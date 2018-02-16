@@ -211,15 +211,15 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
 }
 void Simulation::initialize()
 {
-  DEBUG_BEGIN("Simulation::initialize()\n");
-  DEBUG_EXPR(std::cout << "Name :"<< name() << std::endl;);
+  DEBUG_BEGIN("Simulation::initialize()");
+  DEBUG_EXPR_WE(std::cout << "Simulation name :"<< name() << std::endl;);
   // 1-  OneStepIntegrators initialization ===
   // we set the simulation pointer and the graph of DS in osi
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
   {
-    DEBUG_PRINT("- 1 - set simulation pointer  and the graph of ds in osi\n");
     if (!(*itosi)->isInitialized()){
+      DEBUG_PRINT("- 1 - set simulation pointer  and the graph of ds in osi\n");
       (*itosi)->setSimulationPtr(shared_from_this());
       // a subgraph has to be implemented.
       (*itosi)->setDynamicalSystemsGraph(_nsds->topology()->dSG(0));
@@ -272,7 +272,7 @@ void Simulation::initialize()
         if (_allOSI->size() == 0)
         RuntimeException::selfThrow
             ("Simulation::initialize - there is no osi in this Simulation !!");
-        DEBUG_PRINTF("_allOSI->size() = %i\n", _allOSI->size());
+        DEBUG_PRINTF("_allOSI->size() = %lu\n", _allOSI->size());
         SP::OneStepIntegrator osi_default = *_allOSI->begin();
         _nsds->topology()->setOSI(ds, osi_default);
         if (_allOSI->size() > 1)
@@ -305,6 +305,7 @@ void Simulation::initialize()
        itosi != _allOSI->end(); ++itosi)
   { 
     if (!(*itosi)->isInitialized()){
+      DEBUG_PRINT("- 4 - we finalize the initialization of osi\n");
       DEBUG_PRINT("osi->initialize\n")
       (*itosi)->initialize();
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
@@ -317,15 +318,17 @@ void Simulation::initialize()
   assert (_numberOfIndexSets >0);
   if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets ))
   {
-    DEBUG_PRINT("Topology : different number of indexSets\n");
+    DEBUG_PRINT("Topology : a different number of indexSets has been found \n");
+    DEBUG_PRINT("Topology :  we resize the number of index sets \n");
     topo->indexSetsResize(_numberOfIndexSets);
     // Init if the size has changed
     for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
       topo->resetIndexSetPtr(i);
   }
-
+  // 5 - Initialize OneStepNSProblem(s)
   if (interactionInitialized || !_isInitialized)
   {
+    DEBUG_PRINT( "- 5 -Initialize OneStepNSProblem(s)\n");
     // Initialize OneStepNSProblem(s). Depends on the type of simulation.
     // Warning FP : must be done in any case, even if the interactions set
     // is empty.
@@ -337,9 +340,11 @@ void Simulation::initialize()
     _nsds->topology()->setHasChanged(true);
   }
 
+
+  // 6 - First initialization of the simulation
   if(!_isInitialized)
   {
-
+    DEBUG_PRINT(" - 6 - First initialization of the simulation\n");
     _T = _nsds->finalT();
 
     // === Events manager initialization ===
@@ -453,8 +458,10 @@ int Simulation::computeOneStepNSProblem(int Id)
     }
   }
 
+  int info = (*_allNSProblems)[Id]->compute(nextTime());
+  
   DEBUG_END("Simulation::computeOneStepNSProblem(int Id)\n");
-  return (*_allNSProblems)[Id]->compute(nextTime());
+  return info;
 }
 
 
@@ -527,6 +534,7 @@ void Simulation::run()
 
 void Simulation::processEvents()
 {
+  DEBUG_BEGIN("void Simulation::processEvents()\n");
   _eventsManager->processEvents(*this);
 
   if (_eventsManager->hasNextEvent())
@@ -537,6 +545,7 @@ void Simulation::processEvents()
       updateIndexSets();
     }
   }
+  DEBUG_END("void Simulation::processEvents()\n");
 }
 
 void Simulation::clearNSDSChangeLog()
