@@ -1372,11 +1372,11 @@ class Hdf5():
 
             # add the dynamical system to the non smooth
             # dynamical system
-            if birth:
-                if self.verbose:
-                    print ('birth of body named {0}, translation {1}, orientation {2}'.format(name, translation, orientation))
-                self._nsds.insertDynamicalSystem(body)
-                self._nsds.setName(body, str(name))
+            self._nsds.insertDynamicalSystem(body)
+            self._nsds.setName(body, str(name))
+
+            if birth and self.verbose:
+                print ('birth of body named {0}, translation {1}, orientation {2}'.format(name, translation, orientation))
 
         return body
 
@@ -1535,19 +1535,17 @@ class Hdf5():
                 # add the dynamical system to the non smooth
                 # dynamical system
                 if birth:
-                    nsds = self._nsds
                     if use_proposed:
-                        nsds.insertDynamicalSystem(body)
+                        self._nsds.insertDynamicalSystem(body)
                     elif use_original:
                         self._broadphase.addDynamicObject(
                             body,
                             self._simulation,
                             self._osi)
-                    nsds.setName(body, str(name))
+                    self._nsds.setName(body, str(name))
                 else:
-                    nsds = self._nsds
-                    nsds.insertDynamicalSystem(body)
-                    nsds.setName(body, str(name))
+                    self._nsds.insertDynamicalSystem(body)
+                    self._nsds.setName(body, str(name))
 
         return body
 
