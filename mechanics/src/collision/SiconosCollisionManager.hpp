@@ -129,10 +129,15 @@ public:
     { return std::vector<SP::SiconosCollisionQueryResult>(); }
 
 public:
+  /** Insert a static contactor set */
   virtual StaticContactorSetID insertStaticContactorSet(
-    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector()) = 0;
+    SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector())
+    { return (StaticContactorSetID)0; }
 
-  virtual bool removeStaticContactorSet(StaticContactorSetID id) = 0;
+  /** Remove a static contactor set.
+   * \param id An identifier returned by insertStaticContactorSet. */
+  virtual bool removeStaticContactorSet(StaticContactorSetID id)
+    { return !id; };
 };
 
 #endif /* SiconosCollisionManager.hpp */
