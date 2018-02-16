@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 
     while (s->hasNextEvent())
     {
-      if (k==200) {
+      if (k==201) {
         inter.reset(new Interaction(nslaw, relation));
 
         // link the interaction and the dynamical system
