@@ -32,12 +32,7 @@ private:
   SP::btManifoldPoint _contactPoints;
 
 public:
-  BulletR(const btManifoldPoint &,
-          SP::SiconosVector q1, SP::SiconosVector q2,
-          bool flip=false,
-          double y_correction_A=0,
-          double y_correction_B=0,
-          double scaling=1);
+  BulletR(const btManifoldPoint &);
 
   virtual ~BulletR() {}
 
@@ -57,9 +52,12 @@ public:
     _contactPoints = p;
   };
 
-  virtual void updateContactPointsFromManifoldPoint(const btManifoldPoint& point,
-                                                    SP::NewtonEulerDS ds1,
-                                                    SP::NewtonEulerDS ds2);
+  virtual
+  void updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
+                                            const btManifoldPoint& point,
+                                            bool flip, double scaling,
+                                            SP::NewtonEulerDS ds1,
+                                            SP::NewtonEulerDS ds2);
 
   ACCEPT_STD_VISITORS();
 };

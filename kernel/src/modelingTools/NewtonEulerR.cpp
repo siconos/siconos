@@ -52,7 +52,7 @@ void NewtonEulerR::initialize(Interaction& inter)
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
 
-  if (! _jachq)
+  if (!_jachq)
     _jachq.reset(new SimpleMatrix(ySize, qSize));
   else
   {

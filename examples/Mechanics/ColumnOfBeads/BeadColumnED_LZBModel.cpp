@@ -337,18 +337,13 @@ int main(int argc, char* argv[])
     cout << "Computation Time " << time.elapsed()  << endl;
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    std::cout << "Comparison with a reference file" << std::endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("resultED_LZBModel.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
-    std::cout << "Error = "<< error << std::endl;
-    if (error > 1e-12)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    dataPlot.resize(k, outputSize);
+    ioMatrix::write("BeadColum_LZBModel.dat", "ascii", dataPlot, "noDim");
+
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BeadColum_LZBModel.ref", eps, error)
+        && error > eps)
       return 1;
-    }
   }
   catch (SiconosException e)
   {

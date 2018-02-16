@@ -209,7 +209,9 @@ public:
    * \param workM work matrices
    */
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
-
+  
+  virtual void initialize(Interaction& inter) = 0;
+  
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */

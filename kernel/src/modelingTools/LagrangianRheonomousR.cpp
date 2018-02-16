@@ -49,6 +49,15 @@ void LagrangianRheonomousR::initializeWorkVectorsAndMatrices(Interaction& inter,
   LagrangianR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   checkSize(inter);
 }
+void LagrangianRheonomousR::initialize(Interaction& inter)
+{
+  if (!_jachq)
+  {
+    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int sizeDS = inter.getSizeOfDS();
+    _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
+  }
+}
 
 void LagrangianRheonomousR::checkSize(Interaction& inter)
 {
@@ -113,12 +122,7 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsig
       }
       // Computation of the partial derivative w.r.t time of h(q,t)
       computehDot(time, q, z);
-      if (_pluginJachq->fPtr && !_jachq)
-      {
-        unsigned int sizeY = inter.getSizeOfY();
-        unsigned int sizeQ = DSlink[LagrangianR::q0]->size();
-        _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
-      }
+      assert(_jachq);
       // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
       prod(*_jachq, *DSlink[LagrangianR::q1], y);
       // Sum of the terms
@@ -126,12 +130,7 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsig
     }
     else if (derivativeNumber == 2)
     {
-      if (_pluginJachq->fPtr && !_jachq)
-      {
-        unsigned int sizeY = inter.getSizeOfY();
-        unsigned int sizeQ = DSlink[LagrangianR::q0]->size();
-        _jachq.reset(new SimpleMatrix(sizeY, sizeQ));
-      }
+      assert(_jachq);
       prod(*_jachq, *DSlink[LagrangianR::q2], y); // Approx:,  ...
       // \warning : the computation of y[2] (in event-driven
       // simulation for instance) is approximated by y[2] =

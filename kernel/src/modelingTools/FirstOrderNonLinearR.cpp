@@ -61,6 +61,9 @@ void FirstOrderNonLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, 
 
 }
 
+void FirstOrderNonLinearR::initialize(Interaction& inter)
+{}
+
 void FirstOrderNonLinearR::checkSize(Interaction& inter)
 {}
 

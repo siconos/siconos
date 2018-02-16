@@ -631,6 +631,9 @@ void EventDriven::advanceToEvent()
   _tinit = _eventsManager->startingTime();
   _tend =  _eventsManager->nextTime();
   _tout = _tend;
+
+  DEBUG_PRINTF("_tinit = %g, _tend = %g \n", _tinit, _tend);
+  
   bool isNewEventOccur = false;  // set to true if a new event occur during integration
   OSI::TYPES  osiType = (*_allOSI->begin())->getType(); // Type of OSIs
   double _minConstraint = 0.0;
@@ -641,12 +644,31 @@ void EventDriven::advanceToEvent()
   for (vnext = ui; ui != uiend; ui = vnext)
   {
     ++vnext;
-    _indexSet0->bundle(*ui)->resetAllLambda();
+    // _indexSet0->bundle(*ui)->resetAllLambda();
   }
 
   if (osiType == OSI::NEWMARKALPHAOSI)
   {
-    newtonSolve(_newtonTolerance, _newtonMaxIteration);
+    // if the time to next event if too small, we skip the integration
+    // it may happen if a first event is of time nonsmooth at the initial time
+    // with _tout= _tend
+    if(fabs(_tend-_tinit) >= 10 * MACHINE_PREC)
+    {
+      newtonSolve(_newtonTolerance, _newtonMaxIteration);
+    }
+    else
+    {
+      SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
+      if (indexSet2->size() != 0) // if indexSet2 is not empty, solve LCP to determine contact forces
+      {
+        int  info = computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_POS);
+        if (info != 0)
+        {
+          cout << "Warning!!!In EventDriven::newtonSolve: LCP solver may fail" <<endl;
+        }
+      }
+      updateInput(2);
+    }
     // Update after Newton iteration
     // Update input of level 2 >>> has already been done in newtonSolve
     // Update state of all Dynamicall Systems >>>  has already been done in newtonSolve
@@ -974,6 +996,7 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 double EventDriven::detectEvents(bool updateIstate)
 {
+  DEBUG_BEGIN("double EventDriven::detectEvents(bool updateIstate)\n")
   double _minResiduOutput = 0.0; // maximum of g_i with i running over all activated or deactivated contacts
   // Loop over all interactions to detect whether some constraints are activated or deactivated
   bool _IsContactClosed = false;
@@ -983,10 +1006,6 @@ double EventDriven::detectEvents(bool updateIstate)
   SP::SiconosVector y, ydot, lambda;
   SP::Topology topo = _nsds->topology();
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-  //
-#ifdef DEBUG_MESSAGES
-  cout << "======== In EventDriven::detectEvents =========" <<endl;
-#endif
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = _indexSet0->bundle(*ui);
@@ -1039,14 +1058,14 @@ double EventDriven::detectEvents(bool updateIstate)
       }
     }
     //
-#ifdef DEBUG_MESSAGES
-    cout.precision(15);
-    cout << "Contact number: " << inter->number() <<endl;
-    cout << "Contact gap: " << (*y)(0) <<endl;
-    cout << "Contact force: " << (*lambda)(0) <<endl;
-    cout << "Is contact is closed: " << _IsContactClosed <<endl;
-    cout << "Is contact is opened: " << _IsContactOpened <<endl;
-#endif
+    DEBUG_EXPR_WE(
+      cout.precision(15);
+      cout << "Contact number: " << inter->number() <<endl;
+      cout << "Contact gap: " << (*y)(0) <<endl;
+      cout << "Contact force: " << (*lambda)(0) <<endl;
+      cout << "Is contact is closed: " << _IsContactClosed <<endl;
+      cout << "Is contact is opened: " << _IsContactOpened <<endl;
+      );
     //
   }
   //
@@ -1070,6 +1089,7 @@ double EventDriven::detectEvents(bool updateIstate)
     }
   }
   //
+  DEBUG_END("double EventDriven::detectEvents(bool updateIstate)\n")
   return  _minResiduOutput;
 }
 

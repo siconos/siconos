@@ -389,6 +389,16 @@ void TimeStepping::initializeNewtonLoop()
     (*it)->computeResidu();
   }
 
+  // Predictive contact -- update initial contacts after updating DS positions
+  {
+    NonSmoothDynamicalSystem::ChangeLogIter p = _nsds->changeLogPosition();
+    updateInteractions();
+
+    // If graph changed, need to initialize the new interactions
+    if (p != _nsds->changeLogPosition())
+      initialize();
+  }
+
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   if (indexSet0->size()>0)
   {

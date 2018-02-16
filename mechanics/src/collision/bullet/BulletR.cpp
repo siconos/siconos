@@ -53,29 +53,56 @@ static void copyBtVector3(const btVector3 &from, SiconosVector& to)
 }
 
 // TODO: "point" parameter used only by BulletSpaceFilter
-BulletR::BulletR(const btManifoldPoint &point,
-                 SP::SiconosVector q1, SP::SiconosVector q2,
-                 bool flip,
-                 double y_correction_A,
-                 double y_correction_B,
-                 double scaling)
-  : ContactR(q1, q2, flip, y_correction_A, y_correction_B, scaling)
+BulletR::BulletR(const btManifoldPoint &point)
+  : ContactR()
 {
 }
 
-void BulletR::updateContactPointsFromManifoldPoint(const btManifoldPoint& point,
+void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
+                                                   const btManifoldPoint& point,
+                                                   bool flip, double scaling,
                                                    SP::NewtonEulerDS ds1,
                                                    SP::NewtonEulerDS ds2)
 {
   // Get new positions
-  btVector3 posa = point.getPositionWorldOnA();
-  btVector3 posb = point.getPositionWorldOnB();
+  btVector3 posa = point.m_localPointA * scaling;
+  btVector3 posb = point.m_localPointB * scaling;
+
   SiconosVector va(3), vb(3), vn(3);
-  copyBtVector3(posa, va);
-  copyBtVector3(posb, vb);
+  if (flip) {
+    if (ds2)
+      copyBtVector3(posa, vb);
+    else
+      // If no body2, position is relative to 0,0,0
+      // TODO: scaling?
+      copyBtVector3(point.getPositionWorldOnA(), vb);
+    copyBtVector3(posb, va);
+  } else {
+    copyBtVector3(posa, va);
+    if (ds2)
+      copyBtVector3(posb, vb);
+    else
+      // If no body2, position is relative to 0,0,0
+      // TODO: scaling?
+      copyBtVector3(point.getPositionWorldOnB(), vb);
+  }
 
   // Get new normal
-  copyBtVector3(point.m_normalWorldOnB, vn);
+  if (ds2)
+  {
+    btQuaternion qn(point.m_normalWorldOnB.x(),
+                    point.m_normalWorldOnB.y(),
+                    point.m_normalWorldOnB.z(), 0);
+    btQuaternion qb1 = manifold.getBody1()->getWorldTransform().getRotation();
+    // un-rotate normal into body1 frame
+    qn = qb1.inverse() * qn * qb1;
+    vn(0) = qn.x();
+    vn(1) = qn.y();
+    vn(2) = qn.z();
+    vn = vn/vn.norm2();
+  }
+  else
+    copyBtVector3(point.m_normalWorldOnB, vn);
 
-  ContactR::updateContactPoints(va, vb, point.getDistance(), vn, ds1, ds2);
+  ContactR::updateContactPoints(va, vb, vn*(flip?-1:1));
 }

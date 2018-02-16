@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
     cout << "====> Start computation ... " << endl << endl;
     bool NSEvent = false;
     unsigned int NumberNSEvent = 0;
-    unsigned int k = 1;
+    unsigned int k = 0;
     boost::progress_display show_progress(N);
     while ((EDscheme->hasNextEvent()) && (k < N))
     {
@@ -179,24 +179,31 @@ int main(int argc, char* argv[])
         DataPlot(k, 2) = _qMemory(1);
         DataPlot(k, 3) = _qdotMemory(0);
         DataPlot(k, 4) = _qdotMemory(1);
+        DataPlot(k, 5) = (*_qddot)(0); // Acceleration ax
+        DataPlot(k, 6) = (*_qddot)(1); // Acceleration ay
+        DataPlot(k, 7) = (*_g)(0);     // Contraint in position
+        DataPlot(k, 8) = (*_gdot)(0);  // Constraint in velocity
+        DataPlot(k, 9) = (*_lambda)(0); // Reaction force
         k++;
         ++NumberNSEvent;
         ++show_progress;
         NSEvent = false;                        // The next event is maybe smooth
-      };
-      //-------------------- get data at smooth events or at the end of non-smooth events ---------------
-      DataPlot(k, 0) = EDscheme->startingTime();
-      DataPlot(k, 1) = (*_q)(0); // Position X
-      DataPlot(k, 2) = (*_q)(1); // Position Y
-      DataPlot(k, 3) = (*_qdot)(0); // Velocity Vx
-      DataPlot(k, 4) = (*_qdot)(1); // Velocity Vy
-      DataPlot(k, 5) = (*_qddot)(0); // Acceleration ax
-      DataPlot(k, 6) = (*_qddot)(1); // Acceleration ay
-      DataPlot(k, 7) = (*_g)(0);     // Contraint in position
-      DataPlot(k, 8) = (*_gdot)(0);  // Constraint in velocity
-      DataPlot(k, 9) = (*_lambda)(0); // Reaction force
-      // go to the next time step
-      k++;
+      }
+      else
+      {
+        //-------------------- get data at smooth events or at the end of non-smooth events ---------------
+        DataPlot(k, 0) = EDscheme->startingTime();
+        DataPlot(k, 1) = (*_q)(0); // Position X
+        DataPlot(k, 2) = (*_q)(1); // Position Y
+        DataPlot(k, 3) = (*_qdot)(0); // Velocity Vx
+        DataPlot(k, 4) = (*_qdot)(1); // Velocity Vy
+        DataPlot(k, 5) = (*_qddot)(0); // Acceleration ax
+        DataPlot(k, 6) = (*_qddot)(1); // Acceleration ay
+        DataPlot(k, 7) = (*_g)(0);     // Contraint in position
+        DataPlot(k, 8) = (*_gdot)(0);  // Constraint in velocity
+        DataPlot(k, 9) = (*_lambda)(0); // Reaction force
+        k++;
+      }
       ++show_progress;
     }
     //----------------------- At the end of the simulation --------------------------
@@ -205,10 +212,10 @@ int main(int argc, char* argv[])
     cout << "Number of events processed during simulation: " << (k + 1) << endl;
     cout << "Number of non-smooth events: " << NumberNSEvent << endl;
     cout << "====> Output file writing ..." << endl << endl;
-    ioMatrix::write("SimplependulumResult.dat", "ascii", DataPlot, "noDim");
+    ioMatrix::write("Simplependulum_Lsodar.dat", "ascii", DataPlot, "noDim");
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(DataPlot, "result_LsodarOSI.ref", eps, error)
+    if (ioMatrix::compareRefFile(DataPlot, "Simplependulum_Lsodar.ref", eps, error)
         && error > eps)
       return 1;
   }

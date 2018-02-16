@@ -21,6 +21,11 @@
   detection.
 */
 
+// Note, in general the "outside margin" is not implemented.  What is
+// needed is a way to project the point detected on the external shell
+// back to the shape surface.  This could be for example the closest
+// point on the convex hell.  (For convex shapes.)
+
 #include <algorithm>
 #include <MechanicsFwd.hpp>
 #include <BulletSiconosFwd.hpp>
@@ -1352,16 +1357,9 @@ SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::BodyDS ds1,
                                                        SP::SiconosShape shape1,
                                                        SP::BodyDS ds2,
                                                        SP::SiconosShape shape2,
-                                                       const btManifoldPoint &p,
-                                                       bool flip,
-                                                       double y_correction_A,
-                                                       double y_correction_B,
-                                                       double scaling)
+                                                       const btManifoldPoint &p)
 {
-  return std11::make_shared<BulletR>(p, ds1 ? ds1->q() : SP::SiconosVector(),
-                                     ds2 ? ds2->q() : SP::SiconosVector(),
-                                     flip, y_correction_A,
-                                     y_correction_B, scaling);
+  return std11::make_shared<BulletR>(p);
 }
 
 class CollisionUpdateVisitor : public SiconosVisitor
@@ -1502,7 +1500,9 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       /* update the relation */
       SP::BulletR rel(std11::static_pointer_cast<BulletR>((*p_inter)->relation()));
-      rel->updateContactPointsFromManifoldPoint(*it->point, pairA->ds,
+      rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
+                                                flip, _options.worldScale,
+                                                pairA->ds,
                                                 pairB->ds ? pairB->ds
                                                           : SP::NewtonEulerDS());
 
@@ -1519,17 +1519,9 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       if (nslaw && nslaw->size() == 3)
       {
-        // Remove the added outside margin as a correction factor in Relation
-        double combined_margin =
-          pairA->sshape->outsideMargin() + pairB->sshape->outsideMargin();
-
         SP::BulletR rel(makeBulletR(pairA->ds, pairA->sshape,
                                     pairB->ds, pairB->sshape,
-                                    *it->point,
-                                    flip,
-                                    pairA->sshape->outsideMargin(),
-                                    pairB->sshape->outsideMargin(),
-                                    1.0 / _options.worldScale));
+                                    *it->point));
 
         if (!rel) continue;
 
@@ -1539,30 +1531,31 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         rel->shape[0] = pairA->sshape;
         rel->shape[1] = pairB->sshape;
         rel->contactor[0] = pairA->contactor;
-        rel->contactor[1] = pairA->contactor;
+        rel->contactor[1] = pairB->contactor;
         rel->ds[0] = pairA->ds;
         rel->ds[1] = pairB->ds;
         rel->btObject[0] = pairA->btobject;
-        rel->btObject[1] = pairA->btobject;
+        rel->btObject[1] = pairB->btobject;
 
         // TODO cast down btshape from BodyShapeRecord-derived classes
         // rel->btShape[0] = pairA->btshape;
-        // rel->btShape[1] = pairA->btshape;
+        // rel->btShape[1] = pairB->btshape;
 
-        rel->updateContactPointsFromManifoldPoint(*it->point,
+        rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
+                                                  flip, _options.worldScale,
                                  pairA->ds ? pairA->ds : SP::NewtonEulerDS(),
                                  pairB->ds ? pairB->ds : SP::NewtonEulerDS());
 
         // We wish to be sure that no Interactions are created without
         // sufficient warning before contact.  TODO: Replace with exception or
         // flag.
-        if ((it->point->getDistance() + combined_margin) < 0.0) {
-          DEBUG_PRINTF(stderr, "Interactions must be created with positive distance (%f).\n",
-                       (it->point->getDistance() + combined_margin)/_options.worldScale);
+        if (rel->distance() < 0.0) {
+          DEBUG_PRINTF(stderr, "Interactions must be created with positive "
+                       "distance (%f).\n", rel->distance());
           _stats.interaction_warnings ++;
         }
 
-        inter.reset(new Interaction(nslaw, rel/*4 * i + z*/));
+        inter = std11::make_shared<Interaction>(nslaw, rel);
         _stats.new_interactions_created ++;
       }
       else
@@ -1570,8 +1563,9 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         if (nslaw && nslaw->size() == 1)
         {
           SP::BulletFrom1DLocalFrameR rel(
-            new BulletFrom1DLocalFrameR(createSPtrbtManifoldPoint(*it->point)));
-          inter.reset(new Interaction(nslaw, rel /*4 * i + z*/));
+            std11::make_shared<BulletFrom1DLocalFrameR>(
+              createSPtrbtManifoldPoint(*it->point)));
+          inter = std11::make_shared<Interaction>(nslaw, rel);
         }
       }
 

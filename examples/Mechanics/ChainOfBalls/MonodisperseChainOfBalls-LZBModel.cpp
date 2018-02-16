@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file BouncingBallED.cpp
   \brief \ref EMBouncingBall - C++ input file, Event-Driven version - V. Acary, F. Perignon.
@@ -31,8 +31,8 @@ const double g = 0.0; // Gravity
 using namespace std;
 
 int main(int argc, char* argv[]){
-    boost::timer time;
-    time.restart();
+  boost::timer time;
+  time.restart();
   try{
     // ================= Creation of the model =======================
 
@@ -72,25 +72,25 @@ int main(int argc, char* argv[]){
     //(1) Radius of balls
     SP::SiconosVector RadiusBalls(new SiconosVector(NumberBalls));
     for (unsigned int k = 0; k < NumberBalls; ++k)
-      {
-        (*RadiusBalls)(k) = R_ball;
-      }
+    {
+      (*RadiusBalls)(k) = R_ball;
+    }
     // (2) Mass of balls
     SP::SiconosVector MassBalls(new SiconosVector(NumberBalls));
     for (unsigned int id = 0; id < NumberBalls; ++id)
     {
       (*MassBalls)(id) = (4.0/3.0)*PI*pow((*RadiusBalls)(id),3)*mass_density;
     }
-   // (3) Initial position of balls
-   // For the impactor balls
-   SP::SiconosVector InitPosBalls(new SiconosVector(NumberBalls));
-   (*InitPosBalls)(0) = 0.0;
-   (*InitPosBalls)(1) = (*RadiusBalls)(0) + Height + (*RadiusBalls)(1);
-   for (unsigned int j = 2; j < NumberBalls; ++j)
-     {
-       (*InitPosBalls)(j) = (*InitPosBalls)(j - 1) + (*RadiusBalls)(j - 1) + (*RadiusBalls)(j);
-     }
-   // (4) Initial velocity of balls
+    // (3) Initial position of balls
+    // For the impactor balls
+    SP::SiconosVector InitPosBalls(new SiconosVector(NumberBalls));
+    (*InitPosBalls)(0) = 0.0;
+    (*InitPosBalls)(1) = (*RadiusBalls)(0) + Height + (*RadiusBalls)(1);
+    for (unsigned int j = 2; j < NumberBalls; ++j)
+    {
+      (*InitPosBalls)(j) = (*InitPosBalls)(j - 1) + (*RadiusBalls)(j - 1) + (*RadiusBalls)(j);
+    }
+    // (4) Initial velocity of balls
     SP::SiconosVector InitVelBalls(new SiconosVector(NumberBalls));
     (*InitVelBalls)(0) = V_impact;
     for (unsigned int i = 1; i < NumberBalls; ++i)
@@ -149,29 +149,29 @@ int main(int argc, char* argv[]){
     SP::SiconosVector FextBall;
     double _Rball, _massBall,_Pos0Ball, _Vel0Ball ;
     for(unsigned int i = 0; i < NumberBalls; ++i)
-	    {
-	      _Rball = (*RadiusBalls)(i); // radius of the ball
-	      _massBall = (*MassBalls)(i); // mass of the ball
-	      _Pos0Ball = (*InitPosBalls)(i); // initial position of the ball
-	      _Vel0Ball = (*InitVelBalls)(i); // initial velocity of the ball
-	      // Declaration of the DS in Siconos
-	      MassBall =  SP::SiconosMatrix(new SimpleMatrix(nDofBall,nDofBall));
-	      (*MassBall)(0,0) = _massBall;
-	      // -- Initial positions and velocities --
-	      q0Ball = SP::SiconosVector(new SiconosVector(nDofBall));
-	      v0Ball = SP::SiconosVector(new SiconosVector(nDofBall));
-	      (*q0Ball)(0) = _Pos0Ball;
-	      (*v0Ball)(0) = _Vel0Ball;
-	      // -- The dynamical system --
-	      ball = SP::LagrangianLinearTIDS(new LagrangianLinearTIDS(q0Ball,v0Ball,MassBall));
-	      // -- Set external forces (weight1) --
-	      FextBall = SP::SiconosVector(new SiconosVector(nDofBall));
-	      (*FextBall)(0) = -_massBall*g;
-	      ball->setFExtPtr(FextBall);
-	      //
-	      VecOfallDS.push_back(ball);
-        BallChain->insertDynamicalSystem(ball);
-      }
+    {
+      _Rball = (*RadiusBalls)(i); // radius of the ball
+      _massBall = (*MassBalls)(i); // mass of the ball
+      _Pos0Ball = (*InitPosBalls)(i); // initial position of the ball
+      _Vel0Ball = (*InitVelBalls)(i); // initial velocity of the ball
+      // Declaration of the DS in Siconos
+      MassBall =  SP::SiconosMatrix(new SimpleMatrix(nDofBall,nDofBall));
+      (*MassBall)(0,0) = _massBall;
+      // -- Initial positions and velocities --
+      q0Ball = SP::SiconosVector(new SiconosVector(nDofBall));
+      v0Ball = SP::SiconosVector(new SiconosVector(nDofBall));
+      (*q0Ball)(0) = _Pos0Ball;
+      (*v0Ball)(0) = _Vel0Ball;
+      // -- The dynamical system --
+      ball = SP::LagrangianLinearTIDS(new LagrangianLinearTIDS(q0Ball,v0Ball,MassBall));
+      // -- Set external forces (weight1) --
+      FextBall = SP::SiconosVector(new SiconosVector(nDofBall));
+      (*FextBall)(0) = -_massBall*g;
+      ball->setFExtPtr(FextBall);
+      //
+      VecOfallDS.push_back(ball);
+      BallChain->insertDynamicalSystem(ball);
+    }
     // --------------------
     // --- Interactions ---
     // --------------------
@@ -186,16 +186,16 @@ int main(int argc, char* argv[]){
     E = SP::SiconosVector(new SiconosVector(1));
 
     for(unsigned int j = 0; j < NumberContacts; ++j)
-	    {
-	      ResCoef = (*ResCofContacts)(j) ;
-	      Stiff = (*StiffContacts)(j);
-	      ElasPow = (*ElasCofContacts)(j);
-	      (*E)(0) = -1.0*((*RadiusBalls)(j) + (*RadiusBalls)(j+1));
-	      nslaw = SP::NonSmoothLaw(new MultipleImpactNSL(ResCoef,Stiff,ElasPow));
-	      relation = SP::Relation(new LagrangianLinearTIR(H,E));
-	      interaction = SP::Interaction(new Interaction(nslaw, relation));
-        BallChain->link(interaction, VecOfallDS[j],VecOfallDS[j+1]);
-	    }
+    {
+      ResCoef = (*ResCofContacts)(j) ;
+      Stiff = (*StiffContacts)(j);
+      ElasPow = (*ElasCofContacts)(j);
+      (*E)(0) = -1.0*((*RadiusBalls)(j) + (*RadiusBalls)(j+1));
+      nslaw = SP::NonSmoothLaw(new MultipleImpactNSL(ResCoef,Stiff,ElasPow));
+      relation = SP::Relation(new LagrangianLinearTIR(H,E));
+      interaction = SP::Interaction(new Interaction(nslaw, relation));
+      BallChain->link(interaction, VecOfallDS[j],VecOfallDS[j+1]);
+    }
 
     // ----------------
     // --- Simulation ---
@@ -238,20 +238,20 @@ int main(int argc, char* argv[]){
 
     // --- Time loop ---
     cout << "====> Start computation ... " <<endl<<endl;
-   // ==== Simulation loop - Writing without explicit event handling =====
+    // ==== Simulation loop - Writing without explicit event handling =====
     bool nonSmooth = false;
     unsigned int NumberOfEvents = 0;
     unsigned int NumberOfNSEvents = 0;
     unsigned int k = 0;
     DynamicalSystemsGraph::VIterator ui, uiend;
-   //====================================================================
-    while((k < Npointsave)&(s->hasNextEvent()))
-        {
-	  dataPlot(k,0) =  s->startingTime();
-	  // Save state of the balls
-	  unsigned int col_pos = 1;
-	  unsigned int col_vel = NumberBalls + 1;
-	  for (boost::tie(ui,uiend) = DSG0->vertices(); ui!=uiend; ++ui)
+    //====================================================================
+    while((k < Npointsave) & (s->hasNextEvent()))
+    {
+      dataPlot(k,0) =  s->startingTime();
+      // Save state of the balls
+      unsigned int col_pos = 1;
+      unsigned int col_vel = NumberBalls + 1;
+      for (boost::tie(ui,uiend) = DSG0->vertices(); ui!=uiend; ++ui)
 	    {
 	      SP::DynamicalSystem ds = DSG0->bundle(*ui);
 	      SP::LagrangianDS lag_ds = std11::dynamic_pointer_cast<LagrangianDS>(ds);
@@ -262,15 +262,15 @@ int main(int argc, char* argv[]){
 	      col_pos++;
 	      col_vel++;
 	    }
-	  ++k;
-	  s->advanceToEvent(); // run simulation from one event to the next
-	  if(eventsManager->nextEvent()->getType() == 2)
+      ++k;
+      s->advanceToEvent(); // run simulation from one event to the next
+      if(eventsManager->nextEvent()->getType() == 2)
 	    {
 	      nonSmooth = true;
 	    };
-	  //
-	  s->processEvents();  // process events
-	  if (nonSmooth)
+      //
+      s->processEvents();  // process events
+      if (nonSmooth)
 	    {
 	      //multiple_impact->display();
 	      dataPlot(k,0) = s->startingTime();
@@ -278,30 +278,31 @@ int main(int argc, char* argv[]){
 	      unsigned int col_pos = 1;
 	      unsigned int col_vel = NumberBalls + 1;
 	      for (boost::tie(ui,uiend) = DSG0->vertices(); ui!=uiend; ++ui)
-		{
-		  SP::DynamicalSystem ds = DSG0->bundle(*ui);
-		  SP::LagrangianDS lag_ds = std11::dynamic_pointer_cast<LagrangianDS>(ds);
-		  const SiconosVector& q = lag_ds->qMemory().getSiconosVector(1);
-		  const SiconosVector& v = lag_ds->velocityMemory().getSiconosVector(1);
-		  dataPlot(k,col_pos) = q(0);
-		  dataPlot(k,col_vel) = v(0);
-		  col_pos++;
-		  col_vel++;
-		}
+        {
+          SP::DynamicalSystem ds = DSG0->bundle(*ui);
+          SP::LagrangianDS lag_ds = std11::dynamic_pointer_cast<LagrangianDS>(ds);
+          const SiconosVector& q = lag_ds->qMemory().getSiconosVector(1);
+          const SiconosVector& v = lag_ds->velocityMemory().getSiconosVector(1);
+          dataPlot(k,col_pos) = q(0);
+          dataPlot(k,col_vel) = v(0);
+          col_pos++;
+          col_vel++;
+        }
 	      nonSmooth = false;
 	      ++NumberOfNSEvents;
 	      ++NumberOfEvents;
 	      ++show_progress;
 	      ++k;
 	    }
-	  // --- Get values to be plotted ---
-	  ++NumberOfEvents;
-	  ++show_progress;
-        }
+      // --- Get values to be plotted ---
+      ++NumberOfEvents;
+      ++show_progress;
+    }
 
     cout << "\nComputation Time " << time.elapsed()  << endl;
     // --- Output files ---
     cout<<"====> Output file writing ..."<<endl;
+    dataPlot.resize(k,outputSize);
     ioMatrix::write("MonodisperseChainOfBalls-LZBModel.dat", "ascii",dataPlot,"noDim");
 
     double error=0.0, eps=1e-12;
@@ -311,8 +312,9 @@ int main(int argc, char* argv[]){
 
   }
   catch(SiconosException e)
-    {cout << e.report() << endl;}
+  {cout << e.report() << endl;}
   catch(...)
-    {cout << "Exception caught." << endl;}
-   cout << "Computation Time: " << time.elapsed()  << endl;
+  {cout << "Exception caught." << endl;}
+  cout << "Computation Time: " << time.elapsed()  << endl;
 }
+

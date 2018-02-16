@@ -287,9 +287,18 @@ void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVe
 
 }
 
+double NewtonEulerFrom1DLocalFrameR::distance() const
+{
+  SiconosVector dpc(*_Pc2 - *_Pc1);
+  return dpc.norm2() * (inner_prod(*_Nc, dpc) >= 0 ? -1 : 1);
+}
+
 void NewtonEulerFrom1DLocalFrameR::computeh(double time, BlockVector& q0,
                                             SiconosVector &y)
 {
+  // Contact points and normal are stored as relative to q1 and q2, if
+  // no q2 then pc2 and normal are absolute.
+
   // Update pc1 based on q0 and relPc1
   SP::SiconosVector q1 = (q0.getAllVect())[0];
   ::boost::math::quaternion<double> qq1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6));
@@ -305,14 +314,26 @@ void NewtonEulerFrom1DLocalFrameR::computeh(double time, BlockVector& q0,
   {
     // Update pc2 based on q0 and relPc2
     SP::SiconosVector q2 = (q0.getAllVect())[1];
-    ::boost::math::quaternion<double> qq2((*q1)(3), (*q2)(4), (*q2)(5), (*q2)(6));
+    ::boost::math::quaternion<double> qq2((*q2)(3), (*q2)(4), (*q2)(5), (*q2)(6));
     ::boost::math::quaternion<double> qpc2(0,(*_relPc2)(0),(*_relPc2)(1),(*_relPc2)(2));
 
     // apply q2 rotation and add
-    qpc2 = qq1 * qpc2 / qq2;
+    qpc2 = qq2 * qpc2 / qq2;
     (*_Pc2)(0) = qpc2.R_component_2() + (*q2)(0);
     (*_Pc2)(1) = qpc2.R_component_3() + (*q2)(1);
     (*_Pc2)(2) = qpc2.R_component_4() + (*q2)(2);
+
+    // same for normal
+    ::boost::math::quaternion<double> qnc(0, (*_relNc)(0), (*_relNc)(1), (*_relNc)(2));
+    qnc = qq2 * qnc / qq2;
+    (*_Nc)(0) = qnc.R_component_2();
+    (*_Nc)(1) = qnc.R_component_3();
+    (*_Nc)(2) = qnc.R_component_4();
+  }
+  else
+  {
+    *_Pc2 = *_relPc2;
+    *_Nc = *_relNc;
   }
 
   NewtonEulerR::computeh(time, q0, y);
