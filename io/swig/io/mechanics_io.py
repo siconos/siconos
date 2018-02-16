@@ -3154,17 +3154,20 @@ class Hdf5():
 
             log(simulation.clearNSDSChangeLog, with_timer)()
 
+            # Note these are not the same and neither is correct.
+            # "broadphase.statistics" gives the number of contacts
+            # collected by the collsion engine, but it's possible some
+            # are not in indexset1.  Meanwhile checking the size of
+            # the non-smooth problem is wrong when there are joints.
             if use_proposed:
                 number_of_contacts = (
                     self._broadphase.statistics().new_interactions_created
                     + self._broadphase.statistics().existing_interactions_processed)
             elif use_original:
-                number_of_contacts = (self._simulation()
-                                   .oneStepNSProblem(0).getSizeOutput()//3)
+                number_of_contacts = osnspb.getSizeOutput()//3
 
             if verbose and number_of_contacts > 0 :
-                print_verbose('number of contacts',
-                    self._simulation.oneStepNSProblem(0).getSizeOutput()//3)
+                print_verbose('number of contacts', osnspb.getSizeOutput()//3)
                 self.printSolverInfos()
 
             if violation_verbose and number_of_contacts > 0 :
