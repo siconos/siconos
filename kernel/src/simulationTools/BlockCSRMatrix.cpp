@@ -21,6 +21,7 @@
 #include "BlockCSRMatrix.hpp"
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "NonSmoothLaw.hpp"
+#include "Interaction.hpp"
 
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"

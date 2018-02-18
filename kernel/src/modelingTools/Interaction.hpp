@@ -28,7 +28,7 @@
 #include "SiconosPointers.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosMemory.hpp"
-//#include "SiconosFwd.hpp"
+#include "SiconosAlgebraTypeDef.hpp"
 
 #include <vector>
 
@@ -159,7 +159,7 @@ private:
    * and OneStepIntegrator classes. */
   VectorOfBlockVectors _linkToDSVariables;
 
-  
+
 
   struct _setLevels;
   friend struct Interaction::_setLevels;

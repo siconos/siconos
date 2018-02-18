@@ -22,7 +22,7 @@
 #include "BlockCSRMatrix.hpp"
 #include "SimulationGraphs.hpp"
 #include "SimpleMatrix.hpp"
-
+#include "Interaction.hpp"
 #include "DynamicalSystem.hpp"
 
 

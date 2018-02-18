@@ -17,16 +17,18 @@
 */
 #include "LCP.hpp"
 #include "OSNSMatrix.hpp"
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
-// #define DEBUG_NOCOLOR
-#include "debug.h"
 
 // --- numerics headers ---
 #include "NonSmoothDrivers.h"
 #include "LCP_Solvers.h"
 
-using namespace RELATION;
+
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+#include "debug.h"
+
+
 
 LCP::LCP(int numericsSolverId):
   LinearOSNS(numericsSolverId)

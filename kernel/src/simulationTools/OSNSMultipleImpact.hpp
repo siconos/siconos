@@ -25,8 +25,6 @@
 #include "LinearOSNS.hpp"
 #include <string>
 
-using namespace RELATION;
-
 #define DEFAULT__tolImpact MACHINE_PREC
 #define DEFAULT_TOL_VEL MACHINE_PREC
 #define DEFAULT_TOL_ENER MACHINE_PREC
