@@ -1,3 +1,4 @@
+
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
@@ -592,6 +593,10 @@ void SchatzmanPaoliOSI::prepareNewtonIteration(double time)
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     computeW(time, ds, *_dynamicalSystemsGraph->properties(*dsi).W);
+  }
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
 }
 

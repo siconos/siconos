@@ -56,7 +56,7 @@ FirstOrderType2R::FirstOrderType2R(const std::string& pluginh, const std::string
 
 void FirstOrderType2R::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
-  
+
   FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
 
@@ -131,7 +131,7 @@ void FirstOrderType2R::computeLinearizedOutput(double time, Interaction& inter, 
   VectorOfSMatrices& workM = *interProp.workMatrices;
 
   SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
-  
+
   if (_D)
     prod(*_D, *(inter.lambdaOld(level)), y, true);
   else
@@ -178,8 +178,8 @@ void FirstOrderType2R::computeLinearizedOutput(double time, Interaction& inter, 
   SiconosVector& x = *workV[FirstOrderR::vec_x];
   x = *DSlink[FirstOrderR::x];
 
-  
-  
+
+
   computeh(time, x, *inter.lambda(level), hAlpha);
   DEBUG_PRINT("FirstOrderType2R::computeOutput : new Halpha \n");
   DEBUG_EXPR(hAlpha.display());
@@ -229,22 +229,6 @@ void FirstOrderType2R::computeLinearizedInput(double time, Interaction& inter, I
 
 }
 
-void FirstOrderType2R::prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)
-{
-
-  /* compute the contribution in xPartialNS for the next iteration */
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-  DEBUG_PRINT("FirstOrderType2R::preparNewtonIteration\n");
-  if (_B)
-    prod(*_B, *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
-  else
-    prod(*workM[FirstOrderR::mat_B], *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
-
-  *DSlink[FirstOrderR::xPartialNS] = *workV[FirstOrderR::g_alpha];
-  *DSlink[FirstOrderR::xPartialNS] -= *workV[FirstOrderR::vec_x];
-}
 
 void FirstOrderType2R::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {

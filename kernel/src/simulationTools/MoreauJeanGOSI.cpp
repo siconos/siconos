@@ -840,7 +840,10 @@ void MoreauJeanGOSI::prepareNewtonIteration(double time)
         computeT(d->q(),d->T());
       }
     }
-
+  }
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
 
 

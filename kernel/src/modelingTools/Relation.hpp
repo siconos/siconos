@@ -327,14 +327,7 @@ public:
   {
     return _plugine;
   };
-  /** visitors hook
-   *  \param inter  interaction
-   *  \param interProp
-   */
-  virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)
-  {
-    ;
-  };
+
   VIRTUAL_ACCEPT_VISITORS(Relation);
 
 };

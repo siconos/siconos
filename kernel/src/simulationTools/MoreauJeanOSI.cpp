@@ -1317,7 +1317,8 @@ void MoreauJeanOSI::prepareNewtonIteration(double time)
 
       SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
-      //  VA <2016-04-19 Tue> We compute T to be consitent with the Jacobian at the beginning of the Newton iteration and not at the end
+      //  VA <2016-04-19 Tue> We compute T to be consistent with the Jacobian
+      //   at the beginning of the Newton iteration and not at the end
       Type::Siconos dsType = Type::value(*ds);
       if(dsType == Type::NewtonEulerDS)
       {
@@ -1327,7 +1328,10 @@ void MoreauJeanOSI::prepareNewtonIteration(double time)
     }
 
   }
-
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+  }
 
   DEBUG_END(" MoreauJeanOSI::prepareNewtonIteration(double time)\n");
 

@@ -267,8 +267,25 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
     inter->computeOutput(time, level);
   }
   DEBUG_END("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
-
 }
+
+void NonSmoothDynamicalSystem::computeInteractionJacobians(double time)
+{
+
+  DEBUG_BEGIN("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = _topology->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    InteractionProperties& interProp = indexSet0->properties(*ui);
+    inter->relation()->computeJach(time, *inter, interProp);
+    inter->relation()->computeJacg(time, *inter, interProp);
+  }
+  DEBUG_END("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+}
+
 
 
 void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)

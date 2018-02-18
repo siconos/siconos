@@ -607,6 +607,10 @@ void MoreauJeanBilbaoOSI::display()
 
 void MoreauJeanBilbaoOSI::prepareNewtonIteration(double time)
 {
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+  }
 }
 
 

@@ -72,8 +72,7 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
     _warnOnNonConvergence(true),
-    _resetAllLambda(true),
-    _explicitJacobiansOfRelation(false)
+    _resetAllLambda(true)
 {
 
   if (osi) insertIntegrator(osi);
@@ -90,8 +89,7 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisa
     _isNewtonConverge(false),
     _newtonUpdateInteractionsPerIteration(false),_displayNewtonConvergence(false),
     _warnOnNonConvergence(true),
-    _resetAllLambda(true),
-    _explicitJacobiansOfRelation(false)
+    _resetAllLambda(true)
 {
   (*_allNSProblems).resize(nb);
 }
@@ -182,7 +180,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
         //SP::OneStepIntegrator Osi = indexSet1->properties(*ui1).osi;
 	SP::DynamicalSystem ds1 = indexSet1->properties(*ui1).source;
 	OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
-	
+
         //if(predictorDeactivate(inter1,i))
         if (osi.removeInteractionInIndexSet(inter1, i))
         {
@@ -484,22 +482,6 @@ void   TimeStepping::prepareNewtonIteration()
     (*itosi)->prepareNewtonIteration(tkp1);
   }
 
-  if(!_explicitJacobiansOfRelation)
-  {
-    InteractionsGraph::VIterator ui, uiend;
-    SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
-    SP::Interaction inter;
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-    {
-      inter = indexSet0->bundle(*ui);
-      InteractionProperties& interProp = indexSet0->properties(*ui);
-      inter->relation()->computeJach(tkp1, *inter, interProp);
-      inter->relation()->computeJacg(tkp1, *inter, interProp);
-      // Note FP : prepare call below is only useful for FirstOrderType2R.
-      // We should check if we really need this ...
-      inter->relation()->prepareNewtonIteration(*inter, interProp);
-    }
-  }
   DEBUG_END("TimeStepping::prepareNewtonIteration()\n");
 }
 
@@ -682,13 +664,13 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     //check residuy.
     _newtonResiduYMax = 0.0;
     residu = 0.0;
-    
+
     SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
     for (OSIIterator itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
     {
       residu = std::max(residu,(*itOSI)->computeResiduOutput(getTkp1(), indexSet0));
     }
-    
+
 
 //     InteractionsGraph::VIterator ui, uiend;
 //     SP::Interaction inter;
@@ -704,7 +686,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     if (residu > criterion)
       checkConvergence = false;
   }
-  
+
   if (_computeResiduR)
   {
     //check residur.
@@ -716,8 +698,8 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
     {
       residu = std::max(residu,(*itOSI)->computeResiduInput(getTkp1(), indexSet0));
     }
-    
-    
+
+
     // InteractionsGraph::VIterator ui, uiend;
     // SP::Interaction inter;
     // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
@@ -735,7 +717,7 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
       checkConvergence = false;
     }
   }
-  
+
 
   return(checkConvergence);
 }

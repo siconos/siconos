@@ -278,27 +278,6 @@ void FirstOrderNonLinearR::computeLinearizedInput(double time, Interaction& inte
   DEBUG_BEGIN("FirstOrderNonLinearR::computeLinearizedInput \n");
 }
 
-void FirstOrderNonLinearR::prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)
-{
-
-  /* compute the contribution in xPartialNS for the next iteration */
-  DEBUG_PRINT("FirstOrderNonLinearR::prepareNewtonIteration\n");
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-
-  BlockVector& xPartialNS = *DSlink[FirstOrderR::xPartialNS];
-  xPartialNS = *workV[FirstOrderR::g_alpha];
-
-  if (_B)
-    prod(*_B, *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
-  else
-    prod(*workM[FirstOrderR::mat_B], *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
-
-  xPartialNS -= *workV[FirstOrderR::vec_x];
-
-
-}
 
 void FirstOrderNonLinearR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {

@@ -573,6 +573,10 @@ void NewMarkAlphaOSI::prepareNewtonIteration(double time)
     SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
     computeW(ds, W);
   }
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+  }
   DEBUG_END("NewMarkAlphaOSI::prepareNewtonIteration(double time)\n");
 }
 

@@ -73,7 +73,7 @@ protected:
    */
   unsigned int _newtonOptions;
 
-  
+
   /** Maximum Residual for the Dynamical system */
   double _newtonResiduDSMax;
 
@@ -114,13 +114,8 @@ protected:
    */
   bool _resetAllLambda;
 
-  /** boolean variable to force an explicit evaluation of the Jacobians
-   * mapping of relations only at the beginning of the time--step and
-   * not in the Newton iteration
-   */
 
-  bool _explicitJacobiansOfRelation;
-  
+
   /** Default Constructor
    */
   TimeStepping() :
@@ -135,7 +130,7 @@ protected:
    */
   virtual void newtonSolve(double criterion, unsigned int maxStep);
 
-  
+
 public:
 
   /** initialisation specific to TimeStepping for OneStepNSProblem.
@@ -161,7 +156,7 @@ public:
   //  *  \param osnspb one step non smooth problem (default none)
   //  */
   // TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
-  
+
   /** Constructor with the time-discretisation.
    *  \param td pointer to a timeDiscretisation used in the integration
    *  (linked to the model that owns this simulation)
@@ -258,7 +253,7 @@ public:
   {
     return _isNewtonConverge;
   };
-  
+
   void setDisplayNewtonConvergence(bool newval)
   {
     _displayNewtonConvergence = newval;
@@ -273,19 +268,7 @@ public:
     _resetAllLambda = newval;
   };
 
-  
 
-  
-  bool explicitJacobiansOfRelation()
-  {
-  return  _explicitJacobiansOfRelation;
-  }
-  
-  void setExplicitJacobiansOfRelation(bool newval)
-  {
-    _explicitJacobiansOfRelation = newval;
-  };
-  
   /** To specify if the output interaction residu must be computed.
    *  \param v set to true when the output interaction residu must be computed
    */

@@ -161,9 +161,6 @@ public:
     return true;
   }
 
-  virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp);
-
-
   virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
   virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);

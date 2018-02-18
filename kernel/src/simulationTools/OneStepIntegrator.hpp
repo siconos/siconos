@@ -104,6 +104,15 @@ protected:
 
   bool _isInitialized;
 
+  /** boolean variable to force an explicit evaluation of the Jacobians
+   * mapping of relations only at the beginning of the time--step and
+   * not in the Newton iteration
+   */
+
+  bool _explicitJacobiansOfRelation;
+
+
+
   /** A link to the simulation that owns this OSI */
   SP::Simulation _simulation;
 
@@ -114,7 +123,7 @@ protected:
     : _integratorType(type), _sizeMem(1), _steps(0),
       _levelMinForOutput(0), _levelMaxForOutput(0),
       _levelMinForInput(0), _levelMaxForInput(0),
-      _isInitialized(false) {};
+      _isInitialized(false), _explicitJacobiansOfRelation(false) {};
 
   /** struct to add terms in the integration. Useful for Control */
   SP::ExtraAdditionalTerms _extraAdditionalTerms;
@@ -250,6 +259,15 @@ public:
 
   inline void setIsInitialized( bool value) {_isInitialized = value;};
 
+  bool explicitJacobiansOfRelation()
+  {
+  return  _explicitJacobiansOfRelation;
+  }
+
+  void setExplicitJacobiansOfRelation(bool newval)
+  {
+    _explicitJacobiansOfRelation = newval;
+  };
 
   /** initialise the integrator
    */

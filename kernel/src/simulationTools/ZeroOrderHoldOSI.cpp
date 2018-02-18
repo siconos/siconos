@@ -318,6 +318,11 @@ void ZeroOrderHoldOSI::prepareNewtonIteration(double time)
   //   //SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
   //   //    computeMatrices(time, *ds);
   // }
+
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+  }
 }
 
 

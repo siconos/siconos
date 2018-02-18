@@ -25,13 +25,14 @@
 #include "Topology.hpp"
 #include "DynamicalSystem.hpp"
 
-
-
-
-/** the Non Smooth Dynamical System consists of DynamicalSystem
- *  and Interaction regrouped together in a Topology object,
- *  in the form of a graph of DynamicalSystem as nodes and Interaction as edges
- *  and its dual.
+/** the NonSmoothDynamicalSystem consists of a set of DynamicalSystem objects
+ *  and a set  Interaction objects structured into a graph inside a Topology
+ *  object.  In the DynamicalSystem graph, the DynamicalSystem set is the  node
+ *  set and the Interaction set is  the edge set.
+ *  The DynamicalSystem are insert into te NonSmoothDynamica system thanks to the
+ *  insertDynamicalSystem method and the edge of the graph are constructed through
+ *  the link method.
+ *  A dual graph is also contructed.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \date (Creation) Apr 23, 2004
@@ -68,7 +69,6 @@ private:
   */
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem);
 
-
   /** current time of the simulation
       Warning FP : it corresponds to the time
       at the end of the integration step.
@@ -91,7 +91,6 @@ private:
 
   /** log list of the modifications of the nsds */
   std::list<Changes> _changeLog;
-
 
   /** the topology of the system */
   SP::Topology _topology;
@@ -167,7 +166,7 @@ public:
     _T = newValue;
   };
 
-/** get the title of the simulation
+  /** get the title of the simulation
    *  \return std::string : the title
    */
   inline const std::string  title() const
@@ -231,9 +230,6 @@ public:
     _date = s;
   }
 
-
-
-
   /** get problem type (true if BVP)
    *  \return a bool
    */
@@ -249,8 +245,6 @@ public:
   {
     return !_BVP;
   }
-
-
 
   /** set the NonSmoothDynamicalSystem to BVP, else it is IVP
    *  \param newBvp true if BVP, false otherwise
@@ -409,7 +403,7 @@ public:
     return _topology->name(inter);
   }
 
-    /** specify id the given Interaction is for controlling the DS
+  /** specify id the given Interaction is for controlling the DS
    * \param inter the Interaction
    * \param isControlInteraction true if the Interaction is used for
    * control purposes
@@ -478,6 +472,11 @@ public:
    */
   void updateOutput(double time, unsigned int level = 0);
 
+
+  /** compute Jacobians for all the interactions
+   * \param time
+   */
+  void computeInteractionJacobians(double time);
 
   /** visit all dynamical systems in this system.
    * \param visitor an SP::SiconosVisitor that can visit classes derived from DS

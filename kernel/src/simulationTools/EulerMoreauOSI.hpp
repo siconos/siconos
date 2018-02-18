@@ -137,6 +137,7 @@ protected:
    */
   bool _useGammaForRelation;
 
+
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;

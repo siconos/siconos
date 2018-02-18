@@ -144,8 +144,6 @@ public:
                                       InteractionProperties& interProp,
                                       unsigned int level = 0);
   
-  virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp);
-
   /** return true if the relation requires the computation of residu
    * \return true if residu are required, false otherwise
    */

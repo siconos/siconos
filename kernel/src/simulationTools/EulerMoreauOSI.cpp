@@ -324,7 +324,8 @@ void EulerMoreauOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
 }
 
 
-void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds, DynamicalSystemsGraph::VDescriptor& dsv,
+void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds,
+                              DynamicalSystemsGraph::VDescriptor& dsv,
                               SiconosMatrix& W)
 {
   DEBUG_BEGIN("EulerMoreauOSI::computeW(...)\n");
@@ -359,7 +360,7 @@ void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds, DynamicalSystems
     }
 
     DEBUG_EXPR(W.display(););
-    
+
   }
   // 2 - First order linear systems
   else if(dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
@@ -741,6 +742,7 @@ void EulerMoreauOSI::computeFreeState()
   DEBUG_END("EulerMoreauOSI::computeFreeState()\n");
 }
 
+
 void EulerMoreauOSI::prepareNewtonIteration(double time)
 {
   // XXX TMP hack -- xhub
@@ -755,6 +757,48 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
     SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(*dsi).W;
     computeW(time, *ds, dsv, *W);
   }
+
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+
+    InteractionsGraph::VIterator ui, uiend;
+    SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+
+    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    {
+      Interaction & inter = *indexSet0->bundle(*ui);
+      InteractionProperties& interProp = indexSet0->properties(*ui);
+      VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+      VectorOfVectors& workV = *interProp.workVectors;
+      VectorOfSMatrices& workM = *interProp.workMatrices;
+
+
+      RELATION::TYPES relationType = inter.relation()->getType();
+      RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
+      if(relationType == FirstOrder)
+      {
+        FirstOrderR& relation = static_cast<FirstOrderR&> (*inter.relation());
+        BlockVector& xPartialNS = *DSlink[FirstOrderR::xPartialNS];
+
+        if (relationSubType == NonLinearR || relationSubType == Type2R)
+        {
+          if (relation.B())
+            prod(*relation.B(), *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
+          else
+            prod(*workM[FirstOrderR::mat_B], *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
+
+          xPartialNS = *workV[FirstOrderR::g_alpha];
+          xPartialNS -= *workV[FirstOrderR::vec_x];
+        }
+      }
+    }
+  }
+
+
+
+
+
 }
 
 /// @cond
@@ -1099,7 +1143,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    
+
     RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
     if (relationSubType == Type2R)
     {
@@ -1129,7 +1173,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
   // Set dynamical systems non-smooth part to zero.
   _simulation->nonSmoothDynamicalSystem()->reset(level);
 
-  
+
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
   SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
