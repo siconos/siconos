@@ -106,10 +106,6 @@ void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned i
   *DSlink[FirstOrderR::z] = *z_vec;
 }
 
-void FirstOrderType1R::computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  assert(0);
-}
 void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned int level)
 {
   assert(_pluging && "FirstOrderType1R::computeInput() is not linked to a plugin function");
@@ -129,10 +125,7 @@ void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned in
   *DSlink[FirstOrderR::r] = *r_vec;
   *DSlink[FirstOrderR::z] = *z_vec;
 }
-void FirstOrderType1R::computeLinearizedInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  assert(0);
-}
+
 void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C)
 {
   //

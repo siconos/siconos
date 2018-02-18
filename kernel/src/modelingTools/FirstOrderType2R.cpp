@@ -113,79 +113,6 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned i
   DEBUG_END("FirstOrderType2R::computeOutput \n");
 }
 
-void FirstOrderType2R::computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  DEBUG_BEGIN("FirstOrderType2R::computeLinearizedOutput\n");
-  // compute the new y obtained by linearisation (see DevNotes)
-  // y_{alpha+1}_{k+1} = h(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
-  //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
-  //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
-  // or equivalently
-  // y_{alpha+1}_{k+1} = y_{alpha}_{k+1} - ResiduY_{k+1}^{alpha}
-  //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
-  //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
-  SiconosVector& y = *inter.y(level);
-  DEBUG_EXPR(y.display());
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-
-  SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
-
-  if (_D)
-    prod(*_D, *(inter.lambdaOld(level)), y, true);
-  else
-    prod(*workM[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
-
-  y *= -1.0;
-  //SiconosVector yOld = *inter.yOld(0); // Retrieve  y_{alpha}_{k+1}
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : yOld(level) \n");
-  DEBUG_EXPR(inter.yOld(level)->display());
-
-  y += *inter.yOld(level);
-
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : ResiduY() \n");
-  SiconosVector& residuY = *workV[FirstOrderR::vec_residuY];
-  DEBUG_EXPR(residuY.display());
-
-  y -= residuY;
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) \n");
-  DEBUG_EXPR(y.display());
-
-  BlockVector& deltax = *DSlink[FirstOrderR::deltax];
-  //  deltax -= *(DSlink[FirstOrderR::xold)];
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : deltax \n");
-  DEBUG_EXPR(deltax.display());
-
-  if (_C)
-    prod(*_C, deltax, y, false);
-  else
-    prod(*workM[FirstOrderR::mat_C], deltax, y, false);
-
-
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : y before osnsM\n");
-  DEBUG_EXPR(y.display());
-  if (interProp.block)
-  {
-    SiconosMatrix& osnsM = *interProp.block;
-    prod(osnsM, *inter.lambda(level), y, false);
-    DEBUG_EXPR(inter.lambda(level)->display());
-    DEBUG_EXPR(osnsM.display());
-    DEBUG_PRINT("FirstOrderType2R::computeOutput : new linearized y \n");
-    DEBUG_EXPR(y.display());
-  }
-
-  SiconosVector& x = *workV[FirstOrderR::vec_x];
-  x = *DSlink[FirstOrderR::x];
-
-
-
-  computeh(time, x, *inter.lambda(level), hAlpha);
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : new Halpha \n");
-  DEBUG_EXPR(hAlpha.display());
-  DEBUG_END("FirstOrderType2R::computeLinearizedOutput\n");
-}
-
 void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned int level)
 {
   DEBUG_BEGIN("FirstOrderType2R::computeInput \n");
@@ -198,37 +125,6 @@ void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned in
   DEBUG_EXPR(DSlink[FirstOrderR::r]->display());
   DEBUG_END("FirstOrderType2R::computeInput \n");
 }
-
-void FirstOrderType2R::computeLinearizedInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  DEBUG_BEGIN("FirstOrderType2R::computeLinearizedInput\n");
-  // compute the new r  obtained by linearisation
-  // r_{alpha+1}_{k+1} = g(lambda_{k+1}^{alpha},t_k+1)
-  //                     + B_{k+1}^alpha ( lambda_{k+1}^{alpha+1}- lambda_{k+1}^{alpha} )
-
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-
-  SiconosVector lambda = *inter.lambda(level);
-  lambda -= *(inter.lambdaOld(level));
-
-  if (_B)
-    prod(*_B, lambda, *workV[FirstOrderR::g_alpha], false);
-  else
-    prod(*workM[FirstOrderR::mat_B], lambda, *workV[FirstOrderR::g_alpha], false);
-
-
-  *DSlink[FirstOrderR::r] += *workV[FirstOrderR::g_alpha];
-  DEBUG_EXPR(DSlink[FirstOrderR::r]->display(););
-  //compute the new g_alpha
-  computeg(time, *inter.lambda(level), *workV[FirstOrderR::g_alpha]);
-  DEBUG_EXPR(workV[FirstOrderR::g_alpha]->display(););
-  DEBUG_END("FirstOrderType2R::computeLinearizedInput\n");
-
-
-}
-
 
 void FirstOrderType2R::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
 {

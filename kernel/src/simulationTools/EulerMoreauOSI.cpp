@@ -1136,32 +1136,154 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
   //_simulation->nonSmoothDynamicalSystem()->updateOutput(time,level);
   InteractionsGraph::VIterator ui, uiend;
-  SP::Interaction inter;
   SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    inter = indexSet0->bundle(*ui);
-    assert(inter->lowerLevelForOutput() <= level);
-    assert(inter->upperLevelForOutput() >= level);
+    Interaction& inter = *indexSet0->bundle(*ui);
+    assert(inter.lowerLevelForOutput() <= level);
+    assert(inter.upperLevelForOutput() >= level);
 
-    RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
+    InteractionProperties& interProp = indexSet0->properties(*ui);
+    VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+    VectorOfVectors& workV = *interProp.workVectors;
+    VectorOfSMatrices& workM = *interProp.workMatrices;
+    RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
     if (relationSubType == Type2R)
     {
-      FirstOrderType2R & r = static_cast<FirstOrderType2R&>(*inter->relation());
-      r.computeLinearizedOutput(time, *inter, indexSet0->properties(*ui), level);
+      FirstOrderType2R & r = static_cast<FirstOrderType2R&>(*inter.relation());
+            // compute the new y obtained by linearisation (see DevNotes)
+      // y_{alpha+1}_{k+1} = h(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
+      //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
+      //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
+      // or equivalently
+      // y_{alpha+1}_{k+1} = y_{alpha}_{k+1} - ResiduY_{k+1}^{alpha}
+      //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
+      //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
+      SiconosVector& y = *inter.y(level);
+      DEBUG_EXPR(y.display());
+
+
+      SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
+
+      if (r.D())
+        prod(*r.D(), *(inter.lambdaOld(level)), y, true);
+      else
+        prod(*workM[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
+
+      y *= -1.0;
+      //SiconosVector yOld = *inter.yOld(0); // Retrieve  y_{alpha}_{k+1}
+      DEBUG_PRINT("FirstOrderType2R::computeOutput : yOld(level) \n");
+      DEBUG_EXPR(inter.yOld(level)->display());
+
+      y += *inter.yOld(level);
+
+      DEBUG_PRINT("FirstOrderType2R::computeOutput : ResiduY() \n");
+      SiconosVector& residuY = *workV[FirstOrderR::vec_residuY];
+      DEBUG_EXPR(residuY.display());
+
+      y -= residuY;
+      DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) \n");
+      DEBUG_EXPR(y.display());
+
+      BlockVector& deltax = *DSlink[FirstOrderR::deltax];
+      //  deltax -= *(DSlink[FirstOrderR::xold)];
+      DEBUG_PRINT("FirstOrderType2R::computeOutput : deltax \n");
+      DEBUG_EXPR(deltax.display());
+
+      if (r.C())
+        prod(*r.C(), deltax, y, false);
+      else
+        prod(*workM[FirstOrderR::mat_C], deltax, y, false);
+
+
+      DEBUG_PRINT("FirstOrderType2R::computeOutput : y before osnsM\n");
+      DEBUG_EXPR(y.display());
+      if (interProp.block)
+      {
+        SiconosMatrix& osnsM = *interProp.block;
+        prod(osnsM, *inter.lambda(level), y, false);
+        DEBUG_EXPR(inter.lambda(level)->display());
+        DEBUG_EXPR(osnsM.display());
+        DEBUG_PRINT("FirstOrderType2R::computeOutput : new linearized y \n");
+        DEBUG_EXPR(y.display());
+      }
+
+      SiconosVector& x = *workV[FirstOrderR::vec_x];
+      x = *DSlink[FirstOrderR::x];
+
+
+
+      r.computeh(time, x, *inter.lambda(level), hAlpha);
+      DEBUG_PRINT("FirstOrderType2R::computeOutput : new Halpha \n");
+      DEBUG_EXPR(hAlpha.display());
     }
-    // else if (relationSubType == Type1R)
-    // {
-    //   FirstOrderType1R & r = static_cast<FirstOrderType1R&>(*inter->relation());
-    //   r.computeLinearizedOutput(time, *inter, indexSet0->properties(*ui), level);
-    // }
     else if (relationSubType == NonLinearR )
     {
-      FirstOrderNonLinearR & r = static_cast<FirstOrderNonLinearR&>(*inter->relation());
-      r.computeLinearizedOutput(time, *inter, indexSet0->properties(*ui), level);
+      FirstOrderNonLinearR & r = static_cast<FirstOrderNonLinearR&>(*inter.relation());
+      // compute the new y  obtained by linearisation (see DevNotes)
+      // y_{alpha+1}_{k+1} = h(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
+      //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
+      //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
+      // or equivalently
+      // y_{alpha+1}_{k+1} = y_{alpha}_{k+1} - ResiduY_{k+1}^{alpha}
+      //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
+      //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
+      SiconosVector& y = *inter.y(level);
+      DEBUG_EXPR(y.display());
+
+
+      if (r.D())
+        prod(*r.D(), *(inter.lambdaOld(level)), y, true);
+      else
+        prod(*workM[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
+
+      y *= -1.0;
+      //SiconosVector yOld = *inter.yOld(0); // Retrieve  y_{alpha}_{k+1}
+      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : yOld(level) \n");
+      DEBUG_EXPR(inter.yOld(level)->display());
+
+      y += *inter.yOld(level);
+
+      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : ResiduY() \n");
+      SiconosVector& residuY = *workV[FirstOrderR::vec_residuY];
+      DEBUG_EXPR(residuY().display());
+
+      y -= residuY;
+
+      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : y(level) \n");
+      DEBUG_EXPR(y.display());
+
+      BlockVector& deltax = *DSlink[FirstOrderR::deltax];
+      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : deltax \n");
+      DEBUG_EXPR(deltax.display());
+
+      if (r.C())
+        prod(*r.C(), deltax, y, false);
+      else
+        prod(*workM[FirstOrderR::mat_C], deltax, y, false);
+
+      if (interProp.block)
+      {
+        SiconosMatrix& osnsM = *interProp.block;
+        // osnsM = h * C * W^-1 * B + D
+        DEBUG_EXPR(osnsM.display(););
+        prod(osnsM, *inter.lambda(level), y, false);
+      }
+      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : new linearized y \n");
+      DEBUG_EXPR(y.display());
+
+      SiconosVector& x = *workV[FirstOrderR::vec_x];
+      x = *DSlink[FirstOrderR::x];
+      SiconosVector& z = *workV[FirstOrderR::vec_z];
+      z = *DSlink[FirstOrderR::z];
+
+      SiconosVector hAlpha =  *workV[FirstOrderR::h_alpha];
+      r.computeh(time, x, *inter.lambda(level), z, hAlpha);
+
+      *DSlink[FirstOrderR::z] = z;
     }
     else
-      inter->computeOutput(time, level);
+      inter.computeOutput(time, level);
   }
 }
 
@@ -1175,33 +1297,81 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
 
 
   InteractionsGraph::VIterator ui, uiend;
-  SP::Interaction inter;
+
   SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
-    inter = indexSet0->bundle(*ui);
-    assert(inter->lowerLevelForInput() <= level);
-    assert(inter->upperLevelForInput() >= level);
-
-    RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
+    Interaction& inter = * indexSet0->bundle(*ui);
+    assert(inter.lowerLevelForInput() <= level);
+    assert(inter.upperLevelForInput() >= level);
+    InteractionProperties& interProp = indexSet0->properties(*ui);
+    VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+    VectorOfVectors& workV = *interProp.workVectors;
+    VectorOfSMatrices& workM = *interProp.workMatrices;
+    RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
     if (relationSubType == Type2R)
     {
-      FirstOrderType2R & r = static_cast<FirstOrderType2R&>(*inter->relation());
-      r.computeLinearizedInput(time, *inter, indexSet0->properties(*ui), level);
+      FirstOrderType2R & r = static_cast<FirstOrderType2R&>(*inter.relation());
+      SiconosVector lambda = *inter.lambda(level);
+      lambda -= *(inter.lambdaOld(level));
+
+      if (r.B())
+        prod(*r.B(), lambda, *workV[FirstOrderR::g_alpha], false);
+      else
+        prod(*workM[FirstOrderR::mat_B], lambda, *workV[FirstOrderR::g_alpha], false);
+
+
+      *DSlink[FirstOrderR::r] += *workV[FirstOrderR::g_alpha];
+      DEBUG_EXPR(DSlink[FirstOrderR::r]->display(););
+      //compute the new g_alpha
+      r.computeg(time, *inter.lambda(level), *workV[FirstOrderR::g_alpha]);
+      DEBUG_EXPR(workV[FirstOrderR::g_alpha]->display(););
     }
-    // else if (relationSubType == Type1R)
-    // {
-    //   FirstOrderType1R & r = static_cast<FirstOrderType1R&>(*inter->relation());
-    //   r.computeLinearizedInput(time, *inter, indexSet0->properties(*ui), level);
-    // }
     else if (relationSubType == NonLinearR )
     {
-      FirstOrderNonLinearR & r = static_cast<FirstOrderNonLinearR&>(*inter->relation());
-      r.computeLinearizedInput(time, *inter, indexSet0->properties(*ui), level);
+      FirstOrderNonLinearR & r = static_cast<FirstOrderNonLinearR&>(*inter.relation());
+      // compute the new r  obtained by linearisation
+      // r_{alpha+1}_{k+1} = g(lambda_{k+1}^{alpha},t_k+1)
+      //                     + B_{k+1}^alpha ( lambda_{k+1}^{alpha+1}- lambda_{k+1}^{alpha} )
+
+
+      SiconosVector lambda = *inter.lambda(level);
+      lambda -= *(inter.lambdaOld(level));
+
+      SiconosVector& g_alpha = *workV[FirstOrderR::g_alpha];
+
+      if (r.B())
+        prod(*r.B(), lambda, g_alpha, false);
+      else
+        prod(*workM[FirstOrderR::mat_B], lambda, g_alpha, false);
+
+      BlockVector& deltax = *DSlink[FirstOrderR::deltax];
+      DEBUG_PRINT("FirstOrderNonLinearR::computeInput : deltax \n");
+      DEBUG_EXPR(deltax.display());
+
+      if (r.K())
+        prod(*r.K(), deltax, g_alpha, false);
+      else
+        prod(*workM[FirstOrderR::mat_K], deltax, g_alpha, false);
+
+
+      // Khat = h * K * W^-1 * B
+      prod(*workM[FirstOrderR::mat_Khat], *inter.lambda(level), g_alpha, false);
+
+      *DSlink[FirstOrderR::r] += g_alpha;
+
+      //compute the new g_alpha
+      SiconosVector& x = *workV[FirstOrderR::vec_x];
+      x = *DSlink[FirstOrderR::x];
+      SiconosVector& z = *workV[FirstOrderR::vec_z];
+      z = *DSlink[FirstOrderR::z];
+      r.computeg(time, x, *inter.lambda(level), z, g_alpha);
+      *DSlink[FirstOrderR::z] = z;
+
     }
     else
     {
-      inter->computeInput(time, level);
+      inter.computeInput(time, level);
     }
   }
 
