@@ -301,9 +301,11 @@ void Disks::init(std::string disks_input)
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.3, 2));
 
-    _playground.reset(new SpaceFilter(3, 6, nsds, _plans, _moving_plans));
+    _playground.reset(new SpaceFilter(3, 6, _plans, _moving_plans));
 
-    _playground->insert(nslaw, 0, 0);
+    _playground->insertNonSmoothLaw(nslaw, 0, 0);
+
+    _sim->insertInteractionManager(_playground);
 
   }
 
