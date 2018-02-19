@@ -150,6 +150,18 @@ protected:
     ;
   };
 
+  /** initialize OSI-DS links in the NSDS graph. */
+  void initializeOSIAssociations();
+
+  /** initialize objects (DSs and Interations) found in the NSDS
+   * Changelog and update the changelog iterator.
+   * \return true if any new Interactions were initialized
+   */
+  bool initializeNSDSChangelog();
+
+  /** initialize index sets for OSIs */
+  void initializeIndexSets();
+
 private:
 
   /** copy constructor. Private => no copy nor pass-by value.

@@ -398,7 +398,7 @@ void TimeStepping::initializeNewtonLoop()
 
     // If graph changed, need to initialize the new interactions
     if (p != _nsds->changeLogPosition())
-      initialize();
+      initializeNSDSChangelog();
   }
 
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();

@@ -209,10 +209,9 @@ void Simulation::insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id)
     (*_allNSProblems)[Id] = osns;
   }
 }
-void Simulation::initialize()
+
+void Simulation::initializeOSIAssociations()
 {
-  DEBUG_BEGIN("Simulation::initialize()");
-  DEBUG_EXPR_WE(std::cout << "Simulation name :"<< name() << std::endl;);
   // 1-  OneStepIntegrators initialization ===
   // we set the simulation pointer and the graph of DS in osi
   for (OSIIterator itosi = _allOSI->begin();
@@ -241,11 +240,10 @@ void Simulation::initialize()
     }
     it->second.clear();
   }
+}
 
-  // Allow the InteractionManager to add/remove any interactions it wants
-  updateWorldFromDS();
-  updateInteractions();
-
+bool Simulation::initializeNSDSChangelog()
+{
   // 3- we initialize new  ds and interaction
   /* Changes to the NSDS are tracked by a changelog, making it fast
    * for the Simulation to scan any changes it has not yet seen and
@@ -294,7 +292,11 @@ void Simulation::initialize()
   }
   _nsdsChangeLogPosition = _nsds->changeLogPosition();
 
+  return interactionInitialized;
+}
 
+void Simulation::initializeIndexSets()
+{
   // 4 - we finalize the initialization of osi
 
   // symmetry in indexSets Do we need it ?
@@ -303,7 +305,7 @@ void Simulation::initialize()
   // === OneStepIntegrators initialization ===
   for (OSIIterator itosi = _allOSI->begin();
        itosi != _allOSI->end(); ++itosi)
-  { 
+  {
     if (!(*itosi)->isInitialized()){
       DEBUG_PRINT("- 4 - we finalize the initialization of osi\n");
       DEBUG_PRINT("osi->initialize\n")
@@ -311,7 +313,6 @@ void Simulation::initialize()
       _numberOfIndexSets = std::max<int>((*itosi)->numberOfIndexSets(), _numberOfIndexSets);
     }
   }
-
 
   SP::Topology topo = _nsds->topology();
   unsigned int indxSize = topo->indexSetsSize();
@@ -325,6 +326,27 @@ void Simulation::initialize()
     for (unsigned int i = indxSize; i < topo->indexSetsSize(); i++) // ++i ???
       topo->resetIndexSetPtr(i);
   }
+}
+
+void Simulation::initialize()
+{
+  DEBUG_BEGIN("Simulation::initialize()");
+  DEBUG_EXPR_WE(std::cout << "Simulation name :"<< name() << std::endl;);
+
+  // 1 - Process any pending OSI->DS associations
+  initializeOSIAssociations();
+
+  // 2 - allow the InteractionManager to add/remove any interactions it wants
+  updateWorldFromDS();
+  updateInteractions();
+
+  // 3 - initialize new ds and interactions
+  bool interactionInitialized =
+    initializeNSDSChangelog();
+
+  // 4 - Initialize index sets for OSIs
+  initializeIndexSets();
+
   // 5 - Initialize OneStepNSProblem(s)
   if (interactionInitialized || !_isInitialized)
   {
