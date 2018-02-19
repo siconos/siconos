@@ -37,7 +37,7 @@ void FirstOrderNonLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, 
 {
   FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
-  
+
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
@@ -47,14 +47,9 @@ void FirstOrderNonLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, 
   workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
   workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
   workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
-  
+
   workV[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));
   workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
-
-  workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
-  workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
-  workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
-  workM[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
 
   workM[FirstOrderR::mat_Khat].reset(new SimpleMatrix(sizeDS, sizeY));
 
@@ -62,7 +57,22 @@ void FirstOrderNonLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, 
 }
 
 void FirstOrderNonLinearR::initialize(Interaction& inter)
-{}
+{
+  FirstOrderR::initialize(inter);
+
+  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeDS = inter.getSizeOfDS();
+  //VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  //unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+
+  relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
+  relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+  relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
+  relationMat[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
+
+  // F ? e ?
+}
 
 void FirstOrderNonLinearR::checkSize(Interaction& inter)
 {}
@@ -168,8 +178,9 @@ void FirstOrderNonLinearR::computeInput(double time, Interaction& inter, unsigne
 void FirstOrderNonLinearR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
 
   SiconosVector& x = *workV[FirstOrderR::vec_x];
   x = *DSlink[FirstOrderR::x];
@@ -179,12 +190,12 @@ void FirstOrderNonLinearR::computeJach(double time, Interaction& inter, Interact
 
   if (!_C)
   {
-    computeJachx(time, x, lambda, z, *workM[FirstOrderR::mat_C]);
+    computeJachx(time, x, lambda, z, *relationMat[FirstOrderR::mat_C]);
   }
 
   if (!_D)
   {
-    computeJachlambda(time, x, lambda, z, *workM[FirstOrderR::mat_D]);
+    computeJachlambda(time, x, lambda, z, *relationMat[FirstOrderR::mat_D]);
   }
   *DSlink[FirstOrderR::z] = z;
 }
@@ -192,8 +203,9 @@ void FirstOrderNonLinearR::computeJach(double time, Interaction& inter, Interact
 void FirstOrderNonLinearR::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
+
   SiconosVector& x = *workV[FirstOrderR::vec_x];
   x = *DSlink[FirstOrderR::x];
   SiconosVector& z = *workV[FirstOrderR::vec_z];
@@ -201,11 +213,11 @@ void FirstOrderNonLinearR::computeJacg(double time, Interaction& inter, Interact
   SiconosVector& lambda = *inter.lambda(0);
   if (!_B)
   {
-    computeJacglambda(time, x, lambda, z, *workM[FirstOrderR::mat_B]);
+    computeJacglambda(time, x, lambda, z, *relationMat[FirstOrderR::mat_B]);
   }
   if (!_K)
   {
-    computeJacgx(time, x, lambda, z, *workM[FirstOrderR::mat_K]);
+    computeJacgx(time, x, lambda, z, *relationMat[FirstOrderR::mat_K]);
   }
   *DSlink[FirstOrderR::z] = z;
 }

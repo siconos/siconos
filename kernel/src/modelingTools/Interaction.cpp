@@ -310,58 +310,6 @@ Interaction::Interaction(SP::NonSmoothLaw NSL,
 }
 
 
-
-
-// void Interaction::setDSLinkAndWorkspace(InteractionProperties& interProp,
-// 					DynamicalSystem& ds1, VectorOfVectors& workV1,
-// 					DynamicalSystem& ds2, VectorOfVectors& workV2)
-// {
-//   DEBUG_BEGIN("Interaction::setDSLinkAndWorkspace(...)\n");
-
-//   VectorOfBlockVectors& DSlink = *interProp.DSlink;
-//   VectorOfVectors& workVInter = *interProp.workVectors;
-//   VectorOfSMatrices& workMInter = *interProp.workMatrices;
-
-//   initData(DSlink);
-//   // Initialize interaction work vectors, depending on Dynamical systems
-//   // linked to the interaction.
-
-//   initDSData(ds1, DSlink);
-
-//   if(&ds1 != &ds2)
-//     {
-//       DEBUG_PRINT("ds1 != ds2\n");
-//       DEBUG_PRINTF("ds1 number %i", ds1.number())
-//       DEBUG_PRINTF("ds2 number %i", ds2.number())
-//       initDSData(ds2, DSlink);
-//     }
-
-//   bool computeResidu = _relation->requireResidu();
-
-//   // Relation initializes the work vectors and matrices
-//   _relation->initialize(*this, DSlink, workVInter, workMInter);
-
-//   if (computeResidu)
-//     {
-//       RELATION::TYPES relationType = _relation->getType();
-//       if (relationType == FirstOrder)
-// 	{
-// 	  if (!workVInter[FirstOrderR::g_alpha])
-// 	    workVInter[FirstOrderR::g_alpha].reset(new SiconosVector(_sizeOfDS));
-// 	  if (!workVInter[FirstOrderR::vec_residuR])
-// 	    workVInter[FirstOrderR::vec_residuR].reset(new SiconosVector(_sizeOfDS));
-// 	}
-//       else if (relationType == Lagrangian)
-//         RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for LagrangianR is not implemented");
-//       else if (relationType == NewtonEuler)
-//         RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for NewtonEulerR is not implemented");
-//     }
-
-//   DEBUG_END(" Interaction::setDSLinkAndWorkspace(...)\n");
-// }
-
-
-
 void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
                                               DynamicalSystem& ds2)
 {
@@ -901,7 +849,7 @@ void Interaction::computeInput(double time,  unsigned int level)
 
 
 
-void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const
+void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
   SP::SiconosMatrix originalMatrix;
   RELATION::TYPES relationType = relation()->getType();
@@ -913,7 +861,7 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
     if (CMat)
       originalMatrix = CMat;
     else if (relationSubType != LinearTIR)
-      originalMatrix = workM[FirstOrderR::mat_C];
+      originalMatrix = _relationMatrices[FirstOrderR::mat_C];
   }
   else if (relationType == Lagrangian)
   {
@@ -943,7 +891,7 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-SiconosMatrix& Interaction::getLeftInteractionBlock(VectorOfSMatrices& workM) const
+SiconosMatrix& Interaction::getLeftInteractionBlock() const
 {
   RELATION::TYPES relationType = relation()->getType();
   RELATION::SUBTYPES relationSubType = relation()->getSubType();
@@ -954,7 +902,7 @@ SiconosMatrix& Interaction::getLeftInteractionBlock(VectorOfSMatrices& workM) co
     if (CMat)
       return *CMat;
     else if (relationSubType != LinearTIR)
-      return *workM[FirstOrderR::mat_C];
+      return *_relationMatrices[FirstOrderR::mat_C];
   }
   else if (relationType == Lagrangian)
   {
@@ -971,7 +919,7 @@ SiconosMatrix& Interaction::getLeftInteractionBlock(VectorOfSMatrices& workM) co
     RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
   }
   // stupid compiler check
-  return *workM[FirstOrderR::mat_C];
+  return *_relationMatrices[FirstOrderR::mat_C];
 
 }
 void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
@@ -1011,7 +959,7 @@ void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int 
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const
+void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
   SP::SiconosMatrix originalMatrix; // Complete matrix, Relation member.
   RELATION::TYPES relationType = relation()->getType();
@@ -1023,7 +971,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
     if (BMat)
       originalMatrix = BMat;
     else if (relationSubType != LinearTIR)
-      originalMatrix = workM[FirstOrderR::mat_B];
+      originalMatrix = _relationMatrices[FirstOrderR::mat_B];
     else
        RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, FirstOrderLinearTIR relation but no B matrix found!");
   }
@@ -1052,7 +1000,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const
+void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) const
 {
   // !!! Warning: we suppose that D is interactionBlock diagonal, ie that
   // there is no coupling between Interaction through D !!!  Any
@@ -1069,7 +1017,7 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, V
     if (DMat)
       D = DMat;
     else if (relationSubType != LinearTIR)
-      D = workM[FirstOrderR::mat_D];
+      D = _relationMatrices[FirstOrderR::mat_D];
   }
   else if (relationType == Lagrangian)
   {
@@ -1110,7 +1058,7 @@ void Interaction::computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double
   if ((relationType == FirstOrder) && (workM[FirstOrderR::mat_Khat]))
   {
     SP::SiconosMatrix K = std11::static_pointer_cast<FirstOrderR>(_relation)->K();
-    if (!K) K = workM[FirstOrderR::mat_K];
+    if (!K) K = _relationMatrices[FirstOrderR::mat_K];
     prod(*K, m, *workM[FirstOrderR::mat_Khat], true);
     *workM[FirstOrderR::mat_Khat] *= h;
   }

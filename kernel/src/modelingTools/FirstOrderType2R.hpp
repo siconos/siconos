@@ -87,7 +87,7 @@ public:
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
                               VectorOfVectors& workV, VectorOfSMatrices& workM);
   
-  virtual void initialize(Interaction& inter) {};
+  virtual void initialize(Interaction& inter);
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation

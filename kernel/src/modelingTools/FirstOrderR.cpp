@@ -17,7 +17,11 @@
 */
 #include "FirstOrderR.hpp"
 
-
+void FirstOrderR::initialize(Interaction& inter)
+{
+  inter.relationMatrices().resize(FirstOrderR::relationMatricesSize);
+  inter.relationVectors().resize(FirstOrderR::relationVectorsSize);
+}
 
 void FirstOrderR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workVInter, VectorOfSMatrices& workMInter)
 {

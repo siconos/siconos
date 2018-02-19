@@ -66,6 +66,21 @@ void FirstOrderLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, V
 
   checkSize(inter);
 }
+
+void FirstOrderLinearTIR::initialize(Interaction& inter)
+{
+  DEBUG_PRINT("FirstOrderLinearTIR::initialize(Interaction & inter)\n");
+
+  FirstOrderR::initialize(inter); // ?
+
+  if (!_C)
+    RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() C is null and is a required input.");
+  if (!_B)
+    RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() B is null and is a required input.");
+
+  checkSize(inter);
+}
+
 void FirstOrderLinearTIR::checkSize(Interaction& inter)
 {
   DEBUG_PRINT("FirstOrderLinearTIR::checkSize(Interaction & inter)\n");

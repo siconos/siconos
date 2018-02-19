@@ -58,17 +58,16 @@ variables are required in g.
 
  *
  */
-// namespace FirstOrderR {enum {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};}
-// namespace FirstOrderRVec {enum {xfree, z, x, r, e, g_alpha, residuR, workVecSize};}
-// namespace FirstOrderRMat {enum {C, D, F, B, K, Ktilde, Khat, workMatSize};}
-
-
 class FirstOrderR : public Relation
 {
 public:
   enum FirstOrderRDS  {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};
-  enum FirstOrderRVec {osnsp_rhs,vec_z, vec_x, vec_r, e, h_alpha, g_alpha, vec_residuY, vec_residuR, workVecSize};
-  enum FirstOrderRMat {mat_C, mat_D, mat_F, mat_B, mat_K, mat_Ktilde, mat_Khat, mat_workMatSize};
+  enum FirstOrderRVec {e,  relationVectorsSize};
+  enum FirstOrderRMat {mat_C, mat_D, mat_F, mat_B, mat_K, relationMatricesSize};
+
+
+  enum FirstOrderRWorkVec {osnsp_rhs,vec_z, vec_x, vec_r,  h_alpha, g_alpha, vec_residuY, vec_residuR, workVecSize};
+  enum FirstOrderWorkMat{mat_Ktilde, mat_Khat, mat_workMatSize};
 
 
 protected:
@@ -97,7 +96,7 @@ public:
 
   virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
   
-  virtual void initialize(Interaction& inter) = 0;
+  virtual void initialize(Interaction& inter);
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation

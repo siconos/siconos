@@ -394,10 +394,11 @@ void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds,
     for(std11::tie(oei, oeiend) = _dynamicalSystemsGraph->out_edges(dsv); oei != oeiend; ++oei)
     {
       inter = _dynamicalSystemsGraph->bundle(*oei);
+      VectorOfSMatrices& relationMat = inter->relationMatrices();
       ivd = indexSet.descriptor(inter);
       FirstOrderR& rel = static_cast<FirstOrderR&>(*inter->relation());
       K = rel.K();
-      if(!K) K = (*indexSet.properties(ivd).workMatrices)[FirstOrderR::mat_K];
+      if(!K) K = relationMat[FirstOrderR::mat_K];
       if(K)
       {
         scal(-h * _gamma, *K, W, false);
@@ -771,7 +772,7 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
       InteractionProperties& interProp = indexSet0->properties(*ui);
       VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
       VectorOfVectors& workV = *interProp.workVectors;
-      VectorOfSMatrices& workM = *interProp.workMatrices;
+      VectorOfSMatrices& relationMat = inter.relationMatrices();
 
 
       RELATION::TYPES relationType = inter.relation()->getType();
@@ -786,7 +787,7 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
           if (relation.B())
             prod(*relation.B(), *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
           else
-            prod(*workM[FirstOrderR::mat_B], *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
+            prod(*relationMat[FirstOrderR::mat_B], *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
 
           xPartialNS = *workV[FirstOrderR::g_alpha];
           xPartialNS -= *workV[FirstOrderR::vec_x];
@@ -835,8 +836,10 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
   VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
+  VectorOfSMatrices& relationMat = inter->relationMatrices();
+
   VectorOfVectors& workV = *indexSet->properties(vertex_inter).workVectors;
-  VectorOfSMatrices& workM = *indexSet->properties(vertex_inter).workMatrices;
+
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -880,9 +883,9 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
     SiconosVector& lambda = *inter->lambda(0);
     FirstOrderR& rel = *std11::static_pointer_cast<FirstOrderR>(mainInteraction->relation());
     C = rel.C();
-    if(!C) C = workM[FirstOrderR::mat_C];
+    if(!C) C = relationMat[FirstOrderR::mat_C];
     D = rel.D();
-    if(!D) D = workM[FirstOrderR::mat_D];
+    if(!D) D = relationMat[FirstOrderR::mat_D];
 
     if(D)
     {
@@ -916,9 +919,9 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   {
     FirstOrderType1R& rel = *std11::static_pointer_cast<FirstOrderType1R>(mainInteraction->relation());
     C = rel.C();
-    if(!C) C = workM[FirstOrderR::mat_C];
+    if(!C) C = relationMat[FirstOrderR::mat_C];
     F = rel.F();
-    if(!F) F = workM[FirstOrderR::mat_F];
+    if(!F) F = relationMat[FirstOrderR::mat_F];
     assert(Xfree);
     assert(deltax);
 
@@ -949,7 +952,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   else // First Order Linear Relation
   {
     C = mainInteraction->relation()->C();
-    if(!C) C = workM[FirstOrderR::mat_C];
+    if(!C) C = relationMat[FirstOrderR::mat_C];
 
     if(C)
     {
@@ -985,7 +988,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 	      e = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
 	      if(!e) e = workV[FirstOrderR::e];
 	      F = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
-	      if(!F) F = workM[FirstOrderR::mat_F];
+	      if(!F) F = relationMat[FirstOrderR::mat_F];
 	    }
 
       if(e)
@@ -1143,10 +1146,13 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
     assert(inter.lowerLevelForOutput() <= level);
     assert(inter.upperLevelForOutput() >= level);
 
-    InteractionProperties& interProp = indexSet0->properties(*ui);
+
     VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+    VectorOfSMatrices& relationMat = inter.relationMatrices();
+
+    InteractionProperties& interProp = indexSet0->properties(*ui);
     VectorOfVectors& workV = *interProp.workVectors;
-    VectorOfSMatrices& workM = *interProp.workMatrices;
+
     RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
     if (relationSubType == Type2R)
     {
@@ -1168,7 +1174,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       if (r.D())
         prod(*r.D(), *(inter.lambdaOld(level)), y, true);
       else
-        prod(*workM[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
+        prod(*relationMat[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
 
       y *= -1.0;
       //SiconosVector yOld = *inter.yOld(0); // Retrieve  y_{alpha}_{k+1}
@@ -1193,7 +1199,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       if (r.C())
         prod(*r.C(), deltax, y, false);
       else
-        prod(*workM[FirstOrderR::mat_C], deltax, y, false);
+        prod(*relationMat[FirstOrderR::mat_C], deltax, y, false);
 
 
       DEBUG_PRINT("FirstOrderType2R::computeOutput : y before osnsM\n");
@@ -1235,7 +1241,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       if (r.D())
         prod(*r.D(), *(inter.lambdaOld(level)), y, true);
       else
-        prod(*workM[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
+        prod(*relationMat[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
 
       y *= -1.0;
       //SiconosVector yOld = *inter.yOld(0); // Retrieve  y_{alpha}_{k+1}
@@ -1260,7 +1266,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       if (r.C())
         prod(*r.C(), deltax, y, false);
       else
-        prod(*workM[FirstOrderR::mat_C], deltax, y, false);
+        prod(*relationMat[FirstOrderR::mat_C], deltax, y, false);
 
       if (interProp.block)
       {
@@ -1304,8 +1310,11 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
     Interaction& inter = * indexSet0->bundle(*ui);
     assert(inter.lowerLevelForInput() <= level);
     assert(inter.upperLevelForInput() >= level);
-    InteractionProperties& interProp = indexSet0->properties(*ui);
+
     VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+    VectorOfSMatrices& relationMat = inter.relationMatrices();
+
+    InteractionProperties& interProp = indexSet0->properties(*ui);
     VectorOfVectors& workV = *interProp.workVectors;
     VectorOfSMatrices& workM = *interProp.workMatrices;
     RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
@@ -1318,7 +1327,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       if (r.B())
         prod(*r.B(), lambda, *workV[FirstOrderR::g_alpha], false);
       else
-        prod(*workM[FirstOrderR::mat_B], lambda, *workV[FirstOrderR::g_alpha], false);
+        prod(*relationMat[FirstOrderR::mat_B], lambda, *workV[FirstOrderR::g_alpha], false);
 
 
       *DSlink[FirstOrderR::r] += *workV[FirstOrderR::g_alpha];
@@ -1343,7 +1352,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       if (r.B())
         prod(*r.B(), lambda, g_alpha, false);
       else
-        prod(*workM[FirstOrderR::mat_B], lambda, g_alpha, false);
+        prod(*relationMat[FirstOrderR::mat_B], lambda, g_alpha, false);
 
       BlockVector& deltax = *DSlink[FirstOrderR::deltax];
       DEBUG_PRINT("FirstOrderNonLinearR::computeInput : deltax \n");
@@ -1352,7 +1361,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       if (r.K())
         prod(*r.K(), deltax, g_alpha, false);
       else
-        prod(*workM[FirstOrderR::mat_K], deltax, g_alpha, false);
+        prod(*relationMat[FirstOrderR::mat_K], deltax, g_alpha, false);
 
 
       // Khat = h * K * W^-1 * B

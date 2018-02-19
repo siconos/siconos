@@ -159,7 +159,9 @@ private:
    * and OneStepIntegrator classes. */
   VectorOfBlockVectors _linkToDSVariables;
 
+  VectorOfSMatrices _relationMatrices;
 
+  VectorOfVectors _relationVectors;
 
   struct _setLevels;
   friend struct Interaction::_setLevels;
@@ -672,6 +674,16 @@ public:
   {
     return _linkToDSVariables;
   };
+
+  inline VectorOfVectors & relationVectors()
+  {
+    return _relationVectors;
+  };
+
+  inline VectorOfSMatrices & relationMatrices()
+  {
+    return _relationMatrices;
+  };
   
   // --- OTHER FUNCTIONS ---
 
@@ -720,17 +732,15 @@ public:
   void computeInput(double time, unsigned int level = 0);
 
   /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
-   *  \param workM
    */
-  SiconosMatrix& getLeftInteractionBlock(VectorOfSMatrices& workM) const;
+  SiconosMatrix& getLeftInteractionBlock() const;
 
   /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to one ds.
    *  \param pos int, relative position of the beginning of the required block in relation matrix.
    *  \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
-   *  \param workM
    */
-  void getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
+  void getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const;
 
   /** gets the matrix used in interactionBlock computation. Used only for the formulation projecting on the constraints.
    *         We get only the part corresponding to ds.
@@ -743,16 +753,14 @@ public:
    *         We get only the part corresponding to ds.
    *  \param pos int, relative position of the beginning of the required block in relation matrix.
    *  \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
-   *  \param workM
    */
-  void getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
+  void getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const;
 
   /** gets extra interactionBlock corresponding to the present Interaction (see the
    *  top of this files for extra interactionBlock meaning)
    * \param[in,out] InteractionBlock SP::SiconosMatrix
-   * \param workM
    */
-  void getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const;
+  void getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) const;
 
   void computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const;
 

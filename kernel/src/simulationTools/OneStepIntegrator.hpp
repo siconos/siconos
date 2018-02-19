@@ -56,7 +56,8 @@ class OneStepIntegrator :public std11::enable_shared_from_this<OneStepIntegrator
 
 public :
   /** List of indices used to save tmp work matrices and vectors (last one is the size of the present list) */
-  enum OSI_DSWorkVectorId {local_buffer, residu, residu_free, free, free_tdg, x_partial_ns, delta_x_for_relation,
+  enum OSI_DSWorkVectorId {local_buffer, residu, residu_free, free, free_tdg,
+                           x_partial_ns, delta_x_for_relation,
                            qtmp, acce_memory, acce_like, work_vector_of_vector_size};
 
   enum OSI_DSWorkMatrixId {dense_output_coefficients, work_vector_of_matrix_size};

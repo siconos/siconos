@@ -82,8 +82,8 @@ void FirstOrderLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, Vec
   FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
   // get interesting size
-  unsigned int sizeY = inter.getSizeOfY();
-  unsigned int sizeX = inter.getSizeOfDS();
+  //unsigned int sizeY = inter.getSizeOfY();
+  //unsigned int sizeX = inter.getSizeOfDS();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 
   // Update workV (copy of DS variables)
@@ -92,22 +92,39 @@ void FirstOrderLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, Vec
 
   workM.resize(FirstOrderR::mat_workMatSize);
 
-  if (!_C && _pluginJachx->fPtr)
-    workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeX));
-  if (!_D && _pluginJachlambda->fPtr)
-    workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
-  if (!_B && _pluginJacglambda->fPtr)
-    workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeX, sizeY));
-  if (!_F && _pluginf->fPtr)
-  {
-    workM[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
-  }
-  if (!_e && _plugine->fPtr)
-  {
-    workV[FirstOrderR::e].reset(new SiconosVector(sizeY));
-  }
   checkSize(inter);
 }
+
+
+void FirstOrderLinearR::initialize(Interaction& inter)
+{
+
+  FirstOrderR::initialize(inter);
+
+  // get interesting size
+  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeX = inter.getSizeOfDS();
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+  VectorOfVectors & relationVec= inter.relationVectors();
+
+  if (!_C && _pluginJachx->fPtr)
+    relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeX));
+  if (!_D && _pluginJachlambda->fPtr)
+    relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+  if (!_B && _pluginJacglambda->fPtr)
+    relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeX, sizeY));
+  if (!_F && _pluginf->fPtr)
+    relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
+  if (!_e && _plugine->fPtr)
+    relationVec[FirstOrderR::e].reset(new SiconosVector(sizeY));
+
+  checkSize(inter);
+}
+
+
 void FirstOrderLinearR::checkSize(Interaction& inter)
 {
 

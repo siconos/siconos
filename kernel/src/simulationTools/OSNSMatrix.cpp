@@ -422,7 +422,6 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
       for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
       {
         Interaction& inter = *indexSet.bundle(*ui);
-        VectorOfSMatrices& workMInter = *indexSet.properties(*ui).workMatrices;
 
         SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
         SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
@@ -438,7 +437,7 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
           size_t sizeDS = ds->dimension();
           // this whole part is a hack. Just should just get the rightblock
           leftInteractionBlock.reset(new SimpleMatrix(3, sizeDS));
-          inter.getLeftInteractionBlockForDS(posBlock, leftInteractionBlock, workMInter);
+          inter.getLeftInteractionBlockForDS(posBlock, leftInteractionBlock);
           leftInteractionBlock->trans();
           pos_ds =  DSG.properties(DSG.descriptor(ds)).absolute_position;
           DEBUG_PRINTF("pos = %u", pos);

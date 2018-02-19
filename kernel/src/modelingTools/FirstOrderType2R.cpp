@@ -71,20 +71,37 @@ void FirstOrderType2R::initializeWorkVectorsAndMatrices(Interaction& inter, Vect
   workV[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));
   workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
 
-  if (!_C)
-    workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
-  if (!_D)
-    workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
-//  if (!_jacgx)
-//  {
-//    workM[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
-    // TODO add this back to workV of the DS -> needed for X partial NS
-//  }
-  if (!_B)
-    workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
 
 
 }
+void FirstOrderType2R::initialize(Interaction& inter)
+{
+  FirstOrderR::initialize(inter);
+
+  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeDS = inter.getSizeOfDS();
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+
+  if (!_C)
+    relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
+  if (!_D)
+    relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+  if (!_F)
+    relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
+  if (!_B)
+    relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
+
+//  if (!_jacgx)
+//  {
+//    relationMat[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
+    // TODO add this back to workV of the DS -> needed for X partial NS
+//  }
+}
+
+
+
 void FirstOrderType2R::checkSize(Interaction& inter){}
 
 void FirstOrderType2R::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
@@ -139,19 +156,20 @@ void FirstOrderType2R::computeJach(double time, Interaction& inter, InteractionP
 {
   DEBUG_BEGIN("FirstOrderType2R::computeJach\n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
   if (!_C)
   {
     SiconosVector& x = *workV[FirstOrderR::vec_x];
     x = *DSlink[FirstOrderR::x];
-    computeJachx(time, x, *inter.lambda(0), *workM[FirstOrderR::mat_C]);
+    computeJachx(time, x, *inter.lambda(0), *relationMat[FirstOrderR::mat_C]);
   }
   if (!_D)
   {
     SiconosVector& x = *workV[FirstOrderR::vec_x];
     x = *DSlink[FirstOrderR::x];
-    computeJachlambda(time, x, *inter.lambda(0), *workM[FirstOrderR::mat_D]);
+    computeJachlambda(time, x, *inter.lambda(0), *relationMat[FirstOrderR::mat_D]);
   }
   DEBUG_END("FirstOrderType2R::computeJach\n");
 }
@@ -166,8 +184,8 @@ void FirstOrderType2R::computeJacg(double time, Interaction& inter, InteractionP
   DEBUG_BEGIN("FirstOrderType2R::computeJacg\n");
   if (!_B)
   {
-    VectorOfSMatrices& workM = *interProp.workMatrices;
-    computeJacglambda(time, *inter.lambda(0), *workM[FirstOrderR::mat_B]);
+    VectorOfSMatrices& relationMat = inter.relationMatrices();
+    computeJacglambda(time, *inter.lambda(0), *relationMat[FirstOrderR::mat_B]);
   }
   DEBUG_END("FirstOrderType2R::computeJacg\n");
 }
