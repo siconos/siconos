@@ -130,7 +130,7 @@ def setup_default_classes():
     global use_bullet
     if use_proposed:
         if backend == 'bullet':
-            def m(nsds, options):
+            def m(options):
                 if options is None:
                     options = SiconosBulletOptions()
                 return SiconosBulletCollisionManager(options)
