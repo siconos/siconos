@@ -19,6 +19,7 @@
 #define OccTest_h
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "SiconosConfig.h"
 
 class OccTest : public CppUnit::TestFixture
 {
