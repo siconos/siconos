@@ -169,8 +169,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
         inter = indexSet2->bundle(*ui);
-        inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
-        inter->relation()->computeJacg(told, *inter, indexSet2->properties(*ui));
+        inter->relation()->computeJach(t, *inter);
+        inter->relation()->computeJacg(told, *inter);
       }
 
       if(_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -563,14 +563,9 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       // }
       // _simulation->updateIndexSets();
       DEBUG_PRINT("We compute lambda^-_{k+1} \n");
-      InteractionsGraph::VIterator ui, uiend;
-      SP::Interaction inter;
-      for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
-      {
-        inter = indexSet2->bundle(*ui);
-        inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
-        inter->relation()->computeJacg(t, *inter, indexSet2->properties(*ui));
-      }
+
+      _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet2);
+
       if(_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
         for(OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)

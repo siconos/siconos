@@ -150,9 +150,9 @@ void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, Sim
   virtual void computeInput(double time, Interaction& inter,
                             unsigned int level = 0);
   
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJach(double time, Interaction& inter);
 
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJacg(double time, Interaction& inter);
 
   /** return true if the relation requires the computation of residu
       \return true if residu are required, false otherwise

@@ -178,13 +178,13 @@ public:
    * \param inter
    * \param interProp
    */
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) = 0 ;
+  virtual void computeJach(double time, Interaction& inter) = 0 ;
   /* compute all the G Jacobian
    * \param time
    * \param inter
    * \param interProp
    */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) = 0 ;
+  virtual void computeJacg(double time, Interaction& inter) = 0 ;
 
   /** to compute output
    * \param time current time

@@ -371,7 +371,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
       else if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() == osnsp)  // LCP at position level
       {
         // Update Jacobian matrix
-        inter->relation()->computeJach(t, *inter, indexSet->properties(vertex_inter));
+        inter->relation()->computeJach(t, *inter);
         // compute osnsp_rhs = y_{n,k} + G*q_free
         if(!_IsVelocityLevel)  // output at the position level y_{n,k} = g_{n,k}
         {

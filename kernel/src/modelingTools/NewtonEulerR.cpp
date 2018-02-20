@@ -294,7 +294,7 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
   DEBUG_END("NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
 }
 
-void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void NewtonEulerR::computeJach(double time, Interaction& inter)
 {
   DEBUG_BEGIN("NewtonEulerR::computeJachq(double time, Interaction& inter, ...) \n");
   DEBUG_PRINTF("with time =  %f\n",time);

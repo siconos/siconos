@@ -415,7 +415,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
     for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
+      inter->relation()->computeJach(t, *inter);
       assert(0);
     }
   }
@@ -434,7 +434,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
     for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
+      inter->relation()->computeJach(t, *inter);
       assert(0);
     }
   }

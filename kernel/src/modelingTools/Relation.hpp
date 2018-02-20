@@ -223,14 +223,14 @@ public:
    * \param inter the interaction using this relation
    * \param interProp
    */
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) = 0;
+  virtual void computeJach(double time, Interaction& inter) = 0;
 
   /* compute all the G Jacobian
    * \param time the current time
    * \param inter the interaction using this relation
    * \param interProp
    */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) = 0;
+  virtual void computeJacg(double time, Interaction& inter) = 0;
 
 
   /** default function to compute y

@@ -279,9 +279,22 @@ void NonSmoothDynamicalSystem::computeInteractionJacobians(double time)
   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
-    InteractionProperties& interProp = indexSet0->properties(*ui);
-    inter->relation()->computeJach(time, *inter, interProp);
-    inter->relation()->computeJacg(time, *inter, interProp);
+    inter->relation()->computeJach(time, *inter);
+    inter->relation()->computeJacg(time, *inter);
+  }
+  DEBUG_END("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+}
+
+void NonSmoothDynamicalSystem::computeInteractionJacobians(double time, InteractionsGraph& indexSet)
+{
+  DEBUG_BEGIN("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet.bundle(*ui);
+    inter->relation()->computeJach(time, *inter);
+    inter->relation()->computeJacg(time, *inter);
   }
   DEBUG_END("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
 }

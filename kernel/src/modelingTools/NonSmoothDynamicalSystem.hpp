@@ -473,10 +473,12 @@ public:
   void updateOutput(double time, unsigned int level = 0);
 
 
-  /** compute Jacobians for all the interactions
+  /** compute Jacobians for all the interactions (in indexSet0)
    * \param time
    */
   void computeInteractionJacobians(double time);
+
+  void computeInteractionJacobians(double time, InteractionsGraph& indexSet);
 
   /** visit all dynamical systems in this system.
    * \param visitor an SP::SiconosVisitor that can visit classes derived from DS

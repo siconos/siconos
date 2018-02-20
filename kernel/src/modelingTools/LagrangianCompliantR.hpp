@@ -142,10 +142,10 @@ public:
   */
   void computeInput(double time, Interaction& inter, unsigned int level = 0);
   /* compute all the H Jacobian */
-  void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+  void computeJach(double time, Interaction& inter);
 
   /* compute all the G Jacobian */
-  void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+  void computeJacg(double time, Interaction& inter)
   {
     ;
   }

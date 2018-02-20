@@ -88,6 +88,15 @@ protected:
   SP::SimpleMatrix _B;
   SP::SimpleMatrix _K;
 
+  /** Continuous memory vector of size of x to call plugin */
+  SP::SiconosVector _vec_x;
+  /** Continuous memory vector of size of z to call plugin */
+  SP::SiconosVector _vec_z;
+  /** Continuous memory vector of size of r to call plugin */
+  SP::SiconosVector _vec_r;
+
+
+
 public:
 
   /** destructor

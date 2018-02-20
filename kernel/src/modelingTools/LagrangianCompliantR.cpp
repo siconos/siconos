@@ -129,7 +129,7 @@ void LagrangianCompliantR::computeInput(double time, Interaction& inter , unsign
   *DSlink[LagrangianR::z] = workZ;
 }
 
-void LagrangianCompliantR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void LagrangianCompliantR::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];

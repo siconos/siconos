@@ -40,13 +40,8 @@ void FirstOrderNonLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, 
 
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
-  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
   workV.resize(FirstOrderR::workVecSize);
   workM.resize(FirstOrderR::mat_workMatSize);
-
-  workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
 
   workV[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));
   workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
@@ -62,8 +57,15 @@ void FirstOrderNonLinearR::initialize(Interaction& inter)
 
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
-  //VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  //unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
+
+  _vec_r.reset(new SiconosVector(sizeDS));
+  _vec_x.reset(new SiconosVector(sizeDS));
+  _vec_z.reset(new SiconosVector(sizeZ));
+
+
+
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
   relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
@@ -149,11 +151,11 @@ void FirstOrderNonLinearR::computeOutput(double time, Interaction& inter, unsign
   BlockVector& x = *DSlink[FirstOrderR::x];
   BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
-  SP::SiconosVector x_vec(new SiconosVector(x));
-  SP::SiconosVector z_vec(new SiconosVector(z));
+  *_vec_x = x ;
+  *_vec_z = z ;
   SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
-  computeh(time, *x_vec, lambda, *z_vec, y);
+  computeh(time, *_vec_x, lambda, *_vec_z, y);
   DEBUG_END("FirstOrderNonLinearR::computeOutput \n");
 }
 
@@ -164,60 +166,50 @@ void FirstOrderNonLinearR::computeInput(double time, Interaction& inter, unsigne
   BlockVector& x = *DSlink[FirstOrderR::x];
   BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
-  SP::SiconosVector x_vec(new SiconosVector(x));
-  SP::SiconosVector z_vec(new SiconosVector(z));
-  SP::SiconosVector r_vec(new SiconosVector(*DSlink[FirstOrderR::r]));
+  *_vec_x = x ;
+  *_vec_z = z ;
   SiconosVector& lambda = *inter.lambda(level);
-  computeg(time, *x_vec, lambda, *z_vec, *r_vec);
-  *DSlink[FirstOrderR::r] = *r_vec;
+  computeg(time, *_vec_x, lambda, *_vec_z, *_vec_r);
+  *DSlink[FirstOrderR::r] = *_vec_r;
   DEBUG_END("FirstOrderNonLinearR::computeinput \n");
 }
 
-
-
-void FirstOrderNonLinearR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void FirstOrderNonLinearR::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
-  VectorOfVectors& workV = *interProp.workVectors;
-
-  SiconosVector& x = *workV[FirstOrderR::vec_x];
-  x = *DSlink[FirstOrderR::x];
-  SiconosVector& z = *workV[FirstOrderR::vec_z];
-  z =  *DSlink[FirstOrderR::z];
+  *_vec_x = *DSlink[FirstOrderR::x];
+  *_vec_z = *DSlink[FirstOrderR::z];
   SiconosVector& lambda = *inter.lambda(0);
 
   if (!_C)
   {
-    computeJachx(time, x, lambda, z, *relationMat[FirstOrderR::mat_C]);
+    computeJachx(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_C]);
   }
 
   if (!_D)
   {
-    computeJachlambda(time, x, lambda, z, *relationMat[FirstOrderR::mat_D]);
+    computeJachlambda(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_D]);
   }
-  *DSlink[FirstOrderR::z] = z;
+  *DSlink[FirstOrderR::z] = *_vec_z;
 }
 
-void FirstOrderNonLinearR::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+void FirstOrderNonLinearR::computeJacg(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
-  VectorOfVectors& workV = *interProp.workVectors;
 
-  SiconosVector& x = *workV[FirstOrderR::vec_x];
-  x = *DSlink[FirstOrderR::x];
-  SiconosVector& z = *workV[FirstOrderR::vec_z];
-  z =  *DSlink[FirstOrderR::z];
+  *_vec_x = *DSlink[FirstOrderR::x];
+  *_vec_z = *DSlink[FirstOrderR::z];
   SiconosVector& lambda = *inter.lambda(0);
   if (!_B)
   {
-    computeJacglambda(time, x, lambda, z, *relationMat[FirstOrderR::mat_B]);
+    computeJacglambda(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_B]);
   }
   if (!_K)
   {
-    computeJacgx(time, x, lambda, z, *relationMat[FirstOrderR::mat_K]);
+    computeJacgx(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_K]);
   }
-  *DSlink[FirstOrderR::z] = z;
+  *DSlink[FirstOrderR::z] = *_vec_z;
 }

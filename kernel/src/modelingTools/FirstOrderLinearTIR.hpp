@@ -129,14 +129,14 @@ public:
    *  \param inter Interaction using this Relation
    *  \param interProp
    */
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) {};
+  virtual void computeJach(double time, Interaction& inter) {};
 
   /** compute the jacobian of g: nothing to be done here
    *  \param time current time
    *  \param inter Interaction using this Relation
    *  \param interProp
    */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) {};
+  virtual void computeJacg(double time, Interaction& inter) {};
  
 
   /** set e

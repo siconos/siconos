@@ -156,7 +156,7 @@ void LagrangianRheonomousR::computeInput(double time, Interaction& inter,  unsig
   *DSlink[LagrangianR::z] = z;
 }
 
-void LagrangianRheonomousR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void LagrangianRheonomousR::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];

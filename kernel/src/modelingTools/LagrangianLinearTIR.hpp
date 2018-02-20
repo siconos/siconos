@@ -119,7 +119,7 @@ public:
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
-  void computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+  void computeJach(double time, Interaction& inter)
   {
     ;
   }
@@ -130,7 +130,7 @@ public:
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
-  void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+  void computeJacg(double time, Interaction& inter)
   {
     ;
   }

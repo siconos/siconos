@@ -204,7 +204,7 @@ void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsi
   DEBUG_END("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
 }
 
-void LagrangianScleronomousR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void LagrangianScleronomousR::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];

@@ -242,8 +242,8 @@ public:
     return true;
   }
 
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) {};
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) {};
+  virtual void computeJach(double time, Interaction& inter) {};
+  virtual void computeJacg(double time, Interaction& inter) {};
 
 
   ACCEPT_STD_VISITORS();

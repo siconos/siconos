@@ -370,7 +370,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
     {
     Interaction& inter = *_indexSet0->bundle(*ui);
-    inter.relation()->computeJach(t, inter, _indexSet0->properties(*ui));
+    inter.relation()->computeJach(t, inter);
   }
 
   // solve a LCP at "acceleration" level if required

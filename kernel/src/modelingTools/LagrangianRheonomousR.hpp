@@ -168,9 +168,9 @@ public:
 
 
   /* compute all the H Jacobian */
-  void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+  void computeJach(double time, Interaction& inter);
   /* compute all the G Jacobian */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+  virtual void computeJacg(double time, Interaction& inter)
   {
     ;
   }

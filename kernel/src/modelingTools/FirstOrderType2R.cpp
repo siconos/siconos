@@ -152,24 +152,21 @@ void FirstOrderType2R::computeJachx(double time, SiconosVector& x, SiconosVector
   RuntimeException::selfThrow("FirstOrderType2R::computeJachx must be overload.");
 }
 
-void FirstOrderType2R::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void FirstOrderType2R::computeJach(double time, Interaction& inter)
 {
   DEBUG_BEGIN("FirstOrderType2R::computeJach\n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
-  VectorOfVectors& workV = *interProp.workVectors;
   if (!_C)
   {
-    SiconosVector& x = *workV[FirstOrderR::vec_x];
-    x = *DSlink[FirstOrderR::x];
-    computeJachx(time, x, *inter.lambda(0), *relationMat[FirstOrderR::mat_C]);
+    *_vec_x = *DSlink[FirstOrderR::x];
+    computeJachx(time, *_vec_x, *inter.lambda(0), *relationMat[FirstOrderR::mat_C]);
   }
   if (!_D)
   {
-    SiconosVector& x = *workV[FirstOrderR::vec_x];
-    x = *DSlink[FirstOrderR::x];
-    computeJachlambda(time, x, *inter.lambda(0), *relationMat[FirstOrderR::mat_D]);
+    *_vec_x = *DSlink[FirstOrderR::x];
+    computeJachlambda(time, *_vec_x, *inter.lambda(0), *relationMat[FirstOrderR::mat_D]);
   }
   DEBUG_END("FirstOrderType2R::computeJach\n");
 }
@@ -179,7 +176,7 @@ void FirstOrderType2R::computeJacglambda(double time, SiconosVector& lambda, Sim
   RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
 }
 
-void FirstOrderType2R::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+void FirstOrderType2R::computeJacg(double time, Interaction& inter)
 {
   DEBUG_BEGIN("FirstOrderType2R::computeJacg\n");
   if (!_B)
