@@ -23,17 +23,20 @@ with Hdf5() as io:
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.1, e=0.7)
+    io.addNewtonImpactFrictionNSL('contact', mu=0.5, e=0.2)
 
-    # The sphere object made with an unique Contactor : the sphere shape.
+    # The mesh object made with an unique Contactor : the bunny shape.
     # As a mass is given, it is a dynamic system involved in contact
     # detection and in the simulation.  With no group id specified the
-    # Contactor belongs to group 0
-    io.addObject('bunny', [Contactor('Bunny')],
-                 translation=[0, 0, 4],
-                 orientation=[1, 0, 0, 0],
-                 velocity=[0, 0, 0, 1, 0, 0],
-                 mass=1)
+    # Contactor belongs to group 0.  Ideally we would calculate or add
+    # the mesh inertia matrix here, but it is not done in this
+    # example.
+    for i in range(3):
+        io.addObject('bunny%d'%i, [Contactor('Bunny')],
+                     translation=[0, 0, 3+i],
+                     orientation=[1, 0, 0, 0],
+                     velocity=[0, 0, 0, 1, 0, 0],
+                     mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact

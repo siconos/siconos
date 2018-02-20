@@ -90,10 +90,10 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
-#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <LinearMath/btConvexHullComputer.h>
+#include <BulletCollision/Gimpact/btGImpactShape.h>
 
 #include <LinearMath/btQuaternion.h>
 #include <LinearMath/btVector3.h>
@@ -146,10 +146,10 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #endif
 
 // We need a bit more space to hold mesh data
-class btSiconosMeshData : public btBvhTriangleMeshShape {
+class btSiconosMeshData : public btGImpactMeshShape {
 public:
-  btSiconosMeshData(btStridingMeshInterface*i, bool b)
-    : btBvhTriangleMeshShape(i,b), btScalarVertices(0) {}
+  btSiconosMeshData(btStridingMeshInterface*i)
+    : btGImpactMeshShape(i), btScalarVertices(0) {}
   ~btSiconosMeshData() { if (btScalarVertices) delete[] btScalarVertices; }
   btScalar* btScalarVertices;
   SP::btTriangleIndexVertexArray btTriData;
@@ -1000,11 +1000,14 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   SP::btTriangleIndexVertexArray bttris(datapair.first);
 
   // Create Bullet mesh object
-  SP::BTMESHSHAPE btmesh(std11::make_shared<BTMESHSHAPE>(&*bttris, true));
+  SP::BTMESHSHAPE btmesh(std11::make_shared<BTMESHSHAPE>(&*bttris));
 
   // Hold on to the data since Bullet does not make a copy
   btmesh->btTriData = bttris;
   btmesh->btScalarVertices = datapair.second;
+
+  // Initial bound update for btGImpaceMeshShape
+  btmesh->updateBound();
 
   // initialization
   createCollisionObjectHelper<SP::SiconosMesh, SP::BTMESHSHAPE, BodyMeshRecord>
@@ -1022,7 +1025,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyMeshRecord &record)
     // btBvhTriangleMeshShape supports only outsideMargin.
     // TODO: support insideMargin, scale the points by their normals.
     btmesh->setMargin(mesh->outsideMargin() * _options.worldScale);
-    btmesh->recalcLocalAabb();
+    btmesh->postUpdate();
 
     // TODO: Calculate inertia from a mesh.  For now we leave it at
     // identity, the user can provide an inertia if desired.
