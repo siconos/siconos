@@ -25,7 +25,6 @@
 #include "OneStepIntegrator.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
 
@@ -35,12 +34,14 @@ static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
 // #define DEBUG_MESSAGES
 #include "debug.h"
 //#define CORRECTIONSVELOCITIES
-TimeSteppingDirectProjection::TimeSteppingDirectProjection(SP::TimeDiscretisation td,
-    SP::OneStepIntegrator osi,
-    SP::OneStepNSProblem osnspb_velo,
-    SP::OneStepNSProblem osnspb_pos,
-    unsigned int level)
-  : TimeStepping(td, osi, osnspb_velo)
+TimeSteppingDirectProjection::TimeSteppingDirectProjection(
+  SP::NonSmoothDynamicalSystem nsds,
+  SP::TimeDiscretisation td,
+  SP::OneStepIntegrator osi,
+  SP::OneStepNSProblem osnspb_velo,
+  SP::OneStepNSProblem osnspb_pos,
+  unsigned int level)
+  : TimeStepping(nsds,td, osi, osnspb_velo)
 {
 
   //if (Type::value(osi) != Type::MoreauJeanDirectProjectionOSI)
@@ -98,6 +99,9 @@ void TimeSteppingDirectProjection::nextStep()
 
 void TimeSteppingDirectProjection::advanceToEvent()
 {
+
+  initialize();
+  
   /** First step, Solve the standard velocity formulation.*/
 
   DEBUG_BEGIN("TimeStepping::newtonSolve\n");
@@ -192,9 +196,6 @@ void TimeSteppingDirectProjection::advanceToEvent()
     _nbProjectionIteration++;
     DEBUG_PRINTF("TimeSteppingDirectProjection projection step = %d\n", _nbProjectionIteration);
 
-    if (_newtonUpdateInteractionsPerIteration)
-      updateInteractionsNewtonIteration();
-
     SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
     for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
@@ -284,10 +285,6 @@ void TimeSteppingDirectProjection::advanceToEvent()
         RuntimeException::selfThrow("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
 
     }
-
-    if (_newtonUpdateInteractionsPerIteration)
-      updateInteractionsNewtonIteration();
-    updateWorldFromDS();
 
     computeCriteria(&runningProjection);
 
@@ -501,7 +498,7 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
        aVi != viend; ++aVi)
   {
     SP::Interaction inter = indexSet->bundle(*aVi);
-    inter->computeOutput(getTkp1(), indexSet->properties(*aVi), 0);
+    inter->computeOutput(getTkp1(), 0);
     inter->relation()->computeJach(getTkp1(), *inter, indexSet->properties(*aVi));
 
     if (Type::value(*(inter->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
@@ -609,8 +606,6 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       isNewtonConverge = newtonCheckConvergence(criterion);
       if (!isNewtonConverge && !info)
       {
-        if (_newtonUpdateInteractionsPerIteration)
-          updateInteractionsNewtonIteration();
         updateOutput();
         if (!_allNSProblems->empty() &&  indexSet->size()>0)
           saveYandLambdaInOldVariables();

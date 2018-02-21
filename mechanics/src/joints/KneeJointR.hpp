@@ -55,10 +55,9 @@ protected:
   double _G2P0y;
   double _G2P0z;
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
-                              VectorOfVectors& workV, VectorOfSMatrices& workM);
 
 public:
+
 
   /** Empty constructor. The relation may be initialized later by
    * setPoint, setAbsolute, and setBasePositions. */
@@ -80,6 +79,8 @@ public:
   /** destructor
    */
   virtual ~KneeJointR() {};
+
+  virtual void initialize(Interaction& inter);
 
   /** Initialize the joint constants based on the provided base positions.
    * \param q1 A SiconosVector of size 7 indicating translation and
@@ -113,7 +114,7 @@ public:
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
-  
+
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
   virtual void computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot);

@@ -23,7 +23,6 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/progress.hpp>
 #include "OSNSMatrix.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
 //Default constructor

@@ -30,26 +30,8 @@ private:
   */
   ACCEPT_SERIALIZATION(ContactR);
 
-  double _y_correction_A;
-  double _y_correction_B;
-  double _scaling;
-
-  ContactR()
-    : _y_correction_A(0), _y_correction_B(0), _scaling(1),
-      _flip(false), _contactDistance(0)
-    {}
-
 public:
-  ContactR(SP::SiconosVector q1, SP::SiconosVector q2,
-           bool flip=false,
-           double y_correction_A=0,
-           double y_correction_B=0,
-           double scaling=1);
-
-  bool _flip; /* if true, points A and B are swapped from the point
-               * view of the Relation. */
-
-  double _contactDistance;
+  ContactR();
 
   /* For users that may require extra information about contacts. */
   SP::SiconosVector base[2];
@@ -57,20 +39,16 @@ public:
   SP::SiconosContactor contactor[2];
   SP::BodyDS ds[2];
 
-  double distance() const
-  {
-    return _contactDistance;
-  };
-
-  double y_correction_A() { return _y_correction_A; }
-  double y_correction_B() { return _y_correction_A; }
-  double y_correction() { return _y_correction_A + _y_correction_B; }
-
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 
-  virtual void updateContactPoints(SiconosVector& pos1, SiconosVector& pos2,
-                                   double distance, SiconosVector& normal,
-                                   SP::NewtonEulerDS ds1, SP::NewtonEulerDS ds2);
+  /** Update this contact point information.
+   * \param pos1 Position on ds1 in ds1 frame.
+   * \param pos2 Position on ds2 in ds2 frame (or world frame if ds2=null).
+   * \param normal Normal in ds2 frame (or world frame if ds2=null).
+   */
+  virtual void updateContactPoints(const SiconosVector& pos1,
+                                   const SiconosVector& pos2,
+                                   const SiconosVector& normal);
 
   virtual void preDelete() {}
 

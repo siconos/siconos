@@ -43,9 +43,9 @@ LinearSMCimproved::~LinearSMCimproved()
 {
 }
 
-void LinearSMCimproved::initialize(const Model& m)
+void LinearSMCimproved::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s)
 {
-  LinearSMC::initialize(m);
+  LinearSMC::initialize(nsds,s);
   _up.reset(new SiconosVector(_us->size()));
   _measuredPert.reset(new boost::circular_buffer<SP::SiconosVector>(0));
   _predictedPert.reset(new boost::circular_buffer<SP::SiconosVector>(0));

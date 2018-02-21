@@ -71,6 +71,6 @@ public:
    */
   void setNSdata(double hControl);
 
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem & nsds, const Simulation& s);
 };
 #endif

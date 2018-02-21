@@ -16,9 +16,11 @@ public:
    *  \param osi one step integrator (default none)
    *  \param osnspb_velo one step non smooth problem (default none)
    */
-  MBTB_TimeStepping(SP::TimeDiscretisation td,
-                    SP::OneStepIntegrator osi,
-                    SP::OneStepNSProblem osnspb_velo);
+  MBTB_TimeStepping(
+    SP::NonSmoothDynamicalSystem nsds,
+    SP::TimeDiscretisation td,
+    SP::OneStepIntegrator osi,
+    SP::OneStepNSProblem osnspb_velo);
   //! Overloading of updateWorldFromDS.
   /*!
     It consists in updating the cad model from siconos.

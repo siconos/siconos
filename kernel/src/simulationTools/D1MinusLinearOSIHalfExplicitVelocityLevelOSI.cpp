@@ -27,7 +27,6 @@
 #include "BlockVector.hpp"
 #include "CxxStd.hpp"
 #include "Topology.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
 
@@ -694,7 +693,8 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
   SP::OneStepNSProblems allOSNS  = _simulation->oneStepNSProblems(); // all OSNSP
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
-  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+  VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
+  VectorOfBlockVectors& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
   // get relation and non smooth law information
   RELATION::TYPES relationType = inter->relation()->getType(); // relation
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -745,11 +745,11 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
     /* get the free velocity of the aggregated ds */
     if(relationType == Lagrangian)
     {
-      Xfree = DSlink[LagrangianR::xfree];
+      Xfree = workBlockV[D1MinusLinearOSI::xfree];
     }
     else if(relationType == NewtonEuler)
     {
-      Xfree = DSlink[NewtonEulerR::xfree];
+      Xfree = workBlockV[D1MinusLinearOSI::xfree];
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");

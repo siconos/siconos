@@ -29,6 +29,16 @@
 #include "TimeDiscretisation.hpp"
 #include "ActuatorFactory.hpp"
 
+//#define DEBUG_WHERE_MESSAGES
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+
+#include "debug.h"
+
+
+
 LinearSMC::LinearSMC(SP::ControlSensor sensor, unsigned int type):
   CommonSMC(type, sensor)
 {
@@ -45,13 +55,16 @@ LinearSMC::~LinearSMC()
 
 void LinearSMC::actuate()
 {
+  DEBUG_BEGIN("void LinearSMC::actuate()")
 
   if (!_noUeq)
   {
     computeUeq();
     prod(*_B, *_ueq, *(_DS_SMC->b()));
   }
-
+  DEBUG_EXPR(_DS_SMC->display(););
+  DEBUG_EXPR(_DS_SMC->xMemory().display(););
+  
   *(_DS_SMC->x()) = _sensor->y();
 
   // SS: Really need to modify stored xMemory?
@@ -78,7 +91,7 @@ void LinearSMC::actuate()
   *_u = *_us;
   *_u += *_ueq;
   _indx++;
-
+  DEBUG_END("void LinearSMC::actuate()")
 }
 
 AUTO_REGISTER_ACTUATOR(LINEAR_SMC, LinearSMC)

@@ -92,10 +92,10 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // ------------------
     // --- Simulation ---
@@ -111,17 +111,14 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-    bouncingBall->setSimulation(s);
-    bouncingBall->setSimulation(s);
+    SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI, osnspb));
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
+    // --- Simulation ---
 
-    cout << "====> Initialisation ..." << endl;
-    bouncingBall->initialize();
     int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -153,20 +150,19 @@ int main(int argc, char* argv[])
 
     while (s->hasNextEvent())
     {
-      if (k==200) {
+      if (k==201) {
         inter.reset(new Interaction(nslaw, relation));
 
         // link the interaction and the dynamical system
-        bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
-
-        // initialize Interaction states for the Simulation
-        s->initializeInteraction(s->nextTime(), inter);
+        bouncingBall->link(inter, ball);
 
         // new "lambda" pointer
         lambda = inter->lambda(1);
       }
 
       s->computeOneStep();
+
+      s->clearNSDSChangeLog();
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
@@ -185,18 +181,12 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    std::cout << "Comparison with a reference file" << std::endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("result-Dynamic.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf();
-    std::cout << "error =" << error << std::endl;
 
-    if (error> 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-Dynamic.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 

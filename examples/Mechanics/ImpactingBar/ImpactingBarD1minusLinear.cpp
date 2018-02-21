@@ -131,13 +131,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model impactingBar(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem impactingBar(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    impactingBar->nonSmoothDynamicalSystem()->insertDynamicalSystem(bar);
+    impactingBar->insertDynamicalSystem(bar);
 
     // link the interaction and the dynamical system
-    impactingBar->nonSmoothDynamicalSystem()->link(inter,bar);
+    impactingBar->link(inter,bar);
 
 
     // ------------------
@@ -162,21 +162,16 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem force(new LCP());
 
-    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
+    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(impactingBar, t, 2));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
-
-    impactingBar->setSimulation(s);
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
 
-    cout <<"====> Initialisation ..." <<endl<<endl;
-    impactingBar->initialize();
     int N = floor((T-t0)/h) +1; // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -189,7 +184,7 @@ int main(int argc, char* argv[])
     SP::SiconosVector p = bar->p(1);
     SP::SiconosVector Lambda = inter->lambda(1);
     SP::SiconosVector lambdaminus = inter->lambda(2);
-    const SiconosVector& lambdaplus = inter->lambdaMemory(2).getSiconosVector(0);
+   
     SP::SiconosVector y = inter->y(0);
     int k = 0;
     dataPlot(k,0) = impactingBar->t0();
@@ -198,7 +193,7 @@ int main(int argc, char* argv[])
     dataPlot(k,3) = (*p)(0);
     dataPlot(k,4) = (*Lambda)(0);
     dataPlot(k,11) = (*lambdaminus)(0); // lambda1_{k+1}^-
-    dataPlot(k,12) = (lambdaplus)(0);
+    dataPlot(k,12) = 0.0;
 
     dataPlot(k,7) = (*q)(nDof-1);
     dataPlot(k,8) = (*v)(nDof-1);
@@ -244,6 +239,7 @@ int main(int argc, char* argv[])
 //       v->display();
 
 // --- Get values to be plotted ---
+      const SiconosVector& lambdaplus = inter->lambdaMemory(2).getSiconosVector(0);
       dataPlot(k,0) =s->nextTime();
       dataPlot(k,1) = (*q)(0);
       dataPlot(k,2) = (*v)(0);
@@ -286,19 +282,6 @@ int main(int argc, char* argv[])
     cout<<"====> Output file writing ..."<<endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("ImpactingBarD1MinusLinear.dat", "ascii", dataPlot,"noDim");
-    // // Comparison with a reference file
-    // SimpleMatrix dataPlotRef(dataPlot);
-    // dataPlotRef.zero();
-    // ioMatrix::read("ImpactingBar.ref", "ascii", dataPlotRef);
-
-    // if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    // {
-
-    //   std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-    //   std::cout << "Error = "<< (dataPlot - dataPlotRef).normInf()<<std::endl;
-    //   return 1;
-    // }
-
 
   }
 

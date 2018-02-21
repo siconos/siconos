@@ -51,12 +51,21 @@ public:
 
   virtual ~SiconosShape() {}
 
+  /** Set the inside margin of the shape.  This is a distance that the
+   * contour should be shrunk to improve contact detection robustness.
+   * It will have an effect on the roundness of corners. */
   void setInsideMargin (double margin)
   {
     _inside_margin = margin;
     _version ++;
   }
 
+  /** Set the outside margin of the shape.  This is the distance from
+    * the contact shell to an external shell used to detect contacts
+    * in advance.  The implementation will detect contact points on
+    * the external shell and project them back to the contact shell.
+    * Note: Currently not working in Bullet implementation!  Better to
+    * leave at zero. */
   void setOutsideMargin(double margin)
   {
     _outside_margin = margin;

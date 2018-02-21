@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
     // First System:
     // dx/dt = Ax + u(t) + r
     // x(0) = x0
-    // Note: r = Blambda, B defines in relation below.
+    // Note: r = Blambda, B defined in relation below.
 
     SP::SiconosMatrix A(new SimpleMatrix(ndof, ndof));
     (*A)(0, 0) = 0.0;
@@ -99,18 +99,13 @@ int main(int argc, char* argv[])
     // The Interaction which involves the first DS (the process)
     string nameInter = "processInteraction"; // Name
 
-    //    SP::Interaction myProcessInteraction(new Interaction(myNslaw, myProcessRelation));
-
     SP::Interaction myControllerInteraction(new Interaction(myNslaw, myControllerRelation));
-
-
 
     // -------------
     // --- Model process ---
     // -------------
-    SP::Model process(new Model(t0, T));
-    process->nonSmoothDynamicalSystem()->insertDynamicalSystem(processDS);
-    //     process->nonSmoothDynamicalSystem()->link(myProcessInteraction,processDS);
+    SP::NonSmoothDynamicalSystem process(new NonSmoothDynamicalSystem(t0, T));
+    process->insertDynamicalSystem(processDS);
 
     // ------------------
     // --- Simulation ---
@@ -118,18 +113,19 @@ int main(int argc, char* argv[])
     // TimeDiscretisation
     SP::TimeDiscretisation processTD(new TimeDiscretisation(t0, h));
     // == Creation of the Simulation ==
-    SP::TimeStepping processSimulation(new TimeStepping(processTD, 0));
+    SP::TimeStepping processSimulation(new TimeStepping(process, processTD, 0));
+    processSimulation->setName("Simulation of the process");
     // -- OneStepIntegrators --
     double theta = 0.5;
     SP::EulerMoreauOSI processIntegrator(new EulerMoreauOSI(theta));
-
+    processSimulation->insertIntegrator(processIntegrator);
 
     // -------------
     // --- Model controller ---
     // -------------
-    SP::Model controller(new Model(t0, T));
-    controller->nonSmoothDynamicalSystem()->insertDynamicalSystem(controllerDS);
-    controller->nonSmoothDynamicalSystem()->link(myControllerInteraction, controllerDS);
+    SP::NonSmoothDynamicalSystem controller(new NonSmoothDynamicalSystem(t0, T));
+    controller->insertDynamicalSystem(controllerDS);
+    controller->link(myControllerInteraction, controllerDS);
 
     // ------------------
     // --- Simulation ---
@@ -137,11 +133,12 @@ int main(int argc, char* argv[])
     // TimeDiscretisation
     SP::TimeDiscretisation controllerTD(new TimeDiscretisation(t0, hcontroller));
     // == Creation of the Simulation ==
-    SP::TimeStepping controllerSimulation(new TimeStepping(controllerTD));
+    SP::TimeStepping controllerSimulation(new TimeStepping(controller, controllerTD));
+    controllerSimulation->setName("Simulation of the controller");
     // -- OneStepIntegrators --
     double controllertheta = 0.5;
     SP::EulerMoreauOSI controllerIntegrator(new EulerMoreauOSI(controllertheta));
-
+    controllerSimulation->insertIntegrator(controllerIntegrator);
 
     // -- OneStepNsProblem --
     SP::LCP controllerLCP(new LCP());
@@ -162,13 +159,6 @@ int main(int argc, char* argv[])
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    process->setSimulation(processSimulation);
-    process->initialize();
-    controller->setSimulation(controllerSimulation);
-    controller->initialize();
 
     // --- Get the values to be plotted ---
     unsigned int outputSize = 10; // number of required data
@@ -252,19 +242,7 @@ int main(int argc, char* argv[])
     dataPlot.resize(k, outputSize);
     dataPlotController.resize(kcontroller, outputSize);
     ioMatrix::write("RelayBiSimulation-Controller.dat", "ascii", dataPlotController, "noDim");
-
-
-    // Comparison with a reference file
-    //    SimpleMatrix dataPlotRef(dataPlot);
-    //     dataPlotRef.zero();
-    //     ioMatrix::read("RelayBiSimulation.ref", "ascii", dataPlotRef);
-    //     //std::cout << (dataPlot-dataPlotRef).normInf() <<std::endl;
-
-    //     if ((dataPlot-dataPlotRef).normInf() > 1e-12)
-    //     {
-    //       std::cout << "Warning. The results is rather different from the reference file."<< std::endl;
-    //       return 1;
-    //     }
+    ioMatrix::write("RelayBiSimulation.dat", "ascii", dataPlot, "noDim");
 
   }
 

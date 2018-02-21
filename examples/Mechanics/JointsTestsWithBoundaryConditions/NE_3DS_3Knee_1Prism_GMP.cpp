@@ -245,7 +245,6 @@ int main(int argc, char* argv[])
 
     //
 
-    //SP::NonSmoothLaw nslaw3(new EqualityConditionNSLKneeJointR::numberOfConstraints()());
     SP::SiconosVector P(new SiconosVector(3));
     P->zero();
 
@@ -282,17 +281,16 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model myModel(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem myModel(new NonSmoothDynamicalSystem(t0, T));
     // add the dynamical system in the non smooth dynamical system
-    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam1);
-    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam2);
-    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(beam3);
+    myModel->insertDynamicalSystem(beam1);
+    myModel->insertDynamicalSystem(beam2);
+    myModel->insertDynamicalSystem(beam3);
     // link the interaction and the dynamical system
-    myModel->nonSmoothDynamicalSystem()->link(inter1, beam1);
-    myModel->nonSmoothDynamicalSystem()->link(inter2, beam1, beam2);
-    myModel->nonSmoothDynamicalSystem()->link(inter3, beam2, beam3);
-    myModel->nonSmoothDynamicalSystem()->link(inter4, beam3);
-    //myModel->nonSmoothDynamicalSystem()->link(interFloor, beam3); not compatible with the prescribed velocity
+    myModel->link(inter1, beam1);
+    myModel->link(inter2, beam1, beam2);
+    myModel->link(inter3, beam2, beam3);
+    myModel->link(inter4, beam3);
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -309,24 +307,15 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb(new GenericMechanical());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI1, osnspb));
-    s->prepareIntegratorForDS(OSI1, beam1, myModel, t0);
-    s->prepareIntegratorForDS(OSI2, beam2, myModel, t0);
-    s->prepareIntegratorForDS(OSI3, beam3, myModel, t0);
-
-    //    s->setComputeResiduY(true);
-    //  s->setUseRelativeConvergenceCriteron(false);
-    myModel->setSimulation(s);
-
-
+    SP::TimeStepping s(new TimeStepping(myModel, t, OSI1, osnspb));
+    s->associate(OSI1, beam1);
+    s->associate(OSI2, beam2);
+    s->associate(OSI3, beam3);
+    s->setNewtonTolerance(1e-4);
+    s->setNewtonMaxIteration(50);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    myModel->initialize();
 
 
     // --- Get the values to be plotted ---
@@ -365,9 +354,7 @@ int main(int argc, char* argv[])
     for (k = 0; k < N; k++)
     {
       // solve ...
-      s->newtonSolve(1e-4, 50);
-
-
+      s->advanceToEvent();
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  s->nextTime();
@@ -449,17 +436,11 @@ int main(int argc, char* argv[])
     ioMatrix::write("NE_3DS_3Knee_1Prism_beam2.dat", "ascii", beam2Plot, "noDim");
     ioMatrix::write("NE_3DS_3Knee_1Prism_beam3.dat", "ascii", beam3Plot, "noDim");
 
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("NE_3DS_3Knee_1Prism_GMP.ref", "ascii", dataPlotRef);
-    std::cout << (dataPlot - dataPlotRef).normInf() << std::endl;
-    fclose(pFile);
-    if ((dataPlot - dataPlotRef).normInf() > 1e-7)
-    {
-//      (dataPlot - dataPlotRef).display();
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+
+    double error=0.0, eps=1e-11;
+    if (ioMatrix::compareRefFile(dataPlot, "NE_3DS_3Knee_1Prism_GMP.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 

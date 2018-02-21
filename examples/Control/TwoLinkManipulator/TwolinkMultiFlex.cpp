@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     double criterion = 1e-8;
     unsigned int maxIter = 20000;
     double e = 0.0;
-    double L = 0.0;
+    //double L = 0.0;
     int test = 0;
     int nimpact = 0;
 
@@ -136,16 +136,16 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model Manipulator(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem Manipulator(new NonSmoothDynamicalSystem(t0, T));
    // add the dynamical system in the non smooth dynamical system
-    Manipulator->nonSmoothDynamicalSystem()->insertDynamicalSystem(arm);
+    Manipulator->insertDynamicalSystem(arm);
 
     // link the interaction and the dynamical system
-    Manipulator->nonSmoothDynamicalSystem()->link(inter01, arm);
-    Manipulator->nonSmoothDynamicalSystem()->link(inter02, arm);
+    Manipulator->link(inter01, arm);
+    Manipulator->link(inter02, arm);
     // link the interaction and the dynamical system
-    Manipulator->nonSmoothDynamicalSystem()->link(inter31, arm);
-    Manipulator->nonSmoothDynamicalSystem()->link(inter31, arm);
+    Manipulator->link(inter31, arm);
+    Manipulator->link(inter31, arm);
 
     // ----------------
     // --- Simulation ---
@@ -154,8 +154,9 @@ int main(int argc, char* argv[])
     // -- Time discretisation --
     SP::TimeDiscretisation t(new TimeDiscretisation(t0, h));
 
-    SP::TimeStepping s(new TimeStepping(t));
-
+    SP::TimeStepping s(new TimeStepping(Manipulator, t));
+    s->setNewtonTolerance(criterion);
+    s->setNewtonMaxIteration(maxIter);
     // -- OneStepIntegrators --
     SP::OneStepIntegrator OSI(new MoreauJeanOSI(0.500001));
     s->insertIntegrator(OSI);
@@ -163,21 +164,12 @@ int main(int argc, char* argv[])
     // -- OneStepNsProblem --
     SP::OneStepNSProblem osnspb(new LCP());
     s->insertNonSmoothProblem(osnspb);
-    Manipulator->setSimulation(s);
+
     cout << "=== End of model loading === " << endl;
 
     // =========================== End of model definition ===========================
 
-
-    // ================================= Computation
-    // --- Simulation initialization ---
-
-
-
-    Manipulator->initialize();
-    cout << "End of model initialisation" << endl;
-
-    int k = 0;
+    unsigned int k = 0;
     unsigned int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -252,7 +244,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 14) = (*z)(15);
       dataPlot(k, 15) = (*z)(16); //(19)*(*z)(19);
 
-      s->newtonSolve(criterion, maxIter);
+      s->advanceToEvent();
       dataPlot(k, 12) = (*p)(1);
       (*z)(4) = (inter02->getLambda(1))(0);
       (*z)(18) = (inter31->getLambda(1))(0);

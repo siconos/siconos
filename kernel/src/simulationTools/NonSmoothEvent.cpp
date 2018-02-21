@@ -19,7 +19,6 @@
 #include "EventFactory.hpp"
 #include "EventDriven.hpp"
 #include "SimulationGraphs.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #define DEBUG_STDOUT
 #define DEBUG_MESSAGES

@@ -41,7 +41,7 @@
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // default
-Topology::Topology(): _isTopologyUpToDate(false), _hasChanged(true),
+Topology::Topology(): _hasChanged(true),
   _numberOfConstraints(0), _symmetric(false)
 {
   _IG.resize(1);
@@ -101,37 +101,22 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
   if(ds2)
     {
       dsgv2 = _DSG[0]->add_vertex(ds2);
-      // workVds2 = _DSG[0]->properties(dsgv2).workVectors;
-      // if (!workVds2)
-      // 	{
-      // 	  // V.A. 210/06/2017 Could we defer  this initialization ?
-      // 	  workVds2.reset(new VectorOfVectors());
-      // 	  _DSG[0]->properties(dsgv2).workMatrices.reset(new VectorOfMatrices());
-      // 	}
     }
   else
     {
       dsgv2 = dsgv1;
       ds2_ = ds1;
-      //workVds2 = workVds1;
     }
+
   // this may be a multi edges graph
   assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(!_IG[0]->is_vertex(inter));
   InteractionsGraph::VDescriptor ig_new_ve;
   DynamicalSystemsGraph::EDescriptor new_ed;
   std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
-  InteractionProperties& interProp = _IG[0]->properties(ig_new_ve);
-  inter->initialize_ds_links(interProp, *ds1, *ds2_);
 
+  inter->initializeLinkToDsVariables(*ds1, *ds2_);
 
-  // V.A. 210/06/2017 Could we defer  this initialization ?
-  // F.P. No! DSlink must be uptodate as soon as the
-  // interaction is connected to ds, to ensure computeInput/computeOutput
-  // run properly.
-  // But yes for workVectors and Matrices that are buffers
-  // related to simulation objects.
-  //interProp.DSlink.reset(new VectorOfBlockVectors);
   
   // unsigned int nslawSize = inter->nonSmoothLaw()->size();
   // interProp.block.reset(new SimpleMatrix(nslawSize, nslawSize));
@@ -375,11 +360,6 @@ bool Topology::hasInteraction(SP::Interaction inter) const
   return indexSet0()->is_vertex(inter);
 }
 
-void Topology::initialize()
-{
-  _isTopologyUpToDate = true;
-}
-
 void Topology::setProperties()
 {
   _IG[0]->update_vertices_indices();
@@ -409,8 +389,6 @@ void Topology::clear()
 {
   _IG.clear();
   _DSG.clear();
-
-  _isTopologyUpToDate = false;
 }
 
 SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber) const

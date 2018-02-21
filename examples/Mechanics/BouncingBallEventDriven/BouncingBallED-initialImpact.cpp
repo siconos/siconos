@@ -41,8 +41,8 @@ int main(int argc, char* argv[])
     double t0 = 0;                   // initial computation time
     double T = 8.5;                   // final computation time
     double h = 0.005;                // time step
-    double position_init = 1.0;      // initial position for lowest bead.
-    double velocity_init = 0.0;      // initial velocity for lowest bead.
+    double position_init = 0.0;      // initial position for lowest bead.
+    double velocity_init = -1.0;      // initial velocity for lowest bead.
     double R = 0.1; // Ball radius
     double m = 1; // Ball mass
     double g = 9.81; // Gravity
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     // --------------------
 
     // -- nslaw --
-    double e = 0.0;
+    double e = 0.9;
 
     // Interaction ball-floor
     //
@@ -93,13 +93,13 @@ int main(int argc, char* argv[])
     // --- Model ---
     // -------------
 
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+    bouncingBall->link(inter, ball);
 
     // ----------------
     // --- Simulation ---
@@ -116,31 +116,28 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem acceleration(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::EventDriven s(new EventDriven(t));
+    SP::EventDriven s(new EventDriven(bouncingBall,t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
-    bouncingBall->setSimulation(s);
+
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
     // --- Simulation initialization ---
-    cout << "====> Simulation initialisation ..." << endl << endl;
     s->setPrintStat(true);
-    bouncingBall->initialize();
 
     int N = 1854; // Number of saved points: depends on the number of events ...
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    unsigned int outputSize = 5;
+    unsigned int outputSize = 7;
     SimpleMatrix dataPlot(N + 1, outputSize);
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
     SP::SiconosVector p = ball->p(1);
-    SP::SiconosVector f = ball->p(2);
-
+    SP::SiconosVector f ;
     //   SiconosVector * y = bouncingBall->nonSmoothDynamicalSystem()->interaction(0)->y(0);
 
     SP::EventsManager eventsManager = s->eventsManager();
@@ -152,17 +149,19 @@ int main(int argc, char* argv[])
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*p)(0);
-    dataPlot(0, 4) = (*f)(0);
+    dataPlot(0, 4) = 0.0;
 
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     bool nonSmooth = false;
     unsigned int numberOfEvent = 0 ;
     int k = 0;
+    int kns = 0;
     boost::progress_display show_progress(N);
     while (s->hasNextEvent() && k < N)
     {
       s->advanceToEvent();
+      f = ball->p(2);
       if (eventsManager->nextEvent()->getType() == 2)
         nonSmooth = true;
 
@@ -173,7 +172,10 @@ int main(int argc, char* argv[])
         dataPlot(k, 0) = s->startingTime();
         dataPlot(k, 1) = ball->qMemory().getSiconosVector(1)(0);
         dataPlot(k, 2) = ball->velocityMemory().getSiconosVector(1)(0);
+        dataPlot(k, 3) = (*p)(0);
+        dataPlot(k, 4) = (*f)(0);
         k++;
+        kns++;
         nonSmooth = false;
         ++show_progress;
       }
@@ -182,6 +184,10 @@ int main(int argc, char* argv[])
       dataPlot(k, 2) = (*v)(0);
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*f)(0);
+      dataPlot(k, 5) = (*inter->lambda(1))(0);
+      dataPlot(k, 6) = (*inter->lambda(2))(0);
+
+
       ++k;
       ++numberOfEvent;
       ++show_progress;
@@ -189,29 +195,27 @@ int main(int argc, char* argv[])
 
     // --- Output files ---
     cout << endl;
-    cout << "===== End of Event Driven simulation. " << numberOfEvent << " events have been processed. ==== " << endl << endl;
+    cout << "===== End of Event Driven simulation. " << endl;
+    cout << numberOfEvent << " events have been processed. ==== " << endl;
+
+    cout << numberOfEvent- kns << " events are of time--discretization type  ==== " << endl;
+    cout << kns << " events are  of nonsmooth type  ==== " << endl << endl;
+
     cout << "====> Output file writing ..." << endl << endl;
     dataPlot.resize(k, outputSize);
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
+    ioMatrix::write("BouncingBallED-initialImpact.dat", "ascii", dataPlot, "noDim");
 
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("BouncingBallEDwithRestingContact.ref", "ascii", dataPlotRef);
-    std::cout << "error = " << (dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-3)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallED-initialImpact.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
 
   }
 
   catch (SiconosException e)
   {
     cout << e.report() << endl;
+    return 1;
   }
   catch (...)
   {

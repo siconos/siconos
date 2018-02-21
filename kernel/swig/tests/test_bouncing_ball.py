@@ -51,15 +51,15 @@ def test_bouncing_ball1():
     inter = sk.Interaction(nslaw, relation)
 
     #
-    # Model
+    # NSDS
     #
-    bouncing_ball = sk.Model(t0, tend)
+    bouncing_ball = sk.NonSmoothDynamicalSystem(t0, tend)
 
     # add the dynamical system to the non smooth dynamical system
-    bouncing_ball.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
+    bouncing_ball.insertDynamicalSystem(ball)
 
     # link the interaction and the dynamical system
-    bouncing_ball.nonSmoothDynamicalSystem().link(inter, ball)
+    bouncing_ball.link(inter, ball)
 
     #
     # Simulation
@@ -75,7 +75,7 @@ def test_bouncing_ball1():
     osnspb = sk.LCP()
 
     # (4) Simulation setup with (1) (2) (3)
-    s = sk.TimeStepping(t)
+    s = sk.TimeStepping(bouncing_ball,t)
     s.insertIntegrator(OSI)
     s.insertNonSmoothProblem(osnspb)
 
@@ -84,11 +84,7 @@ def test_bouncing_ball1():
     #
     # computation
     #
-
-    # simulation initialization
-    bouncing_ball.setSimulation(s)
-    bouncing_ball.initialize()
-
+    
     #
     # save and load data from xml and .dat
     #
@@ -221,19 +217,19 @@ def test_bouncing_ball2():
     inter_d = sk.Interaction(nslaw_d, relation_d)
 
     #
-    # Model
+    # NSDS
     #
-    bouncing_ball = sk.Model(t0, T)
+    bouncing_ball = sk.NonSmoothDynamicalSystem(t0, T)
 
-    bouncing_ball_d = sk.Model(t0, T)
+    bouncing_ball_d = sk.NonSmoothDynamicalSystem(t0, T)
 
     # add the dynamical system to the non smooth dynamical system
-    bouncing_ball.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
-    bouncing_ball_d.nonSmoothDynamicalSystem().insertDynamicalSystem(ball_d)
+    bouncing_ball.insertDynamicalSystem(ball)
+    bouncing_ball_d.insertDynamicalSystem(ball_d)
 
     # link the interaction and the dynamical system
-    bouncing_ball.nonSmoothDynamicalSystem().link(inter, ball)
-    bouncing_ball_d.nonSmoothDynamicalSystem().link(inter_d, ball_d)
+    bouncing_ball.link(inter, ball)
+    bouncing_ball_d.link(inter_d, ball_d)
 
     #
     # Simulation
@@ -254,11 +250,11 @@ def test_bouncing_ball2():
     osnspb_d = sk.LCP()
 
     # (4) Simulation setup with (1) (2) (3)
-    s = sk.TimeStepping(t)
+    s = sk.TimeStepping(bouncing_ball,t)
     s.insertIntegrator(OSI)
     s.insertNonSmoothProblem(osnspb)
 
-    s_d = sk.TimeStepping(t_d)
+    s_d = sk.TimeStepping(bouncing_ball_d,t_d)
     s_d.insertIntegrator(OSI_d)
     s_d.insertNonSmoothProblem(osnspb_d)
 
@@ -267,12 +263,6 @@ def test_bouncing_ball2():
     #
     # computation
     #
-
-    # simulation initialization
-    bouncing_ball.setSimulation(s)
-    bouncing_ball_d.setSimulation(s_d)
-    bouncing_ball.initialize()
-    bouncing_ball_d.initialize()
 
     # the number of time steps
     nb_time_steps = int((T - t0) / h + 1)

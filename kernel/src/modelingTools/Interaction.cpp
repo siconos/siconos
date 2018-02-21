@@ -362,20 +362,14 @@ Interaction::Interaction(SP::NonSmoothLaw NSL,
 
 
 
-void Interaction::initialize_ds_links(InteractionProperties& interaction_properties, DynamicalSystem& ds1,
-				      DynamicalSystem& ds2)
+void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
+                                              DynamicalSystem& ds2)
 {
   // Initialize DSlink property
 
-  interaction_properties.DSlink.reset(new VectorOfBlockVectors);
-  // Get (from graph) DSLink property.
-  // This container of vectors is supposed to handle
-  // pointer links to dynamical system(s) attributes
-  // that may be used to compute input and output.
-  // The list of potential keys depends on the relation type
-  // and is defined in an enum, in XXR.hpp, XX being the relation type
-  // (Lagrangian, NewtonEuler or FirstOrder)
-  VectorOfBlockVectors& DSlink = *interaction_properties.DSlink;
+  //_linkToDSVariables.reset(new VectorOfBlockVectors);
+  
+  VectorOfBlockVectors& DSlink = _linkToDSVariables;
   
   // The dynamical systems linked to the interaction (2 at most, ds2 may be equal to ds1).
   RELATION::TYPES relationType = _relation->getType();
@@ -387,21 +381,17 @@ void Interaction::initialize_ds_links(InteractionProperties& interaction_propert
     __initDataLagrangian(DSlink, ds1, ds2);
 
   else if (relationType == NewtonEuler)
+  {
     __initDataNewtonEuler(DSlink, ds1, ds2);
+  }
   else
     RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
         a relation of type: " + relationType);
 
-  // -- Stage 2 : create buffers (in the graph) that will be used for relation/interaction internal operations --
-  // Relation initializes the work vectors and matrices
-  //
-  interaction_properties.workVectors.reset(new VectorOfVectors);
-  interaction_properties.workMatrices.reset(new VectorOfSMatrices);
-  VectorOfVectors& workVInter = *interaction_properties.workVectors;
-  VectorOfSMatrices& workMInter = *interaction_properties.workMatrices;
-  _relation->initialize(*this, DSlink, workVInter, workMInter);
-}
+  _relation->initialize(*this);
 
+  
+}
 
 
 // Initialize and InitializeMemory are separated in two functions
@@ -471,6 +461,16 @@ void Interaction::resetLambda(unsigned int level)
   DSlink[FirstOrderR::x].reset(new BlockVector());
   DSlink[FirstOrderR::r].reset(new BlockVector());
   DSlink[FirstOrderR::z].reset(new BlockVector());
+  RELATION::SUBTYPES relationSubType = _relation->getSubType();
+
+  if(relationSubType != LinearTIR)
+  {
+    //we need extra continuous memory vector
+    //todo 
+  }
+
+
+  
   __initDSDataFirstOrder(ds1, DSlink);
   if(&ds1 != &ds2)
     __initDSDataFirstOrder(ds2, DSlink);
@@ -498,6 +498,15 @@ void Interaction::__initDataLagrangian(VectorOfBlockVectors& DSlink, DynamicalSy
   DSlink[LagrangianR::p1].reset(new BlockVector());
   DSlink[LagrangianR::p2].reset(new BlockVector());
   DSlink[LagrangianR::z].reset(new BlockVector());
+  RELATION::SUBTYPES relationSubType = _relation->getSubType();
+  if(relationSubType != LinearTIR)
+  {
+    //we need extra continuous memory vector
+    //todo 
+  }
+
+
+  
   __initDSDataLagrangian(ds1, DSlink);
   if(&ds1 != &ds2)
     __initDSDataLagrangian(ds2, DSlink);
@@ -794,18 +803,21 @@ void Interaction::swapInOldVariables()
 
 void Interaction::swapInMemory()
 {
+  DEBUG_BEGIN("void Interaction::swapInMemory()\n");
   // i corresponds to the derivative number and j the relation number.
   for (unsigned int  i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
   {
     *(_y_k[i]) = *(_y[i]) ;
     _yMemory[i].swap(*_y[i]);
+    DEBUG_PRINTF("swap level i = %i",i);
+    DEBUG_EXPR(_yMemory[i].display(););
   }
-
+  
   for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
   {
     _lambdaMemory[i].swap(*_lambda[i]);
   }
-
+  DEBUG_END("void Interaction::swapInMemory()\n");
 }
 
 void Interaction::display() const
@@ -866,23 +878,23 @@ void Interaction::display() const
   std::cout << "===================================" <<std::endl;
 }
 
-void Interaction::computeOutput(double time, InteractionProperties& interProp, unsigned int derivativeNumber)
+void Interaction::computeOutput(double time, unsigned int derivativeNumber)
 {
 
   DEBUG_BEGIN("Interaction::computeOutput(...)\n");
   DEBUG_PRINTF("time= %f\t",time);
   DEBUG_PRINTF("derivativeNumber= %i\n",derivativeNumber);
-  relation()->computeOutput(time, *this, interProp, derivativeNumber);
+  relation()->computeOutput(time, *this, derivativeNumber);
   DEBUG_END("Interaction::computeOutput(...)\n");
 
 }
 
-void Interaction::computeInput(double time, InteractionProperties& interProp, unsigned int level)
+void Interaction::computeInput(double time,  unsigned int level)
 {
   DEBUG_BEGIN("Interaction::computeInput(...)\n");
   DEBUG_PRINTF("time= %f\t",time);
   DEBUG_PRINTF("level= %i\n",level);
-  relation()->computeInput(time, *this, interProp, level);
+  relation()->computeInput(time, *this, level);
   DEBUG_END("Interaction::computeInput(...)\n");
 }
 

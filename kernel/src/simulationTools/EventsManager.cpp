@@ -19,7 +19,6 @@
 #include "EventFactory.hpp"
 #include "TimeDiscretisationEvent.hpp"
 #include "TimeDiscretisationEventNoSaveInMemory.hpp"
-#include "Model.hpp"
 #include "Simulation.hpp"
 #include <cmath>
 #include <limits> // for ULONG_MAX
@@ -62,9 +61,11 @@ void EventsManager::initialize(double T)
 // Creation and insertion of a new event into the event set.
 Event& EventsManager::insertEvent(int type, double time)
 {
+  DEBUG_BEGIN("Event& EventsManager::insertEvent(int type, double time)\n");
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
   unsigned int pos = insertEv(regEvent.instantiate(time, type));
+  DEBUG_END("Event& EventsManager::insertEvent(int type, double time)\n");
   return *_events[pos];
 }
 
@@ -92,6 +93,7 @@ void EventsManager::noSaveInMemory(const Simulation& sim)
 void EventsManager::preUpdate(Simulation& sim)
 {
   DEBUG_BEGIN("EventsManager::preUpdate(Simulation& sim)\n");
+  DEBUG_EXPR(display(););
   const mpz_t *t1 = _events[0]->getTimeOfEvent();
   _events[0]->process(sim);
   for (unsigned int i = 1; i < _events.size() ; i++)

@@ -1,7 +1,7 @@
 
 #include "SiconosKernel.hpp"
 #include "const.h"
-#include "NonlinearRelation.h"
+#include "NonlinearRelation.hpp"
 #include "myDS.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +13,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+  
   try
   {
   //printf("argc %i\n", argc);
@@ -74,9 +75,9 @@ int main(int argc, char *argv[])
   SP::Interaction aI(new Interaction(aNSL,aR));
 
 //****BUILD THE model
-  SP::Model  aM(new Model(0,sTf));
-  aM->nonSmoothDynamicalSystem()->insertDynamicalSystem(aDS);
-  aM->nonSmoothDynamicalSystem()->link(aI,aDS);
+  SP::NonSmoothDynamicalSystem  aN(new NonSmoothDynamicalSystem(0,sTf));
+  aN->insertDynamicalSystem(aDS);
+  aN->link(aI,aDS);
 
   // -- (1) OneStepIntegrators --
   SP::OneStepIntegrator  aEulerMoreauOSI(new EulerMoreauOSI(0.5));
@@ -95,19 +96,13 @@ int main(int argc, char *argv[])
   osnspb->setNumericsVerboseMode(0);
 
   // -- (4) Simulation setup with (1) (2) (3)
-  SP::TimeStepping aS(new TimeStepping(aTD,aEulerMoreauOSI,osnspb));
+  SP::TimeStepping aS(new TimeStepping(aN, aTD,aEulerMoreauOSI,osnspb));
   aS->setComputeResiduY(true);
   aS->setComputeResiduR(true);
   aS->setUseRelativeConvergenceCriteron(false);
-
-// Initialization
-  printf("-> Initialisation \n");
-  aM->setSimulation(aS);
-  aM->initialize();
-  printf("-> End of initialization \n");
-
-
-  
+  aS->setNewtonTolerance(5e-4);
+  aS->setNewtonMaxIteration(20);
+  aS->setResetAllLambda(false);
 // BUILD THE STEP INTEGRATOR
 
   SP::SiconosVector  x = aDS->x();
@@ -122,7 +117,7 @@ int main(int argc, char *argv[])
 
   printf("=== Start of simulation: %d steps ===  \n", NBStep);
 
-  dataPlot(0, 0) = aM->t0();
+  dataPlot(0, 0) = aN->t0();
   dataPlot(0,1) = x->getValue(0);
   dataPlot(0,2) = x->getValue(1);
   dataPlot(0, 3) = lambda->getValue(0);
@@ -142,7 +137,7 @@ int main(int argc, char *argv[])
   {
     cmp++;
 
-    aS->newtonSolve(5e-4, 20);
+    aS->advanceToEvent();
 
     dataPlot(cmp, 0) = aS->nextTime();
     dataPlot(cmp, 1) = x->getValue(0);
@@ -176,21 +171,11 @@ int main(int argc, char *argv[])
   if (argc==1)
   //if(argc== 10)
   {
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("simu.1.6.ref", "ascii", dataPlotRef);
-    cout<<"====> Comparison with reference file ..."<<endl;
-    SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
-    (dataPlot - dataPlotRef).normInfByColumn(err);
-    err->display();
-
-    std::cout << "Error w.r.t. reference file : " <<(dataPlot-dataPlotRef).normInf() << std::endl;
-    if ((dataPlot-dataPlotRef).normInf() > 1e-11)
-    {
-      std::cout << "Warning. The result is rather different from the reference file."<< std::endl;
+    // Comparison with a reference file
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "simu.1.6.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
   }
 
   

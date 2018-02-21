@@ -4,11 +4,10 @@
 
 import siconos
 from siconos.mechanics.collision.tools import Contactor
+from siconos.mechanics.collision.bullet import SiconosBulletOptions
 from siconos.io.mechanics_io import thetav, Hdf5
 from math import pi
 from matplotlib import pyplot as plt
-
-siconos.io.mechanics_io.set_implementation('original')
 
 # Cf A set-valued force law for spatial Coulomb-Contensou friction
 # R.I. Leine, Ch. Glocker, European Journal of Mechanics, 2003
@@ -36,6 +35,12 @@ a1 = 0.3       # cm
 a2 = 1.6       # cm
 I1 = 8*1e-3    # kg . cm^2
 I3 = 7*1e-3    # kg . cm^2
+
+# Bullet: do not generate extra contact points for convex pairs by
+# rotational purterbation method.
+options = SiconosBulletOptions()
+options.perturbationIterations = 0
+options.minimumPointsPerturbationThreshold = 0
 
 with Hdf5() as io:
 
@@ -67,8 +72,7 @@ with Hdf5() as io:
 with Hdf5(mode='r+') as io:
 
     io.run(with_timer=True,
-           multipoints_iterations=False,
-           gravity_scale=1./100.,
+           options=options,
            t0=0,
            T=20,
            h=0.0001,

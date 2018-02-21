@@ -125,10 +125,11 @@ int main(int argc, char* argv[])
     SP::Interaction InterDiodeBridgeCapFilter(new Interaction(nslaw, LTIRDiodeBridgeCapFilter));
 
     // --- Model creation ---
-    SP::Model DiodeBridgeCapFilter(new Model(t0, T, Modeltitle));
-    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->insertDynamicalSystem(LS1DiodeBridgeCapFilter);
-    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->insertDynamicalSystem(LS2DiodeBridgeCapFilter);
-    DiodeBridgeCapFilter->nonSmoothDynamicalSystem()->link(InterDiodeBridgeCapFilter, LS1DiodeBridgeCapFilter, LS2DiodeBridgeCapFilter);
+    SP::NonSmoothDynamicalSystem DiodeBridgeCapFilter(new NonSmoothDynamicalSystem(t0, T));
+    DiodeBridgeCapFilter->setTitle(Modeltitle);
+    DiodeBridgeCapFilter->insertDynamicalSystem(LS1DiodeBridgeCapFilter);
+    DiodeBridgeCapFilter->insertDynamicalSystem(LS2DiodeBridgeCapFilter);
+    DiodeBridgeCapFilter->link(InterDiodeBridgeCapFilter, LS1DiodeBridgeCapFilter, LS2DiodeBridgeCapFilter);
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -143,13 +144,7 @@ int main(int argc, char* argv[])
     // -- (3) Non smooth problem
     SP::LCP aLCP(new LCP());
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping aTS(new TimeStepping(aTiDisc, aOSI, aLCP));
-    DiodeBridgeCapFilter->setSimulation(aTS);
-    // Initialization
-    cout << "====> Initialisation ..." << endl << endl;
-    DiodeBridgeCapFilter->initialize();
-    cout << " ---> End of initialization." << endl;
-
+    SP::TimeStepping aTS(new TimeStepping(DiodeBridgeCapFilter,aTiDisc, aOSI, aLCP));
 
     int k = 0;
     double h = aTS->timeStep();
@@ -243,28 +238,13 @@ int main(int argc, char* argv[])
     cout << "Comparison with a reference file ..."<< endl;
     SimpleMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
-
-    ioMatrix::read("DiodeBridgeCapFilter.ref", "ascii", dataPlotRef);
-    SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
-    (dataPlot - dataPlotRef).normInfByColumn(err);
-    err->display();
-    double error = 0.0;
-    for (unsigned int i = 0; i < 3; ++i)
-    {
-      if (error < (*err)(i))
-        error = (*err)(i);
-    }
-
-    cout << "error ="<<error << endl;
-    if (error > 1e-12)
-    {
-      (dataPlot - dataPlotRef).display();
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-      cout << "error ="<<error << endl;
+    Index idx(3);
+    for (int i =0 ; i < 7; i++)
+      idx.push_back(i);
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "DiodeBridgeCapFilter.ref", eps, error, idx)
+        && error > eps)
       return 1;
-    }
-
-
 
   }
 

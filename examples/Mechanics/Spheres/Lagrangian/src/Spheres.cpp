@@ -44,11 +44,9 @@ void localCheckSolverOuput(int, Simulation*)
 // ================= Creation of the model =======================
 void Spheres::init()
 {
-
   SP::TimeDiscretisation timedisc_;
-  SP::Simulation simulation_;
   SP::FrictionContact osnspb_;
-
+  SP::NonSmoothDynamicalSystem nsds;
 
   // User-defined main parameters
 
@@ -89,8 +87,14 @@ void Spheres::init()
     SP::OneStepIntegrator osi;
     osi.reset(new MoreauJeanOSI(theta));
 
+    // -- Time discretisation --
+    timedisc_.reset(new TimeDiscretisation(t0, h));
+
     // -- Model --
-    _model.reset(new Model(t0, T));
+    nsds.reset(new NonSmoothDynamicalSystem(t0, T));
+
+    // -- Simulation (for associate()) --
+    _sim.reset(new TimeStepping(nsds, timedisc_));
 
     for (unsigned int i = 0; i < Spheres->size(0); i++)
     {
@@ -131,20 +135,16 @@ void Spheres::init()
       FExt->setValue(2, -m * g);
       body->setFExtPtr(FExt);
 
-      // add the dynamical system to the one step integrator
-      osi->insertDynamicalSystem(body);
+      // associate the dynamical system with the one step integrator
+      _sim->associate(osi, body);
 
       // add the dynamical system in the non smooth dynamical system
-      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
-
+      nsds->insertDynamicalSystem(body);
     }
 
     // ------------------
     // --- Simulation ---
     // ------------------
-
-    // -- Time discretisation --
-    timedisc_.reset(new TimeDiscretisation(t0, h));
 
     // -- OneStepNsProblem --
     osnspb_.reset(new FrictionContact(3));
@@ -165,9 +165,7 @@ void Spheres::init()
     osnspb_->setNumericsVerboseMode(0); // 0 silent, 1 verbose
     osnspb_->setKeepLambdaAndYState(true); // inject previous solution
 
-    simulation_.reset(new TimeStepping(timedisc_));
-    simulation_->insertIntegrator(osi);
-    simulation_->insertNonSmoothProblem(osnspb_);
+    _sim->insertNonSmoothProblem(osnspb_);
     //     simulation_->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---
@@ -176,13 +174,11 @@ void Spheres::init()
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.8, 3));
 
-    _playground.reset(new SpaceFilter(3, 6, _model, _plans, _moving_plans));
+    _playground.reset(new SpaceFilter(3, 6, _plans, _moving_plans));
 
-    _playground->insert(nslaw, 0, 0);
+    _playground->insertNonSmoothLaw(nslaw, 0, 0);
 
-    _model->setSimulation(simulation_);
-    _model->initialize();
-
+    _sim->insertInteractionManager(_playground);
   }
 
   catch (SiconosException e)

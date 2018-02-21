@@ -40,7 +40,6 @@ void SpheresViewer::draw()
 
   char qs[6];
 
-  DSIterator itDS;
   SP::Interaction interaction;
   SP::Relation relation;
 

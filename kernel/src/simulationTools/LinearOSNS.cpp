@@ -18,7 +18,6 @@
 #include "LinearOSNS.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
-#include "Model.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
 #include "D1MinusLinearOSI.hpp"
@@ -362,7 +361,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)
 {
 
-  DEBUG_PRINT("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
+  DEBUG_BEGIN("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
 
   // Computes matrix _interactionBlocks[inter1][inter2] (and allocates memory if
   // necessary) if inter1 and inter2 have common DynamicalSystem.  How
@@ -568,12 +567,12 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     }
   }
   else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType1);
-
+  DEBUG_END("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
 }
 
 void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, unsigned int pos)
 {
-  DEBUG_PRINT("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
+  DEBUG_BEGIN("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
 
   // At most 2 DS are linked by an Interaction
@@ -621,7 +620,6 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
   // We assume that the osi of ds1 (osi1) is integrating the interaction
-  DEBUG_EXPR(display());
   if ((osi1Type == OSI::EULERMOREAUOSI && osi2Type == OSI::EULERMOREAUOSI) ||
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
@@ -674,10 +672,12 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
   else
     RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + osi1Type  + osi2Type);
   DEBUG_EXPR(_q->display());
+  DEBUG_END("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
 }
 
 void LinearOSNS::computeq(double time)
 {
+  DEBUG_BEGIN("void LinearOSNS::computeq(double time)\n");
   if (_q->size() != _sizeOutput)
     _q->resize(_sizeOutput);
   _q->zero();
@@ -696,12 +696,14 @@ void LinearOSNS::computeq(double time)
     pos = indexSet->properties(*ui).absolute_position;
     computeqBlock(*ui, pos); // free output is saved in y
   }
+  DEBUG_END("void LinearOSNS::computeq(double time)\n");
 }
 
 
 
 bool LinearOSNS::preCompute(double time)
 {
+  DEBUG_BEGIN("bool LinearOSNS::preCompute(double time)\n");
   // This function is used to prepare data for the
   // LinearComplementarityProblem
 
@@ -721,12 +723,18 @@ bool LinearOSNS::preCompute(double time)
 
   // nothing to do
   if (indexSetLevel() == LEVELMAX)
+  {
+    DEBUG_END("bool LinearOSNS::preCompute(double time)\n");
     return false;
+  }
 
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
 
   if (indexSet.size() == 0)
+  {
+    DEBUG_END("bool LinearOSNS::preCompute(double time)\n");
     return false;
+  }
 
   if (!_hasBeenUpdated || !isLinear)
   {
@@ -782,13 +790,14 @@ bool LinearOSNS::preCompute(double time)
 
   // Computes q of LinearOSNS
   computeq(time);
-
+  DEBUG_END("bool LinearOSNS::preCompute(double time)\n");
   return true;
 
 }
 
 void LinearOSNS::postCompute()
 {
+  DEBUG_BEGIN("void LinearOSNS::postCompute()\n");
   // This function is used to set y/lambda values using output from
   // lcp_driver (w,z).  Only Interactions (ie Interactions) of
   // indexSet(leveMin) are concerned.
@@ -823,7 +832,7 @@ void LinearOSNS::postCompute()
     setBlock(*_z, lambda, lambda->size(), pos, 0);
     DEBUG_EXPR(lambda->display(););
   }
-
+  DEBUG_END("void LinearOSNS::postCompute()\n");
 }
 
 void LinearOSNS::display() const

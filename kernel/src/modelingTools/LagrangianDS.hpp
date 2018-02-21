@@ -700,7 +700,7 @@ public:
     @{ */
 
   /** get all the values of the state vector q stored in memory.
-   * note: not const due to SchatzmanPaoliOSI::initializeDynamicalSystem
+   * note: not const due to SchatzmanPaoliOSI::initializeWorkVectorsForDS
    *  \return a memory
    */
   inline SiconosMemory& qMemory()
@@ -709,7 +709,7 @@ public:
   }
 
   /** get all the values of the state vector velocity stored in memory.
-   * note: not const due to SchatzmanPaoliOSI::initializeDynamicalSystem
+   * note: not const due to SchatzmanPaoliOSI::initializeWorkVectorsForDS
    *  \return a memory
    */
   inline SiconosMemory& velocityMemory()

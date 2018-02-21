@@ -109,7 +109,7 @@ BounceResult bounceTest(std::string moving,
     osi.reset(new MoreauJeanOSI(theta));
 
     // -- Model --
-    SP::Model model(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(t0, T));
 
     SP::SiconosVector q0(new SiconosVector(7));
     SP::SiconosVector v0(new SiconosVector(6));
@@ -209,7 +209,7 @@ BounceResult bounceTest(std::string moving,
     body->setFExtPtr(FExt);
 
     // -- Add the dynamical systems into the non smooth dynamical system
-    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+    nsds->insertDynamicalSystem(body);
 
     // -- Time discretisation --
     SP::TimeDiscretisation timedisc(new TimeDiscretisation(t0, h));
@@ -233,13 +233,11 @@ BounceResult bounceTest(std::string moving,
     int N = ceil((T - t0) / h); // Number of time steps
 
     // -- MoreauJeanOSI Time Stepping
-    SP::TimeStepping simulation(new TimeStepping(timedisc));
+    SP::TimeStepping simulation(new TimeStepping(nsds, timedisc));
 
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
 
-    model->setSimulation(simulation);
-    model->initialize();
 
     // Object to manage the Bullet implementation of collisionMan
     SP::SiconosBulletCollisionManager collisionMan(

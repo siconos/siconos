@@ -53,7 +53,7 @@ public:
    *  \param td pointer to a TimeDiscretisation
    *  \param nb number of non smooth problem
    */
-  TimeSteppingD1Minus(SP::TimeDiscretisation td , int nb);
+  TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td , int nb);
 
   /** destructor */
   ~TimeSteppingD1Minus();

@@ -11,7 +11,7 @@ MBTB_JointR* sJointRelations[MBTB_MAX_JOINTS_NUMBER];
 MBTB_Contact* sContacts[MBTB_MAX_CONTACTS_NUMBER];
 SP::Interaction sInterJoints[MBTB_MAX_JOINTS_NUMBER];
 SP::Interaction sInterContacts[MBTB_MAX_CONTACTS_NUMBER];
-SP::Model myModel;
+SP::NonSmoothDynamicalSystem myNsds;
 double myt0;
 double myTf;
 int sJointIndexDS[2*MBTB_MAX_JOINTS_NUMBER];

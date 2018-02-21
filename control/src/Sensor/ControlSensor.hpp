@@ -66,7 +66,7 @@ protected:
 
 public:
 
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds);
 
   /** Get the dimension of the output
    * \return an unsigned int

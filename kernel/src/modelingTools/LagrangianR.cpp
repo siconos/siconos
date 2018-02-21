@@ -24,20 +24,13 @@
 
 #include <iostream>
 
-void LagrangianR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
 {
   // do nothing here, overload this if you need something done
 }
-
-void LagrangianR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianR::checkSize(Interaction& inter)
 {
-  // Memory allocation for G[i], if required (depends on the chosen constructor).
-  unsigned int sizeY = inter.getSizeOfY();
-  unsigned int sizeDS = inter.getSizeOfDS();
-
-  if (! _jachq)
-    _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
-  initComponents(inter, DSlink, workV, workM);
+  // do nothing here, overload this if you need something done
 }
 
 void LagrangianR::_zeroPlugin()

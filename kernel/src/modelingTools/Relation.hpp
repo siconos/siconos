@@ -111,6 +111,7 @@ protected:
    */
   Relation(RELATION::TYPES type, RELATION::SUBTYPES subtype);
 
+
 private:
 
   /** default constructor => private, no copy nor pass-by-value
@@ -207,8 +208,16 @@ public:
    * \param workV work vectors
    * \param workM work matrices
    */
-  virtual void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
   
+  virtual void initialize(Interaction& inter) = 0;
+  
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter) = 0;
+
+
   /** compute all the H Jacobian
    * \param time the current time
    * \param inter the interaction using this relation
@@ -230,15 +239,16 @@ public:
    *  \param interProp
    *  \param derivativeNumber number of the derivative to compute (optional, default = 0)
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0) = 0;
-
+  virtual void computeOutput(double time, Interaction& inter,
+                             unsigned int derivativeNumber = 0) = 0;
   /** default function to compute r
    *  \param time the current time
    *  \param inter the interaction using this relation
    *  \param interProp
    *  \param level the input "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
+  virtual void computeInput(double time, Interaction& inter,
+                            unsigned int level = 0) = 0;
 
   virtual SP::SimpleMatrix C() const = 0;
 
@@ -258,11 +268,11 @@ public:
     return false;
   }
 
-  /** main relation members display 
+  /** main relation members display
    */
   virtual void display() const;
 
-  /** Get _pluginh 
+  /** Get _pluginh
       \return a shared pointer to the plugin
   */
   inline SP::PluggedObject getPluginh() const
@@ -318,7 +328,7 @@ public:
     return _plugine;
   };
   /** visitors hook
-   *  \param inter  interaction 
+   *  \param inter  interaction
    *  \param interProp
    */
   virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)

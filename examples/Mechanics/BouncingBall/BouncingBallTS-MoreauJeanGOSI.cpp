@@ -1,4 +1,4 @@
-/* Siconos is a program dedicated to modeling, simulation and control
+ /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
  * Copyright 2016 INRIA.
@@ -96,13 +96,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+    bouncingBall->link(inter, ball);
 
     // ------------------
     // --- Simulation ---
@@ -120,22 +120,11 @@ int main(int argc, char* argv[])
     osnspb->numericsSolverOptions()->dparam[0]=1e-12;
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-    bouncingBall->setSimulation(s);
+    SP::TimeStepping s(new TimeStepping(bouncingBall,t, OSI, osnspb));
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl;
-    bouncingBall->initialize();
-    cout << "====> Initialisation END ..." << endl;
-
-    // -- set the integrator for the ball --
-
-
 
 
     int N = ceil((T - t0) / h); // Number of time steps

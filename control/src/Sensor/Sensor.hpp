@@ -187,9 +187,9 @@ public:
   //  {return _data;};
 
   /** initialize sensor data.
-   * \param m the Model
+   * \param nsds the Model
    */
-  virtual void initialize(const Model& m) {};
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds) {};
 
   /** capture data when the SensorEvent is processed => set data[SensorEvent]=...
    */

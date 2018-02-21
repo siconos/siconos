@@ -43,7 +43,7 @@ typedef std::map<unsigned int, SP::SimpleMatrix> MapOfDSMatrices;
 // ================== Objects to handle Interactions ==================
 
 /** Map of MapOfInteractionMapOfDSMatrices with a DynamicalSystem as a key - Used for interactionBlock-terms indexed by a DynamicalSystem and an Interaction in assembled matrices of LCP etc ..*/
-typedef std::map< SP::Interaction , MapOfDSMatrices >  MapOfInteractionMapOfDSMatrices;
+//typedef std::map< SP::Interaction , MapOfDSMatrices >  MapOfInteractionMapOfDSMatrices;
 
 /** list of indices */
 typedef std::vector<unsigned int> IndexInt;

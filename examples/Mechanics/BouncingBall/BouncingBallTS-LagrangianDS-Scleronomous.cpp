@@ -90,13 +90,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+    bouncingBall->link(inter, ball);
 
 
     // ------------------
@@ -113,18 +113,12 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-
-    bouncingBall->setSimulation(s);
+    SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI, osnspb));
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize();
     int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -176,16 +170,11 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result-scleronomous.dat", "ascii", dataPlot, "noDim");
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("result-scleronomous.ref", "ascii", dataPlotRef);
 
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-Scleronomous.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 

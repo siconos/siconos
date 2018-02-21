@@ -48,9 +48,7 @@ class NewtonEulerR : public Relation
 {
 public:
 // add deltaq ??? -- xhub 30/03/2014
-  enum NewtonEulerRDS  {xfree, z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};
-  // enum NewtonEulerRVec {xfree, z, q0, dotq, p0, p1, p2, workVecSize};
-  // enum NewtonEulerRMat {C, D, F, workMatSize};
+  enum NewtonEulerRDS  {z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};
 
 protected:
   /** serialization hooks
@@ -101,16 +99,11 @@ protected:
   */
   NewtonEulerR(RELATION::SUBTYPES lagType): Relation(RELATION::NewtonEuler, lagType) {}
 
-  /** initialize components specific to derived classes.
-   * \param inter  Interaction associated with the Relation
-   * \param DSlink
-   * \param workV
-   * \param workM
-   */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 
 public:
-  NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR) {}
+  NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR){};
+
 
   /** destructor
   */
@@ -185,13 +178,21 @@ public:
    */
   SP::SiconosVector _secondOrderTimeDerivativeTerms;
 
-  /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV the work vectors
-   * \param workM work matrices
-  */
-  void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+  /** initialize components specific to derived classes.
+   * \param inter  Interaction associated with the Relation
+   * \param DSlink
+   * \param workV
+   * \param workM
+   */
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+  virtual void initialize(Interaction& inter);
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
 
   /** to compute y = h(q,v,t) using plug-in mechanism
   * \param time current time
@@ -302,18 +303,16 @@ public:
   /** to compute output
    * \param time current time
    * \param inter the interaction using this relation
-   * \param interProp Interaction properties
    * \param derivativeNumber number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
+  virtual void computeOutput(double time, Interaction& inter, unsigned int derivativeNumber = 0);
 
   /** to compute the input
    * \param time current time
    * \param inter the interaction using this relation
-   * \param interProp Interaction properties
    * \param level number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /**
   * return a SP on the C matrix.

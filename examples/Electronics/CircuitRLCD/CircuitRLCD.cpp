@@ -89,14 +89,19 @@ int main(int argc, char* argv[])
     SP::Interaction InterCircuitRLCD(new Interaction(NSLaw, LTIRCircuitRLCD));
 
     // --- Model creation ---
-    SP::Model CircuitRLCD(new Model(t0, T, Modeltitle));
-
+    SP::NonSmoothDynamicalSystem CircuitRLCD(new NonSmoothDynamicalSystem(t0, T));
+    CircuitRLCD->setTitle(Modeltitle);
     // add the dynamical system in the non smooth dynamical system
-    CircuitRLCD->nonSmoothDynamicalSystem()->insertDynamicalSystem(LSCircuitRLCD);
+    CircuitRLCD->insertDynamicalSystem(LSCircuitRLCD);
 
     // link the interaction and the dynamical system
-    CircuitRLCD->nonSmoothDynamicalSystem()->link(InterCircuitRLCD, LSCircuitRLCD);
-    CircuitRLCD->nonSmoothDynamicalSystem()->display();
+    CircuitRLCD->link(InterCircuitRLCD, LSCircuitRLCD);
+
+    InterCircuitRLCD->computeOutput(t0,0);
+    InterCircuitRLCD->computeInput(t0,0);
+
+    
+    CircuitRLCD->display();
 
     // ------------------
     // --- Simulation ---
@@ -112,13 +117,7 @@ int main(int argc, char* argv[])
     SP::LCP LCP_RLCD(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping StratCircuitRLCD(new TimeStepping(TiDiscRLCD, OSI_RLCD, LCP_RLCD));
-    CircuitRLCD->setSimulation(StratCircuitRLCD);
-    
-    cout << "====> Initialisation ..." << endl << endl;
-    CircuitRLCD->initialize();
-    cout << " -----> End of initialization." << endl;
-
+    SP::TimeStepping StratCircuitRLCD(new TimeStepping(CircuitRLCD, TiDiscRLCD, OSI_RLCD, LCP_RLCD));
     double h = StratCircuitRLCD->timeStep();
     int N = ceil((T - t0) / h); // Number of time steps
     int k = 0;
@@ -185,18 +184,10 @@ int main(int argc, char* argv[])
     // dataPlot (ascii) output
     ioMatrix::write("CircuitRLCD.dat", "ascii", dataPlot, "noDim");
 
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("CircuitRLCD.ref", "ascii", dataPlotRef);
-    std::cout << "Error w.r.t reference file   " <<(dataPlot - dataPlotRef).normInf() << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout <<
-        "Warning. The result is rather different from the reference file."
-                << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "CircuitRLCD.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
 
   }
 

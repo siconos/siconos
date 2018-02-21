@@ -17,7 +17,6 @@
  */
 #include "MoreauJeanGOSI.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
@@ -73,7 +72,7 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
     _useGamma = false;
   }
 }
-void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanGOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
@@ -92,7 +91,7 @@ void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
     workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds->dimension()));
     workVectors[OneStepIntegrator::local_buffer].reset(new SiconosVector(lds->dimension()));
 
-    lds->computeForces(m.t0(), lds->q(), lds->velocity());
+    lds->computeForces(t, lds->q(), lds->velocity());
     lds->swapInMemory();
   }
   else if(dsType == Type::NewtonEulerDS)
@@ -108,12 +107,12 @@ void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
     prod(*T, *v, *dotq, true);
 
     //Compute a first value of the forces to store it in _forcesMemory
-    neds->computeForces(m.t0(), neds->q(), v);
+    neds->computeForces(t, neds->q(), v);
     neds->swapInMemory();
   }
 }
 
-void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
+void MoreauJeanGOSI::initializeWorkVectorsForInteraction(Interaction &inter,
                                  InteractionProperties& interProp,
                                  DynamicalSystemsGraph & DSG)
 {
@@ -121,13 +120,25 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
+
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+
+
   VectorOfVectors& workV = *interProp.workVectors;
-  workV.resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
-  workV[MoreauJeanGOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+  workBlockV.resize(MoreauJeanGOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
-  RELATION::TYPES relationType = relation.getType();
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  
+  workV.resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
+  workV[MoreauJeanGOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -137,32 +148,25 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
 
   // if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   // {
-  //   RuntimeException::selfThrow("MoreauJeanGOSI::fillDSLinks. The implementation is not correct for two different OSI for one interaction");
+  //   RuntimeException::selfThrow("MoreauJeanGOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   // }
 
 
 
 
   /* allocate and set work vectors for the osi */
-  unsigned int xfree =0;
-  if (relationType == Lagrangian)
-  {
-    xfree = LagrangianR::xfree;
-  }
-  else if (relationType == NewtonEuler)
-  {
-    xfree = NewtonEulerR::xfree;
-  }
+  unsigned int xfree = MoreauJeanGOSI::xfree;
+
   if (ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
-    if ((!DSlink[xfree]) || (DSlink[xfree]->numberOfBlocks() !=2 ))
-      DSlink[xfree].reset(new BlockVector(2));
+    if ((!workBlockV[xfree]) || (workBlockV[xfree]->numberOfBlocks() !=2 ))
+      workBlockV[xfree].reset(new BlockVector(2));
   }
   else
   {
-    if ((!DSlink[xfree]) || (DSlink[xfree]->numberOfBlocks() !=1 ))
-      DSlink[xfree].reset(new BlockVector(1));
+    if ((!workBlockV[xfree]) || (workBlockV[xfree]->numberOfBlocks() !=1 ))
+      workBlockV[xfree].reset(new BlockVector(1));
   }
 
   if(checkOSI(DSG.descriptor(ds1)))
@@ -170,7 +174,7 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
     DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
     VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-    DSlink[xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
+    workBlockV[xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
   }
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
@@ -184,7 +188,7 @@ void MoreauJeanGOSI::fillDSLinks(Interaction &inter,
       DEBUG_PRINTF("ds2->number() %i is taken into account\n",ds2->number());
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      DSlink[xfree]->setVectorPtr(1,workVds2[OneStepIntegrator::free]);
+      workBlockV[xfree]->setVectorPtr(1,workVds2[OneStepIntegrator::free]);
     }
   }
 
@@ -567,7 +571,7 @@ double MoreauJeanGOSI::computeResidu()
       SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
       prod(W, vold, free_rhs);
 
-      
+
 
       if(d->forces())
       {
@@ -601,7 +605,7 @@ double MoreauJeanGOSI::computeResidu()
 
       residu =  -1.0* free_rhs;
       prod(1.0, W, *v, residu, false);
-      
+
       DEBUG_EXPR(residu.display());
 
       if(d->p(1))
@@ -685,7 +689,7 @@ double MoreauJeanGOSI::computeResidu()
         RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
       }
 
-      // residu = -1.0*free_rhs;      
+      // residu = -1.0*free_rhs;
       // prod(1.0, W, *v, residu, false);
       // DEBUG_EXPR(free_rhs.display());
       // if(d->p(1))
@@ -721,7 +725,7 @@ double MoreauJeanGOSI::computeResidu()
       DEBUG_EXPR(q->display());
       DEBUG_EXPR(v->display());
 
-      
+
       residu.zero();
       // Get the (constant mass matrix)
       // SP::SiconosMatrix massMatrix = d->mass();
@@ -731,7 +735,7 @@ double MoreauJeanGOSI::computeResidu()
       SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
       prod(W, vold, free_rhs);
 
-      
+
 
       if(d->forces())   // if fL exists
       {
@@ -769,10 +773,10 @@ double MoreauJeanGOSI::computeResidu()
       }
 
       residu =  -1.0* free_rhs;
-      
+
       prod(1.0, W, *v, residu, false);
 
-      
+
       if(d->p(1))
         residu -= *d->p(1);// We use DynamicalSystem::free as tmp buffer
 

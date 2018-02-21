@@ -31,6 +31,7 @@ def check_error(n, m, h, TV=False):
     failed = False
     A = np.random.random((n, n))
     B = np.random.random((n, m))
+    
     try:
         Ainv = np.linalg.inv(A)
         Aexp = expm(A * h)
@@ -47,7 +48,7 @@ def check_error(n, m, h, TV=False):
             err_phi = np.linalg.norm((Aexp - AexpS))
             err_psi = np.linalg.norm(Psi - PsiS)
             if err_phi > 5.0e-12 or err_psi > 5.0e-12:
-                print(err_phi, err_psi)
+                print('err_phi', err_phi, 'err_psi', err_psi)
                 failed = True
         except Exception as e :
             print('Exception in check_error(II) :', e)

@@ -37,15 +37,18 @@ LCP::LCP(int numericsSolverId):
 
 int LCP::compute(double time)
 {
-
+  DEBUG_BEGIN("LCP::compute(double time)\n");
   int info = 0;
 
   // --- Prepare data for LCP computing ---
   // And check if there is something to be done
   bool cont = preCompute(time);
   if (!cont)
+  {
+    DEBUG_PRINT("Nothing to compute\n");
+    DEBUG_END("LCP::compute(double time)\n");
     return info;
-
+  }
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)
@@ -87,7 +90,9 @@ int LCP::compute(double time)
     DEBUG_EXPR(display());
 
   }
+  DEBUG_END("LCP::compute(double time)\n");
   return info;
+  
 }
 
 LCP::~LCP()

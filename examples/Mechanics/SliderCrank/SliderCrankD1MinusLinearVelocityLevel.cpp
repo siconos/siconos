@@ -119,12 +119,12 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model sliderWithClearance(new Model(t0, T));
-    sliderWithClearance->nonSmoothDynamicalSystem()->insertDynamicalSystem(slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter1, slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter2, slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter3, slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter4, slider);
+    SP::NonSmoothDynamicalSystem sliderWithClearance(new NonSmoothDynamicalSystem(t0, T));
+    sliderWithClearance->insertDynamicalSystem(slider);
+    sliderWithClearance->link(inter1, slider);
+    sliderWithClearance->link(inter2, slider);
+    sliderWithClearance->link(inter3, slider);
+    sliderWithClearance->link(inter4, slider);
 
     // ----------------
     // --- Simulation ---
@@ -134,21 +134,16 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem force(new LCP());
 
-    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(t, 2));
+    SP::TimeSteppingD1Minus s(new TimeSteppingD1Minus(sliderWithClearance, t, 2));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->insertNonSmoothProblem(force, SICONOS_OSNSP_TS_VELOCITY + 1);
-    sliderWithClearance->setSimulation(s);
-
 
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-    cout << "====> Initialisation ..." << endl << endl;
-    sliderWithClearance->initialize();
     int N = ceil((T - t0) / h) + 1; // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -158,11 +153,13 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q = slider->q();
     SP::SiconosVector v = slider->velocity();
-
-    const SiconosVector& lambda1old = inter1->lambdaMemory(1).getSiconosVector(0);
-    (lambda1old)(0);
-
     int k =0;
+    // computation for a first consistent output
+    inter1->computeOutput(t0,0);
+    inter2->computeOutput(t0,0);
+    inter3->computeOutput(t0,0);
+    inter4->computeOutput(t0,0);
+    
     dataPlot(k, 0) = sliderWithClearance->t0();
     dataPlot(k, 1) = (*q)(0) / (2.*M_PI); // crank revolution
     dataPlot(k, 2) = (*q)(1);
@@ -202,11 +199,11 @@ int main(int argc, char* argv[])
     dataPlot(k, 29) = (*inter3->lambda(2))(0) ; // lambda1_{k+1}^-
     dataPlot(k, 30) = (*inter4->lambda(2))(0) ; // lambda1_{k+1}^-
 
-
-    dataPlot(k, 31) = ( inter1->lambdaMemory(2).getSiconosVector(0) )(0) ; // lambda1old
-    dataPlot(k, 32) = ( inter2->lambdaMemory(2).getSiconosVector(0) )(0) ; // lambda1old
-    dataPlot(k, 33) = ( inter3->lambdaMemory(2).getSiconosVector(0) )(0) ; // lambda1old
-    dataPlot(k, 34) = ( inter4->lambdaMemory(2).getSiconosVector(0) )(0) ; // lambda1old
+    // not yet allocated 
+    // dataPlot(k, 31) = ( inter1->lambdaMemory(2).getSiconosVector(0) )(0) ; // lambda1old
+    // dataPlot(k, 32) = ( inter2->lambdaMemory(2).getSiconosVector(0) )(0) ; // lambda1old
+    // dataPlot(k, 33) = ( inter3->lambdaMemory(2).getSiconosVector(0) )(0) ; // lambda1old
+    // dataPlot(k, 34) = ( inter4->lambdaMemory(2).getSiconosVector(0) )(0) ; // lambda1old
 
 
 
@@ -300,35 +297,11 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-
-
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("SliderCrankD1MinusLinearOSIVelocityLevel.ref", "ascii", dataPlotRef);
-
-    SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
-    (dataPlot - dataPlotRef).normInfByColumn(err);
-    err->display();
-    double error = 0.0;
-    for (unsigned int i = 0; i < err->size(); ++i)
-    {
-      if (error < (*err)(i))
-        error = (*err)(i);
-    }
-
-    std::cout << "Error = "<< error << std::endl;
-
-    if (error > 1e-10)
-    {
-    //  (dataPlot - dataPlotRef).display();
-
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-      std::cout << "Error = "<< error << std::endl;
+    double error=0.0, eps=1e-11;
+    if (ioMatrix::compareRefFile(dataPlot, "SliderCrankD1MinusLinearOSIVelocityLevel.ref", eps, error)
+        && error > eps)
       return 1;
-    }
-
-
+    
   }
 
   catch (SiconosException e)

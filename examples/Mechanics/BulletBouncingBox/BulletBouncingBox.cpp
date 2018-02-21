@@ -62,7 +62,7 @@ int main()
     osi.reset(new MoreauJeanOSI(theta));
 
     // -- Model --
-    SP::Model model(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem model(new NonSmoothDynamicalSystem(t0, T));
 
     // -- Shape: cube with all dimensions=1.0
     SP::SiconosBox box1(std11::make_shared<SiconosBox>(1.0, 1.0, 1.0));
@@ -92,7 +92,7 @@ int main()
     body->setFExtPtr(FExt);
 
     // -- Add the dynamical system in the non smooth dynamical system
-    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+    model->insertDynamicalSystem(body);
 
     SP::SiconosPlane ground(std11::make_shared<SiconosPlane>());
 
@@ -168,14 +168,11 @@ int main()
 
     // -- MoreauJeanOSI Time Stepping with Bullet collision manager as
     // -- the interaction manager.
-    SP::TimeStepping simulation(new TimeStepping(timedisc));
+    SP::TimeStepping simulation(new TimeStepping(model, timedisc));
     simulation->insertInteractionManager(collision_manager);
 
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
-    model->setSimulation(simulation);
-
-    model->initialize();
 
     std::cout << "====> End of initialisation ..." << std::endl << std::endl;
 
@@ -221,7 +218,7 @@ int main()
         // collision detection and an indexSet1, filled by
         // TimeStepping::updateIndexSet with the help of Bullet
         // getDistance() function
-        if (model->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() == 2)
+        if (model->topology()->numberOfIndexSet() == 2)
         {
           SP::InteractionsGraph index1 = simulation->indexSet(1);
 
@@ -263,17 +260,11 @@ int main()
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
 
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("result.ref", "ascii", dataPlotRef);
 
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file : "
-                << (dataPlot - dataPlotRef).normInf() << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "result.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 

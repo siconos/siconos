@@ -124,7 +124,6 @@ void Disks::init(std::string disks_input)
 {
 
   SP::TimeDiscretisation timedisc_;
-  SP::TimeStepping simulation_;
   SP::FrictionContact osnspb_;
 
   // User-defined main parameters
@@ -153,8 +152,8 @@ void Disks::init(std::string disks_input)
     // ------------
     // --- Init ---
     // ------------
-
-    std::cout << "====> Model loading ..." << std::endl << std::endl;
+    
+    std::cout << "====> nsds loading ..." << std::endl << std::endl;
 
     _plans.reset(new SimpleMatrix("plans.dat", true));
     if (_plans->size(0) == 0)
@@ -224,7 +223,9 @@ void Disks::init(std::string disks_input)
     osi.reset(new MoreauJeanOSI(theta));
 
     // -- Model --
-    _model.reset(new Model(t0, T));
+
+    SP::NonSmoothDynamicalSystem nsds;
+    nsds.reset(new NonSmoothDynamicalSystem(t0, T));
 
     for (unsigned int i = 0; i < Disks->size(0); i++)
     {
@@ -254,11 +255,11 @@ void Disks::init(std::string disks_input)
       body->setFExtPtr(FExt);
 
       // add the dynamical system in the non smooth dynamical system
-      _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+      nsds->insertDynamicalSystem(body);
     }
 
 
-    _model->nonSmoothDynamicalSystem()->setSymmetric(true);
+    nsds->setSymmetric(true);
 
 
     // ------------------
@@ -285,14 +286,14 @@ void Disks::init(std::string disks_input)
     osnspb_->setKeepLambdaAndYState(true);  // inject previous solution
 
     // -- Simulation --
-    simulation_.reset(new TimeStepping(timedisc_));
+    _sim.reset(new TimeStepping(nsds,timedisc_));
 
-    std11::static_pointer_cast<TimeStepping>(simulation_)->setNewtonMaxIteration(3);
+    std11::static_pointer_cast<TimeStepping>(_sim)->setNewtonMaxIteration(3);
 
-    simulation_->insertIntegrator(osi);
-    simulation_->insertNonSmoothProblem(osnspb_);
+    _sim->insertIntegrator(osi);
+    _sim->insertNonSmoothProblem(osnspb_);
 
-    simulation_->setCheckSolverFunction(localCheckSolverOuput);
+    std11::static_pointer_cast<TimeStepping>(_sim)->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---
 
@@ -300,12 +301,12 @@ void Disks::init(std::string disks_input)
 
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0, 0, 0.3, 2));
 
-    _playground.reset(new SpaceFilter(3, 6, _model, _plans, _moving_plans));
+    _playground.reset(new SpaceFilter(3, 6, _plans, _moving_plans));
 
-    _playground->insert(nslaw, 0, 0);
+    _playground->insertNonSmoothLaw(nslaw, 0, 0);
 
-    _model->setSimulation(simulation_);
-    _model->initialize();
+    _sim->insertInteractionManager(_playground);
+
   }
 
   catch (SiconosException e)

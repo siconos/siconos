@@ -63,8 +63,8 @@ protected:
    */
   SP::SiconosVector _Nc;
 
-
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  /* _Nc must be calculated relative to q2 */
+  SP::SiconosVector _relNc;
 
   /* Rotation matrix converting the absolute coordinate to the contact frame coordinate.
    * This matrix contains the unit vector(s)of the contact frame in row.
@@ -99,7 +99,7 @@ public:
   NewtonEulerFrom1DLocalFrameR():
     NewtonEulerR(), _Pc1(new SiconosVector(3)), _Pc2(new SiconosVector(3)),
     _relPc1(new SiconosVector(3)), _relPc2(new SiconosVector(3)),
-    _Nc(new SiconosVector(3))
+    _Nc(new SiconosVector(3)), _relNc(new SiconosVector(3))
   {
     /*_ds1=NULL;_ds2=NULL;*/
   }
@@ -109,6 +109,11 @@ public:
   virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
+
+
+  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+  virtual void initialize(Interaction& inter);
 
   /* Default implementation consists in multiplying jachq and T (see NewtonEulerR::computeJachqT)
    * but here we compute the operator from the the contact point locations
@@ -121,6 +126,9 @@ public:
   /* Default implementation of computeh updates contact points and
    * distance for q if different than qold. */
   virtual void computeh(double time, BlockVector& q0, SiconosVector &y);
+
+  /** Return the distance between pc1 and pc, with sign according to normal */
+  double distance() const;
 
   inline SP::SiconosVector pc1() const
   {

@@ -17,18 +17,18 @@
 */
 #include "FirstOrderR.hpp"
 
-void FirstOrderR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workVInter, VectorOfSMatrices& workMInter)
+
+
+void FirstOrderR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workVInter, VectorOfSMatrices& workMInter)
 {
   workVInter.resize(FirstOrderR::workVecSize);
   workMInter.resize(FirstOrderR::mat_workMatSize);
-  initComponents(inter, DSlink, workVInter, workMInter);
   unsigned int sizeY = inter.getSizeOfY();
   
   if (!workVInter[FirstOrderR::h_alpha])
         workVInter[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));
   if (!workVInter[FirstOrderR::vec_residuY])
         workVInter[FirstOrderR::vec_residuY].reset(new SiconosVector(sizeY));
-
   if (requireResidu())
     {
       unsigned int sizeOfDS = inter.getSizeOfDS();
@@ -39,4 +39,7 @@ void FirstOrderR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, V
     }
 }
 
+void FirstOrderR::checkSize(Interaction& inter)
+{
 
+}

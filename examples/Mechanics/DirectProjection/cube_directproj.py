@@ -77,7 +77,6 @@ with Hdf5(mode='r+') as io:
             tolerance=1e-8,
             numerics_verbose=False,
             output_frequency=None,
-            Newton_update_interactions=True,
             projection_itermax=5,
             projection_tolerance=1e-8,
             projection_tolerance_unilateral=1e-8,

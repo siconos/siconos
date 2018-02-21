@@ -19,10 +19,10 @@ double VelYiniPointA = 0.0 ;     // Initial relative velocity Vy of the point A
 double RotVelBlockIni = 0.0;    // Initial angular velocity of the block
 double e = 0.9;       // Restitution coefficient
 double TimeInitial = 0.0;        // Initial time of the simulation
-double TimeFinal =  0.55;      // Final time of the simulation
+double TimeFinal =  0.58;      // Final time of the simulation
 double _rho = 0.99;             // used to computer parameters for NewMark Scheme
 double StepSize = 0.001;         // Time step size
-unsigned int NpointSave = 550;   //
+unsigned int NpointSave = 1500;   //
 unsigned int SizeOutput = 13;     //
 unsigned int maxIter = 20000;
 bool IsTreatFirstSteps = false;
@@ -112,10 +112,10 @@ int main(int argc, char* argv[])
     //================================================================================================================
     //            III. Create the "model" object
     //================================================================================================================
-    SP::Model RoBlockModel(new Model(TimeInitial, TimeFinal));
-    RoBlockModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(RockingBlock);
-    RoBlockModel->nonSmoothDynamicalSystem()->link(inter1, RockingBlock);
-    RoBlockModel->nonSmoothDynamicalSystem()->link(inter2, RockingBlock);
+    SP::NonSmoothDynamicalSystem RoBlockModel(new NonSmoothDynamicalSystem(TimeInitial, TimeFinal));
+    RoBlockModel->insertDynamicalSystem(RockingBlock);
+    RoBlockModel->link(inter1, RockingBlock);
+    RoBlockModel->link(inter2, RockingBlock);
     //================================================================================================================
     //            IV. Create the simulation
     //================================================================================================================
@@ -135,12 +135,11 @@ int main(int argc, char* argv[])
    
 
     //4. Simulation with (1), (2), (3)
-    SP::Simulation EDscheme(new EventDriven(TimeDiscret));
+    SP::Simulation EDscheme(new EventDriven(RoBlockModel, TimeDiscret));
     EDscheme->insertIntegrator(OSI);
     EDscheme->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     EDscheme->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
     EDscheme->insertNonSmoothProblem(position, SICONOS_OSNSP_ED_SMOOTH_POS);
-    RoBlockModel->setSimulation(EDscheme); // initialize the model
     // bool check1 = EDscheme->hasOneStepNSProblem(impact);
     // bool check2 = EDscheme->hasOneStepNSProblem(acceleration);
     // cout << "Impact law included in the simulation: " << check1 << endl;
@@ -149,25 +148,15 @@ int main(int argc, char* argv[])
     //                    V. Process the simulation
     //==================================================================================================================
     // -------------------------------- Simulation initialization ------------------------------------------------------
-    cout << "====> Simulation initialisation ..." << endl << endl;
-    RoBlockModel->initialize(); // initialize the model
     EDscheme->setPrintStat(true);
     SP::EventsManager eventsManager = EDscheme->eventsManager(); // ponters point to the "eventsManager" object
     SP::SiconosVector PosBlock = RockingBlock->q();              // pointer points to the position vector of the rocking block
     SP::SiconosVector VelBlock = RockingBlock->velocity();       // pointer points to the velocity of the rocking block
     SP::SiconosVector AcceBlock = RockingBlock->acceleration();       // pointer points to the velocity of the rocking block
-    SP::SiconosVector GapCon1 = inter1->y(0);
-    SP::SiconosVector GapCon2 = inter2->y(0);
-    SP::SiconosVector VelCon1 = inter1->y(1);
-    SP::SiconosVector VelCon2 = inter2->y(1);
-    SP::SiconosVector LambdaCon1 = inter1->lambda(2);
-    SP::SiconosVector LambdaCon2 = inter2->lambda(2);
-    SP::InteractionsGraph indexSet0 = RoBlockModel->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-    SP::InteractionsGraph indexSet1 = RoBlockModel->nonSmoothDynamicalSystem()->topology()->indexSet(1);
-    SP::InteractionsGraph indexSet2 = RoBlockModel->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+
+    SP::InteractionsGraph indexSet0 = RoBlockModel->topology()->indexSet(0);
     cout << "Size of IndexSet0: " << indexSet0->size() << endl;
-    cout << "Size of IndexSet1: " << indexSet1->size() << endl;
-    cout << "Size of IndexSet2: " << indexSet2->size() << endl;
+
 
     InteractionsGraph::VIterator ui, uiend;
     //-------------------- Save the output during simulation ---------------------------------------------------------
@@ -180,12 +169,12 @@ int main(int argc, char* argv[])
     DataPlot(0, 4) = (*VelBlock)(0); // Velocity Vx
     DataPlot(0, 5) = (*VelBlock)(1); // Velocity Vy
     DataPlot(0, 6) = (*VelBlock)(2); // Angular velocity
-    DataPlot(0, 7) = (*GapCon1)(0);  // Gap at first contact
-    DataPlot(0, 8) = (*GapCon2)(0);  // Gap at second contact
-    DataPlot(0, 9) = (*VelCon1)(0);  // Relative velocity at first contact
-    DataPlot(0, 10) = (*VelCon2)(0);  // Relative velocity at second contact
-    DataPlot(0, 11) = (*LambdaCon1)(0); // Force at first contact
-    DataPlot(0, 12) = (*LambdaCon2)(0); // Force at second contact
+    DataPlot(0, 7) = 0.0;  // Gap at first contact
+    DataPlot(0, 8) = 0.0;  // Gap at second contact
+    DataPlot(0, 9) = 0.0;  // Relative velocity at first contact
+    DataPlot(0, 10) = 0.0;  // Relative velocity at second contact
+    DataPlot(0, 11) = 0.0; // Force at first contact
+    DataPlot(0, 12) = 0.0; // Force at second contact
     //----------------------------------- Simulation starts ----------------------------------------------------------
     cout << "====> Start computation ... " << endl << endl;
     bool NSEvent = false;
@@ -225,6 +214,13 @@ int main(int argc, char* argv[])
         }
       }
       EDscheme->advanceToEvent(); // lead the simulation run from one event to the next
+      SP::SiconosVector GapCon1 = inter1->y(0);
+      SP::SiconosVector GapCon2 = inter2->y(0);
+      SP::SiconosVector VelCon1 = inter1->y(1);
+      SP::SiconosVector VelCon2 = inter2->y(1);
+      
+      SP::SiconosVector LambdaCon1 = inter1->lambda(2);
+      SP::SiconosVector LambdaCon2 = inter2->lambda(2);
       //---------- detect the statue of the current event ------------------------------------
       if (eventsManager->nextEvent()->getType() == 2) // the current event is non-smooth
       {
@@ -292,27 +288,15 @@ int main(int argc, char* argv[])
     cout << "Number of events processed during simulation: " << (k + 1) << endl;
     cout << "Number of non-smooth events: " << NumberNSEvent << endl;
     cout << "====> Output file writing ..." << endl << endl;
-    ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
-    // Comparison with a reference file
-    std::cout << "Comparison with a reference file" << std::endl;
-    SimpleMatrix dataPlotRef(DataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("resultED_NewMarkAlpha.ref", "ascii", dataPlotRef);
-    double error = (DataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
-    std::cout << "Error = "<< error << std::endl;
-    std::cout << "Error by column = "<< std::endl;
+    DataPlot.resize(k,SizeOutput);
+    ioMatrix::write("RockingBlockED_NewMarkAlpha.dat", "ascii", DataPlot, "noDim");
 
-    SP::SiconosVector errCol(new SiconosVector(SizeOutput));
-    (DataPlot - dataPlotRef).normInfByColumn(errCol);
-    errCol->display();
     
-    if (error > 1e-06)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-      std::cout << (DataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf() << std::endl;
-      
+    // Comparison with a reference file
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(DataPlot, "RockingBlockED_NewMarkAlpha.ref", eps, error)
+        && error > eps)
       return 1;
-    }
   }
   //============================== Catch exceptions ===================================================================
   catch (SiconosException e)

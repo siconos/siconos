@@ -163,7 +163,7 @@ void PivotJointR::buildA1A2()
   if (orthoBaseFromVector(&Ax, &Ay, &Az,
                           &_A1x, &_A1y, &_A1z,
                           &_A2x, &_A2y, &_A2z))
-    RuntimeException::selfThrow("PivotJointR::initComponents. Problem in calling orthoBaseFromVector");
+    RuntimeException::selfThrow("PivotJointR::initializeWorkVectorsAndMatrices. Problem in calling orthoBaseFromVector");
 
   assert(fabs(_A1x * Ax + _A1y * Ay + _A1z * Az) < 1e-9 && "PivotJoint, _A1 wrong\n");
   assert(fabs(_A2x * Ax + _A2y * Ay + _A2z * Az) < 1e-9 && "PivotJoint, _A2 wrong\n");

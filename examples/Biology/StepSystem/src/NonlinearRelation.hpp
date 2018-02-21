@@ -10,9 +10,6 @@ public:
   NonlinearRelation();
   virtual ~NonlinearRelation() {};
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
-                              VectorOfVectors& workV, VectorOfSMatrices& workM);
-
   /** default function to compute h */
   virtual void computeh(double t, SiconosVector& x, SiconosVector& lambda, SiconosVector& y);
 

@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10.0;                  // final computation time
+    double T = 10;                  // final computation time
     double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
@@ -91,13 +91,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+    bouncingBall->link(inter, ball);
 
 
     // ------------------
@@ -114,16 +114,10 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-    bouncingBall->setSimulation(s);
+    SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI, osnspb));
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize();
 
     int N = ceil((T - t0) / h); // Number of time steps
 
@@ -134,16 +128,14 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q = ball->q();
     SP::SiconosVector v = ball->velocity();
-    SP::SiconosVector p = ball->p(0);
+    SP::SiconosVector p ;
     SP::SiconosVector lambda = inter->lambda(0);
-    //SP::SiconosVector p = ball->q();
-    //SP::SiconosVector lambda = ball->q() ;
 
     dataPlot(0, 0) = bouncingBall->t0();
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
-    dataPlot(0, 3) = (*p)(0);
-    dataPlot(0, 4) = (*lambda)(0);
+    dataPlot(0, 3) = 0.0;
+    dataPlot(0, 4) = 0.0;
     // --- Time loop ---
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
@@ -158,9 +150,10 @@ int main(int argc, char* argv[])
       //cout << "iteration  " << k <<endl;
       s->computeOneStep();
       // osnspb->display();
-      // ball->velocity()->display();
+      // ball->display();
       // inter->display();
       // --- Get values to be plotted ---
+      p = ball->p(0);
       dataPlot(k, 0) =  s->nextTime();
       dataPlot(k, 1) = (*q)(0);
       dataPlot(k, 2) = (*v)(0);
@@ -177,21 +170,10 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("BouncingBallSchatzmanPaoliOSI.ref", "ascii", dataPlotRef);
-    SP::SiconosVector err(new SiconosVector(outputSize));
-    (dataPlot - dataPlotRef).normInfByColumn(err);
-    err->display();
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-      std::cout << "Error = " << (dataPlot - dataPlotRef).normInf()  <<  std::endl;
-//      (dataPlot - dataPlotRef).display();
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-SchatzmanPaoliOSI.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 

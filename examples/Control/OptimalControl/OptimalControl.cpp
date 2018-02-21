@@ -72,14 +72,16 @@ int main()
   //****BUILD THE INTERACTION
   SP::Interaction aI(new Interaction(aNSL, aR));
   //****BUILD THE SYSTEM
-  SP::Model  aM(new Model(0, sT));
-  aM->nonSmoothDynamicalSystem()->insertDynamicalSystem(aDS);
-  aM->nonSmoothDynamicalSystem()->link(aI,aDS);
+  SP::NonSmoothDynamicalSystem  aM(new NonSmoothDynamicalSystem(0, sT));
+  aM->insertDynamicalSystem(aDS);
+  aM->link(aI,aDS);
   SP::TimeDiscretisation  aTD(new TimeDiscretisation(0, sStep));
-  SP::TimeStepping aS(new TimeStepping(aTD));
+  SP::TimeStepping aS(new TimeStepping(aM, aTD));
   aS->setComputeResiduY(true);
   aS->setComputeResiduR(true);
   aS->setUseRelativeConvergenceCriteron(false);
+  aS->setNewtonTolerance(1.1e-11);
+  aS->setNewtonMaxIteration(50);
   //*****BUILD THE STEP INTEGRATOR
   SP::OneStepIntegrator  aEulerMoreauOSI ;
   aEulerMoreauOSI.reset(new EulerMoreauOSI(0.5));
@@ -93,8 +95,6 @@ int main()
 //  aLCP.reset(new LCP(SICONOS_LCP_NEWTONFB));
 
   aS->insertNonSmoothProblem(aLCP);
-  aM->setSimulation(aS);
-  aM->initialize();
 
   numerics_set_verbose(0);
 
@@ -139,9 +139,7 @@ int main()
     cmp++;
 
     // solve ...
-//    aS->computeOneStep();
-
-    aS->newtonSolve(1.1e-11, 50);
+    aS->computeOneStep();
     x = aDS->x();
     lambda = aI->lambda(0);
     dataPlot(k, 0) = aS->nextTime(); // Initial time of the model
@@ -165,16 +163,10 @@ int main()
   cout << "====> Output file writing ..." << endl;
   ioMatrix::write("OptimalControl.dat", "ascii", dataPlot, "noDim");
 
-  std::cout << "Comparison with a reference file: " ;
-  SimpleMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
-  ioMatrix::read("OptimalControl.ref", "ascii", dataPlotRef);
-  std::cout << "error="<< (dataPlot-dataPlotRef).normInf() <<std::endl;
-  if ((dataPlot - dataPlotRef).normInf() > 5e-11)
-  {
-    std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+  double error=0.0, eps=5e-11;
+  if (ioMatrix::compareRefFile(dataPlot, "OptimalControl.ref", eps, error)
+      && error > eps)
     return 1;
-  }
 
   return 0;
 

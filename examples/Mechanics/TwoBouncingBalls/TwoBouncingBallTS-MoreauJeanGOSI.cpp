@@ -129,15 +129,15 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball1);
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball2);
+    bouncingBall->insertDynamicalSystem(ball1);
+    bouncingBall->insertDynamicalSystem(ball2);
 
     // link the interaction and the dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball1);
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter_bb, ball1, ball2);
+    bouncingBall->link(inter, ball1);
+    bouncingBall->link(inter_bb, ball1, ball2);
 
     // ------------------
     // --- Simulation ---
@@ -159,8 +159,7 @@ int main(int argc, char* argv[])
     //solver_options_print(options);
     options->internalSolvers->dparam[0] = 1e-10;
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-    bouncingBall->setSimulation(s);
+    SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI, osnspb));
  
     // =========================== End of model definition ===========================
 
@@ -168,16 +167,6 @@ int main(int argc, char* argv[])
 
     // --- Simulation initialization ---
 
-    cout << "====> Initialisation ..." << endl;
-    bouncingBall->initialize();
-    cout << "====> Initialisation END ..." << endl;
-
-
-    // -- set the integrator for the ball --
-
-
-    
-    
     int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -238,18 +227,11 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    std::cout << "Comparison with a reference file" << std::endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("TwoBouncingBallTS-MoreauJeanGOSI.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf();
-    std::cout << "error =" << error << std::endl;
 
-    if (error> 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "TwoBouncingBallTS-MoreauJeanGOSI.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 

@@ -24,7 +24,6 @@
 #define InteractionManager_h
 
 #include "Interaction.hpp"
-#include "Model.hpp"
 #include "DynamicalSystem.hpp"
 #include "SiconosVisitor.hpp"
 #include "NSLawMatrix.hpp"
@@ -38,14 +37,6 @@ public:
   /** Called by Simulation after updating positions prior to starting
    * the Newton loop. */
   virtual void updateInteractions(SP::Simulation simulation) {}
-
-  /** Called by Simulation after updating positions inside the Newton
-   * loop but prior to performing the next iteration.  Only override
-   * if different behaviour during the loop is desired.  May or may
-   * not be called depending on Simulation options. */
-  virtual void updateInteractionsNewtonIteration(SP::Simulation simulation) {
-    updateInteractions(simulation);
-  }
 
   /** Specify a non-smooth law to use for a given combination of
    *  interaction groups.

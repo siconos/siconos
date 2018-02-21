@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <math.h>
 
+#include "numerics_verbose.h"
 #include "fc3d_Solvers.h"
 #include "Friction_cst.h"
 #include "op3x3.h"

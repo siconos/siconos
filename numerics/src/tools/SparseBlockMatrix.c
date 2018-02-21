@@ -26,6 +26,7 @@
 #include <string.h>
 #include "numerics_verbose.h"
 #include "op3x3.h"
+#include "SiconosCompat.h"
 //#define DEBUG_MESSAGES 1
 //#define DEBUG_STDOUT 1
 //#define DEBUG_NOCOLOR 1

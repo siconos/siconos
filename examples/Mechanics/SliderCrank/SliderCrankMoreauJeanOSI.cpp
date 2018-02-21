@@ -139,12 +139,12 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model sliderWithClearance(new Model(t0, T));
-    sliderWithClearance->nonSmoothDynamicalSystem()->insertDynamicalSystem(slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter1, slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter2, slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter3, slider);
-    sliderWithClearance->nonSmoothDynamicalSystem()->link(inter4, slider);
+    SP::NonSmoothDynamicalSystem sliderWithClearance(new NonSmoothDynamicalSystem(t0, T));
+    sliderWithClearance->insertDynamicalSystem(slider);
+    sliderWithClearance->link(inter1, slider);
+    sliderWithClearance->link(inter2, slider);
+    sliderWithClearance->link(inter3, slider);
+    sliderWithClearance->link(inter4, slider);
 
     // ----------------
     // --- Simulation ---
@@ -159,22 +159,18 @@ int main(int argc, char* argv[])
     impact->numericsSolverOptions()->dparam[0] = 1e-08;
     impact->numericsSolverOptions()->iparam[0] = 100;
     impact->numericsSolverOptions()->iparam[2] = 1; // random
-    SP::TimeStepping s(new TimeStepping(t));
+    SP::TimeStepping s(new TimeStepping(sliderWithClearance, t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_TS_VELOCITY);
     s->setNewtonTolerance(1e-10);
     s->setNewtonMaxIteration(200);
 
-    SP::Topology topo = sliderWithClearance->nonSmoothDynamicalSystem()->topology();
+    SP::Topology topo = sliderWithClearance->topology();
 
-    sliderWithClearance->setSimulation(s);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-    cout << "====> Initialisation ..." << endl << endl;
-    sliderWithClearance->initialize();
     int N = ceil((T - t0) / h) + 1; // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -184,6 +180,12 @@ int main(int argc, char* argv[])
 
     SP::SiconosVector q = slider->q();
     SP::SiconosVector v = slider->velocity();
+
+    // computation for a first consistent output
+    inter1->computeOutput(t0,0);
+    inter2->computeOutput(t0,0);
+    inter3->computeOutput(t0,0);
+    inter4->computeOutput(t0,0);
 
     dataPlot(0, 0) = sliderWithClearance->t0();
     dataPlot(0, 1) = (*q)(0) / (2.*M_PI); // crank revolution
@@ -222,7 +224,7 @@ int main(int argc, char* argv[])
 
     boost::timer time;
     time.restart();
-    SP::InteractionsGraph indexSet1 = topo->indexSet(1);
+
 
 //    while ((s->hasNextEvent()) && (k<= 3000))
     while ((s->hasNextEvent()))
@@ -267,6 +269,7 @@ int main(int argc, char* argv[])
       dataPlot(k, 23) = (*inter3->lambda(1))(0) ; // lambda3
       dataPlot(k, 24) = (*inter4->lambda(1))(0) ; // lambda4
       dataPlot(k, 25) = s->getNewtonNbIterations();
+      SP::InteractionsGraph indexSet1 = topo->indexSet(1);
       dataPlot(k, 26) = indexSet1->size();
 
       if (indexSet1->size() > 5)
@@ -297,21 +300,11 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    cout << "====> Comparison with a reference file ..." << endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("SliderCrankMoreauJeanOSI.ref", "ascii", dataPlotRef);
-    double error = (dataPlot - dataPlotRef).normInf()/ dataPlotRef.normInf();
-    std::cout << "Error = "<< error << std::endl;
-    if (error > 1e-12)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-      std::cout <<  "error  = " << (dataPlot - dataPlotRef).normInf() << std::endl;
-      SP::SiconosVector err(new SiconosVector(dataPlot.size(1)));
-      (dataPlot - dataPlotRef).normInfByColumn(err);
-      err->display();
+
+    double error=0.0, eps=1e-11;
+    if (ioMatrix::compareRefFile(dataPlot, "SliderCrankMoreauJeanOSI.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
   }
 

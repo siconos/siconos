@@ -187,9 +187,10 @@ public:
   virtual void setTimeDiscretisation(const TimeDiscretisation& td) {};
 
   /** initialize actuator data.
-   * \param m the Model
+   * \param nsds the NonSmoothDynamicalSystem
+   * \param s the simulation
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s);
 
   /** capture data when the ActuatorEvent is processed
    */
@@ -199,10 +200,10 @@ public:
    */
   virtual void display() const;
 
-  /** get the Model used in the Controller, if there is one
+  /** get the NSDS used in the Controller, if there is one
    * \return "NULL" shared_ptr if there is no internal simulation, otherwise
    * it return the Model hoding the simulation
    */
-  virtual SP::Model getInternalModel() const;
+  virtual SP::NonSmoothDynamicalSystem getInternalNSDS() const;
 };
 #endif

@@ -29,13 +29,15 @@ class BulletTimeSteppingDirectProjection : public TimeSteppingDirectProjection
   SP::BulletSpaceFilter _spaceFilter;
 
 public:
-  BulletTimeSteppingDirectProjection(SP::BulletSpaceFilter sf,
-                                         SP::TimeDiscretisation t,
-                                         SP::OneStepIntegrator osi,
-                                         SP::OneStepNSProblem osnspb_velo,
-                                         SP::OneStepNSProblem osnspb_pos,
-                                         unsigned int level = 1) :
-    TimeSteppingDirectProjection(t, osi, osnspb_velo, osnspb_pos),
+  BulletTimeSteppingDirectProjection(
+    SP::NonSmoothDynamicalSystem nsds,
+    SP::BulletSpaceFilter sf,
+    SP::TimeDiscretisation t,
+    SP::OneStepIntegrator osi,
+    SP::OneStepNSProblem osnspb_velo,
+    SP::OneStepNSProblem osnspb_pos,
+    unsigned int level = 1) :
+    TimeSteppingDirectProjection(nsds,t, osi, osnspb_velo, osnspb_pos),
     _spaceFilter(sf) {};
 
 

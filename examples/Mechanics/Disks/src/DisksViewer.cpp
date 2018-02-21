@@ -61,14 +61,13 @@ void DisksViewer::draw()
 
   float lbdmax = 0.;
 
-  DSIterator itDS;
   SP::InteractionsGraph I1;
   SP::Interaction interaction;
   SP::Relation relation;
 
-  if (Siconos_->model()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > 1)
+  if (Siconos_->simulation()->nonSmoothDynamicalSystem()->topology()->numberOfIndexSet() > 1)
   {
-    I1 = Siconos_->model()->simulation()->indexSet(1);
+    I1 = Siconos_->simulation()->indexSet(1);
 
     // calibration
     InteractionsGraph::VIterator ui, uiend;
@@ -182,7 +181,7 @@ void DisksViewer::draw()
 
   if (Siconos_->movingPlans())
   {
-    double time = Siconos_->model()->currentTime();
+    double time = Siconos_->simulation()->getTk();
     for (unsigned int i = 0 ; i < Siconos_->movingPlans()->size1() ; ++i)
     {
       double A = (*Siconos_->movingPlans())(i, 0)(time);

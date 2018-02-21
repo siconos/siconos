@@ -123,14 +123,14 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model bouncingBall(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
     // add the dynamical system in the non smooth dynamical system
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
-    bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(movingplane);
+    bouncingBall->insertDynamicalSystem(ball);
+    bouncingBall->insertDynamicalSystem(movingplane);
 
     // link the interaction and the dynamical systems
-    bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball, movingplane);
+    bouncingBall->link(inter, ball, movingplane);
 
 
 
@@ -148,16 +148,11 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb(new LCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-    bouncingBall->setSimulation(s);
+    SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI, osnspb));
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
 
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    bouncingBall->initialize();
     int N = ceil((T - t0) / h); // Number of time steps
 
     // --- Get the values to be plotted ---
@@ -227,17 +222,11 @@ int main(int argc, char* argv[])
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    cout << "====> Comparison with a reference file  ..." << endl;
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("BallOnMovingPlane.ref", "ascii", dataPlotRef);
-    std::cout << "Error " << ((dataPlot - dataPlotRef).normInf()) << std::endl;
-    if ((dataPlot - dataPlotRef).normInf() > 1e-10)
-    {
-      std::cout << "Warning. The result is rather different from the reference file." << std::endl;
-      std::cout << "error = " <<  (dataPlot - dataPlotRef).normInf() << std::endl;
+
+    double error=0.0, eps=1e-10;
+    if (ioMatrix::compareRefFile(dataPlot, "BallOnMovingPlane.ref", eps, error)
+        && error > eps)
       return 1;
-    }
 
 
   }

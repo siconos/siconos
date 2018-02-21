@@ -48,7 +48,7 @@ void MBTB_init(unsigned int NumOfBodies, unsigned int NumOfJoints, unsigned int 
   // -------------
   // --- Model ---
   // -------------
-  myModel.reset(new Model(myt0, myTf));
+  myNsds.reset(new NonSmoothDynamicalSystem(myt0, myTf));
 }
 
 /*get the quaternion from siconos and 1787update the CADs model*/
@@ -480,24 +480,24 @@ void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
 }
 void MBTB_setSolverIOption(int i,int value)
 {
-  myModel->simulation()->oneStepNSProblem(0)->numericsSolverOptions()->iparam[i]=value;
+  sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam[i]=value;
 }
 void MBTB_setSolverDOption(int i,double value)
 {
-  myModel->simulation()->oneStepNSProblem(0)->numericsSolverOptions()->dparam[i]=value;
+  sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam[i]=value;
 }
 void  MBTB_initSimu(double hTS, int withProj)
 {
 
   for(unsigned int numDS =0; numDS<sNbOfBodies; numDS++)
-    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(sDS[numDS]);
+    myNsds->insertDynamicalSystem(sDS[numDS]);
   for(unsigned int numJ=0; numJ<sNbOfJoints; numJ++)
   {
     if (sJointType[numJ]==PIVOT_0)
-      myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
+      myNsds->link(sInterJoints[numJ],
                                                 sDS[sJointIndexDS[2*numJ]]);
     if (sJointType[numJ]==PIVOT_1)
-      myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
+      myNsds->link(sInterJoints[numJ],
                                                 sDS[sJointIndexDS[2*numJ]],
                                                 sDS[sJointIndexDS[2*numJ+1]]);
   }
@@ -508,7 +508,7 @@ void  MBTB_initSimu(double hTS, int withProj)
     if(sContacts[numC]->_indexBody2!=-1)
     {
       DEBUG_PRINT("MBTB_initSimu(double hTS, int withProj). Link contact with two bodies\n");
-      myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numC],
+      myNsds->link(sInterContacts[numC],
                                                 sDS[sContacts[numC]->_indexBody1],
                                                 sDS[sContacts[numC]->_indexBody2]);
       // sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody2]  );
@@ -517,7 +517,7 @@ void  MBTB_initSimu(double hTS, int withProj)
     else
     {
       DEBUG_PRINT("MBTB_initSimu(double hTS, int withProj). Link contact with one body\n");
-      myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numC],
+      myNsds->link(sInterContacts[numC],
                                                 sDS[sContacts[numC]->_indexBody1]);
 
 
@@ -601,19 +601,19 @@ void  MBTB_initSimu(double hTS, int withProj)
 
   if(withProj==0)
   {
-    sSimu.reset(new MBTB_TimeStepping(t,pOSI0,osnspb));
+    sSimu.reset(new MBTB_TimeStepping(myNsds,t,pOSI0,osnspb));
     SP::MBTB_TimeStepping spSimu = (std11::static_pointer_cast<MBTB_TimeStepping>(sSimu));
   }
   else if (withProj==1)
   {
-    sSimu.reset(new MBTB_TimeSteppingProj(t,pOSI1,osnspb,osnspb_pos,sDParams[11]));
+    sSimu.reset(new MBTB_TimeSteppingProj(myNsds,t,pOSI1,osnspb,osnspb_pos,sDParams[11]));
     (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(sDParams[8]);
     (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(sDParams[9]);
     (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(sDParams[10]);
   }
   else if (withProj==2)
   {
-    sSimu.reset(new MBTB_TimeSteppingCombinedProj(t,pOSI2,osnspb,osnspb_pos,2));
+    sSimu.reset(new MBTB_TimeSteppingCombinedProj(myNsds,t,pOSI2,osnspb,osnspb_pos,2));
     (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setProjectionMaxIteration(sDParams[8]);
     (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTol(sDParams[9]);
     (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTolUnilateral(sDParams[10]);
@@ -666,22 +666,16 @@ void  MBTB_initSimu(double hTS, int withProj)
     }
   }
 
-  // --- Simulation initialization ---
-  cout <<"\n====> Initialisation ..." <<endl<<endl;
-  myModel->setSimulation(sSimu);
-  myModel->initialize();
 
   printf("====> COMPUTE H OF INTERATIONS: (just for display)\n");
-  SP::InteractionsGraph indexSet0 = myModel->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  SP::InteractionsGraph indexSet0 = myNsds->topology()->indexSet0();
   for(unsigned int numJ=0; numJ<sNbOfJoints; numJ++)
   {
     printf("-->compute h of %d \n",numJ);
     SP::Interaction inter = sJointRelations[numJ]->_interaction;
-    InteractionsGraph::VDescriptor ui = indexSet0->descriptor(inter);
     SiconosVector& y = *(inter->y(0));
-    VectorOfBlockVectors& DSlink = *(indexSet0->properties(ui)).DSlink;
-
-    sJointRelations[numJ]->_jointR->computeh(0., *DSlink[NewtonEulerR::q0], y);
+    sJointRelations[numJ]->_jointR->computeOutput(0.,*inter,0);
+    y.display();
   }
   printf("====> COMPUTE H OF INTERATION END)\n");
 
@@ -691,9 +685,13 @@ void  MBTB_initSimu(double hTS, int withProj)
   fclose(fp) ;
   cout <<"====> end of initialisation" <<endl<<endl;
 }
-SP::Model MBTB_model()
+SP::NonSmoothDynamicalSystem MBTB_nsds()
 {
-  return myModel;
+  return myNsds;
+}
+SP::Simulation MBTB_simulation()
+{
+  return sSimu;
 }
 
 void MBTB_doProj(unsigned int v)

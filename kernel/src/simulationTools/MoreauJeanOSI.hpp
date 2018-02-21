@@ -141,11 +141,12 @@ protected:
 
 public:
 
-  enum {RESIDU_FREE, VFREE, BUFFER, WORK_LENGTH};
+  enum MoreauJeanOSI_workVector{RESIDU_FREE, VFREE, BUFFER, WORK_LENGTH};
 
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+  enum MoreauJeanOSI_workVector_bis{OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
-  
+  enum MoreauJeanOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+
   /** constructor from theta value only
    *  \param theta value for all linked DS (default = 0.5).
    *  \param gamma value for all linked DS (default = NaN and gamma is not used).
@@ -295,7 +296,7 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system   
    */
-  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to 
    *  one interaction on the graph and needed by the osi 
@@ -303,7 +304,7 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  virtual void fillDSLinks(Interaction &inter,
+  virtual void initializeWorkVectorsForInteraction(Interaction &inter,
                              InteractionProperties& interProp,
                              DynamicalSystemsGraph & DSG);
 

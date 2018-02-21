@@ -11,6 +11,7 @@ from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere, BRepPri
 from OCC.gp import gp_Pnt
 
 from math import pi
+import numpy as np
 
 siconos.io.mechanics_io.set_implementation('original')
 siconos.io.mechanics_io.set_backend('occ')
@@ -69,7 +70,7 @@ with Hdf5() as io:
 
     # first branch + first mass the center of gravity is at the center of the
     # Mass1
-    io.addObject('arm1', [Contactor(shape_data='Mass1', contact_type='Face', contact_index=0),
+    io.addObject('arm1', [Contactor('Mass1', contact_type='Face', contact_index=0),
                           Contactor('Arm1',
                                     contact_type='Face',
                                     contact_index=0,
@@ -77,10 +78,11 @@ with Hdf5() as io:
                                     relative_orientation=[(1, 0, 0), pi/2])],
                     translation=[0, 0, r2 + gap + r2 + l2 + r1 + hgap],
                     orientation=((1, 0, 0), pi/2),
+                    inertia=np.eye(3),
                     mass=m1)
 
     # second branch + second mass
-    io.addObject('arm2', [Contactor(shape_data='Mass2', instance_name='Mass2Contact',
+    io.addObject('arm2', [Contactor('Mass2', instance_name='Mass2Contact',
                                     contact_type='Face', contact_index=0),
                           Contactor('Arm2',
                                     contact_type='Face',
@@ -90,22 +92,26 @@ with Hdf5() as io:
                     translation=[0, 0, r2 + gap],
                     orientation=((1, 0, 0), pi/2),
                     velocity=[0, 20, 0, 0, 0, 0],
+                    inertia=np.eye(3),
                     mass=m2)
 
     io.addJoint('joint1', 'arm1', 'arm2',
                 points=[[0, 0, -r1]],
                 axes=[[1, 0, 0]],
-                'PivotJointR')
+                joint_class='PivotJointR',
+                absolute=False)
 
     io.addJoint('joint2', 'arm1',
                 points=[[0, r2 + gap + r2 + l2 + r1 + hgap + l1, 0]],
                 axes=[[1, 0, 0]],
-                joint_class='PivotJointR')
+                joint_class='PivotJointR',
+                absolute=False)
 
 
-    io.addObject('ball', [Contactor(shape_data='Mass1', instance_name='BallContact',
+    io.addObject('ball', [Contactor('Brick', instance_name='BallContact',
                                     contact_type='Face', contact_index=0)],
                  translation=[0, -2*r2, r2+gap+.5],
+                 inertia=np.eye(3),
                  mass=m2)
                         
     # the ground object made with the ground shape. As the mass is

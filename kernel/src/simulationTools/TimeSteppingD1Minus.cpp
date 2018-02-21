@@ -33,7 +33,6 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "EventsManager.hpp"
 #include "OneStepNSProblem.hpp"
@@ -55,7 +54,6 @@ using namespace RELATION;
 void TimeSteppingD1Minus::initOSNS()
 {
   // initialize OSNS for InteractionsGraph from Topology
-  assert(_nsds->topology()->isUpToDate());
   SP::Topology topo =  _nsds->topology();
 
   // there is at least one OSNP
@@ -72,7 +70,7 @@ void TimeSteppingD1Minus::initOSNS()
   }
 }
 
-TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td)
+TimeSteppingD1Minus::TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb) : Simulation(nsds, td)
 {
   (*_allNSProblems).resize(nb);
 }
@@ -182,6 +180,10 @@ void TimeSteppingD1Minus::run()
 
 void TimeSteppingD1Minus::advanceToEvent()
 {
+
+  initialize();
+
+  
   // Update interactions if a manager was provided
   updateInteractions();
 

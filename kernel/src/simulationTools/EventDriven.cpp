@@ -19,7 +19,6 @@
 #include "EventDriven.hpp"
 #include "LsodarOSI.hpp"
 #include "LCP.hpp"
-#include "Model.hpp"
 #include "Interaction.hpp"
 #include "EventsManager.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -46,7 +45,7 @@ using namespace RELATION;
 /** defaut constructor
  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
  */
-EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1), _isNewtonConverge(false)
+EventDriven::EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td): Simulation(nsds, td), _istate(1), _isNewtonConverge(false)
 {
   _numberOfOneStepNSproblems = 2;
   (*_allNSProblems).resize(_numberOfOneStepNSproblems);
@@ -58,7 +57,7 @@ EventDriven::EventDriven(SP::TimeDiscretisation td): Simulation(td), _istate(1),
   _localizeEventMaxIter = 100;
 }
 
-EventDriven::EventDriven(SP::TimeDiscretisation td, int nb): Simulation(td), _istate(1), _isNewtonConverge(false)
+EventDriven::EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb): Simulation(nsds, td), _istate(1), _isNewtonConverge(false)
 {
   (*_allNSProblems).resize(nb);
   _numberOfOneStepNSproblems = 0;
@@ -221,7 +220,7 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     DEBUG_PRINTF("ED 2 update with double condition %f\n", gamma);
     DEBUG_PRINTF("ED 3 update with double condition%f\n", _TOL_ED);
 
-    
+
     if (fabs(F) < _TOL_ED)
       indexSet2->remove_vertex(inter);
     else if ((gamma < -_TOL_ED) || (F < -_TOL_ED))
@@ -305,14 +304,12 @@ void EventDriven::initOSNS()
 
 void EventDriven::initOSIs()
 {
-  for (OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
-  {
 
-  }
 }
 
 void EventDriven::initOSIRhs()
 {
+  DEBUG_BEGIN("void EventDriven::initOSIRhs()\n")
   // === initialization for OneStepIntegrators ===
   OSI::TYPES  osiType = (*_allOSI->begin())->getType();
   for (OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
@@ -331,20 +328,25 @@ void EventDriven::initOSIRhs()
       SP::DynamicalSystem ds = osiDSGraph->bundle(*dsi);
       // Initialize right-hand side
       ds->initRhs(startingTime());
+      //DEBUG_EXPR(ds->display());
     }
   }
+  DEBUG_END("void EventDriven::initOSIRhs()\n")
 }
 
-void EventDriven::initialize(SP::Model m, bool withOSI)
+void EventDriven::initialize()
 {
-  // Initialization for Simulation
-  _indexSet0 = m->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-  _DSG0 = m->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DEBUG_BEGIN("void EventDriven::initialize()\n");
 
-  Simulation::initialize(m, withOSI);
+    // Initialization for Simulation
+  _indexSet0 = _nsds->topology()->indexSet(0);
+  _DSG0 = _nsds->topology()->dSG(0);
+
+  Simulation::initialize();
   // Initialization for all OneStepIntegrators
   //initOSIs();
   initOSIRhs();
+  DEBUG_END("void EventDriven::initialize()\n")
 }
 
 void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
@@ -411,12 +413,12 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
     else
     {
       SiconosVector& xtmp2 = ds.getRhs(); // Pointer link !
-      DEBUG_EXPR(xtmp2.display(););
+      //DEBUG_EXPR(xtmp2.display(););
       pos += xtmp2.copyData(&xdot[pos]);
     }
   }
   DEBUG_END("EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)\n");
-    
+
 }
 
 void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
@@ -619,12 +621,19 @@ void EventDriven::updateOutput(unsigned int levelInput)
 void EventDriven::advanceToEvent()
 {
   DEBUG_BEGIN("EventDriven::advanceToEvent()\n");
+
+  initialize();
+
+  
   // Update interactions if a manager was provided
   updateInteractions();
 
   _tinit = _eventsManager->startingTime();
   _tend =  _eventsManager->nextTime();
   _tout = _tend;
+
+  DEBUG_PRINTF("_tinit = %g, _tend = %g \n", _tinit, _tend);
+  
   bool isNewEventOccur = false;  // set to true if a new event occur during integration
   OSI::TYPES  osiType = (*_allOSI->begin())->getType(); // Type of OSIs
   double _minConstraint = 0.0;
@@ -635,12 +644,31 @@ void EventDriven::advanceToEvent()
   for (vnext = ui; ui != uiend; ui = vnext)
   {
     ++vnext;
-    _indexSet0->bundle(*ui)->resetAllLambda();
+    // _indexSet0->bundle(*ui)->resetAllLambda();
   }
 
   if (osiType == OSI::NEWMARKALPHAOSI)
   {
-    newtonSolve(_newtonTolerance, _newtonMaxIteration);
+    // if the time to next event if too small, we skip the integration
+    // it may happen if a first event is of time nonsmooth at the initial time
+    // with _tout= _tend
+    if(fabs(_tend-_tinit) >= 10 * MACHINE_PREC)
+    {
+      newtonSolve(_newtonTolerance, _newtonMaxIteration);
+    }
+    else
+    {
+      SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
+      if (indexSet2->size() != 0) // if indexSet2 is not empty, solve LCP to determine contact forces
+      {
+        int  info = computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_POS);
+        if (info != 0)
+        {
+          cout << "Warning!!!In EventDriven::newtonSolve: LCP solver may fail" <<endl;
+        }
+      }
+      updateInput(2);
+    }
     // Update after Newton iteration
     // Update input of level 2 >>> has already been done in newtonSolve
     // Update state of all Dynamicall Systems >>>  has already been done in newtonSolve
@@ -721,6 +749,7 @@ void EventDriven::advanceToEvent()
       }
       if (_istate == 3) // ie if _tout is not equal to _tend: one or more roots have been found.
       {
+        DEBUG_PRINTF("An event has been found at time = %g", _tout);
         isNewEventOccur = true;
         // Add an event into the events manager list
         _eventsManager->scheduleNonSmoothEvent(*this, _tout);
@@ -791,12 +820,12 @@ double EventDriven::computeResiduConstraints()
         Interaction& inter = *indexSet2->bundle(*ui);
         if (!_flag) // constraints at the position level
         {
-          inter.computeOutput(t, indexSet2->properties(*ui), 0); // compute y[0] for the interaction at the end time
+          inter.computeOutput(t, 0); // compute y[0] for the interaction at the end time
           _y = (*inter.y(0))(0);
         }
         else // constraints at the velocity level
         {
-          inter.computeOutput(t, indexSet2->properties(*ui), 1); // compute y[1] for the interaction at the end time
+          inter.computeOutput(t, 1); // compute y[1] for the interaction at the end time
           _y = (*inter.y(1))(0);
         }
 
@@ -892,7 +921,7 @@ void EventDriven::predictionNewtonIteration()
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *_indexSet0->bundle(*ui);
-    inter.computeOutput(t, _indexSet0->properties(*ui), 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
+    inter.computeOutput(t, 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
     inter.lambda(2)->zero(); // reset lambda[2] to zero
   }
 }
@@ -967,6 +996,7 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 double EventDriven::detectEvents(bool updateIstate)
 {
+  DEBUG_BEGIN("double EventDriven::detectEvents(bool updateIstate)\n")
   double _minResiduOutput = 0.0; // maximum of g_i with i running over all activated or deactivated contacts
   // Loop over all interactions to detect whether some constraints are activated or deactivated
   bool _IsContactClosed = false;
@@ -976,10 +1006,6 @@ double EventDriven::detectEvents(bool updateIstate)
   SP::SiconosVector y, ydot, lambda;
   SP::Topology topo = _nsds->topology();
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-  //
-#ifdef DEBUG_MESSAGES
-  cout << "======== In EventDriven::detectEvents =========" <<endl;
-#endif
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = _indexSet0->bundle(*ui);
@@ -1032,14 +1058,14 @@ double EventDriven::detectEvents(bool updateIstate)
       }
     }
     //
-#ifdef DEBUG_MESSAGES
-    cout.precision(15);
-    cout << "Contact number: " << inter->number() <<endl;
-    cout << "Contact gap: " << (*y)(0) <<endl;
-    cout << "Contact force: " << (*lambda)(0) <<endl;
-    cout << "Is contact is closed: " << _IsContactClosed <<endl;
-    cout << "Is contact is opened: " << _IsContactOpened <<endl;
-#endif
+    DEBUG_EXPR_WE(
+      cout.precision(15);
+      cout << "Contact number: " << inter->number() <<endl;
+      cout << "Contact gap: " << (*y)(0) <<endl;
+      cout << "Contact force: " << (*lambda)(0) <<endl;
+      cout << "Is contact is closed: " << _IsContactClosed <<endl;
+      cout << "Is contact is opened: " << _IsContactOpened <<endl;
+      );
     //
   }
   //
@@ -1063,6 +1089,7 @@ double EventDriven::detectEvents(bool updateIstate)
     }
   }
   //
+  DEBUG_END("double EventDriven::detectEvents(bool updateIstate)\n")
   return  _minResiduOutput;
 }
 

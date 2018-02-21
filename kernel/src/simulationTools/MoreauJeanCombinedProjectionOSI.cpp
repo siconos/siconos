@@ -43,11 +43,11 @@ MoreauJeanCombinedProjectionOSI::MoreauJeanCombinedProjectionOSI(double theta) :
 }
 
 
-void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
+  DEBUG_BEGIN("MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds) \n");
  
-  MoreauJeanOSI::initializeDynamicalSystem(m, t, ds);
+  MoreauJeanOSI::initializeWorkVectorsForDS(t, ds);
   
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
   VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
@@ -71,21 +71,22 @@ void MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double
     ds->initializeNonSmoothInput(k);
   }
   
-  DEBUG_END("MoreauJeanCombinedProjectionOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds) \n");
+  DEBUG_END("MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds) \n");
 }
 
-void MoreauJeanCombinedProjectionOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp,
+void MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp,
                                   DynamicalSystemsGraph & DSG)
 {
-  DEBUG_BEGIN("MoreauJeanCombinedProjectionOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
+  DEBUG_BEGIN("MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
 
-  MoreauJeanOSI::fillDSLinks(inter, interProp,DSG);
+  MoreauJeanOSI::initializeWorkVectorsForInteraction(inter, interProp,DSG);
 
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
@@ -150,7 +151,7 @@ void MoreauJeanCombinedProjectionOSI::fillDSLinks(Interaction &inter, Interactio
 
 
 
-  DEBUG_END("MoreauJeanCombinedProjectionOSI::fillDSLinks(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
+  DEBUG_END("MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
 
 
 }

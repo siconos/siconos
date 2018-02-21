@@ -17,12 +17,14 @@ public:
    *  \param osnspb_pos one step non smooth problem (default none)
    *  \param level
    */
-  MBTB_TimeSteppingProj(SP::TimeDiscretisation td,
-                        SP::OneStepIntegrator osi,
-                        SP::OneStepNSProblem osnspb_velo,
-                        SP::OneStepNSProblem osnspb_pos,
-                        unsigned int level)
-    :TimeSteppingDirectProjection(td,osi,osnspb_velo,osnspb_pos,level) {};
+  MBTB_TimeSteppingProj(
+    SP::NonSmoothDynamicalSystem nsds,
+    SP::TimeDiscretisation td,
+    SP::OneStepIntegrator osi,
+    SP::OneStepNSProblem osnspb_velo,
+    SP::OneStepNSProblem osnspb_pos,
+    unsigned int level)
+    :TimeSteppingDirectProjection(nsds, td,osi,osnspb_velo,osnspb_pos,level) {};
   //! Overloading of updateWorldFromDS.
   /*!
     It consists in updating the cad model from siconos.

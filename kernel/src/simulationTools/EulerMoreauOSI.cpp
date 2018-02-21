@@ -17,17 +17,18 @@
  */
 #include "EulerMoreauOSI.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "FirstOrderLinearR.hpp"
+#include "FirstOrderNonLinearR.hpp"
 #include "FirstOrderType2R.hpp"
 #include "FirstOrderType1R.hpp"
 #include "NonSmoothLaw.hpp"
 #include "CxxStd.hpp"
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
@@ -93,7 +94,7 @@ SP::SiconosMatrix EulerMoreauOSI::WBoundaryConditions(SP::DynamicalSystem ds)
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
-void EulerMoreauOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void EulerMoreauOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
@@ -120,7 +121,7 @@ void EulerMoreauOSI::initializeDynamicalSystem(Model& m, double t, SP::Dynamical
 
 }
 
-void EulerMoreauOSI::fillDSLinks(Interaction &inter,
+void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
                                  InteractionProperties& interProp,
                                  DynamicalSystemsGraph & DSG)
 {
@@ -129,12 +130,19 @@ void EulerMoreauOSI::fillDSLinks(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
+  interProp.workVectors.reset(new VectorOfVectors);
+  interProp.workMatrices.reset(new VectorOfSMatrices);
+
   VectorOfVectors& workV = *interProp.workVectors;
-  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfSMatrices& workM = *interProp.workMatrices;
 
   Relation &relation =  *inter.relation();
+  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
+
+  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -492,6 +500,7 @@ double EulerMoreauOSI::computeResidu()
           folds.computeb(told);
           residu += *folds.b();
         }
+        DEBUG_EXPR(residuFree.display());
 	      // residuFree += -h * (1 - _theta) * f(t_k,x_k)
 	      scal(coef, residu, residuFree, false);
 	      residu.zero();
@@ -508,6 +517,10 @@ double EulerMoreauOSI::computeResidu()
 	      // residuFree += -h * _theta * f(t_{x+1}, x_{k+1}^alpha)
 	      coef = -h * _theta;
 	      scal(coef, residu, residuFree, false);
+        DEBUG_PRINT("- 3 -\n");
+        DEBUG_EXPR(residuFree.display());
+        DEBUG_EXPR(xold.display());
+        DEBUG_EXPR(folds.x()->display());
 	    }
       else if(dsType == Type::FirstOrderNonLinearDS) // FirstOrderNonLinearDS
 	    {
@@ -533,6 +546,8 @@ double EulerMoreauOSI::computeResidu()
 
       if(!_useGamma)  // no gamma
 	    {
+        DEBUG_EXPR(fonlds.r()->display(););
+        DEBUG_EXPR(residu.display());
 	      scal(-h, *fonlds.r(), residu, false); // residu = residu - h*r
 	    }
       else
@@ -775,7 +790,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
-  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
+  VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
   VectorOfVectors& workV = *indexSet->properties(vertex_inter).workVectors;
   VectorOfSMatrices& workM = *indexSet->properties(vertex_inter).workMatrices;
   // Get relation and non smooth law types
@@ -1054,6 +1069,99 @@ void EulerMoreauOSI::display()
   }
   std::cout << "================================" <<std::endl;
 }
+void EulerMoreauOSI::updateOutput(double time)
+{
+  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
+  for (unsigned int level = _levelMinForOutput;
+       level < _levelMaxForOutput + 1;
+       level++)
+    updateOutput(time,level);
+}
+
+void EulerMoreauOSI::updateInput(double time)
+{
+  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
+  for (unsigned int level = _levelMinForInput;
+       level < _levelMaxForInput + 1;
+       level++)
+    updateInput(time,level);
+}
+
+void EulerMoreauOSI::updateOutput(double time, unsigned int level)
+{
+  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
+  //_simulation->nonSmoothDynamicalSystem()->updateOutput(time,level);
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForOutput() <= level);
+    assert(inter->upperLevelForOutput() >= level);
+    
+    RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
+    if (relationSubType == Type2R)
+    {
+      FirstOrderType2R & r = static_cast<FirstOrderType2R&>(*inter->relation());
+      r.computeLinearizedOutput(time, *inter, indexSet0->properties(*ui), level);
+    }
+    // else if (relationSubType == Type1R)
+    // {
+    //   FirstOrderType1R & r = static_cast<FirstOrderType1R&>(*inter->relation());
+    //   r.computeLinearizedOutput(time, *inter, indexSet0->properties(*ui), level);
+    // }
+    else if (relationSubType == NonLinearR )
+    {
+      FirstOrderNonLinearR & r = static_cast<FirstOrderNonLinearR&>(*inter->relation());
+      r.computeLinearizedOutput(time, *inter, indexSet0->properties(*ui), level);
+    }
+    else
+      inter->computeOutput(time, level);
+  }
+}
+
+void EulerMoreauOSI::updateInput(double time, unsigned int level)
+{
+  /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
+  //_simulation->nonSmoothDynamicalSystem()->updateInput(time,level);
+
+  // Set dynamical systems non-smooth part to zero.
+  _simulation->nonSmoothDynamicalSystem()->reset(level);
+
+  
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForInput() <= level);
+    assert(inter->upperLevelForInput() >= level);
+
+    RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
+    if (relationSubType == Type2R)
+    {
+      FirstOrderType2R & r = static_cast<FirstOrderType2R&>(*inter->relation());
+      r.computeLinearizedInput(time, *inter, indexSet0->properties(*ui), level);
+    }
+    // else if (relationSubType == Type1R)
+    // {
+    //   FirstOrderType1R & r = static_cast<FirstOrderType1R&>(*inter->relation());
+    //   r.computeLinearizedInput(time, *inter, indexSet0->properties(*ui), level);
+    // }
+    else if (relationSubType == NonLinearR )
+    {
+      FirstOrderNonLinearR & r = static_cast<FirstOrderNonLinearR&>(*inter->relation());
+      r.computeLinearizedInput(time, *inter, indexSet0->properties(*ui), level);
+    }
+    else
+    {
+      inter->computeInput(time, level);
+    }
+  }
+
+}
 
 
 double EulerMoreauOSI::computeResiduOutput(double time, SP::InteractionsGraph indexSet)
@@ -1082,7 +1190,8 @@ double EulerMoreauOSI::computeResiduInput(double time, SP::InteractionsGraph ind
   {
     InteractionProperties& interProp = indexSet->properties(*ui);
     VectorOfVectors& workV = *interProp.workVectors;
-    VectorOfBlockVectors& DSlink = *interProp.DSlink;
+    SP::Interaction inter = indexSet->bundle(*ui);
+    VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
     SiconosVector&  residuR = *workV[FirstOrderR::vec_residuR];
     //Residu_r = r_alpha_k+1 - g_alpha;
     residuR = *DSlink[FirstOrderR::r];

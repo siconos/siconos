@@ -1367,7 +1367,7 @@ void NewtonEulerDS::initMemory(unsigned int steps)
     _twistMemory.setMemorySize(steps, _ndof);
     _forcesMemory.setMemorySize(steps, _ndof);
     _dotqMemory.setMemorySize(steps, _qDim);
-    //    swapInMemory(); Useless, done in osi->initializeDynamicalSystem
+    //    swapInMemory(); Useless, done in osi->initializeWorkVectorsForDS
   }
 }
 

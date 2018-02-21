@@ -17,6 +17,7 @@
 */
 
 #include "debug.h"
+#include "numerics_verbose.h"
 #include "op3x3.h"
 #include "SparseBlockMatrix.h"
 #include "fc3d_Solvers.h"

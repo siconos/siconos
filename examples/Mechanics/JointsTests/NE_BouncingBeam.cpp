@@ -185,13 +185,13 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model myModel(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem myModel(new NonSmoothDynamicalSystem(t0, T));
     // add the dynamical system in the non smooth dynamical system
-    myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(bouncingbeam);
+    myModel->insertDynamicalSystem(bouncingbeam);
     // link the interaction and the dynamical system
 
-    myModel->nonSmoothDynamicalSystem()->link(inter4, bouncingbeam);
-    myModel->nonSmoothDynamicalSystem()->link(interFloor, bouncingbeam);
+    myModel->link(inter4, bouncingbeam);
+    myModel->link(interFloor, bouncingbeam);
     // ------------------
     // --- Simulation ---
     // ------------------
@@ -207,21 +207,14 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem osnspb(new MLCP());
 
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::TimeStepping s(new TimeStepping(t, OSI3, osnspb));
-    //    s->setComputeResiduY(true);
-    //  s->setUseRelativeConvergenceCriteron(false);
-    myModel->setSimulation(s);
+    SP::TimeStepping s(new TimeStepping(myModel, t, OSI3, osnspb));
+    s->setNewtonTolerance(5e-4);
+    s->setNewtonMaxIteration(50);
 
 
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
-
-    // --- Simulation initialization ---
-
-    cout << "====> Initialisation ..." << endl << endl;
-    myModel->initialize();
-
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -252,7 +245,7 @@ int main(int argc, char* argv[])
     for (k = 0; k < N; k++)
     {
       // solve ...
-      s->newtonSolve(1e-4, 50);
+      s->advanceToEvent();
 
 
 
@@ -301,15 +294,11 @@ int main(int argc, char* argv[])
     ioMatrix::write("NE_BouncingBeam.dat", "ascii", dataPlot, "noDim");
     ioMatrix::write("NE_BouncingBeam_beam.dat", "ascii", bouncingbeamPlot, "noDim");
 
-    // SimpleMatrix dataPlotRef(dataPlot);
-    // dataPlotRef.zero();
-    // ioMatrix::read("NE_BoundingBeam.ref", "ascii", dataPlotRef);
-    // if ((dataPlot - dataPlotRef).normInf() > 1e-7)
-    // {
-    //   (dataPlot - dataPlotRef).display();
-    //   std::cout << "Warning. The results is rather different from the reference file." << std::endl;
-    //   return 1;
-    // }
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "NE_BouncingBeam.ref", eps, error)
+        && error > eps)
+      return 1;
+
 
     fclose(pFile);
   }

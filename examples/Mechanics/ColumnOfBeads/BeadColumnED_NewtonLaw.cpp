@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     // -------------
     // --- Model ---
     // -------------
-    SP::Model BallChain(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem BallChain(new NonSmoothDynamicalSystem(t0, T));
     // ----------------
     // --- Simulation ---
     // ----------------
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
       ball->setFExtPtr(FextBall);
       //
       VecOfallDS.push_back(ball);
-      BallChain->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+      BallChain->insertDynamicalSystem(ball);
 
     }
     // --------------------
@@ -195,9 +195,9 @@ int main(int argc, char* argv[])
       relation = SP::Relation(new LagrangianLinearTIR(H, E));
       interaction = SP::Interaction(new Interaction(nslaw, relation));
       if (j == 0) // for contact wall-ball
-        BallChain->nonSmoothDynamicalSystem()->link(interaction, VecOfallDS[j]);
+        BallChain->link(interaction, VecOfallDS[j]);
       else // For ball-ball contact
-        BallChain->nonSmoothDynamicalSystem()->link(interaction, VecOfallDS[j-1],VecOfallDS[j]);
+        BallChain->link(interaction, VecOfallDS[j-1],VecOfallDS[j]);
     }
 
     // -- (2) Time discretisation --
@@ -206,24 +206,19 @@ int main(int argc, char* argv[])
     SP::OneStepNSProblem impact(new LCP());
     SP::OneStepNSProblem acceleration(new LCP());
     // -- (4) Simulation setup with (1) (2) (3)
-    SP::EventDriven s(new EventDriven(t));
+    SP::EventDriven s(new EventDriven(BallChain, t));
     s->insertIntegrator(OSI);
     s->insertNonSmoothProblem(impact, SICONOS_OSNSP_ED_IMPACT);
     s->insertNonSmoothProblem(acceleration, SICONOS_OSNSP_ED_SMOOTH_ACC);
-    BallChain->setSimulation(s);
 
     // =========================== End of model definition ===========================
     //----------------------------------- Initialization-------------------------------
-    s->setPrintStat(true);
-    BallChain->initialize();
-    SP::DynamicalSystemsGraph DSG0 = BallChain->nonSmoothDynamicalSystem()->topology()->dSG(0);
-    SP::InteractionsGraph IndexSet0 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-    SP::InteractionsGraph IndexSet1 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(1);
-    SP::InteractionsGraph IndexSet2 = BallChain->nonSmoothDynamicalSystem()->topology()->indexSet(2);
+
+    SP::DynamicalSystemsGraph DSG0 = BallChain->topology()->dSG(0);
+    SP::InteractionsGraph IndexSet0 = BallChain->topology()->indexSet(0);
+    
     // // Display topology of the system
     // cout << "Number of vectices of IndexSet0: " << IndexSet0->size() << endl;
-    // cout << "Number of vectices of IndexSet1: " << IndexSet1->size() << endl;
-    // cout << "Number of vectices of IndexSet2: " << IndexSet2->size() << endl;
     // cout << "Number of vectices of DSG0: " << DSG0->size() << endl;
     //
     SP::EventsManager eventsManager = s->eventsManager();
@@ -299,17 +294,13 @@ int main(int argc, char* argv[])
     cout << "Computation Time " << time.elapsed()  << endl;
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
-    // Comparison with a reference file
-    SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
-    ioMatrix::read("resultED_NewtonModel.ref", "ascii", dataPlotRef);
-
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
-    {
-      std::cout << "Warning. The results is rather different from the reference file." << std::endl;
+    dataPlot.resize(k, outputSize);
+    ioMatrix::write("BeadColumnED_NewtonLaw.dat", "ascii", dataPlot, "noDim");
+    double error=0.0, eps=1e-12;
+    if (ioMatrix::compareRefFile(dataPlot, "BeadColumnED_NewtonLaw.ref", eps, error)
+        && error > eps)
       return 1;
-    }
+
   }
   catch (SiconosException e)
   {
