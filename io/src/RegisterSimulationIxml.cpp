@@ -20,22 +20,22 @@
 #ifdef WITH_SERIALIZATION
 #include "SiconosFull.hpp"
 
-#include "RegisterModel.hpp"
+#include "RegisterSimulation.hpp"
 
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/bindings/ublas/vector_sparse.hpp>
 #include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
 
-#include <boost/archive/binary_oarchive.hpp>
+#include <boost/archive/xml_iarchive.hpp>
 
-void RegisterModelObin(std::ofstream& ofs, SP::Model& model)
+void RegisterSimulationIxml(std::ifstream& ifs, SP::Simulation& sim)
 {
-  boost::archive::binary_oarchive ar(ofs);
+  boost::archive::xml_iarchive ar(ifs);
   siconos_io_register_Numerics(ar);
   siconos_io_register_Kernel(ar);
   siconos_io_register_Mechanics(ar);
   siconos_io_register_Control(ar);
-  ar << NVP(model);
+  ar >> NVP(sim);
 }
 #endif

@@ -136,10 +136,6 @@ protected:
   /** map of not-yet-initialized DS variables for each OSI */
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
 
-  /** default constructor.
-   */
-  Simulation() {};
-
   /** Call the interaction manager one if is registered, otherwise do nothing. */
   void updateInteractions();
 
@@ -174,6 +170,10 @@ private:
 
 
 public:
+
+  /** default constructor, for serialization
+   */
+  Simulation() {};
 
   /** default constructor
    *  \param td the timeDiscretisation for this Simulation

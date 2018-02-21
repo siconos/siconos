@@ -261,13 +261,13 @@ void KernelTest::t5()
   // -------------
   // --- Model ---
   // -------------
-  SP::Model bouncingBall(new Model(t0, T));
+  SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
   // add the dynamical system in the non smooth dynamical system
-  bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+  bouncingBall->insertDynamicalSystem(ball);
 
   // link the interaction and the dynamical system
-  bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+  bouncingBall->link(inter, ball);
 
 
   // ------------------
@@ -284,22 +284,18 @@ void KernelTest::t5()
   SP::OneStepNSProblem osnspb(new LCP());
 
   // -- (4) Simulation setup with (1) (2) (3)
-  SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-  s->prepareIntegratorForDS(OSI, ball, bouncingBall, t0);
+  SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI, osnspb));
+  s->associate(OSI, ball);
 
   // =========================== End of model definition ===========================
 
   // ================================= Computation =================================
 
-  // --- Simulation initialization ---
+  Siconos::save(s, BBxml);
 
-  cout << "====> Initialisation ..." << endl << endl;
-  bouncingBall->setSimulation(s);
-  bouncingBall->initialize();
-
-  Siconos::save(bouncingBall, BBxml);
-
-  SP::Model bouncingBallFromFile = Siconos::load(BBxml);
+  SP::Simulation simFromFile = Siconos::load(BBxml);
+  SP::NonSmoothDynamicalSystem bouncingBallFromFile =
+    simFromFile->nonSmoothDynamicalSystem();
 
   CPPUNIT_ASSERT((bouncingBallFromFile->t0() == bouncingBall->t0()));
   // in depth comparison?
@@ -313,25 +309,27 @@ void KernelTest::t5()
 
 void KernelTest::t6()
 {
-  SP::Model bouncingBall = Siconos::load(BBxml);
+  SP::Simulation s = Siconos::load(BBxml);
 
   try
   {
+    SP::NonSmoothDynamicalSystem bouncingBall = s->nonSmoothDynamicalSystem();
+
     double T = bouncingBall->finalT();
     double t0 = bouncingBall->t0();
-    double h = bouncingBall->simulation()->timeStep();
+    double h = s->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
     SP::DynamicalSystemsGraph dsg =
-      bouncingBall->nonSmoothDynamicalSystem()->topology()->dSG(0);
+      bouncingBall->topology()->dSG(0);
 
     SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
       (dsg->bundle(*(dsg->begin())));
 
-    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
+    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(s);
     SP::Interaction inter;
     InteractionsGraph::VIterator ui, uiend;
-    SP::InteractionsGraph indexSet0 = bouncingBall->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    SP::InteractionsGraph indexSet0 = bouncingBall->topology()->indexSet(0);
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       inter = indexSet0->bundle(*ui);
 
@@ -465,18 +463,18 @@ void KernelTest::t8()
   (*v)(1) = 0;
   (*v)(2) = 10.;
 
-  SP::Model model(new Model(0,10));
+  SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(0,10));
 
   ds1.reset(new Disk(1, 1, q, v));
   ds2.reset(new Disk(2, 2, q, v));
 
-  model->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds1);
-  model->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds2);
+  nsds->insertDynamicalSystem(ds1);
+  nsds->insertDynamicalSystem(ds2);
 
   MechanicsIO IO;
 
-  SP::SimpleMatrix positions = IO.positions(*model);
-  SP::SimpleMatrix velocities = IO.velocities(*model);
+  SP::SimpleMatrix positions = IO.positions(*nsds);
+  SP::SimpleMatrix velocities = IO.velocities(*nsds);
 
   //ids
   CPPUNIT_ASSERT((*positions)(0,0) == 1);

@@ -16,20 +16,26 @@
  * limitations under the License.
 */
 
-#ifndef RegisterModel_hpp
-#define RegisterModel_hpp
-
 #include "SiconosConfig.h"
 #ifdef WITH_SERIALIZATION
+#include "SiconosFull.hpp"
 
-#include <fstream>
-#include <SiconosFwd.hpp>
+#include "RegisterSimulation.hpp"
 
-void RegisterModelOxml(std::ofstream& ofs, SP::Model& model);
-void RegisterModelObin(std::ofstream& ofs, SP::Model& model);
-void RegisterModelIxml(std::ifstream& ifs, SP::Model& model);
-void RegisterModelIbin(std::ifstream& ifs, SP::Model& model);
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/bindings/ublas/vector.hpp>
+#include <boost/numeric/bindings/ublas/vector_sparse.hpp>
+#include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
 
-#endif
+#include <boost/archive/binary_iarchive.hpp>
 
+void RegisterSimulationIbin(std::ifstream& ifs, SP::Simulation& sim)
+{
+  boost::archive::binary_iarchive ar(ifs);
+  siconos_io_register_Numerics(ar);
+  siconos_io_register_Kernel(ar);
+  siconos_io_register_Mechanics(ar);
+  siconos_io_register_Control(ar);
+  ar >> NVP(sim);
+}
 #endif

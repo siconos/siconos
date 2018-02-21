@@ -47,6 +47,8 @@ public:
 
   class Changes
   {
+  private:
+    ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Changes);
   public:
     ChangeType typeOfChange;
     SP::DynamicalSystem ds;

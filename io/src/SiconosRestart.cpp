@@ -22,13 +22,14 @@
 
 #include <boost/filesystem.hpp>
 
-#include "RegisterModel.hpp"
+#include "Simulation.hpp"
+#include "RegisterSimulation.hpp"
 
 
 namespace Siconos
 {
 
-  void save(SP::Simulation Simulation s, const std::string& filename)
+  void save(SP::Simulation s, const std::string& filename)
   {
     boost::filesystem::path tempf =
       boost::filesystem::path(filename + ".tmp");
@@ -40,12 +41,12 @@ namespace Siconos
     {
       if (destf.extension() == ".xml")
       {
-        RegisterModelOxml(ofs, s);
+        RegisterSimulationOxml(ofs, s);
       }
 
       else if (destf.extension() == ".bin")
       {
-        RegisterModelObin(ofs, s);
+        RegisterSimulationObin(ofs, s);
       }
     }
 
@@ -58,17 +59,18 @@ namespace Siconos
  */
   SP::Simulation load(const std::string& filename)
   {
-    SP::Simulation s(new Simulation());
+    //SP::Simulation s(new Simulation());
+    SP::Simulation s;
 
     std::ifstream ifs(filename.c_str());
     {
       if (boost::filesystem::path(filename).extension() == ".xml")
       {
-        RegisterModelIxml(ifs, s);
+        RegisterSimulationIxml(ifs, s);
       }
       else if (boost::filesystem::path(filename).extension() == ".bin")
       {
-        RegisterModelIbin(ifs, s);
+        RegisterSimulationIbin(ifs, s);
       }
     }
     return s;

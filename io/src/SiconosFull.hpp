@@ -112,6 +112,26 @@ REGISTER_BOOST_SERIALIZATION(FrictionContact);
 
 
 template <class Archive>
+void siconos_io(Archive& ar, GlobalFrictionContact &v, unsigned int version)
+{
+  SERIALIZE(v, (_contactProblemDim)(_sizeGlobalOutput)(_globalVelocities)(_b)(_H)(_mu)(_numerics_solver_options)(_numerics_solver_id), ar);
+
+  if (Archive::is_loading::value)
+  {
+    if (v._contactProblemDim == 2)
+      assert(! "No gfc2d_driver yet.");
+    else
+      v._gfc_driver = &gfc3d_driver;
+  }
+
+  ar & boost::serialization::make_nvp("LinearOSNS",
+                                      boost::serialization::base_object<LinearOSNS>(v));
+
+}
+REGISTER_BOOST_SERIALIZATION(GlobalFrictionContact);
+
+
+template <class Archive>
 void siconos_io(Archive& ar, __mpz_struct& v, unsigned int version)
 {
   SERIALIZE(v, (_mp_alloc)(_mp_size), ar);
@@ -374,6 +394,7 @@ void siconos_io_register_Kernel(Archive& ar)
   //  ar.register_type(static_cast<PluginHandle*>(NULL));
   ar.register_type(static_cast<__mpz_struct*>(NULL));
   ar.register_type(static_cast<FrictionContact*>(NULL));
+  ar.register_type(static_cast<GlobalFrictionContact*>(NULL));
   ar.register_type(static_cast<LsodarOSI*>(NULL));
 
 
