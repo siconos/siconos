@@ -2878,8 +2878,9 @@ class Hdf5():
 
             log(simulation.computeOneStep, with_timer)()
 
-            if verbose and (k % self._output_frequency == 0) or (k == 1):
-                print_verbose ('output in hdf5 file at step ', k)
+            if (k % self._output_frequency == 0) or (k == 1):
+                if verbose:
+                    print_verbose ('output in hdf5 file at step ', k)
 
                 log(self.outputDynamicObjects, with_timer)()
 
