@@ -98,9 +98,9 @@ class MyBulletManager(Mechanics.collision.bullet.SiconosBulletCollisionManager):
 # with the vview command.
 with Hdf5(mode='r+') as io:
 
-    # We assign our custom CollisionManager to the "space_filter" input
+    # We assign our custom CollisionManager to the "interaction_manager" input
     io.run(with_timer=False,
-            space_filter=MyBulletManager,
+            interaction_manager=MyBulletManager,
             gravity_scale=1,
             t0=0,
             T=8,

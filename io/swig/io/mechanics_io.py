@@ -2614,7 +2614,7 @@ class Hdf5():
     def run(self,
             with_timer=False,
             time_stepping=None,
-            space_filter=None,
+            interaction_manager=None,
             options=None,
             body_class=None,
             shape_class=None,
@@ -2691,7 +2691,7 @@ class Hdf5():
         if set_external_forces is not None:
             self._set_external_forces=set_external_forces
 
-        if space_filter is None:  space_filter = default_manager_class
+        if interaction_manager is None:  interaction_manager = default_manager_class
         if time_stepping is None: time_stepping = default_simulation_class
 
         if output_frequency is not None:
@@ -2796,7 +2796,7 @@ class Hdf5():
             options = SiconosBulletOptions()
             options.perturbationIterations = 3*multipoints_iterations
             options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
-        self._broadphase = space_filter(options)
+        self._broadphase = interaction_manager(options)
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if time_stepping == Kernel.TimeSteppingDirectProjection:
