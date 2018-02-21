@@ -80,7 +80,8 @@ protected:
   SiconosBulletOptions _options;
   SiconosBulletStatistics _stats;
 
-  /*! Provided so that creation of collision points can be overridden. */
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
   virtual SP::BulletR makeBulletR(SP::BodyDS ds1, SP::SiconosShape shape1,
                                   SP::BodyDS ds2, SP::SiconosShape shape2,
                                   const btManifoldPoint &);
