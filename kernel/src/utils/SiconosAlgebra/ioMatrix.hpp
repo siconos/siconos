@@ -64,14 +64,15 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
  * \param data The data to compare against the file.
  * \param filename The name of the file to load and compare.
  * \param epsilon The comparison threshold.
- * \param error A double to receive scalar error.
+ * \param error An optional pointer to double to receive scalar error.
  * \param index An optional list of column indexes, size==0 indicates all columns.
  * \param ref If provided, loaded matrix is returned in this pointer.
  * \param mode Mode string to pass to ioMatrix::read.
  * \param verbose True to print verbose output.
+ * \return True if the file was loaded and the comparison was performed.
  */
 bool compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
-                    double& error, Index index=Index(), SP::SimpleMatrix* ref=0,
+                    double *error=0, Index index=Index(), SP::SimpleMatrix *ref=0,
                     std::string mode="ascii", bool verbose=true);
 }
 

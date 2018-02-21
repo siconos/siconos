@@ -182,7 +182,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
 }
 
 bool compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
-                    double& error, Index index, SP::SimpleMatrix* ref,
+                    double *error, Index index, SP::SimpleMatrix *ref,
                     std::string mode, bool verbose)
 {
   SP::SimpleMatrix r;
@@ -216,16 +216,18 @@ bool compareRefFile(const SimpleMatrix& data, std::string filename, double epsil
       index.push_back(i);
 
   /* Scalar error = max of columns */
-  error = 0.0;
+  double er = 0.0;
   for (unsigned int i = 0; i < index.size(); ++i)
   {
-    if (error < (*err)(index[i]))
-      error = (*err)(index[i]);
+    if (er < (*err)(index[i]))
+      er = (*err)(index[i]);
   }
+  if (error)
+    *error = er;
 
   if (verbose)
     std::cout << "Error = " << error << std::endl;
-  if (error > epsilon)
+  if (er > epsilon)
   {
     if (verbose)
     {
