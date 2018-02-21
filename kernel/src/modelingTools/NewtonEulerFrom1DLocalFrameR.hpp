@@ -143,6 +143,19 @@ public:
     return _Nc;
   }
 
+  inline SP::SiconosVector relPc1() const
+  {
+    return _relPc1;
+  }
+  inline SP::SiconosVector relPc2() const
+  {
+    return _relPc2;
+  }
+  inline SP::SiconosVector relNc() const
+  {
+    return _relNc;
+  }
+
   /** set the coordinates of first contact point
   * \param npc new coordinates
   */
@@ -165,6 +178,33 @@ public:
   void setnc(SP::SiconosVector nnc)
   {
     _Nc = nnc;
+  };
+
+  /** Set the coordinates of first contact point in ds1 frame.
+   * It will be used to compute _Pc1 during computeh().
+  * \param npc new coordinates
+  */
+  void setRelPc1(SP::SiconosVector npc)
+  {
+    _relPc1 = npc;
+  };
+
+  /** Set the coordinates of second contact point in ds2 frame
+   * It will be used to compute _Pc2 during computeh().
+  * \param npc new coordinates
+  */
+  void setRelPc2(SP::SiconosVector npc)
+  {
+    _relPc2 = npc;
+  };
+
+  /** Set the coordinates of inside normal vector at the contact point in ds2 frame.
+   * It will be used to compute _Nc during computeh().
+  * \param nnc new coordinates
+  */
+  void setRelNc(SP::SiconosVector nnc)
+  {
+    _relNc = nnc;
   };
 
   // visitors hook
