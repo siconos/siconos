@@ -20,12 +20,12 @@
 #
 
 from siconos.kernel import NewtonEulerDS, NewtonImpactNSL,\
-     NewtonEulerR, NewtonEulerFrom1DLocalFrameR, Interaction, Model,\
+     NewtonEulerR, NewtonEulerFrom1DLocalFrameR, Interaction,\
      MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping,\
      changeFrameAbsToBody,changeFrameBodyToAbs,\
      rotationVectorFromQuaternion, quaternionFromRotationVector,\
      rotateAbsToBody,\
-     SiconosVector
+     SiconosVector, NonSmoothDynamicalSystem
 
 
 import numpy as np
@@ -164,12 +164,12 @@ ds.display()
 # raw_input()
 
 
-# Model
+# Non-Smooth Dynamical System
 #
-model = Model(t0, T)
+nsds = NonSmoothDynamicalSystem(t0, T)
 
 # add the dynamical system to the non smooth dynamical system
-model.nonSmoothDynamicalSystem().insertDynamicalSystem(ds)
+nsds.insertDynamicalSystem(ds)
 
 #
 # Simulation
@@ -185,20 +185,16 @@ t = TimeDiscretisation(t0, h)
 osnspb = LCP()
 
 # (4) Simulation setup with (1) (2) (3)
-s = TimeStepping(t)
+s = TimeStepping(nsds, t, OSI, osnspb)
 #s.setDisplayNewtonConvergence(True)
 s.setNewtonTolerance(1e-10)
 #s.setNewtonMaxIteration(1)
-s.insertIntegrator(OSI)
-s.insertNonSmoothProblem(osnspb)
-model.setSimulation(s)
+
 # end of model definition
 
 #
 # computation
 #
-# simulation initialization
-model.initialize()
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
