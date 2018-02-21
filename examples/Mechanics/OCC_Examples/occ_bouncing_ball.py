@@ -11,7 +11,6 @@ import siconos.io.mechanics_io
 from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere
 from OCC.gp import gp_Pnt
 
-siconos.io.mechanics_io.set_implementation('original')
 siconos.io.mechanics_io.set_backend('occ')
 
 sphere = BRepPrimAPI_MakeSphere(1.).Shape()

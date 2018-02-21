@@ -27,7 +27,6 @@ from math import pi
 
 # original implementation with occ backend
 import siconos.io.mechanics_io
-siconos.io.mechanics_io.set_implementation('original')
 siconos.io.mechanics_io.set_backend('occ')
 
 # ball shape

@@ -13,7 +13,6 @@ from OCC.gp import gp_Pnt
 from math import pi
 import numpy as np
 
-siconos.io.mechanics_io.set_implementation('original')
 siconos.io.mechanics_io.set_backend('occ')
 
 
