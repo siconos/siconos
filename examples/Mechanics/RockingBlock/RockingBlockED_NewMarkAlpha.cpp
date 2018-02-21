@@ -291,10 +291,11 @@ int main(int argc, char* argv[])
     DataPlot.resize(k,SizeOutput);
     ioMatrix::write("RockingBlockED_NewMarkAlpha.dat", "ascii", DataPlot, "noDim");
 
-    
+
     // Comparison with a reference file
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(DataPlot, "RockingBlockED_NewMarkAlpha.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(DataPlot, "RockingBlockED_NewMarkAlpha.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
   }

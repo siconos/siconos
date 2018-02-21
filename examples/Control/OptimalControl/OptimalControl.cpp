@@ -164,7 +164,7 @@ int main()
   ioMatrix::write("OptimalControl.dat", "ascii", dataPlot, "noDim");
 
   double error=0.0, eps=5e-11;
-  if (ioMatrix::compareRefFile(dataPlot, "OptimalControl.ref", eps, error)
+  if ((error=ioMatrix::compareRefFile(dataPlot, "OptimalControl.ref", eps)) >= 0.0
       && error > eps)
     return 1;
 

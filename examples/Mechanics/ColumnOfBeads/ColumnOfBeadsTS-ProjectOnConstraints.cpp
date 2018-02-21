@@ -263,17 +263,19 @@ int withLevel(unsigned int mylevel)
     double error=0.0, eps=1e-12;
     if (levelForProjection == 1)
     {
-      if (ioMatrix::compareRefFile(dataPlot, "ColumnOfbeadsTS-ProjectionOnConstraints.ref", eps, error)
+      if ((error=ioMatrix::compareRefFile(
+             dataPlot, "ColumnOfbeadsTS-ProjectionOnConstraints.ref", eps)) >= 0.0
           && error > eps)
         return 1;
     }
     else if (levelForProjection == 0)
     {
-      if (ioMatrix::compareRefFile(dataPlot, "ColumnOfbeadsTS-ProjectionOnConstraints-level0.ref", eps, error)
+      if ((error=ioMatrix::compareRefFile(
+             dataPlot, "ColumnOfbeadsTS-ProjectionOnConstraints-level0.ref", eps))>=0.0
           && error > eps)
         return 1;
     }
-    
+
 
   }
 

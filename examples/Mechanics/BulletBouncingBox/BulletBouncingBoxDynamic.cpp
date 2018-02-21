@@ -280,7 +280,7 @@ int main()
     ioMatrix::write("result_dynamic.dat", "ascii", dataPlot, "noDim");
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "result_dynamic.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "result_dynamic.ref", eps)) >= 0.0
         && error > eps)
       return 1;
 

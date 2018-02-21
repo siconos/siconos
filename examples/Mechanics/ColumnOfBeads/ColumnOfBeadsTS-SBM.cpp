@@ -261,7 +261,7 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
     cout << "====> Comparison with reference file ..." << endl;
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "ColumnOfBeadsTS-SBM.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "ColumnOfBeadsTS-SBM.ref", eps))>=0.0
         && error > eps)
     {
       std::cout << "Warning. The result is rather different from the reference file." << std::endl;

@@ -215,7 +215,8 @@ int main(int argc, char* argv[])
     ioMatrix::write("Simplependulum_Lsodar.dat", "ascii", DataPlot, "noDim");
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(DataPlot, "Simplependulum_Lsodar.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(DataPlot, "Simplependulum_Lsodar.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
   }

@@ -308,7 +308,7 @@ int main(int argc, char* argv[]){
     ioMatrix::write("TaperedChainOfBalls-LZBModel.dat", "ascii",dataPlot,"noDim");
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "TaperedChainOfBalls-LZBModel.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "TaperedChainOfBalls-LZBModel.ref", eps, error)) >= 0.0
         && error > eps)
       return 1;
   }

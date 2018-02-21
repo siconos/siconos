@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 
     // Comparison with a reference file
     double error = 0;
-    if (ioMatrix::compareRefFile(*dataPlot, "Twisting.ref", 1e-12, error, idx)
+    if ((error=ioMatrix::compareRefFile(*dataPlot, "Twisting.ref", 1e-12, idx)) >= 0.0
         && error > 1e-12)
     {
       return 1;

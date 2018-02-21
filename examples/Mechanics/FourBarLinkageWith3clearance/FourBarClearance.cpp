@@ -470,7 +470,7 @@ int main(int argc, char* argv[])
 
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "FourBarClearance.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "FourBarClearance.ref", eps)) >= 0.0
         && error > eps)
       return 1;
     

@@ -334,12 +334,13 @@ int main(int argc, char* argv[])
     dataPlotRef.zero();
 #ifdef WITH_PROJ
     double error=0.0, eps=1e-10;
-    if (ioMatrix::compareRefFile(dataPlot, "BallNewtonEuler-WITHPROJ.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "BallNewtonEuler-WITHPROJ.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
 #else
     double error=0.0, eps=1e-10;
-    if (ioMatrix::compareRefFile(dataPlot, "BallNewtonEuler.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "BallNewtonEuler.ref", eps)) >= 0.0
         && error > eps)
       return 1;
 #endif

@@ -169,16 +169,15 @@ int main(int argc, char *argv[])
   dataPlot.resize(cmp,outputSize);
   ioMatrix::write(filename, "ascii", dataPlot, "noDim");
   if (argc==1)
-  //if(argc== 10)
   {
     // Comparison with a reference file
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "simu.1.6.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "simu.1.6.ref", eps)) >= 0.0
         && error > eps)
       return 1;
   }
 
-  
+
   cout << "=== End of simulation. === " << endl;
   }
   catch (SiconosException e)

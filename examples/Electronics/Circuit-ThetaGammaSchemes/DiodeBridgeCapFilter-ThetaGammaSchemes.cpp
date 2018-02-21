@@ -242,7 +242,8 @@ int main(int argc, char* argv[])
     for (int i =0 ; i < 7; i++)
       idx.push_back(i);
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "DiodeBridgeCapFilter.ref", eps, error, idx)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "DiodeBridgeCapFilter.ref",
+                                        eps, idx)) >= 0.0
         && error > eps)
       return 1;
 

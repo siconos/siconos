@@ -187,13 +187,17 @@ int main(int argc, char* argv[])
 
     if (levelForProjection == 1)
     {
-      if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-MoreauJeanDirectProjectionOSI.ref", eps, error)
+      if ((error=ioMatrix::compareRefFile(
+             dataPlot, "BouncingBallTS-MoreauJeanDirectProjectionOSI.ref",
+             eps)) >= 0.0
           && error > eps)
         return 1;
     }
     else
     {
-      if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-MoreauJeanDirectProjectionOSI-level0.ref", eps, error)
+      if ((error=ioMatrix::compareRefFile(
+            dataPlot, "BouncingBallTS-MoreauJeanDirectProjectionOSI-level0.ref",
+            eps)) >= 0.0
           && error > eps)
         return 1;
     }

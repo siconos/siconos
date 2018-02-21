@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
     ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
 
     double error=0.0, eps=1e-05;
-    if (ioMatrix::compareRefFile(DataPlot, "result_AlphaScheme.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(DataPlot, "result_AlphaScheme.ref", eps)) >= 0.0
         && error > eps)
       return 1;
   }

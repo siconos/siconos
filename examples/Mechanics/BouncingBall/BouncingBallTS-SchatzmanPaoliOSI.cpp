@@ -171,7 +171,9 @@ int main(int argc, char* argv[])
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-SchatzmanPaoliOSI.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot,
+                                        "BouncingBallTS-SchatzmanPaoliOSI.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
 

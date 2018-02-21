@@ -438,7 +438,8 @@ int main(int argc, char* argv[])
 
 
     double error=0.0, eps=1e-11;
-    if (ioMatrix::compareRefFile(dataPlot, "NE_3DS_3Knee_1Prism_GMP.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "NE_3DS_3Knee_1Prism_GMP.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
 
