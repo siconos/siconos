@@ -94,7 +94,8 @@ void ObserverTest::test_SMO_ZOH()
   SimpleMatrix& data = *simZOH->data();
   ioMatrix::write("SMO_ZOH.dat", "ascii", data, "noDim");
   double error =0.0;
-  bool test = !(ioMatrix::compareRefFile(data, "SMO.ref", _tol, error)&& error > _tol);
+  bool test = !((error=ioMatrix::compareRefFile(data, "SMO.ref", _tol)) >= 0.0
+                && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_ZOH : ", test, true);
 }
@@ -113,7 +114,8 @@ void ObserverTest::test_SMO_Lsodar()
   SimpleMatrix& data = *simLsodar->data();
   ioMatrix::write("SMO_Lsodar.dat", "ascii", data, "noDim");
   double error =0.0;
-  bool test = !(ioMatrix::compareRefFile(data, "SMO.ref", _tol, error)&& error > _tol);
+  bool test = !((error=ioMatrix::compareRefFile(data, "SMO.ref", _tol)) >= 0.0
+                && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_Lsodar : ", test, true);
 }
@@ -132,7 +134,8 @@ void ObserverTest::test_Luenberger_ZOH()
   SimpleMatrix& data = *simZOH->data();
   ioMatrix::write("Luenberger_ZOH.dat", "ascii", data, "noDim");
   double error =0.0;
-  bool test = !(ioMatrix::compareRefFile(data, "Luenberger.ref", _tol, error)&& error > _tol);
+  bool test = !((error=ioMatrix::compareRefFile(data, "Luenberger.ref", _tol)) >= 0.0
+                && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
 }
@@ -151,7 +154,8 @@ void ObserverTest::test_Luenberger_Lsodar()
   SimpleMatrix& data = *simLsodar->data();
   ioMatrix::write("Luenberger_Lsodar.dat", "ascii", data, "noDim");
   double error =0.0;
-  bool test = !(ioMatrix::compareRefFile(data, "Luenberger.ref", _tol, error)&& error > _tol);
+  bool test = !((error=ioMatrix::compareRefFile(data, "Luenberger.ref", _tol)) >= 0.0
+                && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_Lsodar : ", test , true);
 
