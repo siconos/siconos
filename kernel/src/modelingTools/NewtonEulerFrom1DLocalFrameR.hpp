@@ -83,6 +83,34 @@ protected:
   /*buffer matrices*/
   SP::SimpleMatrix _AUX1;
   SP::SimpleMatrix _AUX2;
+
+  /** Set the coordinates of first contact point.  Must only be done
+  * in a computeh() override.
+  * \param npc new coordinates
+  */
+  void setpc1(SP::SiconosVector npc)
+  {
+    _Pc1 = npc;
+  };
+
+  /** Set the coordinates of second contact point.  Must only be done
+  * in a computeh() override.
+  * \param npc new coordinates
+  */
+  void setpc2(SP::SiconosVector npc)
+  {
+    _Pc2 = npc;
+  };
+
+  /** Set the coordinates of inside normal vector at the contact point.
+   * Must only be done in a computeh() override.
+  * \param nnc new coordinates
+  */
+  void setnc(SP::SiconosVector nnc)
+  {
+    _Nc = nnc;
+  };
+
 private:
   void NIcomputeJachqTFromContacts(SP::SiconosVector q1);
   void NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2);
@@ -155,30 +183,6 @@ public:
   {
     return _relNc;
   }
-
-  /** set the coordinates of first contact point
-  * \param npc new coordinates
-  */
-  void setpc1(SP::SiconosVector npc)
-  {
-    _Pc1 = npc;
-  };
-
-  /** set the coordinates of second contact point
-  * \param npc new coordinates
-  */
-  void setpc2(SP::SiconosVector npc)
-  {
-    _Pc2 = npc;
-  };
-
-  /** set the coordinates of inside normal vector at the contact point
-  * \param nnc new coordinates
-  */
-  void setnc(SP::SiconosVector nnc)
-  {
-    _Nc = nnc;
-  };
 
   /** Set the coordinates of first contact point in ds1 frame.
    * It will be used to compute _Pc1 during computeh().
