@@ -47,12 +47,11 @@ with Hdf5() as io:
 class LinePicker():
     def initialize(self, io):
         self.io = io
-        self.nsds = io._model.nonSmoothDynamicalSystem()
         self.manager = io._broadphase
 
     def step(self):
         query = self.manager.lineIntersectionQuery([0,0,10],[0,0,-10],False)
-        names = [self.nsds.name(q.body) for q in query if q.body is not None]
+        names = [self.io._nsds.name(q.body) for q in query if q.body is not None]
         if len(names) > 0:
             print('time %f, picked %s'%(self.io.currentTime(), ', '.join(names)))
 

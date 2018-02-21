@@ -81,7 +81,7 @@ class roll(object):
     def initialize(self, io):
         ang_force = 6.0
         self.io = io
-        topo = io._model.nonSmoothDynamicalSystem().topology()
+        topo = io._nsds.topology()
         self.wheels = [topo.getDynamicalSystem('wheel%d'%i) for i in [1,2,3,4]]
         self.wheel_const = np.array(self.wheels[0].fExt())
         self.wheel_force = Kernel.SiconosVector(3)

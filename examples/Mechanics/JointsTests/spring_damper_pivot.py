@@ -45,7 +45,7 @@ with Hdf5() as io:
 class Ctrl(object):
     def initialize(self, io):
         self.count = 0
-        self.topo = io._model.nonSmoothDynamicalSystem().topology()
+        self.topo = io._nsds.topology()
         self.ds1 = self.topo.getDynamicalSystem('bar1')
         self.ds2 = self.topo.getDynamicalSystem('bar2')
         self.joint1 = cast_PivotJointR(
