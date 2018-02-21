@@ -97,12 +97,6 @@ with Hdf5(mode='r+',collision_margin=0.05) as io:
     # sizes of small objects may need to be expressed in cm or mm.
 
     io.run(with_timer=False,
-           time_stepping=None,
-           space_filter=None,
-           body_class=None,
-           shape_class=None,
-           face_class=None,
-           edge_class=None,
            gravity_scale=0.1,
            t0=0,
            T=step*hstep,

@@ -201,12 +201,6 @@ with Hdf5() as io:
 with Hdf5(mode='r+') as io:
 
     io.run(with_timer=False,
-           time_stepping=None,
-           space_filter=None,
-           body_class=None,
-           shape_class=None,
-           face_class=None,
-           edge_class=None,
            gravity_scale=1,
            t0=0,
            T=10,

@@ -100,12 +100,7 @@ with Hdf5(mode='r+') as io:
 
     # We assign our custom CollisionManager to the "space_filter" input
     io.run(with_timer=False,
-            time_stepping=None,
             space_filter=MyBulletManager,
-            body_class=None,
-            shape_class=None,
-            face_class=None,
-            edge_class=None,
             gravity_scale=1,
             t0=0,
             T=8,

@@ -168,12 +168,6 @@ with Hdf5(mode='r+') as io:
 
 
   io.run(with_timer=False,
-         time_stepping=None,
-         space_filter=None,
-         body_class=None,
-         shape_class=None,
-         face_class=None,
-         edge_class=None,
          t0=0,
          T=step*hstep,
          h=hstep,
