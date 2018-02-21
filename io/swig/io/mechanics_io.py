@@ -922,7 +922,8 @@ class Hdf5():
     """
 
     def __init__(self, io_filename=None, mode='w',
-                 broadphase=None, nsds=None, simulation=None,osi=None, shape_filename=None,
+                 interaction_manager=None, nsds=None, simulation=None,
+                 osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None, collision_margin=None,
                  use_compression=False, output_domains=False, verbose=True):
 
@@ -932,7 +933,7 @@ class Hdf5():
         else:
             self._io_filename = io_filename
         self._mode = mode
-        self._broadphase = broadphase
+        self._interman = interaction_manager
         self._nsds = nsds
         self._simulation = simulation
         self._osi = osi
@@ -1116,7 +1117,7 @@ class Hdf5():
         return self._boundary_conditions
 
     def importNonSmoothLaw(self, name):
-        if self._broadphase is not None:
+        if self._interman is not None:
             nslawClass = getattr(Kernel, self._nslaws_data[name].attrs['type'])
             if nslawClass == Kernel.NewtonImpactFrictionNSL:
                 nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']), 0.,
@@ -1132,7 +1133,7 @@ class Hdf5():
             gid1 = int(self._nslaws_data[name].attrs['gid1'])
             gid2 = int(self._nslaws_data[name].attrs['gid2'])
             if gid1 >= 0 and gid2 >= 0:
-                self._broadphase.insertNonSmoothLaw(nslaw, gid1, gid2)
+                self._interman.insertNonSmoothLaw(nslaw, gid1, gid2)
 
     def importOccObject(self, name, translation, orientation,
                         velocity, contactors, mass, given_inertia, body_class,
@@ -1233,7 +1234,7 @@ class Hdf5():
         if body_class is None:
             body_class = default_body_class
 
-        if self._broadphase is not None and 'input' in self._data:
+        if self._interman is not None and 'input' in self._data:
             body = None
             if mass is None or mass == 0:
                 # a static object
@@ -1246,7 +1247,7 @@ class Hdf5():
                     cset.append(SiconosContactor(shp, pos, c.group))
                     if self.verbose:
                         print('Adding shape %s to static contactor'%c.shape_name, pos)
-                self._broadphase.insertStaticContactorSet(cset, csetpos)
+                self._interman.insertStaticContactorSet(cset, csetpos)
 
                 self._static[name] = {
                     'number': number,
@@ -1369,7 +1370,7 @@ class Hdf5():
         return joint
 
     def importJoint(self, name):
-        if self._broadphase is not None:
+        if self._interman is not None:
             nsds = self._nsds
             topo = nsds.topology()
 
@@ -1490,7 +1491,7 @@ class Hdf5():
                     nsds.setName(cpl_inter, '%s_coupler%d'%(str(name),n))
 
     def importBoundaryConditions(self, name):
-        if self._broadphase is not None:
+        if self._interman is not None:
             topo = self._nsds.\
                 topology()
 
@@ -1526,7 +1527,7 @@ class Hdf5():
     def importPermanentInteractions(self, name):
         """
         """
-        if (self._broadphase is not None and 'input' in self._data
+        if (self._interman is not None and 'input' in self._data
               and self.permanent_interactions() is not None):
             topo = self._nsds.\
                 topology()
@@ -1582,7 +1583,7 @@ class Hdf5():
 
                     cg1 = int(ctr1.attrs['group'])
                     cg2 = int(ctr2.attrs['group'])
-                    nslaw = self._broadphase.nonSmoothLaw(cg1, cg2)
+                    nslaw = self._interman.nonSmoothLaw(cg1, cg2)
 
                     cocs1 = self._occ_contactors[body1_name][contactor1_name]
                     cocs2 = self._occ_contactors[body2_name][contactor2_name]
@@ -1715,10 +1716,11 @@ class Hdf5():
                     edge_class):
         """
         From the specification given in the hdf5 file with the help of
-        add* functions, import into the broadphase object:
+        add* functions, import into the NSDS:
           - the static objects
           - the dynamic objects
           - the joints
+        and into the interaction_manager:
           - the nonsmooth laws
         that have a specified time of birth <= current time.
         """
@@ -1731,7 +1733,7 @@ class Hdf5():
             self._number_of_shapes += 1
 
         # import dynamical systems
-        if self._broadphase is not None and 'input' in self._data:
+        if self._interman is not None and 'input' in self._data:
 
             dpos_data = self.dynamic_data()
             if dpos_data is not None and len(dpos_data) > 0:
@@ -1837,7 +1839,7 @@ class Hdf5():
     def importBirths(self, body_class=None, shape_class=None,
                      face_class=None, edge_class=None,):
         """
-        Import new objects in the broadphase.
+        Import new objects into the NSDS.
         """
         time = self.currentTime()
 
@@ -1853,7 +1855,7 @@ class Hdf5():
 
     def executeDeaths(self):
         """
-        Remove objects from the broadphase.
+        Remove objects from the NSDS
         """
         time = self.currentTime()
 
@@ -1864,7 +1866,7 @@ class Hdf5():
 
         for time_of_death in current_times_of_deaths:
             for (name, obj, body) in self._deaths[time_of_death]:
-                self._broadphase.removeBody(body)
+                self._interman.removeBody(body)
                 self._nsds.removeDynamicalSystem(body)
 
     def outputStaticObjects(self):
@@ -2796,7 +2798,7 @@ class Hdf5():
             options = SiconosBulletOptions()
             options.perturbationIterations = 3*multipoints_iterations
             options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
-        self._broadphase = interaction_manager(options)
+        self._interman = interaction_manager(options)
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if time_stepping == Kernel.TimeSteppingDirectProjection:
@@ -2817,7 +2819,7 @@ class Hdf5():
             simulation.insertIntegrator(self._osi)
             simulation.insertNonSmoothProblem(osnspb)
 
-        simulation.insertInteractionManager(self._broadphase)
+        simulation.insertInteractionManager(self._interman)
 
         simulation.setNewtonOptions(Newton_options)
         simulation.setNewtonMaxIteration(Newton_max_iter)
@@ -2898,14 +2900,14 @@ class Hdf5():
             log(simulation.clearNSDSChangeLog, with_timer)()
 
             # Note these are not the same and neither is correct.
-            # "broadphase.statistics" gives the number of contacts
+            # "_interman.statistics" gives the number of contacts
             # collected by the collision engine, but it's possible some
             # are not in indexset1.  Meanwhile checking the size of
             # the non-smooth problem is wrong when there are joints.
             if use_bullet:
                 number_of_contacts = (
-                    self._broadphase.statistics().new_interactions_created
-                    + self._broadphase.statistics().existing_interactions_processed)
+                    self._interman.statistics().new_interactions_created
+                    + self._interman.statistics().existing_interactions_processed)
             else:
                 number_of_contacts = osnspb.getSizeOutput()//3
             if verbose and number_of_contacts > 0 :
