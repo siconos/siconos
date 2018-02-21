@@ -52,8 +52,7 @@ static void copyBtVector3(const btVector3 &from, SiconosVector& to)
   to(2) = from.z();
 }
 
-// TODO: "point" parameter used only by BulletSpaceFilter
-BulletR::BulletR(const btManifoldPoint &point)
+BulletR::BulletR()
   : ContactR()
 {
 }

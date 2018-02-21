@@ -15,9 +15,6 @@
 %include native.i
 %include base.i
 
-// due to undefined private copy constructors
-%feature("notabstract") BulletTimeStepping;
-
 // do not wrap visitor visit : this lead to a huge amount of wrapper
 // code generation and this fail at compile time on shared_ptr freearg
 %ignore visit;
@@ -200,11 +197,6 @@ typedef Interaction Interaction;
 
 %include "BulletSiconosFwd.hpp"
 PY_FULL_REGISTER(BulletR, Mechanics);
-PY_FULL_REGISTER(BulletDS, Mechanics);
-PY_FULL_REGISTER(BulletSpaceFilter, Mechanics);
-PY_FULL_REGISTER(BulletTimeStepping, Mechanics);
-PY_FULL_REGISTER(BulletTimeSteppingDirectProjection, Mechanics);
-PY_FULL_REGISTER(BulletWeightedShape, Mechanics);
 PY_FULL_REGISTER(BulletFrom1DLocalFrameR, Mechanics);
 
 
@@ -212,11 +204,6 @@ PY_FULL_REGISTER(BulletFrom1DLocalFrameR, Mechanics);
 
 %inline
 {
-  SP::BulletDS cast_BulletDS(SP::DynamicalSystem ds)
-  {
-    return std11::dynamic_pointer_cast<BulletDS>(ds);
-  };
-
   SP::BulletR cast_BulletR(SP::Relation rel)
   {
     return std11::dynamic_pointer_cast<BulletR>(rel);

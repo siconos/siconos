@@ -49,11 +49,8 @@
   REGISTER(ContactPoints)                       \
   REGISTER(ContactShapeDistance)                \
   REGISTER(Geometer)                            \
-  REGISTER(BulletDS)                            \
   REGISTER(BulletR)                             \
   REGISTER(BulletFrom1DLocalFrameR)             \
-  REGISTER(BulletSpaceFilter)                   \
-  REGISTER(BulletTimeStepping)                  \
   REGISTER(MBTB_FC3DContactRelation)            \
   REGISTER(MBTB_ContactRelation)                \
   REGISTER(BodyDS)                              \

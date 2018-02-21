@@ -1362,7 +1362,7 @@ SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::BodyDS ds1,
                                                        SP::SiconosShape shape2,
                                                        const btManifoldPoint &p)
 {
-  return std11::make_shared<BulletR>(p);
+  return std11::make_shared<BulletR>();
 }
 
 class CollisionUpdateVisitor : public SiconosVisitor

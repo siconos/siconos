@@ -56,17 +56,6 @@ try:
 except:
     have_bullet = False
 
-# Shared Bullet imports
-# TODO do we need these?
-try:
-    from siconos.mechanics.collision.bullet import \
-        btScalarSize, btQuaternion, btTransform, \
-        btVector3, quatRotate
-    from siconos.mechanics.collision.bullet import \
-        __mul__ as mul
-except:
-    have_bullet = False
-
 # OCC imports
 try:
     from siconos.mechanics import occ
@@ -603,7 +592,7 @@ def loadSiconosMesh(shape_filename, scale=None):
     shape = None
 
     if polydata.GetCellType(0) == 5:
-        apoints = np.empty((3, num_points), dtype={4:'f4',8:'f8'}[btScalarSize()])
+        apoints = np.empty((3, num_points), dtype='f8')
         for i in range(0, points.GetNumberOfTuples()):
             p = points.GetTuple(i)
             apoints[0, i] = p[0]
@@ -1253,13 +1242,6 @@ class Hdf5():
                     'number': number,
                     'origin': translation,
                     'orientation': orientation,
-                    'transform': btTransform(btQuaternion(orientation[1],
-                                                          orientation[2],
-                                                          orientation[3],
-                                                          orientation[0]),
-                                             btVector3(translation[0],
-                                                       translation[1],
-                                                       translation[2])),
                     'shape': shp,
                 }
 
@@ -1881,16 +1863,9 @@ class Hdf5():
             if self.verbose:
                 print('output static object', static['number'])
 
-            # fix why do we need bullet here ?
-            if 'transform' in static.keys():
-                tr = static['transform'].getOrigin()
-                rt = static['transform'].getRotation()
-                translation = [ tr.x(), tr.y(), tr.z() ]
-                rotation = [ rt.w(), rt.x(), rt.y(), rt.z() ]
-            else:
-                print (static.keys())
-                translation = static['origin']
-                rotation = static['orientation']
+            print (static.keys())
+            translation = static['origin']
+            rotation = static['orientation']
 
             self._static_data[p, :] = \
                 [time,

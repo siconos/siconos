@@ -29,28 +29,14 @@ private:
   */
   ACCEPT_SERIALIZATION(BulletR);
 
-  SP::btManifoldPoint _contactPoints;
-
 public:
-  BulletR(const btManifoldPoint &);
+  BulletR();
 
   virtual ~BulletR() {}
 
   /* For users that may require extra information about contacts. */
   SP::btCollisionObject btObject[2];
   SP::btCollisionShape btShape[2];
-
-  // TODO used by BulletSpaceFilter
-  SP::btManifoldPoint contactPoint() const
-  {
-    return _contactPoints;
-  };
-
-  // TODO used by BulletSpaceFilter
-  void setContactPoint(SP::btManifoldPoint p)
-  {
-    _contactPoints = p;
-  };
 
   virtual
   void updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,

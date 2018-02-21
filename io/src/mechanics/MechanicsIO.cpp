@@ -5,32 +5,22 @@
 
 #define DUMMY(X, Y) class X : public Y {}
 
-#undef PROPOSED_CLASSES
 #undef BULLET_CLASSES
 #undef OCC_CLASSES
 #undef MECHANISMS_CLASSES
 
-#define PROPOSED_CLASSES() \
-  REGISTER(BodyDS)
-
 #include <BodyDS.hpp>
 
 #define XBULLET_CLASSES() \
-  REGISTER(BulletDS)     \
-  REGISTER(BulletR) \
-  REGISTER(BulletSpaceFilter)
+  REGISTER(BulletR)
 
 #ifdef SICONOS_HAVE_BULLET
-#include <BulletDS.hpp>
 #include <BulletR.hpp>
-#include <BulletSpaceFilter.hpp>
 #else
 #include <NewtonEulerDS.hpp>
 #include <NewtonEulerFrom3DLocalFrameR.hpp>
 #include <SpaceFilter.hpp>
-DUMMY(BulletDS, NewtonEulerDS);
 DUMMY(BulletR, NewtonEulerFrom3DLocalFrameR);
-DUMMY(BulletSpaceFilter, SpaceFilter);
 #endif
 
 #define OCC_CLASSES() \
@@ -71,7 +61,7 @@ DUMMY(MBTB_ContactRelation, NewtonEulerFrom1DLocalFrameR);
   REGISTER(PivotJointR)                         \
   REGISTER(KneeJointR)                          \
   REGISTER(PrismaticJointR)                     \
-  PROPOSED_CLASSES()                            \
+  REGISTER(BodyDS)                              \
   OCC_CLASSES()                                 \
   XBULLET_CLASSES()                             \
   MECHANISMS_CLASSES()                          \
