@@ -33,7 +33,6 @@ SICONOS_IO_REGISTER(DynamicalSystemProperties,
   (workMatrices)
   (workVectors))
 SICONOS_IO_REGISTER(InteractionProperties,
-  (DSlink)
   (absolute_position)
   (absolute_position_proj)
   (block)
@@ -42,6 +41,7 @@ SICONOS_IO_REGISTER(InteractionProperties,
   (source_pos)
   (target)
   (target_pos)
+  (workBlockVectors)
   (workMatrices)
   (workVectors))
 SICONOS_IO_REGISTER(MatrixIntegrator,
@@ -51,7 +51,7 @@ SICONOS_IO_REGISTER(MatrixIntegrator,
   (_TD)
   (_isConst)
   (_mat)
-  (_model)
+  (_nsds)
   (_plugin)
   (_sim))
 SICONOS_IO_REGISTER_WITH_BASES(DynamicalSystemsGraph,(_DynamicalSystemsGraph),
@@ -82,7 +82,6 @@ SICONOS_IO_REGISTER(Topology,
   (_DSG)
   (_IG)
   (_hasChanged)
-  (_isTopologyUpToDate)
   (_numberOfConstraints)
   (_symmetric))
 SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL,(NonSmoothLaw),
@@ -112,14 +111,22 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL,(NonSmoothLaw),
   (_mu))
 SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL,(NonSmoothLaw),
   (_equalitySize))
-SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
-  (_BVP)
-  (_mIsLinear)
-  (_topology))
 SICONOS_IO_REGISTER(PluggedObject,
   (_pluginName))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom3DLocalFrameR,(NewtonEulerFrom1DLocalFrameR),
 )
+SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
+  (_BVP)
+  (_T)
+  (_author)
+  (_changeLog)
+  (_date)
+  (_description)
+  (_mIsLinear)
+  (_t)
+  (_t0)
+  (_title)
+  (_topology))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR,(FirstOrderR),
   (_e))
 SICONOS_IO_REGISTER(BoundaryCondition,
@@ -139,6 +146,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom1DLocalFrameR,(NewtonEulerR),
   (_Pc2)
   (_RotationAbsToContactFrame)
   (_isOnContact)
+  (_relNc)
   (_relPc1)
   (_relPc2)
   (_rotationMatrixAbsToBody))
@@ -212,6 +220,7 @@ SICONOS_IO_REGISTER(Interaction,
   (_lambda)
   (_lambdaMemory)
   (_lambdaOld)
+  (_linkToDSVariables)
   (_lowerLevelForInput)
   (_lowerLevelForOutput)
   (_nslaw)
@@ -301,6 +310,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_I)
   (_T)
   (_Tdot)
+  (_acceleration)
   (_boundaryConditions)
   (_computeJacobianFIntqByFD)
   (_computeJacobianFInttwistByFD)
@@ -328,6 +338,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_mGyr)
   (_mInt)
   (_massMatrix)
+  (_ndof)
   (_nullifyMGyr)
   (_p)
   (_pluginFExt)
@@ -343,6 +354,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_qDim)
   (_qMemory)
   (_reactionToBoundaryConditions)
+  (_rhsMatrices)
   (_scalarMass)
   (_twist)
   (_twist0)
@@ -458,6 +470,28 @@ SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
   (_q)
   (_w)
   (_z))
+SICONOS_IO_REGISTER(Simulation,
+  (_OSIDSmap)
+  (_T)
+  (_allNSProblems)
+  (_allOSI)
+  (_eventsManager)
+  (_interman)
+  (_isInitialized)
+  (_name)
+  (_nsds)
+  (_nsdsChangeLogPosition)
+  (_numberOfIndexSets)
+  (_printStat)
+  (_relativeConvergenceCriterionHeld)
+  (_relativeConvergenceTol)
+  (_staticLevels)
+  (_tend)
+  (_tinit)
+  (_tolerance)
+  (_tout)
+  (_useRelativeConvergenceCriterion)
+  (statOut))
 SICONOS_IO_REGISTER_WITH_BASES(ZeroOrderHoldOSI,(OneStepIntegrator),
   (_useGammaForRelation))
 SICONOS_IO_REGISTER_WITH_BASES(Equality,(LinearOSNS),
@@ -485,31 +519,14 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_newtonResiduRMax)
   (_newtonResiduYMax)
   (_newtonTolerance)
-  (_newtonUpdateInteractionsPerIteration))
-SICONOS_IO_REGISTER(Simulation,
-  (_T)
-  (_allNSProblems)
-  (_allOSI)
-  (_eventsManager)
-  (_interman)
-  (_linkOrUnlink)
-  (_name)
-  (_nsds)
-  (_numberOfIndexSets)
-  (_printStat)
-  (_relativeConvergenceCriterionHeld)
-  (_relativeConvergenceTol)
-  (_staticLevels)
-  (_tend)
-  (_tinit)
-  (_tolerance)
-  (_tout)
-  (_useRelativeConvergenceCriterion)
-  (statOut))
+  (_newtonUpdateInteractionsPerIteration)
+  (_resetAllLambda)
+  (_warnOnNonConvergence))
 SICONOS_IO_REGISTER(OneStepIntegrator,
   (_dynamicalSystemsGraph)
   (_extraAdditionalTerms)
   (_integratorType)
+  (_isInitialized)
   (_levelMaxForInput)
   (_levelMaxForOutput)
   (_levelMinForInput)
@@ -598,16 +615,6 @@ SICONOS_IO_REGISTER_WITH_BASES(EulerMoreauOSI,(OneStepIntegrator),
   (_theta)
   (_useGamma)
   (_useGammaForRelation))
-SICONOS_IO_REGISTER(Model,
-  (_T)
-  (_author)
-  (_date)
-  (_description)
-  (_nsds)
-  (_simulation)
-  (_t)
-  (_t0)
-  (_title))
 
 template <class Archive>
 void siconos_io_register_generated_Kernel(Archive& ar)
@@ -631,9 +638,9 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<EqualityConditionNSL*>(NULL));
   ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
   ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
-  ar.register_type(static_cast<NonSmoothDynamicalSystem*>(NULL));
   ar.register_type(static_cast<PluggedObject*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom3DLocalFrameR*>(NULL));
+  ar.register_type(static_cast<NonSmoothDynamicalSystem*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
   ar.register_type(static_cast<BoundaryCondition*>(NULL));
   ar.register_type(static_cast<NewtonImpactNSL*>(NULL));
@@ -689,7 +696,6 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<MoreauJeanGOSI*>(NULL));
   ar.register_type(static_cast<MoreauJeanOSI*>(NULL));
   ar.register_type(static_cast<EulerMoreauOSI*>(NULL));
-  ar.register_type(static_cast<Model*>(NULL));
 }
 #endif
 #endif
