@@ -173,14 +173,6 @@ int main()
 
   for (int k = 0 ; k < NBStep ; k++)
   {
-    cout << "        " << endl;
-    cout << "        " << endl;
-    cout << "        " << endl;
-    cout << "        " << endl;
-    cout << "        " << endl;
-    cout << "        " << endl;
-    cout << "        " << endl;
-    cout << "########" << k << endl;
     //      if (cmp==150)
     //        numerics_set_verbose(1);
     //      else if (cmp==151)
@@ -189,7 +181,7 @@ int main()
     cmp++;
     // solve ...
     aS->computeOneStep();
-    aMLCP->display();
+    //aMLCP->display();
     aS->nextStep();
     x = aDS->x();
     lambda = aI->lambda(0);

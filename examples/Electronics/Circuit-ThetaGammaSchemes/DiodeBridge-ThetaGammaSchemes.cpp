@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
     dataPlot.resize(k, 10);
     ioMatrix::write("DiodeBridge.dat", "ascii", dataPlot, "noDim");
     double error=0.0, eps=1e-10;
-    if ((error=ioMatrix::compareRefFile(dataPlot, "DiodeBridge.ref", eps)) >= 0.0)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "DiodeBridge.ref", eps)) >= 0.0
         && error > eps)
       return 1;
 
