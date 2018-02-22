@@ -54,26 +54,7 @@ FirstOrderType2R::FirstOrderType2R(const std::string& pluginh, const std::string
   setComputeJacglambdaFunction(SSLH::getPluginName(pluginJacobianglambda), SSLH::getPluginFunctionName(pluginJacobianglambda));
 }
 
-void FirstOrderType2R::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
 
-  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-
-
-  // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = inter.getSizeOfY();
-  unsigned int sizeDS = inter.getSizeOfDS();
-
-
-//  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
-  workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));
-  workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
-
-
-
-}
 void FirstOrderType2R::initialize(Interaction& inter)
 {
   FirstOrderR::initialize(inter);
@@ -84,6 +65,12 @@ void FirstOrderType2R::initialize(Interaction& inter)
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
+  _vec_r.reset(new SiconosVector(sizeDS));
+  _vec_x.reset(new SiconosVector(sizeDS));
+  _vec_z.reset(new SiconosVector(sizeZ));
+
+
+
   if (!_C)
     relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
   if (!_D)
@@ -92,6 +79,8 @@ void FirstOrderType2R::initialize(Interaction& inter)
     relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
   if (!_B)
     relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
+  if (!_K)
+    relationMat[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
 
 //  if (!_jacgx)
 //  {

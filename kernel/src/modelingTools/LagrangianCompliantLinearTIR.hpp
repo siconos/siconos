@@ -92,12 +92,9 @@ public:
 
   /** initialize LagrangianCompliantLinearTIR specific operators.
    * \param inter an Interaction using this relation
-   * \param DSlink
-   * \param workV
-   * \param workM
    */
-  void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
-                      VectorOfVectors& workV, VectorOfSMatrices& workM);
+  void initialize(Interaction& inter);
+
   /** check sizes LagrangianCompliantLinearTIR specific operators.
    * \param inter an Interaction using this relation
    */

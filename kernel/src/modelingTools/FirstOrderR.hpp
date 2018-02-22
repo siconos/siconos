@@ -61,13 +61,13 @@ variables are required in g.
 class FirstOrderR : public Relation
 {
 public:
-  enum FirstOrderRDS  {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};
+  enum FirstOrderRDS  {x,z,r, DSlinkSize};
   enum FirstOrderRVec {e,  relationVectorsSize};
   enum FirstOrderRMat {mat_C, mat_D, mat_F, mat_B, mat_K, relationMatricesSize};
 
 
-  enum FirstOrderRWorkVec {osnsp_rhs,vec_z, vec_x, vec_r,  h_alpha, g_alpha, vec_residuY, vec_residuR, workVecSize};
-  enum FirstOrderWorkMat{mat_Ktilde, mat_Khat, mat_workMatSize};
+  //enum FirstOrderRWorkVec {osnsp_rhs, h_alpha, g_alpha, vec_residuY, vec_residuR, workVecSize};
+  //enum FirstOrderWorkMat{mat_workMatSize};
 
 
 protected:
@@ -103,15 +103,17 @@ public:
   */
   virtual ~FirstOrderR() {};
 
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
-  
+
+  /** initialize the relation (check sizes, memory allocation ...)
+   * \param inter the interaction using this relation
+   */
   virtual void initialize(Interaction& inter);
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
   virtual void checkSize(Interaction& inter) = 0;
-  
+
   /** set C to pointer newC
   *  \param newC the C matrix
   */
@@ -183,7 +185,6 @@ public:
   {
     return _K;
   }
-
 
 };
 #endif

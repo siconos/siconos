@@ -78,11 +78,9 @@ protected:
 
   /** initialize G matrices or components specific to derived classes.
    * \param inter : the Interaction
-   * \param DSlink : block vectors from dynamical systems
-   * \param workV : work vectors
-   * \param workM : work vectors
-  */
-  void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+   */
+  void initialize(Interaction& inter);
+
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */

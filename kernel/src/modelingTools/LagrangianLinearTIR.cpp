@@ -54,10 +54,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e
   _e = e;
 }
 
-void LagrangianLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  checkSize(inter);
-}
+
 void LagrangianLinearTIR::checkSize(Interaction& inter)
 {
   unsigned int sizeY = inter.getSizeOfY();

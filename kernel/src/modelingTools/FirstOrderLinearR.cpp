@@ -76,26 +76,6 @@ FirstOrderLinearR::FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP:
   _e = E;
 }
 
-void FirstOrderLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  
-  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-
-  // get interesting size
-  //unsigned int sizeY = inter.getSizeOfY();
-  //unsigned int sizeX = inter.getSizeOfDS();
-  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
-
-  // Update workV (copy of DS variables)
-  workV.resize(FirstOrderR::workVecSize);
-  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
-
-  workM.resize(FirstOrderR::mat_workMatSize);
-
-  checkSize(inter);
-}
-
-
 void FirstOrderLinearR::initialize(Interaction& inter)
 {
 

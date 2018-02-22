@@ -80,13 +80,7 @@ public:
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
-   * \param DSlink link to DS variable
-   * \param workV work vectors to initialize
-   * \param workM work matrices to initialize
-  */
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
-                              VectorOfVectors& workV, VectorOfSMatrices& workM);
-  
+   */
   virtual void initialize(Interaction& inter);
 
   /** check sizes of the relation specific operators.

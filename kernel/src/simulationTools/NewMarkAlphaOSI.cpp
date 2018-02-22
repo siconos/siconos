@@ -478,14 +478,12 @@ void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
 
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
   interProp.workBlockVectors.reset(new VectorOfBlockVectors);
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
   workBlockV.resize(NewMarkAlphaOSI::BLOCK_WORK_LENGTH);
 
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
 
   workV.resize(NewMarkAlphaOSI::WORK_INTERACTION_LENGTH);

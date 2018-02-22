@@ -32,25 +32,6 @@ typedef FONLR_h FONLR_K;
 typedef FONLR_h FONLR_D;
 
 
-
-void FirstOrderNonLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-
-
-  unsigned int sizeY = inter.getSizeOfY();
-  unsigned int sizeDS = inter.getSizeOfDS();
-  workV.resize(FirstOrderR::workVecSize);
-  workM.resize(FirstOrderR::mat_workMatSize);
-
-  workV[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));
-  workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
-
-  workM[FirstOrderR::mat_Khat].reset(new SimpleMatrix(sizeDS, sizeY));
-
-
-}
-
 void FirstOrderNonLinearR::initialize(Interaction& inter)
 {
   FirstOrderR::initialize(inter);

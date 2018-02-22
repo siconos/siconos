@@ -48,13 +48,7 @@ protected:
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
-   * \param DSlink
-   * \param workV
-   * \param workM
    */
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
-                              VectorOfVectors& workV, VectorOfSMatrices& workM);
-
   virtual void initialize(Interaction& inter);
 
   /** check sizes of the relation specific operators.

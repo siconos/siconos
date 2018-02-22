@@ -217,8 +217,6 @@ public:
   virtual void computeInput(double time, Interaction& inter,
                     unsigned int level = 0);
 
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-  
   virtual void initialize(Interaction& inter);
   
   /** check sizes of the relation specific operators.

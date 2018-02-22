@@ -82,9 +82,11 @@ public:
   */
   virtual ~FirstOrderNonLinearR() {};
 
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-
+  /** initialize the relation (check sizes, memory allocation ...)
+   * \param inter the interaction using this relation
+   */
   void initialize(Interaction& inter);
+
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */

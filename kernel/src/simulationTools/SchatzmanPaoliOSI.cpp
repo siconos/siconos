@@ -173,13 +173,11 @@ void SchatzmanPaoliOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
   workBlockV.resize(SchatzmanPaoliOSI::BLOCK_WORK_LENGTH);
 
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
   workV.resize(SchatzmanPaoliOSI::WORK_INTERACTION_LENGTH);
   workV[SchatzmanPaoliOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));

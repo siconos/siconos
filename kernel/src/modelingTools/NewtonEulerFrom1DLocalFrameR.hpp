@@ -138,9 +138,6 @@ public:
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
 
-
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-
   virtual void initialize(Interaction& inter);
 
   /* Default implementation consists in multiplying jachq and T (see NewtonEulerR::computeJachqT)

@@ -1051,15 +1051,3 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) c
   setBlock(D, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const
-{
-  RELATION::TYPES relationType = relation()->getType();
-
-  if ((relationType == FirstOrder) && (workM[FirstOrderR::mat_Khat]))
-  {
-    SP::SiconosMatrix K = std11::static_pointer_cast<FirstOrderR>(_relation)->K();
-    if (!K) K = _relationMatrices[FirstOrderR::mat_K];
-    prod(*K, m, *workM[FirstOrderR::mat_Khat], true);
-    *workM[FirstOrderR::mat_Khat] *= h;
-  }
-}

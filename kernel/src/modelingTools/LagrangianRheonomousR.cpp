@@ -44,11 +44,6 @@ LagrangianRheonomousR::LagrangianRheonomousR(const std::string& pluginh, const s
   setComputehDotFunction(SSLH::getPluginName(pluginDoth), SSLH::getPluginFunctionName(pluginDoth));
 }
 
-void LagrangianRheonomousR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  LagrangianR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-  checkSize(inter);
-}
 void LagrangianRheonomousR::initialize(Interaction& inter)
 {
   if (!_jachq)

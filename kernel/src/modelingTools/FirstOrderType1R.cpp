@@ -44,21 +44,6 @@ FirstOrderType1R::FirstOrderType1R(const std::string& pluginh, const std::string
   setComputeJacglambdaFunction(SSLH::getPluginName(pluginJacglambda), SSLH::getPluginFunctionName(pluginJacglambda));
 }
 
-void FirstOrderType1R::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-
-  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-
-  // Check if an Interaction is connected to the Relation.
-  //unsigned int sizeY = inter.getSizeOfY();
-  unsigned int sizeDS = inter.getSizeOfDS();
-  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
-
-  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
-  workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
-
-}
 
 void FirstOrderType1R::initialize(Interaction& inter)
 {

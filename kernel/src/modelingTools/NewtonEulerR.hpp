@@ -181,12 +181,7 @@ public:
 
   /** initialize components specific to derived classes.
    * \param inter  Interaction associated with the Relation
-   * \param DSlink
-   * \param workV
-   * \param workM
    */
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-
   virtual void initialize(Interaction& inter);
 
   /** check sizes of the relation specific operators.

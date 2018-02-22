@@ -762,9 +762,6 @@ public:
    */
   void getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) const;
 
-  void computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const;
-
-
 };
 
 #endif // INTERACTION_H

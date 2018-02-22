@@ -93,14 +93,6 @@ void NewtonEulerR::initialize(Interaction& inter)
 }
 
 
-void NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-
-  DEBUG_BEGIN("NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, ...)\n");
-
-  DEBUG_END("NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter)\n");
-}
-
 void NewtonEulerR::checkSize(Interaction& inter)
 {
   unsigned int ySize = inter.getSizeOfY();

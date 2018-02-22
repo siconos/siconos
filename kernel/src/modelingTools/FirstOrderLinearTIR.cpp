@@ -53,20 +53,6 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D,
   _e = e;
 }
 
-void FirstOrderLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  DEBUG_PRINT("FirstOrderLinearTIR::initialize(Interaction & inter)\n");
-
-  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM); // ?
-  
-  if (!_C)
-    RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() C is null and is a required input.");
-  if (!_B)
-    RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() B is null and is a required input.");
-
-  checkSize(inter);
-}
-
 void FirstOrderLinearTIR::initialize(Interaction& inter)
 {
   DEBUG_PRINT("FirstOrderLinearTIR::initialize(Interaction & inter)\n");

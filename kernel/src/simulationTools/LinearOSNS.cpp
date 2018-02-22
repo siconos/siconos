@@ -216,7 +216,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   // simulation type ...  left, right and extra depend on the relation
   // type and the non smooth law.
   relationType = inter->relation()->getType();
-  VectorOfSMatrices& workMInter = *indexSet->properties(vd).workMatrices;
+
 
   inter->getExtraInteractionBlock(currentInteractionBlock);
 
@@ -266,7 +266,11 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         // centralInteractionBlock * X = rightInteractionBlock with PLU
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
         centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
-        inter->computeKhat(*rightInteractionBlock, workMInter, h); // if K is non 0
+        VectorOfSMatrices& workMInter = *indexSet->properties(vd).workMatrices;
+        static_cast<EulerMoreauOSI&>(osi).computeKhat(*inter, *rightInteractionBlock,
+                                                      workMInter, h);
+
+
 
         //      integration of r with theta method removed
         //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B
@@ -622,7 +626,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[FirstOrderR::osnsp_rhs];
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[OneStepIntegrator::osnsp_rhs];
     setBlock(osnsp_rhs, _q, sizeY , 0, pos);
   }
   else if ((osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI  )||

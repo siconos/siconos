@@ -23,26 +23,6 @@ void FirstOrderR::initialize(Interaction& inter)
   inter.relationVectors().resize(FirstOrderR::relationVectorsSize);
 }
 
-void FirstOrderR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workVInter, VectorOfSMatrices& workMInter)
-{
-  workVInter.resize(FirstOrderR::workVecSize);
-  workMInter.resize(FirstOrderR::mat_workMatSize);
-  unsigned int sizeY = inter.getSizeOfY();
-  
-  if (!workVInter[FirstOrderR::h_alpha])
-        workVInter[FirstOrderR::h_alpha].reset(new SiconosVector(sizeY));
-  if (!workVInter[FirstOrderR::vec_residuY])
-        workVInter[FirstOrderR::vec_residuY].reset(new SiconosVector(sizeY));
-  if (requireResidu())
-    {
-      unsigned int sizeOfDS = inter.getSizeOfDS();
-      if (!workVInter[FirstOrderR::g_alpha])
-        workVInter[FirstOrderR::g_alpha].reset(new SiconosVector(sizeOfDS));
-      if (!workVInter[FirstOrderR::vec_residuR])
-        workVInter[FirstOrderR::vec_residuR].reset(new SiconosVector(sizeOfDS));
-    }
-}
-
 void FirstOrderR::checkSize(Interaction& inter)
 {
 

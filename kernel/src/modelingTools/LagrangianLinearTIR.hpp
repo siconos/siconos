@@ -86,12 +86,7 @@ public:
 
   /** initialize LagrangianLinearTIR specific operators.
    * \param inter an Interaction using this relation
-   * \param DSlink
-   * \param workV
-   * \param workM
    */
-  void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
-                      VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation

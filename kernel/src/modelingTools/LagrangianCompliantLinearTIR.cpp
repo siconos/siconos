@@ -53,7 +53,7 @@ LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(SP::SimpleMatrix C, S
   _e = e;
 }
 
-void LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianCompliantLinearTIR::initialize(Interaction& inter)
 {
   checkSize(inter);
 }

@@ -121,21 +121,15 @@ void MoreauJeanGOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-
   interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
   interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
 
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
   workBlockV.resize(MoreauJeanGOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   
   workV.resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
   workV[MoreauJeanGOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));

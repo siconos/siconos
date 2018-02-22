@@ -106,11 +106,11 @@ void EulerMoreauOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds
   initializeIterationMatrixW(t, ds);
 
   // buffers allocation (into the graph)
-  workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
   workVectors[OneStepIntegrator::residu].reset(new SiconosVector(ds->dimension()));
   workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(ds->dimension()));
   workVectors[OneStepIntegrator::free].reset(new SiconosVector(ds->dimension()));
-  workVectors[OneStepIntegrator::x_partial_ns].reset(new SiconosVector(ds->dimension()));
+  workVectors[OneStepIntegrator::local_buffer].reset(new SiconosVector(ds->dimension()));
+  workVectors[OneStepIntegrator::x_partial_ns_for_relation].reset(new SiconosVector(ds->dimension()));
   workVectors[OneStepIntegrator::delta_x_for_relation].reset(new SiconosVector(ds->dimension()));
   workVectors[OneStepIntegrator::local_buffer].reset(new SiconosVector(ds->dimension()));
 
@@ -134,15 +134,28 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+
+  workV.resize(OneStepIntegrator::interaction_work_vector_of_vector_size);
+  workM.resize(OneStepIntegrator::work_vector_of_matrix_size);
+  workBlockV.resize(OneStepIntegrator::work_vector_of_block_vector_size);
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-  RELATION::TYPES relationType = relation.getType();
+  //relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
-  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
+
+
+  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeOfDS = inter.getSizeOfDS();
+  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
+
+  RELATION::TYPES relationType = relation.getType();
+  RELATION::SUBTYPES relationSubType = relation.getSubType();
+  workV[OneStepIntegrator::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -159,28 +172,42 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
     if (relationType == FirstOrder)
     {
-      if (!DSlink[FirstOrderR::xfree])
-      {
-        DSlink[FirstOrderR::xfree].reset(new BlockVector());
-        DSlink[FirstOrderR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-      }
-      else
-        DSlink[FirstOrderR::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
+      workV[OneStepIntegrator::vec_z].reset(new SiconosVector(sizeZ));
+      workV[OneStepIntegrator::vec_x].reset(new SiconosVector(sizeOfDS));
 
-      if (!DSlink[FirstOrderR::xPartialNS])
+      if (relationSubType == NonLinearR || relationSubType == Type2R )
       {
-        DSlink[FirstOrderR::xPartialNS].reset(new BlockVector());
-        DSlink[FirstOrderR::xPartialNS]->insertPtr(workVds1[OneStepIntegrator::x_partial_ns]);
+        workV[OneStepIntegrator::h_alpha].reset(new SiconosVector(sizeY));
+        workV[OneStepIntegrator::vec_residuY].reset(new SiconosVector(sizeY));
+        workV[OneStepIntegrator::g_alpha].reset(new SiconosVector(sizeOfDS));
+        workV[OneStepIntegrator::vec_residuR].reset(new SiconosVector(sizeOfDS));
+        workM[OneStepIntegrator::mat_Khat].reset(new SimpleMatrix(sizeOfDS, sizeY));
+        workM[OneStepIntegrator::mat_Ktilde].reset(new SimpleMatrix(sizeOfDS, sizeY));
+      }
+
+
+      if (!workBlockV[OneStepIntegrator::xfree])
+      {
+        workBlockV[OneStepIntegrator::xfree].reset(new BlockVector());
+        workBlockV[OneStepIntegrator::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
       }
       else
-        DSlink[FirstOrderR::xPartialNS]->setVectorPtr(0,workVds1[OneStepIntegrator::x_partial_ns]);
-      if (!DSlink[FirstOrderR::deltax])
+        workBlockV[OneStepIntegrator::xfree]->setVectorPtr(0,workVds1[OneStepIntegrator::free]);
+
+      if (!workBlockV[OneStepIntegrator::x_partial_ns])
       {
-        DSlink[FirstOrderR::deltax].reset(new BlockVector());
-        DSlink[FirstOrderR::deltax]->insertPtr(workVds1[OneStepIntegrator::delta_x_for_relation]);
+        workBlockV[OneStepIntegrator::x_partial_ns].reset(new BlockVector());
+        workBlockV[OneStepIntegrator::x_partial_ns]->insertPtr(workVds1[OneStepIntegrator::x_partial_ns_for_relation]);
       }
       else
-        DSlink[FirstOrderR::deltax]->setVectorPtr(0,workVds1[OneStepIntegrator::delta_x_for_relation]);
+        workBlockV[OneStepIntegrator::x_partial_ns]->setVectorPtr(0,workVds1[OneStepIntegrator::x_partial_ns_for_relation]);
+      if (!workBlockV[OneStepIntegrator::delta_x])
+      {
+        workBlockV[OneStepIntegrator::delta_x].reset(new BlockVector());
+        workBlockV[OneStepIntegrator::delta_x]->insertPtr(workVds1[OneStepIntegrator::delta_x_for_relation]);
+      }
+      else
+        workBlockV[OneStepIntegrator::delta_x]->setVectorPtr(0,workVds1[OneStepIntegrator::delta_x_for_relation]);
     }
   }
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
@@ -197,36 +224,36 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
       if (relationType == FirstOrder)
 	    {
-	      if (!DSlink[FirstOrderR::xfree])
+	      if (!workBlockV[OneStepIntegrator::xfree])
         {
-          DSlink[FirstOrderR::xfree].reset(new BlockVector());
+          workBlockV[OneStepIntegrator::xfree].reset(new BlockVector());
           //dummy insertion to reserve first vector for ds1
-          DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
-          DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+          workBlockV[OneStepIntegrator::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+          workBlockV[OneStepIntegrator::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
         }
 	      else
-          DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+          workBlockV[OneStepIntegrator::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
 
-	      if (!DSlink[FirstOrderR::xPartialNS])
+	      if (!workBlockV[OneStepIntegrator::x_partial_ns])
         {
-          DSlink[FirstOrderR::xPartialNS].reset(new BlockVector());
+          workBlockV[OneStepIntegrator::x_partial_ns].reset(new BlockVector());
           //dummy insertion to reserve first vector for ds1
-          DSlink[FirstOrderR::xPartialNS]->insertPtr(workVds2[OneStepIntegrator::x_partial_ns]);
-          DSlink[FirstOrderR::xPartialNS]->insertPtr(workVds2[OneStepIntegrator::x_partial_ns]);
+          workBlockV[OneStepIntegrator::x_partial_ns]->insertPtr(workVds2[OneStepIntegrator::x_partial_ns_for_relation]);
+          workBlockV[OneStepIntegrator::x_partial_ns]->insertPtr(workVds2[OneStepIntegrator::x_partial_ns_for_relation]);
         }
 	      else
-          DSlink[FirstOrderR::xPartialNS]->insertPtr(workVds2[OneStepIntegrator::x_partial_ns]);
+          workBlockV[OneStepIntegrator::x_partial_ns]->insertPtr(workVds2[OneStepIntegrator::x_partial_ns_for_relation]);
 
 
-	      if (!DSlink[FirstOrderR::deltax])
+	      if (!workBlockV[OneStepIntegrator::delta_x])
         {
-          DSlink[FirstOrderR::deltax].reset(new BlockVector());
+          workBlockV[OneStepIntegrator::delta_x].reset(new BlockVector());
           //dummy insertion to reserve first vector for ds1
-          DSlink[FirstOrderR::deltax]->insertPtr(workVds2[OneStepIntegrator::delta_x_for_relation]);
-          DSlink[FirstOrderR::deltax]->insertPtr(workVds2[OneStepIntegrator::delta_x_for_relation]);
+          workBlockV[OneStepIntegrator::delta_x]->insertPtr(workVds2[OneStepIntegrator::delta_x_for_relation]);
+          workBlockV[OneStepIntegrator::delta_x]->insertPtr(workVds2[OneStepIntegrator::delta_x_for_relation]);
         }
 	      else
-          DSlink[FirstOrderR::deltax]->insertPtr(workVds2[OneStepIntegrator::delta_x_for_relation]);
+          workBlockV[OneStepIntegrator::delta_x]->insertPtr(workVds2[OneStepIntegrator::delta_x_for_relation]);
 	    }
     }
   }
@@ -408,6 +435,20 @@ void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds,
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
   DEBUG_END("EulerMoreauOSI::computeW(...)\n");
+}
+
+void EulerMoreauOSI::computeKhat(Interaction& inter, SiconosMatrix& m,
+                                 VectorOfSMatrices& workM, double h) const
+{
+  RELATION::TYPES relationType = inter.relation()->getType();
+
+  if ((relationType == FirstOrder) && (workM[OneStepIntegrator::mat_Khat]))
+  {
+    SP::SiconosMatrix K = std11::static_pointer_cast<FirstOrderR>(inter.relation())->K();
+    if (!K) K = inter.relationMatrices()[FirstOrderR::mat_K];
+    prod(*K, m, *workM[OneStepIntegrator::mat_Khat], true);
+    *workM[OneStepIntegrator::mat_Khat] *= h;
+  }
 }
 
 
@@ -695,7 +736,7 @@ void EulerMoreauOSI::computeFreeState()
       // xPartialNS was updated before this fonction call
       // It constains either 0 (first Newton iterate)
       // or g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
-      SiconosVector& xPartialNS = *workVectors[OneStepIntegrator::x_partial_ns];
+      SiconosVector& xPartialNS = *workVectors[OneStepIntegrator::x_partial_ns_for_relation];
       DEBUG_PRINT("EulerMoreauOSI::computeFreeState xPartialNS from Interaction\n");
       DEBUG_EXPR(xPartialNS.display());
 
@@ -770,9 +811,10 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
     {
       Interaction & inter = *indexSet0->bundle(*ui);
       InteractionProperties& interProp = indexSet0->properties(*ui);
-      VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
       VectorOfVectors& workV = *interProp.workVectors;
       VectorOfSMatrices& relationMat = inter.relationMatrices();
+      VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
 
 
       RELATION::TYPES relationType = inter.relation()->getType();
@@ -780,17 +822,17 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
       if(relationType == FirstOrder)
       {
         FirstOrderR& relation = static_cast<FirstOrderR&> (*inter.relation());
-        BlockVector& xPartialNS = *DSlink[FirstOrderR::xPartialNS];
+        BlockVector& xPartialNS = *workBlockV[OneStepIntegrator::x_partial_ns];
 
         if (relationSubType == NonLinearR || relationSubType == Type2R)
         {
           if (relation.B())
-            prod(*relation.B(), *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
+            prod(*relation.B(), *inter.lambda(0), *workV[OneStepIntegrator::vec_x], true);
           else
-            prod(*relationMat[FirstOrderR::mat_B], *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
+            prod(*relationMat[FirstOrderR::mat_B], *inter.lambda(0), *workV[OneStepIntegrator::vec_x], true);
 
-          xPartialNS = *workV[FirstOrderR::g_alpha];
-          xPartialNS -= *workV[FirstOrderR::vec_x];
+          xPartialNS = *workV[OneStepIntegrator::g_alpha];
+          xPartialNS -= *workV[OneStepIntegrator::vec_x];
         }
       }
     }
@@ -837,9 +879,10 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 
   VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
   VectorOfSMatrices& relationMat = inter->relationMatrices();
+  VectorOfVectors & relationVec= inter->relationVectors();
 
   VectorOfVectors& workV = *indexSet->properties(vertex_inter).workVectors;
-
+  VectorOfBlockVectors& workBlockV = *(indexSet->properties(vertex_inter)).workBlockVectors;
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -865,12 +908,12 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 
   SP::SiconosVector H_alpha;
 
-  deltax = DSlink[FirstOrderR::deltax];
+  deltax = workBlockV[OneStepIntegrator::delta_x];
 
-  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[FirstOrderR::osnsp_rhs];
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[OneStepIntegrator::osnsp_rhs];
 
-  Xfree = DSlink[FirstOrderR::xfree];
-
+  Xfree = workBlockV[OneStepIntegrator::xfree];
+  DEBUG_EXPR(Xfree->display(););
   assert(Xfree);
 
 
@@ -912,7 +955,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
     {
       RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Type2R and H_alpha->getValue() should return the mid-point value");
     }
-    SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
+    SiconosVector& hAlpha= *workV[OneStepIntegrator::h_alpha];
     osnsp_rhs += hAlpha;
   }
   else if(relationType == FirstOrder && relationSubType == Type1R)
@@ -944,9 +987,9 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
     {
       RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
     }
-    if(workV[FirstOrderR::h_alpha])
+    if(workV[OneStepIntegrator::h_alpha])
     {
-      osnsp_rhs += *workV[FirstOrderR::h_alpha];
+      osnsp_rhs += *workV[OneStepIntegrator::h_alpha];
     }
   }
   else // First Order Linear Relation
@@ -972,7 +1015,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 	      subprod(*C, *Xfree, osnsp_rhs, coord, true);
 	    }
     }
-
+    DEBUG_EXPR(osnsp_rhs.display(););
     if(relationType == FirstOrder && (relationSubType == LinearTIR || relationSubType == LinearR))
     {
       // In the first order linear case it may be required to add e + FZ to y.
@@ -986,7 +1029,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
       else
 	    {
 	      e = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->e();
-	      if(!e) e = workV[FirstOrderR::e];
+	      if(!e) e = relationVec[FirstOrderR::e];
 	      F = std11::static_pointer_cast<FirstOrderLinearR>(mainInteraction->relation())->F();
 	      if(!F) F = relationMat[FirstOrderR::mat_F];
 	    }
@@ -1001,6 +1044,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 	      subprod(*F, *DSlink[FirstOrderR::z], osnsp_rhs, coord, false);
 	    }
     }
+    DEBUG_EXPR(osnsp_rhs.display(););
 
   }
   DEBUG_END("EulerMoreauOSI::computeFreeOutput(...)\n");
@@ -1152,7 +1196,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
 
     InteractionProperties& interProp = indexSet0->properties(*ui);
     VectorOfVectors& workV = *interProp.workVectors;
-
+    VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
     RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
     if (relationSubType == Type2R)
     {
@@ -1169,7 +1213,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       DEBUG_EXPR(y.display());
 
 
-      SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
+      SiconosVector& hAlpha= *workV[OneStepIntegrator::h_alpha];
 
       if (r.D())
         prod(*r.D(), *(inter.lambdaOld(level)), y, true);
@@ -1184,14 +1228,14 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       y += *inter.yOld(level);
 
       DEBUG_PRINT("FirstOrderType2R::computeOutput : ResiduY() \n");
-      SiconosVector& residuY = *workV[FirstOrderR::vec_residuY];
+      SiconosVector& residuY = *workV[OneStepIntegrator::vec_residuY];
       DEBUG_EXPR(residuY.display());
 
       y -= residuY;
       DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) \n");
       DEBUG_EXPR(y.display());
 
-      BlockVector& deltax = *DSlink[FirstOrderR::deltax];
+      BlockVector& deltax = *workBlockV[OneStepIntegrator::delta_x];
       //  deltax -= *(DSlink[FirstOrderR::xold)];
       DEBUG_PRINT("FirstOrderType2R::computeOutput : deltax \n");
       DEBUG_EXPR(deltax.display());
@@ -1214,7 +1258,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
         DEBUG_EXPR(y.display());
       }
 
-      SiconosVector& x = *workV[FirstOrderR::vec_x];
+      SiconosVector& x = *workV[OneStepIntegrator::vec_x];
       x = *DSlink[FirstOrderR::x];
 
 
@@ -1251,15 +1295,15 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       y += *inter.yOld(level);
 
       DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : ResiduY() \n");
-      SiconosVector& residuY = *workV[FirstOrderR::vec_residuY];
-      DEBUG_EXPR(residuY().display());
+      SiconosVector& residuY = *workV[OneStepIntegrator::vec_residuY];
+      DEBUG_EXPR(residuY.display());
 
       y -= residuY;
 
       DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : y(level) \n");
       DEBUG_EXPR(y.display());
 
-      BlockVector& deltax = *DSlink[FirstOrderR::deltax];
+      BlockVector& deltax = *workBlockV[OneStepIntegrator::delta_x];
       DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : deltax \n");
       DEBUG_EXPR(deltax.display());
 
@@ -1278,12 +1322,12 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : new linearized y \n");
       DEBUG_EXPR(y.display());
 
-      SiconosVector& x = *workV[FirstOrderR::vec_x];
+      SiconosVector& x = *workV[OneStepIntegrator::vec_x];
       x = *DSlink[FirstOrderR::x];
-      SiconosVector& z = *workV[FirstOrderR::vec_z];
+      SiconosVector& z = *workV[OneStepIntegrator::vec_z];
       z = *DSlink[FirstOrderR::z];
 
-      SiconosVector hAlpha =  *workV[FirstOrderR::h_alpha];
+      SiconosVector hAlpha =  *workV[OneStepIntegrator::h_alpha];
       r.computeh(time, x, *inter.lambda(level), z, hAlpha);
 
       *DSlink[FirstOrderR::z] = z;
@@ -1317,6 +1361,8 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
     InteractionProperties& interProp = indexSet0->properties(*ui);
     VectorOfVectors& workV = *interProp.workVectors;
     VectorOfSMatrices& workM = *interProp.workMatrices;
+    VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+
     RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
     if (relationSubType == Type2R)
     {
@@ -1325,16 +1371,16 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       lambda -= *(inter.lambdaOld(level));
 
       if (r.B())
-        prod(*r.B(), lambda, *workV[FirstOrderR::g_alpha], false);
+        prod(*r.B(), lambda, *workV[OneStepIntegrator::g_alpha], false);
       else
-        prod(*relationMat[FirstOrderR::mat_B], lambda, *workV[FirstOrderR::g_alpha], false);
+        prod(*relationMat[FirstOrderR::mat_B], lambda, *workV[OneStepIntegrator::g_alpha], false);
 
 
-      *DSlink[FirstOrderR::r] += *workV[FirstOrderR::g_alpha];
+      *DSlink[FirstOrderR::r] += *workV[OneStepIntegrator::g_alpha];
       DEBUG_EXPR(DSlink[FirstOrderR::r]->display(););
       //compute the new g_alpha
-      r.computeg(time, *inter.lambda(level), *workV[FirstOrderR::g_alpha]);
-      DEBUG_EXPR(workV[FirstOrderR::g_alpha]->display(););
+      r.computeg(time, *inter.lambda(level), *workV[OneStepIntegrator::g_alpha]);
+      DEBUG_EXPR(workV[OneStepIntegrator::g_alpha]->display(););
     }
     else if (relationSubType == NonLinearR )
     {
@@ -1347,14 +1393,14 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       SiconosVector lambda = *inter.lambda(level);
       lambda -= *(inter.lambdaOld(level));
 
-      SiconosVector& g_alpha = *workV[FirstOrderR::g_alpha];
+      SiconosVector& g_alpha = *workV[OneStepIntegrator::g_alpha];
 
       if (r.B())
         prod(*r.B(), lambda, g_alpha, false);
       else
         prod(*relationMat[FirstOrderR::mat_B], lambda, g_alpha, false);
 
-      BlockVector& deltax = *DSlink[FirstOrderR::deltax];
+      BlockVector& deltax = *workBlockV[OneStepIntegrator::delta_x];
       DEBUG_PRINT("FirstOrderNonLinearR::computeInput : deltax \n");
       DEBUG_EXPR(deltax.display());
 
@@ -1365,14 +1411,14 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
 
 
       // Khat = h * K * W^-1 * B
-      prod(*workM[FirstOrderR::mat_Khat], *inter.lambda(level), g_alpha, false);
+      prod(*workM[OneStepIntegrator::mat_Khat], *inter.lambda(level), g_alpha, false);
 
       *DSlink[FirstOrderR::r] += g_alpha;
 
       //compute the new g_alpha
-      SiconosVector& x = *workV[FirstOrderR::vec_x];
+      SiconosVector& x = *workV[OneStepIntegrator::vec_x];
       x = *DSlink[FirstOrderR::x];
-      SiconosVector& z = *workV[FirstOrderR::vec_z];
+      SiconosVector& z = *workV[OneStepIntegrator::vec_z];
       z = *DSlink[FirstOrderR::z];
       r.computeg(time, x, *inter.lambda(level), z, g_alpha);
       *DSlink[FirstOrderR::z] = z;
@@ -1395,9 +1441,9 @@ double EulerMoreauOSI::computeResiduOutput(double time, SP::InteractionsGraph in
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     VectorOfVectors& workV = *indexSet->properties(*ui).workVectors;
-    SiconosVector&  residuY = *workV[FirstOrderR::vec_residuY];
+    SiconosVector&  residuY = *workV[OneStepIntegrator::vec_residuY];
     Interaction & inter = *indexSet->bundle(*ui);
-    residuY = *workV[FirstOrderR::h_alpha];
+    residuY = *workV[OneStepIntegrator::h_alpha];
     scal(-1, residuY, residuY);
     residuY += *(inter.y(0));
     DEBUG_EXPR(residuY.display(););
@@ -1415,10 +1461,10 @@ double EulerMoreauOSI::computeResiduInput(double time, SP::InteractionsGraph ind
     VectorOfVectors& workV = *interProp.workVectors;
     SP::Interaction inter = indexSet->bundle(*ui);
     VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
-    SiconosVector&  residuR = *workV[FirstOrderR::vec_residuR];
+    SiconosVector&  residuR = *workV[OneStepIntegrator::vec_residuR];
     //Residu_r = r_alpha_k+1 - g_alpha;
     residuR = *DSlink[FirstOrderR::r];
-    residuR -= *workV[FirstOrderR::g_alpha];
+    residuR -= *workV[OneStepIntegrator::g_alpha];
     DEBUG_EXPR(residuR.display(););
     residu = std::max(residu,residuR.norm2());
   }

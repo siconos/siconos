@@ -42,9 +42,10 @@ void LagrangianCompliantR::_zeroPlugin()
   _pluginJachlambda.reset(new PluggedObject());
 }
 
-void LagrangianCompliantR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+
+void LagrangianCompliantR::initialize(Interaction& inter)
 {
-  LagrangianR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  LagrangianR::initialize(inter);
   unsigned int sizeY = inter.getSizeOfY();
 
   if (! _jachlambda)

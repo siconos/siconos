@@ -159,13 +159,7 @@ public:
 
   /** initialize components specific to derived classes.
    * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV work vectors
-   * \param workM work matrices
    */
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
-                                                VectorOfVectors& workV, VectorOfSMatrices& workM);
-
   virtual void initialize(Interaction& inter) {};
   
   /** check sizes of the relation specific operators.
