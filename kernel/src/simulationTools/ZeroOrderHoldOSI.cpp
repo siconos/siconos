@@ -151,9 +151,11 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   assert(ds2);
 
   interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
+  workV.resize(OneStepIntegrator::interaction_work_vector_of_vector_size);
+  
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
   workBlockV.resize(OneStepIntegrator::work_vector_of_block_vector_size);
 
