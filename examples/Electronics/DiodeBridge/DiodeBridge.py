@@ -102,13 +102,13 @@ InterDiodeBridge = sk.Interaction(nslaw, LTIRDiodeBridge)
 #
 # Model
 #
-DiodeBridge = sk.Model(t0, T, Modeltitle)
-
+DiodeBridge = sk.NonSmoothDynamicalSystem(t0, T)
+DiodeBridge.setTitle(Modeltitle)
 #   add the dynamical system in the non smooth dynamical system
-DiodeBridge.nonSmoothDynamicalSystem().insertDynamicalSystem(LSDiodeBridge)
+DiodeBridge.insertDynamicalSystem(LSDiodeBridge)
 
 #   link the interaction and the dynamical system
-DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
+DiodeBridge.link(InterDiodeBridge, LSDiodeBridge)
 
 #
 # Simulation
@@ -124,7 +124,7 @@ aTiDisc = sk.TimeDiscretisation(t0, h_step)
 aLCP = sk.LCP()
 
 # (4) Simulation setup with (1) (2) (3)
-aTS = sk.TimeStepping(aTiDisc, aOSI, aLCP)
+aTS = sk.TimeStepping(DiodeBridge, aTiDisc, aOSI, aLCP)
 
 # end of model definition
 
@@ -132,9 +132,6 @@ aTS = sk.TimeStepping(aTiDisc, aOSI, aLCP)
 # computation
 #
 
-# simulation initialization
-DiodeBridge.setSimulation(aTS)
-DiodeBridge.initialize()
 
 k = 0
 h = aTS.timeStep()
@@ -207,7 +204,7 @@ while (k < N):
 from siconos.kernel import SimpleMatrix, getMatrix
 from numpy.linalg import norm
 
-ref = getMatrix(SimpleMatrix("result.ref"))
+ref = getMatrix(SimpleMatrix("DiodeBridge.ref"))
 
 assert (norm(dataPlot - ref) < 1e-12)
 

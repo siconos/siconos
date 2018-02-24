@@ -143,7 +143,7 @@ while s.hasNextEvent():
 #
 # comparison with the reference file
 #
-ref = getMatrix(SimpleMatrix("result.ref"))
+ref = getMatrix(SimpleMatrix("BouncingBallTS.ref"))
 
 if (norm(dataPlot - ref) > 1e-12):
     print("Warning. The result is rather different from the reference file.")

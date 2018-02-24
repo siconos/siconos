@@ -94,13 +94,14 @@ InterCircuitRLCD = sk.Interaction(nslaw, LTIRCircuitRLCD)
 #
 # Model
 #
-CircuitRLCD = sk.Model(t0, T, "CircuitRLCD")
+CircuitRLCD = sk.NonSmoothDynamicalSystem(t0, T)
+CircuitRLCD.setTitle("CircuitRLCD")
 
 #   add the dynamical system in the non smooth dynamical system
-CircuitRLCD.nonSmoothDynamicalSystem().insertDynamicalSystem(LSCircuitRLCD)
+CircuitRLCD.insertDynamicalSystem(LSCircuitRLCD)
 
 #   link the interaction and the dynamical system
-CircuitRLCD.nonSmoothDynamicalSystem().link(InterCircuitRLCD, LSCircuitRLCD)
+CircuitRLCD.link(InterCircuitRLCD, LSCircuitRLCD)
 
 #
 # Simulation
@@ -117,17 +118,13 @@ aTiDisc = sk.TimeDiscretisation(t0, h_step)
 aLCP = sk.LCP()
 
 # (4) Simulation setup with (1) (2) (3)
-aTS = sk.TimeStepping(aTiDisc, aOSI, aLCP)
+aTS = sk.TimeStepping(CircuitRLCD, aTiDisc, aOSI, aLCP)
 
 # end of model definition
 
 #
 # computation
 #
-
-# simulation initialization
-CircuitRLCD.setSimulation(aTS)
-CircuitRLCD.initialize()
 
 k = 0
 h = aTS.timeStep()

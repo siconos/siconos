@@ -33,7 +33,7 @@ if do_plot:
         subplot, title, plot, grid, show, savefig, ylim
 
 from siconos.kernel import \
-    Model, MoreauJeanOSI, TimeDiscretisation, \
+    NonSmoothDynamicalSystem, MoreauJeanOSI, TimeDiscretisation, \
     FrictionContact, NewtonImpactFrictionNSL, TimeStepping
 
 import siconos.kernel as sk
@@ -89,10 +89,10 @@ body.setFExtPtr(weight)
 #
 # Model
 #
-bouncingBox = Model(t0, T)
+bouncingBox = NonSmoothDynamicalSystem(t0, T)
 
 # add the dynamical system to the non smooth dynamical system
-bouncingBox.nonSmoothDynamicalSystem().insertDynamicalSystem(body)
+bouncingBox.insertDynamicalSystem(body)
 
 #
 # Simulation
@@ -136,16 +136,12 @@ scs.append(SiconosContactor(ground))
 broadphase.insertStaticContactorSet(scs, groundOffset)
 
 # (6) Simulation setup with (1) (2) (3) (4) (5)
-simulation = TimeStepping(timedisc)
+simulation = TimeStepping(bouncingBox, timedisc)
 simulation.insertInteractionManager(broadphase)
 
 simulation.insertIntegrator(osi)
 simulation.insertNonSmoothProblem(osnspb)
 
-# simulation initialization
-
-bouncingBox.setSimulation(simulation)
-bouncingBox.initialize()
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
@@ -174,9 +170,7 @@ while(simulation.hasNextEvent()):
     # Add a second box dynamically to the simulation
     if k == 100:
         ds = makeBox(pos=3.0, vel=0.0)
-        bouncingBox.nonSmoothDynamicalSystem().insertDynamicalSystem(ds)
-        simulation.prepareIntegratorForDS(osi, ds, bouncingBox,
-                                          simulation.nextTime())
+        bouncingBox.insertDynamicalSystem(ds)
 
     simulation.computeOneStep()
 
@@ -187,7 +181,7 @@ while(simulation.hasNextEvent()):
     #if (broadphase.collisionWorld().getDispatcher().getNumManifolds() > 0):
     if (broadphase.statistics().new_interactions_created +
         broadphase.statistics().existing_interactions_processed) > 0:
-        if bouncingBox.nonSmoothDynamicalSystem().topology().\
+        if bouncingBox.topology().\
           numberOfIndexSet() == 2:
             index1 = sk.interactions(simulation.indexSet(1))
             if (len(index1) == 4):
