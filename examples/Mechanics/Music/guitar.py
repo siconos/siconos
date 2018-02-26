@@ -199,7 +199,7 @@ class Fret(sk.Interaction):
         super(Fret, self).__init__(nslaw, relation)
 
 
-class Guitar(sk.Model):
+class Guitar(sk.NonSmoothDynamicalSystem):
     """DS (strings) and interaction (frets)
     'assembly' to build a NSDS
     """
@@ -247,14 +247,13 @@ class Guitar(sk.Model):
         # iterate through ds and interactions in the input dictionnary
         # - insert ds into the nonsmooth dynamical system
         # - link each ds to its interaction
-        nsds = self.nonSmoothDynamicalSystem()
         for interaction in strings_and_frets:
             ds = strings_and_frets[interaction]
             assert isinstance(interaction, Fret)
             assert isinstance(ds, StringDS)
-            nsds.insertDynamicalSystem(ds)
+            self.insertDynamicalSystem(ds)
             # link the interaction and the dynamical system
-            nsds.link(interaction, ds)
+            self.link(interaction, ds)
         self.strings_and_frets = strings_and_frets
         # -- Simulation --
         moreau_bilbao = sk.MoreauJeanBilbaoOSI()
@@ -273,13 +272,11 @@ class Guitar(sk.Model):
         # (3) one step non smooth problem
         osnspb = sk.LCP()
         # (4) Simulation setup with (1) (2) (3)
-        self.simu = sk.TimeStepping(t, default_integrator, osnspb)
+        self.simu = sk.TimeStepping(self, t, default_integrator, osnspb)
         if integrators is not None:
             for ds in integrators:
-                self.simu.prepareIntegratorForDS(integrators[ds], ds, self, t0)
-        # simulation initialization
-        self.setSimulation(self.simu)
-        self.initialize()
+                self.simu.associate(integrators[ds], ds)
+
         # internal buffers, used to save data for each time step.
         # A dict of buffers to save ds variables for all time steps
         self.data_ds = {}

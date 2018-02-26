@@ -89,9 +89,9 @@ with Hdf5() as io:
   # is between contactors of group id 0.
   io.addNewtonImpactFrictionNSL('contact', mu=0.3)
 
-  print body_collection
+  print(body_collection)
 
-  f = open('body_collection.dict', 'w')
+  f = open('body_collection.dict', 'wb')
   pickle.dump(body_collection,f)
   f.close()
 

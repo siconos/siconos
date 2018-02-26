@@ -2,6 +2,14 @@
 
 from siconos.io.mechanics_io import Hdf5
 
+
+
+import os.path
+if not os.path.isfile('cube_scene.hdf5'):
+    print('The scene cube_scene.hdf5 is not created')
+    exec(open("./cube_scene.py").read())
+
+
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.

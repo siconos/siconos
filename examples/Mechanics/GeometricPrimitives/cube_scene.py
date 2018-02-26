@@ -10,7 +10,7 @@ import siconos.numerics as Numerics
 
 import pydoc
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with Hdf5(io_filename='cube_scene.hdf5') as io:
 
     # Definition of a cube as a convex shape
     io.addConvexShape('Cube', [

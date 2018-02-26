@@ -73,7 +73,7 @@ with Hdf5() as io:
 # the joint using computehDoF.
 class Ctrl(object):
     def initialize(self, io):
-        self.nsds = io._model.nonSmoothDynamicalSystem()
+        self.nsds = io._nsds
         self.topo = self.nsds.topology()
         self.joint1_inter = self.topo.getInteraction('joint1')
         self.joint1 = Mechanics.joints.cast_NewtonEulerJointR(

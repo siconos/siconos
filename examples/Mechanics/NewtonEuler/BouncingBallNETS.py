@@ -22,9 +22,10 @@
 from siconos.kernel import NewtonEulerDS, NewtonImpactNSL,\
      NewtonEulerR, NewtonEulerFrom1DLocalFrameR, Interaction,\
      MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping,\
-     NonSmoothDynamicalSystem, compareRefFile
+     NonSmoothDynamicalSystem, compareRefFile,\
+     SiconosVector
 
-from numpy import eye, empty, linalg, savetxt
+from numpy import eye, empty, linalg, savetxt, array
 
 import math, os
 
@@ -36,27 +37,23 @@ class BouncingBallR(NewtonEulerFrom1DLocalFrameR):
         NewtonEulerFrom1DLocalFrameR.__init__(self)
         super(BouncingBallR, self).__init__()
 
-    def computeOutput(self, time, interaction, derivativeNumber):
-
-        #print(interProp.DSlink)
-        if derivativeNumber == 0:
-            self.computeh(interaction.linkToDSVariables()[NewtonEulerR.q0],
-                          interaction.y(0))
-        else:
-            super(BouncingBallR, self).computeOutput(time, inter, derivativeNumber);
-
-    def computeh(self, q, y):
-        height = q[0][0] - self._ballRadius
-
+    def computeh(self, time, q, y):
+        print(q)
+        
+        vec_q=SiconosVector(q)
+        
+      
+        height = vec_q[0] - self._ballRadius
+        
         y[0] = height
 
         nnc = [1,0,0]
         self.setnc(nnc)
 
-        ppc1 = [height, q[0][1], q[0][2]]
+        ppc1 = [height, vec_q[1], vec_q[2]]
         self.setpc1(ppc1)
 
-        ppc2 = [0.0, q[0][1], q[0][2]]
+        ppc2 = [0.0, vec_q[1], vec_q[2]]
         self.setpc2(ppc2)
 
 t0 = 0      # start time
@@ -131,7 +128,7 @@ N = int((T - t0) // h)+1
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
-dataPlot = empty((N, 16))
+dataPlot = empty((N+1, 16))
 
 #
 # numpy pointers on dense Siconos vectors
@@ -163,7 +160,7 @@ dataPlot[0, 15] = v[2]
 k = 1
 
 # time loop
-while(s.hasNextEvent() and k < 2000):
+while(s.hasNextEvent()):
     s.computeOneStep()
 
     dataPlot[k, 0] = s.nextTime()
@@ -190,7 +187,7 @@ savetxt("result-py.dat", dataPlot)
 #
 # comparison with the reference file
 #
-compareRefFile(dataPlot, "resultsNETS.ref", 1e-12)
+compareRefFile(dataPlot, "BouncingBallNETS.ref", 1e-12)
 
 #
 # plots

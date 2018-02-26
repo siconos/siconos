@@ -71,7 +71,7 @@ with Hdf5() as io:
   ori = [math.cos(angle/2.0),0.0,math.sin(angle/2.0),0]
   axis = numpy.zeros(3)
   angle_test = Kernel.axisAngleFromQuaternion(trans+ori, axis)
-  print angle_test,axis
+  print(angle_test,axis)
   print('ori initial', ori)
   io.addObject('bar', [Contactor('Bar')],
                translation=trans,
@@ -96,9 +96,9 @@ with Hdf5() as io:
   # is between contactors of group id 0.
   io.addNewtonImpactFrictionNSL('contact', mu=0.3)
 
-  print body_collection
+  print(body_collection)
 
-  f = open('body_collection.dict', 'w')
+  f = open('body_collection.dict', 'wb')
   pickle.dump(body_collection,f)
   f.close()
 
@@ -127,7 +127,6 @@ with Hdf5(mode='r+', collision_margin=0.01) as io:
     # sizes of small objects may need to be expressed in cm or mm.
   io.run(with_timer=False,
          time_stepping=None,
-         space_filter=None,
          body_class=None,
          shape_class=None,
          face_class=None,

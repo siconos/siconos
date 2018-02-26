@@ -99,7 +99,6 @@ with Hdf5(mode='r+',collision_margin=0.05) as io:
 
     io.run(with_timer=False,
            time_stepping=None,
-           space_filter=None,
            body_class=None,
            shape_class=None,
            face_class=None,

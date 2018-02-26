@@ -63,7 +63,7 @@ with Hdf5(use_compression=True) as io:
   v3_extruded = v3 + numpy.dot(plan_thickness,amont_normal)
 
   amont_vertices=numpy.array([v0,v1,v2,v3, v0_extruded,v1_extruded,v2_extruded,v3_extruded])
-  print amont_vertices
+  print('amont_vertices', amont_vertices)
 
   io.addConvexShape('amont',amont_vertices )
   io.addObject('amont', [Contactor('amont')],
@@ -80,7 +80,7 @@ with Hdf5(use_compression=True) as io:
   v5_extruded = v5 + numpy.dot(plan_thickness,aval_normal)
 
   aval_vertices=numpy.array([v2,v3,v4,v5,v2_extruded,v3_extruded,v4_extruded,v5_extruded])
-  print aval_vertices
+  print('aval_vertices', aval_vertices)
 
   io.addConvexShape('aval',aval_vertices )
   io.addObject('aval', [Contactor('aval')],
@@ -100,7 +100,7 @@ with Hdf5(use_compression=True) as io:
                                   v6-[plan_thickness, 0.0 ,0.],v7+[plan_thickness, 0.0 ,0.],
                                   v4_extruded-[plan_thickness, 0.0 ,0.],v5_extruded+[plan_thickness, 0.0 ,0.],
                                   v6_extruded,v7_extruded])
-  print sol_vertices
+  print('sol_vertices', sol_vertices)
 
   io.addConvexShape('sol',sol_vertices )
   io.addObject('sol', [Contactor('sol')],

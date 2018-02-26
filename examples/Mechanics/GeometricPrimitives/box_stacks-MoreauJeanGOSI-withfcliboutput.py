@@ -4,8 +4,7 @@ import numpy
 import math
 
 from siconos.mechanics.collision.tools import Contactor
-#from siconos.io.mechanics_io import Hdf5
-from mechanics_io import Hdf5
+from siconos.io.mechanics_io import Hdf5
 import siconos.io.mechanics_io
 import siconos.numerics as Numerics
 import siconos.kernel as Kernel

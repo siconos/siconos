@@ -54,7 +54,7 @@ class UnstableRotation(NewtonEulerDS):
 
     def computeMExt(self, time, mExt=None):
         td = 2.0 - h
-        if mExt==None :
+        if mExt is None :
             mExt = self._mExt
 
         if isinstance(mExt,SiconosVector):
@@ -110,7 +110,7 @@ class HeavyTop(NewtonEulerDS):
         return r
         
     def computeMInt(self, time, q, v, mInt=None):
-        if mInt==None :
+        if mInt is None :
             mInt = self._mInt
         if isinstance(mInt,SiconosVector):
             r = self.centermass(q)
@@ -130,7 +130,7 @@ class HeavyTop(NewtonEulerDS):
             mInt[0] = m_sv.getValue(0) 
             mInt[1] = m_sv.getValue(1) 
             mInt[2] = m_sv.getValue(2) 
-            print "mInt", mInt
+            print("mInt", mInt)
 
 
 

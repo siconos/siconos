@@ -43,7 +43,7 @@ with Hdf5() as io:
   v5 = numpy.array([-box_width,box_width,0.0])
 
   left_up_vertices=numpy.array([v1,v2,v3,v4, v5])
-  print left_up_vertices
+  print(left_up_vertices)
   io.addConvexShape('Left_up',left_up_vertices )
   io.addObject('left_up', [Contactor('Left_up')],
                translation=translation)

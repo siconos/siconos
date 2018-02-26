@@ -178,7 +178,7 @@ def create_chute(io, box_height = box_height,
     delta_x= -4.370*scale/2.0
     delta_z=  box_height/2.0
     v_v1 = numpy.array([4.370*scale-4.370*1.200*scale*scale/box_height,  1.280*scale, 1.200*scale])+numpy.array([delta_x,0.0,delta_z]) # translation of v2
-    print v_v1
+
     v_v2 = numpy.array([4.370*scale-4.370*1.200*scale*scale/box_height,  box_width, 1.200*scale])+numpy.array([delta_x,0.0,delta_z])   # translation
     v_v3 =  numpy.array([4.370*scale, box_width, 0.0])+numpy.array([delta_x,0.0,delta_z])  # == v11
     v_v4 = numpy.array([4.370*scale, 1.280*scale, 0.0])+numpy.array([delta_x,0.0,delta_z]) # == v4
