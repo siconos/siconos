@@ -4,7 +4,7 @@ from siconos.mechanics.collision.tools import Volume, Contactor, Shape
 from siconos.io.mechanics_io import Hdf5
 import siconos.io.mechanics_io
 
-siconos.io.mechanics_io.set_implementation('original')
+#siconos.io.mechanics_io.set_implementation('original')
 siconos.io.mechanics_io.set_backend('occ')
 
 l1 = 0.153    # crank length
@@ -49,7 +49,7 @@ with Hdf5() as io:
 #                                    instance_name='artefact')],
 #                 translation=[0., 0., 0.])
 
-    io.addObject('part1', [Volume(shape_data='body1',
+    io.addObject('part1', [Volume(shape_name='body1',
                                   instance_name='Body1',
                                   relative_translation=[-0.5*l1, 0., 0.],
                                   relative_orientation=[(0, 1, 0), 0. ])],
@@ -58,7 +58,7 @@ with Hdf5() as io:
                  mass=0.038,
                  inertia=[7.4e-5, 1, 1.])
 
-    io.addObject('part2', [Volume(shape_data='body2',
+    io.addObject('part2', [Volume(shape_name='body2',
                                   instance_name='Body2',
                                   relative_translation=[-0.5 * l2, 0., 0.])],
                  translation=[l1 + 0.5*l2, 0., 0.],
@@ -68,54 +68,54 @@ with Hdf5() as io:
                  inertia=[5.9e-4, 1., 1.])
 
     io.addObject('slider', [
-        Shape(shape_data='Slider',
+        Shape(shape_name='Slider',
               instance_name='cslid',
               relative_translation=[-a, 0., 0.]),
         Contactor(
             instance_name='Contact_b_f1',
-            shape_data='Contact_b_cyl',
+            shape_name='Contact_b_cyl',
             contact_type='Face',
             contact_index=1,
             relative_translation=[-a, 0., 0.]),
         Contactor(
             instance_name='Contact_h_f1',
-            shape_data='Contact_h_cyl',
+            shape_name='Contact_h_cyl',
             contact_type='Face',
             contact_index=1,
             relative_translation=[-a, 0., 0.]),
         Contactor(
             instance_name='Contact_b_f0',
-            shape_data='Contact_b_cyl',
+            shape_name='Contact_b_cyl',
             contact_type='Face',
             contact_index=0,
             relative_translation=[-a, 0., 0.]),
         Contactor(
             instance_name='Contact_h_f0',
-            shape_data='Contact_h_cyl',
+            shape_name='Contact_h_cyl',
             contact_type='Face',
             contact_index=0,
             relative_translation=[-a, 0., 0.]),
         Contactor(
             instance_name='Contact_b_e1',
-            shape_data='Contact_b_cyl',
+            shape_name='Contact_b_cyl',
             contact_type='Edge',
             contact_index=1,
             relative_translation=[-a, 0., 0.]),
         Contactor(
             instance_name='Contact_h_e1',
-            shape_data='Contact_h_cyl',
+            shape_name='Contact_h_cyl',
             contact_type='Edge',
             contact_index=1,
             relative_translation=[-a, 0., 0.]),
         Contactor(
             instance_name='Contact_b_e0',
-            shape_data='Contact_b_cyl',
+            shape_name='Contact_b_cyl',
             contact_type='Edge',
             contact_index=0,
             relative_translation=[-a, 0., 0.]),
         Contactor(
             instance_name='Contact_h_e0',
-            shape_data='Contact_h_cyl',
+            shape_name='Contact_h_cyl',
             contact_type='Edge',
             contact_index=0,
             relative_translation=[-a, 0., 0.])],
@@ -127,13 +127,13 @@ with Hdf5() as io:
     # a static object (mass=0)
     io.addObject('chamber', [Contactor(
         instance_name='Chamber_contact0',
-        shape_data='Chamber',
+        shape_name='Chamber',
         contact_type='Face',
         contact_index=0,
         relative_translation=[0, 0, 0]),
                             Contactor(
         instance_name='Chamber_contact1',
-        shape_data='Chamber',
+        shape_name='Chamber',
         contact_type='Face',
         contact_index=1,
         relative_translation=[0, 0, 0])],
@@ -145,13 +145,13 @@ with Hdf5() as io:
                 joint_class='PivotJointR')
 
     io.addJoint('joint2', 'part2', 'slider',
-                pivot_point=[0.5*l2, 0., 0.],
-                axis=[0., 1., 0],
+                points=[[0.5*l2, 0., 0.]],
+                axes=[[0., 1., 0]],
                 joint_class='PivotJointR')
 
     io.addJoint('joint3', 'part1', 'part2',
-                pivot_point=[l1, 0., 0.],
-                axis=[0., 1., 0.],
+                points=[[l1, 0., 0.]],
+                axes=[[0., 1., 0.]],
                 joint_class='PivotJointR')
 
     io.addInteraction('contact10',
