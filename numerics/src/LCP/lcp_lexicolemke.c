@@ -444,7 +444,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
     }
   }
 
-  options->iparam[1] = ITER;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = ITER;
 
   if (Ifound) *info = 0;
   else *info = 1;
