@@ -64,7 +64,7 @@ Siconos is currently distributed under Apache Licenses (v2).
 ### The archetypal example: "The bouncing ball"
 ```python
 from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL,\
-LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI,\
+LagrangianLinearTIR, Interaction, NonSmoothDynamicalSystem, MoreauJeanOSI,\
 TimeDiscretisation, LCP, TimeStepping
 from numpy import eye, empty
 
