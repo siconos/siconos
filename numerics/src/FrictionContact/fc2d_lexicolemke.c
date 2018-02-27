@@ -97,6 +97,7 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
   *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[0], &error);
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = lcp_options->iparam[SICONOS_IPARAM_ITER_DONE];
+  options->dparam[SICONOS_DPARAM_RESIDU] = error;
 
   if (error > options->iparam[SICONOS_DPARAM_TOL])
   {
