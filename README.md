@@ -91,11 +91,11 @@ nslaw = NewtonImpactNSL(e)
 relation = LagrangianLinearTIR(H)
 inter = Interaction(nslaw, relation)
 # Model
-bouncingBall = Model(t0, T)
+bouncingBall = NonSmoothDynamicalSystem(t0, T)
 # add the dynamical system to the non smooth dynamical system
-bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
+bouncingBall.insertDynamicalSystem(ball)
 # link the interaction and the dynamical system
-bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
+bouncingBall.link(inter, ball)
 # Simulation
 # (1) OneStepIntegrators
 OSI = MoreauJeanOSI(theta)
@@ -104,12 +104,10 @@ t = TimeDiscretisation(t0, h)
 # (3) one step non smooth problem
 osnspb = LCP()
 # (4) Simulation setup with (1) (2) (3)
-s = TimeStepping(t, OSI, osnspb)
+s = TimeStepping(bouncingBall, t, OSI, osnspb)
 # end of model definition
 
 # computation
-bouncingBall.setSimulation(s)
-bouncingBall.initialize() # simulation initialization
 N = (T - t0) / h # the number of time steps
 # time loop
 while s.hasNextEvent():
