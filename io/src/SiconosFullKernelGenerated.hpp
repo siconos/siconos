@@ -507,7 +507,6 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_computeResiduR)
   (_computeResiduY)
   (_displayNewtonConvergence)
-  (_explicitJacobiansOfRelation)
   (_isNewtonConverge)
   (_newtonCumulativeNbIterations)
   (_newtonMaxIteration)
