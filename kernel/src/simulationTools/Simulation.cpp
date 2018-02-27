@@ -62,6 +62,7 @@ Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation
   _allOSI.reset(new OSISet());
   _allNSProblems.reset(new OneStepNSProblems());
   _eventsManager.reset(new EventsManager(td)); //
+  _eventsManager->updateT(_nsds->finalT());
 
   _nsdsChangeLogPosition = nsds->changeLog().begin();
 }
@@ -87,6 +88,7 @@ Simulation::Simulation(SP::TimeDiscretisation td):
   _allOSI.reset(new OSISet());
   _allNSProblems.reset(new OneStepNSProblems());
   _eventsManager.reset(new EventsManager(td)); //
+  _eventsManager->updateT(_nsds->finalT());
 }
 
 // --- Destructor ---
