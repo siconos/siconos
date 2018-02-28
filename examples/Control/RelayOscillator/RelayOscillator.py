@@ -33,8 +33,8 @@ if withPlot:
 
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            RelayNSL, Interaction,\
-                           Model, EulerMoreauOSI, TimeDiscretisation, Relay,  \
-                           TimeStepping,NonSmoothDynamicalSystem
+                           NonSmoothDynamicalSystem, EulerMoreauOSI, TimeDiscretisation, Relay,  \
+                           TimeStepping
 
 #
 # dynamical system
@@ -69,17 +69,15 @@ InterRelayOscillator=Interaction(nslaw,LTIRRelayOscillator)
 #
 # Model
 #
-RelayOscillator=Model(t0,T,Modeltitle)
-
+relayOscillator=NonSmoothDynamicalSystem(t0,T)
+relayOscillator.setTitle(Modeltitle)
 #   add the dynamical system in the non smooth dynamical system
-myNSDS = NonSmoothDynamicalSystem()
-myNSDS.insertDynamicalSystem(LSRelayOscillator)
+relayOscillator.insertDynamicalSystem(LSRelayOscillator)
 
 
 #   link the interaction and the dynamical system
-myNSDS.link(InterRelayOscillator,LSRelayOscillator)
+relayOscillator.link(InterRelayOscillator,LSRelayOscillator)
 
-RelayOscillator.setNonSmoothDynamicalSystemPtr(myNSDS)
 
 
 #
@@ -96,7 +94,7 @@ aTiDisc = TimeDiscretisation(t0,h_step)
 aRelay = Relay()
 
 # (4) Simulation setup with (1) (2) (3)
-aTS = TimeStepping(aTiDisc,aOSI,aRelay)
+aTS = TimeStepping(relayOscillator, aTiDisc,aOSI,aRelay)
 
 # end of model definition
 
@@ -104,9 +102,6 @@ aTS = TimeStepping(aTiDisc,aOSI,aRelay)
 # computation
 #
 
-# simulation initialization
-RelayOscillator.setSimulation(aTS)
-RelayOscillator.initialize()
 
 k = 0
 h = aTS.timeStep();

@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 from numpy import array, eye, empty, zeros
 import numpy as np
 from siconos.kernel import FirstOrderLinearDS, RelayNSL, \
-NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
+NonSmoothDynamicalSystem, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
 Interaction, Relay
 from math import ceil
 
@@ -62,16 +62,15 @@ myNslaw.display()
 
 myProcessInteraction = Interaction(myNslaw,
         myProcessRelation)
-myNSDS = NonSmoothDynamicalSystem()
-myNSDS.insertDynamicalSystem(process)
-myNSDS.link(myProcessInteraction,process)
 
 
-filippov = Model(t0,T)
-filippov.setNonSmoothDynamicalSystemPtr(myNSDS)
+
+filippov = NonSmoothDynamicalSystem(t0,T)
+filippov.insertDynamicalSystem(process)
+filippov.link(myProcessInteraction,process)
 
 td = TimeDiscretisation(t0, h)
-s = TimeStepping(td)
+s = TimeStepping(filippov, td)
 
 myIntegrator = EulerMoreauOSI(theta)
 s.insertIntegrator(myIntegrator)
@@ -84,9 +83,8 @@ osnspb = Relay()
 s.insertNonSmoothProblem(osnspb)
 s.setComputeResiduY(True)
 s.setComputeResiduR(True)
-
-filippov.setSimulation(s)
-filippov.initialize()
+s.setNewtonMaxIteration(30)
+s.setNewtonTolerance(1e-14)
 
 # matrix to save data
 dataPlot = empty((N+1,5))
@@ -98,7 +96,7 @@ dataPlot[0, 4] = myProcessInteraction.lambda_(0)[1]
 # time loop
 k = 1
 while(s.hasNextEvent()):
-     s.newtonSolve(1e-14, 30)
+     s.advanceToEvent()
      dataPlot[k, 0] = s.nextTime()
      dataPlot[k, 1] = process.x()[0]
      dataPlot[k, 2] = process.x()[1]
@@ -131,18 +129,21 @@ plt.title('lambda2')
 plt.grid()
 plt.savefig('ZI_Twisting_all.png')
 
+plt.figure()
 plt.plot(dataPlot[:,1], dataPlot[:,2])
 plt.xlabel('s')
 plt.xlabel('v')
 plt.grid()
 plt.savefig('ZI_Twisting_sv.png')
 
+plt.figure()
 plt.plot(dataPlot[:,3], dataPlot[:,4])
 plt.xlabel('lambda1')
 plt.xlabel('lambda2')
 plt.grid()
 plt.savefig('ZI_Twisting_lambdas.png')
 
+plt.figure()
 pos = np.abs(dataPlot[:,1])
 velocity = (1-myProcessRelation._kappa*np.sign(dataPlot[:,1]*dataPlot[:,2]))*dataPlot[:, 2]*np.sign(dataPlot[:,1])
 
@@ -160,6 +161,7 @@ plt.plot(dataPlot[:,0], control)
 plt.grid()
 plt.savefig('ZI_Twisting_pv.png')
 
+plt.figure()
 indx = np.nonzero(dataPlot[:, 0]>30)
 ttt = dataPlot[indx, 0].flatten()
 
