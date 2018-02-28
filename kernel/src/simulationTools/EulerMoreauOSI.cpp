@@ -132,22 +132,27 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
-  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+  if (!interProp.workVectors)
+  {
+    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors->resize(OneStepIntegrator::interaction_work_vector_of_vector_size);
+  }
+  if (!interProp.workMatrices)
+  {
+    interProp.workMatrices.reset(new VectorOfSMatrices);
+    interProp.workMatrices->resize(OneStepIntegrator::work_vector_of_matrix_size);
+  }
+  if (!interProp.workBlockVectors)
+  {
+    interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+    interProp.workBlockVectors->resize(OneStepIntegrator::work_vector_of_block_vector_size);
+  }
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfSMatrices& workM = *interProp.workMatrices;
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
 
-  workV.resize(OneStepIntegrator::interaction_work_vector_of_vector_size);
-  workM.resize(OneStepIntegrator::work_vector_of_matrix_size);
-  workBlockV.resize(OneStepIntegrator::work_vector_of_block_vector_size);
-
   Relation &relation =  *inter.relation();
-  //relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-
-
 
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeOfDS = inter.getSizeOfDS();
