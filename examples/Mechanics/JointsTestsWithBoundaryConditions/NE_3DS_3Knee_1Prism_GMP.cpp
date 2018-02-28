@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
 
     // -- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new GenericMechanical());
-
+    osnspb->numericsSolverOptions()->dparam[0] = 1e-4;
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(myModel, t, OSI1, osnspb));
     s->associate(OSI1, beam1);
