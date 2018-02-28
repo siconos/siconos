@@ -909,7 +909,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   SP::SiconosVector H_alpha;
 
   deltax = workBlockV[OneStepIntegrator::delta_x];
-
+  DEBUG_EXPR(deltax->display(););
   SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[OneStepIntegrator::osnsp_rhs];
 
   Xfree = workBlockV[OneStepIntegrator::xfree];
@@ -923,6 +923,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
 
   if(relationType == FirstOrder && (relationSubType == Type2R || relationSubType == NonLinearR))
   {
+    DEBUG_PRINT("relationType == FirstOrder && (relationSubType == Type2R || relationSubType == NonLinearR)\n")
     SiconosVector& lambda = *inter->lambda(0);
     FirstOrderR& rel = *std11::static_pointer_cast<FirstOrderR>(mainInteraction->relation());
     C = rel.C();
@@ -956,10 +957,13 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
       RuntimeException::selfThrow("EulerMoreauOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Type2R and H_alpha->getValue() should return the mid-point value");
     }
     SiconosVector& hAlpha= *workV[OneStepIntegrator::h_alpha];
+    DEBUG_EXPR(hAlpha.display());
     osnsp_rhs += hAlpha;
+    DEBUG_EXPR(osnsp_rhs.display(););
   }
   else if(relationType == FirstOrder && relationSubType == Type1R)
   {
+    DEBUG_PRINT("relationType == FirstOrder && relationSubType == Type1R\n");
     FirstOrderType1R& rel = *std11::static_pointer_cast<FirstOrderType1R>(mainInteraction->relation());
     C = rel.C();
     if(!C) C = relationMat[FirstOrderR::mat_C];
@@ -994,6 +998,7 @@ void EulerMoreauOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_in
   }
   else // First Order Linear Relation
   {
+    DEBUG_PRINT("relationType == FirstOrder\n");
     C = mainInteraction->relation()->C();
     if(!C) C = relationMat[FirstOrderR::mat_C];
 
@@ -1180,6 +1185,7 @@ void EulerMoreauOSI::updateInput(double time)
 
 void EulerMoreauOSI::updateOutput(double time, unsigned int level)
 {
+  DEBUG_BEGIN("EulerMoreauOSI::updateOutput(double time, unsigned int level)\n");
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
   //_simulation->nonSmoothDynamicalSystem()->updateOutput(time,level);
   InteractionsGraph::VIterator ui, uiend;
@@ -1213,7 +1219,6 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       DEBUG_EXPR(y.display());
 
 
-      SiconosVector& hAlpha= *workV[OneStepIntegrator::h_alpha];
 
       if (r.D())
         prod(*r.D(), *(inter.lambdaOld(level)), y, true);
@@ -1227,17 +1232,17 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
 
       y += *inter.yOld(level);
 
-      DEBUG_PRINT("FirstOrderType2R::computeOutput : ResiduY() \n");
+      DEBUG_PRINT("EulerMoreauOSI::updateOutput : ResiduY() \n");
       SiconosVector& residuY = *workV[OneStepIntegrator::vec_residuY];
       DEBUG_EXPR(residuY.display());
 
       y -= residuY;
-      DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) \n");
+      DEBUG_PRINT("EulerMoreauOSI::updateOutput : y(level) \n");
       DEBUG_EXPR(y.display());
 
       BlockVector& deltax = *workBlockV[OneStepIntegrator::delta_x];
       //  deltax -= *(DSlink[FirstOrderR::xold)];
-      DEBUG_PRINT("FirstOrderType2R::computeOutput : deltax \n");
+      DEBUG_PRINT("EulerMoreauOSI::updateOutput : deltax \n");
       DEBUG_EXPR(deltax.display());
 
       if (r.C())
@@ -1246,7 +1251,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
         prod(*relationMat[FirstOrderR::mat_C], deltax, y, false);
 
 
-      DEBUG_PRINT("FirstOrderType2R::computeOutput : y before osnsM\n");
+      DEBUG_PRINT("EulerMoreauOSI::updateOutput : y before osnsM\n");
       DEBUG_EXPR(y.display());
       if (interProp.block)
       {
@@ -1254,7 +1259,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
         prod(osnsM, *inter.lambda(level), y, false);
         DEBUG_EXPR(inter.lambda(level)->display());
         DEBUG_EXPR(osnsM.display());
-        DEBUG_PRINT("FirstOrderType2R::computeOutput : new linearized y \n");
+        DEBUG_PRINT("EulerMoreauOSI::updateOutput : new linearized y \n");
         DEBUG_EXPR(y.display());
       }
 
@@ -1262,9 +1267,10 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       x = *DSlink[FirstOrderR::x];
 
 
+      SiconosVector& hAlpha= *workV[OneStepIntegrator::h_alpha];
 
       r.computeh(time, x, *inter.lambda(level), hAlpha);
-      DEBUG_PRINT("FirstOrderType2R::computeOutput : new Halpha \n");
+      DEBUG_PRINT("EulerMoreauOSI::updateOutput : new Halpha \n");
       DEBUG_EXPR(hAlpha.display());
     }
     else if (relationSubType == NonLinearR )
@@ -1294,17 +1300,17 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
 
       y += *inter.yOld(level);
 
-      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : ResiduY() \n");
+      DEBUG_PRINT("EulerMoreauOSI::updateOutput : ResiduY() \n");
       SiconosVector& residuY = *workV[OneStepIntegrator::vec_residuY];
       DEBUG_EXPR(residuY.display());
 
       y -= residuY;
 
-      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : y(level) \n");
+      DEBUG_PRINT("EulerMoreauOSI::updateOutput : y(level) \n");
       DEBUG_EXPR(y.display());
 
       BlockVector& deltax = *workBlockV[OneStepIntegrator::delta_x];
-      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : deltax \n");
+      DEBUG_PRINT("EulerMoreauOSI::updateOutput : deltax \n");
       DEBUG_EXPR(deltax.display());
 
       if (r.C())
@@ -1319,7 +1325,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
         DEBUG_EXPR(osnsM.display(););
         prod(osnsM, *inter.lambda(level), y, false);
       }
-      DEBUG_PRINT("FirstOrderNonLinearR::computeOutput : new linearized y \n");
+      DEBUG_PRINT("EulerMoreauOSI::updateOutput : new linearized y \n");
       DEBUG_EXPR(y.display());
 
       SiconosVector& x = *workV[OneStepIntegrator::vec_x];
@@ -1327,14 +1333,17 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       SiconosVector& z = *workV[OneStepIntegrator::vec_z];
       z = *DSlink[FirstOrderR::z];
 
-      SiconosVector hAlpha =  *workV[OneStepIntegrator::h_alpha];
+      SiconosVector& hAlpha =  *workV[OneStepIntegrator::h_alpha];
       r.computeh(time, x, *inter.lambda(level), z, hAlpha);
-
+      DEBUG_EXPR(x.display(););
+      DEBUG_PRINT("EulerMoreauOSI::updateOutput : new Halpha \n");
+      DEBUG_EXPR(hAlpha.display());
       *DSlink[FirstOrderR::z] = z;
     }
     else
       inter.computeOutput(time, level);
   }
+  DEBUG_END("EulerMoreauOSI::updateOutput(double time, unsigned int level)\n");
 }
 
 void EulerMoreauOSI::updateInput(double time, unsigned int level)
