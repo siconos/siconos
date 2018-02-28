@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(myModel, t, OSI1, osnspb));
     s->setNewtonTolerance(1e-10);
-    s->setNewtonMaxIteration(50);
+    s->setNewtonMaxIteration(4);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
