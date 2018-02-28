@@ -1222,7 +1222,7 @@ void NewtonEulerDS::computeJacobianqForces(double time)
     _jacobianWrenchq->zero();
     if(_jacobianFIntq)
     {
-
+      computeJacobianFIntq(time);
       _jacobianWrenchq->setBlock(0,0,-1.0 * *_jacobianFIntq);
     }
     if(_jacobianMIntq)
