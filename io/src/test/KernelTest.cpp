@@ -477,11 +477,15 @@ void KernelTest::t8()
   SP::SimpleMatrix velocities = IO.velocities(*nsds);
 
   //ids
-  CPPUNIT_ASSERT((*positions)(0,0) == 1);
-  CPPUNIT_ASSERT((*velocities)(0,0) == 1);
+  CPPUNIT_ASSERT((*positions)(0,0) == 0);
+  CPPUNIT_ASSERT((*velocities)(0,0) == 0);
+  CPPUNIT_ASSERT((*positions)(0,0) == ds1->number());
+  CPPUNIT_ASSERT((*velocities)(0,0) == ds1->number());
 
-  CPPUNIT_ASSERT((*positions)(1,0) == 2);
-  CPPUNIT_ASSERT((*velocities)(1,0) == 2);
+  CPPUNIT_ASSERT((*positions)(1,0) == 1);
+  CPPUNIT_ASSERT((*velocities)(1,0) == 1);
+  CPPUNIT_ASSERT((*positions)(1,0) == ds2->number());
+  CPPUNIT_ASSERT((*velocities)(1,0) == ds2->number());
 
   CPPUNIT_ASSERT((*positions)(0,1) == 0.);
   CPPUNIT_ASSERT((*velocities)(0,1) == 0.);
