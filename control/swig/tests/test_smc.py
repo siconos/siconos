@@ -9,7 +9,7 @@ def test_smc1():
     from siconos.control.simulation import ControlManager
     from siconos.control.sensor import LinearSensor
     from siconos.control.controller import LinearSMCOT2
-    from numpy import eye, empty, zeros
+    from numpy import eye, empty, zeros, savetxt
     import numpy as np
     from math import ceil, sin
 
@@ -98,7 +98,8 @@ def test_smc1():
     #    print processSimulation.nextTime()
     # Resize matrix
     dataPlot.resize(k, outputSize)
-
+    np.savetxt("smc_1.dat", dataPlot)
+    #savetxt("test_smc1.txt", dataPlot)
 
 # Same test, but with the simplified interface
 def test_smc2():
@@ -116,6 +117,7 @@ def test_smc2():
         def computeb(self, time):
             t = sin(50*time)
             u = [t, -t]
+            print('u', u)
             self.setbPtr(u)
 
     # variable declaration
@@ -170,7 +172,8 @@ def test_smc2():
     assert norm(dataPlot - ref) < 5e-12
 
 if __name__ == '__main__':
-    print('test_smc1')
-    test_smc1()
+    #print('test_smc1')
+    #test_smc1()
+    print('test_smc2')
     test_smc2()
     
