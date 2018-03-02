@@ -57,9 +57,6 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   if (dsType == Type::FirstOrderNonLinearDS)
   {
     _DS_SMC.reset(new FirstOrderNonLinearDS(*(std11::static_pointer_cast<FirstOrderNonLinearDS>(DS))));
-  // We have to reset the _pluginb
-  SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderNonLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else if (dsType == Type::FirstOrderLinearDS)
   {
