@@ -496,3 +496,42 @@ void KernelTest::t8()
 
 }
 #endif
+
+void KernelTest::t9()
+{
+  try
+  {
+    // Serialize and deserialize an NSDS with T=inf
+    // (a possible failure case for xml archives)
+    double t0 = 0.0;
+    double T = std::numeric_limits<double>::infinity();
+    SP::NonSmoothDynamicalSystem nsds1(new NonSmoothDynamicalSystem(t0, T));
+    SP::NonSmoothDynamicalSystem nsds2;
+
+    std::ofstream ofs("Kernelt9.xml");
+    {
+      boost::archive::xml_oarchive oa(ofs);
+      siconos_io_register_Kernel(oa);
+      oa << NVP(nsds1);
+    }
+
+    std::ifstream ifs("Kernelt9.xml");
+    {
+      boost::archive::xml_iarchive ia(ifs);
+      siconos_io_register_Kernel(ia);
+      ia >> NVP(nsds2);
+    }
+
+    CPPUNIT_ASSERT(nsds1->finalT() == nsds2->finalT());
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    CPPUNIT_ASSERT(false);
+  }
+  catch (...)
+  {
+    cout << "Exception caught in KernelTest.cpp" << endl;
+    CPPUNIT_ASSERT(false);
+  }
+}
