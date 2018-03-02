@@ -147,9 +147,17 @@ if __name__=='__main__':
 
     header_classes = classes_from_headers(all_headers, include_paths)
 
+    # Allow for inner classes
+    def in_maybe_inner(k,h):
+        if '::' in k:
+            # (a bit loose but we can't forward-declare them so match
+            # individual elements instead)
+            return all([c in h for c in k.split('::')])
+        return k in h
+
     # Find the join of the two lists
     classes = {k: v for k,v in doxygen_classes.items()
-               if k in header_classes and not unwanted(k)}
+               if in_maybe_inner(k, header_classes) and not unwanted(k)}
 
     print('{:} classes found.'.format(len(classes)))
 
