@@ -25,10 +25,10 @@
 
 
 /** First Order Linear Systems - \f$M(t) \dot x = A(t)x(t)+ b(t) + r, \quad x(t_0)=x_0\f$.
- 
+
     \author SICONOS Development Team - copyright INRIA
     \date (Creation) Apr 29, 2004
- 
+
     This class represents first order linear systems of the form:
 
     \f[
@@ -43,10 +43,10 @@
     - \f$M \in R^{n\times n} \f$ is an invertible matrix
     - \f$A \in R^{n\times n}\f$
     - \f$b \in R^{n} \f$
- 
+
 
     The following operators can be plugged, in the usual way (see User Guide)
-  
+
     - \f$A(t)\f$
     - \f$b(t)\f$
     - \f$M(t)\f$
@@ -65,7 +65,7 @@ protected:
 
   /** vector specific to the FirstOrderLinearDS */
   SP::SiconosVector _b;
-  
+
   /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
    * @param time : current time
    * @param sizeOfA : size of square-matrix A
@@ -84,6 +84,15 @@ protected:
    */
   SP::PluggedObject _pluginb;
 
+  /** boolean if _A is constant (set thanks to setBPtr for instance)
+   * false by default */
+  bool _hasConstantA;
+
+  /** boolean if _b is constant (set thanks to setBPtr for instance)
+   * false by default */
+  bool _hasConstantB;
+
+
   /** default constructor
    */
   FirstOrderLinearDS(): FirstOrderNonLinearDS() {};
@@ -95,7 +104,7 @@ public:
 
   /** plugin signature */
   typedef   void (*LDSPtrFunction)(double, unsigned int, double*, unsigned int, double*);
-  
+
   /** constructor from initial state and plugins
    *  \param newX0 the initial state of this DynamicalSystem
    *  \param APlugin plugin for A
@@ -130,7 +139,7 @@ public:
   virtual ~FirstOrderLinearDS() {};
 
   /*! @name Right-hand side computation */
-  
+
   /** Initialization function for the rhs and its jacobian.
    *  \param time time of initialization.
    */
@@ -141,7 +150,7 @@ public:
    *  \param bool isDSup flag to avoid recomputation of operators
    */
   void computeRhs(double time, bool isDSUp = false);
-  
+
   /** update \f$\nabla_x rhs\f$ for the current state
    *  \param double time of interest
    *  \param bool isDSup flag to avoid recomputation of operators
@@ -150,9 +159,9 @@ public:
 
   ///@}
 
-  /*! @name Attributes access 
+  /*! @name Attributes access
     @{ */
-  
+
   /** get the matrix \f$A\f$
    *  \return pointer (SP) on a matrix
    */
@@ -175,6 +184,7 @@ public:
   inline void setAPtr(SP::SiconosMatrix newA)
   {
     _A = newA;
+    _hasConstantA = true;
   }
 
   /** set A to a new matrix
@@ -196,6 +206,7 @@ public:
   inline void setbPtr(SP::SiconosVector b)
   {
     _b = b;
+    _hasConstantB = true;
   }
 
   /** set b vector (copy)
@@ -204,11 +215,18 @@ public:
   void setb(const SiconosVector& b);
 
 
+  inline bool hasConstantA() const
+  {
+    return _hasConstantA;
+  }
 
-
+  inline bool hasConstantB() const
+  {
+    return _hasConstantB;
+  }
   // --- plugins related functions
   /*! @name Plugins management  */
-  
+
   //@{
 
   /** Call all plugged-function to initialize plugged-object values
@@ -251,7 +269,7 @@ public:
    * \param time time instant used to compute b
    */
   virtual void computeb(double time);
-  
+
   /** Get _pluginA
    * \return the plugin for A
    */
@@ -283,7 +301,7 @@ public:
   {
     _pluginb = newPluginB;
   };
-  
+
   ///@}
 
   /*! @name Miscellaneous public methods */
@@ -301,7 +319,7 @@ public:
   }
 
   ///@}
-  
+
   ACCEPT_STD_VISITORS();
 
 };
