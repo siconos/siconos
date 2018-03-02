@@ -76,8 +76,7 @@ def get_priority(name, source_dir, header_path, header_line):
                    ('plugin', 5),
                    ('modelingTools', 6),
                    ('simulationTools', 7),
-                   ('model', 8),
-                   (r'.*', 9))
+                   (r'.*', 8))
 
     big_hack_prio = {'GraphProperties': 1e-3,
                      'DynamicalSystemProperties': 2e-3,
