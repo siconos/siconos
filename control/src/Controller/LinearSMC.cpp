@@ -30,11 +30,9 @@
 #include "ActuatorFactory.hpp"
 
 //#define DEBUG_WHERE_MESSAGES
-
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-
 #include "debug.h"
 
 
@@ -55,14 +53,17 @@ LinearSMC::~LinearSMC()
 
 void LinearSMC::actuate()
 {
-  DEBUG_BEGIN("void LinearSMC::actuate()")
+  DEBUG_BEGIN("void LinearSMC::actuate()\n")
+
+
+
 
   if (!_noUeq)
   {
     computeUeq();
-    prod(*_B, *_ueq, *(_DS_SMC->b()));
+    FirstOrderLinearDS& LinearDS_SMC = *std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC);
+    prod(*_B, *_ueq, *(LinearDS_SMC.b()));
   }
-  DEBUG_EXPR(_DS_SMC->display(););
   DEBUG_EXPR(_DS_SMC->xMemory().display(););
   
   *(_DS_SMC->x()) = _sensor->y();
@@ -90,8 +91,9 @@ void LinearSMC::actuate()
   *_us = *_lambda;
   *_u = *_us;
   *_u += *_ueq;
+  DEBUG_EXPR(_u->display(););
   _indx++;
-  DEBUG_END("void LinearSMC::actuate()")
+  DEBUG_END("void LinearSMC::actuate()\n")
 }
 
 AUTO_REGISTER_ACTUATOR(LINEAR_SMC, LinearSMC)

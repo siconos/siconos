@@ -97,9 +97,6 @@ protected:
   /** value of f(x,t,z) */
   SP::SiconosVector _f;
 
-  // Note FP: isn't it strange to define b in this class here rather than in Linear derived class?
-  /** strength vector */
-  SP::SiconosVector _b;
 
   /** to store f(x_k,t_k,z_k)*/
   SP::SiconosVector _fold;
@@ -270,26 +267,6 @@ public:
     _jacobianfx = newPtr;
   }
 
-  /** get b vector (pointer link)
-   *  \return a SP::SiconosVector
-   */
-  inline SP::SiconosVector b() const
-  {
-    return _b;
-  }
-
-  /** set b vector (pointer link)
-   *  \param b a SiconosVector
-   */
-  inline void setbPtr(SP::SiconosVector b)
-  {
-    _b = b;
-  }
-
-  /** set b vector (copy)
-   *  \param b a SiconosVector
-   */
-  void setb(const SiconosVector& b);
 
   /** @} end of members access group. */
 

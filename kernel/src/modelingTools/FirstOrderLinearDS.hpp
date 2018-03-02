@@ -62,6 +62,9 @@ protected:
 
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
   SP::SiconosMatrix _A;
+
+  /** vector specific to the FirstOrderLinearDS */
+  SP::SiconosVector _b;
   
   /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
    * @param time : current time
@@ -179,6 +182,30 @@ public:
    **/
   void setA(const SiconosMatrix& newA);
 
+  /** get b vector (pointer link)
+   *  \return a SP::SiconosVector
+   */
+  inline SP::SiconosVector b() const
+  {
+    return _b;
+  }
+
+  /** set b vector (pointer link)
+   *  \param b a SiconosVector
+   */
+  inline void setbPtr(SP::SiconosVector b)
+  {
+    _b = b;
+  }
+
+  /** set b vector (copy)
+   *  \param b a SiconosVector
+   */
+  void setb(const SiconosVector& b);
+
+
+
+
   // --- plugins related functions
   /*! @name Plugins management  */
   
@@ -212,6 +239,7 @@ public:
    *  \param fct a pointer on a function
    */
   void setComputebFunction(LDSPtrFunction fct);
+  void clearComputebFunction();
 
   /** default function to compute matrix A => same action as
       computeJacobianfx
@@ -235,7 +263,7 @@ public:
   /** Get _pluginb
    * \return the plugin for b
    */
-  inline SP::PluggedObject getPluginb() const
+  inline SP::PluggedObject getPluginB() const
   {
     return _pluginb;
   };

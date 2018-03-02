@@ -78,7 +78,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstO
   if (Type::value(FOLDS) == Type::FirstOrderLinearDS)
   {
     _pluginA.reset(new PluggedObject(*(FOLDS.getPluginA())));
-    _pluginb.reset(new PluggedObject(*(FOLDS.getPluginb())));
+    _pluginb.reset(new PluggedObject(*(FOLDS.getPluginB())));
   }
 }
 
@@ -134,6 +134,11 @@ void FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct)
   if(!_b)
     _b.reset(new SiconosVector(_n));
   _pluginb->setComputeFunction((void*)fct);
+}
+
+void FirstOrderLinearDS::clearComputebFunction()
+{
+  _pluginb.reset(new PluggedObject());
 }
 
 void FirstOrderLinearDS::computeA(double time)
@@ -203,7 +208,38 @@ void FirstOrderLinearDS::computeJacobianRhsx(double time, bool isDSup)
 
 void FirstOrderLinearDS::display() const
 {
+
   std::cout << "=== Linear system display, " << _number << std::endl;
+  std::cout << "M :" << std::endl;
+  if (_M)
+  {
+    _M->display();
+  }
+  else
+    std::cout << "M is identity" << std::endl;
+  std::cout << "A :" << std::endl;
+  if (_A)
+    _A->display();
+  else
+    std::cout << "A is NULL" << std::endl;
+  std::cout << "b :" << std::endl;
+  if (_b)
+    _b->display();
+  else
+    std::cout << "b is NULL" << std::endl;
+  std::cout << "r :" << std::endl;
+  if (_r)
+    _r->display();
+  else
+    std::cout << "r is NULL" << std::endl;
+  if (_pluginA->fPtr)
+  {
+    std::cout << "Has a plugin for A" << std::endl;
+  }
+  if (_pluginb->fPtr)
+  {
+    std::cout << "Has a plugin for b" << std::endl;
+  }
   std::cout << "=============================" << std::endl;
 }
 
@@ -219,4 +255,12 @@ void FirstOrderLinearDS::_zeroPlugin()
 {
   _pluginA.reset(new PluggedObject());
   _pluginb.reset(new PluggedObject());
+}
+
+void FirstOrderLinearDS::setb(const SiconosVector& b)
+{
+  if (_b)
+    *_b = b;
+  else
+    _b.reset(new SiconosVector(b));
 }
