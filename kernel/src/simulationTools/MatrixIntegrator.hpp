@@ -38,16 +38,19 @@ private:
 
 protected:
 
+  /** name or id of the MatrixIntegrator */
+  std::string _name;
+  
   /** The matrix solution to the ODE */
   SP::SiconosMatrix _mat;
 
-  /**The entry Matrix E */
+  /** The entry Matrix E */
   SP::SiconosMatrix _E;
 
-  /**The entry Matrix E, in the plugin form */
+  /** The entry Matrix E, in the plugin form */
   SP::PluggedObject _plugin;
 
-  /**Plugin to compute the value of a column of E */
+  /** Plugin to compute the value of a column of E */
   SP::SubPluggedObject _spo;
 
   /** flag to indicate where the Matrix _mat is constant */
@@ -76,24 +79,43 @@ protected:
 
 public:
 
+  /** get the name of the MatrixIntegrator
+   *  \return std::string : the name of the MatrixIntegrator
+   */
+  inline const std::string name() const
+  {
+    return _name;
+  }
+
+  /** set the name of the MatrixIntegrator
+      \param newName the new name
+   */
+  inline void setName(const std::string& newName)
+  {
+    _name = newName;
+  }
+
+
+  
   /** Constructor to compute \f$\int exp(A\tau)E\amthrm{d}\tau\f$
    * \param ds the DynamicalSystem
-   * \param m the original Model
+   * \param nsds the original  nsds
    * \param E a matrix
    */
   MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td, const  SP::SiconosMatrix E);
 
   /** Constructor to compute \f$\int exp(A\tau)E(\tau)\mathrm{d}\tau\f$
    * \param ds the DynamicalSystem
-   * \param m the original Model
+   * \param nsds the original  nsds
    * \param plugin the plugin to compute \f$E(t)\f$
    * \param p the number of column in E
    */
-  MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td, SP::PluggedObject plugin, const unsigned int p);
+  MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td,
+                   SP::PluggedObject plugin, const unsigned int p);
 
   /** Constructor to compute \f$\int exp(A\tau)\mathrm{d}\tau\f$
    * \param ds the DynamicalSystem
-   * \param m the original Model
+   * \param nsds the original  nsds
    */
   MatrixIntegrator(const DynamicalSystem& ds,const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td);
 
