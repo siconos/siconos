@@ -46,26 +46,26 @@ public:
     addDynamicalSystem, rmDynamicalSystem, addInteraction, rmInteraction, clearTopology
   } ChangeType;
 
-  class Changes
+  class Change
   {
   private:
-    ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Changes);
-    Changes(){};
+    ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Change);
+    Change(){};
   public:
     ChangeType typeOfChange;
     SP::DynamicalSystem ds;
     SP::Interaction i;
 
-    Changes(ChangeType t, SP::DynamicalSystem dsnew ):typeOfChange(t),ds(dsnew){};
-    Changes(ChangeType t, SP::Interaction inew):typeOfChange(t),i(inew){};
-    Changes(ChangeType t):typeOfChange(t){};
+    Change(ChangeType t, SP::DynamicalSystem dsnew ):typeOfChange(t),ds(dsnew){};
+    Change(ChangeType t, SP::Interaction inew):typeOfChange(t),i(inew){};
+    Change(ChangeType t):typeOfChange(t){};
     void display() const;
   };
 
-  typedef std::list<Changes> ChangeLog;
+  typedef std::list<Change> ChangeLog;
   class ChangeLogIter
   {
-    ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Changes);
+    ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Change);
   public:
     ChangeLogIter(){};
     ChangeLogIter(const ChangeLog& log,
@@ -101,7 +101,7 @@ private:
   bool _BVP;
 
   /** log list of the modifications of the nsds */
-  std::list<Changes> _changeLog;
+  std::list<Change> _changeLog;
 
   /** the topology of the system */
   SP::Topology _topology;

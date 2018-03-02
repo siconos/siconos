@@ -261,13 +261,13 @@ bool Simulation::initializeNSDSChangelog()
   {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
     DEBUG_PRINT("The nsds has changed\n")
-    const NonSmoothDynamicalSystem::Changes& changes = *itc;
+    const NonSmoothDynamicalSystem::Change& change = *itc;
     itc++;
 
-    DEBUG_EXPR(changes.display());
-    if (changes.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)
+    DEBUG_EXPR(change.display());
+    if (change.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)
     {
-      SP::DynamicalSystem ds = changes.ds;
+      SP::DynamicalSystem ds = change.ds;
       if (!DSG->properties(DSG->descriptor(ds)).osi)
       {
         if (_allOSI->size() == 0)
@@ -286,9 +286,9 @@ bool Simulation::initializeNSDSChangelog()
       OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
       osi.initializeWorkVectorsForDS(getTk(),ds);
     }
-    else if (changes.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
+    else if (change.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
     {
-      SP::Interaction inter = changes.i;
+      SP::Interaction inter = change.i;
       initializeInteraction(getTk(), inter);
       interactionInitialized = true;
     }
