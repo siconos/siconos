@@ -61,6 +61,7 @@ void LinearSMC::actuate()
   if (!_noUeq)
   {
     computeUeq();
+    // We assert in computeUeq() that the DS is linear.
     FirstOrderLinearDS& LinearDS_SMC = *std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC);
     prod(*_B, *_ueq, *(LinearDS_SMC.b()));
   }
