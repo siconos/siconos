@@ -185,6 +185,7 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType1R,(FirstOrderR),
 )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS,(FirstOrderNonLinearDS),
   (_A)
+  (_b)
   (_pluginA)
   (_pluginb))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR,(LagrangianR),
@@ -249,7 +250,6 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearDiagonalDS,(LagrangianDS),
   (_stiffness))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearDS,(DynamicalSystem),
   (_M)
-  (_b)
   (_f)
   (_fold)
   (_invM)
