@@ -177,20 +177,22 @@ if __name__=='__main__':
         write_header(dest_file, ' '.join(sys.argv), generated_header)
         write_includes(dest_file, all_headers)
 
+        sorted_classes = sorted(classes.values(),
+                                key = lambda k: (k['priority'], k['name']))
+
         class_list = [
             (cl['name'],
              cl['resolved_bases'],
              [m for m in cl['members'] if not unwanted(m)]
              )
-            for cl in sorted(classes.values(),
-                             key = lambda k: (k['priority'], k['name']))]
+            for cl in sorted_classes]
 
         write_classes(dest_file, class_list)
 
         with_base = [(cl['name'],
                       cl['priority'],
                       cl['target'])
-                     for cl in classes.values()
+                     for cl in sorted_classes
                      if not cl['abstract']]
 
         # Note: This was the condition before, but noticed that

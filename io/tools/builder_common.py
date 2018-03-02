@@ -228,7 +228,7 @@ def write_includes(dest_file, all_headers):
 
 
 def write_register_with_bases(dest_file, with_base):
-    for target in {t: None for c,p,t in with_base}.keys():
+    for target in sorted({t: None for c,p,t in with_base}.keys()):
         with_base_s = [c for c, p, t in sorted(with_base, key=lambda k: (k[1], k[0]))
                        if t == target]
         dest_file.write('\n')
