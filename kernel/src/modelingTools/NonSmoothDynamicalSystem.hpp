@@ -50,6 +50,7 @@ public:
   {
   private:
     ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Changes);
+    Changes(){};
   public:
     ChangeType typeOfChange;
     SP::DynamicalSystem ds;

@@ -253,7 +253,8 @@ bool Simulation::initializeNSDSChangelog()
    * optimisation over scanning the whole NSDS for new elements at
    * each step. */
   SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
-  std::list<NonSmoothDynamicalSystem::Changes>::const_iterator itc = _nsdsChangeLogPosition ;
+  NonSmoothDynamicalSystem::ChangeLogIter itc = _nsdsChangeLogPosition;
+
   bool interactionInitialized = false;
   itc++;
   while(itc != _nsds->changeLog().end())

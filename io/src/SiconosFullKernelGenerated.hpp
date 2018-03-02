@@ -115,10 +115,15 @@ SICONOS_IO_REGISTER(PluggedObject,
   (_pluginName))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom3DLocalFrameR,(NewtonEulerFrom1DLocalFrameR),
 )
+SICONOS_IO_REGISTER(NonSmoothDynamicalSystem::Changes,
+  (typeOfChange)
+  (ds)
+  (i))
 SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
   (_BVP)
   (_T)
   (_author)
+  (_changeLog)
   (_date)
   (_description)
   (_mIsLinear)
@@ -469,27 +474,6 @@ SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
   (_q)
   (_w)
   (_z))
-SICONOS_IO_REGISTER(Simulation,
-  (_OSIDSmap)
-  (_T)
-  (_allNSProblems)
-  (_allOSI)
-  (_eventsManager)
-  (_interman)
-  (_isInitialized)
-  (_name)
-  (_nsds)
-  (_numberOfIndexSets)
-  (_printStat)
-  (_relativeConvergenceCriterionHeld)
-  (_relativeConvergenceTol)
-  (_staticLevels)
-  (_tend)
-  (_tinit)
-  (_tolerance)
-  (_tout)
-  (_useRelativeConvergenceCriterion)
-  (statOut))
 SICONOS_IO_REGISTER_WITH_BASES(ZeroOrderHoldOSI,(OneStepIntegrator),
   (_useGammaForRelation))
 SICONOS_IO_REGISTER_WITH_BASES(Equality,(LinearOSNS),
@@ -638,6 +622,7 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<PluggedObject*>(NULL));
   ar.register_type(static_cast<NewtonEulerFrom3DLocalFrameR*>(NULL));
   ar.register_type(static_cast<NonSmoothDynamicalSystem*>(NULL));
+  ar.register_type(static_cast<NonSmoothDynamicalSystem::Changes*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
   ar.register_type(static_cast<BoundaryCondition*>(NULL));
   ar.register_type(static_cast<NewtonImpactNSL*>(NULL));

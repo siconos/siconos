@@ -309,15 +309,15 @@ void KernelTest::t5()
 
 void KernelTest::t6()
 {
-  SP::Simulation s = Siconos::load(BBxml);
+  SP::Simulation sim = Siconos::load(BBxml);
 
   try
   {
-    SP::NonSmoothDynamicalSystem bouncingBall = s->nonSmoothDynamicalSystem();
+    SP::NonSmoothDynamicalSystem bouncingBall = sim->nonSmoothDynamicalSystem();
 
     double T = bouncingBall->finalT();
     double t0 = bouncingBall->t0();
-    double h = s->timeStep();
+    double h = sim->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
     SP::DynamicalSystemsGraph dsg =
@@ -326,7 +326,7 @@ void KernelTest::t6()
     SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
       (dsg->bundle(*(dsg->begin())));
 
-    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(s);
+    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(sim);
     SP::Interaction inter;
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = bouncingBall->topology()->indexSet(0);

@@ -28,7 +28,6 @@
 #include <fstream>
 #include "NonSmoothDynamicalSystem.hpp"
 #include "InteractionManager.hpp"
-#include <list>
 
 /** Description of the simulation process (integrators, time
  *  discretisation and so on) - Base class for TimeStepping or
