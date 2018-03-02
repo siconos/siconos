@@ -406,7 +406,7 @@ void KernelTest::t6()
   }
   catch (...)
   {
-    cout << "Exception caught in BouncingBallTS.cpp" << endl;
+    cout << "Exception caught in KernelTest.cpp" << endl;
     CPPUNIT_ASSERT(false);
 
   }
