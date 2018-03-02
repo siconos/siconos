@@ -64,7 +64,7 @@ Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation
   _eventsManager.reset(new EventsManager(td)); //
   _eventsManager->updateT(_nsds->finalT());
 
-  _nsdsChangeLogPosition = nsds->changeLog().begin();
+  _nsdsChangeLogPosition = _nsds->changeLogBegin();
 }
 
 
@@ -253,7 +253,7 @@ bool Simulation::initializeNSDSChangelog()
    * optimisation over scanning the whole NSDS for new elements at
    * each step. */
   SP::DynamicalSystemsGraph DSG = _nsds->topology()->dSG(0);
-  NonSmoothDynamicalSystem::ChangeLogIter itc = _nsdsChangeLogPosition;
+  NonSmoothDynamicalSystem::ChangeLog::const_iterator& itc = _nsdsChangeLogPosition.it;
 
   bool interactionInitialized = false;
   itc++;

@@ -112,9 +112,9 @@ void NonSmoothDynamicalSystem::clearChangeLogTo(const ChangeLogIter& it)
    * cases), calling this will prevent changelog from building up
    * forever. Important especially for simulations using an
    * InteractionManager, e.g. mechanics_io. */
-  while (_changeLog.begin() != it) {
+  while (_changeLog.begin() != it.it) {
     _changeLog.pop_front();
-    assert((_changeLog.end() != it) && (_changeLog.begin() != _changeLog.end())
+    assert((_changeLog.end() != it.it) && (_changeLog.begin() != _changeLog.end())
            && "NSDS::clearChangeLogTo: iterator not in list!");
   }
 }

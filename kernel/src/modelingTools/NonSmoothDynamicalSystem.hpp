@@ -63,7 +63,17 @@ public:
   };
 
   typedef std::list<Changes> ChangeLog;
-  typedef ChangeLog::const_iterator ChangeLogIter;
+  class ChangeLogIter
+  {
+    ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Changes);
+  public:
+    ChangeLogIter(){};
+    ChangeLogIter(const ChangeLog& log,
+                  const ChangeLog::const_iterator& i)
+      : _log(&log), it(i) {};
+    const ChangeLog *_log;
+    ChangeLog::const_iterator it;
+  };
 
 private:
   /** serialization hooks
@@ -269,9 +279,19 @@ public:
    */
   inline ChangeLogIter changeLogPosition()
   {
-    std::list<Changes>::const_iterator it = _changeLog.end();
+    ChangeLogIter it(_changeLog, _changeLog.end());
     // return iterator to last item, i.e. one less than end
-    return --it;
+    --it.it;
+    return it;
+  };
+
+  /** get an iterator to the beginning of the changelog.
+   * \return an iterator pointing at the beginning of the changelog.
+   */
+  inline ChangeLogIter changeLogBegin()
+  {
+    ChangeLogIter it(_changeLog, _changeLog.begin());
+    return it;
   };
 
   /** clear the changelog up to a given position.

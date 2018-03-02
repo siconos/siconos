@@ -350,7 +350,7 @@ public:
    */
   void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   {
-    _nsdsChangeLogPosition = _nsds->changeLog().begin();
+    _nsdsChangeLogPosition = _nsds->changeLogBegin();
     _nsds = newPtr;
   }
 

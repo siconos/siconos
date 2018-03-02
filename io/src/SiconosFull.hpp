@@ -376,66 +376,31 @@ namespace boost { namespace serialization {
   } // namespace serialization
 } // namespace boost
 
-template<typename T, typename I>
-class ListIterSerializer
-{
-public:
-  friend class boost::serialization::access;
-  const std::list<T>& list;
-  I& it;
-  ListIterSerializer(const std::list<T> &l, I& i) : list(l), it(i) {}
-
-  template<class Archive>
-  void save(Archive &ar, const unsigned int version) const
-  {
-    int pos = std::distance(list.begin(), it);
-    ar & BOOST_SERIALIZATION_NVP(pos);
-  }
-
-  template<class Archive>
-  void load(Archive &ar, const unsigned int version)
-  {
-    int pos;
-    ar & BOOST_SERIALIZATION_NVP(pos);
-    it = list.begin();
-    for (; pos>0; --pos)
-      it++;
-  }
-  BOOST_SERIALIZATION_SPLIT_MEMBER()
-};
-
+// Special overload for serializing an iterator to a list.  Requires
+// keeping a pointer to the list around, must correspond with the
+// changelog of the Simulation's NSDS.
+namespace boost { namespace serialization {
 template <class Archive>
-void siconos_io(Archive & ar, Simulation & s, unsigned int version)
+void save(Archive & ar, const NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned int version)
 {
-  ar & boost::serialization::make_nvp("_OSIDSmap",s._OSIDSmap);
-  ar & boost::serialization::make_nvp("_T",s._T);
-  ar & boost::serialization::make_nvp("_allNSProblems",s._allNSProblems);
-  ar & boost::serialization::make_nvp("_allOSI",s._allOSI);
-  ar & boost::serialization::make_nvp("_eventsManager",s._eventsManager);
-  ar & boost::serialization::make_nvp("_interman",s._interman);
-  ar & boost::serialization::make_nvp("_isInitialized",s._isInitialized);
-  ar & boost::serialization::make_nvp("_name",s._name);
-  ar & boost::serialization::make_nvp("_nsds",s._nsds);
-  ar & boost::serialization::make_nvp("_numberOfIndexSets",s._numberOfIndexSets);
-  ar & boost::serialization::make_nvp("_printStat",s._printStat);
-  ar & boost::serialization::make_nvp("_relativeConvergenceCriterionHeld",s._relativeConvergenceCriterionHeld);
-  ar & boost::serialization::make_nvp("_relativeConvergenceTol",s._relativeConvergenceTol);
-  ar & boost::serialization::make_nvp("_staticLevels",s._staticLevels);
-  ar & boost::serialization::make_nvp("_tend",s._tend);
-  ar & boost::serialization::make_nvp("_tinit",s._tinit);
-  ar & boost::serialization::make_nvp("_tolerance",s._tolerance);
-  ar & boost::serialization::make_nvp("_tout",s._tout);
-  ar & boost::serialization::make_nvp("_useRelativeConvergenceCriterion",s._useRelativeConvergenceCriterion);
-  ar & boost::serialization::make_nvp("statOut",s.statOut);
-
-  ListIterSerializer<NonSmoothDynamicalSystem::Changes,
-                     NonSmoothDynamicalSystem::ChangeLogIter>
-    lis(s.nonSmoothDynamicalSystem()->changeLog(), s._nsdsChangeLogPosition);
-  ar & boost::serialization::make_nvp("_nsdsChangeLogPosition", lis);
-
-  DEBUG_PRINTF("serialize %s\n", "Simulation");
+  ar & BOOST_SERIALIZATION_NVP(i._log);
+  int pos = std::distance(i._log->begin(), i.it);
+  ar & BOOST_SERIALIZATION_NVP(pos);
+  DEBUG_PRINTF("serialize %s\n", "NonSmoothDynamicalSystem::ChangeLogIter");
 };
-REGISTER_BOOST_SERIALIZATION(Simulation);
+template <class Archive>
+void load(Archive & ar, NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned int version)
+{
+  ar & BOOST_SERIALIZATION_NVP(i._log);
+  int pos;
+  ar & BOOST_SERIALIZATION_NVP(pos);
+  i.it = i._log->begin();
+  for (; pos>0; --pos)
+    i.it++;
+  DEBUG_PRINTF("serialize %s\n", "NonSmoothDynamicalSystem::ChangeLogIter");
+};
+}}
+BOOST_SERIALIZATION_SPLIT_FREE(NonSmoothDynamicalSystem::ChangeLogIter)
 
 template <class Archive>
 void siconos_io_register_Kernel(Archive& ar)
