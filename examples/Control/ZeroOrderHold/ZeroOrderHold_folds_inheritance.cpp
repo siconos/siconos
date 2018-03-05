@@ -25,10 +25,29 @@ using namespace std;
 class MyDS : public FirstOrderLinearDS
 {
 public:
-  MyDS(SP::SiconosVector x0, SP::SiconosMatrix A) : FirstOrderLinearDS(x0, A)
+  MyDS(SP::SiconosVector x0) : FirstOrderLinearDS(x0)
   {
     _b.reset(new SiconosVector(x0->size()));
+    _A.reset(new SimpleMatrix(x0->size(), x0->size(), 0));
   };
+  MyDS(const MyDS & myds) : FirstOrderLinearDS(myds)
+  {
+    // copy constructor
+    std::cout << "copy constructor" << std::endl;
+  };
+
+  
+
+  
+  void computeA(double time)
+  {
+    printf("computeA\n");
+    double t = sin(50 * time);
+    _A->eye();
+    *_A  = t * *_A;
+    _A->display();
+  };
+  
   void computeb(double time)
   {
     printf("computeB\n");
@@ -76,7 +95,7 @@ int main(int argc, char* argv[])
   (*Brel)(1, 0) = 2;
 
   // Dynamical Systems
-  SP::FirstOrderLinearDS processDS(new MyDS(x0, A));
+  SP::FirstOrderLinearDS processDS(new MyDS(x0));
 
 
   SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(t0, T));
