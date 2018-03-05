@@ -263,7 +263,7 @@ public:
       computeJacobianfx
       \param time time instant used to compute A
   */
-  void computeA(double time);
+  virtual void computeA(double time);
 
   /** default function to compute vector b
    * \param time time instant used to compute b
