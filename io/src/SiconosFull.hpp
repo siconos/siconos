@@ -378,11 +378,13 @@ namespace boost { namespace serialization {
 
 // Work-around for issue reading inf/nan double values
 // (implementation in RegisterSimulationIxml.cpp)
+#ifndef SWIG
 #include <boost/archive/basic_text_iprimitive.hpp>
 namespace boost { namespace archive {
 template<> template<>
 void basic_text_iprimitive<std::istream>::load<double>( double& t );
 }}
+#endif // SWIG
 
 // Special overload for serializing an iterator to a list.  Requires
 // keeping a pointer to the list around, must correspond with the

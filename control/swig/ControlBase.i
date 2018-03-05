@@ -8,11 +8,7 @@
 #undef WITH_IO
 #undef WITH_SERIALIZATION
 
-#ifdef WITH_SERIALIZATION
-%{
-#include <SiconosFull.hpp>
-%}
-#endif
+%include serialization.i
 
 %include picklable.i
 
