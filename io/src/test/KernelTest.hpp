@@ -21,6 +21,8 @@ class KernelTest : public CppUnit::TestFixture
   CPPUNIT_TEST(t8);
 #endif
 
+  CPPUNIT_TEST(t9);
+
   CPPUNIT_TEST_SUITE_END();
 
   void t0();
@@ -35,6 +37,8 @@ class KernelTest : public CppUnit::TestFixture
   void t7();
   void t8();
 #endif
+
+  void t9();
 
   std::string BBxml;
 public:

@@ -376,8 +376,39 @@ namespace boost { namespace serialization {
   } // namespace serialization
 } // namespace boost
 
+// Work-around for issue reading inf/nan double values
+// (implementation in RegisterSimulationIxml.cpp)
+#include <boost/archive/basic_text_iprimitive.hpp>
+namespace boost { namespace archive {
+template<> template<>
+void basic_text_iprimitive<std::istream>::load<double>( double& t );
+}}
 
-
+// Special overload for serializing an iterator to a list.  Requires
+// keeping a pointer to the list around, must correspond with the
+// changelog of the Simulation's NSDS.
+namespace boost { namespace serialization {
+template <class Archive>
+void save(Archive & ar, const NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned int version)
+{
+  ar & BOOST_SERIALIZATION_NVP(i._log);
+  int pos = std::distance(i._log->begin(), i.it);
+  ar & BOOST_SERIALIZATION_NVP(pos);
+  DEBUG_PRINTF("serialize %s\n", "NonSmoothDynamicalSystem::ChangeLogIter");
+};
+template <class Archive>
+void load(Archive & ar, NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned int version)
+{
+  ar & BOOST_SERIALIZATION_NVP(i._log);
+  int pos;
+  ar & BOOST_SERIALIZATION_NVP(pos);
+  i.it = i._log->begin();
+  for (; pos>0; --pos)
+    i.it++;
+  DEBUG_PRINTF("serialize %s\n", "NonSmoothDynamicalSystem::ChangeLogIter");
+};
+}}
+BOOST_SERIALIZATION_SPLIT_FREE(NonSmoothDynamicalSystem::ChangeLogIter)
 
 template <class Archive>
 void siconos_io_register_Kernel(Archive& ar)

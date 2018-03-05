@@ -395,7 +395,7 @@ void TimeStepping::initializeNewtonLoop()
     updateInteractions();
 
     // If graph changed, need to initialize the new interactions
-    if (p != _nsds->changeLogPosition())
+    if (p.it != _nsds->changeLogPosition().it)
     {
       if (initializeNSDSChangelog())
       {

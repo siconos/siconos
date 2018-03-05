@@ -28,7 +28,6 @@
 #include <fstream>
 #include "NonSmoothDynamicalSystem.hpp"
 #include "InteractionManager.hpp"
-#include <list>
 
 /** Description of the simulation process (integrators, time
  *  discretisation and so on) - Base class for TimeStepping or
@@ -351,7 +350,7 @@ public:
    */
   void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   {
-    _nsdsChangeLogPosition = _nsds->changeLog().begin();
+    _nsdsChangeLogPosition = _nsds->changeLogBegin();
     _nsds = newPtr;
   }
 
