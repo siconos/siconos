@@ -45,6 +45,43 @@
 #pragma GCC diagnostic pop
 #endif
 
+#include <boost/math/quaternion.hpp>
+
+static
+void copyQuatRot(boost::math::quaternion<double>& from, SiconosVector& to)
+{
+  to(3) = from.R_component_1();
+  to(4) = from.R_component_2();
+  to(5) = from.R_component_3();
+  to(6) = from.R_component_4();
+}
+
+static
+void copyQuatRot(const SiconosVector& from, boost::math::quaternion<double>& to)
+{
+  to = boost::math::quaternion<double>(from(3), from(4), from(5), from(6));
+}
+
+static
+void copyQuatPos(const boost::math::quaternion<double>& from, SiconosVector& to)
+{
+  to(0) = from.R_component_2();
+  to(1) = from.R_component_3();
+  to(2) = from.R_component_4();
+}
+
+static
+void copyQuatPos(const SiconosVector& from, boost::math::quaternion<double>& to)
+{
+  to = boost::math::quaternion<double>(0, from(0), from(1), from(2));
+}
+
+static
+void copyQuatPos(const btVector3& from, boost::math::quaternion<double>& to)
+{
+  to = boost::math::quaternion<double>(0, from.x(), from.y(), from.z());
+}
+
 static void copyBtVector3(const btVector3 &from, SiconosVector& to)
 {
   to(0) = from.x();
@@ -63,27 +100,45 @@ void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& m
                                                    SP::NewtonEulerDS ds1,
                                                    SP::NewtonEulerDS ds2)
 {
-  // Get new positions
-  btVector3 posa = point.m_localPointA * scaling;
-  btVector3 posb = point.m_localPointB * scaling;
+  // Get new world positions of contact points and calculate relative
+  // to ds1 and ds2
+
+  ::boost::math::quaternion<double> rq1, rq2, posa;
+  ::boost::math::quaternion<double> pq1, pq2, posb;
+  copyQuatPos(*ds1->q(), pq1);
+  copyQuatPos(point.getPositionWorldOnA() / scaling, posa);
+  copyQuatRot(*ds1->q(), rq1);
+  if (ds2)
+  {
+    copyQuatPos(*ds2->q(), pq2);
+    copyQuatPos(point.getPositionWorldOnB() / scaling, posb);
+    copyQuatRot(*ds2->q(), rq2);
+  }
+
+  if (flip)
+  {
+    ::boost::math::quaternion<double> tmp = posa;
+    posa = posb;
+    posb = tmp;
+  }
 
   SiconosVector va(3), vb(3), vn(3);
   if (flip) {
+    copyQuatPos((1.0/rq1) * (posb - pq1) * rq1, va);
     if (ds2)
-      copyBtVector3(posa, vb);
-    else
+      copyQuatPos((1.0/rq2) * (posa - pq2) * rq2, vb);
+    else {
       // If no body2, position is relative to 0,0,0
-      // TODO: scaling?
-      copyBtVector3(point.getPositionWorldOnA(), vb);
-    copyBtVector3(posb, va);
+      copyBtVector3(point.getPositionWorldOnA() / scaling, vb);
+    }
   } else {
-    copyBtVector3(posa, va);
+    copyQuatPos((1.0/rq1) * (posa - pq1) * rq1, va);
     if (ds2)
-      copyBtVector3(posb, vb);
-    else
+      copyQuatPos((1.0/rq2) * (posb - pq2) * rq2, vb);
+    else {
       // If no body2, position is relative to 0,0,0
-      // TODO: scaling?
-      copyBtVector3(point.getPositionWorldOnB(), vb);
+      copyBtVector3(point.getPositionWorldOnB() / scaling, vb);
+    }
   }
 
   // Get new normal
