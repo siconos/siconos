@@ -219,7 +219,7 @@ atexit.register(remove_run_id_dir)
 
 # Hdf5 IO setup
 if with_io:
-    with io.Hdf5(simulation = mbtb.MBTB_simulation(), broadphase=SpaceFilter(mbtb.MBTB_nsds()),
+    with io.Hdf5(simulation = mbtb.MBTB_simulation(),
                  nsds=mbtb.MBTB_nsds()) as io:
         def _run(nsteps):
             fp = mbtb._MBTB_open('simu.txt', 'a')
