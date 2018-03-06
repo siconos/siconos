@@ -142,17 +142,20 @@ with Hdf5() as io:
     io.addJoint('joint1',  'part1',
                 points=[[0., 0., 0.]],
                 axes=[[0., 1., 0.]],
-                joint_class='PivotJointR')
+                joint_class='PivotJointR',
+                absolute=True)
 
     io.addJoint('joint2', 'part2', 'slider',
-                points=[[0.5*l2, 0., 0.]],
+                points=[[l1+l2, 0., 0.]],
                 axes=[[0., 1., 0]],
-                joint_class='PivotJointR')
+                joint_class='PivotJointR',
+                absolute=True)
 
     io.addJoint('joint3', 'part1', 'part2',
                 points=[[l1, 0., 0.]],
                 axes=[[0., 1., 0.]],
-                joint_class='PivotJointR')
+                joint_class='PivotJointR',
+                absolute=True)
 
     io.addInteraction('contact10',
                       body1_name='slider', contactor1_name='Contact_b_f0',
