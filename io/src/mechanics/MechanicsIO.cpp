@@ -309,7 +309,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
     unsigned int current_row;
     result->resize(graph.vertices_number(), 14);
     for(current_row=0, std11::tie(vi,viend) = graph.vertices();
-        vi!=viend; ++vi, ++current_row)
+        vi!=viend; ++vi)
     {
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
@@ -324,8 +324,9 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       inspector.inter = graph.bundle(*vi);
       graph.bundle(*vi)->relation()->accept(inspector);
       const SiconosVector& data = inspector.answer;
-      if (data.size() == 14) result->setRow(current_row, data);
+      if (data.size() == 14) result->setRow(current_row++, data);
     }
+    result->resize(current_row, 14);
   }
   return result;
 }
