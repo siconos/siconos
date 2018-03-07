@@ -4,7 +4,6 @@ from siconos.mechanics.collision.tools import Volume, Contactor, Shape
 from siconos.io.mechanics_io import Hdf5
 import siconos.io.mechanics_io
 
-#siconos.io.mechanics_io.set_implementation('original')
 siconos.io.mechanics_io.set_backend('occ')
 
 l1 = 0.153    # crank length
@@ -45,14 +44,14 @@ with Hdf5() as io:
     io.addShapeDataFromFile('Artefact',
                             '../Mechanisms/SliderCrank/CAD/artefact2.step')
 
-#    io.addObject('Artefact', [Shape(shape_data='Artefact',
-#                                    instance_name='artefact')],
-#                 translation=[0., 0., 0.])
+    io.addObject('Artefact', [Shape(shape_name='Artefact',
+                                    instance_name='artefact')],
+                 translation=[0., 0., 0.])
 
     io.addObject('part1', [Volume(shape_name='body1',
                                   instance_name='Body1',
                                   relative_translation=[-0.5*l1, 0., 0.],
-                                  relative_orientation=[(0, 1, 0), 0. ])],
+                                  relative_orientation=[(0, 1, 0), 0.])],
                  translation=[0.5*l1, 0., 0.],
                  velocity=[0., 0., -0.5 * w10 * l1, 0., w10, 0.],
                  mass=0.038,
@@ -271,6 +270,6 @@ with Hdf5(mode='r+') as io:
 
     io.run(with_timer=True,
            t0=0,
-           T=10,
+           T=1,
            h=0.0005,
            Newton_max_iter=5)
