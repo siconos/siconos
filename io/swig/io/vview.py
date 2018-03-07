@@ -436,6 +436,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     sactorb = dict()
     clactor = dict()
     times_of_birth = dict()
+    times_of_death = dict()
 
     transform = vtk.vtkTransform()
     transform.Translate(-0.5, 0., 0.)
@@ -868,22 +869,24 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             print (shape_name)
             unfrozen_mappers[shape_name] = next(mappers[shape_name])
 
-    for instance_name in io.instances():
+    for instance_name, instance in io.instances().items():
 
-        instance = int(io.instances()[instance_name].attrs['id'])
-        contactors[instance] = []
-        transforms[instance] = []
-        offsets[instance] = []
-        times_of_birth[instance] = io.instances()[instance_name].\
-                                   attrs.get('time_of_birth',-1)
+        instance = io.instances()[instance_name]
+        instid = int(instance.attrs['id'])
+        contactors[instid] = []
+        transforms[instid] = []
+        offsets[instid] = []
+        if 'time_of_birth' in instance.attrs:
+            times_of_birth[instid] = instance.attrs['time_of_birth']
+        if 'time_of_death' in instance.attrs:
+            times_of_death[instid] = instance.attrs['time_of_death']
 
-        if instance >= 0:
-            dynamic_actors[instance] = list()
+        if instid >= 0:
+            dynamic_actors[instid] = list()
         else:
-            static_actors[instance] = list()
+            static_actors[instid] = list()
 
-        for contactor_instance_name in io.instances()[instance_name]:
-            contactor = io.instances()[instance_name][contactor_instance_name]
+        for contactor_instance_name, contactor in instance.items():
             contact_shape_indx = None
             if 'shape_name' not in contactor.attrs:
                 print("Warning: old format: ctr.name must be ctr.shape_name for body {0}, contact {1}".format(instance_name, contactor_instance_name))
@@ -906,18 +909,18 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     pass
 
 
-            contactors[instance].append(contact_shape_indx)
+            contactors[instid].append(contact_shape_indx)
 
             actor = vtk.vtkActor()
-            if io.instances()[instance_name].attrs.get('mass', 0) > 0:
+            if instance.attrs.get('mass', 0) > 0:
                 # objects that may move
-                dynamic_actors[instance].append(actor)
+                dynamic_actors[instid].append(actor)
 
                 actor.GetProperty().SetOpacity(
                     config.get('dynamic_opacity', 0.7))
             else:
                 # objects that are not supposed to move
-                static_actors[instance].append(actor)
+                static_actors[instid].append(actor)
 
                 actor.GetProperty().SetOpacity(
                     config.get('static_opacity', 1.0))
@@ -957,21 +960,18 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
             big_data_source.AddInputConnection(transformer.GetOutputPort())
 
-            transforms[instance].append(transform)
+            transforms[instid].append(transform)
 
-            if 'center_of_mass' in io.instances()[instance_name].attrs:
-                center_of_mass = io.instances()[instance_name].\
+            if 'center_of_mass' in instance.attrs:
+                center_of_mass = instance.\
                                  attrs['center_of_mass'].astype(float)
             else:
                 center_of_mass = [0., 0., 0.]
 
-            offsets[instance].append(
-                (numpy.subtract(io.instances()[
-                    instance_name][
-                        contactor_instance_name].attrs['translation'].astype(float),
+            offsets[instid].append(
+                (numpy.subtract(contactor.attrs['translation'].astype(float),
                                 center_of_mass),
-                    io.instances()[instance_name][contactor_instance_name].\
-                 attrs['orientation'].astype(float)))
+                 contactor.attrs['orientation'].astype(float)))
 
     pos_data = dpos_data[:]
     spos_data = spos_data[:]
@@ -1021,7 +1021,9 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     # set visibility for all actors associated to a dynamic instance
     def set_actors_viz(instance, time):
-        if times_of_birth[instance] <= time:
+        tob = times_of_birth.get(instance, -1)
+        tod = times_of_death.get(instance, 'inf')
+        if (tob <= time and tod >= time):
             for actor in dynamic_actors[instance]:
                 actor.VisibilityOn()
         else:
