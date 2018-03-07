@@ -292,6 +292,12 @@ bool Simulation::initializeNSDSChangelog()
       initializeInteraction(getTk(), inter);
       interactionInitialized = true;
     }
+    else if (change.typeOfChange == NonSmoothDynamicalSystem::rmDynamicalSystem)
+    {
+      // also need to force an update in this case since indexSet1 may
+      // still have Interactions that refer to DSs that are not in graph
+      interactionInitialized = true;
+    }
   }
   _nsdsChangeLogPosition = _nsds->changeLogPosition();
 
