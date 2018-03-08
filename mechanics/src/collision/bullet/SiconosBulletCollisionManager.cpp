@@ -180,6 +180,8 @@ SiconosBulletOptions::SiconosBulletOptions()
   , clearOverlappingPairCache(false)
   , perturbationIterations(3)
   , minimumPointsPerturbationThreshold(3)
+  , enableSatConvex(false)
+  , enablePolyhedralContactClipping(false)
 {
 }
 
@@ -418,6 +420,7 @@ void SiconosBulletCollisionManager::initialize_impl()
 
   btGImpactCollisionAlgorithm::registerAlgorithm(&*impl->_dispatcher);
   impl->_collisionWorld->getDispatchInfo().m_useContinuous = false;
+  impl->_collisionWorld->getDispatchInfo().m_enableSatConvex = _options.enableSatConvex;
 }
 
 SiconosBulletCollisionManager::SiconosBulletCollisionManager()
@@ -474,6 +477,12 @@ void SiconosBulletCollisionManager_impl::updateAllShapesForDS(const BodyDS &bds)
     (*it)->acceptSP(updateShapeVisitor);
 }
 
+// helper for enabling polyhedral contact clipping for shape types
+// derived from btPolyhedralConvexShape
+static void initPolyhedralFeatures(btPolyhedralConvexShape& btshape)
+{ btshape.initializePolyhedralFeatures(); }
+static void initPolyhedralFeatures(btCollisionShape& btshape) {}
+
 template<typename ST, typename BT, typename BR>
 void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   SP::SiconosVector base, SP::BodyDS ds, ST& shape, BT& btshape,
@@ -489,6 +498,10 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
 
   // associate the shape with the object
   btobject->setCollisionShape(&*btshape);
+
+  // enable contact clipping for SAT
+  if (_options.enablePolyhedralContactClipping)
+    initPolyhedralFeatures(*btshape);
 
   if (!ds)
     btobject->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);

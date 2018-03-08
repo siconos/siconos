@@ -46,6 +46,8 @@ struct SiconosBulletOptions
   bool clearOverlappingPairCache;
   unsigned int perturbationIterations;
   unsigned int minimumPointsPerturbationThreshold;
+  bool enableSatConvex;
+  bool enablePolyhedralContactClipping;
 };
 
 struct SiconosBulletStatistics
