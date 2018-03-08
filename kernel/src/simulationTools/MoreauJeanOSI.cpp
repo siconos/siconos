@@ -487,7 +487,7 @@ void MoreauJeanOSI::_computeWBoundaryConditions(DynamicalSystem& ds, SiconosMatr
 void MoreauJeanOSI::computeW(double t, DynamicalSystem& ds, SiconosMatrix& W)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
-  DEBUG_PRINT("MoreauJeanOSI::computeW starts\n");
+  DEBUG_BEGIN("MoreauJeanOSI::computeW\n");
 
   double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(ds);
@@ -553,7 +553,8 @@ void MoreauJeanOSI::computeW(double t, DynamicalSystem& ds, SiconosMatrix& W)
 
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(ds));
-  DEBUG_PRINT("MoreauJeanOSI::computeW ends\n");
+
+  DEBUG_END("MoreauJeanOSI::computeW\n");
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
 }
@@ -1164,11 +1165,11 @@ void MoreauJeanOSI::computeFreeState()
       SiconosVector& vfree = *workVectors[MoreauJeanOSI::VFREE];
 
       vfree = residuFree;
-
+      DEBUG_EXPR(vfree.display());
       // -- Update W --
       // Note: during computeW, mass and jacobians of forces will be computed/
       computeW(t, d, W);
-
+      DEBUG_EXPR(W.display(););
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X

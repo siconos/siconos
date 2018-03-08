@@ -331,7 +331,7 @@ void LagrangianDS::setPPtr(SP::SiconosVector newPtr, unsigned int level)
 
 void LagrangianDS::computeMass()
 {
-  DEBUG_PRINT("LagrangianDS::computeMass()\n");
+  DEBUG_BEGIN("LagrangianDS::computeMass()\n");
   DEBUG_EXPR(_q[0]->display());
   if(!_hasConstantMass)
   {
@@ -342,6 +342,7 @@ void LagrangianDS::computeMass()
     }
   }
   DEBUG_EXPR(_mass->display());
+  DEBUG_END("LagrangianDS::computeMass()\n");
 }
 
 void LagrangianDS::computeMass(SP::SiconosVector position)
@@ -385,21 +386,39 @@ void LagrangianDS::computeFGyr(SP::SiconosVector position, SP::SiconosVector vel
     ((FPtr5)_pluginFGyr->fPtr)(_ndof, &(*position)(0), &(*velocity)(0), &(*_fGyr)(0), _z->size(), &(*_z)(0));
 }
 
+
 void LagrangianDS::computeJacobianFIntq(double time)
 {
+  DEBUG_BEGIN("LagrangianDS::computeJacobianFIntq()\n");
+  DEBUG_EXPR(_q[0]->display());
+  DEBUG_EXPR(_q[1]->display());
   if(_jacobianFIntq&& _pluginJacqFInt->fPtr)
     ((FPtr6)_pluginJacqFInt->fPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianFIntq)(0, 0), _z->size(), &(*_z)(0));
+  DEBUG_EXPR(if(_jacobianFIntq) _jacobianFIntq->display(););
+  DEBUG_END("LagrangianDS::computeJacobianFIntq()\n");
 }
 void LagrangianDS::computeJacobianFIntqDot(double time)
 {
+  DEBUG_BEGIN("LagrangianDS::computeJacobianFIntqDot()\n");
+  DEBUG_EXPR(_q[0]->display());
+  DEBUG_EXPR(_q[1]->display());
+  DEBUG_EXPR(_z->display());
   if(_jacobianFIntqDot && _pluginJacqDotFInt->fPtr)
     ((FPtr6)_pluginJacqDotFInt->fPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianFIntqDot)(0, 0), _z->size(), &(*_z)(0));
+  DEBUG_EXPR(if(_jacobianFIntqDot) _jacobianFIntqDot->display(););
+  DEBUG_END("LagrangianDS::computeJacobianFIntqDot()\n");
 }
+
 
 void LagrangianDS::computeJacobianFIntq(double time, SP::SiconosVector position, SP::SiconosVector velocity)
 {
+  DEBUG_BEGIN("LagrangianDS::computeJacobianFIntq()\n");
+  DEBUG_EXPR(position->display());
+  DEBUG_EXPR(velocity->display());
   if(_jacobianFIntq && _pluginJacqFInt->fPtr)
     ((FPtr6)_pluginJacqFInt->fPtr)(time, _ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFIntq)(0, 0), _z->size(), &(*_z)(0));
+  DEBUG_EXPR(if(_jacobianFIntq) _jacobianFIntq->display(););
+  DEBUG_END("LagrangianDS::computeJacobianFIntq()\n");
 }
 void LagrangianDS::computeJacobianFIntqDot(double time, SP::SiconosVector position, SP::SiconosVector velocity)
 {
