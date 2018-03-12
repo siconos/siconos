@@ -50,6 +50,11 @@ def usage(long=False):
        initial up direction of the camera (default=y-axis)
      --ortho=scale
        start in ortho mode with given parallel scale (default=perspective)
+     --visible=all
+       all: view all contactors and avatars
+       avatars: view only avatar if an avatar is defined (for each object)
+       contactors: ignore avatars, view only contactors
+         where avatars are contactors with collision_group=-1
     """)
 
 
@@ -60,7 +65,7 @@ try:
                                     'dat', 'tmin=', 'tmax=', 'no-cf',
                                     'cf-scale=', 'normalcone-ratio=',
                                     'advance=', 'fps=', 'camera=', 'lookat=',
-                                    'up=', 'ortho='])
+                                    'up=', 'ortho=', 'visible='])
 except getopt.GetoptError as err:
     sys.stderr.write('{0}\n'.format(str(err)))
     usage()
@@ -102,6 +107,7 @@ advance_by_time = None
 frames_per_second = 25
 cf_disable = False
 initial_camera = [None] * 4
+visible_mode = 'all'
 
 for o, a in opts:
 
@@ -148,6 +154,9 @@ for o, a in opts:
 
     elif o == '--ortho':
         initial_camera[3] = float(a)
+
+    elif o == '--visible':
+        visible_mode = a
 
 if frames_per_second == 0:
     frames_per_second = 25
@@ -202,7 +211,6 @@ big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
 add_compatiblity_methods(big_data_writer)
 big_data_writer.SetInputConnection(big_data_source.GetOutputPort())
 
-contactors = dict()
 offsets = dict()
 
 
@@ -874,7 +882,6 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
         instance = io.instances()[instance_name]
         instid = int(instance.attrs['id'])
-        contactors[instid] = []
         transforms[instid] = []
         offsets[instid] = []
         if 'time_of_birth' in instance.attrs:
@@ -895,6 +902,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             else:
                 shape_attr_name='shape_name'
 
+            collision_group = contactor.attrs['group']
             if 'type' in contactor.attrs:
                 contact_type = contactor.attrs['type']
                 contact_index = contactor.attrs['contact_index']
@@ -910,18 +918,18 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                     pass
 
 
-            contactors[instid].append(contact_shape_indx)
-
             actor = vtk.vtkActor()
             if instance.attrs.get('mass', 0) > 0:
                 # objects that may move
-                dynamic_actors[instid].append(actor)
+                dynamic_actors[instid].append((actor, contact_shape_indx,
+                                               collision_group))
 
                 actor.GetProperty().SetOpacity(
                     config.get('dynamic_opacity', 0.7))
             else:
                 # objects that are not supposed to move
-                static_actors[instid].append(actor)
+                static_actors[instid].append((actor, contact_shape_indx,
+                                              collision_group))
 
                 actor.GetProperty().SetOpacity(
                     config.get('static_opacity', 1.0))
@@ -1019,11 +1027,24 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     def set_dynamic_instance_visibility(instance, time):
         tob = times_of_birth.get(instance, -1)
         tod = times_of_death.get(instance, float('inf'))
+        has_avatar = False
+        if visible_mode=='avatars' or visible_mode=='contactors':
+            for actor, index, group in dynamic_actors[instance]:
+                if group==-1:
+                    has_avatar = True
+                    break
         if (tob <= time and tod >= time):
-            for actor in dynamic_actors[instance]:
-                actor.VisibilityOn()
+            for actor, index, group in dynamic_actors[instance]:
+                if not has_avatar or visible_mode=='all':
+                    actor.VisibilityOn()
+                elif visible_mode=='avatars' and group==-1 and has_avatar:
+                    actor.VisibilityOn()
+                elif visible_mode=='contactors' and group!=-1 and has_avatar:
+                    actor.VisibilityOn()
+                else:
+                    actor.VisibilityOff()
         else:
-            for actor in dynamic_actors[instance]:
+            for actor, index, group in dynamic_actors[instance]:
                 actor.VisibilityOff()
 
     # here the numpy vectorization is used with a column vector and a
@@ -1074,7 +1095,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
         print(spos_data.shape)
         # static objects are always visible
         for instance, actors in static_actors.items():
-            for actor in actors:
+            for actor,_,_ in actors:
                  actor.VisibilityOn()
 
     set_position(*pos_t0)
