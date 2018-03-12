@@ -44,14 +44,14 @@ with Hdf5() as io:
 
   left_up_vertices=numpy.array([v1,v2,v3,v4, v5])
   print(left_up_vertices)
-  io.addConvexShape('Left_up',left_up_vertices )
-  io.addObject('left_up', [Contactor('Left_up')],
+  io.add_convex_shape('Left_up',left_up_vertices )
+  io.add_object('left_up', [Contactor('Left_up')],
                translation=translation)
 
   ######### right_up
-  io.addConvexShape('Right_up',left_up_vertices )
+  io.add_convex_shape('Right_up',left_up_vertices )
   translation = [0.0, 2.0*box_width ,0.0]
-  io.addObject('right_up', [Contactor('Right_up')],
+  io.add_object('right_up', [Contactor('Right_up')],
                translation=translation)
 
   n_polyhedron=1
@@ -95,18 +95,18 @@ with Hdf5() as io:
         print ('inertia,mass',inertia,mass)
 
         # Definition of a polyhedron as a convex shape
-        io.addConvexShape('PolyhedronCS'+str(n)+'_'+str(i)+'_'+str(j), polyhedron_vertices)
+        io.add_convex_shape('PolyhedronCS'+str(n)+'_'+str(i)+'_'+str(j), polyhedron_vertices)
 
         trans=[box_width/5.0+i*x_shift*polyhedron_size, x_shift*(j+2)*polyhedron_size, box_height+polyhedron_size*x_shift*n]
         #trans= [0,0,0]
-        io.addObject('polyhedron'+str(n)+'_'+str(i)+'_'+str(j), [Contactor('PolyhedronCS'+str(n)+'_'+str(i)+'_'+str(j))],
+        io.add_object('polyhedron'+str(n)+'_'+str(i)+'_'+str(j), [Contactor('PolyhedronCS'+str(n)+'_'+str(i)+'_'+str(j))],
                      translation=trans, orientation = orientation_polyhedron,
                      velocity=[0, 0, 0, 0, 0, 0],
                      mass=mass,inertia=inertia)
 
   # Definition of a non smooth law. As no group ids are specified it
   # is between contactors of group id 0.
-  io.addNewtonImpactFrictionNSL('contact', mu=0.3)
+  io.add_Newton_impact_friction_nsl('contact', mu=0.3)
 
 step=10000
 hstep=1e-4

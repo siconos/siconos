@@ -56,20 +56,20 @@ brick = BRepPrimAPI_MakeBox(gp_Pnt(-bx/2.,-by/2.,-bz/2.),bx, by, bz).Shape()
 with Hdf5() as io:
 
     #
-    io.addOccShape('Mass1', sphere1)
-    io.addOccShape('Mass2', sphere2)
-    io.addOccShape('Arm1', cylinder1)
-    io.addOccShape('Arm2', cylinder2)
-    io.addOccShape('Ground', ground)
-    io.addOccShape('Brick', sphere1)
+    io.add_occ_shape('Mass1', sphere1)
+    io.add_occ_shape('Mass2', sphere2)
+    io.add_occ_shape('Arm1', cylinder1)
+    io.add_occ_shape('Arm2', cylinder2)
+    io.add_occ_shape('Ground', ground)
+    io.add_occ_shape('Brick', sphere1)
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.1)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.1)
 
     # first branch + first mass the center of gravity is at the center of the
     # Mass1
-    io.addObject('arm1', [Contactor('Mass1', contact_type='Face', contact_index=0),
+    io.add_object('arm1', [Contactor('Mass1', contact_type='Face', contact_index=0),
                           Contactor('Arm1',
                                     contact_type='Face',
                                     contact_index=0,
@@ -81,7 +81,7 @@ with Hdf5() as io:
                     mass=m1)
 
     # second branch + second mass
-    io.addObject('arm2', [Contactor('Mass2', instance_name='Mass2Contact',
+    io.add_object('arm2', [Contactor('Mass2', instance_name='Mass2Contact',
                                     contact_type='Face', contact_index=0),
                           Contactor('Arm2',
                                     contact_type='Face',
@@ -94,20 +94,20 @@ with Hdf5() as io:
                     inertia=np.eye(3),
                     mass=m2)
 
-    io.addJoint('joint1', 'arm1', 'arm2',
+    io.add_joint('joint1', 'arm1', 'arm2',
                 points=[[0, 0, -r1]],
                 axes=[[1, 0, 0]],
                 joint_class='PivotJointR',
                 absolute=False)
 
-    io.addJoint('joint2', 'arm1',
+    io.add_joint('joint2', 'arm1',
                 points=[[0, r2 + gap + r2 + l2 + r1 + hgap + l1, 0]],
                 axes=[[1, 0, 0]],
                 joint_class='PivotJointR',
                 absolute=False)
 
 
-    io.addObject('ball', [Contactor('Brick', instance_name='BallContact',
+    io.add_object('ball', [Contactor('Brick', instance_name='BallContact',
                                     contact_type='Face', contact_index=0)],
                  translation=[0, -2*r2, r2+gap+.5],
                  inertia=np.eye(3),
@@ -116,17 +116,17 @@ with Hdf5() as io:
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
-    io.addObject('ground', [Contactor('Ground', contact_type='Face', contact_index=5)],
+    io.add_object('ground', [Contactor('Ground', contact_type='Face', contact_index=5)],
                  translation=[0, 0, -.25])
 
 
-    io.addInteraction('sphere-ball',
+    io.add_interaction('sphere-ball',
                       'arm2', 'Mass2Contact',
                       'ball', 'BallContact',
                       distance_calculator='occ',
                       offset=0.01)
 
-    io.addInteraction('ball-ground',
+    io.add_interaction('ball-ground',
                       'ball', 'BallContact',
                       'ground', 'Ground-0',
                       distance_calculator='occ',

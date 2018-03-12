@@ -77,13 +77,13 @@ print 'bowl moment of inertia:', (bowl_I1, bowl_I2, bowl_I3)
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
 
-    io.addOccShape('Contact', bowl)
+    io.add_occ_shape('Contact', bowl)
 
-    io.addOccShape('Ground', ground)
+    io.add_occ_shape('Ground', ground)
 
-    io.addOccShape('Ball', ball)
+    io.add_occ_shape('Ball', ball)
 
-    io.addObject('bowl',
+    io.add_object('bowl',
                  [Contactor('Contact',
                             contact_type='Face',
                             contact_index=0,
@@ -110,7 +110,7 @@ with Hdf5() as io:
     # balls
     #
 
-    io.addObject('ball1',
+    io.add_object('ball1',
                  [Contactor('Ball',
                             instance_name='Ball1',
                             contact_type='Face',
@@ -119,7 +119,7 @@ with Hdf5() as io:
                  mass=.1,
                  inertia=[ball_I1, ball_I2, ball_I3])
 
-    io.addObject('ball2',
+    io.add_object('ball2',
                  [Contactor('Ball',
                             instance_name='Ball2',
                             contact_type='Face',
@@ -127,7 +127,7 @@ with Hdf5() as io:
                  translation=[0, 0, 2], mass=.1,
                  inertia=[ball_I1, ball_I2, ball_I3])
 
-    io.addObject('ball3',
+    io.add_object('ball3',
                  [Contactor('Ball',
                             instance_name='Ball3',
                             contact_type='Face',
@@ -140,7 +140,7 @@ with Hdf5() as io:
     # ground, static object (mass=0)
     #
 
-    io.addObject('ground',
+    io.add_object('ground',
                  [Contactor('Ground',
                             contact_type='Face',
                             contact_index=5)],
@@ -151,49 +151,49 @@ with Hdf5() as io:
     # interactions, order ball -> bowl is important
     # ball -> ground if some balls are ejected
 
-    io.addInteraction('bowl-ground',
+    io.add_interaction('bowl-ground',
                       'bowl', 'Contact-0',
                       'ground', 'Ground-0',
                       distance_calculator='cadmbtb',
                       offset=0.01)
 
-    io.addInteraction('bowl-ball1',
+    io.add_interaction('bowl-ball1',
                       'ball1', 'Ball1',
                       'bowl', 'Contact-1',
                       distance_calculator='cadmbtb',
                       offset=0.05)
 
-    io.addInteraction('bowl-ball2',
+    io.add_interaction('bowl-ball2',
                       'ball2', 'Ball2',
                       'bowl', 'Contact-1',
                       distance_calculator='cadmbtb',
                       offset=0.05)
 
-    io.addInteraction('bowl-ball3',
+    io.add_interaction('bowl-ball3',
                       'ball3', 'Ball3',
                       'bowl', 'Contact-1',
                       distance_calculator='cadmbtb',
                       offset=0.05)
 
-    io.addInteraction('ball1-ball2',
+    io.add_interaction('ball1-ball2',
                       'ball1', 'Ball1',
                       'ball2', 'Ball2',
                       distance_calculator='cadmbtb',
                       offset=0.05)
 
-    io.addInteraction('ball1-ball3',
+    io.add_interaction('ball1-ball3',
                       'ball1', 'Ball1',
                       'ball3', 'Ball3',
                       distance_calculator='cadmbtb',
                       offset=0.05)
 
-    io.addInteraction('ball2-ball3',
+    io.add_interaction('ball2-ball3',
                       'ball2', 'Ball2',
                       'ball3', 'Ball3',
                       distance_calculator='cadmbtb',
                       offset=0.05)
 
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.)
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done

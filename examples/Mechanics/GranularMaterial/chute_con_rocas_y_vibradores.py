@@ -47,9 +47,9 @@ plane_thickness = 0.2
 
 with Hdf5(mode='w', io_filename=fn) as io:
 
-    io.addNewtonImpactFrictionNSL('contact_rocas', mu=float(mu), e=0.01,collision_group1=0, collision_group2=0)
-    io.addNewtonImpactFrictionNSL('contact_chute_rocas', mu=float(mu), e=0.01,collision_group1=1, collision_group2=0)
-    io.addNewtonImpactFrictionNSL('contact_vibratores_rocas', mu=float(mu), e=0.01,collision_group1=2, collision_group2=0)
+    io.add_Newton_impact_friction_nsl('contact_rocas', mu=float(mu), e=0.01,collision_group1=0, collision_group2=0)
+    io.add_Newton_impact_friction_nsl('contact_chute_rocas', mu=float(mu), e=0.01,collision_group1=1, collision_group2=0)
+    io.add_Newton_impact_friction_nsl('contact_vibratores_rocas', mu=float(mu), e=0.01,collision_group1=2, collision_group2=0)
 
 
     

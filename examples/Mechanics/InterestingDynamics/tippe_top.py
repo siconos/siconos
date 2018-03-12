@@ -44,15 +44,15 @@ options.minimumPointsPerturbationThreshold = 0
 
 with Hdf5() as io:
 
-    io.addPrimitiveShape('Body1', 'Sphere', (r1,))
-    io.addPrimitiveShape('Body2', 'Cylinder', (r2, a2))
-    io.addPrimitiveShape('Body3', 'Sphere', (r2,))
-    io.addPrimitiveShape('Ground', 'Box', (100, 100, .5))
+    io.add_primitive_shape('Body1', 'Sphere', (r1,))
+    io.add_primitive_shape('Body2', 'Cylinder', (r2, a2))
+    io.add_primitive_shape('Body3', 'Sphere', (r2,))
+    io.add_primitive_shape('Ground', 'Box', (100, 100, .5))
 
-    io.addNewtonImpactFrictionNSL('contact', mu=mu)
-    io.addObject('ground', [Contactor('Ground')], translation=[0, 0, 0])
+    io.add_Newton_impact_friction_nsl('contact', mu=mu)
+    io.add_object('ground', [Contactor('Ground')], translation=[0, 0, 0])
 
-    io.addObject('tippe-top', [Contactor('Body1',
+    io.add_object('tippe-top', [Contactor('Body1',
                                          relative_translation=[0, 0, a1]),
                                Contactor('Body2',
                                          relative_orientation=([1, 0, 0],

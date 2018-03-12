@@ -19,24 +19,24 @@ ground = BRepPrimAPI_MakeBox(gp_Pnt(-50, -50, 0), 100., 100., .5).Shape()
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
 
-    io.addOccShape('Sphere', sphere)
-    io.addOccShape('Ground', ground)
+    io.add_occ_shape('Sphere', sphere)
+    io.add_occ_shape('Ground', ground)
 
-    io.addObject('sphere',
+    io.add_object('sphere',
                  [Volume('Sphere'), Contactor('Sphere', contact_type='Face', contact_index=0)],
                  mass=1, translation=[0, 0, 10], velocity=[0, 0, 0, 0, 0, 0])
 
-    io.addObject('ground',
+    io.add_object('ground',
                  [Contactor('Ground', contact_type='Face', contact_index=5)],
                  mass=0, translation=[0, 0, 0])
 
-    io.addInteraction('sphere-ground',
+    io.add_interaction('sphere-ground',
                       'sphere', 'Sphere-1',
                       'ground', 'Ground-0',
                       distance_calculator='occ',
                       offset=0.01)
 
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.9)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.9)
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done

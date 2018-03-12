@@ -23,26 +23,26 @@ import numpy as np
 with Hdf5() as io:
 
     # Definition of a cube as a convex shape
-    io.addPrimitiveShape('Cube', 'Box', (1,1,1))
+    io.add_primitive_shape('Cube', 'Box', (1,1,1))
 
     # Definition of the ground shape
-    io.addPrimitiveShape('Ground', 'Box', (10, 10, .5))
+    io.add_primitive_shape('Ground', 'Box', (10, 10, .5))
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.8)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.8)
 
     # The cube object made with an unique Contactor : the cube shape.
     # As a mass is given, it is a dynamic system involved in contact
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
-    io.addObject('cube', [Contactor('Cube')], translation=[0, 0, 2],
+    io.add_object('cube', [Contactor('Cube')], translation=[0, 0, 2],
                  mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
-    io.addObject('ground', [Contactor('Ground')],
+    io.add_object('ground', [Contactor('Ground')],
                  translation=[0, 0, 0])
 
 # Need to keep the MyBulletR relations somewhere otherwise some

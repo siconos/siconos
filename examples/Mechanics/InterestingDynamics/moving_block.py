@@ -31,27 +31,27 @@ r2 = 1
 with Hdf5() as io:
 
     #
-    io.addPrimitiveShape('Arm1', 'Cylinder', (.3, l1))
-    io.addPrimitiveShape('Arm2', 'Cylinder', (.3, l2))
-    io.addPrimitiveShape('Mass1', 'Sphere', (r1,))
-    io.addPrimitiveShape('Mass2', 'Sphere', (r2,))
+    io.add_primitive_shape('Arm1', 'Cylinder', (.3, l1))
+    io.add_primitive_shape('Arm2', 'Cylinder', (.3, l2))
+    io.add_primitive_shape('Mass1', 'Sphere', (r1,))
+    io.add_primitive_shape('Mass2', 'Sphere', (r2,))
 
     # Definition of the ground shape
     ground_slope = 0.29
     ground_size = (100., 400, 2.)
-    io.addPrimitiveShape('Ground', 'Box', ground_size)
-    io.addPrimitiveShape('Ground2', 'Box', ground_size)
+    io.add_primitive_shape('Ground', 'Box', ground_size)
+    io.add_primitive_shape('Ground2', 'Box', ground_size)
     block_size = (50., 20., 20.)
-    io.addPrimitiveShape('Block', 'Box', block_size)
+    io.add_primitive_shape('Block', 'Box', block_size)
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.3)
 
     #first branch + first mass the center of gravity is at the center of the
     #Mass1
     ppos = [0, -10., 15]
-    io.addObject(
+    io.add_object(
         'arm1', [Contactor('Mass1'),
                  Contactor('Arm1', relative_translation=[0, r1 + l1 / 2., 0])],
         translation=ppos,
@@ -59,7 +59,7 @@ with Hdf5() as io:
         velocity=[0, -5, 0, 0, 0, 0],
         mass=m1)
 
-    io.addJoint('joint2', 'arm1',
+    io.add_joint('joint2', 'arm1',
                 points=[[ppos[0], ppos[1], ppos[2] + l1]],
                 axes=[[1, 0, 0]],
                 joint_class='PivotJointR')
@@ -68,18 +68,18 @@ with Hdf5() as io:
     # not given, it is a static object only involved in contact
     # detection.
     shift = -0.5 * ground_size[2] - sin(ground_slope) * ground_size[1] * 0.5
-    io.addObject('ground', [Contactor('Ground')],
+    io.add_object('ground', [Contactor('Ground')],
                  translation=[0, ground_size[1] * 0.3, shift])
-    io.addObject('ground2', [Contactor('Ground2')],
+    io.add_object('ground2', [Contactor('Ground2')],
                  translation=[0, 0, 0.],
                  orientation=((1, 0, 0), -ground_slope))
     translat = [0., block_size[2] * 0.5 * sin(ground_slope),
                 block_size[2] * 0.5 * cos(ground_slope)]
-    io.addObject('block', [Contactor('Block')],
+    io.add_object('block', [Contactor('Block')],
                  translation=translat,
                  orientation=((1, 0, 0), -ground_slope),
                  velocity=[0, 0, 0., 0, 0, 0], mass=m2,)
-    # io.addObject('blockref', [Contactor('Block')],
+    # io.add_object('blockref', [Contactor('Block')],
     #              translation=[0., 0., 0.],
     #              orientation=((1, 0, 0), -ground_slope), mass=m2)
 

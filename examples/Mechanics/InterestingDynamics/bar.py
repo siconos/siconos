@@ -58,7 +58,7 @@ with Hdf5() as io:
   print('scale', scale)
   # raw_input()
   # Definition of a cube as a convex shape
-  io.addConvexShape('Bar', [ (-bar_length,  bar_width, -bar_height),
+  io.add_convex_shape('Bar', [ (-bar_length,  bar_width, -bar_height),
                              (-bar_length, -bar_width, -bar_height),
                              (-bar_length, -bar_width,  bar_height),
                              (-bar_length,  bar_width,  bar_height),
@@ -70,24 +70,24 @@ with Hdf5() as io:
   angle= math.pi/4.0
   ori = [math.cos(angle/2.0),0.0,math.sin(angle/2.0),0]
   print('ori initial', ori)
-  io.addObject('bar', [Contactor('Bar')],
+  io.add_object('bar', [Contactor('Bar')],
                translation=[0,0,3.0*scale],
                orientation = ori,
                velocity=[0, 0, 0, 0, 0.0, 0],
                mass=mass)
 
   # Definition of the ground shape
-  io.addPrimitiveShape('Ground', 'Box', (5*scale, 5*scale, 0.1*scale))
+  io.add_primitive_shape('Ground', 'Box', (5*scale, 5*scale, 0.1*scale))
   angleground= 0.0 ;math.pi/4.0
   origround = [math.cos(angleground/2.0),0.0,math.sin(angleground/2.0),0]
-  io.addObject('ground', [Contactor('Ground')],
+  io.add_object('ground', [Contactor('Ground')],
                translation=[0, 0, 0.0],
                orientation = origround)
 
 
   # Definition of a non smooth law. As no group ids are specified it
   # is between contactors of group id 0.
-  io.addNewtonImpactFrictionNSL('contact', mu=0.3)
+  io.add_Newton_impact_friction_nsl('contact', mu=0.3)
 
   print(body_collection)
 

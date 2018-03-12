@@ -21,7 +21,7 @@ options.worldScale = 1000.0
 with Hdf5() as io:
 
     # Definition of a cube as a convex shape
-    io.addConvexShape('CubeCH', [
+    io.add_convex_shape('CubeCH', [
         (-0.001, 0.001, -0.001),
         (-0.001, -0.001, -0.001),
         (-0.001, -0.001, 0.001),
@@ -32,32 +32,32 @@ with Hdf5() as io:
         (0.001, -0.001, 0.001)])
 
     # Definition of a cube as a primitive shape
-    io.addPrimitiveShape('CubeP', 'Box', (0.002, 0.002, 0.002))
+    io.add_primitive_shape('CubeP', 'Box', (0.002, 0.002, 0.002))
 
     # Definition of the ground shape
-    io.addPrimitiveShape('Ground', 'Box', (0.1, 0.1, .01))
+    io.add_primitive_shape('Ground', 'Box', (0.1, 0.1, .01))
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.1)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.1)
 
     # The cube object made with an unique Contactor : the cube shape.
     # As a mass is given, it is a dynamic system involved in contact
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
-    io.addObject('cubeCH', [Contactor('CubeCH')], translation=[0, 0.003, 0.005],
+    io.add_object('cubeCH', [Contactor('CubeCH')], translation=[0, 0.003, 0.005],
                  velocity=[0.1, 0, 0, 1, 1, 1],
                  mass=0.1)
 
     # The primitive cube geometry object
-    io.addObject('cubeP', [Contactor('CubeP')], translation=[0, -0.003, 0.005],
+    io.add_object('cubeP', [Contactor('CubeP')], translation=[0, -0.003, 0.005],
                  velocity=[0.1, 0, 0, 1, 1, 1],
                  mass=0.1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
-    io.addObject('ground', [Contactor('Ground')],
+    io.add_object('ground', [Contactor('Ground')],
                  translation=[0, 0, -0.005])
 
 

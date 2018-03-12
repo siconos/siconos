@@ -572,7 +572,7 @@ def compute_inertia_and_center_of_mass(shapes, mass, io=None):
 #
 # load .vtp file
 #
-def loadSiconosMesh(shape_filename, scale=None):
+def load_siconos_mesh(shape_filename, scale=None):
     """
     loads a vtk .vtp file and returns a SiconosMesh shape
     WARNING triangles cells assumed!
@@ -675,7 +675,7 @@ class ShapeCollection():
                             tmpf[0].write(data)
                             tmpf[0].flush()
                             scale = self.attributes(shape_name).get('scale',None)
-                            mesh, dims = loadSiconosMesh(tmpf[1], scale=scale)
+                            mesh, dims = load_siconos_mesh(tmpf[1], scale=scale)
                             self._shapes[shape_name] = mesh
                             mesh.setInsideMargin(
                                 self.shape(shape_name).attrs.get('insideMargin',
@@ -1105,7 +1105,7 @@ class Hdf5():
         """
         return self._boundary_conditions
 
-    def importNonSmoothLaw(self, name):
+    def import_nonsmooth_law(self, name):
         if self._interman is not None:
             nslawClass = getattr(Kernel, self._nslaws_data[name].attrs['type'])
             if nslawClass == Kernel.NewtonImpactFrictionNSL:
@@ -1124,7 +1124,7 @@ class Hdf5():
             if gid1 >= 0 and gid2 >= 0:
                 self._interman.insertNonSmoothLaw(nslaw, gid1, gid2)
 
-    def importOccObject(self, name, translation, orientation,
+    def import_occ_object(self, name, translation, orientation,
                         velocity, contactors, mass, given_inertia, body_class,
                         shape_class, face_class, edge_class, birth=False, number=None):
 
@@ -1214,7 +1214,7 @@ class Hdf5():
 
         return body
 
-    def importBulletObject(self, name, translation, orientation,
+    def import_bullet_object(self, name, translation, orientation,
                            velocity, contactors, mass, inertia,
                            body_class, shape_class, birth=False,
                            number = None):
@@ -1290,7 +1290,7 @@ class Hdf5():
 
         return body
 
-    def make_CouplerJointR(self, ds1_name, ds2_name, coupled, references):
+    def make_coupler_jointr(self, ds1_name, ds2_name, coupled, references):
         topo = self._nsds.topology()
         dof1, dof2, ratio = coupled[0,:]
         refds_name = None
@@ -1351,7 +1351,7 @@ class Hdf5():
                                          joint2, int(dof2), ratio)
         return joint
 
-    def importJoint(self, name):
+    def import_joint(self, name):
         if self._interman is not None:
             nsds = self._nsds
             topo = nsds.topology()
@@ -1389,7 +1389,7 @@ class Hdf5():
                 # This case is a little different, handle it specially
                 assert(references is not None)
                 assert(np.shape(coupled)==(1,3))
-                joint = self.make_CouplerJointR(ds1_name, ds2_name,
+                joint = self.make_coupler_jointr(ds1_name, ds2_name,
                                                 coupled, references)
                 coupled = None # Skip the use for "coupled" below, to
                                # install joint-local couplings
@@ -1472,7 +1472,7 @@ class Hdf5():
                         link(cpl_inter, ds1, ds2)
                     nsds.setName(cpl_inter, '%s_coupler%d'%(str(name),n))
 
-    def importBoundaryConditions(self, name):
+    def import_boundary_conditions(self, name):
         if self._interman is not None:
             topo = self._nsds.\
                 topology()
@@ -1506,7 +1506,7 @@ class Hdf5():
             #    self._nsds.\
             #        link(joint_inter, ds1)
 
-    def importPermanentInteractions(self, name):
+    def import_permanent_interactions(self, name):
         """
         """
         if (self._interman is not None and 'input' in self._data
@@ -1602,7 +1602,7 @@ class Hdf5():
                     self._keep.append([cocs1, cocs2, cp1,
                                        cp2, relation])
 
-    def importObject(self, name, body_class=None, shape_class=None,
+    def import_object(self, name, body_class=None, shape_class=None,
                      face_class=None, edge_class=None, birth=False,
                      translation=None, orientation=None, velocity=None):
         """
@@ -1671,7 +1671,7 @@ class Hdf5():
 
         if occ_type:
             # Occ object
-            body = self.importOccObject(
+            body = self.import_occ_object(
                 name, floatv(translation), floatv(orientation),
                 floatv(velocity), contactors, float(mass),
                 inertia, body_class, shape_class, face_class,
@@ -1679,7 +1679,7 @@ class Hdf5():
                 number = self.instances()[name].attrs['id'])
         else:
             # Bullet object
-            body = self.importBulletObject(
+            body = self.import_bullet_object(
                 name, floatv(translation), floatv(orientation),
                 floatv(velocity), contactors, float(mass),
                 inertia, body_class, shape_class, birth=birth,
@@ -1694,7 +1694,7 @@ class Hdf5():
             else:
                 self._deaths[time_of_death] = [(name, obj, body)]
 
-    def importScene(self, time, body_class, shape_class, face_class,
+    def import_scene(self, time, body_class, shape_class, face_class,
                     edge_class):
         """
         From the specification given in the hdf5 file with the help of
@@ -1789,7 +1789,7 @@ class Hdf5():
                         velocity = obj.attrs['velocity']
 
 
-                    self.importObject(name=name, body_class=body_class,
+                    self.import_object(name=name, body_class=body_class,
                                       shape_class=shape_class,
                                       face_class=face_class,
                                       edge_class=edge_class,
@@ -1801,29 +1801,29 @@ class Hdf5():
             # import nslaws
             # note: no time of birth for nslaws and joints
             for name in self._nslaws_data:
-                self.importNonSmoothLaw(name)
+                self.import_nonsmooth_law(name)
 
             for name in self.joints():
-                self.importJoint(name)
+                self.import_joint(name)
 
             for name in self.boundary_conditions():
-                self.importBoundaryConditions(name)
+                self.import_boundary_conditions(name)
 
             for name in self.permanent_interactions():
-                self.importPermanentInteractions(name)
+                self.import_permanent_interactions(name)
 
-    def currentTime(self):
+    def current_time(self):
         if self._initializing:
             return self._simulation.startingTime()
         else:
             return self._simulation.nextTime()
 
-    def importBirths(self, body_class=None, shape_class=None,
+    def import_births(self, body_class=None, shape_class=None,
                      face_class=None, edge_class=None,):
         """
         Import new objects into the NSDS.
         """
-        time = self.currentTime()
+        time = self.current_time()
 
         ind_time = bisect.bisect_right(self._scheduled_births, time)
 
@@ -1832,14 +1832,14 @@ class Hdf5():
 
         for time_of_birth in current_times_of_births:
             for (name, obj) in self._births[time_of_birth]:
-                self.importObject(name, body_class, shape_class,
+                self.import_object(name, body_class, shape_class,
                                   face_class, edge_class, birth=True)
 
-    def executeDeaths(self):
+    def execute_deaths(self):
         """
         Remove objects from the NSDS
         """
-        time = self.currentTime()
+        time = self.current_time()
 
         ind_time = bisect.bisect_right(self._scheduled_deaths, time)
 
@@ -1851,11 +1851,11 @@ class Hdf5():
                 self._interman.removeBody(body)
                 self._nsds.removeDynamicalSystem(body)
 
-    def outputStaticObjects(self):
+    def output_static_objects(self):
         """
         Outputs translations and orientations of static objects
         """
-        time = self.currentTime()
+        time = self.current_time()
         p = 0
         self._static_data.resize(len(self._static), 0)
 
@@ -1879,14 +1879,14 @@ class Hdf5():
                  rotation[3]]
             p += 1
 
-    def outputDynamicObjects(self, initial=False):
+    def output_dynamic_objects(self, initial=False):
         """
         Outputs translations and orientations of dynamic objects.
         """
 
         current_line = self._dynamic_data.shape[0]
 
-        time = self.currentTime()
+        time = self.current_time()
 
         positions = self._io.positions(self._nsds)
 
@@ -1901,14 +1901,14 @@ class Hdf5():
                                                                    positions),
                                                                   axis=1)
 
-    def outputVelocities(self):
+    def output_velocities(self):
         """
         Output velocities of dynamic objects
         """
 
         current_line = self._dynamic_data.shape[0]
 
-        time = self.currentTime()
+        time = self.current_time()
 
         velocities = self._io.velocities(self._nsds)
 
@@ -1923,14 +1923,14 @@ class Hdf5():
                                                                       velocities),
                                                                      axis=1)
 
-    def outputContactForces(self):
+    def output_contact_forces(self):
         """
         Outputs contact forces
         _contact_index_set default value is 1.
         """
         if self._nsds.\
                 topology().indexSetsSize() > 1:
-            time = self.currentTime()
+            time = self.current_time()
             contact_points = self._io.contactPoints(self._nsds,
                                                     self._contact_index_set)
 
@@ -1946,13 +1946,13 @@ class Hdf5():
                                     contact_points),
                                    axis=1)
 
-    def outputDomains(self):
+    def output_domains(self):
         """
         Outputs domains of contact points
         """
         if self._nsds.\
                 topology().indexSetsSize() > 1:
-            time = self.currentTime()
+            time = self.current_time()
             domains = self._io.domains(self._nsds)
 
             if domains is not None:
@@ -1965,12 +1965,12 @@ class Hdf5():
                 self._domain_data[current_line:, :] = \
                     np.concatenate((times, domains), axis=1)
 
-    def outputSolverInfos(self):
+    def output_solver_infos(self):
         """
         Outputs solver #iterations & precision reached
         """
 
-        time = self.currentTime()
+        time = self.current_time()
         so = self._simulation.oneStepNSProblem(0).\
             numericsSolverOptions()
 
@@ -1993,11 +1993,11 @@ class Hdf5():
         self._solv_data[current_line, :] = [time, iterations, precision,
                                             local_precision]
 
-    def printSolverInfos(self):
+    def print_solver_infos(self):
         """
         Outputs solver #iterations & precision reached
         """
-        time = self.currentTime()
+        time = self.current_time()
         so = self._simulation.oneStepNSProblem(0).\
             numericsSolverOptions()
         if so.solverId == Numerics.SICONOS_GENERIC_MECHANICAL_NSGS:
@@ -2019,7 +2019,7 @@ class Hdf5():
               'iterations= ', iterations,
               'precision=', precision)
 
-    def addPluginSource(self, name, filename):
+    def add_plugin_source(self, name, filename):
         """
         Add C source plugin
         """
@@ -2030,7 +2030,7 @@ class Hdf5():
             plugin_src[:] = str_of_file(filename)
             plugin_src.attrs['filename'] = filename
 
-    def importPlugins(self):
+    def import_plugins(self):
         """
         Plugins extraction and compilation.
         """
@@ -2048,10 +2048,10 @@ class Hdf5():
                 file_of_str(plugin_fname, plugin_src)
 
         # build
-        subprocess.check_call(['siconos','--noexec','.'])
+        subprocess.check_call(['siconos', '--noexec','.'])
 
-    def addExternalFunction(self, name, body_name, function_name,
-                            plugin_name, plugin_function_name):
+    def add_external_function(self, name, body_name, function_name,
+                              plugin_name, plugin_function_name):
 
         if name not in self._external_functions:
             ext_fun = group(self._external_functions, name)
@@ -2060,7 +2060,7 @@ class Hdf5():
             ext_fun.attrs['plugin_name'] = plugin_name
             ext_fun.attrs['plugin_function_name'] = plugin_function_name
 
-    def addExternalBCFunction(self, name, body_name, bc_indices,
+    def add_external_bc_function(self, name, body_name, bc_indices,
                               plugin_name, plugin_function_name):
 
         if name not in self._external_functions:
@@ -2070,7 +2070,7 @@ class Hdf5():
             ext_fun.attrs['plugin_function_name'] = plugin_function_name
             ext_fun.attrs['bc_indices'] = bc_indices
 
-    def importExternalFunctions(self):
+    def import_external_functions(self):
         topo = self._nsds.\
                 topology()
 
@@ -2095,15 +2095,12 @@ class Hdf5():
                                                         plugin_function_name)
                 ds.setBoundaryConditions(bc)
 
-
-    def addMeshFromString(self, name, shape_data, scale=None,
-                          insideMargin=None, outsideMargin=None):
+    def add_mesh_from_string(self, name, shape_data, scale=None,
+                             insideMargin=None, outsideMargin=None):
         """
         Add a mesh shape from a string.
         Accepted format : mesh encoded in VTK .vtp format
         """
-
-        import vtk
 
         if name not in self._ref:
 
@@ -2121,8 +2118,8 @@ class Hdf5():
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addMeshFromFile(self, name, filename, scale=None,
-                        insideMargin=None, outsideMargin=None):
+    def add_mesh_from_file(self, name, filename, scale=None,
+                           insideMargin=None, outsideMargin=None):
         """
         Add a mesh shape from a file.
         Accepted format : .stl or mesh encoded in VTK .vtp format
@@ -2156,12 +2153,12 @@ class Hdf5():
                 assert os.path.splitext(filename)[-1][1:] == 'vtp'
                 shape_data = str_of_file(filename)
 
-            self.addMeshFromString(name, shape_data, scale=scale,
+            self.add_mesh_from_string(name, shape_data, scale=scale,
                                    insideMargin=insideMargin,
                                    outsideMargin=outsideMargin)
 
-    def addHeightMap(self, name, heightmap, rectangle,
-                     insideMargin=None, outsideMargin=None):
+    def add_height_map(self, name, heightmap, rectangle,
+                       insideMargin=None, outsideMargin=None):
         """
         Add a heightmap represented as a SiconosMatrix
         """
@@ -2185,7 +2182,7 @@ class Hdf5():
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addBRepFromString(self, name, shape_data):
+    def add_brep_from_string(self, name, shape_data):
         """
         Add a brep contained in a string.
         """
@@ -2206,7 +2203,7 @@ class Hdf5():
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addOccShape(self, name, occ_shape):
+    def add_occ_shape(self, name, occ_shape):
         """
         Add an OpenCascade TopoDS_Shape.
         """
@@ -2237,7 +2234,7 @@ class Hdf5():
                 self._shapeid[name] = shape.attrs['id']
                 self._number_of_shapes += 1
 
-    def addShapeDataFromFile(self, name, filename):
+    def add_shape_data_from_file(self, name, filename):
         """
         Add shape data from a file.
         """
@@ -2254,10 +2251,10 @@ class Hdf5():
             self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addInteraction(self, name, body1_name, contactor1_name=None,
-                       body2_name=None, contactor2_name=None,
-                       distance_calculator='cadmbtb',
-                       offset=0.0001):
+    def add_interaction(self, name, body1_name, contactor1_name=None,
+                        body2_name=None, contactor2_name=None,
+                        distance_calculator='cadmbtb',
+                        offset=0.0001):
         """
         Add permanent interactions between two objects contactors.
         """
@@ -2279,50 +2276,50 @@ class Hdf5():
             self._pinterid[name] = pinter.attrs['id']
             self._number_of_permanent_interactions += 1
 
-    def addConvexShape(self, name, points,
-                       insideMargin=None, outsideMargin=None):
+    def add_convex_shape(self, name, points,
+                         insideMargin=None, outsideMargin=None):
         """
         Add a convex shape defined by a list of points.
         """
         if name not in self._ref:
-            shape=self._ref.create_dataset(name,
+            shape = self._ref.create_dataset(name,
                                              (np.shape(points)[0],
                                               np.shape(points)[1]))
             if insideMargin is not None:
                 shape.attrs['insideMargin'] = insideMargin
             if outsideMargin is not None:
                 shape.attrs['outsideMargin'] = outsideMargin
-            shape[:]=points[:]
-            shape.attrs['type']='convex'
-            shape.attrs['id']=self._number_of_shapes
-            self._shapeid[name]=shape.attrs['id']
+            shape[:] = points[:]
+            shape.attrs['type'] = 'convex'
+            shape.attrs['id'] = self._number_of_shapes
+            self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addPrimitiveShape(self, name, primitive, params,
-                          insideMargin=None, outsideMargin=None):
+    def add_primitive_shape(self, name, primitive, params,
+                            insideMargin=None, outsideMargin=None):
         """
         Add a primitive shape.
         """
         if name not in self._ref:
             shape=self._ref.create_dataset(name, (1, len(params)))
-            shape.attrs['id']=self._number_of_shapes
-            shape.attrs['type']='primitive'
-            shape.attrs['primitive']=primitive
+            shape.attrs['id'] = self._number_of_shapes
+            shape.attrs['type'] = 'primitive'
+            shape.attrs['primitive'] = primitive
             if insideMargin is not None:
                 shape.attrs['insideMargin'] = insideMargin
             if outsideMargin is not None:
                 shape.attrs['outsideMargin'] = outsideMargin
-            shape[:]=params
-            self._shapeid[name]=shape.attrs['id']
+            shape[:] = params
+            self._shapeid[name] = shape.attrs['id']
             self._number_of_shapes += 1
 
-    def addObject(self, name, shapes,
-                  translation,
-                  orientation=[1, 0, 0, 0],
-                  velocity=[0, 0, 0, 0, 0, 0],
-                  mass=None, center_of_mass=[0, 0, 0],
-                  inertia=None, time_of_birth=-1, time_of_death=-1,
-                  allow_self_collide=False):
+    def add_object(self, name, shapes,
+                   translation,
+                   orientation=[1, 0, 0, 0],
+                   velocity=[0, 0, 0, 0, 0, 0],
+                   mass=None, center_of_mass=[0, 0, 0],
+                   inertia=None, time_of_birth=-1, time_of_death=-1,
+                   allow_self_collide=False):
         """Add an object with associated shapes as a list of Volume or
         Contactor objects. Contact detection and processing is
         defined by the Contactor objects. The Volume objects are used for
@@ -2364,7 +2361,7 @@ class Hdf5():
 
         """
         # print(arguments())
-        ori=quaternion_get(orientation)
+        ori = quaternion_get(orientation)
 
         assert (len(translation)==3)
         assert (len(ori)==4)
@@ -2390,7 +2387,7 @@ class Hdf5():
                           com[2])
 
 
-            obj=group(self._input, name)
+            obj =group(self._input, name)
 
             if time_of_birth >= 0:
                 obj.attrs['time_of_birth']=time_of_birth
@@ -2452,7 +2449,7 @@ class Hdf5():
 
             return obj.attrs['id']
 
-    def addNewtonImpactFrictionNSL(self, name, mu, e=0, collision_group1=0,
+    def add_Newton_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
                                    collision_group2=0):
         """
         Add a nonsmooth law for contact between 2 groups.
@@ -2474,8 +2471,8 @@ class Hdf5():
     # Note, default groups are -1 here, indicating not to add them to
     # the nslaw lookup table for contacts, since 1D impacts are
     # useless in this case.  They are however useful for joint stops.
-    def addNewtonImpactNSL(self, name, e=0, collision_group1=-1,
-                           collision_group2=-1):
+    def add_Newton_impact_nsl(self, name, e=0, collision_group1=-1,
+                              collision_group2=-1):
         """
         Add a nonsmooth law for contact between 2 groups.
         Only NewtonImpactNSL are supported.
@@ -2483,7 +2480,7 @@ class Hdf5():
         e is the coefficient of restitution on the contact normal,
         gid1 and gid2 define the group identifiers.
 
-        As opposed to addNewtonImpactFrictionNSL, the default groups are
+        As opposed to add_Newton_impact_friction_nsl, the default groups are
         -1, making the NSL unassociated with point contacts.  It can
         by used for joint stops however.
         """
@@ -2497,8 +2494,8 @@ class Hdf5():
     # Note, default groups are -1 here, indicating not to add them to
     # the nslaw lookup table for contacts, since 1D impacts are
     # useless in this case.  They are however useful for joint friction.
-    def addRelayNSL(self, name, lb, ub, size=1, collision_group1=-1,
-                    collision_group2=-1):
+    def add_relay_nsl(self, name, lb, ub, size=1, collision_group1=-1,
+                      collision_group2=-1):
         """
         Add a nonsmooth law for contact between 2 groups.
         Only NewtonImpactNSL are supported.
@@ -2506,7 +2503,7 @@ class Hdf5():
         e is the coefficient of restitution on the contact normal,
         gid1 and gid2 define the group identifiers.
 
-        As opposed to addNewtonImpactFrictionNSL, the default groups are
+        As opposed to add_Newton_impact_friction_nsl, the default groups are
         -1, making the NSL unassociated with point contacts.  It can
         by used for joint stops however.
         """
@@ -2519,7 +2516,7 @@ class Hdf5():
             nslaw.attrs['gid1']=collision_group1
             nslaw.attrs['gid2']=collision_group2
 
-    def addJoint(self, name, object1, object2=None,
+    def add_joint(self, name, object1, object2=None,
                  points=[[0, 0, 0]], axes=[[0, 1, 0]],
                  joint_class='PivotJointR', absolute=None,
                  allow_self_collide=None, nslaws=None, stops=None,
@@ -2564,8 +2561,8 @@ class Hdf5():
                 assert(len(references)==2 or len(references)==3)
                 joint.attrs['references'] = np.array(references, dtype='S')
 
-    def addBoundaryCondition(self, name, object1, indices=None, bc_class='HarmonicBC',
-                             v=None, a=None, b=None, omega=None, phi=None):
+    def add_boundary_condition(self, name, object1, indices=None, bc_class='HarmonicBC',
+                               v=None, a=None, b=None, omega=None, phi=None):
         """
         add boundarycondition to the object object1
 
@@ -2806,14 +2803,14 @@ class Hdf5():
         
         if len(self._plugins) > 0:
             print_verbose ('import plugins ...')
-            self.importPlugins()
+            self.import_plugins()
 
         print_verbose ('import scene ...')
-        self.importScene(t0, body_class, shape_class, face_class, edge_class)
+        self.import_scene(t0, body_class, shape_class, face_class, edge_class)
 
         if len(self._external_functions) > 0:
             print_verbose ('import external functions ...')
-            self.importExternalFunctions()
+            self.import_external_functions()
 
 
         if controller is not None:
@@ -2821,11 +2818,11 @@ class Hdf5():
 
 
         print_verbose ('first output static and dynamic objects ...')
-        self.outputStaticObjects()
-        self.outputDynamicObjects()
+        self.output_static_objects()
+        self.output_dynamic_objects()
 
         if self._should_output_domains:
-            log(self.outputDomains, with_timer)()
+            log(self.output_domains, with_timer)()
 
         # nsds=model.nonSmoothDynamicalSystem()
         # nds= nsds.getNumberOfDS()
@@ -2840,12 +2837,12 @@ class Hdf5():
             if verbose_progress:
                 print ('step', k, 'of', k0 + int((T - t0) / h)-1)
 
-            log(self.importBirths(body_class=body_class,
+            log(self.import_births(body_class=body_class,
                                   shape_class=shape_class,
                                   face_class=face_class,
                                   edge_class=edge_class))
 
-            log(self.executeDeaths())
+            log(self.execute_deaths())
 
             if controller is not None:
                 controller.step()
@@ -2859,16 +2856,16 @@ class Hdf5():
                 if verbose:
                     print_verbose ('output in hdf5 file at step ', k)
 
-                log(self.outputDynamicObjects, with_timer)()
+                log(self.output_dynamic_objects, with_timer)()
 
-                log(self.outputVelocities, with_timer)()
+                log(self.output_velocities, with_timer)()
 
-                log(self.outputContactForces, with_timer)()
+                log(self.output_contact_forces, with_timer)()
 
                 if self._should_output_domains:
-                    log(self.outputDomains, with_timer)()
+                    log(self.output_domains, with_timer)()
 
-                log(self.outputSolverInfos, with_timer)()
+                log(self.output_solver_infos, with_timer)()
 
                 log(self._out.flush)()
 
@@ -2888,7 +2885,7 @@ class Hdf5():
             if verbose and number_of_contacts > 0 :
                 number_of_contacts = osnspb.getSizeOutput()//3
                 print_verbose('number of contacts', number_of_contacts)
-                self.printSolverInfos()
+                self.print_solver_infos()
 
             if violation_verbose and number_of_contacts > 0 :
                 if len(simulation.y(0,0)) >0 :

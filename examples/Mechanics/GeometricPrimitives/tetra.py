@@ -29,16 +29,16 @@ with Hdf5() as io:
                        (1.0, -1.0, 1.0),
                        (-1.0, -1.0, 1.0),
                        (0.0, 0.0, -1.0)])
-    io.addConvexShape('Tetra', pts - pts.mean(0),
+    io.add_convex_shape('Tetra', pts - pts.mean(0),
                       insideMargin=0.01, outsideMargin=0.0)
 
     # Definition of the ground shape
-    io.addPrimitiveShape('Ground', 'Box', (10, 10, 1),
+    io.add_primitive_shape('Ground', 'Box', (10, 10, 1),
                          insideMargin=0.01, outsideMargin=0.0)
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.01, e=0.7,
+    io.add_Newton_impact_friction_nsl('contact', mu=0.01, e=0.7,
                                   collision_group1=1,
                                   collision_group2=2)
 
@@ -50,7 +50,7 @@ with Hdf5() as io:
     # shape.  As a mass is given, it is a dynamic system involved in
     # contact detection and in the simulation.  With no group id
     # specified the Contactor belongs to group 0
-    io.addObject('tetra', [Contactor('Tetra', collision_group=1)],
+    io.add_object('tetra', [Contactor('Tetra', collision_group=1)],
                  translation=[0, 0, 4],
                  velocity=[0, 0, 0, 0, 0, 0],
                  mass=1, inertia=inertia)
@@ -58,7 +58,7 @@ with Hdf5() as io:
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
-    io.addObject('ground', [Contactor('Ground', collision_group=2)],
+    io.add_object('ground', [Contactor('Ground', collision_group=2)],
                  translation=[0, 0, -0.1])
 
 # Run the simulation from the inputs previously defined and add

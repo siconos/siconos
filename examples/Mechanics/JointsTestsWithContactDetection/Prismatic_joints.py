@@ -5,16 +5,16 @@ import siconos.numerics as Numerics
 import siconos.kernel as Kernel
 
 with Hdf5() as io:
-    io.addPrimitiveShape('Cube', 'Box', (1, 1, 1))
-    io.addPrimitiveShape('Ground', 'Box', (10, 10, .5))
-    io.addNewtonImpactFrictionNSL('contact', e=0.0, mu=0.2)
-    io.addObject('ground', [Contactor('Ground')], translation=[0, 0, -0.25])
+    io.add_primitive_shape('Cube', 'Box', (1, 1, 1))
+    io.add_primitive_shape('Ground', 'Box', (10, 10, .5))
+    io.add_Newton_impact_friction_nsl('contact', e=0.0, mu=0.2)
+    io.add_object('ground', [Contactor('Ground')], translation=[0, 0, -0.25])
 
-    io.addObject('cube1', [Contactor('Cube')], translation=[-1, 0, 0.5], mass=0.1)
-    io.addObject('cube2', [Contactor('Cube')], translation=[ 1, 0, 0.5], mass=0.1,
+    io.add_object('cube1', [Contactor('Cube')], translation=[-1, 0, 0.5], mass=0.1)
+    io.add_object('cube2', [Contactor('Cube')], translation=[ 1, 0, 0.5], mass=0.1,
                  velocity=[5,0,5,0,0,0])
 
-    io.addJoint('joint1', 'cube1', 'cube2', None, [[0,0,1]], 'PrismaticJointR')
+    io.add_joint('joint1', 'cube1', 'cube2', None, [[0,0,1]], 'PrismaticJointR')
 
 with Hdf5(mode='r+') as io:
     io.run(t0=0,

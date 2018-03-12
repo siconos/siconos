@@ -28,37 +28,37 @@ with Hdf5() as io:
     # The heightmap has tangential extents 50 by 50, and its height is
     # not scaled; actual height must be reflected by values in
     # heightmap data.
-    io.addHeightMap('MyTerrain', heightmap, (50, 50))
+    io.add_height_map('MyTerrain', heightmap, (50, 50))
 
     # Definition of a sphere
-    io.addPrimitiveShape('Ball', 'Sphere', (1,))
+    io.add_primitive_shape('Ball', 'Sphere', (1,))
 
     # Definition of a cube
-    io.addPrimitiveShape('Cube', 'Box', (8,8,8))
+    io.add_primitive_shape('Cube', 'Box', (8,8,8))
 
     # Definition of a non smooth law. We put the objects and heightmap
     # into different collision groups so that there are object-terrain
     # collisions but no object-object collisions.
-    io.addNewtonImpactFrictionNSL('contact', mu = 0.3, e = 0.0,
+    io.add_Newton_impact_friction_nsl('contact', mu = 0.3, e = 0.0,
                                   collision_group1=0, collision_group2=1)
 
     # Rain down a 2D array of spheres -- examining the initial collision
     # locations will ensure the terrain is where we think it is.
     for i in range(20):
         for j in range(20):
-            io.addObject('ball_%d_%d'%(i,j),
+            io.add_object('ball_%d_%d'%(i,j),
                          [Contactor('Ball', collision_group=1)],
                          translation=[j*5-47.5, i*5-47.5, 110], mass=1)
 
     # Add a nice big cube for effect
-    io.addObject('cube',
+    io.add_object('cube',
                  [Contactor('Cube', collision_group=1)],
                  translation=[0, 18, 150], mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
-    io.addObject('ground', [Contactor('MyTerrain', collision_group=0)],
+    io.add_object('ground', [Contactor('MyTerrain', collision_group=0)],
                  translation=[0, 0, 0])
 
 # Run the simulation from the inputs previously defined and add
