@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 import siconos.kernel as Kernel
 import numpy as np
 
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
     io.add_primitive_shape('Box', 'Box', (1, 1, 1))
     io.add_primitive_shape('Ground', 'Box', (10, 30, 0.5))
     io.add_Newton_impact_friction_nsl('contact', e=0.5, mu=0.5)
@@ -39,7 +39,7 @@ with Hdf5() as io:
                  nslaws='stop', stops=[[0, 2.0, -1], [0, -2.0, 1]],
                  allow_self_collide=True)
 
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
     io.run(t0=0,
            T=10,
            h=0.001,

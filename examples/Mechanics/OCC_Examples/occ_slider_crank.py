@@ -10,10 +10,10 @@
 #
 
 from siconos.mechanics.collision.tools import Volume, Contactor, Shape
-from siconos.io.mechanics_io import Hdf5
-import siconos.io.mechanics_io
+from siconos.io.mechanics_run import MechanicsHdf5Runner
+import siconos.io.mechanics_run
 
-siconos.io.mechanics_io.set_backend('occ')
+siconos.io.mechanics_run.set_backend('occ')
 
 l1 = 0.153    # crank length
 l2 = 0.306    # connecting rod length
@@ -24,7 +24,7 @@ w10 = -150.   # initial angular speed for the crank
 w20 = 75.     # initial angular speed for the connecting rod
 w30 = 0.      # initial angular speed for the slider
 
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     io.add_plugin_source('plugin', 'SliderCrankPlugin/SliderCrankPlugin.cpp')
 
@@ -293,7 +293,7 @@ with Hdf5() as io:
 
     io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.4)
 
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     io.run(with_timer=True,
            t0=0,

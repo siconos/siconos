@@ -5,19 +5,19 @@
 #
 
 from siconos.mechanics.collision.tools import Volume, Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 from siconos import numerics
-import siconos.io.mechanics_io
+import siconos.io.mechanics_run
 from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere
 from OCC.gp import gp_Pnt
 
-siconos.io.mechanics_io.set_backend('occ')
+siconos.io.mechanics_run.set_backend('occ')
 
 sphere = BRepPrimAPI_MakeSphere(1.).Shape()
 ground = BRepPrimAPI_MakeBox(gp_Pnt(-50, -50, 0), 100., 100., .5).Shape()
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     io.add_occ_shape('Sphere', sphere)
     io.add_occ_shape('Ground', ground)
@@ -42,7 +42,7 @@ with Hdf5() as io:
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

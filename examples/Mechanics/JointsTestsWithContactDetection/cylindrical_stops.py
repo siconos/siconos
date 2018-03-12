@@ -3,7 +3,7 @@
 from __future__ import print_function
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 import siconos.kernel as Kernel
 import siconos.mechanics as Mechanics
@@ -20,7 +20,7 @@ twist = 10
 # Initial push along free linear axis on the body attached to the first joint.
 push = 1
 
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
     # self-collide property: if set to true, collisions between bodies
     # connected by joints are allowed.  In this example, the joint
     # keeps the bodies in an overlapping state, which leads to
@@ -100,7 +100,7 @@ class Ctrl(object):
         print('joint linear position, %f, angle, %f'%tuple(self.yDoF))
 
 # Run the simulation
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
     io.run(t0=0,
            T=20,
            h=0.01,

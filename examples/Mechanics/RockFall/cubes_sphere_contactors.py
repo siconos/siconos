@@ -3,7 +3,7 @@ import numpy
 import math
 import pickle
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 
 from siconos.mechanics.collision.convexhull import ConvexHull
@@ -46,7 +46,7 @@ def normal_plane(p1,p2,p3):
 #create plans
 
 # Creation of the hdf5 file
-with Hdf5(use_compression=True) as io:
+with MechanicsHdf5Runner(use_compression=True) as io:
 
   ######### amont
   v0 = numpy.array([5.00,1.6131,1.0751])
@@ -165,7 +165,7 @@ with Hdf5(use_compression=True) as io:
 step=10000
 hstep=0.0005
 
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
 
   io.run(with_timer=False,

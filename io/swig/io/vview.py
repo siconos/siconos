@@ -184,9 +184,9 @@ from numpy.linalg import norm
 import numpy
 import random
 
-from siconos.io.mechanics_io import Quaternion, Hdf5
-from siconos.io.mechanics_io import tmpfile as io_tmpfile
-from siconos.io.mechanics_io import occ_topo_list, occ_load_file,\
+from siconos.io.mechanics_hdf5 import MechanicsHdf5
+from siconos.io.mechanics_hdf5 import tmpfile as io_tmpfile
+from siconos.io.mechanics_hdf5 import occ_topo_list, occ_load_file,\
     topods_shape_reader, brep_reader
 
 ## Utilities
@@ -221,6 +221,37 @@ big_data_writer.SetInputConnection(big_data_source.GetOutputPort())
 offsets = dict()
 
 
+class Quaternion():
+    def __init__(self, *args):
+        import vtk
+        self._vtkmath = vtk.vtkMath()
+        self._data = vtk.vtkQuaternion[float](*args)
+
+    def __mul__(self, q):
+        r = Quaternion()
+        self._vtkmath.MultiplyQuaternion(self._data, q._data, r._data)
+        return r
+
+    def __getitem__(self, i):
+        return self._data[i]
+
+    def conjugate(self):
+        r = Quaternion((self[0], self[1], self[2], self[3]))
+        r._data.Conjugate()
+        return r
+
+    def rotate(self, v):
+        pv = Quaternion((0, v[0], v[1], v[2]))
+        rv = self * pv * self.conjugate()
+        # assert(rv[0] == 0)
+        return [rv[1], rv[2], rv[3]]
+
+    def axisAngle(self):
+        r = [0, 0, 0]
+        a = self._data.GetRotationAngleAndAxis(r)
+        return r, a
+
+
 ## Program starts
 
 # Read file and open VTK interaction window
@@ -232,7 +263,7 @@ shape = dict()
 pos = dict()
 instances = dict()
 
-with Hdf5(io_filename=io_filename, mode='r') as io:
+with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
 
     def load():
 

@@ -5,12 +5,12 @@
 
 import siconos
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 
 options = siconos.mechanics.collision.bullet.SiconosBulletOptions()
 options.worldScale = 0.01
 
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     # Definition of a tetrahedron as a convex shape
     io.add_primitive_shape('Body1', 'Cylinder', (1, 6))
@@ -25,7 +25,7 @@ with Hdf5() as io:
                   mass=1,
                   inertia=[1, 10, 11])
 
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     io.run(with_timer=True,
            options=options,

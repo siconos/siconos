@@ -1,6 +1,6 @@
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.kernel as Kernel
 import numpy as np
 
@@ -9,7 +9,7 @@ import numpy as np
 # rotational and translational motion.)
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     # Bouncy contact with the ground
     io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.9)
@@ -71,7 +71,7 @@ with Hdf5() as io:
                 coupled=[[0, 0, 3.0]], references=['jnt6','jnt7','bar5'])
 
 # Load and run the simulation
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
     io.run(t0=0,
            T=5,
            h=0.001,

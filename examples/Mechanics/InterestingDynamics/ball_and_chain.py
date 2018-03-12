@@ -3,7 +3,7 @@
 # Various object types sliding, rolling, and sitting still.
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 from siconos.mechanics.collision.convexhull import ConvexHull
 import numpy as np
@@ -20,7 +20,7 @@ num_links = 5
 ball_radius = 0.5
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     # Definition of a half-torus as a composition of convex shapes.
     all_pts = []
@@ -109,7 +109,7 @@ with Hdf5() as io:
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     io.run(with_timer=False,
            t0=0,

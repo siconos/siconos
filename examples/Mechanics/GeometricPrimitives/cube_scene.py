@@ -1,14 +1,15 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 #
 # Example of one object under gravity with one contactor and a ground
 #
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_hdf5 import MechanicsHdf5
 
 # Creation of the hdf5 file for input/output
-with Hdf5(io_filename='cube_scene.hdf5') as io:
+with MechanicsHdf5(io_filename='cube_scene.hdf5') as io:
 
     # Definition of a cube as a convex shape
     io.add_convex_shape('Cube', [
@@ -44,3 +45,6 @@ with Hdf5(io_filename='cube_scene.hdf5') as io:
     # detection.
     io.add_object('ground', [Contactor('Ground')],
                   translation=[0, 0, 0])
+
+    print('Wrote', io._io_filename)
+    print('Now run cube_simulation.py.')

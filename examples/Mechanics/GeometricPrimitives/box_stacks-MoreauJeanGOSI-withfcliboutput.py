@@ -3,7 +3,7 @@
 import os
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 import siconos.kernel as Kernel
 from siconos.io.FrictionContactTrace import FrictionContactTraceParams
@@ -12,7 +12,7 @@ from siconos.io.FrictionContactTrace import FrictionContactTraceParams
 # chains of contacts.
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     width, depth, height = 1, 1, 1
     io.add_primitive_shape('Box', 'Box', [width, depth, height])
@@ -90,7 +90,7 @@ friction_contact_trace_params = FrictionContactTraceParams(
 
     
 # Load and run the simulation
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
     io.run(t0=0,
            T=step*hstep,
            h=hstep,
