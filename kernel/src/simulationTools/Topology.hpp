@@ -273,6 +273,15 @@ public:
     return _IG.size();
   };
 
+  /** get the size of the  InteractionGraphs at a given level
+   * \param level
+   *  \return size of the  InteractionGraphs at a given level
+   */
+  inline unsigned int indexSetSize(unsigned int level) const
+  {
+    return _IG[level]->size();
+  };
+
   /** resize Interactions Graphs
    * \param newSize the new size
    */
