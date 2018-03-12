@@ -1238,6 +1238,11 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorS
   std::vector< SP::SiconosContactor >::const_iterator it;
   for (it=con->begin(); it!=con->end(); it++)
   {
+    // special collision group -1 = do not collide, thus we can skip
+    // creation of associated collision objects
+    if ((*it)->collision_group == -1) continue;
+
+    // otherwise visit the object with createCollisionObject
     ccosv->contactor = *it;
     ccosv->contactor->shape->acceptSP(ccosv);
   }
