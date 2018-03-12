@@ -1023,7 +1023,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     # set visibility for all actors associated to a dynamic instance
     def set_actors_viz(instance, time):
         tob = times_of_birth.get(instance, -1)
-        tod = times_of_death.get(instance, math.inf)
+        tod = times_of_death.get(instance, float('inf'))
         if (tob <= time and tod >= time):
             for actor in dynamic_actors[instance]:
                 actor.VisibilityOn()
