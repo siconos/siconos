@@ -1015,13 +1015,8 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
                        data[:, 7],
                        data[:, 8])
 
-    # to be removed if ok
-    def set_positionv_old(x):
-        for y in x.reshape(-1, 8):
-            set_position(*(y.reshape(8)))
-
     # set visibility for all actors associated to a dynamic instance
-    def set_actors_viz(instance, time):
+    def set_dynamic_instance_visibility(instance, time):
         tob = times_of_birth.get(instance, -1)
         tod = times_of_death.get(instance, float('inf'))
         if (tob <= time and tod >= time):
@@ -1033,30 +1028,10 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
 
     # here the numpy vectorization is used with a column vector and a
     # scalar for the time arg
-    set_actors_vizzz = numpy.vectorize(set_actors_viz)
+    set_visibility_v = numpy.vectorize(set_dynamic_instance_visibility)
 
     def set_dynamic_actors_visibility(time):
-        set_actors_vizzz(list(dynamic_actors.keys()), time)
-
-
-    # to be removed if ok
-    def set_dynamic_actors_visibility_old(id_t=None):
-        for instance, actor in dynamic.actors.items() + static_actors.items():
-            # Instance is a static object
-            visible = instance < 0
-            # Instance is in the current timestep
-            if id_t:
-                visible = visible or instance in pos_data[id_t, 1]
-            # Instance has time of birth <= 0
-            else:
-                tob = [io.instances()[k].attrs['time_of_birth']
-                       for k in io.instances()
-                       if io.instances()[k].attrs['id'] == instance][0]
-                visible = visible or tob <= 0
-            if visible:
-                [actor.VisibilityOn() for actor in actorlist]
-            else:
-                [actor.VisibilityOff() for actor in actorlist]
+        set_visibility_v(dynamic_actors.keys(), time)
 
     if cf_prov is not None:
         for mu in cf_prov._mu_coefs:
