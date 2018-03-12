@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 import os
 
@@ -84,8 +85,8 @@ mathInfo = ""
 
 friction_contact_trace_params = FrictionContactTraceParams(
     dump_itermax=20, dump_probability=None,
-    fileName=fileName, title =title,
-    description = description, mathInfo= mathInfo)
+    fileName=fileName, title=title,
+    description=description, mathInfo=mathInfo)
 
     
 # Load and run the simulation

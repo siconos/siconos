@@ -12,7 +12,7 @@ with Hdf5() as io:
 
     io.add_object('cube1', [Contactor('Cube')], translation=[-1, 0, 0.5], mass=0.1)
     io.add_object('cube2', [Contactor('Cube')], translation=[ 1, 0, 0.5], mass=0.1,
-                 velocity=[5,0,5,0,0,0])
+                  velocity=[5,0,5,0,0,0])
 
     io.add_joint('joint1', 'cube1', 'cube2', None, [[0,0,1]], 'PrismaticJointR')
 

@@ -19,7 +19,7 @@ with Hdf5() as io:
     # Definition of a non smooth law. We put the objects and heightmap
     # into different collision groups so that there are object-terrain
     # collisions but no object-object collisions.
-    io.add_Newton_impact_friction_nsl('contact', mu = 0.6, e = 0.0)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.6, e=0.0)
 
     # Definition of a wheel (Radius = 1.5, width = 0.5)
     io.add_primitive_shape('Wheel', 'Cylinder', (1.5, 0.5))
@@ -56,25 +56,25 @@ with Hdf5() as io:
     io.add_object('body',   [Contactor('Body')],  translation=[ 0, 0, h], mass=1)
 
     io.add_joint('joint1', 'wheel1', 'body',
-                [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+                 [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
     io.add_joint('joint2', 'wheel2', 'body',
-                [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+                 [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
     io.add_joint('joint3', 'wheel3', 'body',
-                [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+                 [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
     io.add_joint('joint4', 'wheel4', 'body',
-                [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
+                 [[0, 0, 0]], [[0, 1, 0]], 'PivotJointR', absolute=False)
 
     # Constant value on Y-axis angular velocity (index 4) to make the wheels spin
     if not use_torque:
         ang_vel = 8.0
         io.add_boundary_condition('spin1', 'wheel1', indices=[4],
-                                bc_class='BoundaryCondition', v = [ang_vel])
+                                  bc_class='BoundaryCondition', v = [ang_vel])
         io.add_boundary_condition('spin2', 'wheel2', indices=[4],
-                                bc_class='BoundaryCondition', v = [ang_vel])
+                                  bc_class='BoundaryCondition', v = [ang_vel])
         io.add_boundary_condition('spin3', 'wheel3', indices=[4],
-                                bc_class='BoundaryCondition', v = [ang_vel])
+                                  bc_class='BoundaryCondition', v = [ang_vel])
         io.add_boundary_condition('spin4', 'wheel4', indices=[4],
-                                bc_class='BoundaryCondition', v = [ang_vel])
+                                  bc_class='BoundaryCondition', v = [ang_vel])
 
 # A controller to give constant torque to the wheels
 class roll(object):

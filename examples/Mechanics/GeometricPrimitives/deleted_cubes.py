@@ -36,23 +36,23 @@ with Hdf5() as io:
 
     # A first cube is introduced a the beginning of the simulation
     io.add_object('cube0', [Contactor('Cube')], translation=[0, 0, 3],
-                 velocity=[0, 0, 0, 0, 0, 1],
-                 mass=1, time_of_death=1.5)
+                  velocity=[0, 0, 0, 0, 0, 1],
+                  mass=1, time_of_death=1.5)
 
     # the second and third cubes introduction is delayed. They are
     # created in the simulation a time 0.5
     io.add_object('cube1', [Contactor('Cube')], translation=[0, 0, 5],
-                 velocity=[0, 0, 0, 0, 0, -1],
-                 mass=1, time_of_birth=0.5)
+                  velocity=[0, 0, 0, 0, 0, -1],
+                  mass=1, time_of_birth=0.5)
     io.add_object('cube2', [Contactor('Cube')], translation=[0, 0, 8],
-                 velocity=[0, 0, 0, 0, 0, -1],
-                 mass=1, time_of_birth=0.5)
+                  velocity=[0, 0, 0, 0, 0, -1],
+                  mass=1, time_of_birth=0.5)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.add_object('ground', [Contactor('Ground')],
-                 translation=[0, 0, 0])
+                  translation=[0, 0, 0])
 
 
 # Run the simulation from the inputs previously defined and add

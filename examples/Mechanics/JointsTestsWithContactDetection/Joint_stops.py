@@ -17,12 +17,12 @@ with Hdf5() as io:
     # show how contact behaviour and stops can interact.
 
     io.add_object('cube1', [Contactor('Box')], translation=[-1, 5, 2.5],
-                 mass=0.1, velocity=[0,0,20,0,0,0],
-                 allow_self_collide=True)
+                  mass=0.1, velocity=[0,0,20,0,0,0],
+                  allow_self_collide=True)
 
     io.add_object('cube2', [Contactor('Box')], translation=[-1, 5, 4.0],
-                 mass=0.1, velocity=[0,0,0,0,0,0],
-                 allow_self_collide=True)
+                  mass=0.1, velocity=[0,0,0,0,0,0],
+                  allow_self_collide=True)
 
     # We add two stops to each joint, one positive and the other
     # negative The initial velocity causes the cube to fly upwards,
@@ -33,11 +33,11 @@ with Hdf5() as io:
     # joint dynamics.
 
     io.add_joint('joint1', 'cube1', None, None, [[0,0.707,0.707]], 'PrismaticJointR',
-                nslaws='stop', stops=[[0, 2.0, -1], [0, -2.0, 1]])
+                 nslaws='stop', stops=[[0, 2.0, -1], [0, -2.0, 1]])
 
     io.add_joint('joint2', 'cube1', 'cube2', None, [[0,0,1]], 'PrismaticJointR',
-                nslaws='stop', stops=[[0, 2.0, -1], [0, -2.0, 1]],
-                allow_self_collide=True)
+                 nslaws='stop', stops=[[0, 2.0, -1], [0, -2.0, 1]],
+                 allow_self_collide=True)
 
 with Hdf5(mode='r+') as io:
     io.run(t0=0,

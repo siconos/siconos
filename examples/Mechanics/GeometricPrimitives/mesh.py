@@ -16,7 +16,7 @@ with Hdf5() as io:
     # Stanford Bunny by Saf, license: Creative Commons - Attribution.
     # Taken from http://www.thingiverse.com/thing:466857
     io.add_mesh_from_file('Bunny', "bunny.stl", scale=0.01,
-                       insideMargin=0.0, outsideMargin=0.0)
+                          insideMargin=0.0, outsideMargin=0.0)
 
     # Definition of the ground shape
     io.add_primitive_shape('Ground', 'Box', (10, 10, 1.0))
@@ -32,17 +32,17 @@ with Hdf5() as io:
     # the mesh inertia matrix here, but it is not done in this
     # example.
     for i in range(3):
-        io.add_object('bunny%d'%i, [Contactor('Bunny')],
-                     translation=[0, 0, 3+i],
-                     orientation=[1, 0, 0, 0],
-                     velocity=[0, 0, 0, 1, 0, 0],
-                     mass=1)
+        io.add_object('bunny%d' % i, [Contactor('Bunny')],
+                      translation=[0, 0, 3+i],
+                      orientation=[1, 0, 0, 0],
+                      velocity=[0, 0, 0, 1, 0, 0],
+                      mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.add_object('ground', [Contactor('Ground')],
-                 translation=[0, 0, -0.5])
+                  translation=[0, 0, -0.5])
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done

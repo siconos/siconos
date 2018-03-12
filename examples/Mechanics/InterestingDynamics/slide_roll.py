@@ -40,8 +40,8 @@ with Hdf5() as io:
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
     io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.0,
-                                  collision_group1=1,
-                                  collision_group2=2)
+                                      collision_group1=1,
+                                      collision_group2=2)
 
     # computation of inertia and volume
     ch = ConvexHull(pts)
@@ -54,77 +54,77 @@ with Hdf5() as io:
     spacing = 4
 
     io.add_object('tetra1', [Contactor('Tetra', collision_group=1)],
-                 translation=[x, y, 2],
-                 velocity=[0, 0, 0, 0, 0, 0],
-                 mass=1, inertia=inertia)
+                  translation=[x, y, 2],
+                  velocity=[0, 0, 0, 0, 0, 0],
+                  mass=1, inertia=inertia)
 
     x += spacing
     io.add_object('tetra2', [Contactor('Tetra', collision_group=1)],
-                 translation=[x, y, 2],
-                 velocity=[0, vel, 0, 0, 0, 0],
-                 mass=1, inertia=inertia)
+                  translation=[x, y, 2],
+                  velocity=[0, vel, 0, 0, 0, 0],
+                  mass=1, inertia=inertia)
 
     x += spacing
     io.add_object('cyl1', [Contactor('Cyl', collision_group=1)],
-                 translation=[x, y, 2],
-                 velocity=[0, 0, 0, 0, 0, 0],
-                 mass=1)
+                  translation=[x, y, 2],
+                  velocity=[0, 0, 0, 0, 0, 0],
+                  mass=1)
 
     x += spacing
     io.add_object('cyl2', [Contactor('Cyl', collision_group=1)],
-                 translation=[x, y, 2], orientation=[(1,1,1), numpy.pi/4],
-                 velocity=[0, 0, 0, 0, 0, 1],
-                 mass=1)
+                  translation=[x, y, 2], orientation=[(1,1,1), numpy.pi/4],
+                  velocity=[0, 0, 0, 0, 0, 1],
+                  mass=1)
 
     x += spacing
     io.add_object('cyl3', [Contactor('Cyl', collision_group=1)],
-                 translation=[x, y, 2],
-                 velocity=[0, vel, 0, 0, 0, 0],
-                 mass=1)
+                  translation=[x, y, 2],
+                  velocity=[0, vel, 0, 0, 0, 0],
+                  mass=1)
 
     x += spacing
     io.add_object('cyl4', [Contactor('Cyl', collision_group=1)],
-                 translation=[x, y, 2], orientation=[(0,0,1), numpy.pi/2],
-                 velocity=[0, vel, 0, 0, 0, 0],
-                 mass=1)
+                  translation=[x, y, 2], orientation=[(0,0,1), numpy.pi/2],
+                  velocity=[0, vel, 0, 0, 0, 0],
+                  mass=1)
 
     x += spacing
     io.add_object('ball1', [Contactor('Ball', collision_group=1)],
-                 translation=[x, y, 2],
-                 velocity=[0, 0, 0, 0, 0, 0],
-                 mass=1)
+                  translation=[x, y, 2],
+                  velocity=[0, 0, 0, 0, 0, 0],
+                  mass=1)
 
     x += spacing
     io.add_object('ball2', [Contactor('Ball', collision_group=1)],
-                 translation=[x, y, 2],
-                 velocity=[0, vel, 0, 0, 0, 0],
-                 mass=1)
+                  translation=[x, y, 2],
+                  velocity=[0, vel, 0, 0, 0, 0],
+                  mass=1)
 
     x += spacing
     io.add_object('box1', [Contactor('Cube', collision_group=1)],
-                 translation=[x, y, 2],
-                 velocity=[0, 0, 0, 0, 0, 0],
-                 mass=1)
+                  translation=[x, y, 2],
+                  velocity=[0, 0, 0, 0, 0, 0],
+                  mass=1)
 
     x += spacing
     io.add_object('box2', [Contactor('Cube', collision_group=1)],
-                 translation=[x, y, 2],
-                 velocity=[0, vel, 0, 0, 0, 0],
-                 mass=1)
+                  translation=[x, y, 2],
+                  velocity=[0, vel, 0, 0, 0, 0],
+                  mass=1)
 
     x += spacing
     stack_height = 3
     for i in range(stack_height):
         io.add_object('box%d'%(i+3), [Contactor('Cube', collision_group=1+(i%2))],
-                     translation=[x, y, i+1],
-                     velocity=[0, 0, 0, 0, 0, 0],
-                     mass=1)
+                      translation=[x, y, i+1],
+                      velocity=[0, 0, 0, 0, 0, 0],
+                      mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.add_object('ground', [Contactor('Ground', collision_group=2)],
-                 translation=[0, 0, 0])
+                  translation=[0, 0, 0])
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done

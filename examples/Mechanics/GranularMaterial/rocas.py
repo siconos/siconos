@@ -80,12 +80,12 @@ def un_cubo(io, name, cname, roca_size=0.05, density=1, trans=None, tob=None):
     inertia,volume=ch.inertia(ch.centroid())
 
     io.add_object(name,
-                 [Contactor(cname)],
-                 translation=trans,
-                 #velocity=veloci,
-                 mass=volume*density,
-                 time_of_birth=tob,
-                 inertia=inertia*density)
+                  [Contactor(cname)],
+                  translation=trans,
+                  #velocity=veloci,
+                  mass=volume*density,
+                  time_of_birth=tob,
+                  inertia=inertia*density)
 
 
 def create_rocas(io, n_layer=5, n_row=5, n_col=5, x_shift=3.0,

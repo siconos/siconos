@@ -37,18 +37,18 @@ with Hdf5() as io:
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
     io.add_object('cube1', [Contactor('CubeCS')], translation=[0, 0, 2],
-                 velocity=[10, 0, 0, 1, 1, 1],
-                 mass=1)
+                  velocity=[10, 0, 0, 1, 1, 1],
+                  mass=1)
 
     io.add_object('cube2', [Contactor('CubePrim')], translation=[0, 3, 2],
-                 velocity=[10, 0, 0, 1, 1, 1],
-                 mass=1)
+                  velocity=[10, 0, 0, 1, 1, 1],
+                  mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.add_object('ground', [Contactor('Ground')],
-                 translation=[0, 0, 0])
+                  translation=[0, 0, 0])
 
 
 # Run the simulation from the inputs previously defined and add

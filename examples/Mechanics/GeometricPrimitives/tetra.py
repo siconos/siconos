@@ -30,36 +30,36 @@ with Hdf5() as io:
                        (-1.0, -1.0, 1.0),
                        (0.0, 0.0, -1.0)])
     io.add_convex_shape('Tetra', pts - pts.mean(0),
-                      insideMargin=0.01, outsideMargin=0.0)
+                        insideMargin=0.01, outsideMargin=0.0)
 
     # Definition of the ground shape
     io.add_primitive_shape('Ground', 'Box', (10, 10, 1),
-                         insideMargin=0.01, outsideMargin=0.0)
+                           insideMargin=0.01, outsideMargin=0.0)
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
     io.add_Newton_impact_friction_nsl('contact', mu=0.01, e=0.7,
-                                  collision_group1=1,
-                                  collision_group2=2)
+                                      collision_group1=1,
+                                      collision_group2=2)
 
     # computation of inertia and volume
     ch = ConvexHull(pts)
-    inertia,volume=ch.inertia(ch.centroid())
+    inertia, volume = ch.inertia(ch.centroid())
 
     # The tetra object made with an unique Contactor : the tetrahedron
     # shape.  As a mass is given, it is a dynamic system involved in
     # contact detection and in the simulation.  With no group id
     # specified the Contactor belongs to group 0
     io.add_object('tetra', [Contactor('Tetra', collision_group=1)],
-                 translation=[0, 0, 4],
-                 velocity=[0, 0, 0, 0, 0, 0],
-                 mass=1, inertia=inertia)
+                  translation=[0, 0, 4],
+                  velocity=[0, 0, 0, 0, 0, 0],
+                  mass=1, inertia=inertia)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.add_object('ground', [Contactor('Ground', collision_group=2)],
-                 translation=[0, 0, -0.1])
+                  translation=[0, 0, -0.1])
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done

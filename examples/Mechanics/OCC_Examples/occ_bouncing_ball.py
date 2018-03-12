@@ -23,18 +23,19 @@ with Hdf5() as io:
     io.add_occ_shape('Ground', ground)
 
     io.add_object('sphere',
-                 [Volume('Sphere'), Contactor('Sphere', contact_type='Face', contact_index=0)],
-                 mass=1, translation=[0, 0, 10], velocity=[0, 0, 0, 0, 0, 0])
+                  [Volume('Sphere'),
+                   Contactor('Sphere', contact_type='Face', contact_index=0)],
+                  mass=1, translation=[0, 0, 10], velocity=[0, 0, 0, 0, 0, 0])
 
     io.add_object('ground',
-                 [Contactor('Ground', contact_type='Face', contact_index=5)],
-                 mass=0, translation=[0, 0, 0])
+                  [Contactor('Ground', contact_type='Face', contact_index=5)],
+                  mass=0, translation=[0, 0, 0])
 
     io.add_interaction('sphere-ground',
-                      'sphere', 'Sphere-1',
-                      'ground', 'Ground-0',
-                      distance_calculator='occ',
-                      offset=0.01)
+                       'sphere', 'Sphere-1',
+                       'ground', 'Ground-0',
+                       distance_calculator='occ',
+                       offset=0.01)
 
     io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.9)
 

@@ -149,12 +149,12 @@ with Hdf5(use_compression=True) as io:
           contactor.append(Contactor(sph, relative_translation=loc))
 
         io.add_object('cube'+str(n)+'_'+str(i)+'_'+str(j),
-                     contactor,
-                     translation=[i*(x_translate+x_shift*cube_size), x_shift*j*(x_translate+cube_size), (x_translate+cube_size*x_shift)*n],
-                     velocity=[0, 0, 0, 0, 0, 0],
-                     orientation=[math.cos(angle_init/2.0),0,math.sin(angle_init/2.0),0],
-                     mass=volume*density,
-                     inertia=inertia*density)
+                      contactor,
+                      translation=[i*(x_translate+x_shift*cube_size), x_shift*j*(x_translate+cube_size), (x_translate+cube_size*x_shift)*n],
+                      velocity=[0, 0, 0, 0, 0, 0],
+                      orientation=[math.cos(angle_init/2.0),0,math.sin(angle_init/2.0),0],
+                      mass=volume*density,
+                      inertia=inertia*density)
 
 
   # Definition of a non smooth law

@@ -15,15 +15,15 @@ with Hdf5() as io:
     # Definition of a tetrahedron as a convex shape
     io.add_primitive_shape('Body1', 'Cylinder', (1, 6))
     io.add_primitive_shape('Body2', 'Box', (2, .4, 11))
-    
+
     io.add_object('roo', [Contactor('Body1'),
-                         Contactor('Body2',
-                                   relative_translation=[0, 3, 0])],
-                 translation=[0, 0, 4],
-                 # a small perturbation on z axis
-                 velocity=[0, 0, 0, 0, 2, 0.0001],
-                 mass=1,
-                 inertia=[1, 10, 11])
+                          Contactor('Body2',
+                                    relative_translation=[0, 3, 0])],
+                  translation=[0, 0, 4],
+                  # a small perturbation on z axis
+                  velocity=[0, 0, 0, 0, 2, 0.0001],
+                  mass=1,
+                  inertia=[1, 10, 11])
 
 with Hdf5(mode='r+') as io:
 

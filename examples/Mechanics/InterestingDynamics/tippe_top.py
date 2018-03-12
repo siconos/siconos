@@ -2,7 +2,6 @@
 
 # A tippe-top with Coulomb friction only & JeanMoreau time stepping.
 
-import siconos
 from siconos.mechanics.collision.tools import Contactor
 from siconos.mechanics.collision.bullet import SiconosBulletOptions
 from siconos.io.mechanics_io import thetav, Hdf5
@@ -53,21 +52,21 @@ with Hdf5() as io:
     io.add_object('ground', [Contactor('Ground')], translation=[0, 0, 0])
 
     io.add_object('tippe-top', [Contactor('Body1',
-                                         relative_translation=[0, 0, a1]),
-                               Contactor('Body2',
-                                         relative_orientation=([1, 0, 0],
-                                                               pi/2),
-                                         relative_translation=[0, 0, a2/2.]),
-                               Contactor('Body3',
-                                         relative_orientation=([1, 0, 0],
-                                                               pi/2),
-                                         relative_translation=[0, 0, a2])],
-                 # we need to avoid contact at first step, so we let the top
-                 # fall. This is not what is done in Leine & Glocker.
-                 translation=[0, 0, r1-a1 + r1-a1],
-                 orientation=([0, 1, 0], 0.1),
-                 velocity=[0, 0, 0, .0, .0, 180],
-                 mass=m)
+                                          relative_translation=[0, 0, a1]),
+                                Contactor('Body2',
+                                          relative_orientation=([1, 0, 0],
+                                                                pi/2),
+                                          relative_translation=[0, 0, a2/2.]),
+                                Contactor('Body3',
+                                          relative_orientation=([1, 0, 0],
+                                                                pi/2),
+                                          relative_translation=[0, 0, a2])],
+                  # we need to avoid contact at first step, so we let the top
+                  # fall. This is not what is done in Leine & Glocker.
+                  translation=[0, 0, r1-a1 + r1-a1],
+                  orientation=([0, 1, 0], 0.1),
+                  velocity=[0, 0, 0, .0, .0, 180],
+                  mass=m)
 
 with Hdf5(mode='r+') as io:
 

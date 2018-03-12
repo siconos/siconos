@@ -34,15 +34,15 @@ with Hdf5() as io:
     # them towards 0,0 so that we can detect them as they roll by.
     for i in range(10):
         io.add_object('sphere%d'%i, [Contactor('Sphere')],
-                     translation=[i*2, 0, 2],
-                     velocity=[-5, 0, 0, 0, 0, 0],
-                     mass=1)
+                      translation=[i*2, 0, 2],
+                      velocity=[-5, 0, 0, 0, 0, 0],
+                      mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.add_object('ground', [Contactor('Ground')],
-                 translation=[0, 0, -0.1])
+                  translation=[0, 0, -0.1])
 
 class LinePicker():
     def initialize(self, io):

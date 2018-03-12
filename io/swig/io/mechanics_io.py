@@ -29,6 +29,11 @@ from siconos.mechanics.collision.tools import Contactor, Volume, Shape
 from siconos.mechanics import joints
 from siconos.io.io_base import MechanicsIO
 
+# Imports for mechanics 'collision' submodule
+from siconos.mechanics.collision import BodyDS, \
+    SiconosSphere, SiconosBox, SiconosCylinder, SiconosPlane, \
+    SiconosConvexHull, SiconosContactor, SiconosContactorSet, \
+    SiconosMesh, SiconosHeightMap
 
 # For 'proposed' implementation, it is necessary to select a back-end,
 # although currently only Bullet is supported for general objects.
@@ -40,14 +45,9 @@ def set_backend(b):
     backend = b
     setup_default_classes()
 
+
 have_bullet = False
 have_occ = False
-
-# Imports for mechanics 'collision' submodule
-from siconos.mechanics.collision import BodyDS, \
-    SiconosSphere, SiconosBox, SiconosCylinder, SiconosPlane, \
-    SiconosConvexHull, SiconosContactor, SiconosContactorSet, \
-    SiconosMesh, SiconosHeightMap
 
 try:
     from siconos.mechanics.collision.bullet import \
@@ -69,6 +69,7 @@ default_manager_class = None
 default_simulation_class = None
 default_body_class = None
 use_bullet = False
+
 
 def setup_default_classes():
     global default_manager_class
@@ -252,7 +253,6 @@ def add_line(dataset, line):
 #
 # fix ctr.'name' in old hdf5 files
 #
-
 def upgrade_io_format(filename):
 
     with Hdf5(filename, mode='a') as io:
@@ -2710,7 +2710,7 @@ class Hdf5():
         timedisc=TimeDiscretisation(t0, h)
 
         fc_index=0
-        
+
         if (osi == Kernel.MoreauJeanGOSI):
             if (friction_contact_trace == False) :
                 if len(joints) > 0:
@@ -2721,7 +2721,7 @@ class Hdf5():
                 from siconos.io.FrictionContactTrace import GlobalFrictionContactTrace
                 osnspb=GlobalFrictionContactTrace(3, SICONOS_GLOBAL_FRICTION_3D_ADMM,friction_contact_trace_params,nsds)
             osnspb.setMaxSize(30000)
-            osnspb.setMStorageType(2)  
+            osnspb.setMStorageType(2)
         else:
             if (friction_contact_trace == False) :
                 if len(joints) > 0:
@@ -2735,7 +2735,7 @@ class Hdf5():
                 osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,nsds)
             osnspb.setMaxSize(30000)
             osnspb.setMStorageType(1)
-            
+
         self._contact_index_set = contact_index_set
 
         # Global solver options
@@ -2757,7 +2757,7 @@ class Hdf5():
             fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
             fcOptions.iparam[0] = 100  # Local solver iterations
 
-        
+
         osnspb.setNumericsVerboseMode(numerics_verbose)
 
         # keep previous solution
@@ -2800,7 +2800,7 @@ class Hdf5():
 
         self._simulation = simulation
 
-        
+
         if len(self._plugins) > 0:
             print_verbose ('import plugins ...')
             self.import_plugins()

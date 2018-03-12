@@ -1,11 +1,7 @@
-
-import os,sys
-import numpy
-import math
+#!/usr/bin/env python
 
 from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
-import siconos.io.mechanics_io
 import siconos.numerics as Numerics
 
 # A collection of box stacks for stress-testing Siconos solver with
@@ -14,11 +10,12 @@ import siconos.numerics as Numerics
 # Creation of the hdf5 file for input/output
 with Hdf5() as io:
 
-    width,depth,height = 1,1,1
-    io.add_primitive_shape('Box', 'Box', [width,depth,height])
+    width, depth, height = 1, 1, 1
+    io.add_primitive_shape('Box', 'Box', [width, depth, height])
 
     k = 0
     sep = 0.01
+
     def make_stack(X, Y, N, M, W):
         global k
         z = height/2.0
@@ -27,9 +24,9 @@ with Hdf5() as io:
                 for j in range(M):
                     x = (i-N/2.0)*(width+sep) + X
                     y = (j-M/2.0)*(depth+sep) + Y
-                    io.add_object('box%03d'%k, [Contactor('Box')],
-                                 translation=[x,y,z],
-                                 mass=1.0)
+                    io.add_object('box%03d' % k, [Contactor('Box')],
+                                  translation=[x, y, z],
+                                  mass=1.0)
                     k += 1
             N = N - 1 if N > 1 else N
             M = M - 1 if M > 1 else M
@@ -47,7 +44,7 @@ with Hdf5() as io:
 
     # Definition of the ground
     io.add_primitive_shape('Ground', 'Box', (50, 50, 0.1))
-    io.add_object('ground', [Contactor('Ground')], [0,0,-0.05])
+    io.add_object('ground', [Contactor('Ground')], [0, 0, -0.05])
 
     # Enable to smash the wall
     # io.add_primitive_shape('Ball', 'Sphere', [1,])

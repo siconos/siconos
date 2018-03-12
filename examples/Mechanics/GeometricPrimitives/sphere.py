@@ -8,7 +8,6 @@
 from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
 import siconos.numerics as Numerics
-import siconos.io.mechanics_io
 from siconos.mechanics.collision.bullet import SiconosBulletOptions
 
 options = SiconosBulletOptions()
@@ -20,11 +19,11 @@ with Hdf5() as io:
 
     # Definition of a sphere
     io.add_primitive_shape('Sphere', 'Sphere', (2,),
-                         insideMargin=0.2, outsideMargin=0.0)
+                           insideMargin=0.2, outsideMargin=0.0)
 
     # Definition of the ground shape
     io.add_primitive_shape('Ground', 'Box', (10, 10, 0.1),
-                         insideMargin=0.05, outsideMargin=0.0)
+                           insideMargin=0.05, outsideMargin=0.0)
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
@@ -35,15 +34,15 @@ with Hdf5() as io:
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
     io.add_object('sphere', [Contactor('Sphere')],
-                 translation=[0, 0, 4],
-                 velocity=[0, 0, 0, 0, 0, 0],
-                 mass=1)
+                  translation=[0, 0, 4],
+                  velocity=[0, 0, 0, 0, 0, 0],
+                  mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.add_object('ground', [Contactor('Ground')],
-                 translation=[0, 0, -0.1])
+                  translation=[0, 0, -0.1])
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done

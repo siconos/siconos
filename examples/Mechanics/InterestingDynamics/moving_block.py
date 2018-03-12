@@ -48,8 +48,8 @@ with Hdf5() as io:
     # is between contactors of group id 0.
     io.add_Newton_impact_friction_nsl('contact', mu=0.3)
 
-    #first branch + first mass the center of gravity is at the center of the
-    #Mass1
+    # first branch + first mass the center of gravity is at the center of the
+    # Mass1
     ppos = [0, -10., 15]
     io.add_object(
         'arm1', [Contactor('Mass1'),
@@ -60,25 +60,25 @@ with Hdf5() as io:
         mass=m1)
 
     io.add_joint('joint2', 'arm1',
-                points=[[ppos[0], ppos[1], ppos[2] + l1]],
-                axes=[[1, 0, 0]],
-                joint_class='PivotJointR')
+                 points=[[ppos[0], ppos[1], ppos[2] + l1]],
+                 axes=[[1, 0, 0]],
+                 joint_class='PivotJointR')
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     shift = -0.5 * ground_size[2] - sin(ground_slope) * ground_size[1] * 0.5
     io.add_object('ground', [Contactor('Ground')],
-                 translation=[0, ground_size[1] * 0.3, shift])
+                  translation=[0, ground_size[1] * 0.3, shift])
     io.add_object('ground2', [Contactor('Ground2')],
-                 translation=[0, 0, 0.],
-                 orientation=((1, 0, 0), -ground_slope))
+                  translation=[0, 0, 0.],
+                  orientation=((1, 0, 0), -ground_slope))
     translat = [0., block_size[2] * 0.5 * sin(ground_slope),
                 block_size[2] * 0.5 * cos(ground_slope)]
     io.add_object('block', [Contactor('Block')],
-                 translation=translat,
-                 orientation=((1, 0, 0), -ground_slope),
-                 velocity=[0, 0, 0., 0, 0, 0], mass=m2,)
+                  translation=translat,
+                  orientation=((1, 0, 0), -ground_slope),
+                  velocity=[0, 0, 0., 0, 0, 0], mass=m2,)
     # io.add_object('blockref', [Contactor('Block')],
     #              translation=[0., 0., 0.],
     #              orientation=((1, 0, 0), -ground_slope), mass=m2)

@@ -1,16 +1,11 @@
-import os,sys
+#!/usr/bin/env python
 
-import numpy
 import math
 import pickle
 
-import random
-
 from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
-import siconos.io.mechanics_io
-#sys.path.append('../..')
-#from mechanics_io import Hdf5
+
 import siconos.numerics as Numerics
 
 # WARNING : in 3D by default z-axis is upward
@@ -18,30 +13,29 @@ import siconos.numerics as Numerics
 
 dim = 3
 
-unscaled_bar_length=1.5
-aspect_ratio=100.0
-unscaled_bar_height=unscaled_bar_length/aspect_ratio
-unscaled_bar_width=unscaled_bar_length/aspect_ratio
+unscaled_bar_length = 1.5
+aspect_ratio = 100.0
+unscaled_bar_height = unscaled_bar_length/aspect_ratio
+unscaled_bar_width = unscaled_bar_length/aspect_ratio
 
 unscaled_volume = unscaled_bar_length*unscaled_bar_height*unscaled_bar_width
-unscaled_density=1000
+unscaled_density = 1000
 
-unscaled_mass=unscaled_volume*unscaled_density
+unscaled_mass = unscaled_volume*unscaled_density
 
-print('unscaled_mass',unscaled_mass)
+print('unscaled_mass', unscaled_mass)
 
+scale = 1.0/unscaled_bar_length*1.0
 
-scale=1.0/unscaled_bar_length*1.0
+density = unscaled_density/(scale**3)
 
-density =  unscaled_density/(scale**3)
+bar_height = unscaled_bar_height*scale
+bar_length = unscaled_bar_length*scale
+bar_width  = unscaled_bar_width*scale
 
-bar_height =  unscaled_bar_height*scale
-bar_length =  unscaled_bar_length*scale
-bar_width  =  unscaled_bar_width*scale
-
-body_collection={}
-body_collection['plan_id']= {}
-id_plan=0
+body_collection = {}
+body_collection['plan_id'] = {}
+id_plan = 0
 # scale =1
 # mass :3.375000e-01
 # Inertia :

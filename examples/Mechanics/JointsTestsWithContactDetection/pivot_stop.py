@@ -50,21 +50,21 @@ with Hdf5() as io:
 
     # The objects, with self-collision disabled as noted above.
     io.add_object('bar', [Contactor('Bar')], translation=[0.45, 0.45, 3], mass=10,
-                 allow_self_collide = self_collide, velocity=[0,0,0,0,twist,0])
+                  allow_self_collide = self_collide, velocity=[0,0,0,0,twist,0])
     io.add_object('post', [Contactor('Post'),
                           Contactor('Knob', relative_translation=[0.1,0,0])],
-                 translation=[0, 0, 3], mass=1,
-                 allow_self_collide = self_collide)
+                  translation=[0, 0, 3], mass=1,
+                  allow_self_collide = self_collide)
 
     # Connect the two bodies by a pivot joint
     io.add_joint('joint1', 'bar', 'post', [[-0.45,0,0]], [[0,1,0]], 'PivotJointR',
-                allow_self_collide = self_collide,
-                nslaws='stop', stops=stops, absolute=False)
+                 allow_self_collide = self_collide,
+                 nslaws='stop', stops=stops, absolute=False)
 
     # Joint from "bar" to the world reference frame, to keep things from falling.
     io.add_joint('joint2', 'post', None, [[0,0,0]], [[0,1,0]],
-                'PivotJointR', absolute=False,
-                friction = 'friction')
+                 'PivotJointR', absolute=False,
+                 friction = 'friction')
 
     # For fully fixed behaviour replace with a FixedJointR.
     # io.add_joint('joint2', 'post', None, None, None, 'FixedJointR')

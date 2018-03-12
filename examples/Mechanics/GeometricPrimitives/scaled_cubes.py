@@ -45,20 +45,22 @@ with Hdf5() as io:
     # As a mass is given, it is a dynamic system involved in contact
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
-    io.add_object('cubeCH', [Contactor('CubeCH')], translation=[0, 0.003, 0.005],
-                 velocity=[0.1, 0, 0, 1, 1, 1],
-                 mass=0.1)
+    io.add_object('cubeCH', [Contactor('CubeCH')],
+                  translation=[0, 0.003, 0.005],
+                  velocity=[0.1, 0, 0, 1, 1, 1],
+                  mass=0.1)
 
     # The primitive cube geometry object
-    io.add_object('cubeP', [Contactor('CubeP')], translation=[0, -0.003, 0.005],
-                 velocity=[0.1, 0, 0, 1, 1, 1],
-                 mass=0.1)
+    io.add_object('cubeP', [Contactor('CubeP')],
+                  translation=[0, -0.003, 0.005],
+                  velocity=[0.1, 0, 0, 1, 1, 1],
+                  mass=0.1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.add_object('ground', [Contactor('Ground')],
-                 translation=[0, 0, -0.005])
+                  translation=[0, 0, -0.005])
 
 
 # Run the simulation from the inputs previously defined and add
@@ -71,7 +73,7 @@ with Hdf5(mode='r+') as io:
     # Because of fixed collision margins used in the collision detection,
     # sizes of small objects may need to be expressed in cm or mm.
     io.run(with_timer=False,
-           options = options,
+           options=options,
            t0=0,
            T=10,
            h=0.005,

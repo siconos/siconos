@@ -14,8 +14,8 @@ import numpy as np
 with Hdf5() as io:
 
     # Definition of a cylinder
-    R =0.1
-    L =2.0
+    R = 0.1
+    L = 2.0
     io.add_primitive_shape('Cyl', 'Cylinder', (R, L))
 
     # Definition of the ground shape
@@ -29,27 +29,25 @@ with Hdf5() as io:
     # As a mass is given, it is a dynamic system involved in contact
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
-    mass_test=1.0
+    mass_test = 1.0
     inertia_test = np.eye(3)
 
-
-    inertia_test[0,0]=0.25*mass_test*R*R+ 1/3.0*mass_test*L*L
-    inertia_test[1,1]=0.5*mass_test*R*R
-    inertia_test[2,2]=0.25*mass_test*R*R+ 1/3.0*mass_test*L*L
+    inertia_test[0, 0] = 0.25*mass_test*R*R + 1/3.0*mass_test*L*L
+    inertia_test[1, 1] = 0.5*mass_test*R*R
+    inertia_test[2, 2] = 0.25*mass_test*R*R + 1/3.0*mass_test*L*L
     print(inertia_test)
-    orientation_test=[0.14, 0.7, 0.7, 0]
-    #orientation_test=[1.0, 0., 0., 0]
+    orientation_test = [0.14, 0.7, 0.7, 0]
     io.add_object('cyl', [Contactor('Cyl')],
-                 translation=[0, 0, 4],
-                 orientation=orientation_test,
-                 velocity=[0, 0, 0, 0, 0, 0],
-                 mass=1 , inertia=inertia_test)
+                  translation=[0, 0, 4],
+                  orientation=orientation_test,
+                  velocity=[0, 0, 0, 0, 0, 0],
+                  mass=1, inertia=inertia_test)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.add_object('ground', [Contactor('Ground')],
-                 translation=[0, 0, -0.1])
+                  translation=[0, 0, -0.1])
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done

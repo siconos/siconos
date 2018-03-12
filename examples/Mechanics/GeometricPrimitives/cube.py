@@ -37,14 +37,14 @@ with Hdf5() as io:
     # detection and in the simulation.  With no group id specified the
     # Contactor belongs to group 0
     io.add_object('cube', [Contactor('Cube')], translation=[0, 0, 2],
-                 velocity=[10, 0, 0, 1, 1, 1],
-                 mass=1)
+                  velocity=[10, 0, 0, 1, 1, 1],
+                  mass=1)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
     io.add_object('ground', [Contactor('Ground')],
-                 translation=[0, 0, 0])
+                  translation=[0, 0, 0])
 
 
 # Run the simulation from the inputs previously defined and add
@@ -57,15 +57,15 @@ with Hdf5(mode='r+') as io:
     # Because of fixed collision margins used in the collision detection,
     # sizes of small objects may need to be expressed in cm or mm.
     io.run(with_timer=False,
-            gravity_scale=1,
-            t0=0,
-            T=10,
-            h=0.0005,
-            theta=0.50001,
-            Newton_max_iter=20,
-            set_external_forces=None,
-            solver=Numerics.SICONOS_FRICTION_3D_NSGS,
-            itermax=100000,
-            tolerance=1e-8,
-            numerics_verbose=False,
-            output_frequency=None)
+           gravity_scale=1,
+           t0=0,
+           T=10,
+           h=0.0005,
+           theta=0.50001,
+           Newton_max_iter=20,
+           set_external_forces=None,
+           solver=Numerics.SICONOS_FRICTION_3D_NSGS,
+           itermax=100000,
+           tolerance=1e-8,
+           numerics_verbose=False,
+           output_frequency=None)

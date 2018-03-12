@@ -34,10 +34,10 @@ r1 = 1
 # radisu of second ball
 r2 = 1
 
-# gap 
+# gap
 gap = .47
 
-# hgap 
+# hgap
 hgap = 0.
 
 # size of a brick
@@ -47,8 +47,8 @@ bz = 2
 
 sphere1 = BRepPrimAPI_MakeSphere(r1).Shape()
 sphere2 = BRepPrimAPI_MakeSphere(r2).Shape()
-cylinder1 =  BRepPrimAPI_MakeCylinder(.3, l1).Shape()
-cylinder2 =  BRepPrimAPI_MakeCylinder(.3, l2).Shape()
+cylinder1 = BRepPrimAPI_MakeCylinder(.3, l1).Shape()
+cylinder2 = BRepPrimAPI_MakeCylinder(.3, l2).Shape()
 ground = BRepPrimAPI_MakeBox(gp_Pnt(-50, -50, 0), 100., 100., .5).Shape()
 brick = BRepPrimAPI_MakeBox(gp_Pnt(-bx/2.,-by/2.,-bz/2.),bx, by, bz).Shape()
 
@@ -69,68 +69,69 @@ with Hdf5() as io:
 
     # first branch + first mass the center of gravity is at the center of the
     # Mass1
-    io.add_object('arm1', [Contactor('Mass1', contact_type='Face', contact_index=0),
-                          Contactor('Arm1',
-                                    contact_type='Face',
-                                    contact_index=0,
-                                    relative_translation=[0, r1+l1, 0],
-                                    relative_orientation=[(1, 0, 0), pi/2])],
-                    translation=[0, 0, r2 + gap + r2 + l2 + r1 + hgap],
-                    orientation=((1, 0, 0), pi/2),
-                    inertia=np.eye(3),
-                    mass=m1)
+    io.add_object('arm1', [Contactor('Mass1', contact_type='Face',
+                                     contact_index=0),
+                           Contactor('Arm1',
+                                     contact_type='Face',
+                                     contact_index=0,
+                                     relative_translation=[0, r1+l1, 0],
+                                     relative_orientation=[(1, 0, 0), pi/2])],
+                  translation=[0, 0, r2 + gap + r2 + l2 + r1 + hgap],
+                  orientation=((1, 0, 0), pi/2),
+                  inertia=np.eye(3),
+                  mass=m1)
 
     # second branch + second mass
     io.add_object('arm2', [Contactor('Mass2', instance_name='Mass2Contact',
-                                    contact_type='Face', contact_index=0),
-                          Contactor('Arm2',
-                                    contact_type='Face',
-                                    contact_index=0,
-                                    relative_translation=[0, r2+l2, 0],
-                                    relative_orientation=[(1, 0, 0), pi/2])],
-                    translation=[0, 0, r2 + gap],
-                    orientation=((1, 0, 0), pi/2),
-                    velocity=[0, 20, 0, 0, 0, 0],
-                    inertia=np.eye(3),
-                    mass=m2)
+                                     contact_type='Face', contact_index=0),
+                           Contactor('Arm2',
+                                     contact_type='Face',
+                                     contact_index=0,
+                                     relative_translation=[0, r2+l2, 0],
+                                     relative_orientation=[(1, 0, 0), pi/2])],
+                  translation=[0, 0, r2 + gap],
+                  orientation=((1, 0, 0), pi/2),
+                  velocity=[0, 20, 0, 0, 0, 0],
+                  inertia=np.eye(3),
+                  mass=m2)
 
     io.add_joint('joint1', 'arm1', 'arm2',
-                points=[[0, 0, -r1]],
-                axes=[[1, 0, 0]],
-                joint_class='PivotJointR',
-                absolute=False)
+                 points=[[0, 0, -r1]],
+                 axes=[[1, 0, 0]],
+                 joint_class='PivotJointR',
+                 absolute=False)
 
     io.add_joint('joint2', 'arm1',
-                points=[[0, r2 + gap + r2 + l2 + r1 + hgap + l1, 0]],
-                axes=[[1, 0, 0]],
-                joint_class='PivotJointR',
-                absolute=False)
-
+                 points=[[0, r2 + gap + r2 + l2 + r1 + hgap + l1, 0]],
+                 axes=[[1, 0, 0]],
+                 joint_class='PivotJointR',
+                 absolute=False)
 
     io.add_object('ball', [Contactor('Brick', instance_name='BallContact',
-                                    contact_type='Face', contact_index=0)],
-                 translation=[0, -2*r2, r2+gap+.5],
-                 inertia=np.eye(3),
-                 mass=m2)
-                        
+                                     contact_type='Face', contact_index=0)],
+                  translation=[0, -2*r2, r2+gap+.5],
+                  inertia=np.eye(3),
+                  mass=m2)
+
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
-    io.add_object('ground', [Contactor('Ground', contact_type='Face', contact_index=5)],
-                 translation=[0, 0, -.25])
+    io.add_object('ground', [Contactor('Ground',
+                                       contact_type='Face', contact_index=5)],
+                  translation=[0, 0, -.25])
 
 
     io.add_interaction('sphere-ball',
-                      'arm2', 'Mass2Contact',
-                      'ball', 'BallContact',
-                      distance_calculator='occ',
-                      offset=0.01)
+                       'arm2', 'Mass2Contact',
+                       'ball', 'BallContact',
+                       distance_calculator='occ',
+                       offset=0.01)
 
     io.add_interaction('ball-ground',
-                      'ball', 'BallContact',
-                      'ground', 'Ground-0',
-                      distance_calculator='occ',
-                      offset=0.01)
+                       'ball', 'BallContact',
+                       'ground', 'Ground-0',
+                       distance_calculator='occ',
+                       offset=0.01)
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
