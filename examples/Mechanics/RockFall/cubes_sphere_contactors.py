@@ -146,8 +146,10 @@ with Hdf5(use_compression=True) as io:
         #contactor = [Shape('CubeCS'+str(n)+'_'+str(i)+'_'+str(j))]
         contactor = []
         for sph,loc in zip(spheres, vertices):
-          contactor.append(Contactor(sph, relative_translation=loc))
-
+          contactor.append(Contactor(sph, relative_translation=loc,  collision_group=1))
+        # add a "fake" contactor for visualization ... 
+        contactor.append(Contactor('CubeCS'+str(n)+'_'+str(i)+'_'+str(j),  collision_group=-1  ))
+        
         io.addObject('cube'+str(n)+'_'+str(i)+'_'+str(j),
                      contactor,
                      translation=[i*(x_translate+x_shift*cube_size), x_shift*j*(x_translate+cube_size), (x_translate+cube_size*x_shift)*n],
@@ -158,7 +160,7 @@ with Hdf5(use_compression=True) as io:
 
 
   # Definition of a non smooth law
-  io.addNewtonImpactFrictionNSL('contact', e=0.01, mu=0.9)
+  io.addNewtonImpactFrictionNSL('contact', e=0.01, mu=0.9,  collision_group1=0, collision_group2=1)
 
 
 step=10000
