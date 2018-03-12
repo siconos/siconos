@@ -27,16 +27,16 @@ from siconos.kernel import SiconosVector, BlockVector
 with Hdf5() as io:
 
     # Definition of two bars connected by a prismatic joint
-    io.addPrimitiveShape('Bar', 'Box', (1, 0.1, 0.1))
-    io.addObject('bar1', [Contactor('Bar')], [0.05,0,2],
+    io.add_primitive_shape('Bar', 'Box', (1, 0.1, 0.1))
+    io.add_object('bar1', [Contactor('Bar')], [0.05,0,2],
                  orientation=[(0,0,1),np.pi/2], mass=1.0, velocity=[0,0,0,0,0,1])
-    io.addObject('bar2', [Contactor('Bar')], [-0.05,0,2],
+    io.add_object('bar2', [Contactor('Bar')], [-0.05,0,2],
                  orientation=[(0,0,1),np.pi/2], mass=1.0)
-    io.addJoint('joint1', 'bar1', 'bar2', None, [[0,1,0]], 'PrismaticJointR', True)
+    io.add_joint('joint1', 'bar1', 'bar2', None, [[0,1,0]], 'PrismaticJointR', True)
 
     # Definition of the ground
-    io.addPrimitiveShape('Ground', 'Box', (5, 5, 0.1))
-    io.addObject('ground', [Contactor('Ground')], [0,0,-0.05])
+    io.add_primitive_shape('Ground', 'Box', (5, 5, 0.1))
+    io.add_object('ground', [Contactor('Ground')], [0,0,-0.05])
 
 class Ctrl(object):
     def initialize(self, io):

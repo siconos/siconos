@@ -1,16 +1,11 @@
-import os,sys
+#!/usr/bin/env python
 
-import numpy
 import math
 import pickle
 
-import random
-
 from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
-import siconos.io.mechanics_io
-#sys.path.append('../..')
-#from mechanics_io import Hdf5
+
 import siconos.numerics as Numerics
 
 # WARNING : in 3D by default z-axis is upward
@@ -18,30 +13,29 @@ import siconos.numerics as Numerics
 
 dim = 3
 
-unscaled_bar_length=1.5
-aspect_ratio=100.0
-unscaled_bar_height=unscaled_bar_length/aspect_ratio
-unscaled_bar_width=unscaled_bar_length/aspect_ratio
+unscaled_bar_length = 1.5
+aspect_ratio = 100.0
+unscaled_bar_height = unscaled_bar_length/aspect_ratio
+unscaled_bar_width = unscaled_bar_length/aspect_ratio
 
 unscaled_volume = unscaled_bar_length*unscaled_bar_height*unscaled_bar_width
-unscaled_density=1000
+unscaled_density = 1000
 
-unscaled_mass=unscaled_volume*unscaled_density
+unscaled_mass = unscaled_volume*unscaled_density
 
-print('unscaled_mass',unscaled_mass)
+print('unscaled_mass', unscaled_mass)
 
+scale = 1.0/unscaled_bar_length*1.0
 
-scale=1.0/unscaled_bar_length*1.0
+density = unscaled_density/(scale**3)
 
-density =  unscaled_density/(scale**3)
+bar_height = unscaled_bar_height*scale
+bar_length = unscaled_bar_length*scale
+bar_width  = unscaled_bar_width*scale
 
-bar_height =  unscaled_bar_height*scale
-bar_length =  unscaled_bar_length*scale
-bar_width  =  unscaled_bar_width*scale
-
-body_collection={}
-body_collection['plan_id']= {}
-id_plan=0
+body_collection = {}
+body_collection['plan_id'] = {}
+id_plan = 0
 # scale =1
 # mass :3.375000e-01
 # Inertia :
@@ -58,7 +52,7 @@ with Hdf5() as io:
   print('scale', scale)
   # raw_input()
   # Definition of a cube as a convex shape
-  io.addConvexShape('Bar', [ (-bar_length,  bar_width, -bar_height),
+  io.add_convex_shape('Bar', [ (-bar_length,  bar_width, -bar_height),
                              (-bar_length, -bar_width, -bar_height),
                              (-bar_length, -bar_width,  bar_height),
                              (-bar_length,  bar_width,  bar_height),
@@ -70,24 +64,24 @@ with Hdf5() as io:
   angle= math.pi/4.0
   ori = [math.cos(angle/2.0),0.0,math.sin(angle/2.0),0]
   print('ori initial', ori)
-  io.addObject('bar', [Contactor('Bar')],
+  io.add_object('bar', [Contactor('Bar')],
                translation=[0,0,3.0*scale],
                orientation = ori,
                velocity=[0, 0, 0, 0, 0.0, 0],
                mass=mass)
 
   # Definition of the ground shape
-  io.addPrimitiveShape('Ground', 'Box', (5*scale, 5*scale, 0.1*scale))
+  io.add_primitive_shape('Ground', 'Box', (5*scale, 5*scale, 0.1*scale))
   angleground= 0.0 ;math.pi/4.0
   origround = [math.cos(angleground/2.0),0.0,math.sin(angleground/2.0),0]
-  io.addObject('ground', [Contactor('Ground')],
+  io.add_object('ground', [Contactor('Ground')],
                translation=[0, 0, 0.0],
                orientation = origround)
 
 
   # Definition of a non smooth law. As no group ids are specified it
   # is between contactors of group id 0.
-  io.addNewtonImpactFrictionNSL('contact', mu=0.3)
+  io.add_Newton_impact_friction_nsl('contact', mu=0.3)
 
   print(body_collection)
 

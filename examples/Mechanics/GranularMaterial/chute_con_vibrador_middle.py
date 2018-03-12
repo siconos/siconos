@@ -72,9 +72,9 @@ def create_chute(io, box_height = box_height,
     left_up_vertices=numpy.array([v1,v2,v3,v1_extruded,v2_extruded,v3_extruded])
     # print left_up_vertices
 
-    io.addConvexShape('Left_up',left_up_vertices,
+    io.add_convex_shape('Left_up',left_up_vertices,
                       insideMargin=0.1*plane_thickness)
-    io.addObject('left_up', [Contactor('Left_up',collision_group=1)],
+    io.add_object('left_up', [Contactor('Left_up',collision_group=1)],
                  translation = trans)
 
 
@@ -91,9 +91,9 @@ def create_chute(io, box_height = box_height,
     left_middle_vertices=numpy.array([v2,v3,v4,v5,v2_extruded,v3_extruded,v4_extruded,v5_extruded])
     # print left_middle_vertices
 
-    io.addConvexShape('Left_middle',left_middle_vertices,
+    io.add_convex_shape('Left_middle',left_middle_vertices,
                       insideMargin=0.1*plane_thickness)
-    io.addObject('left_middle', [Contactor('Left_middle',collision_group=1)],
+    io.add_object('left_middle', [Contactor('Left_middle',collision_group=1)],
                  translation = trans)
 
     ######### left_down
@@ -118,9 +118,9 @@ def create_chute(io, box_height = box_height,
          v6_extruded,v7_extruded])
     # print left_down_vertices
 
-    io.addConvexShape('Left_down',left_down_vertices,
+    io.add_convex_shape('Left_down',left_down_vertices,
                       insideMargin=0.1*plane_thickness)
-    io.addObject('left_udown', [Contactor('Left_down',collision_group=1)],
+    io.add_object('left_udown', [Contactor('Left_down',collision_group=1)],
                  translation = trans)
 
     ######### right_up
@@ -142,9 +142,9 @@ def create_chute(io, box_height = box_height,
         [v8,v9,v10,v11,v8_extruded,v9_extruded,v10_extruded,v11_extruded])
     # print right_up_vertices
 
-    io.addConvexShape('Right_up',right_up_vertices,
+    io.add_convex_shape('Right_up',right_up_vertices,
                       insideMargin=0.1*plane_thickness)
-    io.addObject('right_up', [Contactor('Right_up',collision_group=1)],
+    io.add_object('right_up', [Contactor('Right_up',collision_group=1)],
                  translation = trans)
 
     ######### rear_up
@@ -170,9 +170,9 @@ def create_chute(io, box_height = box_height,
          v11_extruded+[0.0,plane_thickness,0.0]])
     # print rear_up_vertices
 
-    io.addConvexShape('Rear_up',rear_up_vertices,
+    io.add_convex_shape('Rear_up',rear_up_vertices,
                       insideMargin=0.1*plane_thickness)
-    io.addObject('rear_up', [Contactor('Rear_up',collision_group=1)],
+    io.add_object('rear_up', [Contactor('Rear_up',collision_group=1)],
                  translation = trans)
 
     delta_x= -4.370*scale/4.0
@@ -201,15 +201,15 @@ def create_chute(io, box_height = box_height,
     
     
                        
-    io.addConvexShape('Vibrador_1',vibrador_vertices,
+    io.add_convex_shape('Vibrador_1',vibrador_vertices,
                       insideMargin=0.1*plane_thickness)
-    io.addObject('vibrador_1', [Contactor('Vibrador_1',collision_group=2)],
+    io.add_object('vibrador_1', [Contactor('Vibrador_1',collision_group=2)],
                  translation = trans,
                  mass = 1.0)
     
     frequency = 50
     amplitude = 3.3e-3*scale
-    io.addBoundaryCondition('vibration', 'vibrador_1', indices=[0,1,2,3,4,5], bc_class='HarmonicBC',
+    io.add_boundary_condition('vibration', 'vibrador_1', indices=[0,1,2,3,4,5], bc_class='HarmonicBC',
                             a=[0.0,0.0,0.0,0.0,0.0,0.0],
                             b=[0.0,0.0,amplitude*frequency*2.0*math.pi,0.0,0.0,0.0],
                             omega= [0.0,0.0,frequency*2.0*math.pi,0.0,0.0,0.0],
@@ -230,9 +230,9 @@ def create_chute(io, box_height = box_height,
     rear_down_vertices=numpy.array([v4,v11,v6,v4_extruded,v11_extruded,v6_extruded])
     # print rear_down_vertices
 
-    io.addConvexShape('Rear_down',rear_down_vertices,
+    io.add_convex_shape('Rear_down',rear_down_vertices,
                       insideMargin=0.1*plane_thickness)
-    io.addObject('rear_down', [Contactor('Rear_down',collision_group=1)],
+    io.add_object('rear_down', [Contactor('Rear_down',collision_group=1)],
                  translation = trans)
 
     ######### front_up
@@ -251,9 +251,9 @@ def create_chute(io, box_height = box_height,
          v9_extruded+[0.0,plane_thickness,0.0],v10_extruded+[0.0,plane_thickness,0.0]])
     # print front_up_vertices
 
-    io.addConvexShape('Front_up',front_up_vertices,
+    io.add_convex_shape('Front_up',front_up_vertices,
                       insideMargin=0.1*plane_thickness)
-    io.addObject('front_up', [Contactor('Front_up',collision_group=1)],
+    io.add_object('front_up', [Contactor('Front_up',collision_group=1)],
                  translation = trans)
 
     ######### front_down
@@ -267,7 +267,7 @@ def create_chute(io, box_height = box_height,
     front_down_vertices=numpy.array([v5,v7,v10,v5_extruded,v7_extruded,v10_extruded])
     # print front_down_vertices
 
-    io.addConvexShape('Front_down',front_down_vertices,
+    io.add_convex_shape('Front_down',front_down_vertices,
                       insideMargin=0.1*plane_thickness)
-    io.addObject('front_down', [Contactor('Front_down',collision_group=1)],
+    io.add_object('front_down', [Contactor('Front_down',collision_group=1)],
                  translation = trans)

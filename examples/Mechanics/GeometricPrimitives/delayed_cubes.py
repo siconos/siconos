@@ -12,7 +12,7 @@ import siconos.numerics as Numerics
 with Hdf5() as io:
 
     # Definition of a cube as a convex shape
-    io.addConvexShape('Cube', [
+    io.add_convex_shape('Cube', [
         (-1.0, 1.0, -1.0),
         (-1.0, -1.0, -1.0),
         (-1.0, -1.0, 1.0),
@@ -23,11 +23,11 @@ with Hdf5() as io:
         (1.0, -1.0, 1.0)])
 
     # Definition of the ground shape
-    io.addPrimitiveShape('Ground', 'Box', (100, 100, .5))
+    io.add_primitive_shape('Ground', 'Box', (100, 100, .5))
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.3)
 
     # The cube objects are made with an unique Contactor : the cube shape.
     # As a mass is given, they are dynamic systems involved in contact
@@ -35,21 +35,21 @@ with Hdf5() as io:
     # Contactor belongs to group 0
 
     # A first cube is introduced a the beginning of the simulation
-    io.addObject('cube0', [Contactor('Cube')], translation=[0, 0, 2],
-                 velocity=[10, 0, 0, 1, 1, 1],
-                 mass=1)
+    io.add_object('cube0', [Contactor('Cube')], translation=[0, 0, 2],
+                  velocity=[10, 0, 0, 1, 1, 1],
+                  mass=1)
 
     # the second cube introduction is delayed. It is crearted in the simulation
     # a time 0.5
-    io.addObject('cube1', [Contactor('Cube')], translation=[0, 0, 2],
-                 velocity=[10, 0, 0, 1, 1, 1],
-                 mass=1, time_of_birth=0.5)
+    io.add_object('cube1', [Contactor('Cube')], translation=[0, 0, 2],
+                  velocity=[10, 0, 0, 1, 1, 1],
+                  mass=1, time_of_birth=0.5)
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
-    io.addObject('ground', [Contactor('Ground')],
-                 translation=[0, 0, 0])
+    io.add_object('ground', [Contactor('Ground')],
+                  translation=[0, 0, 0])
 
 
 # Run the simulation from the inputs previously defined and add

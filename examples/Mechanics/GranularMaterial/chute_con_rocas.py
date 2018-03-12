@@ -36,7 +36,7 @@ with Hdf5(mode='w') as io:
                              x_shift=2.0, roca_size=0.1, top=3,
                              rate=0.02, density=density)
 
-    io.addNewtonImpactFrictionNSL('contact', mu=1.0, e=0.01)
+    io.add_Newton_impact_friction_nsl('contact', mu=1.0, e=0.01)
 
 with Hdf5(mode='r+', collision_margin=0.01) as io:
     # By default earth gravity is applied and the units are those

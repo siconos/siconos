@@ -38,12 +38,12 @@ def una_roca(io, name, cname, roca_size=0.05, density=1, trans=None, tob=None):
     cm = ch.centroid()
 
     # Definition of a polyhedron as a convex shape
-    io.addConvexShape(cname, vertices, insideMargin=0.1*roca_size)
+    io.add_convex_shape(cname, vertices, insideMargin=0.1*roca_size)
 
     # computation of inertia and volume
     inertia,volume=ch.inertia(ch.centroid())
 
-    io.addObject(name,
+    io.add_object(name,
                  [Contactor(cname)],
                  translation=trans,
                  #velocity=veloci,
@@ -74,18 +74,18 @@ def un_cubo(io, name, cname, roca_size=0.05, density=1, trans=None, tob=None):
     cm = ch.centroid()
 
     # Definition of a polyhedron as a convex shape
-    io.addConvexShape(cname, vertices)
+    io.add_convex_shape(cname, vertices)
 
     # computation of inertia and volume
     inertia,volume=ch.inertia(ch.centroid())
 
-    io.addObject(name,
-                 [Contactor(cname)],
-                 translation=trans,
-                 #velocity=veloci,
-                 mass=volume*density,
-                 time_of_birth=tob,
-                 inertia=inertia*density)
+    io.add_object(name,
+                  [Contactor(cname)],
+                  translation=trans,
+                  #velocity=veloci,
+                  mass=volume*density,
+                  time_of_birth=tob,
+                  inertia=inertia*density)
 
 
 def create_rocas(io, n_layer=5, n_row=5, n_col=5, x_shift=3.0,

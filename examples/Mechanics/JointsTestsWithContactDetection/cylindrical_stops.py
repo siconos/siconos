@@ -30,52 +30,52 @@ with Hdf5() as io:
     # A "bar" connected to a "post".  A "knob" is attached to the post
     # for visual reference -- otherwise no rotation can be seen, since
     # it is cylindrical.
-    io.addPrimitiveShape('Bar', 'Box', (1, 0.1, 0.1))
-    io.addPrimitiveShape('Post', 'Cylinder', (0.05, 1))
-    io.addPrimitiveShape('Knob', 'Box', (0.2, 0.05, 0.05))
-    io.addPrimitiveShape('Ground', 'Box', (4, 4, .5))
+    io.add_primitive_shape('Bar', 'Box', (1, 0.1, 0.1))
+    io.add_primitive_shape('Post', 'Cylinder', (0.05, 1))
+    io.add_primitive_shape('Knob', 'Box', (0.2, 0.05, 0.05))
+    io.add_primitive_shape('Ground', 'Box', (4, 4, .5))
 
     # Ground is defined for visual reference
-    io.addObject('ground', [Contactor('Ground')],
+    io.add_object('ground', [Contactor('Ground')],
                  translation=[0, 0, 0])
 
     # We define a contact law even though this simulation should not
     # feature contact.
-    io.addNewtonImpactFrictionNSL('contact', e=0.7, mu=0.02)
+    io.add_Newton_impact_friction_nsl('contact', e=0.7, mu=0.02)
 
     # This law is used to specify "bouncy" stops on joint1.
-    io.addNewtonImpactNSL('stop', e=0.8)
+    io.add_Newton_impact_nsl('stop', e=0.8)
 
     # Low friction on first joint linear axis
-    io.addRelayNSL('friclow', lb=-0.03, ub=0.03)
+    io.add_relay_nsl('friclow', lb=-0.03, ub=0.03)
 
     # Very high friction on the second joint causes "almost-fixed"
     # behaviour, resulting in a bounce when the first joint hits the
     # stop, with energy partially absorbed by a small movement of the
     # second joint.
-    io.addRelayNSL('frichigh', lb=-3.0, ub=3.0)
+    io.add_relay_nsl('frichigh', lb=-3.0, ub=3.0)
 
     # The objects, with self-collision disabled as noted above.
-    io.addObject('bar', [Contactor('Bar')], translation=[0.45, 0.45, 3], mass=10,
+    io.add_object('bar', [Contactor('Bar')], translation=[0.45, 0.45, 3], mass=10,
                  allow_self_collide = self_collide, velocity=[0,push,0,0,twist,0])
-    io.addObject('post', [Contactor('Post'),
+    io.add_object('post', [Contactor('Post'),
                           Contactor('Knob', relative_translation=[0.1,0,0])],
                  translation=[0, 0, 3], mass=1,
                  allow_self_collide = self_collide)
 
     # Connect the two bodies by a cylindrical joint
-    io.addJoint('joint1', 'bar', 'post', [[-0.45,0,0]], [[0,1,0]], 'CylindricalJointR',
+    io.add_joint('joint1', 'bar', 'post', [[-0.45,0,0]], [[0,1,0]], 'CylindricalJointR',
                 allow_self_collide = self_collide, absolute=False,
                 friction=['friclow', ''],
                 nslaws='stop', stops=stops)
 
     # Joint from "bar" to the world reference frame, to keep things from falling.
-    io.addJoint('joint2', 'post', None, [[0,0,0]], [[0,1,0]],
+    io.add_joint('joint2', 'post', None, [[0,0,0]], [[0,1,0]],
                 'PivotJointR', absolute=False,
                 friction = 'frichigh')
 
     # For fully fixed behaviour replace with a FixedJointR.
-    # io.addJoint('joint2', 'post', None, None, None, 'FixedJointR')
+    # io.add_joint('joint2', 'post', None, None, None, 'FixedJointR')
 
 # We define a "controller" here to show how to measure the angle of
 # the joint using computehDoF.

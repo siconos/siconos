@@ -4,7 +4,6 @@
 
 from siconos.mechanics.collision.tools import Contactor
 from siconos.io.mechanics_io import Hdf5
-import siconos.io.mechanics_io
 import siconos.numerics as Numerics
 from siconos.mechanics.collision.convexhull import ConvexHull
 import numpy as np
@@ -27,8 +26,8 @@ with Hdf5() as io:
     all_pts = []
     s = np.pi/(num_parts-1)/2
     center = radius-girth
-    for i,d in enumerate([-1,1]):
-        for j,r in enumerate(np.linspace(0, np.pi, num_parts)):
+    for i, d in enumerate([-1, 1]):
+        for j, r in enumerate(np.linspace(0, np.pi, num_parts)):
             pts = np.array([
                 [ width, radius*np.sin(r-s)*d+d*length, radius*np.cos(r-s)*d],
                 [-width, radius*np.sin(r-s)*d+d*length, radius*np.cos(r-s)*d],
@@ -40,14 +39,16 @@ with Hdf5() as io:
                 [-width, center*np.sin(r+s)*d+d*length, center*np.cos(r+s)*d],
             ])
             all_pts += list(pts)
-            io.addConvexShape('Chainlink%02d'%(i*num_parts+j), pts)
+            io.add_convex_shape('Chainlink%02d' % (i*num_parts+j), pts)
 
     # connector: using the 16 points closest to center, create two
     # hulls for upper and lower part
     all_pts = np.array(all_pts)
-    connect = all_pts[np.argsort((all_pts[:,1]-0)**2)[:16]]
-    io.addConvexShape('Chainlink%02d'%(num_parts*2+0), connect[connect[:,2] > 0])
-    io.addConvexShape('Chainlink%02d'%(num_parts*2+1), connect[connect[:,2] < 0])
+    connect = all_pts[np.argsort((all_pts[:, 1]-0)**2)[:16]]
+    io.add_convex_shape('Chainlink%02d' % (num_parts*2+0),
+                        connect[connect[:, 2] > 0])
+    io.add_convex_shape('Chainlink%02d' % (num_parts*2+1),
+                        connect[connect[:, 2] < 0])
 
     # computation of inertia and volume of all points
     ch = ConvexHull(all_pts)
@@ -57,54 +58,53 @@ with Hdf5() as io:
     # extrema of the ball
     ball_pos = np.array([0, ball_radius+length*2/3, 0])
     ch = ConvexHull(np.vstack((all_pts,
-                               [ball_pos + [0,ball_radius,0],
-                                ball_pos + [0,0, ball_radius],
-                                ball_pos + [0,0,-ball_radius],
-                                ball_pos + [ ball_radius,0,0],
-                                ball_pos + [-ball_radius,0,0]])))
+                               [ball_pos + [0, ball_radius, 0],
+                                ball_pos + [0, 0,  ball_radius],
+                                ball_pos + [0, 0, -ball_radius],
+                                ball_pos + [ball_radius, 0, 0],
+                                ball_pos + [-ball_radius, 0, 0]])))
     ball_inertia, volume = ch.inertia(ch.centroid())
 
-
     # ball at the end of the chain
-    io.addPrimitiveShape('Ball', 'Sphere', [ball_radius])
+    io.add_primitive_shape('Ball', 'Sphere', [ball_radius])
 
-    chainlink = [Contactor('Chainlink%02d'%i) for i in range(num_parts*2+2)]
+    chainlink = [Contactor('Chainlink%02d' % i) for i in range(num_parts*2+2)]
     ball = [Contactor('Ball', relative_translation=ball_pos)]
     mass = 0.1
     initvel = 0.0
     inertia = link_inertia
     for i in range(num_links):
-        io.addObject('link%02d'%(i*2+0), chainlink,
-                     translation=[0, 0, 10+(i*2+0)*length*2],
-                     orientation=[(1, 0, 0), np.pi/2],
-                     velocity=[0, 0, 0, 0, 0, 0],
-                     mass=mass*(i>0), inertia=inertia)
+        io.add_object('link%02d' % (i*2+0), chainlink,
+                      translation=[0, 0, 10+(i*2+0)*length*2],
+                      orientation=[(1, 0, 0), np.pi/2],
+                      velocity=[0, 0, 0, 0, 0, 0],
+                      mass=mass*(i > 0), inertia=inertia)
         # Last link has the ball
-        if (i+1)==num_links:
+        if (i+1) == num_links:
             # Ball is 10x heavier, and give slide sideways initial
             # velocity to cause collapse of the chain.
             chainlink += ball
             mass = 1
             initvel = 0.1
             inertia = ball_inertia
-        io.addObject('link%02d'%(i*2+1), chainlink,
-                     translation=[0, 0, 10+(i*2+1)*length*2],
-                     orientation=[(1, 1, 1), np.pi*2/3],
-                     velocity=[initvel, 0, 0, 0, 0, 0],
-                     mass=mass, inertia=inertia)
+        io.add_object('link%02d' % (i*2 + 1), chainlink,
+                      translation=[0, 0, 10 + (i*2 + 1)*length*2],
+                      orientation=[(1, 1, 1), np.pi*2/3],
+                      velocity=[initvel, 0, 0, 0, 0, 0],
+                      mass=mass, inertia=inertia)
 
     # Definition of the ground shape
-    io.addPrimitiveShape('Ground', 'Box', (10, 10, 1))
+    io.add_primitive_shape('Ground', 'Box', (10, 10, 1))
 
     # the ground object made with the ground shape. As the mass is
     # not given, it is a static object only involved in contact
     # detection.
-    io.addObject('ground', [Contactor('Ground')],
-                 translation=[0, 0, 0])
+    io.add_object('ground', [Contactor('Ground')],
+                  translation=[0, 0, 0])
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.03, e=0.0)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.03, e=0.0)
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done

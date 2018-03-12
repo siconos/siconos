@@ -3,9 +3,16 @@
 
 # Lighter imports before command line parsing
 from __future__ import print_function
-import sys, os, json
+import sys
+import os
+import json
 import getopt
 import math
+
+if hasattr(math, 'inf'):
+    infinity = math.inf
+else:
+    infinity = float('inf')
 
 ## Print usage information
 def usage(long=False):
@@ -1026,7 +1033,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
     # set visibility for all actors associated to a dynamic instance
     def set_dynamic_instance_visibility(instance, time):
         tob = times_of_birth.get(instance, -1)
-        tod = times_of_death.get(instance, float('inf'))
+        tod = times_of_death.get(instance, infinity)
         has_avatar = False
         if visible_mode=='avatars' or visible_mode=='contactors':
             for actor, index, group in dynamic_actors[instance]:
