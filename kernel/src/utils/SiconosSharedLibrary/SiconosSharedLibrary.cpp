@@ -48,7 +48,18 @@ PluginHandle loadPlugin(const std::string& pluginPath)
   }
 #endif
 #ifdef _SYS_UNX
+  /* -------------------------------------------------------------------------------------- *
+   * For RTLD_DEEPBIND, see                                                                 *
+   * https://stackoverflow.com/questions/34073051/when-we-are-supposed-to-use-rtld-deepbind *
+   * We may want to change this behaviour                                                   *
+   * -------------------------------------------------------------------------------------- */
+
+#ifdef __APPLE__
   HandleRes = dlopen(pluginPath.c_str(), RTLD_LAZY);
+#else
+  HandleRes = dlopen(pluginPath.c_str(), RTLD_LAZY | RTLD_DEEPBIND);
+#endif
+
   if (!HandleRes)
   {
     std::cout << "dlerror() :" << dlerror() <<std::endl;
@@ -64,7 +75,7 @@ void * getProcAddress(PluginHandle plugin, const std::string& procedure)
   void* ptr;
 #ifdef _WIN32
   ptr = (void*) GetProcAddress(plugin, procedure.c_str());
-  if (NULL == ptr)
+  if (!ptr)
   {
     DWORD err = GetLastError();
     std::cout << "SiconosSharedLibrary::getProcAddress Error returned : " << err << std::endl;
@@ -74,7 +85,7 @@ void * getProcAddress(PluginHandle plugin, const std::string& procedure)
 #endif
 #ifdef _SYS_UNX
   ptr = dlsym(plugin, procedure.c_str());
-  if (ptr == NULL)
+  if (!ptr)
   {
     std::cout << "SiconosSharedLibrary::getProcAddress Error returned : " << dlerror() << std::endl;
     std::cout << "Arguments: procedure = " << procedure << std::endl;
