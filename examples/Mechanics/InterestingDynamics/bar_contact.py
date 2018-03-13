@@ -7,9 +7,8 @@ import pickle
 import random
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 #sys.path.append('../..')
-#from mechanics_io import Hdf5
 import siconos.numerics as Numerics
 import siconos.kernel as Kernel
 # WARNING : in 3D by default z-axis is upward
@@ -50,7 +49,7 @@ id_plan=0
 
 #create some bodies
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
   volume = bar_height * bar_length * bar_width
   mass = volume*density
   print('mass', mass)
@@ -119,7 +118,7 @@ def apply_forces(body):
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+', collision_margin=0.01) as io:
+with MechanicsHdf5Runner(mode='r+', collision_margin=0.01) as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

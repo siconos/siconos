@@ -6,7 +6,7 @@
 #
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 import siconos.kernel as Kernel
 
@@ -22,7 +22,7 @@ n_cube = 3
 n_row = 2
 n_col = 2
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
     for i in range(n_row):
         for j in range(n_col):
             for n in range(n_cube):
@@ -97,7 +97,7 @@ with Hdf5() as io:
 
 nstep = 2000
 step = 0.005
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

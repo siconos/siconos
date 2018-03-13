@@ -6,7 +6,7 @@
 #
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 
 import random
@@ -15,7 +15,7 @@ n_cube=4
 n_row=4
 n_col=4
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
     for i in range(n_row):
         for j in range(n_col):
             for n in range(n_cube):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 
 # Run the simulation from the inputs previously defined and add
@@ -10,7 +10,7 @@ import siconos.numerics as Numerics
 
 nstep=20000
 step=0.0005
-with Hdf5(mode='r+',io_filename='n_cubes_scene.hdf5') as io:
+with MechanicsHdf5Runner(mode='r+',io_filename='n_cubes_scene.hdf5') as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

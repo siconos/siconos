@@ -8,7 +8,7 @@ np.set_printoptions(precision=3)
 
 from siconos.mechanics.collision.tools import Contactor
 from siconos.mechanics.joints import cast_PrismaticJointR
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 from siconos.kernel import SiconosVector, BlockVector
 
 # An example of applying force to the axis of a joint, and applying
@@ -24,7 +24,7 @@ from siconos.kernel import SiconosVector, BlockVector
 # friction, see JointsTestsWithContactDetection.
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     # Definition of two bars connected by a prismatic joint
     io.add_primitive_shape('Bar', 'Box', (1, 0.1, 0.1))
@@ -92,7 +92,7 @@ class Ctrl(object):
         self.ds2.setFExtPtr(force2)
 
 # Load and run the simulation
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
     io.run(t0=0,
            T=20,
            h=0.01,

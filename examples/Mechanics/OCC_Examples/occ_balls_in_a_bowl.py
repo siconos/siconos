@@ -9,7 +9,7 @@
 #
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 from siconos import numerics
 
 # for osi specification:
@@ -25,8 +25,8 @@ from OCC.BRepGProp import brepgprop_VolumeProperties
 from math import pi
 
 # original implementation with occ backend
-import siconos.io.mechanics_io
-siconos.io.mechanics_io.set_backend('occ')
+import siconos.io.mechanics_run
+siconos.io.mechanics_run.set_backend('occ')
 
 # ball shape
 ball = BRepPrimAPI_MakeSphere(.15).Shape()
@@ -74,7 +74,7 @@ print 'bowl center of mass:', (bowl_com.Coord(1),
 print 'bowl moment of inertia:', (bowl_I1, bowl_I2, bowl_I3)
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     io.add_occ_shape('Contact', bowl)
 
@@ -197,7 +197,7 @@ with Hdf5() as io:
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     io.run(with_timer=False,
            gravity_scale=1,

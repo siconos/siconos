@@ -7,7 +7,7 @@
 
 from siconos.mechanics.collision.tools import Contactor
 
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 
 import siconos.numerics as Numerics
 
@@ -19,7 +19,7 @@ velocity_init = -1.0
 angular_velocity_init = 0.0
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     # # Definition of a cube as a convex shape
     io.add_convex_shape('CubeCS1', [
@@ -90,7 +90,7 @@ with Hdf5() as io:
 step = 20000
 hstep = 0.001
 
-with Hdf5(mode='r+', collision_margin=0.05) as io:
+with MechanicsHdf5Runner(mode='r+', collision_margin=0.05) as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

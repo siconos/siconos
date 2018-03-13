@@ -35,12 +35,12 @@ if args.frequency is not None:
     args.p = 1.0 / args.frequency
 
 # Heavier imports after command line parsing
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+',io_filename=args.file[0]) as io:
+with MechanicsHdf5Runner(mode='r+',io_filename=args.file[0]) as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

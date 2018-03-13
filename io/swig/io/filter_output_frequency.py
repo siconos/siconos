@@ -4,7 +4,7 @@ import os
 import vtk
 import numpy
 
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_hdf5 import MechanicsHdf5
 
 ## the best way to dump all data
 #  $ h5dump toto.hdf5 > toto.txt
@@ -63,8 +63,8 @@ else:
 
 
 
-with Hdf5(io_filename=io_filename, mode='r') as io:
-    with Hdf5(io_filename=out_filename, mode='w') as out:
+with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
+    with MechanicsHdf5(io_filename=out_filename, mode='w') as out:
 
 
 

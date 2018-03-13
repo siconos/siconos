@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 
 import chute
@@ -25,7 +25,7 @@ box_width  = 3.430
 
 plane_thickness = 0.2
 
-with Hdf5(mode='w') as io:
+with MechanicsHdf5Runner(mode='w') as io:
     ch = chute.create_chute(io, box_height = box_height,
                             box_length = box_length,
                             box_width = box_width,
@@ -38,7 +38,7 @@ with Hdf5(mode='w') as io:
 
     io.add_Newton_impact_friction_nsl('contact', mu=1.0, e=0.01)
 
-with Hdf5(mode='r+', collision_margin=0.01) as io:
+with MechanicsHdf5Runner(mode='r+', collision_margin=0.01) as io:
     # By default earth gravity is applied and the units are those
     # of the International System of Units.
     # Because of fixed collision margins used in the collision detection,

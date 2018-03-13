@@ -7,7 +7,7 @@ import random
 from siconos.mechanics.collision.tools import Contactor
 from siconos.mechanics.collision.convexhull import ConvexHull
 
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 
 unscaled_polyhedron_size = 0.5
@@ -24,7 +24,7 @@ box_width = 3.430*scale
 #create some bodies
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
     angle = 0.0  # math.pi/4.0
     translation = [0.0, 0.0, 0.0]
     orientation = [math.cos(angle/2.0), 0.0, math.sin(angle/2.0), 0.0]
@@ -110,7 +110,7 @@ hstep = 1e-4
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+', collision_margin=0.01) as io:
+with MechanicsHdf5Runner(mode='r+', collision_margin=0.01) as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

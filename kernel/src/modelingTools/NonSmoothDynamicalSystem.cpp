@@ -111,7 +111,7 @@ void NonSmoothDynamicalSystem::clearChangeLogTo(const ChangeLogIter& it)
    * simulations, but in the one-simulation case (currently 100% of
    * cases), calling this will prevent changelog from building up
    * forever. Important especially for simulations using an
-   * InteractionManager, e.g. mechanics_io. */
+   * InteractionManager, e.g. mechanics_run.py. */
   while (_changeLog.begin() != it.it) {
     _changeLog.pop_front();
     assert((_changeLog.end() != it.it) && (_changeLog.begin() != _changeLog.end())

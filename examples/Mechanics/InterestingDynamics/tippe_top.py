@@ -4,7 +4,7 @@
 
 from siconos.mechanics.collision.tools import Contactor
 from siconos.mechanics.collision.bullet import SiconosBulletOptions
-from siconos.io.mechanics_io import thetav, Hdf5
+from siconos.io.mechanics_run import thetav, MechanicsHdf5Runner
 from math import pi
 from matplotlib import pyplot as plt
 
@@ -41,7 +41,7 @@ options = SiconosBulletOptions()
 options.perturbationIterations = 0
 options.minimumPointsPerturbationThreshold = 0
 
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     io.add_primitive_shape('Body1', 'Sphere', (r1,))
     io.add_primitive_shape('Body2', 'Cylinder', (r2, a2))
@@ -68,7 +68,7 @@ with Hdf5() as io:
                   velocity=[0, 0, 0, .0, .0, 180],
                   mass=m)
 
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     io.run(with_timer=True,
            options=options,

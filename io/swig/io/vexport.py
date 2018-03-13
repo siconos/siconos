@@ -65,7 +65,7 @@ import bisect
 from numpy.linalg import norm
 import numpy
 import random
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_hdf5 import MechanicsHdf5
 
 # attach velocity
 # contact points and associated forces are embedded in on a PolyData source
@@ -282,7 +282,7 @@ shape = dict()
 pos = dict()
 instances = dict()
 
-with Hdf5(io_filename=io_filename, mode='r') as io:
+with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
 
     def load():
 

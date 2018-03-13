@@ -3,9 +3,8 @@
 # Various object types sliding, rolling, and sitting still.
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
-import siconos.io.mechanics_io
 from siconos.mechanics.collision.convexhull import ConvexHull
 
 options = siconos.mechanics.collision.bullet.SiconosBulletOptions()
@@ -17,7 +16,7 @@ options.perturbationIterations = 5
 options.minimumPointsPerturbationThreshold = 5
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     # Definition of a tetrahedron as a convex shape.
     # Bottom purposely not even.
@@ -129,7 +128,7 @@ with Hdf5() as io:
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

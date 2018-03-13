@@ -20,7 +20,7 @@ if __name__=='__main__':
     args = parser.parse_args()
 
 # Heavier imports after command line parsing
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_hdf5 import MechanicsHdf5
 import numpy as np
 
 def summarize(io):
@@ -85,7 +85,7 @@ def list_contactors(io):
 
 if __name__=='__main__':
     try:
-        with Hdf5(mode='r', io_filename=args.file[0]) as io:
+        with MechanicsHdf5(mode='r', io_filename=args.file[0]) as io:
             if io.dynamic_data() is None or len(io.dynamic_data()) == 0:
                 print ('Empty simulation found.')
             else:

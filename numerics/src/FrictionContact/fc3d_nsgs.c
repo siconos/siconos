@@ -634,7 +634,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   /*****  NSGS Iterations *****/
 
   /* A special case for the most common options (should correspond
-   * with mechanics_io.py **/
+   * with mechanics_run.py **/
   if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE
       && iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE
       && iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE

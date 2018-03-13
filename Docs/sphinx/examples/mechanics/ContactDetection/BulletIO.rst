@@ -15,7 +15,7 @@ In this set of examples (cubes.py, n_cubes.py, ...), we model collections of rig
 associated with shapes (primitive (sphere, cube capsule, etc), convex hull, mesh) that interact
 with contact and friction (see :ref:`fig-n_cubes`).
 
-The example use extensively the mechanics_io python code that enable to create and manage the geometrical
+The example use extensively the mechanics_run python code that enable to create and manage the geometrical
 data and the results of the simulation in hdf5 file.
 
 The results cab be viewed with the siconos_vview and the siconos_vexport python scripts
@@ -23,7 +23,7 @@ The results cab be viewed with the siconos_vview and the siconos_vexport python 
 A brief description of examples is as follows :
 
 * cube.py is  the simplest example with few cubes that fall down on a rigid fixed plane. The scene is built
-  using calls to mechanics_io methods such as
+  using calls to mechanics_run methods such as
   
   * addPrimitiveShape for creating a primitive shape ::
     

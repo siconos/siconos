@@ -5,7 +5,7 @@ import math
 import pickle
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 
 box_height = 3.683
@@ -50,7 +50,7 @@ def normal_plane(p1,p2,p3):
 #create some bodies
 
 # Creation of the hdf5 file for input/output
-with Hdf5(use_compression=True) as io:
+with MechanicsHdf5Runner(use_compression=True) as io:
 
   ######### left_up
   id_plan=id_plan+1
@@ -285,7 +285,7 @@ hstep=0.005
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.
