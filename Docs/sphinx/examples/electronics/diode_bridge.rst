@@ -143,7 +143,7 @@ we get a first order linear system
 
 .. math::
    
-   \dot x = A.x + r
+   \dot x = A x + r
 
 with the unknowns :math:`x` and :math:`r`.
 
@@ -301,7 +301,7 @@ Complementarity between two variables :math:`y \in R^m, \lambda \in R^m` writes
 
 .. math::
 
-   if \ 0 \leq y \ then \ \lambda = 0 \  and \ if \ \lambda \geq 0 \ then \ y = 0
+   \text{if} \ 0 \leq y \ \text{ then } \ \lambda = 0 \  \text{ and  if } \ \lambda \geq 0 \ \text{ then } \ y = 0
 
 or, using ":math:`\perp`" symbol,
 
@@ -320,7 +320,7 @@ Then, back to our circuit, the complementarity conditions, results of the ideal 
    0 \leq -v_{DF2} \, \perp \, i_{DF2} \geq 0\\
    0 \leq i_{DF1} \, \perp \, -v_{DF1} \geq 0\\
    0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0\\
-   \end{array} \ \ \ \ \ \ or \ \ \ \ \ \  0 \leq y \, \perp \, \lambda \geq 0
+   \end{array} \ \ \ \ \ \ \text{ or } \ \ \ \ \ \  0 \leq y \, \perp \, \lambda \geq 0
 
 with the previously defined :math:`y` and :math:`\lambda`. Note that depending on the diode position in the bridge, :math:`y_i` stands for the reverse voltage across
 the diode or for the diode current.
@@ -339,21 +339,21 @@ The interaction can be completely defined::
 Notice that this interaction just describe some relations and laws but is not connected to any real dynamical system, for the moment.
   
 The modeling part is almost complete, since only one dynamical system and one interaction are needed to describe the problem.
-They must be gathered into a specific object, the :doxysiconos:`Model`.
-A model contains a nonsmooth dynamical system and the description of its simulation. The building of this object is quite simple: just
+They must be gathered into a specific object, the :doxysiconos:`NonSmoothDynamicalSystem`.
+The building of this object is quite simple: just
 set the time window for the simulation, include dynamical systems and link them to the correct interactions.
 
 ::
    
-   # dynamical systems and interactions must be gathered into a model
+   # dynamical systems and interactions must be gathered into a NonSmoothDynamicalSystem
    t0 = 0. # initial time
    T = 5.0e-3 # duration of the simulation
-   DiodeBridge = sk.Model(t0, T)
+   DiodeBridge = sk.NonSmoothDynamicalSystem(t0, T)
    # add the dynamical system in the non smooth dynamical system
-   DiodeBridge.nonSmoothDynamicalSystem().insertDynamicalSystem(ds)
+   DiodeBridge.insertDynamicalSystem(ds)
 
    # link the interaction and the dynamical system
-   DiodeBridge.nonSmoothDynamicalSystem().link(interaction, ds)
+   DiodeBridge.link(interaction, ds)
 
 
 Describing the simulation of the nonsmooth dynamical system
@@ -427,12 +427,7 @@ Then the last step consists in the simulation creation, with its time discretisa
   # simulation and time discretisation
   time_step =  1.0e-6
   td = sk.TimeDiscretisation(t0, time_step)
-  simu = sk.TimeStepping(td, osi, osnspb)
-
-Finally, the simulation is used to initialize the model, which is now complete and ready to run::
-
-  DiodeBridge.setSimulation(simu)
-  DiodeBridge.initialize()
+  simu = sk.TimeStepping(DiodeBridge, td, osi, osnspb)
 
 
 Leading the Simulation Process

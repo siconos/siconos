@@ -6,7 +6,7 @@ Tutorial : a column of three beads
 .. highlight:: c++
 
 This tutorial deals with a column of beads, subjected to the
-gravity. It then introduces Lagrangian Linear systems with Lagrangian
+gravity. It introduces Lagrangian Linear systems with Lagrangian
 Linear Relations and Newton impact law.
 
 Building the Non-Smooth Dynamical System
@@ -14,7 +14,7 @@ Building the Non-Smooth Dynamical System
 
 As described in the figure below, we consider a ball of mass :math:`m` and radius :math:`R`, described by 3 generalized coordinates :math:`q=(z,x,\theta)`
 The ball is subjected to the gravity :math:`g`. The system is also constituted by a rigid plane, defined by its position :math:`h` with respect
-to the axis Oz. We assume that the position of the plane is fixed.
+to the axis Oz. We assume that the position of the plane is fixed and not modeled as a dynamical system.
 
 .. figure:: /figures/mechanics/BouncingBall/BouncingBall.*
    :width: 8cm
@@ -22,7 +22,7 @@ to the axis Oz. We assume that the position of the plane is fixed.
 
    fig 1: Coordinate system
 
-The equation of motion of the ball is given by
+The equation of motion of a ball is given by
 
 .. math::
 
@@ -40,9 +40,9 @@ with
 
 * :math:`M` the inertia term, a :math:`n\times{}n` matrix.
 * :math:`p` the force due to the non-smooth law, ie the reaction at impact. 
-* :math:`F_{ext}(t):  \mathcal R \mapsto \mathcal R^{n}` the given external force.
+* :math:`F_{ext}(t):  \mathcal R \rightarrow \mathcal R^{n}` the given external force.
 
-That fits with Lagrangian, Linear and Time-Invariant coefficient Dynamical System, represented by LagrangianLinearTIDS class (see \ref dsInSiconos).
+That fits with Lagrangian, Linear and Time-Invariant Dynamical System, represented by LagrangianLinearTIDS class (see \ref dsInSiconos).
 
 Next, we will suppose that we have a column of "dsNumber" balls like the one above (mass and radius may be different, and if necessary, variables will be indexed by :math:`i`, the number of the ball). Each ball is governed by a linear system like the one written for a single ball and may be in contact with the balls above and below it.
 
