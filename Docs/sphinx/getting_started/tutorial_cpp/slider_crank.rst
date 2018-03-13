@@ -35,7 +35,7 @@ and to plot the results, you can use for example::
 
   gnuplot -p result.gp
 
-This muste lead to Fig 11 (d) of the paper
+This must lead to Fig 11 (d) of the paper
 
 The example is based on cad files located in examples/Mechanics/Mechanisms/SliderCrank/CAD
 
