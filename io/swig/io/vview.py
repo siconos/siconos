@@ -556,14 +556,13 @@ class InputObserver():
             self._renderer.ResetCameraClippingRange()
 
         if key == 's':
-            if not self._recording:
-                self.vview.recorder.Start()
-                self._recording = True
+            self.toggle_recording(True)
 
         if key == 'e':
-            if self._recording:
-                self._recording = False
-                self.vview.recorder.End()
+            # Note 'e' has the effect to also "end" the program due to
+            # default behaviour of vtkInteractorStyle, see class
+            # documentation.
+            self.toggle_recording(False)
 
         if key == 'C':
                 this_view.action(self)
@@ -573,6 +572,19 @@ class InputObserver():
         slider_repres = obj.GetRepresentation()
         self._time = slider_repres.GetValue()
         self.update()
+
+    def toggle_recording(self, recording):
+        if recording and not self._recording:
+            fps = 25
+            self._timer_id = (self.vview.interactor_renderer
+                              .CreateRepeatingTimer(1000//fps))
+            self._recording = True
+            self.vview.recorder.Start()
+        elif self._recording and not recording:
+            self.vview.interactor_renderer.DestroyTimer(self._timer_id)
+            self._timer_id = None
+            self._recording = False
+            self.vview.recorder.End()
 
         # observer on 2D chart
     def iter_plot_observer(self, obj, event):
@@ -600,7 +612,7 @@ class InputObserver():
                 self._time += self.vview.opts.advance_by_time
                 self.vview.slwsc.SetEnabled(False)  # Scale slider
                 self.vview.xslwsc.SetEnabled(False)  # Time scale slider
-                # slider_widget.SetEnabled(False) # Time slider
+                # slider_widget.SetEnabled(False) # Time slider (TODO video options)
                 # widget.SetEnabled(False) # Axis widget
             self.update()
             self.vview.image_maker.Modified()
@@ -611,10 +623,9 @@ class InputObserver():
                 # slider_widget.SetEnabled(True)
                 # widget.SetEnabled(True) # Axis widget
 
+            # End video if done
             if self._time >= max(self._times):
-                self._recording = False
-                self.vview.recorder.End()
-
+                self.toggle_recording(False)
 
 
 class DataConnector():
@@ -1751,6 +1762,9 @@ class VView(object):
         else:
             self.input_observer = InputObserver(self)
         self.interactor_renderer.AddObserver('KeyPressEvent', self.input_observer.key)
+
+        self.interactor_renderer.AddObserver(
+            'TimerEvent', self.input_observer.recorder_observer)
 
         if self.io.contact_forces_data().shape[0] > 0:
             self.slwsc, self.slrepsc = self.make_slider(
