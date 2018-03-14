@@ -467,7 +467,7 @@ class InputObserver():
 
     def set_opacity(self):
         for instance, actors in self.vview.dynamic_actors.items():
-            for actor in actors:
+            for actor,_,_ in actors:
                 actor.GetProperty().SetOpacity(self._opacity)
 
     def key(self, obj, event):
