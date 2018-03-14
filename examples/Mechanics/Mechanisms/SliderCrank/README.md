@@ -5,9 +5,7 @@ This is an example of a simple multibody system shown on the figure below:
 
 ![image](slider_crank.*)
 
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Wj0ZMcESw-Y" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-
+[![A video fo this example](https://img.youtube.com/vi/Wj0ZMcESw-Y/0.jpg)](https://youtu.be/Wj0ZMcESw-Y)
 
 Model Definition
 ----------------
