@@ -322,7 +322,7 @@ class CFprov():
         self.cn_at_time = dict()
         self.cn = dict()
 
-        self.dom_at_time = dict()
+        self.dom_at_time = [dict(),None][dom_data is None]
         self.dom = dict()
 
         self._contact_field = dict()
@@ -357,6 +357,9 @@ class CFprov():
                             self._dom_data[dom_id_f,-1] == self._data[id_f[imu],-1]
                         )[0]
 
+                    if self._data[id_f[imu]].shape[0]==0:
+                        continue
+
                     self.cpa_at_time[mu] = self._data[
                         id_f[imu], 2:5]
                     self.cpb_at_time[mu] = self._data[
@@ -365,11 +368,6 @@ class CFprov():
                         id_f[imu], 8:11]
                     self.cf_at_time[mu] = self._data[
                         id_f[imu], 11:14]
-
-                    self.dom_at_time[mu] = None
-                    if dom_imu is not None:
-                        self.dom_at_time[mu] = self._dom_data[
-                            dom_id_f[imu], 1]
 
                     self.cpa[mu] = numpy_support.numpy_to_vtk(
                         self.cpa_at_time[mu])
@@ -387,18 +385,20 @@ class CFprov():
                         self.cf_at_time[mu])
                     self.cf[mu].SetName('contactForces')
 
-                    if self.dom_at_time[mu] is not None:
-                        self.dom[mu] = numpy_support.numpy_to_vtk(
-                            self.dom_at_time[mu])
-                        self.dom[mu].SetName('domains')
-
                     self._contact_field[mu].AddArray(self.cpa[mu])
                     self._contact_field[mu].AddArray(self.cpb[mu])
                     self._contact_field[mu].AddArray(self.cn[mu])
                     self._contact_field[mu].AddArray(self.cf[mu])
-                    if self.dom[mu] is not None:
+
+                    if dom_imu is not None:
+                        self.dom_at_time[mu] = self._dom_data[
+                            dom_id_f[imu], 1]
+                        self.dom[mu] = numpy_support.numpy_to_vtk(
+                            self.dom_at_time[mu])
+                        self.dom[mu].SetName('domains')
                         self._contact_field[mu].AddArray(self.dom[mu])
-                except:
+
+                except KeyError:
                     pass
 
         else:
