@@ -35,5 +35,5 @@ or directly
 
 The simulation results can also be viewed from the hdf5 file :
 
-siconos_vview siconos_mechanisms.hdf5
+    siconos_vview siconos_mechanisms.hdf5
 

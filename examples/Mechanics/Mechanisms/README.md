@@ -1,16 +1,15 @@
-Slider Crank
-============
+Siconos mechanisms examples
+---------------------------
 
-This is an example of a simple multibody system shown in the video below:
+[![A video of a circuit breaker simulation](https://img.youtube.com/vi/BvPUsuGX2jo/0.jpg)](https://youtu.be/BvPUsuGX2jo)
 
-[![A video fo this example](https://img.youtube.com/vi/hsqYWCo0Fu4/0.jpg)](https://youtu.be/hsqYWCo0Fu4W)
+
+This directory contains some tests ot the mechanisms toolbox using  CAD files and OpenCascade.
 
 Model Definition
 ----------------
 
-The model is defined in bodydef.py. The example is based on CAD files located in ./CAD and use OpenCascade. (version 0.16 or 0.18).
-
-The option WITH\_CLEARANCE\_ON\_RODE can be set to 1 to add clearance between the rods 1 and 2.
+The multibody system is defined in bodydef.py.
 
 The general options of the siconos_mechanisms toolbox can be overwritten in the file `mbtbLocalOptions.py`
 
@@ -36,4 +35,3 @@ or directly
 The simulation results can also be viewed from the hdf5 file :
 
     siconos_vview siconos_mechanisms.hdf5
-

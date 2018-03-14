@@ -3,9 +3,9 @@ Slider Crank
 
 This is an example of a simple multibody system shown in the video below:
 
-[![A video fo this example](https://img.youtube.com/vi/BvPUsuGX2jo/0.jpg)](https://youtu.be/BvPUsuGX2jo)
+[![A video of this example](https://img.youtube.com/vi/BvPUsuGX2jo/0.jpg)](https://youtu.be/BvPUsuGX2jo)
 
-https://youtu.be/BvPUsuGX2jo
+
 Model Definition
 ----------------
 
@@ -36,5 +36,5 @@ or directly
 
 The simulation results can also be viewed from the hdf5 file :
 
-siconos_vview siconos_mechanisms.hdf5
+    siconos_vview siconos_mechanisms.hdf5
 
