@@ -1907,6 +1907,7 @@ class VView(object):
                 self.renderer.AddActor(self.sactorb[mu])
 
         self.setup_initial_position()
+        self.renderer.ResetCamera()
 
     def initialize_gui(self):
 
