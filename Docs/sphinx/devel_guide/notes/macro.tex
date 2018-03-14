@@ -1,0 +1,286 @@
+%$Id: macro.tex,v 1.10 2004/12/08 13:38:58 acary Exp $
+
+
+%\usepackage{a4wide}
+\textheight 25cm
+\textwidth 16.5cm
+\topmargin -1cm
+%\evensidemargin 0cm
+\oddsidemargin 0cm
+\evensidemargin0cm
+\usepackage{layout}
+
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{minitoc}
+%\usepackage{glosstex}
+\usepackage{colortbl}
+\usepackage{hhline}
+\usepackage{longtable}
+
+%\usepackage{glosstex}
+%\def\glossaryname{Glossary of Notation}
+\def\listacronymname{Acronyms}
+
+\usepackage[outerbars]{changebar}\setcounter{changebargrey}{20}
+%\glxitemorderdefault{acr}{l}
+
+%\usepackage{color}
+\usepackage{graphicx,epsfig}
+\graphicspath{{./Figures/}}
+\usepackage[T1]{fontenc}
+\usepackage{rotating}
+
+%\usepackage{algorithmic}
+%\usepackage{algorithm}
+\usepackage{ntheorem}
+\usepackage{natbib}
+
+
+%\renewcommand{\baselinestretch}{2.0}
+\setcounter{tocdepth}{2}     % Dans la table des matieres
+\setcounter{secnumdepth}{3}  % Avec un numero.
+
+
+
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+\newtheorem{example}{Example}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{corollary}{Corollary}
+\newtheorem{OP}{OP}
+\newtheorem{problem}{Problem}
+\newtheorem{theorem}{Theorem}
+
+
+\newcommand{\CC}{\mbox{\rm $~\vrule height6.6pt width0.5pt depth0.25pt\!\!$C}}
+\newcommand{\ZZ}{\mbox{\rm \lower0.3pt\hbox{$\angle\!\!\!$}Z}}
+\newcommand{\RR}{\mbox{\rm $I\!\!R$}}
+\newcommand{\HH}{\mbox{\rm $I\!\!H$}}
+\newcommand{\NN}{\mbox{\rm $I\!\!N$}}
+
+\newcommand{\Mnn}{\mathcal M^{n\times n}}
+\newcommand{\Mnp}[2]{\ensuremath{\mathcal M^{#1\times #2}}}
+
+
+
+\newcommand{\Frac}[2]{\displaystyle \frac{#1}{#2}}
+
+\newcommand{\DP}[2]{\displaystyle \frac{\partial {#1}}{\partial {#2}}}
+
+% c++ variables writting
+\newcommand{\varcpp}[1]{\textit{#1}}
+% itemize
+\newcommand{\bei}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
+
+\newcommand{\ie}{i.e.}
+\newcommand{\eg}{e.g.}
+\newcommand{\cf}{c.f.}
+\newcommand{\putidx}[1]{\index{#1}\textit{#1}}
+
+\def\Er{{\rm I\! R}}
+\def\En{{\rm I\! N}} 
+\def\Ec{{\rm I\! C}}
+ 
+\def\zc{\hat{z}}
+\def\wc{\hat{w}}
+
+\font\tete=cmr8 at 8 pt
+
+
+% normal tangent
+\def\n{{\hbox{\tiny{N}}}}
+\def\t{{\hbox{\tiny{T}}}}
+\def\nt{\hbox{\tiny{NT}}}
+\def\nsf{\hbox{\tiny{\textsf N}}}
+\def\tsf{\hbox{\tiny{\textsf T}}}
+\def\sigman{\sigma_{\n}}
+\def\sigmat{\sigma_{\t}}
+\def\sigmant{\sigma_{\nt}}
+\def\epsn{\epsilon_{\n}}
+\def\epst{\epsilon_{\t}}
+\def\epsnt{\epsilon_{\nt}}
+\def\eps{\epsilon}
+\def\veps{\varepsilon}
+\def\sig{\sigma}
+\def\Rn{R_{\n}}
+\def\Rt{R_{\t}}
+\def\cn{c_{\n}}
+\def\Cn{C_{\n}}
+\def\ct{c_{\t}}
+\def\Ct{C_{\t}}
+\def\un{u_{\n}}
+\def\ut{\buu_{\t}}
+\def\uut{u_{\t}}
+\def\unc{u_{\n}^c}
+\def\utc{\buu_{\t}^c}
+\def\vn{v_{\n}}
+\def\vt{v_{\t}}
+\def\rr{\hbox{\tiny{\textsf R}}}
+\def\irr{\hbox{\tiny{\textsf{IR}}}}
+\def\rn{r_{\n}}
+\def\rt{\brr_{\t}}
+\def\rnc{r_{\n}^c}
+\def\rtc{\brr_{\t}^c}
+\def\trn{\Tilde{r}_{\n}}
+\def\trt{\Tilde{\brr}_{\t}}
+\def\tr{\Tilde{\brr}}
+\def\tv{\Tilde{\bvv}}
+\def\vn{v_{\n}}
+\def\vt{\bvv_{\t}}
+\def\adh{\mathsf{adh}}
+\def\adj{\hbox{\tiny{\textsf{adj}}}}
+\def\adjc{\hbox{\tiny{\textsf{adjC}}}}
+\def\adja{\hbox{\tiny{\textsf{adjA}}}}
+\def\cc{\hbox{\tiny{\textsf C}}}
+\def\ca{\hbox{\tiny{\textsf A}}}
+
+\DeclareMathOperator{\proj}{proj}
+\DeclareMathOperator{\expm}{expm}
+\DeclareMathOperator{\dexp}{dexp}
+\DeclareMathOperator{\dlexp}{d^l exp}
+\DeclareMathOperator{\drexp}{d^r exp}
+\DeclareMathOperator{\dexpm}{dexpm}
+\DeclareMathOperator{\expq}{expq}
+\DeclareMathOperator{\dexpq}{dexpq}
+\DeclareMathOperator{\Ad}{Ad}
+\DeclareMathOperator{\ad}{ad}
+\DeclareMathOperator{\dd}{d}
+
+
+
+%%  Les ensembles de nombres  C. Fiorio (fiorioÊatÊmath.tu-berlin.de) 
+%
+\def\nbR{\ensuremath{\mathrm{I\!R}}} % IR
+\def\nbN{\ensuremath{\mathrm{I\!N}}} % IN
+\def\nbF{\ensuremath{\mathrm{I\!F}}} % IF
+\def\nbH{\ensuremath{\mathrm{I\!H}}} % IH
+\def\nbK{\ensuremath{\mathrm{I\!K}}} % IK
+\def\nbL{\ensuremath{\mathrm{I\!L}}} % IL
+\def\nbM{\ensuremath{\mathrm{I\!M}}} % IM
+\def\nbP{\ensuremath{\mathrm{I\!P}}} % IP
+
+%----------------------------------------------------------------------
+%                  Modification des subsubsections
+%----------------------------------------------------------------------
+\makeatletter
+\renewcommand\thesubsubsection{\thesubsection.\@alph\c@subsubsection}
+\makeatother
+
+%----------------------------------------------------------------------
+%             Redaction note environnement
+%----------------------------------------------------------------------
+\makeatletter
+\theoremheaderfont{\scshape}
+\theoremstyle{marginbreak}
+\theorembodyfont{\upshape}
+%\newtheorem{rque}{\bf Remarque}[chapter]
+%\newtheorem{rque1}{\bf \fsc{Remarque}}[chapter] !!! \fsc est une commande french
+\newtheorem{ndr1}{\textbf{\textsc{Redaction note}}}[section]
+
+\newenvironment{ndr}%
+{%
+\tt
+%\centerline{---oOo---}
+\noindent\begin{ndr1}%
+}%
+{%
+\begin{flushright}%
+%\vspace{-1.5em}\ding{111}
+\end{flushright}%
+\end{ndr1}%
+%\centerline{---oOo---}
+}
+
+\makeatother
+
+%----------------------------------------------------------------------
+%             Redaction note environnement V.ACARY
+%----------------------------------------------------------------------
+\makeatletter
+\theoremheaderfont{\scshape}
+\theoremstyle{marginbreak}
+\theorembodyfont{\upshape}
+%\newtheorem{rque}{\bf Remarque}[chapter]
+%\newtheorem{rque1}{\bf \fsc{Remarque}}[chapter] !!! \fsc est une commande french
+\newtheorem{ndr1va}{\textbf{\textsc{Redaction note V. ACARY}}}[section]
+
+\newenvironment{ndrva}%
+{%
+\tt
+%\centerline{---oOo---}
+\noindent\begin{ndr1va}%
+}%
+{%
+\begin{flushright}%
+%\vspace{-1.5em}\ding{111}
+\end{flushright}%
+\end{ndr1va}%
+%\centerline{---oOo---}
+}
+
+\makeatother
+%----------------------------------------------------------------------
+%             Redaction note environnement V.ACARY
+%----------------------------------------------------------------------
+\makeatletter
+\theoremheaderfont{\scshape}
+\theoremstyle{marginbreak}
+\theorembodyfont{\upshape}
+%\newtheorem{rque}{\bf Remarque}[chapter]
+%\newtheorem{rque1}{\bf \fsc{Remarque}}[chapter] !!! \fsc est une commande french
+\newtheorem{ndr1fp}{\textbf{\textsc{Redaction note F. PERIGNON}}}[section]
+
+\newenvironment{ndrfp}%
+{%
+\tt
+%\centerline{---oOo---}
+\noindent\begin{ndr1fp}%
+}%
+{%
+\begin{flushright}%
+%\vspace{-1.5em}\ding{111}
+\end{flushright}%
+\end{ndr1fp}%
+%\centerline{---oOo---}
+}
+
+\makeatother
+%----------------------------------------------------------------------
+%                  Chapter head enviroment
+%----------------------------------------------------------------------
+\newenvironment{chapter_head}
+{%
+\begin{center}%
+-------------------- oOo --------------------\\%
+\ \\%
+\begin{minipage}[]{14cm}%
+\noindent\normalsize\advance\baselineskip-1pt %
+}%
+{%
+\par\end{minipage}%
+\ \\%
+\ \\%
+-------------------- oOo --------------------
+\end{center}%
+\vspace*{\stretch{1}}%
+\clearpage%
+\thispagestyle{empty}%
+\vspace*{\stretch{1}}%
+\minitoc%
+\vspace*{\stretch{2}}%
+\clearpage%
+}
+
+
+\newcommand{\contract}{{\,:\,}}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "report"
+%%% End: 
