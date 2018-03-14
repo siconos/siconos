@@ -3,8 +3,9 @@ Slider Crank
 
 This is an example of a simple multibody system shown in the video below:
 
-[![A video fo this example](https://img.youtube.com/vi/Wj0ZMcESw-Y/0.jpg)](https://youtu.be/Wj0ZMcESw-Y)
+[![A video fo this example](https://img.youtube.com/vi/BvPUsuGX2jo/0.jpg)](https://youtu.be/BvPUsuGX2jo)
 
+https://youtu.be/BvPUsuGX2jo
 Model Definition
 ----------------
 
