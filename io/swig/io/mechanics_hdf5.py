@@ -558,7 +558,7 @@ class MechanicsHdf5(object):
                                      use_compression = self._use_compression)
         self._dynamic_data = data(self._data, 'dynamic', 9,
                                   use_compression = self._use_compression)
-        self._cf_data = data(self._data, 'cf', 15,
+        self._cf_data = data(self._data, 'cf', 26,
                              use_compression = self._use_compression)
         if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
