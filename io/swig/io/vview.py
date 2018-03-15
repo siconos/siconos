@@ -1479,7 +1479,7 @@ class VView(object):
                 actor.VisibilityOff()
 
     def set_dynamic_actors_visibility(self, time):
-        self.set_visibility_v(self.dynamic_actors.keys(), time)
+        self.set_visibility_v(list(self.dynamic_actors.keys()), time)
 
     # callback maker for scale manipulation
     def make_scale_observer(self, glyphs):
