@@ -357,9 +357,6 @@ class CFprov():
                             self._dom_data[dom_id_f,-1] == self._data[id_f[imu],-1]
                         )[0]
 
-                    if self._data[id_f[imu]].shape[0]==0:
-                        continue
-
                     self.cpa_at_time[mu] = self._data[
                         id_f[imu], 2:5]
                     self.cpb_at_time[mu] = self._data[
