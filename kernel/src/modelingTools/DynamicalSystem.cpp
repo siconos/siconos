@@ -120,6 +120,7 @@ SP::SiconosVector DynamicalSystem::x(unsigned int level) const
   if (level > _order)
   {
     RuntimeException::selfThrow("Dynamical::x x("+std::to_string(level)+") is not allocated\n"
+
                                 "Hint: Construct a Dyncamical System with a greater order if you need it. \n");
   }
   return _x[level];

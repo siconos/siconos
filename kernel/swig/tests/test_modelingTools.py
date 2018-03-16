@@ -372,7 +372,9 @@ def test_newton_interaction_interface_order1():
     ds = create_newton_euler_order1()
     print('----- ')
 
+
     nslaw = K.NewtonImpactNSL(e)
+
 
     relation  = K.NewtonEulerR()
     relation.setJachq(H)
@@ -388,6 +390,7 @@ def test_newton_interaction_interface_order1():
     # add the dynamical system to the non smooth dynamical system
     nsds.insertDynamicalSystem(ds)
 
+
     # link the interaction and the dynamical system
     nsds.link(inter, ds)
 
@@ -395,8 +398,10 @@ def test_newton_interaction_interface_order1():
     ds.q()
     ds.twist()
 
+
     # test interface
     inter.computeOutput(t0,0)
+
 
     inter.computeInput(t0,1)
 

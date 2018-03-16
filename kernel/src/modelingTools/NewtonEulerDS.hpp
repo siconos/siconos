@@ -515,6 +515,9 @@ public:
   {
     return _twist0;
   }
+  
+  SP::SiconosVector acceleration() const;
+
 
   SP::SiconosVector acceleration() const;
 

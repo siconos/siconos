@@ -543,6 +543,7 @@ SP::SiconosVector NewtonEulerDS::acceleration() const
   if (_order < 2)
   {
     RuntimeException::selfThrow("NewtonEuler::acceleration acceleration is not allocated (_order < 2)\n"
+
                                 "Hint:Construct a NewtonEuler with order >=2 if you need it. see or instance :\n"
                                 "      NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,\n"
                                 "                                   double  mass, SP::SiconosMatrix inertialMatrix,\n"

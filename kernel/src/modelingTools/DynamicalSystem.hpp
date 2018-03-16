@@ -317,6 +317,15 @@ public:
   {
     return _r;
   }
+  
+  /** returns a pointer to r vector (input due to nonsmooth behavior)
+   *  \return SP::SiconosVector
+   */
+  inline SP::SiconosVector r(unsigned int level) const
+  {
+    // if needed _r must be a vector of Vectors in the future
+    return _r;
+  }
 
   /** returns a pointer to r vector (input due to nonsmooth behavior)
    *  \return SP::SiconosVector
