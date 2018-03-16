@@ -277,15 +277,12 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
   interProp.workBlockVectors.reset(new VectorOfBlockVectors);
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
   workBlockV.resize(LsodarOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
 
   workV.resize(LsodarOSI::WORK_INTERACTION_LENGTH);

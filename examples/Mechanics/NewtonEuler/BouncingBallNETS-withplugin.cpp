@@ -304,12 +304,14 @@ int main(int argc, char* argv[])
     // Comparison with a reference file
 #ifdef WITH_PROJ
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallNETS-WITHPROJ.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "BouncingBallNETS-WITHPROJ.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
 #else
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallNETS-WITHPROJ.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "BouncingBallNETS-WITHPROJ.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
 #endif

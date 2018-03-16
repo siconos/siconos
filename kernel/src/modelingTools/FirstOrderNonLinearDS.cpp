@@ -80,8 +80,6 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
     _f.reset(new SiconosVector(*(FONLDS.f())));
   if (FONLDS.jacobianfx())
     _jacobianfx.reset(new SimpleMatrix(*(FONLDS.jacobianfx())));
-  if (FONLDS.b())
-    _b.reset(new SiconosVector(*(FONLDS.b())));
   if (FONLDS.getPluginF())
     _pluginf.reset(new PluggedObject(*(FONLDS.getPluginF())));
   if (FONLDS.getPluginJacxf())
@@ -327,12 +325,4 @@ void FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level)
   // V.A. 28/05/2012:  for the moment various level are not used for First Order systems
   //assert(0);
   _r->zero();
-}
-
-void FirstOrderNonLinearDS::setb(const SiconosVector& b)
-{
-  if (_b)
-    *_b = b;
-  else
-    _b.reset(new SiconosVector(b));
 }

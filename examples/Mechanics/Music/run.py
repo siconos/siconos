@@ -90,7 +90,7 @@ guitar_model = Guitar(interactions,
                       fe)
 
 
-simu = guitar_model.simulation()
+simu = guitar_model.simu
 # sk.TimeStepping(time_discr, osi, osnspb)
 
 # # -- Model setup with dynamics, interaction and simulation --

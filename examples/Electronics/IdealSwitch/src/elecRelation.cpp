@@ -11,11 +11,6 @@ elecRelation::elecRelation():
 }
 
 
-void elecRelation::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  FirstOrderType2R::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-}
-
 
 double elecRelation::source(double t)
 {

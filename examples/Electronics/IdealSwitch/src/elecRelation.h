@@ -10,10 +10,6 @@ public:
   elecRelation();
   virtual ~elecRelation() {};
 
-
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-
-
   /** default function to compute h
    *  \param double : current time
    */

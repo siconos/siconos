@@ -6,9 +6,9 @@
 class OccSpaceFilter : public SpaceFilter
 {
 public:
-  OccSpaceFilter(SP::NonSmoothDynamicalSystem nsds) : SpaceFilter(nsds) {};
+  OccSpaceFilter() : SpaceFilter() {};
 
-  virtual void buildInteractions(double time) {};
+  virtual void updateInteractions(SP::Simulation) {};
 
 };
 

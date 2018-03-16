@@ -22,10 +22,10 @@
 
 import matplotlib
 matplotlib.use('Agg')
-from matplotlib.pyplot import subplot, title, plot, grid, savefig
+from matplotlib.pyplot import subplot, title, plot, grid, savefig, figure
 from numpy import array, eye, empty, zeros, savetxt
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, RelayNSL, \
-NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
+NonSmoothDynamicalSystem, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
 Interaction, Relay
 from math import ceil
 
@@ -56,16 +56,14 @@ myNslaw.display()
 
 myProcessInteraction = Interaction(myNslaw,
         myProcessRelation)
-myNSDS = NonSmoothDynamicalSystem()
-myNSDS.insertDynamicalSystem(process)
-myNSDS.link(myProcessInteraction,process)
 
 
-filippov = Model(t0,T)
-filippov.setNonSmoothDynamicalSystemPtr(myNSDS)
+filippov = NonSmoothDynamicalSystem(t0,T)
+filippov.insertDynamicalSystem(process)
+filippov.link(myProcessInteraction,process)
 
 td = TimeDiscretisation(t0, h)
-s = TimeStepping(td)
+s = TimeStepping(filippov,td)
 
 myIntegrator = EulerMoreauOSI(theta)
 s.insertIntegrator(myIntegrator)
@@ -76,8 +74,6 @@ s.insertIntegrator(myIntegrator)
 
 osnspb = Relay()
 s.insertNonSmoothProblem(osnspb)
-filippov.setSimulation(s)
-filippov.initialize()
 
 # matrix to save data
 dataPlot = empty((N+1,4))
@@ -113,7 +109,7 @@ plot(dataPlot[:,0], dataPlot[:,3])
 title('lambda')
 grid()
 savefig("filipov1.png")
-
+figure()
 plot(dataPlot[:,1], dataPlot[:,2])
 grid()
 savefig("filipov2.png")

@@ -5,32 +5,22 @@
 
 #define DUMMY(X, Y) class X : public Y {}
 
-#undef PROPOSED_CLASSES
 #undef BULLET_CLASSES
 #undef OCC_CLASSES
 #undef MECHANISMS_CLASSES
 
-#define PROPOSED_CLASSES() \
-  REGISTER(BodyDS)
-
 #include <BodyDS.hpp>
 
 #define XBULLET_CLASSES() \
-  REGISTER(BulletDS)     \
-  REGISTER(BulletR) \
-  REGISTER(BulletSpaceFilter)
+  REGISTER(BulletR)
 
 #ifdef SICONOS_HAVE_BULLET
-#include <BulletDS.hpp>
 #include <BulletR.hpp>
-#include <BulletSpaceFilter.hpp>
 #else
 #include <NewtonEulerDS.hpp>
 #include <NewtonEulerFrom3DLocalFrameR.hpp>
 #include <SpaceFilter.hpp>
-DUMMY(BulletDS, NewtonEulerDS);
 DUMMY(BulletR, NewtonEulerFrom3DLocalFrameR);
-DUMMY(BulletSpaceFilter, SpaceFilter);
 #endif
 
 #define OCC_CLASSES() \
@@ -71,7 +61,7 @@ DUMMY(MBTB_ContactRelation, NewtonEulerFrom1DLocalFrameR);
   REGISTER(PivotJointR)                         \
   REGISTER(KneeJointR)                          \
   REGISTER(PrismaticJointR)                     \
-  PROPOSED_CLASSES()                            \
+  REGISTER(BodyDS)                              \
   OCC_CLASSES()                                 \
   XBULLET_CLASSES()                             \
   MECHANISMS_CLASSES()                          \
@@ -319,7 +309,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
     unsigned int current_row;
     result->resize(graph.vertices_number(), 14);
     for(current_row=0, std11::tie(vi,viend) = graph.vertices();
-        vi!=viend; ++vi, ++current_row)
+        vi!=viend; ++vi)
     {
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
@@ -334,8 +324,9 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       inspector.inter = graph.bundle(*vi);
       graph.bundle(*vi)->relation()->accept(inspector);
       const SiconosVector& data = inspector.answer;
-      if (data.size() == 14) result->setRow(current_row, data);
+      if (data.size() == 14) result->setRow(current_row++, data);
     }
+    result->resize(current_row, 14);
   }
   return result;
 }

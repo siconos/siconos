@@ -25,6 +25,7 @@
 #include "SiconosBlas.h"
 #include "AlartCurnierGenerated.h"
 #include "fc3d_GlockerFischerBurmeister_functions.h"
+#include "numerics_verbose.h"
 #include "op3x3.h"
 
 

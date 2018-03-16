@@ -182,14 +182,14 @@ public:
    * \param inter interaction that owns the relation
    * \param interProp
    */
-  void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+  void computeJach(double time, Interaction& inter);
 
   /* compute all the G Jacobian
    * \param time double, current time
    * \param inter interaction that owns the relation
    * \param interProp
    */
-  void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+  void computeJacg(double time, Interaction& inter)
   {
     ;
   }
@@ -217,8 +217,6 @@ public:
   virtual void computeInput(double time, Interaction& inter,
                     unsigned int level = 0);
 
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-  
   virtual void initialize(Interaction& inter);
   
   /** check sizes of the relation specific operators.

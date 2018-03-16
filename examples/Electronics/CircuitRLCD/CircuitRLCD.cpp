@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
     ioMatrix::write("CircuitRLCD.dat", "ascii", dataPlot, "noDim");
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "CircuitRLCD.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "CircuitRLCD.ref", eps)) >= 0.0
         && error > eps)
       return 1;
 

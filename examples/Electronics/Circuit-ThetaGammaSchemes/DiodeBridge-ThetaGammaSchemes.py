@@ -66,7 +66,7 @@ if (withPlot):
 
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            ComplementarityConditionNSL, Interaction,\
-                           Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
+                           NonSmoothDynamicalSystem, EulerMoreauOSI, TimeDiscretisation, LCP,  \
                            TimeStepping
 
 #
@@ -106,13 +106,14 @@ InterDiodeBridge = Interaction(nslaw, LTIRDiodeBridge)
 #
 # Model
 #
-DiodeBridge = Model(t0, T, Modeltitle)
+DiodeBridge = NonSmoothDynamicalSystem(t0, T)
+DiodeBridge.setTitle(Modeltitle)
 
 #   add the dynamical system in the non smooth dynamical system
-DiodeBridge.nonSmoothDynamicalSystem().insertDynamicalSystem(LSDiodeBridge)
+DiodeBridge.insertDynamicalSystem(LSDiodeBridge)
 
 #   link the interaction and the dynamical system
-DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
+DiodeBridge.link(InterDiodeBridge, LSDiodeBridge)
 
 #
 # Simulation
@@ -122,7 +123,7 @@ DiodeBridge.nonSmoothDynamicalSystem().link(InterDiodeBridge, LSDiodeBridge)
 theta = 0.5
 gamma = 0.5
 aOSI = EulerMoreauOSI(theta, gamma)
-#aOSI.setUseGammaForRelation(True)
+aOSI.setUseGammaForRelation(True)
 
 # (2) Time discretisation
 aTiDisc = TimeDiscretisation(t0, h_step)
@@ -131,17 +132,13 @@ aTiDisc = TimeDiscretisation(t0, h_step)
 aLCP = LCP()
 
 # (4) Simulation setup with (1) (2) (3)
-aTS = TimeStepping(aTiDisc, aOSI, aLCP)
+aTS = TimeStepping(DiodeBridge, aTiDisc, aOSI, aLCP)
 
 # end of model definition
 
 #
 # computation
 #
-
-# simulation initialization
-DiodeBridge.setSimulation(aTS)
-DiodeBridge.initialize()
 
 k = 0
 h = aTS.timeStep()

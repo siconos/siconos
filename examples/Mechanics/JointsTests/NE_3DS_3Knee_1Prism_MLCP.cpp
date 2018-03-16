@@ -430,7 +430,8 @@ int main(int argc, char* argv[])
     ioMatrix::write("NE_3DS_3Knee_1Prism_beam3.dat", "ascii", beam3Plot, "noDim");
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "NE_3DS_3Knee_1Prism_MLCP.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "NE_3DS_3Knee_1Prism_MLCP.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
 

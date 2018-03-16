@@ -13,7 +13,7 @@ public:
   virtual ~adjointInput() {};
 
 
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  virtual void initialize(Interaction& inter);
 
 
   /** default function to compute h

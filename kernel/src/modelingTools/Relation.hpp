@@ -204,14 +204,9 @@ public:
 
   /** initialize the relation (memory allocation of work vectors and matrices ...)
    * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV work vectors
-   * \param workM work matrices
    */
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
-  
   virtual void initialize(Interaction& inter) = 0;
-  
+
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
@@ -223,14 +218,14 @@ public:
    * \param inter the interaction using this relation
    * \param interProp
    */
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) = 0;
+  virtual void computeJach(double time, Interaction& inter) = 0;
 
   /* compute all the G Jacobian
    * \param time the current time
    * \param inter the interaction using this relation
    * \param interProp
    */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) = 0;
+  virtual void computeJacg(double time, Interaction& inter) = 0;
 
 
   /** default function to compute y
@@ -328,14 +323,7 @@ public:
   {
     return _plugine;
   };
-  /** visitors hook
-   *  \param inter  interaction
-   *  \param interProp
-   */
-  virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)
-  {
-    ;
-  };
+
   VIRTUAL_ACCEPT_VISITORS(Relation);
 
 };

@@ -8,9 +8,8 @@
 
 #
 
-
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 from siconos import numerics
 
 # for osi specification:
@@ -26,9 +25,8 @@ from OCC.BRepGProp import brepgprop_VolumeProperties
 from math import pi
 
 # original implementation with occ backend
-import siconos.io.mechanics_io
-siconos.io.mechanics_io.set_implementation('original')
-siconos.io.mechanics_io.set_backend('occ')
+import siconos.io.mechanics_run
+siconos.io.mechanics_run.set_backend('occ')
 
 # ball shape
 ball = BRepPrimAPI_MakeSphere(.15).Shape()
@@ -76,138 +74,132 @@ print 'bowl center of mass:', (bowl_com.Coord(1),
 print 'bowl moment of inertia:', (bowl_I1, bowl_I2, bowl_I3)
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
-    io.addOccShape('Contact', bowl)
+    io.add_occ_shape('Contact', bowl)
 
-    io.addOccShape('Ground', ground)
+    io.add_occ_shape('Ground', ground)
 
-    io.addOccShape('Ball', ball)
+    io.add_occ_shape('Ball', ball)
 
-    io.addObject('bowl',
-                 [Contactor('Contact',
-                            contact_type='Face',
-                            contact_index=0,
-                            ),
-                  Contactor('Contact',
-                            contact_type='Face',
-                            contact_index=3,
-                            ),
-                  Contactor('Contact',
-                            contact_type='Edge',
-                            contact_index=0,
-                            )],
-                 mass=bowl_mass,
+    io.add_object('bowl',
+                  [Contactor('Contact',
+                             contact_type='Face',
+                             contact_index=0,
+                  ),
+                   Contactor('Contact',
+                             contact_type='Face',
+                             contact_index=3,
+                   ),
+                   Contactor('Contact',
+                             contact_type='Edge',
+                             contact_index=0,
+                   )],
+                  mass=bowl_mass,
 
-                 orientation=([1, 0, 0], -pi / 2),
-                 translation=[0, 0, 2],
-                 velocity=[0, 0, 0, 0, 2, 0],
-                 center_of_mass=[bowl_com.Coord(1),
-                                 bowl_com.Coord(2),
-                                 bowl_com.Coord(3)],
-                 inertia=[bowl_I1, bowl_I2, bowl_I3])
+                  orientation=([1, 0, 0], -pi / 2),
+                  translation=[0, 0, 2],
+                  velocity=[0, 0, 0, 0, 2, 0],
+                  center_of_mass=[bowl_com.Coord(1),
+                                  bowl_com.Coord(2),
+                                  bowl_com.Coord(3)],
+                  inertia=[bowl_I1, bowl_I2, bowl_I3])
 
     #
     # balls
     #
 
-    io.addObject('ball1',
-                 [Contactor('Ball',
-                            instance_name='Ball1',
-                            contact_type='Face',
-                            contact_index=0)],
-                 translation=[0, .3, 2],
-                 mass=.1,
-                 inertia=[ball_I1, ball_I2, ball_I3])
+    io.add_object('ball1',
+                  [Contactor('Ball',
+                             instance_name='Ball1',
+                             contact_type='Face',
+                             contact_index=0)],
+                  translation=[0, .3, 2],
+                  mass=.1,
+                  inertia=[ball_I1, ball_I2, ball_I3])
 
-    io.addObject('ball2',
-                 [Contactor('Ball',
-                            instance_name='Ball2',
-                            contact_type='Face',
-                            contact_index=0)],
-                 translation=[0, 0, 2], mass=.1,
-                 inertia=[ball_I1, ball_I2, ball_I3])
+    io.add_object('ball2',
+                  [Contactor('Ball',
+                             instance_name='Ball2',
+                             contact_type='Face',
+                             contact_index=0)],
+                  translation=[0, 0, 2], mass=.1,
+                  inertia=[ball_I1, ball_I2, ball_I3])
 
-    io.addObject('ball3',
-                 [Contactor('Ball',
-                            instance_name='Ball3',
-                            contact_type='Face',
-                            contact_index=0)],
-                 translation=[0, -.3, 2],
-                 mass=.1,
-                 inertia=[ball_I1, ball_I2, ball_I3])
+    io.add_object('ball3',
+                  [Contactor('Ball',
+                             instance_name='Ball3',
+                             contact_type='Face',
+                             contact_index=0)],
+                  translation=[0, -.3, 2],
+                  mass=.1,
+                  inertia=[ball_I1, ball_I2, ball_I3])
 
     #
     # ground, static object (mass=0)
     #
 
-    io.addObject('ground',
-                 [Contactor('Ground',
-                            contact_type='Face',
-                            contact_index=5)],
-                 mass=0,
-                 translation=[0, 0, 0])
+    io.add_object('ground',
+                  [Contactor('Ground',
+                             contact_type='Face',
+                             contact_index=5)],
+                  mass=0,
+                  translation=[0, 0, 0])
 
     #
     # interactions, order ball -> bowl is important
     # ball -> ground if some balls are ejected
 
-    io.addInteraction('bowl-ground',
-                      'bowl', 'Contact-0',
-                      'ground', 'Ground-0',
-                      distance_calculator='cadmbtb',
-                      offset=0.01)
+    io.add_interaction('bowl-ground',
+                       'bowl', 'Contact-0',
+                       'ground', 'Ground-0',
+                       distance_calculator='cadmbtb',
+                       offset=0.01)
 
-    io.addInteraction('bowl-ball1',
-                      'ball1', 'Ball1',
-                      'bowl', 'Contact-1',
-                      distance_calculator='cadmbtb',
-                      offset=0.05)
+    io.add_interaction('bowl-ball1',
+                       'ball1', 'Ball1',
+                       'bowl', 'Contact-1',
+                       distance_calculator='cadmbtb',
+                       offset=0.05)
 
-    io.addInteraction('bowl-ball2',
-                      'ball2', 'Ball2',
-                      'bowl', 'Contact-1',
-                      distance_calculator='cadmbtb',
-                      offset=0.05)
+    io.add_interaction('bowl-ball2',
+                       'ball2', 'Ball2',
+                       'bowl', 'Contact-1',
+                       distance_calculator='cadmbtb',
+                       offset=0.05)
 
-    io.addInteraction('bowl-ball3',
-                      'ball3', 'Ball3',
-                      'bowl', 'Contact-1',
-                      distance_calculator='cadmbtb',
-                      offset=0.05)
+    io.add_interaction('bowl-ball3',
+                       'ball3', 'Ball3',
+                       'bowl', 'Contact-1',
+                       distance_calculator='cadmbtb',
+                       offset=0.05)
 
-    io.addInteraction('ball1-ball2',
-                      'ball1', 'Ball1',
-                      'ball2', 'Ball2',
-                      distance_calculator='cadmbtb',
-                      offset=0.05)
+    io.add_interaction('ball1-ball2',
+                       'ball1', 'Ball1',
+                       'ball2', 'Ball2',
+                       distance_calculator='cadmbtb',
+                       offset=0.05)
 
-    io.addInteraction('ball1-ball3',
-                      'ball1', 'Ball1',
-                      'ball3', 'Ball3',
-                      distance_calculator='cadmbtb',
-                      offset=0.05)
+    io.add_interaction('ball1-ball3',
+                       'ball1', 'Ball1',
+                       'ball3', 'Ball3',
+                       distance_calculator='cadmbtb',
+                       offset=0.05)
 
-    io.addInteraction('ball2-ball3',
-                      'ball2', 'Ball2',
-                      'ball3', 'Ball3',
-                      distance_calculator='cadmbtb',
-                      offset=0.05)
+    io.add_interaction('ball2-ball3',
+                       'ball2', 'Ball2',
+                       'ball3', 'Ball3',
+                       distance_calculator='cadmbtb',
+                       offset=0.05)
 
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3, e=0.)
+    io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.)
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     io.run(with_timer=False,
-           time_stepping=None,
-           space_filter=None,
-           body_class=None,
-           shape_class=None,
-           face_class=None,
-           edge_class=None,
            gravity_scale=1,
            t0=0,
            T=10,

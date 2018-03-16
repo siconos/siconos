@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
     // Write the results into the file "ObserverLCS.dat"
     ioMatrix::write("SingleDSObserverLCS.dat", "ascii", dataPlot, "noDim");
     double error=0.0, eps=1e-10;
-    if (ioMatrix::compareRefFile(dataPlot, "SingleDSObserverLCS.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "SingleDSObserverLCS.ref", eps))>=0.0
         && error > eps)
       return 1;
 

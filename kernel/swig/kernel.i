@@ -29,9 +29,11 @@
 #ifdef WITH_SERIALIZATION
 %{
 #define KERNEL_ONLY
-#include <SiconosFull.hpp>
 %}
 #endif
+
+%include serialization.i
+
 %include picklable.i
 
 %{

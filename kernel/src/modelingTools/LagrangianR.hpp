@@ -159,13 +159,7 @@ public:
 
   /** initialize components specific to derived classes.
    * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV work vectors
-   * \param workM work matrices
    */
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
-                                                VectorOfVectors& workV, VectorOfSMatrices& workM);
-
   virtual void initialize(Interaction& inter) {};
   
   /** check sizes of the relation specific operators.
@@ -178,13 +172,13 @@ public:
    * \param inter
    * \param interProp
    */
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) = 0 ;
+  virtual void computeJach(double time, Interaction& inter) = 0 ;
   /* compute all the G Jacobian
    * \param time
    * \param inter
    * \param interProp
    */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) = 0 ;
+  virtual void computeJacg(double time, Interaction& inter) = 0 ;
 
   /** to compute output
    * \param time current time

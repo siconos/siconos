@@ -1,11 +1,17 @@
 #!/usr/bin/env python
 
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
+
+import os.path
+
+if not os.path.isfile('cube_scene.hdf5'):
+    print('The scene cube_scene.hdf5 is not created')
+    exec(open("./cube_scene.py").read())
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+',io_filename='cube_scene.hdf5') as io:
+with MechanicsHdf5Runner(mode='r+', io_filename='cube_scene.hdf5') as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.

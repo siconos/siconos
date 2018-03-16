@@ -173,13 +173,15 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
   {
     if(indexSet1->size() >0)
     {
+
+      //_simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet1);
       InteractionsGraph::VIterator ui, uiend;
       SP::Interaction inter;
       for(std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
       {
         inter = indexSet1->bundle(*ui);
-        inter->relation()->computeJach(t, *inter, indexSet1->properties(*ui));
-        inter->relation()->computeJacg(told, *inter, indexSet1->properties(*ui));
+        inter->relation()->computeJach(t, *inter);
+        inter->relation()->computeJacg(told, *inter);
       }
 
       if(_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged())
@@ -579,14 +581,9 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
       // _simulation->updateIndexSets();
       DEBUG_PRINT("We compute lambda^-_{k+1} \n");
       DEBUG_PRINTF("indexSet1->size() = %i\n",(int)indexSet1->size());
-      InteractionsGraph::VIterator ui, uiend;
-      SP::Interaction inter;
-      for(std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
-      {
-        inter = indexSet1->bundle(*ui);
-        inter->relation()->computeJach(t, *inter, indexSet1->properties(*ui));
-        inter->relation()->computeJacg(t, *inter, indexSet1->properties(*ui));
-      }
+
+      _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(t, *indexSet1);
+
       if(_simulation->nonSmoothDynamicalSystem()->topology()->hasChanged())
       {
         for(OSNSIterator itOsns = allOSNS->begin(); itOsns != allOSNS->end(); ++itOsns)

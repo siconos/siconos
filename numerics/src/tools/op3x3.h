@@ -31,8 +31,21 @@
 #define M_PI_2      1.57079632679489661923132169163975144   /* pi/2           */
 #endif
 
-#include "numerics_verbose.h"
-#include "SiconosCompat.h"
+#ifndef MAYBE_UNUSED
+#ifdef __GNUC__
+#define MAYBE_UNUSED __attribute__((unused))
+#else
+#define MAYBE_UNUSED
+#endif
+#endif
+
+#ifndef WARN_RESULT_IGNORED
+#ifdef __GNUC__
+#define WARN_RESULT_IGNORED __attribute__ ((warn_unused_result))
+#else
+#define WARN_RESULT_IGNORED
+#endif
+#endif
 
 #ifdef __cplusplus
 #undef restrict

@@ -20,12 +20,12 @@
 #
 
 from siconos.kernel import NewtonEulerDS, NewtonImpactNSL,\
-     NewtonEulerR, NewtonEulerFrom1DLocalFrameR, Interaction, Model,\
+     NewtonEulerR, NewtonEulerFrom1DLocalFrameR, Interaction,\
      MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping,\
      changeFrameAbsToBody,changeFrameBodyToAbs,\
      rotationVectorFromQuaternion, quaternionFromRotationVector,\
      rotateAbsToBody,\
-     SiconosVector
+     SiconosVector, NonSmoothDynamicalSystem
 
 
 import numpy as np
@@ -54,7 +54,7 @@ class UnstableRotation(NewtonEulerDS):
 
     def computeMExt(self, time, mExt=None):
         td = 2.0 - h
-        if mExt==None :
+        if mExt is None :
             mExt = self._mExt
 
         if isinstance(mExt,SiconosVector):
@@ -110,7 +110,7 @@ class HeavyTop(NewtonEulerDS):
         return r
         
     def computeMInt(self, time, q, v, mInt=None):
-        if mInt==None :
+        if mInt is None :
             mInt = self._mInt
         if isinstance(mInt,SiconosVector):
             r = self.centermass(q)
@@ -130,7 +130,7 @@ class HeavyTop(NewtonEulerDS):
             mInt[0] = m_sv.getValue(0) 
             mInt[1] = m_sv.getValue(1) 
             mInt[2] = m_sv.getValue(2) 
-            print "mInt", mInt
+            print("mInt", mInt)
 
 
 
@@ -164,12 +164,12 @@ ds.display()
 # raw_input()
 
 
-# Model
+# Non-Smooth Dynamical System
 #
-model = Model(t0, T)
+nsds = NonSmoothDynamicalSystem(t0, T)
 
 # add the dynamical system to the non smooth dynamical system
-model.nonSmoothDynamicalSystem().insertDynamicalSystem(ds)
+nsds.insertDynamicalSystem(ds)
 
 #
 # Simulation
@@ -185,20 +185,16 @@ t = TimeDiscretisation(t0, h)
 osnspb = LCP()
 
 # (4) Simulation setup with (1) (2) (3)
-s = TimeStepping(t)
+s = TimeStepping(nsds, t, OSI, osnspb)
 #s.setDisplayNewtonConvergence(True)
 s.setNewtonTolerance(1e-10)
 #s.setNewtonMaxIteration(1)
-s.insertIntegrator(OSI)
-s.insertNonSmoothProblem(osnspb)
-model.setSimulation(s)
+
 # end of model definition
 
 #
 # computation
 #
-# simulation initialization
-model.initialize()
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot

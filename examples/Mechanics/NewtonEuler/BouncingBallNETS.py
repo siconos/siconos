@@ -20,12 +20,14 @@
 #
 
 from siconos.kernel import NewtonEulerDS, NewtonImpactNSL,\
-     NewtonEulerR, NewtonEulerFrom1DLocalFrameR, Interaction, Model,\
-     MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping
+     NewtonEulerR, NewtonEulerFrom1DLocalFrameR, Interaction,\
+     MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping,\
+     NonSmoothDynamicalSystem, compareRefFile,\
+     SiconosVector
 
-from numpy import eye, empty, linalg, savetxt
+from numpy import eye, empty, linalg, savetxt, array
 
-import math
+import math, os
 
 
 class BouncingBallR(NewtonEulerFrom1DLocalFrameR):
@@ -35,26 +37,23 @@ class BouncingBallR(NewtonEulerFrom1DLocalFrameR):
         NewtonEulerFrom1DLocalFrameR.__init__(self)
         super(BouncingBallR, self).__init__()
 
-    def computeOutput(self, time, interaction, interProp, derivativeNumber):
-
-        #print(interProp.DSlink)
-        if derivativeNumber == 0:
-            self.computeh(interProp.DSlink[NewtonEulerR.q0], interaction.y(0))
-        else:
-            super(BouncingBallR, self).computeOutput(t, inter, interProp, derivativeNumber);
-
-    def computeh(self, q, y):
-        height = q[0] - self._ballRadius
-
+    def computeh(self, time, q, y):
+        print(q)
+        
+        vec_q=SiconosVector(q)
+        
+      
+        height = vec_q[0] - self._ballRadius
+        
         y[0] = height
 
         nnc = [1,0,0]
         self.setnc(nnc)
 
-        ppc1 = [height, q[1], q[2]]
+        ppc1 = [height, vec_q[1], vec_q[2]]
         self.setpc1(ppc1)
 
-        ppc2 = [0.0, q[1], q[2]]
+        ppc2 = [0.0, vec_q[1], vec_q[2]]
         self.setpc2(ppc2)
 
 t0 = 0      # start time
@@ -93,13 +92,13 @@ inter = Interaction(nslaw, relation)
 #
 # Model
 #
-bouncingBall = Model(t0, T)
+bouncingBall = NonSmoothDynamicalSystem(t0, T)
 
 # add the dynamical system to the non smooth dynamical system
-bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
+bouncingBall.insertDynamicalSystem(ball)
 
 # link the interaction and the dynamical system
-bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
+bouncingBall.link(inter, ball)
 
 
 #
@@ -116,25 +115,20 @@ t = TimeDiscretisation(t0, h)
 osnspb = LCP()
 
 # (4) Simulation setup with (1) (2) (3)
-s = TimeStepping(t)
-s.insertIntegrator(OSI)
-s.insertNonSmoothProblem(osnspb)
-bouncingBall.setSimulation(s)
+s = TimeStepping(bouncingBall, t, OSI, osnspb)
+
 # end of model definition
 
 #
 # computation
 #
 
-# simulation initialization
-bouncingBall.initialize()
-
 # the number of time steps
-N = (T - t0) / h
+N = int((T - t0) // h)+1
 
 # Get the values to be plotted
 # ->saved in a matrix dataPlot
-dataPlot = empty((N, 16))
+dataPlot = empty((N+1, 16))
 
 #
 # numpy pointers on dense Siconos vectors
@@ -166,7 +160,7 @@ dataPlot[0, 15] = v[2]
 k = 1
 
 # time loop
-while(s.hasNextEvent() and k < 2000):
+while(s.hasNextEvent()):
     s.computeOneStep()
 
     dataPlot[k, 0] = s.nextTime()
@@ -189,18 +183,11 @@ while(s.hasNextEvent() and k < 2000):
     s.nextStep()
 
 savetxt("result-py.dat", dataPlot)
+
 #
 # comparison with the reference file
 #
-from siconos.kernel import SimpleMatrix, getMatrix
-
-ref = getMatrix(SimpleMatrix("resultNETS.ref"))
-err = linalg.norm(dataPlot - ref)
-print("error w.r.t reference file =", err)
-
-if (err > 1e-12):
-    print("Warning. The result is rather different from the reference file.")
-
+compareRefFile(dataPlot, "BouncingBallNETS.ref", 1e-12)
 
 #
 # plots

@@ -26,6 +26,22 @@
 #include "SiconosControl.hpp"
 using namespace std;
 
+class MyDS : public FirstOrderLinearDS
+{
+public:
+  MyDS(SP::SiconosVector x0, SP::SiconosMatrix A) : FirstOrderLinearDS(x0, A)
+  {
+    _b.reset(new SiconosVector(x0->size()));
+  };
+  void computeb(double time)
+  {
+    double t = sin(50 * time);
+    _b->setValue(0,t);
+    _b->setValue(1,-t);
+  };
+};
+
+
 // main program
 int main(int argc, char* argv[])
 {
@@ -70,8 +86,8 @@ int main(int argc, char* argv[])
   (*Brel)(1, 0) = 2;
 
   // Dynamical Systems
-  SP::FirstOrderLinearDS processDS(new FirstOrderLinearDS(x0, A));
-  processDS->setComputebFunction("RelayPlugin", "computeB");
+  SP::FirstOrderLinearDS processDS(new MyDS(x0, A));
+  //processDS->setComputebFunction("RelayPlugin", "computeB");
   // -------------
   // --- Model process ---
   // -------------

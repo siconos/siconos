@@ -121,37 +121,31 @@ void MoreauJeanGOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
+  if (!interProp.workVectors)
+  {
+    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors->resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
+  }
 
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-
-  interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
-  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
-
+  if (!interProp.workBlockVectors)
+  {
+    interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+    interProp.workBlockVectors->resize(MoreauJeanGOSI::BLOCK_WORK_LENGTH);
+  }
 
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
-  workBlockV.resize(MoreauJeanGOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-  
-  workV.resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
-  workV[MoreauJeanGOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+
+  if (!workV[MoreauJeanGOSI::OSNSP_RHS])
+    workV[MoreauJeanGOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
   // Initialize/allocate memory buffers in interaction.
   bool computeResidu = relation.requireResidu();
   inter.initializeMemory(computeResidu,_steps);
-
-  // if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
-  // {
-  //   RuntimeException::selfThrow("MoreauJeanGOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
-  // }
-
-
 
 
   /* allocate and set work vectors for the osi */
@@ -840,7 +834,10 @@ void MoreauJeanGOSI::prepareNewtonIteration(double time)
         computeT(d->q(),d->T());
       }
     }
-
+  }
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
 
 

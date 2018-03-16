@@ -341,7 +341,7 @@ int main(int argc, char* argv[])
     ioMatrix::write("BeadColum_LZBModel.dat", "ascii", dataPlot, "noDim");
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "BeadColum_LZBModel.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "BeadColum_LZBModel.ref", eps))>=0.0
         && error > eps)
       return 1;
   }

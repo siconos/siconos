@@ -230,8 +230,9 @@ int main(int argc, char* argv[])
 
     // Comparison with a reference file
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "DiodeBridgeCapFilter.ref", eps, error)
-        && error > eps)
+    if (
+      (error=ioMatrix::compareRefFile(dataPlot, "DiodeBridgeCapFilter.ref", eps)) >= 0.0
+      && error > eps)
       return 1;
   }
 

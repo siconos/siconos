@@ -156,7 +156,7 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
   inter.computeOutput(time,  0);
     
   // prepare the gradients
-  inter.relation()->computeJach(time, inter, interaction_properties);
+  inter.relation()->computeJach(time, inter);
   for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
   {
     inter.computeOutput(time, i);

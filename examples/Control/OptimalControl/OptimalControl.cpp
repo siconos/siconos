@@ -23,7 +23,6 @@ using namespace std;
 /************************************************************/
 /*main program*/
 
-static int sNSLawSize = 2;
 
 int main()
 {
@@ -108,18 +107,16 @@ int main()
   SimpleMatrix dataPlot(NBStep+10, outputSize);
 
   SP::SiconosVector z = aDS->x();
-  SP::SiconosVector lambdaOut = aI->lambda(0);
-  SP::SiconosVector yOut = aI->y(0);
 
   dataPlot(0, 0) = aM->t0(); // Initial time of the model
   dataPlot(0, 1) = (*z)(0);
   dataPlot(0, 2) = (*z)(1);
   dataPlot(0, 3) = (*z)(2);
   dataPlot(0, 4) = (*z)(3);
-  dataPlot(0, 5) = (*lambdaOut)(0);
-  dataPlot(0, 6) = (*lambdaOut)(1);
-  dataPlot(0, 7) = (*yOut)(0);
-  dataPlot(0, 8) = (*yOut)(1);
+  dataPlot(0, 5) = (*lambda)(0);
+  dataPlot(0, 6) = (*lambda)(1);
+  dataPlot(0, 7) = (*y)(0);
+  dataPlot(0, 8) = (*y)(1);
 
   // do simulation while events remains in the "future events" list of events manager.
   cout << " ==== Start of  simulation : " << NBStep << " steps====" << endl;
@@ -149,8 +146,8 @@ int main()
     dataPlot(k, 4) = (*x)(3);
     dataPlot(k, 5) = (*lambda)(0);
     dataPlot(k, 6) = (*lambda)(1);
-    dataPlot(k, 7) = (*yOut)(0);
-    dataPlot(k, 8) = (*yOut)(1);
+    dataPlot(k, 7) = (*y)(0);
+    dataPlot(k, 8) = (*y)(1);
     aS->nextStep();
 
 
@@ -163,8 +160,8 @@ int main()
   cout << "====> Output file writing ..." << endl;
   ioMatrix::write("OptimalControl.dat", "ascii", dataPlot, "noDim");
 
-  double error=0.0, eps=5e-11;
-  if (ioMatrix::compareRefFile(dataPlot, "OptimalControl.ref", eps, error)
+  double error=0.0, eps=1e-08;
+  if ((error=ioMatrix::compareRefFile(dataPlot, "OptimalControl.ref", eps)) >= 0.0
       && error > eps)
     return 1;
 

@@ -339,6 +339,7 @@ Interaction::Interaction(SP::NonSmoothLaw NSL,
 
   // Check levels and resize attributes (y, lambda ...) if needed.
   reset();
+
 }
 
 
@@ -914,7 +915,7 @@ void Interaction::computeInput(double time,  unsigned int level)
 
 
 
-void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const
+void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
   SP::SiconosMatrix originalMatrix;
   RELATION::TYPES relationType = relation()->getType();
@@ -926,7 +927,7 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
     if (CMat)
       originalMatrix = CMat;
     else if (relationSubType != LinearTIR)
-      originalMatrix = workM[FirstOrderR::mat_C];
+      originalMatrix = _relationMatrices[FirstOrderR::mat_C];
   }
   else if (relationType == Lagrangian)
   {
@@ -956,7 +957,7 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-SiconosMatrix& Interaction::getLeftInteractionBlock(VectorOfSMatrices& workM) const
+SiconosMatrix& Interaction::getLeftInteractionBlock() const
 {
   RELATION::TYPES relationType = relation()->getType();
   RELATION::SUBTYPES relationSubType = relation()->getSubType();
@@ -967,7 +968,7 @@ SiconosMatrix& Interaction::getLeftInteractionBlock(VectorOfSMatrices& workM) co
     if (CMat)
       return *CMat;
     else if (relationSubType != LinearTIR)
-      return *workM[FirstOrderR::mat_C];
+      return *_relationMatrices[FirstOrderR::mat_C];
   }
   else if (relationType == Lagrangian)
   {
@@ -984,7 +985,7 @@ SiconosMatrix& Interaction::getLeftInteractionBlock(VectorOfSMatrices& workM) co
     RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
   }
   // stupid compiler check
-  return *workM[FirstOrderR::mat_C];
+  return *_relationMatrices[FirstOrderR::mat_C];
 
 }
 void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
@@ -1024,7 +1025,7 @@ void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int 
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const
+void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
   SP::SiconosMatrix originalMatrix; // Complete matrix, Relation member.
   RELATION::TYPES relationType = relation()->getType();
@@ -1036,7 +1037,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
     if (BMat)
       originalMatrix = BMat;
     else if (relationSubType != LinearTIR)
-      originalMatrix = workM[FirstOrderR::mat_B];
+      originalMatrix = _relationMatrices[FirstOrderR::mat_B];
     else
        RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, FirstOrderLinearTIR relation but no B matrix found!");
   }
@@ -1065,7 +1066,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const
+void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) const
 {
   // !!! Warning: we suppose that D is interactionBlock diagonal, ie that
   // there is no coupling between Interaction through D !!!  Any
@@ -1082,7 +1083,7 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, V
     if (DMat)
       D = DMat;
     else if (relationSubType != LinearTIR)
-      D = workM[FirstOrderR::mat_D];
+      D = _relationMatrices[FirstOrderR::mat_D];
   }
   else if (relationType == Lagrangian)
   {
@@ -1116,15 +1117,3 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, V
   setBlock(D, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const
-{
-  RELATION::TYPES relationType = relation()->getType();
-
-  if ((relationType == FirstOrder) && (workM[FirstOrderR::mat_Khat]))
-  {
-    SP::SiconosMatrix K = std11::static_pointer_cast<FirstOrderR>(_relation)->K();
-    if (!K) K = workM[FirstOrderR::mat_K];
-    prod(*K, m, *workM[FirstOrderR::mat_Khat], true);
-    *workM[FirstOrderR::mat_Khat] *= h;
-  }
-}

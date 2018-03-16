@@ -216,9 +216,9 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
   // simulation type ...  left, right and extra depend on the relation
   // type and the non smooth law.
   relationType = inter->relation()->getType();
-  VectorOfSMatrices& workMInter = *indexSet->properties(vd).workMatrices;
 
-  inter->getExtraInteractionBlock(currentInteractionBlock, workMInter);
+
+  inter->getExtraInteractionBlock(currentInteractionBlock);
 
   unsigned int nslawSize = inter->nonSmoothLaw()->size();
   // loop over the DS connected to the interaction.
@@ -236,7 +236,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock.reset(new SimpleMatrix(nslawSize, sizeDS));
-    inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock, workMInter);
+    inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
     DEBUG_EXPR(leftInteractionBlock->display(););
     // Computing depends on relation type -> move this in Interaction method?
     if (relationType == FirstOrder)
@@ -244,7 +244,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 
       rightInteractionBlock.reset(new SimpleMatrix(sizeDS, nslawSize));
 
-      inter->getRightInteractionBlockForDS(pos, rightInteractionBlock, workMInter);
+      inter->getRightInteractionBlockForDS(pos, rightInteractionBlock);
 
       if (osiType == OSI::EULERMOREAUOSI)
       {
@@ -266,7 +266,11 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         // centralInteractionBlock * X = rightInteractionBlock with PLU
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
         centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
-        inter->computeKhat(*rightInteractionBlock, workMInter, h); // if K is non 0
+        VectorOfSMatrices& workMInter = *indexSet->properties(vd).workMatrices;
+        static_cast<EulerMoreauOSI&>(osi).computeKhat(*inter, *rightInteractionBlock,
+                                                      workMInter, h);
+
+
 
         //      integration of r with theta method removed
         //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B
@@ -392,7 +396,6 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   unsigned int pos1, pos2;
   // source of inter1 :
   vertex_inter = indexSet->source(ed);
-  VectorOfSMatrices& workMInter1 = *indexSet->properties(vertex_inter).workMatrices;
   SP::DynamicalSystem tmpds = indexSet->properties(vertex_inter).source;
   if (tmpds == ds)
     pos1 =  indexSet->properties(vertex_inter).source_pos;
@@ -403,7 +406,6 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   }
   // now, inter2
   vertex_inter = indexSet->target(ed);
-  VectorOfSMatrices& workMInter2 = *indexSet->properties(vertex_inter).workMatrices;
   tmpds = indexSet->properties(vertex_inter).source;
   if (tmpds == ds)
     pos2 =  indexSet->properties(vertex_inter).source_pos;
@@ -463,7 +465,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
   // get _interactionBlocks corresponding to the current DS
   // These _interactionBlocks depends on the relation type.
   leftInteractionBlock.reset(new SimpleMatrix(nslawSize1, sizeDS));
-  inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock, workMInter1);
+  inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
 
   // Computing depends on relation type -> move this in Interaction method?
   if (relationType1 == FirstOrder && relationType2 == FirstOrder)
@@ -471,7 +473,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
 
     rightInteractionBlock.reset(new SimpleMatrix(sizeDS, nslawSize2));
 
-    inter2->getRightInteractionBlockForDS(pos2, rightInteractionBlock, workMInter2);
+    inter2->getRightInteractionBlockForDS(pos2, rightInteractionBlock);
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
     SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
@@ -545,7 +547,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       // remind that W contains the inverse of the iteration matrix
       axpy_prod(*leftInteractionBlock, inv_iteration_matrix, *rightInteractionBlock, true);
       // Then save block corresponding to the 'right' interaction into leftInteractionBlock
-      inter2->getLeftInteractionBlockForDS(pos2, leftInteractionBlock, workMInter2);
+      inter2->getLeftInteractionBlockForDS(pos2, leftInteractionBlock);
       leftInteractionBlock->trans();
       // and compute LW-1R == rightInteractionBlock * leftInteractionBlock into currentInteractionBlock
       prod(*rightInteractionBlock, *leftInteractionBlock, *currentInteractionBlock, false);
@@ -554,7 +556,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     {
       // inter1 != inter2
       rightInteractionBlock.reset(new SimpleMatrix(nslawSize2, sizeDS));
-      inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock, workMInter2);
+      inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock);
       rightInteractionBlock->trans();
       // Warning: we use getLeft for Right interactionBlock
       // because right = transpose(left) and because of
@@ -624,7 +626,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[FirstOrderR::osnsp_rhs];
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[OneStepIntegrator::osnsp_rhs];
     setBlock(osnsp_rhs, _q, sizeY , 0, pos);
   }
   else if ((osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI  )||

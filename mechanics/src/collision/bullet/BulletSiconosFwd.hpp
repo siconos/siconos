@@ -52,12 +52,8 @@ DEFINE_SPTR(btPersistentManifold);
 
 DEFINE_SPTR(btBroadphaseInterface);
 
-//DEFINE_SPTR(BulletDS);
-DEFINE_SPTR(BulletWeightedShape);
 //DEFINE_SPTR(BulletR);
 //DEFINE_SPTR(BulletFrom1DLocalFrameR);
-//DEFINE_SPTR(BulletSpaceFilter);
-//DEFINE_SPTR(BulletTimeStepping);
 DEFINE_SPTR(CollisionObjects);
 DEFINE_SPTR_STRUCT(StaticObjects);
 

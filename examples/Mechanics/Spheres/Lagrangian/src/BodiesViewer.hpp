@@ -33,9 +33,13 @@
 #include <SphereNEDSPlanR.hpp>
 #include <SphereNEDSSphereNEDSR.hpp>
 #include <Question.hpp>
+#include <BodyDS.hpp>
+#include <NewtonEulerDS.hpp>
+#include <SiconosContactor.hpp>
+#include <SiconosShape.hpp>
+#include <ContactR.hpp>
 
 #if WITH_BULLET
-#include <BulletDS.hpp>
 #include <BulletR.hpp>
 #define IFBULLET(X) X
 #else
@@ -68,7 +72,7 @@ public:
 /* convenient macros */
 
 
-#define GETALLDS(M) M->model()->nonSmoothDynamicalSystem()->topology()->dSG(0)
+#define GETALLDS(M) M->simulation()->nonSmoothDynamicalSystem()->topology()->dSG(0)
 #define GETNDS(M) GETALLDS(M)->size()
 
 struct ForNdof : public Question<unsigned int>
@@ -79,7 +83,8 @@ struct ForNdof : public Question<unsigned int>
   ANSWER_V(Circle, 3);
   ANSWER_V(SphereLDS, 6);
   ANSWER_V(SphereNEDS, 6);
-  IFBULLET(ANSWER_V(BulletDS, 6));
+  ANSWER_V(BodyDS, 6);
+  ANSWER_V(NewtonEulerDS, 6);
 };
 
 
@@ -91,7 +96,8 @@ struct ForFExt : public Question<SP::SiconosVector>
   ANSWER(Circle, fExt());
   ANSWER(SphereLDS, fExt());
   ANSWER(SphereNEDS, fExt());
-  IFBULLET(ANSWER(BulletDS, fExt()));
+  ANSWER(BodyDS, fExt());
+  ANSWER(NewtonEulerDS, fExt());
 };
 
 
@@ -103,7 +109,8 @@ struct ForPosition : public Question<SP::SiconosVector>
   ANSWER(Circle, q());
   ANSWER(SphereLDS, q());
   ANSWER(SphereNEDS, q());
-  IFBULLET(ANSWER(BulletDS, q()));
+  ANSWER(BodyDS, q());
+  ANSWER(NewtonEulerDS, q());
 };
 
 struct ForRadius : public Question<double>
@@ -114,7 +121,9 @@ struct ForRadius : public Question<double>
   ANSWER(Circle, getRadius());
   ANSWER(SphereLDS, getRadius());
   ANSWER(SphereNEDS, getRadius());
-  IFBULLET(ANSWER_V(BulletDS, 0.)); // fix
+  ANSWER_V(BodyDS,
+           std11::dynamic_pointer_cast<SiconosSphere>(ds.contactors()->at(0)->shape)
+           ->radius());
 };
 
 struct ForMassValue : public Question<double>
@@ -124,8 +133,9 @@ struct ForMassValue : public Question<double>
   ANSWER(Disk, mass()->getValue(0, 0));
   ANSWER(Circle, mass()->getValue(0, 0));
   ANSWER(SphereLDS, mass()->getValue(0, 0));
-  ANSWER(SphereNEDS, massValue());
-  IFBULLET(ANSWER(BulletDS, massValue()));
+  ANSWER(SphereNEDS, scalarMass());
+  ANSWER(BodyDS, scalarMass());
+  ANSWER(NewtonEulerDS, scalarMass());
 };
 
 struct ForJachq : public Question<SP::SiconosMatrix>
@@ -142,6 +152,7 @@ struct ForJachq : public Question<SP::SiconosMatrix>
   ANSWER(SphereLDSSphereLDSR, jachq());
   ANSWER(SphereNEDSSphereNEDSR, jachq());
   IFBULLET(ANSWER(BulletR, jachq()));
+  ANSWER(ContactR, jachq());
 };
 
 struct ForContactForce : public Question<SP::SiconosVector>
@@ -149,6 +160,7 @@ struct ForContactForce : public Question<SP::SiconosVector>
   using SiconosVisitor::visit;
 
   IFBULLET(ANSWER(BulletR, contactForce()));
+  ANSWER(ContactR, contactForce());
 };
 
 
@@ -178,6 +190,7 @@ struct ForContactForce : public Question<SP::SiconosVector>
 
 enum SHAPE
 {
+  UNKNOWN,
   DISK,
   CIRCLE,
   SPHERE,
@@ -192,7 +205,10 @@ struct ForShape : public Question<SHAPE>
   ANSWER_V(Circle, CIRCLE);
   ANSWER_V(SphereLDS, SPHERE);
   ANSWER_V(SphereNEDS, SPHERE);
-  IFBULLET(ANSWER_V(BulletDS, BULLET));
+  ANSWER_V(BodyDS,
+           std11::dynamic_pointer_cast<SiconosSphere>(ds.contactors()->at(0)->shape)
+           ? SPHERE : UNKNOWN);
+  ANSWER_V(NewtonEulerDS, UNKNOWN);
 };
 
 /* dynamical system / figure association */

@@ -130,12 +130,9 @@ public:
   }
   /** initialize the relation (check sizes, memory allocation in workV and workM ...)
    *  \param inter Interaction using this Relation
-   *  \param DSlink
-   *  \param workV
-   *  \param workM
    */
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-  virtual void initialize(Interaction& inter) {};
+  virtual void initialize(Interaction& inter);
+
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
@@ -241,8 +238,8 @@ public:
     return true;
   }
 
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) {};
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) {};
+  virtual void computeJach(double time, Interaction& inter) {};
+  virtual void computeJacg(double time, Interaction& inter) {};
 
 
   ACCEPT_STD_VISITORS();

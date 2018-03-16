@@ -218,13 +218,11 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
 
   workBlockV.resize(D1MinusLinearOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
 
   workV.resize(D1MinusLinearOSI::WORK_INTERACTION_LENGTH);

@@ -86,6 +86,28 @@ void siconos_io(Archive& ar, FrictionContactProblem& p, const unsigned int file_
 REGISTER_BOOST_SERIALIZATION(FrictionContactProblem);
 
 template <class Archive>
+void siconos_io(Archive& ar, GlobalFrictionContactProblem& p, const unsigned int file_version)
+{
+  SERIALIZE(p, (dimension)(numberOfContacts), ar);
+
+  if (Archive::is_loading::value)
+  {
+    p.q = (double *) malloc(p.dimension * p.numberOfContacts * sizeof(double));
+    p.b = (double *) malloc(p.dimension * p.numberOfContacts * sizeof(double));
+    p.mu = (double *) malloc(p.numberOfContacts * sizeof(double));
+    p.M = NM_new();
+    p.H = NM_new();
+  }
+
+  SERIALIZE(p, (M), ar);
+  SERIALIZE(p, (H), ar);
+  SERIALIZE_C_ARRAY(p.dimension * p.numberOfContacts, p, q, ar);
+  SERIALIZE_C_ARRAY(p.dimension * p.numberOfContacts, p, b, ar);
+  SERIALIZE_C_ARRAY(p.dimension, p, mu, ar);
+}
+REGISTER_BOOST_SERIALIZATION(GlobalFrictionContactProblem);
+
+template <class Archive>
 void siconos_io(Archive& ar, SparseBlockStructuredMatrix& v, unsigned int version)
 {
   SERIALIZE(v, (nbblocks)(blocknumber0)(blocknumber1)(filled1)(filled2), ar);

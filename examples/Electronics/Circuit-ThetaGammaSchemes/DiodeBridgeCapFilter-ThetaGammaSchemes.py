@@ -76,7 +76,7 @@ if (withPlot):
 
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
                            ComplementarityConditionNSL, Interaction,\
-                           Model, EulerMoreauOSI, TimeDiscretisation, LCP,  \
+                           NonSmoothDynamicalSystem, EulerMoreauOSI, TimeDiscretisation, LCP,  \
                            TimeStepping
 
 #
@@ -122,14 +122,14 @@ InterDiodeBridgeCapFilter = Interaction(nslaw, LTIRDiodeBridgeCapFilter)
 #
 # Model
 #
-DiodeBridgeCapFilter = Model(t0, T, Modeltitle)
-
+DiodeBridgeCapFilter = NonSmoothDynamicalSystem(t0, T)
+DiodeBridgeCapFilter.setTitle(Modeltitle)
 #   add the dynamical system in the non smooth dynamical system
-DiodeBridgeCapFilter.nonSmoothDynamicalSystem().insertDynamicalSystem(LS1DiodeBridgeCapFilter)
-DiodeBridgeCapFilter.nonSmoothDynamicalSystem().insertDynamicalSystem(LS2DiodeBridgeCapFilter)
+DiodeBridgeCapFilter.insertDynamicalSystem(LS1DiodeBridgeCapFilter)
+DiodeBridgeCapFilter.insertDynamicalSystem(LS2DiodeBridgeCapFilter)
 
 #   link the interaction and the dynamical system
-DiodeBridgeCapFilter.nonSmoothDynamicalSystem().link(InterDiodeBridgeCapFilter, LS1DiodeBridgeCapFilter, LS2DiodeBridgeCapFilter)
+DiodeBridgeCapFilter.link(InterDiodeBridgeCapFilter, LS1DiodeBridgeCapFilter, LS2DiodeBridgeCapFilter)
 
 #
 # Simulation
@@ -137,7 +137,7 @@ DiodeBridgeCapFilter.nonSmoothDynamicalSystem().link(InterDiodeBridgeCapFilter, 
 
 # (1) OneStepIntegrators
 theta = 0.5
-gamma = 1.0
+gamma = 0.5
 aOSI = EulerMoreauOSI(theta, gamma)
 aOSI.setUseGammaForRelation(True)
 
@@ -148,7 +148,7 @@ aTiDisc = TimeDiscretisation(t0, h_step)
 aLCP = LCP()
 
 # (4) Simulation setup with (1) (2) (3)
-aTS = TimeStepping(aTiDisc, aOSI, aLCP)
+aTS = TimeStepping(DiodeBridgeCapFilter, aTiDisc, aOSI, aLCP)
 
 # end of model definition
 
@@ -156,9 +156,6 @@ aTS = TimeStepping(aTiDisc, aOSI, aLCP)
 # computation
 #
 
-# simulation initialization
-DiodeBridgeCapFilter.setSimulation(aTS)
-DiodeBridgeCapFilter.initialize()
 
 k = 0
 h = aTS.timeStep()
@@ -233,7 +230,7 @@ ref = getMatrix(SimpleMatrix("DiodeBridgeCapFilter.ref"))
 error = norm(dataPlot[:,0:6] - ref[:,0:6])
 print("error = " , error)
 
-#assert (error < 1e-09)
+assert (error < 1e-09)
 withRef = False
 if (withPlot):
     #

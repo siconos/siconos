@@ -370,7 +370,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   for (std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
     {
     Interaction& inter = *_indexSet0->bundle(*ui);
-    inter.relation()->computeJach(t, inter, _indexSet0->properties(*ui));
+    inter.relation()->computeJach(t, inter);
   }
 
   // solve a LCP at "acceleration" level if required
@@ -644,7 +644,7 @@ void EventDriven::advanceToEvent()
   for (vnext = ui; ui != uiend; ui = vnext)
   {
     ++vnext;
-    // _indexSet0->bundle(*ui)->resetAllLambda();
+    _indexSet0->bundle(*ui)->resetAllLambda();
   }
 
   if (osiType == OSI::NEWMARKALPHAOSI)
@@ -708,7 +708,7 @@ void EventDriven::advanceToEvent()
     // WARNING: this is supposed to work for only one OSI, including all
     // the DS.  To be reviewed for multiple OSI case (if it has sense?).
 
-    // ---> Step 1: integrate the smooth dynamics from current event to
+    // ---> Step 1: integrrate the smooth dynamics from current event to
     // next event; Starting event = last accessed event.  Next event =
     // next time step or first root of the 'g' function found by
     // integrator (LsodarOSI)
@@ -734,7 +734,7 @@ void EventDriven::advanceToEvent()
       //  cout << " End of LsodarOSI integration" << endl;
       // SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(*it);
       // SA::integer iwork = lsodar->getIwork();
-      // SA::doublereal rwork = lsodar->getRwork();
+       // SA::doublereal rwork = lsodar->getRwork();
       //  cout << "Number of steps used: " << iwork[10] <<endl;
       //  cout << "Method order last used: " << iwork[13] <<endl;
       //  cout << "Step size last used: " << rwork[10] <<endl;

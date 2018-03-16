@@ -153,10 +153,11 @@ int main(int argc, char* argv[])
     cout << "====> Start computation ... " << endl << endl;
     bool NSEvent = false;
     unsigned int NumberNSEvent = 0;
-    unsigned int k = 1;
+    unsigned int k = 0;
     boost::progress_display show_progress(N);
     while ((EDscheme->hasNextEvent()) && (k < N))
     {
+      //std::cout << "--> k = " << k << std::endl;
       EDscheme->advanceToEvent(); // lead the simulation run from one event to the next
       //---------- detect the statue of the current event ------------------------------------
       if (eventsManager->nextEvent()->getType() == 2) // the current event is non-smooth
@@ -171,8 +172,8 @@ int main(int argc, char* argv[])
       if (NSEvent)
       {
         DataPlot(k, 0) = EDscheme->startingTime(); // instant at non-smooth event
-        const SiconosVector& _qMemory = simplependulum->qMemory().getSiconosVector(1);
-        const SiconosVector& _qdotMemory = simplependulum->velocityMemory().getSiconosVector(1);
+        const SiconosVector& _qMemory = simplependulum->qMemory().getSiconosVector(0);
+        const SiconosVector& _qdotMemory = simplependulum->velocityMemory().getSiconosVector(0);
         DataPlot(k, 1) = _qMemory(0);
         DataPlot(k, 2) = _qMemory(1);
         DataPlot(k, 3) = _qdotMemory(0);
@@ -202,10 +203,10 @@ int main(int argc, char* argv[])
     cout << "Number of events processed during simulation: " << (k + 1) << endl;
     cout << "Number of non-smooth events: " << NumberNSEvent << endl;
     cout << "====> Output file writing ..." << endl << endl;
-    ioMatrix::write("result.dat", "ascii", DataPlot, "noDim");
+    ioMatrix::write("SimplePendulumED_AlphaScheme.dat", "ascii", DataPlot, "noDim");
 
-    double error=0.0, eps=1e-05;
-    if (ioMatrix::compareRefFile(DataPlot, "result_AlphaScheme.ref", eps, error)
+    double error=0.0, eps=1e-12;
+    if ((error=ioMatrix::compareRefFile(DataPlot, "SimplePendulumED_AlphaScheme.ref", eps)) >= 0.0
         && error > eps)
       return 1;
   }

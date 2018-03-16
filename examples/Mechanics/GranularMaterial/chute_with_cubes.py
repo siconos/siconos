@@ -5,7 +5,7 @@ import math
 import pickle
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 
 box_height = 3.683
@@ -50,7 +50,7 @@ def normal_plane(p1,p2,p3):
 #create some bodies
 
 # Creation of the hdf5 file for input/output
-with Hdf5(use_compression=True) as io:
+with MechanicsHdf5Runner(use_compression=True) as io:
 
   ######### left_up
   id_plan=id_plan+1
@@ -78,8 +78,8 @@ with Hdf5(use_compression=True) as io:
   left_up_vertices=numpy.array([v1,v2,v3,v1_extruded,v2_extruded,v3_extruded])
   print('left_up_vertices', left_up_vertices)
 
-  io.addConvexShape('Left_up',left_up_vertices )
-  io.addObject('left_up', [Contactor('Left_up')],
+  io.add_convex_shape('Left_up',left_up_vertices )
+  io.add_object('left_up', [Contactor('Left_up')],
                translation=[0, 0, 0])
 
 
@@ -99,8 +99,8 @@ with Hdf5(use_compression=True) as io:
   left_middle_vertices=numpy.array([v2,v3,v4,v5,v2_extruded,v3_extruded,v4_extruded,v5_extruded])
   print('left_middle_vertices',left_middle_vertices)
 
-  io.addConvexShape('Left_middle',left_middle_vertices )
-  io.addObject('left_middle', [Contactor('Left_middle')],
+  io.add_convex_shape('Left_middle',left_middle_vertices )
+  io.add_object('left_middle', [Contactor('Left_middle')],
                translation=[0, 0, 0])
 
   ######### left_down
@@ -122,8 +122,8 @@ with Hdf5(use_compression=True) as io:
                                   v6_extruded,v7_extruded])
   print('left_down_vertices',left_down_vertices)
 
-  io.addConvexShape('Left_down',left_down_vertices )
-  io.addObject('left_udown', [Contactor('Left_down')],
+  io.add_convex_shape('Left_down',left_down_vertices )
+  io.add_object('left_udown', [Contactor('Left_down')],
                translation=[0, 0, 0])
 
   ######### right_up
@@ -148,8 +148,8 @@ with Hdf5(use_compression=True) as io:
   right_up_vertices=numpy.array([v8,v9,v10,v11,v8_extruded,v9_extruded,v10_extruded,v11_extruded])
   print('right_up_vertices',right_up_vertices)
 
-  io.addConvexShape('Right_up',right_up_vertices )
-  io.addObject('right_up', [Contactor('Right_up')],
+  io.add_convex_shape('Right_up',right_up_vertices )
+  io.add_object('right_up', [Contactor('Right_up')],
                translation=[0, 0, 0])
 
   ######### rear_up
@@ -173,8 +173,8 @@ with Hdf5(use_compression=True) as io:
                                 v11_extruded+[0.0,plan_thickness,0.0]])
   print('rear_up_vertices',rear_up_vertices)
 
-  io.addConvexShape('Rear_up',rear_up_vertices )
-  io.addObject('rear_up', [Contactor('Rear_up')],
+  io.add_convex_shape('Rear_up',rear_up_vertices )
+  io.add_object('rear_up', [Contactor('Rear_up')],
                translation=[0, 0, 0])
 
 
@@ -196,8 +196,8 @@ with Hdf5(use_compression=True) as io:
   print('rear_down_vertices',rear_down_vertices)
 
 
-  io.addConvexShape('Rear_down',rear_down_vertices )
-  io.addObject('rear_down', [Contactor('Rear_down')],
+  io.add_convex_shape('Rear_down',rear_down_vertices )
+  io.add_object('rear_down', [Contactor('Rear_down')],
                translation=[0, 0, 0])
 
   ######### front_up
@@ -220,8 +220,8 @@ with Hdf5(use_compression=True) as io:
   print('front_up_vertices',front_up_vertices)
 
 
-  io.addConvexShape('Front_up',front_up_vertices )
-  io.addObject('front_up', [Contactor('Front_up')],
+  io.add_convex_shape('Front_up',front_up_vertices )
+  io.add_object('front_up', [Contactor('Front_up')],
                translation=[0, 0, 0])
 
   ######### front_down
@@ -239,8 +239,8 @@ with Hdf5(use_compression=True) as io:
   front_down_vertices=numpy.array([v5,v7,v10,v5_extruded,v7_extruded,v10_extruded])
   print('front_down_vertices',front_down_vertices)
 
-  io.addConvexShape('Front_down',front_down_vertices )
-  io.addObject('front_down', [Contactor('Front_down')],
+  io.add_convex_shape('Front_down',front_down_vertices )
+  io.add_object('front_down', [Contactor('Front_down')],
                translation=[0, 0, 0])
 
 
@@ -253,7 +253,7 @@ with Hdf5(use_compression=True) as io:
     for j in range(n_col):
       for n in range(n_cube):
         # Definition of a cube as a convex shape
-        io.addConvexShape('CubeCS'+str(n)+'_'+str(i)+'_'+str(j), [ (-cube_size, cube_size, -cube_size),
+        io.add_convex_shape('CubeCS'+str(n)+'_'+str(i)+'_'+str(j), [ (-cube_size, cube_size, -cube_size),
                                                                    (-cube_size, -cube_size, -cube_size),
                                                                    (-cube_size, -cube_size, cube_size),
                                                                    (-cube_size, cube_size, cube_size),
@@ -263,7 +263,7 @@ with Hdf5(use_compression=True) as io:
                                                                    (cube_size, -cube_size, cube_size)])
 
 
-        io.addObject('cube'+str(n)+'_'+str(i)+'_'+str(j), [Contactor('CubeCS'+str(n)+'_'+str(i)+'_'+str(j))],
+        io.add_object('cube'+str(n)+'_'+str(i)+'_'+str(j), [Contactor('CubeCS'+str(n)+'_'+str(i)+'_'+str(j))],
                      translation=[2+i*x_shift*cube_size, 2+x_shift*j*cube_size, 3+cube_size*x_shift*n],
                      velocity=[0, 0, 0, 0, 0, 0],
                      mass=1)
@@ -271,7 +271,7 @@ with Hdf5(use_compression=True) as io:
 
   # Definition of a non smooth law. As no group ids are specified it
   # is between contactors of group id 0.
-  io.addNewtonImpactFrictionNSL('contact', mu=0.3)
+  io.add_Newton_impact_friction_nsl('contact', mu=0.3)
 
   print(body_collection)
   f = open('body_collection.dict', 'wb')
@@ -285,19 +285,13 @@ hstep=0.005
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.
     # Because of fixed collision margins used in the collision detection,
     # sizes of small objects may need to be expressed in cm or mm.
   io.run(with_timer=False,
-         time_stepping=None,
-         space_filter=None,
-         body_class=None,
-         shape_class=None,
-         face_class=None,
-         edge_class=None,
          gravity_scale=0.1,
          t0=0,
          T=step*hstep,

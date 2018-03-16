@@ -75,7 +75,7 @@ A[number_of_cars - 1, ndof - 1] *= 0.5
 A[ndof - 1, number_of_cars - 1] *= 0.5
 A[ndof - 1, ndof - 1] *= 0.5
 # extra-diag values
-for i in xrange(1, number_of_cars):
+for i in range(1, number_of_cars):
     A[i, i - 1] = A[i - 1, i] = 1. / (R * C)
     A[i, i + number_of_cars - 1] = A[i - 1, i + number_of_cars] = 1. / (R * C)
     A[i + number_of_cars, i - 1] = A[i + number_of_cars - 1, i] = 1. / (R * D)
@@ -115,14 +115,14 @@ nslaw = sk.ComplementarityConditionNSL(ninter)
 interaction = sk.Interaction(nslaw, relation)
 
 # -- The Model --
-circuit = sk.Model(t0, T, 'train')
-nsds = circuit.nonSmoothDynamicalSystem()
-nsds.insertDynamicalSystem(RC)
-nsds.link(interaction, RC)
+circuit = sk.NonSmoothDynamicalSystem(t0, T)
+circuit.setTitle('train')
+circuit.insertDynamicalSystem(RC)
+circuit.link(interaction, RC)
 
 # -- Simulation --
 td = sk.TimeDiscretisation(t0, tau)
-simu = sk.TimeStepping(td)
+simu = sk.TimeStepping(circuit, td)
 # osi
 theta = 0.50000000000001
 osi = sk.EulerMoreauOSI(theta)
@@ -132,8 +132,6 @@ simu.insertIntegrator(osi)
 osnspb = sk.LCP()
 simu.insertNonSmoothProblem(osnspb)
 
-circuit.setSimulation(simu)
-circuit.initialize()
 
 # -- Get the values to be plotted --
 output_size = 2 * number_of_cars + 1

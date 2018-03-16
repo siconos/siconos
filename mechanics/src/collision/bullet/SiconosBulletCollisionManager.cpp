@@ -90,10 +90,10 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCylinderShape.h>
 #include <BulletCollision/CollisionShapes/btConvexHullShape.h>
-#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleIndexVertexArray.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <LinearMath/btConvexHullComputer.h>
+#include <BulletCollision/Gimpact/btGImpactShape.h>
 
 #include <LinearMath/btQuaternion.h>
 #include <LinearMath/btVector3.h>
@@ -146,10 +146,10 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #endif
 
 // We need a bit more space to hold mesh data
-class btSiconosMeshData : public btBvhTriangleMeshShape {
+class btSiconosMeshData : public btGImpactMeshShape {
 public:
-  btSiconosMeshData(btStridingMeshInterface*i, bool b)
-    : btBvhTriangleMeshShape(i,b), btScalarVertices(0) {}
+  btSiconosMeshData(btStridingMeshInterface*i)
+    : btGImpactMeshShape(i), btScalarVertices(0) {}
   ~btSiconosMeshData() { if (btScalarVertices) delete[] btScalarVertices; }
   btScalar* btScalarVertices;
   SP::btTriangleIndexVertexArray btTriData;
@@ -180,6 +180,8 @@ SiconosBulletOptions::SiconosBulletOptions()
   , clearOverlappingPairCache(false)
   , perturbationIterations(3)
   , minimumPointsPerturbationThreshold(3)
+  , enableSatConvex(false)
+  , enablePolyhedralContactClipping(false)
 {
 }
 
@@ -418,6 +420,7 @@ void SiconosBulletCollisionManager::initialize_impl()
 
   btGImpactCollisionAlgorithm::registerAlgorithm(&*impl->_dispatcher);
   impl->_collisionWorld->getDispatchInfo().m_useContinuous = false;
+  impl->_collisionWorld->getDispatchInfo().m_enableSatConvex = _options.enableSatConvex;
 }
 
 SiconosBulletCollisionManager::SiconosBulletCollisionManager()
@@ -474,6 +477,12 @@ void SiconosBulletCollisionManager_impl::updateAllShapesForDS(const BodyDS &bds)
     (*it)->acceptSP(updateShapeVisitor);
 }
 
+// helper for enabling polyhedral contact clipping for shape types
+// derived from btPolyhedralConvexShape
+static void initPolyhedralFeatures(btPolyhedralConvexShape& btshape)
+{ btshape.initializePolyhedralFeatures(); }
+static void initPolyhedralFeatures(btCollisionShape& btshape) {}
+
 template<typename ST, typename BT, typename BR>
 void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   SP::SiconosVector base, SP::BodyDS ds, ST& shape, BT& btshape,
@@ -489,6 +498,10 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
 
   // associate the shape with the object
   btobject->setCollisionShape(&*btshape);
+
+  // enable contact clipping for SAT
+  if (_options.enablePolyhedralContactClipping)
+    initPolyhedralFeatures(*btshape);
 
   if (!ds)
     btobject->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
@@ -1000,11 +1013,14 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   SP::btTriangleIndexVertexArray bttris(datapair.first);
 
   // Create Bullet mesh object
-  SP::BTMESHSHAPE btmesh(std11::make_shared<BTMESHSHAPE>(&*bttris, true));
+  SP::BTMESHSHAPE btmesh(std11::make_shared<BTMESHSHAPE>(&*bttris));
 
   // Hold on to the data since Bullet does not make a copy
   btmesh->btTriData = bttris;
   btmesh->btScalarVertices = datapair.second;
+
+  // Initial bound update for btGImpaceMeshShape
+  btmesh->updateBound();
 
   // initialization
   createCollisionObjectHelper<SP::SiconosMesh, SP::BTMESHSHAPE, BodyMeshRecord>
@@ -1022,7 +1038,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyMeshRecord &record)
     // btBvhTriangleMeshShape supports only outsideMargin.
     // TODO: support insideMargin, scale the points by their normals.
     btmesh->setMargin(mesh->outsideMargin() * _options.worldScale);
-    btmesh->recalcLocalAabb();
+    btmesh->postUpdate();
 
     // TODO: Calculate inertia from a mesh.  For now we leave it at
     // identity, the user can provide an inertia if desired.
@@ -1222,6 +1238,11 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorS
   std::vector< SP::SiconosContactor >::const_iterator it;
   for (it=con->begin(); it!=con->end(); it++)
   {
+    // special collision group -1 = do not collide, thus we can skip
+    // creation of associated collision objects
+    if ((*it)->collision_group == -1) continue;
+
+    // otherwise visit the object with createCollisionObject
     ccosv->contactor = *it;
     ccosv->contactor->shape->acceptSP(ccosv);
   }
@@ -1359,7 +1380,7 @@ SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::BodyDS ds1,
                                                        SP::SiconosShape shape2,
                                                        const btManifoldPoint &p)
 {
-  return std11::make_shared<BulletR>(p);
+  return std11::make_shared<BulletR>();
 }
 
 class CollisionUpdateVisitor : public SiconosVisitor

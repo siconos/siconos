@@ -58,17 +58,16 @@ variables are required in g.
 
  *
  */
-// namespace FirstOrderR {enum {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};}
-// namespace FirstOrderRVec {enum {xfree, z, x, r, e, g_alpha, residuR, workVecSize};}
-// namespace FirstOrderRMat {enum {C, D, F, B, K, Ktilde, Khat, workMatSize};}
-
-
 class FirstOrderR : public Relation
 {
 public:
-  enum FirstOrderRDS  {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};
-  enum FirstOrderRVec {osnsp_rhs,vec_z, vec_x, vec_r, e, h_alpha, g_alpha, vec_residuY, vec_residuR, workVecSize};
-  enum FirstOrderRMat {mat_C, mat_D, mat_F, mat_B, mat_K, mat_Ktilde, mat_Khat, mat_workMatSize};
+  enum FirstOrderRDS  {x,z,r, DSlinkSize};
+  enum FirstOrderRVec {e,  relationVectorsSize};
+  enum FirstOrderRMat {mat_C, mat_D, mat_F, mat_B, mat_K, relationMatricesSize};
+
+
+  //enum FirstOrderRWorkVec {osnsp_rhs, h_alpha, g_alpha, vec_residuY, vec_residuR, workVecSize};
+  //enum FirstOrderWorkMat{mat_workMatSize};
 
 
 protected:
@@ -89,21 +88,32 @@ protected:
   SP::SimpleMatrix _B;
   SP::SimpleMatrix _K;
 
+  /** Continuous memory vector of size of x to call plugin */
+  SP::SiconosVector _vec_x;
+  /** Continuous memory vector of size of z to call plugin */
+  SP::SiconosVector _vec_z;
+  /** Continuous memory vector of size of r to call plugin */
+  SP::SiconosVector _vec_r;
+
+
+
 public:
 
   /** destructor
   */
   virtual ~FirstOrderR() {};
 
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
-  
-  virtual void initialize(Interaction& inter) = 0;
+
+  /** initialize the relation (check sizes, memory allocation ...)
+   * \param inter the interaction using this relation
+   */
+  virtual void initialize(Interaction& inter);
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
   virtual void checkSize(Interaction& inter) = 0;
-  
+
   /** set C to pointer newC
   *  \param newC the C matrix
   */
@@ -175,7 +185,6 @@ public:
   {
     return _K;
   }
-
 
 };
 #endif

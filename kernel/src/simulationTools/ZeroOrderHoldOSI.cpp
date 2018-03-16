@@ -136,7 +136,6 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem
   }
 
   // Get work buffers from the graph
-  workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
   workVectors[OneStepIntegrator::free].reset(new SiconosVector(ds->dimension()));
   workVectors[OneStepIntegrator::delta_x_for_relation].reset(new SiconosVector(ds->dimension()));
   DEBUG_END("void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
@@ -150,20 +149,23 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
+  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
+  workV.resize(OneStepIntegrator::interaction_work_vector_of_vector_size);
+  
+  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
+  workBlockV.resize(OneStepIntegrator::work_vector_of_block_vector_size);
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  //relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
+  RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
 
   
-  workV[FirstOrderR::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
+  workV[OneStepIntegrator::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -180,8 +182,13 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == FirstOrder)
     {
-      DSlink[FirstOrderR::xfree].reset(new BlockVector());
-      DSlink[FirstOrderR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+
+      if (relationSubType == NonLinearR || relationSubType == Type2R )
+      {
+        workV[OneStepIntegrator::h_alpha].reset(new SiconosVector(inter.getSizeOfY()));
+      }
+      workBlockV[OneStepIntegrator::xfree].reset(new BlockVector());
+      workBlockV[OneStepIntegrator::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
     }
 
 
@@ -190,17 +197,17 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
       if (relationType == Lagrangian)
       {
-        DSlink[FirstOrderR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+        workBlockV[OneStepIntegrator::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
       }
     }
 
-  if (!DSlink[FirstOrderR::deltax])
+  if (!workBlockV[OneStepIntegrator::delta_x])
   {
-    DSlink[FirstOrderR::deltax].reset(new BlockVector());
-    DSlink[FirstOrderR::deltax]->insertPtr(workVds1[OneStepIntegrator::delta_x_for_relation]);
+    workBlockV[OneStepIntegrator::delta_x].reset(new BlockVector());
+    workBlockV[OneStepIntegrator::delta_x]->insertPtr(workVds1[OneStepIntegrator::delta_x_for_relation]);
   }
   else
-    DSlink[FirstOrderR::deltax]->setVectorPtr(0,workVds1[OneStepIntegrator::delta_x_for_relation]);
+    workBlockV[OneStepIntegrator::delta_x]->setVectorPtr(0,workVds1[OneStepIntegrator::delta_x_for_relation]);
 }
 
 double ZeroOrderHoldOSI::computeResidu()
@@ -318,6 +325,11 @@ void ZeroOrderHoldOSI::prepareNewtonIteration(double time)
   //   //SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
   //   //    computeMatrices(time, *ds);
   // }
+
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+  }
 }
 
 
@@ -340,7 +352,7 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[FirstOrderR::osnsp_rhs];
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[OneStepIntegrator::osnsp_rhs];
     subscal(e, *_inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord, false);
   }
 
@@ -349,7 +361,7 @@ struct ZeroOrderHoldOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[FirstOrderR::osnsp_rhs];
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[OneStepIntegrator::osnsp_rhs];
     osnsp_rhs(0) +=  e * (*_inter->y_k(_osnsp->inputOutputLevel()))(0);
 
   }
@@ -373,6 +385,10 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
   VectorOfVectors& workV = *indexSet->properties(vertex_inter).workVectors;
+  VectorOfBlockVectors& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
+
+
+
   // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -393,14 +409,14 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
 
 
   SP::BlockVector deltax;
-  deltax = DSlink[FirstOrderR::deltax];
+  deltax = workBlockV[OneStepIntegrator::delta_x];
 
-  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[FirstOrderR::osnsp_rhs];
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[OneStepIntegrator::osnsp_rhs];
 
   SP::BlockVector Xfree;
   if(relationType == FirstOrder)
   {
-    Xfree = DSlink[FirstOrderR::xfree];
+    Xfree = workBlockV[OneStepIntegrator::xfree];
   }
   assert(Xfree);
 
@@ -438,7 +454,7 @@ void ZeroOrderHoldOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_
         RuntimeException::selfThrow("ZeroOrderHoldOSI::ComputeFreeOutput not yet implemented with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() should return the mid-point value");
       }
 
-      SiconosVector& hAlpha= *workV[FirstOrderR::h_alpha];
+      SiconosVector& hAlpha= *workV[OneStepIntegrator::h_alpha];
       osnsp_rhs += hAlpha;
     }
 

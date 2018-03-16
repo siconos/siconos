@@ -26,7 +26,7 @@ typedef void (*computeAfct)(double, unsigned int, unsigned int, double*, unsigne
 // --- Constructors ---
 // From a minimum set of data, A and b connected to a plug-in
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const std::string& APlugin, const std::string& bPlugin):
-  FirstOrderNonLinearDS(newX0)
+  FirstOrderNonLinearDS(newX0), _hasConstantA(false), _hasConstantB(false)
 {
   _zeroPlugin();
   setComputeAFunction(SSLH::getPluginName(APlugin), SSLH::getPluginFunctionName(APlugin));
@@ -36,7 +36,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, const std::strin
 
 // From a minimum set of data, A from a given matrix
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA):
-  FirstOrderNonLinearDS(newX0)
+  FirstOrderNonLinearDS(newX0), _hasConstantA(true), _hasConstantB(false)
 {
   _zeroPlugin();
   if ((newA->size(0) != _n) || (newA->size(1) != _n))
@@ -45,14 +45,14 @@ FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatri
 }
 
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0):
-  FirstOrderNonLinearDS(newX0)
+  FirstOrderNonLinearDS(newX0),_hasConstantA(false), _hasConstantB(false)
 {
   _zeroPlugin();
 }
 
 // From a minimum set of data, A from a given matrix
 FirstOrderLinearDS::FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA, SP::SiconosVector newB):
-  FirstOrderNonLinearDS(newX0)
+  FirstOrderNonLinearDS(newX0), _hasConstantA(true), _hasConstantB(true)
 {
   _zeroPlugin();
     
@@ -74,11 +74,14 @@ FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS & FOLDS): FirstO
     _A.reset(new SimpleMatrix(*(FOLDS.A())));
   if(FOLDS.b())
     _b.reset(new SiconosVector(*(FOLDS.b())));
+
+  _hasConstantA = FOLDS.hasConstantA();
+  _hasConstantB = FOLDS.hasConstantB();
   
   if (Type::value(FOLDS) == Type::FirstOrderLinearDS)
   {
     _pluginA.reset(new PluggedObject(*(FOLDS.getPluginA())));
-    _pluginb.reset(new PluggedObject(*(FOLDS.getPluginb())));
+    _pluginb.reset(new PluggedObject(*(FOLDS.getPluginB())));
   }
 }
 
@@ -113,6 +116,7 @@ void FirstOrderLinearDS::setComputeAFunction(const std::string& pluginPath, cons
   if(!_A)
     _A.reset(new SimpleMatrix(_n, _n));
   _pluginA->setComputeFunction(pluginPath, functionName);
+  _hasConstantA = false;
 }
 
 void FirstOrderLinearDS::setComputeAFunction(LDSPtrFunction fct)
@@ -120,6 +124,7 @@ void FirstOrderLinearDS::setComputeAFunction(LDSPtrFunction fct)
   if(!_A)
     _A.reset(new SimpleMatrix(_n, _n));
   _pluginA->setComputeFunction((void*)fct);
+  _hasConstantA = false;
 }
 
 void FirstOrderLinearDS::setComputebFunction(const std::string& pluginPath, const std::string& functionName)
@@ -127,6 +132,7 @@ void FirstOrderLinearDS::setComputebFunction(const std::string& pluginPath, cons
   if (!_b)
     _b.reset(new SiconosVector(_n));
   _pluginb->setComputeFunction(pluginPath, functionName);
+  _hasConstantB = false;
 }
 
 void FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct)
@@ -134,6 +140,12 @@ void FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct)
   if(!_b)
     _b.reset(new SiconosVector(_n));
   _pluginb->setComputeFunction((void*)fct);
+  _hasConstantB = false;
+}
+
+void FirstOrderLinearDS::clearComputebFunction()
+{
+  _pluginb.reset(new PluggedObject());
 }
 
 void FirstOrderLinearDS::computeA(double time)
@@ -203,8 +215,59 @@ void FirstOrderLinearDS::computeJacobianRhsx(double time, bool isDSup)
 
 void FirstOrderLinearDS::display() const
 {
+
   std::cout << "=== Linear system display, " << _number << std::endl;
+  std::cout << "- x " <<std::endl;
+  if (_x[0]) _x[0]->display();
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- x0 " <<std::endl;
+  if (_x0) _x0->display();
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "M :" << std::endl;
+  if (_M)
+  {
+    _M->display();
+  }
+  else
+    std::cout << "M is identity" << std::endl;
+  std::cout << "A :" << std::endl;
+  if (_A)
+    _A->display();
+  else
+    std::cout << "-> NULL" << std::endl;
+  std::cout << "b :" << std::endl;
+  if (_b)
+    _b->display();
+  else
+    std::cout << "-> NULL" << std::endl;
+  std::cout << "r :" << std::endl;
+  if (_r)
+    _r->display();
+  else
+    std::cout << "-> NULL" << std::endl;
+  if (_hasConstantA)
+  {
+    std::cout << "A is a time invariant matrix" << std::endl;
+  }
+  if (_hasConstantB)
+  {
+    std::cout << "b is a time invariant vector" << std::endl;
+  }
+  if (_pluginA->fPtr)
+  {
+    std::cout << "Has a plugin for A" << std::endl;
+  }
+  if (_pluginb->fPtr)
+  {
+    std::cout << "Has a plugin for b" << std::endl;
+  }
   std::cout << "=============================" << std::endl;
+}
+
+void FirstOrderLinearDS::_zeroPlugin()
+{
+  _pluginA.reset(new PluggedObject());
+  _pluginb.reset(new PluggedObject());
 }
 
 void FirstOrderLinearDS::setA(const SiconosMatrix& newA)
@@ -213,10 +276,15 @@ void FirstOrderLinearDS::setA(const SiconosMatrix& newA)
     *_A = newA;
   else
     _A.reset(new SimpleMatrix(newA));
+  _hasConstantA = true;
 }
 
-void FirstOrderLinearDS::_zeroPlugin()
+
+void FirstOrderLinearDS::setb(const SiconosVector& b)
 {
-  _pluginA.reset(new PluggedObject());
-  _pluginb.reset(new PluggedObject());
+  if (_b)
+    *_b = b;
+  else
+    _b.reset(new SiconosVector(b));
+  _hasConstantB = true;
 }

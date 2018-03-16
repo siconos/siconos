@@ -50,7 +50,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem():
 
   // we push a first element in the list to avoid acces to null when
   // we call --_changeLog.end();
-  _changeLog.push_back(Changes(clearTopology));
+  _changeLog.push_back(Change(clearTopology));
   DEBUG_EXPR((--_changeLog.end())->display(););
 
   // see Simulation::initialize() for an explanation of why we
@@ -66,7 +66,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0, double T):
   _topology.reset(new Topology());
   // we push a first element in the list to avoid acces to null when
   // we call --_changeLog.end();
-  _changeLog.push_back(Changes(clearTopology));
+  _changeLog.push_back(Change(clearTopology));
   DEBUG_EXPR((--_changeLog.end())->display());
 
   // see Simulation::initialize() for an explanation of why we
@@ -79,7 +79,7 @@ NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 }
 
 // changelog
-void NonSmoothDynamicalSystem::Changes::display() const
+void NonSmoothDynamicalSystem::Change::display() const
 {
   std::cout << "Changes display   " << this <<std::endl;
   if (typeOfChange == addDynamicalSystem)
@@ -111,10 +111,10 @@ void NonSmoothDynamicalSystem::clearChangeLogTo(const ChangeLogIter& it)
    * simulations, but in the one-simulation case (currently 100% of
    * cases), calling this will prevent changelog from building up
    * forever. Important especially for simulations using an
-   * InteractionManager, e.g. mechanics_io. */
-  while (_changeLog.begin() != it) {
+   * InteractionManager, e.g. mechanics_run.py. */
+  while (_changeLog.begin() != it.it) {
     _changeLog.pop_front();
-    assert((_changeLog.end() != it) && (_changeLog.begin() != _changeLog.end())
+    assert((_changeLog.end() != it.it) && (_changeLog.begin() != _changeLog.end())
            && "NSDS::clearChangeLogTo: iterator not in list!");
   }
 }
@@ -136,33 +136,33 @@ void NonSmoothDynamicalSystem::display() const
 void  NonSmoothDynamicalSystem::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
   _topology->insertDynamicalSystem(ds);
-  _changeLog.push_back(Changes(addDynamicalSystem,ds));
+  _changeLog.push_back(Change(addDynamicalSystem,ds));
   _mIsLinear = ((ds)->isLinear() && _mIsLinear);
 }
 
 void  NonSmoothDynamicalSystem::removeDynamicalSystem(SP::DynamicalSystem ds)
 {
   _topology->removeDynamicalSystem(ds);
-  _changeLog.push_back(Changes(rmDynamicalSystem,ds));
+  _changeLog.push_back(Change(rmDynamicalSystem,ds));
 }
 void  NonSmoothDynamicalSystem::removeInteraction(SP::Interaction inter)
 {
   _topology->removeInteraction(inter);
-  _changeLog.push_back(Changes(rmInteraction,inter));
+  _changeLog.push_back(Change(rmInteraction,inter));
 }
 
 void NonSmoothDynamicalSystem::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
   _mIsLinear = (inter->relation()->isLinear() && _mIsLinear);
   _topology->link(inter, ds1, ds2);
-  _changeLog.push_back(Changes(addInteraction,inter));
+  _changeLog.push_back(Change(addInteraction,inter));
 };
 
 
 void NonSmoothDynamicalSystem::clear()
 {
   _topology->clear();
-  _changeLog.push_back(Changes(clearTopology));
+  _changeLog.push_back(Change(clearTopology));
 }
 
 void NonSmoothDynamicalSystem::setSymmetric(bool val)
@@ -267,8 +267,38 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
     inter->computeOutput(time, level);
   }
   DEBUG_END("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
-
 }
+
+void NonSmoothDynamicalSystem::computeInteractionJacobians(double time)
+{
+
+  DEBUG_BEGIN("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = _topology->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    inter->relation()->computeJach(time, *inter);
+    inter->relation()->computeJacg(time, *inter);
+  }
+  DEBUG_END("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+}
+
+void NonSmoothDynamicalSystem::computeInteractionJacobians(double time, InteractionsGraph& indexSet)
+{
+  DEBUG_BEGIN("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet.bundle(*ui);
+    inter->relation()->computeJach(time, *inter);
+    inter->relation()->computeJacg(time, *inter);
+  }
+  DEBUG_END("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+}
+
 
 
 void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)

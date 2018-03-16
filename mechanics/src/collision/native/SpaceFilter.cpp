@@ -55,16 +55,12 @@ std::size_t hash_value(SP::Hashed const& h)
 
 SpaceFilter::SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
-              SP::NonSmoothDynamicalSystem nsds,
               SP::SiconosMatrix plans,
               SP::FMatrix moving_plans) :
     _bboxfactor(bboxfactor),
     _cellsize(cellsize),
-    _nsds(nsds),
-    _nslaws(new NSLawMatrix()),
     _plans(plans),
     _moving_plans(moving_plans),
-    _osnsinit(false),
     _hash_table(new space_hash()),
     diskdisk_relations(new DiskDiskRDeclaredPool()),
     diskplan_relations(new DiskPlanRDeclaredPool()),
@@ -73,32 +69,17 @@ SpaceFilter::SpaceFilter(unsigned int bboxfactor,
 
 SpaceFilter::SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
-              SP::NonSmoothDynamicalSystem nsds,
               SP::SiconosMatrix plans) :
     _bboxfactor(bboxfactor),
     _cellsize(cellsize),
-    _nsds(nsds),
-    _nslaws(new NSLawMatrix()),
     _plans(plans),
-    _osnsinit(false),
     _hash_table(new space_hash()),
     diskdisk_relations(new DiskDiskRDeclaredPool()),
     diskplan_relations(new DiskPlanRDeclaredPool()),
     circlecircle_relations(new CircleCircleRDeclaredPool())
 {};
 
-SpaceFilter::SpaceFilter(SP::NonSmoothDynamicalSystem nsds) :
-  _nsds(nsds),
-  _nslaws(new NSLawMatrix()),
-  _osnsinit(false),
-  _hash_table(new space_hash()),
-  diskdisk_relations(new DiskDiskRDeclaredPool()),
-  diskplan_relations(new DiskPlanRDeclaredPool()),
-  circlecircle_relations(new CircleCircleRDeclaredPool())
-{};
-
 SpaceFilter::SpaceFilter() :
-  _osnsinit(false),
   _hash_table(new space_hash()),
   diskdisk_relations(new DiskDiskRDeclaredPool()),
   diskplan_relations(new DiskPlanRDeclaredPool()),
@@ -110,8 +91,9 @@ SpaceFilter::SpaceFilter() :
 struct SpaceFilter::_BodyHash : public SiconosVisitor
 {
 public:
+  Simulation& sim;
   SpaceFilter& parent;
-  _BodyHash(SpaceFilter& p) : parent(p) {};
+  _BodyHash(Simulation& s, SpaceFilter& p) : sim(s), parent(p) {};
 
   using SiconosVisitor::visit;
 
@@ -232,16 +214,19 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
+  SP::Simulation sim;
   SP::SpaceFilter parent;
   SP::CircularDS ds1;
 
-  _CircularFilter(SP::SpaceFilter parent, SP::CircularDS ds1) : parent(parent), ds1(ds1) {};
+  _CircularFilter(SP::Simulation s, SP::SpaceFilter parent, SP::CircularDS ds1)
+    : sim(s), parent(parent), ds1(ds1) {};
 
   void visit_circular(SP::CircularDS ds2)
   {
 
     SP::CircularR rel;
-    SP::DynamicalSystemsGraph DSG0 = parent->nsds()->topology()->dSG(0);
+    SP::DynamicalSystemsGraph DSG0 =
+      sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
     assert(ds1 != ds2);
     assert(DSG0->bundle(DSG0->descriptor(ds1)) == ds1);
@@ -319,11 +304,13 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
 
       if (!found)
       {
-        SP::NonSmoothLaw nslaw = (*parent->_nslaws)(DSG0->groupId[DSG0->descriptor(ds1)],
-                                                    DSG0->groupId[DSG0->descriptor(ds2)]);
+        SP::NonSmoothLaw nslaw =
+          parent->nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds1)],
+                               DSG0->groupId[DSG0->descriptor(ds2)]);
+        assert(nslaw);
 
         SP::Interaction inter(new Interaction(nslaw, rel));
-        parent->nsds()->link(inter, ds1, ds2);
+        sim->nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
       }
     }
     else
@@ -346,8 +333,7 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
 
 
         DEBUG_PRINTF("remove interaction : %d\n", DSG0->bundle(*oei)->number());
-        parent->nsds()->topology()->
-        removeInteraction(DSG0->bundle(*oei));
+        sim->unlink(DSG0->bundle(*oei));
       }
     }
   }
@@ -374,15 +360,17 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
+  SP::Simulation sim;
   SP::SpaceFilter parent;
   SP::SphereLDS ds1;
 
-  _SphereLDSFilter(SP::SpaceFilter p, SP::SphereLDS s) : parent(p), ds1(s) {};
+  _SphereLDSFilter(SP::Simulation _sim, SP::SpaceFilter p, SP::SphereLDS s)
+    : sim(_sim), parent(p), ds1(s) {};
 
   void visit(SP::SphereLDS ds2)
   {
     SP::SphereLDSSphereLDSR rel;
-    SP::DynamicalSystemsGraph DSG0 = parent->nsds()->topology()->dSG(0);
+    SP::DynamicalSystemsGraph DSG0(sim->nonSmoothDynamicalSystem()->topology()->dSG(0));
 
     assert(ds1 != ds2);
     assert(DSG0->bundle(DSG0->descriptor(ds1)) == ds1);
@@ -423,11 +411,12 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
 
       if (!found)
       {
-        SP::NonSmoothLaw nslaw = (*parent->_nslaws)(DSG0->groupId[DSG0->descriptor(ds1)],
-                                                    DSG0->groupId[DSG0->descriptor(ds2)]);
+        SP::NonSmoothLaw nslaw =
+          parent->nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds1)],
+                               DSG0->groupId[DSG0->descriptor(ds2)]);
 
         SP::Interaction inter(new Interaction(nslaw, rel));
-        parent->nsds()->link(inter, ds1, ds2);
+        sim->link(inter, ds1, ds2);
       }
     }
     else
@@ -447,8 +436,7 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
 
       if (found)
       {
-        parent->nsds()->topology()->
-        removeInteraction(DSG0->bundle(*oei));
+        sim->unlink(DSG0->bundle(*oei));
       }
 
     }
@@ -460,15 +448,17 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
 {
   using SiconosVisitor::visit;
 
+  SP::Simulation sim;
   SP::SpaceFilter parent;
   SP::SphereNEDS ds1;
 
-  _SphereNEDSFilter(SP::SpaceFilter p, SP::SphereNEDS s) : parent(p), ds1(s) {};
+  _SphereNEDSFilter(SP::Simulation _sim, SP::SpaceFilter p, SP::SphereNEDS s)
+    : sim(_sim), parent(p), ds1(s) {};
 
   void visit(SP::SphereNEDS ds2)
   {
     SP::SphereNEDSSphereNEDSR rel;
-    SP::DynamicalSystemsGraph DSG0 = parent->nsds()->topology()->dSG(0);
+    SP::DynamicalSystemsGraph DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
     assert(ds1 != ds2);
     assert(DSG0->bundle(DSG0->descriptor(ds1)) == ds1);
@@ -509,12 +499,13 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
 
       if (!found)
       {
-        SP::NonSmoothLaw nslaw = (*parent->_nslaws)(DSG0->groupId[DSG0->descriptor(ds1)],
-                                                    DSG0->groupId[DSG0->descriptor(ds2)]);
+        SP::NonSmoothLaw nslaw =
+          parent->nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds1)],
+                               DSG0->groupId[DSG0->descriptor(ds2)]);
 
         SP::Interaction inter(new Interaction(nslaw, rel));
 
-        parent->nsds()->link(inter, ds1, ds2);
+        sim->link(inter, ds1, ds2);
       }
     }
     else
@@ -534,8 +525,7 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
 
       if (found)
       {
-        parent->nsds()->topology()->
-        removeInteraction(DSG0->bundle(*oei));
+        sim->unlink(DSG0->bundle(*oei));
       }
 
     }
@@ -550,13 +540,16 @@ struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
 
   using SiconosVisitor::visit;
 
+  SP::Simulation sim;
   SP::SpaceFilter parent;
   double A, B, C, r, xCenter, yCenter, width;
   bool flag;
-  _IsSameDiskPlanR(SP::SpaceFilter p, double A, double B, double C, double r,
+  _IsSameDiskPlanR(SP::Simulation s, SP::SpaceFilter p,
+                   double A, double B, double C, double r,
                    double xCenter, double yCenter, double width) :
-    parent(p), A(A), B(B), C(C), r(r), xCenter(xCenter), yCenter(yCenter), width(width), flag(false) {};
-
+    sim(s), parent(p), A(A), B(B), C(C), r(r),
+    xCenter(xCenter), yCenter(yCenter), width(width), flag(false)
+    {};
 
   void visit(const DiskDiskR&)
   {
@@ -660,7 +653,8 @@ struct SpaceFilter::_IsSameSpherePlanR : public SiconosVisitor
 
 
 /* proximity detection between circular object and plans */
-void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
+void SpaceFilter::_PlanCircularFilter(SP::Simulation sim,
+                                      double A, double B, double C,
                                       double xCenter, double yCenter,
                                       double width, SP::CircularDS ds)
 {
@@ -669,10 +663,10 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
   /* tolerance */
   double tol = r;
 
-  SP::DynamicalSystemsGraph DSG0 = nsds()->topology()->dSG(0);
+  SP::DynamicalSystemsGraph DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
   _IsSameDiskPlanR
-  isSameDiskPlanR = _IsSameDiskPlanR(shared_from_this(), A, B, C, r,
+  isSameDiskPlanR = _IsSameDiskPlanR(sim, shared_from_this(), A, B, C, r,
                                      xCenter, yCenter, width);
 
 
@@ -704,12 +698,12 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
     if (!found)
       // no
     {
-      SP::NonSmoothLaw nslaw = (*_nslaws)(DSG0->groupId[DSG0->descriptor(ds)],
-                                          DSG0->groupId[DSG0->descriptor(ds)]);
+      SP::NonSmoothLaw nslaw = nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds)],
+                                            DSG0->groupId[DSG0->descriptor(ds)]);
 
       SP::Interaction inter(new Interaction(nslaw, relp));
       DEBUG_PRINTF("insert interaction : %d\n", inter->number());
-      nsds()->link(inter, ds);
+      sim->link(inter, ds);
     }
   }
   else
@@ -728,8 +722,7 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
 
         DEBUG_PRINTF("remove interaction : %d\n", DSG0->bundle(*oei)->number());
 
-        nsds()->topology()->
-        removeInteraction(DSG0->bundle(*oei));
+        sim->unlink(DSG0->bundle(*oei));
         break;
       }
     }
@@ -739,14 +732,15 @@ void SpaceFilter::_PlanCircularFilter(double A, double B, double C,
 
 
 /* proximity detection between circular object and plans */
-void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, double time)
+void SpaceFilter::_MovingPlanCircularFilter(SP::Simulation sim, unsigned int i,
+                                            SP::CircularDS ds, double time)
 {
   double r = ds->getRadius();
 
   /* tolerance */
   double tol = r;
 
-  SP::DynamicalSystemsGraph DSG0 = nsds()->topology()->dSG(0);
+  SP::DynamicalSystemsGraph DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
   _IsSameDiskMovingPlanR
   isSameDiskMovingPlanR = _IsSameDiskMovingPlanR(shared_from_this(),
@@ -785,11 +779,11 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
     if (!found)
       // no
     {
-      SP::NonSmoothLaw nslaw = (*_nslaws)(DSG0->groupId[DSG0->descriptor(ds)],
-                                          DSG0->groupId[DSG0->descriptor(ds)]);
+      SP::NonSmoothLaw nslaw = nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds)],
+                                            DSG0->groupId[DSG0->descriptor(ds)]);
 
       SP::Interaction inter(new Interaction(nslaw, relp));
-      nsds()->link(inter, ds);
+      sim->link(inter, ds);
     }
   }
   else
@@ -805,8 +799,7 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskMovingPlanR.flag)
       {
-        nsds()->topology()->
-        removeInteraction(DSG0->bundle(*oei));
+        sim->unlink(DSG0->bundle(*oei));
         break;
       }
     }
@@ -814,14 +807,17 @@ void SpaceFilter::_MovingPlanCircularFilter(unsigned int i, SP::CircularDS ds, d
 }
 
 /* proximity detection between circular object and plans */
-void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, SP::SphereLDS ds)
+void SpaceFilter::_PlanSphereLDSFilter(SP::Simulation sim,
+                                       double A, double B,
+                                       double C, double D,
+                                       SP::SphereLDS ds)
 {
   double r = ds->getRadius();
 
   /* tolerance */
   double tol = r;
 
-  SP::DynamicalSystemsGraph DSG0 = nsds()->topology()->dSG(0);
+  SP::DynamicalSystemsGraph DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
   _IsSameSpherePlanR
   IsSameSpherePlanR =
@@ -855,11 +851,11 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
     if (!found)
       // no
     {
-      SP::NonSmoothLaw nslaw = (*_nslaws)(DSG0->groupId[DSG0->descriptor(ds)],
-                                                  DSG0->groupId[DSG0->descriptor(ds)]);
+      SP::NonSmoothLaw nslaw = nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds)],
+                                            DSG0->groupId[DSG0->descriptor(ds)]);
 
       SP::Interaction inter(new Interaction(nslaw, relp));
-      nsds()->link(inter, ds);
+      sim->link(inter, ds);
     }
   }
   else
@@ -875,8 +871,7 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && IsSameSpherePlanR.flag)
       {
-        nsds()->topology()->
-        removeInteraction(DSG0->bundle(*oei));
+        sim->unlink(DSG0->bundle(*oei));
         break;
       }
     }
@@ -885,14 +880,16 @@ void SpaceFilter::_PlanSphereLDSFilter(double A, double B, double C, double D, S
 
 
 // note : all PlanObject should be merged
-void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, SP::SphereNEDS ds)
+void SpaceFilter::_PlanSphereNEDSFilter(SP::Simulation sim,
+                                        double A, double B,
+                                        double C, double D, SP::SphereNEDS ds)
 {
   double r = ds->getRadius();
 
   /* tolerance */
   double tol = r;
 
-  SP::DynamicalSystemsGraph DSG0 = nsds()->topology()->dSG(0);
+  SP::DynamicalSystemsGraph DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
   _IsSameSpherePlanR
   isSameSpherePlanR =
@@ -926,11 +923,11 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
     if (!found)
       // no
     {
-      SP::NonSmoothLaw nslaw = (*_nslaws)(DSG0->groupId[DSG0->descriptor(ds)],
-                                          DSG0->groupId[DSG0->descriptor(ds)]);
+      SP::NonSmoothLaw nslaw = nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds)],
+                                            DSG0->groupId[DSG0->descriptor(ds)]);
 
       SP::Interaction inter(new Interaction(nslaw, relp));
-      nsds()->link(inter, ds);
+      sim->link(inter, ds);
     }
   }
   else
@@ -946,8 +943,7 @@ void SpaceFilter::_PlanSphereNEDSFilter(double A, double B, double C, double D, 
       if (DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSpherePlanR.flag)
       {
-        nsds()->topology()->
-        removeInteraction(DSG0->bundle(*oei));
+        sim->unlink(DSG0->bundle(*oei));
         break;
       }
     }
@@ -1028,9 +1024,11 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
   typedef boost::unordered_multiset < interPair,
           boost::hash<interPair> > interPairs;
 
+  SP::Simulation sim;
   SP::SpaceFilter parent;
   double time;
-  _FindInteractions(SP::SpaceFilter p, double time) : parent(p), time(time) {};
+  _FindInteractions(SP::Simulation s, SP::SpaceFilter p, double time)
+    : sim(s), parent(p), time(time) {};
 
   void visit_circular(SP::CircularDS  ds1)
   {
@@ -1042,7 +1040,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     {
       for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
       {
-        parent->_PlanCircularFilter((*parent->_plans)(i, 0),
+        parent->_PlanCircularFilter(sim,
+                                    (*parent->_plans)(i, 0),
                                     (*parent->_plans)(i, 1),
                                     (*parent->_plans)(i, 2),
                                     (*parent->_plans)(i, 3),
@@ -1056,7 +1055,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     {
       for (unsigned int i = 0; i < parent->_moving_plans->size1(); ++i)
       {
-        parent->_MovingPlanCircularFilter(i, ds1, time);
+        parent->_MovingPlanCircularFilter(sim, i, ds1, time);
       }
     }
 
@@ -1075,7 +1074,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     unsigned int j;
     interPairs declaredInteractions;
     std11::shared_ptr<_CircularFilter>
-    circularFilter(new _CircularFilter(parent, ds1));
+    circularFilter(new _CircularFilter(sim, parent, ds1));
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
@@ -1118,7 +1117,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     // interactions with plans
     for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
     {
-      parent->_PlanSphereLDSFilter((*parent->_plans)(i, 0),
+      parent->_PlanSphereLDSFilter(sim,
+                                   (*parent->_plans)(i, 0),
                                    (*parent->_plans)(i, 1),
                                    (*parent->_plans)(i, 2),
                                    (*parent->_plans)(i, 3), ds1);
@@ -1140,7 +1140,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     unsigned int j;
     interPairs declaredInteractions;
 
-    std11::shared_ptr<_SphereLDSFilter> sphereFilter(new _SphereLDSFilter(parent, ds1));
+    std11::shared_ptr<_SphereLDSFilter> sphereFilter(
+      new _SphereLDSFilter(sim, parent, ds1));
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
@@ -1173,7 +1174,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     // interactions with plans
     for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
     {
-      parent->_PlanSphereNEDSFilter((*parent->_plans)(i, 0),
+      parent->_PlanSphereNEDSFilter(sim,
+                                    (*parent->_plans)(i, 0),
                                     (*parent->_plans)(i, 1),
                                     (*parent->_plans)(i, 2),
                                     (*parent->_plans)(i, 3), ds1);
@@ -1195,7 +1197,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     unsigned int j;
     interPairs declaredInteractions;
 
-    std11::shared_ptr<_SphereNEDSFilter> sphereFilter(new _SphereNEDSFilter(parent, ds1));
+    std11::shared_ptr<_SphereNEDSFilter> sphereFilter(
+      new _SphereNEDSFilter(sim, parent, ds1));
 
     for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
@@ -1232,16 +1235,17 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
 
 /* general proximity detection */
-void SpaceFilter::buildInteractions(double time)
+void SpaceFilter::updateInteractions(SP::Simulation sim)
 {
+  double time = sim->getTk();
   SP::DynamicalSystemsGraph
-    DSG0 = nsds()->topology()->dSG(0);
+    DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
   std11::shared_ptr<_BodyHash>
-  hasher(new _BodyHash(*this));
+  hasher(new _BodyHash(*sim, *this));
 
   std11::shared_ptr<_FindInteractions>
-  findInteractions(new _FindInteractions(shared_from_this(), time));
+  findInteractions(new _FindInteractions(sim, shared_from_this(), time));
 
   _hash_table->clear();
 
@@ -1327,22 +1331,4 @@ double SpaceFilter::minDistance(SP::Hashed h)
 
   return dmin;
 
-}
-
-void SpaceFilter::insert(SP::NonSmoothLaw nslaw,
-                         long unsigned int id1,
-                         long unsigned int id2)
-{
-  NSLawMatrix& nslaws = *_nslaws;
-
-  // ublas::matrix size type is not the same on 32 bits and 64 bits
-  unsigned int id = std::max((unsigned int) id1, (unsigned int) id2);
-  nslaws.resize (std::max((unsigned int) nslaws.size1(), (unsigned int) id+1));
-
-  nslaws(id1, id2) = nslaw;
-}
-
-SP::NonSmoothLaw SpaceFilter::nslaw(long unsigned int class1, long unsigned class2)
-{
-  return (*_nslaws)(class1, class2);
 }

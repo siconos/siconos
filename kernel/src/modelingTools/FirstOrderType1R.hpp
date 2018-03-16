@@ -55,7 +55,7 @@ protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(FirstOrderType1R);
-  
+
 
 public:
 
@@ -81,12 +81,9 @@ public:
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
-   * \param DSlink link to DS variable
-   * \param workV work vectors to initialize
-   * \param workM work matrices to initialize
-  */
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-  virtual void initialize(Interaction& inter) {};
+   */
+  virtual void initialize(Interaction& inter);
+
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
@@ -139,7 +136,6 @@ void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, Sim
   *  \param level not used
   */
   virtual void computeOutput(double time, Interaction& inter, unsigned int level = 0);
-  virtual void computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
 
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
@@ -149,13 +145,10 @@ void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, Sim
   */
   virtual void computeInput(double time, Interaction& inter,
                             unsigned int level = 0);
-  virtual void computeLinearizedInput(double time, Interaction& inter,
-                                      InteractionProperties& interProp,
-                                      unsigned int level = 0);
-  
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
 
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJach(double time, Interaction& inter);
+
+  virtual void computeJacg(double time, Interaction& inter);
 
   /** return true if the relation requires the computation of residu
       \return true if residu are required, false otherwise

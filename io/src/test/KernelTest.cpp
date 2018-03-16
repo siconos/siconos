@@ -261,13 +261,13 @@ void KernelTest::t5()
   // -------------
   // --- Model ---
   // -------------
-  SP::Model bouncingBall(new Model(t0, T));
+  SP::NonSmoothDynamicalSystem bouncingBall(new NonSmoothDynamicalSystem(t0, T));
 
   // add the dynamical system in the non smooth dynamical system
-  bouncingBall->nonSmoothDynamicalSystem()->insertDynamicalSystem(ball);
+  bouncingBall->insertDynamicalSystem(ball);
 
   // link the interaction and the dynamical system
-  bouncingBall->nonSmoothDynamicalSystem()->link(inter, ball);
+  bouncingBall->link(inter, ball);
 
 
   // ------------------
@@ -284,22 +284,18 @@ void KernelTest::t5()
   SP::OneStepNSProblem osnspb(new LCP());
 
   // -- (4) Simulation setup with (1) (2) (3)
-  SP::TimeStepping s(new TimeStepping(t, OSI, osnspb));
-  s->prepareIntegratorForDS(OSI, ball, bouncingBall, t0);
+  SP::TimeStepping s(new TimeStepping(bouncingBall, t, OSI, osnspb));
+  s->associate(OSI, ball);
 
   // =========================== End of model definition ===========================
 
   // ================================= Computation =================================
 
-  // --- Simulation initialization ---
+  Siconos::save(s, BBxml);
 
-  cout << "====> Initialisation ..." << endl << endl;
-  bouncingBall->setSimulation(s);
-  bouncingBall->initialize();
-
-  Siconos::save(bouncingBall, BBxml);
-
-  SP::Model bouncingBallFromFile = Siconos::load(BBxml);
+  SP::Simulation simFromFile = Siconos::load(BBxml);
+  SP::NonSmoothDynamicalSystem bouncingBallFromFile =
+    simFromFile->nonSmoothDynamicalSystem();
 
   CPPUNIT_ASSERT((bouncingBallFromFile->t0() == bouncingBall->t0()));
   // in depth comparison?
@@ -313,25 +309,27 @@ void KernelTest::t5()
 
 void KernelTest::t6()
 {
-  SP::Model bouncingBall = Siconos::load(BBxml);
+  SP::Simulation sim = Siconos::load(BBxml);
 
   try
   {
+    SP::NonSmoothDynamicalSystem bouncingBall = sim->nonSmoothDynamicalSystem();
+
     double T = bouncingBall->finalT();
     double t0 = bouncingBall->t0();
-    double h = bouncingBall->simulation()->timeStep();
+    double h = sim->timeStep();
     int N = (int)((T - t0) / h); // Number of time steps
 
     SP::DynamicalSystemsGraph dsg =
-      bouncingBall->nonSmoothDynamicalSystem()->topology()->dSG(0);
+      bouncingBall->topology()->dSG(0);
 
     SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
       (dsg->bundle(*(dsg->begin())));
 
-    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(bouncingBall->simulation());
+    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(sim);
     SP::Interaction inter;
     InteractionsGraph::VIterator ui, uiend;
-    SP::InteractionsGraph indexSet0 = bouncingBall->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+    SP::InteractionsGraph indexSet0 = bouncingBall->topology()->indexSet(0);
     for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       inter = indexSet0->bundle(*ui);
 
@@ -408,7 +406,7 @@ void KernelTest::t6()
   }
   catch (...)
   {
-    cout << "Exception caught in BouncingBallTS.cpp" << endl;
+    cout << "Exception caught in KernelTest.cpp" << endl;
     CPPUNIT_ASSERT(false);
 
   }
@@ -435,14 +433,14 @@ void KernelTest::t7()
   std::ofstream ofs("Kernelt7.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    siconos_io_register_Kernel(oa);
+    siconos_io_register_Mechanics(oa);
     oa << NVP(ds1);
   }
 
   std::ifstream ifs("Kernelt7.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    siconos_io_register_Kernel(ia);
+    siconos_io_register_Mechanics(ia);
     ia >> NVP(ds2);
   }
 
@@ -465,25 +463,29 @@ void KernelTest::t8()
   (*v)(1) = 0;
   (*v)(2) = 10.;
 
-  SP::Model model(new Model(0,10));
+  SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(0,10));
 
   ds1.reset(new Disk(1, 1, q, v));
   ds2.reset(new Disk(2, 2, q, v));
 
-  model->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds1);
-  model->nonSmoothDynamicalSystem()->insertDynamicalSystem(ds2);
+  nsds->insertDynamicalSystem(ds1);
+  nsds->insertDynamicalSystem(ds2);
 
   MechanicsIO IO;
 
-  SP::SimpleMatrix positions = IO.positions(*model);
-  SP::SimpleMatrix velocities = IO.velocities(*model);
+  SP::SimpleMatrix positions = IO.positions(*nsds);
+  SP::SimpleMatrix velocities = IO.velocities(*nsds);
 
   //ids
-  CPPUNIT_ASSERT((*positions)(0,0) == 1);
-  CPPUNIT_ASSERT((*velocities)(0,0) == 1);
+  CPPUNIT_ASSERT((*positions)(0,0) == 0);
+  CPPUNIT_ASSERT((*velocities)(0,0) == 0);
+  CPPUNIT_ASSERT((*positions)(0,0) == ds1->number());
+  CPPUNIT_ASSERT((*velocities)(0,0) == ds1->number());
 
-  CPPUNIT_ASSERT((*positions)(1,0) == 2);
-  CPPUNIT_ASSERT((*velocities)(1,0) == 2);
+  CPPUNIT_ASSERT((*positions)(1,0) == 1);
+  CPPUNIT_ASSERT((*velocities)(1,0) == 1);
+  CPPUNIT_ASSERT((*positions)(1,0) == ds2->number());
+  CPPUNIT_ASSERT((*velocities)(1,0) == ds2->number());
 
   CPPUNIT_ASSERT((*positions)(0,1) == 0.);
   CPPUNIT_ASSERT((*velocities)(0,1) == 0.);
@@ -494,3 +496,42 @@ void KernelTest::t8()
 
 }
 #endif
+
+void KernelTest::t9()
+{
+  try
+  {
+    // Serialize and deserialize an NSDS with T=inf
+    // (a possible failure case for xml archives)
+    double t0 = 0.0;
+    double T = std::numeric_limits<double>::infinity();
+    SP::NonSmoothDynamicalSystem nsds1(new NonSmoothDynamicalSystem(t0, T));
+    SP::NonSmoothDynamicalSystem nsds2;
+
+    std::ofstream ofs("Kernelt9.xml");
+    {
+      boost::archive::xml_oarchive oa(ofs);
+      siconos_io_register_Kernel(oa);
+      oa << NVP(nsds1);
+    }
+
+    std::ifstream ifs("Kernelt9.xml");
+    {
+      boost::archive::xml_iarchive ia(ifs);
+      siconos_io_register_Kernel(ia);
+      ia >> NVP(nsds2);
+    }
+
+    CPPUNIT_ASSERT(nsds1->finalT() == nsds2->finalT());
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    CPPUNIT_ASSERT(false);
+  }
+  catch (...)
+  {
+    cout << "Exception caught in KernelTest.cpp" << endl;
+    CPPUNIT_ASSERT(false);
+  }
+}

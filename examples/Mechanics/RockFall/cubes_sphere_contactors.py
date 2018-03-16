@@ -3,7 +3,7 @@ import numpy
 import math
 import pickle
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 
 from siconos.mechanics.collision.convexhull import ConvexHull
@@ -46,7 +46,7 @@ def normal_plane(p1,p2,p3):
 #create plans
 
 # Creation of the hdf5 file
-with Hdf5(use_compression=True) as io:
+with MechanicsHdf5Runner(use_compression=True) as io:
 
   ######### amont
   v0 = numpy.array([5.00,1.6131,1.0751])
@@ -63,10 +63,10 @@ with Hdf5(use_compression=True) as io:
   v3_extruded = v3 + numpy.dot(plan_thickness,amont_normal)
 
   amont_vertices=numpy.array([v0,v1,v2,v3, v0_extruded,v1_extruded,v2_extruded,v3_extruded])
-  print amont_vertices
+  print('amont_vertices', amont_vertices)
 
-  io.addConvexShape('amont',amont_vertices )
-  io.addObject('amont', [Contactor('amont')],
+  io.add_convex_shape('amont',amont_vertices )
+  io.add_object('amont', [Contactor('amont')],
                translation=[1.50, -1.45, -1.5331])
 
   ######### aval
@@ -80,10 +80,10 @@ with Hdf5(use_compression=True) as io:
   v5_extruded = v5 + numpy.dot(plan_thickness,aval_normal)
 
   aval_vertices=numpy.array([v2,v3,v4,v5,v2_extruded,v3_extruded,v4_extruded,v5_extruded])
-  print aval_vertices
+  print('aval_vertices', aval_vertices)
 
-  io.addConvexShape('aval',aval_vertices )
-  io.addObject('aval', [Contactor('aval')],
+  io.add_convex_shape('aval',aval_vertices )
+  io.add_object('aval', [Contactor('aval')],
                translation=[1.50, -1.45, -1.5331])
 
   ######### sol
@@ -100,10 +100,10 @@ with Hdf5(use_compression=True) as io:
                                   v6-[plan_thickness, 0.0 ,0.],v7+[plan_thickness, 0.0 ,0.],
                                   v4_extruded-[plan_thickness, 0.0 ,0.],v5_extruded+[plan_thickness, 0.0 ,0.],
                                   v6_extruded,v7_extruded])
-  print sol_vertices
+  print('sol_vertices', sol_vertices)
 
-  io.addConvexShape('sol',sol_vertices )
-  io.addObject('sol', [Contactor('sol')],
+  io.add_convex_shape('sol',sol_vertices )
+  io.add_object('sol', [Contactor('sol')],
                translation=[1.50, -1.45, -1.5331])
 
 
@@ -128,12 +128,12 @@ with Hdf5(use_compression=True) as io:
                      (cube_size, cube_size, -cube_size),
                      (cube_size, -cube_size, -cube_size),
                      (cube_size, -cube_size, cube_size)]
-        io.addConvexShape('CubeCS'+str(n)+'_'+str(i)+'_'+str(j), vertices)
+        io.add_convex_shape('CubeCS'+str(n)+'_'+str(i)+'_'+str(j), vertices)
 
         for v in vertices:
           sphere_count += 1
           spheres.append('Sphere%03d'%sphere_count)
-          io.addPrimitiveShape(spheres[-1], 'Sphere', [radius])
+          io.add_primitive_shape(spheres[-1], 'Sphere', [radius])
 
         # computation of inertia and volume
         ch = ConvexHull(vertices)
@@ -146,34 +146,29 @@ with Hdf5(use_compression=True) as io:
         #contactor = [Shape('CubeCS'+str(n)+'_'+str(i)+'_'+str(j))]
         contactor = []
         for sph,loc in zip(spheres, vertices):
-          contactor.append(Contactor(sph, relative_translation=loc))
-
-        io.addObject('cube'+str(n)+'_'+str(i)+'_'+str(j),
-                     contactor,
-                     translation=[i*(x_translate+x_shift*cube_size), x_shift*j*(x_translate+cube_size), (x_translate+cube_size*x_shift)*n],
-                     velocity=[0, 0, 0, 0, 0, 0],
-                     orientation=[math.cos(angle_init/2.0),0,math.sin(angle_init/2.0),0],
-                     mass=volume*density,
-                     inertia=inertia*density)
+          contactor.append(Contactor(sph, relative_translation=loc, collision_group=1))
+        # add a "fake" contactor for visualization ...
+        contactor.append(Contactor('CubeCS'+str(n)+'_'+str(i)+'_'+str(j), collision_group=-1))
+        io.add_object('cube'+str(n)+'_'+str(i)+'_'+str(j),
+                      contactor,
+                      translation=[i*(x_translate+x_shift*cube_size), x_shift*j*(x_translate+cube_size), (x_translate+cube_size*x_shift)*n],
+                      velocity=[0, 0, 0, 0, 0, 0],
+                      orientation=[math.cos(angle_init/2.0),0,math.sin(angle_init/2.0),0],
+                      mass=volume*density,
+                      inertia=inertia*density)
 
 
   # Definition of a non smooth law
-  io.addNewtonImpactFrictionNSL('contact', e=0.01, mu=0.9)
+  io.add_Newton_impact_friction_nsl('contact', e=0.01, mu=0.9, collision_group1=0, collision_group2=1)
 
 
 step=10000
 hstep=0.0005
 
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
 
 
   io.run(with_timer=False,
-         time_stepping=None,
-         space_filter=None,
-         body_class=None,
-         shape_class=None,
-         face_class=None,
-         edge_class=None,
          t0=0,
          T=step*hstep,
          h=hstep,

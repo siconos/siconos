@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("Filippov.dat", "ascii", dataPlot, "noDim");
     double error=0.0, eps=1e-05;
-    if (ioMatrix::compareRefFile(dataPlot, "Filippov.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "Filippov.ref", eps)) >= 0.0
         && error > eps)
       return 1;
   }

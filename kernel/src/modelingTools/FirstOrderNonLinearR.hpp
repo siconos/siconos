@@ -82,9 +82,11 @@ public:
   */
   virtual ~FirstOrderNonLinearR() {};
 
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-
+  /** initialize the relation (check sizes, memory allocation ...)
+   * \param inter the interaction using this relation
+   */
   void initialize(Interaction& inter);
+
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
    */
@@ -117,7 +119,8 @@ public:
    */
   virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& C);
   virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& D);
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+
+  virtual void computeJach(double time, Interaction& inter);
 
   /** default function to compute jacobianG according to lambda
   * \param time current time
@@ -127,6 +130,7 @@ public:
   * \param B
   */
   virtual void computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
+
   /** default function to compute jacobianG according to x
    * \param time  double : current time
    * \param x
@@ -136,16 +140,23 @@ public:
    */
   virtual void computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& K);
 
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
-  virtual void computeOutput(double time, Interaction& inter, unsigned int level = 0);
-  virtual void computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
-  virtual void computeLinearizedInput(double time, Interaction& inter,
-                                      InteractionProperties& interProp,
-                                      unsigned int level = 0);
-  
-  virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJacg(double time, Interaction& inter);
 
+  /** default function to compute y, using the data from the Interaction and DS
+  *  \param time current time (not used)
+  *  \param inter Interaction using this Relation
+  *  \param level not used
+  */
+  virtual void computeOutput(double time, Interaction& inter, unsigned int level = 0);
+
+  /** default function to compute r, using the data from the Interaction and DS
+   *  \param time current time (not used)
+   *  \param inter Interaction using this Relation
+   *  \param level not used
+   */
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
+
+  
   /** return true if the relation requires the computation of residu
    * \return true if residu are required, false otherwise
    */

@@ -25,13 +25,14 @@
 #include "Topology.hpp"
 #include "DynamicalSystem.hpp"
 
-
-
-
-/** the Non Smooth Dynamical System consists of DynamicalSystem
- *  and Interaction regrouped together in a Topology object,
- *  in the form of a graph of DynamicalSystem as nodes and Interaction as edges
- *  and its dual.
+/** the NonSmoothDynamicalSystem consists of a set of DynamicalSystem objects
+ *  and a set  Interaction objects structured into a graph inside a Topology
+ *  object.  In the DynamicalSystem graph, the DynamicalSystem set is the  node
+ *  set and the Interaction set is  the edge set.
+ *  The DynamicalSystem are insert into te NonSmoothDynamica system thanks to the
+ *  insertDynamicalSystem method and the edge of the graph are constructed through
+ *  the link method.
+ *  A dual graph is also contructed.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \date (Creation) Apr 23, 2004
@@ -45,27 +46,39 @@ public:
     addDynamicalSystem, rmDynamicalSystem, addInteraction, rmInteraction, clearTopology
   } ChangeType;
 
-  class Changes
+  class Change
   {
+  private:
+    ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Change);
+    Change(){};
   public:
     ChangeType typeOfChange;
     SP::DynamicalSystem ds;
     SP::Interaction i;
 
-    Changes(ChangeType t, SP::DynamicalSystem dsnew ):typeOfChange(t),ds(dsnew){};
-    Changes(ChangeType t, SP::Interaction inew):typeOfChange(t),i(inew){};
-    Changes(ChangeType t):typeOfChange(t){};
+    Change(ChangeType t, SP::DynamicalSystem dsnew ):typeOfChange(t),ds(dsnew){};
+    Change(ChangeType t, SP::Interaction inew):typeOfChange(t),i(inew){};
+    Change(ChangeType t):typeOfChange(t){};
     void display() const;
   };
 
-  typedef std::list<Changes> ChangeLog;
-  typedef ChangeLog::const_iterator ChangeLogIter;
+  typedef std::list<Change> ChangeLog;
+  class ChangeLogIter
+  {
+    ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Change);
+  public:
+    ChangeLogIter(){};
+    ChangeLogIter(const ChangeLog& log,
+                  const ChangeLog::const_iterator& i)
+      : _log(&log), it(i) {};
+    const ChangeLog *_log;
+    ChangeLog::const_iterator it;
+  };
 
 private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem);
-
 
   /** current time of the simulation
       Warning FP : it corresponds to the time
@@ -88,8 +101,7 @@ private:
   bool _BVP;
 
   /** log list of the modifications of the nsds */
-  std::list<Changes> _changeLog;
-
+  std::list<Change> _changeLog;
 
   /** the topology of the system */
   SP::Topology _topology;
@@ -165,7 +177,7 @@ public:
     _T = newValue;
   };
 
-/** get the title of the simulation
+  /** get the title of the simulation
    *  \return std::string : the title
    */
   inline const std::string  title() const
@@ -229,9 +241,6 @@ public:
     _date = s;
   }
 
-
-
-
   /** get problem type (true if BVP)
    *  \return a bool
    */
@@ -247,8 +256,6 @@ public:
   {
     return !_BVP;
   }
-
-
 
   /** set the NonSmoothDynamicalSystem to BVP, else it is IVP
    *  \param newBvp true if BVP, false otherwise
@@ -272,9 +279,19 @@ public:
    */
   inline ChangeLogIter changeLogPosition()
   {
-    std::list<Changes>::const_iterator it = _changeLog.end();
+    ChangeLogIter it(_changeLog, _changeLog.end());
     // return iterator to last item, i.e. one less than end
-    return --it;
+    --it.it;
+    return it;
+  };
+
+  /** get an iterator to the beginning of the changelog.
+   * \return an iterator pointing at the beginning of the changelog.
+   */
+  inline ChangeLogIter changeLogBegin()
+  {
+    ChangeLogIter it(_changeLog, _changeLog.begin());
+    return it;
   };
 
   /** clear the changelog up to a given position.
@@ -407,7 +424,7 @@ public:
     return _topology->name(inter);
   }
 
-    /** specify id the given Interaction is for controlling the DS
+  /** specify id the given Interaction is for controlling the DS
    * \param inter the Interaction
    * \param isControlInteraction true if the Interaction is used for
    * control purposes
@@ -476,6 +493,13 @@ public:
    */
   void updateOutput(double time, unsigned int level = 0);
 
+
+  /** compute Jacobians for all the interactions (in indexSet0)
+   * \param time
+   */
+  void computeInteractionJacobians(double time);
+
+  void computeInteractionJacobians(double time, InteractionsGraph& indexSet);
 
   /** visit all dynamical systems in this system.
    * \param visitor an SP::SiconosVisitor that can visit classes derived from DS

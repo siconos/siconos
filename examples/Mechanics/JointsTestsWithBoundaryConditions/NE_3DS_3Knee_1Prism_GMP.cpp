@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
 
     // -- (3) one step non smooth problem
     SP::OneStepNSProblem osnspb(new GenericMechanical());
-
+    osnspb->numericsSolverOptions()->dparam[0] = 1e-4;
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(myModel, t, OSI1, osnspb));
     s->associate(OSI1, beam1);
@@ -438,7 +438,8 @@ int main(int argc, char* argv[])
 
 
     double error=0.0, eps=1e-11;
-    if (ioMatrix::compareRefFile(dataPlot, "NE_3DS_3Knee_1Prism_GMP.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "NE_3DS_3Knee_1Prism_GMP.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
 

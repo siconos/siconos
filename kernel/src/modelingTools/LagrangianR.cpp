@@ -24,10 +24,6 @@
 
 #include <iostream>
 
-void LagrangianR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  // do nothing here, overload this if you need something done
-}
 void LagrangianR::checkSize(Interaction& inter)
 {
   // do nothing here, overload this if you need something done

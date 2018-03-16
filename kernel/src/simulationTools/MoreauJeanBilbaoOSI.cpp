@@ -74,19 +74,16 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter
   assert(ds2);
 
 
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   interProp.workVectors.reset(new VectorOfVectors);
   interProp.workMatrices.reset(new VectorOfSMatrices);
 
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
   interProp.workBlockVectors.reset(new VectorOfBlockVectors);
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
   workBlockV.resize(MoreauJeanBilbaoOSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
   RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
   
@@ -607,6 +604,10 @@ void MoreauJeanBilbaoOSI::display()
 
 void MoreauJeanBilbaoOSI::prepareNewtonIteration(double time)
 {
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+  }
 }
 
 

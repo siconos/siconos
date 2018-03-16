@@ -415,7 +415,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
     for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
+      inter->relation()->computeJach(t, *inter);
       assert(0);
     }
   }
@@ -434,7 +434,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
     for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet2->bundle(*ui);
-      inter->relation()->computeJach(t, *inter, indexSet2->properties(*ui));
+      inter->relation()->computeJach(t, *inter);
       assert(0);
     }
   }
@@ -543,20 +543,16 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-
 
   interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
   interProp.workBlockVectors.reset(new VectorOfBlockVectors);
 
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
+
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
   workBlockV.resize(Hem5OSI::BLOCK_WORK_LENGTH);
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
 
 

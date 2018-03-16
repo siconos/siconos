@@ -93,14 +93,6 @@ void NewtonEulerR::initialize(Interaction& inter)
 }
 
 
-void NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-
-  DEBUG_BEGIN("NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter, ...)\n");
-
-  DEBUG_END("NewtonEulerR::initializeWorkVectorsAndMatrices(Interaction& inter)\n");
-}
-
 void NewtonEulerR::checkSize(Interaction& inter)
 {
   unsigned int ySize = inter.getSizeOfY();
@@ -294,7 +286,7 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
   DEBUG_END("NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
 }
 
-void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void NewtonEulerR::computeJach(double time, Interaction& inter)
 {
   DEBUG_BEGIN("NewtonEulerR::computeJachq(double time, Interaction& inter, ...) \n");
   DEBUG_PRINTF("with time =  %f\n",time);

@@ -102,7 +102,8 @@ void SMCTest::test_iSMC_ZOH()
   ioMatrix::write("iSMC_ZOH.dat", "ascii", data, "noDim");
 
   double error =0.0;
-  bool test = !(ioMatrix::compareRefFile(data, "iSMC.ref", _tol, error)&& error > _tol);
+  bool test = !((error=ioMatrix::compareRefFile(data, "iSMC.ref", _tol)) >= 0.0
+                && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
 }
@@ -120,7 +121,8 @@ void SMCTest::test_iSMC_Lsodar()
   SimpleMatrix& data = *simLsodar->data();
   ioMatrix::write("iSMC_Lsodar.dat", "ascii", data, "noDim");
   double error =0.0;
-  bool test = !(ioMatrix::compareRefFile(data, "iSMC.ref", _tol, error)&& error > _tol);
+  bool test = !((error=ioMatrix::compareRefFile(data, "iSMC.ref", _tol)) >= 0.0
+                && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
 }
@@ -138,7 +140,8 @@ void SMCTest::test_eSMC_ZOH()
   SimpleMatrix& data = *simZOH->data();
   ioMatrix::write("eSMC_ZOH.dat", "ascii", data, "noDim");
   double error =0.0;
-  bool test = !(ioMatrix::compareRefFile(data, "eSMC.ref", _tol, error)&& error > _tol);
+  bool test = !((error=ioMatrix::compareRefFile(data, "eSMC.ref", _tol)) >= 0.0
+                && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
 }
@@ -156,7 +159,8 @@ void SMCTest::test_eSMC_Lsodar()
   SimpleMatrix& data = *simLsodar->data();
   ioMatrix::write("eSMC_Lsodar.dat", "ascii", data, "noDim");
   double error =0.0;
-  bool test = !(ioMatrix::compareRefFile(data, "eSMC.ref", _tol, error)&& error > _tol);
+  bool test = !((error=ioMatrix::compareRefFile(data, "eSMC.ref", _tol)) >= 0.0
+                && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
 }

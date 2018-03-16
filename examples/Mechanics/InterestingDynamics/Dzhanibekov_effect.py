@@ -5,27 +5,27 @@
 
 import siconos
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 
 options = siconos.mechanics.collision.bullet.SiconosBulletOptions()
 options.worldScale = 0.01
 
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     # Definition of a tetrahedron as a convex shape
-    io.addPrimitiveShape('Body1', 'Cylinder', (1, 6))
-    io.addPrimitiveShape('Body2', 'Box', (2, .4, 11))
-    
-    io.addObject('roo', [Contactor('Body1'),
-                         Contactor('Body2',
-                                   relative_translation=[0, 3, 0])],
-                 translation=[0, 0, 4],
-                 # a small perturbation on z axis
-                 velocity=[0, 0, 0, 0, 2, 0.0001],
-                 mass=1,
-                 inertia=[1, 10, 11])
+    io.add_primitive_shape('Body1', 'Cylinder', (1, 6))
+    io.add_primitive_shape('Body2', 'Box', (2, .4, 11))
 
-with Hdf5(mode='r+') as io:
+    io.add_object('roo', [Contactor('Body1'),
+                          Contactor('Body2',
+                                    relative_translation=[0, 3, 0])],
+                  translation=[0, 0, 4],
+                  # a small perturbation on z axis
+                  velocity=[0, 0, 0, 0, 2, 0.0001],
+                  mass=1,
+                  inertia=[1, 10, 11])
+
+with MechanicsHdf5Runner(mode='r+') as io:
 
     io.run(with_timer=True,
            options=options,

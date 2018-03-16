@@ -8,7 +8,7 @@ np.set_printoptions(precision=3)
 
 from siconos.mechanics.collision.tools import Contactor
 from siconos.mechanics.joints import cast_PrismaticJointR
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 from siconos.kernel import SiconosVector, BlockVector
 
 # An example of applying force to the axis of a joint, and applying
@@ -24,24 +24,24 @@ from siconos.kernel import SiconosVector, BlockVector
 # friction, see JointsTestsWithContactDetection.
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
     # Definition of two bars connected by a prismatic joint
-    io.addPrimitiveShape('Bar', 'Box', (1, 0.1, 0.1))
-    io.addObject('bar1', [Contactor('Bar')], [0.05,0,2],
+    io.add_primitive_shape('Bar', 'Box', (1, 0.1, 0.1))
+    io.add_object('bar1', [Contactor('Bar')], [0.05,0,2],
                  orientation=[(0,0,1),np.pi/2], mass=1.0, velocity=[0,0,0,0,0,1])
-    io.addObject('bar2', [Contactor('Bar')], [-0.05,0,2],
+    io.add_object('bar2', [Contactor('Bar')], [-0.05,0,2],
                  orientation=[(0,0,1),np.pi/2], mass=1.0)
-    io.addJoint('joint1', 'bar1', 'bar2', None, [[0,1,0]], 'PrismaticJointR', True)
+    io.add_joint('joint1', 'bar1', 'bar2', None, [[0,1,0]], 'PrismaticJointR', True)
 
     # Definition of the ground
-    io.addPrimitiveShape('Ground', 'Box', (5, 5, 0.1))
-    io.addObject('ground', [Contactor('Ground')], [0,0,-0.05])
+    io.add_primitive_shape('Ground', 'Box', (5, 5, 0.1))
+    io.add_object('ground', [Contactor('Ground')], [0,0,-0.05])
 
 class Ctrl(object):
     def initialize(self, io):
         self.count = 0
-        self.topo = io._model.nonSmoothDynamicalSystem().topology()
+        self.topo = io._nsds.topology()
         self.ds1 = self.topo.getDynamicalSystem('bar1')
         self.ds2 = self.topo.getDynamicalSystem('bar2')
         self.joint1 = cast_PrismaticJointR(
@@ -92,7 +92,7 @@ class Ctrl(object):
         self.ds2.setFExtPtr(force2)
 
 # Load and run the simulation
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
     io.run(t0=0,
            T=20,
            h=0.01,

@@ -164,7 +164,7 @@ protected:
   /** mass of the system */
   SP::SiconosMatrix _mass;
 
-  /** true i the  mass matrix is constant */
+  /** true if the  mass matrix is constant */
   bool _hasConstantMass;
 
   /** inverse or factorization of the mass of the system */

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 
 #import chute_con_vibrator_rear_up as chute_con_vibradores
@@ -45,11 +45,11 @@ box_width  = 3.430
 
 plane_thickness = 0.2
 
-with Hdf5(mode='w', io_filename=fn) as io:
+with MechanicsHdf5Runner(mode='w', io_filename=fn) as io:
 
-    io.addNewtonImpactFrictionNSL('contact_rocas', mu=float(mu), e=0.01,collision_group1=0, collision_group2=0)
-    io.addNewtonImpactFrictionNSL('contact_chute_rocas', mu=float(mu), e=0.01,collision_group1=1, collision_group2=0)
-    io.addNewtonImpactFrictionNSL('contact_vibratores_rocas', mu=float(mu), e=0.01,collision_group1=2, collision_group2=0)
+    io.add_Newton_impact_friction_nsl('contact_rocas', mu=float(mu), e=0.01,collision_group1=0, collision_group2=0)
+    io.add_Newton_impact_friction_nsl('contact_chute_rocas', mu=float(mu), e=0.01,collision_group1=1, collision_group2=0)
+    io.add_Newton_impact_friction_nsl('contact_vibratores_rocas', mu=float(mu), e=0.01,collision_group1=2, collision_group2=0)
 
 
     
@@ -69,7 +69,7 @@ with Hdf5(mode='w', io_filename=fn) as io:
     
 
 hstep =1e-3
-with Hdf5(mode='r+', io_filename=fn) as io:
+with MechanicsHdf5Runner(mode='r+', io_filename=fn) as io:
     io.run(with_timer=False,
            t0=0,
            T=45, #100*hstep,

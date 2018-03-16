@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
     // -- (4) Simulation setup with (1) (2) (3)
     SP::TimeStepping s(new TimeStepping(myModel, t, OSI1, osnspb));
     s->setNewtonTolerance(1e-10);
-    s->setNewtonMaxIteration(50);
+    s->setNewtonMaxIteration(4);
     // =========================== End of model definition ===========================
 
     // ================================= Computation =================================
@@ -330,10 +330,9 @@ int main(int argc, char* argv[])
     cout << "====> Output file writing ..." << endl;
     ioMatrix::write("NE_1DS_1Knee_MLCP.dat", "ascii", dataPlot, "noDim");
     ioMatrix::write("NE_1DS_1Knee_MLCP_beam1.dat", "ascii", beam1Plot, "noDim");
-    
 
     double error=0.0, eps=1e-11;
-    if (ioMatrix::compareRefFile(dataPlot, "NE_1DS_1Knee_MLCP.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "NE_1DS_1Knee_MLCP.ref", eps)) >= 0.0
         && error > eps)
       return 1;
 

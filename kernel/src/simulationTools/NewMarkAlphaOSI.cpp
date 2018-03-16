@@ -371,7 +371,7 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
       else if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() == osnsp)  // LCP at position level
       {
         // Update Jacobian matrix
-        inter->relation()->computeJach(t, *inter, indexSet->properties(vertex_inter));
+        inter->relation()->computeJach(t, *inter);
         // compute osnsp_rhs = y_{n,k} + G*q_free
         if(!_IsVelocityLevel)  // output at the position level y_{n,k} = g_{n,k}
         {
@@ -478,14 +478,12 @@ void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
 
   VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
   interProp.workBlockVectors.reset(new VectorOfBlockVectors);
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
   workBlockV.resize(NewMarkAlphaOSI::BLOCK_WORK_LENGTH);
 
 
   Relation &relation =  *inter.relation();
-  relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
 
   workV.resize(NewMarkAlphaOSI::WORK_INTERACTION_LENGTH);
@@ -572,6 +570,10 @@ void NewMarkAlphaOSI::prepareNewtonIteration(double time)
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
     computeW(ds, W);
+  }
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
   DEBUG_END("NewMarkAlphaOSI::prepareNewtonIteration(double time)\n");
 }

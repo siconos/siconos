@@ -106,6 +106,10 @@ typedef VectorOfMatrices::const_iterator VectorOfMatricesConstIterator;
 /** type of object used to save indices */
 typedef std::vector<std::size_t> Index;
 TYPEDEF_SPTR(Index)
+TYPEDEF_SPTR(VectorOfBlockVectors)
+TYPEDEF_SPTR(VectorOfVectors)
+TYPEDEF_SPTR(VectorOfMatrices)
+TYPEDEF_SPTR(VectorOfSMatrices)
 
 namespace ublas = boost::numeric::ublas;
 

@@ -181,9 +181,9 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
   return true;
 }
 
-bool compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
-                    double& error, Index index, SP::SimpleMatrix* ref,
-                    std::string mode, bool verbose)
+double compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
+                      Index index, SP::SimpleMatrix* ref, std::string mode,
+                      bool verbose)
 {
   SP::SimpleMatrix r;
   if (!ref) ref = &r;
@@ -200,7 +200,7 @@ bool compareRefFile(const SimpleMatrix& data, std::string filename, double epsil
                 << " not found, no comparison performed." << std::endl;
   }
   if (!compare)
-    return false;
+    return -1.0;
 
   if (verbose)
     std::cout << "Comparison with reference file " << filename << std::endl;
@@ -216,7 +216,7 @@ bool compareRefFile(const SimpleMatrix& data, std::string filename, double epsil
       index.push_back(i);
 
   /* Scalar error = max of columns */
-  error = 0.0;
+  double error = 0.0;
   for (unsigned int i = 0; i < index.size(); ++i)
   {
     if (error < (*err)(index[i]))
@@ -234,7 +234,7 @@ bool compareRefFile(const SimpleMatrix& data, std::string filename, double epsil
     }
   }
 
-  return true;
+  return error;
 }
 
 } // namespace ioMatrix

@@ -48,7 +48,6 @@ cf_scale_factor = 1
 normalcone_ratio = 1
 time_scale_factor = 1
 vtk_export_mode = True
-view_cycle = -1
 
 if len(args) > 0:
     io_filename = args[0]
@@ -65,7 +64,7 @@ import bisect
 from numpy.linalg import norm
 import numpy
 import random
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_hdf5 import MechanicsHdf5
 
 # attach velocity
 # contact points and associated forces are embedded in on a PolyData source
@@ -282,14 +281,13 @@ shape = dict()
 pos = dict()
 instances = dict()
 
-with Hdf5(io_filename=io_filename, mode='r') as io:
+with MechanicsHdf5(io_filename=io_filename, mode='r') as io:
 
     def load():
 
         ispos_data = io.static_data()
         idpos_data = io.dynamic_data()
         ivelo_data = io.velocities_data()
-
         icf_data = io.contact_forces_data()[:]
 
         isolv_data = io.solver_data()
@@ -641,7 +639,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             pos_data[id_t, 7], pos_data[id_t, 8])
 
         id_tv = numpy.where(velo_data[:, 0] == times[index])
-        
+
         set_velocityv(
             velo_data[id_tv, 1],
             velo_data[id_tv, 2],
@@ -657,7 +655,7 @@ with Hdf5(io_filename=io_filename, mode='r') as io:
             pos_data[id_t, 3],
             pos_data[id_t, 4],
         )
-        
+
         # set_displacementv(
         #     pos_data[id_t, 1],
         #     pos_data[id_t, 2]- pos_data[0, 2],

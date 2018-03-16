@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 from numpy import array, eye, empty, zeros, savetxt
 import numpy as np
 from siconos.kernel import FirstOrderLinearDS, RelayNSL, \
-NonSmoothDynamicalSystem, Model, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
+NonSmoothDynamicalSystem, TimeDiscretisation, TimeStepping, EulerMoreauOSI, \
 Interaction, Relay
 from math import ceil
 
@@ -66,16 +66,14 @@ myNslaw.display()
 
 myProcessInteraction = Interaction(myNslaw,
         myProcessRelation)
-myNSDS = NonSmoothDynamicalSystem()
-myNSDS.insertDynamicalSystem(process)
-myNSDS.link(myProcessInteraction,process)
 
 
-filippov = Model(t0,T)
-filippov.setNonSmoothDynamicalSystemPtr(myNSDS)
 
+filippov = NonSmoothDynamicalSystem(t0,T)
+filippov.insertDynamicalSystem(process)
+filippov.link(myProcessInteraction,process)
 td = TimeDiscretisation(t0, h)
-s = TimeStepping(td)
+s = TimeStepping(filippov,td)
 
 myIntegrator = EulerMoreauOSI(theta)
 s.insertIntegrator(myIntegrator)
@@ -88,9 +86,9 @@ osnspb = Relay()
 s.insertNonSmoothProblem(osnspb)
 s.setComputeResiduY(True)
 s.setComputeResiduR(True)
+s.setNewtonMaxIteration(40)
+s.setNewtonTolerance(1e-12)
 
-filippov.setSimulation(s)
-filippov.initialize()
 
 # matrix to save data
 dataPlot = empty((N+1,5))
@@ -101,7 +99,7 @@ dataPlot[0, 4] = myProcessInteraction.lambda_(0)[1]
 # time loop
 k = 1
 while(s.hasNextEvent()):
-     s.newtonSolve(1e-12, 40)
+     s.advanceToEvent()
      dataPlot[k, 0] = s.nextTime()
      dataPlot[k, 1] = process.x()[0]
      dataPlot[k, 2] = process.x()[1]
@@ -132,13 +130,14 @@ title('lambda2')
 grid()
 plt.savefig('Zhuravlev_all.png')
 
+plt.figure()
 plot(dataPlot[:,1], dataPlot[:,2])
 plt.xlabel('s')
 plt.xlabel('v')
 grid()
 plt.savefig('Zhuravlev_sv.png')
 
-
+plt.figure()
 plot(dataPlot[:,3], dataPlot[:,4])
 plt.xlabel('lambda1')
 plt.xlabel('lambda2')
@@ -147,7 +146,7 @@ plt.savefig('Zhuravlev_lambdas.png')
 
 pos = np.abs(dataPlot[:,1])
 velocity = (1-myProcessRelation._kappa*np.sign(dataPlot[:,1]*dataPlot[:,2]))*dataPlot[:, 2]*np.sign(dataPlot[:,1])
-
+plt.figure()
 subplot(211)
 title('position')
 plot(dataPlot[:,0], pos)
@@ -158,6 +157,7 @@ plot(dataPlot[:,0], velocity)
 grid()
 plt.savefig('Zhuravlev_pv.png')
 
+plt.figure()
 indx = np.nonzero(dataPlot[:, 0]>3)
 ttt = dataPlot[indx, 0].flatten()
 

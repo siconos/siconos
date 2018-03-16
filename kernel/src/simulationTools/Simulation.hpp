@@ -28,7 +28,6 @@
 #include <fstream>
 #include "NonSmoothDynamicalSystem.hpp"
 #include "InteractionManager.hpp"
-#include <list>
 
 /** Description of the simulation process (integrators, time
  *  discretisation and so on) - Base class for TimeStepping or
@@ -136,10 +135,6 @@ protected:
   /** map of not-yet-initialized DS variables for each OSI */
   std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
 
-  /** default constructor.
-   */
-  Simulation() {};
-
   /** Call the interaction manager one if is registered, otherwise do nothing. */
   void updateInteractions();
 
@@ -149,6 +144,18 @@ protected:
   {
     ;
   };
+
+  /** initialize OSI-DS links in the NSDS graph. */
+  void initializeOSIAssociations();
+
+  /** initialize objects (DSs and Interations) found in the NSDS
+   * Changelog and update the changelog iterator.
+   * \return true if any new Interactions were initialized
+   */
+  bool initializeNSDSChangelog();
+
+  /** initialize index sets for OSIs */
+  void initializeIndexSets();
 
 private:
 
@@ -162,6 +169,10 @@ private:
 
 
 public:
+
+  /** default constructor, for serialization
+   */
+  Simulation() {};
 
   /** default constructor
    *  \param td the timeDiscretisation for this Simulation
@@ -339,7 +350,7 @@ public:
    */
   void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
   {
-    _nsdsChangeLogPosition = _nsds->changeLog().begin();
+    _nsdsChangeLogPosition = _nsds->changeLogBegin();
     _nsds = newPtr;
   }
 

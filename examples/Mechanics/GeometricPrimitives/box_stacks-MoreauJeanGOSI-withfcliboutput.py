@@ -1,26 +1,25 @@
+#!/usr/bin/env python
 
-import os,sys
-import numpy
-import math
+import os
 
 from siconos.mechanics.collision.tools import Contactor
-#from siconos.io.mechanics_io import Hdf5
-from mechanics_io import Hdf5
-import siconos.io.mechanics_io
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 import siconos.numerics as Numerics
 import siconos.kernel as Kernel
+from siconos.io.FrictionContactTrace import FrictionContactTraceParams
 
 # A collection of box stacks for stress-testing Siconos solver with
 # chains of contacts.
 
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
 
-    width,depth,height = 1,1,1
-    io.addPrimitiveShape('Box', 'Box', [width,depth,height])
+    width, depth, height = 1, 1, 1
+    io.add_primitive_shape('Box', 'Box', [width, depth, height])
 
     k = 0
     sep = 0.01
+    
     def make_stack(X, Y, N, M, W):
         global k
         z = height/2.0
@@ -29,9 +28,9 @@ with Hdf5() as io:
                 for j in range(M):
                     x = (i-N/2.0)*(width+sep) + X
                     y = (j-M/2.0)*(depth+sep) + Y
-                    io.addObject('box%03d'%k, [Contactor('Box')],
-                                 translation=[x,y,z],
-                                 mass=1.0)
+                    io.add_object('box%03d' % k, [Contactor('Box')],
+                                  translation=[x,y,z],
+                                  mass=1.0)
                     k += 1
             N = N - 1 if N > 1 else N
             M = M - 1 if M > 1 else M
@@ -48,33 +47,29 @@ with Hdf5() as io:
     make_stack(0, 10, 1, 5, 5)
 
     # Definition of the ground
-    io.addPrimitiveShape('Ground', 'Box', (50, 50, 0.1))
-    io.addObject('ground', [Contactor('Ground')], [0,0,-0.05])
+    io.add_primitive_shape('Ground', 'Box', (50, 50, 0.1))
+    io.add_object('ground', [Contactor('Ground')], [0, 0, -0.05])
 
     # Enable to smash the wall
-    # io.addPrimitiveShape('Ball', 'Sphere', [1,])
-    # io.addObject('WreckingBall', [Contactor('Ball')],
+    # io.add_primitive_shape('Ball', 'Sphere', [1,])
+    # io.add_object('WreckingBall', [Contactor('Ball')],
     #              translation=[30,0,3], velocity=[-30,0,2,0,0,0],
     #              mass=10)
 
     # Definition of a non smooth law. As no group ids are specified it
     # is between contactors of group id 0.
-    io.addNewtonImpactFrictionNSL('contact', mu=0.3)
-solver=Numerics.SICONOS_GLOBAL_FRICTION_3D_ADMM
+    io.add_Newton_impact_friction_nsl('contact', mu=0.3)
+solver = Numerics.SICONOS_GLOBAL_FRICTION_3D_ADMM
 
-
-step=125
-hstep=1e-2
-itermax=1000
+step = 125
+hstep = 1e-2
+itermax = 1000
 dump_probability = .02
-theta=0.50
-tolerance=1e-12
+theta = 0.50
+tolerance = 1e-12
 
-from os import path
 if not os.path.exists('box_stacks'):
     os.mkdir('box_stacks')
-
-
 
 fileName = "./Box_stacks/Box_Stacks"
 title = "Box_stacks"
@@ -88,14 +83,14 @@ One Step non smooth problem: {2}, maxiter={3}, tol={4}
 
 mathInfo = ""
 
-from siconos.io.FrictionContactTrace import FrictionContactTraceParams
-friction_contact_trace_params = FrictionContactTraceParams(dump_itermax=20, dump_probability=None,
-                                                           fileName=fileName, title =title,
-                                                           description = description, mathInfo= mathInfo)
+friction_contact_trace_params = FrictionContactTraceParams(
+    dump_itermax=20, dump_probability=None,
+    fileName=fileName, title=title,
+    description=description, mathInfo=mathInfo)
 
     
 # Load and run the simulation
-with Hdf5(mode='r+') as io:
+with MechanicsHdf5Runner(mode='r+') as io:
     io.run(t0=0,
            T=step*hstep,
            h=hstep,

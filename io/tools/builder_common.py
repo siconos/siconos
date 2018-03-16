@@ -38,7 +38,7 @@ input_headers = {
 
 def unwanted(s):
     """ un processed classed or attributes : to be defined explicitely in SiconosFull.hpp"""
-    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SiconosVector|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|_moving_plans|_err|Hem5|_bufferY|_spo|_measuredPert|_predictedPert|_blockCSR', s)
+    m = re.search('xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SiconosVector|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|_moving_plans|_err|Hem5|_bufferY|_spo|_measuredPert|_predictedPert|_blockCSR|NonSmoothDynamicalSystem::ChangeLogIter', s)
     # note _err,_bufferY, _spo, _measuredPert, _predictedPert -> boost::circular_buffer issue with serialization
     # _spo : subpluggedobject
     # _blockCSR -> double * serialization needed by hand (but uneeded anyway for a full restart)
@@ -76,8 +76,7 @@ def get_priority(name, source_dir, header_path, header_line):
                    ('plugin', 5),
                    ('modelingTools', 6),
                    ('simulationTools', 7),
-                   ('model', 8),
-                   (r'.*', 9))
+                   (r'.*', 8))
 
     big_hack_prio = {'GraphProperties': 1e-3,
                      'DynamicalSystemProperties': 2e-3,
@@ -229,7 +228,7 @@ def write_includes(dest_file, all_headers):
 
 
 def write_register_with_bases(dest_file, with_base):
-    for target in {t: None for c,p,t in with_base}.keys():
+    for target in sorted({t: None for c,p,t in with_base}.keys()):
         with_base_s = [c for c, p, t in sorted(with_base, key=lambda k: (k[1], k[0]))
                        if t == target]
         dest_file.write('\n')

@@ -262,7 +262,7 @@ int main()
 
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "result.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "result.ref", eps)) >= 0.0
         && error > eps)
       return 1;
 

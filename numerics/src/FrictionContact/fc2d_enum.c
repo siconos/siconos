@@ -93,6 +93,29 @@ void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *veloci
 
 
   /*        printf("\n"); */
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = lcp_options->iparam[SICONOS_IPARAM_ITER_DONE];
+  options->iparam[SICONOS_DPARAM_RESIDU] = lcp_options->iparam[SICONOS_DPARAM_RESIDU];
+
+  if (options->dparam[SICONOS_DPARAM_RESIDU] > options->iparam[SICONOS_DPARAM_TOL])
+  {
+
+    if (verbose > 0)
+      printf("--------------- FC2D - ENUM - No convergence after %i iterations"
+             " residual = %14.7e < %7.3e\n", options->iparam[SICONOS_IPARAM_ITER_DONE],
+             options->dparam[SICONOS_DPARAM_RESIDU],
+             options->dparam[SICONOS_DPARAM_TOL] );
+
+  }
+  else
+  {
+
+    if (verbose > 0)
+      printf("--------------- FC2D - ENUM - Convergence after %i iterations"
+             " residual = %14.7e < %7.3e\n", options->iparam[SICONOS_IPARAM_ITER_DONE],
+             options->dparam[SICONOS_DPARAM_RESIDU], options->dparam[SICONOS_DPARAM_TOL]);
+
+    *info = 0;
+  }
   double error;
   *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[0], &error);
   free(zlcp);

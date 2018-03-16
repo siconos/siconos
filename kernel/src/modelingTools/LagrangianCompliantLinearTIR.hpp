@@ -92,12 +92,9 @@ public:
 
   /** initialize LagrangianCompliantLinearTIR specific operators.
    * \param inter an Interaction using this relation
-   * \param DSlink
-   * \param workV
-   * \param workM
    */
-  void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
-                      VectorOfVectors& workV, VectorOfSMatrices& workM);
+  void initialize(Interaction& inter);
+
   /** check sizes LagrangianCompliantLinearTIR specific operators.
    * \param inter an Interaction using this relation
    */
@@ -121,7 +118,7 @@ public:
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
-  void computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+  void computeJach(double time, Interaction& inter)
   {
     ;
   }
@@ -132,7 +129,7 @@ public:
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
-  void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+  void computeJacg(double time, Interaction& inter)
   {
     ;
   }

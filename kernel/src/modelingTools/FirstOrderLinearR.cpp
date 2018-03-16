@@ -76,38 +76,35 @@ FirstOrderLinearR::FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP:
   _e = E;
 }
 
-void FirstOrderLinearR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderLinearR::initialize(Interaction& inter)
 {
-  
-  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+
+  FirstOrderR::initialize(inter);
 
   // get interesting size
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeX = inter.getSizeOfDS();
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
-
-  // Update workV (copy of DS variables)
-  workV.resize(FirstOrderR::workVecSize);
-  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
-
-  workM.resize(FirstOrderR::mat_workMatSize);
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+  VectorOfVectors & relationVec= inter.relationVectors();
 
   if (!_C && _pluginJachx->fPtr)
-    workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeX));
+    relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeX));
   if (!_D && _pluginJachlambda->fPtr)
-    workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+    relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
   if (!_B && _pluginJacglambda->fPtr)
-    workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeX, sizeY));
+    relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeX, sizeY));
   if (!_F && _pluginf->fPtr)
-  {
-    workM[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
-  }
+    relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
   if (!_e && _plugine->fPtr)
-  {
-    workV[FirstOrderR::e].reset(new SiconosVector(sizeY));
-  }
+    relationVec[FirstOrderR::e].reset(new SiconosVector(sizeY));
+
   checkSize(inter);
 }
+
+
 void FirstOrderLinearR::checkSize(Interaction& inter)
 {
 

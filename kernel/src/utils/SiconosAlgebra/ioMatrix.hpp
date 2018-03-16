@@ -58,21 +58,23 @@ bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m
 bool write(const std::string& fileName, const std::string& mode, const SiconosMatrix& m, const std::string& outputType = "python");
 
 /** Function to load data from a file and compare it with the provided
- * data.  Returns true if the file was loaded and the comparison was
- * performed.  Caller needs to check diff <= epsilon to verify the
- * result.
+ * data.  Returns the measured difference between files if the file
+ * was loaded and the comparison was performed, which must be >= 0.0,
+ * otherwise -1.0 is returned.  Caller needs to check diff <= epsilon
+ * to verify the result.
  * \param data The data to compare against the file.
  * \param filename The name of the file to load and compare.
  * \param epsilon The comparison threshold.
- * \param error A double to receive scalar error.
  * \param index An optional list of column indexes, size==0 indicates all columns.
  * \param ref If provided, loaded matrix is returned in this pointer.
  * \param mode Mode string to pass to ioMatrix::read.
  * \param verbose True to print verbose output.
+ * \return Positive or 0.0 if the file was loaded and the comparison was performed,
+           otherwise -1.
  */
-bool compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
-                    double& error, Index index=Index(), SP::SimpleMatrix* ref=0,
-                    std::string mode="ascii", bool verbose=true);
+double compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
+                      Index index=Index(), SP::SimpleMatrix* ref=0,
+                      std::string mode="ascii", bool verbose=true);
 }
 
 #endif

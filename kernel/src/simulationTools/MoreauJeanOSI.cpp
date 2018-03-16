@@ -38,7 +38,6 @@
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
-
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -170,24 +169,31 @@ void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   assert(ds1);
   assert(ds2);
 
-  interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
-  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+  DEBUG_PRINTF("interaction number %i\n", inter.number());
+
+  if (!interProp.workVectors)
+  {
+    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors->resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
+  }
+
+  //interProp.workMatrices.reset(new VectorOfSMatrices);
+
+  if (!interProp.workBlockVectors)
+  {
+    interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+    interProp.workBlockVectors->resize(MoreauJeanOSI::BLOCK_WORK_LENGTH);
+  }
 
   VectorOfVectors& workV = *interProp.workVectors;
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
   //VectorOfSMatrices& workM = *interProp.workMatrices;
 
-  workBlockV.resize(MoreauJeanOSI::BLOCK_WORK_LENGTH);
-
   Relation &relation =  *inter.relation();
   relation.checkSize(inter);
-  //relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
 
-  workV.resize(MoreauJeanOSI::WORK_INTERACTION_LENGTH);
-  workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
-
-
+  if (!workV[MoreauJeanOSI::OSNSP_RHS])
+    workV[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -196,7 +202,9 @@ void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   inter.initializeMemory(computeResidu,_steps);
 
   /* allocate and set work vectors for the osi */
-  unsigned int xfree = xfree = MoreauJeanOSI::xfree;
+  unsigned int xfree = MoreauJeanOSI::xfree;
+  DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
+  DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
 
   if (ds1 != ds2)
   {
@@ -217,8 +225,6 @@ void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
     workBlockV[xfree]->setVectorPtr(0,workVds1[MoreauJeanOSI::VFREE]);
   }
-  DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
-  DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
 
   if (ds1 != ds2)
   {
@@ -231,6 +237,8 @@ void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter,
       workBlockV[xfree]->setVectorPtr(1,workVds2[MoreauJeanOSI::VFREE]);
     }
   }
+
+  DEBUG_EXPR(workBlockV[xfree]->display(););
   DEBUG_END("MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
 
 }
@@ -479,7 +487,7 @@ void MoreauJeanOSI::_computeWBoundaryConditions(DynamicalSystem& ds, SiconosMatr
 void MoreauJeanOSI::computeW(double t, DynamicalSystem& ds, SiconosMatrix& W)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
-  DEBUG_PRINT("MoreauJeanOSI::computeW starts\n");
+  DEBUG_BEGIN("MoreauJeanOSI::computeW\n");
 
   double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(ds);
@@ -545,7 +553,8 @@ void MoreauJeanOSI::computeW(double t, DynamicalSystem& ds, SiconosMatrix& W)
 
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(ds));
-  DEBUG_PRINT("MoreauJeanOSI::computeW ends\n");
+
+  DEBUG_END("MoreauJeanOSI::computeW\n");
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
 }
@@ -1156,11 +1165,11 @@ void MoreauJeanOSI::computeFreeState()
       SiconosVector& vfree = *workVectors[MoreauJeanOSI::VFREE];
 
       vfree = residuFree;
-
+      DEBUG_EXPR(vfree.display());
       // -- Update W --
       // Note: during computeW, mass and jacobians of forces will be computed/
       computeW(t, d, W);
-
+      DEBUG_EXPR(W.display(););
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X
@@ -1317,7 +1326,8 @@ void MoreauJeanOSI::prepareNewtonIteration(double time)
 
       SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
 
-      //  VA <2016-04-19 Tue> We compute T to be consitent with the Jacobian at the beginning of the Newton iteration and not at the end
+      //  VA <2016-04-19 Tue> We compute T to be consistent with the Jacobian
+      //   at the beginning of the Newton iteration and not at the end
       Type::Siconos dsType = Type::value(*ds);
       if(dsType == Type::NewtonEulerDS)
       {
@@ -1327,7 +1337,10 @@ void MoreauJeanOSI::prepareNewtonIteration(double time)
     }
 
   }
-
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+  }
 
   DEBUG_END(" MoreauJeanOSI::prepareNewtonIteration(double time)\n");
 

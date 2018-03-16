@@ -56,14 +56,13 @@ nslaw = sk.RelayNSL(ninter)
 particle_interaction = sk.Interaction(nslaw, particle_relation)
 
 # -- The Model --
-filippov = sk.Model(t0, T)
-nsds = filippov.nonSmoothDynamicalSystem()
-nsds.insertDynamicalSystem(particle)
-nsds.link(particle_interaction, particle)
+filippov = sk.NonSmoothDynamicalSystem(t0, T)
+filippov.insertDynamicalSystem(particle)
+filippov.link(particle_interaction, particle)
 
 # -- Simulation --
 td = sk.TimeDiscretisation(t0, h)
-simu = sk.TimeStepping(td)
+simu = sk.TimeStepping(filippov,td)
 # osi
 theta = 0.5
 myIntegrator = sk.EulerMoreauOSI(theta)
@@ -72,9 +71,6 @@ simu.insertIntegrator(myIntegrator)
 # osns
 osnspb = sk.Relay(sn.SICONOS_RELAY_LEMKE)
 simu.insertNonSmoothProblem(osnspb)
-
-filippov.setSimulation(simu)
-filippov.initialize()
 
 # -- Get the values to be plotted --
 output_size = 1 + ndof + 2 * ninter

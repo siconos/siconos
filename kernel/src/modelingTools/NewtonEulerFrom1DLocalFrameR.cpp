@@ -176,24 +176,6 @@ void NewtonEulerFrom1DLocalFrameR::initialize(Interaction& inter)
   //  _isContact=1;
 }
 
-void NewtonEulerFrom1DLocalFrameR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  NewtonEulerR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-  //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
-  unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
-  _jachq.reset(new SimpleMatrix(1, qSize));
-
-
-
-  /* VA 12/04/2016 All of what follows should be put in WorkM*/
-  _RotationAbsToContactFrame.reset(new SimpleMatrix(1, 3));
-  _rotationMatrixAbsToBody.reset(new SimpleMatrix(3, 3));
-  _AUX1.reset(new SimpleMatrix(3, 3));
-  _AUX2.reset(new SimpleMatrix(1, 3));
-  _NPG1.reset(new SimpleMatrix(3, 3));
-  _NPG2.reset(new SimpleMatrix(3, 3));
-  //  _isContact=1;
-}
 
 
 

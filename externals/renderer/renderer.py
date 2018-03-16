@@ -49,7 +49,7 @@ from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion,gp_Vec, gp_XYZ
 from OCC.TopLoc import TopLoc_Location
 
 #from Siconos.Mechanics import IO
-import siconos.io.mechanics_io as IO
+import siconos.io.mechanics_run as IO
 from Quaternion import Quat
 from collections import Counter, defaultdict
 from itertools import groupby

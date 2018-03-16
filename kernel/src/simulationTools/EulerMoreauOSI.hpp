@@ -137,6 +137,7 @@ protected:
    */
   bool _useGammaForRelation;
 
+
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
@@ -311,6 +312,9 @@ public:
    *  \param W the matrix to compute
    */
   void computeW(double time, DynamicalSystem& ds, DynamicalSystemsGraph::VDescriptor& dsv, SiconosMatrix& W);
+
+  void computeKhat(Interaction& inter, SiconosMatrix& m,
+                   VectorOfSMatrices& workM, double h) const;
 
   /** compute WBoundaryConditionsMap[ds] EulerMoreauOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem

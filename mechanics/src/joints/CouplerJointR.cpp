@@ -132,7 +132,7 @@ void CouplerJointR::makeBlockVectors(SP::SiconosVector q1, SP::SiconosVector q2,
    * specify the position of the references with respect to the joints
    * (i.e. whether joint1 is defined as q1-ref1 or ref1-q1.)  This has
    * an effect on the sign of the measurement, and therefore must be
-   * specified by the user.  In mechanics_io.py, the user only needs
+   * specified by the user.  In mechanics_run.py, the user only needs
    * to specify the two reference joints: we assume the reference body
    * is that which is not ds1 or ds2, and reference indexes are
    * calculated automatically.  Here we do not have that luxury since

@@ -265,12 +265,13 @@ int main(int argc, char* argv[])
     cout << "Number of non-smooth events: " << NumberNSEvent << endl;
     cout << "====> Output file writing ..." << endl << endl;
     ioMatrix::write("RockingBlockED_Lsodar_LZBimpact.dat", "ascii", DataPlot, "noDim");
-    
+
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(DataPlot, "RockingBlockED_Lsodar_LZBimpact.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(DataPlot, "RockingBlockED_Lsodar_LZBimpact.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
-   
+
   }
   //============================== Catch exceptions ===================================================================
   catch (SiconosException e)

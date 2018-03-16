@@ -112,6 +112,26 @@ REGISTER_BOOST_SERIALIZATION(FrictionContact);
 
 
 template <class Archive>
+void siconos_io(Archive& ar, GlobalFrictionContact &v, unsigned int version)
+{
+  SERIALIZE(v, (_contactProblemDim)(_sizeGlobalOutput)(_globalVelocities)(_b)(_H)(_mu)(_numerics_solver_options)(_numerics_solver_id), ar);
+
+  if (Archive::is_loading::value)
+  {
+    if (v._contactProblemDim == 2)
+      assert(! "No gfc2d_driver yet.");
+    else
+      v._gfc_driver = &gfc3d_driver;
+  }
+
+  ar & boost::serialization::make_nvp("LinearOSNS",
+                                      boost::serialization::base_object<LinearOSNS>(v));
+
+}
+REGISTER_BOOST_SERIALIZATION(GlobalFrictionContact);
+
+
+template <class Archive>
 void siconos_io(Archive& ar, __mpz_struct& v, unsigned int version)
 {
   SERIALIZE(v, (_mp_alloc)(_mp_size), ar);
@@ -356,8 +376,41 @@ namespace boost { namespace serialization {
   } // namespace serialization
 } // namespace boost
 
+// Work-around for issue reading inf/nan double values
+// (implementation in RegisterSimulationIxml.cpp)
+#ifndef SWIG
+#include <boost/archive/basic_text_iprimitive.hpp>
+namespace boost { namespace archive {
+template<> template<>
+void basic_text_iprimitive<std::istream>::load<double>( double& t );
+}}
+#endif // SWIG
 
-
+// Special overload for serializing an iterator to a list.  Requires
+// keeping a pointer to the list around, must correspond with the
+// changelog of the Simulation's NSDS.
+namespace boost { namespace serialization {
+template <class Archive>
+void save(Archive & ar, const NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned int version)
+{
+  ar & BOOST_SERIALIZATION_NVP(i._log);
+  int pos = std::distance(i._log->begin(), i.it);
+  ar & BOOST_SERIALIZATION_NVP(pos);
+  DEBUG_PRINTF("serialize %s\n", "NonSmoothDynamicalSystem::ChangeLogIter");
+};
+template <class Archive>
+void load(Archive & ar, NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned int version)
+{
+  ar & BOOST_SERIALIZATION_NVP(i._log);
+  int pos;
+  ar & BOOST_SERIALIZATION_NVP(pos);
+  i.it = i._log->begin();
+  for (; pos>0; --pos)
+    i.it++;
+  DEBUG_PRINTF("serialize %s\n", "NonSmoothDynamicalSystem::ChangeLogIter");
+};
+}}
+BOOST_SERIALIZATION_SPLIT_FREE(NonSmoothDynamicalSystem::ChangeLogIter)
 
 template <class Archive>
 void siconos_io_register_Kernel(Archive& ar)
@@ -374,6 +427,7 @@ void siconos_io_register_Kernel(Archive& ar)
   //  ar.register_type(static_cast<PluginHandle*>(NULL));
   ar.register_type(static_cast<__mpz_struct*>(NULL));
   ar.register_type(static_cast<FrictionContact*>(NULL));
+  ar.register_type(static_cast<GlobalFrictionContact*>(NULL));
   ar.register_type(static_cast<LsodarOSI*>(NULL));
 
 

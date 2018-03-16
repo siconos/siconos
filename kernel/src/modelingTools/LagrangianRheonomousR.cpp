@@ -44,11 +44,6 @@ LagrangianRheonomousR::LagrangianRheonomousR(const std::string& pluginh, const s
   setComputehDotFunction(SSLH::getPluginName(pluginDoth), SSLH::getPluginFunctionName(pluginDoth));
 }
 
-void LagrangianRheonomousR::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  LagrangianR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
-  checkSize(inter);
-}
 void LagrangianRheonomousR::initialize(Interaction& inter)
 {
   if (!_jachq)
@@ -156,7 +151,7 @@ void LagrangianRheonomousR::computeInput(double time, Interaction& inter,  unsig
   *DSlink[LagrangianR::z] = z;
 }
 
-void LagrangianRheonomousR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void LagrangianRheonomousR::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];

@@ -295,7 +295,7 @@ int main(int argc, char* argv[])
     ioMatrix::write("NE_BouncingBeam_beam.dat", "ascii", bouncingbeamPlot, "noDim");
 
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "NE_BouncingBeam.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "NE_BouncingBeam.ref", eps)) >= 0.0
         && error > eps)
       return 1;
 

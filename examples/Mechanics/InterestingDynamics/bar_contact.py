@@ -7,9 +7,8 @@ import pickle
 import random
 
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_io import Hdf5
+from siconos.io.mechanics_run import MechanicsHdf5Runner
 #sys.path.append('../..')
-#from mechanics_io import Hdf5
 import siconos.numerics as Numerics
 import siconos.kernel as Kernel
 # WARNING : in 3D by default z-axis is upward
@@ -50,14 +49,14 @@ id_plan=0
 
 #create some bodies
 # Creation of the hdf5 file for input/output
-with Hdf5() as io:
+with MechanicsHdf5Runner() as io:
   volume = bar_height * bar_length * bar_width
   mass = volume*density
   print('mass', mass)
   print('scale', scale)
   # raw_input()
   # Definition of a cube as a convex shape
-  io.addConvexShape('Bar', [ (-bar_length,  bar_width, -bar_height),
+  io.add_convex_shape('Bar', [ (-bar_length,  bar_width, -bar_height),
                              (-bar_length, -bar_width, -bar_height),
                              (-bar_length, -bar_width,  bar_height),
                              (-bar_length,  bar_width,  bar_height),
@@ -71,34 +70,34 @@ with Hdf5() as io:
   ori = [math.cos(angle/2.0),0.0,math.sin(angle/2.0),0]
   axis = numpy.zeros(3)
   angle_test = Kernel.axisAngleFromQuaternion(trans+ori, axis)
-  print angle_test,axis
+  print(angle_test,axis)
   print('ori initial', ori)
-  io.addObject('bar', [Contactor('Bar')],
+  io.add_object('bar', [Contactor('Bar')],
                translation=trans,
                orientation = ori,
                velocity=[0, 0, 0, 0, 0.0, 0],
                mass=mass)
 
   # Definition of the ground shape
-  io.addPrimitiveShape('Ground', 'Box', (5*scale, 5*scale, 0.1*scale))
+  io.add_primitive_shape('Ground', 'Box', (5*scale, 5*scale, 0.1*scale))
   angleground=  -math.pi/4.0
   axis = [1.0, 0.0, 0.0]
   origround = [math.cos(angleground/2.0),
                axis[0] * math.sin(angleground/2.0),
                axis[1] * math.sin(angleground/2.0),
                axis[2] * math.sin(angleground/2.0)]
-  io.addObject('ground', [Contactor('Ground')],
+  io.add_object('ground', [Contactor('Ground')],
                translation=[0, 0, 0.0],
                orientation = origround)
 
 
   # Definition of a non smooth law. As no group ids are specified it
   # is between contactors of group id 0.
-  io.addNewtonImpactFrictionNSL('contact', mu=0.3)
+  io.add_Newton_impact_friction_nsl('contact', mu=0.3)
 
-  print body_collection
+  print(body_collection)
 
-  f = open('body_collection.dict', 'w')
+  f = open('body_collection.dict', 'wb')
   pickle.dump(body_collection,f)
   f.close()
 
@@ -119,7 +118,7 @@ def apply_forces(body):
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done
 # with the vview command.
-with Hdf5(mode='r+', collision_margin=0.01) as io:
+with MechanicsHdf5Runner(mode='r+', collision_margin=0.01) as io:
 
     # By default earth gravity is applied and the units are those
     # of the International System of Units.
@@ -127,7 +126,6 @@ with Hdf5(mode='r+', collision_margin=0.01) as io:
     # sizes of small objects may need to be expressed in cm or mm.
   io.run(with_timer=False,
          time_stepping=None,
-         space_filter=None,
          body_class=None,
          shape_class=None,
          face_class=None,

@@ -56,7 +56,7 @@ private:
 
   /** default constructor
    */
-  FirstOrderLinearTIDS() {};
+  FirstOrderLinearTIDS()  {_hasConstantA =true ;_hasConstantB =true; };
 
 public:
 

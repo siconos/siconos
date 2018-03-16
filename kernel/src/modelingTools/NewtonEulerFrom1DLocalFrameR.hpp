@@ -83,6 +83,34 @@ protected:
   /*buffer matrices*/
   SP::SimpleMatrix _AUX1;
   SP::SimpleMatrix _AUX2;
+
+  /** Set the coordinates of first contact point.  Must only be done
+  * in a computeh() override.
+  * \param npc new coordinates
+  */
+  void setpc1(SP::SiconosVector npc)
+  {
+    _Pc1 = npc;
+  };
+
+  /** Set the coordinates of second contact point.  Must only be done
+  * in a computeh() override.
+  * \param npc new coordinates
+  */
+  void setpc2(SP::SiconosVector npc)
+  {
+    _Pc2 = npc;
+  };
+
+  /** Set the coordinates of inside normal vector at the contact point.
+   * Must only be done in a computeh() override.
+  * \param nnc new coordinates
+  */
+  void setnc(SP::SiconosVector nnc)
+  {
+    _Nc = nnc;
+  };
+
 private:
   void NIcomputeJachqTFromContacts(SP::SiconosVector q1);
   void NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2);
@@ -109,9 +137,6 @@ public:
   virtual ~NewtonEulerFrom1DLocalFrameR() {};
 
   virtual void computeJachq(double time, Interaction& inter, SP::BlockVector q0);
-
-
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
 
   virtual void initialize(Interaction& inter);
 
@@ -143,28 +168,44 @@ public:
     return _Nc;
   }
 
-  /** set the coordinates of first contact point
+  inline SP::SiconosVector relPc1() const
+  {
+    return _relPc1;
+  }
+  inline SP::SiconosVector relPc2() const
+  {
+    return _relPc2;
+  }
+  inline SP::SiconosVector relNc() const
+  {
+    return _relNc;
+  }
+
+  /** Set the coordinates of first contact point in ds1 frame.
+   * It will be used to compute _Pc1 during computeh().
   * \param npc new coordinates
   */
-  void setpc1(SP::SiconosVector npc)
+  void setRelPc1(SP::SiconosVector npc)
   {
-    _Pc1 = npc;
+    _relPc1 = npc;
   };
 
-  /** set the coordinates of second contact point
+  /** Set the coordinates of second contact point in ds2 frame
+   * It will be used to compute _Pc2 during computeh().
   * \param npc new coordinates
   */
-  void setpc2(SP::SiconosVector npc)
+  void setRelPc2(SP::SiconosVector npc)
   {
-    _Pc2 = npc;
+    _relPc2 = npc;
   };
 
-  /** set the coordinates of inside normal vector at the contact point
+  /** Set the coordinates of inside normal vector at the contact point in ds2 frame.
+   * It will be used to compute _Nc during computeh().
   * \param nnc new coordinates
   */
-  void setnc(SP::SiconosVector nnc)
+  void setRelNc(SP::SiconosVector nnc)
   {
-    _Nc = nnc;
+    _relNc = nnc;
   };
 
   // visitors hook

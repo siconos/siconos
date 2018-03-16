@@ -48,13 +48,8 @@ protected:
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
-   * \param DSlink
-   * \param workV
-   * \param workM
    */
-  virtual void initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink,
-                              VectorOfVectors& workV, VectorOfSMatrices& workM);
-  virtual void initialize(Interaction& inter) {};
+  virtual void initialize(Interaction& inter);
 
   /** check sizes of the relation specific operators.
    * \param inter an Interaction using this relation
@@ -128,14 +123,14 @@ public:
    *  \param inter Interaction using this Relation
    *  \param interProp
    */
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) {};
+  virtual void computeJach(double time, Interaction& inter) {};
 
   /** compute the jacobian of g: nothing to be done here
    *  \param time current time
    *  \param inter Interaction using this Relation
    *  \param interProp
    */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) {};
+  virtual void computeJacg(double time, Interaction& inter) {};
  
 
   /** set e

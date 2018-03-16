@@ -175,7 +175,8 @@ int main(int argc, char* argv[])
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     std::cout << "Comparison with a reference file" << std::endl;
     double error=0.0, eps=1e-12;
-    if (ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-MoreauJeanGOSI.ref", eps, error)
+    if ((error=ioMatrix::compareRefFile(dataPlot, "BouncingBallTS-MoreauJeanGOSI.ref",
+                                        eps)) >= 0.0
         && error > eps)
       return 1;
 

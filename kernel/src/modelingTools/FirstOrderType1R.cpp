@@ -44,33 +44,30 @@ FirstOrderType1R::FirstOrderType1R(const std::string& pluginh, const std::string
   setComputeJacglambdaFunction(SSLH::getPluginName(pluginJacglambda), SSLH::getPluginFunctionName(pluginJacglambda));
 }
 
-void FirstOrderType1R::initializeWorkVectorsAndMatrices(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+
+void FirstOrderType1R::initialize(Interaction& inter)
 {
 
-  FirstOrderR::initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
+  FirstOrderR::initialize(inter);
 
   // Check if an Interaction is connected to the Relation.
   unsigned int sizeY = inter.getSizeOfY();
   unsigned int sizeDS = inter.getSizeOfDS();
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 
-
-  workV.resize(FirstOrderR::workVecSize);
-  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
-  workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
-
-  workM.resize(FirstOrderR::mat_workMatSize);
-
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
   if (!_C)
-    workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
+    relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
   if (!_D)
-    workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+    relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
   if (!_F)
-    workM[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
+    relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
   if (!_B)
-    workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
+    relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
 }
+
+
 void FirstOrderType1R::checkSize(Interaction& inter)
 {
 
@@ -106,10 +103,6 @@ void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned i
   *DSlink[FirstOrderR::z] = *z_vec;
 }
 
-void FirstOrderType1R::computeLinearizedOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  assert(0);
-}
 void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned int level)
 {
   assert(_pluging && "FirstOrderType1R::computeInput() is not linked to a plugin function");
@@ -129,10 +122,7 @@ void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned in
   *DSlink[FirstOrderR::r] = *r_vec;
   *DSlink[FirstOrderR::z] = *z_vec;
 }
-void FirstOrderType1R::computeLinearizedInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
-  assert(0);
-}
+
 void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C)
 {
   //
@@ -156,36 +146,33 @@ void FirstOrderType1R::computeJacglambda(double time, SiconosVector& lambda, Sic
     ((Type1Ptr)(_pluginJacglambda->fPtr))(lambda.size(), &(lambda)(0), B.size(0), B.getArray(), z.size(), &(z)(0));
 }
 
-void FirstOrderType1R::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void FirstOrderType1R::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-  SiconosVector& x = *workV[FirstOrderR::vec_x];
-  x = *DSlink[FirstOrderR::x];
-  SiconosVector& z = *workV[FirstOrderR::vec_z];
-  z = *DSlink[FirstOrderR::z];
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+
+  *_vec_x = *DSlink[FirstOrderR::x];
+  *_vec_z = *DSlink[FirstOrderR::z];
   if (!_C)
   {
-    computeJachx(time, x, z, *workM[FirstOrderR::mat_C]);
+    computeJachx(time, *_vec_x, *_vec_z, *relationMat[FirstOrderR::mat_C]);
   }
   if (!_F)
   {
-    computeJachz(time, x, z, *workM[FirstOrderR::mat_F]);
+    computeJachz(time, *_vec_x, *_vec_z, *relationMat[FirstOrderR::mat_F]);
   }
-  *DSlink[FirstOrderR::z] = z;
+  *DSlink[FirstOrderR::z] = *_vec_z;
 }
 
-void FirstOrderType1R::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+void FirstOrderType1R::computeJacg(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-  SiconosVector& z = *workV[FirstOrderR::vec_z];
-  z = *DSlink[FirstOrderR::z];
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+
+  *_vec_z = *DSlink[FirstOrderR::z];
   if (!_B)
   {
-    computeJacglambda(time, *inter.lambda(0), z, *workM[FirstOrderR::mat_B]);
+    computeJacglambda(time, *inter.lambda(0), *_vec_z, *relationMat[FirstOrderR::mat_B]);
   }
-  *DSlink[FirstOrderR::z] = z;
+  *DSlink[FirstOrderR::z] = *_vec_z;
 }
