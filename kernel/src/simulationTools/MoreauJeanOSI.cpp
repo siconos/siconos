@@ -116,12 +116,15 @@ void MoreauJeanOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
   workVectors.resize(MoreauJeanOSI::WORK_LENGTH);
 
+
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
   assert(dsType == Type::LagrangianLinearTIDS
          || dsType == Type::LagrangianDS
          || dsType == Type::NewtonEulerDS
          || dsType == Type::LagrangianLinearDiagonalDS);
+
+  ds->setOrder(1);
 
   // Compute W (iteration matrix)
   initializeIterationMatrixW(t, ds);

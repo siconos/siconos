@@ -683,6 +683,33 @@ void NewtonEulerDS::initRhs(double time)
   DEBUG_END("NewtonEulerDS::initRhs(double time)\n");
 }
 
+void NewtonEulerDS::setOrder(const unsigned int newOrder)
+{
+
+  if (newOrder >= 0)
+  {
+    if (_q)
+      _q.reset(new SiconosVector(_qDim));
+  }
+  if (newOrder > 0)
+  {
+    if (_twist)
+      _twist.reset(new SiconosVector(_ndof));
+    if (_dotq)
+      _dotq.reset(new SiconosVector(_qDim));
+  }
+  if (newOrder > 1)
+  {
+    if (_acceleration)
+      _acceleration.reset(new SiconosVector(_ndof));
+  }
+  if (newOrder > 2)
+  {
+    RuntimeException::selfThrow("NewtonEuler::setOrder - impossible to set order at thie value ");
+  }
+  _order = newOrder;
+}
+
 void NewtonEulerDS::resetToInitialState()
 {
   // set q and q[1] to q0 and Twist0

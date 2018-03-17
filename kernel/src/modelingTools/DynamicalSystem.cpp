@@ -37,7 +37,7 @@ void DynamicalSystem::_init()
   // components.
   
   _stepsInMemory = 1;
-  _x.resize(2);
+  _x.resize(_order+1);
   _z.reset(new SiconosVector(1));
 }
 
@@ -66,11 +66,12 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
     _x0.reset(new SiconosVector(*(ds.x0())));
   if(ds.r())
     _r.reset(new SiconosVector(*(ds.r())));
-  _x.resize(2);
-  if(ds.x())
-     _x[0].reset(new SiconosVector(*(ds.x())));
-  if(ds.rhs())
-    _x[1].reset(new SiconosVector(*(ds.rhs())));
+  _x.resize(_order+1);
+  for (unsigned int o =0; o < _order+1; o++)
+  {
+    if (ds.x(o))
+      _x[o].reset(new SiconosVector(*(ds.x(o))));
+  }
   if (ds.jacobianRhsx())
     _jacxRhs.reset(new SimpleMatrix(*(ds.jacobianRhsx())));
 
@@ -92,6 +93,7 @@ void DynamicalSystem::resetToInitialState()
 
 
 // Setters
+
 
 void DynamicalSystem::setX0(const SiconosVector& newValue)
 {
@@ -120,7 +122,6 @@ SP::SiconosVector DynamicalSystem::x(unsigned int level) const
   if (level > _order)
   {
     RuntimeException::selfThrow("Dynamical::x x("+std::to_string(level)+") is not allocated\n"
-
                                 "Hint: Construct a Dyncamical System with a greater order if you need it. \n");
   }
   return _x[level];

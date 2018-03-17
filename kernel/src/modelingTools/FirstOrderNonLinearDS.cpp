@@ -95,6 +95,16 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const FirstOrderNonLinearDS & FONLD
   _rMemory = FONLDS.rMemory();
 }
 
+void FirstOrderNonLinearDS::setOrder(const unsigned int newOrder)
+{
+  _order = newOrder;
+  _x.resize(_order+1);
+  for (unsigned int o =0; o < _order+1; o++)
+  {
+    if (_x[o])
+      _x[o].reset(new SiconosVector(_n));
+  }
+}
 
 void FirstOrderNonLinearDS::_zeroPlugin()
 {

@@ -167,6 +167,8 @@ public:
   /** destructor */
   virtual ~FirstOrderNonLinearDS() {};
 
+  void setOrder(const unsigned int newOrder);
+  
   /*! @name Right-hand side computation */
   //@{
 

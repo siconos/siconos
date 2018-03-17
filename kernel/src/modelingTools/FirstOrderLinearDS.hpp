@@ -138,6 +138,9 @@ public:
   /** destructor */
   virtual ~FirstOrderLinearDS() {};
 
+
+
+  
   /*! @name Right-hand side computation */
 
   /** Initialization function for the rhs and its jacobian.

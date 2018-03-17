@@ -43,11 +43,7 @@ void LagrangianDS::_init(SP::SiconosVector position, SP::SiconosVector velocity)
   _q[0].reset(new SiconosVector(*_q0));
   _q[1].reset(new SiconosVector(*_velocity0));
 
-  if (_order  > 1)
-    for (unsigned int i = 2 ; i < _order+1 ; i++)
-    {
-      _q[i].reset(new SiconosVector(_ndof));
-    }
+  setOrder(_order);
 
   // /** \todo lazy Memory allocation */
   // _p.resize(3);
@@ -149,6 +145,17 @@ void LagrangianDS::initializeNonSmoothInput(unsigned int min, unsigned int max)
       _p[i].reset(new SiconosVector(_ndof));
   }
   DEBUG_END("void LagrangianDS::initializeNonSmoothInput(unsigned int min, unsigned int max)\n")
+}
+
+void LagrangianDS::setOrder(const unsigned int newOrder)
+{
+  _order = newOrder;
+  _q.resize(_order+1);
+  for (unsigned int o =0; o < _order+1; o++)
+  {
+    if (_q[o])
+      _q[o].reset(new SiconosVector(_ndof));
+  }
 }
 
 void LagrangianDS::resetToInitialState()

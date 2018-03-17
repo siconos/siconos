@@ -427,6 +427,8 @@ public:
    */
   void resetNonSmoothPart(unsigned int level);
 
+  void setOrder(const unsigned int newOrder);
+  
   // -- forces --
   /** get forces
    *  \return pointer on a SiconosVector
@@ -517,10 +519,6 @@ public:
   }
   
   SP::SiconosVector acceleration() const;
-
-
-  SP::SiconosVector acceleration() const;
-
 
   /** Get the linear velocity in the absolute (inertial) or relative
    * (body) frame of reference.

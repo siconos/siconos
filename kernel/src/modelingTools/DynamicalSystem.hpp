@@ -274,6 +274,12 @@ public:
    */
   void setX0(const SiconosVector& newValue);
 
+  /** set the order of the dynamical system
+   *  An increase of the order implies allocation of _x up to _order+1
+   *  \param newOrder unsigned int
+   */
+  virtual void setOrder(const unsigned int newOrder) =0;
+  
   /** set initial state (pointer link)
    *  \param newPtr SP::SiconosVector
    */
@@ -327,14 +333,6 @@ public:
     return _r;
   }
 
-  /** returns a pointer to r vector (input due to nonsmooth behavior)
-   *  \return SP::SiconosVector
-   */
-  inline SP::SiconosVector r(unsigned int level) const
-  {
-    // if needed _r must be a vector of Vectors in the future
-    return _r;
-  }
 
   /** get a copy of r vector (input due to nonsmooth behavior)
    *  \return a SiconosVector

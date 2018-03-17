@@ -341,6 +341,8 @@ public:
   /** destructor */
   virtual ~LagrangianDS() {};
 
+  void setOrder(const unsigned int newOrder);
+
   /*! @name Right-hand side computation */
   //@{
 
