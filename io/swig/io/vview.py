@@ -409,6 +409,7 @@ class InputObserver():
     def __init__(self, vview, times=None, slider_repres=None):
         self.vview = vview
         self._opacity = 1.0
+        self._opacity_static = 1.0
         self._current_id = vtk.vtkIdTypeArray()
         self._renderer = vview.renderer
         self._renderer_window = vview.renderer_window
@@ -467,6 +468,13 @@ class InputObserver():
             for actor,_,_ in actors:
                 actor.GetProperty().SetOpacity(self._opacity)
 
+    def set_opacity_static(self):
+        for instance, actors in self.vview.static_actors.items():
+            for actor,_,_ in actors:
+                actor.GetProperty().SetOpacity(self._opacity_static)
+
+    
+
     def key(self, obj, event):
         key = obj.GetKeySym()
         print('key', key)
@@ -505,7 +513,14 @@ class InputObserver():
         if key == 'T':
             self._opacity += .1
             self.set_opacity()
+            
+        if key == 'y':
+            self._opacity_static -= .1
+            self.set_opacity_static()
 
+        if key == 'Y':
+            self._opacity_static += .1
+            self.set_opacity_static()
         if key == 'c':
             print('camera position:', self._renderer.GetActiveCamera().GetPosition())
             print('camera focal point', self._renderer.GetActiveCamera().GetFocalPoint())
@@ -1251,7 +1266,10 @@ class VView(object):
         else:
             shape_attr_name='shape_name'
 
-        collision_group = contactor.attrs['group']
+        if 'group' in  contactor.attrs:
+            collision_group = contactor.attrs['group']
+        else:
+            collision_group = -1
         if 'type' in contactor.attrs:
             contact_type = contactor.attrs['type']
             contact_index = contactor.attrs['contact_index']
