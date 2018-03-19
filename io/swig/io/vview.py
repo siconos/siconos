@@ -144,7 +144,7 @@ class VViewOptions(object):
                 self.max_time = float(a)
 
             elif o == '--cf-scale':
-                self.opts.cf_scale_factor = float(a)
+                self.cf_scale_factor = float(a)
 
             elif o == '--no-cf':
                 self.cf_disable = True
