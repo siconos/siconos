@@ -1002,7 +1002,8 @@ class MechanicsHdf5(object):
 
                 if hasattr(ctor, 'parameters') and \
                         ctor.parameters is not None:
-                    dat.attrs['parameters'] = pickle.dumps(ctor.parameters)
+                    ## we add np.void to manage writing string in hdf5 files see http://docs.h5py.org/en/latest/strings.html
+                    dat.attrs['parameters'] = np.void(pickle.dumps(ctor.parameters))
 
                 if hasattr(ctor, 'contact_type') and \
                    ctor.contact_type is not None:
