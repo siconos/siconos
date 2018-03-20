@@ -8,7 +8,7 @@
 include(FindPythonModule)
 include(FindSphinxModule)
 
-set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/Docs/build/html/ CACHE INTERNAL "Root path to documentation - Corresponds to 'htdocs' on gforge page.")
+set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/Docs/build/html/ CACHE INTERNAL "Root path to generated documentation.")
 
 #  ====== doxygen documentation setup ======
 # This setup is required if one at least of
@@ -17,13 +17,15 @@ set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/Docs/build/html/ CACHE INTERNAL "Root path 
 # - python docstrings from doxygen (xml) (see WITH_DOXY2SWIG)
 # - doxygen documentation generated from source files (see WITH_DOCUMENTATION)
 if(USE_DOXYGEN)
-  find_package(Doxygen REQUIRED)
 
+  # Search doxygen and set config
+  find_package(Doxygen REQUIRED)
   # Output path for doxygen documentation
   if(NOT DOXYGEN_OUTPUT)
     set(DOXYGEN_OUTPUT ${DOC_ROOT_DIR}/doxygen CACHE INTERNAL "Path to doxygen outputs.")
   endif()
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/tags)
+  
+  #file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/tags)
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
   
   file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/man)
@@ -81,13 +83,16 @@ endif()
   
 #  ====== Create a Target to generate sphinx documentation ======
 if(USE_SPHINX)
+  find_package(doxyrest CONFIGS doxyrest_config.cmake)
+  if(doxyrest_FOUND)
+    set(HAS_DOXYREST "True")
+    message("Doxyrest found : ${DOXYREST_EXE}")
+  endif()
+  #find_sphinx_module(doxyrest)
   # find_python_module(breathe REQUIRED)
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
-  find_sphinx_module(sphinxcontrib doxylink REQUIRED)
-
-  file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/sphinx"
-    DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+  #find_sphinx_module(sphinxcontrib doxylink REQUIRED)
   
   # --- conf.py describes sphinx setup ---
   configure_file (
@@ -101,7 +106,15 @@ if(USE_SPHINX)
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/reference/siconos_api_reference.rst.in"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference/siconos_api_reference.rst" @ONLY)
-  
+
+  file(GLOB files_rst ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/*.rst)
+  foreach(filepath ${files_rst})
+    get_filename_component(filename ${filepath} NAME)
+    configure_file (
+      "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/${filename}"
+      "${CMAKE_CURRENT_BINARY_DIR}/sphinx/${filename}" @ONLY)
+  endforeach()
+
   # --- Build a target for sphinx ---
   # --> use make html or make latex ... to build documentation.
   set(SPHINX_EXECUTABLE sphinx-build)
@@ -130,8 +143,11 @@ if(USE_SPHINX)
     ${CMAKE_CURRENT_BINARY_DIR}/build/latex
     )
 
-  add_custom_target(doc DEPENDS html)
-
+  # Use doxyrest to generate rst files from doxygen (xml) outputs.
+  add_custom_target(doxyrest
+    COMMAND ${DOXYREST_EXE} ${DOXYGEN_OUTPUT}/xml/index.xml -o ${CMAKE_CURRENT_BINARY_DIR}/sphinx/doxygen.rst -F ${DOXYREST_FRAME_DIR} -f c_index.rst.in
+    )
+  
   # python api auto doc
   if(WITH_PYTHON_WRAPPER)
     set(SPHINX_APIDOC sphinx-apidoc)

@@ -82,6 +82,6 @@ macro(finalize_doxygen)
       Docs/doxygen_layout/header.html)
     add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
     add_dependencies(html doxygen)
-
+    add_dependencies(doxyrest doxygen)
   endif()
 endmacro()
