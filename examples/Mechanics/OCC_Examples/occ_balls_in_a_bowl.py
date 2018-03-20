@@ -42,11 +42,11 @@ ball_I1 = ball_props.MomentOfInertia(gp_Ax1(ball_com, gp_Dir(1, 0, 0)))
 ball_I2 = ball_props.MomentOfInertia(gp_Ax1(ball_com, gp_Dir(0, 1, 0)))
 ball_I3 = ball_props.MomentOfInertia(gp_Ax1(ball_com, gp_Dir(0, 0, 1)))
 
-print 'ball mass:', ball_mass
-print 'ball center of mass:', (ball_com.Coord(1),
+print('ball mass:', ball_mass)
+print('ball center of mass:', (ball_com.Coord(1),
                                ball_com.Coord(2),
-                               ball_com.Coord(3))
-print 'ball moment of inertia:', (ball_I1, ball_I2, ball_I3)
+                               ball_com.Coord(3)))
+print('ball moment of inertia:', (ball_I1, ball_I2, ball_I3))
 
 # the ground
 ground = BRepPrimAPI_MakeBox(gp_Pnt(-20, -20, 0), 40., 40., .5).Shape()
@@ -67,11 +67,11 @@ bowl_I1 = bowl_props.MomentOfInertia(gp_Ax1(bowl_com, gp_Dir(1, 0, 0)))
 bowl_I2 = bowl_props.MomentOfInertia(gp_Ax1(bowl_com, gp_Dir(0, 1, 0)))
 bowl_I3 = bowl_props.MomentOfInertia(gp_Ax1(bowl_com, gp_Dir(0, 0, 1)))
 
-print 'bowl mass:', bowl_mass
-print 'bowl center of mass:', (bowl_com.Coord(1),
+print('bowl mass:', bowl_mass)
+print('bowl center of mass:', (bowl_com.Coord(1),
                                bowl_com.Coord(2),
-                               bowl_com.Coord(3))
-print 'bowl moment of inertia:', (bowl_I1, bowl_I2, bowl_I3)
+                               bowl_com.Coord(3)))
+print('bowl moment of inertia:', (bowl_I1, bowl_I2, bowl_I3))
 
 # Creation of the hdf5 file for input/output
 with MechanicsHdf5Runner() as io:
