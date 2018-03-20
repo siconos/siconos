@@ -794,6 +794,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             assert (given_inertia is not None)
             inertia = given_inertia
+            if inertia is not None:
+                if np.shape(inertia) == (3,):
+                    inertia = np.diag(inertia)
+                elif np.shape(inertia) != (3,3):
+                    print('Wrong shape of inertia')
+
 
             body = body_class(
                 list(translation) + list(orientation), velocity, mass, inertia)

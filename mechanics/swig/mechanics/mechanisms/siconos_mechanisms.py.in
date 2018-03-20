@@ -35,7 +35,7 @@ from siconos.mechanics.mechanisms import cadmbtb
 from siconos.mechanics.collision.native import SpaceFilter
 with_io = "@HAVE_SICONOS_IO@" is "TRUE"
 if with_io:
-    from siconos.io import mechanics_run as io
+    from siconos.io.mechanics_run import MechanicsHdf5Runner
 from siconos.mechanics.collision.tools import Shape, Contactor
 
 default_options = os.path.join(mechanisms_path, 'mbtbDefaultOptions.py')
@@ -219,7 +219,7 @@ atexit.register(remove_run_id_dir)
 
 # Hdf5 IO setup
 if with_io:
-    with io.Hdf5(simulation = mbtb.MBTB_simulation(),
+    with MechanicsHdf5Runner(simulation = mbtb.MBTB_simulation(),
                  nsds=mbtb.MBTB_nsds()) as io:
         def _run(nsteps):
             fp = mbtb._MBTB_open('simu.txt', 'a')
@@ -230,10 +230,10 @@ if with_io:
                       '<', nsteps + currentTimerCmp)
                 mbtb._MBTB_STEP()
                 mbtb._MBTB_displayStep()
-                io.outputDynamicObjects()
-                io.outputVelocities()
-                io.outputContactForces()
-                io.outputSolverInfos()
+                io.output_dynamic_objects()
+                io.output_velocities()
+                io.output_contact_forces()
+                io.output_solver_infos()
                 if mbtb.cvar.sTimerCmp % mbtb.cvar.sFreqOutput == 0:
                     mbtb._MBTB_printStep(fp)
             mbtb._MBTB_close(fp)
@@ -352,10 +352,10 @@ if with_io:
 
             offset[idBody] = [-v for v in initCenterMass[idBody]]
 
-            io.addShapeDataFromFile(shape_name, afile[idBody])
+            io.add_shape_data_from_file(shape_name, afile[idBody])
 
             assoc_shapes[idBody] = [
-                Shape(shape_name, relative_translation=offset[idBody])]
+                Contactor(shape_name, relative_translation=offset[idBody], collision_group=-1)]
     #        io.addObject('obj-{0}'.format(shape_name),
     #                     [Shape(shape_name, relative_translation=offset)],
     #                     mass=1,
@@ -367,8 +367,8 @@ if with_io:
             shape_name2 = os.path.basename(
                 os.path.splitext(afileContact2[idContact])[0])
 
-            io.addShapeDataFromFile(shape_name1, afileContact1[idContact])
-            io.addShapeDataFromFile(shape_name2, afileContact2[idContact])
+            io.add_shape_data_from_file(shape_name1, afileContact1[idContact])
+            io.add_shape_data_from_file(shape_name2, afileContact2[idContact])
 
             print(contactBody1[idContact], contactBody2[idContact])
 
@@ -388,12 +388,12 @@ if with_io:
             shape_name = os.path.basename(
                 os.path.splitext(Artefactfile[idArtefact])[0])
 
-            io.addShapeDataFromFile(shape_name, Artefactfile[idArtefact])
+            io.add_shape_data_from_file(shape_name, Artefactfile[idArtefact])
 
         for idBody in range(NBBODIES):
             shape_name = os.path.basename(os.path.splitext(afile[idBody])[0])
 
-            io.addObject('obj-{0}'.format(shape_name),
+            io.add_object('obj-{0}'.format(shape_name),
                          assoc_shapes[idBody],
                          mass=1,
                          translation=[0, 0, 0])
@@ -403,12 +403,12 @@ if with_io:
             shape_name = os.path.basename(
                 os.path.splitext(Artefactfile[idArtefact])[0])
 
-            io.addObject('artefact-{0}'.format(shape_name),
-                         [Shape(shape_name)],
+            io.add_object('artefact-{0}'.format(shape_name),
+                         [Contactor(shape_name,collision_group=-1)],
                          mass=0,
                          translation=[0, 0, 0])
 
-        io.outputStaticObjects()
+        io.output_static_objects()
 
         if with3D and __name__ == '__main__':
             cadmbtb.CADMBTB_setIParam(0, dumpGraphic)

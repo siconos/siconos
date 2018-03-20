@@ -10,10 +10,10 @@
 #
 
 from siconos.mechanics.collision.tools import Volume, Contactor, Shape
-from siconos.io.mechanics_run import MechanicsHdf5Runner
-import siconos.io.mechanics_run
+from mechanics_run import MechanicsHdf5Runner
+import mechanics_run
 
-siconos.io.mechanics_run.set_backend('occ')
+mechanics_run.set_backend('occ')
 
 l1 = 0.153    # crank length
 l2 = 0.306    # connecting rod length
@@ -66,7 +66,7 @@ with MechanicsHdf5Runner() as io:
                   translation=[0.5*l1, 0., 0.],
                   velocity=[0., 0., -0.5 * w10 * l1, 0., w10, 0.],
                   mass=0.038,
-                  inertia=[7.4e-5, 1, 1.])
+                  inertia=[1., 7.4e-5, 1.])
 
     io.add_object('part2', [Volume(shape_name='body2',
                                    instance_name='Body2',
@@ -75,7 +75,7 @@ with MechanicsHdf5Runner() as io:
                   orientation=[0., 0., 1., 0.],
                   velocity=[0., 0., -0.5 * w10 * l1, 0., w20, 0.],
                   mass=0.038,
-                  inertia=[5.9e-4, 1., 1.])
+                  inertia=[1., 5.9e-4,  1.])
 
     io.add_object('slider', [
         Shape(shape_name='Slider',
@@ -132,7 +132,7 @@ with MechanicsHdf5Runner() as io:
                  translation=[l1 + l2 + a, 0., 0.],
                  velocity=[-0., 0., 0., 0., w30, 0.],
                  mass=0.076,
-                 inertia=[2.7e-6, 1., 1.])
+                 inertia=[1, 2.7e-6,  1.])
 
     # a static object (mass=0)
     io.add_object('chamber', [Contactor(
@@ -166,118 +166,118 @@ with MechanicsHdf5Runner() as io:
                  axes=[[0., 1., 0.]],
                  joint_class='PivotJointR',
                  absolute=True)
-
+    offset= 0.024
     io.add_interaction('contact10',
                        body1_name='slider', contactor1_name='Contact_b_f0',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact0',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact11',
                        body1_name='slider', contactor1_name='Contact_b_f0',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact1',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact20',
                        body1_name='slider', contactor1_name='Contact_h_f0',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact0',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact21',
                        body1_name='slider', contactor1_name='Contact_h_f0',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact1',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact30',
                        body1_name='slider', contactor1_name='Contact_b_f1',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact0',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact31',
                        body1_name='slider', contactor1_name='Contact_b_f1',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact1',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact40',
                        body1_name='slider', contactor1_name='Contact_h_f1',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact0',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact41',
                        body1_name='slider', contactor1_name='Contact_h_f1',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact1',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact50',
                        body1_name='slider', contactor1_name='Contact_b_e0',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact0',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact51',
                        body1_name='slider', contactor1_name='Contact_b_e0',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact1',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact60',
                        body1_name='slider', contactor1_name='Contact_h_e0',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact0',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact61',
                        body1_name='slider', contactor1_name='Contact_h_e0',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact1',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact70',
                        body1_name='slider', contactor1_name='Contact_b_e1',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact0',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact71',
                        body1_name='slider', contactor1_name='Contact_b_e1',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact1',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact80',
                        body1_name='slider', contactor1_name='Contact_h_e1',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact0',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_interaction('contact81',
                        body1_name='slider', contactor1_name='Contact_h_e1',
                        body2_name='chamber',
                        contactor2_name='Chamber_contact1',
                        distance_calculator='cadmbtb',
-                       offset=0.024)
+                       offset=offset)
 
     io.add_external_function('f1', 'part1', 'setComputeFExtFunction',
                              'SliderCrankPlugin', 'externalForcesB1')
@@ -293,10 +293,16 @@ with MechanicsHdf5Runner() as io:
 
     io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.4)
 
+h_step=1e-4
+n_step=2000
+
+
+
 with MechanicsHdf5Runner(mode='r+') as io:
 
     io.run(with_timer=True,
            t0=0,
-           T=1,
-           h=0.0005,
+           T=n_step*h_step,
+           h=h_step,
+           itermax=1000,
            Newton_max_iter=5)
