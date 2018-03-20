@@ -154,43 +154,43 @@ with MechanicsHdf5Runner() as io:
                        'bowl', 'Contact-0',
                        'ground', 'Ground-0',
                        distance_calculator='cadmbtb',
-                       offset=0.01)
+                       offset1=0.01)
 
     io.add_interaction('bowl-ball1',
                        'ball1', 'Ball1',
                        'bowl', 'Contact-1',
                        distance_calculator='cadmbtb',
-                       offset=0.05)
+                       offset1=0.05)
 
     io.add_interaction('bowl-ball2',
                        'ball2', 'Ball2',
                        'bowl', 'Contact-1',
                        distance_calculator='cadmbtb',
-                       offset=0.05)
+                       offset1=0.05)
 
     io.add_interaction('bowl-ball3',
                        'ball3', 'Ball3',
                        'bowl', 'Contact-1',
                        distance_calculator='cadmbtb',
-                       offset=0.05)
+                       offset1=0.05)
 
     io.add_interaction('ball1-ball2',
                        'ball1', 'Ball1',
                        'ball2', 'Ball2',
                        distance_calculator='cadmbtb',
-                       offset=0.05)
+                       offset1=0.05)
 
     io.add_interaction('ball1-ball3',
                        'ball1', 'Ball1',
                        'ball3', 'Ball3',
                        distance_calculator='cadmbtb',
-                       offset=0.05)
+                       offset1=0.05)
 
     io.add_interaction('ball2-ball3',
                        'ball2', 'Ball2',
                        'ball3', 'Ball3',
                        distance_calculator='cadmbtb',
-                       offset=0.05)
+                       offset1=0.05)
 
     io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.)
 
@@ -209,7 +209,7 @@ with MechanicsHdf5Runner(mode='r+') as io:
            set_external_forces=None,
            solver=numerics.SICONOS_FRICTION_3D_NSGS,
            itermax=100000,
-           tolerance=1e-8,
+           tolerance=1e-7,
            numerics_verbose=False,
            output_frequency=None
            # osi=kernel.MoreauJeanCombinedProjectionOSI
