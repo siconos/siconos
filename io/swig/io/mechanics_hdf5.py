@@ -766,7 +766,7 @@ class MechanicsHdf5(object):
     def add_interaction(self, name, body1_name, contactor1_name=None,
                         body2_name=None, contactor2_name=None,
                         distance_calculator='cadmbtb',
-                        offset=0.0001):
+                        offset1=0.0, offset2=0.0):
         """
         Add permanent interactions between two objects contactors.
         """
@@ -783,7 +783,8 @@ class MechanicsHdf5(object):
             if contactor2_name is not None:
                 pinter.attrs['contactor2_name'] = contactor2_name
             pinter.attrs['distance_calculator'] = distance_calculator
-            pinter.attrs['offset'] = offset
+            pinter.attrs['offset1'] = offset1
+            pinter.attrs['offset2'] = offset2
 
             self._number_of_permanent_interactions += 1
 
