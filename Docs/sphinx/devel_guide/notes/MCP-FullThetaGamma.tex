@@ -216,11 +216,15 @@ y_p =  h(x^{\alpha}_{k+\gamma},\lambda^{\alpha}_{k+\gamma}) + \gamma C^{\alpha}_
 
 \paragraph{Implementation details}
 
-For the moment (Feb. 2011), we set $x_q=(1-\gamma) x_{k} + \gamma x_{free} $ in the linear case The nonlinear case is not yet implemented since we need to change the management of {\verb H_alpha } in Relation to be able to compute the mid--point values. things that remain to  do
-\begin{itemize}
-\item implement the function \texttt{BlockVector  computeg(t,lambda)} and \texttt{SimpleVector computeh(t,x,lambda)} which takes into account the values of the argument and return and vector
-\item remove temporary computation in Relation of {\verb Xq, \verb g_alpha and \verb H_alpha }. This should be stored somewhere else. (in the  node of the graph)
-\end{itemize}
+For the moment (Feb. 2011), we set $x_q=(1-\gamma) x_{k} + \gamma x_{free} $ in the linear case.
+The nonlinear case is not yet implemented since we need to
+change the management of \texttt{ H_alpha} Relation to be able to compute the mid--point values.
+% things that remain to  do
+%
+% \begin{itemize}
+% \item implement the function \texttt{BlockVector  computeg(t,lambda)} and \texttt{SimpleVector computeh(t,x,lambda)} which takes into account the values of the argument and return and vector
+% \item remove temporary computation in Relation of {\verb Xq, \verb g_alpha and \verb H_alpha }. This should be stored somewhere else. (in the  node of the graph)
+% \end{itemize}
 
 
 

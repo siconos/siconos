@@ -10,13 +10,13 @@ Developer guide
    modal_moreau_jean
    about_ci
    plugins
-   
+   notes/DevNotes
 
 To do.
 
 `Unpolished developement notes`_.
 
-.. _Unpolished developement notes: DevNotes.pdf
+.. _Unpolished developement notes: ./notes/DevNotes.pdf
 
 
 
