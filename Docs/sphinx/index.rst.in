@@ -11,7 +11,10 @@
    :hidden:
    :maxdepth: 3
 
-   documentation_index
+   install_guide/install_guide
+   getting_started/index
+   users_guide/index
+   examples/index
    documentation_index_dev
    talks
    download
