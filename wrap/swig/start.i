@@ -1,5 +1,7 @@
 // signatures
-%feature("autodoc", 2);
+// docstrings are generated from doxygen thanks to an external tool
+// (doxy2swig.py)
+//%feature("autodoc", 0);
 
 // named parameters (broken with overloaded function)
 // %feature("kwargs");
