@@ -19,7 +19,7 @@ macro(doxy2swig_docstrings COMP)
     foreach(_F ${${COMP}_HDRS})
       get_filename_component(_XFWE ${_F} NAME_WE)
       get_filename_component(_EXT ${_F} EXT)
-      string(REPLACE "_" "__" _FWE ${_XFWE})
+      string(REPLACE "_" "__" _FWE "${_XFWE}")
       file(GLOB ${_FWE}_XMLS
 	${DOXYGEN_OUTPUT}/xml/*class${_FWE}.xml
 	${DOXYGEN_OUTPUT}/xml/*struct${_FWE}.xml
