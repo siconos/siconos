@@ -242,18 +242,18 @@ psiv = np.vectorize(psi)
 #
 def compute_inertia_and_center_of_mass(shapes, mass, io=None):
     """
-    compute inertia from a list of Shape
+    Compute inertia from a list of Shapes.
     """
     from OCC.GProp import GProp_GProps
     from OCC.BRepGProp import brepgprop_VolumeProperties
     from OCC.gp import gp_Ax1, gp_Dir
+    from siconos.mechanics import occ
 
     props = GProp_GProps()
 
     for shape in shapes:
 
         iprops = GProp_GProps()
-        iiprops = GProp_GProps()
 
         if shape.data is None:
             if io is not None:
@@ -266,7 +266,7 @@ def compute_inertia_and_center_of_mass(shapes, mass, io=None):
 
         ishape = occ.OccContactShape(iishape).data()
         # the shape relative displacement
-        occ.occ_move(ishape, list(shape.translation) +\
+        occ.occ_move(ishape, list(shape.translation) +
                      list(shape.orientation))
 
         brepgprop_VolumeProperties(iishape, iprops)
@@ -277,74 +277,7 @@ def compute_inertia_and_center_of_mass(shapes, mass, io=None):
             density = shape.mass / iprops.Mass()
 
         elif shape.parameters is not None and \
-           hasattr(shape.parameters, 'density'):
-            density = shape.parameters.density
-        else:
-            density = 1.
-
-        assert density is not None
-        props.Add(iprops, density)
-
-    assert (props.Mass() > 0.)
-
-    global_density = mass / props.Mass()
-    computed_com = props.CentreOfMass()
-    I1 = global_density * props.MomentOfInertia(
-        gp_Ax1(computed_com, gp_Dir(1, 0, 0)))
-    I2 = global_density * props.MomentOfInertia(
-        gp_Ax1(computed_com, gp_Dir(0, 1, 0)))
-    I3 = global_density * props.MomentOfInertia(
-        gp_Ax1(computed_com, gp_Dir(0, 0, 1)))
-
-    inertia = [I1, I2, I3]
-    center_of_mass = np.array([computed_com.Coord(1),
-                               computed_com.Coord(2),
-                               computed_com.Coord(3)])
-
-    return inertia, center_of_mass
-
-
-#
-# inertia
-#
-def compute_inertia_and_center_of_mass(shapes, mass, io=None):
-    """
-    compute inertia from a list of Shape
-    """
-    from OCC.GProp import GProp_GProps
-    from OCC.BRepGProp import brepgprop_VolumeProperties
-    from OCC.gp import gp_Ax1, gp_Dir
-
-    props = GProp_GProps()
-
-    for shape in shapes:
-
-        iprops = GProp_GProps()
-        iiprops = GProp_GProps()
-
-        if shape.data is None:
-            if io is not None:
-                shape.data = io._shape.get(shape.shape_name, new_instance=True)
-            else:
-                warn('cannot get shape {0}'.format(shape.shape_name))
-                return None
-
-        iishape = shape.data
-
-        ishape = occ.OccContactShape(iishape).data()
-        # the shape relative displacement
-        occ.occ_move(ishape, list(shape.translation) +\
-                     list(shape.orientation))
-
-        brepgprop_VolumeProperties(iishape, iprops)
-
-        density = None
-
-        if hasattr(shape, 'mass') and shape.mass is not None:
-            density = shape.mass / iprops.Mass()
-
-        elif shape.parameters is not None and \
-           hasattr(shape.parameters, 'density'):
+             hasattr(shape.parameters, 'density'):
             density = shape.parameters.density
         else:
             density = 1.
@@ -1002,7 +935,8 @@ class MechanicsHdf5(object):
 
                 if hasattr(ctor, 'parameters') and \
                         ctor.parameters is not None:
-                    dat.attrs['parameters'] = pickle.dumps(ctor.parameters)
+                    ## we add np.void to manage writing string in hdf5 files see http://docs.h5py.org/en/latest/strings.html
+                    dat.attrs['parameters'] = np.void(pickle.dumps(ctor.parameters))
 
                 if hasattr(ctor, 'contact_type') and \
                    ctor.contact_type is not None:

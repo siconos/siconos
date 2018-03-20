@@ -144,7 +144,7 @@ class VViewOptions(object):
                 self.max_time = float(a)
 
             elif o == '--cf-scale':
-                self.opts.cf_scale_factor = float(a)
+                self.cf_scale_factor = float(a)
 
             elif o == '--no-cf':
                 self.cf_disable = True
@@ -357,9 +357,6 @@ class CFprov():
                             self._dom_data[dom_id_f,-1] == self._data[id_f[imu],-1]
                         )[0]
 
-                    if self._data[id_f[imu]].shape[0]==0:
-                        continue
-
                     self.cpa_at_time[mu] = self._data[
                         id_f[imu], 2:5]
                     self.cpb_at_time[mu] = self._data[
@@ -412,6 +409,8 @@ class InputObserver():
     def __init__(self, vview, times=None, slider_repres=None):
         self.vview = vview
         self._opacity = 1.0
+        self._opacity_static = 1.0
+        self._opacity_contact = 0.4
         self._current_id = vtk.vtkIdTypeArray()
         self._renderer = vview.renderer
         self._renderer_window = vview.renderer_window
@@ -470,6 +469,20 @@ class InputObserver():
             for actor,_,_ in actors:
                 actor.GetProperty().SetOpacity(self._opacity)
 
+    def set_opacity_static(self):
+        for instance, actors in self.vview.static_actors.items():
+            for actor,_,_ in actors:
+                actor.GetProperty().SetOpacity(self._opacity_static)
+
+    def set_opacity_contact(self):
+        for mu in self.vview.cf_prov._mu_coefs:
+            self.vview.cactor[mu].GetProperty().SetOpacity(self._opacity_contact)
+            self.vview.gactor[mu].GetProperty().SetOpacity(self._opacity_contact)
+            self.vview.clactor[mu].GetProperty().SetOpacity(self._opacity_contact)
+            self.vview.sactora[mu].GetProperty().SetOpacity(self._opacity_contact)
+            self.vview.sactorb[mu].GetProperty().SetOpacity(self._opacity_contact)
+                    
+
     def key(self, obj, event):
         key = obj.GetKeySym()
         print('key', key)
@@ -502,13 +515,34 @@ class InputObserver():
             self._time += self._time_step
 
         if key == 't':
+            print('Decrease the opacity of bodies')
             self._opacity -= .1
             self.set_opacity()
 
         if key == 'T':
+            print('Increase the opacity of bodies')
             self._opacity += .1
             self.set_opacity()
+            
+        if key == 'y':
+            print('Decrease the opacity of static bodies')
+            self._opacity_static -= .1
+            self.set_opacity_static()
 
+        if key == 'Y':
+            print('Increase the opacity of static bodies')
+            self._opacity_static += .1
+            self.set_opacity_static()
+            
+        if key == 'u':
+            print('Decrease the opacity of contact elements')
+            self._opacity_contact -= .1
+            self.set_opacity_contact()
+
+        if key == 'U':
+            print('Increase the opacity of contact elements')
+            self._opacity_contact += .1
+            self.set_opacity_contact()
         if key == 'c':
             print('camera position:', self._renderer.GetActiveCamera().GetPosition())
             print('camera focal point', self._renderer.GetActiveCamera().GetFocalPoint())
@@ -894,7 +928,8 @@ class VView(object):
             self.cmapper[mu].ScalarVisibilityOn()
 
         self.cactor[mu] = vtk.vtkActor()
-        self.cactor[mu].GetProperty().SetOpacity(0.4)
+        
+        self.cactor[mu].GetProperty().SetOpacity(self.config.get('contact_opacity', 0.4))
         self.cactor[mu].GetProperty().SetColor(0, 0, 1)
         self.cactor[mu].SetMapper(self.cmapper[mu])
 
@@ -1254,7 +1289,10 @@ class VView(object):
         else:
             shape_attr_name='shape_name'
 
-        collision_group = contactor.attrs['group']
+        if 'group' in  contactor.attrs:
+            collision_group = contactor.attrs['group']
+        else:
+            collision_group = -1
         if 'type' in contactor.attrs:
             contact_type = contactor.attrs['type']
             contact_index = contactor.attrs['contact_index']
@@ -1479,7 +1517,7 @@ class VView(object):
                 actor.VisibilityOff()
 
     def set_dynamic_actors_visibility(self, time):
-        self.set_visibility_v(self.dynamic_actors.keys(), time)
+        self.set_visibility_v(list(self.dynamic_actors.keys()), time)
 
     # callback maker for scale manipulation
     def make_scale_observer(self, glyphs):
