@@ -35,7 +35,7 @@ with MechanicsHdf5Runner() as io:
                        'sphere', 'Sphere-1',
                        'ground', 'Ground-0',
                        distance_calculator='occ',
-                       offset=0.01)
+                       offset1=0.01)
 
     io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0.9)
 
