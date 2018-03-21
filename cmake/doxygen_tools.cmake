@@ -29,7 +29,7 @@ endmacro()
 # --------------------------------
 macro(update_xml_doxy_config_file COMP)
   set(XML_INPUTS)
-  set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/Docs/config/${COMP}doxy.config.xml")
+  set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy.config.xml")
   foreach(_dir ${${COMP}_DIRS})
     list(FIND ${COMP}_EXCLUDE_DOXY ${_dir} check_dir)
     if(NOT ${_dir} MATCHES test AND ${check_dir} EQUAL -1)
@@ -43,17 +43,17 @@ macro(update_xml_doxy_config_file COMP)
   endforeach()
   set(GENERATE_HTML NO)
   set(GENERATE_XML YES)
-  configure_file(${CMAKE_SOURCE_DIR}/Docs/config/doxy.config.in ${DOXY_CONFIG_XML} @ONLY)
+  configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy.config.in ${DOXY_CONFIG_XML} @ONLY)
 endmacro()
 
 
 # --------------------------------
 # Run doxygen to build documentation
-# See CMAKE_BINARY_DIR/Docs/<component_name>doxy.log
+# See CMAKE_BINARY_DIR/docs/<component_name>doxy.log
 # for errors and warnings.
 # --------------------------------
 macro(build_doc_xml COMP)
-  set(confname ${CMAKE_BINARY_DIR}/Docs/config/${COMP}doxy.config.xml)
+  set(confname ${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy.config.xml)
   execute_process(COMMAND ${DOXYGEN_EXECUTABLE} ${confname}
     OUTPUT_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log ERROR_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log)
   message(" -- Build xml doc for component ${COMP} ...")
@@ -77,9 +77,9 @@ macro(finalize_doxygen)
     foreach(_dir ${DOXY_INPUTS})
       set(DOXYGEN_INPUTS "${DOXYGEN_INPUTS} ${_dir}")
     endforeach()
-    configure_file(${CMAKE_SOURCE_DIR}/Docs/config/doxy.config.in ${DOXY_CONFIG} @ONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/Docs/doxygen_layout/header.html.in
-      Docs/doxygen_layout/header.html)
+    configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy.config.in ${DOXY_CONFIG} @ONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/docs/doxygen_layout/header.html.in
+      docs/doxygen_layout/header.html)
     add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
     add_dependencies(html doxygen)
     add_dependencies(doxyrest doxygen)

@@ -118,7 +118,7 @@ endif()
 # doxygen doc from source files, sphinx doc
 # and docstrings from doxygen, depending on the
 # enabled options.
-add_subdirectory(Docs)
+add_subdirectory(docs)
 
 # ========= Setup each required component =========
 foreach(COMPONENT ${COMPONENTS})

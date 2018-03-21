@@ -145,7 +145,7 @@ if(USE_SPHINX)
 
   # Use doxyrest to generate rst files from doxygen (xml) outputs.
   add_custom_target(doxyrest
-    COMMAND ${DOXYREST_EXE} ${DOXYGEN_OUTPUT}/xml/index.xml -o ${CMAKE_CURRENT_BINARY_DIR}/sphinx/doxygen.rst -F ${DOXYREST_FRAME_DIR} -f c_index.rst.in
+    COMMAND ${DOXYREST_EXE} ${DOXYGEN_OUTPUT}/xml/index.xml -o ${CMAKE_CURRENT_BINARY_DIR}/sphinx/from_doxygen/index.rst -F ${DOXYREST_FRAME_DIR} -f c_index.rst.in
     )
   
   # python api auto doc

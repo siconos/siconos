@@ -791,8 +791,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = @CMAKE_SOURCE_DIR@/Docs/config/mainpage.doxygen \
-                         @DOXYGEN_INPUTS@
+INPUT                  = @DOXYGEN_INPUTS@
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1098,7 +1097,7 @@ HTML_FILE_EXTENSION    = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            = @CMAKE_BINARY_DIR@/Docs/doxygen_layout/header.html
+HTML_HEADER            = @CMAKE_BINARY_DIR@/docs/doxygen_layout/header.html
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1108,7 +1107,7 @@ HTML_HEADER            = @CMAKE_BINARY_DIR@/Docs/doxygen_layout/header.html
 # that doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER            = @CMAKE_SOURCE_DIR@/Docs/doxygen_layout/footer.html
+HTML_FOOTER            = @CMAKE_SOURCE_DIR@/docs/doxygen_layout/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
