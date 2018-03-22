@@ -71,7 +71,10 @@ if(WITH_PYTHON_WRAPPER)
       SET(EMULATOR)
       SET(DRIVE_LETTER)
     ENDIF()
-    
+
+    include(tools4tests)
+    set_ldlibpath()
+
     find_python_module(pytest REQUIRED)
     # -- Runner for tests --
     set(TESTS_RUNNER ${CMAKE_CURRENT_BINARY_DIR}/runtests.py CACHE INTERNAL "driver for python tests")
