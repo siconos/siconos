@@ -69,12 +69,14 @@ if(HAVE_SICONOS_MECHANICS)
       set(_OTHER_COMPONENTS ${COMPONENTS})
       list(REMOVE_ITEM _OTHER_COMPONENTS ${COMPONENT})
       set(MANPAGES_FOR_TOOLS)
+      include(tools4tests)
+      set_ldlibpath()
       macro (GEN_MANPAGE_FROM_HELP TOOL)
         # set PYTHONPATH to swig dir, which contains "siconos", so
         # that "import siconos.*" works
         add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/${TOOL}.1
-          COMMAND env PYTHONPATH=${SICONOS_SWIG_ROOT_DIR}/.. ${HELP2MAN}
-            -s1 -N -o  ${CMAKE_BINARY_DIR}/man/${TOOL}.1
+          COMMAND env PYTHONPATH=${SICONOS_SWIG_ROOT_DIR}/.. ${LDLIBPATH}
+            ${HELP2MAN} -s1 -N -o  ${CMAKE_BINARY_DIR}/man/${TOOL}.1
             --opt-include=${CMAKE_SOURCE_DIR}/man/${TOOL}.help2man
             --include=${CMAKE_SOURCE_DIR}/man/footer.help2man
             --no-discard-stderr
