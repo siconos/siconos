@@ -40,7 +40,8 @@ def test_serialization3():
 
 def test_serialization4():
     from siconos.kernel import LagrangianLinearTIDS, NewtonImpactNSL, \
-        LagrangianLinearTIR, Interaction, Model, MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping
+        LagrangianLinearTIR, Interaction, NonSmoothDynamicalSystem, \
+        MoreauJeanOSI, TimeDiscretisation, LCP, TimeStepping
 
     from numpy import array, eye, empty
 
@@ -82,13 +83,13 @@ def test_serialization4():
     #
     # Model
     #
-    first_bouncingBall = Model(t0, T)
+    first_bouncingBall = NonSmoothDynamicalSystem(t0, T)
 
     # add the dynamical system to the non smooth dynamical system
-    first_bouncingBall.nonSmoothDynamicalSystem().insertDynamicalSystem(ball)
+    first_bouncingBall.insertDynamicalSystem(ball)
 
     # link the interaction and the dynamical system
-    first_bouncingBall.nonSmoothDynamicalSystem().link(inter, ball)
+    first_bouncingBall.link(inter, ball)
 
     #
     # Simulation
@@ -104,30 +105,25 @@ def test_serialization4():
     osnspb = LCP()
 
     # (4) Simulation setup with (1) (2) (3)
-    s = TimeStepping(t)
+    s = TimeStepping(first_bouncingBall, t)
     s.insertIntegrator(OSI)
     s.insertNonSmoothProblem(osnspb)
 
     # end of model definition
 
     #
-    # computation
-    #
-
-    # simulation initialization
-    first_bouncingBall.setSimulation(s)
-    first_bouncingBall.initialize()
-
-    #
     # save and load data from xml and .dat
     #
     from siconos.io.io_base import save, load
-    save(first_bouncingBall, "bouncingBall.xml")
+    save(s, "bouncingBall.xml")
 
-    bouncingBall = load("bouncingBall.xml")
+    s = load("bouncingBall.xml")
+    bouncingBall = s.nonSmoothDynamicalSystem()
+    ball = bouncingBall.dynamicalSystem(ball.number())
+    inter = bouncingBall.interaction(inter.number())
 
     # the number of time steps
-    N = (T-t0)/h+1
+    N = int((T-t0)/h+1)
 
     # Get the values to be plotted
     # ->saved in a matrix dataPlot
@@ -177,4 +173,3 @@ def test_serialization4():
                                               "data/result.ref")))
 
     assert (norm(dataPlot - ref) < 1e-12)
-
