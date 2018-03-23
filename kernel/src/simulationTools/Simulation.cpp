@@ -45,7 +45,7 @@
 // --- Constructor with a TimeDiscretisation (and thus a NonSmoothDynamicalSystem) and an
 // --- id ---
 Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td):
-  _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
+  _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0), _T(0.0),
   _nsds(nsds),
   _numberOfIndexSets(0),
   _tolerance(DEFAULT_TOLERANCE), _printStat(false),
@@ -72,7 +72,7 @@ Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation
 // --- Constructor with a TimeDiscretisation (and thus a Model) and an
 // --- id ---
 Simulation::Simulation(SP::TimeDiscretisation td):
-  _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0),
+  _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0), _T(0.0),
   _numberOfIndexSets(0),
   _tolerance(DEFAULT_TOLERANCE), _printStat(false),
   _staticLevels(false),_isInitialized(false)
