@@ -1,5 +1,7 @@
 # Mechanics IO
 
+"""Run a pre-configured Siconos "mechanics" HDF5 file."""
+
 from __future__ import print_function
 
 import os

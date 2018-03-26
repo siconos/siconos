@@ -80,6 +80,7 @@ if(HAVE_SICONOS_MECHANICS)
             --opt-include=${CMAKE_SOURCE_DIR}/man/${TOOL}.help2man
             --include=${CMAKE_SOURCE_DIR}/man/footer.help2man
             --no-discard-stderr
+            -n \"`sed '/Description: /!d\;s///' ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}`\"
             ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}
           DEPENDS ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL} ${_OTHER_COMPONENTS}
           WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/..

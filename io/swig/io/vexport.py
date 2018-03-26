@@ -1,5 +1,7 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
-"""Export a Siconos mechanics-IO HDF5 file in VTK format."""
+"""
+Description: Export a Siconos mechanics-IO HDF5 file in VTK format.
+"""
 
 # Lighter imports before command line parsing
 from __future__ import print_function

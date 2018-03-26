@@ -1,11 +1,13 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
-"""Compare the contents of two Siconos mechanics-IO HDF5 simulation
-files.  Sole output on standard output shall be the maximum difference
-between the columns selected for comparison.  Return code 0 will be
-returned if maximum difference is less than the threshold, otherwise 1
-will be returned if greater, or 2 if the files could not be opened or
-do not contain the necessary tables.  Non-matching time indices shall
-be considered as failing the comparison.
+"""
+Description: Numerically compare the contents of two Siconos mechanics-IO HDF5 simulation files.
+
+Sole output on standard output shall be the maximum difference between
+the columns selected for comparison.  Return code 0 will be returned
+if maximum difference is less than the threshold, otherwise 1 will be
+returned if greater, or 2 if the files could not be opened or do not
+contain the necessary tables.  Non-matching time indices shall be
+considered as failing the comparison.
 """
 
 # Lighter imports before command line parsing
