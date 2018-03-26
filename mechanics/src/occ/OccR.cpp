@@ -71,7 +71,7 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
   _Nc->setValue(1, n1y);
   _Nc->setValue(2, n1z);
 
-  dist.value -= (_offset1-_offset2);
+  dist.value -= (_offset1+_offset2);
 
   y.setValue(0, dist.value);
 
