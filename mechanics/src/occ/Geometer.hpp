@@ -8,7 +8,7 @@
 #include "cadmbtb.hpp"
 #include <Standard_TypeDef.hxx>
 #include <limits>
-
+#include <iostream>
 
 struct DistanceCalculatorType { VIRTUAL_ACCEPT_VISITORS(DistanceCalculatorType); };
 struct OccDistanceType : DistanceCalculatorType { ACCEPT_STD_VISITORS(); };
@@ -133,11 +133,14 @@ struct FaceGeometer : public Geometer
     ContactShapeDistance& dist = this->answer;
     dist.value = std::numeric_limits<double>::infinity();
     distanceFaceEdge<DistType>(this->face1, edge2,
-                               dist.x1, dist.y1, dist.z1,
                                dist.x2, dist.y2, dist.z2,
+                               dist.x1, dist.y1, dist.z1,
                                dist.nx, dist.ny, dist.nz,
                                this->_normalFromFace1,
                                dist.value);
+    dist.nx = -dist.nx;
+    dist.ny = -dist.ny;
+    dist.nz = -dist.nz;
   }
 
 };
@@ -161,6 +164,7 @@ struct EdgeGeometer : public Geometer
                                dist.nx, dist.ny, dist.nz,
                                this->_normalFromFace1,
                                dist.value);
+    std::cout << std::endl << "+++" << dist.value << std::endl;
   }
   void visit(const OccContactEdge& edge2)
   {

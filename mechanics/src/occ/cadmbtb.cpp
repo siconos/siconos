@@ -288,15 +288,15 @@ void cadmbtb_distanceFaceEdge(
   const TopoDS_Face& face1 = *pface1;
   const TopoDS_Edge& edge2 = *pedge2;
 
-  int n = 4;
-  double x[4];
+  int n = 3;
+  double x[3];
   double f = 0;
-  double g[4];
-  double dxim[4];
+  double g[3];
+  double dxim[3];
   double df1 =0;
   double epsabs=0;
-  double binf[4];
-  double bsup[4];
+  double binf[3];
+  double bsup[3];
   double rz[4*(4+9)/2 + 1];
   int iz[2*4+1];
 
@@ -306,20 +306,18 @@ void cadmbtb_distanceFaceEdge(
   bsup[1] = csh1.bsup1[1];
 
   binf[2] = csh2.binf1[0];
-  binf[3] = csh2.binf1[1];
   bsup[2] = csh2.bsup1[0];
-  bsup[3] = csh2.bsup1[1];
 
-  /*Because of the case of cylinder, we chose to start from the midle point.*/
+  dxim[0]=1e-6*(bsup[0]-binf[0]);
+  dxim[1]=1e-6*(bsup[1]-binf[1]);
+  dxim[2]=1e-6*(bsup[2]-binf[2]);
+
   x[0]=(binf[0]+bsup[0])*0.5;
   x[1]=(binf[1]+bsup[1])*0.5;
   x[2]=(binf[2]+bsup[2])*0.5;
-  // x[3]=(binf[3]+bsup[3])*0.5;
   cadmbtb_myf_FaceEdge(x,&f,g,face1,edge2);
 
   df1=f;
-  /*n=3 because of Face, edge.*/
-  n=3;
 
   int mode =1;
   int imp=0;
