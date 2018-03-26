@@ -1,5 +1,7 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
-"""Viewer for Siconos mechanics-IO HDF5 files based on VTK."""
+"""
+Description: Viewer and exporter for Siconos mechanics-IO HDF5 files based on VTK.
+"""
 
 # Lighter imports before command line parsing
 from __future__ import print_function

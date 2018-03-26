@@ -1,4 +1,7 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
+"""
+Description: Viewer for Siconos mechanics-IO HDF5 files based on VTK.
+"""
 
 from siconos.io.vview import VView, VViewConfig, VViewOptions
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
