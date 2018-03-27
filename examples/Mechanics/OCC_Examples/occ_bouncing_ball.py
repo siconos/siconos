@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Example of a bouncing ball with OpenCascade contactors
+# Example of a bouncing ball with OpenCascade contactors and occ distance
 #
 
 from siconos.mechanics.collision.tools import Volume, Contactor

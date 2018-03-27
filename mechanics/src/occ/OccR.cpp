@@ -47,29 +47,16 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
                dist.x2, dist.y2, dist.z2,
                dist.nx, dist.ny, dist.nz);
 
-  double& X1 = dist.x1;
-  double& Y1 = dist.y1;
-  double& Z1 = dist.z1;
+  _Pc1->setValue(0, dist.x1 + _offset1*dist.nx);
+  _Pc1->setValue(1, dist.y1 + _offset1*dist.ny);
+  _Pc1->setValue(2, dist.z1 + _offset1*dist.nz);
+  _Pc2->setValue(0, dist.x2 - _offset2*dist.nx);
+  _Pc2->setValue(1, dist.y2 - _offset2*dist.ny);
+  _Pc2->setValue(2, dist.z2 - _offset2*dist.nz);
 
-  double& X2 = dist.x2;
-  double& Y2 = dist.y2;
-  double& Z2 = dist.z2;
-
-  double& n1x = dist.nx;
-  double& n1y = dist.ny;
-  double& n1z = dist.nz;
-
-  _Pc1->setValue(0, X1+_offset1*n1x);
-  _Pc1->setValue(1, Y1+_offset1*n1y);
-  _Pc1->setValue(2, Z1+_offset1*n1z);
-  _Pc2->setValue(0, X2-_offset2*n1x);
-  _Pc2->setValue(1, Y2-_offset2*n1y);
-  _Pc2->setValue(2, Z2-_offset2*n1z);
-
-  /* cf comments from O. Bonnefon */
-  _Nc->setValue(0, n1x);
-  _Nc->setValue(1, n1y);
-  _Nc->setValue(2, n1z);
+  _Nc->setValue(0, dist.nx);
+  _Nc->setValue(1, dist.ny);
+  _Nc->setValue(2, dist.nz);
 
   dist.value -= (_offset1+_offset2);
 
