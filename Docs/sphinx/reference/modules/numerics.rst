@@ -1,8 +1,6 @@
 siconos.numerics
 ================
 
-Nonsmooth problems:
-
 .. toctree::
    numerics/LCP
    numerics/MCP

@@ -9,3 +9,4 @@ User guide
 	      
    modeling
    simulation
+   intro_python_API

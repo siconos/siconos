@@ -9,7 +9,6 @@ This is the documentation of `python <https://www.python.org/>`_ interface to Si
 .. toctree::
    :maxdepth: 2
 
-   introduction
    modules/numerics
    modules/kernel
    modules/mechanics

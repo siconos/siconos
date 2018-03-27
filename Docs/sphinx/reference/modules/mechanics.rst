@@ -1,15 +1,11 @@
 siconos.mechanics
 =================
 
-Usage
-^^^^^
-
-Siconos Mechanics API
-^^^^^^^^^^^^^^^^^^^^^
-
 .. toctree::
-   mechanics/bodies
+   mechanics/coll/tools
+   mechanics/coll/bodies
+   mechanics/collision
    mechanics/joints
    mechanics/occ
-   mechanics/collision/tools
+
 

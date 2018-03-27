@@ -31,6 +31,11 @@ macro(doxy2swig_docstrings COMP)
           DEPENDS ${DOXYGEN_OUTPUT}/xml/${_FWE_XML}.xml
           COMMAND ${PYTHON_EXECUTABLE}
 	  ARGS "${CMAKE_BINARY_DIR}/share/doxy2swig.py"
+          "--function-signature"
+          "--type-info"
+          "--constructor-list"
+          "--attribute-list"
+          "--overloaded-functions"
 	  ${DOXYGEN_OUTPUT}/xml/${_FWE_XML}.xml ${outfile_name}
           COMMENT "docstrings generation for ${_FWE} (parsing ${_FWE_XML}.xml)")
 	add_custom_target(doc_${_FWE_XML}.i DEPENDS ${outfile_name})
