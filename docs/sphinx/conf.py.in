@@ -18,6 +18,7 @@ import os
 import re
 import importlib
 import sphinx_bootstrap_theme
+import textwrap
 
 # append siconos package build path to sys
 siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'wrap')
@@ -62,13 +63,55 @@ extensions += [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',]
 
+extensions += ['breathe', 'exhale']
+
 #numpydoc_class_members_toctree = True
 # -----------------------------------------------------------------------------
 # Autosummary
 # -----------------------------------------------------------------------------
 
-#breathe_projects = {"@PROJECT_NAME@": "@DOXYGEN_OUTPUT@/xml"}
-#breathe_default_project = "@PROJECT_NAME@"
+breathe_projects = {"@PROJECT_NAME@": "@DOXYGEN_OUTPUT@/xml"}
+breathe_default_project = "@PROJECT_NAME@"
+# breathe_projects_source = {
+#      "auto" : ( "/Users/Franck/Projets/Siconos/siconos/kernel/src/modelingTools", ["FirstOrderLinearTIR.hpp", "LagrangianLinearDiagonalDS.hpp"] )
+#      }
+
+
+# Setup the exhale extension
+exhale_args = {
+    # These arguments are required
+    "containmentFolder":     "./sphinx/api",
+    "rootFileName":          "library_root.rst",
+    "rootFileTitle":         "Library API",
+    "afterTitleDescription": textwrap.dedent('''
+       .. note::
+
+       The following documentation presents the C++ API.  The Python API
+       generally mirrors the C++ API, but some methods may not be available in
+       Python or may perform different actions.
+    '''),
+    "doxygenStripFromPath":  ".",
+    # Suggested optional arguments
+    "createTreeView":        True,
+    # TIP: if using the sphinx-bootstrap-theme, you need
+    "createTreeView": True,
+    "treeViewIsBootstrap": True,
+    "treeViewBootstrapLevels": 4,
+    "exhaleExecutesDoxygen": False,
+    # Uncomment when using exhale to call doxygen
+    #"exhaleDoxygenStdin":    "INPUT = @DOXYGEN_INPUTS@ "
+}
+
+# sphinx versioning option. Review this later (issue to be fixed :
+# https://github.com/CityOfZion/neon-js/issues/111)
+# scv_root_ref = 'feature_branch'
+
+# Tell sphinx what the primary language being documented is.
+primary_domain = 'cpp'
+
+# Tell sphinx what the pygments highlight language should be.
+highlight_language = 'cpp'
+
 
 #import glob
 # autosummary_generate = glob.glob("@CMAKE_CURRENT_BINARY_DIR@/sphinx/reference/*.rst")
@@ -93,7 +136,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'@PROJECT_NAME_CAP@'
-copyright = u@YEAR@ + u'Siconos development team'
+copyright = u@YEAR@ + u' - Siconos development team'
 author = u'Siconos development team'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -147,12 +190,12 @@ todo_include_todos = True
 html_theme = 'bootstrap'
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ['@CMAKE_CURRENT_SOURCE_DIR@/sphinx/sphinx_themes']
-html_theme_path += sphinx_bootstrap_theme.get_html_theme_path()
+#html_theme_path = ['@CMAKE_CURRENT_SOURCE_DIR@/sphinx/sphinx_themes']
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {'bootswatch_theme': "superhero", }
+html_theme_options = {'bootswatch_theme': "sandstone", }
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -308,9 +351,9 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 #intersphinx_mapping = {'https://docs.python.org/': None}
 intersphinx_mapping = {'python': ('https://docs.python.org', None),
-                        'numpy': ('http://docs.scipy.org/doc/numpy/', None),
-                        'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-                        'matplotlib': ('http://matplotlib.sourceforge.net/', None)}
+                        'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+                        'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+                        'matplotlib': ('https://matplotlib.org/', None)}
 
 
 path_to_numerics = os.path.join('@CMAKE_SOURCE_DIR@', 'numerics')
