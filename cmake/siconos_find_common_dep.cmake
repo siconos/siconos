@@ -6,8 +6,8 @@
 
 # --- Blas Lapack ---
 # include(BlasLapackSetup)
-compile_with(BLAS REQUIRED ONLY numerics externals)
-compile_with(LAPACK REQUIRED ONLY numerics externals)
+compile_with(BLAS REQUIRED SICONOS_COMPONENTS numerics externals)
+compile_with(LAPACK REQUIRED SICONOS_COMPONENTS numerics externals)
 if(NOT BLAS_INCLUDE_DIRS)
   message(FATAL_ERROR "cannot find blas include directories")
 endif()
@@ -16,12 +16,12 @@ if(NOT LAPACK_INCLUDE_DIRS)
 endif()
 
 # --- Numerics optional dependencies ---
-compile_with(MlcpSimplex ONLY numerics)
+compile_with(MlcpSimplex SICONOS_COMPONENTS numerics)
 compile_with(Pthread)
 IF(GAMS_DIR)
   SET(GAMS_C_API_FIND_REQUIRED TRUE)
 ENDIF(GAMS_DIR)
-COMPILE_WITH(GamsCApi ONLY numerics)
+COMPILE_WITH(GamsCApi SICONOS_COMPONENTS numerics)
 IF(GAMSCAPI_FOUND)
   # needed for siconosconfig.h
   IF(NOT GAMS_DIR)
@@ -48,9 +48,9 @@ if (WITH_SYSTEM_SUITESPARSE)
   set(USE_SYSTEM_SUITESPARSE ${_sys_CXSparse} CACHE INTERNAL "flag to check to systemwide SuiteSparse install")
 endif()
 
-compile_with(PathFerris ONLY numerics)
-compile_with(PathVI ONLY numerics)
-compile_with(LpSolve ONLY numerics)
+compile_with(PathFerris SICONOS_COMPONENTS numerics)
+compile_with(PathVI SICONOS_COMPONENTS numerics)
+compile_with(LpSolve SICONOS_COMPONENTS numerics)
 if(LpSolve_FOUND)
   set(HAS_ONE_LP_SOLVER TRUE)
   set(HAS_EXTREME_POINT_ALGO TRUE)
@@ -60,7 +60,7 @@ endif(LpSolve_FOUND)
 # --- Mumps ---
 if(WITH_MUMPS)
   if(NOT IDONTWANTMPI)
-    compile_with(MPI REQUIRED ONLY numerics)
+    compile_with(MPI REQUIRED SICONOS_COMPONENTS numerics)
   endif(NOT IDONTWANTMPI)
   if(MPI_FOUND)
     set(HAVE_MPI TRUE)
@@ -70,12 +70,12 @@ if(WITH_MUMPS)
       get_filename_component(MUMPS_LIBRARY_DIRECTORY "${MPI_LIBRARY}" PATH)
     endif()
   endif()
-  compile_with(MUMPS REQUIRED ONLY numerics)
+  compile_with(MUMPS REQUIRED SICONOS_COMPONENTS numerics)
 endif()
 
 # --- UMFPACK ---
 if(WITH_UMFPACK)
-  compile_with(Umfpack REQUIRED ONLY numerics)
+  compile_with(Umfpack REQUIRED SICONOS_COMPONENTS numerics)
 endif()
 
 # --- SUPERLU ---
@@ -84,30 +84,30 @@ IF (WITH_SUPERLU AND WITH_SUPERLU_MT)
 ENDIF()
 
 if(WITH_SUPERLU)
-  compile_with(SuperLU REQUIRED ONLY numerics)
+  compile_with(SuperLU REQUIRED SICONOS_COMPONENTS numerics)
 endif()
 
 if(WITH_SUPERLU_MT)
-  compile_with(SuperLU_MT REQUIRED ONLY numerics)
+  compile_with(SuperLU_MT REQUIRED SICONOS_COMPONENTS numerics)
 endif()
 
 # not ready yet
 #if(WITH_SUPERLU_dist)
-#  compile_with(SuperLU_dist REQUIRED ONLY numerics)
+#  compile_with(SuperLU_dist REQUIRED SICONOS_COMPONENTS numerics)
 #endif()
 
 # --- Fclib ---
 IF(WITH_FCLIB)
-  COMPILE_WITH(FCLIB REQUIRED ONLY numerics)
+  COMPILE_WITH(FCLIB REQUIRED SICONOS_COMPONENTS numerics)
   IF(FCLib_FCLIB_HEADER_ONLY)
-    COMPILE_WITH(HDF5 REQUIRED ONLY numerics COMPONENTS C HL)
+    COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL SICONOS_COMPONENTS numerics )
   ELSE()
     APPEND_C_FLAGS("-DFCLIB_NOT_HEADER_ONLY")
 ENDIF()
   IF(FCLIB_NOTFOUND)
     # try the package stuff
     # need FCLib_DIR !!
-    COMPILE_WITH(FCLib 1.0 REQUIRED ONLY numerics)
+    COMPILE_WITH(FCLib 1.0 REQUIRED SICONOS_COMPONENTS numerics)
   ENDIF()
 ENDIF()
 
@@ -125,7 +125,7 @@ ENDIF()
 # --- Bullet ---
 SET(BULLET_PATHS "")
 IF(WITH_BULLET)
-  COMPILE_WITH(Bullet REQUIRED ONLY mechanics)
+  COMPILE_WITH(Bullet REQUIRED SICONOS_COMPONENTS mechanics)
   IF(BULLET_FOUND)
     SET(SICONOS_HAVE_BULLET TRUE)
     MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
@@ -159,7 +159,8 @@ ENDIF(WITH_BULLET)
 IF(WITH_MECHANISMS OR WITH_OCC)
   SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
   message(STATUS "Searching for OCE ....")
-  compile_with(OCE 0.15 REQUIRED COMPONENTS ${OCE_TOOLKITS} ONLY mechanics)
+  compile_with(OCE 0.15 REQUIRED COMPONENTS ${OCE_TOOLKITS}
+    SICONOS_COMPONENTS mechanics)
   if(OCE_FOUND)
     message(STATUS "Found OCE version ${OCE_VERSION}")
     if(NOT OCE_ALL_FOUND)
@@ -178,7 +179,7 @@ IF(WITH_MECHANISMS OR WITH_OCC)
     # try to find OpenCascade files.
     message(STATUS "OCE not found.  Try to find OpenCascade files.")
     FIND_PACKAGE(OpenCASCADE REQUIRED COMPONENTS ${OCE_TOOLKITS})
-    COMPILE_WITH(OpenCASCADE ONLY mechanics)
+    COMPILE_WITH(OpenCASCADE SICONOS_COMPONENTS mechanics)
 
     IF(OpenCASCADE_FOUND)
       message(STATUS "OpenCASCADE_INCLUDE_DIR = " ${OpenCASCADE_INCLUDE_DIR})
@@ -211,7 +212,7 @@ ENDIF()
 
 # -- VTK --
 IF(WITH_VTK)
-  COMPILE_WITH(VTK ONLY mechanics)
+  COMPILE_WITH(VTK SICONOS_COMPONENTS mechanics)
   IF(VTK_FOUND)
     MESSAGE(STATUS "Found vtk-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}")
     SET(SICONOS_HAVE_VTK TRUE)
@@ -224,14 +225,14 @@ ENDIF()
 # -- FreeCAD --
 # For python bindings
 if(WITH_FREECAD)
-  compile_with(FreeCAD COMPONENTS Part REQUIRED ONLY mechanics)
+  compile_with(FreeCAD COMPONENTS Part REQUIRED SICONOS_COMPONENTS mechanics)
 endif()
 
 
 # -- HDF5 --
 # For logging in Numerics
 IF(WITH_HDF5)
-  COMPILE_WITH(HDF5 REQUIRED ONLY numerics COMPONENTS C HL)
+  COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL SICONOS_COMPONENTS numerics)
 ENDIF(WITH_HDF5)
 
 #
@@ -239,7 +240,9 @@ ENDIF(WITH_HDF5)
 #
 include(serialization_vector_test)
 if(WITH_SERIALIZATION)
-  COMPILE_WITH(Boost 1.47 ONLY io COMPONENTS serialization filesystem REQUIRED)
+  COMPILE_WITH(Boost 1.47
+    COMPONENTS serialization filesystem REQUIRED
+    SICONOS_COMPONENTS io)
   if (Boost_VERSION GREATER 106100)
     # If boost is recent enough, prefer system boost serialization to
     # the one included in "externals/boost_serialization".
