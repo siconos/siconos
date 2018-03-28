@@ -6,8 +6,8 @@
 
 # --- Blas Lapack ---
 # include(BlasLapackSetup)
-compile_with(BLAS REQUIRED)
-compile_with(LAPACK REQUIRED)
+compile_with(BLAS REQUIRED ONLY numerics externals)
+compile_with(LAPACK REQUIRED ONLY numerics externals)
 if(NOT BLAS_INCLUDE_DIRS)
   message(FATAL_ERROR "cannot find blas include directories")
 endif()
@@ -16,12 +16,12 @@ if(NOT LAPACK_INCLUDE_DIRS)
 endif()
 
 # --- Numerics optional dependencies ---
-compile_with(MlcpSimplex)
+compile_with(MlcpSimplex ONLY numerics)
 compile_with(Pthread)
 IF(GAMS_DIR)
   SET(GAMS_C_API_FIND_REQUIRED TRUE)
 ENDIF(GAMS_DIR)
-COMPILE_WITH(GamsCApi)
+COMPILE_WITH(GamsCApi ONLY numerics)
 IF(GAMSCAPI_FOUND)
   # needed for siconosconfig.h
   IF(NOT GAMS_DIR)
@@ -48,9 +48,9 @@ if (WITH_SYSTEM_SUITESPARSE)
   set(USE_SYSTEM_SUITESPARSE ${_sys_CXSparse} CACHE INTERNAL "flag to check to systemwide SuiteSparse install")
 endif()
 
-compile_with(PathFerris)
-compile_with(PathVI)
-compile_with(LpSolve)
+compile_with(PathFerris ONLY numerics)
+compile_with(PathVI ONLY numerics)
+compile_with(LpSolve ONLY numerics)
 if(LpSolve_FOUND)
   set(HAS_ONE_LP_SOLVER TRUE)
   set(HAS_EXTREME_POINT_ALGO TRUE)
@@ -60,7 +60,7 @@ endif(LpSolve_FOUND)
 # --- Mumps ---
 if(WITH_MUMPS)
   if(NOT IDONTWANTMPI)
-    compile_with(MPI REQUIRED)
+    compile_with(MPI REQUIRED ONLY numerics)
   endif(NOT IDONTWANTMPI)
   if(MPI_FOUND)
     set(HAVE_MPI TRUE)
@@ -70,12 +70,12 @@ if(WITH_MUMPS)
       get_filename_component(MUMPS_LIBRARY_DIRECTORY "${MPI_LIBRARY}" PATH)
     endif()
   endif()
-  compile_with(MUMPS REQUIRED)
+  compile_with(MUMPS REQUIRED ONLY numerics)
 endif()
 
 # --- UMFPACK ---
 if(WITH_UMFPACK)
-  compile_with(Umfpack REQUIRED)
+  compile_with(Umfpack REQUIRED ONLY numerics)
 endif()
 
 # --- SUPERLU ---
@@ -84,30 +84,30 @@ IF (WITH_SUPERLU AND WITH_SUPERLU_MT)
 ENDIF()
 
 if(WITH_SUPERLU)
-  compile_with(SuperLU REQUIRED)
+  compile_with(SuperLU REQUIRED ONLY numerics)
 endif()
 
 if(WITH_SUPERLU_MT)
-  compile_with(SuperLU_MT REQUIRED)
+  compile_with(SuperLU_MT REQUIRED ONLY numerics)
 endif()
 
 # not ready yet
 #if(WITH_SUPERLU_dist)
-#  compile_with(SuperLU_dist REQUIRED)
+#  compile_with(SuperLU_dist REQUIRED ONLY numerics)
 #endif()
 
 # --- Fclib ---
 IF(WITH_FCLIB)
-  COMPILE_WITH(FCLIB REQUIRED)
+  COMPILE_WITH(FCLIB REQUIRED ONLY numerics)
   IF(FCLib_FCLIB_HEADER_ONLY)
-    COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL)
+    COMPILE_WITH(HDF5 REQUIRED ONLY numerics COMPONENTS C HL)
   ELSE()
     APPEND_C_FLAGS("-DFCLIB_NOT_HEADER_ONLY")
 ENDIF()
   IF(FCLIB_NOTFOUND)
     # try the package stuff
     # need FCLib_DIR !!
-    COMPILE_WITH(FCLib 1.0 REQUIRED)
+    COMPILE_WITH(FCLib 1.0 REQUIRED ONLY numerics)
   ENDIF()
 ENDIF()
 
@@ -178,7 +178,8 @@ IF(WITH_MECHANISMS OR WITH_OCC)
     # try to find OpenCascade files.
     message(STATUS "OCE not found.  Try to find OpenCascade files.")
     FIND_PACKAGE(OpenCASCADE REQUIRED COMPONENTS ${OCE_TOOLKITS})
-    COMPILE_WITH(OpenCASCADE)
+    COMPILE_WITH(OpenCASCADE ONLY mechanics)
+
     IF(OpenCASCADE_FOUND)
       message(STATUS "OpenCASCADE_INCLUDE_DIR = " ${OpenCASCADE_INCLUDE_DIR})
       message(STATUS "OpenCASCADE_LIBRARIES = " ${OpenCASCADE_LIBRARIES})
@@ -210,7 +211,7 @@ ENDIF()
 
 # -- VTK --
 IF(WITH_VTK)
-  COMPILE_WITH(VTK)
+  COMPILE_WITH(VTK ONLY mechanics)
   IF(VTK_FOUND)
     MESSAGE(STATUS "Found vtk-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}")
     SET(SICONOS_HAVE_VTK TRUE)
@@ -223,14 +224,14 @@ ENDIF()
 # -- FreeCAD --
 # For python bindings
 if(WITH_FREECAD)
-  compile_with(FreeCAD COMPONENTS Part REQUIRED)
+  compile_with(FreeCAD COMPONENTS Part REQUIRED ONLY mechanics)
 endif()
 
 
 # -- HDF5 --
 # For logging in Numerics
 IF(WITH_HDF5)
-  COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL)
+  COMPILE_WITH(HDF5 REQUIRED ONLY numerics COMPONENTS C HL)
 ENDIF(WITH_HDF5)
 
 #
@@ -238,7 +239,7 @@ ENDIF(WITH_HDF5)
 #
 include(serialization_vector_test)
 if(WITH_SERIALIZATION)
-  COMPILE_WITH(Boost 1.47 COMPONENTS serialization filesystem REQUIRED)
+  COMPILE_WITH(Boost 1.47 ONLY io COMPONENTS serialization filesystem REQUIRED)
   if (Boost_VERSION GREATER 106100)
     # If boost is recent enough, prefer system boost serialization to
     # the one included in "externals/boost_serialization".
