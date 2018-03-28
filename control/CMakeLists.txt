@@ -31,10 +31,10 @@ set(${COMPONENT}_HDRS_EXCLUDE_DIR)
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
 list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} numerics kernel)
+list(APPEND ${COMPONENT}_LINK_LIBRARIES numerics kernel)
 if (CMAKE_SKIP_RPATH)
   # if no RPATH, then linking does not work for tests without specifying externals
-  set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} externals)
+  list(APPEND ${COMPONENT}_LINK_LIBRARIES externals)
 endif()
 
 include(WindowsControlSetup)
