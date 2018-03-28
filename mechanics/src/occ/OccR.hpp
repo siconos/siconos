@@ -47,15 +47,15 @@ public:
    */
   void computeh(double time, BlockVector& q0, SiconosVector& y);
 
-  /** Set offset.
+  /** Set offset1, offset from first contact.
    * \param val : the new value.
    */
-  void setOffset(double val) { _offset = val; };
+  void setOffset1(double val) { _offset1 = val; };
 
-  /** Set normalFromFace1.
+  /** Set offset2, offset from second contact.
    * \param val : the new value.
    */
-  void setNormalFromFace1(bool val) { _normalFromFace1 = val; };
+  void setOffset2(double val) { _offset2 = val; };
 
   /** Get geometer.
    * \return a SP::Geometer object.
@@ -77,9 +77,8 @@ protected:
 
   SP::Geometer _geometer;
 
-  bool _normalFromFace1;
-  bool _offsetp1;
-  double _offset;
+  double _offset1;
+  double _offset2;
 };
 
 #endif

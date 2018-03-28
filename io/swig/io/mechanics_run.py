@@ -1208,7 +1208,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 contactor2_names = [contactor2_name]
 
             distance_calculator = pinter.attrs['distance_calculator']
-            offset = pinter.attrs['offset']
+            offset1 = pinter.attrs['offset1']
+            offset2 = pinter.attrs['offset2']
 
             body1 = self._input[body1_name]
             body2 = self._input[body2_name]
@@ -1246,7 +1247,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     relation = occ.OccR(cp1, cp2,
                                         real_dist_calc[distance_calculator]())
 
-                    relation.setOffset(offset)
+                    relation.setOffset1(offset1)
+                    relation.setOffset2(offset2)
 
                     inter = Interaction(nslaw, relation)
 
