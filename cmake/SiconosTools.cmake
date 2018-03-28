@@ -131,11 +131,11 @@ ENDMACRO(PRINT_VAR V)
 # with the same 'options' as find_package
 # (see http://www.cmake.org/cmake/help/v3.0/command/find_package.html?highlight=find_package)
 MACRO(COMPILE_WITH)
-  
+
   set(options REQUIRED)
-  set(oneValueArgs ONLY)
-  set(multiValueArgs COMPONENTS)
-  
+  set(oneValueArgs)
+  set(multiValueArgs COMPONENTS ONLY)
+
   cmake_parse_arguments(COMPILE_WITH "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   set(_NAME)
@@ -209,9 +209,11 @@ MACRO(COMPILE_WITH)
     list(REMOVE_DUPLICATES _LINK_LIBRARIES)
   endif()
   if(COMPILE_WITH_ONLY)
-    set(_sico_component ${COMPILE_WITH_ONLY})
-    set(${_sico_component}_LINK_LIBRARIES ${${_sico_component}_LINK_LIBRARIES}
-      ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries for ${_sico_component}.")
+    FOREACH(_O ${COMPILE_WITH_ONLY})
+      set(_sico_component ${_O})
+      set(${_sico_component}_LINK_LIBRARIES ${${_sico_component}_LINK_LIBRARIES}
+        ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries for ${_sico_component}.")
+    ENDFOREACH()
   else()
     set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES}
       ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries.")
