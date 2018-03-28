@@ -23,7 +23,7 @@ IF(GAMSCAPI_FOUND)
   ENDIF(C_HAVE_WERR_CONV)
 
   # XXX hack for now ...
-  COMPILE_WITH(PathVI)
+  COMPILE_WITH(PathVI SICONOS_COMPONENTS numerics)
   IF(PathVI_FOUND)
     SET(HAVE_GAMS_PATHVI TRUE)
     #    compile_with(Cplex)

@@ -17,7 +17,7 @@ endif()
 
 # --- Numerics optional dependencies ---
 compile_with(MlcpSimplex SICONOS_COMPONENTS numerics)
-compile_with(Pthread)
+compile_with(Pthread SICONOS_COMPONENTS numerics)
 IF(GAMS_DIR)
   SET(GAMS_C_API_FIND_REQUIRED TRUE)
 ENDIF(GAMS_DIR)
@@ -37,7 +37,11 @@ ENDIF(GAMSCAPI_FOUND)
 # --- SuiteSparse ---
 # Look for system-installed SuiteSparse/CSparse
 if (WITH_SYSTEM_SUITESPARSE)
-  compile_with(SuiteSparse COMPONENTS CXSparse)
+  compile_with(SuiteSparse COMPONENTS CXSparse
+    SICONOS_COMPONENTS externals numerics)
+  # Note on the above: The CSparse data structures are referred to in
+  # kernel, but the functions are only called from numerics, so it is
+  # not a link-time dependency for kernel.
   if (NOT SuiteSparse_FOUND OR NOT SuiteSparse_CXSparse_FOUND)
     set(_sys_CXSparse FALSE)
     message(STATUS "System SuiteSparse was requested (WITH_SYSTEM_SUITESPARSE=${WITH_SYSTEM_SUITESPARSE})\ 
@@ -110,6 +114,9 @@ ENDIF()
     COMPILE_WITH(FCLib 1.0 REQUIRED SICONOS_COMPONENTS numerics)
   ENDIF()
 ENDIF()
+
+# GMP
+compile_with(GMP REQUIRED SICONOS_COMPONENTS kernel)
 
 IF(WITH_CXX)
   # --- Boost ---
