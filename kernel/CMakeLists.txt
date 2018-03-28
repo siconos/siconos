@@ -39,7 +39,7 @@ compile_with(GMP REQUIRED)
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
 list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} externals numerics)
+list(APPEND ${COMPONENT}_LINK_LIBRARIES externals numerics)
 
 include(WindowsKernelSetup)
 
