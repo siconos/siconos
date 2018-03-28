@@ -53,64 +53,68 @@ extensions = [
     #'sphinxcontrib.doxylink'
 ]
 
-# Set doxyrest conf.
-with_doxyrest = @HAS_DOXYREST@
-if with_doxyrest:
-    sys.path.insert(1, os.path.abspath('@DOXYREST_SPHINX_DIR@'))
-    extensions += ['doxyrest', 'cpplexer']
     
 extensions += [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',]
 
-extensions += ['breathe', 'exhale']
+# ---- Start doxyrest conf ---
+with_doxyrest = @HAS_DOXYREST@
+if with_doxyrest:
+    sys.path.insert(1, os.path.abspath('@DOXYREST_SPHINX_DIR@'))
+    extensions += ['doxyrest', 'cpplexer']
+
+# ---- Start Exhale conf ---
+with_exhale = @HAS_EXHALE@
+if with_exhale:
+    extensions += ['breathe', 'exhale']
+    breathe_projects = {"@PROJECT_NAME@": "@DOXYGEN_OUTPUT@/xml"}
+    breathe_default_project = "@PROJECT_NAME@"
+    # breathe_projects_source = {
+    #      "auto" : ( "/Users/Franck/Projets/Siconos/siconos/kernel/src/modelingTools", ["FirstOrderLinearTIR.hpp", "LagrangianLinearDiagonalDS.hpp"] )
+    #      }
+
+
+    # Setup the exhale extension
+    exhale_args = {
+        # These arguments are required
+        "containmentFolder":     "./sphinx/api",
+        "rootFileName":          "library_root.rst",
+        "rootFileTitle":         "Library API",
+        "afterTitleDescription": textwrap.dedent('''
+           .. note::
+
+           The following documentation presents the C++ API.  The Python API
+           generally mirrors the C++ API, but some methods may not be available in
+           Python or may perform different actions.
+        '''),
+        "doxygenStripFromPath":  ".",
+        # Suggested optional arguments
+        "createTreeView":        True,
+        # TIP: if using the sphinx-bootstrap-theme, you need
+        "createTreeView": True,
+        "treeViewIsBootstrap": True,
+        "treeViewBootstrapLevels": 4,
+        "exhaleExecutesDoxygen": False,
+        # Uncomment when using exhale to call doxygen
+        #"exhaleDoxygenStdin":    "INPUT = @DOXYGEN_INPUTS@ "
+    }
+
+    # sphinx versioning option. Review this later (issue to be fixed :
+    # https://github.com/CityOfZion/neon-js/issues/111)
+    # scv_root_ref = 'feature_branch'
+
+    # Tell sphinx what the primary language being documented is.
+    primary_domain = 'cpp'
+
+    # Tell sphinx what the pygments highlight language should be.
+    highlight_language = 'cpp'
+
 
 #numpydoc_class_members_toctree = True
 # -----------------------------------------------------------------------------
 # Autosummary
 # -----------------------------------------------------------------------------
-
-breathe_projects = {"@PROJECT_NAME@": "@DOXYGEN_OUTPUT@/xml"}
-breathe_default_project = "@PROJECT_NAME@"
-# breathe_projects_source = {
-#      "auto" : ( "/Users/Franck/Projets/Siconos/siconos/kernel/src/modelingTools", ["FirstOrderLinearTIR.hpp", "LagrangianLinearDiagonalDS.hpp"] )
-#      }
-
-
-# Setup the exhale extension
-exhale_args = {
-    # These arguments are required
-    "containmentFolder":     "./sphinx/api",
-    "rootFileName":          "library_root.rst",
-    "rootFileTitle":         "Library API",
-    "afterTitleDescription": textwrap.dedent('''
-       .. note::
-
-       The following documentation presents the C++ API.  The Python API
-       generally mirrors the C++ API, but some methods may not be available in
-       Python or may perform different actions.
-    '''),
-    "doxygenStripFromPath":  ".",
-    # Suggested optional arguments
-    "createTreeView":        True,
-    # TIP: if using the sphinx-bootstrap-theme, you need
-    "createTreeView": True,
-    "treeViewIsBootstrap": True,
-    "treeViewBootstrapLevels": 4,
-    "exhaleExecutesDoxygen": False,
-    # Uncomment when using exhale to call doxygen
-    #"exhaleDoxygenStdin":    "INPUT = @DOXYGEN_INPUTS@ "
-}
-
-# sphinx versioning option. Review this later (issue to be fixed :
-# https://github.com/CityOfZion/neon-js/issues/111)
-# scv_root_ref = 'feature_branch'
-
-# Tell sphinx what the primary language being documented is.
-primary_domain = 'cpp'
-
-# Tell sphinx what the pygments highlight language should be.
-highlight_language = 'cpp'
 
 
 #import glob

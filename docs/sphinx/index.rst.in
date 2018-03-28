@@ -10,17 +10,12 @@
 .. toctree::
    :hidden:
    :maxdepth: 3
-
+	      
    install_guide/install_guide
    getting_started/index
-   users_guide/index
    examples/index
-   documentation_index_dev
-   talks
-   download
-   contacts
-   related_projects
-   z_siconos_bibtex
+   reference/index
+   full_doc_index
 
 
 Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems in C++ and in Python:

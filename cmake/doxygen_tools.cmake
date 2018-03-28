@@ -81,7 +81,13 @@ macro(finalize_doxygen)
     configure_file(${CMAKE_SOURCE_DIR}/docs/doxygen_layout/header.html.in
       docs/doxygen_layout/header.html)
     add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
+    add_custom_target(doxypng2sphinx
+      COMMAND  ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/docs/find_doxygen_diagrams.py
+      DEPENDS doxygen)
     add_dependencies(html doxygen)
-    add_dependencies(doxyrest doxygen)
+    if(HAS_DOXYREST)
+      add_dependencies(doxyrest doxygen)
+      add_dependencies(html doxyrest)
+    endif()
   endif()
 endmacro()

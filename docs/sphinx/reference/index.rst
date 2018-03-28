@@ -1,8 +1,8 @@
 .. _siconos_api:
 
 
-Full API
-========
+Siconos API
+===========
 
 .. toctree::
    :maxdepth: 4
@@ -10,3 +10,5 @@ Full API
    siconos_api_reference
    howto
    siconos_python_reference
+
+   

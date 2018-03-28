@@ -1,8 +1,18 @@
 .. _siconos_api_reference:
 
 
-Siconos API reference (C/C++)
-=============================
+Siconos API (C/C++)
+===================
+
+Different versions on test
+
+* Doxygen only (a doxygen conf + run doxygen, html mode)
+* Exhale : use conf.py (sphinx) to handle doxygen run (xml outputs + rst generations from those outputs) and sphinx build
+* Doxyrest : same results as exhale but not as convenient as exhale. I use it to generate rst files from \page inputs in doxygen and that's it.
+
+  
+Doxygen only
+------------
 
 Documentation is automatically generated from the Siconos C/C++ source files using Doxygen:
 
@@ -10,3 +20,30 @@ Documentation is automatically generated from the Siconos C/C++ source files usi
 
 .. _C/C++ API documentation: ../doxygen/html/index.html
 
+Doxyrest
+--------
+
+.. toctree::
+   :maxdepth: 6
+
+   /from_doxygen/index
+
+	 
+
+Doxygen to sphinx via exhale
+----------------------------
+
+.. toctree::
+   :maxdepth: 6
+
+   /api/library_root.rst
+   /reference/class_diagrams
+   /api/class_view_hierarchy
+   /api/unabridged_api
+   /api/file_view_hierarchy
+   
+Index
+-----
+
+* :ref:`genindex`
+* :ref:`modindex`

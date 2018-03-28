@@ -8,7 +8,12 @@
 include(FindPythonModule)
 include(FindSphinxModule)
 
-option(USE_DOXYREST "Build Documentation. Default = OFF" OFF)
+# Devel option : activate this to generate rst from doxygen xml outputs
+# using doxyrest. 
+option(USE_DOXYREST "Build rst files from doxygen outputs (tool = doxyrest). Default = OFF" OFF)
+# Devel option : activate this to generate rst from doxygen xml outputs
+# using exhale
+option(USE_EXHALE "Build rst files from doxygen outputs (tool = exhale). Default = OFF" OFF)
 
 set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/Docs/build/html/ CACHE INTERNAL "Root path to generated documentation.")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
@@ -89,10 +94,16 @@ if(USE_SPHINX)
     find_package(doxyrest CONFIGS doxyrest_config.cmake REQUIRED)
     if(doxyrest_FOUND)
       set(HAS_DOXYREST "True")
-      message("Doxyrest found : ${DOXYREST_EXE}")
+      message(STATUS "Doxyrest found : ${DOXYREST_EXE}")
     endif()
   else()
     set(HAS_DOXYREST "False")
+  endif()
+  if(USE_EXHALE)
+    find_python_module(exhale REQUIRED)
+    set(HAS_EXHALE "True")
+  else()
+    set(HAS_EXHALE "False")
   endif()
   #find_sphinx_module(doxyrest)
   # find_python_module(breathe REQUIRED)
@@ -117,6 +128,11 @@ if(USE_SPHINX)
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/siconos.bib"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/siconos.bib" COPYONLY)
 
+  configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/find_doxygen_diagrams.py"
+    "${CMAKE_CURRENT_BINARY_DIR}/find_doxygen_diagrams.py" @ONLY)
+
+  
   # List and copy all rst files from source dir to binary dir
   file(GLOB_RECURSE files_rst RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/sphinx
     ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/*.rst)
