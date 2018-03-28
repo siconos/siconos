@@ -42,9 +42,8 @@ set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
 set(SICONOS_INCLUDE_DIRECTORIES
   CACHE INTERNAL "Include directories for external dependencies.")
 
-set(SICONOS_LINK_LIBRARIES ${CMAKE_DL_LIBS}
+set(SICONOS_LINK_LIBRARIES
   CACHE INTERNAL "List of external libraries.")
-# CMAKE_DL needed on Debian (and others?) for dlopen or equivalent (used for plugins)
 
 set(${PROJECT_NAME}_LOCAL_LIBRARIES
   CACHE INTERNAL "List of siconos components libraries.")
