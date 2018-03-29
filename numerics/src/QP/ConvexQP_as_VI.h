@@ -18,12 +18,6 @@
 #ifndef CONVEXQP_AS_VI_H
 #define CONVEXQP_AS_VI_H
 
-/*! \page cqpProblemVI ConvexQP as VI
- *
- *
- */
-
-
 /*!\file ConvexQP_as_VI.h
   \brief Definition of a structure to handle with ConvexQP problems.
 */

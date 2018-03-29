@@ -18,12 +18,6 @@
 #ifndef FRICTIONCONTACTPROBLEM_AS_CONVEXQP_H
 #define FRICTIONCONTACTPROBLEM_AS_CONVEXQP_H
 
-/*! \page fcProblemConvexQP Friction-contact problems (2D or 3D) as ConvexQP
- *
- *
- */
-
-
 /*!\file FrictionContactProblem_as_ConvexQP.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */

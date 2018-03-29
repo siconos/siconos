@@ -18,12 +18,6 @@
 #ifndef SOCLCP_AS_VI_H
 #define SOCLCP_AS_VI_H
 
-/*! \page soclp_vi_Problem SOCLCP as VI
- *
- *
- */
-
-
 /*!\file SecondOrderConeLinearComplementarityProblem_as_VI.h
   \brief Definition of a structure to handle with SOCLCP problems.
 */

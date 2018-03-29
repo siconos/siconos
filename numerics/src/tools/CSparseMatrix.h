@@ -20,12 +20,6 @@
 #ifndef SparseMatrix_H
 #define SparseMatrix_H
 
-/*! \page SparseMatrixPage Sparse Matrix Storage in Numerics
-
-Documentation to be done
-
-*/
-
 #include <stdio.h>
 
 /*!\file CSparseMatrix.h

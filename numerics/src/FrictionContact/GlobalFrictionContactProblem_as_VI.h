@@ -18,12 +18,6 @@
 #ifndef GLOBALFRICTIONCONTACTPROBLEM_AS_VI_H
 #define GLOBALFRICTIONCONTACTPROBLEM_AS_VI_H
 
-/*! \page fcProblemVI Friction-contact problems (2D or 3D) as VI
- *
- *
- */
-
-
 /*!\file GlobalFrictionContactProblem_as_VI.h
   \brief Definition of a structure to handle with global friction-contact (2D or 3D) problems.
 */

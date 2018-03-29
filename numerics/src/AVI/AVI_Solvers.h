@@ -24,28 +24,6 @@
   \author siconos-team@lists.gforge.inria.fr
 */
 
-/*! \page AVISolvers Affine Variational Inequalities Solvers
-
-This page gives an overview of the available solvers for AVI and their required parameters.
-
-For each solver, the input argument are:
-- an AffineVariationalInequalities
-- the unknown z
-- the value of the function F(z)
-- info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a SolverOptions struct, which contains iparam and dparam
-
-\section aviCaoFerris The Cao-Ferris algorithm
-
-Direct solver for AVI based on pivoting method principle for (degenerated) problem.
-
- function: avi_caoferris() \n
- parameters:
-- iparam[0] (in): max. number of iterations
-- iparam[1] (in,out): boolean, 1 if memory has been allocated, 0 otherwise
-- iparam[1] (out): number of iterations processed
-*/
-
 #include "AffineVariationalInequalities.h"
 #include "SolverOptions.h"
 

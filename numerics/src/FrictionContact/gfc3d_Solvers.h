@@ -25,23 +25,6 @@
 
 */
 
-/*! \page GlobalFC3DSolvers Global Friction-Contact 3D problems Solvers
-
-This page gives an overview of the available solvers for friction-contact (3D) problems and their required parameters.
-
-For each solver, the input argument are:
-- a FrictionContactProblem
-- the unknowns (reaction,velocity)
-- info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a SolverOptions structure, which handles iparam and dparam
-
-\section pfc3Dnsgs Non-Smooth Gauss Seidel Solver
-
- function: fc3d_nsgs()
- parameters:
-
-
-*/
 #include "GlobalFrictionContactProblem.h"
 #include "SolverOptions.h"
 #include "Friction_cst.h"

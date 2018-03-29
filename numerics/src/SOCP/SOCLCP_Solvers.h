@@ -23,24 +23,6 @@
 
 */
 
-/*! \page SecondOrderConeLinearComplementarityProblemSolvers  Second Order Cone Linear Complementarity Problem (SOCLCP) solvers
-
-This page gives an overview of the available solvers for Second Order Cone Linear Complementarity Problem (SOCLCP) and their required parameters.
-
-For each solver, the input argument are:
-- a SecondOrderConeLinearComplementarityProblem
-- the unknowns (r,v)
-- info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a SolverOptions structure, which handles iparam and dparam
-
-\section soclcp nsgs Non-Smooth Gauss Seidel Solver
-
- function: secondOrderConeLinearComplementarity_nsgs(problem, r , v , &info , options);
- parameters:
-
-
-*/
-
 #include "SecondOrderConeLinearComplementarityProblem.h"
 #include "SolverOptions.h"
 

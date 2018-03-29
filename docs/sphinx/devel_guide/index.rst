@@ -11,6 +11,7 @@ Developer guide
    about_ci
    plugins
    notes/DevNotes
+   todos_from_doxygen
 
 To do.
 

@@ -28,20 +28,6 @@
  * \author Olivier Huber
 */
 
-/*! \page NCProblem Nonlinear Complementarity problems (NCP)
-  \section ncpProblemIntro  Problem Statement
-  Given a sufficiently smooth function \f${F}\colon {{\mathrm{I\!R}}}^{n}  \to {{\mathrm{I\!R}}}^{n}\f$
-  The Nonlinear Complementarity Problem (NCP) is to find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n})\f$ such that:
-  \f{align*}{
-  w &= F(z) \\
-  0 &\le w \perp z \ge 0
-  \f}
-
-  \section ncpSolversList Available solvers:
-  - ncp_FBLSA(), nonsmooth Newton method based on Fisher-Burmeister function with a line search.
-  - ncp_pathsearch(), a solver based on a path search method
-*/
-
 /** type for user defined function used to compute F and its jacobian.
  */
 typedef void (*ptrFunctionNCP)(void* env, int n, double* z, double* F);
