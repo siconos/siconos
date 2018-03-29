@@ -1,7 +1,7 @@
 .. _siconos_install_guide:
 
-Installation guide
-==================
+Download and install
+====================
 
 Whatever your system is, you will need first to :
 

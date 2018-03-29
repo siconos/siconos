@@ -1,8 +1,8 @@
 .. _siconos_api:
 
 
-Siconos API
-===========
+Full API
+========
 
 .. toctree::
    :maxdepth: 4

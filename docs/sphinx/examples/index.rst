@@ -1,7 +1,7 @@
 .. _siconos_examples:
 
-Examples
-========
+Browse examples
+===============
 
 A lot of examples of modeling and simulation of nonsmooth systems with Siconos are available. To have a look on it, you can browse them on github at `all current examples`_.
 

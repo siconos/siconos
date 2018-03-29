@@ -1,7 +1,7 @@
 .. _siconos_getting_started:
 
-Getting Started
-===============
+Quickstart
+==========
 
 This manual aims at giving user a short overview of the software functionnalities and to provide some guidelines for your first steps with nonsmooth systems
 simulation with Siconos.

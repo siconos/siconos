@@ -7,6 +7,7 @@ Developer guide
 .. toctree::
    :maxdepth: 3
 
+   write_and_build_doc
    modal_moreau_jean
    about_ci
    plugins
