@@ -37,8 +37,7 @@ Using an LCP reformulation (splitting z in positive and negative part), we have 
 .. index:: single: Relay Problems Solvers
 .. _doxid-_relay_solvers:
 
-Relay Problems Solvers
-======================
+.. rubric:: Relay Problems Solvers:
 
 This page gives an overview of the available solvers for relay problems and their required parameters.
 

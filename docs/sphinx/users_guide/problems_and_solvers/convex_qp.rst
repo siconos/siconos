@@ -5,7 +5,7 @@ ConvexQP
 ========
 
 .. _doxid-convexqp_problem_1convexQPintro:
-.. rubric:: Problem statement:
+.. rubric:: Problem:
 
 Given
 
@@ -54,8 +54,7 @@ In the most simple case, we return
 .. _doxid-cqp_problem_v_i:
 
 
-ConvexQP problems Solvers
-=========================
+.. rubric:: ConvexQP Solvers:
 
 This page gives an overview of the available solvers for Convex QP problems and their required parameters.
 

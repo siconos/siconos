@@ -33,8 +33,7 @@ A Mixed Complementarity problem (MCP) is a NCP "augmented" with equality constra
 .. index:: single: MixedComplementarity Problems Solvers
 .. _doxid-_m_c_p_solvers:
 
-MixedComplementarity Problems Solvers
-=====================================
+.. rubric ::MixedComplementarity Problems Solvers:
 
 .. _doxid-_m_c_p_solvers_1mcp_FischerBurmeister:
 .. rubric:: semi-smooth Newton/Fisher-Burmeister solver.:

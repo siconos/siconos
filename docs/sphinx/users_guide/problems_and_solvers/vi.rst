@@ -53,8 +53,7 @@ Use the generic function :ref:`variationalInequality_driver() <doxid-_non_smooth
 .. index:: single: VI problems Solvers
 .. _doxid-_v_i_solvers:
 
-VI problems Solvers
-===================
+.. rubric:: VI problems Solvers:
 
 This page gives an overview of the available solvers for Variational Inequality problems and their required parameters.
 

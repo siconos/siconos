@@ -4,8 +4,7 @@
 Affine Variational Inequalities (AVI)
 =====================================
 
-.. _doxid-_a_v_i_1aviIntro:
-.. rubric:: The problem:
+.. rubric:: Problem:
 
 The Affine Variational Inequality (AVI) is defined by
 
@@ -46,8 +45,7 @@ Use the generic function AVI_driver() to call one the the specific solvers liste
 .. index:: single: Affine Variational Inequalities Solvers
 .. _doxid-_a_v_i_solvers:
 
-Affine Variational Inequalities Solvers
-=======================================
+.. rubric:: Affine Variational Inequalities Solvers:
 
 Overview of the available solvers for AVI and their required parameters.
 

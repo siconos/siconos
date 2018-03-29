@@ -55,8 +55,8 @@ See the related functions/solvers list in ``SOCLCP_Solvers.h`` .
 .. index:: single: Second Order Cone Linear Complementarity Problem (SOCLCP) solvers
 .. _doxid-_second_order_cone_linear_complementarity_problem_solvers:
 
-Second Order Cone Linear Complementarity Problem (SOCLCP) solvers
-=================================================================
+.. rubric:: Second Order Cone Linear Complementarity Problem (SOCLCP) solvers:
+
 
 This page gives an overview of the available solvers for Second Order Cone Linear Complementarity Problem (SOCLCP) and their required parameters.
 

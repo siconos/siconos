@@ -1,8 +1,8 @@
 .. index:: single: Global-Friction-contact problems (2 or 3-dimensional)
 .. _doxid-global_fc_problem:
 
-Global-Friction-contact problems (2 or 3-dimensional)
-=====================================================
+Global-Friction-contact problems (2D or 3D)
+===========================================
 
 .. _doxid-global_fc_problem_1pfcIntro:
 .. rubric:: Problem statement.:
@@ -66,8 +66,7 @@ gfc3d problems needs some specific parameters, given to the :ref:`gfc3d_driver()
 .. index:: single: Global Friction-Contact 3D problems Solvers
 .. _doxid-_global_f_c3_d_solvers:
 
-Global Friction-Contact 3D problems Solvers
-===========================================
+.. rubric:: Global Friction-Contact 3D problems Solvers:
 
 This page gives an overview of the available solvers for friction-contact (3D) problems and their required parameters.
 

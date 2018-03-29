@@ -74,12 +74,14 @@ macro(finalize_doxygen)
     set(DOXY_WARNINGS "NO")
     set(GENERATE_HTML YES)
     set(GENERATE_XML YES)
+    set(EXTRACT_ALL NO)
+    if(USE_DEVEL_DOXYGEN)
+      set(EXTRACT_ALL YES)
+    endif()
     foreach(_dir ${DOXY_INPUTS})
       set(DOXYGEN_INPUTS "${DOXYGEN_INPUTS} ${_dir}")
     endforeach()
     configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy.config.in ${DOXY_CONFIG} @ONLY)
-    configure_file(${CMAKE_SOURCE_DIR}/docs/doxygen_layout/header.html.in
-      docs/doxygen_layout/header.html)
     add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
     add_custom_target(doxypng2sphinx
       COMMAND  ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/docs/find_doxygen_diagrams.py

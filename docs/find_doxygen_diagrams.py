@@ -10,7 +10,7 @@ import os
 
 # Scan doxygen output path and create a list with
 # files matching requirements
-doxygen_output_path = '@DOXYGEN_OUTPUT@/html'
+html_doxygen_output_path = '@DOC_ROOT_DIR@/html/doxygen'
 outputfile = '@CMAKE_CURRENT_BINARY_DIR@/sphinx/reference/class_diagrams.rst'
 class_diagram_match = 'inherit_graph*.png'
 
@@ -18,7 +18,7 @@ header = '.. _api_class_diagrams:\n\n'
 header += 'Siconos API - Classes diagrams\n'
 header += '==============================\n\n'
 
-files = glob.glob(os.path.join(doxygen_output_path, class_diagram_match))
+files = glob.glob(os.path.join(html_doxygen_output_path, class_diagram_match))
 file = open(outputfile, 'w')
 file.writelines(header)
 params = [':height: 190 px', ':class: gallery']

@@ -18,7 +18,7 @@ Documentation is automatically generated from the Siconos C/C++ source files usi
 
 `C/C++ API documentation`_.
 
-.. _C/C++ API documentation: ../doxygen/html/index.html
+.. _C/C++ API documentation: ../doxygen/index.html
 
 Doxyrest
 --------

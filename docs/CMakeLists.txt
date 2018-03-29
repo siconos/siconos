@@ -15,7 +15,10 @@ option(USE_DOXYREST "Build rst files from doxygen outputs (tool = doxyrest). Def
 # using exhale
 option(USE_EXHALE "Build rst files from doxygen outputs (tool = exhale). Default = OFF" OFF)
 
-set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/Docs/build/html/ CACHE INTERNAL "Root path to generated documentation.")
+# Devel option : generate pure doxygen doc (no sphinx), extracting all and with graphs.
+option(USE_DEVEL_DOXYGEN "Build doxygen (html, latex ...) doc, extracting all. Devel purpose. Default = OFF" OFF)
+
+set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/Docs/build/ CACHE INTERNAL "Root path to generated documentation.")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
 
 #  ====== doxygen documentation setup ======
@@ -62,8 +65,7 @@ if(USE_DOXYGEN)
   # Doc will be built when 'make doxygen' is called.
   if(WITH_DOCUMENTATION)
     # config file name
-    set(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/config/doxy.config" CACHE INTERNAL "Doxygen configuration file for doc from sources.")
-
+    set(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/config/doxy.config" CACHE INTERNAL "Doxygen configuration file used to produce xml files for sphinx.")
     # The generation of the config and the creation of the target will be done later,
     # after the update of inputs by each component, with macro 'finalize_doxygen'
     
