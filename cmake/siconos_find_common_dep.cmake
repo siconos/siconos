@@ -155,36 +155,11 @@ IF(WITH_BULLET)
   ENDIF(BULLET_FOUND)
 ENDIF(WITH_BULLET)
 
-# --- OCC ---
-IF(WITH_OCC)
-  if(NOT WITH_MECHANISMS)
-    COMPILE_WITH(OCE 0.15 REQUIRED ONLY mechanics)
-    SET(SICONOS_HAVE_OCC TRUE)
-  endif()
-  if(OCE_VERSION VERSION_LESS 0.18)
-    # DRAWEXE link fails on some systems and must be removed.
-    # MESSAGE(STATUS "DRAWEXE link fails on some systems is removed.")
-    list(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE)
-    list(REMOVE_ITEM mechanics_LINK_LIBRARIES DRAWEXE)
-    set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-    set(mechanics_LINK_LIBRARIES ${mechanics_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-  endif()
-ENDIF()
-
 # --- Mechanisms (Saladyn?) ---
-IF(WITH_MECHANISMS)
+IF(WITH_MECHANISMS OR WITH_OCC)
   SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
-
   message(STATUS "Searching for OCE ....")
-  compile_with(OCE COMPONENTS ${OCE_TOOLKITS} ONLY mechanics)
-  if(OCE_VERSION VERSION_LESS 0.18)
-    # DRAWEXE link fails on some systems and must be removed.
-    #MESSAGE(STATUS "DRAWEXE link fails on some systems is removed.")
-    list(REMOVE_ITEM mechanics_LINK_LIBRARIES DRAWEXE)
-    list(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE)
-    set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-    set(mechanics_LINK_LIBRARIES ${mechanics_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-  endif()
+  compile_with(OCE 0.15 REQUIRED COMPONENTS ${OCE_TOOLKITS} ONLY mechanics)
   if(OCE_FOUND)
     message(STATUS "Found OCE version ${OCE_VERSION}")
     if(NOT OCE_ALL_FOUND)
@@ -195,17 +170,15 @@ IF(WITH_MECHANISMS)
   if(OCE_FOUND)
     # Include files reside in ${OCE_INCLUDE_DIRS};
     #    include_directories(${OCE_INCLUDE_DIRS})
-    # We do not need library path, they will be automatically imported.
+    # We do not need library path, they will be automatically imported
   else(OCE_FOUND)
     # OCE not found; either it is not found and user
     # has to set OCE_DIR to the directory containing
     # OCEConfig.cmake, or OCE is not installed and we
     # try to find OpenCascade files.
     message(STATUS "OCE not found.  Try to find OpenCascade files.")
-
     FIND_PACKAGE(OpenCASCADE REQUIRED COMPONENTS ${OCE_TOOLKITS})
     COMPILE_WITH(OpenCASCADE)
-
     IF(OpenCASCADE_FOUND)
       message(STATUS "OpenCASCADE_INCLUDE_DIR = " ${OpenCASCADE_INCLUDE_DIR})
       message(STATUS "OpenCASCADE_LIBRARIES = " ${OpenCASCADE_LIBRARIES})
@@ -214,13 +187,26 @@ IF(WITH_MECHANISMS)
     ELSE(OpenCASCADE_FOUND)
       MESSAGE(STATUS "OpenCascade Libraries not found in standard paths.")
     ENDIF(OpenCASCADE_FOUND)
-
   endif(OCE_FOUND)
   SET(HAVE_MECHANISMS TRUE)
   if(WITH_OCC)
     SET(SICONOS_HAVE_OCC TRUE)
   endif()
-endif()
+  if(OCE_VERSION VERSION_LESS 0.18)
+    MESSAGE(STATUS " mechanics_LINK_LIBRARIES:" "${mechanics_LINK_LIBRARIES}")
+    SET(UNDEED_OCE_TOOLKITS "DRAWEXE" "TKDraw" "TKTopTest" "TKViewerTest" "TKXSDRAW" "TKDCAF" "TKXDEDRAW" "TKTObjDRAW" "TKQADraw"   )
+    FOREACH(_T ${UNDEED_OCE_TOOLKITS})
+      MESSAGE(STATUS "Unneeded ${_T} oce toolkit provokes issues since it not installed on some systems. We remove it")
+      list(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE ${_T})
+      list(REMOVE_ITEM mechanics_LINK_LIBRARIES ${_T})
+
+    ENDFOREACH()
+    set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
+    set(mechanics_LINK_LIBRARIES ${mechanics_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
+    MESSAGE(STATUS " mechanics_LINK_LIBRARIES:" "${mechanics_LINK_LIBRARIES}")
+  ENDIF()
+ENDIF()
+
 
 # -- VTK --
 IF(WITH_VTK)
