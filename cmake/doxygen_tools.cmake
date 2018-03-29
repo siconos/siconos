@@ -86,6 +86,7 @@ macro(finalize_doxygen)
     add_custom_target(doxypng2sphinx
       COMMAND  ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/docs/find_doxygen_diagrams.py
       DEPENDS doxygen)
+    add_dependencies(html doxypng2sphinx)
     add_dependencies(html doxygen)
     if(HAS_DOXYREST)
       add_dependencies(doxyrest doxygen)

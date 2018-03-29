@@ -13,7 +13,7 @@ For this, check directly :ref:`siconos_users_guide`, :ref:`siconos_api_reference
    :maxdepth: 2
 
    nsds_basics
-   tutorial_python/siconos_tutorial
+   tutorial_python/index
    tutorial_cpp/siconos_tutorial
    running_siconos
    cpp_reminder

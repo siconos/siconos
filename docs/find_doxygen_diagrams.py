@@ -19,16 +19,21 @@ header += 'Siconos API - Classes diagrams\n'
 header += '==============================\n\n'
 
 files = glob.glob(os.path.join(html_doxygen_output_path, class_diagram_match))
+# we need relative paths for sphinx ...
+realfiles = [f.split('@DOC_ROOT_DIR@/html')[1] for f in files]
+realfiles = ['/..' + f for f in realfiles]
+
 file = open(outputfile, 'w')
 file.writelines(header)
-params = [':height: 190 px', ':class: gallery']
+#params = [':height: 190 px', ':class: gallery']
+params = [':class: gallery']
 img_prefix = '.. image:: '
 
-for f in files :
-    img = img_prefix + f
-    line = img + '\n'
+for f in realfiles :
+    line = img_prefix + f
     for p in params:
-        line += '\t' + p + '\n\n'
+        line += '\n\t' + p
+    line += '\n\n'
     file.writelines(line)
 
 file.close()

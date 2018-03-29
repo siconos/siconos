@@ -1,4 +1,4 @@
-.. _documentation_index:
+.. _full_documentation:
 
 
 ##################
@@ -46,7 +46,7 @@ This is the complete table of contents of Siconos documentation.
    
 **Developpers' corner**
 
-For people who contribute to siconos
+*For people who contribute to siconos*
 
 .. toctree::
    :maxdepth: 5

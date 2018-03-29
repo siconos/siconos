@@ -53,10 +53,27 @@ extensions = [
     #'sphinxcontrib.doxylink'
 ]
 
-    
-extensions += [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',]
+with_python_wrapper = '@WITH_PYTHON_WRAPPER@' == 'ON'
+if with_python_wrapper:
+    extensions += [
+        'sphinx.ext.autodoc',
+        'sphinx.ext.autosummary',]
+    #numpydoc_class_members_toctree = True
+    # -----------------------------------------------------------------------------
+    # Autosummary
+    # -----------------------------------------------------------------------------
+
+
+    #import glob
+    # autosummary_generate = glob.glob("@CMAKE_CURRENT_BINARY_DIR@/sphinx/reference/*.rst")
+
+    # doxylink = {
+    #     'doxysiconos':
+    #     ('@CMAKE_CURRENT_BINARY_DIR@/build/tags/@PROJECT_NAME@.tag',
+    #      'doxygen/html'),
+    # }
+
+    autoclass_content = 'init'
 
 # ---- Start doxyrest conf ---
 with_doxyrest = @HAS_DOXYREST@
@@ -111,22 +128,6 @@ if with_exhale:
     highlight_language = 'cpp'
 
 
-#numpydoc_class_members_toctree = True
-# -----------------------------------------------------------------------------
-# Autosummary
-# -----------------------------------------------------------------------------
-
-
-#import glob
-# autosummary_generate = glob.glob("@CMAKE_CURRENT_BINARY_DIR@/sphinx/reference/*.rst")
-
-# doxylink = {
-#     'doxysiconos':
-#     ('@CMAKE_CURRENT_BINARY_DIR@/build/tags/@PROJECT_NAME@.tag',
-#      'doxygen/html'),
-# }
-
-autoclass_content = 'init'
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -398,5 +399,5 @@ def source_read(app, docname, source):
 def setup(app):
     app.connect('source-read', source_read)
 
-#default is alphabetical which is better.    
-#autodoc_member_order = 'bysource'
+#if with_python_wrapper:
+#    autodoc_member_order = 'bysource'

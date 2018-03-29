@@ -11,7 +11,7 @@
    :hidden:
    :maxdepth: 3
 	      
-   install_guide/install_guide
+   install_guide/index
    getting_started/index
    examples/index
    reference/index

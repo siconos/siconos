@@ -18,7 +18,7 @@ option(USE_EXHALE "Build rst files from doxygen outputs (tool = exhale). Default
 # Devel option : generate pure doxygen doc (no sphinx), extracting all and with graphs.
 option(USE_DEVEL_DOXYGEN "Build doxygen (html, latex ...) doc, extracting all. Devel purpose. Default = OFF" OFF)
 
-set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/Docs/build/ CACHE INTERNAL "Root path to generated documentation.")
+set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/docs/build/ CACHE INTERNAL "Root path to generated documentation.")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
 
 #  ====== doxygen documentation setup ======
@@ -58,7 +58,7 @@ if(USE_DOXYGEN)
   endif()
 
   # == set configuration file for doxygen doc from sources ==
-  #  - Results in binary_dir/Docs/
+  #  - Results in binary_dir/docs/
   #  - input config from config/doxy.config
   #  - only html output (add option for latex?)
   # 'inputs' are updated by each component, during call to update_xml_doxy_config_file macro.
@@ -72,7 +72,7 @@ if(USE_DOXYGEN)
   endif()
     
   # == set configuration file for doxy2swig (use doxygen ouput to create docstrings) ==
-  #  - Results in binary_dir/Docs/
+  #  - Results in binary_dir/docs/
   #  - input config from config/<component_name>doxy.config
   #  - only xml output
   # 'inputs' are updated by each component, during call to update_xml_doxy_config_file macro.
@@ -163,9 +163,14 @@ if(USE_SPHINX)
     )
 
 
+  add_custom_target(copy-sphinx-figures
+    COMMAND cmake -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/figures ${CMAKE_CURRENT_BINARY_DIR}/sphinx/figures
+    )
+  
   add_custom_target(html
     COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS}
     ${CMAKE_CURRENT_BINARY_DIR}/build/html
+    DEPENDS copy-sphinx-figures
     )
 
   # Option to be tested later : generate docs for a list of tags, branches ...
@@ -182,12 +187,11 @@ if(USE_SPHINX)
     add_dependencies(html doxyrest)
   endif()
 
-  # symlink in build dir to figures directory from source dir.
-  add_custom_command(
-    TARGET html PRE_BUILD
-    COMMAND ln -sf ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/figures
-    ${CMAKE_CURRENT_BINARY_DIR}/sphinx/figures)
-  
+  # # symlink in build dir to figures directory from source dir.
+  # add_custom_command(
+  #   TARGET html PRE_BUILD
+  #   COMMAND ln -sfn ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/figures
+  #   ${CMAKE_CURRENT_BINARY_DIR}/sphinx/figures)
   
   # -- To build latex doc : make latex -- 
   set(SPHINX_LATEX_PARAMETERS

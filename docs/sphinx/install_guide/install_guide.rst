@@ -1,17 +1,19 @@
 .. _siconos_install_guide:
 
-Download and install
-====================
+Build and install
+=================
 
 Whatever your system is, you will need first to :
 
-* Download the sources of Siconos as explained in :ref:`siconos_gettingsources`.
+* Download the sources of Siconos as explained in :ref:`download`.
 * Create anywhere (but not in *path_to_sources*) a build directory.
 * Check :ref:`siconos_dependencies`. Most of them are commonly or at least easily installed
   on many standard systems.
 * Check the list of :ref:`siconos_valid_platforms` on which siconos has been succesfully installed.
+
 The quick way
 -------------
+
 If you do not want to bother with all installations details and only need a 'standard' siconos install, just do ::
 
    cd path_to_build
@@ -69,18 +71,6 @@ The last step is the installation of all required libraries, headers and so on i
 
 Use CMAKE_INSTALL_PREFIX option to choose the path for your installation. If not set a default path is chosen, usually /usr/local (that depends on your system).
  
-.. _siconos_gettingsources:
-
-Getting the sources
--------------------
-
-Siconos is freely available on github, https://github.com/siconos/siconos, so for example just run::
-
-   git clone git@github.com:siconos/siconos.git
-
-and you will get a directory 'siconos' which contains all the sources. This directory will be denoted *path_to_sources* in the following.
-
-
 .. _siconos_package:
 
 Siconos package description

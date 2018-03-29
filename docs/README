@@ -4,7 +4,7 @@ in siconos build directory:
 
 make doc
 
---> html documentation in siconos/build_dir/Docs/build/html
+--> html documentation in siconos/build_dir/docs/build/html
 
 make latex
 
@@ -14,7 +14,7 @@ make latex
 
 Transfer to Gforge: 
 
-scp -pr siconos_build_dir/build/Docs/build/html/* login@scm.gforge.inria.fr:/home/groups/siconos/htdocs
+scp -pr siconos_build_dir/build/docs/build/html/* login@scm.gforge.inria.fr:/home/groups/siconos/htdocs
 
 -p option for first commit only => allow to keep same files permissions (rw|rw|r) after sending. 
 

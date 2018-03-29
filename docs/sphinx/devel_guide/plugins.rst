@@ -14,7 +14,7 @@ Consider a class with an attribute '_xx', for which you want to propose a plugin
 
 Attributes to add to the class:
 
-- _pluginxx, a :doxysiconos:`PluggedObject`,
+- _pluginxx, a :class:`PluggedObject`,
   
 Methods to add to the class:
 
@@ -33,15 +33,15 @@ Plugged functions can be set either with the construtor or with the setComputeXx
 Example/template
 ^^^^^^^^^^^^^^^^
 
-computation of :math:`f(x,t,z)` in :doxysiconos:`FirstOrderNonLinearDS`.
+computation of :math:`f(x,t,z)` in :class:`FirstOrderNonLinearDS`.
 
 Attributes and methods
 
-- :doxysiconos:`FirstOrderNonLinearDS::_f`
-- :doxysiconos:`FirstOrderNonLinearDS::_pluginf`
-- :doxysiconos:`FirstOrderNonLinearDS::computef()`
-- :doxysiconos:`FirstOrderNonLinearDS::setComputeFFunction`
-- :doxysiconos:`FirstOrderNonLinearDS::_zeroPlugin`
-- :doxysiconos:`FirstOrderNonLinearDS::updatePlugins`
+- :class:`FirstOrderNonLinearDS::_f`
+- :class:`FirstOrderNonLinearDS::_pluginf`
+- :class:`FirstOrderNonLinearDS::computef()`
+- :class:`FirstOrderNonLinearDS::setComputeFFunction`
+- :class:`FirstOrderNonLinearDS::_zeroPlugin`
+- :class:`FirstOrderNonLinearDS::updatePlugins`
 
   

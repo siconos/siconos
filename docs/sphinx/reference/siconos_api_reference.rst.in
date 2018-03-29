@@ -23,6 +23,8 @@ Documentation is automatically generated from the Siconos C/C++ source files usi
 Doxyrest
 --------
 
+On test ...
+
 .. toctree::
    :maxdepth: 6
 
