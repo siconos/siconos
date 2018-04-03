@@ -31,11 +31,6 @@ macro(doxy2swig_docstrings COMP)
           DEPENDS ${DOXYGEN_OUTPUT}/xml/${_FWE_XML}.xml
           COMMAND ${PYTHON_EXECUTABLE}
 	  ARGS "${CMAKE_BINARY_DIR}/share/doxy2swig.py"
-          "--function-signature"
-          "--type-info"
-          "--constructor-list"
-          "--attribute-list"
-          "--overloaded-functions"
 	  ${DOXYGEN_OUTPUT}/xml/${_FWE_XML}.xml ${outfile_name}
           COMMENT "docstrings generation for ${_FWE} (parsing ${_FWE_XML}.xml)")
 	add_custom_target(doc_${_FWE_XML}.i DEPENDS ${outfile_name})
@@ -87,6 +82,10 @@ macro(add_siconos_swig_sub_module fullname)
   # Add component dependencies to the current submodule deps.
   if(DEFINED SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
     set(SWIG_MODULE_${_name}_EXTRA_DEPS ${SWIG_MODULE_${COMPONENT}_EXTRA_DEPS})
+  endif()
+
+  if(WITH_DOXY2SWIG)
+    list(APPEND SWIG_MODULE_${_name}_EXTRA_DEPS ${COMPONENTS}_docstrings)
   endif()
   
   # add as dependencies all the i files
@@ -153,9 +152,6 @@ macro(add_siconos_swig_sub_module fullname)
     swig_link_libraries(${_name} ${PYTHON_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
   endif()
 
-  # set dep between docstrings and python bindings
-  add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT}_docstrings)
-  
   # set dependency of sphinx apidoc to this target
   if(USE_SPHINX)
     add_dependencies(apidoc ${SWIG_MODULE_${_name}_REAL_NAME})
