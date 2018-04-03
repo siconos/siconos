@@ -26,19 +26,21 @@
 #include <SiconosFwd.hpp>
 #include <string>
 
+/** SICONOS
+ */
 namespace Siconos
 {
 
 /** save a Siconos Simulation with the full simulation state into a
  *  file
- * \param s
+ * \param s a Simulation
  * \param filename with extension : .xml, .bin (binary archive)
  */
 void save(SP::Simulation s, const std::string& filename);
 
 /** load a Siconos Model with the full simulation state from file
  * \param filename
- * \return a SP::Model
+ * \return a Simulation
  */
 SP::Simulation load(const std::string& filename);
 
