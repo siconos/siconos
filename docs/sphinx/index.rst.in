@@ -19,7 +19,9 @@
    reference/index
    complete_documentation
    siconos_links
-   :ref:`genindex`
+   search_index
+   
+   
 
 .. image:: https://travis-ci.org/siconos/siconos.svg?branch=master
    :target: https://travis-ci.org/siconos/siconos
@@ -72,11 +74,10 @@ Fluid Mechanics, and Computer Graphics.
 +---------+---------+
 	     
 	 
-..
-   Indices and tables
-   ==================
 
-..   * :ref:`genindex`
-..   * :ref:`modindex`
-..   * :ref:`search`
+Indices and tables
+==================
 
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

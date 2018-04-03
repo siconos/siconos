@@ -206,7 +206,8 @@ if(USE_SPHINX)
     COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_LATEX_PARAMETERS}
     ${CMAKE_CURRENT_BINARY_DIR}/build/latex
     )
-
+  
+  add_custom_target(doc DEPENDS html)
   
   # python api auto doc
   if(WITH_PYTHON_WRAPPER)
