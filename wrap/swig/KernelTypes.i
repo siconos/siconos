@@ -55,7 +55,7 @@
 %{
   {
     int newmem = 0;
-    void *argp$argnum;
+    void *argp$argnum = NULL;
     int res$argnum = SWIG_ConvertPtrAndOwn($input, &argp$argnum, $descriptor(TYPE *),  0 , &newmem);
     if (SWIG_IsOK(res$argnum)) {
       $1 = static_cast<TYPE*>(argp$argnum);
@@ -84,7 +84,7 @@
 %{
   {
     int newmem = 0;
-    void *argp$argnum;
+    void *argp$argnum = NULL;
     int res$argnum = SWIG_ConvertPtrAndOwn($input, &argp$argnum, $descriptor(TYPE *),  0 , &newmem);
     if (SWIG_IsOK(res$argnum)) {
       $1 = static_cast<TYPE*>(argp$argnum);
@@ -112,7 +112,7 @@
 %typecheck(SWIG_TYPECHECK_POINTER) (TYPE&)
 %{
   {
-    void *ptr;
+    void *ptr = NULL;
     int res = SWIG_ConvertPtr($input, &ptr, $descriptor(TYPE *), 0);
     $1 = SWIG_CheckState(res);
     if (!$1) {
@@ -124,7 +124,7 @@
 %typecheck(SWIG_TYPECHECK_POINTER) (const TYPE&)
 %{
   {
-    void *ptr;
+    void *ptr = NULL;
     int res = SWIG_ConvertPtr($input, &ptr, $descriptor(TYPE *), 0);
     $1 = SWIG_CheckState(res);
     if (!$1) {
@@ -258,7 +258,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
   }
 }
 %typemap(in,fragment="SWIG_AsVal_int") unsigned int {
-  int x;
+  int x=-1;
   int ecode = SWIG_AsVal_int($input, &x);
   if (SWIG_IsOK(ecode)) {
     if (x < 0)
@@ -333,7 +333,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
 (TYPE)
 {
   // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (TYPE)
-  TYPE * ptr;
+  TYPE * ptr = NULL;
 
   int res = SWIG_ConvertPtr($input, (void **) (&ptr), $descriptor(TYPE *), 0);
   int state = SWIG_CheckState(res);
@@ -346,7 +346,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
 (TYPE&)
 {
   // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (TYPE&)
-  TYPE * ptr;
+  TYPE * ptr = NULL;
 
   int res = SWIG_ConvertPtr($input, (void **) (&ptr), $descriptor(TYPE *), 0);
   int state = SWIG_CheckState(res);
@@ -363,7 +363,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
 (const TYPE&)
 {
   // %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY) (const TYPE&)
-  TYPE * ptr;
+  TYPE * ptr = NULL;
 
   int res = SWIG_ConvertPtr($input, (void **) (&ptr), $descriptor(const TYPE *), 0);
   int state = SWIG_CheckState(res);
@@ -569,7 +569,7 @@ struct IsDense : public Question<bool>
 
   SP::SiconosVector SiconosVector_from_python(PyObject* obj)
   {
-    void * swig_argp;
+    void * swig_argp = NULL;
     SP::SiconosVector c_result;
 
     // try a conversion from SP::SiconosVector
@@ -1245,7 +1245,7 @@ struct IsDense : public Question<bool>
     for (i = 0; i < PyObject_Length(input); i++)
     {
       o = PySequence_GetItem(input,i);
-      int x;
+      int x = -1;
       int ecode = SWIG_AsVal_int(o, &x);
       if (!SWIG_IsOK(ecode) && PyArray_CheckScalar(o)) {
         // TODO: By treating as int, we lose half the range of the
