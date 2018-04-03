@@ -5,18 +5,31 @@
    Git SHA-1: @SOURCE_ABBREV_GIT_SHA1@
    Build: @BUILD_TIMESTAMP@
 
+:github_url: https://github.com/siconos/siconos/
+   
 @PROJECT_NAME_CAP@: nonsmooth numerical simulation
 ===================================================
 .. toctree::
    :hidden:
    :maxdepth: 3
-	      
+   
    install_guide/index
    getting_started/index
    examples/index
    reference/index
    complete_documentation
+   siconos_links
+   :ref:`genindex`
 
+.. image:: https://travis-ci.org/siconos/siconos.svg?branch=master
+   :target: https://travis-ci.org/siconos/siconos
+   :alt: Build Status
+
+.. image:: https://img.shields.io/badge/licence-apache2-yellow.svg
+   :target: https://www.apache.org/licenses/LICENSE-2.0
+   :alt: License
+
+      
 Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems in C++ and in Python:
 
 * Mechanical systems (rigid or solid) with unilateral contact and Coulomb friction and impact (nonsmooth mechanics, 
@@ -38,27 +51,26 @@ Fluid Mechanics, and Computer Graphics.
 	 <center>
 	 <iframe width="560" height="315" src="https://www.youtube.com/embed/3I_BkFTqH8I" frameborder="0" allowfullscreen></iframe>
 	 </center>
-	 
-.. container:: index-gallery
 
-    .. image:: /figures/buck.*
-       :height: 190 px
-       :class: gallery
-       :alt: Analog circuit simulation with non-smooth components
-    .. image:: /figures/C60.*
-       :height: 190 px
-       :class: gallery
-       :alt: Simulation of a mechanical circuit breaker
-    .. image:: /figures/Exomars.24.10.small.*
-       :height: 190 px
-       :class: gallery
-       :alt: Simulation of the ExoMars rover
-    .. image:: /figures/snapshot-silo.*
-       :height: 190 px
-       :class: gallery
-       :alt: Simulation of granular materials
+.. |imag1| image::  /figures/buck.*
+   :scale: 50%
+   :align: middle
+.. |imag2| image::  /figures/C60.*
+   :scale: 50%
+   :align: top
+.. |imag3| image:: /figures/Exomars.24.10.small.*
+   :scale: 50%
+   :align: top
+.. |imag4| image:: /figures/snapshot-silo.*
+   :scale: 50%
+   :align: top
 
-
++---------+---------+
+| |imag1| | |imag2| |  
++---------+---------+
+| |imag3| | |imag4| |
++---------+---------+
+	     
 	 
 ..
    Indices and tables

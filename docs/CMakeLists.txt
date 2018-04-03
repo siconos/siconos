@@ -172,6 +172,8 @@ if(USE_SPHINX)
     ${CMAKE_CURRENT_BINARY_DIR}/build/html
     DEPENDS copy-sphinx-figures
     )
+  add_custom_command(TARGET html POST_BUILD
+      COMMENT "Done. Sphinx doc has been generated in ${DOC_ROOT_DIR}/html")
 
   # Option to be tested later : generate docs for a list of tags, branches ...
   add_custom_target(html-multiversion

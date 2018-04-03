@@ -82,10 +82,18 @@ macro(finalize_doxygen)
       set(DOXYGEN_INPUTS "${DOXYGEN_INPUTS} ${_dir}")
     endforeach()
     configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy.config.in ${DOXY_CONFIG} @ONLY)
-    add_custom_target(doxygen ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
+    add_custom_target(doxygen
+      COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG}
+      COMMENT "Run doxygen ${DOXY_CONFIG} ...")
+    add_custom_command(TARGET doxygen POST_BUILD
+      COMMENT "Doxygen documentation has been built in : \n - ${DOXYGEN_OUTPUT} (xml) \n - ${DOC_ROOT_DIR}/html/doxygen (html).")
+    
     add_custom_target(doxypng2sphinx
       COMMAND  ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/docs/find_doxygen_diagrams.py
-      DEPENDS doxygen)
+      DEPENDS doxygen
+      COMMENT "Browse doxygen outputs (graphs ...)")
+    add_custom_command(TARGET doxypng2sphinx POST_BUILD
+      COMMENT "Done. Generate class_diagrams.rst file in ${CMAKE_BINARY_DIR}/docs/sphinx/reference")
     add_dependencies(html doxypng2sphinx)
     add_dependencies(html doxygen)
     if(HAS_DOXYREST)
