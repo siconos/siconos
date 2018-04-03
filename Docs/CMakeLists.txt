@@ -85,19 +85,22 @@ if(USE_SPHINX)
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
   find_sphinx_module(sphinxcontrib doxylink REQUIRED)
+
+  file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/sphinx"
+    DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
   
   # --- conf.py describes sphinx setup ---
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/conf.py.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/conf.py" @ONLY)
+    "${CMAKE_CURRENT_BINARY_DIR}/sphinx/conf.py" @ONLY)
 
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst" @ONLY)
+    "${CMAKE_CURRENT_BINARY_DIR}/sphinx/index.rst" @ONLY)
 
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/reference/siconos_api_reference.rst.in"
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/reference/siconos_api_reference.rst" @ONLY)
+    "${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference/siconos_api_reference.rst" @ONLY)
   
   # --- Build a target for sphinx ---
   # --> use make html or make latex ... to build documentation.
@@ -107,7 +110,7 @@ if(USE_SPHINX)
   set(SPHINX_PARAMETERS
     -b html # html output
     -d build/doctrees # path to doctree files
-    ${CMAKE_CURRENT_SOURCE_DIR}/sphinx  # path to rst source
+    ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
     )
 
   add_custom_target(html
@@ -119,7 +122,7 @@ if(USE_SPHINX)
   set(SPHINX_LATEX_PARAMETERS
     -b latex # latex output
     -d build/doctrees # path to doctree files
-    ${CMAKE_CURRENT_SOURCE_DIR}/sphinx  # path to rst source
+    ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
     )
   
   add_custom_target(latex
@@ -127,20 +130,20 @@ if(USE_SPHINX)
     ${CMAKE_CURRENT_BINARY_DIR}/build/latex
     )
 
+  add_custom_target(doc DEPENDS html)
+
   # python api auto doc
   if(WITH_PYTHON_WRAPPER)
-
     set(SPHINX_APIDOC sphinx-apidoc)
     set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)
-    set(APIDOC_PARAMETERS -e -P -o ${GENERATED_DOC})
+    set(APIDOC_PARAMETERS -e -P -M -o ${GENERATED_DOC})
     list(GET COMPONENTS -1 _last_comp)
     add_custom_target(apidoc
       COMMAND ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
       ${CMAKE_BINARY_DIR}/wrap/${SICONOS_PYTHON_PACKAGE}
       DEPENDS ${_last_comp}
       )
+    add_dependencies(doc apidoc)
   endif()
-
-  add_custom_target(doc DEPENDS html)
 
 endif()
