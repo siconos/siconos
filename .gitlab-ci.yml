@@ -1,0 +1,24 @@
+make_doc:
+  stage: build
+  image: ubuntu/17.10
+  script:
+    - "sh CI/make_sico_doc.sh"
+  artifacts:
+    paths:
+      - docs/build
+  only:
+  - update_docs
+
+pages:
+
+  image: python:alpine
+  script:
+  - mv docs/build public
+  artifacts:
+    paths:
+    - public
+  dependencies:
+  - make_doc
+  only:
+  - update_docs
+
