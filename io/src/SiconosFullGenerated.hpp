@@ -324,6 +324,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_I)
   (_T)
   (_Tdot)
+  (_acceleration)
   (_boundaryConditions)
   (_computeJacobianFIntqByFD)
   (_computeJacobianFInttwistByFD)
@@ -351,6 +352,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_mGyr)
   (_mInt)
   (_massMatrix)
+  (_ndof)
   (_nullifyMGyr)
   (_p)
   (_pluginFExt)
@@ -366,6 +368,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_qDim)
   (_qMemory)
   (_reactionToBoundaryConditions)
+  (_rhsMatrices)
   (_scalarMass)
   (_twist)
   (_twist0)
@@ -481,6 +484,25 @@ SICONOS_IO_REGISTER_WITH_BASES(LinearOSNS,(OneStepNSProblem),
   (_q)
   (_w)
   (_z))
+SICONOS_IO_REGISTER(Simulation,
+  (_T)
+  (_allNSProblems)
+  (_allOSI)
+  (_eventsManager)
+  (_interman)
+  (_linkOrUnlink)
+  (_name)
+  (_nsds)
+  (_numberOfIndexSets)
+  (_printStat)
+  (_relativeConvergenceCriterionHeld)
+  (_relativeConvergenceTol)
+  (_tend)
+  (_tinit)
+  (_tolerance)
+  (_tout)
+  (_useRelativeConvergenceCriterion)
+  (statOut))
 SICONOS_IO_REGISTER_WITH_BASES(ZeroOrderHoldOSI,(OneStepIntegrator),
   (_useGammaForRelation))
 SICONOS_IO_REGISTER_WITH_BASES(Equality,(LinearOSNS),
@@ -508,26 +530,8 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_newtonResiduRMax)
   (_newtonResiduYMax)
   (_newtonTolerance)
-  (_newtonUpdateInteractionsPerIteration))
-SICONOS_IO_REGISTER(Simulation,
-  (_T)
-  (_allNSProblems)
-  (_allOSI)
-  (_eventsManager)
-  (_interman)
-  (_linkOrUnlink)
-  (_name)
-  (_nsds)
-  (_numberOfIndexSets)
-  (_printStat)
-  (_relativeConvergenceCriterionHeld)
-  (_relativeConvergenceTol)
-  (_tend)
-  (_tinit)
-  (_tolerance)
-  (_tout)
-  (_useRelativeConvergenceCriterion)
-  (statOut))
+  (_newtonUpdateInteractionsPerIteration)
+  (_warnOnNonConvergence))
 SICONOS_IO_REGISTER(OneStepIntegrator,
   (_dynamicalSystemsGraph)
   (_extraAdditionalTerms)
@@ -1051,53 +1055,6 @@ SICONOS_IO_REGISTER(Sensor,
   (_type))
 
 template <class Archive>
-void siconos_io_register_generated_Mechanics(Archive& ar)
-{
-  ar.register_type(static_cast<ContactR*>(NULL));
-  ar.register_type(static_cast<PivotJointR*>(NULL));
-  ar.register_type(static_cast<SphereLDSPlanR*>(NULL));
-  ar.register_type(static_cast<SphereLDSSphereLDSR*>(NULL));
-  ar.register_type(static_cast<SphereNEDSSphereNEDSR*>(NULL));
-  ar.register_type(static_cast<Circle*>(NULL));
-  ar.register_type(static_cast<FixedJointR*>(NULL));
-  ar.register_type(static_cast<KneeJointR*>(NULL));
-  ar.register_type(static_cast<SphereLDS*>(NULL));
-  ar.register_type(static_cast<SphereNEDSPlanR*>(NULL));
-  ar.register_type(static_cast<CircleCircleR*>(NULL));
-  ar.register_type(static_cast<CircularR*>(NULL));
-  ar.register_type(static_cast<Disk*>(NULL));
-  ar.register_type(static_cast<DiskDiskR*>(NULL));
-  ar.register_type(static_cast<DiskPlanR*>(NULL));
-  ar.register_type(static_cast<SiconosCollisionQueryResult*>(NULL));
-  ar.register_type(static_cast<SphereNEDS*>(NULL));
-  ar.register_type(static_cast<BodyDS*>(NULL));
-  ar.register_type(static_cast<CircularDS*>(NULL));
-  ar.register_type(static_cast<JointFrictionR*>(NULL));
-  ar.register_type(static_cast<SiconosShape*>(NULL));
-  ar.register_type(static_cast<JointStopR*>(NULL));
-  ar.register_type(static_cast<CouplerJointR*>(NULL));
-  ar.register_type(static_cast<CylindricalJointR*>(NULL));
-  ar.register_type(static_cast<FMatrix*>(NULL));
-  ar.register_type(static_cast<PrismaticJointR*>(NULL));
-  ar.register_type(static_cast<SiconosContactor*>(NULL));
-  ar.register_type(static_cast<DiskMovingPlanR*>(NULL));
-  ar.register_type(static_cast<Hashed*>(NULL));
-  ar.register_type(static_cast<SpaceFilter*>(NULL));
-  ar.register_type(static_cast<SiconosContactorSet*>(NULL));
-  ar.register_type(static_cast<space_hash*>(NULL));
-  ar.register_type(static_cast<CircleCircleRDeclaredPool*>(NULL));
-  ar.register_type(static_cast<SiconosPlane*>(NULL));
-  ar.register_type(static_cast<DiskDiskRDeclaredPool*>(NULL));
-  ar.register_type(static_cast<DiskPlanRDeclaredPool*>(NULL));
-  ar.register_type(static_cast<SiconosSphere*>(NULL));
-  ar.register_type(static_cast<SiconosBox*>(NULL));
-  ar.register_type(static_cast<SiconosCylinder*>(NULL));
-  ar.register_type(static_cast<SiconosConvexHull*>(NULL));
-  ar.register_type(static_cast<SiconosMesh*>(NULL));
-  ar.register_type(static_cast<SiconosHeightMap*>(NULL));
-}
-
-template <class Archive>
 void siconos_io_register_generated_Kernel(Archive& ar)
 {
   ar.register_type(static_cast<SiconosException*>(NULL));
@@ -1178,6 +1135,53 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<MoreauJeanOSI*>(NULL));
   ar.register_type(static_cast<EulerMoreauOSI*>(NULL));
   ar.register_type(static_cast<Model*>(NULL));
+}
+
+template <class Archive>
+void siconos_io_register_generated_Mechanics(Archive& ar)
+{
+  ar.register_type(static_cast<ContactR*>(NULL));
+  ar.register_type(static_cast<PivotJointR*>(NULL));
+  ar.register_type(static_cast<SphereLDSPlanR*>(NULL));
+  ar.register_type(static_cast<SphereLDSSphereLDSR*>(NULL));
+  ar.register_type(static_cast<SphereNEDSSphereNEDSR*>(NULL));
+  ar.register_type(static_cast<Circle*>(NULL));
+  ar.register_type(static_cast<FixedJointR*>(NULL));
+  ar.register_type(static_cast<KneeJointR*>(NULL));
+  ar.register_type(static_cast<SphereLDS*>(NULL));
+  ar.register_type(static_cast<SphereNEDSPlanR*>(NULL));
+  ar.register_type(static_cast<CircleCircleR*>(NULL));
+  ar.register_type(static_cast<CircularR*>(NULL));
+  ar.register_type(static_cast<Disk*>(NULL));
+  ar.register_type(static_cast<DiskDiskR*>(NULL));
+  ar.register_type(static_cast<DiskPlanR*>(NULL));
+  ar.register_type(static_cast<SiconosCollisionQueryResult*>(NULL));
+  ar.register_type(static_cast<SphereNEDS*>(NULL));
+  ar.register_type(static_cast<BodyDS*>(NULL));
+  ar.register_type(static_cast<CircularDS*>(NULL));
+  ar.register_type(static_cast<JointFrictionR*>(NULL));
+  ar.register_type(static_cast<SiconosShape*>(NULL));
+  ar.register_type(static_cast<JointStopR*>(NULL));
+  ar.register_type(static_cast<CouplerJointR*>(NULL));
+  ar.register_type(static_cast<CylindricalJointR*>(NULL));
+  ar.register_type(static_cast<FMatrix*>(NULL));
+  ar.register_type(static_cast<PrismaticJointR*>(NULL));
+  ar.register_type(static_cast<SiconosContactor*>(NULL));
+  ar.register_type(static_cast<DiskMovingPlanR*>(NULL));
+  ar.register_type(static_cast<Hashed*>(NULL));
+  ar.register_type(static_cast<SpaceFilter*>(NULL));
+  ar.register_type(static_cast<SiconosContactorSet*>(NULL));
+  ar.register_type(static_cast<space_hash*>(NULL));
+  ar.register_type(static_cast<CircleCircleRDeclaredPool*>(NULL));
+  ar.register_type(static_cast<SiconosPlane*>(NULL));
+  ar.register_type(static_cast<DiskDiskRDeclaredPool*>(NULL));
+  ar.register_type(static_cast<DiskPlanRDeclaredPool*>(NULL));
+  ar.register_type(static_cast<SiconosSphere*>(NULL));
+  ar.register_type(static_cast<SiconosBox*>(NULL));
+  ar.register_type(static_cast<SiconosCylinder*>(NULL));
+  ar.register_type(static_cast<SiconosConvexHull*>(NULL));
+  ar.register_type(static_cast<SiconosMesh*>(NULL));
+  ar.register_type(static_cast<SiconosHeightMap*>(NULL));
 }
 
 template <class Archive>

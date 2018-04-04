@@ -196,16 +196,16 @@ LagrangianDS : ... == Mass, FInt, FExt, FGyr, JacobianFIntq, JacobianFGyrq, Jaco
 
 ** initializeDynamicalSystem : called in OSI::initialize AND in Topology.cpp through CallInitDS (still required??)
 ** FONLDS : b() never documented, used in FOLDS, defined in FOLNDS ...
-
+   
 * done 
   ** remove initialize function
-
+  
 
 ** updatePlugins : to be checked
 ** resetToInitialState : should we also initialize rhs/ _x[1]? 
-
+   
 ** initializeNonSmoothInput and resetNonSmoothPart : check behavior, sometimes redondent
-
+   
 * Dynamical Systems
 
 ** private vars
