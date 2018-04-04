@@ -31,7 +31,11 @@
    :target: https://www.apache.org/licenses/LICENSE-2.0
    :alt: License
 
-      
+.. image:: https://gricad-gitlab.univ-grenoble-alpes.fr/perignfr/siconos-mirror/badges/master/pipeline.svg
+   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/perignfr/siconos-mirror/commits/update_docs
+   :alt: Pipeline status
+
+	 
 Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems in C++ and in Python:
 
 * Mechanical systems (rigid or solid) with unilateral contact and Coulomb friction and impact (nonsmooth mechanics, 
