@@ -22,6 +22,16 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 
 --------------------------------------------------------------------------------
+  v4.2.0 (in development branch siconos/master)
+--------------------------------------------------------------------------------
+Main changes:
+	[...]
+	* [mechanics] occ: new interface with OpenCascade, similar to the
+	interface with Bullet
+	* [io] mechanics_io, vview: OpenCascade Contactors, cf OCC_Examples
+	* [io] mechanics_io: management of external C plugins
+
+--------------------------------------------------------------------------------
   v4.1.0 (in development branch siconos/master)
 --------------------------------------------------------------------------------
 Main changes:
