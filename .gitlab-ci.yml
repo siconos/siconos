@@ -7,7 +7,7 @@ make_doc:
     paths:
       - docs/build
   only:
-  - update_docs
+  - update_doc
 
 pages:
 
@@ -20,5 +20,5 @@ pages:
   dependencies:
   - make_doc
   only:
-  - update_docs
+  - update_doc
 
