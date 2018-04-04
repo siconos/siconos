@@ -98,7 +98,7 @@ protected:
       Default: equal to 10 x machine double precision (std::numeric_limits<double>::epsilon)
   */
   double _tolerance;
-  
+
   /** Output setup: if true, display solver stats */
   bool _printStat;
 
@@ -312,7 +312,13 @@ public:
   {
     return _nsds;
   }
-
+  /** set the NonSmoothDynamicalSystem of the Simulation
+   *  \param newPtr a pointer on NonSmoothDynamicalSystem
+   */
+  void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
+  {
+    _nsds = newPtr;
+  }
   /** get tolerance
    *  \return a double
    */
@@ -330,6 +336,7 @@ public:
     _tolerance = inputVal;
   };
 
+
   /** set printStat value: if true, print solver stats.
       \param newVal true to activate stats
    */
@@ -337,6 +344,7 @@ public:
   {
     _printStat = newVal;
   };
+
 
   /** get printStat value
       \return true if stats are activated
