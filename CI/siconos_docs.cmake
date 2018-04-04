@@ -58,4 +58,4 @@ option(INSTALL_INTERNAL_HEADERS
 # List of components to build and installed
 # List of siconos component to be installed
 # complete list = externals numerics kernel control mechanics io
-set(COMPONENTS externals  CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel CACHE INTERNAL "List of siconos components to build and install")

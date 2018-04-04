@@ -57,4 +57,4 @@ git remote add gitlab_for_doc git@gricad-gitlab.univ-grenoble-alpes.fr:nonsmooth
 
 ```
 git checkout update_doc
-git push gitlab_for_doc
+git push gitlab_for_doc update_doc
