@@ -13,7 +13,7 @@ pages:
 
   image: python:alpine
   script:
-  - mv docs/build public
+  - mv docs/build/html public
   artifacts:
     paths:
     - public
