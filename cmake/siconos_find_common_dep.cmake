@@ -6,8 +6,8 @@
 
 # --- Blas Lapack ---
 # include(BlasLapackSetup)
-compile_with(BLAS REQUIRED SICONOS_COMPONENTS numerics externals)
-compile_with(LAPACK REQUIRED SICONOS_COMPONENTS numerics externals)
+compile_with(BLAS REQUIRED SICONOS_COMPONENTS kernel numerics externals)
+compile_with(LAPACK REQUIRED SICONOS_COMPONENTS kernel numerics externals)
 if(NOT BLAS_INCLUDE_DIRS)
   message(FATAL_ERROR "cannot find blas include directories")
 endif()
