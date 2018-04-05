@@ -27,6 +27,7 @@
 #include "NumericsSparseMatrix.h"
 #include "numerics_verbose.h"
 #include "NumericsMatrix.h"
+#include "string.h" // memcpy
 
 #include "debug.h"
 

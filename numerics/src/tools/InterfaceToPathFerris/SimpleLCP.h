@@ -51,9 +51,11 @@
 #include "SiconosConfig.h"
 #include <stdint.h>
 
-
+#ifdef HAVE_PATHFERRIS
 #include "PATH_SDK/include/Types.h"
-
+#else
+typedef void MCP_Termination;
+#endif
 
 //const unsigned short int *__ctype_b;
 //const int32_t *__ctype_tolower ;
