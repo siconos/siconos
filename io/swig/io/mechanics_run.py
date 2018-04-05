@@ -494,7 +494,10 @@ class ShapeCollection():
                             step_reader.PrintCheckTransfer(
                                 failsonly, IFSelect_ItemsByEntity)
 
-                            ok = step_reader.TransferRoot(1)
+
+
+                            #ok = step_reader.TransferRoot(1)
+                            ok = step_reader.TransferRoots() # VA : We decide to loads all shapes in the step file
                             nbs = step_reader.NbShapes()
 
                             for i in range(1, nbs + 1):
