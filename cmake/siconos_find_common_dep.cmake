@@ -52,6 +52,7 @@ if (WITH_SYSTEM_SUITESPARSE)
   set(USE_SYSTEM_SUITESPARSE ${_sys_CXSparse} CACHE INTERNAL "flag to check to systemwide SuiteSparse install")
 endif()
 
+# --- Other solvers ---
 compile_with(PathFerris SICONOS_COMPONENTS numerics)
 compile_with(PathVI SICONOS_COMPONENTS numerics)
 compile_with(LpSolve SICONOS_COMPONENTS numerics)
@@ -60,6 +61,13 @@ if(LpSolve_FOUND)
   set(HAS_EXTREME_POINT_ALGO TRUE)
   set(WITH_LPSOLVE TRUE)
 endif(LpSolve_FOUND)
+
+# --- Sort ---
+if(EXISTS "${CMAKE_SOURCE_DIR}/externals/sort/sort.h")
+  if(EXISTS "${CMAKE_SOURCE_DIR}/externals/sort/sort_common.h")
+    set(HAVE_SORT TRUE)
+  endif()
+endif()
 
 # --- Mumps ---
 if(WITH_MUMPS)

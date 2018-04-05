@@ -8,6 +8,7 @@
 #cmakedefine HAVE_SICONOS_CONTROL
 #cmakedefine HAVE_PATHFERRIS
 #cmakedefine HAVE_PATHVI
+#cmakedefine HAVE_SORT
 #cmakedefine HAVE_MLCPSIMPLEX
 #cmakedefine HAVE_TIME_H
 #cmakedefine HAVE_SYSTIMES_H
