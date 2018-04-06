@@ -69,6 +69,11 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/externals/sort/sort.h")
   endif()
 endif()
 
+# --- ql0001 ---
+if(EXISTS "${CMAKE_SOURCE_DIR}/externals/optim_misc/ql0001/ql0001.f")
+  set(HAVE_QL0001 TRUE)
+endif()
+
 # --- Mumps ---
 if(WITH_MUMPS)
   if(NOT IDONTWANTMPI)

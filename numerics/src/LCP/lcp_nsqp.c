@@ -125,6 +125,7 @@ void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *
   iwar = (int *)malloc(liwar * sizeof(int));
   iwar[0] = 1;
 
+#ifdef HAVE_QL0001
 #ifdef HAS_FORTRAN
   /* / call ql0001_*/
   /*   F77NAME(ql0001)(m, me, mmax, n, nmax, mnn, Q, p, A, b, xl, xu, */
@@ -132,7 +133,10 @@ void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *
   CNAME(ql0001)(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
                   z, lambda, &iout, info, &un, war, &lwar, iwar, &liwar, &tol);
 #else
-  numerics_error("lcp_qp","Fortran language is not enabled in siconos  numerics");
+  numerics_error("lcp_qp","Fortran language is not enabled in siconos numerics");
+#endif
+#else
+  numerics_error("lcp_qp","ql0001 is not available in siconos numerics");
 #endif
   /* /    printf("tol = %10.4e\n",*tol);
   // for (i=0;i<mnn;i++)printf("lambda[%i] = %g\n",i,lambda[i]);
