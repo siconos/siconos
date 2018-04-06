@@ -9,6 +9,7 @@
 #cmakedefine HAVE_PATHFERRIS
 #cmakedefine HAVE_PATHVI
 #cmakedefine HAVE_SORT
+#cmakedefine HAVE_QL0001
 #cmakedefine HAVE_MLCPSIMPLEX
 #cmakedefine HAVE_TIME_H
 #cmakedefine HAVE_SYSTIMES_H

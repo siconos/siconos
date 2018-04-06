@@ -31,8 +31,8 @@ def test_lcp_pgs():
     print('pgs error=', SO.dparam[1])
     assert (np.linalg.norm(z-zsol) <= ztol)
     assert not info
-    
-if siconos.WITH_FORTRAN:
+
+if siconos.WITH_FORTRAN and siconos.WITH_QL0001:
     def test_lcp_qp():
         SO=N.SolverOptions(lcp,N.SICONOS_LCP_QP)
         info  = N.lcp_qp(lcp,z,w,SO)
