@@ -240,7 +240,7 @@ psiv = np.vectorize(psi)
 #
 # inertia
 #
-def compute_inertia_and_center_of_mass(shapes, mass, io=None):
+def compute_inertia_and_center_of_mass(shapes, io=None):
     """
     Compute inertia from a list of Shapes.
     """
@@ -249,7 +249,7 @@ def compute_inertia_and_center_of_mass(shapes, mass, io=None):
     from OCC.gp import gp_Ax1, gp_Dir
     from siconos.mechanics import occ
 
-    props = GProp_GProps()
+    system = GProp_GProps()
 
     for shape in shapes:
 
@@ -279,21 +279,34 @@ def compute_inertia_and_center_of_mass(shapes, mass, io=None):
         elif shape.parameters is not None and \
              hasattr(shape.parameters, 'density'):
             density = shape.parameters.density
+            #print('shape.parameters.density:', shape.parameters.density)
         else:
             density = 1.
 
         assert density is not None
-        props.Add(iprops, density)
+        # print("shape", shape.shape_name)
+        # print('density:', density)
+        # print('iprops.Mass():', iprops.Mass())
 
-    assert (props.Mass() > 0.)
+        system.Add(iprops, density)
 
-    global_density = mass / props.Mass()
-    computed_com = props.CentreOfMass()
-    I1 = global_density * props.MomentOfInertia(
+
+    mass=  system.Mass()
+    assert (system.Mass() > 0.)
+
+    computed_com = system.CentreOfMass()
+
+    gp_mat= system.MatrixOfInertia()
+    inertia_matrix = np.zeros((3,3))
+    for i in range(0,3):
+        for j in range(0,3):
+            inertia_matrix[i,j]=  gp_mat.Value(i+1,j+1)
+
+    I1 =  system.MomentOfInertia(
         gp_Ax1(computed_com, gp_Dir(1, 0, 0)))
-    I2 = global_density * props.MomentOfInertia(
+    I2 =  system.MomentOfInertia(
         gp_Ax1(computed_com, gp_Dir(0, 1, 0)))
-    I3 = global_density * props.MomentOfInertia(
+    I3 = system.MomentOfInertia(
         gp_Ax1(computed_com, gp_Dir(0, 0, 1)))
 
     inertia = [I1, I2, I3]
@@ -301,7 +314,7 @@ def compute_inertia_and_center_of_mass(shapes, mass, io=None):
                                computed_com.Coord(2),
                                computed_com.Coord(3)])
 
-    return inertia, center_of_mass
+    return mass, center_of_mass, inertia, inertia_matrix
 
 
 def occ_topo_list(shape):
@@ -880,22 +893,32 @@ class MechanicsHdf5(object):
 
             com_translation = [0., 0., 0.]
 
-            if inertia is None and mass is not None and mass > 0.:
+            if (inertia is None) or (mass is None):
                 if any(map(lambda s: isinstance(s,Volume), shapes)):
+
                     # a computed inertia and center of mass
                     # occ only
                     volumes = filter(lambda s: isinstance(s, Volume),
                                      shapes)
 
-                    inertia, com = compute_inertia_and_center_of_mass(volumes, mass, self)
-
-                    print('{0}: computed inertia:'.format(name),
-                          inertia[0], inertia[1], inertia[2])
+                    computed_mass, com, computed_inertia, computed_inertia_matrix = compute_inertia_and_center_of_mass(volumes, self)
+                    print('{0}: computed mass from Volume'.format(name))
                     print('{0}: computed center of mass:'.format(name),
                           com[0],
                           com[1],
                           com[2])
+                    print('{0}: computed mass:'.format(name),
+                          computed_mass)
+                    print('{0}: computed inertia:'.format(name),
+                          computed_inertia[0], computed_inertia[1], computed_inertia[2])
+                    print('{0}: computed inertia matrix:'.format(name),
+                          computed_inertia_matrix)
 
+                    if mass is None:
+                        mass=computed_mass
+
+                    if inertia is None:
+                        inertia=computed_inertia_matrix
 
             obj =group(self._input, name)
 
