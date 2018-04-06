@@ -981,7 +981,7 @@ class MechanicsHdf5(object):
                 obj.attrs['id']=(self._number_of_dynamic_objects + 1)
                 self._number_of_dynamic_objects += 1
 
-            return obj.attrs['id']
+            return obj
 
     def add_Newton_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
                                    collision_group2=0):
