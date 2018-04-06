@@ -70,11 +70,12 @@ class VViewOptions(object):
               .format(os.path.split(sys.argv[0])[1]))
         print()
         if not long:
-            print("""[--help] [tmin=<float value>] [tmax=<float value>]
-    [--cf-scale=<float value>] [--no-cf]
-    [--advance=<'fps' or float value>] [--fps=float value]
-    [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
-    """)
+            print("""[--help] [--tmin=<float value>] [--tmax=<float value>]
+            [--cf-scale=<float value>] [--no-cf] [--normalcone-ratio = <float value>]
+            [--advance=<'fps' or float value>] [--fps=float value]
+            [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
+            [--visible=all,avatars,contactors]
+            """)
         else:
             print("""Options:
      --help
