@@ -91,7 +91,7 @@ macro(add_docker_targets)
   string(REPLACE ":" "-" DOCKER_WORKDIR_VOLUME ${DOCKER_WORKDIR_VOLUME})
   string(REPLACE "." "-" DOCKER_WORKDIR_VOLUME ${DOCKER_WORKDIR_VOLUME})
 
-  set(CTEST_OPTIONS_WITHOUT_DOCKER)
+  set(CTEST_OPTIONS_WITHOUT_DOCKER "--output-on-failure")
   # List of options (-DOPTION=VALUE ...) to be passed to ctest
   # Warning : these are not siconos conf. options for cmake but
   # the options needed by ctest to prepare the pipeline (cmake, make ...)
