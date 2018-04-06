@@ -41,8 +41,8 @@ To clarify things before getting into details, here are the standard minimal ste
   my_model.initialize()
 
 
-Depending on your problem, you may have to change the integrator (here a :doxysiconos:`MoreauJeanOSI`), the nonsmooth problem formulation (:doxysiconos:`LCP`) and the
-global strategy (:doxysiconos:`TimeStepping`). Details on all the possibilities will be given in the sections below. You may also check the examples package to find some
+Depending on your problem, you may have to change the integrator (here a :class:`MoreauJeanOSI`), the nonsmooth problem formulation (:class:`LCP`) and the
+global strategy (:class:`TimeStepping`). Details on all the possibilities will be given in the sections below. You may also check the examples package to find some
 templates.
 
 Then, the simulation loop will be::

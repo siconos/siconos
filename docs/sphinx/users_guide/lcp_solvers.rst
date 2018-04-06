@@ -10,9 +10,9 @@ For each solver, the input argument are:
 * a LinearComplementarityProblem structure
 * the unknowns z and w
 * info, the termination value (0: convergence, >0 problem which depends on the solver)
-* a :doxysiconos:`SolverOptions` structure, which handles solver parameters (iparam and dparam)
+* a :class:`SolverOptions` structure, which handles solver parameters (iparam and dparam)
 
-Remark: when the filterOn parameter (from :doxysiconos:`SolverOptions`) is different from 0, lcp_compute_error() is called at the end of the
+Remark: when the filterOn parameter (from :class:`SolverOptions`) is different from 0, lcp_compute_error() is called at the end of the
 process to check the validity of the solution. This function needs a tolerance value and returns an error.
 In that case, tolerance is dparam[0] and error output dparam[1]. Thus, in the following solvers, when dparam[0,1] are omitted, that means that they are not required inputs, and that if filter is on, some default values will be used.
 
@@ -21,7 +21,7 @@ lexicographic Lemke
 
 Direct solver for LCP based on pivoting method principle for degenerated problem.
 
- function: :doxysiconos:`lcp_lexicolemke()`
+ function: :function:`lcp_lexicolemke()`
  
  parameters:
 
@@ -42,7 +42,7 @@ The QP we solve is
 
   If the symmetry condition is not fulfilled, use the NSQP Solver
 
-function: :doxysiconos:`lcp_qp()`
+function: :function:`lcp_qp()`
 
 parameters:
 
@@ -54,7 +54,7 @@ NSQP Solver
 non symmetric (and not nonsmooth as one could have thought in a plateform dedicated to nonsmooth problems)
 quadratic programm formulation for solving an LCP with a non symmetric matrix.
 
-function: :doxysiconos:`:doxysiconos:`lcp_nsqp()`
+function: :function:`lcp_nsqp()`
 
 parameters:
 
@@ -67,7 +67,7 @@ Conjugated Projected Gradient solver for LCP based on quadratic minimization.
 Reference: "Conjugate gradient type algorithms for frictional multi-contact problems: applications to granular materials",
 M. Renouf, P. Alart. doi:10.1016/j.cma.2004.07.009
 
-function: :doxysiconos:`lcp_cpg()`
+function: :function:`lcp_cpg()`
 
 parameters:
 
@@ -81,7 +81,7 @@ PGS Solver
 
 Projected Gauss-Seidel solver
 
-function: :doxysiconos:`lcp_pgs()`
+function: :function:`lcp_pgs()`
 
 parameters:
 
@@ -95,7 +95,7 @@ RPGS Solver
 
 Regularized Projected Gauss-Seidel, solver for LCP, able to handle with matrices with null diagonal terms
 
-function: :doxysiconos:`lcp_rpgs()`
+function: :function:`lcp_rpgs()`
 
 parameters:
 
@@ -110,7 +110,7 @@ PSOR Solver
 
 Projected Succesive over relaxation solver for LCP. See Cottle, Pang and Stone (2009), Chap 5 
 
-function: :doxysiconos:`lcp_psor()`
+function: :function:`lcp_psor()`
 
 parameters:
 
@@ -125,7 +125,7 @@ NewtonMin Solver
 
 a nonsmooth Newton method based on the min formulation of the LCP
 
-function: :doxysiconos:`lcp_newton_min()`
+function: :function:`lcp_newton_min()`
 
 parameters:
 
@@ -143,7 +143,7 @@ NewtonFB Solver
 a nonsmooth Newton method based based on the Fischer-Burmeister NCP function.
 It uses a variant of line search algorithm (VFBLSA in Facchinei-Pang 2003).
 
-function: :doxysiconos:`lcp_newton_FB()`
+function: :function:`lcp_newton_FB()`
 
 parameters:
 
@@ -161,7 +161,7 @@ Newton min + FB Solver
 a nonsmooth Newton method based based on the minFBLSA algorithm : the descent direction is given
 by a min reformulation but the linesearch is done with Fischer-Burmeister (and if needed the gradient direction).
 
-function: :doxysiconos:`lcp_newton_minFB()`
+function: :function:`lcp_newton_minFB()`
 
 parameters:
 
@@ -178,7 +178,7 @@ Path (Ferris) Solver
 
 This solver uses the external PATH solver
 
-function: :doxysiconos:`lcp_path()`
+function: :function:`lcp_path()`
 
 parameters:
 
@@ -189,7 +189,7 @@ Enumerative Solver
 
 A brute-force method to find the solution of the LCP
 
-function: :doxysiconos:`lcp_enum()`
+function: :function:`lcp_enum()`
 
 parameters:
 
@@ -205,7 +205,7 @@ Latin Solver
 
 LArge Time INcrements solver
 
-function: :doxysiconos:`lcp_latin()`
+function: :function:`lcp_latin()`
 
 parameters:
 
@@ -220,7 +220,7 @@ Latin_w Solver
 
 LArge Time INcrements solver with relaxation
 
-function: :doxysiconos:`lcp_latin_w()`
+function: :function:`lcp_latin_w()`
 
 parameters:
 
@@ -238,7 +238,7 @@ Gauss-Seidel for Sparse-Block matrices. \n
 Matrix M of the LCP must be a SparseBlockStructuredMatrix. \n
 This solver first build a local problem for each row of blocks and then call any of the other solvers through lcp_driver()`.
 
-function: :doxysiconos:`lcp_nsgs_SBM()`
+function: :function:`lcp_nsgs_SBM()`
 
 parameters:
 

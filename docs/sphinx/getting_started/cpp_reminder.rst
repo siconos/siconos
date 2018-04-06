@@ -1,4 +1,4 @@
-.. _cpp_reminder::
+.. _cpp_reminder:
 
 
 C++ Refresher
@@ -52,10 +52,10 @@ Matrices and vectors handling
 
 The basic classes available in the platform to deal with vectors and matrices are:
 
-* :doxysiconos:`SiconosVector` : vector of double, can be dense or sparse.
-* :doxysiconos:`BlockVector` : vector of :doxysiconos:`SiconosVector`
-* :doxysiconos:`SimpleMatrix` : matrix of double, can be dense, sparse, triangular, banded, symmetric, zero or identity.
-* :doxysiconos:`BlockMatrix` : matrix of :doxysiconos:`SimpleMatrix` 
+* :class:`SiconosVector` : vector of double, can be dense or sparse.
+* :class:`BlockVector` : vector of :class:`SiconosVector`
+* :class:`SimpleMatrix` : matrix of double, can be dense, sparse, triangular, banded, symmetric, zero or identity.
+* :class:`BlockMatrix` : matrix of :class:`SimpleMatrix` 
 
 All these objects are just an interface to `Boost Ublas library <http://www.boost.org/libs/numeric/ublas/doc/index.htm>`_ vector and matrix. 
 
@@ -129,7 +129,7 @@ Check the complete list of available constructors in reference documentation of 
 Read/write vectors and matrices from/to file
 """"""""""""""""""""""""""""""""""""""""""""
 
-This is done using :doxysiconos:`ioVector` and :doxysiconos:`ioMatrix` classes.
+This is done using :class:`ioVector` and :class:`ioMatrix` classes.
 
 ::
 

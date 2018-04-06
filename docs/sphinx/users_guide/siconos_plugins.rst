@@ -14,11 +14,11 @@ Suppose you want to set :math:`F_{Ext}(t,z) = cos(t)`, then you can define a C f
 the dynamical system so that each time the system needs to compute its external forces, your cosine function will be called.
 
 
-At the time, plug-in are available for :doxysiconos:`DynamicalSystems` and :doxysiconos:`Relation`. For both of them and for their derived classes, a list
+At the time, plug-in are available for :class:`DynamicalSystems` and :class:`Relation`. For both of them and for their derived classes, a list
 of the variables that can be plugged is given in :ref:`ds_plugins` and :ref:`relation_plugins`.
 
 * find the variable you want to plug and check what is the expected list of arguments for a function plugged to this variable
-(check :ref:`ds_plugins` or :ref:`relation_plugins`).
+  (check :ref:`ds_plugins` or :ref:`relation_plugins`).
 
 * write a C function::
 
@@ -43,9 +43,9 @@ Plugins overview
    :header: "Class Name", "operator", "plugin name", "signature"
    :widths: 10 5 5 40
 
-   :doxysiconos:`DynamicalSystem`, ":math:`g(\dot x, x, t, z)`", g, "``(double time, int size, double* fext, int zsize, double *z)``"
-   :doxysiconos:`LagrangianLinearTIDS`, ":math:`F_{Ext}(t,z)`", FExt, "``(double time, int size, double* fext, int zsize, double *z)``"
-   :doxysiconos:`FirstOrderR`, ":math:`h(x,t,\lambda,z)`", h, "``(double time, int x.size, double * x, int lambda.size, double * lambda, double * y, int z.size, double * z)``"
+   :class:`DynamicalSystem`, ":math:`g(\dot x, x, t, z)`", g, "``(double time, int size, double* fext, int zsize, double *z)``"
+   :class:`LagrangianLinearTIDS`, ":math:`F_{Ext}(t,z)`", FExt, "``(double time, int size, double* fext, int zsize, double *z)``"
+   :class:`FirstOrderR`, ":math:`h(x,t,\lambda,z)`", h, "``(double time, int x.size, double * x, int lambda.size, double * lambda, double * y, int z.size, double * z)``"
 
 
 Example

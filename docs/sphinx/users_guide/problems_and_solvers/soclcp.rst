@@ -9,7 +9,7 @@ Second Order Cone Linear Complementarity Problem
 
 Given
 
-* a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n} `
+* a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
 
 * a vector :math:` {q} \in {{\mathrm{I\!R}}}^n`
 

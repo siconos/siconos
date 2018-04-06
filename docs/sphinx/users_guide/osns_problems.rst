@@ -15,14 +15,14 @@ Linear nonsmooth problems
 
 where :math:`w \in R^{n}, z \in R^{n}` are the unknowns.
 
-* Linear Complementarity Problems (:doxysiconos:`LCP`)
+* Linear Complementarity Problems (:class:`LCP`)
 
 .. math::
 
    w =  q + M z, M \in R^{n \times n }, q \in R^{n} \\
    w \geq 0, z \geq 0,  z^{T} w =0
 
-* Mixed Linear Complementarity Problems (:doxysiconos:`MLCP`)
+* Mixed Linear Complementarity Problems (:class:`MLCP`)
 
 .. math::
   
@@ -38,10 +38,10 @@ where
    A \in R^{n \times n }, B \in R^{m \times m }\\
    C \in R^{n \times m }, D \in R^{m \times n }
    
-* :doxysiconos:`Relay`
-* :doxysiconos:`Equality`
-* :doxysiconos:`AVI`
-* 2D or 3D friction contact problem :doxysiconos:`FrictionContact`
+* :class:`Relay`
+* :class:`Equality`
+* :class:`AVI`
+* 2D or 3D friction contact problem :class:`FrictionContact`
 
 .. math::
 
@@ -53,8 +53,8 @@ With :math:`velocity \in R^{n}, reaction \in R^{n}` the unknowns,
 and :math:`M \in R^{n \times n }, q \in R^{n}`
 
   
-* multiple-impact problem (:doxysiconos:`OSNSMultipleImpact`)
-* primal friction contact problems (:doxysiconos:`GlobalFrictionContact`)
+* multiple-impact problem (:class:`OSNSMultipleImpact`)
+* primal friction contact problems (:class:`GlobalFrictionContact`)
 
 .. math::
 
@@ -67,7 +67,7 @@ and :math:`localVelocity,localReaction` belongs to the Coulomb friction law with
 With :math:`velocity \in R^{n}, reaction \in R^{n}, localVelocity \in R^{m}, localReaction \in R^{m}` the unknowns,
 :math:`M \in R^{n \times n }, q \in R^{n}`. :math:`tildeLocalVelocity \in R^{m}` is the modified local velocity (:math:`e U_{N,k}`), :math:`M \in R^{n \times n }, q \in R^{n}, H \in R^{n \times m }`.
    
-* Generic mechanical problem (:doxysiconos:`GenericMechanical`)
+* Generic mechanical problem (:class:`GenericMechanical`)
   
 Complete problem with bilateral equality, complementarity, impact and friction.
 
@@ -120,7 +120,7 @@ Note that all time-independent operators are computed during simulation initiali
 Customize simulation behavior
 -----------------------------
 
-Each time :doxysiconos:`ComputeOneStepNS()` function, i.e. the numerics solver, is called, it returns an int, giving some information about the convergence of the solver:
+Each time :function:`ComputeOneStepNS()` function, i.e. the numerics solver, is called, it returns an int, giving some information about the convergence of the solver:
 
 * output = 0 => solver succeeded,
 * else, the meaning of output depends on the solver called (see :ref:`numerics_solvers`).

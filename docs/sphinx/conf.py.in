@@ -104,27 +104,36 @@ if with_exhale:
            generally mirrors the C++ API, but some methods may not be available in
            Python or may perform different actions.
         '''),
-        "doxygenStripFromPath":  ".",
+        "doxygenStripFromPath":  "@CMAKE_SOURCE_DIR@",
         # Suggested optional arguments
         "createTreeView":        True,
         # TIP: if using the sphinx-bootstrap-theme, you need
         #"createTreeView": True,
         #"treeViewIsBootstrap": True,
         #"treeViewBootstrapLevels": 4,
-        "exhaleExecutesDoxygen": False,
+        "exhaleExecutesDoxygen": True,
+        "doxygenStripFromPath": "@CMAKE_SOURCE_DIR@",
+        "exhaleUseDoxyfile" : True,
         # Uncomment when using exhale to call doxygen
-        #"exhaleDoxygenStdin":    "INPUT = @DOXYGEN_INPUTS@ "
+        # "exhaleDoxygenStdin": textwrap.dedent('''
+        #  INPUT = @DOXYGEN_INPUTS@
+        #  RECURSIVE = NO
+        #  EXTRACT_ALL= NO
+        #  EXTRACT_STATIC = NO
+        #  HIDE_UNDOC_MEMBERS = YES
+        #  HIDE_UNDOC_CLASSES = YES     
+        #''')
     }
 
-    # sphinx versioning option. Review this later (issue to be fixed :
-    # https://github.com/CityOfZion/neon-js/issues/111)
-    # scv_root_ref = 'feature_branch'
+# sphinx versioning option. Review this later (issue to be fixed :
+# https://github.com/CityOfZion/neon-js/issues/111)
+# scv_root_ref = 'feature_branch'
 
-    # Tell sphinx what the primary language being documented is.
-    primary_domain = 'cpp'
+# Tell sphinx what the primary language being documented is.
+primary_domain = 'cpp'
 
-    # Tell sphinx what the pygments highlight language should be.
-    highlight_language = 'cpp'
+# Tell sphinx what the pygments highlight language should be.
+highlight_language = 'cpp'
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -161,7 +170,7 @@ language = None
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['**/*test*']
+exclude_patterns = ['**/*test*', '**/doxygen']
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True
@@ -201,14 +210,13 @@ html_theme_options = {
     'logo_only': False,
     'display_version': True,
     'prev_next_buttons_location': 'bottom',
-    'style_external_links': True,
-    'vcs_pageview_mode': '',
+    #'vcs_pageview_mode': '',
     # Toc options
     'collapse_navigation': False,
     'sticky_navigation': True,
     'navigation_depth': 4,
-    'includehidden': True,
-    'titles_only': False,
+    #'includehidden': True,
+    #'titles_only': False,
 }
 
 html_context = {

@@ -4,14 +4,14 @@
 Dynamical Systems
 =================
 
-:doxysiconos:`DynamicalSystem` is the class used in Siconos to describe a set of ordinary differential equations, which is the essential first tep of any Non-Smooth problem description in Siconos.
+:class:`DynamicalSystem` is the class used in Siconos to describe a set of ordinary differential equations, which is the essential first tep of any Non-Smooth problem description in Siconos.
 This base class defines a common interface to all systems. To fit with different types of problems, we propose several derived classes representing some specific formulations, as described below.
 
 .. image:: /figures/dynamical_system_classes.*
 
-As usual, a complete description of the interface (members and methods) of these classes can be found in the doxygen documentation, see for example :doxysiconos:`DynamicalSystem`.
+As usual, a complete description of the interface (members and methods) of these classes can be found in the doxygen documentation, see for example :class:`DynamicalSystem`.
 
-Note that :doxysiconos:`DynamicalSystem` is an abstract class, and no object of this type can be implemented. It just provides a generic interface for all systems.
+Note that :class:`DynamicalSystem` is an abstract class, and no object of this type can be implemented. It just provides a generic interface for all systems.
 
   
 Overview
@@ -45,9 +45,9 @@ The aim of this class is to provide some members and functions for all dynamical
 
 *That means that all members and functions described below are also available in any of the derived classes.*
 
-Each system is identified thanks to a number and the current state of the system is saved as a vector :doxysiconos:`DynamicalSystem::x`, with x[0]= :math:`x` and x[1]= :math:`\dot x`.
+Each system is identified thanks to a number and the current state of the system is saved as a vector :function:`DynamicalSystem::x`, with x[0]= :math:`x` and x[1]= :math:`\dot x`.
 
-All the functions and their gradients ( :math:`g, rhs, \nabla_x g` ...) can be accessed with functions like :doxysiconos:`DynamicalSystem::jacobianRhsx` for :math:`\nabla_{x} rhs(x, t, z)`. Check the reference for a complete list of the members and methods.
+All the functions and their gradients ( :math:`g, rhs, \nabla_x g` ...) can be accessed with functions like :function:`DynamicalSystem::jacobianRhsx` for :math:`\nabla_{x} rhs(x, t, z)`. Check the reference for a complete list of the members and methods.
 
 The common rules for all members are, 'name' being the required variable:
 
@@ -91,21 +91,21 @@ Common interface
 
 The following functions are (and must) be present in any class derived from DynamicalSystems
 
-* :doxysiconos:`DynamicalSystem::initRhs()`
+* :function:`DynamicalSystem::initRhs()`
 
-* :doxysiconos:`DynamicalSystem::icomputeRhs(time)`
+* :function:`DynamicalSystem::icomputeRhs(time)`
 
-* :doxysiconos:`DynamicalSystem::computeJacobianRhsx(time)`
+* :function:`DynamicalSystem::computeJacobianRhsx(time)`
   
-* :doxysiconos:`DynamicalSystem::initializeNonSmoothInput(level)`
+* :function:`DynamicalSystem::initializeNonSmoothInput(level)`
 
-* :doxysiconos:`DynamicalSystem::swapInMemory()`
+* :function:`DynamicalSystem::swapInMemory()`
 
-* :doxysiconos:`DynamicalSystem::display()`
+* :function:`DynamicalSystem::display()`
 
-* :doxysiconos:`DynamicalSystem::resetAllNonSmoothParts()`
+* :function:`DynamicalSystem::resetAllNonSmoothParts()`
 
-* :doxysiconos:`DynamicalSystem::resetNonSmoothPart(level)`
+* :function:`DynamicalSystem::resetNonSmoothPart(level)`
   
 
 
@@ -115,7 +115,7 @@ First order dynamical systems
 Non linear
 """"""""""
 
-:doxysiconos:`FirstOrderNonLinearDS`
+:class:`FirstOrderNonLinearDS`
 
 They are described by the following set:
 
@@ -135,7 +135,7 @@ with:
 * M is supposed to be invertible (if not, we can not compute x[1]=rhs ...).  
 
 * initial conditions are given by the member x0, vector of size n. This corresponds to x value when simulation is starting, 
-\e ie after a call to simulation initialize() function. \n
+  \e ie after a call to simulation initialize() function. \n
 
 * There are plug-in functions in this class for f and its Jacobian, jacobianfx.
 
@@ -146,14 +146,14 @@ We have:
    rhs &= M^{-1}(f(t,x,z)+r) \\
    \nabla_x rhs &= M^{-1}\nabla_x f(t,x,z)
 
-Other variables are those of :doxysiconos:`DynamicalSystem` class, but some of them are not defined and thus not usable:
+   Other variables are those of :class:`DynamicalSystem` class, but some of them are not defined and thus not usable:
 
 * g and its gradients
 
 Linear
 """"""
 
-:doxysiconos:`FirstOrderLinearDS`
+:class:`FirstOrderLinearDS`
 
 Described by the set of n equations and initial conditions: 
 
@@ -166,9 +166,9 @@ With:
 
 * A(t,z): nXn matrix, state independent but possibly time-dependent.
 * b(t,z): Vector of size n, possibly time-dependent.
-A and B have corresponding plug-in functions. 
-
-Other variables are those of :doxysiconos:`DynamicalSystem` and FirstOrderNonLinearDS classes, but some of them are not defined and thus not usable: \n
+  A and B have corresponding plug-in functions. 
+  Other variables are those of :class:`DynamicalSystem` and FirstOrderNonLinearDS classes, but some of them are not defined and thus not usable: \n
+  
 * g and its gradients
 * f and its gradient
 
@@ -199,7 +199,7 @@ Second order (Lagrangian) systems
 Non linear
 """"""""""
 
-:doxysiconos:`LagrangianDS`, derived from :doxysiconos:`DynamicalSystem`.
+:class:`LagrangianDS`, derived from :class:`DynamicalSystem`.
 
 Lagrangian second order non linear systems are described by the following set of nDof equations + initial conditions:
 
@@ -233,10 +233,10 @@ We consider that the Mass matrix is invertible and that its gradient is null.
 
 There are plug-in functions in this class for :math:`F_{int}, F_{Ext}, M, fGyr` and the four Jacobian matrices. 
 
-Other variables are those of :doxysiconos:`DynamicalSystem` class, but some of them are not defined and thus not usable: \n
+Other variables are those of :class:`DynamicalSystem` class, but some of them are not defined and thus not usable: \n
 * g and its gradients
 
-Links with :doxysiconos:`DynamicalSystem` are, :math:`n= 2 ndof` and :math:`x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]`. \n
+Links with :class:`DynamicalSystem` are, :math:`n= 2 ndof` and :math:`x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]`. \n
 
 And we have:
 
@@ -270,7 +270,7 @@ With:
 * C: constant viscosity nDof X nDof matrix 
 * K: constant rigidity nDof X nDof matrix 
 
-Other variables are those of :doxysiconos:`DynamicalSystem` and LagrangianDS classes, but some of them are not defined and thus not usable: \n
+Other variables are those of :class:`DynamicalSystem` and LagrangianDS classes, but some of them are not defined and thus not usable: \n
 * g and its gradients
 * fL, fInt, fGyr and their gradients.
 
@@ -295,8 +295,8 @@ And we have:
 Dynamical Systems plug-in functions
 -----------------------------------
 
-* :doxysiconos:`DynamicalSystem`: :math:`g(t,\dot x,x,z), \ \ \nabla_x g(t,\dot x,x,z), \ \ \nabla_{\dot x} g(t,\dot x,x,z)`
-* :doxysiconos:`FirstOrderNonLinearDS`: :math:`f(t,x,z), \ \ \nabla_x f(t,x,z)`
-* :doxysiconos:`FirstOrderLinearDS`: A(t,z), b(t,z)
-* :doxysiconos:`LagrangianDS`: :math:`M(q,z), \ \ fGyr(\dot q,q,z), \ \ F_{Int}(t,\dot q,q ,z), \ \ F_{Ext}(t,z), \ \ \nabla_q F_{Int}(t,\dot q,q,z), \ \ \nabla_{\dot q}F_{Int}(t,\dot q, q, z), \ \ \nabla_q fGyr(\dot q, q, z), \ \ \nabla_{\dot q}fGyr(\dot q, q, z)`.
-* :doxysiconos:`LagrangianLinearTIDS`: :math:`F_{Ext}(t,z)`
+* :class:`DynamicalSystem`: :math:`g(t,\dot x,x,z), \ \ \nabla_x g(t,\dot x,x,z), \ \ \nabla_{\dot x} g(t,\dot x,x,z)`
+* :class:`FirstOrderNonLinearDS`: :math:`f(t,x,z), \ \ \nabla_x f(t,x,z)`
+* :class:`FirstOrderLinearDS`: A(t,z), b(t,z)
+* :class:`LagrangianDS`: :math:`M(q,z), \ \ fGyr(\dot q,q,z), \ \ F_{Int}(t,\dot q,q ,z), \ \ F_{Ext}(t,z), \ \ \nabla_q F_{Int}(t,\dot q,q,z), \ \ \nabla_{\dot q}F_{Int}(t,\dot q, q, z), \ \ \nabla_q fGyr(\dot q, q, z), \ \ \nabla_{\dot q}fGyr(\dot q, q, z)`.
+* :class:`LagrangianLinearTIDS`: :math:`F_{Ext}(t,z)`

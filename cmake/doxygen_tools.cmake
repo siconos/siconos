@@ -60,13 +60,13 @@ macro(build_doc_xml COMP)
 endmacro()
 
 
+# --------------------------------------
+# Call this macro when all documentation
+# process are over (doxygen, sphinx ...)
+# to prepare doxygen config with
+# an uptodate list of inputs.
 # --------------------------------
-# Call this macro after each
-# component setup, to prepare
-# doxygen config with a uptodate
-# list of inputs.
-# --------------------------------
-macro(finalize_doxygen)
+macro(finalize_doc)
   if(WITH_DOCUMENTATION)
     # verbose mode.
     #  Always off, since warnings may be obtained with 'doxygen_warnings' target.
@@ -101,4 +101,16 @@ macro(finalize_doxygen)
       add_dependencies(html doxyrest)
     endif()
   endif()
+  
+  # --- Generates conf.py, to describe sphinx setup ---
+  # !! Should be call after doxygen setup
+  # to have a propre DOXYGEN_INPUT value.
+  configure_file (
+    "${CMAKE_SOURCE_DIR}/docs/sphinx/conf.py.in"
+    "${CMAKE_BINARY_DIR}/docs/sphinx/conf.py" @ONLY)
+  configure_file(
+    "${DOXY_CONFIG}"
+    "${CMAKE_BINARY_DIR}/docs/sphinx/Doxyfile" @ONLY)
+
+
 endmacro()

@@ -126,7 +126,7 @@ foreach(COMPONENT ${COMPONENTS})
   add_subdirectory(${COMPONENT})
 endforeach()
 
-finalize_doxygen()
+finalize_doc()
 
 include(FeatureSummary)
 feature_summary(WHAT ALL)

@@ -10,6 +10,7 @@ Developer guide
    write_and_build_doc
    modal_moreau_jean
    about_ci
+   how_to_add_new_task
    plugins
    notes/DevNotes
    todos_from_doxygen

@@ -105,6 +105,7 @@ We should sort, clean, update the followings ...
    nsds_basics
    tutorial_python/index
    tutorial_cpp/siconos_tutorial
+   tutorial_cpp/RLCD
    running_siconos
    cpp_reminder
 

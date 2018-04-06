@@ -268,7 +268,7 @@ extern "C"
    * preferably a triplet matrix.
    * \param M the NumericsMatrix
    * \param i row index
-   * \param i column index
+   * \param j column index
    * \param val the value to be inserted.
    */
   void NM_zentry(NumericsMatrix* M, int i, int j, double val);
@@ -276,7 +276,7 @@ extern "C"
   /** get the value of a NumericsMatrix.
    * \param M the NumericsMatrix
    * \param i row index
-   * \param i column index
+   * \param j column index
    * \return  the value to be inserted.
    */
   double NM_get_value(NumericsMatrix* M, int i, int j);
@@ -284,7 +284,6 @@ extern "C"
   /** compare to NumericsMatrix up to a given tolerance
    * \param A the NumericsMatrix
    * \param B the NumericsMatrix
-   * \param tol tolerance
    */
   bool NM_equal(NumericsMatrix* A, NumericsMatrix* B);
 
@@ -495,7 +494,6 @@ extern "C"
   void NM_read_in_file(NumericsMatrix* const M, FILE *file);
 
   /** Create from file a NumericsMatrix with  memory allocation
-     \param M the matrix to be read
      \param file the corresponding  file
      \return 0 if the matrix
   */

@@ -10,7 +10,7 @@ For each solver, the input argument are:
 * a FrictionContactProblem
 * the unknowns (reaction,velocity)
 * info, the termination value (0: convergence, >0 problem which depends on the solver)
-* a :doxysiconos:`SolverOptions` structure, which handles iparam and dparam
+* a :class:`SolverOptions` structure, which handles iparam and dparam
 
 2D solvers
 ----------
@@ -18,7 +18,7 @@ For each solver, the input argument are:
 CPG
 ^^^
 
-function: :doxysiconos:`pfc_2D_cpg()`
+function: :function:`pfc_2D_cpg()`
 
 parameters:
 
@@ -33,7 +33,7 @@ parameters:
 Non-Smooth Gauss Seidel
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-function: :doxysiconos:`fc3d_nsgs()`
+function: :function:`fc3d_nsgs()`
 
 parameters:
 

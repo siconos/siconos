@@ -67,7 +67,7 @@ if(USE_DOXYGEN)
     # config file name
     set(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/config/doxy.config" CACHE INTERNAL "Doxygen configuration file used to produce xml files for sphinx.")
     # The generation of the config and the creation of the target will be done later,
-    # after the update of inputs by each component, with macro 'finalize_doxygen'
+    # after the update of inputs by each component, with macro 'finalize_doc'
     
   endif()
     
@@ -95,29 +95,23 @@ if(USE_SPHINX)
   if(USE_DOXYREST)
     find_package(doxyrest CONFIGS doxyrest_config.cmake REQUIRED)
     if(doxyrest_FOUND)
-      set(HAS_DOXYREST "True")
+      set(HAS_DOXYREST "True" CACHE INTERNAL "True if doxyrest required and found.")
       message(STATUS "Doxyrest found : ${DOXYREST_EXE}")
     endif()
   else()
-    set(HAS_DOXYREST "False")
+    set(HAS_DOXYREST "False" CACHE INTERNAL "True if doxyrest required and found.")
   endif()
   if(USE_EXHALE)
+    find_python_module(breathe REQUIRED)
     find_python_module(exhale REQUIRED)
-    set(HAS_EXHALE "True")
+    set(HAS_EXHALE "True" CACHE INTERNAL "True if exhale required and found.")
   else()
-    set(HAS_EXHALE "False")
+    set(HAS_EXHALE "False" CACHE INTERNAL "True if exhale required and found.")
   endif()
-  #find_sphinx_module(doxyrest)
-  # find_python_module(breathe REQUIRED)
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
   #find_sphinx_module(sphinxcontrib doxylink REQUIRED)
   
-  # --- conf.py describes sphinx setup ---
-  configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/conf.py.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/sphinx/conf.py" @ONLY)
-
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst.in"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/index.rst" @ONLY)

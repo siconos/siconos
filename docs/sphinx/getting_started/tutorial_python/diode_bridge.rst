@@ -147,8 +147,8 @@ we get a first order linear system
 
 with the unknowns :math:`x` and :math:`r`.
 
-To represent this kind of ordinary differential equations, siconos has a class :doxysiconos:`FirstOrderLinearTIDS` (TIDS stands for time-invariant coefficients dynamical system)
-which inherits from :doxysiconos:`DynamicalSystem`. Check :ref:`dynamical_systems` to find a complete review of all the dynamical systems formalisms available in the software.
+To represent this kind of ordinary differential equations, siconos has a class :class:`FirstOrderLinearTIDS` (TIDS stands for time-invariant coefficients dynamical system)
+which inherits from :class:`DynamicalSystem`. Check :ref:`dynamical_systems` to find a complete review of all the dynamical systems formalisms available in the software.
 
 ::
 
@@ -253,8 +253,8 @@ this is equivalent to the linear relation between :math:`(x, r)` and :math:`(y, 
 
    y = Cx + D\lambda, \ \ \ r = B\lambda
 
-To represent this kind of algebraic equations, siconos has a class :doxysiconos:`FirstOrderLinearTIR` (TIR stands for time-invariant coefficients relations)
-which inherits from :doxysiconos:`Relation`. Check :ref:`relations` to find a complete review of all the relations formalisms available in the software.
+To represent this kind of algebraic equations, siconos has a class :class:`FirstOrderLinearTIR` (TIR stands for time-invariant coefficients relations)
+which inherits from :class:`Relation`. Check :ref:`relations` to find a complete review of all the relations formalisms available in the software.
 
 ::
 
@@ -285,7 +285,7 @@ which inherits from :doxysiconos:`Relation`. Check :ref:`relations` to find a co
    # nslaw + relation == interaction
    interaction = sk.Interaction(nonsmooth_law, relation)
        
-Notice that a complete :doxysiconos:`FirstOrderLinearTIR` writes
+Notice that a complete :class:`FirstOrderLinearTIR` writes
 
 .. math::
 
@@ -325,8 +325,8 @@ Then, back to our circuit, the complementarity conditions, results of the ideal 
 with the previously defined :math:`y` and :math:`\lambda`. Note that depending on the diode position in the bridge, :math:`y_i` stands for the reverse voltage across
 the diode or for the diode current.
 
-To represent such a nonsmooth law siconos has a class :doxysiconos:`ComplementarityConditionNSL` (you will find NSL in each class-name defining a nonsmooth law)
-which inherits from :doxysiconos:`NonSmoothLaw`. Check :ref:`non_smooth_laws` to find a complete review of all available laws in the software.
+To represent such a nonsmooth law siconos has a class :class:`ComplementarityConditionNSL` (you will find NSL in each class-name defining a nonsmooth law)
+which inherits from :class:`NonSmoothLaw`. Check :ref:`non_smooth_laws` to find a complete review of all available laws in the software.
 
 ::
 
@@ -339,7 +339,7 @@ The interaction can be completely defined::
 Notice that this interaction just describe some relations and laws but is not connected to any real dynamical system, for the moment.
   
 The modeling part is almost complete, since only one dynamical system and one interaction are needed to describe the problem.
-They must be gathered into a specific object, the :doxysiconos:`NonSmoothDynamicalSystem`.
+They must be gathered into a specific object, the :class:`NonSmoothDynamicalSystem`.
 The building of this object is quite simple: just
 set the time window for the simulation, include dynamical systems and link them to the correct interactions.
 
@@ -379,7 +379,7 @@ time :math:`t_i` and :math:`t_{i+1}`. The integration of the equation over the t
    W &= (M - h\theta A) \\
    x^{free}_i &=  x_i + h W^{-1}(A x_i + b)
 
-This corresponds to :doxysiconos:`EulerMoreauOSI` integrators, which inherits from :doxysiconos:`OneStepIntegrator`. Check :ref:`time_integrators` to find a complete review of integrators available in the software.
+This corresponds to :class:`EulerMoreauOSI` integrators, which inherits from :class:`OneStepIntegrator`. Check :ref:`time_integrators` to find a complete review of integrators available in the software.
 
 ::
 
@@ -412,7 +412,7 @@ with
 
    q = Cx^{free}_{i+1},    M = hCW^{-1}B + D
 
-This is known as a Linear Complementarity Problem, written in siconos thanks to :doxysiconos:`LCP` class, which inherits from :doxysiconos:`OneStepNSProblem`.
+This is known as a Linear Complementarity Problem, written in siconos thanks to :class:`LCP` class, which inherits from :class:`OneStepNSProblem`.
 As usual, check :ref:`osns_problems` for a complete review of the nonsmooth problems formulations available in Siconos.
 To each formulation, one must associate a solver, picked from the list given in :ref:`lcp_solvers`::
 
@@ -469,9 +469,9 @@ For the present case, :math:`x, y \ and \ \lambda` at each time step are needed 
       simu.nextStep()
 
 
-* :doxysiconos:`hasNextEvent()` is true as long as there are events to be considered, i.e. until T is reached
-* :doxysiconos:`nextStep()` is mainly used to increment the time step, save current state and prepare initial values for next step.
-* :doxysiconos:`computeOneStep()` performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to
+* :function:`Simulation::hasNextEvent()` is true as long as there are events to be considered, i.e. until T is reached
+* :function:`Simulation::nextStep()` is mainly used to increment the time step, save current state and prepare initial values for next step.
+* :function:`Simulation::computeOneStep()` performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to
   obtain the so-called free-state, that is without non-smooth effects, then it will formalize and solve a LCP before re-integrate the dynamics using the LCP results. 
 
 The results can now be postprocessed, with matplotlib for example::

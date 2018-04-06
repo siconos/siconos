@@ -6,7 +6,7 @@ Time integration of the dynamics
 Dynamical systems integration over a time-step or between two events must be defined thanks to
 'one-step integrators'.
 
-* Euler-Moreau (:doxysiconos:`EulerMoreauOSI`)
+* Euler-Moreau (:class:`EulerMoreauOSI`)
 
 For first-order dynamical systems, in an 'event-capturing' simulation strategy.
   
@@ -28,7 +28,7 @@ Another variant can also be used (FullThetaGamma scheme)
    r_{k+\gamma} = g(x_{k+\gamma},\lambda_{k+\gamma},t_{k+\gamma})\\[2mm]
    \mbox{nslaw} ( y_{k+\gamma} , \lambda_{k+\gamma})
 
-* Moreau-Jean (:doxysiconos:`MoreauJeanOSI`)
+* Moreau-Jean (:class:`MoreauJeanOSI`)
 
 For mechanical (second-order) systems, in an 'event-capturing' simulation strategy.
 
@@ -49,16 +49,16 @@ Numerically, this set is defined as
 
    \mathcal I_1 = \{\alpha \in \mathcal I \mid G^\top (q_{k} + h v_{k}) + w \leq 0\text{ and } U_k \leq 0 \}.
 
-* Schatzman-Paoli (:doxysiconos:`SchatzmanPaoliOSI`)
-* zero-order  (:doxysiconos:`ZeroOrderHoldOSI`) 
-* Lsodar (:doxysiconos:`LsodarOSI`)
+* Schatzman-Paoli (:class:`SchatzmanPaoliOSI`)
+* zero-order  (:class:`ZeroOrderHoldOSI`) 
+* Lsodar (:class:`LsodarOSI`)
 
 For 'event-driven' simulation strategy. Integrator based on LSODAR (https://computation.llnl.gov/casc/odepack/) rootfinding routine :
 "Lsodar solves problems dy/dt = f with full or banded Jacobian and automatic method selection, and at the same time, it finds the roots of any of a set of given functions of the form g(t,y). This is often useful for finding stop conditions or points at which switches are to be made in the function f". 
 In Siconos, Lsodar is used for event-driven algorithm, to integrate the dynamics with stops at new non-smooth events (violation of a constraint)
 
-* Hem5 (:doxysiconos:`Hem5OSI`)
+* Hem5 (:class:`Hem5OSI`)
 
 For 'event-driven' simulation strategy. Based on Ernst Hairer HEM5 integrator (http://www.unige.ch/~hairer/software.html)
 
-* Newmark (:doxysiconos:`NewMarkAlphaOSI`)
+* Newmark (:class:`NewMarkAlphaOSI`)

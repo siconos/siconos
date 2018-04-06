@@ -9,7 +9,7 @@ Friction-contact problems (2D or 3D)
 
 Given
 
-* a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n} `
+* a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
 
 * a vector :math:` {q} \in {{\mathrm{I\!R}}}^n`
 

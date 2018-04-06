@@ -6,7 +6,7 @@ Test doxygen/sphinx links
 
 
 
-To link a siconos class:
+To link to a siconos class:
 
 .. code::
 
@@ -21,13 +21,18 @@ To a file :
 
 .. code::
 
-   Try to link to .. _file_kernel_src_modelingTools_DynamicalSystem.hpp
-
+   Try to link to :ref:`kernel_src_modelingTools_DynamicalSystem.hpp`
       
 Result : 
 
-.. _file_kernel_src_modelingTools_DynamicalSystem.hpp
+Try to link to :ref:`kernel_src_modelingTools_DynamicalSystem.hpp`
 
+To link to a method : 
 
-To a method : 
+.. code::
 
+   Try to link to :function:`Simulation::nextStep`
+
+Result :
+
+Try to link to :function:`Simulation::nextStep`

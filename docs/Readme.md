@@ -58,3 +58,9 @@ git remote add gitlab_for_doc git@gricad-gitlab.univ-grenoble-alpes.fr:nonsmooth
 ```
 git checkout update_doc
 git push gitlab_for_doc update_doc
+
+
+
+
+Remark : automatic mirroring between github and gitlab (i.e. push to github -> trigger push to gitlab) is something
+that is supposed to be available "soon" ...

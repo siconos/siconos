@@ -12,3 +12,5 @@ Users guide
    numerics_vectors_and_matrices
    problems_and_solvers/index
    intro_python_API
+   control
+   simulation_strategies

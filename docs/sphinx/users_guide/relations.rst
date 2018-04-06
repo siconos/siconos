@@ -5,13 +5,13 @@ Relations
 
 Relations are used to link local variables of the Interaction and global variables of the DynamicalSystems, and thus define constraints in the systems.
 
-:doxysiconos:`Relation` is an abstract class which provides a generic interface for all types of relations.
+:class:`Relation` is an abstract class which provides a generic interface for all types of relations.
 Each relation has a type which correspond to the types of dynamical systems they fit with (FirstOrder or Lagrangian), a sub-type, (linear, non linear, scleronomous...).
 Usually, "type+subtype" corresponds more or less to the name of the derived class.
 Then, depending on the sub-class, each relation holds some plug-in functions or operators used to define the constraints. They are listed below for each available type of relation. 
 
 
-Available classes: :doxysiconos:`FirstOrderR`, :doxysiconos:`FirstOrderLinearR`, :doxysiconos:`FirstOrderLinearTIR`, :doxysiconos:`LagrangianR`, :doxysiconos:`LagrangianRheonomousR`, :doxysiconos:`LagrangianScleronomousR`, :doxysiconos:`LagrangianCompliantR`, :doxysiconos:`LagrangianLinearR`.
+Available classes: :class:`FirstOrderR`, :class:`FirstOrderLinearR`, :class:`FirstOrderLinearTIR`, :class:`LagrangianR`, :class:`LagrangianRheonomousR`, :class:`LagrangianScleronomousR`, :class:`LagrangianCompliantR`, :class:`LagrangianLinearR`.
 
 .. image:: /figures/relation_classes.*
 
@@ -21,7 +21,7 @@ First Order Relations
 Non Linear
 """"""""""
 
-Class :doxysiconos:`FirstOrderR`
+Class :class:`FirstOrderR`
 
 .. math::
    
@@ -39,14 +39,14 @@ We denote:
    \end{array}
    
 :math:`h`, :math:`g` (and their jacobian according to :math:`X` and :math:`\lambda`) are defined with some plug-in functions. \n
-See the doxygen documentation of the class :doxysiconos:`FirstOrderR` to have a list of the set/get/compute functions.
+See the doxygen documentation of the class :class:`FirstOrderR` to have a list of the set/get/compute functions.
 
 Note: for the signification of :math:`X`, :math:`Z`, :math:`R` see :ref:`interactions`
 
 Linear
 """"""
 
-Class: :doxysiconos:`FirstOrderLinearR`
+Class: :class:`FirstOrderLinearR`
 
 .. math::
    
@@ -58,7 +58,7 @@ Plug-in functions are available for all operators.
 Linear with Time Invariant Coefficients
 """""""""""""""""""""""""""""""""""""""
 
-Class :doxysiconos:`FirstOrderLinearTIR`
+Class :class:`FirstOrderLinearTIR`
 
 .. math::
   
@@ -71,7 +71,7 @@ Lagrangian (second order) Relations
 Scleronomous
 """"""""""""
 
-xClass :doxysiconos:`LagrangianScleronomousR`
+xClass :class:`LagrangianScleronomousR`
 
 The constraints depend only on the state,
 
@@ -90,7 +90,7 @@ with
 Rheonomous
 """"""""""
 
-Class :doxysiconos:`LagrangianRheonomousR`
+Class :class:`LagrangianRheonomousR`
 
 The constraints depend on time and state, 
 
@@ -109,7 +109,7 @@ with
 Compliant
 """""""""
 
-Class: :doxysiconos:`LagrangianCompliantR`
+Class: :class:`LagrangianCompliantR`
 
 The constraints depends on state and :math:`\lambda`, with a function of time for which :math:`\dot\lambda(t)` makes sense.
 
@@ -129,7 +129,7 @@ with
 Linear and Time Invariant Coefficients
 """"""""""""""""""""""""""""""""""""""
 
-Class: :doxysiconos:`LagrangianLinearR`
+Class: :class:`LagrangianLinearR`
 
 Lagrangian linear relations with time-invariant coefficients. 
 

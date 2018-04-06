@@ -9,9 +9,9 @@ Global-Friction-contact problems (2D or 3D)
 
 Given
 
-* a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n} `
+* a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
 
-* a matrix :math:`{H} \in {{\mathrm{I\!R}}}^{n \times {d\, n_c}} `
+* a matrix :math:`{H} \in {{\mathrm{I\!R}}}^{n \times {d\, n_c}}`
 
 * a vector :math:`{q} \in {{\mathrm{I\!R}}}^n`
 

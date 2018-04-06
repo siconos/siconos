@@ -9,8 +9,10 @@ Whatever your system is, you will need first to :
 * Create anywhere (but not in *path_to_sources*) a build directory.
 * Check :ref:`siconos_dependencies`. Most of them are commonly or at least easily installed
   on many standard systems.
-* Check the list of :ref:`siconos_valid_platforms` on which siconos has been succesfully installed.
+* Check the list of platforms and configs for which siconos has been succesfully (or not ...)  installed :
 
+  http://cdash-bipop.inrialpes.fr/index.php?project=Siconos
+  
 The quick way
 -------------
 
@@ -154,7 +156,7 @@ if *siconos_install_path* is not a standard path of your system, you may need to
 .. _siconos_cmake_options:
 
 CMake options
---------------------------------------
+-------------
 
 Most options are like '-DWITH_XXX=ON or OFF to enable or disable some behavior or some interface to other libraries.
 If ON, the cmake system will search for XXX libraries, headers, or anything required on your system and will end up in error if not found. 

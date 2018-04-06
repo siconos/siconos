@@ -71,29 +71,30 @@ The Simulation process
 Thus, a general step  of integration for EventDriven will looks like:
 "While there are some events in the unProcessedEvents set, integrate the smooth dynamics between current and next event and then process with the behavior at event".
 Or:
-\code
-SP::EventDriven s(new EventDriven(myModel));
 
-s->initialize();
+code:: c++
+  
+  SP::EventDriven s(new EventDriven(myModel));
 
-// We get the events manager
-SP::EventsManager eventsManager = s->eventsManager();
+  s->initialize();
 
-// while there are some events ...
-while(eventsManager->hasNextEvent())
-{
+  // We get the events manager
+  SP::EventsManager eventsManager = s->eventsManager();
+  
+  // while there are some events ...
+  while(eventsManager->hasNextEvent())
+  {
   // integrate between current and next event
   s->advanceToEvent();
   // solve the non-smooth dynamics, if necessary ...
   eventsManager->processEvents();
-}
+  }
 
-// Or in one step:
-while(eventsManager->hasNextEvent())
-{
- s->computeOneStep();
-}
-\endcode
+  // Or in one step:
+  while(eventsManager->hasNextEvent())
+  {
+  s->computeOneStep();
+  }
 
 .. _event_driven_lagrange:
 
@@ -220,6 +221,7 @@ This results in the computation of :math:`y, \dot y` at this new point and to an
     - Formalize and solve the <b>"LCP at velocity level"</b>
     - Update the index sets :math:`I_1` and :math:`I_2` and check that  :math:`I_1 - I_2 =\emptyset`
    endif
+
 -# if :math:`I_2\neq \emptyset` then 
     - Formalize and solve the <b>"LCP at acceleration level"</b>
     - for :math:`\alpha \in I_2` do
@@ -228,6 +230,7 @@ This results in the computation of :math:`y, \dot y` at this new point and to an
       endif\n
      endfor\n 
     endif\n
+
 -# go to the next time step.
 
 Implementation in Siconos

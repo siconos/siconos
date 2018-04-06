@@ -28,10 +28,10 @@ Slides (in chronological order)
 
 * Lecture Notes on Numerical methods for nonsmooth mechanical systems
   V. Acary. Nonsmooth Contact Mechanics: Modeling and Simulation. Summer school September 2012.
-     + `Introductory lecture  <https://github.com/siconos/siconos-tutorials/blob/master/talks/2012-Aussois/Acary-Aussois2012-Lecture0.pdf>`_.
-     + `Lecture 1 Notes on Numerical methods for nonsmooth mechanical systems <https://github.com/siconos/siconos-tutorials/blob/master/talks/2012-Aussois/Acary-Aussois2012-Lecture1.pdf>`_.
-     + `Lecture 2 Notes on Numerical methods for nonsmooth mechanical systems <https://github.com/siconos/siconos-tutorials/blob/master/talks/2012-Aussois/Acary-Aussois2012-Lecture2.pdf>`_.
-     + `Lecture 3 Notes on Numerical methods for nonsmooth mechanical systems <https://github.com/siconos/siconos-tutorials/blob/master/talks/2012-Aussois/Acary-Aussois2012-Lecture3.pdf>`_.
+  + `Introductory lecture  <https://github.com/siconos/siconos-tutorials/blob/master/talks/2012-Aussois/Acary-Aussois2012-Lecture0.pdf>`_.
+  + `Lecture 1 Notes on Numerical methods for nonsmooth mechanical systems <https://github.com/siconos/siconos-tutorials/blob/master/talks/2012-Aussois/Acary-Aussois2012-Lecture1.pdf>`_.
+  + `Lecture 2 Notes on Numerical methods for nonsmooth mechanical systems <https://github.com/siconos/siconos-tutorials/blob/master/talks/2012-Aussois/Acary-Aussois2012-Lecture2.pdf>`_.
+  + `Lecture 3 Notes on Numerical methods for nonsmooth mechanical systems <https://github.com/siconos/siconos-tutorials/blob/master/talks/2012-Aussois/Acary-Aussois2012-Lecture3.pdf>`_.
 
 *  `Siconos software overview.   <https://github.com/siconos/siconos-tutorials/blob/master/talks/2008-Overview/main.pdf>`_.
    F. Pérignon. Naples, September 2008.

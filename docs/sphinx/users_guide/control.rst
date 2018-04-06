@@ -1,4 +1,4 @@
-.. _control_toolbox::
+.. _control_toolbox:
 
 Control Toolbox
 ===============
@@ -12,7 +12,7 @@ Rules:
 
 * define a control manager linked to an EXISTING model::
 
-  SP::ControlManager cm(new ControlManager(myModel));
+    SP::ControlManager cm(new ControlManager(myModel));
 
 * add Sensors and Actuators to this manager::
 

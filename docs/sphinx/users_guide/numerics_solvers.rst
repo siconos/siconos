@@ -3,9 +3,9 @@
 Solvers definition (numerics)
 =============================
 
-To define a non-smooth problem in Numerics, the structure :doxysiconos:`SolverOptions` is used. It handles the name of the solver and its input-output parameters.
+To define a non-smooth problem in Numerics, the structure :class:`SolverOptions` is used. It handles the name of the solver and its input-output parameters.
 
-:doxysiconos:`SolverOptions` main components are:
+:class:`SolverOptions` main components are:
    * a name
    * two lists of input-output parameters (int: iparam, double: dparam) and their sizes
 

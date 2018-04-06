@@ -7,3 +7,4 @@ Download and install
 
    download
    install_guide
+   siconos_dep

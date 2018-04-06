@@ -50,8 +50,8 @@ Newton Impact Law plus Coulomb Friction.
 
 In this case, y components are in the following order:
 
-*first relation, normal part
-*first relation, tangential part
+* first relation, normal part
+* first relation, tangential part
 * ...
 * relation n, normal part
 * relation n, tangential part
