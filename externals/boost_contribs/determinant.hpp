@@ -17,9 +17,12 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 
-#ifndef __determinant__
-#define __determinant__
+/* This file (C) 2008 Maik Beckmann
+ * https://lists.boost.org/MailArchives/ublas/2008/09/2984.php
+ */
 
+#ifndef determinant_hpp
+#define determinant_hpp
 
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/lu.hpp>
