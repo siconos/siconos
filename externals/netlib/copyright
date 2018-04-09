@@ -1,0 +1,115 @@
+
+# dctemplates, dftemplates
+
+These sources are from: http://www.netlib.no/netlib/templates/index.html
+
+No license agreement could be found in the source archives for
+dctemplates/dftemplates, however, permission was granted via email by
+the author, Jack Dongarra, to incorporate into Siconos or any other
+package under the terms of the Modified BSD license (also known as
+3-clause BSD license), reproduced below.
+
+Statement from Jack Dongarra via personal communication with Stephen
+Sinclair, April 5, 2018:
+
+  From: Jack Dongarra <dongarra@icl.utk.edu>
+  Message-Id: <DF8FFBC7-D94C-4FE3-8598-A2CA0D362318@icl.utk.edu>
+  Subject: Re: use of your software "templates"
+  Date: Thu, 5 Apr 2018 15:49:27 -0400
+  In-Reply-To: <20180405194136.GA2203@huckle.eecs.utk.edu>
+  Cc: "Michael W. Berry" <mberry@utk.edu>
+  To: Stephen Sinclair <radarsat1@gmail.com>
+
+  Stephen,
+  All the software is licensed under the Modified BSD license. So you are
+  free to use it and incorporate it into any package.
+  Hope this helps,
+  Jack Dongarra
+
+# odepack
+
+These source files are from http://www.netlib.org/odepack/
+
+The sources are also available at
+https://computation.llnl.gov/casc/odepack/ which indicates a public
+domain license agreement at
+https://computation.llnl.gov/casc/odepack/download/opks_agree.html
+which is reproduced below.
+
+# copyrights
+
+Files: externals/netlib/dctemplates/* externals/netlib/dftemplates/*
+Copyright: 1993 Richard Barrett
+           1993 Michael Berry
+           1993 Tony F. Chan
+           1993 James Demmel
+           1993 June Donato
+           1993 Jack Dongarra
+           1993 Victor Eijkhout
+           1993 Roldan Pozo
+           1993 Charles Romine
+           1993 Henk Van der Vorst
+License: BSD-3-clause
+
+Files: externals/netlib/odepack/*
+Copyright: Alan C. Hindmarsh
+License: ODEPACK-Public-Domain
+
+License: BSD-3-clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+ .
+     (1) Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+ .
+     (2) Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
+     the documentation and/or other materials provided with the
+     distribution.
+ .
+     (3)The name of the author may not be used to
+     endorse or promote products derived from this software without
+     specific prior written permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+ INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+License: ODEPACK-Public-Domain
+ This work was produced at the University of California, Lawrence
+ Livermore National Laboratory (UC LLNL) under contract
+ no. W-7405-ENG-48 (Contract 48) between the U.S. Department of Energy
+ (DOE) and The Regents of the University of California (University)
+ for the operation of UC LLNL. The rights of the Federal Government
+ are reserved under Contract 48 subject to the restrictions agreed
+ upon by the DOE and University as allowed under DOE Acquisition
+ Letter 97-1.
+ .
+ The ODEPACK package has been declared to be in the Public Domain.
+ .
+ DISCLAIMER
+ .
+ This work was prepared as an account of work sponsored by an agency
+ of the United States Government. Neither the United States Government
+ nor the University of California nor any of their employees, makes
+ any warranty, express or implied, or assumes any liability or
+ responsibility for the accuracy, completeness, or usefulness of any
+ information, apparatus, product, or process disclosed, or represents
+ that its use would not infringe privately-owned rights. Reference
+ herein to any specific commercial products, process, or service by
+ trade name, trademark, manufacturer or otherwise does not necessarily
+ constitute or imply its endorsement, recommendation, or favoring by
+ the United States Government or the University of California. The
+ views and opinions of authors expressed herein do not necessarily
+ state or reflect those of the United States Government or the
+ University of California, and shall not be used for advertising or
+ product endorsement purposes.

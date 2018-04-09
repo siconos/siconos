@@ -1,0 +1,159 @@
+
+These files are not strictly compliant with open source definitions.
+Note that they can be deleted and Siconos will still compile and
+function.  Currently the LCP_QP solver will give runtime errors if
+ql0001.f is removed.
+
+# qnb.f
+
+License agreement unknown.
+
+# ql0001/ql0001.f
+
+Taken from http://www.klaus-schittkowski.de/ql.htm
+
+According to http://www.klaus-schittkowski.de/SOFTWARE_A.pdf the
+software is license to be free for use for members or students of
+academic institutions.
+
+# copyrights
+
+Files: qnb.f
+Copyright: 2013 Claude Lemarechal
+           2013 Eliane Panier
+           2013 J. Charles Gilbert
+License: Unknown
+
+Files: ql0001/ql0001.f
+Copyright: 2005 Klaus Schittkowski
+License: QL
+
+License: QL
+ This license Agreement is a legal agreement between Klaus
+ Schittkowski (Siedlerstr. 3, D-95448 Eckersdorf), subsequently called
+ the Author, of the one part and You, the user, whose name and address
+ are set out on the a ccompanying letter of the other part, for the
+ software subsequently called the Softwa re, which is specified on the
+ accompanying letter and which includes computer software an d
+ electronic documentation. By installing, copying, or otherwise using
+ the Software or any updates, you agree to be bound by the terms of
+ this Agreement. If you do not agree to the terms of this Agreement,
+ do not install, copy, or otherwise use the Software.  The software is
+ protected by copyright laws and international copyright treaties, as
+ well as other intellectual property laws and treaties.
+ .
+ LICENSE TO USE THE SOFTWARE:
+ .
+ 1. General License Grant (Single User License).
+ The Author grants to you a personal, non-exclusive, non-transferable
+ license to make and use copies of the Software provided that You are
+ the only individual using the Software, in perpetuity unless
+ terminated under the specific provisions of this Agreement. If you are
+ an entity, the Author grants you the right to designate one individual
+ within your organization to have the sole right to use the Software in
+ the manner provided above.
+ .
+ 2. Limitations on Commercial Use.
+ If the license for the Software is designated as something other than
+ a commercial license, including academic or research licenses, student
+ licenses, or certain free promotional licenses, then You may not use
+ the license for commercial gain or purpose. Moreover, if the license
+ is designated as a trial or evaluation license, then it may not be
+ used for any commercial purposes.
+ .
+ 3. Transfer of Software.
+ You may permanently transfer your rights to use the Software, the
+ Software itself including any updates to the purchased version of the
+ Software, and the accompanying documentation, including this
+ Agreement, provided that you retain no copies of the Software,
+ updates, documentation, or this Agreement and the recipient accepts
+ all of the terms and conditions of this Agreement without reservation
+ or condition. The Author must be notified in writing of any such
+ transfer within three months. Any attempts otherwise to rent, lease,
+ sublicense, assign, or otherwise transfer any of the rights, duties or
+ obligations of this Agreement is not permitted, shall be void and of
+ no force or effect.
+ .
+ 4. Copyright.
+ Title and copyright to the Software, in whole and in part and all
+ copies thereof, and all modifications, enhancements, derivatives and
+ other alterations of the Software regardless of who made any
+ modifications, if any, are, and will remain, the sole and exclusive
+ property of the Author. You may not use, copy, modify, disassemble,
+ decompile, reverse engineer or transfer the programs or any copy,
+ modification, or merged portion, in whole or in part, except as
+ expressly provided for this Agreement. If you transfer possession of
+ any copy, modification or merged portion of the program to another
+ party, your license is automatically terminated. You can not
+ sublicense, assign or otherwise transfer the license to a third party
+ granted by this Agreement. The software is licensed, not sold.
+ .
+ 5. Documentation.
+ This Agreement grants You a nonexclusive license to make and use an
+ unlimited number of copies of any documentation, provided that such
+ copies shall be used only for personal purposes a nd are not to be
+ republished or distributed (either in hard copy or electronic form)
+ beyond the user’s premises.
+ .
+ 6. Storage/Network Use.
+ You may store or install a copy of the Software on a storage device,
+ such as a network server, used only to install or run the Software on
+ computers used by a licensed end user in accordance with Section 1. A
+ license for the Software may not be shared or used concurrently by
+ other end users.
+ .
+ 7. Limited Warranty and Liability.
+ The Author warrants that the Software will perform substantially as
+ described in the documentation accompanying the Software for a period
+ of ninety days from downloading or activating. Other than this limited
+ warranty, the Author does not warrant that the functions contained in
+ the program will meet your requirements or that the operation of the
+ program is uninterrupted or error free. While the Author has attempted
+ to assure that use of the Software will not result in any errors or
+ miscalculations, the Author is not responsible in the event of any
+ errors or miscalculations occurring. You assume the entire risk as to
+ the quality, use and performance of the programs. Should the programs
+ prove defective, you, and not the Author, assume the entire cost of
+ necessary servicing, repair or correction. Your sole remedies and the
+ entire liability of the Author are set forth above.
+ .
+ 8. Disclaimer of Damages.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE TO YOU UNDER ANY THEORY FOR ANY
+ DAMAGES SUFFERED BY YOU OR ANY USER OF THE SOFTWARE, OR FOR ANY
+ SPECIAL, INCIDEN- TAL, INDIRECT, CONSEQUENTIAL, OR SIMILAR DAMAGES
+ (INCLUDING WITHOUT LIMITATION, DAMAGES FOR LOSS OF BUSINESS PROFITS,
+ BUSINESS INTERRUPTION, LOSS OF BUSINESS INFORMATION, OR ANY OTHER
+ PECUNIARY LOSS) ARISING OUT OF THE USE OR INABILITY TO USE THE
+ SOFTWARE, OR THE PROVISION OF OR FAILURE TO PROVIDE SUPPORT SERVICES,
+ EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+ DAMAGES, AND REGARDLESS OF THE LEGAL OR EQUITABLE THEORY (CONTRACT,
+ TORT OR OTHERWISE) UPON WHICH THE CLAIM IS BASED. IN ANY CASE, THE
+ AUTHOR’S ENTIRE LIABILITY UNDER ANY PROVISION OF THIS AGREEMENT SHALL
+ BE LIMITED TO THE AMOUNT ACTUALLY PAID BY YOU FOR THE
+ SOFTWARE. BECAUSE SOME STATES AND JURISDICTIONS DO NOT ALLOW THE
+ EXCLUSION OR LIMITATION OF LIABILITY, THE ABOVE LIMITATION MAY NOT
+ APPLY TO YOU.
+ .
+ 9. Jurisdiction.
+ This agreement shall be governed by the laws of Germany.  Any disputes
+ arising in relation to this Agreement shall be subject to the
+ exclusive jurisdiction of the German courts.
+ .
+ 10. Acknowledgement.
+ You acknowledge that you have read this Agreement, understand it,
+ and agree to be bound by its terms and conditions. You further agree
+ it is the complete and exclusive statement of the agreement between us
+ that supersedes any proposal or prior agreement, oral or written and
+ any other communications between us relating to this subject matter of
+ this Agreement.
+ .
+ 11. Termination.
+ If You fail to comply with the terms and conditions of this Agreement,
+ the Author may terminate this Agreement and Your right and license to
+ use the Software. You may terminate this Agreement at any time by
+ notifying the Author. Upon the termination of this Agreement for any
+ reason, You must delete the Software from Your computer and archives.
+ .
+ 12. Validity.
+ The Agreement is part of the Software, accepted by You as it is, and
+ valid without signing it
