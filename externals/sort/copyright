@@ -1,0 +1,15 @@
+
+These files are from https://github.com/mhhg/sorting-threshold/
+
+License agreement information is currently unknown.  A bug has been
+filed to determine this information:
+
+https://github.com/mhhg/sorting-threshold/issues/1
+
+This directory can be safely deleted, and Siconos will make use of
+stdlib qsort instead.
+
+License: All Rights Reserved
+Copyright: 2010-2014 Christopher Swenson
+           2012 Vojtech Fried
+           2012 Google Inc.
