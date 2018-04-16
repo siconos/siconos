@@ -44,7 +44,7 @@ include(WindowsMechanicsSetup)
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
 list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-list(APPEND ${COMPONENT}_LINK_LIBRARIES numerics kernel)
+list(APPEND ${COMPONENT}_LINK_LIBRARIES numerics externals kernel)
 
 if(WITH_BULLET)
   list(APPEND ${COMPONENT}_DIRS src/collision/bullet)
