@@ -52,6 +52,10 @@ if(NOT WITH_MECHANISMS)
   list(APPEND ${COMPONENT}_python_excluded_tests
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_siconos_mechanisms.py)
 endif()
+if(NOT WITH_OCC)
+  list(APPEND ${COMPONENT}_python_excluded_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_occ_inertia.py)
+endif()
 build_python_tests()
 
 
