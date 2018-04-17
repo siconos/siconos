@@ -1280,14 +1280,13 @@ class VView(object):
 
         for shape_name in self.mappers.keys():
             if shape_name not in self.unfrozen_mappers:
-                print (shape_name)
                 self.unfrozen_mappers[shape_name] = next(self.mappers[shape_name])
 
     def init_contactor(self, contactor_instance_name, instance, instid):
         contactor = instance[contactor_instance_name]
         contact_shape_indx = None
         if 'shape_name' not in contactor.attrs:
-            print("Warning: old format: ctr.name must be ctr.shape_name for body {0}, contact {1}".format(instance_name, contactor_instance_name))
+            print("Warning: old format: ctr.name must be ctr.shape_name for contact {0}".format(contactor_instance_name))
             shape_attr_name='name'
         else:
             shape_attr_name='shape_name'
@@ -1417,7 +1416,7 @@ class VView(object):
             self.static_actors[instid] = list()
 
         for contactor_instance_name in instance:
-            self.init_contactor(contactor_instance_name, instance, instid)
+            self.init_contactor(contactor_instance_name, instance,  instid)
 
     def init_instances(self):
         for instance_name in self.io.instances():
@@ -1427,7 +1426,7 @@ class VView(object):
     def set_position_i(self, instance, q0, q1, q2, q3, q4, q5, q6):
         if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
            or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
-            print('Bad position for', instance, q0, q1, q2, q3, q4, q5, q6)
+            print('Bad position for object number', int(instance),' :',  q0, q1, q2, q3, q4, q5, q6)
             return
 
         q = Quaternion((q3, q4, q5, q6))
