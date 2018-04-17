@@ -5,7 +5,7 @@ __all__ = ['create_rocas', 'una_roca']
 import numpy, random, math
 from siconos.mechanics.collision.tools import Contactor
 from siconos.mechanics.collision.convexhull import ConvexHull
-
+import sys
 def una_roca(io, name, cname, roca_size=0.05, density=1, trans=None, tob=None):
     # Definition of an irregular polyhedron as a convex shape
 
@@ -43,6 +43,12 @@ def una_roca(io, name, cname, roca_size=0.05, density=1, trans=None, tob=None):
     # computation of inertia and volume
     inertia,volume=ch.inertia(ch.centroid())
 
+    # print('geometric inertia:', inertia)
+    # print('volume:', volume)
+    # print('mass:', volume*density)
+    # print('inertia:', inertia*density)
+
+
     io.add_object(name,
                  [Contactor(cname)],
                  translation=trans,
@@ -78,6 +84,9 @@ def un_cubo(io, name, cname, roca_size=0.05, density=1, trans=None, tob=None):
 
     # computation of inertia and volume
     inertia,volume=ch.inertia(ch.centroid())
+
+
+
 
     io.add_object(name,
                   [Contactor(cname)],
@@ -122,10 +131,13 @@ def create_rocas(io, n_layer=5, n_row=5, n_col=5, x_shift=3.0,
         sizes = (sizes - bottom)*scale + roca_size - rng/2*1.28
 
     k=0
+    print('Creation of the rocks')
     for n in range(n_layer):
         for i in range(n_row):
             for j in range(n_col):
                 # initial translation
+                if (k%100 == 0):
+                    print('.', end='', flush=True)
                 trans = [(i-n_row/2.0)*x_shift*roca_size,
                          (j-n_col/2.0)*x_shift*roca_size,
                          top]
