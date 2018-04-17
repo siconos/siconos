@@ -54,7 +54,7 @@ def create_chute(io, box_height = box_height,
                  box_width = box_width,
                  plane_thickness = plane_thickness,
                  scale = 1.0, trans = [0,0,0]):
-
+    print('Creation of the hopper')
     box_height *= scale
     box_length *= scale
     box_width *= scale
