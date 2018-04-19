@@ -27,11 +27,12 @@
 #include "fc3d_GlockerFischerBurmeister_functions.h"
 #include "numerics_verbose.h"
 #include "op3x3.h"
+#include "fc3d_compute_error.h"
 
 
 /* #define DEBUG_CHECK */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
+#define DEBUG_MESSAGES
+#define DEBUG_STDOUT
 #include "debug.h"
 #include <string.h>
 #include <float.h>
@@ -261,9 +262,9 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
   else if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID)
   {
     if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
-        options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_NSN_PLI_LOOP)
+        options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP)
     {
-      info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(localproblem, local_reaction, options);
+      info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(localproblem, local_reaction, options);
     }
     else
     {
@@ -832,7 +833,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
   iparam[SICONOS_IPARAM_ITER_DONE]=inew;
   return 1;
 }
-int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(FrictionContactProblem* localproblem, double * local_reaction, SolverOptions * options)
+int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem* localproblem, double * local_reaction, SolverOptions * options)
 {
 
   int info = -1;
@@ -843,12 +844,32 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(FrictionC
   int newton_iteration_number = options->iparam[SICONOS_IPARAM_MAX_ITER];
   int pli_iteration_number = options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER];
 
-  double current_error = 1e+24;
 
+  /* compute current_error */
 
-  /* Perform a first call to NSN solver to see if is succeeds quickly */
+  /* compute local_velocity */ 
+  double * local_q = localproblem->q;
+  double * local_M = localproblem->M->matrix0;
+  double worktmp[3];
+  double local_velocity[3] = {0., 0., 0.};
+  cpy3(local_q,local_velocity);
+  mvp3x3(local_M,local_reaction,local_velocity);
+  double current_error = 0.0;
+  fc3d_unitary_compute_and_add_error(local_reaction,local_velocity, localproblem->mu[0], &current_error, worktmp  );
+  DEBUG_PRINTF("fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid current_error= %e\n", current_error);
 
-  if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY ] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_NSN_PLI_LOOP)
+  if (!(options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
+        options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP||
+        options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY ] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_FALLBACK))
+    {
+      numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid","Unknown local nsn hybrid solver");
+    }
+  
+  
+  
+  /* Perform a first call to NSN solver to see if it succeeds quickly */
+  if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY ] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP||
+      options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY ] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_FALLBACK)
   {
     options->iparam[SICONOS_IPARAM_MAX_ITER]= newton_iteration_number;
     info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(localproblem,  local_reaction, options);
@@ -876,12 +897,97 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(FrictionC
       }
     }
   }
-
-  int loop = 0 ;
-  while (loop <  max_loop && current_error >= options->dparam[SICONOS_DPARAM_TOL] )
+  if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
+      options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP)
   {
-    loop++;
-    DEBUG_PRINTF("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:  loop = %i\n", loop);
+    int loop = 0 ;
+    while (loop <  max_loop && current_error >= options->dparam[SICONOS_DPARAM_TOL] )
+    {
+      loop++;
+      DEBUG_PRINTF("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:  loop = %i\n", loop);
+      /* step 1 : fixed point projection solver */
+      options->iparam[SICONOS_IPARAM_MAX_ITER]= pli_iteration_number;
+      info = fc3d_projectionOnConeWithLocalIteration_solve (localproblem, local_reaction, options);
+      DEBUG_PRINTF("fc3d_projectionOnConeWithLocalIteration_solve ended with error = %e\n", options->dparam[SICONOS_DPARAM_RESIDU]);
+      int nan2 = isnan(options->dparam[SICONOS_DPARAM_RESIDU]) || isinf(options->dparam[SICONOS_DPARAM_RESIDU]);
+      if (nan2) {
+        DEBUG_PRINTF("No hope for contact %d, setting to zero.\n",
+                     options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]);
+        local_reaction[0] = 0;
+        local_reaction[1] = 0;
+        local_reaction[2] = 0;
+      }
+      else
+      {
+        if (options->dparam[SICONOS_DPARAM_RESIDU] < current_error)
+        {
+          DEBUG_PRINTF("Improvement. Keep the new local solution of loop %i with error = %e\n", loop, options->dparam[SICONOS_DPARAM_RESIDU]);
+          current_error = options->dparam[SICONOS_DPARAM_RESIDU];
+          memcpy(local_reaction_backup, local_reaction, sizeof(double)*3);
+
+        }
+        else
+        {
+          DEBUG_PRINTF("No Improvement in loop %i. Get back to the local backup solution = %e\n", loop, current_error);
+          memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
+        }
+      }
+      if (current_error < options->dparam[SICONOS_DPARAM_TOL])
+      {
+        options->iparam[SICONOS_IPARAM_MAX_ITER]= newton_iteration_number;
+        break;
+      }
+      /* step 2 : nonsmooth Newton solver */
+      options->iparam[SICONOS_IPARAM_MAX_ITER]= newton_iteration_number;
+      info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(localproblem,  local_reaction, options);
+      DEBUG_PRINTF("fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped  ended with error = %e\n", options->dparam[SICONOS_DPARAM_RESIDU]);
+      int nan3 = isnan(options->dparam[SICONOS_DPARAM_RESIDU]) || isinf(options->dparam[SICONOS_DPARAM_RESIDU]);
+      if (nan3)
+      {
+        DEBUG_PRINTF("No Improvement. get back to the local backup solution = %e\n", current_error);
+        memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
+      }
+      else
+      {
+        if (options->dparam[SICONOS_DPARAM_RESIDU] <= options->dparam[SICONOS_DPARAM_TOL]
+            || options->dparam[SICONOS_DPARAM_RESIDU] <= current_error)
+        {
+          DEBUG_PRINTF("Improvement. Keep the new local solution of loop %i with error = %e\n", loop, options->dparam[SICONOS_DPARAM_RESIDU]);
+          current_error = options->dparam[SICONOS_DPARAM_RESIDU];
+          memcpy(local_reaction_backup, local_reaction, sizeof(double)*3);
+          /* getchar(); */
+        }
+        else
+        {
+          if (loop ==1){
+            DEBUG_PRINTF("No Improvement in loop %i. reset to zero local solution = %e\n", loop, current_error);
+            local_reaction[0] = 0.0;
+            local_reaction[1] = 0.0;
+            local_reaction[2] = 0.0;
+          }
+          else
+          {
+            DEBUG_PRINTF("No Improvement in loop %i. Get back to the local backup solution = %e\n", loop, current_error);
+            memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
+          }
+        }
+      }
+    }
+    
+    if (loop == max_loop && max_loop != 1)
+    {
+      if (verbose >0)
+      {
+        printf("Maximum number of loop (%i) in SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID has been reached for contact %i with error = %e \n",max_loop,options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER],current_error);
+      }
+    }
+    
+  }
+
+
+  // FAll Back solution
+  if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY ] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_FALLBACK)
+  {
     /* step 1 : fixed point projection solver */
     options->iparam[SICONOS_IPARAM_MAX_ITER]= pli_iteration_number;
     info = fc3d_projectionOnConeWithLocalIteration_solve (localproblem, local_reaction, options);
@@ -898,67 +1004,21 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(FrictionC
     {
       if (options->dparam[SICONOS_DPARAM_RESIDU] < current_error)
       {
-        DEBUG_PRINTF("Improvement. Keep the new local solution of loop %i with error = %e\n", loop, options->dparam[SICONOS_DPARAM_RESIDU]);
+        DEBUG_PRINTF("Improvement. Keep the new local solution with error = %e\n", options->dparam[SICONOS_DPARAM_RESIDU]);
         current_error = options->dparam[SICONOS_DPARAM_RESIDU];
         memcpy(local_reaction_backup, local_reaction, sizeof(double)*3);
 
       }
       else
       {
-        DEBUG_PRINTF("No Improvement in loop %i. Get back to the local backup solution = %e\n", loop, current_error);
+        DEBUG_PRINTF("No Improvement in loop %i. Get back to the local backup solution = %e\n",  current_error);
         memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
       }
     }
-    if (current_error < options->dparam[SICONOS_DPARAM_TOL])
-    {
-      options->iparam[SICONOS_IPARAM_MAX_ITER]= newton_iteration_number;
-      break;
-    }
-    /* step 2 : nonsmooth Newton solver */
     options->iparam[SICONOS_IPARAM_MAX_ITER]= newton_iteration_number;
-    info = fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(localproblem,  local_reaction, options);
-    DEBUG_PRINTF("fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped  ended with error = %e\n", options->dparam[SICONOS_DPARAM_RESIDU]);
-    int nan3 = isnan(options->dparam[SICONOS_DPARAM_RESIDU]) || isinf(options->dparam[SICONOS_DPARAM_RESIDU]);
-    if (nan3)
-    {
-      DEBUG_PRINTF("No Improvement. get back to the local backup solution = %e\n", current_error);
-      memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
-    }
-    else
-    {
-      if (options->dparam[SICONOS_DPARAM_RESIDU] <= options->dparam[SICONOS_DPARAM_TOL]
-          || options->dparam[SICONOS_DPARAM_RESIDU] <= current_error)
-      {
-        DEBUG_PRINTF("Improvement. Keep the new local solution of loop %i with error = %e\n", loop, options->dparam[SICONOS_DPARAM_RESIDU]);
-        current_error = options->dparam[SICONOS_DPARAM_RESIDU];
-        memcpy(local_reaction_backup, local_reaction, sizeof(double)*3);
-        /* getchar(); */
-      }
-      else
-      {
-        if (loop ==1){
-          DEBUG_PRINTF("No Improvement in loop %i. reset to zero local solution = %e\n", loop, current_error);
-          local_reaction[0] = 0.0;
-          local_reaction[1] = 0.0;
-          local_reaction[2] = 0.0;
-        }
-        else
-        {
-          DEBUG_PRINTF("No Improvement in loop %i. Get back to the local backup solution = %e\n", loop, current_error);
-          memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
-        }
-      }
-    }
   }
+  
 
-
-  if (loop == max_loop && max_loop != 1)
-  {
-    if (verbose >0)
-    {
-    printf("Maximum number of loop (%i) in SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID has been reached for contact %i with error = %e \n",max_loop,options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER],current_error);
-    }
-  }
 
 
   memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
@@ -1050,6 +1110,6 @@ int fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(SolverOptions* o
   options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] =
     SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
   options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP] = 1;
-  options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER] = 10;
+  options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER] = 100;
   return 0;
 }
