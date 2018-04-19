@@ -1901,6 +1901,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
             #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
             fcOptions.iparam[0] = 100  # Local solver iterations
+            fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
+            #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_FALLBACK
 
 
         osnspb.setNumericsVerboseMode(numerics_verbose)
