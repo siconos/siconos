@@ -88,7 +88,7 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
   int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem,
                                                             double * R, SolverOptions * options);
 
-  int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(FrictionContactProblem* localproblem,
+  int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem* localproblem,
                                                             double * local_reaction, SolverOptions* options);
 
   /* Set the default solver options for the ONECONTACT_NSN Solver
