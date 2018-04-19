@@ -1750,6 +1750,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             itermax=100000,
             tolerance=1e-8,
+            exit_tolerance=None,
             projection_itermax=20,
             projection_tolerance=1e-8,
             projection_tolerance_unilateral=1e-8,
@@ -1898,6 +1899,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # Friction one-contact solver options
             fcOptions = solverOptions.internalSolvers[fc_index]
             fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
+            #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
             fcOptions.iparam[0] = 100  # Local solver iterations
 
 
@@ -2056,8 +2058,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     print_verbose('  velocity min :',np.min(v))
                 #     #print(simulation.output(1,0))
 
-
+            precision = solverOptions.dparam[Numerics.SICONOS_DPARAM_RESIDU]
+            if (exit_tolerance is not None):
+                if (precision > exit_tolerance):
+                    print('precision is larger exit_tolerance')
+                    return False
             log(simulation.nextStep, with_timer)()
 
             print_verbose ('')
             k += 1
+        return True
