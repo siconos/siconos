@@ -31,8 +31,8 @@
 
 
 /* #define DEBUG_CHECK */
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
 #include "debug.h"
 #include <string.h>
 #include <float.h>
@@ -860,7 +860,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
 
   if (!(options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
         options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP||
-        options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY ] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_FALLBACK))
+        options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_FALLBACK))
     {
       numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid","Unknown local nsn hybrid solver");
     }
@@ -985,7 +985,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
   }
 
 
-  // FAll Back solution
+  // Fall Back solution
   if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY ] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_FALLBACK)
   {
     /* step 1 : fixed point projection solver */
@@ -1018,9 +1018,6 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
     options->iparam[SICONOS_IPARAM_MAX_ITER]= newton_iteration_number;
   }
   
-
-
-
   memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
   options->dparam[SICONOS_DPARAM_RESIDU] = current_error;
 
