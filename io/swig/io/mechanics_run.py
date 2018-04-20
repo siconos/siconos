@@ -1748,6 +1748,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             Newton_max_iter=20,
             set_external_forces=None,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
+            local_solver=Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID,
             itermax=100000,
             tolerance=1e-8,
             exit_tolerance=None,
@@ -1776,18 +1777,20 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
           t0 : starting time (default 0)
           T  : end time      (default 10)
           h  : timestep      (default 0.0005)
-          multiPointIterations : use bullet "multipoint iterations"
+          multiPoint_iterations : use bullet "multipoint iterations"
                                  (default True)
           theta : parameter for Moreau-Jean OSI (default 0.50001)
           Newton_max_iter : maximum number of iterations for
                           integrator Newton loop (default 20)
           set_external_forces : method for external forces
                                 (default earth gravity)
-          solver : default Numerics.SICONOS_FRICTION_3D_NSGS
-          itermax : maximum number of iteration for solver
-          tolerance : friction contact solver tolerance
+          solver : OneStepNsProblem solver  (default Numerics.SICONOS_FRICTION_3D_NSGS)
+          local_solver : OneStepNsProblem solver local solver (default Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID)
+          itermax : maximum number of iteration for solver (default 100000)
+          tolerance : friction contact solver tolerance (default 1e-8)
+          exit_tolerance : if not None, the simulation will stop if precision >= exit_tolerance (default None)
           numerics_verbose : set verbose mode in numerics
-          output_frequency :
+          output_frequency : (default 1)
           contact_index_set : index set from which contact point information is retrieved.
         """
         self.verbose = verbose
@@ -1853,7 +1856,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # (2) Time discretisation --
         timedisc=TimeDiscretisation(t0, h)
 
-        fc_index=0
+        
 
         if (osi == Kernel.MoreauJeanGOSI):
             if (friction_contact_trace == False) :
@@ -1870,9 +1873,30 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if (friction_contact_trace == False) :
                 if len(joints) > 0:
                     osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
+                    solverOptions = osnspb.numericsSolverOptions()
+                    # Friction one-contact solver options
                     fc_index=1
+                    fcOptions = solverOptions.internalSolvers[fc_index]
+                    fcOptions.iparam[0] = 100  # Local solver iterations
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
+                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
+                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP
                 else:
                     osnspb=FrictionContact(3, solver)
+                    solverOptions = osnspb.numericsSolverOptions()
+                    # Friction one-contact solver options
+                    fc_index=0
+                    fcOptions = solverOptions.internalSolvers[fc_index]
+                    fcOptions.iparam[0] = 100  # Local solver iterations
+                    fcOptions.solverId = local_solver
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
+                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
+                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP
+                    
 
             else:
                 from siconos.io.FrictionContactTrace import FrictionContactTrace
@@ -1885,6 +1909,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # Global solver options
         solverOptions = osnspb.numericsSolverOptions()
         solverOptions.iparam[0]=itermax
+        solverOptions.dparam[0] = tolerance
+
         # -- full error evaluation
         #solverOptions.iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
         # --  Adaptive error evaluation
@@ -1893,18 +1919,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # -- light error evaluation with full final
         solverOptions.iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
         solverOptions.iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
-        solverOptions.dparam[0] = tolerance
-
-        if (osi != Kernel.MoreauJeanGOSI):
-            # Friction one-contact solver options
-            fcOptions = solverOptions.internalSolvers[fc_index]
-            fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
-            #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP
-            #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
-            fcOptions.iparam[0] = 100  # Local solver iterations
-            #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
-            #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP
-          
+    
 
         osnspb.setNumericsVerboseMode(numerics_verbose)
 
