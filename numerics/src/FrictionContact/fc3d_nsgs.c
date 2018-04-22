@@ -88,10 +88,9 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
                                        ComputeErrorPtr* computeError,
                                        FrictionContactProblem* problem,
                                        FrictionContactProblem* localproblem,
-                                       SolverOptions * options,
-                                       SolverOptions * localsolver_options)
+                                       SolverOptions * options)
 {
-
+  SolverOptions * localsolver_options = options->internalSolvers;
   /** Connect to local solver */
   switch (localsolver_options->solverId)
   {
@@ -157,7 +156,25 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
     *update = &fc3d_onecontact_nonsmooth_Newton_AC_update;
     *freeSolver = (FreeSolverNSGSPtr)&fc3d_onecontact_nonsmooth_Newton_solvers_free;
     *computeError = (ComputeErrorPtr)&fc3d_compute_error;
-    fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
+    /* if (options->numberOfInternalSolvers ==1 ) */
+    /* { */
+    /*   /\* we increase the number of local solver options *\/ */
+    /*   options->numberOfInternalSolvers = 2; */
+    /*   SolverOptions * new_local_options =  (SolverOptions *)malloc(options->numberOfInternalSolvers* sizeof(SolverOptions)); */
+    /*   new_local_options[0].iparam=NULL; */
+    /*   new_local_options[1].iparam=NULL; */
+    /*   new_local_options[0].dparam=NULL; */
+    /*   new_local_options[1].dparam=NULL; */
+    /*   solver_options_nullify(&new_local_options[0]); */
+    /*   solver_options_nullify(&new_local_options[1]);       */
+    /*   solver_options_copy(localsolver_options, &new_local_options[0]); */
+    /*   fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(&new_local_options[1]); */
+    /*   free(localsolver_options); */
+    /*   options->internalSolvers = new_local_options; */
+    /*   localsolver_options = options->internalSolvers; */
+    /* } */
+    fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, &localsolver_options[0]);
+    /* fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem, &localsolver_options[1]); */
     break;
   }  /* Newton solver (Glocker-Fischer-Burmeister)*/
   case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
@@ -600,7 +617,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
   fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
                              (FreeSolverNSGSPtr *)&freeSolver, &computeError,
-                             problem, localproblem, options, localsolver_options);
+                             problem, localproblem, options);
 
   scontacts = allocShuffledContacts(problem, options);
 
