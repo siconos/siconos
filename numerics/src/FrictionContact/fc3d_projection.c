@@ -31,6 +31,11 @@
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
+
 /* Static variables */
 
 /* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in MGlobal and qGlobal */
@@ -48,7 +53,6 @@
 /* static double qLocal[3]; */
 /* static double mu_i = 0.0; */
 
-#define VERBOSE_DEBUG
 
 void fc3d_projection_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem)
 {
@@ -268,7 +272,7 @@ void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem * probl
 
 int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localproblem, double* reaction, SolverOptions* options)
 {
-  
+  DEBUG_BEGIN("fc3d_projectionOnConeWithLocalIteration_solve(...)\n");
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -295,10 +299,10 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
   /* double as = 1.0 / (MLocal[8] + mu_i); */
   /* at = an; */
   /* as = an; */
-  double rho=   options->dWork[options->iparam[4]] , rho_k;
-
-  /* printf ("saved rho = %14.7e\n",rho );  */
-  /* printf ("options->iparam[4] = %i\n",options->iparam[4] );  */
+  double rho=   options->dWork[options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]] , rho_k;
+  DEBUG_PRINTF (" Contact options->iparam[4] = %i\n",options->iparam[4] );
+  DEBUG_PRINTF("saved rho = %14.7e\n",rho );
+  assert(rho >0);
 
 
 
@@ -427,7 +431,9 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
   }
   options->dWork[options->iparam[4]] =rho;
   options->dparam[1] = localerror ;
-
+  DEBUG_PRINTF("final rho  =%e\n", rho);
+  
+  DEBUG_END("fc3d_projectionOnConeWithLocalIteration_solve(...)\n");
   if (localerror > localtolerance)
     return 1;
   return 0;
