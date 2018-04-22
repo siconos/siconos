@@ -110,9 +110,9 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
                                          4*nc * sizeof(double));
       options->dWorkSize = 4*nc ;
     }
-
   }
 
+  
 
   double  * rho;
   for (int contact =0; contact <nc ; contact++)
@@ -124,6 +124,7 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
     }
     else if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID)
     {
+      options->dWork[contact] = 1.0; // for PLI algorithm.
       rho = &options->dWork[3*contact+nc];
     }
     numerics_printf("fc3d_AC_initialize "" compute rho for contact = %i",contact);
