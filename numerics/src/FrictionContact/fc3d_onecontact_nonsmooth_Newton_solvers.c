@@ -863,7 +863,9 @@ static double compute_local_error(FrictionContactProblem* localproblem, double *
   mvp3x3(local_M,local_reaction,local_velocity);
   double current_error = 0.0;
   fc3d_unitary_compute_and_add_error(local_reaction,local_velocity, localproblem->mu[0], &current_error, worktmp  );
-  current_error /= norm_q;
+  current_error = sqrt(current_error);
+  if (fabs(norm_q) > DBL_EPSILON)
+    current_error /= norm_q;
   return current_error;
 }
 
@@ -952,14 +954,15 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
     keep_or_discard_solution(localproblem, local_reaction,
                              local_reaction_backup,  options,
                              & current_error);
-  }
+  
 
-  if (current_error <= options->dparam[SICONOS_DPARAM_TOL])
-  {
-    options->dparam[SICONOS_DPARAM_RESIDU] = current_error;
-    DEBUG_PRINTF("First call of NSN solver ends with current_error= %e\n", current_error);
-    DEBUG_END("fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid\n");
-    return info;
+    if (current_error <= options->dparam[SICONOS_DPARAM_TOL])
+    {
+      options->dparam[SICONOS_DPARAM_RESIDU] = current_error;
+      DEBUG_PRINTF("First call of NSN solver ends with current_error= %e\n", current_error);
+      DEBUG_END("fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid\n");
+      return info;
+    }
   }
 
   if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ||
