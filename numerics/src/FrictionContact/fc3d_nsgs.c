@@ -525,6 +525,7 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
     {
       *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
+      assert(*tolerance > 0.0 && "tolerance has to be positive");
       if (verbose > 0)
         printf("------- FC3D - NSGS - We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
       hasNotConverged = 1;
