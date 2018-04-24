@@ -21,7 +21,8 @@ else:
 
 ## Persistent configuration
 class VViewConfig(dict):
-    def __init__(self, d={'window_size': [600,600]}, filename=None):
+    def __init__(self, d={'background_color' : [0., 0. , 0.],
+                          'window_size': [600,600]}, filename=None):
         super(self.__class__, self).__init__(d)
         self.should_save_config = True
         if filename is not None:
@@ -1586,6 +1587,17 @@ class VView(object):
         slider_repres.SetTitleHeight(0.02)
         slider_repres.SetLabelHeight(0.02)
 
+        background_color = self.config.get('background_color', [.0,.0,.0])
+        reverse_background_color =numpy.ones(3) - background_color
+
+        if (numpy.linalg.norm(background_color-reverse_background_color) < 0.2):
+            reverse_background_color = numpy.ones(3)
+        slider_repres.GetSliderProperty().SetColor(*reverse_background_color)
+        slider_repres.GetTitleProperty().SetColor(*reverse_background_color);
+        slider_repres.GetLabelProperty().SetColor(*reverse_background_color);
+        slider_repres.GetTubeProperty().SetColor(*reverse_background_color);
+        slider_repres.GetCapProperty().SetColor(*reverse_background_color);
+
         slider_widget = vtk.vtkSliderWidget()
         slider_widget.SetInteractor(interactor)
         slider_widget.SetRepresentation(slider_repres)
@@ -1652,6 +1664,8 @@ class VView(object):
         # Set the occlusion ratio (initial value is 0.0, exact image)
         self.renderer.SetOcclusionRatio(0.1)
 
+
+        
         # Set the initial camera position and orientation if specified
         if self.opts.initial_camera[0] is not None:
             self.renderer.GetActiveCamera().SetPosition(*self.opts.initial_camera[0])
@@ -1688,6 +1702,7 @@ class VView(object):
         # hlight.SetPosition(0, 0, 500)
         hlight.SetLightTypeToHeadlight()
         self.renderer.AddLight(hlight)
+        self.renderer.SetBackground(*self.config.get('background_color', [.0,.0,.0]))
 
     def setup_charts(self):
         # Warning! numpy support offer a view on numpy array
@@ -1788,6 +1803,18 @@ class VView(object):
             slider_repres.SetLabelFormat("%3.4lf")
             slider_repres.SetTitleHeight(0.02)
             slider_repres.SetLabelHeight(0.02)
+            
+            background_color = self.config.get('background_color', [.0,.0,.0])
+            reverse_background_color =numpy.ones(3) - background_color
+
+            if (numpy.linalg.norm(background_color-reverse_background_color) < 0.2):
+                reverse_background_color = numpy.ones(3)
+
+            slider_repres.GetSliderProperty().SetColor(*reverse_background_color)
+            slider_repres.GetTitleProperty().SetColor(*reverse_background_color);
+            slider_repres.GetLabelProperty().SetColor(*reverse_background_color);
+            slider_repres.GetTubeProperty().SetColor(*reverse_background_color);
+            slider_repres.GetCapProperty().SetColor(*reverse_background_color);
 
             slider_widget = vtk.vtkSliderWidget()
             self.slider_widget = slider_widget
