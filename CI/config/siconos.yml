@@ -20,7 +20,7 @@ match:
 installer:
   any:
     fedora: dnf --setopt=deltarpm=false install -y
-    debian: apt-get install -y --force-yes
+    debian: apt-get install -y
     nixos/nix: nix-env -i
 
 updater:
@@ -447,7 +447,7 @@ pkgs:
   path:
     debian:
       command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib/x86_64-linux-gnu/libpath47.so &&
-               apt-get install -y --force-yes patchelf &&
+               apt-get install -y patchelf &&
                patchelf --replace-needed libgfortran.so.3 libm.so.6
     fedora:
       command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib64/libpath47.so &&
