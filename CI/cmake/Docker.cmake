@@ -78,7 +78,7 @@ macro(add_docker_targets)
   # Call print_command from mksenv.py to write Dockerfile
   execute_process(COMMAND ${DOCKER_MKSENV_COMMAND} --docker --distrib ${DOCKER_DISTRIB} --pkgs ${DOCKER_TEMPLATES} --split=${DOCKER_MKSENV_SPLIT} ${DOCKER_MKSENV_INPUT} OUTPUT_VARIABLE _contents_)
   file(APPEND ${GENERATED_DOCKER_FILE} ${_contents_})
-  file(APPEND ${GENERATED_DOCKER_FILE} "RUN mkdir -p /usr/local\n")
+  file(APPEND ${GENERATED_DOCKER_FILE} "RUN mkdir -p /usr/local")
   # ================== End of Dockerfile creation ==================
 
 
