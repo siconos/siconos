@@ -8,7 +8,7 @@ from siconos.io.mechanics_hdf5 import MechanicsHdf5
 
 if __name__=='__main__':
     ## Persistent configuration
-    config = VViewConfig({'window_size': [600,600]})
+    config = VViewConfig()
 
     # Load it immediately
     config.load_configuration()
