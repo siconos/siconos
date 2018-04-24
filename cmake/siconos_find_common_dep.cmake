@@ -272,8 +272,10 @@ endif()
 
 # -- Python bindings --
 if(WITH_PYTHON_WRAPPER)
-  compile_With(Numpy REQUIRED)
-  find_package(SWIG 2.0.7 REQUIRED)
+  compile_with(Numpy REQUIRED)
+  # trick (required with nix stuff) to force swig3 rather than swig2, if available.
+  find_program(SWIG_EXECUTABLE NAMES swig swig3.0 swig2.0 PATHS ENV PATH)
+  compile_with(SWIG 2.0.11 REQUIRED)
   include(${SWIG_USE_FILE})
   include(FindPythonModule)
   if(NOT NO_RUNTIME_BUILD_DEP)
