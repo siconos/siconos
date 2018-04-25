@@ -26,6 +26,11 @@
 #include <iostream>
 #include "NonSmoothDynamicalSystem.hpp"
 
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
+
 Actuator::Actuator(): _type(0), _id("none")
 {
 }
@@ -45,6 +50,7 @@ void Actuator::addSensorPtr(SP::ControlSensor newSensor)
 
 void Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 {
+  DEBUG_BEGIN("Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)\n")
   if (!_sensor)
   {
     RuntimeException::selfThrow("Actuator::initialize - No Sensor given to the Actuator");
@@ -75,6 +81,7 @@ void Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation
   }
 
   DSG0.u[dsgVD] = _u;
+  DEBUG_END("Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)\n")
 }
 
 void Actuator::setSizeu(unsigned size)

@@ -160,7 +160,8 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   RELATION::TYPES relationType = relation.getType();
   RELATION::SUBTYPES relationSubType = relation.getSubType();
-  workV[OneStepIntegrator::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
+  if(!workV[OneStepIntegrator::osnsp_rhs])
+    workV[OneStepIntegrator::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);

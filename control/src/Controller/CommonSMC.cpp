@@ -62,16 +62,16 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   {
     _DS_SMC.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
     std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setComputebFunction(NULL);
-  // We have to reset the _pluginb
-  SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
+    // We have to reset the _pluginb
+    SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
+    std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
     _DS_SMC.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
-  // We have to reset the _pluginb
-  SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
+    // We have to reset the _pluginb
+    SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
+    std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else
   {
@@ -80,7 +80,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   _DS_SMC->setNumber(999999);
   _DS_SMC->initMemory(1);
   _DS_SMC->swapInMemory();
-
+  //DEBUG_EXPR(_DS_SMC->display(););
 
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...

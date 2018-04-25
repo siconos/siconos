@@ -35,9 +35,9 @@
 
 //#define DEBUG_WHERE_MESSAGES
 
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 
 #include <debug.h>
 
@@ -62,7 +62,7 @@ ZeroOrderHoldOSI::ZeroOrderHoldOSI():
 
 void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
+  DEBUG_BEGIN("void ZeroOrderHoldOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
   VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
 
@@ -73,30 +73,53 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem
 
   if((dsType != Type::FirstOrderLinearDS) && (dsType != Type::FirstOrderLinearTIDS))
     RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - the DynamicalSystem does not have the right type");
+
+  const TimeDiscretisation& td = _simulation->eventsManager()->timeDiscretisation();
+
+
   unsigned int indxIter = 0;
   DynamicalSystemsGraph::AVIterator avi, aviend;
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
   if(!DSG0.Ad.hasKey(dsgVD))
   {
-    DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds, *_simulation->nonSmoothDynamicalSystem(), _simulation->eventsManager()->timeDiscretisation() ));
+    DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds,
+                                              *_simulation->nonSmoothDynamicalSystem(),
+                                              td));
+    DSG0.Ad[dsgVD]->setName("MatrixIntegrator for A part (Ad)");
+
+
     if(DSG0.Ad.at(dsgVD)->isConst())
+    {
+      DEBUG_PRINT("The system is assumed to be time invariant and is integrated \n");
       DSG0.Ad.at(dsgVD)->integrate();
+    }
+
   }
   else
     RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - Ad MatrixIntegrator is already initialized for ds the DS");
 
   if((static_cast<const FirstOrderLinearDS&>(*ds)).b())
   {
+    DEBUG_PRINT("The dynamical system has a b term \n");
     SP::SiconosMatrix E(new SimpleMatrix(ds->n(), ds->n(), 0));
     E->eye();
-    DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(new MatrixIntegrator(*ds,* _simulation->nonSmoothDynamicalSystem(),_simulation->eventsManager()->timeDiscretisation(), E)));
+    DSG0.AdInt.insert(dsgVD, SP::MatrixIntegrator(
+                        new MatrixIntegrator(*ds,
+                                             * _simulation->nonSmoothDynamicalSystem(),
+                                             td, E)));
+    DSG0.AdInt[dsgVD]->setName("MatrixIntegrator for E part (AdInt)");
     if(DSG0.AdInt.at(dsgVD)->isConst())
+    {
+      DEBUG_PRINT("The system is assumed to be time invariant and is integrated \n");
       DSG0.AdInt.at(dsgVD)->integrate();
+    }
   }
 
   // init extra term, usually to add control terms
   if(_extraAdditionalTerms)
-    _extraAdditionalTerms->init(DSG0, *_simulation->nonSmoothDynamicalSystem(), _simulation->eventsManager()->timeDiscretisation());
+    _extraAdditionalTerms->init(DSG0,
+                                *_simulation->nonSmoothDynamicalSystem(),
+                                td);
 
   // Now we search for an Interaction dedicated to control
   for(std11::tie(avi, aviend) = DSG0.adjacent_vertices(dsgVD);
@@ -118,19 +141,29 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem
         indxIter++;
         if(!relR.getPluginJacLg()->isPlugged())
         {
-          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds,*_simulation->nonSmoothDynamicalSystem(),_simulation->eventsManager()->timeDiscretisation(), relR.B()));
+          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds,*_simulation->nonSmoothDynamicalSystem(),
+                                                    _simulation->eventsManager()->timeDiscretisation(),
+                                                    relR.B()));
+          DSG0.Bd[dsgVD]->setName("MatrixIntegrator for input part (Bd) (unplugged version)");
           if(DSG0.Bd.at(dsgVD)->isConst())
+          {
             DSG0.Bd.at(dsgVD)->integrate();
+            DEBUG_PRINT("The system is assumed to be time invariant and is integrated \n");
+          }
         }
         else
         {
-          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, *_simulation->nonSmoothDynamicalSystem(),_simulation->eventsManager()->timeDiscretisation(), relR.getPluging(), inter.getSizeOfY()));
+          DSG0.Bd[dsgVD].reset(new MatrixIntegrator(*ds, *_simulation->nonSmoothDynamicalSystem(),
+                                                    _simulation->eventsManager()->timeDiscretisation(),
+                                                    relR.getPluging(),
+                                                    inter.getSizeOfY()));
+          DSG0.Bd[dsgVD]->setName("MatrixIntegrator for input part (Bd) (plugged version)");
         }
       }
       else
       {
         //        RuntimeException::selfThrow("ZeroOrderHoldOSI::initialize - DS linked with more that one iteraction");
-        DEBUG_PRINTF("number of iteraction attached to the process : %d\n", indxIter);
+        DEBUG_PRINTF("number of interaction attached to the process : %d\n", indxIter);
       }
     }
   }
@@ -145,27 +178,31 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 				     InteractionProperties& interProp,
 				     DynamicalSystemsGraph & DSG)
 {
+  DEBUG_BEGIN("ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(...)\n");
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-
-  interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+  if (!interProp.workVectors)
+  {
+    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors->resize(OneStepIntegrator::interaction_work_vector_of_vector_size);
+  }
+  if (!interProp.workBlockVectors)
+  {
+    interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+    interProp.workBlockVectors->resize(OneStepIntegrator::work_vector_of_block_vector_size);
+  }
 
   VectorOfVectors& workV = *interProp.workVectors;
-  workV.resize(OneStepIntegrator::interaction_work_vector_of_vector_size);
-  
   VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
-  workBlockV.resize(OneStepIntegrator::work_vector_of_block_vector_size);
 
   Relation &relation =  *inter.relation();
-  //relation.initializeWorkVectorsAndMatrices(inter, DSlink, workV, workM);
   RELATION::TYPES relationType = relation.getType();
   RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
 
-  
-  workV[OneStepIntegrator::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
+  if(!workV[OneStepIntegrator::osnsp_rhs])
+    workV[OneStepIntegrator::osnsp_rhs].reset(new SiconosVector(inter.getSizeOfY()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -208,20 +245,12 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   }
   else
     workBlockV[OneStepIntegrator::delta_x]->setVectorPtr(0,workVds1[OneStepIntegrator::delta_x_for_relation]);
+  DEBUG_END("ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(...)\n");
 }
 
 double ZeroOrderHoldOSI::computeResidu()
 {
   DEBUG_BEGIN("double ZeroOrderHoldOSI::computeResidu()\n");
-  // This function is used to compute the residu for each "MoreauJeanOSI-discretized" dynamical system.
-  // It then computes the norm of each of them and finally return the maximum
-  // value for those norms.
-  //
-  // The state values used are those saved in the DS, ie the last computed ones.
-  //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
-  //  $\mathcal R_{free}(x) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) $
-
-  // Operators computed at told have index i, and (i+1) at t.
 
   // Iteration through the set of Dynamical Systems.
   //
@@ -250,7 +279,7 @@ double ZeroOrderHoldOSI::computeResidu()
       RuntimeException::selfThrow("ZeroOrderHoldOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
   }
   DEBUG_END("double ZeroOrderHoldOSI::computeResidu()\n");
-  return maxResidu; 
+  return maxResidu;
 }
 
 void ZeroOrderHoldOSI::computeFreeState()
@@ -268,13 +297,12 @@ void ZeroOrderHoldOSI::computeFreeState()
   Type::Siconos dsType ; // Type of the current DS.
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  DEBUG_EXPR(display(););
+  //DEBUG_EXPR(display(););
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     dsType = Type::value(*ds); // Its type
-    DEBUG_EXPR(ds->display(););
     DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
     VectorOfVectors& workVectors = *DSG0.properties(dsgVD).workVectors;
 //    updateMatrices(dsDescr);
@@ -289,14 +317,26 @@ void ZeroOrderHoldOSI::computeFreeState()
 
       SiconosVector& xfree = *workVectors[OneStepIntegrator::free];
       DEBUG_EXPR(xfree.display(););
-      
+      DEBUG_EXPR(DSG0.Ad.at(dsgVD)->mat().display(););
+      DEBUG_EXPR(d.x()->display(););
       prod(DSG0.Ad.at(dsgVD)->mat(), *d.x(), xfree); // xfree = Ad*xold
       DEBUG_EXPR(xfree.display(););
-      if(d.b())
+
+
+      
+
+      
+      if(d.hasConstantB() && d.b())
       {
         assert(DSG0.AdInt.hasKey(dsgVD));
+        DEBUG_EXPR(DSG0.AdInt.at(dsgVD)->mat().display(););
+        DEBUG_EXPR(d.b()->display(););
         prod(DSG0.AdInt.at(dsgVD)->mat(), *d.b(), xfree, false); // xfree += AdInt*b
         DEBUG_EXPR(xfree.display(););
+      }
+      else
+      {
+        
       }
 
       // add extra term, possible control terms
@@ -309,14 +349,14 @@ void ZeroOrderHoldOSI::computeFreeState()
     }
     else
       RuntimeException::selfThrow("ZeroOrderHoldOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
-    
+
   }
   DEBUG_END("void ZeroOrderHoldOSI::computeFreeState()\n");
 }
 
 void ZeroOrderHoldOSI::prepareNewtonIteration(double time)
 {
-
+  DEBUG_BEGIN("ZeroOrderHoldOSI::prepareNewtonIteration(double time)\n");
   // DynamicalSystemsGraph::VIterator dsi, dsend;
 
   // for (std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
@@ -330,6 +370,7 @@ void ZeroOrderHoldOSI::prepareNewtonIteration(double time)
   {
     _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
+  DEBUG_END("ZeroOrderHoldOSI::prepareNewtonIteration(double time)\n");
 }
 
 

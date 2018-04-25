@@ -27,6 +27,11 @@
 #include "ControlSensor.hpp"
 #include "TimeDiscretisation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+//#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 LinearSMCOT2::LinearSMCOT2(SP::ControlSensor sensor): CommonSMC(LINEAR_SMC_OT2, sensor), _coeff(0.0)
 {
@@ -38,6 +43,7 @@ LinearSMCOT2::~LinearSMCOT2()
 
 void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s)
 {
+  DEBUG_BEGIN(" LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s)\n");
   if (!_Csurface)
   {
     RuntimeException::selfThrow("CommonSMC::initialize - you have to set either _Csurface or h(.) before initializing the Actuator");
@@ -83,7 +89,8 @@ void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simula
   {
     RuntimeException::selfThrow("LinearSMCOT2 is not yet implemented for system of type" + dsType);
   }
-
+  _DSPred->setNumber(999999);
+  _DSPhi->setNumber(999999);
   // We have to reset _pluginb
   // _DSPhi->setComputebFunction(NULL);
   // _DSPred->setComputebFunction(NULL);
@@ -127,11 +134,12 @@ void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simula
   _simulPred->associate(_PredOSI, _DSPred);
 
   _X = _sensor->yTk();
-
+  DEBUG_END(" LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s)\n");
 }
 
 void LinearSMCOT2::actuate()
 {
+  DEBUG_BEGIN("LinearSMCOT2::actuate()\n");
   double hCurrent = _tdPhi->currentTimeStep(_indx);
   // Get current value of the state
   // Update it
@@ -164,6 +172,9 @@ void LinearSMCOT2::actuate()
   // Compute \hat{x}_k
   _simulPred->advanceToEvent();
   _simulPred->processEvents();
+  DEBUG_EXPR(_Xhat->display(););
+  DEBUG_EXPR(_u->display(););
+  DEBUG_END("LinearSMCOT2::actuate()\n");
 }
 
 void LinearSMCOT2::setTimeDiscretisation(const TimeDiscretisation& td)

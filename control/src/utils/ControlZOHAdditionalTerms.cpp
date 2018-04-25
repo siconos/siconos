@@ -35,7 +35,7 @@ void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0,
                                      const NonSmoothDynamicalSystem & nsds,
                                      const TimeDiscretisation & td)
 {
-  DEBUG_BEGIN("void ControlZOHAdditionalTerms::init(...)\n")
+  DEBUG_BEGIN("void ControlZOHAdditionalTerms::init(...)\n");
   DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   for (std11::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
   {
@@ -43,21 +43,35 @@ void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0,
     if (DSG0.B.hasKey(*dsvi))
     {
       DSG0.Bd[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.B[*dsvi]));
+      DSG0.Bd[*dsvi]->setName("MatrixIntegrator for additional term part (Bd) (unplugged version)");
       if (DSG0.Bd.at(*dsvi)->isConst())
+      {
+        DEBUG_PRINT("The system is assumed to be constant and is integrated for computing Bd\n");
         DSG0.Bd.at(*dsvi)->integrate();
+      }
     }
     if (DSG0.L.hasKey(*dsvi))
     {
       DSG0.Ld[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.L[*dsvi]));
+      DSG0.Ld[*dsvi]->setName("MatrixIntegrator for additional term part (Ld) (unplugged version)");
       if (DSG0.Ld.at(*dsvi)->isConst())
+      {
+        DEBUG_PRINT("The system  is assumed to be constant and  is integrated for computing Ld\n");
         DSG0.Ld.at(*dsvi)->integrate();
+      }
     }
     if (DSG0.pluginB.hasKey(*dsvi))
+    {
       DSG0.Bd[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.pluginB[*dsvi], DSG0.u[*dsvi]->size()));
+      DSG0.Bd[*dsvi]->setName("MatrixIntegrator for additional term part (Bd) (plugged version)");
+    }
     if (DSG0.pluginL.hasKey(*dsvi))
+    {
       DSG0.Ld[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.pluginL[*dsvi], DSG0.e[*dsvi]->size()));
+      DSG0.Ld[*dsvi]->setName("MatrixIntegrator for additional term part (Ld) (unplugged version)");
+    }
   }
-  DEBUG_END("void ControlZOHAdditionalTerms::init(...)\n")
+  DEBUG_END("void ControlZOHAdditionalTerms::init(...)\n");
 }
 
 void ControlZOHAdditionalTerms::addSmoothTerms(DynamicalSystemsGraph& DSG0,
@@ -68,20 +82,21 @@ void ControlZOHAdditionalTerms::addSmoothTerms(DynamicalSystemsGraph& DSG0,
   // check whether we have a system with a control input
   if (DSG0.u.hasKey(dsgVD))
   {
-    DEBUG_PRINT("a system has a control input\n");
+    DEBUG_PRINT("The dynamical system has a control input\n");
     assert(DSG0.Bd.hasKey(dsgVD));
     if (!DSG0.Bd.at(dsgVD)->isConst())
     {
       DSG0.Bd.at(dsgVD)->integrate();
     }
     DEBUG_EXPR(DSG0.Bd.at(dsgVD)->mat().display());
-    DEBUG_EXPR(xfree.display());
     DEBUG_EXPR((*DSG0.u.at(dsgVD)).display());
     prod(DSG0.Bd.at(dsgVD)->mat(), *DSG0.u.at(dsgVD), xfree, false); // xfree += Bd*u
+    DEBUG_EXPR(xfree.display());
   }
   // check whether the DynamicalSystem is an Observer
   if (DSG0.e.hasKey(dsgVD))
   {
+    DEBUG_PRINT("The dynamical system is an Observer\n");
     assert(DSG0.Ld.hasKey(dsgVD));
     if (!DSG0.Ld.at(dsgVD)->isConst())
     {
