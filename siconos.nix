@@ -64,8 +64,7 @@ stdenv.mkDerivation rec {
     if test -e $out/nix-support/propagated-native-build-inputs; then
         ln -s $out/nix-support/propagated-native-build-inputs $out/nix-support/propagated-user-env-packages
     fi
-    echo "siconos" > $out/${pythonX.sitePackages}/${name}.pth
-  '';
+   '';
 
  
   meta = with stdenv.lib; {
