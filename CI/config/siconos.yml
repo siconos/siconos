@@ -237,19 +237,13 @@ pkgs:
       - python-matplotlib
       
     ubuntu-14.04:
-       - cmake-3.0.2
+      - cmake-3.0.2
 
+    fedora:
+      - cmake-3.0.2
 
   cmake-3.0.2:
-    ubuntu-12.04:
-      command:
-        wget http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz&&
-        tar xf cmake-3.0.2.tar.gz&&
-        cd cmake-3.0.2&&
-        ./configure&&
-        make install
-
-    ubuntu-14.04:
+    any:
       command:
         wget http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz&&
         tar xf cmake-3.0.2.tar.gz&&
