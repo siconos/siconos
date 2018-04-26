@@ -100,17 +100,17 @@ macro(finalize_doc)
       add_dependencies(doxyrest doxygen)
       add_dependencies(html doxyrest)
     endif()
+    # --- Generates conf.py, to describe sphinx setup ---
+    # !! Should be call after doxygen setup
+    # to have a propre DOXYGEN_INPUT value.
+    configure_file (
+      "${CMAKE_SOURCE_DIR}/docs/sphinx/conf.py.in"
+      "${CMAKE_BINARY_DIR}/docs/sphinx/conf.py" @ONLY)
+    configure_file(
+      "${DOXY_CONFIG}"
+      "${CMAKE_BINARY_DIR}/docs/sphinx/Doxyfile" @ONLY)
   endif()
   
-  # --- Generates conf.py, to describe sphinx setup ---
-  # !! Should be call after doxygen setup
-  # to have a propre DOXYGEN_INPUT value.
-  configure_file (
-    "${CMAKE_SOURCE_DIR}/docs/sphinx/conf.py.in"
-    "${CMAKE_BINARY_DIR}/docs/sphinx/conf.py" @ONLY)
-  configure_file(
-    "${DOXY_CONFIG}"
-    "${CMAKE_BINARY_DIR}/docs/sphinx/Doxyfile" @ONLY)
 
 
 endmacro()
