@@ -97,7 +97,7 @@ macro(add_docker_targets)
   # the options needed by ctest to prepare the pipeline (cmake, make ...)
   # like SITE, config file ...
   # If CI_OPTIONS is empty, default.cmake will be used.
-  set(CTEST_OPTIONS ${CI_OPTIONS};-DWITH_DOCKER=0;-VV)
+  set(CTEST_OPTIONS ${CI_OPTIONS};-DWITH_DOCKER=0;-V)
 
 
   foreach(_f ${CTEST_OPTIONS})
