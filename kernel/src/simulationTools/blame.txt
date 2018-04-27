@@ -1,7 +1,7 @@
 eac4bf285f kernel/src/simulationTools/D1MinusLinearOSIHalfExplicitAccelerationLevelOSI.cpp (Maurice Bremond  2016-05-13 17:46:05 +0200   1) /* Siconos is a program dedicated to modeling, simulation and control
 e560e663c0 Kernel/src/simulationTools/D1MinusLinearOSIExplicitAccelerationLevelOSI.cpp     (Vincent Acary    2014-09-12 16:34:48 -0300   2)  * of non smooth dynamical systems.
 e560e663c0 Kernel/src/simulationTools/D1MinusLinearOSIExplicitAccelerationLevelOSI.cpp     (Vincent Acary    2014-09-12 16:34:48 -0300   3)  *
-eac4bf285f kernel/src/simulationTools/D1MinusLinearOSIHalfExplicitAccelerationLevelOSI.cpp (Maurice Bremond  2016-05-13 17:46:05 +0200   4)  * Copyright 2016 INRIA.
+eac4bf285f kernel/src/simulationTools/D1MinusLinearOSIHalfExplicitAccelerationLevelOSI.cpp (Maurice Bremond  2016-05-13 17:46:05 +0200   4)  * Copyright 2018 INRIA.
 e560e663c0 Kernel/src/simulationTools/D1MinusLinearOSIExplicitAccelerationLevelOSI.cpp     (Vincent Acary    2014-09-12 16:34:48 -0300   5)  *
 eac4bf285f kernel/src/simulationTools/D1MinusLinearOSIHalfExplicitAccelerationLevelOSI.cpp (Maurice Bremond  2016-05-13 17:46:05 +0200   6)  * Licensed under the Apache License, Version 2.0 (the "License");
 eac4bf285f kernel/src/simulationTools/D1MinusLinearOSIHalfExplicitAccelerationLevelOSI.cpp (Maurice Bremond  2016-05-13 17:46:05 +0200   7)  * you may not use this file except in compliance with the License.
