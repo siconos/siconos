@@ -65,31 +65,42 @@ if(HAVE_SICONOS_MECHANICS)
 
     # automatic manpages using help2man
     if (HELP2MAN)
+      # all other components must be built first so that tools don't fail to run
+      set(_OTHER_COMPONENTS ${COMPONENTS})
+      list(REMOVE_ITEM _OTHER_COMPONENTS ${COMPONENT})
       set(MANPAGES_FOR_TOOLS)
+      include(tools4tests)
+      set_ldlibpath()
       macro (GEN_MANPAGE_FROM_HELP TOOL)
+        # set PYTHONPATH to swig dir, which contains "siconos", so
+        # that "import siconos.*" works
         add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/man/${TOOL}.1
-          COMMAND ${HELP2MAN}
-            -s1 -N -o  ${CMAKE_BINARY_DIR}/man/${TOOL}.1
+          COMMAND env PYTHONPATH=${SICONOS_SWIG_ROOT_DIR}/.. ${LDLIBPATH}
+            ${HELP2MAN} -s1 -N -o  ${CMAKE_BINARY_DIR}/man/${TOOL}.1
             --opt-include=${CMAKE_SOURCE_DIR}/man/${TOOL}.help2man
             --include=${CMAKE_SOURCE_DIR}/man/footer.help2man
             --no-discard-stderr
+            -n \"`sed '/Description: /!d\;s///' ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}`\"
             ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}
-          DEPENDS ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL}
-          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+          DEPENDS ${SICONOS_SWIG_ROOT_DIR}/io/${TOOL} ${_OTHER_COMPONENTS}
+          WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/..
           COMMENT "Generating man/${TOOL}.1 using help2man"
           )
         install(FILES ${CMAKE_BINARY_DIR}/man/${TOOL}.1 DESTINATION share/man/man1)
         list(APPEND MANPAGES_FOR_TOOLS ${CMAKE_BINARY_DIR}/man/${TOOL}.1)
       endmacro()
-      GEN_MANPAGE_FROM_HELP(siconos_vview)
-      GEN_MANPAGE_FROM_HELP(siconos_vexport)
-      GEN_MANPAGE_FROM_HELP(siconos_info)
-      GEN_MANPAGE_FROM_HELP(siconos_run)
-      GEN_MANPAGE_FROM_HELP(siconos_filter)
-      GEN_MANPAGE_FROM_HELP(siconos_compare)
+      list(FIND COMPONENTS mechanics _HAVE_MECHANICS)
+      if (NOT ${_HAVE_MECHANICS} EQUAL -1)
+        GEN_MANPAGE_FROM_HELP(siconos_vview)
+        GEN_MANPAGE_FROM_HELP(siconos_vexport)
+        GEN_MANPAGE_FROM_HELP(siconos_info)
+        GEN_MANPAGE_FROM_HELP(siconos_run)
+        GEN_MANPAGE_FROM_HELP(siconos_filter)
+        GEN_MANPAGE_FROM_HELP(siconos_compare)
       if (WITH_MECHANISMS)
         # needs --help
         # GEN_MANPAGE_FROM_HELP(siconos_pprocess)
+      endif()
       endif()
 
       add_custom_target(manpages ALL DEPENDS ${MANPAGES_FOR_TOOLS})

@@ -71,7 +71,19 @@ if(WITH_PYTHON_WRAPPER)
       SET(EMULATOR)
       SET(DRIVE_LETTER)
     ENDIF()
-    
+
+    # if a (DY)LD_LIBRARY_PATH is needed, export it
+    set(EXPORT_LDLIBPATH)
+    include(tools4tests)
+    set_ldlibpath()
+    if(LDLIBPATH)
+      # put quotes around the paths for export
+      string(REPLACE "=" ";" ENV_LDLIBPATH "${LDLIBPATH}")
+      list(GET ENV_LDLIBPATH 0 ENV_LDLIBPATH_NAME)
+      list(GET ENV_LDLIBPATH 1 ENV_LDLIBPATH_PATH)
+      set(EXPORT_LDLIBPATH "export ${ENV_LDLIBPATH_NAME}=\"${ENV_LDLIBPATH_PATH}\"")
+    endif()
+
     find_python_module(pytest REQUIRED)
     # -- Runner for tests --
     set(TESTS_RUNNER ${CMAKE_CURRENT_BINARY_DIR}/runtests.py CACHE INTERNAL "driver for python tests")

@@ -120,12 +120,11 @@ endif()#
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
-set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-list(APPEND ${COMPONENT}_LINK_LIBRARIES kernel)
-list(APPEND ${COMPONENT}_LINK_LIBRARIES numerics)
+list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
+list(APPEND ${COMPONENT}_LINK_LIBRARIES kernel numerics)
 if (CMAKE_SKIP_RPATH)
   # if no RPATH, then linking does not work for tests without specifying externals
-  set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} externals)
+  list(APPEND ${COMPONENT}_LINK_LIBRARIES externals)
 endif()
 
 if(HAVE_SICONOS_CONTROL)
@@ -136,14 +135,7 @@ if(HAVE_SICONOS_MECHANICS)
 endif()
 
 # remove debug & optimized inside LINK_LIBRARIES...
-foreach(_L ${${COMPONENT}_LINK_LIBRARIES})
-  if(NOT ${_L} STREQUAL "debug")
-    if(NOT ${_L} STREQUAL "optimized")
-      list(APPEND _LL ${_L})
-    endif()
-  endif()
-endforeach()
-set(${COMPONENT}_LINK_LIBRARIES ${_LL})
+list(REMOVE_ITEM ${COMPONENT}_LINK_LIBRARIES "debug" "optimized")
 
 # add dependencies for header generation
 add_custom_target(SerializersGeneration ALL

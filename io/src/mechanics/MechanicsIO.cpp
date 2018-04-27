@@ -149,7 +149,7 @@ void contactPointProcess(SiconosVector& answer,
                          const T& rel)
 {
 
-  answer.resize(14);
+  answer.resize(23);
   const SiconosVector& posa = *rel.pc1();
   const SiconosVector& posb = *rel.pc2();
   const SiconosVector& nc = *rel.nc();
@@ -177,7 +177,16 @@ void contactPointProcess(SiconosVector& answer,
   answer.setValue(10, cf(0));
   answer.setValue(11, cf(1));
   answer.setValue(12, cf(2));
-  answer.setValue(13, id);
+  answer.setValue(13,inter.y(0)->getValue(0));
+  answer.setValue(14,inter.y(0)->getValue(1));
+  answer.setValue(15,inter.y(0)->getValue(2));
+  answer.setValue(16,inter.y(1)->getValue(0));
+  answer.setValue(17,inter.y(1)->getValue(1));
+  answer.setValue(18,inter.y(1)->getValue(2));
+  answer.setValue(19,inter.lambda(1)->getValue(0));
+  answer.setValue(20,inter.lambda(1)->getValue(1));
+  answer.setValue(21,inter.lambda(1)->getValue(2));
+  answer.setValue(22, id);
 };
 
 template<>
@@ -307,7 +316,10 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
     InteractionsGraph& graph =
       *nsds.topology()->indexSet(index_set);
     unsigned int current_row;
-    result->resize(graph.vertices_number(), 14);
+    result->resize(graph.vertices_number(), 25);
+
+    SP::DynamicalSystem ds1;
+    SP::DynamicalSystem ds2;
     for(current_row=0, std11::tie(vi,viend) = graph.vertices();
         vi!=viend; ++vi)
     {
@@ -323,10 +335,21 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       ContactPointInspector inspector;
       inspector.inter = graph.bundle(*vi);
       graph.bundle(*vi)->relation()->accept(inspector);
-      const SiconosVector& data = inspector.answer;
-      if (data.size() == 14) result->setRow(current_row++, data);
+      SiconosVector& data = inspector.answer;
+      if (data.size() == 23)
+      {
+        data.resize(23+2);
+        ds1 = graph.properties(*vi).source;
+        ds2 = graph.properties(*vi).target;
+        data.setValue(23,ds1->number());
+        data.setValue(24,ds1->number());
+        result->setRow(current_row++, data);
+      }
     }
-    result->resize(current_row, 14);
+    result->resize(current_row, 25);
+
+
+
   }
   return result;
 }

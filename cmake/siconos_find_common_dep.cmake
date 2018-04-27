@@ -6,8 +6,8 @@
 
 # --- Blas Lapack ---
 # include(BlasLapackSetup)
-compile_with(BLAS REQUIRED)
-compile_with(LAPACK REQUIRED)
+compile_with(BLAS REQUIRED SICONOS_COMPONENTS kernel numerics externals)
+compile_with(LAPACK REQUIRED SICONOS_COMPONENTS kernel numerics externals)
 if(NOT BLAS_INCLUDE_DIRS)
   message(FATAL_ERROR "cannot find blas include directories")
 endif()
@@ -16,12 +16,12 @@ if(NOT LAPACK_INCLUDE_DIRS)
 endif()
 
 # --- Numerics optional dependencies ---
-compile_with(MlcpSimplex)
-compile_with(Pthread)
+compile_with(MlcpSimplex SICONOS_COMPONENTS numerics)
+compile_with(Pthread SICONOS_COMPONENTS numerics)
 IF(GAMS_DIR)
   SET(GAMS_C_API_FIND_REQUIRED TRUE)
 ENDIF(GAMS_DIR)
-COMPILE_WITH(GamsCApi)
+COMPILE_WITH(GamsCApi SICONOS_COMPONENTS numerics)
 IF(GAMSCAPI_FOUND)
   # needed for siconosconfig.h
   IF(NOT GAMS_DIR)
@@ -37,7 +37,11 @@ ENDIF(GAMSCAPI_FOUND)
 # --- SuiteSparse ---
 # Look for system-installed SuiteSparse/CSparse
 if (WITH_SYSTEM_SUITESPARSE)
-  compile_with(SuiteSparse COMPONENTS CXSparse)
+  compile_with(SuiteSparse COMPONENTS CXSparse
+    SICONOS_COMPONENTS externals numerics)
+  # Note on the above: The CSparse data structures are referred to in
+  # kernel, but the functions are only called from numerics, so it is
+  # not a link-time dependency for kernel.
   if (NOT SuiteSparse_FOUND OR NOT SuiteSparse_CXSparse_FOUND)
     set(_sys_CXSparse FALSE)
     message(STATUS "System SuiteSparse was requested (WITH_SYSTEM_SUITESPARSE=${WITH_SYSTEM_SUITESPARSE})\ 
@@ -48,19 +52,32 @@ if (WITH_SYSTEM_SUITESPARSE)
   set(USE_SYSTEM_SUITESPARSE ${_sys_CXSparse} CACHE INTERNAL "flag to check to systemwide SuiteSparse install")
 endif()
 
-compile_with(PathFerris)
-compile_with(PathVI)
-compile_with(LpSolve)
+# --- Other solvers ---
+compile_with(PathFerris SICONOS_COMPONENTS numerics)
+compile_with(PathVI SICONOS_COMPONENTS numerics)
+compile_with(LpSolve SICONOS_COMPONENTS numerics)
 if(LpSolve_FOUND)
   set(HAS_ONE_LP_SOLVER TRUE)
   set(HAS_EXTREME_POINT_ALGO TRUE)
   set(WITH_LPSOLVE TRUE)
 endif(LpSolve_FOUND)
 
+# --- Sort ---
+if(EXISTS "${CMAKE_SOURCE_DIR}/externals/sort/sort.h")
+  if(EXISTS "${CMAKE_SOURCE_DIR}/externals/sort/sort_common.h")
+    set(HAVE_SORT TRUE)
+  endif()
+endif()
+
+# --- ql0001 ---
+if(EXISTS "${CMAKE_SOURCE_DIR}/externals/optim_misc/ql0001/ql0001.f")
+  set(HAVE_QL0001 TRUE)
+endif()
+
 # --- Mumps ---
 if(WITH_MUMPS)
   if(NOT IDONTWANTMPI)
-    compile_with(MPI REQUIRED)
+    compile_with(MPI REQUIRED SICONOS_COMPONENTS numerics)
   endif(NOT IDONTWANTMPI)
   if(MPI_FOUND)
     set(HAVE_MPI TRUE)
@@ -70,12 +87,12 @@ if(WITH_MUMPS)
       get_filename_component(MUMPS_LIBRARY_DIRECTORY "${MPI_LIBRARY}" PATH)
     endif()
   endif()
-  compile_with(MUMPS REQUIRED)
+  compile_with(MUMPS REQUIRED SICONOS_COMPONENTS numerics)
 endif()
 
 # --- UMFPACK ---
 if(WITH_UMFPACK)
-  compile_with(Umfpack REQUIRED)
+  compile_with(Umfpack REQUIRED SICONOS_COMPONENTS numerics)
 endif()
 
 # --- SUPERLU ---
@@ -84,32 +101,35 @@ IF (WITH_SUPERLU AND WITH_SUPERLU_MT)
 ENDIF()
 
 if(WITH_SUPERLU)
-  compile_with(SuperLU REQUIRED)
+  compile_with(SuperLU REQUIRED SICONOS_COMPONENTS numerics)
 endif()
 
 if(WITH_SUPERLU_MT)
-  compile_with(SuperLU_MT REQUIRED)
+  compile_with(SuperLU_MT REQUIRED SICONOS_COMPONENTS numerics)
 endif()
 
 # not ready yet
 #if(WITH_SUPERLU_dist)
-#  compile_with(SuperLU_dist REQUIRED)
+#  compile_with(SuperLU_dist REQUIRED SICONOS_COMPONENTS numerics)
 #endif()
 
 # --- Fclib ---
 IF(WITH_FCLIB)
-  COMPILE_WITH(FCLIB REQUIRED)
+  COMPILE_WITH(FCLIB REQUIRED SICONOS_COMPONENTS numerics)
   IF(FCLib_FCLIB_HEADER_ONLY)
-    COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL)
+    COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL SICONOS_COMPONENTS numerics )
   ELSE()
     APPEND_C_FLAGS("-DFCLIB_NOT_HEADER_ONLY")
 ENDIF()
   IF(FCLIB_NOTFOUND)
     # try the package stuff
     # need FCLib_DIR !!
-    COMPILE_WITH(FCLib 1.0 REQUIRED)
+    COMPILE_WITH(FCLib 1.0 REQUIRED SICONOS_COMPONENTS numerics)
   ENDIF()
 ENDIF()
+
+# GMP
+compile_with(GMP REQUIRED SICONOS_COMPONENTS kernel)
 
 IF(WITH_CXX)
   # --- Boost ---
@@ -125,7 +145,7 @@ ENDIF()
 # --- Bullet ---
 SET(BULLET_PATHS "")
 IF(WITH_BULLET)
-  COMPILE_WITH(Bullet REQUIRED ONLY mechanics)
+  COMPILE_WITH(Bullet REQUIRED SICONOS_COMPONENTS mechanics)
   IF(BULLET_FOUND)
     SET(SICONOS_HAVE_BULLET TRUE)
     MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
@@ -155,36 +175,12 @@ IF(WITH_BULLET)
   ENDIF(BULLET_FOUND)
 ENDIF(WITH_BULLET)
 
-# --- OCC ---
-IF(WITH_OCC)
-  if(NOT WITH_MECHANISMS)
-    COMPILE_WITH(OCE 0.15 REQUIRED ONLY mechanics)
-    SET(SICONOS_HAVE_OCC TRUE)
-  endif()
-  if(OCE_VERSION VERSION_LESS 0.18)
-    # DRAWEXE link fails on some systems and must be removed.
-    # MESSAGE(STATUS "DRAWEXE link fails on some systems is removed.")
-    list(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE)
-    list(REMOVE_ITEM mechanics_LINK_LIBRARIES DRAWEXE)
-    set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-    set(mechanics_LINK_LIBRARIES ${mechanics_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-  endif()
-ENDIF()
-
 # --- Mechanisms (Saladyn?) ---
-IF(WITH_MECHANISMS)
+IF(WITH_MECHANISMS OR WITH_OCC)
   SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
-
   message(STATUS "Searching for OCE ....")
-  compile_with(OCE COMPONENTS ${OCE_TOOLKITS} ONLY mechanics)
-  if(OCE_VERSION VERSION_LESS 0.18)
-    # DRAWEXE link fails on some systems and must be removed.
-    #MESSAGE(STATUS "DRAWEXE link fails on some systems is removed.")
-    list(REMOVE_ITEM mechanics_LINK_LIBRARIES DRAWEXE)
-    list(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE)
-    set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-    set(mechanics_LINK_LIBRARIES ${mechanics_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-  endif()
+  compile_with(OCE 0.15 REQUIRED COMPONENTS ${OCE_TOOLKITS}
+    SICONOS_COMPONENTS mechanics)
   if(OCE_FOUND)
     message(STATUS "Found OCE version ${OCE_VERSION}")
     if(NOT OCE_ALL_FOUND)
@@ -195,16 +191,15 @@ IF(WITH_MECHANISMS)
   if(OCE_FOUND)
     # Include files reside in ${OCE_INCLUDE_DIRS};
     #    include_directories(${OCE_INCLUDE_DIRS})
-    # We do not need library path, they will be automatically imported.
+    # We do not need library path, they will be automatically imported
   else(OCE_FOUND)
     # OCE not found; either it is not found and user
     # has to set OCE_DIR to the directory containing
     # OCEConfig.cmake, or OCE is not installed and we
     # try to find OpenCascade files.
     message(STATUS "OCE not found.  Try to find OpenCascade files.")
-
     FIND_PACKAGE(OpenCASCADE REQUIRED COMPONENTS ${OCE_TOOLKITS})
-    COMPILE_WITH(OpenCASCADE)
+    COMPILE_WITH(OpenCASCADE SICONOS_COMPONENTS mechanics)
 
     IF(OpenCASCADE_FOUND)
       message(STATUS "OpenCASCADE_INCLUDE_DIR = " ${OpenCASCADE_INCLUDE_DIR})
@@ -214,17 +209,30 @@ IF(WITH_MECHANISMS)
     ELSE(OpenCASCADE_FOUND)
       MESSAGE(STATUS "OpenCascade Libraries not found in standard paths.")
     ENDIF(OpenCASCADE_FOUND)
-
   endif(OCE_FOUND)
   SET(HAVE_MECHANISMS TRUE)
   if(WITH_OCC)
     SET(SICONOS_HAVE_OCC TRUE)
   endif()
-endif()
+  if(OCE_VERSION VERSION_LESS 0.18)
+    MESSAGE(STATUS " mechanics_LINK_LIBRARIES:" "${mechanics_LINK_LIBRARIES}")
+    SET(UNDEED_OCE_TOOLKITS "DRAWEXE" "TKDraw" "TKTopTest" "TKViewerTest" "TKXSDRAW" "TKDCAF" "TKXDEDRAW" "TKTObjDRAW" "TKQADraw"   )
+    FOREACH(_T ${UNDEED_OCE_TOOLKITS})
+      MESSAGE(STATUS "Unneeded ${_T} oce toolkit provokes issues since it not installed on some systems. We remove it")
+      list(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE ${_T})
+      list(REMOVE_ITEM mechanics_LINK_LIBRARIES ${_T})
+
+    ENDFOREACH()
+    set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
+    set(mechanics_LINK_LIBRARIES ${mechanics_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
+    MESSAGE(STATUS " mechanics_LINK_LIBRARIES:" "${mechanics_LINK_LIBRARIES}")
+  ENDIF()
+ENDIF()
+
 
 # -- VTK --
 IF(WITH_VTK)
-  COMPILE_WITH(VTK)
+  COMPILE_WITH(VTK SICONOS_COMPONENTS mechanics)
   IF(VTK_FOUND)
     MESSAGE(STATUS "Found vtk-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}")
     SET(SICONOS_HAVE_VTK TRUE)
@@ -237,14 +245,14 @@ ENDIF()
 # -- FreeCAD --
 # For python bindings
 if(WITH_FREECAD)
-  compile_with(FreeCAD COMPONENTS Part REQUIRED)
+  compile_with(FreeCAD COMPONENTS Part REQUIRED SICONOS_COMPONENTS mechanics)
 endif()
 
 
 # -- HDF5 --
 # For logging in Numerics
 IF(WITH_HDF5)
-  COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL)
+  COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL SICONOS_COMPONENTS numerics)
 ENDIF(WITH_HDF5)
 
 #
@@ -252,7 +260,8 @@ ENDIF(WITH_HDF5)
 #
 include(serialization_vector_test)
 if(WITH_SERIALIZATION)
-  COMPILE_WITH(Boost 1.47 COMPONENTS serialization filesystem REQUIRED)
+  COMPILE_WITH(Boost 1.47
+    COMPONENTS serialization filesystem REQUIRED)
   if (Boost_VERSION GREATER 106100)
     # If boost is recent enough, prefer system boost serialization to
     # the one included in "externals/boost_serialization".

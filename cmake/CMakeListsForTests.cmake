@@ -3,6 +3,8 @@
 # built from @CMAKE_SOURCE_DIR@/cmake/CMakeListsForTests.cmake
 SET(SOURCE_DIR @CMAKE_CURRENT_SOURCE_DIR@/@_CURRENT_TEST_DIRECTORY@)
 
+set_ldlibpath()
+
 # Search for reference files and copy them to binary dir
 FILE(GLOB TESTS_REF ${SOURCE_DIR}/*.ref)
 FOREACH(_F ${TESTS_REF})
@@ -25,34 +27,6 @@ if(CMAKE_SYSTEM_NAME MATCHES Windows)
     set(COMPONENT_BIN_DIR "${COMPONENT_BIN_DIR}\;${BASE_BIN_DIR}/${_C}")
   endforeach()
   SET(COMPONENT_PATH "${COMPONENT_BIN_DIR}\;@ENV_PATH@")
-endif()
-
-# In certain cases, ex. no rpath, or running tests with plugins,
-# libraries cannot be found at link or test time, so we add the
-# LD_LIBRARY_PATH variable.
-if (CMAKE_SKIP_RPATH)
-  SET(LDLIBPATH "")
-  FOREACH(_C ${COMPONENTS})
-    LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
-  ENDFOREACH()
-  if (NOT CMAKE_SYSTEM_NAME MATCHES WINDOWS)
-    STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
-  endif()
-  if (CMAKE_SYSTEM_NAME MATCHES APPLE)
-    if ($ENV{DYLD_LIBRARY_PATH})
-      set(LDLIBPATH "${LDLIBPATH}:$ENV{DYLD_LIBRARY_PATH}")
-    endif()
-    SET(LDLIBPATH "DYLD_LIBRARY_PATH=${LDLIBPATH}")
-  else()
-    if (CMAKE_SYSTEM_NAME MATCHES WINDOWS)
-      SET(LDLIBPATH "Path=${LDLIBPATH};$ENV{Path}")
-    else()
-      if ($ENV{LD_LIBRARY_PATH})
-        set(LDLIBPATH "${LDLIBPATH}:$ENV{LD_LIBRARY_PATH}")
-      endif()
-      SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
-    endif()
-  endif()
 endif()
 
 FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
@@ -116,17 +90,6 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   add_dependencies(${_EXE} @COMPONENT@)
   target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT@)
   target_link_libraries(${_EXE} ${PRIVATE} ${@COMPONENT@_LINK_LIBRARIES})
-
-  # if no rpath, tests cannot find the libraries and build fails, so
-  # we add the LD_LIBRARY_PATH variable
-  if (CMAKE_SKIP_RPATH)
-    SET(LDLIBPATH "")
-    FOREACH(_C ${COMPONENTS})
-      LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
-    ENDFOREACH()
-    STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
-    SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
-  endif()
 
   set(COMPONENT_TEST_LIB_ @COMPONENT_TEST_LIB@)
   if(COMPONENT_TEST_LIB_)
@@ -220,7 +183,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
     if (LDLIBPATH)
       SET_TARGET_PROPERTIES(${_EXE} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "${ENV_PPTY}")
+      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
     endif()
 
     IF(USE_SANITIZER MATCHES "asan")

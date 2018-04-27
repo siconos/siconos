@@ -18,7 +18,6 @@ void cadmbtb_distanceFaceFace(const OccContactFace& csh1,
                               Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                               Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
                               Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                              bool normalFromFace1,
                               Standard_Real& MinDist);
 
 void cadmbtb_distanceFaceEdge(
@@ -26,7 +25,6 @@ void cadmbtb_distanceFaceEdge(
   Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
   Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
   Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-  bool normalFromFace1,
   Standard_Real& MinDist);
 
 #endif

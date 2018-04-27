@@ -131,11 +131,17 @@ ENDMACRO(PRINT_VAR V)
 # with the same 'options' as find_package
 # (see http://www.cmake.org/cmake/help/v3.0/command/find_package.html?highlight=find_package)
 MACRO(COMPILE_WITH)
-  
-  set(options REQUIRED)
-  set(oneValueArgs ONLY)
-  set(multiValueArgs COMPONENTS)
-  
+
+  # Options for this command:
+  set(options REQUIRED)          # REQUIRED is a boolean flag (present or not)
+  set(oneValueArgs)              # there are no arguments that take only one value
+  set(multiValueArgs             # arguments that take multiple values:
+    COMPONENTS                   # - which components of the requested package are needed
+    SICONOS_COMPONENTS           # - to which Siconos components does this dependency apply
+    )
+  # If SICONOS_COMPONENTS is not specified, it is assumed it is a
+  # dependency for all Siconos components
+
   cmake_parse_arguments(COMPILE_WITH "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   set(_NAME)
@@ -208,10 +214,12 @@ MACRO(COMPILE_WITH)
   if(_LINK_LIBRARIES)
     list(REMOVE_DUPLICATES _LINK_LIBRARIES)
   endif()
-  if(COMPILE_WITH_ONLY)
-    set(_sico_component ${COMPILE_WITH_ONLY})
-    set(${_sico_component}_LINK_LIBRARIES ${${_sico_component}_LINK_LIBRARIES}
-      ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries for ${_sico_component}.")
+  if(COMPILE_WITH_SICONOS_COMPONENTS)
+    FOREACH(_O ${COMPILE_WITH_SICONOS_COMPONENTS})
+      set(_sico_component ${_O})
+      set(${_sico_component}_LINK_LIBRARIES ${${_sico_component}_LINK_LIBRARIES}
+        ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries for ${_sico_component}.")
+    ENDFOREACH()
   else()
     set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES}
       ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries.")

@@ -151,7 +151,6 @@ void cadmbtb_distanceFaceFace(const OccContactFace& csh1,
                               Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                               Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
                               Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                              bool normalFromFace1,
                               Standard_Real& MinDist)
 {
   // need the 2 sp pointers to keep memory
@@ -225,48 +224,22 @@ void cadmbtb_distanceFaceFace(const OccContactFace& csh1,
   DEBUG_PRINTF("mode=%d and min value at u=%e,v=%e f=%e\n",mode,x[0],x[1],sqrt(f));
   DEBUG_PRINTF("_CADMBTB_getMinDistanceFaceFace_using_n2qn1 dist = %e\n",sqrt(f));
 
-  double sqrt_f=sqrt(f);
-  if(MinDist>sqrt_f)
-  {
-    MinDist=sqrt_f;
+  MinDist=sqrt(f);
 
-    if(normalFromFace1)
-    {
-      gp_Dir normal = cadmbtb_FaceNormal(face1,x[0],x[1]);
-      normal.Coord(nX,nY,nZ);
-      //check orientation of normal from face 1
-      gp_Pnt aPaux1 = cadmbtb_FacePoint(face1,x[0],x[1]);
-      aPaux1.Coord(X1, Y1, Z1);
-      gp_Pnt aPaux2 = cadmbtb_FacePoint(face2,x[2],x[3]);
-      aPaux2.Coord(X2, Y2, Z2);
-      if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)>0)
-        normal.Reverse();
-      normal.Coord(nX,nY,nZ);
-    }
-    else
-    {
-      gp_Dir normal = cadmbtb_FaceNormal(face2,x[2],x[3]);
-      normal.Coord(nX,nY,nZ);
-      /**check orientation of normal from face 2**/
-      gp_Pnt aPaux1 = cadmbtb_FacePoint(face1,x[0],x[1]);
-      aPaux1.Coord(X1, Y1, Z1);
-      gp_Pnt aPaux2 = cadmbtb_FacePoint(face2,x[2],x[3]);
-      aPaux2.Coord(X2, Y2, Z2);
-      if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)<0)
-      { normal.Reverse();
-        normal.Coord(nX,nY,nZ);}
+  gp_Dir normal = cadmbtb_FaceNormal(face2,x[2],x[3]);
+  normal.Coord(nX,nY,nZ);
 
-
-      nX=-nX;
-      nY=-nY;
-      nZ=-nZ;
-    }
-
-  }
+  /**check orientation of normal from face 2**/
   gp_Pnt aPaux1 = cadmbtb_FacePoint(face1,x[0],x[1]);
   aPaux1.Coord(X1, Y1, Z1);
   gp_Pnt aPaux2 = cadmbtb_FacePoint(face2,x[2],x[3]);
   aPaux2.Coord(X2, Y2, Z2);
+  if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)<0)
+  {
+    normal.Reverse();
+  }
+  normal.Coord(nX,nY,nZ);
+
 }
 
 
@@ -277,7 +250,6 @@ void cadmbtb_distanceFaceEdge(
   Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
   Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
   Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-  bool normalFromFace1,
   Standard_Real& MinDist)
 {
 
@@ -288,15 +260,15 @@ void cadmbtb_distanceFaceEdge(
   const TopoDS_Face& face1 = *pface1;
   const TopoDS_Edge& edge2 = *pedge2;
 
-  int n = 4;
-  double x[4];
+  int n = 3;
+  double x[3];
   double f = 0;
-  double g[4];
-  double dxim[4];
+  double g[3];
+  double dxim[3];
   double df1 =0;
   double epsabs=0;
-  double binf[4];
-  double bsup[4];
+  double binf[3];
+  double bsup[3];
   double rz[4*(4+9)/2 + 1];
   int iz[2*4+1];
 
@@ -306,20 +278,18 @@ void cadmbtb_distanceFaceEdge(
   bsup[1] = csh1.bsup1[1];
 
   binf[2] = csh2.binf1[0];
-  binf[3] = csh2.binf1[1];
   bsup[2] = csh2.bsup1[0];
-  bsup[3] = csh2.bsup1[1];
 
-  /*Because of the case of cylinder, we chose to start from the midle point.*/
+  dxim[0]=1e-6*(bsup[0]-binf[0]);
+  dxim[1]=1e-6*(bsup[1]-binf[1]);
+  dxim[2]=1e-6*(bsup[2]-binf[2]);
+
   x[0]=(binf[0]+bsup[0])*0.5;
   x[1]=(binf[1]+bsup[1])*0.5;
   x[2]=(binf[2]+bsup[2])*0.5;
-  // x[3]=(binf[3]+bsup[3])*0.5;
   cadmbtb_myf_FaceEdge(x,&f,g,face1,edge2);
 
   df1=f;
-  /*n=3 because of Face, edge.*/
-  n=3;
 
   int mode =1;
   int imp=0;
@@ -345,28 +315,28 @@ void cadmbtb_distanceFaceEdge(
 #endif
   }
 
-  double sqrt_f=sqrt(f);
+  MinDist=sqrt(f);
 
-  DEBUG_PRINTF("mode=%d and min value at u=%e,v=%e f=%e\n",mode,x[0],x[1],sqrt_f);
-  DEBUG_PRINTF("cadmbtb_getMinDistanceFaceEdge_using_n2qn1 dist = %e\n",sqrt_f);
+  DEBUG_PRINTF("mode=%d and min value at u=%e,v=%e f=%e\n",mode,x[0],x[1],MinDist);
+  DEBUG_PRINTF("cadmbtb_getMinDistanceFaceEdge_using_n2qn1 dist = %e\n",MinDist);
 
-  if(MinDist>sqrt_f)
+  /** V.A. Normal is always computed form the surface which is safer  */
+  gp_Dir normal = cadmbtb_FaceNormal(face1,x[0],x[1]);
+  gp_Pnt aPaux = cadmbtb_FacePoint(face1,x[0],x[1]);
+
+  /** Coordinate of the contact point on the surface */
+  aPaux.Coord(X1, Y1, Z1);
+  normal.Coord(nX,nY,nZ);
+
+  /** Coordinate of the contact point on the edge  */
+  aPaux = cadmbtb_EdgePoint(edge2,x[2]);
+  aPaux.Coord(X2, Y2, Z2);
+
+  /** check orientation of normal*/
+  if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)>0)
   {
-    /** V.A. Normal is always computed form the surface which is safer  */
-    MinDist=sqrt_f;
-    gp_Dir normal = cadmbtb_FaceNormal(face1,x[0],x[1]);
-    gp_Pnt aPaux = cadmbtb_FacePoint(face1,x[0],x[1]);
-    /** Coodinate of the contact point on the surface */
-    aPaux.Coord(X1, Y1, Z1);
+    normal.Reverse();
     normal.Coord(nX,nY,nZ);
-    /** Coordinate of the contact point on the edge  */
-    aPaux = cadmbtb_EdgePoint(edge2,x[2]);
-    aPaux.Coord(X2, Y2, Z2);
-    /** check orientation of normal*/
-    if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)>0)
-    {
-      normal.Reverse();
-      normal.Coord(nX,nY,nZ);
-    }
   }
+
 }

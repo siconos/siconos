@@ -22,7 +22,66 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 
 --------------------------------------------------------------------------------
-  v4.1.0 (in development branch siconos/master)
+  v4.2.0 (in development branch siconos/master)
+--------------------------------------------------------------------------------
+Main changes:
+	[...]
+
+	* [kernel] remove Model class
+
+
+	* [kernel,mechanics,control,io] new API for the initilaization of simulation.
+	It is no longer mandatory to call for simulation initialize before running
+	a simulation. Warning: this modification is quit deep and changes a lot the
+	internal implementation of initialization of objects
+
+	* [kernel] add _relationMatrices and _relationVectors in Interaction
+	The objective is to be able to use modeling classes without resorting to
+        work matrices and vectors. Work matrices are only used for simulation purpose.
+        These matrices and vectors are stored in interaction rather than in Relation to
+        continue to be able to use just one relation in multiple interaction. If this
+        option continue to be chosen, we could also move relation matrices of LagrangianR
+        and NewtonEuler R.
+
+        * [kernel] remove work vectors and matrices, computeLinearizedOutput/Input,
+	prepareNewtonIteration from Relation classes.
+
+        * [kernel] Important change in initMemory of DS
+        The memory is only initialized if we need more steps in Memory.
+        This hacks is done to avoid multiple memory resetting if multiple simulations shared the same memory
+        In the latter case, this has to be done more carefully in the future.
+
+	* [kernel] separate initialization of DSlink and work vectors and matrices in Relation.
+        rename initialize --> initializeDSLink
+        rename initcomponents --> initializeWorkVectorsAndMatrices
+
+	* [numerics] add GFC3D_ADMM solvers
+
+	* [numerics] add NM_transpose() function and correct bug in NM_gemm()
+
+	* [numerics] add various ways of computing rho in NSN
+
+	* [numerics] add ConvexQP PG solver for LCP
+
+	* [numerics] new ConvexQP problem with PG algo
+        replace fc3d PG by convex PG
+        use ConvexQP as tangent problem in fc3d Panagiotoupoulos
+
+	* [numerics] correct the relative norm computation in LCP
+        * [numerics] new implementation of projected gradient algorithm for quadratic program on Cylinder
+        correct armijo type line search as proposed in
+        Calamai, P.H. and More, J.J., Projected gradient methods for linearly constrained problems, Mathematical Programming, 39 (1987), 93-116.
+	* [numerics] use enum for options in VI solvers EG and FPP
+	* [numerics] add gfc3d_VI_FixedPointProjection solver	
+
+
+	* [mechanics] occ: new interface with OpenCascade, similar to the
+	interface with Bullet
+	* [io] mechanics_io, vview: OpenCascade Contactors, cf OCC_Examples
+	* [io] mechanics_io: management of external C plugins
+
+--------------------------------------------------------------------------------
+  v4.1.0
 --------------------------------------------------------------------------------
 Main changes:
 	* [kernel] refactoring the initialization of classes
@@ -105,7 +164,7 @@ Main changes:
 	JointStopR, CouplerJointR.
 
 --------------------------------------------------------------------------------
-  v4.0.0 (in development branch siconos/master)
+  v4.0.0
 --------------------------------------------------------------------------------
 Main changes:
 
@@ -137,7 +196,7 @@ Main changes:
 	* issue: [io] serialization needs boost <= 1.57
 
 --------------------------------------------------------------------------------
-v3.8.0 (in development branch siconos/master)
+v3.8.0
 --------------------------------------------------------------------------------
 Main Changes:
 

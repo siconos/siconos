@@ -69,7 +69,11 @@ set(${COMPONENT}_LINKER_LANGUAGE C)
 if(MLCPSIMPLEX_FOUND) 
   set(${COMPONENT}_LINKER_LANGUAGE CXX)
 endif()
-set(${COMPONENT}_LINK_LIBRARIES externals ${SICONOS_LINK_LIBRARIES})
+# CMAKE_DL_LIBS needed for dlopen or equivalent
+list(APPEND ${COMPONENT}_LINK_LIBRARIES ${CMAKE_DL_LIBS})
+list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
+list(APPEND ${COMPONENT}_LINK_LIBRARIES externals)
+
 set(COMPONENT_TEST_LIB "numerics-test")
 include(LibraryProjectSetup)
 library_project_setup()

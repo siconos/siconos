@@ -1,5 +1,7 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
-"""Viewer for Siconos mechanics-IO HDF5 files based on VTK."""
+"""
+Description: Viewer and exporter for Siconos mechanics-IO HDF5 files based on VTK.
+"""
 
 # Lighter imports before command line parsing
 from __future__ import print_function
@@ -19,7 +21,8 @@ else:
 
 ## Persistent configuration
 class VViewConfig(dict):
-    def __init__(self, d={'window_size': [600,600]}, filename=None):
+    def __init__(self, d={'background_color' : [0., 0. , 0.],
+                          'window_size': [600,600]}, filename=None):
         super(self.__class__, self).__init__(d)
         self.should_save_config = True
         if filename is not None:
@@ -68,11 +71,12 @@ class VViewOptions(object):
               .format(os.path.split(sys.argv[0])[1]))
         print()
         if not long:
-            print("""[--help] [tmin=<float value>] [tmax=<float value>]
-    [--cf-scale=<float value>] [--no-cf]
-    [--advance=<'fps' or float value>] [--fps=float value]
-    [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
-    """)
+            print("""[--help] [--tmin=<float value>] [--tmax=<float value>]
+            [--cf-scale=<float value>] [--no-cf] [--normalcone-ratio = <float value>]
+            [--advance=<'fps' or float value>] [--fps=float value]
+            [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
+            [--visible=all,avatars,contactors]
+            """)
         else:
             print("""Options:
      --help
@@ -144,7 +148,7 @@ class VViewOptions(object):
                 self.max_time = float(a)
 
             elif o == '--cf-scale':
-                self.opts.cf_scale_factor = float(a)
+                self.cf_scale_factor = float(a)
 
             elif o == '--no-cf':
                 self.cf_disable = True
@@ -409,6 +413,8 @@ class InputObserver():
     def __init__(self, vview, times=None, slider_repres=None):
         self.vview = vview
         self._opacity = 1.0
+        self._opacity_static = 1.0
+        self._opacity_contact = 0.4
         self._current_id = vtk.vtkIdTypeArray()
         self._renderer = vview.renderer
         self._renderer_window = vview.renderer_window
@@ -467,6 +473,20 @@ class InputObserver():
             for actor,_,_ in actors:
                 actor.GetProperty().SetOpacity(self._opacity)
 
+    def set_opacity_static(self):
+        for instance, actors in self.vview.static_actors.items():
+            for actor,_,_ in actors:
+                actor.GetProperty().SetOpacity(self._opacity_static)
+
+    def set_opacity_contact(self):
+        for mu in self.vview.cf_prov._mu_coefs:
+            self.vview.cactor[mu].GetProperty().SetOpacity(self._opacity_contact)
+            self.vview.gactor[mu].GetProperty().SetOpacity(self._opacity_contact)
+            self.vview.clactor[mu].GetProperty().SetOpacity(self._opacity_contact)
+            self.vview.sactora[mu].GetProperty().SetOpacity(self._opacity_contact)
+            self.vview.sactorb[mu].GetProperty().SetOpacity(self._opacity_contact)
+                    
+
     def key(self, obj, event):
         key = obj.GetKeySym()
         print('key', key)
@@ -499,13 +519,34 @@ class InputObserver():
             self._time += self._time_step
 
         if key == 't':
+            print('Decrease the opacity of bodies')
             self._opacity -= .1
             self.set_opacity()
 
         if key == 'T':
+            print('Increase the opacity of bodies')
             self._opacity += .1
             self.set_opacity()
+            
+        if key == 'y':
+            print('Decrease the opacity of static bodies')
+            self._opacity_static -= .1
+            self.set_opacity_static()
 
+        if key == 'Y':
+            print('Increase the opacity of static bodies')
+            self._opacity_static += .1
+            self.set_opacity_static()
+            
+        if key == 'u':
+            print('Decrease the opacity of contact elements')
+            self._opacity_contact -= .1
+            self.set_opacity_contact()
+
+        if key == 'U':
+            print('Increase the opacity of contact elements')
+            self._opacity_contact += .1
+            self.set_opacity_contact()
         if key == 'c':
             print('camera position:', self._renderer.GetActiveCamera().GetPosition())
             print('camera focal point', self._renderer.GetActiveCamera().GetFocalPoint())
@@ -891,7 +932,8 @@ class VView(object):
             self.cmapper[mu].ScalarVisibilityOn()
 
         self.cactor[mu] = vtk.vtkActor()
-        self.cactor[mu].GetProperty().SetOpacity(0.4)
+        
+        self.cactor[mu].GetProperty().SetOpacity(self.config.get('contact_opacity', 0.4))
         self.cactor[mu].GetProperty().SetColor(0, 0, 1)
         self.cactor[mu].SetMapper(self.cmapper[mu])
 
@@ -1239,19 +1281,21 @@ class VView(object):
 
         for shape_name in self.mappers.keys():
             if shape_name not in self.unfrozen_mappers:
-                print (shape_name)
                 self.unfrozen_mappers[shape_name] = next(self.mappers[shape_name])
 
     def init_contactor(self, contactor_instance_name, instance, instid):
         contactor = instance[contactor_instance_name]
         contact_shape_indx = None
         if 'shape_name' not in contactor.attrs:
-            print("Warning: old format: ctr.name must be ctr.shape_name for body {0}, contact {1}".format(instance_name, contactor_instance_name))
+            print("Warning: old format: ctr.name must be ctr.shape_name for contact {0}".format(contactor_instance_name))
             shape_attr_name='name'
         else:
             shape_attr_name='shape_name'
 
-        collision_group = contactor.attrs['group']
+        if 'group' in  contactor.attrs:
+            collision_group = contactor.attrs['group']
+        else:
+            collision_group = -1
         if 'type' in contactor.attrs:
             contact_type = contactor.attrs['type']
             contact_index = contactor.attrs['contact_index']
@@ -1373,7 +1417,7 @@ class VView(object):
             self.static_actors[instid] = list()
 
         for contactor_instance_name in instance:
-            self.init_contactor(contactor_instance_name, instance, instid)
+            self.init_contactor(contactor_instance_name, instance,  instid)
 
     def init_instances(self):
         for instance_name in self.io.instances():
@@ -1383,7 +1427,7 @@ class VView(object):
     def set_position_i(self, instance, q0, q1, q2, q3, q4, q5, q6):
         if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
            or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
-            print('Bad position for', instance, q0, q1, q2, q3, q4, q5, q6)
+            print('Bad position for object number', int(instance),' :',  q0, q1, q2, q3, q4, q5, q6)
             return
 
         q = Quaternion((q3, q4, q5, q6))
@@ -1543,6 +1587,17 @@ class VView(object):
         slider_repres.SetTitleHeight(0.02)
         slider_repres.SetLabelHeight(0.02)
 
+        background_color = self.config.get('background_color', [.0,.0,.0])
+        reverse_background_color =numpy.ones(3) - background_color
+
+        if (numpy.linalg.norm(background_color-reverse_background_color) < 0.2):
+            reverse_background_color = numpy.ones(3)
+        slider_repres.GetSliderProperty().SetColor(*reverse_background_color)
+        slider_repres.GetTitleProperty().SetColor(*reverse_background_color);
+        slider_repres.GetLabelProperty().SetColor(*reverse_background_color);
+        slider_repres.GetTubeProperty().SetColor(*reverse_background_color);
+        slider_repres.GetCapProperty().SetColor(*reverse_background_color);
+
         slider_widget = vtk.vtkSliderWidget()
         slider_widget.SetInteractor(interactor)
         slider_widget.SetRepresentation(slider_repres)
@@ -1609,6 +1664,8 @@ class VView(object):
         # Set the occlusion ratio (initial value is 0.0, exact image)
         self.renderer.SetOcclusionRatio(0.1)
 
+
+        
         # Set the initial camera position and orientation if specified
         if self.opts.initial_camera[0] is not None:
             self.renderer.GetActiveCamera().SetPosition(*self.opts.initial_camera[0])
@@ -1645,6 +1702,7 @@ class VView(object):
         # hlight.SetPosition(0, 0, 500)
         hlight.SetLightTypeToHeadlight()
         self.renderer.AddLight(hlight)
+        self.renderer.SetBackground(*self.config.get('background_color', [.0,.0,.0]))
 
     def setup_charts(self):
         # Warning! numpy support offer a view on numpy array
@@ -1745,6 +1803,18 @@ class VView(object):
             slider_repres.SetLabelFormat("%3.4lf")
             slider_repres.SetTitleHeight(0.02)
             slider_repres.SetLabelHeight(0.02)
+            
+            background_color = self.config.get('background_color', [.0,.0,.0])
+            reverse_background_color =numpy.ones(3) - background_color
+
+            if (numpy.linalg.norm(background_color-reverse_background_color) < 0.2):
+                reverse_background_color = numpy.ones(3)
+
+            slider_repres.GetSliderProperty().SetColor(*reverse_background_color)
+            slider_repres.GetTitleProperty().SetColor(*reverse_background_color);
+            slider_repres.GetLabelProperty().SetColor(*reverse_background_color);
+            slider_repres.GetTubeProperty().SetColor(*reverse_background_color);
+            slider_repres.GetCapProperty().SetColor(*reverse_background_color);
 
             slider_widget = vtk.vtkSliderWidget()
             self.slider_widget = slider_widget

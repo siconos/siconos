@@ -146,6 +146,8 @@ def test_vi_C_interface():
                  double gamma;
                  double g;
                  double kappa;
+                 unsigned int f_eval;
+                 unsigned int nabla_eval;
                   } data;
                  ''')
 

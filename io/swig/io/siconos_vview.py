@@ -1,11 +1,14 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
+"""
+Description: Viewer for Siconos mechanics-IO HDF5 files based on VTK.
+"""
 
 from siconos.io.vview import VView, VViewConfig, VViewOptions
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
 
 if __name__=='__main__':
     ## Persistent configuration
-    config = VViewConfig({'window_size': [600,600]})
+    config = VViewConfig()
 
     # Load it immediately
     config.load_configuration()

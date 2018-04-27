@@ -8,7 +8,7 @@
 #include "cadmbtb.hpp"
 #include <Standard_TypeDef.hxx>
 #include <limits>
-
+#include <iostream>
 
 struct DistanceCalculatorType { VIRTUAL_ACCEPT_VISITORS(DistanceCalculatorType); };
 struct OccDistanceType : DistanceCalculatorType { ACCEPT_STD_VISITORS(); };
@@ -16,8 +16,7 @@ struct CadmbtbDistanceType : DistanceCalculatorType { ACCEPT_STD_VISITORS(); };
 
 struct Geometer : public Question<ContactShapeDistance>
 {
-  bool _normalFromFace1;
-  Geometer() : _normalFromFace1(true) {};
+  Geometer() {};
 };
 
 template<typename DistType>
@@ -26,7 +25,6 @@ void distanceFaceFace(const OccContactFace& csh1,
                       Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                       Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
                       Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                      bool normalFromFace1,
                       Standard_Real& MinDist)
 {}
 
@@ -36,11 +34,8 @@ void distanceFaceEdge(const OccContactFace& csh1,
                       Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                       Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
                       Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                      bool normalFromFace1,
                       Standard_Real& MinDist)
 {}
-
-
 
 template<typename DistType>
 void distanceEdgeEdge(const OccContactEdge& csh1,
@@ -48,7 +43,6 @@ void distanceEdgeEdge(const OccContactEdge& csh1,
                       Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                       Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
                       Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                      bool normalFromFace1,
                       Standard_Real& MinDist)
 {
   throw "Geometer: Edge-Edge distance unimplemented";
@@ -61,11 +55,10 @@ void distanceFaceFace<CadmbtbDistanceType>(const OccContactFace& csh1,
                                    Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                                    Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
                                    Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                                   bool normalFromFace1,
                                    Standard_Real& MinDist)
 {
   cadmbtb_distanceFaceFace(csh1, csh2, X1, Y1, Z1, X2, Y2, Z2, nX, nY, nZ,
-			   normalFromFace1, MinDist);
+                           MinDist);
 }
 
 template<>
@@ -74,25 +67,23 @@ void distanceFaceEdge<CadmbtbDistanceType>(const OccContactFace& csh1,
                                    Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                                    Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
                                    Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                                   bool normalFromFace1,
                                    Standard_Real& MinDist)
 {
   cadmbtb_distanceFaceEdge(csh1, csh2, X1, Y1, Z1, X2, Y2, Z2, nX, nY, nZ,
-			   normalFromFace1, MinDist);
+                           MinDist);
 }
 
 
 template<>
 void distanceFaceFace<OccDistanceType>(const OccContactFace& csh1,
-                               const OccContactFace& csh2,
-                               Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
-                               Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
-                               Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                               bool normalFromFace1,
-                               Standard_Real& MinDist)
+                                       const OccContactFace& csh2,
+                                       Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
+                                       Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
+                                       Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
+                                       Standard_Real& MinDist)
 {
   occ_distanceFaceFace(csh1, csh2, X1, Y1, Z1, X2, Y2, Z2, nX, nY, nZ,
-		       normalFromFace1, MinDist);
+                       MinDist);
 }
 
 template<>
@@ -101,11 +92,9 @@ void distanceFaceEdge<OccDistanceType>(const OccContactFace& csh1,
                                Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
                                Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
                                Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                               bool normalFromFace1,
                                Standard_Real& MinDist)
 {
-  occ_distanceFaceEdge(csh1, csh2, X1, Y1, Z1, X2, Y2, Z2, nX, nY, nZ,
-		       normalFromFace1, MinDist);
+  occ_distanceFaceEdge(csh1, csh2, X1, Y1, Z1, X2, Y2, Z2, nX, nY, nZ, MinDist);
 }
 
 template <typename DistType>
@@ -121,11 +110,10 @@ struct FaceGeometer : public Geometer
   {
     ContactShapeDistance& dist = this->answer;
     dist.value = std::numeric_limits<double>::infinity();
-    distanceFaceFace<DistType>(face2, this->face1,
+    distanceFaceFace<DistType>(this->face1, face2,
                                dist.x1, dist.y1, dist.z1,
                                dist.x2, dist.y2, dist.z2,
                                dist.nx, dist.ny, dist.nz,
-                               this->_normalFromFace1,
                                dist.value);
   }
   void visit(const OccContactEdge& edge2)
@@ -136,8 +124,10 @@ struct FaceGeometer : public Geometer
                                dist.x1, dist.y1, dist.z1,
                                dist.x2, dist.y2, dist.z2,
                                dist.nx, dist.ny, dist.nz,
-                               this->_normalFromFace1,
                                dist.value);
+    dist.nx = -dist.nx;
+    dist.ny = -dist.ny;
+    dist.nz = -dist.nz;
   }
 
 };
@@ -159,7 +149,6 @@ struct EdgeGeometer : public Geometer
                                dist.x1, dist.y1, dist.z1,
                                dist.x2, dist.y2, dist.z2,
                                dist.nx, dist.ny, dist.nz,
-                               this->_normalFromFace1,
                                dist.value);
   }
   void visit(const OccContactEdge& edge2)
@@ -170,7 +159,6 @@ struct EdgeGeometer : public Geometer
                                dist.x1, dist.y1, dist.z1,
                                dist.x2, dist.y2, dist.z2,
                                dist.nx, dist.ny, dist.nz,
-                               this->_normalFromFace1,
                                dist.value);
   }
 

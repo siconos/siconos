@@ -125,13 +125,13 @@ with MechanicsHdf5Runner() as io:
                        'arm2', 'Mass2Contact',
                        'ball', 'BallContact',
                        distance_calculator='occ',
-                       offset=0.01)
+                       offset1=0.01)
 
     io.add_interaction('ball-ground',
                        'ball', 'BallContact',
                        'ground', 'Ground-0',
                        distance_calculator='occ',
-                       offset=0.01)
+                       offset1=0.01)
 
 # Run the simulation from the inputs previously defined and add
 # results to the hdf5 file. The visualisation of the output may be done

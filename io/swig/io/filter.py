@@ -1,5 +1,7 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
-"""Filter the contents of a Siconos mechanics-IO HDF5 simulation file."""
+"""
+Description: Filter the contents of a Siconos mechanics-IO HDF5 simulation file.
+"""
 
 # Lighter imports before command line parsing
 from __future__ import print_function

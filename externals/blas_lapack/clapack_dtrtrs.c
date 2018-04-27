@@ -3,74 +3,77 @@
 #include "SiconosLapack.h"
 
 
-/* rewrite blas DTRTRS in cblas version
-   -- LAPACK routine (version 3.0) --
-   Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
-   Courant Institute, Argonne National Lab, and Rice University
-   March 31, 1993
+/*  -- LAPACK routine (version 3.1) -- */
+/*     Univ. of Tennessee, Univ. of California Berkeley and NAG Ltd.. */
+/*     November 2006 */
 
-   Purpose
-   =======
+/*     .. Scalar Arguments .. */
+/*     .. */
+/*     .. Array Arguments .. */
+/*     .. */
 
-   DTRTRS solves a triangular system of the form
+/*  Purpose */
+/*  ======= */
 
-   A * X = B  or  A**T * X = B,
+/*  DTRTRS solves a triangular system of the form */
 
-   where A is a triangular matrix of order N, and B is an N-by-NRHS
-   matrix.  A check is made to verify that A is nonsingular.
+/*     A * X = B  or  A**T * X = B, */
 
-   Arguments
-   =========
+/*  where A is a triangular matrix of order N, and B is an N-by-NRHS */
+/*  matrix.  A check is made to verify that A is nonsingular. */
 
-   \param UPLO    (input) CHARACTER*1
-   = 'U':  A is upper triangular;
-   = 'L':  A is lower triangular.
+/*  Arguments */
+/*  ========= */
 
-   \param TRANS   (input) CHARACTER*1
-   Specifies the form of the system of equations:
-   = 'N':  A * X = B  (No transpose)
-   = 'T':  A**T * X = B  (Transpose)
-   = 'C':  A**H * X = B  (Conjugate transpose = Transpose)
+/*  UPLO    (input) CHARACTER*1 */
+/*          = 'U':  A is upper triangular; */
+/*          = 'L':  A is lower triangular. */
 
-   \param DIAG    (input) CHARACTER*1
-   = 'N':  A is non-unit triangular;
-   = 'U':  A is unit triangular.
+/*  TRANS   (input) CHARACTER*1 */
+/*          Specifies the form of the system of equations: */
+/*          = 'N':  A * X = B  (No transpose) */
+/*          = 'T':  A**T * X = B  (Transpose) */
+/*          = 'C':  A**H * X = B  (Conjugate transpose = Transpose) */
 
-   \param N       (input) INTEGER
-   The order of the matrix A.  N >= 0.
+/*  DIAG    (input) CHARACTER*1 */
+/*          = 'N':  A is non-unit triangular; */
+/*          = 'U':  A is unit triangular. */
 
-   \param NRHS    (input) INTEGER
-   The number of right hand sides, i.e., the number of columns
-   of the matrix B.  NRHS >= 0.
+/*  N       (input) INTEGER */
+/*          The order of the matrix A.  N >= 0. */
 
-   \param A       (input) DOUBLE PRECISION array, dimension (LDA,N)
-   The triangular matrix A.  If UPLO = 'U', the leading N-by-N
-   upper triangular part of the array A contains the upper
-   triangular matrix, and the strictly lower triangular part of
-   A is not referenced.  If UPLO = 'L', the leading N-by-N lower
-   triangular part of the array A contains the lower triangular
-   matrix, and the strictly upper triangular part of A is not
-   referenced.  If DIAG = 'U', the diagonal elements of A are
-   also not referenced and are assumed to be 1.
+/*  NRHS    (input) INTEGER */
+/*          The number of right hand sides, i.e., the number of columns */
+/*          of the matrix B.  NRHS >= 0. */
 
-   \param LDA     (input) INTEGER
-   The leading dimension of the array A.  LDA >= max(1,N).
+/*  A       (input) DOUBLE PRECISION array, dimension (LDA,N) */
+/*          The triangular matrix A.  If UPLO = 'U', the leading N-by-N */
+/*          upper triangular part of the array A contains the upper */
+/*          triangular matrix, and the strictly lower triangular part of */
+/*          A is not referenced.  If UPLO = 'L', the leading N-by-N lower */
+/*          triangular part of the array A contains the lower triangular */
+/*          matrix, and the strictly upper triangular part of A is not */
+/*          referenced.  If DIAG = 'U', the diagonal elements of A are */
+/*          also not referenced and are assumed to be 1. */
 
-   \param B       (input/output) DOUBLE PRECISION array, dimension (LDB,NRHS)
-   On entry, the right hand side matrix B.
-   On exit, if INFO = 0, the solution matrix X.
+/*  LDA     (input) INTEGER */
+/*          The leading dimension of the array A.  LDA >= max(1,N). */
 
-   \param LDB     (input) INTEGER
-   The leading dimension of the array B.  LDB >= max(1,N).
+/*  B       (input/output) DOUBLE PRECISION array, dimension (LDB,NRHS) */
+/*          On entry, the right hand side matrix B. */
+/*          On exit, if INFO = 0, the solution matrix X. */
 
-   \return INFO    (output) INTEGER
-   = 0:  successful exit
-   < 0: if INFO = -i, the i-th argument had an illegal value
-   > 0: if INFO = i, the i-th diagonal element of A is zero,
-   indicating that the matrix is singular and the solutions
-   X have not been computed.
-*/
-#define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
+/*  LDB     (input) INTEGER */
+/*          The leading dimension of the array B.  LDB >= max(1,N). */
+
+/*  INFO    (output) INTEGER */
+/*          = 0:  successful exit */
+/*          < 0: if INFO = -i, the i-th argument had an illegal value */
+/*          > 0: if INFO = i, the i-th diagonal element of A is zero, */
+/*               indicating that the matrix is singular and the solutions */
+/*               X have not been computed. */
+
+/*  ===================================================================== */
 
 #if defined(HAS_ATLAS_LAPACK)
 
@@ -147,7 +150,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
     i__1 = n;
     for (info = 0; info < i__1; ++info)
     {
-      if (a_ref(info, info) == 0.)
+      if (a[info + info * a_dim1] == 0.)
       {
         return ++info;
       }

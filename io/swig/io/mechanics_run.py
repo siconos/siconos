@@ -1,5 +1,7 @@
 # Mechanics IO
 
+"""Run a pre-configured Siconos "mechanics" HDF5 file."""
+
 from __future__ import print_function
 
 import os
@@ -492,7 +494,10 @@ class ShapeCollection():
                             step_reader.PrintCheckTransfer(
                                 failsonly, IFSelect_ItemsByEntity)
 
-                            ok = step_reader.TransferRoot(1)
+
+
+                            #ok = step_reader.TransferRoot(1)
+                            ok = step_reader.TransferRoots() # VA : We decide to loads all shapes in the step file
                             nbs = step_reader.NbShapes()
 
                             for i in range(1, nbs + 1):
@@ -794,6 +799,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             assert (given_inertia is not None)
             inertia = given_inertia
+            if inertia is not None:
+                if np.shape(inertia) == (3,):
+                    inertia = np.diag(inertia)
+                elif np.shape(inertia) != (3,3):
+                    print('Wrong shape of inertia')
+
 
             body = body_class(
                 list(translation) + list(orientation), velocity, mass, inertia)
@@ -1202,7 +1213,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 contactor2_names = [contactor2_name]
 
             distance_calculator = pinter.attrs['distance_calculator']
-            offset = pinter.attrs['offset']
+            offset1 = pinter.attrs['offset1']
+            offset2 = pinter.attrs['offset2']
 
             body1 = self._input[body1_name]
             body2 = self._input[body2_name]
@@ -1240,7 +1252,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     relation = occ.OccR(cp1, cp2,
                                         real_dist_calc[distance_calculator]())
 
-                    relation.setOffset(offset)
+                    relation.setOffset1(offset1)
+                    relation.setOffset2(offset2)
 
                     inter = Interaction(nslaw, relation)
 
@@ -1735,8 +1748,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             Newton_max_iter=20,
             set_external_forces=None,
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
+            local_solver=Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID,
             itermax=100000,
             tolerance=1e-8,
+            exit_tolerance=None,
             projection_itermax=20,
             projection_tolerance=1e-8,
             projection_tolerance_unilateral=1e-8,
@@ -1762,18 +1777,20 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
           t0 : starting time (default 0)
           T  : end time      (default 10)
           h  : timestep      (default 0.0005)
-          multiPointIterations : use bullet "multipoint iterations"
+          multiPoint_iterations : use bullet "multipoint iterations"
                                  (default True)
           theta : parameter for Moreau-Jean OSI (default 0.50001)
           Newton_max_iter : maximum number of iterations for
                           integrator Newton loop (default 20)
           set_external_forces : method for external forces
                                 (default earth gravity)
-          solver : default Numerics.SICONOS_FRICTION_3D_NSGS
-          itermax : maximum number of iteration for solver
-          tolerance : friction contact solver tolerance
+          solver : OneStepNsProblem solver  (default Numerics.SICONOS_FRICTION_3D_NSGS)
+          local_solver : OneStepNsProblem solver local solver (default Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID)
+          itermax : maximum number of iteration for solver (default 100000)
+          tolerance : friction contact solver tolerance (default 1e-8)
+          exit_tolerance : if not None, the simulation will stop if precision >= exit_tolerance (default None)
           numerics_verbose : set verbose mode in numerics
-          output_frequency :
+          output_frequency : (default 1)
           contact_index_set : index set from which contact point information is retrieved.
         """
         self.verbose = verbose
@@ -1839,7 +1856,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # (2) Time discretisation --
         timedisc=TimeDiscretisation(t0, h)
 
-        fc_index=0
+        
 
         if (osi == Kernel.MoreauJeanGOSI):
             if (friction_contact_trace == False) :
@@ -1856,9 +1873,30 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if (friction_contact_trace == False) :
                 if len(joints) > 0:
                     osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
+                    solverOptions = osnspb.numericsSolverOptions()
+                    # Friction one-contact solver options
                     fc_index=1
+                    fcOptions = solverOptions.internalSolvers[fc_index]
+                    fcOptions.iparam[0] = 100  # Local solver iterations
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
+                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
+                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP
                 else:
                     osnspb=FrictionContact(3, solver)
+                    solverOptions = osnspb.numericsSolverOptions()
+                    # Friction one-contact solver options
+                    fc_index=0
+                    fcOptions = solverOptions.internalSolvers[fc_index]
+                    fcOptions.iparam[0] = 100  # Local solver iterations
+                    fcOptions.solverId = local_solver
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP
+                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
+                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
+                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP
+                    
 
             else:
                 from siconos.io.FrictionContactTrace import FrictionContactTrace
@@ -1871,6 +1909,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # Global solver options
         solverOptions = osnspb.numericsSolverOptions()
         solverOptions.iparam[0]=itermax
+        solverOptions.dparam[0] = tolerance
+
         # -- full error evaluation
         #solverOptions.iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL
         # --  Adaptive error evaluation
@@ -1879,14 +1919,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # -- light error evaluation with full final
         solverOptions.iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
         solverOptions.iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
-        solverOptions.dparam[0] = tolerance
-
-        if (osi != Kernel.MoreauJeanGOSI):
-            # Friction one-contact solver options
-            fcOptions = solverOptions.internalSolvers[fc_index]
-            fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
-            fcOptions.iparam[0] = 100  # Local solver iterations
-
+    
 
         osnspb.setNumericsVerboseMode(numerics_verbose)
 
@@ -2043,8 +2076,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     print_verbose('  velocity min :',np.min(v))
                 #     #print(simulation.output(1,0))
 
-
+            precision = solverOptions.dparam[Numerics.SICONOS_DPARAM_RESIDU]
+            if (exit_tolerance is not None):
+                if (precision > exit_tolerance):
+                    print('precision is larger exit_tolerance')
+                    return False
             log(simulation.nextStep, with_timer)()
 
             print_verbose ('')
             k += 1
+        return True

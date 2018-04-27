@@ -27,6 +27,7 @@
 #include "NumericsSparseMatrix.h"
 #include "numerics_verbose.h"
 #include "NumericsMatrix.h"
+#include "string.h" // memcpy
 
 #include "debug.h"
 
@@ -44,10 +45,20 @@ typedef struct
   size_t indx;
 } sort_indices_struct;
 
+#ifdef HAVE_SORT
 #define SORT_NAME sorter
 #define SORT_TYPE sort_indices_struct
 #define SORT_CMP(x, y) ((x).i - (y).i)
 #include "sort.h"
+#else
+#include "stdlib.h" // qsort
+static int sort_indices_struct_cmp(const void *a, const void *b)
+{
+  const sort_indices_struct *sa = (const sort_indices_struct *) a;
+  const sort_indices_struct *sb = (const sort_indices_struct *) b;
+  return (sa->i > sb->i) - (sa->i < sb->i);
+}
+#endif
 
 #if defined(__clang__)
 #pragma clang diagnostic pop
@@ -290,7 +301,12 @@ void NSM_fix_csc(CSparseMatrix* A)
         s[i].indx = i;
       }
 
-      sorter_tim_sort(s, len);
+#ifdef HAVE_SORT
+        sorter_tim_sort(s, len);
+#else
+        qsort(s, len, sizeof(sort_indices_struct),
+              sort_indices_struct_cmp);
+#endif
 
       for (size_t i = 0, pp = ps; i < len; ++i, ++pp)
       {

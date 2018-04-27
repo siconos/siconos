@@ -1,4 +1,7 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
+"""
+Description: Export a Siconos mechanics-IO HDF5 file in VTK format.
+"""
 
 from siconos.io.vview import VView, VExportOptions
 from siconos.io.mechanics_hdf5 import MechanicsHdf5

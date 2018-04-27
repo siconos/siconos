@@ -33,13 +33,13 @@ set(${COMPONENT}_HDRS_EXCLUDE
 set(${COMPONENT}_Unstable_SRCS
   )
 
-compile_with(GMP REQUIRED)
-
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
-set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} externals numerics)
+# CMAKE_DL_LIBS for dlopen or equivalent (used for plugins)
+list(APPEND ${COMPONENT}_LINK_LIBRARIES ${CMAKE_DL_LIBS})
+list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
+list(APPEND ${COMPONENT}_LINK_LIBRARIES externals numerics)
 
 include(WindowsKernelSetup)
 

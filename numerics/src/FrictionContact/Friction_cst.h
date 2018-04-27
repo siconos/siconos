@@ -311,15 +311,14 @@ enum SICONOS_FRICTION_3D_NSN_LINESEARCH_ENUM
 
 enum SICONOS_FRICTION_3D_NSN_HYBRID_ENUM
 {
-  /** Loop NSN-PLI strategy for the hybrid solver */
+  /** No strategy for the hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO = 0,
-  /** Loop NSN-PLI strategy for the hybrid solver */
+  /** Loop PLI-NSN strategy for the hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP = 1,
-  /** Loop PLI-NSN-PLI strategy for the hybrid solver */
-  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_PLI_LOOP = 2,
-  /** NSN and after Loop NSN-PLI strategy for the hybrid solver */
-  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_NSN_PLI_LOOP = 3,
-  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN =4,
+  /** NSN and after Loop PLI-NSN strategy for the hybrid solver */
+  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP = 2,
+  /** VI_EG preconditionning to NSN strategy for the hybrid solver */
+  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN =3
 };
 
 

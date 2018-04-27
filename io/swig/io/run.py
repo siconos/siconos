@@ -1,5 +1,7 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
-"""Run a pre-generated Siconos mechanics-IO HDF5 simulation file."""
+"""
+Description: Run a pre-generated Siconos mechanics-IO HDF5 simulation file.
+"""
 
 # Lighter imports before command line parsing
 from __future__ import print_function
@@ -7,11 +9,14 @@ import argparse
 
 parser = argparse.ArgumentParser(
     description = __doc__,
-    epilog = """Note that this script only provides a basic interface for the most
-    common simulation options.  For more complex options, or to
-    specify behaviour such as controllers, you must create a custom
-    simulation script.  If a partially-completed simulation is found,
-    it will be continued from the last time step until T.""")
+    epilog = """This script only provides a basic interface for the most common
+    simulation options.  For more complex options, or to specify
+    behaviour such as controllers, you must create a custom simulation
+    script.  If a partially-completed simulation is found, it will be
+    continued from the last time step until T.
+
+    Note that most example scripts do not use this program, and simply
+    define and then run the simulation in the same script.""")
 
 parser.add_argument('file', metavar='filename', type=str, nargs=1,
                     help = 'simulation file (HDF5)')

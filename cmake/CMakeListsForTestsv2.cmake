@@ -3,6 +3,8 @@
 # built from @CMAKE_SOURCE_DIR@/cmake/CMakeListsForTests.cmake.in 
 SET(SOURCE_DIR @CMAKE_CURRENT_SOURCE_DIR@/@_CURRENT_TEST_DIRECTORY@)
 
+set_ldlibpath()
+
 # Search for reference files and copy them to binary dir
 FILE(GLOB TESTS_REF ${SOURCE_DIR}/*.ref)
 FOREACH(_F ${TESTS_REF})
@@ -21,34 +23,6 @@ IF(CMAKE_SYSTEM_NAME MATCHES Windows)
 ELSE()
   SET(EXE_EXT)
 ENDIF()
-
-# In certain cases, ex. no rpath, or running tests with plugins,
-# libraries cannot be found at link or test time, so we add the
-# LD_LIBRARY_PATH variable.
-if (CMAKE_SKIP_RPATH)
-  SET(LDLIBPATH "")
-  FOREACH(_C ${COMPONENTS})
-    LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
-  ENDFOREACH()
-  if (NOT CMAKE_SYSTEM_NAME MATCHES WINDOWS)
-    STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
-  endif()
-  if (CMAKE_SYSTEM_NAME MATCHES APPLE)
-    if ($ENV{DYLD_LIBRARY_PATH})
-      set(LDLIBPATH "${LDLIBPATH}:$ENV{DYLD_LIBRARY_PATH}")
-    endif()
-    SET(LDLIBPATH "DYLD_LIBRARY_PATH=${LDLIBPATH}")
-  else()
-    if (CMAKE_SYSTEM_NAME MATCHES WINDOWS)
-      SET(LDLIBPATH "Path=${LDLIBPATH};$ENV{Path}")
-    else()
-      if ($ENV{LD_LIBRARY_PATH})
-        set(LDLIBPATH "${LDLIBPATH}:$ENV{LD_LIBRARY_PATH}")
-      endif()
-      SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
-    endif()
-  endif()
-endif()
 
 FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
   file(APPEND ${TESTS_LOGFILE} "Adding test suite ${_CURRENT_TEST_DIRECTORY}/${_EXE} \n")

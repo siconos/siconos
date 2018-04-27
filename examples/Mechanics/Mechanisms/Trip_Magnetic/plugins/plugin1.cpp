@@ -3,6 +3,7 @@
 #include <cmath>
 #include "MBTB_DATA.hpp"
 #include <boost/math/quaternion.hpp>
+#include "op3x3.h"
 #define EQUIPAGE 4
 #define PLATINE 3
 
