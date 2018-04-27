@@ -33,7 +33,7 @@ set(SICONOS_VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}")
 # If any interfaces have been removed since the last public release, then set
 # age to 0.
 
-set(SO_current 5)
+set(SO_current 6)
 set(SO_revision 0)
 set(SO_age 0)
 
