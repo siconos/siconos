@@ -21,26 +21,6 @@
 /*!\file MixedComplementarityProblem.h
 */
 
-/*! \page MCProblem Mixed (Non Linear) Complementarity problem (MCP)
-  \section mcpIntro  Problem Statement
-  Given a sufficiently smooth function \f${F} \colon {{\mathrm{I\!R}}}^{n+m}  \to {{\mathrm{I\!R}}}^{n+m} \f$,
-  the Mixed Complementarity problem (MCP) is to find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n+m})\f$ such that:\n
-  \f{align*}{
-  w &= \begin{pmatrix}w_e\\w_i\end{pmatrix} = F(z) \\
-  w_e &=0 \\
-  0 &\le w_i \perp z_i \ge 0,
-  \f}
-  where "i" (resp. "e") stands for inequalities (resp. equalities). The vector \f$z\f$ is splitted like \f$w\f$:
-  \f{equation*}{z =\begin{pmatrix}z_e\\z_i\end{pmatrix}.\f}
-  The vectors \f$z_i,w_i\f$ are of size <tt>sizeEqualities</tt>, the vectors \f$z_e,w_e\f$ are of size <tt>sizeInequalities</tt>
-  and \f$F\f$ is a non linear function that must be user-defined.
-
-  A Mixed Complementarity problem (MCP) is a NCP "augmented" with equality constraints.
-
-  \section mcpSolversList Available solvers :
-  - mcp_FB(), nonsmooth Newton method based on Fisher-Burmeister function.
-*/
-
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"
 

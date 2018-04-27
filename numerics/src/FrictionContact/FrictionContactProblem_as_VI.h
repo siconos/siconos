@@ -18,12 +18,6 @@
 #ifndef FRICTIONCONTACTPROBLEM_AS_VI_H
 #define FRICTIONCONTACTPROBLEM_AS_VI_H
 
-/*! \page fcProblemVI Friction-contact problems (2D or 3D) as VI
- *
- *
- */
-
-
 /*!\file FrictionContactProblem_as_VI.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */

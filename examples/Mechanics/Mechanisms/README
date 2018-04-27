@@ -1,9 +1,0 @@
-This directory contains some tests ot the mechanisms toolbox from CAD
-Each example directory contains a bodydef.py describing the multibody.
-
-It assumes that both Siconos/Mechanics and Siconos/Front-End have been
-configured at the cmake level with -DWITH_MECHANISMS=1 and are installed.
-
-Then, in each directory, the simulation may be executed with this command:
-
-siconos -Psiconos_mechanisms .

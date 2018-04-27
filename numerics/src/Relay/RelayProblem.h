@@ -21,38 +21,6 @@
 
 #include <assert.h>
 #include <stdio.h>
-/*! \page RelayProblem Relay or box-constrained AVI problems
-  \section relayIntro The problem
-  Find \f$(z,w)\f$ such that:
-  \f{equation*}
-  \left\lbrace
-  \begin{array}{l}
-  w = M z + q\\
-  -w \in \mathcal{N}_{K}(z)\\
-  \end{array},
-  \right.
-  \f}
-  where M is an (\f$ n \times n \f$)-matrix, q, z and w are n-dimensional vectors, K is the box
-  defined by \f$K=\{x\in\mathbb{R}^n \mid lb_i \leq x_i \leq ub_i, i = 1, ..., n \}\f$ and
-  \f$\mathcal{N}_K(z)\f$ is the normal cone to \f$K\f$ at \f$z\f$.
-
-  The solvers and their parameters are described in \ref RelaySolvers. \n
-
-  \section relaySolversList Available solvers
-
-  The "direct" solvers are
-  - relay_avi_caoferris() based on an algorithm by Cao and Ferris for AVI with a polytopic set \f$K\f$.
-  - relay_path() using the PATH solver
-
-  Using an LCP reformulation (splitting z in positive and negative part), we have the following
-  available solvers:
-
-  - relay_enum() which solves the LCP using the enumerative method
-  - relay_lexicolemke() which solves the LCP using Lemke's algorithm
-
-  (see the functions/solvers list in Relay_Solvers.h)
-
-*/
 
 /*!\file RelayProblem.h
   \brief Structure used to define a Relay (dual or primal) Problem

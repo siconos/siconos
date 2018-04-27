@@ -83,6 +83,10 @@ macro(add_siconos_swig_sub_module fullname)
   if(DEFINED SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
     set(SWIG_MODULE_${_name}_EXTRA_DEPS ${SWIG_MODULE_${COMPONENT}_EXTRA_DEPS})
   endif()
+
+  if(WITH_DOXY2SWIG)
+    list(APPEND SWIG_MODULE_${_name}_EXTRA_DEPS ${COMPONENTS}_docstrings)
+  endif()
   
   # add as dependencies all the i files
   file(GLOB ${_name}_I_FILES ${CMAKE_CURRENT_SOURCE_DIR}/${_path}/*.i)
@@ -148,9 +152,6 @@ macro(add_siconos_swig_sub_module fullname)
     swig_link_libraries(${_name} ${PYTHON_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
   endif()
 
-  # set dep between docstrings and python bindings
-  add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT}_docstrings)
-  
   # set dependency of sphinx apidoc to this target
   if(USE_SPHINX)
     add_dependencies(apidoc ${SWIG_MODULE_${_name}_REAL_NAME})

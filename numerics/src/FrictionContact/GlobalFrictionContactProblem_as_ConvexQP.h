@@ -18,12 +18,6 @@
 #ifndef GLOBALFRICTIONCONTACTPROBLEM_AS_CONVEXQP_H
 #define GLOBALFRICTIONCONTACTPROBLEM_AS_CONVEXQP_H
 
-/*! \page fcProblemConvexQP Global Friction-contact problems (2D or 3D) as ConvexQP
- *
- *
- */
-
-
 /*!\file GlobalFrictionContactProblem_as_ConvexQP.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */

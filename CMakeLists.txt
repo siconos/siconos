@@ -24,6 +24,10 @@ include(SiconosTools)
 set(PROJECT_NAME siconos)
 set(PROJECT_NAME_CAP Siconos)
 
+
+# Get current year (for licence and other cartridges)
+execute_process(COMMAND date "+\"%Y\"" OUTPUT_VARIABLE YEAR)
+string(STRIP ${YEAR} YEAR)
 if(USER_OPTIONS_FILE)
   get_filename_component(input_file ${USER_OPTIONS_FILE} NAME)
   get_filename_component(path_to_file ${USER_OPTIONS_FILE} PATH)
@@ -114,7 +118,7 @@ endif()
 # doxygen doc from source files, sphinx doc
 # and docstrings from doxygen, depending on the
 # enabled options.
-add_subdirectory(Docs)
+add_subdirectory(docs)
 
 # ========= Setup each required component =========
 foreach(COMPONENT ${COMPONENTS})
@@ -122,7 +126,7 @@ foreach(COMPONENT ${COMPONENTS})
   add_subdirectory(${COMPONENT})
 endforeach()
 
-finalize_doxygen()
+finalize_doc()
 
 include(FeatureSummary)
 feature_summary(WHAT ALL)

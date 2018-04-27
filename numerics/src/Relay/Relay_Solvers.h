@@ -24,51 +24,6 @@
   Subroutines for the resolution of relay problems.
 */
 
-/*! \page RelaySolvers Relay Problems Solvers
-
-This page gives an overview of the available solvers for relay problems and their required parameters.
-
-For each solver, the input argument are:
-- a RelayProblem
-- the unknowns (z,w)
-- info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a SolverOptions structure, which handles iparam and dparam
-
-\section relayENUM Enumerative solver
-The relay problem is reformulated as a LCP and solved with the enumerative solver
-
- function: relay_enum()\n
-   parameters:
-  - dparam[0] (in): tolerance
-  - iparam[0] (in) : search for multiple solutions if 1
-  - iparam[1] (out) : key of the solution
-  - iparam[3] (in) :  starting key values (seed)
-  - iparam[4] (in) :  use DGELS (1) or DGESV (0).
-
-\section relayPATH PATH solver
-The relay problem is reformulated as a LCP and solved with the PATH solver
-
- function: relay_path()\n
-- dparam[0] (in): tolerance
-
-\section relayLEMKE Lemke solver
-The relay problem is reformulated as a LCP and solved with Lemke's method
-
- function: relay_lexicolemke()\n
- parameters:
-- iparam[0] (in): maximum number of iterations allowed
-- iparam[1] (out): number of iterations processed
-
-\section relayAVI_CaoFerris CaoFerris solver
-The relay problem is reformulated as an AVI and solved with the solver proposed by Cao and Ferris
-
- function: relay_avi_caoferris()\n
- parameters:
-- iparam[0] (in): maximum number of iterations allowed
-- iparam[1] (out): number of iterations processed
-
-*/
-
 #include "RelayProblem.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"

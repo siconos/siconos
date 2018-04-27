@@ -19,11 +19,6 @@
 #ifndef NumericsVector_H
 #define NumericsVector_H
 
-/*! \page NumericsVectorPage Matrix Storage in numerics component
-
-*/
-
-
 /*!\file NumericsVector.h
   \brief Structure definition and functions related to vector storage in Numerics
   \author Franck Perignon

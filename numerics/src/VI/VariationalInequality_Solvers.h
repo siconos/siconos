@@ -22,17 +22,6 @@
   \brief Subroutines for the resolution of Variational Inequalites (VI) problems
 */
 
-/*! \page VISolvers VI problems Solvers
-
-This page gives an overview of the available solvers for Variational Inequality problems and their required parameters.
-
-For each solver, the input argument are:
-- a VariationalInequality
-- the unknowns (x,fx)
-- info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a SolverOptions structure, which handles iparam and dparam
-*/
-
 #include "VariationalInequality.h"
 #include "SolverOptions.h"
 #include "VI_cst.h"

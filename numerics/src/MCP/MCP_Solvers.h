@@ -24,20 +24,6 @@
   \author siconos-team@lists.gforge.inria.fr
 */
 
-/*! \page MCPSolvers MixedComplementarity Problems Solvers
-
-  \section mcp_FischerBurmeister  semi-smooth Newton/Fisher-Burmeister solver.
-  a nonsmooth Newton method based based on the Fischer-Bursmeister convex function
-
-  function: mcp_FischerBurmeister() \n
-  parameters:
-  - iparam[0] (in): maximum number of iterations allowed
-  - iparam[1] (out): number of iterations processed
-  - dparam[0] (in): tolerance
-  - dparam[1] (out): resulting error
-
- */
-
 #include "MixedComplementarityProblem.h"
 #include "SolverOptions.h"
 

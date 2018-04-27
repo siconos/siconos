@@ -18,30 +18,6 @@
 #ifndef QP_SOLVERS_H
 #define QP_SOLVERS_H
 
-/*! \page QPSolvers Quadratic Programming problems (QP)
-  \section qpIntro The problem
-
-  Minimize: \n
-  \f[
-  \frac{1}{2} x' C x + d' x
-  \f]
-
-  subject to:\n
-  \f{eqnarray*}
-  A(j)*x  +  b(j)   =  0 & , & j=1,...,me \\
-  A(j)*x  +  b(j)  >=  0 & , & j=me+1,...,m \\
-  xl  <=  x  <=  xu
-  \f}
-
-  \section qpSolversList Available solvers
-
-  The qp pack is not yet implemented.
-  The only available function is ql0001() (fortran subroutine)
-
-  (see the functions/solvers list in QP_Solvers.h)
-
-*/
-
 /*!\file QP_Solvers.h
   Subroutines for the resolution of QP problems.\n
 

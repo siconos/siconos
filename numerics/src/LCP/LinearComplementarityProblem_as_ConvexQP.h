@@ -18,12 +18,6 @@
 #ifndef LCP_AS_CONVEXQP_H
 #define LCP_AS_CONVEXQP_H
 
-/*! \page lcpConvexQP LCP as ConvexQP
- *
- *
- */
-
-
 /*!\file LinearComplementarityProblem_as_ConvexQP.h
   \brief Definition of a structure to handle with LCP problems.
 */

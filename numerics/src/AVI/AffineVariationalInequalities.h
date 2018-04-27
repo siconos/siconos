@@ -24,38 +24,6 @@
  * \author Olivier Huber
 */
 
-/*! \page AVI Affine Variational Inequalities (AVI)
- * \section aviIntro The problem
- *  The Affine Variational Inequality (AVI) is defined by
- *
- *   Given \f$q\in\mathbb{R}^n\f$, \f$M\in\mathbb{R}^{n\times n}\f$ and a set \f$K\in\mathbb{R}^n\f$,
- *   find \f$z\in\mathbb{R}^n\f$ such that:
- *   \f{equation*}{(Mz+q)^T(y -z) \geq 0,\quad \text{ for all } y \in K,\f}
- *   or equivalently,
- *   \f{equation*}{-(Mz + q) \in \mathcal{N}_K(z)\f}
- *   where \f$\mathcal{N}_K\f$ is the normal cone to \f$K\f$ at \f$z\f$.
- *
- * The AVI is a special case of a Variational Inequality (VI), where the
- * function \f$F\f$ is affine. For VI solvers, see \ref viProblem .
- *
- * From more details on theory and analysis of AVI (and VI in general), we refer to
- *
- * Facchinei, Francisco; Pang, Jong-Shi (2003),
- * <i>Finite Dimensional Variational Inequalities and Complementarity Problems</i>, Vol. 1 & 2,
- * Springer Series in Operations Research, Berlin-Heidelberg-New York: Springer-Verlag.
- *
- *  \section aviSolversList Available solvers
-
-  The solvers and their parameters are described in \ref AVISolvers. \n
-  Use the generic function AVI_driver() to call one the the specific solvers listed below:
-
-    - avi_caoferris(), direct solver for AVI based on pivoting method principle for degenerate problem.\n
-  Choice of pivot variable is performed via lexicographic ordering
-
-  (see also the functions/solvers list in AVI_Solvers.h and numbering in AVI_cst.h)
-
-*/
-
 #include "NumericsFwd.h"
 #include <stdio.h>
 

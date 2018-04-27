@@ -22,16 +22,6 @@
   \brief Subroutines for the resolution of Variational Inequalites (VI) problems
 */
 
-/*! \page ConvexQPSolvers ConvexQP problems Solvers
-
-This page gives an overview of the available solvers for Convex QP problems and their required parameters.
-
-For each solver, the input argument are:
-- a ConvexQP problem
-- the unknowns (x,fx)
-- info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a SolverOptions structure, which handles iparam and dparam
-*/
 
 #include "ConvexQP.h"
 #include "SolverOptions.h"

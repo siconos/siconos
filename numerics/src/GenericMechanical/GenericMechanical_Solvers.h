@@ -23,14 +23,6 @@
 
 */
 
-/*! \page genericSolversList Generic Contact Problem Solvers
-
-Documentation to be done ...
-
-
-*/
-
-
 #include "GenericMechanicalProblem.h"
 #include "SolverOptions.h"
 

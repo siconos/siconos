@@ -152,6 +152,7 @@ macro(LIBRARY_PROJECT_SETUP)
     add_subdirectory(swig)
   endif()
 
+  add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
   
 endmacro()
 

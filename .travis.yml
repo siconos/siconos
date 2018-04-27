@@ -35,23 +35,21 @@ env:
   - TASK=default:distrib=ubuntu,17.10
   - TASK=default:distrib=debian,latest
   - TASK=default:distrib=fedora,latest:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
-  
   - TASK=default:distrib=ubuntu,17.10:ci_config=with_cxx11
   - TASK=default:pkgs+=lpsolve,
-  - TASK=default:ci_config=nix:distrib=nixos/nix,latest:targets=.,docker-build,docker-cmd:pkgs=cmake,make,siconos-nix-default,
-  
- # - TASK=default:distrib=ubuntu,17.10:build_configuration=Profiling:pkgs+=profiling,
-
   - TASK=default:pkgs-=atlas-lapack:pkgs+=openblas-lapacke,
-#  - TASK=default:distrib=ubuntu,17.10:ci_config=with_serialization:pkgs+=serialization,
   - TASK=default:ci_config=with_mumps:pkgs+=mumps,
   - TASK=default:ci_config=with_umfpack:pkgs+=umfpack,
 
-  # siconos package
-  #- TASK=empty:docker=true:ci_config=examples_all:distrib=fedora,latest:pkgs=siconos,siconos-source:srcs=examples,:targets=examples,docker-build,docker-ctest
-  #- TASK=empty:docker=true:ci_config=examples_all:distrib=ubuntu,16.04:pkgs=siconos,siconos-source:srcs=examples,:targets=examples,docker-build,docker-ctest
+# not finalized yet
+# - TASK=default:ci_config=nix:distrib=nixos/nix,latest:targets=.,docker-build,docker-cmd:pkgs=cmake,make,siconos-nix-default,
+# tasks too long for travis:
+# - TASK=default:distrib=ubuntu,17.10:build_configuration=Profiling:pkgs+=profiling,
+#  - TASK=default:distrib=ubuntu,17.10:ci_config=with_serialization:pkgs+=serialization,
+# siconos package
+#  - TASK=empty:docker=true:ci_config=examples_all:distrib=fedora,latest:pkgs=siconos,siconos-source:srcs=examples,:targets=examples,docker-build,docker-ctest
+#  - TASK=empty:docker=true:ci_config=examples_all:distrib=ubuntu,16.04:pkgs=siconos,siconos-source:srcs=examples,:targets=examples,docker-build,docker-ctest
 
-  
 before_script:
   - case $TASK in
       *docker=false*)
