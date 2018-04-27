@@ -73,22 +73,26 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter
   assert(ds1);
   assert(ds2);
 
+  if (!interProp.workVectors)
+  {
+    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors->resize(MoreauJeanBilbaoOSI::WORK_INTERACTION_LENGTH);
+  }
 
+  if (!interProp.workBlockVectors)
+  {
+    interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+    interProp.workBlockVectors->resize(MoreauJeanBilbaoOSI::BLOCK_WORK_LENGTH);
+  }
 
-  interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
-
-  VectorOfVectors& workV = *interProp.workVectors;
-  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
-  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
-  workBlockV.resize(MoreauJeanBilbaoOSI::BLOCK_WORK_LENGTH);
+  VectorOfVectors& inter_work = *interProp.workVectors;
+  VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
 
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
   RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
   
-  workV.resize(MoreauJeanBilbaoOSI::WORK_INTERACTION_LENGTH);
-  workV[MoreauJeanBilbaoOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  inter_work[MoreauJeanBilbaoOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   if(relationType != Lagrangian || relationSubType != LinearTIR)
     RuntimeException::selfThrow("MoreauJeanBilbaoOSI::computeFreeOutput only Lagrangian Linear Relations are allowed.");
@@ -104,14 +108,14 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter
   if(checkOSI(DSG.descriptor(ds1)))
   {
     VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-    if (!workBlockV[MoreauJeanBilbaoOSI::xfree])
+    if (!inter_work_block[MoreauJeanBilbaoOSI::xfree])
     {
-      workBlockV[MoreauJeanBilbaoOSI::xfree].reset(new BlockVector());
-      workBlockV[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds1[MoreauJeanBilbaoOSI::VFREE]);
+      inter_work_block[MoreauJeanBilbaoOSI::xfree].reset(new BlockVector());
+      inter_work_block[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds1[MoreauJeanBilbaoOSI::VFREE]);
     }
     else
     {
-      workBlockV[MoreauJeanBilbaoOSI::xfree]->setVectorPtr(0,workVds1[MoreauJeanBilbaoOSI::VFREE]);
+      inter_work_block[MoreauJeanBilbaoOSI::xfree]->setVectorPtr(0,workVds1[MoreauJeanBilbaoOSI::VFREE]);
     }
   }
   if (ds1 != ds2)
@@ -119,16 +123,16 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForInteraction(Interaction &inter
     if(checkOSI(DSG.descriptor(ds2)))
     {
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      if (!workBlockV[MoreauJeanBilbaoOSI::xfree])
+      if (!inter_work_block[MoreauJeanBilbaoOSI::xfree])
       {
-        workBlockV[MoreauJeanBilbaoOSI::xfree].reset(new BlockVector());
+        inter_work_block[MoreauJeanBilbaoOSI::xfree].reset(new BlockVector());
         //dummy insertion to reserve first vector for ds1
-        workBlockV[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
-        workBlockV[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
+        inter_work_block[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
+        inter_work_block[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
       }
       else
       {
-        workBlockV[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
+        inter_work_block[MoreauJeanBilbaoOSI::xfree]->insertPtr(workVds2[MoreauJeanBilbaoOSI::VFREE]);
       }
     }
   }
@@ -150,10 +154,10 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
   // W = mass + time_step**2/2(I - Theta)Stiffness + time_step * Sigma*
 
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  VectorOfVectors& work = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
 
-  if(work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]
-     || work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
+  if(ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]
+     || ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
      || _dynamicalSystemsGraph->properties(dsv).W)
     RuntimeException::selfThrow("MoreauJeanBilbaoOSI::_initialize_iteration_matrix(t,ds) - W has already been initialized by another osi");
 
@@ -167,15 +171,15 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
   _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(ndof, ndof, Siconos::BANDED, 0, 0));
 
   // - I - theta
-  work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA].reset(new SiconosVector(ndof));
+  ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA].reset(new SiconosVector(ndof));
   // - dt * sigma*
-  work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR].reset(new SiconosVector(ndof));
+  ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR].reset(new SiconosVector(ndof));
   SimpleMatrix& iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).W;
   // Todo : check perf of two different methods to compute W and friends
-  _compute_osi_parameters_v1(lldds, work, iteration_matrix);
+  _compute_osi_parameters_v1(lldds, ds_work_vectors, iteration_matrix);
 }
 
-// void MoreauJeanBilbaoOSI::_compute_osi_parameters_v0(LagrangianLinearDiagonalDS& lldds, VectorOfVectors& work, SimpleMatrix& iteration_matrix_w)
+// void MoreauJeanBilbaoOSI::_compute_osi_parameters_v0(LagrangianLinearDiagonalDS& lldds, VectorOfVectors& ds_work_vectors, SimpleMatrix& iteration_matrix_w)
 // {
 //   // notations:
 //   // - stiffness(k) = omega
@@ -188,26 +192,26 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
 
 //   DenseVect& omega2 = *stiffness.dense();
 //   DenseVect& sigma = *damping.dense();
-//   DenseVect& buffer = *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]->dense();
-//   DenseVect& sigma_star = *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]->dense();
+//   DenseVect& buffer = *ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]->dense();
+//   DenseVect& sigma_star = *ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]->dense();
 //   // sigma**2, saved in sigma_star. Remind that damping == 2.*sigma
 //   std::transform(sigma.begin(), sigma.end(),
 //                 sigma.begin(), sigma_star.begin(), std::multiplies<double>() );
-//   *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] *= (0.25);
+//   *ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] *= (0.25);
 //   // sqrt(sigma**2 - omega**2) saved in buffer
-//   sub(*work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR], omega2, *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]);
+//   sub(*ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR], omega2, *ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]);
 //   std::transform(buffer.begin(), buffer.end(), buffer.begin(),
 //                  static_cast<std::complex<double> (*)(std::complex<double>)>(std::sqrt));
-//   *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA] *= time_step;
-//   // exp( work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]) = exp(sqrt(sigma**2 - omega**2), in sigma_star
+//   *ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA] *= time_step;
+//   // exp( ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]) = exp(sqrt(sigma**2 - omega**2), in sigma_star
 //   std::transform(buffer.begin(), buffer.end(), sigma_star.begin(), exp);
-//   // exp(-work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]) = exp(-sqrt(sigma**2 - omega**2) in buffer
-//   *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA] *= -1.;
+//   // exp(-ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]) = exp(-sqrt(sigma**2 - omega**2) in buffer
+//   *ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA] *= -1.;
 //   std::transform(buffer.begin(), buffer.end(), buffer.begin(), exp);
 //   // sum of exp in buffer
-//   add(*work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA], *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR], *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]);
-//   // exp(-sigma*time_step) in work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
-//   *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] = -time_step * sigma;
+//   add(*ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA], *ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR], *ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]);
+//   // exp(-sigma*time_step) in ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
+//   *ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] = -time_step * sigma;
 //   std::transform(sigma_star.begin(), sigma_star.end(), sigma_star.begin(), exp);
 //   // Ak = exp(-sigma*time_step)*(exp(-sqrt(sigma**2 - omega**2)) + exp(sqrt(sigma**2 - omega**2))
 //   // i.e. Ak = sigma_star * buffer (component wise), result in buffer
@@ -217,33 +221,33 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
 //   std::transform(sigma_star.begin(), sigma_star.end(),
 //                 sigma_star.begin(), sigma_star.begin(), std::multiplies<double>() );
 //   // 1 + ek in iteration_mat (temp buffer in VFREE)
-//   work[MoreauJeanBilbaoOSI::VFREE]->fill(1.);
-//   DenseVect& iteration_matrix = *work[MoreauJeanBilbaoOSI::VFREE]->dense();
-//   add(*work[MoreauJeanBilbaoOSI::VFREE], *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR],
-//       *work[MoreauJeanBilbaoOSI::VFREE]);
+//   ds_work_vectors[MoreauJeanBilbaoOSI::VFREE]->fill(1.);
+//   DenseVect& iteration_matrix = *ds_work_vectors[MoreauJeanBilbaoOSI::VFREE]->dense();
+//   add(*ds_work_vectors[MoreauJeanBilbaoOSI::VFREE], *ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR],
+//       *ds_work_vectors[MoreauJeanBilbaoOSI::VFREE]);
 //   // 1 - ek in ek (sigma_star)
-//   *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] *= -1.;
+//   *ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] *= -1.;
 //   transform(sigma_star.begin(), sigma_star.end(), sigma_star.begin(),
 //             bind2nd(std::plus<double>(), 1.0));
 //   // 1 - ek/1 +ek in sigma_star
 //   std::transform(sigma_star.begin(), sigma_star.end(),
 //                 iteration_matrix.begin(), sigma_star.begin(), std::divides<double>() );
 //   // 1 + ek - Ak (i.e. iteration_matrix - buffer) in iteration_matrix
-//   sub(*work[MoreauJeanBilbaoOSI::VFREE], *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA],
-//       *work[MoreauJeanBilbaoOSI::VFREE]);
+//   sub(*ds_work_vectors[MoreauJeanBilbaoOSI::VFREE], *ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA],
+//       *ds_work_vectors[MoreauJeanBilbaoOSI::VFREE]);
 //   // Ak / (1 + ek - Ak) in buffer (i.e. buffer/iteration_matrix in buffer)
 //   std::transform(buffer.begin(), buffer.end(),
 //                 iteration_matrix.begin(), buffer.begin(), std::divides<double>() );
 //   // 2./(omega_k**2 * time_step ** 2) in iteration_matrix
 //   double coeff = 2. / (time_step * time_step);
-//   work[MoreauJeanBilbaoOSI::VFREE]->fill(coeff);
+//   ds_work_vectors[MoreauJeanBilbaoOSI::VFREE]->fill(coeff);
 //   std::transform(iteration_matrix.begin(), iteration_matrix.end(),
 //                 omega2.begin(), iteration_matrix.begin(), std::divides<double>() );
 //   std::transform(iteration_matrix.begin(), iteration_matrix.end(),
 //                 omega2.begin(), iteration_matrix.begin(), std::divides<double>() );
 //   // 1 - theta_k = 1 - 2/w**2*dt**2 + (Ak / (1+ek -Ak) (i.e. 1. - iteration_matrix + buffer) in buffer
-//   sub(*work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA], *work[MoreauJeanBilbaoOSI::VFREE],
-//       *work[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]);
+//   sub(*ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA], *ds_work_vectors[MoreauJeanBilbaoOSI::VFREE],
+//       *ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA]);
 //   transform(buffer.begin(), buffer.end(), buffer.begin(),
 //             bind2nd(std::plus<double>(), 1.0));
 //   // sigma* * dt= (1 + (1-theta_k)*omega**2*dt**2/2) * (1-ek)/(1+ek) in sigma_star
@@ -266,13 +270,13 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds)
 //   SiconosMatrix& mass = *lldds.mass();
 //   for(unsigned int i=0;i<lldds.dimension();++i)
 //   {
-//     iteration_matrix_w(i, i) =  mass(i, i) + 0.5 * time_step * time_step * (*work[MoreauJeanBilbaoOSI::VFREE])(i);
-//     iteration_matrix_w(i, i) += (*work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR])(i);
+//     iteration_matrix_w(i, i) =  mass(i, i) + 0.5 * time_step * time_step * (*ds_work_vectors[MoreauJeanBilbaoOSI::VFREE])(i);
+//     iteration_matrix_w(i, i) += (*ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR])(i);
 //     iteration_matrix_w(i, i) = 1. / iteration_matrix_w(i, i);
 //   }
 //   // save 2. * dt * sigma_* in sigma_star
 //   double two = 2.;
-//   *work[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] *= two;
+//   *ds_work_vectors[MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR] *= two;
 // }
 
 void MoreauJeanBilbaoOSI::_compute_osi_parameters_v1(LagrangianLinearDiagonalDS& lldds, VectorOfVectors& work, SimpleMatrix& iteration_matrix)
@@ -484,7 +488,7 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
   Interaction& inter = *indexSet.bundle(vertex_inter);
   //VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   assert(inter.relation());
-  VectorOfBlockVectors& workBlockV = *indexSet.properties(vertex_inter).workBlockVectors;
+  VectorOfBlockVectors& inter_work_block = *indexSet.properties(vertex_inter).workBlockVectors;
   // Get relation and non smooth law types
   // RELATION::TYPES relationType = inter.relation()->getType();
   // RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
@@ -503,7 +507,7 @@ void MoreauJeanBilbaoOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vert
   coord[6] = 0;
   coord[7] = sizeY;
   // buffer used to save output
-  BlockVector& x_free = *workBlockV[MoreauJeanBilbaoOSI::xfree];
+  BlockVector& x_free = *inter_work_block[MoreauJeanBilbaoOSI::xfree];
   SiconosVector& osnsp_rhs = *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
 
 
@@ -631,7 +635,7 @@ bool MoreauJeanBilbaoOSI::addInteractionInIndexSet(SP::Interaction inter, unsign
 }
 
 
-bool MoreauJeanBilbaoOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanBilbaoOSI::removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1);
   double h = _simulation->timeStep();
@@ -644,7 +648,7 @@ bool MoreauJeanBilbaoOSI::removeInteractionInIndexSet(SP::Interaction inter, uns
 
   DEBUG_EXPR(
     if(y > 0)
-      DEBUG_PRINT("MoreauJeanOSI::removeInteractionInIndexSet DEACTIVATE.\n");
+      DEBUG_PRINT("MoreauJeanOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
     );
   return (y > 0.0);
 }

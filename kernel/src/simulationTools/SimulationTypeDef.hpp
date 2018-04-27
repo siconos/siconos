@@ -26,15 +26,16 @@
 #include <vector>
 #include <map>
 #include <set>
-
-#include "SiconosPointers.hpp"
 #include "SiconosVector.hpp"
+#include "SiconosPointers.hpp"
+
+/** double precision machine */
+#define MACHINE_PREC std::numeric_limits<double>::epsilon()
 
 // ================== Objects to handle DS ==================
 
-/** Map of SP::SimpleMatrix; key = the number of the related DS*/
+/** Map of SP::SimpleMatrix; used only in MoreauJeanGOSI. key = the number(id) of the related DS*/
 typedef std::map<unsigned int, SP::SimpleMatrix> MapOfDSMatrices;
-
 
 /** list of indices */
 typedef std::vector<unsigned int> IndexInt;
@@ -62,10 +63,6 @@ TYPEDEF_SPTR(OneStepNSProblems)
 
 /** default tolerance value, used to update index sets */
 #define DEFAULT_TOLERANCE 10 * MACHINE_PREC
-
-/** double precision machine */
-/*  eq dlmach('e'),  DBL_EPSILON,  fabs(a-b) <  */
-#define MACHINE_PREC std::numeric_limits<double>::epsilon()
 
 enum SICONOS_OSNSP
 {

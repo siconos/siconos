@@ -62,8 +62,13 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 class SchatzmanPaoliOSI : public OneStepIntegrator
 {
 public:
-   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
-  enum SchatzmanPaoliOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+
+  enum SchatzmanPaoliOSI_ds_workVector_id {RESIDU_FREE, FREE, LOCAL_BUFFER, WORK_LENGTH};
+
+  enum SchatzmanPaoliOSI_interaction_workVector_id{OSNSP_RHS, WORK_INTERACTION_LENGTH};
+
+  enum SchatzmanPaoliOSI_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
+
 protected:
   /** serialization hooks
   */

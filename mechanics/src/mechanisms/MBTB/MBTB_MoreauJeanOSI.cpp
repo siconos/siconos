@@ -36,7 +36,7 @@ bool MBTB_MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigne
     DEBUG_PRINT("MBTB_MoreauJeanOSI::addInteractionInIndexSet ACTIVATE.\n");
   return (y<=0);
 }
-bool MBTB_MoreauJeanOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i==1);
   double h = _simulation->timeStep();
@@ -51,7 +51,7 @@ bool MBTB_MoreauJeanOSI::removeInteractionInIndexSet(SP::Interaction inter, unsi
   y += gamma*h*yDot;
   assert(!isnan(y));
   if(y>0)
-    DEBUG_PRINT("MBTB_MoreauJeanOSI::removeInteractionInIndexSet DEACTIVATE.\n");
+    DEBUG_PRINT("MBTB_MoreauJeanOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
   return (y>0);
 }
 #endif
@@ -77,7 +77,7 @@ bool MBTB_MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigne
   return (y<=_activateYPosThreshold);
 }
 
-bool MBTB_MoreauJeanOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
 
 {
   assert(i==1);
@@ -85,15 +85,15 @@ bool MBTB_MoreauJeanOSI::removeInteractionInIndexSet(SP::Interaction inter, unsi
   double y = (inter->y(i-1))->getValue(0); // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity 
 
-  DEBUG_PRINTF("MBTB_MoreauJeanOSI::removeInteractionInIndexSet yref=%e, yDot=%e .\n", y, yDot);
+  DEBUG_PRINTF("MBTB_MoreauJeanOSI::removeInteractionFromIndexSet yref=%e, yDot=%e .\n", y, yDot);
 
-  DEBUG_PRINTF("MBTB_MoreauJeanOSI::removeInteractionInIndexSet  _deactivateYPosThreshold =%e, _deactivateYVelThreshold=%e\n",
+  DEBUG_PRINTF("MBTB_MoreauJeanOSI::removeInteractionFromIndexSet  _deactivateYPosThreshold =%e, _deactivateYVelThreshold=%e\n",
                _deactivateYPosThreshold ,
                _deactivateYVelThreshold );
 
   assert(!isnan(y));
   if(y>_deactivateYPosThreshold && yDot>=_deactivateYVelThreshold)
-    DEBUG_PRINT("MBTB_MoreauJeanOSI::removeInteractionInIndexSet DEACTIVATE.\n");
+    DEBUG_PRINT("MBTB_MoreauJeanOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
   return (y>_deactivateYPosThreshold && yDot>=_deactivateYVelThreshold);
 }
 

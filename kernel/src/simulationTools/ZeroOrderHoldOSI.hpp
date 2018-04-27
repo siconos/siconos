@@ -61,6 +61,12 @@ protected:
 
 public:
 
+  enum ZeroOrderHoldOSI_ds_workVector_id{RESIDU_FREE, FREE, DELTA_X, DELTA_X_FOR_RELATION, WORK_LENGTH};
+
+  enum ZeroOrderHoldOSI_interaction_workVector_id{OSNSP_RHS, H_ALPHA, WORK_INTERACTION_LENGTH};
+
+  enum ZeroOrderHoldOSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
+
   /** basic constructor
    */
   ZeroOrderHoldOSI();
@@ -142,7 +148,7 @@ public:
    * \param i the level of the IndexSet
    * \return true if y>0
    */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
   /** Unused
    * \param time current time

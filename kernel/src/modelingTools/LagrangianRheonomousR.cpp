@@ -48,7 +48,7 @@ void LagrangianRheonomousR::initialize(Interaction& inter)
 {
   if (!_jachq)
   {
-    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int sizeY = inter.dimension();
     unsigned int sizeDS = inter.getSizeOfDS();
     _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
   }
@@ -112,7 +112,7 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsig
     {
       if (!_hDot)
       {
-        unsigned int sizeY = inter.getSizeOfY();
+        unsigned int sizeY = inter.dimension();
         _hDot.reset(new SiconosVector(sizeY));
       }
       // Computation of the partial derivative w.r.t time of h(q,t)

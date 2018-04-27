@@ -54,21 +54,6 @@
 class OneStepIntegrator :public std11::enable_shared_from_this<OneStepIntegrator>
 {
 
-public :
-  /** List of indices used to save tmp work matrices and vectors (last one is the size of the present list) */
-  enum OSI_ds_workVector_id {local_buffer, residu, residu_free,
-                             free, free_tdg,
-                             x_partial_ns_for_relation, delta_x_for_relation,
-                             qtmp, acce_memory, acce_like,
-                             work_vector_of_vector_size};
-  enum OSI_interaction_workVector_id{osnsp_rhs, vec_x, vec_z,
-                                     h_alpha, g_alpha, vec_residuY, vec_residuR,
-                                     interaction_work_vector_of_vector_size};
-
-  enum OSI_interaction_workBlockVector_id{xfree, x_partial_ns, delta_x, work_vector_of_block_vector_size };
-
-  enum OSI_WorkMatrix_id {mat_Ktilde, mat_Khat, dense_output_coefficients, work_vector_of_matrix_size};
-
 protected:
   /* serialization hooks */
   ACCEPT_SERIALIZATION(OneStepIntegrator);
@@ -440,9 +425,9 @@ public:
    * \param i
    * \return bool
    */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
   {
-    RuntimeException::selfThrow("OneStepIntegrator::removeInteractionInIndexSet - Should not be called at this level");
+    RuntimeException::selfThrow("OneStepIntegrator::removeInteractionFromIndexSet - Should not be called at this level");
     return 0;
   };
 

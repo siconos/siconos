@@ -59,22 +59,22 @@ void LagrangianCompliantLinearTIR::initialize(Interaction& inter)
 }
 void LagrangianCompliantLinearTIR::checkSize(Interaction& inter)
 {
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   if (!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
-    RuntimeException::selfThrow("LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between H matrix and the interaction.");
+    RuntimeException::selfThrow("LagrangianCompliantLinearTIR::checkSize inconsistent sizes between H matrix and the interaction.");
 
   if ((_jachlambda) && (_jachlambda->size(0) != sizeY || _jachlambda->size(1) != sizeY))
-    RuntimeException::selfThrow("LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between D matrix and the interaction.");
+    RuntimeException::selfThrow("LagrangianCompliantLinearTIR::checkSize inconsistent sizes between D matrix and the interaction.");
 
   if ((_e) && _e->size() != sizeY)
-    RuntimeException::selfThrow("LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between e vector and the dimension of the interaction.");
+    RuntimeException::selfThrow("LagrangianCompliantLinearTIR::checkSize inconsistent sizes between e vector and the dimension of the interaction.");
 
   unsigned int sizeZ = DSlink[LagrangianR::z]->size();
   if ((_F) && (
         _F->size(0) != sizeZ || _F->size(1) != sizeZ))
-    RuntimeException::selfThrow("LagrangianCompliantLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between F matrix and the interaction.");
+    RuntimeException::selfThrow("LagrangianCompliantLinearTIR::checkSize inconsistent sizes between F matrix and the interaction.");
 
 }
 

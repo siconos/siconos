@@ -55,12 +55,12 @@ void MoreauJeanCombinedProjectionOSI::initializeWorkVectorsForDS(double t, SP::D
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-    workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->dimension()));
+    workVectors[MoreauJeanOSI::QTMP].reset(new SiconosVector(d->dimension()));
   }
   else if(dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS>(ds);
-    workVectors[OneStepIntegrator::qtmp].reset(new SiconosVector(d->getqDim()));
+    workVectors[MoreauJeanOSI::QTMP].reset(new SiconosVector(d->getqDim()));
   }
   else
   {
@@ -190,7 +190,7 @@ bool MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet(SP::Interaction i
 }
 
 
-bool MoreauJeanCombinedProjectionOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanCombinedProjectionOSI::removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(0);
   return(0);

@@ -46,7 +46,7 @@ void LagrangianCompliantR::_zeroPlugin()
 void LagrangianCompliantR::initialize(Interaction& inter)
 {
   LagrangianR::initialize(inter);
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
 
   if (! _jachlambda)
     _jachlambda.reset(new SimpleMatrix(sizeY, sizeY));

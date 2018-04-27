@@ -59,7 +59,7 @@ void FirstOrderType2R::initialize(Interaction& inter)
 {
   FirstOrderR::initialize(inter);
 
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   unsigned int sizeDS = inter.getSizeOfDS();
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();

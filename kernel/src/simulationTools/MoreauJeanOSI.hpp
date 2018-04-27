@@ -141,7 +141,7 @@ protected:
 
 public:
 
-  enum MoreauJeanOSI_ds_workVector_id{RESIDU_FREE, VFREE, BUFFER, WORK_LENGTH};
+  enum MoreauJeanOSI_ds_workVector_id{RESIDU_FREE, VFREE, BUFFER, QTMP, WORK_LENGTH};
 
   enum MoreauJeanOSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
@@ -372,7 +372,7 @@ public:
    * \param i level of the IndexSet
    * \return Boolean
    */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
 
   /** method to prepare the fist Newton iteration

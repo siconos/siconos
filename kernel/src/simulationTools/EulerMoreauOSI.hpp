@@ -149,6 +149,17 @@ protected:
   EulerMoreauOSI() {};
 
 public:
+
+  enum EulerMoreauOSI_ds_workVector_id{RESIDU, RESIDU_FREE, FREE, X_PARTIAL_NS_FOR_RELATION,
+				       DELTA_X_FOR_RELATION,LOCAL_BUFFER, WORK_LENGTH};
+
+  enum EulerMoreauOSI_interaction_workVector_id{OSNSP_RHS, VEC_X, VEC_Z, H_ALPHA, VEC_RESIDU_Y,
+						G_ALPHA, VEC_RESIDU_R, WORK_INTERACTION_LENGTH};
+
+  enum EulerMoreauOSI_interaction_workBlockVector_id{XFREE, X_PARTIAL_NS, DELTA_X, BLOCK_WORK_LENGTH};
+
+  enum EulerMoreauOSI_interaction_workMat_id{MAT_KHAT, MAT_KTILDE, MAT_WORK_LENGTH};
+
   /** constructor from theta value only
    *  \param theta value for all DS.
    */

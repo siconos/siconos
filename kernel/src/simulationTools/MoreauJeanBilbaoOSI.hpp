@@ -38,11 +38,13 @@ protected:
 
 public:
 
-  enum {TWO_DT_SIGMA_STAR, ONE_MINUS_THETA, VFREE, WORK_LENGTH};
+  enum MoreauJeanBilbaoOSI_ds_workVector_id {TWO_DT_SIGMA_STAR, ONE_MINUS_THETA, VFREE, WORK_LENGTH};
 
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+  enum MoreauJeanBilbaoOSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
-  enum MoreauJeanOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+  enum MoreauJeanBilbaoOSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
+
+  
   /* Constructor - No extra parameters: depends only on connected ds and simulation time step*/
   MoreauJeanBilbaoOSI();
 
@@ -155,7 +157,7 @@ public:
    * \param i level of the IndexSet
    * \return Boolean
    */
-  bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
 
   /* visitors hook */

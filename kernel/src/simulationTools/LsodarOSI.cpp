@@ -182,7 +182,7 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
     if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
       SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
-      SiconosVector &free=*workVectors[OneStepIntegrator::free];
+      SiconosVector &free=*workVectors[LsodarOSI::FREE];
       // we assume that inverseMass and forces are updated after call of ds->computeRhs(t);
       free = *lds->forces();
       if(lds->inverseMass())
@@ -236,7 +236,7 @@ void LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
-  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
+  VectorOfVectors& ds_work_vectors = *_initializeDSWorkVectors(ds);
 
   Type::Siconos dsType = Type::value(*ds);
 
@@ -250,8 +250,8 @@ void LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
       _xWork.reset(new BlockVector());
     _xWork->insertPtr(lds.q());
     _xWork->insertPtr(lds.velocity());
-    workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
-    workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds.dimension()));
+    ds_work_vectors.resize(LsodarOSI::WORK_LENGTH);
+    ds_work_vectors[LsodarOSI::FREE].reset(new SiconosVector(lds.dimension()));
   }
   else
   {
@@ -275,18 +275,25 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
 
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  if (!interProp.workVectors)
+  {
+    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors->resize(LsodarOSI::WORK_INTERACTION_LENGTH);
+  }
 
-  interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
-  workBlockV.resize(LsodarOSI::BLOCK_WORK_LENGTH);
+  if (!interProp.workBlockVectors)
+  {
+    interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+    interProp.workBlockVectors->resize(LsodarOSI::BLOCK_WORK_LENGTH);
+  }
+
+  VectorOfVectors& inter_work = *interProp.workVectors;
+  VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
 
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
-  workV.resize(LsodarOSI::WORK_INTERACTION_LENGTH);
-  workV[LsodarOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
+  inter_work[LsodarOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
 
@@ -329,8 +336,8 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   if (relationType == Lagrangian)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
-    workBlockV[LsodarOSI::xfree].reset(new BlockVector());
-    workBlockV[LsodarOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    inter_work_block[LsodarOSI::xfree].reset(new BlockVector());
+    inter_work_block[LsodarOSI::xfree]->insertPtr(workVds1[LsodarOSI::FREE]);
     DSlink[LagrangianR::p2].reset(new BlockVector());
     DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
     DSlink[LagrangianR::q2].reset(new BlockVector());
@@ -338,8 +345,8 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   }
   // else if (relationType == NewtonEuler)
   // {
-  //   workBlockV[NewtonEulerR::xfree].reset(new BlockVector());
-  //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  //   inter_work_block[::xfree].reset(new BlockVector());
+  //   inter_work_block[::xfree]->insertPtr(workVds1[LsodarOSI::FREE]);
   // }
 
 
@@ -350,13 +357,13 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     if (relationType == Lagrangian)
     {
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
-      workBlockV[LsodarOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      inter_work_block[LsodarOSI::xfree]->insertPtr(workVds2[LsodarOSI::FREE]);
       DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
       DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {
-    //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    //   inter_work_block[NewtonEulerR::xfree]->insertPtr(workVds2[LsodarOSI::FREE]);
     // }
   }
 }
@@ -627,7 +634,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
-  VectorOfBlockVectors& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
+  VectorOfBlockVectors& inter_work_block = *indexSet->properties(vertex_inter).workBlockVectors;
 
 // Get relation and non smooth law types
   RELATION::TYPES relationType = inter->relation()->getType();
@@ -651,7 +658,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   SP::BlockVector Xfree;
 
 
-  // All of these values should be stored in the node corrseponding to the Interactionwhen a MoreauJeanOSI scheme is used.
+  // All of these values should be stored in the node corrseponding to the Interactionwhen a LsodarOSI scheme is used.
 
   /* V.A. 10/10/2010
    * Following the type of OSNS  we need to retrieve the velocity or the acceleration
@@ -664,12 +671,12 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
   {
     if(relationType == Lagrangian)
     {
-      Xfree = workBlockV[LsodarOSI::xfree];
+      Xfree = inter_work_block[LsodarOSI::xfree];
       DEBUG_EXPR(Xfree->display(););
     }
     // else if  (relationType == NewtonEuler)
     // {
-    //   Xfree = inter->data(NewtonEulerR::free);
+    //   Xfree = inter->data(::FREE);
     // }
     assert(Xfree);
     //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;

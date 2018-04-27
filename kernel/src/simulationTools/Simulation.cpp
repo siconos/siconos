@@ -75,16 +75,12 @@ Simulation::Simulation(SP::TimeDiscretisation td):
   _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0), _T(0.0),
   _numberOfIndexSets(0),
   _tolerance(DEFAULT_TOLERANCE), _printStat(false),
-  _staticLevels(false),_isInitialized(false)
+  _staticLevels(false),_isInitialized(false), _useRelativeConvergenceCriterion(false),
+  _relativeConvergenceCriterionHeld(false), _relativeConvergenceTol(10e-3)
+
 {
   if (!td)
     RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
-  _useRelativeConvergenceCriterion = false;
-  _relativeConvergenceCriterionHeld = false;
-  _relativeConvergenceTol = 10e-3;
-
-  // === indexSets will be updated during initialize() call ===
-
   _allOSI.reset(new OSISet());
   _allNSProblems.reset(new OneStepNSProblems());
   _eventsManager.reset(new EventsManager(td)); //

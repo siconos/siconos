@@ -626,7 +626,13 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[OneStepIntegrator::osnsp_rhs];
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[EulerMoreauOSI::OSNSP_RHS];
+    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+  }
+  else if(osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI)
+  {
+    osi1.computeFreeOutput(vertex_inter, this);
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
     setBlock(osnsp_rhs, _q, sizeY , 0, pos);
   }
   else if ((osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI  )||

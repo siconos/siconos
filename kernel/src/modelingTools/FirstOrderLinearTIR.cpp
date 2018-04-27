@@ -72,23 +72,23 @@ void FirstOrderLinearTIR::checkSize(Interaction& inter)
   DEBUG_PRINT("FirstOrderLinearTIR::checkSize(Interaction & inter)\n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  DEBUG_PRINTF("_C->size(0) = %i,\t inter.getSizeOfY() = %i\n ",_C->size(0),inter.getSizeOfY() );
+  DEBUG_PRINTF("_C->size(0) = %i,\t inter.dimension() = %i\n ",_C->size(0),inter.dimension() );
   DEBUG_PRINTF("_C->size(1) = %i,\t inter.getSizeOfDS() = %i\n ",_C->size(1),inter.getSizeOfDS() );
 
-  assert((_C->size(0) == inter.getSizeOfY() && _C->size(1) == inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
+  assert((_C->size(0) == inter.dimension() && _C->size(1) == inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
 
-  assert((_B->size(1) == inter.getSizeOfY() && _B->size(0) ==  inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
+  assert((_B->size(1) == inter.dimension() && _B->size(0) ==  inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
 
   // C and B are the minimum inputs. The others may remain null.
 
   if (_D)
-    assert((_D->size(0) == inter.getSizeOfY() || _D->size(1) == inter.getSizeOfY()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
+    assert((_D->size(0) == inter.dimension() || _D->size(1) == inter.dimension()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
 
 
   if (_F)
-    assert(((_F->size(0) != inter.getSizeOfY()) && (_F->size(1) != DSlink[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
+    assert(((_F->size(0) != inter.dimension()) && (_F->size(1) != DSlink[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
   if (_e)
-    assert(_e->size() == inter.getSizeOfY() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
+    assert(_e->size() == inter.dimension() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 
 }
 
@@ -120,7 +120,6 @@ void FirstOrderLinearTIR::computeOutput(double time, Interaction& inter, unsigne
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   computeh(*DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], y);
 }
-
 
 void FirstOrderLinearTIR::computeg(SiconosVector& lambda, BlockVector& r)
 {

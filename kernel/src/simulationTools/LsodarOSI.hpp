@@ -83,10 +83,12 @@ private:
   friend struct _NSLEffectOnFreeOutput;
 
 public:
-  
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
-  enum LsodarOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+  enum LsodarOSI_ds_workVector_id{FREE, WORK_LENGTH};
+
+  enum LsodarOSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+  enum LsodarOSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
 
   /** Lsodar counter : Number of steps taken for the problem so far. */
   static int count_NST;

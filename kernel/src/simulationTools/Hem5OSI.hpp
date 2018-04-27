@@ -113,9 +113,11 @@ public:
   SP::Hem5OSI_impl _impl;
   friend class Hem5OSI_impl;
 
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+  enum Hem5OSI_ds_workVector_id{FREE, WORK_LENGTH};
 
-  enum Hem5OSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+  enum Hem5OSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+  enum Hem5OSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
 
   /** constructor from a minimum set of data
    */

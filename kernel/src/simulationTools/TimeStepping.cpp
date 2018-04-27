@@ -182,7 +182,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
 	OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
 
         //if(predictorDeactivate(inter1,i))
-        if (osi.removeInteractionInIndexSet(inter1, i))
+        if (osi.removeInteractionFromIndexSet(inter1, i))
         {
           // Interaction is not active
           // ui1 becomes invalid
@@ -206,8 +206,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
               indexSet1->eraseProperties(ed1);
             }
           }
-
-
           indexSet1->remove_vertex(inter1);
           /* \warning V.A. 25/05/2012 : Multiplier lambda are only set to zero if they are removed from the IndexSet*/
           inter1->lambda(1)->zero();
@@ -680,7 +678,6 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
 //       VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
 
 //       inter->computeResiduY(, workV);
-//       residu = workV[FirstOrderR::vec_residuY]->norm2();
 //     inter->residuY()->norm2();
     if (residu > _newtonResiduYMax) _newtonResiduYMax = residu;
     if (residu > criterion)
@@ -710,7 +707,6 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
 
     //   inter->computeResiduR(getTkp1(), DSlink, workV);
     //   // TODO support other DS
-    //   residu = workV[FirstOrderR::vec_residuR]->norm2();
     if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
     if (residu > criterion)
     {

@@ -112,7 +112,7 @@ public:
    * \param i level
    * \return bool
    */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
   /** visitors hook
   */

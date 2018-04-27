@@ -57,7 +57,7 @@ LagrangianLinearTIR::LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e
 
 void LagrangianLinearTIR::checkSize(Interaction& inter)
 {
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   if (!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianLinearTIR::initializeWorkVectorsAndMatrices inconsistent sizes between H matrix and the interaction.");

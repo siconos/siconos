@@ -114,7 +114,7 @@ unsigned int D1MinusLinearOSI::numberOfIndexSets() const
 void D1MinusLinearOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
-  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
+  VectorOfVectors& ds_work_vectors = *_initializeDSWorkVectors(ds);
 
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
@@ -126,10 +126,10 @@ void D1MinusLinearOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem 
     lds->init_generalized_coordinates(2); // acceleration is required for the ds
     lds->init_inverse_mass(); // invMass required to update post-impact velocity
 
-    workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
-    workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(lds->dimension()));
-    workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds->dimension()));
-    workVectors[OneStepIntegrator::free_tdg].reset(new SiconosVector(lds->dimension()));
+    ds_work_vectors.resize(D1MinusLinearOSI::WORK_LENGTH);
+    ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE].reset(new SiconosVector(lds->dimension()));
+    ds_work_vectors[D1MinusLinearOSI::FREE].reset(new SiconosVector(lds->dimension()));
+    ds_work_vectors[D1MinusLinearOSI::FREE_TDG].reset(new SiconosVector(lds->dimension()));
     // Update dynamical system components (for memory swap).
     lds->computeForces(t, lds->q(), lds->velocity());
     lds->swapInMemory();
@@ -138,10 +138,10 @@ void D1MinusLinearOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem 
   {
     SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
     neds->init_inverse_mass(); // invMass required to update post-impact velocity
-    workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
-    workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(neds->dimension()));
-    workVectors[OneStepIntegrator::free].reset(new SiconosVector(neds->dimension()));
-    workVectors[OneStepIntegrator::free_tdg].reset(new SiconosVector(neds->dimension()));
+    ds_work_vectors.resize(D1MinusLinearOSI::WORK_LENGTH);
+    ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE].reset(new SiconosVector(neds->dimension()));
+    ds_work_vectors[D1MinusLinearOSI::FREE].reset(new SiconosVector(neds->dimension()));
+    ds_work_vectors[D1MinusLinearOSI::FREE_TDG].reset(new SiconosVector(neds->dimension()));
     //Compute a first value of the forces to store it in _forcesMemory
     neds->computeForces(t, neds->q(), neds->twist());
     neds->swapInMemory();
@@ -216,21 +216,24 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workMatrices.reset(new VectorOfSMatrices);
-  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+  if (!interProp.workVectors)
+  {
+    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors->resize(D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
+  }
+  if (!interProp.workBlockVectors)
+  {
+    interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+    interProp.workBlockVectors->resize(D1MinusLinearOSI::BLOCK_WORK_LENGTH);
+  }
 
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
-
-  workBlockV.resize(D1MinusLinearOSI::BLOCK_WORK_LENGTH);
+  VectorOfVectors& inter_work = *interProp.workVectors;
+  VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
 
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
-  workV.resize(D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
-  workV[D1MinusLinearOSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
-
+  inter_work[D1MinusLinearOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
@@ -260,13 +263,13 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     DSlink[LagrangianR::p2].reset(new BlockVector());
     DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
 
-    workBlockV[D1MinusLinearOSI::xfree].reset(new BlockVector());
-    workBlockV[D1MinusLinearOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    inter_work_block[D1MinusLinearOSI::xfree].reset(new BlockVector());
+    inter_work_block[D1MinusLinearOSI::xfree]->insertPtr(workVds1[D1MinusLinearOSI::FREE]);
   }
   else if (relationType == NewtonEuler)
   {
-    workBlockV[D1MinusLinearOSI::xfree].reset(new BlockVector());
-    workBlockV[D1MinusLinearOSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    inter_work_block[D1MinusLinearOSI::xfree].reset(new BlockVector());
+    inter_work_block[D1MinusLinearOSI::xfree]->insertPtr(workVds1[D1MinusLinearOSI::FREE]);
   }
 
   if (ds1 != ds2)
@@ -274,14 +277,14 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == Lagrangian)
     {
-      workBlockV[D1MinusLinearOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      inter_work_block[D1MinusLinearOSI::xfree]->insertPtr(workVds2[D1MinusLinearOSI::FREE]);
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
       DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
 
     }
     else if (relationType == NewtonEuler)
     {
-      workBlockV[D1MinusLinearOSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      inter_work_block[D1MinusLinearOSI::xfree]->insertPtr(workVds2[D1MinusLinearOSI::FREE]);
     }
   }
 }
@@ -328,7 +331,7 @@ void D1MinusLinearOSI::computeFreeState()
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
     Type::Siconos dsType = Type::value(*ds);
-    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+    VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     /* \warning the following conditional statement should be removed with a MechanicalDS class */
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
@@ -339,7 +342,7 @@ void D1MinusLinearOSI::computeFreeState()
       // get left state from memory
       const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); // right limit
       DEBUG_EXPR(vold.display());
-      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
+      SiconosVector& residuFree = *ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE];
       SiconosVector &vfree  = *d->velocity(); // POINTER CONSTRUCTOR : contains free velocity
 
       // get right information
@@ -367,7 +370,7 @@ void D1MinusLinearOSI::computeFreeState()
       // get right information
       //SP::SiconosMatrix M(new SimpleMatrix(*(d->mass()))); // we copy the mass matrix to avoid its factorization;
       SiconosVector &vfree = *d->twist(); // POINTER CONSTRUCTOR : contains free velocity
-      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
+      SiconosVector& residuFree = *ds_work_vectors[D1MinusLinearOSI::RESIDU_FREE];
 
       vfree = residuFree;
       DEBUG_EXPR(residuFree.display());
@@ -512,18 +515,18 @@ bool D1MinusLinearOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned 
   return 0;
 }
 
-bool D1MinusLinearOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool D1MinusLinearOSI::removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
 {
-  DEBUG_BEGIN("D1MinusLinearOSI::removeInteractionInIndexSet.\n");
-  DEBUG_END("D1MinusLinearOSI::removeInteractionInIndexSet.\n");
+  DEBUG_BEGIN("D1MinusLinearOSI::removeInteractionFromIndexSet.\n");
+  DEBUG_END("D1MinusLinearOSI::removeInteractionFromIndexSet.\n");
   switch(_typeOfD1MinusLinearOSI)
   {
   case halfexplicit_acceleration_level:
-    return removeInteractionInIndexSetHalfExplicitAccelerationLevel(inter,i);
+    return removeInteractionFromIndexSetHalfExplicitAccelerationLevel(inter,i);
   case halfexplicit_velocity_level:
-    return removeInteractionInIndexSetHalfExplicitVelocityLevel(inter,i);
+    return removeInteractionFromIndexSetHalfExplicitVelocityLevel(inter,i);
   }
-  RuntimeException::selfThrow("D1MinusLinearOSI::removeInteractionInIndexSet() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
+  RuntimeException::selfThrow("D1MinusLinearOSI::removeInteractionFromIndexSet() - not implemented for type of D1MinusLinearOSI: " + _typeOfD1MinusLinearOSI);
   return 0;
 }
 

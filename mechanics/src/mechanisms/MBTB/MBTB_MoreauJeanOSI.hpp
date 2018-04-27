@@ -34,7 +34,7 @@ public:
    * \param i level
    * \return a Boolean
    */
-  bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
 };
 TYPEDEF_SPTR(MBTB_MoreauJeanOSI);

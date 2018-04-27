@@ -144,9 +144,11 @@ protected:
 
 public:
   
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+  enum MoreauJeanGOSI_ds_workVector_id {RESIDU_FREE, FREE, LOCAL_BUFFER, WORK_LENGTH};
 
-  enum MoreauJeanGOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+  enum MoreauJeanGOSI_interaction_workVector_id{OSNSP_RHS, WORK_INTERACTION_LENGTH};
+
+  enum MoreauJeanGOSI_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
 
   /** constructor from theta value only
    *  \param theta value for all linked DS (default = 0.5).
@@ -248,7 +250,7 @@ public:
    * \param i level of the IndexSet
    * \return Boolean
    */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
 
   /** method to prepare the fist Newton iteration

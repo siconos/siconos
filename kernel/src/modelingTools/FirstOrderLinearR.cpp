@@ -82,7 +82,7 @@ void FirstOrderLinearR::initialize(Interaction& inter)
   FirstOrderR::initialize(inter);
 
   // get interesting size
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   unsigned int sizeX = inter.getSizeOfDS();
 
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
@@ -111,7 +111,7 @@ void FirstOrderLinearR::checkSize(Interaction& inter)
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   // get interesting size
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   unsigned int sizeX = inter.getSizeOfDS();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 

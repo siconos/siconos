@@ -170,7 +170,7 @@ unsigned int OSNSMultipleImpact::EstimateNdataCols()
   for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     //_numberCols = _numberCols + 3*(indexSet->bundle(*ui)->interaction()->nonSmoothLaw()->size()) + 1;
-    _numberCols = _numberCols + (indexSet->bundle(*ui)->getSizeOfY());
+    _numberCols = _numberCols + (indexSet->bundle(*ui)->dimension());
   }
   // Number of columns for data at particles
   SP::DynamicalSystemsGraph DSG = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -846,8 +846,8 @@ void OSNSMultipleImpact::SaveDataOneStep(unsigned int _ithPoint)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
     SP::SiconosVector ydot = inter->y(1);
-    SP::SiconosVector P_inter(new SiconosVector(inter->getSizeOfY()));
-    SP::SiconosVector F_inter(new SiconosVector(inter->getSizeOfY()));
+    SP::SiconosVector P_inter(new SiconosVector(inter->dimension()));
+    SP::SiconosVector F_inter(new SiconosVector(inter->dimension()));
     SP::SiconosVector E_inter(new SiconosVector(1));
     if (indexSet1->is_vertex(inter)) // if Interaction belongs to the IndexSet[1]
     {

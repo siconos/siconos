@@ -167,7 +167,7 @@ public:
    * \param i level
    * \return bool
    */
-  bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
   /** Perform the integration of the dynamical systems linked to this integrator
    *  without taking into account the nonsmooth input (_r or _p)

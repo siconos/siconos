@@ -313,10 +313,6 @@ Interaction::Interaction(SP::NonSmoothLaw NSL,
 void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
                                               DynamicalSystem& ds2)
 {
-  // Initialize DSlink property
-
-  //_linkToDSVariables.reset(new VectorOfBlockVectors);
-  
   VectorOfBlockVectors& DSlink = _linkToDSVariables;
   
   // The dynamical systems linked to the interaction (2 at most, ds2 may be equal to ds1).
@@ -329,9 +325,8 @@ void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
     __initDataLagrangian(DSlink, ds1, ds2);
 
   else if (relationType == NewtonEuler)
-  {
     __initDataNewtonEuler(DSlink, ds1, ds2);
-  }
+
   else
     RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
         a relation of type: " + relationType);
@@ -891,37 +886,6 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-SiconosMatrix& Interaction::getLeftInteractionBlock() const
-{
-  RELATION::TYPES relationType = relation()->getType();
-  RELATION::SUBTYPES relationSubType = relation()->getSubType();
-
-  if (relationType == FirstOrder)
-  {
-    SP::SiconosMatrix CMat = std11::static_pointer_cast<FirstOrderR> (relation())->C();
-    if (CMat)
-      return *CMat;
-    else if (relationSubType != LinearTIR)
-      return *_relationMatrices[FirstOrderR::mat_C];
-  }
-  else if (relationType == Lagrangian)
-  {
-    SP::LagrangianR r = std11::static_pointer_cast<LagrangianR> (relation());
-    return *r->jachq();
-  }
-  else if (relationType == NewtonEuler)
-  {
-    SP::NewtonEulerR r = std11::static_pointer_cast<NewtonEulerR> (relation());
-    return *r->jachqT();
-  }
-  else
-  {
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
-  }
-  // stupid compiler check
-  return *_relationMatrices[FirstOrderR::mat_C];
-
-}
 void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
   DEBUG_PRINT("Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) \n");
@@ -1028,7 +992,7 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) c
     D = std11::static_pointer_cast<NewtonEulerR> (relation())->jachlambda();
   }
   else
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
+    RuntimeException::selfThrow("Interaction::getExtraInteractionBlockForDS, not yet implemented for relations of type " + relationType);
 
   if (!D)
   {
@@ -1036,18 +1000,6 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) c
     return; //ie no extra interactionBlock
   }
 
-  // copy sub-interactionBlock of originalMatrix into InteractionBlock
-  // dim of the sub-interactionBlock
-  Index subDim(2);
-  subDim[0] = InteractionBlock->size(0);
-  subDim[1] = InteractionBlock->size(1);
-  // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in InteractionBlock
-  Index subPos(4);
-  subPos[0] = 0;//_relativePosition;
-  subPos[1] = 0;//_relativePosition;
-  subPos[2] = 0;
-  subPos[3] = 0;
-  setBlock(D, InteractionBlock, subDim, subPos);
+  *InteractionBlock = *D;
 }
 

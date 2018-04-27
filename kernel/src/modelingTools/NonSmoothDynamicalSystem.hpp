@@ -487,12 +487,18 @@ public:
    */
   void updateInput(double time, unsigned int level);
 
-  /** compute output for all the interactions
+  /** compute output for all the interactions for a given level
    * \param time
-   *  \param level y min order to be computed
+   * \param level y order to be computed
    */
   void updateOutput(double time, unsigned int level = 0);
 
+  /** compute output for all the interactions and for a level range
+   * \param time
+   * \param level_min y min order to be computed
+   * \param level_max y max order to be computed
+   */
+  void updateOutput(double time, unsigned int level_min, unsigned int level_max);
 
   /** compute Jacobians for all the interactions (in indexSet0)
    * \param time

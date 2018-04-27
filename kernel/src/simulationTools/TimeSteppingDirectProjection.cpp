@@ -27,6 +27,7 @@
 #include "NewtonEulerR.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
+#include "MoreauJeanOSI.hpp"
 
 static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
 // #define DEBUG_NOCOLOR
@@ -179,12 +180,12 @@ void TimeSteppingDirectProjection::advanceToEvent()
     if (dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
-      *workVectors[OneStepIntegrator::qtmp] = *neds->q();
+      *workVectors[MoreauJeanOSI::QTMP] = *neds->q();
     }
     else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      *workVectors[OneStepIntegrator::qtmp] = * d->q();
+      *workVectors[MoreauJeanOSI::QTMP] = * d->q();
 
     }
     else
@@ -249,7 +250,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       {
         SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
         SP::SiconosVector q = neds->q();
-        SP::SiconosVector qtmp =  workVectors[OneStepIntegrator::qtmp];
+        SP::SiconosVector qtmp =  workVectors[MoreauJeanOSI::QTMP];
 
 	DEBUG_EXPR_WE(std ::cout << "qtmp before  update " << std::endl;
 		       qtmp->display();
@@ -273,7 +274,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
         SP::SiconosVector q = d->q();
-        SP::SiconosVector qtmp =  workVectors[OneStepIntegrator::qtmp];
+        SP::SiconosVector qtmp =  workVectors[MoreauJeanOSI::QTMP];
 
         if (d->p(0))
         {

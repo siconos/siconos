@@ -61,8 +61,15 @@ protected:
 
 public:
 
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
-  enum NewMarkAlphaOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+  enum NewMarkAlphaOSI_ds_workVector_id {RESIDU_FREE, FREE, ACCE_LIKE,
+					 ACCE_MEMORY, WORK_LENGTH};
+
+  enum NewMarkAlphaOSI_interaction_workVector_id{OSNSP_RHS, WORK_INTERACTION_LENGTH};
+
+  enum NewMarkAlphaOSI_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
+
+  enum NewMarkAlphaOSI_interaction_workMat_id{DENSE_OUTPUT_COEFFICIENTS, MAT_WORK_LENGTH};
+
   /** constructor with only parameters beta, gamma, alpha_m, alpha_f
   * \param beta double
   * \param gamma double

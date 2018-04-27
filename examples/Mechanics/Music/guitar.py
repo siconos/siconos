@@ -286,7 +286,7 @@ class Guitar(sk.NonSmoothDynamicalSystem):
         # A dict of buffers to save interactions variables for all time steps
         self.data_interactions = {}
         for interaction in self.strings_and_frets:
-            nbc = interaction.getSizeOfY()
+            nbc = interaction.dimension()
             self.data_interactions[interaction] = \
                 npw.zeros((self.nb_time_steps + 1, 3 * nbc))
         # time instants
@@ -303,7 +303,7 @@ class Guitar(sk.NonSmoothDynamicalSystem):
         interaction : Fret
             interaction of interest
         """
-        nbc = interaction.getSizeOfY()
+        nbc = interaction.dimension()
         self.data_interactions[interaction][k, :nbc] = interaction.y(0)
         self.data_interactions[interaction][k, nbc:2 * nbc] = interaction.y(1)
         self.data_interactions[interaction][k, 2 * nbc:] = \
@@ -423,7 +423,7 @@ class Guitar(sk.NonSmoothDynamicalSystem):
         data = self.data_interactions[interaction]
         # current interaction
         # number of contact points
-        nbc = interaction.getSizeOfY()
+        nbc = interaction.dimension()
         # distance(s) string/fret
         dist = data[:, :nbc]
         vel = data[:, nbc:2 * nbc]
@@ -497,7 +497,7 @@ class Guitar(sk.NonSmoothDynamicalSystem):
         plt.figure(nfig, figsize=(17, 8))
         for ic in range(nb_inter):
             inter = interactions[ic]
-            #nbc = inter.getSizeOfY()
+            #nbc = inter.dimension()
             # find lambda > 0 to identify contact times
             contact_indices = np.where(
                 self.data_interactions[inter][:, 0] < 1e-9)
@@ -537,7 +537,7 @@ class Guitar(sk.NonSmoothDynamicalSystem):
         pos = ds.dimension()
         for ic in range(nb_inter):
             interaction = interactions[ic]
-            nbc = interaction.getSizeOfY()
+            nbc = interaction.dimension()
             self.data_interactions[interaction] = input_tab[:,
                                                             pos:pos + 3 * nbc]
             pos += 3 * nbc

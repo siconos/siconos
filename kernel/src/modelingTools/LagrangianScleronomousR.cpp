@@ -72,7 +72,7 @@ void LagrangianScleronomousR::initialize(Interaction& inter)
 {
   if (!_jachq)
   {
-    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int sizeY = inter.dimension();
     unsigned int sizeDS = inter.getSizeOfDS();
     _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
   }
@@ -159,7 +159,7 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  un
       {
         if (_plugindotjacqh && _plugindotjacqh->fPtr)
         {
-          unsigned int sizeY = inter.getSizeOfY();
+          unsigned int sizeY = inter.dimension();
           unsigned int sizeDS = inter.getSizeOfDS();
           _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
         }
