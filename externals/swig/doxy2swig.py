@@ -164,7 +164,10 @@ class Doxy2SWIG:
 
     def write(self, fname):
         o = my_open_write(fname)
-        o.write(str(u''.join(self.pieces).encode('utf-8').strip()))
+        if(sys.version_info > (3, 0)):
+            o.write(''.join(self.pieces))
+        else:
+            o.write(str(u''.join(self.pieces).encode('utf-8').strip()))
         o.write('\n')
         o.close()
 
