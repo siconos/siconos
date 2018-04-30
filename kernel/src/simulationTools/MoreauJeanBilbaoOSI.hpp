@@ -75,18 +75,6 @@ public:
       linked to this OSI*/
   virtual void initialize_nonsmooth_problems();
 
-  //void _compute_osi_parameters_v0(LagrangianLinearDiagonalDS& ds, VectorOfVectors& work, SimpleMatrix& W);
-
-  /** Compute integrator parameters (iteration matrix, theta ...) for a given ds
-      \param ds the dynamical system to integrate
-      \param work buffer
-      \param[in,out] iteration matrix
-  */
-  void _compute_osi_parameters_v1(LagrangianLinearDiagonalDS& ds, VectorOfVectors& work, SimpleMatrix& W) ;
-
-  // Same as above, different methods to perform matrix op. Test purpose.
-  // void _compute_osi_parameters_v2(LagrangianLinearDiagonalDS& ds, VectorOfVectors& work, SimpleMatrix& W);
-
   /** get the number of index sets required for the simulation
    * \return unsigned int
    */

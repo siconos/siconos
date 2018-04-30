@@ -2,12 +2,9 @@
 in JSV paper (Issanchou 2017) and using Siconos for contact
 simulation.
 
-The possible setups for
-guitar simulation :
 
-- single contact case : one string, one contact. 
-- bass guitar : one string, a list of frets.
-- fretless guitar : one string, no frets, contacts allowed everywhere on the neck.
+Bass guitar with frets.
+Restitution coeff = 0.9
 
 """
 import sys
@@ -17,25 +14,42 @@ from model_tools import save_simu_to_hdf5, build_frets_from_file
 
 from guitar import StringDS, Guitar
 
-# Default parameters of the model (string and contacts) and of the simulation
-import parameters
-
-
 # ---- Read (command line inputs) parameters ---
 # - sample freq
 # - output (time) frequency
 # - restitution coeff
 # - final time
-# - case : choose among 'bass', 'fretless', 'one_contact'
-#
+# - path to matlab inputs
+# sample freq and  time-discretisation
+
+### Default parameters of the model (string and contacts) and of the simulation ###
+
+## Case 1 : one contact
+one_contact = {'fs': 5000, 'output_freq' : 1, 'restit': 1., 'final_time': 3.,
+               'matlab_input': 'one_contact/pb1', 'nb_modes': 999, 'length': 1.,
+               'output_name': 'single_e', 'filt_frets': True}
+
+## Case 2 : bass guitar, with frets
+bass_guitar = {'fs': 15680, 'output_freq' : 1, 'restit': 1., 'final_time': 1.,
+               'matlab_input': 'bass_guitar/pb2', 'nb_modes': 862, 'length': .863,
+               'output_name': 'bass_e', 'filt_frets': True}
+
+## Case 3 : fretless bass guitar
+one_contact = {'fs': 15680, 'output_freq' : 1, 'restit': 1.,
+               'final_time': 1., 'matlab_input':'fretless_bass_guitar/bsf',
+               'nb_modes': 862, 'length': .863,
+               'output_name': 'fretless_e', 'filt_frets': False}
 
 
+### Select case ###
+
+ocp = one_contact
 
 """ Read some values from command line
 
  If set, command line arguments must be:
 
- python run.py fs output_freq restitution_coeff final_time case
+ python run.py fs output_freq restitution_coeff final_time matlab_input
 
 """
 
@@ -44,40 +58,28 @@ if len(sys.argv) > 1:
     output_freq = int(sys.argv[2])
     restit = float(sys.argv[3])
     final_time = float(sys.argv[4])
-    case = sys.argv[5]
-
-    # Select case #
-    # Depends on matlab_input.
-
-    if case.find('fretless'):
-        run_case = parameters.fretless_bass_guitar
-    
-    elif case.find('one_contact'):
-        run_case = parameters.one_contact
-
-    elif case.find('bass'):
-        run_case = parameters.bass_guitar
+    matlab_input = sys.argv[5]
 
 else:
-    # No inputs from command --> use default values, bass_guitar.
-    run_case = parameters.bass_guitar
-    fs = run_case['fs']
-    output_freq = run_case['output_freq']
-    restit = run_case['restit']
-    final_time = 0.2
+    # No inputs from command --> use default values
+    fs = ocp['fs']
+    output_freq = ocp['output_freq']
+    restit = ocp['restit']
+    final_time = ocp['final_time']
+    matlab_input = ocp['matlab_input']
 
-matlab_input = run_case['matlab_input']
-number_of_modes = run_case['nb_modes']
+   
+number_of_modes = ocp['nb_modes']
 initial_time = 0.
-max_coords = run_case['max_coords']
-filt_frets = run_case['filt_frets']
-output_name = run_case['output_name']
+max_coords = None#(1., 0.5)
+filt_frets = ocp['filt_frets']
+output_name = ocp['output_name']
 output_name += str(restit)
 visu = True # plot frets/neck 
 # -- Geometry and material --
 # Indeed, since parameters are read from matlab input, only length matter.
 G_string = {
-    'length': run_case['length']
+    'length': ocp['length']
     # diameter = equivalent diameter (A5)
     #'diameter': 1.14e-3,
     #'density': 6.69e-3,
@@ -85,10 +87,12 @@ G_string = {
     #'tension': 191.6,
     }
 
+
 # -- The dynamical system --
 string = StringDS(number_of_modes, geometry_and_material=G_string,
                   max_coords=max_coords,
                   matlab_input=matlab_input)
+
 
 current_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -106,7 +110,6 @@ guitar_model = Guitar(interactions, [initial_time, final_time],
 
 if not guitar_model.save_interactions:
     print("Warning! No interactions output!")
-    
 # Save initial state
 guitar_model.time[0] = initial_time
 guitar_model.save_ds_state_modal(0, string)
@@ -161,7 +164,6 @@ while simu.hasNextEvent():
     simu.nextStep()
 print('End of simulation process. Duration: ', time.clock() - start_time)
 print("nb steps", k)
-
 # --- Output dir for results ---
 result_dir = os.getcwd()# + '/temp'
 if not os.path.exists(result_dir):
@@ -173,5 +175,4 @@ save_simu_to_hdf5(guitar_model, string,
                    matlab_data=matlab_input,
                    filename=filename, filt_frets=filt_frets,
                    restit=restit)
-
 print('write (hdf5) file ' + filename + ': {0}.'.format(time.clock() - start))

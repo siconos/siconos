@@ -114,8 +114,6 @@ protected:
    */
   bool _resetAllLambda;
 
-
-
   /** Default Constructor
    */
   TimeStepping() :
@@ -188,6 +186,9 @@ public:
   */
   void computeFreeState();
 
+  /** Reset all lambdas of all interactions */
+  void resetLambdas();
+  
   /** step from current event to next event of EventsManager
   */
   void advanceToEvent();
