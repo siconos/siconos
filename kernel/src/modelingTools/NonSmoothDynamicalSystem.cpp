@@ -135,9 +135,13 @@ void NonSmoothDynamicalSystem::display() const
 
 void  NonSmoothDynamicalSystem::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
-  _topology->insertDynamicalSystem(ds);
-  _changeLog.push_back(Change(addDynamicalSystem,ds));
-  _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+  // Do not insert the same ds several times : results in errors in initialisation process.
+  if(! _topology->hasDynamicalSystem(ds))
+    {
+      _topology->insertDynamicalSystem(ds);
+      _changeLog.push_back(Change(addDynamicalSystem,ds));
+      _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+    }
 }
 
 void  NonSmoothDynamicalSystem::removeDynamicalSystem(SP::DynamicalSystem ds)

@@ -346,6 +346,11 @@ bool Topology::hasInteraction(SP::Interaction inter) const
   return indexSet0()->is_vertex(inter);
 }
 
+bool Topology::hasDynamicalSystem(SP::DynamicalSystem ds) const
+{
+  return _DSG[0]->is_vertex(ds);
+}
+
 void Topology::setProperties()
 {
   _IG[0]->update_vertices_indices();

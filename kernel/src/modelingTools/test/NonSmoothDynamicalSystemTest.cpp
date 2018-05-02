@@ -48,6 +48,12 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemA: ", nsds->getNumberOfDS() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemB: ", nsds->getNumberOfInteractions() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemC: ", nsds->dynamicalSystem(23)->number() == 23, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemD: ", nsds->topology()->hasDynamicalSystem(ds) == true, true);
+
+  // Try again : must be ignored
+  nsds->insertDynamicalSystem(ds);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemE: ", nsds->getNumberOfDS() == 1, true);
+  
   std::cout << "------- test insertDynamicalSystem ok -------" <<std::endl;
 }
 

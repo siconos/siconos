@@ -128,8 +128,15 @@ public:
    *  \param inter an Interaction
    *  \return a bool
    */
+  bool hasDynamicalSystem(SP::DynamicalSystem ds) const;
+
+  /** check if a dynamical system is already a vertex of the DS graph.
+   *  \param ds a DynamicalSystem
+   *  \return a bool
+   */
   bool hasInteraction(SP::Interaction inter) const;
 
+  
   /** remove an Interaction from the topology. The interaction is
    *  removed from Dynamical Systems graph and Interactions Graph.
    *  The interaction is not removed from actives subgraphs : see updateIndexSet
