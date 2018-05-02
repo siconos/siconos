@@ -7,7 +7,7 @@ make_doc:
     paths:
       - build/docs/build
   only:
-  - update_doc
+  - master
 
 pages:
 
