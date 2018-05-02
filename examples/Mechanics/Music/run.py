@@ -47,17 +47,18 @@ if len(sys.argv) > 1:
     case = sys.argv[5]
 
     # Select case #
-    # Depends on matlab_input.
-
-    if case.find('fretless'):
+    if case.find('fretless') >= 0:
         run_case = parameters.fretless_bass_guitar
     
-    elif case.find('one_contact'):
+    elif case.find('one_contact') >= 0:
         run_case = parameters.one_contact
 
-    elif case.find('bass'):
+    elif case.find('bass') >= 0:
         run_case = parameters.bass_guitar
-
+    else:
+        print("Unknown case. Stop")
+        sys.exit()
+        
 else:
     # No inputs from command --> use default values, bass_guitar.
     run_case = parameters.bass_guitar

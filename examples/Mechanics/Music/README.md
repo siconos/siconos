@@ -17,15 +17,17 @@
 
 siconos run.py 
 
+(default setup : bass guitar, fs= 15680)
+
 * with input args
 
-siconos run.py frequency output_frequency restit final_time matlab_input
+siconos run.py frequency output_frequency restit final_time case
 
 - frequency : sample freq
 - output_frequency : freq. on output files writing
 - restit : restitution coeff
 - final_time : duration
-- matlab_input : path/prefix where path is the location of matlab files describing the model. e.g. : bass_guitar/pb2
+- case : selected setup ('fretless', 'one_contact' or 'bass').
 
 
 ## Usage on Luke cluster

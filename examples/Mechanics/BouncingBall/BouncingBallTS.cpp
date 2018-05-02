@@ -96,8 +96,6 @@ int main(int argc, char* argv[])
 
     // add the dynamical system in the non smooth dynamical system
     bouncingBall->insertDynamicalSystem(ball);
-    //if(!bouncingBall->topology()->hasDynamicalSystem(ball))
-    bouncingBall->insertDynamicalSystem(ball);
 
     // link the interaction and the dynamical system
     bouncingBall->link(inter, ball);

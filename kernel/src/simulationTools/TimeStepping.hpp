@@ -215,6 +215,9 @@ public:
     return _newtonCumulativeNbIterations;
   }
 
+  /** Check nsds changelog and update/init initial contacts if required */
+  void updateContactsFromChangeLog();
+  
   /** initialize the Newton
    * It computes the initial residu and set the, if needed to Newton variable
    * to start the newton algorithm.

@@ -238,10 +238,6 @@ typedef __mpz_struct mpz_t[1];
 %import "RelationNamespace.hpp";
 
 
-
-
-
-
 //namespace std {
 
   %template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>,
@@ -340,4 +336,10 @@ KERNEL_REGISTRATION()
     return std11::dynamic_pointer_cast<LagrangianDS>(ds);
   }
 
+  // Required to get size of a graph of interactions in python interp
+  size_t size_graph(const InteractionsGraph& index_set)
+  {
+    return index_set.size();
+  }
+  
 %}
