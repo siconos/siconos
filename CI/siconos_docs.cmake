@@ -14,9 +14,9 @@
 # --------- User-defined options ---------
 # Use cmake -DOPTION_NAME=some-value ... to modify default value.
 option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" ON)
-option(WITH_PYTHON_WRAPPER "Build python bindings using swig. Default = ON" OFF)
+option(WITH_PYTHON_WRAPPER "Build python bindings using swig. Default = ON" ON)
 option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings. Default = OFF" ON)
-option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." OFF)
+option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." ON)
 option(WITH_FORTRAN "Verbose mode to get some system/arch details. Default = OFF." ON)
 option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = OFF." OFF)
 option(WITH_TESTING "Enable 'make test' target" OFF)
