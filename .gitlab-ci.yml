@@ -22,5 +22,5 @@ pages:
   dependencies:
   - make_doc
   only:
-  - update_doc
+  - master
 
