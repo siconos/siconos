@@ -467,6 +467,7 @@ void TimeStepping::resetLambdas()
 void TimeStepping::advanceToEvent()
 {
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
+  initialize();
   resetLambdas();
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 }

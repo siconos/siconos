@@ -45,7 +45,9 @@ void MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSyst
 {
   // Get work buffers from the graph and initialize ds state and memory
   VectorOfVectors& work_ds = *_initializeDSWorkVectors(ds);
-  
+
+ 
+  DEBUG_PRINT("initializeWorkVectorsForDS() \n");
   // Check consistency between OSI type and DS type
   Type::Siconos dsType = Type::value(*ds);
   if(dsType != Type::LagrangianLinearDiagonalDS)

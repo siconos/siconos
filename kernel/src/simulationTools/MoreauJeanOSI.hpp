@@ -271,7 +271,7 @@ public:
   };
 
   /** set the boolean to indicate that we use gamma for the relation
-   *  \param newUseGammaForRelation a Boolean
+   *  \param newExplicitNewtonEulerDSOperators a Boolean
    */
   inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators)
   {
@@ -292,7 +292,6 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to 
    *  one dynamical system on the graph and needed by the osi 
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system   
    */
@@ -329,6 +328,7 @@ public:
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem
    *  \param WBoundaryConditions write the result in WBoundaryConditions
+   *  \param iteration_matrix the OSI iteration matrix (W)
    */
   void _computeWBoundaryConditions(DynamicalSystem& ds, SiconosMatrix& WBoundaryConditions, SiconosMatrix& iteration_matrix);
 

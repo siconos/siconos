@@ -16,13 +16,12 @@
  * limitations under the License.
 */
 
-/*! \file  MoreauJeanOSI.hpp */
+/*! \file  MoreauJeanBilbaoOSI.hpp */
 
 #ifndef MoreauJeanBilbaoOSI_H
 #define MoreauJeanBilbaoOSI_H
 
 #include "OneStepIntegrator.hpp"
-
 #include <limits>
 
 /**  \class MoreauJeanBilbaoOSI */

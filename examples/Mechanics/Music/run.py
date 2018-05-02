@@ -134,12 +134,14 @@ print("Start simulation ...")
 start_time = time.clock()
 pos = 1
 
-while simu.hasNextEvent():
+while k < 2: #simu.hasNextEvent():
     if k % 100000 == 0:
         print('step = ', k, '---- time = ',
               simu.nextTime(),
               '------------------------')
+    print("one step")
     simu.computeOneStep()
+    print("end one step")
 
     # -- save data every output_freq time step --
     if k % guitar_model.output_freq == 0:

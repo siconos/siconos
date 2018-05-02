@@ -187,6 +187,7 @@ void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
 
   Relation &relation =  *inter.relation();
+  relation.checkSize(inter);
 
   if (!inter_work[MoreauJeanOSI::OSNSP_RHS])
     inter_work[MoreauJeanOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));

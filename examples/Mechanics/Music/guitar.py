@@ -344,20 +344,21 @@ class Guitar(object):
             assert isinstance(ds, StringDS)
             self.nsds.insertDynamicalSystem(ds)
         else:
+            self.nsds.insertDynamicalSystem(list(strings_and_frets.values())[0])
             for interaction in strings_and_frets:
                 ds = strings_and_frets[interaction]
                 assert isinstance(interaction, Fret)
                 assert isinstance(ds, StringDS)
-                self.nsds.insertDynamicalSystem(ds)
+                #self.nsds.insertDynamicalSystem(ds)
                 # link the interaction and the dynamical system
                 self.nsds.link(interaction, ds)
         self.strings_and_frets = strings_and_frets
         # -- Simulation --
         moreau_bilbao = sk.MoreauJeanBilbaoOSI()
-        moreau_jean = sk.MoreauJeanOSI(0.500001)
-        default_integrator = moreau_bilbao
-        if default_integrator == 'MoreauJean':
-            default_integrator = moreau_jean
+        #moreau_jean = sk.MoreauJeanOSI(0.500001)
+        #default_integrator = moreau_bilbao
+        #if default_integrator == 'MoreauJean':
+        #    default_integrator = moreau_jean
         
         # (2) Time discretisation --
         t0 = time_range[0]
@@ -371,11 +372,12 @@ class Guitar(object):
         # (3) one step non smooth problem
         self.osnspb = sk.LCP()
         # (4) Simulation setup with (1) (2) (3)
-        self.default_integrator = default_integrator
-        self.simulation = sk.TimeStepping(self.nsds, t, default_integrator, self.osnspb)
-        if integrators is not None:
-            for ds in integrators:
-                self.simulation.prepareIntegratorForDS(integrators[ds], ds, self, t0)
+        self.default_integrator = moreau_bilbao #default_integrator
+        #self.simulation = sk.TimeStepping(self.nsds, t, default_integrator, self.osnspb)
+        self.simulation = sk.TimeStepping(self.nsds, t, moreau_bilbao, self.osnspb)
+        # if integrators is not None:
+        #     for ds in integrators:
+        #         self.simulation.prepareIntegratorForDS(integrators[ds], ds, self, t0)
 
         # internal buffers, used to save data for each time step.
         # A dict of buffers to save ds variables for all time steps
