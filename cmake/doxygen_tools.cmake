@@ -3,12 +3,15 @@
 # 
 # =======================================
 
-# --------------------------------
-# Update doxy.config to take
-# into account sources/headers files
-# of COMP.
-# --------------------------------
+# ---------------------------------------------
+# For a given component (numerics, kernel ...)
+# get the list of directories containing
+# sources to be used to generate doxygen doc.
+# Result is saved in CACHE variable DOXY_INPUTS
+# ---------------------------------------------
 macro(update_doxy_config_file COMP)
+  # Scan all dirs of current component and append
+  # them to DOXY_INPUTS
   foreach(_dir ${${COMP}_DIRS})
     list(FIND ${COMP}_EXCLUDE_DOXY ${_dir} check_dir)
     if(NOT ${_dir} MATCHES test AND ${check_dir} EQUAL -1)
@@ -16,49 +19,9 @@ macro(update_doxy_config_file COMP)
     endif()
   endforeach()
   list(REMOVE_DUPLICATES DOXY_INPUTS)
+  # Save doxy_inputs to cache.
   set(DOXY_INPUTS ${DOXY_INPUTS} CACHE INTERNAL "doxy inputs")
 endmacro()
-
-
-# --------------------------------
-# Update doxy.config to take
-# into account sources/headers files
-# of COMP.
-# !! Generate only xml output !!
-# Required for python-docstrings
-# --------------------------------
-macro(update_xml_doxy_config_file COMP)
-  set(XML_INPUTS)
-  set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy.config.xml")
-  foreach(_dir ${${COMP}_DIRS})
-    list(FIND ${COMP}_EXCLUDE_DOXY ${_dir} check_dir)
-    if(NOT ${_dir} MATCHES test AND ${check_dir} EQUAL -1)
-      list(APPEND XML_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/${_dir})
-    endif()
-  endforeach()
-  list(REMOVE_DUPLICATES XML_INPUTS)
-  set(DOXYGEN_INPUTS)
-  foreach(_dir ${XML_INPUTS})
-    set(DOXYGEN_INPUTS "${DOXYGEN_INPUTS} ${_dir}")
-  endforeach()
-  set(GENERATE_HTML NO)
-  set(GENERATE_XML YES)
-  configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy.config.in ${DOXY_CONFIG_XML} @ONLY)
-endmacro()
-
-
-# --------------------------------
-# Run doxygen to build documentation
-# See CMAKE_BINARY_DIR/docs/<component_name>doxy.log
-# for errors and warnings.
-# --------------------------------
-macro(build_doc_xml COMP)
-  set(confname ${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy.config.xml)
-  execute_process(COMMAND ${DOXYGEN_EXECUTABLE} ${confname}
-    OUTPUT_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log ERROR_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log)
-  message(" -- Build xml doc for component ${COMP} ...")
-endmacro()
-
 
 # --------------------------------------
 # Call this macro when all documentation
@@ -102,7 +65,7 @@ macro(finalize_doc)
     endif()
     # --- Generates conf.py, to describe sphinx setup ---
     # !! Should be call after doxygen setup
-    # to have a propre DOXYGEN_INPUT value.
+    # to have a correct DOXYGEN_INPUT value.
     configure_file (
       "${CMAKE_SOURCE_DIR}/docs/sphinx/conf.py.in"
       "${CMAKE_BINARY_DIR}/docs/sphinx/conf.py" @ONLY)

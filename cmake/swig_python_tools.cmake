@@ -7,30 +7,52 @@
 # Build targets to generate python
 # docstrings from xml doxygen output.
 #
-# Warning : xml files must exist
-# before any call to this macro!!
+# 1) Doxygen to create xml outputs.
+# 2) Doxy2swig to
+#    create docstrings from xml outputs.
+#
+# This macro must be called for each
+# component, in LibraryProjectSetup.
+#
+# -- Targets :
+# 1) headers --> xml using doxygen
+# 2) xml files --> .i using doxy2swig (one .i for each xml file)
+# 3) .i files --> ${COMP}-docstrings.i (one single file)
+
+# 1 : target xml4swig_${COMP}
+# 2 and 3 : target ${COMP}_docstrings
+
+# Note FP : the whole process must be re-executed for any change in a header file of the component
+# (unless we set a doxygen conf for each header, don't think we need to bother with that.)
+# 
+# Doxygen steps are driven by cmake while doxy2swig and related are hidden in build_docstrings python
+# script.
 # -----------------------------------
 macro(doxy2swig_docstrings COMP)
   if(WITH_${COMPONENT}_DOXY2SWIG)
-    update_xml_doxy_config_file(${COMP})
-
-    # -- Targets :
-    # 1) headers --> xml using doxygen
-    # 2) xml files --> .i using doxy2swig (one .i for each xml file)
-    # 3) .i files --> ${COMP}-docstrings.i (one single file)
-
-    # 1 : target xml4swig_${COMP}
-    # 2 and 3 : target ${COMP}_docstrings
     
-    # Note FP : the whole process must be re-executed for any change in a header file of the component
-    # (unless we set a doxygen conf for each header, don't think we need to bother with that.)
-    # 
-    # Doxygen steps are driven by cmake while doxy2swig and related are hidden in build_docstrings python
-    # script.
-
     # -- doxygen/xml config --
+
+    # 1 - Create COMPdoxy.config.xml in binary dir,
+    #     from doxy.config (source dir), taking
+    #     into account sources/headers files
+    #     of current component COMP.
+    #
+    # 2 - Run doxygen to build xml documentation
+    #
+    # Results in CMAKE_BINARY_DIR/docs/build/xml-docstrings
+    #
+    # Warning : output path must be different from
+    # output for xml used by sphinx/breathe/exhale.
+    # -----------------------------------------------------
+    
+    # Generate doxygen config file for COMP
+    set(DOXY2SWIG_OUTPUT ${DOXYGEN_OUTPUT}/doxy2swig-xml/${COMP})
+    file(MAKE_DIRECTORY ${DOXY2SWIG_OUTPUT})
     set(XML_INPUTS)
-    set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy.config.xml")
+    # Set config file name
+    set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy-xml.config")
+    # Add all subdirectories related to the current component into DOXYGEN_INPUTS
     foreach(_dir ${${COMP}_DIRS})
       list(FIND ${COMP}_EXCLUDE_DOXY ${_dir} check_dir)
       if(NOT ${_dir} MATCHES test AND ${check_dir} EQUAL -1)
@@ -42,11 +64,15 @@ macro(doxy2swig_docstrings COMP)
     foreach(_dir ${XML_INPUTS})
       set(DOXYGEN_INPUTS "${DOXYGEN_INPUTS} ${_dir}")
     endforeach()
-    set(GENERATE_HTML NO)
-    set(GENERATE_XML YES)
+    # Create doxygen configuration file in binary dir
     set(DOXY_QUIET "YES")
     set(DOXY_WARNINGS "NO")
-    configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy.config.in ${DOXY_CONFIG_XML} @ONLY)
+    set(GENERATE_HTML NO)
+    set(GENERATE_XML YES)
+    set(EXTRACT_ALL YES)
+    set(XML_OUTPUT doxy2swig-xml/${COMP})
+    message(" -- Create doxygen conf (xml for docstrings) for component ${COMP}")
+    configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy2swig.config.in ${DOXY_CONFIG_XML} @ONLY)
 
     # -- target to build xml doc for current component  --
     add_custom_target(xml4swig_${COMP}
