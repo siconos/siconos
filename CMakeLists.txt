@@ -19,6 +19,8 @@ include(OutOfSourcesBuild)
 
 # Some useful macros
 include(SiconosTools)
+configure_file(scripts/buildtools.py share/buildtools.py COPYONLY)
+
 
 # cmake project name
 set(PROJECT_NAME siconos)

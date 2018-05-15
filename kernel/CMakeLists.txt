@@ -42,6 +42,10 @@ list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
 list(APPEND ${COMPONENT}_LINK_LIBRARIES externals numerics)
 
 include(WindowsKernelSetup)
+# Some directories to exclude from xml to swig process
+set(${COMPONENT}_EXCLUDE_DOXY
+  src/utils/SiconosTools # if included, it breaks swig process for mechanics
+  )
 
 include(LibraryProjectSetup)
 library_project_setup()

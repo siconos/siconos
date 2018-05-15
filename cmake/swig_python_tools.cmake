@@ -13,51 +13,67 @@
 macro(doxy2swig_docstrings COMP)
   if(WITH_${COMPONENT}_DOXY2SWIG)
     update_xml_doxy_config_file(${COMP})
-    build_doc_xml(${COMP})
-    set(DOCSTRINGS_FILES)
-    # for each header of the current component ...
-    foreach(_F ${${COMP}_HDRS})
-      get_filename_component(_XFWE ${_F} NAME_WE)
-      get_filename_component(_EXT ${_F} EXT)
-      string(REPLACE "_" "__" _FWE "${_XFWE}")
-      file(GLOB ${_FWE}_XMLS
-	${DOXYGEN_OUTPUT}/xml/*class${_FWE}.xml
-	${DOXYGEN_OUTPUT}/xml/*struct${_FWE}.xml
-	${DOXYGEN_OUTPUT}/xml/${_FWE}_8h*.xml)
-      foreach(_FXML ${${_FWE}_XMLS})
-	get_filename_component(_FWE_XML ${_FXML} NAME_WE)
-	set(outfile_name ${SICONOS_SWIG_ROOT_DIR}/${_FWE_XML}.i)
-	add_custom_command(OUTPUT ${outfile_name} 
-          DEPENDS ${DOXYGEN_OUTPUT}/xml/${_FWE_XML}.xml
-          COMMAND ${PYTHON_EXECUTABLE}
-	  ARGS "${CMAKE_BINARY_DIR}/share/doxy2swig.py"
-	  ${DOXYGEN_OUTPUT}/xml/${_FWE_XML}.xml ${outfile_name}
-          COMMENT "docstrings generation for ${_FWE} (parsing ${_FWE_XML}.xml)")
-	add_custom_target(doc_${_FWE_XML}.i DEPENDS ${outfile_name})
-	list(APPEND DOCSTRINGS_FILES ${outfile_name})
-      endforeach()
-    endforeach()
 
-    if (DOCSTRINGS_FILES)
-      add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-        DEPENDS ${DOCSTRINGS_FILES}
-        COMMAND cat
-        ARGS ${DOCSTRINGS_FILES} > ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-        COMMENT "${COMP} docstrings concatenation")
-    else()
-      add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-        DEPENDS ${DOCSTRINGS_FILES}
-        COMMAND touch
-        ARGS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
-    endif()
+    # -- Targets :
+    # 1) headers --> xml using doxygen
+    # 2) xml files --> .i using doxy2swig (one .i for each xml file)
+    # 3) .i files --> ${COMP}-docstrings.i (one single file)
+
+    # 1 : target xml4swig_${COMP}
+    # 2 and 3 : target ${COMP}_docstrings
+    
+    # Note FP : the whole process must be re-executed for any change in a header file of the component
+    # (unless we set a doxygen conf for each header, don't think we need to bother with that.)
+    # 
+    # Doxygen steps are driven by cmake while doxy2swig and related are hidden in build_docstrings python
+    # script.
+
+    # -- doxygen/xml config --
+    set(XML_INPUTS)
+    set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy.config.xml")
+    foreach(_dir ${${COMP}_DIRS})
+      list(FIND ${COMP}_EXCLUDE_DOXY ${_dir} check_dir)
+      if(NOT ${_dir} MATCHES test AND ${check_dir} EQUAL -1)
+	list(APPEND XML_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/${_dir})
+      endif()
+    endforeach()
+    list(REMOVE_DUPLICATES XML_INPUTS)
+    set(DOXYGEN_INPUTS)
+    foreach(_dir ${XML_INPUTS})
+      set(DOXYGEN_INPUTS "${DOXYGEN_INPUTS} ${_dir}")
+    endforeach()
+    set(GENERATE_HTML NO)
+    set(GENERATE_XML YES)
+    set(DOXY_QUIET "YES")
+    set(DOXY_WARNINGS "NO")
+    configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy.config.in ${DOXY_CONFIG_XML} @ONLY)
+
+    # -- target to build xml doc for current component  --
+    add_custom_target(xml4swig_${COMP}
+      COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML}
+      OUTPUT_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log ERROR_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log
+      COMMENT " -- Build xml doc for component ${COMP} ..."
+      )
+    
+    # -- command to build .i files from xml doc for current component  --
+    add_custom_command(OUTPUT  ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
+      DEPENDS xml4swig_${COMP}
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      "import buildtools; buildtools.build_docstrings('${${COMP}_HDRS}', '${COMP}', '${DOXY_CONFIG_XML}', '${SICONOS_SWIG_ROOT_DIR}')"
+      VERBATIM
+      )
   else()
+    # No doxy2swig but 
+    # generate empty ${COMP}-docstrings.i file (required because of %include in swig files)
     add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-      DEPENDS ${DOCSTRINGS_FILES}
       COMMAND touch
       ARGS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       )
   endif()
-  add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
+  
+  add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
+    COMMENT "Create swig files from xml for component ${COMP}.")
+
 endmacro()
 
 # ----------------------------------------------------------------------

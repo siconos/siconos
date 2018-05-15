@@ -151,8 +151,8 @@ macro(LIBRARY_PROJECT_SETUP)
   if(WITH_${COMPONENT}_PYTHON_WRAPPER)
     add_subdirectory(swig)
   endif()
-
-  add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
   
+  add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
+
 endmacro()
 
