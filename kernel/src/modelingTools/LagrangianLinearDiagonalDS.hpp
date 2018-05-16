@@ -96,15 +96,15 @@ public:
    *  \param v0 initial velocity
    *  \param stiffness diagonal of the stiffness matrix
    *  \param damping diagonal of the damping matrix
-   *  \param mass, diagonal of the mass matrix
+   *  \param mass diagonal of the mass matrix
    */
   LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosVector stiffness, SP::SiconosVector damping, SP::SiconosVector mass);
 
   /** constructor for complete system with identity mass matrix
    *  \param q0 initial coordinates
    *  \param v0 initial velocity
-   *  \param mass, diagonal of the mass matrix
    *  \param stiffness diagonal of the stiffness matrix
+   *  \param damping diagonal of the damping matrix
    */
   LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosVector stiffness, SP::SiconosVector damping);
 
@@ -159,7 +159,7 @@ public:
   //@{
 
   /** allocate (if needed)  and compute rhs and its jacobian.
-   * \param time of initialization
+   * \param t time of initialization
    */
   void initRhs(double t) ;
 

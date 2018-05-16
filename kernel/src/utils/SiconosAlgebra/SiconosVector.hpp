@@ -404,7 +404,7 @@ public:
   SiconosVector& operator -=(const BlockVector& v);
 
   /** component-wise exponential of a vector
-      \param SiconosVector input, such that result (this) = exp(input)
+      \param input vector such that result (this) = exp(input)
   */
   void exp(SiconosVector& input);
 

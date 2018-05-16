@@ -353,21 +353,19 @@ public:
   void initRhs(double time) ;
 
   /** set nonsmooth input to zero
-   *  \param int input-level to be initialized.
+   *  \param level input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) ;
 
   /** update right-hand side for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  virtual void computeRhs(double time, bool isDSup = false);
+  virtual void computeRhs(double time);
 
   /** update \f$\nabla_x rhs\f$ for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  virtual void computeJacobianRhsx(double time, bool isDSup = false);
+  virtual void computeJacobianRhsx(double time);
 
   /** reset non-smooth part of the rhs (i.e. p), for all 'levels' */
   void resetAllNonSmoothParts();
@@ -1012,7 +1010,7 @@ public:
   /** Allocate memory for q[level], level > 1
       Useful for some integrators that need
       q[2] or other coordinates vectors.
-      \param int the required level
+      \param level the required level
    */
   void init_generalized_coordinates(unsigned int level);
 

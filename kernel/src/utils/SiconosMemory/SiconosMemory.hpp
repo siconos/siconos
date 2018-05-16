@@ -101,9 +101,9 @@ public:
 
   /** fill the memory with a vector of siconosVector
    * \param v MemoryContainer
-   *       _size is set to the size of the deque given in parameters
+   * \param size of the input container
    */
-  void setVectorMemory(const MemoryContainer& v, MemoryContainer::size_type _size);
+  void setVectorMemory(const MemoryContainer& v, MemoryContainer::size_type size);
 
   /** To get SiconosVector number i of the memory
    * \param int i: the position in the memory of the wanted SiconosVector
@@ -127,8 +127,9 @@ public:
     return size();
   };
 
-  /** set the max size of the SiconosMemory
-   * \param max the max size for this SiconosMemory
+  /** set size of the SiconosMemory (number of vectors and size of vector)
+   * \param steps the max size for this SiconosMemory, size of the container
+   * \param vectorSize size of each vector of the container
    */
   void setMemorySize(const unsigned int steps,
                      const unsigned int vectorSize);

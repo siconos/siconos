@@ -289,7 +289,6 @@ public:
   //virtual void initialize(Model& m);
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
@@ -356,12 +355,14 @@ public:
   void updateInput(double time);
 
   /** update the output of the Interaction attached to this Integrator
-   *  \param level level of interest for the dynamics
+   * \param time current time
+   * \param level level of interest for the dynamics
    */
   void updateOutput(double time, unsigned int level);
 
   /** update the input of the Interaction attached to this Integrator
-   *  \param level level of interest for the dynamics
+   * \param time current time
+   * \param level level of interest for the dynamics
    */
   void updateInput(double time, unsigned int level);
   

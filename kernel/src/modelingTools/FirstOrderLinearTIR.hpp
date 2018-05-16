@@ -102,15 +102,14 @@ public:
   /** default function to compute y
    *  \param time current time
    *  \param inter Interaction using this Relation
-   *  \param interProp
-   *  \param level not used
+   *  \param level
    */
- virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
+  virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
+  
   /** default function to compute r
    *  \param time current time
    *  \param inter Interaction using this Relation
-   *  \param interProp
-   *  \param level not used
+   *  \param level
    */
   virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
@@ -121,14 +120,12 @@ public:
   /** compute the jacobian of h: nothing to be done here
    *  \param time current time
    *  \param inter Interaction using this Relation
-   *  \param interProp
    */
   virtual void computeJach(double time, Interaction& inter) {};
 
   /** compute the jacobian of g: nothing to be done here
    *  \param time current time
    *  \param inter Interaction using this Relation
-   *  \param interProp
    */
   virtual void computeJacg(double time, Interaction& inter) {};
  

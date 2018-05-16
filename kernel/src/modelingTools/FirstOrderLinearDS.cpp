@@ -162,7 +162,7 @@ void FirstOrderLinearDS::computeb(double time)
     ((LDSPtrFunction)_pluginb->fPtr)(time, _n, &(*_b)(0), _z->size(), &(*_z)(0));
 }
 /*This function is called only by LsodarOSI and eventDriven*/
-void FirstOrderLinearDS::computeRhs(double time, bool isDSup)
+void FirstOrderLinearDS::computeRhs(double time)
 {
   // second argument is useless at the time - Used in derived classes
   // compute A=jacobianfx
@@ -193,7 +193,7 @@ void FirstOrderLinearDS::computeRhs(double time, bool isDSup)
   }
 }
 
-void FirstOrderLinearDS::computeJacobianRhsx(double time, bool isDSup)
+void FirstOrderLinearDS::computeJacobianRhsx(double time)
 {
   if(_A)
     {

@@ -40,7 +40,7 @@ public:
 
   /** Specify a non-smooth law to use for a given combination of
    *  interaction groups.
-   * \param nsl a SP::NonSmoothLaw
+   * \param nslaw the new nonsmooth law
    * \param group1 first group
    * \param group2 second group */
   virtual void insertNonSmoothLaw(SP::NonSmoothLaw nslaw,

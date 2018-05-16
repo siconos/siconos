@@ -188,7 +188,7 @@ public:
   double minDistance(SP::Hashed h);
 
   /** Broadphase contact detection: add interactions in indexSet 0.
-   *  \param time the current time.
+   *  \param simulation the current simulation setup
    */
   virtual void updateInteractions(SP::Simulation simulation);
 

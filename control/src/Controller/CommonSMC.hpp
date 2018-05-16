@@ -157,7 +157,8 @@ public:
   virtual void actuate() = 0;
 
   /** Initialization
-   * \param m the Model
+   * \param nsds current nonsmooth dynamical system
+   * \param s current simulation setup
    */
   virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
 

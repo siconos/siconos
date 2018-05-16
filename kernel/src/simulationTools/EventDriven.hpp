@@ -92,11 +92,13 @@ protected:
 
 public:
   /** defaut constructor
-   *  \param td time discretisation
+   * \param nsds current nonsmooth dynamical system
+   * \param td time discretisation
    */
   EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
 
   /** constructor with data
+   *  \param nsds current nonsmooth dynamical system
    *  \param td time discretisation
    *  \param nb number of NSProblem
    */
@@ -110,10 +112,7 @@ public:
   */
   ~EventDriven() {};
 
-  /** Overload Simulation::initialize
-   * \param m the Model
-   * \param withOSI
-   */
+  /** Overload Simulation::initialize */
   void initialize();
 
   /* Getters and setters */

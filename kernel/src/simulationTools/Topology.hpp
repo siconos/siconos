@@ -124,18 +124,17 @@ public:
 
   // === GETTERS/SETTERS ===
 
-  /** check if Interaction inter is in the set
-   *  \param inter an Interaction
-   *  \return a bool
+  /** check if an dynamical system is already a vertex of the DSs graph.
+   *  \param ds the DS to test
+   *  \return true if ds is in the graph
    */
   bool hasDynamicalSystem(SP::DynamicalSystem ds) const;
 
-  /** check if a dynamical system is already a vertex of the DS graph.
-   *  \param ds a DynamicalSystem
-   *  \return a bool
+  /** check if an interaction is already a vertex of the Interactions graph.
+   *  \param inter the Interaction to test
+   *  \return true if inter is in the graph
    */
   bool hasInteraction(SP::Interaction inter) const;
-
   
   /** remove an Interaction from the topology. The interaction is
    *  removed from Dynamical Systems graph and Interactions Graph.
@@ -154,7 +153,6 @@ public:
    *  Graph.  The dynamical system is not removed from actives
    *  subgraphs : see updateIndexSet
    *  \param ds the dynamical system to remove
-   *  \param removeInteractions if true, also remove all interactions with this ds
    */
   void removeDynamicalSystem(SP::DynamicalSystem ds);
 
@@ -177,7 +175,7 @@ public:
   void setName(SP::Interaction inter, const std::string& name);
 
   /** get the name for this Interaction
-   * \param ds a pointer to the system
+   * \param inter a pointer to the Interaction
    * \return name the name of the Interaction, or empty string if not found.
    */
   std::string name(SP::Interaction inter);

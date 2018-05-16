@@ -50,8 +50,9 @@ protected:
 public:
 
   /** constructor with the time-discretisation
-   *  \param td pointer to a TimeDiscretisation
-   *  \param nb number of non smooth problem
+   * \param nsds the current nonsmooth dynamical system
+   * \param td pointer to a TimeDiscretisation
+   * \param nb number of non smooth problem
    */
   TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td , int nb);
 

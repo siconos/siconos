@@ -137,14 +137,14 @@ public:
    *  \param joint1 The joint for the first reference measurement theta1.
    *  \param dof1 The degree of freedom index of joint1 to use for
    *              the first reference measurement theta1.
-   *  \param ref1 The optional reference vector for the first
+   *  \param refds1 The optional reference vector for the first
    *                reference measurement theta1.
    *  \param ref1_index Must be 0 or 1, depending on where ref1
    *                    appears in joint1.
    *  \param joint2 The joint for the second reference measurement theta2.
    *  \param dof2 The degree of freedom index of joint2 to use for
    *              the second reference measurement theta2.
-   *  \param ref2 The optional reference vector for the second
+   *  \param refds2 The optional reference vector for the second
    *                reference measurement theta2.
    *  \param ref2_index Must be 0 or 1, depending on where ref2
    *                    appears in joint2.

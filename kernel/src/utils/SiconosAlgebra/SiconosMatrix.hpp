@@ -476,17 +476,21 @@ public:
    */
   virtual size_t nnz(double tol = 1e-14);
 
-  /** return the number of non-zero in the matrix
-   * \param csm the compressed column sparse matrix
-   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
-   * \return the number of non-zeros
+  /** Fill sparse matrix
+   *  \param csc the compressed column sparse matrix
+   *  \param row_off
+   *  \param col_off
+   *  \param tol the tolerance under which a number is considered as equal to zero 
+   *  \return true if function worked.
    */
   bool fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
 
   /** return the number of non-zero in the matrix
-   * \param triplet the triplet sparse matrix
-   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
-   * \return the number of non-zeros
+   *  \param csc the compressed column sparse matrix
+   *  \param row_off
+   *  \param col_off
+   *  \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
+   *  \return the number of non-zeros
    */
   bool fillTriplet(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
 

@@ -1056,10 +1056,9 @@ void NewtonEulerDS::computeJacobianMIntvByFD(double time, SP::SiconosVector q, S
 }
 
 
-void NewtonEulerDS::computeRhs(double time, bool isDSup)
+void NewtonEulerDS::computeRhs(double time)
 {
-  DEBUG_BEGIN("NewtonEulerDS::computeRhs(double time, bool isDSup)");
-  // if isDSup == true, this means that there is no need to re-compute mass ...
+  DEBUG_BEGIN("NewtonEulerDS::computeRhs(double time)");
   *_acceleration = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
 
   computeForces(time, _q, _twist);
@@ -1079,7 +1078,7 @@ void NewtonEulerDS::computeRhs(double time, bool isDSup)
 
 }
 
-void NewtonEulerDS::computeJacobianRhsx(double time, bool isDSup)
+void NewtonEulerDS::computeJacobianRhsx(double time)
 {
   if(_jacobianWrenchq)
   {

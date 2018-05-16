@@ -268,14 +268,12 @@ public:
   /** compute all the jacobian of h
    * \param time current time
    * \param inter the interaction using this relation
-   * \param interProp Interaction properties
    */
   virtual void computeJach(double time, Interaction& inter);
 
   /** compute all the jacobian of g
    * \param time current time
    * \param inter the interaction using this relation
-   * \param interProp Interaction properties
    */
   virtual void computeJacg(double time, Interaction& inter)
   {

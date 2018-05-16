@@ -194,7 +194,8 @@ public:
   SimpleMatrix(const SimpleMatrix& smat);
   
   /** copy constructor of a block given by the coord = [r0A r1A c0A c1A]
-   *  \param A the matrix for extracting the block
+   *  \param A the matrix which contains the block to extract
+   *  \param coord positions of the block to be extracted (row:start, row:end, col:start, col:end)
    */
   SimpleMatrix(const SimpleMatrix& A , const Index& coord );
 

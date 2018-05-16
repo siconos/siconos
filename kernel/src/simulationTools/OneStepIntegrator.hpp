@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! \file OnestepIntegrator.hpp
+/*! \file OneStepIntegrator.hpp
 
   Base class (i.e. common interface) for dynamical system integration over a time step.
 */
@@ -272,7 +272,6 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
@@ -386,12 +385,14 @@ public:
   virtual void updateInput(double time);
 
   /** update the output of the Interaction attached to this Integrator
-   *  \param level level of interest for the dynamics
+   * \param time current time
+   * \param level level of interest for the dynamics
    */
   virtual void updateOutput(double time, unsigned int level);
 
   /** update the input of the Interaction attached to this Integrator
-   *  \param level level of interest for the dynamics
+   * \param time current time
+   * \param level level of interest for the dynamics
    */
   virtual void updateInput(double time, unsigned int level);
 

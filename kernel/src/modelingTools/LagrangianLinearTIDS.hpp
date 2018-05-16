@@ -126,7 +126,7 @@ public:
   //@{
 
   /** allocate (if needed)  and compute rhs and its jacobian.
-   * \param time of initialization
+   * \param t time of initialization
    */
   void initRhs(double t) ;
 

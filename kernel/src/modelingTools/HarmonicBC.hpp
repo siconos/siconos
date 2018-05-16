@@ -35,11 +35,13 @@ class HarmonicBC : public  BoundaryCondition
 {
 public:
 
-  /** \fn HarmonicBC(SP::UnsignedIntVector  newVelocityIndices);
-   *  \brief Basic constructor
-   *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
+  /** Constructor
+   * \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
+   * \param a constant value for additive term of the prescribed velocity
+   * \param b constant value for multiplicative term of the prescribed velocity
+   * \param omega frequency
+   * \param phi phase
    */
-
   HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
              double a, double b,
              double omega, double phi) ;

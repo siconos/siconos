@@ -215,7 +215,6 @@ public:
   /** compute all the H Jacobian
    * \param time the current time
    * \param inter the interaction using this relation
-   * \param interProp
    */
   virtual void computeJach(double time, Interaction& inter) = 0;
 
@@ -230,7 +229,6 @@ public:
   /** default function to compute y
    *  \param time the current time
    *  \param inter the interaction using this relation
-   *  \param interProp
    *  \param derivativeNumber number of the derivative to compute (optional, default = 0)
    */
   virtual void computeOutput(double time, Interaction& inter,
@@ -238,7 +236,6 @@ public:
   /** default function to compute r
    *  \param time the current time
    *  \param inter the interaction using this relation
-   *  \param interProp
    *  \param level the input "derivative" order of lambda used to compute input
    */
   virtual void computeInput(double time, Interaction& inter,

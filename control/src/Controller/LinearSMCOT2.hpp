@@ -78,7 +78,8 @@ public:
   virtual ~LinearSMCOT2();
 
   /** initialize actuator data.
-   * \param m the Model
+   * \param nsds current nonsmooth dynamical system
+   * \param s current simulation setup
   */
   void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s);
 

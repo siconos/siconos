@@ -227,14 +227,6 @@ protected:
 
 public:
 
-  /** Constructor with interaction size, NonSmoothLaw and Relation.
-   *  \param interactionSize size of the interaction,
-             i.e. the size of the input and output
-   *  \param NSL pointer to the NonSmoothLaw
-   *  \param rel a pointer to the Relation
-   */
-  //Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel);
-
   /** constructor with NonSmoothLaw and Relation (i.e. inter size == nslaw size)
    *  \param NSL pointer to the NonSmoothLaw, the interaction size is
    *         infered from the size of the NonSmoothLaw
@@ -263,7 +255,6 @@ public:
   //@{
 
   /** set the links  between the interaction and the DynamicalSystem(s) members.
-   *  \param interaction_properties properties (inside the graph) of the current interaction
       \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
       \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is allowed.
   */
@@ -280,6 +271,7 @@ public:
   void resetLambda(unsigned int level);
 
   /** build memories vectors for y and \f$\lambda\f$
+   * \param computeResiduY true if interaction should compute extra residu value
    * \param steps number of required memories (depends on the OSI)
   */
   void initializeMemory(bool computeResiduY, unsigned int steps);

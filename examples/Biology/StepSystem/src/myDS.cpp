@@ -70,7 +70,7 @@ void MyDS::computeJacobianfx(double t, SP::SiconosVector x)
 
 }
 
-// void MyDS::computeRhs(double t, bool  b)
+// void MyDS::computeRhs(double t)
 // {
 //   ;
 // }

@@ -169,7 +169,6 @@ public:
   
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
@@ -229,12 +228,6 @@ public:
    *  without taking into account the nonsmooth input (_r or _p)
    */
   virtual void computeFreeState();
-
-  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex_inter vertex of the interaction graph
-   * \param osnsp pointer to OneStepNSProblem
-   */
-//  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i

@@ -65,10 +65,10 @@
    \section osns_options Options for Numerics and the driver for solvers
 
    When the Numerics driver is called a set of solver options (name, tolerance, max. number of iterations ...)
-   is required --> SolverOptions, \ref NumericsSolver.
+   is required --> SolverOptions.
 
    Default values are always set in solver options the OneStepNSProblem is built
-   but if you need to set them yourself, please see \ref NumericsSolver. 
+   but if you need to set them yourself, please check Users'guide, Numerics solvers part.
 
  */
 class OneStepNSProblem

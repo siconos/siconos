@@ -337,7 +337,6 @@ public:
 
   /** remove a dynamical system
    * \param ds a pointer to the dynamical system to remove
-   * \param removeInterations if true, all interactions connected to the ds will also be removed
    */
   void removeDynamicalSystem(SP::DynamicalSystem ds);
 
@@ -375,7 +374,7 @@ public:
   }
 
   /** get Interaction named name
-   * \param nb the name of the Interaction to get
+   * \param name of the Interaction to get
    * \return a pointer to an Interaction
    */
   inline SP::Interaction interaction(std::string name) const
@@ -418,7 +417,7 @@ public:
   };
 
   /** get the name for this Interaction
-   * \param ds a pointer to the system
+   * \param inter a pointer to the Interaction
    * \return name the name of the Interaction, or empty string if not found.
    */
   std::string name(SP::Interaction inter)

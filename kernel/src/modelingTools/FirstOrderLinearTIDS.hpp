@@ -92,17 +92,13 @@ public:
 
   /** Default function to the right-hand side term
    *  \param time current time
-   *  \param isDSup flag to avoid recomputation of operators
-   *
    */
-  void computeRhs(double time, bool isDSup = false);
+  void computeRhs(double time);
 
   /** Default function to jacobian of the right-hand side term according to x
    *  \param time current time
-   *  \param isDSup flag to avoid recomputation of operators
-   *
    */
-  void computeJacobianRhsx(double time, bool isDSup = false);
+  void computeJacobianRhsx(double time);
 
   ///@}
 

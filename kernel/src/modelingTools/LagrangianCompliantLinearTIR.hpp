@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-/*! \file LagrangianLinearTIR.hpp
+/*! \file LagrangianCompliantLinearTIR.hpp
  */
 #ifndef LAGRANGIANCOMPLIANTLINEARRELATION_H
 #define LAGRANGIANCOMPLIANTLINEARRELATION_H

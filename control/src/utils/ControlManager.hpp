@@ -188,6 +188,7 @@ public:
    * addSensor()
    * \param s a SP::Sensor to the Sensor we want to add
    * \param td the TimeDiscretisation used for the associated Event
+   * \param nsds current nonsmooth dynamical system
    */
   void addAndRecordSensorPtr(SP::Sensor s, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds);
 
@@ -195,7 +196,7 @@ public:
    * \param name the type of the Actuator
    * \param td the SP::TimeDiscretisation of the Actuator
    * \param sensor the ControlSensor used to feed the Actuator
-   * \return a SP::ACtuator to the added Actuator
+   * \return the added Actuator
    */
   SP::Actuator addActuator(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor);
 
@@ -223,7 +224,8 @@ public:
    * addActuator()
    * \param act a SP::Actuator to the Actuator we want to add
    * \param td the TimeDiscretisation used for the associated Event
-   */
+   * \param nsds current nonsmooth dynamical system
+ */
   void addAndRecordActuatorPtr(SP::Actuator act, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds);
 
   /** To build and add a new Observer in the Manager
@@ -243,7 +245,8 @@ public:
    * \param td the SP::TimeDiscretisation of the Observer
    * \param sensor the ControlSensor feeding the Observer
    * \param xHat0 the initial guess for the state
-   * \return a SP::Observer to the added Observer
+   * \param nsds current nonsmooth dynamical system
+   * \return the added Observer
    */
   SP::Observer addAndRecordObserver(int name, SP::TimeDiscretisation td, SP::ControlSensor sensor, const SiconosVector& xHat0, const NonSmoothDynamicalSystem& nsds);
 
@@ -259,12 +262,13 @@ public:
    * addObserver()
    * \param obs a SP::Observer to the Observer we want to add
    * \param td the TimeDiscretisation used for the associated Event
+   * \param nsds current nonsmooth dynamical system
    */
   void addAndRecordObserverPtr(SP::Observer obs, SP::TimeDiscretisation td, const NonSmoothDynamicalSystem& nsds);
 
 
   /** initialize all Sensors, Observers and Actuators.
-   * \param m the Model
+   * \param nsds current nonsmooth dynamical system
    */
   void initialize(const NonSmoothDynamicalSystem& nsds);
 

@@ -172,26 +172,24 @@ public:
   virtual void initRhs(double time) = 0 ;
 
   /** set nonsmooth input to zero
-   *  \param int input-level to be initialized.
+   *  \param level input-level to be initialized.
    */
   virtual void initializeNonSmoothInput(unsigned int level) = 0;
 
   /** compute all component of the dynamical system, for the current state.
-   *  \param double time of interest
+   *  \param time current time (the one used to update ds component)
    */
   void update(double time);
 
   /** update right-hand side for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  virtual void computeRhs(double time, bool isDSup = false) = 0;
+  virtual void computeRhs(double time) = 0;
 
   /** update \f$\nabla_x rhs\f$ for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  virtual void computeJacobianRhsx(double time , bool isDSup = false) = 0;
+  virtual void computeJacobianRhsx(double time) = 0;
 
   /** reset nonsmooth part of the rhs, for all 'levels' */
   virtual void resetAllNonSmoothParts() = 0;
@@ -256,12 +254,12 @@ public:
   }
 
   /** set initial state (copy)
-   *  \param a SiconosVector
+   *  \param newValue input vector to copy
    */
   void setX0(const SiconosVector& newValue);
 
   /** set initial state (pointer link)
-   *  \param newPtr SP::SiconosVector
+   *  \param newPtr vector (pointer) to set x0
    */
   void setX0Ptr(SP::SiconosVector newPtr);
 
@@ -418,7 +416,7 @@ public:
   }
   
   /** set number of steps to be saved
-   *  \param int steps
+   *  \param steps
    */
   inline void setStepsInMemory(int steps)
   {

@@ -132,7 +132,6 @@ void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, Sim
   /** default function to compute y, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
   virtual void computeOutput(double time, Interaction& inter, unsigned int level = 0);
@@ -140,7 +139,6 @@ void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, Sim
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
   virtual void computeInput(double time, Interaction& inter,

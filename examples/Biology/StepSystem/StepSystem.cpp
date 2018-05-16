@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
     dataPlot(cmp, 5) = lambda->getValue(2);
     dataPlot(cmp, 6) = lambda->getValue(3);
 
-    aDS->computeRhs(aS->nextTime(),true);
+    aDS->computeRhs(aS->nextTime());
 
     if (cmp==1) // tricks just for display to avoid the computation of the initial Rhs
     {

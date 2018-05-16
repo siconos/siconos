@@ -175,21 +175,19 @@ public:
   void initRhs(double time);
 
   /** set nonsmooth input to zero
-   *  \param int input-level to be initialized.
+   *  \param level input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) ;
 
   /** update right-hand side for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  void computeRhs(double time, bool isDSUp = false);
+  void computeRhs(double time);
 
   /** update \f$\nabla_x rhs\f$ for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  void computeJacobianRhsx(double time, bool isDSUp = false);
+  void computeJacobianRhsx(double time);
 
   /** reset non-smooth part of the rhs (i.e. r), for all 'levels' */
   virtual void resetAllNonSmoothParts();
@@ -369,7 +367,7 @@ public:
    *   \times R \mapsto R^{n \times n} \f$ with x different from
    *   current saved state.
    *  \param time instant used in the computations
-   *  \param x2 a SiconosVector to store the resuting value
+   *  \param state a SiconosVector to store the resuting value
    */
   virtual void computeJacobianfx(double time, SP::SiconosVector state);
 

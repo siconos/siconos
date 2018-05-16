@@ -238,4 +238,31 @@ def replace_uppercase_letters(filename):
     return ''.join(r)
 
 
+def filter_doxygen_warnings_files(warnings_path, outputfile):
+    """Post process outputs from doxygen warnings : 
+     * remove all empty files
+     * cat all warnings files into one
 
+     Parameters
+     ----------
+     warnings_path : string
+         full path to warnings files
+     outputfile : string
+         name of resulting file (concat.). Saved in warnings_path
+    """
+    
+    warnfiles = glob.glob(os.path.join(warnings_path, '*.warnings'))
+    real_warnings = []
+    for f in warnfiles:
+        if os.stat(f).st_size == 0:
+            os.remove(f)
+        else:
+            real_warnings.append(f)
+    outputfile = os.path.join(warnings_path, outputfile)
+    with open(outputfile, 'w') as outfile:
+        for fname in real_warnings:
+            with open(fname) as infile:
+                for line in infile:
+                    outfile.write(line)
+            
+    

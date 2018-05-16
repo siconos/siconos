@@ -74,6 +74,15 @@ macro(finalize_doc)
       "${CMAKE_BINARY_DIR}/docs/sphinx/Doxyfile" @ONLY)
   endif()
   
+  if(WITH_DOXYGEN_WARNINGS)
+    add_custom_target(filter_warnings
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      "import buildtools; buildtools.filter_doxygen_warnings_files('${CMAKE_BINARY_DIR}/doxygen_warnings', 'SUMMARY.warnings')"
+      VERBATIM
+      COMMENT "Filter doxygen warnings (result : SUMMARY.warnings)."
+      )
+
+  endif()
 
 
 endmacro()

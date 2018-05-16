@@ -32,7 +32,8 @@ private:
 public:
   /** initialize elements in the graph for the computations
    * \param DSG0 the graph of DynamicalSystems
-   * \param model the current Model
+   * \param nsds current nonsmooth dynamical system
+   * \param td current time discretisation
    */
   virtual void init(DynamicalSystemsGraph& DSG0, const NonSmoothDynamicalSystem & nsds, const TimeDiscretisation & td);
 

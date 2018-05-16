@@ -449,10 +449,9 @@ void LagrangianDS::computeJacobianFGyrqDot(SP::SiconosVector position, SP::Sicon
     ((FPtr5)_pluginJacqDotFGyr->fPtr)(_ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFGyrqDot)(0, 0), _z->size(), &(*_z)(0));
 }
 
-void LagrangianDS::computeRhs(double time, bool isDSup)
+void LagrangianDS::computeRhs(double time)
 {
-  DEBUG_BEGIN("LagrangianDS::computeRhs(double time, bool isDSup)");
-  // if isDSup == true, this means that there is no need to re-compute mass ...
+  DEBUG_BEGIN("LagrangianDS::computeRhs(double time)");
   *_q[2] = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
 
   // if(_forces)
@@ -467,7 +466,7 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
   // -- Case 2: mass is not constant, we copy it into _inverseMass
   // Then we proceed with PLUForwardBackward.
   // mass and inv(mass) computation
-  if(_mass && !isDSup && !_hasConstantMass)  // if it is necessary to re-compute mass, FInt ..., ie if they have not been compiled during the present time step
+  if(_mass && !_hasConstantMass)  // if it is necessary to re-compute mass, FInt ..., ie if they have not been compiled during the present time step
   {
     computeMass();
     *_inverseMass = *_mass;
@@ -479,14 +478,12 @@ void LagrangianDS::computeRhs(double time, bool isDSup)
 
   _x[1]->setBlock(0, *_q[1]);
   _x[1]->setBlock(_ndof, *_q[2]);
-  DEBUG_END("LagrangianDS::computeRhs(double time, bool isDSup)");
+  DEBUG_END("LagrangianDS::computeRhs(double time)");
 }
 
-void LagrangianDS::computeJacobianRhsx(double time, bool isDSup)
+void LagrangianDS::computeJacobianRhsx(double time)
 {
-  // if isDSup == true, this means that there is no need to re-compute mass ...
-
-  if(!isDSup && !_hasConstantMass)
+  if(!_hasConstantMass)
     computeMass();
 
   //  if(mass->isPlugged()) : mass may b not plugged in LagrangianDS children

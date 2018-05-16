@@ -96,7 +96,6 @@ public:
   /** default function to compute y
   *  \param time not used
   *  \param inter the Interaction we want to update
-  *  \param interProp interaction properties
   *  \param derivativeNumber the derivative of y we want to compute
   */
   void computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber = 0);
@@ -104,7 +103,6 @@ public:
   /** default function to compute r
   *  \param time not used
   *  \param inter the Interaction we want to update
-  *  \param interProp interaction properties
   *  \param level the derivative of lambda we want to compute
   */
   void computeInput(double time, Interaction& inter, unsigned int level = 0);

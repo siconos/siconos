@@ -167,31 +167,13 @@ public:
   /* compute all the H Jacobian 
    * \param time
    * \param inter
-   * \param interProp
    */
   virtual void computeJach(double time, Interaction& inter) = 0 ;
   /* compute all the G Jacobian
    * \param time
    * \param inter
-   * \param interProp
    */
   virtual void computeJacg(double time, Interaction& inter) = 0 ;
-
-  /** to compute output
-   * \param time current time
-   * \param inter
-   * \param interProp
-   *  \param derivativeNumber number of the derivative to compute, optional, default = 0.
-   */
-  //virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0) = 0;
-
-  /** to compute p
-   *  \param time current time
-   * \param inter
-   * \param interProp
-   *  \param level "derivative" order of lambda used to compute input
-   */
-  //virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
 
   /** main relation members display
   */

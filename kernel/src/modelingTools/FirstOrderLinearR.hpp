@@ -174,11 +174,9 @@ public:
 
   /** default function to compute h
   *  \param time current time
-  *  \param workV
-  *  \param workM
   *  \param x XXX
-  *  \param z XXX
   *  \param lambda
+  *  \param z XXX
   *  \param y value of h
   */
   void computeh(double time, 
@@ -187,7 +185,6 @@ public:
 
   /** default function to compute g
   *  \param time current time
-  *  \param workM
   *  \param lambda XXX
   *  \param z XXX
   *  \param r non-smooth input
@@ -197,7 +194,6 @@ public:
   /** default function to compute y
   *  \param time current time
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
   virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
@@ -205,7 +201,6 @@ public:
   /** default function to compute r
   *  \param time current time
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
   virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);

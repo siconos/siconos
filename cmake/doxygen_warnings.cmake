@@ -10,11 +10,11 @@
 # set docs/CMakeLists.txt
 #
 # Use -DWITH_DOXYGEN_WARNINGS_INFILE=ON to save outputs in files.
-# Default = OFF.
+# Default = ON.
 # ===========================================================================
 
 if(WITH_${COMPONENT}_DOXYGEN_WARNINGS)
-  set(WITH_DOXYGEN_WARNINGS_INFILE "True" CACHE INTERNAL "Generate Doxygen warnings in a file.")
+  set(WITH_DOXYGEN_WARNINGS_INFILE "False" CACHE INTERNAL "Generate Doxygen warnings into a file.")
   foreach(_F ${${COMPONENT}_SRCS})
     get_filename_component(_FP ${_F} PATH)
     get_filename_component(_FWE1 ${_F} NAME_WE)
@@ -36,7 +36,7 @@ if(WITH_${COMPONENT}_DOXYGEN_WARNINGS)
     
     ADD_CUSTOM_COMMAND(OUTPUT ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.warnings
       COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.config
-      COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.warnings
+      #COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_BINARY_DIR}/doxygen_warnings/${_FWE1}.warnings
       DEPENDS ${_F}
       DEPENDS ${CURRENT_SICONOS_HEADER}
       )

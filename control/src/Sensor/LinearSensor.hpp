@@ -79,7 +79,7 @@ public:
   virtual ~LinearSensor();
 
   /** initialize sensor data
-   * \param m the Model
+   * \param nsds current nonsmooth dynamical system
    */
   virtual void initialize(const NonSmoothDynamicalSystem& nsds);
 

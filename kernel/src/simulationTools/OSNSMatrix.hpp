@@ -84,8 +84,8 @@
  *  interactionBlocks are saved in the matrix M and there is no copy of
  *  sub-interactionBlocks, only links thanks to pointers.
  *
- * - Sparse matrix (_storageType = 2): at the time of writting, only csc (compressed-sparse column).
- *   Could also be triplet (coo or coordinate) or csr (compressed-sparse row).
+ *  - Sparse matrix (_storageType = 2): at the time of writting, only csc (compressed-sparse column).
+ *    Could also be triplet (coo or coordinate) or csr (compressed-sparse row).
  */
 class OSNSMatrix
 {
@@ -121,11 +121,10 @@ protected:
   virtual unsigned updateSizeAndPositions(InteractionsGraph & indexSet);
 
   /** For each DynamicalSystem in the graph, compute its absolute position
-   * \param indexSet the index set of the dynamical systems
+   * \param DSG the index set of the dynamical systems
    * \return the dimension of the problem (or size of the matrix),
    * computed as the sum of the nslaw of all the Interaction in indexSet
    */
-
   virtual unsigned updateSizeAndPositions(DynamicalSystemsGraph & DSG);
 
 private:
@@ -226,13 +225,14 @@ public:
   virtual void fillW(InteractionsGraph&indexSet, bool update = true);
 
   /** fill the current class using an index set
-   * \param indexSet the index set of the dynamicalSystems
+   * \param DSG the index set of the dynamicalSystems
    * \param update if true update the size of the Matrix (default true)
    */
   virtual void fillM(DynamicalSystemsGraph& DSG, bool update = true);
 
   /** fill the current class using an index set
-   * \param indexSet the index set of the dynamicalSystems
+   * \param DSG the index set of the dynamicalSystems
+   * \param indexSet the index set of the Interactions
    * \param update if true update the size of the Matrix (default true)
    */
   virtual void fillH(DynamicalSystemsGraph& DSG, InteractionsGraph& indexSet,  bool update = true);

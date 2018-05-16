@@ -147,7 +147,8 @@ public:
   virtual void setTimeDiscretisation(const TimeDiscretisation& td);
 
   /** initialize observer data.
-   * \param nsds
+   * \param nsds current nonsmooth dynamical system
+   * \param s current simulation setup
    */
   virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
 

@@ -146,16 +146,14 @@ public:
   void initRhs(double time) ;
 
   /** update right-hand side for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  void computeRhs(double time, bool isDSUp = false);
+  void computeRhs(double time);
 
   /** update \f$\nabla_x rhs\f$ for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  void computeJacobianRhsx(double time, bool isDSUp = false);
+  void computeJacobianRhsx(double time);
 
   ///@}
 

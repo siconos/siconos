@@ -173,6 +173,7 @@ public:
    *
    * \param ans The vector to receive the projection.
    * \param q0 The state q of one or more NewtonEulerDS
+   * \param axis 
    * \param absoluteRef If true, ans is in the inertial frame,
    *                    otherwise the q1 frame is assumed.
    */
