@@ -382,21 +382,17 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
 
   _simulation = sim;
 
-  // === Adds this in the simulation set of OneStepNSProblem === First
-  // checks the id if required.  An id is required if there is more
-  // than one OneStepNSProblem in the simulation
-
   // The maximum size of the problem (for example, the dim. of M in
   // LCP or Friction problems).  Set to the number of possible scalar
   // constraints declared in the topology.
   if (_maxSize == 0) // if maxSize not set explicitely by user before
-    // initialize
     _maxSize = simulation()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 }
 
 SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::DynamicalSystem ds)
 {
-  // Connect block to the OSI matrix of a dynamical system for the current simulation.
+  // Returns the integration matrix from one-step integrator and dynamical system.
+
   // Matrix depends on OSI type.
   SP::SimpleMatrix block;
   OSI::TYPES osiType; // type of the current one step integrator

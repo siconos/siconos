@@ -10,7 +10,18 @@ import scipy.io as sio
 
 
 def save_dof(fileslist, dof, outputfile):
-    """Save displacement values in mat file
+    """Save displacement for a given dof, in mat file
+    Extract results from a list of simulations 
+    (e.g. convergence study, to plot dof = f(frequency))
+    
+    Parameters
+    ----------
+    fileslist : list of string
+        list of files (h5) from which displacements must be loaded
+    dof : int
+        degree of freedom of interest
+    outputfile : string
+        name of resulting file (.mat)
     """
 
     files = list(fileslist.values())
@@ -48,6 +59,18 @@ def save_dof(fileslist, dof, outputfile):
 
 def compute_errors(fileslist, dofs=None, shift=1, savedofs=None, ifref=-1):
     """Compute relative error defined in 3.36 from Clara's manuscript.
+
+    Parameters
+    ----------
+    fileslist : list of string
+        list of h5 files, each of them holding results of a simulation for 
+        a given frequency.
+    dofs : list of int
+        degrees of freedom (ds) of interest
+    savedofs : list of int
+        list of dofs to be saved in matlab file (default : none)
+    ifref : id (in filelist) of the simu (i.e. freq) used as reference
+    for error computation. Default = max freq.
     """
     #fref = max(list(fileslist.keys()))
     fref = list(fileslist.keys())[ifref]
@@ -176,7 +199,7 @@ def compute_errors_rel(fileslist, dofs=None, shift=1):
 
 
 def check_time_vectors(filelist):
-    """Compute relative error defined in 3.36 from Clara's manuscript.
+    """Ensure compatibility between time vectors from a list of simulation
     """
 
     # Load reference and current simulations,

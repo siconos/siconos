@@ -75,9 +75,7 @@ def test_bouncing_ball1():
     osnspb = sk.LCP()
 
     # (4) Simulation setup with (1) (2) (3)
-    s = sk.TimeStepping(bouncing_ball,t)
-    s.insertIntegrator(OSI)
-    s.insertNonSmoothProblem(osnspb)
+    s = sk.TimeStepping(bouncing_ball,t, OSI, osnspb)
 
     # end of model definition
 
@@ -250,13 +248,9 @@ def test_bouncing_ball2():
     osnspb_d = sk.LCP()
 
     # (4) Simulation setup with (1) (2) (3)
-    s = sk.TimeStepping(bouncing_ball,t)
-    s.insertIntegrator(OSI)
-    s.insertNonSmoothProblem(osnspb)
+    s = sk.TimeStepping(bouncing_ball,t, OSI, osnspb)
 
-    s_d = sk.TimeStepping(bouncing_ball_d,t_d)
-    s_d.insertIntegrator(OSI_d)
-    s_d.insertNonSmoothProblem(osnspb_d)
+    s_d = sk.TimeStepping(bouncing_ball_d,t_d, OSI_d, osnspb_d)
 
     # end of model definition
 

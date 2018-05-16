@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 /** \struct FrictionContactProblem FrictionContactProblem.h
- *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem, see details in \ref fcProblem.
+ *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem.
 */
 struct FrictionContactProblem
 {

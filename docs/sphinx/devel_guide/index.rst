@@ -14,6 +14,7 @@ Developer guide
    plugins
    notes/DevNotes
    todos_from_doxygen
+   howto_doc
 
 To do.
 

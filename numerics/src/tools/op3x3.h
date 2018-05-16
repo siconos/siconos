@@ -324,7 +324,8 @@ static inline void mvp3x3(const double* restrict a, const double* restrict v, do
   *pr++ += *a++ * *v++;
 }
 
-/** add a matrix vector multiplication scaled by alpha
+/** add a matrix vector multiplication scaled by alpha 
+ * \param[in] alpha scalar coeff
  * \param[in] a a[9]
  * \param[in] v v[3]
  * \param[out] r r[3] the result of r += av

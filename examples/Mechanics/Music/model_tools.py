@@ -8,10 +8,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 import os
+import parameters
 
 
 def build_frets_from_file(string, restitution_coeff, matlab_frets_file, filt, visu=False):
+    """Create interactions (contacts with frets or neck) from parameters described in a 
+    matlab file.
 
+    Parameters
+    ----------
+    string : StringDS
+        the dynamical system that will be involved in interactions
+    restitution_coeff : double
+        restitution coeff for nonsmooth law
+    matlab_frets_file : string
+        input file describing the profile of the neck
+    filt : boolean
+        true to create interactions only at 'real' frets positions
+        (i.e. not for all points on the neck)
+    visu : boolean
+        true to plot frets positions on the neck.
+    """
     all_frets_positions = scipy.io.loadmat(matlab_frets_file)['h'][:, 0]
     # Compute pos[i] - pos[i-1] to find 'real' frets
     delt = all_frets_positions[1:]
@@ -233,6 +250,9 @@ def load_model_nointer(filename, visu=True):
 
 
 def load_convert_and_save(filename):
+    """Load hdf5 file to create a model, convert output from modal to 
+    nodal and save new model into h5 file.
+    """
     # Load hdf5 file to set model and string
     ref_model, ref_string, ref_frets, restit = load_model(filename)
     # Convert (modal to real) displacements
@@ -251,6 +271,14 @@ def load_convert_and_save(filename):
     source.close()
     
 def load_data(filename):
+    """Load h5 file and extract ds and interaction data.
+    
+    Return 
+    ------
+    data_ds : array, ds dofs. Shape : ndof x nb saved time instants
+    data_interaction : list, interactions dofs
+    time : vector of time instants
+    """
     h5source = h5py.File(filename, 'r')
 
     data_ds = np.asarray(h5source['dof'])
@@ -263,7 +291,12 @@ def load_data(filename):
     return data_ds, data_inter, time
 
 
-
+def load(filename, case):
+    matlab_input = case['matlab_input']
+    m, s, f, e = load_model(filename)
+    frets_file = matlab_input + '_h.mat'
+    all_frets_positions = scipy.io.loadmat(frets_file)['h'][:, 0]
+    return m, s, f, all_frets_positions, e
 
 
 def compute_ak1(omega2, sigma, dt):
@@ -275,8 +308,6 @@ def compute_ak2(omega2, sigma, dt):
     expo = np.sqrt(sigma ** 2 - omega2) * dt
     ak = np.exp(-dt * sigma) * (np.exp(expo) + np.exp(-expo))
     return ak
-
-
 
 def compute_dtsigmastar(omega2, sigma, dt):
     sigdt = sigma * dt

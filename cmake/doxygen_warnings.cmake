@@ -8,9 +8,13 @@
 #
 # A config file is generated for each header, from ${DOXY_WARNINGS_CONFIG} file
 # set docs/CMakeLists.txt
+#
+# Use -DWITH_DOXYGEN_WARNINGS_INFILE=ON to save outputs in files.
+# Default = OFF.
 # ===========================================================================
 
 if(WITH_${COMPONENT}_DOXYGEN_WARNINGS)
+  set(WITH_DOXYGEN_WARNINGS_INFILE "True" CACHE INTERNAL "Generate Doxygen warnings in a file.")
   foreach(_F ${${COMPONENT}_SRCS})
     get_filename_component(_FP ${_F} PATH)
     get_filename_component(_FWE1 ${_F} NAME_WE)

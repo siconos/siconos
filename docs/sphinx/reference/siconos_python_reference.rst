@@ -10,3 +10,10 @@ This is the documentation of `python <https://www.python.org/>`_ interface to Si
    :maxdepth: 1
 
    modules
+
+
+   
+Index
+-----
+
+* :ref:`modindex`

@@ -135,10 +135,9 @@ public:
   */
   virtual void initOSNS();
 
-  /** Constructor with the time-discretisation.
-   * \param nsds the nsds that we want to simulate
-   *  \param td pointer to a timeDiscretisation used in the integration
-   *  (linked to the model that owns this simulation)
+  /** Standard constructor
+   * \param nsds NonSmoothDynamicalSystem to be simulated
+   * \param td pointer to a timeDiscretisation used in the integration
    *  \param osi one step integrator (default none)
    *  \param osnspb one step non smooth problem (default none)
    */
@@ -146,19 +145,10 @@ public:
                SP::OneStepIntegrator osi,
                SP::OneStepNSProblem osnspb);
 
-  // /** Constructor with the time-discretisation.
-  //  * \param nsds the nsds that we want to simulate
-  //  *  \param td pointer to a timeDiscretisation used in the integration
-  //  *  (linked to the model that owns this simulation)
-  //  *  \param osi one step integrator (default none)
-  //  *  \param osnspb one step non smooth problem (default none)
-  //  */
-  // TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
-
   /** Constructor with the time-discretisation.
-   *  \param td pointer to a timeDiscretisation used in the integration
-   *  (linked to the model that owns this simulation)
-   *  \param nb number of non smooth problem
+   * \param nsds NonSmoothDynamicalSystem to be simulated
+   * \param td pointer to a timeDiscretisation used in the integration
+   * \param nb number of non smooth problem
    */
   TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb =0);
 

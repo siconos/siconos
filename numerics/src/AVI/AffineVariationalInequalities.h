@@ -30,7 +30,7 @@
 #include "SiconosSets.h"
 
 /** \struct AffineVariationalInequalities AffineVariationalInequalities.h
- *  \brief Structure that contains and defines an \ref AVI
+ *  \brief Structure that contains and defines an AVI
  *
  *   The problem is the following: given a matrix \f$M\f$ and \f$q\f$, find \f$z\f$ such that:
  *   \f{equation*}{
@@ -53,23 +53,19 @@ struct AffineVariationalInequalities
 extern "C"
 {
 #endif
-  /** \fn void AVI_display(AffineVariationalInequalities* problem)
-   *  \brief function to display a AffineVariationalInequalities
-   *  \param  avi pointer to a AffineVariationalInequalities to display
+  /** Affine Variational Inequalities display
+   *  \param avi pointer to the AffineVariationalInequalities to display
    */
   void AVI_display(AffineVariationalInequalities* avi);
 
-  /** \fn int AVI_printInFile(AffineVariationalInequalities*  problem, FILE* file)
-   *  \brief function to write in a file a AffineVariationalInequalities
+  /** write AVI to file
    *  \param avi pointer to a AffineVariationalInequalities to print
    *  \param file pointer to a FILE
    *  \return 1 if successfull
    */
   int AVI_printInFile(AffineVariationalInequalities* avi, FILE* file);
 
-  /** \fn  int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file)
-   *  \brief function to read and create a AffineVariationalInequalities
-   *   from a file
+  /** read from file and create AffineVariationalInequalities
    *  \param avi pointer to a AffineVariationalInequalities to create
    *  \param file pointer to a FILE
    *  \return 1 if successfull

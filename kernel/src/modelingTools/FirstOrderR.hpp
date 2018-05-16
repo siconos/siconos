@@ -65,11 +65,6 @@ public:
   enum FirstOrderRVec {e,  relationVectorsSize};
   enum FirstOrderRMat {mat_C, mat_D, mat_F, mat_B, mat_K, relationMatricesSize};
 
-
-  //enum FirstOrderRWorkVec {osnsp_rhs, h_alpha, g_alpha, vec_residuY, vec_residuR, workVecSize};
-  //enum FirstOrderWorkMat{mat_workMatSize};
-
-
 protected:
   /** serialization hooks
   */

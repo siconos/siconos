@@ -18,7 +18,7 @@ option(USE_EXHALE "Build rst files from doxygen outputs (tool = exhale). Default
 # Devel option : generate pure doxygen doc (no sphinx), extracting all and with graphs.
 option(USE_DEVEL_DOXYGEN "Build doxygen (html, latex ...) doc, extracting all. Devel purpose. Default = OFF" OFF)
 
-set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/docs/build/ CACHE INTERNAL "Root path to generated documentation.")
+set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/docs/build CACHE INTERNAL "Root path to generated documentation.")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
 
 #  ====== doxygen documentation setup ======
@@ -35,15 +35,13 @@ if(USE_DOXYGEN)
   if(NOT DOXYGEN_OUTPUT)
     set(DOXYGEN_OUTPUT ${DOC_ROOT_DIR}/doxygen CACHE INTERNAL "Path to doxygen outputs.")
   endif()
-  
-  #file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/tags)
-  
+
   file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT}/man)
   
-  # --- Config file and its options. --
-  # --> one for doxygen warnings (from doxy_warnings.config.in)
-  # --> one for documentation and python docstrings (from doxy.config.in)
-  
+  # --- Config files and their options. --
+  # --> a lot for doxygen warnings (from doxy_warnings.config.in)
+  # --> one for documentation (html and xml to sphinx) (from doxy.config.in)
+
   # == set configuration file for doxygen warnings ==
   #  - Results in binary_dir/doxygen_warnings
   #  - input config from config/doxy_warnings.config
@@ -60,33 +58,16 @@ if(USE_DOXYGEN)
   # == set configuration file for doxygen doc from sources ==
   #  - Results in binary_dir/docs/
   #  - input config from config/doxy.config
-  #  - only html output (add option for latex?)
-  # 'inputs' are updated by each component, during call to update_xml_doxy_config_file macro.
+  #  - only html output
+  # 'inputs' are updated by each component, during call to update_doxy_config_file macro.
   # Doc will be built when 'make doxygen' is called.
   if(WITH_DOCUMENTATION)
     # config file name
-    set(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/config/doxy.config" CACHE INTERNAL "Doxygen configuration file used to produce xml files for sphinx.")
+    set(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/config/doxy.config" CACHE INTERNAL "Doxygen configuration file : used to produce html (doxygen only) and xml files for sphinx (breathe/exhale).")
     # The generation of the config and the creation of the target will be done later,
     # after the update of inputs by each component, with macro 'finalize_doc'
     
   endif()
-    
-  # == set configuration file for doxy2swig (use doxygen ouput to create docstrings) ==
-  #  - Results in binary_dir/docs/
-  #  - input config from config/<component_name>doxy.config
-  #  - only xml output
-  # 'inputs' are updated by each component, during call to update_xml_doxy_config_file macro.
-  # The xml doc is built for each component, during call to build_doc_xml macro.
-  # Here, we just need to create a target to create xml files for a given component
-  # for example --> make numerics_xml to create xml files for numerics.
-  if(WITH_DOXY2SWIG)
-    foreach(comp ${COMPONENTS})
-      set(DOXY_CONFIG_XML ${CMAKE_CURRENT_BINARY_DIR}/config/${comp}doxy.config.xml)
-      add_custom_target(${comp}_xml ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML} WORKING_DIRECTORY ${DOC_ROOT_DIR}
-	COMMENT "Build xml documentation files.")
-    endforeach()
-  endif()
-
 endif()
 
   
@@ -149,23 +130,36 @@ if(USE_SPHINX)
   # --> use make html or make latex ... to build documentation.
   set(SPHINX_EXECUTABLE sphinx-build)
 
-  # -- To build html doc : make html --
-  set(SPHINX_PARAMETERS
-    -b html # html output
-    -d build/doctrees # path to doctree files
-    ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
-    )
+  if(HAS_EXHALE)
+    set(SPHINX_PARAMETERS
+      -b html # html output
+      -d build/doctrees # path to doctree files
+      ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
+      -t WithExhale
+      )
+    
+  else()
+    set(SPHINX_PARAMETERS
+      -b html # html output
+      -d build/doctrees # path to doctree files
+      ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
+      -t WithoutExhale
+      )
+  endif()
 
-
+  # -- Target to copy figures required by sphinx from source to binary dir --
+  #  make copy-sphinx-figures
   add_custom_target(copy-sphinx-figures
     COMMAND cmake -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/figures ${CMAKE_CURRENT_BINARY_DIR}/sphinx/figures
     )
   
+  # -- To build html doc : make html --
   add_custom_target(html
     COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS}
     ${CMAKE_CURRENT_BINARY_DIR}/build/html
     DEPENDS copy-sphinx-figures
     )
+
   add_custom_command(TARGET html POST_BUILD
       COMMENT "Done. Sphinx doc has been generated in ${DOC_ROOT_DIR}/html")
 
@@ -176,6 +170,7 @@ if(USE_SPHINX)
     )
   
   # -- To use doxyrest to generate rst files from doxygen (xml) outputs : make doxyrest --
+  # Note FP : test purpose only, exhale/breathe seems to be better than doxyrest.
   if(HAS_DOXYREST)
     add_custom_target(doxyrest
       COMMAND ${DOXYREST_EXE} ${DOXYGEN_OUTPUT}/xml/index.xml -o ${CMAKE_CURRENT_BINARY_DIR}/sphinx/from_doxygen/index.rst -F ${DOXYREST_FRAME_DIR} -f c_index.rst.in
@@ -183,12 +178,6 @@ if(USE_SPHINX)
     add_dependencies(html doxyrest)
   endif()
 
-  # # symlink in build dir to figures directory from source dir.
-  # add_custom_command(
-  #   TARGET html PRE_BUILD
-  #   COMMAND ln -sfn ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/figures
-  #   ${CMAKE_CURRENT_BINARY_DIR}/sphinx/figures)
-  
   # -- To build latex doc : make latex -- 
   set(SPHINX_LATEX_PARAMETERS
     -b latex # latex output
@@ -203,7 +192,8 @@ if(USE_SPHINX)
   
   add_custom_target(doc DEPENDS html)
   
-  # python api auto doc
+  # -- Target to build python api documention with apidoc --
+  # make apidoc
   if(WITH_PYTHON_WRAPPER)
     set(SPHINX_APIDOC sphinx-apidoc)
     set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)

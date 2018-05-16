@@ -7,7 +7,7 @@ Contacts
 
 .. topic:: Siconos development team
 
-	`INRIA - Bipop`_
+	`INRIA - Tripop`_
 
 	**E-Mail** : siconos-team@lists.gforge.inria.fr
 
@@ -15,5 +15,5 @@ Contacts
 	
 .. _Contributors: https://github.com/siconos/siconos/blob/master/credits.md
 
-.. _INRIA - Bipop: http://www.inrialpes.fr/bipop/
+.. _INRIA - Tripop: https://team.inria.fr/tripop/
 

@@ -264,7 +264,7 @@ if(WITH_${COMPONENT}_TESTING)
   STRING(CONCAT FC3D_DATA_SET "Confeti-ex13-Fc3D-SBM.dat;" "${FC3D_DATA_SET}")
 
   foreach(_DAT ${FC3D_DATA_SET})
-    MESSAGE(STATUS "Setting test for ${_DAT}")
+    #MESSAGE(STATUS "Setting test for ${_DAT}")
     # --- GAMS Solvers ---
     if(HAVE_GAMS_C_API)
       NEW_FC_3D_TEST(${_DAT} SICONOS_FRICTION_3D_GAMS_PATH)

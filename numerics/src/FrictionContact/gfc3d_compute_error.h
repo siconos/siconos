@@ -35,9 +35,11 @@ extern "C"
    * The value of the local velocity (velocity) is recomputed
    * \param problem the structure which defines the friction-contact problem
    * \param[in] reaction
-   * \param[in] globalVelocity
-   * \param[out]velocity
+   * \param[in] velocity
+   * \param[out] globalVelocity
    * \param tolerance value for error computation
+   * \param options pointer to SolverOptions
+   * \param norm normalisation coeff
    * \param[in,out] error value
    * \return 0 if successfull
    */

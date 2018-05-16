@@ -147,6 +147,27 @@ with
    v_{free}^{i} &= v^i - W^{-1}(\Delta tKq^i + (\Delta t^2\theta K + \Delta tC) v^i) & = v^i - W^{-1}(\Delta tKq^i + 2\Delta t \Sigma^* v^i) \\
    \end{array}
 
+
+
+
+Taylor expansions
+^^^^^^^^^^^^^^^^^
+
+For some values of the time step it may be necessary to use Taylor expansions of iteration matrix and :math:`\Delta t\sigma^*` to avoid convergence problems.
+
+Those terms write:
+
+.. math::
+
+   \Delta t\sigma^* & = \Delta t \sigma + \frac{\Delta t^{3} \sigma}{12} \omega^{2} + \Delta t^{5} \left(\frac{\omega^{4} \sigma}{240} - \frac{\omega^{2} \sigma^{3}}{180}\right) \\
+   & +  \Delta t^{7} \left(\frac{\omega^{6} \sigma}{6048} - \frac{\omega^{4} \sigma^{3}}{1512} + \frac{\omega^{2} \sigma^{5}}{1890}\right) + \mathcal{O}\left(\Delta t^{8}\right) \\
+   \frac{1}{W_{kk}} &= 1 - \Delta t \sigma + \Delta t^{2} \left(- \frac{\omega^{2}}{12} + \frac{2 \sigma^{2}}{3}\right) \\
+   &+\Delta t^{3} \left(\frac{\omega^{2} \sigma}{12} - \frac{\sigma^{3}}{3}\right) + \Delta t^{4} \left(\frac{\omega^{4}}{360} - \frac{\omega^{2} \sigma^{2}}{20} + \frac{2 \sigma^{4}}{15}\right)\\
+   &+ \Delta t^{5} \left(- \frac{\omega^{4} \sigma}{360} + \frac{\omega^{2} \sigma^{3}}{45} - \frac{2 \sigma^{5}}{45}\right) \\
+   &+  \Delta t^{6} \left(- \frac{\omega^{6}}{20160} + \frac{\omega^{4} \sigma^{2}}{630} - \frac{\omega^{2} \sigma^{4}}{126} + \frac{4 \sigma^{6}}{315}\right)\\
+   &+  \Delta t^{7} \left(\frac{\omega^{6} \sigma}{20160} - \frac{\omega^{4} \sigma^{3}}{1512} + \frac{\omega^{2} \sigma^{5}}{420} - \frac{\sigma^{7}}{315}\right) + \mathcal{O}\left(\Delta t^{8}\right)\\
+
+
    
 Notes, remarks, questions
 ^^^^^^^^^^^^^^^^^^^^^^^^^

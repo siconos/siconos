@@ -125,7 +125,7 @@ extern "C"
 {
 #endif
 
-  /** \struct CSparseMatrix_lu_factors SparseMatrix.h
+  /** \struct CSparseMatrix_lu_factors
    * Information used and produced by CSparse for an LU factorization*/
   typedef struct {
     CS_INT n;       /**< size of linear system */

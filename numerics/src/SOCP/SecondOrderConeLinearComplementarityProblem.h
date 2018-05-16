@@ -21,8 +21,8 @@
 #include "NumericsMatrix.h"
 #include "NumericsFwd.h"
 
-/** \struct  SecondOrderConeLinearComplementarityProblem SecondOrderConeLinearComplementarityProblem.h
- *  The structure that defines a Second Order Cone Linear Complementarity Problem, , see details in \ref soclcpProblem.
+/** \struct  SecondOrderConeLinearComplementarityProblem
+ *  The structure that defines a Second Order Cone Linear Complementarity Problem.
  */
 struct SecondOrderConeLinearComplementarityProblem
 {

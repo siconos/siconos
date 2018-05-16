@@ -54,7 +54,7 @@ extern "C"
 {
 #endif
   /** display a ConvexQPProblem
-   * \param convexQP the problem to display
+   * \param cqp the problem to display
    */
   void convexQP_display(ConvexQP*  cqp);
 

@@ -137,6 +137,26 @@ Writing doc
 * Document all sources files (headers) using doxygen, as defined in http://www.stack.nl/~dimitri/doxygen/manual/index.html
 
 
-  
-  
 
+Doxygen to sphinx
+-----------------
+  
+Existing tools (as far as we know ...)
+
+* `Sphinx/Exhale tool`_
+* doxyrest https://github.com/vovkos/doxyrest
+
+Both are available in siconos, (use -DUSE_EXHALE=ON or -DUSE_DOXYREST=ON). We prefer exhale.
+
+
+Exhale/sphinx pipeline :
+* generates rst files from xml files (doxygen outputs) in CMAKE_BINARY_DIR/docs/sphinx/api
+* build html (as usual) from rst files, in CMAKE_BINARY_DIR/docs/build/html/api
+
+Exhale conf is defined in conf.py.in (sphinx) and may also handle doxygen run (xml outputs + rst generations from those outputs).
+
+  
+Doxyrest works the same way but is not as convenient as exhale. Outputs are in CMAKE_BINARY_DIR/docs/sphinx/from_doxygen.
+
+Both (exhale and doxyrest) are quite slow and doc generation may take long time ...
+It seems that it strongly depends on the chosen theme for sphinx (avoid bootswatch).

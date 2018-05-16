@@ -111,7 +111,6 @@ protected:
    */
   Relation(RELATION::TYPES type, RELATION::SUBTYPES subtype);
 
-
 private:
 
   /** default constructor => private, no copy nor pass-by-value

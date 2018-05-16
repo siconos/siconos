@@ -81,6 +81,7 @@ extern "C"
       \param w vector
       \param tolerance value for error computation
       \param options
+      \param norm normalisation coeff
       \param[in,out] error value
       \return 0 if ok
    */

@@ -5,7 +5,7 @@ make_doc:
     - "sh CI/make_siconos_doc.sh"
   artifacts:
     paths:
-      - build/docs/build
+      - build/docs/build/html
   only:
   - master
 

@@ -46,7 +46,7 @@ typedef struct
 } NumericsMatrixInternalData;
 
 /** \struct NumericsMatrix NumericsMatrix.h
-    Interface to different type of matrices in numerics component, see \ref NumericsMatrixPage.
+    Interface to different type of matrices in numerics component.
 
     See NM_* functions for linear algebra operations on dense, sparse block and sparse storage.
 */

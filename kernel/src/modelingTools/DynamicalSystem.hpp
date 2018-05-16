@@ -343,7 +343,7 @@ public:
    */
   virtual void setRhsPtr(SP::SiconosVector newPtr);
 
-  /** returns a pointer to $\nabla_x rhs()$
+  /** returns a pointer to \f$\nabla_x rhs()\f$
    *  \return SP::SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianRhsx() const

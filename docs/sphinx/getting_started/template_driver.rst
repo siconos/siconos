@@ -30,7 +30,6 @@ C++ template for siconos driver
     // - Relations - 
     // - NonSmoothLaw -
     // -- NonSmoothDynamicalSystem --	
-    // -- Model --
     // == Creation of the Simulation ==
     // -- TimeDiscretisation --
     // -- Simulation (time stepping or event-driven)
@@ -38,8 +37,6 @@ C++ template for siconos driver
     // -- OneStepNSProblem --
     // ================================= Computation =================================
 
-    // --- Initialisation of the simulation ---
-	
     // --- Time loop ---
   }
   

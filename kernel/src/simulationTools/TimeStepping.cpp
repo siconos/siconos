@@ -349,11 +349,6 @@ void TimeStepping::initOSNS()
 void TimeStepping::nextStep()
 {
   DEBUG_BEGIN("void TimeStepping::nextStep()\n");
-  // if(!_isInitialized)
-  // {
-  //   // if the simulation run starts with nextStep();
-  //   initialize();
-  // }
   processEvents();
   DEBUG_END("void TimeStepping::nextStep()\n");
 }

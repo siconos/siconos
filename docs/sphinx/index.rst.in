@@ -21,7 +21,8 @@
    complete_documentation
    siconos_links
    search_index
-   
+   contacts
+   license
    
 
 .. image:: https://travis-ci.org/siconos/siconos.svg?branch=master

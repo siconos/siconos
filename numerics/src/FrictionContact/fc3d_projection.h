@@ -136,12 +136,9 @@ extern "C"
   int fc3d_projectionOnCone_velocity_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
 
   /** solve friction-contact 3D problem with projection on the (Tresca Cylinder)
-   * \param localproblem :  the local problem to initialize
-   * \param reaction
    * \param options
    * \return 0 if successfull
    */
-
   int fc3d_projectionOnCone_velocity_setDefaultSolverOptions(SolverOptions* options);
   
   int fc3d_projectionOnCylinder_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
