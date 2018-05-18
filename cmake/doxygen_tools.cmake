@@ -63,15 +63,30 @@ macro(finalize_doc)
       add_dependencies(doxyrest doxygen)
       add_dependencies(html doxyrest)
     endif()
+    if(HAS_EXHALE)
+      # xml outputs for exhale. Conf might be different from
+      # xml outputs for swig.
+      set(DOXYGEN_4_EXHALE ${DOXYGEN_OUTPUT}/xml4exhale)
+      configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxyxml2sphinx.config.in
+	"${CMAKE_BINARY_DIR}/docs/sphinx/Doxyfile" @ONLY)
+    endif()
+
+    ## TEST PURPOSE : maybe this tool is better than doxy2swig/exhale??
+    if(DOXY2RST)
+      set(DOXYGEN_4_EXHALE ${DOXYGEN_OUTPUT}/xml4exhale)
+      add_custom_target(doxy2rst
+	COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+	"import buildtools; buildtools.parse_doxygen_wrapper('${DOXYGEN_4_EXHALE}', '${CMAKE_BINARY_DIR}/docs/sphinx/reference')"
+	VERBATIM
+	)
+    endif()
     # --- Generates conf.py, to describe sphinx setup ---
     # !! Should be call after doxygen setup
     # to have a correct DOXYGEN_INPUT value.
     configure_file (
       "${CMAKE_SOURCE_DIR}/docs/sphinx/conf.py.in"
       "${CMAKE_BINARY_DIR}/docs/sphinx/conf.py" @ONLY)
-    configure_file(
-      "${DOXY_CONFIG}"
-      "${CMAKE_BINARY_DIR}/docs/sphinx/Doxyfile" @ONLY)
+
   endif()
   
   if(WITH_DOXYGEN_WARNINGS)

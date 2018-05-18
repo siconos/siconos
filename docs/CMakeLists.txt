@@ -91,15 +91,12 @@ if(USE_SPHINX)
   endif()
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
+  find_python_module(numpydoc REQUIRED)
   #find_sphinx_module(sphinxcontrib doxylink REQUIRED)
   
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst.in"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/index.rst" @ONLY)
-
-  configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/reference/siconos_api_reference.rst.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference/siconos_api_reference.rst" @ONLY)
 
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/siconos.bib"
@@ -109,6 +106,7 @@ if(USE_SPHINX)
     "${CMAKE_CURRENT_SOURCE_DIR}/find_doxygen_diagrams.py"
     "${CMAKE_CURRENT_BINARY_DIR}/find_doxygen_diagrams.py" @ONLY)
 
+  configure_file(${CMAKE_SOURCE_DIR}/externals/swig/parse_doxygen.py ${CMAKE_BINARY_DIR}/share/parse_doxygen.py COPYONLY)
   
   # List and copy all rst files from source dir to binary dir
   file(GLOB_RECURSE files_rst RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/sphinx
@@ -198,13 +196,19 @@ if(USE_SPHINX)
     set(SPHINX_APIDOC sphinx-apidoc)
     set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)
     set(APIDOC_PARAMETERS -e -P -M -o ${GENERATED_DOC})
+    # -e : Put documentation for each module on its own page
+    # -P : Include “_private” modules. (should we??)
+    # -M : Put module documentation before submodule documentation.
     list(GET COMPONENTS -1 _last_comp)
+    # apidoc must be run AFTER swig process --> depends on components
     add_custom_target(apidoc
       COMMAND ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
       ${CMAKE_BINARY_DIR}/wrap/${SICONOS_PYTHON_PACKAGE}
       DEPENDS ${_last_comp}
       )
-    add_dependencies(doc apidoc)
+
+    # Sphinx html gen. depends on apidoc outputs.
+    add_dependencies(html apidoc)
   endif()
 
 endif()

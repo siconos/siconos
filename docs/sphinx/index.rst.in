@@ -8,82 +8,65 @@
 :github_url: https://github.com/siconos/siconos/
 :gitlab_url: https://gricad-gitlab.univ-grenoble-alpes.fr/perignfr/siconos-mirror/
    
-@PROJECT_NAME_CAP@: nonsmooth numerical simulation
-===================================================
+@PROJECT_NAME_CAP@: nonsmooth numerical simulation |licence|
+============================================================
 .. toctree::
    :hidden:
    :maxdepth: 3
    
-   install_guide/index
    getting_started/index
+   install_guide/index
    examples/index
    reference/index
    complete_documentation
-   siconos_links
    search_index
-   contacts
    license
    
 
-.. image:: https://travis-ci.org/siconos/siconos.svg?branch=master
+.. |imag1| image::  /figures/buck.*
+   :height: 150
+
+.. |imag2| image::  /figures/C60.*
+   :height: 150
+
+.. |imag3| image:: /figures/Exomars.24.10.small.*
+   :height: 150
+
+========================================= =========================
+  .. include:: about.rst                   .. include:: video.rst   
+========================================= =========================
+
+
+.. csv-table:: 
+
+   .. include:: teaser.rst, |imag1|, |imag2|, |imag3|, .. include:: contacts.rst
+
+
+.. |travis| image:: https://travis-ci.org/siconos/siconos.svg?branch=master
    :target: https://travis-ci.org/siconos/siconos
    :alt: Build Status
 
-.. image:: https://img.shields.io/badge/licence-apache2-yellow.svg
+.. |licence| image:: https://img.shields.io/badge/licence-apache2-yellow.svg
    :target: https://www.apache.org/licenses/LICENSE-2.0
    :alt: License
 
-.. image:: https://gricad-gitlab.univ-grenoble-alpes.fr/perignfr/siconos-mirror/badges/update_doc/pipeline.svg
+.. |docbuild| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/perignfr/siconos-mirror/badges/update_doc/pipeline.svg
    :target: https://gricad-gitlab.univ-grenoble-alpes.fr/perignfr/siconos-mirror/commits/update_docs
-   :alt: Pipeline status
-
-	 
-Siconos is an open-source scientific software primarily targeted at modeling and simulating nonsmooth dynamical systems in C++ and in Python:
-
-* Mechanical systems (rigid or solid) with unilateral contact and Coulomb friction and impact (nonsmooth mechanics, 
-  contact dynamics, multibody systems dynamics or granular materials). 
-
-* Switched Electrical Circuit such as electrical circuits with ideal and piecewise linear components: power converter, rectifier, Phase-Locked Loop (PLL) or Analog-to-Digital converter.
-
-* Sliding mode control systems.
-    
-* Biology (Gene regulatory network). 
-
-Other applications are found in Systems and Control (hybrid systems, differential inclusions,
-optimal control with state constraints), Optimization (Complementarity systems and Variational inequalities), 
-Fluid Mechanics, and Computer Graphics.
+   :alt: Doc status
 
 
-.. raw:: html
 
-	 <center>
-	 <iframe width="560" height="315" src="https://www.youtube.com/embed/3I_BkFTqH8I" frameborder="0" allowfullscreen></iframe>
-	 </center>
 
-.. |imag1| image::  /figures/buck.*
-   :scale: 50%
-   :align: middle
-.. |imag2| image::  /figures/C60.*
-   :scale: 50%
-   :align: top
-.. |imag3| image:: /figures/Exomars.24.10.small.*
-   :scale: 50%
-   :align: top
-.. |imag4| image:: /figures/snapshot-silo.*
-   :scale: 50%
-   :align: top
+Project status
+--------------
 
-+---------+---------+
-| |imag1| | |imag2| |  
-+---------+---------+
-| |imag3| | |imag4| |
-+---------+---------+
-	     
-	 
+.. csv-table:: 
 
-Indices and tables
-==================
+   `Siconos CI on Travis`_ |travis| and `Jenkins`_, `Cdash reports`_, Documentation build |docbuild|
+ 
+.. _Siconos CI on Travis: https://travis-ci.org/siconos/siconos
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. _Cdash reports: http://cdash-tripop.inrialpes.fr/index.php?project=Siconos
+
+ 
+.. _Jenkins: https://ci.inria.fr/siconos--

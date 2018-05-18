@@ -10,6 +10,7 @@ Writing and building documention for Siconos Software
 
 .. _build_doc:
 
+**********************
 Building documentation
 **********************
 
@@ -20,7 +21,7 @@ Which documentation for who?
 Target : users and developpers.
   
   
-.. code:: bash
+.. code-block:: bash
 
    cmake -DWITH_DOCUMENTATION=ON ...
    make doc # The whole doc
@@ -29,16 +30,18 @@ Target : users and developpers.
    # or
    make html (html only)
 
+
 Resulting files will be in docs/build/html of the current building path.
 
 
 * Full doxygen (i.e. extract all from sources!)  html documentation.
+
   Target : developpers only. Indeed, everything is included in sphinx doc except things like callgraph or collaboration graphs.
   Use this when those graphs are needed. 
 
   Same as above, with a new cmake option :
 
-.. code:: bash
+.. code-block:: bash
 
    cmake -DWITH_DOCUMENTATION=ON -DUSE_DEVEL_DOXYGEN=ON
    make doc # The whole doc
@@ -73,42 +76,98 @@ Dependencies
 Doxygen docs
 ============
 
-3 differents parts :
-
-* API doc generation : standard doxygen doc, from C/C++ headers.
-* Doxygen warnings
-* docstring generation : create docstrings for swig outputs, based on doxygen.
-
+  
 API doc from doxygen
 --------------------
-  
-Defined in file docs/config/doxy.config.in.
-During cmake process this file is used to generate CMAKE_BINARY_DIR/docs/config/doxy.config that will
-be used by doxygen to build doc in DOXYGEN_OUTPUT.
 
-html, latex, xml and man outputs
+Automatic generation of documentation from source code (C/C++).
 
-man? Does it works?
+* **Sources** : headers
+* **Config** : docs/config/doxy.config.in. This file is used to generate CMAKE_BINARY_DIR/docs/config/doxy.config that will be used by doxygen to build doc in DOXYGEN_OUTPUT.
+* **Results** (all in in CMAKE_BINARY_DIR/doc/build/html/doxygen)
+  * html files
+  * png (class diagrams ...)
+
+**Usage :**
+
+.. code-block:: bash
+
+   cmake -DWITH_DOCUMENTATION=ON
+   make doxygen
+   # check : open in web browser CMAKE_BINARY_DIR/doc/build/html/doxygen/index.html
 
 
-Doxygen warnings
-----------------
-  What for?
+**Remark :**
 
-  Process:
+Doxygen ouput is set to be "quiet" and without warnings.
+But, if required (devel), use:
 
-* If WITH_DOXYGEN_WARNINGS is ON (default=OFF)
-  
-  * Conf generated from docs/config/doxy_warnings.config.in
-  * Work done following include(doxygen_warnings) for each component (numerics, kernel ...)
-    called in LibraryProjectSetup.
-  * Result : .config and .warnings files for each header of the current component.
-    All files generated in CMAKE_BINARY_DIR/doxygen_warnings.
+.. code-block:: bash
 
-Doxygen to swig
----------------
+   cmake -DWITH_DOCUMENTATION=ON -DWITH_DOXYGEN_WARNINGS=ON
+   make filter_warnings
+   # if WITH_DOXYGEN_WARNINGS_INFILE=ON, create doxygen_warnings/SUMMARY.warnings
 
-Describe this ...
+It will generate (during compilation process) and print doxygen warnings, either on screen or in files
+saved in CMAKE_BINARY_DIR/doxygen_warnings (if WITH_DOXYGEN_WARNINGS_INFILE=ON ...).
+
+doxygen warnings conf is defined in docs/config/doxy_warnings.config.in and setup in
+cmake/doxygen_warnings.cmake.
+
+
+Docstrings (for swig)
+---------------------
+
+To produce documentation in python interface, xml outputs from doxygen are used to create swig
+files containing 'docstrings' for python.
+
+Comments written in C++ (doxygen) will be available in python interface, e.g. :
+
+.. code-block:: python
+
+   import siconos.kernel as sk
+   help(sk.DynamicalSystem)
+   
+   Help on class LCP in module siconos.kernel:
+
+   class LCP(LinearOSNS)
+   |  Non Smooth Problem Formalization and Simulation.
+   |
+   |  author: SICONOS Development Team - copyright INRIA
+   |
+   |  This is an abstract class, that provides an interface to define a non smooth
+   |  problem:
+   |
+   |  *   a formulation (ie the way the problem is written)
+   |  *   a solver (algorithm and solving formulation, that can be different from
+   |      problem formulation)
+   |  *   routines to compute the problem solution.
+
+
+Usage 
+
+.. code-block:: bash
+
+   cmake -DWITH_DOCUMENTATION=ON -DWITH_DOXY2SWIG=ON
+   make numerics_docstrings
+
+   
+Process :
+
+#. Generates xml files for each component (doxygen).\n
+   Config from docs/config/doxy2swig.config.in\n
+   Results in CMAKE_BINARY_DIR/docs/build/doxygen/doxy2swig-xml/component_name\n
+   target : make xml4swig_component_name
+   
+#. Generates swig files (.i) from xml for one component and concatenate into
+   CMAKE_BINARY_DIR/wrap/siconos/component_name-docstrings.i. \n
+   Tool = doxy2swig (https://github.com/m7thon/doxy2swig) saved in externals/swig.\n
+   target : make component_name_docstrings
+
+These \*-docstrings.i files are included into component.i (e.g. kernel.i) to produce doc during swig process.
+
+Todo : test this tool (https://bitbucket.org/trlandet/doxygen_to_sphinx_and_swig/) which produces
+both docstrings for swig and rst for sphinx from doxygen outputs, in one shot.
 
 
 Sphinx doc
@@ -130,6 +189,7 @@ Process :
 
 .. _doc_rules:
 
+***********
 Writing doc
 ***********
 
@@ -139,14 +199,15 @@ Writing doc
 
 
 Doxygen to sphinx
------------------
+=================
   
 Existing tools (as far as we know ...)
 
-* `Sphinx/Exhale tool`_
+* Sphinx/Exhale(breathe) : https://github.com/svenevs/exhale`Sphinx/Exhale
 * doxyrest https://github.com/vovkos/doxyrest
+* https://bitbucket.org/trlandet/doxygen_to_sphinx_and_swig
 
-Both are available in siconos, (use -DUSE_EXHALE=ON or -DUSE_DOXYREST=ON). We prefer exhale.
+Both exhale and doxyrest are available in siconos, (use -DUSE_EXHALE=ON or -DUSE_DOXYREST=ON). We prefer exhale.
 
 
 Exhale/sphinx pipeline :

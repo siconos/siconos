@@ -72,12 +72,14 @@ Thus, a general step  of integration for EventDriven will looks like:
 "While there are some events in the unProcessedEvents set, integrate the smooth dynamics between current and next event and then process with the behavior at event".
 Or:
 
-code:: c++
+code-block:: c++
+
+  // Assume a NonSmoothDynamicalSystem nsds and
+  // a TimeDiscretisation td ...
+  SP::EventDriven s(new EventDriven(nsds, td));
+
+  // ...
   
-  SP::EventDriven s(new EventDriven(myModel));
-
-  s->initialize();
-
   // We get the events manager
   SP::EventsManager eventsManager = s->eventsManager();
   

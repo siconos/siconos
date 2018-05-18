@@ -9,28 +9,32 @@ The siconos API C++ documentation is automatically generated using `Sphinx/Exhal
 
 .. only:: WithoutExhale
 
-   If this part is empty, it means exhale is OFF and no documentation for C++ API
+   If you see this message, it means exhale is OFF and no documentation for C++ API
    has been generated. Try to reconfigure with -DUSE_EXHALE=ON or
-   switch to :ref:`doxygen_only`.
+   switch to `C/C++ Doxygen documentation`_.
+
+   .. toctree::
+      :maxdepth: 2
+
+      /reference/class_diagrams
+      /reference/generated_api
 
 .. only:: WithExhale
 
    .. toctree::
-      :maxdepth: 6
+      :maxdepth: 2
 
-      /api/library_root.rst
+      /reference/generated_api
       /reference/class_diagrams
       /api/class_view_hierarchy
-      /api/unabridged_api
       /api/file_view_hierarchy
-   
-Index of classes, functions ...
--------------------------------
-
-* :ref:`genindex`
+      /api/unabridged_api
 
 
+A complete alphabetical list of all classes, structs, typedef ... is available in :ref:`genindex`.
 
+
+      
 .. _doxygen_only:
 
 Doxygen only
@@ -38,10 +42,10 @@ Doxygen only
 
 The 'standard' (Doxygen only) documentation is also available, mostly for developers:
 
-`C/C++ API documentation`_, 
+`C/C++ Doxygen documentation`_, 
 
  
-.. _C/C++ API documentation: ../doxygen/index.html
+.. _C/C++ Doxygen documentation: ../doxygen/index.html
 
 .. _Sphinx/Exhale tool: https://github.com/svenevs/exhale
 

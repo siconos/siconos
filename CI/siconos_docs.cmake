@@ -15,7 +15,7 @@
 # Use cmake -DOPTION_NAME=some-value ... to modify default value.
 option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" ON)
 option(WITH_PYTHON_WRAPPER "Build python bindings using swig. Default = ON" ON)
-option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings. Default = OFF" ON)
+option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings. Default = OFF" OFF)
 option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." ON)
 option(WITH_FORTRAN "Verbose mode to get some system/arch details. Default = OFF." ON)
 option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = OFF." OFF)
@@ -58,4 +58,4 @@ option(INSTALL_INTERNAL_HEADERS
 # List of components to build and installed
 # List of siconos component to be installed
 # complete list = externals numerics kernel control mechanics io
-set(COMPONENTS externals numerics kernel CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")

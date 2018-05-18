@@ -70,7 +70,6 @@ More about Siconos project
    :maxdepth: 5
 	      
    talks
-   contacts
    related_projects
    z_siconos_bibtex
 

@@ -82,15 +82,13 @@ namespace ioVector
     \param[in] flags
     \param[in,out] m the SiconosVector to be written
     \param[in] precision value for float output. Default = 15.
-    \param[in] outputType std::string type of output:
-        Type of Output for write function:
-        - "boost": boost way: \n
-        [row] (a0, a1,..)
-        - "python"(default): \n
-        row \n
-        a0 a1 a2 ... \n
-        - "noDim": \n
-        a0 a1 a2 ... \n
+    \param[in] outputType output format, choose between 
+        - "boost": [row] (a0, a1,..)
+        - "python" (default): 
+        row 
+        a0 a1 a2 ...
+        - "noDim":
+        a0 a1 a2 ... 
         Reading input format is the one corresponding to "python".
     \param[in] flags
     \return bool true if read ok, else false ...

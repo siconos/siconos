@@ -15,7 +15,7 @@ outputfile = '@CMAKE_CURRENT_BINARY_DIR@/sphinx/reference/class_diagrams.rst'
 class_diagram_match = 'inherit_graph*.png'
 
 header = '.. _api_class_diagrams:\n\n'
-header += 'Siconos API - Classes diagrams\n'
+header += 'C++ Class diagrams\n'
 header += '==============================\n\n'
 
 files = glob.glob(os.path.join(html_doxygen_output_path, class_diagram_match))

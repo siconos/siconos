@@ -204,13 +204,14 @@ Developers or advanced users options
 
 * WITH_DOXY2SWIG=ON/OFF : enable/disable conversion of doxygen outputs to python docstrings
 
-For example, to build siconos with documentation for all components, no python bindings and an installation in '/home/myname/mysiconos', just run::
+For example, to build siconos with documentation for all components, no python bindings and an installation in '/home/myname/mysiconos', just run
+
+.. code-block:: bash
 
   cd build_directory
   cmake -DCMAKE_INSTALL_PREFIX='/home/myname/mysiconos' -DWITH_PYTHON_WRAPPER=OFF -DWITH_DOCUMENTATION=ON *path_to_sources*
 
-But when you need a lot of options, this may get a bit tedious, with very long command line. To avoid this, you can use
-:ref:`siconos_install_with_user_options`.
+But when you need a lot of options, this may get a bit tedious, with very long command line. To avoid this, you can use :ref:`siconos_install_with_user_options`.
 
 .. _siconos_install_with_user_options:
 

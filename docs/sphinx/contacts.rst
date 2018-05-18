@@ -1,17 +1,12 @@
-.. _contacts:
+**Contacts**
 
+Siconos development team
 
-========
-Contacts
-========
+`INRIA - Tripop`_
 
-.. topic:: Siconos development team
+**E-Mail** : siconos-team@lists.gforge.inria.fr
 
-	`INRIA - Tripop`_
-
-	**E-Mail** : siconos-team@lists.gforge.inria.fr
-
-	`Contributors`_
+`Contributors`_
 	
 .. _Contributors: https://github.com/siconos/siconos/blob/master/credits.md
 

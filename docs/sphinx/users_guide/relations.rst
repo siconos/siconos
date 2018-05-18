@@ -71,7 +71,7 @@ Lagrangian (second order) Relations
 Scleronomous
 """"""""""""
 
-xClass :class:`LagrangianScleronomousR`
+Class :class:`LagrangianScleronomousR`
 
 The constraints depend only on the state,
 

@@ -92,6 +92,9 @@
 %ignore getDSBlocks;
 %ignore getInvMBlock;
 
+// SiconosMemory
+%ignore swap;
+
 %warnfilter(509) rotateAbsToBody;
 %warnfilter(509) changeFrameAbsToBody;
 %warnfilter(509) changeFrameBodyToAbs;

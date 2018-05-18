@@ -5,10 +5,10 @@ matplotlib
 h5py
 sphinx
 sphinx-rtd-theme
-sphinxcontrib-autodoc-doxygen
 sphinxcontrib-bibtex
 sphinxcontrib-pandoc-markdown
 sphinxcontrib-versioning
 sphinxcontrib-websupport
+numpydoc
 breathe
 exhale
