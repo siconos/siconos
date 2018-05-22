@@ -268,7 +268,7 @@ void Interaction::reset()
        i < _upperLevelForInput + 1 ;
        i++)
   {
-    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
+    DEBUG_PRINTF("Interaction::reset(). _lambda[%i].reset()\n",i)
       _lambda[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i]->zero();
@@ -341,7 +341,7 @@ void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
 // since we need to know the relative degree to know
 // "numberOfDerivatives", while numberOfRelations and the size of the
 // non smooth law are required inputs to compute the relative degree.
-void Interaction::initializeMemory(bool computeResidu, unsigned int steps)
+void Interaction::initializeMemory(unsigned int steps)
 {
 
   DEBUG_PRINT("Interaction::initializeMemory() \n");
@@ -368,7 +368,7 @@ void Interaction::initializeMemory(bool computeResidu, unsigned int steps)
 
   for (unsigned int i = _lowerLevelForInput ; i < _upperLevelForInput + 1 ; i++)
   {
-    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
+    DEBUG_PRINTF("Interaction::initializeMemory(). _lambdaMemory[%i].setMemorySize()\n",i)
     _lambdaMemory[i].setMemorySize(steps, nslawSize);
   }
 

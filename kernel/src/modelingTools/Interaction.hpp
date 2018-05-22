@@ -274,7 +274,7 @@ public:
    * \param computeResiduY true if interaction should compute extra residu value
    * \param steps number of required memories (depends on the OSI)
   */
-  void initializeMemory(bool computeResiduY, unsigned int steps);
+  void initializeMemory(unsigned int steps);
 
   // === GETTERS/SETTERS ===
   /** get the value of number
