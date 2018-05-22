@@ -53,9 +53,9 @@
     (number of block columns)
     \param *blocksize0 the list of sums of the number of rows of the
     first column of blocks of M: blocksize0[i] = blocksize0[i-1] +
-    ni,\n ni being the number of rows of the block at row i
+    ni, ni being the number of rows of the block at row i
     *blocksize1 the list of sums of the number of columns of the
-    first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,\n
+    first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,
     ni being the number of columns of the block at column i
     \param filled1 index of the last non empty line + 1
     \param filled2 number of non null blocks
@@ -98,10 +98,10 @@
  * - the vector index1_data is equal to {0,2,4,6}
  * - the vector index2_data is equal to {0,1,1,2,0,2}
  * - the block contains all non null block matrices stored in Fortran
-     order (column by column) as\n
- *   block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}\n
- *   block[1] = {3,4,0,0,-1,1,0,6}\n
- *   ...\n
+     order (column by column) as
+ *   block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}
+ *   block[1] = {3,4,0,0,-1,1,0,6}
+ *   ...
  *   block[5] = {2,-1,2,2}
 */
 

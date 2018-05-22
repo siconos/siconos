@@ -67,7 +67,7 @@ extern "C"
     \param[in,out] w a n-vector of doubles which contains the solution of the problem.
     \param[in,out] options structure used to define the solver(s) and their parameters
     \return info termination value
-    - 0 : successful\n
+    - 0 : successful
     - >0 : otherwise see each solver for more information about the log info
     \author Franck Perignon
   */
@@ -79,7 +79,7 @@ extern "C"
       \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and their parameters
       \return info termination value
-      - 0 : successful\n
+      - 0 : successful
       - >0 : otherwise see each solver for more information about the log info
       \todo Sizing the regularization parameter and apply it only on null diagnal term
       \author Vincent Acary
@@ -132,7 +132,7 @@ extern "C"
     \param[in,out] w a n-vector of doubles which contains the solution of the problem.
     \param[in,out] options structure used to define the solver(s) and their parameters
     \return info termination value
-    - 0 : successful\n
+    - 0 : successful
     - >0 : otherwise see each solver for more information about the log info
     \author Olivier Huber
   */
@@ -143,7 +143,7 @@ extern "C"
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and its(their) parameters
-      \return info termination value  0 : successful, else error.\n
+      \return info termination value  0 : successful, else error.
   */
   int mcp_driver(MixedComplementarityProblem* problem, double *z, double *w, SolverOptions* options);
 
@@ -152,7 +152,7 @@ extern "C"
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and its(their) parameters
-      \return info termination value  0 : successful, else error.\n
+      \return info termination value  0 : successful, else error.
   */
   int mcp_driver2(MixedComplementarityProblem2* problem, double *z, double *w, SolverOptions* options);
 
@@ -270,7 +270,7 @@ extern "C"
       \param[in,out] w a n-vector of doubles which contains the solution of the problem.
       \param[in,out] options structure used to define the solver(s) and its (their) parameters
       \return info termination value
-      - 0 : successful\n
+      - 0 : successful
       - >0 : otherwise see each solver for more information about the log info
    * \author Nineb Sheherazade.
    */

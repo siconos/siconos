@@ -19,7 +19,7 @@
 #define MCP_SOLVERS_H
 
 /*!\file MCP_Solvers.h
-  \brief List of all the available solvers for the resolution of Mixed Complementarity Problems.\n
+  \brief List of all the available solvers for the resolution of Mixed Complementarity Problems.
 
   \author siconos-team@lists.gforge.inria.fr
 */

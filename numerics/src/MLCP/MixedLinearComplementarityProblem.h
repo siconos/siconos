@@ -29,7 +29,7 @@
 #include "SiconosConfig.h"
 
 /** \struct MixedLinearComplementarityProblem MixedLinearComplementarityProblem.h
- *  The Structure that contains and defines MLCProblem. Find \f$(z,w)\f$ such that:\n
+ *  The Structure that contains and defines MLCProblem. Find \f$(z,w)\f$ such that:
  * \f$
  * \left\{
  * \begin{array}{l}
@@ -55,7 +55,7 @@
  * \end{array}
  * \right]
  * \f$
- * \f$ u, w_{1}\f$ are vectors of size n.\n
+ * \f$ u, w_{1}\f$ are vectors of size n.
  * \f$ v, w_{2}\f$ are vectors of size m.
  *
  */
