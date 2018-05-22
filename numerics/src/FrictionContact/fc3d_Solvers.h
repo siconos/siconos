@@ -19,7 +19,7 @@
 #define FRICTIONCONTACT3DSOLVERS_H
 
 /*!\file fc3d_Solvers.h
-  \brief Subroutines for the resolution of contact problems with friction (3-dimensional case).\n
+  \brief Subroutines for the resolution of contact problems with friction (3-dimensional case).
 
 */
 

@@ -31,7 +31,7 @@
   velocity, reaction (the unknowns) and q are vectors of size n. M is a nXn matrix.
 
   and is formulate as:
-  Find \f$reaction_G \in \mathcal{R}^5\f$ such that:\n\n
+  Find \f$reaction_G \in \mathcal{R}^5\f$ such that:
   \f$
   0 \le F_G(reaction_G) \perp reaction_G \ge 0 \\
   \f$

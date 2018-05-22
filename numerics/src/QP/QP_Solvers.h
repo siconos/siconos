@@ -19,7 +19,7 @@
 #define QP_SOLVERS_H
 
 /*!\file QP_Solvers.h
-  Subroutines for the resolution of QP problems.\n
+  Subroutines for the resolution of QP problems.
 
   \author Franck Perignon
 */

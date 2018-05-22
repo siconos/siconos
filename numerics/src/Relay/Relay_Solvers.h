@@ -46,15 +46,15 @@ extern "C"
   int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int solverId);
 
 
-  /** relay_pgs is a projected Gauss-Seidel solver for relay problems.\n
+  /** relay_pgs is a projected Gauss-Seidel solver for relay problems.
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param options the pointer to options to set
-   * \param[out] info an integer which returns the termination value:\n
-   0 = convergence,\n
-   1 = no convergence,\n
-   2 = Null diagonal term\n
+   * \param[out] info an integer which returns the termination value:
+   0 = convergence,
+   1 = no convergence,
+   2 = Null diagonal term
    \author V. Acary
   */
   void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
@@ -64,14 +64,14 @@ extern "C"
   */
   int relay_pgs_setDefaultSolverOptions(SolverOptions* options);
 
-  /** relay_lexicolemke is a Lemke solver for  relay problems.\n
+  /** relay_lexicolemke is a Lemke solver for  relay problems.
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
      * \param options struct used to define the solver(s) and its (their) parameters
-     * \param[out] info an integer which returns the termination value:\n
-     0 = convergence,\n
-     1 = no convergence,\n
+     * \param[out] info an integer which returns the termination value:
+     0 = convergence,
+     1 = no convergence,
      \author V. Acary
     */
   void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
@@ -81,15 +81,15 @@ extern "C"
   */
   int relay_lexicolemke_setDefaultSolverOptions(SolverOptions* options);
 
-  /** relay_enum is enum solver for  relay problems.\n
+  /** relay_enum is enum solver for  relay problems.
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
      * \param options struct used to define the solver(s) and its (their) parameters
-     * \param[out] info an integer which returns the termination value:\n
-     0 = convergence,\n
-     1 = no convergence,\n
-     2 = Null diagonal term\n
+     * \param[out] info an integer which returns the termination value:
+     0 = convergence,
+     1 = no convergence,
+     2 = Null diagonal term
      \author V. Acary
     */
   void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
@@ -100,15 +100,15 @@ extern "C"
   */
   int relay_enum_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options);
 
-  /** relay_path is a resolution of the Relay with its inherent MCP formulation and using path.\n
+  /** relay_path is a resolution of the Relay with its inherent MCP formulation and using path.
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
    * \param options struct used to define the solver(s) and its (their) parameters
-   * \param[out] info an integer which returns the termination value:\n
-   *  0 = convergence,\n
-   *  1 = no convergence,\n
-   *  2 = Nul diagonal term\n
+   * \param[out] info an integer which returns the termination value:
+   *  0 = convergence,
+   *  1 = no convergence,
+   *  2 = Nul diagonal term
    * \author V. acary
    */
   void relay_path(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
@@ -124,9 +124,9 @@ extern "C"
    * \param[in,out] z vector which on call is the initial point and on exit is the solution of the problem.
    * \param[in,out] w vector for computations
    * \param options struct used to define the solver(s) and its (their) parameters
-   * \param[out] info an integer which returns the termination value:\n
-   *  0 = convergence,\n
-   *  1 = no convergence,\n
+   * \param[out] info an integer which returns the termination value:
+   *  0 = convergence,
+   *  1 = no convergence,
    * \author Olivier Huber
    */
   void relay_avi_caoferris(RelayProblem* problem, double* restrict z, double* restrict w, int *info, SolverOptions* options);
@@ -145,9 +145,9 @@ extern "C"
    * \param[in,out] z vector which on call is the initial point and on exit is the solution of the problem.
    * \param[in,out] w vector for computations
    * \param options struct used to define the solver(s) and its (their) parameters
-   * \param[out] info an integer which returns the termination value:\n
-   *  0 = convergence,\n
-   *  1 = no convergence,\n
+   * \param[out] info an integer which returns the termination value:
+   *  0 = convergence,
+   *  1 = no convergence,
    * \author Olivier Huber
    */
   void relay_avi_caoferris_test(RelayProblem* problem, double* restrict z, double* restrict w, int *info, SolverOptions* options);
@@ -157,38 +157,38 @@ extern "C"
    */
   int relay_avi_caoferris_test_setDefaultSolverOptions(SolverOptions* options);
 
-  /** dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.\n
+  /** dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 = convergence,\n
-   1 = no convergence,\n
-   2 = Cholesky factorization failed,\n
-   3 = Nul diagonal term\n
+   * \param[out] info an integer which returns the termination value:
+   0 = convergence,
+   1 = no convergence,
+   2 = Cholesky factorization failed,
+   3 = Nul diagonal term
    * \param options struct used to define the solver(s) and its (their) parameters
    \author Nineb Sheherazade.
   */
   void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)  ;
 
-  /**  dr_nlgs is a specific nlgs (Non Linear Gauss Seidel) solver for dual relay problems.\n
+  /**  dr_nlgs is a specific nlgs (Non Linear Gauss Seidel) solver for dual relay problems.
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 = convergence,\n
-   1 = no convergence,\n
-   2 = Nul diagonal term\n
+   * \param[out] info an integer which returns the termination value:
+   0 = convergence,
+   1 = no convergence,
+   2 = Nul diagonal term
    * \param options struct used to define the solver(s) and its (their) parameters
   */
   void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
-  /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution \n
-     * of the LCP : \n
+  /** This function computes the input vector \f$ w = Mz + q \f$ and checks the validity of the vector z as a solution 
+     * of the LCP : 
      * \f$
      *   -(Mz + q) \in  N_{[lb,ub]}(z)
      * \f$
-     * The criterion is based on \f$ error = \|z- proj_{[lb,ub]}(z - \rho * (M*z+q)) \|, \rho >0\f$ \n
+     * The criterion is based on \f$ error = \|z- proj_{[lb,ub]}(z - \rho * (M*z+q)) \|, \rho >0\f$ 
      * This error is divided by \f$ \|q\| \f$ and then compared to tol.
      * \param[in] problem structure that represents the Relay (M, q...)
      * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
@@ -201,7 +201,7 @@ extern "C"
   int relay_compute_error(RelayProblem* problem, double* restrict z , double* restrict w, double tolerance, double* restrict error);
 
 
-  /** This function computes the projection on the boxr \f$ [lb,ub]\f$ of the vector  \f$z\f$  \n
+  /** This function computes the projection on the boxr \f$ [lb,ub]\f$ of the vector  \f$z\f$  
      * \param[in,out] z a n-vector of doubles which returns the projection
      * \param[in,out] ub a n-vector of doubles which contains the upper bounds
      * \param[in,out] lb a n-vector of doubles which contains the lower bounds

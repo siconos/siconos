@@ -19,7 +19,7 @@
 #define GENERICMECHANICALSOLVERS_H
 
 /*!\file GenericMechanical_Solvers.h
-  \brief Subroutines for the resolution of contact problems.\n
+  \brief Subroutines for the resolution of contact problems.
 
 */
 
