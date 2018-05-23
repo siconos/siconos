@@ -29,8 +29,7 @@
 
 #include "SiconosSets.h"
 
-/** \struct AffineVariationalInequalities AffineVariationalInequalities.h
- *  \brief Structure that contains and defines an AVI
+/**  \brief Structure that contains and defines an AVI
  *
  *   The problem is the following: given a matrix \f$M\f$ and \f$q\f$, find \f$z\f$ such that:
  *   \f{equation*}{
