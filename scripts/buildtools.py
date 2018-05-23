@@ -277,11 +277,9 @@ def parse_doxygen_wrapper(xml_directory, rst_directory):
         name = name.split('namespace')[1]
         xmlnamespaces.append(name)
 
-    print(xmlnamespaces)
     all_rst_files = []
     all_swig_files = []
     for namespace in xmlnamespaces:
-        print(namespace)
         namespaces = pdox.read_doxygen_xml_files(xml_directory, [namespace])
         # Get sorted list of members
         members = list(namespaces[namespace].members.values())
