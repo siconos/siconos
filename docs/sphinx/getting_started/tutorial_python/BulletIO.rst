@@ -25,14 +25,19 @@ A brief description of examples is as follows :
 * cube.py is  the simplest example with few cubes that fall down on a rigid fixed plane. The scene is built
   using calls to mechanics_run methods such as
   
-  * addPrimitiveShape for creating a primitive shape ::
+  * addPrimitiveShape for creating a primitive shape
+
+
+  .. code-block:: python
     
       with Hdf5(mode='r+') as io:
 	io.addPrimitiveShape('Ground', 'Box', (100, 100, .5))
     
-  * addConvexShape for creating a convex shape addPrimitiveShape, addNewtonImpactFrictionNSL) ::
+  * addConvexShape for creating a convex shape addPrimitiveShape, addNewtonImpactFrictionNSL)
       
-      with Hdf5(mode='r+') as io:
+  .. code-block:: python
+		  
+     with Hdf5(mode='r+') as io:
 	io.addConvexShape('Cube_1', [
 	(-1.0, 1.0, -1.0),
 	(-1.0, -1.0, -1.0),
@@ -43,14 +48,18 @@ A brief description of examples is as follows :
 	(1.0, -1.0, -1.0),
 	(1.0, -1.0, 1.0)])
       
-  * addObject for associating Newton Euler Dynamical System to a shape::
+  * addObject for associating Newton Euler Dynamical System to a shape
+
+  .. code-block:: python
 
       with Hdf5(mode='r+') as io:
         io.addObject('cube', [Contactor('Cube')], translation=[0, 0, 2],
 	velocity=[10, 0, 0, 1, 1, 1],
 	mass=1)
 
-  The computation is launched using the method run() with default arguments::
+  The computation is launched using the method run() with default arguments
+
+  .. code-block:: python
 
       with Hdf5(mode='r+') as io:
         io.run(with_timer=False,

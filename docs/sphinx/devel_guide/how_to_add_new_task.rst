@@ -25,7 +25,9 @@ Create a task
 
   By default, variables not set in my_task_name.cmake are read from cmake/siconos_default.cmake.
 
-2. Create a new entry in file task.py, e.g.::
+2. Create a new entry in file task.py, e.g.
+
+.. code-block:: python
      
      my_new_task = CiTask(
      ci_config='task_name',

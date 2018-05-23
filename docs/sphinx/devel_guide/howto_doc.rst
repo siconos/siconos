@@ -8,7 +8,7 @@ Test doxygen/sphinx links
 
 To link to a siconos class:
 
-.. code::
+.. code-block:: rst
 
    Try to link to :class:`DynamicalSystem`
    
@@ -19,7 +19,7 @@ Try link to :class:`DynamicalSystem`
 
 To a file : 
 
-.. code::
+.. code-block:: rst
 
    Try to link to :ref:`kernel_src_modelingTools_DynamicalSystem.hpp`
       
@@ -29,7 +29,7 @@ Try to link to :ref:`kernel_src_modelingTools_DynamicalSystem.hpp`
 
 To link to a method : 
 
-.. code::
+.. code-block:: rst
 
    Try to link to :function:`Simulation::nextStep`
 
