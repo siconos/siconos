@@ -396,13 +396,13 @@ void TimeStepping::initializeNewtonLoop()
     (*it)->computeResidu();
   }
 
-  updateWorldFromDS();
+  //updateWorldFromDS();
 
-  // Predictive contact -- update initial contacts after updating DS positions
-  {
-    updateInteractions();
-    updateContactsFromChangeLog();
-  }
+  // // Predictive contact -- update initial contacts after updating DS positions
+  // {
+  //   updateInteractions();
+  //   updateContactsFromChangeLog();
+  // }
 
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   if (indexSet0->size()>0)
