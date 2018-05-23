@@ -75,8 +75,9 @@ Simulation::Simulation(SP::TimeDiscretisation td):
   _name("unnamed"), _tinit(0.0), _tend(0.0), _tout(0.0), _T(0.0),
   _numberOfIndexSets(0),
   _tolerance(DEFAULT_TOLERANCE), _printStat(false),
-  _staticLevels(false),_isInitialized(false), _useRelativeConvergenceCriterion(false),
-  _relativeConvergenceCriterionHeld(false), _relativeConvergenceTol(10e-3)
+  _staticLevels(false), _useRelativeConvergenceCriterion(false),
+  _relativeConvergenceCriterionHeld(false), _relativeConvergenceTol(10e-3),
+  _isInitialized(false)
 
 {
   if (!td)
