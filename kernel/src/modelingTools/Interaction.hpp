@@ -686,7 +686,7 @@ public:
 
   /** print the data to the screen
   */
-  void display() const;
+  void display(bool brief = true) const;
 
   /** reset the global Interaction counter (for ids)
    *  \return the previous value of count

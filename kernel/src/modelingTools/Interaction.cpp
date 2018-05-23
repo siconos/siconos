@@ -299,6 +299,7 @@ void Interaction::__init()
 
   // Check levels and resize attributes (y, lambda ...) if needed.
   reset();
+
 }
 
 Interaction::Interaction(SP::NonSmoothLaw NSL,
@@ -332,7 +333,6 @@ void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
         a relation of type: " + relationType);
 
   _relation->initialize(*this);
-
   
 }
 
@@ -344,7 +344,7 @@ void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
 void Interaction::initializeMemory(unsigned int steps)
 {
 
-  DEBUG_PRINT("Interaction::initializeMemory() \n");
+  DEBUG_BEGIN("Interaction::initializeMemory() \n");
   // Warning: this function is called from Simulation initialize,
   // since we need to know :
   // the levels _lowerLevelForOutput and _upperLevelForOutput to size Y
@@ -359,6 +359,7 @@ void Interaction::initializeMemory(unsigned int steps)
   //  assert(_upperLevelForInput >=0);
   assert(_upperLevelForInput >= _lowerLevelForInput);
 
+
   _yMemory.resize(_upperLevelForOutput + 1);
   _lambdaMemory.resize(_upperLevelForInput + 1);
   unsigned int nslawSize = _nslaw->size();
@@ -372,6 +373,7 @@ void Interaction::initializeMemory(unsigned int steps)
     _lambdaMemory[i].setMemorySize(steps, nslawSize);
   }
 
+  DEBUG_END("Interaction::initializeMemory() \n");
 
 }
 
@@ -748,6 +750,7 @@ void Interaction::swapInMemory()
 {
   DEBUG_BEGIN("void Interaction::swapInMemory()\n");
   // i corresponds to the derivative number and j the relation number.
+  DEBUG_EXPR(display(false));
   for (unsigned int  i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
   {
     *(_y_k[i]) = *(_y[i]) ;
@@ -763,7 +766,7 @@ void Interaction::swapInMemory()
   DEBUG_END("void Interaction::swapInMemory()\n");
 }
 
-void Interaction::display() const
+void Interaction::display(bool brief) const
 {
   std::cout << "======= Interaction display number " << _number <<" =======" <<std::endl;
 
@@ -776,47 +779,55 @@ void Interaction::display() const
 
   cout << "| "  ; _relation->display();
   for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
-    {
+  {
 
-      std::cout << "| y[" << i  << "] : ";
-      if (_y[i])
-	{
-	  if (_y[i]->size() >= 5) std::cout <<std::endl;
-	  _y[i]->display();
-	}
-      else std::cout << "->NULL" <<std::endl;
-    }
-  for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
+    std::cout << "| y[" << i  << "] : ";
+    if (_y[i])
     {
-      std::cout << "| yOld[" << i  << "] : ";
-      if (_yOld[i])
-	{
-	  if (_yOld[i]->size() >= 5) std::cout <<std::endl;
-	  _yOld[i]->display();
-	}
-      else std::cout << "->NULL" <<std::endl;
+      if (_y[i]->size() >= 5) std::cout <<std::endl;
+      _y[i]->display();
     }
+    else std::cout << "->NULL" <<std::endl;
+  }
   for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
+  {
+    std::cout << "| yOld[" << i  << "] : ";
+    if (_yOld[i])
+    {
+      if (_yOld[i]->size() >= 5) std::cout <<std::endl;
+      _yOld[i]->display();
+    }
+    else std::cout << "->NULL" <<std::endl;
+  }
+  for (unsigned int i = 0; i < _upperLevelForInput + 1; i++)
+  {
+    std::cout << "| lambda[" << i  << "] : ";
+    if (_lambda[i])
+    {
+      if (_lambda[i]->size() >= 5) std::cout <<std::endl;
+      _lambda[i]->display();
+    }
+    else std::cout << "->NULL" <<std::endl;
+  }
+  if(!brief)
+  {
+    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
       std::cout << "| y_k[" << i  << "] : ";
       if (_y_k[i])
-	{
-	  if (_y_k[i]->size() >= 5) std::cout <<std::endl;
-	  _y_k[i]->display();
-	}
+      {
+        if (_y_k[i]->size() >= 5) std::cout <<std::endl;
+        _y_k[i]->display();
+      }
       else std::cout << "->NULL" <<std::endl;
     }
-  for (unsigned int i = 0; i < _upperLevelForInput + 1; i++)
+    std::cout << "| _yMemory size: " << _yMemory.size() <<std::endl;;
+    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
-      std::cout << "| lambda[" << i  << "] : ";
-      if (_lambda[i])
-	{
-	  if (_lambda[i]->size() >= 5) std::cout <<std::endl;
-	  _lambda[i]->display();
-	}
-      else std::cout << "->NULL" <<std::endl;
+      std::cout << "| y_Memory[" << i  << "] : ";
+      _yMemory[i].display();
     }
-
+  }
 
   std::cout << "===================================" <<std::endl;
 }
