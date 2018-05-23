@@ -170,6 +170,7 @@ Todo : test this tool (https://bitbucket.org/trlandet/doxygen_to_sphinx_and_swig
 both docstrings for swig and rst for sphinx from doxygen outputs, in one shot.
 
 
+
 Sphinx doc
 ==========
 
@@ -185,6 +186,19 @@ Process :
 
 
 
+Remarks
+-------
+
+* Great care is required when writing doxygen comments, doxy2swig, sphinx, exhale are very sensitive and fail easily ...
+
+  * Do not comment doxygen comments --> breaks doxy2swig outputs.
+    e.g. commenting a function and its doc will append the doc to the next function in the file
+    and so break doxy2swig outputs
+  * Write proper latex formulas in doxygen comments, else doxy2swig or sphinx output will fail.
+
+  * Try to follow numpydoc (https://numpydoc.readthedocs.io/en/latest/) requirements.
+    
+  
 
 
 .. _doc_rules:

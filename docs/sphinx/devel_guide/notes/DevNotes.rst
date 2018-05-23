@@ -14,8 +14,8 @@ Uncomment DevNotes.rst to check outputs.
    | version   | ?              |
    +-----------+----------------+
 
-   LinearDS - Linear Time Invariant Relations
-   ------------------------------------------
+LinearDS - Linear Time Invariant Relations
+------------------------------------------
 
    ..
       General notations

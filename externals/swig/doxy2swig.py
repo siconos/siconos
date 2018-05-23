@@ -474,7 +474,6 @@ class Doxy2SWIG:
             self.add_text("""
 
             .. math::
-               :nowrap:
 
                {0}
 
