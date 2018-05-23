@@ -371,16 +371,16 @@ void TimeStepping::computeOneStep()
 
 void TimeStepping::updateContactsFromChangeLog()
 {
-  NonSmoothDynamicalSystem::ChangeLogIter p = _nsds->changeLogPosition();
-  // If graph changed, need to initialize the new interactions
-  if (p.it != _nsds->changeLogPosition().it)
-    {
-      if (initializeNSDSChangelog())
-	{
-	  initOSNS();
-	  _nsds->topology()->setHasChanged(true);
-	}
-    }
+  // NonSmoothDynamicalSystem::ChangeLogIter p = _nsds->changeLogPosition();
+  // // If graph changed, need to initialize the new interactions
+  // if (p.it != _nsds->changeLogPosition().it)
+  // {
+  if (initializeNSDSChangelog())
+  {
+    initOSNS();
+    _nsds->topology()->setHasChanged(true);
+  }
+  // }
 }
 
 
