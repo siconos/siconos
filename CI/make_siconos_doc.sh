@@ -8,5 +8,5 @@ pip3 install git+https://github.com/sphinx-contrib/youtube.git
 mkdir build
 cd build
 export LANG=C.UTF-8 # Required, else doxy2swig fails!
-cmake ../ -DUSER_OPTIONS_FILE=$PWD/../CI/siconos_docs.cmake -DUSE_EXHALE=ON 
+cmake ../ -DUSER_OPTIONS_FILE=$PWD/../CI/siconos_docs.cmake -DUSE_EXHALE=OFF
 make doc
