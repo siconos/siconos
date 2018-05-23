@@ -34,7 +34,7 @@ typedef void (*ptrFunctionNCP)(void* env, int n, double* z, double* F);
 typedef void (*ptrFunctionJacNCP)(void* env, int n, double* z, NumericsMatrix* jacF);
 
 /** \struct  NonlinearComplementarityProblem NonlinearComplementarityProblem.h
- * The structure that defines a Nonlinear Complementarity Problem (NCP) : Find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n})\f$ such that:\n
+ * The structure that defines a Nonlinear Complementarity Problem (NCP) : Find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n})\f$ such that:
   \f{align*}{
   w &= F(z) \\
   0 &\le w \perp z \ge 0

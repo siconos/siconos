@@ -712,7 +712,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
     Done = Standard_False;
     State = F.GetStateNumber();
     if (mydebug) {
-      cout << "Echec Perform stop because F_Dir.Value failed."<<endl;
+      cout << "Failure - Perform stop because F_Dir.Value failed."<<endl;
     }
     return;
   }

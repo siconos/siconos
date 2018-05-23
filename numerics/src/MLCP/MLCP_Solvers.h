@@ -191,7 +191,7 @@ extern "C"
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:
    0 : success,it found a solution
-   1 : echec,it did not find any solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
@@ -203,7 +203,7 @@ extern "C"
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:
    0 : success,it found a solution
-   1 : echec,it did not find any solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
@@ -215,7 +215,7 @@ extern "C"
   * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
   * \param[out] info an integer which returns the termination value:
   0 : success,it found a solution
-  1 : echec,it did not find any solution
+  1 : failure,it did not find any solution
   \param[in,out] options structure used to define the solver and its parameters.
   \author Olivier Bonnefon
   */
@@ -227,7 +227,7 @@ extern "C"
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:
    0 : success,it found a solution
-   1 : echec,it did not find any solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
@@ -239,7 +239,7 @@ extern "C"
   * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
   * \param[out] info an integer which returns the termination value:
   0 : success,it found a solution
-  1 : echec,it did not find any solution
+  1 : failure,it did not find any solution
   \param[in,out] options structure used to define the solver and its parameters.
   \author Olivier Bonnefon
   */
@@ -252,7 +252,7 @@ extern "C"
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:
    0 : success,it found a solution
-   1 : echec,it did not find any solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
@@ -264,7 +264,7 @@ extern "C"
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:
    0 : success,it found a solution
-   1 : echec,it did not find any solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */
@@ -275,7 +275,7 @@ extern "C"
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
    * \param[out] info an integer which returns the termination value:
    0 : success,it found a solution
-   1 : echec,it did not find any solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
    \author Olivier Bonnefon
   */

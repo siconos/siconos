@@ -57,7 +57,7 @@ if with_python_wrapper:
     extensions += [
         'sphinx.ext.autodoc',
         'sphinx.ext.autosummary',
-        #'numpydoc.numpydoc',
+        'numpydoc.numpydoc',
         ]
     #numpydoc_class_members_toctree = True
     # -----------------------------------------------------------------------------
