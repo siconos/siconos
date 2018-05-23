@@ -31,8 +31,8 @@
     This class provides tools to describe non linear relation of the type:
 
     \f[
-    y &= h(q,t,z) \\
-    \dot y &=  \nabla^\top_q(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
+    y = h(q,t,z) \\
+    \dot y =  \nabla^\top_q(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
     \f]
 
     or more generally
@@ -118,12 +118,6 @@ public:
 
 
   // -- hDot --
-
-  /** get vector hDot
-  *  \return a SiconosVector
-
-  inline const SiconosVector gethDot() const { return *hDot; }
-  */
 
   /** get a pointer on vector hDot
   *  \return a smart pointer on a SiconosVector

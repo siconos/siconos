@@ -58,6 +58,7 @@ if with_python_wrapper:
         'sphinx.ext.autodoc',
         'sphinx.ext.autosummary',
         'numpydoc.numpydoc',
+        'sphinx.ext.napoleon'
         ]
     #numpydoc_class_members_toctree = True
     # -----------------------------------------------------------------------------

@@ -116,11 +116,6 @@ public:
 
   // -- Jach --
 
-  /** get matrix Jach[index]
-  *  \return a SimpleMatrix
-  inline const SimpleMatrix getJach(unsigned int  index = 0) const { return *(Jach.at(index)); }
-  */
-
   /** get a pointer on matrix Jach[index]
   *  \return a pointer on a SimpleMatrix
   */

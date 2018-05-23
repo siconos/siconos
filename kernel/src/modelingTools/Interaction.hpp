@@ -356,13 +356,8 @@ public:
     return _interactionSize;
   }
   
-  //  /** get the number of relations in the interaction
-  //  *  \return an unsigned int
-  //  */
-  // inline unsigned int numberOfRelations() const {return _numberOfRelations;}
-
   /** Get the sum of DS sizes, for DS involved in interaction.
-   *  \return an unsigned int.
+   *  \return an unsigned int
    */
   inline unsigned int getSizeOfDS() const
   {
