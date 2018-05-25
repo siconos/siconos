@@ -145,7 +145,7 @@ pkgs:
   python-modules:
     nix:
       command: 'printf "with import <nixpkgs> {}\;" > /tmp/python-env.nix && echo "" >> /tmp/python-env.nix && printf "pkgs.python27.withPackages (ps: with ps\; [lxml pytest scipy matplotlib])" >> /tmp/python-env.nix && echo "" >> /tmp/python-env.nix >> /tmp/python-env.nix && cat /tmp/python-env.nix >&2 && nix-env -if /tmp/python-env.nix'
-      
+
   python3-env:
     nix:
     debian:
@@ -193,15 +193,15 @@ pkgs:
     any:
       command:
         pip install --upgrade pip
-      
+
   siconos-doc-pip-pkgs:
     any:
       command:
         pip install sphinxcontrib-bibtex &&
         pip install sphinxcontrib-doxylink &&
-	pip install numpydoc &&
-	pip install git+https://github.com/sphinx-contrib/youtube.git
-      
+        pip install numpydoc &&
+        pip install git+https://github.com/sphinx-contrib/youtube.git
+
   profiling:
     nix:
       - valgrind
@@ -231,13 +231,13 @@ pkgs:
   make:
     nix:
       - gnumake
-      
+
   cmake:
     ubuntu-12.04:
       - python-software-properties
       - cmake-3.0.2
       - python-matplotlib
-      
+
     ubuntu-14.04:
       - cmake-3.0.2
 
@@ -256,7 +256,7 @@ pkgs:
   swig:
     nix:
       - swig
-        
+
   gfortran:
     nix: gfortran-wrapper
     fedora: gcc-gfortran
@@ -665,4 +665,4 @@ pkgs:
     nix:
       run-command:
         cd $SOURCE_DIR && nix-env -f . -iA  siconos-full
-      
+
