@@ -162,7 +162,6 @@ macro(finalize_doc)
     # endif()
 
     foreach(COMP ${COMPONENTS})
-      message("ADD DEP TO ${COMP}")
       add_dependencies(html ${COMP}-doxy2rst)
     endforeach()
 
