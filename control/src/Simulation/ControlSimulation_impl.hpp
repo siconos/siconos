@@ -46,39 +46,30 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(DynamicalSystem
   {
     SiconosVector& x = *DSG0.bundle(*dsvi)->x();
     nb += x.size();
+
     std::string nameDS;
-    if (DSG0.name.hasKey(*dsvi))
-    {
+    if (DSG0.name.hasKey(*dsvi)) {
       nameDS = DSG0.name[*dsvi];
-    }
-    else
-    {
+    } else {
       nameDS = "unknownDS" + TO_STR(counter);
       ++counter;
     }
 
-    for (unsigned i = 0; i < x.size(); ++i)
-    {
+    for (unsigned i = 0; i < x.size(); ++i) {
       legend.append(" " + nameDS + "_" + TO_STR(i));
     }
 
-
-
-    if (DSG0.u.hasKey(*dsvi))
-    {
+    if (DSG0.u.hasKey(*dsvi)) {
       unsigned sizeU = DSG0.u[*dsvi]->size();
       nb += sizeU;
-      for (unsigned i = 0; i < sizeU; ++i)
-      {
+      for (unsigned i = 0; i < sizeU; ++i) {
         legend.append(" " + nameDS + "_u_" + TO_STR(i));
       }
     }
 
-    if (DSG0.e.hasKey(*dsvi))
-    {
+    if (DSG0.e.hasKey(*dsvi)) {
       unsigned sizeE = DSG0.e[*dsvi]->size();
-      for (unsigned i = 0; i < sizeE; ++i)
-      {
+      for (unsigned i = 0; i < sizeE; ++i) {
         legend.append(" " + nameDS + "_e_" + TO_STR(i));
       }
       nb += DSG0.e[*dsvi]->size();

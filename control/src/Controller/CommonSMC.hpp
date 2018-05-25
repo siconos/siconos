@@ -25,6 +25,7 @@
 
 #include "Actuator.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosFwd.hpp"
 
 #include <relay_cst.h>
 
@@ -130,7 +131,7 @@ protected:
 
 public:
 
-  /** Constructor with a TimeDiscretisation and a Model.
+  /**General constructor
    * \param type the type of the SMC Actuator
    * \param sensor the ControlSensor feeding the Actuator
    */
@@ -138,18 +139,15 @@ public:
     _indx(0), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS), _precision(1e-8),
     _thetaSMC(0.5), _noUeq(false), _computeResidus(true) {}
 
-  /** Constructor with a TimeDiscretisation, a Model and two matrices
+  /** Constructor for dynamics affine in control
    * \param type the type of the SMC Actuator
    * \param sensor the ControlSensor feeding the Actuator
-   * \param B the B matrix
-   * \param D the saturation matrix
+   * \param B the matrix multiplying the control input
+   * \param D the saturation matrix (optional)
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std11::shared_ptr<SimpleMatrix>()):
-    Actuator(type, sensor), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS),
-    _precision(1e-8), _thetaSMC(0.5), _noUeq(false), _computeResidus(true)
-  {
-    _B = B;
-  }
+    Actuator(type, sensor, B), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS),
+    _precision(1e-8), _thetaSMC(0.5), _noUeq(false), _computeResidus(true) {}
 
 
   /** Compute the new control law at each event

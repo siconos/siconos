@@ -16,42 +16,35 @@
  * limitations under the License.
 */
 
-/*! \file Twisting.hpp
-  \brief twisting algorithm with a modification
+/*! \file RegularTwisting.hpp
+  \brief twisting algorithm with a direct discretization
 */
 
-#ifndef Twisting_H
-#define Twisting_H
+#ifndef RegularTwisting_H
+#define RegularTwisting_H
 
-#include "CommonSMC.hpp"
+#include "Twisting.hpp"
 
 
-/** Modified Twisting Controller with an implicit discretization
- *
- * This is the twisting controller that gives the best result
- */
-class Twisting : public CommonSMC
+/** Twisting Controller with a straightforward discretization */
+class RegularTwisting : public Twisting
 {
 private:
   /** serialization hooks */
-  ACCEPT_SERIALIZATION(Twisting);
+  ACCEPT_SERIALIZATION(RegularTwisting);
 
 
 protected:
   /** default constructor */
-  Twisting() {};
+  RegularTwisting() {};
 
 public:
-  /** Constructor for the ActuatorFactory
-   * \param sensor the ControlSensor feeding the Actuator
-   */
-  Twisting(SP::ControlSensor sensor): CommonSMC(TWISTING, sensor) {};
 
-  /** Constructor for a nonlinear system.
+  /** Constructor for a nonlinear system or the ActuatorFactory
    * \param sensor the ControlSensor feeding the Actuator
    * \param hControl sampling period
    */
-  Twisting(SP::ControlSensor sensor, double hControl);
+  RegularTwisting(SP::ControlSensor sensor);
 
   /** Constructor for the linear case
    * \param sensor the ControlSensor feeding the Actuator
@@ -59,22 +52,11 @@ public:
    * \param beta twisting parameter
    * \param hControl sampling period
    */
-  Twisting(SP::ControlSensor sensor, double gain, double beta, double hControl);
+  RegularTwisting(SP::ControlSensor sensor, double gain, double beta);
 
   /** destructor
    */
-  virtual ~Twisting();
+  virtual ~RegularTwisting();
 
-  /** Compute the new control law at each event
-   * Here we are using the following formula:
-   */
-  virtual void actuate();
-
-  /** set nonsmooth data: NormalConeNSL and AVI osnsp
-   * \param hControl sampling period
-   */
-  virtual void setNSdata(double hControl);
-
-  virtual void initialize(const NonSmoothDynamicalSystem & nsds, const Simulation& s);
 };
 #endif

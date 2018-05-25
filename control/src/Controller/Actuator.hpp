@@ -115,11 +115,17 @@ protected:
 
 public:
 
-  /** Constructor with a TimeDiscretisation.
+  /** General Constructor
    * \param type the type of the Actuator, which corresponds to the class type
    * \param sensor the ControlSensor feeding the Actuator
    */
   Actuator(unsigned int type, SP::ControlSensor sensor);
+
+  /** General Constructor with dynamics affine in control
+   * \param type the type of the Actuator, which corresponds to the class type
+   * \param sensor the ControlSensor feeding the Actuator
+   */
+  Actuator(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B);
 
   /** destructor
    */

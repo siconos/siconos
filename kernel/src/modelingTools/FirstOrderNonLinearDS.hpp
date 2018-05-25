@@ -410,8 +410,6 @@ public:
 
 };
 
-TYPEDEF_SPTR(FirstOrderNonLinearDS)
-
 #endif
 
 

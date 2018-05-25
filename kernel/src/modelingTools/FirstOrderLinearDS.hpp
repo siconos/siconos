@@ -322,6 +322,4 @@ public:
 
 };
 
-TYPEDEF_SPTR(FirstOrderLinearDS)
-
 #endif // FirstOrderLinearDS_H

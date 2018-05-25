@@ -172,7 +172,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   _nsdsSMC->link(_interactionSMC, _DS_SMC);
   _nsdsSMC->setControlProperty(_interactionSMC, true);
   _nsdsSMC->topology()->setName(_interactionSMC, "Sgn_SMC");
-  
+
   _simulationSMC->setName("linear sliding mode controller simulation");
   _simulationSMC->insertIntegrator(_integratorSMC);
   _simulationSMC->associate(_integratorSMC, _DS_SMC);

@@ -30,6 +30,8 @@
 #define LINEAR_SMC_OT2             104
 #define LINEAR_SMC_IMPROVED        105
 #define TWISTING                   106
+#define REGULAR_TWISTING           107
+#define EXPLICIT_TWISTING          108
 
 
 /** Sensor types */

@@ -55,17 +55,15 @@ void LinearSMC::actuate()
 {
   DEBUG_BEGIN("void LinearSMC::actuate()\n")
 
-
-
-
   if (!_noUeq)
   {
     computeUeq();
     FirstOrderLinearDS& LinearDS_SMC = *std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC);
     prod(*_B, *_ueq, *(LinearDS_SMC.b()));
   }
+
   DEBUG_EXPR(_DS_SMC->xMemory().display(););
-  
+
   *(_DS_SMC->x()) = _sensor->y();
 
   // SS: Really need to modify stored xMemory?

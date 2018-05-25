@@ -81,6 +81,7 @@ void Twisting::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation
   {
     RuntimeException::selfThrow("Twisting::initialize - nslaw or osnsp not set. If you used the constructor with only the ControlSensor as argument, you need to manually call setNSdata");
   }
+
   CommonSMC::initialize(nsds, s);
 }
 
