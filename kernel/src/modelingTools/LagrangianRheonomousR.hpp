@@ -71,17 +71,8 @@ protected:
   SP::SiconosVector _hDot;
 
   /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
-  * @param sizeDS sum of the sizes of all the DynamicalSystems involved in the interaction
-  * @param q pointer to the first element of q
-  * @param time current time
-  * @param sizeY size of vector hDot (ie of the intercation)
-  * @param[in,out] pointer to the first element of hDot
-  * @param sizeZ size of vector z
-  * @param[in,out] z a vector of user-defined parameters
-  */
+   */
   SP::PluggedObject _pluginhDot;
-
-
 
   /** default constructor
   */
@@ -93,11 +84,11 @@ protected:
 public:
 
   /** constructor from a set of data
-  *  \param pluginh name of the plugin to compute h.\n
+  *  \param pluginh name of the plugin to compute h.
   * Its signature must be "void userPluginH(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"
-  *  \param pluginJacobianhq name of the plugin  to compute jacobian h according to q.\n
+  *  \param pluginJacobianhq name of the plugin  to compute jacobian h according to q.
   * Its signature must be "void userPluginG0(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"
-  *  \param pluginDoth name of the plugin to compute hDot. \n
+  *  \param pluginDoth name of the plugin to compute hDot. 
   * Its signature must be "void userPluginHDot(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)
   */
   LagrangianRheonomousR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginDoth);

@@ -22,6 +22,10 @@ import textwrap
 # append siconos package build path to sys
 siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'wrap')
 sys.path.insert(0, siconos_pythonpath)
+siconos_tools_path = os.path.join("@CMAKE_BINARY_DIR@", 'share')
+sys.path.insert(0, siconos_tools_path)
+
+import buildtools as bt
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -58,7 +62,7 @@ if with_python_wrapper:
         'sphinx.ext.autodoc',
         'sphinx.ext.autosummary',
         'numpydoc.numpydoc',
-        'sphinx.ext.napoleon'
+        #'sphinx.ext.napoleon'
         ]
     #numpydoc_class_members_toctree = True
     # -----------------------------------------------------------------------------
@@ -83,17 +87,20 @@ if with_doxyrest:
     sys.path.insert(1, os.path.abspath('@DOXYREST_SPHINX_DIR@'))
     extensions += ['doxyrest', 'cpplexer']
 
-# ---- Start Exhale conf ---
+# ---- Start Breathe/Exhale conf ---
+extensions += ['breathe']
+components = bt.parse_cmake_list("@COMPONENTS@")
+#['externals', 'numerics']
+breathe_projects = {}
+for comp in components:
+    breathe_projects[comp] = "@DOXYGEN_4_RST@/" + comp
+    # Path to doxygen outputs
+breathe_default_project = 'numerics' # "@PROJECT_NAME@"
+breathe_default_members = ('members', 'public-members')
+
 with_exhale = @HAS_EXHALE@
 if with_exhale:
-    extensions += ['breathe', 'exhale']
-    breathe_projects = {"@PROJECT_NAME@": "@DOXYGEN_4_EXHALE@"} # Path to doxygen outputs
-    breathe_default_project = "@PROJECT_NAME@"
-    # breathe_projects_source = {
-    #      "auto" : ( "/Users/Franck/Projets/Siconos/siconos/kernel/src/modelingTools", ["FirstOrderLinearTIR.hpp", "LagrangianLinearDiagonalDS.hpp"] )
-    #      }
-
-
+    extensions += ['exhale']
     # Setup the exhale extension
     exhale_args = {
         # These arguments are required
@@ -136,7 +143,7 @@ if with_exhale:
 primary_domain = 'cpp'
 
 # Tell sphinx what the pygments highlight language should be.
-highlight_language = 'cpp'
+#highlight_language = 'cpp'
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -176,15 +183,15 @@ language = None
 exclude_patterns = ['**/*test*', '**/doxygen']
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
-#add_function_parentheses = True
+add_function_parentheses = True
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-#add_module_names = True
+add_module_names = True
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
-#show_authors = False
+show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -196,7 +203,7 @@ pygments_style = 'sphinx'
 #keep_warnings = False
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
+todo_include_todos = False
 
 
 # -- Options for HTML output ----------------------------------------------

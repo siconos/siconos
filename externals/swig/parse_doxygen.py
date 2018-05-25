@@ -143,7 +143,7 @@ class NamespaceMember(object):
         """
         Add a member to a class
         """
-        assert self.kind == 'class'
+        #assert self.kind == 'class'
         self.members[item.name] = item
         item.namespace = self
     
@@ -187,8 +187,8 @@ class NamespaceMember(object):
             pnl = get_single_element(pi, 'parameternamelist')
             pd = get_single_element(pi, 'parameterdescription')
             param_desc = description_to_string(pd)
-            
             pns = pnl.findall('parametername')
+
             for pn in pns:
                 pname = pn.text
                 pdesc = param_desc
@@ -203,6 +203,8 @@ class NamespaceMember(object):
             memory = {'skip_simplesect': False}
             if ss.get('kind', '') == 'return':
                 item.type_description = description_to_string(ss, memory=memory)
+            if ss.get('kind', '') == 'author':
+                memory = {'skip_simplesect': True}
         
         # Get enum values
         for ev in mdef.findall('enumvalue'):
@@ -258,7 +260,6 @@ class NamespaceMember(object):
         """
         bd = get_single_element(elem, 'briefdescription')
         dd = get_single_element(elem, 'detaileddescription')
-        
         description_to_rst(bd, self.docstring)
         if self.docstring and self.docstring[-1].strip():
             self.docstring.append('')
@@ -368,6 +369,7 @@ class NamespaceMember(object):
         if for_swig and not for_mock:
             escaped = [line.replace('\\', '\\\\').replace('"', '\\"') for line in ret]
             sname = self.name
+            print(sname)
             if sname.endswith('=0'):
                 sname = sname[:-2]
             elif sname.endswith('=delete'):
@@ -503,12 +505,12 @@ def description_to_rst(element, lines, indent='', skipelems=(), memory=None):
     children = list(element)
     postfix = ''
     postfix_lines = []
-    
+
     # Handle known tags that show up in description type element trees
     # Tag contents are handled beneath, if the if-branch does not return
     # Unknown tags are just output unchanged and a WARNING is shown (in main)
     if tag in ('briefdescription', 'detaileddescription', 'parameterdescription',
-               'type', 'highlight'):
+               'type', 'highlight', 'warning'):
         pass
     
     elif element in memory:
@@ -546,6 +548,8 @@ def description_to_rst(element, lines, indent='', skipelems=(), memory=None):
         return
     
     elif tag == 'ulink':
+        print(element.text)
+        print(element.get('url'))
         lines[-1] += '`%s <%s>`_ ' % (element.text, element.get('url'))
         return
     
@@ -622,7 +626,16 @@ def description_to_rst(element, lines, indent='', skipelems=(), memory=None):
         # We parse these separately in the return-type reading process
         if memory.get('skip_simplesect', True):
             return
-    
+
+    elif tag == 'simplesect' and element.get('kind', '') == 'author' :
+        # We parse these separately in the return-type reading process
+        if memory.get('skip_simplesect', True):
+            return
+
+    elif tag == 'simplesect' and element.get('kind', '') == 'warning' :
+        # We parse these separately in the return-type reading process
+        if memory.get('skip_simplesect', True):
+            return
     else:
         NOT_IMPLEMENTED_ELEMENTS.add(tag)
         lines.append(ET.tostring(element)) 
@@ -768,6 +781,76 @@ def read_doxygen_xml_files(xml_directory, namespace_names, verbose=True):
     return root_namespace.subspaces
 
 
+
+def read_doxygen_xml_files_no_ns(xml_directory, xml_file_name, verbose=True):
+    """
+    Read doxygen XML files from the given directory. Restrict the returned
+    namespaces to the ones listed in the namespaces input iterable
+    
+    Remember: we are built for speed, not ultimate flexibility, hence the
+    restrictions to avoid parsing more than we are interested in actually
+    outputing in the end 
+    """
+    myitems = Namespace('')
+    myitems.add(Namespace('ALL'))
+
+    if verbose:
+        print('Parsing doxygen XML file  %s' % xml_file_name)
+    
+    # root_namespace = Namespace('')
+    # for nn in namespace_names:
+    #     root_namespace.add(Namespace(nn))
+
+
+    # Loop through xml files of compounds and get class definitions
+    #xml_files = os.listdir(xml_directory)
+    #xml_files = xml_directory
+    for i in range(1):#xml_file_name in xml_files:
+        #if not xml_file_name.startswith('class'):
+        #    continue
+        
+        path = os.path.join(xml_directory, xml_file_name)
+        root = ET.parse(path).getroot()
+        compounds = root.findall('compounddef')
+        for c in compounds:
+            kind = c.attrib['kind']
+            names = c.findall('compoundname')
+            
+            assert len(names) == 1
+            name = names[0].text
+            if name.find('.h'):
+                name = ''
+            nn = name.split('::')[0]
+            
+            namespace = myitems.subspaces.get('ALL', None)
+
+            print(name)
+            
+            #if not namespace:
+            #    continue
+            
+            item = NamespaceMember.from_compounddef(c, name, kind, xml_file_name)
+            namespace.add(item)
+
+    # Loop through other elements in the namespaces
+    # for namespace in root_namespace.subspaces.values():
+    #     file_name = 'namespace%s.xml' % namespace.name
+    #     path = os.path.join(xml_directory, file_name)
+    #     root = ET.parse(path).getroot()
+    #     compound = get_single_element(root, 'compounddef')
+    #     sections = compound.findall('sectiondef')
+    #     for s in sections:
+    #         members = s.findall('memberdef')
+    #         for m in members:
+    #             name = get_single_element(m, 'name').text
+    #             kind = m.attrib['kind']
+    #             item = NamespaceMember.from_memberdef(m, name, kind, xml_file_name, namespace)
+    #             namespace.add(item)            
+    # if verbose: print('Done parsing files')
+    
+    return myitems.subspaces
+
+
 if __name__ == '__main__':
     if len(sys.argv) != 3:
         print('Call me like "script path_to/xml/dir namespace"')
@@ -780,7 +863,7 @@ if __name__ == '__main__':
     
     # Parse the XML files
     namespaces = read_doxygen_xml_files(xml_directory, [namespace])
-    
+
     # Get sorted list of members
     members = list(namespaces[namespace].members.values())
     members.sort(key=lambda m: m.name)
