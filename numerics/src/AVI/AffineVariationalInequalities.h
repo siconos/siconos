@@ -33,7 +33,7 @@
  *
  * The problem is : given a matrix \f$M\f$ and \f$q\f$, find \f$z\f$ such that
  * 
- * \f$\langle x - z, q + Mz \rangle \geq 0 \quad \textrm{for all }x\in K \f$
+ * \f[ \langle x - z, q + Mz \rangle \geq 0 \quad \text{for all }x\in K \f]
  *
  */
 struct AffineVariationalInequalities

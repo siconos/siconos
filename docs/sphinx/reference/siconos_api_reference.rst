@@ -5,20 +5,18 @@ Siconos API (C/C++)
 ===================
 
 
-The siconos API C++ documentation is automatically generated using `Sphinx/Exhale tool`_.
+The siconos API C++ documentation is automatically generated using `Sphinx/Breathe`_ and `Doxygen`_.
 
 .. only:: WithoutExhale
 
-   If you see this message, it means exhale is OFF and no documentation for C++ API
-   has been generated. Try to reconfigure with -DUSE_EXHALE=ON or
-   switch to `C/C++ Doxygen documentation`_.
-
    .. toctree::
-      :maxdepth: 2
-
-      /reference/class_diagrams
-      /reference/generated_api
-
+      :maxdepth: 1
+      :glob:
+	 
+      /reference/*/breathe_api
+      /reference/*/files_list
+      /reference/*/sources_list
+      
 .. only:: WithExhale
 
    .. toctree::
@@ -29,10 +27,9 @@ The siconos API C++ documentation is automatically generated using `Sphinx/Exhal
       /api/class_view_hierarchy
       /api/file_view_hierarchy
       /api/unabridged_api
+      
 
-
-A complete alphabetical list of all classes, structs, typedef ... is available in :ref:`genindex`.
-
+Check :ref:`genindex` for a complete alphabetical list of all objects and functions of the C/C++ API (and more).
 
       
 .. _doxygen_only:
@@ -49,12 +46,16 @@ The 'standard' (Doxygen only) documentation is also available, mostly for develo
 
 .. _Sphinx/Exhale tool: https://github.com/svenevs/exhale
 
+.. _Sphinx/Breathe : http://breathe.readthedocs.io/en/latest/
+
+.. _Doxygen: http://www.stack.nl/~dimitri/doxygen/
+
 
 ..
    Doxyrest
    --------
 
-   On test ...
+   test ...
 
    .. toctree::
       :maxdepth: 6

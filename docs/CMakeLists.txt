@@ -82,8 +82,8 @@ if(USE_SPHINX)
   else()
     set(HAS_DOXYREST "False" CACHE INTERNAL "True if doxyrest required and found.")
   endif()
+  find_python_module(breathe REQUIRED)
   if(USE_EXHALE)
-    find_python_module(breathe REQUIRED)
     find_python_module(exhale REQUIRED)
     set(HAS_EXHALE "True" CACHE INTERNAL "True if exhale required and found.")
   else()
@@ -187,7 +187,7 @@ if(USE_SPHINX)
     COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_LATEX_PARAMETERS}
     ${CMAKE_CURRENT_BINARY_DIR}/build/latex
     )
-  
+
   add_custom_target(doc DEPENDS html)
   
   # -- Target to build python api documention with apidoc --
@@ -208,7 +208,7 @@ if(USE_SPHINX)
       )
 
     # Sphinx html gen. depends on apidoc outputs.
-    add_dependencies(html apidoc)
+    #add_dependencies(html apidoc)
   endif()
 
 endif()

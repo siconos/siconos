@@ -70,6 +70,7 @@ macro(doxy2swig_docstrings COMP)
     set(GENERATE_HTML NO)
     set(GENERATE_XML YES)
     set(EXTRACT_ALL YES)
+    set(EXTRACT_PRIVATE YES)
     set(XML_OUTPUT doxy2swig-xml/${COMP})
     message(" -- Create doxygen conf (xml for docstrings) for component ${COMP}")
     configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy2swig.config.in ${DOXY_CONFIG_XML} @ONLY)
@@ -80,7 +81,7 @@ macro(doxy2swig_docstrings COMP)
       OUTPUT_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log ERROR_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log
       COMMENT " -- Build xml doc for component ${COMP} ..."
       )
-    
+
     # -- command to build .i files from xml doc for current component  --
     add_custom_command(OUTPUT  ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       DEPENDS xml4swig_${COMP}

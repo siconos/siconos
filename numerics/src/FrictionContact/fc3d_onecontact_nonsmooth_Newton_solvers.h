@@ -63,9 +63,9 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
 
   /** compute error for friction-contact 3D problem with Newton
    *  \param dimension of the global problem
-   *   \param[in,out] velocity vector (\warning in-out parameter )
-   *   \param reaction global reaction vector
-   *   \param output_error
+   *  \param[in,out] velocity vector
+   *  \param reaction global reaction vector
+   *  \param output_error
    */
   void fc3d_onecontact_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity, double*reaction, double * output_error);
 

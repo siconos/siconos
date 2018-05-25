@@ -201,13 +201,13 @@ extern "C"
   int relay_compute_error(RelayProblem* problem, double* restrict z , double* restrict w, double tolerance, double* restrict error);
 
 
-  /** This function computes the projection on the boxr \f$ [lb,ub]\f$ of the vector  \f$z\f$  
-     * \param[in,out] z a n-vector of doubles which returns the projection
-     * \param[in,out] ub a n-vector of doubles which contains the upper bounds
-     * \param[in,out] lb a n-vector of doubles which contains the lower bounds
-     * \param[in,out] n size of the a n-vector
-     * \author Vincent Acary
-     */
+  /** This function computes the projection on the boxr \f$ [lb,ub]\f$ of the vector \f$z\f$
+   * \param[in,out] z a n-vector of doubles which returns the projection
+   * \param[in,out] ub a n-vector of doubles which contains the upper bounds
+   * \param[in,out] lb a n-vector of doubles which contains the lower bounds
+   * \param[in,out] n size of the a n-vector
+   * \author Vincent Acary
+   */
   void project_on_box(int n, double* restrict z , double* restrict lb, double* restrict ub);
 
   /** This function transform a RelayProblem into a LinearComplementarityProblem

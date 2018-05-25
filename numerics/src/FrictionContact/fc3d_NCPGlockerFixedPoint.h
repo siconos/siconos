@@ -60,7 +60,7 @@ extern "C"
 
   /** compute error for friction-contact 3D problem with Fixed Point
    * \param dimension of the global problem
-   * \param[in,out] velocity vector (\warning in-out parameter )
+   * \param[in,out] velocity vector
    * \param reaction vector
    * \param output_error
   */
