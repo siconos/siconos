@@ -610,11 +610,13 @@ double NM_get_value(NumericsMatrix* M, int i, int j)
       fprintf(stderr, "NM_get_value ::  unknown origin %d for sparse matrix\n", M->matrix2->origin);
     }
     }
+    break;
   }
   default:
     fprintf(stderr, "NM_get_value ::  unknown matrix storage = %d\n", M->storageType);
   }
-return 0.0;
+
+  return 0.0;
 
 }
 

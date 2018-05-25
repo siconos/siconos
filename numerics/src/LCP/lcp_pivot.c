@@ -362,6 +362,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
             DEBUG_PRINT("The pivot column is nonpositive ! We are on ray !\n"
                 "It either means that the algorithm failed or that the LCP is infeasible\n"
                 "Check the class of the M matrix to find out the meaning of this\n");
+            goto exit_lcp_pivot;
           default:
             bck_drive = drive < dim + 1 ? drive - 1 : drive - dim - 2;
         }
