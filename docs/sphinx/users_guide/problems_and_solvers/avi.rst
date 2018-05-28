@@ -35,7 +35,7 @@ The solvers and their parameters are described in :ref:`Affine Variational Inequ
 
 Use the generic function AVI_driver() to call one the the specific solvers listed below:
 
-* :ref:`avi_caoferris() <doxid-_a_v_i___solvers_8h_1aead64029113ca36a2cc14f116ad8b6e4>` , direct solver for AVI based on pivoting method principle for degenerate problem.
+* :func:`avi_caoferris()` , direct solver for AVI based on pivoting method principle for degenerate problem.
   
   Choice of pivot variable is performed via lexicographic ordering
 
@@ -51,7 +51,7 @@ Overview of the available solvers for AVI and their required parameters.
 
 For each solver, the input argument are:
 
-* an :ref:`AffineVariationalInequalities <doxid-struct_affine_variational_inequalities>`
+* an :class:`AffineVariationalInequalities`
 
 * the unknown z
 
@@ -66,7 +66,7 @@ For each solver, the input argument are:
 
 Direct solver for AVI based on pivoting method principle for (degenerated) problem.
 
-function: :ref:`avi_caoferris() <doxid-_a_v_i___solvers_8h_1aead64029113ca36a2cc14f116ad8b6e4>`
+function: :func:`avi_caoferris()`
 
 parameters:
 

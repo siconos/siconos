@@ -32,10 +32,10 @@ of the variables that can be plugged is given in :ref:`ds_plugins` and :ref:`rel
 
 .. code-block:: c++
 
-    ds->setComputeFExtFunction('myPlugin', 'external_forces');
-    // ...
-    ds->computeFExt(2.)
-    // --> call external_forces with time == 2.
+   ds->setComputeFExtFunction('myPlugin', 'external_forces');
+   // ...
+   ds->computeFExt(2.)
+   // --> call external_forces with time == 2.
     
 
 Plugins overview

@@ -32,7 +32,11 @@ try:
     from doxy2swig import Doxy2SWIG
 except:
     pass #
-import parse_doxygen as pxml
+
+try: 
+    import parse_doxygen as pxml
+except:
+    pass
 
 try:
     import lxml.etree as ET
@@ -94,9 +98,9 @@ def get_xml_files(header_name, xml_path, case_sense_names=True):
     if not case_sense_names:
         fnwe = replace_uppercase_letters(fnwe)
     # Look for 'class' files
-    classfiles = glob.glob(os.path.join(xml_path, '*class' + fnwe + '*.xml'))
+    classfiles = glob.glob(os.path.join(xml_path, 'class' + fnwe + '.xml'))
     # Look for 'struct' files
-    structfiles = glob.glob(os.path.join(xml_path, '*struct' + fnwe + '*.xml'))
+    structfiles = glob.glob(os.path.join(xml_path, 'struct' + fnwe + '.xml'))
     # Look for '8h' (?) files
     files8h = glob.glob(os.path.join(xml_path, fnwe + '_8h*.xml'))
     allfiles = classfiles + structfiles + files8h
@@ -487,6 +491,7 @@ def xml2rst(headername, srcdir, component_name, sphinx_directory, doxyconf):
         elif f.find('_8h') > -1:
             label = '.. _file' + refname + ':\n\n'
             shortname = headername.split(srcdir)[-1]
+            shortname = shortname.replace('/./', '/')
             if shortname[0] == '/':
                 shortname = shortname[1:]
             title = 'File ' + shortname
@@ -600,16 +605,13 @@ def find_doxygen_diagrams(doxygen_path, output_directory):
     # files matching requirements
     class_diagram_match = 'inherit_graph*.png'
 
-    header = '.. _api_class_diagrams:\n\n'
-    header += 'C++ Class diagrams\n'
-    header += len(header) * '=' + '\n\n'
-
+    ref = '.. _api_class_diagrams:\n\n'
+    header = 'C++ Class diagrams'
+    header += '\n' + len(header) * '=' + '\n\n'
+    header = ref + header
     files = glob.glob(os.path.join(doxygen_path, class_diagram_match))
-    # we need relative paths for sphinx ...
-    print("ff", files)
-    realfiles = [f.split(doxygen_path)[1] for f in files]
-    print(realfiles)
-    realfiles = ['/..' + f for f in realfiles]
+    realfiles = [os.path.join('../doxygen', os.path.basename(f)) for f in files]
+    realfiles = ['/' + f for f in realfiles]
     outputfile = os.path.join(output_directory, 'class_diagrams.rst')
     with open(outputfile, 'w') as file:
         file.writelines(header)
@@ -623,3 +625,27 @@ def find_doxygen_diagrams(doxygen_path, output_directory):
                 line += '\n\t' + p
             line += '\n\n'
             file.writelines(line)
+
+
+def filter_sphinx_warnings(warnfile):
+    """Remove 'expected' warnings from sphinx logfile
+    to keep only useful outputs
+    
+    """
+    expected_warnings = [
+        'WARNING: Duplicate declaration', # Known breathe warning
+        'WARNING: Citation',
+        'WARNING: image file not readable: ../inherit_graph',
+        ]
+    with open(warnfile) as ff:
+        keep_msg = ff.readlines()
+        
+    for msg in expected_warnings:
+        with open(warnfile) as ff:
+            # remove useless lines
+            current = [n for n in ff.readlines() if (not n.find(msg) > -1)]
+        keep_msg = [msg for msg in current if msg in keep_msg]
+
+    with open(warnfile, 'w') as ff:
+        for msg in keep_msg:
+            ff.write(msg)
