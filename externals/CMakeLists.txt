@@ -76,16 +76,16 @@ endif()
 # No docs for externals.
 set(${COMPONENT}_EXCLUDE_DOXY
   # .
-  # blas_lapack
-  # hairer
-  # netlib/dftemplates
-  # netlib/odepack
-  # optim_misc
-  # optim_misc/ql0001
-  # SOL/lumod-c
-  # sort
-  # tools
-  ${${COMPONENT}_DIRS}
+  blas_lapack
+  hairer
+  netlib/dftemplates
+  netlib/odepack
+  optim_misc
+  optim_misc/ql0001
+  SOL/lumod-c
+  sort
+  tools
+  #${${COMPONENT}_DIRS}
   )
 
 SET(${COMPONENT}_EXCLUDE_SRCS "SOL/lumod-c/sparselib.c" "SOL/lumod-c/lumod_sparse.c")

@@ -93,6 +93,9 @@ And, compile, link and execute (in one shot, thanks to siconos script)::
 
   siconos run.cpp
 
+
+For new simulation, start with the :ref:`template for c++ driver file <template_siconos_driver>`
+or try to mimic one of the examples distributed with the software (https://github.com/siconos/siconos/tree/master/examples).
   
 More
 ----

@@ -21,6 +21,8 @@ option(USE_DEVEL_DOXYGEN "Build doxygen (html, latex ...) doc, extracting all. D
 set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/docs/build CACHE INTERNAL "Root path to generated documentation.")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doctools.py ${CMAKE_BINARY_DIR}/share/doctools.py COPYONLY)
+
 #  ====== doxygen documentation setup ======
 # This setup is required if one at least of
 # the following is needed:
@@ -102,10 +104,6 @@ if(USE_SPHINX)
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/siconos.bib"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/siconos.bib" COPYONLY)
 
-  configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/find_doxygen_diagrams.py"
-    "${CMAKE_CURRENT_BINARY_DIR}/find_doxygen_diagrams.py" @ONLY)
-
   configure_file(${CMAKE_SOURCE_DIR}/externals/swig/parse_doxygen.py ${CMAKE_BINARY_DIR}/share/parse_doxygen.py COPYONLY)
   
   # List and copy all rst files from source dir to binary dir
@@ -138,6 +136,7 @@ if(USE_SPHINX)
     
   else()
     set(SPHINX_PARAMETERS
+      -w ${CMAKE_CURRENT_BINARY_DIR}/sphinx_warnings.log
       -b html # html output
       -d build/doctrees # path to doctree files
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source

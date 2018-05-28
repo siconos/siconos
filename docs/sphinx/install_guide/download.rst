@@ -1,7 +1,11 @@
 .. _download:
 
+
 Download Siconos
 ================
+
+.. contents::
+   :local:
 
 
 Latest source release

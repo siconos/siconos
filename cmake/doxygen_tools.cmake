@@ -90,7 +90,7 @@ macro(doxy2rst_sphinx COMP)
     
     add_custom_target(${COMP}-doxy2rst
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-      "import buildtools; buildtools.create_breathe_files('${${COMP}_HDRS}', '${CMAKE_SOURCE_DIR}', '${COMP}', '${SPHINX_API_DIR}','${DOXY_CONFIG_XML}')"
+      "import doctools; doctools.create_breathe_files('${${COMP}_HDRS}', '${CMAKE_SOURCE_DIR}', '${COMP}', '${SPHINX_API_DIR}','${DOXY_CONFIG_XML}')"
       VERBATIM
       DEPENDS ${COMP}-doxy2xml
       )
@@ -140,9 +140,13 @@ macro(finalize_doc)
     # run : make doxypng2sphinx
     # depends : doxygen-html
     add_custom_target(doxypng2sphinx
-      COMMAND  ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/docs/find_doxygen_diagrams.py
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      "import doctools; doctools.find_doxygen_diagrams('${CMAKE_CURRENT_BINARY_DIR}/build/html/doxygen', '${CMAKE_BINARY_DIR}/docs/sphinx/reference')"
+      VERBATIM
       DEPENDS doxygen-html
       COMMENT "Browse doxygen outputs (graphs ...)")
+
+  
     add_custom_command(TARGET doxypng2sphinx POST_BUILD
       COMMENT "Done. Generate class_diagrams.rst file in ${CMAKE_BINARY_DIR}/docs/sphinx/reference")
 
@@ -158,7 +162,7 @@ macro(finalize_doc)
     #   set(DOXYGEN_4_RST ${DOXYGEN_OUTPUT}/xml4rst)
     #   add_custom_target(doxy2rst
     # 	COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-    # 	"import buildtools; buildtools.parse_doxygen_wrapper('${DOXYGEN_4_RST}', '${CMAKE_BINARY_DIR}/docs/sphinx/reference')"
+    # 	"import doctools; doctools.parse_doxygen_wrapper('${DOXYGEN_4_RST}', '${CMAKE_BINARY_DIR}/docs/sphinx/reference')"
     # 	VERBATIM
     # 	)
     # endif()
@@ -179,7 +183,7 @@ macro(finalize_doc)
   if(WITH_DOXYGEN_WARNINGS)
     add_custom_target(filter_warnings
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-      "import buildtools; buildtools.filter_doxygen_warnings_files('${CMAKE_BINARY_DIR}/doxygen_warnings', 'SUMMARY.warnings')"
+      "import doctools; doctools.filter_doxygen_warnings_files('${CMAKE_BINARY_DIR}/doxygen_warnings', 'SUMMARY.warnings')"
       VERBATIM
       COMMENT "Filter doxygen warnings (result : SUMMARY.warnings)."
       )
