@@ -796,7 +796,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
 int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
 {
-  numerics_printf_verbose(verbose,"fc3d_nsgs_setDefaultSolverOptions\n");
+  numerics_printf_verbose(1,"fc3d_nsgs_setDefaultSolverOptions\n");
 
   /*  strcpy(options->solverName,"NSGS");*/
   options->solverId = SICONOS_FRICTION_3D_NSGS;
