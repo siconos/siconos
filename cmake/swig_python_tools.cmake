@@ -51,7 +51,7 @@ macro(doxy2swig_docstrings COMP)
     file(MAKE_DIRECTORY ${DOXY2SWIG_OUTPUT})
     set(XML_INPUTS)
     # Set config file name
-    set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy-xml.config")
+    set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxyswig-xml.config")
     # Add all subdirectories related to the current component into DOXYGEN_INPUTS
     foreach(_dir ${${COMP}_DIRS})
       list(FIND ${COMP}_EXCLUDE_DOXY ${_dir} check_dir)
