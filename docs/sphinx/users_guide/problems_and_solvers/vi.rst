@@ -38,15 +38,15 @@ The problem is stored and given to the solver in Siconos/Numerics thanks to a C 
 .. _doxid-vi_problem_1viSolversList:
 .. rubric:: Available solvers for Variational Inequality:
 
-Use the generic function :ref:`variationalInequality_driver() <doxid-_non_smooth_drivers_8h_1a504bea03415a250a258bf6e8638cbd80>` to call one the the specific solvers listed below:
+Use the generic function :func:`variationalInequality_driver()` to call one the the specific solvers listed below:
 
-* :ref:`variationalInequality_ExtraGradient() <doxid-_variational_inequality___solvers_8h_1a29f3b870ece0368cdaee2ae8d71f200b>` : Extra gradient solver. SolverId: SICONOS_VI_EG = 1000.
+* :func:`variationalInequality_ExtraGradient()` : Extra gradient solver. SolverId: SICONOS_VI_EG = 1000.
 
-* :ref:`variationalInequality_FixedPointProjection() <doxid-_variational_inequality___solvers_8h_1ad473da643ea0fbe4cfa68a768e2e7d2e>` : Fixed-point solver. SolverId: SICONOS_VI_EG = 1001.
+* :func:`variationalInequality_FixedPointProjection()` : Fixed-point solver. SolverId: SICONOS_VI_EG = 1001.
 
-* :ref:`variationalInequality_HyperplaneProjection() <doxid-_variational_inequality___solvers_8h_1adbdcf02711dc0fcb0580cbd79272a717>` : Hyperplane Projection based Solver. SolverId: SICONOS_VI_HP_STR = 1002.
+* :func:`variationalInequality_HyperplaneProjection()` : Hyperplane Projection based Solver. SolverId: SICONOS_VI_HP_STR = 1002.
 
-* :ref:`variationalInequality_box_newton_QiLSA() <doxid-_variational_inequality___solvers_8h_1a3d3b82b39122441e679e5a11d2c23e70>` : Solver using the merit function proposed by Qi for box-constrained VI. SolverId: SICONOS_VI_BOX_QI_STR = 1003
+* :func:`variationalInequality_box_newton_QiLSA()` : Solver using the merit function proposed by Qi for box-constrained VI. SolverId: SICONOS_VI_BOX_QI_STR = 1003
 
 (see the functions/solvers list in ``VariationalInequality_Solvers.h`` )
 

@@ -4,59 +4,57 @@
 Test doxygen/sphinx links
 -------------------------
 
+Below some examples on how to write internal links to siconos objects in sphinx documents (rst).
 
+* Link to a siconos class or a struct:
 
-To link to a siconos class or a struct:
+  .. code-block:: rst
+		  
+     Try to link to :class:`DynamicalSystem`
 
-.. code-block:: rst
-
-   Try to link to :class:`DynamicalSystem`
-
-Result : 
+  **Result** : 
       
-Try link to :class:`DynamicalSystem`
+  Try link to :class:`DynamicalSystem`
 
 
-To a file (programs listing): 
+* Link to a file (programs listing): 
 
-.. code-block:: rst
+  .. code-block:: rst
 
-   Try to link to :ref:`pgm_kernel_src_modelingTools_DynamicalSystem.hpp`
+     Try to link to :ref:`pgm_kernel_src_modelingTools_DynamicalSystem.hpp`
       
-Result : 
+  **Result** : 
 
-Try to link to :ref:`pgm_kernel_src_modelingTools_DynamicalSystem.hpp`
-Try to link to :ref:`pgm_externals_SuiteSparse_CXSparse_cs.h`
+  Try to link to :ref:`pgm_kernel_src_modelingTools_DynamicalSystem.hpp`
 
-To a file (documentation): 
+* Link to a file (documentation): 
 
-.. code-block:: rst
+  .. code-block:: rst
 
-   Try to link to :ref:`file_kernel_src_modelingTools_DynamicalSystem.hpp`
+     Try to link to :ref:`file_kernel_src_modelingTools_DynamicalSystem.hpp`
       
-Result : 
+  **Result** : 
 
-Try to link to :ref:`file_kernel_src_modelingTools_DynamicalSystem.hpp`
-Try to link to :ref:`file_externals_SuiteSparse_CXSparse_cs.h`
-
-
-To link to a method : 
-
-.. code-block:: rst
-
-   Try to link to :func:`Simulation::nextStep`
-
-Result :
-
-Try to link to :func:`Simulation::nextStep`
+  Try to link to :ref:`file_kernel_src_modelingTools_DynamicalSystem.hpp`
 
 
-To link to a function : 
+* Link to a class method : 
 
-.. code-block:: rst
+  .. code-block:: rst
 
-   Try to link to :func:`cs_dl_norm`
+     Try to link to :func:`Simulation::nextStep`
 
-Result :
+  **Result** :
 
-Try to link to :func:`cs_dl_norm`
+  Try to link to :func:`Simulation::nextStep`
+
+
+* Link to a function : 
+
+  .. code-block:: rst
+
+     Try to link to :func:`cs_dl_norm`
+
+  **Result** :
+
+  Try to link to :func:`cs_dl_norm`

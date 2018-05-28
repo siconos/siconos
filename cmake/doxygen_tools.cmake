@@ -141,7 +141,7 @@ macro(finalize_doc)
     # depends : doxygen-html
     add_custom_target(doxypng2sphinx
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-      "import doctools; doctools.find_doxygen_diagrams('${CMAKE_CURRENT_BINARY_DIR}/build/html/doxygen', '${CMAKE_BINARY_DIR}/docs/sphinx/reference')"
+      "import doctools; doctools.find_doxygen_diagrams('${CMAKE_BINARY_DIR}/docs/build/html/doxygen', '${CMAKE_BINARY_DIR}/docs/sphinx/reference')"
       VERBATIM
       DEPENDS doxygen-html
       COMMENT "Browse doxygen outputs (graphs ...)")

@@ -81,7 +81,7 @@ macro(doxy2swig_docstrings COMP)
     add_custom_target(xml4swig_${COMP}
       COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML}
       OUTPUT_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log ERROR_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log
-      COMMENT " -- Build xml doc for component ${COMP} ..."
+      COMMENT " -- Build xml (for swig) doc for component ${COMP} ..."
       )
 
     # -- command to build .i files from xml doc for current component  --

@@ -49,19 +49,19 @@ This problem models any instance of discretized frictional contact problem obtai
 
 * the modeling of static contact problems. In this last case, :math:`u` plays the role of the relative displacement at contact
 
-The problem is stored and given to the solver in Siconos/Numerics thanks to a C structure :ref:`GlobalFrictionContactProblem <doxid-struct_global_friction_contact_problem>` .
+The problem is stored and given to the solver in Siconos/Numerics thanks to a C structure :class:`GlobalFrictionContactProblem` .
 
 .. _doxid-global_fc_problem_1pfc3DSolversList:
 .. rubric:: Available solvers for Friction Contact 3D:
 
-Use the generic function :ref:`gfc3d_driver() <doxid-_non_smooth_drivers_8h_1a44096d1e6519a0183219f779b1627424>` to call one the the specific solvers listed below:
+Use the generic function :func:`gfc3d_driver()` to call one the the specific solvers listed below:
 
-* :ref:`gfc3d_nsgs() <doxid-gfc3d___solvers_8h_1a8744cb3657964afe57ebe1f68e15305a>` : non-smooth Gauss-Seidel solver (see the functions/solvers list in ``gfc3d_Solvers.h`` )
+* :func:`gfc3d_nsgs()` : non-smooth Gauss-Seidel solver (see the functions/solvers list in ``gfc3d_Solvers.h`` )
 
 .. _doxid-global_fc_problem_1pfc3DParam:
 .. rubric:: Required and optional parameters:
 
-gfc3d problems needs some specific parameters, given to the :ref:`gfc3d_driver() <doxid-_non_smooth_drivers_8h_1a44096d1e6519a0183219f779b1627424>` function thanks to a SolverOptions structure.
+gfc3d problems needs some specific parameters, given to the :func:`gfc3d_driver()` function thanks to a SolverOptions structure.
 
 .. index:: single: Global Friction-Contact 3D problems Solvers
 .. _doxid-_global_f_c3_d_solvers:
@@ -72,7 +72,7 @@ This page gives an overview of the available solvers for friction-contact (3D) p
 
 For each solver, the input argument are:
 
-* a :ref:`FrictionContactProblem <doxid-struct_friction_contact_problem>`
+* a :class:`FrictionContactProblem`
 
 * the unknowns (reaction,velocity)
 
@@ -83,5 +83,5 @@ For each solver, the input argument are:
 .. _doxid-_global_f_c3_d_solvers_1pfc3Dnsgs:
 .. rubric:: Non-Smooth Gauss Seidel Solver:
 
-function: :ref:`fc3d_nsgs() <doxid-fc3d___solvers_8h_1ad5fdf1a37ff65852645b460ada37cb71>` parameters:
+function: :func:`fc3d_nsgs()` parameters:
 

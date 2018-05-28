@@ -125,7 +125,7 @@ if(USE_SPHINX)
   # --- Build a target for sphinx ---
   # --> use make html or make latex ... to build documentation.
   set(SPHINX_EXECUTABLE sphinx-build)
-
+  set(SPHINX_LOG_FILE ${CMAKE_BINARY_DIR}/docs/sphinx_warnings.log)    
   if(HAS_EXHALE)
     set(SPHINX_PARAMETERS
       -b html # html output
@@ -136,7 +136,7 @@ if(USE_SPHINX)
     
   else()
     set(SPHINX_PARAMETERS
-      -w ${CMAKE_CURRENT_BINARY_DIR}/sphinx_warnings.log
+      -w ${SPHINX_LOG_FILE}
       -b html # html output
       -d build/doctrees # path to doctree files
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
@@ -152,10 +152,18 @@ if(USE_SPHINX)
   
   # -- To build html doc : make html --
   add_custom_target(html
-    COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS}
-    ${CMAKE_CURRENT_BINARY_DIR}/build/html
+    #COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS}
+    COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS} 2> errors.txt ${CMAKE_CURRENT_BINARY_DIR}/build/html
+    VERBATIM
     DEPENDS copy-sphinx-figures
     )
+
+
+  add_custom_command(TARGET html POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      "import doctools; doctools.filter_sphinx_warnings('${SPHINX_LOG_FILE}')"
+      VERBATIM
+      COMMENT "Filtering sphinx logfile into ${SPHINX_LOG_FILE}.")
 
   add_custom_command(TARGET html POST_BUILD
       COMMENT "Done. Sphinx doc has been generated in ${DOC_ROOT_DIR}/html")
@@ -207,7 +215,9 @@ if(USE_SPHINX)
       )
 
     # Sphinx html gen. depends on apidoc outputs.
-    #add_dependencies(html apidoc)
+    if(WITH_DOXY2SWIG)
+      add_dependencies(html apidoc)
+    endif()
   endif()
 
 endif()

@@ -15,22 +15,22 @@ Find :math:`(z,w)` such that:
 
 where M is an ( :math:` n \times n ` )-matrix, q, z and w are n-dimensional vectors, K is the box defined by :math:`K=\{x\in\mathbb{R}^n \mid lb_i \leq x_i \leq ub_i, i = 1, ..., n \}` and :math:`\mathcal{N}_K(z)` is the normal cone to :math:`K` at :math:`z` .
 
-The solvers and their parameters are described in :ref:`Relay Problems Solvers <doxid-_relay_solvers>` .
+The solvers and their parameters are described in :class:`Relay Problems Solvers` .
 
 .. _doxid-_relay_problem_1relaySolversList:
 .. rubric:: Available solvers:
 
 The "direct" solvers are
 
-* :ref:`relay_avi_caoferris() <doxid-_relay___solvers_8h_1a02bb6df7e1147154ba01c36d79cb3a11>` based on an algorithm by Cao and Ferris for AVI with a polytopic set :math:`K` .
+* :func:`relay_avi_caoferris()` based on an algorithm by Cao and Ferris for AVI with a polytopic set :math:`K` .
 
-* :ref:`relay_path() <doxid-_relay___solvers_8h_1a343139518641407ce13174b1ad360a32>` using the PATH solver
+* :func:`relay_path()` using the PATH solver
 
 Using an LCP reformulation (splitting z in positive and negative part), we have the following available solvers:
 
-* :ref:`relay_enum() <doxid-_relay___solvers_8h_1acb9e15dbc9ae90c1c02ac1f5a7937790>` which solves the LCP using the enumerative method
+* :func:`relay_enum()` which solves the LCP using the enumerative method
 
-* :ref:`relay_lexicolemke() <doxid-_relay___solvers_8h_1af0ac56c5358a7148ce5c56eb68eabbc2>` which solves the LCP using Lemke's algorithm
+* :func:`relay_lexicolemke()` which solves the LCP using Lemke's algorithm
 
 (see the functions/solvers list in ``Relay_Solvers.h`` )
 
@@ -45,7 +45,7 @@ This page gives an overview of the available solvers for relay problems and thei
 
 For each solver, the input argument are:
 
-* a :ref:`RelayProblem <doxid-struct_relay_problem>`
+* a :class:`RelayProblem`
 
 * the unknowns (z,w)
 
@@ -58,7 +58,7 @@ For each solver, the input argument are:
 
 The relay problem is reformulated as a LCP and solved with the enumerative solver
 
-function: :ref:`relay_enum() <doxid-_relay___solvers_8h_1acb9e15dbc9ae90c1c02ac1f5a7937790>`
+function: :func:`relay_enum()`
 
 parameters:
 
@@ -77,7 +77,7 @@ parameters:
 
 The relay problem is reformulated as a LCP and solved with the PATH solver
 
-function: :ref:`relay_path() <doxid-_relay___solvers_8h_1a343139518641407ce13174b1ad360a32>`
+function: :func:`relay_path()`
 
 
 
@@ -88,7 +88,7 @@ function: :ref:`relay_path() <doxid-_relay___solvers_8h_1a343139518641407ce13174
 
 The relay problem is reformulated as a LCP and solved with Lemke's method
 
-function: :ref:`relay_lexicolemke() <doxid-_relay___solvers_8h_1af0ac56c5358a7148ce5c56eb68eabbc2>`
+function: :func:`relay_lexicolemke()`
 
 parameters:
 
@@ -101,7 +101,7 @@ parameters:
 
 The relay problem is reformulated as an AVI and solved with the solver proposed by Cao and Ferris
 
-function: :ref:`relay_avi_caoferris() <doxid-_relay___solvers_8h_1a02bb6df7e1147154ba01c36d79cb3a11>`
+function: :func:`relay_avi_caoferris()`
 
 parameters:
 

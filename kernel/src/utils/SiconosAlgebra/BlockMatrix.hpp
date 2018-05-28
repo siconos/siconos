@@ -456,11 +456,10 @@ public:
   friend SiconosMatrix& operator *=(SiconosMatrix& m, const double& s);
   friend SiconosMatrix& operator /=(SiconosMatrix& m, const double& s);
 
-  /** return the number of non-zero in the matrix
-   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
-   * \return the number of non-zeros
+  /** number of non-zero in the matrix
+   * \param tol the tolerance under which a number is considered zero
    */
-  virtual size_t nnz(double tol = 1e-14);
+  virtual size_t nnz(double tol = 1.);//e-14);
 };
 
 //DEFINE_SPTR(BlockMatrix)
