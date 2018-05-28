@@ -469,9 +469,9 @@ For the present case, :math:`x, y \ and \ \lambda` at each time step are needed 
       simu.nextStep()
 
 
-* :function:`Simulation::hasNextEvent()` is true as long as there are events to be considered, i.e. until T is reached
-* :function:`Simulation::nextStep()` is mainly used to increment the time step, save current state and prepare initial values for next step.
-* :function:`Simulation::computeOneStep()` performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to
+* :func:`Simulation::hasNextEvent()` is true as long as there are events to be considered, i.e. until T is reached
+* :func:`Simulation::nextStep()` is mainly used to increment the time step, save current state and prepare initial values for next step.
+* :func:`Simulation::computeOneStep()` performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to
   obtain the so-called free-state, that is without non-smooth effects, then it will formalize and solve a LCP before re-integrate the dynamics using the LCP results. 
 
 The results can now be postprocessed, with matplotlib for example::
