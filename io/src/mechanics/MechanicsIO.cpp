@@ -342,7 +342,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
         ds1 = graph.properties(*vi).source;
         ds2 = graph.properties(*vi).target;
         data.setValue(23,ds1->number());
-        data.setValue(24,ds1->number());
+        data.setValue(24,ds2->number());
         result->setRow(current_row++, data);
       }
     }
