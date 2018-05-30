@@ -462,23 +462,51 @@ class Doxy2SWIG:
         self.add_text(['";', '\n'])
     
 
-# MARK: Tag handlers
+    ## Modifs FP. to include properly latex formulas from doxygen xml.
     def do_formula(self, node):
+        indent = ''
+        # Note : each indent turns to new line in .i at the end of process.
+        content = node.firstChild.data.strip()
+        if content.startswith(r'\['):
+            lines = ['']
+            lines.append(indent)
+            lines.append(indent + '.. math::')
+            lines.append(indent + '   ')
+            lines.append(indent + '   ' + content[2:-2])
+            lines.append(indent)
+            lines.append(indent)
+            if lines and not lines[0].strip():
+                lines = lines[1:]
+            lines.insert(0, indent)
+            #escaped = [line.replace('\\', '\\\\').replace('"', '\\"') for line in lines]
+            escaped = [re.escape(line) for line in lines]
+            ret = ['\n'.join(escaped).rstrip() + '\n']
+        elif content.startswith(r'$'):
+            lines = []
+            lines.append(':math:`' + content[1:-1] + '`')
+            escaped = [re.escape(line) for line in lines]
+            #escaped = [line.replace('\\', '\\\\').replace('"', '\\"') for line in lines]
+            ret = ['\n'.join(escaped).rstrip()]
+
+        else: # latex without \f[ or \f$ in doxygen.
+            msg = 'doxy2swig, parsing formula warning:'
+            msg += 'unusual doxygen/latex formula.'
+            msg += 'Parsing is very likely to fail (form: %s)'.format(content)
+            print(msg)
+            lines = ['']
+            lines.append(indent)
+            lines.append(indent + '.. math::')
+            lines.append('   ' + ':nowrap:')
+            lines.append(indent)
+            lines.append(indent + '   ' + content)
+            lines.append(indent)
+            lines.append(indent)
+            escaped = [re.escape(line) for line in lines]
+            #escaped = [line.replace('\\', '\\\\').replace('"', '\\"') for line in lines]
+            ret = ['\n'.join(escaped).rstrip() + '\n']
         self.add_text(' ')
-        data = '{0}'.format(node.firstChild.data).strip().\
-               replace('\\', r'\\\\').\
-               replace('"', r'\"').replace('$', '').strip()
-        if len(data) <= 20:
-            self.add_text(' :math:`{0}` '.format(data))
-        else:
-            self.add_text("""
-
-            .. math::
-
-               {0}
-
-""".format(data))
-
+        self.add_text(ret[0])
+            
     def do_linebreak(self, node):
         self.add_text('  ')
     

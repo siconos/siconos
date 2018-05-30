@@ -26,6 +26,7 @@ This file is to be copied into CMAKE_BINARY_DIR/share using configure_file
 import glob
 import os
 import subprocess
+import shutil
 import buildtools as bt
 
 try:
@@ -138,6 +139,7 @@ def xml2swig(header_name, xml_path, swig_path, case_sense_names):
         # set output filename == xml file without extension + .i
         outputname = os.path.basename(f).split('.')[0] + '.i'
         outputname = os.path.join(swig_path, outputname)
+        filter_xml_formulas(f)
         p = Doxy2SWIG(f)
         # with_function_signature = options.f,
         # with_type_info = options.t,
@@ -580,9 +582,12 @@ def filter_comments(headername):
     """Returns list of lines from a
     source file, without doxygen comments.
     """
+    
     with open(headername) as ff:
         # remove doxygen comments lines
-        conf = [n for n in ff.readlines() if (not n.lstrip().startswith('/*') and not n.lstrip().startswith('*'))]
+        conf = [n for n in ff.readlines() if (not n.lstrip().startswith(r'/*')
+                                              and not n.lstrip().startswith('*')
+                                              and not n.lstrip().startswith(r'\b'))]
         return conf
 
 
@@ -649,3 +654,9 @@ def filter_sphinx_warnings(warnfile):
     with open(warnfile, 'w') as ff:
         for msg in keep_msg:
             ff.write(msg)
+            
+def filter_xml_formulas(xmlfile):
+
+    fileout = xmlfile.split('.')[0] + '.tmp'
+    subprocess.call(["python_replace_escape.sh", xmlfile, fileout])
+    shutil.move(fileout, xmlfile)

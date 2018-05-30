@@ -206,6 +206,7 @@ if(USE_SPHINX)
     # -e : Put documentation for each module on its own page
     # -P : Include “_private” modules. (should we??)
     # -M : Put module documentation before submodule documentation.
+    # -a : append documented module path to sys.path
     list(GET COMPONENTS -1 _last_comp)
     # apidoc must be run AFTER swig process --> depends on components
     add_custom_target(apidoc

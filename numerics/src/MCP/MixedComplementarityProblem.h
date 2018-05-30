@@ -34,11 +34,13 @@ typedef void (*ptrFunctionMCP_nabla)(void* env, int n, double* z, NumericsMatrix
 
 /** \struct  MixedComplementarityProblem MixedComplementarityProblem.h
  * The structure that defines a Mixed Complementarity problem (MCP) : find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n+m})\f$ such that:
+
   \f{align*}{
   w &= \begin{pmatrix}w_e\\w_i\end{pmatrix} = F(z) \\
   w_e &=0 \\
   0 &\le w_i \perp z_i \ge 0
   \f}
+
   where "i" (resp. "e") stands for inequalities (resp. equalities). The vector \f$z\f$ is splitted like \f$w\f$:
   \f{equation*}{z =\begin{pmatrix}z_e\\z_i\end{pmatrix}\f}.
   \f$z_i,w_i\f$ are vectors of size sizeEqualities, \f$z_e,w_e\f$ vectors of size sizeInequalities

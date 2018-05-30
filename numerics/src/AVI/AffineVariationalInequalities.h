@@ -30,11 +30,14 @@
 #include "SiconosSets.h"
 
 /** \brief Structure that contains and defines an AVI
- *
- * The problem is : given a matrix \f$M\f$ and \f$q\f$, find \f$z\f$ such that
- * 
- * \f[ \langle x - z, q + Mz \rangle \geq 0 \quad \text{for all }x\in K \f]
- *
+ 
+  The problem is : given a matrix \f$M\f$ and \f$q\f$, find \f$z\f$ such that
+  
+  \f[ \langle x - z, q + Mz \rangle \geq 0 \ \text{for all }x\in K \f]
+
+  Test : 
+
+
  */
 struct AffineVariationalInequalities
 {
