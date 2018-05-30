@@ -130,8 +130,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   double norm_b = cblas_dnrm2(m , problem->b , 1);
 
-
-  
   numerics_printf_verbose(1,"---- GFC3D - ADMM - Problem information");
   numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
   numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
@@ -172,14 +170,16 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   else if  (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
             SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_ADAPTIVE)
   {
-    numerics_error("gfc3d_ADMM", "Adaptive rho stratgey not yet implemented.");
+    numerics_error("gfc3d_ADMM", "Adaptive rho strategy not yet implemented.");
   }
-  
-  
+
+
   if (rho <= DBL_EPSILON)
     numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
 
   double * tmp =  options->dWork;
+
+  int accelerated = options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION]
 
   /* Compute M + rho H H^T (storage in M)*/
   NumericsMatrix *Htrans;
@@ -313,7 +313,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       DEBUG_PRINTF("residual e_k = %e \n", e_k);
       DEBUG_PRINTF("eta  = %e \n", eta);
 
-      if ((e <  eta * e_k))
+      if ((e <  eta * e_k)|| (accelerated == SICONOS_CONVEXQP_ADMM_ACCELERATION))
       {
         tau  = 0.5 *(1 +sqrt(1.0+4.0*tau_k*tau_k));
         alpha = (tau_k-1.0)/tau;
@@ -376,7 +376,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     gfc3d_compute_error(problem,  reaction, u, z,  tolerance, options, norm_q, &error);
     numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
   }
-  
+
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
@@ -419,7 +419,7 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] =
     SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF;
-  
+
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
 
