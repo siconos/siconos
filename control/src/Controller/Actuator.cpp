@@ -36,7 +36,9 @@ Actuator::Actuator(unsigned int type, SP::ControlSensor sensor): _type(type), _i
 
 Actuator::Actuator(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B): _type(type), _id("none"), _B(B), _sensor(sensor)
 {
-  _u.reset(new SiconosVector(B->size(1), 0));
+  if (B) {
+    _u = std11::make_shared<SiconosVector>(B->size(1), 0);
+  }
 }
 
 Actuator::~Actuator()

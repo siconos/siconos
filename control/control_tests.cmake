@@ -18,7 +18,7 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(tests)
   
   IF(WITH_FORTRAN)
-     NEW_TEST(PIDTest.cpp SMCTest.cpp ObserverTest.cpp )
+    NEW_TEST(ControlTests PIDTest.cpp SMCTest.cpp ObserverTest.cpp TwistingTest.cpp)
   ENDIF(WITH_FORTRAN)
 
   END_TEST()

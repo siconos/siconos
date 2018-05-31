@@ -35,7 +35,10 @@
 #include "debug.h"
 
 
-PID::PID(SP::ControlSensor sensor, SP::SimpleMatrix B): Actuator(PID_, sensor, B), _ref(0), _curDeltaT(0) {}
+PID::PID(SP::ControlSensor sensor, SP::SimpleMatrix B): Actuator(PID_, sensor, B), _ref(0), _curDeltaT(0)
+{
+  _u.reset(new SiconosVector(1, 0));
+}
 
 PID::~PID()
 {
