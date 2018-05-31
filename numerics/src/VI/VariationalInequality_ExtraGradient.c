@@ -61,9 +61,11 @@ int determine_convergence(double error, double *tolerance, int iter,
       if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
       {
 
-        printf("error = %e ", error);
-        printf("absolute_error = %e ", absolute_error);
-        printf("options->dparam[SICONOS_DPARAM_TOL]= %e\n", options->dparam[SICONOS_DPARAM_TOL]);
+        if (verbose > 0) {
+          printf("error = %e ", error);
+          printf("absolute_error = %e ", absolute_error);
+          printf("options->dparam[SICONOS_DPARAM_TOL]= %e\n", options->dparam[SICONOS_DPARAM_TOL]);
+        }
 
         *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
         if (verbose > 0)
