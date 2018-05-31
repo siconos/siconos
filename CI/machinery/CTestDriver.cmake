@@ -169,7 +169,6 @@ if(NOT SUBMIT)
 else()
   # note: if the submission process experiences some slow-down, then we
   # may get a return-code error, so we do it in a second phase.
-  ctest_start("${MODE}")
   ctest_submit(RETURN_VALUE SUBMIT_RETURN_VAL)
 
   if(NOT SUBMIT_RETURN_VAL EQUAL 0)
