@@ -233,14 +233,14 @@ void convexQP_ADMM(ConvexQP* problem,
       {
         NM_gemv(rho, Atrans, u, 1.0, z);
       }
-      DEBUG_PRINT("rhs:")
-        DEBUG_EXPR(NV_display(z,n));
+      DEBUG_PRINT("rhs:");
+      DEBUG_EXPR(NV_display(z,n));
 
       /* Linear system solver */
       /* cblas_dcopy(n , w_k , 1 , z, 1); */
       NM_gesv_expert(W,z,NM_KEEP_FACTORS);
-      DEBUG_PRINT("z:")
-        DEBUG_EXPR(NV_display(z,n));
+      DEBUG_PRINT("z:");
+      DEBUG_EXPR(NV_display(z,n));
 
       /********************/
       /*  2 - Compute u */
