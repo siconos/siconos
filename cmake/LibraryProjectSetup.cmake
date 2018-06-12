@@ -89,9 +89,10 @@ macro(LIBRARY_PROJECT_SETUP)
   # xml files for python docstrings ...
   # xml files are required to build docstrings target
   # and so they must be build during cmake run.
-  include(swig_python_tools)
-  doxy2swig_docstrings(${COMPONENT})
-
+  if(WITH_PYTHON_WRAPPER)
+    include(swig_python_tools)
+    doxy2swig_docstrings(${COMPONENT})
+  endif()
   
   # update the main doxy file, without building the doc
   if(WITH_${COMPONENT}_DOCUMENTATION)
@@ -157,7 +158,9 @@ macro(LIBRARY_PROJECT_SETUP)
     add_subdirectory(swig)
   endif()
   
-  add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
-
+  if(WITH_PYTHON_WRAPPER)
+    add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
+  endif()
+  
 endmacro()
 
