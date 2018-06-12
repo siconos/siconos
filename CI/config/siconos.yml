@@ -20,7 +20,7 @@ match:
 installer:
   any:
     fedora: dnf --setopt=deltarpm=false install -y
-    debian: apt-get install -y
+    debian: DEBIAN_FRONTEND=noninteractive apt-get install -f -y
     nixos/nix: nix-env -i
 
 updater:
@@ -334,6 +334,10 @@ pkgs:
       - libatlas-base-dev
       - libatlas-dev
     ubuntu-17.10:
+      - libblas-dev
+      - liblapack-dev
+      - libatlas-base-dev
+    ubuntu-18.04:
       - libblas-dev
       - liblapack-dev
       - libatlas-base-dev
