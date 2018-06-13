@@ -502,7 +502,7 @@ void solver_options_set(SolverOptions* options, int solverId)
   {
 #ifdef HAVE_GAMS_C_API
     iSize = 5;
-    dSize = 4; // stupid thing in checkTrivialCase in fc3d_driver.c
+    dSize = 4; // stupid thing in fc3d_checkTrivialCase in fc3d_driver.c
     iter_max = 10000;
     /* test here for the SICONOS_LCP_GAMS case */
     tol = tol == 0. ? 1e-9 : tol;

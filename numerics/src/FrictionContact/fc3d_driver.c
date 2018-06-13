@@ -87,7 +87,7 @@ int fc3d_driver(FrictionContactProblem* problem,
     numerics_error("fc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
   /* Check for trivial case */
-  info = checkTrivialCase(problem, velocity, reaction, options);
+  info = fc3d_checkTrivialCase(problem, velocity, reaction, options);
   if (info == 0)
   {
     /* If a trivial solution is found, we set the number of iterations to 0
@@ -112,6 +112,13 @@ int fc3d_driver(FrictionContactProblem* problem,
   {
     numerics_printf(" ========================== Call NSGSV solver for Friction-Contact 3D problem ==========================\n");
     fc3d_nsgs_velocity(problem, reaction , velocity , &info , options);
+    break;
+  }
+  /* ADMM*/
+  case SICONOS_FRICTION_3D_ADMM:
+  {
+    numerics_printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
+    fc3d_admm(problem, reaction , velocity , &info , options);
     break;
   }
   /* Proximal point algorithm */
@@ -282,7 +289,7 @@ exit:
 
 }
 
-int checkTrivialCase(FrictionContactProblem* problem, double* velocity,
+int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity,
                      double* reaction, SolverOptions* options)
 {
   /* Number of contacts */
@@ -303,6 +310,6 @@ int checkTrivialCase(FrictionContactProblem* problem, double* velocity,
     reaction[i] = 0.;
   }
   
-  numerics_printf("fc3d checkTrivialCase, take off, trivial solution reaction = 0, velocity = q.\n");
+  numerics_printf("fc3d fc3d_checkTrivialCase, take off, trivial solution reaction = 0, velocity = q.\n");
   return 0;
 }

@@ -43,6 +43,11 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =    fc3d_nsgs_velocity_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_ADMM:
+  {
+    info =    fc3d_admm_setDefaultSolverOptions(options);
+    break;
+  }
   case SICONOS_FRICTION_3D_PROX:
   {
     info =    fc3d_proximal_setDefaultSolverOptions(options);

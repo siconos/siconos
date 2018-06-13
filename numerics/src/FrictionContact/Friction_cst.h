@@ -59,6 +59,8 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_NSN_AC_TEST = 521,
   /** Panagiotopoulos, fixed point, local formulation */
   SICONOS_FRICTION_3D_PFP = 522,
+  /** ADMM local formulation */
+  SICONOS_FRICTION_3D_ADMM = 523,
 
   /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
 
@@ -151,6 +153,7 @@ extern const char* const   SICONOS_FRICTION_3D_GAMS_LCP_PATH_STR;
 extern const char* const   SICONOS_FRICTION_3D_GAMS_LCP_PATHVI_STR;
 extern const char* const   SICONOS_FRICTION_3D_SOCLCP_STR;
 extern const char* const   SICONOS_FRICTION_3D_ACLMFP_STR;
+extern const char* const   SICONOS_FRICTION_3D_ADMM_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSGS_WR_STR ;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR_STR ;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_PROX_WR_STR ;

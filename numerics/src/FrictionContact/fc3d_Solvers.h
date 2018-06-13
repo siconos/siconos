@@ -115,7 +115,7 @@ extern "C"
   void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
-                                FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+                                         FrictionContactProblem* problem, FrictionContactProblem* localproblem,
                                          SolverOptions * options);
 
   /** set the default solver parameters and perform memory allocation for NSGS
@@ -123,9 +123,13 @@ extern "C"
   */
   int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options);
 
+  void fc3d_admm(FrictionContactProblem*  problem, double*  reaction,
+                 double*  velocity,
+                 int*  info, SolverOptions*  options);
 
-
-
+  void fc3d_admm_init(FrictionContactProblem* problem, SolverOptions* options);
+  void fc3d_admm_free(FrictionContactProblem* problem, SolverOptions* options);
+  int fc3d_admm_setDefaultSolverOptions(SolverOptions* options);
   /** Non-Smooth Gauss Seidel in velocity solver for friction-contact 3D problem
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
@@ -386,7 +390,7 @@ extern "C"
       \param options the pointer to the array of options to set
       \return info  =0 if a trivial solution has been found, else = -1
   */
-  int checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
+  int fc3d_checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
 
 
   void fc3d_nonsmooth_Newton_AlartCurnier2(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);

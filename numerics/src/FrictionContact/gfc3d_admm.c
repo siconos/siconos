@@ -179,7 +179,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   double * tmp =  options->dWork;
 
-  int accelerated = options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION]
+  int accelerated = options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION];
 
   /* Compute M + rho H H^T (storage in M)*/
   NumericsMatrix *Htrans;
@@ -313,7 +313,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       DEBUG_PRINTF("residual e_k = %e \n", e_k);
       DEBUG_PRINTF("eta  = %e \n", eta);
 
-      if ((e <  eta * e_k)|| (accelerated == SICONOS_CONVEXQP_ADMM_ACCELERATION))
+      if ((e <  eta * e_k)|| (accelerated == SICONOS_FRICTION_3D_ADMM_ACCELERATION))
       {
         tau  = 0.5 *(1 +sqrt(1.0+4.0*tau_k*tau_k));
         alpha = (tau_k-1.0)/tau;
