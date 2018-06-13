@@ -327,6 +327,17 @@ def print_commands(*args, **kwargs):
         installer = None
         updater = None
 
+        definition = get_entry(spec, options.distrib,
+                               options.distrib_version, wildcard(spec)
+                               , 'env')
+
+        if definition is not None:
+                if is_list(definition):
+                    for iter_def in definition:
+                        definitions.append(iter_def)
+                else:
+                    definitions.append(definition)
+
         for pkg in options.pkgs:
 
             installer = get_entry(spec, options.distrib, options.distrib_version,
@@ -370,15 +381,19 @@ def print_commands(*args, **kwargs):
                 else:
                     by_installer.append(pkg)
 
-        # Write preamble into file
+        # write preamble into file
         # e.g. 'FROM fedora:latest' in a dockerfile
         begin(distrib=options.distrib, distrib_version=options.distrib_version,
               output_mode=options.output_mode)
 
+        # write environment variables
+        env(definitions, options.output_mode)
+
         # read and set command line to install package for the given distrib
         # e.g. 'apt-get install ...' on a debian
         if installer is None:
-            installer = get_entry(spec, options.distrib, options.distrib_version,
+            installer = get_entry(spec, options.distrib,
+                                  options.distrib_version,
                                   wildcard(spec), 'installer')
 
         assert installer is not None
@@ -405,8 +420,7 @@ def print_commands(*args, **kwargs):
 
         run_command = '&&'.join(by_run_commands)
         install(run_command=run_command, output_mode=options.output_mode)
-            
-        env(definitions, options.output_mode)
+
 
 
 if __name__ == '__main__':

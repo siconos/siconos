@@ -20,7 +20,7 @@ match:
 installer:
   any:
     fedora: dnf --setopt=deltarpm=false install -y
-    debian: DEBIAN_FRONTEND=noninteractive apt-get install -f -y
+    debian: apt-get install -f -y
     nixos/nix: nix-env -i
 
 updater:
@@ -91,6 +91,10 @@ env:
   path:
     any:
       - PATH_LICENSE_STRING="3413119131&Courtesy&&&USR&54784&12_1_2016&1000&PATH&GEN&31_12_2017&0_0_0&5000&0_0"
+
+  any:
+    debian:
+      - DEBIAN_FRONTEND=noninteractive
 
 ##############################################################################
 # set dependencies list for some packages/distrib
