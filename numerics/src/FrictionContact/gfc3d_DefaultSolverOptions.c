@@ -88,6 +88,12 @@ int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info = gfc3d_ADMM_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_GLOBAL_FRICTION_3D_ADMM_WR:
+  {
+    info =    gfc3d_admm_wr_setDefaultSolverOptions(options);
+    break;
+  }
+
   case SICONOS_GLOBAL_FRICTION_3D_VI_FPP:
   {
     info = gfc3d_VI_FixedPointProjection_setDefaultSolverOptions(options);
@@ -96,7 +102,6 @@ int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
   default:
   {
     numerics_error("gfc3d_setDefaultSolverOptions", "Unknown Solver");
-
   }
   }
 

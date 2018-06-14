@@ -56,11 +56,11 @@ void fc3d_admm_init(FrictionContactProblem* problem, SolverOptions* options)
   int nc = problem->numberOfContacts;
   /* int n = problem->M->size0; */
   int m = 3 * nc;
-  if(!options->dWork || options->dWorkSize != m)
-  {
-    options->dWork = (double*)calloc(m,sizeof(double));
-    options->dWorkSize = m;
-  }
+  /* if(!options->dWork || options->dWorkSize != m) */
+  /* { */
+  /*   options->dWork = (double*)calloc(m,sizeof(double)); */
+  /*   options->dWorkSize = m; */
+  /* } */
   if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] == SICONOS_FRICTION_3D_ADMM_ACCELERATION ||
       options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] == SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART)
   {
@@ -148,7 +148,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   numerics_printf_verbose(1,"---- FC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
 
   int internal_allocation=0;
-  if(!options->dWork || options->dWorkSize != m)
+  if(!(Fc3d_ADDM_data *)options->solverData)
   {
     fc3d_admm_init(problem, options);
     internal_allocation = 1;
@@ -196,7 +196,8 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
 
   Fc3d_ADDM_data * data = (Fc3d_ADDM_data *)options->solverData;
-
+  
+  /* we use velocity as a tmp */
   double * tmp = velocity;
 
   double * z = data->z;;
@@ -471,7 +472,7 @@ int fc3d_admm_setDefaultSolverOptions(SolverOptions* options)
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
 
   options->internalSolvers = NULL;
-
+  options->solverData = NULL;
 
   return 0;
 }
