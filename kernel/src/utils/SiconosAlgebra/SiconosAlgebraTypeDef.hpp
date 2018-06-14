@@ -61,13 +61,13 @@ const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ DE
 const unsigned int M_MAXSIZEFORDISPLAY = 10;
 const std::string DEFAULT_FORMAT = "ascii";
 
-/** Siconos::UBLAS_TYPE is an enumerated type of Siconos::DENSE, TRIANGULAR, SYMMETRIC,
-    SPARSE, BANDED. It is used to describe the type of matrix or
-    vector we want to construct.
- */
 namespace Siconos
 {
-enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY};
+  /** Siconos::UBLAS_TYPE is an enumerated type of Siconos::DENSE, TRIANGULAR, SYMMETRIC,
+      SPARSE, BANDED. It is used to describe the type of matrix or
+      vector we want to construct.
+  */
+  enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY};
 }
 // Notes:
 // Vector definition in boost: vector<T,A> see http://www.boost.org/libs/numeric/ublas/doc/vector.htm

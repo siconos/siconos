@@ -1,10 +1,10 @@
 .. index:: single: Global-Friction-contact problems (2 or 3-dimensional)
-.. _doxid-global_fc_problem:
+.. _global_fc_problem:
 
 Global-Friction-contact problems (2D or 3D)
 ===========================================
 
-.. _doxid-global_fc_problem_1pfcIntro:
+.. _global_fc_problem_1pfcIntro:
 .. rubric:: Problem statement.:
 
 Given
@@ -51,14 +51,14 @@ This problem models any instance of discretized frictional contact problem obtai
 
 The problem is stored and given to the solver in Siconos/Numerics thanks to a C structure :class:`GlobalFrictionContactProblem` .
 
-.. _doxid-global_fc_problem_1pfc3DSolversList:
+.. _global_fc_problem_1pfc3DSolversList:
 .. rubric:: Available solvers for Friction Contact 3D:
 
 Use the generic function :func:`gfc3d_driver()` to call one the the specific solvers listed below:
 
 * :func:`gfc3d_nsgs()` : non-smooth Gauss-Seidel solver (see the functions/solvers list in ``gfc3d_Solvers.h`` )
 
-.. _doxid-global_fc_problem_1pfc3DParam:
+.. _global_fc_problem_1pfc3DParam:
 .. rubric:: Required and optional parameters:
 
 gfc3d problems needs some specific parameters, given to the :func:`gfc3d_driver()` function thanks to a SolverOptions structure.

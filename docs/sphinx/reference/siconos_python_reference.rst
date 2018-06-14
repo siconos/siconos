@@ -6,14 +6,29 @@ Python API reference
 
 This is the documentation of `python <https://www.python.org/>`_ interface to Siconos.
 
-.. toctree::
-   :maxdepth: 5
 
-   modules
+Python API classes
+------------------
+	  
+.. toctree::
+   :maxdepth: 2
+   :glob:
+   
+   python/*/autodoc_classes
+
+
+Python API functions and other objects
+--------------------------------------
+	  
+.. toctree::
+   :maxdepth: 2
+   :glob:
+      
+   python/*/autodoc_files
 
 
    
 Index
 -----
 
-* :ref:`modindex`
+* :ref:`genindex`

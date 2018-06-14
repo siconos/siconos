@@ -164,10 +164,7 @@ class Doxy2SWIG:
 
     def write(self, fname):
         o = my_open_write(fname)
-        if(sys.version_info > (3, 0)):
-            o.write(''.join(self.pieces))
-        else:
-            o.write(str(u''.join(self.pieces).encode('utf-8').strip()))
+        o.write(''.join(self.pieces))
         o.write('\n')
         o.close()
 
@@ -371,7 +368,7 @@ class Doxy2SWIG:
             self.add_text('\n')
             self.add_line_with_subsequent_indent('* ' + self.get_function_signature(n))
             self.subnode_parse(n, pieces = [], indent=4, ignore=['definition', 'name'])
-
+        
     def make_attribute_list(self, node):
         """Produces the "Attributes" section in class docstrings for public
         member variables (attributes).
@@ -413,6 +410,7 @@ class Doxy2SWIG:
 
         md_nodes = self.get_specific_subnodes(node, 'memberdef', recursive=2)
         for n in md_nodes:
+            
             if n.attributes['prot'].value != 'public':
                 continue
             if n.attributes['kind'].value in ['variable', 'typedef']:
@@ -462,51 +460,7 @@ class Doxy2SWIG:
         self.add_text(['";', '\n'])
     
 
-    ## Modifs FP. to include properly latex formulas from doxygen xml.
-    def do_formula(self, node):
-        indent = ''
-        # Note : each indent turns to new line in .i at the end of process.
-        content = node.firstChild.data.strip()
-        if content.startswith(r'\['):
-            lines = ['']
-            lines.append(indent)
-            lines.append(indent + '.. math::')
-            lines.append(indent + '   ')
-            lines.append(indent + '   ' + content[2:-2])
-            lines.append(indent)
-            lines.append(indent)
-            if lines and not lines[0].strip():
-                lines = lines[1:]
-            lines.insert(0, indent)
-            #escaped = [line.replace('\\', '\\\\').replace('"', '\\"') for line in lines]
-            escaped = [re.escape(line) for line in lines]
-            ret = ['\n'.join(escaped).rstrip() + '\n']
-        elif content.startswith(r'$'):
-            lines = []
-            lines.append(':math:`' + content[1:-1] + '`')
-            escaped = [re.escape(line) for line in lines]
-            #escaped = [line.replace('\\', '\\\\').replace('"', '\\"') for line in lines]
-            ret = ['\n'.join(escaped).rstrip()]
-
-        else: # latex without \f[ or \f$ in doxygen.
-            msg = 'doxy2swig, parsing formula warning:'
-            msg += 'unusual doxygen/latex formula.'
-            msg += 'Parsing is very likely to fail (form: %s)'.format(content)
-            print(msg)
-            lines = ['']
-            lines.append(indent)
-            lines.append(indent + '.. math::')
-            lines.append('   ' + ':nowrap:')
-            lines.append(indent)
-            lines.append(indent + '   ' + content)
-            lines.append(indent)
-            lines.append(indent)
-            escaped = [re.escape(line) for line in lines]
-            #escaped = [line.replace('\\', '\\\\').replace('"', '\\"') for line in lines]
-            ret = ['\n'.join(escaped).rstrip() + '\n']
-        self.add_text(' ')
-        self.add_text(ret[0])
-            
+# MARK: Tag handlers
     def do_linebreak(self, node):
         self.add_text('  ')
     

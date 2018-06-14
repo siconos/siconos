@@ -39,15 +39,11 @@ const std::string transpose = "transpose";
  *
  * \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
  *
- * Notes:
- *  - to handle with sparse matrices see http://freenet-homepage.de/guwi17/ublas/matrix_sparse_usage.html#Q2, for operations improvments.
- *  - See SandBox/Algebra for comparison between ublas (direct call) and Siconos perf.
- *  - Different way to compute matrix-vector or matrix-matrix products are proposed (prod, axpy_prod, gem...) based either on ublas or boost numeric bindings.
- *   See SandBox/Algebra/TestOperators to know which the most performant op. on your system.
- *   axpy_prod is only efficient for sparse or for large objects. For small matrices and vectors it is slower.
- *
- *  See also Siconos Algebra's page in Users Guide.
- *
+ * 
+ *  
+ *  \rststar
+ *  See :ref:`siconos_algebra` in :ref:`siconos_users_guide`.
+ *  \endrststar
  *
  */
 class SimpleMatrix: public SiconosMatrix

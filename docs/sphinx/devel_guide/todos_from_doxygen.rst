@@ -32,7 +32,7 @@ Todo List
 
   * Sizing the regularization paramter and apply it only on null diagnal term
 
-*  :ref:`Matrix Storage in numerics component <doxid-_numerics_matrix_page>`
+*  :ref:`Matrix Storage in numerics component <numerics_matrix_storage>`
 
    write proper doc for CSparse storage and complete the example above.
 

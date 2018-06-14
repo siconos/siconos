@@ -157,7 +157,7 @@ Process :
 #. Generates xml files for each component (doxygen).\n
    Config from docs/config/doxy2swig.config.in\n
    Results in CMAKE_BINARY_DIR/docs/build/doxygen/doxy2swig-xml/component_name\n
-   target : make xml4swig_component_name
+   target : make component_name_xml4swig
    
 #. Generates swig files (.i) from xml for one component and concatenate into
    CMAKE_BINARY_DIR/wrap/siconos/component_name-docstrings.i. \n

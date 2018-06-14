@@ -22,6 +22,10 @@ set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/docs/build CACHE INTERNAL "Root path to gen
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doctools.py ${CMAKE_BINARY_DIR}/share/doctools.py COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/replace_py_escape.sh ${CMAKE_BINARY_DIR}/share/replace_py_escape.sh COPYONLY)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/replace_latex.sh ${CMAKE_BINARY_DIR}/share/replace_latex.sh COPYONLY)
+
 
 #  ====== doxygen documentation setup ======
 # This setup is required if one at least of
@@ -152,13 +156,11 @@ if(USE_SPHINX)
   
   # -- To build html doc : make html --
   add_custom_target(html
-    #COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS}
     COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS} 2> errors.txt ${CMAKE_CURRENT_BINARY_DIR}/build/html
     VERBATIM
     DEPENDS copy-sphinx-figures
     )
-
-
+  
   add_custom_command(TARGET html POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
       "import doctools; doctools.filter_sphinx_warnings('${SPHINX_LOG_FILE}')"
@@ -197,28 +199,28 @@ if(USE_SPHINX)
 
   add_custom_target(doc DEPENDS html)
   
-  # -- Target to build python api documention with apidoc --
-  # make apidoc
-  if(WITH_PYTHON_WRAPPER)
-    set(SPHINX_APIDOC sphinx-apidoc)
-    set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)
-    set(APIDOC_PARAMETERS -e -P -M -o ${GENERATED_DOC})
-    # -e : Put documentation for each module on its own page
-    # -P : Include “_private” modules. (should we??)
-    # -M : Put module documentation before submodule documentation.
-    # -a : append documented module path to sys.path
-    list(GET COMPONENTS -1 _last_comp)
-    # apidoc must be run AFTER swig process --> depends on components
-    add_custom_target(apidoc
-      COMMAND ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
-      ${CMAKE_BINARY_DIR}/wrap/${SICONOS_PYTHON_PACKAGE}
-      DEPENDS ${_last_comp}
-      )
+  # # -- Target to build python api documention with apidoc --
+  # # make apidoc
+  # if(WITH_PYTHON_WRAPPER)
+  #   set(SPHINX_APIDOC sphinx-apidoc)
+  #   set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)
+  #   set(APIDOC_PARAMETERS -e -M -o ${GENERATED_DOC})
+  #   # -e : Put documentation for each module on its own page
+  #   # -P : Include “_private” modules. (should we??)
+  #   # -M : Put module documentation before submodule documentation.
+  #   # -a : append documented module path to sys.path
+  #   list(GET COMPONENTS -1 _last_comp)
+  #   # apidoc must be run AFTER swig process --> depends on components
+  #   add_custom_target(apidoc
+  #     COMMAND ${CMAKE_COMMAND} -E env "SPHINX_APIDOC_OPTIONS='members','undoc-members'" ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
+  #     ${CMAKE_BINARY_DIR}/wrap/${SICONOS_PYTHON_PACKAGE}
+  #     DEPENDS ${_last_comp}
+  #     )
 
-    # Sphinx html gen. depends on apidoc outputs.
-    if(WITH_DOXY2SWIG)
-      add_dependencies(html apidoc)
-    endif()
-  endif()
+  #   # Sphinx html gen. depends on apidoc outputs.
+  #   if(WITH_DOXY2SWIG)
+  #     #add_dependencies(html apidoc)
+  #   endif()
+  # endif()
 
 endif()

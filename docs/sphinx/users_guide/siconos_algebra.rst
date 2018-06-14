@@ -1,8 +1,53 @@
-.. index:: single: Matrix Storage in numerics component
-.. _doxid-_numerics_matrix_page:
+.. _siconos_algebra:
+
+Linear Algebra in Siconos
+=========================
+
+An overview of matrices and vectors in Siconos : storage, usage, operations ...
+Based on boost (https://www.boost.org/) ublas linear algebra library.
+
+Defined in :
+
+* numerics/src/tools
+* kernel/src/utils/SiconosAlgebra
+
+.. contents::
+   :local:
+
+
+     
+Vectors
+-------
+
+Vectors in siconos are defined with SiconosVector object.
+
+* Contains real numbers (type : double precision)
+* Can be dense or sparse.
+
+
+Matrices
+--------
+
+Matrices are represented with SimpleMatrix class, which is a wrapper around boost ublas matrix types.
+
+* Contains real numbers (type : double precision)
+* Can be dense, triangular, symmetric, sparse, banded, zero or identity
+
+
+Notes about SimpleMatrix
+""""""""""""""""""""""""
+
+* Concerning sparse matrices, see http://freenet-homepage.de/guwi17/ublas/matrix_sparse_usage.html#Q2, for operations improvments.
+* Comparison between ublas (direct call) and Siconos are available in sandbox (developers only) gitlab project.
+* Different ways to compute matrix-vector or matrix-matrix products are proposed (prod, axpy_prod, gem...) based either on ublas or boost numeric bindings.
+* axpy_prod is only efficient for sparse or for large objects. For small matrices and vectors it is slower.
+
+
+  
+.. _numerics_matrix_storage:
 
 Matrix Storage in numerics component
-====================================
+------------------------------------
 
 Numerics component proposes different ways to store 'matrix-like' objects, all handled through a C structure, :ref:`NumericsMatrix <doxid-struct_numerics_matrix>` .
 
@@ -72,10 +117,10 @@ For the second way of storage, :ref:`SparseBlockStructuredMatrix <doxid-struct_s
 
 Todo write proper doc for CSparse storage and complete the example above.
 
-.. _doxid-_numerics_matrix_page_1NumericsMatrixTools:
+.. _numerics_matrix_storage_1NumericsMatrixTools:
 .. rubric:: Functions on NumericsMatrix:
 
-.. _doxid-_numerics_matrix_page_1NMAlloc:
+.. _numerics_matrix_storage_1NMAlloc:
 .. rubric:: Create, fill and delete NumericsMatrix functions:
 
 * :ref:`NM_create() <doxid-_numerics_matrix_8h_1a7bf697d892ef962778d10c62696735a7>` : allocation without initial values
@@ -88,7 +133,7 @@ Todo write proper doc for CSparse storage and complete the example above.
 
 These last two functions accept a *data* parameter, which if non-NULL contains the matrix data.
 
-.. _doxid-_numerics_matrix_page_1NM_LA:
+.. _numerics_matrix_storage_1NM_LA:
 .. rubric:: Linear Algebra:
 
 The following linear algebra operation are supported:
@@ -103,7 +148,7 @@ The following linear algebra operation are supported:
 
 -LAPACK-like functions -NM_gesv(): solve a linear system Ax = b
 
-.. _doxid-_numerics_matrix_page_1NM_IO:
+.. _numerics_matrix_storage_1NM_IO:
 .. rubric:: Input / Output:
 
 * :ref:`NM_display() <doxid-_numerics_matrix_8h_1ab5b41fe722c5aedbb2a7e80fad32a3c9>` : display a :ref:`NumericsMatrix <doxid-struct_numerics_matrix>`

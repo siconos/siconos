@@ -28,7 +28,13 @@
 #include <stdio.h>
 
 /** \struct GlobalFrictionContactProblem GlobalFrictionContactProblem.h
- * The structure that defines a Friction-Contact (3D or 2D ) problem \f$\mathrm{PFC}(M,H,q,b,\mu)\f$  such that
+ *
+ * The structure that defines a Friction-Contact (3D or 2D ) problem
+ *
+ * Details in :ref:`global_fc_problem`
+ *
+ * \f$\mathrm{PFC}(M,H,q,b,\mu)\f$  such that
+ *
  * \f{eqnarray*}{
  * \begin{cases}
  *  M v =  q +  H r \\
@@ -43,8 +49,9 @@
  *    C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
  * \end{cases}
  * \f}
+ *
  * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
-
+ *
 */
 struct GlobalFrictionContactProblem
 {
