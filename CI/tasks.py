@@ -55,7 +55,7 @@ default = SiconosCiTask(
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
           'python-env'],
     srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
+    targets={'.': ['docker-build', 'docker-ctest']})
 
 minimal = SiconosCiTask(
     docker=True,
@@ -64,7 +64,7 @@ minimal = SiconosCiTask(
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
           'atlas-lapack', 'python-minimal'],
     srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
+    targets={'.': ['docker-build', 'docker-ctest']})
 
 minimal_with_python = SiconosCiTask(
     docker=True,
@@ -73,7 +73,7 @@ minimal_with_python = SiconosCiTask(
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
           'atlas-lapack', 'python-env'],
     srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
+    targets={'.': ['docker-build', 'docker-ctest']})
 
 #
 # 3. all the tasks
@@ -241,7 +241,7 @@ siconos_light_examples = minimal_with_python.copy()(
     ci_config='examples_light',
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install', 'docker-make-clean'],
-             'examples': ['docker-build', 'docker-ctest', 'docker-submit', 'docker-make-clean']},
+             'examples': ['docker-build', 'docker-ctest', 'docker-make-clean']},
     add_srcs=['examples'])
 
 # Case2 : siconos with mechanics components and bullet + related examples
@@ -250,7 +250,7 @@ siconos_all_examples = minimal_with_python.copy()(
     add_pkgs=['bullet', 'h5py'],
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install', 'docker-make-clean'],
-             'examples': ['docker-build', 'docker-ctest', 'docker-submit', 'docker-make-clean']},
+             'examples': ['docker-build', 'docker-ctest', 'docker-make-clean']},
     add_srcs=['examples'])
 
 siconos_test_deb = SiconosCiTask(

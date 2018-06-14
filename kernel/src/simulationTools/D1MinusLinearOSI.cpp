@@ -118,7 +118,7 @@ void D1MinusLinearOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem 
 
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
-  assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || Type::NewtonEulerDS);
+  assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::NewtonEulerDS);
   
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {

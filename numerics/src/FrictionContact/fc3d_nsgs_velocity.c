@@ -70,7 +70,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   double tolerance = dparam[0];
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
   /* Check for trivial case */
-  /*   *info = checkTrivialCase(n, q,velocity, reaction, options); */
+  /*   *info = fc3d_checkTrivialCase(n, q,velocity, reaction, options); */
 
   if (*info == 0)
     return;

@@ -1790,7 +1790,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
           tolerance : friction contact solver tolerance (default 1e-8)
           exit_tolerance : if not None, the simulation will stop if precision >= exit_tolerance (default None)
           numerics_verbose : set verbose mode in numerics
-          output_frequency : (default 1)
+          output_frequency : 0 to disable (default 1)
           contact_index_set : index set from which contact point information is retrieved.
         """
         self.verbose = verbose
@@ -2015,7 +2015,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             log(simulation.computeOneStep, with_timer)()
 
-            if (k % self._output_frequency == 0) or (k == 1):
+            if (self._output_frequency and (k % self._output_frequency == 0)) or (k == 1):
                 if verbose:
                     print_verbose ('output in hdf5 file at step ', k)
 

@@ -82,6 +82,10 @@ extern "C"
   void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
   int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options);
+  
+  void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+
+  int gfc3d_admm_wr_setDefaultSolverOptions(SolverOptions* options);
 
   int gfc3d_nonsmooth_Newton_AlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options);
 

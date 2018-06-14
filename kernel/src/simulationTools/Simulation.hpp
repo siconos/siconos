@@ -145,9 +145,8 @@ protected:
 
   /** initialize objects (DSs and Interations) found in the NSDS
    * Changelog and update the changelog iterator.
-   * \return true if any new Interactions were initialized
    */
-  bool initializeNSDSChangelog();
+  void initializeNSDSChangelog();
 
   /** initialize index sets for OSIs */
   void initializeIndexSets();

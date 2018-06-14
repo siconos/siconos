@@ -541,6 +541,54 @@ int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options)
   return 0;
 }
 
+void  gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+{
+  DEBUG_BEGIN("gfc3d_admm_wr\n");
+  NumericsMatrix *H = problem->H;
+  // We compute only if the local problem has contacts
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
+  if (H->size1 > 0)
+  {
+    // Reformulation
+    FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    if (verbose)
+    {
+      printf("Reformulation info a reduced problem onto local variables ...\n");
+    }
+    gfc3d_reformulation_local_problem(problem, localproblem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
+    if (verbose)
+    {
+      printf("Call to the fc3d solver ...\n");
+    }
+    fc3d_admm(localproblem, reaction , velocity , info , options->internalSolvers);
+
+    options->iparam[1] =  options->internalSolvers->iparam[1];
+    options->dparam[1] =  options->internalSolvers->dparam[1];
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+
+    freeLocalProblem(localproblem);
+  }
+  else
+  {
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+    *info = 0 ;
+  }
+  DEBUG_END("gfc3d_admm_wr\n");
+}
+int gfc3d_admm_wr_setDefaultSolverOptions(SolverOptions* options)
+{
+  if (verbose > 0)
+  {
+    printf("Set the Default SolverOptions for the ADMM_WR Solver\n");
+  }
+  fc3d_admm_setDefaultSolverOptions(options);
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_ADMM_WR;
+  options->numberOfInternalSolvers = 1;
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
+  fc3d_admm_setDefaultSolverOptions(options->internalSolvers);
+  return 0;
+}
 
 
 void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)

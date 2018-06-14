@@ -233,14 +233,14 @@ void convexQP_ADMM(ConvexQP* problem,
       {
         NM_gemv(rho, Atrans, u, 1.0, z);
       }
-      DEBUG_PRINT("rhs:")
-        DEBUG_EXPR(NV_display(z,n));
+      DEBUG_PRINT("rhs:");
+      DEBUG_EXPR(NV_display(z,n));
 
       /* Linear system solver */
       /* cblas_dcopy(n , w_k , 1 , z, 1); */
       NM_gesv_expert(W,z,NM_KEEP_FACTORS);
-      DEBUG_PRINT("z:")
-        DEBUG_EXPR(NV_display(z,n));
+      DEBUG_PRINT("z:");
+      DEBUG_EXPR(NV_display(z,n));
 
       /********************/
       /*  2 - Compute u */
@@ -327,7 +327,7 @@ void convexQP_ADMM(ConvexQP* problem,
       /* q --> z */
       cblas_dcopy(n , q , 1 , z, 1);
       cblas_dscal(n, -1, z,1);
-      
+
       /*  u -b + xi_k --> u */
       cblas_dcopy(m , u_hat , 1 , tmp, 1);
       cblas_daxpy(m, -1.0, b, 1, tmp , 1);
@@ -392,7 +392,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
       /* xi_hat -  A z_k + u_k -b ->  xi */
       cblas_daxpy(m, 1, xi_hat, 1, xi , 1);
-      
+
       /**********************/
       /*  3 - Acceleration  */
       /**********************/
@@ -404,7 +404,7 @@ void convexQP_ADMM(ConvexQP* problem,
       s = d * d;
 
       e =r+s;
-      
+
       DEBUG_PRINTF("residual e = %e \n", e);
       DEBUG_PRINTF("residual r = %e \n", r);
       DEBUG_PRINTF("residual s = %e \n", s);
@@ -476,7 +476,7 @@ void convexQP_ADMM(ConvexQP* problem,
     NM_gesv_expert(W,z,NM_KEEP_FACTORS);
     DEBUG_PRINT("z:");
     DEBUG_EXPR(NV_display(z,n));
-    
+
     /* check the full criterion */
     /* **** Criterium convergence **** */
     convexQP_compute_error(problem, z , xi, w, u, tolerance, rho, options, norm_q, &error);
