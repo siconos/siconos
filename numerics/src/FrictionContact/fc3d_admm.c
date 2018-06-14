@@ -161,20 +161,20 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   double rho = 0.0;
 
   if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-      SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT)
+     SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT)
   {
     rho = dparam[SICONOS_FRICTION_3D_ADMM_RHO];
   }
-  /* else if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] == */
-  /*          SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF) */
-  /* { */
-  /*   double norm_1_M =   NM_norm_1(problem->M); */
-  /*   double norm_1_H =   NM_norm_1(problem->H); */
-  /*   if ((fabs(norm_1_H) > DBL_EPSILON) &&  (fabs(norm_1_M) > DBL_EPSILON)) */
-  /*     rho = norm_1_M/norm_1_H; */
-  /*   else */
-  /*     rho = dparam[SICONOS_FRICTION_3D_ADMM_RHO]; */
-  /* } */
+  else if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
+           SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF)
+  {
+    double norm_1_M =   NM_norm_1(problem->M);
+    double norm_1_H =   1.0;
+    if ((fabs(norm_1_H) > DBL_EPSILON) &&  (fabs(norm_1_M) > DBL_EPSILON))
+      rho = norm_1_M/norm_1_H;
+    else
+      rho = dparam[SICONOS_FRICTION_3D_ADMM_RHO];
+  }
   else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
           SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_ADAPTIVE)
   {
@@ -466,7 +466,7 @@ int fc3d_admm_setDefaultSolverOptions(SolverOptions* options)
 
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] =
-    SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT;
+    SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF;
 
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
