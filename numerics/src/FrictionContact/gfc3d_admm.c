@@ -168,9 +168,9 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       rho = dparam[SICONOS_FRICTION_3D_ADMM_RHO];
   }
   else if  (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-            SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_ADAPTIVE)
+            SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING)
   {
-    numerics_error("gfc3d_ADMM", "Adaptive rho strategy not yet implemented.");
+    numerics_error("fc3d_admm", "Redidual balancing  strategy  for rho not yet implemented.");
   }
 
 
