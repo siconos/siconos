@@ -207,8 +207,11 @@ extern "C"
   static inline void NM_alloc_internalData(NumericsMatrix* M)
   {
     M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWorkSize = 0;
     M->internalData->iWork = NULL;
+    M->internalData->iWorkSize = 0;
+    M->internalData->dWork = NULL;
+    M->internalData->dWorkSize = 0;
+    M->internalData->isLUfactorized = 0;
   }
  /** set NumericsMatrix fields to NULL
    * \param A a matrix

@@ -1674,10 +1674,11 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   int sizeB = B->size0 * B->size1;
   B->size0 = A->size0;
   B->size1 = A->size1;
-
-  if (B->storageType >= 0 && B->storageType != A->storageType)
+  
+  /* if (B->storageType >= 0 && B->storageType != A->storageType) */
   {
     NM_internalData_free(B);
+    NM_alloc_internalData(B);
   }
   B->storageType = A->storageType;
   switch (A->storageType)
@@ -2295,14 +2296,12 @@ NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
   if (!A->internalData)
   {
     NM_alloc_internalData(A);
-    A->internalData->iWork = NULL;
-    A->internalData->iWorkSize = 0;
-    A->internalData->dWork = NULL;
-    A->internalData->dWorkSize = 0;
-    A->internalData->isLUfactorized = 0;
   }
   return A->internalData;
 }
+
+
+
 
 void* NM_iWork(NumericsMatrix* A, size_t size, size_t sizeof_elt)
 {
