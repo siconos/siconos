@@ -199,7 +199,6 @@ macro(add_siconos_swig_sub_module fullname)
 
   # set dependency of sphinx apidoc to this target
   if(USE_SPHINX)
-    add_dependencies(apidoc ${SWIG_MODULE_${_name}_REAL_NAME})
     set(pymodule_name ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.py)
     add_custom_target(${_name}_replace_latex
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
@@ -207,8 +206,6 @@ macro(add_siconos_swig_sub_module fullname)
       VERBATIM
       DEPENDS ${SWIG_MODULE_${_name}_REAL_NAME}
       COMMENT "Insert latex into docstrings.")
-
-    #add_dependencies(apidoc ${_name}_replace_latex)
 
     set(SPHINX_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs/sphinx/reference/python/${_name})
     add_custom_target(${_name}_autodoc
@@ -219,7 +216,7 @@ macro(add_siconos_swig_sub_module fullname)
       #DEPENDS ${SWIG_MODULE_${_name}_REAL_NAME}
       COMMENT "Create rst files from python docstrings for module siconos.${_name}")
 
-    add_dependencies(html ${_name}_autodoc)
+    add_dependencies(create_rst ${_name}_autodoc)
 
 
   endif()

@@ -145,7 +145,8 @@ def xml2swig(header_name, component_name, xml_path, swig_working_dir,
         p.run()
         for feat in p.features:
             docstrings_features[feat] = header_name
-
+        if len(p.enums) > 0:
+            docstrings_features['pydata_' + p.name] = p.enums
 
 def replace_uppercase_letters(filename):
     """Replace uppercase letters in a string
@@ -507,10 +508,10 @@ def module_docstrings2rst(module_name, sphinx_directory):
     with open(features_filename, 'rb') as f:
         features = pickle.load(f)
 
-    # We should remove pyfiles each time the function is call
+    # We have to remove pyfiles each time the function is call
     # because of 'a' (append) in writing process
-    pyfiles = glob.glob(os.path.join(sphinx_directory, 'pyfile*'))
-    pyfiles += glob.glob(os.path.join(sphinx_directory, 'pyclass*'))
+    pyfiles = glob.glob(os.path.join(sphinx_directory, '*pyfile.rst'))
+    pyfiles += glob.glob(os.path.join(sphinx_directory, '*pyclass.rst'))
     for file in pyfiles:
         os.remove(file)
 
@@ -521,21 +522,19 @@ def module_docstrings2rst(module_name, sphinx_directory):
         current = getattr(comp, obj)
         needs_doc = hasattr(current, '__doc__') and current.__doc__ is not None 
         if needs_doc and len(current.__doc__.strip()) > 0:
-            gen, kind, name = create_autodoc(current, module_name, sphinx_directory)
+            gen, kind, name = create_autodoc(current, module_name)
             if kind == 'pyclass': # one rst file per class
-                outputname = kind + name + '.rst'
+                outputname = name + '_' + kind + '.rst'
                 outputname = os.path.join(sphinx_directory, outputname)
                 class_files.append(outputname)
             elif kind == 'pyfunction': # one rst file for all functions from a given header
                 outputname = os.path.basename(features[name]).split('.')[0]
-                outputname = 'pyfile_' + outputname + '.rst'
+                outputname = outputname + '_pyfile.rst'
                 outputname = os.path.join(sphinx_directory, outputname)
                 pyfunc_files.append(outputname)
             else:
                 print("TEMP : kind unprocessed in doc ", kind)
                 continue
-            print(kind)
-            print(outputname)
             with open(outputname, 'a+') as out:
                 out.write(gen)
                 out.write('\n')
@@ -550,7 +549,7 @@ def module_docstrings2rst(module_name, sphinx_directory):
         shortname = os.path.basename(fname).split('.')[0]
         label = '.. _' + shortname + ':\n\n'
 
-        title = 'Functions related to ' + shortname.split('pyfile_')[1]
+        title = shortname.split('_pyfile')[0] + ' (functions)' 
         lenname = len(title)
         title = label + title + '\n' + lenname * '-' + '\n\n'
         with open(fname, 'r+') as f:
@@ -564,7 +563,7 @@ def module_docstrings2rst(module_name, sphinx_directory):
     title = module_name + ' classes (Python API)'
     title += '\n' + len(title) * '=' + '\n\n'
     with open(outputname, 'wt') as out:
-        out.write(title)
+        #out.write(title)
         out.write('.. toctree::\n    :maxdepth: 4\n\n')
         for f in class_files:
             name = os.path.basename(f).split('.')[0]
@@ -577,23 +576,83 @@ def module_docstrings2rst(module_name, sphinx_directory):
     with open(outputname, 'wt') as out:
         out.write(title)
         out.write('.. toctree::\n    :maxdepth: 2\n\n')
+        out.write('    autodoc_pydata\n')
         for f in pyfunc_files:
             name = os.path.basename(f).split('.')[0]
             out.write('    ' + name + '\n')
- 
 
-def create_autodoc(current, module_name, sphinx_directory):
+    
+    allfiles = class_files + pyfunc_files
+    allfiles.sort()
+    submodule_name = module_name.split('.')[-1]
+    outputname = os.path.join(sphinx_directory, 'autodoc_all.rst')
+    title = module_name + ' documentation (Python API)\n'
+    title += len(title) * '=' + '\n\n'
+    indent = 4 * ' '
+    basename = '/reference/python/' + submodule_name + '/'
+    with open(outputname, 'wt') as out:
+        out.write(title)
+        out.write('.. toctree::\n    :maxdepth: 2\n\n')
+        gen = ''
+        shorttitle = 'Constants'
+        gen += shorttitle + ' <' + basename + 'autodoc_pydata>\n'
+        for f in allfiles:
+            name = os.path.basename(f).split('.')[0]
+            if name.count('_pyclass') > 0:
+                shorttitle = name.split('_pyclass')[0] + ' (class) '
+            elif name.count('_pyfile') > 0:
+                shorttitle = name.split('_pyfile')[0] + ' (functions) '
+            else:
+                shorttitle = ''
+            gen += shorttitle + '<' + basename + name + '>\n'
+        out.write(textwrap.indent(gen, indent))
+        out.write('\n')
+    
 
+            
+    # Process enums
+    # Get saved enums for the current module
+    outputname = os.path.join(sphinx_directory, 'autodoc_pydata.rst')
+    title = module_name + ' constants (Python API)\n'
+    title += len(title) * '-' + '\n\n'
+    enumskeys = [k for k in features if k.find('pydata') > -1]
+    enums = [features[key] for  key in enumskeys]
+    with open(outputname, 'wt') as out:
+        out.write(title) 
+        for key in enumskeys:
+            enums = features[key]
+            for ename in enums:
+                if len(enums[ename][1].strip()) > 0:
+                    gen = ''
+                    gen += '.. _pydata_' + ename + ':\n\n'
+                    gen += '.. py:data:: ' + ename + '\n\n'
+                    gen += '    {0} ({1})\n\n'.format(enums[ename][1].strip(), enums[ename][0])
+                    out.write(gen)            
+
+def create_autodoc(current, module_name):
+    """Create autodoc directive
+    
+    Parameters
+    ----------
+    current : object
+        'object' of interest, one output from python
+        command dir(module)
+    module_name : string
+        module name (e.g. siconos.kernel)
+    sphinx_directory : string
+        location (full path) where output files
+        should be written
+    """
     if inspect.isclass(current):
         name = current.__name__
         fullname = module_name + '.' + name
         kind = 'pyclass'
-        title = 'Python class ' + fullname
+        title = fullname + ' (Python class)'
         directive = '.. autoclass:: ' + fullname + '\n'
         directive += '    :members:\n\n'
-        label = '.. _index:: single: ' + module_name.split('.')[1] + ';' + name
-        label += '\n'
-        label += '.. _' + kind +'_' + name + ':\n\n'
+        #label = '.. index:: single: ' + module_name.split('.')[1] + ';' + name
+        #label += '\n'
+        label = '.. _' + kind +'_' + name + ':\n\n'
         lenname = len(title)
         title = label + title + '\n' + lenname * '-' + '\n\n'
     elif inspect.isfunction(current):
@@ -602,6 +661,8 @@ def create_autodoc(current, module_name, sphinx_directory):
         title = fullname
         kind = 'pyfunction'
         directive = '.. autofunction:: ' + fullname + '\n\n'
+        #label = '.. index:: single: ' + module_name.split('.')[1] + ';' + name
+        #label += '\n'
         label = '.. _' + kind +'_' + name + ':\n\n'
         title = label + 4 * '-' + '\n\n'
     else: # current is neither a class nor a function
@@ -614,6 +675,43 @@ def create_autodoc(current, module_name, sphinx_directory):
     gen = title + directive
     return gen, kind, name
 
+
+def build_python_api_main(sphinx_directory):
+
+    outputdir = os.path.join(sphinx_directory, 'reference')
+    mainrst_filename = os.path.join(outputdir, 'python_api.rst')
+    # list documented (python) packages
+    docpython_dir = os.path.join(outputdir, 'python')
+    packages = glob.glob(os.path.join(docpython_dir, '*'))
+    packages = [os.path.basename(p) for p in packages]
+    with open(mainrst_filename, 'w') as f:
+        label = '.. _siconos_python_reference:\n\n\n'
+        title = 'Siconos Python API reference'
+        title += '\n' + len(title) * '#' + '\n\n'
+        title += 'This is the documentation of `python <https://www.python.org/>`_ interface to Siconos.\n\n\n'
+        f.write(label)
+        f.write(title)
+        indent = 4 * ' '
+
+        toc_header = '.. toctree::\n'
+        toc_header += textwrap.indent(':maxdepth: 2\n\n', indent)
+        #f.write(toc_header)
+        for p in packages:
+            
+            directive = '.. include:: python/' + p + '/autodoc_all.rst\n\n'
+            f.write(directive)
+
+        #     plabel = '.. _pysiconos_' + p + ':\n\n\n'
+        #     content = 'siconos.' + p + ' package documentation'
+        #     content += '\n' + len(content) * '-' + '\n\n'
+        #     content = plabel + content
+        #     content += toc_header
+        #     toc = 'python/' + p + '/autodoc_classes\n'
+        #     toc += 'python/' + p + '/autodoc_files\n'
+        #     content += textwrap.indent(toc, indent)
+        #     f.write(content)
+        
+            
 def create_rst_for_program(headername, srcdir, sphinx_directory, filterdox=False):
     """
     Parameters

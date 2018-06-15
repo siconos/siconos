@@ -88,18 +88,20 @@ class SiconosDoxy2Swig(Doxy2SWIG):
 
         # dict to export latex formula, to be processed later
         self.latex_forms = {} 
+        # dict to export enums, to be processed later
+        self.enums = {} 
         # dict to trace list of all features, used as input for autodoc
         # to sort functions doc by file of origin
         self.features = []
         # xml source file name
         self.xml_filename = xmlfile
 
-        name = os.path.basename(self.xml_filename).split('.')[0]
+        self.name = os.path.basename(self.xml_filename).split('.')[0]
         # name (full path) of the .i file that will be created
-        self.swig_outputname = os.path.join(swig_workdir, name + '.i')
+        self.swig_outputname = os.path.join(swig_workdir, self.name + '.i')
         # pickle file used to save latex forms
-        self.swig_outputname = os.path.join(swig_workdir, name + '.i')
-        self.latex_filename = os.path.join(swig_workdir, 'latex_' + name + '.pickle')
+        self.swig_outputname = os.path.join(swig_workdir, self.name + '.i')
+        self.latex_filename = os.path.join(swig_workdir, 'latex_' + self.name + '.pickle')
 
         self.ignores.append('author')
         self.ignores.append('date')
@@ -117,6 +119,18 @@ class SiconosDoxy2Swig(Doxy2SWIG):
             source = source.replace(item, type_map[item])
         return source
     
+    def parse_enum(self, node):
+        """Parse memberdef node with kind=enum
+        """
+        for n in self.get_specific_subnodes(node, 'enumvalue', recursive=4):
+            # Get name of the enum
+            ename = self.extract_text(self.get_specific_subnodes(n, 'name'))
+            # Value of the enum
+            evalue = self.extract_text(self.get_specific_subnodes(n, 'initializer'))
+            # Description
+            edescr = self.extract_text(self.get_specific_subnodes(n, 'briefdescription'))
+            self.enums[ename] = (evalue, edescr)
+            
     def write(self, fname):
         with open(fname, 'w') as o:
             if(sys.version_info > (3, 0)):
@@ -415,6 +429,9 @@ class SiconosDoxy2Swig(Doxy2SWIG):
             for sig in md_nodes:
                 self.features.append(sig)
                 self.handle_typical_memberdefs(sig, md_nodes[sig])
+
+        # Process enums
+        self.parse_enum(node)
                 
     def do_parameteritem(self, node):
         # Overload doxy2swig to remove '*'

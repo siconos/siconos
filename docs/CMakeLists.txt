@@ -24,9 +24,6 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doctools.py ${CMAKE_BINARY_DIR}/share/doctools.py COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/replace_py_escape.sh ${CMAKE_BINARY_DIR}/share/replace_py_escape.sh COPYONLY)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/replace_latex.sh ${CMAKE_BINARY_DIR}/share/replace_latex.sh COPYONLY)
-
-
 #  ====== doxygen documentation setup ======
 # This setup is required if one at least of
 # the following is needed:
@@ -154,13 +151,19 @@ if(USE_SPHINX)
     COMMAND cmake -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/figures ${CMAKE_CURRENT_BINARY_DIR}/sphinx/figures
     )
   
+  add_custom_target(create_rst
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+    "import doctools; doctools.build_python_api_main('${CMAKE_CURRENT_BINARY_DIR}/sphinx')"
+    VERBATIM
+    COMMENT "Create main rst file for python API.")
+  
   # -- To build html doc : make html --
   add_custom_target(html
     COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS} 2> errors.txt ${CMAKE_CURRENT_BINARY_DIR}/build/html
     VERBATIM
-    DEPENDS copy-sphinx-figures
+    DEPENDS copy-sphinx-figures create_rst
     )
-  
+
   add_custom_command(TARGET html POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
       "import doctools; doctools.filter_sphinx_warnings('${SPHINX_LOG_FILE}')"

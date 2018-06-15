@@ -13,4 +13,4 @@ Although those two APIs are quite similar, two different documentations (both ge
    :maxdepth: 1
 
    siconos_api_reference
-   siconos_python_reference
+   python_api
