@@ -104,7 +104,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
                int* restrict info, SolverOptions* restrict options)
 {
 
-  verbose=1;
+  /* verbose=1; */
   /* frictionContact_display(problem); */
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -359,10 +359,10 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     DEBUG_PRINTF("residual e_k = %e \n", e_k);
     DEBUG_PRINTF("eta  = %e \n", eta);
 
-    printf("residual e = %e \n", e);
-    printf("residual r = %e \n", r);
-    printf("residual s = %e \n", s);
-    printf("residual e_k = %e \n", e_k);
+    /* printf("residual e = %e \n", e); */
+    /* printf("residual r = %e \n", r); */
+    /* printf("residual s = %e \n", s); */
+    /* printf("residual e_k = %e \n", e_k); */
     
     if((e <  eta * e_k))
     {
