@@ -120,6 +120,7 @@ endmacro()
 #
 # ----------------------------------------------------------------------
 macro(add_siconos_swig_sub_module fullname)
+
   get_filename_component(_name ${fullname} NAME)
   get_filename_component(_path ${fullname} PATH)
   
@@ -208,14 +209,23 @@ macro(add_siconos_swig_sub_module fullname)
       COMMENT "Insert latex into docstrings.")
 
     set(SPHINX_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs/sphinx/reference/python/${_name})
+    # python modules for previous components are required to apidoc (e.g. kernel.py for control).
+    # So we get this last comp and add a dependency.
+    list(APPEND PROCESSED_PYTHON_MODULES ${SWIG_MODULE_${_name}_REAL_NAME})
+    list(REMOVE_DUPLICATES PROCESSED_PYTHON_MODULES)
+    set(PROCESSED_PYTHON_MODULES ${PROCESSED_PYTHON_MODULES} CACHE INTERNAL "python modules for siconos")
     add_custom_target(${_name}_autodoc
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share:${CMAKE_BINARY_DIR}/wrap ${PYTHON_EXECUTABLE} -c
-      "import doctools; doctools.module_docstrings2rst('siconos.${_name}', '${SPHINX_OUTPUT_DIR}')"
+      "import doctools; doctools.module_docstrings2rst('${COMPONENT}', '${_name}', '${SPHINX_OUTPUT_DIR}')"
       VERBATIM
       DEPENDS ${_name}_replace_latex
       #DEPENDS ${SWIG_MODULE_${_name}_REAL_NAME}
       COMMENT "Create rst files from python docstrings for module siconos.${_name}")
 
+    foreach(dep ${PROCESSED_PYTHON_MODULES})
+      add_dependencies(${_name}_autodoc ${dep})
+    endforeach()
+    
     add_dependencies(create_rst ${_name}_autodoc)
 
 

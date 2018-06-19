@@ -103,7 +103,9 @@ def get_xml_files(header_name, xml_path, case_sense_names=True):
     structfiles = glob.glob(os.path.join(xml_path, 'struct' + fnwe + '.xml'))
     # Look for '8h' (?) files
     files8h = glob.glob(os.path.join(xml_path, fnwe + '_8h*.xml'))
-    allfiles = classfiles + structfiles + files8h
+    # Look for namespaces files
+    namespaces_files = glob.glob(os.path.join(xml_path, 'namespace*.xml'))
+    allfiles = classfiles + structfiles + files8h + namespaces_files
     return allfiles
 
 
@@ -470,6 +472,11 @@ def xml2rst(headername, srcdir, component_name, sphinx_directory, doxyconf):
             outputname = 'file_' + os.path.basename(headername).split('.')[0]
             outputname = os.path.join(sphinx_directory, outputname + '.rst')
             
+        else: # namespaces files.
+            # Nothing to be done, breathe deal with those
+            # directly from _8h file.
+            continue
+            
         with open(outputname, 'wt') as out:
             out.write(gen)
             out.write('\n')
@@ -478,20 +485,25 @@ def xml2rst(headername, srcdir, component_name, sphinx_directory, doxyconf):
 
 
 
-def module_docstrings2rst(module_name, sphinx_directory):
+def module_docstrings2rst(component_name, module_name, sphinx_directory):
     """Import a module and create 'rst' (autodoc)
     file for each documented (docstrings) object.
 
     Parameters
     ----------
 
+    component_name : string
+         current component (might be different from module name, e.g control)
     module_name : string
-         name of the module (e.g. siconos.numerics)
+         name of the module (e.g. sensor)
     sphinx_directory : string
          directory (absolute) where rst files will
          be written. 
 
     Notes:
+       * module_path is required for module like sensor
+         located in siconos/control directory, 
+         to build module name like siconos.control.sensor
        * Usually : sphinx_directory 
          = binary_dir/docs/sphinx/reference/python/module_name
        * Results : 
@@ -500,11 +512,17 @@ def module_docstrings2rst(module_name, sphinx_directory):
           * pyfunctions.rst to collect all pyfunc *
   
     """
+
+    # Test case with submodules (e.g. sensor in control)
+    if component_name != module_name:
+        module_name = 'siconos.' + component_name + '.' + module_name
+    else:
+        module_name = 'siconos.' + module_name
     comp = importlib.import_module(module_name)
     if not os.path.exists(sphinx_directory):
         os.makedirs(sphinx_directory)
         
-    features_filename = comp.__file__.split('.')[0] + '.pickle'
+    features_filename = comp.__file__.split(component_name)[0] + component_name + '.pickle'
     with open(features_filename, 'rb') as f:
         features = pickle.load(f)
 
@@ -528,12 +546,32 @@ def module_docstrings2rst(module_name, sphinx_directory):
                 outputname = os.path.join(sphinx_directory, outputname)
                 class_files.append(outputname)
             elif kind == 'pyfunction': # one rst file for all functions from a given header
-                outputname = os.path.basename(features[name]).split('.')[0]
+                if name in features:
+                    featname = features[name]
+                elif name.replace('_', '::', 1) in features:
+                    # - when two classes wrapped with swig have
+                    # the same method (same name),
+                    # swig create class1_methodname and class2_methodname.
+                    # while features name is class1::methodname.
+                    # - the same kind of thing happens for static class methods.
+                    # We have to take these into account ... and the fact
+                    # that some methods names may contain '_'
+                    # (maxreplace=1 in replace below)
+                    featname = features[name.replace('_', '::', 1)]
+                elif name.split('::')[-1] in features:
+                    # another way for swig to deal with
+                    # namespaces ...
+                    featname = features[name.split('::')[-1]]
+                    
+                else:
+                    #raise Exception('Unknown feature name : ', name)
+                    featname = name
+                outputname = os.path.basename(featname).split('.')[0]
                 outputname = outputname + '_pyfile.rst'
                 outputname = os.path.join(sphinx_directory, outputname)
                 pyfunc_files.append(outputname)
             else:
-                print("TEMP : kind unprocessed in doc ", kind)
+                # pydata, processed later.
                 continue
             with open(outputname, 'a+') as out:
                 out.write(gen)

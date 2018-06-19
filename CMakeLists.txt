@@ -21,7 +21,6 @@ include(OutOfSourcesBuild)
 include(SiconosTools)
 configure_file(scripts/buildtools.py share/buildtools.py COPYONLY)
 
-
 # cmake project name
 set(PROJECT_NAME siconos)
 set(PROJECT_NAME_CAP Siconos)
@@ -126,6 +125,8 @@ add_subdirectory(docs)
 foreach(COMPONENT ${COMPONENTS})
   message("\n--------------------------------------------------")
   add_subdirectory(${COMPONENT})
+  set(LAST_COMP ${COMPONENT})
+  message("LAST COMP IS .... ${LAST_COMP}")
 endforeach()
 
 finalize_doc()
