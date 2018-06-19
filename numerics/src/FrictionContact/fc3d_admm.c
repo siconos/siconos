@@ -158,7 +158,8 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  double rho = 0.0;
+  double rho = 0.0, rho_k=0.0, rho_k_1=0.0;
+  int is_rho_variable=0, has_rho_changed = 0 ;
 
   if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
      SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT)
@@ -176,16 +177,17 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
       rho = dparam[SICONOS_FRICTION_3D_ADMM_RHO];
   }
   else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-          SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_ADAPTIVE)
+          SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING)
   {
-    numerics_error("fc3d_admm", "Adaptive rho stratgey not yet implemented.");
+    rho = dparam[SICONOS_FRICTION_3D_ADMM_RHO];
+    is_rho_variable = 1 ;
+    has_rho_changed = 0;
   }
-
+  rho_k=rho;
+  rho_k_1=rho;
 
   if(rho <= DBL_EPSILON)
-    numerics_error("fc3d_admm", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
-
-  /* double * tmp =  options->dWork; */
+    numerics_error("fc3d_admm", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] (rho) must be nonzero");
 
   /* Compute M + rho I (storage in W)*/
   NumericsMatrix *W = NM_new();
@@ -194,7 +196,12 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   NM_add_to_diag3(W, rho);
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
+  double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
+  double br_phi = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI];
 
+  assert(br_tau > 1);
+  assert(br_phi > 1);
+  
   Fc3d_ADDM_data * data = (Fc3d_ADDM_data *)options->solverData;
   
   /* we use velocity as a tmp */
@@ -216,40 +223,62 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   cblas_dcopy(m , reaction , 1 , z_k, 1);
   cblas_dcopy(m , reaction , 1 , z_hat, 1);
 
-
   cblas_dscal(m, 1.0/rho, velocity, 1);
   cblas_dcopy(m , velocity , 1 , xi, 1);
   cblas_dcopy(m , velocity , 1 , xi_k, 1);
   cblas_dcopy(m , velocity , 1 , xi_hat, 1);
 
-  double e_k = INFINITY, e, d, alpha, r, s, residual;
+  double e_k = INFINITY, e,  alpha, r, s, residual;
   double tau , tau_k = 1.0;
   int pos;
   double normUT;
-  cblas_dcopy(m,q,1,q_s,1);
 
   while((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
-
-
     DEBUG_PRINTF("\n\n\n############### iteration:%i\n", iter);
 
+
+    if (is_rho_variable && iter >= 1)
+    {
+      if (r > br_phi * s)
+      {
+        rho = br_tau* rho_k;
+        has_rho_changed = 1;
+      }
+      else if (s > br_phi * r)
+      {
+        rho = rho_k/br_tau;
+        has_rho_changed = 1;
+      }
+      else
+      {
+        /* keep the value of rho */
+        has_rho_changed = 0;
+      }
+    }
+
+    if (has_rho_changed)
+    {
+      NM_copy(M,W);
+      NM_add_to_diag3(W, rho);
+    }
+    if (fabs(rho_k_1/rho_k -1) >= DBL_EPSILON)
+    {
+      cblas_dscal(m, rho_k_1/rho_k, xi_k,1);
+      cblas_dscal(m, rho_k_1/rho_k, xi_hat,1);
+    }
+    
     /********************/
     /*  0 - Compute q(s)   */
     /********************/
 
-
-
-    /* if (iter % 100 ==0 ) */
+    cblas_dcopy(m,q,1,q_s,1);
+    for(contact = 0 ; contact < nc ; ++contact)
     {
-      cblas_dcopy(m,q,1,q_s,1);
-      for(contact = 0 ; contact < nc ; ++contact)
-      {
-        pos = contact * 3;
-        normUT = rho*sqrt(xi[pos + 1] * xi[pos + 1] + xi[pos + 2] * xi[pos + 2]);
-        q_s[pos] +=  problem->mu[contact]*normUT;
-      }
+      pos = contact * 3;
+      normUT = rho*sqrt(xi[pos + 1] * xi[pos + 1] + xi[pos + 2] * xi[pos + 2]);
+      q_s[pos] +=  problem->mu[contact]*normUT;
     }
 
     /********************/
@@ -261,7 +290,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     cblas_dcopy(m , q_s, 1 , reaction, 1);
     cblas_dscal(m, -1.0, reaction,1);
 
-    /* -q_s + rho * (xi_hat - z_hat )--> reaction */
+    /* -q_s - rho * (xi_hat - z_hat )--> reaction */
     cblas_dcopy(m , xi_hat , 1 , tmp, 1);
     cblas_daxpy(m, -1.0, z_hat, 1, tmp , 1);
     cblas_daxpy(m, -1.0*rho, tmp, 1, reaction, 1);
@@ -288,23 +317,25 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     /* Loop through the contact points */
     for(contact = 0 ; contact < nc ; ++contact)
     {
-      pos = contact * 3;
-      projectionOnCone(&z[pos], mu[contact]);
+      projectionOnCone(&z[contact * 3], mu[contact]);
     }
     DEBUG_PRINT("After projection :");
     DEBUG_EXPR(NV_display(z,m));
+    
+    if (fabs(rho_k_1/rho_k -1) >= DBL_EPSILON)
+    {
+      cblas_dscal(m, rho_k_1/rho_k, xi_hat,1);
+    }
 
     /**********************/
     /*  3 - Compute xi */
     /**********************/
-
-
+    
     /* r - z --> residual  */
-
     cblas_dcopy(m , reaction, 1 , xi, 1);
     cblas_daxpy(m, -1.0, z, 1, xi , 1);
-    d = cblas_dnrm2(m , xi , 1);
-    r = d * d;
+    r = cblas_dnrm2(m , xi , 1);
+
 
     cblas_daxpy(m, 1.0, xi_hat, 1, xi , 1);
     DEBUG_PRINT("xi : ")
@@ -316,10 +347,11 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
 
     cblas_dcopy(m , z_hat , 1 , tmp, 1);
     cblas_daxpy(m, -1, z, 1, tmp , 1);
-    d = cblas_dnrm2(m , tmp , 1);
-    s = d * d;
+    s = cblas_dnrm2(m , tmp , 1);
 
-    e =r+s;
+    e =rho_k*(r*r+s*s);
+
+
 
     DEBUG_PRINTF("residual e = %e \n", e);
     DEBUG_PRINTF("residual r = %e \n", r);
@@ -327,6 +359,11 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     DEBUG_PRINTF("residual e_k = %e \n", e_k);
     DEBUG_PRINTF("eta  = %e \n", eta);
 
+    /* printf("residual e = %e \n", e); */
+    /* printf("residual r = %e \n", r); */
+    /* printf("residual s = %e \n", s); */
+    /* printf("residual e_k = %e \n", e_k); */
+    
     if((e <  eta * e_k))
     {
       tau  = 0.5 *(1 +sqrt(1.0+4.0*tau_k*tau_k));
@@ -349,70 +386,37 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     {
       tau_k=1.0;
       e_k = e_k /eta;
-      DEBUG_PRINTF("tau_k  = %e \t alpha  = %e   \n", tau_k, alpha);
+      DEBUG_PRINTF("tau_k  = %e  \n", tau_k);
       cblas_dcopy(m , xi_k , 1 , xi_hat, 1);
       cblas_dcopy(m , z_k , 1 , z_hat, 1);
-      /* printf("xi_hat:");(NV_display(xi_hat,m)); */
-      /* printf("z:");(NV_display(z_hat,m)); */
     }
 
+    /* Next step */
     cblas_dcopy(m , z , 1 , z_k, 1);
     cblas_dcopy(m , xi , 1 , xi_k, 1);
-
+    rho_k = rho ;
+    rho_k_1 = rho_k ;
+    
     residual = sqrt(e);
     if(fabs(norm_q) > DBL_EPSILON)
       residual /= norm_q;
 
     numerics_printf_verbose(1,"---- FC3D - ADMM  - Iteration %i rho = %14.7e, residual = %14.7e, tol = %14.7e", iter, rho, residual, tolerance);
 
-    /* fc3d_compute_error(problem,  reaction, velocity, tolerance, options, norm_q, &error); */
-    /* printf("velo:");(NV_display(velocity,m)); */
-    /* numerics_printf_verbose(1,"---- FC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error); */
-    /* cblas_dcopy(m , xi , 1 , velocity, 1);  */
-    /* cblas_dscal(m, -1.0*rho, velocity, 1);   */
-    /* for (contact = 0 ; contact < nc ; ++contact)  */
-    /*   { */
-    /*     pos = contact * 3; */
-    /*     normUT = sqrt(velocity[pos + 1] * velocity[pos + 1] + velocity[pos + 2] * velocity[pos + 2]); */
-    /*     velocity[pos] -=  problem->mu[contact]*normUT; */
-    /*   } */
-
-
-
     if(residual < tolerance)
     {
-
-      /* check the full criterion */
-      /* cblas_dscal(m, rho, u, 1); */
-
-
-      /* cblas_dscal(m, rho, tmp, 1);  */
-      /* for (contact = 0 ; contact < nc ; ++contact) */
-      /* { */
-      /*   pos = contact * 3; */
-      /*   normUT = sqrt(tmp[pos + 1] * tmp[pos + 1] + tmp[pos + 2] * tmp[pos + 2]); */
-      /*   tmp[pos] -=  problem->mu[contact]*normUT; */
-      /* } */
-
-      /* (NV_display(tmp,m)); */
       fc3d_compute_error(problem,  reaction, velocity, tolerance, options, norm_q, &error);
       DEBUG_EXPR(NV_display(velocity,m));
       if(error < dparam[SICONOS_DPARAM_TOL])
       {
         hasNotConverged = 0;
         numerics_printf_verbose(1,"---- FC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
-
-        /* cblas_dcopy(m , tmp , 1 , u, 1); */
-
-
       }
       else
       {
         numerics_printf_verbose(1,"---- FC3D - ADMM  - The tolerance on the  residual is not sufficient to reach accuracy (error =  %14.7e)", error);
         tolerance = tolerance * residual/error;
         numerics_printf_verbose(1,"---- FC3D - ADMM  - We reduce the tolerance on the residual to %14.7e", tolerance);
-        /* cblas_dscal(m, 1.0/rho, u, 1); */
-
       }
     }
     *info = hasNotConverged;
@@ -420,7 +424,6 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
 
   if(iter==itermax)
   {
-    /* cblas_dcopy(m , tmp , 1 , u, 1);     */
     fc3d_compute_error(problem,  reaction, velocity, tolerance, options, norm_q, &error);
     numerics_printf_verbose(1,"---- FC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
   }
@@ -470,6 +473,8 @@ int fc3d_admm_setDefaultSolverOptions(SolverOptions* options)
 
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
+  options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
+  options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=10.0;
 
   options->internalSolvers = NULL;
   options->solverData = NULL;
