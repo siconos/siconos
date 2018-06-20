@@ -95,6 +95,9 @@ env:
   any:
     debian:
       - DEBIAN_FRONTEND=noninteractive
+    fedora:
+      - MODULEPATH=/usr/share/Modules/modulefiles:/etc/modulefiles:/usr/share/modulefiles
+
 
 ##############################################################################
 # set dependencies list for some packages/distrib
@@ -121,6 +124,12 @@ pkgs:
       - gmp
       - swig
       - cppunit
+      - start-command
+
+  start-command:
+    any:
+      run-command:
+        /bin/echo *************************************************************************
 
   python-minimal:
     nix:
@@ -240,7 +249,6 @@ pkgs:
     ubuntu-12.04:
       - python-software-properties
       - cmake-3.0.2
-      - python-matplotlib
 
     ubuntu-14.04:
       - cmake-3.0.2
@@ -254,6 +262,15 @@ pkgs:
         wget http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz&&
         tar xf cmake-3.0.2.tar.gz&&
         cd cmake-3.0.2&&
+        ./configure&&
+        make install
+
+  cmake-3.11.4:
+    any:
+      command:
+        wget http://www.cmake.org/files/v3.11/cmake-3.11.4.tar.gz&&
+        tar xf cmake-3.11.4.tar.gz&&
+        cd cmake-3.11.4&&
         ./configure&&
         make install
 
@@ -324,6 +341,7 @@ pkgs:
     debian:
       - libopenblas-dev
       - liblapacke-dev
+
     fedora:
       - openblas-devel
       - lapack-devel
@@ -673,4 +691,3 @@ pkgs:
     nix:
       run-command:
         cd $SOURCE_DIR && nix-env -f . -iA  siconos-full
-
