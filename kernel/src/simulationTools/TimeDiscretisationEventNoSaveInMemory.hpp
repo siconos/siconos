@@ -27,10 +27,6 @@ Time Discretisation Events
  *  This Event does not automatically save in memory some variables.
  *  Use it at your own risk
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.6.0.
- *  \date (Creation) July 10, 2013
- *
  */
 class TimeDiscretisationEventNoSaveInMemory : public Event
 {

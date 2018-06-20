@@ -30,10 +30,6 @@ TYPEDEF_SPTR(RelayProblem)
 
 /** Formalization and Resolution of a Linear Complementarity Problem (Relay)
  
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) Apr 26, 2004
- 
   \section Relayintro Aim of the Relay class
  
   This class is devoted to the formalization and the resolution of the

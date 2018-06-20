@@ -41,10 +41,6 @@ union VECTOR_UBLAS_TYPE
 
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
  *
- * \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 07/21/2006
- *
  * Used to handle vectors of double.
  *
  * Two possible types: Siconos::DENSE (default) and SPARSE.

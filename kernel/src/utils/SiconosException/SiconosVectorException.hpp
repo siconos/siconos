@@ -26,12 +26,6 @@
 
 /** Exception caused by a SiconosVector
  *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 05/25/2004
- *
- *
- *
  * SiconosVectorException must be throws when an error is find in a SiconosVector
  * This exception can be caught by "catch(SiconosVectorException)" or "catch(SiconosException)"
  *

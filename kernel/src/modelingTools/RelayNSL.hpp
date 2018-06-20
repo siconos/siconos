@@ -24,37 +24,54 @@
 #include "NonSmoothLaw.hpp"
 
 /** Relay NonSmoothLaw
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27, 2004 (documentation) Nov 25, 2009
- *
- * This class formalizes the Relay nonsmooth law  i.e.
- * \f[
- * \begin{array}{l}
- * -y \in \mathcal{N}_{[lb,ub]}(\lambda),
- * \end{array}
- * \f]
- * where \f$lb\f$ is the lower bound and   \f$ub\f$ is the upper bound of the Relay law.
- *
- * In this default case, the lower bound is set to \f$lb=-1\f$ and the upper bound ub is set to \f$ub=1\f$. We get  the well-known form of the RelayNSL as
- * the multivalued sign function, i.e.
- * \f[
- * \begin{array}{l}
- * y \in -\mathcal{N}_{[-1,1]}(\lambda)\quad \Longleftrightarrow \quad\lambda \in -\mbox{sgn} (y)
- * \end{array}
- * \f]
- * where the multi-valued sign function is defined as
- * \f[
- *  \mbox{sgn} (y) =
- *  \left\{ \begin{array}{lcl}
- *  1 &\quad& y >0 \\
- *  \,[-1,1] &\quad& y =0 \\
- *  -1 &\quad& y <0 \\
- *  \end{array}\right.
- *  \f]
- * \todo Build the Sgn NonSmoothLaw as the default instance of Relay
- */
+ 
+    This class formalizes the Relay nonsmooth law  i.e.
+
+ \rst
+
+ .. math::
+     :nowrap:
+ 
+     \begin{array}{l}
+     -y \in \mathcal{N}_{[lb,ub]}(\lambda),
+     \end{array}
+     
+ \endrst
+
+ where \f$lb\f$ is the lower bound and   \f$ub\f$ is the upper bound of the Relay law.
+
+ In this default case, the lower bound is set to \f$lb=-1\f$ and the upper bound ub is set to \f$ub=1\f$. We get  the well-known form of the RelayNSL as
+ the multivalued sign function, i.e.
+ 
+ \rst
+
+ .. math::
+     :nowrap:
+
+     \begin{array}{l}
+     y \in -\mathcal{N}_{[-1,1]}(\lambda)\quad \Longleftrightarrow \quad\lambda \in -\mbox{sgn} (y)
+     \end{array}
+ 
+ \endrst
+ where the multi-valued sign function is defined as
+ 
+ \rst
+ 
+ .. math::
+     :nowrap:
+     
+     \mbox{sgn} (y) =
+     \left\{ \begin{array}{lcl}
+     1 &\quad& y >0 \\
+     \,[-1,1] &\quad& y =0 \\
+     -1 &\quad& y <0 \\
+     \end{array}\right.
+ 
+ \endrst
+ 
+\todo Build the Sgn NonSmoothLaw as the default instance of Relay
+
+*/
 class RelayNSL : public NonSmoothLaw
 {
 

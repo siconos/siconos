@@ -21,8 +21,6 @@
     \brief Header file for Siconos Algebra objects
 
     This file provides typedef for matrix and vector objects, const values and so on ...
-    \author SICONOS Development Team - copyright INRIA
-    \date (creation) 10/17/2006
 */
 
 #ifndef SiconosAlgebra

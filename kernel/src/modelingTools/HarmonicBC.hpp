@@ -21,14 +21,10 @@
 
 #include "BoundaryCondition.hpp"
 
-/** \class HarmonicBC
- *  \brief This class models a simple harmonic boundary conditions for
+/**\brief This class models a simple harmonic boundary conditions for
  *   prescribing the velocities in a Dynamical System. A simple
  *   boundary condition is considered to fix a component \f$ j \f$ of
  *   the velocity vector, i.e., \f$ v_j(t) = a +  b cos( \omega t+ \phi)\f$.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 4.1.0.
- *  \date (Creation) November 2016
  *
  */
 class HarmonicBC : public  BoundaryCondition

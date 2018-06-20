@@ -41,8 +41,6 @@ typedef void* PluginHandle;
 
 /** Plug-in utilities
  *
- * \author SICONOS Development Team - copyright INRIA
- * \date (creation) 07/21/2006
  */
 namespace SiconosSharedLibrary
 {

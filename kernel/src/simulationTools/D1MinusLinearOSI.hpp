@@ -32,11 +32,7 @@
 #include "SimpleMatrix.hpp"
 
 
-/** \class D1MinusLinearOSI D1MinusLinearOSI.hpp Time-Integrator for Dynamical Systems
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.6.0 -- 3.7.x
- *  \date (Creation) September 01, 2011
+/** Time-Integrator for Dynamical Systems
  *
  * Reference:
  *

@@ -30,9 +30,6 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
 /**  \class MoreauJeanOSI
  *   \brief One Step time Integrator for First Order Dynamical Systems  for
  *    mechanical Systems (LagrangianDS and NewtonEulerDS)
- *   \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) Apr 26, 2004
  *
  * This integrator is the work horse of the event--capturing time stepping schemes
  * for mechanical systems.  It is mainly based on the pioneering works of M. Jean and

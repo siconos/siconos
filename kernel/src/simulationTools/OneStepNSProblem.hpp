@@ -28,9 +28,6 @@
 
 /** Non Smooth Problem Formalization and Simulation
 
-   \author SICONOS Development Team - copyright INRIA
-   \date (Creation) Apr 26, 2004
-
   This is an abstract class, that provides an interface to define a
   non smooth problem:
   - a formulation (ie the way the problem is written)

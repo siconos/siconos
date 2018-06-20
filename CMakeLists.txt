@@ -125,8 +125,6 @@ add_subdirectory(docs)
 foreach(COMPONENT ${COMPONENTS})
   message("\n--------------------------------------------------")
   add_subdirectory(${COMPONENT})
-  set(LAST_COMP ${COMPONENT})
-  message("LAST COMP IS .... ${LAST_COMP}")
 endforeach()
 
 finalize_doc()

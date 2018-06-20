@@ -33,11 +33,6 @@
 
 /** General Siconos Exception
  *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 05/25/2004
- *
- *
  * SiconosException should not be throws directly; prefer to use an inherit class
  * This exception can be caught by "catch(SiconosException)"
  *

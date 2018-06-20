@@ -35,9 +35,6 @@ typedef std::vector<SiconosVector> MemoryContainer;
 TYPEDEF_SPTR(MemoryContainer)
 
 /** This class is a backup for vectors of previous time step
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.0.0.
-    \date (Creation) 07/06/2004
 
     There is a max number of saved vector (memorySize) and all the vector (simple or block)
     should have the same size.

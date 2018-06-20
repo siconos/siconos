@@ -31,17 +31,20 @@ TYPEDEF_SPTR(FrictionContactProblem)
 
 /** Formalization and Resolution of a Friction-Contact Problem
 
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) Dec 15, 2005
-
   This class is devoted to the formalization and the resolution of
   friction contact problems defined by :
-  \f{eqnarray}
-  velocity =  q + M reaction \\
-  \\
-  velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
-  \f}
+
+
+  \rst
+  
+  .. math::
+
+     velocity =  q + M reaction \\
+     \\
+     velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
+  
+  \endrst
+
   and a Coulomb friction law.
 
   With:

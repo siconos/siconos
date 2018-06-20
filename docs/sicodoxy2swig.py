@@ -45,6 +45,9 @@ type_map = {
     'SiconosMatrix': 'array_like (np.float64, 2D)',
     'SimpleMatrix': 'array_like (np.float64, 2D)',
     'SiconosVector': 'array_like (np.float64, 1D)',
+    'SP::SiconosMatrix': 'array_like (np.float64, 2D)',
+    'SP::SimpleMatrix': 'array_like (np.float64, 2D)',
+    'SP::SiconosVector': 'array_like (np.float64, 1D)',
     r'double*': 'array_like (np.float64, 1D)',
     r'double *': 'array_like (np.float64, 1D)',
     'Index': 'array_like (int, 1D)',
@@ -176,7 +179,7 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         # Either inline
         if latex.startswith("$") and latex.endswith("$"):
             latex = latex[1:-1]
-            latex = r':math:`' + latex + r'` ' 
+            latex = r':math:`' + latex.strip() + r'`'
             # If we're inline create a math node like the :math: role
             rst_node = node_factory.math()
         else:
@@ -192,13 +195,16 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         rst_node["latex"] = latex
 
         # Required parameters which we don't have values for
-        rst_node["label"] = None
+        rst_node["label"] = 'inline'
         rst_node["nowrap"] = False
         rst_node["docname"] = None
         rst_node["number"] = None
         self.latex_forms[__id] = rst_node
-        id_formula = 'FORMULA' + str(__id)
-        self.add_text(' ')
+        # !!  '_' is required 
+        # e.g. replace('FORMULA1') leads to wrong behavior because of FORMULA10
+        # while 'FORMULA1_' works.
+        id_formula = 'FORMULA' + str(__id) + '_'
+        #self.add_text(' ')
         self.add_text(id_formula)
 
     def do_verbatim(self, node):
@@ -246,7 +252,7 @@ class SiconosDoxy2Swig(Doxy2SWIG):
             rst_node["number"] = None
 
             self.latex_forms[__id] = rst_node
-            id_formula = 'FORMULA' + str(__id)
+            id_formula = 'FORMULA' + str(__id) + '_'
             #self.add_text(' ')
             self.add_text(id_formula)
 
@@ -320,6 +326,28 @@ class SiconosDoxy2Swig(Doxy2SWIG):
             self.add_text('\n')
             self.subnode_parse(n, pieces = [], indent=0, ignore=['definition', 'name'])
             self.add_text('\n')
+
+    def make_attribute_list(self, node):
+        """Produces the "Attributes" section in class docstrings for public
+        member variables (attributes).
+        """
+        atr_nodes = []
+        for n in self.get_specific_subnodes(node, 'memberdef', recursive=2):
+            if n.attributes['kind'].value == 'variable' and n.attributes['prot'].value == 'public':
+                atr_nodes.append(n)
+        if not atr_nodes:
+            return
+        self.add_text(['\n', 'Attributes',
+                       '\n', '----------'])
+        for n in atr_nodes:
+            name = self.extract_text(self.get_specific_subnodes(n, 'name'))
+            self.add_text(['\n ', name, ' : '])
+            argstring = self.parse_typemap(self.extract_text(self.get_specific_subnodes(n, 'type')))
+            self.add_text(['`', argstring, '`'])
+            self.add_text('  \n')
+            restrict = ['briefdescription', 'detaileddescription']
+            self.subnode_parse(n, pieces=[''], indent=4, restrict=restrict)
+
 
             
     def handle_typical_memberdefs_no_overload(self, signature, memberdef_nodes):

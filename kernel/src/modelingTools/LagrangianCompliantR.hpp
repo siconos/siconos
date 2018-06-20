@@ -25,29 +25,25 @@
 
 /** Lagrangian Compliant Relation: Scleronomous, Non-Holonomic (function of lambda).
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date Apr 27, 2004
- *
- * \f[
+ * \f$
  * Y[0] = y = h(q,\lambda(t),z)
- * \f]
+ * \f$
  *
- * \f[
+ * \f$
  * Y[1] = \dot y = G0(q,\lambda(t),z)\dot q + G1((q,\lambda(t),z)\dot\lambda(t)
- * \f]
+ * \f$
  *
- * \f[
+ * \f$
  * p = G0^t(q,\lambda(t),z)\lambda(t)
- * \f]
+ * \f$
  *
  * with
- * \f[
+ * \f$
  * G0(q,\lambda(t),z) = \nabla_q h(q,\lambda(t),z)
- * \f]
- * \f[
+ * \f$
+ * \f$
  * G1(q,\lambda(t),z) = \nabla_{\lambda}h(q,\lambda(t),z)
- * \f]
+ * \f$
  *
  * h, G0 and G1 are connected to user-defined functions.
  *

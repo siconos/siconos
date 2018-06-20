@@ -46,7 +46,7 @@
  */
 struct AffineVariationalInequalities
 {
-  unsigned size;     /**< size of the problem */
+  unsigned int size;     /**< size of the problem */
   NumericsMatrix* M; /**< M matrix of the AVI (see the mathematical description)*/
   double* q;         /**< vector of the AVI (see the mathematical description)*/
   double* d;         /**< Covering vector (optional) */

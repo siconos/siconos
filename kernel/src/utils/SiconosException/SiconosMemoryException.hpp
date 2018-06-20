@@ -26,8 +26,6 @@
 
 /** Exceptions for SiconosMemory
  *
- * \author SICONOS Development Team - copyright INRIA
- * \date (creation) 07/21/2006
  *  Matrices can be either block or Simple.
  *  See Derived classes for details.
  */

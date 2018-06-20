@@ -30,10 +30,6 @@ TYPEDEF_SPTR(GenericMechanicalProblem)
 
 /** Formalization and Resolution of a generic mechanical problem: It mixes bilateral equality, complementarity, impact and friction problems.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) June 23 2010
- *
  * This class is devoted to contains of a set of Non-Smooth Problem.
  *
  * \b Main functions:

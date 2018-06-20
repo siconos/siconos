@@ -30,9 +30,6 @@
 
 /**  Generic class to manage DynamicalSystem(s) time-integration
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \date (Creation) Apr 26, 2004
- *
  * !!! This is a virtual class, interface for some specific integrators !!!
  *
  * At the time, available integrators are:

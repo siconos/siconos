@@ -33,10 +33,6 @@
 
 /** Non Smooth Laws (NSL) Base Class
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) May 05, 2004
- *
  * This class is the base class for all nonsmooth laws in Siconos.
  * A nonsmooth law characterize the (nonsmooth) relationship between 2 variables,
  * usually designated by \f$y\f$ and \f$\lambda\f$. \f$y\f$ is most of time seen as the

@@ -21,8 +21,6 @@
     \brief Header file for Siconos Algebra objects
 
     This file provides typedef for matrix and vector objects, const values and so on ...
-    \author SICONOS Development Team - copyright INRIA
-    \date (creation) 10/17/2006
 */
 
 #ifndef SiconosAlgebraTypeDef
@@ -120,7 +118,6 @@ namespace ublas = boost::numeric::ublas;
 typedef ublas::matrix<double, ublas::column_major, std::vector<double> > DenseMat;
 TYPEDEF_SPTR(DenseMat)
 
-//typedef ublas::matrix<double, ublas::column_major, ublas::bounded_array<double, 10000> > DenseMat;
 /** TriangMat is a typedef of boost::ublas::numeric::triangular_matrix<double, upper, column_major, std::vector<double> >
  */
 typedef ublas::triangular_matrix<double, ublas::upper, ublas::column_major> TriangMat;

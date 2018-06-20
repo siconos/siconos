@@ -21,14 +21,10 @@
 
 #include "BoundaryCondition.hpp"
 
-/** \class FixedBC
- *  \brief This class models a simple fixed boundary conditions for
+/** \brief This class models a simple fixed boundary conditions for
  *   prescribing the velocities in a Dynamical System. A simple
  *   boundary condition is considered to fix a component \f$ j \f$ of
  *   the velocity vector, i.e., \f$ v_j(t) = 0\f$ 
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 4.1.0
- *  \date November 2016
  *
  */
 class FixedBC : public  BoundaryCondition

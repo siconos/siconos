@@ -26,15 +26,16 @@
 
 /** First Order Linear Systems - \f$M(t) \dot x = A(t)x(t)+ b(t) + r, \quad x(t_0)=x_0\f$.
 
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) Apr 29, 2004
-
     This class represents first order linear systems of the form:
 
-    \f[
-    M(t) \dot x = A(t)x(t)+ b(t) + r,
-    x(t_0)=x_0
-    \f]
+    \rst
+
+    .. math::
+
+        M(t) \\dot x = A(t)x(t)+ b(t) + r,
+        x(t_0)=x_0
+    
+    \endrst
 
     where
 

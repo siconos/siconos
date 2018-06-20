@@ -29,22 +29,18 @@ const std::string transpose = "transpose";
 
 /**  Matrix (embedded various types of Boost matrices of double)
  *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 07/21/2006
- *
  * SimpleMatrix is used in the platform to store matrices (mathematical object) of double.
  *
  * Possible types: Siconos::DENSE (default), TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, Siconos::IDENTITY.
  *
  * \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
- *
- * 
- *  
- *  \rststar
- *  See :ref:`siconos_algebra` in :ref:`siconos_users_guide`.
- *  \endrststar
- *
+
+\rst
+
+See :ref:`siconos_algebra` in :ref:`siconos_users_guide`.
+
+\endrst
+
  */
 class SimpleMatrix: public SiconosMatrix
 {

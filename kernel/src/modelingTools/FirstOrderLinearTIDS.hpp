@@ -26,16 +26,17 @@
 
 /** First order linear and time-invariant coeff systems - \f$M \dot x = Ax(t)+ b + r, x(t_0)=x_0\f$.
  
-   \author SICONOS Development Team - copyright INRIA
-   \date (Creation) Apr 29, 2004
- 
- 
    This class represents first order linear systems of the form:
  
-   \f[
-   M\dot x(t) = A x(t) + b + r,
-   x(t_0)=x_0
-   \f]
+   \rst
+   
+   .. math::
+
+       M\\dot x(t) = A x(t) + b + r,
+       x(t_0)=x_0
+
+   \endrst
+
 
    where
    - \f$x \in R^{n} \f$ is the state,

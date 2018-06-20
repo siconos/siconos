@@ -29,18 +29,18 @@
 
 /** Lagrangian non linear dynamical systems - \f$M(q,z) \dot v = F(v, q, t, z) + p \f$
 
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) Apr 29, 2004
-
     This class defines and computes a generic ndof-dimensional
     Lagrangian Non Linear Dynamical System of the form :
 
-    \f[
-    \begin{cases}
-    M(q,z) \dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p  \\
-    \dot q = v
-    \end{cases}
-    \f]
+    \rst
+    .. math::
+        
+      \begin{cases}
+      M(q,z) \\dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p  \\
+      \dot q = v
+      \end{cases}
+           
+\endrst
 
     where
     - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
@@ -62,14 +62,14 @@
     variables, some sort of discrete state.
 
     The equation of motion is also shortly denoted as:
-    \f[
+    \f$
     M(q,z) \dot v = F(v, q, t, z) + p
-    \f]
+    \f$
 
     where
     - \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
     acting on the system, that is
-    \f[ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) + F_{int}(v, q , t, z) \f]
+    \f$ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) + F_{int}(v, q , t, z) \f$
     This vector is stored in the  SiconosVector forces()
 
 
@@ -92,23 +92,31 @@
     - \f$ n= 2 ndof \f$
     - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
     - rhs given by:
-    \f[
-    \dot x = \left[\begin{array}{c}
-    \dot q \\
-    \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
-    \end{array}\right]
-    \f]
+
+    \rst
+    .. math::
+        
+        \\dot x = \left[\begin{array}{c}
+        \\dot q \\
+        \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
+        \end{array}\right]
+           
+\endrst
     - jacobian of the rhs, with respect to x
-    \f[
-    \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
-    0  & I \\
-    \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\dot q}(M^{-1}(q)F(v, q , t, z)) \\
-    \end{array}\right]
-    \f]
+
+    \rst
+    .. math::        
+
+        \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
+        0  & I \\
+        \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\\dot q}(M^{-1}(q)F(v, q , t, z)) \\
+        \end{array}\right]
+           
+\endrst
     - input due to the non smooth law:
-    \f[
+    \f$
     r = \left[\begin{array}{c}0 \\ p \end{array}\right]
-    \f]
+    \f$
 
 
 */

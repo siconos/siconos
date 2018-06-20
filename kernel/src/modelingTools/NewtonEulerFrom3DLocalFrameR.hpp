@@ -24,10 +24,6 @@
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 /** NewtonEulerFrom3DLocalFrameR
  *
- * \author O. Bonnefon
- *  \version 3.0.0.
- *  \date Dec, 2010
- *
  * This class is an interface for relation with impact and FC3D.
  * From NewtonEulerFrom1DLocalFrameR, it inherits to the computation of the jacobian, this operator is use for the predictor of activation and deactivation of the Interaction.
  * The OSNSP is build using the matrix jachqT, that is computed from the point if contact pc1, pc2 and Nc.

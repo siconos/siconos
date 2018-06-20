@@ -93,16 +93,21 @@ void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFra
 /** NewtonEuler non linear dynamical systems
  
   The equations of motion in the Newton-Euler formalism can be stated as
-  \f{equation}
-  \label{eq:NewtonEuler}
-  \left\{\begin{array}{rcl}
-    M \dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \\
-    I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&  M_{ext}(t), \\
-    \dot q &=& T(q) [ v, \Omega] \\
-    \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
-  \end{array}\right.
-  \f}
-  with
+
+  \rst
+
+  .. math::
+     :nowrap:
+     
+      \left\{\begin{array}{rcl}
+      M \\dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \             \
+      I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&  M_{ext}(t), \ \
+      \dot q &=& T(q) [ v, \Omega] \                                    \
+      \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
+      \end{array}\right.
+ \endrst
+ 
+ with
   <ul>
   <li> \f$x_G,v_G\f$ position and velocity of the center of mass expressed in a inertial frame of
   reference (world frame) </li>

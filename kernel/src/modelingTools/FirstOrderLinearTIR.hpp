@@ -25,17 +25,16 @@
 
 /** Linear Time Invariant Relation, derived from class FirstOrderR
 
-\author SICONOS Development Team - copyright INRIA
-\version 3.0.0.
-\date Apr 15, 2007
-
 Linear Relation for First Order Dynamical Systems:
 
-\f{eqnarray}
-y &=& Cx(t) + Fz + D\lambda + e\\
+\rst
 
-R &=& B\lambda
-\f}
+ .. math::
+
+     y &=& Cx(t) + Fz + D\lambda + e\\
+     R &=& B\lambda
+
+\endrst
 
  */
 class FirstOrderLinearTIR : public FirstOrderR

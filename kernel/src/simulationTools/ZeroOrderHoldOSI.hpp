@@ -30,8 +30,6 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
 
 /**  ZeroOrderHoldOSI Time-Integrator for Dynamical Systems
  *
- *  \author SICONOS Development Team - copyright INRIA
- *
  * See User's guide for details.
  *
  * ZeroOrderHoldOSI class is used to define some time-integrators methods for a

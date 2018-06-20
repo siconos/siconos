@@ -28,10 +28,6 @@
 
 /** Object to handle block-matrices (ie lists of SiconosMatrix*)
  *
- * \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 21/07/2006
- *
  *  A BlockMatrix is a boost::ublas::compressed_matrix of SP::SiconosMatrix.
  * The blocks positions are given by two Index objects, tabRow and tabCol.
  *

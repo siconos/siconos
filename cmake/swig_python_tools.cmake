@@ -123,7 +123,6 @@ macro(add_siconos_swig_sub_module fullname)
 
   get_filename_component(_name ${fullname} NAME)
   get_filename_component(_path ${fullname} PATH)
-  
   message(" -- Build module ${_name} in directory ${_path} for parent ${COMPONENT}")
   # Add component dependencies to the current submodule deps.
   if(DEFINED SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
@@ -216,7 +215,7 @@ macro(add_siconos_swig_sub_module fullname)
     set(PROCESSED_PYTHON_MODULES ${PROCESSED_PYTHON_MODULES} CACHE INTERNAL "python modules for siconos")
     add_custom_target(${_name}_autodoc
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share:${CMAKE_BINARY_DIR}/wrap ${PYTHON_EXECUTABLE} -c
-      "import doctools; doctools.module_docstrings2rst('${COMPONENT}', '${_name}', '${SPHINX_OUTPUT_DIR}')"
+      "import doctools; doctools.module_docstrings2rst('${COMPONENT}', '${_path}', '${_name}', '${SPHINX_OUTPUT_DIR}')"
       VERBATIM
       DEPENDS ${_name}_replace_latex
       #DEPENDS ${SWIG_MODULE_${_name}_REAL_NAME}

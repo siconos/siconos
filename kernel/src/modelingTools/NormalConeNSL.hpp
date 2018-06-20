@@ -24,25 +24,33 @@
 #include "NonSmoothLaw.hpp"
 
 /** NormalCone NonSmoothLaw
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.8.0.
- *  \date Feb 10, 2015
- *
- * This class formalizes a nonsmooth law in the form of a normal cone inclusion i.e.
- * \f[
- * y \in \mathcal{N}_{-P}(-\lambda),
- * \f]
- * where \f$P\f$ is the polytopic set. This is a generalization of the RelayNSL law,
- * where the set \f$P\f$ is a scaled box. Note that there exists an inverse of the
- * previous relation in the form
- * \f[
- * -\lambda \in \partial \sigma_{-P} (y),
- *  \f]
- *  with \f$\sigma_{-P}\f$ the support function of \f$-P\f$ and \f$\partial \sigma_{-P}\f$
- *  the subdifferential of this support function.
- *
- */
+ 
+  This class formalizes a nonsmooth law in the form of a normal cone inclusion i.e.
+
+  \rst
+  
+  .. math::
+  
+      y \in \mathcal{N}_{-P}(-\lambda),
+      
+  \endrst
+
+  where \f$P\f$ is the polytopic set. This is a generalization of the RelayNSL law,
+  where the set \f$P\f$ is a scaled box. Note that there exists an inverse of the
+  previous relation in the form
+
+  \rst
+
+  .. math::
+
+      -\lambda \in \partial \sigma_{-P} (y),
+   
+  \endrst
+
+  with \f$\sigma_{-P}\f$ the support function of \f$-P\f$ and \f$\partial \sigma_{-P}\f$
+  the subdifferential of this support function.
+ 
+*/
 class NormalConeNSL : public NonSmoothLaw
 {
 

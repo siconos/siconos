@@ -28,10 +28,6 @@
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) 05/02/2010
- *
  * This class is used to define an interface for various storage used
  * for matrices in OneStepNSProblem. Its aim is to fill the
  * Numerics structure NumericsMatrix, required in many XXX_problem

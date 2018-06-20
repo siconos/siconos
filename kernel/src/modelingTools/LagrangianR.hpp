@@ -27,10 +27,6 @@
 
 /** Lagrangian (Non Linear) Relation (generic interface)
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date Apr 27, 2004
- *
  * Relations for Lagrangian Dynamical Systems.
  * This class is only an interface for specific (Linear, scleronomic, rheomomic  ...)
  * Lagrangian Relations (see derived classes).
@@ -40,26 +36,26 @@
  * If \f$y = h(t,q,\dot q,\ldots)\f$ describes the constraint (the relation) , all the gradients of h
  * are handled by the following SimpleMatrix and SiconosVector objects.
  *
- * <ul>
- * <li> The Jacobian of the constraints with respect to the coodinates  \f$q\f$
- * i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]  is stored in  SP::SimpleMatrix _jachq .
+ * - The Jacobian of the constraints with respect to the coodinates  \f$q\f$
+ * 
+ *  i.e. \f$\nabla^T_q h(t,q,\dot q,\ldots)\f$  is stored in  SP::SimpleMatrix _jachq .
  *
  * This Jacobian is mainly used for Newton linearization and to compute the time-derivative of the constraint \f$y = h(q,\ldots)\f$ that is
- *  \f[\dot y (t) = \nabla^T_q h(t,q,\dot q,\ldots) (q) \dot q +\ldots\f]
+ *  \f$\dot y (t) = \nabla^T_q h(t,q,\dot q,\ldots) (q) \dot q +\ldots\f$
  * This object can also store
  * more general linearized part of the gap function. If \f$y=h(q)\f$ models a gap function, then the time--derivative
  * can be generically  written as
- * \f[\dot y (t) = H(q,\ldots) \dot q  +\ldots. \f]
+ * \f$\dot y (t) = H(q,\ldots) \dot q  +\ldots. \f$
  * The matrix \f$H(q,\ldots) \f$ is also stored in   SP::SimpleMatrix _jachq </li>
  *
- * <li> The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
- *  i.e. \f[\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f] is stored in  SP::SimpleMatrix _jachqDot </li>
+ * - The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
+ *  i.e. \f$\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f$ is stored in  SP::SimpleMatrix _jachqDot </li>
  *
- * <li>The time-derivative of Jacobian of the constraints with respect to the generalized coordinates  \f$ q\f$
- *  i.e. \f[\frac{d}{dt} \nabla^\top_{q} h(t,q,\dot q,\ldots).\f]. This value is useful to compute the second-order
+ * - The time-derivative of Jacobian of the constraints with respect to the generalized coordinates  \f$ q\f$
+ *  i.e. \f$\frac{d}{dt} \nabla^\top_{q} h(t,q,\dot q,\ldots).\f$. This value is useful to compute the second-order
  * time--derivative of the constraints with respect to time.</li>
  *
- * </ul>
+ * 
  *
  * In corresponding derived classes, h and Jacobians are connected to plug-in functions (user-defined).
  *
@@ -81,18 +77,18 @@ protected:
   SP::SimpleMatrix _jachlambda;
 
   /**The Jacobian of the constraints with respect to the generalized coodinates  \f$q\f$
-   *  i.e. \f[\nabla^\top_q h(t,q,\dot q,\ldots)\f]
+   *  i.e. \f$\nabla^\top_q h(t,q,\dot q,\ldots)\f$
    */
   SP::SimpleMatrix _jachq;
 
   /**The Jacobian of the constraints with respect to the generalized velocities  \f$\dot q\f$
-   *  i.e. \f[\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f]
+   *  i.e. \f$\nabla^\top_{\dot q} h(t,q,\dot q,\ldots)\f$
    */
   SP::SimpleMatrix _jachqDot;
 
   /**The time-derivative of Jacobian of the constraints with respect
      to the generalized coordinates  \f$ q\f$
-   * i.e. \f[\frac{d}{dt} \nabla^\top_{ q} h(t,q,\dot q,\ldots).\f]
+   * i.e. \f$\frac{d}{dt} \nabla^\top_{ q} h(t,q,\dot q,\ldots).\f$
    * This value is useful to compute the second-order
    * time--derivative of the constraints with respect to time.
    */

@@ -36,10 +36,7 @@
     A dual graph is also contructed, where Interactions are vertices and DynamicalSystems
     are edges.
     
-    
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) Apr 23, 2004
- */
+*/
 class NonSmoothDynamicalSystem
 {
 public:

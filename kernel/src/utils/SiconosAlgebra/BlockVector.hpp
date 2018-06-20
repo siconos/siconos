@@ -27,9 +27,6 @@
 
 /** Object to handle block-vectors (ie list of SP::SiconosVector)
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *
  * A block vector is a stl vector that handles pointers to SiconosVector.
  *
  * Insertion of NULL SP::SiconosVector is not allowed.

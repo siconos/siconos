@@ -25,10 +25,6 @@ Time Discretisation Events
 
 /** Event that corresponds to user-defined time discretisation points
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 21, 2006
- *
  */
 class TimeDiscretisationEvent : public Event
 {

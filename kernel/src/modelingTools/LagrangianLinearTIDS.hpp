@@ -27,16 +27,13 @@
 
 /** Lagrangian Linear Systems with time invariant coefficients - \f$M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
  
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) Apr 29, 2004
- 
- 
     The class LagrangianLinearTIDS  allows to define  and compute a generic ndof-dimensional
     Lagrangian Linear Time Invariant Dynamical System of the form :
-    where
-    \f[
+
+    \f$
     M \ddot q + C \dot q + K q =  F_{ext}(t,z) + p,
-    \f]
+    \f$
+
     where
     - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
     - \f$ \dot q  \in R^{ndof} \f$  the velocity, i. e. the time derivative of the  generalized coordinates.
@@ -49,14 +46,14 @@
     -  \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
  
    The equation of motion is also shortly denoted as:
-    \f[
+    \f$
     M(q,z) \dot v = F(v, q, t, z) + p
-    \f]
+    \f$
     
     where
     - \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
     acting on the system, that is
-    \f[ F(v, q, t, z) =  F_{ext}(t, z) -  Cv - Kq \f]
+    \f$ F(v, q, t, z) =  F_{ext}(t, z) -  Cv - Kq \f$
     This vector is stored in the  SiconosVector forces()
 
     
@@ -66,23 +63,38 @@
     - \f$ n= 2 ndof \f$
     - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
     - rhs given by:
-    \f[
-    rhs(x,t,z) = \left[\begin{array}{c}
-    \dot q  \\
-    \ddot q = M^{-1}\left[F_{ext}(t, z) - C \dot q - K q  + p \right]\\
-    \end{array}\right]
-    \f]
+
+    \rst
+    .. math::
+      :nowrap:
+  
+        rhs(x,t,z) = \left[\begin{array}{c}
+        \\dot q  \\
+        \ddot q = M^{-1}\left[F_{ext}(t, z) - C \\dot q - K q  + p \right]\\
+        \end{array}\right]
+
+    \endrst
     Its jacobian is:
-    \f[
-    \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
-    0  & I \\
-    -M^{-1}K & -M^{-1}C \\
-    \end{array}\right]
-    \f]
-    The input due to the non smooth law is:
-    \f[
-    r = \left[\begin{array}{c}0 \\ p \end{array}\right]
-    \f]
+
+    \rst
+    .. math::
+        
+        \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
+        0   & I \\
+        -M^{-1}K & -M^{-1}C \\
+        \end{array}\right]
+   
+   \endrst
+  
+  The input due to the non smooth law is:
+
+  \rst
+
+  .. math::
+        
+      r = \left[\begin{array}{c}0 \\ p \end{array}\right]
+   
+  \endrst
 */
 class LagrangianLinearTIDS : public LagrangianDS
 {

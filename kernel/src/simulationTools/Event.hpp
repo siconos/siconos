@@ -41,10 +41,6 @@ const double DEFAULT_TICK = 1e-16;
 
 /** Abstract class that represents generic time events.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 21, 2006
- *
  *  This base class simply records the time at which the event will take place. A pure virtual function named process
  *  will be invoked to execute the event.
  *  The time is represented with a mpz_t, from gmp library. See http://gmplib.org.

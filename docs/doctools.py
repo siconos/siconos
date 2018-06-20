@@ -142,6 +142,7 @@ def xml2swig(header_name, component_name, xml_path, swig_working_dir,
     allfiles = get_xml_files(header_name, xml_path, case_sense_names)
     # Build .i files
     for f in allfiles:
+        filter_dot_in_xml_formulas(f)
         # set output filename == xml file without extension + .i
         p = SiconosDoxy2Swig(f, component_name, swig_working_dir)
         p.run()
@@ -432,6 +433,8 @@ def xml2rst(headername, srcdir, component_name, sphinx_directory, doxyconf):
     # Then, for each xml, write sphinx header.
     # 3 cases : class, struct or file.
     for f in xml_files:
+        
+        filter_dot_in_xml_formulas(f)
         path = os.path.join(xml_path, f)
         root = ET.parse(path).getroot()
         compounds = root.findall('compounddef')
@@ -485,7 +488,7 @@ def xml2rst(headername, srcdir, component_name, sphinx_directory, doxyconf):
 
 
 
-def module_docstrings2rst(component_name, module_name, sphinx_directory):
+def module_docstrings2rst(component_name, module_path, module_name, sphinx_directory):
     """Import a module and create 'rst' (autodoc)
     file for each documented (docstrings) object.
 
@@ -493,7 +496,10 @@ def module_docstrings2rst(component_name, module_name, sphinx_directory):
     ----------
 
     component_name : string
-         current component (might be different from module name, e.g control)
+         name of the current component (e.g. kernel)
+    module_path : string
+        current module path, relative to swig working dir
+        (usually wrap/siconos), e.g. mechanics/collision for module bodies.
     module_name : string
          name of the module (e.g. sensor)
     sphinx_directory : string
@@ -514,10 +520,12 @@ def module_docstrings2rst(component_name, module_name, sphinx_directory):
     """
 
     # Test case with submodules (e.g. sensor in control)
-    if component_name != module_name:
-        module_name = 'siconos.' + component_name + '.' + module_name
+    if module_path == '.' or module_path == '':
+         module_name = 'siconos.' + module_name
     else:
-        module_name = 'siconos.' + module_name
+        module_path = module_path.replace(r'/', r'.')
+        module_name = 'siconos.' + module_path + '.' + module_name
+
     comp = importlib.import_module(module_name)
     if not os.path.exists(sphinx_directory):
         os.makedirs(sphinx_directory)
@@ -632,7 +640,7 @@ def module_docstrings2rst(component_name, module_name, sphinx_directory):
         out.write(title)
         out.write('.. toctree::\n    :maxdepth: 2\n\n')
         gen = ''
-        shorttitle = 'Constants'
+        shorttitle = 'Enums and constants'
         gen += shorttitle + ' <' + basename + 'autodoc_pydata>\n'
         for f in allfiles:
             name = os.path.basename(f).split('.')[0]
@@ -908,6 +916,25 @@ def filter_xml_formulas(xmlfile):
     subprocess.call([replace_sh, xmlfile, fileout])
     shutil.move(fileout, xmlfile)
 
+def filter_dot_in_xml_formulas(xmlfile):
+    """Replace \\dot with \dot in xml input.
+    
+    dot is confusing for doxygen (may be latex or graphviz), so in latex formula inside \rst 
+    we need to use \\dot and replace it later, when breathe/sphinx comes into action.
+
+    Parameters
+    ----------
+    xmlfile: string
+        xml file name (full path) (in-out param)
+    """
+    fileout = xmlfile.split('.')[0] + '.tmp'
+    with open(xmlfile, 'r+') as f:
+        lines = f.read()
+    newlines = lines.replace(r'\\dot', r'\dot')
+    with open(fileout, 'w') as f:
+        f.write(newlines)
+    shutil.move(fileout, xmlfile)
+
 def replace_latex(pyfile, latex_dir):
     """Post processing of latex forms in docstrings.
     
@@ -946,13 +973,20 @@ def replace_latex(pyfile, latex_dir):
         with open(fname, 'rb') as f:
             latex_dict = pickle.load(f)
             for form in latex_dict:
-                idf = 'FORMULA' + str(form)
+                idf = 'FORMULA' + str(form) + '_'
+                # we must \\dot in \rst doxygen
+                # else there is a confusion with dot from graphviz.
+                formula = latex_dict[form]["latex"].replace(r'\\', '\\\\')
                 # escape \
                 formula = latex_dict[form]["latex"].replace('\\', '\\\\')
+                formula_type = latex_dict[form]["label"] # inline or not
                 #formula = ''.join(formula)
                 for line in source_lines:
-                    indent = len(line) - len(line.lstrip())
-                    rst.append(line.replace(idf, textwrap.indent(formula, indent * ' ')))
+                    if formula_type == 'inline':
+                        rst.append(line.replace(idf, formula))
+                    else:
+                        indent = len(line) - len(line.lstrip())
+                        rst.append(line.replace(idf, textwrap.indent(formula, indent * ' ')))
                 source_lines = list(rst)
                 rst = []
                 #cmd = [runner, idf, formula, source, target]
@@ -961,8 +995,6 @@ def replace_latex(pyfile, latex_dir):
                 #shutil.copyfile(target, source)
 
 
-    #tmp = ''.join(source_lines)
-    #print(tmp)
     # Replace .py with new results.
     with open(target, 'w') as f:
         for line in source_lines:

@@ -25,13 +25,13 @@ Target : users and developpers.
 
    cmake -DWITH_DOCUMENTATION=ON ...
    make doc # The whole doc
-   # or
-   make doxygen (doxygen only ...)
-   # or
-   make html (html only)
-
 
 Resulting files will be in docs/build/html of the current building path.
+
+Some other targets are available to build only sub-parts of the doc. Check :ref:`make_targets` for details.
+
+
+
 
 
 * Full doxygen (i.e. extract all from sources!)  html documentation.
@@ -208,8 +208,116 @@ Writing doc
 ***********
 
 
-* Document all sources files (headers) using doxygen, as defined in http://www.stack.nl/~dimitri/doxygen/manual/index.html
+Document source code
+====================
 
+General rules:
+
+* Document all header files using doxygen comments, as defined in http://www.stack.nl/~dimitri/doxygen/manual/index.html
+* Use  "\rst" / "\endrst" tags to write reStructuredText (reST) specific (i.e. that doxygen can not tackle) comments.
+  See details below for references and math formula.
+* In the case of comments with leading asterisk, use "\rststar" / "\endrststar" tags
+
+
+
+References to sphinx documents
+------------------------------
+
+To refer to any other sphinx document (reminder about sphinx cross-ref : http://www.sphinx-doc.org/en/stable/markup/inline.html)
+use "\rst" / "\endrst" tags :
+
+.. code :: rst
+
+  /** Class used to defined friction-contact problems
+  
+  This class deals with blabla
+
+  \rst
+  
+   See :ref:`global_fc_problem`
+
+   \endrst
+
+  */
+
+or with leading asterisk
+
+.. code :: rst
+
+  /** Class used to defined friction-contact problems
+   *
+   * This class deals with blabla
+   *
+   * \rststar
+   *
+   *   See :ref:`global_fc_problem`
+   *
+   * \endrststar
+   *  
+   *
+   */
+
+  
+
+Math and latex
+--------------
+
+* inline math
+
+  .. code:: rst
+
+     use this \f$\alpha\f$ to write inline math
+
+* displayed math
+
+  Use "\rst" / "\endrst" tags :
+  
+  .. code:: rst
+
+     \rst
+     
+     .. math::
+        :nowrap:
+      
+         \left\{\begin{array}{l}
+         y \geq 0, \lambda \geq 0, y^{T} \lambda=0\\
+         if y \leq 0 \quad \mbox{then} \quad \\dot y(t^{+}) - e \\dot y(t^{-}) \geq 0, \quad  \lambda \geq 0, (\\dot y(t^{+}) - e \\dot y(t^{-}))^{T} \lambda=0
+         \end{array}\right.
+
+     \endrst
+
+
+If you need comments with leading asterisk, use "\rststar" / "\endrststar" tags :
+
+.. code:: rst
+   
+ * \rststar
+ *
+ * .. math::
+ *    :nowrap:
+ *
+ *    \begin{eqnarray}
+ *    \begin{cases}
+ *     M v =  q +  H r \\
+ *     u = H^\top v + b \\
+ *     \hat u = u +\left[
+ *       \left[\begin{array}{c}
+ *           \mu^\alpha \|u^\alpha_{T}\|\\
+ *           0 \\
+ *           0
+ *         \end{array}\right]^T, \alpha = 1 \ldots n_c
+ *      \right]^T \\ \\
+ *      C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
+ *     \end{cases}
+ *    \end{eqnarray}
+ *
+ * \endrststar
+
+  
+
+
+
+  
 
 
 Doxygen to sphinx

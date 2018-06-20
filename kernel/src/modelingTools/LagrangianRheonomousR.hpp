@@ -25,27 +25,34 @@
 
 /** Lagrangian (Non Linear) Rheonomous Relation
 
-    \author SICONOS Development Team - copyright INRIA
-    \date February 28, 2007
-
     This class provides tools to describe non linear relation of the type:
 
-    \f[
-    y = h(q,t,z) \\
-    \dot y =  \nabla^\top_q(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
-    \f]
+    \rst
+    .. math::
+        
+
+        y = h(q,t,z) \\
+        \\dot y =  \nabla^\top_q(q,t,z)\\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
+    \endrst
 
     or more generally
 
-    \f[
-    \dot y =  H(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z)
-    \f]
+    \rst
+    .. math::
+        
+        \\dot y =  H(q,t,z)\\dot q + \frac{\partial }{\partial t}h(q,t,z)
+
+    \endrst
 
     and by duality
 
-    \f[
-    p = H^\top(q,t,z)\lambda
-    \f]
+    \rst
+
+    .. math::
+ 
+        p = H^\top(q,t,z)\lambda
+    
+    \endrst
 
     The following operators (and their jacobians) can be plugged, in the usual way (see User Guide, 'User-defined plugins')
 

@@ -28,15 +28,12 @@
 
 /**  General First Order Non Linear Dynamical Systems - \f$ M(t) \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0 \f$
      
-     \author SICONOS Development Team - copyright INRIA
-     \date (Creation) April 29, 2004
-     
      This class defines and computes a generic n-dimensional
      dynamical system of the form :
      
-     \f[
+     \f$
      M \dot x = f(x,t,z) + r, \quad x(t_0) = x_0
-     \f]
+     \f$
 
      where
 
@@ -52,17 +49,21 @@
  
   By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
   and the initial conditions are given by
-   \f[
+   \f$
    x(t_0)=x_0
-  \f]
+  \f$
   To define a Boundary Value Problem, a pointer on a BoundaryCondition must be set.
    
   The right-hand side and its jacobian (from base classe) are defined as
 
-  \f[
-  rhs = \dot x =  M^{-1}(f(x,t,z)+ r) \\
-  jacobianRhsx = \nabla_x rhs(x,t,z) = M^{-1}\nabla_x f(x,t,z)
-  \f]
+  \rst
+  
+  .. math::
+
+      rhs = \\dot x =  M^{-1}(f(x,t,z)+ r) \\
+      jacobianRhsx = \nabla_x rhs(x,t,z) = M^{-1}\nabla_x f(x,t,z)
+ 
+     \endrst
 
 
   The following operators can be plugged, in the usual way (see User Guide)

@@ -26,12 +26,6 @@
 
 /** Exception caused by a SiconosMatrix
  *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 05/25/2004
- *
- *
- *
  * SiconosMatrixException must be throws when an error is find in a SiconosMatrix
  * This exception can be caught by "catch(SiconosMatrixException)" or "catch(SiconosException)"
  *
