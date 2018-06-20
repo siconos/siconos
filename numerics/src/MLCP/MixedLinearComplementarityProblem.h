@@ -21,7 +21,6 @@
 /*!\file MixedLinearComplementarityProblem.h
   \brief Structure used to define a Mixed Linear Complementarity Problem
 
-  \author Olivier Bonnefon
 */
 
 #include <stdio.h>

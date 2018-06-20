@@ -21,7 +21,6 @@
 /*!\file QP_Solvers.h
   Subroutines for the resolution of QP problems.
 
-  \author Franck Perignon
 */
 
 #ifdef __cplusplus

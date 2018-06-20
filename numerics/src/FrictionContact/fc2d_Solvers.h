@@ -20,8 +20,6 @@
 
 /*!\file fc2d_Solvers.h
   \brief Subroutines for the resolution of contact problems with friction (2-dimensional case).
-  \author Nineb Sheherazade and Dubois Frederic.
-  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
 */
 
 #include "FrictionContactProblem.h"
@@ -74,7 +72,6 @@ extern "C"
        \param[out] velocity global vector
        \param[in,out] info termination value
        \param[in,out] options SolverOptions structure
-       \author Nineb Sheherazade.
   */
   void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
@@ -129,7 +126,6 @@ extern "C"
      0 = convergence,
      1 = no convergence,
      2 = Null diagonal term
-     \author V. Acary
     */
   void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options);
 
@@ -143,7 +139,6 @@ extern "C"
   /** This function transform a FrictionContactProblem (2D) into a LinearComplementarityProblem
    * \param[in] problem A pointer to a FrictionContactProblem to transform
    * \param[out] lcp_problem A pointer to a LinearComplementarity_problem resulting from the reformulation
-   * \author Vincent Acary
    */
 
   int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * lcp_problem);
@@ -162,7 +157,6 @@ extern "C"
      0 = convergence,
      1 = no convergence,
      2 = Null diagonal term
-     \author V. Acary
     */
   void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options);
 

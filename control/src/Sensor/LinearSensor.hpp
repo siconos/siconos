@@ -27,9 +27,6 @@
 
 /** \class LinearSensor
  *  \brief Common linear Sensor to get output of the system
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.3.0.
- *  \date (Creation) november 08, 2011
  *
  * A generic linear sensor, to capture the output y defined as y = Cx + Du
  *

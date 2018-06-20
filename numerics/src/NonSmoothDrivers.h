@@ -69,7 +69,6 @@ extern "C"
     \return info termination value
     - 0 : successful
     - >0 : otherwise see each solver for more information about the log info
-    \author Franck Perignon
   */
   int linearComplementarity_driver(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
 
@@ -82,7 +81,6 @@ extern "C"
       - 0 : successful
       - >0 : otherwise see each solver for more information about the log info
       \todo Sizing the regularization parameter and apply it only on null diagnal term
-      \author Vincent Acary
   */
   int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w, SolverOptions* options);
 
@@ -134,7 +132,6 @@ extern "C"
     \return info termination value
     - 0 : successful
     - >0 : otherwise see each solver for more information about the log info
-    \author Olivier Huber
   */
   int avi_driver(AffineVariationalInequalities* problem, double* z, double* w, SolverOptions* options);
 
@@ -272,7 +269,6 @@ extern "C"
       \return info termination value
       - 0 : successful
       - >0 : otherwise see each solver for more information about the log info
-   * \author Nineb Sheherazade.
    */
   int relay_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options);
 

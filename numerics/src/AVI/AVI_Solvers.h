@@ -21,7 +21,6 @@
 /*!\file AVI_Solvers.h
   \brief Subroutines for the resolution of Affine Variational Inequalities.
 
-  \author siconos-team@lists.gforge.inria.fr
 */
 
 #include "AffineVariationalInequalities.h"
@@ -41,7 +40,6 @@ extern "C"
    * \param[in,out] options structure used to define the solver and its parameters.
    *
    * \return info about the convergence: 0 ok; 1 ...
-   *\author Olivier Huber
    */
   int avi_caoferris(AffineVariationalInequalities* problem, double *z, double* w, SolverOptions* options);
 
@@ -53,7 +51,6 @@ extern "C"
    * \param[in,out] options structure used to define the solver and its parameters.
    *
    * \return info about the convergence: 0 ok; 1 ...
-   *\author Olivier Huber
    */
   int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, SolverOptions* options);
 
@@ -72,7 +69,6 @@ extern "C"
    * is less than this value, the solution is accepted
    * \param[in,out] error
    * \return status: 0 : convergence, 1: error > tolerance
-   * \author Olivier Huber
    */
   //int avi_compute_error(AffineVariationalInequalities* problem, double *z , double *w, double tolerance, double* error);
 
@@ -88,7 +84,6 @@ extern "C"
   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
   * \param[in,out] error
-  * \author Olivier Huber
   */
 //  void avi_compute_error_only(int n,  double *z , double *w, double * error);
 

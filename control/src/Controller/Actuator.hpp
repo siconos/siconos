@@ -35,10 +35,6 @@
 
 /** Actuators Base Class
 
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) February 09, 2007
-
    Abstract class, interface to user-defined actuators.
 
    An Actuator is dedicated to act on parameters of the Model

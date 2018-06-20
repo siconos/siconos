@@ -25,7 +25,6 @@
 /*!\file NonlinearComplementarityProblem.h
  * \brief data structure to formalize a Nonlinear Complementarity Problem (NCP)
  *
- * \author Olivier Huber
 */
 
 /** type for user defined function used to compute F and its jacobian.

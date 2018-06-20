@@ -29,8 +29,6 @@
   The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth Newton-type methods
   for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).
 
-  \author Olivier Bonnefon
-
  */
 
 

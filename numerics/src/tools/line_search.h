@@ -22,7 +22,6 @@
 /*!\file line_search.h
  * \brief Basic structures for line-search (and arcsearch) methods
  *
- * \author Olivier Huber
  */
 
 #include "Newton_methods.h"

@@ -22,7 +22,6 @@
 /*! \file NCP_PathSearch.h
  * \brief Functions for the pathsearch for NCP
  *
- * \author Olivier Huber
  */
 
 #include "PathSearch.h"

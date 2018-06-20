@@ -21,7 +21,6 @@
 
 /*!\file NCP_Solvers.h
   \brief Functions related to NCP formulation and solvers.
-  \author Franck Perignon, Olivier Huber
 */
 
 #include "SparseBlockMatrix.h"
@@ -44,7 +43,6 @@ extern "C"
    * \param[in] tol tolerance for the error
    * \param[out] err value of the error
    * \return 0 if the solution is good enough, 1 otherwise
-   * \author Olivier Huber
   */
   int ncp_compute_error(int n, double* z, double* F, double tol, double *err);
 

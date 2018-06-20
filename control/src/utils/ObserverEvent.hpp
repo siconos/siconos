@@ -27,10 +27,6 @@
 
 /** Events when the observer updates the state estimate
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.6.0
- *  \date (Creation) May 21, 2013
- *
  *
  */
 class ObserverEvent : public Event

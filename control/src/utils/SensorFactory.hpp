@@ -52,10 +52,6 @@ template<class SubType> SP::Sensor factory(SP::DynamicalSystem ds)
 
 /** Registry Class for sensors.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 01, 2007
- *
  * Sensor factory.
  * Use:
  *     SensorFactory::Registry& regSensor(SensorFactory::Registry::get()) ;
@@ -96,10 +92,6 @@ public :
 } ;
 
 /** Registration Class for sensors.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 01, 2007
  *
  * Class used for auto-registration of Sensor-type objects.
  *

@@ -21,7 +21,6 @@
 
 /*!\file NumericsVector.h
   \brief Structure definition and functions related to vector storage in Numerics
-  \author Franck Perignon
 */
 #include <stdlib.h>
 #include <assert.h>

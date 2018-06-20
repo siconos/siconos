@@ -22,7 +22,6 @@
 /*!\file NumericsSparseMatrix.h
  * \brief Data structures and functions for sparse matrices
  *
- * \author Olivier Huber
  */
 
 #include "SiconosConfig.h"

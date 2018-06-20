@@ -21,7 +21,6 @@
 /*!\file LCP_Solvers.h
   \brief Subroutines for the resolution of Linear Complementarity Problems.
 
-  \author siconos-team@lists.gforge.inria.fr
 */
 
 #include "NumericsFwd.h"
@@ -51,7 +50,6 @@ extern "C"
    *                Other : The constraints are inconstent
    * \param[in,out] options structure used to define the solver and its parameters.
    *
-   * \author Vincent Acary
    */
   void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -71,7 +69,6 @@ extern "C"
    3: pWp nul
    * \param[in,out] options structure used to define the solver and its parameters.
    *
-   \author Mathieu Renouf.
   */
   void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -107,9 +104,7 @@ extern "C"
    1 : iter = itermax
    2 : negative diagonal term
    * \param[in,out] options structure used to define the solver and its parameters.
-   *
 
-   \author Mathieu Renouf & Pascal Denoyelle
    \todo Sizing the regularization paramter and apply it only on null diagnal term
 
   */
@@ -155,8 +150,6 @@ extern "C"
    *                Other : The constraints are inconstent
    * \param[in,out] options structure used to define the solver and its parameters.
    *
-   * \author Vincent Acary
-   *
    */
   void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -176,8 +169,6 @@ extern "C"
    2 : Cholesky Factorization failed 
    3 : nul diagonal term
    * \param[in,out] options structure used to define the solver and its parameters.
-
-   \author Nineb Sheherazade.
   */
   void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
@@ -196,9 +187,6 @@ extern "C"
    2 : Cholesky Factorization failed 
    3 : nul diagonal term
    * \param[in,out] options structure used to define the solver and its parameters.
-   *
-
-   \author Nineb Sheherazade.
   */
   void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -219,8 +207,6 @@ extern "C"
    * 1 : iter = itermax
    * 2 : negative diagonal term
    * \param[in,out] options structure used to define the solver and its parameters.
-   *
-   *\author Mathieu Renouf
    */
   void lcp_lexicolemke(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -255,8 +241,6 @@ extern "C"
       *                Other : The constraints are inconstent
       * \param[in,out] options structure used to define the solver and its parameters.
       *
-      \author Vincent Acary
-
       \todo Optimizing the memory allocation (Try to avoid the copy of JacH into A)
       \todo Add rules for the computation of the penalization rho
       \todo Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
@@ -292,8 +276,6 @@ extern "C"
    *                2 - failure in the descent direction search (in LAPACK) 
    *
    * \param[in,out] options structure used to define the solver and its parameters.
-   * \author Vincent Acary and Olivier Huber
-   *
    * \todo Optimizing the memory allocation (Try to avoid the copy of JacH into A)
    * \todo Add rules for the computation of the penalization rho
    * \todo Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
@@ -313,7 +295,6 @@ extern "C"
    *                2 - failure in the descent direction search (in LAPACK) 
    *
    * \param[in,out] options structure used to define the solver and its parameters.
-   * \author Olivier Huber
    */
   void lcp_newton_minFB(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -326,8 +307,6 @@ extern "C"
    1 : iter = itermax
    2 : negative diagonal term
    * \param[in,out] options structure used to define the solver and its parameters.
-
-   \author Olivier Bonnefon
   */
   void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -339,8 +318,6 @@ extern "C"
   0 : success
   1 : failed
   * \param[in,out] options structure used to define the solver and its parameters.
-
-  \author Olivier Bonnefon
   */
   void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -373,8 +350,6 @@ extern "C"
    * 0 : convergence
    * 1 : iter = itermax
    * \param[in,out] options structure used to define the solver and its parameters.
-   *
-   *\author Olivier Huber
    */
   void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -389,8 +364,6 @@ extern "C"
    * 0 : convergence
    * 1 : iter = itermax
    * \param[in,out] options structure used to define the solver and its parameters.
-   *
-   *\author Olivier Huber
    */
   void lcp_pivot(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
   void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* u , double* s, int *info , SolverOptions* options, double* cov_vec);
@@ -407,8 +380,6 @@ extern "C"
    * 0 : convergence
    * 1 : iter = itermax
    * \param[in,out] options structure used to define the solver and its parameters.
-   *
-   *\author Olivier Huber
    */
   void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -420,8 +391,6 @@ extern "C"
    * 0 : convergence
    * 1 : iter = itermax
    * \param[in,out] options structure used to define the solver and its parameters.
-   *
-   *\author Olivier Huber
    */
   void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -434,7 +403,6 @@ extern "C"
    0 : convergence
    >0 : failed, depends on local solver
    * \param[in,out] options structure used to define the solver and its parameters.
-   * \author Mathieu Renouf, Pascal Denoyelle, Franck Perignon
    */
   void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, int* info, SolverOptions* options);
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
@@ -465,7 +433,6 @@ extern "C"
    * \param[in] tolerance threshold used to validate the solution: if the error is less than this value, the solution is accepted
    * \param[out] error the actual error of the solution with respect to the problem
    * \return status: 0 : convergence, 1: error > tolerance
-   * \author Pascal Denoyelle, Franck Perignon
    */
   int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double *w, double tolerance, double* error);
 
@@ -481,7 +448,6 @@ extern "C"
   * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
   * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
   * \param[out] error the result of the computation
-  * \author Pascal Denoyelle, Franck Perignon
   */
   void lcp_compute_error_only(unsigned int n,  double *z , double *w, double * error);
 
@@ -504,7 +470,6 @@ extern "C"
       \return info termination value
       - 0 : successful
       - >0 : otherwise see each solver for more information about the log info
-      \author Nineb Sheherazade, Mathieu Renouf, Franck Perignon
   */
   int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , double *w, SolverOptions* options);
 

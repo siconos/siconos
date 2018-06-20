@@ -27,11 +27,6 @@
 
 /** Events when sensor data capture is done.
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 01, 2007
- *
- *
  */
 class SensorEvent : public Event
 {

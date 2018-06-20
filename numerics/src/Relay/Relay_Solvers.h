@@ -19,8 +19,7 @@
 #define RELAY_SOLVERS_H
 
 /*!\file Relay_Solvers.h
-  \author Nineb Sheherazade and Dubois Frederic.
-  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon and Olivier Huber
+
   Subroutines for the resolution of relay problems.
 */
 
@@ -55,7 +54,7 @@ extern "C"
    0 = convergence,
    1 = no convergence,
    2 = Null diagonal term
-   \author V. Acary
+
   */
   void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -72,7 +71,6 @@ extern "C"
      * \param[out] info an integer which returns the termination value:
      0 = convergence,
      1 = no convergence,
-     \author V. Acary
     */
   void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -90,7 +88,6 @@ extern "C"
      0 = convergence,
      1 = no convergence,
      2 = Null diagonal term
-     \author V. Acary
     */
   void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -109,7 +106,6 @@ extern "C"
    *  0 = convergence,
    *  1 = no convergence,
    *  2 = Nul diagonal term
-   * \author V. acary
    */
   void relay_path(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -127,7 +123,6 @@ extern "C"
    * \param[out] info an integer which returns the termination value:
    *  0 = convergence,
    *  1 = no convergence,
-   * \author Olivier Huber
    */
   void relay_avi_caoferris(RelayProblem* problem, double* restrict z, double* restrict w, int *info, SolverOptions* options);
 
@@ -148,7 +143,6 @@ extern "C"
    * \param[out] info an integer which returns the termination value:
    *  0 = convergence,
    *  1 = no convergence,
-   * \author Olivier Huber
    */
   void relay_avi_caoferris_test(RelayProblem* problem, double* restrict z, double* restrict w, int *info, SolverOptions* options);
 
@@ -167,7 +161,6 @@ extern "C"
    2 = Cholesky factorization failed,
    3 = Nul diagonal term
    * \param options struct used to define the solver(s) and its (their) parameters
-   \author Nineb Sheherazade.
   */
   void dr_latin(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)  ;
 
@@ -196,7 +189,6 @@ extern "C"
      * \param[in] tolerance threshold used to validate the solution: if the error is less than this value, the solution is accepted
      * \param[in,out] error the actual error of the solution with respect to the problem
      * \return status: 0 : convergence, 1: error > tolerance
-     * \author Vincent Acary
      */
   int relay_compute_error(RelayProblem* problem, double* restrict z , double* restrict w, double tolerance, double* restrict error);
 
@@ -206,14 +198,12 @@ extern "C"
    * \param[in,out] ub a n-vector of doubles which contains the upper bounds
    * \param[in,out] lb a n-vector of doubles which contains the lower bounds
    * \param[in,out] n size of the a n-vector
-   * \author Vincent Acary
    */
   void project_on_box(int n, double* restrict z , double* restrict lb, double* restrict ub);
 
   /** This function transform a RelayProblem into a LinearComplementarityProblem
      * \param[in] problem A pointer to a Relay_problem to transform
      * \param[out] lcp_problem A pointer to a LinearComplementarity_problem resulting from the reformulation
-     * \author Vincent Acary
      */
   void relay_to_lcp(RelayProblem* problem, LinearComplementarityProblem* lcp_problem);
 

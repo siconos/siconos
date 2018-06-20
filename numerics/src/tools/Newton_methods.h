@@ -27,7 +27,6 @@
  *
  * More precisely, the function newton_LSA() is algorithm VFBLSA.
  *
- * \author Olivier Huber
  */
 
 #include "SolverOptions.h"

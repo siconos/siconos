@@ -20,7 +20,6 @@
 
 /*!\file fc3d_NCPGlockerFixedPoint.h
   \brief Typedef and functions declarations related to NCP-Fixed Point solver for 3 dimension frictional contact problems.
-  \author Houari Khenous
   Each solver must have 4 functions in its interface:
   - initialize: link local static variables to the global ones (M,q,...)
   - update: link/fill the local variables corresponding to sub-blocks of the full problem, for a specific contact

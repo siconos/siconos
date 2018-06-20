@@ -21,7 +21,6 @@
 /*!\file AffineVariationalInequalities.h
  * \brief Definitions for AVI
  *
- * \author Olivier Huber
 */
 
 #include "NumericsFwd.h"

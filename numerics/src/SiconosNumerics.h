@@ -18,7 +18,6 @@
 #ifndef SICONOSNUMERICS_H
 #define SICONOSNUMERICS_H
 /*!\file SiconosNumerics.h
- *   \author Vincent Acary
  */
 
 #include <stdio.h>

@@ -25,7 +25,6 @@
  * - polytopes and polyhedra \f$ \{ x \in \mathbb{R}^n | Hx\leq K\}\f$
  * - sets defined by a set of inequalities \f$\{g_i(x)\leq 0\}\f$ ( work in progress)
  *
- * \author Olivier Huber
 */
 
 #include "NumericsFwd.h"

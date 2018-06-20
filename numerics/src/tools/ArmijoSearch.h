@@ -26,7 +26,6 @@
  * classical one. The arcsearch assumes that the direction of descent is the
  * gradient of the merit function.
  *
- * \author Olivier Huber
  */
 
 #include "line_search.h"

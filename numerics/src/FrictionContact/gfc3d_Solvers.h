@@ -21,8 +21,6 @@
 /*!\file gfc3d_Solvers.h
   Subroutines for the resolution of contact problems with friction (3-dimensional case).
 
-  \author Vincent Acary
-
 */
 
 #include "GlobalFrictionContactProblem.h"

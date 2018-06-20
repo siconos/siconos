@@ -30,7 +30,6 @@
   \brief Structure definition and functions related to
   SparseBlockStructuredMatrix
 
-  \author Pascal Denoyelle and Franck Perignon and Co
 */
 
 /** Structure to store sparse block matrices with square diagonal

@@ -21,7 +21,6 @@
 
 /*!\file NumericsMatrix.h
   \brief Structure definition and functions related to matrix storage in Numerics
-  \author Franck Perignon
 */
 #include <stdlib.h>
 #include <assert.h>

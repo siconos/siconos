@@ -20,7 +20,6 @@
 
 /*!\file GlobalFrictionContactProblem.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
-  \author Vincent Acary.
 */
 
 #include "NumericsFwd.h"

@@ -44,8 +44,6 @@
 
   Two different storages are available for M: dense and sparse block.
 
-  \author Houari Khenous, Franck Perignon
-
  */
 #include "FrictionContactProblem.h"
 #include "SparseBlockMatrix.h"

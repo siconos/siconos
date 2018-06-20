@@ -20,8 +20,6 @@
 
 /*!\file MLCP_Solvers.h
   Solvers for Mixed Linear Complementary Problems (MCLP)
-  \author Vincent Acary 
-  Last Modifications : Olivier Bonnefon
 
 */
 
@@ -57,7 +55,6 @@ extern "C"
 
       \param[in] problem the MixedLinearComplementarityProblem structure which handles the problem (M,q)
       \param[in] options structure used to define the solver(s) and their parameters
-      \author Olivier Bonnefon
   */
   void mlcp_driver_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
   /** General interface to reset a solver.
@@ -71,7 +68,6 @@ extern "C"
 
       \param[in] problem the MixedLinearComplementarityProblem structure which handles the problem (M,q)
       \param[in] options structure used to define the solver(s) and their parameters
-      \author Olivier Bonnefon
   */
   void mlcp_driver_reset(MixedLinearComplementarityProblem* problem, SolverOptions* options);
   /*
@@ -100,7 +96,6 @@ extern "C"
       \param[in] options structure used to define the solver(s) and their parameters
       \return the number of integers that must be allocated by the user.
 
-      \author Olivier Bonnefon
   */
   int mlcp_driver_get_iwork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
   /** General interface to get the number of doubles that must be allocated for the solver.
@@ -116,7 +111,6 @@ extern "C"
       \param[in] options structure used to define the solver(s) and their parameters
       \return the number of doubles that must be allocated by the user.
 
-      \author Olivier Bonnefon
   */
   int mlcp_driver_get_dwork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 
@@ -129,7 +123,7 @@ extern "C"
    1 : iter = itermax
    2 : negative diagonal term
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Vincent Acary
+
   */
   void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -142,7 +136,7 @@ extern "C"
    1 : iter = itermax
    2 : negative diagonal term
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Vincent Acary
+
   */
   void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -155,7 +149,6 @@ extern "C"
    1 : iter = itermax
    2 : negative diagonal term
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Vincent Acary
   */
   void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -168,7 +161,6 @@ extern "C"
    1 : iter = itermax
    2 : negative diagonal term
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Vincent Acary
   */
   void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -181,7 +173,6 @@ extern "C"
    1 : iter = itermax
    2 : negative diagonal term
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_path(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -193,7 +184,6 @@ extern "C"
    0 : success,it found a solution
    1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -205,7 +195,6 @@ extern "C"
    0 : success,it found a solution
    1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -217,7 +206,6 @@ extern "C"
   0 : success,it found a solution
   1 : failure,it did not find any solution
   \param[in,out] options structure used to define the solver and its parameters.
-  \author Olivier Bonnefon
   */
   void mlcp_direct_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -229,7 +217,6 @@ extern "C"
    0 : success,it found a solution
    1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_direct_simplex(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -241,7 +228,6 @@ extern "C"
   0 : success,it found a solution
   1 : failure,it did not find any solution
   \param[in,out] options structure used to define the solver and its parameters.
-  \author Olivier Bonnefon
   */
   void mlcp_direct_path(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -254,7 +240,6 @@ extern "C"
    0 : success,it found a solution
    1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_simplex(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -266,7 +251,6 @@ extern "C"
    0 : success,it found a solution
    1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
   /** Direct Fischer Burmeister solver
@@ -277,7 +261,6 @@ extern "C"
    0 : success,it found a solution
    1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_direct_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -291,7 +274,6 @@ extern "C"
    0 : convergence
    >0 : failed, depends on local solver
    * \param[in,out] options structure used to define the solver and its parameters.
-   * \author Vincent Acary
    */
   void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double *w, int* info, SolverOptions* options);
 
@@ -334,7 +316,6 @@ extern "C"
      \param[in] tolerance threshold used to validate the solution: if the error is less than this value, the solution is accepted
      \param[in,out] error
      \return status: 0 : convergence, 1: error > tolerance
-    \author Vincent Acary form the routine  filter_result_LCP.c of Pascal Denoyelle
   */
   int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, double *w, double tolerance, double * error);
 

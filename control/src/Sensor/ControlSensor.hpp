@@ -28,9 +28,6 @@
 
 /** \class ControlSensor
  *  \brief Generic control Sensor to get the output of the system
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.4.0.
- *  \date (Creation) november 09, 2011
  *
  * A generic control sensor
  *

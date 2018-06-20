@@ -83,7 +83,6 @@ extern "C"
       Output nc, c
       a and b: interger vectors in increasing order
       c : vector of integers of a that are not in b.
-      \author Nineb Sheherazade & Dureisseix David.
   */
   void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c);
 

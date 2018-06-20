@@ -30,7 +30,6 @@
   0 \le F(z) \perp z \ge 0 \\
   \f}
 
-  \author Franck Perignon, 21/05/2008
 */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
