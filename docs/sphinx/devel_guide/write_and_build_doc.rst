@@ -236,7 +236,7 @@ use "\rst" / "\endrst" tags :
   
    See :ref:`global_fc_problem`
 
-   \endrst
+  \endrst
 
   */
 
@@ -270,7 +270,9 @@ Math and latex
 
 * displayed math
 
-  Use "\rst" / "\endrst" tags :
+  - Wrap your formula between "\rst" and "\endrst" tags and write math as you would with sphinx (see http://www.sphinx-doc.org/en/master/ext/math.html).
+  - Between rst tags, replace all occurences of :code:'\dot' with :code:'\\dot', else doxygen will fail to produce documentation.
+  
   
   .. code:: rst
 
