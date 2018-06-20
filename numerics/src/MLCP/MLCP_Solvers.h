@@ -289,24 +289,31 @@ extern "C"
   /**
     This function checks the validity of the vector z as a solution 
     of the MLCP : 
-    \f{eqnarray*}
-     \left\lbrace
-      \begin{array}{l}
-      A u + Cv +a =w1\\
-      D u + Bv +b = w2\\
-      0 \le v \perp  w2 \ge 0\\
-      w1=0\\
+
+    \rst
+
+    .. math::
+      :nowrap:
+
+      \left\lbrace
+       \begin{array}{l}
+       A u + Cv +a =w1\\
+       D u + Bv +b = w2\\
+       0 \le v \perp  w2 \ge 0\\
+       w1=0\\
+       \end{array}
+      \right.
+      w =
+      \left\lbrace
+      \begin{array}{c}
+      w1\\
+      w2\\
       \end{array}
-     \right.
-     w =
-     \left\lbrace
-     \begin{array}{c}
-     w1\\
-     w2\\
-     \end{array}
-     \right\rbrace
-     \f}
-     The criterion is based on \f$ \sum [ (z[i]*(Mz+q)[i])_{pos} + (z[i])_{neg} + (Mz+q)[i])_{neg} ] \f$ 
+      \right\rbrace
+    
+ \endrst
+ 
+    The criterion is based on \f$ \sum [ (z[i]*(Mz+q)[i])_{pos} + (z[i])_{neg} + (Mz+q)[i])_{neg} ] \f$ 
      with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. 
      This sum is divided by \f$ \|q\| \f$ and then compared to tol.
      It changes the input vector w by storing \f$ Mz + q \f$ in it.

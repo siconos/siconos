@@ -36,7 +36,6 @@ typedef void (*Type2PtrG)(unsigned int, double*,  unsigned int, double*);
  * .. math::
  *     :nowrap:
  *
- *     \f{eqnarray}
  *     y &=& h(x,\lambda,z)\\
  *     r &=& g(\lambda,z)
  *

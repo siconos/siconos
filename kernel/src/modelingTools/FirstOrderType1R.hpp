@@ -38,7 +38,6 @@ typedef void (*Type1Ptr)(unsigned int, double*, unsigned int, double*, unsigned 
  * .. math::
  *    :nowrap:
  *
- *    \f{eqnarray}
  *    y &=& h(x,z)\\
  *    r &=& g(\lambda,z)
  *

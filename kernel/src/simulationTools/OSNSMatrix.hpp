@@ -58,14 +58,21 @@
  * We denote interactionBlocks[interi][interj] = mij \n Then, a call to
  * fill(indexSet, interactionBlock) results in a matrix which looks like:
  *
- * \f{eqnarray*}
- M=\left\lbrace\begin{array}{cccc}
- m22 & m23 & m28 &  0 \\
- m32 & m33 & 0   &  0 \\
- 0  &  0  & m88 & m812 \\
- 0  &  0  & m128& m1212
- \end{array}\right.
- \f}
+ * 
+ \rst
+
+ .. math::
+   :nowrap:
+   
+     M=\left\lbrace\begin{array}{cccc}
+     m22 & m23 & m28 &  0 \\
+     m32 & m33 & 0   &  0 \\
+     0  &  0  & m88 & m812 \\
+     0  &  0  & m128& m1212
+    \end{array}\right.
+
+ \endrst
+
  *
  *
  * Note: at the time the available storage types are:
