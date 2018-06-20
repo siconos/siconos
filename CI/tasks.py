@@ -20,12 +20,13 @@ class SiconosCiTask(CiTask):
         return super(SiconosCiTask, self).__init__(*args, **kwargs)
     
     def template_maker(self):
-        redundants = [
+        unwanted_for_sitename = [
             'build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz',
-            'asan', 'cppunit_clang', 'python-env', 'profiling',
-            'python3-env', 'path', 'h5py3']
+            'asan', 'cppunit_clang', 'python-env', 'profiling', 'path',
+            'h5py3']
         return '-'.join([p.replace('+', 'x')
-                         for p in self._pkgs if p not in redundants])
+                         for p in self._pkgs if p not in
+                         unwanted_for_sitename])
 
 # PLEASE KEEP CONFIGS AS WHAT THEY MEAN.
 # DO NOT ADD PACKAGES IF THEY ARE NOT NECESSARY.
@@ -201,14 +202,14 @@ siconos_clang_cfi = siconos_default.copy()(
 
 siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
-    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
+#    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
     add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
     build_configuration='Debug')
 
 siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     distrib='fedora:rawhide',
-    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
+#    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
     add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
     build_configuration='Debug',
     fast=False)

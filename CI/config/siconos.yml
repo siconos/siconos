@@ -20,7 +20,7 @@ match:
 installer:
   any:
     fedora: dnf --setopt=deltarpm=false install -y
-    debian: DEBIAN_FRONTEND=noninteractive apt-get install -f -y
+    debian: apt-get install -f -y
     nixos/nix: nix-env -i
 
 updater:
@@ -92,6 +92,13 @@ env:
     any:
       - PATH_LICENSE_STRING="3413119131&Courtesy&&&USR&54784&12_1_2016&1000&PATH&GEN&31_12_2017&0_0_0&5000&0_0"
 
+  any:
+    debian:
+      - DEBIAN_FRONTEND=noninteractive
+    fedora:
+      - MODULEPATH=/usr/share/Modules/modulefiles:/etc/modulefiles:/usr/share/modulefiles
+
+
 ##############################################################################
 # set dependencies list for some packages/distrib
 # (read using pkg_entries function from mksenv.py)
@@ -117,6 +124,12 @@ pkgs:
       - gmp
       - swig
       - cppunit
+      - start-command
+
+  start-command:
+    any:
+      run-command:
+        /bin/echo *************************************************************************
 
   python-minimal:
     nix:
@@ -236,7 +249,6 @@ pkgs:
     ubuntu-12.04:
       - python-software-properties
       - cmake-3.0.2
-      - python-matplotlib
 
     ubuntu-14.04:
       - cmake-3.0.2
@@ -250,6 +262,15 @@ pkgs:
         wget http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz&&
         tar xf cmake-3.0.2.tar.gz&&
         cd cmake-3.0.2&&
+        ./configure&&
+        make install
+
+  cmake-3.11.4:
+    any:
+      command:
+        wget http://www.cmake.org/files/v3.11/cmake-3.11.4.tar.gz&&
+        tar xf cmake-3.11.4.tar.gz&&
+        cd cmake-3.11.4&&
         ./configure&&
         make install
 
@@ -320,6 +341,7 @@ pkgs:
     debian:
       - libopenblas-dev
       - liblapacke-dev
+
     fedora:
       - openblas-devel
       - lapack-devel
@@ -669,4 +691,3 @@ pkgs:
     nix:
       run-command:
         cd $SOURCE_DIR && nix-env -f . -iA  siconos-full
-

@@ -9,6 +9,7 @@
 set(CTEST_PROJECT_NAME "Siconos")
 set(CTEST_NIGHTLY_START_TIME "20:00:00 CET")
 
+# https is needed on cdash server side
 set(CTEST_DROP_METHOD "https")
 set(CTEST_DROP_SITE "cdash-tripop.inrialpes.fr")
 set(CTEST_DROP_LOCATION "/submit.php?project=Siconos")
