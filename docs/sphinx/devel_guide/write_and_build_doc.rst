@@ -316,8 +316,22 @@ If you need comments with leading asterisk, use "\rststar" / "\endrststar" tags 
  * \endrststar
 
   
+Enums, union ...
+----------------
 
+Since they will probably appear as global variables in python API,
+it's important that each component of the enum has an explicit comment, e.g:
 
+.. code-block:: cpp
+
+    /** Global description of the enum */ 
+    enum UBLAS_TYPE
+    {
+     /** id for dense matrix or vector */
+     DENSE = 1, 
+     /** id for triangular matrix */
+     TRIANGULAR,
+    }
 
   
 

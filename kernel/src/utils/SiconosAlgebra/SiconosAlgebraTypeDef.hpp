@@ -65,7 +65,21 @@ namespace Siconos
       SPARSE, BANDED. It is used to describe the type of matrix or
       vector we want to construct.
   */
-  enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY};
+  enum UBLAS_TYPE {
+    /** id for dense matrix or vector */
+    DENSE = 1, 
+    /** id for triangular matrix */
+    TRIANGULAR,
+    /** id for symmetric matrix */
+    SYMMETRIC,
+    /** id for sparse matrix or vector */
+    SPARSE,
+    /** id for banded matrix */
+    BANDED,
+    /** id for zero matrix */
+    ZERO,
+    /** id for identity matrix */
+    IDENTITY};
 }
 // Notes:
 // Vector definition in boost: vector<T,A> see http://www.boost.org/libs/numeric/ublas/doc/vector.htm

@@ -103,9 +103,7 @@ def get_xml_files(header_name, xml_path, case_sense_names=True):
     structfiles = glob.glob(os.path.join(xml_path, 'struct' + fnwe + '.xml'))
     # Look for '8h' (?) files
     files8h = glob.glob(os.path.join(xml_path, fnwe + '_8h*.xml'))
-    # Look for namespaces files
-    namespaces_files = glob.glob(os.path.join(xml_path, 'namespace*.xml'))
-    allfiles = classfiles + structfiles + files8h + namespaces_files
+    allfiles = classfiles + structfiles + files8h
     return allfiles
 
 
@@ -140,6 +138,7 @@ def xml2swig(header_name, component_name, xml_path, swig_working_dir,
     """
     # Get xml files related to current header
     allfiles = get_xml_files(header_name, xml_path, case_sense_names)
+
     # Build .i files
     for f in allfiles:
         filter_dot_in_xml_formulas(f)
@@ -151,6 +150,24 @@ def xml2swig(header_name, component_name, xml_path, swig_working_dir,
         if len(p.enums) > 0:
             docstrings_features['pydata_' + p.name] = p.enums
 
+    # Look for namespaces files
+    namespaces_files = glob.glob(os.path.join(xml_path, 'namespace*.xml'))
+    # Build corresponding .i files
+    for f in namespaces_files:
+        namespace_name = f.split('.')[0].split('namespace')[-1]
+        namespace_name = namespace_name.replace(r'_1_1', r'::')
+        filter_dot_in_xml_formulas(f)
+        # set output filename == xml file without extension + .i
+        p = SiconosDoxy2Swig(f, component_name, swig_working_dir)
+        p.run()
+        hpp_name = p.get_specific_subnodes(p.xmldoc, 'location', recursive=4)
+        hpp_name = hpp_name[0].attributes['file'].value
+        for feat in p.features:
+            docstrings_features[feat] = hpp_name
+        if len(p.enums) > 0:
+            docstrings_features['pydata_' + p.name] = p.enums
+
+            
 def replace_uppercase_letters(filename):
     """Replace uppercase letters in a string
     with _lowercase (following doxygen way)
@@ -572,8 +589,14 @@ def module_docstrings2rst(component_name, module_path, module_name, sphinx_direc
                     featname = features[name.split('::')[-1]]
                     
                 else:
-                    #raise Exception('Unknown feature name : ', name)
-                    featname = name
+                    keys = list(features.keys())
+                    for k in keys:
+                        if k.count(name) > -1:
+                            featname = features[k]
+                            break
+                    else:
+                        raise Exception('Unknown feature name : ', name)
+                    #featname = name
                 outputname = os.path.basename(featname).split('.')[0]
                 outputname = outputname + '_pyfile.rst'
                 outputname = os.path.join(sphinx_directory, outputname)
@@ -586,9 +609,9 @@ def module_docstrings2rst(component_name, module_path, module_name, sphinx_direc
                 out.write('\n')
 
     # -- Create rst files to collect list of classes and files (i.e. files just created above) --
-    class_files.sort()
+    #class_files.sort()
     pyfunc_files = list(set(pyfunc_files))
-    pyfunc_files.sort()
+    #pyfunc_files.sort()
 
     # Insert title (required to be taken into account in toctree ...)
     for fname in pyfunc_files:
@@ -604,28 +627,28 @@ def module_docstrings2rst(component_name, module_path, module_name, sphinx_direc
             f.write(title + lines)
             
     
-    # Classes and structs
-    outputname = os.path.join(sphinx_directory, 'autodoc_classes.rst')
-    title = module_name + ' classes (Python API)'
-    title += '\n' + len(title) * '=' + '\n\n'
-    with open(outputname, 'wt') as out:
-        #out.write(title)
-        out.write('.. toctree::\n    :maxdepth: 4\n\n')
-        for f in class_files:
-            name = os.path.basename(f).split('.')[0]
-            out.write('    ' + name + '\n')
+    # # Classes and structs
+    # outputname = os.path.join(sphinx_directory, 'autodoc_classes.rst')
+    # title = module_name + ' classes (Python API)'
+    # title += '\n' + len(title) * '=' + '\n\n'
+    # with open(outputname, 'wt') as out:
+    #     #out.write(title)
+    #     out.write('.. toctree::\n    :maxdepth: 4\n\n')
+    #     for f in class_files:
+    #         name = os.path.basename(f).split('.')[0]
+    #         out.write('    ' + name + '\n')
             
-    # Files doc
-    outputname = os.path.join(sphinx_directory, 'autodoc_files.rst')
-    title = module_name + ' documentation (Python API)\n'
-    title += len(title) * '=' + '\n\n'
-    with open(outputname, 'wt') as out:
-        out.write(title)
-        out.write('.. toctree::\n    :maxdepth: 2\n\n')
-        out.write('    autodoc_pydata\n')
-        for f in pyfunc_files:
-            name = os.path.basename(f).split('.')[0]
-            out.write('    ' + name + '\n')
+    # # Files doc
+    # outputname = os.path.join(sphinx_directory, 'autodoc_files.rst')
+    # title = module_name + ' documentation (Python API)\n'
+    # title += len(title) * '=' + '\n\n'
+    # with open(outputname, 'wt') as out:
+    #     out.write(title)
+    #     out.write('.. toctree::\n    :maxdepth: 2\n\n')
+    #     out.write('    autodoc_pydata\n')
+    #     for f in pyfunc_files:
+    #         name = os.path.basename(f).split('.')[0]
+    #         out.write('    ' + name + '\n')
 
     
     allfiles = class_files + pyfunc_files
@@ -661,19 +684,36 @@ def module_docstrings2rst(component_name, module_path, module_name, sphinx_direc
     outputname = os.path.join(sphinx_directory, 'autodoc_pydata.rst')
     title = module_name + ' constants (Python API)\n'
     title += len(title) * '-' + '\n\n'
+    title += 'All the predefined global constants in ' + module_name
+    title += '(generated from C++ enum, global variables, ...) \n\n'
     enumskeys = [k for k in features if k.find('pydata') > -1]
     enums = [features[key] for  key in enumskeys]
+    header = '**Usage** :\n\n.. code-block:: python\n\n'
+    importname = 's' + module_name.split('.')[-1][0]
+    code = 'import ' + module_name + ' as ' + importname
+    code += '\n \nprint(' + importname + '.CONSTNAME)\n\n'
+    header += textwrap.indent(code, '    ')
+    title += header
+    title += '\n-----\n\n**List and descriptions of available constants** :\n\n'
+
     with open(outputname, 'wt') as out:
         out.write(title) 
         for key in enumskeys:
             enums = features[key]
             for ename in enums:
-                if len(enums[ename][1].strip()) > 0:
-                    gen = ''
-                    gen += '.. _pydata_' + ename + ':\n\n'
-                    gen += '.. py:data:: ' + ename + '\n\n'
-                    gen += '    {0} ({1})\n\n'.format(enums[ename][1].strip(), enums[ename][0])
-                    out.write(gen)            
+                # Document only data available in python API
+                if hasattr(comp, ename):
+                    # and only data with a description
+                    if len(enums[ename][1].strip()) > 0:
+                        gen = ''
+                        gen += '.. _pydata_' + ename + ':\n\n'
+                        gen += '.. py:data:: ' + ename + '\n\n'
+                        if len(enums[ename][0]) > 0:
+                            # Add initializer value if set
+                            gen += '    {0} ({1})\n\n'.format(enums[ename][1].strip(), enums[ename][0])
+                        else:
+                            gen += '    {0} \n\n'.format(enums[ename][1].strip())
+                        out.write(gen)            
 
 def create_autodoc(current, module_name):
     """Create autodoc directive

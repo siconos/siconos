@@ -57,6 +57,7 @@ type_map = {
     r'std::': '',
     r'SP::': '',
     'friend': '',
+    'string': 'str',
     }
 
 class SiconosDoxy2Swig(Doxy2SWIG):
@@ -306,11 +307,11 @@ class SiconosDoxy2Swig(Doxy2SWIG):
                 argsstring.append(declname + defval)
                 param_id = param_id + 1
             argsstring = '(' + ', '.join(argsstring) + ')'
-        #type = self.extract_text(self.get_specific_subnodes(node, 'type'))
+        type = self.extract_text(self.get_specific_subnodes(node, 'type'))
         argsstring =  self.parse_typemap(argsstring)
         function_definition = name + argsstring
-        # if type != '' and type != 'void':
-        #     function_definition = function_definition + ' -> ' + type
+        if type != '' and type != 'void':
+             function_definition = function_definition + ' '# + type
         return function_definition
 
     
