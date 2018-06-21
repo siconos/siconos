@@ -11,7 +11,7 @@ sphinxcontrib-versioning
 sphinxcontrib-websupport
 sphinxbootstrap4theme
 sphinx-bootstrap-theme
-napoleon
+sphinxcontrib-napoleon
 numpydoc
 breathe
 
