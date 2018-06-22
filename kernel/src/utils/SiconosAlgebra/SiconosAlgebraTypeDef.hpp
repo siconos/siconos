@@ -125,21 +125,23 @@ TYPEDEF_SPTR(VectorOfSMatrices)
 
 namespace ublas = boost::numeric::ublas;
 
-/** Various matrix types available in Siconos **/
+/* Various matrix types available in Siconos */
 
-/** DenseMat is a typedef of boost::ublas::numeric::matrix<double, column_major, std::vector<double> >
- */
+/** DenseMat is a typedef of boost::ublas::numeric::matrix<double, column_major, std::vector<double> >  */
 typedef ublas::matrix<double, ublas::column_major, std::vector<double> > DenseMat;
+
 TYPEDEF_SPTR(DenseMat)
 
 /** TriangMat is a typedef of boost::ublas::numeric::triangular_matrix<double, upper, column_major, std::vector<double> >
  */
 typedef ublas::triangular_matrix<double, ublas::upper, ublas::column_major> TriangMat;
+
 TYPEDEF_SPTR(TriangMat)
 
 /** SymMat is a typedef of boost::ublas::numeric::symmetric_matrix<double, upper, column_major, std::vector<double> >
  */
 typedef ublas::symmetric_matrix<double, ublas::upper, ublas::column_major> SymMat;
+
 TYPEDEF_SPTR(SymMat)
 
 /** BandedMat is a typedef of boost::ublas::numeric::banded_matrix<double, column_major, std::vector<double> >

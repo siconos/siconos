@@ -58,6 +58,11 @@ type_map = {
     r'SP::': '',
     'friend': '',
     'string': 'str',
+    'void': 'None',
+    'Siconos::': '',
+    'UBLAS_TYPE': 'int',
+    'false': 'False',
+    'true' : 'True',
     }
 
 class SiconosDoxy2Swig(Doxy2SWIG):
@@ -134,6 +139,18 @@ class SiconosDoxy2Swig(Doxy2SWIG):
             # Description
             edescr = self.extract_text(self.get_specific_subnodes(n, 'briefdescription'))
             self.enums[ename] = (evalue, edescr)
+
+    def parse_typedefs(self, node):
+        """Parse memberdef node with kind=typedef
+        """
+        # Get name of the typedef
+        ename = self.extract_text(self.get_specific_subnodes(node, 'name'))
+        # type
+        old_type = self.extract_text(self.get_specific_subnodes(node, 'type'))
+        # Description
+        edescr = self.extract_text(self.get_specific_subnodes(node, 'briefdescription'))
+        if len(edescr) > 0:
+            self.enums[ename] = (old_type, edescr)
             
     def write(self, fname):
         with open(fname, 'w') as o:
@@ -257,6 +274,45 @@ class SiconosDoxy2Swig(Doxy2SWIG):
             #self.add_text(' ')
             self.add_text(id_formula)
 
+    def get_memberdef_nodes_and_signatures(self, node, kind):
+        """Collects the memberdef nodes and corresponding signatures that
+        correspond to public function entries that are at most depth 2 deeper
+        than the current (compounddef) node. Returns a dictionary with 
+        function signatures (what swig expects after the %feature directive)
+        as keys, and a list of corresponding memberdef nodes as values."""
+        sig_dict = {}
+        sig_prefix = ''
+        if kind in ('file', 'namespace'):
+            ns_node = node.getElementsByTagName('innernamespace')
+            if not ns_node and kind == 'namespace':
+                ns_node = node.getElementsByTagName('compoundname')
+            if ns_node:
+                sig_prefix = self.extract_text(ns_node[0]) + '::'
+        elif kind in ('class', 'struct'):
+            # Get the full function name.
+            cn_node = node.getElementsByTagName('compoundname')
+            sig_prefix = self.extract_text(cn_node[0]) + '::'
+
+        md_nodes = self.get_specific_subnodes(node, 'memberdef', recursive=2)
+        for n in md_nodes:
+            
+            if n.attributes['prot'].value != 'public':
+                continue
+            if n.attributes['kind'].value in ['variable']:
+                continue
+            if not self.get_specific_subnodes(n, 'definition'):
+                continue
+            name = self.extract_text(self.get_specific_subnodes(n, 'name'))
+            if name[:8] == 'operator':
+                continue
+            sig = sig_prefix + name
+            if sig in sig_dict:
+                sig_dict[sig].append(n)
+            else:
+                sig_dict[sig] = [n]
+        return sig_dict
+
+            
     def handle_typical_memberdefs(self, signature, memberdef_nodes):
         """Overload doxy2swig method to complete features list
         """
@@ -307,11 +363,12 @@ class SiconosDoxy2Swig(Doxy2SWIG):
                 argsstring.append(declname + defval)
                 param_id = param_id + 1
             argsstring = '(' + ', '.join(argsstring) + ')'
-        type = self.extract_text(self.get_specific_subnodes(node, 'type'))
+        rtype = self.extract_text(self.get_specific_subnodes(node, 'type'))
         argsstring =  self.parse_typemap(argsstring)
         function_definition = name + argsstring
-        if type != '' and type != 'void':
-             function_definition = function_definition + ' '# + type
+        if rtype != '' : #and type != 'void':
+            rtype =  self.parse_typemap(' -> ' + rtype)
+            function_definition = function_definition + rtype
         return function_definition
 
     
@@ -449,15 +506,19 @@ class SiconosDoxy2Swig(Doxy2SWIG):
                 self.parse(n)
 
         # now explicitely handle possibly overloaded member functions.
-        if kind in ['class', 'struct','file', 'namespace']:
+        if kind in ['class', 'struct','file', 'namespace', 'typedef']:
             # Get a dictionnary of objects (memberdef nodes) in the node
             # - exclude private and protected
-            # - exclude variables, typedef
+            # - exclude variables
             # - dict.keys = name of the member, dict.value = the memberdef node
             md_nodes = self.get_memberdef_nodes_and_signatures(node, kind)
             for sig in md_nodes:
                 self.features.append(sig)
                 self.handle_typical_memberdefs(sig, md_nodes[sig])
+                # typedef
+                #for n in md_nodes[sig]:
+                #    if n.attributes['kind'].value == 'typedef':
+                #        self.parse_typedefs(n)
 
         # Process enums
         self.parse_enum(node)

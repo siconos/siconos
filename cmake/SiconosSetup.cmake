@@ -95,6 +95,13 @@ endif()
 get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
   include(FindPythonModule)
+  # --- xml schema. Used in tests. ---
+  if(WITH_XML)
+    set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/config/xmlschema/SiconosModelSchema-V3.7.xsd")
+    if(NOT NO_RUNTIME_BUILD_DEP)
+      find_python_module(lxml REQUIRED)
+    endif()
+  endif()
 endif()
 
 # Choice of CSparse/CXSparse integer size

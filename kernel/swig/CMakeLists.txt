@@ -24,6 +24,10 @@ set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
 
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
+if(NOT WITH_XML)
+  list(APPEND ${COMPONENT}_python_excluded_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py)
+endif()
 
 if(NOT WITH_FORTRAN)
   list(APPEND ${COMPONENT}_python_excluded_tests
@@ -32,3 +36,4 @@ endif()
 
 build_python_tests()
 
+configure_file(fromXml.py.in ${SICONOS_SWIG_ROOT_DIR}/fromXml.py @ONLY)

@@ -112,7 +112,7 @@ if with_python_wrapper:
     napoleon_include_special_with_doc = False
     napoleon_use_ivar = True
     napoleon_use_param = True
-    napoleon_use_rtype = True
+    napoleon_use_rtype = False#True
     
 # ---- Start doxyrest conf ---
 with_doxyrest = @HAS_DOXYREST@
