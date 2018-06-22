@@ -158,7 +158,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  double rho = 0.0, rho_k=0.0, rho_k_1=0.0;
+  double rho = 0.0, rho_k=0.0, rho_ratio=0.0;
   int is_rho_variable=0, has_rho_changed = 0 ;
 
   if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
@@ -184,7 +184,6 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     has_rho_changed = 0;
   }
   rho_k=rho;
-  rho_k_1=rho;
 
   if(rho <= DBL_EPSILON)
     numerics_error("fc3d_admm", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] (rho) must be nonzero");
@@ -201,9 +200,9 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
 
   assert(br_tau > 1);
   assert(br_phi > 1);
-  
+
   Fc3d_ADDM_data * data = (Fc3d_ADDM_data *)options->solverData;
-  
+
   /* we use velocity as a tmp */
   double * tmp = velocity;
 
@@ -238,37 +237,12 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     ++iter;
     DEBUG_PRINTF("\n\n\n############### iteration:%i\n", iter);
 
-
-    if (is_rho_variable && iter >= 1)
-    {
-      if (r > br_phi * s)
-      {
-        rho = br_tau* rho_k;
-        has_rho_changed = 1;
-      }
-      else if (s > br_phi * r)
-      {
-        rho = rho_k/br_tau;
-        has_rho_changed = 1;
-      }
-      else
-      {
-        /* keep the value of rho */
-        has_rho_changed = 0;
-      }
-    }
-
     if (has_rho_changed)
     {
       NM_copy(M,W);
       NM_add_to_diag3(W, rho);
     }
-    if (fabs(rho_k_1/rho_k -1) >= DBL_EPSILON)
-    {
-      cblas_dscal(m, rho_k_1/rho_k, xi_k,1);
-      cblas_dscal(m, rho_k_1/rho_k, xi_hat,1);
-    }
-    
+
     /********************/
     /*  0 - Compute q(s)   */
     /********************/
@@ -311,6 +285,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     cblas_dcopy(m , xi_hat  , 1 , z, 1);
     cblas_daxpy(m, 1, reaction, 1, z , 1);
 
+
     DEBUG_PRINT("Before projection :");
     DEBUG_EXPR(NV_display(z,m));
 
@@ -321,16 +296,11 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     }
     DEBUG_PRINT("After projection :");
     DEBUG_EXPR(NV_display(z,m));
-    
-    if (fabs(rho_k_1/rho_k -1) >= DBL_EPSILON)
-    {
-      cblas_dscal(m, rho_k_1/rho_k, xi_hat,1);
-    }
 
     /**********************/
     /*  3 - Compute xi */
     /**********************/
-    
+
     /* r - z --> residual  */
     cblas_dcopy(m , reaction, 1 , xi, 1);
     cblas_daxpy(m, -1.0, z, 1, xi , 1);
@@ -342,16 +312,15 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     DEBUG_EXPR(NV_display(xi,m));
 
     /**********************/
-    /*  3 - Acceleration  */
+    /*  3 - Residual  */
     /**********************/
 
     cblas_dcopy(m , z_hat , 1 , tmp, 1);
     cblas_daxpy(m, -1, z, 1, tmp , 1);
-    s = cblas_dnrm2(m , tmp , 1);
 
-    e =rho_k*(r*r+s*s);
+    s = rho*cblas_dnrm2(m , tmp , 1);
 
-
+    e =r*r+s*s;
 
     DEBUG_PRINTF("residual e = %e \n", e);
     DEBUG_PRINTF("residual r = %e \n", r);
@@ -364,6 +333,10 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     /* printf("residual s = %e \n", s); */
     /* printf("residual e_k = %e \n", e_k); */
     
+    /*********************************/
+    /*  3 - Acceleration and restart */
+    /*********************************/
+
     if((e <  eta * e_k))
     {
       tau  = 0.5 *(1 +sqrt(1.0+4.0*tau_k*tau_k));
@@ -386,17 +359,48 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     {
       tau_k=1.0;
       e_k = e_k /eta;
-      DEBUG_PRINTF("tau_k  = %e  \n", tau_k);
+      DEBUG_PRINTF(" Restart tau_k  = %e  \n", tau_k);
+      /* printf(" Restart tau_k  = %e  \n", tau_k); */
       cblas_dcopy(m , xi_k , 1 , xi_hat, 1);
       cblas_dcopy(m , z_k , 1 , z_hat, 1);
     }
 
+
+    rho_k = rho ;
+
+    if (is_rho_variable && iter >= 1)
+    {
+      if (r > br_phi * s)
+      {
+        rho = br_tau* rho_k;
+        has_rho_changed = 1;
+      }
+      else if (s > br_phi * r)
+      {
+        rho = rho_k/br_tau;
+        has_rho_changed = 1;
+      }
+      else
+      {
+        /* keep the value of rho */
+        has_rho_changed = 0;
+      }
+    }
+    rho_ratio = rho_k/rho;
+
+    /* rho =1.0; */
+    /* rho_k=1.0; */
+    /* rho_k_1=1.0; */
+    DEBUG_PRINTF("rho =%e\t,rho_k =%e \n", rho, rho_k);
+    /* printf("rho =%e\t,rho_k =%e \n", rho, rho_k); */
+
+    cblas_dscal(m, rho_ratio, xi,1);
+    cblas_dscal(m, rho_ratio, xi_hat,1);
+
     /* Next step */
     cblas_dcopy(m , z , 1 , z_k, 1);
     cblas_dcopy(m , xi , 1 , xi_k, 1);
-    rho_k = rho ;
-    rho_k_1 = rho_k ;
-    
+
     residual = sqrt(e);
     if(fabs(norm_q) > DBL_EPSILON)
       residual /= norm_q;
