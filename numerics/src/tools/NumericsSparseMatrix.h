@@ -105,6 +105,7 @@ extern "C"
    */
   NumericsSparseMatrix* NSM_new(void);
 
+  NumericsSparseMatrix * NSM_triplet_eye(unsigned int size);
 
   /** Free allocated space for a NumericsSparseMatrix.
    * \param A a NumericsSparseMatrix

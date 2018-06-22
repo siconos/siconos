@@ -400,3 +400,26 @@ NumericsSparseMatrix * NSM_new_from_file(FILE* file)
   return out;
 }
 
+NumericsSparseMatrix * NSM_triplet_eye(unsigned int size)
+{
+  int info;
+  int _origin = NSM_TRIPLET;
+  NumericsSparseMatrix * out = NSM_new();
+  out->origin = _origin;
+
+  CSparseMatrix * C = cs_spalloc(size, size, size, 1, 1);
+
+  for (unsigned int k ; k < size; k++)
+  {
+    C->i[k] =k;
+    C->p[k] =k;
+    C->x[k] =1.0;
+  }
+  if (C->nz >= 0)
+  {
+    assert(out->origin ==NSM_TRIPLET);
+    out->triplet = C;
+    out->origin = NSM_TRIPLET;
+  }
+  return out;
+}

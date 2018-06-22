@@ -1249,6 +1249,12 @@ NumericsMatrix* NM_new(void)
   return M;
 }
 
+NumericsMatrix* NM_eye(int size)
+{
+  NumericsMatrix* M = NM_create(NM_SPARSE, size, size);
+  M->matrix2 = NSM_triplet_eye(size);
+  return M;
+}
 NumericsMatrix* NM_create(int storageType, int size0, int size1)
 {
   assert(size0 > 0);

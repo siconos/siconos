@@ -91,7 +91,7 @@ extern "C"
    * \return a pointer to allocated space
    */
   NumericsMatrix* NM_new(void);
-
+  NumericsMatrix* NM_eye(int size);
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
    * \param size0 number of rows
