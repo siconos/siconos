@@ -21,7 +21,6 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "FirstOrderLinearTIDS.hpp"
 #include "ZeroOrderHoldOSI.hpp"
-#include "Model.hpp"
 #include "TimeStepping.hpp"
 #include "TimeDiscretisation.hpp"
 #include "ioMatrix.hpp"
@@ -69,7 +68,7 @@ private:
   double _t0;
   double _T;
   double _tol;
-  SP::Model _model;
+  SP::NonSmoothDynamicalSystem _model;
   SP::TimeStepping _sim;
   SP::FirstOrderLinearDS _DS;
   SP::TimeDiscretisation _TD;

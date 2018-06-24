@@ -177,6 +177,8 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
     // compute standard rhs stored in the dynamical system
     ds->computeRhs(t);
     DEBUG_EXPR(ds->getRhs().display(););
+    /* This next line is a good protection  */
+    assert(_dynamicalSystemsGraph->properties(*dsi).workVectors);
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     Type::Siconos dsType = Type::value(*ds);
     if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
