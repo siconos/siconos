@@ -181,9 +181,9 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   {
     rho = dparam[SICONOS_FRICTION_3D_ADMM_RHO];
     is_rho_variable = 1 ;
-    has_rho_changed = 0;
   }
   rho_k=rho;
+  has_rho_changed = 1;
 
   if(rho <= DBL_EPSILON)
     numerics_error("fc3d_admm", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] (rho) must be nonzero");
@@ -191,8 +191,8 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
   /* Compute M + rho I (storage in W)*/
   NumericsMatrix *W = NM_new();
 
-  NM_copy(M, W);
-  NM_add_to_diag3(W, rho);
+  /* NM_copy(M, W); */
+  /* NM_add_to_diag3(W, rho); */
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
@@ -319,6 +319,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     cblas_daxpy(m, -1, z, 1, tmp , 1);
 
     s = rho*cblas_dnrm2(m , tmp , 1);
+    /* s = cblas_dnrm2(m , tmp , 1); */
 
     e =r*r+s*s;
 
@@ -351,7 +352,8 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
       cblas_dscal(m, 1+alpha, xi_hat,1);
       cblas_daxpy(m, -alpha, xi_k, 1, xi_hat , 1);
       DEBUG_EXPR(NV_display(xi_hat,m));
-      DEBUG_PRINTF("tau  = %e, \t tau_k  = %e, \t alpha  = %e   \n", tau, tau_k, alpha);
+      DEBUG_PRINTF("Accelerate :tau  = %e, \t tau_k  = %e, \t alpha  = %e   \n", tau, tau_k, alpha);
+      /* printf("Accelerate :tau  = %e, \t tau_k  = %e, \t alpha  = %e   \n", tau, tau_k, alpha); */
       tau_k=tau;
       e_k=e;
     }
@@ -390,7 +392,8 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
 
     /* rho =1.0; */
     /* rho_k=1.0; */
-    /* rho_k_1=1.0; */
+    /* rho_ratio = rho_k/rho; */
+    /* has_rho_changed = 0; */
     DEBUG_PRINTF("rho =%e\t,rho_k =%e \n", rho, rho_k);
     /* printf("rho =%e\t,rho_k =%e \n", rho, rho_k); */
 
@@ -477,7 +480,7 @@ int fc3d_admm_setDefaultSolverOptions(SolverOptions* options)
 
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
-  options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
+  options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU]=1.5;
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=10.0;
 
   options->internalSolvers = NULL;
