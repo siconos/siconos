@@ -25,6 +25,7 @@
 #include "gfc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "fc3d_Solvers.h"
+#include "fc3d_solvers_wr.h"
 #include <string.h>
 
 #include "NumericsSparseMatrix.h"
@@ -64,18 +65,25 @@ GlobalFrictionContactProblem*  fc3d_reformulation_global_problem(FrictionContact
   globalproblem->dimension =  problem->dimension;
 
   globalproblem->mu = (double *)malloc(m*sizeof(double));
-  cblas_dcopy(m,problem->mu,1,globalproblem->mu,1);
+  cblas_dcopy(nc,problem->mu,1,globalproblem->mu,1);
   globalproblem->q = (double *)malloc(m*sizeof(double));
   cblas_dcopy(m,problem->q,1,globalproblem->q,1);
   globalproblem->b = (double *)calloc(m,sizeof(double));
 
   NumericsMatrix *M = problem->M;
-  NumericsMatrix *Mglobal = NM_new();
-  NM_copy(M,Mglobal);
+
+
+  NumericsMatrix *Mglobal = NM_create(NM_SPARSE,m,m);
+  CSparseMatrix * M_triplet = NM_triplet(M);
+  Mglobal->matrix2->triplet = M_triplet;
+  Mglobal->matrix2->origin = NSM_TRIPLET;
   globalproblem->M=Mglobal;
 
   NumericsMatrix *Hglobal = NM_eye(m);
+  NM_display(Hglobal);
   globalproblem->H=M=Hglobal;
+
+
 
    return globalproblem;
 }

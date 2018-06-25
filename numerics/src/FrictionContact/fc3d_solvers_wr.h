@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifndef FRICTIONCONTACT3DSOLVERS_H
-#define FRICTIONCONTACT3DSOLVERS_H
+#ifndef FRICTIONCONTACT3DSOLVERS_WR_H
+#define FRICTIONCONTACT3DSOLVERS_WR_H
 
 /*!\file gfc3d_Solvers.h
   Subroutines for the resolution of contact problems with friction (3-dimensional case).
