@@ -61,6 +61,8 @@ class VViewOptions(object):
         self.advance_by_time = None
         self.frames_per_second = 25
         self.cf_disable = False
+        self.imr = False
+        self.global_filter = False
         self.initial_camera = [None] * 4
         self.visible_mode = 'all'
 
@@ -72,7 +74,8 @@ class VViewOptions(object):
         print()
         if not long:
             print("""[--help] [--tmin=<float value>] [--tmax=<float value>]
-            [--cf-scale=<float value>] [--no-cf] [--normalcone-ratio = <float value>]
+            [--cf-scale=<float value>] [--no-cf] [--imr] [--global-filter]
+            [--normalcone-ratio = <float value>]
             [--advance=<'fps' or float value>] [--fps=float value]
             [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
             [--visible=all,avatars,contactors]
@@ -92,12 +95,21 @@ class VViewOptions(object):
        the normal cone and the contact points are also rescaled
      --no-cf
        do not display contact forces
+     --imr
+       immediate-mode-rendering, use less memory at the price of
+       slower rendering
+     --global-filter
+       add a global filter, so the display is done with only one vtk
+       actor. As the global filter (vtkCompositeDataGeometryFilter) is
+       really slow, this is only a proof of concept.
      --normalcone-ratio = value  (default : 1.0 )
-       introduce a ratio between the representation of the contact forces arrows
-       the normal cone and the contact points. useful when the contact forces are
-       small with respect to the characteristic dimesion
+       introduce a ratio between the representation of the contact
+       forces arrows the normal cone and the contact points. useful
+       when the contact forces are small with respect to the
+       characteristic dimesion
      --advance= value or 'fps'
-       automatically advance time during recording (default : don't advance)
+       automatically advance time during recording (default : don't
+       advance)
      --fps= value
        frames per second of generated video (default 25)
      --camera=x,y,z
@@ -107,12 +119,13 @@ class VViewOptions(object):
      --up=x,y,z
        initial up direction of the camera (default=y-axis)
      --ortho=scale
-       start in ortho mode with given parallel scale (default=perspective)
+       start in ortho mode with given parallel scale
+       (default=perspective)
      --visible=all
        all: view all contactors and avatars
-       avatars: view only avatar if an avatar is defined (for each object)
-       contactors: ignore avatars, view only contactors
-         where avatars are contactors with collision_group=-1
+       avatars: view only avatar if an avatar is defined (for each
+       object) contactors: ignore avatars, view only contactors where
+       avatars are contactors with collision_group=-1
     """)
 
     def parse(self):
@@ -120,9 +133,11 @@ class VViewOptions(object):
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                            ['help', 'version',
-                                            'dat', 'tmin=', 'tmax=', 'no-cf',
+                                            'dat', 'tmin=', 'tmax=',
+                                            'no-cf', 'imr', 'global-filter',
                                             'cf-scale=', 'normalcone-ratio=',
-                                            'advance=', 'fps=', 'camera=', 'lookat=',
+                                            'advance=', 'fps=', 'camera=',
+                                            'lookat=',
                                             'up=', 'ortho=', 'visible='])
             self.configure(opts, args)
         except getopt.GetoptError as err:
@@ -138,7 +153,7 @@ class VViewOptions(object):
                 exit(0)
 
             elif o == '--version':
-                print('{0} @SICONOS_VERSION@'.format(os.path.split(sys.argv[0])[1]))
+                print('{0} 4.2.0'.format(os.path.split(sys.argv[0])[1]))
                 exit(0)
 
             elif o == '--tmin':
@@ -152,6 +167,12 @@ class VViewOptions(object):
 
             elif o == '--no-cf':
                 self.cf_disable = True
+
+            elif o == '--imr':
+                self.imr = True
+
+            elif o == '--global-filter':
+                self.global_filter = True
 
             elif o == '--normalcone-ratio':
                 self.normalcone_ratio = float(a)
@@ -226,7 +247,7 @@ class VExportOptions(VViewOptions):
                 self.usage(long=True)
                 exit(0)
             if o == '--version':
-                print('{0} @SICONOS_VERSION@'.format(os.path.split(sys.argv[0])[1]))
+                print('{0} 4.2.0'.format(os.path.split(sys.argv[0])[1]))
                 exit(0)
             if o in ('--ascii'):
                 self.ascii_mode = True
@@ -485,7 +506,7 @@ class InputObserver():
             self.vview.clactor[mu].GetProperty().SetOpacity(self._opacity_contact)
             self.vview.sactora[mu].GetProperty().SetOpacity(self._opacity_contact)
             self.vview.sactorb[mu].GetProperty().SetOpacity(self._opacity_contact)
-                    
+
 
     def key(self, obj, event):
         key = obj.GetKeySym()
@@ -527,7 +548,7 @@ class InputObserver():
             print('Increase the opacity of bodies')
             self._opacity += .1
             self.set_opacity()
-            
+
         if key == 'y':
             print('Decrease the opacity of static bodies')
             self._opacity_static -= .1
@@ -537,7 +558,7 @@ class InputObserver():
             print('Increase the opacity of static bodies')
             self._opacity_static += .1
             self.set_opacity_static()
-            
+
         if key == 'u':
             print('Decrease the opacity of contact elements')
             self._opacity_contact -= .1
@@ -909,6 +930,8 @@ class VView(object):
         self.cone_glyph[mu].SetColorModeToColorByScalar()
 
         self.cmapper[mu] = vtk.vtkPolyDataMapper()
+        if not self.opts.imr:
+            self.cmapper[mu].ImmediateModeRenderingOff()
         self.cmapper[mu].SetInputConnection(self.cone_glyph[mu].GetOutputPort())
 
         # Random color map, up to 256 domains
@@ -932,7 +955,7 @@ class VView(object):
             self.cmapper[mu].ScalarVisibilityOn()
 
         self.cactor[mu] = vtk.vtkActor()
-        
+
         self.cactor[mu].GetProperty().SetOpacity(self.config.get('contact_opacity', 0.4))
         self.cactor[mu].GetProperty().SetColor(0, 0, 1)
         self.cactor[mu].SetMapper(self.cmapper[mu])
@@ -971,6 +994,8 @@ class VView(object):
         self.arrow_glyph[mu].OrientOn()
 
         self.gmapper[mu] = vtk.vtkPolyDataMapper()
+        if not self.opts.imr:
+            self.gmapper[mu].ImmediateModeRenderingOff()
         self.gmapper[mu].SetInputConnection(self.arrow_glyph[mu].GetOutputPort())
         self.gmapper[mu].SetScalarModeToUsePointFieldData()
         self.gmapper[mu].SetColorModeToMapScalars()
@@ -999,6 +1024,8 @@ class VView(object):
             self.cylinder_glyph[mu]._scale_fact * self.opts.cf_scale_factor)
 
         self.clmapper[mu] = vtk.vtkPolyDataMapper()
+        if not self.opts.imr:
+            self.clmapper[mu].ImmediateModeRenderingOff()
         self.clmapper[mu].SetInputConnection(self.cylinder_glyph[mu].GetOutputPort())
 
         self.sphere_glypha[mu] = vtk.vtkGlyph3D()
@@ -1029,8 +1056,12 @@ class VView(object):
         # self.sphere_glyph.OrientOn()
 
         self.smappera[mu] = vtk.vtkPolyDataMapper()
+        if not self.opts.imr:
+            self.smappera[mu].ImmediateModeRenderingOff()
         self.smappera[mu].SetInputConnection(self.sphere_glypha[mu].GetOutputPort())
         self.smapperb[mu] = vtk.vtkPolyDataMapper()
+        if not self.opts.imr:
+            self.smapperb[mu].ImmediateModeRenderingOff()
         self.smapperb[mu].SetInputConnection(self.sphere_glyphb[mu].GetOutputPort())
 
         # self.cmapper.SetScalarModeToUsePointFieldData()
@@ -1183,6 +1214,8 @@ class VView(object):
             delaunay.Update()
             self.datasets[shape_name] = polydata
             mapper = vtk.vtkPolyDataMapper()
+            if not self.opts.imr:
+                mapper.ImmediateModeRenderingOff()
             mapper.SetInputConnection(delaunay.GetOutputPort())
             add_compatiblity_methods(mapper)
             self.mappers[shape_name] = None
@@ -1272,6 +1305,8 @@ class VView(object):
 
             self.readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
+            if not self.opts.imr:
+                mapper.ImmediateModeRenderingOff()
             mapper.SetInputConnection(source.GetOutputPort())
             self.mappers[shape_name] = (x for x in [mapper])
 
@@ -1310,28 +1345,28 @@ class VView(object):
             except AttributeError:
                 pass
 
+        if not self.opts.global_filter:
+            actor = vtk.vtkActor()
+            if instance.attrs.get('mass', 0) > 0:
+                # objects that may move
+                self.dynamic_actors[instid].append((actor, contact_shape_indx,
+                                                    collision_group))
 
-        actor = vtk.vtkActor()
-        if instance.attrs.get('mass', 0) > 0:
-            # objects that may move
-            self.dynamic_actors[instid].append((actor, contact_shape_indx,
-                                                collision_group))
+                actor.GetProperty().SetOpacity(
+                    self.config.get('dynamic_opacity', 0.7))
+            else:
+                # objects that are not supposed to move
+                self.static_actors[instid].append((actor, contact_shape_indx,
+                                                   collision_group))
 
-            actor.GetProperty().SetOpacity(
-                self.config.get('dynamic_opacity', 0.7))
-        else:
-            # objects that are not supposed to move
-            self.static_actors[instid].append((actor, contact_shape_indx,
-                                               collision_group))
+                actor.GetProperty().SetOpacity(
+                    self.config.get('static_opacity', 1.0))
 
-            actor.GetProperty().SetOpacity(
-                self.config.get('static_opacity', 1.0))
+            actor.GetProperty().SetColor(random_color())
 
-        actor.GetProperty().SetColor(random_color())
+            actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
 
-        actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
-
-        self.renderer.AddActor(actor)
+            self.renderer.AddActor(actor)
 
         transform = vtk.vtkTransform()
         transformer = vtk.vtkTransformFilter()
@@ -1353,10 +1388,12 @@ class VView(object):
             scale_transform.Scale(scale, scale, scale)
             scale_transform.SetInput(transform)
             transformer.SetTransform(scale_transform)
-            actor.SetUserTransform(scale_transform)
+            if not self.global_filter:
+                actor.SetUserTransform(scale_transform)
         else:
             transformer.SetTransform(transform)
-            actor.SetUserTransform(transform)
+            if not self.opts.global_filter:
+                actor.SetUserTransform(transform)
 
         self.transformers[contact_shape_indx] = transformer
 
@@ -1665,7 +1702,7 @@ class VView(object):
         self.renderer.SetOcclusionRatio(0.1)
 
 
-        
+
         # Set the initial camera position and orientation if specified
         if self.opts.initial_camera[0] is not None:
             self.renderer.GetActiveCamera().SetPosition(*self.opts.initial_camera[0])
@@ -1803,7 +1840,7 @@ class VView(object):
             slider_repres.SetLabelFormat("%3.4lf")
             slider_repres.SetTitleHeight(0.02)
             slider_repres.SetLabelHeight(0.02)
-            
+
             background_color = self.config.get('background_color', [.0,.0,.0])
             reverse_background_color =numpy.ones(3) - background_color
 
@@ -1934,8 +1971,25 @@ class VView(object):
             big_data_writer.Write()
 
     def initialize_vtk(self):
+
         self.big_data_source = vtk.vtkMultiBlockDataGroupFilter()
         add_compatiblity_methods(self.big_data_source)
+
+        if self.opts.global_filter:
+            self.big_data_geometry_filter = vtk.vtkCompositeDataGeometryFilter()
+            add_compatiblity_methods(self.big_data_geometry_filter)
+            self.big_data_geometry_filter.SetInputConnection(self.big_data_source.GetOutputPort())
+
+            self.big_data_mapper = vtk.vtkCompositePolyDataMapper()
+            add_compatiblity_methods(self.big_data_mapper)
+            self.big_data_mapper.SetInputConnection(self.big_data_geometry_filter.GetOutputPort())
+
+            if self.opts.imr:
+                self.big_data_mapper.ImmediateModeRenderingOff()
+
+
+            self.big_actor = vtk.vtkActor()
+            self.big_actor.SetMapper(self.big_data_mapper)
 
         self.cf_prov = None
         if not self.opts.cf_disable:
@@ -1987,7 +2041,12 @@ class VView(object):
                 self.renderer.AddActor(self.sactora[mu])
                 self.renderer.AddActor(self.sactorb[mu])
 
+
         self.setup_initial_position()
+
+        if self.opts.global_filter:
+            self.renderer.AddActor(self.big_actor)
+
         self.renderer.ResetCamera()
 
     def initialize_gui(self):
