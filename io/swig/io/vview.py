@@ -62,6 +62,9 @@ class VViewOptions(object):
         self.frames_per_second = 25
         self.cf_disable = False
         self.imr = False
+        self.depth_peeling = True
+        self.maximum_number_of_peels = 100
+        self.occlusion_ratio = 0.1
         self.global_filter = False
         self.initial_camera = [None] * 4
         self.visible_mode = 'all'
@@ -75,6 +78,8 @@ class VViewOptions(object):
         if not long:
             print("""[--help] [--tmin=<float value>] [--tmax=<float value>]
             [--cf-scale=<float value>] [--no-cf] [--imr] [--global-filter]
+            [--no-depth-peeling] [--maximum-number-of-peels=<int value>]
+            [--occlusion-ratio=<float value>]
             [--normalcone-ratio = <float value>]
             [--advance=<'fps' or float value>] [--fps=float value]
             [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
@@ -102,6 +107,13 @@ class VViewOptions(object):
        add a global filter, so the display is done with only one vtk
        actor. As the global filter (vtkCompositeDataGeometryFilter) is
        really slow, this is only a proof of concept.
+       too slow at the moment.
+     --no-depth-peeling (default : on)
+       do not use vtk depth peeling
+     --maximum-number-of-peels= value
+       maximum number of peels when depth peeling is on
+     --occlusion-ration= value
+       occlusion-ration when depth peeling is on
      --normalcone-ratio = value  (default : 1.0 )
        introduce a ratio between the representation of the contact
        forces arrows the normal cone and the contact points. useful
@@ -135,6 +147,9 @@ class VViewOptions(object):
                                            ['help', 'version',
                                             'dat', 'tmin=', 'tmax=',
                                             'no-cf', 'imr', 'global-filter',
+                                            'no-depth-peeling',
+                                            'maximum-number-of-peels=',
+                                            'occlusion-ratio=',
                                             'cf-scale=', 'normalcone-ratio=',
                                             'advance=', 'fps=', 'camera=',
                                             'lookat=',
@@ -153,7 +168,7 @@ class VViewOptions(object):
                 exit(0)
 
             elif o == '--version':
-                print('{0} 4.2.0'.format(os.path.split(sys.argv[0])[1]))
+                print('{0} @SICONOS_VERSION@'.format(os.path.split(sys.argv[0])[1]))
                 exit(0)
 
             elif o == '--tmin':
@@ -170,6 +185,15 @@ class VViewOptions(object):
 
             elif o == '--imr':
                 self.imr = True
+
+            elif o == '--no-depth-peeling':
+                self.depth_peeling=False
+
+            elif o == '--maximum-number-of-peels':
+                self.maximum_number_of_peels = int(a)
+
+            elif o == '--occlusion-ratio':
+                self.occlusion_ratio = float(a)
 
             elif o == '--global-filter':
                 self.global_filter = True
@@ -247,7 +271,7 @@ class VExportOptions(VViewOptions):
                 self.usage(long=True)
                 exit(0)
             if o == '--version':
-                print('{0} 4.2.0'.format(os.path.split(sys.argv[0])[1]))
+                print('{0} @SICONOS_VERSION@'.format(os.path.split(sys.argv[0])[1]))
                 exit(0)
             if o in ('--ascii'):
                 self.ascii_mode = True
@@ -1682,26 +1706,26 @@ class VView(object):
         self.interactor_renderer.GetInteractorStyle(
         ).SetCurrentStyleToTrackballCamera()
 
-        # http://www.itk.org/Wiki/VTK/Depth_Peeling ?
+        # http://www.itk.org/Wiki/VTK/Depth_Peeling
 
-        # Use a render window with alpha bits (as initial value is 0 (false) ):
-        self.renderer_window.SetAlphaBitPlanes(1)
+        if self.opts.depth_peeling:
+            # Use a render window with alpha bits (as initial value is 0 (false) ):
+            self.renderer_window.SetAlphaBitPlanes(1)
 
-        # Force to not pick a framebuffer with a multisample buffer ( as initial
-        # value is 8):
-        self.renderer_window.SetMultiSamples(0)
+            # Force to not pick a framebuffer with a multisample buffer ( as initial
+            # value is 8):
+            self.renderer_window.SetMultiSamples(0)
 
-        # Choose to use depth peeling (if supported) (initial value is 0
-        # (false) )
-        self.renderer.SetUseDepthPeeling(1)
+            # Choose to use depth peeling (if supported) (initial value is 0
+            # (false) )
+            self.renderer.SetUseDepthPeeling(1)
 
-        # Set depth peeling parameters.
-        self.renderer.SetMaximumNumberOfPeels(100)
+            # Set depth peeling parameters.
+            self.renderer.SetMaximumNumberOfPeels(
+                self.opts.maximum_number_of_peels)
 
-        # Set the occlusion ratio (initial value is 0.0, exact image)
-        self.renderer.SetOcclusionRatio(0.1)
-
-
+            # Set the occlusion ratio (initial value is 0.0, exact image)
+            self.renderer.SetOcclusionRatio(self.opts.occlusion_ratio)
 
         # Set the initial camera position and orientation if specified
         if self.opts.initial_camera[0] is not None:
