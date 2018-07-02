@@ -51,7 +51,7 @@ macro(doxy2swig_docstrings COMP)
     file(MAKE_DIRECTORY ${DOXY2SWIG_OUTPUT})
     set(XML_INPUTS)
     # Set config file name
-    set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxyswig-xml.config")
+    set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy2swig-xml.config")
     # Add all subdirectories related to the current component into DOXYGEN_INPUTS
     foreach(_dir ${${COMP}_DIRS})
       list(FIND ${COMP}_EXCLUDE_DOXY ${_dir} check_dir)
@@ -207,7 +207,7 @@ macro(add_siconos_swig_sub_module fullname)
       DEPENDS ${SWIG_MODULE_${_name}_REAL_NAME}
       COMMENT "Insert latex into docstrings.")
 
-    set(SPHINX_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs/sphinx/reference/python/${_name})
+    set(SPHINX_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs/sphinx/reference/python/)
     # python modules for previous components are required to apidoc (e.g. kernel.py for control).
     # So we get this last comp and add a dependency.
     list(APPEND PROCESSED_PYTHON_MODULES ${SWIG_MODULE_${_name}_REAL_NAME})
@@ -215,7 +215,7 @@ macro(add_siconos_swig_sub_module fullname)
     set(PROCESSED_PYTHON_MODULES ${PROCESSED_PYTHON_MODULES} CACHE INTERNAL "python modules for siconos")
     add_custom_target(${_name}_autodoc
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share:${CMAKE_BINARY_DIR}/wrap ${PYTHON_EXECUTABLE} -c
-      "import doctools; doctools.module_docstrings2rst('${COMPONENT}', '${_path}', '${_name}', '${SPHINX_OUTPUT_DIR}')"
+      "import doctools; doctools.module_docstrings2rst('${COMPONENT}', '${_path}', '${_name}', '${SPHINX_OUTPUT_DIR}', '${SICONOS_SWIG_ROOT_DIR}')"
       VERBATIM
       DEPENDS ${_name}_replace_latex
       #DEPENDS ${SWIG_MODULE_${_name}_REAL_NAME}

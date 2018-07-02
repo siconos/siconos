@@ -37,7 +37,7 @@
  * OSNS classes (LCP ...) and to leave it into this class. \n
  *
  * Two main functions:
- * - fill(indexSet, interactionBlocks): fill the matrix using a list of
+ *   - fill(indexSet, interactionBlocks): fill the matrix using a list of
  *   "active" Interaction, in indexSet, and a
  *   MapOfMapOfInteractionMatrices, interactionBlocks, which determines
  *   which Interaction are connected or not (ie have common DynamicalSystem).
@@ -61,16 +61,18 @@
 
  \rst
 
- .. math::
-   :nowrap:
-     M=\left\lbrace\begin{array}{cccc}
-     m22 & m23 & m28 &  0 \\
-     m32 & m33 & 0   &  0 \\
-     0  &  0  & m88 & m812 \\
-     0  &  0  & m128& m1212
-     \end{array}\right.
+  .. math::
+    :nowrap:
+  
+      M=\left\lbrace\begin{array}{cccc}
+      m22 & m23 & m28 &  0 \\
+      m32 & m33 & 0   &  0 \\
+      0   &  0  & m88 & m812 \\
+      0  &  0  & m128& m1212
+      \end{array}\right.
 
  \endrst
+
  *
  *
  * Note: at the time the available storage types are:

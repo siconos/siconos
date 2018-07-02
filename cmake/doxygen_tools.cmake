@@ -86,7 +86,7 @@ macro(doxy2rst_sphinx COMP)
       COMMENT "Generate xml/doxygen files for ${COMP} (conf: ${DOXY_CONFIG_XML}).") 
 
     
-    set(SPHINX_API_DIR "${CMAKE_BINARY_DIR}/docs/sphinx/reference/")
+    set(SPHINX_API_DIR "${CMAKE_BINARY_DIR}/docs/sphinx/reference/cpp")
     
     add_custom_target(${COMP}-doxy2rst
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c

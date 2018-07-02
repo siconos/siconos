@@ -29,94 +29,87 @@
 
 /** Lagrangian non linear dynamical systems - \f$M(q,z) \dot v = F(v, q, t, z) + p \f$
 
-    This class defines and computes a generic ndof-dimensional
-    Lagrangian Non Linear Dynamical System of the form :
+ This class defines and computes a generic ndof-dimensional
+ Lagrangian Non Linear Dynamical System of the form :
 
-    \rst
-    .. math::
+ \rst
+  .. math::
         
       \begin{cases}
       M(q,z) \\dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p  \\
       \dot q = v
       \end{cases}
            
-\endrst
+ \endrst
 
-    where
-    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
-    - \f$ \dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
+ where
+ 
+   - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
+   - \f$ \dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
     derivative of the generalized coordinates (Lagrangian systems).
-    - \f$ \ddot q =\dot v \in R^{ndof} \f$ the acceleration, i. e. the second
+   - \f$ \ddot q =\dot v \in R^{ndof} \f$ the acceleration, i. e. the second
     time derivative of the generalized coordinates.
-    - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth
+   - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth
     Interaction.
-    - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
+   - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
     in the SiconosMatrix mass().
-    - \f$ F_{gyr}(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
+   - \f$ F_{gyr}(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
     saved in the SiconosVector fGyr().
-    - \f$ F_{int}(\dot q , q , t) \in R^{ndof} \f$ are the internal
+   - \f$ F_{int}(\dot q , q , t) \in R^{ndof} \f$ are the internal
     forces saved in the SiconosVector fInt().
-    - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces saved in
+   - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces saved in
     the SiconosVector fExt().
-    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
+   - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
     variables, some sort of discrete state.
 
-    The equation of motion is also shortly denoted as:
-    \f$
-    M(q,z) \dot v = F(v, q, t, z) + p
-    \f$
+ The equation of motion is also shortly denoted as  \f$ M(q,z) \dot v = F(v, q, t, z) + p\f$
 
-    where
-    - \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
-    acting on the system, that is
-    \f$ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) + F_{int}(v, q , t, z) \f$
-    This vector is stored in the  SiconosVector forces()
+ where \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces acting on the system, that is
+ \f$ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) + F_{int}(v, q , t, z) \f$
+ This vector is stored in the  SiconosVector forces().
 
+ q[i] is the derivative number i of q.
+ Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
 
-    q[i] is the derivative number i of q.
-    Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
+ The following operators (and their jacobians) can be plugged, in the usual way (see User Guide, 'User-defined plugins')
 
-    The following operators (and their jacobians) can be plugged, in the usual way (see User Guide, 'User-defined plugins')
+ - \f$M(q)\f$ (computeMass())
+ - \f$F_{gyr}(v, q, z)\f$ (computeFGyr())
+ - \f$F_{int}(v , q , t, z)\f$ (computeFInt())
+ - \f$F_{ext}(t, z)\f$ (computeFExt())
 
-    - \f$M(q)\f$ (computeMass())
-    - \f$F_{gyr}(v, q, z)\f$ (computeFGyr())
-    - \f$F_{int}(v , q , t, z)\f$ (computeFInt())
-    - \f$F_{ext}(t, z)\f$ (computeFExt())
+ If required (e.g. for Event-Driven like simulation), reformulation as a first-order system (DynamicalSystem)
+ is possible, with:
 
+ - \f$ n= 2 ndof \f$
+ - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
+ - rhs given by:
 
-
-
-    If required (e.g. for Event-Driven like simulation), reformulation as a first-order system (DynamicalSystem)
-    is possible, with:
-
-    - \f$ n= 2 ndof \f$
-    - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
-    - rhs given by:
-
-    \rst
+ \rst
     .. math::
-        
+       :nowrap:
+
         \\dot x = \left[\begin{array}{c}
         \\dot q \\
         \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
         \end{array}\right]
            
-\endrst
-    - jacobian of the rhs, with respect to x
+ \endrst
+ 
+ - jacobian of the rhs, with respect to x
 
-    \rst
+ \rst
     .. math::        
+       :nowrap:
 
         \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
         0  & I \\
         \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\\dot q}(M^{-1}(q)F(v, q , t, z)) \\
         \end{array}\right]
            
-\endrst
-    - input due to the non smooth law:
-    \f$
-    r = \left[\begin{array}{c}0 \\ p \end{array}\right]
-    \f$
+  \endrst
+ 
+- input due to the non smooth law: \f$r = \left[\begin{array}{c}0 \\ p \end{array}\right]\f$
 
 
 */

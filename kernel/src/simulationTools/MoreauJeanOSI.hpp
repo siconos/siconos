@@ -27,16 +27,13 @@
 
 const unsigned int MOREAUSTEPSINMEMORY = 1;
 
-/**  \class MoreauJeanOSI
- *   \brief One Step time Integrator for First Order Dynamical Systems  for
- *    mechanical Systems (LagrangianDS and NewtonEulerDS)
- *
+/** One Step time Integrator, Moreau-Jean algorithm.
  * This integrator is the work horse of the event--capturing time stepping schemes
  * for mechanical systems.  It is mainly based on the pioneering works of M. Jean and
  * J.J. Moreau for the time integration of mechanical systems
  * with unilateral contact, impact and Coulomb's friction with \f$\theta\f$ scheme
  *
- * For the linear Lagrangina system, the scheme reads as
+ * For the linear Lagrangian system, the scheme reads as
  * 
  \rst
 

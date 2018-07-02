@@ -12,5 +12,8 @@ Although those two APIs are quite similar, two different documentations (both ge
 .. toctree::
    :maxdepth: 1
 
-   siconos_api_reference
+   cpp_api
    python_api
+
+
+

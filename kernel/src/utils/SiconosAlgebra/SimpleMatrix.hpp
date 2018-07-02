@@ -487,20 +487,20 @@ public:
 
   friend void setBlock(SPC::SiconosMatrix , SP::SiconosMatrix , const Index&, const Index&);
 
-  /** get block at position row-col, ie return this in SimpleMatrix case
-   * \param row unsigned int
-   * \param col unsigned int col
-   * \return SP::SiconosMatrix
+  /** get block at position row-col, (current matrix in SimpleMatrix case)
+   * \param row row index
+   * \param col column index
+   * \return a sub-matrix
    */
   inline SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0)
   {
     return shared_from_this();
   };
 
-  /** get block at position row-col, ie return this in SimpleMatrix case
-   *  \param row unsigned int
-   *  \param col unsigned int
-   * \return SPC::SiconosMatrix
+  /** get block at position row-col, (current matrix in SimpleMatrix case)
+   * \param row row index
+   * \param col column index
+   * \return a sub-matrix
    */
   inline SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
   {

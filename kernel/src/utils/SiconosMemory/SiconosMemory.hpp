@@ -32,6 +32,7 @@
 
 /** Container used to save vectors in SiconosMemory */
 typedef std::vector<SiconosVector> MemoryContainer;
+
 TYPEDEF_SPTR(MemoryContainer)
 
 /** This class is a backup for vectors of previous time step

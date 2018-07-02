@@ -26,7 +26,7 @@
 
 const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
 
-/** \brief One Step time Integrator for First Order Dynamical Systems.
+/** One Step time Integrator for First Order Dynamical Systems.
  *
  * This integrator is the work horse of the event--capturing time stepping schemes
  * for first order systems.
@@ -147,6 +147,7 @@ protected:
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
+
   friend struct _NSLEffectOnFreeOutput;
 
 

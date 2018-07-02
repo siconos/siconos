@@ -115,7 +115,25 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         self.ignores.append('author')
         self.ignores.append('date')
         self.ignores.append('version')
+        self.replace_latex = True
 
+    def get_xml_compound_infos(self):
+        """Returns object (class, struct ...) name, kind
+        and brief description
+        from an xml node (compound)
+        """
+        subn = self.get_specific_subnodes(self.xmldoc, 'compounddef')
+        compound = subn[0]
+        kind = compound.attributes['kind'].value
+        name = compound.getElementsByTagName('compoundname')[0].childNodes[0].data
+        brief = self.get_specific_subnodes(compound, 'briefdescription')[0]
+        self.replace_latex = False
+        descr = self.extract_text(brief).strip()
+        descr = ' '.join(descr.split('\n'))
+        self.replace_latex = True
+        return name, kind, descr
+        
+        
     def add_separator(self):
         """add horizontal line in doc
         """
@@ -223,7 +241,10 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         # while 'FORMULA1_' works.
         id_formula = 'FORMULA' + str(__id) + '_'
         #self.add_text(' ')
-        self.add_text(id_formula)
+        if self.replace_latex:
+            self.add_text(id_formula)
+        else:
+            self.add_text(latex)
 
     def do_verbatim(self, node):
         """Read latex or other verbatim rst from xml file
@@ -480,7 +501,7 @@ class SiconosDoxy2Swig(Doxy2SWIG):
             for n in ('briefdescription','detaileddescription'):
                 if n in sub_dict:
                     self.parse(sub_dict[n])
-
+                    
             # Name of the original (C/C++) header.
             sub_list = self.get_specific_subnodes(node, 'includes')
             if sub_list:

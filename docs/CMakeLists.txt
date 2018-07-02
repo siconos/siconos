@@ -153,9 +153,9 @@ if(USE_SPHINX)
   
   add_custom_target(create_rst
     COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-    "import doctools; doctools.build_python_api_main('${CMAKE_CURRENT_BINARY_DIR}/sphinx')"
+    "import doctools; doctools.build_api_main('${CMAKE_CURRENT_BINARY_DIR}/sphinx')"
     VERBATIM
-    COMMENT "Create main rst file for python API.")
+    COMMENT "Create main rst files for C/C++ and python API.")
   
   # -- To build html doc : make html --
   add_custom_target(html
