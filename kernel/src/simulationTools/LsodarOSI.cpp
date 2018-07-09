@@ -152,6 +152,18 @@ void LsodarOSI::updateData()
   iwork.reset(new integer[_intData[7]]);
   for(int i = 0; i < _intData[7]; i++) iwork[i] = 0;
 
+  // This is for documentation purposes only
+  // Set the flag to generate extra printing at method switches.
+  //iwork[4] = 0;
+  // Set the maximal number of steps for one call
+  //iwork[5] = 0;
+  // set  the maximum number of messages printed (per problem)
+  //iwork[6] = 0;
+  // Set the maximum order to be allowed for the nonstiff (Adams) method
+  //iwork[7] = 0;
+  // Set   the maximum order to be allowed for the stiff  (BDF) method.
+  //iwork[8] = 0;
+
   rwork.reset(new doublereal[_intData[6]]);
   for(int i = 0; i < _intData[6]; i++) rwork[i] = 0.0;
 
@@ -166,7 +178,7 @@ void LsodarOSI::fillXWork(integer* sizeOfX, doublereal* x)
   (*_xWork) = x;
 }
 
-void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
+void LsodarOSI::computeRhs(double t)
 {
   DEBUG_BEGIN("LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)\n")
   DynamicalSystemsGraph::VIterator dsi, dsend;
@@ -193,8 +205,8 @@ void LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)
     }
     if(_extraAdditionalTerms)
     {
-      DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
-      _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, t, ds->getRhs());
+      DynamicalSystemsGraph::VDescriptor dsgVD = _dynamicalSystemsGraph->descriptor(ds);
+      _extraAdditionalTerms->addSmoothTerms(*_dynamicalSystemsGraph, dsgVD, t, ds->getRhs());
     }
   }
   DEBUG_END("LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)\n")
@@ -262,6 +274,22 @@ void LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
     _xWork->insertPtr(ds->x());
   }
   ds->swapInMemory();
+
+  // Update necessary data
+
+  // 1 - Neq; x vector size.
+  _intData[0] = _xWork->size();
+  // 5 - lrw, size of rwork
+  _intData[6] = 22 + _intData[0] * std::max(16, (int)_intData[0] + 9) + 3 * _intData[1];
+  // 6 - liw, size of iwork
+  _intData[7] = 20 + _intData[0];
+
+  // memory allocation for doublereal*, according to _intData values
+  updateData();
+
+  _xtmp.reset(new SiconosVector(_xWork->size()));
+
+  computeRhs(t);
 
   DEBUG_END("LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
 }
@@ -394,15 +422,10 @@ void LsodarOSI::initialize()
   //     initializeWorkVectorsForInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
   //   }
 
-  computeRhs(_simulation->nonSmoothDynamicalSystem()->t0(),*_dynamicalSystemsGraph);
-
 
   //   Integer parameters for LSODAROSI are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
 
-  // 1 - Neq; x vector size.
-  _intData[0] = _xWork->size();
-  _xtmp.reset(new SiconosVector(_xWork->size()));
   // 2 - Ng, number of constraints:
   _intData[1] = std11::static_pointer_cast<EventDriven>(_simulation)->computeSizeOfg();
   // 3 - Itol, itask, iopt
@@ -425,11 +448,6 @@ void LsodarOSI::initialize()
   //                 <0: error. See table below, in integrate function output message.
 
 
-  // 5 - lrw, size of rwork
-  _intData[6] = 22 + _intData[0] * std::max(16, (int)_intData[0] + 9) + 3 * _intData[1];
-
-  // 6 - liw, size of iwork
-  _intData[7] = 20 + _intData[0];
 
   // 7 - JT, Jacobian type indicator
   _intData[8] = 2;   // jt, Jacobian type indicator.
@@ -438,22 +456,8 @@ void LsodarOSI::initialize()
   //           4 means a user-supplied banded Jacobian.
   //           5 means an internally generated banded Jacobian (using ML+MU+1 extra calls to f per df/dx evaluation).
 
-  // memory allocation for doublereal*, according to _intData values ...
-  updateData();
-
   // set the optional input flags of LSODAROSI to 0
   // LSODAROSI will take the default values
-
-  // Set the flag to generate extra printing at method switches.
-  iwork[4] = 0;
-  // Set the maximal number of steps for one call
-  iwork[5] = 0;
-  // set  the maximum number of messages printed (per problem)
-  iwork[6] = 0;
-  // Set the maximum order to be allowed for the nonstiff (Adams) method
-  iwork[7] = 0;
-  // Set   the maximum order to be allowed for the stiff  (BDF) method.
-  iwork[8] = 0;
 
 
   // === Error handling in LSODAROSI===

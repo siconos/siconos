@@ -232,9 +232,8 @@ public:
 
   /** compute rhs(t) for all dynamical systems in the set
    * \param t current time of simulation
-   * \param DSG0 the graph of DynamicalSystem
    */
-  void computeRhs(double t, DynamicalSystemsGraph& DSG0);
+  void computeRhs(double t);
 
   /** compute jacobian of the rhs at time t for all dynamical systems in the set
    * \param t current time of simulation

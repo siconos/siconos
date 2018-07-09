@@ -387,7 +387,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   }
 
   // update the DS of the OSI.
-  lsodar.computeRhs(t, *_DSG0);
+  lsodar.computeRhs(t);
   //  for the DS state, ie the ones computed by lsodar (x above)
   // Update Index sets? No !!
 
