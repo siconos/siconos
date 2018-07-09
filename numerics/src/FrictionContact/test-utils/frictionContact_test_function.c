@@ -48,8 +48,7 @@ void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 #ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_FRICTION_3D_GAMS_PATHVI ||
       solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI ||
-      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI
-fc3d_reformulation_global_problem(FrictionContactProblem* problem)      )
+      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI)
   {
     add_GAMS_opt_str(GP, "avi_start", "ray_first", GAMS_OPT_SOLVER);
     add_GAMS_opt_str(GP, "ratio_tester", "expand", GAMS_OPT_SOLVER);
