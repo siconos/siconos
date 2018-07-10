@@ -31,7 +31,7 @@
 /** FirstOrder Non Linear Relation.
  *
  *  Relation for First Order Dynamical Systems, with:
- * \rsrstar
+ * \rststar
  *
  * .. math::
  *

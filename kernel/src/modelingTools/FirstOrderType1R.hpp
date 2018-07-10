@@ -34,7 +34,7 @@ typedef void (*Type1Ptr)(unsigned int, double*, unsigned int, double*, unsigned 
  * Derived from FirstOrderR - See this class for more comments.
  *
  *  Relation for First Order Dynamical Systems, with:
- * \rststat
+ * \rststar
  * .. math::
  *    :nowrap:
  *

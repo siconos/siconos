@@ -41,7 +41,6 @@ Linear Relation for First Order Dynamical Systems:
 .. math::
 
     y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
-
     R &=& B(t,z) \lambda
 
 \endrst

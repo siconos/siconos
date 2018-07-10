@@ -26,9 +26,10 @@
 
 #include "SiconosMatrix.hpp"
 
-/** Object to handle block-matrices (ie lists of SiconosMatrix*)
+/** "Block" matrix, ie container of matrices 
  *
- *  A BlockMatrix is a boost::ublas::compressed_matrix of SP::SiconosMatrix.
+ * A BlockMatrix is a boost::ublas::compressed_matrix of SP::SiconosMatrix.
+ *
  * The blocks positions are given by two Index objects, tabRow and tabCol.
  *
  * If block 1 is n1xm1, block2 n2xm2, block3 n3xm3 ..., then:\n

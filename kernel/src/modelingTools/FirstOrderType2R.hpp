@@ -17,7 +17,7 @@
 */
 
 /*! \file FirstOrderType2R.hpp
-  \brief non linear relations: \f$y=h(x,\lambda,z)\quadr=g(\lambda,z)\f$
+  \brief non linear relations: \f$y=h(x,\lambda,z), r=g(\lambda,z)\f$
  */
 
 #ifndef FirstOrderType2R_H
@@ -28,16 +28,17 @@
 typedef void (*Type2PtrH)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
 typedef void (*Type2PtrG)(unsigned int, double*,  unsigned int, double*);
 
-/** FirstOrder Non Linear Relation.
- * Derived from FirstOrderR - See this class for more comments.
+/** First order non linear Relation.
  *
  *  Relation for First Order Dynamical Systems, with:
- * \rststar
- * .. math::
- *     :nowrap:
  *
- *     y &=& h(x,\lambda,z)\\
- *     r &=& g(\lambda,z)
+ * \rststar
+ *
+ * .. math::
+ *   :nowrap:
+ *
+ *   y &=& h(x,\lambda,z)\\
+ *   r &=& g(\lambda,z)
  *
  * \endrststar
  *

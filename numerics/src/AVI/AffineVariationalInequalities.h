@@ -30,7 +30,7 @@
 
 /** Structure that contains and defines an AVI
 
-  The problem is : given a matrix \f$M\f$ and \f$q\f$, find \f$z\f$ such that
+  The problem is : given a matrix \f$M\f$ and a vector\f$q\f$, find \f$z\f$ such that
 
  \rst
  
@@ -40,7 +40,7 @@
 
  \endrst
 
- See \rst :ref:`global_fc_problem` \endrst
+ See \rst :ref:`avi_problem`_ \endrst
 
  */
 struct AffineVariationalInequalities

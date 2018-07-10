@@ -17,7 +17,7 @@
  */
 
 /*! \file LagrangianDS.hpp
-  \brief LagrangianDS class - Second Order Non Linear Dynamical Systems.
+  LagrangianDS class - Second Order Non Linear Dynamical Systems.
 */
 
 #ifndef LAGRANGIANDS_H
@@ -33,43 +33,43 @@
  Lagrangian Non Linear Dynamical System of the form :
 
  \rst
-  .. math::
+ .. math::
         
-      \begin{cases}
-      M(q,z) \\dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p  \\
-      \dot q = v
-      \end{cases}
+   \begin{cases}
+   M(q,z) \\dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p \\
+   \\dot q = v
+   \end{cases}
            
  \endrst
 
  where
  
-   - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
-   - \f$ \dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
-    derivative of the generalized coordinates (Lagrangian systems).
-   - \f$ \ddot q =\dot v \in R^{ndof} \f$ the acceleration, i. e. the second
-    time derivative of the generalized coordinates.
-   - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth
-    Interaction.
-   - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
-    in the SiconosMatrix mass().
-   - \f$ F_{gyr}(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
-    saved in the SiconosVector fGyr().
-   - \f$ F_{int}(\dot q , q , t) \in R^{ndof} \f$ are the internal
-    forces saved in the SiconosVector fInt().
-   - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces saved in
-    the SiconosVector fExt().
-   - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
-    variables, some sort of discrete state.
+ - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
+ - \f$ \\dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
+ derivative of the generalized coordinates (Lagrangian systems).
+ - \f$ \ddot q =\\dot v \in R^{ndof} \f$ the acceleration, i. e. the second
+ time derivative of the generalized coordinates.
+ - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth
+ Interaction.
+ - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
+ in the SiconosMatrix mass().
+ - \f$ F_{gyr}(\\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
+ saved in the SiconosVector fGyr().
+ - \f$ F_{int}(\\dot q , q , t) \in R^{ndof} \f$ are the internal
+ forces saved in the SiconosVector fInt().
+ - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces saved in
+ the SiconosVector fExt().
+ - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
+ variables, some sort of discrete state.
 
- The equation of motion is also shortly denoted as  \f$ M(q,z) \dot v = F(v, q, t, z) + p\f$
+ The equation of motion is also shortly denoted as  \f$ M(q,z) \\dot v = F(v, q, t, z) + p\f$
 
  where \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces acting on the system, that is
  \f$ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) + F_{int}(v, q , t, z) \f$
  This vector is stored in the  SiconosVector forces().
 
  q[i] is the derivative number i of q.
- Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
+ Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \\dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
 
  The following operators (and their jacobians) can be plugged, in the usual way (see User Guide, 'User-defined plugins')
 
@@ -82,34 +82,47 @@
  is possible, with:
 
  - \f$ n= 2 ndof \f$
- - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
+ - \f$ x = \left[\begin{array}{c}q \\ \\dot q\end{array}\right]\f$
  - rhs given by:
 
- \rst
-    .. math::
-       :nowrap:
+   \rst
+ 
+   .. math::
+      :nowrap:
 
-        \\dot x = \left[\begin{array}{c}
-        \\dot q \\
-        \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
-        \end{array}\right]
+      \\dot x = \left[\begin{array}{c}
+      \\dot q\\
+      \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
+      \end{array}\right]
            
- \endrst
+   \endrst
  
  - jacobian of the rhs, with respect to x
 
  \rst
-    .. math::        
-       :nowrap:
 
-        \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
-        0  & I \\
-        \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\\dot q}(M^{-1}(q)F(v, q , t, z)) \\
-        \end{array}\right]
+ .. math::        
+    :nowrap:
+
+    \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
+    0  & I \\
+    \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\\dot q}(M^{-1}(q)F(v, q , t, z)) \\
+    \end{array}\right]
            
-  \endrst
+\endrst
  
-- input due to the non smooth law: \f$r = \left[\begin{array}{c}0 \\ p \end{array}\right]\f$
+- input due to the non smooth law: 
+
+ \rst
+
+ .. math::
+    :nowrap:
+    
+    \left[\begin{array}{c}
+     0 \\
+     p \end{array}\right]
+
+ \endrst
 
 
 */

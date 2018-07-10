@@ -17,7 +17,7 @@
 */
 
 /*! \file BlockVector.hpp
-  \brief Object to handle vectors of vectors ( ... of vectors)
+  \brief Object to handle vectors of vectors
 */
 
 #ifndef BLOCKVECTOR_H
@@ -25,7 +25,7 @@
 
 #include "SiconosAlgebraTypeDef.hpp"
 
-/** Object to handle block-vectors (ie list of SP::SiconosVector)
+/** "Block" vector : container (list) of SiconosVector
  *
  * A block vector is a stl vector that handles pointers to SiconosVector.
  *

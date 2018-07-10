@@ -1,5 +1,5 @@
 .. index:: single: Affine Variational Inequalities (AVI)
-.. _doxid-_a_v_i:
+.. _avi_problem:
 
 Affine Variational Inequalities (AVI)
 =====================================
@@ -22,16 +22,16 @@ or equivalently,
 
 where :math:`\mathcal{N}_K` is the normal cone to :math:`K` at :math:`z` .
 
-The AVI is a special case of a Variational Inequality (VI), where the function :math:`F` is affine. For VI solvers, see :ref:`Variational Inequality (VI) <doxid-vi_problem>` .
+The AVI is a special case of a Variational Inequality (VI), where the function :math:`F` is affine. For VI solvers, see :ref:`Variational Inequality (VI) <vi_problem>` .
 
 From more details on theory and analysis of AVI (and VI in general), we refer to
 
 Facchinei, Francisco; Pang, Jong-Shi (2003), *Finite Dimensional Variational Inequalities and Complementarity Problems* , Vol. 1 & 2, Springer Series in Operations Research, Berlin-Heidelberg-New York: Springer-Verlag.
 
-.. _doxid-_a_v_i_1aviSolversList:
+.. _avi_problem_1aviSolversList:
 .. rubric:: Available solvers:
 
-The solvers and their parameters are described in :ref:`Affine Variational Inequalities Solvers <doxid-_a_v_i_solvers>` .
+The solvers and their parameters are described in :ref:`Affine Variational Inequalities Solvers <avi_problem_solvers>` .
 
 Use the generic function AVI_driver() to call one the the specific solvers listed below:
 
@@ -43,7 +43,7 @@ Use the generic function AVI_driver() to call one the the specific solvers liste
 
 
 .. index:: single: Affine Variational Inequalities Solvers
-.. _doxid-_a_v_i_solvers:
+.. _avi_problem_solvers:
 
 .. rubric:: Affine Variational Inequalities Solvers:
 
@@ -61,7 +61,7 @@ For each solver, the input argument are:
 
 * a SolverOptions struct, which contains iparam and dparam
 
-.. _doxid-_a_v_i_solvers_1aviCaoFerris:
+.. _avi_problem_solvers_1aviCaoFerris:
 .. rubric:: The Cao-Ferris algorithm:
 
 Direct solver for AVI based on pivoting method principle for (degenerated) problem.

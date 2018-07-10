@@ -94,7 +94,7 @@ if(USE_SPHINX)
   endif()
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
-  find_python_module(numpydoc REQUIRED)
+  #find_python_module(numpydoc REQUIRED)
   #find_sphinx_module(sphinxcontrib doxylink REQUIRED)
   
   configure_file (

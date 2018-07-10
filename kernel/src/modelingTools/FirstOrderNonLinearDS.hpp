@@ -60,8 +60,8 @@
   
   .. math::
 
-      rhs = \\dot x =  M^{-1}(f(x,t,z)+ r) \\
-      jacobianRhsx = \nabla_x rhs(x,t,z) = M^{-1}\nabla_x f(x,t,z)
+      rhs &=& \\dot x =  M^{-1}(f(x,t,z)+ r) \\
+      jacobianRhsx &=& \nabla_x rhs(x,t,z) = M^{-1}\nabla_x f(x,t,z)
  
      \endrst
 

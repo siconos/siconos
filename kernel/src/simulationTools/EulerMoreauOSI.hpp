@@ -83,12 +83,12 @@ const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
  * .. math::
  *     :nowrap:
  *
- *   \begin{cases}
+ *     \begin{cases}
  *     M x_{k+1} = M x_{k} +h f(x_{k+\theta},t_{k+1}) + h r(t_{k+\gamma}) \\[2mm]
  *     y_{k+\gamma} =  h(t_{k+\gamma},x_{k+\gamma},\lambda _{k+\gamma}) \\[2mm]
  *     r_{k+\gamma} = g(x_{k+\gamma},\lambda_{k+\gamma},t_{k+\gamma})\\[2mm]
  *     \mbox{nslaw} ( y_{k+\gamma} , \lambda_{k+\gamma})
- *   \end{cases}
+ *     \end{cases}
  *
  * \endrststar
  *

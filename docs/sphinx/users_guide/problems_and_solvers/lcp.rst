@@ -1,10 +1,10 @@
 .. index:: single: Linear Complementarity problems (LCP)
-.. _doxid-_l_c_problem:
+.. _lc_problem:
 
 Linear Complementarity problems (LCP)
 =====================================
 
-.. _doxid-_l_c_problem_1lcpIntro:
+.. _lc_problem_1lcpIntro:
 .. rubric:: The problem:
 
 The Linear Complementarity problem (LCP) is defined by
@@ -23,14 +23,14 @@ From more details on theory and analysis of LCP, we refer to
 
 R.W. Cottle, J.S. Pang, and R.E. Stone. *The Linear Complementarity Problem.* Academic Press, Inc., Boston, MA, 1992.
 
-The problem is stored and given to the solver in numerics thanks to the C structure :ref:`LinearComplementarityProblem <doxid-struct_linear_complementarity_problem>` .
+The problem is stored and given to the solver in numerics thanks to the C structure :ref:`LinearComplementarityProblem <struct_linear_complementarity_problem>` .
 
-.. _doxid-_l_c_problem_1lcpSolversList:
+.. _lc_problem_1lcpSolversList:
 .. rubric:: Available solvers:
 
 Use the generic functions :func:`lcp_driver_DenseMatrix` to call one the the specific solvers listed below:
 
-.. _doxid-_l_c_problem_1lcpDirectSolvers:
+.. _lc_problem_1lcpDirectSolvers:
 .. rubric:: Direct solvers:
 
 * :func:`lcp_lexicolemke` , direct solver for LCP based on pivoting method principle for degenerate problem: the choice of pivot variable is performed via lexicographic ordering.
@@ -41,7 +41,7 @@ Use the generic functions :func:`lcp_driver_DenseMatrix` to call one the the spe
 
 * :func:`lcp_path()` , interface to the PATH solver
 
-.. _doxid-_l_c_problem_1lcpIterativeSolvers:
+.. _lc_problem_1lcpIterativeSolvers:
 .. rubric:: Iterative solvers:
 
 * :func:`lcp_cpg()` , CPG (Conjugated Projected Gradient) solver for LCP based on quadratic minimization.
@@ -58,7 +58,7 @@ Use the generic functions :func:`lcp_driver_DenseMatrix` to call one the the spe
 
 * :func:`lcp_nsgs_SBM()` , Gauss-Seidel solver based on a Sparse-Block storage for the matrix M of the LCP.
 
-.. _doxid-_l_c_problem_1lcpEquationBasedSolvers:
+.. _lc_problem_1lcpEquationBasedSolvers:
 .. rubric:: Equation-based solvers:
 
 * :func:`lcp_newton_min()` , nonsmooth Newton method based on the min formulation of the LCP.
@@ -67,7 +67,7 @@ Use the generic functions :func:`lcp_driver_DenseMatrix` to call one the the spe
 
 * :func:`lcp_newton_minFB()` , nonsmooth Newton method combining the min and FB functions.
 
-.. _doxid-_l_c_problem_1lcpReformulation:
+.. _lc_problem_1lcpReformulation:
 .. rubric:: QP-reformulation:
 
 * :func:`lcp_qp()` , quadratic programm formulation

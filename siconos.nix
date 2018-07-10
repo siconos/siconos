@@ -23,7 +23,6 @@ let
 in
 
 stdenv.mkDerivation rec {
- inherit version;
  name = "siconos-${version}";
  
  enableParallelBuilding = true;	

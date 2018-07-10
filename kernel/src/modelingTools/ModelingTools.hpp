@@ -1,3 +1,4 @@
+
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
@@ -13,11 +14,11 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
 */
 /*! \file ModelingTools.hpp
-Include files related to modelingTools
-Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
+Include files related to modeling part of Siconos.
+
 */
 
 #include "EqualityConditionNSL.hpp"
