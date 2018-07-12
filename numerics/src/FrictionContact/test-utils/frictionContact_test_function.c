@@ -43,6 +43,7 @@
 #include <time.h>
 
 
+
 void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 {
 #ifdef HAVE_GAMS_C_API
@@ -94,10 +95,8 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = frictionContact_printInFile(problem, foutput);
-
-  int global_hdf5_output ;
-
-  global_hdf5_output = 0;
+#ifdef WITH_FCLIB
+  int global_hdf5_output =0;
 
   if(global_hdf5_output)
   {
@@ -109,17 +108,6 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
     srand(stime);
     char filename[100];
     sprintf(filename,"gfc3d_%d.hdf5",rand());
-
-
-    /* static char template[] = "gfc3d_XXXXXX.hdf5"; */
-    /* char fname[PATH_MAX]; */
-    /* int fd; */
-    /* strcpy(fname, template);		/\* Copy template *\/ */
-    /* fd = mkstemp(fname);			/\* Create and open temp file *\/ */
-    /* printf("Filename is %s\n", fname); */
-
-    /* printf("%s ", fname); */
-
 
     GlobalFrictionContactProblem * gfc3d = fc3d_reformulation_global_problem(problem);
 
@@ -134,7 +122,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
                                       filename);
 
   }
-
+#endif
 
 
 
