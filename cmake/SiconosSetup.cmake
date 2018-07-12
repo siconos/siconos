@@ -97,7 +97,7 @@ if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
   include(FindPythonModule)
   # --- xml schema. Used in tests. ---
   if(WITH_XML)
-    set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/config/xmlschema/SiconosModelSchema-V3.7.xsd")
+    set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/kernel/swig/SiconosModelSchema-V3.7.xsd")
     if(NOT NO_RUNTIME_BUILD_DEP)
       find_python_module(lxml REQUIRED)
     endif()
