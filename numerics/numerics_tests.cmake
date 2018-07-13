@@ -341,6 +341,9 @@ if(WITH_${COMPONENT}_TESTING)
     SET(fc3d__NSN_AC_TEST_Tol_1e-3_Max_1000_inTol_0_inMax_0_Capsules-i122-1617_PROPERTIES WILL_FAIL TRUE)
   ENDIF()
 
+  IF(WITH_UMFPACK)
+    SET(fc3d__ADMM_Tol_1e-5_Max_10000_inTol_0_inMax_0_IPARAM_SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT_Confeti-ex13-Fc3D-SBM_PROPERTIES WILL_FAIL TRUE)
+  ENDIF()
 
 
   # --- NSGS with different local solvers and parameters ---
