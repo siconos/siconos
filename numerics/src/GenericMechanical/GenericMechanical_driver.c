@@ -273,7 +273,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     currentRowNumber = 0;
     curProblem =  pGMP->firstListElem;
     int  posInX = 0;
-    int curSize = 0;
+    size_t curSize = 0;
 
     DEBUG_PRINTF("GS it %d, initial value:\n", it);
     DEBUG_EXPR(
