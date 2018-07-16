@@ -1575,56 +1575,7 @@ void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B)
   memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
 }
 
-void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col,
-                             size_t block_row_size, size_t block_col_size)
-{
-  assert(M);
-  assert(M->storageType == NM_SPARSE);
-  assert(blockM);
-  assert(pos_row < (size_t)M->size0);
-  assert(pos_col < (size_t)M->size1);
-  assert(block_row_size > 0 && block_row_size + pos_row <= (unsigned long int)M->size0);
-  assert(block_col_size > 0 && block_col_size + pos_col <= (unsigned long int)M->size1);
 
-  assert(M->matrix2);
-
-  /* Clear memory */
-  memset(blockM, 0, block_row_size*block_col_size * sizeof(double));
-
-//  switch (Msparse->origin)
-  {
-//  case NSM_CSC:
-  {
-    CSparseMatrix* Mcsc = NM_csc(M);
-    assert(Mcsc);
-    CS_INT* Mp = Mcsc->p;
-    CS_INT* Mi = Mcsc->i;
-    double* Mx = Mcsc->x;
-    for (size_t j = pos_col; j < pos_col + block_col_size; ++j)
-    {
-      for (CS_INT p = Mp[j]; p < Mp[j+1]; ++p)
-      {
-        CS_INT row_nb = Mi[p];
-        if (row_nb >= (CS_INT) pos_row)
-        {
-          if (row_nb >= (CS_INT)(pos_row + block_row_size))
-          {
-            break;
-          }
-          else
-          {
-            blockM[(j-pos_col)*block_col_size + row_nb - pos_row] = Mx[p];
-          }
-        }
-      }
-    }
-//    break;
-  }
-//  default:
-//    printf("NSM_extract_block :: unsupported matrix type %d\n", Msparse->origin);
-//    exit(EXIT_FAILURE);
-  }
-}
 
 void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
 {
@@ -1915,14 +1866,6 @@ NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A)
   return A->matrix2;
 }
 
-NSM_linear_solver_params* NM_linearSolverParams(NumericsMatrix* A)
-{
-  if(!numericsSparseMatrix(A)->linearSolverParams)
-  {
-    numericsSparseMatrix(A)->linearSolverParams = newNSM_linear_solver_params();
-  }
-  return numericsSparseMatrix(A)->linearSolverParams;
-}
 
 
 CSparseMatrix* NM_triplet(NumericsMatrix* A)
@@ -2440,14 +2383,12 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
   case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
   case NM_SPARSE:
   {
-    NSM_linear_solver_params* p = NM_linearSolverParams(A);
+    NSM_linear_solver_params* p = NSM_linearSolverParams(A);
     switch (p->solver)
     {
     case NSM_CS_LUSOL:
-      if (verbose >= 2)
-      {
-        printf("NM_gesv: using CSparse\n" );
-      }
+      numerics_printf_verbose(2,"NM_gesv, using CSparse" );
+
       if (keep == NM_KEEP_FACTORS)
       {
         if (!(p->dWork && p->solver_data))
@@ -2460,10 +2401,12 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
           CSparseMatrix_lu_factors* cs_lu_A = (CSparseMatrix_lu_factors*) malloc(sizeof(CSparseMatrix_lu_factors));
+          numerics_printf_verbose(2,"NM_gesv, we compute factors and keep it" );
           CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
           p->solver_data = cs_lu_A;
         }
-
+        
+        numerics_printf_verbose(2,"NM_gesv, we solve with given factors" );
         info = !CSparseMatrix_solve((CSparseMatrix_lu_factors *)NSM_solver_data(p), NSM_workspace(p), b);
       }
       else
@@ -2858,96 +2801,7 @@ void NM_update_size(NumericsMatrix* A)
   }
 }
 
-CS_INT* NSM_diag_indices(NumericsMatrix* M)
-{
-  NumericsSparseMatrix* A = M->matrix2;
-  assert(A);
-  if (A->diag_indx) return A->diag_indx;
 
-  CS_INT* indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
-  A->diag_indx = indices;
-  /* XXX hack --xhub  */
-  if (A->origin == NSM_TRIPLET) { NM_csc(M); A->origin = NSM_CSC; }
-  switch (A->origin)
-  {
-  case NSM_CSC:
-  {
-    assert(A->csc);
-    indices[0] = 0;
-    CSparseMatrix* newMat = cs_spalloc(M->size0, M->size1, A->csc->p[M->size0]+M->size0, 1, 0);
-    CS_INT* Ai = A->csc->i;
-    CS_INT* Ap = A->csc->p;
-    double* Ax = A->csc->x;
-    CS_INT* Ni = newMat->i;
-    CS_INT* Np = newMat->p;
-    double* Nx = newMat->x;
-    CS_INT end = Ap[1];
-    CS_INT inc = 0;
-    Np[0] = 0;
-    if (Ai[0] == 0)
-    {
-      memcpy(Ni, Ai, end*sizeof(CS_INT));
-      Np[1] = Ap[1];
-      memcpy(Nx, Ax, end*sizeof(double));
-    }
-    else
-    {
-      Ni[0] = 0;
-      Np[1] = Ap[1] + 1;
-      Nx[0] = 0.;
-      memcpy(&Ni[1], Ai, end*sizeof(CS_INT));
-      memcpy(&Nx[1], Ax, end*sizeof(double));
-      ++inc;
-    }
-
-    /* Could optimize further and copy everything using memcpy */
-    for (size_t j = 1; j < (size_t)M->size0; ++j)
-    {
-      CS_INT rem = 0;
-      for (CS_INT p = Ap[j]; (rem == 0) && (p < Ap[j+1]); ++p)
-      {
-        if (Ai[p] < (CS_INT) j)
-        {
-          Ni[p+inc] = Ai[p];
-          Nx[p+inc] = Ax[p];
-        }
-        else
-        {
-          if (Ai[p] > (CS_INT) j)
-          {
-            Ni[p+inc] = j;
-            Nx[p+inc] = 0.;
-            indices[j] = p+inc;
-            ++inc;
-          }
-          else
-          {
-            indices[j] = p+inc;
-          }
-          rem = p;
-          Np[j] = Ap[j] + inc;
-        }
-        end = Ap[j+1] - rem;
-        memcpy(&Ni[rem+inc], &Ai[rem], end*sizeof(CS_INT));
-        memcpy(&Nx[rem+inc], &Ax[rem], end*sizeof(double));
-        assert(inc <= M->size0);
-      }
-    }
-    Np[M->size0] = Ap[M->size0] + inc;
-    NM_clearSparseStorage(M);
-    A->origin = NSM_CSC;
-    A->csc = newMat;
-    break;
-  }
-  case NSM_TRIPLET:
-  case NSM_CSR:
-  default:
-    printf("NSM_diag_indices :: unknown matrix origin %d", A->origin);
-    exit(EXIT_FAILURE);
-  }
-
-  return indices;
-}
 
 void NM_csc_alloc(NumericsMatrix* A, CS_INT nzmax)
 {
@@ -2978,7 +2832,7 @@ void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax)
 
 void NM_setSparseSolver(NumericsMatrix* A, unsigned solver_id)
 {
-  NM_linearSolverParams(A)->solver = (NSM_linear_solver)solver_id;
+  NSM_linearSolverParams(A)->solver = (NSM_linear_solver)solver_id;
 }
 
 

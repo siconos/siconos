@@ -325,13 +325,6 @@ extern "C"
    *  A copy is always performed
    */
   void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-  /** return the set of indices corresponding to the diagonal elements of the
-   * matrix
-   * \warning should be better tested
-   * \param M the matrix
-   * \return the list of indices for the diagonal elements
-   */
-  CS_INT* NSM_diag_indices(NumericsMatrix* M);
 
   /**************************************************/
   /** Matrix - vector product           *************/
@@ -567,15 +560,6 @@ extern "C"
     */
   void NM_clearSparseStorage(NumericsMatrix *A);
 
-  /** Extract a block from a sparse matrix
-   * \param M matrix
-   * \param blockM dense storage for the block
-   * \param pos_row starting row for the block
-   * \param pos_col starting column for the block
-   * \param block_row_size block width
-   * \param block_col_size block height
-   */
-  void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
 
 
   /** Direct computation of the solution of a real system of linear
@@ -619,11 +603,6 @@ extern "C"
     return NM_gesv_expert(A, b, preserve ? NM_PRESERVE : NM_NONE);
   }
 
-  /** Get linear solver parameters with initialization if needed.
-   * \param[in,out] A a NumericsMatrix.
-   * \return a pointer on parameters.
-   */
-  NSM_linear_solver_params* NM_linearSolverParams(NumericsMatrix* A);
 
   /** Set the linear solver
    * \param A the matrix

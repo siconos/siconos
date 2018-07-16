@@ -154,11 +154,35 @@ extern "C"
    */
   size_t NSM_nnz(const CSparseMatrix* const A);
 
+  /** return the set of indices corresponding to the diagonal elements of the
+   * matrix
+   * \warning should be better tested
+   * \param M the matrix
+   * \return the list of indices for the diagonal elements
+   */
+  CS_INT* NSM_diag_indices(NumericsMatrix* M);
+
+  /** Extract a block from a sparse matrix
+   * \param M matrix
+   * \param blockM dense storage for the block
+   * \param pos_row starting row for the block
+   * \param pos_col starting column for the block
+   * \param block_row_size block width
+   * \param block_col_size block height
+   */
+  void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
+
   /** Free allocated space for NSM_linear_solver_params.
    * \param p a NSM_linear_solver_params
    * \return NULL on success
    */
   NSM_linear_solver_params* NSM_LinearSolverParams_free(NSM_linear_solver_params* p);
+
+  /** Get linear solver parameters with initialization if needed.
+   * \param[in,out] A a NumericsMatrix.
+   * \return a pointer on parameters.
+   */
+  NSM_linear_solver_params* NSM_linearSolverParams(NumericsMatrix* A);
 
   /** Check and fix a matrix, if needed
    * \param A the matrix to check, modified if necessary to have ordered indices
