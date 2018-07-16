@@ -262,7 +262,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
     local_reaction[0] = 0.0;
     local_reaction[1] = 0.0;
     local_reaction[2] = 0.0;
-    numerics_printf("fc3d_onecontact_nonsmooth_Newton_solvers_solve, take off, trivial solution reaction = 0, velocity = q.\n");
+    numerics_printf_verbose(2,"fc3d_onecontact_nonsmooth_Newton_solvers_solve, take off, trivial solution reaction = 0, velocity = q.\n");
     info=0;
     options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
     options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
