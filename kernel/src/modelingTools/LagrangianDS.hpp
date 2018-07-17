@@ -88,7 +88,6 @@
    \rst
  
    .. math::
-      :nowrap:
 
       \\dot x = \left[\begin{array}{c}
       \\dot q\\
@@ -102,7 +101,6 @@
  \rst
 
  .. math::        
-    :nowrap:
 
     \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
     0  & I \\
@@ -116,7 +114,6 @@
  \rst
 
  .. math::
-    :nowrap:
     
     \left[\begin{array}{c}
      0 \\
@@ -141,7 +138,7 @@ protected:
   void _init(SP::SiconosVector position, SP::SiconosVector velocity);
 
   // -- MEMBERS --
-
+  
   /** number of degrees of freedom of the system */
   unsigned int _ndof;
 

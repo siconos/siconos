@@ -36,10 +36,9 @@ typedef void (*Type1Ptr)(unsigned int, double*, unsigned int, double*, unsigned 
  *  Relation for First Order Dynamical Systems, with:
  * \rststar
  * .. math::
- *    :nowrap:
  *
- *    y &=& h(x,z)\\
- *    r &=& g(\lambda,z)
+ *    y &= h(x,z)\\
+ *    r &= g(\lambda,z)
  *
  * \endrststar
  * 

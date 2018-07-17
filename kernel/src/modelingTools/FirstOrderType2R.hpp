@@ -35,10 +35,9 @@ typedef void (*Type2PtrG)(unsigned int, double*,  unsigned int, double*);
  * \rststar
  *
  * .. math::
- *   :nowrap:
  *
- *   y &=& h(x,\lambda,z)\\
- *   r &=& g(\lambda,z)
+ *   y &= h(x,\lambda,z)\\
+ *   r &= g(\lambda,z)
  *
  * \endrststar
  *
