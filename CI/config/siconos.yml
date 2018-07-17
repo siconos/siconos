@@ -253,9 +253,6 @@ pkgs:
     ubuntu-14.04:
       - cmake-3.0.2
 
-    fedora:
-      - cmake-3.0.2
-
   cmake-3.0.2:
     any:
       command:
