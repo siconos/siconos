@@ -166,7 +166,7 @@ MUMPS_INT* NM_MUMPS_jcn(NumericsMatrix* A)
 
 DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 {
-  NSM_linear_solver_params* params = NM_linearSolverParams(A);
+  NSM_linear_solver_params* params = NSM_linearSolverParams(A);
   DMUMPS_STRUC_C* mumps_id;
 
   if (!params->solver_data)
@@ -256,7 +256,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
       fprintf(stderr, "NM_MUMPS_irn :: xhub doubt this code is correct");
       exit(EXIT_FAILURE);
 #if 0
-      nz = NM_linearSolverParams(A)->iWork[2 * NM_csc(A)->nzmax];
+      nz = NSM_linearSolverParams(A)->iWork[2 * NM_csc(A)->nzmax];
       mumps_id->nz = nz;
       mumps_id->a = numericsSparseMatrix(A)->csc->x;
 #endif
