@@ -182,7 +182,8 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     //Compute MinvH   <- M^-1 H
 
 
-    int infoMInv = NM_inverse_diagonal_block_matrix_in_place(M);
+    int infoMInv = 0;
+    infoMInv = NM_inverse_diagonal_block_matrix_in_place(M);
     assert(!infoMInv);
 
     DEBUG_PRINT("M inverse :");
