@@ -111,7 +111,7 @@ NumericsSparseMatrix* NSM_new(void)
     malloc(sizeof(NumericsSparseMatrix));
 
   NSM_null(p);
-  p->linearSolverParams = newNSM_linear_solver_params();
+  p->linearSolverParams = NSM_linearSolverParams_new();
 
   return p;
 }
@@ -120,7 +120,7 @@ NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A)
 {
   if (A->linearSolverParams)
   {
-    NSM_LinearSolverParams_free(A->linearSolverParams);
+    NSM_linearSolverParams_free(A->linearSolverParams);
     A->linearSolverParams = NULL;
   }
   if (A->triplet)
@@ -152,7 +152,7 @@ NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A)
 }
 
 
-NSM_linear_solver_params* newNSM_linear_solver_params(void)
+NSM_linear_solver_params* NSM_linearSolverParams_new(void)
 {
   NSM_linear_solver_params* p = (NSM_linear_solver_params*)
     malloc(sizeof(NSM_linear_solver_params));
@@ -183,8 +183,18 @@ NSM_linear_solver_params* newNSM_linear_solver_params(void)
 
   return p;
 }
+NSM_linear_solver_params* NSM_linearSolverParams(NumericsMatrix* A)
+{
+  if(!numericsSparseMatrix(A)->linearSolverParams)
+  {
+    numericsSparseMatrix(A)->linearSolverParams = NSM_linearSolverParams_new();
+  }
+  return numericsSparseMatrix(A)->linearSolverParams;
+}
 
-NSM_linear_solver_params* NSM_LinearSolverParams_free(NSM_linear_solver_params* p)
+
+
+NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* p)
 {
   /* First free solver_data if some additional information has been given  */
   if (p->solver_free_hook)
@@ -421,14 +431,7 @@ NumericsSparseMatrix * NSM_triplet_eye(unsigned int size)
   return out;
 }
 
-NSM_linear_solver_params* NSM_linearSolverParams(NumericsMatrix* A)
-{
-  if(!numericsSparseMatrix(A)->linearSolverParams)
-  {
-    numericsSparseMatrix(A)->linearSolverParams = newNSM_linear_solver_params();
-  }
-  return numericsSparseMatrix(A)->linearSolverParams;
-}
+
 
 CS_INT* NSM_diag_indices(NumericsMatrix* M)
 {

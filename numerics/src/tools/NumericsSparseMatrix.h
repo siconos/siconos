@@ -114,10 +114,7 @@ extern "C"
   NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A);
 
 
-  /** New and empty NSM_linear_solver_params.
-   * \return a pointer on the allocated space.
-   */
-  NSM_linear_solver_params* newNSM_linear_solver_params(void);
+
 
    /** Free a workspace related to a LU factorization
    * \param p the structure to free
@@ -176,8 +173,14 @@ extern "C"
    * \param p a NSM_linear_solver_params
    * \return NULL on success
    */
-  NSM_linear_solver_params* NSM_LinearSolverParams_free(NSM_linear_solver_params* p);
+  NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* p);
+  
+  /** New and empty NSM_linear_solver_params.
+   * \return a pointer on the allocated space.
+   */
+  NSM_linear_solver_params* NSM_linearSolverParams_new(void);
 
+  
   /** Get linear solver parameters with initialization if needed.
    * \param[in,out] A a NumericsMatrix.
    * \return a pointer on parameters.

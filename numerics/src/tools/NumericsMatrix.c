@@ -407,7 +407,86 @@ void NM_internalData_free(NumericsMatrix* m)
     m->internalData = NULL;
   }
 }
+void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B )
+  {
 
+    if (!A->internalData)/* no internal data in A */
+    {
+      if (B->internalData)
+      {
+        NM_internalData_free(B);
+      }
+    }
+    else
+    {
+      if (!B->internalData)
+      {
+        NM_internalData_new(B);
+      }
+      
+    
+      size_t sizeof_elt = A->internalData->sizeof_elt;
+
+      if (A->internalData->iWork)
+      {
+
+        int size = A->internalData->iWorkSize / sizeof_elt;
+
+
+        if (! B->internalData->iWork)
+        {
+          B->internalData->iWork = malloc(size*sizeof_elt);
+          B->internalData->iWorkSize = A->internalData->iWorkSize;
+        }
+        else
+        {
+          if( A->internalData->iWorkSize != B->internalData->iWorkSize)
+          {
+            B->internalData->iWorkSize = A->internalData->iWorkSize;
+            B->internalData->iWork = realloc(B->internalData->iWork,size*sizeof_elt);
+          }
+        }
+
+        memcpy(B->internalData->iWork, A->internalData->iWork, A->internalData->iWorkSize);
+      }
+      else
+      {
+        if (B->internalData->iWork)
+          free(B->internalData->iWork);
+        B->internalData->iWorkSize=0;
+      }
+
+
+
+      if (A->internalData->dWork)
+      {
+        if (! B->internalData->dWork)
+        {
+          B->internalData->dWork = malloc(A->internalData->dWorkSize*sizeof(double));
+          B->internalData->dWorkSize = A->internalData->dWorkSize;
+        }
+        else
+        {
+          if( A->internalData->dWorkSize != B->internalData->dWorkSize)
+          {
+            B->internalData->dWorkSize = A->internalData->dWorkSize;
+            B->internalData->dWork = realloc(B->internalData->dWork,A->internalData->dWorkSize*sizeof(double));
+          }
+        }
+
+        for (unsigned i =0; i < A->internalData->dWorkSize; i++)
+          B->internalData->dWork[i] = A->internalData->dWork[i];
+      }
+      else
+      {
+        if (B->internalData->dWork)
+          free(B->internalData->dWork);
+        B->internalData->dWorkSize=0;
+      }
+      B->internalData->isLUfactorized = A->internalData->isLUfactorized;
+      B->internalData->isInversed = A->internalData->isInversed;
+    }
+  }
 void NM_free(NumericsMatrix* m)
 {
   assert(m && "NM_free, m == NULL");
@@ -741,6 +820,12 @@ void NM_display(const NumericsMatrix* const m)
     /* { */
     /*   fprintf(stderr, "display for sparse matrix: no matrix found!\n"); */
     /* } */
+
+    if (m->matrix2->linearSolverParams)
+    {
+      printf("========== matrix2 has linear solver params\n");
+    }
+
     break;
   }
   default:
@@ -753,6 +838,9 @@ void NM_display(const NumericsMatrix* const m)
   {
     printf("========== internalData->iWorkSize = %lu\n", m->internalData->iWorkSize );
     printf("========== internalData->iWork = %p\n", m->internalData->iWork );
+  
+    printf("========== internalData->dWorkSize = %lu\n", m->internalData->iWorkSize );
+    printf("========== internalData->dWork = %p\n", m->internalData->iWork );
   }
   else
   {
@@ -995,7 +1083,7 @@ NumericsMatrix* NM_new_from_filename(char * filename)
     NumericsMatrix * A= NM_new_from_file(finput);
     fclose(finput);
     return A;
-    
+
   }
   return NULL;
 }
@@ -1017,7 +1105,7 @@ NumericsMatrix* NM_create_from_filename(char * filename)
     NumericsMatrix * A= NM_create_from_file(finput);
     fclose(finput);
     return A;
-    
+
   }
   return NULL;
 }
@@ -1343,7 +1431,7 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
     {
       for(int j = 0; j < Atrans->size1; j++)
       {
-        Atrans->matrix0[i+j*Atrans->size0] = A->matrix0[j+i*A->size0]; 
+        Atrans->matrix0[i+j*Atrans->size0] = A->matrix0[j+i*A->size0];
       }
     }
     break;
@@ -1454,11 +1542,16 @@ void NM_clearCSR(NumericsMatrix* A)
 
 void NM_clearSparseStorage(NumericsMatrix *A)
 {
-  if (A->matrix2) A->matrix2->origin = NSM_UNKNOWN;
+  if (A->matrix2){
+    A->matrix2->origin = NSM_UNKNOWN;
+    if (A->matrix2->linearSolverParams)
+      A->matrix2->linearSolverParams = NSM_linearSolverParams_free(A->matrix2->linearSolverParams);
+  }
   NM_clearTriplet(A);
   NM_clearCSC(A);
   NM_clearCSCTranspose(A);
   NM_clearCSR(A);
+ 
 }
 
 
@@ -1481,12 +1574,12 @@ int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
   {
     B->matrix0 = (double *)calloc(A->size0*A->size1, sizeof(double));
   }
-  
+
   assert(B->matrix0);
 
   B->size0 = A->size0;
   B->size1 = A->size1;
-  
+
   switch (A->storageType)
   {
   case NM_DENSE:
@@ -1522,7 +1615,7 @@ int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
 
 
   return info;
-  
+
 
 }
 
@@ -1631,12 +1724,10 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   int sizeB = B->size0 * B->size1;
   B->size0 = A->size0;
   B->size1 = A->size1;
+
+  /* NM_internalData_copy(A,B); */
+  NM_internalData_free(B);
   
-  /* if (B->storageType >= 0 && B->storageType != A->storageType) */
-  {
-    NM_internalData_free(B);
-    NM_alloc_internalData(B);
-  }
   B->storageType = A->storageType;
   switch (A->storageType)
   {
@@ -1834,6 +1925,8 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     }
 
     NM_copy_sparse(A_, B_);
+    
+    numericsSparseMatrix(B)->linearSolverParams = NSM_linearSolverParams_free(numericsSparseMatrix(B)->linearSolverParams);
 
     /* invalidations */
     NM_clearDense(B);
@@ -2244,7 +2337,7 @@ NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
 {
   if (!A->internalData)
   {
-    NM_alloc_internalData(A);
+    NM_internalData_new(A);
   }
   return A->internalData;
 }
@@ -2255,13 +2348,14 @@ NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
 void* NM_iWork(NumericsMatrix* A, size_t size, size_t sizeof_elt)
 {
   size_t bit_size = size * sizeof_elt;
+  NM_internalData(A)->sizeof_elt =   sizeof_elt;
+
   if (!NM_internalData(A)->iWork)
   {
-    assert(A->internalData);
-
     assert(A->internalData->iWorkSize == 0);
     A->internalData->iWork = malloc(bit_size);
     A->internalData->iWorkSize = bit_size;
+
   }
   else
   {
@@ -2324,13 +2418,14 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
     if (keep == NM_KEEP_FACTORS)
     {
-
+      numerics_printf_verbose(2,"NM_gesv_expert, using LAPACK" );
       //double* wkspace = NM_dWork(A, A->size0*A->size1);
       lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
       DEBUG_PRINTF("iwork and dwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
 
       if (!NM_internalData(A)->isLUfactorized)
       {
+        numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it" );
         DEBUG_PRINT("Start to call DGETRF for NM_DENSE storage\n");
         //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
         DGETRF(A->size0, A->size1, A->matrix0, A->size0, ipiv, &info);
@@ -2352,6 +2447,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
         NM_internalData(A)->isLUfactorized = true;
       }
       DEBUG_PRINT("Start to call DGETRS for NM_DENSE storage\n");
+      numerics_printf_verbose(2,"NM_gesv_expert, we solve with given factors" );
       DGETRS(LA_NOTRANS, A->size0, 1, A->matrix0, A->size0, ipiv, b, A->size0, &info);
       DEBUG_PRINT("End of call DGETRS for NM_DENSE storage\n");
       if (info < 0)
@@ -2401,11 +2497,11 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
           CSparseMatrix_lu_factors* cs_lu_A = (CSparseMatrix_lu_factors*) malloc(sizeof(CSparseMatrix_lu_factors));
-          numerics_printf_verbose(2,"NM_gesv, we compute factors and keep it" );
+          numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it" );
           CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
           p->solver_data = cs_lu_A;
         }
-        
+
         numerics_printf_verbose(2,"NM_gesv, we solve with given factors" );
         info = !CSparseMatrix_solve((CSparseMatrix_lu_factors *)NSM_solver_data(p), NSM_workspace(p), b);
       }
@@ -2954,4 +3050,20 @@ int NM_is_symmetric(NumericsMatrix* A)
     }
   }
   return 1;
+}
+
+double NM_symmetry_discrepancy(NumericsMatrix* A)
+{
+  int n = A->size0;
+  int m = A->size1;
+
+  double d = 0.0;
+  for (int i =0; i < n ; i++)
+  {
+    for (int j =0 ; j < m ; j++)
+    {
+      d= fmax (d,fabs(NM_get_value(A,i,j)-NM_get_value(A,j,i)));
+    }
+  }
+  return d;
 }

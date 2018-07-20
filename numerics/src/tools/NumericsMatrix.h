@@ -38,6 +38,7 @@ typedef struct
 {
   size_t iWorkSize; /**< size of iWork */
   void *iWork; /**< integer workspace */
+  size_t sizeof_elt ; ; /**< sizeof_elt of an element in bytes (result of sizeof for instance)*/
   size_t dWorkSize; /**< size of dWork */
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
@@ -111,7 +112,7 @@ extern "C"
   NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
   NumericsMatrix* NM_create_from_filename(char *filename);
   NumericsMatrix* NM_create_from_file(FILE *file);
-  
+
 
  /** Copy a CSparseMatrix inside another CSparseMatrix.
    *  Reallocations are performed if B cannot hold a copy of A
@@ -192,26 +193,15 @@ extern "C"
    * \return  a pointer to a NumericsMatrix
    */
   NumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1);
-  
+
   /** new NumericsMatrix equal to the transpose of a given matrix
-   * \param[in] A 
+   * \param[in] A
    * \return  a pointer to a NumericsMatrix
    */
   NumericsMatrix* NM_transpose(NumericsMatrix * A);
 
-  
-  /** Allocate the internalData structure (but not its content!)
-   * \param M the matrix to modify
-   */
-  static inline void NM_alloc_internalData(NumericsMatrix* M)
-  {
-    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWork = NULL;
-    M->internalData->iWorkSize = 0;
-    M->internalData->dWork = NULL;
-    M->internalData->dWorkSize = 0;
-    M->internalData->isLUfactorized = 0;
-  }
+
+
  /** set NumericsMatrix fields to NULL
    * \param A a matrix
    */
@@ -616,6 +606,24 @@ extern "C"
    */
   NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A);
 
+  /** Allocate the internalData structure (but not its content!)
+   * \param M the matrix to modify
+   */
+  static inline void NM_internalData_new(NumericsMatrix* M)
+  {
+    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
+    M->internalData->iWork = NULL;
+    M->internalData->iWorkSize = 0;
+    M->internalData->dWork = NULL;
+    M->internalData->dWorkSize = 0;
+    M->internalData->isLUfactorized = 0;
+  }
+  /** Copy the internalData structure 
+   * \param M the matrix to modify
+   */
+  void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B );
+
+
   /** Integer work vector initialization, if needed.
    * \param[in,out] A pointer on a NumericsMatrix.
    * \param[in] size number of element to allocate
@@ -673,7 +681,7 @@ extern "C"
   int NM_check(const NumericsMatrix* const A);
 
  /** Compute the  1-norm of a sparse matrix = max (sum (abs (A))), largest column sum of a matrix (the sparse format for now)
-   * \param A the matrix 
+   * \param A the matrix
    * \return the norm*/
   double NM_norm_1(NumericsMatrix* const A);
 
@@ -683,7 +691,7 @@ extern "C"
   double NM_norm_inf(NumericsMatrix* const A);
 
   int NM_is_symmetric(NumericsMatrix* A);
-
+  double NM_symmetry_discrepancy(NumericsMatrix* A);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
