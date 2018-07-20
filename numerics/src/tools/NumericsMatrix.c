@@ -1925,8 +1925,8 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     }
 
     NM_copy_sparse(A_, B_);
-    
-    numericsSparseMatrix(B)->linearSolverParams = NSM_linearSolverParams_free(numericsSparseMatrix(B)->linearSolverParams);
+    if (numericsSparseMatrix(B)->linearSolverParams)
+      numericsSparseMatrix(B)->linearSolverParams = NSM_linearSolverParams_free(numericsSparseMatrix(B)->linearSolverParams);
 
     /* invalidations */
     NM_clearDense(B);
