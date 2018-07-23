@@ -200,8 +200,6 @@ extern "C"
    */
   NumericsMatrix* NM_transpose(NumericsMatrix * A);
 
-
-
  /** set NumericsMatrix fields to NULL
    * \param A a matrix
    */
@@ -503,11 +501,6 @@ extern "C"
   */
   void NM_read_in_file_scilab(NumericsMatrix* const M, FILE *file);
 
-
-
-
-
-
   /** Clear dense storage, if it is existent.
    * \param[in,out] A a Numericsmatrix
    */
@@ -645,9 +638,15 @@ extern "C"
    * \param alpha the term to add
    */
   void NM_add_to_diag3(NumericsMatrix* M, double alpha);
-
-
-
+  
+  /** Add two matrices with coefficients C = alpha*A + beta*B
+   * \param alpha the first coefficient
+   * \param A the first  matrix
+   * \param beta the second coefficient
+   * \param B the second  matrix
+   * \return C a new NumericsMatrix
+   */
+  NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B);
 
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type
