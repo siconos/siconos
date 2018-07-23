@@ -40,6 +40,13 @@ extern "C"
   \return the type of projection
   */
   unsigned projectionOnCone(double* r, double  mu);
+  
+  /** projectionOnDualCone Projection on the second Order Cone in \f$R^3\f$, \f$K \{ r, r_1 \geq 0, 0 mu \sqrt(u_2^2+u_3^2) \geq u_1  \} \f$
+  \param[in,out] u the vector to be projected
+  \param[in] mu the angle of the cone
+  \return the type of projection
+  */
+  unsigned projectionOnDualCone(double* u, double  mu);
 
   /** projectionOnCone Projection on the second Order Cone in \f$R^n\f$, \f$K \{ r, r_1 \geq 0, 0 \|[r_2,r_n]\| \geq mu r_1  \} \f$
   \param[in,out] r the vector to be projected

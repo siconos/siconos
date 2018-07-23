@@ -274,7 +274,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       for (contact = 0 ; contact < nc ; ++contact)
       {
         pos = contact * 3;
-        projectionOnCone(&u[pos], 1.0/mu[contact]);
+        projectionOnDualCone(&u[pos], mu[contact]);
       }
 
 

@@ -41,6 +41,33 @@ unsigned projectionOnCone(double* r, double  mu)
     return PROJCONE_BOUNDARY;
   }
 }
+unsigned projectionOnDualCone(double* u, double  mu)
+{
+  double normT = hypot(u[1], u[2]);
+  
+  if (normT <= - mu * u[0])
+  {
+    u[0] = 0.0;
+    u[1] = 0.0;
+    u[2] = 0.0;
+    return PROJCONE_DUAL;
+  }
+  else if (mu * normT <= u[0])
+  {
+    return PROJCONE_INSIDE;
+  }
+  else
+  {
+    double mu2 = mu * mu;
+    u[0] = (normT + mu * u[0]) / (mu2 + 1.0);
+    u[1] = u[0] * u[1] / normT;
+    u[2] = u[0] * u[2] / normT;
+    u[0] = mu * u[0];
+  
+    return PROJCONE_BOUNDARY;
+  }
+}
+
 
 void projectionOnSecondOrderCone(double* r, double  mu, int size)
 {
