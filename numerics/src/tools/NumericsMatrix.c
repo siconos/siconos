@@ -1293,7 +1293,7 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
   assert(A->size1 == B->size1 && "NM_add :: A->size1 != A->size1 ");
 
 
-  /* The storageType of A is chosen for C */
+  /* The storageType  for C inherits from A except for NM_SPARSE_BLOCK */
   NumericsMatrix *C = NM_create(A->storageType, A->size0, A->size1);
 
   switch (A->storageType)
@@ -1308,6 +1308,7 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
     case NM_DENSE:
     {
       cblas_daxpy(nm, beta, B->matrix0, 1, C->matrix0,1 );
+      break;
     }
     case NM_SPARSE_BLOCK:
     case NM_SPARSE:
@@ -1315,6 +1316,7 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
       NumericsMatrix* B_dense = NM_create(NM_DENSE, A->size0, A->size1);
       NM_to_dense(B, B_dense);
       cblas_daxpy(nm, beta, B_dense->matrix0, 1, C->matrix0,1 );
+      break;
     }
     default:
     {
@@ -1323,16 +1325,9 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
       break;
     }
     }
-
-  /* case NM_SPARSE_BLOCK: */
-  /* { */
-
-
-
-  /*   numerics_error("NM_add", "Not yet implemented for NM_DESE storage"); */
-  /*   break; */
-  /* } */
-
+    break;
+  }
+  case NM_SPARSE_BLOCK:
   case NM_SPARSE:
   {
     CSparseMatrix* result = cs_add(NM_csc(A), NM_csc(B), alpha, beta);
@@ -1342,12 +1337,13 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
 
     C_nsm->csc = result;
     C_nsm->origin = NSM_CSC;
-
+    C->storageType=NM_SPARSE;
+    
     break;
   }
   default:
-    printf("NM_add:: unsupported matrix storage %d", A->storageType);
-    exit(EXIT_FAILURE);
+  {
+    numerics_error("NM_add:","unsupported matrix storage %d", A->storageType);
   }
   }
   return C;
