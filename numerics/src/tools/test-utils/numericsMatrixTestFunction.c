@@ -1093,6 +1093,7 @@ int test_SBM_row_permutation(SparseBlockStructuredMatrix *M)
 int test_SBM_column_permutation(SparseBlockStructuredMatrix *M)
 {
   SparseBlockStructuredMatrix MRes;
+  SBM_null(&MRes);
   int nbCol = M->blocknumber1;
   unsigned int * colBlockIndex = (unsigned int*) malloc(nbCol * sizeof(unsigned int));
   int * mark = (int*) malloc(nbCol * sizeof(int));

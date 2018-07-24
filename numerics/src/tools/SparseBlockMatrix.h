@@ -185,7 +185,11 @@ extern "C"
    */
   SparseBlockStructuredMatrix* SBM_new(void);
 
-  
+  /** set Sparse Block Matrix. fields to NULL
+   * \param sbm a matrix
+   */
+  void SBM_null(SparseBlockStructuredMatrix* sbm);
+
   /** SparseMatrix - vector product y = alpha*A*x + beta*y
       \param[in] sizeX dim of the vectors x
       \param[in] sizeY dim of the vectors y

@@ -114,13 +114,6 @@ extern "C"
   NumericsMatrix* NM_create_from_file(FILE *file);
 
 
- /** Copy a CSparseMatrix inside another CSparseMatrix.
-   *  Reallocations are performed if B cannot hold a copy of A
-   * \param[in] A a CSparseMatrix
-   * \param[in,out] B a CSparseMatrix
-   */
-  void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B);
-
   /** Copy a NumericsMatrix inside another NumericsMatrix (deep).
    *  Reallocations are performed if B cannot hold a copy of A
    * \param[in] A a NumericsMatrix
