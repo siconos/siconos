@@ -121,6 +121,11 @@ extern "C"
   
   void createSplittedFrictionContactProblem(FrictionContactProblem* problem, SplittedFrictionContactProblem * splitted_problem);
   
+  void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
+                                                 double * reaction,
+                                                 double * velocity,
+                                                 double tol,
+                                                 int do_print)  ;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
