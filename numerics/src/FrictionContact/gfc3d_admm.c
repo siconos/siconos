@@ -264,7 +264,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
       /* H^ z_k - reaction_k + b */
       cblas_dcopy(m , b , 1 , u, 1);
-      cblas_daxpy(m, -1, reaction_hat, 1, u , 1);
+      cblas_daxpy(m, -1.0, reaction_hat, 1, u , 1);
       NM_gemv(1.0, Htrans, z, 1.0, u);
 
       DEBUG_PRINT("before projection");
@@ -287,13 +287,13 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
       /* - H^T z_k + u_k -b ->  reaction (residual) */
       cblas_dcopy(m , u, 1 , reaction, 1);
-      cblas_daxpy(m, -1, b, 1, reaction , 1);
+      cblas_daxpy(m, -1.0, b, 1, reaction , 1);
       NM_gemv(-1.0, Htrans, z, 1.0, reaction);
       d = cblas_dnrm2(m , reaction , 1);
       r = d * d;
 
       /* reaction_hat -  A z_k + u_k -b ->  xi */
-      cblas_daxpy(m, 1, reaction_hat, 1, reaction , 1);
+      cblas_daxpy(m, 1.0, reaction_hat, 1, reaction , 1);
 
       /**********************/
       /*  3 - Acceleration  */
@@ -301,7 +301,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
       DEBUG_EXPR(NV_display(u_hat,m));
       cblas_dcopy(m , u_hat , 1 , tmp, 1);
-      cblas_daxpy(m, -1, u, 1, tmp , 1);
+      cblas_daxpy(m, -1.0, u, 1, tmp , 1);
       d = cblas_dnrm2(m , tmp , 1);
       s = d * d;
 
@@ -383,6 +383,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
 
   /***** Free memory *****/
+  NM_free(W);
+  NM_free(Htrans);
   if (internal_allocation)
   {
     gfc3d_ADMM_free(problem,options);
