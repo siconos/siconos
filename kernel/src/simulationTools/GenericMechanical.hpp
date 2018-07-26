@@ -37,7 +37,7 @@ TYPEDEF_SPTR(GenericMechanicalProblem)
  *  the interactionBlock-matrices saved in the field interactionBlocks.\n
  *  Functions: initialize(), computeInteractionBlock(), preCompute()
  *  - solving of the GenericMechanical problem: function compute(), used to call solvers from Numerics through \n
- * the genericMechanical_driver() interface of Numerics.
+ * the gmp_driver() interface of Numerics.
  *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
  *  ouput results from the solver (velocity,reaction); function postCompute().
  *
