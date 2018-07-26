@@ -95,7 +95,7 @@ static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, do
     free(reaction);
     free(velocity);
 
-    freeFrictionContactProblem(problem);
+    frictionContactProblem_free(problem);
 
   }
 
@@ -144,7 +144,7 @@ static int solve_dense(int solver_id, FrictionContactProblem* FC, double* r, dou
     free(reaction);
     free(velocity);
 
-    freeFrictionContactProblem(problem);
+    frictionContactProblem_free(problem);
   }
 
   if (info)
@@ -210,7 +210,7 @@ int main(void)
   {
     int solver_id = solvers_to_test[s];
 
-    FrictionContactProblem* FC = frictionContactProblem_new(3, 3, W, q, mu);
+    FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, 3, W, q, mu);
     double r[9] = {0.};
     double u[9] = {0.};
 
@@ -219,7 +219,7 @@ int main(void)
     FC->M = NULL;
     FC->q = NULL;
     FC->mu = NULL;
-    freeFrictionContactProblem(FC);
+    frictionContactProblem_free(FC);
 
     if (solver_id != SICONOS_FRICTION_3D_HP)
     {
@@ -230,7 +230,7 @@ int main(void)
       }
     }
 
-    FrictionContactProblem* FCdense = frictionContactProblem_new(3, 3, tmpM, q, mu);
+    FrictionContactProblem* FCdense = frictionContactProblem_new_with_data(3, 3, tmpM, q, mu);
     double rdense[9] = {0.};
     double udense[9] = {0.};
 
@@ -240,7 +240,7 @@ int main(void)
     FCdense->M = NULL;
     FCdense->q = NULL;
     FCdense->mu = NULL;
-    freeFrictionContactProblem(FCdense);
+    frictionContactProblem_free(FCdense);
 
     if (solver_id != SICONOS_FRICTION_3D_HP)
     {

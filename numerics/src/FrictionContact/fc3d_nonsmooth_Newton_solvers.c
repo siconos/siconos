@@ -843,7 +843,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
-  freeFrictionContactProblem(localproblem);
+  frictionContactProblem_free(localproblem);
   
   if (!options->dWork)
   {

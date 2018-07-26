@@ -74,5 +74,5 @@ void fc3d_local_problem_free(FrictionContactProblem* localproblem,
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
-  freeFrictionContactProblem(localproblem);
+  frictionContactProblem_free(localproblem);
 }

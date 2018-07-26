@@ -63,6 +63,29 @@ struct SplittedFrictionContactProblem
 extern "C"
 {
 #endif
+
+
+  /* create an empty FrictionContactProblem
+   * \return an empty fcp */
+  FrictionContactProblem* frictionContactProblem_new(void);
+
+  /** new FrictionContactProblem from minimal set of data
+   * \param[in] dim the problem dimension
+   * \param[in] nc the number of contact
+   * \param[in] M the NumericsMatrix
+   * \param[in] q the q vector
+   * \param[in] mu the mu vector
+   * \return a pointer to a FrictionContactProblem structure
+   */
+  FrictionContactProblem* frictionContactProblem_new_with_data(int dim, int nc,
+      NumericsMatrix* M, double* q, double* mu);
+
+  /** free a FrictionContactProblem
+   * \param problem the problem to free
+   */
+  void frictionContactProblem_free(FrictionContactProblem* problem);
+
+
   /** display a FrictionContactProblem
    * \param problem the problem to display
    */
@@ -96,31 +119,13 @@ extern "C"
    */
   int frictionContact_newFromFilename(FrictionContactProblem*  problem, char * filename);
 
-  /** free a FrictionContactProblem
-   * \param problem the problem to free
-   */
-  void freeFrictionContactProblem(FrictionContactProblem* problem);
 
 
-  /** new FrictionContactProblem from minimal set of data
-   * \param[in] dim the problem dimension
-   * \param[in] nc the number of contact
-   * \param[in] M the NumericsMatrix
-   * \param[in] q the q vector
-   * \param[in] mu the mu vector
-   * \return a pointer to a FrictionContactProblem structure
-   */
-  FrictionContactProblem* frictionContactProblem_new(int dim, int nc,
-      NumericsMatrix* M, double* q, double* mu);
 
 
-  /* create an empty FrictionContactProblem
-   * \return an empty fcp */
-  FrictionContactProblem* newFCP(void);
 
-  
   void createSplittedFrictionContactProblem(FrictionContactProblem* problem, SplittedFrictionContactProblem * splitted_problem);
-  
+
   void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
                                                  double * reaction,
                                                  double * velocity,
@@ -132,4 +137,3 @@ extern "C"
 #endif
 
 #endif
-

@@ -111,8 +111,8 @@ static int write_test_fclib(char * filename)
     info += !(problem_from_file->M->matrix1->index2_data[i] == problem1->M->matrix1->index2_data[i]);
     }*/
 
-  freeFrictionContactProblem(problem);
-  freeFrictionContactProblem(problem1);
+  frictionContactProblem_free(problem);
+  frictionContactProblem_free(problem1);
   free(basename);
   free(title);
   free(description);

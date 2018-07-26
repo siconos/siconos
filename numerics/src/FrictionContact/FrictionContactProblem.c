@@ -154,7 +154,7 @@ int frictionContact_newFromFilename(FrictionContactProblem* problem, char* filen
   return info;
 }
 
-void freeFrictionContactProblem(FrictionContactProblem* problem)
+void frictionContactProblem_free(FrictionContactProblem* problem)
 {
   assert(problem);
   if (problem->M)
@@ -180,7 +180,7 @@ void freeFrictionContactProblem(FrictionContactProblem* problem)
 
 }
 
-FrictionContactProblem* newFCP(void)
+FrictionContactProblem* frictionContactProblem_new(void)
 {
   FrictionContactProblem* fcp = (FrictionContactProblem*) malloc(sizeof(FrictionContactProblem));
   fcp->dimension = 0;
@@ -192,7 +192,7 @@ FrictionContactProblem* newFCP(void)
   return fcp;
 }
 
-FrictionContactProblem* frictionContactProblem_new(int dim, int nc, NumericsMatrix* M, double* q, double* mu)
+FrictionContactProblem* frictionContactProblem_new_with_data(int dim, int nc, NumericsMatrix* M, double* q, double* mu)
 {
   FrictionContactProblem* fcp = (FrictionContactProblem*) malloc(sizeof(FrictionContactProblem));
 

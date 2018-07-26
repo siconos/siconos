@@ -189,7 +189,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   free(reaction);
   free(velocity);
 
-  freeFrictionContactProblem(problem);
+  frictionContactProblem_free(problem);
   fclose(foutput);
 
   return info;
@@ -275,7 +275,7 @@ int frictionContact_test_function_hdf5(const char * path, SolverOptions * option
   free(reaction);
   free(velocity);
 
-  freeFrictionContactProblem(problem);
+  frictionContactProblem_free(problem);
   fclose(foutput);
 
   return info;
