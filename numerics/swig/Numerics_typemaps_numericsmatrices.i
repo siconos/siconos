@@ -366,7 +366,7 @@
 {
  // perform a deep copy
  if (!$1) { $1 = CSparseMatrix_alloc_for_copy($input); }
- NM_copy_sparse($input, $1);
+ CSparseMatrix_copy($input, $1);
 }
 
 %typemap(freearg) (CSparseMatrix*)
