@@ -30,7 +30,7 @@
 %newobject variationalInequality_new;
 %newobject frictionContactProblem_new;
 %newobject genericMechanical_newFromFile;
-%newobject buildEmptyGenericMechanicalProblem;
+%newobject genericMechanicalProblem_new;
 
 // NumericsMatrix
 %newobject newNSM_linear_solver_params;

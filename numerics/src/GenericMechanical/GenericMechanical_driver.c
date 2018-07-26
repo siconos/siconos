@@ -54,7 +54,7 @@
 #include "LinearComplementarityProblem.h"
 #include "lcp_cst.h"
 
-int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
+int gmp_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
   int storageType = pGMP->M->storageType;
@@ -192,7 +192,7 @@ int GenericMechanical_compute_error(GenericMechanicalProblem* pGMP, double *reac
       break;
     }
     default:
-      printf("Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
+      printf("Numerics : gmp_gauss_seidel unknown problem type %d.\n", curProblem->type);
     }
     /*next*/
     posInX += curProblem->size;
@@ -219,12 +219,12 @@ static int SScmpTotal = 0;
 #endif
 //#define GMP_WRITE_PRB
 //static double sCoefLS=1.0;
-void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info,
+void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info,
 				 SolverOptions* options)
 {
 #ifdef GMP_WRITE_PRB
   FILE * toto1  = fopen("GMP_CURRENT.txt", "w");
-  genericMechanical_printInFile(pGMP, toto1);
+  genericMechanicalProblem_printInFile(pGMP, toto1);
   fclose(toto1);
 #endif
 
@@ -247,8 +247,8 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   double * w = 0;
   int resLocalSolver = 0;
   int local_solver_error_occurred = 0;
-  //printf("genericMechanicalProblem_GS \n");
-  //displayGMP(pGMP);
+  //printf("gmp_gauss_seidel \n");
+  //genericMechanicalProblem_display(pGMP);
   double * pPrevReaction = NULL;
   double * pBuffVelocity = NULL;
   int withLS = options->iparam[1];
@@ -261,7 +261,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   }
   else
   {
-    pPrevReaction = (double *) malloc(genericMechanical_getNbDWork(pGMP, options) * sizeof(double));
+    pPrevReaction = (double *) malloc(gmp_get_nb_dwork(pGMP, options) * sizeof(double));
   }
   pBuffVelocity = pPrevReaction + pGMP->size;
   while (it < iterMax && tolViolate)
@@ -367,7 +367,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
         break;
       }
       default:
-        printf("genericMechanical_GS Numerics : genericMechanicalProblem_GS unknown problem type %d.\n", curProblem->type);
+        printf("genericMechanical_GS Numerics : gmp_gauss_seidel unknown problem type %d.\n", curProblem->type);
       }
       if (resLocalSolver) {
         curProblem->error = 1;
@@ -389,10 +389,10 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
 
     if (withLS)
     {
-      tolViolate = GenericMechanical_compute_error(pGMP, reaction, pBuffVelocity, tol, options, err);
+      tolViolate = gmp_compute_error(pGMP, reaction, pBuffVelocity, tol, options, err);
       for (int i = 0; i < pGMP->size; i++)
         pPrevReaction[i] = reaction[i] + (*pCoefLS) * (reaction[i] - pPrevReaction[i]);
-      tolViolateLS = GenericMechanical_compute_error(pGMP, pPrevReaction, velocity, tol, options, errLS);
+      tolViolateLS = gmp_compute_error(pGMP, pPrevReaction, velocity, tol, options, errLS);
 
       DEBUG_PRINTF("GMP :noscale error=%e error LS=%e\n", *err, *errLS);
       DEBUG_PRINTF("GMP :scale coeff=%e\n", *pCoefLS);
@@ -416,12 +416,12 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
     }
     else
     {
-      tolViolate = GenericMechanical_compute_error(pGMP, reaction, velocity, tol, options, err);
+      tolViolate = gmp_compute_error(pGMP, reaction, velocity, tol, options, err);
     }
     if (verbose > 0)
       printf("--------------- GMP - GS - Iteration %i Residual = %14.7e <= %7.3e\n", it, *err, options->dparam[0]);
 
-    //tolViolate=GenericMechanical_compute_error(pGMP,reaction,velocity,tol,options,&err);
+    //tolViolate=gmp_compute_error(pGMP,reaction,velocity,tol,options,&err);
     /*next GS it*/
     it++;
     //printf("---GenericalMechanical_drivers,  IT=%d, err=%e.\n",it,err);
@@ -438,17 +438,17 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
   options->iparam[3] = it;
 #ifdef GMP_WRITE_FAILED_PRB
   FILE * toto  = fopen("GMP_NOT_FAILED.txt", "w");
-  genericMechanical_printInFile(pGMP, toto);
+  genericMechanicalProblem_printInFile(pGMP, toto);
   fclose(toto);
 #endif
   if (tolViolate)
   {
     if (verbose > 0)
-      printf("genericMechanicalProblem_GS failed with Iteration %i Residual = %14.7e <= %7.3e\n", it, *err, options->dparam[0]);
+      printf("gmp_gauss_seidel failed with Iteration %i Residual = %14.7e <= %7.3e\n", it, *err, options->dparam[0]);
 
 #ifdef GMP_WRITE_FAILED_PRB
     FILE * toto  = fopen("GMP_FAILED.txt", "w");
-    genericMechanical_printInFile(pGMP, toto);
+    genericMechanicalProblem_printInFile(pGMP, toto);
     fclose(toto);
 #endif
 
@@ -490,7 +490,7 @@ void genericMechanicalProblem_GS(GenericMechanicalProblem* pGMP, double * reacti
  * options->iparam[2] == 2 Equalities are assemblated in one block
  * options->iparam[2] == 3 Try to solve like a MLCP (==> No FC3d)
  */
-int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity,
+int gmp_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity,
                              SolverOptions* options)
 {
   // if (options == NULL )
@@ -501,27 +501,27 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
   int info = 0;
   DEBUG_EXPR(
     NM_display(problem->M);
-    displayGMP(problem);
+    genericMechanicalProblem_display(problem);
     );
   if (!options->iparam[2])
   {
-    genericMechanicalProblem_GS(problem, reaction, velocity, &info, options);
+    gmp_gauss_seidel(problem, reaction, velocity, &info, options);
   }
   else if (options->iparam[2] == 1)
   {
-    GMPReducedSolve(problem, reaction, velocity, &info, options);
+    gmp_reduced_solve(problem, reaction, velocity, &info, options);
   }
   else if (options->iparam[2] == 2)
   {
-    GMPReducedEqualitySolve(problem, reaction, velocity, &info, options);
+    gmp_reduced_equality_solve(problem, reaction, velocity, &info, options);
   }
   else if (options->iparam[2] == 3)
   {
-    GMPasMLCP(problem, reaction, velocity, &info, options);
+    gmp_as_mlcp(problem, reaction, velocity, &info, options);
   }
   else
   {
-    printf("genericMechanical_driver error, options->iparam[2] wrong value. (0, 1 or 2).\n");
+    printf("gmp_driver error, options->iparam[2] wrong value. (0, 1 or 2).\n");
   }
 
   return info;
@@ -531,7 +531,7 @@ int genericMechanical_driver(GenericMechanicalProblem* problem, double *reaction
 
 
 
-void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, int id)
+void gmp_setDefaultSolverOptions(SolverOptions* options, int id)
 {
   options->solverId = SICONOS_GENERIC_MECHANICAL_NSGS;
   options->iSize = 15;
@@ -591,7 +591,7 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
     (&options->internalSolvers[1])->dparam[0] = 1e-12;
     break;
   default:
-    printf("genericMechanicalProblem_setDefaultSolverOptions : fc3d_solverId unknown :%d\n", id);
+    printf("gmp_setDefaultSolverOptions : fc3d_solverId unknown :%d\n", id);
   }
 
 
@@ -600,23 +600,23 @@ void genericMechanicalProblem_setDefaultSolverOptions(SolverOptions* options, in
 
 /*Alloc memory iff options->iWork options->dWork and are  null.
  Return 0 if the memory is not allocated. else return 1.*/
-int genericMechanical_alloc_working_memory(GenericMechanicalProblem* pGMP, SolverOptions* options)
+int gmp_working_memory_alloc(GenericMechanicalProblem* pGMP, SolverOptions* options)
 {
   if (options->dWork)
     return 0;
 
-  options->dWork = (double *) malloc(genericMechanical_getNbDWork(pGMP, options) * sizeof(double));
+  options->dWork = (double *) malloc(gmp_get_nb_dwork(pGMP, options) * sizeof(double));
   return 1;
 
 }
 /*free the Work memory, and set pointer to zero.*/
-void genericMechanical_free_working_memory(GenericMechanicalProblem* pGMP, SolverOptions* options)
+void gmp_working_memory_free(GenericMechanicalProblem* pGMP, SolverOptions* options)
 {
   if (options->dWork)
     free(options->dWork);
   options->dWork = NULL;
 }
-int genericMechanical_getNbDWork(GenericMechanicalProblem* pGMP, SolverOptions* options)
+int gmp_get_nb_dwork(GenericMechanicalProblem* pGMP, SolverOptions* options)
 {
   return 2 * pGMP->size;
 }
