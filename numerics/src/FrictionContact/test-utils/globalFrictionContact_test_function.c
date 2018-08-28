@@ -32,6 +32,8 @@
 #include "numerics_verbose.h"
 #include "NumericsVector.h"
 #include "SiconosCompat.h"
+
+#include <string.h>
 #if defined(WITH_FCLIB)
 #include <fclib.h>
 #include <fclib_interface.h>
@@ -130,10 +132,47 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
 {
 
   int k, info = -1 ;
-
   GlobalFrictionContactProblem* problem = globalFrictionContact_fclib_read(path);
-  FILE * foutput  =  fopen("checkinput.dat", "w");
-  info = globalFrictionContact_printInFile(problem, foutput);
+
+  int check_input=1;
+  if(check_input)
+  {
+    int nLen;
+    nLen = strlen (path);
+
+
+    /* remove the extension */
+    char * path_copy = strdup(path);
+    printf("path_copy = %s \n", path_copy);
+
+
+    if ((nLen > 0) && (nLen < 400)) {
+
+      while (nLen) {
+
+           // Check for extension character !!!
+           if (path_copy [nLen] == '.') {
+
+                path_copy [nLen] = '\0';
+                break;
+           }
+
+           nLen --;
+
+      }
+      printf("path_copy = %s \n", path_copy);
+    }
+
+    char * path_out = (char *)calloc((nLen+10), sizeof(char));
+    sprintf(path_out, "%s.dat", path); /* finally we keep the extension .hdf5.dat */
+    printf("path_out = %s \n", path_out);
+    FILE * foutput  =  fopen(path_out, "w");
+    info = globalFrictionContact_printInFile(problem, foutput);
+    fclose(foutput);
+  }
+
+
+
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
@@ -193,7 +232,7 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
   free(global_velocity);
 
   freeGlobalFrictionContactProblem(problem);
-  fclose(foutput);
+
 
   return info;
 
