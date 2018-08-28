@@ -38,7 +38,11 @@
 #undef restrict
 #define restrict __restrict
 #endif
-//#define VERBOSE_DEBUG
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+
 
 #include "debug.h"
 
@@ -47,6 +51,7 @@ int CSparseMatrix_aaxpy(const double alpha, const CSparseMatrix *A,
                         const double * restrict x,
                         const double beta, double * restrict y)
 {
+  DEBUG_BEGIN("CSparseMatrix_aaxpy(...)\n");
   CS_INT p, n, *Ap, *Ai ;
   int j;
   double *Ax ;
@@ -66,10 +71,12 @@ int CSparseMatrix_aaxpy(const double alpha, const CSparseMatrix *A,
   {
     for(p = Ap [j] ; p < Ap [j+1] ; p++)
     {
+      DEBUG_PRINTF("j=%i,\t p=%i,\t Ai [p]  =%i,\t y [Ai [p]] = %e,\t ", j, p, Ai [p],y [Ai [p]] );
       y [Ai [p]] *= beta;
       y [Ai [p]] += alpha * Ax [p] * x [j] ;
     }
   }
+  DEBUG_END("CSparseMatrix_aaxpy(...)\n");
   return 1;
 }
 
