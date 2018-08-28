@@ -727,12 +727,9 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
 
       norm_z = cblas_dnrm2(2*m , z , 1);
       norm_b_s = cblas_dnrm2(2*m , b_s, 1);
-
     }
-
     else
     {
-
       cblas_dcopy(2*m , b_s, 1 , xi, 1);
       cblas_daxpy(2*m, -1.0, z, 1, xi , 1);
       NM_gemv(1.0, A, reaction, 1.0, xi);
@@ -811,7 +808,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
     {
       tau_k=1.0;
       e_k = e_k /eta;
-      numerics_printf_verbose(2,"No acceleration and restart tau_k  = %e  \n", tau_k);
+      numerics_printf_verbose(2,"Restart tau_k  = %e  \n", tau_k);
       cblas_dcopy(2*m , xi_k , 1 , xi_hat, 1);
       cblas_dcopy(2*m , z_k , 1 , z_hat, 1);
     }
@@ -824,7 +821,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
     /*********************************/
 
     rho_k = rho ;
-
+    numerics_printf_verbose(2, "residuals : r  = %e, \t  s = %e", r, s);
     if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
         SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
     {
@@ -832,7 +829,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
       s_scaled = s / (rho*norm_ATxi);
       /* s_scaled = s / (norm_ATxi); */
       numerics_printf_verbose(2, "scaling : norm_Ar  = %e, \t  norm_b_s = %e, \t norm_z  = %e, \t norm_ATxi = %e, \t", norm_Ar, norm_b_s, norm_z, norm_ATxi);
-      numerics_printf_verbose(2, "residuals : r  = %e, \t  s = %e", r, s);
+ 
       numerics_printf_verbose(2, "scaled residuals : r_scaled  = %e, \t  s_scaled = %e", r_scaled, s_scaled);
     }
     else

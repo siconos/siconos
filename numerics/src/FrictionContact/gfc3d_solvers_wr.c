@@ -189,7 +189,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     DEBUG_PRINT("M inverse :");
     DEBUG_EXPR(NM_display(M));
 
-    double alpha = 1.0, beta = 1.0;
+    double alpha = 1.0, beta = 0.0;
     NM_gemm(alpha, M, H, beta, MinvH);
 
     NumericsMatrix * Htrans= NM_create(NM_SPARSE_BLOCK, H->size1, H->size0);
