@@ -128,8 +128,8 @@ size_t NA_rm_duplicate(size_t *arr, size_t len)
 
 // Merge arr1[0..n1-1] and arr2[0..n2-1] into
 // arr3[0..n1+n2-1]
-void NA_merge(size_t * arr1, size_t * arr2, size_t n1,
-              size_t n2, size_t *arr3)
+void NA_merge_sorted_arrays(size_t * arr1, size_t * arr2, size_t n1,
+                            size_t n2, size_t *arr3)
 {
     size_t i = 0, j = 0, k = 0;
 
@@ -154,6 +154,33 @@ void NA_merge(size_t * arr1, size_t * arr2, size_t n1,
     // Store remaining elements of second array
     while (j < n2)
         arr3[k++] = arr2[j++];
+}
+
+static void NA_swap(size_t *xp, size_t *yp)
+{
+    int temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
+void NA_sort_bubble(size_t *arr, size_t len)
+{
+   size_t i, j;
+   for (i = 0; i < len-1; i++)
+       for (j = 0; j < len-i-1; j++)
+           if (arr[j] > arr[j+1])
+              NA_swap(&arr[j], &arr[j+1]);
+}
+
+
+size_t  NA_merge_and_sort_sorted_arrays(size_t * arr1, size_t * arr2, size_t n1,
+                                     size_t n2, size_t *arr3)
+{
+  NA_merge_sorted_arrays(arr1, arr2,  n1, n2, arr3);
+  int n3 = NA_rm_duplicate(arr3, n1+n2);
+  NA_sort_bubble(arr3, n3);
+  
+  return n3;
 }
 
 void NA_display(size_t * arr1,  size_t n1)

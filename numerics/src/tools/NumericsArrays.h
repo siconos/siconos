@@ -44,12 +44,16 @@ extern "C"
   /** */
   void NA_sortsn_(int *ddl_i, int *sort, int *n);
 
-
   size_t NA_rm_duplicate(size_t *arr, size_t len);
+
+  void NA_sort_bubble(size_t *arr, size_t len);
+
   
-  void NA_merge(size_t * arr1, size_t * arr2, size_t n1,
+  void NA_merge_sorted_arrays(size_t * arr1, size_t * arr2, size_t n1,
                 size_t n2, size_t *arr3);
   
+  size_t  NA_merge_and_sort_sorted_arrays(size_t * arr1, size_t * arr2, size_t n1,
+                                       size_t n2, size_t *arr3);
   void NA_display(size_t * arr1,  size_t n1);
   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

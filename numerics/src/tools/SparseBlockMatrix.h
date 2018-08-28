@@ -173,6 +173,20 @@ struct SparseBlockStructuredMatrixPred
   double **workspace;
 };
 
+struct SBM_index_by_column
+{
+  /* the index of the last non empty line + 1 */
+  size_t filled3;
+  /* the size of index2_data that corresponds of the number of non null blocks*/
+  size_t filled4;
+
+  unsigned int * index3_data;
+  unsigned int * index4_data;
+  size_t * blockMap;
+};
+
+
+
 #define NUMERICS_SBM_FREE_BLOCK 4
 #define NUMERICS_SBM_FREE_SBM 8
 

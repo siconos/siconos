@@ -378,6 +378,15 @@ extern "C"
   void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
                const double beta, NumericsMatrix *C);
 
+   /** Matrix matrix multiplication : C = A B 
+   * \param[in] A a NumericsMatrix
+   * \param[in] B a NumericsMatrix
+   * \param[in,out] C a NumericsMatrix
+   */
+  NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B);
+
+
+  
   /** Transposed matrix multiplication : y += alpha transpose(A) x + y
    * \param[in] alpha scalar
    * \param[in] A a NumericsMatrix

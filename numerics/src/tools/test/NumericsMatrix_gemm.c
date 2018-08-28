@@ -31,8 +31,8 @@
 #include "sanitizer.h"
 #include "SparseBlockMatrix.h"
 /* #define DEBUG_NOCOLOR */
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 
@@ -40,7 +40,7 @@
 
 /* ============================================================================================================================== */
 
-static int NM_gemm_test(NumericsMatrix** MM)
+static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
 {
 
 
@@ -53,7 +53,7 @@ static int NM_gemm_test(NumericsMatrix** MM)
   int info = -1;
   printf("== Numerics tests: NM_gemm(NumericsMatrix,NumericsMatrix) == \n");
   int i, j, k;
-  double alpha = 1.0, beta = 0.0;
+  
   double tol = 1e-12;
 
   double * C2ref = 0;
@@ -64,20 +64,83 @@ static int NM_gemm_test(NumericsMatrix** MM)
   NumericsMatrix C;
   NM_null(&C);
 
-  C.storageType = 0;
+  C.storageType = NM_DENSE;
   C.size0 = M1->size0;
   C.size1 = M1->size1;
-  C.matrix0 = (double *)malloc(C.size0 * C.size1 * sizeof(double));
+  C.matrix0 = (double *)calloc(C.size0 * C.size1 , sizeof(double));
   MSAN_INIT_VAR(C.matrix0, C.size0 * C.size1);
-  NM_gemm(alpha, M1, M1, beta,  &C);
 
-  double * Cref = (double *)malloc(C.size0 * C.size1 * sizeof(double));
+  for (i=0; i < 4 ; i++)
+  {
+    for (j=0; j < 4 ; j++)
+      C.matrix0[i + j * C.size0 ] = 1.0;
+  }
+  for (i=0; i < 4 ; i++)
+  {
+    for (j=4; j < 6 ; j++)
+      C.matrix0[i + j * C.size0 ] = 2.0;
+  }
+  for (i=4; i < 6 ; i++)
+  {
+    for (j=4; j < 6 ; j++)
+      C.matrix0[i + j * C.size0 ] = 3.0;
+  }
+  for (i=4; i < 6 ; i++)
+  {
+    for (j=6; j < 8 ; j++)
+      C.matrix0[i + j * C.size0 ] = 4.0;
+  }
+  for (i=6; i < 8 ; i++)
+  {
+    for (j=0; j < 4 ; j++)
+      C.matrix0[i + j * C.size0 ] = 5.0;
+  }
+  for (i=6; i < 8 ; i++)
+  {
+    for (j=6; j < 8 ; j++)
+      C.matrix0[i + j * C.size0 ] = 6.0;
+  }
+  DEBUG_EXPR(NM_display(&C));
+
+  NM_gemm(alpha, M1, M1, beta,  &C);
+  
+  double * Cref = (double *)calloc(C.size0 * C.size1, sizeof(double));
+  for (i=0; i < 4 ; i++)
+  {
+    for (j=0; j < 4 ; j++)
+      Cref[i + j * C.size0 ] = 1.0;
+  }
+  for (i=0; i < 4 ; i++)
+  {
+    for (j=4; j < 6 ; j++)
+      Cref[i + j * C.size0 ] = 2.0;
+  }
+  for (i=4; i < 6 ; i++)
+  {
+    for (j=4; j < 6 ; j++)
+      Cref[i + j * C.size0 ] = 3.0;
+  }
+  for (i=4; i < 6 ; i++)
+  {
+    for (j=6; j < 8 ; j++)
+      Cref[i + j * C.size0 ] = 4.0;
+  }
+  for (i=6; i < 8 ; i++)
+  {
+    for (j=0; j < 4 ; j++)
+      Cref[i + j * C.size0 ] = 5.0;
+  }
+  for (i=6; i < 8 ; i++)
+  {
+    for (j=6; j < 8 ; j++)
+      Cref[i + j * C.size0 ] = 6.0;
+  }
   double sum;
   for (i = 0; i < C.size0; i++)
   {
     for (j = 0; j < C.size1; j++)
     {
-      sum = 0.0;
+      sum = beta* Cref[i + j * C.size0];
       for (k = 0; k < M1->size1; k++)
       {
         sum = sum + M1->matrix0[i + k * M1->size0] * M1->matrix0[k + j * M1->size0];
@@ -119,6 +182,7 @@ static int NM_gemm_test(NumericsMatrix** MM)
   C2.size1 = M3->size1;
   C2.matrix0 = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
   MSAN_INIT_VAR(C2.matrix0, C2.size0 * C2.size1);
+  
   NM_gemm(alpha, M1, M3, beta,  &C2);
 
   C2ref = (double *)malloc(C2.size0 * C2.size1 * sizeof(double));
@@ -170,7 +234,7 @@ static int NM_gemm_test(NumericsMatrix** MM)
   
   NM_gemm(alpha, M2, M2, beta,  &C3);
   DEBUG_EXPR(NM_display(&C3));
-  
+  DEBUG_EXPR(NM_dense_display(Cref,M2->size0,M2->size1,M2->size0));
   /*     Check if it is correct */
 
   /* C3 and CRef must have the same values.*/
@@ -178,27 +242,36 @@ static int NM_gemm_test(NumericsMatrix** MM)
   info = SBM_dense_equal(C3.matrix1, Cref, tol);
  
   if (info == 0)
-    printf("Step 2 ( C = alpha*A*B + beta*C, sparse storage) ok ...\n");
+    printf("Step 2 ( C = alpha*A*B + beta*C, SBM storage) ok ...\n");
   else
   {
-    printf("Step 2 ( C = alpha*A*B + beta*C, sparse storage) failed ...\n");
+    printf("Step 2 ( C = alpha*A*B + beta*C, SBM storage) failed ...\n");
     goto exit_3;
   }
 
   NumericsMatrix C4;
+  NM_null(&C4);
+  C4.storageType = NM_SPARSE_BLOCK;
+  C4.size0 = M2->size0;
+  C4.size1 = M4->size1;
+  SBM4 = SBM_new();
+  C4.matrix1 = SBM4;
+  SBM_alloc_for_gemm(M2->matrix1, M4->matrix1, SBM4);
+  
   NM_gemm(alpha, M2, M4, beta,  &C4);
-
-
+  
+  DEBUG_EXPR(NM_display(&C4));
+  DEBUG_EXPR(NM_dense_display(C2ref,M2->size0,M4->size1,M2->size0));
   /*     Check if it is correct */
   /* C4 and C2Ref must have the same values.*/
 
   info = SBM_dense_equal(C4.matrix1, C2ref, tol);
   
   if (info == 0)
-    printf("Step 3 ( C = alpha*A*B + beta*C, sparse storage) ok ...\n");
+    printf("Step 3 ( C = alpha*A*B + beta*C, SBM storage) ok ...\n");
   else
   {
-    printf("Step 3 ( C = alpha*A*B + beta*C, sparse storage) failed ...\n");
+    printf("Step 3 ( C = alpha*A*B + beta*C, SBM storage) failed ...\n");
   }
 
   NM_free(&C4);
@@ -228,7 +301,19 @@ int main(void)
     return info;
   }
   printf("Construction ok ...\n");
-  info = NM_gemm_test(NMM);
+
+  info = NM_gemm_test(NMM,1.0,0.0);
+  /* if (info != 0) */
+  /* { */
+  /*   printf("End of ProdNumericsMatrix : unsucessfull\n"); */
+  /*   return info; */
+  /* } */
+  /* info = NM_gemm_test(NMM,1.0,1.0); */
+  if (info != 0)
+  {
+    printf("End of ProdNumericsMatrix : unsucessfull\n");
+    return info;
+  }
   printf("End of ProdNumericsMatrix ...\n");
   if (info != 0) return info;
   /* free memory */

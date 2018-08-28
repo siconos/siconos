@@ -20,6 +20,9 @@ if(WITH_${COMPONENT}_TESTING)
     NEW_TEST(test_dgels test_dgels.c)
   endif()
   NEW_TEST(test_dpotrf test_dpotrf.c)
+
+  NEW_TEST(NumericsArrays_test NumericsArrays.c)
+  
   #NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
   NEW_TEST(NumericsMatrix_IO_test NumericsMatrix_IO_test.c)
   NEW_TEST(NumericsMatrix_gemv NumericsMatrix_gemv.c)

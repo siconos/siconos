@@ -30,8 +30,8 @@
 #include "SparseBlockMatrix.h"
 #include "SiconosLapack.h"
 /* #define DEBUG_NOCOLOR */
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 

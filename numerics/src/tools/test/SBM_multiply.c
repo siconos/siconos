@@ -30,8 +30,8 @@
 #include "SparseBlockMatrix.h"
 #include "SiconosLapack.h"
 /* #define DEBUG_NOCOLOR */
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 
@@ -57,8 +57,8 @@ static int SBM_multiply_test1(double tol)
 
   double * C_dense = (double *) malloc(nm*sizeof(double));
 
-  double beta=1.0;
-  double alpha =1.0;
+  double beta = 0.0;
+  double alpha=1.0;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, m, n,
               alpha, M_dense, n, M_dense, n, beta, C_dense, n);
 
@@ -103,7 +103,7 @@ static int SBM_multiply_test2(double tol)
 
   double * C2_dense = (double *) malloc(nm*sizeof(double));
 
-  double beta=1.0;
+  double beta  =0.0;
   double alpha =1.0;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, m, n,
               alpha, M2_dense, n, M5_dense, n, beta, C2_dense, n);
@@ -127,17 +127,6 @@ static int SBM_multiply_test2(double tol)
   if (info == 1)
     return info;
 
-  /* SBM_add_without_allocation(SBM2,SBM5,alpha,beta,C2); */
-  /* info = SBM_dense_equal(C2, C2_dense, tol); */
-  /* DEBUG_EXPR(SBM_print(C2);); */
-  /* if (info == 1) */
-  /*   return info; */
-  /* SBM_add_without_allocation(SBM5,SBM2,alpha,beta,C3); */
-  /* info = SBM_dense_equal(C3, C3_dense, tol); */
-  /* DEBUG_EXPR(SBM_print(C3);); */
-  /* if (info == 1) */
-  /*   return info; */
-  
   NM_free(M2);
   NM_free(M5);
   SBM_free(C2);
@@ -151,6 +140,57 @@ static int SBM_multiply_test2(double tol)
 
 
 }
+static int SBM_multiply_test3(double tol)
+{
+  printf("========= Starts SBM tests SBM_multiply_test3  ========= \n");
+  int info = 0;
+  NumericsMatrix *M2 = test_matrix_2();
+  SparseBlockStructuredMatrix * SBM2= M2->matrix1;
+  DEBUG_EXPR(SBM_print(SBM2););
+
+  NumericsMatrix *M4 = test_matrix_4();
+  SparseBlockStructuredMatrix * SBM4= M4->matrix1;
+  DEBUG_EXPR(SBM_print(SBM4););
+
+
+  SparseBlockStructuredMatrix * C2 = SBM_multiply(SBM2,SBM4);
+  DEBUG_EXPR(SBM_print(C2););
+
+
+  int n =  M2->size0 ;
+
+  int m =  M4->size1 ;
+  
+  
+  double * M2_dense = (double *) malloc(n*n*sizeof(double));
+  double * M4_dense = (double *) malloc(n*m*sizeof(double));
+  SBM_to_dense(SBM2, M2_dense);
+  SBM_to_dense(SBM4, M4_dense);
+
+
+  double * C2_dense = (double *) malloc(n*m*sizeof(double));
+
+  double beta  =0.0;
+  double alpha =1.0;
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, m, n,
+              alpha, M2_dense, n, M4_dense, n, beta, C2_dense, n);
+
+  DEBUG_EXPR(NM_dense_display(C2_dense,n,m,n););
+
+  info = SBM_dense_equal(C2, C2_dense, tol);
+  
+
+  NM_free(M2);
+  NM_free(M4);
+  SBM_free(C2);
+  free(C2_dense);
+  free(M2_dense);
+  free(M4_dense);
+
+  return info;
+
+
+}
 int main(void)
 {
 
@@ -159,13 +199,19 @@ int main(void)
 
   printf("========= Starts SBM tests SBM_multiply ========= \n");
 
-  /* info = SBM_multiply_test1(tol); */
-  /* if (info == 1) */
-  /* { */
-  /*   printf("========= Ends SBM tests SBM_multiply  :  Unsuccessfull ========= \n"); */
-  /*   return info; */
-  /* } */
+  info = SBM_multiply_test1(tol);
+  if (info == 1)
+  {
+    printf("========= Ends SBM tests SBM_multiply  :  Unsuccessfull ========= \n");
+    return info;
+  }
   info = SBM_multiply_test2(tol);
+  if (info == 1)
+  {
+    printf("========= Ends SBM tests SBM_multiply  :  Unsuccessfull ========= \n");
+    return info;
+  }
+  info = SBM_multiply_test3(tol);
   if (info == 1)
   {
     printf("========= Ends SBM tests SBM_multiply  :  Unsuccessfull ========= \n");

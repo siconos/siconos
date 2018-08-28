@@ -2165,6 +2165,105 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
   }
 }
 
+NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
+{
+  DEBUG_BEGIN("NM_multiply(...) \n")
+  size_t storageType;
+
+  NumericsMatrix * C = NM_new();
+
+  /* At the time of writing, we are able to transform anything into NM_SPARSE,
+   * hence we use this format whenever possible */
+  if (A->storageType == NM_SPARSE || B->storageType == NM_SPARSE || C->storageType == NM_SPARSE)
+  {
+    storageType = NM_SPARSE;
+  }
+  else
+  {
+    storageType = A->storageType;
+  }
+  switch(storageType)
+  {
+  case NM_DENSE:
+  {
+    assert(A->matrix0);
+    assert(B->matrix0);
+
+    C->size0 = A->size0;
+    C->size1 = B->size1;
+    C->matrix0 = (double *)malloc(C->size0*C->size1*sizeof(double));
+    assert(C->matrix0);
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, A->size0, B->size1, B->size0,
+                1.0, A->matrix0, A->size0, B->matrix0, B->size0, 0.0, C->matrix0, A->size0);
+    NM_clearSparseBlock(C);
+    NM_clearSparseStorage(C);
+    C->storageType=storageType;
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    assert(A->matrix1);
+    assert(B->matrix1);
+    
+    /* New version taht follows the principle of sparse matrices in Csparse*/
+    SparseBlockStructuredMatrix * C_SBM = SBM_multiply(A->matrix1, B->matrix1);
+    NM_clearSparseBlock(C);
+    NM_clearDense(C);
+    NM_clearSparseStorage(C);
+    C->matrix1 = C_SBM;
+    C->size0 = A->size0;
+    C->size1 = B->size1;
+    C->storageType=storageType;
+    break;
+  }
+  case NM_SPARSE:
+  {
+    /* We need to free the allocated data here, hence we have to save the
+     * matrix pointer. Otherwise, we have a memleak */
+#ifdef WITH_MKL_SPBLAS
+    if (check_mkl_lib() && (fabs(beta -1.) < 100*DBL_EPSILON))
+    {
+      if (!B->matrix2) NM_triplet(B);
+      NumericsSparseMatrix* result = NM_MKL_spblas_gemm(0, A->matrix2, B->matrix2);
+      assert(result);
+      int size0 = C->size0;
+      int size1 = C->size1;
+      NM_free(C);
+      NM_null(C);
+      NM_fill(C, NM_SPARSE, size0, size1, result);
+      NM_MKL_to_sparse_matrix(C);
+      return;
+    }
+#endif
+    DEBUG_EXPR(NM_display(A));
+    DEBUG_EXPR(NM_display(B));
+    DEBUG_EXPR(cs_print((const cs * ) NM_csc(A),0););
+    DEBUG_EXPR(cs_print((const cs * ) NM_csc(B),0););
+    assert(A->size1 == B->size0 && "NM_gemm :: A->size1 != B->size0 ");
+    CSparseMatrix* C_csc = cs_multiply(NM_csc(A), NM_csc(B));
+    DEBUG_EXPR(cs_print((const cs * ) tmp_matrix,0););
+    assert(C_csc && "NM_gemm :: cs_multiply failed");
+    NSM_fix_csc(C_csc);
+
+    NM_clearDense(C);
+    NM_clearSparseBlock(C);
+    NM_clearSparseStorage(C);
+    C->storageType=storageType;
+    numericsSparseMatrix(C)->csc = C_csc;
+    C->size0 = (int)C->matrix2->csc->m;
+    C->size1 = (int)C->matrix2->csc->n;
+    numericsSparseMatrix(C)->origin = NSM_CSC;
+    break;
+  }
+  default:
+  {
+    assert(0 && "NM_multiply unknown storageType");
+  }
+  }
+  return C;
+  DEBUG_END("NM_multiply(...) \n")
+}
+
 void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
              const double beta, NumericsMatrix* C)
 {
@@ -2200,23 +2299,23 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     assert(B->matrix1);
     assert(C->matrix1);
 
-    /* old version */
-    SBM_alloc_for_gemm(A->matrix1, B->matrix1, C->matrix1);
-    SBM_gemm(alpha, A->matrix1, B->matrix1, beta, C->matrix1);
-    NM_clearDense(C);
-    NM_clearSparseStorage(C);
-    C->storageType=storageType;
-    
-    /* New version */
-    /* SparseBlockStructuredMatrix * C_tmp = SBM_multiply(A->matrix1, B->matrix1); */
-    /* SparseBlockStructuredMatrix * result = SBM_add(C_tmp, C->matrix1, alpha, beta); */
-    /* NM_clearSparseBlock(C); */
+    /* old version that cannot work for beta != 0.0*/
+    /* SBM_alloc_for_gemm(A->matrix1, B->matrix1, C->matrix1); */
+    /* SBM_gemm(alpha, A->matrix1, B->matrix1, beta, C->matrix1); */
     /* NM_clearDense(C); */
     /* NM_clearSparseStorage(C); */
-    /* C->matrix1 = result; */
-    /* C->size0 = A->size0; */
-    /* C->size1 = B->size1; */
     /* C->storageType=storageType; */
+    
+    /* New version that follows the principle of sparse matrices in Csparse*/
+    SparseBlockStructuredMatrix * C_tmp = SBM_multiply(A->matrix1, B->matrix1);
+    SparseBlockStructuredMatrix * result = SBM_add(C_tmp, C->matrix1, alpha, beta);
+    NM_clearSparseBlock(C);
+    NM_clearDense(C);
+    NM_clearSparseStorage(C);
+    C->matrix1 = result;
+    C->size0 = A->size0;
+    C->size1 = B->size1;
+    C->storageType=storageType;
     break;
   }
   case NM_SPARSE:

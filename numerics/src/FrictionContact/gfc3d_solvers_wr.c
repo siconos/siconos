@@ -175,11 +175,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     int m = H->size1;
 
     // compute W = H^T M^-1 H
-
-
-    NumericsMatrix * MinvH= NM_create(NM_SPARSE_BLOCK, m, m);
-
-    //Compute MinvH   <- M^-1 H
+    // compute MinvH   <- M^-1 H
 
 
     int infoMInv = 0;
@@ -189,18 +185,21 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     DEBUG_PRINT("M inverse :");
     DEBUG_EXPR(NM_display(M));
 
-    double alpha = 1.0, beta = 0.0;
-    NM_gemm(alpha, M, H, beta, MinvH);
+
+    NumericsMatrix * MinvH = NM_multiply(M,H);
+    
+    /* NumericsMatrix * MinvH= NM_create(NM_SPARSE_BLOCK, m, m); */
+    /* double alpha = 1.0, beta = 0.0; */
+    /* NM_gemm(alpha, M, H, beta, MinvH); */
 
     NumericsMatrix * Htrans= NM_create(NM_SPARSE_BLOCK, H->size1, H->size0);
-
     SBM_transpose(H->matrix1, Htrans->matrix1);
 
-    localproblem->M = NM_create(NM_SPARSE_BLOCK, m, m );
+    /* localproblem->M = NM_create(NM_SPARSE_BLOCK, m, m ); */
+    /* NumericsMatrix *W = localproblem->M; */
+    /* NM_gemm(alpha, Htrans, MinvH, beta, W); */
 
-    NumericsMatrix *W = localproblem->M;
-    NM_gemm(alpha, Htrans, MinvH, beta, W);
-
+    localproblem->M =  NM_multiply(Htrans,MinvH);
 
 
 #ifdef OUTPUT_DEBUG
@@ -246,9 +245,6 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     double  condWInverse;
     condWInverse = cond(WInverse, m, m);
 
-
-
-
     FILE * file2 = fopen("dataWInverse.dat", "w");
     NM_write_in_file_scilab(WnumInverse, file2);
     fclose(file2);
@@ -282,7 +278,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     // compute H^T M^-1 q+ b
     double* qtmp = (double*)malloc(n * sizeof(double));
     for (int i = 0; i < n; i++) qtmp[i] = 0.0;
-
+    double alpha = 1.0, beta = 0.0; 
     double beta2 = 0.0;
     NM_gemv(alpha, M, problem->q, beta2, qtmp);
     NM_gemv(alpha, Htrans, qtmp, beta, localproblem->q);
@@ -325,15 +321,19 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     DEBUG_EXPR(NM_display(Minv););
 
 
-    NumericsMatrix* MinvH = NM_create(NM_SPARSE,n,m);
-    NM_triplet_alloc(MinvH, n);
-    MinvH->matrix2->origin = NSM_TRIPLET;
-    DEBUG_EXPR(NM_display(MinvH););
-    NM_gemm(1.0, Minv, H, 0.0, MinvH);
+    /* NumericsMatrix* MinvH = NM_create(NM_SPARSE,n,m); */
+    /* NM_triplet_alloc(MinvH, n); */
+    /* MinvH->matrix2->origin = NSM_TRIPLET; */
+    /* DEBUG_EXPR(NM_display(MinvH);); */
+    /* NM_gemm(1.0, Minv, H, 0.0, MinvH); */
+
+    NumericsMatrix* MinvH = NM_multiply(Minv,H);
     DEBUG_EXPR(NM_display(MinvH););
 
     // Product H^T M^-1 H
     NM_csc_trans(H);
+
+    
     NumericsMatrix* Htrans = NM_new();
     Htrans->storageType = NM_SPARSE;
     Htrans-> size0 = m;
@@ -343,15 +343,15 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     Htrans->matrix2->csc = NM_csc_trans(H);
     DEBUG_EXPR(NM_display(Htrans););
 
-    localproblem->M = NM_create(NM_SPARSE, m, m);
-
-    NumericsMatrix *W = localproblem->M;
-    int nzmax= m*m;
-    NM_csc_empty_alloc(W, nzmax);
-    W->matrix2->origin = NSM_CSC;
-
-    NM_gemm(1.0, Htrans, MinvH, 0.0, W);
-    DEBUG_EXPR(NM_display(W););
+    /* localproblem->M = NM_create(NM_SPARSE, m, m); */
+    /* NumericsMatrix *W = localproblem->M; */
+    /* int nzmax= m*m; */
+    /* NM_csc_empty_alloc(W, nzmax); */
+    /* W->matrix2->origin = NSM_CSC; */
+    /* NM_gemm(1.0, Htrans, MinvH, 0.0, W); */
+    
+    localproblem->M = NM_multiply(Htrans,MinvH);
+    DEBUG_EXPR(NM_display(localproblem->M););
 
     // compute localq = H^T M^(-1) q +b
 
