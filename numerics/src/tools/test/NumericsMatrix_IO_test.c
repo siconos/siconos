@@ -34,33 +34,64 @@ int main(void)
 
   int i, nmm = 4 ;
   NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
+  NumericsMatrix ** Mread = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
 
+  int info = test_build_first_4_NM(NMM);
 
-  for (i = 0 ; i < nmm; i++)
-  {
-    NMM[i] = NM_new();
-  }
-
-
-  int info = test_BuildNumericsMatrix(NMM);
   if (info != 0)
   {
     printf("Construction failed ...\n");
     return info;
   }
   printf("Construction ok ...\n");
-  info = test_prodNumericsMatrix(NMM);
-  printf("End of ProdNumericsMatrix ...\n");
-  if (info != 0) return info;
+
+  /* Test of various I/O functions */
+
+  for (i = 0 ; i < nmm; i++)
+  {
+
+    printf("test on NMM[%i]\n", i);
+
+    NM_display(NMM[i]);
+    NM_display_row_by_row(NMM[i]);
+    FILE * foutput = fopen("testprintInfile.dat", "w");
+    NM_write_in_file(NMM[i], foutput);
+    fclose(foutput);
+    FILE * finput = fopen("testprintInfile.dat", "r");
+    NM_read_in_file(NMM[i], finput);
+    fclose(finput);
+    
+    FILE * finput2 = fopen("testprintInfile.dat", "r");
+    Mread[i] = NM_new_from_file(finput2);
+    fclose(finput2);
+    
+    char  filename[50] = "testprintInfileName.dat";
+    NM_write_in_filename(NMM[i], filename);
+    NM_read_in_filename(NMM[i], filename);
+    printf("end of test on NMM[%i]\n", i);
+
+  }
+  for (i = 0 ; i < nmm; i++, i++)
+  {
+    FILE * foutput2 = fopen("testprintInfileForScilab.dat", "w");
+    NM_write_in_file_scilab(NMM[i], foutput2);
+    fclose(foutput2);
+  }
+
+
+
   /* free memory */
 
   for (i = 0 ; i < nmm; i++)
   {
     NM_free(NMM[i]);
     free(NMM[i]);
+    NM_free(Mread[i]);
+    free(Mread[i]);
   }
 
   free(NMM);
+  free(Mread);
 
 
 

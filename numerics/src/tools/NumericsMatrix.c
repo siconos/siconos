@@ -2200,12 +2200,23 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     assert(B->matrix1);
     assert(C->matrix1);
 
+    /* old version */
     SBM_alloc_for_gemm(A->matrix1, B->matrix1, C->matrix1);
     SBM_gemm(alpha, A->matrix1, B->matrix1, beta, C->matrix1);
-
     NM_clearDense(C);
     NM_clearSparseStorage(C);
     C->storageType=storageType;
+    
+    /* New version */
+    /* SparseBlockStructuredMatrix * C_tmp = SBM_multiply(A->matrix1, B->matrix1); */
+    /* SparseBlockStructuredMatrix * result = SBM_add(C_tmp, C->matrix1, alpha, beta); */
+    /* NM_clearSparseBlock(C); */
+    /* NM_clearDense(C); */
+    /* NM_clearSparseStorage(C); */
+    /* C->matrix1 = result; */
+    /* C->size0 = A->size0; */
+    /* C->size1 = B->size1; */
+    /* C->storageType=storageType; */
     break;
   }
   case NM_SPARSE:

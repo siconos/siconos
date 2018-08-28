@@ -36,13 +36,8 @@ int main(void)
   NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
 
 
-  for (i = 0 ; i < nmm; i++)
-  {
-    NMM[i] = NM_new();
-  }
 
-
-  int info = test_BuildNumericsMatrix(NMM);
+  int info = test_build_first_4_NM(NMM);
   if (info != 0)
   {
     printf("Construction failed ...\n");

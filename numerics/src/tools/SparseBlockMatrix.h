@@ -118,16 +118,17 @@ struct SparseBlockStructuredMatrix
   unsigned int *blocksize0;
   /* the vector of cumulated column sizes of blocks */
   unsigned int *blocksize1;
+
   /* the index of the last non empty line + 1 */
   size_t filled1;
   /* the size of index2_data that corresponds of the number of non null blocks*/
   size_t filled2;
-  
+
   size_t *index1_data;
   size_t *index2_data;
 
 };
- 
+
 struct SparseBlockCoordinateMatrix
 {
   /** number of blocks */
@@ -214,7 +215,7 @@ extern "C"
                   const SparseBlockStructuredMatrix* const A,
                   double* const x, double* y);
 
-  /** SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
+  /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix product C = alpha*A*B + beta*C
 
      \param[in] alpha coefficient
      \param[in] A the matrix to be multiplied
@@ -223,7 +224,7 @@ extern "C"
      \param[in,out] C the resulting matrix
   */
   void SBM_gemm(double alpha, const SparseBlockStructuredMatrix* const A,
-                  const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C);
+                const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C);
 
   /** Allocating Memory and initialization for  SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
     \param[in] A the matrix to be multiplied
@@ -231,6 +232,31 @@ extern "C"
     \param[in,out] C the resulting matrix
   */
   void SBM_alloc_for_gemm(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B, SparseBlockStructuredMatrix*  C);
+
+  SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B);
+
+  /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix addition C = alpha*A + beta*B
+     \param[in] A the matrix to be added
+     \param[in] B the matrix to be added
+     \param[in] alpha coefficient
+     \param[in] beta coefficient
+     \return C the resulting matrix
+  */
+  SparseBlockStructuredMatrix * SBM_add(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B, double alpha, double beta);
+
+  /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix addition C = alpha*A + beta*B without allocation
+      We assume that C has the correct structure
+     \param[in] A the matrix to be added
+     \param[in] B the matrix to be added
+     \param[in] alpha coefficient
+     \param[in] beta coefficient
+     \param[in,out] C the resulting matrix
+  */
+
+  void SBM_add_without_allocation(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B,
+                                  double alpha, double beta,
+                                  SparseBlockStructuredMatrix * C );
+
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
       \param[in] sizeX dim of the vector x
@@ -264,13 +290,13 @@ extern "C"
   */
   void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
   void SBM_row_prod_no_diag_1x1(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
-  
+
 
   void SBM_extract_component_3x3(const SparseBlockStructuredMatrix* const A,
                                  SparseBlockStructuredMatrix*  B,
                                  unsigned int *row_components, unsigned int row_components_size,
                                  unsigned int *col_components, unsigned int col_components_size);
-  
+
   /** Destructor for SparseBlockStructuredMatrix objects
       \param blmat SparseBlockStructuredMatrix the matrix to be destroyed.
    */
@@ -368,9 +394,6 @@ extern "C"
   int SBM_inverse_diagonal_block_matrix_in_place(const SparseBlockStructuredMatrix*  M, int* ipiv);
 
 
-
-
-
   /** Copy a SBM into a Dense Matrix
   \param[in] A the SparseBlockStructuredMatrix matrix
   \param[in] denseMat pointer on the filled dense Matrix
@@ -446,7 +469,7 @@ extern "C"
    */
   SparseBlockStructuredMatrix* SBCM_to_SBM(SparseBlockCoordinateMatrix* MC);
 
-  
+
   /** free a SparseBlockStructuredMatrix created with SBCM_to_SBM
    * \param[in,out] M a SparseBlockStructuredMatrix to free*/
   void SBM_free_from_SBCM(SparseBlockStructuredMatrix* M);
@@ -460,10 +483,9 @@ extern "C"
   */
   int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat, SparseBlockStructuredMatrix* outSBM);
 
-  
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
 #endif /* NSSPACK_H */
-

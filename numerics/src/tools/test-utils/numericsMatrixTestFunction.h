@@ -25,9 +25,13 @@
 extern "C"
 {
 #endif
-  int test_BuildNumericsMatrix(NumericsMatrix** MM);
-  int test_prodNumericsMatrix(NumericsMatrix** MM);
-  int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM);
+  NumericsMatrix * test_matrix_1(void);
+  NumericsMatrix * test_matrix_2(void);
+  NumericsMatrix * test_matrix_3(void);
+  NumericsMatrix * test_matrix_4(void);
+  NumericsMatrix * test_matrix_5(void);
+  int SBM_dense_equal(SparseBlockStructuredMatrix * M, double * m, double tol);
+  int test_build_first_4_NM(NumericsMatrix** MM);
   int test_NM_row_prod(NumericsMatrix* M1, NumericsMatrix* M2);
   int test_NM_row_prod_no_diag(NumericsMatrix* M1, NumericsMatrix* M2);
   int test_NM_row_prod_non_square(NumericsMatrix* M3, NumericsMatrix* M4);
