@@ -80,24 +80,24 @@ static int SBM_add_test2(double tol, double alpha, double beta)
   SparseBlockStructuredMatrix * SBM2= M2->matrix1;
   DEBUG_EXPR(SBM_print(SBM2););
 
-  NumericsMatrix *M5 = test_matrix_5();
-  SparseBlockStructuredMatrix * SBM5= M5->matrix1;
-  DEBUG_EXPR(SBM_print(SBM5););
+  NumericsMatrix *M10 = test_matrix_10();
+  SparseBlockStructuredMatrix * SBM10= M10->matrix1;
+  DEBUG_EXPR(SBM_print(SBM10););
 
 
-  SparseBlockStructuredMatrix * C2 = SBM_add(SBM2,SBM5,alpha,beta);
+  SparseBlockStructuredMatrix * C2 = SBM_add(SBM2,SBM10,alpha,beta);
   DEBUG_EXPR(SBM_print(C2););
 
-  SparseBlockStructuredMatrix * C3 = SBM_add(SBM5,SBM2,alpha,beta);
+  SparseBlockStructuredMatrix * C3 = SBM_add(SBM10,SBM2,alpha,beta);
   DEBUG_EXPR(SBM_print(C3););
 
   int n =  M2->size0 ;
   int m =  M2->size1; 
   int nm = n*m;
   double * M2_dense = (double *) malloc(nm*sizeof(double));
-  double * M5_dense = (double *) malloc(nm*sizeof(double));
+  double * M10_dense = (double *) malloc(nm*sizeof(double));
   SBM_to_dense(SBM2, M2_dense);
-  SBM_to_dense(SBM5, M5_dense);
+  SBM_to_dense(SBM10, M10_dense);
 
   double * C2_dense = (double *) malloc(nm*sizeof(double));
 
@@ -105,7 +105,7 @@ static int SBM_add_test2(double tol, double alpha, double beta)
   
   cblas_daxpy(nm, alpha, M2_dense, 1, C2_dense, 1);
 
-  cblas_daxpy(nm, beta, M5_dense, 1, C2_dense, 1);
+  cblas_daxpy(nm, beta, M10_dense, 1, C2_dense, 1);
 
   DEBUG_EXPR(NM_dense_display(C2_dense,n,m,n ));
   info = SBM_dense_equal(C2, C2_dense, tol);
@@ -115,7 +115,7 @@ static int SBM_add_test2(double tol, double alpha, double beta)
   double * C3_dense = (double *) malloc(nm*sizeof(double));
 
   cblas_dscal(nm, 0.0, C3_dense, 1);
-  cblas_daxpy(nm, alpha, M5_dense, 1, C3_dense, 1);
+  cblas_daxpy(nm, alpha, M10_dense, 1, C3_dense, 1);
   cblas_daxpy(nm, beta, M2_dense, 1, C3_dense, 1);
   DEBUG_EXPR(NM_dense_display(C3_dense,n,m,n ));
   
@@ -123,25 +123,25 @@ static int SBM_add_test2(double tol, double alpha, double beta)
   if (info == 1)
     return info;
 
-  SBM_add_without_allocation(SBM2,SBM5,alpha,beta,C2);
+  SBM_add_without_allocation(SBM2,SBM10,alpha,beta,C2);
   info = SBM_dense_equal(C2, C2_dense, tol);
   DEBUG_EXPR(SBM_print(C2););
   if (info == 1)
     return info;
-  SBM_add_without_allocation(SBM5,SBM2,alpha,beta,C3);
+  SBM_add_without_allocation(SBM10,SBM2,alpha,beta,C3);
   info = SBM_dense_equal(C3, C3_dense, tol);
   DEBUG_EXPR(SBM_print(C3););
   if (info == 1)
     return info;
   
   NM_free(M2);
-  NM_free(M5);
+  NM_free(M10);
   SBM_free(C2);
   SBM_free(C3);
   free(C2_dense);
   free(C3_dense);
   free(M2_dense);
-  free(M5_dense);
+  free(M10_dense);
 
   return info;
 

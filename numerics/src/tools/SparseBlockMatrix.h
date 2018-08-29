@@ -180,8 +180,8 @@ struct SBM_index_by_column
   /* the size of index2_data that corresponds of the number of non null blocks*/
   size_t filled4;
 
-  unsigned int * index3_data;
-  unsigned int * index4_data;
+  size_t * index3_data;
+  size_t * index4_data;
   size_t * blockMap;
 };
 
@@ -230,22 +230,14 @@ extern "C"
                   double* const x, double* y);
 
   /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix product C = alpha*A*B + beta*C
-
-     \param[in] alpha coefficient
-     \param[in] A the matrix to be multiplied
-     \param[in] B the matrix to be multiplied
-    \param[in] beta coefficient
-     \param[in,out] C the resulting matrix
+      \param[in] alpha coefficient
+      \param[in] A the matrix to be multiplied
+      \param[in] B the matrix to be multiplied
+      \param[in] beta coefficient
+      \param[in,out] C the resulting matrix
   */
   void SBM_gemm(double alpha, const SparseBlockStructuredMatrix* const A,
                 const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C);
-
-  /** Allocating Memory and initialization for  SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
-    \param[in] A the matrix to be multiplied
-    \param[in] B the matrix to be multiplied
-    \param[in,out] C the resulting matrix
-  */
-  void SBM_alloc_for_gemm(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B, SparseBlockStructuredMatrix*  C);
 
   SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B);
 
@@ -256,6 +248,9 @@ extern "C"
      \param[in] beta coefficient
      \return C the resulting matrix
   */
+
+  SparseBlockStructuredMatrix*  SBM_zero_matrix_for_multiply(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B);
+  
   SparseBlockStructuredMatrix * SBM_add(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B, double alpha, double beta);
 
   /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix addition C = alpha*A + beta*B without allocation
@@ -375,6 +370,8 @@ extern "C"
       \return pos the position of the block
   */
   unsigned int SBM_get_position_diagonal_block(const SparseBlockStructuredMatrix* const M, unsigned int num);
+
+  int SBM_zentry(const SparseBlockStructuredMatrix* const M, unsigned int row, unsigned int col, double val);
 
   /** get the element of row i and column j of the matrix M
      \param M the SparseBlockStructuredMatrix matrix

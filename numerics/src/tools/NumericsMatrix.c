@@ -581,6 +581,11 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
     M->matrix0[i+j*M->size0] = val;
     break;
   }
+  case NM_SPARSE_BLOCK:
+  {
+    CHECK_RETURN(SBM_zentry(M->matrix1, i, j, val));
+    break;
+  }
   case NM_SPARSE:
   {
     assert(M->matrix2);
