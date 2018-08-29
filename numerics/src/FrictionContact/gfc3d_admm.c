@@ -124,7 +124,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
                 double* restrict velocity, double* restrict globalVelocity,
                 int* restrict info, SolverOptions* restrict options)
 {
-  verbose=3;
+  /* verbose=3; */
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
