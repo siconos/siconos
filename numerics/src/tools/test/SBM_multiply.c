@@ -76,37 +76,37 @@ static int SBM_multiply_test1(double tol)
 
 static int SBM_multiply_test2(double tol)
 {
-  printf("========= Starts SBM tests SBM_multiply_test2 e ========= \n");
+  printf("========= Starts SBM tests SBM_multiply_test2 ========= \n");
   int info = 0;
   NumericsMatrix *M2 = test_matrix_2();
   SparseBlockStructuredMatrix * SBM2= M2->matrix1;
   DEBUG_EXPR(SBM_print(SBM2););
 
-  NumericsMatrix *M5 = test_matrix_5();
-  SparseBlockStructuredMatrix * SBM5= M5->matrix1;
-  DEBUG_EXPR(SBM_print(SBM5););
+  NumericsMatrix *M10 = test_matrix_10();
+  SparseBlockStructuredMatrix * SBM10= M10->matrix1;
+  DEBUG_EXPR(SBM_print(SBM10););
 
 
-  SparseBlockStructuredMatrix * C2 = SBM_multiply(SBM2,SBM5);
+  SparseBlockStructuredMatrix * C2 = SBM_multiply(SBM2,SBM10);
   DEBUG_EXPR(SBM_print(C2););
 
-  SparseBlockStructuredMatrix * C3 = SBM_multiply(SBM5,SBM2);
+  SparseBlockStructuredMatrix * C3 = SBM_multiply(SBM10,SBM2);
   DEBUG_EXPR(SBM_print(C3););
 
   int n =  M2->size0 ;
   int m =  M2->size1; 
   int nm = n*m;
   double * M2_dense = (double *) malloc(nm*sizeof(double));
-  double * M5_dense = (double *) malloc(nm*sizeof(double));
+  double * M10_dense = (double *) malloc(nm*sizeof(double));
   SBM_to_dense(SBM2, M2_dense);
-  SBM_to_dense(SBM5, M5_dense);
+  SBM_to_dense(SBM10, M10_dense);
 
   double * C2_dense = (double *) malloc(nm*sizeof(double));
 
   double beta  =0.0;
   double alpha =1.0;
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, m, n,
-              alpha, M2_dense, n, M5_dense, n, beta, C2_dense, n);
+              alpha, M2_dense, n, M10_dense, n, beta, C2_dense, n);
 
   DEBUG_EXPR(NM_dense_display(C2_dense,n,m,n););
 
@@ -116,7 +116,7 @@ static int SBM_multiply_test2(double tol)
 
   double * C3_dense = (double *) malloc(nm*sizeof(double));
   cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, n, m, n,
-              alpha, M5_dense, n, M2_dense, n, beta, C3_dense, n);
+              alpha, M10_dense, n, M2_dense, n, beta, C3_dense, n);
 
   DEBUG_EXPR(NM_dense_display(C3_dense,n,m,n););
 
@@ -128,13 +128,13 @@ static int SBM_multiply_test2(double tol)
     return info;
 
   NM_free(M2);
-  NM_free(M5);
+  NM_free(M10);
   SBM_free(C2);
   SBM_free(C3);
   free(C2_dense);
   free(C3_dense);
   free(M2_dense);
-  free(M5_dense);
+  free(M10_dense);
 
   return info;
 

@@ -28,9 +28,9 @@
 #include "op3x3.h"
 #include "SiconosCompat.h"
 #include "NumericsArrays.h"
-// #define DEBUG_STDOUT 1
-// #define DEBUG_MESSAGES 1
-//#define DEBUG_NOCOLOR 1
+#define DEBUG_STDOUT 1
+#define DEBUG_MESSAGES 1
+#define DEBUG_NOCOLOR 1
 #include "debug.h"
 #include "CSparseMatrix.h"
 
@@ -603,11 +603,12 @@ static void SBM_index_by_column_compute(const SparseBlockStructuredMatrix* const
   }
 }
 
-static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B,
-                                SparseBlockStructuredMatrix*  C, struct SBM_index_by_column * SBM_index_by_column_B)
+static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A,
+                                const SparseBlockStructuredMatrix* const B,
+                                SparseBlockStructuredMatrix*  C,
+                                struct SBM_index_by_column * SBM_index_by_column_B)
 {
   DEBUG_BEGIN("SBM_check_C_for_gemm(...)\n");
-
 
   unsigned int need_alloc=0;
 
@@ -794,7 +795,7 @@ static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A, cons
   return need_alloc;
 }
 
-static int SBM_check_compatibility_for_gemm(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B)
+static int SBM_check_compatibility_for_multiply(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B)
 {
   DEBUG_BEGIN(" SBM_check_compatibility_for_gemm(...)\n");
   assert(A);
@@ -926,7 +927,7 @@ SparseBlockStructuredMatrix*  SBM_zero_matrix_for_multiply(const SparseBlockStru
   assert(B);
 
   /*     Check the compatibility of the number and the sizes of blocks */
-  int compat =  SBM_check_compatibility_for_gemm(A,B);
+  int compat =  SBM_check_compatibility_for_multiply(A,B);
   if (!compat)
   {
     numerics_error("SBM_zero_matrix_for_multiply", "Non compatible matrices or blocks sizes.\n");
@@ -957,7 +958,7 @@ SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* co
 
 
   /*     Check the compatibility of the number and the sizes of blocks */
-  int compat =  SBM_check_compatibility_for_gemm(A,B);
+  int compat =  SBM_check_compatibility_for_multiply(A,B);
   if (!compat)
   {
     numerics_error("SBM_multiply", "Non compatible matrices or blocks sizes.\n");
@@ -1094,61 +1095,21 @@ SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* co
   return C;
 }
 
-
-
-
-
-
-void SBM_gemm(double alpha, const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B,
-              double beta, SparseBlockStructuredMatrix*  C)
+void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix* const A,
+                                 const SparseBlockStructuredMatrix* const B,
+                                 double beta, SparseBlockStructuredMatrix*  C)
 {
   DEBUG_BEGIN("SBM_gemm\(...)\n");
-  assert(A);
-  assert(B);
-  assert(C);
-
-  /*     Check the compatibility of size of matrices */
-  assert(A->blocksize0);
-  assert(A->blocksize1);
-  assert(B->blocksize0);
-  assert(B->blocksize1);
-
-  assert(A->blocksize1[A->blocknumber1 - 1] == B->blocksize0[B->blocknumber0 - 1]);
-
-  /*     Check the compatibility of the number and the sizes of blocks */
-  int compat =  SBM_check_compatibility_for_gemm(A,B);
-  if (!compat)
-  {
-    numerics_error("SBM_gemm", "matrix,matrix product not implemented for non compatible blocks sizes.\n");
-  }
-
-  {
-    assert(C->blocknumber0 == A->blocknumber0);
-    assert(C->blocknumber1 == B->blocknumber1);
-
-    /* My eyes are bleeding; if this is important, move it into a function --xhub */
-    /*    assert( {int compat =1;
-                 for(unsigned int i =0; i<C->blocknumber0; i++)
-      {
-        if(C->blocksize0[i] != A->blocksize0[i]) compat =0;
-        }
-        compat==1;
-                });
-        assert( {int compat =1;
-                 for(unsigned int j =0; j<C->blocknumber1; j++)
-      {
-        if(C->blocksize1[j] != B->blocksize1[j]) compat =0;
-        }
-        compat==1;
-                });*/
-  }
-
-
-  /* Search  the non null blocks of C */
-
+  
+  /*  Check the compatibility of the number and the sizes of blocks */
+  assert(!SBM_check_compatibility_for_multiply(A,B));
 
   struct SBM_index_by_column* B_index_by_column = SBM_index_by_column_new();
   SBM_index_by_column_compute(B, B_index_by_column);
+
+
+  /*  Check the memory allocation in C */
+  assert(!SBM_check_C_for_gemm(A, B, C, B_index_by_column));
 
   size_t Bfilled3 =  B_index_by_column->filled3;
   size_t  * Bindex3_data = B_index_by_column->index3_data;
@@ -1158,9 +1119,7 @@ void SBM_gemm(double alpha, const SparseBlockStructuredMatrix* const A, const Sp
 
   unsigned int currentRowNumberofA;
   unsigned int currentColNumberofB;
-
-
-
+  
   size_t colNumberAA;
   size_t rowNumberBB;
 
@@ -2181,9 +2140,7 @@ int SBM_zentry(const SparseBlockStructuredMatrix* const M, unsigned int row, uns
   }
   DEBUG_PRINTF("colNumber= %i\n", colNumber);
 
-
-
-  int nbRows, nbColumns;
+  size_t nbRows, nbColumns;
   size_t row_pos=0, col_pos=0;
   for (size_t blockNum = M->index1_data[rowNumber];
        blockNum < M->index1_data[rowNumber + 1]; ++blockNum)
@@ -2295,59 +2252,6 @@ double SBM_get_value(const SparseBlockStructuredMatrix* const M, unsigned int ro
 
 
 
-}
-
-static int SBM_copy_old(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B, unsigned int copyBlock)
-{
-  assert(A);
-  B->nbblocks = A->nbblocks;
-  B->blocknumber0 = A->blocknumber0;
-  B->blocknumber1 = A->blocknumber1;
-  B->blocksize0 = (unsigned int*)malloc(B->blocknumber0 * sizeof(unsigned int));
-  for (unsigned int i = 0; i < B->blocknumber0; i++) B->blocksize0[i] = A->blocksize0[i];
-  B->blocksize1 = (unsigned int*)malloc(B->blocknumber1 * sizeof(unsigned int));
-  for (unsigned int i = 0; i < B->blocknumber1; i++) B->blocksize1[i] = A->blocksize1[i];
-  B->filled1 = A->filled1;
-  B->filled2 = A->filled2;
-  B->index1_data = (size_t*)malloc(B->filled1 * sizeof(size_t));
-  for (unsigned int i = 0; i < B->filled1; i++) B->index1_data[i] = A->index1_data[i];
-  B->index2_data = (size_t*)malloc(B->filled2 * sizeof(size_t));
-  for (unsigned int i = 0; i < B->filled2; i++) B->index2_data[i] = A->index2_data[i];
-  B->block = (double **)malloc(B->nbblocks * sizeof(double*));
-  if (copyBlock)
-  {
-    unsigned int currentRowNumber ;
-    size_t colNumber;
-    unsigned int nbRows, nbColumns;
-    for (currentRowNumber = 0 ; currentRowNumber < B->filled1 - 1; ++currentRowNumber)
-    {
-      for (size_t blockNum = B->index1_data[currentRowNumber];
-           blockNum < B->index1_data[currentRowNumber + 1]; ++blockNum)
-      {
-        assert(blockNum < B->filled2);
-        colNumber = B->index2_data[blockNum];
-        /* Get dim. of the current block */
-        nbRows = B->blocksize0[currentRowNumber];
-        if (currentRowNumber != 0)
-          nbRows -= B->blocksize0[currentRowNumber - 1];
-        nbColumns = B->blocksize1[colNumber];
-        if (colNumber != 0)
-          nbColumns -= B->blocksize1[colNumber - 1];
-        B->block[blockNum] = (double*)malloc(nbRows * nbColumns * sizeof(double));
-        for (unsigned int i = 0; i < nbRows * nbColumns; i++)
-        {
-          B->block[blockNum] [i] = A->block[blockNum] [i] ;
-        }
-      }
-    }
-  }
-  else
-  {
-    for (unsigned int n = 0; n < B->nbblocks; n++)
-      B->block[n] = A->block[n];
-  }
-
-  return 0;
 }
 
 int SBM_copy(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMatrix*  B, unsigned int copyBlock)

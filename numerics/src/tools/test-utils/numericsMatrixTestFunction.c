@@ -211,7 +211,7 @@ NumericsMatrix * test_matrix_5()
 {
   NumericsMatrix * M2 = test_matrix_2();
 
-  CSparseMatrix* M2_csc =  NM_csc(M2);
+  NM_csc(M2);
 
   NM_clearDense(M2);
   NM_clearSparseBlock(M2);
@@ -223,7 +223,7 @@ NumericsMatrix * test_matrix_6()
 {
   NumericsMatrix * M4 = test_matrix_4();
 
-  CSparseMatrix* M4_csc =  NM_csc(M4);
+  NM_csc(M4);
 
   NM_clearDense(M4);
   NM_clearSparseBlock(M4);

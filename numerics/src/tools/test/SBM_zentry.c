@@ -136,10 +136,13 @@ static int SBM_zentry_test2(double tol)
 
   NumericsMatrix * M2 = test_matrix_2();
   
-  CHECK_RETURN(SBM_zentry(M2->matrix1,0,8,1.0));
-  CHECK_RETURN(SBM_zentry(M2->matrix1,8,0,1.0));
+  /* CHECK_RETURN(SBM_zentry(M2->matrix1,0,8,1.0)); */
+  /* CHECK_RETURN(SBM_zentry(M2->matrix1,8,0,1.0)); */
+  /* CHECK_RETURN(SBM_zentry(M2->matrix1,0,7,1.0)); */
   
-  CHECK_RETURN(SBM_zentry(M2->matrix1,0,7,1.0));
+  info = SBM_zentry(M2->matrix1,0,8,1.0);
+  info = SBM_zentry(M2->matrix1,8,0,1.0);
+  info = SBM_zentry(M2->matrix1,0,7,1.0);
 
   NM_free(M2);
 

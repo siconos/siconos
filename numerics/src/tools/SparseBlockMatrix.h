@@ -230,16 +230,30 @@ extern "C"
                   double* const x, double* y);
 
   /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix product C = alpha*A*B + beta*C
-      \param[in] alpha coefficient
+   * The routine has to be used with precaution. The allocation of C is not done
+   *  since we want to add beta*C. We assume that the structure and the allocation
+   *  of the matrix is right. 
+   *   \param[in] alpha coefficient
+   *   \param[in] A the matrix to be multiplied
+   *   \param[in] B the matrix to be multiplied
+   *   \param[in] beta coefficient
+   *   \param[in,out] C the resulting matrix
+   */
+  void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix* const A,
+                                  const SparseBlockStructuredMatrix* const B,
+                                  double beta, SparseBlockStructuredMatrix*  C);
+  
+  /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix multiplication C = A *B
+      Correct allocation is performed
       \param[in] A the matrix to be multiplied
       \param[in] B the matrix to be multiplied
-      \param[in] beta coefficient
-      \param[in,out] C the resulting matrix
+      \return C the resulting matrix
   */
-  void SBM_gemm(double alpha, const SparseBlockStructuredMatrix* const A,
-                const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C);
-
   SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B);
+
+  /** Perform the allocation of a zero matrix that is compatible qith multiplication
+   */
+  SparseBlockStructuredMatrix*  SBM_zero_matrix_for_multiply(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B);
 
   /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix addition C = alpha*A + beta*B
      \param[in] A the matrix to be added
@@ -248,9 +262,6 @@ extern "C"
      \param[in] beta coefficient
      \return C the resulting matrix
   */
-
-  SparseBlockStructuredMatrix*  SBM_zero_matrix_for_multiply(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B);
-  
   SparseBlockStructuredMatrix * SBM_add(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B, double alpha, double beta);
 
   /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix addition C = alpha*A + beta*B without allocation
