@@ -28,9 +28,9 @@
 #include "op3x3.h"
 #include "SiconosCompat.h"
 #include "NumericsArrays.h"
-#define DEBUG_STDOUT 1
-#define DEBUG_MESSAGES 1
-#define DEBUG_NOCOLOR 1
+/* #define DEBUG_STDOUT 1 */
+/* #define DEBUG_MESSAGES 1 */
+/* #define DEBUG_NOCOLOR 1 */
 #include "debug.h"
 #include "CSparseMatrix.h"
 
