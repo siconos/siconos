@@ -28,9 +28,10 @@
 #include "op3x3.h"
 #include "SiconosCompat.h"
 #include "NumericsArrays.h"
+/* #define DEBUG_NOCOLOR 1 */
 /* #define DEBUG_STDOUT 1 */
 /* #define DEBUG_MESSAGES 1 */
-/* #define DEBUG_NOCOLOR 1 */
+
 #include "debug.h"
 #include "CSparseMatrix.h"
 
@@ -603,191 +604,6 @@ static void SBM_index_by_column_compute(const SparseBlockStructuredMatrix* const
   }
 }
 
-static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A,
-                                const SparseBlockStructuredMatrix* const B,
-                                SparseBlockStructuredMatrix*  C,
-                                struct SBM_index_by_column * SBM_index_by_column_B)
-{
-  DEBUG_BEGIN("SBM_check_C_for_gemm(...)\n");
-
-  assert(A);
-  assert(B);
-  assert(C);
-
-  /*     Check the compatibility of size of matrices */
-  assert(A->blocksize0);
-  assert(A->blocksize1);
-  assert(B->blocksize0);
-  assert(B->blocksize1);
-  assert(C->blocksize0);
-  assert(C->blocksize1);
-
-  assert(A->blocksize1[A->blocknumber1 - 1] == B->blocksize0[B->blocknumber0 - 1]);
-
-  /*     Check the compatibility of the number and the sizes of blocks */
-
-  if (!C)
-  {
-    return 0;
-  }
-  else
-  {
-    if (C->blocknumber0 != A->blocknumber0)
-    {
-      DEBUG_PRINTF("blocknumber0 are not consistent\n");
-      return 0;
-    }
-    if (C->blocknumber1 != B->blocknumber1)
-    {
-       DEBUG_PRINTF("blocknumber1 are not consistent\n");
-       return 0;
-    }
-  }
-
-  unsigned int currentRowNumberofA;
-
-  size_t colNumberAA;
-  size_t rowNumberBB;
-
-
-  unsigned int needed_nbblocks= -1;
-  unsigned int C_filled2_check= -1;
-  unsigned int C_index1_data_check= 0;
-
-  for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
-  {
-    C_index1_data_check = C->index1_data[currentRowNumberofA];
-    /* C->index1_data[currentRowNumberofA + 1] = C->index1_data[currentRowNumberofA]; */
-    if(C->blocksize0[currentRowNumberofA]!= A->blocksize0[currentRowNumberofA])
-    {
-      return 0;
-    }
-    DEBUG_PRINTF("C->index1_data[currentRowNumberofA + 1] = %zu \n", C->index1_data[currentRowNumberofA + 1]);
-    DEBUG_PRINTF("C->index1_data[currentRowNumberofA + 1] = %zu \n", C->index1_data[currentRowNumberofA + 1]);
-    for (unsigned int currentColNumberofB = 0 ; currentColNumberofB < SBM_index_by_column_B->filled3 - 1; ++currentColNumberofB)
-    {
-      DEBUG_PRINT("\n");
-      DEBUG_PRINTF("check for the block of C(%i,%i)\n",currentRowNumberofA,currentColNumberofB );
-      int BlockCexists = 0;
-
-      if(C->blocksize1[currentColNumberofB]!= B->blocksize1[currentColNumberofB])
-      {
-        return 0;
-      }
-      for (size_t blockNumAA = A->index1_data[currentRowNumberofA];
-           blockNumAA < A->index1_data[currentRowNumberofA + 1]; ++blockNumAA)
-      {
-        assert(blockNumAA < A->filled2);
-        colNumberAA = A->index2_data[blockNumAA];
-
-        for (size_t blockNumBB = SBM_index_by_column_B->index3_data[currentColNumberofB];
-             blockNumBB < SBM_index_by_column_B->index3_data[currentColNumberofB + 1]; ++blockNumBB)
-        {
-          rowNumberBB = SBM_index_by_column_B->index4_data[blockNumBB];
-          DEBUG_PRINTF("colNumberAA= %zu, rowNumberBB= %zu\n", colNumberAA, rowNumberBB);
-          if (rowNumberBB == colNumberAA)
-          {
-            BlockCexists = 1; 
-
-            /* size_t C_blockNum = 0; */
-
-            /* int block_C_found = 0; */
-            /* /\* find the correct blockNum is C *\/ */
-            /* for (size_t blockNumCC= C->index1_data[currentRowNumberofA]; */
-            /*      blockNumCC < C->index1_data[currentRowNumberofA + 1]; ++blockNumCC) */
-            /* { */
-            /*   if (C->index2_data[blockNumCC] == currentColNumberofB) */
-            /*   { */
-            /*     C_blockNum = blockNumCC; */
-            /*     block_C_found = 1; */
-            /*     DEBUG_PRINTF("Block in C (number %zu ) is found with corresponding row % zu and col %zu ",C_blockNum, currentRowNumberofA, currentColNumberofB); */
-            /*   } */
-            /* } */
-            
-
-
-
-            
-            needed_nbblocks++;
-            /* C->index1_data[currentRowNumberofA + 1]++ ; */
-            C_index1_data_check++;
-
-            DEBUG_PRINTF("increment needed_nbblocks = %i\n", needed_nbblocks);
-            if (needed_nbblocks >= C->nbblocks )
-            {
-              return 0;
-            }
-            /* C->nbblocks++; */
-            C_filled2_check ++;
-            /* C->filled2++; */
-
-            unsigned int Cblocksize0 = A->blocksize0[currentRowNumberofA];
-            if (currentRowNumberofA != 0)
-              Cblocksize0  -= A->blocksize0[currentRowNumberofA - 1];
-            unsigned int Cblocksize1 = B->blocksize1[currentColNumberofB];
-            if (currentColNumberofB != 0)
-              Cblocksize1 -= B->blocksize1[currentColNumberofB - 1];
-            DEBUG_PRINTF("C block number %i is needed for %i %i of size %dX%d\n",needed_nbblocks, currentRowNumberofA, currentColNumberofB,Cblocksize0,Cblocksize1);
-
-            /* Check size of the current block  */
-            /* if C->blocksize0  and C->blocksize1 are correct, we need to ensure that the block is in right position in the matrix */
-            /* check index_data1 and index_data2 */
-            if (C->index2_data[needed_nbblocks] != currentColNumberofB)
-            {
-              DEBUG_PRINT("C->index2_data[needed_nbblocks] != currentColNumberofB\n");
-              DEBUG_PRINTF("C->index2_data[needed_nbblocks] = %zu \t, currentColNumberofB = %zu\n",
-                           C->index2_data[needed_nbblocks], currentColNumberofB);
-              return 0;
-            }
-            /* Cindex2_datatmp[C->nbblocks] = currentColNumberofB ; */
-            break;
-          };
-        }
-        if (BlockCexists) break;
-      }
-    }
-    if (C->index1_data[currentRowNumberofA + 1] != C_index1_data_check)
-    {
-      DEBUG_PRINT("The number of blocks in C is different from the number of block that is required for SBM_gemm_without_allocation\n");
-      DEBUG_PRINT("C->index1_data[currentRowNumberofA + 1] != C_index1_data_check\n");
-      DEBUG_PRINTF("C->index1_data[currentRowNumberofA + 1] = %zu,\t C_index1_data_check = %zu\n",
-                   C->index1_data[currentRowNumberofA + 1], C_index1_data_check);
-
-      return 0;
-    }
-  }
-
-  needed_nbblocks++;
-
-  DEBUG_PRINTF("needed_nbblocks = %i \n", needed_nbblocks);
-  DEBUG_PRINTF("C->nbblocks = %i \n", C->nbblocks);
-
-  if(C->nbblocks!= needed_nbblocks)
-  {
-    return 0;
-  }
-
-  C_filled2_check ++;
-  if(C->filled2!= C_filled2_check  )
-  {
-    return 0;
-  }
-  DEBUG_PRINTF("C_filled2_check = %i \n", C_filled2_check);
-  DEBUG_PRINTF("C->filled2 = %zu \n", C->filled2);
-
-
-  /* C->nbblocks++; */
-  /* C->filled2++; */
-  /* assert(C->nbblocks ==  C->filled2); */
-  /* C->block = (double**)malloc(C->nbblocks * sizeof(double*)); */
-  /* C->index2_data = (size_t*)malloc(C->nbblocks * sizeof(size_t)); */
-
-  /* for (unsigned int i = 0 ; i < C->nbblocks; i++)  C->block[i] = Cblocktmp[i]; */
-  DEBUG_PRINTF("need_alloc = %i \n", need_alloc);
-  DEBUG_END("SBM_check_C_for_gemm(...)\n");
-  return 1;
-}
-
 static int SBM_check_compatibility_for_multiply(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B)
 {
   DEBUG_BEGIN(" SBM_check_compatibility_for_gemm(...)\n");
@@ -971,9 +787,6 @@ SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* co
   size_t * Bindex4_data = B_index_by_column->index4_data;
   size_t * blockMap  = B_index_by_column->blockMap;
 
-  unsigned int currentRowNumberofA;
-  unsigned int currentColNumberofB;
-
   double alpha = 1.0;
   double beta =  1.0; /* We assume that C is zero */
 
@@ -982,12 +795,12 @@ SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* co
 
   int Cnbblocks = -1;
 
-  for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
+  for (size_t currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
   {
 
-    for (currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
+    for (size_t currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
     {
-      DEBUG_PRINTF("\n computation of the block of C(%i,%i)\n",currentRowNumberofA,currentColNumberofB );
+      DEBUG_PRINTF("\n computation of the block of C(%zu,%zu)\n",currentRowNumberofA,currentColNumberofB );
       int CblockPassed = 1;
       for (size_t blockNumAA = A->index1_data[currentRowNumberofA];
            blockNumAA < A->index1_data[currentRowNumberofA + 1]; ++blockNumAA)
@@ -1031,7 +844,7 @@ SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* co
               Bblocksize0 -= B->blocksize0[rowNumberBB - 1];
 
 
-            DEBUG_PRINTF("Contribution of the product of blocks matrices A(%i,%zu) (block number %zu) and B(%zu,%i) (block number %zu) of  sizes %dX%d by %dX%d\n",
+            DEBUG_PRINTF("Contribution of the product of blocks matrices A(%zu,%zu) (block number %zu) and B(%zu,%zu) (block number %zu) of  sizes %dX%d by %dX%d\n",
                          currentRowNumberofA,colNumberAA, blockNumAA, rowNumberBB, currentColNumberofB, blockMap[blockNumBB],
                          Ablocksize0,Ablocksize1,Bblocksize0,Bblocksize1   );
 
@@ -1043,7 +856,7 @@ SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* co
                         Ablocksize0, Bblocksize1, Ablocksize1, alpha, A->block[blockNumAA],
                         Ablocksize0, B->block[blockMap[blockNumBB]], Bblocksize0,
                         beta, C->block[Cnbblocks], Ablocksize0);
-            
+
             DEBUG_EXPR(NM_dense_display(A->block[blockNumAA], Ablocksize0, Ablocksize1, 0););
             DEBUG_EXPR(NM_dense_display(B->block[blockMap[blockNumBB]], Bblocksize0, Bblocksize1, 0););
             DEBUG_EXPR(NM_dense_display(C->block[Cnbblocks], Ablocksize0, Bblocksize1, 0););
@@ -1076,6 +889,136 @@ SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* co
   return C;
 }
 
+static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A,
+                                const SparseBlockStructuredMatrix* const B,
+                                SparseBlockStructuredMatrix*  C,
+                                struct SBM_index_by_column * SBM_index_by_column_B)
+{
+  DEBUG_BEGIN("SBM_check_C_for_gemm(...)\n");
+
+  assert(A);
+  assert(B);
+  assert(C);
+
+  /*     Check the compatibility of size of matrices */
+  assert(A->blocksize0);
+  assert(A->blocksize1);
+  assert(B->blocksize0);
+  assert(B->blocksize1);
+  assert(C->blocksize0);
+  assert(C->blocksize1);
+
+  assert(A->blocksize1[A->blocknumber1 - 1] == B->blocksize0[B->blocknumber0 - 1]);
+
+  /*     Check the compatibility of the number and the sizes of blocks */
+
+  if (!C)
+  {
+    return 0;
+  }
+  else
+  {
+    if (C->blocknumber0 != A->blocknumber0)
+    {
+      DEBUG_PRINT("blocknumber0 are not consistent\n");
+      return 0;
+    }
+    if (C->blocknumber1 != B->blocknumber1)
+    {
+       DEBUG_PRINT("blocknumber1 are not consistent\n");
+       return 0;
+    }
+  }
+
+  size_t currentRowNumberofA;
+
+  size_t colNumberAA;
+  size_t rowNumberBB;
+
+  for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
+  {
+    if(C->blocksize0[currentRowNumberofA]!= A->blocksize0[currentRowNumberofA])
+    {
+      DEBUG_PRINTF("C->blocksize0[%zu] is not consistent with A->blocksize0[%zu]\n",currentRowNumberofA,currentRowNumberofA);
+      return 0;
+    }
+
+    for (size_t currentColNumberofB = 0 ; currentColNumberofB < SBM_index_by_column_B->filled3 - 1; ++currentColNumberofB)
+    {
+      DEBUG_PRINT("\n");
+      DEBUG_PRINTF("check for the block of C(%zu,%zu)\n",currentRowNumberofA,currentColNumberofB );
+      int BlockCexists = 0;
+
+      if(C->blocksize1[currentColNumberofB]!= B->blocksize1[currentColNumberofB])
+      {
+        DEBUG_PRINTF("C->blocksize1[%zu] is not consistent with B->blocksize1[%zu]\n",currentRowNumberofA,currentRowNumberofA);
+        return 0;
+      }
+      for (size_t blockNumAA = A->index1_data[currentRowNumberofA];
+           blockNumAA < A->index1_data[currentRowNumberofA + 1]; ++blockNumAA)
+      {
+        assert(blockNumAA < A->filled2);
+        colNumberAA = A->index2_data[blockNumAA];
+
+        for (size_t blockNumBB = SBM_index_by_column_B->index3_data[currentColNumberofB];
+             blockNumBB < SBM_index_by_column_B->index3_data[currentColNumberofB + 1]; ++blockNumBB)
+        {
+          rowNumberBB = SBM_index_by_column_B->index4_data[blockNumBB];
+
+          if (rowNumberBB == colNumberAA)
+          {
+            BlockCexists = 1;
+
+            unsigned int Cblocksize0 = A->blocksize0[currentRowNumberofA];
+            if (currentRowNumberofA != 0)
+              Cblocksize0  -= A->blocksize0[currentRowNumberofA - 1];
+            unsigned int Cblocksize1 = B->blocksize1[currentColNumberofB];
+            if (currentColNumberofB != 0)
+              Cblocksize1 -= B->blocksize1[currentColNumberofB - 1];
+            DEBUG_PRINTF("C block number is needed for %zu %zu of size %dX%d\n",
+                         currentRowNumberofA, currentColNumberofB,Cblocksize0,Cblocksize1);
+
+            /* search for the block */
+            size_t C_blockNum = 0;
+            int block_C_found = 0;
+            /* find the correct blockNum is C */
+            for (size_t blockNumCC= C->index1_data[currentRowNumberofA];
+                 blockNumCC < C->index1_data[currentRowNumberofA + 1]; ++blockNumCC)
+            {
+              if (C->index2_data[blockNumCC] == currentColNumberofB)
+              {
+                C_blockNum = blockNumCC;
+                block_C_found = 1;
+                DEBUG_PRINTF("Block in C (number %zu ) is found with corresponding row %zu and col %zu\n",
+                             C_blockNum, currentRowNumberofA, currentColNumberofB);
+              }
+            }
+            if(!block_C_found)
+            {
+              DEBUG_PRINTF("Block in C (number %zu ) is found with corresponding row %zu and col %zu\n",
+                           C_blockNum, currentRowNumberofA, currentColNumberofB);
+              return 0;
+            }
+
+            if (!C->block[C_blockNum])
+            {
+              DEBUG_PRINTF("Block in C (number %zu ) is found but not allocated\n",
+                             C_blockNum);
+              return 0;
+            }
+
+            break;
+          };
+        }
+        if (BlockCexists) break;
+      }
+    }
+  }
+
+  DEBUG_END("SBM_check_C_for_gemm(...)\n");
+  return 1;
+}
+
 void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix* const A,
                                  const SparseBlockStructuredMatrix* const B,
                                  double beta, SparseBlockStructuredMatrix*  C)
@@ -1098,21 +1041,17 @@ void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix
   size_t * Bindex4_data = B_index_by_column->index4_data;
   size_t * blockMap  = B_index_by_column->blockMap;
 
-  unsigned int currentRowNumberofA;
-  unsigned int currentColNumberofB;
-
   size_t colNumberAA;
   size_t rowNumberBB;
 
-  int Cnbblocks = -1;
   double local_beta=0.0;
-
-  for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
+  long int C_blockNum = -1;
+  for (size_t currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
   {
 
-    for (currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
+    for (size_t currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
     {
-      DEBUG_PRINTF("\n computation of the block of C(%i,%i)\n",currentRowNumberofA,currentColNumberofB );
+      DEBUG_PRINTF("\n computation of the block of C(%zu,%zu)\n",currentRowNumberofA,currentColNumberofB );
       int CblockPassed = 1;
       local_beta=beta;
       for (size_t blockNumAA = A->index1_data[currentRowNumberofA];
@@ -1133,12 +1072,25 @@ void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix
 
           if (rowNumberBB == colNumberAA)
           {
+            /* search for the block */
             if (CblockPassed)
             {
-              Cnbblocks++; /* Find the right C block number*/
               CblockPassed = 0;
+              C_blockNum = -1;
+              /* find the correct blockNum is C */
+              for (size_t blockNumCC= C->index1_data[currentRowNumberofA];
+                   blockNumCC < C->index1_data[currentRowNumberofA + 1]; ++blockNumCC)
+              {
+                if (C->index2_data[blockNumCC] == currentColNumberofB)
+                {
+                  C_blockNum = blockNumCC;
+                  DEBUG_PRINTF("Block in C (number %zu ) is found with corresponding row %zu and col %zu\n",
+                               C_blockNum, currentRowNumberofA, currentColNumberofB);
+                }
+              }
             }
-            assert(Cnbblocks < (int) C->nbblocks);
+            assert(C_blockNum >=0);
+
 
             int Ablocksize0 = A->blocksize0[currentRowNumberofA];
             if (currentRowNumberofA != 0)
@@ -1158,7 +1110,7 @@ void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix
               Bblocksize0 -= B->blocksize0[rowNumberBB - 1];
 
 
-            DEBUG_PRINTF("Contribution of the product of blocks matrices A(%i,%zu) (block number %zu) and B(%zu,%i) (block number %zu) of  sizes %dX%d by %dX%d\n",
+            DEBUG_PRINTF("Contribution of the product of blocks matrices A(%zu,%zu) (block number %zu) and B(%zu,%zu) (block number %zu) of  sizes %dX%d by %dX%d\n",
                          currentRowNumberofA,colNumberAA, blockNumAA, rowNumberBB, currentColNumberofB, blockMap[blockNumBB],
                          Ablocksize0,Ablocksize1,Bblocksize0,Bblocksize1   );
 
@@ -1168,32 +1120,20 @@ void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix
             cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
                         Ablocksize0, Bblocksize1, Ablocksize1, alpha, A->block[blockNumAA],
                         Ablocksize0, B->block[blockMap[blockNumBB]], Bblocksize0,
-                        local_beta, C->block[Cnbblocks], Ablocksize0);
+                        local_beta, C->block[C_blockNum], Ablocksize0);
             local_beta=1.0;
             DEBUG_EXPR(NM_dense_display(A->block[blockNumAA], Ablocksize0, Ablocksize1, 0););
             DEBUG_EXPR(NM_dense_display(B->block[blockMap[blockNumBB]], Bblocksize0, Bblocksize1, 0););
-            DEBUG_EXPR(NM_dense_display(C->block[Cnbblocks], Ablocksize0, Bblocksize1, 0););
+            DEBUG_EXPR(NM_dense_display(C->block[C_blockNum], Ablocksize0, Bblocksize1, 0););
           }
         }
       }
     }
   }
 
-  assert((Cnbblocks + 1) == (int) C->nbblocks);
-
-
-
-  free(Bindex3_data);
-  free(Bindex4_data);
-  free(blockMap);
-
-  /* SBM_print(C); */
-
+  SBM_index_by_column_free(B_index_by_column);
 
   DEBUG_END("SBM_gemm_without_allocation\(...)\n")
-  /*   fprintf(stderr,"Numerics, SparseBlockStructuredMatrix, product matrix - matrix SBM_gemm(alpha,A,B,beta,C) not yet implemented.\n"); */
-  /*   exit(EXIT_FAILURE); */
-
 }
 void SBM_row_prod(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber,
                    const SparseBlockStructuredMatrix* const A,

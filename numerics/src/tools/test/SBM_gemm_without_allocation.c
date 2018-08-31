@@ -386,35 +386,35 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
 
 
 
-  /* /\* /\\************************************************************************************\\/ *\/ */
-  /* /\* /\\* C = alpha*A*B + beta*C, SBM storage, empty column of blocks, extra blocks       *\\/ *\/ */
-  /* /\* /\\************************************************************************************\\/ *\/ */
+  /* /\************************************************************************************\/ */
+  /* /\* C = alpha*A*B + beta*C, SBM storage, empty column of blocks, extra blocks       *\/ */
+  /* /\************************************************************************************\/ */
 
-  /* NumericsMatrix * C20 = test_matrix_20(); */
-  /* DEBUG_EXPR(NM_display(C20);); */
+  NumericsMatrix * C20 = test_matrix_20();
+  DEBUG_EXPR(NM_display(C20););
 
-  /* add_initial_value_square_2(C20); */
+  add_initial_value_square_2(C20);
 
-  /* NM_gemm(alpha, M10, M10, beta, C20); */
+  NM_gemm(alpha, M10, M10, beta, C20);
 
-  /* SBM_gemm_without_allocation(alpha, M10->matrix1, M10->matrix1, beta, C20->matrix1); */
+  SBM_gemm_without_allocation(alpha, M10->matrix1, M10->matrix1, beta, C20->matrix1);
  
-  /* DEBUG_EXPR(NM_display(C20)); */
-  /* DEBUG_EXPR(NM_dense_display(C3ref->matrix0,M10->size0,M10->size1,M10->size0)); */
+  DEBUG_EXPR(NM_display(C20));
+  DEBUG_EXPR(NM_dense_display(C3ref->matrix0,M10->size0,M10->size1,M10->size0));
 
-  /* info = NM_dense_equal(C20,C3ref->matrix0,tol); */
+  info = NM_dense_equal(C20,C3ref->matrix0,tol);
 
-  /* if (info == 0) */
-  /*   printf("Step 8 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks, extra blocks) ok ...\n"); */
-  /* else */
-  /* { */
-  /*   printf("Step 8 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks, extra blocks) failed ...\n"); */
-  /*   goto exit_9; */
-  /* } */
+  if (info == 0)
+    printf("Step 8 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks, extra blocks) ok ...\n");
+  else
+  {
+    printf("Step 8 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks, extra blocks) failed ...\n");
+    goto exit_9;
+  }
 
 
-/* exit_9: */
-/*   NM_free(C20); */
+exit_9:
+  NM_free(C20);
 exit_8:
   NM_free(M10);
   NM_free(C8);
@@ -462,8 +462,20 @@ int main(void)
     printf("End of Numerics tests for SBM_gemm_without_allocation : unsucessfull\n");
     return info;
   }
+  info = SBM_gemm_without_allocation_test(NMM,0.0,1.0);
+  if (info != 0)
+  {
+    printf("End of Numerics tests for SBM_gemm_without_allocation : unsucessfull\n");
+    return info;
+  }
+  info = SBM_gemm_without_allocation_test(NMM,0.5,0.5);
+  if (info != 0)
+  {
+    printf("End of Numerics tests for SBM_gemm_without_allocation : unsucessfull\n");
+    return info;
+  }
 
-  printf("End of Numerics tests for SBM_gemm_without_allocation : unsucessfull ...\n");
+  printf("End of Numerics tests for SBM_gemm_without_allocation : Sucessfull ...\n");
   if (info != 0) return info;
   /* free memory */
 
