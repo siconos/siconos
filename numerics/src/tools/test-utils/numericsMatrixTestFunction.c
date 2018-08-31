@@ -66,7 +66,7 @@ NumericsMatrix * test_matrix_3()
 {
   NumericsMatrix * M3 = NM_new();
   int n = 8;
-  
+
   int nn = 4;
   /* Double * storage (column-major) */
   double m00[] = {1, 2, 0, 5, 0, 0, 0, 0,
@@ -87,7 +87,7 @@ NumericsMatrix * test_matrix_2()
 {
   NumericsMatrix * M2 = NM_new();
   int n = 8;
-  
+
   /* Build a NumericsMatrix with sparse-block storage */
   M2->storageType = 1;
   M2->size0 = n;
@@ -149,9 +149,9 @@ NumericsMatrix * test_matrix_2()
   for (int i = 0; i < 4; i++)
     SBM->block[5][i] = block5[i];
   /* SBM_print(SBM); */
-  
+
   return M2;
-  
+
 }
 
 
@@ -160,7 +160,7 @@ NumericsMatrix * test_matrix_4()
 {
   NumericsMatrix * M4 = NM_new();
   int n = 8;
-  
+
   /* Build a NumericsMatrix with sparse-block storage */
   M4->storageType = 1;
   M4->size0 = n;
@@ -229,15 +229,42 @@ NumericsMatrix * test_matrix_6()
   NM_clearSparseBlock(M4);
   M4->storageType=NM_SPARSE;
   numericsSparseMatrix(M4)->origin = NSM_CSC;
+
   return M4;
 }
 
+NumericsMatrix * test_matrix_9()
+{
+  NumericsMatrix * M = NM_new();
+  int n = 8;
+  /* Double * storage (column-major) */
+  double m0[64] = {1, 2, 0, 5,   0, 0,   0, 0,
+                   2, 1, 0, 0,   0, 0,   0, 0,
+                   0, 0, 1, -1,  0, 0,   2, 2,
+                   4, 0, -1, 6,  0, 0,   1, 2,
+
+                   0, 0, 0, 0,   0, 0,   0, 0,
+                   0, 0, 0, 0,   0, 0,   0, 0,
+
+                   0, 0, 0, 0,   0, 0,   2, -1,
+                   0, 0, 0, 0,   5, 2,   2, 2
+                  };
+  M->storageType = 0;
+  M->size0 = n;
+  M->size1 = n;
+  M->matrix0 = (double *)malloc(n * n * sizeof(double));
+
+
+  for (int i = 0; i < n * n; i++)
+    M->matrix0[i] = m0[i];
+  return M;
+}
 
 NumericsMatrix * test_matrix_10()
 {
   NumericsMatrix * M = NM_new();
   int n = 8;
-  
+
   /* Build a NumericsMatrix with sparse-block storage */
   M->storageType = 1;
   M->size0 = n;
@@ -278,7 +305,7 @@ NumericsMatrix * test_matrix_10()
   double block3[4] = {0, 0, 5, 2};
   double block4[8] = {0, 0, 0, 0, 2, 2, 1, 2};
   double block5[4] = {2, -1, 2, 2};
-  
+
   SBM->block[0] = (double *)malloc(16 * sizeof(double));
   /* SBM->block[1] = (double *)malloc(8 * sizeof(double)); */
   /* SBM->block[2] = (double *)malloc(4 * sizeof(double)); */
@@ -298,10 +325,77 @@ NumericsMatrix * test_matrix_10()
   for (int i = 0; i < 4; i++)
     SBM->block[3][i] = block5[i];
   /* SBM_print(SBM); */
-  
+
   return M;
-  
 }
+NumericsMatrix * test_matrix_20()
+{
+  NumericsMatrix * M = NM_new();
+  int n = 8;
+
+  /* Build a NumericsMatrix with sparse-block storage */
+  M->storageType = 1;
+  M->size0 = n;
+  M->size1 = n;
+
+  SparseBlockStructuredMatrix * SBM = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  M->matrix1 = SBM;
+  SBM->nbblocks = 9;
+  SBM->blocknumber0 = 3;
+  SBM->blocknumber1 = SBM->blocknumber0 ;
+
+  SBM->blocksize0 = (unsigned int*)malloc(3 * sizeof(unsigned int));
+  SBM->blocksize0[0] = 4;
+  SBM->blocksize0[1] = 6;
+  SBM->blocksize0[2] = 8;
+  SBM->blocksize1 = SBM->blocksize0;
+
+  SBM->filled1 = 4;
+  SBM->filled2 = SBM->nbblocks;
+
+  SBM->index1_data = (size_t*)malloc((SBM->filled1) * sizeof(size_t));
+  SBM->index1_data[0] = 0;
+  SBM->index1_data[1] = 3;
+  SBM->index1_data[2] = 6;
+  SBM->index1_data[3] = 9;
+
+  SBM->index2_data = (size_t*)malloc((SBM->filled2) * sizeof(size_t));
+  SBM->index2_data[0] =  0;
+  SBM->index2_data[1] =  1;
+  SBM->index2_data[2] =  2;
+  SBM->index2_data[3] =  0;
+  SBM->index2_data[4] =  1;
+  SBM->index2_data[5] =  2;
+  SBM->index2_data[6] =  0;
+  SBM->index2_data[7] =  1;
+  SBM->index2_data[8] =  2;
+
+  SBM->block = (double **)malloc(SBM->nbblocks * sizeof(*(SBM->block)));
+
+
+  for (size_t currentRowNumber = 0 ; currentRowNumber < SBM->filled1 - 1; ++currentRowNumber)
+  {
+    for (size_t blockNum = SBM->index1_data[currentRowNumber];
+         blockNum < SBM->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      unsigned int blocksize0 = SBM->blocksize0[currentRowNumber];
+      if (currentRowNumber != 0)
+        blocksize0  -= SBM->blocksize0[currentRowNumber - 1];
+
+      unsigned int colNumber = SBM->index2_data[blockNum];
+      unsigned int blocksize1 = SBM->blocksize1[colNumber];
+      if (colNumber != 0)
+        blocksize1 -= SBM->blocksize1[colNumber - 1];
+
+      SBM->block[blockNum] = (double * )calloc(blocksize0*blocksize1,sizeof(double));
+    }
+  }
+
+
+  return M;
+}
+
+
 
 
 int SBM_dense_equal(SparseBlockStructuredMatrix * M, double * mat, double tol)
@@ -310,7 +404,7 @@ int SBM_dense_equal(SparseBlockStructuredMatrix * M, double * mat, double tol)
 
   int n = M->blocksize0[M->blocknumber0-1];
   int m = M->blocksize1[M->blocknumber1-1];
-  
+
   for (int i = 0; i < n; i++)
   {
     for (int j = 0; j < m; j++)
@@ -320,7 +414,7 @@ int SBM_dense_equal(SparseBlockStructuredMatrix * M, double * mat, double tol)
         printf("Matrices are not equal on element %i %i ", i, j);
         printf(" with values %e, %e\n", mat[i + j * n], SBM_get_value(M, i, j)  );
         info = 1;
-      }  
+      }
       if (info == 1) break;
     }
     if (info == 1) break ;
@@ -333,7 +427,7 @@ int NM_dense_equal(NumericsMatrix * M, double * mat, double tol)
 
   int n = M->size0;
   int m = M->size1;
-  
+
   for (int i = 0; i < n; i++)
   {
     for (int j = 0; j < m; j++)
@@ -343,7 +437,7 @@ int NM_dense_equal(NumericsMatrix * M, double * mat, double tol)
         printf("Matrices are not equal on element %i %i ", i, j);
         printf(" with values %e, %e\n", mat[i + j * n], NM_get_value(M, i, j)  );
         info = 1;
-      }  
+      }
       if (info == 1) break;
     }
     if (info == 1) break ;
@@ -357,7 +451,7 @@ int test_build_first_4_NM(NumericsMatrix** MM)
   MM[1] = test_matrix_2();
   MM[2] = test_matrix_3();
   MM[3] = test_matrix_4();
-  
+
   NumericsMatrix* M1 =  MM[0];
   NumericsMatrix* M2 =  MM[1];
   NumericsMatrix* M3 =  MM[2];
@@ -373,7 +467,7 @@ int test_build_first_4_NM(NumericsMatrix** MM)
   /*   SBM_print(SBM2); */
   /* M3 and M4 must have the same values.*/
   info = SBM_dense_equal(M4->matrix1, M3->matrix0, tol);
-  
+
   return info;
 }
 /* ============================================================================================================================== */

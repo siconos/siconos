@@ -230,9 +230,12 @@ extern "C"
                   double* const x, double* y);
 
   /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix product C = alpha*A*B + beta*C
-   * The routine has to be used with precaution. The allocation of C is not done
+   *  The routine has to be used with precaution. The allocation of C is not done
    *  since we want to add beta*C. We assume that the structure and the allocation
-   *  of the matrix is right. 
+   *  of the matrix C are right. Especially:
+   *    - the blocks C(i,j) must exists
+   *    - the sizes of blocks must be consistent
+   *    - no extra block must be present in C
    *   \param[in] alpha coefficient
    *   \param[in] A the matrix to be multiplied
    *   \param[in] B the matrix to be multiplied

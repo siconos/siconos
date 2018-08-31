@@ -32,7 +32,10 @@ extern "C"
   NumericsMatrix * test_matrix_5(void);
   NumericsMatrix * test_matrix_6(void);
   
+  NumericsMatrix * test_matrix_9(void);
   NumericsMatrix * test_matrix_10(void);
+  NumericsMatrix * test_matrix_20(void);
+  
   int SBM_dense_equal(SparseBlockStructuredMatrix * M, double * m, double tol);
   int NM_dense_equal(NumericsMatrix * M, double * m, double tol);
   int test_build_first_4_NM(NumericsMatrix** MM);

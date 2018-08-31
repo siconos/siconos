@@ -43,6 +43,7 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(SBM_add SBM_add.c)
   NEW_TEST(SBM_multiply SBM_multiply.c)
   NEW_TEST(SBM_zentry SBM_zentry.c)
+  NEW_TEST(SBM_gemm_without_allocation SBM_gemm_without_allocation.c)
   
   # Specfic tests for sparse matrices 
   NEW_TEST(SparseMatrix0 SparseMatrix_test0.c)
