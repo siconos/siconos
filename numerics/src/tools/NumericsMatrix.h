@@ -264,11 +264,18 @@ extern "C"
    */
   double NM_get_value(NumericsMatrix* M, int i, int j);
 
-  /** compare to NumericsMatrix up to a given tolerance
+  /** compare to NumericsMatrix up to machine accuracy (DBL_EPSILON)
    * \param A the NumericsMatrix
    * \param B the NumericsMatrix
    */
   bool NM_equal(NumericsMatrix* A, NumericsMatrix* B);
+  
+  /** compare to NumericsMatrix up to a given tolerance
+   * \param A the NumericsMatrix
+   * \param B the NumericsMatrix
+   * \param tol the tolerance
+   */
+  bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol);
 
 
 

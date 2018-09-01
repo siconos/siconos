@@ -706,6 +706,11 @@ double NM_get_value(NumericsMatrix* M, int i, int j)
 
 bool NM_equal(NumericsMatrix* A, NumericsMatrix* B)
 {
+  return NM_compare(A, B, DBL_EPSILON);
+};
+
+bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
+{
   assert(A);
   assert(B);
   if (A->size0 != B->size0)
@@ -721,17 +726,20 @@ bool NM_equal(NumericsMatrix* A, NumericsMatrix* B)
     for (int j =0; j< A->size1 ; j++)
     {
       DEBUG_PRINTF("error %i %i = %e\n",i,j, fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
-      if (fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)) >= DBL_EPSILON)
+      if (fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)) >= tol)
       {
-        DEBUG_PRINTF("A %i %i = %e\n",i,j, NM_get_value(A, i, j));
-        DEBUG_PRINTF("B %i %i = %e\n",i,j, NM_get_value(B, i, j));
-        DEBUG_PRINTF("error %i %i = %e\n",i,j, fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
+
+        DEBUG_PRINTF("A(%i,%i) = %e\t, B(%i,%i) = %e\t,  error = %e\n",
+                     i,j, NM_get_value(A, i, j),
+                     i,j, NM_get_value(B, i, j),
+                     fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
         return false;
       }
     }
   }
   return true;
 };
+
 
 void NM_vector_display(double * m, int nRow)
 {
@@ -2246,7 +2254,7 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
     DEBUG_EXPR(cs_print((const cs * ) NM_csc(B),0););
     assert(A->size1 == B->size0 && "NM_gemm :: A->size1 != B->size0 ");
     CSparseMatrix* C_csc = cs_multiply(NM_csc(A), NM_csc(B));
-    DEBUG_EXPR(cs_print((const cs * ) tmp_matrix,0););
+    DEBUG_EXPR(cs_print((const cs * ) C_csc,0););
     assert(C_csc && "NM_gemm :: cs_multiply failed");
     NSM_fix_csc(C_csc);
 
