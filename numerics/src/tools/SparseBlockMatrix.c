@@ -363,7 +363,7 @@ static int SBM_check_compatibility_for_add(const SparseBlockStructuredMatrix* co
 
 
 
-static SparseBlockStructuredMatrix * SBM_alloc_for_add(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B)
+static SparseBlockStructuredMatrix * SBM_calloc_for_add(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B)
 {
   DEBUG_BEGIN("SBM_alloc_for_add(...)\n");
   size_t max_number_of_blocks_in_row = 0;
@@ -423,15 +423,27 @@ static SparseBlockStructuredMatrix * SBM_alloc_for_add(SparseBlockStructuredMatr
     DEBUG_PRINTF("number_of_blocks_in_row = %zu\n",number_of_blocks_in_row);
     C->index1_data[currentRowNumber+1] = C->index1_data[currentRowNumber] + number_of_blocks_in_row ;
     C->filled1++;
+
+    int blocksize0 = C->blocksize0[currentRowNumber];
+    if (currentRowNumber != 0)
+      blocksize0  -= C->blocksize0[currentRowNumber - 1];
+
     int currentColNumber=0;
+    int idx=0;
     for (size_t blockNum = C->index1_data[currentRowNumber];
          blockNum < C->index1_data[currentRowNumber + 1]; ++blockNum)
     {
 
        C->filled2++;
-       C->index2_data[blockNum]=common_block[currentColNumber];
-       currentColNumber++;
-       C->block[blockNum] = (double *)malloc(A->blocksize0[currentRowNumber]*A->blocksize1[common_block[currentColNumber]]*sizeof(double));
+       currentColNumber = common_block[idx];
+       C->index2_data[blockNum]=currentColNumber;
+       idx++;
+
+       int blocksize1 = C->blocksize1[currentColNumber];
+       if (currentColNumber != 0)
+          blocksize1 -= C->blocksize1[currentColNumber - 1];
+
+       C->block[blockNum] = (double *)calloc(blocksize0*blocksize1,sizeof(double));
     }
 
   }
@@ -455,13 +467,16 @@ void SBM_add_without_allocation(SparseBlockStructuredMatrix * A, SparseBlockStru
     nb_blocks_in_rowC  = C->index1_data[currentRowNumber + 1] - C->index1_data[currentRowNumber];
     DEBUG_PRINTF("\n nb_blocks_in_rowC = %zu\n",nb_blocks_in_rowC );
 
+    /* for (size_t blockNum = C->index1_data[currentRowNumber]; */
+    /*      blockNum < C->index1_data[currentRowNumber + 1]; ++blockNum) */
+    /* { */
+    /*   nm = C->blocksize0[currentRowNumber] * C->blocksize1[C->index2_data[blockNum]]; */
+    /*   for (int j =0 ;  j< nm ; j++)  C->block[blockNum][j]=0.0; */
+    /* } */
 
-    for (size_t blockNum = C->index1_data[currentRowNumber];
-         blockNum < C->index1_data[currentRowNumber + 1]; ++blockNum)
-    {
-      nm = C->blocksize0[currentRowNumber] * C->blocksize1[C->index2_data[blockNum]];
-      for (int j =0 ;  j< nm ; j++)  C->block[blockNum][j]=0.0;
-    }
+    int blocksize0 = C->blocksize0[currentRowNumber];
+    if (currentRowNumber != 0)
+      blocksize0  -= C->blocksize0[currentRowNumber - 1];
 
     size_t jC = C->index1_data[currentRowNumber], jA = A->index1_data[currentRowNumber];
 
@@ -477,7 +492,12 @@ void SBM_add_without_allocation(SparseBlockStructuredMatrix * A, SparseBlockStru
       else
       {
         DEBUG_PRINTF("add a block number %zu of A to blocknumber %zu of C\n",jA,jC );
-        nm = C->blocksize0[currentRowNumber] * C->blocksize1[C->index2_data[jC]];
+
+        int blocksize1 = C->blocksize1[C->index2_data[jC]];
+        if (C->index2_data[jC] != 0)
+          blocksize1 -= C->blocksize1[C->index2_data[jC] - 1];
+
+        nm = blocksize0*blocksize1;
         cblas_daxpy(nm, alpha, A->block[jA], 1, C->block[jC], 1 );
         jA++;
 
@@ -497,7 +517,11 @@ void SBM_add_without_allocation(SparseBlockStructuredMatrix * A, SparseBlockStru
       }
       else
       {
-        nm = C->blocksize0[currentRowNumber] * C->blocksize1[C->index2_data[jC]];
+        int blocksize1 = C->blocksize1[C->index2_data[jC]];
+        if (C->index2_data[jC] != 0)
+          blocksize1 -= C->blocksize1[C->index2_data[jC] - 1];
+
+        nm = blocksize0*blocksize1;
         cblas_daxpy(nm, beta, B->block[jB], 1, C->block[jC], 1 );
         DEBUG_PRINTF("add a block number %zu of B to blocknumber %zu of C\n",jB,jC );
         jB++;
@@ -522,7 +546,7 @@ SparseBlockStructuredMatrix * SBM_add(SparseBlockStructuredMatrix * A, SparseBlo
     numerics_error("SBM_add", "Non compatible matrices or blocks sizes.\n");
     return NULL;
   }
-  SparseBlockStructuredMatrix * C = SBM_alloc_for_add(A,B);
+  SparseBlockStructuredMatrix * C = SBM_calloc_for_add(A,B);
   SBM_add_without_allocation(A, B, alpha, beta, C );
 
   return C;
