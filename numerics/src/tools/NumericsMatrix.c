@@ -711,6 +711,7 @@ bool NM_equal(NumericsMatrix* A, NumericsMatrix* B)
 
 bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
 {
+  DEBUG_BEGIN("NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)\n");
   assert(A);
   assert(B);
   if (A->size0 != B->size0)
@@ -725,7 +726,7 @@ bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
   {
     for (int j =0; j< A->size1 ; j++)
     {
-      DEBUG_PRINTF("error %i %i = %e\n",i,j, fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)));
+      /* DEBUG_PRINTF("error %i %i = %e\n",i,j, fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j))); */
       if (fabs(NM_get_value(A, i, j) - NM_get_value(B, i, j)) >= tol)
       {
 
@@ -737,6 +738,7 @@ bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
       }
     }
   }
+  DEBUG_END("NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)\n");
   return true;
 };
 
@@ -833,11 +835,24 @@ void NM_display(const NumericsMatrix* const m)
     /* { */
     /*   fprintf(stderr, "display for sparse matrix: no matrix found!\n"); */
     /* } */
-
+    if (m->matrix2->diag_indx)
+    {
+      printf("========== m->matrix2->diag_indx = %p\n", m->matrix2->diag_indx );
+      for (int  i = 0; i < m->size0; ++i) printf("diag_indices[%i] = %li\t ", i, m->matrix2->diag_indx[i]);
+    }
+    else
+    {
+      printf("========== m->matrix2->diag_indx --> NULL\n");
+    }
     if (m->matrix2->linearSolverParams)
     {
-      printf("========== matrix2 has linear solver params\n");
+      printf("========== m->matrix2->linearSolverParams = %p \n", m->matrix2->linearSolverParams);
     }
+    else
+    {
+      printf("========== m->matrix2->linearSolverParams --> NULL\n");
+    }
+
 
     break;
   }
@@ -1289,6 +1304,12 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
   case NM_SPARSE:
   {
     CS_INT* diag_indices = NSM_diag_indices(M);
+
+    DEBUG_EXPR(
+      printf("diag_indices:\n");
+      for (size_t i = 0; i < n; ++i) printf("diag_indices[%zu] = %li\t ", i, diag_indices[i]);
+      );
+
     double* Mx = NSM_data(M->matrix2);
     for (size_t i = 0; i < n; ++i) Mx[diag_indices[i]] += alpha;
 
@@ -1699,11 +1720,9 @@ int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
 }
 
 
-
-
-
 void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
 {
+  DEBUG_BEGIN("NM_copy_to_sparse(...)\n")
   assert(A);
   assert(B);
   B->size0 = A->size0;
@@ -1746,6 +1765,7 @@ void NM_copy_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B)
     exit(EXIT_FAILURE);
   }
   }
+  DEBUG_END("NM_copy_to_sparse(...)\n")
 }
 
 void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
@@ -1759,6 +1779,9 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
 
   /* NM_internalData_copy(A,B); */
   NM_internalData_free(B);
+
+
+  
 
   B->storageType = A->storageType;
   switch (A->storageType)
@@ -1793,7 +1816,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
 
     SparseBlockStructuredMatrix* A_ = A->matrix1;
     SparseBlockStructuredMatrix* B_ = B->matrix1;
-    
+
     SBM_copy(A_,B_,1);
 
     /* invalidations */
@@ -1864,13 +1887,27 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     }
 
     CSparseMatrix_copy(A_, B_);
-    
-    if (numericsSparseMatrix(B)->linearSolverParams)
-      numericsSparseMatrix(B)->linearSolverParams = NSM_linearSolverParams_free(numericsSparseMatrix(B)->linearSolverParams);
+
 
     /* invalidations */
     NM_clearDense(B);
     NM_clearSparseBlock(B);
+
+    if (numericsSparseMatrix(B)->linearSolverParams)
+      numericsSparseMatrix(B)->linearSolverParams = NSM_linearSolverParams_free(numericsSparseMatrix(B)->linearSolverParams);
+
+
+    /* We remove diag_indx from B and  we copy it from A if it exists */
+    if (numericsSparseMatrix(B)->diag_indx)
+    {
+      free(numericsSparseMatrix(B)->diag_indx);
+      numericsSparseMatrix(B)->diag_indx=NULL;
+    }
+    if (A->matrix2->diag_indx)
+    {
+      numericsSparseMatrix(B)->diag_indx = (CS_INT*) malloc(A->size0 * sizeof(CS_INT));
+      memcpy(numericsSparseMatrix(B)->diag_indx, A->matrix2->diag_indx, A->size0 * sizeof(CS_INT));
+    }
 
     if (B_->nz >= 0)
     {
@@ -2008,6 +2045,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
 
 CSparseMatrix* NM_csc(NumericsMatrix *A)
 {
+  DEBUG_BEGIN("NM_csc(NumericsMatrix *A)\n");
   assert(A);
 
   if(!numericsSparseMatrix(A)->csc)
@@ -2037,6 +2075,7 @@ CSparseMatrix* NM_csc(NumericsMatrix *A)
     assert(A->matrix2->csc);
     NM_clearCSCTranspose(A);
   }
+  DEBUG_END("NM_csc(NumericsMatrix *A)\n");
   return A->matrix2->csc;
 }
 
@@ -2217,7 +2256,7 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
   {
     assert(A->matrix1);
     assert(B->matrix1);
-    
+
     /* New version taht follows the principle of sparse matrices in Csparse*/
     SparseBlockStructuredMatrix * C_SBM = SBM_multiply(A->matrix1, B->matrix1);
     NM_clearSparseBlock(C);
@@ -2318,7 +2357,7 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     /* NM_clearDense(C); */
     /* NM_clearSparseStorage(C); */
     /* C->storageType=storageType; */
-    
+
     /* New version that follows the principle of sparse matrices in Csparse*/
     SparseBlockStructuredMatrix * C_tmp = SBM_multiply(A->matrix1, B->matrix1);
     SparseBlockStructuredMatrix * result = SBM_add(C_tmp, C->matrix1, alpha, beta);
@@ -3012,8 +3051,6 @@ size_t NM_nnz(const NumericsMatrix* M)
     return SIZE_MAX;
   }
 }
-
-
 
 double NM_norm_1(NumericsMatrix* A)
 {
