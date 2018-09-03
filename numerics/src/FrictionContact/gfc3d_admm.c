@@ -132,19 +132,37 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;
   int m = 3 * nc;
-  /* NumericsMatrix* M = problem->M; */
-  /* NumericsMatrix* H = problem->H; */
-
-  NumericsMatrix* M = NM_create(NM_SPARSE,  problem->M->size0,  problem->M->size1);
-  NumericsMatrix* H = NM_create(NM_SPARSE,  problem->H->size0,  problem->H->size1);
-  
-
-  NM_copy_to_sparse(problem->M, M);
-  NM_copy_to_sparse(problem->H, H);
 
 
+  NumericsMatrix* M = NULL;
+  NumericsMatrix* H = NULL;
 
-  
+  /* if SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE,
+     we force the copy into a NM_SPARSE storageType */
+
+  if(iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] == SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE
+     && problem->M->storageType == NM_SPARSE_BLOCK)
+  {
+    DEBUG_PRINT("Force a copy to sparse storage type\n");
+    M = NM_create(NM_SPARSE,  problem->M->size0,  problem->M->size1);
+    NM_copy_to_sparse(problem->M, M);
+  }
+  else
+  {
+    M = problem->M;
+  }
+  if(iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] == SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE
+     && problem->H->storageType == NM_SPARSE_BLOCK)
+  {
+    DEBUG_PRINT("Force a copy to sparse storage type\n");
+    H = NM_create(NM_SPARSE,  problem->H->size0,  problem->H->size1);
+    NM_copy_to_sparse(problem->H, H);
+  }
+  else
+  {
+    H = problem->H;
+  }
+
   double* q = problem->q;
   double* mu = problem->mu;
 
@@ -203,7 +221,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   NumericsMatrix *Htrans =  NM_transpose(H);
 
   NumericsMatrix *W = NM_new();
-
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
@@ -556,16 +573,14 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] =
     SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-
-
+  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] =  SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] =
     SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT;
 
+
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
-
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=10.0;
 

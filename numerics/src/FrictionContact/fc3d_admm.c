@@ -147,7 +147,30 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
   int nc = problem->numberOfContacts;
   /* int n = problem->M->size0; */
   int m = 3 * nc;
-  NumericsMatrix* M = problem->M;
+  NumericsMatrix* M=  NULL;
+
+  /* if SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE,
+     we force the copy into a NM_SPARSE storageType */
+
+  if(iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] == SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE
+     && problem->M->storageType == NM_SPARSE_BLOCK)
+  {
+    DEBUG_PRINT("Force a copy to sparse storage type\n");
+    M = NM_create(NM_SPARSE,  problem->M->size0,  problem->M->size1);
+    NM_copy_to_sparse(problem->M, M);
+  }
+  else
+  {
+    M = problem->M;
+  }
+
+  /* if (M->storageType == NM_SPARSE_BLOCK) */
+  /* { */
+  /*   CSparseMatrix* dummy; */
+  /*   dummy = NM_csc(M); */
+  /*   M->storageType = NM_SPARSE; */
+  /* } */
+
   double* q = problem->q;
   double* mu = problem->mu;
 
@@ -164,14 +187,6 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[0];
-
-
-  /* if (M->storageType == NM_SPARSE_BLOCK) */
-  /* { */
-  /*   CSparseMatrix* dummy; */
-  /*   dummy = NM_csc(M); */
-  /*   M->storageType = NM_SPARSE; */
-  /* } */
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
@@ -216,8 +231,6 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
   rho_k=rho;
   int has_rho_changed = 1;
-
-
 
   while((iter < itermax) && (hasNotConverged > 0))
   {
@@ -829,7 +842,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
       s_scaled = s / (rho*norm_ATxi);
       /* s_scaled = s / (norm_ATxi); */
       numerics_printf_verbose(2, "scaling : norm_Ar  = %e, \t  norm_b_s = %e, \t norm_z  = %e, \t norm_ATxi = %e, \t", norm_Ar, norm_b_s, norm_z, norm_ATxi);
- 
+
       numerics_printf_verbose(2, "scaled residuals : r_scaled  = %e, \t  s_scaled = %e", r_scaled, s_scaled);
     }
     else
@@ -1076,14 +1089,12 @@ int fc3d_admm_setDefaultSolverOptions(SolverOptions* options)
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] = SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
-
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY;
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-
+  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] =  SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] =
     SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF;
-
+  
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
