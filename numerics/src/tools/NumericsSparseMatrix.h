@@ -83,8 +83,6 @@ extern "C"
    * triplet (aka coordinate, COO), CSC (via CSparse) and CSR if MKL is used */
   struct NumericsSparseMatrix
   {
-    NSM_linear_solver_params* linearSolverParams;
-                               /**< solver-specific parameters */
     CSparseMatrix* triplet;    /**< triplet format, aka coordinate */
     CSparseMatrix* csc;        /**< csc matrix */
     CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
@@ -92,6 +90,9 @@ extern "C"
     CS_INT*           diag_indx;  /**< indices for the diagonal terms.
                                     Very useful for the proximal perturbation */
     unsigned       origin;     /**< original format of the matrix */
+    NSM_linear_solver_params* linearSolverParams;
+                               /**< solver-specific parameters */
+
   };
 
 
