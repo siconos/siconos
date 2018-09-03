@@ -123,14 +123,16 @@ static int SBM_add_test2(double tol, double alpha, double beta)
   if (info == 1)
     return info;
 
-  SBM_add_without_allocation(SBM2,SBM10,alpha,beta,C2);
-  info = SBM_dense_equal(C2, C2_dense, tol);
+  SBM_add_without_allocation(SBM2,SBM10,alpha,beta,C2,0.0);
   DEBUG_EXPR(SBM_print(C2););
+  info = SBM_dense_equal(C2, C2_dense, tol);
   if (info == 1)
     return info;
-  SBM_add_without_allocation(SBM10,SBM2,alpha,beta,C3);
-  info = SBM_dense_equal(C3, C3_dense, tol);
+  
+  SBM_add_without_allocation(SBM10,SBM2,alpha,beta,C3,0.0);
   DEBUG_EXPR(SBM_print(C3););
+  info = SBM_dense_equal(C3, C3_dense, tol);
+
   if (info == 1)
     return info;
   

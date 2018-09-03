@@ -267,18 +267,20 @@ extern "C"
   */
   SparseBlockStructuredMatrix * SBM_add(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B, double alpha, double beta);
 
-  /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix addition C = alpha*A + beta*B without allocation
+  /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix addition C = alpha*A + beta*B + gamma*C without allocation
       We assume that C has the correct structure
      \param[in] A the matrix to be added
      \param[in] B the matrix to be added
      \param[in] alpha coefficient
      \param[in] beta coefficient
-     \param[in,out] C the resulting matrix
+     \param[in] gamma coefficient
+      \param[in,out] C the resulting matrix
   */
 
   void SBM_add_without_allocation(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B,
                                   double alpha, double beta,
-                                  SparseBlockStructuredMatrix * C );
+                                  SparseBlockStructuredMatrix * C,
+                                  double gamma);
 
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A

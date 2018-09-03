@@ -365,7 +365,7 @@ static int SBM_check_compatibility_for_add(const SparseBlockStructuredMatrix* co
 
 static SparseBlockStructuredMatrix * SBM_calloc_for_add(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B)
 {
-  DEBUG_BEGIN("SBM_alloc_for_add(...)\n");
+  DEBUG_BEGIN("SBM_calloc_for_add(...)\n");
   size_t max_number_of_blocks_in_row = 0;
   size_t number_of_blocks_in_row = 0;
   size_t nb_blocks_in_rowA  =0,  nb_blocks_in_rowB =0;
@@ -449,51 +449,56 @@ static SparseBlockStructuredMatrix * SBM_calloc_for_add(SparseBlockStructuredMat
   }
   C->filled1++;
   C->nbblocks = C->filled2;
-  DEBUG_END("SBM_alloc_for_add(...)\n");
+  DEBUG_END("SBM_calloc_for_add(...)\n");
   return C;
 }
 
 void SBM_add_without_allocation(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B,
                                 double alpha, double beta,
-                                SparseBlockStructuredMatrix * C )
+                                SparseBlockStructuredMatrix * C, double gamma)
 {
   DEBUG_BEGIN("SBM_add_without_allocation(...)\n");
   assert(SBM_check_compatibility_for_add(A,B) && "Non compatible matrices or blocks sizes.\n");
-  size_t nb_blocks_in_rowC =0;
   int nm =0;
-  for (unsigned int currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
+  size_t colNumber;
+  for (unsigned int currentRowNumber = 0 ; currentRowNumber < C->filled1 - 1; ++currentRowNumber)
   {
+    DEBUG_PRINT("\n");
+    DEBUG_PRINTF("Computation of the blocks [%i, %i ] in row %i\n", C->index1_data[currentRowNumber], C->index1_data[currentRowNumber+1]-1,  currentRowNumber);
 
-    nb_blocks_in_rowC  = C->index1_data[currentRowNumber + 1] - C->index1_data[currentRowNumber];
-    DEBUG_PRINTF("\n nb_blocks_in_rowC = %zu\n",nb_blocks_in_rowC );
-
-    /* for (size_t blockNum = C->index1_data[currentRowNumber]; */
-    /*      blockNum < C->index1_data[currentRowNumber + 1]; ++blockNum) */
-    /* { */
-    /*   nm = C->blocksize0[currentRowNumber] * C->blocksize1[C->index2_data[blockNum]]; */
-    /*   for (int j =0 ;  j< nm ; j++)  C->block[blockNum][j]=0.0; */
-    /* } */
-
-    int blocksize0 = C->blocksize0[currentRowNumber];
+    unsigned int blocksize0 = C->blocksize0[currentRowNumber];
     if (currentRowNumber != 0)
       blocksize0  -= C->blocksize0[currentRowNumber - 1];
+
+    for (size_t blockNum = C->index1_data[currentRowNumber];
+         blockNum < C->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      colNumber=C->index2_data[blockNum];
+      unsigned int blocksize1 = C->blocksize1[colNumber];
+      if (colNumber != 0)
+        blocksize1 -= C->blocksize1[colNumber - 1];
+
+      nm = blocksize0 * blocksize1;
+      DEBUG_PRINTF("gamma*C for block %zu of size %ix%i\n",blockNum, blocksize0, blocksize1 );
+      cblas_dscal(nm, gamma,  C->block[blockNum], 1 );
+    }
 
     size_t jC = C->index1_data[currentRowNumber], jA = A->index1_data[currentRowNumber];
 
     while(jC < C->index1_data[currentRowNumber+1] && jA < A->index1_data[currentRowNumber+1] )
     {
-      DEBUG_PRINTF("block number jC = %zu\t, blocknumber  jA = %zu\n", jC, jA);
-      DEBUG_PRINTF("column number C->index2_data[jC] = %zu\t, column number  jA = %zu\n", C->index2_data[jC], A->index2_data[jA]);
+      /* DEBUG_PRINTF("block number jC = %zu\t, blocknumber  jA = %zu\n", jC, jA); */
       if (C->index2_data[jC] < A->index2_data[jA])
       {
-        DEBUG_PRINT("no block of A to add Block increment jA\n");
+        /* DEBUG_PRINT("no block of A to add Block increment jA\n"); */
         jC++;
       }
       else
       {
+        DEBUG_PRINTF("column number C->index2_data[jC] = %zu\t, column number  jA = %zu\n", C->index2_data[jC], A->index2_data[jA]);
         DEBUG_PRINTF("add a block number %zu of A to blocknumber %zu of C\n",jA,jC );
 
-        int blocksize1 = C->blocksize1[C->index2_data[jC]];
+        unsigned int blocksize1 = C->blocksize1[C->index2_data[jC]];
         if (C->index2_data[jC] != 0)
           blocksize1 -= C->blocksize1[C->index2_data[jC] - 1];
 
@@ -508,22 +513,23 @@ void SBM_add_without_allocation(SparseBlockStructuredMatrix * A, SparseBlockStru
 
     while(jC < C->index1_data[currentRowNumber+1] && jB < B->index1_data[currentRowNumber+1] )
     {
-      DEBUG_PRINTF("block number jC = %zu\t, blocknumber  jB = %zu\n", jC, jB);
-      DEBUG_PRINTF("column number C->index2_data[jC] = %zu\t, column number  jB = %zu\n", C->index2_data[jC], B->index2_data[jB]);
+
       if (C->index2_data[jC] < B->index2_data[jB])
       {
-        DEBUG_PRINT("no block of B to add Block increment jB\n");
+        /* DEBUG_PRINT("no block of B to add Block increment jB\n"); */
         jC++;
       }
       else
       {
-        int blocksize1 = C->blocksize1[C->index2_data[jC]];
+        DEBUG_PRINTF("add a block number %zu of B to blocknumber %zu of C\n",jB,jC );
+        DEBUG_PRINTF("column number C->index2_data[jC] = %zu\t, column number  jB = %zu\n", C->index2_data[jC], B->index2_data[jB]);
+        unsigned int blocksize1 = C->blocksize1[C->index2_data[jC]];
         if (C->index2_data[jC] != 0)
           blocksize1 -= C->blocksize1[C->index2_data[jC] - 1];
 
         nm = blocksize0*blocksize1;
         cblas_daxpy(nm, beta, B->block[jB], 1, C->block[jC], 1 );
-        DEBUG_PRINTF("add a block number %zu of B to blocknumber %zu of C\n",jB,jC );
+
         jB++;
 
       }
@@ -547,7 +553,7 @@ SparseBlockStructuredMatrix * SBM_add(SparseBlockStructuredMatrix * A, SparseBlo
     return NULL;
   }
   SparseBlockStructuredMatrix * C = SBM_calloc_for_add(A,B);
-  SBM_add_without_allocation(A, B, alpha, beta, C );
+  SBM_add_without_allocation(A, B, alpha, beta, C, 0.0);
 
   return C;
 
