@@ -215,18 +215,21 @@ void SBM_print(const SparseBlockStructuredMatrix* const m)
   {
     for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
     {
+      /* Get dim. of the current block */
+      nbRows = m->blocksize0[currentRowNumber];
+      if (currentRowNumber != 0)
+        nbRows -= m->blocksize0[currentRowNumber - 1];
+      assert(nbRows);
+
       for (size_t blockNum = m->index1_data[currentRowNumber];
            blockNum < m->index1_data[currentRowNumber + 1]; ++blockNum)
       {
         assert(blockNum < m->filled2);
         colNumber = m->index2_data[blockNum];
         assert(colNumber < m->blocknumber1);
-        /* Get dim. of the current block */
-        nbRows = m->blocksize0[currentRowNumber];
+        
 
-        if (currentRowNumber != 0)
-          nbRows -= m->blocksize0[currentRowNumber - 1];
-        assert(nbRows);
+        
         nbColumns = m->blocksize1[colNumber];
         if (colNumber != 0)
           nbColumns -= m->blocksize1[colNumber - 1];
@@ -324,6 +327,11 @@ void SBM_gemv(unsigned int sizeX, unsigned int sizeY, double alpha, const Sparse
 
   for (unsigned int currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
   {
+    /* Get dim. of the current block */
+    nbRows = A->blocksize0[currentRowNumber];
+    if (currentRowNumber != 0)
+      nbRows -= A->blocksize0[currentRowNumber - 1];
+    assert((nbRows <= sizeY));
     for (size_t blockNum = A->index1_data[currentRowNumber];
          blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
     {
@@ -332,15 +340,6 @@ void SBM_gemv(unsigned int sizeX, unsigned int sizeY, double alpha, const Sparse
       colNumber = A->index2_data[blockNum];
 
       assert(colNumber < sizeX);
-
-      /* Get dim. of the current block */
-      nbRows = A->blocksize0[currentRowNumber];
-
-
-      if (currentRowNumber != 0)
-        nbRows -= A->blocksize0[currentRowNumber - 1];
-
-      assert((nbRows <= sizeY));
 
       nbColumns = A->blocksize1[colNumber];
       if (colNumber != 0)
@@ -400,6 +399,12 @@ void SBM_gemv_3x3(unsigned int sizeX, unsigned int sizeY, const SparseBlockStruc
 
   for (unsigned int currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
   {
+    /* Get dim. of the current block */
+    nbRows = A->blocksize0[currentRowNumber];
+    if (currentRowNumber != 0)
+      nbRows -= A->blocksize0[currentRowNumber - 1];
+      
+    assert((nbRows <= sizeY));
     for (size_t blockNum = A->index1_data[currentRowNumber];
          blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
     {
@@ -409,14 +414,7 @@ void SBM_gemv_3x3(unsigned int sizeX, unsigned int sizeY, const SparseBlockStruc
 
       assert(colNumber < sizeX);
 
-      /* Get dim. of the current block */
-      nbRows = A->blocksize0[currentRowNumber];
 
-
-      if (currentRowNumber != 0)
-        nbRows -= A->blocksize0[currentRowNumber - 1];
-
-      assert((nbRows <= sizeY));
 
       nbColumns = A->blocksize1[colNumber];
       if (colNumber != 0)
@@ -500,17 +498,16 @@ void SBM_extract_component_3x3(const SparseBlockStructuredMatrix* const restrict
 
   for (unsigned int currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
   {
-
+    /* Get dim. of the current block */
+    nbRows = A->blocksize0[currentRowNumber];
+    if (currentRowNumber != 0)
+      nbRows -= A->blocksize0[currentRowNumber - 1];
+    
     for (size_t blockNum = A->index1_data[currentRowNumber];
          blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
     {
       assert(blockNum < A->filled2);
-      /* Get dim. of the current block */
-      nbRows = A->blocksize0[currentRowNumber];
-      if (currentRowNumber != 0)
-        nbRows -= A->blocksize0[currentRowNumber - 1];
-
-
+      
       B->block[blockNum] = (double*) malloc(row_components_size*col_components_size*sizeof(double));
 
       for (unsigned int i = 0; i < row_components_size; i++ )
@@ -899,6 +896,9 @@ static SparseBlockStructuredMatrix*  SBM_calloc_multiply(const SparseBlockStruct
   for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
   {
     C->index1_data[currentRowNumberofA + 1] = C->index1_data[currentRowNumberofA];
+    unsigned int Cblosksize0 = A->blocksize0[currentRowNumberofA];
+    if (currentRowNumberofA != 0)
+      Cblosksize0  -= A->blocksize0[currentRowNumberofA - 1];
     for (unsigned int currentColNumberofB = 0 ; currentColNumberofB < SBM_index_by_column_B->filled3 - 1; ++currentColNumberofB)
     {
       int BlockCexists = 0;
@@ -920,9 +920,7 @@ static SparseBlockStructuredMatrix*  SBM_calloc_multiply(const SparseBlockStruct
             /*           printf("C block number %i exists for %i %i ",C->nbblocks, currentRowNumberofA, currentColNumberofB ); */
 
             C->filled2++;
-            unsigned int Cblosksize0 = A->blocksize0[currentRowNumberofA];
-            if (currentRowNumberofA != 0)
-              Cblosksize0  -= A->blocksize0[currentRowNumberofA - 1];
+
             unsigned int Cblocksize1 = B->blocksize1[currentColNumberofB];
             if (currentColNumberofB != 0)
               Cblocksize1 -= B->blocksize1[currentColNumberofB - 1];
@@ -1029,10 +1027,16 @@ SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* co
 
   for (size_t currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
   {
-
+    int Ablocksize0 = A->blocksize0[currentRowNumberofA];
+    if (currentRowNumberofA != 0)
+      Ablocksize0  -= A->blocksize0[currentRowNumberofA - 1];
     for (size_t currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
     {
       DEBUG_PRINTF("\n computation of the block of C(%zu,%zu)\n",currentRowNumberofA,currentColNumberofB );
+      int Bblocksize1 = B->blocksize1[currentColNumberofB];
+      if (currentColNumberofB != 0)
+        Bblocksize1 -= B->blocksize1[currentColNumberofB - 1];
+      /*           printf("of size %dX%d\n",Ablocksize0,Bblocksize1  ); */
       int CblockPassed = 1;
       for (size_t blockNumAA = A->index1_data[currentRowNumberofA];
            blockNumAA < A->index1_data[currentRowNumberofA + 1]; ++blockNumAA)
@@ -1057,15 +1061,6 @@ SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* co
             }
             assert(Cnbblocks < (int) C->nbblocks);
             /*           printf("Compute C block number %i for %i %i ", Cnbblocks,currentRowNumberofA, currentColNumberofB ); */
-
-            int Ablocksize0 = A->blocksize0[currentRowNumberofA];
-            if (currentRowNumberofA != 0)
-              Ablocksize0  -= A->blocksize0[currentRowNumberofA - 1];
-
-            int Bblocksize1 = B->blocksize1[currentColNumberofB];
-            if (currentColNumberofB != 0)
-              Bblocksize1 -= B->blocksize1[currentColNumberofB - 1];
-            /*           printf("of size %dX%d\n",Ablocksize0,Bblocksize1  ); */
 
             int Ablocksize1 = A->blocksize1[colNumberAA];
             if (colNumberAA != 0)
@@ -1169,11 +1164,15 @@ static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A,
 
   for (currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
   {
+
     if(C->blocksize0[currentRowNumberofA]!= A->blocksize0[currentRowNumberofA])
     {
       DEBUG_PRINTF("C->blocksize0[%zu] is not consistent with A->blocksize0[%zu]\n",currentRowNumberofA,currentRowNumberofA);
       return 0;
     }
+    unsigned int Cblocksize0 = A->blocksize0[currentRowNumberofA];
+    if (currentRowNumberofA != 0)
+      Cblocksize0  -= A->blocksize0[currentRowNumberofA - 1];
 
     for (size_t currentColNumberofB = 0 ; currentColNumberofB < SBM_index_by_column_B->filled3 - 1; ++currentColNumberofB)
     {
@@ -1201,9 +1200,6 @@ static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A,
           {
             BlockCexists = 1;
 
-            unsigned int Cblocksize0 = A->blocksize0[currentRowNumberofA];
-            if (currentRowNumberofA != 0)
-              Cblocksize0  -= A->blocksize0[currentRowNumberofA - 1];
             unsigned int Cblocksize1 = B->blocksize1[currentColNumberofB];
             if (currentColNumberofB != 0)
               Cblocksize1 -= B->blocksize1[currentColNumberofB - 1];
@@ -1280,10 +1276,16 @@ void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix
   long int C_blockNum = -1;
   for (size_t currentRowNumberofA = 0 ; currentRowNumberofA < A->filled1 - 1; ++currentRowNumberofA)
   {
-
+    int Ablocksize0 = A->blocksize0[currentRowNumberofA];
+    if (currentRowNumberofA != 0)
+      Ablocksize0  -= A->blocksize0[currentRowNumberofA - 1];
     for (size_t currentColNumberofB = 0 ; currentColNumberofB < Bfilled3 - 1; ++currentColNumberofB)
     {
       DEBUG_PRINTF("\n computation of the block of C(%zu,%zu)\n",currentRowNumberofA,currentColNumberofB );
+
+      int Bblocksize1 = B->blocksize1[currentColNumberofB];
+      if (currentColNumberofB != 0)
+        Bblocksize1 -= B->blocksize1[currentColNumberofB - 1];
       int CblockPassed = 1;
       local_beta=beta;
       for (size_t blockNumAA = A->index1_data[currentRowNumberofA];
@@ -1324,13 +1326,7 @@ void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix
             assert(C_blockNum >=0);
 
 
-            int Ablocksize0 = A->blocksize0[currentRowNumberofA];
-            if (currentRowNumberofA != 0)
-              Ablocksize0  -= A->blocksize0[currentRowNumberofA - 1];
 
-            int Bblocksize1 = B->blocksize1[currentColNumberofB];
-            if (currentColNumberofB != 0)
-              Bblocksize1 -= B->blocksize1[currentColNumberofB - 1];
             /*           printf("of size %dX%d\n",Ablocksize0,Bblocksize1  ); */
 
             int Ablocksize1 = A->blocksize1[colNumberAA];
