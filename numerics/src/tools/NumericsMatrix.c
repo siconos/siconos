@@ -1166,7 +1166,7 @@ void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row
   }
   case NM_SPARSE_BLOCK:
   {
-    int diagPos = SBM_get_position_diagonal_block(M->matrix1, block_row_nb);
+    int diagPos = SBM_diagonal_block_index(M->matrix1, block_row_nb);
     (*Block) = M->matrix1->block[diagPos];
     break;
   }
@@ -1208,7 +1208,7 @@ void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block
   }
   case NM_SPARSE_BLOCK:
   {
-    int diagPos = SBM_get_position_diagonal_block(M->matrix1, block_row_nb);
+    int diagPos = SBM_diagonal_block_index(M->matrix1, block_row_nb);
     (*Block) = M->matrix1->block[diagPos];
     break;
   }
@@ -1251,7 +1251,7 @@ void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block)
   }
   case NM_SPARSE_BLOCK:
   {
-    int diagPos = SBM_get_position_diagonal_block(M->matrix1, block_row_nb);
+    int diagPos = SBM_diagonal_block_index(M->matrix1, block_row_nb);
     double* Mptr = M->matrix1->block[diagPos];
     double* Bmat = *Block;
     /* The part of MM which corresponds to the current block is copied into MLocal */
@@ -1294,7 +1294,7 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
   {
     for (size_t ic = 0; ic < n/3; ++ic)
     {
-      int diagPos = SBM_get_position_diagonal_block(M->matrix1, ic);
+      int diagPos = SBM_diagonal_block_index(M->matrix1, ic);
       M->matrix1->block[diagPos][0] += alpha;
       M->matrix1->block[diagPos][4] += alpha;
       M->matrix1->block[diagPos][8] += alpha;

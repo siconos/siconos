@@ -93,7 +93,7 @@ NumericsMatrix * test_matrix_2()
   M2->size0 = n;
   M2->size1 = n;
 
-  SparseBlockStructuredMatrix * SBM = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  SparseBlockStructuredMatrix * SBM = SBM_new();
   M2->matrix1 = SBM;
   SBM->nbblocks = 6;
   SBM->blocknumber0 = 3;
@@ -166,7 +166,7 @@ NumericsMatrix * test_matrix_4()
   M4->size0 = n;
   M4->size1 = 4;
 
-  M4->matrix1 = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  M4->matrix1 = SBM_new();
   SparseBlockStructuredMatrix * SBM4 = M4->matrix1;
 
   SBM4->nbblocks = 2;
@@ -270,7 +270,7 @@ NumericsMatrix * test_matrix_10()
   M->size0 = n;
   M->size1 = n;
 
-  SparseBlockStructuredMatrix * SBM = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  SparseBlockStructuredMatrix * SBM = SBM_new();
   M->matrix1 = SBM;
   SBM->nbblocks = 4;
   SBM->blocknumber0 = 3;
@@ -338,7 +338,7 @@ NumericsMatrix * test_matrix_20()
   M->size0 = n;
   M->size1 = n;
 
-  SparseBlockStructuredMatrix * SBM = (SparseBlockStructuredMatrix *)malloc(sizeof(SparseBlockStructuredMatrix));
+  SparseBlockStructuredMatrix * SBM = SBM_new();
   M->matrix1 = SBM;
   SBM->nbblocks = 9;
   SBM->blocknumber0 = 3;

@@ -55,7 +55,7 @@ int main(void)
   mc.column = Aj;
 
   mc.block = block;
-
+ 
   SparseBlockStructuredMatrix* m = SBCM_to_SBM(&mc);
 
   SBM_print(m);

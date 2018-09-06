@@ -48,17 +48,6 @@
 #pragma clang diagnostic ignored "-Wfloat-conversion"
 #endif
 #endif
-
-
-SparseBlockStructuredMatrix* SBM_new(void)
-{
-  SparseBlockStructuredMatrix* sbm = (SparseBlockStructuredMatrix*)
-    malloc(sizeof(SparseBlockStructuredMatrix));
-
-  SBM_null(sbm);
-
-  return sbm;
-}
 void SBM_null(SparseBlockStructuredMatrix* sbm)
 {
   sbm->nbblocks = 0;
@@ -71,8 +60,221 @@ void SBM_null(SparseBlockStructuredMatrix* sbm)
   sbm->filled2 = 0;
   sbm->index1_data = NULL;
   sbm->index2_data = NULL;
+  sbm->diagonal_blocks = NULL;
+}
+
+SparseBlockStructuredMatrix* SBM_new(void)
+{
+  SparseBlockStructuredMatrix* sbm = (SparseBlockStructuredMatrix*)
+    malloc(sizeof(SparseBlockStructuredMatrix));
+
+  SBM_null(sbm);
+
+  return sbm;
+}
+
+void SBM_free(SparseBlockStructuredMatrix *sbm)
+{
+  /* Free memory for SparseBlockStructuredMatrix */
+  /* Warning: nothing is done to check if memory has really been
+   allocated for each component or if it was only pointer links.  Note
+   that when used from the Kernel, memory is not directly allocated
+   for such structures and this function must not be called. See in
+   kernel/src/simulationsTools/SparseBlockMatrix.cpp for details on
+   the way the structure is filled in.
+  */
+  assert(sbm);
+
+  if (sbm->blocksize0)
+  {
+
+    free(sbm->blocksize0);
+    if (sbm->blocksize0 == sbm->blocksize1)
+    {
+      sbm->blocksize1 = NULL ;
+    }
+    sbm->blocksize0 = NULL;
+  }
+  if (sbm->blocksize1)
+  {
+    free(sbm->blocksize1);
+    sbm->blocksize1 = NULL;
+  }
+
+  for (unsigned int i = 0 ; i < sbm->nbblocks ; i++)
+  {
+    if (sbm->block[i])
+    {
+      free(sbm->block[i]);
+      sbm->block[i] = NULL;
+    }
+  }
+
+  if (sbm->block)
+  {
+    free(sbm->block);
+    sbm->block = NULL;
+  }
+
+
+  if (sbm->index1_data)
+  {
+    free(sbm->index1_data);
+    sbm->index1_data = NULL;
+  }
+
+  if (sbm->index2_data)
+  {
+    free(sbm->index2_data);
+    sbm->index2_data = NULL;
+  }
+
+  if (sbm->diagonal_blocks)
+  {
+    free(sbm->diagonal_blocks);
+    sbm->diagonal_blocks = NULL;
+  }
+  sbm->filled1 = 0;
+  sbm->filled2 = 0;
+  sbm->blocknumber0 = 0;
+  sbm->blocknumber1 = 0;
+  sbm->nbblocks = 0;
+}
+
+
+void SBM_print(const SparseBlockStructuredMatrix* const m)
+{
+  if (! m)
+  {
+    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix display failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  if (m->blocknumber0 == 0)
+  {
+    printf("Numerics, SparseBlockStructuredMatrix display: matrix dim = 0.");
+    return;
+  }
+
+  int size0 = m->blocksize0[m->blocknumber0 - 1];
+  int size1 = m->blocksize1[m->blocknumber1 - 1];
+  printf("Sparse-Block structured matrix of size %dX%d elements, and  %dX%d blocks\n", size0, size1, m->blocknumber0, m->blocknumber1);
+  printf("and %d non null blocks\n", m->nbblocks);
+  printf("Diagonal blocks sizes = [ ");
+  int diagonalblocknumber  = m->blocknumber1 + ((m->blocknumber0 - m->blocknumber1) & -(m->blocknumber0 < m->blocknumber1)); // min(m->blocknumber0,m->blocknumber1);
+  for (int i = 0; i < diagonalblocknumber; i++)
+  {
+    size0 = m->blocksize0[i];
+    if (i != 0) size0 -= m->blocksize0[i - 1];
+    size1 = m->blocksize1[i];
+    if (i != 0) size1 -= m->blocksize1[i - 1];
+    printf("%dX%d ", size0, size1);
+  }
+  printf("]\n");
+  printf("index1_data of size %li= {", (long int)m->filled1);
+  if (m->index1_data)
+  {
+    for (unsigned int i = 0 ; i < m->filled1 - 1; i++) printf("%li,  ", (long int)m->index1_data[i]);
+    printf("%li}\n", (long int)m->index1_data[m->filled1 - 1]);
+  }
+  else
+    printf("m->index1_data --> NULL}\n");
+
+  printf("index2_data of size %li= {", (long int)m->filled2);
+  if (m->index2_data)
+  {
+    for (unsigned int i = 0 ; i < m->filled2 - 1; i++) printf("%li,  ", (long int)m->index2_data[i]);
+    printf("%li}\n", (long int)m->index2_data[m->filled2 - 1]);
+  }
+  else
+    printf("m->index2_data --> NULL}\n");
+
+  printf("blocksize0 of size %li= {", (long int)m->blocknumber0);
+  if (m->blocksize0)
+  {
+    for (unsigned int i = 0 ; i < m->blocknumber0 - 1; i++) printf("%li,  ", (long int)m->blocksize0[i]);
+    printf("%li}\n", (long int)m->blocksize0[m->blocknumber0 - 1]);
+  }
+  else
+    printf("m->blocksize0 --> NULL}\n");
+
+  printf("blocksize1 of size %li= {", (long int)m->blocknumber1);
+   if (m->blocksize1)
+   {
+     for (unsigned int i = 0 ; i < m->blocknumber1 - 1; i++) printf("%li,  ", (long int)m->blocksize1[i]);
+     printf("%li}\n", (long int)m->blocksize1[m->blocknumber1 - 1]);
+   }
+   else
+     printf("m->blocksize1 --> NULL}\n");
+
+
+  unsigned int sizemax = 10;
+  unsigned int currentRowNumber ;
+  size_t colNumber;
+  unsigned int nbRows, nbColumns;
+  if (m->block)
+  {
+    for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
+    {
+      for (size_t blockNum = m->index1_data[currentRowNumber];
+           blockNum < m->index1_data[currentRowNumber + 1]; ++blockNum)
+      {
+        assert(blockNum < m->filled2);
+        colNumber = m->index2_data[blockNum];
+        assert(colNumber < m->blocknumber1);
+        /* Get dim. of the current block */
+        nbRows = m->blocksize0[currentRowNumber];
+
+        if (currentRowNumber != 0)
+          nbRows -= m->blocksize0[currentRowNumber - 1];
+        assert(nbRows);
+        nbColumns = m->blocksize1[colNumber];
+        if (colNumber != 0)
+          nbColumns -= m->blocksize1[colNumber - 1];
+        assert(nbColumns);
+
+        printf("block[" SN_SIZE_T_F "] of size %dX%d\n", blockNum, nbRows, nbColumns);
+        if(m->block[blockNum])
+        {
+          if ((nbRows <= sizemax) & (nbColumns <= sizemax))
+          {
+            for (unsigned int i = 0; i < nbRows; i++)
+            {
+              for (unsigned int j = 0; j < nbColumns; j++)
+              {
+                printf("block[" SN_SIZE_T_F "](%i,%i) = %12.8e\n", blockNum, i, j, m->block[blockNum][i + j * nbRows]);
+              }
+            }
+          }
+          else
+          {
+            printf("Block[" SN_SIZE_T_F "] is too large to be displayed\n", blockNum);
+          }
+        }
+        else
+          printf("Block[" SN_SIZE_T_F "] --> NULL \n", blockNum);
+
+      }
+    }
+  }
+  else
+    printf("m->block --> NULL");
+
+  printf("m-diagonal_blocks  ");
+  if (m->diagonal_blocks)
+  {
+    printf("[ ");
+    for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
+    {
+      printf(" %i",m->diagonal_blocks[currentRowNumber] );
+    }
+    printf("]\n");
+  }
+  else
+    printf("--> NULL");
+  
 
 }
+
 
 /* a basic iterator scheme for different kind of sparse
  * matrices (csc, csr, triplet) */
@@ -1445,187 +1647,7 @@ void SBM_row_prod_no_diag_1x1(unsigned int sizeX, unsigned int sizeY, unsigned i
   }
 }
 
-void SBM_free(SparseBlockStructuredMatrix *blmat)
-{
-  /* Free memory for SparseBlockStructuredMatrix */
-  /* Warning: nothing is done to check if memory has really been
-   allocated for each component or if it was only pointer links.  Note
-   that when used from the Kernel, memory is not directly allocated
-   for such structures and this function must not be called. See in
-   kernel/src/simulationsTools/SparseBlockMatrix.cpp for details on
-   the way the structure is filled in.
-  */
-  assert(blmat);
 
-  if (blmat->blocksize0)
-  {
-
-    free(blmat->blocksize0);
-    if (blmat->blocksize0 == blmat->blocksize1)
-    {
-      blmat->blocksize1 = NULL ;
-    }
-    blmat->blocksize0 = NULL;
-  }
-  if (blmat->blocksize1)
-  {
-    free(blmat->blocksize1);
-    blmat->blocksize1 = NULL;
-  }
-
-  for (unsigned int i = 0 ; i < blmat->nbblocks ; i++)
-  {
-    if (blmat->block[i])
-    {
-      free(blmat->block[i]);
-      blmat->block[i] = NULL;
-    }
-  }
-
-  if (blmat->block)
-  {
-    free(blmat->block);
-    blmat->block = NULL;
-  }
-
-
-  if (blmat->index1_data)
-  {
-    free(blmat->index1_data);
-    blmat->index1_data = NULL;
-  }
-
-  if (blmat->index2_data)
-  {
-    free(blmat->index2_data);
-    blmat->index2_data = NULL;
-  }
-
-  blmat->filled1 = 0;
-  blmat->filled2 = 0;
-  blmat->blocknumber0 = 0;
-  blmat->blocknumber1 = 0;
-  blmat->nbblocks = 0;
-}
-
-void SBM_print(const SparseBlockStructuredMatrix* const m)
-{
-  if (! m)
-  {
-    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix display failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
-  if (m->blocknumber0 == 0)
-  {
-    printf("Numerics, SparseBlockStructuredMatrix display: matrix dim = 0.");
-    return;
-  }
-
-  int size0 = m->blocksize0[m->blocknumber0 - 1];
-  int size1 = m->blocksize1[m->blocknumber1 - 1];
-  printf("Sparse-Block structured matrix of size %dX%d elements, and  %dX%d blocks\n", size0, size1, m->blocknumber0, m->blocknumber1);
-  printf("and %d non null blocks\n", m->nbblocks);
-  printf("Diagonal blocks sizes = [ ");
-  int diagonalblocknumber  = m->blocknumber1 + ((m->blocknumber0 - m->blocknumber1) & -(m->blocknumber0 < m->blocknumber1)); // min(m->blocknumber0,m->blocknumber1);
-  for (int i = 0; i < diagonalblocknumber; i++)
-  {
-    size0 = m->blocksize0[i];
-    if (i != 0) size0 -= m->blocksize0[i - 1];
-    size1 = m->blocksize1[i];
-    if (i != 0) size1 -= m->blocksize1[i - 1];
-    printf("%dX%d ", size0, size1);
-  }
-  printf("]\n");
-  printf("index1_data of size %li= {", (long int)m->filled1);
-  if (m->index1_data)
-  {
-    for (unsigned int i = 0 ; i < m->filled1 - 1; i++) printf("%li,  ", (long int)m->index1_data[i]);
-    printf("%li}\n", (long int)m->index1_data[m->filled1 - 1]);
-  }
-  else
-    printf("m->index1_data --> NULL}\n");
-
-  printf("index2_data of size %li= {", (long int)m->filled2);
-  if (m->index2_data)
-  {
-    for (unsigned int i = 0 ; i < m->filled2 - 1; i++) printf("%li,  ", (long int)m->index2_data[i]);
-    printf("%li}\n", (long int)m->index2_data[m->filled2 - 1]);
-  }
-  else
-    printf("m->index2_data --> NULL}\n");
-
-  printf("blocksize0 of size %li= {", (long int)m->blocknumber0);
-  if (m->blocksize0)
-  {
-    for (unsigned int i = 0 ; i < m->blocknumber0 - 1; i++) printf("%li,  ", (long int)m->blocksize0[i]);
-    printf("%li}\n", (long int)m->blocksize0[m->blocknumber0 - 1]);
-  }
-  else
-    printf("m->blocksize0 --> NULL}\n");
-
-  printf("blocksize1 of size %li= {", (long int)m->blocknumber1);
-   if (m->blocksize1)
-   {
-     for (unsigned int i = 0 ; i < m->blocknumber1 - 1; i++) printf("%li,  ", (long int)m->blocksize1[i]);
-     printf("%li}\n", (long int)m->blocksize1[m->blocknumber1 - 1]);
-   }
-   else
-     printf("m->blocksize1 --> NULL}\n");
-
-
-  unsigned int sizemax = 10;
-  unsigned int currentRowNumber ;
-  size_t colNumber;
-  unsigned int nbRows, nbColumns;
-  if (m->block)
-  {
-    for (currentRowNumber = 0 ; currentRowNumber < m->filled1 - 1; ++currentRowNumber)
-    {
-      for (size_t blockNum = m->index1_data[currentRowNumber];
-           blockNum < m->index1_data[currentRowNumber + 1]; ++blockNum)
-      {
-        assert(blockNum < m->filled2);
-        colNumber = m->index2_data[blockNum];
-        assert(colNumber < m->blocknumber1);
-        /* Get dim. of the current block */
-        nbRows = m->blocksize0[currentRowNumber];
-
-        if (currentRowNumber != 0)
-          nbRows -= m->blocksize0[currentRowNumber - 1];
-        assert(nbRows);
-        nbColumns = m->blocksize1[colNumber];
-        if (colNumber != 0)
-          nbColumns -= m->blocksize1[colNumber - 1];
-        assert(nbColumns);
-
-        printf("block[" SN_SIZE_T_F "] of size %dX%d\n", blockNum, nbRows, nbColumns);
-        if(m->block[blockNum])
-        {
-          if ((nbRows <= sizemax) & (nbColumns <= sizemax))
-          {
-            for (unsigned int i = 0; i < nbRows; i++)
-            {
-              for (unsigned int j = 0; j < nbColumns; j++)
-              {
-                printf("block[" SN_SIZE_T_F "](%i,%i) = %12.8e\n", blockNum, i, j, m->block[blockNum][i + j * nbRows]);
-              }
-            }
-          }
-          else
-          {
-            printf("Block[" SN_SIZE_T_F "] is too large to be displayed\n", blockNum);
-          }
-        }
-        else
-          printf("Block[" SN_SIZE_T_F "] --> NULL \n", blockNum);
-
-      }
-    }
-  }
-  else
-    printf("m->block --> NULL");
-
-}
 void SBM_write_in_file(const SparseBlockStructuredMatrix* const m, FILE * file)
 {
   DEBUG_PRINT("printInFileSBM\n");
@@ -2017,16 +2039,45 @@ void SBM_free_pred(SparseBlockStructuredMatrixPred *blmatpred)
 
 }
 
-unsigned int SBM_get_position_diagonal_block(const SparseBlockStructuredMatrix* const M, unsigned int num)
+
+unsigned int * SBM_diagonal_block_indices(SparseBlockStructuredMatrix* const M)
 {
-  /* Look for the first block of row number num */
-  unsigned int pos;
-  size_t firstBlockOfRow = M->index1_data[num];
+  assert(M);
+  if (M->diagonal_blocks) return M->diagonal_blocks;
 
-  /* Look at the diagonal block */
-  for (pos = (unsigned int)firstBlockOfRow; M->index2_data[pos] != num; ++pos, assert(pos < M->filled2));
+  unsigned int * diagonal_blocks = (unsigned int*) malloc(M->blocksize0[M->blocknumber0-1]* sizeof(unsigned int));
+  for (size_t currentRowNumber = 0 ; currentRowNumber < M->filled1 - 1; ++currentRowNumber)
+  {
+    for (size_t blockNum = M->index1_data[currentRowNumber];
+         blockNum < M->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      if (M->index2_data[blockNum] == currentRowNumber)
+      {
+        diagonal_blocks[currentRowNumber] = blockNum;
+        break;
+      }
+      /* Warning: no check if the diagonal block does not exists */
+    }
+  }
+  M->diagonal_blocks = diagonal_blocks;
+  return diagonal_blocks;
+}
 
-  return pos;
+
+unsigned int SBM_diagonal_block_index(SparseBlockStructuredMatrix* const M, unsigned int row)
+{
+
+  unsigned int * diagonal_blocks = SBM_diagonal_block_indices(M);
+  return diagonal_blocks[row];
+  
+  /* /\* Look for the first block of row number num *\/ */
+  /* unsigned int pos; */
+  /* size_t firstBlockOfRow = M->index1_data[row]; */
+
+  /* /\* Look at the diagonal block *\/ */
+  /* for (pos = (unsigned int)firstBlockOfRow; M->index2_data[pos] != row; ++pos, assert(pos < M->filled2)); */
+
+  /* return pos; */
 }
 
 int SBM_zentry(const SparseBlockStructuredMatrix* const M, unsigned int row, unsigned int col, double val)
@@ -2265,6 +2316,22 @@ int SBM_copy(const SparseBlockStructuredMatrix* const A, SparseBlockStructuredMa
     for (unsigned int n = 0; n < B->nbblocks; n++)
       B->block[n] = A->block[n];
   }
+
+  if (B->diagonal_blocks)
+  {
+    free(B->diagonal_blocks);
+    B->diagonal_blocks=NULL;
+  }
+ 
+  if (A->diagonal_blocks)
+  {
+     B->diagonal_blocks = (unsigned int*) malloc(A->blocksize0[A->blocknumber0-1]* sizeof(unsigned int));
+     memcpy(B->diagonal_blocks,A->diagonal_blocks, A->blocksize0[A->blocknumber0-1]* sizeof(unsigned int));
+  }
+
+
+
+  
   return 0;
 }
 
@@ -2664,13 +2731,38 @@ int sparseMatrixNext(sparse_matrix_iterator* it)
   return 0;
 }
 
+
+void SBCM_null(SparseBlockCoordinateMatrix* MC)
+{
+  MC->blocknumber0 = 0;
+  MC->blocknumber1 = 0; 
+  MC->nbblocks = 0;
+  
+  MC->row = NULL;
+  MC->column = NULL;
+  MC->blocksize0 = NULL;
+  MC->blocksize1 = NULL;
+  MC->block=NULL ;
+  
+}
+
+SparseBlockCoordinateMatrix* SBCM_new(void)
+{
+  SparseBlockCoordinateMatrix* MC = (SparseBlockCoordinateMatrix*) malloc(sizeof(SparseBlockCoordinateMatrix));
+  SBCM_null(MC);
+  return MC;
+}
+
+
+
 SparseBlockCoordinateMatrix*  SBCM_new_3x3(unsigned int m, unsigned int n,
     unsigned int nbblocks,
     unsigned int *row,
     unsigned int *column,
     double *block)
 {
-  SparseBlockCoordinateMatrix* MC = (SparseBlockCoordinateMatrix*) malloc(sizeof(SparseBlockCoordinateMatrix));
+  
+  SparseBlockCoordinateMatrix* MC = SBCM_new();
   MC->blocknumber0 = m; /* block row */
   MC->blocknumber1 = n; /* block column */
   MC->nbblocks = nbblocks;
@@ -2710,8 +2802,7 @@ void  SBCM_free_3x3(SparseBlockCoordinateMatrix *MC)
 /* i.e coo.h file under scipy sparsetools */
 SparseBlockStructuredMatrix* SBCM_to_SBM(SparseBlockCoordinateMatrix* MC)
 {
-  SparseBlockStructuredMatrix* M = (SparseBlockStructuredMatrix *)
-    malloc(sizeof(SparseBlockStructuredMatrix));
+  SparseBlockStructuredMatrix* M = SBM_new();
 
   M->nbblocks = MC->nbblocks;
   M->filled2 = MC->nbblocks;

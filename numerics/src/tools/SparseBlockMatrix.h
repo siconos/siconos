@@ -68,7 +68,7 @@
 
 
     Related functions: SBM_gemv(), SBM_row_prod(), SBM_free(),
-    SBM_print, SBM_get_position_diagonal_block()
+    SBM_print, SBM_diagonal_block_index()
  * If we consider the matrix M and the right-hand-side q defined as
  *
  * \f$
@@ -126,6 +126,9 @@ struct SparseBlockStructuredMatrix
 
   size_t *index1_data;
   size_t *index2_data;
+
+  /* the indices of the diagonal blocks */
+  unsigned int * diagonal_blocks;
 
 };
 
@@ -380,12 +383,18 @@ extern "C"
    */
   void SBM_free_pred(SparseBlockStructuredMatrixPred *blmatpred);
 
-  /** Find index position in blocks of the diagonal block of row num
+  /** Compute the indices of blocks of the diagonal block
       \param M the SparseBlockStructuredMatrix matrix
-      \param num the row of the required block
+      \return the indices for all the rows
+  */
+  unsigned int * SBM_diagonal_block_indices(SparseBlockStructuredMatrix* const M);
+
+  /** Find index of the diagonal block in a row
+      \param M the SparseBlockStructuredMatrix matrix
+      \param row the row of the required block
       \return pos the position of the block
   */
-  unsigned int SBM_get_position_diagonal_block(const SparseBlockStructuredMatrix* const M, unsigned int num);
+  unsigned int SBM_diagonal_block_index(SparseBlockStructuredMatrix* const M, unsigned int row);
 
   int SBM_zentry(const SparseBlockStructuredMatrix* const M, unsigned int row, unsigned int col, double val);
 
@@ -470,6 +479,12 @@ extern "C"
   */
   void SBM_column_permutation(unsigned int *colIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C);
 
+  void  SBCM_null(SparseBlockCoordinateMatrix* MC);
+  
+  SparseBlockCoordinateMatrix*  SBCM_new(void);
+
+
+  
 
   /** allocate a SparseBlockCoordinateMatrix from a list of 3x3
    * blocks
