@@ -32,6 +32,7 @@
 
 #include "numerics_verbose.h"
 #include "NumericsVector.h"
+#include "NumericsSparseMatrix.h"
 
 
 /* #define DEBUG_NOCOLOR */
