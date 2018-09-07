@@ -16,21 +16,47 @@
  * limitations under the License.
  */
 
+#define _XOPEN_SOURCE 700
+#include <string.h>
+
+#if (__linux ||  __APPLE__)
+#elif _MSC_VER
+#define strdup _strdup
+#else
+static inline char* strdup(char* src)
+{
+  size_t len = strlen(src) + 1;
+  char* dest = (char*)malloc(len * sizeof(char));
+  strcpy(dest, src, len);
+  return dest;
+}
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "globalFrictionContact_test_function.h"
-#include "Friction_cst.h"
+#include <errno.h>
+
+#include "NonSmoothDrivers.h"
+#include "GAMSlink.h"
+#include "frictionContact_test_function.h"
 #include "SolverOptions.h"
 #include "Friction_cst.h"
-#include "gfc3d_Solvers.h"
+#include "@TEST_NAME_PREFIX@_Solvers.h"
 
+/* For internal solvers based on other formulation */
+#include "SOCLCP_Solvers.h"
+#include "SOCLCP_cst.h"
+#include "ConvexQP_cst.h"
+#include "VI_cst.h"
 
 int main(void)
 {
   int info =0 ;
 
   char filename[] = "./data/@TEST_DATA@";
-  printf("GFC 3D test on %s\n",filename);
+  printf("Test on %s\n",filename);
+
+  setenv("SICONOS_HDF5_NAME", "log-@TEST_DATA@-tol-@TEST_TOLERANCE@-imax-@TEST_MAXITER@.hdf5", 1);
 
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   double testTolerance = @TEST_TOLERANCE@;
@@ -39,7 +65,7 @@ int main(void)
   double test_internal_tol = @TEST_INTERNAL_SOLVER_TOLERANCE@;
   int test_internal_maxit = @TEST_INTERNAL_SOLVER_MAXITER@;
  
-  info=gfc3d_setDefaultSolverOptions(options,@TEST_SOLVER@);
+  info=@TEST_NAME_PREFIX@_setDefaultSolverOptions(options,@TEST_SOLVER@);
   if (testTolerance > 0.)
   {
     options->dparam[0]=@TEST_TOLERANCE@;
@@ -47,16 +73,27 @@ int main(void)
   if (test_maxiter > 0)
     options->iparam[0]=@TEST_MAXITER@;
 
-
   if (testInternalSolver)
   {
-    options->internalSolvers->solverId=@TEST_INTERNAL_SOLVER@;
+    if (testInternalSolver >= 400 && testInternalSolver < 700)
+    {
+      info=@TEST_NAME_PREFIX@_setDefaultSolverOptions(options->internalSolvers,@TEST_INTERNAL_SOLVER@);
+    }
+    else if (testInternalSolver >= 1100 && testInternalSolver < 1200)
+    {
+      info=soclcp_setDefaultSolverOptions(options->internalSolvers,@TEST_INTERNAL_SOLVER@);
+    }
+    else
+    {
+      fprintf(stderr, "unknown internal solver\n");
+      exit(EXIT_FAILURE);
+    }
+    
     if(test_internal_tol > 0.)
       options->internalSolvers->dparam[0]=@TEST_INTERNAL_SOLVER_TOLERANCE@;
     if(test_internal_maxit > 0)
       options->internalSolvers->iparam[0]=@TEST_INTERNAL_SOLVER_MAXITER@;
   }
-
   int iparam_idx_size = @IPARAM_IDX_SIZE@;
   if (iparam_idx_size)
   {
@@ -102,10 +139,31 @@ int main(void)
       options->internalSolvers->dparam[internal_dparam_idx[kk]] = internal_dparam_val[kk];
     }
   }
+#ifdef HAVE_GAMS_C_API
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunreachable-code"
+#pragma clang diagnostic ignored  "-Wtautological-compare"
+#endif /*  __clang__  */
+  if ((@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATH) || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_PATHVI)
+      || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_LCP_PATH) || (@TEST_SOLVER@ == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI))
+  {
+    assert(options->solverParameters);
+    SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
+    GP->model_dir = strdup(GAMS_MODELS_SOURCE_DIR);
+    GP->filename = "@TEST_DATA@";
+    frictionContact_test_gams_opts(GP, @TEST_SOLVER@);
+  }
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif /* __clang__  */
+#endif
 
-  info = gfc3d_test_function_hdf5(filename,options);
+  info = frictionContact_test_function_hdf5(filename,options);
   solver_options_delete(options);
   free(options);
-  printf("\nEnd of GFC3D test on %s\n", filename);
+
+  printf("\nEnd of test on %s\n", filename);
+  unsetenv("SICONOS_HDF5_NAME");
   return info;
 }
