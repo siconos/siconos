@@ -160,6 +160,9 @@ extern "C"
    */
   CS_INT* NSM_diag_indices(NumericsMatrix* M);
 
+  CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M);
+
+  
   /** Extract a block from a sparse matrix
    * \param M matrix
    * \param blockM dense storage for the block

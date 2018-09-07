@@ -28,7 +28,9 @@
 #include "numerics_verbose.h"
 #include "NumericsMatrix.h"
 #include "string.h" // memcpy
-
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 #if defined(__clang__)
@@ -435,6 +437,7 @@ NumericsSparseMatrix * NSM_triplet_eye(unsigned int size)
 
 CS_INT* NSM_diag_indices(NumericsMatrix* M)
 {
+  DEBUG_BEGIN("NSM_diag_indices(NumericsMatrix* M)\n");
   NumericsSparseMatrix* A = M->matrix2;
   assert(A);
   if (A->diag_indx) return A->diag_indx;
@@ -512,6 +515,49 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
     NM_clearSparseStorage(M);
     A->origin = NSM_CSC;
     A->csc = newMat;
+    DEBUG_EXPR(NM_display(M););
+    break;
+  }
+  case NSM_TRIPLET:
+  case NSM_CSR:
+  default:
+
+    exit(EXIT_FAILURE);
+  }
+  DEBUG_END("NSM_diag_indices(NumericsMatrix* M)\n");
+  return indices;
+}
+
+CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M)
+{
+  NumericsSparseMatrix* A = M->matrix2;
+  assert(A);
+  if (A->diag_indx) return A->diag_indx;
+
+  CS_INT* indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
+  A->diag_indx = indices;
+  /* XXX hack --xhub  */
+  if (A->origin == NSM_TRIPLET) { NM_csc(M); A->origin = NSM_CSC; }
+  switch (A->origin)
+  {
+  case NSM_CSC:
+  {
+    assert(A->csc);
+
+    CS_INT* Ai = A->csc->i;
+    CS_INT* Ap = A->csc->p;
+    
+    for (size_t j = 0; j < (size_t)M->size0; ++j)
+    {
+      for (CS_INT p = Ap[j]; p < Ap[j+1]; ++p)
+      {
+        if (Ai[p] ==j)
+        {
+          indices[j] = p;
+          break;
+        }
+      }
+    }
     break;
   }
   case NSM_TRIPLET:
@@ -523,6 +569,9 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
 
   return indices;
 }
+
+
+
 
 void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col,
                              size_t block_row_size, size_t block_col_size)
