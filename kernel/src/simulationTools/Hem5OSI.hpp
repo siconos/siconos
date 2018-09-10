@@ -32,9 +32,6 @@ TYPEDEF_SPTR(Hem5OSI_impl);
 
 /** Hem5OSI solver (odepack)
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
  *
  * Many parameters are required as input/output for LSODAR. See the documentation of this function
  * in externals/odepack/opkdmain.f to have a full description of these parameters.  \n

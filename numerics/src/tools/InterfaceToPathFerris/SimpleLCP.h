@@ -19,7 +19,6 @@
 /*! \file SimpleLCP.h
 
   \brief Interface for Path(Ferris) Solver
-  \author Olivier Bonnefond
 */
 
 /* \page FerrisPath Path (Ferris) Solver Interface

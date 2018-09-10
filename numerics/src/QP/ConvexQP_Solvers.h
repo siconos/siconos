@@ -31,15 +31,10 @@
 extern "C"
 {
 #endif
-  /** set the default solver parameters and perform memory allocation for ConvexQP
-      \param options the pointer to the options to set
-      \param solverId the identifier of the solver
-  */
-  /* int convexQP_setDefaultSolverOptions(SolverOptions* options, int solverId); */
 
   /** Projected Gradient solver for Convex QP problem
       \param problem the variational inequality problem to solve
-      \param x global vector (n), in-out parameter
+      \param z global vector (n), in-out parameter
       \param w global vector (n), in-out parameters
       \param info return 0 if the solution is found
       \param options the solver options :

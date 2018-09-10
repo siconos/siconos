@@ -48,7 +48,7 @@ NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A)
 
   int status;
 
-  NSM_linear_solver_params* params = NM_linearSolverParams(A);
+  NSM_linear_solver_params* params = NSM_linearSolverParams(A);
 
   if (params->solver_data)
   {

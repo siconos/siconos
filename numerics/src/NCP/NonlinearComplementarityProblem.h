@@ -25,7 +25,6 @@
 /*!\file NonlinearComplementarityProblem.h
  * \brief data structure to formalize a Nonlinear Complementarity Problem (NCP)
  *
- * \author Olivier Huber
 */
 
 /** type for user defined function used to compute F and its jacobian.
@@ -34,11 +33,11 @@ typedef void (*ptrFunctionNCP)(void* env, int n, double* z, double* F);
 typedef void (*ptrFunctionJacNCP)(void* env, int n, double* z, NumericsMatrix* jacF);
 
 /** \struct  NonlinearComplementarityProblem NonlinearComplementarityProblem.h
- * The structure that defines a Nonlinear Complementarity Problem (NCP) : Find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n})\f$ such that:\n
-  \f{align*}{
-  w &= F(z) \\
-  0 &\le w \perp z \ge 0
-  \f}
+ * The structure that defines a Nonlinear Complementarity Problem (NCP) : Find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n})\f$ such that:
+
+  \f[ 
+  w &= F(z) \\ 0 &\le w \perp z \ge 0
+  \f]
  */
 struct NonlinearComplementarityProblem
 {

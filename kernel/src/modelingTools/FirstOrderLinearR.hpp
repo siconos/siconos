@@ -33,17 +33,17 @@ typedef void (*FOVecPtr)(double, unsigned int, double*, unsigned int, double*);
 
 /** First Order Linear Relation
 
-\author SICONOS Development Team - copyright INRIA
-\version 3.0.0.
-\date Apr 15, 2007
 
 Linear Relation for First Order Dynamical Systems:
 
-\f{eqnarray}
-y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
+\rst
 
-R &=& B(t,z) \lambda
-\f}
+.. math::
+
+    y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
+    R &=& B(t,z) \lambda
+
+\endrst
 
 The following operators can be plugged: \f$ B(t,z), C(t,z), D(t,z), e(t,z), F(t,z)\f$
 

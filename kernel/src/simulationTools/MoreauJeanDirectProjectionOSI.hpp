@@ -32,9 +32,6 @@ const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
 /**  \class MoreauJeanDirectProjectionOSI
  *   \brief One Step time Integrator for First Order Dynamical Systems  for
  *    mechanical Systems (LagrangianDS and NewtonEulerDS) with  Direct Projection Algorithm
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.4.0.
- *  \date (Creation) May 02, 2012
  *
  * This class reimplement a special activation of constraints
  * in the MoreauJeanOSI for the Direct Projection Algorithm

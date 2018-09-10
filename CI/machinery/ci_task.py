@@ -161,7 +161,6 @@ class CiTask(object):
                  add_pkgs=None, remove_pkgs=None, add_srcs=None,
                  remove_srcs=None, add_targets=None, remove_targets=None):
 
-
             # WARNING: remember that default arg are mutable in python
             # http://docs.python-guide.org/en/latest/writing/gotchas/
 
@@ -212,16 +211,18 @@ class CiTask(object):
 
             new_task = deepcopy(self)
             
-            new_task.__init__(mode=mode, build_configuration=build_configuration,
+            new_task.__init__(mode=mode,
+                              build_configuration=build_configuration,
                               docker=docker,
-                              distrib=new_distrib, ci_config=ci_config, fast=fast,
-                              pkgs=pkgs, srcs=new_srcs, targets=new_targets, cmake_cmd=cmake_cmd,
+                              distrib=new_distrib, ci_config=ci_config,
+                              fast=fast,
+                              pkgs=pkgs, srcs=new_srcs, targets=new_targets,
+                              cmake_cmd=cmake_cmd,
                               cmake_args=cmake_args,
                               make_cmd=make_cmd,
                               make_args=make_args,
                               directories=directories)
             return new_task
-            
         return init
 
     def run(self, root_dir, dry_run=False):
@@ -295,7 +296,8 @@ class CiTask(object):
 
             except Exception as error:
                 print('failure on {0} for {1}'.format(src, self._targets[src]))
-                raise error
+                print(error)
+                return_code += 1
 
         return return_code
 

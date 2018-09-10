@@ -53,10 +53,6 @@ template<class SubType> SP::Actuator factory(SP::ControlSensor sensor)
 
 /** Registry Class for Actuators.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 01, 2007
- *
  * Actuator factory.
  * Use:
  *
@@ -100,10 +96,6 @@ public :
 } ;
 
 /** Registration Class for Actuators.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 01, 2007
  *
  * Class used for auto-registration of Actuator-type objects.
  *

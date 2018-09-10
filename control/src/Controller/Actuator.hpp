@@ -35,10 +35,6 @@
 
 /** Actuators Base Class
 
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) February 09, 2007
-
    Abstract class, interface to user-defined actuators.
 
    An Actuator is dedicated to act on parameters of the Model
@@ -115,11 +111,17 @@ protected:
 
 public:
 
-  /** Constructor with a TimeDiscretisation.
+  /** General Constructor
    * \param type the type of the Actuator, which corresponds to the class type
    * \param sensor the ControlSensor feeding the Actuator
    */
   Actuator(unsigned int type, SP::ControlSensor sensor);
+
+  /** General Constructor with dynamics affine in control
+   * \param type the type of the Actuator, which corresponds to the class type
+   * \param sensor the ControlSensor feeding the Actuator
+   */
+  Actuator(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B);
 
   /** destructor
    */

@@ -53,10 +53,6 @@ template<class SubType> SP::Relation factory(int name)
 
 /** Registry Class for sensors.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) November 2010
- *
  * Relation factory.
  * Use:
  *     RelationFactory::Registry& regRelation(RelationFactory::Registry::get()) ;
@@ -91,10 +87,6 @@ public :
 } ;
 
 /** Registration Class for relations.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) November 2010
  *
  * Class used for auto-registration of Relation-type objects.
  *

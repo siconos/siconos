@@ -1,7 +1,27 @@
 .. _siconos_install_guide:
 
 Build and install
-=================
+#################
+
+.. contents::
+   :local:
+
+
+Overview
+========
+
+*Siconos software*, once properly build and installed, consists in some dynamics libraries, c++ headers, a few scripts and python packages.
+To use the software, you need to fulfill some prerequesites, download build and install the package from sources.
+
+Binaries for Debian are also available.
+
+ 
+
+Installation from sources
+=========================
+      
+Prerequisites
+-------------
 
 Whatever your system is, you will need first to :
 
@@ -16,7 +36,7 @@ Whatever your system is, you will need first to :
 The quick way
 -------------
 
-If you do not want to bother with all installations details and only need a 'standard' siconos install, just do ::
+If you do not want to bother with all installations details and only need a 'standard' siconos install, just do : (first ensure you follow the steps described above : download, check dependencies ...)
 
    cd path_to_build
    cmake path_to_sources
@@ -48,7 +68,7 @@ are detailled in :ref:`siconos_cmake_options`.
 
       ccmake path_to_sources ...
 
-    *to open some dialog-interface to cmake configuration. 'cmake-gui' is also another option. For details check cmake documentation : https://cmake.org/runningcmake/.*
+    *to open some dialog-interface to cmake configuration. 'cmake-gui' is also another option. For details check cmake documentation : https://cmake.org/runningcmake/ .*
 
 Once the cmake process is done, you will get many generated files in *path_to_build*, including a Makefile and a CMakeCache.txt. The latter contains all
 the variables set during configuration. Do not forget to check the screen output of cmake to be sure that everything went fine.
@@ -293,3 +313,15 @@ You can also test all examples in a raw::
 This will compile, link and execute all the examples distributed with siconos.
 
 Check :ref:`running_siconos` for more details on *siconos* script.
+
+
+Binaries installation
+=====================
+
+Check the list of (possibly old) available binaries : https://gforge.inria.fr/frs/?group_id=9
+
+and use your favorite package manager to install Siconos, e.g.
+
+.. code-block:: bash
+
+   apt install siconos-XXX.deb

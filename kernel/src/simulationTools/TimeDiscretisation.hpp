@@ -30,10 +30,6 @@ typedef std::vector<double> TkVector;
 
 /** A time discretisation scheme
 
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.0.0.
-    \date (Creation) Apr 26, 2004
-
     A TimeDiscretisation object is used to discretized a given time interval. \n
     TimeDiscretisation are used:
     - in the simulation, as a user-input to discretized [t0,T]

@@ -30,14 +30,10 @@ TYPEDEF_SPTR(MuStorage)
 
 /** Base (abstract) class for linear non-smooth problems
 
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) November 13, 2010
-
     Base class for linear non-smooth problems, usually in the form:
 
-    \f[
-    w =  q + M z
-    \f]
+    \f$ w =  q + M z \f$
+
     where
     - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
     - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$

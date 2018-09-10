@@ -34,10 +34,6 @@ typedef std::vector<SP::Event> EventsContainer; // Event are already sorted
 
 /** Tools to handle a set of Events for the Simulation
 
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.6.0.
-   \date (Creation) December 22, 2012
-
    The EventsManager handles a set of events (from user time-discretisation, sensors, non-smooth ...),
    and is supposed to provide to the simulation the values of "current" and "next" events to define
    the time-integration interval.

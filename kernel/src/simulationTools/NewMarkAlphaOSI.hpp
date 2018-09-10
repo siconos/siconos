@@ -25,9 +25,6 @@
 
 /**  NewMarkAlpha Scheme Time-Integrator for Dynamical Systems
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
  *
  * NewMarkAlphaOSI is used to solve constrained dynamical systems represented by index-3 DAE
  *

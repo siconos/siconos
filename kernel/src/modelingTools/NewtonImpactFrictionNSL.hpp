@@ -26,11 +26,6 @@
 
 /** Newton Impact-Friction Non Smooth Law
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) March 22, 2005
- *
- *
  */
 class NewtonImpactFrictionNSL : public NonSmoothLaw
 {

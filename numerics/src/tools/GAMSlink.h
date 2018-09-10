@@ -446,7 +446,7 @@ extern "C"
   /** Add a string option to the GAMS parameters
    * \param GP the GAMS parameter struct
    * \param name the name of the option
-   * \param value the option value
+   * \param value_orig the option value
    * \param type the type of the option
    */
   void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value_orig, unsigned type);

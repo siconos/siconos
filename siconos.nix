@@ -18,12 +18,11 @@ with stdenv.lib;
 
 let
 	pythonenv = pythonX.withPackages (ps: with ps; [pip numpy ipython h5py matplotlib lxml scipy pytest]);
-
-
+        boost-dev-meta = (pkgs.boost.meta // {outputsToInstall =["out" "dev"]; });
+        boost-dev = pkgs.boost // {meta = boost-dev-meta;};               
 in
 
 stdenv.mkDerivation rec {
- inherit version;
  name = "siconos-${version}";
  
  enableParallelBuilding = true;	
@@ -40,6 +39,7 @@ stdenv.mkDerivation rec {
     gmp
     boost
     cppunit
+    boost-dev
     ]
   ++ optional (numerics_only != true) [ boost ];
   

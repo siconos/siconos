@@ -22,8 +22,6 @@
 /*!\file soclcp_compute_error.h
   \brief functions related to error computation for SOCLCP
 
-  \author Vincent Acary, 28/08/2015
-
 */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

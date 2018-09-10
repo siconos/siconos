@@ -25,27 +25,34 @@
 
 /** Lagrangian (Non Linear) Rheonomous Relation
 
-    \author SICONOS Development Team - copyright INRIA
-    \date February 28, 2007
-
     This class provides tools to describe non linear relation of the type:
 
-    \f[
-    y &= h(q,t,z) \\
-    \dot y &=  \nabla^\top_q(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
-    \f]
+    \rst
+    .. math::
+        
+
+        y = h(q,t,z) \\
+        \\dot y =  \nabla^\top_q(q,t,z)\\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
+    \endrst
 
     or more generally
 
-    \f[
-    \dot y =  H(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z)
-    \f]
+    \rst
+    .. math::
+        
+        \\dot y =  H(q,t,z)\\dot q + \frac{\partial }{\partial t}h(q,t,z)
+
+    \endrst
 
     and by duality
 
-    \f[
-    p = H^\top(q,t,z)\lambda
-    \f]
+    \rst
+
+    .. math::
+ 
+        p = H^\top(q,t,z)\lambda
+    
+    \endrst
 
     The following operators (and their jacobians) can be plugged, in the usual way (see User Guide, 'User-defined plugins')
 
@@ -71,17 +78,8 @@ protected:
   SP::SiconosVector _hDot;
 
   /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
-  * @param sizeDS sum of the sizes of all the DynamicalSystems involved in the interaction
-  * @param q pointer to the first element of q
-  * @param time current time
-  * @param sizeY size of vector hDot (ie of the intercation)
-  * @param[in,out] pointer to the first element of hDot
-  * @param sizeZ size of vector z
-  * @param[in,out] z a vector of user-defined parameters
-  */
+   */
   SP::PluggedObject _pluginhDot;
-
-
 
   /** default constructor
   */
@@ -93,11 +91,11 @@ protected:
 public:
 
   /** constructor from a set of data
-  *  \param pluginh name of the plugin to compute h.\n
+  *  \param pluginh name of the plugin to compute h.
   * Its signature must be "void userPluginH(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"
-  *  \param pluginJacobianhq name of the plugin  to compute jacobian h according to q.\n
+  *  \param pluginJacobianhq name of the plugin  to compute jacobian h according to q.
   * Its signature must be "void userPluginG0(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)"
-  *  \param pluginDoth name of the plugin to compute hDot. \n
+  *  \param pluginDoth name of the plugin to compute hDot. 
   * Its signature must be "void userPluginHDot(unsigned int, double*, double, unsigned int, double*, unsigned int, double*)
   */
   LagrangianRheonomousR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginDoth);
@@ -118,12 +116,6 @@ public:
 
 
   // -- hDot --
-
-  /** get vector hDot
-  *  \return a SiconosVector
-
-  inline const SiconosVector gethDot() const { return *hDot; }
-  */
 
   /** get a pointer on vector hDot
   *  \return a smart pointer on a SiconosVector

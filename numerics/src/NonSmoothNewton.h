@@ -26,8 +26,6 @@
   The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth Newton-type methods
   for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).
 
-  \author Houari Khenous - Franck Perignon
-
  */
 
 /* Pointer to function that corresponds to the function \f$ \phi \f$ */
@@ -56,10 +54,10 @@ extern "C"
   \param z unknown vector, in-out argument
   \param phi pointer to \f$ \phi \f$ function
   \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
-  \param iparam vector of int parameters:\n
+  \param iparam vector of int parameters:
    - [0] : max. number of iterations
    - [1] : number of iterations processed
-  \param dparam vector of double parameters:\n
+  \param dparam vector of double parameters:
    - [0]: tolerance
    - [1]: error
   \return int 0 if ok
@@ -73,10 +71,10 @@ extern "C"
   \param z unknown vector, in-out argument
   \param phi pointer to \f$ \phi \f$ function
   \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
-  \param iparam vector of int parameters:\n
+  \param iparam vector of int parameters:
    - [0] : max. number of iterations
    - [1] : number of iterations processed
-  \param dparam vector of double parameters:\n
+  \param dparam vector of double parameters:
    - [0]: tolerance
    - [1]: error
   \return int 0 if ok

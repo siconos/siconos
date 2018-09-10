@@ -27,12 +27,6 @@
 
 /** Quadratic Problem
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
- *
- *
- *
  */
 class QP : public OneStepNSProblem
 {

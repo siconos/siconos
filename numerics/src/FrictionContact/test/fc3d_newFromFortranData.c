@@ -42,7 +42,7 @@ int main(void)
 
   NumericsMatrix* NM = NM_new_SBM(m * 3, n * 3, M);
 
-  FrictionContactProblem* FC = frictionContactProblem_new(3, 3, NM, q, mu);
+  FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, 3, NM, q, mu);
 
 //  frictionContact_display(FC);
 

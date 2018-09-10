@@ -46,7 +46,9 @@ endmacro(ADD_CXX_OPTIONS)
 # "There are many more known variants/revisions that we do not handle/detect."
 
 set(cxx_detect_code "
-#if __cplusplus >= 201402L
+#if __cplusplus >= 201703L
+#error CXXVERSION 201703L
+#elif __cplusplus >= 201402L
 #error CXXVERSION 201402L
 #elif __cplusplus >= 201103L
 #error CXXVERSION 201103L

@@ -57,10 +57,6 @@ template<class SubType> SP::DynamicalSystem factory(int name, const SiconosVecto
 
 /** Registry Class for DynamicalSystem.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) November 2010
- *
  * DynamicalSystem factory.
  * Use:
 
@@ -101,10 +97,6 @@ public :
 } ;
 
 /** Registration Class for sensors.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) November 2010
  *
  * Class used for auto-registration of DynamicalSystem-type objects.
  *

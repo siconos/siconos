@@ -30,11 +30,6 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 
 /**  SchatzmanPaoliOSI Time-Integrator for Dynamical Systems
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
- *
- *
  * SchatzmanPaoliOSI class is used to define some time-integrators methods for a
  * list of dynamical systems.
 

@@ -29,10 +29,6 @@
 /**  This class describes the topology of the non-smooth dynamical
  *  system. It holds all the "potential" Interactions".
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) July 20, 2005
- *
  *  Topology is built in NSDS constructors but initialized in
  *  Simulation->initialize(), ie when all Interactions have been
  *  clearly defined.

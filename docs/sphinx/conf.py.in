@@ -22,6 +22,10 @@ import textwrap
 # append siconos package build path to sys
 siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'wrap')
 sys.path.insert(0, siconos_pythonpath)
+siconos_tools_path = os.path.join("@CMAKE_BINARY_DIR@", 'share')
+sys.path.insert(0, siconos_tools_path)
+
+import buildtools as bt
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -57,42 +61,79 @@ if with_python_wrapper:
     extensions += [
         'sphinx.ext.autodoc',
         'sphinx.ext.autosummary',
-        #'numpydoc.numpydoc',
+        # numpydoc must be listed after autodoc!
+        # but we don't need it anymore because of napoleon
+        #'numpydoc.numpydoc', 
+        # napoleon will preprocess docstrings to convert them to
+        # rst in numpydoc style
+        'sphinx.ext.napoleon', 
         ]
     #numpydoc_class_members_toctree = True
-    # -----------------------------------------------------------------------------
-    # Autosummary
-    # -----------------------------------------------------------------------------
 
+    # ---- Autodoc config ----
+    
+    # Use class docstring for documentation, not __init__ (which is the same
+    # due to doxy2swig way of doing things).
+    autoclass_content = 'class'
 
-    #import glob
-    # autosummary_generate = glob.glob("@CMAKE_CURRENT_BINARY_DIR@/sphinx/reference/*.rst")
+    autodoc_default_flags = ['members', 'show-inheritance',]
+    autodoc_docstring_signature = True
 
-    # doxylink = {
-    #     'doxysiconos':
-    #     ('@CMAKE_CURRENT_BINARY_DIR@/build/tags/@PROJECT_NAME@.tag',
-    #      'doxygen/html'),
-    # }
+    # ---- Napoleon config ----
+    
+    ### Customize napoleon/sphinx output.
+    ### Source : https://michaelgoerz.net/notes/extending-sphinx-napoleon-docstring-sections.html
+    from sphinx.ext.napoleon.docstring import GoogleDocstring
 
-    autoclass_content = 'init'
+    # first, we define new methods for any new sections and add them to the class
+    def parse_keys_section(self, section):
+        return self._format_fields('Keys', self._consume_fields())
+    GoogleDocstring._parse_keys_section = parse_keys_section
 
+    def parse_attributes_section(self, section):
+        return self._format_fields('Attributes', self._consume_fields())
+    GoogleDocstring._parse_attributes_section = parse_attributes_section
+
+    def parse_class_attributes_section(self, section):
+        return self._format_fields('Class Attributes', self._consume_fields())
+    GoogleDocstring._parse_class_attributes_section = parse_class_attributes_section
+
+    # we now patch the parse method to guarantee that the the above methods are
+    # assigned to the _section dict
+    def patched_parse(self):
+        self._sections['keys'] = self._parse_keys_section
+        self._sections['class attributes'] = self._parse_class_attributes_section
+        self._unpatched_parse()
+    GoogleDocstring._unpatched_parse = GoogleDocstring._parse
+    GoogleDocstring._parse = patched_parse
+    
+    napoleon_include_private_with_doc = False
+    napoleon_include_init_with_doc = False
+    napoleon_include_special_with_doc = False
+    napoleon_use_ivar = True
+    napoleon_use_param = True
+    napoleon_use_rtype = False#True
+    
 # ---- Start doxyrest conf ---
 with_doxyrest = @HAS_DOXYREST@
 if with_doxyrest:
     sys.path.insert(1, os.path.abspath('@DOXYREST_SPHINX_DIR@'))
     extensions += ['doxyrest', 'cpplexer']
 
-# ---- Start Exhale conf ---
+# ---- Start Breathe/Exhale conf ---
+extensions += ['breathe']
+components = bt.parse_cmake_list("@COMPONENTS@")
+#['externals', 'numerics']
+breathe_projects = {}
+for comp in components:
+    breathe_projects[comp] = "@DOXYGEN_4_RST@/" + comp
+    # Path to doxygen outputs
+breathe_default_project = 'numerics' # "@PROJECT_NAME@"
+breathe_default_members = ('members', 'public-members')
+
 with_exhale = @HAS_EXHALE@
 if with_exhale:
-    extensions += ['breathe', 'exhale']
-    breathe_projects = {"@PROJECT_NAME@": "@DOXYGEN_4_EXHALE@"} # Path to doxygen outputs
-    breathe_default_project = "@PROJECT_NAME@"
-    # breathe_projects_source = {
-    #      "auto" : ( "/Users/Franck/Projets/Siconos/siconos/kernel/src/modelingTools", ["FirstOrderLinearTIR.hpp", "LagrangianLinearDiagonalDS.hpp"] )
-    #      }
-
-
+    extensions += ['exhale']
     # Setup the exhale extension
     exhale_args = {
         # These arguments are required
@@ -175,15 +216,15 @@ language = None
 exclude_patterns = ['**/*test*', '**/doxygen']
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
-#add_function_parentheses = True
+add_function_parentheses = True
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
-#add_module_names = True
+add_module_names = True
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
-#show_authors = False
+show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -195,7 +236,7 @@ pygments_style = 'sphinx'
 #keep_warnings = False
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
+todo_include_todos = False
 
 
 # -- Options for HTML output ----------------------------------------------

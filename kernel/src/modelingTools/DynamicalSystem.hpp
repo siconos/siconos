@@ -40,38 +40,32 @@
 #include <iostream>
 /** Abstract interface to Dynamical Systems
 
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) January 15, 2007
+This class is used to describe dynamical systems of the form :
 
+   
+\f$ g(\dot x, x, t, z) = 0\f$
 
-    This class is used to describe dynamical systems of the form :
-    \f[
-    g(\dot x, x, t, z) = 0
-    \f]
-    where
+\endverbatim
 
-     - \f$ x \in R^{n} \f$ is the state.
+where
+    
+- \f$ x \in R^{n} \f$ is the state.
+- \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
+  variables, some sort of discret state.  For example, z may be used
+  to set some perturbation parameters, to control the system (z
+  set by actuators) and so on.
+- \f$ g : R^{n} \times R  \to  R^{n}   \f$ .
 
-     - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
-     variables, some sort of discret state.  For example, z may be used
-     to set some perturbation parameters, to control the system (z
-     set by actuators) and so on.
-     - \f$ g : R^{n} \times R  \to  R^{n}   \f$ .
+By default, the DynamicalSystem is considered to be an Initial Value
+Problem (IVP) and the initial conditions are given by 
 
-  By default, the DynamicalSystem is considered to be an Initial Value
-  Problem (IVP) and the initial conditions are given by
+\f$x(t_0)=x_0\f$
 
-   \f[
-   x(t_0)=x_0
-  \f]
+Under some specific conditions, the system can be written as:
 
-  Under some specific conditions, the system can be written as:
+\f$\dot x = rhs(x, t, z)\f$
 
-  \f[
-  \dot x = rhs(x, t, z)
-  \f]
-
-  In that case, \f$ \nabla_{\dot x} g \f$ must be invertible.
+In that case, \f$ \nabla_{\dot x} g \f$ must be invertible.
 
 */
 
@@ -90,10 +84,6 @@ private:
 
   /** used to set ds number */
   static unsigned int __count;
-
-  /** copy constructor => private, no copy nor pass-by-value.
-   */
-  //  DynamicalSystem(const DynamicalSystem & );
 
 protected:
 
@@ -436,7 +426,7 @@ public:
   //@}
 
   /*! @name Plugins management  */
-  
+  //@{ 
   /** call all plugged functions for the current state
    * \param time  the current time
    */

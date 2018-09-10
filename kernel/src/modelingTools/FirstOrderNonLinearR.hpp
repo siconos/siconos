@@ -29,15 +29,17 @@
 /** Pointer to function for plug-in for operators related to input and its gradients.*/
 
 /** FirstOrder Non Linear Relation.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27, 2004
  *
  *  Relation for First Order Dynamical Systems, with:
- * \f{eqnarray}
- * y &=& h(X,t,\lambda,Z)\\
- * R &=& g(X,t,\lambda,Z)
- * \f}
+ * \rststar
+ *
+ * .. math::
+ *
+ *     y &=& h(X,t,\lambda,Z) \\
+ *     R &=& g(X,t,\lambda,Z)
+ *
+ * \endrststar
+ *
  *  X, Z, R corresponds to DynamicalSystem variables.
  *  If DS1 and DS2 are involved in the linked Interaction, then X =[x1 x2], Z=[z1 z2] ...
  *

@@ -19,7 +19,6 @@
 /*!\file sn_logger.h
  * \brief Common data structures used by loggers in Siconos/Numerics
  *
- * \author Olivier Huber
  */
 
 #ifndef SN_LOGGER_H

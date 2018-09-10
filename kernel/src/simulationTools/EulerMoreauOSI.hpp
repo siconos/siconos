@@ -26,12 +26,7 @@
 
 const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
 
-/** \class EulerMoreauOSI
- * Time-Integrator for Dynamical Systems
- *  \brief One Step time Integrator for First Order Dynamical Systems.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.7.0.
- *  \date (Creation) Dec 26, 2013
+/** One Step time Integrator for First Order Dynamical Systems.
  *
  * This integrator is the work horse of the event--capturing time stepping schemes
  * for first order systems.
@@ -63,28 +58,39 @@ const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
  *
  * Main time--integration schemes are based on the following \f$\theta-\gamma\f$ scheme
  *
- * \f{equation}{
- *  \begin{cases}
- *   \label{eq:toto1}
- *     M x_{k+1} = M x_{k} +h\theta f(x_{k+1},t_{k+1})+h(1-\theta) f(x_k,t_k) + h \gamma r(t_{k+1})
- *   + h(1-\gamma)r(t_k)  \\[2mm]
- *   y_{k+1} =  h(t_{k+1},x_{k+1},\lambda _{k+1}) \\[2mm]
- *   r_{k+1} = g(x_{k+1},\lambda_{k+1},t_{k+1})\\[2mm]
- *    \mbox{nslaw} ( y_{k+1} , \lambda_{k+1})
- * \end{cases}
- * \f}
+ * \rststar
+ *
+ * .. math::
+ *     :nowrap:
+ *
+ *     \begin{cases}
+ *      \label{eq:toto1}
+ *      M x_{k+1} = M x_{k} +h\theta f(x_{k+1},t_{k+1})+h(1-\theta) f(x_k,t_k) + h \gamma r(t_{k+1})
+ *      + h(1-\gamma)r(t_k)  \\[2mm]
+ *      y_{k+1} =  h(t_{k+1},x_{k+1},\lambda _{k+1}) \\[2mm]
+ *      r_{k+1} = g(x_{k+1},\lambda_{k+1},t_{k+1})\\[2mm]
+ *       \mbox{nslaw} ( y_{k+1} , \lambda_{k+1})
+ *      \end{cases}
+ *
+ * \endrststar
+ *
  * where \f$\theta = [0,1]\f$ and \f$\gamma \in [0,1]\f$.
  * As in Acary & Brogliato 2008, we call the previous problem  the ``one--step nonsmooth problem''.
  *
  * Another variant can also be used (FullThetaGamma scheme)
- *  \f{equation}{
- *   \begin{cases}
+ * \rststar
+ *
+ * .. math::
+ *     :nowrap:
+ *
+ *     \begin{cases}
  *     M x_{k+1} = M x_{k} +h f(x_{k+\theta},t_{k+1}) + h r(t_{k+\gamma}) \\[2mm]
  *     y_{k+\gamma} =  h(t_{k+\gamma},x_{k+\gamma},\lambda _{k+\gamma}) \\[2mm]
  *     r_{k+\gamma} = g(x_{k+\gamma},\lambda_{k+\gamma},t_{k+\gamma})\\[2mm]
  *     \mbox{nslaw} ( y_{k+\gamma} , \lambda_{k+\gamma})
- *   \end{cases}
- * \f}
+ *     \end{cases}
+ *
+ * \endrststar
  *
  *
  * EulerMoreauOSI class is used to define some time-integrators methods for a
@@ -141,6 +147,7 @@ protected:
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
+
   friend struct _NSLEffectOnFreeOutput;
 
 

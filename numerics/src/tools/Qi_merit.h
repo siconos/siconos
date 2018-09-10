@@ -31,8 +31,6 @@
 
   Reference Facchinei--Pang pp.869 - 877.
 
-  \author Olivier Huber, 21/05/2014
-
 */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

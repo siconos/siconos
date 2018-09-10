@@ -22,8 +22,6 @@
 /*!\file VariationalInequality_computeError.h
   \brief functions related to error computation for friction-contact problems
 
-  \author Vincent Acary, 26/05/2008
-
 */
 
 #ifdef __cplusplus

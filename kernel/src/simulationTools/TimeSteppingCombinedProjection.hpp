@@ -27,10 +27,6 @@
 
 /** Time-Stepping scheme
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.4.0.
- *  \date (Creation) May 2012
- *
  */
 class TimeSteppingCombinedProjection : public TimeStepping
 {

@@ -220,8 +220,9 @@ knowing the value of :math:`y, \dot y` and :math:`I_1, I_2` at the beginning of 
 This results in the computation of :math:`y, \dot y` at this new point and to an update of the index sets :math:`I_1` and :math:`I_2`.
 
 -# if :math:`I_1 - I_2 \neq \emptyset` then Impacts occur: 
-    - Formalize and solve the <b>"LCP at velocity level"</b>
-    - Update the index sets :math:`I_1` and :math:`I_2` and check that  :math:`I_1 - I_2 =\emptyset`
+      - Formalize and solve the <b>"LCP at velocity level"</b>
+      - Update the index sets :math:`I_1` and :math:`I_2` and check that  :math:`I_1 - I_2 =\emptyset`
+	
    endif
 
 -# if :math:`I_2\neq \emptyset` then 
@@ -230,7 +231,8 @@ This results in the computation of :math:`y, \dot y` at this new point and to an
       if :math:`\ddot y_{\alpha} >0, F_{\alpha} = 0` remove :math:`\alpha` from :math:`I_2` and :math:`I_1`
       else if :math:`\ddot y_{\alpha} =0, F_{\alpha}=0` then undetermined case.
       endif\n
-     endfor\n 
+
+    endfor\n 
     endif\n
 
 -# go to the next time step.
@@ -308,8 +310,8 @@ Finally, the algorithm described earlier is:
 -# Integration of the Bilateral Smooth Dynamics:
 To integrate these systems thanks to lsodar, we need to define f(x,t) and g(x,t).
 To compute f(x,t), we:
-  - formalize and solve a "LCP at acceleration level" to compute :math:`(y[2],lambda[2])`
-  - collect and rewrite the Dynamics of all the Dynamical Systems as a first order system, including the result of the LCP computation.
+- formalize and solve a "LCP at acceleration level" to compute :math:`(y[2],lambda[2])`
+- collect and rewrite the Dynamics of all the Dynamical Systems as a first order system, including the result of the LCP computation.
 The function g(x,t) is given by:
 
 .. math::

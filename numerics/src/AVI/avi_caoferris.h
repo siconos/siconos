@@ -43,10 +43,8 @@ extern "C"
    * \param d the covering vector for Lemke
    * \param size_x dimension of the solution variable
    * \param A set of active constraints
-   * \param options struct used to define the solver(s) and its (their)
-   * parameters
+   * \param options struct used to define the solver(s) and its (their) parameters
    * \return 0 if success, 1 if failure
-   * \author Olivier Huber
    */
   int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* u, double* s, double* d, unsigned size_x, unsigned* A, SolverOptions* options);
 

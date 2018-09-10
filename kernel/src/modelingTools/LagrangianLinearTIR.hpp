@@ -26,19 +26,11 @@
 
 /**  Lagrangian Linear Relation.
 
-\author SICONOS Development Team - copyright INRIA
-\version 3.0.0.
-\date (Creation) Apr 27, 2004
-
 Lagrangian Relation with:
 
-\f[
-y= Cq + e + Fz
-\f]
+\f$y= Cq + e + Fz\f$
 
-\f[
-p = C^t \lambda
-\f]
+\f$ p = C^t \lambda \f$
 
 C is the only required input to built a LagrangianLinearTIR.
 

@@ -120,10 +120,10 @@ Note that all time-independent operators are computed during simulation initiali
 Customize simulation behavior
 -----------------------------
 
-Each time :function:`ComputeOneStepNS()` function, i.e. the numerics solver, is called, it returns an int, giving some information about the convergence of the solver:
+Each time :func:`ComputeOneStepNS()` function, i.e. the numerics solver, is called, it returns an int, giving some information about the convergence of the solver:
 
 * output = 0 => solver succeeded,
-* else, the meaning of output depends on the solver called (see :ref:`numerics_solvers`).
+* else, the meaning of output depends on the solver called (see :ref:`problems_and_solvers`).
   
 By default, when the convergence is not achieved, an exception is throwed and the process stops.
 Change this behavior is possible by defining a specific function of the form::

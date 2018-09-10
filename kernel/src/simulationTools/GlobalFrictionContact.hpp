@@ -33,16 +33,19 @@ TYPEDEF_SPTR(GlobalFrictionContactProblem)
 
 /** Formalization and Resolution of a Friction-Contact Problem
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Dec 15, 2005
- *
  * This class is devoted to the formalization and the resolution of
  * primal friction contact problems defined by :
- * \f{eqnarray*}
- *  M velocity =  q + H reaction \\
- *  globalVelocities = H^T velocity + tildeGlobalVelocities\\
- * \f}
+ *
+
+ \rst
+ 
+ .. math::
+  
+   M velocity =  q + H reaction \\
+   globalVelocities = H^T velocity + tildeGlobalVelocities
+
+ \endrst
+
  * and \f$globalVelocities, reaction\f$ belongs to the Coulomb friction law with unilateral contact.
  *
  * With:

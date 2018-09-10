@@ -35,9 +35,9 @@
 #include "debug.h"
 
 
-PID::PID(SP::ControlSensor sensor, SP::SimpleMatrix B): Actuator(PID_, sensor), _ref(0), _curDeltaT(0)
+PID::PID(SP::ControlSensor sensor, SP::SimpleMatrix B): Actuator(PID_, sensor, B), _ref(0), _curDeltaT(0)
 {
-  _B = B;
+  _u.reset(new SiconosVector(1, 0));
 }
 
 PID::~PID()
@@ -46,7 +46,6 @@ PID::~PID()
 
 void PID::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 {
-  _u.reset(new SiconosVector(1, 0));
   Actuator::initialize(nsds,s);
 
   _curDeltaT = s.currentTimeStep();

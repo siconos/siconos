@@ -24,7 +24,6 @@
 
 /*!\file NCP_FixedP.h
 
-  \author Houari Khenous, 31/05/2008
 */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

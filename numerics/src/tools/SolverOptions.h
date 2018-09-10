@@ -23,7 +23,6 @@
 
 /*!\file SolverOptions.h
   Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
-  \author Franck Perignon
 */
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"

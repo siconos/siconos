@@ -21,8 +21,6 @@
     \brief Header file for Siconos Algebra objects
 
     This file provides typedef for matrix and vector objects, const values and so on ...
-    \author SICONOS Development Team - copyright INRIA
-    \date (creation) 10/17/2006
 */
 
 #ifndef SiconosAlgebraTypeDef
@@ -61,13 +59,27 @@ const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ DE
 const unsigned int M_MAXSIZEFORDISPLAY = 10;
 const std::string DEFAULT_FORMAT = "ascii";
 
-/** Siconos::UBLAS_TYPE is an enumerated type of Siconos::DENSE, TRIANGULAR, SYMMETRIC,
-    SPARSE, BANDED. It is used to describe the type of matrix or
-    vector we want to construct.
- */
 namespace Siconos
 {
-enum UBLAS_TYPE {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY};
+  /** Siconos::UBLAS_TYPE is an enumerated type of Siconos::DENSE, TRIANGULAR, SYMMETRIC,
+      SPARSE, BANDED. It is used to describe the type of matrix or
+      vector we want to construct.
+  */
+  enum UBLAS_TYPE {
+    /** id for dense matrix or vector */
+    DENSE = 1, 
+    /** id for triangular matrix */
+    TRIANGULAR,
+    /** id for symmetric matrix */
+    SYMMETRIC,
+    /** id for sparse matrix or vector */
+    SPARSE,
+    /** id for banded matrix */
+    BANDED,
+    /** id for zero matrix */
+    ZERO,
+    /** id for identity matrix */
+    IDENTITY};
 }
 // Notes:
 // Vector definition in boost: vector<T,A> see http://www.boost.org/libs/numeric/ublas/doc/vector.htm
@@ -113,22 +125,23 @@ TYPEDEF_SPTR(VectorOfSMatrices)
 
 namespace ublas = boost::numeric::ublas;
 
-/** Various matrix types available in Siconos **/
+/* Various matrix types available in Siconos */
 
-/** DenseMat is a typedef of boost::ublas::numeric::matrix<double, column_major, std::vector<double> >
- */
+/** DenseMat is a typedef of boost::ublas::numeric::matrix<double, column_major, std::vector<double> >  */
 typedef ublas::matrix<double, ublas::column_major, std::vector<double> > DenseMat;
+
 TYPEDEF_SPTR(DenseMat)
 
-//typedef ublas::matrix<double, ublas::column_major, ublas::bounded_array<double, 10000> > DenseMat;
 /** TriangMat is a typedef of boost::ublas::numeric::triangular_matrix<double, upper, column_major, std::vector<double> >
  */
 typedef ublas::triangular_matrix<double, ublas::upper, ublas::column_major> TriangMat;
+
 TYPEDEF_SPTR(TriangMat)
 
 /** SymMat is a typedef of boost::ublas::numeric::symmetric_matrix<double, upper, column_major, std::vector<double> >
  */
 typedef ublas::symmetric_matrix<double, ublas::upper, ublas::column_major> SymMat;
+
 TYPEDEF_SPTR(SymMat)
 
 /** BandedMat is a typedef of boost::ublas::numeric::banded_matrix<double, column_major, std::vector<double> >

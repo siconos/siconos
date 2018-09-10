@@ -431,9 +431,9 @@ void OSNSMatrix::fillH(DynamicalSystemsGraph & DSG, InteractionsGraph& indexSet,
           leftInteractionBlock->fillTriplet(Htriplet, pos_ds, pos);
         }
       }
-      break;
 
     }
+    break;
   }
   default:
   {

@@ -27,30 +27,32 @@
 
 const unsigned int MOREAUSTEPSINMEMORY = 1;
 
-/**  \class MoreauJeanOSI
- *   \brief One Step time Integrator for First Order Dynamical Systems  for
- *    mechanical Systems (LagrangianDS and NewtonEulerDS)
- *   \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) Apr 26, 2004
- *
+/** One Step time Integrator, Moreau-Jean algorithm.
  * This integrator is the work horse of the event--capturing time stepping schemes
  * for mechanical systems.  It is mainly based on the pioneering works of M. Jean and
  * J.J. Moreau for the time integration of mechanical systems
  * with unilateral contact, impact and Coulomb's friction with \f$\theta\f$ scheme
  *
- * For the linear Lagrangina system, the scheme reads as
- * \f{equation}{
- * \begin{cases}
- *  M (v_{k+1}-v_k)
- *  + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G P_{k+1},\label{eq:MoreauTS-motion}\\[1mm]
- *  q_{k+1} = q_{k} + h v_{k+\theta}, \quad \\[1mm]
- *  U_{k+1} = G^\top\, v_{k+1}, \\[1mm]
- *  \begin{array}{lcl}
- *    0 \leq U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha \in \mathcal I_1, \\[1mm]
- *    P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I \setminus \mathcal I_1,
- * \end{array}
- * \end{cases} \f}
+ * For the linear Lagrangian system, the scheme reads as
+ * 
+ \rst
+
+ .. math::
+    :nowrap:
+
+    \begin{cases}
+     M (v_{k+1}-v_k)
+     + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G P_{k+1},\label{eq:MoreauTS-motion}\\[1mm]
+     q_{k+1} = q_{k} + h v_{k+\theta}, \quad \\[1mm]
+     U_{k+1} = G^\top\, v_{k+1}, \\[1mm]
+     \begin{array}{lcl}
+      0 \leq U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha \in \mathcal I_1, \\[1mm]
+      P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I \setminus \mathcal I_1,
+    \end{array}
+    \end{cases}
+
+ \endrst
+ 
  * with  \f$\theta \in [0,1]\f$. The index set \f$\mathcal I_1\f$ is the discrete equivalent
  * to the rule that allows us to apply the Signorini  condition at the velocity level.
  * In the numerical practice, we choose to define this set by

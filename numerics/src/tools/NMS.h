@@ -25,7 +25,6 @@
  * Main reference for this implementation: Linear Algebra Enhancements to the
  * PATH Solver, by Li, Ferris and Munson
  *
- * \author Olivier Huber
  */
 
 #include "SiconosConfig.h"

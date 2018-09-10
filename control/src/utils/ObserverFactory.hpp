@@ -54,10 +54,6 @@ template<class SubType> SP::Observer factory(SP::ControlSensor sensor, const Sic
 
 /** Registry Class for Observers.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.6.0.
- *  \date (Creation) June 15, 2013
- *
  * Observer factory.
  * Use:
  *     ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
@@ -99,10 +95,6 @@ public :
 } ;
 
 /** Registration Class for Observers.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.6.0.
- *  \date (Creation) June 15, 2013
  *
  * Class used for auto-registration of Observer-type objects.
  *

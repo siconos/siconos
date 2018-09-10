@@ -22,8 +22,6 @@
 /*!\file fc3d_compute_error.h
   \brief functions related to error computation for friction-contact problems
 
-  \author Vincent Acary, 26/05/2008
-
 */
 
 #include "FrictionContactProblem.h"

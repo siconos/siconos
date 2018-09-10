@@ -22,7 +22,6 @@
 /*!\file hdf5_logger.h
  * \brief Logger using an HDF5 output
  *
- * \author Olivier Huber
  */
 
 #ifndef HDF5_LOGGER_H

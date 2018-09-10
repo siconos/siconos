@@ -61,7 +61,7 @@ int main(void)
   soclcp->q = NULL;
   soclcp->tau = NULL;
   freeSecondOrderConeLinearComplementarityProblem(soclcp);
-  freeFrictionContactProblem(problem);
+  frictionContactProblem_free(problem);
 
 
   fclose(finput);

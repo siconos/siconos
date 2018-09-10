@@ -26,11 +26,7 @@
 /** type of function used to post-treat output info from solver. */
 typedef void (*CheckSolverFPtr)(int, Simulation*);
 
-/** \class TimeStepping
-    \brief Event-capturing Time-Stepping simulation
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
+/** \brief Event-capturing Time-Stepping simulation
  *
  * This class implements the basic algorithm for Event-capturing Time-Stepping
  * simulations.
@@ -205,9 +201,6 @@ public:
     return _newtonCumulativeNbIterations;
   }
 
-  /** Check nsds changelog and update/init initial contacts if required */
-  void updateContactsFromChangeLog();
-  
   /** initialize the Newton
    * It computes the initial residu and set the, if needed to Newton variable
    * to start the newton algorithm.

@@ -21,13 +21,6 @@
 
 /*! \file SiconosPointers.hpp
   Siconos interface to reference-counting pointers
-*/
-
-/** Siconos pointers
-
- \author SICONOS Development Team - copyright INRIA
- \version 3.0.0.
- \date (Creation) 2010
 
  Siconos pointers are reference counting pointers. Memory pointed by a
  Siconos pointer is automaticaly deallocated.

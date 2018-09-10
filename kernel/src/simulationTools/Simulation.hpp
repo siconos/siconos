@@ -32,10 +32,6 @@
 /** Description of the simulation process (integrators, time
     discretisation and so on).
     
-    \author SICONOS Development Team - copyright INRIA
-    \version 4.2.0.
-    \date (Creation) Apr 26, 2004
- 
     !!! This is an abstract class !!!
     
     The available simulations are TimeStepping, EventDriven and TimeSteppingD1Minus.  
@@ -145,9 +141,8 @@ protected:
 
   /** initialize objects (DSs and Interations) found in the NSDS
    * Changelog and update the changelog iterator.
-   * \return true if any new Interactions were initialized
    */
-  bool initializeNSDSChangelog();
+  void initializeNSDSChangelog();
 
   /** initialize index sets for OSIs */
   void initializeIndexSets();

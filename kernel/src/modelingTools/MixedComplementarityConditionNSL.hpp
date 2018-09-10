@@ -28,11 +28,6 @@
 
 /** Complementarity NonSmoothLaw
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 2.1.1.
- *  \date (Creation) Apr 27, 2004
- *
- *
  **/
 class MixedComplementarityConditionNSL : public NonSmoothLaw
 {

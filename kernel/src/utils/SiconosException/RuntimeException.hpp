@@ -25,11 +25,6 @@
 
 /** Runtime exceptions
  *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 05/25/2004
- *
- *
  * RuntimeException can be throws for example when a pointer is used but not allocated
  * This exception can be caught by "catch(RuntimeException)" or "catch(SiconosException)"
  *

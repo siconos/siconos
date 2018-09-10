@@ -30,10 +30,6 @@ TYPEDEF_SPTR(GenericMechanicalProblem)
 
 /** Formalization and Resolution of a generic mechanical problem: It mixes bilateral equality, complementarity, impact and friction problems.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) June 23 2010
- *
  * This class is devoted to contains of a set of Non-Smooth Problem.
  *
  * \b Main functions:
@@ -41,7 +37,7 @@ TYPEDEF_SPTR(GenericMechanicalProblem)
  *  the interactionBlock-matrices saved in the field interactionBlocks.\n
  *  Functions: initialize(), computeInteractionBlock(), preCompute()
  *  - solving of the GenericMechanical problem: function compute(), used to call solvers from Numerics through \n
- * the genericMechanical_driver() interface of Numerics.
+ * the gmp_driver() interface of Numerics.
  *  - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using \n
  *  ouput results from the solver (velocity,reaction); function postCompute().
  *

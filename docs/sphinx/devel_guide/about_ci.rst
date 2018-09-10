@@ -20,7 +20,9 @@ The ouput can be checked here : https://travis-ci.org/siconos/siconos
 
 For Jenkins, the 'worker' is one of the 'nodes' available on Jenkins interface, e.g. siconos---vm0, siconos---vm1 ...
 The executed tasks are those listed in tasks.py in the dictionnary known_tasks, for the chosen hostname (i.e. node name).
-For example, if::
+For example, if
+
+.. code-block:: python
 
   known_tasks = {'siconos---vm0':
                (siconos_fedora_latest,

@@ -21,7 +21,6 @@ include(OutOfSourcesBuild)
 include(SiconosTools)
 configure_file(scripts/buildtools.py share/buildtools.py COPYONLY)
 
-
 # cmake project name
 set(PROJECT_NAME siconos)
 set(PROJECT_NAME_CAP Siconos)

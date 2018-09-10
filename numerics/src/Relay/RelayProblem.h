@@ -25,7 +25,6 @@
 /*!\file RelayProblem.h
   \brief Structure used to define a Relay (dual or primal) Problem
 
-  \author Franck Perignon
 */
 
 #include "NumericsFwd.h"
@@ -50,7 +49,6 @@ extern "C"
 
   /** Relay_display displays on screen a Relay_problem
   * \param[in] p Relay_problem to be displayed
-  * \author Vincent Acary
   */
   void Relay_display(RelayProblem* p);
 

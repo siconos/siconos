@@ -1,7 +1,7 @@
 .. index:: single: Mixed Linear Complementarity problems (MLCP)
 .. _doxid-_m_l_c_problem:
 
-Mixed Linear Complementarity problems (MLCP)
+Mixed Linear Complementarity Problems (MLCP)
 ============================================
 
 .. _doxid-_m_l_c_problem_1mlcpIntro:
@@ -28,29 +28,29 @@ D is an ( :math:` m \times n` ) matrix, a and u is an ( :math:` n ` ) vectors b,
 .. _doxid-_m_l_c_problem_1mlcpSolversList:
 .. rubric:: Available solvers:
 
-The solvers and their parameters are described in :ref:`Mixed Linear Complementary Problems Solvers <doxid-_m_l_c_p_solvers>` .
+The solvers and their parameters are described in :ref:`Mixed Linear Complementarity Problems Solvers`.
 
 Use the generic function mlcp_solver(), to call one the the specific solvers listed below:
 
-* :ref:`mlcp_pgs() <doxid-_m_l_c_p___solvers_8h_1a391df904e7ca9524600a4020c666eaf4>` , (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver
+* :func:`mlcp_pgs()` , (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver
 
-* :ref:`mlcp_rpgs() <doxid-_m_l_c_p___solvers_8h_1a713b3386b8147006bc2551cf6260b0a8>` , (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver
+* :func:`mlcp_rpgs()` , (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver
 
-* :ref:`mlcp_psor() <doxid-_m_l_c_p___solvers_8h_1a042c7d18132a2650ab024f07c6c075d2>` , projected successive overrelaxation method
+* :func:`mlcp_psor()` , projected successive overrelaxation method
 
-* :ref:`mlcp_rpsor() <doxid-_m_l_c_p___solvers_8h_1a7d203e7424804b9264b6a541a30b6f1b>` , regularized projected successive overrelaxation method
+* :func:`mlcp_rpsor()` , regularized projected successive overrelaxation method
 
-* :ref:`mlcp_path() <doxid-_m_l_c_p___solvers_8h_1affdd454280e36f9647f18458d772ab25>` , path solver
+* :func:`mlcp_path()` , path solver
 
-* :ref:`mlcp_enum() <doxid-_m_l_c_p___solvers_8h_1a3de29ee7e305e0f0e14ee59318219323>` , enumeratif solver
+* :func:`mlcp_enum()` , enumeratif solver
 
-* :ref:`mlcp_simplex() <doxid-_m_l_c_p___solvers_8h_1afa51cfd13f421967d31f2e6dad0d8bf0>` , solver based on the simplex algorithm
+* :func:`mlcp_simplex()` , solver based on the simplex algorithm
 
-* :ref:`mlcp_direct_path() <doxid-_m_l_c_p___solvers_8h_1ace7ff36a9eee83da42757c52faf853fa>` , use the last solution to find the solution. If it failed the mlcp_path is called.
+* :func:`mlcp_direct_path()` , use the last solution to find the solution. If it failed the mlcp_path is called.
 
-* :ref:`mlcp_direct_enum() <doxid-_m_l_c_p___solvers_8h_1af4bc6aec42c30467cc469e9fe69fda03>` , use the last solution to find the solution. If it failed the mlcp_enum is called.
+* :func:`mlcp_direct_enum()` , use the last solution to find the solution. If it failed the mlcp_enum is called.
 
-* :ref:`mlcp_direct_simplex() <doxid-_m_l_c_p___solvers_8h_1aba19b84c417a8cf97693916dc0c22717>` , use the last solution to find the solution. If it failed the mlcp_simplex is called.
+* :func:`mlcp_direct_simplex()` , use the last solution to find the solution. If it failed the mlcp_simplex is called.
 
 Note that all the algorithms are not available for the two options of storage M,q or A,B,C,D,a,b
 
@@ -59,8 +59,8 @@ Note that all the algorithms are not available for the two options of storage M,
 .. index:: single: Mixed Linear Complementary Problems Solvers
 .. _doxid-_m_l_c_p_solvers:
 
-Mixed Linear Complementary Problems Solvers
-===========================================
+Mixed Linear Complementarity Problems Solvers
+=============================================
 
 This page gives an overview of the available solvers for MLCP and their required parameters.
 
@@ -68,7 +68,7 @@ This page gives an overview of the available solvers for MLCP and their required
 
 For each solver, the input argument are:
 
-* a :ref:`MixedLinearComplementarityProblem <doxid-struct_mixed_linear_complementarity_problem>`
+* a :class:`MixedLinearComplementarityProblem`
 
 * the unknowns (z,w)
 
@@ -81,7 +81,7 @@ For each solver, the input argument are:
 
 Projected Gauss-Seidel solver
 
-function: :ref:`mlcp_pgs() <doxid-_m_l_c_p___solvers_8h_1a391df904e7ca9524600a4020c666eaf4>`
+function: :func:`mlcp_pgs()`
 
 parameters:
 
@@ -117,7 +117,7 @@ Projected Gauss-Seidel solver
 
 Regularized Projected Gauss-Seidel, solver for MLCP, able to handle with matrices with null diagonal terms
 
-function: :ref:`mlcp_rpgs() <doxid-_m_l_c_p___solvers_8h_1a713b3386b8147006bc2551cf6260b0a8>`
+function: :func:`mlcp_rpgs()`
 
 parameters:
 
@@ -134,7 +134,7 @@ parameters:
 .. _doxid-_m_l_c_p_solvers_1mlcpPSOR:
 .. rubric:: PSOR Solver:
 
-Projected Succesive over relaxation solver for MLCP. See cottle, Pang Stone Chap 5 function: :ref:`mlcp_psor() <doxid-_m_l_c_p___solvers_8h_1a042c7d18132a2650ab024f07c6c075d2>`
+Projected Succesive over relaxation solver for MLCP. See cottle, Pang Stone Chap 5 function: :func:`mlcp_psor()`
 
 parameters:
 
@@ -151,7 +151,7 @@ parameters:
 .. _doxid-_m_l_c_p_solvers_1mlcpRPSOR:
 .. rubric:: RPSOR Solver:
 
-Regularized Projected Succesive over relaxation solver for MLCP function: :ref:`mlcp_rpsor() <doxid-_m_l_c_p___solvers_8h_1a7d203e7424804b9264b6a541a30b6f1b>`
+Regularized Projected Succesive over relaxation solver for MLCP function: :func:`mlcp_rpsor()`
 
 parameters:
 
@@ -172,13 +172,13 @@ parameters:
 
 The path solver must be initialize:
 
-1) Initialize the solver with :ref:`mlcp_driver_init() <doxid-_m_l_c_p___solvers_8h_1ab3dfdf0024b7c36f68f9333c762792b2>` .
+1) Initialize the solver with :func:`mlcp_driver_init()`.
 
-2) Use a lot with :ref:`mlcp_driver() <doxid-_non_smooth_drivers_8h_1a514d2fda3f57ebad039803d5c7aba26f>` .
+2) Use a lot with :func:`mlcp_driver()`.
 
-3) Reset the solver with :ref:`mlcp_driver_reset() <doxid-_m_l_c_p___solvers_8h_1a0c48cf90299ddb25092044fbd5b527f4>` .
+3) Reset the solver with :func:`mlcp_driver_reset()`.
 
-function: :ref:`mlcp_path() <doxid-_m_l_c_p___solvers_8h_1affdd454280e36f9647f18458d772ab25>`
+function: :func:`mlcp_path()`
 
 parameters:
 
@@ -189,21 +189,21 @@ parameters:
 
 The enumeratif solver must be initialize:
 
-1) Initialize the solver with :ref:`mlcp_driver_init() <doxid-_m_l_c_p___solvers_8h_1ab3dfdf0024b7c36f68f9333c762792b2>` .
+1) Initialize the solver with :func:`mlcp_driver_init()`.
 
-2) Use a lot with :ref:`mlcp_driver() <doxid-_non_smooth_drivers_8h_1a514d2fda3f57ebad039803d5c7aba26f>` .
+2) Use a lot with :func:`mlcp_driver()`.
 
-3) Reset the solver with :ref:`mlcp_driver_reset() <doxid-_m_l_c_p___solvers_8h_1a0c48cf90299ddb25092044fbd5b527f4>` .
+3) Reset the solver with :func:`mlcp_driver_reset()`.
 
-function: :ref:`mlcp_enum() <doxid-_m_l_c_p___solvers_8h_1a3de29ee7e305e0f0e14ee59318219323>`
+function: :func:`mlcp_enum()`
 
 The enumeratif solver must be initialize:
 
-1) Initialize the solver with :ref:`mlcp_driver_init() <doxid-_m_l_c_p___solvers_8h_1ab3dfdf0024b7c36f68f9333c762792b2>` .
+1) Initialize the solver with :func:`mlcp_driver_init()`.
 
-2) Use a lot with :ref:`mlcp_driver() <doxid-_non_smooth_drivers_8h_1a514d2fda3f57ebad039803d5c7aba26f>` .
+2) Use a lot with :func:`mlcp_driver()`.
 
-3) Reset the solver with :ref:`mlcp_driver_reset() <doxid-_m_l_c_p___solvers_8h_1a0c48cf90299ddb25092044fbd5b527f4>` .
+3) Reset the solver with :func:`mlcp_driver_reset()`.
 
 parameters:
 
@@ -211,30 +211,30 @@ parameters:
 
 * iparam[4] (in) : use DGELS (1) or DGESV (0).
 
-* dWork : working float zone size : The number of doubles is retruned by the function :ref:`mlcp_driver_get_dwork() <doxid-_m_l_c_p___solvers_8h_1aa8b03cc5a8c3309d386e746ae6dee904>` . MUST BE ALLOCATED BY THE USER.
+* dWork : working float zone size : The number of doubles is retruned by the function :func:`mlcp_driver_get_dwork()`. MUST BE ALLOCATED BY THE USER.
 
-* iWork : working int zone size : . The number of double is retruned by the function :ref:`mlcp_driver_get_iwork() <doxid-_m_l_c_p___solvers_8h_1a5275bec2d324d0926b6bcad975c68edd>` . MUST BE ALLOCATED BY THE USER.
+* iWork : working int zone size : . The number of double is retruned by the function :func:`mlcp_driver_get_iwork()`. MUST BE ALLOCATED BY THE USER.
 
 .. _doxid-_m_l_c_p_solvers_1mlcpSIMPLEX:
 .. rubric:: SIMPLEX Solver:
 
 The simplex solver must be initialize:
 
-1) Initialize the solver with :ref:`mlcp_driver_init() <doxid-_m_l_c_p___solvers_8h_1ab3dfdf0024b7c36f68f9333c762792b2>` .
+1) Initialize the solver with :func:`mlcp_driver_init()`.
 
-2) Use a lot with :ref:`mlcp_driver() <doxid-_non_smooth_drivers_8h_1a514d2fda3f57ebad039803d5c7aba26f>` .
+2) Use a lot with :func:`mlcp_driver()`.
 
-3) Reset the solver with :ref:`mlcp_driver_reset() <doxid-_m_l_c_p___solvers_8h_1a0c48cf90299ddb25092044fbd5b527f4>` .
+3) Reset the solver with :func:`mlcp_driver_reset()`.
 
-function: :ref:`mlcp_simplex() <doxid-_m_l_c_p___solvers_8h_1afa51cfd13f421967d31f2e6dad0d8bf0>`
+function: :func:`mlcp_simplex()`
 
 The simplex solver must be initialize:
 
-1) Initialize the solver with :ref:`mlcp_driver_init() <doxid-_m_l_c_p___solvers_8h_1ab3dfdf0024b7c36f68f9333c762792b2>` .
+1) Initialize the solver with :func:`mlcp_driver_init()`.
 
-2) Use a lot with :ref:`mlcp_driver() <doxid-_non_smooth_drivers_8h_1a514d2fda3f57ebad039803d5c7aba26f>` .
+2) Use a lot with :func:`mlcp_driver()`.
 
-3) Reset the solver with :ref:`mlcp_driver_reset() <doxid-_m_l_c_p___solvers_8h_1a0c48cf90299ddb25092044fbd5b527f4>` .
+3) Reset the solver with :func:`mlcp_driver_reset()`.
 
 parameters:
 
@@ -246,22 +246,22 @@ parameters:
 
 * dparam[2] (in): A positive value, tolerance to consider that a var is negative(ex: 10e-9).
 
-* dWork : working float zone size : The number of doubles is retruned by the function :ref:`mlcp_driver_get_dwork() <doxid-_m_l_c_p___solvers_8h_1aa8b03cc5a8c3309d386e746ae6dee904>` . MUST BE ALLOCATED BY THE USER.
+* dWork : working float zone size : The number of doubles is retruned by the function :func:`mlcp_driver_get_dwork()`. MUST BE ALLOCATED BY THE USER.
 
-* iWork : working int zone size : . The number of double is retruned by the function :ref:`mlcp_driver_get_iwork() <doxid-_m_l_c_p___solvers_8h_1a5275bec2d324d0926b6bcad975c68edd>` . MUST BE ALLOCATED BY THE USER.
+* iWork : working int zone size : . The number of double is retruned by the function :func:`mlcp_driver_get_iwork()`. MUST BE ALLOCATED BY THE USER.
 
 .. _doxid-_m_l_c_p_solvers_1mlcpDIRECT_ENUM:
 .. rubric:: DIRECT_ENUM Solver:
 
 The direct and enumeratif solver must be initialize:
 
-1) Initialize the solver with :ref:`mlcp_driver_init() <doxid-_m_l_c_p___solvers_8h_1ab3dfdf0024b7c36f68f9333c762792b2>` .
+1) Initialize the solver with :func:`mlcp_driver_init()`.
 
-2) Use a lot with :ref:`mlcp_driver() <doxid-_non_smooth_drivers_8h_1a514d2fda3f57ebad039803d5c7aba26f>` .
+2) Use a lot with :func:`mlcp_driver()`.
 
-3) Reset the solver with :ref:`mlcp_driver_reset() <doxid-_m_l_c_p___solvers_8h_1a0c48cf90299ddb25092044fbd5b527f4>` .
+3) Reset the solver with :func:`mlcp_driver_reset()`.
 
-function: :ref:`mlcp_direct_enum() <doxid-_m_l_c_p___solvers_8h_1af4bc6aec42c30467cc469e9fe69fda03>`
+function: :func:`mlcp_direct_enum()`.
 
 parameters:
 
@@ -275,22 +275,22 @@ parameters:
 
 * dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
 
-* dWork : working float zone size : The number of doubles is retruned by the function :ref:`mlcp_driver_get_dwork() <doxid-_m_l_c_p___solvers_8h_1aa8b03cc5a8c3309d386e746ae6dee904>` . MUST BE ALLOCATED BY THE USER.
+* dWork : working float zone size : The number of doubles is retruned by the function :func:`mlcp_driver_get_dwork()`. MUST BE ALLOCATED BY THE USER.
 
-* iWork : working int zone size : . The number of double is retruned by the function :ref:`mlcp_driver_get_iwork() <doxid-_m_l_c_p___solvers_8h_1a5275bec2d324d0926b6bcad975c68edd>` . MUST BE ALLOCATED BY THE USER.
+* iWork : working int zone size : . The number of double is retruned by the function :func:`mlcp_driver_get_iwork()`. MUST BE ALLOCATED BY THE USER.
 
 .. _doxid-_m_l_c_p_solvers_1mlcpDIRECT_PATH:
 .. rubric:: DIRECT_PATH Solver:
 
 The path solver must be initialize:
 
-1) Initialize the solver with :ref:`mlcp_driver_init() <doxid-_m_l_c_p___solvers_8h_1ab3dfdf0024b7c36f68f9333c762792b2>` .
+1) Initialize the solver with :func:`mlcp_driver_init()`.
 
-2) Use a lot with :ref:`mlcp_driver() <doxid-_non_smooth_drivers_8h_1a514d2fda3f57ebad039803d5c7aba26f>` .
+2) Use a lot with :func:`mlcp_driver()`.
 
-3) Reset the solver with :ref:`mlcp_driver_reset() <doxid-_m_l_c_p___solvers_8h_1a0c48cf90299ddb25092044fbd5b527f4>` .
+3) Reset the solver with :func:`mlcp_driver_reset()`.
 
-function: :ref:`mlcp_direct_path() <doxid-_m_l_c_p___solvers_8h_1ace7ff36a9eee83da42757c52faf853fa>`
+function: :func:`mlcp_direct_path()`
 
 parameters:
 
@@ -304,22 +304,22 @@ parameters:
 
 * dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
 
-* dWork : working float zone size : The number of doubles is retruned by the function :ref:`mlcp_driver_get_dwork() <doxid-_m_l_c_p___solvers_8h_1aa8b03cc5a8c3309d386e746ae6dee904>` . MUST BE ALLOCATED BY THE USER.
+* dWork : working float zone size : The number of doubles is retruned by the function :func:`mlcp_driver_get_dwork()`. MUST BE ALLOCATED BY THE USER.
 
-* iWork : working int zone size : . The number of double is retruned by the function :ref:`mlcp_driver_get_iwork() <doxid-_m_l_c_p___solvers_8h_1a5275bec2d324d0926b6bcad975c68edd>` . MUST BE ALLOCATED BY THE USER.
+* iWork : working int zone size : . The number of double is retruned by the function :func:`mlcp_driver_get_iwork()`. MUST BE ALLOCATED BY THE USER.
 
 .. _doxid-_m_l_c_p_solvers_1mlcpDIRECT_SIMPLEX:
 .. rubric:: DIRECT_SIMPLEX Solver:
 
 The direct and simplex solver must be initialize:
 
-1) Initialize the solver with :ref:`mlcp_driver_init() <doxid-_m_l_c_p___solvers_8h_1ab3dfdf0024b7c36f68f9333c762792b2>` .
+1) Initialize the solver with :func:`mlcp_driver_init()`.
 
-2) Use a lot with :ref:`mlcp_driver() <doxid-_non_smooth_drivers_8h_1a514d2fda3f57ebad039803d5c7aba26f>` .
+2) Use a lot with :func:`mlcp_driver()`.
 
-3) Reset the solver with :ref:`mlcp_driver_reset() <doxid-_m_l_c_p___solvers_8h_1a0c48cf90299ddb25092044fbd5b527f4>` .
+3) Reset the solver with :func:`mlcp_driver_reset()`.
 
-function: :ref:`mlcp_direct_simplex() <doxid-_m_l_c_p___solvers_8h_1aba19b84c417a8cf97693916dc0c22717>`
+function: :func:`mlcp_direct_simplex()`.
 
 parameters:
 
@@ -339,7 +339,7 @@ parameters:
 
 * dparam[6] (in): A tolerance for the direct solver to consider that a var is positive(ex: 1e-12).
 
-* dWork : working float zone size : The number of doubles is retruned by the function :ref:`mlcp_driver_get_dwork() <doxid-_m_l_c_p___solvers_8h_1aa8b03cc5a8c3309d386e746ae6dee904>` . MUST BE ALLOCATED BY THE USER.
+* dWork : working float zone size : The number of doubles is retruned by the function :func:`mlcp_driver_get_dwork()`. MUST BE ALLOCATED BY THE USER.
 
-* iWork : working int zone size : . The number of double is retruned by the function :ref:`mlcp_driver_get_iwork() <doxid-_m_l_c_p___solvers_8h_1a5275bec2d324d0926b6bcad975c68edd>` . MUST BE ALLOCATED BY THE USER.
+* iWork : working int zone size : . The number of double is retruned by the function :func:`mlcp_driver_get_iwork()`. MUST BE ALLOCATED BY THE USER.
 

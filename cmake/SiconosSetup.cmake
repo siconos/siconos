@@ -97,12 +97,11 @@ if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
   include(FindPythonModule)
   # --- xml schema. Used in tests. ---
   if(WITH_XML)
-    set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/config/xmlschema/SiconosModelSchema-V3.7.xsd")
-    IF(NOT NO_RUNTIME_BUILD_DEP)
+    set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/kernel/swig/SiconosModelSchema-V3.7.xsd")
+    if(NOT NO_RUNTIME_BUILD_DEP)
       find_python_module(lxml REQUIRED)
-    ENDIF(NOT NO_RUNTIME_BUILD_DEP)
+    endif()
   endif()
-
 endif()
 
 # Choice of CSparse/CXSparse integer size

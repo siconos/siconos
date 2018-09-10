@@ -33,9 +33,6 @@
 
 /** Non-smooth interaction involving 1 or 2 Dynamical Systems.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \date (Creation) Apr 29, 2004
- *
  * An interaction represents the "link" between a set of Dynamical
  * Systems.
  * The state variables and inputs of the DynamicalSystem (x,R)
@@ -356,13 +353,8 @@ public:
     return _interactionSize;
   }
   
-  //  /** get the number of relations in the interaction
-  //  *  \return an unsigned int
-  //  */
-  // inline unsigned int numberOfRelations() const {return _numberOfRelations;}
-
   /** Get the sum of DS sizes, for DS involved in interaction.
-   *  \return an unsigned int.
+   *  \return an unsigned int
    */
   inline unsigned int getSizeOfDS() const
   {

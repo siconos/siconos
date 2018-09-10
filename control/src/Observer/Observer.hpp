@@ -36,10 +36,6 @@
 
 /** Observers Base Class
 
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.6.0
-   \date (Creation) May 21, 2013
-
    Abstract class, interface to user-defined observers.
 
    An Observer is dedicated to estimate the state of a DynamicalSystem given

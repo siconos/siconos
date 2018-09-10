@@ -3,7 +3,7 @@
 Siconos required and optional dependencies
 ==========================================
 
-* a compiler suite, with c++, c and gfortran compilers (See :ref:`siconos_valid_platforms`).
+* a compiler suite, with c++, c and gfortran compilers.
 
 * cmake (version > 2.8.7, 3.x will be better) (https://cmake.org)
 

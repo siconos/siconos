@@ -19,8 +19,7 @@
 #define ALGEBRATOOLS_HPP
 
 /*! \file AlgebraTools.hpp
-  Utilities to perform operations on matrices 
-  (e.g. exponantial ...)
+  Utilities to perform operations on matrices (exponantial ...)
 */
 
 #include "SiconosFwd.hpp"

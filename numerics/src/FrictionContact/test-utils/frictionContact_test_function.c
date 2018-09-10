@@ -27,6 +27,7 @@
 #include "NonSmoothDrivers.h"
 #include "frictionContact_test_function.h"
 #include "fc3d_Solvers.h"
+#include "fc3d_solvers_wr.h"
 #include "gfc3d_Solvers.h"
 #include "Friction_cst.h"
 #if defined(WITH_FCLIB)
@@ -35,14 +36,20 @@
 #endif
 #include "numerics_verbose.h"
 #include "SiconosCompat.h"
+#include <stdio.h>
+#include <string.h>
+#include <fcntl.h>	/* for open flags */
+#include <limits.h>	/* for PATH_MAX */
+#include <time.h>
+
+
 
 void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 {
 #ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_FRICTION_3D_GAMS_PATHVI ||
       solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI ||
-      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI
-      )
+      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI)
   {
     add_GAMS_opt_str(GP, "avi_start", "ray_first", GAMS_OPT_SOLVER);
     add_GAMS_opt_str(GP, "ratio_tester", "expand", GAMS_OPT_SOLVER);
@@ -88,12 +95,42 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = frictionContact_printInFile(problem, foutput);
+#ifdef WITH_FCLIB
+  int global_hdf5_output =0;
+
+  if(global_hdf5_output)
+  {
+/* get the current calendar time */
+    int stime;
+    long ltime;
+    ltime = time(NULL);
+    stime = (unsigned) ltime/2;
+    srand(stime);
+    char filename[100];
+    sprintf(filename,"gfc3d_%d.hdf5",rand());
+
+    GlobalFrictionContactProblem * gfc3d = fc3d_reformulation_global_problem(problem);
+
+    char * title = "--";
+    char * description = "--";
+    char * mathInfo = "--";
+
+    globalFrictionContact_fclib_write(gfc3d,
+                                      title,
+                                      description,
+                                      mathInfo,
+                                      filename);
+
+  }
+#endif
+
+
 
   solver_options_print(options);
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
   //int dim = problem->numberOfContacts;
-  
+
   double *reaction = (double*)calloc(dim * NC, sizeof(double));
   double *velocity = (double*)calloc(dim * NC, sizeof(double));
 
@@ -152,7 +189,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   free(reaction);
   free(velocity);
 
-  freeFrictionContactProblem(problem);
+  frictionContactProblem_free(problem);
   fclose(foutput);
 
   return info;
@@ -167,7 +204,7 @@ int frictionContact_test_function_hdf5(const char * path, SolverOptions * option
   int k, info = -1 ;
   /* FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem)); */
   /* info = frictionContact_newFromFile(problem, f); */
-  
+
   FrictionContactProblem* problem = frictionContact_fclib_read(path);
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = frictionContact_printInFile(problem, foutput);
@@ -175,7 +212,7 @@ int frictionContact_test_function_hdf5(const char * path, SolverOptions * option
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
   //int dim = problem->numberOfContacts;
-  
+
   double *reaction = (double*)calloc(dim * NC, sizeof(double));
   double *velocity = (double*)calloc(dim * NC, sizeof(double));
 
@@ -238,7 +275,7 @@ int frictionContact_test_function_hdf5(const char * path, SolverOptions * option
   free(reaction);
   free(velocity);
 
-  freeFrictionContactProblem(problem);
+  frictionContactProblem_free(problem);
   fclose(foutput);
 
   return info;

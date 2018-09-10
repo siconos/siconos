@@ -41,19 +41,20 @@ public:
   /** Specify a non-smooth law to use for a given combination of
    *  interaction groups.
    * \param nslaw the new nonsmooth law
-   * \param group1 first group
-   * \param group2 second group */
+   * \param group1 id of the fisrt group of interactions
+   * \param group2  id of the second group of interactions
+   */
   virtual void insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
-                                  long unsigned int group1,
-                                  long unsigned int group2);
+                                  unsigned long int group1,
+                                  unsigned long int group2);
 
   /** Retrieve a non-smooth law to use for a given combination of
    *  interaction groups.
    * \return nsl a SP::NonSmoothLaw
    * \param group1 first group
    * \param group2 second group */
-  virtual SP::NonSmoothLaw nonSmoothLaw(long unsigned int group1,
-                                        long unsigned int group2);
+  virtual SP::NonSmoothLaw nonSmoothLaw(unsigned long int group1,
+                                        unsigned long int group2);
 
 protected:
 

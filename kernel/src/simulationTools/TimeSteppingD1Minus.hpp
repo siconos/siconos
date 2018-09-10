@@ -27,10 +27,6 @@
 
 /** TimeSteppingD1Minus Timestepping Strategy
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) September 16, 2011
- *
  *  see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
  *  on Discontinuous Galerkin Methods: Definition and Outlook
  */

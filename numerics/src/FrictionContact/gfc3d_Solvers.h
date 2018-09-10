@@ -19,9 +19,7 @@
 #define GLOBALFRICTIONCONTACT3DSOLVERS_H
 
 /*!\file gfc3d_Solvers.h
-  Subroutines for the resolution of contact problems with friction (3-dimensional case).\n
-
-  \author Vincent Acary
+  Subroutines for the resolution of contact problems with friction (3-dimensional case).
 
 */
 
@@ -82,6 +80,10 @@ extern "C"
   void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
   int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options);
+  
+  void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+
+  int gfc3d_admm_wr_setDefaultSolverOptions(SolverOptions* options);
 
   int gfc3d_nonsmooth_Newton_AlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options);
 

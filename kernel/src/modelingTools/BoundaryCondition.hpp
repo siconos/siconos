@@ -28,31 +28,24 @@
 
 typedef  void (*FPtrPrescribedVelocity)(double, unsigned int, double*);
 
-/** \class BoundaryCondition
- *  \brief This class models simple boundary conditions for
+/** \brief This class models simple boundary conditions for
  *   prescribing the velocities in a Dynamical System. A simple
  *   boundary condition is considered to fix a component \f$ j \f$ of
  *   * the velocity vector, i.e., \f$ v_j(t) = bc(t)\f$ where \f$
  *   bc(t)\f$ is a given function of time.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.2.0.
- *  \date (Re-Creation) September 2010
  *
  */
 class BoundaryCondition
 {
 public:
 
-  /** \fn BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices);
-   *  \brief Basic constructor
+  /** \brief Basic constructor
    *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
    */
 
   BoundaryCondition(SP::UnsignedIntVector newVelocityIndices);
 
-  /** \fn BoundaryCondition(SP::UnsignedIntVector  newVelocityIndices,
-   *                 SP::SiconosVector newVelocityValues);
-   *  \brief Constructor with constant prescribed values
+  /** brief Constructor with constant prescribed values
    *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
    *  \param newVelocityValues the values of the prescribed velocities
    */
@@ -122,9 +115,6 @@ protected:
 
   /*plugin defining the function V(t)*/
   SP::PluggedObject _pluginPrescribedVelocity;
-
-  //   /*Link to the precribed DynamicalSystem*/
-  //   SP::DynamicalSystem _DS;
 };
 
 TYPEDEF_SPTR(BoundaryCondition)

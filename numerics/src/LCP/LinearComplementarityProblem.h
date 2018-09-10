@@ -25,8 +25,14 @@
 #include "SiconosConfig.h"
 
 #include <stdio.h>
-/** \struct LinearComplementarityProblem LinearComplementarityProblem.h
- *  \brief Structure that contains and defines a LCP Problem.
+/** Structure that contains and defines a LCP Problem.
+
+    \rst 
+    
+    See :ref:`lc_problem`_ 
+    
+    \endrst
+
   */
 struct LinearComplementarityProblem
 {

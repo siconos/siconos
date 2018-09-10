@@ -15,13 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-/*!\file fc2d_projc.c
- *
- * fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for global contact problem with friction.\n
- *
- * \author Sheherazade Nineb.
- *
- */
 
 #include <stdio.h>
 #include <stdlib.h>

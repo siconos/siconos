@@ -30,18 +30,18 @@ typedef void (*Type1Ptr)(unsigned int, double*, unsigned int, double*, unsigned 
 
 
 /** FirstOrder Non Linear Relation.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27, 2004
  *
  * Derived from FirstOrderR - See this class for more comments.
  *
  *  Relation for First Order Dynamical Systems, with:
- * \f{eqnarray}
- * y &=& h(x,z)\\
- * r &=& g(\lambda,z)
- * \f}
+ * \rststar
+ * .. math::
  *
+ *    y &= h(x,z)\\
+ *    r &= g(\lambda,z)
+ *
+ * \endrststar
+ * 
  * Operators (and their corresponding plug-in):
 - h: saved in Interaction as y (plug-in: output[0])
 - \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )

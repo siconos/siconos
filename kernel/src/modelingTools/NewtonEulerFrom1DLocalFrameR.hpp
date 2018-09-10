@@ -27,10 +27,6 @@
 
 /** NewtonEulerFrom1DLocalFrameR
  *
- * \author O. Bonnefon
- *  \version 3.0.0.
- *  \date Dec, 2010
- *
  * This class is an interface for a relation with impact.  It
  * implements the computation of the jacoboian of h from the points of
  * contacts and the normal.  Use this class consists in overloading

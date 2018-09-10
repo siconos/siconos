@@ -11,7 +11,7 @@ At the time, two types of algorithms are available in siconos:
 * *Event-driven algorithms*: based on the time-decomposition of the dynamics in modes, time-intervals where the dynamics are smooth, and discrete events, times where the dynamics are nonsmooth.
 * *Event-capturing algorithms* (a.k.a time-stepping), where a time-discretisation of the whole system (smooth dynamics, constraints, nonsmooth laws) is written leading to a one-step nonsmooth problem that must be solved at each time step.
 
-Details, advantages and drawbacks of both methods are largely discussed in :cite:`Acary.Brogliato.2008`.
+Details, advantages and drawbacks of both methods are largely discussed in :cite:`Acary.Brogliato2008`.
 
 For both algorithms, the main steps to describe a simulation are:
 

@@ -20,8 +20,6 @@
 
 /*!\file MLCP_Solvers.h
   Solvers for Mixed Linear Complementary Problems (MCLP)
-  \author Vincent Acary \n
-  Last Modifications : Olivier Bonnefon
 
 */
 
@@ -46,8 +44,8 @@ extern "C"
 #include "mlcp_cst.h"
 
 
-  /** General interface to initialize a solver.\n
-      Must be call for the following solvers:\n
+  /** General interface to initialize a solver.
+      Must be call for the following solvers:
       - mlcp_enum
       - mlcp_path
       - mlcp_simplex
@@ -57,11 +55,10 @@ extern "C"
 
       \param[in] problem the MixedLinearComplementarityProblem structure which handles the problem (M,q)
       \param[in] options structure used to define the solver(s) and their parameters
-      \author Olivier Bonnefon
   */
   void mlcp_driver_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-  /** General interface to reset a solver.\n
-      Must be call for the following solvers:\n
+  /** General interface to reset a solver.
+      Must be call for the following solvers:
       - mlcp_enum
       - mlcp_path
       - mlcp_simplex
@@ -71,7 +68,6 @@ extern "C"
 
       \param[in] problem the MixedLinearComplementarityProblem structure which handles the problem (M,q)
       \param[in] options structure used to define the solver(s) and their parameters
-      \author Olivier Bonnefon
   */
   void mlcp_driver_reset(MixedLinearComplementarityProblem* problem, SolverOptions* options);
   /*
@@ -87,8 +83,8 @@ extern "C"
     \param[in] options structure used to define the solver(s) and their parameters
    */
   void mlcp_free_working_memory(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-  /** General interface to get the number of integers that must be allocated for the solver.\n
-      Must be use for the following solvers:\n
+  /** General interface to get the number of integers that must be allocated for the solver.
+      Must be use for the following solvers:
       - mlcp_enum
       - mlcp_path
       - mlcp_simplex
@@ -100,11 +96,10 @@ extern "C"
       \param[in] options structure used to define the solver(s) and their parameters
       \return the number of integers that must be allocated by the user.
 
-      \author Olivier Bonnefon
   */
   int mlcp_driver_get_iwork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-  /** General interface to get the number of doubles that must be allocated for the solver.\n
-      Must be use for the following solvers:\n
+  /** General interface to get the number of doubles that must be allocated for the solver.
+      Must be use for the following solvers:
       - mlcp_enum
       - mlcp_path
       - mlcp_simplex
@@ -116,7 +111,6 @@ extern "C"
       \param[in] options structure used to define the solver(s) and their parameters
       \return the number of doubles that must be allocated by the user.
 
-      \author Olivier Bonnefon
   */
   int mlcp_driver_get_dwork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 
@@ -124,12 +118,12 @@ extern "C"
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
    * \param[in,out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : convergence\n
-   1 : iter = itermax\n
+   * \param[out] info an integer which returns the termination value:
+   0 : convergence
+   1 : iter = itermax
    2 : negative diagonal term
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Vincent Acary
+
   */
   void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -137,12 +131,12 @@ extern "C"
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
    * \param[in,out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : convergence\n
-   1 : iter = itermax\n
+   * \param[out] info an integer which returns the termination value:
+   0 : convergence
+   1 : iter = itermax
    2 : negative diagonal term
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Vincent Acary
+
   */
   void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -150,12 +144,11 @@ extern "C"
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
    * \param[in,out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : convergence\n
-   1 : iter = itermax\n
+   * \param[out] info an integer which returns the termination value:
+   0 : convergence
+   1 : iter = itermax
    2 : negative diagonal term
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Vincent Acary
   */
   void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -163,12 +156,11 @@ extern "C"
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
    * \param[in,out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : convergence\n
-   1 : iter = itermax\n
+   * \param[out] info an integer which returns the termination value:
+   0 : convergence
+   1 : iter = itermax
    2 : negative diagonal term
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Vincent Acary
   */
   void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -176,12 +168,11 @@ extern "C"
    * \param[in] problem structure that represents the MLCP (n,m,M, q...)
    * \param[in,out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : convergence\n
-   1 : iter = itermax\n
+   * \param[out] info an integer which returns the termination value:
+   0 : convergence
+   1 : iter = itermax
    2 : negative diagonal term
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_path(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -189,11 +180,10 @@ extern "C"
    * \param[in] problem structure that represents the MLCP (n,mM, q...)
    * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : success,it found a solution\n
-   1 : echec,it did not find any solution\n
+   * \param[out] info an integer which returns the termination value:
+   0 : success,it found a solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -201,11 +191,10 @@ extern "C"
    * \param[in]  problem MixedLinearComplementarityProblem* problem structure that represents the MLCP (n,mM, q...)
    * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : success,it found a solution\n
-   1 : echec,it did not find any solution\n
+   * \param[out] info an integer which returns the termination value:
+   0 : success,it found a solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -213,11 +202,10 @@ extern "C"
   * \param[in] problem structure that represents the MLCP (n,mM, q...)
   * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
   * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
-  * \param[out] info an integer which returns the termination value:\n
-  0 : success,it found a solution\n
-  1 : echec,it did not find any solution\n
+  * \param[out] info an integer which returns the termination value:
+  0 : success,it found a solution
+  1 : failure,it did not find any solution
   \param[in,out] options structure used to define the solver and its parameters.
-  \author Olivier Bonnefon
   */
   void mlcp_direct_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -225,11 +213,10 @@ extern "C"
    * \param[in] problem structure that represents the MLCP (n,mM, q...)
    * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : success,it found a solution\n
-   1 : echec,it did not find any solution\n
+   * \param[out] info an integer which returns the termination value:
+   0 : success,it found a solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_direct_simplex(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -237,11 +224,10 @@ extern "C"
   * \param[in] problem structure that represents the MLCP (n,mM, q...)
   * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
   * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
-  * \param[out] info an integer which returns the termination value:\n
-  0 : success,it found a solution\n
-  1 : echec,it did not find any solution\n
+  * \param[out] info an integer which returns the termination value:
+  0 : success,it found a solution
+  1 : failure,it did not find any solution
   \param[in,out] options structure used to define the solver and its parameters.
-  \author Olivier Bonnefon
   */
   void mlcp_direct_path(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -250,11 +236,10 @@ extern "C"
    * \param[in] problem structure that represents the MLCP (n,mM, q...)
    * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : success,it found a solution\n
-   1 : echec,it did not find any solution\n
+   * \param[out] info an integer which returns the termination value:
+   0 : success,it found a solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_simplex(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -262,22 +247,20 @@ extern "C"
    * \param[in] problem structure that represents the MLCP (n,mM, q...)
    * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : success,it found a solution\n
-   1 : echec,it did not find any solution\n
+   * \param[out] info an integer which returns the termination value:
+   0 : success,it found a solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
   /** Direct Fischer Burmeister solver
    * \param[in] problem structure that represents the MLCP (n,mM, q...)
    * \param[out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[out] w a m+n-vector of doubles which returns the solution of the problem.
-   * \param[out] info an integer which returns the termination value:\n
-   0 : success,it found a solution\n
-   1 : echec,it did not find any solution\n
+   * \param[out] info an integer which returns the termination value:
+   0 : success,it found a solution
+   1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its parameters.
-   \author Olivier Bonnefon
   */
   void mlcp_direct_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options);
 
@@ -287,11 +270,10 @@ extern "C"
    * \param[in] problem structure that represents the LCP (M, q...). M must be a SparseBlockStructuredMatrix
    * \param[in,out] z a n-vector of doubles which contains the initial solution and returns the solution of the problem.
    * \param[in,out] w a n-vector of doubles which returns the solution of the problem.
-   * \param info an integer which returns the termination value:\n
-   0 : convergence\n
+   * \param info an integer which returns the termination value:
+   0 : convergence
    >0 : failed, depends on local solver
    * \param[in,out] options structure used to define the solver and its parameters.
-   * \author Vincent Acary
    */
   void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double *w, int* info, SolverOptions* options);
 
@@ -305,36 +287,42 @@ extern "C"
   //  void mlcp_GaussSeidel_SBM(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options, int numberOfSolvers);
 
   /**
-    This function checks the validity of the vector z as a solution \n
-    of the MLCP : \n
-    \f{eqnarray*}
-     \left\lbrace
-      \begin{array}{l}
-      A u + Cv +a =w1\\
-      D u + Bv +b = w2\\
-      0 \le v \perp  w2 \ge 0\\
-      w1=0\\
+    This function checks the validity of the vector z as a solution 
+    of the MLCP : 
+
+    \rst
+
+    .. math::
+      :nowrap:
+
+      \left\lbrace
+       \begin{array}{l}
+       A u + Cv +a =w1\\
+       D u + Bv +b = w2\\
+       0 \le v \perp  w2 \ge 0\\
+       w1=0\\
+       \end{array}
+      \right.
+      w =
+      \left\lbrace
+      \begin{array}{c}
+      w1\\
+      w2\\
       \end{array}
-     \right.
-     w =
-     \left\lbrace
-     \begin{array}{c}
-     w1\\
-     w2\\
-     \end{array}
-     \right\rbrace
-     \f}
-     The criterion is based on \f$ \sum [ (z[i]*(Mz+q)[i])_{pos} + (z[i])_{neg} + (Mz+q)[i])_{neg} ] \f$ \n
-     with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. \n
-     This sum is divided by \f$ \|q\| \f$ and then compared to tol.\n
-     It changes the input vector w by storing \f$ Mz + q \f$ in it.\n
+      \right\rbrace
+    
+ \endrst
+ 
+    The criterion is based on \f$ \sum [ (z[i]*(Mz+q)[i])_{pos} + (z[i])_{neg} + (Mz+q)[i])_{neg} ] \f$ 
+     with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. 
+     This sum is divided by \f$ \|q\| \f$ and then compared to tol.
+     It changes the input vector w by storing \f$ Mz + q \f$ in it.
      \param[in] problem structure that represents the MLCP (n,m,M, q... or (A,B,C...))
      \param[in,out] z a m+n-vector of doubles which contains the initial solution and returns the solution of the problem.
      \param[in,out] w a m+n-vector of doubles which returns the solution of the problem.
      \param[in] tolerance threshold used to validate the solution: if the error is less than this value, the solution is accepted
      \param[in,out] error
      \return status: 0 : convergence, 1: error > tolerance
-    \author Vincent Acary form the routine  filter_result_LCP.c of Pascal Denoyelle
   */
   int mlcp_compute_error(MixedLinearComplementarityProblem* problem, double *z, double *w, double tolerance, double * error);
 

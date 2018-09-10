@@ -23,10 +23,6 @@
 
 /** Events due to non smooth behavior (contact occurence...)
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 21, 2006
- *
  * Those events are detected during Simulation process (integration of the smooth part with a roots-finding algorithm)
  * and scheduled into the EventsManager.
  *

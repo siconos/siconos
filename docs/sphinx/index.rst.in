@@ -50,11 +50,10 @@
    :target: https://www.apache.org/licenses/LICENSE-2.0
    :alt: License
 
-.. |docbuild| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/perignfr/siconos-mirror/badges/update_doc/pipeline.svg
-   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/perignfr/siconos-mirror/commits/update_docs
+.. |docbuild| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-mirror/badges/master/pipeline.svg
+   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-mirror/commits/master
    :alt: Doc status
-
-
+	 
 
 
 Project status
@@ -66,7 +65,7 @@ Project status
  
 .. _Siconos CI on Travis: https://travis-ci.org/siconos/siconos
 
-.. _Cdash reports: http://cdash-tripop.inrialpes.fr/index.php?project=Siconos
+.. _Cdash reports: https://cdash-tripop.inrialpes.fr/index.php?project=Siconos
 
  
 .. _Jenkins: https://ci.inria.fr/siconos--

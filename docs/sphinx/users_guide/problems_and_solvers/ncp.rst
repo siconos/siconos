@@ -16,11 +16,11 @@ Find :math:`z \in \mathcal{R}^n_+` such that:
 .. _doxid-_n_c_problem_1ncpSolvers:
 .. rubric:: Available solvers/formulations::
 
-* :ref:`ncp_newton_FBLSA() <doxid-_n_c_p___solvers_8h_1a40745d92602fe0fcee13673198033f80>` with the FB merit function and a Newton with line-search
+* :func:`ncp_newton_FBLSA()` with the FB merit function and a Newton with line-search
 
-* :ref:`ncp_newton_minFBLSA() <doxid-_n_c_p___solvers_8h_1ae19022f23ec79fd49a6e78333712f94e>` with the min merit function (with the FB as backup) and a Newton with line-search
+* :func:`ncp_newton_minFBLSA()` with the min merit function (with the FB as backup) and a Newton with line-search
 
-* :ref:`ncp_pathsearch() <doxid-_n_c_p___solvers_8h_1a49975529861665a52403be3689692f84>` solver using a path search
+* :func:`ncp_pathsearch()` solver using a path search
 
 * NCP_Path() Interface to Path (Ferris)
 
@@ -38,5 +38,5 @@ Given a sufficiently smooth function :math:`{F}\colon {{\mathrm{I\!R}}}^{n} \to 
 
 * ncp_FBLSA(), nonsmooth Newton method based on Fisher-Burmeister function with a line search.
 
-* :ref:`ncp_pathsearch() <doxid-_n_c_p___solvers_8h_1a49975529861665a52403be3689692f84>` , a solver based on a path search method
+* :func:`ncp_pathsearch()` , a solver based on a path search method
 

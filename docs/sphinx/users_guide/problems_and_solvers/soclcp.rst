@@ -35,20 +35,20 @@ with
 
     \begin{eqnarray} C^\alpha_{\mu} = \{ r \mid \|[r_1, \ldots, r_{n^\alpha}]\| \leq \mu^\alpha * r_0 \} \subset {\mathrm{I\!R}}^{n^\alpha} \end{eqnarray}
 
-The problem is stored and given to the solver in numerics thanks to the C structure :ref:`SecondOrderConeLinearComplementarityProblem <doxid-struct_second_order_cone_linear_complementarity_problem>` .
+The problem is stored and given to the solver in numerics thanks to the C structure :class:`SecondOrderConeLinearComplementarityProblem` .
 
 .. _doxid-soclcp_problem_1SOCLCPSolversList:
 .. rubric:: Available solvers for SOCCLP:
 
 see ``SOCLCP_cst.h`` for solver ids.
 
-Use the generic function :ref:`soclcp_driver() <doxid-_non_smooth_drivers_8h_1a6fc996a07f24a72c0dbe0dc4b85733b9>` to call one the the specific solvers listed below:
+Use the generic function :func:`soclcp_driver()` to call one the the specific solvers listed below:
 
-* :ref:`soclcp_nsgs() <doxid-_s_o_c_l_c_p___solvers_8h_1ac8c7dcc8d1f1ee0a12ae16384561029e>` : PSOR (Gauss-Seidel with overrelaxation) solver. SolverId : SICONOS_SOCLCP_NSGS ,
+* :func:`soclcp_nsgs()` : PSOR (Gauss-Seidel with overrelaxation) solver. SolverId : SICONOS_SOCLCP_NSGS ,
 
 * soclcp_VI_FixedPointProjection() : VI formulation and fixed point projection. SolverId : SICONOS_SOCLCP_VI_FPP ,
 
-* :ref:`soclcp_VI_ExtraGradient() <doxid-_s_o_c_l_c_p___solvers_8h_1a60adc9ddff54149b8188610d4df499a1>` : VI formulation and extra-gradient solver. SolverId : SICONOS_SOCLCP_VI_EG ,
+* :func:`soclcp_VI_ExtraGradient()` : VI formulation and extra-gradient solver. SolverId : SICONOS_SOCLCP_VI_EG ,
 
 See the related functions/solvers list in ``SOCLCP_Solvers.h`` .
 
@@ -64,7 +64,7 @@ This page gives an overview of the available solvers for Second Order Cone Linea
 
 For each solver, the input argument are:
 
-* a :ref:`SecondOrderConeLinearComplementarityProblem <doxid-struct_second_order_cone_linear_complementarity_problem>`
+* a :class:`SecondOrderConeLinearComplementarityProblem`
 
 * the unknowns (r,v)
 

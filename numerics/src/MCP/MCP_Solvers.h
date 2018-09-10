@@ -19,9 +19,7 @@
 #define MCP_SOLVERS_H
 
 /*!\file MCP_Solvers.h
-  \brief List of all the available solvers for the resolution of Mixed Complementarity Problems.\n
-
-  \author siconos-team@lists.gforge.inria.fr
+  \brief List of all the available solvers for the resolution of Mixed Complementarity Problems.
 */
 
 #include "MixedComplementarityProblem.h"
@@ -61,7 +59,6 @@ extern "C"
       \param[out] w not used
       \param[out] info termination value:   0 if success else >0.
       \param[in,out] options structure used to define the solver and its parameters.
-      \author Franck Pérignon
   */
   void mcp_FischerBurmeister(MixedComplementarityProblem* problem, double* z, double* w, int* info, SolverOptions* options);
 
@@ -72,7 +69,6 @@ extern "C"
       \param[out] Fmcp n1+n2-vector which contains the value of Fmcp(z) = (G(z), H(z))
       \param[out] info termination value:   0 if success else >0.
       \param[in,out] options structure used to define the solver and its parameters.
-      \author Olivier Huber
   */
   void mcp_newton_FBLSA(MixedComplementarityProblem2* problem, double* z, double* Fmcp, int* info, SolverOptions* options);
 
@@ -84,7 +80,6 @@ extern "C"
       \param[out] Fmcp n1+n2-vector which contains the value of Fmcp(z) = (G(z), H(z))
       \param[out] info termination value:   0 if success else >0.
       \param[in,out] options structure used to define the solver and its parameters.
-      \author Olivier Huber
   */
   void mcp_newton_minFBLSA(MixedComplementarityProblem2* problem, double* z, double* Fmcp, int* info, SolverOptions* options);
 

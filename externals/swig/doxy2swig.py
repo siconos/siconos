@@ -164,10 +164,7 @@ class Doxy2SWIG:
 
     def write(self, fname):
         o = my_open_write(fname)
-        if(sys.version_info > (3, 0)):
-            o.write(''.join(self.pieces))
-        else:
-            o.write(str(u''.join(self.pieces).encode('utf-8').strip()))
+        o.write(''.join(self.pieces))
         o.write('\n')
         o.close()
 
@@ -371,7 +368,7 @@ class Doxy2SWIG:
             self.add_text('\n')
             self.add_line_with_subsequent_indent('* ' + self.get_function_signature(n))
             self.subnode_parse(n, pieces = [], indent=4, ignore=['definition', 'name'])
-
+        
     def make_attribute_list(self, node):
         """Produces the "Attributes" section in class docstrings for public
         member variables (attributes).
@@ -413,6 +410,7 @@ class Doxy2SWIG:
 
         md_nodes = self.get_specific_subnodes(node, 'memberdef', recursive=2)
         for n in md_nodes:
+            
             if n.attributes['prot'].value != 'public':
                 continue
             if n.attributes['kind'].value in ['variable', 'typedef']:
@@ -463,23 +461,6 @@ class Doxy2SWIG:
     
 
 # MARK: Tag handlers
-    def do_formula(self, node):
-        self.add_text(' ')
-        data = '{0}'.format(node.firstChild.data).strip().\
-               replace('\\', r'\\\\').\
-               replace('"', r'\"').replace('$', '').strip()
-        if len(data) <= 20:
-            self.add_text(' :math:`{0}` '.format(data))
-        else:
-            self.add_text("""
-
-            .. math::
-               :nowrap:
-
-               {0}
-
-""".format(data))
-
     def do_linebreak(self, node):
         self.add_text('  ')
     

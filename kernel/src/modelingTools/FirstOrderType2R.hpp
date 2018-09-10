@@ -17,7 +17,7 @@
 */
 
 /*! \file FirstOrderType2R.hpp
-  \brief non linear relations: \f$y=h(x,\lambda,z)\quadr=g(\lambda,z)\f$
+  \brief non linear relations: \f$y=h(x,\lambda,z), r=g(\lambda,z)\f$
  */
 
 #ifndef FirstOrderType2R_H
@@ -28,18 +28,18 @@
 typedef void (*Type2PtrH)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
 typedef void (*Type2PtrG)(unsigned int, double*,  unsigned int, double*);
 
-/** FirstOrder Non Linear Relation.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27
- *
- * Derived from FirstOrderR - See this class for more comments.
+/** First order non linear Relation.
  *
  *  Relation for First Order Dynamical Systems, with:
- * \f{eqnarray}
- * y &=& h(x,\lambda,z)\\
- * r &=& g(\lambda,z)
- * \f}
+ *
+ * \rststar
+ *
+ * .. math::
+ *
+ *   y &= h(x,\lambda,z)\\
+ *   r &= g(\lambda,z)
+ *
+ * \endrststar
  *
  * Operators (and their corresponding plug-in):
  * - h: saved in Interaction as y (plug-in: output[0])

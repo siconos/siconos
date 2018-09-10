@@ -104,18 +104,30 @@ void ControlSimulation::addDynamicalSystem(SP::DynamicalSystem ds, const std::st
 
 void ControlSimulation::addSensor(SP::Sensor sensor, const double h)
 {
+  if (h < _h) {
+     RuntimeException::selfThrow("The timestep for a sensor cannot be smaller than the one for the simulation");
+  }
+
   SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
   _CM->addSensorPtr(sensor, td);
 }
 
 void ControlSimulation::addActuator(SP::Actuator actuator, const double h)
 {
+  if (h < _h) {
+     RuntimeException::selfThrow("The timestep for an actuator cannot be smaller than the one for the simulation");
+  }
+
   SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
   _CM->addActuatorPtr(actuator, td);
 }
 
 void ControlSimulation::addObserver(SP::Observer observer, const double h)
 {
+  if (h < _h) {
+     RuntimeException::selfThrow("The timestep for an observer cannot be smaller than the one for the simulation");
+  }
+
   SP::TimeDiscretisation td(new TimeDiscretisation(_t0, h));
   _CM->addObserverPtr(observer, td);
 }
@@ -124,6 +136,7 @@ void ControlSimulation::storeData(unsigned indx)
 {
   unsigned startingColumn = 1;
   startingColumn = storeAllStates(indx, startingColumn, *_DSG0, *_IG0, *_dataM);
+
   if (!_saveOnlyMainSimulation)
   {
     // iter over controller and observer

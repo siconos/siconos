@@ -17,7 +17,7 @@
 */
 
 /*! \file Twisting.hpp
-  \brief twisting algorithm
+  \brief twisting algorithm with a modification
 */
 
 #ifndef Twisting_H
@@ -26,6 +26,10 @@
 #include "CommonSMC.hpp"
 
 
+/** Modified Twisting Controller with an implicit discretization
+ *
+ * This is the twisting controller that gives the best result
+ */
 class Twisting : public CommonSMC
 {
 private:
@@ -69,7 +73,7 @@ public:
   /** set nonsmooth data: NormalConeNSL and AVI osnsp
    * \param hControl sampling period
    */
-  void setNSdata(double hControl);
+  virtual void setNSdata(double hControl);
 
   virtual void initialize(const NonSmoothDynamicalSystem & nsds, const Simulation& s);
 };

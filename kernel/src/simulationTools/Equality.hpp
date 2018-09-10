@@ -26,18 +26,15 @@
 
 /** Formalization and Resolution of a Linear Complementarity Problem (Equality)
  
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) Apr 26, 2004
- 
   \section Equalityintro Aim of the Equality class
  
   This class is devoted to the formalization and the resolution of the
   Linear system (Equality) defined by :
-   \f[
+  \f$
   0 = w =  q + M z
-  \f]
+  \f$
   where
+
      - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
      - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  

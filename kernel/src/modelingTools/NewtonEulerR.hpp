@@ -26,11 +26,6 @@
 
 /** NewtonEuler (Non Linear) Relation (generic interface)
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date Apr 27, 2004
- *
- * \class NewtonEulerR
  * Relations for NewtonEuler Dynamical Systems. This class is only an
  * interface for specific (Linear, Scleronomous ...)  NewtonEuler
  * Relations (see derived classes).

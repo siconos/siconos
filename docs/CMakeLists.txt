@@ -21,6 +21,9 @@ option(USE_DEVEL_DOXYGEN "Build doxygen (html, latex ...) doc, extracting all. D
 set(DOC_ROOT_DIR ${CMAKE_BINARY_DIR}/docs/build CACHE INTERNAL "Root path to generated documentation.")
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/html)
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doctools.py ${CMAKE_BINARY_DIR}/share/doctools.py COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/replace_py_escape.sh ${CMAKE_BINARY_DIR}/share/replace_py_escape.sh COPYONLY)
+
 #  ====== doxygen documentation setup ======
 # This setup is required if one at least of
 # the following is needed:
@@ -82,8 +85,8 @@ if(USE_SPHINX)
   else()
     set(HAS_DOXYREST "False" CACHE INTERNAL "True if doxyrest required and found.")
   endif()
+  find_python_module(breathe REQUIRED)
   if(USE_EXHALE)
-    find_python_module(breathe REQUIRED)
     find_python_module(exhale REQUIRED)
     set(HAS_EXHALE "True" CACHE INTERNAL "True if exhale required and found.")
   else()
@@ -91,7 +94,7 @@ if(USE_SPHINX)
   endif()
   find_python_module(sphinx REQUIRED)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
-  find_python_module(numpydoc REQUIRED)
+  #find_python_module(numpydoc REQUIRED)
   #find_sphinx_module(sphinxcontrib doxylink REQUIRED)
   
   configure_file (
@@ -101,10 +104,6 @@ if(USE_SPHINX)
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/siconos.bib"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/siconos.bib" COPYONLY)
-
-  configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/find_doxygen_diagrams.py"
-    "${CMAKE_CURRENT_BINARY_DIR}/find_doxygen_diagrams.py" @ONLY)
 
   configure_file(${CMAKE_SOURCE_DIR}/externals/swig/parse_doxygen.py ${CMAKE_BINARY_DIR}/share/parse_doxygen.py COPYONLY)
   
@@ -127,7 +126,7 @@ if(USE_SPHINX)
   # --- Build a target for sphinx ---
   # --> use make html or make latex ... to build documentation.
   set(SPHINX_EXECUTABLE sphinx-build)
-
+  set(SPHINX_LOG_FILE ${CMAKE_BINARY_DIR}/docs/sphinx_warnings.log)    
   if(HAS_EXHALE)
     set(SPHINX_PARAMETERS
       -b html # html output
@@ -138,6 +137,7 @@ if(USE_SPHINX)
     
   else()
     set(SPHINX_PARAMETERS
+      -w ${SPHINX_LOG_FILE}
       -b html # html output
       -d build/doctrees # path to doctree files
       ${CMAKE_CURRENT_BINARY_DIR}/sphinx  # path to rst source
@@ -151,12 +151,24 @@ if(USE_SPHINX)
     COMMAND cmake -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/figures ${CMAKE_CURRENT_BINARY_DIR}/sphinx/figures
     )
   
+  add_custom_target(create_rst
+    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+    "import doctools; doctools.build_api_main('${CMAKE_CURRENT_BINARY_DIR}/sphinx')"
+    VERBATIM
+    COMMENT "Create main rst files for C/C++ and python API.")
+  
   # -- To build html doc : make html --
   add_custom_target(html
-    COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS}
-    ${CMAKE_CURRENT_BINARY_DIR}/build/html
-    DEPENDS copy-sphinx-figures
+    COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_PARAMETERS} 2> errors.txt ${CMAKE_CURRENT_BINARY_DIR}/build/html
+    VERBATIM
+    DEPENDS copy-sphinx-figures create_rst
     )
+
+  add_custom_command(TARGET html POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      "import doctools; doctools.filter_sphinx_warnings('${SPHINX_LOG_FILE}')"
+      VERBATIM
+      COMMENT "Filtering sphinx logfile into ${SPHINX_LOG_FILE}.")
 
   add_custom_command(TARGET html POST_BUILD
       COMMENT "Done. Sphinx doc has been generated in ${DOC_ROOT_DIR}/html")
@@ -187,28 +199,31 @@ if(USE_SPHINX)
     COMMAND ${SPHINX_EXECUTABLE} ${SPHINX_LATEX_PARAMETERS}
     ${CMAKE_CURRENT_BINARY_DIR}/build/latex
     )
-  
+
   add_custom_target(doc DEPENDS html)
   
-  # -- Target to build python api documention with apidoc --
-  # make apidoc
-  if(WITH_PYTHON_WRAPPER)
-    set(SPHINX_APIDOC sphinx-apidoc)
-    set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)
-    set(APIDOC_PARAMETERS -e -P -M -o ${GENERATED_DOC})
-    # -e : Put documentation for each module on its own page
-    # -P : Include “_private” modules. (should we??)
-    # -M : Put module documentation before submodule documentation.
-    list(GET COMPONENTS -1 _last_comp)
-    # apidoc must be run AFTER swig process --> depends on components
-    add_custom_target(apidoc
-      COMMAND ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
-      ${CMAKE_BINARY_DIR}/wrap/${SICONOS_PYTHON_PACKAGE}
-      DEPENDS ${_last_comp}
-      )
+  # # -- Target to build python api documention with apidoc --
+  # # make apidoc
+  # if(WITH_PYTHON_WRAPPER)
+  #   set(SPHINX_APIDOC sphinx-apidoc)
+  #   set(GENERATED_DOC ${CMAKE_CURRENT_BINARY_DIR}/sphinx/reference)
+  #   set(APIDOC_PARAMETERS -e -M -o ${GENERATED_DOC})
+  #   # -e : Put documentation for each module on its own page
+  #   # -P : Include “_private” modules. (should we??)
+  #   # -M : Put module documentation before submodule documentation.
+  #   # -a : append documented module path to sys.path
+  #   list(GET COMPONENTS -1 _last_comp)
+  #   # apidoc must be run AFTER swig process --> depends on components
+  #   add_custom_target(apidoc
+  #     COMMAND ${CMAKE_COMMAND} -E env "SPHINX_APIDOC_OPTIONS='members','undoc-members'" ${SPHINX_APIDOC} ${APIDOC_PARAMETERS}
+  #     ${CMAKE_BINARY_DIR}/wrap/${SICONOS_PYTHON_PACKAGE}
+  #     DEPENDS ${_last_comp}
+  #     )
 
-    # Sphinx html gen. depends on apidoc outputs.
-    add_dependencies(html apidoc)
-  endif()
+  #   # Sphinx html gen. depends on apidoc outputs.
+  #   if(WITH_DOXY2SWIG)
+  #     #add_dependencies(html apidoc)
+  #   endif()
+  # endif()
 
 endif()

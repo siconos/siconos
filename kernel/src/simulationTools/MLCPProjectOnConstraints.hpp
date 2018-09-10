@@ -26,10 +26,6 @@
 #include "OSNSMatrixProjectOnConstraints.hpp"
 /** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.3.0.
- *  \date (Creation) 01, 2011
- *
  * This class is devoted to the formalization and the resolution of the
  * Mixed Linear Complementarity Problem (MLCP) for the specific problem
  * of the projection onto the constraints in Mechanics

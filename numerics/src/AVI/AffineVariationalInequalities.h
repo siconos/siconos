@@ -21,7 +21,6 @@
 /*!\file AffineVariationalInequalities.h
  * \brief Definitions for AVI
  *
- * \author Olivier Huber
 */
 
 #include "NumericsFwd.h"
@@ -29,24 +28,31 @@
 
 #include "SiconosSets.h"
 
-/** \struct AffineVariationalInequalities AffineVariationalInequalities.h
- *  \brief Structure that contains and defines an AVI
- *
- *   The problem is the following: given a matrix \f$M\f$ and \f$q\f$, find \f$z\f$ such that:
- *   \f{equation*}{
- *   \langle x - z, q + Mz \rangle \geq 0\quad \text{for all }x\in K.
- *   \f}
+/** Structure that contains and defines an AVI
+
+  The problem is : given a matrix \f$M\f$ and a vector\f$q\f$, find \f$z\f$ such that
+
+ \rst
+ 
+ .. math::
+
+     \langle x - z, q + Mz \rangle \geq 0 \ \text{for all }x\in K
+
+ \endrst
+
+ See \rst :ref:`avi_problem`_ \endrst
+
  */
 struct AffineVariationalInequalities
 {
-  unsigned size;     /**< size of the problem */
+  unsigned int size;     /**< size of the problem */
   NumericsMatrix* M; /**< M matrix of the AVI (see the mathematical description)*/
   double* q;         /**< vector of the AVI (see the mathematical description)*/
   double* d;         /**< Covering vector (optional) */
   polyhedron_set poly;  /**< Polyhedra where the solution has to belong */
   double* lb;        /**< Lower bounds for the variables */
   double* ub;        /**< Upper bounds for the variables */
-  void* cones;       /**< Non-oyhedral Cones where the variable lives (not implemented yet) */
+  void* cones;       /**< Non-polyhedral Cones where the variable lives (not implemented yet) */
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -72,8 +78,7 @@ extern "C"
    */
   int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file);
 
-  /** \fn  int AVI_newFromFilename(AffineVariationalInequalities* avi, FILE* file)
-   *  \brief function to read and create a AffineVariationalInequalities
+  /** function to read and create a AffineVariationalInequalities
    *   from a file
    *  \param avi pointer to a AffineVariationalInequalities to create
    *  \param filename that contains the AVI
@@ -81,8 +86,7 @@ extern "C"
    */
   int AVI_newFromFilename(AffineVariationalInequalities* avi, char* filename);
 
-  /** \fn  void freeAVI(AffineVariationalInequalities* avi)
-   *  \brief function to delete a AffineVariationalInequalities
+  /** function to delete a AffineVariationalInequalities
    *  \param avi  pointer to a AffineVariationalInequalities to delete
    */
   void freeAVI(AffineVariationalInequalities* avi);

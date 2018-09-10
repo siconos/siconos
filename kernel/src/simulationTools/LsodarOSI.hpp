@@ -30,10 +30,6 @@
 
 /** LsodarOSI solver (odepack)
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
- *
  * Many parameters are required as input/output for LSODAR. See the documentation of this function
  * in externals/odepack/opkdmain.f to have a full description of these parameters.  \n
  * Most of them are read-only parameters (ie can not be set by user). \n
@@ -236,9 +232,8 @@ public:
 
   /** compute rhs(t) for all dynamical systems in the set
    * \param t current time of simulation
-   * \param DSG0 the graph of DynamicalSystem
    */
-  void computeRhs(double t, DynamicalSystemsGraph& DSG0);
+  void computeRhs(double t);
 
   /** compute jacobian of the rhs at time t for all dynamical systems in the set
    * \param t current time of simulation

@@ -21,7 +21,6 @@
 
 /*!\file NumericsMatrix.h
   \brief Structure definition and functions related to matrix storage in Numerics
-  \author Franck Perignon
 */
 #include <stdlib.h>
 #include <assert.h>
@@ -39,6 +38,7 @@ typedef struct
 {
   size_t iWorkSize; /**< size of iWork */
   void *iWork; /**< integer workspace */
+  size_t sizeof_elt ; ; /**< sizeof_elt of an element in bytes (result of sizeof for instance)*/
   size_t dWorkSize; /**< size of dWork */
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
@@ -92,7 +92,7 @@ extern "C"
    * \return a pointer to allocated space
    */
   NumericsMatrix* NM_new(void);
-
+  NumericsMatrix* NM_eye(int size);
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
    * \param size0 number of rows
@@ -112,14 +112,7 @@ extern "C"
   NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
   NumericsMatrix* NM_create_from_filename(char *filename);
   NumericsMatrix* NM_create_from_file(FILE *file);
-  
 
- /** Copy a CSparseMatrix inside another CSparseMatrix.
-   *  Reallocations are performed if B cannot hold a copy of A
-   * \param[in] A a CSparseMatrix
-   * \param[in,out] B a CSparseMatrix
-   */
-  void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B);
 
   /** Copy a NumericsMatrix inside another NumericsMatrix (deep).
    *  Reallocations are performed if B cannot hold a copy of A
@@ -193,23 +186,13 @@ extern "C"
    * \return  a pointer to a NumericsMatrix
    */
   NumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1);
-  
+
   /** new NumericsMatrix equal to the transpose of a given matrix
-   * \param[in] A 
+   * \param[in] A
    * \return  a pointer to a NumericsMatrix
    */
   NumericsMatrix* NM_transpose(NumericsMatrix * A);
 
-  
-  /** Allocate the internalData structure (but not its content!)
-   * \param M the matrix to modify
-   */
-  static inline void NM_alloc_internalData(NumericsMatrix* M)
-  {
-    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWorkSize = 0;
-    M->internalData->iWork = NULL;
-  }
  /** set NumericsMatrix fields to NULL
    * \param A a matrix
    */
@@ -281,11 +264,18 @@ extern "C"
    */
   double NM_get_value(NumericsMatrix* M, int i, int j);
 
-  /** compare to NumericsMatrix up to a given tolerance
+  /** compare to NumericsMatrix up to machine accuracy (DBL_EPSILON)
    * \param A the NumericsMatrix
    * \param B the NumericsMatrix
    */
   bool NM_equal(NumericsMatrix* A, NumericsMatrix* B);
+  
+  /** compare to NumericsMatrix up to a given tolerance
+   * \param A the NumericsMatrix
+   * \param B the NumericsMatrix
+   * \param tol the tolerance
+   */
+  bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol);
 
 
 
@@ -323,13 +313,6 @@ extern "C"
    *  A copy is always performed
    */
   void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-  /** return the set of indices corresponding to the diagonal elements of the
-   * matrix
-   * \warning should be better tested
-   * \param M the matrix
-   * \return the list of indices for the diagonal elements
-   */
-  CS_INT* NSM_diag_indices(NumericsMatrix* M);
 
   /**************************************************/
   /** Matrix - vector product           *************/
@@ -402,6 +385,15 @@ extern "C"
   void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
                const double beta, NumericsMatrix *C);
 
+   /** Matrix matrix multiplication : C = A B 
+   * \param[in] A a NumericsMatrix
+   * \param[in] B a NumericsMatrix
+   * \param[in,out] C a NumericsMatrix
+   */
+  NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B);
+
+
+  
   /** Transposed matrix multiplication : y += alpha transpose(A) x + y
    * \param[in] alpha scalar
    * \param[in] A a NumericsMatrix
@@ -518,11 +510,6 @@ extern "C"
   */
   void NM_read_in_file_scilab(NumericsMatrix* const M, FILE *file);
 
-
-
-
-
-
   /** Clear dense storage, if it is existent.
    * \param[in,out] A a Numericsmatrix
    */
@@ -565,15 +552,6 @@ extern "C"
     */
   void NM_clearSparseStorage(NumericsMatrix *A);
 
-  /** Extract a block from a sparse matrix
-   * \param M matrix
-   * \param blockM dense storage for the block
-   * \param pos_row starting row for the block
-   * \param pos_col starting column for the block
-   * \param block_row_size block width
-   * \param block_col_size block height
-   */
-  void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
 
 
   /** Direct computation of the solution of a real system of linear
@@ -617,11 +595,6 @@ extern "C"
     return NM_gesv_expert(A, b, preserve ? NM_PRESERVE : NM_NONE);
   }
 
-  /** Get linear solver parameters with initialization if needed.
-   * \param[in,out] A a NumericsMatrix.
-   * \return a pointer on parameters.
-   */
-  NSM_linear_solver_params* NM_linearSolverParams(NumericsMatrix* A);
 
   /** Set the linear solver
    * \param A the matrix
@@ -634,6 +607,24 @@ extern "C"
    * \return a pointer on internal data.
    */
   NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A);
+
+  /** Allocate the internalData structure (but not its content!)
+   * \param M the matrix to modify
+   */
+  static inline void NM_internalData_new(NumericsMatrix* M)
+  {
+    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
+    M->internalData->iWork = NULL;
+    M->internalData->iWorkSize = 0;
+    M->internalData->dWork = NULL;
+    M->internalData->dWorkSize = 0;
+    M->internalData->isLUfactorized = 0;
+  }
+  /** Copy the internalData structure 
+   * \param M the matrix to modify
+   */
+  void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B );
+
 
   /** Integer work vector initialization, if needed.
    * \param[in,out] A pointer on a NumericsMatrix.
@@ -656,9 +647,15 @@ extern "C"
    * \param alpha the term to add
    */
   void NM_add_to_diag3(NumericsMatrix* M, double alpha);
-
-
-
+  
+  /** Add two matrices with coefficients C = alpha*A + beta*B
+   * \param alpha the first coefficient
+   * \param A the first  matrix
+   * \param beta the second coefficient
+   * \param B the second  matrix
+   * \return C a new NumericsMatrix
+   */
+  NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B);
 
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type
@@ -692,7 +689,7 @@ extern "C"
   int NM_check(const NumericsMatrix* const A);
 
  /** Compute the  1-norm of a sparse matrix = max (sum (abs (A))), largest column sum of a matrix (the sparse format for now)
-   * \param A the matrix 
+   * \param A the matrix
    * \return the norm*/
   double NM_norm_1(NumericsMatrix* const A);
 
@@ -702,7 +699,7 @@ extern "C"
   double NM_norm_inf(NumericsMatrix* const A);
 
   int NM_is_symmetric(NumericsMatrix* A);
-
+  double NM_symmetry_discrepancy(NumericsMatrix* A);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

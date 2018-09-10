@@ -621,12 +621,12 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     {
       case 0:
         {
-          NM_linearSolverParams(AWpB)->solver = NSM_CS_LUSOL;
+          NSM_linearSolverParams(AWpB)->solver = NSM_CS_LUSOL;
           break;
         }
       case 1:
         {
-          NM_linearSolverParams(AWpB)->solver = NSM_MUMPS;
+          NSM_linearSolverParams(AWpB)->solver = NSM_MUMPS;
 
 #ifdef HAVE_MPI
 
@@ -843,7 +843,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
-  freeFrictionContactProblem(localproblem);
+  frictionContactProblem_free(localproblem);
   
   if (!options->dWork)
   {

@@ -28,10 +28,6 @@
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) 05/02/2010
- *
  * This class is used to define an interface for various storage methods used
  * for matrices in OneStepNSProblem. Its aim is to fill the
  * Numerics structure NumericsMatrix, required in many XXX_problem
@@ -62,14 +58,21 @@
  * We denote interactionBlocks[interi][interj] = mij \n Then, a call to
  * fill(indexSet, interactionBlock) results in a matrix which looks like:
  *
- * \f{eqnarray*}
- M=\left\lbrace\begin{array}{cccc}
- m22 & m23 & m28 &  0 \\
- m32 & m33 & 0   &  0 \\
- 0  &  0  & m88 & m812 \\
- 0  &  0  & m128& m1212
- \end{array}\right.
- \f}
+ * 
+ \rst
+
+ .. math::
+   :nowrap:
+   
+     M=\left\lbrace\begin{array}{cccc}
+     m22 & m23 & m28 &  0 \\
+     m32 & m33 & 0   &  0 \\
+     0  &  0  & m88 & m812 \\
+     0  &  0  & m128& m1212
+    \end{array}\right.
+
+ \endrst
+
  *
  *
  * Note: at the time the available storage types are:

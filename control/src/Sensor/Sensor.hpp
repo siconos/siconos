@@ -46,10 +46,6 @@
 
 /** Sensor Base Class
 
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) February 01, 2007
-
    Abstract class, interface to user-defined sensors.
 
    A Sensor is dedicated to data capture. It gives an interface for

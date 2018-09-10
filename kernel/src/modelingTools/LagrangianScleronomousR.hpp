@@ -22,66 +22,79 @@
 #define LagrangianScleronomousR_H
 
 #include "LagrangianR.hpp"
-/** \class LagrangianScleronomousR
- * \brief   Scleronomic Lagrangian (Non Linear) Relations
- *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date Apr 27, 2004
- *
- * Scleronomic Relation (constraint) :
- * \f[
- * y = h(q,z) \\
- * \f]
- *
- * \f[
- * \dot y = \nabla^\top_q h(q,z) \dot q
- * \f]
- * or more generally
- * \f[
- * \dot y = H(q,z) \dot q
- * \f]
- *
- * and by duality
- *
- * \f[
- * p = \nabla_q h(q,z)\lambda
- * \f]
- * or more generally
- * \f[
- * p = H^\top(q,z)\lambda
- * \f]
- *
- * with
- *
- * \f[
- * H^\top(q,z) = \nabla_q h(q,z)
- * \f]
- *
- * is the pure Lagrangian setting.
- *
- *  y (or its discrete approximation) is stored in y[0]
- * \f$ \dot y \f$ (or its discrete approximation) is  stored in y[1]
- *  higher level y[i] can be used for storing higher levels of derivatives.
- *
- * Jacobians and h are connected to plug-in functions.\n
- * The plugin function to compute h(q,z) needs the following parameters:\n
- * --> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction\n
- * --> q : pointer to the first element of q \n
- * --> sizeY : size of vector y (ie of the interaction) \n
- * --> [in,out] y : pointer to the first element of y \n
- * --> sizeZ : size of vector z \n
- * --> [in,out] z: pointer to z vector(s) from DS. \n
- * Its signature must be "void plugin(unsigned int, double*, unsigned int, double*, unsigned int, double*)"\n\n
- * The plugin function to compute G0(q,z), gradient of h according to q, needs the following parameters: \n
- *--> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction  \n
- *--> q : pointer to the first element of q  \n
- *--> sizeY : size of vector y (ie of the intercation) \n
- *--> [in,out] H : pointer to the first element of H (sizeY X sizeDS matrix)\n
- * --> sizeZ : size of vector z \n
- * -->[in,out] z: pointer to z vector(s) from DS.\n
- * Its signature must be "void plugin(unsigned int, double*, unsigned int, double*, unsigned int, double*)"\n
- *
+/** \brief   Scleronomic Lagrangian (Non Linear) Relations
+ 
+  Scleronomic Relation (constraint) :
+
+ \rst 
+  .. math::
+      
+      y = h(q,z) \\
+
+  \endrst
+ 
+ \rst 
+  .. math::
+
+      \\dot y = \nabla^\top_q h(q,z) \\dot q
+  \endrst
+
+  or more generally
+
+ \rst 
+ .. math::
+     \\dot y = H(q,z) \\dot q
+  \endrst
+ 
+  and by duality
+ 
+ \rst 
+ .. math::
+
+     p = \nabla_q h(q,z)\lambda
+ 
+ \endrst
+
+  or more generally
+
+  \rst 
+
+  .. math::
+      p = H^\top(q,z)\lambda
+  \endrst
+ 
+  with
+ 
+  \rst 
+  .. math::
+  
+      H^\top(q,z) = \nabla_q h(q,z)
+  \endrst
+ 
+  is the pure Lagrangian setting.
+ 
+   y (or its discrete approximation) is stored in y[0]
+  \f$ \dot y \f$ (or its discrete approximation) is  stored in y[1]
+   higher level y[i] can be used for storing higher levels of derivatives.
+ 
+  Jacobians and h are connected to plug-in functions.\n
+  The plugin function to compute h(q,z) needs the following parameters:\n
+  --> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction\n
+  --> q : pointer to the first element of q \n
+  --> sizeY : size of vector y (ie of the interaction) \n
+  --> [in,out] y : pointer to the first element of y \n
+  --> sizeZ : size of vector z \n
+  --> [in,out] z: pointer to z vector(s) from DS. \n
+  Its signature must be "void plugin(unsigned int, double*, unsigned int, double*, unsigned int, double*)"\n\n
+  The plugin function to compute G0(q,z), gradient of h according to q, needs the following parameters: \n
+ --> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction  \n
+ --> q : pointer to the first element of q  \n
+ --> sizeY : size of vector y (ie of the intercation) \n
+ --> [in,out] H : pointer to the first element of H (sizeY X sizeDS matrix)\n
+  --> sizeZ : size of vector z \n
+  -->[in,out] z: pointer to z vector(s) from DS.\n
+  Its signature must be "void plugin(unsigned int, double*, unsigned int, double*, unsigned int, double*)"\n
+ 
  */
 class LagrangianScleronomousR : public LagrangianR
 {
@@ -100,7 +113,7 @@ protected:
   * @param[in,out] z: pointer to z vector(s) from DS.
   */
   /** Plugin object for the time--derivative of Jacobian i.e.
-   * \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
+   * \f$\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f$
    * stored in _dotjachq
    */
   SP::PluggedObject _plugindotjacqh;

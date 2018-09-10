@@ -21,7 +21,7 @@ lexicographic Lemke
 
 Direct solver for LCP based on pivoting method principle for degenerated problem.
 
- function: :function:`lcp_lexicolemke()`
+ function: :func:`lcp_lexicolemke()`
  
  parameters:
 
@@ -42,7 +42,7 @@ The QP we solve is
 
   If the symmetry condition is not fulfilled, use the NSQP Solver
 
-function: :function:`lcp_qp()`
+function: :func:`lcp_qp()`
 
 parameters:
 
@@ -54,7 +54,7 @@ NSQP Solver
 non symmetric (and not nonsmooth as one could have thought in a plateform dedicated to nonsmooth problems)
 quadratic programm formulation for solving an LCP with a non symmetric matrix.
 
-function: :function:`lcp_nsqp()`
+function: :func:`lcp_nsqp()`
 
 parameters:
 
@@ -67,7 +67,7 @@ Conjugated Projected Gradient solver for LCP based on quadratic minimization.
 Reference: "Conjugate gradient type algorithms for frictional multi-contact problems: applications to granular materials",
 M. Renouf, P. Alart. doi:10.1016/j.cma.2004.07.009
 
-function: :function:`lcp_cpg()`
+function: :func:`lcp_cpg()`
 
 parameters:
 
@@ -81,7 +81,7 @@ PGS Solver
 
 Projected Gauss-Seidel solver
 
-function: :function:`lcp_pgs()`
+function: :func:`lcp_pgs()`
 
 parameters:
 
@@ -95,7 +95,7 @@ RPGS Solver
 
 Regularized Projected Gauss-Seidel, solver for LCP, able to handle with matrices with null diagonal terms
 
-function: :function:`lcp_rpgs()`
+function: :func:`lcp_rpgs()`
 
 parameters:
 
@@ -110,7 +110,7 @@ PSOR Solver
 
 Projected Succesive over relaxation solver for LCP. See Cottle, Pang and Stone (2009), Chap 5 
 
-function: :function:`lcp_psor()`
+function: :func:`lcp_psor()`
 
 parameters:
 
@@ -125,7 +125,7 @@ NewtonMin Solver
 
 a nonsmooth Newton method based on the min formulation of the LCP
 
-function: :function:`lcp_newton_min()`
+function: :func:`lcp_newton_min()`
 
 parameters:
 
@@ -143,7 +143,7 @@ NewtonFB Solver
 a nonsmooth Newton method based based on the Fischer-Burmeister NCP function.
 It uses a variant of line search algorithm (VFBLSA in Facchinei-Pang 2003).
 
-function: :function:`lcp_newton_FB()`
+function: :func:`lcp_newton_FB()`
 
 parameters:
 
@@ -161,7 +161,7 @@ Newton min + FB Solver
 a nonsmooth Newton method based based on the minFBLSA algorithm : the descent direction is given
 by a min reformulation but the linesearch is done with Fischer-Burmeister (and if needed the gradient direction).
 
-function: :function:`lcp_newton_minFB()`
+function: :func:`lcp_newton_minFB()`
 
 parameters:
 
@@ -178,7 +178,7 @@ Path (Ferris) Solver
 
 This solver uses the external PATH solver
 
-function: :function:`lcp_path()`
+function: :func:`lcp_path()`
 
 parameters:
 
@@ -189,7 +189,7 @@ Enumerative Solver
 
 A brute-force method to find the solution of the LCP
 
-function: :function:`lcp_enum()`
+function: :func:`lcp_enum()`
 
 parameters:
 
@@ -205,7 +205,7 @@ Latin Solver
 
 LArge Time INcrements solver
 
-function: :function:`lcp_latin()`
+function: :func:`lcp_latin()`
 
 parameters:
 
@@ -220,7 +220,7 @@ Latin_w Solver
 
 LArge Time INcrements solver with relaxation
 
-function: :function:`lcp_latin_w()`
+function: :func:`lcp_latin_w()`
 
 parameters:
 
@@ -238,7 +238,7 @@ Gauss-Seidel for Sparse-Block matrices. \n
 Matrix M of the LCP must be a SparseBlockStructuredMatrix. \n
 This solver first build a local problem for each row of blocks and then call any of the other solvers through lcp_driver()`.
 
-function: :function:`lcp_nsgs_SBM()`
+function: :func:`lcp_nsgs_SBM()`
 
 parameters:
 

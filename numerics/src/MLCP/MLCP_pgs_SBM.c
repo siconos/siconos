@@ -36,15 +36,13 @@
 #include <assert.h>
 #include "numerics_verbose.h"
 
-static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z);
-
-void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
+static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
 
   assert(blmat->blocksize0[rowNumber] > 0);
 
   /* Position in vector blmat->block of the required diagonal block */
-  int diagPos = SBM_get_position_diagonal_block(blmat, rowNumber);
+  int diagPos = SBM_diagonal_block_index(blmat, rowNumber);
   /* Gets diagonal block = MLocal  */
   local_problem->M->matrix0 = blmat->block[diagPos];
   local_problem->size = blmat->blocksize0[rowNumber];

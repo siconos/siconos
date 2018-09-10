@@ -369,21 +369,6 @@ void TimeStepping::computeOneStep()
 }
 
 
-void TimeStepping::updateContactsFromChangeLog()
-{
-  // NonSmoothDynamicalSystem::ChangeLogIter p = _nsds->changeLogPosition();
-  // // If graph changed, need to initialize the new interactions
-  // if (p.it != _nsds->changeLogPosition().it)
-  // {
-  if (initializeNSDSChangelog())
-  {
-    initOSNS();
-    _nsds->topology()->setHasChanged(true);
-  }
-  // }
-}
-
-
 void TimeStepping::initializeNewtonLoop()
 {
   DEBUG_BEGIN("TimeStepping::initializeNewtonLoop()\n");
@@ -403,6 +388,7 @@ void TimeStepping::initializeNewtonLoop()
   //   updateInteractions();
   //   updateContactsFromChangeLog();
   // }
+
 
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   if (indexSet0->size()>0)

@@ -29,11 +29,11 @@ int genericMechanical_test_function(FILE * f, SolverOptions * options)
   GenericMechanicalProblem* problem = genericMechanical_newFromFile(f);
   double *reaction = (double*)calloc(problem->size, sizeof(double));
   double *velocity = (double*)calloc(problem->size, sizeof(double));
-  info = genericMechanical_driver(problem,
+  info = gmp_driver(problem,
                                   reaction , velocity,
                                   options);
   double err = 0;
-  GenericMechanical_compute_error(problem, reaction , velocity, options->dparam[0], options, &err);
+  gmp_compute_error(problem, reaction , velocity, options->dparam[0], options, &err);
   printf("\n");
   for (k = 0 ; k < problem->size; k++)
   {
@@ -61,7 +61,7 @@ int genericMechanical_test_function(FILE * f, SolverOptions * options)
   free(reaction);
   free(velocity);
 
-  freeGenericMechanicalProblem(problem, NUMERICS_GMP_FREE_MATRIX | NUMERICS_GMP_FREE_GMP);
+  genericMechanicalProblem_free(problem, NUMERICS_GMP_FREE_MATRIX | NUMERICS_GMP_FREE_GMP);
 
   return info;
 

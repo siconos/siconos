@@ -6,10 +6,10 @@ Users guide
 
 .. toctree::
    :maxdepth: 3
-	      
+
+   siconos_algebra
    modeling
    simulation
-   numerics_vectors_and_matrices
    problems_and_solvers/index
    control
    simulation_strategies

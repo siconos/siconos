@@ -20,7 +20,6 @@
 
 /*!\file fc3d_Path.h
   \brief Typedef and functions declarations related to NCP-Path solver for 3 dimension frictional contact problems.
-  \author Franck Perignon
 
   Each solver must have 4 functions in its interface:
   - initialize: link local static variables to the global ones (M,q,...)

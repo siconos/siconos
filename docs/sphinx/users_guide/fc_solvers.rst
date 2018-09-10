@@ -18,7 +18,7 @@ For each solver, the input argument are:
 CPG
 ^^^
 
-function: :function:`pfc_2D_cpg()`
+function: :func:`pfc_2D_cpg()`
 
 parameters:
 
@@ -33,7 +33,7 @@ parameters:
 Non-Smooth Gauss Seidel
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-function: :function:`fc3d_nsgs()`
+function: :func:`fc3d_nsgs()`
 
 parameters:
 

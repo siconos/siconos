@@ -28,23 +28,23 @@
 #define MLCP_NB_BLOCKS 200
 /** Formalization and Resolution of a Mixed Linear Complementarity Problem (MLCP)
  
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) Apr 26, 2004
- 
   \section MLCPintro Aim of the MLCP class
  
   This class is devoted to the formalization and the resolution of the
   Mixed Linear Complementarity Problem (MLCP) defined by :
-    \f[
-  0 =  Au + Cv + a
-  \f]
-  \f[
-  z =  Du + Bv + b
-  \f]
-  \f[
-  v \geq 0, z \geq 0,  z^{T} v =0
-  \f]
+
+  \rst
+
+  .. math::
+
+     0 =  Au + Cv + a \\
+     \\
+     z =  Du + Bv + b \\
+     \\
+     v \geq 0, z \geq 0,  z^{T} v =0
+
+  \endrst
+
   where
      - \f$ u \in R^{n} \f$ \f$ v \in R^{m} \f$  and \f$z \in R^{m} \f$ are the unknowns,
      - \f$ a \in R^{n} \f$ and \f$ b \in R^{m} \f$

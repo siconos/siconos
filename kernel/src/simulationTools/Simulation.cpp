@@ -241,9 +241,9 @@ void Simulation::initializeOSIAssociations()
   }
 }
 
-bool Simulation::initializeNSDSChangelog()
+void Simulation::initializeNSDSChangelog()
 {
-  // 3- we initialize new  ds and interaction
+  // 4- we initialize new  ds and interaction
   /* Changes to the NSDS are tracked by a changelog, making it fast
    * for the Simulation to scan any changes it has not yet seen and
    * initialize the associated ata structures.  It is just an
@@ -298,12 +298,25 @@ bool Simulation::initializeNSDSChangelog()
   }
   _nsdsChangeLogPosition = _nsds->changeLogPosition();
 
-  return interactionInitialized;
+  // (re)initialize OneStepNSProblem(s) if necessary
+  if (interactionInitialized || !_isInitialized)
+  {
+    DEBUG_PRINT( "(re)Initialize OneStepNSProblem(s)\n");
+    // Initialize OneStepNSProblem(s). Depends on the type of simulation.
+    // Warning FP : must be done in any case, even if the interactions set
+    // is empty.
+    initOSNS();
+
+    // Since initOSNS calls updateIndexSets() which resets the
+    // topology->hasChanged() flag, it must be specified explicitly.
+    // Otherwise OneStepNSProblem may fail to update its matrices.
+    _nsds->topology()->setHasChanged(true);
+  }
 }
 
 void Simulation::initializeIndexSets()
 {
-  // 4 - we finalize the initialization of osi
+  // 3 - we finalize the initialization of osi
 
   // symmetry in indexSets Do we need it ?
   _nsds->topology()->setProperties();
@@ -342,34 +355,17 @@ void Simulation::initialize()
   // 1 - Process any pending OSI->DS associations
   initializeOSIAssociations();
 
-  // 2 - allow the InteractionManager to add/remove any interactions it wants
+  // 2 - Initialize index sets for OSIs
+  initializeIndexSets();
+
+  // 3 - allow the InteractionManager to add/remove any interactions it wants
   updateWorldFromDS();
   updateInteractions();
 
-  // 3 - initialize new ds and interactions
-  bool interactionInitialized =
-    initializeNSDSChangelog();
+  // 4 - initialize new ds and interactions
+  initializeNSDSChangelog();
 
-  // 4 - Initialize index sets for OSIs
-  initializeIndexSets();
-
-  // 5 - Initialize OneStepNSProblem(s)
-  if (interactionInitialized || !_isInitialized)
-  {
-    DEBUG_PRINT( "- 5 -Initialize OneStepNSProblem(s)\n");
-    // Initialize OneStepNSProblem(s). Depends on the type of simulation.
-    // Warning FP : must be done in any case, even if the interactions set
-    // is empty.
-    initOSNS();
-
-    // Since initOSNS calls updateIndexSets() which resets the
-    // topology->hasChanged() flag, it must be specified explicitly.
-    // Otherwise OneStepNSProblem may fail to update its matrices.
-    _nsds->topology()->setHasChanged(true);
-  }
-
-
-  // 6 - First initialization of the simulation
+  // 5 - First initialization of the simulation
   if(!_isInitialized)
   {
     DEBUG_PRINT(" - 6 - First initialization of the simulation\n");

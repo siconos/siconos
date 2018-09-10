@@ -28,12 +28,14 @@ of the variables that can be plugged is given in :ref:`ds_plugins` and :ref:`rel
        (*fext)(i) = cos(time);
     }
 
-* connect your function to the variable. For each 'plugable' variable, a setComputeVARNAMEFunction exists ::
+* connect your function to the variable. For each 'plugable' variable, a setComputeVARNAMEFunction exists
 
-    ds->setComputeFExtFunction('myPlugin', 'external_forces');
-    // ...
-    ds->computeFExt(2.)
-    // --> call external_forces with time == 2.
+.. code-block:: c++
+
+   ds->setComputeFExtFunction('myPlugin', 'external_forces');
+   // ...
+   ds->computeFExt(2.)
+   // --> call external_forces with time == 2.
     
 
 Plugins overview

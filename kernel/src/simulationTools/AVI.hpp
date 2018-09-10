@@ -29,19 +29,18 @@
 TYPEDEF_SPTR(AffineVariationalInequalities)
 
 /** Formalization and Resolution of an Affine Variational Inequality (AVI)
- 
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) Apr 26, 2004
- 
-  \section AVIintro Aim of the AVI class
- 
-  This class is devoted to the formalization and the resolution of
-  Affine variational Inequalities (AVI): given a polytopic set \f$P\f$, \f$M\in R^{p\times p}\f$ and \f$q\in R^p\f$,
-  \f[
-  \text{find z}\in P\text{such that for all x}\in P\quad \langle x-z, Mz+q\rangle \geq 0.
-  \f]
-  \todo : add "recover" function to start from old values of z and w.
+    
+ This class is devoted to the formalization and the resolution of
+ Affine variational Inequalities (AVI): given a polytopic set \f$P\f$, \f$M\in R^{p\times p}\f$ and \f$q\in R^p\f$,
+  
+ \rst
+
+ .. math::
+
+   \text{find z}\in P\text{such that for all x}\in P\quad \langle x-z, Mz+q\rangle \geq 0.
+
+ \endrst
+ \todo : add "recover" function to start from old values of z and w.
 */
 class AVI : public LinearOSNS
 {

@@ -44,14 +44,25 @@ void* open_library(const char* lib_name, const int flags)
   if (!HandleRes)
   {
     int err = (int)GetLastError();
-    printf("dlopen error number %d while trying to open %s\n", err, lib_name);
+    printf("LoadLibrary error number %d while trying to open %s\n", err, lib_name);
     exit(err);
   }
 #else
+  /* -------------------------------------------------------------------------------------- *
+   * For RTLD_DEEPBIND, see                                                                 *
+   * https://stackoverflow.com/questions/34073051/when-we-are-supposed-to-use-rtld-deepbind *
+   * We may want to change this behaviour                                                   *
+   * -------------------------------------------------------------------------------------- */
+
+#ifdef __APPLE__
   HandleRes = dlopen(lib_name, RTLD_LAZY | flags);
+#else
+  HandleRes = dlopen(lib_name, RTLD_LAZY | RTLD_DEEPBIND | flags);
+#endif
+
   if (!HandleRes)
   {
-    printf("dlopen error %s while trying to open %s\n", dlerror(), lib_name);
+    printf("dlopen error ``%s'' while trying to open library ``%s''\n", dlerror(), lib_name);
   }
 #endif
   return HandleRes;
@@ -63,7 +74,7 @@ void* get_function_address(void* plugin, const char* func)
 #ifdef _WIN32
   HMODULE pluginW = (HMODULE) plugin;
   ptr = (void*) GetProcAddress(pluginW, func);
-  if (NULL == ptr)
+  if (!ptr)
   {
     DWORD err = GetLastError();
     printf("Error %d while trying to find procedure %s\n", func);
@@ -71,9 +82,9 @@ void* get_function_address(void* plugin, const char* func)
   }
 #else
   ptr = dlsym(plugin, func);
-  if (ptr == NULL)
+  if (!ptr)
   {
-    printf("Error %s while trying to find procedure %s\n", dlerror(), func);
+    printf("Error ``%s'' while trying to find procedure %s\n", dlerror(), func);
     exit(EXIT_FAILURE);
   }
 #endif

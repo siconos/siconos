@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include "numerics_verbose.h"
 #include "SparseBlockMatrix.h"
-
+#include <math.h>
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
@@ -154,7 +154,7 @@ int frictionContact_newFromFilename(FrictionContactProblem* problem, char* filen
   return info;
 }
 
-void freeFrictionContactProblem(FrictionContactProblem* problem)
+void frictionContactProblem_free(FrictionContactProblem* problem)
 {
   assert(problem);
   if (problem->M)
@@ -180,7 +180,7 @@ void freeFrictionContactProblem(FrictionContactProblem* problem)
 
 }
 
-FrictionContactProblem* newFCP(void)
+FrictionContactProblem* frictionContactProblem_new(void)
 {
   FrictionContactProblem* fcp = (FrictionContactProblem*) malloc(sizeof(FrictionContactProblem));
   fcp->dimension = 0;
@@ -192,7 +192,7 @@ FrictionContactProblem* newFCP(void)
   return fcp;
 }
 
-FrictionContactProblem* frictionContactProblem_new(int dim, int nc, NumericsMatrix* M, double* q, double* mu)
+FrictionContactProblem* frictionContactProblem_new_with_data(int dim, int nc, NumericsMatrix* M, double* q, double* mu)
 {
   FrictionContactProblem* fcp = (FrictionContactProblem*) malloc(sizeof(FrictionContactProblem));
 
@@ -291,13 +291,70 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  Spli
     SBM_to_dense(M_tt->matrix1, M_tt->matrix0);
     M_tt->storageType=NM_DENSE;
 #endif
-    
+
     break;
   }
   default:
-    numerics_error("fc3d_Panagiotopoulos_FixedPoint_split_normal_tangent_problem", "storageType value %d not implemented yet !", storageType);
+    numerics_error("createSplittedFrictionContactProblem", "storageType value %d not implemented yet !", storageType);
   }
 
 
+
+}
+void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
+                                               double * reaction,
+                                               double * velocity,
+
+                                               double tol,
+                                               int do_print)
+{
+  /* NumericsMatrix* M = problem->M; */
+  /* double* q = problem->q; */
+  double* mu = problem->mu;
+
+  /* Number of contacts */
+  int nc = problem->numberOfContacts;
+  /* int n = problem->M->size0; */
+  /* int m = 3 * nc; */
+
+
+  int contact =0, pos =0;
+
+  int take_off_count=0;
+  int closed_count=0;
+
+  int sticking_count=0;
+  int sliding_count=0;
+  int ambiguous_take_off_count=0;
+  int ambiguous_closed_count=0;
+
+  for (contact =0; contact < nc; contact ++)
+  {
+    pos=contact*3;
+    if (velocity[pos] > tol)
+    {
+      take_off_count++;
+      if (fabs(reaction[pos]) > tol)
+        ambiguous_take_off_count++;
+    }
+    else if (reaction[pos] > tol)
+    {
+      closed_count++;
+      if (fabs(velocity[pos]) > tol)
+        ambiguous_closed_count++;
+
+      double criteria = reaction[pos+1]*reaction[pos+1] + reaction[pos+2]*reaction[pos+2] - mu[contact]*mu[contact]*reaction[pos]*reaction[pos];
+      if (criteria < 0 )
+      {
+        sticking_count++;
+      }
+      else
+      {
+        sliding_count++;
+      }
+    }
+  }
+
+  numerics_printf_verbose(do_print, "---- FC3D - STAT  - Number of contact = %i\t,  take off = %i\t, closed = %i\t, sliding = %i\t,sticking = %i\t, ambiguous take off = %i\t, ambiguous closed = %i",nc ,take_off_count,closed_count,sliding_count,sticking_count, ambiguous_take_off_count,ambiguous_closed_count);
 
 }

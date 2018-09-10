@@ -19,7 +19,6 @@
 /*!\file lcp_avi_caoferris.c
  \brief Solve an LCP by reformulating it as an AVI and the solver by Cao and
 Ferris solves the subsequent AVI.
- \author Olivier Huber
 */
 
 #include "AVI_Solvers.h"

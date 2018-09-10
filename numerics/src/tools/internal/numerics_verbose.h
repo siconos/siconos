@@ -119,32 +119,35 @@ extern "C"
 #endif
 
 
-  /* msg output and exit with error
-     \param fn_name name of the function where error occurs
-     \param msg formatted output msg
-  */
+  /** msg output and exit with error
+   * \param fn_name name of the function where error occurs
+   * \param msg formatted output msg
+   */
   void numerics_error(const char* fn_name, const char* msg, ...) NO_RETURN;
 
-  /* log error message without exit
-     \param fn_name name of the function where the error occurs
-     \param msg formatted output message
-  */
+  /** log error message without exit
+   *
+   * \param fn_name name of the function where the error occurs
+   * \param msg formatted output message
+   */
   void numerics_error_nonfatal(const char* fn_name, const char* msg, ...);
 
-  /* log warning
-     \param fn_name name of the function where warning occurs
-     \param msg formatted output message
-  */
+  /** log warning
+   *
+   * \param fn_name name of the function where warning occurs
+   * \param msg formatted output message
+   */
   void numerics_warning(const char * fn_name, char* msg, ...);
 
-  /* log message (if verbosity is on)
-     \param fmt formatted output message
+  /** log message (if verbosity is on)
+   *
+   * \param fmt formatted output message
   */
   void numerics_printf(const char * fmt, ...);
 
-  /* log message if verbose is non null
+  /** log message if verbose is non null
    * \param verbose log message is non null
-     \param fmt formatted output message
+   * \param fmt formatted output message
   */
   void numerics_printf_verbose(int verbose, const char * fmt, ...);
 

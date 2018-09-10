@@ -109,3 +109,4 @@ print("%e" % norm(dataPlot - ref))
 if (norm(dataPlot - ref) > 1e-12):
     print(dataPlot - ref)
     print("Warning. The result is rather different from the reference file.")
+    return 1

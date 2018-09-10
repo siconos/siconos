@@ -37,12 +37,7 @@
  *   2013, 256, pp. 224-250
  *
  * 
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Aug 2010
- *  
- 
+ * 
  */
 class TimeSteppingDirectProjection : public TimeStepping
 {

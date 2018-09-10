@@ -27,7 +27,7 @@
 
 NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 {
-  NSM_linear_solver_params* params = NM_linearSolverParams(A);
+  NSM_linear_solver_params* params = NSM_linearSolverParams(A);
 
   if (params->solver_data)
   {

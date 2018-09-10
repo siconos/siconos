@@ -46,8 +46,6 @@
 
   The notations below are more or less those of this paper.
 
-  \author Houari Khenous, Franck Pérignon last modification (17/07/2012)
-
 */
 
 #include "SiconosConfig.h"

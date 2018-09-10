@@ -31,8 +31,6 @@
 
   Two different storages are available for M: dense and sparse block.
 
-  \author INRIA Siconos Team
-
 */
 #include "NumericsMatrix.h"
 #include "SolverOptions.h"

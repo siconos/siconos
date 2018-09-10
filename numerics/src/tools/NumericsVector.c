@@ -63,3 +63,16 @@ void NV_write_in_file_python(double * m,  int nRow, FILE* file)
   }
   fprintf(file, "]");
 }
+
+bool NV_equal(double * x, double * y, int n, double tol)
+{
+  for (int i =0; i< n ; i++)
+  {
+    if (fabs(x[i] - y[i]) >= tol)
+    {
+      DEBUG_PRINTF("error %i = %e\n",i, fabs(x[i]) - y[i]);
+      return false;
+    } 
+  }
+  return true;
+}

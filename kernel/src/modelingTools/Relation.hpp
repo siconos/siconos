@@ -28,9 +28,6 @@
 #include "SiconosAlgebraTypeDef.hpp"
 
 /** General Non Linear Relation (Virtual Base class for Relations).
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27, 2004
  *
  *  A relation is a link between global variables of the Dynamical
  * Systems and some local ones, named y and lambda; belonging to one

@@ -26,10 +26,6 @@
 
 /** A visitor pattern.
 
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) June 14, 2009
-
    User has to instantiate a derivation of SiconosVisitor class :
 
    struct myvisitor : public SiconosVisitor

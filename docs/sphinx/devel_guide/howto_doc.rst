@@ -4,35 +4,57 @@
 Test doxygen/sphinx links
 -------------------------
 
+Below some examples on how to write internal links to siconos objects in sphinx documents (rst).
 
+* Link to a siconos class or a struct:
 
-To link to a siconos class:
+  .. code-block:: rst
+		  
+     Try to link to :class:`DynamicalSystem`
 
-.. code::
-
-   Try to link to :class:`DynamicalSystem`
-   
-Result : 
+  **Result** : 
       
-Try link to :class:`DynamicalSystem`
+  Try link to :class:`DynamicalSystem`
 
 
-To a file : 
+* Link to a file (programs listing): 
 
-.. code::
+  .. code-block:: rst
 
-   Try to link to :ref:`kernel_src_modelingTools_DynamicalSystem.hpp`
+     Try to link to :ref:`pgm_kernel_src_modelingTools_DynamicalSystem.hpp`
       
-Result : 
+  **Result** : 
 
-Try to link to :ref:`kernel_src_modelingTools_DynamicalSystem.hpp`
+  Try to link to :ref:`pgm_kernel_src_modelingTools_DynamicalSystem.hpp`
 
-To link to a method : 
+* Link to a file (documentation): 
 
-.. code::
+  .. code-block:: rst
 
-   Try to link to :function:`Simulation::nextStep`
+     Try to link to :ref:`file_kernel_src_modelingTools_DynamicalSystem.hpp`
+      
+  **Result** : 
 
-Result :
+  Try to link to :ref:`file_kernel_src_modelingTools_DynamicalSystem.hpp`
 
-Try to link to :function:`Simulation::nextStep`
+
+* Link to a class method : 
+
+  .. code-block:: rst
+
+     Try to link to :func:`Simulation::nextStep`
+
+  **Result** :
+
+  Try to link to :func:`Simulation::nextStep`
+
+
+* Link to a function : 
+
+  .. code-block:: rst
+
+     Try to link to :func:`cs_dl_norm`
+
+  **Result** :
+
+  Try to link to :func:`cs_dl_norm`

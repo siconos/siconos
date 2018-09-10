@@ -358,6 +358,16 @@ macro(NEW_FC_3D_TEST)
   unset(TEST_NAME_PREFIX)
 endmacro()
 
+macro(NEW_FC_3D_TEST_HDF5)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME fc_test_hdf5.c.in )
+  set(TEST_NAME_PREFIX fc3d)
+  NEW_FC_TEST(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
+
 macro(NEW_FC_2D_TEST)
   # Set name of the file used to generate tests (c)source files.
   set(SOURCE_FILE_NAME fc_test.c.in )

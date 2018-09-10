@@ -49,10 +49,6 @@ typedef Observers::iterator ObserversIterator;
 
 /** ControlManager Class: tools to provide control in a Simulation (Sensors, Actuators, Observers)
 
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.0.0.
-    \date (Creation) February 08, 2007
-
     This class is used to handle all the sensors and actuators declared by the user and to
     schedule them into the simulation.
 
