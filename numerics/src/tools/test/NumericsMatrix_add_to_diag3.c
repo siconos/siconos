@@ -87,7 +87,6 @@ int main(void)
 {
 
   printf("========= Starts Numerics tests for NM_add_to_diag3 ========= \n");
-  int info =-1;
 
   SparseBlockStructuredMatrix * SBM = SBM_new();
   FILE *file = fopen("data/SBM1.dat", "r");
@@ -98,7 +97,7 @@ int main(void)
   M->matrix1=SBM;
 
   
-  info = NM_add_to_diag3_test(M,1.0);
+  int info = NM_add_to_diag3_test(M,1.0);
   if (info != 0)
   {
     printf("End of  : Numerics tests for NM_add_to_diag3unsucessfull\n");
