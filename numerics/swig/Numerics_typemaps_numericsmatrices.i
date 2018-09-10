@@ -243,13 +243,8 @@
 
 %typemap(in, numinputs=0) (SparseBlockStructuredMatrix* outSBM) 
 {
-  $1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
+  $1 = SBM_new();
   if(!$1) SWIG_fail;
-
-  $1->block = NULL;
-  $1->index1_data = NULL;
-  $1->index2_data = NULL;
-
 }
 
 %typemap(argout) (SparseBlockStructuredMatrix* outSBM)
