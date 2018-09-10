@@ -2877,6 +2877,9 @@ int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat, Sparse
   A->blocknumber0 = (int) bnrow;
   A->blocknumber1 = (int) bncol;
 
+  
+  A->diagonal_blocks=NULL;
+  
   //  assert(A->blocksize0 == NULL);
   A->blocksize0 = (unsigned int*) malloc(A->blocknumber0 * sizeof(unsigned int));
 
