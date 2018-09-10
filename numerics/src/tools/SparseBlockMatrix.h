@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@
   \brief Structure definition and functions related to
   SparseBlockStructuredMatrix
 
-  \author Pascal Denoyelle and Franck Perignon and Co
 */
 
 /** Structure to store sparse block matrices with square diagonal
@@ -53,9 +52,9 @@
     (number of block columns)
     \param *blocksize0 the list of sums of the number of rows of the
     first column of blocks of M: blocksize0[i] = blocksize0[i-1] +
-    ni,\n ni being the number of rows of the block at row i
+    ni, ni being the number of rows of the block at row i
     *blocksize1 the list of sums of the number of columns of the
-    first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,\n
+    first row of blocks of M: blocksize1[i] = blocksize1[i-1] + ni,
     ni being the number of columns of the block at column i
     \param filled1 index of the last non empty line + 1
     \param filled2 number of non null blocks
@@ -69,7 +68,7 @@
 
 
     Related functions: SBM_gemv(), SBM_row_prod(), SBM_free(),
-    SBM_print, SBM_get_position_diagonal_block()
+    SBM_print, SBM_diagonal_block_index()
  * If we consider the matrix M and the right-hand-side q defined as
  *
  * \f$
@@ -98,10 +97,10 @@
  * - the vector index1_data is equal to {0,2,4,6}
  * - the vector index2_data is equal to {0,1,1,2,0,2}
  * - the block contains all non null block matrices stored in Fortran
-     order (column by column) as\n
- *   block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}\n
- *   block[1] = {3,4,0,0,-1,1,0,6}\n
- *   ...\n
+     order (column by column) as
+ *   block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}
+ *   block[1] = {3,4,0,0,-1,1,0,6}
+ *   ...
  *   block[5] = {2,-1,2,2}
 */
 
@@ -119,16 +118,20 @@ struct SparseBlockStructuredMatrix
   unsigned int *blocksize0;
   /* the vector of cumulated column sizes of blocks */
   unsigned int *blocksize1;
+
   /* the index of the last non empty line + 1 */
   size_t filled1;
   /* the size of index2_data that corresponds of the number of non null blocks*/
   size_t filled2;
-  
+
   size_t *index1_data;
   size_t *index2_data;
 
+  /* the indices of the diagonal blocks */
+  unsigned int * diagonal_blocks;
+
 };
- 
+
 struct SparseBlockCoordinateMatrix
 {
   /** number of blocks */
@@ -173,6 +176,20 @@ struct SparseBlockStructuredMatrixPred
   double **workspace;
 };
 
+struct SBM_index_by_column
+{
+  /* the index of the last non empty line + 1 */
+  size_t filled3;
+  /* the size of index2_data that corresponds of the number of non null blocks*/
+  size_t filled4;
+
+  size_t * index3_data;
+  size_t * index4_data;
+  size_t * blockMap;
+};
+
+
+
 #define NUMERICS_SBM_FREE_BLOCK 4
 #define NUMERICS_SBM_FREE_SBM 8
 
@@ -186,7 +203,11 @@ extern "C"
    */
   SparseBlockStructuredMatrix* SBM_new(void);
 
-  
+  /** set Sparse Block Matrix. fields to NULL
+   * \param sbm a matrix
+   */
+  void SBM_null(SparseBlockStructuredMatrix* sbm);
+
   /** SparseMatrix - vector product y = alpha*A*x + beta*y
       \param[in] sizeX dim of the vectors x
       \param[in] sizeY dim of the vectors y
@@ -211,23 +232,59 @@ extern "C"
                   const SparseBlockStructuredMatrix* const A,
                   double* const x, double* y);
 
-  /** SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
+  /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix product C = alpha*A*B + beta*C
+   *  The routine has to be used with precaution. The allocation of C is not done
+   *  since we want to add beta*C. We assume that the structure and the allocation
+   *  of the matrix C are right. Especially:
+   *    - the blocks C(i,j) must exists
+   *    - the sizes of blocks must be consistent
+   *    - no extra block must be present in C
+   *   \param[in] alpha coefficient
+   *   \param[in] A the matrix to be multiplied
+   *   \param[in] B the matrix to be multiplied
+   *   \param[in] beta coefficient
+   *   \param[in,out] C the resulting matrix
+   */
+  void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix* const A,
+                                  const SparseBlockStructuredMatrix* const B,
+                                  double beta, SparseBlockStructuredMatrix*  C);
+  
+  /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix multiplication C = A *B
+      Correct allocation is performed
+      \param[in] A the matrix to be multiplied
+      \param[in] B the matrix to be multiplied
+      \return C the resulting matrix
+  */
+  SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B);
 
+  /** Perform the allocation of a zero matrix that is compatible qith multiplication
+   */
+  SparseBlockStructuredMatrix*  SBM_zero_matrix_for_multiply(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B);
+
+  /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix addition C = alpha*A + beta*B
+     \param[in] A the matrix to be added
+     \param[in] B the matrix to be added
      \param[in] alpha coefficient
-     \param[in] A the matrix to be multiplied
-     \param[in] B the matrix to be multiplied
-    \param[in] beta coefficient
-     \param[in,out] C the resulting matrix
+     \param[in] beta coefficient
+     \return C the resulting matrix
   */
-  void SBM_gemm(double alpha, const SparseBlockStructuredMatrix* const A,
-                  const SparseBlockStructuredMatrix* const B,  double beta, SparseBlockStructuredMatrix*  C);
+  SparseBlockStructuredMatrix * SBM_add(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B, double alpha, double beta);
 
-  /** Allocating Memory and initialization for  SparseMatrix - SparseMatrix product C = alpha*A*B + beta*C
-    \param[in] A the matrix to be multiplied
-    \param[in] B the matrix to be multiplied
-    \param[in,out] C the resulting matrix
+  /** SparseBlockStructuredMatrix - SparseBlockStructuredMatrix addition C = alpha*A + beta*B + gamma*C without allocation
+      We assume that C has the correct structure
+     \param[in] A the matrix to be added
+     \param[in] B the matrix to be added
+     \param[in] alpha coefficient
+     \param[in] beta coefficient
+     \param[in] gamma coefficient
+      \param[in,out] C the resulting matrix
   */
-  void SBM_alloc_for_gemm(const SparseBlockStructuredMatrix* const A, const SparseBlockStructuredMatrix* const B, SparseBlockStructuredMatrix*  C);
+
+  void SBM_add_without_allocation(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B,
+                                  double alpha, double beta,
+                                  SparseBlockStructuredMatrix * C,
+                                  double gamma);
+
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
       \param[in] sizeX dim of the vector x
@@ -261,13 +318,13 @@ extern "C"
   */
   void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
   void SBM_row_prod_no_diag_1x1(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y);
-  
+
 
   void SBM_extract_component_3x3(const SparseBlockStructuredMatrix* const A,
                                  SparseBlockStructuredMatrix*  B,
                                  unsigned int *row_components, unsigned int row_components_size,
                                  unsigned int *col_components, unsigned int col_components_size);
-  
+
   /** Destructor for SparseBlockStructuredMatrix objects
       \param blmat SparseBlockStructuredMatrix the matrix to be destroyed.
    */
@@ -326,12 +383,20 @@ extern "C"
    */
   void SBM_free_pred(SparseBlockStructuredMatrixPred *blmatpred);
 
-  /** Find index position in blocks of the diagonal block of row num
+  /** Compute the indices of blocks of the diagonal block
       \param M the SparseBlockStructuredMatrix matrix
-      \param num the row of the required block
+      \return the indices for all the rows
+  */
+  unsigned int * SBM_diagonal_block_indices(SparseBlockStructuredMatrix* const M);
+
+  /** Find index of the diagonal block in a row
+      \param M the SparseBlockStructuredMatrix matrix
+      \param row the row of the required block
       \return pos the position of the block
   */
-  unsigned int SBM_get_position_diagonal_block(const SparseBlockStructuredMatrix* const M, unsigned int num);
+  unsigned int SBM_diagonal_block_index(SparseBlockStructuredMatrix* const M, unsigned int row);
+
+  int SBM_zentry(const SparseBlockStructuredMatrix* const M, unsigned int row, unsigned int col, double val);
 
   /** get the element of row i and column j of the matrix M
      \param M the SparseBlockStructuredMatrix matrix
@@ -363,9 +428,6 @@ extern "C"
   \return 0 ik ok
   */
   int SBM_inverse_diagonal_block_matrix_in_place(const SparseBlockStructuredMatrix*  M, int* ipiv);
-
-
-
 
 
   /** Copy a SBM into a Dense Matrix
@@ -417,6 +479,12 @@ extern "C"
   */
   void SBM_column_permutation(unsigned int *colIndex, SparseBlockStructuredMatrix* A, SparseBlockStructuredMatrix*  C);
 
+  void  SBCM_null(SparseBlockCoordinateMatrix* MC);
+  
+  SparseBlockCoordinateMatrix*  SBCM_new(void);
+
+
+  
 
   /** allocate a SparseBlockCoordinateMatrix from a list of 3x3
    * blocks
@@ -443,7 +511,7 @@ extern "C"
    */
   SparseBlockStructuredMatrix* SBCM_to_SBM(SparseBlockCoordinateMatrix* MC);
 
-  
+
   /** free a SparseBlockStructuredMatrix created with SBCM_to_SBM
    * \param[in,out] M a SparseBlockStructuredMatrix to free*/
   void SBM_free_from_SBCM(SparseBlockStructuredMatrix* M);
@@ -457,10 +525,9 @@ extern "C"
   */
   int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat, SparseBlockStructuredMatrix* outSBM);
 
-  
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
 #endif /* NSSPACK_H */
-

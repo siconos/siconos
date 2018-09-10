@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 */
 
 /*! \file FirstOrderType2R.hpp
-  \brief non linear relations: \f$y=h(x,\lambda,z)\quadr=g(\lambda,z)\f$
+  \brief non linear relations: \f$y=h(x,\lambda,z), r=g(\lambda,z)\f$
  */
 
 #ifndef FirstOrderType2R_H
@@ -28,18 +28,18 @@
 typedef void (*Type2PtrH)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
 typedef void (*Type2PtrG)(unsigned int, double*,  unsigned int, double*);
 
-/** FirstOrder Non Linear Relation.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27
- *
- * Derived from FirstOrderR - See this class for more comments.
+/** First order non linear Relation.
  *
  *  Relation for First Order Dynamical Systems, with:
- * \f{eqnarray}
- * y &=& h(x,\lambda,z)\\
- * r &=& g(\lambda,z)
- * \f}
+ *
+ * \rststar
+ *
+ * .. math::
+ *
+ *   y &= h(x,\lambda,z)\\
+ *   r &= g(\lambda,z)
+ *
+ * \endrststar
  *
  * Operators (and their corresponding plug-in):
  * - h: saved in Interaction as y (plug-in: output[0])

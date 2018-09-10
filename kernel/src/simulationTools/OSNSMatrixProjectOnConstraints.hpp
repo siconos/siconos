@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,6 @@
 /** Interface to some specific storage types for matrices used in
  * OneStepNSProblem
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) 05/02/2010
- *
  * This class is used to define an interface for various storage used
  * for matrices in OneStepNSProblem. Its aim is to fill the
  * Numerics structure NumericsMatrix, required in many XXX_problem
@@ -41,7 +37,7 @@
  * OSNS classes (LCP ...) and to leave it into this class. \n
  *
  * Two main functions:
- * - fill(indexSet, interactionBlocks): fill the matrix using a list of
+ *   - fill(indexSet, interactionBlocks): fill the matrix using a list of
  *   "active" Interaction, in indexSet, and a
  *   MapOfMapOfInteractionMatrices, interactionBlocks, which determines
  *   which Interaction are connected or not (ie have common DynamicalSystem).
@@ -62,14 +58,21 @@
  * We denote interactionBlocks[interi][interj] = mij \n Then, a call to
  * fill(indexSet, interactionBlock) results in a matrix which looks like:
  *
- * \f{eqnarray*}
- M=\left\lbrace\begin{array}{cccc}
- m22 & m23 & m28 &  0 \\
- m32 & m33 & 0   &  0 \\
- 0  &  0  & m88 & m812 \\
- 0  &  0  & m128& m1212
- \end{array}\right.
- \f}
+
+ \rst
+
+  .. math::
+    :nowrap:
+  
+      M=\left\lbrace\begin{array}{cccc}
+      m22 & m23 & m28 &  0 \\
+      m32 & m33 & 0   &  0 \\
+      0   &  0  & m88 & m812 \\
+      0  &  0  & m128& m1212
+      \end{array}\right.
+
+ \endrst
+
  *
  *
  * Note: at the time the available storage types are:

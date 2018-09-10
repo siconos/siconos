@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1116,10 +1116,9 @@ void NewtonEulerDS::computeJacobianMIntvByFD(double time, SP::SiconosVector q, S
 }
 
 
-void NewtonEulerDS::computeRhs(double time, bool isDSup)
+void NewtonEulerDS::computeRhs(double time)
 {
-  DEBUG_BEGIN("NewtonEulerDS::computeRhs(double time, bool isDSup)");
-  // if isDSup == true, this means that there is no need to re-compute mass ...
+  DEBUG_BEGIN("NewtonEulerDS::computeRhs(double time)");
   *_acceleration = *(_p[2]); // Warning: r/p update is done in Interactions/Relations
 
   computeForces(time, _q, _twist);
@@ -1139,7 +1138,7 @@ void NewtonEulerDS::computeRhs(double time, bool isDSup)
 
 }
 
-void NewtonEulerDS::computeJacobianRhsx(double time, bool isDSup)
+void NewtonEulerDS::computeJacobianRhsx(double time)
 {
   if(_jacobianWrenchq)
   {

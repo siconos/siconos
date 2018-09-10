@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@
 
 /*!\file SolverOptions.h
   Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
-  \author Franck Perignon
 */
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"

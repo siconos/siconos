@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   _nsdsSMC->link(_interactionSMC, _DS_SMC);
   _nsdsSMC->setControlProperty(_interactionSMC, true);
   _nsdsSMC->topology()->setName(_interactionSMC, "Sgn_SMC");
-  
+
   _simulationSMC->setName("linear sliding mode controller simulation");
   _simulationSMC->insertIntegrator(_integratorSMC);
   _simulationSMC->associate(_integratorSMC, _DS_SMC);

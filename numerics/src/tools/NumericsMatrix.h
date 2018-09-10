@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,102 +19,8 @@
 #ifndef NumericsMatrix_H
 #define NumericsMatrix_H
 
-/*! \page NumericsMatrixPage Matrix Storage in numerics component
-
-Numerics component proposes different ways to store 'matrix-like' objects,
-all handled through a C structure, NumericsMatrix.
-
-
-A number (NumericsMatrix.storageType) identify the type of storage while only one pointer
-among NumericsMatrix.matrixX, X = storageType = 0, 1 or 2, is not NULL and hold the values of the matrix.
-
-At the time, the following storages are available: \n
-- "classical" (i.e. dense) column-major storage in a double*, NumericsMatrix.matrix0
-- sparse block storage, in a structure of type
-  SparseBlockStructuredMatrix (warning: only for square matrices!!), NumericsMatrix.matrix1
-- sparse storage (csc, csr or triplet), based on CSparse (from T.Davis), NumericsMatrix.matrix2
-
-
-As an example, consider the following matrix A of size 8X8:\n
-\f{equation*}
-  A=\left[\begin{array}{cccc|cc|cc}
-           1 & 2 & 0 & 4   & 3 &-1   & 0 & 0\\
-           2 & 1 & 0 & 0   & 4 & 1   & 0 & 0\\
-           0 & 0 & 1 &-1   & 0 & 0   & 0 & 0\\
-           5 & 0 &-1 & 6   & 0 & 6   & 0 & 0\\
-           \hline
-           0 & 0 & 0 & 0   & 1 & 0   & 0 & 5\\
-           0 & 0 & 0 & 0   & 0 & 2   & 0 & 2\\
-           \hline
-           0 & 0 & 2 & 1   & 0 & 0   & 2 & 2\\
-           0 & 0 & 2 & 2   & 0 & 0   & -1& 2\\
- \end{array}\right]
-\f}
-
-How can we store this matrix ?\n
-The first classical storage results in: \n
- - M.storageType = 0
- - M.size0 = 8, M.size1 = 8
- - M.matrix0 = [1 2 0 5 0 0 0 0 2 1 0 0 ...]\n
-matrix0 being a double* of size 64.
-
-For the second way of storage, SparseBlockStructuredMatrix we have:
- - M.storageType = 1
- - M.size0 = 8, M.size1 = 8
- - M.matrix1 a SparseBlockStructuredMatrix in which we save:
-  - the number of non null blocks, 6 (matrix1->nbblocks) and the number of diagonal blocks, 3 (matrix1->size).
-  - the vector matrix1->blocksize which collects the sum of diagonal blocks sizes until the present one, is equal to [4,6,8], \n
-  blocksize[i] = blocksize[i-1] + ni,  ni being the size of the diagonal block at row(block) i. \n
-  Note that the last element of blocksize corresponds to the real size of the matrix.
-  - the list of positions of non null blocks in vectors matrix1->ColumnIndex and matrix1->RowIndex, equal to [0,1,1,2,0,2] and [0,0,1,1,2,2]
-  - the list of non null blocks, in matrix1->block, stored in Fortran order (column-major) as\n
-    matrix1->block[0] = [1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6]\n
-    matrix1->block[1] = [3,4,0,0,-1,1,0,6]\n
-    ...\n
-    matrix1->block[5] = [2,-1,2,2]
-
-
-\todo write proper doc for CSparse storage and complete the example above.
-
-\section NumericsMatrixTools Functions on NumericsMatrix
-
-\subsection NMAlloc Create, fill and delete NumericsMatrix functions
-
-- NM_create(): allocation without initial values
-- NM_create_from_data(): allocation and set default values from external data
-- NM_fill(): needs a pre-defined NumericsMatrix, set default values from external data
-- NM_free(): free a NumericsMatrix
-
-These last two functions accept a <i>data</i> parameter, which if non-NULL contains the matrix data.
-
-\subsection NM_LA Linear Algebra
-
-The following linear algebra operation are supported:
-
-- BLAS-like functions:
-  - product matrix - vector: NM_gemv() and NM_tgemv() (transpose)
-  - product matrix - matrix: NM_gemm()
-  - partial product matrix - vector: NM_row_prod()
-
--LAPACK-like functions
-  -NM_gesv(): solve a linear system Ax = b
-
-\subsection NM_IO Input / Output
-
-  - NM_display(): display a NumericsMatrix
-  - NM_display_row_by_row(): display a NumericsMatrix row by row
-  - NM_write_in_filename(), NM_write_in_file(): save to filesystem
-  - NM_read_in_filename(), NM_read_in_file(): fill a NumericsMatrix from a file
-  - NM_new_from_file(): create new NumericsMatrix from a file
-
-*/
-
-
-
-
 /*!\file NumericsMatrix.h
   \brief Structure definition and functions related to matrix storage in Numerics
-  \author Franck Perignon
 */
 #include <stdlib.h>
 #include <assert.h>
@@ -132,6 +38,7 @@ typedef struct
 {
   size_t iWorkSize; /**< size of iWork */
   void *iWork; /**< integer workspace */
+  size_t sizeof_elt ; ; /**< sizeof_elt of an element in bytes (result of sizeof for instance)*/
   size_t dWorkSize; /**< size of dWork */
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
@@ -139,7 +46,7 @@ typedef struct
 } NumericsMatrixInternalData;
 
 /** \struct NumericsMatrix NumericsMatrix.h
-    Interface to different type of matrices in numerics component, see \ref NumericsMatrixPage.
+    Interface to different type of matrices in numerics component.
 
     See NM_* functions for linear algebra operations on dense, sparse block and sparse storage.
 */
@@ -185,7 +92,7 @@ extern "C"
    * \return a pointer to allocated space
    */
   NumericsMatrix* NM_new(void);
-
+  NumericsMatrix* NM_eye(int size);
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
    * \param size0 number of rows
@@ -205,14 +112,7 @@ extern "C"
   NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
   NumericsMatrix* NM_create_from_filename(char *filename);
   NumericsMatrix* NM_create_from_file(FILE *file);
-  
 
- /** Copy a CSparseMatrix inside another CSparseMatrix.
-   *  Reallocations are performed if B cannot hold a copy of A
-   * \param[in] A a CSparseMatrix
-   * \param[in,out] B a CSparseMatrix
-   */
-  void NM_copy_sparse(const CSparseMatrix* const A, CSparseMatrix* B);
 
   /** Copy a NumericsMatrix inside another NumericsMatrix (deep).
    *  Reallocations are performed if B cannot hold a copy of A
@@ -286,23 +186,13 @@ extern "C"
    * \return  a pointer to a NumericsMatrix
    */
   NumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1);
-  
+
   /** new NumericsMatrix equal to the transpose of a given matrix
-   * \param[in] A 
+   * \param[in] A
    * \return  a pointer to a NumericsMatrix
    */
   NumericsMatrix* NM_transpose(NumericsMatrix * A);
 
-  
-  /** Allocate the internalData structure (but not its content!)
-   * \param M the matrix to modify
-   */
-  static inline void NM_alloc_internalData(NumericsMatrix* M)
-  {
-    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWorkSize = 0;
-    M->internalData->iWork = NULL;
-  }
  /** set NumericsMatrix fields to NULL
    * \param A a matrix
    */
@@ -361,7 +251,7 @@ extern "C"
    * preferably a triplet matrix.
    * \param M the NumericsMatrix
    * \param i row index
-   * \param i column index
+   * \param j column index
    * \param val the value to be inserted.
    */
   void NM_zentry(NumericsMatrix* M, int i, int j, double val);
@@ -369,17 +259,23 @@ extern "C"
   /** get the value of a NumericsMatrix.
    * \param M the NumericsMatrix
    * \param i row index
-   * \param i column index
+   * \param j column index
    * \return  the value to be inserted.
    */
   double NM_get_value(NumericsMatrix* M, int i, int j);
 
+  /** compare to NumericsMatrix up to machine accuracy (DBL_EPSILON)
+   * \param A the NumericsMatrix
+   * \param B the NumericsMatrix
+   */
+  bool NM_equal(NumericsMatrix* A, NumericsMatrix* B);
+  
   /** compare to NumericsMatrix up to a given tolerance
    * \param A the NumericsMatrix
    * \param B the NumericsMatrix
-   * \param tol tolerance
+   * \param tol the tolerance
    */
-  bool NM_equal(NumericsMatrix* A, NumericsMatrix* B);
+  bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol);
 
 
 
@@ -417,13 +313,6 @@ extern "C"
    *  A copy is always performed
    */
   void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-  /** return the set of indices corresponding to the diagonal elements of the
-   * matrix
-   * \warning should be better tested
-   * \param M the matrix
-   * \return the list of indices for the diagonal elements
-   */
-  CS_INT* NSM_diag_indices(NumericsMatrix* M);
 
   /**************************************************/
   /** Matrix - vector product           *************/
@@ -496,6 +385,15 @@ extern "C"
   void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
                const double beta, NumericsMatrix *C);
 
+   /** Matrix matrix multiplication : C = A B 
+   * \param[in] A a NumericsMatrix
+   * \param[in] B a NumericsMatrix
+   * \param[in,out] C a NumericsMatrix
+   */
+  NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B);
+
+
+  
   /** Transposed matrix multiplication : y += alpha transpose(A) x + y
    * \param[in] alpha scalar
    * \param[in] A a NumericsMatrix
@@ -588,7 +486,6 @@ extern "C"
   void NM_read_in_file(NumericsMatrix* const M, FILE *file);
 
   /** Create from file a NumericsMatrix with  memory allocation
-     \param M the matrix to be read
      \param file the corresponding  file
      \return 0 if the matrix
   */
@@ -612,11 +509,6 @@ extern "C"
      \param file the corresponding  file
   */
   void NM_read_in_file_scilab(NumericsMatrix* const M, FILE *file);
-
-
-
-
-
 
   /** Clear dense storage, if it is existent.
    * \param[in,out] A a Numericsmatrix
@@ -660,15 +552,6 @@ extern "C"
     */
   void NM_clearSparseStorage(NumericsMatrix *A);
 
-  /** Extract a block from a sparse matrix
-   * \param M matrix
-   * \param blockM dense storage for the block
-   * \param pos_row starting row for the block
-   * \param pos_col starting column for the block
-   * \param block_row_size block width
-   * \param block_col_size block height
-   */
-  void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
 
 
   /** Direct computation of the solution of a real system of linear
@@ -712,11 +595,6 @@ extern "C"
     return NM_gesv_expert(A, b, preserve ? NM_PRESERVE : NM_NONE);
   }
 
-  /** Get linear solver parameters with initialization if needed.
-   * \param[in,out] A a NumericsMatrix.
-   * \return a pointer on parameters.
-   */
-  NSM_linear_solver_params* NM_linearSolverParams(NumericsMatrix* A);
 
   /** Set the linear solver
    * \param A the matrix
@@ -729,6 +607,24 @@ extern "C"
    * \return a pointer on internal data.
    */
   NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A);
+
+  /** Allocate the internalData structure (but not its content!)
+   * \param M the matrix to modify
+   */
+  static inline void NM_internalData_new(NumericsMatrix* M)
+  {
+    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
+    M->internalData->iWork = NULL;
+    M->internalData->iWorkSize = 0;
+    M->internalData->dWork = NULL;
+    M->internalData->dWorkSize = 0;
+    M->internalData->isLUfactorized = 0;
+  }
+  /** Copy the internalData structure 
+   * \param M the matrix to modify
+   */
+  void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B );
+
 
   /** Integer work vector initialization, if needed.
    * \param[in,out] A pointer on a NumericsMatrix.
@@ -751,9 +647,15 @@ extern "C"
    * \param alpha the term to add
    */
   void NM_add_to_diag3(NumericsMatrix* M, double alpha);
-
-
-
+  
+  /** Add two matrices with coefficients C = alpha*A + beta*B
+   * \param alpha the first coefficient
+   * \param A the first  matrix
+   * \param beta the second coefficient
+   * \param B the second  matrix
+   * \return C a new NumericsMatrix
+   */
+  NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B);
 
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type
@@ -787,7 +689,7 @@ extern "C"
   int NM_check(const NumericsMatrix* const A);
 
  /** Compute the  1-norm of a sparse matrix = max (sum (abs (A))), largest column sum of a matrix (the sparse format for now)
-   * \param A the matrix 
+   * \param A the matrix
    * \return the norm*/
   double NM_norm_1(NumericsMatrix* const A);
 
@@ -797,7 +699,7 @@ extern "C"
   double NM_norm_inf(NumericsMatrix* const A);
 
   int NM_is_symmetric(NumericsMatrix* A);
-
+  double NM_symmetry_discrepancy(NumericsMatrix* A);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

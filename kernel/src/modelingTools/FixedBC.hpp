@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,10 @@
 
 #include "BoundaryCondition.hpp"
 
-/** \class FixedBC
- *  \brief This class models a simple fixed boundary conditions for
+/** \brief This class models a simple fixed boundary conditions for
  *   prescribing the velocities in a Dynamical System. A simple
  *   boundary condition is considered to fix a component \f$ j \f$ of
  *   the velocity vector, i.e., \f$ v_j(t) = 0\f$ 
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 4.1.0
- *  \date November 2016
  *
  */
 class FixedBC : public  BoundaryCondition

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,8 @@
 #ifndef NumericsVector_H
 #define NumericsVector_H
 
-/*! \page NumericsVectorPage Matrix Storage in numerics component
-
-*/
-
-
 /*!\file NumericsVector.h
   \brief Structure definition and functions related to vector storage in Numerics
-  \author Franck Perignon
 */
 #include <stdlib.h>
 #include <assert.h>
@@ -44,11 +38,22 @@ extern "C"
 
   /** Screen display of the vector content stored as a double * array
       \param m the vector to be displayed
-      \param nRow the number of rows
+      \param n the size of the vector
    */
-  void NV_display(double * m, int nRow);
+  void NV_display(double * m, int n);
 
   void NV_write_in_file_python(double * m,  int nRow, FILE* file);
+
+  /** Test if two vectors are equal up to a given tolerance
+      \param x the vector to be tested
+      \param y the vector to be tested
+      \param n the size of the vector
+      \param tol the tolerance
+      \return 1 is equal
+   */
+  bool NV_equal(double * x, double * y, int nRow, double tol);
+
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,14 +233,14 @@ void convexQP_ADMM(ConvexQP* problem,
       {
         NM_gemv(rho, Atrans, u, 1.0, z);
       }
-      DEBUG_PRINT("rhs:")
-        DEBUG_EXPR(NV_display(z,n));
+      DEBUG_PRINT("rhs:");
+      DEBUG_EXPR(NV_display(z,n));
 
       /* Linear system solver */
       /* cblas_dcopy(n , w_k , 1 , z, 1); */
       NM_gesv_expert(W,z,NM_KEEP_FACTORS);
-      DEBUG_PRINT("z:")
-        DEBUG_EXPR(NV_display(z,n));
+      DEBUG_PRINT("z:");
+      DEBUG_EXPR(NV_display(z,n));
 
       /********************/
       /*  2 - Compute u */
@@ -248,7 +248,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
       /* A z_k - xi_k + b */
       cblas_dcopy(m , b , 1 , tmp, 1);
-      cblas_daxpy(m, -1, xi, 1, tmp , 1);
+      cblas_daxpy(m, -1.0, xi, 1, tmp , 1);
       if (AisIdentity)
       {
         cblas_daxpy(m, 1.0, z, 1, tmp , 1);
@@ -269,7 +269,7 @@ void convexQP_ADMM(ConvexQP* problem,
       /**********************/
 
       /* xi_k + A z_k -u_k +b -> xi_k */
-      cblas_daxpy(m, -1, b, 1, xi , 1);
+      cblas_daxpy(m, -1.0, b, 1, xi , 1);
 
       if (AisIdentity)
       {
@@ -280,7 +280,7 @@ void convexQP_ADMM(ConvexQP* problem,
         NM_gemv(-1.0, A, z, 1.0, xi);
       }
 
-      cblas_daxpy(m, 1, u, 1, xi , 1);
+      cblas_daxpy(m, 1.0, u, 1, xi , 1);
       DEBUG_EXPR(NV_display(xi,m));
 
       DEBUG_EXPR(NV_display(u,m));
@@ -327,7 +327,7 @@ void convexQP_ADMM(ConvexQP* problem,
       /* q --> z */
       cblas_dcopy(n , q , 1 , z, 1);
       cblas_dscal(n, -1, z,1);
-      
+
       /*  u -b + xi_k --> u */
       cblas_dcopy(m , u_hat , 1 , tmp, 1);
       cblas_daxpy(m, -1.0, b, 1, tmp , 1);
@@ -355,7 +355,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
       /* A z_k - xi_k + b */
       cblas_dcopy(m , b , 1 , tmp, 1);
-      cblas_daxpy(m, -1, xi_hat, 1, tmp , 1);
+      cblas_daxpy(m, -1.0, xi_hat, 1, tmp , 1);
       if (AisIdentity)
       {
         cblas_daxpy(m, 1.0, z, 1, tmp , 1);
@@ -378,7 +378,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
       /* - A z_k + u_k -b ->  xi (residual) */
       cblas_dcopy(m , u, 1 , xi, 1);
-      cblas_daxpy(m, -1, b, 1, xi , 1);
+      cblas_daxpy(m, -1.0, b, 1, xi , 1);
       if (AisIdentity)
       {
         cblas_daxpy(m, -1.0, z, 1, xi , 1);
@@ -391,20 +391,20 @@ void convexQP_ADMM(ConvexQP* problem,
       r = d * d;
 
       /* xi_hat -  A z_k + u_k -b ->  xi */
-      cblas_daxpy(m, 1, xi_hat, 1, xi , 1);
-      
+      cblas_daxpy(m, 1.0, xi_hat, 1, xi , 1);
+
       /**********************/
       /*  3 - Acceleration  */
       /**********************/
 
       DEBUG_EXPR(NV_display(u_hat,m));
       cblas_dcopy(m , u_hat , 1 , tmp, 1);
-      cblas_daxpy(m, -1, u, 1, tmp , 1);
+      cblas_daxpy(m, -1.0, u, 1, tmp , 1);
       d = cblas_dnrm2(m , tmp , 1);
       s = d * d;
 
       e =r+s;
-      
+
       DEBUG_PRINTF("residual e = %e \n", e);
       DEBUG_PRINTF("residual r = %e \n", r);
       DEBUG_PRINTF("residual s = %e \n", s);
@@ -476,7 +476,7 @@ void convexQP_ADMM(ConvexQP* problem,
     NM_gesv_expert(W,z,NM_KEEP_FACTORS);
     DEBUG_PRINT("z:");
     DEBUG_EXPR(NV_display(z,n));
-    
+
     /* check the full criterion */
     /* **** Criterium convergence **** */
     convexQP_compute_error(problem, z , xi, w, u, tolerance, rho, options, norm_q, &error);
@@ -503,11 +503,25 @@ void convexQP_ADMM(ConvexQP* problem,
 
   /* free(z_k); */
   /* free(w_k); */
+
   if (internal_allocation)
   {
     convexQP_ADMM_free(problem,options);
   }
-  /* free(xi_k); */
+
+  NM_free(W);
+  if (AisIdentity)
+  {
+    NM_free(A);
+    free(b);
+  }
+  else
+  {
+    NM_free(Atrans);
+  }
+
+
+/* free(xi_k); */
 
 }
 

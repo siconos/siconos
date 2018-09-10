@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,12 @@ void ZOHTest::init()
 {
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
   _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new Model(_t0, _T));
-  _sim.reset(new TimeStepping(_TD, 0));
+  _model.reset(new NonSmoothDynamicalSystem(_t0, _T));
+  _sim.reset(new TimeStepping(_model, _TD, 0));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _sim->prepareIntegratorForDS(_ZOH, _DS, _model, _t0);
-  _model->setSimulation(_sim);
-  _model->initialize();
+  _model->insertDynamicalSystem(_DS);
+  _sim->associate(_ZOH, _DS);
+  _sim->initialize();
 }
 
 void ZOHTest::tearDown()
@@ -154,18 +153,17 @@ void ZOHTest::testMatrixIntegration2()
   SP::NonSmoothLaw nslaw(new RelayNSL(_n));
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
   _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new Model(_t0, _T));
+  _model.reset(new NonSmoothDynamicalSystem(_t0, _T));
   SP::Interaction inter(new Interaction(nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->link(inter, _DS);
-  _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
-  _sim.reset(new TimeStepping(_TD, 1));
-  _sim->prepareIntegratorForDS(_ZOH, _DS, _model, _t0);
+  _model->insertDynamicalSystem(_DS);
+  _model->link(inter, _DS);
+  _model->setControlProperty(inter, true);
+  _sim.reset(new TimeStepping(_model, _TD, 1));
+  _sim->associate(_ZOH, _DS);
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
-  _model->setSimulation(_sim);
-  _model->initialize();
+  _sim->initialize();
   SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);
@@ -221,18 +219,17 @@ void ZOHTest::testMatrixIntegration3()
   SP::NonSmoothLaw nslaw(new RelayNSL(_n));
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
   _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new Model(_t0, _T));
+  _model.reset(new NonSmoothDynamicalSystem(_t0, _T));
   SP::Interaction inter(new Interaction(nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->link(inter, _DS);
-  _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
-  _sim.reset(new TimeStepping(_TD, 1));
-  _sim->prepareIntegratorForDS(_ZOH, _DS, _model, _t0);
+  _model->insertDynamicalSystem(_DS);
+  _model->link(inter, _DS);
+  _model->setControlProperty(inter, true);
+  _sim.reset(new TimeStepping(_model, _TD, 1));
+  _sim->associate(_ZOH, _DS);
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
-  _model->setSimulation(_sim);
-  _model->initialize();
+  _sim->initialize();
   SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);
@@ -294,18 +291,17 @@ void ZOHTest::testMatrixIntegration4()
   SP::NonSmoothLaw nslaw(new RelayNSL(_n));
   _DS.reset(new FirstOrderLinearDS(_x0, _A, _b));
   _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new Model(_t0, _T));
+  _model.reset(new NonSmoothDynamicalSystem(_t0, _T));
   SP::Interaction inter(new Interaction(nslaw, rel));
   _ZOH.reset(new ZeroOrderHoldOSI());
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->link(inter, _DS);
-  _model->nonSmoothDynamicalSystem()->setControlProperty(inter, true);
-  _sim.reset(new TimeStepping(_TD, 1));
-  _sim->prepareIntegratorForDS(_ZOH, _DS, _model, _t0);
+  _model->insertDynamicalSystem(_DS);
+  _model->link(inter, _DS);
+  _model->setControlProperty(inter, true);
+  _sim.reset(new TimeStepping(_model, _TD, 1));
+  _sim->associate(_ZOH, _DS);
   SP::Relay osnspb(new Relay());
   _sim->insertNonSmoothProblem(osnspb);
-  _model->setSimulation(_sim);
-  _model->initialize();
+  _sim->initialize();
   SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
   SiconosVector& xProc = *_DS->x();
   SiconosVector& lambda = *inter->lambda(0);

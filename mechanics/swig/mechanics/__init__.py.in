@@ -1,8 +1,0 @@
-
-
-with_occ = "@WITH_OCC@" is "ON"
-
-if with_occ:
-    from siconos.mechanics.occ import OccContactShape, OccContactFace, \
-        OccContactEdge, OccBody, OccR, OccTimeStepping, ContactShapeDistance, \
-        ContactPoint, OccSpaceFilter, Geometer

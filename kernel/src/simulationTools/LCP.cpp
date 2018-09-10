@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,34 @@ LCP::LCP(int numericsSolverId):
   linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
 }
 
+int LCP::numericsCompute()
+{
+  // Note FP : wrap call to numerics solver inside this function
+  // for python API (e.g. to allow profiling without C struct handling)
+  
+  // The LCP in Numerics format
+  _numerics_problem->M = &*_M->numericsMatrix();
+  _numerics_problem->q = _q->getArray();
+  _numerics_problem->size = _sizeOutput;
+  int info  = 0;
+  //const char * name = &*_numerics_solver_options->solverName;
+  if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
+    {
+      lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
+      
+      
+    }
+  info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
+				      &*_numerics_solver_options);
+  
+  if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
+    {
+      lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);    
+    }
+  return info;
+  
+  }
+
 int LCP::compute(double time)
 {
   DEBUG_BEGIN("LCP::compute(double time)\n");
@@ -64,28 +92,7 @@ int LCP::compute(double time)
   if (_sizeOutput != 0)
   {
 
-    // The LCP in Numerics format
-    _numerics_problem->M = &*_M->numericsMatrix();
-    _numerics_problem->q = _q->getArray();
-    _numerics_problem->size = _sizeOutput;
-
-    //const char * name = &*_numerics_solver_options->solverName;
-    if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
-    {
-      lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
-
-
-    }
-    info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
-                                        &*_numerics_solver_options);
-
-    if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
-    {
-      lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);
-
-
-    }
-
+    info = numericsCompute();
     // --- Recovering of the desired variables from LCP output ---
     postCompute();
 
@@ -94,7 +101,6 @@ int LCP::compute(double time)
   }
   DEBUG_END("LCP::compute(double time)\n");
   return info;
-  
 }
 
 LCP::~LCP()

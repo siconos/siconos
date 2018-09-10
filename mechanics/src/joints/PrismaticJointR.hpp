@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,12 @@ protected:
   double _cq2q103;
   double _cq2q104;
 
-  /** Return the normal of the linear DoF axis.  \param axis must be 0 */
+  /** Return the normal of the linear DoF axis.
+   * \param ans
+   * \param q0
+   * \param axis must be 0
+   * \param absoluteRef
+   */
   virtual void _normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
                           bool absoluteRef=true);
 
@@ -91,7 +96,7 @@ public:
    *  \param d1 first DynamicalSystem linked by the joint.
    *  \param d2 second DynamicalSystem linked by the joint, or NULL
    *            for absolute frame.
-   *  \param A SiconosVector of size 3 that defines the prismatic axis.
+   *  \param axis SiconosVector of size 3 that defines the prismatic axis.
    *  \param absoluteRef if true, A is in the absolute frame,
    *                     otherwise A is in d1 frame.
    */

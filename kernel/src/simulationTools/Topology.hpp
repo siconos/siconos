@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,6 @@
 
 /**  This class describes the topology of the non-smooth dynamical
  *  system. It holds all the "potential" Interactions".
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) July 20, 2005
  *
  *  Topology is built in NSDS constructors but initialized in
  *  Simulation->initialize(), ie when all Interactions have been
@@ -124,12 +120,18 @@ public:
 
   // === GETTERS/SETTERS ===
 
-  /** check if Interaction inter is in the set
-   *  \param inter an Interaction
-   *  \return a bool
+  /** check if an dynamical system is already a vertex of the DSs graph.
+   *  \param ds the DS to test
+   *  \return true if ds is in the graph
+   */
+  bool hasDynamicalSystem(SP::DynamicalSystem ds) const;
+
+  /** check if an interaction is already a vertex of the Interactions graph.
+   *  \param inter the Interaction to test
+   *  \return true if inter is in the graph
    */
   bool hasInteraction(SP::Interaction inter) const;
-
+  
   /** remove an Interaction from the topology. The interaction is
    *  removed from Dynamical Systems graph and Interactions Graph.
    *  The interaction is not removed from actives subgraphs : see updateIndexSet
@@ -147,7 +149,6 @@ public:
    *  Graph.  The dynamical system is not removed from actives
    *  subgraphs : see updateIndexSet
    *  \param ds the dynamical system to remove
-   *  \param removeInteractions if true, also remove all interactions with this ds
    */
   void removeDynamicalSystem(SP::DynamicalSystem ds);
 
@@ -170,7 +171,7 @@ public:
   void setName(SP::Interaction inter, const std::string& name);
 
   /** get the name for this Interaction
-   * \param ds a pointer to the system
+   * \param inter a pointer to the Interaction
    * \return name the name of the Interaction, or empty string if not found.
    */
   std::string name(SP::Interaction inter);

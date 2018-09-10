@@ -12,7 +12,7 @@ import functools
 def usage():
     print("""
     {0} [-v] [--packages-db=...] \
-        [--tasks=<task1>,<task2>,...] \
+        [--task=<task1>,<task2>,...] \
         [--list-tasks] \
         [--root-dir=...] \
         [--targets=...] \
@@ -52,6 +52,7 @@ for o, a in opts:
 
     if o in ('--packages-db',):
         database = a
+        assert database is not None
         
     if o in ('--root-dir',):
         root_dir = os.path.abspath(a)
@@ -105,7 +106,8 @@ for o, a in opts:
                 if verbose:
                     t = getattr(tasks, s)
                     t.display()
-
+        sys.exit()
+    
     if o in ('--print',):
         print_mode = True
         output_mode_str = a
@@ -113,8 +115,6 @@ for o, a in opts:
     if o in ('--dry-run',):
         dry_run = True
 
-
-assert database is not None
         
 hostname = gethostname().split('.')[0]
 
@@ -127,7 +127,7 @@ if task is None:
 else:
     tasks = [task]
 
-
+    
 if print_mode:
 
     from machinery.mksenv import print_commands, output_mode_spec

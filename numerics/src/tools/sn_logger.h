@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 /*!\file sn_logger.h
  * \brief Common data structures used by loggers in Siconos/Numerics
  *
- * \author Olivier Huber
  */
 
 #ifndef SN_LOGGER_H

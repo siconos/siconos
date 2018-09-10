@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,6 @@ union VECTOR_UBLAS_TYPE
 };
 
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
- *
- * \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 07/21/2006
  *
  * Used to handle vectors of double.
  *
@@ -404,7 +400,7 @@ public:
   SiconosVector& operator -=(const BlockVector& v);
 
   /** component-wise exponential of a vector
-      \param SiconosVector input, such that result (this) = exp(input)
+      \param input vector such that result (this) = exp(input)
   */
   void exp(SiconosVector& input);
 

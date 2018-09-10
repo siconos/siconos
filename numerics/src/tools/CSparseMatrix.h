@@ -20,12 +20,6 @@
 #ifndef SparseMatrix_H
 #define SparseMatrix_H
 
-/*! \page SparseMatrixPage Sparse Matrix Storage in Numerics
-
-Documentation to be done
-
-*/
-
 #include <stdio.h>
 
 /*!\file CSparseMatrix.h
@@ -131,7 +125,7 @@ extern "C"
 {
 #endif
 
-  /** \struct CSparseMatrix_lu_factors SparseMatrix.h
+  /** \struct CSparseMatrix_lu_factors
    * Information used and produced by CSparse for an LU factorization*/
   typedef struct {
     CS_INT n;       /**< size of linear system */
@@ -219,7 +213,13 @@ extern "C"
    * \return NULL on success
   */
   CSparseMatrix* CSparseMatrix_spfree_on_stack(CSparseMatrix* A);
-
+  
+  /** Copy a CSparseMatrix inside another CSparseMatrix.
+   *  Reallocations are performed if B cannot hold a copy of A
+   * \param[in] A a CSparseMatrix
+   * \param[in,out] B a CSparseMatrix
+   */
+  void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

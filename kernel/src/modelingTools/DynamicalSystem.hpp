@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,38 +40,32 @@
 #include <iostream>
 /** Abstract interface to Dynamical Systems
 
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) January 15, 2007
+This class is used to describe dynamical systems of the form :
 
+   
+\f$ g(\dot x, x, t, z) = 0\f$
 
-    This class is used to describe dynamical systems of the form :
-    \f[
-    g(\dot x, x, t, z) = 0
-    \f]
-    where
+\endverbatim
 
-     - \f$ x \in R^{n} \f$ is the state.
+where
+    
+- \f$ x \in R^{n} \f$ is the state.
+- \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
+  variables, some sort of discret state.  For example, z may be used
+  to set some perturbation parameters, to control the system (z
+  set by actuators) and so on.
+- \f$ g : R^{n} \times R  \to  R^{n}   \f$ .
 
-     - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
-     variables, some sort of discret state.  For example, z may be used
-     to set some perturbation parameters, to control the system (z
-     set by actuators) and so on.
-     - \f$ g : R^{n} \times R  \to  R^{n}   \f$ .
+By default, the DynamicalSystem is considered to be an Initial Value
+Problem (IVP) and the initial conditions are given by 
 
-  By default, the DynamicalSystem is considered to be an Initial Value
-  Problem (IVP) and the initial conditions are given by
+\f$x(t_0)=x_0\f$
 
-   \f[
-   x(t_0)=x_0
-  \f]
+Under some specific conditions, the system can be written as:
 
-  Under some specific conditions, the system can be written as:
+\f$\dot x = rhs(x, t, z)\f$
 
-  \f[
-  \dot x = rhs(x, t, z)
-  \f]
-
-  In that case, \f$ \nabla_{\dot x} g \f$ must be invertible.
+In that case, \f$ \nabla_{\dot x} g \f$ must be invertible.
 
 */
 
@@ -90,10 +84,6 @@ private:
 
   /** used to set ds number */
   static unsigned int __count;
-
-  /** copy constructor => private, no copy nor pass-by-value.
-   */
-  //  DynamicalSystem(const DynamicalSystem & );
 
 protected:
 
@@ -175,7 +165,7 @@ public:
   virtual void initRhs(double time) = 0 ;
 
   /** set nonsmooth input to zero
-   *  \param int input-level to be initialized.
+   *  \param level input-level to be initialized.
    */
   virtual void initializeNonSmoothInput(unsigned int level) = 0;
 
@@ -185,21 +175,19 @@ public:
   virtual void initializeNonSmoothInput(unsigned int minlevel, unsigned int maxlevel) = 0;
 
   /** compute all component of the dynamical system, for the current state.
-   *  \param double time of interest
+   *  \param time current time (the one used to update ds component)
    */
   void update(double time);
 
   /** update right-hand side for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  virtual void computeRhs(double time, bool isDSup = false) = 0;
+  virtual void computeRhs(double time) = 0;
 
   /** update \f$\nabla_x rhs\f$ for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  virtual void computeJacobianRhsx(double time , bool isDSup = false) = 0;
+  virtual void computeJacobianRhsx(double time) = 0;
 
   /** reset nonsmooth part of the rhs, for all 'levels' */
   virtual void resetAllNonSmoothParts() = 0;
@@ -270,7 +258,7 @@ public:
   }
 
   /** set initial state (copy)
-   *  \param a SiconosVector
+   *  \param newValue input vector to copy
    */
   void setX0(const SiconosVector& newValue);
 
@@ -281,7 +269,7 @@ public:
   virtual void setOrder(const unsigned int newOrder) =0;
   
   /** set initial state (pointer link)
-   *  \param newPtr SP::SiconosVector
+   *  \param newPtr vector (pointer) to set x0
    */
   void setX0Ptr(SP::SiconosVector newPtr);
 
@@ -378,7 +366,7 @@ public:
    */
   virtual void setRhsPtr(SP::SiconosVector newPtr);
 
-  /** returns a pointer to $\nabla_x rhs()$
+  /** returns a pointer to \f$\nabla_x rhs()\f$
    *  \return SP::SiconosMatrix
    */
   inline SP::SiconosMatrix jacobianRhsx() const
@@ -453,7 +441,7 @@ public:
   }
   
   /** set number of steps to be saved
-   *  \param int steps
+   *  \param steps
    */
   inline void setStepsInMemory(int steps)
   {
@@ -473,7 +461,7 @@ public:
   //@}
 
   /*! @name Plugins management  */
-  
+  //@{ 
   /** call all plugged functions for the current state
    * \param time  the current time
    */

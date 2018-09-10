@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,19 +25,18 @@
 #include "Topology.hpp"
 #include "DynamicalSystem.hpp"
 
-/** the NonSmoothDynamicalSystem consists of a set of DynamicalSystem objects
- *  and a set  Interaction objects structured into a graph inside a Topology
- *  object.  In the DynamicalSystem graph, the DynamicalSystem set is the  node
- *  set and the Interaction set is  the edge set.
- *  The DynamicalSystem are insert into te NonSmoothDynamica system thanks to the
- *  insertDynamicalSystem method and the edge of the graph are constructed through
- *  the link method.
- *  A dual graph is also contructed.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \date (Creation) Apr 23, 2004
- *
- */
+/** the NonSmoothDynamicalSystem consists in Dynamical Systems and Interactions
+    structured into a graph defined in a Topology.
+    In the DynamicalSystem graph, DynamicalSystem objects are nodes and Interaction objects 
+    are edges.
+
+    To add a DynamicalSystem, use insertDynamicalSystem method.
+    To add a new Interaction, use link method.
+    
+    A dual graph is also contructed, where Interactions are vertices and DynamicalSystems
+    are edges.
+    
+*/
 class NonSmoothDynamicalSystem
 {
 public:
@@ -83,7 +82,7 @@ private:
   /** current time of the simulation
       Warning FP : it corresponds to the time
       at the end of the integration step.
-      It means that _t corresponds to tkp1 of the≈b
+      It means that _t corresponds to tkp1 of the
       simulation or nextTime().
    */
   double _t;
@@ -335,7 +334,6 @@ public:
 
   /** remove a dynamical system
    * \param ds a pointer to the dynamical system to remove
-   * \param removeInterations if true, all interactions connected to the ds will also be removed
    */
   void removeDynamicalSystem(SP::DynamicalSystem ds);
 
@@ -373,7 +371,7 @@ public:
   }
 
   /** get Interaction named name
-   * \param nb the name of the Interaction to get
+   * \param name of the Interaction to get
    * \return a pointer to an Interaction
    */
   inline SP::Interaction interaction(std::string name) const
@@ -416,7 +414,7 @@ public:
   };
 
   /** get the name for this Interaction
-   * \param ds a pointer to the system
+   * \param inter a pointer to the Interaction
    * \return name the name of the Interaction, or empty string if not found.
    */
   std::string name(SP::Interaction inter)
@@ -487,18 +485,28 @@ public:
    */
   void updateInput(double time, unsigned int level);
 
-  /** compute output for all the interactions
+  /** compute output for all the interactions for a given level
    * \param time
-   *  \param level y min order to be computed
+   * \param level y order to be computed
    */
   void updateOutput(double time, unsigned int level = 0);
 
+  /** compute output for all the interactions and for a level range
+   * \param time
+   * \param level_min y min order to be computed
+   * \param level_max y max order to be computed
+   */
+  void updateOutput(double time, unsigned int level_min, unsigned int level_max);
 
   /** compute Jacobians for all the interactions (in indexSet0)
    * \param time
    */
   void computeInteractionJacobians(double time);
 
+  /** compute Jacobians for all the interactions of a given index set.
+   \param time
+   \param indexSet InteractionsGraph of interest
+   */
   void computeInteractionJacobians(double time, InteractionsGraph& indexSet);
 
   /** visit all dynamical systems in this system.

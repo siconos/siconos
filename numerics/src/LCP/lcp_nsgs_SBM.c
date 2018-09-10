@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@
 /* #define DEBUG_MESSAGES 1 */
 #include "debug.h"
 #include "numerics_verbose.h"
-void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, const SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
+void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
 
   assert(blmat->blocksize0[rowNumber] > 0);
 
   /* Position in vector blmat->block of the required diagonal block */
-  int diagPos = SBM_get_position_diagonal_block(blmat, rowNumber);
+  int diagPos = SBM_diagonal_block_index(blmat, rowNumber);
   /* Gets diagonal block = MLocal  */
   local_problem->M->matrix0 = blmat->block[diagPos];
   local_problem->size = blmat->blocksize0[rowNumber];

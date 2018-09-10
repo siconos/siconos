@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,7 +182,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
 	OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
 
         //if(predictorDeactivate(inter1,i))
-        if (osi.removeInteractionInIndexSet(inter1, i))
+        if (osi.removeInteractionFromIndexSet(inter1, i))
         {
           // Interaction is not active
           // ui1 becomes invalid
@@ -206,8 +206,6 @@ void TimeStepping::updateIndexSet(unsigned int i)
               indexSet1->eraseProperties(ed1);
             }
           }
-
-
           indexSet1->remove_vertex(inter1);
           /* \warning V.A. 25/05/2012 : Multiplier lambda are only set to zero if they are removed from the IndexSet*/
           inter1->lambda(1)->zero();
@@ -351,11 +349,6 @@ void TimeStepping::initOSNS()
 void TimeStepping::nextStep()
 {
   DEBUG_BEGIN("void TimeStepping::nextStep()\n");
-  // if(!_isInitialized)
-  // {
-  //   // if the simulation run starts with nextStep();
-  //   initialize();
-  // }
   processEvents();
   DEBUG_END("void TimeStepping::nextStep()\n");
 }
@@ -375,6 +368,7 @@ void TimeStepping::computeOneStep()
   advanceToEvent();
 }
 
+
 void TimeStepping::initializeNewtonLoop()
 {
   DEBUG_BEGIN("TimeStepping::initializeNewtonLoop()\n");
@@ -387,23 +381,12 @@ void TimeStepping::initializeNewtonLoop()
     (*it)->computeResidu();
   }
 
-  updateWorldFromDS();
-
   // Predictive contact -- update initial contacts after updating DS positions
-  {
-    NonSmoothDynamicalSystem::ChangeLogIter p = _nsds->changeLogPosition();
-    updateInteractions();
+  updateWorldFromDS();
+  updateInteractions();
 
-    // If graph changed, need to initialize the new interactions
-    if (p.it != _nsds->changeLogPosition().it)
-    {
-      if (initializeNSDSChangelog())
-      {
-        initOSNS();
-        _nsds->topology()->setHasChanged(true);
-      }
-    }
-  }
+  // Changes in updateInteractions may require initialization
+  initializeNSDSChangelog();
 
   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
   if (indexSet0->size()>0)
@@ -450,23 +433,27 @@ void TimeStepping::run()
   std::cout << "===== End of " << Type::name(*this) << "simulation. " << count << " events have been processed. ==== " <<std::endl;
 }
 
+void TimeStepping::resetLambdas()
+{
+  if(_resetAllLambda)
+    {
+      // Initialize lambdas of all interactions.
+      SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
+      InteractionsGraph::VIterator ui, uiend, vnext;
+      std11::tie(ui, uiend) = indexSet0->vertices();
+      for (vnext = ui; ui != uiend; ui = vnext)
+	{
+	  ++vnext;
+	  indexSet0->bundle(*ui)->resetAllLambda();
+	}
+    }
+}
+
 void TimeStepping::advanceToEvent()
 {
   DEBUG_PRINTF("TimeStepping::advanceToEvent(). Time =%f\n",getTkp1());
-
   initialize();
-  if (_resetAllLambda)
-  {
-    // Initialize lambdas of all interactions.
-    SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
-    InteractionsGraph::VIterator ui, uiend, vnext;
-    std11::tie(ui, uiend) = indexSet0->vertices();
-    for (vnext = ui; ui != uiend; ui = vnext)
-    {
-      ++vnext;
-      indexSet0->bundle(*ui)->resetAllLambda();
-    }
-  }
+  resetLambdas();
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 }
 
@@ -680,7 +667,6 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
 //       VectorOfVectors& workV = *indexSet0->properties(*ui).workVectors;
 
 //       inter->computeResiduY(, workV);
-//       residu = workV[FirstOrderR::vec_residuY]->norm2();
 //     inter->residuY()->norm2();
     if (residu > _newtonResiduYMax) _newtonResiduYMax = residu;
     if (residu > criterion)
@@ -710,7 +696,6 @@ bool TimeStepping::newtonCheckConvergence(double criterion)
 
     //   inter->computeResiduR(getTkp1(), DSlink, workV);
     //   // TODO support other DS
-    //   residu = workV[FirstOrderR::vec_residuR]->norm2();
     if (residu > _newtonResiduRMax) _newtonResiduRMax = residu;
     if (residu > criterion)
     {

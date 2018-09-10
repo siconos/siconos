@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,6 @@ template<class SubType> SP::Relation factory(int name)
 
 /** Registry Class for sensors.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) November 2010
- *
  * Relation factory.
  * Use:
  *     RelationFactory::Registry& regRelation(RelationFactory::Registry::get()) ;
@@ -91,10 +87,6 @@ public :
 } ;
 
 /** Registration Class for relations.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) November 2010
  *
  * Class used for auto-registration of Relation-type objects.
  *

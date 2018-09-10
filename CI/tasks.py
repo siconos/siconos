@@ -20,12 +20,13 @@ class SiconosCiTask(CiTask):
         return super(SiconosCiTask, self).__init__(*args, **kwargs)
     
     def template_maker(self):
-        redundants = [
+        unwanted_for_sitename = [
             'build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz',
-            'asan', 'cppunit_clang', 'python-env', 'profiling',
-            'python3-env', 'path', 'h5py3']
+            'asan', 'cppunit_clang', 'python-env', 'profiling', 'path',
+            'h5py3']
         return '-'.join([p.replace('+', 'x')
-                         for p in self._pkgs if p not in redundants])
+                         for p in self._pkgs if p not in
+                         unwanted_for_sitename])
 
 # PLEASE KEEP CONFIGS AS WHAT THEY MEAN.
 # DO NOT ADD PACKAGES IF THEY ARE NOT NECESSARY.
@@ -55,7 +56,7 @@ default = SiconosCiTask(
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
           'python-env'],
     srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
+    targets={'.': ['docker-build', 'docker-ctest']})
 
 minimal = SiconosCiTask(
     docker=True,
@@ -64,7 +65,7 @@ minimal = SiconosCiTask(
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
           'atlas-lapack', 'python-minimal'],
     srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
+    targets={'.': ['docker-build', 'docker-ctest']})
 
 minimal_with_python = SiconosCiTask(
     docker=True,
@@ -73,7 +74,7 @@ minimal_with_python = SiconosCiTask(
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
           'atlas-lapack', 'python-env'],
     srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
+    targets={'.': ['docker-build', 'docker-ctest']})
 
 #
 # 3. all the tasks
@@ -201,14 +202,14 @@ siconos_clang_cfi = siconos_default.copy()(
 
 siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
-    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
+#    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
     add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
     build_configuration='Debug')
 
 siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     distrib='fedora:rawhide',
-    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
+#    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
     add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
     build_configuration='Debug',
     fast=False)
@@ -241,7 +242,7 @@ siconos_light_examples = minimal_with_python.copy()(
     ci_config='examples_light',
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install', 'docker-make-clean'],
-             'examples': ['docker-build', 'docker-ctest', 'docker-submit', 'docker-make-clean']},
+             'examples': ['docker-build', 'docker-ctest', 'docker-make-clean']},
     add_srcs=['examples'])
 
 # Case2 : siconos with mechanics components and bullet + related examples
@@ -250,7 +251,7 @@ siconos_all_examples = minimal_with_python.copy()(
     add_pkgs=['bullet', 'h5py'],
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install', 'docker-make-clean'],
-             'examples': ['docker-build', 'docker-ctest', 'docker-submit', 'docker-make-clean']},
+             'examples': ['docker-build', 'docker-ctest', 'docker-make-clean']},
     add_srcs=['examples'])
 
 siconos_test_deb = SiconosCiTask(

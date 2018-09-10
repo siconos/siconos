@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-/*! \file LagrangianLinearTIR.hpp
+/*! \file LagrangianCompliantLinearTIR.hpp
  */
 #ifndef LAGRANGIANCOMPLIANTLINEARRELATION_H
 #define LAGRANGIANCOMPLIANTLINEARRELATION_H
@@ -25,19 +25,16 @@
 
 /**  Lagrangian Linear Relation.
 
-\author SICONOS Development Team - copyright INRIA
-\version 3.0.0.
-\date (Creation) Apr 27, 2004
 
 Lagrangian Relation with:
 
-\f[
+\f$
 y= Cq + e + D\lambda + Fz
-\f]
+\f$
 
-\f[
+\f$
 p = C^t \lambda
-\f]
+\f$
 
 C is the only required input to built a LagrangianCompliantLinearTIR.
 D is mandatory and may represent a stiffness in the relation

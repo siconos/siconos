@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ void NewtonEulerR::initialize(Interaction& inter)
 
   DEBUG_BEGIN("NewtonEulerR::initialize(Interaction& inter)\n");
 
-  unsigned int ySize = inter.getSizeOfY();
+  unsigned int ySize = inter.dimension();
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
 
@@ -95,7 +95,7 @@ void NewtonEulerR::initialize(Interaction& inter)
 
 void NewtonEulerR::checkSize(Interaction& inter)
 {
-  unsigned int ySize = inter.getSizeOfY();
+  unsigned int ySize = inter.dimension();
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
   assert((_jachq->size(1) == qSize && _jachq->size(0) == ySize) ||
@@ -247,7 +247,7 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
   DEBUG_EXPR(inter.display());
 
   unsigned int k = 0;
-  unsigned int ySize = inter.getSizeOfY();
+  unsigned int ySize = inter.dimension();
   SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
   SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));
   Index dimIndex(2);
@@ -318,7 +318,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   // Compute the time derivative of the Jacobian
     if (!_dotjachq) // lazy initialization
   {
-    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int sizeY = inter.dimension();
     unsigned int xSize = inter.getSizeOfDS();
     unsigned int qSize = 7 * (xSize / 6);
 
@@ -343,7 +343,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   // Compute the product of jachq and Tdot --> jachqTdot
 
   unsigned int k = 0;
-  unsigned int ySize = inter.getSizeOfY();
+  unsigned int ySize = inter.dimension();
   unsigned int xSize = inter.getSizeOfDS();
   SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
   SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));

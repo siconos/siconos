@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@
 /*!\file NumericsSparseMatrix.h
  * \brief Data structures and functions for sparse matrices
  *
- * \author Olivier Huber
  */
 
 #include "SiconosConfig.h"
@@ -84,8 +83,6 @@ extern "C"
    * triplet (aka coordinate, COO), CSC (via CSparse) and CSR if MKL is used */
   struct NumericsSparseMatrix
   {
-    NSM_linear_solver_params* linearSolverParams;
-                               /**< solver-specific parameters */
     CSparseMatrix* triplet;    /**< triplet format, aka coordinate */
     CSparseMatrix* csc;        /**< csc matrix */
     CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
@@ -93,6 +90,9 @@ extern "C"
     CS_INT*           diag_indx;  /**< indices for the diagonal terms.
                                     Very useful for the proximal perturbation */
     unsigned       origin;     /**< original format of the matrix */
+    NSM_linear_solver_params* linearSolverParams;
+                               /**< solver-specific parameters */
+
   };
 
 
@@ -106,6 +106,7 @@ extern "C"
    */
   NumericsSparseMatrix* NSM_new(void);
 
+  NumericsSparseMatrix * NSM_triplet_eye(unsigned int size);
 
   /** Free allocated space for a NumericsSparseMatrix.
    * \param A a NumericsSparseMatrix
@@ -114,10 +115,7 @@ extern "C"
   NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A);
 
 
-  /** New and empty NSM_linear_solver_params.
-   * \return a pointer on the allocated space.
-   */
-  NSM_linear_solver_params* newNSM_linear_solver_params(void);
+
 
    /** Free a workspace related to a LU factorization
    * \param p the structure to free
@@ -154,11 +152,41 @@ extern "C"
    */
   size_t NSM_nnz(const CSparseMatrix* const A);
 
+  /** return the set of indices corresponding to the diagonal elements of the
+   * matrix
+   * \warning should be better tested
+   * \param M the matrix
+   * \return the list of indices for the diagonal elements
+   */
+  CS_INT* NSM_diag_indices(NumericsMatrix* M);
+
+  /** Extract a block from a sparse matrix
+   * \param M matrix
+   * \param blockM dense storage for the block
+   * \param pos_row starting row for the block
+   * \param pos_col starting column for the block
+   * \param block_row_size block width
+   * \param block_col_size block height
+   */
+  void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col, size_t block_row_size, size_t block_col_size);
+
   /** Free allocated space for NSM_linear_solver_params.
    * \param p a NSM_linear_solver_params
    * \return NULL on success
    */
-  NSM_linear_solver_params* NSM_LinearSolverParams_free(NSM_linear_solver_params* p);
+  NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* p);
+  
+  /** New and empty NSM_linear_solver_params.
+   * \return a pointer on the allocated space.
+   */
+  NSM_linear_solver_params* NSM_linearSolverParams_new(void);
+
+  
+  /** Get linear solver parameters with initialization if needed.
+   * \param[in,out] A a NumericsMatrix.
+   * \return a pointer on parameters.
+   */
+  NSM_linear_solver_params* NSM_linearSolverParams(NumericsMatrix* A);
 
   /** Check and fix a matrix, if needed
    * \param A the matrix to check, modified if necessary to have ordered indices

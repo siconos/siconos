@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -371,6 +371,7 @@ void solver_options_set(SolverOptions* options, int solverId)
   {
     tol = 1e-12;
   }
+  /* FALLTHRU */
   case SICONOS_LCP_PGS:
   case SICONOS_LCP_CPG:
   case SICONOS_LCP_NEWTONMIN:
@@ -381,6 +382,7 @@ void solver_options_set(SolverOptions* options, int solverId)
     iSize = 2;
     dSize = 2;
     iter_max = 1000;
+    /* test here for the SICONOS_LCP_PATH case */
     tol = tol == 0. ? 1e-8 : tol;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     break;
@@ -490,6 +492,7 @@ void solver_options_set(SolverOptions* options, int solverId)
   {
     tol = 1e-12;
   }
+  /* FALLTHRU */
   case SICONOS_FRICTION_3D_GAMS_PATH:
   case SICONOS_FRICTION_3D_GAMS_PATHVI:
   case SICONOS_FRICTION_3D_GAMS_LCP_PATH:
@@ -499,8 +502,9 @@ void solver_options_set(SolverOptions* options, int solverId)
   {
 #ifdef HAVE_GAMS_C_API
     iSize = 5;
-    dSize = 4; // stupid thing in checkTrivialCase in fc3d_driver.c
+    dSize = 4; // stupid thing in fc3d_checkTrivialCase in fc3d_driver.c
     iter_max = 10000;
+    /* test here for the SICONOS_LCP_GAMS case */
     tol = tol == 0. ? 1e-9 : tol;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     if (!options->solverParameters)
@@ -509,7 +513,7 @@ void solver_options_set(SolverOptions* options, int solverId)
     }
     break;
 #else
-    printf("solver_options_set :: GAMS was not enabled, exiting!\n");
+    printf("%s :: GAMS was not enabled, exiting!\n", __func__);
     exit(EXIT_FAILURE);
 #endif
   }
@@ -523,7 +527,7 @@ void solver_options_set(SolverOptions* options, int solverId)
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     break;
   default:
-   printf("solver_options_set not supported for solver id %d named %s\n", solverId, solver_options_id_to_name(solverId));
+   printf("%s solver id %d named %s, is not supported\n", __func__, solverId, solver_options_id_to_name(solverId));
    exit(EXIT_FAILURE);
  }
 

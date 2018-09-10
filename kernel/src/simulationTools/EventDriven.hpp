@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,6 @@
 #include "SiconosFwd.hpp"               // for OneStepIntegrator, etc
 
 /** Simulation based on event driven method, ie events detection (see theoretical manual for more details).
- *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
  *
  * WARNING: at the time only written for Lagrangian systems !!!
  *
@@ -92,11 +88,13 @@ protected:
 
 public:
   /** defaut constructor
-   *  \param td time discretisation
+   * \param nsds current nonsmooth dynamical system
+   * \param td time discretisation
    */
   EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
 
   /** constructor with data
+   *  \param nsds current nonsmooth dynamical system
    *  \param td time discretisation
    *  \param nb number of NSProblem
    */
@@ -110,10 +108,7 @@ public:
   */
   ~EventDriven() {};
 
-  /** Overload Simulation::initialize
-   * \param m the Model
-   * \param withOSI
-   */
+  /** Overload Simulation::initialize */
   void initialize();
 
   /* Getters and setters */

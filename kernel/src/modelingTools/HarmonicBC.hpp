@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,25 +21,23 @@
 
 #include "BoundaryCondition.hpp"
 
-/** \class HarmonicBC
- *  \brief This class models a simple harmonic boundary conditions for
+/**\brief This class models a simple harmonic boundary conditions for
  *   prescribing the velocities in a Dynamical System. A simple
  *   boundary condition is considered to fix a component \f$ j \f$ of
  *   the velocity vector, i.e., \f$ v_j(t) = a +  b cos( \omega t+ \phi)\f$.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 4.1.0.
- *  \date (Creation) November 2016
  *
  */
 class HarmonicBC : public  BoundaryCondition
 {
 public:
 
-  /** \fn HarmonicBC(SP::UnsignedIntVector  newVelocityIndices);
-   *  \brief Basic constructor
-   *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
+  /** Constructor
+   * \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
+   * \param a constant value for additive term of the prescribed velocity
+   * \param b constant value for multiplicative term of the prescribed velocity
+   * \param omega frequency
+   * \param phi phase
    */
-
   HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
              double a, double b,
              double omega, double phi) ;

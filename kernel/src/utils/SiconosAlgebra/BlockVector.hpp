@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 */
 
 /*! \file BlockVector.hpp
-  \brief Object to handle vectors of vectors ( ... of vectors)
+  \brief Object to handle vectors of vectors
 */
 
 #ifndef BLOCKVECTOR_H
@@ -25,10 +25,7 @@
 
 #include "SiconosAlgebraTypeDef.hpp"
 
-/** Object to handle block-vectors (ie list of SP::SiconosVector)
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
+/** "Block" vector : container (list) of SiconosVector
  *
  * A block vector is a stl vector that handles pointers to SiconosVector.
  *
@@ -63,10 +60,10 @@ private:
 public:
 
   /** Set a subblock of the current vector with the content (copy) of a SiconosVector
-      \param SiconosVector : input
-      \param int size_block : size of the block to be filled in
-      \param int start_in : starting position in input of the block to be copied
-      \param int start_out : starting position in current vector of the block to be filled in.
+      \param input the vector to be copied
+      \param size_block size of the block to be copied
+      \param start_in starting position in input vector of the block to be copied
+      \param start_out starting position in current vector of the block to be filled in.
    */
   void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in, unsigned int start_out);
 

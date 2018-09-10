@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -288,16 +288,16 @@ bool GlobalFrictionContact::preCompute(double time)
       OSI::TYPES osiType = Osi.getType();
       if (osiType == OSI::MOREAUJEANGOSI)
       {
-        VectorOfVectors& workVectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
+        VectorOfVectors& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
 
         if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
-          SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
+          SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
           setBlock(vfree, _q, dss, 0, offset);
         }
         else  if (dsType == Type::NewtonEulerDS)
         {
-          SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
+          SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
           setBlock(vfree, _q, dss, 0, offset);
         }
       }

@@ -31,6 +31,7 @@
 #include "fc3d_compute_error.h"
 #include "projectionOnCone.h"
 #include "SiconosCompat.h"
+#include "numerics_verbose.h"
 
 #ifdef HAVE_GAMS_C_API
 
@@ -951,7 +952,8 @@ bad_angle:
           b[0] = ui[0];
           b[1] = ui[1];
           b[2] = ui[2];
-          solve_3x3_gepp(mat, b);
+
+          SOLVE_3X3_GEPP(mat, b);
 
           assert(isfinite(b[0]));
           assert(isfinite(b[1]));
@@ -976,7 +978,8 @@ bad_angle:
           /* now the dual var: A^T \lambda_y = (y_n, u_t) */
           b[0] = ui[0];
           /*  XXX mat is not changed, so we should not have any trouble here */
-          solve_3x3_gepp(mat, b);
+          SOLVE_3X3_GEPP(mat, b);
+
           assert(isfinite(b[0]));
           assert(isfinite(b[1]));
           assert(isfinite(b[2]));

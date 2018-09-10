@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,14 +143,9 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
 {
   DEBUG_BEGIN("LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor& vd)\n");
 
-  // Computes matrix _interactionBlocks[inter1][inter1] (and allocates memory if
-  // necessary) one or two DS are concerned by inter1 .  How
-  // _interactionBlocks are computed depends explicitely on the type of
-  // Relation of each Interaction.
-
-  // Warning: we suppose that at this point, all non linear
-  // operators (G for lagrangian relation for example) have been
-  // computed through plug-in mechanism.
+  // Compute diagonal block (graph property) for a given interaction.
+  // - How  blocks are computed depends explicitely on the nonsmooth law, the relation and the dynamical system types.
+  // - No memory allocation there : blocks should be previously (updateInteractionBlocks) and properly allocated.
 
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
@@ -626,7 +621,13 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
       (osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI))
   {
     osi1.computeFreeOutput(vertex_inter, this);
-    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[OneStepIntegrator::osnsp_rhs];
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[EulerMoreauOSI::OSNSP_RHS];
+    setBlock(osnsp_rhs, _q, sizeY , 0, pos);
+  }
+  else if(osi1Type == OSI::ZOHOSI && osi2Type == OSI::ZOHOSI)
+  {
+    osi1.computeFreeOutput(vertex_inter, this);
+    SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
     setBlock(osnsp_rhs, _q, sizeY , 0, pos);
   }
   else if ((osi1Type == OSI::MOREAUJEANOSI  && osi2Type == OSI::MOREAUJEANOSI  )||

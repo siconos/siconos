@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,12 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemA: ", nsds->getNumberOfDS() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemB: ", nsds->getNumberOfInteractions() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemC: ", nsds->dynamicalSystem(23)->number() == 23, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemD: ", nsds->topology()->hasDynamicalSystem(ds) == true, true);
+
+  // Try again : must be ignored
+  nsds->insertDynamicalSystem(ds);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemE: ", nsds->getNumberOfDS() == 1, true);
+  
   std::cout << "------- test insertDynamicalSystem ok -------" <<std::endl;
 }
 

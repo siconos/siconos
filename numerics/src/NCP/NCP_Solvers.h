@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,8 @@
 #ifndef NCP_H
 #define NCP_H
 
-/*! \page NCProblem Nonlinear Complementarity Problems (NCP)
-
-  \section ncpIntro The problem
-  Find \f$z \in \mathcal{R}^n_+\f$ such that:
-  \f{equation*}{
-  0 \le z \perp F(z) \ge 0
-  \f}
-
-  \section ncpSolvers Available solvers/formulations:
-   - ncp_newton_FBLSA() with the FB merit function and a Newton with line-search
-   - ncp_newton_minFBLSA() with the min merit function (with the FB as backup) and a Newton with line-search
-   - ncp_pathsearch() solver using a path search
-   - NCP_Path() Interface to Path (Ferris)
-*/
-
 /*!\file NCP_Solvers.h
   \brief Functions related to NCP formulation and solvers.
-  \author Franck Perignon, Olivier Huber
 */
 
 #include "SparseBlockMatrix.h"
@@ -59,7 +43,6 @@ extern "C"
    * \param[in] tol tolerance for the error
    * \param[out] err value of the error
    * \return 0 if the solution is good enough, 1 otherwise
-   * \author Olivier Huber
   */
   int ncp_compute_error(int n, double* z, double* F, double tol, double *err);
 

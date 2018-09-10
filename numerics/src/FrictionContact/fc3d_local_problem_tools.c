@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,5 +74,5 @@ void fc3d_local_problem_free(FrictionContactProblem* localproblem,
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
-  freeFrictionContactProblem(localproblem);
+  frictionContactProblem_free(localproblem);
 }

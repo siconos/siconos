@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -446,7 +446,7 @@ extern "C"
   /** Add a string option to the GAMS parameters
    * \param GP the GAMS parameter struct
    * \param name the name of the option
-   * \param value the option value
+   * \param value_orig the option value
    * \param type the type of the option
    */
   void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value_orig, unsigned type);

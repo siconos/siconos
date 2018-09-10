@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@
 
 /*!\file NCP_FixedP.h
 
-  \author Houari Khenous, 31/05/2008
 */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

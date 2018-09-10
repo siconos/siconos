@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,11 @@
 
 /**  General First Order Non Linear Dynamical Systems - \f$ M(t) \dot{x} = f(x,t,z) + r, \quad x(t_0) = x_0 \f$
 
-     \author SICONOS Development Team - copyright INRIA
-     \date (Creation) April 29, 2004
-
      This class defines and computes a generic n-dimensional
      dynamical system of the form :
 
-     \f[
      M \dot x = f(x,t,z) + r, \quad x(t_0) = x_0
-     \f]
+     \f$
 
      where
 
@@ -52,17 +48,21 @@
 
   By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
   and the initial conditions are given by
-   \f[
+   \f$
    x(t_0)=x_0
-  \f]
+  \f$
   To define a Boundary Value Problem, a pointer on a BoundaryCondition must be set.
 
   The right-hand side and its jacobian (from base classe) are defined as
 
-  \f[
-  rhs = \dot x =  M^{-1}(f(x,t,z)+ r) \\
-  jacobianRhsx = \nabla_x rhs(x,t,z) = M^{-1}\nabla_x f(x,t,z)
-  \f]
+  \rst
+  
+  .. math::
+
+      rhs &=& \\dot x =  M^{-1}(f(x,t,z)+ r) \\
+      jacobianRhsx &=& \nabla_x rhs(x,t,z) = M^{-1}\nabla_x f(x,t,z)
+ 
+     \endrst
 
 
   The following operators can be plugged, in the usual way (see User Guide)
@@ -178,7 +178,7 @@ public:
   void initRhs(double time);
 
   /** set nonsmooth input to zero
-   *  \param int input-level to be initialized.
+   *  \param level input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) ;
 
@@ -189,16 +189,14 @@ public:
   void initializeNonSmoothInput(unsigned int min, unsigned int max) ;
 
   /** update right-hand side for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  void computeRhs(double time, bool isDSUp = false);
+  void computeRhs(double time);
 
   /** update \f$\nabla_x rhs\f$ for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  void computeJacobianRhsx(double time, bool isDSUp = false);
+  void computeJacobianRhsx(double time);
 
   /** reset non-smooth part of the rhs (i.e. r), for all 'levels' */
   virtual void resetAllNonSmoothParts();
@@ -378,7 +376,7 @@ public:
    *   \times R \mapsto R^{n \times n} \f$ with x different from
    *   current saved state.
    *  \param time instant used in the computations
-   *  \param x2 a SiconosVector to store the resuting value
+   *  \param state a SiconosVector to store the resuting value
    */
   virtual void computeJacobianfx(double time, SP::SiconosVector state);
 
@@ -420,7 +418,5 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-
-TYPEDEF_SPTR(FirstOrderNonLinearDS)
 
 #endif

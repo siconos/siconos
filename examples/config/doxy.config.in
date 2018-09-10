@@ -1,4 +1,4 @@
-# Doxyfile 1.8.10
+# Doxyfile 1.8.14
 
 # This file describes the settings to be used by the documentation system
 # doxygen (www.doxygen.org) for a project.
@@ -20,8 +20,8 @@
 # This tag specifies the encoding used for all characters in the config file
 # that follow. The default is UTF-8 which is also the encoding used for all text
 # before the first occurrence of this tag. Doxygen uses libiconv (or the iconv
-# built into libc) for the transcoding. See http://www.gnu.org/software/libiconv
-# for the list of possible encodings.
+# built into libc) for the transcoding. See
+# https://www.gnu.org/software/libiconv/ for the list of possible encodings.
 # The default value is: UTF-8.
 
 DOXYFILE_ENCODING      = UTF-8
@@ -236,7 +236,8 @@ TAB_SIZE               = 8
 # will allow you to put the command \sideeffect (or @sideeffect) in the
 # documentation, which will result in a user-defined paragraph with heading
 # "Side Effects:". You can put \n's in the value part of an alias to insert
-# newlines.
+# newlines (in the resulting output). You can put ^^ in the value part of an
+# alias to insert a newline as if a physical newline was in the original file.
 
 ALIASES                =
 
@@ -303,6 +304,15 @@ EXTENSION_MAPPING      =
 
 MARKDOWN_SUPPORT       = YES
 
+# When the TOC_INCLUDE_HEADINGS tag is set to a non-zero value, all headings up
+# to that level are automatically included in the table of contents, even if
+# they do not have an id attribute.
+# Note: This feature currently applies only to Markdown headings.
+# Minimum value: 0, maximum value: 99, default value: 0.
+# This tag requires that the tag MARKDOWN_SUPPORT is set to YES.
+
+TOC_INCLUDE_HEADINGS   = 0
+
 # When enabled doxygen tries to link words that correspond to documented
 # classes, or namespaces to their corresponding documentation. Such a link can
 # be prevented in individual cases by putting a % sign in front of the word or
@@ -328,7 +338,7 @@ BUILTIN_STL_SUPPORT    = NO
 CPP_CLI_SUPPORT        = NO
 
 # Set the SIP_SUPPORT tag to YES if your project consists of sip (see:
-# http://www.riverbankcomputing.co.uk/software/sip/intro) sources only. Doxygen
+# https://www.riverbankcomputing.com/software/sip/intro) sources only. Doxygen
 # will parse them like normal C++ but will assume all classes use public instead
 # of private inheritance when no explicit protection keyword is present.
 # The default value is: NO.
@@ -515,7 +525,7 @@ INTERNAL_DOCS          = NO
 # and Mac users are advised to set this option to NO.
 # The default value is: system dependent.
 
-CASE_SENSE_NAMES       = YES
+CASE_SENSE_NAMES       = NO
 
 # If the HIDE_SCOPE_NAMES tag is set to NO then doxygen will show members with
 # their full class and namespace scopes in the documentation. If set to YES, the
@@ -699,7 +709,7 @@ LAYOUT_FILE            =
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
 # extension is automatically appended if omitted. This requires the bibtex tool
-# to be installed. See also http://en.wikipedia.org/wiki/BibTeX for more info.
+# to be installed. See also https://en.wikipedia.org/wiki/BibTeX for more info.
 # For LaTeX the style of the bibliography can be controlled using
 # LATEX_BIB_STYLE. To use this feature you need bibtex and perl available in the
 # search path. See also \cite for info how to create references.
@@ -749,6 +759,12 @@ WARN_IF_DOC_ERROR      = @DOXY_WARNINGS@
 
 WARN_NO_PARAMDOC       = @DOXY_WARNINGS@
 
+# If the WARN_AS_ERROR tag is set to YES then doxygen will immediately stop when
+# a warning is encountered.
+# The default value is: NO.
+
+WARN_AS_ERROR          = NO
+
 # The WARN_FORMAT tag determines the format of the warning messages that doxygen
 # can produce. The string should contain the $file, $line, and $text tags, which
 # will be replaced by the file and line number from which the warning originated
@@ -780,7 +796,7 @@ INPUT                  = @DOXYGEN_EXAMPLES_INPUT@
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
 # libiconv (or the iconv built into libc) for the transcoding. See the libiconv
-# documentation (see: http://www.gnu.org/software/libiconv) for the list of
+# documentation (see: https://www.gnu.org/software/libiconv/) for the list of
 # possible encodings.
 # The default value is: UTF-8.
 
@@ -797,8 +813,8 @@ INPUT_ENCODING         = UTF-8
 # If left blank the following patterns are tested:*.c, *.cc, *.cxx, *.cpp,
 # *.c++, *.java, *.ii, *.ixx, *.ipp, *.i++, *.inl, *.idl, *.ddl, *.odl, *.h,
 # *.hh, *.hxx, *.hpp, *.h++, *.cs, *.d, *.php, *.php4, *.php5, *.phtml, *.inc,
-# *.m, *.markdown, *.md, *.mm, *.dox, *.py, *.f90, *.f, *.for, *.tcl, *.vhd,
-# *.vhdl, *.ucf, *.qsf, *.as and *.js.
+# *.m, *.markdown, *.md, *.mm, *.dox, *.py, *.pyw, *.f90, *.f95, *.f03, *.f08,
+# *.f, *.for, *.tcl, *.vhd, *.vhdl, *.ucf and *.qsf.
 
 FILE_PATTERNS          = *.c \
                          *.cc \
@@ -872,7 +888,7 @@ EXCLUDE_SYMLINKS       = YES
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = 
+EXCLUDE_PATTERNS       =
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
@@ -925,6 +941,10 @@ IMAGE_PATH             =
 # Note that the filter must not add or remove lines; it is applied before the
 # code is scanned, but not when the output code is generated. If lines are added
 # or removed, the anchors will not be placed correctly.
+#
+# Note that for custom extensions or not directly supported extensions you also
+# need to set EXTENSION_MAPPING for the extension otherwise the files are not
+# properly processed by doxygen.
 
 INPUT_FILTER           =
 
@@ -934,6 +954,10 @@ INPUT_FILTER           =
 # (like *.cpp=my_cpp_filter). See INPUT_FILTER for further information on how
 # filters are used. If the FILTER_PATTERNS tag is empty or if none of the
 # patterns match the file name, INPUT_FILTER is applied.
+#
+# Note that for custom extensions or not directly supported extensions you also
+# need to set EXTENSION_MAPPING for the extension otherwise the files are not
+# properly processed by doxygen.
 
 FILTER_PATTERNS        =
 
@@ -1018,7 +1042,7 @@ SOURCE_TOOLTIPS        = YES
 # If the USE_HTAGS tag is set to YES then the references to source code will
 # point to the HTML generated by the htags(1) tool instead of doxygen built-in
 # source browser. The htags tool is part of GNU's global source tagging system
-# (see http://www.gnu.org/software/global/global.html). You will need version
+# (see https://www.gnu.org/software/global/global.html). You will need version
 # 4.8.6 or higher.
 #
 # To use it do the following:
@@ -1113,7 +1137,7 @@ HTML_FILE_EXTENSION    = .html
 # of the possible markers and block names see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_HEADER            = @CMAKE_SOURCE_DIR@/Docs/doxygen_layout/header.html
+HTML_HEADER            = @CMAKE_SOURCE_DIR@/docs/doxygen_layout/header.html
 
 # The HTML_FOOTER tag can be used to specify a user-defined HTML footer for each
 # generated HTML page. If the tag is left blank doxygen will generate a standard
@@ -1123,7 +1147,7 @@ HTML_HEADER            = @CMAKE_SOURCE_DIR@/Docs/doxygen_layout/header.html
 # that doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER            = @CMAKE_SOURCE_DIR@/Docs/doxygen_layout/footer.html
+HTML_FOOTER            = @CMAKE_SOURCE_DIR@/docs/doxygen_layout/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1163,7 +1187,7 @@ HTML_EXTRA_FILES       =
 # The HTML_COLORSTYLE_HUE tag controls the color of the HTML output. Doxygen
 # will adjust the colors in the style sheet and background images according to
 # this color. Hue is specified as an angle on a colorwheel, see
-# http://en.wikipedia.org/wiki/Hue for more information. For instance the value
+# https://en.wikipedia.org/wiki/Hue for more information. For instance the value
 # 0 represents red, 60 is yellow, 120 is green, 180 is cyan, 240 is blue, 300
 # purple, and 360 is red again.
 # Minimum value: 0, maximum value: 359, default value: 220.
@@ -1199,6 +1223,17 @@ HTML_COLORSTYLE_GAMMA  = 67
 
 HTML_TIMESTAMP         = YES
 
+# If the HTML_DYNAMIC_MENUS tag is set to YES then the generated HTML
+# documentation will contain a main index with vertical navigation menus that
+# are dynamically created via Javascript. If disabled, the navigation index will
+# consists of multiple levels of tabs that are statically embedded in every HTML
+# page. Disable this option to support browsers that do not have Javascript,
+# like the Qt help browser.
+# The default value is: YES.
+# This tag requires that the tag GENERATE_HTML is set to YES.
+
+HTML_DYNAMIC_MENUS     = YES
+
 # If the HTML_DYNAMIC_SECTIONS tag is set to YES then the generated HTML
 # documentation will contain sections that can be hidden and shown after the
 # page has loaded.
@@ -1222,12 +1257,12 @@ HTML_INDEX_NUM_ENTRIES = 100
 
 # If the GENERATE_DOCSET tag is set to YES, additional index files will be
 # generated that can be used as input for Apple's Xcode 3 integrated development
-# environment (see: http://developer.apple.com/tools/xcode/), introduced with
+# environment (see: https://developer.apple.com/tools/xcode/), introduced with
 # OSX 10.5 (Leopard). To create a documentation set, doxygen will generate a
 # Makefile in the HTML output directory. Running make will produce the docset in
 # that directory and running make install will install the docset in
 # ~/Library/Developer/Shared/Documentation/DocSets so that Xcode will find it at
-# startup. See http://developer.apple.com/tools/creatingdocsetswithdoxygen.html
+# startup. See https://developer.apple.com/tools/creatingdocsetswithdoxygen.html
 # for more information.
 # The default value is: NO.
 # This tag requires that the tag GENERATE_HTML is set to YES.
@@ -1343,7 +1378,7 @@ QCH_FILE               =
 
 # The QHP_NAMESPACE tag specifies the namespace to use when generating Qt Help
 # Project output. For more information please see Qt Help Project / Namespace
-# (see: http://qt-project.org/doc/qt-4.8/qthelpproject.html#namespace).
+# (see: http://doc.qt.io/qt-4.8/qthelpproject.html#namespace).
 # The default value is: org.doxygen.Project.
 # This tag requires that the tag GENERATE_QHP is set to YES.
 
@@ -1351,8 +1386,7 @@ QHP_NAMESPACE          = org.doxygen.Project
 
 # The QHP_VIRTUAL_FOLDER tag specifies the namespace to use when generating Qt
 # Help Project output. For more information please see Qt Help Project / Virtual
-# Folders (see: http://qt-project.org/doc/qt-4.8/qthelpproject.html#virtual-
-# folders).
+# Folders (see: http://doc.qt.io/qt-4.8/qthelpproject.html#virtual-folders).
 # The default value is: doc.
 # This tag requires that the tag GENERATE_QHP is set to YES.
 
@@ -1360,23 +1394,21 @@ QHP_VIRTUAL_FOLDER     = doc
 
 # If the QHP_CUST_FILTER_NAME tag is set, it specifies the name of a custom
 # filter to add. For more information please see Qt Help Project / Custom
-# Filters (see: http://qt-project.org/doc/qt-4.8/qthelpproject.html#custom-
-# filters).
+# Filters (see: http://doc.qt.io/qt-4.8/qthelpproject.html#custom-filters).
 # This tag requires that the tag GENERATE_QHP is set to YES.
 
 QHP_CUST_FILTER_NAME   =
 
 # The QHP_CUST_FILTER_ATTRS tag specifies the list of the attributes of the
 # custom filter to add. For more information please see Qt Help Project / Custom
-# Filters (see: http://qt-project.org/doc/qt-4.8/qthelpproject.html#custom-
-# filters).
+# Filters (see: http://doc.qt.io/qt-4.8/qthelpproject.html#custom-filters).
 # This tag requires that the tag GENERATE_QHP is set to YES.
 
 QHP_CUST_FILTER_ATTRS  =
 
 # The QHP_SECT_FILTER_ATTRS tag specifies the list of the attributes this
 # project's filter section matches. Qt Help Project / Filter Attributes (see:
-# http://qt-project.org/doc/qt-4.8/qthelpproject.html#filter-attributes).
+# http://doc.qt.io/qt-4.8/qthelpproject.html#filter-attributes).
 # This tag requires that the tag GENERATE_QHP is set to YES.
 
 QHP_SECT_FILTER_ATTRS  =
@@ -1469,7 +1501,7 @@ EXT_LINKS_IN_WINDOW    = NO
 
 FORMULA_FONTSIZE       = 10
 
-# Use the FORMULA_TRANPARENT tag to determine whether or not the images
+# Use the FORMULA_TRANSPARENT tag to determine whether or not the images
 # generated for formulas are transparent PNGs. Transparent PNGs are not
 # supported properly for IE 6.0, but are supported on all modern browsers.
 #
@@ -1481,7 +1513,7 @@ FORMULA_FONTSIZE       = 10
 FORMULA_TRANSPARENT    = YES
 
 # Enable the USE_MATHJAX option to render LaTeX formulas using MathJax (see
-# http://www.mathjax.org) which uses client side Javascript for the rendering
+# https://www.mathjax.org) which uses client side Javascript for the rendering
 # instead of using pre-rendered bitmaps. Use this if you do not have LaTeX
 # installed or if you want to formulas look prettier in the HTML output. When
 # enabled you may also need to install MathJax separately and configure the path
@@ -1508,8 +1540,8 @@ MATHJAX_FORMAT         = HTML-CSS
 # MATHJAX_RELPATH should be ../mathjax. The default value points to the MathJax
 # Content Delivery Network so you can quickly see the result without installing
 # MathJax. However, it is strongly recommended to install a local copy of
-# MathJax from http://www.mathjax.org before deployment.
-# The default value is: http://cdn.mathjax.org/mathjax/latest.
+# MathJax from https://www.mathjax.org before deployment.
+# The default value is: https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/.
 # This tag requires that the tag USE_MATHJAX is set to YES.
 
 MATHJAX_RELPATH        = http://cdn.mathjax.org/mathjax/latest
@@ -1570,7 +1602,7 @@ SERVER_BASED_SEARCH    = NO
 #
 # Doxygen ships with an example indexer (doxyindexer) and search engine
 # (doxysearch.cgi) which are based on the open source search engine library
-# Xapian (see: http://xapian.org/).
+# Xapian (see: https://xapian.org/).
 #
 # See the section "External Indexing and Searching" for details.
 # The default value is: NO.
@@ -1583,7 +1615,7 @@ EXTERNAL_SEARCH        = NO
 #
 # Doxygen ships with an example indexer (doxyindexer) and search engine
 # (doxysearch.cgi) which are based on the open source search engine library
-# Xapian (see: http://xapian.org/). See the section "External Indexing and
+# Xapian (see: https://xapian.org/). See the section "External Indexing and
 # Searching" for details.
 # This tag requires that the tag SEARCHENGINE is set to YES.
 
@@ -1770,11 +1802,19 @@ LATEX_SOURCE_CODE      = NO
 
 # The LATEX_BIB_STYLE tag can be used to specify the style to use for the
 # bibliography, e.g. plainnat, or ieeetr. See
-# http://en.wikipedia.org/wiki/BibTeX and \cite for more info.
+# https://en.wikipedia.org/wiki/BibTeX and \cite for more info.
 # The default value is: plain.
 # This tag requires that the tag GENERATE_LATEX is set to YES.
 
 LATEX_BIB_STYLE        = plain
+
+# If the LATEX_TIMESTAMP tag is set to YES then the footer of each generated
+# page will contain the date and time when the page was generated. Setting this
+# to NO can help when comparing the output of multiple runs.
+# The default value is: NO.
+# This tag requires that the tag GENERATE_LATEX is set to YES.
+
+LATEX_TIMESTAMP        = NO
 
 #---------------------------------------------------------------------------
 # Configuration options related to the RTF output
@@ -1945,9 +1985,9 @@ DOCBOOK_PROGRAMLISTING = NO
 #---------------------------------------------------------------------------
 
 # If the GENERATE_AUTOGEN_DEF tag is set to YES, doxygen will generate an
-# AutoGen Definitions (see http://autogen.sf.net) file that captures the
-# structure of the code including all documentation. Note that this feature is
-# still experimental and incomplete at the moment.
+# AutoGen Definitions (see http://autogen.sourceforge.net/) file that captures
+# the structure of the code including all documentation. Note that this feature
+# is still experimental and incomplete at the moment.
 # The default value is: NO.
 
 GENERATE_AUTOGEN_DEF   = NO
@@ -2085,13 +2125,13 @@ SKIP_FUNCTION_MACROS   = YES
 # the path). If a tag file is not located in the directory in which doxygen is
 # run, you must also specify the path to the tagfile here.
 
-TAGFILES               = @CMAKE_BINARY_DIR@/Docs/build/tags/@PROJECT_NAME@.tag
+TAGFILES               = @CMAKE_BINARY_DIR@/docs/build/tags/@PROJECT_NAME@.tag
 
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create a
 # tag file that is based on the input files it reads. See section "Linking to
 # external documentation" for more information about the usage of tag files.
 
-GENERATE_TAGFILE       = @CMAKE_BINARY_DIR@/Docs/build/tags/@PROJECT_NAME@_examples.tag
+GENERATE_TAGFILE       = @CMAKE_BINARY_DIR@/docs/build/tags/@PROJECT_NAME@_examples.tag
 
 # If the ALLEXTERNALS tag is set to YES, all external class will be listed in
 # the class index. If set to NO, only the inherited external classes will be
@@ -2368,6 +2408,11 @@ DIAFILE_DIRS           =
 # will not generate output for the diagram.
 
 PLANTUML_JAR_PATH      =
+
+# When using plantuml, the PLANTUML_CFG_FILE tag can be used to specify a
+# configuration file for plantuml.
+
+PLANTUML_CFG_FILE      =
 
 # When using plantuml, the specified paths are searched for files specified by
 # the !include statement in a plantuml block.

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,6 @@
 /**  \class MoreauJeanGOSI
  *   \brief One Step time Integrator for First Order Dynamical Systems  for
  *    mechanical Systems (LagrangianDS and NewtonEulerDS)
- *   \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) Apr 26, 2004
  *
  * This integrator is the work horse of the event--capturing time stepping schemes
  * for mechanical systems.  It is mainly based on the pioneering works of M. Jean and
@@ -39,17 +36,24 @@
  * with unilateral contact, impact and Coulomb's friction with \f$\theta\f$ scheme
  *
  * For the linear Lagrangina system, the scheme reads as
- * \f{equation}{
- * \begin{cases}
- *  M (v_{k+1}-v_k)
- *  + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G P_{k+1},\label{eq:MoreauTS-motion}\\[1mm]
- *  q_{k+1} = q_{k} + h v_{k+\theta}, \quad \\[1mm]
- *  U_{k+1} = G^\top\, v_{k+1}, \\[1mm]
- *  \begin{array}{lcl}
- *    0 \leq U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha \in \mathcal I_1, \\[1mm]
- *    P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I \setminus \mathcal I_1,
- * \end{array}
- * \end{cases} \f}
+ * \rststar
+ *
+ * .. math::
+ *   :nowrap:
+ * 
+ *   \begin{cases}
+ *    M (v_{k+1}-v_k)
+ *     + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G P_{k+1},\label{eq:MoreauTS-motion}\\[1mm]
+ *     q_{k+1} = q_{k} + h v_{k+\theta}, \quad \\[1mm]
+ *     U_{k+1} = G^\top\, v_{k+1}, \\[1mm]
+ *     \begin{array}{lcl}
+ *      0 \leq U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha \in \mathcal I_1, \\[1mm]
+ *     P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I \setminus \mathcal I_1,
+ *    \end{array}
+ *     \end{cases}
+ *
+ * \endrststar
+ *
  * with  \f$\theta \in [0,1]\f$. The index set \f$\mathcal I_1\f$ is the discrete equivalent
  * to the rule that allows us to apply the Signorini  condition at the velocity level.
  * In the numerical practice, we choose to define this set by
@@ -144,9 +148,11 @@ protected:
 
 public:
   
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+  enum MoreauJeanGOSI_ds_workVector_id {RESIDU_FREE, FREE, LOCAL_BUFFER, WORK_LENGTH};
 
-  enum MoreauJeanGOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+  enum MoreauJeanGOSI_interaction_workVector_id{OSNSP_RHS, WORK_INTERACTION_LENGTH};
+
+  enum MoreauJeanGOSI_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
 
   /** constructor from theta value only
    *  \param theta value for all linked DS (default = 0.5).
@@ -167,7 +173,6 @@ public:
   
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
@@ -228,12 +233,6 @@ public:
    */
   virtual void computeFreeState();
 
-  /** integrates the Interaction linked to this integrator, without taking non-smooth effects into account
-   * \param vertex_inter vertex of the interaction graph
-   * \param osnsp pointer to OneStepNSProblem
-   */
-//  virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
-
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
    * \param inter the Interaction to test
@@ -248,7 +247,7 @@ public:
    * \param i level of the IndexSet
    * \return Boolean
    */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
 
   /** method to prepare the fist Newton iteration

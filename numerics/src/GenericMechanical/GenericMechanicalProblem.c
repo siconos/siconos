@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
 /* void * solverLCP; */
 /* void * solverMLCP; */
 
-GenericMechanicalProblem * buildEmptyGenericMechanicalProblem()
+GenericMechanicalProblem * genericMechanicalProblem_new()
 {
   GenericMechanicalProblem * paux = (GenericMechanicalProblem *)malloc(sizeof(GenericMechanicalProblem));
   paux->firstListElem = 0;
@@ -44,7 +44,7 @@ GenericMechanicalProblem * buildEmptyGenericMechanicalProblem()
   return paux;
 }
 
-void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP, unsigned int level)
+void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int level)
 {
   if (!pGMP)
     return;
@@ -76,7 +76,7 @@ void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP, unsigned int 
       break;
     }
     default:
-      printf("Numerics : freeGenericMechanicalProblem case %d not managed.\n", pElem->type);
+      printf("Numerics : genericMechanicalProblem_free case %d not managed.\n", pElem->type);
     }
 
     free(pElem->problem);
@@ -98,7 +98,7 @@ void freeGenericMechanicalProblem(GenericMechanicalProblem * pGMP, unsigned int 
     free(pGMP);
 
 }
-void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
+void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size)
 {
   listNumericsProblem * newProblem = (listNumericsProblem*) malloc(sizeof(listNumericsProblem));
   newProblem->nextProblem = 0;
@@ -174,14 +174,14 @@ void * addProblem(GenericMechanicalProblem * pGMP, int problemType, int size)
     break;
   }
   default:
-    printf("GenericMechanicalProblem.h addProblem : problemType unknown: %d . \n", problemType);
+    printf("GenericMechanicalProblem.h gmp_add : problemType unknown: %d . \n", problemType);
     exit(EXIT_FAILURE);
   }
   return  newProblem->problem;
 }
 
 
-void displayGMP(GenericMechanicalProblem * pGMP)
+void genericMechanicalProblem_display(GenericMechanicalProblem * pGMP)
 {
   listNumericsProblem * pElem = pGMP->firstListElem;
   int ii;
@@ -202,7 +202,7 @@ void displayGMP(GenericMechanicalProblem * pGMP)
   printf("\nEND Display a GenericMechanicalProblem:\n");
 }
 
-void genericMechanical_printInFile(GenericMechanicalProblem*  pGMP, FILE* file)
+void genericMechanicalProblem_printInFile(GenericMechanicalProblem*  pGMP, FILE* file)
 {
   listNumericsProblem * curProblem = pGMP->firstListElem;
   /*Print M*/
@@ -229,7 +229,7 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
   int i, posInX, localSize;
   void * prb;
 
-  GenericMechanicalProblem*  pGMP = buildEmptyGenericMechanicalProblem();
+  GenericMechanicalProblem*  pGMP = genericMechanicalProblem_new();
 
   //fscanf(file,"%d\n",&nsubProb);
 
@@ -249,7 +249,7 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
       posInX = m->blocksize0[ii - 1];
     localSize = m->blocksize0[ii] - posInX;
     CHECK_IO(fscanf(file, "%d\n", &prbType));
-    prb = addProblem(pGMP, prbType, localSize);
+    prb = gmp_add(pGMP, prbType, localSize);
     if (prbType == SICONOS_NUMERICS_PROBLEM_FC3D)
     {
       CHECK_IO(fscanf(file, "%lf ", ((FrictionContactProblem*)prb)->mu));
@@ -259,7 +259,7 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
 
 
 #ifdef GMP_DEBUG
-  displayGMP(pGMP);
+  genericMechanicalProblem_display(pGMP);
 #endif
 
   return pGMP;

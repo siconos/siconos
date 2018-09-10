@@ -7,57 +7,102 @@
 # Build targets to generate python
 # docstrings from xml doxygen output.
 #
-# Warning : xml files must exist
-# before any call to this macro!!
+# 1) Doxygen to create xml outputs.
+# 2) Doxy2swig to
+#    create docstrings from xml outputs.
+#
+# This macro must be called for each
+# component, in LibraryProjectSetup.
+#
+# -- Targets :
+# 1) headers --> xml using doxygen
+# 2) xml files --> .i using doxy2swig (one .i for each xml file)
+# 3) .i files --> ${COMP}-docstrings.i (one single file)
+
+# 1 : target ${COMP}_xml4swig
+# 2 and 3 : target ${COMP}_docstrings
+
+# Note FP : the whole process must be re-executed for any change in a header file of the component
+# (unless we set a doxygen conf for each header, don't think we need to bother with that.)
+# 
+# Doxygen steps are driven by cmake while doxy2swig and related are hidden in build_docstrings python
+# script.
 # -----------------------------------
 macro(doxy2swig_docstrings COMP)
   if(WITH_${COMPONENT}_DOXY2SWIG)
-    update_xml_doxy_config_file(${COMP})
-    build_doc_xml(${COMP})
-    set(DOCSTRINGS_FILES)
-    # for each header of the current component ...
-    foreach(_F ${${COMP}_HDRS})
-      get_filename_component(_XFWE ${_F} NAME_WE)
-      get_filename_component(_EXT ${_F} EXT)
-      string(REPLACE "_" "__" _FWE "${_XFWE}")
-      file(GLOB ${_FWE}_XMLS
-	${DOXYGEN_OUTPUT}/xml/*class${_FWE}.xml
-	${DOXYGEN_OUTPUT}/xml/*struct${_FWE}.xml
-	${DOXYGEN_OUTPUT}/xml/${_FWE}_8h*.xml)
-      foreach(_FXML ${${_FWE}_XMLS})
-	get_filename_component(_FWE_XML ${_FXML} NAME_WE)
-	set(outfile_name ${SICONOS_SWIG_ROOT_DIR}/${_FWE_XML}.i)
-	add_custom_command(OUTPUT ${outfile_name} 
-          DEPENDS ${DOXYGEN_OUTPUT}/xml/${_FWE_XML}.xml
-          COMMAND ${PYTHON_EXECUTABLE}
-	  ARGS "${CMAKE_BINARY_DIR}/share/doxy2swig.py"
-	  ${DOXYGEN_OUTPUT}/xml/${_FWE_XML}.xml ${outfile_name}
-          COMMENT "docstrings generation for ${_FWE} (parsing ${_FWE_XML}.xml)")
-	add_custom_target(doc_${_FWE_XML}.i DEPENDS ${outfile_name})
-	list(APPEND DOCSTRINGS_FILES ${outfile_name})
-      endforeach()
-    endforeach()
+    
+    # -- doxygen/xml config --
 
-    if (DOCSTRINGS_FILES)
-      add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-        DEPENDS ${DOCSTRINGS_FILES}
-        COMMAND cat
-        ARGS ${DOCSTRINGS_FILES} > ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-        COMMENT "${COMP} docstrings concatenation")
-    else()
-      add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-        DEPENDS ${DOCSTRINGS_FILES}
-        COMMAND touch
-        ARGS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
+    # 1 - Create COMPdoxy.config.xml in binary dir,
+    #     from doxy.config (source dir), taking
+    #     into account sources/headers files
+    #     of current component COMP.
+    #
+    # 2 - Run doxygen to build xml documentation
+    #
+    # Results in CMAKE_BINARY_DIR/docs/build/xml-docstrings
+    #
+    # Warning : output path must be different from
+    # output for xml used by sphinx/breathe/exhale.
+    # -----------------------------------------------------
+    
+    # Generate doxygen config file for COMP
+    set(DOXY2SWIG_OUTPUT ${DOXYGEN_OUTPUT}/doxy2swig-xml/${COMP})
+    file(MAKE_DIRECTORY ${DOXY2SWIG_OUTPUT})
+    set(XML_INPUTS)
+    # Set config file name
+    set(DOXY_CONFIG_XML "${CMAKE_BINARY_DIR}/docs/config/${COMP}doxy2swig-xml.config")
+    # Add all subdirectories related to the current component into DOXYGEN_INPUTS
+    foreach(_dir ${${COMP}_DIRS})
+      list(FIND ${COMP}_EXCLUDE_DOXY ${_dir} check_dir)
+      if(NOT ${_dir} MATCHES test AND ${check_dir} EQUAL -1)
+	list(APPEND XML_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/${_dir})
+      endif()
+    endforeach()
+    if(XML_INPUTS)
+      list(REMOVE_DUPLICATES XML_INPUTS)
     endif()
+    set(DOXYGEN_INPUTS)
+    foreach(_dir ${XML_INPUTS})
+      set(DOXYGEN_INPUTS "${DOXYGEN_INPUTS} ${_dir}")
+    endforeach()
+    # Create doxygen configuration file in binary dir
+    set(DOXY_QUIET "YES")
+    set(DOXY_WARNINGS "NO")
+    set(GENERATE_HTML NO)
+    set(GENERATE_XML YES)
+    set(EXTRACT_ALL NO)
+    set(EXTRACT_PRIVATE NO)
+    set(XML_OUTPUT doxy2swig-xml/${COMP})
+    message(" -- Create doxygen conf (xml for docstrings) for component ${COMP}")
+    configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxy2swig.config.in ${DOXY_CONFIG_XML} @ONLY)
+
+    # -- target to build xml doc for current component  --
+    add_custom_target(${COMP}_xml4swig
+      COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML}
+      OUTPUT_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log ERROR_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy.log
+      COMMENT " -- Build xml (for swig) doc for component ${COMP} ..."
+      )
+
+    # -- command to build .i files from xml doc for current component  --
+    add_custom_command(OUTPUT  ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
+      DEPENDS ${COMP}_xml4swig
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      "import doctools; doctools.build_docstrings('${${COMP}_HDRS}', '${COMP}', '${DOXY_CONFIG_XML}', '${SICONOS_SWIG_ROOT_DIR}')"
+      VERBATIM
+      )
   else()
+    # No doxy2swig but 
+    # generate empty ${COMP}-docstrings.i file (required because of %include in swig files)
     add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-      DEPENDS ${DOCSTRINGS_FILES}
       COMMAND touch
       ARGS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       )
   endif()
-  add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i)
+  
+  add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
+    COMMENT "Create swig files from xml for component ${COMP}.")
+
 endmacro()
 
 # ----------------------------------------------------------------------
@@ -75,13 +120,17 @@ endmacro()
 #
 # ----------------------------------------------------------------------
 macro(add_siconos_swig_sub_module fullname)
+
   get_filename_component(_name ${fullname} NAME)
   get_filename_component(_path ${fullname} PATH)
-  
   message(" -- Build module ${_name} in directory ${_path} for parent ${COMPONENT}")
   # Add component dependencies to the current submodule deps.
   if(DEFINED SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
     set(SWIG_MODULE_${_name}_EXTRA_DEPS ${SWIG_MODULE_${COMPONENT}_EXTRA_DEPS})
+  endif()
+
+  if(WITH_DOXY2SWIG)
+    list(APPEND SWIG_MODULE_${_name}_EXTRA_DEPS ${COMPONENTS}_docstrings)
   endif()
   
   # add as dependencies all the i files
@@ -148,12 +197,37 @@ macro(add_siconos_swig_sub_module fullname)
     swig_link_libraries(${_name} ${PYTHON_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
   endif()
 
-  # set dep between docstrings and python bindings
-  add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT}_docstrings)
-  
   # set dependency of sphinx apidoc to this target
   if(USE_SPHINX)
-    add_dependencies(apidoc ${SWIG_MODULE_${_name}_REAL_NAME})
+    set(pymodule_name ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.py)
+    add_custom_target(${_name}_replace_latex
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+      "import doctools; doctools.replace_latex('${pymodule_name}', '${SICONOS_SWIG_ROOT_DIR}/tmp_${_name}/')"
+      VERBATIM
+      DEPENDS ${SWIG_MODULE_${_name}_REAL_NAME}
+      COMMENT "Insert latex into docstrings.")
+
+    set(SPHINX_OUTPUT_DIR ${CMAKE_BINARY_DIR}/docs/sphinx/reference/python/)
+    # python modules for previous components are required to apidoc (e.g. kernel.py for control).
+    # So we get this last comp and add a dependency.
+    list(APPEND PROCESSED_PYTHON_MODULES ${SWIG_MODULE_${_name}_REAL_NAME})
+    list(REMOVE_DUPLICATES PROCESSED_PYTHON_MODULES)
+    set(PROCESSED_PYTHON_MODULES ${PROCESSED_PYTHON_MODULES} CACHE INTERNAL "python modules for siconos")
+    add_custom_target(${_name}_autodoc
+      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share:${CMAKE_BINARY_DIR}/wrap ${PYTHON_EXECUTABLE} -c
+      "import doctools; doctools.module_docstrings2rst('${COMPONENT}', '${_path}', '${_name}', '${SPHINX_OUTPUT_DIR}', '${SICONOS_SWIG_ROOT_DIR}')"
+      VERBATIM
+      DEPENDS ${_name}_replace_latex
+      #DEPENDS ${SWIG_MODULE_${_name}_REAL_NAME}
+      COMMENT "Create rst files from python docstrings for module siconos.${_name}")
+
+    foreach(dep ${PROCESSED_PYTHON_MODULES})
+      add_dependencies(${_name}_autodoc ${dep})
+    endforeach()
+    
+    add_dependencies(create_rst ${_name}_autodoc)
+
+
   endif()
   
   # Copy __init__.py file if needed

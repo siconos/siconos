@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 
 /*!\file fc3d_NCPGlockerFixedPoint.h
   \brief Typedef and functions declarations related to NCP-Fixed Point solver for 3 dimension frictional contact problems.
-  \author Houari Khenous
   Each solver must have 4 functions in its interface:
   - initialize: link local static variables to the global ones (M,q,...)
   - update: link/fill the local variables corresponding to sub-blocks of the full problem, for a specific contact
@@ -60,7 +59,7 @@ extern "C"
 
   /** compute error for friction-contact 3D problem with Fixed Point
    * \param dimension of the global problem
-   * \param[in,out] velocity vector (\warning in-out parameter )
+   * \param[in,out] velocity vector
    * \param reaction vector
    * \param output_error
   */

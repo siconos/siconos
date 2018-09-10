@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,6 @@
 /*!\file MixedComplementarityProblem.h
 */
 
-/*! \page MCProblem Mixed (Non Linear) Complementarity problem (MCP)
-  \section mcpIntro  Problem Statement
-  Given a sufficiently smooth function \f${F} \colon {{\mathrm{I\!R}}}^{n+m}  \to {{\mathrm{I\!R}}}^{n+m} \f$,
-  the Mixed Complementarity problem (MCP) is to find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n+m})\f$ such that:\n
-  \f{align*}{
-  w &= \begin{pmatrix}w_e\\w_i\end{pmatrix} = F(z) \\
-  w_e &=0 \\
-  0 &\le w_i \perp z_i \ge 0,
-  \f}
-  where "i" (resp. "e") stands for inequalities (resp. equalities). The vector \f$z\f$ is splitted like \f$w\f$:
-  \f{equation*}{z =\begin{pmatrix}z_e\\z_i\end{pmatrix}.\f}
-  The vectors \f$z_i,w_i\f$ are of size <tt>sizeEqualities</tt>, the vectors \f$z_e,w_e\f$ are of size <tt>sizeInequalities</tt>
-  and \f$F\f$ is a non linear function that must be user-defined.
-
-  A Mixed Complementarity problem (MCP) is a NCP "augmented" with equality constraints.
-
-  \section mcpSolversList Available solvers :
-  - mcp_FB(), nonsmooth Newton method based on Fisher-Burmeister function.
-*/
-
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"
 
@@ -53,15 +33,22 @@ typedef void (*ptrFunctionMCP2)(void* env, int n, double* z, double * F);
 typedef void (*ptrFunctionMCP_nabla)(void* env, int n, double* z, NumericsMatrix * F);
 
 /** \struct  MixedComplementarityProblem MixedComplementarityProblem.h
- * The structure that defines a Mixed Complementarity problem (MCP) : Find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n+m})\f$ such that:\n
-  \f{align*}{
-  w &= \begin{pmatrix}w_e\\w_i\end{pmatrix} = F(z) \\
+ * The structure that defines a Mixed Complementarity problem (MCP) : find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n+m})\f$ such that:
+
+  \f[
+  w &= \begin{pmatrix}w_e\\w_i\end{pmatrix} = F(z) \    \
   w_e &=0 \\
   0 &\le w_i \perp z_i \ge 0
-  \f}
+  \f]
+
   where "i" (resp. "e") stands for inequalities (resp. equalities). The vector \f$z\f$ is splitted like \f$w\f$:
-  \f{equation*}{z =\begin{pmatrix}z_e\\z_i\end{pmatrix}\f}.
-  \f$z_i,w_i\f$ are vectors of size <pre>sizeEqualities</pre>, \f$z_e,w_e\f$ vectors of size <pre>sizeInequalities</pre>
+
+  \f[
+  z =\begin{pmatrix}z_e\\z_i\end{pmatrix}
+  \f]
+
+  \f$z_i,w_i\f$ are vectors of size sizeEqualities, \f$z_e,w_e\f$ vectors of size sizeInequalities
+
   and \f$F\f$ is a non linear function that must be user-defined.
  */
 struct MixedComplementarityProblem

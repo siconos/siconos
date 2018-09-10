@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   double tolerance = dparam[0];
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
   /* Check for trivial case */
-  /*   *info = checkTrivialCase(n, q,velocity, reaction, options); */
+  /*   *info = fc3d_checkTrivialCase(n, q,velocity, reaction, options); */
 
   if (*info == 0)
     return;

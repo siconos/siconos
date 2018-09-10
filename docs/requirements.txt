@@ -1,0 +1,17 @@
+scipy
+lxml
+pytest
+matplotlib
+h5py
+sphinx
+sphinx-rtd-theme
+sphinxcontrib-bibtex
+sphinxcontrib-pandoc-markdown
+sphinxcontrib-versioning
+sphinxcontrib-websupport
+sphinxbootstrap4theme
+sphinx-bootstrap-theme
+sphinxcontrib-napoleon
+numpydoc
+breathe
+

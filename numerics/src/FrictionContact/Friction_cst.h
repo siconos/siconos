@@ -59,6 +59,8 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_NSN_AC_TEST = 521,
   /** Panagiotopoulos, fixed point, local formulation */
   SICONOS_FRICTION_3D_PFP = 522,
+  /** ADMM local formulation */
+  SICONOS_FRICTION_3D_ADMM = 523,
 
   /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
 
@@ -104,7 +106,8 @@ enum FRICTION_SOLVER
   /** VI formulation, Extra-gradient, local formulation */
   SICONOS_GLOBAL_FRICTION_3D_VI_EG = 611,
   SICONOS_GLOBAL_FRICTION_3D_ACLMFP = 612,
-  SICONOS_GLOBAL_FRICTION_3D_ADMM = 613
+  SICONOS_GLOBAL_FRICTION_3D_ADMM = 613,
+  SICONOS_GLOBAL_FRICTION_3D_ADMM_WR = 614
 };
 
 
@@ -151,6 +154,7 @@ extern const char* const   SICONOS_FRICTION_3D_GAMS_LCP_PATH_STR;
 extern const char* const   SICONOS_FRICTION_3D_GAMS_LCP_PATHVI_STR;
 extern const char* const   SICONOS_FRICTION_3D_SOCLCP_STR;
 extern const char* const   SICONOS_FRICTION_3D_ACLMFP_STR;
+extern const char* const   SICONOS_FRICTION_3D_ADMM_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSGS_WR_STR ;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR_STR ;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_PROX_WR_STR ;
@@ -165,6 +169,7 @@ extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ACLMFP_STR;
 extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_STR;
+extern const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_WR_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR ;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR ;
 
@@ -360,8 +365,12 @@ enum SICONOS_FRICTION_3D_ADMM_IPARAM_ENUM
 {
   /** index in iparam to store the strategy for computing rho */
   SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY = 9,
-  /** index in iparam to store the acceleration paramter */
-  SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION= 10
+  /** index in iparam to store the acceleration parameter */
+  SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION= 10,
+  /** index in iparam to store the symmetry parameter */
+  SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY= 11,
+  /** index in iparam to store the sparse storage parameter */
+  SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE= 12
 
 };
 
@@ -370,7 +379,11 @@ enum SICONOS_FRICTION_3D_ADMM_DPARAM_ENUM
   /** index in dparam to store the rho value for projection formulation */
   SICONOS_FRICTION_3D_ADMM_RHO = 3,
   /** index in dparam to store the eta value for the restarting criteria */
-  SICONOS_FRICTION_3D_ADMM_RESTART_ETA = 4
+  SICONOS_FRICTION_3D_ADMM_RESTART_ETA = 4,
+  /** index in dparam to store the tau value for the balancing residual technique */
+  SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU = 5,
+  /** index in dparam to store the phi value for the balancing residual technique */
+  SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI = 6
 };
 
 enum SICONOS_FRICTION_3D_ADMM_ACCELERATION_ENUM
@@ -380,6 +393,19 @@ enum SICONOS_FRICTION_3D_ADMM_ACCELERATION_ENUM
   SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART= 2
 };
 
+enum SICONOS_FRICTION_3D_ADMM_SYMMETRY_ENUM
+{
+  SICONOS_FRICTION_3D_ADMM_CHECK_SYMMETRY= 0,
+  SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY= 1,
+  SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY= 2
+};
+
+enum SICONOS_FRICTION_3D_ADMM_STORAGE_ENUM
+{
+  SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE= 0,
+  SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE= 1
+};
+
 enum SICONOS_FRICTION_3D_ADMM_STRATEGY_ENUM
 {
   /** A constant value given in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
@@ -387,7 +413,9 @@ enum SICONOS_FRICTION_3D_ADMM_STRATEGY_ENUM
   /** A computed value stored in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
   SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF =1,
   /** An adaptive strategy for rho is used */
-  SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_ADAPTIVE =2
+  SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING =2,
+  /** An adaptive strategy for rho is used */
+  SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING =3
 };
 
 

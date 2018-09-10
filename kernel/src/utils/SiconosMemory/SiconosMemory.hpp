@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,10 @@
 
 /** Container used to save vectors in SiconosMemory */
 typedef std::vector<SiconosVector> MemoryContainer;
+
 TYPEDEF_SPTR(MemoryContainer)
 
 /** This class is a backup for vectors of previous time step
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.0.0.
-    \date (Creation) 07/06/2004
 
     There is a max number of saved vector (memorySize) and all the vector (simple or block)
     should have the same size.
@@ -101,9 +99,9 @@ public:
 
   /** fill the memory with a vector of siconosVector
    * \param v MemoryContainer
-   *       _size is set to the size of the deque given in parameters
+   * \param size of the input container
    */
-  void setVectorMemory(const MemoryContainer& v, MemoryContainer::size_type _size);
+  void setVectorMemory(const MemoryContainer& v, MemoryContainer::size_type size);
 
   /** To get SiconosVector number i of the memory
    * \param int i: the position in the memory of the wanted SiconosVector
@@ -127,8 +125,9 @@ public:
     return size();
   };
 
-  /** set the max size of the SiconosMemory
-   * \param max the max size for this SiconosMemory
+  /** set size of the SiconosMemory (number of vectors and size of vector)
+   * \param steps the max size for this SiconosMemory, size of the container
+   * \param vectorSize size of each vector of the container
    */
   void setMemorySize(const unsigned int steps,
                      const unsigned int vectorSize);

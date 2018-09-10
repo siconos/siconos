@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ void NCPGlocker_fillMLocal(FrictionContactProblem * problem, FrictionContactProb
   }
   else if (storageType == 1)
   {
-    int diagPos = SBM_get_position_diagonal_block(MGlobal->matrix1, contact);
+    int diagPos = SBM_diagonal_block_index(MGlobal->matrix1, contact);
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
     /*     cblas_dcopy(9, MGlobal->matrix1->block[diagPos], 1,localproblem->M->matrix0 , 1); */
   }

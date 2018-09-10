@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,6 @@
 #define RTOL_DEFAULT 10 * MACHINE_PREC;
 
 /** LsodarOSI solver (odepack)
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
  *
  * Many parameters are required as input/output for LSODAR. See the documentation of this function
  * in externals/odepack/opkdmain.f to have a full description of these parameters.  \n
@@ -83,10 +79,12 @@ private:
   friend struct _NSLEffectOnFreeOutput;
 
 public:
-  
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
-  enum LsodarOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+  enum LsodarOSI_ds_workVector_id{FREE, WORK_LENGTH};
+
+  enum LsodarOSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+  enum LsodarOSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
 
   /** Lsodar counter : Number of steps taken for the problem so far. */
   static int count_NST;
@@ -234,9 +232,8 @@ public:
 
   /** compute rhs(t) for all dynamical systems in the set
    * \param t current time of simulation
-   * \param DSG0 the graph of DynamicalSystem
    */
-  void computeRhs(double t, DynamicalSystemsGraph& DSG0);
+  void computeRhs(double t);
 
   /** compute jacobian of the rhs at time t for all dynamical systems in the set
    * \param t current time of simulation
@@ -256,7 +253,6 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */

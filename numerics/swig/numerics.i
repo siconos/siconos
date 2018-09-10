@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2016 INRIA.
+// Copyright 2018 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ namespace std11 = boost;
 #endif
 
 // put needed shared_ptrs here
-// commented-out for now, swig insists on calling freeFrictionContactProblem()
+// commented-out for now, swig insists on calling frictionContactProblem_free()
 // instead of respecting the shared_ptr!
 // %shared_ptr(FrictionContactProblem)
 

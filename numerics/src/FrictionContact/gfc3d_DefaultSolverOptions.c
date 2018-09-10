@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,12 @@ int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info = gfc3d_ADMM_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_GLOBAL_FRICTION_3D_ADMM_WR:
+  {
+    info =    gfc3d_admm_wr_setDefaultSolverOptions(options);
+    break;
+  }
+
   case SICONOS_GLOBAL_FRICTION_3D_VI_FPP:
   {
     info = gfc3d_VI_FixedPointProjection_setDefaultSolverOptions(options);
@@ -96,7 +102,6 @@ int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
   default:
   {
     numerics_error("gfc3d_setDefaultSolverOptions", "Unknown Solver");
-
   }
   }
 

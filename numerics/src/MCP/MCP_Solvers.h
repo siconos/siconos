@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,8 @@
 #define MCP_SOLVERS_H
 
 /*!\file MCP_Solvers.h
-  \brief List of all the available solvers for the resolution of Mixed Complementarity Problems.\n
-
-  \author siconos-team@lists.gforge.inria.fr
+  \brief List of all the available solvers for the resolution of Mixed Complementarity Problems.
 */
-
-/*! \page MCPSolvers MixedComplementarity Problems Solvers
-
-  \section mcp_FischerBurmeister  semi-smooth Newton/Fisher-Burmeister solver.
-  a nonsmooth Newton method based based on the Fischer-Bursmeister convex function
-
-  function: mcp_FischerBurmeister() \n
-  parameters:
-  - iparam[0] (in): maximum number of iterations allowed
-  - iparam[1] (out): number of iterations processed
-  - dparam[0] (in): tolerance
-  - dparam[1] (out): resulting error
-
- */
 
 #include "MixedComplementarityProblem.h"
 #include "SolverOptions.h"
@@ -75,7 +59,6 @@ extern "C"
       \param[out] w not used
       \param[out] info termination value:   0 if success else >0.
       \param[in,out] options structure used to define the solver and its parameters.
-      \author Franck Pérignon
   */
   void mcp_FischerBurmeister(MixedComplementarityProblem* problem, double* z, double* w, int* info, SolverOptions* options);
 
@@ -86,7 +69,6 @@ extern "C"
       \param[out] Fmcp n1+n2-vector which contains the value of Fmcp(z) = (G(z), H(z))
       \param[out] info termination value:   0 if success else >0.
       \param[in,out] options structure used to define the solver and its parameters.
-      \author Olivier Huber
   */
   void mcp_newton_FBLSA(MixedComplementarityProblem2* problem, double* z, double* Fmcp, int* info, SolverOptions* options);
 
@@ -98,7 +80,6 @@ extern "C"
       \param[out] Fmcp n1+n2-vector which contains the value of Fmcp(z) = (G(z), H(z))
       \param[out] info termination value:   0 if success else >0.
       \param[in,out] options structure used to define the solver and its parameters.
-      \author Olivier Huber
   */
   void mcp_newton_minFBLSA(MixedComplementarityProblem2* problem, double* z, double* Fmcp, int* info, SolverOptions* options);
 

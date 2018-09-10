@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,15 +24,12 @@
 
 /** Lagrangian Linear Systems with time invariant and diagonal coefficients - \f$M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
 
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) Apr 29, 2004
-
     The class LagrangianLinearDiagonalDS  allows to define  and compute a generic ndof-dimensional
     Lagrangian Linear Time Invariant Dynamical System of the form :
     where
-    \f[
+    \f$
     M \ddot q + C \dot q + K q =  F_{ext}(t,z) + p,
-    \f]
+    \f$
     where
     - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
     - \f$ \dot q  \in R^{ndof} \f$  the velocity, i. e. the time derivative of the  generalized coordinates.
@@ -51,23 +48,32 @@
     - \f$ n= 2 ndof \f$
     - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
     - rhs given by:
-    \f[
-    rhs(x,t,z) = \left[\begin{array}{c}
-    \dot q  \\
-    \ddot q = M^{-1}\left[F_{ext}(t, z) - C \dot q - K q  + p \right]\\
-    \end{array}\right]
-    \f]
+
+    \rst
+    .. math::
+        
+        rhs(x,t,z) = \left[\begin{array}{c}
+        \\dot q  \\
+        \ddot q = M^{-1}\left[F_{ext}(t, z) - C \\dot q - K q  + p \right]\\
+        \end{array}\right]
+    
+    \endrst
+
     Its jacobian is:
-    \f[
-    \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
-    0  & I \\
-    -M^{-1}K & -M^{-1}C \\
-    \end{array}\right]
-    \f]
+    \rst
+    .. math::
+
+        \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
+        0  & I \\
+        -M^{-1}K & -M^{-1}C \\
+        \end{array}\right]
+
+\endrst
+
     The input due to the non smooth law is:
-    \f[
+    \f$
     r = \left[\begin{array}{c}0 \\ p \end{array}\right]
-    \f]
+    \f$
 */
 class LagrangianLinearDiagonalDS : public LagrangianDS
 {
@@ -96,15 +102,15 @@ public:
    *  \param v0 initial velocity
    *  \param stiffness diagonal of the stiffness matrix
    *  \param damping diagonal of the damping matrix
-   *  \param mass, diagonal of the mass matrix
+   *  \param mass diagonal of the mass matrix
    */
   LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosVector stiffness, SP::SiconosVector damping, SP::SiconosVector mass);
 
   /** constructor for complete system with identity mass matrix
    *  \param q0 initial coordinates
    *  \param v0 initial velocity
-   *  \param mass, diagonal of the mass matrix
    *  \param stiffness diagonal of the stiffness matrix
+   *  \param damping diagonal of the damping matrix
    */
   LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosVector stiffness, SP::SiconosVector damping);
 
@@ -159,7 +165,7 @@ public:
   //@{
 
   /** allocate (if needed)  and compute rhs and its jacobian.
-   * \param time of initialization
+   * \param t time of initialization
    */
   void initRhs(double t) ;
 

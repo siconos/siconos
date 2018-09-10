@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,6 @@ TYPEDEF_SPTR(Hem5OSI_impl);
 
 /** Hem5OSI solver (odepack)
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
  *
  * Many parameters are required as input/output for LSODAR. See the documentation of this function
  * in externals/odepack/opkdmain.f to have a full description of these parameters.  \n
@@ -113,9 +110,11 @@ public:
   SP::Hem5OSI_impl _impl;
   friend class Hem5OSI_impl;
 
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+  enum Hem5OSI_ds_workVector_id{FREE, WORK_LENGTH};
 
-  enum Hem5OSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+  enum Hem5OSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+  enum Hem5OSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
 
   /** constructor from a minimum set of data
    */
@@ -255,7 +254,6 @@ public:
   void initialize();
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */

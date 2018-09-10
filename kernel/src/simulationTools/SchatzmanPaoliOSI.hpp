@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,6 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 
 /**  SchatzmanPaoliOSI Time-Integrator for Dynamical Systems
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
- *
- *
  * SchatzmanPaoliOSI class is used to define some time-integrators methods for a
  * list of dynamical systems.
 
@@ -62,8 +57,13 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 class SchatzmanPaoliOSI : public OneStepIntegrator
 {
 public:
-   enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
-  enum SchatzmanPaoliOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+
+  enum SchatzmanPaoliOSI_ds_workVector_id {RESIDU_FREE, FREE, LOCAL_BUFFER, WORK_LENGTH};
+
+  enum SchatzmanPaoliOSI_interaction_workVector_id{OSNSP_RHS, WORK_INTERACTION_LENGTH};
+
+  enum SchatzmanPaoliOSI_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
+
 protected:
   /** serialization hooks
   */
@@ -244,7 +244,6 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */

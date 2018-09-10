@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,6 @@
 #include "SimulationGraphs.hpp"
 
 /** Non Smooth Problem Formalization and Simulation
-
-   \author SICONOS Development Team - copyright INRIA
-   \date (Creation) Apr 26, 2004
 
   This is an abstract class, that provides an interface to define a
   non smooth problem:
@@ -65,10 +62,10 @@
    \section osns_options Options for Numerics and the driver for solvers
 
    When the Numerics driver is called a set of solver options (name, tolerance, max. number of iterations ...)
-   is required --> SolverOptions, \ref NumericsSolver.
+   is required --> SolverOptions.
 
    Default values are always set in solver options the OneStepNSProblem is built
-   but if you need to set them yourself, please see \ref NumericsSolver. 
+   but if you need to set them yourself, please check Users'guide, Numerics solvers part.
 
  */
 class OneStepNSProblem

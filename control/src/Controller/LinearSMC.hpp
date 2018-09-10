@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 */
 
 /*! \file LinearSMC.hpp
-  \brief General interface to define an actuator
-*/
+ *
+ *  \brief Linear sliding mode controller
+ */
 
 #ifndef LinearSMC_H
 #define LinearSMC_H
@@ -26,6 +27,14 @@
 #include "CommonSMC.hpp"
 
 
+/** Linear sliding mode controller
+ *
+ *  This controller implements the following sliding mode control strategy:
+ *  \f$\begin{equation} u = u_{\mathrm{eq}} + u_s\qquad\text{where}\begin{cases} u_{\mathrm{eq}} \text{is the equivalent control input}\\u_s = -sgn(\sigma)\end{cases},\end{equation}\f$
+ *
+ * where \f$ \sigma = Cx\f$ is the user-defined sliding variable.
+ *
+ *  */
 class LinearSMC : public CommonSMC
 {
 private:
@@ -48,7 +57,7 @@ public:
 
   /** Constructor with all the data
    * \param sensor the ControlSensor feeding the Actuator
-   * \param B the B matrix in the FirstOrderLinearR
+   * \param B the matrix 
    * \param D the D matrix in the FirstOrderLinearR
    * \param type do not set this yourself ! this is used in derived classes
    */
@@ -62,7 +71,7 @@ public:
 
   /** Compute the new control law at each event
    * Here we are using the following formula:
-   * TODO
+   * \f$u = u_{\mathrm{eq}} + u_s\f$
    */
   virtual void actuate();
 

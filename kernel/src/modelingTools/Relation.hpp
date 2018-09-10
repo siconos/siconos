@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,6 @@
 #include "SiconosAlgebraTypeDef.hpp"
 
 /** General Non Linear Relation (Virtual Base class for Relations).
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27, 2004
  *
  *  A relation is a link between global variables of the Dynamical
  * Systems and some local ones, named y and lambda; belonging to one
@@ -110,7 +107,6 @@ protected:
    *  \param subtype subtype of the relation
    */
   Relation(RELATION::TYPES type, RELATION::SUBTYPES subtype);
-
 
 private:
 
@@ -216,7 +212,6 @@ public:
   /** compute all the H Jacobian
    * \param time the current time
    * \param inter the interaction using this relation
-   * \param interProp
    */
   virtual void computeJach(double time, Interaction& inter) = 0;
 
@@ -231,7 +226,6 @@ public:
   /** default function to compute y
    *  \param time the current time
    *  \param inter the interaction using this relation
-   *  \param interProp
    *  \param derivativeNumber number of the derivative to compute (optional, default = 0)
    */
   virtual void computeOutput(double time, Interaction& inter,
@@ -240,7 +234,6 @@ public:
   /** default function to compute r
    *  \param time the current timels
    *  \param inter the interaction using this relation
-   *  \param interProp
    *  \param level the input "derivative" order of lambda used to compute input
    */
   virtual void computeInput(double time, Interaction& inter,

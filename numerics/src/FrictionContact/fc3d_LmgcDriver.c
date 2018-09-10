@@ -48,7 +48,7 @@ int fc3d_LmgcDriver(double *reaction,
 
   NumericsMatrix* NM = NM_new_SBM(nc * 3, nc * 3, M);
 
-  FrictionContactProblem* FC = frictionContactProblem_new(3, nc, NM, q, mu);
+  FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, nc, NM, q, mu);
 
   /* frictionContact_display(FC); */
 

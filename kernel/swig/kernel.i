@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2016 INRIA.
+// Copyright 2018 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -91,6 +91,9 @@
 %ignore getWBoundaryConditionsMap;
 %ignore getDSBlocks;
 %ignore getInvMBlock;
+
+// SiconosMemory
+%ignore swap;
 
 %warnfilter(509) rotateAbsToBody;
 %warnfilter(509) changeFrameAbsToBody;
@@ -238,10 +241,6 @@ typedef __mpz_struct mpz_t[1];
 %import "RelationNamespace.hpp";
 
 
-
-
-
-
 //namespace std {
 
   %template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>,
@@ -340,4 +339,10 @@ KERNEL_REGISTRATION()
     return std11::dynamic_pointer_cast<LagrangianDS>(ds);
   }
 
+  // Required to get size of a graph of interactions in python interp
+  size_t size_graph(const InteractionsGraph& index_set)
+  {
+    return index_set.size();
+  }
+  
 %}

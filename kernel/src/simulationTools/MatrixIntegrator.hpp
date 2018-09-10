@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,14 +78,16 @@ public:
 
   /** Constructor to compute \f$\int exp(A\tau)E\amthrm{d}\tau\f$
    * \param ds the DynamicalSystem
-   * \param m the original Model
+   * \param nsds current nonsmooth dynamical system
+   * \param td current time discretisation
    * \param E a matrix
    */
   MatrixIntegrator(const DynamicalSystem& ds, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td, const  SP::SiconosMatrix E);
 
   /** Constructor to compute \f$\int exp(A\tau)E(\tau)\mathrm{d}\tau\f$
    * \param ds the DynamicalSystem
-   * \param m the original Model
+   * \param nsds current nonsmooth dynamical system
+   * \param td current time discretisation
    * \param plugin the plugin to compute \f$E(t)\f$
    * \param p the number of column in E
    */
@@ -93,7 +95,8 @@ public:
 
   /** Constructor to compute \f$\int exp(A\tau)\mathrm{d}\tau\f$
    * \param ds the DynamicalSystem
-   * \param m the original Model
+   * \param nsds current nonsmooth dynamical system
+   * \param td current time discretisation
    */
   MatrixIntegrator(const DynamicalSystem& ds,const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation &td);
 

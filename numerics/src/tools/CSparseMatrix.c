@@ -38,7 +38,11 @@
 #undef restrict
 #define restrict __restrict
 #endif
-//#define VERBOSE_DEBUG
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+
 
 #include "debug.h"
 
@@ -47,6 +51,7 @@ int CSparseMatrix_aaxpy(const double alpha, const CSparseMatrix *A,
                         const double * restrict x,
                         const double beta, double * restrict y)
 {
+  DEBUG_BEGIN("CSparseMatrix_aaxpy(...)\n");
   CS_INT p, n, *Ap, *Ai ;
   int j;
   double *Ax ;
@@ -66,10 +71,12 @@ int CSparseMatrix_aaxpy(const double alpha, const CSparseMatrix *A,
   {
     for(p = Ap [j] ; p < Ap [j+1] ; p++)
     {
+      DEBUG_PRINTF("j=%i,\t p=%i,\t Ai [p]  =%i,\t y [Ai [p]] = %e,\t ", j, p, Ai [p],y [Ai [p]] );
       y [Ai [p]] *= beta;
       y [Ai [p]] += alpha * Ax [p] * x [j] ;
     }
   }
+  DEBUG_END("CSparseMatrix_aaxpy(...)\n");
   return 1;
 }
 
@@ -535,3 +542,52 @@ CSparseMatrix* CSparseMatrix_alloc_for_copy(const CSparseMatrix* const m)
 
   return out;
 }
+
+void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B)
+{
+  assert (A);
+  assert (B);
+
+  if (B->nzmax < A->nzmax)
+  {
+    B->x = (double *) realloc(B->x, A->nzmax * sizeof(double));
+    B->i = (CS_INT *) realloc(B->i, A->nzmax * sizeof(CS_INT));
+  }
+  else if (!(B->x))
+  {
+    B->x = (double *) malloc(A->nzmax * sizeof(double));
+  }
+
+  if (A->nz >= 0)
+  {
+    /* triplet */
+    B->p = (CS_INT *) realloc(B->p, A->nzmax * sizeof(CS_INT));
+  }
+  else if ((A->nz == -1) && (B->n < A->n))
+  {
+    /* csc */
+    B->p = (CS_INT *) realloc(B->p, (A->n + 1) * sizeof(CS_INT));
+  }
+  else if ((A->nz == -2) && (B->m < A->m))
+  {
+    /* csr */
+    B->p = (CS_INT *) realloc(B->p, (A->m + 1) * sizeof(CS_INT));
+  }
+
+
+  B->nzmax = A->nzmax;
+  B->nz = A->nz;
+  B->m = A->m;
+  B->n = A->n;
+
+  memcpy(B->x, A->x, A->nzmax * sizeof(double));
+  memcpy(B->i, A->i, A->nzmax * sizeof(CS_INT));
+
+  size_t size_cpy = -1;
+  if (A->nz >= 0) { size_cpy = A->nzmax; }
+  else if (A->nz == -1) { size_cpy = A->n + 1; }
+  else if (A->nz == -2) { size_cpy = A->m + 1; }
+
+  memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
+}
+

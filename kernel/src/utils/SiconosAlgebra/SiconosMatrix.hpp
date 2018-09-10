@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,6 @@ TYPEDEF_SPTR(VInt)
 
 /** Abstract class to provide interface for matrices handling
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \date (creation) 07/21/2006
  *  Matrices can be either block or Simple.
  *  See Derived classes for details.
  *
@@ -476,17 +474,21 @@ public:
    */
   virtual size_t nnz(double tol = 1e-14);
 
-  /** return the number of non-zero in the matrix
-   * \param csm the compressed column sparse matrix
-   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
-   * \return the number of non-zeros
+  /** Fill sparse matrix
+   *  \param csc the compressed column sparse matrix
+   *  \param row_off
+   *  \param col_off
+   *  \param tol the tolerance under which a number is considered as equal to zero 
+   *  \return true if function worked.
    */
   bool fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
 
   /** return the number of non-zero in the matrix
-   * \param triplet the triplet sparse matrix
-   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
-   * \return the number of non-zeros
+   *  \param csc the compressed column sparse matrix
+   *  \param row_off
+   *  \param col_off
+   *  \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
+   *  \return the number of non-zeros
    */
   bool fillTriplet(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
 

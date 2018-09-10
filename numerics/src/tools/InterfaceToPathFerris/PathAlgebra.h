@@ -3,7 +3,6 @@
 
 /*!\file PathAlgebra.h
   \brief functions and tools used to convert matrices between Numerics and Path format
-  \author Franck Perignon , 26/05/2008
 */
 
 #include "SiconosConfig.h"

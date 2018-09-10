@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,19 +30,12 @@
 #include "InteractionManager.hpp"
 
 /** Description of the simulation process (integrators, time
- *  discretisation and so on) - Base class for TimeStepping or
- *  EventDriven.
- *
- *   \author SICONOS Development Team - copyright INRIA
- *   \version 4.2.0.
- *   \date (Creation) Apr 26, 2004
- *
- *   !!! This is an abstract class !!!
- *
- *   The available simulations are TimeStepping and EventDriven. See
- *   derived classes for more details.
- *
- */
+    discretisation and so on).
+    
+    !!! This is an abstract class !!!
+    
+    The available simulations are TimeStepping, EventDriven and TimeSteppingD1Minus.  
+*/
 
 class Simulation : public std11::enable_shared_from_this<Simulation>
 {
@@ -69,7 +62,6 @@ protected:
   */
   double _tout;
 
-  
   double _T;
 
   /** the dynamical systems integrators */
@@ -88,26 +80,25 @@ protected:
   SP::InteractionManager _interman;
 
   /** _numberOfIndexSets is the number of index sets that we need for
-   * simulation. It corresponds for most of the simulation to
-   * _numberOfIndexSets = _levelMaxForOutput + 1
-   * Nevetheless, some simulation needs more sets of indices that the number
-   * of output that we considered.
+   * simulation. It corresponds for most of the simulations to levelMaxForOutput + 1.
+   * Nevertheless, some simulations need more sets of indices that the number
+   * of outputs that we considered.
    */
   unsigned int _numberOfIndexSets;
 
-  /** tolerance value used to compute the index sets - Default: equal
-      to machine double precision (from dlamch lapack routine).*/
+  /** tolerance value used to compute the index sets.
+      Default: equal to 10 x machine double precision (std::numeric_limits<double>::epsilon)
+  */
   double _tolerance;
 
-  /** Flag for optional output. True if output display for solver stat
-      required, else false.*/
+  /** Output setup: if true, display solver stats */
   bool _printStat;
 
   /** _staticLevels : do not recompute levels once they have been
    * initialized */
   bool _staticLevels;
 
-  /**Output file for stats*/
+  /** File id for stats outputs.*/
   std::ofstream statOut;
 
   /**
@@ -150,9 +141,8 @@ protected:
 
   /** initialize objects (DSs and Interations) found in the NSDS
    * Changelog and update the changelog iterator.
-   * \return true if any new Interactions were initialized
    */
-  bool initializeNSDSChangelog();
+  void initializeNSDSChangelog();
 
   /** initialize index sets for OSIs */
   void initializeIndexSets();
@@ -167,7 +157,6 @@ private:
    */
   Simulation& operator=(const Simulation&);
 
-
 public:
 
   /** default constructor, for serialization
@@ -175,6 +164,7 @@ public:
   Simulation() {};
 
   /** default constructor
+   *  \param nsds current nonsmooth dynamical system
    *  \param td the timeDiscretisation for this Simulation
    */
   Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
@@ -217,9 +207,7 @@ public:
     _name = newName;
   }
 
-  /** get time instant k of the time discretisation
-   *  \return the time instant t_k
-   */
+  /** returns time instant k of the time discretisation  */
   double getTk() const;
 
   /** get time instant k+1 of the time discretisation
@@ -236,13 +224,10 @@ public:
    */
   double getTkp2() const;
 
-  /** Get current timestep
-   * \return the current timestep
-   */
+  /** returns current timestep  */
   double currentTimeStep() const;
 
-  /** get the EventsManager
-   *  \return a pointer to EventsManager
+  /** returns a pointer to the EventsManager
    */
   inline SP::EventsManager eventsManager() const
   {
@@ -251,14 +236,14 @@ public:
 
   /** get "current time" (ie starting point for current integration,
       time of currentEvent of eventsManager.)
-   *  \return a double.
-   */
+      \return a double.
+  */
   double startingTime() const;
 
   /** get "next time" (ie ending point for current integration, time
       of nextEvent of eventsManager.)
-   *  \return a double.
-   */
+      \return a double.
+  */
   double nextTime() const;
 
   /** get the current time step size ("next time"-"current time")
@@ -269,10 +254,9 @@ public:
     return (nextTime() - startingTime());
   };
 
-  /** check if a future event is to be treated or not (ie if some
+  /** true if a future event is to be treated or not (ie if some
       events remain in the eventsManager).
-   *  \return a bool.
-   */
+  */
   bool hasNextEvent() const;
 
   /** get all the Integrators of the Simulation
@@ -344,7 +328,6 @@ public:
   {
     return _nsds;
   }
-
   /** set the NonSmoothDynamicalSystem of the Simulation
    *  \param newPtr a pointer on NonSmoothDynamicalSystem
    */
@@ -400,8 +383,6 @@ public:
 
   /** Complete initialisation of the Simulation (OneStepIntegrators,
       OneStepNSProblem, TImediscretisation).
-      \param m the model to be linked to this Simulation
-      \param init optional flag for partial initialization
   */
   virtual void initialize();
 
@@ -409,19 +390,9 @@ public:
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);
 
-  /** Associate an OSI with a DynamicalSystem in the graph and
-   *  initialize any necessary graph properties (e.g. work vectors).
-   *  Inserts the integrator into the set if not already present.
-   *
-   *  \param osi The OneStepIntegrator to associate with the DynamicalSystem.
-   *  \param ds The DynamicalSystem, which must be already inserted
-   *            into the NonSmoothDynamicalSystem.
-   *  \param m The Model for initializing the OSI.
-   *  \param time The current time for initializing the OSI. */
-  // void prepareIntegratorForDS(SP::OneStepIntegrator osi, SP::DynamicalSystem ds,
-  //                             SP::Model m, double time);
-
-  /** Set an object to automatically manage interactions during the simulation */
+  /** Set an object to automatically manage interactions during the simulation
+   * \param manager 
+   */
   void insertInteractionManager(SP::InteractionManager manager)
     { _interman = manager; }
   

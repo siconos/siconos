@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,6 @@ const unsigned int MOREAUPROJECTONCONSTRAINTSOSISTEPSINMEMORY = 1;
 /**  \class MoreauJeanDirectProjectionOSI
  *   \brief One Step time Integrator for First Order Dynamical Systems  for
  *    mechanical Systems (LagrangianDS and NewtonEulerDS) with  Direct Projection Algorithm
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.4.0.
- *  \date (Creation) May 02, 2012
  *
  * This class reimplement a special activation of constraints
  * in the MoreauJeanOSI for the Direct Projection Algorithm
@@ -131,7 +128,6 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
@@ -167,7 +163,7 @@ public:
    * \param i level
    * \return bool
    */
-  bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
   /** Perform the integration of the dynamical systems linked to this integrator
    *  without taking into account the nonsmooth input (_r or _p)

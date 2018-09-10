@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +33,6 @@ const unsigned long int GAPLIMIT_DEFAULT = 100;
 typedef std::vector<SP::Event> EventsContainer; // Event are already sorted
 
 /** Tools to handle a set of Events for the Simulation
-
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.6.0.
-   \date (Creation) December 22, 2012
 
    The EventsManager handles a set of events (from user time-discretisation, sensors, non-smooth ...),
    and is supposed to provide to the simulation the values of "current" and "next" events to define

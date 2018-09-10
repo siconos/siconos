@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,6 @@
 #include "SiconosVisitor.hpp"
 
 /** Non Smooth Laws (NSL) Base Class
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) May 05, 2004
  *
  * This class is the base class for all nonsmooth laws in Siconos.
  * A nonsmooth law characterize the (nonsmooth) relationship between 2 variables,

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@
  * - polytopes and polyhedra \f$ \{ x \in \mathbb{R}^n | Hx\leq K\}\f$
  * - sets defined by a set of inequalities \f$\{g_i(x)\leq 0\}\f$ ( work in progress)
  *
- * \author Olivier Huber
 */
 
 #include "NumericsFwd.h"

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,30 +27,32 @@
 
 const unsigned int MOREAUSTEPSINMEMORY = 1;
 
-/**  \class MoreauJeanOSI
- *   \brief One Step time Integrator for First Order Dynamical Systems  for
- *    mechanical Systems (LagrangianDS and NewtonEulerDS)
- *   \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) Apr 26, 2004
- *
+/** One Step time Integrator, Moreau-Jean algorithm.
  * This integrator is the work horse of the event--capturing time stepping schemes
  * for mechanical systems.  It is mainly based on the pioneering works of M. Jean and
  * J.J. Moreau for the time integration of mechanical systems
  * with unilateral contact, impact and Coulomb's friction with \f$\theta\f$ scheme
  *
- * For the linear Lagrangina system, the scheme reads as
- * \f{equation}{
- * \begin{cases}
- *  M (v_{k+1}-v_k)
- *  + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G P_{k+1},\label{eq:MoreauTS-motion}\\[1mm]
- *  q_{k+1} = q_{k} + h v_{k+\theta}, \quad \\[1mm]
- *  U_{k+1} = G^\top\, v_{k+1}, \\[1mm]
- *  \begin{array}{lcl}
- *    0 \leq U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha \in \mathcal I_1, \\[1mm]
- *    P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I \setminus \mathcal I_1,
- * \end{array}
- * \end{cases} \f}
+ * For the linear Lagrangian system, the scheme reads as
+ * 
+ \rst
+
+ .. math::
+    :nowrap:
+
+    \begin{cases}
+     M (v_{k+1}-v_k)
+     + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G P_{k+1},\label{eq:MoreauTS-motion}\\[1mm]
+     q_{k+1} = q_{k} + h v_{k+\theta}, \quad \\[1mm]
+     U_{k+1} = G^\top\, v_{k+1}, \\[1mm]
+     \begin{array}{lcl}
+      0 \leq U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha \in \mathcal I_1, \\[1mm]
+      P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I \setminus \mathcal I_1,
+    \end{array}
+    \end{cases}
+
+ \endrst
+ 
  * with  \f$\theta \in [0,1]\f$. The index set \f$\mathcal I_1\f$ is the discrete equivalent
  * to the rule that allows us to apply the Signorini  condition at the velocity level.
  * In the numerical practice, we choose to define this set by
@@ -141,7 +143,7 @@ protected:
 
 public:
 
-  enum MoreauJeanOSI_ds_workVector_id{RESIDU_FREE, VFREE, BUFFER, WORK_LENGTH};
+  enum MoreauJeanOSI_ds_workVector_id{RESIDU_FREE, VFREE, BUFFER, QTMP, WORK_LENGTH};
 
   enum MoreauJeanOSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
@@ -271,7 +273,7 @@ public:
   };
 
   /** set the boolean to indicate that we use gamma for the relation
-   *  \param newUseGammaForRelation a Boolean
+   *  \param newExplicitNewtonEulerDSOperators a Boolean
    */
   inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators)
   {
@@ -292,7 +294,6 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to 
    *  one dynamical system on the graph and needed by the osi 
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system   
    */
@@ -329,6 +330,7 @@ public:
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem
    *  \param WBoundaryConditions write the result in WBoundaryConditions
+   *  \param iteration_matrix the OSI iteration matrix (W)
    */
   void _computeWBoundaryConditions(DynamicalSystem& ds, SiconosMatrix& WBoundaryConditions, SiconosMatrix& iteration_matrix);
 
@@ -372,7 +374,7 @@ public:
    * \param i level of the IndexSet
    * \return Boolean
    */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
 
   /** method to prepare the fist Newton iteration

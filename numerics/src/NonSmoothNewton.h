@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@
 
   The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth Newton-type methods
   for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).
-
-  \author Houari Khenous - Franck Perignon
 
  */
 
@@ -56,10 +54,10 @@ extern "C"
   \param z unknown vector, in-out argument
   \param phi pointer to \f$ \phi \f$ function
   \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
-  \param iparam vector of int parameters:\n
+  \param iparam vector of int parameters:
    - [0] : max. number of iterations
    - [1] : number of iterations processed
-  \param dparam vector of double parameters:\n
+  \param dparam vector of double parameters:
    - [0]: tolerance
    - [1]: error
   \return int 0 if ok
@@ -73,10 +71,10 @@ extern "C"
   \param z unknown vector, in-out argument
   \param phi pointer to \f$ \phi \f$ function
   \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
-  \param iparam vector of int parameters:\n
+  \param iparam vector of int parameters:
    - [0] : max. number of iterations
    - [1] : number of iterations processed
-  \param dparam vector of double parameters:\n
+  \param dparam vector of double parameters:
    - [0]: tolerance
    - [1]: error
   \return int 0 if ok

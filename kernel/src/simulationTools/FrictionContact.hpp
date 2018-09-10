@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,17 +31,20 @@ TYPEDEF_SPTR(FrictionContactProblem)
 
 /** Formalization and Resolution of a Friction-Contact Problem
 
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) Dec 15, 2005
-
   This class is devoted to the formalization and the resolution of
   friction contact problems defined by :
-  \f{eqnarray}
-  velocity =  q + M reaction \\
-  \\
-  velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
-  \f}
+
+
+  \rst
+  
+  .. math::
+
+     velocity =  q + M reaction \\
+     \\
+     velocity \geq 0, reaction \geq 0,  reaction^{T} velocity =0
+  
+  \endrst
+
   and a Coulomb friction law.
 
   With:

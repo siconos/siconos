@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,10 @@
 #define GLOBALFRICTIONCONTACT3DSOLVERS_H
 
 /*!\file gfc3d_Solvers.h
-  Subroutines for the resolution of contact problems with friction (3-dimensional case).\n
-
-  \author Vincent Acary
+  Subroutines for the resolution of contact problems with friction (3-dimensional case).
 
 */
 
-/*! \page GlobalFC3DSolvers Global Friction-Contact 3D problems Solvers
-
-This page gives an overview of the available solvers for friction-contact (3D) problems and their required parameters.
-
-For each solver, the input argument are:
-- a FrictionContactProblem
-- the unknowns (reaction,velocity)
-- info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a SolverOptions structure, which handles iparam and dparam
-
-\section pfc3Dnsgs Non-Smooth Gauss Seidel Solver
-
- function: fc3d_nsgs()
- parameters:
-
-
-*/
 #include "GlobalFrictionContactProblem.h"
 #include "SolverOptions.h"
 #include "Friction_cst.h"
@@ -99,6 +80,10 @@ extern "C"
   void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
   int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options);
+  
+  void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
+
+  int gfc3d_admm_wr_setDefaultSolverOptions(SolverOptions* options);
 
   int gfc3d_nonsmooth_Newton_AlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options);
 

@@ -164,7 +164,9 @@ if(WITH_PYTHON_WRAPPER)
 
   # ====== conf/copy file for docstrings generation from doxygen ====
   if(WITH_DOXY2SWIG)
-    configure_file(doxy2swig.py ${CMAKE_BINARY_DIR}/share/doxy2swig.py COPYONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/externals/swig/doxy2swig.py ${CMAKE_BINARY_DIR}/share/doxy2swig.py COPYONLY)
+    configure_file(${CMAKE_SOURCE_DIR}/docs/sicodoxy2swig.py ${CMAKE_BINARY_DIR}/share/sicodoxy2swig.py COPYONLY)
+    
   endif()
 
 endif()

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,6 @@ extern "C" double rint(double x);
 const double DEFAULT_TICK = 1e-16;
 
 /** Abstract class that represents generic time events.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 21, 2006
  *
  *  This base class simply records the time at which the event will take place. A pure virtual function named process
  *  will be invoked to execute the event.

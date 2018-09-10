@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,17 @@
 #include "Interaction.hpp"
 
 /** FirstOrder Non Linear Relation.
- *  \author SICONOS Development Team - copyright INRIA
- *  \date (Creation) Apr 27, 2004
  *
  *  Relation for First Order Dynamical Systems, with:
- * \f{eqnarray}
- * y &=& h(X,t,\lambda,Z)\\
- * R &=& g(X,t,\lambda,Z)
- * \f}
+ *
+ * \rststar
+ *
+ * .. math::
+ * 
+ *     y &=& h(X,t,\lambda,Z)\\
+ *     R &=& g(X,t,\lambda,Z)
+ *
+ \endrststar
  *  X, Z, R corresponds to DynamicalSystem variables.
  *  If DS1 and DS2 are involved in the linked Interaction, then X =[x1 x2], Z=[z1 z2] ...
  *
@@ -64,11 +67,6 @@ public:
   enum FirstOrderRDS  {x,z,r, DSlinkSize};
   enum FirstOrderRVec {e,  relationVectorsSize};
   enum FirstOrderRMat {mat_C, mat_D, mat_F, mat_B, mat_K, relationMatricesSize};
-
-
-  //enum FirstOrderRWorkVec {osnsp_rhs, h_alpha, g_alpha, vec_residuY, vec_residuR, workVecSize};
-  //enum FirstOrderWorkMat{mat_workMatSize};
-
 
 protected:
   /** serialization hooks

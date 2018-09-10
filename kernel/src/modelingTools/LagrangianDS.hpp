@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
  */
 
 /*! \file LagrangianDS.hpp
-  \brief LagrangianDS class - Second Order Non Linear Dynamical Systems.
+  LagrangianDS class - Second Order Non Linear Dynamical Systems.
 */
 
 #ifndef LAGRANGIANDS_H
@@ -29,86 +29,97 @@
 
 /** Lagrangian non linear dynamical systems - \f$M(q,z) \dot v = F(v, q, t, z) + p \f$
 
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) Apr 29, 2004
+ This class defines and computes a generic ndof-dimensional
+ Lagrangian Non Linear Dynamical System of the form :
 
-    This class defines and computes a generic ndof-dimensional
-    Lagrangian Non Linear Dynamical System of the form :
+ \rst
+ .. math::
+        
+   \begin{cases}
+   M(q,z) \\dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p \\
+   \\dot q = v
+   \end{cases}
+           
+ \endrst
 
-    \f[
-    \begin{cases}
-    M(q,z) \dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p  \\
-    \dot q = v
-    \end{cases}
-    \f]
+ where
+ 
+ - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
+ - \f$ \\dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
+ derivative of the generalized coordinates (Lagrangian systems).
+ - \f$ \ddot q =\\dot v \in R^{ndof} \f$ the acceleration, i. e. the second
+ time derivative of the generalized coordinates.
+ - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth
+ Interaction.
+ - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
+ in the SiconosMatrix mass().
+ - \f$ F_{gyr}(\\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
+ saved in the SiconosVector fGyr().
+ - \f$ F_{int}(\\dot q , q , t) \in R^{ndof} \f$ are the internal
+ forces saved in the SiconosVector fInt().
+ - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces saved in
+ the SiconosVector fExt().
+ - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
+ variables, some sort of discrete state.
 
-    where
-    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
-    - \f$ \dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
-    derivative of the generalized coordinates (Lagrangian systems).
-    - \f$ \ddot q =\dot v \in R^{ndof} \f$ the acceleration, i. e. the second
-    time derivative of the generalized coordinates.
-    - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth
-    Interaction.
-    - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term saved
-    in the SiconosMatrix mass().
-    - \f$ F_{gyr}(\dot q, q) \in R^{ndof}\f$ is the non linear inertia term
-    saved in the SiconosVector fGyr().
-    - \f$ F_{int}(\dot q , q , t) \in R^{ndof} \f$ are the internal
-    forces saved in the SiconosVector fInt().
-    - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces saved in
-    the SiconosVector fExt().
-    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic
-    variables, some sort of discrete state.
+ The equation of motion is also shortly denoted as  \f$ M(q,z) \\dot v = F(v, q, t, z) + p\f$
 
-    The equation of motion is also shortly denoted as:
-    \f[
-    M(q,z) \dot v = F(v, q, t, z) + p
-    \f]
+ where \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces acting on the system, that is
+ \f$ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) + F_{int}(v, q , t, z) \f$
+ This vector is stored in the  SiconosVector forces().
 
-    where
-    - \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
-    acting on the system, that is
-    \f[ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) + F_{int}(v, q , t, z) \f]
-    This vector is stored in the  SiconosVector forces()
+ q[i] is the derivative number i of q.
+ Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \\dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
 
+ The following operators (and their jacobians) can be plugged, in the usual way (see User Guide, 'User-defined plugins')
 
-    q[i] is the derivative number i of q.
-    Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
+ - \f$M(q)\f$ (computeMass())
+ - \f$F_{gyr}(v, q, z)\f$ (computeFGyr())
+ - \f$F_{int}(v , q , t, z)\f$ (computeFInt())
+ - \f$F_{ext}(t, z)\f$ (computeFExt())
 
-    The following operators (and their jacobians) can be plugged, in the usual way (see User Guide, 'User-defined plugins')
+ If required (e.g. for Event-Driven like simulation), reformulation as a first-order system (DynamicalSystem)
+ is possible, with:
 
-    - \f$M(q)\f$ (computeMass())
-    - \f$F_{gyr}(v, q, z)\f$ (computeFGyr())
-    - \f$F_{int}(v , q , t, z)\f$ (computeFInt())
-    - \f$F_{ext}(t, z)\f$ (computeFExt())
+ - \f$ n= 2 ndof \f$
+ - \f$ x = \left[\begin{array}{c}q \\ \\dot q\end{array}\right]\f$
+ - rhs given by:
 
+   \rst
+ 
+   .. math::
 
+      \\dot x = \left[\begin{array}{c}
+      \\dot q\\
+      \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
+      \end{array}\right]
+           
+   \endrst
+ 
+ - jacobian of the rhs, with respect to x
 
+ \rst
 
-    If required (e.g. for Event-Driven like simulation), reformulation as a first-order system (DynamicalSystem)
-    is possible, with:
+ .. math::        
 
-    - \f$ n= 2 ndof \f$
-    - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
-    - rhs given by:
-    \f[
-    \dot x = \left[\begin{array}{c}
-    \dot q \\
-    \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
-    \end{array}\right]
-    \f]
-    - jacobian of the rhs, with respect to x
-    \f[
     \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
     0  & I \\
-    \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\dot q}(M^{-1}(q)F(v, q , t, z)) \\
+    \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\\dot q}(M^{-1}(q)F(v, q , t, z)) \\
     \end{array}\right]
-    \f]
-    - input due to the non smooth law:
-    \f[
-    r = \left[\begin{array}{c}0 \\ p \end{array}\right]
-    \f]
+           
+\endrst
+ 
+- input due to the non smooth law: 
+
+ \rst
+
+ .. math::
+    
+    \left[\begin{array}{c}
+     0 \\
+     p \end{array}\right]
+
+ \endrst
 
 
 */
@@ -127,7 +138,7 @@ protected:
   void _init(SP::SiconosVector position, SP::SiconosVector velocity);
 
   // -- MEMBERS --
-
+  
   /** number of degrees of freedom of the system */
   unsigned int _ndof;
 
@@ -360,21 +371,20 @@ public:
    */
   void initializeNonSmoothInput(unsigned int min, unsigned max) ;
 
-  /** set nonsmooth input
+  /** set nonsmooth input to zero
+   *  \param level input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) ;
 
   /** update right-hand side for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  virtual void computeRhs(double time, bool isDSup = false);
+  virtual void computeRhs(double time);
 
   /** update \f$\nabla_x rhs\f$ for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  virtual void computeJacobianRhsx(double time, bool isDSup = false);
+  virtual void computeJacobianRhsx(double time);
 
   /** reset non-smooth part of the rhs (i.e. p), for all 'levels' */
   void resetAllNonSmoothParts();
@@ -1014,7 +1024,7 @@ public:
   /** Allocate memory for q[level], level > 1
       Useful for some integrators that need
       q[2] or other coordinates vectors.
-      \param int the required level
+      \param level the required level
    */
   void init_generalized_coordinates(unsigned int level);
 

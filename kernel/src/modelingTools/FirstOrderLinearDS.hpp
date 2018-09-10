@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,16 @@
 
 /** First Order Linear Systems - \f$M(t) \dot x = A(t)x(t)+ b(t) + r, \quad x(t_0)=x_0\f$.
 
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) Apr 29, 2004
-
     This class represents first order linear systems of the form:
 
-    \f[
-    M(t) \dot x = A(t)x(t)+ b(t) + r,
-    x(t_0)=x_0
-    \f]
+    \rst
+
+    .. math::
+
+        M(t) \\dot x = A(t)x(t)+ b(t) + r,
+        x(t_0)=x_0
+    
+    \endrst
 
     where
 
@@ -149,16 +150,14 @@ public:
   void initRhs(double time) ;
 
   /** update right-hand side for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  void computeRhs(double time, bool isDSUp = false);
+  void computeRhs(double time);
 
   /** update \f$\nabla_x rhs\f$ for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  void computeJacobianRhsx(double time, bool isDSUp = false);
+  void computeJacobianRhsx(double time);
 
   ///@}
 
@@ -326,7 +325,5 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-
-TYPEDEF_SPTR(FirstOrderLinearDS)
 
 #endif // FirstOrderLinearDS_H

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,4 +62,17 @@ void NV_write_in_file_python(double * m,  int nRow, FILE* file)
     fprintf(file, "%32.24e,\t ", m[i]);
   }
   fprintf(file, "]");
+}
+
+bool NV_equal(double * x, double * y, int n, double tol)
+{
+  for (int i =0; i< n ; i++)
+  {
+    if (fabs(x[i] - y[i]) >= tol)
+    {
+      DEBUG_PRINTF("error %i = %e\n",i, fabs(x[i]) - y[i]);
+      return false;
+    } 
+  }
+  return true;
 }

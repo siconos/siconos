@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,7 +253,7 @@ void FirstOrderNonLinearDS::computeJacobianfx(double time, SP::SiconosVector sta
     ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, state->getArray(), &(*_jacobianfx)(0, 0), _z->size(), _z->getArray());
 }
 
-void FirstOrderNonLinearDS::computeRhs(double time, bool isDSUp)
+void FirstOrderNonLinearDS::computeRhs(double time)
 {
   // second argument is useless at the time - Used in derived classes
 
@@ -280,7 +280,7 @@ void FirstOrderNonLinearDS::computeRhs(double time, bool isDSUp)
   }
 }
 
-void FirstOrderNonLinearDS::computeJacobianRhsx(double time, bool isDSUp)
+void FirstOrderNonLinearDS::computeJacobianRhsx(double time)
 {
   // second argument is useless at the time - Used in derived classes
 

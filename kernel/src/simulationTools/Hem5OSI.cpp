@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -496,7 +496,7 @@ void Hem5OSI_impl::fprob(integer* IFCN,
 void Hem5OSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
   // Get work buffers from the graph
-  VectorOfVectors& workVectors = *_initializeDSWorkVectors(ds);
+  VectorOfVectors& ds_work_vectors = *_initializeDSWorkVectors(ds);
 
   Type::Siconos dsType = Type::value(*ds);
   
@@ -524,8 +524,8 @@ void Hem5OSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
     _vWork->insertPtr(lds.velocity());
     _aWork->insertPtr(lds.acceleration());
     _forcesWork->insertPtr(lds.forces());
-    workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
-    workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds.dimension()));
+    ds_work_vectors.resize(Hem5OSI::WORK_LENGTH);
+    ds_work_vectors[Hem5OSI::FREE].reset(new SiconosVector(lds.dimension()));
 
   }
   else
@@ -544,20 +544,27 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
 
-  interProp.workVectors.reset(new VectorOfVectors);
-  interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+  if (!interProp.workVectors)
+  {
+    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors->resize(Hem5OSI::WORK_INTERACTION_LENGTH);
+  }
 
-  VectorOfVectors& workV = *interProp.workVectors;
+  if (!interProp.workBlockVectors)
+  {
+    interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+    interProp.workBlockVectors->resize(Hem5OSI::BLOCK_WORK_LENGTH);
+  }
 
-  VectorOfBlockVectors& workBlockV = *interProp.workBlockVectors;
-  workBlockV.resize(Hem5OSI::BLOCK_WORK_LENGTH);
+  VectorOfVectors& inter_work = *interProp.workVectors;
+  VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
 
+  
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
 
+  inter_work[Hem5OSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
-  workV.resize(Hem5OSI::WORK_INTERACTION_LENGTH);
-  workV[Hem5OSI::OSNSP_RHS].reset(new SiconosVector(inter.getSizeOfY()));
   NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
   Type::Siconos nslType = Type::value(nslaw);
 
@@ -582,25 +589,24 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
   _check_and_update_interaction_levels(inter);
   // Initialize/allocate memory buffers in interaction.
-  bool computeResidu = relation.requireResidu();
-  inter.initializeMemory(computeResidu,_steps);
+  inter.initializeMemory(_steps);
 
   /* allocate and set work vectors for the osi */
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
+    RuntimeException::selfThrow("Hem5OSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
 
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
   {
-    workBlockV[Hem5OSI::xfree].reset(new BlockVector());
-    workBlockV[Hem5OSI::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    inter_work_block[Hem5OSI::xfree].reset(new BlockVector());
+    inter_work_block[Hem5OSI::xfree]->insertPtr(workVds1[Hem5OSI::FREE]);
   }
   // else if (relationType == NewtonEuler)
   // {
-  //   workBlockV[NewtonEulerR::xfree].reset(new BlockVector());
-  //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  //   inter_work_block[::xfree].reset(new BlockVector());
+  //   inter_work_block[::xfree]->insertPtr(workVds1[Hem5OSI::FREE]);
   // }
 
   if (ds1 != ds2)
@@ -608,11 +614,11 @@ void Hem5OSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == Lagrangian)
     {
-      workBlockV[Hem5OSI::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      inter_work_block[Hem5OSI::xfree]->insertPtr(workVds2[Hem5OSI::FREE]);
     }
     // else if (relationType == NewtonEuler)
     // {
-    //   workBlockV[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    //   inter_work_block[::xfree]->insertPtr(workVds2[Hem5OSI::FREE]);
     // }
   }
 }
@@ -1001,7 +1007,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
     }
     // else if  (relationType == NewtonEuler)
     // {
-    //   Xfree = inter->data(NewtonEulerR::free);
+    //   Xfree = inter->data(::FREE);
     // }
     assert(Xfree);
     //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;

@@ -48,6 +48,9 @@ DEFINE_SPTR(OneStepIntegrator)
 DEFINE_SPTR(Relation)
 
 DEFINE_SPTR(FirstOrderR)
+DEFINE_SPTR(FirstOrderNonLinearDS)
+DEFINE_SPTR(FirstOrderLinearDS)
+DEFINE_SPTR(FirstOrderLinearTIDS)
 
 DEFINE_SPTR(Simulation)
 DEFINE_SPTR(EventDriven)

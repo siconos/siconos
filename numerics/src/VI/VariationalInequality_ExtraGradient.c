@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,9 +61,11 @@ int determine_convergence(double error, double *tolerance, int iter,
       if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
       {
 
-        printf("error = %e ", error);
-        printf("absolute_error = %e ", absolute_error);
-        printf("options->dparam[SICONOS_DPARAM_TOL]= %e\n", options->dparam[SICONOS_DPARAM_TOL]);
+        if (verbose > 0) {
+          printf("error = %e ", error);
+          printf("absolute_error = %e ", absolute_error);
+          printf("options->dparam[SICONOS_DPARAM_TOL]= %e\n", options->dparam[SICONOS_DPARAM_TOL]);
+        }
 
         *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
         if (verbose > 0)

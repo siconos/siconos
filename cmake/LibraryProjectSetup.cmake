@@ -84,16 +84,22 @@ macro(LIBRARY_PROJECT_SETUP)
   # --- doxygen warnings ---
   include(doxygen_warnings)
 
-  # --- doxygen documentation ---
+  # --- documentation ---
+  
   # xml files for python docstrings ...
   # xml files are required to build docstrings target
   # and so they must be build during cmake run.
-  include(swig_python_tools)
-  doxy2swig_docstrings(${COMPONENT})
-
+  if(WITH_PYTHON_WRAPPER)
+    include(swig_python_tools)
+    doxy2swig_docstrings(${COMPONENT})
+  endif()
+  
   # update the main doxy file, without building the doc
   if(WITH_${COMPONENT}_DOCUMENTATION)
     update_doxy_config_file(${COMPONENT})
+
+    # Prepare target to generate rst files from xml
+    doxy2rst_sphinx(${COMPONENT})
   endif()
 
   # -- include --
@@ -151,7 +157,10 @@ macro(LIBRARY_PROJECT_SETUP)
   if(WITH_${COMPONENT}_PYTHON_WRAPPER)
     add_subdirectory(swig)
   endif()
-
+  
+  if(WITH_PYTHON_WRAPPER)
+    add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
+  endif()
   
 endmacro()
 

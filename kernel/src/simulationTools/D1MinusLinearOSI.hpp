@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,7 @@
 #include "SimpleMatrix.hpp"
 
 
-/** \class D1MinusLinearOSI D1MinusLinearOSI.hpp Time-Integrator for Dynamical Systems
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.6.0 -- 3.7.x
- *  \date (Creation) September 01, 2011
+/** Time-Integrator for Dynamical Systems
  *
  * Reference:
  *
@@ -157,10 +153,13 @@ public:
                                      numberOfTypeOfD1MinusLinearOSI
                                     };
 
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+  enum D1MinusLinearOSI_ds_workVector_id {RESIDU_FREE, FREE, FREE_TDG, WORK_LENGTH};
 
-  enum D1MinusLinear_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+  enum D1MinusLinearOSI_interaction_workVector_id{OSNSP_RHS, WORK_INTERACTION_LENGTH};
 
+  enum D1MinusLinearOSI_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
+
+ 
   /** basic constructor
    */
   D1MinusLinearOSI();
@@ -209,12 +208,10 @@ public:
   /** initialization of the D1MinusLinearOSI integrator; for linear time
    *  invariant systems, we compute time invariant operator
    */
-  // virtual void initialize(Model& m);
   virtual void initialize_nonsmooth_problems();
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
@@ -311,7 +308,7 @@ public:
    * \param i the index set level
    * \return a boolean if it needs to be removed or not
   */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
@@ -327,7 +324,7 @@ public:
    * \param i the index set level
    * \return a boolean if it needs to be removed or not
   */
-  virtual bool removeInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be included
     * in the IndexSet of level i
@@ -343,7 +340,7 @@ public:
    * \param i the index set level
    * \return a boolean if it needs to be removed or not
   */
-  virtual bool removeInteractionInIndexSetHalfExplicitVelocityLevel(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSetHalfExplicitVelocityLevel(SP::Interaction inter, unsigned int i);
 
   /** displays the data of the D1MinusLinearOSI's integrator */
   virtual void display()

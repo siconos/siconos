@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,17 @@
 
 /** First order linear and time-invariant coeff systems - \f$M \dot x = Ax(t)+ b + r, x(t_0)=x_0\f$.
  
-   \author SICONOS Development Team - copyright INRIA
-   \date (Creation) Apr 29, 2004
- 
- 
    This class represents first order linear systems of the form:
  
-   \f[
-   M\dot x(t) = A x(t) + b + r,
-   x(t_0)=x_0
-   \f]
+   \rst
+   
+   .. math::
+
+       M\\dot x(t) = A x(t) + b + r,
+       x(t_0)=x_0
+
+   \endrst
+
 
    where
    - \f$x \in R^{n} \f$ is the state,
@@ -92,17 +93,13 @@ public:
 
   /** Default function to the right-hand side term
    *  \param time current time
-   *  \param isDSup flag to avoid recomputation of operators
-   *
    */
-  void computeRhs(double time, bool isDSup = false);
+  void computeRhs(double time);
 
   /** Default function to jacobian of the right-hand side term according to x
    *  \param time current time
-   *  \param isDSup flag to avoid recomputation of operators
-   *
    */
-  void computeJacobianRhsx(double time, bool isDSup = false);
+  void computeJacobianRhsx(double time);
 
   ///@}
 
@@ -123,7 +120,5 @@ public:
   ACCEPT_STD_VISITORS();
 
 };
-
-TYPEDEF_SPTR(FirstOrderLinearTIDS)
 
 #endif // LINEARTIDS_H

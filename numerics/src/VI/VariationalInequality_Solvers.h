@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,6 @@
 
 /*!\file VariationalInequality_Solvers.h
   \brief Subroutines for the resolution of Variational Inequalites (VI) problems
-*/
-
-/*! \page VISolvers VI problems Solvers
-
-This page gives an overview of the available solvers for Variational Inequality problems and their required parameters.
-
-For each solver, the input argument are:
-- a VariationalInequality
-- the unknowns (x,fx)
-- info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a SolverOptions structure, which handles iparam and dparam
 */
 
 #include "VariationalInequality.h"

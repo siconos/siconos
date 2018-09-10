@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,6 @@
 
 #include "NewtonEulerFrom1DLocalFrameR.hpp"
 /** NewtonEulerFrom3DLocalFrameR
- *
- * \author O. Bonnefon
- *  \version 3.0.0.
- *  \date Dec, 2010
  *
  * This class is an interface for relation with impact and FC3D.
  * From NewtonEulerFrom1DLocalFrameR, it inherits to the computation of the jacobian, this operator is use for the predictor of activation and deactivation of the Interaction.

@@ -195,7 +195,8 @@ int gfc3d_LmgcDriver(double *reaction,
 
   SolverOptions numerics_solver_options;
   
-  int infi = gfc3d_setDefaultSolverOptions(&numerics_solver_options, solver_id);
+  int infi = 0;
+  infi = gfc3d_setDefaultSolverOptions(&numerics_solver_options, solver_id);
   assert(!infi);
   int iSize_min = isize < numerics_solver_options.iSize ? isize : numerics_solver_options.iSize;
   DEBUG_PRINTF("iSize_min = %i", iSize_min);

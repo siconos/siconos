@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! \file OnestepIntegrator.hpp
+/*! \file OneStepIntegrator.hpp
 
   Base class (i.e. common interface) for dynamical system integration over a time step.
 */
@@ -29,9 +29,6 @@
 #include "SimulationGraphs.hpp"
 
 /**  Generic class to manage DynamicalSystem(s) time-integration
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \date (Creation) Apr 26, 2004
  *
  * !!! This is a virtual class, interface for some specific integrators !!!
  *
@@ -53,21 +50,6 @@
  */
 class OneStepIntegrator :public std11::enable_shared_from_this<OneStepIntegrator>
 {
-
-public :
-  /** List of indices used to save tmp work matrices and vectors (last one is the size of the present list) */
-  enum OSI_ds_workVector_id {local_buffer, residu, residu_free,
-                             free, free_tdg,
-                             x_partial_ns_for_relation, delta_x_for_relation,
-                             qtmp, acce_memory, acce_like,
-                             work_vector_of_vector_size};
-  enum OSI_interaction_workVector_id{osnsp_rhs, vec_x, vec_z,
-                                     h_alpha, g_alpha, vec_residuY, vec_residuR,
-                                     interaction_work_vector_of_vector_size};
-
-  enum OSI_interaction_workBlockVector_id{xfree, x_partial_ns, delta_x, work_vector_of_block_vector_size };
-
-  enum OSI_WorkMatrix_id {mat_Ktilde, mat_Khat, dense_output_coefficients, work_vector_of_matrix_size};
 
 protected:
   /* serialization hooks */
@@ -287,7 +269,6 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
@@ -401,12 +382,14 @@ public:
   virtual void updateInput(double time);
 
   /** update the output of the Interaction attached to this Integrator
-   *  \param level level of interest for the dynamics
+   * \param time current time
+   * \param level level of interest for the dynamics
    */
   virtual void updateOutput(double time, unsigned int level);
 
   /** update the input of the Interaction attached to this Integrator
-   *  \param level level of interest for the dynamics
+   * \param time current time
+   * \param level level of interest for the dynamics
    */
   virtual void updateInput(double time, unsigned int level);
 
@@ -440,9 +423,9 @@ public:
    * \param i
    * \return bool
    */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
   {
-    RuntimeException::selfThrow("OneStepIntegrator::removeInteractionInIndexSet - Should not be called at this level");
+    RuntimeException::selfThrow("OneStepIntegrator::removeInteractionFromIndexSet - Should not be called at this level");
     return 0;
   };
 

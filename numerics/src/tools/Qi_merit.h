@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@
   \brief functions related to the Qi C-functions used as a merit function for box VI problems
 
   Reference Facchinei--Pang pp.869 - 877.
-
-  \author Olivier Huber, 21/05/2014
 
 */
 

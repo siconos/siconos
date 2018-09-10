@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@
 #define LINEAR_SMC_OT2             104
 #define LINEAR_SMC_IMPROVED        105
 #define TWISTING                   106
+#define REGULAR_TWISTING           107
+#define EXPLICIT_TWISTING          108
 
 
 /** Sensor types */

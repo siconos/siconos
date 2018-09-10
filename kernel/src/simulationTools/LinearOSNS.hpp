@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,10 @@ TYPEDEF_SPTR(MuStorage)
 
 /** Base (abstract) class for linear non-smooth problems
 
-    \author SICONOS Development Team - copyright INRIA
-    \date (Creation) November 13, 2010
-
     Base class for linear non-smooth problems, usually in the form:
 
-    \f[
-    w =  q + M z
-    \f]
+    \f$ w =  q + M z \f$
+
     where
     - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
     - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$

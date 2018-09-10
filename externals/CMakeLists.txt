@@ -73,12 +73,11 @@ endif()
 
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
+# No docs for externals.
 set(${COMPONENT}_EXCLUDE_DOXY
-  netlib
-  hairer
-  PATH_SDK/include
-  tools)
-
+  # .
+  ${${COMPONENT}_DIRS}
+  )
 
 SET(${COMPONENT}_EXCLUDE_SRCS "SOL/lumod-c/sparselib.c" "SOL/lumod-c/lumod_sparse.c")
 

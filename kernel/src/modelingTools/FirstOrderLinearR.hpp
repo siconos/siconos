@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,17 @@ typedef void (*FOVecPtr)(double, unsigned int, double*, unsigned int, double*);
 
 /** First Order Linear Relation
 
-\author SICONOS Development Team - copyright INRIA
-\version 3.0.0.
-\date Apr 15, 2007
 
 Linear Relation for First Order Dynamical Systems:
 
-\f{eqnarray}
-y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
+\rst
 
-R &=& B(t,z) \lambda
-\f}
+.. math::
+
+    y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
+    R &=& B(t,z) \lambda
+
+\endrst
 
 The following operators can be plugged: \f$ B(t,z), C(t,z), D(t,z), e(t,z), F(t,z)\f$
 
@@ -174,11 +174,9 @@ public:
 
   /** default function to compute h
   *  \param time current time
-  *  \param workV
-  *  \param workM
   *  \param x XXX
-  *  \param z XXX
   *  \param lambda
+  *  \param z XXX
   *  \param y value of h
   */
   void computeh(double time, 
@@ -187,7 +185,6 @@ public:
 
   /** default function to compute g
   *  \param time current time
-  *  \param workM
   *  \param lambda XXX
   *  \param z XXX
   *  \param r non-smooth input
@@ -197,7 +194,6 @@ public:
   /** default function to compute y
   *  \param time current time
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
   virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
@@ -205,7 +201,6 @@ public:
   /** default function to compute r
   *  \param time current time
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
   virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);

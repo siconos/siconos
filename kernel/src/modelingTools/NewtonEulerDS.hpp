@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,16 +93,21 @@ void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFra
 /** NewtonEuler non linear dynamical systems
  
   The equations of motion in the Newton-Euler formalism can be stated as
-  \f{equation}
-  \label{eq:NewtonEuler}
-  \left\{\begin{array}{rcl}
-    M \dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \\
-    I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&  M_{ext}(t), \\
-    \dot q &=& T(q) [ v, \Omega] \\
-    \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
-  \end{array}\right.
-  \f}
-  with
+
+  \rst
+
+  .. math::
+     :nowrap:
+     
+      \left\{\begin{array}{rcl}
+      M \\dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \             \
+      I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&  M_{ext}(t), \ \
+      \dot q &=& T(q) [ v, \Omega] \                                    \
+      \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
+      \end{array}\right.
+ \endrst
+ 
+ with
   <ul>
   <li> \f$x_G,v_G\f$ position and velocity of the center of mass expressed in a inertial frame of
   reference (world frame) </li>
@@ -397,7 +402,7 @@ public:
   void initRhs(double time) ;
 
   /** set nonsmooth input to zero
-   *  \param int input-level to be initialized.
+   *  \param level input-level to be initialized.
    */
   void initializeNonSmoothInput(unsigned int level) ;
 
@@ -408,16 +413,14 @@ public:
   void initializeNonSmoothInput(unsigned int min, unsigned max) ;
 
   /** update right-hand side for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  virtual void computeRhs(double time, bool isDSup = false);
+  virtual void computeRhs(double time);
 
   /** update \f$\nabla_x rhs\f$ for the current state
-   *  \param double time of interest
-   *  \param bool isDSup flag to avoid recomputation of operators
+   *  \param time of interest
    */
-  virtual void computeJacobianRhsx(double time, bool isDup = false);
+  virtual void computeJacobianRhsx(double time);
 
   /** reset non-smooth part of the rhs (i.e. p), for all 'levels' */
   void resetAllNonSmoothParts();
@@ -554,7 +557,7 @@ public:
    * \param absoluteRef If true, velocity is returned in the inertial
    *                    frame, otherwise velocity is returned in the
    *                    body frame.
-   * \param v A SiconosVector of size 3 to receive the angular velocity.
+   * \param w A SiconosVector of size 3 to receive the angular velocity.
    */
   void angularVelocity(bool absoluteRef, SiconosVector &w) const;
 
@@ -955,7 +958,7 @@ public:
 
   /** default function to compute the external forces
     * \param time the current time
-    * \param[return] fExt the computed external force
+    * \param fExt the computed external force (in-out param)
     */
   virtual void computeFExt(double time, SP::SiconosVector fExt);
 
@@ -965,9 +968,10 @@ public:
    * Nevertheless, if _isMextExpressedInInertialFrame) is set to true, we assume that 
    * the external moment is given in the inertial frame and we perform the rotation afterwards
    * \param time the current time
-   * \param[return] mExt the computed external moment
+   * \param mExt the computed external moment (in-out param)
    */
   virtual void computeMExt(double time, SP::SiconosVector mExt);
+  
   virtual void computeMExt(double time);
 
   /** Adds a force/torque impulse to a body's FExt and MExt vectors in
@@ -1062,8 +1066,8 @@ public:
   virtual void computeMGyr(SP::SiconosVector twist);
 
   /** function to compute gyroscopic forces with some specific values for q and twist (ie not those of the current state).
-   *  \param twist SP::SiconosVector: pointers on  twist vector
-   *  \param SP::SiconosVector mGyr
+   *  \param twist pointer to twist vector
+   *  \param mGyr pointer to gyroscopic forces
    */
   virtual void computeMGyr(SP::SiconosVector twist, SP::SiconosVector mGyr);
 
@@ -1075,7 +1079,9 @@ public:
 
   /** Default function to compute the jacobian following q of mGyr
    * by forward finite difference
-   *  \param time the current time
+   * \param time the current time
+   * \param q current state
+   * \param twist pointer to twist vector
    */
   virtual void computeJacobianMGyrtwistByFD(double time, SP::SiconosVector q, SP::SiconosVector twist);
 

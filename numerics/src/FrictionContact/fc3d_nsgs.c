@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -796,7 +796,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
 int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
 {
-  numerics_printf_verbose(verbose,"fc3d_nsgs_setDefaultSolverOptions\n");
+  numerics_printf_verbose(1,"fc3d_nsgs_setDefaultSolverOptions\n");
 
   /*  strcpy(options->solverName,"NSGS");*/
   options->solverId = SICONOS_FRICTION_3D_NSGS;

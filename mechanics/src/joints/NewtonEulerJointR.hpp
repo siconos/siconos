@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2017 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,6 +173,7 @@ public:
    *
    * \param ans The vector to receive the projection.
    * \param q0 The state q of one or more NewtonEulerDS
+   * \param axis 
    * \param absoluteRef If true, ans is in the inertial frame,
    *                    otherwise the q1 frame is assumed.
    */

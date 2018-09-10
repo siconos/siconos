@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@
 #define fc2dSolvers_H
 
 /*!\file fc2d_Solvers.h
-  \brief Subroutines for the resolution of contact problems with friction (2-dimensional case).\n
-  \author Nineb Sheherazade and Dubois Frederic.
-  Last Modifications : Mathieu Renouf , Pascal Denoyelle, Franck Perignon
+  \brief Subroutines for the resolution of contact problems with friction (2-dimensional case).
 */
 
 #include "FrictionContactProblem.h"
@@ -74,7 +72,6 @@ extern "C"
        \param[out] velocity global vector
        \param[in,out] info termination value
        \param[in,out] options SolverOptions structure
-       \author Nineb Sheherazade.
   */
   void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
@@ -83,7 +80,7 @@ extern "C"
   */
   int fc2d_latin_setDefaultSolverOptions(SolverOptions* options);
 
-  /** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for global contact problem with friction.\n
+  /** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for global contact problem with friction.
    *
    *
    * \param[in] xi  the intermediate iterate which goes to be projected (projc1).
@@ -98,7 +95,7 @@ extern "C"
   void fc2d_projc(double xi[], int *n, int statusi[], double p[], double fric[], double *reaction, int *status);
 
   /** fc2d_projf is a specific projection operator related to CPG (conjugated projected gradient) algorithm
-   *              for global contact problem with friction.\n
+   *              for global contact problem with friction.
    *
    *
    * \param[in] etat  parameter which represents the status vector.
@@ -120,16 +117,15 @@ extern "C"
 
 
 
-  /** fc2d_lexicolemke is a Lemke solver for  frictionContact2D problems.\n
+  /** fc2d_lexicolemke is a Lemke solver for  frictionContact2D problems.
      * \param[in] problem structure that represents the fc2d (M, q...)
      * \param[in,out] reaction a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] velocity a n-vector of doubles which returns the solution of the problem.
      * \param options
-     * \param[out] info an integer which returns the termination value:\n
-     0 = convergence,\n
-     1 = no convergence,\n
-     2 = Null diagonal term\n
-     \author V. Acary
+     * \param[out] info an integer which returns the termination value:
+     0 = convergence,
+     1 = no convergence,
+     2 = Null diagonal term
     */
   void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options);
 
@@ -143,7 +139,6 @@ extern "C"
   /** This function transform a FrictionContactProblem (2D) into a LinearComplementarityProblem
    * \param[in] problem A pointer to a FrictionContactProblem to transform
    * \param[out] lcp_problem A pointer to a LinearComplementarity_problem resulting from the reformulation
-   * \author Vincent Acary
    */
 
   int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * lcp_problem);
@@ -153,16 +148,15 @@ extern "C"
   */
   int fc2d_enum_setDefaultSolverOptions(SolverOptions* options);
 
-  /** fc2d_enum solver for  frictionContact2D problems.\n
+  /** fc2d_enum solver for  frictionContact2D problems.
      * \param[in] problem structure that represents the fc2d (M, q...)
      * \param[in,out] reaction a n-vector of doubles which contains the initial solution and returns the solution of the problem.
      * \param[in,out] velocity a n-vector of doubles which returns the solution of the problem.
      * \param options
-     * \param[out] info an integer which returns the termination value:\n
-     0 = convergence,\n
-     1 = no convergence,\n
-     2 = Null diagonal term\n
-     \author V. Acary
+     * \param[out] info an integer which returns the termination value:
+     0 = convergence,
+     1 = no convergence,
+     2 = Null diagonal term
     */
   void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options);
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,13 @@
 #undef restrict
 #define restrict __restrict
 #endif
+
+#define SOLVE_3X3_GEPP(MAT, X) \
+{ \
+  int res = solve_3x3_gepp(mat, X); \
+  if (res) { printf("%s :: Call solve_3x3_gepp(" #MAT ", " #X " failed!. "\
+                    "No pivot could be selected for column %d\n", __func__, res); } }
+
 
 /** OP3X3(EXPR) do EXPR 9 times
  * \param EXPR a C expression that should contains self incrementing
@@ -324,7 +331,8 @@ static inline void mvp3x3(const double* restrict a, const double* restrict v, do
   *pr++ += *a++ * *v++;
 }
 
-/** add a matrix vector multiplication scaled by alpha
+/** add a matrix vector multiplication scaled by alpha 
+ * \param[in] alpha scalar coeff
  * \param[in] a a[9]
  * \param[in] v v[3]
  * \param[out] r r[3] the result of r += av
@@ -727,6 +735,7 @@ void print3(double* v);
  * \param[out] A2x first component of the vector A
  * \param[out] A2y second component of the vector A
  * \param[out] A2z third component of the vector A
+ *
  * \return 0 if success, 1 if there is a problem
 */
 WARN_RESULT_IGNORED
@@ -794,8 +803,10 @@ static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
 
 /** solve Ax = b by partial pivoting Gaussian elimination. This function is 10
  * to 20 times faster than calling LAPACK (tested with netlib and atlas).
+ *
  * \param a column-major matrix (not modified)
  * \param[in,out] b on input, the right-hand side; on output the solution x
+ *
  * \return 0 if ok, otherwise the column where no pivot could be selected
  */
 WARN_RESULT_IGNORED
@@ -921,9 +932,12 @@ static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
 }
 
 /** Computation of the eigenvalues of a symmetric 3x3 real matrix
+ *
  * \param a symmetric column-major matrix (not modified)
  * \param b a 3x3 work matrix
  * \param[in,out] eig eigenvalie in decreasing order
+ *
+ * \return 0 all the time
  */
 WARN_RESULT_IGNORED
 static inline int eig_3x3(double* restrict a, double* restrict b, double* restrict eig)

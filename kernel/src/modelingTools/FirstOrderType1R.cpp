@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ void FirstOrderType1R::initialize(Interaction& inter)
   FirstOrderR::initialize(inter);
 
   // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   unsigned int sizeDS = inter.getSizeOfDS();
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();

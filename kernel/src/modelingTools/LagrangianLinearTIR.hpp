@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,11 @@
 
 /**  Lagrangian Linear Relation.
 
-\author SICONOS Development Team - copyright INRIA
-\version 3.0.0.
-\date (Creation) Apr 27, 2004
-
 Lagrangian Relation with:
 
-\f[
-y= Cq + e + Fz
-\f]
+\f$y= Cq + e + Fz\f$
 
-\f[
-p = C^t \lambda
-\f]
+\f$ p = C^t \lambda \f$
 
 C is the only required input to built a LagrangianLinearTIR.
 
@@ -96,7 +88,6 @@ public:
   /** default function to compute y
   *  \param time not used
   *  \param inter the Interaction we want to update
-  *  \param interProp interaction properties
   *  \param derivativeNumber the derivative of y we want to compute
   */
   void computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber = 0);
@@ -104,7 +95,6 @@ public:
   /** default function to compute r
   *  \param time not used
   *  \param inter the Interaction we want to update
-  *  \param interProp interaction properties
   *  \param level the derivative of lambda we want to compute
   */
   void computeInput(double time, Interaction& inter, unsigned int level = 0);

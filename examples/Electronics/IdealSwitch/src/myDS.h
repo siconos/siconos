@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,10 +103,9 @@ public:
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  virtual void computeJacobianfx(double, bool  = false);
+  virtual void computeJacobianfx(double);
 
   /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$ with x different from current saved state.
    *  \param double time : current time
@@ -116,10 +115,9 @@ public:
 
   /** Default function to the right-hand side term
    *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  virtual void computeRhs(double, bool  = false);
+  virtual void computeRhs(double);
   virtual void resetNonSmoothPart(unsigned int level);
 
 };

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,47 +19,6 @@
 /*!\file ConvexQP.h
   \brief Definition of a structure to handle Convex Quadratic Problem.
 */
-
-/** \page convexqpProblem ConvexQP
- *
- * \section convexQPintro Problem statement
- * Given
- * <ul>
- *   <li> an integer \f$n\f$, the dimension of the ambient space,</li>
- *   <li> a SDP matrix \f$ M \in  \mathrm{I\!R}^{n \times n}\f$</li>
- *   <li> a vector \f$ q \in  \mathrm{I\!R}^n\f$</li>
- *   <li> a matrix \f$ A \in  \mathrm{I\!R}^{m times n}\f$ of constraints</li>
- *   <li> a vector \f$ b \in  \mathrm{I\!R}^m\f$</li>
- *   <li> a convex set \f$ {C} \in {{\mathrm{I\!R}}}^m\f$</li>
- * </ul>
- * the convex QP problem is to find a vector \f$z\in{{\mathrm{I\!R}}}^n\f$,
- * \f{equation*}{
- *   \begin{array}{lcl}
- *     \min & & \frac{1}{2} z^T M z + z^T q \\
- *      s.t  & & A z + b  \in C \\
- *   \end{array}
- * \f}
- * and is most simple example is when \f$ b= 0 A =I\f$ and we obtain
- *    \f{equation*}{
- *  \begin{array}{lcl}
- *    \min & & \frac{1}{2} z^T M z + Z^T q \\
- *    s.t  & &  z  \in C \\
- *  \end{array}
- * \f}
- * Most of the solver returns
- * <ul>
- *   <li> the solution vector \f$ z \in  \mathrm{I\!R}^n\f$ </li>
- *   <li> the vector \f$ u \in  \mathrm{I\!R}^m\f$ </li>
- *   <li> the multiplier \f$ \xi \in  \mathrm{I\!R}^m\f$ such that \f$ - \xi \in \partial \Psi_C(u) \f$ </li>
- *   <li> the vector \f$ w \in  \mathrm{I\!R}^n\f$ such that \f$ w =A^T \xi \f$ </li>
- * </ul>
- * In the most simple case, we return
- * <ul>
- *   <li> the solution vector \f$ z = u \in  \mathrm{I\!R}^n\f$ </li>
- *   <li> the vector \f$ w =\xi \in  \mathrm{I\!R}^m\f$ </li>
- * </ul>
- * 
- */
 
 #ifndef CONVEXQP_H
 #define CONVEXQP_H
@@ -95,7 +54,7 @@ extern "C"
 {
 #endif
   /** display a ConvexQPProblem
-   * \param convexQP the problem to display
+   * \param cqp the problem to display
    */
   void convexQP_display(ConvexQP*  cqp);
 

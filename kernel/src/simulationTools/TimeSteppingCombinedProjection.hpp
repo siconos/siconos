@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,10 +26,6 @@
 
 
 /** Time-Stepping scheme
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.4.0.
- *  \date (Creation) May 2012
  *
  */
 class TimeSteppingCombinedProjection : public TimeStepping

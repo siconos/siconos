@@ -1,0 +1,72 @@
+# -*- org -*-
+
+* Names
+
+ - We are using the CamelCas naming convention. In C++, the first
+   letter is capitalized for class names, whereas it is not for method
+   names. Private attributes begin with an underscore followed by a
+   lower case letter.  Underscores are forbidden in class and method
+   names.
+
+ - SWIG is used to generate Python bindings. It processes headers
+   files to do its magic. Therefore the parameter names in headers are
+   not meaningless.
+
+* code style c, c++ 
+
+ - cf astyle documentation. We use ansi style with
+   unpad parenthesis and 2 spaces for indentation
+
+   astyle --style=ansi -U -v -s2
+
+* code style python
+
+  we prefer pep8 style
+  use [[../Tools/emacs/siconos-dot-emacs.el]]
+
+
+* Pointers
+ - We use a lot of shared_ptr (SP in Siconos) but make sure to not abuse them
+   since they come with a cost. For instant, in most case you should not pass
+   a SP as an argument. When a variable is used only locally or temporary, it
+   also usually not needed. The same applies to private attributes in classes
+   that are really private (not used outside the class).
+
+* Debug
+ - Do not use assert in constructor. Usually you need to do checks and throw
+   an exception if something is wrong. Furthermore in python it will either
+   kill the interpreter or fail silently.
+
+* Documentation
+We are using Doxygen to document the code. Please document a function or a
+method before its signature. Doxygen uses '/**' and '*/' as delimiter.
+- how to document function:
+
+/** function to compare bar and fun
+* \param bar an integer
+* \param fun an integer
+* \return 1 if fun > bar, 0 otherwise
+*/
+unsigned int foo(int bar, int fun);
+
+for the parameter, you can also also specify the direction using [in], [out]
+or [in, out]. Example:
+/** function to copy and multiply by a scalar
+* \param[in] x the input vector
+* \param[out] y the output vector
+* \param coeff the coefficient to apply
+*/
+void myaxpy(double * x, double * y, double coeff)
+
+- how to document variables:
+/** used to compute foo */
+unsigned int bar;
+
+- how to document a class:
+provide a brief description:
+/** \brief This class describe bar */
+
+and a detailed one
+/** This class is meant to ... blablabla ... */
+
+document all the attributes and the functions

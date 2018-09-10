@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,6 @@ TYPEDEF_SPTR(SparseBlockStructuredMatrix)
 /** Definition of a compressed sparse row matrix of SiconosMatrix,
  * used in OneStepNSProblem to store the M matrix.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) 29/11/2007
- *
  * This class defines a specific compressed row sparse storage for
  * blocks matrices, each block being a SiconosMatrix*.
  *
@@ -74,14 +70,18 @@ TYPEDEF_SPTR(SparseBlockStructuredMatrix)
  * resulting matrix has 4 X 4 blocks, with 8 non-null blocks and looks
  * like:
  *
- * \f{equation*}
-   M=\left\lbrace\begin{array}{cccc}
+ \rst
+
+ .. math::
+    :nowrap:
+
+    M=\left\lbrace\begin{array}{cccc}
     b11 & b13 & 0 & b18 \\
     b31 & b22 & 0 & 0 \\
     0   & 0   & b33&0 \\
     b81 & 0   & 0 & b44
     \end{array}\right.
-    \f}
+ 
  *
  * with nc = 4, nbNonNullBlocks = 8, RowPos = [0 0 0 1 1 2 3 3],
  * RowCol = [0 1 3 0 1 2 0 3]\n and _diagsize0 = [3 6 9 12].

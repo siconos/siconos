@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,7 @@
 /** type of function used to post-treat output info from solver. */
 typedef void (*CheckSolverFPtr)(int, Simulation*);
 
-/** \class TimeStepping
-    \brief Event-capturing Time-Stepping simulation
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
+/** \brief Event-capturing Time-Stepping simulation
  *
  * This class implements the basic algorithm for Event-capturing Time-Stepping
  * simulations.
@@ -114,8 +110,6 @@ protected:
    */
   bool _resetAllLambda;
 
-
-
   /** Default Constructor
    */
   TimeStepping() :
@@ -137,10 +131,9 @@ public:
   */
   virtual void initOSNS();
 
-  /** Constructor with the time-discretisation.
-   * \param nsds the nsds that we want to simulate
-   *  \param td pointer to a timeDiscretisation used in the integration
-   *  (linked to the model that owns this simulation)
+  /** Standard constructor
+   * \param nsds NonSmoothDynamicalSystem to be simulated
+   * \param td pointer to a timeDiscretisation used in the integration
    *  \param osi one step integrator (default none)
    *  \param osnspb one step non smooth problem (default none)
    */
@@ -148,19 +141,10 @@ public:
                SP::OneStepIntegrator osi,
                SP::OneStepNSProblem osnspb);
 
-  // /** Constructor with the time-discretisation.
-  //  * \param nsds the nsds that we want to simulate
-  //  *  \param td pointer to a timeDiscretisation used in the integration
-  //  *  (linked to the model that owns this simulation)
-  //  *  \param osi one step integrator (default none)
-  //  *  \param osnspb one step non smooth problem (default none)
-  //  */
-  // TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
-
   /** Constructor with the time-discretisation.
-   *  \param td pointer to a timeDiscretisation used in the integration
-   *  (linked to the model that owns this simulation)
-   *  \param nb number of non smooth problem
+   * \param nsds NonSmoothDynamicalSystem to be simulated
+   * \param td pointer to a timeDiscretisation used in the integration
+   * \param nb number of non smooth problem
    */
   TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb =0);
 
@@ -188,6 +172,9 @@ public:
   */
   void computeFreeState();
 
+  /** Reset all lambdas of all interactions */
+  void resetLambdas();
+  
   /** step from current event to next event of EventsManager
   */
   void advanceToEvent();

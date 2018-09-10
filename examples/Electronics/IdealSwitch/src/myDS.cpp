@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ void  MyDS::computeF(double, SP::SiconosVector)
   _f->setValue(0, 0);
 }
 
-void MyDS::computeJacobianfx(double t, bool  b)
+void MyDS::computeJacobianfx(double t)
 {
   _jacobianfx->setValue(0, 0, 0);
 }
@@ -46,7 +46,7 @@ void MyDS::computeJacobianfx(double t, SP::SiconosVector v)
   _jacobianfx->setValue(0, 0, 0);
 }
 
-void MyDS::computeRhs(double t, bool  b)
+void MyDS::computeRhs(double t)
 {
   ;
 }

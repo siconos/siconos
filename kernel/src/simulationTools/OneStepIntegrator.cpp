@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,7 @@ OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
     _dynamicalSystemsGraph->descriptor(ds);
 
   // Create new work buffers, store in the graph
-  SP::VectorOfVectors wv = std11::make_shared<VectorOfVectors>(
-    OneStepIntegrator::work_vector_of_vector_size);
+  SP::VectorOfVectors wv = std11::make_shared<VectorOfVectors>();
   SP::VectorOfMatrices wm = std11::make_shared<VectorOfMatrices>();
   _dynamicalSystemsGraph->properties(dsv).workVectors = wv;
   _dynamicalSystemsGraph->properties(dsv).workMatrices = wm;
@@ -68,57 +67,6 @@ void OneStepIntegrator::initialize()
   _isInitialized=true;
 
 }
-
-// void OneStepIntegrator::initialize_old()
-// {
-//   if (_extraAdditionalTerms)
-//   {
-//     _extraAdditionalTerms->init(*_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0),
-//                                 *_simulation->nonSmoothDynamicalSystem(),
-//                                 _simulation->eventsManager()->timeDiscretisation());
-//   }
-
-//   double t0 = _simulation->startingTime();
-
-//   // 1 - Loop over all dynamical systems
-//   //  For each ds, allocate/initialize the required buffers in the ds graph
-//   // (workDS and workMatrices properties, that depend both on osi and ds types)
-//   // Note FP : what if a DS is associated with more than one osi?
-//   DynamicalSystemsGraph::VIterator dsi, dsend;
-//   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-//   {
-//     if(!checkOSI(dsi)) continue;
-//     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-//     initializeWorkVectorsForDS(t0, ds);
-//   }
-
-//   // 2 - Nonsmooth problems : set levels and initialize. Depends on OSI type.
-//   // Note FP : is it the right place for this initialization??
-//   initialize_nonsmooth_problems();
-
-//   // 3 - Loop over all interactions of index set 0.
-//   // For each interaction, allocate/initialize buffers in the interaction graph
-//   // (DSlink property) and connect/fill these buffers with DS buffers.
-//   // This strongly depends on the DS and OSI types.
-//   SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
-//   InteractionsGraph::VIterator ui, uiend;
-//   for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-//   {
-//     Interaction& inter = *indexSet0->bundle(*ui);
-//     unsigned int nslawSize = inter.nonSmoothLaw()->size();
-//     InteractionProperties& interaction_properties = indexSet0->properties(*ui);
-//     // init block property. Note FP: this should probably be moved
-//     // to OSNSPb init?
-//     interaction_properties.block.reset(new SimpleMatrix(nslawSize, nslawSize));
-
-//     // Update DSlink : this depends on OSI and relation types.
-//     initializeWorkVectorsForInteraction(inter, interaction_properties, *_dynamicalSystemsGraph);
-
-//     // Update interaction attributes (output)
-//     update_interaction_output(inter, t0, interaction_properties);
-
-//   }
-// }
 
 void OneStepIntegrator::update_interaction_output(Interaction& inter, double time, InteractionProperties& interaction_properties)
 {
@@ -186,12 +134,6 @@ void OneStepIntegrator::_check_and_update_interaction_levels(Interaction& inter)
     inter.reset();
 }
 
-// void OneStepIntegrator::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
-// {
-//   RuntimeException::selfThrow("OneStepIntegrator::initializeWorkVectorsForDS not implemented for integrator of type " + _integratorType);
-// }
-
-
 void OneStepIntegrator::resetAllNonSmoothParts()
 {
  DynamicalSystemsGraph::VIterator dsi, dsend;
@@ -215,10 +157,7 @@ void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
 void OneStepIntegrator::updateOutput(double time)
 {
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  for (unsigned int level = _levelMinForOutput;
-       level < _levelMaxForOutput + 1;
-       level++)
-    _simulation->nonSmoothDynamicalSystem()->updateOutput(time,level);
+  _simulation->nonSmoothDynamicalSystem()->updateOutput(time,_levelMinForOutput, _levelMaxForOutput);
 }
 
 void OneStepIntegrator::updateInput(double time)

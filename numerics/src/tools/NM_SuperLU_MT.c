@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ NM_SuperLU_MT_WS* NM_SuperLU_MT_factorize(NumericsMatrix* A)
 
   int status;
 
-  NSM_linear_solver_params* params = NM_linearSolverParams(A);
+  NSM_linear_solver_params* params = NSM_linearSolverParams(A);
 
   if (params->solver_data)
   {

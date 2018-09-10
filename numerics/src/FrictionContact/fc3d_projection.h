@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@
   Then a "local" (ie for one contact => size = 3) problem is built (update function) and solved (solve function).
 
   Two different storages are available for M: dense and sparse block.
-
-  \author INRIA Siconos Team
 
 */
 #include "NumericsMatrix.h"
@@ -136,12 +134,9 @@ extern "C"
   int fc3d_projectionOnCone_velocity_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
 
   /** solve friction-contact 3D problem with projection on the (Tresca Cylinder)
-   * \param localproblem :  the local problem to initialize
-   * \param reaction
    * \param options
    * \return 0 if successfull
    */
-
   int fc3d_projectionOnCone_velocity_setDefaultSolverOptions(SolverOptions* options);
   
   int fc3d_projectionOnCylinder_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);

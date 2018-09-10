@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,12 @@
  * limitations under the License.
 */
 
-/*! \file  MoreauJeanOSI.hpp */
+/*! \file  MoreauJeanBilbaoOSI.hpp */
 
 #ifndef MoreauJeanBilbaoOSI_H
 #define MoreauJeanBilbaoOSI_H
 
 #include "OneStepIntegrator.hpp"
-
 #include <limits>
 
 /**  \class MoreauJeanBilbaoOSI */
@@ -38,11 +37,13 @@ protected:
 
 public:
 
-  enum {TWO_DT_SIGMA_STAR, ONE_MINUS_THETA, VFREE, WORK_LENGTH};
+  enum MoreauJeanBilbaoOSI_ds_workVector_id {TWO_DT_SIGMA_STAR, ONE_MINUS_THETA, VFREE, WORK_LENGTH};
 
-  enum {OSNSP_RHS,WORK_INTERACTION_LENGTH};
+  enum MoreauJeanBilbaoOSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
 
-  enum MoreauJeanOSI_workBlockVector{xfree, BLOCK_WORK_LENGTH};
+  enum MoreauJeanBilbaoOSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
+
+  
   /* Constructor - No extra parameters: depends only on connected ds and simulation time step*/
   MoreauJeanBilbaoOSI();
 
@@ -51,7 +52,6 @@ public:
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
@@ -72,18 +72,6 @@ public:
   /** Initialization process of the nonsmooth problems
       linked to this OSI*/
   virtual void initialize_nonsmooth_problems();
-
-  //void _compute_osi_parameters_v0(LagrangianLinearDiagonalDS& ds, VectorOfVectors& work, SimpleMatrix& W);
-
-  /** Compute integrator parameters (iteration matrix, theta ...) for a given ds
-      \param ds the dynamical system to integrate
-      \param work buffer
-      \param[in,out] iteration matrix
-  */
-  void _compute_osi_parameters_v1(LagrangianLinearDiagonalDS& ds, VectorOfVectors& work, SimpleMatrix& W) ;
-
-  // Same as above, different methods to perform matrix op. Test purpose.
-  // void _compute_osi_parameters_v2(LagrangianLinearDiagonalDS& ds, VectorOfVectors& work, SimpleMatrix& W);
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -155,7 +143,7 @@ public:
    * \param i level of the IndexSet
    * \return Boolean
    */
-  bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
 
   /* visitors hook */

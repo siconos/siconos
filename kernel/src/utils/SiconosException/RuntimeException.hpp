@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,6 @@
 #include "SiconosException.hpp"
 
 /** Runtime exceptions
- *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 05/25/2004
- *
  *
  * RuntimeException can be throws for example when a pointer is used but not allocated
  * This exception can be caught by "catch(RuntimeException)" or "catch(SiconosException)"

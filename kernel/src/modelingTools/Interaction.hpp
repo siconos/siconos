@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,10 @@
 #include "SiconosVector.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
-
 #include <vector>
 #include <limits.h>
 
 /** Non-smooth interaction involving 1 or 2 Dynamical Systems.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \date (Creation) Apr 29, 2004
  *
  * An interaction represents the "link" between a set of Dynamical
  * Systems.
@@ -229,14 +225,6 @@ protected:
 
 public:
 
-  /** Constructor with interaction size, NonSmoothLaw and Relation.
-   *  \param interactionSize size of the interaction,
-             i.e. the size of the input and output
-   *  \param NSL pointer to the NonSmoothLaw
-   *  \param rel a pointer to the Relation
-   */
-  //Interaction(unsigned int interactionSize, SP::NonSmoothLaw NSL, SP::Relation rel);
-
   /** constructor with NonSmoothLaw and Relation (i.e. inter size == nslaw size)
    *  \param NSL pointer to the NonSmoothLaw, the interaction size is
    *         infered from the size of the NonSmoothLaw
@@ -266,7 +254,6 @@ public:
   //@{
 
   /** set the links  between the interaction and the DynamicalSystem(s) members.
-   *  \param interaction_properties properties (inside the graph) of the current interaction
       \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
       \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is allowed.
   */
@@ -283,9 +270,10 @@ public:
   void resetLambda(unsigned int level);
 
   /** build memories vectors for y and \f$\lambda\f$
+   * \param computeResiduY true if interaction should compute extra residu value
    * \param steps number of required memories (depends on the OSI)
   */
-  void initializeMemory(bool computeResiduY, unsigned int steps);
+  void initializeMemory(unsigned int steps);
 
   // === GETTERS/SETTERS ===
   /** get the value of number
@@ -361,30 +349,14 @@ public:
     return _upperLevelForInput;
   };
 
-  
-  /** Get the dimension of the interaction (y and _lambda size).
-  *  \return an unsigned int.
-  */
-  inline unsigned int getSizeOfY() const
+  /** returns dimension (i.e. nslaw size == y and lambda size) */
+  inline unsigned int dimension() const
   {
     return _interactionSize;
   }
-
-  /** Set the dimension of the Interaction.
-  *  \param newVal : an unsigned int.
-  */
-  inline void setInteractionSize(const unsigned int newVal)
-  {
-    _interactionSize = newVal;
-  }
-
-  //  /** get the number of relations in the interaction
-  //  *  \return an unsigned int
-  //  */
-  // inline unsigned int numberOfRelations() const {return _numberOfRelations;}
-
+  
   /** Get the sum of DS sizes, for DS involved in interaction.
-   *  \return an unsigned int.
+   *  \return an unsigned int
    */
   inline unsigned int getSizeOfDS() const
   {
@@ -708,7 +680,7 @@ public:
 
   /** print the data to the screen
   */
-  void display() const;
+  void display(bool brief = true) const;
 
   /** reset the global Interaction counter (for ids)
    *  \return the previous value of count
@@ -732,10 +704,6 @@ public:
    *  \param level order of _lambda used to compute input.
    */
   void computeInput(double time, unsigned int level = 0);
-
-  /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
-   */
-  SiconosMatrix& getLeftInteractionBlock() const;
 
   /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to one ds.

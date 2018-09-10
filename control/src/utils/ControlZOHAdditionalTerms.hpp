@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,8 @@ private:
 public:
   /** initialize elements in the graph for the computations
    * \param DSG0 the graph of DynamicalSystems
-   * \param model the current Model
+   * \param nsds current nonsmooth dynamical system
+   * \param td current time discretisation
    */
   virtual void init(DynamicalSystemsGraph& DSG0, const NonSmoothDynamicalSystem & nsds, const TimeDiscretisation & td);
 
