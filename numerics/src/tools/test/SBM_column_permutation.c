@@ -44,7 +44,7 @@ int main(void)
     printf("========= Failed SBM tests 3 for SBM  ========= \n");
     return 1;
   }
-  SBMfree(M, NUMERICS_SBM_FREE_BLOCK);
+  SBM_free(M);
   file = fopen("data/SBM2.dat", "r");
   M = SBM_new_from_file(file);
   fclose(file);
@@ -54,7 +54,7 @@ int main(void)
     printf("========= Failed SBM tests 3 for SBM  ========= \n");
     return 1;
   }
-  SBMfree(M, NUMERICS_SBM_FREE_BLOCK);
+  SBM_free(M);
   printf("\n========= Succed SBM tests 3 for SBM  ========= \n");
   return 0;
 

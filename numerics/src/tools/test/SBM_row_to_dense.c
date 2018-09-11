@@ -45,7 +45,7 @@ int main(void)
     return 1;
   }
 
-  SBMfree(M, NUMERICS_SBM_FREE_BLOCK);
+  SBM_free(M);
 
 
 
@@ -58,7 +58,7 @@ int main(void)
     printf("========= Failed SBM tests 1 for SBM  ========= \n");
     return 1;
   }
-  SBMfree(M2, NUMERICS_SBM_FREE_BLOCK);
+  SBM_free(M2);
   printf("\n========= Succeeded SBM tests 1 for SBM  ========= \n");
   return 0;
 

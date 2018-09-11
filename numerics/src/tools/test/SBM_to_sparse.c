@@ -78,7 +78,7 @@ int main(void)
 
   free(denseMat);
   printf("NUMERICS_SBM_FREE_BLOCK value %d", NUMERICS_SBM_FREE_BLOCK);
-  SBMfree(M, NUMERICS_SBM_FREE_BLOCK);
+  SBM_free(M);
   printf("\n========= Succed SBM tests 4 for SBM  ========= \n");
   return 0;
 
