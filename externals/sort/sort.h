@@ -1,4 +1,4 @@
-/* Copyright (c) 2010-2014 Christopher Swenson. */
+/* Copyright (c) 2010-2017 Christopher Swenson. */
 /* Copyright (c) 2012 Vojtech Fried. */
 /* Copyright (c) 2012 Google Inc. All Rights Reserved. */
 
@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-
-#include "sort_common.h"
 
 #ifndef SORT_NAME
 #error "Must declare SORT_NAME"
@@ -25,8 +23,106 @@
 #define TIM_SORT_STACK_SIZE 128
 #endif
 
+#ifndef SORT_SWAP
+#define SORT_SWAP(x,y) {SORT_TYPE _sort_swap_temp = (x); (x) = (y); (y) = _sort_swap_temp;}
+#endif
 
-#define SORT_SWAP(x,y) {SORT_TYPE __SORT_SWAP_t = (x); (x) = (y); (y) = __SORT_SWAP_t;}
+
+/* Common, type-agnostic functions and constants that we don't want to declare twice. */
+#ifndef SORT_COMMON_H
+#define SORT_COMMON_H
+
+#ifndef MAX
+#define MAX(x,y) (((x) > (y) ? (x) : (y)))
+#endif
+
+#ifndef MIN
+#define MIN(x,y) (((x) < (y) ? (x) : (y)))
+#endif
+
+static int compute_minrun(const uint64_t);
+
+/* From http://oeis.org/classic/A102549 */
+static const uint64_t shell_gaps[48] = {1, 4, 10, 23, 57, 132, 301, 701, 1750, 4376, 10941, 27353, 68383, 170958, 427396, 1068491, 2671228, 6678071, 16695178, 41737946, 104344866, 260862166, 652155416, 1630388541, 4075971353LL, 10189928383LL, 25474820958LL, 63687052396LL, 159217630991LL, 398044077478LL, 995110193696LL, 2487775484241LL, 6219438710603LL, 15548596776508LL, 38871491941271LL, 97178729853178LL, 242946824632946LL, 607367061582366LL, 1518417653955916LL, 3796044134889791LL, 9490110337224478LL, 23725275843061196LL, 59313189607652991LL, 148282974019132478LL, 370707435047831196LL, 926768587619577991LL, 2316921469048944978LL, 5792303672622362446LL};
+
+#ifndef CLZ
+#ifdef __GNUC__
+#define CLZ __builtin_clzll
+#else
+
+static int clzll(uint64_t);
+
+/* adapted from Hacker's Delight */
+static int clzll(uint64_t x) {
+  int n;
+
+  if (x == 0) {
+    return 64;
+  }
+
+  n = 0;
+
+  if (x <= 0x00000000FFFFFFFFL) {
+    n = n + 32;
+    x = x << 32;
+  }
+
+  if (x <= 0x0000FFFFFFFFFFFFL) {
+    n = n + 16;
+    x = x << 16;
+  }
+
+  if (x <= 0x00FFFFFFFFFFFFFFL) {
+    n = n + 8;
+    x = x << 8;
+  }
+
+  if (x <= 0x0FFFFFFFFFFFFFFFL) {
+    n = n + 4;
+    x = x << 4;
+  }
+
+  if (x <= 0x3FFFFFFFFFFFFFFFL) {
+    n = n + 2;
+    x = x << 2;
+  }
+
+  if (x <= 0x7FFFFFFFFFFFFFFFL) {
+    n = n + 1;
+  }
+
+  return n;
+}
+
+#define CLZ clzll
+#endif
+#endif
+
+static __inline int compute_minrun(const uint64_t size) {
+  const int top_bit = 64 - CLZ(size);
+  const int shift = MAX(top_bit, 6) - 6;
+  const int minrun = size >> shift;
+  const uint64_t mask = (1ULL << shift) - 1;
+
+  if (mask & size) {
+    return minrun + 1;
+  }
+
+  return minrun;
+}
+
+static __inline size_t rbnd(size_t len) {
+  int k;
+
+  if (len < 16) {
+    return 2;
+  }
+
+  k = 62 - CLZ(len);
+  return 1ULL << ((2 * k) / 3);
+}
+
+#endif /* SORT_COMMON_H */
 
 #define SORT_CONCAT(x, y) x ## _ ## y
 #define SORT_MAKE_STR1(x, y) SORT_CONCAT(x,y)
@@ -106,8 +202,8 @@
 #endif
 
 typedef struct {
-  uint64_t start;
-  uint64_t length;
+  size_t start;
+  size_t length;
 } TIM_SORT_RUN_T;
 
 
@@ -120,11 +216,11 @@ void MERGE_SORT_IN_PLACE(SORT_TYPE *dst, const size_t size);
 void SELECTION_SORT(SORT_TYPE *dst, const size_t size);
 void TIM_SORT(SORT_TYPE *dst, const size_t size);
 void BUBBLE_SORT(SORT_TYPE *dst, const size_t size);
-void MERGE_SORT_IN_PLACE_ASWAP(SORT_TYPE * dst1, SORT_TYPE * dst2, size_t len);
+
+void MERGE_SORT_IN_PLACE_ASWAP(SORT_TYPE * dst1, SORT_TYPE * dst2, size_t len) ;
 void MERGE_SORT_IN_PLACE_FRONTMERGE(SORT_TYPE *dst1, size_t l1, SORT_TYPE *dst2, size_t l2);
 size_t MERGE_SORT_IN_PLACE_BACKMERGE(SORT_TYPE * dst1, size_t l1, SORT_TYPE * dst2, size_t l2);
 void MERGE_SORT_IN_PLACE_RMERGE(SORT_TYPE *dst, size_t len, size_t lp, size_t r);
-
 
 /* Shell sort implementation based on Wikipedia article
    http://en.wikipedia.org/wiki/Shell_sort
@@ -137,8 +233,8 @@ void SHELL_SORT(SORT_TYPE *dst, const size_t size) {
 
   /* TODO: binary search to find first gap? */
   int inci = 47;
-  uint64_t inc = shell_gaps[inci];
-  uint64_t i;
+  size_t inc = shell_gaps[inci];
+  size_t i;
 
   while (inc > (size >> 1)) {
     inc = shell_gaps[--inci];
@@ -147,7 +243,7 @@ void SHELL_SORT(SORT_TYPE *dst, const size_t size) {
   while (1) {
     for (i = inc; i < size; i++) {
       SORT_TYPE temp = dst[i];
-      uint64_t j = i;
+      size_t j = i;
 
       while ((j >= inc) && (SORT_CMP(dst[j - inc], temp) > 0)) {
         dst[j] = dst[j - inc];
@@ -166,9 +262,9 @@ void SHELL_SORT(SORT_TYPE *dst, const size_t size) {
 }
 
 /* Function used to do a binary search for binary insertion sort */
-static __inline int64_t BINARY_INSERTION_FIND(SORT_TYPE *dst, const SORT_TYPE x,
+static __inline size_t BINARY_INSERTION_FIND(SORT_TYPE *dst, const SORT_TYPE x,
     const size_t size) {
-  int64_t l, c, r;
+  size_t l, c, r;
   SORT_TYPE cx;
   l = 0;
   r = size - 1;
@@ -207,12 +303,12 @@ static __inline int64_t BINARY_INSERTION_FIND(SORT_TYPE *dst, const SORT_TYPE x,
 
 /* Binary insertion sort, but knowing that the first "start" entries are sorted.  Used in timsort. */
 static void BINARY_INSERTION_SORT_START(SORT_TYPE *dst, const size_t start, const size_t size) {
-  uint64_t i;
+  size_t i;
 
   for (i = start; i < size; i++) {
-    int64_t j;
+    size_t j;
     SORT_TYPE x;
-    int64_t location;
+    size_t location;
 
     /* If this entry is already correct, just move along */
     if (SORT_CMP(dst[i - 1], dst[i]) <= 0) {
@@ -225,6 +321,10 @@ static void BINARY_INSERTION_SORT_START(SORT_TYPE *dst, const size_t start, cons
 
     for (j = i - 1; j >= location; j--) {
       dst[j + 1] = dst[j];
+
+      if (j == 0) { /* check edge case because j is unsigned */
+        break;
+      }
     }
 
     dst[location] = x;
@@ -248,8 +348,8 @@ void SELECTION_SORT(SORT_TYPE *dst, const size_t size) {
     return;
   }
 
-  uint64_t i;
-  uint64_t j;
+  size_t i;
+  size_t j;
 
   for (i = 0; i < size; i++) {
     for (j = i + 1; j < size; j++) {
@@ -479,10 +579,10 @@ void MERGE_SORT_IN_PLACE(SORT_TYPE *dst, const size_t len) {
 /* Standard merge sort */
 void MERGE_SORT(SORT_TYPE *dst, const size_t size) {
   SORT_TYPE *newdst;
-  const uint64_t middle = size / 2;
-  uint64_t out = 0;
-  uint64_t i = 0;
-  uint64_t j = middle;
+  const size_t middle = size / 2;
+  size_t out = 0;
+  size_t i = 0;
+  size_t j = middle;
 
   /* don't bother sorting an array of size <= 1 */
   if (size <= 1) {
@@ -638,7 +738,7 @@ void QUICK_SORT(SORT_TYPE *dst, const size_t size) {
 
 /* timsort implementation, based on timsort.txt */
 
-static __inline void REVERSE_ELEMENTS(SORT_TYPE *dst, int64_t start, int64_t end) {
+static __inline void REVERSE_ELEMENTS(SORT_TYPE *dst, size_t start, size_t end) {
   while (1) {
     if (start >= end) {
       return;
@@ -650,8 +750,8 @@ static __inline void REVERSE_ELEMENTS(SORT_TYPE *dst, int64_t start, int64_t end
   }
 }
 
-static int64_t COUNT_RUN(SORT_TYPE *dst, const uint64_t start, const size_t size) {
-  uint64_t curr;
+static size_t COUNT_RUN(SORT_TYPE *dst, const size_t start, const size_t size) {
+  size_t curr;
 
   if (size - start == 1) {
     return 1;
@@ -703,15 +803,15 @@ static int64_t COUNT_RUN(SORT_TYPE *dst, const uint64_t start, const size_t size
 }
 
 static int CHECK_INVARIANT(TIM_SORT_RUN_T *stack, const int stack_curr) {
-  int64_t A, B, C;
+  size_t A, B, C;
 
   if (stack_curr < 2) {
     return 1;
   }
 
   if (stack_curr == 2) {
-    const int64_t A1 = stack[stack_curr - 2].length;
-    const int64_t B1 = stack[stack_curr - 1].length;
+    const size_t A1 = stack[stack_curr - 2].length;
+    const size_t B1 = stack[stack_curr - 1].length;
 
     if (A1 <= B1) {
       return 0;
@@ -742,7 +842,7 @@ static void TIM_SORT_RESIZE(TEMP_STORAGE_T *store, const size_t new_size) {
 
     if (tempstore == NULL) {
       fprintf(stderr, "Error allocating temporary storage for tim sort: need %lu bytes",
-              sizeof(SORT_TYPE) * new_size);
+              (unsigned long)(sizeof(SORT_TYPE) * new_size));
       exit(1);
     }
 
@@ -753,11 +853,11 @@ static void TIM_SORT_RESIZE(TEMP_STORAGE_T *store, const size_t new_size) {
 
 static void TIM_SORT_MERGE(SORT_TYPE *dst, const TIM_SORT_RUN_T *stack, const int stack_curr,
                            TEMP_STORAGE_T *store) {
-  const int64_t A = stack[stack_curr - 2].length;
-  const int64_t B = stack[stack_curr - 1].length;
-  const int64_t curr = stack[stack_curr - 2].start;
+  const size_t A = stack[stack_curr - 2].length;
+  const size_t B = stack[stack_curr - 1].length;
+  const size_t curr = stack[stack_curr - 2].start;
   SORT_TYPE *storage;
-  int64_t i, j, k;
+  size_t i, j, k;
   TIM_SORT_RESIZE(store, MIN(A, B));
   storage = store->storage;
 
@@ -777,26 +877,27 @@ static void TIM_SORT_MERGE(SORT_TYPE *dst, const TIM_SORT_RUN_T *stack, const in
       } else if (i < A) {
         dst[k] = storage[i++];
       } else {
-        dst[k] = dst[j++];
+        break;
       }
     }
   } else {
     /* right merge */
     memcpy(storage, &dst[curr + A], B * sizeof(SORT_TYPE));
-    i = B - 1;
-    j = curr + A - 1;
+    i = B;
+    j = curr + A;
+    k = curr + A + B;
 
-    for (k = curr + A + B - 1; k >= curr; k--) {
-      if ((i >= 0) && (j >= curr)) {
-        if (SORT_CMP(dst[j], storage[i]) > 0) {
-          dst[k] = dst[j--];
+    while (k-- > curr) {
+      if ((i > 0) && (j > curr)) {
+        if (SORT_CMP(dst[j - 1], storage[i - 1]) > 0) {
+          dst[k] = dst[--j];
         } else {
-          dst[k] = storage[i--];
+          dst[k] = storage[--i];
         }
-      } else if (i >= 0) {
-        dst[k] = storage[i--];
+      } else if (i > 0) {
+        dst[k] = storage[--i];
       } else {
-        dst[k] = dst[j--];
+        break;
       }
     }
   }
@@ -805,7 +906,7 @@ static void TIM_SORT_MERGE(SORT_TYPE *dst, const TIM_SORT_RUN_T *stack, const in
 static int TIM_SORT_COLLAPSE(SORT_TYPE *dst, TIM_SORT_RUN_T *stack, int stack_curr,
                              TEMP_STORAGE_T *store, const size_t size) {
   while (1) {
-    int64_t A, B, C, D;
+    size_t A, B, C, D;
     int ABC, BCD, CD;
 
     /* if the stack only has one thing on it, we are done with the collapse */
@@ -869,12 +970,12 @@ static int TIM_SORT_COLLAPSE(SORT_TYPE *dst, TIM_SORT_RUN_T *stack, int stack_cu
 static __inline int PUSH_NEXT(SORT_TYPE *dst,
                               const size_t size,
                               TEMP_STORAGE_T *store,
-                              const uint64_t minrun,
+                              const size_t minrun,
                               TIM_SORT_RUN_T *run_stack,
-                              uint64_t *stack_curr,
-                              uint64_t *curr) {
-  uint64_t len = COUNT_RUN(dst, *curr, size);
-  uint64_t run = minrun;
+                              size_t *stack_curr,
+                              size_t *curr) {
+  size_t len = COUNT_RUN(dst, *curr, size);
+  size_t run = minrun;
 
   if (run > size - *curr) {
     run = size - *curr;
@@ -910,16 +1011,16 @@ static __inline int PUSH_NEXT(SORT_TYPE *dst,
 }
 
 void TIM_SORT(SORT_TYPE *dst, const size_t size) {
+  size_t minrun;
+  TEMP_STORAGE_T _store, *store;
+  TIM_SORT_RUN_T run_stack[TIM_SORT_STACK_SIZE];
+  size_t stack_curr = 0;
+  size_t curr = 0;
+
   /* don't bother sorting an array of size 1 */
   if (size <= 1) {
     return;
   }
-
-  uint64_t minrun;
-  TEMP_STORAGE_T _store, *store;
-  TIM_SORT_RUN_T run_stack[TIM_SORT_STACK_SIZE];
-  uint64_t stack_curr = 0;
-  uint64_t curr = 0;
 
   if (size < 64) {
     BINARY_INSERTION_SORT(dst, size);
@@ -959,11 +1060,11 @@ void TIM_SORT(SORT_TYPE *dst, const size_t size) {
 
 /* heap sort: based on wikipedia */
 
-static __inline void HEAP_SIFT_DOWN(SORT_TYPE *dst, const int64_t start, const int64_t end) {
-  int64_t root = start;
+static __inline void HEAP_SIFT_DOWN(SORT_TYPE *dst, const size_t start, const size_t end) {
+  size_t root = start;
 
   while ((root << 1) <= end) {
-    int64_t child = root << 1;
+    size_t child = root << 1;
 
     if ((child < end) && (SORT_CMP(dst[child], dst[child + 1]) < 0)) {
       child++;
@@ -979,10 +1080,15 @@ static __inline void HEAP_SIFT_DOWN(SORT_TYPE *dst, const int64_t start, const i
 }
 
 static __inline void HEAPIFY(SORT_TYPE *dst, const size_t size) {
-  int64_t start = size >> 1;
+  size_t start = size >> 1;
 
-  while (start >= 0) {
+  while (1) {
     HEAP_SIFT_DOWN(dst, start, size - 1);
+
+    if (start == 0) {
+      break;
+    }
+
     start--;
   }
 }
@@ -993,7 +1099,7 @@ void HEAP_SORT(SORT_TYPE *dst, const size_t size) {
     return;
   }
 
-  int64_t end = size - 1;
+  size_t end = size - 1;
   HEAPIFY(dst, size);
 
   while (end > 0) {
@@ -1330,7 +1436,7 @@ static void SQRT_SORT_COMMON_SORT(SORT_TYPE *arr, int Len, SORT_TYPE *extbuf, in
 }
 
 static void SQRT_SORT(SORT_TYPE *arr, size_t Len) {
-  int L = 1;
+  size_t L = 1;
   SORT_TYPE *ExtBuf;
   int *Tags;
 
@@ -2073,7 +2179,7 @@ static void GRAIL_SORT_FIXED_BUFFER(SORT_TYPE *arr, size_t Len) {
 }
 
 static void GRAIL_SORT_DYN_BUFFER(SORT_TYPE *arr, size_t Len) {
-  int L = 1;
+  size_t L = 1;
   SORT_TYPE *ExtBuf;
 
   while (L * L < Len) {
@@ -2134,7 +2240,7 @@ static void GRAIL_REC_MERGE(SORT_TYPE *A, int L1, int L2) {
 }
 
 static void REC_STABLE_SORT(SORT_TYPE *arr, size_t L) {
-  int m, h, p0, p1, rest;
+  size_t m, h, p0, p1, rest;
 
   for (m = 1; m < L; m += 2) {
     if (SORT_CMP_A(arr + m - 1, arr + m) > 0) {
@@ -2248,5 +2354,3 @@ void BUBBLE_SORT(SORT_TYPE *dst, const size_t size) {
 #undef SQRT_SORT_COMMON_SORT
 #undef SORT_CMP_A
 #undef BUBBLE_SORT
-
-
