@@ -354,10 +354,10 @@ extern "C"
   void SBM_read_in_file(SparseBlockStructuredMatrix* const M, FILE *file);
 
   /** Create from file a SparseBlockStructuredMatrix with  memory allocation
-      \param outSBM the matrix to be displayed
       \param file the corresponding name of the file
+      \return the matrix to be displayed
    */
-  void SBM_new_from_file(SparseBlockStructuredMatrix* const outSBM, FILE *file);
+  SparseBlockStructuredMatrix* SBM_new_from_file(FILE *file);
 
   /** print in file  of the matrix content in Scilab format for each block
       \param M the matrix to be displayed

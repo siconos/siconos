@@ -39,21 +39,20 @@ static int SBM_add_test1(double tol, double alpha, double beta)
 {
 
   int info=0;
-  SparseBlockStructuredMatrix M;
   FILE *file = fopen("data/SBM1.dat", "r");
-  SBM_new_from_file(&M, file);
+  SparseBlockStructuredMatrix * M = SBM_new_from_file(file);
   fclose(file);
-  /* SBM_print(&M); */
+  /* SBM_print(M); */
 
 
 
-  SparseBlockStructuredMatrix * C = SBM_add(&M,&M,alpha,beta);
+  SparseBlockStructuredMatrix * C = SBM_add(M,M,alpha,beta);
   /* SBM_print(C); */
 
-  int nm = M.blocksize0[M.blocknumber0-1] * M.blocksize1[M.blocknumber1-1];
+  int nm = M->blocksize0[M->blocknumber0-1] * M->blocksize1[M->blocknumber1-1];
   double * M_dense = (double *) malloc(nm*sizeof(double));
 
-  SBM_to_dense(&M, M_dense);
+  SBM_to_dense(M, M_dense);
 
   double * C_dense = (double *) malloc(nm*sizeof(double));
 
@@ -66,7 +65,7 @@ static int SBM_add_test1(double tol, double alpha, double beta)
   free(M_dense);
   free(C_dense);
 
-  SBMfree(&M, NUMERICS_SBM_FREE_BLOCK);
+  SBM_free(M);
   SBM_free(C);
   return info;
 

@@ -35,21 +35,20 @@ int main(void)
 {
   int res;
   printf("========= Starts SBM tests 4 for SBM ========= \n");
-  SparseBlockStructuredMatrix M;
   FILE *file = fopen("data/SBM2.dat", "r");
-  SBM_new_from_file(&M, file);
-  SBM_print(&M);
+  SparseBlockStructuredMatrix * M = SBM_new_from_file(file);
+  SBM_print(M);
   fclose(file);
   /*alloc enough memory */
   CSparseMatrix sparseMat;
-  res = SBM_to_sparse_init_memory(&M, &sparseMat);
+  res = SBM_to_sparse_init_memory(M, &sparseMat);
   if (res)
   {
     printf("========= Failed SBM tests 4 for SBM  ========= \n");
     return 1;
   }
 
-  res = SBM_to_sparse(&M, &sparseMat);
+  res = SBM_to_sparse(M, &sparseMat);
   if (res)
   {
     printf("========= Failed SBM tests 4 for SBM  ========= \n");
@@ -58,10 +57,10 @@ int main(void)
   cs_print(&sparseMat, 1);
   CSparseMatrix_spfree_on_stack(&sparseMat);
 
-  int n = M.blocksize0[M.blocknumber0 - 1];
-  int m = M.blocksize1[M.blocknumber1 - 1];
+  int n = M->blocksize0[M->blocknumber0 - 1];
+  int m = M->blocksize1[M->blocknumber1 - 1];
   double * denseMat = (double *)malloc(n * m * sizeof(double));
-  SBM_to_dense(&M, denseMat);
+  SBM_to_dense(M, denseMat);
   if (res)
   {
     printf("========= Failed SBM tests 4 for SBM  ========= \n");
@@ -79,7 +78,7 @@ int main(void)
 
   free(denseMat);
   printf("NUMERICS_SBM_FREE_BLOCK value %d", NUMERICS_SBM_FREE_BLOCK);
-  SBMfree(&M, NUMERICS_SBM_FREE_BLOCK);
+  SBMfree(M, NUMERICS_SBM_FREE_BLOCK);
   printf("\n========= Succed SBM tests 4 for SBM  ========= \n");
   return 0;
 

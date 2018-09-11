@@ -1086,8 +1086,7 @@ NumericsMatrix* NM_new_from_file(FILE *file)
   }
   else if (storageType == NM_SPARSE_BLOCK)
   {
-    data = SBM_new();
-    SBM_new_from_file((SparseBlockStructuredMatrix*)data, file);
+    data = SBM_new_from_file(file);
   }
   else
   {

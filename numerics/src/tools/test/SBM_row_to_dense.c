@@ -33,32 +33,32 @@ int main(void)
 {
 
   printf("========= Starts SBM tests 1 for SBM ========= \n");
-  SparseBlockStructuredMatrix M;
+  
   FILE *file = fopen("data/SBM1.dat", "r");
-  SBM_new_from_file(&M, file);
+  SparseBlockStructuredMatrix * M =SBM_new_from_file(file);
   fclose(file);
   /*alloc enough memory */
-  int res = test_SBM_row_to_dense(&M);
+  int res = test_SBM_row_to_dense(M);
   if (res)
   {
     printf("========= Failed SBM tests 1 for SBM  ========= \n");
     return 1;
   }
 
-  SBMfree(&M, NUMERICS_SBM_FREE_BLOCK);
+  SBMfree(M, NUMERICS_SBM_FREE_BLOCK);
 
 
-  SparseBlockStructuredMatrix M2;
+
   file = fopen("data/SBM2.dat", "r");
-  SBM_new_from_file(&M2, file);
+  SparseBlockStructuredMatrix * M2 = SBM_new_from_file(file);
   fclose(file);
-  res = test_SBM_row_to_dense(&M2);
+  res = test_SBM_row_to_dense(M2);
   if (res)
   {
     printf("========= Failed SBM tests 1 for SBM  ========= \n");
     return 1;
   }
-  SBMfree(&M2, NUMERICS_SBM_FREE_BLOCK);
+  SBMfree(M2, NUMERICS_SBM_FREE_BLOCK);
   printf("\n========= Succeeded SBM tests 1 for SBM  ========= \n");
   return 0;
 
