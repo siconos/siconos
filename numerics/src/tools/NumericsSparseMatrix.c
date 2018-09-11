@@ -387,7 +387,7 @@ NumericsSparseMatrix * NSM_new_from_file(FILE* file)
   CHECK_IO(fscanf(file, "%d", &_origin), &info);
   NumericsSparseMatrix * out = NSM_new();
   out->origin = _origin;
-  
+
   CSparseMatrix * C = CSparseMatrix_new_from_file(file);
 
   if (C->nz >= 0)
@@ -442,7 +442,19 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
   assert(A);
   if (A->diag_indx) return A->diag_indx;
 
-  CS_INT* indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
+  /* 1-  we assume that all diagonal elements exist, and we search it in a trivial way */
+  CS_INT* indices = NSM_diag_indices_trivial(M);
+  if (indices)
+  {
+    A->diag_indx = indices;
+    return indices;
+  }
+
+  /* 2- if not, we compute the diagonal indices in the general case without any assumption
+   * on the existence  of the diagonal elements. This makes sure that the matrix is replaced
+   * by one that has all diagonal elements. The copy of the matrix could be optimized. */
+
+  indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
   A->diag_indx = indices;
   /* XXX hack --xhub  */
   if (A->origin == NSM_TRIPLET) { NM_csc(M); A->origin = NSM_CSC; }
@@ -546,17 +558,26 @@ CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M)
 
     CS_INT* Ai = A->csc->i;
     CS_INT* Ap = A->csc->p;
-    
-    for (size_t j = 0; j < (size_t)M->size0; ++j)
+
+    for (CS_INT j = 0; j < (CS_INT)M->size0; ++j)
     {
+      int is_diag_index_found = 0;
       for (CS_INT p = Ap[j]; p < Ap[j+1]; ++p)
       {
         if (Ai[p] ==j)
         {
           indices[j] = p;
+          is_diag_index_found=1;
           break;
         }
       }
+      if (!is_diag_index_found)
+      {
+        free(indices);
+        A->diag_indx = NULL;
+        return NULL;
+      }
+
     }
     break;
   }

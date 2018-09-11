@@ -1302,7 +1302,7 @@ void NM_add_to_diag3(NumericsMatrix* M, double alpha)
   }
   case NM_SPARSE:
   {
-    CS_INT* diag_indices = NSM_diag_indices_trivial(M);
+    CS_INT* diag_indices = NSM_diag_indices(M);
 
     DEBUG_EXPR(
       printf("diag_indices:\n");
