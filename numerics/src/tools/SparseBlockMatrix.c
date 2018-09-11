@@ -1838,17 +1838,15 @@ void SBM_write_in_filename(const SparseBlockStructuredMatrix* const m, const cha
 {
 
 }
-void SBM_new_from_file(SparseBlockStructuredMatrix* const m, FILE *file)
+SparseBlockStructuredMatrix *  SBM_new_from_file(FILE *file)
 {
-  if (! m)
-  {
-    fprintf(stderr, "Numerics, SparseBlockStructuredMatrix SBM_read_in_file failed, NULL input.\n");
-    exit(EXIT_FAILURE);
-  }
+
+  SparseBlockStructuredMatrix * m = SBM_new();
+  
   assert(file);
   CHECK_IO(fscanf(file, "%d", &(m->nbblocks)));
 
-  if (m->nbblocks == 0)  return;
+  if (m->nbblocks == 0)  return NULL;
 
   CHECK_IO(fscanf(file, "%d", &(m->blocknumber0)));
   CHECK_IO(fscanf(file, "%d", &(m->blocknumber1)));
@@ -1919,9 +1917,9 @@ void SBM_new_from_file(SparseBlockStructuredMatrix* const m, FILE *file)
       {
         CHECK_IO(fscanf(file, "%32le\n", &(m->block[blockNum][i])));
       }
-
     }
   }
+  return m;
 }
 
 void SBM_read_in_file(SparseBlockStructuredMatrix* const m, FILE *file)

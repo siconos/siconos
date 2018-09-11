@@ -39,21 +39,21 @@ static int SBM_multiply_test1(double tol)
 {
 
   int info=0;
-  SparseBlockStructuredMatrix M;
-  FILE *file = fopen("data/SBM1.dat", "r");
-  SBM_new_from_file(&M, file);
-  fclose(file);
-  DEBUG_EXPR(SBM_print(&M););
 
-  SparseBlockStructuredMatrix * C = SBM_multiply(&M,&M);
+  FILE *file = fopen("data/SBM1.dat", "r");
+  SparseBlockStructuredMatrix * M = SBM_new_from_file(file);
+  fclose(file);
+  DEBUG_EXPR(SBM_print(M););
+
+  SparseBlockStructuredMatrix * C = SBM_multiply(M,M);
   DEBUG_EXPR(SBM_print(C););
   
-  int n = M.blocksize0[M.blocknumber0-1];
-  int m = M.blocksize1[M.blocknumber1-1];
+  int n = M->blocksize0[M->blocknumber0-1];
+  int m = M->blocksize1[M->blocknumber1-1];
   int nm = n*m;
   
   double * M_dense = (double *) malloc(nm*sizeof(double));
-  SBM_to_dense(&M, M_dense);
+  SBM_to_dense(M, M_dense);
 
   double * C_dense = (double *) malloc(nm*sizeof(double));
 
@@ -69,7 +69,7 @@ static int SBM_multiply_test1(double tol)
   free(M_dense);
   free(C_dense);
 
-  SBMfree(&M, NUMERICS_SBM_FREE_BLOCK);
+  SBM_free(M);
   SBM_free(C);
   return info;
 }
