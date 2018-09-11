@@ -88,9 +88,8 @@ int main(void)
 
   printf("========= Starts Numerics tests for NM_add_to_diag3 ========= \n");
 
-  SparseBlockStructuredMatrix * SBM = SBM_new();
   FILE *file = fopen("data/SBM1.dat", "r");
-  SBM_new_from_file(SBM, file);
+  SparseBlockStructuredMatrix * SBM = SBM_new_from_file(file);
   fclose(file);
 
   NumericsMatrix * M = NM_create(NM_SPARSE_BLOCK, SBM->blocksize0[SBM->blocknumber0-1],SBM->blocksize1[SBM->blocknumber1-1] );
