@@ -32,6 +32,7 @@
 
 #include "numerics_verbose.h"
 #include "NumericsVector.h"
+#include "NumericsSparseMatrix.h"
 
 
 /* #define DEBUG_NOCOLOR */
@@ -158,6 +159,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     DEBUG_PRINT("Force a copy to sparse storage type\n");
     M = NM_create(NM_SPARSE,  problem->M->size0,  problem->M->size1);
     NM_copy_to_sparse(problem->M, M);
+    NSM_diag_indices(M);
   }
   else
   {

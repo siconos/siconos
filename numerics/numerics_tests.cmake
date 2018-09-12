@@ -31,6 +31,7 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(NumericsMatrix_row_prod_non_square NumericsMatrix_row_prod_non_square.c)
   NEW_TEST(NumericsMatrix_row_prod_no_diag NumericsMatrix_row_prod_no_diag.c)
   NEW_TEST(NumericsMatrix_row_prod_no_diag_non_square NumericsMatrix_row_prod_no_diag_non_square.c)
+  NEW_TEST(NumericsMatrix_add_to_diag3 NumericsMatrix_add_to_diag3.c)
   NEW_TEST(NumericsMatrix_convert NumericsMatrix_convert.c)
   # Specfic tests for SBM matrices 
   NEW_TEST(SBM_row_to_dense SBM_row_to_dense.c)

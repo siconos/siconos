@@ -177,9 +177,12 @@ def test_SBM_to_SBM_from_csparse():
             assert (SBM_get_value(SBM1,i,j) - SBM_get_value(SBM2,i,j)) < eps
 
 
-
-
-#test_from_csc1(
-#test_from_csr1()
-#test_from_csc162x162()
-#test_from_csc162x162_to_dense()
+if __name__ == "__main__":
+    test_from_csc1()
+    test_from_csr1()
+    test_from_csr2()
+    test_SBM_to_SBM_from_csparse()
+    test_from_csc162x162()
+    #test_from_csc162x162_to_dense()
+    test_SBM_to_sparse1()
+    test_SBM_from_csparse1()

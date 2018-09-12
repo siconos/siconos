@@ -32,7 +32,7 @@
 #include "SiconosLapack.h"
 #include "numerics_verbose.h"
 #include "sanitizer.h"
-/* #define DEBUG_NOCOLOR */
+/* /\* #define DEBUG_NOCOLOR *\/ */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
