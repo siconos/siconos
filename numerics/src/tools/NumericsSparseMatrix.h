@@ -49,7 +49,7 @@ extern "C"
   /** \enum NSM_linear_solver NumericsSparseMatrix.h
    * id for linear algebra solvers */
   typedef enum { NSM_CS_LUSOL, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT } NSM_linear_solver;
-  
+
   typedef void (*freeNSLSP)(void* p);
 
   /** \enum NumericsSparseTypesNZ
@@ -160,9 +160,7 @@ extern "C"
    */
   CS_INT* NSM_diag_indices(NumericsMatrix* M);
 
-  CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M);
 
-  
   /** Extract a block from a sparse matrix
    * \param M matrix
    * \param blockM dense storage for the block
@@ -178,13 +176,13 @@ extern "C"
    * \return NULL on success
    */
   NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* p);
-  
+
   /** New and empty NSM_linear_solver_params.
    * \return a pointer on the allocated space.
    */
   NSM_linear_solver_params* NSM_linearSolverParams_new(void);
 
-  
+
   /** Get linear solver parameters with initialization if needed.
    * \param[in,out] A a NumericsMatrix.
    * \return a pointer on parameters.
@@ -214,9 +212,9 @@ extern "C"
    * \return a pointer on the allocated space.
    */
   NumericsSparseMatrix* NSM_new_from_file(FILE *file);
- 
 
-  
+
+
   int NSM_to_dense(const NumericsSparseMatrix * const A, double * B);
 
 

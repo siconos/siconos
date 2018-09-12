@@ -434,6 +434,57 @@ NumericsSparseMatrix * NSM_triplet_eye(unsigned int size)
 }
 
 
+static CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M)
+{
+  NumericsSparseMatrix* A = M->matrix2;
+  assert(A);
+  if (A->diag_indx) return A->diag_indx;
+
+  CS_INT* indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
+  A->diag_indx = indices;
+  /* XXX hack --xhub  */
+  if (A->origin == NSM_TRIPLET) { NM_csc(M); A->origin = NSM_CSC; }
+  switch (A->origin)
+  {
+  case NSM_CSC:
+  {
+    assert(A->csc);
+
+    CS_INT* Ai = A->csc->i;
+    CS_INT* Ap = A->csc->p;
+
+    for (CS_INT j = 0; j < (CS_INT)M->size0; ++j)
+    {
+      int is_diag_index_found = 0;
+      for (CS_INT p = Ap[j]; p < Ap[j+1]; ++p)
+      {
+        if (Ai[p] ==j)
+        {
+          indices[j] = p;
+          is_diag_index_found=1;
+          break;
+        }
+      }
+      if (!is_diag_index_found)
+      {
+        free(indices);
+        A->diag_indx = NULL;
+        return NULL;
+      }
+
+    }
+    break;
+  }
+  case NSM_TRIPLET:
+  case NSM_CSR:
+  default:
+    printf("NSM_diag_indices :: unknown matrix origin %d", A->origin);
+    exit(EXIT_FAILURE);
+  }
+
+  return indices;
+}
+
 
 CS_INT* NSM_diag_indices(NumericsMatrix* M)
 {
@@ -446,7 +497,6 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
   CS_INT* indices = NSM_diag_indices_trivial(M);
   if (indices)
   {
-    A->diag_indx = indices;
     return indices;
   }
 
@@ -537,57 +587,6 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M)
     exit(EXIT_FAILURE);
   }
   DEBUG_END("NSM_diag_indices(NumericsMatrix* M)\n");
-  return indices;
-}
-
-CS_INT* NSM_diag_indices_trivial(NumericsMatrix* M)
-{
-  NumericsSparseMatrix* A = M->matrix2;
-  assert(A);
-  if (A->diag_indx) return A->diag_indx;
-
-  CS_INT* indices = (CS_INT*) malloc(M->size0 * sizeof(CS_INT));
-  A->diag_indx = indices;
-  /* XXX hack --xhub  */
-  if (A->origin == NSM_TRIPLET) { NM_csc(M); A->origin = NSM_CSC; }
-  switch (A->origin)
-  {
-  case NSM_CSC:
-  {
-    assert(A->csc);
-
-    CS_INT* Ai = A->csc->i;
-    CS_INT* Ap = A->csc->p;
-
-    for (CS_INT j = 0; j < (CS_INT)M->size0; ++j)
-    {
-      int is_diag_index_found = 0;
-      for (CS_INT p = Ap[j]; p < Ap[j+1]; ++p)
-      {
-        if (Ai[p] ==j)
-        {
-          indices[j] = p;
-          is_diag_index_found=1;
-          break;
-        }
-      }
-      if (!is_diag_index_found)
-      {
-        free(indices);
-        A->diag_indx = NULL;
-        return NULL;
-      }
-
-    }
-    break;
-  }
-  case NSM_TRIPLET:
-  case NSM_CSR:
-  default:
-    printf("NSM_diag_indices :: unknown matrix origin %d", A->origin);
-    exit(EXIT_FAILURE);
-  }
-
   return indices;
 }
 
