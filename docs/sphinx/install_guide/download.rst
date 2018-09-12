@@ -21,9 +21,9 @@ Development sources
 
 Siconos project is hosted on github : https://github.com/siconos/siconos
 
-and the development source code can be freely downloaded. Try for example:
+and the development source code can be freely downloaded. Try for example::
 
-  git clone git@github.com:siconos/siconos.git
+  git clone https://github.com/siconos/siconos.git
 
 As user, you will probably only need to clone the repository (as shown above) once and then just update your local copy to
 include the last revision::

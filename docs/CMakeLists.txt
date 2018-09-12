@@ -96,7 +96,18 @@ if(USE_SPHINX)
   find_sphinx_module(sphinxcontrib bibtex REQUIRED)
   #find_python_module(numpydoc REQUIRED)
   #find_sphinx_module(sphinxcontrib doxylink REQUIRED)
-  
+  find_sphinx_module(sphinxcontrib youtube)
+  if(NOT ${youtube_FOUND})
+    # This python package can not be found using standard ways such as conda or pip,
+    # so we force download and install.
+    message("Can not found sphinxcontrib-youtube. It will be downloaded and installed ...")
+    execute_process(
+      COMMAND ${PYTHON_EXECUTABLE} -m pip install git+https://github.com/sphinx-contrib/youtube.git)
+    find_sphinx_module(sphinxcontrib youtube REQUIRED)
+  endif()
+  # Sphinx theme for documentation
+  #find_python_module(sphinx-bootstrap-theme REQUIRED)
+  find_python_module(sphinx_bootstrap_theme REQUIRED)
   configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/index.rst.in"
     "${CMAKE_CURRENT_BINARY_DIR}/sphinx/index.rst" @ONLY)
@@ -119,9 +130,15 @@ if(USE_SPHINX)
   endforeach()
   
   # html menu
+  #configure_file (
+  #  "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_templates/menu.html"
+  #  "${CMAKE_CURRENT_BINARY_DIR}/sphinx/_templates/menu.html" COPYONLY)
+
+  # css
   configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_templates/menu.html"
-    "${CMAKE_CURRENT_BINARY_DIR}/sphinx/_templates/menu.html" COPYONLY)
+    "${CMAKE_CURRENT_SOURCE_DIR}/sphinx/_static/biblio.css"
+    "${CMAKE_CURRENT_BINARY_DIR}/sphinx/_static/biblio.css" COPYONLY)
+
   
   # --- Build a target for sphinx ---
   # --> use make html or make latex ... to build documentation.

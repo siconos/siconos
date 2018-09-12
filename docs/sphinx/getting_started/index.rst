@@ -7,6 +7,11 @@ This manual aims at giving you a short overview of the software functionnalities
 simulation with Siconos. There you will learn basics things to know to describe a nonsmooth problem or to run a simulation using siconos, for both APIs, C++ or Python.
 For a more detailed description of Siconos and its functionnalities please check the :ref:`full_documentation` table of content.
 
+
+.. contents::
+   :local:
+
+
 What is Siconos?
 ----------------
 
