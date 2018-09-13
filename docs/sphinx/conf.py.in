@@ -18,6 +18,8 @@ import os
 import re
 import importlib
 import textwrap
+from distutils.version import LooseVersion
+import sphinx
 
 # append siconos package build path to sys
 siconos_pythonpath = os.path.join("@CMAKE_BINARY_DIR@", 'wrap')
@@ -76,7 +78,16 @@ if with_python_wrapper:
     # due to doxy2swig way of doing things).
     autoclass_content = 'class'
 
-    autodoc_default_flags = ['members', 'show-inheritance',]
+    ## Deprecated in sphinx 1.8, see eg http://luc.lino-framework.org/blog/2018/0821.html
+    if LooseVersion(sphinx.__version__) < LooseVersion("1.8"):
+        autodoc_default_flags = ['members', 'show-inheritance',]
+    else:
+        autodoc_default_options={
+          'members': None,
+          'show-inheritance': None,
+        }
+    
+
     autodoc_docstring_signature = True
 
     # ---- Napoleon config ----
