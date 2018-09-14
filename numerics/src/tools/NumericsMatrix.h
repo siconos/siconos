@@ -375,6 +375,10 @@ extern "C"
                const double beta,
                double *y);
 
+  void NM_gemv_nt(const double alpha, NumericsMatrix* A, const double *x,
+                  const double beta,
+                  double *y);
+
   /** Matrix matrix multiplication : C = alpha A B + beta C
    * \param[in] alpha scalar
    * \param[in] A a NumericsMatrix

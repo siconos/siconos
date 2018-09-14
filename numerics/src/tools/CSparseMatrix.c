@@ -47,36 +47,73 @@
 #include "debug.h"
 
 /* y = alpha*A*x+beta*y */
-int CSparseMatrix_aaxpy(const double alpha, const CSparseMatrix *A,
-                        const double * restrict x,
-                        const double beta, double * restrict y)
+int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A,
+                         const double *restrict x,
+                         const double beta, double *restrict y)
 {
-  DEBUG_BEGIN("CSparseMatrix_aaxpy(...)\n");
-  CS_INT p, n, *Ap, *Ai ;
-  int j;
-  double *Ax ;
-  if(!A || !x || !y) return (0) ;	     /* check inputs */
-  n = A->n ;
-  Ap = A->p ;
-  Ai = A->i ;
-  Ax = A->x ;
 
-  if (!(fabs(beta-1.) < 100*DBL_EPSILON))
+    CS_INT n, m, *Ap, *Ai ;
+    double *Ax ;
+    if(!CS_CSC(A) || !x || !y) return (0);	     /* check inputs */
+    {
+    n = A->n;
+    m = A->m;
+    Ap = A->p;
+    Ai = A->i;
+    Ax = A->x;
+
+
+    {
+#pragma omp parallel for schedule(static)
+    for(int j=0; j<m; j++)
+    {
+      y[j] *= beta;
+    }
+
+#pragma omp parallel for schedule(guided)
+    for(int j=0 ; j<n ; j++)
+    {
+      for(CS_INT p = Ap [j] ; p < Ap [j+1] ; p++)
+      {
+        double temp = alpha * Ax [p] * x [j];
+
+#pragma omp atomic
+        y [Ai [p]] += temp;
+      }
+    }
+    }
+
+  }
+  return 1;
+
+}
+
+int CSparseMatrix_aaxpby_nt(const double alpha, const CSparseMatrix *A,
+                            const double *restrict x,
+                            const double beta, double *restrict y)
+{
+  CS_INT n, m, *Ap, *Ai ;
+  double *Ax ;
+  if(!CS_CSC(A) || !x || !y) return (0);	     /* check inputs */
+  n = A->n;
+  m = A->m;
+  Ap = A->p;
+  Ai = A->i;
+  Ax = A->x;
+
+  for(int j=0; j<m; j++)
   {
-    numerics_error("CSparseMatrix_aaxpy",
-                   "is broken for beta != 1, if you don't see why, ask Olivier");
+    y[j] *= beta;
   }
 
-  for(j = 0 ; j < n ; j++)
+  for(int j=0 ; j<n ; j++)
   {
-    for(p = Ap [j] ; p < Ap [j+1] ; p++)
+    for(CS_INT p = Ap [j] ; p < Ap [j+1] ; p++)
     {
-      DEBUG_PRINTF("j=%i,\t p=%i,\t Ai [p]  =%i,\t y [Ai [p]] = %e,\t ", j, p, Ai [p],y [Ai [p]] );
-      y [Ai [p]] *= beta;
       y [Ai [p]] += alpha * Ax [p] * x [j] ;
     }
   }
-  DEBUG_END("CSparseMatrix_aaxpy(...)\n");
+
   return 1;
 }
 

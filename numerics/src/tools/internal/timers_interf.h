@@ -43,6 +43,7 @@
   !defined(TIMER_ATL_CPUTIME) &&   \
   !defined(TIMER_CLOCK) &&         \
   !defined(TIMER_FFTW_CYCLE) &&    \
+  !defined(TIMER_OMP_WTIME) && \
   !defined(TIMER_SYSTIMES))
 /* the default timer */
 #ifdef HAVE_TIME_H
@@ -95,6 +96,20 @@ static inline double elapsed_clock_gettime(struct timespec* t1, struct timespec*
   elapsed_clock_gettime(__timer__##T##1,__timer__##T##2)
 
 #define TIMER_TICK_CLOCK_GETTIME double
+#endif
+
+#ifdef HAVE_OMP_GET_WTIME
+#include <omp.h>
+#define DECL_TIMER_OMP_WALLTIME(T)               \
+  double __timer__##T##1,__timer__##T##2
+#define START_TIMER_OMP_WALLTIME(T)             \
+  __timer__##T##1 = omp_get_wtime()
+#define STOP_TIMER_OMP_WALLTIME(T)              \
+  __timer__##T##2 = omp_get_wtime()
+#define ELAPSED_OMP_WALLTIME(T)                 \
+  __timer__##T##2-__timer__##T##1
+#define TIMER_TICK_OMP_WALLTIME double
+
 #endif
 
 #ifdef HAVE_ATLAS_AUX_H
@@ -171,6 +186,13 @@ static inline double elapsed_clock_gettime(struct timespec* t1, struct timespec*
 #define ELAPSED ELAPSED_CLOCK_GETTIME
 #define TIMER_TICK TIMER_TICK_CLOCK_GETTIME
 #define TIMER_NAME "clock_gettime"
+#elif defined(TIMER_OMP_WTIME)
+#define DECL_TIMER DECL_TIMER_OMP_WALLTIME
+#define START_TIMER START_TIMER_OMP_WALLTIME
+#define STOP_TIMER STOP_TIMER_OMP_WALLTIME
+#define ELAPSED ELAPSED_OMP_WALLTIME
+#define TIMER_TICK TIMER_TICK_OMP_WALLTIME
+#define TIMER_NAME "omp_wtime"
 #elif defined(TIMER_ATL_WALLTIME)
 #define DECL_TIMER DECL_TIMER_ATL_WALLTIME
 #define START_TIMER START_TIMER_ATL_WALLTIME
@@ -229,6 +251,3 @@ static inline double elapsed_clock_gettime(struct timespec* t1, struct timespec*
 #endif
 
 #endif
-
-
-

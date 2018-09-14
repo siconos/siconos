@@ -162,8 +162,11 @@ extern "C"
    * \param[in, out] y pointer on a dense vector of size A->n
    * \return 0 if A x or y is NULL else 1
    */
-  int CSparseMatrix_aaxpy(const double alpha, const CSparseMatrix *A, const double *x,
-               const double beta, double *y);
+  int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A, const double *x,
+                           const double beta, double *y);
+
+  int CSparseMatrix_aaxpby_nt(const double alpha, const CSparseMatrix *A, const double *x,
+                              const double beta, double *y);
 
 
     /** Allocate a CSparse matrix for future copy (as in NSM_copy)

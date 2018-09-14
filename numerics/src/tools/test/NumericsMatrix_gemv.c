@@ -24,11 +24,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "CSparseMatrix_internal.h"
+#include "NumericsSparseMatrix.h"
 #include "NumericsMatrix.h"
 #include "NumericsVector.h"
 #include <math.h>
 #include "numericsMatrixTestFunction.h"
 #include "SiconosLapack.h"
+
+
+CS_INT cs_print (const cs *A, CS_INT brief);
 
 static int NM_gemv_test(NumericsMatrix** MM)
 {
@@ -47,6 +52,7 @@ static int NM_gemv_test(NumericsMatrix** MM)
   double * yref2 = (double *)malloc(n * sizeof(double));;
   double * y = (double *)malloc(n * sizeof(double));
   double * y2 = (double *)malloc(n * sizeof(double));
+
   for (i = 0; i < n; i++)
   {
     x[i] = i + 1.0;
@@ -55,10 +61,10 @@ static int NM_gemv_test(NumericsMatrix** MM)
     y[i] = yref[i];
     y2[i] = yref2[i];
   }
-  x2[0] = 0;
-  x2[1] = 0;
-  x2[2] = 0;
-  x2[3] = 0;
+  x2[0] = 0.1;
+  x2[1] = 0.2;
+  x2[2] = 0.3;
+  x2[3] = 0.4;
   int incx = 1, incy = 1;
   cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, alpha, M1->matrix0, n, x, incx, beta, yref, incy);
 
@@ -76,10 +82,27 @@ static int NM_gemv_test(NumericsMatrix** MM)
     return info;
   }
 
+  /* sparse storage test for M1 */
+  for (i=0; i<n; i++) y[i]=0.1*i;
+  NM_csc(M1);
+  M1->storageType = NM_SPARSE;
+
+  NM_gemv(alpha, M1, x, beta, y);
+
+  if (NV_equal(y, yref, n, tol))
+    printf("Step 0 ( y = alpha*A*x + beta*y, csc storage) ok ...\n");
+  else
+  {
+    printf("Step 0 ( y = alpha*A*x + beta*y, csc storage) failed ...\n");
+    info=1;
+    return info;
+  }
+  /* end of sparse storage test for M1 */
+
   cblas_dgemv(CblasColMajor, CblasNoTrans, n, m, alpha, M3->matrix0, n, x2, incx, beta, yref2, incy);
 
   NM_gemv(alpha, M3, x2, beta, y2);
-  
+
   if (NV_equal(y2, yref2, n, tol))
     printf("Step 1 ( y = alpha*A*x + beta*y, double* storage, non square) ok ...\n");
   else
@@ -89,7 +112,29 @@ static int NM_gemv_test(NumericsMatrix** MM)
     return info;
   }
 
-  /* Sparse ... */
+  /* sparse storage test for M3 */
+  for (i=0; i<n; i++) y2[i]=0.1*i;
+  NM_csc(M3);
+  M3->storageType = NM_SPARSE;
+
+  cs_print(M3->matrix2->csc, 0);
+
+  NM_gemv(alpha, M3, x2, beta, y2);
+
+  if (NV_equal(y2, yref2, n, tol))
+    printf("Step 1 ( y = alpha*A*x + beta*y, csc storage, non square) ok ...\n");
+  else
+  {
+    printf("Step 1 ( y = alpha*A*x + beta*y, csc storage, non square) failed ...\n");
+    info=1;
+    return info;
+  }
+  /* end of sparse storage test for M3 */
+
+
+
+  
+  /* Sparse Block... */
   for (i = 0; i < n; i++)
   {
     y[i] = 0.1 * i;
@@ -106,7 +151,23 @@ static int NM_gemv_test(NumericsMatrix** MM)
     return info;
   }
 
+  /* sparse storage test for M2 */
+  for (i=0; i<n; i++) y[i]=0.1*i;
+  NM_csc(M2);
+  M2->storageType = NM_SPARSE;
 
+  NM_gemv(alpha, M2, x, beta, y);
+
+  if (NV_equal(y, yref, n, tol))
+    printf("Step 2 ( y = alpha*A*x + beta*y, csc storage) ok ...\n");
+  else
+  {
+    printf("Step 2 ( y = alpha*A*x + beta*y, csc storage) failed ...\n");
+    info=1;
+    return info;
+  }
+  /* end of sparse storage test for M2 */
+  
   NM_gemv(alpha, M4, x2, beta, y2);
 
   if (NV_equal(y2, yref2, n, tol))
@@ -118,6 +179,22 @@ static int NM_gemv_test(NumericsMatrix** MM)
     return info;
   }
 
+  /* sparse storage test for M4 */
+  for (i=0; i<n; i++) y2[i]=0.1*i;
+  NM_csc(M4);
+  M4->storageType = NM_SPARSE;
+
+  NM_gemv(alpha, M4, x2, beta, y2);
+
+  if (NV_equal(y2, yref2, n, tol))
+    printf("Step 3 ( y = alpha*A*x + beta*y, csc storage) ok ...\n");
+  else
+  {
+    printf("Step 3 ( y = alpha*A*x + beta*y, csc storage) failed ...\n");
+    info=1;
+    return info;
+  }
+  /* end of sparse storage test for M4 */
 
   free(x);
   free(x2);

@@ -69,7 +69,7 @@ void NM_prod_mv_3x3(int sizeX, int sizeY, NumericsMatrix* A,
     break;
   /* coordinate */
     case NM_SPARSE:
-      CSparseMatrix_aaxpy(alpha, NM_csc(A), x, beta, y);
+      CSparseMatrix_aaxpby(alpha, NM_csc(A), x, beta, y);
     break;
 
     default:
@@ -1997,7 +1997,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
       {
         NM_dense_to_sparse(A, A);
       }
-      else
+      else if (A->size0 > 0 || A->size1 > 0)
       {
         fprintf(stderr, "NM_triplet: sparse matrix cannot be constructed.\n");
         exit(EXIT_FAILURE);
@@ -2151,22 +2151,44 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
   case NM_SPARSE:
   {
     assert(A->storageType == NM_SPARSE);
-    // if possible use the much simpler version provided by CSparse
-    // Also at the time of writing, CSparseMatrix_aaxpy is bugged --xhub
-    bool beta_check = false;
-    if (fabs(beta) < 100*DBL_EPSILON)
+    CHECK_RETURN(CSparseMatrix_aaxpby(alpha, NM_csc(A), x, beta, y));
+    break;
+  }
+  default:
     {
-      memset(y, 0, A->size0*sizeof(double));
-      beta_check = true;
+      assert(0 && "NM_gemv unknown storageType");
     }
-    if (fabs(alpha - 1.) < 100*DBL_EPSILON && (fabs(beta - 1.) < 100*DBL_EPSILON || beta_check))
-    {
-      CHECK_RETURN(cs_gaxpy(NM_csc(A), x, y));
-    }
-    else
-    {
-      CHECK_RETURN(CSparseMatrix_aaxpy(alpha, NM_csc(A), x, beta, y));
-    }
+  }
+}
+
+void NM_gemv_nt(const double alpha, NumericsMatrix* A, const double *x,
+                const double beta, double *y)
+{
+  assert(A);
+  assert(x);
+  assert(y);
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    cblas_dgemv(CblasColMajor, CblasNoTrans, A->size0, A->size1,
+                alpha, A->matrix0, A->size0, x, 1, beta, y, 1);
+
+     break;
+  }
+
+  case NM_SPARSE_BLOCK:
+  {
+    SBM_gemv(A->size1, A->size0, alpha, A->matrix1, x, beta, y);
+
+     break;
+  }
+
+  case NM_SPARSE:
+  {
+    assert(A->storageType == NM_SPARSE);
+    CHECK_RETURN(CSparseMatrix_aaxpby_nt(alpha, NM_csc(A), x, beta, y));
     break;
   }
   default:
@@ -2191,22 +2213,7 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
   case NM_SPARSE_BLOCK:
   case NM_SPARSE:
     {
-      /* if possible use the much simpler version provided by CSparse
-       Also at the time of writing, CSparseMatrix_aaxpy is bugged --xhub */
-      bool beta_check = false;
-      if (fabs(beta) < 100*DBL_EPSILON)
-      {
-        memset(y, 0, A->size0*sizeof(double));
-        beta_check = true;
-      }
-      if (fabs(alpha - 1.) < 100*DBL_EPSILON && (fabs(beta - 1.) < 100*DBL_EPSILON || beta_check))
-      {
-        CHECK_RETURN(cs_gaxpy(NM_csc_trans(A), x, y));
-      }
-      else
-      {
-        CHECK_RETURN(CSparseMatrix_aaxpy(alpha, NM_csc_trans(A), x, beta, y));
-      }
+      CHECK_RETURN(CSparseMatrix_aaxpby(alpha, NM_csc_trans(A), x, beta, y));
       break;
     }
   default:
