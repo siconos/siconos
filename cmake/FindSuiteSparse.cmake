@@ -31,6 +31,10 @@ if (SuiteSparse_USE_CXSparse)
   if (CXSparse_INCLUDE_DIR AND CXSparse_LIBRARY)
       set(SuiteSparse_CXSparse_FOUND TRUE)
   endif()
+
+  # At least on some systems we need to link to libcolamd which is
+  # another output from suitesparse.
+  find_library(colamd_LIBRARY NAMES colamd)
 endif ()
 
 include(FindPackageHandleStandardArgs)
@@ -43,7 +47,7 @@ if (SuiteSparse_USE_CXSparse AND CXSparse_LIBRARY)
   mark_as_advanced(CXSparse_INCLUDE_DIR CXSparse_LIBRARY)
 endif ()
 
-set(SuiteSparse_LIBRARIES ${CXSparse_LIBRARY})
+set(SuiteSparse_LIBRARIES ${CXSparse_LIBRARY} ${colamd_LIBRARY})
 set(SuiteSparse_INCLUDE_DIRS ${CXSparse_INCLUDE_DIR})
 
 # If at least one component was found, SuiteSparse was found.
