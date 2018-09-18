@@ -209,3 +209,7 @@ endif()
 
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
+
+
+# We don't want warnings from externals libraries.
+target_compile_options(externals PRIVATE "-w")
