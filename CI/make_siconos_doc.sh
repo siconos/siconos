@@ -9,4 +9,5 @@ mkdir build
 cd build
 export LANG=C.UTF-8 # Required, else doxy2swig fails!
 cmake ../ -DUSER_OPTIONS_FILE=$PWD/../CI/siconos_docs.cmake
+make -j 4
 make doc -j 4
