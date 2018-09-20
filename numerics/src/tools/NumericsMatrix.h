@@ -269,7 +269,7 @@ extern "C"
    * \param B the NumericsMatrix
    */
   bool NM_equal(NumericsMatrix* A, NumericsMatrix* B);
-  
+
   /** compare to NumericsMatrix up to a given tolerance
    * \param A the NumericsMatrix
    * \param B the NumericsMatrix
@@ -375,10 +375,6 @@ extern "C"
                const double beta,
                double *y);
 
-  void NM_gemv_nt(const double alpha, NumericsMatrix* A, const double *x,
-                  const double beta,
-                  double *y);
-
   /** Matrix matrix multiplication : C = alpha A B + beta C
    * \param[in] alpha scalar
    * \param[in] A a NumericsMatrix
@@ -389,7 +385,7 @@ extern "C"
   void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
                const double beta, NumericsMatrix *C);
 
-   /** Matrix matrix multiplication : C = A B 
+   /** Matrix matrix multiplication : C = A B
    * \param[in] A a NumericsMatrix
    * \param[in] B a NumericsMatrix
    * \param[in,out] C a NumericsMatrix
@@ -397,7 +393,7 @@ extern "C"
   NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B);
 
 
-  
+
   /** Transposed matrix multiplication : y += alpha transpose(A) x + y
    * \param[in] alpha scalar
    * \param[in] A a NumericsMatrix
@@ -624,7 +620,7 @@ extern "C"
     M->internalData->dWorkSize = 0;
     M->internalData->isLUfactorized = 0;
   }
-  /** Copy the internalData structure 
+  /** Copy the internalData structure
    * \param M the matrix to modify
    */
   void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B );
@@ -651,7 +647,7 @@ extern "C"
    * \param alpha the term to add
    */
   void NM_add_to_diag3(NumericsMatrix* M, double alpha);
-  
+
   /** Add two matrices with coefficients C = alpha*A + beta*B
    * \param alpha the first coefficient
    * \param A the first  matrix

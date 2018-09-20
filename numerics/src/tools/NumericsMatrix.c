@@ -2161,43 +2161,6 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
   }
 }
 
-void NM_gemv_nt(const double alpha, NumericsMatrix* A, const double *x,
-                const double beta, double *y)
-{
-  assert(A);
-  assert(x);
-  assert(y);
-
-  switch (A->storageType)
-  {
-  case NM_DENSE:
-  {
-    cblas_dgemv(CblasColMajor, CblasNoTrans, A->size0, A->size1,
-                alpha, A->matrix0, A->size0, x, 1, beta, y, 1);
-
-     break;
-  }
-
-  case NM_SPARSE_BLOCK:
-  {
-    SBM_gemv(A->size1, A->size0, alpha, A->matrix1, x, beta, y);
-
-     break;
-  }
-
-  case NM_SPARSE:
-  {
-    assert(A->storageType == NM_SPARSE);
-    CHECK_RETURN(CSparseMatrix_aaxpby_nt(alpha, NM_csc(A), x, beta, y));
-    break;
-  }
-  default:
-    {
-      assert(0 && "NM_gemv unknown storageType");
-    }
-  }
-}
-
 /* Numerics Matrix wrapper  for y <- alpha trans(A) x + beta y */
 void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
               const double beta, double *y)

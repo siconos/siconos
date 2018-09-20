@@ -52,10 +52,10 @@ int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A,
                          const double beta, double *restrict y)
 {
 
-    CS_INT n, m, *Ap, *Ai ;
-    double *Ax ;
-    if(!CS_CSC(A) || !x || !y) return (0);	     /* check inputs */
-    {
+  CS_INT n, m, *Ap, *Ai ;
+  double *Ax ;
+  if(!CS_CSC(A) || !x || !y) return (0);	     /* check inputs */
+  {
     n = A->n;
     m = A->m;
     Ap = A->p;
@@ -63,60 +63,23 @@ int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A,
     Ax = A->x;
 
 
-    {
-#pragma omp parallel for schedule(static)
     for(int j=0; j<m; j++)
     {
       y[j] *= beta;
     }
 
-#pragma omp parallel for schedule(guided)
     for(int j=0 ; j<n ; j++)
     {
       for(CS_INT p = Ap [j] ; p < Ap [j+1] ; p++)
       {
-        double temp = alpha * Ax [p] * x [j];
-
-#pragma omp atomic
-        y [Ai [p]] += temp;
+        y [Ai [p]] += alpha * Ax [p] * x [j];
       }
     }
-    }
 
   }
   return 1;
 
 }
-
-int CSparseMatrix_aaxpby_nt(const double alpha, const CSparseMatrix *A,
-                            const double *restrict x,
-                            const double beta, double *restrict y)
-{
-  CS_INT n, m, *Ap, *Ai ;
-  double *Ax ;
-  if(!CS_CSC(A) || !x || !y) return (0);	     /* check inputs */
-  n = A->n;
-  m = A->m;
-  Ap = A->p;
-  Ai = A->i;
-  Ax = A->x;
-
-  for(int j=0; j<m; j++)
-  {
-    y[j] *= beta;
-  }
-
-  for(int j=0 ; j<n ; j++)
-  {
-    for(CS_INT p = Ap [j] ; p < Ap [j+1] ; p++)
-    {
-      y [Ai [p]] += alpha * Ax [p] * x [j] ;
-    }
-  }
-
-  return 1;
-}
-
 
 int CSparseMatrix_check_triplet(CSparseMatrix *T)
 {
@@ -627,4 +590,3 @@ void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B)
 
   memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
 }
-

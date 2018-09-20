@@ -165,10 +165,6 @@ extern "C"
   int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A, const double *x,
                            const double beta, double *y);
 
-  int CSparseMatrix_aaxpby_nt(const double alpha, const CSparseMatrix *A, const double *x,
-                              const double beta, double *y);
-
-
     /** Allocate a CSparse matrix for future copy (as in NSM_copy)
    * \param m the matrix used as model
    * \return an newly allocated matrix
