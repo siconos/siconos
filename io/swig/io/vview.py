@@ -249,16 +249,17 @@ class VExportOptions(VViewOptions):
         if long:
             print()
             print("""Options:
-            --help     display this message
-            --version  display version information
-            --ascii    export file in ascii format
+            --help           display this message
+            --version        display version information
+            --global-filter  one vtp file/time step
+            --ascii          export file in ascii format
             """)
 
     def parse(self):
         ## Parse command line
         try:
             opts, args = getopt.gnu_getopt(sys.argv[1:], '',
-                                           ['help','version','ascii'])
+                                           ['help','version','ascii', 'global-filter'])
             self.configure(opts, args)
         except getopt.GetoptError as err:
                 sys.stderr.write('{0}\n'.format(str(err)))
@@ -273,6 +274,8 @@ class VExportOptions(VViewOptions):
             if o == '--version':
                 print('{0} @SICONOS_VERSION@'.format(os.path.split(sys.argv[0])[1]))
                 exit(0)
+            if o == '--global-filter':
+                self.global_filter = True
             if o in ('--ascii'):
                 self.ascii_mode = True
 
@@ -1930,10 +1933,18 @@ class VView(object):
         self.widget.InteractiveOn()
 
     def export(self):
-        big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
+        if self.opts.global_filter:
+            big_data_writer = vtk.vtkXMLPolyDataWriter()
+        else:
+            big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
         add_compatiblity_methods(big_data_writer)
-        big_data_writer.SetInputConnection(self.big_data_source.GetOutputPort())
+        if self.opts.global_filter:
+            big_data_writer.SetInputConnection(self.big_data_geometry_filter.GetOutputPort())
+        else:
+            big_data_writer.SetInputConnection(self.big_data_source.GetOutputPort())
 
+        if self.opts.ascii_mode:
+            big_data_writer.SetDataModeToAscii()
         times = list(set(self.dpos_data[:, 0]))
         times.sort()
         ntime = len(times)
@@ -1987,11 +1998,14 @@ class VView(object):
             big_data_writer.SetFileName('{0}-{1}.{2}'.format(
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
                 index, big_data_writer.GetDefaultFileExtension()))
-            big_data_writer.SetTimeStep(times[index])
-            self.big_data_source.Update()
+            # time step has been lost (vtk-7)
+            if hasattr(big_data_writer, 'SetTimeStep'):
+                big_data_writer.SetTimeStep(times[index])
+            if self.opts.global_filter:
+                self.big_data_geometry_filter.Update()
+            else:
+                self.big_data_source.Update()
 
-            if self.opts.ascii_mode:
-                big_data_writer.SetDataModeToAscii()
             big_data_writer.Write()
 
     def initialize_vtk(self):
