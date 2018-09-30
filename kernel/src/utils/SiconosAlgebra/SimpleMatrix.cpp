@@ -679,11 +679,12 @@ void SimpleMatrix::display() const
 {
   std::cout.setf(std::ios::scientific);
   std::cout.precision(6);
-
+  
   if (size(0) == 0 || size(1) ==0)
   {
     std::cout << "SimpleMatrix::display(): empty matrix" << std::endl;
   }
+  std::cout << "num = " << _num << "\t";
   if (_num == 1)
   {
     Siconos::algebra::print_m(*mat.Dense);
