@@ -54,7 +54,7 @@ TYPEDEF_SPTR(VInt)
  * You can find an overview on how to build and use vectors and matrices in siconos users guide .
  *
  */
-class SiconosMatrix : public std11::enable_shared_from_this<SiconosMatrix>
+class SiconosMatrix //: public std11::enable_shared_from_this<SiconosMatrix>
 {
 protected:
   /** serialization hooks
@@ -350,14 +350,23 @@ public:
    *  \param col unsigned int col
    * \return SP::SiconosMatrix
    */
-  virtual SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) = 0;
+  virtual SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0)
+  {
+    RuntimeException::selfThrow("SP::SiconosMatrix block(...) must be implemented");
+    return SP::SiconosMatrix();
+  };
+  
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
    *  \param row unsigned int row
    *  \param col unsigned int col
    * \return SPC::SiconosMatrix
    */
-  virtual SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const = 0;
+  virtual SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
+  {
+    RuntimeException::selfThrow("SP::SiconosMatrix block(...) must be implemented");
+    return SPC::SiconosMatrix();
+  };
 
   /** get row index of current matrix and save it into vOut
    *  \param index row we want to get
