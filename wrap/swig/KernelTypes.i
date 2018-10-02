@@ -912,21 +912,10 @@ struct IsDense : public Question<bool>
 
 %typemap(out, fragment="SiconosVector") (std11::shared_ptr<SiconosVector>)
 {
-  // %typemap(out) TYPE
-  // compile time test to reproduce swig director test. swig does not
-  // seem to provides facilities to customize this
-  // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
-  // variable.
-  typedef BOOST_TYPEOF(*arg1) self_type;
+  // %typemap(out, fragment="SiconosVector") (std11::shared_ptr<SiconosVector>)
 
-  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
-    DirectorCast<self_type >,
-    DirectorNoCast<self_type > >::type CastMaybe;
-
-  CastMaybe cast_maybe;
-
-  Swig::Director* l_director = cast_maybe.value(&*arg1);
-  bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
+  // from the wrapper we always return a numpy vector
+  bool l_upcall = false;
 
   $result = SP_SiconosVector_out($1, l_upcall, obj0);
 }
@@ -935,6 +924,11 @@ struct IsDense : public Question<bool>
 %typemap(directorout, fragment="SiconosVector") std11::shared_ptr<SiconosVector> ()
 {
   // %typemap(directorout, fragment="SiconosVector") std11::shared_ptr<SiconosVector> ()
+
+  // TO BE FIXED :
+  // find the magic test :
+  // if (called_from_python) { return python_type; } else { return c++_type; }
+
   c_result = SiconosVector_from_python($input);
   if (!c_result) throw Swig::DirectorMethodException();
 }
@@ -1110,6 +1104,11 @@ struct IsDense : public Question<bool>
 %typemap(directorout, fragment="SiconosMatrix") std11::shared_ptr<TYPE> ()
 {
   // %typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SiconosMatrix> ()
+
+  // TO BE FIXED :
+  // find the magic test :
+  // if (called_from_python) { return python_type; } else { return c++_type; }
+
   PyArrayObject* array_dout = NULL;
   int is_new_object_dout;
   bool ok = SiconosMatrix_from_python($input, &array_dout, &is_new_object_dout, &c_result);
@@ -1120,20 +1119,8 @@ struct IsDense : public Question<bool>
 {
   // %typemap(out) TYPE
 
-  // compile time test to reproduce swig director test. swig does not
-  // seem to provides facilities to customize this
-  // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
-  // variable.
-  typedef BOOST_TYPEOF(*arg1) self_type;
-
-  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
-    DirectorCast<self_type >,
-    DirectorNoCast<self_type > >::type CastMaybe;
-
-  CastMaybe cast_maybe;
-
-  Swig::Director* l_director = cast_maybe.value(&*arg1);
-  bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
+  // from the wrapper we always return a numpy matrix
+  bool l_upcall = false;
 
   // call from director?
   $result = SiconosMatrix_to_numpy($1, l_upcall);
@@ -1172,22 +1159,10 @@ struct IsDense : public Question<bool>
 {
   // %typemap(out) std11::shared_ptr<SiconosVector>
 
-  // compile time test to reproduce swig director test. swig does not
-  // seem to provides facilities to customize this
-  // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
-  // variable.
-  typedef BOOST_TYPEOF(*arg1) self_type;
+  // from the wrapper we always return a numpy array
+  bool l_upcall = false;
 
-  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type>,
-    DirectorCast<self_type >,
-    DirectorNoCast<self_type > >::type CastMaybe;
-
-  CastMaybe cast_maybe;
-
-  Swig::Director* l_director = cast_maybe.value(&*arg1);
-  bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
-
-  // call from director?
+  // call from director?  TO BE REMOVED
   if (l_upcall)
   {
     // result from C++ method, return the pointer
