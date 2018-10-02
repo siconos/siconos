@@ -179,3 +179,8 @@ def test_lagrangian_tids():
     assert np.allclose(stiffness, ds.jacobianqForces())
     ds.computeJacobianqDotForces(time)
     assert np.allclose(damping, ds.jacobianqDotForces())
+
+
+if __name__ == "__main__":
+    # execute only if run as a script
+    test_lagrangian_tids()
