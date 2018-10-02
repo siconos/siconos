@@ -125,12 +125,13 @@ FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SPC,TYPE)
 
     SharedPointerKeeper(std11::shared_ptr<void> v) : ref(v) 
     {
-      DEBUG_PRINTF("SharedPointerKeeper : use_count %ld\n",v.use_count());
+      DEBUG_PRINTF("SharedPointerKeeper : get %p use_count %ld\n",v.get(),v.use_count());
     };
 
     ~SharedPointerKeeper()
     {
-      DEBUG_PRINT("~SharedPointerKeeper()\n");
+      
+      DEBUG_PRINTF("~SharedPointerKeeper() : get %p use_count %ld\n", ref.get(),ref.use_count() );
       //    ref.reset(); // destructor called
     }
 
@@ -147,7 +148,7 @@ FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SPC,TYPE)
 
   static  void sharedPointerKeeperDeleteCap(PyObject * cap)
   {
-    DEBUG_PRINT("sharedPointerKeeperDeleteCap\n");
+    //DEBUG_PRINT("sharedPointerKeeperDeleteCap\n");
     void* o = (void*) PyCapsule_GetPointer(cap,SWIGPY_CAPSULE_NAME);
     delete static_cast<SharedPointerKeeper *>(o);
     return;

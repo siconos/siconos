@@ -744,7 +744,8 @@ struct IsDense : public Question<bool>
     return result;
   }
 
-  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SP::SimpleMatrix* c_result)
+  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object,
+                                 SP::SimpleMatrix* c_result)
   {
     void * swig_argp;
 
@@ -764,7 +765,8 @@ struct IsDense : public Question<bool>
     return true;
   }
 
-  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SP::SiconosMatrix* c_result)
+  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object,
+                                 SP::SiconosMatrix* c_result)
   {
     void * swig_argp;
     int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SiconosMatrix *),  0  | 0);
@@ -1104,15 +1106,29 @@ struct IsDense : public Question<bool>
 %typemap(directorout, fragment="SiconosMatrix") std11::shared_ptr<TYPE> ()
 {
   // %typemap(directorout, fragment="NumPy_Fragments") std11::shared_ptr<SiconosMatrix> ()
-
   // TO BE FIXED :
   // find the magic test :
   // if (called_from_python) { return python_type; } else { return c++_type; }
+  DEBUG_BEGIN("%typemap(directorout, fragment= NumPy_Fragments ) std11::shared_ptr<SiconosMatrix> ()\n");
 
   PyArrayObject* array_dout = NULL;
   int is_new_object_dout;
   bool ok = SiconosMatrix_from_python($input, &array_dout, &is_new_object_dout, &c_result);
+
+  DEBUG_PRINTF("ok = %s, is_new_object_dout = %i \n", ok ?"true":"false", is_new_object_dout);
+  DEBUG_EXPR_WE(std::cout << "c_result : " << c_result << std::endl;);
+  DEBUG_PRINTF(" c_result.get() : %p, c_result.use_count() = %li  \n" , c_result.get(),c_result.use_count()   );
+  if ((SP::SiconosMatrix) c_result)
+  {
+    ((SP::SiconosMatrix) c_result)->display();
+    c_result.get()->display();
+  }
+  else
+  {
+    std::cout << "(SP::SiconosMatrix) c_result " << NULL << std::endl;
+  }
   if (!ok) throw Swig::DirectorMethodException();
+  DEBUG_END("%typemap(directorout, fragment= NumPy_Fragments ) std11::shared_ptr<SiconosMatrix> ()\n");
 }
 
 %typemap(out, fragment="SiconosMatrix") (std11::shared_ptr<TYPE>)
@@ -1124,6 +1140,7 @@ struct IsDense : public Question<bool>
 
   // call from director?
   $result = SiconosMatrix_to_numpy($1, l_upcall);
+  DEBUG_END("%typemap(out, fragment= SiconosMatrix ) (std11::shared_ptr<TYPE>)\n");
 }
 %enddef
 //////////////////////////////////////////////////////////////////////////////
