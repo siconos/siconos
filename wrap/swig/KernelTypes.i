@@ -917,7 +917,7 @@ struct IsDense : public Question<bool>
   // seem to provides facilities to customize this
   // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
   // variable.
-  typedef BOOST_TYPEOF(arg1) self_type;
+  typedef BOOST_TYPEOF(*arg1) self_type;
 
   typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
     DirectorCast<self_type >,
@@ -925,7 +925,7 @@ struct IsDense : public Question<bool>
 
   CastMaybe cast_maybe;
 
-  Swig::Director* l_director = cast_maybe.value(arg1);
+  Swig::Director* l_director = cast_maybe.value(&*arg1);
   bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
 
   $result = SP_SiconosVector_out($1, l_upcall, obj0);
@@ -1124,7 +1124,7 @@ struct IsDense : public Question<bool>
   // seem to provides facilities to customize this
   // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
   // variable.
-  typedef BOOST_TYPEOF(arg1) self_type;
+  typedef BOOST_TYPEOF(*arg1) self_type;
 
   typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
     DirectorCast<self_type >,
@@ -1132,7 +1132,7 @@ struct IsDense : public Question<bool>
 
   CastMaybe cast_maybe;
 
-  Swig::Director* l_director = cast_maybe.value(arg1);
+  Swig::Director* l_director = cast_maybe.value(&*arg1);
   bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
 
   // call from director?
@@ -1150,7 +1150,7 @@ struct IsDense : public Question<bool>
     struct DirectorCast
   {
     typedef DirectorCast type;
-    Swig::Director* value(T& p)
+    Swig::Director* value(T* p)
     {
       return SWIG_DIRECTOR_CAST(p);
     }
@@ -1160,7 +1160,7 @@ struct IsDense : public Question<bool>
     struct DirectorNoCast
   {
     typedef DirectorNoCast type;
-    Swig::Director* value(T& p)
+    Swig::Director* value(T* p)
     {
       return 0;
     }
@@ -1176,15 +1176,15 @@ struct IsDense : public Question<bool>
   // seem to provides facilities to customize this
   // arg1 is the class instantiation (swig 2.0) => no way to get this as a swig
   // variable.
-  typedef BOOST_TYPEOF(arg1) self_type;
+  typedef BOOST_TYPEOF(*arg1) self_type;
 
-  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type >,
+  typedef boost::mpl::eval_if<boost::is_polymorphic<self_type>,
     DirectorCast<self_type >,
     DirectorNoCast<self_type > >::type CastMaybe;
 
   CastMaybe cast_maybe;
 
-  Swig::Director* l_director = cast_maybe.value(arg1);
+  Swig::Director* l_director = cast_maybe.value(&*arg1);
   bool l_upcall = (l_director && (l_director->swig_get_self()==obj0));
 
   // call from director?
