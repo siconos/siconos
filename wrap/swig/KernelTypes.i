@@ -1118,7 +1118,7 @@ struct IsDense : public Question<bool>
   DEBUG_PRINTF("ok = %s, is_new_object_dout = %i \n", ok ?"true":"false", is_new_object_dout);
   DEBUG_EXPR_WE(std::cout << "c_result : " << c_result << std::endl;);
   DEBUG_PRINTF(" c_result.get() : %p, c_result.use_count() = %li  \n" , c_result.get(),c_result.use_count()   );
-  if ((SP::SiconosMatrix) c_result)
+  DEBUG_EXPR_WE(if ((SP::SiconosMatrix) c_result)
   {
     ((SP::SiconosMatrix) c_result)->display();
     c_result.get()->display();
@@ -1126,7 +1126,7 @@ struct IsDense : public Question<bool>
   else
   {
     std::cout << "(SP::SiconosMatrix) c_result " << NULL << std::endl;
-  }
+  });
   if (!ok) throw Swig::DirectorMethodException();
   DEBUG_END("%typemap(directorout, fragment= NumPy_Fragments ) std11::shared_ptr<SiconosMatrix> ()\n");
 }
