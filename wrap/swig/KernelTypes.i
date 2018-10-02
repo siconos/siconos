@@ -744,44 +744,43 @@ struct IsDense : public Question<bool>
     return result;
   }
 
-  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object,
-                                 SP::SimpleMatrix* c_result)
+   SP::SimpleMatrix SimpleMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
   {
     void * swig_argp;
-
+    SP::SimpleMatrix c_result;
     int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SimpleMatrix *),  0  | 0);
 
     if (!SWIG_IsOK(swig_res))
     {
       // try a conversion from numpy
-      *c_result = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
-      if (!c_result) { return false; }
+      c_result = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
+      if (!c_result) { return SP::SimpleMatrix(); }
     }
     else if (swig_argp)
     {
-      *c_result = *(reinterpret_cast< SP::SimpleMatrix * >(swig_argp));
+      c_result = *(reinterpret_cast< SP::SimpleMatrix * >(swig_argp));
       if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SimpleMatrix * >(swig_argp);
     }
-    return true;
+    return c_result;
   }
 
-  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object,
-                                 SP::SiconosMatrix* c_result)
+   SP::SiconosMatrix SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
   {
     void * swig_argp;
+    SP::SiconosMatrix c_result;
     int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SiconosMatrix *),  0  | 0);
 
     if (!SWIG_IsOK(swig_res))
     {
-      *c_result = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
-      if (!c_result) { return false; }
+      c_result = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
+      if (!c_result) { return SP::SiconosMatrix(); }
     }
     else if (swig_argp)
     {
-      *c_result = *(reinterpret_cast< SP::SiconosMatrix * >(swig_argp));
+      c_result = *(reinterpret_cast< SP::SiconosMatrix * >(swig_argp));
       if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosMatrix * >(swig_argp);
     }
-    return true;
+    return c_result;
   }
 
   bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SiconosMatrix** c_result, std::vector<SP::SiconosMatrix>& keeper)
@@ -1004,7 +1003,7 @@ struct IsDense : public Question<bool>
 // numpy or TYPE on input -> TYPE
 %typemap(in, fragment="SiconosMatrix") (std11::shared_ptr<TYPE>) (PyArrayObject* array=NULL, int is_new_object = 0)
 {
-
+  // %typemap(in, fragment="SiconosMatrix") (std11::shared_ptr<TYPE>) (PyArrayObject* array=NULL, int is_new_object = 0)
   void *argp1=0;
   int res1=0;
   int newmem = 0;
@@ -1029,8 +1028,8 @@ struct IsDense : public Question<bool>
   }
   else
   {
-    bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1);
-    if (!ok) { SWIG_exception_fail(SWIG_ValueError, "expected matrix"); }
+    $1 = SimpleMatrix_from_python($input, &array, &is_new_object);
+    if (!$1) { SWIG_exception_fail(SWIG_ValueError, "expected matrix"); }
   }
 }
 
@@ -1113,9 +1112,9 @@ struct IsDense : public Question<bool>
 
   PyArrayObject* array_dout = NULL;
   int is_new_object_dout;
-  bool ok = SiconosMatrix_from_python($input, &array_dout, &is_new_object_dout, &c_result);
-
-  DEBUG_PRINTF("ok = %s, is_new_object_dout = %i \n", ok ?"true":"false", is_new_object_dout);
+  c_result = SimpleMatrix_from_python($input, &array_dout, &is_new_object_dout);
+  
+  DEBUG_PRINTF("is_new_object_dout = %i \n", is_new_object_dout);
   DEBUG_EXPR_WE(std::cout << "c_result : " << c_result << std::endl;);
   DEBUG_PRINTF(" c_result.get() : %p, c_result.use_count() = %li  \n" , c_result.get(),c_result.use_count()   );
   DEBUG_EXPR_WE(if ((SP::SiconosMatrix) c_result)
@@ -1127,7 +1126,7 @@ struct IsDense : public Question<bool>
   {
     std::cout << "(SP::SiconosMatrix) c_result " << NULL << std::endl;
   });
-  if (!ok) throw Swig::DirectorMethodException();
+//  if (!c_result) throw Swig::DirectorMethodException();
   DEBUG_END("%typemap(directorout, fragment= NumPy_Fragments ) std11::shared_ptr<SiconosMatrix> ()\n");
 }
 
