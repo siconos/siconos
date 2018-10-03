@@ -274,7 +274,7 @@ def run_simulation_with_two_ds(ball, ball_d, t0):
 
 
     data.resize(k,5)
-    view= True
+    view= False
     if view:
         import matplotlib.pyplot as plt
 
