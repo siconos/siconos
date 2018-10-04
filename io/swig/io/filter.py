@@ -98,9 +98,11 @@ class CopyVisitor(object):
 
         # Determine chunks argument
         if obj.__class__ == h5py.Dataset:
-            chunks = obj.chunks
-            if np.any(np.array(chunks) > np.array(obj.shape)):
-                chunks = None
+            chunks = None
+            if (hasattr(obj, 'chunks')
+                and obj.chunks is not None
+                and np.all(np.array(obj.chunks) <= np.array(obj.shape))):
+                chunks = obj.chunks
 
             shape = obj.shape
             time_idx = None
