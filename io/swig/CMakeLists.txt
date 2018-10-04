@@ -71,11 +71,8 @@ if(HAVE_SICONOS_MECHANICS)
 
       # swig modules must be built before vview and vexport can generate manpages
       foreach(_SWIG_MODULE ${${COMPONENT}_PYTHON_MODULES})
-        message(STATUS _SWIG_MODULE=${_SWIG_MODULE})
         get_filename_component(_SWIG_MODULE_NAME ${_SWIG_MODULE} NAME)
-        message(STATUS _SWIG_MODULE_NAME=${_SWIG_MODULE_NAME})
         list(APPEND _OTHER_COMPONENTS ${_SWIG_MODULE_NAME}_swig_compilation _${_SWIG_MODULE_NAME})
-        message(STATUS _OTHER_COMPONENTS=${_OTHER_COMPONENTS})
       endforeach()
 
       set(MANPAGES_FOR_TOOLS)
