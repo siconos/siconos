@@ -24,56 +24,28 @@
 
 /** Lagrangian Linear Systems with time invariant and diagonal coefficients - \f$M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
 
-    The class LagrangianLinearDiagonalDS  allows to define  and compute a generic ndof-dimensional
-    Lagrangian Linear Time Invariant Dynamical System of the form :
-    where
-    \f$
-    M \ddot q + C \dot q + K q =  F_{ext}(t,z) + p,
-    \f$
-    where
+
+     where
+
     - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
-    - \f$ \dot q  \in R^{ndof} \f$  the velocity, i. e. the time derivative of the  generalized coordinates.
+    - \f$ \dot q = v \in R^{ndof} \f$  the velocity, i. e. the time derivative of the  generalized coordinates.
     - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the  generalized coordinates.
-    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In particular case of Non Smooth evolution,
+    - \f$ p  \in R^{ndof} \f$  the forces due to the nonsmooth interaction. In the particular case of a nonsmooth evolution,
     the variable p contains the impulse and not the force.
-    -  \f$ M \in  R^{ndof \times ndof} \f$ is Mass matrix stored in the SiconosMatrix mass().
-    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix stored in the SiconosMatrix K().
-    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix stored in the SiconosMatrix C().
+    -  \f$ M \in  R^{ndof \times ndof} \f$ is the mass matrix (access : mass() method).
+    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix (access : stiffness() method).
+    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix (access : damping() method).
     -  \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
-    - all matrix coefficients are diagonal
 
-    If required (e.g. for Event-Driven like simulation), reformulation as a first-order system (DynamicalSystem)
-    is possible, with:
+    Remind that the specificity of this class is that all matrices are diagonal (and hence only diagonal coefficients are saved in memory).
 
-    - \f$ n= 2 ndof \f$
-    - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
-    - rhs given by:
+   \rst
 
-    \rst
-    .. math::
-        
-        rhs(x,t,z) = \left[\begin{array}{c}
-        \\dot q  \\
-        \ddot q = M^{-1}\left[F_{ext}(t, z) - C \\dot q - K q  + p \right]\\
-        \end{array}\right]
-    
+    For details about dynamical systems in Siconos, please read user's guide chapter :ref:`dynamical_systems`.
+
     \endrst
 
-    Its jacobian is:
-    \rst
-    .. math::
 
-        \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
-        0  & I \\
-        -M^{-1}K & -M^{-1}C \\
-        \end{array}\right]
-
-\endrst
-
-    The input due to the non smooth law is:
-    \f$
-    r = \left[\begin{array}{c}0 \\ p \end{array}\right]
-    \f$
 */
 class LagrangianLinearDiagonalDS : public LagrangianDS
 {
@@ -89,13 +61,17 @@ protected:
   /** damping matrix */
   SP::SiconosVector _damping;
 
-  /** mass density*/
+  /** mass density */
   double _mu;
 
   /** default constructor */
   LagrangianLinearDiagonalDS():LagrangianDS() {};
 
 public:
+
+  /*! @name public constructors */
+  //@{
+
 
   /** constructor from initial state and all operators.
    *  \param q0 initial coordinates
@@ -121,9 +97,11 @@ public:
    */
   LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosVector stiffness);
 
-  /** destructor */
+  /* destructor */
   ~LagrangianLinearDiagonalDS(){};
 
+  ///@}
+  
   /*! @name Attributes access
     @{ */
 
@@ -171,8 +149,8 @@ public:
 
   /** Compute \f$F(v,q,t,z)\f$
    *  \param time the current time
-   *  \param q SP::SiconosVector: pointers on q
-   *  \param velocity SP::SiconosVector: pointers on velocity
+   *  \param q generalized coordinates
+   *  \param velocity time derivative of the  generalized coordinates
    */
   void computeForces(double time, SP::SiconosVector q, SP::SiconosVector velocity);
 

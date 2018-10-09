@@ -223,8 +223,9 @@ public:
     return _n;
   }
 
-  /** returns the dimension of the system (n for first order, ndof for Lagrangian).
-   * Useful to avoid if(typeOfDS) when size is required.
+  /** returns the dimension of the system 
+      (depends on system type, e.g. n for first order,
+      ndof for Lagrangian).
    */
   virtual inline unsigned int dimension() const
   {

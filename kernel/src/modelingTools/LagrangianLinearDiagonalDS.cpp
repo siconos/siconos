@@ -110,8 +110,6 @@ void LagrangianLinearDiagonalDS::computeForces(double time, SP::SiconosVector q2
 }
 
 
-
-
 void LagrangianLinearDiagonalDS::display() const
 {
   LagrangianDS::display();

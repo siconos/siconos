@@ -4,7 +4,7 @@
 Dynamical Systems
 =================
 
-:class:`DynamicalSystem` is the class used in Siconos to describe a set of ordinary differential equations, which is the essential first tep of any Non-Smooth problem description in Siconos.
+:class:`DynamicalSystem` is the class used in Siconos to describe a set of ordinary differential equations, which is the essential first step of any nonsmooth problem description in Siconos.
 This base class defines a common interface to all systems. To fit with different types of problems, we propose several derived classes representing some specific formulations, as described below.
 
 .. image:: /figures/dynamical_system_classes.*

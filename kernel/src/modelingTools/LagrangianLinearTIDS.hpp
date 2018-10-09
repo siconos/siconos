@@ -40,9 +40,9 @@
     - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the  generalized coordinates.
     - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In particular case of Non Smooth evolution,
     the variable p contains the impulse and not the force.
-    -  \f$ M \in  R^{ndof \times ndof} \f$ is Mass matrix stored in the SiconosMatrix mass().
-    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix stored in the SiconosMatrix K().
-    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix stored in the SiconosMatrix C().
+    -  \f$ M \in  R^{ndof \times ndof} \f$ is the Mass matrix (access : mass() method).
+    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix (access : K() method).
+    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix (access : C() method).
     -  \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
  
    The equation of motion is also shortly denoted as:
@@ -53,12 +53,11 @@
     where
     - \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
     acting on the system, that is
-    \f$ F(v, q, t, z) =  F_{ext}(t, z) -  Cv - Kq \f$
-    This vector is stored in the  SiconosVector forces()
+    \f$ F(v, q, t, z) =  F_{ext}(t, z) -  Cv - Kq \f$.
 
+    This vector is saved and may be accessed using forces() method.
     
-    If required (e.g. for Event-Driven like simulation), reformulation as a first-order system (DynamicalSystem)
-    is possible, with:
+    If required (e.g. for Event-Driven like simulation), reformulation as a first-order system is also available, and writes:
     
     - \f$ n= 2 ndof \f$
     - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
@@ -66,8 +65,7 @@
 
     \rst
     .. math::
-      :nowrap:
-  
+    
         rhs(x,t,z) = \left[\begin{array}{c}
         \\dot q  \\
         \ddot q = M^{-1}\left[F_{ext}(t, z) - C \\dot q - K q  + p \right]\\
@@ -85,12 +83,11 @@
         \end{array}\right]
    
    \endrst
-  
-  The input due to the non smooth law is:
-
+   
+   with the input due to the non smooth law:
   \rst
 
-  .. math::
+   .. math::
         
       r = \left[\begin{array}{c}0 \\ p \end{array}\right]
    
@@ -114,6 +111,9 @@ protected:
 
 public:
 
+  /*! @name public constructors */
+  //@{
+
   /** constructor from initial state and all matrix operators.
    *  \param q0 initial coordinates
    *  \param v0 initial velocity
@@ -134,6 +134,8 @@ public:
   /** destructor */
   ~LagrangianLinearTIDS(){};
 
+  ///@}
+  
   /*! @name Right-hand side computation */
   //@{
 

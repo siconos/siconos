@@ -24,15 +24,26 @@
 #include "OneStepIntegrator.hpp"
 #include <limits>
 
-/**  \class MoreauJeanBilbaoOSI */
+/** One-step integrator for event-capturing simulation combining Moreau-Jean and Bilbao numerical scheme.
+    
+    Numerical scheme which combines an exact method (Bilbao) for the linear (non-contacting) part of the equations of motion
+    with a Moreau-Jean time-stepping for the nonsmooth part.
+
+    \rst
+      Check details in :ref:`modal_moreau_jean`.
+    \endrst
+
+*/
 class MoreauJeanBilbaoOSI : public OneStepIntegrator
 {
 protected:
+
   /* serialization hooks */
   ACCEPT_SERIALIZATION(MoreauJeanBilbaoOSI);
 
   /** nslaw effects */
   struct _NSLEffectOnFreeOutput;
+
   friend struct _NSLEffectOnFreeOutput;
 
 public:
@@ -43,7 +54,6 @@ public:
 
   enum MoreauJeanBilbaoOSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
 
-  
   /* Constructor - No extra parameters: depends only on connected ds and simulation time step*/
   MoreauJeanBilbaoOSI();
 
