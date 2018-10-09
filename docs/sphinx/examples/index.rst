@@ -3,13 +3,13 @@
 Browse examples
 ===============
 
-A lot of examples of modeling and simulation of nonsmooth systems with Siconos are available. To have a look on it, you can browse them on github at `all current examples`_.
+A lot of examples of modeling and simulation of nonsmooth systems with Siconos are available.
+They are part of a specific git project, together with some tutorials. Please check  `Siconos tutorials and examples`_.
 
-.. _all current examples: https://github.com/siconos/siconos/tree/master/examples
+.. _Siconos tutorials and examples: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials
 
 
-
-All of them are distributed with siconos package and are the results of several contributions (which means that depending on each author(s) the documentation
+All of them are the results of several contributions (which means that depending on each author(s) the documentation
 may be more or less detailed ...)
 
 Click on one of the images below to find details about the system and its simulation or check in the table of contents at the bottom of this page to find
@@ -24,37 +24,39 @@ Gallery
    .. image:: /figures/mechanics/BouncingBall/BouncingBall.*
       :height: 100px
       :class: gallery
-      :target:  https://github.com/siconos/siconos/blob/master/examples/Mechanics/BouncingBall/BouncingBallTS.cpp
+      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/mechanics/BouncingBall/BouncingBallTS.cpp
    .. image:: /figures/electronics/CircuitRLCD/SchemaCircuitRLCD.*
       :height: 100px
       :class: gallery
-      :target: https://github.com/siconos/siconos/blob/master/examples/Electronics/CircuitRLCD/CircuitRLCD.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/electronics/CircuitRLCD/CircuitRLCD.cpp
    .. image:: /figures/electronics/DiodeBridge/SchemaDiodeBridge.*
       :height: 100px
       :class: gallery
-      :target: https://github.com/siconos/siconos/blob/master/examples/Electronics/DiodeBridge/DiodeBridge.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/electronics/DiodeBridge/DiodeBridge.cpp
    .. image:: /figures/mechanics/Woodpecker/woodpeckerphoto.png
       :height: 100px
       :class: gallery
-      :target: https://github.com/siconos/siconos/blob/master/examples/Mechanics/Woodpecker/WoodPecker.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/mechanics/Woodpecker/WoodPecker.cpp
 
    .. image:: /figures/mechanics/MultiBeads/BeadsColumn.*
       :height: 100px
       :class: gallery
-      :target:  https://github.com/siconos/siconos/blob/master/examples/Mechanics/ColumnOfBeads/ColumnOfBeadsTS.cpp 
+      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/mechanics/ColumnOfBeads/ColumnOfBeadsTS.cpp 
    .. image:: /figures/control/Two-linkManipulator/two-linkManipulatorResults2.*
       :height: 100px
       :class: gallery
-      :target:  https://github.com/siconos/siconos/blob/master/examples/Control/TwoLinkManipulator/TwoLinkManipulator.cpp 
+      :target:  https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/control/TwoLinkManipulator/TwoLinkManipulator.cpp 
    .. image:: /figures/electronics/PowerConverter/PRC_fig2.*
       :height: 100px
       :class: gallery
-      :target: https://github.com/siconos/siconos/blob/master/examples/Electronics/PowerConverter/PRC.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/electronics/PowerConverter/PRC.cpp
    .. image:: /figures/control/ObserverLCS/ObserverLCS.*
       :height: 100px
       :class: gallery
-      :target: https://github.com/siconos/siconos/blob/master/examples/Control/ObserverLCS/ObserverLCS.cpp
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/control/ObserverLCS/ObserverLCS.cpp
    .. image:: /figures/mechanics/slider_crank/slider_crank.*
       :height: 100px
       :class: gallery
-      :target: https://github.com/siconos/siconos/blob/master/examples/Mechanics/SliderCrank/SliderCrankMoreauJeanOSI.cpp 
+      :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials/blob/master/examples/mechanics/SliderCrank/SliderCrankMoreauJeanOSI.cpp
+
+               

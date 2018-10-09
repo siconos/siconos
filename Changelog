@@ -22,6 +22,17 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 
 --------------------------------------------------------------------------------
+  Current (in development branch siconos/master)
+--------------------------------------------------------------------------------
+
+Main changes:
+	[...]
+
+	Remove examples from siconos repository : moved to a dedicated repo
+	(https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials)
+
+	
+--------------------------------------------------------------------------------
   v4.2.0 (in development branch siconos/master)
 --------------------------------------------------------------------------------
 Main changes:

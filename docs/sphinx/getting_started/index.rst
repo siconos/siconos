@@ -36,7 +36,7 @@ Try it
 The easiest way to start with Siconos : try tutorial notebooks available here :
 
 .. image:: https://mybinder.org/badge.svg
-   :target: https://mybinder.org/v2/gh/siconos/siconos-tutorials.git/master
+   :target: https://mybinder.org/v2/git/https%3A%2F%2Fgricad-gitlab.univ-grenoble-alpes.fr%2Fnonsmooth%2Fsiconos-tutorial.git/b08a0514b22b3927b58bddce3c4018f27ac0fc7d?filepath=siconos-notebooks%2Findex.ipynb
 
 This page propose a Python interactive interface (notebooks) to Siconos, that you can use through your web browser, online.
 
