@@ -74,7 +74,7 @@ if(WITH_MECHANISMS)
   set(exename ${SICONOS_SWIG_ROOT_DIR}/tests/test_siconos_mechanisms.py)
   add_python_test(${name}, ${exename})
   # data (CAD and body) taken from slider crank example
-  set(path_to_test_sources ${CMAKE_SOURCE_DIR}/examples/Mechanics/Mechanisms/SliderCrank)
+  set(path_to_test_sources ${CMAKE_CURRENT_SOURCE_DIR}/tests/slider_crank)
   configure_file(${path_to_test_sources}/bodydef.py ${SICONOS_SWIG_ROOT_DIR}/tests/ COPYONLY)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/mbtbLocalOptions.py ${SICONOS_SWIG_ROOT_DIR}/tests/ COPYONLY)
   file(GLOB cad4tests RELATIVE ${path_to_test_sources}/CAD ${path_to_test_sources}/CAD/*)
