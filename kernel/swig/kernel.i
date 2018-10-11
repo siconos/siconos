@@ -339,10 +339,16 @@ KERNEL_REGISTRATION()
     return std11::dynamic_pointer_cast<LagrangianDS>(ds);
   }
 
+  SP::NewtonEulerFrom1DLocalFrameR cast_NewtonEulerFrom1DLocalFrameR(SP::Relation r)
+  {
+    return std11::dynamic_pointer_cast<NewtonEulerFrom1DLocalFrameR>(r);
+  }
+
+
   // Required to get size of a graph of interactions in python interp
   size_t size_graph(const InteractionsGraph& index_set)
   {
     return index_set.size();
   }
-  
+
 %}
