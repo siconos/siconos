@@ -61,7 +61,7 @@ class FrictionContactTraceParams():
 
 class FrictionContactTrace(FrictionContact):
 
-    def __init__(self, dim, solver, params=None, model=None):
+    def __init__(self, dim, solver, params=None, nsds=None):
         if params == None:
             self._params = FrictionContactTraceParams()
         else:
@@ -79,7 +79,7 @@ class FrictionContactTrace(FrictionContact):
                 self.condition = self.random_and_maxiter_condition
         self._counter = 0
         self._stepcounter = 0
-        self._model=model
+        self._nsds=nsds
         super(FrictionContactTrace, self).__init__(dim, solver)
 
     def maxiter_condition(self, SO):
@@ -93,6 +93,7 @@ class FrictionContactTrace(FrictionContact):
 
     def compute(self,time):
         info = 0
+        self.setKeepLambdaAndYState(False)
         cont = self.preCompute(time)
 
         if (not cont):
@@ -120,10 +121,8 @@ class FrictionContactTrace(FrictionContact):
             z_backup = self.z().copy()
             SO = self.numericsSolverOptions()
 
-
-            info = self.solve()
-
-            if self.condition(SO):
+            if self.condition(SO) and has_fclib: 
+           
                 # problem = self.getNumericsProblemPtr()
                 # print(problem, type(problem))
                     
@@ -136,6 +135,8 @@ class FrictionContactTrace(FrictionContact):
                                                               SO.iparam[N.SICONOS_IPARAM_ITER_DONE],
                                                               problem.numberOfContacts,
                                                               self._counter)
+
+                print('filename =', filename)
                 if os.path.exists(filename):
                     os.remove(filename)
                     print('WARNING: file '+filename+ ' was existing and has been replaced')
@@ -150,17 +151,25 @@ class FrictionContactTrace(FrictionContact):
                 guess = F.fclib_solution()
                 guess.u = w_backup
                 guess.r = z_backup
-                F.fclib_write_guesses(1, [guess], filename)
+                F.fclib_write_guesses(1, guess, filename)
+
+                with h5py.File(filename, 'r+') as fclib_file:
+                    attrs = fclib_file['fclib_local']['info'].attrs
+                    attrs.create('numberOfInvolvedDS',
+                                 self._nsds.topology().numberOfInvolvedDS(1))
+
+
+                    
+            info = self.solve()
+
+            if self.condition(SO) and has_fclib: 
                 
                 solution = F.fclib_solution()
                 solution.u = self.w()
                 solution.z = self.z()
                 F.fclib_write_solution(solution, filename)
 
-                with h5py.File(filename, 'r+') as fclib_file:
-                    attrs = fclib_file['fclib_local']['info'].attrs
-                    attrs.create('numberOfInvolvedDS',
-                                 self._model.nonSmoothDynamicalSystem().topology().numberOfInvolvedDS(1))
+
 
                 
             self.postCompute()
@@ -184,7 +193,7 @@ class GlobalFrictionContactTraceParams():
 
 class GlobalFrictionContactTrace(GlobalFrictionContact):
 
-    def __init__(self, dim, solver, params=None, model=None):
+    def __init__(self, dim, solver, params=None, nsds=None):
         if params == None:
             self._params = GlobalFrictionContactTraceParams()
         else:
@@ -202,7 +211,7 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
                 self.condition = self.random_and_maxiter_condition
         self._counter = 0
         self._stepcounter = 0
-        self._model=model
+        self._nsds=nsds
         super(GlobalFrictionContactTrace, self).__init__(dim, solver)
 
     def maxiter_condition(self, SO):
@@ -232,6 +241,7 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
         SO = self.numericsSolverOptions()
 
         info = self.solve()
+        
         if self.condition(SO) and has_fclib:
             # problem = self.getNumericsProblemPtr()
             # print(problem, type(problem))
@@ -260,6 +270,9 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
             guess.u = w_backup
             guess.r = z_backup
             F.fclib_write_guesses(1, guess, filename)
+
+
+
             
             solution = F.fclib_solution()
             solution.u = self.w()
