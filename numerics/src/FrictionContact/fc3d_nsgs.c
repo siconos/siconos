@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
 #include "fc3d_Path.h"
 #include "fc3d_NCPGlockerFixedPoint.h"
@@ -67,14 +67,14 @@ void fc3d_nsgs_update(int contact, FrictionContactProblem* problem, FrictionCont
   */
   /* Call the update function which depends on the storage for MGlobal/MBGlobal */
   /* Build a local problem for a specific contact
-   reaction corresponds to the global vector (size n) of the global problem.
+     reaction corresponds to the global vector (size n) of the global problem.
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
   fc3d_local_problem_fill_M(problem, localproblem, contact);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
-     excluding the block corresponding to the current contact. ****/
+         excluding the block corresponding to the current contact. ****/
   fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
 
   /* Friction coefficient for current block*/
@@ -248,8 +248,7 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
   }
   default:
   {
-    fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n", solver_options_id_to_name(localsolver_options->solverId));
-    exit(EXIT_FAILURE);
+    numerics_error("fc3d_nsgs_initialize_local_solver", "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n", solver_options_id_to_name(localsolver_options->solverId));
   }
   }
 }
@@ -258,9 +257,9 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
 /* swap two indices */
 void uint_swap (unsigned int *a, unsigned int *b)
 {
-    unsigned int temp = *a;
-    *a = *b;
-    *b = temp;
+  unsigned int temp = *a;
+  *a = *b;
+  *b = temp;
 }
 
 /* shuffle an unsigned array */
@@ -335,13 +334,13 @@ void accumulateLightErrorSum(double *light_error_sum, double localreaction[3],
 }
 int file_exists(const char *fname)
 {
-    FILE *file;
-    if ((file = fopen(fname, "r")))
-    {
-        fclose(file);
-        return 1;
-    }
-    return 0;
+  FILE *file;
+  if ((file = fopen(fname, "r")))
+  {
+    fclose(file);
+    return 1;
+  }
+  return 0;
 }
 static
 void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
@@ -367,7 +366,7 @@ void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
 
     if (file_exists(fname))
     {
-       /* printf(" %s already dumped\n", fname); */
+      /* printf(" %s already dumped\n", fname); */
     }
     else
     {
@@ -396,10 +395,9 @@ void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
 
 #endif
 
-    if (verbose > 0)
-      printf("Discard local reaction for contact %i at iteration %i "
-             "with local_error = %e\n",
-             contact, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
+    numerics_printf("Discard local reaction for contact %i at iteration %i "
+                    "with local_error = %e",
+                    contact, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
     memcpy(&reaction[contact*3], localreaction, sizeof(double)*3);
@@ -438,10 +436,9 @@ double calculateFullErrorAdaptiveInterval(FrictionContactProblem *problem,
           && options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE)
         options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] *= 2;
     }
-    if (verbose > 0)
-      printf("--------------- FC3D - NSGS - Iteration %i "
-             "options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = %i, options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = % i \n",
-             iter, options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY], options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION]);
+    numerics_printf("--------------- FC3D - NSGS - Iteration %i "
+                    "options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = %i, options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = % i",
+                    iter, options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY], options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION]);
   }
   else
     (*computeError)(problem, reaction , velocity, tolerance, options, norm_q,  &error);
@@ -467,17 +464,17 @@ double calculateFullErrorFinal(FrictionContactProblem *problem, SolverOptions *o
   {
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
     {
-      printf("------- FC3D - NSGS - Warning absolute "
-             "Residual = %14.7e is larger than required precision = %14.7e\n",
-             absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
+      numerics_printf("------- FC3D - NSGS - Warning absolute "
+                      "Residual = %14.7e is larger than required precision = %14.7e",
+                      absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
     }
     else
     {
-      printf("------- FC3D - NSGS - absolute "
-             "Residual = %14.7e is smaller than required precision = %14.7e\n",
-             absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
+      numerics_printf("------- FC3D - NSGS - absolute "
+                      "Residual = %14.7e is smaller than required precision = %14.7e",
+                      absolute_error, options->dparam[SICONOS_DPARAM_TOL]);
     }
-}
+  }
   return absolute_error;
 }
 
@@ -490,15 +487,13 @@ int determine_convergence(double error, double tolerance, int iter,
   if (error < tolerance)
   {
     hasNotConverged = 0;
-    if (verbose > 0)
-      printf("--------------- FC3D - NSGS - Iteration %i "
-             "Residual = %14.7e < %7.3e\n", iter, error, tolerance);
+    numerics_printf("--------------- FC3D - NSGS - Iteration %i "
+                    "Residual = %14.7e < %7.3e\n", iter, error, tolerance);
   }
   else
   {
-    if (verbose > 0)
-      printf("--------------- FC3D - NSGS - Iteration %i "
-             "Residual = %14.7e > %7.3e\n", iter, error, tolerance);
+    numerics_printf("--------------- FC3D - NSGS - Iteration %i "
+                    "Residual = %14.7e > %7.3e\n", iter, error, tolerance);
   }
   return hasNotConverged;
 }
@@ -514,9 +509,8 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
   if (error < *tolerance)
   {
     hasNotConverged = 0;
-    if (verbose > 0)
-      printf("--------------- FC3D - NSGS - Iteration %i "
-             "Residual = %14.7e < %7.3e\n", iter, error, *tolerance);
+    numerics_printf("--------------- FC3D - NSGS - Iteration %i "
+                    "Residual = %14.7e < %7.3e", iter, error, *tolerance);
 
     double absolute_error = calculateFullErrorFinal(problem, options,
                                                     computeError,
@@ -525,15 +519,18 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
     {
       *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
-      assert(*tolerance > 0.0 && "tolerance has to be positive");
-      if (verbose > 0)
-        printf("------- FC3D - NSGS - We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
+      /* assert(*tolerance > 0.0 && "tolerance has to be positive"); */
+      if (*tolerance < DBL_EPSILON)
+      {
+        numerics_warning("determine_convergence_with_full_fina", "We try to set a very smal tolerance");
+        *tolerance = DBL_EPSILON;
+      }
+      numerics_printf("------- FC3D - NSGS - We modify the required incremental precision to reach accuracy to %e", *tolerance);
       hasNotConverged = 1;
     }
     else
     {
-      if (verbose > 0)
-        printf("------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy to %e\n", *tolerance);
+      numerics_printf("------- FC3D - NSGS - The incremental precision is sufficient to reach accuracy to %e", *tolerance);
     }
 
 
@@ -542,9 +539,8 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
   }
   else
   {
-    if (verbose > 0)
-      printf("--------------- FC3D - NSGS - Iteration %i "
-             "Residual = %14.7e > %7.3e\n", iter, error, *tolerance);
+    numerics_printf("--------------- FC3D - NSGS - Iteration %i "
+                    "Residual = %14.7e > %7.3e", iter, error, *tolerance);
   }
   return hasNotConverged;
 }
@@ -608,8 +604,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   if (options->numberOfInternalSolvers < 1)
   {
     numerics_error("fc3d_nsgs",
-                  "The NSGS method needs options for the internal solvers, "
-                  "options[0].numberOfInternalSolvers should be >= 1");
+                   "The NSGS method needs options for the internal solvers, "
+                   "options[0].numberOfInternalSolvers should be >= 1");
   }
   assert(options->internalSolvers);
 
@@ -617,8 +613,8 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   localproblem = fc3d_local_problem_allocate(problem);
 
   fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
-                             (FreeSolverNSGSPtr *)&freeSolver, &computeError,
-                             problem, localproblem, options);
+                                    (FreeSolverNSGSPtr *)&freeSolver, &computeError,
+                                    problem, localproblem, options);
 
   scontacts = allocShuffledContacts(problem, options);
 
@@ -796,7 +792,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
 int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
 {
-  numerics_printf_verbose(1,"fc3d_nsgs_setDefaultSolverOptions\n");
+  numerics_printf_verbose(1,"fc3d_nsgs_setDefaultSolverOptions");
 
   /*  strcpy(options->solverName,"NSGS");*/
   options->solverId = SICONOS_FRICTION_3D_NSGS;
