@@ -787,6 +787,11 @@ bool LinearOSNS::preCompute(double time)
         }
       }
     }
+    else
+    {
+      _w->zero();
+      _z->zero();
+    }
   }
   // else
   // nothing to do (IsLinear and not changed)
