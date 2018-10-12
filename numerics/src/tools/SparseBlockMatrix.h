@@ -22,7 +22,6 @@
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
 #include <stdio.h>
-/* #include "SiconosCompat.h" */
 
 #include "CSparseMatrix.h"
 

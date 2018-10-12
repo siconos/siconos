@@ -25,7 +25,6 @@
 #include "VariationalInequality.h"
 #include "SolverOptions.h"
 #include "VI_cst.h"
-#include "SiconosCompat.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

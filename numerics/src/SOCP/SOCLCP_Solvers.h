@@ -36,7 +36,6 @@
 /* #include "soclcp_unitary_enumerative.h" */
 
 #include "SOCLCP_cst.h"
-#include "SiconosCompat.h"
 
 
 /** pointer to function used to call local solver */

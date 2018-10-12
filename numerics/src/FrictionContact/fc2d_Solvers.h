@@ -26,7 +26,6 @@
 #include "SolverOptions.h"
 #include "Friction_cst.h"
 #include "LinearComplementarityProblem.h"
-#include "SiconosCompat.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
