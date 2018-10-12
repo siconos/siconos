@@ -24,14 +24,21 @@
 #include "projectionOnCone.h"
 #include "projectionOnCylinder.h"
 #include "SiconosLapack.h"
+#include "numerics_verbose.h"
 
 #include <math.h>
 #include <assert.h>
 #include <float.h>
+
+/* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
-#include "numerics_verbose.h"
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
+
+
 void fc3d_unitary_compute_and_add_error(double* restrict r , double* restrict u, double mu, double* restrict error, double * worktmp)
 {
 
@@ -54,6 +61,7 @@ int fc3d_compute_error(
   double *z , double *w, double tolerance,
   SolverOptions * options, double norm, double * error)
 {
+  DEBUG_BEGIN("fc3d_compute_error(...)\n");
   assert(problem);
   assert(z);
   assert(w);
@@ -68,6 +76,10 @@ int fc3d_compute_error(
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   // Compute the current velocity
   NM_prod_mv_3x3(n, n, problem->M, z, w);
+  DEBUG_EXPR(NV_display(problem->q,n););
+  DEBUG_EXPR(NV_display(w,n););
+  DEBUG_EXPR(NV_display(z,n););
+  
 
   *error = 0.;
   int ic, ic3;
@@ -75,15 +87,17 @@ int fc3d_compute_error(
   for (ic = 0, ic3 = 0 ; ic < nc ; ic++, ic3 += 3)
   {
     fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], error, worktmp);
+    DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);
   }
   *error = sqrt(*error);
-
+  DEBUG_PRINTF("absolute error = %12.8e\n", *error);
   /* Compute relative error with respect to norm */
   DEBUG_PRINTF("norm = %12.8e\n", norm);
   if (fabs(norm) > DBL_EPSILON)
     *error /= norm;
   /* *error = *error / (norm + 1.0); old version */
-
+  DEBUG_PRINTF("relative error = %12.8e\n", *error);
+  DEBUG_END("fc3d_compute_error(...)\n");
   if (*error > tolerance)
     return 1;
 
