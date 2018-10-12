@@ -519,12 +519,12 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
     {
       *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
-      /* assert(*tolerance > 0.0 && "tolerance has to be positive"); */
-      if (*tolerance < DBL_EPSILON)
-      {
-        numerics_warning("determine_convergence_with_full_fina", "We try to set a very smal tolerance");
-        *tolerance = DBL_EPSILON;
-      }
+      assert(*tolerance > 0.0 && "tolerance has to be positive");
+      /* if (*tolerance < DBL_EPSILON) */
+      /* { */
+      /*   numerics_warning("determine_convergence_with_full_fina", "We try to set a very smal tolerance"); */
+      /*   *tolerance = DBL_EPSILON; */
+      /* } */
       numerics_printf("------- FC3D - NSGS - We modify the required incremental precision to reach accuracy to %e", *tolerance);
       hasNotConverged = 1;
     }
