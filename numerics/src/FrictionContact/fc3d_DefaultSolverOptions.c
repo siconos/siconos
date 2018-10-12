@@ -201,6 +201,12 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =  fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:
+  {
+    info =  fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(options);
+    options->solverId=SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID;
+    break;
+  }
 
   default:
   {
