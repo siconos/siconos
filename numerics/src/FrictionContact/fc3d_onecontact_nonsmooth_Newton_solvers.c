@@ -38,6 +38,9 @@
 #include <string.h>
 #include <float.h>
 
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
 static computeNonsmoothFunction  Function = NULL;
 static NewtonFunctionPtr F = NULL;
 static NewtonFunctionPtr jacobianF = NULL;
@@ -240,8 +243,7 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem*
  }
   else
   {
-    fprintf(stderr, "Numerics, fc3d_onecontact_nonsmooth_Newton_solvers failed. Unknown formulation type.\n");
-    exit(EXIT_FAILURE);
+    numerics_error("fc3d_onecontact_nonsmooth_Newton_solvers_initialize", "Unknown formulation type.");
   }
 }
 
@@ -250,6 +252,8 @@ void fc3d_onecontact_nonsmooth_Newton_solvers_initialize(FrictionContactProblem*
 
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* localproblem, double* local_reaction, SolverOptions * options)
 {
+  numerics_printf_verbose(2, "--------------- fc3d_onecontact_nonsmooth_Newton_solvers_solve starts");
+  numerics_printf_verbose(2, "-- contact %i", options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]);
 
   /*  (*updateSolver)(contact, local_reaction); */
   int info =1;
@@ -262,10 +266,11 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
     local_reaction[0] = 0.0;
     local_reaction[1] = 0.0;
     local_reaction[2] = 0.0;
-    numerics_printf_verbose(2,"fc3d_onecontact_nonsmooth_Newton_solvers_solve, take off, trivial solution reaction = 0, velocity = q.\n");
+    numerics_printf_verbose(2,"take off, trivial solution reaction = 0, velocity = q.");
     info=0;
     options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
     options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
+    numerics_printf_verbose(2, "--------------- fc3d_onecontact_nonsmooth_Newton_solvers_solve ends");
     return info;
   }
 
@@ -312,6 +317,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
       /* note : exit on failure should be done in DefaultCheckSolverOutput */
     }
   }
+  numerics_printf_verbose(2, "--------------- fc3d_onecontact_nonsmooth_Newton_solvers_solve ends");
   return info;
   /*  (*postSolver)(contact,reaction); */
 }
@@ -430,8 +436,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
   int * iparam = options->iparam;
   double * dparam = options->dparam;
 
-  if (verbose > 1)
-    printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct  -- start iteration for contact %i \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]);
+  numerics_printf_verbose(2, "--------------- fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct starts");
 
   double mu = localproblem->mu[0];
   double * qLocal = localproblem->q;
@@ -538,7 +543,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem
   return 1;
 }
 
-//#undef DEBUG_MESSAGES
+#undef DEBUG_MESSAGES
 static int LineSearchGP(FrictionContactProblem* localproblem,
                   computeNonsmoothFunction  Function,
                   double * t_opt,
@@ -551,7 +556,7 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
                   double * B,
                   double * velocity)
 {
-  DEBUG_PRINT("LineSearchGP -- Start Line search\n");
+  numerics_printf_verbose(2, "-- LineSearchGP starts");
 
   double alpha = *t_opt;
 
@@ -677,10 +682,8 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
     {
       DEBUG_PRINTF("Success in LS: alpha = %12.8e\n", alpha);
       *t_opt = alpha;
-      if (verbose > 1)
-      {
-        printf("-    LineSearchGP success number of iteration = %i  alpha = %.10e \n", iter, alpha);
-      }
+      
+      numerics_printf_verbose(2, "-- LineSearchGP success number of iteration = %i  alpha = %.10e", iter, alpha);
       return 0;
 
     }
@@ -713,14 +716,11 @@ static int LineSearchGP(FrictionContactProblem* localproblem,
 
 
   }
-  if (verbose > 1)
-  {
-    printf("-    LineSearchGP not succeed max number of iteration reached  = %i  with alpha = %.10e \n", LSitermax, alpha);
-  }
+  numerics_printf_verbose(2,"-- LineSearchGP not succeed max number of iteration reached  = %i  with alpha = %.10e", LSitermax, alpha);
   *t_opt = alpha;
   return -1;
 }
-//#define DEBUG_MESSAGES
+#define DEBUG_MESSAGES
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem,
                                                           double * R, SolverOptions * options)
 {
@@ -728,9 +728,8 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
   int * iparam = options->iparam;
   double * dparam = options->dparam;
 
-  if (verbose > 1)
-    printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped  -- start iteration for contact %i \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]);
-
+  numerics_printf_verbose(2, "--------------- fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped starts");
+  
   double mu = localproblem->mu[0];
   double * qLocal = localproblem->q;
 
@@ -838,8 +837,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
                          inew, dparam[1]);
       break;
     }
-
-    if (verbose > 1) printf("---------------    fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped  -- contact %i # iteration = %i  error = %.10e \n", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
+    numerics_printf_verbose(2,"-- contact %i # iteration = %i  error = %.10e", iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER], inew, dparam[1]);
 
     if (dparam[SICONOS_DPARAM_RESIDU] < dparam[SICONOS_DPARAM_TOL])
     {
@@ -847,7 +845,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
       return 0;
     }
   }// End of the Newton iteration
-
+  
   iparam[SICONOS_IPARAM_ITER_DONE]=inew;
   return 1;
 }
@@ -861,11 +859,20 @@ static double compute_local_error(FrictionContactProblem* localproblem, double *
   double local_velocity[3] = {0., 0., 0.};
   cpy3(local_q,local_velocity);
   mvp3x3(local_M,local_reaction,local_velocity);
+  DEBUG_EXPR(NV_display(local_q,3););
+  DEBUG_EXPR(NV_display(local_velocity,3););
+  DEBUG_EXPR(NV_display(local_reaction,3););
+  
+
+  
   double current_error = 0.0;
+
   fc3d_unitary_compute_and_add_error(local_reaction,local_velocity, localproblem->mu[0], &current_error, worktmp  );
   current_error = sqrt(current_error);
+  DEBUG_PRINTF("absolute local error = %e", current_error);
   if (fabs(norm_q) > DBL_EPSILON)
     current_error /= norm_q;
+  DEBUG_PRINTF("relative local error = %e", current_error);
   return current_error;
 }
 
@@ -894,7 +901,7 @@ static void keep_or_discard_solution(FrictionContactProblem* localproblem, doubl
     /* local_reaction[1] = 0; */
     /* local_reaction[2] = 0; */
     DEBUG_PRINTF("Discard the new local solution with error = %e\n", error);
-    DEBUG_PRINTF("Get back to the local backup solution = %e\n",  current_error);
+    DEBUG_PRINTF("Get back to the local backup solution = %e\n",  *current_error);
     cpy3(local_reaction_backup, local_reaction);
     //memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
   }
@@ -910,7 +917,7 @@ static void keep_or_discard_solution(FrictionContactProblem* localproblem, doubl
       else
       {
         DEBUG_PRINTF("Discard the new local solution with error = %e\n", error);
-        DEBUG_PRINTF("Get back to the local backup solution = %e\n",  current_error);
+        DEBUG_PRINTF("Get back to the local backup solution = %e\n",  *current_error);
         cpy3(local_reaction_backup, local_reaction);
         //memcpy(local_reaction, local_reaction_backup, sizeof(double)*3);
       }
@@ -919,9 +926,8 @@ static void keep_or_discard_solution(FrictionContactProblem* localproblem, doubl
 
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem* localproblem, double * local_reaction, SolverOptions * options)
 {
-  DEBUG_BEGIN("fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid\n");
-  DEBUG_PRINTF("   contact %d\n", options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]);
-  
+  numerics_printf_verbose(2, "--------------- fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid starts");
+
   int info = -1;
   double local_reaction_backup[3] = {local_reaction[0], local_reaction[1], local_reaction[2]};
 
