@@ -288,7 +288,11 @@ void BlockCSRMatrix::convert()
     _sparseBlockStructuredMatrix->index2_data = _blockCSR->index2_data().begin();
     _sparseBlockStructuredMatrix->block =  _blockCSR->value_data().begin();
   };
-
+  if (_sparseBlockStructuredMatrix->diagonal_blocks)
+  {
+    free(_sparseBlockStructuredMatrix->diagonal_blocks);
+    _sparseBlockStructuredMatrix->diagonal_blocks = NULL;
+  }
   //   // Loop through the non-null blocks
   //   for (SpMatIt1 i1 = _blockCSR->begin1(); i1 != _blockCSR->end1(); ++i1)
   //     {
