@@ -51,7 +51,7 @@ endif()
 
 # Set target names from components list
 assert(COMPONENTS)
-set(AVAILABLE_COMPONENTS "externals numerics kernel control mechanics io")
+set(AVAILABLE_COMPONENTS "externals numerics kernel control mechanics mechanisms io")
 foreach(component_name ${COMPONENTS})
   string(TOUPPER ${component_name} upname)
   list(FIND ${AVAILABLE_COMPONENTS} ${component_name} comp_exists)

@@ -97,21 +97,27 @@ Use CMAKE_INSTALL_PREFIX option to choose the path for your installation. If not
 
 Siconos package description
 ---------------------------
-Siconos software is made of 4 components:
+Siconos software is made of different components described below
 
-* numerics (C api). A collection of low-level algorithms for solving basic Algebra and optimization problem arising in the simulation of nonsmooth dynamical systems.
+* **externals** : API or tools related to external software libraries used by Siconos.
 
-* kernel (C++ api), used to model and simulate nonsmooth dynamical systems.
+* **numerics** (C  and Python api). A collection of low-level algorithms for solving basic Algebra and optimization problem arising in the simulation of nonsmooth dynamical systems.
 
-* control (C++ api)
+* **kernel** (C++ and Python api), used to model and simulate nonsmooth dynamical systems.
 
-* mechanics (C++ api)
+* **control** (C++ and Python api) : control toolbox
+
+* **mechanics** (C++ and Python api) : toolbox for collision detection and joints
+
+* **mechanisms** (C++ and Python  api) : toolbox for collision detection and joints (legacy version, won't be sustained in long term)
+
+* **io** (C++ api) : tools related to input/outputs (hdf5, vtk ...)
 
 
 .. image:: /figures/siconos_components.*
-	   
-TODO : describe siconos distribution (main directories, files and so on)
-  
+
+The list of components to be installed can be set using :ref:`siconos_install_with_user_options` (mind the dependencies shown in the figure above).
+
 
 .. _siconos_run_tests:
 
@@ -255,41 +261,61 @@ To write your own file, just copy the file default_options.cmake (in *path_to_so
 
 Here is an example, to build numerics and kernel, with documentation, no tests ...::
 
-  # --------- User-defined options ---------
-  # Use cmake -DOPTION_NAME=some-value ... to modify default value.
-  # !!! Warning : do not suppress any line below, just set ON/OFF value !!!
-  option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" ON)
-  option(WITH_PYTHON_WRAPPER "Build python bindings using swig. Default = ON" ON)
-  option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings." OFF)
-  option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = ON." OFF)
-  option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = off." OFF)
-  option(WITH_TESTING "Enable 'make test' target" OFF)
-  option(WITH_GIT "Consider sources are under GIT" OFF)
+  # --- List of siconos components to build and install ---
+  # The complete list is : externals numerics kernel control mechanics mechanisms io
+  set(COMPONENTS externals numerics kernel CACHE INTERNAL "List of siconos components to build and install")
+
+  option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
   option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
   option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
-  option(WITH_CXX "Enable CXX compiler for Numerics. Default=ON." ON)
+
+  # --- Build/compiling options ---
+  option(DEV_MODE "Compilation flags setup for developers. Default = OFF" OFF)
+  option(DEV_MODE_STRICT "Compilation flags setup for developers (extra strict, conversion warnings). Default = OFF" OFF)
+  option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
+  option(WITH_FORTRAN "Enable Fortran compiler. Default = ON" ON)
+  option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)
+  option(NO_RUNTIME_BUILD_DEP "Do not check for runtime dependencies. Useful only for packaging. Default = OFF" OFF)
+  option(WITH_DOCKER "Build inside a docker container. Default = OFF" OFF)
   option(WITH_UNSTABLE "Enable this to include all 'unstable' sources. Default=OFF" OFF)
-  option(BUILD_SHARED_LIBS "Building of shared libraries" ON)
-  option(DEV_MODE "Compilation flags setup for developpers. Default: ON" OFF)
+  option(WITH_UNSTABLE_TEST "Enable this to include all 'unstable' test. Default=OFF" OFF)
+  option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
+  option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = OFF." OFF)
+  option(WITH_TESTING "Enable 'make test' target" OFF)
+  option(WITH_GIT "Consider sources are under GIT" OFF)
+
+  # --- Documentation setup ---
+  option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" ON)
+  option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings. Default = OFF" OFF)
+  option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." ON)
+
+  # --- List of external libraries/dependencies to be searched (or not) ---
   option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
   option(WITH_OCC "compilation with OpenCascade Bindings. Default = OFF" OFF)
-  option(WITH_MUMPS "Compilation with MUMPS solver. Default = OFF" OFF)
-  option(WITH_FCLIB "link with fclib when this mode is enable. Default = off." OFF)
-  option(WITH_FREECAD "Use FreeCAD" OFF)
-  option(WITH_MECHANISMS "Generation of bindings for Saladyn Mechanisms toolbox" OFF)
-  option(WITH_XML "Enable xml files i/o. Default = ON" ON)
+  option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
+  option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
+  option(WITH_SUPERLU "Compilation with the SuperLU solver. Default = OFF" OFF)
+  option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version. Default = OFF" OFF)
+  option(WITH_FCLIB "link with fclib when this mode is enable. Default = OFF" OFF)
+  option(WITH_FREECAD "Use FreeCAD. Default = OFF" OFF)
+  option(WITH_RENDERER "Install OCC renderer. Default = OFF" OFF)
+  option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead of built-in CXSparse library. Default = ON" ON)
+  option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
+
+  # -- Installation setup ---
   # Set python install mode:
   # - user --> behave as 'python setup.py install --user'
   # - standard --> install in python site-package (ie behave as python setup.py install)
   # - prefix --> install in python CMAKE_INSTALL_PREFIX (ie behave as python setup.py install --prefix=CMAKE_INSTALL_PREFIX)
-  set(siconos_python_install "user" CACHE STRING "Install mode for siconos python package")
-  # List of components to build and installed
-  # List of siconos component to be installed
-  # complete list = externals numerics kernel control mechanics io
-  set(COMPONENTS externals numerics kernel CACHE INTERNAL "List of siconos components to build and install")
+  set(siconos_python_install "standard" CACHE STRING "Install mode for siconos python package")
+
+  # If OFF, headers from libraries in externals will not be installed.
+  option(INSTALL_EXTERNAL_HEADERS "Whether or not headers for external libraries should be installed. Default=OFF" OFF)
+
+  # If ON, internal headers will not be installed.
+  option(INSTALL_INTERNAL_HEADERS "Whether or not headers for internal definitions should be installed. Default=OFF" OFF)
 
   
-
 .. _siconos_runexample:
 
 Test your installation

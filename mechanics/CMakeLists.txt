@@ -23,13 +23,6 @@ if(WITH_OCC)
   list(APPEND ${COMPONENT}_DIRS src/occ)
 endif()
 
-if(WITH_MECHANISMS)
-  list(APPEND ${COMPONENT}_DIRS
-    src/mechanisms/CADMBTB
-    src/mechanisms/MBTB
-    src/mechanisms/TIMERMBTB)
-endif()
-
 # Unstable sources. Will be included only
 # if WITH_${COMPONENT}_UNSTABLE is true.
 set(${COMPONENT}_Unstable_SRCS
@@ -37,8 +30,6 @@ set(${COMPONENT}_Unstable_SRCS
 
 # List of directories of headers not to be installed
 set(${COMPONENT}_HDRS_EXCLUDE_DIR)
-
-include(WindowsMechanicsSetup)
 
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
@@ -52,7 +43,7 @@ if(WITH_BULLET)
   set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${BULLET_LIBRARIES})
 endif()
 
-if(WITH_MECHANISMS OR WITH_OCC OR CMAKE_SKIP_RPATH)
+if(WITH_OCC OR CMAKE_SKIP_RPATH)
   # if no RPATH, then linking does not work for tests without specifying externals
   # for n2qn1
   set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} externals)
