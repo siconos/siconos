@@ -175,12 +175,17 @@ IF(WITH_BULLET)
   ENDIF(BULLET_FOUND)
 ENDIF(WITH_BULLET)
 
-# --- Mechanisms (Saladyn?) ---
-IF(WITH_MECHANISMS OR WITH_OCC)
+# --- Open Cascade ---
+# See https://github.com/tpaviot/oce
+# Our preference goes to OpenCascade community edition (rather than standard Occ)/
+# OCE is required by components mechanisms and mechanics/occ
+
+IF(WITH_OCE)
   SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
   message(STATUS "Searching for OCE ....")
   compile_with(OCE 0.15 REQUIRED COMPONENTS ${OCE_TOOLKITS}
     SICONOS_COMPONENTS mechanics)
+  
   if(OCE_FOUND)
     message(STATUS "Found OCE version ${OCE_VERSION}")
     if(NOT OCE_ALL_FOUND)
@@ -210,9 +215,8 @@ IF(WITH_MECHANISMS OR WITH_OCC)
       MESSAGE(STATUS "OpenCascade Libraries not found in standard paths.")
     ENDIF(OpenCASCADE_FOUND)
   endif(OCE_FOUND)
-  SET(HAVE_MECHANISMS TRUE)
-  if(WITH_OCC)
-    SET(SICONOS_HAVE_OCC TRUE)
+  if(WITH_OCE)
+    SET(SICONOS_HAS_OCE TRUE)
   endif()
   if(OCE_VERSION VERSION_LESS 0.18)
     MESSAGE(STATUS " mechanics_LINK_LIBRARIES:" "${mechanics_LINK_LIBRARIES}")

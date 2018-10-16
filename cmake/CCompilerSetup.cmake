@@ -57,7 +57,7 @@ if(DEV_MODE)
   add_c_options("-Werror=int-to-pointer-cast")
   add_c_options("-Werror=pointer-to-int-cast")
 
-  if((NOT WITH_MECHANISMS) AND (NOT WITH_PYTHON_WRAPPER))
+  if((NOT WITH_OCE) AND (NOT WITH_PYTHON_WRAPPER))
     add_c_options("-Werror=missing-declarations")
   endif()
 

@@ -15,7 +15,7 @@ set(${COMPONENT}_PYTHON_MODULES
   "mechanics/collision/native"
   "mechanics/collision/bodies")
 
-if(WITH_OCC)
+if(WITH_OCE)
   list(APPEND ${COMPONENT}_PYTHON_MODULES "mechanics/occ")
 endif()
 
@@ -33,12 +33,6 @@ if(WITH_BULLET)
   endif()
 endif()
 
-if(WITH_MECHANISMS)
-  list(APPEND ${COMPONENT}_PYTHON_MODULES
-    "mechanics/mechanisms/cadmbtb"
-    "mechanics/mechanisms/mbtb")
-endif()
-
 set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/kernel/swig)
 
@@ -47,12 +41,7 @@ configure_file(mechanics/collision/convexhull.py  ${SICONOS_SWIG_ROOT_DIR}/mecha
 configure_file(mechanics/collision/__init__.py  ${SICONOS_SWIG_ROOT_DIR}/mechanics/collision/__init__.py )
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
-# exclude mechanisms tests. They will be activated later (below) if required.
-if(NOT WITH_MECHANISMS)
-  list(APPEND ${COMPONENT}_python_excluded_tests
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_siconos_mechanisms.py)
-endif()
-if(NOT WITH_OCC)
+if(NOT WITH_OCE)
   list(APPEND ${COMPONENT}_python_excluded_tests
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_occ_inertia.py)
 endif()

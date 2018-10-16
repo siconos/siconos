@@ -222,11 +222,9 @@ Developers or advanced users options
 
 * WITH_BULLET=ON/OFF : enable/disable bullet (http://bulletphysics.org/wordpress/) for contact detection.
 
-* WITH_OCC=ON/OFF : enable/disable OpenCascade bindings (https://github.com/tpaviot/oce)
+* WITH_OCE=ON/OFF : enable/disable OpenCascade bindings (https://github.com/tpaviot/oce)
 
 * WITH_FREECAD=ON/OFF : enable/disable Freecad python bindings (http://www.freecadweb.org)
-
-* WITH_MECHANISMS=ON/OFF: enable/disable usage of Saladyn machanisms toolbox.
 
 * WITH_DOXY2SWIG=ON/OFF : enable/disable conversion of doxygen outputs to python docstrings
 
@@ -291,14 +289,14 @@ Here is an example, to build numerics and kernel, with documentation, no tests .
 
   # --- List of external libraries/dependencies to be searched (or not) ---
   option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
-  option(WITH_OCC "compilation with OpenCascade Bindings. Default = OFF" OFF)
+  option(WITH_OCE "compilation with OpenCascade Bindings. Default = OFF" OFF)
   option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
   option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
   option(WITH_SUPERLU "Compilation with the SuperLU solver. Default = OFF" OFF)
   option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version. Default = OFF" OFF)
   option(WITH_FCLIB "link with fclib when this mode is enable. Default = OFF" OFF)
   option(WITH_FREECAD "Use FreeCAD. Default = OFF" OFF)
-  option(WITH_RENDERER "Install OCC renderer. Default = OFF" OFF)
+  option(WITH_RENDERER "Install OCE renderer. Default = OFF" OFF)
   option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead of built-in CXSparse library. Default = ON" ON)
   option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
 

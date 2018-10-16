@@ -33,10 +33,7 @@ if(HAVE_SICONOS_MECHANICS)
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_info' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/info.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_info'\")")
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_filter' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/filter.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_filter'\")")
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_run' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/run.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_run'\")")
-    if (WITH_MECHANISMS)
-      install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_pprocess' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/pprocess.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_pprocess'\")")
-    endif()
-  else()
+   else()
 
     configure_file(io/mechanics_hdf5.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_hdf5.py @ONLY)
     configure_file(io/mechanics_run.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_run.py @ONLY)
@@ -49,20 +46,12 @@ if(HAVE_SICONOS_MECHANICS)
     configure_file(io/filter.py     ${SICONOS_SWIG_ROOT_DIR}/io/siconos_filter @ONLY)
     configure_file(io/run.py        ${SICONOS_SWIG_ROOT_DIR}/io/siconos_run @ONLY)
     configure_file(io/compare.py    ${SICONOS_SWIG_ROOT_DIR}/io/siconos_compare @ONLY)
-    if (WITH_MECHANISMS)
-      configure_file(io/pprocess.py   ${SICONOS_SWIG_ROOT_DIR}/io/siconos_pprocess @ONLY)
-    endif()
-
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vview    DESTINATION bin)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_vexport  DESTINATION bin)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_info     DESTINATION bin)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_filter   DESTINATION bin)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_run      DESTINATION bin)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_compare  DESTINATION bin)
-    if (WITH_MECHANISMS)
-      install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_pprocess DESTINATION bin RENAME siconos_pprocess)
-    endif()
-
     # automatic manpages using help2man
     if (HELP2MAN)
       # all other components must be built first so that tools don't fail to run
@@ -104,10 +93,6 @@ if(HAVE_SICONOS_MECHANICS)
         GEN_MANPAGE_FROM_HELP(siconos_run)
         GEN_MANPAGE_FROM_HELP(siconos_filter)
         GEN_MANPAGE_FROM_HELP(siconos_compare)
-      if (WITH_MECHANISMS)
-        # needs --help
-        # GEN_MANPAGE_FROM_HELP(siconos_pprocess)
-      endif()
       endif()
 
       add_custom_target(manpages ALL DEPENDS ${MANPAGES_FOR_TOOLS})
@@ -115,6 +100,21 @@ if(HAVE_SICONOS_MECHANICS)
   endif()
 
 endif()
+
+if(HAVE_SICONOS_MECHANISMS)
+  list(APPEND ${COMPONENT}_SWIG_DEFS "-DWITH_MECHANISMS")
+
+  if(INSTALL_PYTHON_SYMLINKS)
+    message("Making symlinks for io Python modules")
+    execute_process(COMMAND sh -c "mkdir -p '${SICONOS_SWIG_ROOT_DIR}/io'")
+    configure_file(io/pprocess.py   ${SICONOS_SWIG_ROOT_DIR}/io/siconos_pprocess @ONLY)
+  else()
+    configure_file(io/pprocess.py   ${SICONOS_SWIG_ROOT_DIR}/io/siconos_pprocess @ONLY)
+    install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_pprocess DESTINATION bin RENAME siconos_pprocess)
+  endif()
+endif()
+
+
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 

@@ -1,27 +1,23 @@
 #================================================================
-# cmake utilities to build mechanics component
+# cmake utilities to build mechanisms component
 #================================================================
 
-set(COMPONENT mechanics)
+set(COMPONENT mechanisms)
 message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 # Name used for the target to be built
 set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
 # --- Search component dependencies ---
+if(NOT WITH_OCE)
+  message(FATAL_ERROR "Please run cmake again with option WITH_OCE=ON (required for mechanisms) or do not setup Siconos with mechanisms component.")
+endif()
 
 # --- Sources and headers ---
 # source directories for numerics
 set(${COMPONENT}_DIRS
-  src/.
-  src/collision
-  src/collision/native
-  src/collision/native/bodies
-  src/joints
-  )
-
-if(WITH_OCE)
-  list(APPEND ${COMPONENT}_DIRS src/occ)
-endif()
+  src/CADMBTB
+  src/MBTB
+  src/TIMERMBTB)
 
 # Unstable sources. Will be included only
 # if WITH_${COMPONENT}_UNSTABLE is true.
@@ -37,17 +33,6 @@ set(${COMPONENT}_LINKER_LANGUAGE CXX)
 list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
 list(APPEND ${COMPONENT}_LINK_LIBRARIES numerics externals kernel)
 
-if(WITH_BULLET)
-  list(APPEND ${COMPONENT}_DIRS src/collision/bullet)
-  include_directories(${BULLET_INCLUDE_DIRS})
-  set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${BULLET_LIBRARIES})
-endif()
-
-if(WITH_OCE OR CMAKE_SKIP_RPATH)
-  # if no RPATH, then linking does not work for tests without specifying externals
-  # for n2qn1
-  set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} externals)
-endif()
 
 include(LibraryProjectSetup)
 library_project_setup()

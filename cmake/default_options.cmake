@@ -16,9 +16,10 @@
 
 # --- List of siconos components to build and install ---
 # The complete list is : externals numerics kernel control mechanics mechanisms io
+# mechanisms is "off" by default.
 # Check https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos/install_guide/install_guide.html#id6
 # for details about components.
-set(COMPONENTS externals numerics kernel control mechanics mechanisms io CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
 
 option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
@@ -49,7 +50,7 @@ option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = 
 
 # --- List of external libraries/dependencies to be searched (or not) ---
 option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
-option(WITH_OCC "compilation with OpenCascade Bindings. Default = OFF" OFF)
+option(WITH_OCE "compilation with OpenCascade Bindings. Default = OFF" OFF)
 option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
 option(WITH_SUPERLU "Compilation with the SuperLU solver. Default = OFF" OFF)

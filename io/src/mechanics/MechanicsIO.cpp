@@ -26,7 +26,7 @@ DUMMY(BulletR, NewtonEulerFrom3DLocalFrameR);
 #define OCC_CLASSES() \
   REGISTER(OccBody) \
   REGISTER(OccR)
-#ifdef SICONOS_HAVE_OCC
+#ifdef SICONOS_HAS_OCE
 #include <OccBody.hpp>
 #include <OccR.hpp>
 #else

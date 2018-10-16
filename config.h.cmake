@@ -31,7 +31,7 @@
 #cmakedefine HAS_EXTREME_POINT_ALGO
 #cmakedefine SICONOS_HAVE_VTK
 #cmakedefine SICONOS_HAVE_BULLET
-#cmakedefine SICONOS_HAVE_OCC
+#cmakedefine SICONOS_HAS_OCE
 #cmakedefine HAVE_SERIALIZATION
 #cmakedefine WITH_SERIALIZATION
 #cmakedefine HAVE_GENERATION

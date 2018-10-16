@@ -214,9 +214,9 @@ components_list = "@SICONOS_PYTHON_MODULES@"
 with_component['control'] = get_cmake_option("@HAVE_SICONOS_CONTROL@")
 with_component['mechanics'] = get_cmake_option("@HAVE_SICONOS_MECHANICS@")
 with_component['io'] = get_cmake_option("@HAVE_SICONOS_IO@")
-with_mechanisms = get_cmake_option("@WITH_MECHANISMS@")
+with_component['mechanisms'] = get_cmake_option("@HAVE_SICONOS_MECHANISMS@")
 with_bullet = get_cmake_option("@WITH_BULLET@")
-with_occ = get_cmake_option("@WITH_OCC@")
+with_oce = get_cmake_option("@WITH_OCE@")
 packages_for_tests = []
 with_testing = get_cmake_option("@WITH_TESTING@")
 if with_testing:
@@ -228,9 +228,6 @@ for comp in list(with_component.keys()):
 
 if with_component['mechanics']:
     packages.append('siconos.mechanics.collision')
-
-if with_mechanisms:
-    packages.append('siconos.mechanics.mechanisms')
 
 
 packages += packages_for_tests
