@@ -142,104 +142,55 @@ IF(WITH_BOOST_LOG)
   APPEND_CXX_FLAGS("-DBOOST_LOG_DYN_LINK")
 ENDIF()
 
-# --- Bullet ---
-SET(BULLET_PATHS "")
-IF(WITH_BULLET)
-  COMPILE_WITH(Bullet REQUIRED SICONOS_COMPONENTS mechanics)
-  IF(BULLET_FOUND)
-    SET(SICONOS_HAVE_BULLET TRUE)
-    MESSAGE( STATUS " Bullet include dirs : ${BULLET_INCLUDE_DIRS}" )
-    IF(BULLET_USE_DOUBLE_PRECISION)
-      APPEND_CXX_FLAGS("-DBT_USE_DOUBLE_PRECISION")
-    ENDIF(BULLET_USE_DOUBLE_PRECISION)
 
-    # If a custom bullet was set, provide it for user programs.
-    IF(BULLET_INCLUDE_DIR)
-      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_INCLUDE_DIR \"${BULLET_INCLUDE_DIR}\")")
-    ENDIF()
-    IF(BULLET_COLLISION_LIBRARY)
-      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_COLLISION_LIBRARY \"${BULLET_COLLISION_LIBRARY}\")")
-    ENDIF()
-    IF(BULLET_DYNAMICS_LIBRARY)
-      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_DYNAMICS_LIBRARY \"${BULLET_DYNAMICS_LIBRARY}\")")
-    ENDIF()
-    IF(BULLET_MATH_LIBRARY)
-      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_MATH_LIBRARY \"${BULLET_MATH_LIBRARY}\")")
-    ENDIF()
-    IF(BULLET_SOFTBODY_LIBRARY)
-      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_SOFTBODY_LIBRARY \"${BULLET_SOFTBODY_LIBRARY}\")")
-    ENDIF()
-    IF(BULLET_USE_DOUBLE_PRECISION)
-      SET(BULLET_PATHS "${BULLET_PATHS}\nset(BULLET_USE_DOUBLE_PRECISION \"${BULLET_USE_DOUBLE_PRECISION}\")")
-    ENDIF()
-  ENDIF(BULLET_FOUND)
-ENDIF(WITH_BULLET)
-
-# --- Open Cascade ---
-# See https://github.com/tpaviot/oce
-# Our preference goes to OpenCascade community edition (rather than standard Occ)/
-# OCE is required by components mechanisms and mechanics/occ
-
-IF(WITH_OCE)
-  SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
-  message(STATUS "Searching for OCE ....")
-  compile_with(OCE 0.15 REQUIRED COMPONENTS ${OCE_TOOLKITS}
-    SICONOS_COMPONENTS mechanics)
-  compile_with(OCE 0.15 REQUIRED COMPONENTS ${OCE_TOOLKITS}
-    SICONOS_COMPONENTS mechanisms)
+# # --- Open Cascade ---
+# # See https://github.com/tpaviot/oce
+# # Our preference goes to OpenCascade community edition (rather than standard Occ)/
+# # OCE is required by components mechanisms and mechanics/occ
+# if(WITH_OCE)
+#   # Set the list of toolkits modules which are requested.
+#   SET(OCE_TOOLKITS "TKernel"  "TKMath" "TKService" "TKV3d"  "TKBRep" "TKIGES" "TKSTL" "TKVRML" "TKSTEP" "TKSTEPAttr" "TKSTEP209" "TKSTEPBase" "TKShapeSchema" "TKGeomBase" "TKGeomAlgo" "TKG3d" "TKG2d" "TKXSBase" "TKPShape" "TKShHealing" "TKHLR" "TKTopAlgo" "TKMesh" "TKPrim" "TKCDF" "TKBool" "TKBO" "TKFillet" "TKOffset")
   
-  if(OCE_FOUND)
-    message(STATUS "Found OCE version ${OCE_VERSION}")
-    if(NOT OCE_ALL_FOUND)
-      set(OCE_FOUND false)
-      message(WARNING "Ignoring OCE installation due to missing toolkit(s): ${OCE_MISSING_TOOLKITS}")
-    endif(NOT OCE_ALL_FOUND)
-  endif(OCE_FOUND)
-  if(OCE_FOUND)
-    # Include files reside in ${OCE_INCLUDE_DIRS};
-    #    include_directories(${OCE_INCLUDE_DIRS})
-    # We do not need library path, they will be automatically imported
-  else(OCE_FOUND)
-    # OCE not found; either it is not found and user
-    # has to set OCE_DIR to the directory containing
-    # OCEConfig.cmake, or OCE is not installed and we
-    # try to find OpenCascade files.
-    message(STATUS "OCE not found.  Try to find OpenCascade files.")
-    FIND_PACKAGE(OpenCASCADE REQUIRED COMPONENTS ${OCE_TOOLKITS})
-    COMPILE_WITH(OpenCASCADE SICONOS_COMPONENTS mechanics)
-    COMPILE_WITH(OpenCASCADE SICONOS_COMPONENTS mechanisms)
+#   message(STATUS "Searching for OCE ....")
+#   # Explore system to find oce and required toolkits --> Looks for OCEConfig.cmake and OCEConfigVersion.cmake which
+#   # must have been installed with oce package.
+#   # It defines the following variables (according to OCE doc)
+#   #  OCE_INCLUDE_DIRS - include directory for OCE
+#   #  OCE_LIBRARIES    - all libraries to link against (warning, may be slower than just specify the used libs)
+#   #  OCE_ALL_FOUND    - set to TRUE if all requested COMPONENTS are specified (see below), false otherwise
+#   #  OCE_MISSING_TOOLKITS - when OCE_ALL_FOUND is FALSE, contains a list of missing toolkits
+#   #  OCE_ALL_BUILT_MODULES - the list of source directories compiled (mostly useful when running swig to generate wrappers)
+#   compile_with(OCE 0.17 REQUIRED COMPONENTS ${OCE_TOOLKITS} # Debian/fedora/archlinux/
+#     SICONOS_COMPONENTS mechanics)
 
-    IF(OpenCASCADE_FOUND)
-      message(STATUS "OpenCASCADE_INCLUDE_DIR = " ${OpenCASCADE_INCLUDE_DIR})
-      message(STATUS "OpenCASCADE_LIBRARIES = " ${OpenCASCADE_LIBRARIES})
-      message(STATUS "OpenCASCADE_LINK_DIRECTORY = " ${OpenCASCADE_LINK_DIRECTORY})
-      include_directories(${OpenCASCADE_INCLUDE_DIR})
-    ELSE(OpenCASCADE_FOUND)
-      MESSAGE(STATUS "OpenCascade Libraries not found in standard paths.")
-    ENDIF(OpenCASCADE_FOUND)
-  endif(OCE_FOUND)
-  if(WITH_OCE)
-    SET(SICONOS_HAS_OCE TRUE)
-  endif()
-  if(OCE_VERSION VERSION_LESS 0.18)
-    MESSAGE(STATUS " mechanics_LINK_LIBRARIES:" "${mechanics_LINK_LIBRARIES}")
-    SET(UNDEED_OCE_TOOLKITS "DRAWEXE" "TKDraw" "TKTopTest" "TKViewerTest" "TKXSDRAW" "TKDCAF" "TKXDEDRAW" "TKTObjDRAW" "TKQADraw"   )
-    FOREACH(_T ${UNDEED_OCE_TOOLKITS})
-      MESSAGE(STATUS "Unneeded ${_T} oce toolkit provokes issues since it not installed on some systems. We remove it")
-      list(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE ${_T})
-      list(REMOVE_ITEM mechanics_LINK_LIBRARIES ${_T})
-      list(REMOVE_ITEM mechanisms_LINK_LIBRARIES ${_T})
+#   if(OCE_ALL_FOUND)
+#     message(STATUS "OCE found.")
+#     message("    OCE libraries : ${OCE_LIBRARIES}.")
+#     message("    OCE headers path : ${OCE_INCLUDE_DIRS}.")
+#     message(STATUS "Found OCE version ${OCE_VERSION}")
+#   else()
+#     message(FATAL_ERROR "OCE detection failed due to missing toolkit(s): ${OCE_MISSING_TOOLKITS}")
+#   endif()
+  
+#   set(SICONOS_HAS_OCE TRUE)
 
-    ENDFOREACH()
-    set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-    set(mechanics_LINK_LIBRARIES ${mechanics_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-    set(mechanisms_LINK_LIBRARIES ${mechanisms_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
-    MESSAGE(STATUS " mechanics_LINK_LIBRARIES:" "${mechanics_LINK_LIBRARIES}")
-    MESSAGE(STATUS " mechanisms_LINK_LIBRARIES:" "${mechanisms_LINK_LIBRARIES}")
+#   # # Some toolkits lead to build issues, since on some systems they are not available.
+#   # # 
+#   # if(OCE_VERSION VERSION_LESS 0.18)
 
-    
-  ENDIF()
-ENDIF()
+#   #   MESSAGE(STATUS " mechanics_LINK_LIBRARIES:" "${mechanics_LINK_LIBRARIES}")
+#   #   SET(UNDEED_OCE_TOOLKITS "DRAWEXE" "TKDraw" "TKTopTest" "TKViewerTest" "TKXSDRAW" "TKDCAF" "TKXDEDRAW" "TKTObjDRAW" "TKQADraw"   )
+#   #   FOREACH(_T ${UNDEED_OCE_TOOLKITS})
+#   #     MESSAGE(STATUS "Unneeded ${_T} oce toolkit provokes issues since it not installed on some systems. We remove it")
+#   #     list(REMOVE_ITEM SICONOS_LINK_LIBRARIES  ${_T})
+#   #     list(REMOVE_ITEM mechanics_LINK_LIBRARIES ${_T})
+
+#   #   ENDFOREACH()
+#   #   set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
+#   #   set(mechanics_LINK_LIBRARIES ${mechanics_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
+#   #   MESSAGE(STATUS " mechanics_LINK_LIBRARIES:" "${mechanics_LINK_LIBRARIES}")
+#   # ENDIF()
+# endif()
 
 
 # -- VTK --
