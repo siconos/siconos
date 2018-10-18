@@ -3,6 +3,7 @@
 #
 # Usage : find_python_module(mpi4py REQUIRED)
 #
+include(FindPackageHandleStandardArgs)
 function(find_python_module module)
 	string(TOUPPER ${module} module_upper)
 	if(ARGC GREATER 1 AND ARGV1 STREQUAL "REQUIRED")

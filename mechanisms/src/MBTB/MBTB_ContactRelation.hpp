@@ -1,7 +1,7 @@
 #ifndef MBTB_CONTACTRELATION
 #define MBTB_CONTACTRELATION
 
-#include "MechanicsFwd.hpp"
+#include "MechanismsFwd.hpp"
 #include <SiconosKernel.hpp>
 #include "MBTB_Contact.hpp"
 //! It is a relation dedicated for the simple unilateral (ie: without  Coulomb friction).

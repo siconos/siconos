@@ -2,8 +2,7 @@
 #ifndef MBTB_FC3DCONTACTRELATION
 #define MBTB_FC3DCONTACTRELATION
 
-#include "MechanicsFwd.hpp"
-
+#include "MechanismsFwd.hpp"
 #include <SiconosKernel.hpp>
 #include "MBTB_Contact.hpp"
 

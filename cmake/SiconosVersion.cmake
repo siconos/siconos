@@ -1,5 +1,4 @@
 # --- set siconos current version ---
-# This file is also required for examples.
 set(MAJOR_VERSION 4)
 set(MINOR_VERSION 2)
 set(PATCH_VERSION 0)

@@ -51,8 +51,6 @@
   REGISTER(Geometer)                            \
   REGISTER(BulletR)                             \
   REGISTER(BulletFrom1DLocalFrameR)             \
-  REGISTER(MBTB_FC3DContactRelation)            \
-  REGISTER(MBTB_ContactRelation)                \
   REGISTER(BodyDS)                              \
   REGISTER(ContactR)                            \
   REGISTER(SiconosContactor)                    \

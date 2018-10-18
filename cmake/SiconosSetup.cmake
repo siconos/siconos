@@ -174,11 +174,16 @@ if("${isSystemDir}" STREQUAL "-1")
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${_install_lib}")
 endif()
 
-# install cmake macros
-# ==> those that may be required during call to siconos script.
+# List of cmake macros that will be distributed with siconos software.
+# They may be required during call to siconos script
+# or to configure projects depending on Siconos (e.g. siconos-tutorials)
 set(cmake_macros
   SiconosTools.cmake
   FindQGLViewer.cmake
+  OutOfSourcesBuild.cmake
+  FindPythonModule.cmake
+  valgrind.supp
+  SiconosTools.cmake
   )
 foreach(file ${cmake_macros})
   install(FILES cmake/${file} DESTINATION share/${PROJECT_NAME}/cmake)

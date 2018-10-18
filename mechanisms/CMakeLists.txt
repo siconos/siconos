@@ -25,6 +25,7 @@ set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${OCE_LIBRARIES})
 # --- Sources and headers ---
 # source directories for numerics
 set(${COMPONENT}_DIRS
+  src/
   src/CADMBTB
   src/MBTB
   src/TIMERMBTB)
