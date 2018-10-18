@@ -185,6 +185,8 @@ IF(WITH_OCE)
   message(STATUS "Searching for OCE ....")
   compile_with(OCE 0.15 REQUIRED COMPONENTS ${OCE_TOOLKITS}
     SICONOS_COMPONENTS mechanics)
+  compile_with(OCE 0.15 REQUIRED COMPONENTS ${OCE_TOOLKITS}
+    SICONOS_COMPONENTS mechanisms)
   
   if(OCE_FOUND)
     message(STATUS "Found OCE version ${OCE_VERSION}")
@@ -205,6 +207,7 @@ IF(WITH_OCE)
     message(STATUS "OCE not found.  Try to find OpenCascade files.")
     FIND_PACKAGE(OpenCASCADE REQUIRED COMPONENTS ${OCE_TOOLKITS})
     COMPILE_WITH(OpenCASCADE SICONOS_COMPONENTS mechanics)
+    COMPILE_WITH(OpenCASCADE SICONOS_COMPONENTS mechanisms)
 
     IF(OpenCASCADE_FOUND)
       message(STATUS "OpenCASCADE_INCLUDE_DIR = " ${OpenCASCADE_INCLUDE_DIR})
@@ -225,11 +228,16 @@ IF(WITH_OCE)
       MESSAGE(STATUS "Unneeded ${_T} oce toolkit provokes issues since it not installed on some systems. We remove it")
       list(REMOVE_ITEM SICONOS_LINK_LIBRARIES DRAWEXE ${_T})
       list(REMOVE_ITEM mechanics_LINK_LIBRARIES ${_T})
+      list(REMOVE_ITEM mechanisms_LINK_LIBRARIES ${_T})
 
     ENDFOREACH()
     set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
     set(mechanics_LINK_LIBRARIES ${mechanics_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
+    set(mechanisms_LINK_LIBRARIES ${mechanisms_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
     MESSAGE(STATUS " mechanics_LINK_LIBRARIES:" "${mechanics_LINK_LIBRARIES}")
+    MESSAGE(STATUS " mechanisms_LINK_LIBRARIES:" "${mechanisms_LINK_LIBRARIES}")
+
+    
   ENDIF()
 ENDIF()
 

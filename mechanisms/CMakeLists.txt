@@ -31,7 +31,7 @@ set(${COMPONENT}_HDRS_EXCLUDE_DIR)
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
 list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-list(APPEND ${COMPONENT}_LINK_LIBRARIES numerics externals kernel)
+list(APPEND ${COMPONENT}_LINK_LIBRARIES numerics externals kernel mechanics)
 
 
 include(LibraryProjectSetup)
