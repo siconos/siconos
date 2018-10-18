@@ -15,7 +15,7 @@ example_path = '@EXAMPLE_PATH@'
 
 sys.path.append(siconos_pythonpath)
 mechanisms_path = os.path.join(siconos_pythonpath,
-                               'siconos/mechanics/mechanisms')
+                               'siconos/mechanisms')
 
 print('############## Enrironment variable                ###############')
 
@@ -26,8 +26,8 @@ print("sys.path: ", sys.path)
 print('############## Loading of definition files         ###############')
 
 
-from siconos.mechanics.mechanisms import mbtb
-from siconos.mechanics.mechanisms import cadmbtb
+from siconos.mechanisms import mbtb
+from siconos.mechanisms import cadmbtb
 
 # simple hdf5 output
 # a dummy SpaceFilter is needed for model encapsulation

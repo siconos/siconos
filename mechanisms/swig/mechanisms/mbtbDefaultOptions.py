@@ -1,7 +1,7 @@
 """"Default values for bodies and contact parameters.
 Should be change in bodydef.py if needed.
 """
-from siconos.mechanics.mechanisms import mbtb
+from siconos.mechanisms import mbtb
 import numpy as np
 import array
 
