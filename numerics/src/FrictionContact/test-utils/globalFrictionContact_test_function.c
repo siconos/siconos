@@ -15,6 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
+#define _XOPEN_SOURCE 700
+#include <string.h>
+
+#if (__linux ||  __APPLE__)
+#elif _MSC_VER
+#define strdup _strdup
+#else
+static inline char* strdup(char* src)
+{
+  size_t len = strlen(src) + 1;
+  char* dest = (char*)malloc(len * sizeof(char));
+  strcpy(dest, src, len);
+  return dest;
+}
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
