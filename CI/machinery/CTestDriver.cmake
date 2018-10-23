@@ -12,7 +12,7 @@ endif()
 # -- Get config --
 # i.e. set extra options/values (cmake -Doption=value ...)
 # either from file default.cmake or
-# from file CI_CONFIG.cmake 
+# from file CI_CONFIG.cmake
 # --> may set SICONOS_CMAKE_OPTIONS
 # --> may set DSICONOS_COMPONENTS
 if(CI_CONFIG)
@@ -106,8 +106,8 @@ find_program(CTEST_GIT_COMMAND NAMES git)
 find_program(CTEST_COVERAGE_COMMAND NAMES gcov)
 find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
 
-set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-leak-kinds=definite,possible --track-origins=yes --error-limit=no --gen-suppressions=all") 
-#set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-reachable=yes --error-limit=no --gen-suppressions=all") 
+set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-leak-kinds=definite,possible --track-origins=yes --error-limit=no --gen-suppressions=all")
+#set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-reachable=yes --error-limit=no --gen-suppressions=all")
 set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${CTEST_SOURCE_DIRECTORY}/cmake/valgrind.supp)
 
 #set(CTEST_NOTES_FILES ${CTEST_BINARY_DIRECTORY}/Testing/Notes/Build)
@@ -150,27 +150,35 @@ set(CTEST_BUILD_FLAGS -j${NP})
 set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${NP})
 endif()
 ctest_start("${MODE}")
-if(FROM_REPO)
-ctest_update()
+
+if(SUBMIT EQUAL 0)
+
+  if(FROM_REPO)
+    ctest_update()
+  endif()
+  ctest_configure()
+  ctest_build()
+  ctest_test(PARALLEL_LEVEL ${NP} RETURN_VALUE TEST_RETURN_VAL)
+
+  if (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
+    ctest_coverage()
+  endif (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
+  if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+    ctest_memcheck()
+  endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
 endif()
-ctest_configure()
-ctest_build()
-ctest_test(PARALLEL_LEVEL ${NP} RETURN_VALUE TEST_RETURN_VAL)
 
-if (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
-ctest_coverage()
-endif (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
-if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
-ctest_memcheck()
-endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+if(SUBMIT EQUAL 1)
+  # note: if the submission process experiences some slow-down, then we
+  # may get a return-code error, so we do it in a second phase.
+  ctest_submit(RETURN_VALUE SUBMIT_RETURN_VAL)
 
-# note: if the submission process experiences some slow-down, then we
-# may get a return-code error, so we do it in a second phase.
-ctest_submit(RETURN_VALUE SUBMIT_RETURN_VAL)
-
-if(NOT SUBMIT_RETURN_VAL EQUAL 0)
-message(WARNING " *** submission failure *** ")
+  if(NOT SUBMIT_RETURN_VAL EQUAL 0)
+    message(WARNING " *** submission failure *** ")
+  endif()
 endif()
+
 if(NOT TEST_RETURN_VAL EQUAL 0)
-message(FATAL_ERROR " *** test failure *** ")
+  message(FATAL_ERROR " *** test failure *** ")
 endif()
+

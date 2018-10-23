@@ -56,7 +56,7 @@ default = SiconosCiTask(
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
           'python-env'],
     srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest']})
+    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
 minimal = SiconosCiTask(
     docker=True,
@@ -65,7 +65,7 @@ minimal = SiconosCiTask(
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
           'atlas-lapack', 'python-minimal'],
     srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest']})
+    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
 minimal_with_python = SiconosCiTask(
     docker=True,
@@ -74,7 +74,7 @@ minimal_with_python = SiconosCiTask(
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
           'atlas-lapack', 'python-env'],
     srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest']})
+    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
 #
 # 3. all the tasks
