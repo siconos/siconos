@@ -407,6 +407,7 @@ pkgs:
     opensuse:
       - libgmp10-6.1.2-5.1.x86_64
       - mumps
+      - mumps-devel
       
     debian:
       - libmumps-seq
