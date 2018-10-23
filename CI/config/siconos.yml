@@ -34,8 +34,14 @@ updater:
   llvm-toolchain:
     debian-sid: printf "deb http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main\ndeb-src http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main" >> /etc/apt/sources.list && apt-get update -y
     debian-jessie: printf "deb http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main\ndeb-src http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main" >> /etc/apt/sources.list && apt-get update -y
+
   any:
     debian: apt-get update -y
+    opensuse: zypper --gpg-auto-import-keys refresh
+
+  # science repo for opensuse (needed for mumps installation)
+  mumps-seq:
+    opensuse: zypper addrepo https://download.opensuse.org/repositories/science/openSUSE_Leap_42.3/science.repo && zypper --gpg-auto-import-keys refresh
 
 
 ##############################################################################
@@ -76,7 +82,7 @@ env:
       - OMPI_CC=/usr/bin/clang
       - OMPI_CXX=/usr/bin/clang++
 
-  mumps:
+  mumps-par:
     any:
       - CC=mpicc
       - FC=mpif90
@@ -124,7 +130,7 @@ pkgs:
       - make
       - cmake
       - boost
-      - gmp
+      - gmp-pkg
       - swig
       - cppunit
       - start-command
@@ -318,12 +324,14 @@ pkgs:
       boost-filesystem
       boost-serialization
 
-  gmp:
+  gmp-pkg:
     nix: gmp-with-cxx
     debian: libgmp-dev
+    opensuse:
+      - gmp-devel
     fedora: gmp-devel
-    opensuse: gmp-devel
 
+    
   cppunit:
     nix:
       - cppunit
@@ -395,7 +403,16 @@ pkgs:
     fedora:
       - OCE-devel
 
-  mumps:
+  mumps-seq:
+    opensuse:
+      - libgmp10-6.1.2-5.1.x86_64
+      - mumps
+      
+    debian:
+      - libmumps-seq
+      - libmumps-seq-dev
+      
+  mumps-par:
     nix:
       - pfff_mumps_is_missing
     debian-7.8:
