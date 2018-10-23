@@ -118,7 +118,7 @@ if(SICONOS_HAS_BULLET)
   # Update compile flags for component
   if(BULLET_USE_DOUBLE_PRECISION)
     # Do we need this as public or private? Check if mechanics io needs this option?
-    target_compile_options(${COMPONENTS} PUBLIC "-DBT_USE_DOUBLE_PRECISION")
+    target_compile_options(${COMPONENT} PUBLIC "-DBT_USE_DOUBLE_PRECISION")
   endif()
 endif()
 
