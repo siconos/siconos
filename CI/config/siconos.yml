@@ -10,6 +10,8 @@ match:
   ubuntu: debian
   nixos/nix: nix
   nvidia/opengl: debian
+  suse: opensuse
+  opensuse: fedora
 
 ##############################################################################
 # Set commands used to install and update packages
@@ -22,6 +24,7 @@ installer:
     fedora: dnf --setopt=deltarpm=false install -y
     debian: apt-get install -f -y
     nixos/nix: nix-env -i
+    opensuse: zypper install -y
 
 updater:
   # specific installer for sicono package from launchpad
@@ -110,8 +113,8 @@ env:
 #      debian:
 #         - python-dev
 #         - python-scipy
-# 
-# 
+#
+#
 pkgs:
 
   build-base:
@@ -154,6 +157,14 @@ pkgs:
       - pytest
       - scipy
       - python-matplotlib
+
+  pytest:
+    opensuse:
+      python-pytest
+
+  scipy:
+    opensuse:
+      python-scipy
 
   python-modules:
     nix:
@@ -280,6 +291,7 @@ pkgs:
   gfortran:
     nix: gfortran-wrapper
     fedora: gcc-gfortran
+    opensuse: gcc-fortran
 
   gcc:
     nix: gcc-wrapper
@@ -293,6 +305,7 @@ pkgs:
     nix: boost-1.63.0
     debian: libboost-dev
     fedora: boost-devel
+    opensuse: boost-devel
 
   serialization:
     nix:
@@ -307,7 +320,7 @@ pkgs:
     nix: gmp-with-cxx
     debian: libgmp-dev
     fedora: gmp-devel
-
+    opensuse: gmp-devel
 
   cppunit:
     nix:
