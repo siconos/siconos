@@ -36,8 +36,8 @@ env:
   - TASK=default:distrib=ubuntu,18.04
   - TASK=default:distrib=debian,latest
   - TASK=default:distrib=fedora,latest:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
-  - TASK=default:distrib=opensuse,42.3:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
-  - TASK=default:distrib=opensuse,42.3:ci_config=with_mumps-seq:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,mumps-seq
+  - TASK=default:distrib=opensuse,42.3:ci_config=with_cxx11:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
+  - TASK=default:distrib=opensuse,42.3:ci_config=with_cxx11,with_mumps-seq:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,mumps-seq
   - TASK=default:distrib=ubuntu,17.10:ci_config=with_cxx11
   - TASK=default:pkgs+=lpsolve,
   - TASK=default:pkgs-=atlas-lapack:pkgs+=openblas-lapacke,
