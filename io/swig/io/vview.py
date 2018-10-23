@@ -769,6 +769,47 @@ def makeConvexSourceClass():
             output.SetPoints(self._points)
     return ConvexSource
 
+
+
+class Hsource(VTKPythonAlgorithmBase):
+    def __init__(self, data):
+        from vtk.numpy_interface import algorithms as algs
+        algs.VTKPythonAlgorithmBase.__init__(self,
+                                             nInputPorts=0,
+                                             nOutputPorts=1,
+                                             outputType='vtkPolyData')
+        self._data = data
+        self._raw_times = self._data[:, 0]
+        self._times = list(set(self._raw_times))
+        self._times.sort()
+
+    def RequestInformation(self, request, inInfo, outInfo):
+
+        info = outInfo[0].GetInformationObject(0)
+
+        info.Set(vtk.vtkStreamingDemandDrivenPipeline.TIME_STEPS(),
+                 self._times,
+                 len(self._times))
+        info.Set(vtk.vtkStreamingDemandDrivenPipeline.TIME_RANGE(),
+                 [self._times[0], self._times[-1]], 2)
+
+        return 1
+
+    def RequestData(self, request, inInfo, outInfo):
+        from vtk.numpy_interface import dataset_adapter as dsa
+
+        info = outInfo.GetInformationObject(0)
+        output = dsa.WrapDataObject(vtk.vtkPolyData.GetData(outInfo))
+
+        # The time step requested
+        t = info.Get(vtk.vtkStreamingDemandDrivenPipeline.UPDATE_TIME_STEP())
+
+        id_t = numpy.where(self._times[:] == t)
+        self.pos_data = self._data[id_t, :]
+        v = dsa.numpyTovtkDataArray(self.pos_data)
+        v.SetName("data")
+        output.GetPointData().SetVectors(v)
+
 # Read file and open VTK interaction window
 
 class VView(object):
@@ -1950,6 +1991,15 @@ class VView(object):
         ntime = len(times)
         k=0
         packet= int(ntime/100)+1
+
+        # independant of time
+        if numpy.shape(self.spos_data)[0] > 0:
+            self.set_position_v(self.spos_data[:, 1], self.spos_data[:, 2],
+                                self.spos_data[:, 3],
+                                self.spos_data[:, 4], self.spos_data[:, 5],
+                                self.spos_data[:, 6],
+                                self.spos_data[:, 7], self.spos_data[:, 8])
+
         for time in times:
             k=k+1
             if (k%packet == 0):
@@ -1964,13 +2014,6 @@ class VView(object):
             self.cf_prov.xmethod()
 
             id_t = numpy.where(self.pos_data[:, 0] == times[index])
-
-            if numpy.shape(self.spos_data)[0] > 0:
-                self.set_position_v(self.spos_data[:, 1], self.spos_data[:, 2],
-                              self.spos_data[:, 3],
-                              self.spos_data[:, 4], self.spos_data[:, 5],
-                              self.spos_data[:, 6],
-                              self.spos_data[:, 7], self.spos_data[:, 8])
 
             self.set_position_v(
                 self.pos_data[id_t, 1], self.pos_data[id_t, 2], self.pos_data[id_t, 3],
