@@ -23,7 +23,7 @@ if(WITH_OCE)
   #  OCE_ALL_FOUND    - set to TRUE if all requested COMPONENTS are specified (see below), false otherwise
   #  OCE_MISSING_TOOLKITS - when OCE_ALL_FOUND is FALSE, contains a list of missing toolkits
   #  OCE_ALL_BUILT_MODULES - the list of source directories compiled (mostly useful when running swig to generate wrappers)
-  find_package(OCE 0.17 REQUIRED COMPONENTS ${OCE_TOOLKITS})
+  find_package(OCE 0.16 REQUIRED COMPONENTS ${OCE_TOOLKITS})
 
   if(OCE_ALL_FOUND)
     message(STATUS "OCE found.")
