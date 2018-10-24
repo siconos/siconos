@@ -24,6 +24,7 @@
 // Proper definition of isnan
 #ifndef SICONOS_ISNAN
 #define SICONOS_ISNAN
+#include "SiconosConfig.h"
 #if __cplusplus >= 201103L
 #include <cmath>
 #ifndef SICONOS_STD_ISNAN_ALREADY_HERE_AND_I_DO_NOT_KNOW_WHY
