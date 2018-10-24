@@ -94,4 +94,8 @@
 // use to force 32 bits int when creating numpy array
 // Useful to support old scipy version (< 0.14.0)
 #cmakedefine SICONOS_FORCE_NPY_INT32
+
+// on opensuse 42.3 Stdxx.h, failure with cxx11 and using std::isnan
+#cmakedefine SICONOS_STD_ISNAN_ALREADY_HERE_AND_I_DO_NOT_KNOW_WHY
+
 #endif

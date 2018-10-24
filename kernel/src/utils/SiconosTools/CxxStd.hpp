@@ -26,6 +26,10 @@
 #define SICONOS_ISNAN
 #if __cplusplus >= 201103L
 #include <cmath>
+#ifndef SICONOS_STD_ISNAN_ALREADY_HERE_AND_I_DO_NOT_KNOW_WHY
+using std::isnan;
+using std::isinf;
+#endif
 #else
 #if ((!defined(_MSC_VER)) && (!defined( __SUNPRO_CC)))
 #include <cmath>
