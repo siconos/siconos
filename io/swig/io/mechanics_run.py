@@ -918,6 +918,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         print('Wrong shape of inertia')
                     have_inertia = True
                 else:
+                    inertia=0.0*np.eye(3) # set a temporary null value
                     have_inertia = False
 
                 body = body_class(translation + orientation,

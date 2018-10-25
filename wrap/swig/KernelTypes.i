@@ -717,13 +717,13 @@ struct IsDense : public Question<bool>
 
   SP::SimpleMatrix SimpleMatrix_from_numpy(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
   {
-    if (obj==Py_None)
-      return SP::SimpleMatrix();
+    // if (obj==Py_None)
+    //   return SP::SimpleMatrix();
 
     PyArrayObject* array = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, is_new_object);
     if (!array)
     {
-      PyErr_SetString(PyExc_TypeError, "Could not get array obj from the python object");
+      PyErr_SetString(PyExc_TypeError, "SimpleMatrix_from_numpy - Could not get array obj from the python object");
       PyObject_Print(obj, stderr, 0);
       return std11::shared_ptr<SimpleMatrix>();
     }
@@ -731,7 +731,7 @@ struct IsDense : public Question<bool>
     if (!require_dimensions(array,2) ||
         !require_native(array) || !require_fortran(array))
     {
-      PyErr_SetString(PyExc_TypeError, "The given object does not have the right structure. We expect a 2 dimensional array (or list, tuple, ...)");
+      PyErr_SetString(PyExc_TypeError, "SimpleMatrix_from_numpy - The given object does not have the right structure. We expect a 2 dimensional array (or list, tuple, ...)");
       PyObject_Print(obj, stderr, 0);
       return std11::shared_ptr<SimpleMatrix>();
     }
@@ -744,7 +744,7 @@ struct IsDense : public Question<bool>
     return result;
   }
 
-   SP::SimpleMatrix SimpleMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
+  SP::SimpleMatrix SimpleMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
   {
     void * swig_argp;
     SP::SimpleMatrix c_result;
@@ -754,7 +754,7 @@ struct IsDense : public Question<bool>
     {
       // try a conversion from numpy
       c_result = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
-      if (!c_result) { return SP::SimpleMatrix(); }
+      //if (!c_result) { return SP::SimpleMatrix(); }
     }
     else if (swig_argp)
     {
