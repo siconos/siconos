@@ -98,8 +98,10 @@ endif()
 # cf discussions here:
 # https://gitlab.kitware.com/cmake/cmake/issues/17000
 
-if(CTEST_BINARY_DIRECTORY)
-  file(REMOVE_RECURSE ${CTEST_BINARY_DIRECTORY})
+if(SUBMIT EQUAL 0)
+  if(CTEST_BINARY_DIRECTORY)
+    file(REMOVE_RECURSE ${CTEST_BINARY_DIRECTORY})
+  endif()
 endif()
 
 find_program(CTEST_GIT_COMMAND NAMES git)
@@ -166,6 +168,9 @@ if(SUBMIT EQUAL 0)
   if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
     ctest_memcheck()
   endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+  if(NOT TEST_RETURN_VAL EQUAL 0)
+    message(FATAL_ERROR " *** test failure *** ")
+  endif()
 endif()
 
 if(SUBMIT EQUAL 1)
@@ -178,7 +183,5 @@ if(SUBMIT EQUAL 1)
   endif()
 endif()
 
-if(NOT TEST_RETURN_VAL EQUAL 0)
-  message(FATAL_ERROR " *** test failure *** ")
-endif()
+
 
