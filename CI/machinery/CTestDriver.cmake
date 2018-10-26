@@ -151,6 +151,7 @@ if(NOT NP EQUAL 0)
 set(CTEST_BUILD_FLAGS -j${NP})
 set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${NP})
 endif()
+
 ctest_start("${MODE}")
 
 if(SUBMIT EQUAL 0)
@@ -168,6 +169,7 @@ if(SUBMIT EQUAL 0)
   if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
     ctest_memcheck()
   endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+
   if(NOT TEST_RETURN_VAL EQUAL 0)
     message(FATAL_ERROR " *** test failure *** ")
   endif()
@@ -176,7 +178,12 @@ endif()
 if(SUBMIT EQUAL 1)
   # note: if the submission process experiences some slow-down, then we
   # may get a return-code error, so we do it in a second phase.
-  ctest_submit(RETURN_VALUE SUBMIT_RETURN_VAL)
+
+  # we need to get all the previously built files as ctest_start may
+  # begin with another tag
+  file(GLOB SUBMIT_FILES ${CMAKE_BINARY_DIR}/Testing/*/*)
+  message(STATUS "submit files : ${SUBMIT_FILES}")
+  ctest_submit(FILES ${SUBMIT_FILES} RETURN_VALUE SUBMIT_RETURN_VAL)
 
   if(NOT SUBMIT_RETURN_VAL EQUAL 0)
     message(WARNING " *** submission failure *** ")
