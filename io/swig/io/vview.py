@@ -770,6 +770,7 @@ def makeConvexSourceClass():
     return ConvexSource
 
 
+from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 
 class Hsource(VTKPythonAlgorithmBase):
     def __init__(self, data):
