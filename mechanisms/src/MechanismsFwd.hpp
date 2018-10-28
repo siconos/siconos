@@ -2,17 +2,18 @@
 #define MechanismsFwd_hpp
 #include <SiconosPointers.hpp>
 
+#include <MechanicsFwd.hpp>
 #define MECHANISMS_CLASSES()\
   REGISTER(MBTB_FC3DContactRelation)            \
-  REGISTER(MBTB_ContactRelation)             
+  REGISTER(MBTB_ContactRelation)
 
 
 #include <SiconosVisitables.hpp>
 
 #undef SICONOS_VISITABLES
 #define SICONOS_VISITABLES() \
-  KERNEL_CLASSES() \
-  MECHANISMS_CLASSES()
+  KERNEL_CLASSES()           \
+  MECHANICS_CLASSES()
 
 #undef REGISTER
 #undef REGISTER_BASE
