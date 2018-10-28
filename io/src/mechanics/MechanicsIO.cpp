@@ -1,6 +1,4 @@
-
 #include "SiconosConfig.h"
-
 #include "MechanicsIO.hpp"
 
 #define DUMMY(X, Y) class X : public Y {}
@@ -39,7 +37,8 @@ DUMMY(OccR, NewtonEulerFrom3DLocalFrameR);
 #define MECHANISMS_CLASSES() \
   REGISTER(MBTB_FC3DContactRelation) \
   REGISTER(MBTB_ContactRelation)
-#ifdef HAVE_MECHANISMS
+
+#ifdef HAVE_SICONOS_MECHANISMS
 #include <MBTB_FC3DContactRelation.hpp>
 #include <MBTB_ContactRelation.hpp>
 #else
@@ -56,16 +55,17 @@ DUMMY(MBTB_ContactRelation, NewtonEulerFrom1DLocalFrameR);
   REGISTER(LagrangianR)                         \
   REGISTER(Disk)                                \
   REGISTER(Circle)                              \
+  REGISTER(NewtonEulerR)                        \
   REGISTER(NewtonEulerFrom1DLocalFrameR)        \
   REGISTER(NewtonEulerFrom3DLocalFrameR)        \
   REGISTER(PivotJointR)                         \
   REGISTER(KneeJointR)                          \
   REGISTER(PrismaticJointR)                     \
   REGISTER(BodyDS)                              \
-  OCC_CLASSES()                                 \
-  XBULLET_CLASSES()                             \
   MECHANISMS_CLASSES()                          \
-  REGISTER(NewtonEulerR)
+  OCC_CLASSES()                                 \
+  XBULLET_CLASSES()
+
 
 #undef SICONOS_VISITABLES
 #define SICONOS_VISITABLES() VISITOR_CLASSES()

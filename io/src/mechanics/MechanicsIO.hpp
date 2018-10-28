@@ -20,6 +20,9 @@
 #define MechanicsIO_hpp
 
 #include <MechanicsFwd.hpp>
+// #ifdef HAVE_SICONOS_MECHANISMS
+// #include <MechanismsFwd.hpp>
+// #endif
 #include <SiconosPointers.hpp>
 #include <SiconosFwd.hpp>
 

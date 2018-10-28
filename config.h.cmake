@@ -6,6 +6,7 @@
 #cmakedefine HAVE_SICONOS_IO
 #cmakedefine HAVE_SICONOS_MECHANICS
 #cmakedefine HAVE_SICONOS_CONTROL
+#cmakedefine HAVE_SICONOS_MECHANISMS
 #cmakedefine HAVE_PATHFERRIS
 #cmakedefine HAVE_PATHVI
 #cmakedefine HAVE_SORT

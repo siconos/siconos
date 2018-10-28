@@ -133,6 +133,9 @@ endif()
 if(HAVE_SICONOS_MECHANICS)
   list(APPEND ${COMPONENT}_LINK_LIBRARIES mechanics)
 endif()
+if(HAVE_SICONOS_MECHANISMS)
+  list(APPEND ${COMPONENT}_LINK_LIBRARIES mechanisms)
+endif()
 
 # remove debug & optimized inside LINK_LIBRARIES...
 list(REMOVE_ITEM ${COMPONENT}_LINK_LIBRARIES "debug" "optimized")
