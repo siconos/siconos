@@ -353,9 +353,9 @@ def build_docstrings(headers, component_name, doxygen_config_filename, siconos_s
 
     outputfile = os.path.join(siconos_swig_path, component_name + '-docstrings.i')
     swigfiles = glob.glob(os.path.join(swig_working_dir, '*.i'))
-    with open(outputfile, 'w') as outfile:
+    with open(outputfile, 'w', encoding='utf8') as outfile:
         for fname in swigfiles:
-            with open(fname) as infile:
+            with open(fname, encoding='utf8') as infile:
                 for line in infile:
                     outfile.write(line)
     msg = 'Generates file ' # + outputfile + ' for doctrings in swig.'
@@ -1182,10 +1182,10 @@ def filter_dot_in_xml_formulas(xmlfile):
         xml file name (full path) (in-out param)
     """
     fileout = xmlfile.split('.')[0] + '.tmp'
-    with open(xmlfile, 'r+') as f:
+    with open(xmlfile, 'r+', encoding='utf8') as f:
         lines = f.read()
     newlines = lines.replace(r'\\dot', r'\dot')
-    with open(fileout, 'w') as f:
+    with open(fileout, 'w', encoding='utf8') as f:
         f.write(newlines)
     shutil.move(fileout, xmlfile)
 

@@ -171,7 +171,7 @@ class SiconosDoxy2Swig(Doxy2SWIG):
             self.enums[ename] = (old_type, edescr)
             
     def write(self, fname):
-        with open(fname, 'w') as o:
+        with open(fname, 'w', encoding='utf8') as o:
             if(sys.version_info > (3, 0)):
                 o.write(''.join(self.pieces))
             else:
