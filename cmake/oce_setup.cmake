@@ -39,10 +39,10 @@ if(WITH_OCE)
   # For versions of OCE older than 0.18 AND on some specific systems (namely Debian),
   # some toolkits are detected (through OCEConfig.cmake) but the
   # libraries are not available. We must not link them with the component.
-  if(OCE_VERSION VERSION_LESS 0.18)
+  #if(OCE_VERSION VERSION_LESS 0.18)
     set(UNNEEDED_OCE_TOOLKITS "DRAWEXE" "TKDraw" "TKTopTest" "TKViewerTest" "TKXSDRAW" "TKDCAF" "TKXDEDRAW" "TKTObjDRAW" "TKQADraw"   )
     foreach(_T ${UNNEEDED_OCE_TOOLKITS})
       list(REMOVE_ITEM OCE_LIBRARIES  ${_T})
     endforeach()
-  endif()
+  #endif()
 endif()
