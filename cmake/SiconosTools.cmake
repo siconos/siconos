@@ -390,3 +390,22 @@ macro(get_subdirectories result current_dir)
   endforeach()
   set(${result} ${dirs})
 endmacro()
+
+
+# Replacement for list(FILTER ...) (see cmake doc)
+# when current cmake version < 3.6)
+# Usage :
+# list_filter(<listname> <matching expr>)
+# example:
+# set(mylist name src plugin)
+# list_filter(mylist src)
+# ==> mylist contains only name and plugin
+function(list_filter inout_list_name regex)
+  foreach(name IN LISTS ${inout_list_name})
+    string(FIND ${name} ${regex} result)
+    if(${result} GREATER -1)
+      list(REMOVE_ITEM ${inout_list_name} ${name})
+    endif()
+  endforeach()
+  set(${inout_list_name} ${${inout_list_name}} PARENT_SCOPE)
+endfunction()
