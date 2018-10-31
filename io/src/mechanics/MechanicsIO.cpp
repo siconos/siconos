@@ -12,7 +12,7 @@
 #define XBULLET_CLASSES() \
   REGISTER(BulletR)
 
-#ifdef SICONOS_HAVE_BULLET
+#ifdef SICONOS_HAS_BULLET
 #include <BulletR.hpp>
 #else
 #include <NewtonEulerDS.hpp>
