@@ -483,38 +483,33 @@ class InputObserver():
         self._slider_repres = slider_repres
 
     def update(self):
+
+        self.vview.io_reader.SetTime(self._time)
+        
         if self._times is None:
             self.vview.renderer_window.Render()
             return
-        index = bisect.bisect_left(self._times, self._time)
-        index = max(0, index)
-        index = min(index, len(self._times) - 1)
+
         if self.vview.cf_prov is not None:
-            self.vview.cf_prov._time = self._times[index]
+            self.vview.cf_prov._time = self.vview.io_reader._time
             self.vview.cf_prov.xmethod()
 
-        self.vview.set_dynamic_actors_visibility(self._times[index])
+        self.vview.set_dynamic_actors_visibility(self.vview.io_reader._time)
 
-        id_t = numpy.where(self.vview.pos_data[:, 0] == self._times[index])
-        self.vview.set_position(*self.vview.pos_data[id_t, :])
+        #pos_data = dsa.WrapDataObject(self.vview.io_reader.GetOutputDataObject(0).GetFieldData().GetArrayByName('pos_data'))
+        pos_data = self.vview.io_reader.pos_data
+        
+        self.vview.set_position(pos_data)
 
-        self._slider_repres.SetValue(self._time)
+        self._slider_repres.SetValue(self.vview.io_reader._time)
 
         self._current_id.SetNumberOfValues(1)
-        self._current_id.SetValue(0, index)
+        self._current_id.SetValue(0, self.vview.io_reader._index)
 
         self.vview.iter_plot.SetSelection(self._current_id)
         self.vview.prec_plot.SetSelection(self._current_id)
 
         self.vview.renderer_window.Render()
-
-    def object_pos(self, id_):
-        index = bisect.bisect_left(self._times, self._time)
-        index = max(0, index)
-        index = min(index, len(self._times) - 1)
-
-        id_t = numpy.where(pos_data[:, 0] == self._times[index])
-        return (pos_data[id_t[0][id_], 2], pos_data[id_t[0][id_], 3], pos_data[id_t[0][id_], 4])
 
     def set_opacity(self):
         for instance, actors in self.vview.dynamic_actors.items():
@@ -772,25 +767,24 @@ def makeConvexSourceClass():
 
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 
-class Hsource(VTKPythonAlgorithmBase):
-    def __init__(self, data):
-        from vtk.numpy_interface import algorithms as algs
-        algs.VTKPythonAlgorithmBase.__init__(self,
-                                             nInputPorts=0,
-                                             nOutputPorts=1,
-                                             outputType='vtkPolyData')
-        self._data = data
-        self._raw_times = self._data[:, 0]
-        self._times = list(set(self._raw_times))
-        self._times.sort()
+class IOReader(VTKPythonAlgorithmBase):
+    def __init__(self):
+        VTKPythonAlgorithmBase.__init__(self,
+                                        nInputPorts=0,
+                                        nOutputPorts=1,
+                                        outputType='vtkPolyData')
+        self._io = None
+
 
     def RequestInformation(self, request, inInfo, outInfo):
 
-        info = outInfo[0].GetInformationObject(0)
+        info = outInfo.GetInformationObject(0)
 
+        
         info.Set(vtk.vtkStreamingDemandDrivenPipeline.TIME_STEPS(),
                  self._times,
                  len(self._times))
+        
         info.Set(vtk.vtkStreamingDemandDrivenPipeline.TIME_RANGE(),
                  [self._times[0], self._times[-1]], 2)
 
@@ -798,21 +792,86 @@ class Hsource(VTKPythonAlgorithmBase):
 
     def RequestData(self, request, inInfo, outInfo):
         from vtk.numpy_interface import dataset_adapter as dsa
-
         info = outInfo.GetInformationObject(0)
-        output = dsa.WrapDataObject(vtk.vtkPolyData.GetData(outInfo))
+        output = vtk.vtkPolyData.GetData(outInfo)
 
         # The time step requested
         t = info.Get(vtk.vtkStreamingDemandDrivenPipeline.UPDATE_TIME_STEP())
 
-        id_t = numpy.where(self._times[:] == t)
-        self.pos_data = self._data[id_t, :]
-        v = dsa.numpyTovtkDataArray(self.pos_data)
-        v.SetName("data")
-        output.GetPointData().SetVectors(v)
+        id_t = numpy.searchsorted(self._times, t, side='right') - 1
+        self._id_t_m = range(self._indices[id_t],
+                             self._indices[min(id_t+1, len(self._indices)-1)])
+        self._time = self._times[id_t]
+        self._index = id_t
+        
+        id_t_cf = numpy.searchsorted(self._cf_times, t, side='right') - 1
+        self._id_t_m_cf = range(self._cf_indices[id_t_cf],
+                                self._cf_indices[min(id_t_cf+1,
+                                                     len(self._cf_indices)-1)])
+
+        self.pos_data = self._idpos_data[self._id_t_m, :]
+        self.velo_data = self._ivelo_data[self._id_t_m, :]
+        self.cf_data = self._icf_data[self._id_t_m_cf, :]
+
+        vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
+        vtk_pos_data.SetName('pos_data')
+
+        vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data)
+        vtk_pos_data.SetName('velo_data')
+
+        vtk_cf_data = dsa.numpyTovtkDataArray(self.cf_data)
+        vtk_cf_data.SetName('cf_data')
+
+        output.GetFieldData().AddArray(vtk_pos_data)
+        output.GetFieldData().AddArray(vtk_velo_data)
+        output.GetFieldData().AddArray(vtk_cf_data)
+        
+        return 1
+        
+    def SetIO(self, io):
+        self._io = io
+
+        self._ispos_data = self._io.static_data()
+        self._idpos_data = self._io.dynamic_data()
+        try:
+            self._idom_data = self._io.domains_data()
+        except ValueError:
+            self._idom_data = None
+
+        self._icf_data = self._io.contact_forces_data()
+        self._isolv_data = self._io.solver_data()
+        self._ivelo_data = self._io.velocities_data()
+
+        self._spos_data = self._ispos_data[:, :]
+        
+        # all times as hdf5 slice
+        self._raw_times = self._idpos_data[:, 0]
+        self._cf_raw_times = self._icf_data[:, 0]
+        
+        # build times steps
+        self._times, self._indices = numpy.unique(self._raw_times,
+                                                  return_index=True)
+        self._cf_times, self._cf_indices = numpy.unique(self._raw_times,
+                                                        return_index=True)
+        # self._times.sort()
+        # self._indices = ?
+        # we assume times must be sorted
+        assert all(self._times[i] <= self._times[i+1]
+                   for i in range(len(self._times)-1))
+
+        assert all(self._cf_times[i] <= self._cf_times[i+1]
+                   for i in range(len(self._cf_times)-1))
+        
+        self.Modified()
+        return 1
+
+    def SetTime(self, time):
+        self.GetOutputInformation(0).Set(
+            vtk.vtkStreamingDemandDrivenPipeline.UPDATE_TIME_STEP(),
+            time)
+        self.Update()
 
 # Read file and open VTK interaction window
-
 class VView(object):
     def __init__(self, io, options, config=None):
         self.opts = options
@@ -823,10 +882,6 @@ class VView(object):
         self.refs_attrs = []
         self.shape = dict()
         self.pos = dict()
-        self.instances = dict()
-
-        (self.spos_data, self.dpos_data, self.dom_data,
-         self.cf_data, self.solv_data, self.velo_data) = self.load()
 
         self.contact_posa = dict()
         self.contact_posb = dict()
@@ -867,35 +922,13 @@ class VView(object):
 
         self.offsets = dict()
 
-    def load(self):
-
-        ispos_data = self.io.static_data()
-        idpos_data = self.io.dynamic_data()
-        try:
-            idom_data = self.io.domains_data()
-        except ValueError:
-            idom_data = None
-
-        icf_data = self.io.contact_forces_data()[:]
-
-        isolv_data = self.io.solver_data()
-        ivelo_data = self.io.velocities_data()
-
-        return ispos_data, idpos_data, idom_data, icf_data, isolv_data, ivelo_data
-
+        self.io_reader = IOReader()
+        self.io_reader.SetIO(io=self.io)
+        
     def reload(self):
-        (self.spos_data, self.dpos_data, self.dom_data,
-         self.cf_data, self.solv_data, self.velo_data) = self.load()
+
         if not self.opts.cf_disable:
             self.cf_prov = CFprov(self.cf_data, self.dom_data)
-        times = list(set(self.dpos_data[:, 0]))
-        times.sort()
-
-        if len(self.spos_data) > 0:
-            self.instances = set(self.dpos_data[:, 1]).union(
-                set(self.spos_data[:, 1]))
-        else:
-            self.instances = set(self.dpos_data[:, 1])
 
         if self.cf_prov is not None:
             self.cf_prov._time = min(times[:])
@@ -908,15 +941,10 @@ class VView(object):
                 self.contact_pos_force[mu].Update()
                 self.contact_pos_norm[mu].Update()
 
-        self.id_t0 = numpy.where(
-            self.dpos_data[:, 0] == self.time0)
-
-        self.pos_data = self.dpos_data[:]
-        self.min_time = times[0]
+        self.min_time = self.io_reader._times[0]
+        self.max_time = self.io_reader._times[-1]
         self.set_dynamic_actors_visibility(self.time0)
-
-        self.max_time = times[len(times) - 1]
-
+        
     def init_contact_pos(self, mu):
 
         self.contact_posa[mu] = vtk.vtkDataObjectToDataSetFilter()
@@ -1715,14 +1743,17 @@ class VView(object):
         return slider_widget, slider_repres
 
     def setup_initial_position(self):
+        from vtk.numpy_interface import dataset_adapter as dsa
         self.time0 = None
         try:
             # Positions at first time step
-            self.time0 = min(self.dpos_data[:, 0])
-            self.id_t0 = numpy.where(self.dpos_data[:, 0] == self.time0)
-            self.pos_t0 = self.pos_data[self.id_t0, 0:9]
+            self.io_reader.SetTime(0)
+            self.time0 = self.io_reader._times[0]
+            #self.pos_t0 = dsa.WrapDataObject(self.io_reader.GetOutputDataObject(0).GetFieldData().GetArray('pos_data'))
+            self.pos_t0 = [self.io_reader.pos_data]
+
         except ValueError:
-            # this is for the case simulation hass not been ran and
+            # this is for the case simulation has not been ran and
             # time does not exists
             self.time0 = 0
             self.id_t0 = None
@@ -1734,8 +1765,8 @@ class VView(object):
                 for k in self.io.instances()
                 if self.io.instances()[k].attrs['id'] >= 0])
 
-        if numpy.shape(self.spos_data)[0] > 0:
-            self.set_position(self.spos_data)
+        if numpy.shape(self.io_reader._spos_data)[0] > 0:
+            self.set_position(self.io_reader._spos_data)
             # static objects are always visible
             for instance, actors in self.static_actors.items():
                 for actor,_,_ in actors:
@@ -1813,9 +1844,9 @@ class VView(object):
     def setup_charts(self):
         # Warning! numpy support offer a view on numpy array
         # the numpy array must not be garbage collected!
-        nxtime = self.solv_data[:, 0]
-        nxiters = self.solv_data[:, 1]
-        nprecs = self.solv_data[:, 2]
+        nxtime = self.io_reader._isolv_data[:, 0]
+        nxiters = self.io_reader._isolv_data[:, 1]
+        nprecs = self.io_reader._isolv_data[:, 2]
         xtime = numpy_support.numpy_to_vtk(nxtime)
         xiters = numpy_support.numpy_to_vtk(nxiters)
         xprecs = numpy_support.numpy_to_vtk(nprecs)
@@ -1975,6 +2006,8 @@ class VView(object):
         self.widget.InteractiveOn()
 
     def export(self):
+        from vtk.numpy_interface import dataset_adapter as dsa
+        
         if self.opts.global_filter:
             big_data_writer = vtk.vtkXMLPolyDataWriter()
         else:
@@ -1987,56 +2020,55 @@ class VView(object):
 
         if self.opts.ascii_mode:
             big_data_writer.SetDataModeToAscii()
-        times = list(set(self.dpos_data[:, 0]))
-        times.sort()
+        times = self.io_reader._times
         ntime = len(times)
         k=0
         packet= int(ntime/100)+1
 
         # independant of time
-        if numpy.shape(self.spos_data)[0] > 0:
-            self.set_position_v(self.spos_data[:, 1], self.spos_data[:, 2],
-                                self.spos_data[:, 3],
-                                self.spos_data[:, 4], self.spos_data[:, 5],
-                                self.spos_data[:, 6],
-                                self.spos_data[:, 7], self.spos_data[:, 8])
+        spos_data = self.io_reader._spos_data
+        if numpy.shape(spos_data) > 0:
+            self.set_position_v(spos_data[:, 1], spos_data[:, 2],
+                                spos_data[:, 3],
+                                spos_data[:, 4], spos_data[:, 5],
+                                spos_data[:, 6],
+                                spos_data[:, 7], spos_data[:, 8])
 
         for time in times:
             k=k+1
             if (k%packet == 0):
                 sys.stdout.write('.')
-            index = bisect.bisect_left(times, time)
-            index = max(0, index)
-            index = min(index, len(times) - 1)
+            self.io_reader.SetTime(time)
 
-            self.cf_prov._time = times[index]
+            #self.cf_prov._time = times[index]
 
             # fix: should be called by contact_source?
-            self.cf_prov.xmethod()
+            #self.cf_prov.xmethod()
 
-            id_t = numpy.where(self.pos_data[:, 0] == times[index])
+            #id_t = numpy.where(self.pos_data[:, 0] == times[index])
+            pos_data = dsa.WrapDataObject(self.io_reader.GetOutputDataObject(0).GetFieldData().GetArrayByName('pos_data'))
 
+            velo_data = dsa.WrapDataObject(self.io_reader.GetOutputDataObject(0).GetFieldData().GetArrayByName('velo_data'))
+            
             self.set_position_v(
-                self.pos_data[id_t, 1], self.pos_data[id_t, 2], self.pos_data[id_t, 3],
-                self.pos_data[id_t, 4], self.pos_data[id_t, 5], self.pos_data[id_t, 6],
-                self.pos_data[id_t, 7], self.pos_data[id_t, 8])
-
-            id_tv = numpy.where(self.velo_data[:, 0] == times[index])[0]
+                pos_data[:, 1], pos_data[:, 2], pos_data[:, 3],
+                pos_data[:, 4], pos_data[:, 5], pos_data[:, 6],
+                pos_data[:, 7], pos_data[:, 8])
 
             self.set_velocity_v(
-                self.velo_data[id_tv, 1],
-                self.velo_data[id_tv, 2],
-                self.velo_data[id_tv, 3],
-                self.velo_data[id_tv, 4],
-                self.velo_data[id_tv, 5],
-                self.velo_data[id_tv, 6],
-                self.velo_data[id_tv, 7])
+                velo_data[:, 1],
+                velo_data[:, 2],
+                velo_data[:, 3],
+                velo_data[:, 4],
+                velo_data[:, 5],
+                velo_data[:, 6],
+                velo_data[:, 7])
 
             self.set_translation_v(
-                self.pos_data[id_t, 1],
-                self.pos_data[id_t, 2],
-                self.pos_data[id_t, 3],
-                self.pos_data[id_t, 4],
+                pos_data[:, 1],
+                pos_data[:, 2],
+                pos_data[:, 3],
+                pos_data[:, 4],
             )
 
             big_data_writer.SetFileName('{0}-{1}.{2}'.format(
@@ -2069,7 +2101,6 @@ class VView(object):
             if self.opts.imr:
                 self.big_data_mapper.ImmediateModeRenderingOff()
 
-
             self.big_actor = vtk.vtkActor()
             self.big_actor.SetMapper(self.big_data_mapper)
 
@@ -2079,7 +2110,7 @@ class VView(object):
             for mu in self.cf_prov._mu_coefs:
                 self.init_contact_pos(mu)
 
-        times = self.dpos_data[:, 0]
+        times = self.io_reader._times
 
         if (len(times) == 0):
             print('No dynamic data found!  Empty simulation.')
@@ -2103,8 +2134,6 @@ class VView(object):
                            'stl': vtk.vtkSTLReader}
         self.unfrozen_mappers = dict()
 
-        self.pos_data = self.dpos_data[:]
-        self.spos_data = self.spos_data[:]
         self.build_set_functions()
 
         self.renderer = vtk.vtkRenderer()
@@ -2134,8 +2163,7 @@ class VView(object):
     def initialize_gui(self):
 
         self.setup_vtk_renderer()
-        times = self.dpos_data[:, 0]
-        self.setup_sliders(times)
+        self.setup_sliders(self.io_reader._times)
         self.setup_charts()
         self.setup_axes()
 
