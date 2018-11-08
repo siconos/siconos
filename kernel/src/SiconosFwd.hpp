@@ -26,6 +26,7 @@ DEFINE_SPTR(BlockCSRMatrix)
 DEFINE_SPTR(Interaction)
 
 DEFINE_SPTR(NonSmoothDynamicalSystem)
+DEFINE_SPTR(LinearComplementaritySystemsNSDS)
 
 // --- Non-Smooth problems ---
 DEFINE_SPTR(OneStepNSProblem)
@@ -48,6 +49,7 @@ DEFINE_SPTR(OneStepIntegrator)
 DEFINE_SPTR(Relation)
 
 DEFINE_SPTR(FirstOrderR)
+
 DEFINE_SPTR(FirstOrderNonLinearDS)
 DEFINE_SPTR(FirstOrderLinearDS)
 DEFINE_SPTR(FirstOrderLinearTIDS)
