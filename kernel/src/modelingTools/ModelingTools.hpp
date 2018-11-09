@@ -51,4 +51,5 @@ Include files related to modeling part of Siconos.
 
 
 #include "NonSmoothDynamicalSystem.hpp"
+#include "LinearComplementaritySystemsNSDS.hpp"
 

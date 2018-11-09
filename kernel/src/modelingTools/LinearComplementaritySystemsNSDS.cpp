@@ -51,6 +51,7 @@ LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(double t0, do
   insertDynamicalSystem(_ds);
 
   _relation.reset(new FirstOrderLinearTIR(C, B));
+
   // todo: check sizes
   if (D)
   {
