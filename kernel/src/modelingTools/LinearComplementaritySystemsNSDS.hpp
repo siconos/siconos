@@ -43,12 +43,14 @@ private:
   ACCEPT_SERIALIZATION(LinearComplementaritySystemsNSDS);
 
 
-
+  /* a first order linear TI dynamical systems */
   SP::FirstOrderLinearTIDS _ds;
+  /* a first order linear TI relation */
   SP::FirstOrderLinearTIR _relation;
-  SP::Interaction _interaction;
+  /* a complementarity condition */
   SP::ComplementarityConditionNSL _nslaw;
-
+  /* an interaction*/
+  SP::Interaction _interaction;
 
 
 public:
