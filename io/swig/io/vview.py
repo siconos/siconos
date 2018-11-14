@@ -799,19 +799,24 @@ class IOReader(VTKPythonAlgorithmBase):
         t = info.Get(vtk.vtkStreamingDemandDrivenPipeline.UPDATE_TIME_STEP())
 
         id_t = numpy.searchsorted(self._times, t, side='right') - 1
-        self._id_t_m = range(self._indices[id_t],
-                             self._indices[min(id_t+1, len(self._indices)-1)])
+        if id_t < len(self._indices)-1:
+            self._id_t_m = range(self._indices[id_t],
+                                 self._indices[id_t+1])
+        else:
+            self._id_t_m = [self._indices[id_t]]
         self._time = self._times[id_t]
         self._index = id_t
         
         id_t_cf = numpy.searchsorted(self._cf_times, t, side='right') - 1
-        self._id_t_m_cf = range(self._cf_indices[id_t_cf],
-                                self._cf_indices[min(id_t_cf+1,
-                                                     len(self._cf_indices)-1)])
+        if id_t_cf < len(self._cf_indices)-1:
+            self._id_t_m_cf = range(self._cf_indices[id_t_cf],
+                                    self._cf_indices[id_t_cf+1])
+        else:
+            self._id_t_m_cf = [self._cf_indices[id_t_cf]]
 
         self.pos_data = self._idpos_data[self._id_t_m, :]
         self.velo_data = self._ivelo_data[self._id_t_m, :]
-        self.cf_data = self._icf_data[self._id_t_m_cf, :]
+        #self.cf_data = self._icf_data[self._id_t_m_cf, :]
 
         vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
         vtk_pos_data.SetName('pos_data')
@@ -819,12 +824,12 @@ class IOReader(VTKPythonAlgorithmBase):
         vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data)
         vtk_pos_data.SetName('velo_data')
 
-        vtk_cf_data = dsa.numpyTovtkDataArray(self.cf_data)
-        vtk_cf_data.SetName('cf_data')
+        #vtk_cf_data = dsa.numpyTovtkDataArray(self.cf_data)
+        #vtk_cf_data.SetName('cf_data')
 
         output.GetFieldData().AddArray(vtk_pos_data)
         output.GetFieldData().AddArray(vtk_velo_data)
-        output.GetFieldData().AddArray(vtk_cf_data)
+        #output.GetFieldData().AddArray(vtk_cf_data)
         
         return 1
         
