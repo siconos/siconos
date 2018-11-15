@@ -33,8 +33,7 @@ if(WITH_OCE)
   else()
     message(FATAL_ERROR "OCE detection failed due to missing toolkit(s): ${OCE_MISSING_TOOLKITS}")
   endif()
-  
-  set(SICONOS_HAS_OCE TRUE)
+  set(SICONOS_HAS_OCE TRUE CACHE INTERNAL "True if OCE API has been found and is activated.)")
 
   # For versions of OCE older than 0.18 AND on some specific systems (namely Debian),
   # some toolkits are detected (through OCEConfig.cmake) but the

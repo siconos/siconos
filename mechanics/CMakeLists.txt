@@ -38,22 +38,20 @@ if(WITH_BULLET)
   # --> set BULLET_INCLUDE_DIRS, BULLET_FOUND, BULLET_LIBRARIES.
   # --> Accept : BULLET_ROOT (as install path or Windows build path)
   if(BULLET_FOUND)
-    set(SICONOS_HAS_BULLET TRUE)
+    set(SICONOS_HAS_BULLET TRUE CACHE INTERNAL "True if Bullet API has been found and is activated.")
     # If a custom bullet was set, provide it for user programs.
     message(STATUS "Bullet found.")
     message("    Bullet libraries : ${BULLET_LIBRARIES}.")
     message("    Bullet headers path : ${BULLET_INCLUDE_DIRS}.")
     # Append mechanics bullet component sources to sources list
     list(APPEND ${COMPONENT}_DIRS src/collision/bullet)
-
-    set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${BULLET_LIBRARIES})
-    # Add bullet headers to search path
-    # 'private' add limited to current target would be better.
-    # But those headers are missing during swig process. Todo : find a proper
-    # way to deal with this.
-    # target_include_directories(${COMPONENT} PRIVATE ${BULLET_INCLUDE_DIRS})
+    # # Add bullet headers to search path
+    # # 'private' add limited to current target would be better.
+    # # But those headers are missing during swig process. Todo : find a proper
+    # # way to deal with this.
+    # # target_include_directories(${COMPONENT} PRIVATE ${BULLET_INCLUDE_DIRS})
     include_directories(${BULLET_INCLUDE_DIRS})
-    # Add bullet libs to components links
+    # # Add bullet to component list of dep
     set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${BULLET_LIBRARIES})
   endif()
 endif()
@@ -110,10 +108,8 @@ library_project_setup()
 
 
 if(SICONOS_HAS_BULLET)
-  # Add bullet headers to search path
-  #target_include_directories(${COMPONENT} PRIVATE ${BULLET_INCLUDE_DIRS})
-  # Add bullet libs to components links
-  # target_link_libraries(${COMPONENT} PRIVATE ${BULLET_LIBRARIES})
+  # add bullet dep to siconos-mechanics interface (headers, libs and so on)
+  #target_link_libraries(${COMPONENT} PUBLIC ${BULLET_LIBRARIES})
 
   # Update compile flags for component
   if(BULLET_USE_DOUBLE_PRECISION)
