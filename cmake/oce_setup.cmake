@@ -5,11 +5,6 @@
 # - add occ to the build process
 # - set SICONOS_HAS_OCE var (distributed in siconosConfig.cmake)
 
-if(SICONOS_HAS_OCE)
-  # Job has already been done ... return
-  return()
-endif()
-
 if(WITH_OCE)
   # Set the list of toolkits modules which are requested.
   # Do we really need to set this explicitely??
