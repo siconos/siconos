@@ -509,7 +509,7 @@ class InputObserver():
         self.vview.iter_plot.SetSelection(self._current_id)
         self.vview.prec_plot.SetSelection(self._current_id)
 
-        self.vview.renderer_window.Render()
+#        self.vview.renderer_window.Render()
 
     def set_opacity(self):
         for instance, actors in self.vview.dynamic_actors.items():
@@ -798,7 +798,7 @@ class IOReader(VTKPythonAlgorithmBase):
         # The time step requested
         t = info.Get(vtk.vtkStreamingDemandDrivenPipeline.UPDATE_TIME_STEP())
 
-        id_t = numpy.searchsorted(self._times, t, side='right') - 1
+        id_t = max(0, numpy.searchsorted(self._times, t, side='right') - 1)
         if id_t < len(self._indices)-1:
             self._id_t_m = range(self._indices[id_t],
                                  self._indices[id_t+1])
@@ -807,7 +807,7 @@ class IOReader(VTKPythonAlgorithmBase):
         self._time = self._times[id_t]
         self._index = id_t
         
-        id_t_cf = numpy.searchsorted(self._cf_times, t, side='right') - 1
+        id_t_cf = max(0, numpy.searchsorted(self._cf_times, t, side='right') - 1)
         if id_t_cf < len(self._cf_indices)-1:
             self._id_t_m_cf = range(self._cf_indices[id_t_cf],
                                     self._cf_indices[id_t_cf+1])
@@ -1752,8 +1752,8 @@ class VView(object):
         self.time0 = None
         try:
             # Positions at first time step
-            self.io_reader.SetTime(0)
             self.time0 = self.io_reader._times[0]
+            self.io_reader.SetTime(self.time0)
             #self.pos_t0 = dsa.WrapDataObject(self.io_reader.GetOutputDataObject(0).GetFieldData().GetArray('pos_data'))
             self.pos_t0 = [self.io_reader.pos_data]
 
@@ -2207,6 +2207,7 @@ from siconos.io.mechanics_hdf5 import MechanicsHdf5
 from siconos.io.mechanics_hdf5 import tmpfile as io_tmpfile
 from siconos.io.mechanics_hdf5 import occ_topo_list, occ_load_file,\
     topods_shape_reader, brep_reader
+
 
 if __name__=='__main__':
     ## Options and config already loaded above
