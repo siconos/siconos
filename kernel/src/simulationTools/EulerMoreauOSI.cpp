@@ -31,7 +31,7 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-//#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
 using namespace RELATION;
@@ -439,6 +439,7 @@ void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds,
   }
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
+  DEBUG_EXPR(W.display());
   DEBUG_END("EulerMoreauOSI::computeW(...)\n");
 }
 
@@ -533,18 +534,19 @@ double EulerMoreauOSI::computeResidu()
       DEBUG_EXPR(residuFree.display());
       double coef = -h * (1 - _theta);
       if(dsType == Type::FirstOrderLinearDS)
-	    {
-	      // computes f(t_k,x_k)
-	      // No fold in FirstOrderLinearDS.
-	      // residu is used as a tmp buffer to compute Ax + b
-	      residu.zero();
-	      if(folds.A())
-        {
-          folds.computeA(told);
-          prod(*folds.A(), xold, residu);
-        }
-	      if(folds.b())
-        {
+      {
+         // computes f(t_k,x_k)
+         // No fold in FirstOrderLinearDS.
+         // residu is used as a tmp buffer to compute Ax + b
+         residu.zero();
+         if(folds.A())
+         {
+            folds.computeA(told);
+            prod(*folds.A(), xold, residu);
+         }
+
+         if(folds.b())
+         {
           folds.computeb(told);
           residu += *folds.b();
         }
@@ -615,7 +617,7 @@ double EulerMoreauOSI::computeResidu()
       //Don't use W because it is LU factorized
       //Residu : R_{free} = M(x^{\alpha}_{k+1} - x_{k}) -h( A (\theta x^{\alpha}_{k+1} + (1-\theta)  x_k) +b_{k+1})
       if(foltids.b())
-        residuFree = *(foltids.b());
+        scal(-h, *(foltids.b()), residuFree, true);
       else
         residuFree.zero();
 
