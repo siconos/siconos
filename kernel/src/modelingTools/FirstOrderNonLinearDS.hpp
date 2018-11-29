@@ -173,7 +173,7 @@ public:
   /** allocate (if needed)  and compute rhs and its jacobian.
    * \param time of initialization
    */
-  void initRhs(double time);
+  virtual void initRhs(double time);
 
   /** set nonsmooth input to zero
    *  \param level input-level to be initialized.
@@ -183,7 +183,7 @@ public:
   /** update right-hand side for the current state
    *  \param time of interest
    */
-  void computeRhs(double time);
+  virtual void computeRhs(double time);
 
   /** update \f$\nabla_x rhs\f$ for the current state
    *  \param time of interest

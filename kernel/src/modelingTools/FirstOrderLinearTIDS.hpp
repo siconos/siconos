@@ -89,12 +89,12 @@ public:
   /** Initialization function for the rhs and its jacobian.
    *  \param time of initialization.
    */
-  void initRhs(double time);
+  virtual void initRhs(double time);
 
   /** Default function to the right-hand side term
    *  \param time current time
    */
-  void computeRhs(double time);
+  virtual void computeRhs(double time);
 
   /** Default function to jacobian of the right-hand side term according to x
    *  \param time current time
