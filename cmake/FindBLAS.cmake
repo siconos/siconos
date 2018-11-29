@@ -80,28 +80,6 @@ if(NOT BLAS_FOUND)
 
       if(_libraries_work)
 
-	# first try with pkg-config --xhub
-	set(${_prefix}_${_library}_LIBRARIES "")
-	message(STATUS "Try to find ${_library} using pkg-config")
-	pkg_check_modules(PC_${_library} QUIET ${_library})
-	foreach(PC_LIB ${PC_${_library}_LIBRARIES})
-	  find_library(${PC_LIB}_LIBRARY
-	    NAMES ${PC_LIB}
-	    HINTS ${PC_${_library}_LIBRARY_DIRS}
-	    )
-	  if (NOT ${PC_LIB}_LIBRARY)
-	    message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_${_library}_LIBRARY_DIRS}")
-	  endif (NOT ${PC_LIB}_LIBRARY)
-	  list(APPEND ${_prefix}_${_library}_LIBRARIES ${${PC_LIB}_LIBRARY})
-	endforeach(PC_LIB)
-	## pkg-config may give some hints about headers location
-	# TODO support this via a mechanism close to LIBRARIES
-	#if (${_prefix}_${_library}_LIBRARIES)
-	#  set(INCLUDE_DIR_HINTS ${PC_${_library}_INCLUDE_DIRS})
-	#endif()
-
-	## Try with regular find_library
-	if(NOT ${_prefix}_${_library}_LIBRARIES)
 	# HINTS are checked before PATHS, that's why we call
 	# find_library twice, to give priority to LD_LIBRARY_PATH or user-defined paths
 	# over pkg-config process.
@@ -109,18 +87,35 @@ if(NOT BLAS_FOUND)
 	find_library(${_prefix}_${_library}_LIBRARIES
 	  NAMES ${_library}
 	  PATHS ${_libdir}
-	  PATH_SUFFIXES atlas
+          PATH_SUFFIXES atlas
 	  NO_DEFAULT_PATH
 	  )
 	find_library(${_prefix}_${_library}_LIBRARIES
 	  NAMES ${_library}
           PATH_SUFFIXES atlas
 	  )
-        endif()
 
-      mark_as_advanced(${_prefix}_${_library}_LIBRARIES)
-      set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARIES})
-      set(_libraries_work ${${_prefix}_${_library}_LIBRARIES})
+	## If search fails, we try with pkg-config
+	if(NOT ${_prefix}_${_library}_LIBRARIES)
+	  set(${_prefix}_${_library}_LIBRARIES "")
+	  message(STATUS "Try to find ${_library} using pkg-config")
+	  pkg_check_modules(PC_${_library} QUIET ${_library})
+	  foreach(PC_LIB ${PC_${_library}_LIBRARIES})
+	    find_library(${PC_LIB}_LIBRARY
+	      NAMES ${PC_LIB}
+	      HINTS ${PC_${_library}_LIBRARY_DIRS}
+	      )
+	    if (NOT ${PC_LIB}_LIBRARY)
+	      message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_${_library}_LIBRARY_DIRS}")
+	    endif (NOT ${PC_LIB}_LIBRARY)
+	    list(APPEND ${_prefix}_${_library}_LIBRARIES ${${PC_LIB}_LIBRARY})
+	  endforeach(PC_LIB)
+	  ## pkg-config may give some hints about headers location
+	  set(INCLUDE_DIR_HINTS ${PC_${_library}_INCLUDE_DIRS})
+	endif()
+	mark_as_advanced(${_prefix}_${_library}_LIBRARIES)
+	set(${LIBRARIES} ${${LIBRARIES}} ${${_prefix}_${_library}_LIBRARIES})
+	set(_libraries_work ${${_prefix}_${_library}_LIBRARIES})
       endif()
     endforeach()
     if(_libraries_work)
