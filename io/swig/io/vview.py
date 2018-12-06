@@ -406,7 +406,8 @@ class CFprov():
         if self._data is not None:
 
             mus, imus = numpy.unique(self._data[:, 1], return_inverse=True)
-                        
+
+            #print('xmethod', self._data[i, 2:5]))
             for i, imu in enumerate(imus):
                 mu = mus[imu]
                 fdata = self._output[mu].GetFieldData()
