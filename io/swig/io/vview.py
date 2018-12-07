@@ -347,7 +347,6 @@ class CFprov():
         from vtk.numpy_interface import dataset_adapter as dsa
 
         self._ioreader = ioreader
-        self._data = self._ioreader.cf_data
         
         self.cpa_at_time = dict()
         self.cpa = dict()
@@ -403,22 +402,23 @@ class CFprov():
                         
     def xmethod(self):
         
-        if self._data is not None:
+        if self._ioreader.cf_data is not None:
 
-            mus, imus = numpy.unique(self._data[:, 1], return_inverse=True)
+            data = self._ioreader.cf_data
+            mus, imus = numpy.unique(data[:, 1], return_inverse=True)
 
-            #print('xmethod', self._data[i, 2:5]))
+            #print('xmethod', data[i, 2:5]))
             for i, imu in enumerate(imus):
                 mu = mus[imu]
                 fdata = self._output[mu].GetFieldData()
                         
-                numpy.copyto(fdata['contactPositionsA'], self._data[
+                numpy.copyto(fdata['contactPositionsA'], data[
                     i, 2:5])
-                numpy.copyto(fdata['contactPositionsB'], self._data[
+                numpy.copyto(fdata['contactPositionsB'], data[
                     i, 5:8])
-                numpy.copyto(fdata['contactNormals'], self._data[
+                numpy.copyto(fdata['contactNormals'], data[
                     i, 8:11])
-                numpy.copyto(fdata['contactForces'], self._data[
+                numpy.copyto(fdata['contactForces'], data[
                     i, 11:14])
 
 
