@@ -232,28 +232,13 @@ if(NOT BLAS_FOUND)
       set(OPENBLAS_LIB_NAME "openblas")
     endif()
     message(STATUS "Try to find blas in openblas ...")
-
-    # OpenBLAS has a CMake module now .. yeah --xhub
-    if (OPENBLAS_LIB_NAME STREQUAL "openblas")
-      find_package(OpenBLAS)
-      if (OpenBLAS_FOUND)
-        set(BLAS_LIBRARIES ${OpenBLAS_LIBRARIES})
-        set(INCLUDE_DIR_HINTS ${OpenBLAS_INCLUDE_DIR})
-        set(BLAS_VERSION ${OpenBLAS_VERSION})
-      endif()
-    endif()
-
-    # Fall back to classical method
-    if (NOT BLAS_LIBRARIES)
-      check_blas_libraries(
-        BLAS_LIBRARIES
-        BLAS
-        sgemm
-        ""
-        "${OPENBLAS_LIB_NAME}"
-        "")
-    endif()
-
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${OPENBLAS_LIB_NAME}"
+      "")
     if(BLAS_LIBRARIES)
       set(WITH_BLAS "openblas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
       set(BLAS_HEADER cblas.h CACHE STRING "Blas header name")
@@ -266,11 +251,8 @@ if(NOT BLAS_FOUND)
       #set(BLAS_INCLUDE_SUFFIXES cblas_header)
       #set(INCLUDE_DIR_HINTS ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
 
-      if (NOT INCLUDE_DIR_HINTS)
-        get_filename_component(_bdir ${BLAS_LIBRARIES} DIRECTORY)
-        set(INCLUDE_DIR_HINTS "${_bdir}/../include/openblas/")
-      endif()
-
+      get_filename_component(_bdir ${BLAS_LIBRARIES} DIRECTORY)
+      set(INCLUDE_DIR_HINTS "${_bdir}/../include/openblas/")
       set(OPENBLAS_FOUND 1)
 
     endif(BLAS_LIBRARIES)
