@@ -26,39 +26,21 @@
 #include "Relation.hpp"
 #include "Interaction.hpp"
 
-/** FirstOrder Non Linear Relation.
+/** FirstOrder Relation
  *
- *  Relation for First Order Dynamical Systems, with:
+ * This is an abstract class for all relation operating on first order systems.
+ * It should not be used. Rather, the following classes should be used:
  *
- * \rststar
+ * - FirstOrderNonlinearR: for fully nonlinear relations: $\f y = h(t, X, \lambda, Z)\f$, $\f$ R = g(t, X, \lambda, Z)\f$.
+ * - FirstOrderType2R: specialization with $\f y = h(t, X, \lambda, Z)\f$, $\f$ R = g(t, \lambda, Z)\f$.
+ * - FirstOrderType1R: further specialization with $\f y = h(t, X, Z)\f$, $\f$ R = g(t, \lambda, Z)\f$.
+ * - FirstOrderLinearR: linear case: $\f y = C(t)x + D(t)\lambda + F(t) z + e$, $\f$ R = B(t)\lambda\f$.
+ * - FirstOrderLinearR: time-invariant linear case: $\f y = Cx + D\lambda + F z + e$, $\f$ R = B\lambda\f$.
  *
- * .. math::
- * 
- *     y &=& h(X,t,\lambda,Z)\\
- *     R &=& g(X,t,\lambda,Z)
+ * If the relation involves only one DynamicalSystem, then \f$R = r\f$, \f$X = x\f$, and \f$Z = z\f$.
+ * With two, then \f$R = [r_1, r_2] \f$, \f$X = [x_1 x_2] \f$, and \f$Z = [z_1 z_2]\f$.
  *
- \endrststar
- *  X, Z, R corresponds to DynamicalSystem variables.
- *  If DS1 and DS2 are involved in the linked Interaction, then X =[x1 x2], Z=[z1 z2] ...
- *
- *  \f$ y \ and \ \lambda \f$ are specific variables of the interaction (see this class for more details).
- *  h and g are plugged on external functions, via plug-in mechanism (see SiconosSharedLibrary).
- *
- * h <=> output
- *
- * g <=> input
- *
- * Operators (and their corresponding plug-in):
-- h: saved in Interaction as y (plug-in: output[0])
-- \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
-- \f$ \nabla_\lambda h \f$: jacobianH[1] ( output[2] )
-- g: saved in DS as r ( input[0])
-- \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
-
-
-Note: we use a vector for jacobianG while there is only one jacobian. Just for future changes and to allow easy new implementations if some other
-variables are required in g.
-
+ * Remember that $y$ and $\lambda$ are relation from the Interaction, and have the same size.
  *
  */
 class FirstOrderR : public Relation

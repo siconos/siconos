@@ -15,8 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
 /*! \file AVI.hpp
-  \brief Affine Variational Inequalities formulation
+
+    \brief Affine Variational Inequalities formulation
 */
 
 #ifndef AVI_H
@@ -26,13 +28,14 @@
 
 #include <AVI_cst.h>
 #include <AffineVariationalInequalities.h>
+
 TYPEDEF_SPTR(AffineVariationalInequalities)
 
 /** Formalization and Resolution of an Affine Variational Inequality (AVI)
-    
+
  This class is devoted to the formalization and the resolution of
  Affine variational Inequalities (AVI): given a polytopic set \f$P\f$, \f$M\in R^{p\times p}\f$ and \f$q\in R^p\f$,
-  
+
  \rst
 
  .. math::
@@ -42,6 +45,7 @@ TYPEDEF_SPTR(AffineVariationalInequalities)
  \endrst
  \todo : add "recover" function to start from old values of z and w.
 */
+
 class AVI : public LinearOSNS
 {
 
@@ -62,7 +66,7 @@ public:
 
   /** destructor
    */
-  ~AVI();
+  virtual ~AVI();
 
   void initialize(SP::Simulation sim);
   virtual void setSolverId(int solverId);
