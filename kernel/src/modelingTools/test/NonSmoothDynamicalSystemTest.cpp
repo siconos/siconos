@@ -48,6 +48,7 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
     nsds->insertDynamicalSystem(dsnull);
   } catch (const RuntimeException& e) {
     /*  Pass */
+    std::cout << "testinsertDynamicalSystemNull: success!" << std::endl;
   } catch (const std::exception& e) {
     std::cout << "testinsertDynamicalSystemNull:" << e.what() << std::endl;
     CPPUNIT_FAIL("testinsertDynamicalSystemNull: unexpected exception ");

@@ -71,7 +71,7 @@ if(WITH_${COMPONENT}_TESTING)
   BEGIN_TEST(src/simulationTools/test)
 
   IF(HAS_FORTRAN)
-   NEW_TEST(testSimulationTools OSNSPTest.cpp EulerMoreauTest.cpp ZOHTest.cpp)
+   NEW_TEST(testSimulationTools OSNSPTest.cpp EulerMoreauTest.cpp LsodarTest.cpp ZOHTest.cpp)
    ELSE()
     NEW_TEST(testSimulationTools OSNSPTest.cpp EulerMoreauTest.cpp)
   ENDIF()

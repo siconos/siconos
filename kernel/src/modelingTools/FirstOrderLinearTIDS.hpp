@@ -94,7 +94,7 @@ public:
   /** Default function to the right-hand side term
    *  \param time current time
    */
-  virtual void computeRhs(double time);
+  void computeRhs(double time);
 
   /** Default function to jacobian of the right-hand side term according to x
    *  \param time current time
