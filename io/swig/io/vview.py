@@ -1,4 +1,4 @@
-#!/usr/bin/env /usr/bin/python3
+#!/usr/bin/env @PYTHON_EXECUTABLE@
 """
 Description: Viewer and exporter for Siconos mechanics-IO HDF5 files based on VTK.
 """
@@ -68,6 +68,7 @@ class VViewOptions(object):
         self.global_filter = False
         self.initial_camera = [None] * 4
         self.visible_mode = 'all'
+        self.export = False
 
     ## Print usage information
     def usage(self, long=False):
@@ -168,7 +169,7 @@ class VViewOptions(object):
                 exit(0)
 
             elif o == '--version':
-                print('{0} 4.2.0'.format(os.path.split(sys.argv[0])[1]))
+                print('{0} @SICONOS_VERSION@'.format(os.path.split(sys.argv[0])[1]))
                 exit(0)
 
             elif o == '--tmin':
@@ -240,6 +241,7 @@ class VViewOptions(object):
 class VExportOptions(VViewOptions):
     def __init__(self):
         super(self.__class__, self).__init__()
+        self.export = True
         self.ascii_mode = False
 
     def usage(self, long=False):
@@ -347,7 +349,7 @@ class CFprov():
         from vtk.numpy_interface import dataset_adapter as dsa
 
         self._ioreader = ioreader
-        
+
         self.cpa_at_time = dict()
         self.cpa = dict()
 
@@ -363,69 +365,85 @@ class CFprov():
         self.dom_at_time = [dict(), None][ioreader._idom_data is None]
         self.dom = dict()
 
+        self._points = dict()
         self._contact_field = dict()
-        self._vtk_output = dict()
         self._output = dict()
 
         for mu in self._ioreader._mu_coefs:
+            self._points[mu] = vtk.vtkPoints()
             self._contact_field[mu] = vtk.vtkPointData()
-            self._vtk_output[mu] = vtk.vtkPolyData()
-            self._output[mu] = dsa.WrapDataObject(self._vtk_output[mu])
+            self._output[mu] = vtk.vtkPolyData()
+            self._output[mu].SetPoints(self._points[mu])
             self._output[mu].SetFieldData(self._contact_field[mu])
 
-            self.cpa[mu] = vtk.vtkDoubleArray()
-            self.cpa[mu].SetNumberOfValues(3)
+
+    def xmethod(self):
+        nan = numpy.nan
+
+        for mu in self._ioreader._mu_coefs:
+            self.cpa_at_time[mu] = [[nan, nan, nan]]
+            self.cpb_at_time[mu] = [[nan, nan, nan]]
+            self.cn_at_time[mu] =  [[nan, nan, nan]]
+            self.cf_at_time[mu] =  [[nan, nan, nan]]
+
+        if self._ioreader.cf_data is not None:
+            self.contact = True
+
+            data = self._ioreader.cf_data
+
+            for mu in self._ioreader._mu_coefs:
+
+                imu = numpy.where(
+                    abs(data[:, 1] - mu) < 1e-15)[0]
+
+                #dom_imu = None
+                #dom_imu = numpy.where(
+                #    self._dom_data[:,-1] == data[id_f[imu],-1]
+                #)[0]
+
+                if len(imu) > 0:
+                    self.cpa_at_time[mu] = data[
+                        imu, 2:5]
+                    self.cpb_at_time[mu] = data[
+                        imu, 5:8]
+                    self.cn_at_time[mu] = - data[
+                        imu, 8:11]
+                    self.cf_at_time[mu] = data[
+                        imu, 11:14]
+
+        for mu in self._ioreader._mu_coefs:
+            self.cpa[mu] = numpy_support.numpy_to_vtk(
+                self.cpa_at_time[mu])
             self.cpa[mu].SetName('contactPositionsA')
 
-            self.cpb[mu] = vtk.vtkDoubleArray()
-            self.cpb[mu].SetNumberOfValues(3)
+            self.cpb[mu] = numpy_support.numpy_to_vtk(
+                self.cpb_at_time[mu])
             self.cpb[mu].SetName('contactPositionsB')
 
-            self.cn[mu] = vtk.vtkDoubleArray()
-            self.cn[mu].SetNumberOfValues(3)
+            self.cn[mu] = numpy_support.numpy_to_vtk(
+                self.cn_at_time[mu])
             self.cn[mu].SetName('contactNormals')
 
-            self.cf[mu] = vtk.vtkDoubleArray()
-            self.cf[mu].SetNumberOfValues(3)
-            self.cf[mu].SetName('contactForces')                       
-
-            self.dom[mu] = vtk.vtkDoubleArray()
-            self.dom[mu].SetNumberOfValues(1)
-            self.dom[mu].SetName('domain')      
+            self.cf[mu] = numpy_support.numpy_to_vtk(
+                self.cf_at_time[mu])
+            self.cf[mu].SetName('contactForces')
 
             self._contact_field[mu].AddArray(self.cpa[mu])
             self._contact_field[mu].AddArray(self.cpb[mu])
-            self._contact_field[mu].AddArray(self.cn[mu])        
+            self._contact_field[mu].AddArray(self.cn[mu])
             self._contact_field[mu].AddArray(self.cf[mu])
-            self._contact_field[mu].AddArray(self.dom[mu])
 
-                        
-    def xmethod(self):
-        
-        if self._ioreader.cf_data is not None:
+            self._points[mu].SetData(self.cpa[mu])
+            self._output[mu].GetPointData().AddArray(self.cn[mu])
+            self._output[mu].GetPointData().AddArray(self.cf[mu])
+                #if dom_imu is not None:
+                #    self.dom_at_time[mu] = self._dom_data[
+                #        dom_imu, 1]
+                #    self.dom[mu] = numpy_support.numpy_to_vtk(
+                #        self.dom_at_time[mu])
+                #    self.dom[mu].SetName('domains')
+                #    self._contact_field[mu].AddArray(self.dom[mu])
 
-            data = self._ioreader.cf_data
-            mus, imus = numpy.unique(data[:, 1], return_inverse=True)
-
-            #print('xmethod', data[i, 2:5]))
-            for i, imu in enumerate(imus):
-                mu = mus[imu]
-                fdata = self._output[mu].GetFieldData()
-                        
-                numpy.copyto(fdata['contactPositionsA'], data[
-                    i, 2:5])
-                numpy.copyto(fdata['contactPositionsB'], data[
-                    i, 5:8])
-                numpy.copyto(fdata['contactNormals'], data[
-                    i, 8:11])
-                numpy.copyto(fdata['contactForces'], data[
-                    i, 11:14])
-
-
-        else:
-            pass
-
-        # self._output.Update()
 
 
 class InputObserver():
@@ -457,7 +475,7 @@ class InputObserver():
     def update(self):
 
         self.vview.io_reader.SetTime(self._time)
-        
+
         if self._times is None:
             self.vview.renderer_window.Render()
             return
@@ -472,9 +490,8 @@ class InputObserver():
 
         self.vview.set_dynamic_actors_visibility(self.vview.io_reader._time)
 
-        #pos_data = dsa.WrapDataObject(self.vview.io_reader.GetOutputDataObject(0).GetFieldData().GetArrayByName('pos_data'))
         pos_data = self.vview.io_reader.pos_data
-        
+
         self.vview.set_position(pos_data)
 
         self._slider_repres.SetValue(self.vview.io_reader._time)
@@ -749,16 +766,17 @@ class IOReader(VTKPythonAlgorithmBase):
                                         outputType='vtkPolyData')
         self._io = None
         self._with_contact_forces = with_contact_forces
+        self.cf_data = None
 
     def RequestInformation(self, request, inInfo, outInfo):
 
         info = outInfo.GetInformationObject(0)
 
-        
+
         info.Set(vtk.vtkStreamingDemandDrivenPipeline.TIME_STEPS(),
                  self._times,
                  len(self._times))
-        
+
         info.Set(vtk.vtkStreamingDemandDrivenPipeline.TIME_RANGE(),
                  [self._times[0], self._times[-1]], 2)
 
@@ -783,7 +801,7 @@ class IOReader(VTKPythonAlgorithmBase):
         self._index = id_t
         self.pos_data = self._idpos_data[self._id_t_m, :]
         self.velo_data = self._ivelo_data[self._id_t_m, :]
-        
+
         vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
         vtk_pos_data.SetName('pos_data')
 
@@ -794,24 +812,33 @@ class IOReader(VTKPythonAlgorithmBase):
         output.GetFieldData().AddArray(vtk_velo_data)
 
         if self._with_contact_forces:
-            id_t_cf = max(0, numpy.searchsorted(self._cf_times, t, side='right') - 1)
-            if id_t_cf < len(self._cf_indices)-1:
-                self._id_t_m_cf = range(self._cf_indices[id_t_cf],
-                                        self._cf_indices[id_t_cf+1])
+            current_cft=numpy.searchsorted(self._cf_times, t, side='right')
+            if (current_cft>0):
+                id_t_cf = max(0, current_cft - 1)
+                if id_t_cf < len(self._cf_indices)-1:
+                    self._id_t_m_cf = range(self._cf_indices[id_t_cf],
+                                            self._cf_indices[id_t_cf+1])
+                else:
+                    self._id_t_m_cf = [self._cf_indices[id_t_cf]]
+
+                self._cf_time = self._cf_times[id_t_cf]
+
+                self.cf_data = self._icf_data[self._id_t_m_cf, :]
+
+                vtk_cf_data = dsa.numpyTovtkDataArray(self.cf_data)
+                vtk_cf_data.SetName('cf_data')
+
+                output.GetFieldData().AddArray(vtk_cf_data)
             else:
-                self._id_t_m_cf = [self._cf_indices[id_t_cf]]
+                print('no cf')
+                self.cf_data = None
+                vtk_cf_data = dsa.numpyTovtkDataArray(numpy.array([]))
+                vtk_cf_data.SetName('cf_data')
+                output.GetFieldData().AddArray(vtk_cf_data)
 
-            self._cf_time = self._cf_times[id_t]
 
-            self.cf_data = self._icf_data[self._id_t_m_cf, :]
-
-            vtk_cf_data = dsa.numpyTovtkDataArray(self.cf_data)
-            vtk_cf_data.SetName('cf_data')
-
-            output.GetFieldData().AddArray(vtk_cf_data)
-        
         return 1
-        
+
     def SetIO(self, io):
         self._io = io
 
@@ -827,31 +854,32 @@ class IOReader(VTKPythonAlgorithmBase):
         self._ivelo_data = self._io.velocities_data()
 
         self._spos_data = self._ispos_data[:, :]
-        
+
         # all times as hdf5 slice
         self._raw_times = self._idpos_data[:, 0]
 
         if self._with_contact_forces:
             self._cf_raw_times = self._icf_data[:, 0]
-            
+
         # build times steps
         self._times, self._indices = numpy.unique(self._raw_times,
                                                   return_index=True)
 
         if self._with_contact_forces:
-            self._cf_times, self._cf_indices = numpy.unique(self._raw_times,
+            self._cf_times, self._cf_indices = numpy.unique(self._cf_raw_times,
                                                             return_index=True)
             self._mu_coefs = numpy.unique(self._icf_data[:, 1],
                                           return_index=False)
         # self._times.sort()
         # self._indices = ?
         # we assume times must be sorted
-        assert all(self._times[i] <= self._times[i+1]
-                   for i in range(len(self._times)-1))
+#        assert all(self._times[i] <= self._times[i+1]
+#                   for i in range(len(self._times)-1))
 
-        assert all(self._cf_times[i] <= self._cf_times[i+1]
-                   for i in range(len(self._cf_times)-1))
-        
+#        if self._with_contact_forces:
+#            assert all(self._cf_times[i] <= self._cf_times[i+1]
+#                       for i in range(len(self._cf_times)-1))
+
         self.Modified()
         return 1
 
@@ -914,7 +942,7 @@ class VView(object):
 
         self.io_reader = IOReader(with_contact_forces=not self.opts.cf_disable)
         self.io_reader.SetIO(io=self.io)
-        
+
     def reload(self):
 
         if not self.opts.cf_disable:
@@ -924,9 +952,9 @@ class VView(object):
             self.cf_prov._time = min(times[:])
             self.cf_prov.xmethod()
             for mu in self.cf_prov._ioreader._mu_coefs:
-                self.contact_posa[mu].SetInputData(self.cf_prov._vtk_output[mu])
+                self.contact_posa[mu].SetInputData(self.cf_prov._output[mu])
                 self.contact_posa[mu].Update()
-                self.contact_posb[mu].SetInputData(self.cf_prov._vtk_output[mu])
+                self.contact_posb[mu].SetInputData(self.cf_prov._output[mu])
                 self.contact_posb[mu].Update()
                 self.contact_pos_force[mu].Update()
                 self.contact_pos_norm[mu].Update()
@@ -934,7 +962,7 @@ class VView(object):
         self.min_time = self.io_reader._times[0]
         self.max_time = self.io_reader._times[-1]
         self.set_dynamic_actors_visibility(self.time0)
-        
+
     def init_contact_pos(self, mu):
 
         self.contact_posa[mu] = vtk.vtkDataObjectToDataSetFilter()
@@ -965,7 +993,7 @@ class VView(object):
         self.contact_pos_force[mu].SetVectorComponent(2, "contactForces", 2)
 
         self.contact_pos_norm[mu].SetInputConnection(
-            self.contact_posa[mu].GetOutputPort())
+            self.contact_pos_force[mu].GetOutputPort())
         self.contact_pos_norm[mu].SetInputFieldToDataObjectField()
         self.contact_pos_norm[mu].SetOutputAttributeDataToPointData()
         self.contact_pos_norm[mu].SetVectorComponent(0, "contactNormals", 0)
@@ -977,20 +1005,14 @@ class VView(object):
 
     def init_cf_sources(self, mu, transform):
 
-        self.contact_posa[mu].SetInputData(self.cf_prov._vtk_output[mu])
+        self.cf_collector.AddInputData(self.cf_prov._output[mu])
+        self.contact_posa[mu].SetInputData(self.cf_prov._output[mu])
         self.contact_posa[mu].Update()
-        self.contact_posb[mu].SetInputData(self.cf_prov._vtk_output[mu])
+        self.contact_posb[mu].SetInputData(self.cf_prov._output[mu])
         self.contact_posb[mu].Update()
 
         self.contact_pos_force[mu].Update()
         self.contact_pos_norm[mu].Update()
-
-        self.big_data_source.AddInputConnection(self.contact_posa[mu].GetOutputPort())
-        self.big_data_source.AddInputConnection(self.contact_posb[mu].GetOutputPort())
-        self.big_data_source.AddInputConnection(
-            self.contact_pos_force[mu].GetOutputPort())
-        self.big_data_source.AddInputConnection(
-            self.contact_pos_norm[mu].GetOutputPort())
 
         self.cone[mu] = vtk.vtkConeSource()
         self.cone[mu].SetResolution(40)
@@ -1407,6 +1429,7 @@ class VView(object):
                 self.unfrozen_mappers[shape_name] = next(self.mappers[shape_name])
 
     def init_contactor(self, contactor_instance_name, instance, instid):
+        print('init_contactor',contactor_instance_name, instance, instid)
         contactor = instance[contactor_instance_name]
         contact_shape_indx = None
         if 'shape_name' not in contactor.attrs:
@@ -1433,7 +1456,7 @@ class VView(object):
             except AttributeError:
                 pass
 
-        if not self.opts.global_filter:
+        if not (self.opts.global_filter or self.opts.export):
             actor = vtk.vtkActor()
             if instance.attrs.get('mass', 0) > 0:
                 # objects that may move
@@ -1454,7 +1477,8 @@ class VView(object):
 
             actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
 
-            self.renderer.AddActor(actor)
+            if not (self.opts.global_filter or self.opts.export):
+                self.renderer.AddActor(actor)
 
         transform = vtk.vtkTransform()
         transformer = vtk.vtkTransformFilter()
@@ -1480,12 +1504,10 @@ class VView(object):
                 actor.SetUserTransform(scale_transform)
         else:
             transformer.SetTransform(transform)
-            if not self.opts.global_filter:
+            if not (self.opts.global_filter or self.opts.export):
                 actor.SetUserTransform(transform)
 
         self.transformers[contact_shape_indx] = transformer
-
-        self.big_data_source.AddInputConnection(transformer.GetOutputPort())
 
         self.transforms[instid].append(transform)
 
@@ -1505,25 +1527,22 @@ class VView(object):
         self.data_connectors_v[instid]._connector.SetInputConnection(
             transformer.GetOutputPort())
         self.data_connectors_v[instid]._connector.Update()
-        self.big_data_source.AddInputConnection(
-            self.data_connectors_v[instid]._connector.GetOutputPort())
 
         self.data_connectors_t[instid] = DataConnector(instid,
                                                        data_name='translation',
                                                        data_size=3)
         self.data_connectors_t[instid]._connector.SetInputConnection(
-            transformer.GetOutputPort())
+            self.data_connectors_v[instid]._connector.GetOutputPort())
         self.data_connectors_t[instid]._connector.Update()
-        self.big_data_source.AddInputConnection(
-            self.data_connectors_t[instid]._connector.GetOutputPort())
 
         self.data_connectors_d[instid] = DataConnector(instid,
                                                        data_name='displacement',
                                                        data_size=3)
         self.data_connectors_d[instid]._connector.SetInputConnection(
-            transformer.GetOutputPort())
+            self.data_connectors_t[instid]._connector.GetOutputPort())
         self.data_connectors_d[instid]._connector.Update()
-        self.big_data_source.AddInputConnection(
+
+        self.objects_collector.AddInputConnection(
             self.data_connectors_d[instid]._connector.GetOutputPort())
 
     def init_instance(self, instance_name):
@@ -1542,6 +1561,7 @@ class VView(object):
             self.static_actors[instid] = list()
 
         for contactor_instance_name in instance:
+            print('contactor instance name:', instance_name, contactor_instance_name)
             self.init_contactor(contactor_instance_name, instance,  instid)
 
     def init_instances(self):
@@ -1998,16 +2018,11 @@ class VView(object):
 
     def export(self):
         from vtk.numpy_interface import dataset_adapter as dsa
-        
-        if self.opts.global_filter:
-            big_data_writer = vtk.vtkXMLPolyDataWriter()
-        else:
-            big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
+
+        big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
         add_compatiblity_methods(big_data_writer)
-        if self.opts.global_filter:
-            big_data_writer.SetInputConnection(self.big_data_geometry_filter.GetOutputPort())
-        else:
-            big_data_writer.SetInputConnection(self.big_data_source.GetOutputPort())
+
+        big_data_writer.SetInputConnection(self.big_data_collector.GetOutputPort())
 
         if self.opts.ascii_mode:
             big_data_writer.SetDataModeToAscii()
@@ -2018,7 +2033,7 @@ class VView(object):
 
         # independant of time
         spos_data = self.io_reader._spos_data
-        if numpy.shape(spos_data) > 0:
+        if spos_data.size > 0:
             self.set_position_v(spos_data[:, 1], spos_data[:, 2],
                                 spos_data[:, 3],
                                 spos_data[:, 4], spos_data[:, 5],
@@ -2026,8 +2041,8 @@ class VView(object):
                                 spos_data[:, 7], spos_data[:, 8])
 
         for time in times:
-            k=k+1
-            if (k%packet == 0):
+            k = k+1
+            if (k % packet == 0):
                 sys.stdout.write('.')
             self.io_reader.SetTime(time)
 
@@ -2037,10 +2052,10 @@ class VView(object):
             #self.cf_prov.xmethod()
 
             #id_t = numpy.where(self.pos_data[:, 0] == times[index])
-            pos_data = dsa.WrapDataObject(self.io_reader.GetOutputDataObject(0).GetFieldData().GetArrayByName('pos_data'))
+            pos_data = self.io_reader.pos_data
 
-            velo_data = dsa.WrapDataObject(self.io_reader.GetOutputDataObject(0).GetFieldData().GetArrayByName('velo_data'))
-            
+            velo_data = self.io_reader.velo_data
+
             self.set_position_v(
                 pos_data[:, 1], pos_data[:, 2], pos_data[:, 3],
                 pos_data[:, 4], pos_data[:, 5], pos_data[:, 6],
@@ -2062,32 +2077,55 @@ class VView(object):
                 pos_data[:, 4],
             )
 
+            if self.cf_prov is not None:
+                self.cf_prov.xmethod()
+                self.cf_collector.Update()
+                for mu in self.cf_prov._ioreader._mu_coefs:
+                    self.contact_posa[mu].Update()
+                    self.contact_posb[mu].Update()
+                    self.contact_pos_force[mu].Update()
+                    self.contact_pos_norm[mu].Update()
+
             big_data_writer.SetFileName('{0}-{1}.{2}'.format(
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
-                index, big_data_writer.GetDefaultFileExtension()))
+                k, big_data_writer.GetDefaultFileExtension()))
             # time step has been lost (vtk-7)
             if hasattr(big_data_writer, 'SetTimeStep'):
                 big_data_writer.SetTimeStep(times[index])
             if self.opts.global_filter:
                 self.big_data_geometry_filter.Update()
             else:
-                self.big_data_source.Update()
+                self.big_data_collector.Update()
 
             big_data_writer.Write()
 
     def initialize_vtk(self):
 
-        self.big_data_source = vtk.vtkMultiBlockDataGroupFilter()
-        add_compatiblity_methods(self.big_data_source)
+        self.objects_collector = vtk.vtkMultiBlockDataGroupFilter()
+        add_compatiblity_methods(self.objects_collector)
+        self.cf_collector = vtk.vtkMultiBlockDataGroupFilter()
+        add_compatiblity_methods(self.cf_collector)
+
+        self.big_data_collector = vtk.vtkMultiBlockDataGroupFilter()
+        add_compatiblity_methods(self.big_data_collector)
+
+        self.big_data_collector.AddInputConnection(self.cf_collector.GetOutputPort())
 
         if self.opts.global_filter:
+
             self.big_data_geometry_filter = vtk.vtkCompositeDataGeometryFilter()
             add_compatiblity_methods(self.big_data_geometry_filter)
-            self.big_data_geometry_filter.SetInputConnection(self.big_data_source.GetOutputPort())
+            self.big_data_geometry_filter.SetInputConnection(self.objects_collector.GetOutputPort())
 
+            self.big_data_collector.AddInputConnection(self.big_data_geometry_filter.GetOutputPort())
+        else:
+            self.big_data_collector.AddInputConnection(self.objects_collector.GetOutputPort())
+
+
+        if self.opts.global_filter and not self.opts.export:
             self.big_data_mapper = vtk.vtkCompositePolyDataMapper()
             add_compatiblity_methods(self.big_data_mapper)
-            self.big_data_mapper.SetInputConnection(self.big_data_geometry_filter.GetOutputPort())
+            self.big_data_mapper.SetInputConnection(self.big_data_collector.GetOutputPort())
 
             if self.opts.imr:
                 self.big_data_mapper.ImmediateModeRenderingOff()
@@ -2132,27 +2170,27 @@ class VView(object):
             for mu in self.cf_prov._ioreader._mu_coefs:
                 self.init_cf_sources(mu, transform)
 
+        if not self.opts.export:
+            if self.cf_prov is not None and not self.opts.global_filter:
+                for mu in self.cf_prov._ioreader._mu_coefs:
+                    self.renderer.AddActor(self.gactor[mu])
+                    self.renderer.AddActor(self.cactor[mu])
 
-        if self.cf_prov is not None:
-            for mu in self.cf_prov._ioreader._mu_coefs:
-                self.renderer.AddActor(self.gactor[mu])
-                self.renderer.AddActor(self.cactor[mu])
+                    self.renderer.AddActor(self.clactor[mu])
+                    self.renderer.AddActor(self.sactora[mu])
+                    self.renderer.AddActor(self.sactorb[mu])
 
-                self.renderer.AddActor(self.clactor[mu])
-                self.renderer.AddActor(self.sactora[mu])
-                self.renderer.AddActor(self.sactorb[mu])
+            if self.cf_prov is not None:
+                self.cf_prov.xmethod()
+                for mu in self.cf_prov._ioreader._mu_coefs:
+                    self.contact_posa[mu].Update()
+                    self.contact_posb[mu].Update()
+                    self.contact_pos_force[mu].Update()
+                    self.contact_pos_norm[mu].Update()
+            if self.opts.global_filter:
+                self.renderer.AddActor(self.big_actor)
 
-        if self.cf_prov is not None:
-            self.cf_prov.xmethod()
-            for mu in self.cf_prov._ioreader._mu_coefs:
-                self.contact_posa[mu].Update()
-                self.contact_posb[mu].Update()
-                self.contact_pos_force[mu].Update()
-                self.contact_pos_norm[mu].Update()
-        if self.opts.global_filter:
-            self.renderer.AddActor(self.big_actor)
-
-        self.renderer.ResetCamera()
+            self.renderer.ResetCamera()
 
     def initialize_gui(self):
 
