@@ -136,9 +136,6 @@ protected:
 
   // -- MEMBERS --
 
-  /** Dimension of _twist, _ndof=6 */
-  unsigned int _ndof;
-
   /** _twist contains the twist of the Newton Euler dynamical system.
    *  _twist[0:2] : \f$v_G \in \RR^3 \f$ velocity of the center of mass in
    * the inertial frame of reference (world frame).
@@ -426,7 +423,7 @@ public:
   /** get JacobianqForces
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SimpleMatrix jacobianqForces() const
+  inline SP::SiconosMatrix jacobianqForces() const
   {
     return _jacobianWrenchq;
   }
@@ -434,7 +431,7 @@ public:
   /** get JacobianvForces
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SimpleMatrix jacobianvForces() const
+  inline SP::SiconosMatrix jacobianvForces() const
   {
     return _jacobianWrenchTwist;
   }

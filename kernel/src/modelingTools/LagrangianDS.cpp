@@ -55,7 +55,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0):
 }
 
 // From initial state and constant mass matrix, \f$ M\ddot q = p \f$
-LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SimpleMatrix newMass):
+LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix newMass):
   SecondOrderDS(2 * q0->size(), v0->size()),
   _hasConstantFExt(true)
 

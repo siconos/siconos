@@ -25,7 +25,7 @@
 
 // --- Constructor from a initial conditions and matrix-operators
 LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0,
-    SP::SimpleMatrix newMass,  SP::SimpleMatrix newK, SP::SimpleMatrix newC):
+    SP::SiconosMatrix newMass,  SP::SimpleMatrix newK, SP::SimpleMatrix newC):
   LagrangianDS(newQ0, newVelocity0, newMass)
 {
   assert((newK->size(0) == _ndof && newK->size(1) == _ndof) &&

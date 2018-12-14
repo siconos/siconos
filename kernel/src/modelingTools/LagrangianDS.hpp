@@ -139,9 +139,6 @@ protected:
 
   // -- MEMBERS --
 
-  /** number of degrees of freedom of the system */
-  unsigned int _ndof;
-
   /** state of the system. See details on top of page. */
   VectorOfVectors _q;
 
@@ -191,10 +188,10 @@ protected:
   SP::SiconosVector _forces;
 
   /** jacobian_q forces*/
-  SP::SimpleMatrix _jacobianqForces;
+  SP::SiconosMatrix _jacobianqForces;
 
   /** jacobian_{qDot} forces*/
-  SP::SimpleMatrix _jacobianqDotForces;
+  SP::SiconosMatrix _jacobianqDotForces;
 
   /** memory of previous forces of the system */
   SiconosMemory _forcesMemory;
@@ -310,7 +307,7 @@ public:
    *  \param mass SiconosMatrix : mass matrix
    */
   LagrangianDS(SP::SiconosVector position,
-               SP::SiconosVector velocity, SP::SimpleMatrix mass);
+               SP::SiconosVector velocity, SP::SiconosMatrix mass);
 
   /** constructor from initial state and mass (plugin) \f$Mdv = p \f$
    *  \param position SiconosVector : initial coordinates of this DynamicalSystem
@@ -615,7 +612,7 @@ public:
   /** get \f$ \nabla_qF(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
-  virtual inline SP::SimpleMatrix jacobianqForces() const
+  virtual inline SP::SiconosMatrix jacobianqForces() const
   {
     return _jacobianqForces;
   }
@@ -623,7 +620,7 @@ public:
   /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
-  virtual inline SP::SimpleMatrix jacobianvForces() const
+  virtual inline SP::SiconosMatrix jacobianvForces() const
   {
     return _jacobianqDotForces;
   }
@@ -631,7 +628,7 @@ public:
   /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
-  virtual inline SP::SimpleMatrix jacobianqDotForces() const
+  virtual inline SP::SiconosMatrix jacobianqDotForces() const
   {
     return _jacobianqDotForces;
   }

@@ -121,7 +121,7 @@ protected:
   unsigned int _ndof;
 
   /** mass of the system */
-  SP::SimpleMatrix _mass;
+  SP::SiconosMatrix _mass;
 
   /** true if the  mass matrix is constant */
   bool _hasConstantMass;
@@ -177,7 +177,7 @@ public:
   /** get mass matrix (pointer link)
    *  \return SP::SiconosMatrix
    */
-  inline SP::SimpleMatrix mass() const
+  inline SP::SiconosMatrix mass() const
   {
     return _mass;
   }
@@ -360,12 +360,12 @@ public:
   /** get \f$ \nabla_qF(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
-  virtual  SP::SimpleMatrix jacobianqForces() const =0;
+  virtual  SP::SiconosMatrix jacobianqForces() const =0;
 
   /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
-  virtual  SP::SimpleMatrix jacobianvForces() const =0;
+  virtual  SP::SiconosMatrix jacobianvForces() const =0;
 
   ///@}
 
