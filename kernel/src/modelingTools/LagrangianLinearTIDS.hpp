@@ -101,10 +101,10 @@ protected:
   ACCEPT_SERIALIZATION(LagrangianLinearTIDS);
 
   /** stiffness matrix */
-  SP::SiconosMatrix _K;
+  SP::SimpleMatrix _K;
 
   /** damping matrix */
-  SP::SiconosMatrix _C;
+  SP::SimpleMatrix _C;
 
   /** default constructor */
   LagrangianLinearTIDS():LagrangianDS() {};
@@ -121,14 +121,15 @@ public:
    *  \param K stiffness matrix
    *  \param C damping matrix
    */
-  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M, SP::SiconosMatrix K, SP::SiconosMatrix C);
+  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0,
+                       SP::SimpleMatrix M, SP::SimpleMatrix K, SP::SimpleMatrix C);
 
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v = F_{ext}(t,z) + p\f$.
    *  \param q0 initial coordinates
    *  \param v0 initial velocity
    *  \param M mass matrix
    */
-  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix M):
+  LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SimpleMatrix M):
     LagrangianDS(q0, v0, M){};
 
   /** destructor */
@@ -175,12 +176,12 @@ public:
   /** set (copy) the value of the stiffness matrix
    *  \param K new stiffness matrix
    */
-  void setK(const SiconosMatrix& K);
+  void setK(const SimpleMatrix& K);
 
   /** set stiffness matrix (pointer link)
    *  \param newPtr pointer to the new Stiffness matrix
    */
-  void setKPtr(SP::SiconosMatrix newPtr);
+  void setKPtr(SP::SimpleMatrix newPtr);
   
   /** get a copy of the damping matrix
    *  \return SimpleMatrix
@@ -190,7 +191,7 @@ public:
   /** get damping matrix (pointer link)
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix C() const
+  inline SP::SimpleMatrix C() const
   {
     return _C;
   }
@@ -198,17 +199,17 @@ public:
   /** set (copy) the value of the damping matrix
    *  \param C new damping matrix
    */
-  void setC(const SiconosMatrix& C);
+  void setC(const SimpleMatrix& C);
 
   /** set damping matrix (pointer link)
    * \param newPtr pointer to the new damping matrix
    */
-  void setCPtr(SP::SiconosMatrix newPtr) ;
+  void setCPtr(SP::SimpleMatrix newPtr) ;
 
   /** get \f$ \nabla_qF(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianqForces() const
+  inline SP::SimpleMatrix jacobianqForces() const
   {
     return _K;
   }
@@ -216,7 +217,7 @@ public:
   /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianqDotForces() const
+  inline SP::SimpleMatrix jacobianqDotForces() const
   {
     return _C;
   }

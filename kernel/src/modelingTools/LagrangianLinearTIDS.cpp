@@ -25,7 +25,7 @@
 
 // --- Constructor from a initial conditions and matrix-operators
 LagrangianLinearTIDS::LagrangianLinearTIDS(SP::SiconosVector newQ0, SP::SiconosVector newVelocity0,
-    SP::SiconosMatrix newMass,  SP::SiconosMatrix newK, SP::SiconosMatrix newC):
+    SP::SimpleMatrix newMass,  SP::SimpleMatrix newK, SP::SimpleMatrix newC):
   LagrangianDS(newQ0, newVelocity0, newMass)
 {
   assert((newK->size(0) == _ndof && newK->size(1) == _ndof) &&
@@ -76,7 +76,7 @@ void LagrangianLinearTIDS::initRhs(double time)
 
 }
 
-void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
+void LagrangianLinearTIDS::setK(const SimpleMatrix& newValue)
 {
   if (newValue.size(0) != _ndof || newValue.size(1) != _ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setK: inconsistent input matrix size ");
@@ -87,14 +87,14 @@ void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
     *_K = newValue;
 }
 
-void LagrangianLinearTIDS::setKPtr(SP::SiconosMatrix newPtr)
+void LagrangianLinearTIDS::setKPtr(SP::SimpleMatrix newPtr)
 {
   if (newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
   _K = newPtr;
 }
 
-void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
+void LagrangianLinearTIDS::setC(const SimpleMatrix& newValue)
 {
   if (newValue.size(0) != _ndof || newValue.size(1) != _ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
@@ -105,7 +105,7 @@ void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
     *_C = newValue;
 }
 
-void LagrangianLinearTIDS::setCPtr(SP::SiconosMatrix newPtr)
+void LagrangianLinearTIDS::setCPtr(SP::SimpleMatrix newPtr)
 {
   if (newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");

@@ -47,17 +47,17 @@ void LagrangianDS::_init(SP::SiconosVector position, SP::SiconosVector velocity)
 
 // Build from initial state only
 LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0):
-  DynamicalSystem(2 * q0->size()), _ndof(v0->size()),
-  _hasConstantMass(true), _hasConstantFExt(true)
+  SecondOrderDS(2 * q0->size(), v0->size()),
+  _hasConstantFExt(true)
 {
   // Initial conditions
   _init(q0, v0);
 }
 
 // From initial state and constant mass matrix, \f$ M\ddot q = p \f$
-LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosMatrix newMass):
-  DynamicalSystem(2 * q0->size()), _ndof(v0->size()),
-  _hasConstantMass(true), _hasConstantFExt(true)
+LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SimpleMatrix newMass):
+  SecondOrderDS(2 * q0->size(), v0->size()),
+  _hasConstantFExt(true)
 
 {
   _init(q0, v0);
@@ -68,10 +68,11 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::Sicon
 // From a set of data - Mass loaded from a plugin
 // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
 LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, const std::string& massName):
-  DynamicalSystem(), _ndof(q0->size()),
-  _hasConstantMass(false), _hasConstantFExt(true)
+  SecondOrderDS(2 * q0->size(), v0->size()),
+  _hasConstantFExt(true)
 {
   _init(q0, v0);
+  _hasConstantMass = false;
   // Mass
   _mass.reset(new SimpleMatrix(_ndof, _ndof));
   setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));
@@ -308,25 +309,6 @@ void LagrangianDS::setVelocity0Ptr(SP::SiconosVector newPtr)
   if(newPtr->size() != _ndof)
     RuntimeException::selfThrow("LagrangianDS - setVelocity0Ptr: inconsistent input vector size ");
   _velocity0 = newPtr;
-}
-
-void LagrangianDS::setP(const SiconosVector& newValue, unsigned int level)
-{
-  if(newValue.size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setP: inconsistent input vector size ");
-
-  if(! _p[level])
-    _p[level].reset(new SiconosVector(newValue));
-  else
-    *(_p[level]) = newValue;
-}
-
-void LagrangianDS::setPPtr(SP::SiconosVector newPtr, unsigned int level)
-{
-
-  if(newPtr->size() != _ndof)
-    RuntimeException::selfThrow("LagrangianDS - setPPtr: inconsistent input vector size ");
-  _p[level] = newPtr;
 }
 
 void LagrangianDS::computeMass()
@@ -568,7 +550,7 @@ void LagrangianDS::computeJacobianqForces(double time)
   }
   //else nothing.
 }
-void LagrangianDS::computeJacobianqDotForces(double time)
+void LagrangianDS::computeJacobianvForces(double time)
 {
   if(_jacobianqDotForces)
   {
@@ -788,12 +770,3 @@ double LagrangianDS::computeKineticEnergy()
   return K;
 }
 
-void LagrangianDS::setBoundaryConditions(SP::BoundaryCondition newbd)
-{
-  if(!_boundaryConditions)
-  {
-    std::cout << "Warning : LagrangianDS::setBoundaryConditions. old boundary conditions were pre-existing" <<std::endl;
-  }
-  _boundaryConditions = newbd;
-  _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
-};

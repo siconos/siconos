@@ -15,6 +15,7 @@
   PY_REGISTER(DynamicalSystem, Kernel);                                         \
   PY_REGISTER(NonSmoothDynamicalSystem, Kernel);                                \
   PY_REGISTER(Topology, Kernel);                                                \
+  PY_REGISTER(SecondOrderDS, Kernel);                                   \
   PY_REGISTER(LagrangianDS, Kernel);                                            \
   PY_REGISTER(LagrangianLinearTIDS, Kernel);                                    \
   PY_REGISTER(LagrangianLinearDiagonalDS, Kernel);                              \

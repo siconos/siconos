@@ -392,7 +392,7 @@ Q0 : contains the center of mass coordinate, and the quaternion initial. (dim(Q0
 Twist0 : contains the initial velocity of center of mass and the omega initial. (dim(VTwist0)=6)
 */
 NewtonEulerDS::NewtonEulerDS():
-  DynamicalSystem(13),
+  SecondOrderDS(13,6),
   _hasConstantFExt(false),
   _hasConstantMExt(false),
   _isMextExpressedInInertialFrame(false),
@@ -412,7 +412,7 @@ NewtonEulerDS::NewtonEulerDS():
 
 NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
                              double  mass, SP::SiconosMatrix inertialMatrix):
-  DynamicalSystem(13),
+  SecondOrderDS(13,6),
   _hasConstantFExt(false),
   _hasConstantMExt(false),
   _isMextExpressedInInertialFrame(false),
@@ -450,6 +450,27 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
   DEBUG_END("NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,double  mass, SP::SiconosMatrix inertialMatrix)\n");
 }
 
+
+void NewtonEulerDS::init_forces()
+{
+  // Allocate memory for forces and its jacobians.
+  // Needed only for integrators with first-order formulation.
+
+  if(!_wrench)
+      _wrench.reset(new SiconosVector(_ndof));
+  if(!_mGyr)
+    _mGyr.reset(new SiconosVector(3,0.0));
+
+  /** The follwing jacobian are always allocated since we have always
+   * Gyroscopical forces that has non linear forces
+   * This should be remove if the integration is explicit or _nullifyMGyr(false) is set to true ?
+   */
+  _jacobianMGyrtwist.reset(new SimpleMatrix(3, _ndof));
+  _jacobianWrenchTwist.reset(new SimpleMatrix(_ndof, _ndof));
+
+}
+
+
 void NewtonEulerDS::_init()
 {
   // --- NEWTONEULER INHERITED CLASS MEMBERS ---
@@ -472,8 +493,8 @@ void NewtonEulerDS::_init()
   _p[1].reset(new SiconosVector(_ndof)); // Needed in NewtonEulerR
 
 
-  _massMatrix.reset(new SimpleMatrix(_ndof, _ndof));
-  _massMatrix->zero();
+  _mass.reset(new SimpleMatrix(_ndof, _ndof));
+  _mass->zero();
   _T.reset(new SimpleMatrix(_qDim, _ndof));
 
   _scalarMass = 1.;
@@ -481,17 +502,7 @@ void NewtonEulerDS::_init()
   _I->eye();
   updateMassMatrix();
 
-  _wrench.reset(new SiconosVector(_ndof));
-  _mGyr.reset(new SiconosVector(3,0.0));
-
-  /** The follwing jacobian are always allocated since we have always
-   * Gyroscopical forces that has non linear forces
-   * This should be remove if the integration is explicit or _nullifyMGyr(false) is set to true ?
-   */
-
-  _jacobianMGyrtwist.reset(new SimpleMatrix(3, _ndof));
-  _jacobianWrenchTwist.reset(new SimpleMatrix(_ndof, _ndof));
-
+  init_forces();
 
   //We initialize _z with a null vector of size 1, since z is required in plug-in functions call.
   _z.reset(new SiconosVector(1));
@@ -500,13 +511,13 @@ void NewtonEulerDS::_init()
 
 void NewtonEulerDS::updateMassMatrix()
 {
-  // _massMatrix->zero();
-  // _massMatrix->setValue(0, 0, _scalarMass);
-  // _massMatrix->setValue(1, 1, _scalarMass);
-  // _massMatrix->setValue(2, 2, _scalarMass);
+  // _mass->zero();
+  // _mass->setValue(0, 0, _scalarMass);
+  // _mass->setValue(1, 1, _scalarMass);
+  // _mass->setValue(2, 2, _scalarMass);
 
-  _massMatrix->eye();
-  * _massMatrix *=  _scalarMass;
+  _mass->eye();
+  * _mass *=  _scalarMass;
 
   Index dimIndex(2);
   dimIndex[0] = 3;
@@ -516,7 +527,7 @@ void NewtonEulerDS::updateMassMatrix()
   startIndex[1] = 0;
   startIndex[2] = 3;
   startIndex[3] = 3;
-  setBlock(_I, _massMatrix, dimIndex, startIndex);
+  setBlock(_I, _mass, dimIndex, startIndex);
 
 }
 
@@ -650,6 +661,78 @@ void NewtonEulerDS::initRhs(double time)
   DEBUG_END("NewtonEulerDS::initRhs(double time)\n");
 }
 
+void NewtonEulerDS::setQ(const SiconosVector& newValue)
+{
+  if(newValue.size() != _qDim)
+    RuntimeException::selfThrow("NewtonEulerDS - setQ: inconsistent input vector size ");
+
+  if(! _q)
+    _q.reset(new SiconosVector(newValue));
+  else
+    *_q = newValue;
+}
+
+void NewtonEulerDS::setQPtr(SP::SiconosVector newPtr)
+{
+  if(newPtr->size() != _qDim)
+    RuntimeException::selfThrow("NewtonEulerDS - setQPtr: inconsistent input vector size ");
+  _q = newPtr;
+}
+void NewtonEulerDS::setQ0(const SiconosVector& newValue)
+{
+  if(newValue.size() != _qDim)
+    RuntimeException::selfThrow("NewtonEulerDS - setQ0: inconsistent input vector size ");
+
+  if(! _q0)
+    _q0.reset(new SiconosVector(newValue));
+  else
+    *_q0 = newValue;
+}
+
+void NewtonEulerDS::setQ0Ptr(SP::SiconosVector newPtr)
+{
+  if(newPtr->size() != _qDim)
+    RuntimeException::selfThrow("NewtonEulerDS - setQ0Ptr: inconsistent input vector size ");
+  _q0 = newPtr;
+}
+void NewtonEulerDS::setVelocity(const SiconosVector& newValue)
+{
+  if(newValue.size() != _ndof)
+    RuntimeException::selfThrow("NewtonEulerDS - setVelocity: inconsistent input vector size ");
+
+  if(! _twist)
+    _twist0.reset(new SiconosVector(newValue));
+  else
+    *_twist = newValue;
+}
+
+void NewtonEulerDS::setVelocityPtr(SP::SiconosVector newPtr)
+{
+  if(newPtr->size() != _ndof)
+    RuntimeException::selfThrow("NewtonEulerDS - setVelocityPtr: inconsistent input vector size ");
+  _twist = newPtr;
+}
+
+void NewtonEulerDS::setVelocity0(const SiconosVector& newValue)
+{
+  if(newValue.size() != _ndof)
+    RuntimeException::selfThrow("NewtonEulerDS - setVelocity0: inconsistent input vector size ");
+
+  if(! _twist0)
+    _twist0.reset(new SiconosVector(newValue));
+  else
+    *_twist0 = newValue;
+}
+
+void NewtonEulerDS::setVelocity0Ptr(SP::SiconosVector newPtr)
+{
+  if(newPtr->size() != _ndof)
+    RuntimeException::selfThrow("NewtonEulerDS - setVelocity0Ptr: inconsistent input vector size ");
+  _twist0 = newPtr;
+}
+
+
+
 void NewtonEulerDS::resetToInitialState()
 {
   // set q and q[1] to q0 and Twist0
@@ -671,19 +754,19 @@ void NewtonEulerDS::resetToInitialState()
 
 void NewtonEulerDS::init_inverse_mass()
 {
-  if(_massMatrix && !_inverseMass)
+  if(_mass && !_inverseMass)
     {
       updateMassMatrix();
-      _inverseMass.reset(new SimpleMatrix(*_massMatrix));
+      _inverseMass.reset(new SimpleMatrix(*_mass));
     }
 }
 
 void NewtonEulerDS::update_inverse_mass()
 {
-  if(_massMatrix && _inverseMass)
+  if(_mass && _inverseMass)
     {
       updateMassMatrix();
-      *_inverseMass = *_massMatrix;
+      *_inverseMass = *_mass;
     }
 }
 
@@ -1490,28 +1573,18 @@ double NewtonEulerDS::computeKineticEnergy()
 {
   DEBUG_BEGIN("NewtonEulerDS::computeKineticEnergy()\n");
   assert(_twist);
-  assert(_massMatrix);
+  assert(_mass);
   DEBUG_EXPR(_twist->display());
-  DEBUG_EXPR(_massMatrix->display());
+  DEBUG_EXPR(_mass->display());
 
   SiconosVector tmp(6);
-  prod(*_massMatrix, *_twist, tmp, true);
+  prod(*_mass, *_twist, tmp, true);
   double K =0.5*inner_prod(tmp,*_twist);
 
   DEBUG_PRINTF("Kinetic Energy = %e\n", K);
   DEBUG_END("NewtonEulerDS::computeKineticEnergy()\n");
   return K;
 }
-void NewtonEulerDS::setBoundaryConditions(SP::BoundaryCondition newbd)
-{
-  if(!_boundaryConditions)
-  {
-    std::cout << "Warning : NewtonEulerDS::setBoundaryConditions. old boundary conditions were pre-existing" <<std::endl;
-  }
-  _boundaryConditions = newbd;
-  _reactionToBoundaryConditions.reset(new SiconosVector(_boundaryConditions->velocityIndices()->size()));
-
-};
 
 SP::SiconosVector NewtonEulerDS::linearVelocity(bool absoluteRef) const
 {
