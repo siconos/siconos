@@ -228,17 +228,17 @@ public:
   virtual void computeJacobianRhsx(double time) =0;
 
   /** reset non-smooth part of the rhs (i.e. p), for all 'levels' */
-  void resetAllNonSmoothParts() =0;
+  virtual void resetAllNonSmoothParts() =0;
 
   /** set nonsmooth part of the rhs (i.e. p) to zero for a given level
    * \param level
    */
-  void resetNonSmoothPart(unsigned int level) =0;
+  virtual void resetNonSmoothPart(unsigned int level) =0;
 
   /** set the value of the right-hand side, \f$ \dot x \f$
    *  \param newValue SiconosVector
    */
-  void setRhs(const SiconosVector& newValue)
+  virtual void setRhs(const SiconosVector& newValue)
   {
     RuntimeException::selfThrow("SecondOrderDS - setRhs call is forbidden for 2nd order systems.");
   }
@@ -246,7 +246,7 @@ public:
   /** set right-hand side, \f$ \dot x \f$ (pointer link)
    *  \param newPtr SP::SiconosVector
    */
-  void setRhsPtr(SP::SiconosVector newPtr)
+  virtual void setRhsPtr(SP::SiconosVector newPtr)
   {
     RuntimeException::selfThrow("SecondOrderDS - setRhsPtr call is forbidden for 2nd order systems.");
   }
