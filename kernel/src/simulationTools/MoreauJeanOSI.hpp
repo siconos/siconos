@@ -340,10 +340,7 @@ public:
    */
   void _initializeIterationMatrixWBoundaryConditions(DynamicalSystem& ds, const DynamicalSystemsGraph::VDescriptor& dsv);
 
-  void applyBoundaryConditions(LagrangianDS& d,  SiconosVector& residu,
-                               DynamicalSystemsGraph::VIterator dsi, double t,
-                               const SiconosVector & v);
-  void applyBoundaryConditions(NewtonEulerDS& d,  SiconosVector& residu,
+  void applyBoundaryConditions(SecondOrderDS& d,  SiconosVector& residu,
                                DynamicalSystemsGraph::VIterator dsi, double t,
                                const SiconosVector & v);
 
