@@ -26,7 +26,7 @@
 
 
 /** Lagrangian Linear Systems with time invariant coefficients - \f$M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
- 
+
     The class LagrangianLinearTIDS  allows to define  and compute a generic ndof-dimensional
     Lagrangian Linear Time Invariant Dynamical System of the form :
 
@@ -44,28 +44,28 @@
     -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix (access : K() method).
     -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix (access : C() method).
     -  \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
- 
+
    The equation of motion is also shortly denoted as:
     \f$
     M(q,z) \dot v = F(v, q, t, z) + p
     \f$
-    
+
     where
     - \f$F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
     acting on the system, that is
     \f$ F(v, q, t, z) =  F_{ext}(t, z) -  Cv - Kq \f$.
 
     This vector is saved and may be accessed using forces() method.
-    
+
     If required (e.g. for Event-Driven like simulation), reformulation as a first-order system is also available, and writes:
-    
+
     - \f$ n= 2 ndof \f$
     - \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
     - rhs given by:
 
     \rst
     .. math::
-    
+
         rhs(x,t,z) = \left[\begin{array}{c}
         \\dot q  \\
         \ddot q = M^{-1}\left[F_{ext}(t, z) - C \\dot q - K q  + p \right]\\
@@ -76,21 +76,21 @@
 
     \rst
     .. math::
-        
+
         \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
         0   & I \\
         -M^{-1}K & -M^{-1}C \\
         \end{array}\right]
-   
+
    \endrst
-   
+
    with the input due to the non smooth law:
   \rst
 
    .. math::
-        
+
       r = \left[\begin{array}{c}0 \\ p \end{array}\right]
-   
+
   \endrst
 */
 class LagrangianLinearTIDS : public LagrangianDS
@@ -101,10 +101,10 @@ protected:
   ACCEPT_SERIALIZATION(LagrangianLinearTIDS);
 
   /** stiffness matrix */
-  SP::SimpleMatrix _K;
+  SP::SiconosMatrix _K;
 
   /** damping matrix */
-  SP::SimpleMatrix _C;
+  SP::SiconosMatrix _C;
 
   /** default constructor */
   LagrangianLinearTIDS():LagrangianDS() {};
@@ -122,7 +122,7 @@ public:
    *  \param C damping matrix
    */
   LagrangianLinearTIDS(SP::SiconosVector q0, SP::SiconosVector v0,
-                       SP::SiconosMatrix M, SP::SimpleMatrix K, SP::SimpleMatrix C);
+                       SP::SiconosMatrix M, SP::SiconosMatrix K, SP::SiconosMatrix C);
 
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v = F_{ext}(t,z) + p\f$.
    *  \param q0 initial coordinates
@@ -136,7 +136,7 @@ public:
   ~LagrangianLinearTIDS(){};
 
   ///@}
-  
+
   /*! @name Right-hand side computation */
   //@{
 
@@ -176,13 +176,13 @@ public:
   /** set (copy) the value of the stiffness matrix
    *  \param K new stiffness matrix
    */
-  void setK(const SimpleMatrix& K);
+  void setK(const SiconosMatrix& K);
 
   /** set stiffness matrix (pointer link)
    *  \param newPtr pointer to the new Stiffness matrix
    */
-  void setKPtr(SP::SimpleMatrix newPtr);
-  
+  void setKPtr(SP::SiconosMatrix newPtr);
+
   /** get a copy of the damping matrix
    *  \return SimpleMatrix
    */
@@ -191,7 +191,7 @@ public:
   /** get damping matrix (pointer link)
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SimpleMatrix C() const
+  inline SP::SiconosMatrix C() const
   {
     return _C;
   }
@@ -199,12 +199,12 @@ public:
   /** set (copy) the value of the damping matrix
    *  \param C new damping matrix
    */
-  void setC(const SimpleMatrix& C);
+  void setC(const SiconosMatrix& C);
 
   /** set damping matrix (pointer link)
    * \param newPtr pointer to the new damping matrix
    */
-  void setCPtr(SP::SimpleMatrix newPtr) ;
+  void setCPtr(SP::SiconosMatrix newPtr) ;
 
   /** get \f$ \nabla_qF(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
@@ -226,7 +226,7 @@ public:
 
   /*! @name Miscellaneous public methods */
   //@{
-  
+
   /**\return true if the Dynamical system is linear.
    */
   virtual bool isLinear()
@@ -239,7 +239,7 @@ public:
   void display() const;
 
   ///@}
-  
+
   ACCEPT_STD_VISITORS();
 
 };
