@@ -10,6 +10,7 @@ import os
 import json
 import getopt
 import math
+from functools import reduce
 
 # Exports from this module
 __all__ = ['VView', 'VViewOptions', 'VExportOptions', 'VViewConfig']
@@ -362,20 +363,34 @@ class CFprov():
         self.cn_at_time = dict()
         self.cn = dict()
 
+        self.ids_at_time = dict()
+        self.ids = dict()
+
         self.dom_at_time = [dict(), None][ioreader._idom_data is None]
         self.dom = dict()
+
+        self._all_objs_pos = dict()
+        self._all_objs_pos_vtk = dict()
 
         self._points = dict()
         self._contact_field = dict()
         self._output = dict()
+        self._objs_points = dict()
+        self._objs_output = dict()
+
 
         for mu in self._ioreader._mu_coefs:
+            # the contact points
             self._points[mu] = vtk.vtkPoints()
             self._contact_field[mu] = vtk.vtkPointData()
             self._output[mu] = vtk.vtkPolyData()
             self._output[mu].SetPoints(self._points[mu])
             self._output[mu].SetFieldData(self._contact_field[mu])
 
+            # the objects translations
+            self._objs_points[mu] = vtk.vtkPoints()
+            self._objs_output[mu] = vtk.vtkPolyData()
+            self._objs_output[mu].SetPoints(self._objs_points[mu])
 
     def xmethod(self):
         nan = numpy.nan
@@ -385,6 +400,7 @@ class CFprov():
             self.cpb_at_time[mu] = [[nan, nan, nan]]
             self.cn_at_time[mu] =  [[nan, nan, nan]]
             self.cf_at_time[mu] =  [[nan, nan, nan]]
+            self.ids_at_time[mu] = None
 
         if self._ioreader.cf_data is not None:
             self.contact = True
@@ -410,6 +426,8 @@ class CFprov():
                         imu, 8:11]
                     self.cf_at_time[mu] = data[
                         imu, 11:14]
+                    self.ids_at_time[mu] = data[
+                        imu, 23:26].astype(int)
 
         for mu in self._ioreader._mu_coefs:
             self.cpa[mu] = numpy_support.numpy_to_vtk(
@@ -428,14 +446,48 @@ class CFprov():
                 self.cf_at_time[mu])
             self.cf[mu].SetName('contactForces')
 
+            if self.ids_at_time[mu] is not None:
+                self.ids[mu] = numpy_support.numpy_to_vtk(
+                    self.ids_at_time[mu])
+                self.ids[mu].SetName('ids')
+                self._contact_field[mu].AddArray(self.ids[mu])
+                self._output[mu].GetPointData().AddArray(self.ids[mu])
+
+            # field info (should go in point data)
             self._contact_field[mu].AddArray(self.cpa[mu])
             self._contact_field[mu].AddArray(self.cpb[mu])
             self._contact_field[mu].AddArray(self.cn[mu])
             self._contact_field[mu].AddArray(self.cf[mu])
 
+            # contact points
             self._points[mu].SetData(self.cpa[mu])
             self._output[mu].GetPointData().AddArray(self.cn[mu])
             self._output[mu].GetPointData().AddArray(self.cf[mu])
+
+            if self.ids_at_time[mu] is not None:
+                dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
+                dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
+                _i, _i, dsa_pos_ids = numpy.intersect1d(
+                    self._ioreader.pos_data[:, 1],
+                    dsa_ids, return_indices=True)
+                _i, _i, dsb_pos_ids = numpy.intersect1d(
+                    self._ioreader.pos_data[:, 1],
+                    dsb_ids, return_indices=True)
+
+                # objects a & b translations
+                com_pos_a = self._ioreader.pos_data[dsa_pos_ids, 2:5]
+                com_pos_b = self._ioreader.pos_data[dsb_pos_ids, 2:5]
+
+                self._all_objs_pos[mu] = numpy.vstack((com_pos_a,
+                                                      com_pos_b))
+
+                self._all_objs_pos_vtk[mu] = numpy_support.numpy_to_vtk(
+                    self._all_objs_pos[mu])
+                self._objs_points[mu].SetData(self._all_objs_pos_vtk[mu])
+#                self._objs_output[mu].GetPointData().AddArray(self.cn[mu])
+#                self._objs_output[mu].GetPointData().AddArray(self.cf[mu])
+
+
                 #if dom_imu is not None:
                 #    self.dom_at_time[mu] = self._dom_data[
                 #        dom_imu, 1]
@@ -993,7 +1045,7 @@ class VView(object):
         self.contact_pos_force[mu].SetVectorComponent(2, "contactForces", 2)
 
         self.contact_pos_norm[mu].SetInputConnection(
-            self.contact_pos_force[mu].GetOutputPort())
+            self.contact_posa[mu].GetOutputPort())
         self.contact_pos_norm[mu].SetInputFieldToDataObjectField()
         self.contact_pos_norm[mu].SetOutputAttributeDataToPointData()
         self.contact_pos_norm[mu].SetVectorComponent(0, "contactNormals", 0)
@@ -1005,7 +1057,8 @@ class VView(object):
 
     def init_cf_sources(self, mu, transform):
 
-        self.cf_collector.AddInputData(self.cf_prov._output[mu])
+#        self.cf_collector.AddInputData(self.cf_prov._output[mu])
+        self.cf_collector.AddInputData(self.cf_prov._objs_output[mu])
         self.contact_posa[mu].SetInputData(self.cf_prov._output[mu])
         self.contact_posa[mu].Update()
         self.contact_posb[mu].SetInputData(self.cf_prov._output[mu])
