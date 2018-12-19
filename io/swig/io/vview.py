@@ -463,8 +463,9 @@ class CFprov():
             self._points[mu].SetData(self.cpa[mu])
             self._output[mu].GetPointData().AddArray(self.cn[mu])
             self._output[mu].GetPointData().AddArray(self.cf[mu])
-
             if self.ids_at_time[mu] is not None:
+                self._output[mu].GetPointData().AddArray(self.ids[mu])
+
                 dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
                 dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
                 _i, _i, dsa_pos_ids = numpy.intersect1d(
@@ -475,11 +476,11 @@ class CFprov():
                     dsb_ids, return_indices=True)
 
                 # objects a & b translations
-                com_pos_a = self._ioreader.pos_data[dsa_pos_ids, 2:5]
-                com_pos_b = self._ioreader.pos_data[dsb_pos_ids, 2:5]
+                obj_pos_a = self._ioreader.pos_data[dsa_pos_ids, 2:5]
+                obj_pos_b = self._ioreader.pos_data[dsb_pos_ids, 2:5]
 
-                self._all_objs_pos[mu] = numpy.vstack((com_pos_a,
-                                                      com_pos_b))
+                self._all_objs_pos[mu] = numpy.vstack((obj_pos_a,
+                                                      obj_pos_b))
 
                 self._all_objs_pos_vtk[mu] = numpy_support.numpy_to_vtk(
                     self._all_objs_pos[mu])
@@ -756,7 +757,7 @@ class InputObserver():
 
 class DataConnector():
 
-    def __init__(self, instance, data_name='velocity', data_size=6):
+    def __init__(self, instance, data_name, data_size):
 
         self._instance = instance
         self._data_name = data_name
@@ -767,21 +768,25 @@ class DataConnector():
         self._vtk_data = vtk.vtkFloatArray()
         self._vtk_data.SetName(data_name)
         self._vtk_data.SetNumberOfComponents(data_size)
-        self._vtk_data.SetNumberOfTuples(1)
 
     def method(self):
         input = self._connector.GetInput()
         output = self._connector.GetOutput()
         output.ShallowCopy(input)
+        ncells = output.GetNumberOfCells()
 
-        if output.GetFieldData().GetArray(self._data_name) is None:
-            output.GetFieldData().AddArray(self._vtk_data)
+        self._vtk_data.SetNumberOfTuples(ncells)
+
+        if output.GetCellData().GetArray(self._data_name) is None:
+            output.GetCellData().AddArray(self._vtk_data)
 
         data = self._data
 
-        data_t = tuple(data[0:self._data_size])
-        output.GetFieldData().GetArray(self._data_name).SetTuple(
-            0, data_t)
+        data_t = data[0:self._data_size]
+
+        for i in range(ncells):
+            output.GetCellData().GetArray(self._data_name).SetTuple(i, data_t)
+
 
 
 # attach velocity
@@ -819,6 +824,7 @@ class IOReader(VTKPythonAlgorithmBase):
         self._io = None
         self._with_contact_forces = with_contact_forces
         self.cf_data = None
+        self.points = vtk.vtkPoints()
 
     def RequestInformation(self, request, inInfo, outInfo):
 
@@ -838,6 +844,7 @@ class IOReader(VTKPythonAlgorithmBase):
         from vtk.numpy_interface import dataset_adapter as dsa
         info = outInfo.GetInformationObject(0)
         output = vtk.vtkPolyData.GetData(outInfo)
+        output.SetPoints(self.points)
 
         # The time step requested
         t = info.Get(vtk.vtkStreamingDemandDrivenPipeline.UPDATE_TIME_STEP())
@@ -860,8 +867,13 @@ class IOReader(VTKPythonAlgorithmBase):
         vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data)
         vtk_pos_data.SetName('velo_data')
 
-        output.GetFieldData().AddArray(vtk_pos_data)
-        output.GetFieldData().AddArray(vtk_velo_data)
+        vtk_points_data =  dsa.numpyTovtkDataArray(self.pos_data[:, 2:5])
+
+#        output.GetFieldData().AddArray(vtk_pos_data)
+        #output.GetFieldData().AddArray(vtk_velo_data)
+        self.points.SetData(vtk_points_data)
+
+        output.GetPointData().AddArray(vtk_velo_data)
 
         if self._with_contact_forces:
             current_cft=numpy.searchsorted(self._cf_times, t, side='right')
@@ -982,6 +994,7 @@ class VView(object):
         self.data_connectors_v = dict()
         self.data_connectors_t = dict()
         self.data_connectors_d = dict()
+        self.data_connectors_i = dict()
         self.times_of_birth = dict()
         self.times_of_death = dict()
         self.min_time = self.opts.min_time
@@ -1057,7 +1070,7 @@ class VView(object):
 
     def init_cf_sources(self, mu, transform):
 
-#        self.cf_collector.AddInputData(self.cf_prov._output[mu])
+        self.cf_collector.AddInputData(self.cf_prov._output[mu])
         self.cf_collector.AddInputData(self.cf_prov._objs_output[mu])
         self.contact_posa[mu].SetInputData(self.cf_prov._output[mu])
         self.contact_posa[mu].Update()
@@ -1576,7 +1589,9 @@ class VView(object):
              contactor.attrs['orientation'].astype(float)))
 
 
-        self.data_connectors_v[instid] = DataConnector(instid)
+        self.data_connectors_v[instid] = DataConnector(instid,
+                                                       data_name='velocity',
+                                                       data_size=6)
         self.data_connectors_v[instid]._connector.SetInputConnection(
             transformer.GetOutputPort())
         self.data_connectors_v[instid]._connector.Update()
@@ -1595,8 +1610,15 @@ class VView(object):
             self.data_connectors_t[instid]._connector.GetOutputPort())
         self.data_connectors_d[instid]._connector.Update()
 
-        self.objects_collector.AddInputConnection(
+        self.data_connectors_i[instid] = DataConnector(instid,
+                                                       data_name='instance',
+                                                       data_size=1)
+        self.data_connectors_i[instid]._connector.SetInputConnection(
             self.data_connectors_d[instid]._connector.GetOutputPort())
+        self.data_connectors_i[instid]._connector.Update()
+
+        self.objects_collector.AddInputConnection(
+            self.data_connectors_i[instid]._connector.GetOutputPort())
 
     def init_instance(self, instance_name):
         instance = self.io.instances()[instance_name]
@@ -1657,10 +1679,11 @@ class VView(object):
                             data[:, 7],
                             data[:, 8])
 
-    def build_set_functions(self, dcv=None, dct=None, dcd=None):
+    def build_set_functions(self, dcv=None, dct=None, dcd=None, dci=None):
         if dcv is None: dcv = self.data_connectors_v
         if dct is None: dct = self.data_connectors_t
         if dcd is None: dcd = self.data_connectors_d
+        if dci is None: dci = self.data_connectors_i
 
         # the numpy vectorization is ok on column vectors for each args
         self.set_position_v = numpy.vectorize(self.set_position_i)
@@ -1692,6 +1715,14 @@ class VView(object):
 
         if dcd is not None:
             self.set_displacement_v = numpy.vectorize(set_displacement)
+
+        def set_instance(instance):
+            if instance in dci:
+                dci[instance]._data[:] = [instance]
+                dci[instance]._connector.Update()
+
+        if dci is not None:
+            self.set_instance_v = numpy.vectorize(set_instance)
 
     # set visibility for all actors associated to a dynamic instance
     def set_dynamic_instance_visibility(self, instance, time):
@@ -2129,6 +2160,8 @@ class VView(object):
                 pos_data[:, 3],
                 pos_data[:, 4],
             )
+
+            self.set_instance_v(pos_data[:, 1])
 
             if self.cf_prov is not None:
                 self.cf_prov.xmethod()
