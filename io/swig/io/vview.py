@@ -105,11 +105,12 @@ class VViewOptions(object):
      --imr
        immediate-mode-rendering, use less memory at the price of
        slower rendering
-     --global-filter
-       add a global filter, so the display is done with only one vtk
-       actor. As the global filter (vtkCompositeDataGeometryFilter) is
-       really slow, this is only a proof of concept.
-       too slow at the moment.
+     --global-filter (default : off)
+       With export mode, concatenates all blocks in a big vtkPolyData.
+       This for when the number of objects is huge.
+       With vview, the display is done with only one vtk
+       actor. Note that global-filter use a vtkCompositeDataGeometryFilter
+       which is slow.
      --no-depth-peeling (default : on)
        do not use vtk depth peeling
      --maximum-number-of-peels= value
@@ -396,10 +397,10 @@ class CFprov():
         nan = numpy.nan
 
         for mu in self._ioreader._mu_coefs:
-            self.cpa_at_time[mu] = [[nan, nan, nan]]
-            self.cpb_at_time[mu] = [[nan, nan, nan]]
-            self.cn_at_time[mu] =  [[nan, nan, nan]]
-            self.cf_at_time[mu] =  [[nan, nan, nan]]
+            self.cpa_at_time[mu] = [[0., 0., 0.]]
+            self.cpb_at_time[mu] = [[0., 0., 0.]]
+            self.cn_at_time[mu] =  [[0., 0., 0.]]
+            self.cf_at_time[mu] =  [[0., 0., 0.]]
             self.ids_at_time[mu] = None
 
         if self._ioreader.cf_data is not None:
@@ -426,67 +427,68 @@ class CFprov():
                         imu, 8:11]
                     self.cf_at_time[mu] = data[
                         imu, 11:14]
-                    self.ids_at_time[mu] = data[
-                        imu, 23:26].astype(int)
+                    if len(data[imu,:]) > 26:
+                        self.ids_at_time[mu] = data[
+                            imu, 23:26].astype(int)
 
-        for mu in self._ioreader._mu_coefs:
-            self.cpa[mu] = numpy_support.numpy_to_vtk(
-                self.cpa_at_time[mu])
-            self.cpa[mu].SetName('contactPositionsA')
+            for mu in self._ioreader._mu_coefs:
+                self.cpa[mu] = numpy_support.numpy_to_vtk(
+                    self.cpa_at_time[mu])
+                self.cpa[mu].SetName('contactPositionsA')
 
-            self.cpb[mu] = numpy_support.numpy_to_vtk(
-                self.cpb_at_time[mu])
-            self.cpb[mu].SetName('contactPositionsB')
+                self.cpb[mu] = numpy_support.numpy_to_vtk(
+                    self.cpb_at_time[mu])
+                self.cpb[mu].SetName('contactPositionsB')
 
-            self.cn[mu] = numpy_support.numpy_to_vtk(
-                self.cn_at_time[mu])
-            self.cn[mu].SetName('contactNormals')
+                self.cn[mu] = numpy_support.numpy_to_vtk(
+                    self.cn_at_time[mu])
+                self.cn[mu].SetName('contactNormals')
 
-            self.cf[mu] = numpy_support.numpy_to_vtk(
-                self.cf_at_time[mu])
-            self.cf[mu].SetName('contactForces')
+                self.cf[mu] = numpy_support.numpy_to_vtk(
+                    self.cf_at_time[mu])
+                self.cf[mu].SetName('contactForces')
 
-            if self.ids_at_time[mu] is not None:
-                self.ids[mu] = numpy_support.numpy_to_vtk(
-                    self.ids_at_time[mu])
-                self.ids[mu].SetName('ids')
-                self._contact_field[mu].AddArray(self.ids[mu])
-                self._output[mu].GetPointData().AddArray(self.ids[mu])
+                # field info for vview (should go in point data)
+                self._contact_field[mu].AddArray(self.cpa[mu])
+                self._contact_field[mu].AddArray(self.cpb[mu])
+                self._contact_field[mu].AddArray(self.cn[mu])
+                self._contact_field[mu].AddArray(self.cf[mu])
 
-            # field info (should go in point data)
-            self._contact_field[mu].AddArray(self.cpa[mu])
-            self._contact_field[mu].AddArray(self.cpb[mu])
-            self._contact_field[mu].AddArray(self.cn[mu])
-            self._contact_field[mu].AddArray(self.cf[mu])
+                # contact points
+                self._points[mu].SetData(self.cpa[mu])
+                self._output[mu].GetPointData().AddArray(self.cn[mu])
+                self._output[mu].GetPointData().AddArray(self.cf[mu])
 
-            # contact points
-            self._points[mu].SetData(self.cpa[mu])
-            self._output[mu].GetPointData().AddArray(self.cn[mu])
-            self._output[mu].GetPointData().AddArray(self.cf[mu])
-            if self.ids_at_time[mu] is not None:
-                self._output[mu].GetPointData().AddArray(self.ids[mu])
+                if self.ids_at_time[mu] is not None:
+                    self.ids[mu] = numpy_support.numpy_to_vtk(
+                        self.ids_at_time[mu])
+                    self.ids[mu].SetName('ids')
+                    self._contact_field[mu].AddArray(self.ids[mu])
+                    self._output[mu].GetPointData().AddArray(self.ids[mu])
 
-                dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
-                dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
-                _i, _i, dsa_pos_ids = numpy.intersect1d(
-                    self._ioreader.pos_data[:, 1],
-                    dsa_ids, return_indices=True)
-                _i, _i, dsb_pos_ids = numpy.intersect1d(
-                    self._ioreader.pos_data[:, 1],
-                    dsb_ids, return_indices=True)
+                    if len(self.ids_at_time[mu][0, :] > 2):
+                           dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
+                           dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
+                           _i, _i, dsa_pos_ids = numpy.intersect1d(
+                               self._ioreader.pos_data[:, 1],
+                               dsa_ids, return_indices=True)
+                           _i, _i, dsb_pos_ids = numpy.intersect1d(
+                               self._ioreader.pos_data[:, 1],
+                               dsb_ids, return_indices=True)
 
-                # objects a & b translations
-                obj_pos_a = self._ioreader.pos_data[dsa_pos_ids, 2:5]
-                obj_pos_b = self._ioreader.pos_data[dsb_pos_ids, 2:5]
+                           # objects a & b translations
+                           obj_pos_a = self._ioreader.pos_data[dsa_pos_ids, 2:5]
+                           obj_pos_b = self._ioreader.pos_data[dsb_pos_ids, 2:5]
 
-                self._all_objs_pos[mu] = numpy.vstack((obj_pos_a,
-                                                      obj_pos_b))
+                           self._all_objs_pos[mu] = numpy.vstack((obj_pos_a,
+                                                                  obj_pos_b))
 
-                self._all_objs_pos_vtk[mu] = numpy_support.numpy_to_vtk(
-                    self._all_objs_pos[mu])
-                self._objs_points[mu].SetData(self._all_objs_pos_vtk[mu])
-#                self._objs_output[mu].GetPointData().AddArray(self.cn[mu])
-#                self._objs_output[mu].GetPointData().AddArray(self.cf[mu])
+                           self._all_objs_pos_vtk[mu] = numpy_support.numpy_to_vtk(
+                               self._all_objs_pos[mu])
+                           self._objs_points[mu].SetData(self._all_objs_pos_vtk[mu])
+
+                           self._objs_output[mu].GetPointData().AddArray(self.cn[mu])
+                           self._objs_output[mu].GetPointData().AddArray(self.cf[mu])
 
 
                 #if dom_imu is not None:
@@ -894,7 +896,7 @@ class IOReader(VTKPythonAlgorithmBase):
 
                 output.GetFieldData().AddArray(vtk_cf_data)
             else:
-                print('no cf')
+                # there is no contact forces at this time
                 self.cf_data = None
                 vtk_cf_data = dsa.numpyTovtkDataArray(numpy.array([]))
                 vtk_cf_data.SetName('cf_data')
@@ -1495,7 +1497,6 @@ class VView(object):
                 self.unfrozen_mappers[shape_name] = next(self.mappers[shape_name])
 
     def init_contactor(self, contactor_instance_name, instance, instid):
-        print('init_contactor',contactor_instance_name, instance, instid)
         contactor = instance[contactor_instance_name]
         contact_shape_indx = None
         if 'shape_name' not in contactor.attrs:
@@ -1636,7 +1637,6 @@ class VView(object):
             self.static_actors[instid] = list()
 
         for contactor_instance_name in instance:
-            print('contactor instance name:', instance_name, contactor_instance_name)
             self.init_contactor(contactor_instance_name, instance,  instid)
 
     def init_instances(self):
@@ -1645,29 +1645,30 @@ class VView(object):
 
     # this sets the position for all transforms associated to an instance
     def set_position_i(self, instance, q0, q1, q2, q3, q4, q5, q6):
+        # all objects are set to a nan position at startup,
+        # so they are invisibles
         if (numpy.any(numpy.isnan([q0, q1, q2, q3, q4, q5, q6]))
-           or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
+            or numpy.any(numpy.isinf([q0, q1, q2, q3, q4, q5, q6]))):
             print('Bad position for object number', int(instance),' :',  q0, q1, q2, q3, q4, q5, q6)
-            return
+        else:
+            q = Quaternion((q3, q4, q5, q6))
 
-        q = Quaternion((q3, q4, q5, q6))
+            for transform, offset in zip(self.transforms[instance],
+                                         self.offsets[instance]):
 
-        for transform, offset in zip(self.transforms[instance],
-                                     self.offsets[instance]):
+                p = q.rotate(offset[0])
 
-            p = q.rotate(offset[0])
+                r = q * Quaternion(offset[1])
 
-            r = q * Quaternion(offset[1])
+                transform.Identity()
+                transform.Translate(q0 + p[0], q1 + p[1], q2 + p[2])
 
-            transform.Identity()
-            transform.Translate(q0 + p[0], q1 + p[1], q2 + p[2])
+                axis, angle = r.axisAngle()
 
-            axis, angle = r.axisAngle()
-
-            transform.RotateWXYZ(angle * 180. / pi,
-                                 axis[0],
-                                 axis[1],
-                                 axis[2])
+                transform.RotateWXYZ(angle * 180. / pi,
+                                     axis[0],
+                                     axis[1],
+                                     axis[2])
 
     def set_position(self, data):
         self.set_position_v(data[:, 1],
@@ -1839,15 +1840,30 @@ class VView(object):
 
     def setup_initial_position(self):
         from vtk.numpy_interface import dataset_adapter as dsa
+
+        if self.opts.export:
+            # For time_of_birth specifications with export mode:
+            # a 0 scale for objects whose existence is deferred.
+            # The correct transform will be set in set_position when
+            # the objects appears in pos_data.
+            # One have to disable vtkMath generic warnings in order to avoid
+            # plenty of 'Unable to factor linear system'
+            vtk.vtkMath.GlobalWarningDisplayOff()
+            for instance_name in self.io.instances():
+                instance = self.io.instances()[instance_name]
+                instid = int(instance.attrs['id'])
+                for transform in self.transforms[instid]:
+                    transform.Scale(0, 0, 0)
         self.time0 = None
-        try:
+        if len(self.io_reader._times) > 0:
             # Positions at first time step
             self.time0 = self.io_reader._times[0]
             self.io_reader.SetTime(self.time0)
             #self.pos_t0 = dsa.WrapDataObject(self.io_reader.GetOutputDataObject(0).GetFieldData().GetArray('pos_data'))
+
             self.pos_t0 = [self.io_reader.pos_data]
 
-        except ValueError:
+        else:
             # this is for the case simulation has not been ran and
             # time does not exists
             self.time0 = 0
