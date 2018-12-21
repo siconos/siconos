@@ -346,9 +346,11 @@ class Quaternion():
 # contact forces provider
 class CFprov():
 
-    def __init__(self, ioreader):
+    def __init__(self, ioreader, export):
 
         from vtk.numpy_interface import dataset_adapter as dsa
+
+        self._export = export
 
         self._ioreader = ioreader
 
@@ -431,64 +433,65 @@ class CFprov():
                         self.ids_at_time[mu] = data[
                             imu, 23:26].astype(int)
 
-            for mu in self._ioreader._mu_coefs:
-                self.cpa[mu] = numpy_support.numpy_to_vtk(
-                    self.cpa_at_time[mu])
-                self.cpa[mu].SetName('contactPositionsA')
+        for mu in self._ioreader._mu_coefs:
+            self.cpa[mu] = numpy_support.numpy_to_vtk(
+            self.cpa_at_time[mu])
+            self.cpa[mu].SetName('contact_positions_a')
 
-                self.cpb[mu] = numpy_support.numpy_to_vtk(
-                    self.cpb_at_time[mu])
-                self.cpb[mu].SetName('contactPositionsB')
+            self.cpb[mu] = numpy_support.numpy_to_vtk(
+                self.cpb_at_time[mu])
+            self.cpb[mu].SetName('contact_positions_b')
 
-                self.cn[mu] = numpy_support.numpy_to_vtk(
-                    self.cn_at_time[mu])
-                self.cn[mu].SetName('contactNormals')
+            self.cn[mu] = numpy_support.numpy_to_vtk(
+                self.cn_at_time[mu])
+            self.cn[mu].SetName('contact_normals')
 
-                self.cf[mu] = numpy_support.numpy_to_vtk(
-                    self.cf_at_time[mu])
-                self.cf[mu].SetName('contactForces')
+            self.cf[mu] = numpy_support.numpy_to_vtk(
+                self.cf_at_time[mu])
+            self.cf[mu].SetName('contact_forces')
 
-                # field info for vview (should go in point data)
+            # field info for vview (should go in point data)
+            if not self._export:
                 self._contact_field[mu].AddArray(self.cpa[mu])
                 self._contact_field[mu].AddArray(self.cpb[mu])
                 self._contact_field[mu].AddArray(self.cn[mu])
                 self._contact_field[mu].AddArray(self.cf[mu])
 
-                # contact points
-                self._points[mu].SetData(self.cpa[mu])
-                self._output[mu].GetPointData().AddArray(self.cn[mu])
-                self._output[mu].GetPointData().AddArray(self.cf[mu])
+            # contact points
+            self._points[mu].SetData(self.cpa[mu])
+            self._output[mu].GetPointData().AddArray(self.cn[mu])
+            self._output[mu].GetPointData().AddArray(self.cf[mu])
 
-                if self.ids_at_time[mu] is not None:
-                    self.ids[mu] = numpy_support.numpy_to_vtk(
-                        self.ids_at_time[mu])
-                    self.ids[mu].SetName('ids')
-                    self._contact_field[mu].AddArray(self.ids[mu])
-                    self._output[mu].GetPointData().AddArray(self.ids[mu])
+            if self.ids_at_time[mu] is not None:
+                self.ids[mu] = numpy_support.numpy_to_vtk(
+                    self.ids_at_time[mu])
+                self.ids[mu].SetName('ids')
+                self._contact_field[mu].AddArray(self.ids[mu])
+                self._output[mu].GetPointData().AddArray(self.ids[mu])
 
-                    if len(self.ids_at_time[mu][0, :] > 2):
-                           dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
-                           dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
-                           _i, _i, dsa_pos_ids = numpy.intersect1d(
-                               self._ioreader.pos_data[:, 1],
-                               dsa_ids, return_indices=True)
-                           _i, _i, dsb_pos_ids = numpy.intersect1d(
-                               self._ioreader.pos_data[:, 1],
-                               dsb_ids, return_indices=True)
+                if len(self.ids_at_time[mu][0, :] > 2):
+                       dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
+                       dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
+                       _i, _i, dsa_pos_ids = numpy.intersect1d(
+                           self._ioreader.pos_data[:, 1],
+                           dsa_ids, return_indices=True)
+                       _i, _i, dsb_pos_ids = numpy.intersect1d(
+                           self._ioreader.pos_data[:, 1],
+                           dsb_ids, return_indices=True)
 
-                           # objects a & b translations
-                           obj_pos_a = self._ioreader.pos_data[dsa_pos_ids, 2:5]
-                           obj_pos_b = self._ioreader.pos_data[dsb_pos_ids, 2:5]
+                       # objects a & b translations
+                       obj_pos_a = self._ioreader.pos_data[dsa_pos_ids, 2:5]
+                       obj_pos_b = self._ioreader.pos_data[dsb_pos_ids, 2:5]
 
-                           self._all_objs_pos[mu] = numpy.vstack((obj_pos_a,
-                                                                  obj_pos_b))
+                       self._all_objs_pos[mu] = numpy.vstack((obj_pos_a,
+                                                              obj_pos_b))
 
-                           self._all_objs_pos_vtk[mu] = numpy_support.numpy_to_vtk(
-                               self._all_objs_pos[mu])
-                           self._objs_points[mu].SetData(self._all_objs_pos_vtk[mu])
+                       self._all_objs_pos_vtk[mu] = numpy_support.numpy_to_vtk(
+                           self._all_objs_pos[mu])
+                       self._objs_points[mu].SetData(self._all_objs_pos_vtk[mu])
 
-                           self._objs_output[mu].GetPointData().AddArray(self.cn[mu])
-                           self._objs_output[mu].GetPointData().AddArray(self.cf[mu])
+                       self._objs_output[mu].GetPointData().AddArray(self.cn[mu])
+                       self._objs_output[mu].GetPointData().AddArray(self.cf[mu])
 
 
                 #if dom_imu is not None:
@@ -1013,7 +1016,7 @@ class VView(object):
     def reload(self):
 
         if not self.opts.cf_disable:
-            self.cf_prov = CFprov(self.io_reader)
+            self.cf_prov = CFprov(self.io_reader, self.opts.export)
 
         if self.cf_prov is not None:
             self.cf_prov._time = min(times[:])
@@ -1042,30 +1045,30 @@ class VView(object):
         self.contact_pos_norm[mu] = vtk.vtkFieldDataToAttributeDataFilter()
 
         self.contact_posa[mu].SetDataSetTypeToPolyData()
-        self.contact_posa[mu].SetPointComponent(0, "contactPositionsA", 0)
-        self.contact_posa[mu].SetPointComponent(1, "contactPositionsA", 1)
-        self.contact_posa[mu].SetPointComponent(2, "contactPositionsA", 2)
+        self.contact_posa[mu].SetPointComponent(0, "contact_positions_a", 0)
+        self.contact_posa[mu].SetPointComponent(1, "contact_positions_a", 1)
+        self.contact_posa[mu].SetPointComponent(2, "contact_positions_a", 2)
 
         self.contact_posb[mu].SetDataSetTypeToPolyData()
-        self.contact_posb[mu].SetPointComponent(0, "contactPositionsB", 0)
-        self.contact_posb[mu].SetPointComponent(1, "contactPositionsB", 1)
-        self.contact_posb[mu].SetPointComponent(2, "contactPositionsB", 2)
+        self.contact_posb[mu].SetPointComponent(0, "contact_positions_b", 0)
+        self.contact_posb[mu].SetPointComponent(1, "contact_positions_b", 1)
+        self.contact_posb[mu].SetPointComponent(2, "contact_positions_b", 2)
 
         self.contact_pos_force[mu].SetInputConnection(
             self.contact_posa[mu].GetOutputPort())
         self.contact_pos_force[mu].SetInputFieldToDataObjectField()
         self.contact_pos_force[mu].SetOutputAttributeDataToPointData()
-        self.contact_pos_force[mu].SetVectorComponent(0, "contactForces", 0)
-        self.contact_pos_force[mu].SetVectorComponent(1, "contactForces", 1)
-        self.contact_pos_force[mu].SetVectorComponent(2, "contactForces", 2)
+        self.contact_pos_force[mu].SetVectorComponent(0, "contact_forces", 0)
+        self.contact_pos_force[mu].SetVectorComponent(1, "contact_forces", 1)
+        self.contact_pos_force[mu].SetVectorComponent(2, "contact_forces", 2)
 
         self.contact_pos_norm[mu].SetInputConnection(
             self.contact_posa[mu].GetOutputPort())
         self.contact_pos_norm[mu].SetInputFieldToDataObjectField()
         self.contact_pos_norm[mu].SetOutputAttributeDataToPointData()
-        self.contact_pos_norm[mu].SetVectorComponent(0, "contactNormals", 0)
-        self.contact_pos_norm[mu].SetVectorComponent(1, "contactNormals", 1)
-        self.contact_pos_norm[mu].SetVectorComponent(2, "contactNormals", 2)
+        self.contact_pos_norm[mu].SetVectorComponent(0, "contact_normals", 0)
+        self.contact_pos_norm[mu].SetVectorComponent(1, "contact_normals", 1)
+        self.contact_pos_norm[mu].SetVectorComponent(2, "contact_normals", 2)
 
         if self.cf_prov.dom_at_time is not None:
             self.contact_pos_norm[mu].SetScalarComponent(0, "domains", 0)
@@ -1098,7 +1101,7 @@ class VView(object):
             self.cone_glyph[mu]._scale_fact *self.opts.cf_scale_factor)
         self.cone_glyph[mu].SetVectorModeToUseVector()
 
-        self.cone_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
+        self.cone_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contact_normals')
         self.cone_glyph[mu].OrientOn()
 
         # Don't allow scalar to affect size of glyph
@@ -1167,8 +1170,8 @@ class VView(object):
             self.arrow_glyph[mu]._scale_fact * self.opts.cf_scale_factor)
         self.arrow_glyph[mu].SetVectorModeToUseVector()
 
-        self.arrow_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactForces')
-        self.arrow_glyph[mu].SetInputArrayToProcess(3, 0, 0, 0, 'contactForces')
+        self.arrow_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contact_forces')
+        self.arrow_glyph[mu].SetInputArrayToProcess(3, 0, 0, 0, 'contact_forces')
         self.arrow_glyph[mu].OrientOn()
 
         self.gmapper[mu] = vtk.vtkPolyDataMapper()
@@ -1178,8 +1181,8 @@ class VView(object):
         self.gmapper[mu].SetScalarModeToUsePointFieldData()
         self.gmapper[mu].SetColorModeToMapScalars()
         self.gmapper[mu].ScalarVisibilityOn()
-        self.gmapper[mu].SelectColorArray('contactForces')
-        # gmapper.SetScalarRange(contact_pos_force.GetOutput().GetPointData().GetArray('contactForces').GetRange())
+        self.gmapper[mu].SelectColorArray('contact_forces')
+        # gmapper.SetScalarRange(contact_pos_force.GetOutput().GetPointData().GetArray('contact_forces').GetRange())
 
         self.gactor[mu] = vtk.vtkActor()
         self.gactor[mu].SetMapper(self.gmapper[mu])
@@ -1195,7 +1198,7 @@ class VView(object):
         self.cylinder_glyph[mu].SetSourceConnection(self.cylinder[mu].GetOutputPort())
         self.cylinder_glyph[mu].SetVectorModeToUseVector()
 
-        self.cylinder_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
+        self.cylinder_glyph[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contact_normals')
         self.cylinder_glyph[mu].OrientOn()
         self.cylinder_glyph[mu]._scale_fact = self.opts.normalcone_ratio
         self.cylinder_glyph[mu].SetScaleFactor(
@@ -1230,7 +1233,7 @@ class VView(object):
             self.sphere_glyphb[mu]._scale_fact * self.opts.cf_scale_factor)
         # self.sphere_glyphb[mu].SetVectorModeToUseVector()
 
-        # self.sphere_glyphb[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contactNormals')
+        # self.sphere_glyphb[mu].SetInputArrayToProcess(1, 0, 0, 0, 'contact_normals')
         # self.sphere_glyph.OrientOn()
 
         self.smappera[mu] = vtk.vtkPolyDataMapper()
@@ -1245,8 +1248,8 @@ class VView(object):
         # self.cmapper.SetScalarModeToUsePointFieldData()
         # self.cmapper.SetColorModeToMapScalars()
         # self.cmapper.ScalarVisibilityOn()
-        # self.cmapper.SelectColorArray('contactNormals')
-        # self.gmapper.SetScalarRange(contact_pos_force.GetOutput().GetPointData().GetArray('contactForces').GetRange())
+        # self.cmapper.SelectColorArray('contact_normals')
+        # self.gmapper.SetScalarRange(contact_pos_force.GetOutput().GetPointData().GetArray('contact_forces').GetRange())
 
         self.clactor[mu] = vtk.vtkActor()
         # cactor.GetProperty().SetOpacity(0.4)
@@ -1604,18 +1607,11 @@ class VView(object):
             self.data_connectors_v[instid]._connector.GetOutputPort())
         self.data_connectors_t[instid]._connector.Update()
 
-        self.data_connectors_d[instid] = DataConnector(instid,
-                                                       data_name='displacement',
-                                                       data_size=3)
-        self.data_connectors_d[instid]._connector.SetInputConnection(
-            self.data_connectors_t[instid]._connector.GetOutputPort())
-        self.data_connectors_d[instid]._connector.Update()
-
         self.data_connectors_i[instid] = DataConnector(instid,
                                                        data_name='instance',
                                                        data_size=1)
         self.data_connectors_i[instid]._connector.SetInputConnection(
-            self.data_connectors_d[instid]._connector.GetOutputPort())
+            self.data_connectors_t[instid]._connector.GetOutputPort())
         self.data_connectors_i[instid]._connector.Update()
 
         self.objects_collector.AddInputConnection(
@@ -1708,14 +1704,6 @@ class VView(object):
 
         if dct is not None:
             self.set_translation_v = numpy.vectorize(set_translation)
-
-        def set_displacement(instance, x0, x1, x2 ):
-            if instance in dcd:
-                dcd[instance]._data[:] = [x0, x1, x2]
-                dcd[instance]._connector.Update()
-
-        if dcd is not None:
-            self.set_displacement_v = numpy.vectorize(set_displacement)
 
         def set_instance(instance):
             if instance in dci:
@@ -2201,6 +2189,8 @@ class VView(object):
 
             big_data_writer.Write()
 
+        big_data_writer.Write()
+
     def initialize_vtk(self):
 
         self.objects_collector = vtk.vtkMultiBlockDataGroupFilter()
@@ -2262,7 +2252,7 @@ class VView(object):
 
         self.cf_prov = None
         if not self.opts.cf_disable:
-            self.cf_prov = CFprov(self.io_reader)
+            self.cf_prov = CFprov(self.io_reader, self.opts.export)
             for mu in self.cf_prov._ioreader._mu_coefs:
                 self.init_contact_pos(mu)
 
