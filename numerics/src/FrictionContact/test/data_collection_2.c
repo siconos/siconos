@@ -28,10 +28,6 @@ char ** data_collection()
 
   char ** data_collection_1 = (char **)malloc(n_data_1*sizeof(char *));
   int n_data=0;
-  data_collection_1[n_data++] = "./data/FC3D_Example1.dat";
-  data_collection_1[n_data++] = "./data/FC3D_Example1_SBM.dat";
-  data_collection_1[n_data++] = "./data/FrictionContact3D_1c.dat";
-  data_collection_1[n_data++] = "./data/FrictionContact3D_RR_1c.dat";
 
   data_collection_1[n_data++] = "./data/Capsules-i100-1090.dat";
   data_collection_1[n_data++] = "./data/Capsules-i100-889.dat";
@@ -39,29 +35,9 @@ char ** data_collection()
   data_collection_1[n_data++] = "./data/Capsules-i103-990.dat";
   data_collection_1[n_data++] = "./data/Capsules-i122-1617.dat";
 
-  data_collection_1[n_data++] = "./data/Rover1039.dat";
-  data_collection_1[n_data++] = "./data/Rover1040.dat";
-  data_collection_1[n_data++] = "./data/Rover1041.dat";
-  data_collection_1[n_data++] = "./data/Rover11035.dat";
-  data_collection_1[n_data++] = "./data/Rover11211.dat";
-
-  data_collection_1[n_data++] = "./data/Rover3865.dat";
-  data_collection_1[n_data++] = "./data/Rover4144.dat";
-  data_collection_1[n_data++] = "./data/Rover4493.dat";
-  data_collection_1[n_data++] = "./data/Rover4516.dat";
-  data_collection_1[n_data++] = "./data/Rover4609.dat";
-  data_collection_1[n_data++] = "./data/Rover4613.dat";
-  data_collection_1[n_data++] = "./data/Rover4622.dat";
-  data_collection_1[n_data++] = "./data/Rover9770.dat";
-
-  data_collection_1[n_data++] = "./data/NESpheres_10_1.dat";
-  data_collection_1[n_data++] = "./data/NESpheres_30_1.dat";
-
-  data_collection_1[n_data++] = "./data/Confeti-ex13-Fc3D-SBM.dat";
   
   data_collection_1[n_data++] = "---";
 
 
   return data_collection_1;
 }
-
