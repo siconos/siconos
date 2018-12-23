@@ -50,7 +50,9 @@ MACRO(BEGIN_TEST2 _D)
     *.npz
     *.xml
     *.DAT
-    *.INI)
+    *.INI
+    data_collection*.c
+    test_*.c)
 
   IF(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils)
     FILE(GLOB_RECURSE TEST_UTILS_SOURCES_TMP ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils/*.[ch])
@@ -357,6 +359,39 @@ macro(NEW_FC_3D_TEST)
   unset(SOURCE_FILE_NAME)
   unset(TEST_NAME_PREFIX)
 endmacro()
+
+MACRO(NEW_FC_TEST_1)
+
+  # check input file name
+  assert(SOURCE_FILE_NAME)
+  # check prefix for test (fc3d, gfc3d ...)
+  assert(TEST_NAME_PREFIX)
+  
+  STRING(CONCAT TEST_NAME ${TEST_NAME_PREFIX} ${TEST_COLLECTION})
+
+  
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/FrictionContact/test/${SOURCE_FILE_NAME} 
+    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+
+  SET(${TEST_NAME}_FSOURCES)
+
+  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
+  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+
+ENDMACRO(NEW_FC_TEST_1)
+
+
+macro(NEW_FC_3D_TEST_COLLECTION)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME fc_test_collection.c.in )
+  set(TEST_NAME_PREFIX fc3d)
+  set(TEST_COLLECTION ${ARGV0})
+  NEW_FC_TEST_1(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
+
 
 macro(NEW_FC_3D_TEST_HDF5)
   # Set name of the file used to generate tests (c)source files.
