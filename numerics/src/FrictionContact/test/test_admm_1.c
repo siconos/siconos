@@ -25,55 +25,60 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
 {
   int n_test=150;
   int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
+  char *** test_admm = (char ***)malloc(n_test*sizeof(char **));
 
   for (int n =0 ; n <n_test ; n++)
   {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
+    test_admm[n] = (char **)malloc(n_entry*sizeof(char *));
   }
 
   int n =0;
   for ( int d =0; d <n_data_1; d++)
   {
-    test_nsgs[n][0] = data_collection_1[d];
-    test_nsgs[n][1] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][1], "%d", SICONOS_FRICTION_3D_ADMM);
-    test_nsgs[n][2] = "1e-5";
-    test_nsgs[n][3] = "10000";
-    test_nsgs[n][4] = "0";
-    test_nsgs[n][5] = "0";
-    test_nsgs[n][6] = "0";
-    test_nsgs[n][7] = "iparam";
-    test_nsgs[n][8] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][8], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
-    test_nsgs[n][9] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][9], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT);
-    test_nsgs[n][10] = "---"; 
+    int e=0;
+    test_admm[n][e++] = data_collection_1[d];
+    test_admm[n][e++] = "0";
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM);
+    test_admm[n][e++] = "1e-5";
+    test_admm[n][e++] = "10000";
+    test_admm[n][e++] = "0";
+    test_admm[n][e++] = "0";
+    test_admm[n][e++] = "0";
+    test_admm[n][e++] = "iparam";
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT);
+    test_admm[n][e++] = "---"; 
     n++;
   }
   for ( int d =0; d <n_data_1; d++)
   {
-    test_nsgs[n][0] = data_collection_1[d];
-    test_nsgs[n][1] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][1], "%d", SICONOS_FRICTION_3D_ADMM);
-    test_nsgs[n][2] = "1e-5";
-    test_nsgs[n][3] = "10000";
-    test_nsgs[n][4] = "0";
-    test_nsgs[n][5] = "0";
-    test_nsgs[n][6] = "0";
-    test_nsgs[n][7] = "iparam";
-    test_nsgs[n][8] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][8], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
-    test_nsgs[n][9] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][9], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING);
-    test_nsgs[n][10] = "---"; 
+    int e=0;
+    test_admm[n][e++] = data_collection_1[d];
+    test_admm[n][e++] = "0";
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM);
+    test_admm[n][e++] = "1e-5";
+    test_admm[n][e++] = "10000";
+    test_admm[n][e++] = "0";
+    test_admm[n][e++] = "0";
+    test_admm[n][e++] = "0";
+    test_admm[n][e++] = "iparam";
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING);
+    test_admm[n][e++] = "---"; 
     n++;
   }
 
+  test_admm[24][1] = "1";  /* FC3D ADMM	./data/Confeti-ex13-Fc3D-SBM.dat */
 
   
 
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+  test_admm[n][0] ="---";
+  return test_admm;
 
 }
