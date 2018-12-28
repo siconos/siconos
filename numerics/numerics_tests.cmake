@@ -6,50 +6,28 @@ set(TEST_WRAP)
 if(WITH_${COMPONENT}_TESTING)
 
   BEGIN_TEST(src/tools/test)
-  if(HAS_LAPACK_DGESVD)
-    NEW_TEST(pinvtest testpinv.c)
-  endif()
+
   NEW_TEST(test_op3x3 test_op3x3.c)
+  
   NEW_TEST(test_timers_interf test_timers_interf.c)
-  NEW_TEST(test_cblas test_cblas.c)
-  NEW_TEST(test_dgesv test_dgesv.c)
+
+  NEW_TEST(test_blas_lapack test_blas_lapack.c)
   if(HAS_LAPACK_DGESVD)
-    NEW_TEST(test_gesvd test_gesvd.c)
+    NEW_TEST(test_pinv test_pinv.c)
   endif()
-  if(HAS_LAPACK_DGELS)
-    NEW_TEST(test_dgels test_dgels.c)
-  endif()
-  NEW_TEST(test_dpotrf test_dpotrf.c)
 
   NEW_TEST(NumericsArrays_test NumericsArrays.c)
-  
-  #NEW_TEST(NumericsMatrixTest main_NumericsMatrix.c)
-  NEW_TEST(NumericsMatrix_IO_test NumericsMatrix_IO_test.c)
-  NEW_TEST(NumericsMatrix_gemv NumericsMatrix_gemv.c)
-  NEW_TEST(NumericsMatrix_gemm NumericsMatrix_gemm.c)
-  NEW_TEST(NumericsMatrix_row_prod NumericsMatrix_row_prod.c)
-  NEW_TEST(NumericsMatrix_row_prod_non_square NumericsMatrix_row_prod_non_square.c)
-  NEW_TEST(NumericsMatrix_row_prod_no_diag NumericsMatrix_row_prod_no_diag.c)
-  NEW_TEST(NumericsMatrix_row_prod_no_diag_non_square NumericsMatrix_row_prod_no_diag_non_square.c)
-  NEW_TEST(NumericsMatrix_add_to_diag3 NumericsMatrix_add_to_diag3.c)
-  NEW_TEST(NumericsMatrix_convert NumericsMatrix_convert.c)
-  # Specfic tests for SBM matrices 
-  NEW_TEST(SBM_row_to_dense SBM_row_to_dense.c)
-  NEW_TEST(SBM_row_permutation SBM_row_permutation.c)
-  NEW_TEST(SBM_column_permutation SBM_column_permutation.c)
-  NEW_TEST(SBM_to_dense SBM_to_dense.c)
-  NEW_TEST(SBM_to_sparse SBM_to_sparse.c)
+
+  #  tests for NumericsMatrix
+  NEW_TEST(NumericsMatrix_test NM_test.c)
+
+  # Specific tests for SBM matrices
+  NEW_TEST(SBM_test SBM_test.c)
   NEW_TEST(SBCM_to_SBM SBCM_to_SBM.c)
-  NEW_TEST(SBM_extract_component_3x3 SBM_extract_component_3x3.c)
-  NEW_TEST(SBM_add SBM_add.c)
-  NEW_TEST(SBM_multiply SBM_multiply.c)
-  NEW_TEST(SBM_zentry SBM_zentry.c)
-  NEW_TEST(SBM_gemm_without_allocation SBM_gemm_without_allocation.c)
   
-  # Specfic tests for sparse matrices 
-  NEW_TEST(SparseMatrix0 SparseMatrix_test0.c)
-  NEW_TEST(SparseMatrix_NM_gemm SparseMatrix_NM_gemm.c)
-  NEW_TEST(SparseMatrix_NM_add SparseMatrix_NM_add.c)
+  # Specific tests for sparse matrices
+  NEW_TEST(SparseMatrix_test SparseMatrix_test.c)
+  
   IF(HAS_ONE_LP_SOLVER)
     NEW_TEST(Vertex_extraction vertex_problem.c)
   ENDIF(HAS_ONE_LP_SOLVER)
