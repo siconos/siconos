@@ -39,7 +39,170 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test_lcp[n][e++] = data_collection_1[d];
     test_lcp[n][e++] = "0";
     test_lcp[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_NSGS_SBM);
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_LEMKE);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  
+  /* for ( int d =0; d <n_data_1; d++) */
+  /* { */
+  /*   int e=0; */
+  /*   test_lcp[n][e++] = data_collection_1[d]; */
+  /*   test_lcp[n][e++] = "0"; */
+  /*   test_lcp[n][e] = (char *)malloc(50*sizeof(char)); */
+  /*   sprintf(test_lcp[n][e++], "%d", SICONOS_FRICTION_3D_NSGS); */
+  /*   test_lcp[n][e++] = "1e-5"; */
+  /*   test_lcp[n][e++] = "10000"; */
+  /*   test_lcp[n][e] = (char *)malloc(50*sizeof(char)); */
+  /*   sprintf(test_lcp[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP); */
+  /*   test_lcp[n][e++] = "0.0"; */
+  /*   test_lcp[n][e++] = "0"; */
+  /*   test_lcp[n][e++] = "internal_iparam"; */
+  /*   test_lcp[n][e++] = "10"; */
+  /*   test_lcp[n][e++] = "1"; */
+  /*   test_lcp[n][e++] = "---";  */
+  /*   n++; */
+  /* } */
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_CPG);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_PGS);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_RPGS);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_LATIN);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_LATIN_W);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_AVI_CAOFERRIS);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_NEWTONMIN);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_NEWTON_FBLSA);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_NEWTON_MINFBLSA);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_BARD);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_MURTY);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_PIVOT);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_PIVOT_LUMOD);
+    test_lcp[n][e++] = "---"; 
+    n++;
+  }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_lcp[n][e++] = data_collection_1[d];
+    test_lcp[n][e++] = "0";
+    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_PATHSEARCH);
     test_lcp[n][e++] = "---"; 
     n++;
   }

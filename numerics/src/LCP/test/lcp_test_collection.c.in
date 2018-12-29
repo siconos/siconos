@@ -31,22 +31,22 @@
 
 #ifdef TEST_LCP_COLLECTION_1
 #include "data_collection_1.c"
-#include "test_solvers_collection.c"
+#include "test_solvers_collection_1.c"
 #endif
 
 #ifdef TEST_LCP_COLLECTION_2
 #include "data_collection_2.c"
-#include "test_solvers_collection_0.c"
+#include "test_solvers_collection_1.c"
 #endif
 
 #ifdef TEST_LCP_COLLECTION_3 /* SBM */
 #include "data_collection_3.c"
-#include "test_solvers_collection_1.c"
+#include "test_solvers_collection_2.c"
 #endif
 
 #ifdef TEST_LCP_COLLECTION_4
 #include "data_collection_4.c"
-#include "test_solvers_collection.c"
+#include "test_solvers_collection_3.c"
 #endif
 
 

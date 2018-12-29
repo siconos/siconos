@@ -35,8 +35,6 @@ if(WITH_${COMPONENT}_TESTING)
 
   BEGIN_TEST2(src/LCP/test)
 
-
-
   FILE(GLOB_RECURSE _DATA_FILES 
     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
     data_collection*.c
@@ -45,39 +43,41 @@ if(WITH_${COMPONENT}_TESTING)
   FOREACH(_F ${_DATA_FILES})
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_F} COPYONLY)
   ENDFOREACH(_F ${_DATA_FILES})
+
+  NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
+
   NEW_LCP_TEST_COLLECTION(TEST_LCP_COLLECTION_1)
-  
   NEW_LCP_TEST_COLLECTION(TEST_LCP_COLLECTION_2)
   NEW_LCP_TEST_COLLECTION(TEST_LCP_COLLECTION_3)
   NEW_LCP_TEST_COLLECTION(TEST_LCP_COLLECTION_4)
 
 
   
-  MACRO(SET_LCP_TEST_AS_FAILED DATASET_LCP_DIAG FAILING_ALGO)
-    FOREACH(_DS ${DATASET_LCP_DIAG})
-      FOREACH(_SOLVER ${FAILING_ALGO})
-	SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
-      ENDFOREACH()
-    ENDFOREACH()
-  ENDMACRO()
+  # MACRO(SET_LCP_TEST_AS_FAILED DATASET_LCP_DIAG FAILING_ALGO)
+  #   FOREACH(_DS ${DATASET_LCP_DIAG})
+  #     FOREACH(_SOLVER ${FAILING_ALGO})
+  # 	SET(test-LCP_${_SOLVER}-lcp_${_DS}_PROPERTIES WILL_FAIL TRUE)
+  #     ENDFOREACH()
+  #   ENDFOREACH()
+  # ENDMACRO()
 
-  SET(DATASET_LCP "lcp_mmc.dat;lcp_deudeu.dat;lcp_trivial.dat;lcp_ortiz.dat;lcp_enum_fails.dat")
-  LIST(APPEND DATASET_LCP
-    "lcp_exp_murty.dat;lcp_exp_murty2.dat;lcp_CPS_1.dat;lcp_CPS_2.dat;lcp_CPS_3.dat;lcp_CPS_4.dat;lcp_CPS_4bis.dat;lcp_CPS_5.dat")
-  SET(DATASET_BLOCK_LCP "lcp_deudeu_block.dat")
-  # PSOR is not working :(
+  # SET(DATASET_LCP "lcp_mmc.dat;lcp_deudeu.dat;lcp_trivial.dat;lcp_ortiz.dat;lcp_enum_fails.dat")
+  # LIST(APPEND DATASET_LCP
+  #   "lcp_exp_murty.dat;lcp_exp_murty2.dat;lcp_CPS_1.dat;lcp_CPS_2.dat;lcp_CPS_3.dat;lcp_CPS_4.dat;lcp_CPS_4bis.dat;lcp_CPS_5.dat")
+  # SET(DATASET_BLOCK_LCP "lcp_deudeu_block.dat")
+  # # PSOR is not working :(
 
-  SET(SICONOS_LCP_SOLVERS
-    "ENUM;LEMKE;CPG;PGS;RPGS;LATIN;LATIN_W;AVI_CAOFERRIS;NEWTONMIN;NEWTON_FBLSA;NEWTON_MINFBLSA;BARD;MURTY;PIVOT;PIVOT_LUMOD;PATHSEARCH;CONVEXQP_PG")
-  if(HAS_FORTRAN AND HAVE_QL0001)
-    LIST(APPEND SICONOS_LCP_SOLVERS "QP;NSQP;")
-  endif()
-  IF(HAVE_PATHFERRIS)
-    LIST(APPEND SICONOS_LCP_SOLVERS "PATH")
-  ENDIF()
-  IF(HAVE_GAMS_C_API)
-    LIST(APPEND SICONOS_LCP_SOLVERS "GAMS")
-  ENDIF(HAVE_GAMS_C_API)
+  # SET(SICONOS_LCP_SOLVERS
+  #   "ENUM;LEMKE;CPG;PGS;RPGS;LATIN;LATIN_W;AVI_CAOFERRIS;NEWTONMIN;NEWTON_FBLSA;NEWTON_MINFBLSA;BARD;MURTY;PIVOT;PIVOT_LUMOD;PATHSEARCH;CONVEXQP_PG")
+  # if(HAS_FORTRAN AND HAVE_QL0001)
+  #   LIST(APPEND SICONOS_LCP_SOLVERS "QP;NSQP;")
+  # endif()
+  # IF(HAVE_PATHFERRIS)
+  #   LIST(APPEND SICONOS_LCP_SOLVERS "PATH")
+  # ENDIF()
+  # IF(HAVE_GAMS_C_API)
+  #   LIST(APPEND SICONOS_LCP_SOLVERS "GAMS")
+  # ENDIF(HAVE_GAMS_C_API)
   # FOREACH(_DS ${DATASET_LCP})
   #   FOREACH(_SOLVER ${SICONOS_LCP_SOLVERS})
   #     NEW_LCP_TEST(SICONOS_LCP_${_SOLVER} ${_DS})
@@ -145,30 +145,29 @@ if(WITH_${COMPONENT}_TESTING)
   # SET(test-LCP_NEWTON_FBLSA-lcp_CPS_1_PROPERTIES WILL_FAIL TRUE)
 
   # special tests
-  NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol.dat)
-  NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol_perturbed.dat)
-  SET(test-LCP_ENUM-lcp_Pang_isolated_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
-  NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_inf_sol_perturbed.dat)
+  # NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol.dat)
+  # NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol_perturbed.dat)
+  # SET(test-LCP_ENUM-lcp_Pang_isolated_sol_perturbed_PROPERTIES WILL_FAIL TRUE)
+  # NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_inf_sol_perturbed.dat)
 
   # TODO refinment of solution
   # NEW_LCP_TEST(SICONOS_LCP_LEMKE lcp_tobenna.dat)
   # NEW_LCP_TEST(SICONOS_LCP_PIVOT lcp_tobenna.dat)
   #  NEW_LCP_TEST(SICONOS_LCP_PIVOT_LUMOD lcp_tobenna.dat)
   # LUMOD is not ready for prime time now
-  SET(test-LCP_PIVOT_LUMOD-lcp_mmc_PROPERTIES WILL_FAIL TRUE)
-  IF(DEV_MODE)
-    SET(test-LCP_PIVOT-lcp_tobenna_PROPERTIES WILL_FAIL FALSE)
-    #   SET(test-LCP_PIVOT_LUMOD-lcp_tobenna_PROPERTIES WILL_FAIL FALSE)
-  ENDIF(DEV_MODE)
+  # SET(test-LCP_PIVOT_LUMOD-lcp_mmc_PROPERTIES WILL_FAIL TRUE)
+  # IF(DEV_MODE)
+  #   SET(test-LCP_PIVOT-lcp_tobenna_PROPERTIES WILL_FAIL FALSE)
+  #   #   SET(test-LCP_PIVOT_LUMOD-lcp_tobenna_PROPERTIES WILL_FAIL FALSE)
+  # ENDIF(DEV_MODE)
 
-  IF(HAVE_PATHFERRIS)
-    NEW_LCP_TEST(SICONOS_LCP_PATH lcp_tobenna.dat)
-  ENDIF(HAVE_PATHFERRIS)
-  IF(HAVE_GAMS_C_API)
-    NEW_LCP_TEST(SICONOS_LCP_GAMS lcp_tobenna.dat)
-  ENDIF(HAVE_GAMS_C_API)
+  # IF(HAVE_PATHFERRIS)
+  #   NEW_LCP_TEST(SICONOS_LCP_PATH lcp_tobenna.dat)
+  # ENDIF(HAVE_PATHFERRIS)
+  # IF(HAVE_GAMS_C_API)
+  #   NEW_LCP_TEST(SICONOS_LCP_GAMS lcp_tobenna.dat)
+  # ENDIF(HAVE_GAMS_C_API)
 
-  NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
 
   END_TEST(LCP/test)
 
