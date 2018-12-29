@@ -54,7 +54,7 @@ set(installed_targets ${installed_targets}
 set(PRIVATE PRIVATE CACHE INTERNAL "")
 set(PUBLIC PUBLIC CACHE INTERNAL "")
 
-set(tests_timeout 30 CACHE INTERNAL "Limit time for tests (in seconds)")
+set(tests_timeout 60 CACHE INTERNAL "Limit time for tests (in seconds)")
 
 # extensions of source files that must be taken into account
 get_standard_ext()

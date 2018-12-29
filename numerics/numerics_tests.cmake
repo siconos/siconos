@@ -35,6 +35,24 @@ if(WITH_${COMPONENT}_TESTING)
 
   BEGIN_TEST2(src/LCP/test)
 
+
+
+  FILE(GLOB_RECURSE _DATA_FILES 
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
+    data_collection*.c
+    test_*.c)
+  
+  FOREACH(_F ${_DATA_FILES})
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_F} COPYONLY)
+  ENDFOREACH(_F ${_DATA_FILES})
+  NEW_LCP_TEST_COLLECTION(TEST_LCP_COLLECTION_1)
+  
+  NEW_LCP_TEST_COLLECTION(TEST_LCP_COLLECTION_2)
+  NEW_LCP_TEST_COLLECTION(TEST_LCP_COLLECTION_3)
+  NEW_LCP_TEST_COLLECTION(TEST_LCP_COLLECTION_4)
+
+
+  
   MACRO(SET_LCP_TEST_AS_FAILED DATASET_LCP_DIAG FAILING_ALGO)
     FOREACH(_DS ${DATASET_LCP_DIAG})
       FOREACH(_SOLVER ${FAILING_ALGO})
@@ -60,71 +78,71 @@ if(WITH_${COMPONENT}_TESTING)
   IF(HAVE_GAMS_C_API)
     LIST(APPEND SICONOS_LCP_SOLVERS "GAMS")
   ENDIF(HAVE_GAMS_C_API)
-  FOREACH(_DS ${DATASET_LCP})
-    FOREACH(_SOLVER ${SICONOS_LCP_SOLVERS})
-      NEW_LCP_TEST(SICONOS_LCP_${_SOLVER} ${_DS})
-    ENDFOREACH()
-  ENDFOREACH()
-  FOREACH(_DS ${DATASET_BLOCK_LCP})
-    FOREACH(_SOLVER ${SICONOS_LCP_SOLVERS})
-      NEW_LCP_TEST(SICONOS_LCP_${_SOLVER} ${_DS} 1)
-    ENDFOREACH()
-  ENDFOREACH()
+  # FOREACH(_DS ${DATASET_LCP})
+  #   FOREACH(_SOLVER ${SICONOS_LCP_SOLVERS})
+  #     NEW_LCP_TEST(SICONOS_LCP_${_SOLVER} ${_DS})
+  #   ENDFOREACH()
+  # ENDFOREACH()
+  # FOREACH(_DS ${DATASET_BLOCK_LCP})
+  #   FOREACH(_SOLVER ${SICONOS_LCP_SOLVERS})
+  #     NEW_LCP_TEST(SICONOS_LCP_${_SOLVER} ${_DS} 1)
+  #   ENDFOREACH()
+  # ENDFOREACH()
 
-  # CPG does not work everywhere
-  SET(test-LCP_CPG-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_CPG-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_CPG-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_CPG-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_CPG-lcp_enum_fails_PROPERTIES WILL_FAIL TRUE)
+  # # CPG does not work everywhere
+  # SET(test-LCP_CPG-lcp_exp_murty_PROPERTIES WILL_FAIL TRUE)
+  # SET(test-LCP_CPG-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
+  # SET(test-LCP_CPG-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
+  # SET(test-LCP_CPG-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
+  # SET(test-LCP_CPG-lcp_enum_fails_PROPERTIES WILL_FAIL TRUE)
 
-  # problem with Cholesky here
-  SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2" "LATIN;LATIN_W")
-  RM_TEST2(SICONOS_LCP_LATIN "lcp_ortiz.dat")
-  RM_TEST2(SICONOS_LCP_LATIN_W "lcp_ortiz.dat")
+  # # problem with Cholesky here
+  # SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2" "LATIN;LATIN_W")
+  # RM_TEST2(SICONOS_LCP_LATIN "lcp_ortiz.dat")
+  # RM_TEST2(SICONOS_LCP_LATIN_W "lcp_ortiz.dat")
 
-  # QP reformulation does not always work when the matrix is not symmetric
-  # Use NSQP
-  SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2;ortiz;enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "QP")
-  SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2;" "CONVEXQP_PG")
+  # # QP reformulation does not always work when the matrix is not symmetric
+  # # Use NSQP
+  # SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2;ortiz;enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "QP")
+  # SET_LCP_TEST_AS_FAILED("exp_murty;exp_murty2;" "CONVEXQP_PG")
 
-  # NEWTONMIN has no backup descent dir -> problem in DGESV -> GAME OVER !
-  SET(test-LCP_NEWTONMIN-lcp_CPS_1_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_NEWTONMIN-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_NEWTONMIN-lcp_CPS_5_PROPERTIES WILL_FAIL TRUE)
-
-
-
-  # NaN showing up in DGESV -> NEWTONMIN looks really buggy
-  SET(test-LCP_NEWTONMIN-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_NEWTONMIN-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
-  SET(test-LCP_NEWTONMIN-lcp_enum_fails_PROPERTIES WILL_FAIL TRUE)
-
-  IF(NOT WITH_UNSTABLE_TEST)
-    RM_TEST2(SICONOS_LCP_NEWTONMIN "lcp_mmc.dat")
-  ENDIF()
+  # # NEWTONMIN has no backup descent dir -> problem in DGESV -> GAME OVER !
+  # SET(test-LCP_NEWTONMIN-lcp_CPS_1_PROPERTIES WILL_FAIL TRUE)
+  # SET(test-LCP_NEWTONMIN-lcp_CPS_2_PROPERTIES WILL_FAIL TRUE)
+  # SET(test-LCP_NEWTONMIN-lcp_CPS_5_PROPERTIES WILL_FAIL TRUE)
 
 
-  # those test cannot be solved with an algorithm that requires non-zero
-  # diagonal elements, that is PGS, BARD, MURTY, LATIN and LATIN_W
-  SET_LCP_TEST_AS_FAILED("enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "PGS;BARD;MURTY;LATIN;LATIN_W;CONVEXQP_PG")
-  # suprinsingly this works ...
-  SET(test-LCP_MURTY-lcp_enum_fails_PROPERTIES WILL_FAIL FALSE)
 
-  # those test cannot be solved with Lemke-based solvers (CPS_3 is for Lemke-Howson)
-  SET_LCP_TEST_AS_FAILED("CPS_3" "LEMKE;AVI_CAOFERRIS;PIVOT;PIVOT_LUMOD;PATHSEARCH")
+  # # NaN showing up in DGESV -> NEWTONMIN looks really buggy
+  # SET(test-LCP_NEWTONMIN-lcp_CPS_4_PROPERTIES WILL_FAIL TRUE)
+  # SET(test-LCP_NEWTONMIN-lcp_CPS_4bis_PROPERTIES WILL_FAIL TRUE)
+  # SET(test-LCP_NEWTONMIN-lcp_enum_fails_PROPERTIES WILL_FAIL TRUE)
 
-  # PSD matrices and those algo does not seem to be a good idea
-  SET_LCP_TEST_AS_FAILED("CPS_2;CPS_3" "NSQP;RPGS")
+  # IF(NOT WITH_UNSTABLE_TEST)
+  #   RM_TEST2(SICONOS_LCP_NEWTONMIN "lcp_mmc.dat")
+  # ENDIF()
 
-  # lcp_mmc is of size 26, way too much for enum
-  RM_TEST2(SICONOS_LCP_ENUM "lcp_mmc.dat")
-  # this LCP was put here to show that enum does not work on every LCP, likely
-  # due to numerical problems, but works on some system ...
-  RM_TEST2(SICONOS_LCP_ENUM "lcp_enum_fails.dat")
 
-  # TODO backup path when GDESV fails
-  SET(test-LCP_NEWTON_FBLSA-lcp_CPS_1_PROPERTIES WILL_FAIL TRUE)
+  # # those test cannot be solved with an algorithm that requires non-zero
+  # # diagonal elements, that is PGS, BARD, MURTY, LATIN and LATIN_W
+  # SET_LCP_TEST_AS_FAILED("enum_fails;CPS_2;CPS_3;CPS_4;CPS_4bis" "PGS;BARD;MURTY;LATIN;LATIN_W;CONVEXQP_PG")
+  # # suprinsingly this works ...
+  # SET(test-LCP_MURTY-lcp_enum_fails_PROPERTIES WILL_FAIL FALSE)
+
+  # # those test cannot be solved with Lemke-based solvers (CPS_3 is for Lemke-Howson)
+  # SET_LCP_TEST_AS_FAILED("CPS_3" "LEMKE;AVI_CAOFERRIS;PIVOT;PIVOT_LUMOD;PATHSEARCH")
+
+  # # PSD matrices and those algo does not seem to be a good idea
+  # SET_LCP_TEST_AS_FAILED("CPS_2;CPS_3" "NSQP;RPGS")
+
+  # # lcp_mmc is of size 26, way too much for enum
+  # RM_TEST2(SICONOS_LCP_ENUM "lcp_mmc.dat")
+  # # this LCP was put here to show that enum does not work on every LCP, likely
+  # # due to numerical problems, but works on some system ...
+  # RM_TEST2(SICONOS_LCP_ENUM "lcp_enum_fails.dat")
+
+  # # TODO backup path when GDESV fails
+  # SET(test-LCP_NEWTON_FBLSA-lcp_CPS_1_PROPERTIES WILL_FAIL TRUE)
 
   # special tests
   NEW_LCP_TEST(SICONOS_LCP_ENUM lcp_Pang_isolated_sol.dat)
@@ -154,6 +172,19 @@ if(WITH_${COMPONENT}_TESTING)
 
   END_TEST(LCP/test)
 
+
+
+
+
+
+
+
+
+
+
+
+
+  
   BEGIN_TEST2(src/Relay/test)
 
   SET(DATA_SET "relay1.dat;relay_2x2.dat;relay_4x4.dat;relay_simple2.dat;step_1x1.dat;step_2x2.dat;step_4x4.dat")
