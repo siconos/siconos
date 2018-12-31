@@ -112,10 +112,38 @@ static inline char* strdup(char* src)
 #include "test_fp_1.c"
 #endif
 
+#ifdef TEST_FP_COLLECTION_2
+#include "data_collection_3.c"
+#include "test_fp_2.c"
+#endif
+
 #ifdef TEST_PROX_COLLECTION_1
 #include "data_collection_3.c"
 #include "test_prox_1.c"
 #endif
+
+
+
+/* #define TIMEOUT 10 */
+/* int do_something_with_device() */
+/* { */
+/*     if (!wait_for_response_from_device()) { */
+/*         return TIMEOUT_ERROR; */
+/*     } */
+/*     // continue with processing */
+/* } */
+
+/* int wait_for_response_from_device() */
+/* { */
+/*     time_t start = time(NULL); */
+/*     while (time(NULL) - start < TIMEOUT) { */
+/*         if (check_device_ready()) { */
+/*             return 1; */
+/*         } */
+/*     } */
+/*     return 0; */
+/* } */
+ 
 
 
 int fc_test(char ** );

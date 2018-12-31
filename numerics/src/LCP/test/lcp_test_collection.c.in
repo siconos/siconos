@@ -150,6 +150,11 @@ int main(void)
   _test_collection[78][1] = "1";
   _test_collection[94][1] = "1";
   _test_collection[95][1] = "1";
+
+  _test_collection[10][1] = "2";
+  _test_collection[27][1] = "2";
+  _test_collection[33][1] = "2";
+  
 #endif
 
 #ifdef TEST_LCP_COLLECTION_2
@@ -230,7 +235,7 @@ int main(void)
 
       failed_tests[n_failed_test]  = n_t;
       n_failed_test++;
-      if (strcmp(_test_collection[n_t][1],"0") == 0)
+      if (strcmp(_test_collection[n_t][1],"0") == 0 )
         out = 1;
     }
     else
@@ -263,6 +268,12 @@ int main(void)
     else if (strcmp(_test_collection[failed_tests[t]][1],"0") ==0)
     {
       printf("test %i \t should not fail : \t %s\t",
+             failed_tests[t],
+             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
+    }
+    else if (strcmp(_test_collection[failed_tests[t]][1],"2") ==0)
+    {
+      printf("test %i \t unstable : \t %s\t",
              failed_tests[t],
              solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
     }

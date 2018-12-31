@@ -150,6 +150,10 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
   n++;
 
 
+#ifdef WITH_UMFPACK
+  test_nsn[5][1] = "1";
+  test_nsn[8][1] = "1";
+#endif
 
 
 
