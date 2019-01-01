@@ -72,6 +72,11 @@ static inline char* strdup(char* src)
 #include "test_nsgs_4.c"
 #endif
 
+#ifdef TEST_NSGS_COLLECTION_4
+#include "data_collection_4.c"
+#include "test_nsgs_4.c"
+#endif
+
 #ifdef TEST_NSGS_COLLECTION_5
 #include "data_collection_3.c"
 #include "test_nsgs_5.c"
