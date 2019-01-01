@@ -72,11 +72,6 @@ static inline char* strdup(char* src)
 #include "test_nsgs_4.c"
 #endif
 
-#ifdef TEST_NSGS_COLLECTION_4
-#include "data_collection_4.c"
-#include "test_nsgs_4.c"
-#endif
-
 #ifdef TEST_NSGS_COLLECTION_5
 #include "data_collection_3.c"
 #include "test_nsgs_5.c"
@@ -333,10 +328,10 @@ int main (void)
   }
   printf("number of tests = %i\n", n_test);
 
-#ifdef TEST_ADMM_COLLECTION_3 */
+#ifdef TEST_ADMM_COLLECTION_3 
   _test_collection[1][1] = "1";  /*FC3D ADMM	./data/LMGC_100_PR_PerioBox-i00361-60-03000.hdf5 */
   _test_collection[3][1] = "1";  /*FC3D ADMM	./data/LMGC_100_PR_PerioBox-i00361-60-03000.hdf5 */
-#endif */
+#endif 
 
 
   
