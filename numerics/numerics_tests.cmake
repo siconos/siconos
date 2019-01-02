@@ -7,29 +7,29 @@ if(WITH_${COMPONENT}_TESTING)
 
   BEGIN_TEST(src/tools/test)
 
-  NEW_TEST(test_op3x3 test_op3x3.c)
+  NEW_TEST(tools_test_op3x3 test_op3x3.c)
   
-  NEW_TEST(test_timers_interf test_timers_interf.c)
+  NEW_TEST(tools_test_timers_interf test_timers_interf.c)
 
-  NEW_TEST(test_blas_lapack test_blas_lapack.c)
+  NEW_TEST(tools_test_blas_lapack test_blas_lapack.c)
   if(HAS_LAPACK_DGESVD)
-    NEW_TEST(test_pinv test_pinv.c)
+    NEW_TEST(tools_test_pinv test_pinv.c)
   endif()
 
-  NEW_TEST(NumericsArrays_test NumericsArrays.c)
+  NEW_TEST(tools_test_NumericsArrays NumericsArrays.c)
 
   #  tests for NumericsMatrix
-  NEW_TEST(NumericsMatrix_test NM_test.c)
+  NEW_TEST(tools_test_NumericsMatrix NM_test.c)
 
   # Specific tests for SBM matrices
-  NEW_TEST(SBM_test SBM_test.c)
-  NEW_TEST(SBCM_to_SBM SBCM_to_SBM.c)
+  NEW_TEST(tools_test_SBM SBM_test.c)
+  NEW_TEST(tools_test_SBCM_to_SBM SBCM_to_SBM.c)
   
   # Specific tests for sparse matrices
-  NEW_TEST(SparseMatrix_test SparseMatrix_test.c)
+  NEW_TEST(tools_test_SparseMatrix SparseMatrix_test.c)
   
   IF(HAS_ONE_LP_SOLVER)
-    NEW_TEST(Vertex_extraction vertex_problem.c)
+    NEW_TEST(tools_test_Vertex_extraction vertex_problem.c)
   ENDIF(HAS_ONE_LP_SOLVER)
   END_TEST()
 
@@ -44,7 +44,7 @@ if(WITH_${COMPONENT}_TESTING)
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_F} COPYONLY)
   ENDFOREACH(_F ${_DATA_FILES})
 
-  NEW_TEST(LCP_DefaultSolverOptionstest LinearComplementarity_DefaultSolverOptions_test.c)
+  NEW_TEST(lcp_test_DefaultSolverOptions LinearComplementarity_DefaultSolverOptions_test.c)
 
   NEW_LCP_TEST_COLLECTION(TEST_LCP_COLLECTION_1)
   NEW_LCP_TEST_COLLECTION(TEST_LCP_COLLECTION_2)
@@ -170,19 +170,6 @@ if(WITH_${COMPONENT}_TESTING)
 
 
   END_TEST(LCP/test)
-
-
-
-
-
-
-
-
-
-
-
-
-
   
   BEGIN_TEST2(src/Relay/test)
 
@@ -204,22 +191,22 @@ if(WITH_${COMPONENT}_TESTING)
   # ENUM on an LCP of size 30 is a bad idea ...
   RM_TEST2(RELAY_ENUM "relay1.dat")
 
-  NEW_TEST(Relaytest1 relay_test1.c)
-  NEW_TEST(Relaytest2 relay_test2.c)
+  NEW_TEST(test_relay_1 relay_test1.c)
+  NEW_TEST(test_relay_2 relay_test2.c)
 
   IF(HAVE_PATHFERRIS)
     NEW_TEST(Relaytest3 relay_test3.c)
   ENDIF(HAVE_PATHFERRIS)
 
-  NEW_TEST(Relaytest10 relay_test10.c)
-  NEW_TEST(Relaytest11 relay_test11.c)
-  NEW_TEST(Relaytest12 relay_test12.c)
-  NEW_TEST(Relaytest13 relay_test13.c)
-  NEW_TEST(Relaytest20 relay_test20.c)
-  NEW_TEST(Steptest1 step_test1.c)
-  NEW_TEST(Steptest2 step_test2.c)
-  NEW_TEST(Steptest3 step_test3.c)
-  NEW_TEST(Steptest4 step_test4.c)
+  NEW_TEST(test_relay_10 relay_test10.c)
+  NEW_TEST(test_relay_11 relay_test11.c)
+  NEW_TEST(test_relay_12 relay_test12.c)
+  NEW_TEST(test_relay_13 relay_test13.c)
+  NEW_TEST(test_relay_20 relay_test20.c)
+  NEW_TEST(test_step_1 step_test1.c)
+  NEW_TEST(test_step_2 step_test2.c)
+  NEW_TEST(test_step_3 step_test3.c)
+  NEW_TEST(test_step_4 step_test4.c)
 
   END_TEST()
 
