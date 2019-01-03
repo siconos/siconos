@@ -71,6 +71,7 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test_nsgs[n][e++] = "---";
     n++;
   }
+
 #endif
   for ( int d =0; d <n_data_1; d++)
   {
@@ -209,7 +210,7 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test_nsgs[n][e++] = "---";
     n++;
   }
-
+#ifdef HAS_LAPACK_DGESVD
   test_nsgs[5][1] = "1";
   test_nsgs[6][1] = "1";
   test_nsgs[19][1] = "1";
@@ -219,7 +220,23 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
   test_nsgs[58][1] = "1";
   test_nsgs[59][1] = "1";
   test_nsgs[65][1] = "1";
+#else
+  test_nsgs[5][1] = "1";
+  test_nsgs[6][1] = "1";
+  test_nsgs[12][1] = "1";
+  test_nsgs[24][1] = "1";
+  test_nsgs[38][1] = "1";
+  test_nsgs[51][1] = "1";
+  test_nsgs[52][1] = "1";
+  test_nsgs[58][1] = "1";
+  
+#endif
 
+
+
+
+
+  
   test_nsgs[n][0] ="---";
   return test_nsgs;
 
