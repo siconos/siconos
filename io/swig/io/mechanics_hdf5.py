@@ -931,11 +931,11 @@ class MechanicsHdf5(object):
                 translation=com
                 for s in shapes:
                     s.translation =  s.translation - com
-                    
-                
 
 
-            
+
+
+
             if time_of_birth >= 0:
                 obj.attrs['time_of_birth']=time_of_birth
             if time_of_death >= 0:
