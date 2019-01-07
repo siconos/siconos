@@ -625,11 +625,11 @@ int main(void)
   int info = test_0();
   if (!info)
   {
-    printf("end test #%i sucessfull\n",i);
+    printf("end test #%i successful\n",i);
   }
   else
   {
-    printf("end test #%i  not  sucessfull\n",i);
+    printf("end test #%i  not  successful\n",i);
   }
 
   i++;
@@ -637,11 +637,11 @@ int main(void)
   info += test_1();
   if (!info)
   {
-    printf("end test #%i sucessfull\n",i);
+    printf("end test #%i successful\n",i);
   }
   else
   {
-    printf("end test #%i  not  sucessfull\n",i);
+    printf("end test #%i  not  successful\n",i);
   }
   
   i++;
@@ -649,11 +649,11 @@ int main(void)
   info += test_2();
   if (!info)
   {
-    printf("end test #%i sucessfull\n",i);
+    printf("end test #%i successful\n",i);
   }
   else
   {
-    printf("end test #%i  not  sucessfull\n",i);
+    printf("end test #%i  not  successful\n",i);
   }
 
   
@@ -662,11 +662,11 @@ int main(void)
   info += test_3();
   if (!info)
   {
-    printf("end test #%i sucessfull\n",i);
+    printf("end test #%i successful\n",i);
   }
   else
   {
-    printf("end test #%i  not  sucessfull\n",i);
+    printf("end test #%i  not  successful\n",i);
   }
 
   
@@ -675,11 +675,11 @@ int main(void)
   info += test_4();
   if (!info)
   {
-    printf("end test #%i sucessfull\n",i);
+    printf("end test #%i successful\n",i);
   }
   else
   {
-    printf("end test #%i  not  sucessfull\n",i);
+    printf("end test #%i  not  successful\n",i);
   }
   
   i++;
@@ -687,11 +687,11 @@ int main(void)
   info += test_5();
   if (!info)
   {
-    printf("end test #%i sucessfull\n",i);
+    printf("end test #%i successful\n",i);
   }
   else
   {
-    printf("end test #%i  not  sucessfull\n",i);
+    printf("end test #%i  not  successful\n",i);
   }
 
 
