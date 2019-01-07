@@ -391,27 +391,7 @@ if(WITH_${COMPONENT}_TESTING)
   #===========================================
   ## test 2D dense on two differents files
 
-  NEW_FC_2D_TEST(FrictionContactProblem00374.dat SICONOS_FRICTION_2D_NSGS)
-  NEW_FC_2D_TEST(FrictionContactProblem00374.dat SICONOS_FRICTION_2D_CPG)
-  NEW_FC_2D_TEST(FrictionContactProblem00374.dat SICONOS_FRICTION_2D_LATIN)
-  NEW_FC_2D_TEST(FrictionContactProblem00394.dat SICONOS_FRICTION_2D_NSGS)
-  NEW_FC_2D_TEST(FrictionContactProblem00394.dat SICONOS_FRICTION_2D_CPG)
-  NEW_FC_2D_TEST(FrictionContactProblem00394.dat SICONOS_FRICTION_2D_LATIN)
-
-  ## test 2D sparse on 4 differents files
-  NEW_FC_2D_TEST(FrictionContactProblem00727.dat SICONOS_FRICTION_2D_NSGS 1e-12 5000)
-  NEW_FC_2D_TEST(FrictionContactProblem00031.dat SICONOS_FRICTION_2D_NSGS 1e-12 5000)
-  NEW_FC_2D_TEST(FrictionContactProblem00071.dat SICONOS_FRICTION_2D_NSGS 1e-12 5000)
-  NEW_FC_2D_TEST(FrictionContactProblem00237.dat SICONOS_FRICTION_2D_NSGS 1e-12 5000)
-
-  NEW_FC_2D_TEST(FC2D_SliderCrankLagrangian00000.dat SICONOS_FRICTION_2D_LEMKE)
-  NEW_FC_2D_TEST(FrictionContactProblem00374.dat SICONOS_FRICTION_2D_LEMKE)
-  NEW_FC_2D_TEST(FC2D_SliderCrankLagrangian00001.dat SICONOS_FRICTION_2D_LEMKE 0 0
-    0 0 0 WILL_FAIL)
-
-  NEW_FC_2D_TEST(FC2D_SliderCrankLagrangian00000.dat SICONOS_FRICTION_2D_ENUM)
-  NEW_FC_2D_TEST(FC2D_SliderCrankLagrangian00001.dat SICONOS_FRICTION_2D_ENUM)
-
+  NEW_FC_2D_TEST_COLLECTION(TEST_FC2D_COLLECTION_1)
 
   END_TEST()
 
@@ -462,12 +442,6 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(ConvexQP_FC3D_test_collection ConvexQP_FC3D_test.c)
  
   END_TEST()
-
-  # NEW_TEST(ConvexQP_ADMM_reduced ConvexQP_test2.c)
-
-  # IF(WITH_MUMPS)
-  #   SET(ConvexQP_ADMM_reduced_PROPERTIES WILL_FAIL TRUE)
-  # ENDIF(WITH_MUMPS)
 
   
   BEGIN_TEST(src/AVI/test)

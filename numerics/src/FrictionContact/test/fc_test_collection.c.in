@@ -140,6 +140,11 @@ static inline char* strdup(char* src)
 #include "test_quartic_1.c"
 #endif
 
+#ifdef TEST_FC2D_COLLECTION_1
+#include "data_collection_fc2d_1.c"
+#include "test_fc2d_1.c"
+#endif
+
 
 
 /* #define TIMEOUT 10 */

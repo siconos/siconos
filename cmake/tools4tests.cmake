@@ -412,6 +412,16 @@ macro(NEW_FC_2D_TEST)
   unset(TEST_NAME_PREFIX)
 endmacro()
 
+macro(NEW_FC_2D_TEST_COLLECTION)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME fc_test_collection.c.in )
+  set(TEST_NAME_PREFIX fc2d)
+  set(TEST_COLLECTION ${ARGV0})
+  NEW_FC_TEST_1(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
 macro(NEW_GFC_3D_TEST)
   # Set name of the file used to generate tests (c)source files.
   set(SOURCE_FILE_NAME gfc3d_test.c.in )
