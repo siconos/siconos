@@ -172,36 +172,18 @@ if(WITH_${COMPONENT}_TESTING)
   END_TEST(LCP/test)
   
   BEGIN_TEST2(src/Relay/test)
+  FILE(GLOB_RECURSE _DATA_FILES 
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
+    data_collection*.c
+    test_*.c)
+  
+  FOREACH(_F ${_DATA_FILES})
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_F} COPYONLY)
+  ENDFOREACH(_F ${_DATA_FILES})
 
-  SET(DATA_SET "relay1.dat;relay_2x2.dat;relay_4x4.dat;relay_simple2.dat;step_1x1.dat;step_2x2.dat;step_4x4.dat")
-  SET(SICONOS_RELAY_SOLVERS "ENUM;LEMKE;PGS;AVI_CAOFERRIS")
-  IF(HAS_ONE_LP_SOLVER)
-    LIST(APPEND SICONOS_RELAY_SOLVERS "AVI_CAOFERRIS_TEST")
-  ENDIF()
+  NEW_RELAY_TEST_COLLECTION(TEST_RELAY_COLLECTION_1)
 
-  IF(HAVE_PATHFERRIS)
-    LIST(APPEND SICONOS_RELAY_SOLVERS "PATH")
-  ENDIF()
-  FOREACH(_DS ${DATA_SET})
-    FOREACH(_SOLVER ${SICONOS_RELAY_SOLVERS})
-      NEW_RELAY_TEST(SICONOS_RELAY_${_SOLVER} ${_DS})
-    ENDFOREACH()
-  ENDFOREACH()
 
-  # ENUM on an LCP of size 30 is a bad idea ...
-  RM_TEST2(RELAY_ENUM "relay1.dat")
-
-  NEW_TEST(test_relay_1 relay_test1.c)
-  NEW_TEST(test_relay_2 relay_test2.c)
-
-  IF(HAVE_PATHFERRIS)
-    NEW_TEST(Relaytest3 relay_test3.c)
-  ENDIF(HAVE_PATHFERRIS)
-
-  NEW_TEST(test_relay_10 relay_test10.c)
-  NEW_TEST(test_relay_11 relay_test11.c)
-  NEW_TEST(test_relay_12 relay_test12.c)
-  NEW_TEST(test_relay_13 relay_test13.c)
   NEW_TEST(test_relay_20 relay_test20.c)
   NEW_TEST(test_step_1 step_test1.c)
   NEW_TEST(test_step_2 step_test2.c)
@@ -409,16 +391,10 @@ if(WITH_${COMPONENT}_TESTING)
   # === Variationnal inequalities tests ===
 
   BEGIN_TEST(src/VI/test)
-  NEW_TEST(VI_test0 VI_test.c)
-  NEW_TEST(VI_test1 VI_test1.c)
-  NEW_TEST(VI_test2 VI_test2.c)
-  NEW_TEST(VI_test3 VI_test3.c)
-  NEW_TEST(VI_test5 VI_test5.c)
-  NEW_TEST(VI_testFC3D1 VI_testFC3D1.c)
-  NEW_TEST(VI_testFC3D2 VI_testFC3D2.c)
-  NEW_TEST(VI_testFC3D3 VI_testFC3D3.c)
-  SET(VI_testFC3D3_PROPERTIES WILL_FAIL TRUE)
 
+  
+  NEW_TEST(VI_test_collection VI_test_collection_1.c)
+  NEW_TEST(VI_fc3d_test_collection VI_fc3d_test_collection_1.c)
 
   SET(SICONOS_VI_SOLVERS "BOX_QI;BOX_AVI_LSA")
   IF(HAVE_PATHFERRIS)
@@ -435,6 +411,8 @@ if(WITH_${COMPONENT}_TESTING)
     ENDFOREACH()
   ENDFOREACH()
   END_TEST()
+
+  # === QP tests ===
   BEGIN_TEST(src/QP/test)
 
   NEW_TEST(ConvexQP_test_collection ConvexQP_test.c)
