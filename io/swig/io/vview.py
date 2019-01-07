@@ -563,7 +563,7 @@ class InputObserver():
         self.vview.iter_plot.SetSelection(self._current_id)
         self.vview.prec_plot.SetSelection(self._current_id)
 
-#        self.vview.renderer_window.Render()
+        self.vview.renderer_window.Render()
 
     def set_opacity(self):
         for instance, actors in self.vview.dynamic_actors.items():
@@ -701,6 +701,7 @@ class InputObserver():
 
         if key == 'C':
                 this_view.action(self)
+
         self.update()
 
     def time(self, obj, event):
@@ -832,6 +833,7 @@ class IOReader(VTKPythonAlgorithmBase):
         self._io = None
         self._with_contact_forces = with_contact_forces
         self.cf_data = None
+        self.time = 0
         self.points = vtk.vtkPoints()
 
     def RequestInformation(self, request, inInfo, outInfo):
@@ -885,15 +887,25 @@ class IOReader(VTKPythonAlgorithmBase):
         try:
             if self._with_contact_forces:
                 ncfindices = len(self._cf_indices)
-                id_t_cf = min(numpy.searchsorted(self._cf_times, t, side='right'),
+                id_t_cf = min(numpy.searchsorted(self._cf_times, t,
+                                                 side='right'),
                               ncfindices-1)
-                if (id_t_cf > 0):
+                # Check the duration between t and last impact.
+                # If it is superior to current time step, we consider there
+                # is no contact (rebound).
+                # The current time step is the max between slider timestep
+                # and simulation timestep
+                ctimestep = max(self.timestep, self._avg_timestep)
+                if (id_t_cf > 0 and abs(t-self._cf_times[id_t_cf-1])
+                    <= ctimestep):
                     if id_t_cf < ncfindices-1:
-                        self._id_t_m_cf = range(self._cf_indices[id_t_cf],
-                                                self._cf_indices[id_t_cf+1])
+                        self._id_t_m_cf = range(self._cf_indices[id_t_cf-1],
+                                                self._cf_indices[id_t_cf])
                         self.cf_data = self._icf_data[self._id_t_m_cf, :]
+
                     else:
-                        self.cf_data = self._icf_data[self._cf_indices[id_t_cf]:, :]
+                        self.cf_data = self._icf_data[self._cf_indices[
+                            id_t_cf]:, :]
 
                     self._cf_time = self._cf_times[id_t_cf]
 
@@ -908,7 +920,6 @@ class IOReader(VTKPythonAlgorithmBase):
                     vtk_cf_data.SetName('cf_data')
                     output.GetFieldData().AddArray(vtk_cf_data)
         except Exception as e:
-            print(self._cf_indices[id_t_cf])
             print(e)
         return 1
 
@@ -937,6 +948,9 @@ class IOReader(VTKPythonAlgorithmBase):
         # build times steps
         self._times, self._indices = numpy.unique(self._raw_times,
                                                   return_index=True)
+        dcf = self._times[1:]-self._times[:-1]
+        self._avg_timestep = numpy.mean(dcf)
+        self._min_timestep = numpy.min(dcf)
 
         if self._with_contact_forces:
             self._cf_times, self._cf_indices = numpy.unique(self._cf_raw_times,
@@ -960,6 +974,8 @@ class IOReader(VTKPythonAlgorithmBase):
         self.GetOutputInformation(0).Set(
             vtk.vtkStreamingDemandDrivenPipeline.UPDATE_TIME_STEP(),
             time)
+        self.timestep = abs(self.time-time)
+        self.time = time
         self.Update()
 
 # Read file and open VTK interaction window
@@ -2070,12 +2086,13 @@ class VView(object):
             self.input_observer = InputObserver(self)
         self.interactor_renderer.AddObserver('KeyPressEvent', self.input_observer.key)
 
+
         self.interactor_renderer.AddObserver(
             'TimerEvent', self.input_observer.recorder_observer)
 
         if self.io.contact_forces_data().shape[0] > 0:
             self.slwsc, self.slrepsc = self.make_slider(
-                'Scale',
+                'CF scale',
                 self.make_scale_observer([self.cone_glyph, self.cylinder_glyph,
                                           self.sphere_glypha, self.sphere_glyphb,
                                           self.arrow_glyph]),
