@@ -395,6 +395,8 @@ class CFprov():
             self._objs_output[mu] = vtk.vtkPolyData()
             self._objs_output[mu].SetPoints(self._objs_points[mu])
 
+        self.xmethod()
+
     def xmethod(self):
         nan = numpy.nan
 
