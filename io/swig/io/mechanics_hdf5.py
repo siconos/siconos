@@ -837,9 +837,10 @@ class MechanicsHdf5(object):
             self._number_of_shapes += 1
 
     def add_object(self, name, shapes,
-                   translation,
+                   translation =[0, 0, 0],
                    orientation=[1, 0, 0, 0],
                    velocity=[0, 0, 0, 0, 0, 0],
+                   use_volume_centroid_as_initial_translation=False,
                    mass=None, center_of_mass=[0, 0, 0],
                    inertia=None, time_of_birth=-1, time_of_death=-1,
                    allow_self_collide=False):
@@ -882,13 +883,16 @@ class MechanicsHdf5(object):
             The principal moments of inertia (array of length 3) or
             a full 3x3 inertia matrix
 
+        use_volume_centroid_as_initial_translation: boolean.
+            if True and if a Volume is given is the list of shape, the position of
+            the volume centroid is used as initial translation.
         """
         # print(arguments())
         ori = quaternion_get(orientation)
 
         assert (len(translation)==3)
         assert (len(ori)==4)
-
+        is_center_of_mass_computed=False
         if name not in self._input:
 
             com_translation = [0., 0., 0.]
@@ -913,7 +917,7 @@ class MechanicsHdf5(object):
                           computed_inertia[0], computed_inertia[1], computed_inertia[2])
                     print('{0}: computed inertia matrix:'.format(name),
                           computed_inertia_matrix)
-
+                    is_center_of_mass_computed=True
                     if mass is None:
                         mass=computed_mass
 
@@ -922,6 +926,16 @@ class MechanicsHdf5(object):
 
             obj =group(self._input, name)
 
+
+            if use_volume_centroid_as_initial_translation and is_center_of_mass_computed:
+                translation=com
+                for s in shapes:
+                    s.translation =  s.translation - com
+                    
+                
+
+
+            
             if time_of_birth >= 0:
                 obj.attrs['time_of_birth']=time_of_birth
             if time_of_death >= 0:
