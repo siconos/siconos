@@ -398,13 +398,6 @@ class CFprov():
     def xmethod(self):
         nan = numpy.nan
 
-        for mu in self._ioreader._mu_coefs:
-            self.cpa_at_time[mu] = [[0., 0., 0.]]
-            self.cpb_at_time[mu] = [[0., 0., 0.]]
-            self.cn_at_time[mu] =  [[0., 0., 0.]]
-            self.cf_at_time[mu] =  [[0., 0., 0.]]
-            self.ids_at_time[mu] = None
-
         if self._ioreader.cf_data is not None:
             self.contact = True
 
@@ -432,6 +425,16 @@ class CFprov():
                     if len(data[imu,:]) > 26:
                         self.ids_at_time[mu] = data[
                             imu, 23:26].astype(int)
+                    else:
+                        self.ids_at_time[mu] = None
+
+        else:
+            for mu in self._ioreader._mu_coefs:
+                self.cpa_at_time[mu] = [[nan, nan, nan]]
+                self.cpb_at_time[mu] = [[nan, nan, nan]]
+                self.cn_at_time[mu] =  [[nan, nan, nan]]
+                self.cf_at_time[mu] =  [[nan, nan, nan]]
+                self.ids_at_time[mu] = None
 
         for mu in self._ioreader._mu_coefs:
             self.cpa[mu] = numpy_support.numpy_to_vtk(
@@ -879,33 +882,34 @@ class IOReader(VTKPythonAlgorithmBase):
         self.points.SetData(vtk_points_data)
 
         output.GetPointData().AddArray(vtk_velo_data)
+        try:
+            if self._with_contact_forces:
+                ncfindices = len(self._cf_indices)
+                id_t_cf = min(numpy.searchsorted(self._cf_times, t, side='right'),
+                              ncfindices-1)
+                if (id_t_cf > 0):
+                    if id_t_cf < ncfindices-1:
+                        self._id_t_m_cf = range(self._cf_indices[id_t_cf],
+                                                self._cf_indices[id_t_cf+1])
+                        self.cf_data = self._icf_data[self._id_t_m_cf, :]
+                    else:
+                        self.cf_data = self._icf_data[self._cf_indices[id_t_cf]:, :]
 
-        if self._with_contact_forces:
-            current_cft=numpy.searchsorted(self._cf_times, t, side='right')
-            if (current_cft>0):
-                id_t_cf = max(0, current_cft - 1)
-                if id_t_cf < len(self._cf_indices)-1:
-                    self._id_t_m_cf = range(self._cf_indices[id_t_cf],
-                                            self._cf_indices[id_t_cf+1])
+                    self._cf_time = self._cf_times[id_t_cf]
+
+                    vtk_cf_data = dsa.numpyTovtkDataArray(self.cf_data)
+                    vtk_cf_data.SetName('cf_data')
+
+                    output.GetFieldData().AddArray(vtk_cf_data)
                 else:
-                    self._id_t_m_cf = [self._cf_indices[id_t_cf]]
-
-                self._cf_time = self._cf_times[id_t_cf]
-
-                self.cf_data = self._icf_data[self._id_t_m_cf, :]
-
-                vtk_cf_data = dsa.numpyTovtkDataArray(self.cf_data)
-                vtk_cf_data.SetName('cf_data')
-
-                output.GetFieldData().AddArray(vtk_cf_data)
-            else:
-                # there is no contact forces at this time
-                self.cf_data = None
-                vtk_cf_data = dsa.numpyTovtkDataArray(numpy.array([]))
-                vtk_cf_data.SetName('cf_data')
-                output.GetFieldData().AddArray(vtk_cf_data)
-
-
+                    # there is no contact forces at this time
+                    self.cf_data = None
+                    vtk_cf_data = dsa.numpyTovtkDataArray(numpy.array([]))
+                    vtk_cf_data.SetName('cf_data')
+                    output.GetFieldData().AddArray(vtk_cf_data)
+        except Exception as e:
+            print(self._cf_indices[id_t_cf])
+            print(e)
         return 1
 
     def SetIO(self, io):
