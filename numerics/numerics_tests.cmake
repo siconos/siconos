@@ -175,34 +175,31 @@ if(WITH_${COMPONENT}_TESTING)
   FILE(GLOB_RECURSE _DATA_FILES 
     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${_D}
     data_collection*.c
-    test_*.c)
-  
+    test_*.c)  
   FOREACH(_F ${_DATA_FILES})
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/${_D}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${_D}/${_F} COPYONLY)
   ENDFOREACH(_F ${_DATA_FILES})
 
   NEW_RELAY_TEST_COLLECTION(TEST_RELAY_COLLECTION_1)
 
-
-  NEW_TEST(test_relay_20 relay_test20.c)
-  NEW_TEST(test_step_1 step_test1.c)
-  NEW_TEST(test_step_2 step_test2.c)
-  NEW_TEST(test_step_3 step_test3.c)
-  NEW_TEST(test_step_4 step_test4.c)
+  NEW_TEST(relay_test_20 relay_test20.c)
+  NEW_TEST(step_test_1 step_test1.c)
+  NEW_TEST(step_test_2 step_test2.c)
+  NEW_TEST(step_test_3 step_test3.c)
+  NEW_TEST(step_test_4 step_test4.c)
 
   END_TEST()
-
 
   BEGIN_TEST(src/MLCP/test)
   IF(HAVE_SYSTIMES_H AND WITH_CXX)
-    NEW_TEST(MLCPtest main_mlcp.cpp)
+    NEW_TEST(MLCP_test_0 main_mlcp.cpp)
   ENDIF(HAVE_SYSTIMES_H AND WITH_CXX)
-  NEW_TEST(ReadWrite_MLCPtest MixedLinearComplementarity_ReadWrite_test.c)
+  NEW_TEST(MLCP_test_read_write MixedLinearComplementarity_ReadWrite_test.c)
   END_TEST()
 
   BEGIN_TEST(src/MCP/test)
-  NEW_TEST(MCPtest MCP_test.c)
-  NEW_TEST(MCPtest1 MCP_test1.c)
+  NEW_TEST(MCP_test_0 MCP_test.c)
+  NEW_TEST(MCP_test_1 MCP_test1.c)
   END_TEST()
 
   BEGIN_TEST(src/NCP/test)
