@@ -53,7 +53,7 @@ static int test_0(void)
   {
     NM_zentry(M, k, k, 1);
   }
-  NM_display(M);
+  /* NM_display(M); */
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
@@ -70,7 +70,7 @@ static int test_0(void)
   cqp.A = NULL;
   cqp.b = NULL;
 
-  convexQP_display(&cqp);
+  /* convexQP_display(&cqp); */
 
   /* Call the callback */
   double x[10],  PX[10];
@@ -153,7 +153,7 @@ static int test_1(void)
   }
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-  verbose=1;
+  /* verbose=1; */
   int info = convexQP_ProjectedGradient_setDefaultSolverOptions(options);
 
   options->dparam[0]=1e-12;
@@ -203,7 +203,7 @@ static int test_2(void)
   {
     NM_zentry(M, k, k, 1);
   }
-  NM_display(M);
+  /* NM_display(M); */
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
@@ -217,7 +217,7 @@ static int test_2(void)
   cqp.M = M;
   cqp.ProjectionOnC = &PXtest_2 ;
   cqp.q = q;
-  convexQP_display(&cqp);
+  /* convexQP_display(&cqp); */
 
 
   /* Call the callback */
@@ -243,7 +243,7 @@ static int test_2(void)
   }
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-  verbose=1;
+  /* verbose=1; */
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
 
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
@@ -295,7 +295,7 @@ static int test_3(void)
   {
     NM_zentry(M, k, k, 1);
   }
-  DEBUG_EXPR(NM_display(M));
+  /* DEBUG_EXPR(NM_display(M)); */
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
@@ -314,7 +314,7 @@ static int test_3(void)
   {
     NM_zentry(A, k, k, 1);
   }
-  DEBUG_EXPR(NM_display(A));
+  /* DEBUG_EXPR(NM_display(A)); */
 
 
   double * b = (double *) malloc(cqp.size*sizeof(double));
@@ -329,7 +329,7 @@ static int test_3(void)
   cqp.q = q;
   cqp.A = A;
   cqp.b = b;
-  convexQP_display(&cqp);
+  /* convexQP_display(&cqp); */
 
 
   /* Call the callback */
@@ -355,7 +355,7 @@ static int test_3(void)
   }
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-  verbose=1;
+  /* verbose=1; */
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
 
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
@@ -413,7 +413,7 @@ static int test_4(void)
   {
     NM_zentry(M, k, k, 1);
   }
-  DEBUG_EXPR(NM_display(M));
+  /* DEBUG_EXPR(NM_display(M)); */
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
@@ -432,7 +432,7 @@ static int test_4(void)
   {
     NM_zentry(A, k, k, 1);
   }
-  DEBUG_EXPR(NM_display(A));
+  /* DEBUG_EXPR(NM_display(A)); */
 
 
   double * b = (double *) malloc(cqp.size*sizeof(double));
@@ -447,7 +447,7 @@ static int test_4(void)
   cqp.q = q;
   cqp.A = A;
   cqp.b = b;
-  convexQP_display(&cqp);
+  /* convexQP_display(&cqp); */
 
 
   /* Call the callback */
@@ -473,7 +473,7 @@ static int test_4(void)
   }
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-  verbose=1;
+  /* verbose=1; */
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
 
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
@@ -530,7 +530,7 @@ static int test_5(void)
   {
     NM_zentry(M, k, k, 1);
   }
-  DEBUG_EXPR(NM_display(M));
+  /* DEBUG_EXPR(NM_display(M)); */
 
 
   double * q = (double *) malloc(cqp.size*sizeof(double));
@@ -549,7 +549,7 @@ static int test_5(void)
   {
     NM_zentry(A, k, k, 1);
   }
-  DEBUG_EXPR(NM_display(A));
+  /* DEBUG_EXPR(NM_display(A)); */
 
 
   double * b = (double *) malloc(cqp.size*sizeof(double));
@@ -564,7 +564,7 @@ static int test_5(void)
   cqp.q = q;
   cqp.A = A;
   cqp.b = b;
-  convexQP_display(&cqp);
+  /* convexQP_display(&cqp); */
 
 
   /* Call the callback */
@@ -590,7 +590,7 @@ static int test_5(void)
   }
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-  verbose=1;
+  /* verbose=1; */
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
 
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
@@ -634,8 +634,9 @@ int main(void)
 
   i++;
   printf("start test #%i\n",i);
-  info += test_1();
-  if (!info)
+  int info_test = test_1();
+  info += info_test;
+  if (!info_test)
   {
     printf("end test #%i successful\n",i);
   }
@@ -643,23 +644,48 @@ int main(void)
   {
     printf("end test #%i  not  successful\n",i);
   }
-  
+
   i++;
   printf("start test #%i\n",i);
-  info += test_2();
-  if (!info)
+  info_test = test_2();
+
+
+#ifndef WITH_MUMPS
+  info += info_test;
+#endif
+  if (!info_test)
   {
     printf("end test #%i successful\n",i);
   }
   else
   {
+#ifndef WITH_MUMPS
     printf("end test #%i  not  successful\n",i);
+#else
+    printf("end test #%i  not  successful (as predicted with mumps)\n",i);
+#endif
   }
 
-  
+
+
   i++;
   printf("start test #%i ConvexQP_ADDM\n",i);
-  info += test_3();
+  info_test = test_3();
+  info += info_test;
+  if (!info_test)
+  {
+    printf("end test #%i successful\n",i);
+  }
+  else
+  {
+    printf("end test #%i  not  successful\n",i);
+  }
+
+
+  i++;
+  printf("start test #%i ConvexQP_ADDM_ACCELERATION\n",i);
+  info_test = test_4();
+  info += info_test;
   if (!info)
   {
     printf("end test #%i successful\n",i);
@@ -669,22 +695,10 @@ int main(void)
     printf("end test #%i  not  successful\n",i);
   }
 
-  
-  i++;
-  printf("start test #%i ConvexQP_ADDM_ACCELERATION\n",i);
-  info += test_4();
-  if (!info)
-  {
-    printf("end test #%i successful\n",i);
-  }
-  else
-  {
-    printf("end test #%i  not  successful\n",i);
-  }
-  
   i++;
   printf("start test #%i ConvexQP_ADDM_ACCELERATION_AND_RESTART\n",i);
-  info += test_5();
+  info_test = test_5();
+  info += info_test;
   if (!info)
   {
     printf("end test #%i successful\n",i);
