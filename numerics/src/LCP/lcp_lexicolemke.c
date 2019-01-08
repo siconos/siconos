@@ -359,7 +359,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
     {
       Ifound = 1;
       DEBUG_PRINT("The pivot column is nonpositive !\n"
-          "It either means that the algorithm failed or that the LCP is infeasible\n"
+          "It either means that the algorithm is not able to finish or that the LCP is infeasible\n"
           "Check the class of the M matrix to find out the meaning of this\n");
       break;
     }

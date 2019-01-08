@@ -24,20 +24,27 @@
 
 #include "GenericMechanical_Solvers.h"
 #include "GenericMechanical_cst.h"
+
 #include "NonSmoothDrivers.h"
-#include "fc3d_compute_error.h"
-#include "fc3d_unitary_enumerative.h"
+
 #include "GMPReduced.h"
 #include "SiconosBlas.h"
 #include "numerics_verbose.h"
+
 #include "LCP_Solvers.h"
+
 #include "FrictionContactProblem.h"
 #include "Friction_cst.h"
+#include "fc3d_compute_error.h"
+#include "fc3d_unitary_enumerative.h"
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
+
 #include "Relay_Solvers.h"
 #include "RelayProblem.h"
 #include "relay_cst.h"
-#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
+
 #include "NumericsMatrix.h"
+
 #include "numerics_verbose.h"
 /* #define GENERICMECHANICAL_DEBUG  */
 /* #define GENERICMECHANICAL_DEBUG2  */
@@ -46,6 +53,9 @@
 /* #define GENERICMECHANICAL_FC3D */
 /* #define GMP_WRITE_FAILED_PRB */
 /* #define GMP_WRITE_PRB */
+
+
+const char* const   SICONOS_GENERIC_MECHANICAL_NSGS_STR = "GMP_NSGS";
 
 
 //#define DEBUG_MESSAGES

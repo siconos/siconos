@@ -16,22 +16,33 @@
  * limitations under the License.
 */
 
-#ifndef GenericMechanical_cst_h
-#define GenericMechanical_cst_h
-
-/*!\file GenericMechanical_cst.h
-  \brief Constants to define the list of available GenericMechanical solvers. 
-  See the solver list \ref genericSolversList
+/*
+  Tests functions for SBM structure
 */
-/**\enum GENERIC_MECHANICAL_SOLVER
-   \brief Each SICONOS_GENERIC_MECHANICAL_XXX refers to number of the solver XXX 
-   for GENERIC_MECHANICAL. See the solver list \ref genericSolversList
- */
-enum GENERIC_MECHANICAL_SOLVER
-{
-  SICONOS_GENERIC_MECHANICAL_NSGS = 2000
-};
 
-extern const char* const  SICONOS_GENERIC_MECHANICAL_NSGS_STR;
 
-#endif
+int SBM_add_test_all(void);
+
+int SBM_zentry_all(void);
+
+int SBM_to_dense_all(void);
+
+int SBM_to_sparse_all(void);
+
+int SBM_multiply_test_all(void);
+
+int gemm_square_triplet(void);
+int gemm_square_csc(void);
+int gemm_square_triplet_into_csc(void);
+int gemm_rectangle_triplet(void);
+
+
+int SBM_gemm_without_allocation_all(void);
+
+int test_SBM_row_to_dense_all(void);
+
+int test_SBM_column_permutation_all(void);
+
+int test_SBM_row_permutation_all(void);
+
+int SBM_extract_component_3x3_all(void);
