@@ -120,6 +120,12 @@ static inline char* strdup(char* src)
 #include "test_vi_based_1.c"
 #endif
 
+#ifdef TEST_FP_COLLECTION_0
+#include "data_collection_3.c"
+#include "test_fp_0.c"
+#endif
+
+
 #ifdef TEST_FP_COLLECTION_1
 #include "data_collection_3.c"
 #include "test_fp_1.c"

@@ -40,9 +40,15 @@ char *** test_collection(int n_data_1, char ** data_collection)
   test_fp[n][e++] = data_collection[d];
   test_fp[n][e++] = "1";
   test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ACLMFP);
-  test_fp[n][e++] = "1e-06";
-  test_fp[n][e++] = "200";
+  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_DSFP);
+  test_fp[n][e++] = "1e-03";
+  test_fp[n][e++] = "100000";
+  test_fp[n][e++] = "0";
+  test_fp[n][e++] = "0";
+  test_fp[n][e++] = "0";
+  test_fp[n][e++] = "dparam";
+  test_fp[n][e++] = "3";
+  test_fp[n][e++] = "8e4";
   test_fp[n][e++] = "---";
   n++;
 
@@ -51,15 +57,15 @@ char *** test_collection(int n_data_1, char ** data_collection)
   test_fp[n][e++] = data_collection[d];
   test_fp[n][e++] = "1";
   test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ACLMFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "200";
+  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_DSFP);
   test_fp[n][e++] = "0";
   test_fp[n][e++] = "0";
   test_fp[n][e++] = "0";
-  test_fp[n][e++] = "iparam";
-  test_fp[n][e++] = "1";
-  test_fp[n][e++] = "1";
+  test_fp[n][e++] = "0";
+  test_fp[n][e++] = "0";
+  test_fp[n][e++] = "dparam";
+  test_fp[n][e++] = "3";
+  test_fp[n][e++] = "1e2";
   test_fp[n][e++] = "---";
   n++;
   
@@ -68,13 +74,15 @@ char *** test_collection(int n_data_1, char ** data_collection)
   test_fp[n][e++] = data_collection[d];
   test_fp[n][e++] = "1";
   test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ACLMFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "200";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_SOCLCP_VI_FPP);
+  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_DSFP);
   test_fp[n][e++] = "0";
   test_fp[n][e++] = "0";
+  test_fp[n][e++] = "0";
+  test_fp[n][e++] = "0";
+  test_fp[n][e++] = "0";
+  test_fp[n][e++] = "dparam";
+  test_fp[n][e++] = "3";
+  test_fp[n][e++] = "5e3";
   test_fp[n][e++] = "---";
   n++;
 
@@ -83,25 +91,15 @@ char *** test_collection(int n_data_1, char ** data_collection)
   test_fp[n][e++] = data_collection[d];
   test_fp[n][e++] = "1";
   test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ACLMFP);
+  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_DSFP);
   test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "200";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_SOCLCP_VI_EG);
+  test_fp[n][e++] = "100000";
   test_fp[n][e++] = "0";
   test_fp[n][e++] = "0";
-  test_fp[n][e++] = "---";
-  n++;
-
-
-  d=5;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_SOCLCP);
   test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
+  test_fp[n][e++] = "dparam";
+  test_fp[n][e++] = "3";
+  test_fp[n][e++] = "2.0";
   test_fp[n][e++] = "---";
   n++;
   
