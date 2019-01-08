@@ -50,7 +50,9 @@ MACRO(BEGIN_TEST2 _D)
     *.npz
     *.xml
     *.DAT
-    *.INI)
+    *.INI
+    data_collection*.c
+    test_*.c)
 
   IF(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils)
     FILE(GLOB_RECURSE TEST_UTILS_SOURCES_TMP ${CMAKE_CURRENT_SOURCE_DIR}/${_D}-utils/*.[ch])
@@ -358,6 +360,39 @@ macro(NEW_FC_3D_TEST)
   unset(TEST_NAME_PREFIX)
 endmacro()
 
+MACRO(NEW_FC_TEST_1)
+
+  # check input file name
+  assert(SOURCE_FILE_NAME)
+  # check prefix for test (fc3d, gfc3d ...)
+  assert(TEST_NAME_PREFIX)
+  
+  STRING(CONCAT TEST_NAME ${TEST_NAME_PREFIX} "_" ${TEST_COLLECTION})
+
+  STRING(TOLOWER ${TEST_NAME} TEST_NAME)
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/FrictionContact/test/${SOURCE_FILE_NAME} 
+    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+
+  SET(${TEST_NAME}_FSOURCES)
+
+  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
+  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+
+ENDMACRO(NEW_FC_TEST_1)
+
+
+macro(NEW_FC_3D_TEST_COLLECTION)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME fc_test_collection.c.in )
+  set(TEST_NAME_PREFIX fc3d)
+  set(TEST_COLLECTION ${ARGV0})
+  NEW_FC_TEST_1(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
+
+
 macro(NEW_FC_3D_TEST_HDF5)
   # Set name of the file used to generate tests (c)source files.
   set(SOURCE_FILE_NAME fc_test_hdf5.c.in )
@@ -377,6 +412,16 @@ macro(NEW_FC_2D_TEST)
   unset(TEST_NAME_PREFIX)
 endmacro()
 
+macro(NEW_FC_2D_TEST_COLLECTION)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME fc_test_collection.c.in )
+  set(TEST_NAME_PREFIX fc2d)
+  set(TEST_COLLECTION ${ARGV0})
+  NEW_FC_TEST_1(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
 macro(NEW_GFC_3D_TEST)
   # Set name of the file used to generate tests (c)source files.
   set(SOURCE_FILE_NAME gfc3d_test.c.in )
@@ -391,6 +436,16 @@ macro(NEW_GFC_3D_TEST_HDF5)
   set(SOURCE_FILE_NAME gfc3d_test_hdf5.c.in )
   set(TEST_NAME_PREFIX gfc3d)
   NEW_FC_TEST(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
+macro(NEW_GFC_3D_TEST_COLLECTION)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME gfc3d_test_collection.c.in )
+  set(TEST_NAME_PREFIX gfc3d)
+  set(TEST_COLLECTION ${ARGV0})
+  NEW_FC_TEST_1(${ARGV})
   unset(SOURCE_FILE_NAME)
   unset(TEST_NAME_PREFIX)
 endmacro()
@@ -416,8 +471,8 @@ MACRO(NEW_PB_TEST)
   STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
 
   SET(TEST_EXE ${TEST_SBM_PREFIX}${TEST_SOLVER_NAME}${TEST_SBM_C})
-  SET(TEST_NAME "test-${TEST_SBM_PREFIX}${TEST_SOLVER_NAME}-${TEST_DATA_NAME}")
-
+  SET(TEST_NAME "test_${TEST_SBM_PREFIX}${TEST_SOLVER_NAME}_${TEST_DATA_NAME}")
+  STRING(TOLOWER ${TEST_NAME} TEST_NAME)
 
   LIST(FIND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_EXE} ALREADY_CONF)
   IF(ALREADY_CONF EQUAL -1)
@@ -440,9 +495,72 @@ MACRO(NEW_LCP_TEST)
   NEW_PB_TEST(lcptest ${ARGV})
 ENDMACRO(NEW_LCP_TEST)
 
+MACRO(NEW_LCP_TEST_1)
+
+  # check input file name
+  assert(SOURCE_FILE_NAME)
+  assert(TEST_NAME_PREFIX)
+  
+  STRING(CONCAT TEST_NAME ${TEST_NAME_PREFIX} "_" ${TEST_COLLECTION})
+
+  STRING(TOLOWER ${TEST_NAME} TEST_NAME)
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/LCP/test/${SOURCE_FILE_NAME} 
+    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+
+  SET(${TEST_NAME}_FSOURCES)
+
+  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
+  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+
+ENDMACRO(NEW_LCP_TEST_1)
+
+MACRO(NEW_LCP_TEST_COLLECTION)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME lcp_test_collection.c.in )
+  set(TEST_NAME_PREFIX lcp)
+  set(TEST_COLLECTION ${ARGV0})
+  NEW_LCP_TEST_1(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
+
+
+
+
+
 MACRO(NEW_RELAY_TEST)
   NEW_PB_TEST(relaytest ${ARGV})
 ENDMACRO(NEW_RELAY_TEST)
+
+MACRO(NEW_RELAY_TEST_1)
+
+  # check input file name
+  assert(SOURCE_FILE_NAME)
+  assert(TEST_NAME_PREFIX)
+  
+  STRING(CONCAT TEST_NAME ${TEST_NAME_PREFIX} "_" ${TEST_COLLECTION})
+
+  STRING(TOLOWER ${TEST_NAME} TEST_NAME)
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/Relay/test/${SOURCE_FILE_NAME} 
+    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+
+  SET(${TEST_NAME}_FSOURCES)
+
+  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
+  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+
+ENDMACRO(NEW_RELAY_TEST_1)
+
+MACRO(NEW_RELAY_TEST_COLLECTION)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME relay_test_collection.c.in )
+  set(TEST_NAME_PREFIX relay)
+  set(TEST_COLLECTION ${ARGV0})
+  NEW_RELAY_TEST_1(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
 
 MACRO(NEW_NCP_TEST)
   SET(FILE_TO_CONF ${ARGV0})
@@ -539,6 +657,42 @@ MACRO(NEW_GMP_TEST)
   LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
 
 ENDMACRO(NEW_GMP_TEST)
+
+
+MACRO(NEW_GMP_TEST_1)
+
+  # check input file name
+  assert(SOURCE_FILE_NAME)
+  assert(TEST_NAME_PREFIX)
+  
+  STRING(CONCAT TEST_NAME ${TEST_NAME_PREFIX} "_" ${TEST_COLLECTION})
+
+  STRING(TOLOWER ${TEST_NAME} TEST_NAME)
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/numerics/src/GenericMechanical/test/${SOURCE_FILE_NAME} 
+    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+
+  SET(${TEST_NAME}_FSOURCES)
+
+  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
+  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
+
+ENDMACRO(NEW_GMP_TEST_1)
+
+MACRO(NEW_GMP_TEST_COLLECTION)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME gmp_test_collection.c.in )
+  set(TEST_NAME_PREFIX gmp)
+  set(TEST_COLLECTION ${ARGV0})
+  NEW_GMP_TEST_1(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
+
+
+
+
+
+
 
 # add subdirs (i.e. CMakeLists.txt generated for tests) to the build
 MACRO(END_TEST)

@@ -1,0 +1,313 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2016 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+
+#include "NonSmoothDrivers.h"
+#include "lcp_test_function.h"
+#include "lcp_cst.h"
+
+#include "SolverOptions.h"
+#define @TEST_COLLECTION@ 1
+
+#ifdef TEST_LCP_COLLECTION_1
+#include "data_collection_1.c"
+#include "test_solvers_collection_1.c"
+#endif
+
+#ifdef TEST_LCP_COLLECTION_2
+#include "data_collection_2.c"
+#include "test_solvers_collection_1.c"
+#endif
+
+#ifdef TEST_LCP_COLLECTION_3 /* SBM */
+#include "data_collection_3.c"
+#include "test_solvers_collection_2.c"
+#endif
+
+#ifdef TEST_LCP_COLLECTION_4
+#include "data_collection_4.c"
+#include "test_solvers_collection_3.c"
+#endif
+
+
+#ifdef TEST_LCP_COLLECTION_3 /* SBM */
+static int lcp_test_single(char ** test)
+{
+  int info = 0;
+
+  char * filename = test[0];
+  printf("\n Test on %s\t ",filename);
+  printf("Test on %s\n", filename);
+
+  FILE * finput  =  fopen(filename, "r");
+  if (finput == NULL)
+  {
+    printf("Error! Could not open filename %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
+
+
+  int will_failed =0;
+
+  will_failed  = atoi(test[1]);
+
+  int  solver = atoi(test[2]);
+  printf("with solver %i\n ",solver);
+
+  info = lcp_test_function_SBM(finput, solver);
+
+  fclose(finput);
+  printf("\nEnd of test on %s\n", filename);
+  return info;
+}
+
+#else
+static int lcp_test_single(char ** test)
+{
+  int info = 0;
+
+  char * filename = test[0];
+  printf("\n Test on %s\t ",filename);
+  printf("Test on %s\n", filename);
+
+  FILE * finput  =  fopen(filename, "r");
+  if (finput == NULL)
+  {
+    printf("Error! Could not open filename %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
+
+
+  int will_failed =0;
+
+  will_failed  = atoi(test[1]);
+
+  int  solver = atoi(test[2]);
+  printf("with solver %i\n ",solver);
+
+  info = lcp_test_function(finput, solver, filename);
+
+  fclose(finput);
+  printf("\nEnd of test on %s\n", filename);
+  return info;
+}
+
+#endif
+
+
+
+
+
+
+int main(void)
+{
+  int out =0;
+  int n_failed_test=0;
+  int n_succeeded_test=0;
+  char ** _data_collection = data_collection();
+  int n_data = 0;
+  while (strcmp(_data_collection[n_data], "---") !=0)
+  {
+    n_data++;
+  }
+  printf("number of data = %i\n", n_data);
+
+  char *** _test_collection = test_collection(n_data, _data_collection);
+  int n_test = 0;
+  char * foo =  _test_collection[n_test][0];
+  while (strcmp(foo , "---") != 0)
+  {
+    n_test++;
+    foo =  _test_collection[n_test][0];
+  }
+  printf("number of tests = %i\n", n_test);
+
+#ifdef TEST_LCP_COLLECTION_1
+  _test_collection[28][1] = "1";
+  _test_collection[29][1] = "1";
+  _test_collection[34][1] = "1";
+  _test_collection[35][1] = "1";
+  _test_collection[78][1] = "1";
+  _test_collection[94][1] = "1";
+  _test_collection[95][1] = "1";
+
+  _test_collection[10][1] = "2";
+  _test_collection[27][1] = "2";
+  _test_collection[33][1] = "2";
+  _test_collection[40][1] = "2";
+  _test_collection[42][1] = "2";
+  
+  
+#endif
+
+#ifdef TEST_LCP_COLLECTION_2
+  _test_collection[3][1] = "1";
+  _test_collection[7][1] = "1";
+  _test_collection[9][1] = "1";
+  _test_collection[11][1] = "1";
+  _test_collection[12][1] = "1";
+  _test_collection[14][1] = "1";
+  _test_collection[16][1] = "1";
+  _test_collection[17][1] = "1";
+  _test_collection[18][1] = "1";
+  _test_collection[19][1] = "1";
+  _test_collection[23][1] = "1";
+  _test_collection[24][1] = "1";
+  _test_collection[28][1] = "1";
+  _test_collection[30][1] = "1";
+  _test_collection[31][1] = "1";
+  _test_collection[32][1] = "1";
+  _test_collection[33][1] = "1";
+  _test_collection[35][1] = "1";
+  _test_collection[37][1] = "1";
+  _test_collection[38][1] = "1";
+  _test_collection[39][1] = "1";
+  _test_collection[40][1] = "1";
+  _test_collection[45][1] = "1";
+  _test_collection[49][1] = "1";
+  _test_collection[50][1] = "1";
+  _test_collection[51][1] = "1";
+  _test_collection[53][1] = "1";
+  _test_collection[54][1] = "1";
+  _test_collection[55][1] = "1";
+  _test_collection[57][1] = "1";
+  _test_collection[70][1] = "1";
+  _test_collection[72][1] = "1";
+  _test_collection[73][1] = "1";
+  _test_collection[74][1] = "1";
+  _test_collection[75][1] = "1";
+  _test_collection[79][1] = "1";
+  _test_collection[80][1] = "1";
+  _test_collection[81][1] = "1";
+  _test_collection[82][1] = "1";
+  _test_collection[87][1] = "1";
+  _test_collection[94][1] = "1";
+  _test_collection[101][1] = "1";
+  _test_collection[105][1] = "1";
+  _test_collection[107][1] = "1";
+  _test_collection[108][1] = "1";
+  _test_collection[109][1] = "1";
+  _test_collection[110][1] = "1";
+#endif
+
+
+
+
+
+  int * failed_tests = (int*)calloc(n_test, sizeof(int));
+  int * succeeded_tests = (int*)calloc(n_test, sizeof(int));
+  clock_t t1, t2;
+  long clk_tck = CLOCKS_PER_SEC;
+  for (int n_t =0; n_t < n_test ; n_t++)
+  {
+    printf("\n################# start of test # %i #######################\n", n_t);
+    printf("%s\t", solver_options_id_to_name(atoi(_test_collection[n_t][2])));
+    int e=0;
+    while(strcmp(_test_collection[n_t][e], "---") !=0)
+    {
+      printf("%s \t ",_test_collection[n_t][e]);
+      e++;
+    }
+    t1 = clock();
+    int info = lcp_test_single(_test_collection[n_t]);
+    t2 = clock();
+    (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
+
+    if (info)
+    {
+
+      failed_tests[n_failed_test]  = n_t;
+      n_failed_test++;
+      if (strcmp(_test_collection[n_t][1],"0") == 0 )
+        out = 1;
+    }
+    else
+    {
+      e=0;
+      succeeded_tests[n_failed_test]  = n_t;
+      n_succeeded_test++;
+      while(strcmp(_test_collection[n_t][e], "---") !=0)
+      {
+        printf("%s \t ",_test_collection[n_t][e]);
+        e++;
+      }
+    }
+    printf("\n################# end of  test # %i #######################\n", n_t);
+  }
+  printf("\n Failed tests : [ ");
+  for (int t =0; t < n_failed_test; t++)
+  {
+    printf("%i \t", failed_tests[t]);
+  }
+  printf("] :\n");
+  for (int t =0; t < n_failed_test; t++)
+  {
+    if (strcmp(_test_collection[failed_tests[t]][1],"1") ==0 )
+    {
+      printf("test %i \t should fail : \t %s\t",
+             failed_tests[t],
+             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
+    }
+    else if (strcmp(_test_collection[failed_tests[t]][1],"0") ==0)
+    {
+      printf("test %i \t should not fail : \t %s\t",
+             failed_tests[t],
+             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
+    }
+    else if (strcmp(_test_collection[failed_tests[t]][1],"2") ==0)
+    {
+      printf("test %i \t unstable : \t %s\t",
+             failed_tests[t],
+             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
+    }
+    int e=0;
+    while(strcmp(_test_collection[failed_tests[t]][e], "---") !=0)
+    {
+      printf("%s \t ",_test_collection[failed_tests[t] ] [e]);
+      e++;
+    }
+    printf("\n");
+  }
+  for (int t =0; t < n_succeeded_test; t++)
+  {
+    if (strcmp(_test_collection[succeeded_tests[t]][1],"1") ==0)
+    {
+      printf("test %i \t should fail but finally not : \t %s\t",
+             failed_tests[t],
+             solver_options_id_to_name(atoi(_test_collection[succeeded_tests[t]][2])));
+      int e=0;
+      while(strcmp(_test_collection[succeeded_tests[t]][e], "---") !=0)
+      {
+        printf("%s \t ",_test_collection[failed_tests[t] ] [e]);
+        e++;
+      }
+      printf("\n");
+    }
+
+  }
+
+
+
+  return out;
+
+}

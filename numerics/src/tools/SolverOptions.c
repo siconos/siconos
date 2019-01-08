@@ -26,6 +26,7 @@
 #include "lcp_cst.h"
 #include "relay_cst.h"
 #include "Friction_cst.h"
+#include "GenericMechanical_cst.h"
 #include "AVI_cst.h"
 #include "VI_cst.h"
 #include "SOCLCP_cst.h"

@@ -65,7 +65,7 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 
   int k, info = -1 ;
   GlobalFrictionContactProblem* problem = (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
-  numerics_set_verbose(1);
+  /* numerics_set_verbose(1); */
 
   info = globalFrictionContact_newFromFile(problem, f);
   globalFrictionContact_display(problem);
@@ -198,7 +198,7 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
   double *reaction = (double*)calloc(dim * NC, sizeof(double));
   double *velocity = (double*)calloc(dim * NC, sizeof(double));
   double *global_velocity = (double*)calloc(n, sizeof(double));
-  verbose=1;
+  /* verbose=1; */
   if (dim == 3)
   {
     info = gfc3d_driver(problem, reaction, velocity, global_velocity, options);

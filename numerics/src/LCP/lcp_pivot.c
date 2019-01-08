@@ -8,7 +8,7 @@
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ *ßfailed
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -360,7 +360,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
           case SICONOS_LCP_PIVOT_PATHSEARCH:
             *info = LCP_PIVOT_RAY_TERMINATION;
             printf("The pivot column is nonpositive ! We are on ray !\n"
-                "It either means that the algorithm failed or that the LCP is infeasible\n"
+                "It either means that the algorithm is not able to finish or that the LCP is infeasible\n"
                 "Check the class of the M matrix to find out the meaning of this\n");
             goto _exit;
           default:
