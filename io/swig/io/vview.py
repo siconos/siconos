@@ -10,7 +10,6 @@ import os
 import json
 import getopt
 import math
-from functools import reduce
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtk.numpy_interface import dataset_adapter as dsa
 
