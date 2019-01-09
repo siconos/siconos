@@ -5,11 +5,6 @@
 # - add occ to the build process
 # - set SICONOS_HAS_OCE var (distributed in siconosConfig.cmake)
 
-if(SICONOS_HAS_OCE)
-  # Job has already been done ... return
-  return()
-endif()
-
 if(WITH_OCE)
   # Set the list of toolkits modules which are requested.
   # Do we really need to set this explicitely??
@@ -33,8 +28,7 @@ if(WITH_OCE)
   else()
     message(FATAL_ERROR "OCE detection failed due to missing toolkit(s): ${OCE_MISSING_TOOLKITS}")
   endif()
-  
-  set(SICONOS_HAS_OCE TRUE)
+  set(SICONOS_HAS_OCE TRUE CACHE INTERNAL "True if OCE API has been found and is activated.)")
 
   # For versions of OCE older than 0.18 AND on some specific systems (namely Debian),
   # some toolkits are detected (through OCEConfig.cmake) but the

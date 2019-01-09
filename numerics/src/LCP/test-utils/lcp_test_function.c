@@ -127,7 +127,7 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
   info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSGS_SBM);
 
-  solver_options_set(options->internalSolvers, solverId);
+  //solver_options_set(options->internalSolvers, solverId);
 
 #ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)

@@ -47,7 +47,7 @@ Plugins overview
 
    :class:`DynamicalSystem`, ":math:`g(\dot x, x, t, z)`", g, "``(double time, int size, double* fext, int zsize, double *z)``"
    :class:`LagrangianLinearTIDS`, ":math:`F_{Ext}(t,z)`", FExt, "``(double time, int size, double* fext, int zsize, double *z)``"
-   :class:`FirstOrderR`, ":math:`h(x,t,\lambda,z)`", h, "``(double time, int x.size, double * x, int lambda.size, double * lambda, double * y, int z.size, double * z)``"
+   :class:`FirstOrderR`, ":math:`h(x,t,\lambda,z)`", h, "``(double time, int x_size, double *x, int lambda_size, double * lambda, double * y, int z_size, double * z)``"
 
 
 Example

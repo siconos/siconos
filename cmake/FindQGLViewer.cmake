@@ -6,64 +6,54 @@
 #  QGLVIEWER_LIBRARY - Link these to use QGLViewer
 #  QGLVIEWER_DEFINITIONS - Compiler switches required for using QGLViewer
 #
+find_package(Qt5 COMPONENTS Core Xml OpenGL Gui Widgets)
+if(NOT Qt5_FOUND)
+  message("Qt5 not found. Install it and set Qt5_DIR accordingly")
+  if (WIN32)
+    message("  In Windows, Qt5_DIR should be something like C:/Qt/5.4/msvc2013_64_opengl/lib/cmake/Qt5")
+  endif()
+endif()
 
-FOREACH(_D QGLViewer;qglviewer-qt4)
-  FIND_PATH(QGLVIEWER_INCLUDE_DIR NAMES qglviewer.h
-    PATHS
-    $ENV{QGLVIEWER_INCLUDE_DIR}
-    /usr/include/${_D}
-    /usr/local/include/${_D}
-    ${siconos_ROOT_DIR}/include/${_D}
-    ${CMAKE_INSTALL_PREFIX}/include/${_D}
-    )
-ENDFOREACH(_D QGLViewer;qglviewer-qt4)
+find_path(QGLVIEWER_INCLUDE_DIR qglviewer.h
+    /usr/include/QGLViewer
+    /opt/local/include/QGLViewer
+    /usr/local/include/QGLViewer
+    /sw/include/QGLViewer
+    ENV QGLVIEWERROOT
+  )
 
-FIND_LIBRARY(QGLVIEWER_LIBRARY NAMES QGLViewer
-  PATHS
-  $ENV{QGLVIEWER_LIB_DIR}
-  /usr/lib
-  /usr/local/lib
-  ${siconos_ROOT_DIR}/lib
-  ${CMAKE_INSTALL_PREFIX}/lib
+find_library(QGLVIEWER_LIBRARY_RELEASE
+  NAMES qglviewer QGLViewer qglviewer-qt5 QGLViewer-qt5
+  PATHS /usr/lib
+        /usr/local/lib
+        /opt/local/lib
+	/sw/lib
+        ENV QGLVIEWERROOT
+        ENV LD_LIBRARY_PATH
+        ENV LIBRARY_PATH
+  PATH_SUFFIXES QGLViewer QGLViewer/release
+)
+find_library(QGLVIEWER_LIBRARY_DEBUG
+  NAMES dqglviewer dQGLViewer dqglviewer-qt5 dQGLViewer-qt5 QGLViewerd2
+  PATHS /usr/lib
+        /usr/local/lib
+        /opt/local/lib
+	/sw/lib
+        ENV QGLVIEWERROOT
+        ENV LD_LIBRARY_PATH
+        ENV LIBRARY_PATH
+  PATH_SUFFIXES QGLViewer QGLViewer/debug
 )
 
-IF(NOT QGLVIEWER_LIBRARY)
-  FIND_LIBRARY(QGLVIEWER_LIBRARY NAMES 3dviewer
-    PATHS
-    $ENV{QLGLVIEWER_LIB_DIR}
-    /usr/lib
-    /usr/local/lib
-    ${siconos_ROOT_DIR}/lib
-    ${CMAKE_INSTALL_PREFIX}/lib
-  )
-ENDIF(NOT QGLVIEWER_LIBRARY)
+if(QGLVIEWER_LIBRARY_RELEASE)
+  if(QGLVIEWER_LIBRARY_DEBUG)
+    set(QGLVIEWER_LIBRARY optimized ${QGLVIEWER_LIBRARY_RELEASE} debug ${QGLVIEWER_LIBRARY_DEBUG})
+  else()
+    set(QGLVIEWER_LIBRARY ${QGLVIEWER_LIBRARY_RELEASE})
+  endif()
+endif()
 
-IF(NOT QGLVIEWER_LIBRARY)
-  FIND_LIBRARY(QGLVIEWER_LIBRARY NAMES qglviewer-qt4
-    PATHS
-    $ENV{QLGLVIEWER_LIB_DIR}
-    /usr/lib
-    /usr/local/lib
-    ${siconos_ROOT_DIR}/lib
-    ${CMAKE_INSTALL_PREFIX}/lib
-  )
-ENDIF(NOT QGLVIEWER_LIBRARY)
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(QGLVIEWER DEFAULT_MSG
+  QGLVIEWER_INCLUDE_DIR QGLVIEWER_LIBRARY)
 
-IF(QGLVIEWER_INCLUDE_DIR AND QGLVIEWER_LIBRARY)
-   SET(QGLVIEWER_FOUND TRUE)
-ENDIF(QGLVIEWER_INCLUDE_DIR AND QGLVIEWER_LIBRARY)
-
-IF(QGLVIEWER_FOUND)
-  IF(NOT QGLViewer_FIND_QUIETLY)
-    MESSAGE(STATUS "Found QGLViewer: ${QGLVIEWER_LIBRARY}")
-  ENDIF(NOT QGLViewer_FIND_QUIETLY)
-ELSE(QGLVIEWER_FOUND)
-  IF(QGLViewer_FIND_REQUIRED)
-    MESSAGE(FATAL_ERROR "Could not find QGLViewer")
-  ENDIF(QGLViewer_FIND_REQUIRED)
-ENDIF(QGLVIEWER_FOUND)
-
-# show the QGLVIEWER_INCLUDE_DIR and QGLVIEWER_LIBRARY variables only in the advanced view
-IF(QGLVIEWER_FOUND)
-  MARK_AS_ADVANCED(QGLVIEWER_INCLUDE_DIR QGLVIEWER_LIBRARY )
-ENDIF(QGLVIEWER_FOUND)

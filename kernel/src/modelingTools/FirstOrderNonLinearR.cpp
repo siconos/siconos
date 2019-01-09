@@ -24,7 +24,7 @@
 
 #include "debug.h"
 
-typedef void (*FONLR_h)(double, unsigned, double*, unsigned, double*, double*, unsigned, double*);
+typedef void (*FONLR_h)(double time, unsigned x_size, double *x, unsigned size_lambda, double* lambda, double *, unsigned z_size, double *z);
 typedef FONLR_h FONLR_g;
 typedef FONLR_h FONLR_C;
 typedef FONLR_h FONLR_B;

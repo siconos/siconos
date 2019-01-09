@@ -397,10 +397,10 @@ NewtonEulerDS::NewtonEulerDS():
   _hasConstantMExt(false),
   _isMextExpressedInInertialFrame(false),
   _nullifyMGyr(false),
-  _computeJacobianFIntqByFD(false),
-  _computeJacobianFInttwistByFD(false),
-  _computeJacobianMIntqByFD(false),
-  _computeJacobianMInttwistByFD(false),
+  _computeJacobianFIntqByFD(true),
+  _computeJacobianFInttwistByFD(true),
+  _computeJacobianMIntqByFD(true),
+  _computeJacobianMInttwistByFD(true),
   _epsilonFD(sqrt(std::numeric_limits< double >::epsilon()))
 {
   /* common code for constructors
@@ -417,10 +417,10 @@ NewtonEulerDS::NewtonEulerDS(SP::SiconosVector Q0, SP::SiconosVector Twist0,
   _hasConstantMExt(false),
   _isMextExpressedInInertialFrame(false),
   _nullifyMGyr(false),
-  _computeJacobianFIntqByFD(false),
-  _computeJacobianFInttwistByFD(false),
-  _computeJacobianMIntqByFD(false),
-  _computeJacobianMInttwistByFD(false),
+  _computeJacobianFIntqByFD(true),
+  _computeJacobianFInttwistByFD(true),
+  _computeJacobianMIntqByFD(true),
+  _computeJacobianMInttwistByFD(true),
   _epsilonFD(sqrt(std::numeric_limits< double >::epsilon()))
 
 {
@@ -1425,6 +1425,7 @@ void NewtonEulerDS::setComputeJacobianFIntqFunction(const std::string&  pluginPa
     _jacobianFIntq.reset(new SimpleMatrix(3, _qDim));
   if(!_jacobianWrenchq)
     _jacobianWrenchq.reset(new SimpleMatrix(_ndof, _qDim));
+  _computeJacobianFIntqByFD = false;
 }
 void NewtonEulerDS::setComputeJacobianFIntvFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
@@ -1432,7 +1433,7 @@ void NewtonEulerDS::setComputeJacobianFIntvFunction(const std::string&  pluginPa
   _pluginJactwistFInt->setComputeFunction(pluginPath, functionName);
   if(!_jacobianFInttwist)
     _jacobianFInttwist.reset(new SimpleMatrix(3, _ndof));
-
+  _computeJacobianFInttwistByFD = false;
 }
 void NewtonEulerDS::setComputeJacobianFIntqFunction(FInt_NE fct)
 {
@@ -1441,6 +1442,7 @@ void NewtonEulerDS::setComputeJacobianFIntqFunction(FInt_NE fct)
     _jacobianFIntq.reset(new SimpleMatrix(3, _qDim));
   if(!_jacobianWrenchq)
     _jacobianWrenchq.reset(new SimpleMatrix(_ndof, _qDim));
+  _computeJacobianFIntqByFD = false;
 }
 void NewtonEulerDS::setComputeJacobianFIntvFunction(FInt_NE fct)
 {
@@ -1449,6 +1451,7 @@ void NewtonEulerDS::setComputeJacobianFIntvFunction(FInt_NE fct)
     _jacobianFInttwist.reset(new SimpleMatrix(3, _ndof));
   if(!_jacobianWrenchTwist)
     _jacobianWrenchTwist.reset(new SimpleMatrix(_ndof, _ndof));
+  _computeJacobianFInttwistByFD = false;
 }
 
 void NewtonEulerDS::setComputeJacobianMIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
@@ -1458,7 +1461,7 @@ void NewtonEulerDS::setComputeJacobianMIntqFunction(const std::string&  pluginPa
     _jacobianMIntq.reset(new SimpleMatrix(3, _qDim));
   if(!_jacobianWrenchq)
     _jacobianWrenchq.reset(new SimpleMatrix(_ndof, _qDim));
-
+  _computeJacobianMIntqByFD=false;
 }
 void NewtonEulerDS::setComputeJacobianMIntvFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
@@ -1467,6 +1470,7 @@ void NewtonEulerDS::setComputeJacobianMIntvFunction(const std::string&  pluginPa
     _jacobianMInttwist.reset(new SimpleMatrix(3, _ndof));
   if(!_jacobianWrenchTwist)
     _jacobianWrenchTwist.reset(new SimpleMatrix(_ndof, _ndof));
+  _computeJacobianMInttwistByFD=false;
 }
 void NewtonEulerDS::setComputeJacobianMIntqFunction(FInt_NE fct)
 {
@@ -1475,6 +1479,7 @@ void NewtonEulerDS::setComputeJacobianMIntqFunction(FInt_NE fct)
     _jacobianMIntq.reset(new SimpleMatrix(3, _qDim));
   if(!_jacobianWrenchq)
     _jacobianWrenchq.reset(new SimpleMatrix(_ndof, _qDim));
+  _computeJacobianMIntqByFD = false;
 }
 void NewtonEulerDS::setComputeJacobianMIntvFunction(FInt_NE fct)
 {
@@ -1483,6 +1488,7 @@ void NewtonEulerDS::setComputeJacobianMIntvFunction(FInt_NE fct)
     _jacobianMInttwist.reset(new SimpleMatrix(3, _ndof));
   if(!_jacobianWrenchTwist)
     _jacobianWrenchTwist.reset(new SimpleMatrix(_ndof, _ndof));
+  _computeJacobianMInttwistByFD=false;
 }
 
 

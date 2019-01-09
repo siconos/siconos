@@ -43,6 +43,17 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
                                           std11::make_shared<SiconosVector>(3)));
   ds->setNumber(23);
 
+  try {
+    SP::DynamicalSystem dsnull;
+    nsds->insertDynamicalSystem(dsnull);
+  } catch (const RuntimeException& e) {
+    /*  Pass */
+    std::cout << "testinsertDynamicalSystemNull: success!" << std::endl;
+  } catch (const std::exception& e) {
+    std::cout << "testinsertDynamicalSystemNull:" << e.what() << std::endl;
+    CPPUNIT_FAIL("testinsertDynamicalSystemNull: unexpected exception ");
+  }
+
   nsds->insertDynamicalSystem(ds);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemA: ", nsds->getNumberOfDS() == 1, true);

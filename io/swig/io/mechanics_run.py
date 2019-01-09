@@ -909,23 +909,22 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 }
 
             else:
-                # a moving object
 
-                if inertia is not None:
-                    if np.shape(inertia) == (3,):
+                if inertia is not None and np.shape(inertia) == (3,):
                         inertia = np.diag(inertia)
-                    elif np.shape(inertia) != (3,3):
-                        print('Wrong shape of inertia')
-                    have_inertia = True
-                else:
-                    inertia=0.0*np.eye(3) # set a temporary null value
-                    have_inertia = False
 
-                body = body_class(translation + orientation,
-                                  velocity,
-                                  mass, inertia)
-                if have_inertia:
+                if inertia is not None and np.shape(inertia) == (3,3):
+                    body = body_class(translation + orientation,
+                                      velocity, mass, inertia)
                     body.setUseContactorInertia(False)
+                else:
+                    if inertia is not None:
+                        print('**** Warning inertia for object named {0} does not have the correct shape: {1} instead of (3, 3) or (3,)'.format(name, np.shape(inertia)))
+                        print('**** Inertia will be computed with the shape of the first contactor')
+                    body = body_class(translation + orientation,
+                                      velocity, mass)
+                    body.setUseContactorInertia(True)
+
 
                 self_collide = self._input[name].get('allow_self_collide',None)
                 if self_collide is not None:

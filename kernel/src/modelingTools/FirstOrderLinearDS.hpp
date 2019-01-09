@@ -144,12 +144,12 @@ public:
   /** Initialization function for the rhs and its jacobian.
    *  \param time time of initialization.
    */
-  void initRhs(double time) ;
+  virtual void initRhs(double time) ;
 
   /** update right-hand side for the current state
    *  \param time of interest
    */
-  void computeRhs(double time);
+  virtual void computeRhs(double time);
 
   /** update \f$\nabla_x rhs\f$ for the current state
    *  \param time of interest
