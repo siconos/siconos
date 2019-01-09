@@ -635,11 +635,6 @@ class DataConnector():
             output.GetCellData().GetArray(self._data_name).SetTuple(i, data_t)
 
 
-
-# attach velocity
-# contact points and associated forces are embedded in on a PolyData source
-# (deferred class creation due to needing vtk to be imported)
-
 def makeConvexSourceClass():
     class UnstructuredGridSource(vtk.vtkProgrammableSource):
         def GetOutputPort(self):
@@ -662,6 +657,9 @@ def makeConvexSourceClass():
     return ConvexSource
 
 
+# attempt for a vtk reader
+# only half the way, the reading part is ok but the output is only used
+# in vview and export from python members
 class IOReader(VTKPythonAlgorithmBase):
 
     def __init__(self):
@@ -692,7 +690,6 @@ class IOReader(VTKPythonAlgorithmBase):
 
     def RequestData(self, request, inInfo, outInfo):
 
-        from vtk.numpy_interface import dataset_adapter as dsa
         info = outInfo.GetInformationObject(0)
         output = vtk.vtkPolyData.GetData(outInfo)
         output.SetPoints(self.points)
@@ -720,8 +717,6 @@ class IOReader(VTKPythonAlgorithmBase):
 
         vtk_points_data = dsa.numpyTovtkDataArray(self.pos_data[:, 2:5])
 
-#        output.GetFieldData().AddArray(vtk_pos_data)
-        #output.GetFieldData().AddArray(vtk_velo_data)
         self.points.SetData(vtk_points_data)
 
         output.GetPointData().AddArray(vtk_velo_data)
@@ -801,7 +796,7 @@ class IOReader(VTKPythonAlgorithmBase):
 
             for mu in self._mu_coefs:
                 self.cpa[mu] = numpy_support.numpy_to_vtk(
-                self.cpa_at_time[mu])
+                    self.cpa_at_time[mu])
                 self.cpa[mu].SetName('contact_positions_a')
 
                 self.cpb[mu] = numpy_support.numpy_to_vtk(
@@ -824,6 +819,7 @@ class IOReader(VTKPythonAlgorithmBase):
 
                 # contact points
                 self._points[mu].SetData(self.cpa[mu])
+                self._output[mu].GetPointData().AddArray(self.cpb[mu])
                 self._output[mu].GetPointData().AddArray(self.cn[mu])
                 self._output[mu].GetPointData().AddArray(self.cf[mu])
 
@@ -917,6 +913,10 @@ class IOReader(VTKPythonAlgorithmBase):
             time)
         self.timestep = abs(self.time-time)
         self.time = time
+
+        # with a True pipeline: self.Modified()
+        # but as the consumers (VView class, export function) are
+        # not (yet) vtk filters, the Update is needed here
         self.Update()
 
         # contact forces provider
@@ -980,9 +980,6 @@ class IOReader(VTKPythonAlgorithmBase):
 
     def ExportOff(self):
         self._export = False
-
-
-
 
 
 # Read file and open VTK interaction window
@@ -1606,7 +1603,7 @@ class VView(object):
             scale_transform.Scale(scale, scale, scale)
             scale_transform.SetInput(transform)
             transformer.SetTransform(scale_transform)
-            if not self.global_filter:
+            if not (self.global_filter or self.opts.export):
                 actor.SetUserTransform(scale_transform)
         else:
             transformer.SetTransform(transform)
@@ -1728,7 +1725,6 @@ class VView(object):
         def set_velocity(instance, v0, v1, v2, v3, v4, v5):
             if instance in dcv:
                 dcv[instance]._data[:] = [v0, v1, v2, v3, v4, v5]
-                dcv[instance]._connector.Update()
 
         if dcv is not None:
             self.set_velocity_v = numpy.vectorize(set_velocity)
@@ -1736,7 +1732,6 @@ class VView(object):
         def set_translation(instance, x0, x1, x2 ):
             if instance in dct:
                 dct[instance]._data[:] = [x0, x1, x2]
-                dct[instance]._connector.Update()
 
         if dct is not None:
             self.set_translation_v = numpy.vectorize(set_translation)
@@ -1744,7 +1739,6 @@ class VView(object):
         def set_instance(instance):
             if instance in dci:
                 dci[instance]._data[:] = [instance]
-                dci[instance]._connector.Update()
 
         if dci is not None:
             self.set_instance_v = numpy.vectorize(set_instance)
@@ -1863,7 +1857,6 @@ class VView(object):
         return slider_widget, slider_repres
 
     def setup_initial_position(self):
-        from vtk.numpy_interface import dataset_adapter as dsa
 
         if self.opts.export:
             # For time_of_birth specifications with export mode:
@@ -2140,8 +2133,8 @@ class VView(object):
         self.widget.SetEnabled(True)
         self.widget.InteractiveOn()
 
+    # this should be extracted from the VView class
     def export(self):
-        from vtk.numpy_interface import dataset_adapter as dsa
 
         big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
         add_compatiblity_methods(big_data_writer)
@@ -2170,14 +2163,7 @@ class VView(object):
                 sys.stdout.write('.')
             self.io_reader.SetTime(time)
 
-            #self.cf_prov._time = times[index]
-
-            # fix: should be called by contact_source?
-            #self.cf_prov.xmethod()
-
-            #id_t = numpy.where(self.pos_data[:, 0] == times[index])
             pos_data = self.io_reader.pos_data
-
             velo_data = self.io_reader.velo_data
 
             self.set_position_v(
@@ -2202,15 +2188,6 @@ class VView(object):
             )
 
             self.set_instance_v(pos_data[:, 1])
-
-            if not self.opts.cf_disable:
-                self.io_reader.Update()
-                self.cf_collector.Update()
-                for mu in self.io_reader._mu_coefs:
-                    self.contact_posa[mu].Update()
-                    self.contact_posb[mu].Update()
-                    self.contact_pos_force[mu].Update()
-                    self.contact_pos_norm[mu].Update()
 
             big_data_writer.SetFileName('{0}-{1}.{2}'.format(
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
