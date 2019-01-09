@@ -24,6 +24,7 @@
 #define LAGRANGIANDS_H
 
 #include "DynamicalSystem.hpp"
+#include "SecondOrderDS.hpp"
 #include "BoundaryCondition.hpp"
 #include "SiconosConst.hpp"
 
@@ -34,14 +35,14 @@
 
  \rst
   .. math::
-        
+
      M(q,z) \\dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p \\
      \\dot q = v
-           
+
  \endrst
 
  where
- 
+
  - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
  - \f$ \\dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
  derivative of the generalized coordinates (Lagrangian systems).
@@ -81,35 +82,35 @@
  - rhs given by:
 
    \rst
- 
+
    .. math::
 
       \\dot x = \left[\begin{array}{c}
       \\dot q\\
       \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
       \end{array}\right]
-           
+
    \endrst
- 
+
  - jacobian of the rhs, with respect to x
 
    \rst
 
-    .. math::        
+    .. math::
 
        \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
        0  & I \\
        \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\\dot q}(M^{-1}(q)F(v, q , t, z)) \\
        \end{array}\right]
-           
+
      \endrst
- 
+
      with the input due to the non smooth law:
 
      \rst
 
      .. math::
-    
+
       \left[\begin{array}{c}
       0 \\
       p \end{array}\right]
@@ -120,9 +121,9 @@
     - initRhs() to allocate/initialize memory for these new operators,
     - rhs() to get the rhs vector
     - computeRhs(), computeJacobianRhsx() ..., to update the content of rhs, its jacobians ...
- 
+
 */
-class LagrangianDS : public DynamicalSystem
+class LagrangianDS : public SecondOrderDS
 {
 
 protected:
@@ -137,9 +138,6 @@ protected:
   void _init(SP::SiconosVector position, SP::SiconosVector velocity);
 
   // -- MEMBERS --
-  
-  /** number of degrees of freedom of the system */
-  unsigned int _ndof;
 
   /** state of the system. See details on top of page. */
   VectorOfVectors _q;
@@ -155,30 +153,6 @@ protected:
 
   /** memory of previous velocities of the system */
   SiconosMemory _velocityMemory;
-
-  /** "Reaction", generalized forces or imuplses due to the non smooth law
-   * The index corresponds to the kinematic
-   * level of the corresponding constraints. It mainly depends on what the simulation
-   * part want to store, but some rules have to be followed. For instance :
-   *  - for the constraints at the acceleration level, _p[2] stores the reaction forces,
-   *  - for the constraints at the veocity level,  _p[1] stores the (discrete) reaction impulse
-   *  - for the constraints at the position level, _p[0] stores the multiplier for a constraint
-   * in position
-   */
-  std::vector<SP::SiconosVector> _p;
-
-  /** memory of previous generalized forces due to constraints */
-  VectorOfMemories _pMemory;
-
-
-  /** mass of the system */
-  SP::SiconosMatrix _mass;
-
-  /** true if the  mass matrix is constant */
-  bool _hasConstantMass;
-
-  /** inverse or factorization of the mass of the system */
-  SP::SimpleMatrix _inverseMass;
 
   /** internal forces applied to  the system */
   SP::SiconosVector _fInt;
@@ -221,12 +195,6 @@ protected:
 
   /** memory of previous forces of the system */
   SiconosMemory _forcesMemory;
-
-  /** Boundary condition applied to a dynamical system*/
-  SP::BoundaryCondition _boundaryConditions;
-
-  /** Reaction to an applied  boundary condition */
-  SP::SiconosVector _reactionToBoundaryConditions;
 
   enum LagrangianDSRhsMatrices {jacobianXBloc10, jacobianXBloc11, zeroMatrix, idMatrix, numberOfRhsMatrices};
   /** A container of matrices to save matrices that are involed in first order from of
@@ -323,7 +291,7 @@ protected:
   void _zeroPlugin();
 
   /** Default constructor */
-  LagrangianDS():DynamicalSystem(Type::LagrangianDS) {};
+  LagrangianDS():SecondOrderDS() {};
 
 public:
 
@@ -424,20 +392,22 @@ public:
   /** Compute \f$\nabla_{\dot q}F(v,q,t,z)\f$ for current \f$q,v\f$
    *  \param time the current time
    */
-  virtual void computeJacobianqDotForces(double time);
+  virtual void computeJacobianqDotForces(double time)
+  {
+    computeJacobianvForces(time);
+  };
+
+  /** Compute \f$\nabla_{\dot q}F(v,q,t,z)\f$ for current \f$q,v\f$
+   *  \param time the current time
+   */
+  virtual void computeJacobianvForces(double time);
 
   ///@}
 
   /*! @name Attributes access
     @{ */
 
-  /** return the number of degrees of freedom of the system
-   *  \return an unsigned int.
-   */
-  virtual inline unsigned int dimension() const
-  {
-    return _ndof;
-  }
+
   /** generalized coordinates of the system (vector of size dimension())
    *  \return pointer on a SiconosVector
    */
@@ -518,52 +488,6 @@ public:
     return _q[2];
   };
 
-  /** get input due to nonsmooth interaction, \f$p\f$
-   *  \param level unsigned int, required level for p
-   *  \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector p(unsigned int level) const
-  {
-    return _p[level];
-  }
-
-  /** set nonsmooth input (copy)
-   *  \param newValue
-   *  \param level required level for p
-   */
-  void setP(const SiconosVector& newValue, unsigned int level);
-
-  /** set nonsmooth input (pointer link)
-   *  \param newPtr
-   *  \param level required level for p
-   */
-  void setPPtr(SP::SiconosVector newPtr, unsigned int level);
-
-  /** get mass matrix (pointer link)
-   *  \return SP::SiconosMatrix
-   */
-  inline SP::SiconosMatrix mass() const
-  {
-    return _mass;
-  }
-
-  /** get (pointer) LU-factorization of the mass, used for LU-forward-backward computation
-   *  \return pointer SP::SimpleMatrix
-   */
-  inline SP::SimpleMatrix inverseMass() const
-  {
-    return _inverseMass;
-  }
-
-  /** set mass to pointer newPtr
-   *  \param newPtr a plugged matrix SP
-   */
-  inline void setMassPtr(SP::SiconosMatrix newPtr)
-  {
-    _mass = newPtr;
-    _hasConstantMass = true;
-  }
-
   /** get \$F_{int}\$ (pointer link)
    *  \return pointer on a plugged vector
    */
@@ -571,7 +495,6 @@ public:
   {
     return _fInt;
   }
-
 
   /** set  \$F_{int}\$ (pointer link)
    *  \param newPtr a SP to plugged vector
@@ -697,6 +620,14 @@ public:
   /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
+  virtual inline SP::SiconosMatrix jacobianvForces() const
+  {
+    return _jacobianqDotForces;
+  }
+
+  /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
+   *  \return pointer on a SiconosMatrix
+   */
   virtual inline SP::SiconosMatrix jacobianqDotForces() const
   {
     return _jacobianqDotForces;
@@ -711,7 +642,7 @@ public:
    * note: not const due to SchatzmanPaoliOSI::initializeWorkVectorsForDS
    *  \return a memory
    */
-  inline SiconosMemory& qMemory()
+  inline const SiconosMemory& qMemory()
   {
     return _qMemory;
   }
@@ -720,7 +651,7 @@ public:
    * note: not const due to SchatzmanPaoliOSI::initializeWorkVectorsForDS
    *  \return a memory
    */
-  inline SiconosMemory& velocityMemory()
+  inline const SiconosMemory& velocityMemory()
   {
     return _velocityMemory;
   }
@@ -987,35 +918,6 @@ public:
    * Used in EventDriven (LsodarOSI->updateState)
    */
   void computePostImpactVelocity();
-
-  /** set Boundary Conditions
-   *  \param newbd BoundaryConditions
-   */
-  void setBoundaryConditions(SP::BoundaryCondition newbd);
-
-  /** get Boundary Conditions
-   *  \return SP::BoundaryCondition pointer on a BoundaryConditions
-   */
-  inline SP::BoundaryCondition boundaryConditions()
-  {
-    return _boundaryConditions;
-  };
-
-  /** set Reaction to Boundary Conditions
-   *  \param newrbd BoundaryConditions pointer
-   */
-  inline void setReactionToBoundaryConditions(SP::SiconosVector newrbd)
-  {
-    _reactionToBoundaryConditions = newrbd;
-  };
-
-  /** get Reaction to  Boundary Conditions
-   *  \return pointer on a BoundaryConditions
-   */
-  inline SP::SiconosVector reactionToBoundaryConditions()
-  {
-    return _reactionToBoundaryConditions;
-  };
 
   /** Allocate memory for q[level], level > 1
       Useful for some integrators that need

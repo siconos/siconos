@@ -48,9 +48,7 @@ DEFINE_SPTR(OneStepIntegrator)
 DEFINE_SPTR(Relation)
 
 DEFINE_SPTR(FirstOrderR)
-DEFINE_SPTR(FirstOrderNonLinearDS)
-DEFINE_SPTR(FirstOrderLinearDS)
-DEFINE_SPTR(FirstOrderLinearTIDS)
+
 
 DEFINE_SPTR(Simulation)
 DEFINE_SPTR(EventDriven)
@@ -66,9 +64,14 @@ DEFINE_SPTR(TimeDiscretisation)
 
 // Dynamical systems
 DEFINE_SPTR(DynamicalSystem)
+DEFINE_SPTR(SecondOrderDS)
 DEFINE_SPTR(LagrangianLinearTIDS)
 DEFINE_SPTR(LagrangianLinearDiagonalDS)
 DEFINE_SPTR(NewtonEulerDS)
+
+DEFINE_SPTR(FirstOrderNonLinearDS)
+DEFINE_SPTR(FirstOrderLinearDS)
+DEFINE_SPTR(FirstOrderLinearTIDS)
 
 DEFINE_SPTR(Event)
 DEFINE_SPTR(NonSmoothLaw)

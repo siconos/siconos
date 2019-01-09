@@ -39,14 +39,14 @@ void SphereLDS::computeMass()
   normalize(*q(), 4);
   normalize(*q(), 5);
 
-  // SS: Forcing modification of qold, is this necessary?
-  if (qMemory().nbVectorsInMemory() >= 1)
-  {
-    SiconosVector& qold = qMemory().getSiconosVectorMutable(0);
-    normalize(qold, 3);
-    normalize(qold, 4);
-    normalize(qold, 5);
-  }
+  // // SS: Forcing modification of qold, is this necessary?
+  // if (qMemory().nbVectorsInMemory() >= 1)
+  // {
+  //   SiconosVector& qold = qMemory().getSiconosVector(0);
+  //   normalize(qold, 3);
+  //   normalize(qold, 4);
+  //   normalize(qold, 5);
+  // }
 
   double theta = q()->getValue(3);
 

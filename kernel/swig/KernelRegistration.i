@@ -15,6 +15,7 @@
   PY_REGISTER(DynamicalSystem, Kernel);                                         \
   PY_REGISTER(NonSmoothDynamicalSystem, Kernel);                                \
   PY_REGISTER(Topology, Kernel);                                                \
+  PY_REGISTER(SecondOrderDS, Kernel);                                   \
   PY_REGISTER(LagrangianDS, Kernel);                                            \
   PY_REGISTER(LagrangianLinearTIDS, Kernel);                                    \
   PY_REGISTER(LagrangianLinearDiagonalDS, Kernel);                              \
@@ -72,3 +73,22 @@
   PY_REGISTER(FixedBC, Kernel);                                                 \
   PY_REGISTER(OSNSMatrix, Kernel);                                              \
   PY_REGISTER(BlockCSRMatrix, Kernel);
+
+%feature("nodirector") SecondOrderDS::dimension;
+%feature("nodirector") SecondOrderDS::q;
+%feature("nodirector") SecondOrderDS::q0;
+%feature("nodirector") SecondOrderDS::velocity;
+%feature("nodirector") SecondOrderDS::velocity0;
+%feature("nodirector") SecondOrderDS::acceleration;
+%feature("nodirector") SecondOrderDS::forces;
+%feature("nodirector") SecondOrderDS::jacobianqForces;
+%feature("nodirector") SecondOrderDS::jacobianvForces;
+%feature("nodirector") SecondOrderDS::p;
+%feature("nodirector") SecondOrderDS::mass;
+%feature("nodirector") SecondOrderDS::inverseMass;
+%feature("nodirector") SecondOrderDS::qMemory;
+%feature("nodirector") SecondOrderDS::velocityMemory;
+%feature("nodirector") SecondOrderDS::forcesMemory;
+%feature("nodirector") SecondOrderDS::reactionToBoundaryConditions;
+
+
