@@ -41,8 +41,8 @@
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-// #define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_WHERE_MESSAGES
+//#define DEBUG_BEGIN_END_ONLY
+//#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
 
@@ -126,37 +126,33 @@ void MoreauJeanOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
   // Compute W (iteration matrix)
   initializeIterationMatrixW(t, ds);
 
+  SP::SecondOrderDS sods = std11::static_pointer_cast<SecondOrderDS> (ds);
+  ds_work_vectors[MoreauJeanOSI::RESIDU_FREE].reset(new SiconosVector(sods->dimension()));
+  ds_work_vectors[MoreauJeanOSI::VFREE].reset(new SiconosVector(sods->dimension()));
+ 
   if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearDiagonalDS)
   {
     // buffers allocation (inside the graph)
     SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
-    ds_work_vectors[MoreauJeanOSI::RESIDU_FREE].reset(new SiconosVector(lds->dimension()));
-    ds_work_vectors[MoreauJeanOSI::VFREE].reset(new SiconosVector(lds->dimension()));
     ds_work_vectors[MoreauJeanOSI::BUFFER].reset(new SiconosVector(lds->dimension()));
-
-    // Update dynamical system components (for memory swap).
-    lds->computeForces(t, lds->q(), lds->velocity());
-    lds->swapInMemory();
   }
   else if(dsType == Type::NewtonEulerDS)
   {
     SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
     DEBUG_PRINTF("neds->number() %i \n",neds->number());
-    // buffers allocation (into the graph)
-    ds_work_vectors[MoreauJeanOSI::RESIDU_FREE].reset(new SiconosVector(neds->dimension()));
-    ds_work_vectors[MoreauJeanOSI::VFREE].reset(new SiconosVector(neds->dimension()));
-
     //Compute a first value of the dotq  to store it in  _dotqMemory
     SP::SiconosMatrix T = neds->T();
     SP::SiconosVector dotq = neds->dotq();
     SP::SiconosVector v = neds->twist();
     prod(*T, *v, *dotq, true);
-
-    //Compute a first value of the forces to store it in _forcesMemory
-    neds->computeForces(t, neds->q(), v);
-    neds->swapInMemory();
   }
   DEBUG_END("MoreauJeanOSI::initializeWorkVectorsForDS(Model&, double t, SP::DynamicalSystem ds)\n");
+  // Update dynamical system components (for memory swap).
+  sods->computeForces(t, sods->q(), sods->velocity());
+  sods->swapInMemory();
+
+  
+  
 
 }
 void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter,
@@ -392,23 +388,16 @@ void MoreauJeanOSI::_initializeIterationMatrixWBoundaryConditions(DynamicalSyste
 
 
   Type::Siconos dsType = Type::value(ds);
-  if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::NewtonEulerDS
+  if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS
+     || dsType == Type::NewtonEulerDS
      || dsType == Type::LagrangianLinearDiagonalDS)
   {
     // Memory allocation for WBoundaryConditions
     unsigned int sizeWBoundaryConditions = ds.dimension(); // n for first order systems, ndof for lagrangian.
 
-    SP::BoundaryCondition bc;
-    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianLinearDiagonalDS)
-    {
-      LagrangianDS& d = static_cast<LagrangianDS&> (ds);
-      bc = d.boundaryConditions();
-    }
-    else if(dsType == Type::NewtonEulerDS)
-    {
-     NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
-      bc = d.boundaryConditions();
-    }
+    SecondOrderDS&  d = static_cast<SecondOrderDS&> (ds);
+    SP::BoundaryCondition bc = d.boundaryConditions();
+
     unsigned int numberBoundaryConditions = bc->velocityIndices()->size();
     _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions.reset(new SimpleMatrix(sizeWBoundaryConditions, numberBoundaryConditions));
     _computeWBoundaryConditions(ds,*_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions,
@@ -438,21 +427,8 @@ void MoreauJeanOSI::_computeWBoundaryConditions(DynamicalSystem& ds, SiconosMatr
     int columnindex = 0;
 
     std::vector<unsigned int>::iterator itindex;
-
-    SP::BoundaryCondition bc;
-
-    //SP::SiconosMatrix W = _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
-
-    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianLinearDiagonalDS)
-    {
-      LagrangianDS& d = static_cast<LagrangianDS&> (ds);
-      bc = d.boundaryConditions();
-    }
-    else if(dsType == Type::NewtonEulerDS)
-    {
-      NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
-      bc = d.boundaryConditions();
-    }
+    SecondOrderDS& d = static_cast<SecondOrderDS&> (ds);
+    SP::BoundaryCondition bc = d.boundaryConditions();
 
     for(itindex = bc->velocityIndices()->begin() ;
         itindex != bc->velocityIndices()->end();
@@ -494,7 +470,6 @@ void MoreauJeanOSI::computeW(double t, DynamicalSystem& ds, SiconosMatrix& W)
   }
   else if(dsType == Type::LagrangianDS)
   {
-
 
     LagrangianDS& d = static_cast<LagrangianDS&> (ds);
     if(d.mass())
@@ -585,7 +560,7 @@ void MoreauJeanOSI::computeInitialNewtonState()
   DEBUG_END("MoreauJeanOSI::computeInitialNewtonState()\n");
 }
 
-void MoreauJeanOSI::applyBoundaryConditions(LagrangianDS& d,  SiconosVector& residu,
+void MoreauJeanOSI::applyBoundaryConditions(SecondOrderDS& d,  SiconosVector& residu,
                                             DynamicalSystemsGraph::VIterator dsi, double t,
                                             const SiconosVector & v)
 {
@@ -614,38 +589,6 @@ void MoreauJeanOSI::applyBoundaryConditions(LagrangianDS& d,  SiconosVector& res
     }
   }
 }
-
-
-void MoreauJeanOSI::applyBoundaryConditions(NewtonEulerDS& d,  SiconosVector& residu,
-                                            DynamicalSystemsGraph::VIterator dsi, double t,
-                                            const SiconosVector & v)
-{
-  if(d.boundaryConditions())
-  {
-    d.boundaryConditions()->computePrescribedVelocity(t);
-
-    unsigned int columnindex = 0;
-    SimpleMatrix & WBoundaryConditions  = *_dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions ;
-    SP::SiconosVector columntmp(new SiconosVector(d.dimension()));
-
-    for(std::vector<unsigned int>::iterator  itindex = d.boundaryConditions()->velocityIndices()->begin() ;
-        itindex != d.boundaryConditions()->velocityIndices()->end();
-        ++itindex)
-    {
-      double DeltaPrescribedVelocity =
-        d.boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-        - v.getValue(*itindex);
-
-      WBoundaryConditions.getCol(columnindex, *columntmp);
-      residu -= *columntmp * (DeltaPrescribedVelocity);
-
-      residu.setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
-
-      columnindex ++;
-    }
-  }
-}
-
 
 
 double MoreauJeanOSI::computeResidu()
@@ -1048,10 +991,11 @@ void MoreauJeanOSI::computeFreeState()
     dsType = Type::value(ds); // Its type
     SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W; // Its W MoreauJeanOSI matrix of iteration.
     VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    // 3 - Lagrangian Non Linear Systems
-    if(dsType == Type::LagrangianDS)
-    {
-      DEBUG_PRINT("MoreauJeanOSI::computeFreeState(), dsType == Type::LagrangianDS\n");
+    // // 3 - Lagrangian Non Linear Systems
+    // if(dsType == Type::LagrangianDS ||
+    //    dsType == Type::NewtonEulerDS)
+    // {
+      DEBUG_PRINT("MoreauJeanOSI::computeFreeState()\n");
       // IN to be updated at current time: W, M, q, v, fL
       // IN at told: qi,vi, fLi
 
@@ -1065,11 +1009,12 @@ void MoreauJeanOSI::computeFreeState()
       // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
 
       // -- Convert the DS into a Lagrangian one.
-      LagrangianDS& d = static_cast<LagrangianDS&> (ds);
+      SecondOrderDS& d = static_cast<SecondOrderDS&> (ds);
+      const SiconosVector& vold = d.velocityMemory().getSiconosVector(0); //vi (vold)
+      const SiconosVector& v = *d.velocity(); // v = v_k,i+1
 
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const SiconosVector &v = *d.velocity(); // v = v_k,i+1
       DEBUG_EXPR(v.display());
+      DEBUG_EXPR(vold .display());
 
       // --- ResiduFree computation ---
       // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
@@ -1082,138 +1027,153 @@ void MoreauJeanOSI::computeFreeState()
       DEBUG_EXPR(vfree.display());
       // -- Update W --
       // Note: during computeW, mass and jacobians of forces will be computed/
-      computeW(t, d, W);
+      if(dsType == Type::LagrangianDS
+         || dsType == Type:: NewtonEulerDS)
+        computeW(t, d, W);
       DEBUG_EXPR(W.display(););
-      // -- vfree =  v - W^{-1} ResiduFree --
-      // At this point vfree = residuFree
-      // -> Solve WX = vfree and set vfree = X
-      W.PLUForwardBackwardInPlace(vfree);
-      // -> compute real vfree
-      vfree *= -1.0;
-      vfree += v;
-      DEBUG_EXPR(vfree.display());
+      if (dsType == Type::LagrangianLinearDiagonalDS)
+      {
+        // W is diagonal and contains the inverse of the iteration matrix!
+        for(unsigned int i=0;i<d.dimension();++i)
+          vfree(i) = -W(i, i) * vfree(i) + vold(i);
+      }
+      else
+      {
+        // -- vfree =  v - W^{-1} ResiduFree --
+        // At this point vfree = residuFree
+        // -> Solve WX = vfree and set vfree = X
+        W.PLUForwardBackwardInPlace(vfree);
+        // -> compute real vfree
+        vfree *= -1.0;
+              // Get state i (previous time step) from Memories -> var. indexed with "Old"
+        if(dsType == Type::LagrangianLinearTIDS)
+        {
+          vfree += vold;
+        }
+        else
+        {
+          vfree += v;
+        }
+        DEBUG_EXPR(vfree.display());
+      }
+    // }
+    // // 4 - Lagrangian Linear Systems
+    // else if(dsType == Type::LagrangianLinearTIDS)
+    // {
+    //   DEBUG_PRINT("MoreauJeanOSI::computeFreeState(), dsType == Type::LagrangianLinearTIDS\n");
+    //   // IN to be updated at current time: Fext
+    //   // IN at told: qi,vi, fext
+    //   // IN constants: K,C
 
-    }
-    // 4 - Lagrangian Linear Systems
-    else if(dsType == Type::LagrangianLinearTIDS)
-    {
-      DEBUG_PRINT("MoreauJeanOSI::computeFreeState(), dsType == Type::LagrangianLinearTIDS\n");
-      // IN to be updated at current time: Fext
-      // IN at told: qi,vi, fext
-      // IN constants: K,C
+    //   // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
+    //   // "i" values are saved in memory vectors.
 
-      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
-      // "i" values are saved in memory vectors.
+    //   // vFree = v_i + W^{-1} ResiduFree    // with
+    //   // ResiduFree = (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
 
-      // vFree = v_i + W^{-1} ResiduFree    // with
-      // ResiduFree = (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
+    //   // -- Convert the DS into a Lagrangian one.
+    //   LagrangianLinearTIDS& d = static_cast<LagrangianLinearTIDS&> (ds);
 
-      // -- Convert the DS into a Lagrangian one.
-      LagrangianLinearTIDS& d = static_cast<LagrangianLinearTIDS&> (ds);
+    //   // Get state i (previous time step) from Memories -> var. indexed with "Old"
+    //   const SiconosVector& vold = d.velocityMemory().getSiconosVector(0); //vi
 
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const SiconosVector& vold = d.velocityMemory().getSiconosVector(0); //vi
+    //   // --- ResiduFree computation ---
+    //   // vFree pointer is used to compute and save ResiduFree in this first step.
 
-      // --- ResiduFree computation ---
-      // vFree pointer is used to compute and save ResiduFree in this first step.
+    //   // Velocity free and residu. vFree = RESfree (pointer equality !!).
+    //   SiconosVector& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
+    //   SiconosVector& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
-      // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SiconosVector& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
-      SiconosVector& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
+    //   vfree = residuFree;
+    //   DEBUG_EXPR(vfree.display());
+    //   W.PLUForwardBackwardInPlace(vfree);
+    //   vfree *= -1.0;
+    //   vfree += vold;
 
-      vfree = residuFree;
-      DEBUG_EXPR(vfree.display());
-      W.PLUForwardBackwardInPlace(vfree);
-      vfree *= -1.0;
-      vfree += vold;
-
-      DEBUG_EXPR(vfree.display());
-
-
-    }
-    // 4 - Lagrangian Linear Diagonal Systems
-    else if(dsType == Type::LagrangianLinearDiagonalDS)
-    {
-      // IN to be updated at current time: Fext
-      // IN at told: qi,vi, fext
-      // IN constants: K,C
-
-      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
-      // "i" values are saved in memory vectors.
-
-      // vFree = v_i + W^{-1} ResiduFree    // with
-      // ResiduFree = (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
-
-      // -- Convert the DS into a Lagrangian one.
-      LagrangianLinearDiagonalDS& d = static_cast<LagrangianLinearDiagonalDS&> (ds);
-
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const SiconosVector& vold = d.velocityMemory().getSiconosVector(0); //vi
-
-      // --- ResiduFree computation ---
-      // vFree pointer is used to compute and save ResiduFree in this first step.
-
-      // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SiconosVector& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
-      // W is diagonal and contains the inverse of the iteration matrix!
-      for(unsigned int i=0;i<d.dimension();++i)
-        vfree(i) = -W(i, i) * vfree(i) + vold(i);
-
-    }
-    else if(dsType == Type::NewtonEulerDS)
-    {
-      // IN to be updated at current time: W, M, q, v, fL
-      // IN at told: qi,vi,
-
-      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
-      // Index k stands for Newton iteration and thus corresponds to the last computed
-      // value, ie the one saved in the DynamicalSystem.
-      // "i" values are saved in memory vectors.
-
-      // vFree = v_k,i+1 - W^{-1} ResiduFree
-      // with
-      // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1)
-      //                                        - h*(1-theta)*forces(ti,vi,qi)
-
-      // -- Convert the DS into a NewtonEuler one.
-      NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
-
-      // --- ResiduFree computation ---
-      // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
-      //
-      // vFree pointer is used to compute and save ResiduFree in this first step.
-
-      SiconosVector& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
-      SiconosVector& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
+    //   DEBUG_EXPR(vfree.display());
 
 
-      vfree = residuFree;
+    // }
+    // // 4 - Lagrangian Linear Diagonal Systems
+    // else if(dsType == Type::LagrangianLinearDiagonalDS)
+    // {
+    //   // IN to be updated at current time: Fext
+    //   // IN at told: qi,vi, fext
+    //   // IN constants: K,C
 
-      // -- Update W --
-      // Note: during computeW, mass and jacobians of forces will be computed/
-      SimpleMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
-      computeW(t, d, W);
-      const SiconosVector& v = *d.twist(); // v = v_k,i+1
+    //   // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
+    //   // "i" values are saved in memory vectors.
 
-      // -- vfree =  v - W^{-1} ResiduFree --
-      // At this point vfree = residuFree
-      // -> Solve WX = vfree and set vfree = X
-      //    std::cout<<"MoreauJeanOSI::computeFreeState residu free"<<endl;
-      //    vfree->display();
-      DEBUG_EXPR(residuFree.display(););
+    //   // vFree = v_i + W^{-1} ResiduFree    // with
+    //   // ResiduFree = (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
 
-      W.PLUForwardBackwardInPlace(vfree);
-      //    std::cout<<"MoreauJeanOSI::computeFreeState -WRfree"<<endl;
-      //    vfree->display();
-      //    scal(h,*vfree,*vfree);
-      // -> compute real vfree
-      vfree *= -1.0;
-      DEBUG_EXPR(vfree.display(););
-      vfree += v;
-      DEBUG_EXPR(vfree.display(););
-    }
-    else
-      RuntimeException::selfThrow("MoreauJeanOSI::computeFreeState - not yet implemented for Dynamical system of type: " +  Type::name(ds));
+    //   // -- Convert the DS into a Lagrangian one.
+    //   LagrangianLinearDiagonalDS& d = static_cast<LagrangianLinearDiagonalDS&> (ds);
+
+    //   // Get state i (previous time step) from Memories -> var. indexed with "Old"
+    //   const SiconosVector& vold = d.velocityMemory().getSiconosVector(0); //vi
+
+    //   // --- ResiduFree computation ---
+    //   // vFree pointer is used to compute and save ResiduFree in this first step.
+
+    //   // Velocity free and residu. vFree = RESfree (pointer equality !!).
+    //   SiconosVector& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
+    //   // W is diagonal and contains the inverse of the iteration matrix!
+    //   for(unsigned int i=0;i<d.dimension();++i)
+    //     vfree(i) = -W(i, i) * vfree(i) + vold(i);
+
+    // }
+    // // else if  (dsType == Type::NewtonEulerDS)
+    // {
+    //   // IN to be updated at current time: W, M, q, v, fL
+    //   // IN at told: qi,vi,
+
+    //   // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
+    //   // Index k stands for Newton iteration and thus corresponds to the last computed
+    //   // value, ie the one saved in the DynamicalSystem.
+    //   // "i" values are saved in memory vectors.
+
+    //   // vFree = v_k,i+1 - W^{-1} ResiduFree
+    //   // with
+    //   // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1)
+    //   //                                        - h*(1-theta)*forces(ti,vi,qi)
+      
+    //   // -- Convert the DS into a NewtonEuler one.
+    //   NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
+    //   // --- ResiduFree computation ---
+    //   // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
+    //   //
+    //   // vFree pointer is used to compute and save ResiduFree in this first step.
+    //   SiconosVector& residuFree = *ds_work_vectors[MoreauJeanOSI::RESIDU_FREE];
+    //   SiconosVector& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
+
+    //   vfree = residuFree;
+
+    //   // -- Update W --
+    //   // Note: during computeW, mass and jacobians of forces will be computed/
+    //   //SimpleMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
+    //   computeW(t, d, W);
+    //   const SiconosVector& v = *d.twist(); // v = v_k,i+1
+
+    //   // -- vfree =  v - W^{-1} ResiduFree --
+    //   // At this point vfree = residuFree
+    //   // -> Solve WX = vfree and set vfree = X
+    //   //    std::cout<<"MoreauJeanOSI::computeFreeState residu free"<<endl;
+    //   //    vfree->display();
+    //   DEBUG_EXPR(residuFree.display(););
+
+    //   W.PLUForwardBackwardInPlace(vfree);
+    //   //    std::cout<<"MoreauJeanOSI::computeFreeState -WRfree"<<endl;
+    //   //    vfree->display();
+    //   //    scal(h,*vfree,*vfree);
+    //   // -> compute real vfree
+    //   vfree *= -1.0;
+    //   DEBUG_EXPR(vfree.display(););
+    //   vfree += v;
+    //   DEBUG_EXPR(vfree.display(););
+    // }
+    // else
+    //   RuntimeException::selfThrow("MoreauJeanOSI::computeFreeState - not yet implemented for Dynamical system of type: " +  Type::name(ds));
 
   }
   DEBUG_END("MoreauJeanOSI::computeFreeState()\n");

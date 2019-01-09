@@ -121,17 +121,14 @@ void SchatzmanPaoliOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSyste
     SP::SiconosVector velocity  = lltids->velocity();
 
     // We first swap the initial value contained in q and v after initialization.
-    lltids->qMemory().swap(*q);
-    lltids->velocityMemory().swap(*velocity);
+    lltids->swapInMemory();
 
     // we compute the new state values
     double h = _simulation->timeStep();
     *q = *q0 + h* * v0;
 
     //*velocity=*velocity; we do nothing for the velocity
-
-    lltids->qMemory().swap(*q);
-    lltids->velocityMemory().swap(*velocity);
+    lltids->swapInMemory();
 
   }
   // W initialization

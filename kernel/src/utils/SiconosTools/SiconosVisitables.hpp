@@ -49,6 +49,7 @@
   REGISTER(SimpleMatrix)                               \
   REGISTER(BlockVector)                                \
   REGISTER(BlockMatrix)                                \
+  REGISTER(SecondOrderDS)                              \
   REGISTER(LagrangianDS)                               \
   REGISTER(LagrangianLinearTIDS)                       \
   REGISTER(LagrangianLinearDiagonalDS)                 \
