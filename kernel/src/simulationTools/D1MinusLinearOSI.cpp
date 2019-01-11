@@ -209,11 +209,13 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 				     InteractionProperties& interProp,
 				     DynamicalSystemsGraph & DSG)
 {
+
+  DEBUG_BEGIN("D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
-
+  DEBUG_PRINTF("interaction number %i\n", inter.number());
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   if (!interProp.workVectors)
@@ -254,21 +256,55 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   }
 
 
-  /* allocate ant set work vectors for the osi */
-  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+  /* allocate and set work vectors for the osi */
+  unsigned int xfree = D1MinusLinearOSI::xfree;
+  DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
+  DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
+
+  if (ds1 != ds2)
+  {
+    DEBUG_PRINT("ds1 != ds2\n");
+    if ((!inter_work_block[xfree]) || (inter_work_block[xfree]->numberOfBlocks() !=2 ))
+      inter_work_block[xfree].reset(new BlockVector(2));
+  }
+  else
+  {
+    if ((!inter_work_block[xfree]) || (inter_work_block[xfree]->numberOfBlocks() !=1 ))
+      inter_work_block[xfree].reset(new BlockVector(1));
+  }
+
+  if(checkOSI(DSG.descriptor(ds1)))
+  {
+    DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
+    assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
+    VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+    inter_work_block[xfree]->setVectorPtr(0,workVds1[D1MinusLinearOSI::FREE]);
+  }
+  if (ds1 != ds2)
+  {
+    DEBUG_PRINT("ds1 != ds2\n");
+    if(checkOSI(DSG.descriptor(ds2)))
+    {
+      DEBUG_PRINTF("ds2->number() %i is taken into account\n",ds2->number());
+      assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
+      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+      inter_work_block[xfree]->setVectorPtr(1,workVds2[D1MinusLinearOSI::FREE]);
+    }
+  }
+
+  DEBUG_EXPR(inter_work_block[xfree]->display(););
+
+
+  
   if (relationType == Lagrangian)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
     DSlink[LagrangianR::p2].reset(new BlockVector());
     DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
-
-    inter_work_block[D1MinusLinearOSI::xfree].reset(new BlockVector());
-    inter_work_block[D1MinusLinearOSI::xfree]->insertPtr(workVds1[D1MinusLinearOSI::FREE]);
   }
   else if (relationType == NewtonEuler)
   {
-    inter_work_block[D1MinusLinearOSI::xfree].reset(new BlockVector());
-    inter_work_block[D1MinusLinearOSI::xfree]->insertPtr(workVds1[D1MinusLinearOSI::FREE]);
+    
   }
 
   if (ds1 != ds2)
@@ -276,16 +312,15 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == Lagrangian)
     {
-      inter_work_block[D1MinusLinearOSI::xfree]->insertPtr(workVds2[D1MinusLinearOSI::FREE]);
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
       DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
-
     }
     else if (relationType == NewtonEuler)
     {
-      inter_work_block[D1MinusLinearOSI::xfree]->insertPtr(workVds2[D1MinusLinearOSI::FREE]);
     }
   }
+
+  DEBUG_END("D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
 }
 
 double D1MinusLinearOSI::computeResidu()
