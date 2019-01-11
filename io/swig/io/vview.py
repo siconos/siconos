@@ -64,7 +64,11 @@ class VViewOptions(object):
         self.advance_by_time = None
         self.frames_per_second = 25
         self.cf_disable = False
-        self.imr = False
+        if hasattr(vtk.vtkPolyDataMapper(), 'ImmediateModeRenderingOff'):
+            self.imr = False
+        else:
+            # vtk 8
+            self.imr = True
         self.depth_peeling = True
         self.maximum_number_of_peels = 100
         self.occlusion_ratio = 0.1
