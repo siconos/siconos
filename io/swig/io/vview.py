@@ -996,6 +996,8 @@ class VView(object):
         self.refs_attrs = []
         self.shape = dict()
         self.pos = dict()
+        self.mass = dict()
+        self.inertia = dict()
 
         self.contact_posa = dict()
         self.contact_posb = dict()
@@ -1024,6 +1026,7 @@ class VView(object):
         self.sactorb = dict()
         self.clactor = dict()
         self.data_connectors_v = dict()
+        self.data_connectors_k = dict()
         self.data_connectors_t = dict()
         self.data_connectors_d = dict()
         self.data_connectors_i = dict()
@@ -1636,11 +1639,18 @@ class VView(object):
             transformer.GetOutputPort())
         self.data_connectors_v[instid]._connector.Update()
 
+        self.data_connectors_k[instid] = DataConnector(instid,
+                                                       data_name='kinetic_energy',
+                                                       data_size=1)
+        self.data_connectors_k[instid]._connector.SetInputConnection(
+            self.data_connectors_v[instid]._connector.GetOutputPort())
+        self.data_connectors_k[instid]._connector.Update()
+
         self.data_connectors_t[instid] = DataConnector(instid,
                                                        data_name='translation',
                                                        data_size=3)
         self.data_connectors_t[instid]._connector.SetInputConnection(
-            self.data_connectors_v[instid]._connector.GetOutputPort())
+            self.data_connectors_k[instid]._connector.GetOutputPort())
         self.data_connectors_t[instid]._connector.Update()
 
         self.data_connectors_i[instid] = DataConnector(instid,
@@ -1662,6 +1672,17 @@ class VView(object):
             self.times_of_birth[instid] = instance.attrs['time_of_birth']
         if 'time_of_death' in instance.attrs:
             self.times_of_death[instid] = instance.attrs['time_of_death']
+
+        if 'mass' in instance.attrs:
+            # a dynamic instance
+            self.mass[instid] = instance.attrs['id']
+            if 'inertia' in instance.attrs:
+                self.inertia[instid] = instance.attrs['inertia']
+            else:
+                self.inertia[instid] = numpy.eye(3)
+
+        else:
+            print('no mass for instance', instance_name)
 
         if instid >= 0:
             self.dynamic_actors[instid] = list()
@@ -1712,8 +1733,9 @@ class VView(object):
                             data[:, 7],
                             data[:, 8])
 
-    def build_set_functions(self, dcv=None, dct=None, dcd=None, dci=None):
+    def build_set_functions(self, dck=None, dcv=None, dct=None, dcd=None, dci=None):
         if dcv is None: dcv = self.data_connectors_v
+        if dck is None: dck = self.data_connectors_k
         if dct is None: dct = self.data_connectors_t
         if dcd is None: dcd = self.data_connectors_d
         if dci is None: dci = self.data_connectors_i
@@ -1728,6 +1750,11 @@ class VView(object):
         def set_velocity(instance, v0, v1, v2, v3, v4, v5):
             if instance in dcv:
                 dcv[instance]._data[:] = [v0, v1, v2, v3, v4, v5]
+                dck[instance]._data[:] = \
+                    0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
+                         numpy.dot([v3, v4, v5],
+                                   numpy.dot(self.inertia[instance],
+                                             [v3, v4, v5])))
 
         if dcv is not None:
             self.set_velocity_v = numpy.vectorize(set_velocity)
