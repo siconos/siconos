@@ -886,7 +886,7 @@ class IOReader(VTKPythonAlgorithmBase):
                     #    self.dom[mu].SetName('domains')
                     #    self._contact_field[mu].AddArray(self.dom[mu])
 
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
 
         return 1
