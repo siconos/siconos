@@ -10,6 +10,7 @@ import os
 import json
 import getopt
 import math
+import traceback
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtk.numpy_interface import dataset_adapter as dsa
 
@@ -806,7 +807,7 @@ class IOReader(VTKPythonAlgorithmBase):
                             self.ids_at_time[mu] = data[
                                 imu, 23:26].astype(int)
                         else:
-                            self.ids_at_time[mu] = None
+                            self.ids_at_time[mu] = [[nan, nan, nan]]
 
             else:
                 for mu in self._mu_coefs:
@@ -814,7 +815,7 @@ class IOReader(VTKPythonAlgorithmBase):
                     self.cpb_at_time[mu] = [[nan, nan, nan]]
                     self.cn_at_time[mu] =  [[nan, nan, nan]]
                     self.cf_at_time[mu] =  [[nan, nan, nan]]
-                    self.ids_at_time[mu] = None
+                    self.ids_at_time[mu] = [[nan, nan, nan]]
 
             for mu in self._mu_coefs:
                 self.cpa[mu] = numpy_support.numpy_to_vtk(
@@ -852,7 +853,7 @@ class IOReader(VTKPythonAlgorithmBase):
                     self._contact_field[mu].AddArray(self.ids[mu])
                     self._output[mu].GetPointData().AddArray(self.ids[mu])
 
-                    if len(self.ids_at_time[mu][0, :] > 2):
+                    if len(self.ids_at_time[mu]) > 2:
                         dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
                         dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
                         _i, _i, dsa_pos_ids = numpy.intersect1d(
@@ -886,7 +887,7 @@ class IOReader(VTKPythonAlgorithmBase):
                     #    self._contact_field[mu].AddArray(self.dom[mu])
 
         except Exception as e:
-            print(e)
+            traceback.print_exc()
 
         return 1
 
