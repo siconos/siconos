@@ -803,11 +803,12 @@ class IOReader(VTKPythonAlgorithmBase):
                             imu, 8:11]
                         self.cf_at_time[mu] = data[
                             imu, 11:14]
-                        if len(data[imu,:]) > 26:
+                        if data[imu,:].shape[1] > 26:
                             self.ids_at_time[mu] = data[
                                 imu, 23:26].astype(int)
                         else:
-                            self.ids_at_time[mu] = [[nan, nan, nan]]
+                            self.ids_at_time[mu] = numpy.array(
+                                [[nan, nan, nan]])
 
             else:
                 for mu in self._mu_coefs:
@@ -815,7 +816,7 @@ class IOReader(VTKPythonAlgorithmBase):
                     self.cpb_at_time[mu] = [[nan, nan, nan]]
                     self.cn_at_time[mu] =  [[nan, nan, nan]]
                     self.cf_at_time[mu] =  [[nan, nan, nan]]
-                    self.ids_at_time[mu] = [[nan, nan, nan]]
+                    self.ids_at_time[mu] = numpy.array([[nan, nan, nan]])
 
             for mu in self._mu_coefs:
                 self.cpa[mu] = numpy_support.numpy_to_vtk(
@@ -846,36 +847,35 @@ class IOReader(VTKPythonAlgorithmBase):
                 self._output[mu].GetPointData().AddArray(self.cn[mu])
                 self._output[mu].GetPointData().AddArray(self.cf[mu])
 
-                if self.ids_at_time[mu] is not None:
+                if self.ids_at_time[mu].shape[0] > 0:
                     self.ids[mu] = numpy_support.numpy_to_vtk(
                         self.ids_at_time[mu])
                     self.ids[mu].SetName('ids')
                     self._contact_field[mu].AddArray(self.ids[mu])
                     self._output[mu].GetPointData().AddArray(self.ids[mu])
 
-                    if len(self.ids_at_time[mu]) > 2:
-                        dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
-                        dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
-                        _i, _i, dsa_pos_ids = numpy.intersect1d(
-                            self.pos_data[:, 1],
-                            dsa_ids, return_indices=True)
-                        _i, _i, dsb_pos_ids = numpy.intersect1d(
-                            self.pos_data[:, 1],
-                            dsb_ids, return_indices=True)
+                    dsa_ids = numpy.unique(self.ids_at_time[mu][:, 1])
+                    dsb_ids = numpy.unique(self.ids_at_time[mu][:, 2])
+                    _i, _i, dsa_pos_ids = numpy.intersect1d(
+                        self.pos_data[:, 1],
+                        dsa_ids, return_indices=True)
+                    _i, _i, dsb_pos_ids = numpy.intersect1d(
+                        self.pos_data[:, 1],
+                        dsb_ids, return_indices=True)
 
-                        # objects a & b translations
-                        obj_pos_a = self.pos_data[dsa_pos_ids, 2:5]
-                        obj_pos_b = self.pos_data[dsb_pos_ids, 2:5]
+                    # objects a & b translations
+                    obj_pos_a = self.pos_data[dsa_pos_ids, 2:5]
+                    obj_pos_b = self.pos_data[dsb_pos_ids, 2:5]
 
-                        self._all_objs_pos[mu] = numpy.vstack((obj_pos_a,
-                                                               obj_pos_b))
+                    self._all_objs_pos[mu] = numpy.vstack((obj_pos_a,
+                                                           obj_pos_b))
 
-                        self._all_objs_pos_vtk[mu] = numpy_support.numpy_to_vtk(
-                            self._all_objs_pos[mu])
-                        self._objs_points[mu].SetData(self._all_objs_pos_vtk[mu])
+                    self._all_objs_pos_vtk[mu] = numpy_support.numpy_to_vtk(
+                        self._all_objs_pos[mu])
+                    self._objs_points[mu].SetData(self._all_objs_pos_vtk[mu])
 
-                        self._objs_output[mu].GetPointData().AddArray(self.cn[mu])
-                        self._objs_output[mu].GetPointData().AddArray(self.cf[mu])
+                    self._objs_output[mu].GetPointData().AddArray(self.cn[mu])
+                    self._objs_output[mu].GetPointData().AddArray(self.cf[mu])
 
 
                     #if dom_imu is not None:
