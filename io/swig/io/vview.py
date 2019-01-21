@@ -256,6 +256,8 @@ class VExportOptions(VViewOptions):
         self.start_step = 0
         self.end_step = None
         self.stride = 1
+        self.nprocs = 1
+        self.gen_para_script = False
 
     def usage(self, long=False):
         print(__doc__); print()
@@ -274,6 +276,7 @@ class VExportOptions(VViewOptions):
             --stride=n           integer, set export time step/simulation time step
                                  (default: 1)
             --ascii              export file in ascii format
+            ---gen-para-script=n generation of a gnu parallel command for n processus
             """)
 
     def parse(self):
@@ -282,7 +285,8 @@ class VExportOptions(VViewOptions):
             opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                            ['help', 'version', 'ascii',
                                             'start-step=', 'end-step=',
-                                            'stride=', 'global-filter'])
+                                            'stride=', 'global-filter',
+                                            'gen-para-script='])
             self.configure(opts, args)
         except getopt.GetoptError as err:
                 sys.stderr.write('{0}\n'.format(str(err)))
@@ -306,6 +310,9 @@ class VExportOptions(VViewOptions):
                 self.end_step = int(a)
             if o == '--stride':
                 self.stride = int(a)
+            if o == '--gen-para-script':
+                self.gen_para_script = True
+                self.nprocs = int(a)
             if o in ('--ascii'):
                 self.ascii_mode = True
 
@@ -803,12 +810,11 @@ class IOReader(VTKPythonAlgorithmBase):
                             imu, 8:11]
                         self.cf_at_time[mu] = data[
                             imu, 11:14]
-                        if data[imu,:].shape[1] > 26:
+                        if data[imu, :].shape[1] > 26:
                             self.ids_at_time[mu] = data[
                                 imu, 23:26].astype(int)
                         else:
-                            self.ids_at_time[mu] = numpy.array(
-                                [[nan, nan, nan]])
+                            self.ids_at_time[mu] = None
 
             else:
                 for mu in self._mu_coefs:
@@ -816,7 +822,7 @@ class IOReader(VTKPythonAlgorithmBase):
                     self.cpb_at_time[mu] = [[nan, nan, nan]]
                     self.cn_at_time[mu] =  [[nan, nan, nan]]
                     self.cf_at_time[mu] =  [[nan, nan, nan]]
-                    self.ids_at_time[mu] = numpy.array([[nan, nan, nan]])
+                    self.ids_at_time[mu] = None
 
             for mu in self._mu_coefs:
                 self.cpa[mu] = numpy_support.numpy_to_vtk(
@@ -847,7 +853,7 @@ class IOReader(VTKPythonAlgorithmBase):
                 self._output[mu].GetPointData().AddArray(self.cn[mu])
                 self._output[mu].GetPointData().AddArray(self.cf[mu])
 
-                if self.ids_at_time[mu].shape[0] > 0:
+                if self.ids_at_time[mu] is not None:
                     self.ids[mu] = numpy_support.numpy_to_vtk(
                         self.ids_at_time[mu])
                     self.ids[mu].SetName('ids')
@@ -2186,157 +2192,178 @@ class VView(object):
     # this should be extracted from the VView class
     def export(self):
 
-        big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
-        add_compatiblity_methods(big_data_writer)
-
-        big_data_writer.SetInputConnection(self.big_data_collector.GetOutputPort())
-
-        if self.opts.ascii_mode:
-            big_data_writer.SetDataModeToAscii()
         times = self.io_reader._times[
                 self.opts.start_step:self.opts.end_step:self.opts.stride]
         ntime = len(times)
-        k = self.opts.start_step
-        packet = int(ntime/100)+1
 
-        # independant of time
-        spos_data = self.io_reader._spos_data
-        if spos_data.size > 0:
-            self.set_position_v(spos_data[:, 1], spos_data[:, 2],
-                                spos_data[:, 3],
-                                spos_data[:, 4], spos_data[:, 5],
-                                spos_data[:, 6],
-                                spos_data[:, 7], spos_data[:, 8])
-
-        for time in times:
-            k = k + self.opts.stride
-            if (k % packet == 0):
-                sys.stdout.write('.')
-            self.io_reader.SetTime(time)
-
-            pos_data = self.io_reader.pos_data
-            velo_data = self.io_reader.velo_data
-
-            self.set_position_v(
-                pos_data[:, 1], pos_data[:, 2], pos_data[:, 3],
-                pos_data[:, 4], pos_data[:, 5], pos_data[:, 6],
-                pos_data[:, 7], pos_data[:, 8])
-
-            self.set_velocity_v(
-                velo_data[:, 1],
-                velo_data[:, 2],
-                velo_data[:, 3],
-                velo_data[:, 4],
-                velo_data[:, 5],
-                velo_data[:, 6],
-                velo_data[:, 7])
-
-            self.set_translation_v(
-                pos_data[:, 1],
-                pos_data[:, 2],
-                pos_data[:, 3],
-                pos_data[:, 4],
-            )
-
-            self.set_instance_v(pos_data[:, 1])
-
-            big_data_writer.SetFileName('{0}-{1}.{2}'.format(
-                os.path.splitext(os.path.basename(self.opts.io_filename))[0],
-                k, big_data_writer.GetDefaultFileExtension()))
+        if self.opts.gen_para_script:
+            # just the generation of a parallel command
+            options_str = ''
+            if self.opts.ascii_mode:
+                options_str += '--ascii'
             if self.opts.global_filter:
-                self.big_data_geometry_filter.Update()
-            else:
-                self.big_data_collector.Update()
+                options_str += '--global-filter'
+            ntimes_proc = int(ntime / self.opts.nprocs)
+            s = ''
+            for i in range(self.opts.nprocs):
+                s += '{0}/{1} '.format(ntimes_proc*i, ntimes_proc*(i+1))
+            print('#!/bin/sh')
+            print('parallel --verbose', sys.argv[0], self.opts.io_filename,
+                  options_str, '--start-step={//} --end-step={/} :::', s)
+
+        else:
+            # export
+            big_data_writer = vtk.vtkXMLMultiBlockDataWriter()
+            add_compatiblity_methods(big_data_writer)
+
+            big_data_writer.SetInputConnection(self.big_data_collector.GetOutputPort())
+
+            if self.opts.ascii_mode:
+                big_data_writer.SetDataModeToAscii()
+            k = self.opts.start_step
+
+            packet = int(ntime/100)+1
+
+            # independant of time
+            spos_data = self.io_reader._spos_data
+            if spos_data.size > 0:
+                self.set_position_v(spos_data[:, 1], spos_data[:, 2],
+                                    spos_data[:, 3],
+                                    spos_data[:, 4], spos_data[:, 5],
+                                    spos_data[:, 6],
+                                    spos_data[:, 7], spos_data[:, 8])
+
+            for time in times:
+                k = k + self.opts.stride
+                if (k % packet == 0):
+                    sys.stdout.write('.')
+                self.io_reader.SetTime(time)
+
+                pos_data = self.io_reader.pos_data
+                velo_data = self.io_reader.velo_data
+
+                self.set_position_v(
+                    pos_data[:, 1], pos_data[:, 2], pos_data[:, 3],
+                    pos_data[:, 4], pos_data[:, 5], pos_data[:, 6],
+                    pos_data[:, 7], pos_data[:, 8])
+
+                self.set_velocity_v(
+                    velo_data[:, 1],
+                    velo_data[:, 2],
+                    velo_data[:, 3],
+                    velo_data[:, 4],
+                    velo_data[:, 5],
+                    velo_data[:, 6],
+                    velo_data[:, 7])
+
+                self.set_translation_v(
+                    pos_data[:, 1],
+                    pos_data[:, 2],
+                    pos_data[:, 3],
+                    pos_data[:, 4],
+                )
+
+                self.set_instance_v(pos_data[:, 1])
+
+                big_data_writer.SetFileName('{0}-{1}.{2}'.format(
+                    os.path.splitext(os.path.basename(self.opts.io_filename))[0],
+                    k, big_data_writer.GetDefaultFileExtension()))
+                if self.opts.global_filter:
+                    self.big_data_geometry_filter.Update()
+                else:
+                    self.big_data_collector.Update()
+
+                big_data_writer.Write()
 
             big_data_writer.Write()
 
-        big_data_writer.Write()
-
     def initialize_vtk(self):
 
-        self.objects_collector = vtk.vtkMultiBlockDataGroupFilter()
-        add_compatiblity_methods(self.objects_collector)
-        self.cf_collector = vtk.vtkMultiBlockDataGroupFilter()
-        add_compatiblity_methods(self.cf_collector)
+        if not self.opts.gen_para_script:
 
-        self.big_data_collector = vtk.vtkMultiBlockDataGroupFilter()
-        add_compatiblity_methods(self.big_data_collector)
+            self.objects_collector = vtk.vtkMultiBlockDataGroupFilter()
+            add_compatiblity_methods(self.objects_collector)
+            self.cf_collector = vtk.vtkMultiBlockDataGroupFilter()
+            add_compatiblity_methods(self.cf_collector)
 
-        self.big_data_collector.AddInputConnection(self.cf_collector.GetOutputPort())
+            self.big_data_collector = vtk.vtkMultiBlockDataGroupFilter()
+            add_compatiblity_methods(self.big_data_collector)
 
-        if self.opts.global_filter:
-
-            self.big_data_geometry_filter = vtk.vtkCompositeDataGeometryFilter()
-            add_compatiblity_methods(self.big_data_geometry_filter)
-            self.big_data_geometry_filter.SetInputConnection(self.objects_collector.GetOutputPort())
-
-            self.big_data_collector.AddInputConnection(self.big_data_geometry_filter.GetOutputPort())
-        else:
-            self.big_data_collector.AddInputConnection(self.objects_collector.GetOutputPort())
-
-
-        if self.opts.global_filter and not self.opts.export:
-            self.big_data_mapper = vtk.vtkCompositePolyDataMapper()
-            add_compatiblity_methods(self.big_data_mapper)
-            self.big_data_mapper.SetInputConnection(self.big_data_collector.GetOutputPort())
-
-            if self.opts.imr:
-                self.big_data_mapper.ImmediateModeRenderingOff()
-
-            self.big_actor = vtk.vtkActor()
-            self.big_actor.SetMapper(self.big_data_mapper)
-
-        times = self.io_reader._times
-
-        if (len(times) == 0):
-            print('No dynamic data found!  Empty simulation.')
-
-        self.readers = dict()
-        self.datasets = dict()
-        self.mappers = dict()
-        self.dynamic_actors = dict()
-        self.static_actors = dict()
-        self.vtk_reader = {'vtp': vtk.vtkXMLPolyDataReader,
-                           'stl': vtk.vtkSTLReader}
-        self.unfrozen_mappers = dict()
-
-        self.build_set_functions()
-
-        self.renderer = vtk.vtkRenderer()
-        self.renderer_window = vtk.vtkRenderWindow()
-        self.interactor_renderer = vtk.vtkRenderWindowInteractor()
-
-        self.init_shapes()
-        self.init_instances()
-
-        if self.opts.cf_disable:
-            self.io_reader.ContactForcesOff()
-            self.setup_initial_position()
-        else:
-            self.io_reader.ContactForcesOn()
-            for mu in self.io_reader._mu_coefs:
-                self.init_contact_pos(mu)
-
-            self.setup_initial_position()
-            transform = vtk.vtkTransform()
-            transform.Translate(-0.5, 0., 0.)
-            for mu in self.io_reader._mu_coefs:
-                self.init_cf_sources(mu, transform)
-
-        if not self.opts.export:
-            if not self.opts.cf_disable and not self.opts.global_filter:
-                for mu in self.io_reader._mu_coefs:
-                    self.renderer.AddActor(self.gactor[mu])
-                    self.renderer.AddActor(self.cactor[mu])
-
-                    self.renderer.AddActor(self.clactor[mu])
-                    self.renderer.AddActor(self.sactora[mu])
-                    self.renderer.AddActor(self.sactorb[mu])
+            self.big_data_collector.AddInputConnection(self.cf_collector.GetOutputPort())
 
             if self.opts.global_filter:
-                self.renderer.AddActor(self.big_actor)
 
-            self.renderer.ResetCamera()
+                self.big_data_geometry_filter = vtk.vtkCompositeDataGeometryFilter()
+                add_compatiblity_methods(self.big_data_geometry_filter)
+                self.big_data_geometry_filter.SetInputConnection(self.objects_collector.GetOutputPort())
+
+                self.big_data_collector.AddInputConnection(self.big_data_geometry_filter.GetOutputPort())
+            else:
+                self.big_data_collector.AddInputConnection(self.objects_collector.GetOutputPort())
+
+
+            if self.opts.global_filter and not self.opts.export:
+                self.big_data_mapper = vtk.vtkCompositePolyDataMapper()
+                add_compatiblity_methods(self.big_data_mapper)
+                self.big_data_mapper.SetInputConnection(self.big_data_collector.GetOutputPort())
+
+                if self.opts.imr:
+                    self.big_data_mapper.ImmediateModeRenderingOff()
+
+                self.big_actor = vtk.vtkActor()
+                self.big_actor.SetMapper(self.big_data_mapper)
+
+            times = self.io_reader._times
+
+            if (len(times) == 0):
+                print('No dynamic data found!  Empty simulation.')
+
+            self.readers = dict()
+            self.datasets = dict()
+            self.mappers = dict()
+            self.dynamic_actors = dict()
+            self.static_actors = dict()
+            self.vtk_reader = {'vtp': vtk.vtkXMLPolyDataReader,
+                               'stl': vtk.vtkSTLReader}
+            self.unfrozen_mappers = dict()
+
+            self.build_set_functions()
+
+            self.renderer = vtk.vtkRenderer()
+            self.renderer_window = vtk.vtkRenderWindow()
+            self.interactor_renderer = vtk.vtkRenderWindowInteractor()
+
+            self.init_shapes()
+            self.init_instances()
+
+            if self.opts.cf_disable:
+                self.io_reader.ContactForcesOff()
+                self.setup_initial_position()
+            else:
+                self.io_reader.ContactForcesOn()
+                for mu in self.io_reader._mu_coefs:
+                    self.init_contact_pos(mu)
+
+                self.setup_initial_position()
+                transform = vtk.vtkTransform()
+                transform.Translate(-0.5, 0., 0.)
+                for mu in self.io_reader._mu_coefs:
+                    self.init_cf_sources(mu, transform)
+
+            if not self.opts.export:
+                if not self.opts.cf_disable and not self.opts.global_filter:
+                    for mu in self.io_reader._mu_coefs:
+                        self.renderer.AddActor(self.gactor[mu])
+                        self.renderer.AddActor(self.cactor[mu])
+
+                        self.renderer.AddActor(self.clactor[mu])
+                        self.renderer.AddActor(self.sactora[mu])
+                        self.renderer.AddActor(self.sactorb[mu])
+
+                if self.opts.global_filter:
+                    self.renderer.AddActor(self.big_actor)
+
+                self.renderer.ResetCamera()
 
     def initialize_gui(self):
 
