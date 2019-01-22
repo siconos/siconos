@@ -1704,7 +1704,15 @@ class VView(object):
             # a dynamic instance
             self.mass[instid] = instance.attrs['id']
             if 'inertia' in instance.attrs:
-                self.inertia[instid] = instance.attrs['inertia']
+                inertia = instance.attrs['inertia']
+                if len(inertia.shape) > 1 and inertia.shape[0] == inertia.shape[1] == 3:
+                    self.inertia[instid] = inertia
+                else:
+                    self.inertia[instid] = numpy.zeros((3, 3))
+                    self.inertia[instid][0, 0] = inertia[0]
+                    self.inertia[instid][1, 1] = inertia[1]
+                    self.inertia[instid][2, 2] = inertia[2]
+
             else:
                 self.inertia[instid] = numpy.eye(3)
 
