@@ -77,6 +77,7 @@ class VViewOptions(object):
         self.initial_camera = [None] * 4
         self.visible_mode = 'all'
         self.export = False
+        self.gen_para_script = False
 
     ## Print usage information
     def usage(self, long=False):
@@ -2307,7 +2308,7 @@ class VView(object):
                 add_compatiblity_methods(self.big_data_mapper)
                 self.big_data_mapper.SetInputConnection(self.big_data_collector.GetOutputPort())
 
-                if self.opts.imr:
+                if not self.opts.imr:
                     self.big_data_mapper.ImmediateModeRenderingOff()
 
                 self.big_actor = vtk.vtkActor()
