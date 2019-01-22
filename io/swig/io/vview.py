@@ -11,6 +11,7 @@ import json
 import getopt
 import math
 import traceback
+import vtk
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtk.numpy_interface import dataset_adapter as dsa
 
@@ -633,37 +634,43 @@ class InputObserver():
                 self.toggle_recording(False)
 
 
-class DataConnector():
-
-    def __init__(self, instance, data_name, data_size):
-
+class CellConnector(vtk.vtkProgrammableFilter):
+    """
+    Add Arrays to Cells
+    """
+    def __init__(self, instance, data_names, data_sizes):
+        vtk.vtkProgrammableFilter.__init__(self)
         self._instance = instance
-        self._data_name = data_name
-        self._data_size = data_size
-        self._connector = vtk.vtkProgrammableFilter()
-        self._connector.SetExecuteMethod(self.method)
-        self._data = numpy.zeros(data_size)
-        self._vtk_data = vtk.vtkFloatArray()
-        self._vtk_data.SetName(data_name)
-        self._vtk_data.SetNumberOfComponents(data_size)
+        self._data_names = data_names
+        self._data_sizes = data_sizes
+        self.SetExecuteMethod(self.method)
+        self._datas = [numpy.zeros(s) for s in data_sizes]
+        self._vtk_datas = [None]*len(data_sizes)
+        self._index = list(enumerate(data_names))
+        for i, data_name in self._index:
+            self._vtk_datas[i] = vtk.vtkFloatArray()
+            self._vtk_datas[i].SetName(data_name)
+            self._vtk_datas[i].SetNumberOfComponents(data_sizes[i])
 
     def method(self):
-        input = self._connector.GetInput()
-        output = self._connector.GetOutput()
+        input = self.GetInput()
+        output = self.GetOutput()
         output.ShallowCopy(input)
         ncells = output.GetNumberOfCells()
 
-        self._vtk_data.SetNumberOfTuples(ncells)
+        for i, data_name in self._index:
+            self._vtk_datas[i].SetNumberOfTuples(ncells)
 
-        if output.GetCellData().GetArray(self._data_name) is None:
-            output.GetCellData().AddArray(self._vtk_data)
+            if output.GetCellData().GetArray(data_name) is None:
+                output.GetCellData().AddArray(self._vtk_datas[i])
 
-        data = self._data
+            data = self._datas[i]
 
-        data_t = data[0:self._data_size]
+            data_t = data[0:self._data_sizes[i]]
 
-        for i in range(ncells):
-            output.GetCellData().GetArray(self._data_name).SetTuple(i, data_t)
+            for c in range(ncells):
+                output.GetCellData().GetArray(data_name).SetTuple(c, data_t)
+
 
 
 def makeConvexSourceClass():
@@ -1052,11 +1059,7 @@ class VView(object):
         self.sactora = dict()
         self.sactorb = dict()
         self.clactor = dict()
-        self.data_connectors_v = dict()
-        self.data_connectors_k = dict()
-        self.data_connectors_t = dict()
-        self.data_connectors_d = dict()
-        self.data_connectors_i = dict()
+        self.cell_connectors = dict()
         self.times_of_birth = dict()
         self.times_of_death = dict()
         self.min_time = self.opts.min_time
@@ -1658,37 +1661,17 @@ class VView(object):
                             center_of_mass),
              contactor.attrs['orientation'].astype(float)))
 
-
-        self.data_connectors_v[instid] = DataConnector(instid,
-                                                       data_name='velocity',
-                                                       data_size=6)
-        self.data_connectors_v[instid]._connector.SetInputConnection(
+        self.cell_connectors[instid] = CellConnector(
+            instid,
+            data_names=['instance', 'translation',
+                        'velocity', 'kinetic_energy'],
+            data_sizes=[1, 3, 6, 1])
+        self.cell_connectors[instid].SetInputConnection(
             transformer.GetOutputPort())
-        self.data_connectors_v[instid]._connector.Update()
-
-        self.data_connectors_k[instid] = DataConnector(instid,
-                                                       data_name='kinetic_energy',
-                                                       data_size=1)
-        self.data_connectors_k[instid]._connector.SetInputConnection(
-            self.data_connectors_v[instid]._connector.GetOutputPort())
-        self.data_connectors_k[instid]._connector.Update()
-
-        self.data_connectors_t[instid] = DataConnector(instid,
-                                                       data_name='translation',
-                                                       data_size=3)
-        self.data_connectors_t[instid]._connector.SetInputConnection(
-            self.data_connectors_k[instid]._connector.GetOutputPort())
-        self.data_connectors_t[instid]._connector.Update()
-
-        self.data_connectors_i[instid] = DataConnector(instid,
-                                                       data_name='instance',
-                                                       data_size=1)
-        self.data_connectors_i[instid]._connector.SetInputConnection(
-            self.data_connectors_t[instid]._connector.GetOutputPort())
-        self.data_connectors_i[instid]._connector.Update()
 
         self.objects_collector.AddInputConnection(
-            self.data_connectors_i[instid]._connector.GetOutputPort())
+            self.cell_connectors[instid].GetOutputPort())
+        self.cell_connectors[instid].Update()
 
     def init_instance(self, instance_name):
         instance = self.io.instances()[instance_name]
@@ -1768,12 +1751,8 @@ class VView(object):
                             data[:, 7],
                             data[:, 8])
 
-    def build_set_functions(self, dck=None, dcv=None, dct=None, dcd=None, dci=None):
-        if dcv is None: dcv = self.data_connectors_v
-        if dck is None: dck = self.data_connectors_k
-        if dct is None: dct = self.data_connectors_t
-        if dcd is None: dcd = self.data_connectors_d
-        if dci is None: dci = self.data_connectors_i
+    def build_set_functions(self, cc=None):
+        if cc is None: cc = self.cell_connectors
 
         # the numpy vectorization is ok on column vectors for each args
         self.set_position_v = numpy.vectorize(self.set_position_i)
@@ -1783,30 +1762,27 @@ class VView(object):
         self.set_visibility_v = numpy.vectorize(self.set_dynamic_instance_visibility)
 
         def set_velocity(instance, v0, v1, v2, v3, v4, v5):
-            if instance in dcv:
-                dcv[instance]._data[:] = [v0, v1, v2, v3, v4, v5]
-                dck[instance]._data[:] = \
+            if instance in cc:
+                cc[instance]._datas[2][:] = [v0, v1, v2, v3, v4, v5]
+                cc[instance]._datas[3][:] = \
                     0.5*(self.mass[instance]*(v0*v0+v1*v1+v2*v2) +
                          numpy.dot([v3, v4, v5],
                                    numpy.dot(self.inertia[instance],
                                              [v3, v4, v5])))
 
-        if dcv is not None:
-            self.set_velocity_v = numpy.vectorize(set_velocity)
+        self.set_velocity_v = numpy.vectorize(set_velocity)
 
         def set_translation(instance, x0, x1, x2 ):
-            if instance in dct:
-                dct[instance]._data[:] = [x0, x1, x2]
+            if instance in cc:
+                cc[instance]._datas[1][:] = [x0, x1, x2]
 
-        if dct is not None:
-            self.set_translation_v = numpy.vectorize(set_translation)
+        self.set_translation_v = numpy.vectorize(set_translation)
 
         def set_instance(instance):
-            if instance in dci:
-                dci[instance]._data[:] = [instance]
+            if instance in cc:
+                cc[instance]._datas[0][:] = [instance]
 
-        if dci is not None:
-            self.set_instance_v = numpy.vectorize(set_instance)
+        self.set_instance_v = numpy.vectorize(set_instance)
 
     # set visibility for all actors associated to a dynamic instance
     def set_dynamic_instance_visibility(self, instance, time):
@@ -2404,7 +2380,6 @@ if __name__=='__main__':
     opts.parse()
 
 # Heavier imports after command line parsing
-import vtk
 from vtk.util import numpy_support
 from math import pi
 import bisect
