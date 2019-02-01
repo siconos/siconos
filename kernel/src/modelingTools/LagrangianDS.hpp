@@ -553,7 +553,11 @@ public:
   {
     return _jacobianFIntqDot;
   }
+  
+  void allocateFIntqFunction();
+  void allocateFIntqDotFunction();
 
+  
   /** set \f$\nabla_{q}F_{int}\f$, (pointer link)
    *  \param newPtr a SP SiconosMatrix
    */
@@ -625,13 +629,6 @@ public:
     return _jacobianqDotForces;
   }
 
-  /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
-   *  \return pointer on a SiconosMatrix
-   */
-  virtual inline SP::SiconosMatrix jacobianqDotForces() const
-  {
-    return _jacobianqDotForces;
-  }
 
   ///@}
 
@@ -712,28 +709,19 @@ public:
     _hasConstantMass = false;
   }
 
+  void allocateFInt();
+
+  
   /** allow to set a specified function to compute FInt
    *  \param pluginPath std::string : the complete path to the plugin
    *  \param functionName std::string : the name of the function to use in this plugin
    */
-  void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
-  {
-    _pluginFInt->setComputeFunction(pluginPath, functionName);
-    if(!_fInt)
-      _fInt.reset(new SiconosVector(_ndof));
-    //    Plugin::setFunction(&computeFIntPtr, pluginPath,functionName);
-  }
-
+  void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName);
+  
   /** set a specified function to compute fInt
    *  \param fct a pointer on the plugin function
    */
-  void setComputeFIntFunction(FPtr6 fct)
-  {
-    _pluginFInt->setComputeFunction((void*)fct);
-    if(!_fInt)
-      _fInt.reset(new SiconosVector(_ndof));
-    //    computeFIntPtr = fct;
-  }
+  void setComputeFIntFunction(FPtr6 fct);
 
   /** allow to set a specified function to compute Fext
    *  \param pluginPath std::string : the complete path to the plugin

@@ -114,7 +114,7 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds, SiconosMatrix& W)
     if(dsType == Type::LagrangianDS)
     {
       K = lds->jacobianqForces(); // jacobian according to q
-      C = lds->jacobianqDotForces(); // jacobian according to velocity
+      C = lds->jacobianvForces(); // jacobian according to velocity
       lds->computeMass(lds->q());
     }
     else // LagrangianLinearTIDS

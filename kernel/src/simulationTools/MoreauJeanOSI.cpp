@@ -480,9 +480,9 @@ void MoreauJeanOSI::computeW(double t, DynamicalSystem& ds, SiconosMatrix& W)
     else
       W.eye();
 
-    if(d.jacobianqDotForces())
+    if(d.jacobianvForces())
     {
-      SiconosMatrix& C = *d.jacobianqDotForces(); // jacobian according to velocity
+      SiconosMatrix& C = *d.jacobianvForces(); // jacobian according to velocity
       d.computeJacobianqDotForces(t);
       scal(-h * _theta, C, W, false); // W -= h*_theta*C
     }

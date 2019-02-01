@@ -140,7 +140,7 @@ void LagrangianDS::update_inverse_mass()
 
 void LagrangianDS::init_forces()
 {
-  // Allocate memory for forces and its jacobians.
+  // Allocate memory for forces and its jacobians.void LagrangianDS::init_forces()
   // Needed only for integrators with first-order formulation.
   if(_fInt || _fExt || _fGyr)
   {
@@ -696,6 +696,29 @@ void LagrangianDS::computePostImpactVelocity()
   *_q[1] += tmp;  // v+ = v- + p
   DEBUG_BEGIN("LagrangianDS::computePostImpactV() END \n");
 }
+void  LagrangianDS::allocateFInt()
+{
+  if(!_fInt)
+    _fInt.reset(new SiconosVector(_ndof));
+}
+
+void  LagrangianDS::setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
+{
+  _pluginFInt->setComputeFunction(pluginPath, functionName);
+  allocateFInt();
+  //    Plugin::setFunction(&computeFIntPtr, pluginPath,functionName);
+}
+
+void LagrangianDS::setComputeFIntFunction(FPtr6 fct)
+{
+  _pluginFInt->setComputeFunction((void*)fct);
+  allocateFInt();
+  //    computeFIntPtr = fct;
+}
+
+
+
+
 
 void LagrangianDS::setComputeFGyrFunction(const std::string& pluginPath, const std::string&  functionName)
 {
@@ -713,19 +736,30 @@ void LagrangianDS::setComputeFGyrFunction(FPtr5 fct)
   init_forces();
 }
 
+void LagrangianDS::allocateFIntqFunction()
+{
+  if(!_jacobianFIntq)
+    _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
+}
+
 void LagrangianDS::setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqFInt->setComputeFunction(pluginPath, functionName);
-  if(!_jacobianFIntq)
-    _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
+  allocateFIntqFunction();
   init_forces();
 }
+
+void LagrangianDS::allocateFIntqDotFunction()
+{
+  if(!_jacobianFIntqDot)
+    _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
+}
+
 
 void LagrangianDS::setComputeJacobianFIntqDotFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqDotFInt->setComputeFunction(pluginPath, functionName);
-  if(!_jacobianFIntqDot)
-    _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
+  allocateFIntqDotFunction();
   init_forces();
 }
 
