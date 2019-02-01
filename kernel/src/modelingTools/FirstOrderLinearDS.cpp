@@ -213,7 +213,7 @@ void FirstOrderLinearDS::computeJacobianRhsx(double time)
   // else 0
 }
 
-void FirstOrderLinearDS::display() const
+void FirstOrderLinearDS::display(bool brief) const
 {
 
   std::cout << "=== Linear system display, " << _number << std::endl;

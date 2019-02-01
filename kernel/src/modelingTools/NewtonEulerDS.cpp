@@ -1400,7 +1400,7 @@ void NewtonEulerDS::computeJacobianMGyrtwist(double time)
 }
 
 
-void NewtonEulerDS::display() const
+void NewtonEulerDS::display(bool brief) const
 {
   std::cout << "=====> NewtonEuler System display (number: " << _number << ")." <<std::endl;
   std::cout << "- _ndof : " << _ndof <<std::endl;

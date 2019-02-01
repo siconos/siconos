@@ -754,7 +754,7 @@ public:
 
   /** print the data to the screen
    */
-  void display() const;
+  void display(bool brief = true) const;
 
   //  inline SP::SiconosMatrix jacobianZFL() const { return jacobianZFL; }
 

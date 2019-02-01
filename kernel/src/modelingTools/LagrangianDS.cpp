@@ -575,7 +575,7 @@ void LagrangianDS::computeJacobianvForces(double time)
 //    RuntimeException::selfThrow("LagrangianDS::computeJacobianZFL - not implemented");
 // }
 
-void LagrangianDS::display() const
+void LagrangianDS::display(bool brief) const
 {
   std::cout << "=====> Lagrangian System display (number: " << _number << ")." <<std::endl;
   std::cout << "- _ndof : " << _ndof <<std::endl;
@@ -602,6 +602,30 @@ void LagrangianDS::display() const
   std::cout << "- p[2] " <<std::endl;
   if(_p[2]) _p[2]->display();
   else std::cout << "-> NULL" <<std::endl;
+
+  if (!brief)
+  {
+    std::cout << "- Forces " <<std::endl;
+    if (_forces) _forces ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    std::cout << "- FInt " <<std::endl;
+    if (_fInt) _fInt ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    
+    std::cout << "- jacobianqForces " <<std::endl;
+    if (_jacobianqForces) _jacobianqForces ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    std::cout << "- jacobianFIntq " <<std::endl;
+    if (_jacobianFIntq) _jacobianFIntq ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    
+    std::cout << "- jacobianqDotForces " <<std::endl;
+    if (_jacobianqDotForces) _jacobianqDotForces ->display();
+    else std::cout << "-> NULL" <<std::endl;
+
+  }
+
+  
   std::cout << "===================================== " <<std::endl;
 }
 

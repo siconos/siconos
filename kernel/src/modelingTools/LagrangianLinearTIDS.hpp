@@ -236,7 +236,7 @@ public:
 
   /** print the data onto the screen
    */
-  void display() const;
+  void display(bool brief =true) const;
 
   ///@}
 

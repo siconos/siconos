@@ -421,7 +421,7 @@ public:
 
   /** print the data of the dynamical system on the standard output
    */
-  virtual void display() const =0;
+  virtual void display(bool brief = true) const =0;
 
   /** set Boundary Conditions
    *  \param newbd BoundaryConditions

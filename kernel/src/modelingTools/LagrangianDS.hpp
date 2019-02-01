@@ -912,7 +912,7 @@ public:
 
   /** print the data of the dynamical system on the standard output
    */
-  void display() const;
+  void display(bool brief = true) const;
 
   /** Computes post-impact velocity, using pre-impact velocity and impulse (p) value.
    * Used in EventDriven (LsodarOSI->updateState)

@@ -113,7 +113,7 @@ void LagrangianLinearTIDS::setCPtr(SP::SiconosMatrix newPtr)
   _C = newPtr;
 }
 
-void LagrangianLinearTIDS::display() const
+void LagrangianLinearTIDS::display(bool brief) const
 {
   LagrangianDS::display();
   std::cout << "===== Lagrangian Linear Time Invariant System display ===== " <<std::endl;

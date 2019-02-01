@@ -107,7 +107,7 @@ public:
 
   /** data display on screen
    */
-  void display() const;
+  void display(bool brief = true) const;
 
   ///@}
 
