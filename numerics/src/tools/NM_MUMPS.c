@@ -26,70 +26,6 @@
 
 #ifdef WITH_MUMPS
 
-#ifdef HAVE_MPI
-
-/* thread_local madness for the MPI communicator */
-#include "tlsdef.h"
-
-
-/* MPI_INIT should be called only once. Therefore we have to remember if this
- * was already done or not. Using TLS seems to be the best option here --xhub  */
-tlsvar MPI_Comm NM_mpi_com = MPI_COMM_NULL;
-
-
-#if defined(_WIN32) && defined(_MSC_VER)
-  BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
-  {
-    if (NM_mpi_com != MPI_COMM_NULL)
-    {
-      MPI_Finalize();
-      NM_mpi_com = MPI_COMM_NULL;
-    }
-    return true;
-  }
-#elif defined(__GNUC__) & !defined(__APPLE__)
-
-  static DESTRUCTOR_ATTR void cleanup_MPI(void)
-  {
-    if (NM_mpi_com != MPI_COMM_NULL)
-    {
-      MPI_Finalize();
-      NM_mpi_com = MPI_COMM_NULL;
-    }
-  }
-
-#endif
-
-MPI_Comm NM_MPI_com(MPI_Comm m)
-{
-  assert(m);
-  if (NM_mpi_com == MPI_COMM_NULL)
-  {
-    if (m != MPI_COMM_NULL)
-    {
-      NM_mpi_com = m;
-    }
-    else
-    {
-      int myid;
-      int argc = 0;
-      /* C99 requires that argv[argc] == NULL. With openmpi 1.8, we get a
-       * segfault if this is not true */
-      char *argv0 = NULL;
-      char **argv = &argv0;
-      CHECK_MPI(MPI_Init(&argc, &argv));
-      CHECK_MPI(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
-
-      NM_mpi_com = MPI_COMM_WORLD;
-    }
-  }
-
-  return NM_mpi_com;
-
-}
-
-#endif /* WITH_MPI */
-
 MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A)
 {
 
@@ -169,13 +105,13 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
   NSM_linear_solver_params* params = NSM_linearSolverParams(A);
   DMUMPS_STRUC_C* mumps_id;
 
-  if (!params->solver_data)
+  if (!params->linear_solver_data)
   {
     /* valgrind reports some conditional move on initialized data in MUMPS
      * --xhub */
-    params->solver_data = calloc(1, sizeof(DMUMPS_STRUC_C));
+    params->linear_solver_data = calloc(1, sizeof(DMUMPS_STRUC_C));
 
-    mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
+    mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
 
     // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
     mumps_id->job = JOB_INIT;
@@ -264,7 +200,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
   }
   else
   {
-    mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
+    mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
     DEBUG_EXPR_WE(double data_ptr = NULL;
         if (numericsSparseMatrix(A)->triplet) { data_ptr = numericsSparseMatrix(A)->triplet->x; }
         else { data_ptr = numericsSparseMatrix(A)->csc->x; }
@@ -279,15 +215,15 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 void NM_MUMPS_free(void* p)
 {
   NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
-  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) params->solver_data;
+  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
 
   /* clean the mumps instance */
   mumps_id->job = -2;
   dmumps_c(mumps_id);
 
   /* Here we free mumps_id ...  */
-  free(params->solver_data);
-  params->solver_data = NULL;
+  free(params->linear_solver_data);
+  params->linear_solver_data = NULL;
 
 }
 

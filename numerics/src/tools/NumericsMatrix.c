@@ -2546,10 +2546,10 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
       if (keep == NM_KEEP_FACTORS)
       {
-        if (!(p->dWork && p->solver_data))
+        if (!(p->dWork && p->linear_solver_data))
         {
           assert(!NSM_workspace(p));
-          assert(!NSM_solver_data(p));
+          assert(!NSM_linear_solver_data(p));
           assert(!p->solver_free_hook);
 
           p->solver_free_hook = &NSM_free_p;
@@ -2558,11 +2558,11 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           CSparseMatrix_lu_factors* cs_lu_A = (CSparseMatrix_lu_factors*) malloc(sizeof(CSparseMatrix_lu_factors));
           numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it" );
           CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
-          p->solver_data = cs_lu_A;
+          p->linear_solver_data = cs_lu_A;
         }
 
         numerics_printf_verbose(2,"NM_gesv, we solve with given factors" );
-        info = !CSparseMatrix_solve((CSparseMatrix_lu_factors *)NSM_solver_data(p), NSM_workspace(p), b);
+        info = !CSparseMatrix_solve((CSparseMatrix_lu_factors *)NSM_linear_solver_data(p), NSM_workspace(p), b);
       }
       else
       {
