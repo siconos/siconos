@@ -486,6 +486,9 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B )
       B->internalData->isLUfactorized = A->internalData->isLUfactorized;
       B->internalData->isInversed = A->internalData->isInversed;
     }
+
+    B->internalData->mpi_comm = A->internalData->mpi_comm;
+
   }
 void NM_free(NumericsMatrix* m)
 {

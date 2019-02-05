@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 
+#ifdef WITH_MUMPS
 #include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
@@ -24,7 +25,8 @@
 #include "debug.h"
 #include "numerics_verbose.h"
 
-#ifdef WITH_MUMPS
+
+#include "NM_MPI.h"
 
 MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A)
 {
@@ -119,13 +121,13 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
     mumps_id->sym = 0;
 
 #ifdef HAVE_MPI
-    if (NM_MPI_com(MPI_COMM_NULL) == MPI_COMM_WORLD)
+    if (NM_MPI_comm(A) == MPI_COMM_WORLD)
     {
       mumps_id->comm_fortran = (MUMPS_INT) USE_COMM_WORLD;
     }
     else
     {
-      mumps_id->comm_fortran = (MUMPS_INT) MPI_Comm_c2f(NM_MPI_com(MPI_COMM_NULL));
+      mumps_id->comm_fortran = (MUMPS_INT) MPI_Comm_c2f(NM_MPI_comm(A));
     }
 #endif /* WITH_MPI */
 
@@ -176,37 +178,40 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
     //mumps_id->CNTL(3) = ...;
     //mumps_id->CNTL(5) = ...;
 
-    mumps_id->n = (MUMPS_INT) NM_triplet(A)->n;
-    mumps_id->irn = NM_MUMPS_irn(A);
-    mumps_id->jcn = NM_MUMPS_jcn(A);
+    if (NM_MPI_rank(A) == 0)
+    {
+      mumps_id->n = (MUMPS_INT) NM_triplet(A)->n;
+      mumps_id->irn = NM_MUMPS_irn(A);
+      mumps_id->jcn = NM_MUMPS_jcn(A);
 
-    MUMPS_INT nz;
-    if (numericsSparseMatrix(A)->triplet)
-    {
-      nz = (MUMPS_INT) numericsSparseMatrix(A)->triplet->nz;
+      MUMPS_INT nz;
+      nz = (MUMPS_INT) NM_triplet(A)->nz;
       mumps_id->nz = nz;
-      mumps_id->a = numericsSparseMatrix(A)->triplet->x;
+      mumps_id->a = NM_triplet(A)->x;
+      }
     }
-    else
-    {
-      fprintf(stderr, "NM_MUMPS_irn :: xhub doubt this code is correct");
-      exit(EXIT_FAILURE);
+/* MB: mumps does not accept csc format for input
+/*      else
+      {
+        fprintf(stderr, "NM_MUMPS_irn :: xhub doubt this code is correct");
+        exit(EXIT_FAILURE);
 #if 0
-      nz = NSM_linearSolverParams(A)->iWork[2 * NM_csc(A)->nzmax];
-      mumps_id->nz = nz;
-      mumps_id->a = numericsSparseMatrix(A)->csc->x;
+        nz = NSM_linearSolverParams(A)->iWork[2 * NM_csc(A)->nzmax];
+        mumps_id->nz = nz;
+        mumps_id->a = numericsSparseMatrix(A)->csc->x;
 #endif
-    }
-  }
+      }
+*/
+
   else
   {
     mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
     DEBUG_EXPR_WE(double data_ptr = NULL;
-        if (numericsSparseMatrix(A)->triplet) { data_ptr = numericsSparseMatrix(A)->triplet->x; }
-        else { data_ptr = numericsSparseMatrix(A)->csc->x; }
-        if (data_ptr != mumps_id->a) { fprintf(stderr, "the data array and mumps_id->a don't match: %p != %p\n", data_ptr, mumps_id-a); } )
+                  if (numericsSparseMatrix(A)->triplet) { data_ptr = numericsSparseMatrix(A)->triplet->x; }
+                  else { data_ptr = numericsSparseMatrix(A)->csc->x; }
+                  if (data_ptr != mumps_id->a) { fprintf(stderr, "the data array and mumps_id->a don't match: %p != %p\n", data_ptr, mumps_id-a); } )
 
-  }
+      }
 
   return mumps_id;
 }

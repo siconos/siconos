@@ -16,10 +16,11 @@
  * limitations under the License.
 */
 #include "SiconosConfig.h"
+#include "NumericsFwd.h"
 
 #ifdef HAVE_MPI
 #include <mpi.h>
-#define NM_MPI_comm MPI_Comm
+#define NM_MPI_comm_t MPI_Comm
 
 #include <stdio.h>
 #define CHECK_MPI(EXPR)                                                 \
@@ -39,5 +40,7 @@
     };                                                                  \
   } while(0)
 #else
-#define NM_MPI_comm int
+#define NM_MPI_comm_t int
 #endif
+
+int NM_MPI_rank(NumericsMatrix* A);

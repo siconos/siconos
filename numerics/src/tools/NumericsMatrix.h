@@ -30,6 +30,7 @@
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
 #include "CSparseMatrix.h" // for CS_INT
+#include "NM_MPI.h"
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
@@ -43,6 +44,7 @@ typedef struct
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
   bool isInversed; /**<  true if the matrix containes its inverse (in place inversion) */
+  NM_MPI_comm_t mpi_comm; /**< optional mpi communicator (initialized to MPI_COMM_WORLD if needed and not given) */
 } NumericsMatrixInternalData;
 
 /** \struct NumericsMatrix NumericsMatrix.h
@@ -619,6 +621,11 @@ extern "C"
     M->internalData->dWork = NULL;
     M->internalData->dWorkSize = 0;
     M->internalData->isLUfactorized = 0;
+#ifdef HAVE_MPI
+    M->internalData->mpi_comm = MPI_COMM_NULL;
+#else
+    M->internalData->mpi_comm = 0;
+#endif
   }
   /** Copy the internalData structure
    * \param M the matrix to modify

@@ -71,8 +71,6 @@ extern "C"
     int dWorkSize;
 
     linalg_data_t* linalg_data; /**< data for the linear algebra */
-
-    NM_MPI_comm mpi_com; /**< optional mpi communicator */
   };
 
   /**\enum NumericsSparseOrigin NumericsSparseMatrix.h

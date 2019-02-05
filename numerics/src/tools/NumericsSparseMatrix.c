@@ -183,7 +183,6 @@ NSM_linear_solver_params* NSM_linearSolverParams_new(void)
   p->dWork = NULL;
   p->linalg_data = NULL;
 
-  p->mpi_com = NULL;
   return p;
 }
 
