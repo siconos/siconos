@@ -21,13 +21,14 @@
 #ifdef HAVE_MPI
 #include <mpi.h>
 #define NM_MPI_comm_t MPI_Comm
+NM_MPI_comm_t NM_MPI_comm(NumericsMatrix* A);
 
 #include <stdio.h>
-#define CHECK_MPI(EXPR)                                                 \
+#define CHECK_MPI(COMM, EXPR)                                           \
   do                                                                    \
   {                                                                     \
     int error_code = EXPR;                                              \
-    MPI_Errhandler_set(MPI_COMM_WORLD, MPI_ERRORS_RETURN);              \
+    MPI_Errhandler_set(COMM, MPI_ERRORS_RETURN);                        \
     if (error_code != MPI_SUCCESS) {                                    \
       char error_string[1024];                                          \
       int length_of_error_string, error_class;                          \
@@ -36,7 +37,7 @@
       fprintf(stderr, "%3d: %s\n", 0, error_string);                    \
       MPI_Error_string(error_code, error_string, &length_of_error_string); \
       fprintf(stderr, "%3d: %s\n", 0, error_string);                    \
-      MPI_Abort(MPI_COMM_WORLD, error_code);                            \
+      MPI_Abort(COMM, error_code);                                      \
     };                                                                  \
   } while(0)
 #else

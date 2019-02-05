@@ -38,10 +38,6 @@ extern "C"
 
 #ifdef WITH_MUMPS
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif /* HAVE_MPI */
-
 #include <dmumps_c.h>
 
 #ifndef MUMPS_INT
@@ -54,14 +50,6 @@ extern "C"
 #define ICNTL(I) icntl[(I)-1]
 #define CNTL(I) cntl[(I)-1]
 #define RINFOG(I) rinfog[(I)-1]
-
-#ifdef HAVE_MPI
-  /** Get the MPI communicator. Call MPI_Init if needed.
-   * \param[in] m an MPI communicator
-   * \return the MPI communicator.
-   */
-  MPI_Comm NM_MPI_com(MPI_Comm m);
-#endif /*  HAVE_MPI */
 
   MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A);
   MUMPS_INT* NM_MUMPS_jcn(NumericsMatrix* A);

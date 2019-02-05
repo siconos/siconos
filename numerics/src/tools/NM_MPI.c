@@ -22,33 +22,29 @@
 NM_MPI_comm_t NM_MPI_comm(NumericsMatrix* A)
 {
   assert(A);
-  NumericsMatrixInternalData* p = NM_internalData(A);
-  if (p->mpi_comm == MPI_COMM_NULL)
+  NM_MPI_comm_t mpi_comm = NM_internalData(A)->mpi_comm;
+  if (mpi_comm == MPI_COMM_NULL)
   {
-    int myid;
-    int argc = 0;
-    /* C99 requires that argv[argc] == NULL. With openmpi 1.8, we get a
-     * segfault if this is not true */
-    char *argv0 = 0;
-    char **argv = &argv0;
-    CHECK_MPI(MPI_Init(&argc, &argv));
-    CHECK_MPI(MPI_Comm_rank(MPI_COMM_WORLD, &myid));
-
-    p->mpi_comm = MPI_COMM_WORLD;
+    fprintf(stderr, "siconos/numerics: warning MPI_comm not initialized.\nMPI must be initialized before any call to siconos/numerics\n");
   }
-  return p->mpi_comm;
-
+  return mpi_comm;
 }
+
+void NM_MPI_set_comm(NumericsMatrix* A, NM_MPI_comm_t comm)
+{
+  assert(A);
+  NM_internalData(A)->mpi_comm = comm;
+}
+
 
 #endif /* WITH_MPI */
 
 int NM_MPI_rank(NumericsMatrix* A)
 {
   assert(A);
-  NumericsMatrixInternalData* p = NM_internalData(A);
   int myid;
 #ifdef HAVE_MPI
-  CHECK_MPI(MPI_Comm_rank(p->mpi_comm, &myid));
+  CHECK_MPI(NM_MPI_comm(A), MPI_Comm_rank(NM_MPI_comm(A), &myid));
 #else
   myid = 0;
 #endif

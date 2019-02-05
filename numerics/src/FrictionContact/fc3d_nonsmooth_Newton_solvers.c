@@ -627,21 +627,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
       case 1:
         {
           NSM_linearSolverParams(AWpB)->solver = NSM_MUMPS;
-
-#ifdef HAVE_MPI
-
-          assert (options->solverData);
-
-          if ((MPI_Comm) options->solverData == MPI_COMM_NULL)
-          {
-            options->solverData = NM_MPI_com(MPI_COMM_NULL);
-          }
-          else
-          {
-            NM_MPI_com((MPI_Comm) options->solverData);
-          }
-
-#endif
           break;
         }
       default:

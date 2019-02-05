@@ -178,6 +178,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
     //mumps_id->CNTL(3) = ...;
     //mumps_id->CNTL(5) = ...;
 
+    /* numerics matrices are not distributed */
     if (NM_MPI_rank(A) == 0)
     {
       mumps_id->n = (MUMPS_INT) NM_triplet(A)->n;
