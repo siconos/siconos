@@ -65,6 +65,17 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::Sicon
   _mass = newMass;
 }
 
+
+void LagrangianDS::allocateMass()
+{
+  if (!_mass)
+  {
+    _mass.reset(new SimpleMatrix(_ndof, _ndof));
+  }
+  
+}
+
+
 // From a set of data - Mass loaded from a plugin
 // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
 LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, const std::string& massName):
@@ -74,7 +85,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, const std
   _init(q0, v0);
   _hasConstantMass = false;
   // Mass
-  _mass.reset(new SimpleMatrix(_ndof, _ndof));
+  allocateMass();
   setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));
 }
 
@@ -315,14 +326,7 @@ void LagrangianDS::computeMass()
 {
   DEBUG_BEGIN("LagrangianDS::computeMass()\n");
   DEBUG_EXPR(_q[0]->display());
-  if(!_hasConstantMass)
-  {
-    if(_mass && _pluginMass->fPtr)
-    {
-      ((FPtr7)_pluginMass->fPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
-      _mass->resetLU();
-    }
-  }
+  computeMass(_q[0]);
   DEBUG_EXPR(_mass->display());
   DEBUG_END("LagrangianDS::computeMass()\n");
 }
@@ -605,6 +609,10 @@ void LagrangianDS::display(bool brief) const
 
   if (!brief)
   {
+    std::cout << "- Mass " <<std::endl;
+    if (_mass) _mass ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    
     std::cout << "- Forces " <<std::endl;
     if (_forces) _forces ->display();
     else std::cout << "-> NULL" <<std::endl;
@@ -618,6 +626,7 @@ void LagrangianDS::display(bool brief) const
     std::cout << "- jacobianFIntq " <<std::endl;
     if (_jacobianFIntq) _jacobianFIntq ->display();
     else std::cout << "-> NULL" <<std::endl;
+
     
     std::cout << "- jacobianqDotForces " <<std::endl;
     if (_jacobianqDotForces) _jacobianqDotForces ->display();
@@ -736,7 +745,7 @@ void LagrangianDS::setComputeFGyrFunction(FPtr5 fct)
   init_forces();
 }
 
-void LagrangianDS::allocateFIntqFunction()
+void LagrangianDS::allocateJacobianFIntq()
 {
   if(!_jacobianFIntq)
     _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
@@ -745,11 +754,11 @@ void LagrangianDS::allocateFIntqFunction()
 void LagrangianDS::setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqFInt->setComputeFunction(pluginPath, functionName);
-  allocateFIntqFunction();
+  allocateJacobianFIntq();
   init_forces();
 }
 
-void LagrangianDS::allocateFIntqDotFunction()
+void LagrangianDS::allocateJacobianFIntqDot()
 {
   if(!_jacobianFIntqDot)
     _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
@@ -759,23 +768,21 @@ void LagrangianDS::allocateFIntqDotFunction()
 void LagrangianDS::setComputeJacobianFIntqDotFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqDotFInt->setComputeFunction(pluginPath, functionName);
-  allocateFIntqDotFunction();
+  allocateJacobianFIntqDot();
   init_forces();
 }
 
 void LagrangianDS::setComputeJacobianFIntqFunction(FPtr6 fct)
 {
   _pluginJacqFInt->setComputeFunction((void *)fct);
-  if(!_jacobianFIntq)
-    _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
+  allocateJacobianFIntq();
   init_forces();
 }
 
 void LagrangianDS::setComputeJacobianFIntqDotFunction(FPtr6 fct)
 {
   _pluginJacqDotFInt->setComputeFunction((void *)fct);
-  if(!_jacobianFIntqDot)
-    _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
+  allocateJacobianFIntqDot();
   init_forces();
 }
 

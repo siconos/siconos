@@ -553,9 +553,9 @@ public:
   {
     return _jacobianFIntqDot;
   }
-  
-  void allocateFIntqFunction();
-  void allocateFIntqDotFunction();
+  void allocateMass();
+  void allocateJacobianFIntq();
+  void allocateJacobianFIntqDot();
 
   
   /** set \f$\nabla_{q}F_{int}\f$, (pointer link)
