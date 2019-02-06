@@ -217,7 +217,7 @@ public:
   /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix jacobianqvForces() const
+  inline SP::SiconosMatrix jacobianvForces() const
   {
     return _C;
   }
