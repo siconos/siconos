@@ -16,13 +16,19 @@
  * limitations under the License.
 */
 #include "SiconosConfig.h"
-#include "NumericsFwd.h"
 
 #ifdef HAVE_MPI
+#include "NumericsFwd.h"
 #include <mpi.h>
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
+{
+#endif
+
 #define NM_MPI_comm_t MPI_Comm
 NM_MPI_comm_t NM_MPI_comm(NumericsMatrix* A);
-
+void NM_MPI_set_comm(NumericsMatrix* A, NM_MPI_comm_t comm);
 #include <stdio.h>
 #define CHECK_MPI(COMM, EXPR)                                           \
   do                                                                    \
@@ -42,6 +48,11 @@ NM_MPI_comm_t NM_MPI_comm(NumericsMatrix* A);
   } while(0)
 #else
 #define NM_MPI_comm_t int
+
 #endif
 
 int NM_MPI_rank(NumericsMatrix* A);
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+}
+#endif

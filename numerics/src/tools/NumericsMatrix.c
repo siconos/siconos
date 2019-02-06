@@ -28,6 +28,7 @@
 #include "NumericsSparseMatrix.h"
 #include "SiconosCompat.h"
 #include "SparseBlockMatrix.h"
+#include "NM_MUMPS.h"
 #include "NM_conversions.h"
 #include "SiconosLapack.h"
 #include "numerics_verbose.h"

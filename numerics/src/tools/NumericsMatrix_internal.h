@@ -36,40 +36,7 @@ extern "C"
   void NM_internalData_free(NumericsMatrix* m);
 
 
-#ifdef WITH_MUMPS
 
-#include <dmumps_c.h>
-
-#ifndef MUMPS_INT
-#define MUMPS_INT int
-#endif
-
-#define JOB_INIT -1
-#define JOB_END -2
-#define USE_COMM_WORLD -987654
-#define ICNTL(I) icntl[(I)-1]
-#define CNTL(I) cntl[(I)-1]
-#define RINFOG(I) rinfog[(I)-1]
-
-  MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A);
-  MUMPS_INT* NM_MUMPS_jcn(NumericsMatrix* A);
-
-  /** Get (and create if necessary) the working data for MUMPS
-   * \param A the matrix to be factorized
-   */
-  DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A);
-
-  /** Free the working data for MUMPS
-   * \param p a NSM_linear_solver_params object holding the data
-   */
-  void NM_MUMPS_free(void* p);
-
-  /** Display extra information about the solve
-   * \param mumps_id the working space of MUMPS
-   */
-  void NM_MUMPS_extra_display(DMUMPS_STRUC_C* mumps_id);
-
-#endif
 
 #ifdef WITH_UMFPACK
 #include <umfpack.h>

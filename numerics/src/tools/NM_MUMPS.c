@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 
+#include "NM_MUMPS.h"
 #ifdef WITH_MUMPS
 #include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
@@ -27,6 +28,21 @@
 
 
 #include "NM_MPI.h"
+
+void NM_MUMPS_free(void* p)
+{
+  NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
+  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
+
+  /* clean the mumps instance */
+  mumps_id->job = -2;
+  dmumps_c(mumps_id);
+
+  /* Here we free mumps_id ...  */
+  free(params->linear_solver_data);
+  params->linear_solver_data = NULL;
+
+}
 
 MUMPS_INT* NM_MUMPS_irn(NumericsMatrix* A)
 {
@@ -102,6 +118,7 @@ MUMPS_INT* NM_MUMPS_jcn(NumericsMatrix* A)
 }
 
 
+
 DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 {
   NSM_linear_solver_params* params = NSM_linearSolverParams(A);
@@ -115,10 +132,10 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 
     mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
 
-    // Initialize a MUMPS instance. Use MPI_COMM_WORLD.
+    // Initialize a MUMPS instance.
     mumps_id->job = JOB_INIT;
-    mumps_id->par = 1;
-    mumps_id->sym = 0;
+    mumps_id->par = 1; /* host (rank=0) is also involved in computations */
+    mumps_id->sym = 0; /* unsymmetric */
 
 #ifdef HAVE_MPI
     if (NM_MPI_comm(A) == MPI_COMM_WORLD)
@@ -192,7 +209,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
       }
     }
 /* MB: mumps does not accept csc format for input
-/*      else
+      else
       {
         fprintf(stderr, "NM_MUMPS_irn :: xhub doubt this code is correct");
         exit(EXIT_FAILURE);
@@ -218,20 +235,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
 }
 
 
-void NM_MUMPS_free(void* p)
-{
-  NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
-  DMUMPS_STRUC_C* mumps_id = (DMUMPS_STRUC_C*) params->linear_solver_data;
 
-  /* clean the mumps instance */
-  mumps_id->job = -2;
-  dmumps_c(mumps_id);
-
-  /* Here we free mumps_id ...  */
-  free(params->linear_solver_data);
-  params->linear_solver_data = NULL;
-
-}
 
 void NM_MUMPS_extra_display(DMUMPS_STRUC_C* mumps_id)
 {
