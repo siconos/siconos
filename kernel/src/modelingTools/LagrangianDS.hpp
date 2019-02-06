@@ -556,6 +556,9 @@ public:
   void allocateMass();
   void allocateJacobianFIntq();
   void allocateJacobianFIntqDot();
+  void allocateFInt();
+  void allocateFExt();
+
 
   
   /** set \f$\nabla_{q}F_{int}\f$, (pointer link)
@@ -708,8 +711,6 @@ public:
       _mass.reset(new SimpleMatrix(_ndof, _ndof));
     _hasConstantMass = false;
   }
-
-  void allocateFInt();
 
   
   /** allow to set a specified function to compute FInt

@@ -705,6 +705,11 @@ void LagrangianDS::computePostImpactVelocity()
   *_q[1] += tmp;  // v+ = v- + p
   DEBUG_BEGIN("LagrangianDS::computePostImpactV() END \n");
 }
+void  LagrangianDS::allocateFExt()
+{
+  if(!_fExt)
+    _fExt.reset(new SiconosVector(_ndof));
+}
 void  LagrangianDS::allocateFInt()
 {
   if(!_fInt)
