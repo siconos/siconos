@@ -684,7 +684,7 @@ void SimpleMatrix::display() const
   {
     std::cout << "SimpleMatrix::display(): empty matrix" << std::endl;
   }
-  std::cout << "num = " << _num << "\t";
+  std::cout << "SimpleMatrix storage type - num = " << _num << "\n";
   if (_num == 1)
   {
     Siconos::algebra::print_m(*mat.Dense);
