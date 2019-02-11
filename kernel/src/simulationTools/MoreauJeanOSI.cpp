@@ -436,20 +436,21 @@ void MoreauJeanOSI::_computeWBoundaryConditions(SecondOrderDS& ds,
         itindex != bc->velocityIndices()->end();
         ++itindex)
     {
-
+      if (!iteration_matrix.isSymmetric(1e-10))
+      {
+       // iteration_matrix.display();
+       std::cout <<"Warning, we apply boundary conditions assuming W symmetric" << std::endl;
+      }
       iteration_matrix.getCol(*itindex, *columntmp);
-      /*\warning we assume that W is symmetric in the Lagrangian case
+      /*\warning we assume that W is symmetric
         we store only the column and not the row */
 
       WBoundaryConditions.setCol(columnindex, *columntmp);
       double diag = (*columntmp)(*itindex);
       columntmp->zero();
       (*columntmp)(*itindex) = diag;
-
       iteration_matrix.setCol(*itindex, *columntmp);
       iteration_matrix.setRow(*itindex, *columntmp);
-
-
       columnindex ++;
     }
     DEBUG_EXPR(iteration_matrix.display(););
@@ -1694,8 +1695,7 @@ void MoreauJeanOSI::updateState(const unsigned int )
         {
           _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
-          if (!_dynamicalSystemsGraph->properties(*dsi).W->isSymmetric(1e-10))
-            std::cout <<"Warning, we apply boundary conditions assuming W symmetric" << std::endl;
+
           double value = - inner_prod(*columntmp, v);
           if( d.p(_levelMaxForInput)&& d.p(_levelMaxForInput)->size() > 0)
           {
