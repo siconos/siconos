@@ -1,38 +1,38 @@
 #!/usr/bin/env python
 import numpy as np
-import siconos.kernel as K
+import siconos.kernel as kernel
 
 def test_autocast():
-    dsA = K.LagrangianDS([0],[0],[[1]])
-    dsB = K.FirstOrderLinearDS([0],[[1]])
-    nsds = K.NonSmoothDynamicalSystem(0, 0)
+    dsA = kernel.LagrangianDS([0],[0],[[1]])
+    dsB = kernel.FirstOrderLinearDS([0],[[1]])
+    nsds = kernel.NonSmoothDynamicalSystem(0, 0)
     nsds.insertDynamicalSystem(dsA)
     nsds.insertDynamicalSystem(dsB)
 
-    assert(type(nsds.dynamicalSystem(dsA.number())) == K.LagrangianDS)
-    assert(type(nsds.dynamicalSystem(dsB.number())) == K.FirstOrderLinearDS)
+    assert(type(nsds.dynamicalSystem(dsA.number())) == kernel.LagrangianDS)
+    assert(type(nsds.dynamicalSystem(dsB.number())) == kernel.FirstOrderLinearDS)
 
 
 def test_getVector():
-    assert (K.getVector([1,2,3]) == np.array([1,2,3])).all()
-    v = K.SiconosVector(3)
+    assert (kernel.getVector([1,2,3]) == np.array([1,2,3])).all()
+    v = kernel.SiconosVector(3)
     v.setValue(0,1)
     v.setValue(1,2)
     v.setValue(2,4)
 
-    assert (K.getVector(v) != np.array([1,2,3])).any()
+    assert (kernel.getVector(v) != np.array([1,2,3])).any()
 
-    assert (K.getVector(v) == np.array([1,2,4])).all()
+    assert (kernel.getVector(v) == np.array([1,2,4])).all()
 
-    v1 = K.SiconosVector([1, 2, 3])
-    v2 = K.SiconosVector(np.asarray([1, 2, 3]))
+    v1 = kernel.SiconosVector([1, 2, 3])
+    v2 = kernel.SiconosVector(np.asarray([1, 2, 3]))
 
-    assert (K.getVector(v1) == K.getVector(v2)).all()
+    assert (kernel.getVector(v1) == kernel.getVector(v2)).all()
 
 
 def test_castVector():
     i = [1.0,4.0,3.0]
-    v = K.SiconosVector([1,2,3])
+    v = kernel.SiconosVector([1,2,3])
     assert str(v) == '[3](1,2,3)'
     repr(v)
     assert v[0] == 1.0
@@ -59,9 +59,9 @@ def test_castVector():
 
 
 def test_getMatrix():
-    assert (K.getMatrix([[1,2,3]]) == np.array([[1,2,3]])).all()
+    assert (kernel.getMatrix([[1,2,3]]) == np.array([[1,2,3]])).all()
 
-    m = K.SimpleMatrix(1,3)
+    m = kernel.SimpleMatrix(1,3)
 
     m.setValue(0,0,1)
 
@@ -69,16 +69,49 @@ def test_getMatrix():
 
     m.setValue(0,2,3)
 
-    assert (K.getMatrix(m) == np.array([[1,2,3]])).all()
+    assert (kernel.getMatrix(m) == np.array([[1,2,3]])).all()
 
-    assert (K.getMatrix(m) != np.array([[1,0,3]])).any()
+    assert (kernel.getMatrix(m) != np.array([[1,0,3]])).any()
 
-    m1 = K.SimpleMatrix(((1,2,3), (4,5,6)))
-    m2 = K.SimpleMatrix(np.array([[1,2,3],[4,5,6]]))
-    assert (K.getMatrix(m1) == K.getMatrix(K.SimpleMatrix(m2))).all()
+    m1 = kernel.SimpleMatrix(((1,2,3), (4,5,6)))
+    m2 = kernel.SimpleMatrix(np.array([[1,2,3],[4,5,6]]))
+    assert (kernel.getMatrix(m1) == kernel.getMatrix(kernel.SimpleMatrix(m2))).all()
 
+def test_matrix_bracket_operator():
+    M = kernel.SimpleMatrix(10,10)
+    M.zero()
+    def fill_matrix(M):
+        for i in range(M.size(0)):
+            for j in range(M.size(1)):
+                M[i,j] = i+j
+         
+        return
+
+    fill_matrix(M)
+    print(M, type(M))
+    for i in range(M.size(0)):
+        for j in range(M.size(1)):
+            assert(M[i,j]==i+j)
+
+    M[0,1]=266.0
+    assert(M[0,1]== 266.0)
+    
+    try:
+        M[0:1]= [0,2]
+    except Exception as e:
+        print(e)
+        pass
+    try:
+        M[1.0,1]= 4.0
+    except Exception as e:
+        print(e)
+        pass
+
+
+
+    
 def test_LagrangianDS_setMassPtr():
-    class LDS(K.LagrangianDS):
+    class LDS(kernel.LagrangianDS):
         pass
 
     lds = LDS()
@@ -89,7 +122,7 @@ def test_LagrangianDS_setMassPtr():
 
 
 def test_LagrangianScleronomousR_setJachqPtr():
-    class Rel(K.LagrangianScleronomousR):
+    class Rel(kernel.LagrangianScleronomousR):
         pass
 
     r = Rel()
@@ -110,7 +143,7 @@ def test_LagrangianScleronomousR_setJachqPtr():
 
 
 def test_SolverOption():
-    lcp = K.LCP()
+    lcp = kernel.LCP()
 
     i0 = lcp.numericsSolverOptions().iparam[0]
 
@@ -131,7 +164,7 @@ def test_SolverOption():
 
 
 def test_BoundaryCondition():
-    B = K.BoundaryCondition([1,2,3])
+    B = kernel.BoundaryCondition([1,2,3])
 
     print(B)
 
@@ -140,3 +173,7 @@ def test_BoundaryCondition():
     B.velocityIndices()[2]=5
 
     assert (B.velocityIndices() == [1, 2, 5]).all()
+if __name__ == "__main__":
+    # execute only if run as a script
+    test_matrix_bracket_operator()
+
