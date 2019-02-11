@@ -85,6 +85,7 @@ typedef std::string bytes;
       boost::archive::xml_oarchive ar(ss);
       siconos_io_register_ ## COMPONENT(ar);
       ar << ::boost::serialization::make_nvp(BOOST_PP_STRINGIZE(CLASS),(*($self)));
+      // ar must go out of scope to force flush to stringstream before ss.str!
     }
     return ss.str();
   }
