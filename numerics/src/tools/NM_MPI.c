@@ -19,10 +19,10 @@
 #include <assert.h>
 #ifdef HAVE_MPI
 #include "NumericsMatrix.h"
-NM_MPI_comm_t NM_MPI_comm(NumericsMatrix* A)
+MPI_Comm NM_MPI_comm(NumericsMatrix* A)
 {
   assert(A);
-  NM_MPI_comm_t mpi_comm = NM_internalData(A)->mpi_comm;
+  MPI_Comm mpi_comm = NM_internalData(A)->mpi_comm;
   if (mpi_comm == MPI_COMM_NULL)
   {
     fprintf(stderr, "siconos/numerics: warning MPI_comm not initialized.\nMPI must be initialized before any call to siconos/numerics\n");
@@ -30,7 +30,7 @@ NM_MPI_comm_t NM_MPI_comm(NumericsMatrix* A)
   return mpi_comm;
 }
 
-void NM_MPI_set_comm(NumericsMatrix* A, NM_MPI_comm_t comm)
+void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm)
 {
   assert(A);
   NM_internalData(A)->mpi_comm = comm;

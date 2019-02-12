@@ -1,8 +1,15 @@
  // Matrices
+
+#ifdef WITH_MPI4PY
+%include mpi4py/mpi4py.i
+%mpi4py_typemap(Comm, MPI_Comm);
+#endif
+
 %include "CSparseMatrix.h"
 %include "SparseBlockMatrix.h"
 %include "NumericsMatrix.h"
 %include "NumericsSparseMatrix.h"
+%include "NM_MPI.h"
 
 %define %NM_convert_from_target(input, output, ACTION)
 {

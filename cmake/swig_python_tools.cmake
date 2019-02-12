@@ -156,7 +156,12 @@ macro(add_siconos_swig_sub_module fullname)
   IF(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
     set_source_files_properties(${swig_file}
       PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS_${_name}}" CPLUSPLUS ON)
-  ENDIF(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
+  ELSE(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
+    IF(${COMPONENT} MATCHES "numerics")
+      set_source_files_properties(${swig_file}
+        PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS_${_name}}")
+    ENDIF()
+  ENDIF()
 
   # --- build swig module ---
   if(CMAKE_VERSION VERSION_LESS 3.8.0)

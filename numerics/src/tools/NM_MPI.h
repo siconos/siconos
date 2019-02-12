@@ -26,9 +26,8 @@ extern "C"
 {
 #endif
 
-#define NM_MPI_comm_t MPI_Comm
-NM_MPI_comm_t NM_MPI_comm(NumericsMatrix* A);
-void NM_MPI_set_comm(NumericsMatrix* A, NM_MPI_comm_t comm);
+MPI_Comm NM_MPI_comm(NumericsMatrix* A);
+void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm);
 #include <stdio.h>
 #define CHECK_MPI(COMM, EXPR)                                           \
   do                                                                    \
@@ -47,7 +46,7 @@ void NM_MPI_set_comm(NumericsMatrix* A, NM_MPI_comm_t comm);
     };                                                                  \
   } while(0)
 #else
-#define NM_MPI_comm_t int
+#define MPI_Comm int
 
 #endif
 

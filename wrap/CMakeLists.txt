@@ -30,6 +30,10 @@ if(WITH_PYTHON_WRAPPER)
   # protected methods needed to the interface to compile.
   # - with "dirprot" swig will attemp to wrap all the public and protected methods at once.
   set(SWIG_DEFS "-dirprot;-dirvtable;-Wextra")
+
+  if(WITH_MPI4PY)
+    set(SWIG_DEFS "${SWIG_DEFS};-I${python_MPI4PY}/include;-DWITH_MPI4PY")
+  endif()
   
   if(WITH_FCLIB)
     set(SWIG_DEFS "${SWIG_DEFS};-DWITH_FCLIB")

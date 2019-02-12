@@ -44,7 +44,7 @@ typedef struct
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
   bool isInversed; /**<  true if the matrix containes its inverse (in place inversion) */
-  NM_MPI_comm_t mpi_comm; /**< optional mpi communicator (initialized to MPI_COMM_WORLD if needed and not given) */
+  MPI_Comm mpi_comm; /**< optional mpi communicator */
 } NumericsMatrixInternalData;
 
 /** \struct NumericsMatrix NumericsMatrix.h
