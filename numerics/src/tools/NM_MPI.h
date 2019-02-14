@@ -45,9 +45,6 @@ void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm);
       MPI_Abort(COMM, error_code);                                      \
     };                                                                  \
   } while(0)
-#else
-#define MPI_Comm int
-
 #endif
 
 int NM_MPI_rank(NumericsMatrix* A);

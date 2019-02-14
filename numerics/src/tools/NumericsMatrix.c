@@ -1780,11 +1780,10 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   B->size0 = A->size0;
   B->size1 = A->size1;
 
-  /* NM_internalData_copy(A,B); */
   NM_internalData_free(B);
 
-
-  
+  /* here mpi_comm may be copied for example */
+  NM_internalData_copy(A, B);
 
   B->storageType = A->storageType;
   switch (A->storageType)
@@ -1888,7 +1887,6 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       exit(EXIT_FAILURE);
     }
     }
-
     CSparseMatrix_copy(A_, B_);
 
 
@@ -1897,8 +1895,13 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     NM_clearSparseBlock(B);
 
     if (numericsSparseMatrix(B)->linearSolverParams)
-      numericsSparseMatrix(B)->linearSolverParams = NSM_linearSolverParams_free(numericsSparseMatrix(B)->linearSolverParams);
+    {
+      numericsSparseMatrix(B)->linearSolverParams =
+        NSM_linearSolverParams_free(numericsSparseMatrix(B)->linearSolverParams);
+    }
 
+    /* here mumps_id may be copied for example */
+    numericsSparseMatrix(B)->linearSolverParams = A->matrix2->linearSolverParams;
 
     /* We remove diag_indx from B and  we copy it from A if it exists */
     if (numericsSparseMatrix(B)->diag_indx)
@@ -2581,23 +2584,24 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       {
         printf("NM_gesv: using MUMPS\n" );
       }
-      /* the mumps instance is initialized (call with job=-1) */
-      DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+      if (!NM_MUMPS_id(A)->job)
+      {
+        /* the mumps instance is initialized (call with job=-1) */
+        NM_MUMPS_set_control_params(A);
+        NM_MUMPS(A, -1);
+      }
+      NM_MUMPS_set_problem(A, b);
 
-      mumps_id->rhs = b;
+      DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
       if (keep != NM_KEEP_FACTORS|| mumps_id->job == -1)
       {
-        mumps_id->job = 6;
+        NM_MUMPS(A, 6); /* analyzis,factorization,solve*/
       }
       else
       {
-        mumps_id->job = 3;
+        NM_MUMPS(A, 3); /* solve */
       }
-
-
-      /* compute the solution */
-      dmumps_c(mumps_id);
 
       info = mumps_id->info[0];
 
@@ -2611,13 +2615,12 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       }
       if (keep != NM_KEEP_FACTORS)
       {
-        NM_MUMPS_free(p);
+        NM_MUMPS(A, -2);
       }
-      else if (!p->solver_free_hook)
+      if (!p->solver_free_hook)
       {
         p->solver_free_hook = &NM_MUMPS_free;
       }
-
       break;
     }
 #endif /* WITH_MUMPS */

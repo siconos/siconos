@@ -10,6 +10,12 @@
 %include "NumericsMatrix.h"
 %include "NumericsSparseMatrix.h"
 %include "NM_MPI.h"
+%include "NM_MUMPS.h"
+
+%{
+#include "NM_MPI.h"
+#include "NM_MUMPS.h"
+%}
 
 %define %NM_convert_from_target(input, output, ACTION)
 {

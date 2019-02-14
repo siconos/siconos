@@ -612,7 +612,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     AWpB = (NumericsMatrix*) (rho + problemSize);
   }
 
-  /* just for allocations */
+  /* just for allocations, mumps_id and mpi communicator may be passed also */
   NM_copy(problem->M, AWpB);
 
   if (problem->M->storageType != NM_DENSE)
