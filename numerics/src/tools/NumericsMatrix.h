@@ -68,6 +68,9 @@ struct NumericsMatrix
 
 };
 
+/*! RawNumericsMatrix is used without conversion in python */
+typedef NumericsMatrix RawNumericsMatrix;
+
 /*! Available types of storage for NumericsMatrix */
 typedef enum NumericsMatrix_types {
   NM_DENSE,        /**< dense format */
@@ -93,15 +96,15 @@ extern "C"
   /** Creation of an empty NumericsMatrix.
    * \return a pointer to allocated space
    */
-  NumericsMatrix* NM_new(void);
-  NumericsMatrix* NM_eye(int size);
+  RawNumericsMatrix* NM_new(void);
+  RawNumericsMatrix* NM_eye(int size);
   /** create a NumericsMatrix and allocate the memory according to the matrix type
    * \param storageType the type of storage
    * \param size0 number of rows
    * \param size1 number of columns
    * \return a pointer to a NumericsMatrix
    */
-  NumericsMatrix* NM_create(int storageType, int size0, int size1);
+  RawNumericsMatrix* NM_create(int storageType, int size0, int size1);
 
   /** create a NumericsMatrix and possibly set the data
    * \param storageType the type of storage
@@ -111,9 +114,9 @@ extern "C"
    * set to NULL
    * \return a pointer to a NumericsMatrix
    */
-  NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
-  NumericsMatrix* NM_create_from_filename(char *filename);
-  NumericsMatrix* NM_create_from_file(FILE *file);
+  RawNumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
+  RawNumericsMatrix* NM_create_from_filename(char *filename);
+  RawNumericsMatrix* NM_create_from_file(FILE *file);
 
 
   /** Copy a NumericsMatrix inside another NumericsMatrix (deep).
@@ -136,7 +139,7 @@ extern "C"
    * \param mat the model matrix
    * \return a pointer to a NumericsMatrix
    */
-  NumericsMatrix* NM_duplicate(NumericsMatrix* mat);
+  RawNumericsMatrix* NM_duplicate(NumericsMatrix* mat);
 
 
   /** Creation, if needed, of sparse matrix storage.
@@ -187,13 +190,13 @@ extern "C"
    * \param[in] m1 the SparseBlockStructuredMatrix
    * \return  a pointer to a NumericsMatrix
    */
-  NumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1);
+  RawNumericsMatrix* NM_new_SBM(int size0, int size1, SparseBlockStructuredMatrix* m1);
 
   /** new NumericsMatrix equal to the transpose of a given matrix
    * \param[in] A
    * \return  a pointer to a NumericsMatrix
    */
-  NumericsMatrix* NM_transpose(NumericsMatrix * A);
+  RawNumericsMatrix* NM_transpose(NumericsMatrix * A);
 
  /** set NumericsMatrix fields to NULL
    * \param A a matrix
@@ -392,7 +395,7 @@ extern "C"
    * \param[in] B a NumericsMatrix
    * \param[in,out] C a NumericsMatrix
    */
-  NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B);
+  RawNumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B);
 
 
 
@@ -491,8 +494,8 @@ extern "C"
      \param file the corresponding  file
      \return 0 if the matrix
   */
-  NumericsMatrix*  NM_new_from_file(FILE *file);
-  NumericsMatrix*  NM_new_from_filename(char * filename);
+  RawNumericsMatrix*  NM_new_from_file(FILE *file);
+  RawNumericsMatrix*  NM_new_from_filename(char * filename);
 
   /**  NM_write_in_file_scilab of the matrix content
    \param M the matrix to be printed
@@ -662,7 +665,7 @@ extern "C"
    * \param B the second  matrix
    * \return C a new NumericsMatrix
    */
-  NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B);
+  RawNumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B);
 
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type
@@ -707,6 +710,16 @@ extern "C"
 
   int NM_is_symmetric(NumericsMatrix* A);
   double NM_symmetry_discrepancy(NumericsMatrix* A);
+
+
+  /** Pass a NumericsMatrix through swig typemaps.
+   * This is only usefull in python.
+   * \param A the matrix
+   */
+  NumericsMatrix* NM_convert(NumericsMatrix* A)
+  {
+    return A;
+  };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -89,6 +89,8 @@
 %include Numerics_NM_matlab.i
 #endif /* SWIGMATLAB */
 
+%apply SWIGTYPE { RawNumericsMatrix };
+
 // Numpy array -> NumericsMatrix
 %typemap(in, fragment="NumericsMatrix") (NumericsMatrix*) 
  // free in typemap(freearg)
