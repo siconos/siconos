@@ -718,7 +718,7 @@ extern "C"
    * This is only usefull in python.
    * \param A the matrix
    */
-  NumericsMatrix* NM_convert(NumericsMatrix* A)
+  static inline NumericsMatrix* NM_convert(NumericsMatrix* A)
   {
     return A;
   };

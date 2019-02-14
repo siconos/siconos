@@ -89,8 +89,6 @@
 %include Numerics_NM_matlab.i
 #endif /* SWIGMATLAB */
 
-%apply SWIGTYPE { RawNumericsMatrix };
-
 // Numpy array -> NumericsMatrix
 %typemap(in, fragment="NumericsMatrix") (NumericsMatrix*) 
  // free in typemap(freearg)
@@ -151,6 +149,11 @@
     $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), $descriptor(NumericsMatrix *), SWIG_POINTER_NEW |  0 );
   }
 }
+%typemap(out) (RawNumericsMatrix*) {
+  $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), $descriptor(NumericsMatrix *), SWIG_POINTER_NEW |  0 );
+ }
+
+
 
 %typemap(freearg) (double *z)
 {
@@ -389,3 +392,5 @@
 // issue with typemap out and is useless for now
 // convert matrix to scipy.sparse.csc and do the job there
 %ignore SBM_row_to_dense;
+
+
