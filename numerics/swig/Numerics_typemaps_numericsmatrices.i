@@ -150,7 +150,7 @@
   }
 }
 %typemap(out) (RawNumericsMatrix*) {
-  $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), $descriptor(NumericsMatrix *), SWIG_POINTER_NEW |  0 );
+  $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), $descriptor(NumericsMatrix *), 0 |  0 );
  }
 
 

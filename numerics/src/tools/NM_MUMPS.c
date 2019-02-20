@@ -24,7 +24,7 @@
 #include "numerics_verbose.h"
 #include "NM_MPI.h"
 
-/* #define DEBUG_MESSAGES */
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 void NM_MUMPS_free(void* p)
@@ -89,7 +89,7 @@ void NM_MUMPS(NumericsMatrix* A, int job)
   {
     NM_MUMPS_id(A)->job = job;
     /* we send the job number for listening processes */
-    DEBUG_PRINTF("MPI: %d sending job %d\n", NM_MPI_rank(A),job);
+    DEBUG_PRINTF("NM_MUMPS: %d sending job %d\n", NM_MPI_rank(A),job);
     CHECK_MPI(NM_MPI_comm(A), MPI_Bcast(&job, 1, MPI_INT, 0, NM_MPI_comm(A)));
     if (job)
     {
@@ -107,8 +107,9 @@ void NM_MUMPS(NumericsMatrix* A, int job)
     while(ijob)
     {
       /* I am a listening process, I will stop when ijob = 0 */
+      DEBUG_PRINTF("NM_MUMPS: %d waiting for job specification from process 0\n", NM_MPI_rank(A));
       CHECK_MPI(NM_MPI_comm(A), MPI_Bcast(&ijob, 1, MPI_INT, 0, NM_MPI_comm(A)));
-      DEBUG_PRINTF("MPI: %d receiving job %d\n", NM_MPI_rank(A),ijob);
+      DEBUG_PRINTF("NM_MUMPS: %d receiving job %d\n", NM_MPI_rank(A),ijob);
       if (ijob)
       {
         NM_MUMPS_id(A)->job = ijob;
