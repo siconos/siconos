@@ -120,7 +120,7 @@ class FrictionContactTrace(FrictionContact):
             w_backup = self.w().copy()
             z_backup = self.z().copy()
             SO = self.numericsSolverOptions()
-
+            fclib_written = False
             if self.condition(SO) and has_fclib: 
            
                 # problem = self.getNumericsProblemPtr()
@@ -158,11 +158,12 @@ class FrictionContactTrace(FrictionContact):
                     attrs.create('numberOfInvolvedDS',
                                  self._nsds.topology().numberOfInvolvedDS(1))
 
+                fclib_written =True
 
                     
             info = self.solve()
 
-            if self.condition(SO) and has_fclib: 
+            if fclib_written:
                 
                 solution = F.fclib_solution()
                 solution.u = self.w()
