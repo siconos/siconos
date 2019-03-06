@@ -1321,8 +1321,8 @@ if (!dcast) {
   SP::DynamicalSystem ds = mds;
   PyObject** _tmpobj = &resultobj;
   %formacro(%_factory_dispatch_SP, FirstOrderLinearTIDS, FirstOrderLinearDS, FirstOrderNonLinearDS)
-  %formacro(%_factory_dispatch_SP, LagrangianLinearTIDS, LagrangianDS)
-  %formacro(%_factory_dispatch_SP, NewtonEulerDS)
+  %formacro(%_factory_dispatch_SP, LagrangianLinearTIDS, LagrangianDS, SecondOrderDS)
+  %formacro(%_factory_dispatch_SP, NewtonEulerDS, SecondOrderDS)
   if (!dcast) {
     SP::DynamicalSystem *pds = new SP::DynamicalSystem(ds);
     resultobj = SWIG_NewPointerObj(%as_voidptr(pds), $descriptor(SP::DynamicalSystem *), SWIG_POINTER_OWN);
@@ -1344,8 +1344,8 @@ if (!dcast) {
 {
   int dcast = 0;
   %formacro(%_factory_dispatch_SP_output, FirstOrderLinearTIDS, FirstOrderLinearDS, FirstOrderNonLinearDS)
-  %formacro(%_factory_dispatch_SP_output, LagrangianLinearTIDS, LagrangianDS)
-  %formacro(%_factory_dispatch_SP_output, NewtonEulerDS)
+  %formacro(%_factory_dispatch_SP_output, LagrangianLinearTIDS, LagrangianDS, SecondOrderDS)
+  %formacro(%_factory_dispatch_SP_output, NewtonEulerDS, SecondOrderDS)
   if (!dcast) {
     %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(SP::DynamicalSystem *), $owner | %newpointer_flags));
   }
