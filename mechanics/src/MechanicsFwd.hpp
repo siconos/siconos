@@ -60,6 +60,8 @@
   REGISTER(SiconosSphere)                       \
   REGISTER(SiconosBox)                          \
   REGISTER(SiconosCylinder)                     \
+  REGISTER(SiconosCone)                         \
+  REGISTER(SiconosCapsule)                     \
   REGISTER(SiconosConvexHull)                   \
   REGISTER(SiconosPlane)                        \
   REGISTER(SiconosMesh)                         \

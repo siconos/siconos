@@ -34,7 +34,7 @@ from siconos.io.io_base import MechanicsIO
 
 # Imports for mechanics 'collision' submodule
 from siconos.mechanics.collision import BodyDS, \
-    SiconosSphere, SiconosBox, SiconosCylinder, SiconosPlane, \
+    SiconosSphere, SiconosBox, SiconosCylinder, SiconosCone, SiconosCapsule, SiconosPlane, \
     SiconosConvexHull, SiconosContactor, SiconosContactorSet, \
     SiconosMesh, SiconosHeightMap
 
@@ -421,7 +421,9 @@ class ShapeCollection():
         self._primitive = {'Sphere': SiconosSphere,
                            'Box': SiconosBox,
                            'Cylinder': SiconosCylinder,
-                           'Plane': SiconosPlane}
+                           'Plane': SiconosPlane,
+                           'Capsule': SiconosCapsule,
+                           'Cone':SiconosCone}
 
     def shape(self, shape_name):
         return self._io.shapes()[shape_name]
