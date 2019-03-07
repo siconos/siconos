@@ -429,9 +429,9 @@ class ShapeCollection():
         self._primitive = {'Sphere': SiconosSphere,
                            'Box': SiconosBox,
                            'Cylinder': SiconosCylinder,
-                           'Plane': SiconosPlane,
                            'Capsule': SiconosCapsule,
-                           'Cone':SiconosCone}
+                           'Cone':SiconosCone,
+                           'Plane': SiconosPlane}
 
     def shape(self, shape_name):
         return self._io.shapes()[shape_name]
@@ -1738,7 +1738,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                                                         plugin_function_name)
                 ds.setBoundaryConditions(bc)
 
-    def explodeNewtonSolve(self,s, with_timer):
+    def explode_Newton_solve(self, s, with_timer):
         log(s.initialize,with_timer)()
         log(s.resetLambdas,with_timer)()
         # Again the access to s._newtonTolerance generates a segfault due to director
@@ -1754,6 +1754,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         log(s.initializeNewtonLoop,with_timer)()
         while (not isNewtonConverge) and (newtonNbIterations <newtonMaxIteration):
             #print('newtonNbIterations',newtonNbIterations)
+            info=0
             newtonNbIterations = newtonNbIterations+1
             log(s.prepareNewtonIteration,with_timer)()
             log(s.computeFreeState,with_timer)()
@@ -1765,11 +1766,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if (not isNewtonConverge) and (newtonNbIterations <newtonMaxIteration):
                 log(s.updateOutput,with_timer)()
             isNewtonConverge = log(s.newtonCheckConvergence,with_timer)(newtonTolerance)
-
+            if s.displayNewtonConvergence():
+                s.displayNewtonConvergenceInTheLoop();
             if (not isNewtonConverge) and (not info):
                 if s.numberOfOSNSProblems() > 0:
                     log(s.saveYandLambdaInOldVariables,with_timer)()
+        if s.displayNewtonConvergence():
+            s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration);
 
+
+            
     def run(self,
             with_timer=False,
             time_stepping=None,
@@ -1806,7 +1812,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             friction_contact_trace_params=None,
             contact_index_set=1,
             osi=Kernel.MoreauJeanOSI,
-            explodeNewtonSolve=False):
+            explode_Newton_solve=False,
+            display_Newton_convergence=False):
         """
         Run a simulation from inputs in hdf5 file.
         parameters are:
@@ -2002,6 +2009,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         simulation.setNewtonOptions(Newton_options)
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
+        simulation.setDisplayNewtonConvergence(True)
 
 
         self._simulation = simulation
@@ -2057,9 +2065,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                  osnspb._stepcounter = k
 
 
-            if explodeNewtonSolve:
+            if explode_Newton_solve:
                 if(time_stepping == TimeStepping) :
-                    log(self.explodeNewtonSolve, with_timer, before=False)(simulation, with_timer)
+                    log(self.explode_Newton_solve, with_timer, before=False)(simulation, with_timer)
                 else:
                     print('simulation of type', type(time_stepping),' has no exploded version' )
                     log(simulation.computeOneStep, with_timer)()
