@@ -164,11 +164,6 @@ extern "C"
   int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options);
 
 
-  void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
-                                         SolverOptions* options,
-                                         SolverOptions* internalsolver_options,
-                                         double error);
-
   
   /** Fixed point solver for friction-contact 3D problem based on the Tresca
   problem with fixed friction threshold
@@ -394,6 +389,12 @@ extern "C"
 
 
   void fc3d_nonsmooth_Newton_AlartCurnier2(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+  
+  void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
+                                         SolverOptions* options,
+                                         SolverOptions* internalsolver_options,
+                                         double error);
 
   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
