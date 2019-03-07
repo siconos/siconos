@@ -24,7 +24,8 @@ import siconos.io.mechanics_hdf5
 import siconos.numerics as Numerics
 from siconos.kernel import \
     EqualityConditionNSL, \
-    Interaction, DynamicalSystem, TimeStepping
+    Interaction, DynamicalSystem, TimeStepping,\
+    SICONOS_OSNSP_TS_VELOCITY
 import siconos.kernel as Kernel
 
 # Siconos Mechanics imports
@@ -174,19 +175,26 @@ def warn(msg):
     sys.stderr.write('{0}: {1}'.format(sys.argv[0], msg))
 
 
-def log(fun, with_timer=False):
+def log(fun, with_timer=False, before=True):
     if with_timer:
         t = Timer()
 
         def logged(*args):
             t.update()
-            print('{0} ...'.format(fun.__name__), end='')
-            fun(*args)
-            print('..... {0} s'.format(t.elapsed()))
+            if before:
+                print('| {0:50s} ...'.format(fun.__name__), end='')
+            else:
+                print('|-->start {0:42s} ...'.format(fun.__name__))
+            output =fun(*args)
+            if not before:
+                print('|-->end {0:44s} ...'.format(fun.__name__), end='')
+            print('..... {0:6.2e} s'.format(t.elapsed()))
+            return output
         return logged
     else:
         def silent(*args):
-            fun(*args)
+            output = fun(*args)
+            return output
         return silent
 
 
@@ -1730,6 +1738,38 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                                                         plugin_function_name)
                 ds.setBoundaryConditions(bc)
 
+    def explodeNewtonSolve(self,s, with_timer):
+        log(s.initialize,with_timer)()
+        log(s.resetLambdas,with_timer)()
+        # Again the access to s._newtonTolerance generates a segfault due to director
+        newtonTolerance = s.newtonTolerance()
+        newtonMaxIteration = s.newtonMaxIteration()
+
+        # return _kernel.TimeStepping_newtonSolve(self, criterion, maxStep)
+        # RuntimeError: accessing protected member newtonSolve
+        #s.newtonSolve(newtonTolerance, newtonMaxIteration);
+
+        newtonNbIterations =0
+        isNewtonConverge =False
+        log(s.initializeNewtonLoop,with_timer)()
+        while (not isNewtonConverge) and (newtonNbIterations <newtonMaxIteration):
+            #print('newtonNbIterations',newtonNbIterations)
+            newtonNbIterations = newtonNbIterations+1
+            log(s.prepareNewtonIteration,with_timer)()
+            log(s.computeFreeState,with_timer)()
+            if s.numberOfOSNSProblems() >0:
+                info = log(s.computeOneStepNSProblem,with_timer)(SICONOS_OSNSP_TS_VELOCITY)
+            log(s.DefaultCheckSolverOutput,with_timer)(info);
+            log(s.updateInput,with_timer)();
+            log(s.updateState,with_timer)();
+            if (not isNewtonConverge) and (newtonNbIterations <newtonMaxIteration):
+                log(s.updateOutput,with_timer)()
+            isNewtonConverge = log(s.newtonCheckConvergence,with_timer)(newtonTolerance)
+
+            if (not isNewtonConverge) and (not info):
+                if s.numberOfOSNSProblems() > 0:
+                    log(s.saveYandLambdaInOldVariables,with_timer)()
+
     def run(self,
             with_timer=False,
             time_stepping=None,
@@ -1765,7 +1805,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             friction_contact_trace=False,
             friction_contact_trace_params=None,
             contact_index_set=1,
-            osi=Kernel.MoreauJeanOSI):
+            osi=Kernel.MoreauJeanOSI,
+            explodeNewtonSolve=False):
         """
         Run a simulation from inputs in hdf5 file.
         parameters are:
@@ -1858,7 +1899,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # (2) Time discretisation --
         timedisc=TimeDiscretisation(t0, h)
 
-        
+
 
         if (osi == Kernel.MoreauJeanGOSI):
             if (friction_contact_trace == False) :
@@ -1898,7 +1939,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
                     #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
                     #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP
-                    
+
 
             else:
                 from siconos.io.FrictionContactTrace import FrictionContactTrace
@@ -1921,7 +1962,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # -- light error evaluation with full final
         solverOptions.iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
         solverOptions.iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
-    
+
 
         osnspb.setNumericsVerboseMode(numerics_verbose)
 
@@ -2015,7 +2056,17 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if (friction_contact_trace == True) :
                  osnspb._stepcounter = k
 
-            log(simulation.computeOneStep, with_timer)()
+
+            if explodeNewtonSolve:
+                if(time_stepping == TimeStepping) :
+                    log(self.explodeNewtonSolve, with_timer, before=False)(simulation, with_timer)
+                else:
+                    print('simulation of type', type(time_stepping),' has no exploded version' )
+                    log(simulation.computeOneStep, with_timer)()
+            else:
+                log(simulation.computeOneStep, with_timer)()
+
+
 
             if (self._output_frequency and (k % self._output_frequency == 0)) or (k == 1):
                 if verbose:
