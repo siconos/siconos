@@ -487,6 +487,62 @@ void TimeStepping::saveYandLambdaInOldVariables()
     }
 }
 
+void TimeStepping::displayNewtonConvergenceInTheLoop()
+{
+  if (_displayNewtonConvergence)
+  {
+    std::cout << "TimeStepping::newtonSolve --  _newtonNbIterations =" << _newtonNbIterations << std::endl;
+    std::cout << "TimeStepping::newtonSolve --  _newtonResiduDSMax =" << _newtonResiduDSMax << std::endl;
+    if (_computeResiduY)
+    {
+      std::cout << "TimeStepping::newtonSolve --  _newtonResiduYMax =" << _newtonResiduYMax << std::endl;
+    }
+    else
+    {
+      std::cout << "TimeStepping::newtonSolve --  _newtonResiduYMax =" << "not computed" << std::endl;
+    }
+    if (_computeResiduR)
+    {
+      std::cout << "TimeStepping::newtonSolve --  _newtonResiduRMax =" << _newtonResiduRMax << std::endl;
+    }
+    else
+    {
+      std::cout << "TimeStepping::newtonSolve --  _newtonResiduRMax =" << "not computed" << std::endl;
+    }
+  }
+  else
+  {
+    DEBUG_PRINTF("# _newtonNbIterations = %i\n",_newtonNbIterations);
+    DEBUG_PRINTF("# _newtonResiduDSMax = %12.8e\t",_newtonResiduDSMax );
+    DEBUG_PRINTF("# _newtonResiduYMax = %12.8e\t",_newtonResiduYMax );
+    DEBUG_PRINTF("# _newtonResiduRMax = %12.8e\n",_newtonResiduRMax );
+  }
+}
+void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep)
+{
+  if (_displayNewtonConvergence)
+  {
+    std::cout << "TimeStepping::newtonSolve --  _newtonCumulativeNbIterations =" << _newtonCumulativeNbIterations << std::endl;
+  }
+  else
+  {
+    DEBUG_PRINTF("# _newtonCumulativeNbIterations= %i\n",_newtonCumulativeNbIterations );
+  }
+
+  if (!_isNewtonConverge)
+  {
+    if (_warnOnNonConvergence)
+      std::cout << "TimeStepping::newtonSolve -- Newton process stopped:"
+                << "max. number of steps ("
+                << maxStep
+                <<") reached at accuracy = "
+                << _newtonResiduDSMax
+                <<"."
+                  << std::endl ;
+    if (info && _warnOnNonConvergence)
+      std::cout << "TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
+  }
+}
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
 {
 
@@ -512,7 +568,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutput)
       DefaultCheckSolverOutput(info);
-
     else
       checkSolverOutput(info, this);
 
@@ -529,12 +584,12 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     //_isNewtonConverge = newtonCheckConvergence(criterion);
     while ((!_isNewtonConverge) && (_newtonNbIterations < maxStep))
     {
-      DEBUG_BEGIN("          \n");
-      DEBUG_END("          \n");
       _newtonNbIterations++;
+      info=0;
 
       prepareNewtonIteration();
       computeFreeState();
+
       if (info && _warnOnNonConvergence)
         std::cout << "New Newton loop because of nonsmooth solver failed\n" <<std::endl;
 
@@ -547,67 +602,39 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
       // is also relevant here.
       //InteractionsGraph& indexSet0 = *_nsds->topology()->indexSet0();
       //bool hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
+
       bool hasNSProblems = (!_allNSProblems->empty()) ? true : false;
       if (hasNSProblems)
       {
-      info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+        info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+        // Check output from solver (convergence or not ...)
+        if (!checkSolverOutput)
+          DefaultCheckSolverOutput(info);
+        else
+          checkSolverOutput(info, this);
       }
-      // Check output from solver (convergence or not ...)
-      if (!checkSolverOutput)
-        DefaultCheckSolverOutput(info);
-      else
-        checkSolverOutput(info, this);
 
       updateInput();
       updateState();
 
-      if (!_isNewtonConverge && _newtonNbIterations < maxStep) {
-        //hasNSProblems = (!_allNSProblems->empty() &&   indexSet0.size() > 0) ? true : false;
-        hasNSProblems = (!_allNSProblems->empty()) ? true : false;
+      if (!_isNewtonConverge && _newtonNbIterations < maxStep)
+      {
         updateOutput();
       }
+
       _isNewtonConverge = newtonCheckConvergence(criterion);
 
       if (!_isNewtonConverge && !info)
       {
-        hasNSProblems = (!_allNSProblems->empty()) ? true : false;
-
         if (hasNSProblems)
           saveYandLambdaInOldVariables();
       }
+      displayNewtonConvergenceInTheLoop();
+    } // End of the Newton Loop
 
-      if (_displayNewtonConvergence)
-      {
-        std::cout << "TimeStepping::newtonSolve --  _newtonNbIterations =" << _newtonNbIterations << std::endl;
-        std::cout << "TimeStepping::newtonSolve --  _newtonResiduDSMax =" << _newtonResiduDSMax << std::endl;
-        std::cout << "TimeStepping::newtonSolve --  _newtonResiduYMax =" << _newtonResiduRMax << std::endl;
-        std::cout << "TimeStepping::newtonSolve --  _newtonResiduRMax =" << _newtonResiduRMax << std::endl;
-      }
-      else
-        {
-      DEBUG_PRINTF("# _newtonNbIterations = %i\n",_newtonNbIterations);
-      DEBUG_PRINTF("# _newtonResiduDSMax = %12.8e\t",_newtonResiduDSMax );
-      DEBUG_PRINTF("# _newtonResiduYMax = %12.8e\t",_newtonResiduYMax );
-      DEBUG_PRINTF("# _newtonResiduRMax = %12.8e\n",_newtonResiduRMax );
-        }
-    }
     _newtonCumulativeNbIterations += _newtonNbIterations;
-     if (_displayNewtonConvergence)
-      {
-        std::cout << "TimeStepping::newtonSolve --  _newtonCumulativeNbIterations =" << _newtonCumulativeNbIterations << std::endl;
-      }
-     else
-     {
-        DEBUG_PRINTF("# _newtonCumulativeNbIterations= %i\n",_newtonCumulativeNbIterations );
-     }
-    if (!_isNewtonConverge)
-    {
-      if (_warnOnNonConvergence)
-        std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep <<
-          ") reached at accuracy = "<< _newtonResiduDSMax  <<"." <<std::endl ;
-      if (info && _warnOnNonConvergence)
-        std::cout << "TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
-    }
+
+    displayNewtonConvergenceAtTheEnd(info, maxStep);
   }
   else
     RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + _newtonOptions);
