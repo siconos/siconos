@@ -41,8 +41,8 @@ Include files related to modeling part of Siconos.
 #include "FirstOrderLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#include "NewtonEulerFrom1DLocalFrameR.hpp"
-#include "NewtonEulerFrom3DLocalFrameR.hpp"
+#include "NewtonEuler1DR.hpp"
+#include "NewtonEuler3DR.hpp"
 
 #include "BoundaryCondition.hpp"
 #include "HarmonicBC.hpp"

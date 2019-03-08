@@ -14,11 +14,11 @@ MBTB_ContactRelation::~MBTB_ContactRelation()
 
 
 
-MBTB_ContactRelation::MBTB_ContactRelation(): NewtonEulerFrom1DLocalFrameR()
+MBTB_ContactRelation::MBTB_ContactRelation(): NewtonEuler1DR()
 {
   _pContact=NULL;
 }
-MBTB_ContactRelation::MBTB_ContactRelation(MBTB_Contact *pC): NewtonEulerFrom1DLocalFrameR()
+MBTB_ContactRelation::MBTB_ContactRelation(MBTB_Contact *pC): NewtonEuler1DR()
 {
   _pContact=pC;
 }

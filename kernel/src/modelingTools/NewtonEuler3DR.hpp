@@ -15,30 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-/*! \file NewtonEulerFrom3DLocalFrameR.hpp
+/*! \file NewtonEuler3DR.hpp
 
  */
 #ifndef NEWTONEULERRELATIONFC3D_H
 #define NEWTONEULERRELATIONFC3D_H
 
-#include "NewtonEulerFrom1DLocalFrameR.hpp"
-/** NewtonEulerFrom3DLocalFrameR
+#include "NewtonEuler1DR.hpp"
+/** NewtonEuler3DR
  *
  * This class is an interface for relation with impact and FC3D.
- * From NewtonEulerFrom1DLocalFrameR, it inherits to the computation of the jacobian, this operator is use for the predictor of activation and deactivation of the Interaction.
+ * From NewtonEuler1DR, it inherits to the computation of the jacobian, this operator is use for the predictor of activation and deactivation of the Interaction.
  * The OSNSP is build using the matrix jachqT, that is computed from the point if contact pc1, pc2 and Nc.
  * Use this class consists in overload the method computeh, and children class has to set the menber pc1, pc2 and nc.
  *
  *
  */
 
-class NewtonEulerFrom3DLocalFrameR : public NewtonEulerFrom1DLocalFrameR
+class NewtonEuler3DR : public NewtonEuler1DR
 {
 
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(NewtonEulerFrom3DLocalFrameR);
+  ACCEPT_SERIALIZATION(NewtonEuler3DR);
 
   void FC3DcomputeJachqTFromContacts(SP::SiconosVector q1);
   void FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2);
@@ -46,11 +46,11 @@ private:
 protected:
 
 public:
-  NewtonEulerFrom3DLocalFrameR(): NewtonEulerFrom1DLocalFrameR() {}
+  NewtonEuler3DR(): NewtonEuler1DR() {}
 
   /** destructor
   */
-  virtual ~NewtonEulerFrom3DLocalFrameR() {};
+  virtual ~NewtonEuler3DR() {};
 
   /** initialize components specific to derived classes.
    * \param inter the interaction using this relation

@@ -17,7 +17,7 @@
 */
 
 
-#include "NewtonEulerFrom3DLocalFrameR.hpp"
+#include "NewtonEuler3DR.hpp"
 #include "NewtonEulerDS.hpp"
 #include <boost/math/quaternion.hpp>
 #include "Interaction.hpp"
@@ -33,9 +33,9 @@
 /*
 See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local velocities'
 */
-void NewtonEulerFrom3DLocalFrameR::initialize(Interaction& inter)
+void NewtonEuler3DR::initialize(Interaction& inter)
 {
-  NewtonEulerFrom1DLocalFrameR::initialize(inter);
+  NewtonEuler1DR::initialize(inter);
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
   _jachq.reset(new SimpleMatrix(3, qSize));
@@ -44,9 +44,9 @@ void NewtonEulerFrom3DLocalFrameR::initialize(Interaction& inter)
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
 }
-void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
+void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 {
-  DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)\n");
+  DEBUG_BEGIN("NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)\n");
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
   double Nz = _Nc->getValue(2);
@@ -67,13 +67,13 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
   assert(_Nc->norm2() >0.0
          && std::abs(_Nc->norm2()-1.0) < 1e-6
-         && "NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Normal vector not consistent ") ;
+         && "NewtonEuler3DR::FC3DcomputeJachqTFromContacts. Normal vector not consistent ") ;
 
   double t[6];
   double * pt = t;
 
   if (orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
-    RuntimeException::selfThrow("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
+    RuntimeException::selfThrow("NewtonEuler3DR::FC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
   pt = t;
   _RotationAbsToContactFrame->setValue(0, 0, Nx);
   _RotationAbsToContactFrame->setValue(1, 0, *pt);
@@ -148,10 +148,10 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   //   prod(*jaux, *v, *vRes, true);
   //   vRes->display();
   //   );
-  DEBUG_END("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)\n");
+  DEBUG_END("NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)\n");
 }
 
-void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)
+void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)
 {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
@@ -181,7 +181,7 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
   double t[6];
   double * pt = t;
   if(orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
-    RuntimeException::selfThrow("NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
+    RuntimeException::selfThrow("NewtonEuler3DR::FC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
   pt = t;
   _RotationAbsToContactFrame->setValue(0, 0, Nx);
   _RotationAbsToContactFrame->setValue(1, 0, *pt);
@@ -249,9 +249,9 @@ void NewtonEulerFrom3DLocalFrameR::FC3DcomputeJachqTFromContacts(SP::SiconosVect
 
 }
 
-void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0)
+void NewtonEuler3DR::computeJachqT(Interaction& inter, SP::BlockVector q0)
 {
-  DEBUG_BEGIN("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter,  SP::BlockVector q0)\n");
+  DEBUG_BEGIN("NewtonEuler3DR::computeJachqT(Interaction& inter,  SP::BlockVector q0)\n");
   if (q0->numberOfBlocks()>1)
   {
     FC3DcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
@@ -260,7 +260,7 @@ void NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVe
   {
     FC3DcomputeJachqTFromContacts((q0->getAllVect())[0]);
   }
-  DEBUG_END("NewtonEulerFrom3DLocalFrameR::computeJachqT(Interaction& inter,  SP::BlockVector q0)\n");
+  DEBUG_END("NewtonEuler3DR::computeJachqT(Interaction& inter,  SP::BlockVector q0)\n");
 
 
 }

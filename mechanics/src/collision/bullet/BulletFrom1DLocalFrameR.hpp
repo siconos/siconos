@@ -20,9 +20,9 @@
 #define BulletFrom1DLocalFrameR_hpp
 
 #include "BulletSiconosFwd.hpp"
-#include <NewtonEulerFrom1DLocalFrameR.hpp>
+#include <NewtonEuler1DR.hpp>
 
-class BulletFrom1DLocalFrameR : public NewtonEulerFrom1DLocalFrameR
+class BulletFrom1DLocalFrameR : public NewtonEuler1DR
 {
 private:
   /** serialization hooks

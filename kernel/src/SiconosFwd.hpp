@@ -92,8 +92,8 @@ DEFINE_SPTR(OSNSMatrix)
 DEFINE_SPTR(SiconosMemory)
 
 DEFINE_SPTR(NewtonEulerR)
-DEFINE_SPTR(NewtonEulerFrom1DLocalFrameR)
-DEFINE_SPTR(NewtonEulerFrom3DLocalFrameR)
+DEFINE_SPTR(NewtonEuler1DR)
+DEFINE_SPTR(NewtonEuler3DR)
 
 // OSI
 DEFINE_SPTR(EulerMoreauOSI)

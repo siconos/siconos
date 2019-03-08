@@ -27,9 +27,9 @@
 #include "Geometer.hpp"
 
 #include <SiconosFwd.hpp>
-#include <NewtonEulerFrom3DLocalFrameR.hpp>
+#include <NewtonEuler3DR.hpp>
 
-class OccR : public NewtonEulerFrom3DLocalFrameR
+class OccR : public NewtonEuler3DR
 {
 public:
   /** Constructor from contact points.

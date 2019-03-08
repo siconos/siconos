@@ -21,9 +21,9 @@
 
 #include "MechanicsFwd.hpp"
 #include "SiconosVector.hpp"
-#include "NewtonEulerFrom3DLocalFrameR.hpp"
+#include "NewtonEuler3DR.hpp"
 
-class ContactR : public NewtonEulerFrom3DLocalFrameR
+class ContactR : public NewtonEuler3DR
 {
 private:
   /** serialization hooks

@@ -17,7 +17,7 @@
 */
 
 
-#include "NewtonEulerFrom1DLocalFrameR.hpp"
+#include "NewtonEuler1DR.hpp"
 #include <boost/math/quaternion.hpp>
 #include "NewtonEulerDS.hpp"
 #include "Interaction.hpp"
@@ -37,7 +37,7 @@
 /*
 See devNotes.pdf for details. A detailed documentation is available in DevNotes.pdf: chapter 'NewtonEulerR: computation of \nabla q H'. Subsection 'Case FC3D: using the local frame local velocities'
 */
-void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector q1)
+void NewtonEuler1DR::NIcomputeJachqTFromContacts(SP::SiconosVector q1)
 {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
@@ -86,12 +86,12 @@ void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector
     _jachqT->setValue(0, jj, _AUX2->getValue(0, jj - 3));
 
 #ifdef NEFC3D_DEBUG
-  printf("NewtonEulerFrom1DLocalFrameR jhqt\n");
+  printf("NewtonEuler1DR jhqt\n");
   _jachqT->display();
 #endif
 }
 
-void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)
+void NewtonEuler1DR::NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)
 {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
@@ -159,7 +159,7 @@ void NewtonEulerFrom1DLocalFrameR::NIcomputeJachqTFromContacts(SP::SiconosVector
     _jachqT->setValue(0, jj + 6, -_AUX2->getValue(0, jj - 3));
 }
 
-void NewtonEulerFrom1DLocalFrameR::initialize(Interaction& inter)
+void NewtonEuler1DR::initialize(Interaction& inter)
 {
   NewtonEulerR::initialize(inter);
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
@@ -179,10 +179,10 @@ void NewtonEulerFrom1DLocalFrameR::initialize(Interaction& inter)
 
 
 
-void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::BlockVector q0)
+void NewtonEuler1DR::computeJachq(double time, Interaction& inter, SP::BlockVector q0)
 {
 
-  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 ) \n");
+  DEBUG_BEGIN("NewtonEuler1DR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 ) \n");
   DEBUG_PRINTF("with time =  %f\n",time);
   DEBUG_PRINTF("with inter =  %p\n",&inter);
 
@@ -201,7 +201,7 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
   {
     SP::SiconosVector q = (q0->getAllVect())[iDS];
     double sign = 1.0;
-    DEBUG_PRINTF("NewtonEulerFrom1DLocalFrameR::computeJachq : ds%d->q :", iDS);
+    DEBUG_PRINTF("NewtonEuler1DR::computeJachq : ds%d->q :", iDS);
     DEBUG_EXPR_WE(q->display(););
 
     ::boost::math::quaternion<double>    quatGP;
@@ -214,13 +214,13 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
     else
     {
       sign = -1.0;
-      //cout<<"NewtonEulerFrom1DLocalFrameR::computeJachq sign is -1 \n";
+      //cout<<"NewtonEuler1DR::computeJachq sign is -1 \n";
       ::boost::math::quaternion<double>    quatAux(0, _Pc2->getValue(0) - q->getValue(0), _Pc2->getValue(1) - q->getValue(1),
                                                    _Pc2->getValue(2) - q->getValue(2));
       quatGP = quatAux;
     }
-    DEBUG_PRINTF("NewtonEulerFrom1DLocalFrameR::computeJachq :GP :%lf, %lf, %lf\n", quatGP.R_component_2(), quatGP.R_component_3(), quatGP.R_component_4());
-    DEBUG_PRINTF("NewtonEulerFrom1DLocalFrameR::computeJachq :Q :%e,%e, %e, %e\n", q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
+    DEBUG_PRINTF("NewtonEuler1DR::computeJachq :GP :%lf, %lf, %lf\n", quatGP.R_component_2(), quatGP.R_component_3(), quatGP.R_component_4());
+    DEBUG_PRINTF("NewtonEuler1DR::computeJachq :Q :%e,%e, %e, %e\n", q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
     ::boost::math::quaternion<double>    quatQ(q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
     ::boost::math::quaternion<double>    quatcQ(q->getValue(3), -q->getValue(4), -q->getValue(5), -q->getValue(6));
     ::boost::math::quaternion<double>    quat0(1, 0, 0, 0);
@@ -230,11 +230,11 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
     _2qiquatGP *= 2 * (q->getValue(3));
     quatBuff = (quatGP * quatQ) + (quatcQ * quatGP) - _2qiquatGP;
 
-    DEBUG_PRINTF("NewtonEulerFrom1DLocalFrameR::computeJachq :quattBuuf : %e,%e,%e \n", quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
+    DEBUG_PRINTF("NewtonEuler1DR::computeJachq :quattBuuf : %e,%e,%e \n", quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
 
     _jachq->setValue(0, 7 * iDS + 3, sign * (quatBuff.R_component_2()*_Nc->getValue(0) +
                                              quatBuff.R_component_3()*_Nc->getValue(1) + quatBuff.R_component_4()*_Nc->getValue(2)));
-    //cout<<"WARNING NewtonEulerFrom1DLocalFrameR set jachq \n";
+    //cout<<"WARNING NewtonEuler1DR set jachq \n";
     //_jachq->setValue(0,7*iDS+3,0);
     for (unsigned int i = 1; i < 4; i++)
     {
@@ -248,13 +248,13 @@ void NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter,
   }
 
   DEBUG_EXPR(_jachq->display(););
-  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 \n");
+  DEBUG_END("NewtonEuler1DR::computeJachq(double time, Interaction& inter, SP::BlockVector q0 \n");
 
 }
 
-void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0 )
+void NewtonEuler1DR::computeJachqT(Interaction& inter, SP::BlockVector q0 )
 {
-  DEBUG_BEGIN("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0 \n")
+  DEBUG_BEGIN("NewtonEuler1DR::computeJachqT(Interaction& inter, SP::BlockVector q0 \n")
     
   if (q0->numberOfBlocks()>1)
   {
@@ -265,17 +265,17 @@ void NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVe
     NIcomputeJachqTFromContacts((q0->getAllVect())[0]);
   }
 
-  DEBUG_END("NewtonEulerFrom1DLocalFrameR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
+  DEBUG_END("NewtonEuler1DR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
 
 }
 
-double NewtonEulerFrom1DLocalFrameR::distance() const
+double NewtonEuler1DR::distance() const
 {
   SiconosVector dpc(*_Pc2 - *_Pc1);
   return dpc.norm2() * (inner_prod(*_Nc, dpc) >= 0 ? -1 : 1);
 }
 
-void NewtonEulerFrom1DLocalFrameR::computeh(double time, BlockVector& q0,
+void NewtonEuler1DR::computeh(double time, BlockVector& q0,
                                             SiconosVector &y)
 {
   // Contact points and normal are stored as relative to q1 and q2, if
