@@ -52,6 +52,7 @@
   REGISTER(BulletR)                             \
   REGISTER(BulletFrom1DLocalFrameR)             \
   REGISTER(RigidBodyDS)                              \
+  REGISTER(RigidBody2dDS)                              \
   REGISTER(ContactR)                            \
   REGISTER(SiconosContactor)                    \
   REGISTER(SiconosContactorSet)                 \
