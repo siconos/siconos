@@ -136,7 +136,7 @@ SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL,(NonSmoothLaw),
   (_equalitySize))
 SICONOS_IO_REGISTER(PluggedObject,
   (_pluginName))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom3DLocalFrameR,(NewtonEulerFrom1DLocalFrameR),
+SICONOS_IO_REGISTER_WITH_BASES(NewtonEuler3DR,(NewtonEuler1DR),
 )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR,(FirstOrderR),
   (_e))
@@ -159,7 +159,7 @@ SICONOS_IO_REGISTER(BoundaryCondition,
   (_velocityIndices))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactNSL,(NonSmoothLaw),
   (_e))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerFrom1DLocalFrameR,(NewtonEulerR),
+SICONOS_IO_REGISTER_WITH_BASES(NewtonEuler1DR,(NewtonEulerR),
   (_AUX1)
   (_AUX2)
   (_NPG1)
@@ -649,7 +649,7 @@ SICONOS_IO_REGISTER_WITH_BASES(EulerMoreauOSI,(OneStepIntegrator),
   (_theta)
   (_useGamma)
   (_useGammaForRelation))
-SICONOS_IO_REGISTER_WITH_BASES(ContactR,(NewtonEulerFrom3DLocalFrameR),
+SICONOS_IO_REGISTER_WITH_BASES(ContactR,(NewtonEuler3DR),
   (base)
   (contactor)
   (ds)
@@ -698,7 +698,7 @@ SICONOS_IO_REGISTER_WITH_BASES(SphereLDSSphereLDSR,(LagrangianScleronomousR),
   (r1)
   (r1pr2)
   (r2))
-SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSSphereNEDSR,(NewtonEulerFrom3DLocalFrameR),
+SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSSphereNEDSR,(NewtonEuler3DR),
   (r1)
   (r1pr2)
   (r2))
@@ -731,7 +731,7 @@ SICONOS_IO_REGISTER_WITH_BASES(SphereLDS,(LagrangianDS),
   (I)
   (massValue)
   (radius))
-SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSPlanR,(NewtonEulerFrom3DLocalFrameR),
+SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSPlanR,(NewtonEuler3DR),
   (A)
   (B)
   (C)
@@ -1101,12 +1101,12 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<NewtonImpactFrictionNSL*>(NULL));
   ar.register_type(static_cast<MixedComplementarityConditionNSL*>(NULL));
   ar.register_type(static_cast<PluggedObject*>(NULL));
-  ar.register_type(static_cast<NewtonEulerFrom3DLocalFrameR*>(NULL));
+  ar.register_type(static_cast<NewtonEuler3DR*>(NULL));
   ar.register_type(static_cast<FirstOrderLinearTIR*>(NULL));
   ar.register_type(static_cast<NonSmoothDynamicalSystem*>(NULL));
   ar.register_type(static_cast<BoundaryCondition*>(NULL));
   ar.register_type(static_cast<NewtonImpactNSL*>(NULL));
-  ar.register_type(static_cast<NewtonEulerFrom1DLocalFrameR*>(NULL));
+  ar.register_type(static_cast<NewtonEuler1DR*>(NULL));
   ar.register_type(static_cast<LagrangianLinearTIR*>(NULL));
   ar.register_type(static_cast<NormalConeNSL*>(NULL));
   ar.register_type(static_cast<NewtonEulerR*>(NULL));

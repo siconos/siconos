@@ -339,9 +339,9 @@ KERNEL_REGISTRATION()
     return std11::dynamic_pointer_cast<LagrangianDS>(ds);
   }
 
-  SP::NewtonEulerFrom1DLocalFrameR cast_NewtonEulerFrom1DLocalFrameR(SP::Relation r)
+  SP::NewtonEuler1DR cast_NewtonEuler1DR(SP::Relation r)
   {
-    return std11::dynamic_pointer_cast<NewtonEulerFrom1DLocalFrameR>(r);
+    return std11::dynamic_pointer_cast<NewtonEuler1DR>(r);
   }
 
 

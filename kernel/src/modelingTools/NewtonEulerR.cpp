@@ -238,7 +238,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int le
     RuntimeException::selfThrow("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)  not yet implemented for level > 1");
   DEBUG_END("NewtonEulerR::computeInput(...)\n");
 }
-/*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEulerFrom3DLocalFrameR and NewtonEulerFrom1DLocalFrameR)*/
+/*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEuler3DR and NewtonEuler1DR)*/
 
 void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
 {

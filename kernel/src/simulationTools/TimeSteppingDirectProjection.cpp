@@ -21,7 +21,7 @@
 #include "TimeSteppingDirectProjection.hpp"
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
-#include "NewtonEulerFrom1DLocalFrameR.hpp"
+#include "NewtonEuler1DR.hpp"
 #include "OneStepIntegrator.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
@@ -147,7 +147,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //   double criteria = (*it)->relation()->y(0)->getValue(0);
   //   if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
   //  Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL){
-  //     SP::NewtonEulerFrom1DLocalFrameR ri = std11::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> ((*it)->relation());
+  //     SP::NewtonEuler1DR ri = std11::static_pointer_cast<NewtonEuler1DR> ((*it)->relation());
   //     if (criteria < -1e-7){
   //  ri->_isOnContact=true;
   //     }else{

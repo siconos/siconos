@@ -27,7 +27,7 @@
 #include <BlockVector.hpp>
 
 ContactR::ContactR()
-  : NewtonEulerFrom3DLocalFrameR()
+  : NewtonEuler3DR()
 {
 }
 
@@ -36,7 +36,7 @@ void ContactR::computeh(double time, BlockVector& q0, SiconosVector& y)
   DEBUG_BEGIN("ContactR::computeh(...)\n");
 
   // Update contact points and distance if necessary
-  NewtonEulerFrom3DLocalFrameR::computeh(time, q0, y);
+  NewtonEuler3DR::computeh(time, q0, y);
 
   y.setValue(0, distance());
 

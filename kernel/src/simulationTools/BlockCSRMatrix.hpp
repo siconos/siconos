@@ -218,7 +218,7 @@ public:
   void fillM(InteractionsGraph& indexSet);
 
   /** fill the matrix with the H matrix 
-   * \warning only for NewtonEulerFrom3DLocalFrameR
+   * \warning only for NewtonEuler3DR
    * \param indexSet of the active constraints
    */
   void fillH(InteractionsGraph& indexSet);

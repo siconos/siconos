@@ -24,15 +24,11 @@
 #include "NewtonEulerR.hpp"
 #include "NewtonEulerDS.hpp"
 
+
 /** NewtonEuler1DR
  *
- * This class implements a relation for NewtonEulerDS.
- *
- * This relation implements the gap and the normal relative velocity as an output
- * of one or two  NewtonEulerDS. As an input, it transforms the normal reaction force
- * into a generalized forces and moments.
- * 
- * It implements the computation of the jacoboian of h from the points of
+ * This class is an interface for a relation with impact.  It
+ * implements the computation of the jacoboian of h from the points of
  * contacts and the normal.  Use this class consists in overloading
  * the method computeh, by setting the member pc1, pc2, nc and y.  The
  * matrix jachq is used both for the building of the OSNSP (with T)

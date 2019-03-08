@@ -22,7 +22,7 @@
 #include "LagrangianR.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#include "NewtonEulerFrom1DLocalFrameR.hpp"
+#include "NewtonEuler1DR.hpp"
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "NonSmoothDynamicalSystem.hpp"

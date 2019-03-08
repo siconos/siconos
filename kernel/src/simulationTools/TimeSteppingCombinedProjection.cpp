@@ -22,7 +22,7 @@
 #include "TimeSteppingCombinedProjection.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianDS.hpp"
-#include "NewtonEulerFrom1DLocalFrameR.hpp"
+#include "NewtonEuler1DR.hpp"
 #include "OneStepIntegrator.hpp"
 #include "MLCPProjectOnConstraints.hpp"
 #include "NonSmoothLaw.hpp"

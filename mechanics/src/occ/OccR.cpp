@@ -14,7 +14,7 @@
 OccR::OccR(const ContactPoint& contact1,
            const ContactPoint& contact2,
            const DistanceCalculatorType& distance_calculator) :
-  NewtonEulerFrom3DLocalFrameR(),
+  NewtonEuler3DR(),
   _contact1(contact1),
   _contact2(contact2),
   _geometer(),
