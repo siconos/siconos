@@ -30,8 +30,9 @@
   PY_REGISTER(LagrangianScleronomousR, Kernel);                                 \
   PY_REGISTER(LagrangianCompliantR, Kernel);                                    \
   PY_REGISTER(NewtonEulerR, Kernel);                                            \
-  PY_REGISTER(NewtonEuler1DR, Kernel);                            \
-  PY_REGISTER(NewtonEuler3DR, Kernel);                            \
+  PY_REGISTER(NewtonEuler1DR, Kernel);                                  \
+  PY_REGISTER(NewtonEuler3DR, Kernel);                                  \
+  PY_REGISTER(NewtonEuler5DR, Kernel);                                  \
   PY_REGISTER(FirstOrderR, Kernel);                                             \
   PY_REGISTER(FirstOrderNonLinearR, Kernel);                                    \
   PY_REGISTER(FirstOrderType1R, Kernel);                                        \

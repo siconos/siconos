@@ -43,6 +43,7 @@ Include files related to modeling part of Siconos.
 #include "NewtonEulerR.hpp"
 #include "NewtonEuler1DR.hpp"
 #include "NewtonEuler3DR.hpp"
+#include "NewtonEuler5DR.hpp"
 
 #include "BoundaryCondition.hpp"
 #include "HarmonicBC.hpp"
