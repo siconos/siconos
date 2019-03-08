@@ -22,7 +22,7 @@
 #include <debug.h>
 
 #include "BulletR.hpp"
-#include <BodyDS.hpp>
+#include <RigidBodyDS.hpp>
 #include <Interaction.hpp>
 
 #if defined(__clang__)

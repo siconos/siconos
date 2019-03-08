@@ -48,7 +48,7 @@
 DEFINE_SPTR(UpdateShapeVisitor)
 
 #include "SiconosBulletCollisionManager.hpp"
-#include "BodyDS.hpp"
+#include "RigidBodyDS.hpp"
 #include "BulletR.hpp"
 #include "BulletFrom1DLocalFrameR.hpp"
 
@@ -198,14 +198,14 @@ SiconosBulletOptions::SiconosBulletOptions()
 class BodyShapeRecord
 {
 public:
-  BodyShapeRecord(SP::SiconosVector b, SP::BodyDS d, SP::SiconosShape sh,
+  BodyShapeRecord(SP::SiconosVector b, SP::RigidBodyDS d, SP::SiconosShape sh,
                   SP::btCollisionObject btobj, SP::SiconosContactor con)
     : base(b), ds(d), sshape(sh), btobject(btobj), contactor(con),
       shape_version(sh->version()) {}
   virtual ~BodyShapeRecord() {}
 
   SP::SiconosVector base;
-  SP::BodyDS ds;
+  SP::RigidBodyDS ds;
   SP::SiconosShape sshape;
   SP::btCollisionObject btobject;
   SP::SiconosContactor contactor;
@@ -218,7 +218,7 @@ template <typename SICONOSSHAPE, typename BULLETSHAPE>
 class BodyShapeRecordT : BodyShapeRecord
 {
 public:
-  BodyShapeRecordT(SP::SiconosVector base, SP::BodyDS ds,
+  BodyShapeRecordT(SP::SiconosVector base, SP::RigidBodyDS ds,
                    SICONOSSHAPE sh, BULLETSHAPE btsh,
                    SP::btCollisionObject btobj, SP::SiconosContactor con)
     : BodyShapeRecord(base, ds, sh, btobj, con), shape(sh), btshape(btsh) {}
@@ -230,7 +230,7 @@ public:
   class X : public BodyShapeRecord,                                     \
             public std11::enable_shared_from_this<X> {                  \
   public:                                                               \
-    X(SP::SiconosVector base, SP::BodyDS ds,                            \
+    X(SP::SiconosVector base, SP::RigidBodyDS ds,                            \
       SICONOSSHAPE sh, BULLETSHAPE btsh,                                \
       SP::btCollisionObject btobj, SP::SiconosContactor con)            \
       : BodyShapeRecord(base, ds, sh, btobj, con), shape(sh), btshape(btsh) {} \
@@ -250,7 +250,7 @@ SHAPE_RECORD(BodyCapsuleRecord, SP::SiconosCapsule, SP::BTCAPSHAPE);
 SHAPE_RECORD(BodyMeshRecord, SP::SiconosMesh, std11::shared_ptr<btSiconosMeshData>);
 SHAPE_RECORD(BodyHeightRecord, SP::SiconosHeightMap, std11::shared_ptr<btSiconosHeightData>);
 
-typedef std::map<const BodyDS*, std::vector<std11::shared_ptr<BodyShapeRecord> > >
+typedef std::map<const RigidBodyDS*, std::vector<std11::shared_ptr<BodyShapeRecord> > >
   BodyShapeMap;
 
 /** For associating static contactor sets and their offsets.
@@ -290,52 +290,52 @@ protected:
 
   /* Create collision objects for each shape type */
   void createCollisionObject(const SP::SiconosVector base,
-                             const SP::BodyDS ds,
+                             const SP::RigidBodyDS ds,
                              const SP::SiconosPlane plane,
                              const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosVector base,
-                             const SP::BodyDS ds,
+                             const SP::RigidBodyDS ds,
                              const SP::SiconosSphere sphere,
                              const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosVector base,
-                             const SP::BodyDS ds,
+                             const SP::RigidBodyDS ds,
                              const SP::SiconosBox box,
                              const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosVector base,
-                             const SP::BodyDS ds,
+                             const SP::RigidBodyDS ds,
                              const SP::SiconosCylinder cyl,
                              const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosVector base,
-                             const SP::BodyDS ds,
+                             const SP::RigidBodyDS ds,
                              const SP::SiconosCone cone,
                              const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosVector base,
-                             const SP::BodyDS ds,
+                             const SP::RigidBodyDS ds,
                              const SP::SiconosCapsule capsule,
                              const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosVector base,
-                             const SP::BodyDS ds,
+                             const SP::RigidBodyDS ds,
                              const SP::SiconosConvexHull ch,
                              const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosVector base,
-                             const SP::BodyDS ds,
+                             const SP::RigidBodyDS ds,
                              const SP::SiconosMesh mesh,
                              const SP::SiconosContactor contactor);
   void createCollisionObject(const SP::SiconosVector base,
-                             const SP::BodyDS ds,
+                             const SP::RigidBodyDS ds,
                              const SP::SiconosHeightMap height,
                              const SP::SiconosContactor contactor);
 
   /* Call the above functions for each shape associated with a body or contactor. */
   void createCollisionObjectsForBodyContactorSet(
-    const SP::BodyDS ds,
+    const SP::RigidBodyDS ds,
     const SP::SiconosVector base = SP::SiconosVector(),
     const SP::SiconosContactorSet contactor = SP::SiconosContactorSet());
 
   /* A helper function used to initialise new shapes, generic to the
    * shape type */
   template<typename ST, typename BT, typename BR>
-  void createCollisionObjectHelper(SP::SiconosVector base, SP::BodyDS ds,
+  void createCollisionObjectHelper(SP::SiconosVector base, SP::RigidBodyDS ds,
                                    ST& shape, BT& btshape, BodyShapeMap& bodyShapeMap,
                                    SP::SiconosContactor contactor);
 
@@ -349,7 +349,7 @@ protected:
   void updateShape(BodyMeshRecord &record);
   void updateShape(BodyHeightRecord &record);
 
-  void updateAllShapesForDS(const BodyDS &bds);
+  void updateAllShapesForDS(const RigidBodyDS &bds);
   void updateShapePosition(const BodyShapeRecord &record);
 
   /* Helper to apply an offset transform to a position and return as a
@@ -389,7 +389,7 @@ SiconosBulletCollisionManager::insertStaticContactorSet(
     (*position)(3) = 1.0;
   }
   rec->base = position;
-  impl->createCollisionObjectsForBodyContactorSet(SP::BodyDS(), rec->base, cs);
+  impl->createCollisionObjectsForBodyContactorSet(SP::RigidBodyDS(), rec->base, cs);
   impl->_staticContactorSetRecords[&*rec] = rec;
   return static_cast<SiconosBulletCollisionManager::StaticContactorSetID>(&*rec);
 }
@@ -491,7 +491,7 @@ public:
     { impl.updateShape(*record); }
 };
 
-void SiconosBulletCollisionManager_impl::updateAllShapesForDS(const BodyDS &bds)
+void SiconosBulletCollisionManager_impl::updateAllShapesForDS(const RigidBodyDS &bds)
 {
   SP::UpdateShapeVisitor updateShapeVisitor(new UpdateShapeVisitor(*this));
   std::vector<std11::shared_ptr<BodyShapeRecord> >::iterator it;
@@ -507,7 +507,7 @@ static void initPolyhedralFeatures(btCollisionShape& btshape) {}
 
 template<typename ST, typename BT, typename BR>
 void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
-  SP::SiconosVector base, SP::BodyDS ds, ST& shape, BT& btshape,
+  SP::SiconosVector base, SP::RigidBodyDS ds, ST& shape, BT& btshape,
   BodyShapeMap& bodyShapeMap, SP::SiconosContactor contactor)
 {
   assert(base && "Collision objects must have a base position.");
@@ -604,7 +604,7 @@ void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyShapeReco
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
-  const SP::BodyDS ds,
+  const SP::RigidBodyDS ds,
   SP::SiconosSphere sphere,
   const SP::SiconosContactor contactor)
 {
@@ -681,7 +681,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
-  const SP::BodyDS ds,
+  const SP::RigidBodyDS ds,
   SP::SiconosPlane plane,
   SP::SiconosContactor contactor)
 {
@@ -749,7 +749,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyPlaneRecord& record)
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
-  const SP::BodyDS ds,
+  const SP::RigidBodyDS ds,
   SP::SiconosBox box,
   SP::SiconosContactor contactor)
 {
@@ -823,7 +823,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBoxRecord &record)
 }
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
-  const SP::BodyDS ds,
+  const SP::RigidBodyDS ds,
   SP::SiconosCylinder cylinder,
   SP::SiconosContactor contactor)
 {
@@ -873,7 +873,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCylinderRecord &record)
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
-  const SP::BodyDS ds,
+  const SP::RigidBodyDS ds,
   SP::SiconosCone cone,
   SP::SiconosContactor contactor)
 {
@@ -922,7 +922,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyConeRecord &record)
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
-  const SP::BodyDS ds,
+  const SP::RigidBodyDS ds,
   SP::SiconosCapsule capsule,
   SP::SiconosContactor contactor)
 {
@@ -977,7 +977,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCapsuleRecord &record)
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
-  const SP::BodyDS ds,
+  const SP::RigidBodyDS ds,
   SP::SiconosConvexHull ch,
   SP::SiconosContactor contactor)
 {
@@ -1116,7 +1116,7 @@ make_bt_vertex_array(SP::SiconosMesh mesh, SCALAR1 _s1, SCALAR2 _s2)
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
-  const SP::BodyDS ds,
+  const SP::RigidBodyDS ds,
   SP::SiconosMesh mesh,
   SP::SiconosContactor contactor)
 {
@@ -1187,7 +1187,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyMeshRecord &record)
 
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
-  const SP::BodyDS ds,
+  const SP::RigidBodyDS ds,
   SP::SiconosHeightMap heightmap,
   SP::SiconosContactor contactor)
 {
@@ -1311,12 +1311,12 @@ class CreateCollisionObjectShapeVisitor : public SiconosVisitor
 public:
   using SiconosVisitor::visit;
   SiconosBulletCollisionManager_impl &impl;
-  const SP::BodyDS ds;
+  const SP::RigidBodyDS ds;
   const SP::SiconosVector base;
   SP::SiconosContactor contactor;
 
   CreateCollisionObjectShapeVisitor(SiconosBulletCollisionManager_impl &_impl,
-                                    const SP::BodyDS _ds,
+                                    const SP::RigidBodyDS _ds,
                                     const SP::SiconosVector _base)
     : impl(_impl), ds(_ds), base(_base) {}
 
@@ -1341,7 +1341,7 @@ public:
 };
 
 void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorSet(
-  const SP::BodyDS ds,
+  const SP::RigidBodyDS ds,
   SP::SiconosVector base,
   SP::SiconosContactorSet contactors)
 {
@@ -1378,7 +1378,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorS
   }
 }
 
-void SiconosBulletCollisionManager::removeBody(const SP::BodyDS& body)
+void SiconosBulletCollisionManager::removeBody(const SP::RigidBodyDS& body)
 {
   BodyShapeMap::iterator it( impl->bodyShapeMap.find(&*body) );
   if (it == impl->bodyShapeMap.end())
@@ -1504,9 +1504,9 @@ bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
   return false;
 }
 
-SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::BodyDS ds1,
+SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::RigidBodyDS ds1,
                                                        SP::SiconosShape shape1,
-                                                       SP::BodyDS ds2,
+                                                       SP::RigidBodyDS ds2,
                                                        SP::SiconosShape shape2,
                                                        const btManifoldPoint &p)
 {
@@ -1522,7 +1522,7 @@ public:
   CollisionUpdateVisitor(SiconosBulletCollisionManager_impl& _impl)
     : impl(_impl) {}
 
-  void visit(SP::BodyDS bds)
+  void visit(SP::RigidBodyDS bds)
   {
     if (bds->contactors()) {
       if (impl.bodyShapeMap.find(&*bds) == impl.bodyShapeMap.end())
@@ -1536,7 +1536,7 @@ public:
 
 void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)
 {
-  // -2. update collision objects from all BodyDS dynamical systems
+  // -2. update collision objects from all RigidBodyDS dynamical systems
   SP::SiconosVisitor updateVisitor(new CollisionUpdateVisitor(*impl));
   simulation->nonSmoothDynamicalSystem()->visitDynamicalSystems(updateVisitor);
 
@@ -1582,7 +1582,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   {
     DEBUG_PRINTF("  -- %p, %p, %p\n", it->objectA, it->objectB, it->point);
 
-    // Get the BodyDS and SiconosShape pointers
+    // Get the RigidBodyDS and SiconosShape pointers
 
     const BodyShapeRecord *pairA, *pairB;
     pairA = reinterpret_cast<const BodyShapeRecord*>(it->objectA->getUserPointer());
@@ -1614,9 +1614,9 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter( indexSet0->bundle(*ui) );
-        SP::BodyDS ds1( std11::dynamic_pointer_cast<BodyDS>(
+        SP::RigidBodyDS ds1( std11::dynamic_pointer_cast<RigidBodyDS>(
                           indexSet0->properties(*ui).source) );
-        SP::BodyDS ds2( std11::dynamic_pointer_cast<BodyDS>(
+        SP::RigidBodyDS ds2( std11::dynamic_pointer_cast<RigidBodyDS>(
                           indexSet0->properties(*ui).target) );
         if (ds1 && ds2 && (((&*ds1==&*pairA->ds) && (&*ds2==&*pairB->ds))
                            || ((&*ds1==&*pairB->ds) && (&*ds2==&*pairA->ds))))

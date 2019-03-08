@@ -795,7 +795,7 @@ SICONOS_IO_REGISTER(SiconosCollisionQueryResult,
   (shape))
 SICONOS_IO_REGISTER_WITH_BASES(SphereNEDS,(NewtonEulerDS),
   (radius))
-SICONOS_IO_REGISTER_WITH_BASES(BodyDS,(NewtonEulerDS),
+SICONOS_IO_REGISTER_WITH_BASES(RigidBodyDS,(NewtonEulerDS),
   (_allowSelfCollide)
   (_contactors)
   (_useContactorInertia))
@@ -1181,7 +1181,7 @@ void siconos_io_register_generated_Mechanics(Archive& ar)
   ar.register_type(static_cast<DiskPlanR*>(NULL));
   ar.register_type(static_cast<SiconosCollisionQueryResult*>(NULL));
   ar.register_type(static_cast<SphereNEDS*>(NULL));
-  ar.register_type(static_cast<BodyDS*>(NULL));
+  ar.register_type(static_cast<RigidBodyDS*>(NULL));
   ar.register_type(static_cast<CircularDS*>(NULL));
   ar.register_type(static_cast<JointFrictionR*>(NULL));
   ar.register_type(static_cast<SiconosCollisionManager*>(NULL));

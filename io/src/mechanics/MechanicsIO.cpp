@@ -7,7 +7,7 @@
 #undef OCC_CLASSES
 #undef MECHANISMS_CLASSES
 
-#include <BodyDS.hpp>
+#include <RigidBodyDS.hpp>
 
 #define XBULLET_CLASSES() \
   REGISTER(BulletR)
@@ -61,7 +61,7 @@ DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
   REGISTER(PivotJointR)                         \
   REGISTER(KneeJointR)                          \
   REGISTER(PrismaticJointR)                     \
-  REGISTER(BodyDS)                              \
+  REGISTER(RigidBodyDS)                              \
   MECHANISMS_CLASSES()                          \
   OCC_CLASSES()                                 \
   XBULLET_CLASSES()
