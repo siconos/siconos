@@ -94,6 +94,7 @@ DEFINE_SPTR(SiconosMemory)
 DEFINE_SPTR(NewtonEulerR)
 DEFINE_SPTR(NewtonEuler1DR)
 DEFINE_SPTR(NewtonEuler3DR)
+DEFINE_SPTR(NewtonEuler5DR)
 
 // OSI
 DEFINE_SPTR(EulerMoreauOSI)
