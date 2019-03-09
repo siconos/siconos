@@ -30,7 +30,7 @@
 #include <SiconosContactor.hpp>
 
 class RigidBody2dDS : public LagrangianDS,
-               public std11::enable_shared_from_this<RigidBody2dDS>
+                      public std11::enable_shared_from_this<RigidBody2dDS>
 {
 protected:
   /** serialization hooks
@@ -50,7 +50,7 @@ public:
 
   RigidBody2dDS(SP::SiconosVector position,
                 SP::SiconosVector velocity,
-                SP::SimpleMatrix mass = SP::SimpleMatrix());
+                SP::SiconosMatrix mass = SP::SimpleMatrix());
 
   virtual ~RigidBody2dDS();
 

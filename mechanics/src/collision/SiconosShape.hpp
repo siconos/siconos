@@ -415,4 +415,33 @@ public:
   ACCEPT_VISITORS();
 };
 
+
+class SiconosDisk : public SiconosShape,
+                    public std11::enable_shared_from_this<SiconosDisk>
+{
+private:
+  SiconosDisk() : SiconosShape() {};
+
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosDisk);
+  float _radius;
+
+public:
+  SiconosDisk(float radius)
+    : SiconosShape(), _radius(radius) {}
+
+  virtual ~SiconosDisk() {}
+
+  float radius() const { return _radius; }
+  void setRadius(float r) { _radius = r; _version ++; }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
+
+
 #endif /* SiconosShape_h */
