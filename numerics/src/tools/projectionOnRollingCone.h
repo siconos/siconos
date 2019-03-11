@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
+enum {PROJRCONE_DUAL, PROJRCONE_INSIDE, PROJRCONE_BOUNDARY_FRICTION, PROJRCONE_BOUNDARY_ROLLING, PROJRCONE_BOUNDARY_FRICTION_ROLLING};
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -38,14 +38,14 @@ extern "C"
   \param[in] mu the angle of the cone
   \return the type of projection
   */
-  unsigned projectionOnRollingCone(double* r, double  mu);
+  unsigned projectionOnRollingCone(double* r, double  mu, double  mur);
   
   /** projectionOnDualCone Projection on the second Order Cone in \f$R^3\f$, \f$K \{ r, r_1 \geq 0, 0 mu \sqrt(u_2^2+u_3^2) \geq u_1  \} \f$
   \param[in,out] u the vector to be projected
   \param[in] mu the angle of the cone
   \return the type of projection
   */
-  unsigned projectionOnDualRollingCone(double* u, double  mu);
+  unsigned projectionOnDualRollingCone(double* u, double  mu, double  mur);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

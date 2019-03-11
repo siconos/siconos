@@ -111,8 +111,8 @@ enum FRICTION_SOLVER
 
 
   /** Non-smooth Gauss Seidel, local formulation */
-  SICONOS_ROLLING_FRICTION_3D_NSGS = 800,
-  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration = 801
+  SICONOS_ROLLING_FRICTION_3D_NSGS = 3000,
+  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration = 3001
  
 
 

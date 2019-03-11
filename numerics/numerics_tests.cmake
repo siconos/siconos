@@ -15,7 +15,7 @@ if(WITH_${COMPONENT}_TESTING)
   if(HAS_LAPACK_DGESVD)
     NEW_TEST(tools_test_pinv test_pinv.c)
   endif()
-
+  NEW_TEST(tools_projection test_projection.c)
   NEW_TEST(tools_test_NumericsArrays NumericsArrays.c)
 
   #  tests for NumericsMatrix

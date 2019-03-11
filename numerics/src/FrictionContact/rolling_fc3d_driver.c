@@ -30,10 +30,11 @@ const char* const   SICONOS_ROLLING_FRICTION_3D_NSGS_STR = "RFC3D_NSGS";
 
 const char* const  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR = "RFC3D_ProjectionOnConeWithLocalIteration";
 
-int rolling_fc3d_driver(FrictionContactProblem* problem,
-                double *reaction, double *velocity,
-                SolverOptions* options)
+int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
+                        double *reaction, double *velocity,
+                        SolverOptions* options)
 {
+  verbose=3;
   if (options == NULL)
     numerics_error("rolling_fc3d_driver", "null input for solver options");
 
@@ -83,26 +84,26 @@ exit:
 
 }
 
-int rolling_fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity,
-                     double* reaction, SolverOptions* options)
+int rolling_fc3d_checkTrivialCase(RollingFrictionContactProblem* problem, double* velocity,
+                                  double* reaction, SolverOptions* options)
 {
-  /* /\* Number of contacts *\/ */
-  /* int nc = problem->numberOfContacts; */
-  /* double* q = problem->q; */
-  /* /\* Dimension of the problem *\/ */
-  /* int n = 3 * nc; */
-  /* int i = 0; */
-  /* /\*take off? R=0 ?*\/ */
-  /* for (i = 0; i < nc; i++) */
-  /* { */
-  /*   if (q[3 * i] < -DBL_EPSILON) */
-  /*     return -1; */
-  /* } */
-  /* for (i = 0 ; i < n ; ++i) */
-  /* { */
-  /*   velocity[i] = q[i]; */
-  /*   reaction[i] = 0.; */
-  /* } */
+  /* Number of contacts */
+  int nc = problem->numberOfContacts;
+  double* q = problem->q;
+  /* Dimension of the problem */
+  int n = 5 * nc;
+  int i = 0;
+  /*take off? R=0 ?*/
+  for (i = 0; i < nc; i++)
+  {
+    if (q[5 * i] < -DBL_EPSILON)
+      return -1;
+  }
+  for (i = 0 ; i < n ; ++i)
+  {
+    velocity[i] = q[i];
+    reaction[i] = 0.;
+  }
   
   numerics_printf("fc3d fc3d_checkTrivialCase, take off, trivial solution reaction = 0, velocity = q.\n");
   return 0;

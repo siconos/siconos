@@ -23,32 +23,32 @@
 
 */
 
-#include "FrictionContactProblem.h"
+#include "RollingFrictionContactProblem.h"
 #include "SolverOptions.h"
 #include "rolling_fc3d_projection.h"
-#include "fc3d_local_problem_tools.h"
+#include "rolling_fc3d_local_problem_tools.h"
 #include "Friction_cst.h"
 
 /** pointer to function used to call local solver */
-typedef int (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions *);
+typedef int (*RollingSolverPtr)(RollingFrictionContactProblem*, double*, SolverOptions *);
 
 /** pointer to function used to update local problem */
-typedef void (*UpdatePtr)(int, FrictionContactProblem*, FrictionContactProblem*, double*, SolverOptions *);
+typedef void (*RollingUpdatePtr)(int, RollingFrictionContactProblem*, RollingFrictionContactProblem*, double*, SolverOptions *);
 
 /** pointer to function used to post-processed results after a call to the (local) solver */
-typedef void (*PostSolverPtr)(int, double*);
+typedef void (*RollingPostSolverPtr)(int, double*);
 
 /** pointer to function used to update velocity and compute error */
-typedef void (*ComputeErrorPtr)(FrictionContactProblem*, double*, double*, double, SolverOptions*, double,  double*);
+typedef void (*RollingComputeErrorPtr)(RollingFrictionContactProblem*, double*, double*, double, SolverOptions*, double,  double*);
 
 /** pointer to function used to free memory for objects used in solvers */
-typedef void (*FreeSolverPtr)();
+typedef void (*RollingFreeSolverPtr)();
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem*, FrictionContactProblem*, SolverOptions*  );
+typedef void (*RollingFreeSolverNSGSPtr)(RollingFrictionContactProblem*, RollingFrictionContactProblem*, SolverOptions*  );
 
 /** pointer to function used to call internal solver for proximal point solver */
-typedef void (*internalSolverPtr)(FrictionContactProblem*, double*, double*, int *, SolverOptions *);
+typedef void (*internalRollingSolverPtr)(RollingFrictionContactProblem*, double*, double*, int *, SolverOptions *);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -104,11 +104,15 @@ extern "C"
       The internal (local) solver must set by the SolverOptions options[1]
 
   */
-  void rolling_fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
-  void  rolling_fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
-                                         FrictionContactProblem* problem, FrictionContactProblem* localproblem,
-                                         SolverOptions * options);
+  void  rolling_fc3d_nsgs_initialize_local_solver(RollingSolverPtr* solve,
+                                                  RollingUpdatePtr* update,
+                                                  RollingFreeSolverNSGSPtr* freeSolver,
+                                                  RollingComputeErrorPtr* computeError,
+                                                  RollingFrictionContactProblem* problem,
+                                                  RollingFrictionContactProblem* localproblem,
+                                                  SolverOptions * options);
 
   /** set the default solver parameters and perform memory allocation for NSGS
       \param options the pointer to the array of options to set
@@ -122,9 +126,9 @@ extern "C"
       \param options the pointer to the array of options to set
       \return info  =0 if a trivial solution has been found, else = -1
   */
-  int rolling_fc3d_checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
+  int rolling_fc3d_checkTrivialCase(RollingFrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
 
-  void rolling_fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
+  void rolling_fc3d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
                                          SolverOptions* options,
                                          SolverOptions* internalsolver_options,
                                          double error);

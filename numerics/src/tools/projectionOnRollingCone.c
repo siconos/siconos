@@ -17,56 +17,67 @@
 */
 #include <math.h>
 #include "projectionOnRollingCone.h"
-#include "projectionOnCone.h"
 
-unsigned projectionOnRollingCone(double* r, double  mu)
+
+unsigned projectionOnRollingCone(double* r, double  mu, double mur)
 {
   double normT = hypot(r[1], r[2]);
-  if (mu * normT <= - r[0])
+  double normMT = hypot(r[3], r[4]);
+
+
+  if ((mu * normT <= - r[0]) && ((mur * normMT <= - r[0])))
   {
     r[0] = 0.0;
     r[1] = 0.0;
     r[2] = 0.0;
-    return PROJCONE_DUAL;
+    r[3] = 0.0;
+    r[4] = 0.0;
+    return PROJRCONE_DUAL;
   }
-  else if (normT <= mu * r[0])
+  else if ((normT <= mu * r[0]) && (normMT <= mur * r[0]))
   {
-    return PROJCONE_INSIDE;
+    return PROJRCONE_INSIDE;
   }
   else
   {
-    double mu2 = mu * mu;
-    r[0] = (mu * normT + r[0]) / (mu2 + 1.0);
-    r[1] = mu * r[0] * r[1] / normT;
-    r[2] = mu * r[0] * r[2] / normT;
-    return PROJCONE_BOUNDARY;
+    if ((normT > mu * r[0]) && (normMT <= mur * r[0]))
+    {
+      double mu2 = mu * mu;
+      r[0] = (mu * normT + r[0]) / (mu2 + 1.0);
+      r[1] = mu * r[0] * r[1] / normT;
+      r[2] = mu * r[0] * r[2] / normT;
+      //r[3] = r[3] ;
+      //r[4] = r[4] ;
+      return PROJRCONE_BOUNDARY_FRICTION;
+    }
+    else if ((normT > mu * r[0]) && (normMT > mur * r[0]))
+    {
+      double mu2 = mu * mu;
+      double mur2 = mur*mur;
+      r[0] = (mu * normT + mur * normMT + r[0]) / (mur2+ mu2 + 1.0);
+      r[1] = mu * r[0] * r[1] / normT;
+      r[2] = mu * r[0] * r[2] / normT;
+      r[3] = mur * r[0] * r[3] / normMT;
+      r[4] = mur * r[0] * r[4] / normMT;
+      return PROJRCONE_BOUNDARY_FRICTION_ROLLING;
+    }
+
+    else if ((normT <= mu * r[0]) && (normMT > mur * r[0]))
+    {
+      double mur2 = mur*mur;
+      r[0] = (mur * normMT + r[0]) / (mur2 + 1.0);
+      //r[1] = r[1] ;
+      //r[2] = r[2] ;
+      r[3] = mur * r[0] * r[3] / normMT;
+      r[4] = mur * r[0] * r[4] / normMT;
+      return PROJRCONE_BOUNDARY_ROLLING;
+    }
+    else
+      return 18;
   }
 }
-unsigned projectionOnDualRollingCone(double* u, double  mu)
+unsigned projectionOnDualRollingCone(double* u, double  mu, double mur)
 {
-  double normT = hypot(u[1], u[2]);
-  
-  if (normT <= - mu * u[0])
-  {
-    u[0] = 0.0;
-    u[1] = 0.0;
-    u[2] = 0.0;
-    return PROJCONE_DUAL;
-  }
-  else if (mu * normT <= u[0])
-  {
-    return PROJCONE_INSIDE;
-  }
-  else
-  {
-    double mu2 = mu * mu;
-    u[0] = (normT + mu * u[0]) / (mu2 + 1.0);
-    u[1] = u[0] * u[1] / normT;
-    u[2] = u[0] * u[2] / normT;
-    u[0] = mu * u[0];
-  
-    return PROJCONE_BOUNDARY;
-  }
+  return 0;
+
 }
-
-

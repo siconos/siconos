@@ -47,7 +47,9 @@ extern "C"
    *   the rest is used to formalize the local problem)
    * \param options
    */
-  void rolling_fc3d_projection_update(int number,  FrictionContactProblem* problem, FrictionContactProblem* localproblem, double* reaction, SolverOptions* options);
+  void rolling_fc3d_projection_update(int number,  RollingFrictionContactProblem* problem,
+                                      RollingFrictionContactProblem* localproblem, double* reaction,
+                                      SolverOptions* options);
   
 
 
@@ -59,9 +61,9 @@ extern "C"
    * \param options
    * \return 0 if successfull
    */
-  int rolling_fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options);
-  void rolling_fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
-  void rolling_fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
+  int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContactProblem * localproblem , double* reaction, SolverOptions * options);
+  void rolling_fc3d_projectionOnConeWithLocalIteration_free(RollingFrictionContactProblem * problem, RollingFrictionContactProblem * localproblem, SolverOptions* localsolver_options);
+  void rolling_fc3d_projectionOnConeWithLocalIteration_initialize(RollingFrictionContactProblem * problem, RollingFrictionContactProblem * localproblem, SolverOptions* localsolver_options);
   int rolling_fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

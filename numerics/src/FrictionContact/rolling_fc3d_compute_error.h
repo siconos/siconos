@@ -41,7 +41,7 @@ extern "C"
       \param[in,out] error value
       \return 0 if ok
    */
-  int rolling_fc3d_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double norm, double * error);
+  int rolling_fc3d_compute_error(RollingFrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double norm, double * error);
 
   /** Error computation (using the normal map residual) for one friction-contact 3D problem
       \param r the reaction force
@@ -50,7 +50,7 @@ extern "C"
       \param worktmp work vector
       \param[in,out] error value
    */
-  void rolling_fc3d_unitary_compute_and_add_error(double r[3] , double u[3], double mu, double * error, double * worktmp);
+  void rolling_fc3d_unitary_compute_and_add_error(double r[3] , double u[3], double mu, double mur, double * error, double * worktmp);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
