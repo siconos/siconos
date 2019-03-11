@@ -22,7 +22,7 @@ Include files related to Siconos Mechanics collision interface
 #ifndef SiconosCollision_hpp
 #define SiconosCollision_hpp
 
-#include "BodyDS.hpp"
+#include "RigidBodyDS.hpp"
 #include "ContactR.hpp"
 #include "SiconosCollision.hpp"
 #include "SiconosCollisionManager.hpp"

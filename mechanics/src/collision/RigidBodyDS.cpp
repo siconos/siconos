@@ -1,12 +1,12 @@
 
 #include "MechanicsFwd.hpp"
 #include "NewtonEulerDS.hpp"
-#include "BodyDS.hpp"
+#include "RigidBodyDS.hpp"
 #include "SiconosContactor.hpp"
 
 #include <boost/make_shared.hpp>
 
-BodyDS::BodyDS(SP::SiconosVector position,
+RigidBodyDS::RigidBodyDS(SP::SiconosVector position,
                SP::SiconosVector velocity,
                double mass,
                SP::SimpleMatrix inertia)
@@ -17,6 +17,6 @@ BodyDS::BodyDS(SP::SiconosVector position,
 {
 }
 
-BodyDS::~BodyDS()
+RigidBodyDS::~RigidBodyDS()
 {
 }

@@ -22,7 +22,7 @@
 #include <debug.h>
 
 #include "ContactR.hpp"
-#include <BodyDS.hpp>
+#include <RigidBodyDS.hpp>
 #include <Interaction.hpp>
 #include <BlockVector.hpp>
 

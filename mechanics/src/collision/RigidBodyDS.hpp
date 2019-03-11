@@ -16,28 +16,28 @@
  * limitations under the License.
 */
 
-/*! \file BodyDS.hpp
-  \brief Definition of an abstract body
+/*! \file RigidBodyDS.hpp
+  \brief Definition of an abstract 3D rigid body above NewtonEulerDS
 */
 
 
-#ifndef BodyDS_h
-#define BodyDS_h
+#ifndef RigidBodyDS_h
+#define RigidBodyDS_h
 
 #include <MechanicsFwd.hpp>
 #include <NewtonEulerDS.hpp>
 #include <SiconosVisitor.hpp>
 #include <SiconosContactor.hpp>
 
-class BodyDS : public NewtonEulerDS,
-               public std11::enable_shared_from_this<BodyDS>
+class RigidBodyDS : public NewtonEulerDS,
+               public std11::enable_shared_from_this<RigidBodyDS>
 {
 protected:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(BodyDS);
+  ACCEPT_SERIALIZATION(RigidBodyDS);
 
-  BodyDS() : NewtonEulerDS() {};
+  RigidBodyDS() : NewtonEulerDS() {};
 
   SP::SiconosContactorSet _contactors;
   bool _useContactorInertia;
@@ -48,12 +48,12 @@ protected:
 
 public:
 
-  BodyDS(SP::SiconosVector position,
+  RigidBodyDS(SP::SiconosVector position,
          SP::SiconosVector velocity,
          double mass,
          SP::SimpleMatrix inertia = SP::SimpleMatrix());
 
-  virtual ~BodyDS();
+  virtual ~RigidBodyDS();
 
   void setUseContactorInertia(bool use) { _useContactorInertia = use; }
 
@@ -82,4 +82,4 @@ public:
   ACCEPT_BASE_VISITORS(NewtonEulerDS);
 };
 
-#endif /* BodyDS_h */
+#endif /* RigidBodyDS_h */

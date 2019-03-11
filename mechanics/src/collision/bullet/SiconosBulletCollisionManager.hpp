@@ -84,8 +84,8 @@ protected:
 
   /** Provided so that creation of collision points can be overridden.
    * See modify_normals.py in examples/Mechanics/Hacks */
-  virtual SP::BulletR makeBulletR(SP::BodyDS ds1, SP::SiconosShape shape1,
-                                  SP::BodyDS ds2, SP::SiconosShape shape2,
+  virtual SP::BulletR makeBulletR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
+                                  SP::RigidBodyDS ds2, SP::SiconosShape shape2,
                                   const btManifoldPoint &);
 
 public:
@@ -94,7 +94,7 @@ public:
 
   bool removeStaticContactorSet(StaticContactorSetID id);
 
-  void removeBody(const SP::BodyDS& body);
+  void removeBody(const SP::RigidBodyDS& body);
 
   void updateInteractions(SP::Simulation simulation);
 

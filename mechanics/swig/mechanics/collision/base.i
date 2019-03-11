@@ -30,7 +30,7 @@ PY_FULL_REGISTER(SiconosShape, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosContactorSet, Mechanics);
 PY_FULL_REGISTER(SiconosContactor, Mechanics);
 PY_FULL_REGISTER(ContactR, Mechanics);
-PY_FULL_REGISTER(BodyDS, Mechanics);
+PY_FULL_REGISTER(RigidBodyDS, Mechanics);
 PY_FULL_REGISTER(SiconosCollisionQueryResult, Mechanics);
 PY_FULL_REGISTER(SiconosCollisionManager, Mechanics);
 

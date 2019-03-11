@@ -34,7 +34,7 @@ from siconos.mechanics import joints
 from siconos.io.io_base import MechanicsIO
 
 # Imports for mechanics 'collision' submodule
-from siconos.mechanics.collision import BodyDS, \
+from siconos.mechanics.collision import RigidBodyDS, \
     SiconosSphere, SiconosBox, SiconosCylinder, SiconosCone, SiconosCapsule, SiconosPlane, \
     SiconosConvexHull, SiconosContactor, SiconosContactorSet, \
     SiconosMesh, SiconosHeightMap
@@ -81,7 +81,7 @@ def setup_default_classes():
     global default_body_class
     global use_bullet
     default_simulation_class = TimeStepping
-    default_body_class = BodyDS
+    default_body_class = RigidBodyDS
     if backend == 'bullet':
         def m(options):
             if options is None:
