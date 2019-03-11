@@ -450,6 +450,15 @@ macro(NEW_GFC_3D_TEST_COLLECTION)
   unset(TEST_NAME_PREFIX)
 endmacro()
 
+macro(NEW_RFC_3D_TEST_COLLECTION)
+  # Set name of the file used to generate tests (c)source files.
+  set(SOURCE_FILE_NAME rfc3d_test_collection.c.in )
+  set(TEST_NAME_PREFIX rolling_fc3d)
+  set(TEST_COLLECTION ${ARGV0})
+  NEW_FC_TEST_1(${ARGV})
+  unset(SOURCE_FILE_NAME)
+  unset(TEST_NAME_PREFIX)
+endmacro()
 
 MACRO(NEW_PB_TEST)
   SET(FILE_TO_CONF ${ARGV0})

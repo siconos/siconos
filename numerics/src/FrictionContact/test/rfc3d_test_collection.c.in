@@ -1,0 +1,284 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2016 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#define _XOPEN_SOURCE 700
+#include <string.h>
+
+#if (__linux ||  __APPLE__)
+#elif _MSC_VER
+#define strdup _strdup
+#else
+static inline char* strdup(char* src)
+{
+  size_t len = strlen(src) + 1;
+  char* dest = (char*)malloc(len * sizeof(char));
+  strcpy(dest, src, len);
+  return dest;
+}
+#endif
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <time.h>
+
+#include "NonSmoothDrivers.h"
+#include "GAMSlink.h"
+#include "rollingFrictionContact_test_function.h"
+#include "frictionContact_test_function.h"
+#include "SolverOptions.h"
+#include "Friction_cst.h"
+#include "@TEST_NAME_PREFIX@_Solvers.h"
+
+/* /\* For internal solvers based on other formulation *\/ */
+/* #include "SOCLCP_Solvers.h" */
+/* #include "SOCLCP_cst.h" */
+/* #include "ConvexQP_cst.h" */
+/* #include "VI_cst.h" */
+
+#define @TEST_COLLECTION@ 1
+
+#ifdef TEST_NSGS_COLLECTION_1
+#include "data_collection_rfc3d_1.c"
+#include "test_first_order_rfc3d_1.c"
+#endif
+
+
+
+int rfc_test(char ** );
+
+int rfc_test(char ** test)
+{
+  int info =0 ;
+
+  char * filename = test[0];
+  printf("\n Test on %s\t ",filename);
+
+
+  int will_failed =0;
+
+  will_failed  = atoi(test[1]);
+
+  int  solver = atoi(test[2]);
+  printf("with solver %i\n ",solver);
+
+  /* setenv("SICONOS_HDF5_NAME", "log-@TEST_DATA@-tol-@TEST_TOLERANCE@-imax-@TEST_MAXITER@.hdf5", 1); */
+  FILE * finput  =  fopen(filename,"r");
+  if (!finput)
+  {
+    int _errno = errno;
+    fprintf(stderr, "%s :: unable to open file %s\n", __func__, filename);
+    return _errno;
+  }
+  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
+  double testTolerance = atof(test[3]);
+  int test_maxiter = atoi(test[4]);
+
+  int e=5;
+  int testInternalSolver = 0;
+  double test_internal_tol = 0.0;
+  int test_internal_maxit = 0;
+  if (strcmp(test[e],"---") !=0)
+  {
+    testInternalSolver = atoi(test[e++]);
+    test_internal_tol = atof(test[e++]);
+    test_internal_maxit =atoi(test[e++]);
+  }
+
+  info=@TEST_NAME_PREFIX@_setDefaultSolverOptions(options,solver);
+  if (testTolerance > 0.)
+  {
+    options->dparam[0]=testTolerance;
+  }
+  if (test_maxiter > 0)
+    options->iparam[0]=test_maxiter;
+
+  if (testInternalSolver)
+  {
+    options->internalSolvers->solverId=testInternalSolver;
+    if(test_internal_tol > 0.)
+      options->internalSolvers->dparam[0]= test_internal_tol;
+    if(test_internal_maxit > 0)
+      options->internalSolvers->iparam[0]= test_internal_maxit;
+  }
+
+
+  while (strcmp(test[e],"---") !=0)
+  {
+    if ((strcmp(test[e],"iparam") ==0))
+    {
+      options->iparam[atoi(test[e+1])] = atoi(test[e+2]);
+      e++;
+    }
+    if ((strcmp(test[e],"dparam") ==0))
+    {
+      options->dparam[atoi(test[e+1])] = atof(test[e+2]);
+      e++;
+    }
+    if ((strcmp(test[e],"internal_iparam") ==0))
+    {
+      options->internalSolvers->iparam[atoi(test[e+1])] = atoi(test[e+2]);
+      e++;
+    }
+    if ((strcmp(test[e],"internal_dparam") ==0))
+    {
+      options->internalSolvers->dparam[atoi(test[e+1])] = atof(test[e+2]);
+      e++;
+    }
+
+    e++;
+  }
+
+
+#ifdef TEST_HDF5
+      info = rfc3d_test_function_hdf5(filename,options);
+#else
+      info = rollingFrictionContact_test_function(finput,options);
+#endif
+
+  solver_options_delete(options);
+  free(options);
+
+  fclose(finput);
+  printf("\nEnd of GF3D test on %s\n", filename);
+  unsetenv("SICONOS_HDF5_NAME");
+  return info;
+}
+
+
+char ** data_collection(void);
+  char *** test_collection(int, char ** );
+
+
+int main (void)
+{
+  int out =0;
+  int n_failed_test=0;
+  int n_succeeded_test=0;
+  char ** _data_collection = data_collection();
+  int n_data = 0;
+  while (strcmp(_data_collection[n_data], "---") !=0)
+  {
+    n_data++;
+  }
+  printf("number of data = %i\n", n_data);
+
+  char *** _test_collection = test_collection(n_data, _data_collection);
+  int n_test = 0;
+  char * foo =  _test_collection[n_test][0];
+  while (strcmp(foo , "---") != 0)
+  {
+    n_test++;
+    foo =  _test_collection[n_test][0];
+  }
+  printf("number of tests = %i\n", n_test);
+
+#ifdef TEST_NSGS_COLLECTION_1
+  _test_collection[18][1]="1"; 
+#endif
+
+
+  int * failed_tests = (int*)calloc(n_test, sizeof(int));
+  int * succeeded_tests = (int*)calloc(n_test, sizeof(int));
+  clock_t t1, t2;
+  long clk_tck = CLOCKS_PER_SEC;
+  for (int n_t =0; n_t < n_test ; n_t++)
+  {
+    printf("\n################# start of test # %i #######################\n", n_t);
+    printf("%s\t", solver_options_id_to_name(atoi(_test_collection[n_t][2])));
+    int e=0;
+    while(strcmp(_test_collection[n_t][e], "---") !=0)
+    {
+      printf("%s \t ",_test_collection[n_t][e]);
+      e++;
+    }
+    t1 = clock();
+    int info = rfc_test(_test_collection[n_t]);
+    t2 = clock();
+    (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
+    if (info)
+    {
+
+      failed_tests[n_failed_test]  = n_t;
+      n_failed_test++;
+      if (strcmp(_test_collection[n_t][1],"0") == 0)
+        out = 1;
+    }
+    else
+    {
+      e=0;
+      succeeded_tests[n_failed_test]  = n_t;
+      n_succeeded_test++;
+      while(strcmp(_test_collection[n_t][e], "---") !=0)
+      {
+        printf("%s \t ",_test_collection[n_t][e]);
+        e++;
+      }
+    }
+    printf("\n################# end of  test # %i #######################\n", n_t);
+  }
+  printf("\n Failed tests : [ ");
+  for (int t =0; t < n_failed_test; t++)
+  {
+    printf("%i \t", failed_tests[t]);
+  }
+  printf("] :\n");
+  for (int t =0; t < n_failed_test; t++)
+  {
+    if (strcmp(_test_collection[failed_tests[t]][1],"1") ==0 )
+    {
+      printf("test %i \t should fail : \t %s\t",
+             failed_tests[t],
+             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
+    }
+    else if (strcmp(_test_collection[failed_tests[t]][1],"0") ==0)
+    {
+      printf("test %i \t should not fail : \t %s\t",
+             failed_tests[t],
+             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
+    }
+    int e=0;
+    while(strcmp(_test_collection[failed_tests[t]][e], "---") !=0)
+    {
+      printf("%s \t ",_test_collection[failed_tests[t] ] [e]);
+      e++;
+    }
+    printf("\n");
+  }
+  for (int t =0; t < n_succeeded_test; t++)
+  {
+    if (strcmp(_test_collection[succeeded_tests[t]][1],"1") ==0)
+    {
+      printf("test %i \t should fail but finally not : \t %s\t",
+             failed_tests[t],
+             solver_options_id_to_name(atoi(_test_collection[succeeded_tests[t]][2])));
+      int e=0;
+      while(strcmp(_test_collection[succeeded_tests[t]][e], "---") !=0)
+      {
+        printf("%s \t ",_test_collection[failed_tests[t] ] [e]);
+        e++;
+      }
+      printf("\n");
+    }
+
+  }
+
+
+
+  return out;
+}

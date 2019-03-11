@@ -364,6 +364,11 @@ if(WITH_${COMPONENT}_TESTING)
     
     NEW_GFC_3D_TEST_COLLECTION(TEST_NSN_COLLECTION_2)
     
+  # ---------------------------------------------------
+  # --- Rolling friction contact problem formulation ---
+  # ---------------------------------------------------
+  
+  NEW_RFC_3D_TEST_COLLECTION(TEST_NSGS_COLLECTION_1)
   endif()
 
   #===========================================

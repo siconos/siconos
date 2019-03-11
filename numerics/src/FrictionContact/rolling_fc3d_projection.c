@@ -181,7 +181,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
     ls_iter = 0 ;
     success =0;
     rho_k=rho / tau;
-
+    
     normUT = sqrt(velocity_k[1] * velocity_k[1] + velocity_k[2] * velocity_k[2]);
 
     normOmegaT = sqrt(velocity_k[3] * velocity_k[3] + velocity_k[4] * velocity_k[4]);
@@ -203,9 +203,9 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
       /* cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocity, incy); */
 
 
-      for (i = 0; i < 3; i++) velocity[i] = MLocal[i + 0 * 3] * reaction[0] + qLocal[i]
-                                + MLocal[i + 1 * 3] * reaction[1] +
-                                + MLocal[i + 2 * 3] * reaction[2]
+      for (i = 0; i < 5; i++) velocity[i] = MLocal[i + 0 * 5] * reaction[0] + qLocal[i]
+                                + MLocal[i + 1 * 5] * reaction[1] +
+                                + MLocal[i + 2 * 5] * reaction[2]
                                 + MLocal[i + 3 * 5] * reaction[3]
                                 + MLocal[i + 4 * 5] * reaction[4];
 
@@ -253,6 +253,9 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
       }
       else
         rho =rho_k;
+
+      /* rho_k=1.0; */
+      /* rho=1.0; */
     if (verbose > 1)
     {
       printf("--  rolling_fc3d_projectionOnConeWithLocalIteration_solve localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);

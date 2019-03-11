@@ -35,6 +35,10 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
                         SolverOptions* options)
 {
   verbose=3;
+  rollingFrictionContact_display(problem);
+  rollingFrictionContact_printInFilename(problem, "rfc3d_sphere_1.dat");
+
+  
   if (options == NULL)
     numerics_error("rolling_fc3d_driver", "null input for solver options");
 
