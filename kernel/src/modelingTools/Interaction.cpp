@@ -29,6 +29,7 @@
 #include "RelayNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#include "NewtonImpactRollingFrictionNSL.hpp"
 #include "DynamicalSystem.hpp"
 
 #include "LagrangianDS.hpp"
@@ -187,6 +188,23 @@ struct Interaction::_setLevels : public SiconosVisitor
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
+  {
+    RELATION::TYPES relationType = _interaction->relation()->getType();
+    if (relationType == Lagrangian || relationType == NewtonEuler)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(1);
+
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(1);
+
+    }
+    else
+    {
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+    }
+  }
+    void visit(const NewtonImpactRollingFrictionNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
     if (relationType == Lagrangian || relationType == NewtonEuler)

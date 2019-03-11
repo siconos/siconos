@@ -25,9 +25,9 @@
 
 #include "op3x3.h"
 
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 /*
@@ -35,14 +35,16 @@ See devNotes.pdf for details. A detailed documentation is available in DevNotes.
 */
 void NewtonEuler5DR::initialize(Interaction& inter)
 {
+  DEBUG_BEGIN("NewtonEuler5DR::NewtonEuler5DR::initialize(Interaction& inter)\n");
   NewtonEuler1DR::initialize(inter);
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
-  _jachq.reset(new SimpleMatrix(3, qSize));
+  _jachq.reset(new SimpleMatrix(5, qSize));
 
   _RotationAbsToContactFrame.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
+  DEBUG_END("NewtonEuler5DR::NewtonEuler5DR::initialize(Interaction& inter)\n");
 }
 void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 {
@@ -129,7 +131,12 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
+  for (unsigned int ii = 3; ii < 5; ii++)
+    for (unsigned int jj = 3; jj < 6; jj++)
+      _jachqT->setValue(ii, jj, _RotationAbsToContactFrame->getValue(ii-2, jj-3));
+
   DEBUG_EXPR(_jachqT->display(););
+  
   // DEBUG_EXPR_WE(
   //   SP::SimpleMatrix jaux(new SimpleMatrix(*_jachqT));
   //   jaux->trans();
@@ -153,6 +160,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 
 void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)
 {
+  DEBUG_BEGIN("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)\n");
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
   double Nz = _Nc->getValue(2);
@@ -246,6 +254,12 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Si
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj + 6, -_AUX2->getValue(ii, jj - 3));
+
+
+  DEBUG_EXPR(_jachqT->display(););
+
+  
+  DEBUG_END("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)\n");
 
 }
 
