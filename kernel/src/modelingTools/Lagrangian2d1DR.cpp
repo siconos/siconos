@@ -56,7 +56,7 @@ void Lagrangian2d1DR::computeJachq(SiconosVector& q, SiconosVector& z)
 
   _jachq->setValue(0,0,Nx);
   _jachq->setValue(0,1,Ny);
-  //_jachq->setValue(0,2,(G1y-Py)*Nx - (G1x-Px)*Ny);
+  _jachq->setValue(0,2,(G1y-Py)*Nx - (G1x-Px)*Ny);
 
 
   if (q.size() ==6)
@@ -67,7 +67,7 @@ void Lagrangian2d1DR::computeJachq(SiconosVector& q, SiconosVector& z)
 
     _jachq->setValue(0,3,-Nx);
     _jachq->setValue(0,4,-Ny);
-    //_jachq->setValue(0,5,-(G2y-Py)*Nx - (G2x-Px)*Ny);
+    _jachq->setValue(0,5,- ((G2y-Py)*Nx - (G2x-Px)*Ny));
   }
   DEBUG_EXPR(_jachq->display(););
   DEBUG_END("Lagrangian2d1DR::computeJachq(Interaction& inter, SP::BlockVector q0) \n");
