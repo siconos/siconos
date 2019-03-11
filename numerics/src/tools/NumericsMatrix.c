@@ -313,6 +313,7 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
   }
   }
 }
+
 void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init)
 {
   assert(A);
@@ -1181,7 +1182,6 @@ void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row
   }
   }
 }
-
 void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block)
 {
   int storageType = M->storageType;
@@ -1215,6 +1215,67 @@ void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block
   {
     size_t start_row = (size_t)block_row_nb + block_row_nb + block_row_nb;
     NSM_extract_block(M, *Block, start_row, start_row, 3, 3);
+    break;
+  }
+  default:
+  {
+    printf("NM_extract_diag_block :: unknown matrix storage");
+    exit(EXIT_FAILURE);
+  }
+  }
+}
+
+void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double ** Block)
+{
+  int storageType = M->storageType;
+  switch (storageType)
+  {
+  case NM_DENSE:
+  {
+    double* Mptr = M->matrix0 + (M->size0 + 1)*(block_row_nb + block_row_nb + block_row_nb);
+    double* Bmat = *Block;
+    /* The part of MM which corresponds to the current block is copied into MLocal */
+    Bmat[0] = Mptr[0];
+    Bmat[1] = Mptr[1];
+    Bmat[2] = Mptr[2];
+    Bmat[3] = Mptr[3];
+    Bmat[4] = Mptr[4];
+    Mptr += M->size0;
+    Bmat[5] = Mptr[0];
+    Bmat[6] = Mptr[1];
+    Bmat[7] = Mptr[2];
+    Bmat[8] = Mptr[3];
+    Bmat[9] = Mptr[4];
+    Mptr += M->size0;
+    Bmat[10] = Mptr[0];
+    Bmat[11] = Mptr[1];
+    Bmat[12] = Mptr[2];
+    Bmat[13] = Mptr[3];
+    Bmat[14] = Mptr[4];
+     Mptr += M->size0;
+    Bmat[15] = Mptr[0];
+    Bmat[16] = Mptr[1];
+    Bmat[17] = Mptr[2];
+    Bmat[18] = Mptr[3];
+    Bmat[19] = Mptr[4];
+    Mptr += M->size0;
+    Bmat[20] = Mptr[0];
+    Bmat[21] = Mptr[1];
+    Bmat[22] = Mptr[2];
+    Bmat[23] = Mptr[3];
+    Bmat[24] = Mptr[4];
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    int diagPos = SBM_diagonal_block_index(M->matrix1, block_row_nb);
+    (*Block) = M->matrix1->block[diagPos];
+    break;
+  }
+  case NM_SPARSE:
+  {
+    size_t start_row = (size_t)block_row_nb + block_row_nb + block_row_nb;
+    NSM_extract_block(M, *Block, start_row, start_row, 5, 5);
     break;
   }
   default:
