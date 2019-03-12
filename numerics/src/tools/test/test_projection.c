@@ -1,7 +1,7 @@
-#include "pinv.h"
-#include "cond.h"
+#include "math.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include <string.h>
 #include <projectionOnRollingCone.h>
@@ -12,6 +12,7 @@ static void display(unsigned int status)
   if (status == PROJRCONE_INSIDE)
   {
     printf("PROJRCONE_INSIDE reaction was inside the cone\n");
+    
   }
   else if (status == PROJRCONE_DUAL)
   {
@@ -33,20 +34,37 @@ static void display(unsigned int status)
 
 }
 
+static double orthogonality(double * reaction, double * reaction_ori)
+{
+  double ortho =0.0;
+  for (int i =0; i<5; i++)
+  {
+    ortho += (reaction_ori[i] - reaction[i])*(reaction_ori[i] - reaction[i]);
+  }
+  return sqrt(ortho);
+}
+
 int main(void)
 {
 
   int info=0;
   unsigned int status;
-  double reaction[5];
+  double reaction[5], reaction_ori[5];
   double mu=1.0, mur=1.0;
+  double ortho=0.0;
   
   reaction[0] = 1.0;
   reaction[1] = 0.0;
   reaction[2] = 0.0;
   reaction[3] = 0.0;
   reaction[4] = 0.0;
+  for (int i =0; i<5; i++)  reaction_ori[i] = reaction[i];
   status = projectionOnRollingCone(reaction,mu,mur);
+
+  ortho = orthogonality(reaction,reaction_ori);
+  printf("ortho = %f", ortho);
+  assert(ortho < 1e-12);
+
   display(status);
   if (status != PROJRCONE_INSIDE)
   {

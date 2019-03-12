@@ -335,7 +335,7 @@ void statsIterationCallback(RollingFrictionContactProblem *problem,
   if (options->callback)
   {
     options->callback->collectStatsIteration(options->callback->env,
-                                             problem->numberOfContacts * 3,
+                                             problem->numberOfContacts * 5,
                                              reaction, velocity,
                                              error, NULL);
   }
@@ -371,7 +371,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
 
   RollingFrictionContactProblem* localproblem;
   double localreaction[5];
-
+  
   /*****  NSGS Iterations *****/
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
@@ -451,12 +451,11 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
                            problem, localproblem, reaction, localsolver_options,
                            localreaction);
 
-        accumulateLightErrorSum(&light_error_sum, localreaction, &reaction[contact*3]);
+        accumulateLightErrorSum(&light_error_sum, localreaction, &reaction[contact*5]);
 
         /* #if 0 */
         acceptLocalReactionFiltered(localproblem, localsolver_options,
                                     contact, iter, reaction, localreaction);
-
       }
 
       error = calculateLightError(light_error_sum, nc, reaction);
@@ -498,7 +497,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
         if (iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] == SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE)
           performRelaxation(localreaction, &reaction[contact*3], omega);
 
-        accumulateLightErrorSum(&light_error_sum, localreaction, &reaction[contact*3]);
+        accumulateLightErrorSum(&light_error_sum, localreaction, &reaction[contact*5]);
 
         /* int test =100; */
         /* if (contact == test) */

@@ -30,11 +30,14 @@
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 
-#define DEBUG_NOCOLOR
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
 #include "debug.h"
 
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
 
 void rolling_fc3d_projection_update(int contact, RollingFrictionContactProblem* problem,
                                     RollingFrictionContactProblem* localproblem, double* reaction, SolverOptions* options)
@@ -57,6 +60,8 @@ void rolling_fc3d_projection_update(int contact, RollingFrictionContactProblem* 
 
   /* Friction coefficient for current block*/
   localproblem->mu[0] = problem->mu[contact];
+  /* Rolling Friction coefficient for current block*/
+  localproblem->mu_r[0] = problem->mu_r[contact];
 
 }
 
@@ -111,15 +116,15 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
   /* double an = 1. / (MLocal[0]); */
-
   /* double at = 1.0 / (MLocal[4] + mu_i); */
   /* double as = 1.0 / (MLocal[8] + mu_i); */
   /* at = an; */
   /* as = an; */
+  
   double rho=   options->dWork[options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]] , rho_k;
-  DEBUG_PRINTF (" Contact options->iparam[4] = %i\n",options->iparam[4] );
+  DEBUG_PRINTF ("Contact options->iparam[4] = %i,\t",options->iparam[4] );
   DEBUG_PRINTF("saved rho = %14.7e\n",rho );
-  assert(rho >0);
+  assert(rho >0.0);
 
 
 
@@ -244,7 +249,9 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
     /* compute local error */
     localerror =0.0;
     rolling_fc3d_unitary_compute_and_add_error(reaction , velocity, mu_i, mu_r_i, &localerror, worktmp);
-
+    DEBUG_EXPR(NV_display(velocity,5););
+    DEBUG_EXPR(NV_display(reaction,5););
+  
 
     /*Update rho*/
       if ((rho_k*a1 < Lmin * a2) && (localerror < localerror_k))

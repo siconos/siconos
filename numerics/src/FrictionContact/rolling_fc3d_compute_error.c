@@ -29,9 +29,9 @@
 #include <assert.h>
 #include <float.h>
 
-#define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -40,29 +40,30 @@
 
 void rolling_fc3d_unitary_compute_and_add_error(double* restrict r , double* restrict u, double mu, double mur, double* restrict error, double * worktmp)
 {
-
   //double normUT;
   //double worktmp[3];
   /* Compute the modified local velocity */
   //normUT = hypot(u[1], u[2]); // i.e sqrt(u[ic3p1]*u[ic3p1]+u[ic3p2]*u[ic3p2]);
-  worktmp[0] = r[0] - u[0] - mu *  hypot(u[1], u[2]) - mur * hypot(u[3], u[4]);
+  worktmp[0] = r[0] -  u[0] - mu *  hypot(u[1], u[2]) - mur * hypot(u[3], u[4]);
   worktmp[1] = r[1] -  u[1] ;
   worktmp[2] = r[2] -  u[2] ;
   worktmp[3] = r[3] -  u[3] ;
   worktmp[4] = r[4] -  u[4] ;
+  DEBUG_EXPR(NV_display(worktmp,5););
   projectionOnRollingCone(worktmp, mu, mur);
+  DEBUG_EXPR(NV_display(worktmp,5););
   worktmp[0] = r[0] -  worktmp[0];
   worktmp[1] = r[1] -  worktmp[1];
   worktmp[2] = r[2] -  worktmp[2];
   worktmp[3] = r[3] -  worktmp[3];
   worktmp[4] = r[4] -  worktmp[4];
+  DEBUG_EXPR(NV_display(worktmp,5););
   *error +=
     worktmp[0] * worktmp[0] +
     worktmp[1] * worktmp[1] +
     worktmp[2] * worktmp[2] +
     worktmp[3] * worktmp[3] +
     worktmp[4] * worktmp[4];
-
 }
 int rolling_fc3d_compute_error(
   RollingFrictionContactProblem* problem,
@@ -92,14 +93,13 @@ int rolling_fc3d_compute_error(
   DEBUG_EXPR(NV_display(w,n););
   DEBUG_EXPR(NV_display(z,n););
   
-
   *error = 0.;
   int ic, ic5;
   double worktmp[5];
   for (ic = 0, ic5 = 0 ; ic < nc ; ic++, ic5 += 5)
   {
     rolling_fc3d_unitary_compute_and_add_error(z + ic5, w + ic5, mu[ic], mur[ic], error, worktmp);
-    DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);
+    DEBUG_PRINTF("squared absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);
   }
   *error = sqrt(*error);
   DEBUG_PRINTF("absolute error = %12.8e\n", *error);

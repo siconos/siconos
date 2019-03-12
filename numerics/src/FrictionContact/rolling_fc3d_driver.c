@@ -34,9 +34,9 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
                         double *reaction, double *velocity,
                         SolverOptions* options)
 {
-  verbose=3;
-  rollingFrictionContact_display(problem);
-  rollingFrictionContact_printInFilename(problem, "rfc3d_sphere_1.dat");
+  /* verbose=3; */
+  /* rollingFrictionContact_display(problem); */
+  /* rollingFrictionContact_printInFilename(problem, "rfc3d_sphere_1.dat"); */
 
   
   if (options == NULL)
