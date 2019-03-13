@@ -51,8 +51,15 @@ extern "C"
                                       RollingFrictionContactProblem* localproblem, double* reaction,
                                       SolverOptions* options);
   
-
-
+  void rolling_fc3d_projection_initialize(RollingFrictionContactProblem * problem,
+                                          RollingFrictionContactProblem * localproblem);
+  void rolling_fc3d_projection_free(RollingFrictionContactProblem * problem,
+                                    RollingFrictionContactProblem * localproblem,
+                                    SolverOptions* localsolver_options );
+  
+  int rolling_fc3d_projectionOnCone_solve(
+  RollingFrictionContactProblem* localproblem, double* reaction, SolverOptions * options);
+  int rolling_fc3d_projectionOnCone_setDefaultSolverOptions(SolverOptions* options);
   
   /** solve friction-contact 3D problem with projection on the Cone with local
    *   iteration up to convergence of the local problem

@@ -38,10 +38,18 @@
 #endif
 
 
-void rolling_fc3d_unitary_compute_and_add_error(double* restrict r , double* restrict u, double mu, double mur, double* restrict error, double * worktmp)
+void rolling_fc3d_unitary_compute_and_add_error(
+  double* restrict r,
+  double* restrict u,
+  double mu,
+  double mur,
+  double* restrict error,
+  double * worktmp)
 {
-  //double normUT;
-  //double worktmp[3];
+  DEBUG_BEGIN("rolling_fc3d_unitary_compute_and_add_error(...)\n");
+  DEBUG_EXPR(NV_display(r,5););
+  DEBUG_EXPR(NV_display(u,5););
+  DEBUG_PRINTF(" tilde u[0] = %f\n", u[0] + mu *  hypot(u[1], u[2]) + mur * hypot(u[3], u[4] ));
   /* Compute the modified local velocity */
   //normUT = hypot(u[1], u[2]); // i.e sqrt(u[ic3p1]*u[ic3p1]+u[ic3p2]*u[ic3p2]);
   worktmp[0] = r[0] -  u[0] - mu *  hypot(u[1], u[2]) - mur * hypot(u[3], u[4]);
@@ -49,9 +57,9 @@ void rolling_fc3d_unitary_compute_and_add_error(double* restrict r , double* res
   worktmp[2] = r[2] -  u[2] ;
   worktmp[3] = r[3] -  u[3] ;
   worktmp[4] = r[4] -  u[4] ;
-  DEBUG_EXPR(NV_display(worktmp,5););
+  DEBUG_PRINT("r-rho tilde v  before projection");DEBUG_EXPR(NV_display(worktmp,5););
   projectionOnRollingCone(worktmp, mu, mur);
-  DEBUG_EXPR(NV_display(worktmp,5););
+  DEBUG_PRINT("after projection");DEBUG_EXPR(NV_display(worktmp,5););
   worktmp[0] = r[0] -  worktmp[0];
   worktmp[1] = r[1] -  worktmp[1];
   worktmp[2] = r[2] -  worktmp[2];
@@ -64,41 +72,43 @@ void rolling_fc3d_unitary_compute_and_add_error(double* restrict r , double* res
     worktmp[2] * worktmp[2] +
     worktmp[3] * worktmp[3] +
     worktmp[4] * worktmp[4];
+  DEBUG_END("rolling_fc3d_unitary_compute_and_add_error(...)\n");
 }
+
 int rolling_fc3d_compute_error(
   RollingFrictionContactProblem* problem,
-  double *z , double *w, double tolerance,
+  double *reaction , double *velocity, double tolerance,
   SolverOptions * options, double norm, double * error)
 {
   DEBUG_BEGIN("rolling_fc3d_compute_error(...)\n");
   assert(problem);
-  assert(z);
-  assert(w);
+  assert(reaction);
+  assert(velocity);
   assert(error);
 
-  /* Computes w = Mz + q */
+  /* Computes velocity = Mreaction + q */
   int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;
   int n = nc * 5;
   double *mu = problem->mu;
   double *mur = problem->mu_r;
 
-  cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
+  cblas_dcopy(n , problem->q , incx , velocity , incy); // velocity <-q
   // Compute the current velocity
-  //NM_prod_mv_3x3(n, n, problem->M, z, w);
-  NM_gemv(1.0, problem->M, z,
+  //NM_prod_mv_3x3(n, n, problem->M, reaction, velocity);
+  NM_gemv(1.0, problem->M, reaction,
                1.0,
-               w);
+               velocity);
   DEBUG_EXPR(NV_display(problem->q,n););
-  DEBUG_EXPR(NV_display(w,n););
-  DEBUG_EXPR(NV_display(z,n););
+  DEBUG_EXPR(NV_display(velocity,n););
+  DEBUG_EXPR(NV_display(reaction,n););
   
   *error = 0.;
   int ic, ic5;
   double worktmp[5];
   for (ic = 0, ic5 = 0 ; ic < nc ; ic++, ic5 += 5)
   {
-    rolling_fc3d_unitary_compute_and_add_error(z + ic5, w + ic5, mu[ic], mur[ic], error, worktmp);
+    rolling_fc3d_unitary_compute_and_add_error(reaction + ic5, velocity + ic5, mu[ic], mur[ic], error, worktmp);
     DEBUG_PRINTF("squared absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);
   }
   *error = sqrt(*error);

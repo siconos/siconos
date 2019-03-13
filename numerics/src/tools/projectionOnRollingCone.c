@@ -18,6 +18,10 @@
 #include <math.h>
 #include "projectionOnRollingCone.h"
 
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
 
 unsigned projectionOnRollingCone(double* r, double  mu, double mur)
 {
@@ -61,7 +65,6 @@ unsigned projectionOnRollingCone(double* r, double  mu, double mur)
       r[4] = mur * r[0] * r[4] / normMT;
       return PROJRCONE_BOUNDARY_FRICTION_ROLLING;
     }
-
     else if ((normT <= mu * r[0]) && (normMT > mur * r[0]))
     {
       double mur2 = mur*mur;
@@ -80,4 +83,29 @@ unsigned projectionOnDualRollingCone(double* u, double  mu, double mur)
 {
   return 0;
 
+}
+
+void display_status_rolling_cone(unsigned int status)
+{
+  printf("status = %i\n", status);
+  if (status == PROJRCONE_INSIDE)
+  {
+    printf("PROJRCONE_INSIDE reaction was inside the cone\n");
+  }
+  else if (status == PROJRCONE_DUAL)
+  {
+    printf("PROJRCONE_DUAL reaction was inside the dual cone\n");
+  }
+  else if (status == PROJRCONE_BOUNDARY_FRICTION)
+  {
+    printf("PROJRCONE_BOUNDARY_FRICTION reaction is projected on the friction cone\n");
+  }
+  else if (status == PROJRCONE_BOUNDARY_ROLLING)
+  {
+    printf("PROJRCONE_BOUNDARY_ROLLING reaction is projected on the rolling cone\n");
+  }
+  else if (status == PROJRCONE_BOUNDARY_FRICTION_ROLLING)
+  {
+    printf("PROJRCONE_BOUNDARY_FRICTION_ROLLING reaction is projected on the both cones\n");
+  }
 }

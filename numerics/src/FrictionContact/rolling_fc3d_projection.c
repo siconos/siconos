@@ -67,6 +67,76 @@ void rolling_fc3d_projection_update(int contact, RollingFrictionContactProblem* 
 
 
 
+void rolling_fc3d_projection_initialize(RollingFrictionContactProblem * problem,
+                                        RollingFrictionContactProblem * localproblem)
+{
+}
+
+void rolling_fc3d_projection_free(RollingFrictionContactProblem * problem,
+                                  RollingFrictionContactProblem * localproblem,
+                                  SolverOptions* localsolver_options )
+{
+}
+
+int rolling_fc3d_projectionOnCone_solve(
+  RollingFrictionContactProblem* localproblem, double* reaction, SolverOptions * options)
+{
+  DEBUG_BEGIN("rolling_fc3d_projectionOnCone_solve(...)\n");
+
+
+
+  double * MLocal = localproblem->M->matrix0;
+  double * qLocal = localproblem->q;
+  double mu_i = localproblem->mu[0];
+  double mu_r_i = localproblem->mu_r[0];
+  /* int nLocal = 3; */
+
+  /* this part is critical for the success of the projection */
+  /*double an = 1./(MLocal[0]);*/
+  /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
+  /*   double det = MLocal[1*nLocal+1]*MLocal[2*nLocal+2] - MLocal[2*nLocal+1] + MLocal[1*nLocal+2]; */
+  /*   double beta = alpha*alpha - 4*det; */
+  /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
+
+  //double an = 1./(MLocal[0]+mu_i);
+  double an = 1. / (MLocal[0]);
+
+  an=1.0;
+  /* int incx = 1, incy = 1; */
+  double velocity[5];
+  double normUT, normOmegaT;
+  /* cblas_dcopy_msan(nLocal , qLocal, incx , velocity , incy); */
+  /* cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocity, incy); */
+   for (int i = 0; i < 5; i++) velocity[i]
+                              = MLocal[i + 0 * 5] * reaction[0] + qLocal[i]
+                              + MLocal[i + 1 * 5] * reaction[1]
+                              + MLocal[i + 2 * 5] * reaction[2]
+                              + MLocal[i + 3 * 5] * reaction[3]
+                              + MLocal[i + 4 * 5] * reaction[4];
+   DEBUG_EXPR(NV_display(velocity,5););
+
+  
+  normUT = hypot(velocity[1], velocity[2]);
+  normOmegaT = hypot(velocity[3], velocity[4]);
+  reaction[0] -= an * (velocity[0] + mu_i * normUT+ mu_r_i*normOmegaT);
+  reaction[1] -= an * velocity[1];
+  reaction[2] -= an * velocity[2];
+  reaction[3] -= an * velocity[3];
+  reaction[4] -= an * velocity[4];
+
+#ifdef DEBUG_MESSAGES
+  display_status_rolling_cone(projectionOnRollingCone(reaction, mu_i, mu_r_i));
+#else
+  projectionOnRollingCone(reaction, mu_i, mu_r_i);
+#endif
+  
+  DEBUG_EXPR(NV_display(reaction,5););
+  DEBUG_END("rolling_fc3d_projectionOnCone_solve(...)\n");
+  return 0;
+
+}
+
+
 
 
 void rolling_fc3d_projectionOnConeWithLocalIteration_initialize(RollingFrictionContactProblem * problem, RollingFrictionContactProblem * localproblem, SolverOptions* localsolver_options )
@@ -95,6 +165,7 @@ void rolling_fc3d_projectionOnConeWithLocalIteration_free(RollingFrictionContact
 int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContactProblem* localproblem, double* reaction, SolverOptions* options)
 {
   DEBUG_BEGIN("rolling_fc3d_projectionOnConeWithLocalIteration_solve(...)\n");
+  //DEBUG_EXPR(rollingFrictionContact_display(localproblem););
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -102,7 +173,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
   double * MLocal = localproblem->M->matrix0;
   double * qLocal = localproblem->q;
   double mu_i = localproblem->mu[0];
-  double mu_r_i = localproblem->mu_r[0];  /* int nLocal = 3; */
+  double mu_r_i = localproblem->mu_r[0];  /* int nLocal = 5; */
 
 
   /*   /\* Builds local problem for the current contact *\/ */
@@ -120,13 +191,11 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
   /* double as = 1.0 / (MLocal[8] + mu_i); */
   /* at = an; */
   /* as = an; */
-  
+
   double rho=   options->dWork[options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]] , rho_k;
   DEBUG_PRINTF ("Contact options->iparam[4] = %i,\t",options->iparam[4] );
   DEBUG_PRINTF("saved rho = %14.7e\n",rho );
   assert(rho >0.0);
-
-
 
   /* int incx = 1, incy = 1; */
   int i ;
@@ -139,7 +208,6 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
   int localiter = 0;
   double localtolerance = dparam[0];
 
-
   /* Variable for Line_search */
   double a1,a2;
   int success = 0;
@@ -149,12 +217,10 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
   /* double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7]; */
   double tau=2.0/3.0, tauinv = 3.0/2.0,  L= 0.9, Lmin =0.3;
 
-
-
-
   /*     printf ("localtolerance = %14.7e\n",localtolerance ); */
   while ((localerror > localtolerance) && (localiter < iparam[0]))
   {
+    DEBUG_PRINT("\n Local iteration starts \n");
     localiter ++;
 
     /*    printf ("reaction[0] = %14.7e\n",reaction[0]); */
@@ -172,62 +238,78 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
     reaction_k[2]=reaction[2];
     reaction_k[3]=reaction[3];
     reaction_k[4]=reaction[4];
+    DEBUG_EXPR(NV_display(reaction_k,5););
+
 
     /* /\* velocity_k <- q  *\/ */
     /* cblas_dcopy_msan(nLocal , qLocal , 1 , velocity_k, 1); */
     /* /\* velocity_k <- q + M * reaction  *\/ */
-    /* cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocity_k, incy); */
-    for (i = 0; i < 5; i++) velocity_k[i] =  MLocal[i + 0 * 5] * reaction[0] + qLocal[i]
+    /* cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0,
+       MLocal, 3, reaction, incx, 1.0, velocity_k, incy); */
+
+    for (i = 0; i < 5; i++) velocity_k[i]
+                              = MLocal[i + 0 * 5] * reaction[0] + qLocal[i]
                               + MLocal[i + 1 * 5] * reaction[1]
                               + MLocal[i + 2 * 5] * reaction[2]
                               + MLocal[i + 3 * 5] * reaction[3]
                               + MLocal[i + 4 * 5] * reaction[4];
+    DEBUG_EXPR(NV_display(velocity_k,5););
 
     ls_iter = 0 ;
     success =0;
     rho_k=rho / tau;
-    
-    normUT = sqrt(velocity_k[1] * velocity_k[1] + velocity_k[2] * velocity_k[2]);
 
-    normOmegaT = sqrt(velocity_k[3] * velocity_k[3] + velocity_k[4] * velocity_k[4]);
+    /* normUT = sqrt(velocity_k[1] * velocity_k[1] + velocity_k[2] * velocity_k[2]); */
+    /* normOmegaT = sqrt(velocity_k[3] * velocity_k[3] + velocity_k[4] * velocity_k[4]); */
+    normUT = hypot(velocity_k[1], velocity_k[2]);
+    normOmegaT = hypot(velocity_k[3], velocity_k[4]);
+    /* ls_itermax=1; */
+    DEBUG_PRINTF("ls_itermax =%i\n", ls_itermax);
     while (!success && (ls_iter < ls_itermax))
     {
       rho_k = rho_k * tau ;
+      DEBUG_PRINTF("rho_k =%f\n", rho_k);
       reaction[0] = reaction_k[0] - rho_k * (velocity_k[0] + mu_i * normUT + mu_r_i*normOmegaT);
       reaction[1] = reaction_k[1] - rho_k * velocity_k[1];
       reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
       reaction[3] = reaction_k[3] - rho_k * velocity_k[3];
       reaction[4] = reaction_k[4] - rho_k * velocity_k[4];
-
-
+      DEBUG_PRINT("r-rho tilde v before projection")
+      DEBUG_EXPR(NV_display(reaction,5););
+/* #ifdef DEBUG_MESSAGES */
+/*       display_status_rolling_cone(projectionOnRollingCone(&reaction[0], mu_i, mu_r_i)); */
+/* #else */
       projectionOnRollingCone(&reaction[0], mu_i, mu_r_i);
-
+/* #endif */
+      DEBUG_EXPR(NV_display(reaction,5););
       /* velocity <- q  */
       /* cblas_dcopy(nLocal , qLocal , 1 , velocity, 1); */
       /* velocity <- q + M * reaction  */
       /* cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocity, incy); */
 
 
-      for (i = 0; i < 5; i++) velocity[i] = MLocal[i + 0 * 5] * reaction[0] + qLocal[i]
-                                + MLocal[i + 1 * 5] * reaction[1] +
+      for (i = 0; i < 5; i++) velocity[i]
+                                = MLocal[i + 0 * 5] * reaction[0] + qLocal[i]
+                                + MLocal[i + 1 * 5] * reaction[1]
                                 + MLocal[i + 2 * 5] * reaction[2]
                                 + MLocal[i + 3 * 5] * reaction[3]
                                 + MLocal[i + 4 * 5] * reaction[4];
+      DEBUG_EXPR(NV_display(velocity,5););
 
 
+      a1 = sqrt(
+        (velocity_k[0] - velocity[0]) * (velocity_k[0] - velocity[0]) +
+        (velocity_k[1] - velocity[1]) * (velocity_k[1] - velocity[1]) +
+        (velocity_k[2] - velocity[2]) * (velocity_k[2] - velocity[2]) +
+        (velocity_k[3] - velocity[3]) * (velocity_k[3] - velocity[3]) +
+        (velocity_k[4] - velocity[4]) * (velocity_k[4] - velocity[4]));
 
-      a1 = sqrt((velocity_k[0] - velocity[0]) * (velocity_k[0] - velocity[0]) +
-                (velocity_k[1] - velocity[1]) * (velocity_k[1] - velocity[1]) +
-                (velocity_k[2] - velocity[2]) * (velocity_k[2] - velocity[2]) +
-                (velocity_k[3] - velocity[3]) * (velocity_k[3] - velocity[3]) +
-                (velocity_k[4] - velocity[4]) * (velocity_k[4] - velocity[4])
-        );
-
-      a2 = sqrt((reaction_k[0] - reaction[0]) * (reaction_k[0] - reaction[0]) +
-                (reaction_k[1] - reaction[1]) * (reaction_k[1] - reaction[1]) +
-                (reaction_k[2] - reaction[2]) * (reaction_k[2] - reaction[2]) +
-                (reaction_k[3] - reaction[3]) * (reaction_k[3] - reaction[3]) +
-                (reaction_k[4] - reaction[4]) * (reaction_k[4] - reaction[4]));
+      a2 = sqrt(
+        (reaction_k[0] - reaction[0]) * (reaction_k[0] - reaction[0]) +
+        (reaction_k[1] - reaction[1]) * (reaction_k[1] - reaction[1]) +
+        (reaction_k[2] - reaction[2]) * (reaction_k[2] - reaction[2]) +
+        (reaction_k[3] - reaction[3]) * (reaction_k[3] - reaction[3]) +
+        (reaction_k[4] - reaction[4]) * (reaction_k[4] - reaction[4]));
 
 
 
@@ -236,9 +318,13 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
       DEBUG_PRINTF("rho_k = %12.8e\t", rho_k);
       DEBUG_PRINTF("a1 = %12.8e\t", a1);
       DEBUG_PRINTF("a2 = %12.8e\t", a2);
-      /* DEBUG_PRINTF("norm reaction = %12.8e\t",sqrt(( reaction[0]) * (reaction[0]) + */
-      /*           ( reaction[1]) *  reaction[1]) + */
-      /*           ( reaction[2]) * ( reaction[2])); */
+      DEBUG_PRINTF("norm reaction = %12.8e\t",
+                   sqrt(reaction[0] * reaction[0] +
+                        reaction[1] * reaction[1] +
+                        reaction[2] * reaction[2] +
+                        reaction[3] * reaction[3] +
+                        reaction[4] * reaction[4]
+                     ) );
       DEBUG_PRINTF("success = %i\n", success);
 
       ls_iter++;
@@ -248,10 +334,13 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
 
     /* compute local error */
     localerror =0.0;
-    rolling_fc3d_unitary_compute_and_add_error(reaction , velocity, mu_i, mu_r_i, &localerror, worktmp);
-    DEBUG_EXPR(NV_display(velocity,5););
+    rolling_fc3d_unitary_compute_and_add_error(reaction , velocity,
+                                               mu_i, mu_r_i,
+                                               &localerror, worktmp);
     DEBUG_EXPR(NV_display(reaction,5););
-  
+    DEBUG_EXPR(NV_display(velocity,5););
+
+
 
     /*Update rho*/
       if ((rho_k*a1 < Lmin * a2) && (localerror < localerror_k))
@@ -262,13 +351,15 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
         rho =rho_k;
 
       /* rho_k=1.0; */
-      /* rho=1.0; */
+      /* rho=1.0 */
+
+        ;
     if (verbose > 1)
     {
       printf("--  rolling_fc3d_projectionOnConeWithLocalIteration_solve localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
 
     }
-
+    //getchar();
 
   }
   options->dWork[options->iparam[4]] =rho;
@@ -300,6 +391,24 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(Solv
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+
+  return 0;
+}
+int rolling_fc3d_projectionOnCone_setDefaultSolverOptions(SolverOptions* options)
+{
+
+  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnCone  Solver\n");
+  
+
+  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 10;
+  options->dSize = 10;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  solver_options_nullify(options);
 
   return 0;
 }

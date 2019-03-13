@@ -27,6 +27,7 @@
 #include <time.h>
 #include <float.h>
 #include <string.h>
+/* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
@@ -85,6 +86,15 @@ void rolling_fc3d_nsgs_initialize_local_solver(RollingSolverPtr* solve, RollingU
     *freeSolver = (RollingFreeSolverNSGSPtr)&rolling_fc3d_projectionOnConeWithLocalIteration_free;
     *computeError = (RollingComputeErrorPtr)&rolling_fc3d_compute_error;
     rolling_fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,localsolver_options );
+    break;
+  }
+  case SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone:
+  {
+    *solve = &rolling_fc3d_projectionOnCone_solve;
+    *update = &rolling_fc3d_projection_update;
+    *freeSolver = (RollingFreeSolverNSGSPtr)&rolling_fc3d_projection_free;
+    *computeError = (RollingComputeErrorPtr)&rolling_fc3d_compute_error;
+    rolling_fc3d_projection_initialize(problem, localproblem);
     break;
   }
   default:
@@ -171,7 +181,7 @@ void acceptLocalReactionFiltered(RollingFrictionContactProblem *localproblem,
       || isinf(localsolver_options->dparam[SICONOS_DPARAM_RESIDU])
       || localsolver_options->dparam[SICONOS_DPARAM_RESIDU] > 1.0)
   {
-    DEBUG_EXPR(frictionContact_display(localproblem));
+    DEBUG_EXPR(rollingFrictionContact_display(localproblem));
     DEBUG_PRINTF("Discard local reaction for contact %i at iteration %i "
                  "with local_error = %e\n",
                  contact, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
@@ -194,10 +204,13 @@ void acceptLocalReactionUnconditionally(unsigned int contact,
 static
 double calculateLightError(double light_error_sum, unsigned int nc, double *reaction)
 {
+  DEBUG_BEGIN("calculateLightError(...)\n");
   double error = sqrt(light_error_sum);
   double norm_r = cblas_dnrm2(nc*5 , reaction , 1);
   if (fabs(norm_r) > DBL_EPSILON)
     error /= norm_r;
+  DEBUG_PRINTF("error = %f\n", error);
+  DEBUG_END("calculateLightError(...)\n");
   return error;
 }
 
@@ -295,7 +308,8 @@ int determine_convergence_with_full_final(RollingFrictionContactProblem *problem
 
     double absolute_error = calculateFullErrorFinal(problem, options,
                                                     computeError,
-                                                    reaction, velocity, options->dparam[SICONOS_DPARAM_TOL],
+                                                    reaction, velocity,
+                                                    options->dparam[SICONOS_DPARAM_TOL],
                                                     norm_q);
     if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
     {
@@ -303,7 +317,7 @@ int determine_convergence_with_full_final(RollingFrictionContactProblem *problem
       assert(*tolerance > 0.0 && "tolerance has to be positive");
       /* if (*tolerance < DBL_EPSILON) */
       /* { */
-      /*   numerics_warning("determine_convergence_with_full_fina", "We try to set a very smal tolerance"); */
+      /*   numerics_warning("determine_convergence_with_full_final", "We try to set a very smal tolerance"); */
       /*   *tolerance = DBL_EPSILON; */
       /* } */
       numerics_printf("------- RFC3D - NSGS - We modify the required incremental precision to reach accuracy to %e", *tolerance);
@@ -347,6 +361,11 @@ void statsIterationCallback(RollingFrictionContactProblem *problem,
 void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
                double *velocity, int* info, SolverOptions* options)
 {
+
+  /* problem->mu_r[0]=0.1; */
+  /* problem->mu[0]=1.0; */
+
+  
   /* verbose=1; */
   /* int and double parameters */
   int* iparam = options->iparam;

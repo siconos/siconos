@@ -47,6 +47,10 @@ extern "C"
   */
   unsigned projectionOnDualRollingCone(double* u, double  mu, double  mur);
 
+  
+  void display_status_rolling_cone(unsigned int status);
+
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

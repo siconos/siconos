@@ -29,6 +29,7 @@ char ** data_collection()
   char ** data_collection_1 = (char **)malloc(n_data_1*sizeof(char *));
   int n_data=0;
   data_collection_1[n_data++] = "./data/RFC3D_sphere_1.dat";
+  data_collection_1[n_data++] = "./data/RFC3D_sphere_2.dat";
   data_collection_1[n_data++] = "---";
 
 

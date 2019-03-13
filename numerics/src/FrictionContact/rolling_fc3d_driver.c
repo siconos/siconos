@@ -30,6 +30,8 @@ const char* const   SICONOS_ROLLING_FRICTION_3D_NSGS_STR = "RFC3D_NSGS";
 
 const char* const  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR = "RFC3D_ProjectionOnConeWithLocalIteration";
 
+const char* const  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR = "RFC3D_ProjectionOnCone";
+
 int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
                         double *reaction, double *velocity,
                         SolverOptions* options)
@@ -38,7 +40,7 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
   /* rollingFrictionContact_display(problem); */
   /* rollingFrictionContact_printInFilename(problem, "rfc3d_sphere_1.dat"); */
 
-  
+
   if (options == NULL)
     numerics_error("rolling_fc3d_driver", "null input for solver options");
 
@@ -58,7 +60,7 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
   {
     /* If a trivial solution is found, we set the number of iterations to 0
        and the reached acuracy to 0.0 .
-    */ 
+    */
     options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
     options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
     goto exit;
@@ -108,7 +110,7 @@ int rolling_fc3d_checkTrivialCase(RollingFrictionContactProblem* problem, double
     velocity[i] = q[i];
     reaction[i] = 0.;
   }
-  
+
   numerics_printf("fc3d fc3d_checkTrivialCase, take off, trivial solution reaction = 0, velocity = q.\n");
   return 0;
 }
