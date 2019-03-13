@@ -123,7 +123,10 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "SiconosSets.h"
 #include "GAMSlink.h"
 #include "NumericsFwd.h"
-  %}
+
+#include "projectionOnCone.h"
+#include "projectionOnRollingCone.h"
+%}
 
 #ifdef WITH_SERIALIZATION
 %{
