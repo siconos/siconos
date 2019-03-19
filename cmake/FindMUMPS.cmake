@@ -15,7 +15,7 @@ INCLUDE(FindPackageHandleStandardArgs)
 IF(IDONTWANTMPI)
   SET(__MUMPS_NAMES dmumps_seq dmumps)
 ELSE(IDONTWANTMPI)
-  SET(__MUMPS_NAMES dmumps)
+  SET(__MUMPS_NAMES dmumps_ptscotch dmumps_scotch dmumps)
 ENDIF(IDONTWANTMPI)
 
 IF(MUMPS_LIBRARY_DIRECTORY)
