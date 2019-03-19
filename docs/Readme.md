@@ -16,24 +16,11 @@ make latex
 --> to create tex files
 
 
-# Transfer to Gforge: 
-
-
-scp -pr siconos_build_dir/build/docs/build/html/* login@scm.gforge.inria.fr:/home/groups/siconos/htdocs
-
--p option for first commit only => allow to keep same files permissions (rw|rw|r) after sending. 
-
-Warning: if you generate latex or xml do not transfer it! 
-
-
-
 # Tests: use gitlab to create and publish siconos doc
-
-!! Only in update_doc branch
 
 ## Details:
 
-* A mirror of siconos project on gricad-gitlab : https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-mirror
+* A mirror of siconos project on gricad-gitlab : https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos
 * CI is configured to build and publish documentation (see files .gitlab-ci.yml and CI/make_siconos_doc.sh)
 
 	* gitlab-ci.yml : two jobs (make_doc and publish)
@@ -50,17 +37,16 @@ Warning: if you generate latex or xml do not transfer it!
 * Add remote repo:
 
 ```
-git remote add gitlab_for_doc git@gricad-gitlab.univ-grenoble-alpes.fr:nonsmooth/siconos-mirror.git
+git remote add sico-doc git@gricad-gitlab.univ-grenoble-alpes.fr:nonsmooth/siconos-mirror.git
 ```
 
 * To publish doc:
 
 ```
-git checkout update_doc
-git push gitlab_for_doc update_doc
+git checkout master
+git push sico-doc
 
 
 
 
-Remark : automatic mirroring between github and gitlab (i.e. push to github -> trigger push to gitlab) is something
-that is supposed to be available "soon" ...
+Remark : automatic mirroring between github and gitlab (i.e. push to github -> trigger push to gitlab) is in place
