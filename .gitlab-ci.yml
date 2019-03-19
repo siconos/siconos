@@ -1,6 +1,6 @@
 make_doc:
   stage: build
-  image: ubuntu:17.10
+  image: ubuntu:18.04
   script:
     - "sh CI/make_siconos_doc.sh"
   artifacts:
