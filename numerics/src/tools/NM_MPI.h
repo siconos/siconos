@@ -47,8 +47,11 @@ void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm);
   } while(0)
 #endif
 
-int NM_MPI_rank(NumericsMatrix* A);
+  int NM_MPI_rank(NumericsMatrix* A);
+
+  void NM_MPI_copy(const NumericsMatrix* A, NumericsMatrix*  B);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
+

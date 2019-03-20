@@ -50,3 +50,15 @@ int NM_MPI_rank(NumericsMatrix* A)
 #endif
   return myid;
 }
+
+void NM_MPI_copy(const NumericsMatrix* A, NumericsMatrix* B)
+{
+  assert(A);
+  assert(B);
+#ifdef HAVE_MPI
+  if (A->internalData && A->internalData->mpi_comm)
+  {
+    NM_MPI_set_comm(B, A->internalData->mpi_comm);
+  }
+#endif
+}

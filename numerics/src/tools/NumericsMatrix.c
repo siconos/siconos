@@ -29,6 +29,7 @@
 #include "SiconosCompat.h"
 #include "SparseBlockMatrix.h"
 #include "NM_MUMPS.h"
+#include "NM_MPI.h"
 #include "NM_conversions.h"
 #include "SiconosLapack.h"
 #include "numerics_verbose.h"
@@ -487,8 +488,6 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B )
       B->internalData->isLUfactorized = A->internalData->isLUfactorized;
       B->internalData->isInversed = A->internalData->isInversed;
     }
-
-    B->internalData->mpi_comm = A->internalData->mpi_comm;
 
   }
 void NM_free(NumericsMatrix* m)
@@ -1333,6 +1332,11 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
   /* The storageType  for C inherits from A except for NM_SPARSE_BLOCK */
   NumericsMatrix *C = NM_create(A->storageType, A->size0, A->size1);
 
+  /* should we copy the whole internal data ? */
+  /*NM_internalData_copy(A, C);*/
+  NM_MPI_copy(A, C);
+  NM_MUMPS_copy(A, C);
+
   switch (A->storageType)
   {
   case NM_DENSE:
@@ -1560,6 +1564,9 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
     exit(EXIT_FAILURE);
   }
   }
+  NM_MPI_copy(A, Atrans);
+  NM_MUMPS_copy(A, Atrans);
+
   return Atrans;
 }
 
@@ -1782,9 +1789,6 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
 
   NM_internalData_free(B);
 
-  /* here mpi_comm may be copied for example */
-  NM_internalData_copy(A, B);
-
   B->storageType = A->storageType;
   switch (A->storageType)
   {
@@ -1894,15 +1898,6 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     NM_clearDense(B);
     NM_clearSparseBlock(B);
 
-    if (numericsSparseMatrix(B)->linearSolverParams)
-    {
-      numericsSparseMatrix(B)->linearSolverParams =
-        NSM_linearSolverParams_free(numericsSparseMatrix(B)->linearSolverParams);
-    }
-
-    /* here mumps_id may be copied for example */
-    numericsSparseMatrix(B)->linearSolverParams = A->matrix2->linearSolverParams;
-
     /* We remove diag_indx from B and  we copy it from A if it exists */
     if (numericsSparseMatrix(B)->diag_indx)
     {
@@ -1931,6 +1926,9 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     break;
   }
   }
+  NM_internalData_copy(A, B);
+  NM_MPI_copy(A, B);
+  NM_MUMPS_copy(A, B);
 }
 
 NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A)

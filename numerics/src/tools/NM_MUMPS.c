@@ -102,8 +102,8 @@ void NM_MUMPS(NumericsMatrix* A, int job)
     /* Loop until the end of everything. Note: job = -2 is not the end
        of everything as some job = -1 may be done later. Here we have
        a convention: job = 0 (which is not part of MUMPS) means that
-       we will never call again MUMPS and that we are going to stop
-       all the processes. */
+       we want all the processes to continue outside NM_MUMPS.
+    */
     while(ijob)
     {
       /* I am a listening process, I will stop when ijob = 0 */
@@ -141,23 +141,22 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A)
 #endif /* WITH_MPI */
 
 
- if (verbose == 1)
+ if (verbose == 0)
   {
     mumps_id->ICNTL(1) = -1; // Error messages, standard output stream.
     mumps_id->ICNTL(2) = -1; // Diagnostics,    standard output stream.
     mumps_id->ICNTL(3) = -1; // Global infos,   standard output stream.
   }
-  else if (verbose == 2)
+  else if (verbose == 1)
   {
-    mumps_id->ICNTL(1) = -1; // Error messages, standard output stream.
-    mumps_id->ICNTL(2) = -1; // Diagnostics,    standard output stream.
+    mumps_id->ICNTL(1) = 6; // Error messages, standard output stream.
+    mumps_id->ICNTL(2) = 6; // Diagnostics,    standard output stream.
     mumps_id->ICNTL(3) = 6; // Global infos,   standard output stream.
 //      mumps_id->ICNTL(4) = 4; // Errors, warnings and information on
                               // input, output parameters printed.
 
-    mumps_id->ICNTL(11) = 2; // Error analysis
   }
-  else if (verbose >= 3)
+  else if (verbose > 1)
   {
     mumps_id->ICNTL(1) = 6; // Error messages, standard output stream.
     mumps_id->ICNTL(2) = 6; // Diagnostics,    standard output stream.
@@ -170,9 +169,9 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A)
   }
   else
   {
-    mumps_id->ICNTL(1) = -1;
-    mumps_id->ICNTL(2) = -1;
-    mumps_id->ICNTL(3) = -1;
+    mumps_id->ICNTL(1) = 0;
+    mumps_id->ICNTL(2) = 0;
+    mumps_id->ICNTL(3) = 0;
   }
  mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
 //      mumps_id->ICNTL(10) = -2; // One step of iterative refinment
@@ -182,7 +181,7 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A)
     //mumps_id->CNTL(3) = ...;
     //mumps_id->CNTL(5) = ...;
 
-
+ mumps_id->ICNTL(7) = 3; // scotch
 }
 
 void NM_MUMPS_set_problem(NumericsMatrix* A, double *b)
@@ -225,3 +224,19 @@ void NM_MUMPS_extra_display(NumericsMatrix* A)
 }
 #endif
 
+#include <string.h>
+void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B)
+{
+#ifdef WITH_MUMPS
+  if (A->matrix2 && A->matrix2->linearSolverParams && A->matrix2->linearSolverParams->solver==NSM_MUMPS && A->matrix2->linearSolverParams->linear_solver_data)
+  {
+    DMUMPS_STRUC_C* new_id = (DMUMPS_STRUC_C*) calloc(1, sizeof(DMUMPS_STRUC_C));
+    memcpy(new_id, A->matrix2->linearSolverParams->linear_solver_data, sizeof(DMUMPS_STRUC_C));
+    if (B->matrix2 && B->matrix2->linearSolverParams)
+    {
+      NSM_linearSolverParams_free(B->matrix2->linearSolverParams);
+    }
+    NM_MUMPS_set_id(B, new_id);
+  }
+#endif
+}

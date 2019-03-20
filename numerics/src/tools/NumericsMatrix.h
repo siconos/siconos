@@ -628,8 +628,6 @@ extern "C"
     M->internalData->isLUfactorized = 0;
 #ifdef HAVE_MPI
     M->internalData->mpi_comm = MPI_COMM_NULL;
-#else
-    M->internalData->mpi_comm = 0;
 #endif
   }
   /** Copy the internalData structure
