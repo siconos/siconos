@@ -1232,7 +1232,11 @@ void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double ** Block
   {
   case NM_DENSE:
   {
-    double* Mptr = M->matrix0 + (M->size0 + 1)*(block_row_nb + block_row_nb + block_row_nb);
+    double* Mptr = M->matrix0 + (M->size0 + 1)*(block_row_nb
+                                                + block_row_nb
+                                                + block_row_nb
+                                                + block_row_nb
+                                                + block_row_nb);
     double* Bmat = *Block;
     /* The part of MM which corresponds to the current block is copied into MLocal */
     Bmat[0] = Mptr[0];
@@ -1252,7 +1256,7 @@ void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double ** Block
     Bmat[12] = Mptr[2];
     Bmat[13] = Mptr[3];
     Bmat[14] = Mptr[4];
-     Mptr += M->size0;
+    Mptr += M->size0;
     Bmat[15] = Mptr[0];
     Bmat[16] = Mptr[1];
     Bmat[17] = Mptr[2];
