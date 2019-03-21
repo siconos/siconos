@@ -1,8 +1,8 @@
 #include "SiconosNumerics.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
-#include "siconos/NM_MUMPS.h"
-#include "siconos/NM_MPI.h"
+#include "NM_MUMPS.h"
+#include "NM_MPI.h"
 #define SIZE 2
 #include <stdlib.h>
 #include <stdio.h>
