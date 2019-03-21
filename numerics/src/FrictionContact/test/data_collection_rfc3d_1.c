@@ -30,6 +30,7 @@ char ** data_collection()
   int n_data=0;
   data_collection_1[n_data++] = "./data/RFC3D_sphere_1.dat";
   data_collection_1[n_data++] = "./data/RFC3D_sphere_2.dat";
+  data_collection_1[n_data++] = "./data/RFC3D_cube_1.dat";
   data_collection_1[n_data++] = "---";
 
 
