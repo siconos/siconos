@@ -400,7 +400,7 @@ int rolling_fc3d_projectionOnCone_setDefaultSolverOptions(SolverOptions* options
   numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnCone  Solver\n");
   
 
-  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone;
+  options->solverId = SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone;
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
