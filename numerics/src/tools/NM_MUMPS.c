@@ -123,6 +123,30 @@ void NM_MUMPS(NumericsMatrix* A, int job)
 #endif
 }
 
+void NM_MUMPS_set_icntl(NumericsMatrix* A, unsigned int index, int val)
+{
+  DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+  mumps_id->ICNTL(index) = val;
+}
+
+int NM_MUMPS_icntl(NumericsMatrix* A, unsigned int index)
+{
+  DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+  return mumps_id->ICNTL(index);
+}
+
+void NM_MUMPS_set_cntl(NumericsMatrix* A, unsigned int index, double val)
+{
+  DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+  mumps_id->CNTL(index) = val;
+}
+
+double NM_MUMPS_cntl(NumericsMatrix* A, unsigned int index)
+{
+  DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+  return mumps_id->CNTL(index);
+}
+
 void NM_MUMPS_set_control_params(NumericsMatrix* A)
 {
   DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
@@ -139,15 +163,18 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A)
     mumps_id->comm_fortran = (MUMPS_INT) MPI_Comm_c2f(NM_MPI_comm(A));
   }
 #endif /* WITH_MPI */
+}
 
-
- if (verbose == 0)
+void NM_MUMPS_set_verbosity(NumericsMatrix* A, unsigned int verbosity)
+{
+  DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+  if (verbosity == 0)
   {
     mumps_id->ICNTL(1) = -1; // Error messages, standard output stream.
     mumps_id->ICNTL(2) = -1; // Diagnostics,    standard output stream.
     mumps_id->ICNTL(3) = -1; // Global infos,   standard output stream.
   }
-  else if (verbose == 1)
+  else if (verbosity == 1)
   {
     mumps_id->ICNTL(1) = 6; // Error messages, standard output stream.
     mumps_id->ICNTL(2) = 6; // Diagnostics,    standard output stream.
@@ -156,24 +183,14 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A)
                               // input, output parameters printed.
 
   }
-  else if (verbose > 1)
-  {
-    mumps_id->ICNTL(1) = 6; // Error messages, standard output stream.
-    mumps_id->ICNTL(2) = 6; // Diagnostics,    standard output stream.
-    mumps_id->ICNTL(3) = 6; // Global infos,   standard output stream.
-//      mumps_id->ICNTL(4) = 4; // Errors, warnings and information on
-                              // input, output parameters printed.
+}
 
-//      mumps_id->ICNTL(10) = 1; // One step of iterative refinment
-    mumps_id->ICNTL(11) = 1; // Error analysis
-  }
-  else
-  {
-    mumps_id->ICNTL(1) = 0;
-    mumps_id->ICNTL(2) = 0;
-    mumps_id->ICNTL(3) = 0;
-  }
- mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
+/* to be checked */
+void NM_MUMPS_set_default_params(NumericsMatrix* A)
+{
+  DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+  mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
 //      mumps_id->ICNTL(10) = -2; // One step of iterative refinment
     // ok for a cube on a plane & four contact points
     // computeAlartCurnierSTD != generated in this case...
@@ -181,7 +198,7 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A)
     //mumps_id->CNTL(3) = ...;
     //mumps_id->CNTL(5) = ...;
 
- mumps_id->ICNTL(7) = 3; // scotch
+  mumps_id->ICNTL(7) = 3; // scotch
 }
 
 void NM_MUMPS_set_problem(NumericsMatrix* A, double *b)

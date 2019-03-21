@@ -44,6 +44,8 @@ int main(int argc, char *argv[])
   }
 
   assert (rank == 0);
+  NM_MUMPS_set_verbosity(M, 1);
+
   /*
      2*x - y = 1
      x   + y = 1

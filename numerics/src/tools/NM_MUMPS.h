@@ -43,36 +43,67 @@ extern "C"
 
   void NM_MUMPS_set_irn_jcn(NumericsMatrix* A);
 
-  /** Get (and create if necessary) the config data for MUMPS
-   * \param A the matrix to be factorized
+  /** Get (and create if necessary) the config data for MUMPS.
+   * \param A, the matrix to be factorized.
    */
   DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A);
 
-  /** Set the config data for MUMPS
-   * \param A the matrix
-   * \param id the config data
+  /** Set the config data for MUMPS.
+   * \param A the matrix,
+   * \param id the config data,
+   * \return the DMUMPS_STRUC_C config.
    */
   void NM_MUMPS_set_id(NumericsMatrix* A, DMUMPS_STRUC_C* id);
 
-  /** Free the config data for MUMPS
-   * \param param p a pointer on the linear solver parameters
-   */
-  void NM_MUMPS_free(void* p);
-
-  /** Set control parameters (mpi communicator, verbosity)
-   * \param A the matrix holding the MUMPS config
+  /** Set control parameters (mpi communicator, verbosity).
+   * \param A, the matrix holding the MUMPS config.
    */
   void NM_MUMPS_set_control_params(NumericsMatrix* A);
 
+  /** Set icntl control.
+   * \param A, the matrix holding the MUMPS config,
+   * \param index, the fortran index in the icntl array,
+   * \param val, the new integer value.
+   */
+  void NM_MUMPS_set_icntl(NumericsMatrix* A, unsigned int index, int val);
+
+  /** Return icntl value.
+   * \param A, the matrix holding the MUMPS config,
+   * \param index, the FORTRAN index in the icntl array,
+   * \return the ICNTL(index) value.
+   */
+  int NM_MUMPS_icntl(NumericsMatrix* A, unsigned int index);
+
+  /** Set cntl control.
+   * \param A, the matrix holding the MUMPS config,
+   * \param index, the FORTRAN index in the cntl array,
+   * \param val the new double value.
+   */
+  void NM_MUMPS_set_cntl(NumericsMatrix* A, unsigned int index, double val);
+
+   /** Return cntl value.
+   * \param A, the matrix holding the MUMPS config,
+   * \param index, the FORTRAN index in the cntl array.
+   * \return the CNTL(index) value.
+   */
+  double NM_MUMPS_cntl(NumericsMatrix* A, unsigned int index);
+
   /** Set linear problem
-   * \param A the matrix holding the MUMPS config
-   * \param b a pointer on double values
+   * \param A, the matrix holding the MUMPS config,
+   * \param b, a pointer on double values.
    */
   void NM_MUMPS_set_problem(NumericsMatrix* A, double *b);
 
-  /** Set parameters for the solve
+  /** Set MUMPS verbosity.
+   * \param A, the matrix holding the MUMPS config,
+   * \param verbosity, an integer: 0 for silent or 1 for verbose.
+   */
+  void NM_MUMPS_set_verbosity(NumericsMatrix* A, unsigned int verbosity);
+
+  /** Set some default parameters for the solve.
    * \param A the matrix holding the MUMPS config
-  void NM_MUMPS_set_params(NumericsMatrix* A);
+   */
+  void NM_MUMPS_set_default_params(NumericsMatrix* A);
 
   /** Display extra information about the solve
    * \param A the matrix holding the MUMPS config
@@ -86,6 +117,12 @@ extern "C"
    * \param job the int that specify the MUMPS job.  job=0 makes all process return.
    */
   void NM_MUMPS(NumericsMatrix* A, int job);
+
+  /** Free the config data for MUMPS
+   * \param param p a pointer on the linear solver parameters
+   */
+  void NM_MUMPS_free(void* p);
+
 
 #endif /* WITH_MUMPS */
   /** copy MUMPS id if compiled WITH_MUMPS, otherwise do nothing.
