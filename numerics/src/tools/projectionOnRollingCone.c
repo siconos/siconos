@@ -23,7 +23,7 @@
 /* #define DEBUG_STDOUT */
 #include "debug.h"
 
-unsigned projectionOnRollingCone(double* r, double  mu, double mur)
+unsigned int projectionOnRollingCone(double* r, double  mu, double mur)
 {
   double normT = hypot(r[1], r[2]);
   double normMT = hypot(r[3], r[4]);
@@ -44,31 +44,35 @@ unsigned projectionOnRollingCone(double* r, double  mu, double mur)
   }
   else
   {
-    if ((normT > mu * r[0]) && (normMT <= mur * r[0]))
+    double mu2 = mu * mu;
+    double mur2 = mur*mur;
+    
+    
+    double trial_rn =  (mu * normT + mur * normMT + r[0]) / (mur2+ mu2 + 1.0);
+    if ((normT > mu * trial_rn) && (normMT > mur * trial_rn))
     {
-      double mu2 = mu * mu;
-      r[0] = (mu * normT + r[0]) / (mu2 + 1.0);
-      r[1] = mu * r[0] * r[1] / normT;
-      r[2] = mu * r[0] * r[2] / normT;
-      //r[3] = r[3] ;
-      //r[4] = r[4] ;
-      return PROJRCONE_BOUNDARY_FRICTION;
-    }
-    else if ((normT > mu * r[0]) && (normMT > mur * r[0]))
-    {
-      double mu2 = mu * mu;
-      double mur2 = mur*mur;
-      r[0] = (mu * normT + mur * normMT + r[0]) / (mur2+ mu2 + 1.0);
+      r[0] = trial_rn;
       r[1] = mu * r[0] * r[1] / normT;
       r[2] = mu * r[0] * r[2] / normT;
       r[3] = mur * r[0] * r[3] / normMT;
       r[4] = mur * r[0] * r[4] / normMT;
       return PROJRCONE_BOUNDARY_FRICTION_ROLLING;
     }
-    else if ((normT <= mu * r[0]) && (normMT > mur * r[0]))
+
+    trial_rn = (mu * normT + r[0]) / (mu2 + 1.0);
+    if ((normT > mu * trial_rn) && (normMT <= mur * trial_rn))
     {
-      double mur2 = mur*mur;
-      r[0] = (mur * normMT + r[0]) / (mur2 + 1.0);
+      r[0] = trial_rn;
+      r[1] = mu * r[0] * r[1] / normT;
+      r[2] = mu * r[0] * r[2] / normT;
+      //r[3] = r[3] ;
+      //r[4] = r[4] ;
+      return PROJRCONE_BOUNDARY_FRICTION;
+    }
+    trial_rn =  (mur * normMT + r[0]) / (mur2 + 1.0);
+    if ((normT <= mu * trial_rn) && (normMT > mur * trial_rn))
+    {
+      r[0] = trial_rn;
       //r[1] = r[1] ;
       //r[2] = r[2] ;
       r[3] = mur * r[0] * r[3] / normMT;
@@ -76,7 +80,7 @@ unsigned projectionOnRollingCone(double* r, double  mu, double mur)
       return PROJRCONE_BOUNDARY_ROLLING;
     }
     else
-      return 18;
+      return 20;
   }
 }
 unsigned projectionOnDualRollingCone(double* u, double  mu, double mur)

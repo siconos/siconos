@@ -38,7 +38,7 @@ extern "C"
   \param[in] mu the angle of the cone
   \return the type of projection
   */
-  unsigned projectionOnRollingCone(double* r, double  mu, double  mur);
+  unsigned int projectionOnRollingCone(double* r, double  mu, double  mur);
   
   /** projectionOnDualCone Projection on the second Order Cone in \f$R^3\f$, \f$K \{ r, r_1 \geq 0, 0 mu \sqrt(u_2^2+u_3^2) \geq u_1  \} \f$
   \param[in,out] u the vector to be projected
