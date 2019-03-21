@@ -16,16 +16,17 @@
  * limitations under the License.
 */
 #include "SiconosConfig.h"
-
-#ifdef HAVE_MPI
 #include "NumericsFwd.h"
+#ifdef HAVE_MPI
 #include <mpi.h>
+#endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
+#ifdef HAVE_MPI
 MPI_Comm NM_MPI_comm(NumericsMatrix* A);
 void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm);
 #include <stdio.h>

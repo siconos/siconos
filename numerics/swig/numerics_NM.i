@@ -1,8 +1,10 @@
  // Matrices
 
+#ifdef HAVE_MPI
 #ifdef WITH_MPI4PY
 %include mpi4py/mpi4py.i
 %mpi4py_typemap(Comm, MPI_Comm);
+#endif
 #endif
 
 %include "CSparseMatrix.h"
