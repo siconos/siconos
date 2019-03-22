@@ -10,13 +10,16 @@
 #include <RigidBodyDS.hpp>
 
 #define XBULLET_CLASSES() \
-  REGISTER(BulletR)
+  REGISTER(BulletR)\
+  REGISTER(Bullet5DR)
 
 #ifdef SICONOS_HAS_BULLET
 #include <BulletR.hpp>
+#include <Bullet5DR.hpp>
 #else
 #include <NewtonEulerDS.hpp>
 #include <NewtonEuler3DR.hpp>
+#include <NewtonEuler5DR.hpp>
 #include <SpaceFilter.hpp>
 DUMMY(BulletR, NewtonEuler3DR);
 #endif
@@ -58,6 +61,7 @@ DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
   REGISTER(NewtonEulerR)                        \
   REGISTER(NewtonEuler1DR)        \
   REGISTER(NewtonEuler3DR)        \
+  REGISTER(NewtonEuler5DR)        \
   REGISTER(PivotJointR)                         \
   REGISTER(KneeJointR)                          \
   REGISTER(PrismaticJointR)                     \
@@ -137,7 +141,8 @@ struct GetVelocity : public SiconosVisitor
 
 struct ForMu : public Question<double>
 {
-    ANSWER(NewtonImpactFrictionNSL, mu());
+  //ANSWER(NewtonImpactFrictionNSL, mu());
+    ANSWER(NewtonImpactRollingFrictionNSL, mu());
     ANSWER_V_NOUSING(NewtonImpactNSL, 0.);
 };
 
@@ -328,6 +333,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       typedef Visitor < Classes <
                           NewtonEuler1DR,
                           NewtonEuler3DR,
+                          NewtonEuler5DR,
                           PrismaticJointR,
                           KneeJointR,
                           PivotJointR>,

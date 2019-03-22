@@ -6,6 +6,7 @@
   PY_REGISTER(NonSmoothLaw, Kernel);                                            \
   PY_REGISTER(NewtonImpactNSL, Kernel);                                         \
   PY_REGISTER(NewtonImpactFrictionNSL, Kernel);                                 \
+  PY_REGISTER(NewtonImpactRollingFrictionNSL, Kernel);                  \
   PY_REGISTER(MixedComplementarityConditionNSL, Kernel);                        \
   PY_REGISTER(ComplementarityConditionNSL, Kernel);                             \
   PY_REGISTER(EqualityConditionNSL, Kernel);                                    \
@@ -53,7 +54,8 @@
   PY_REGISTER(MLCPProjectOnConstraints, Kernel);                                \
   PY_REGISTER(GenericMechanical, Kernel);                                       \
   PY_REGISTER(FrictionContact, Kernel);                                         \
-  PY_REGISTER(GlobalFrictionContact, Kernel);                                         \
+  PY_REGISTER(GlobalFrictionContact, Kernel);                           \
+  PY_REGISTER(RollingFrictionContact, Kernel);                          \
   PY_REGISTER(EulerMoreauOSI, Kernel);                                          \
   PY_REGISTER(MoreauJeanOSI, Kernel);                                           \
   PY_REGISTER(MoreauJeanBilbaoOSI, Kernel);                                     \
