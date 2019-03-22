@@ -2587,6 +2587,9 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
         /* the mumps instance is initialized (call with job=-1) */
         NM_MUMPS_set_control_params(A);
         NM_MUMPS(A, -1);
+        NM_MUMPS_set_verbosity(A, verbose);
+        NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
+        NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
       NM_MUMPS_set_problem(A, b);
 
