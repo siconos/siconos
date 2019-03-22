@@ -19,15 +19,21 @@
 #include <assert.h>
 #ifdef HAVE_MPI
 #include "NumericsMatrix.h"
+#include "numerics_verbose.h"
 MPI_Comm NM_MPI_comm(NumericsMatrix* A)
 {
   assert(A);
-  MPI_Comm mpi_comm = NM_internalData(A)->mpi_comm;
-  if (mpi_comm == MPI_COMM_NULL)
+
+  if (NM_internalData(A)->mpi_comm == MPI_COMM_NULL)
   {
-    fprintf(stderr, "siconos/numerics: warning MPI_comm not initialized.\nMPI must be initialized before any call to siconos/numerics\n");
+    if (verbose)
+    {
+      fprintf(stderr, "siconos/numerics: warning, MPI communicator has not been initialized,\n");
+      fprintf(stderr, "siconos/numerics: MPI_COMM_WORLD will be used.\n");
+    }
+    NM_internalData(A)->mpi_comm = MPI_COMM_WORLD;
   }
-  return mpi_comm;
+  return NM_internalData(A)->mpi_comm = MPI_COMM_WORLD;
 }
 
 void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm)
