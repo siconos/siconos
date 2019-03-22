@@ -24,7 +24,7 @@
 #include "numerics_verbose.h"
 #include "NM_MPI.h"
 
-#define DEBUG_MESSAGES
+/*#define DEBUG_MESSAGES*/
 #include "debug.h"
 
 void NM_MUMPS_free(void* p)
