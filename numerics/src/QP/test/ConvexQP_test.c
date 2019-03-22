@@ -617,8 +617,12 @@ static int test_5(void)
   return info;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
+
+#ifdef HAVE_MPI
+  MPI_Init(&argc, &argv);
+#endif
 
   int i=0;
   printf("start test #%i\n",i);
@@ -708,9 +712,9 @@ int main(void)
     printf("end test #%i  not  successful\n",i);
   }
 
+#ifdef HAVE_MPI
+  MPI_Finalize();
+#endif
 
   return info;
-
-
-
 }

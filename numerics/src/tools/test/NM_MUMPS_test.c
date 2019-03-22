@@ -28,7 +28,9 @@ int main(int argc, char *argv[])
 
   NumericsMatrix* M = NM_create(NM_SPARSE, SIZE, SIZE);
 
+#ifdef HAVE_MPI
   NM_MPI_set_comm(M, MPI_COMM_WORLD);
+#endif
   NM_MUMPS_set_control_params(M);
   NM_triplet_alloc(M, 0);
   M->matrix2->origin = NSM_TRIPLET;

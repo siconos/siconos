@@ -49,9 +49,13 @@ static inline char* strdup(char* src)
 #include "ConvexQP_cst.h"
 #include "VI_cst.h"
 
-int main(void)
+int main(int argc, char *argv[])
 {
   int info =0 ;
+
+#ifdef HAVE_MPI
+  MPI_Init(&argc, &argv);
+#endif
 
   char filename[] = "./data/@TEST_DATA@";
   printf("Test on %s\n",filename);
@@ -173,5 +177,10 @@ int main(void)
   fclose(finput);
   printf("\nEnd of test on %s\n", filename);
   unsetenv("SICONOS_HDF5_NAME");
+
+#ifdef HAVE_MPI
+  MPI_Finalize();
+#endif
+
   return info;
 }
