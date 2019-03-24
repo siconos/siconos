@@ -44,19 +44,13 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test_nsgs[n][e++] = "0";
     test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
     sprintf(test_nsgs[n][e++], "%d", SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "internal_iparam";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "20";
-    test_nsgs[n][e++] = "internal_dparam";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "0";
+    test_nsgs[n][e++] = "1e-14";
+    test_nsgs[n][e++] = "50";
     test_nsgs[n][e++] = "---";
     n++;
   }
- 
-    for ( int d =0; d <n_data_1; d++)
+
+  for ( int d =0; d <n_data_1; d++)
   {
     int e=0;
     test_nsgs[n][e++] = data_collection_1[d];
@@ -69,10 +63,10 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     sprintf(test_nsgs[n][e++], "%d", SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);
     test_nsgs[n][e++] = "0.0";
     test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
+    test_nsgs[n][e++] = "---";
     n++;
   }
-    
+
   test_nsgs[n][0] ="---";
   return test_nsgs;
 
