@@ -28,8 +28,7 @@ unsigned int projectionOnRollingCone(double* r, double  mu, double mur)
   double normT = hypot(r[1], r[2]);
   double normMT = hypot(r[3], r[4]);
 
-
-  if ((mu * normT <= - r[0]) && ((mur * normMT <= - r[0])))
+  if (mu * normT  + mur * normMT <= - r[0])
   {
     r[0] = 0.0;
     r[1] = 0.0;
