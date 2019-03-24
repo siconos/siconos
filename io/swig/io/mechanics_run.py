@@ -715,7 +715,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                  use_compression=False, output_domains=False, verbose=True):
         super(self.__class__, self).__init__(io_filename, mode,
                                              use_compression, output_domains, verbose)
-
         self._interman = interaction_manager
         self._nsds = nsds
         self._simulation = simulation
@@ -778,12 +777,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if nslawClass == Kernel.NewtonImpactFrictionNSL:
                 nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']), 0.,
                                    float(self._nslaws_data[name].attrs['mu']), 3)
+            elif nslawClass == Kernel.NewtonImpactRollingFrictionNSL:
+                nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']), 0.,
+                                   float(self._nslaws_data[name].attrs['mu']),
+                                   float(self._nslaws_data[name].attrs['mu_r']), 5)
             elif nslawClass == Kernel.NewtonImpactNSL:
                 nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']))
             elif nslawClass == Kernel.RelayNSL:
                 nslaw = nslawClass(int(self._nslaws_data[name].attrs['size']),
                                    float(self._nslaws_data[name].attrs['lb']),
-                                   float(self._nslaws_data[name].attrs['ub']))
+                                   float(self._nslaws_data[name].attrs['ub']))            
             assert(nslaw)
             self._nslaws[name] = nslaw
             gid1 = int(self._nslaws_data[name].attrs['gid1'])
@@ -1852,8 +1855,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         from siconos.kernel import \
             NonSmoothDynamicalSystem, OneStepNSProblem,\
             TimeDiscretisation,\
-            GenericMechanical, FrictionContact, GlobalFrictionContact,\
-            NewtonImpactFrictionNSL
+            GenericMechanical, FrictionContact,\
+            GlobalFrictionContact, RollingFrictionContact,\
+            NewtonImpactFrictionNSL, NewtonImpactRollingFrictionNSL
 
         from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN
         from siconos.numerics import SICONOS_GLOBAL_FRICTION_3D_ADMM
@@ -1936,6 +1940,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 else:
                     osnspb=FrictionContact(3, solver)
                     solverOptions = osnspb.numericsSolverOptions()
+
+
+
                     # Friction one-contact solver options
                     fc_index=0
                     fcOptions = solverOptions.internalSolvers[fc_index]
@@ -2002,7 +2009,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         else:
             simulation=time_stepping(nsds,timedisc)
             simulation.insertIntegrator(self._osi)
-            simulation.insertNonSmoothProblem(osnspb)
 
         simulation.insertInteractionManager(self._interman)
 
@@ -2022,6 +2028,35 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         print_verbose ('import scene ...')
         self.import_scene(t0, body_class, shape_class, face_class, edge_class)
 
+        print(self._nslaws_data)
+        for name in self._nslaws_data:
+            print('self._nslaws_data[name].attrs[ type ]',self._nslaws_data[name].attrs['type'])
+            print(self._nslaws)
+
+        is_rolling_contact = False
+        for key in self._nslaws.keys():
+            #print('key', key)
+            #print('self._nslaws[key]', self._nslaws[key] )
+            
+            if isinstance(self._nslaws[key],NewtonImpactRollingFrictionNSL):
+                is_rolling_contact = True
+                #print('rolling contact is found')
+        # check that we have only one nslaw type compatible with Rolling
+        if is_rolling_contact:
+            osnspb=RollingFrictionContact(5)
+            solverOptions = osnspb.numericsSolverOptions()
+            solverOptions.iparam[0]=itermax
+            solverOptions.dparam[0] = tolerance
+            # Friction one-contact solver options
+            fc_index=0
+            fcOptions = solverOptions.internalSolvers[fc_index]
+            fcOptions.iparam[0] = 50 # Local solver iterations
+            #fcOptions.solverId =  Numerics.SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone
+        simulation.insertNonSmoothProblem(osnspb)
+
+        #input()
+        
+        
         if len(self._external_functions) > 0:
             print_verbose ('import external functions ...')
             self.import_external_functions()
@@ -2073,7 +2108,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     log(simulation.computeOneStep, with_timer)()
             else:
                 log(simulation.computeOneStep, with_timer)()
-
 
 
             if (self._output_frequency and (k % self._output_frequency == 0)) or (k == 1):
