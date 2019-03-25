@@ -2582,7 +2582,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       {
         printf("NM_gesv: using MUMPS\n" );
       }
-      if (!NM_MUMPS_id(A)->job)
+      if (!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
       {
         /* the mumps instance is initialized (call with job=-1) */
         NM_MUMPS_set_control_params(A);
