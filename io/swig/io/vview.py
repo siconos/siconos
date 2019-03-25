@@ -1639,7 +1639,7 @@ class VView(object):
             scale_transform.Scale(scale, scale, scale)
             scale_transform.SetInput(transform)
             transformer.SetTransform(scale_transform)
-            if not (self.global_filter or self.opts.export):
+            if not (self.opts.global_filter or self.opts.export):
                 actor.SetUserTransform(scale_transform)
         else:
             transformer.SetTransform(transform)
