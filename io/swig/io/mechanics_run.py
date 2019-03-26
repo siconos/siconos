@@ -1,3 +1,4 @@
+
 # Mechanics IO
 
 """Run a pre-configured Siconos "mechanics" HDF5 file."""
@@ -1692,9 +1693,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             local_precision = so.dparam[2]
 
 
-        print('SolverInfos at time :', time,
-              'iterations= ', iterations,
-              'precision={0:5.3e}'.format(precision))
+        print('Numerics solver info at time : {0:10.6f}'.format(time),
+              'iterations = {0:8d}'.format(iterations),
+              'precision = {0:5.3e}'.format(precision))
 
     def import_plugins(self):
         """
@@ -1897,10 +1898,23 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             print_verbose('Simulation time {0} >= T={1}, exiting.'.format(t0,T))
             return
 
-        # Model
-        #
+        # Respect run() parameter for multipoints_iterations for
+        # backwards compatibility, but this is overridden by
+        # SiconosBulletOptions if one is provided.
+        if multipoints_iterations is not None and options is None:
+            options = SiconosBulletOptions()
+            options.perturbationIterations = 3*multipoints_iterations
+            options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
+        self._interman = interaction_manager(options)
+
+        # (0) NonSmooth Dynamical Systems definition
         self._nsds=NonSmoothDynamicalSystem(t0, T)
         nsds=self._nsds
+        
+        print_verbose ('import scene ...')
+        self.import_scene(t0, body_class, shape_class, face_class, edge_class)
+
+        self._contact_index_set = contact_index_set
 
         # (1) OneStepIntegrators
         joints=list(self.joints())
@@ -1911,57 +1925,63 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         timedisc=TimeDiscretisation(t0, h)
 
 
-
-        if (osi == Kernel.MoreauJeanGOSI):
-            if (friction_contact_trace == False) :
-                if len(joints) > 0:
-                    raise RuntimeError("MoreauJeanGOSI can not deal with joints")
+        # (3) choice of default OneStepNonSmoothProblem w.r.t the type of nslaws        
+        nslaw_type_list =[]
+        for name in self._nslaws_data:
+            nslaw_type_list.append(self._nslaws_data[name].attrs['type'])
+        nb_of_nslaw_type =  len(set(nslaw_type_list))
+        
+        if (friction_contact_trace == False) :
+            if (osi == Kernel.MoreauJeanGOSI):
+                if (nb_of_nslaw_type >1) or 'NewtonImpactFrictionNSL' not in set(nslaw_type_list):
+                    raise RuntimeError("MoreauJeanGOSI can deal only with NewtonImpactFrictionNSL nslaw")
                 else:
                     osnspb=GlobalFrictionContact(3,SICONOS_GLOBAL_FRICTION_3D_ADMM)
+                    osnspb.setMaxSize(30000)
+                    osnspb.setMStorageType(2)
             else:
-                from siconos.io.FrictionContactTrace import GlobalFrictionContactTrace
-                osnspb=GlobalFrictionContactTrace(3, SICONOS_GLOBAL_FRICTION_3D_ADMM,friction_contact_trace_params,nsds)
-            osnspb.setMaxSize(30000)
-            osnspb.setMStorageType(2)
-        else:
-            if (friction_contact_trace == False) :
-                if len(joints) > 0:
+                if (nb_of_nslaw_type >1):
                     osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
-                    solverOptions = osnspb.numericsSolverOptions()
-                    # Friction one-contact solver options
+                    solverOptions = osnspb.numericsSolverOptions()                    
                     fc_index=1
-                    fcOptions = solverOptions.internalSolvers[fc_index]
-                    fcOptions.iparam[0] = 100  # Local solver iterations
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
-                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
-                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP
-                else:
-                    osnspb=FrictionContact(3, solver)
-                    solverOptions = osnspb.numericsSolverOptions()
-
-
-
                     # Friction one-contact solver options
-                    fc_index=0
                     fcOptions = solverOptions.internalSolvers[fc_index]
                     fcOptions.iparam[0] = 100  # Local solver iterations
                     fcOptions.solverId = local_solver
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
-                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
-                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP
+                else:
+                    if 'NewtonImpactFrictionNSL' in set(nslaw_type_list):
+                        osnspb=FrictionContact(3, solver)
+                        solverOptions = osnspb.numericsSolverOptions()
+                        fc_index=0
+                        # Friction one-contact solver options
+                        fcOptions = solverOptions.internalSolvers[fc_index]
+                        fcOptions.iparam[0] = 100  # Local solver iterations
+                        fcOptions.solverId = local_solver
+                        osnspb.setMaxSize(30000)
+                        osnspb.setMStorageType(1)
+                    elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
+                         osnspb=RollingFrictionContact(5)
+                         solverOptions = osnspb.numericsSolverOptions()
+                         solverOptions.iparam[0]=itermax
+                         solverOptions.dparam[0] = tolerance
+                    else:
+                        raise RuntimeError("Unknown nslaw type"+ str(set(nslaw_type_list)))
 
-
+        else:
+            if (osi == Kernel.MoreauJeanGOSI):
+                if (nb_of_nslaw_type >1) or 'NewtonImpactFrictionNSL' not in set(nslaw_type_list):
+                    raise RuntimeError("MoreauJeanGOSI can deal only with NewtonImpactFrictionNSL nslaw")
+                else:
+                    from siconos.io.FrictionContactTrace import GlobalFrictionContactTrace
+                    osnspb=GlobalFrictionContactTrace(3, SICONOS_GLOBAL_FRICTION_3D_ADMM,friction_contact_trace_params,nsds)
+                    osnspb.setMaxSize(30000)
+                    osnspb.setMStorageType(2)
             else:
                 from siconos.io.FrictionContactTrace import FrictionContactTrace
                 osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,nsds)
-            osnspb.setMaxSize(30000)
-            osnspb.setMStorageType(1)
-
-        self._contact_index_set = contact_index_set
+                osnspb.setMaxSize(30000)
+                osnspb.setMStorageType(1)
+                
 
         # Global solver options
         solverOptions = osnspb.numericsSolverOptions()
@@ -1983,15 +2003,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
 
-        # Respect run() parameter for multipoints_iteratinos for
-        # backwards compatibility, but this is overridden by
-        # SiconosBulletOptions if one is provided.
-        if multipoints_iterations is not None and options is None:
-            options = SiconosBulletOptions()
-            options.perturbationIterations = 3*multipoints_iterations
-            options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
-        self._interman = interaction_manager(options)
-
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if time_stepping == Kernel.TimeSteppingDirectProjection:
             osnspb_pos=Kernel.MLCPProjectOnConstraints(Numerics.SICONOS_MLCP_ENUM, 1.0)
@@ -2010,6 +2021,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             simulation=time_stepping(nsds,timedisc)
             simulation.insertIntegrator(self._osi)
 
+        simulation.insertNonSmoothProblem(osnspb)
         simulation.insertInteractionManager(self._interman)
 
         simulation.setNewtonOptions(Newton_options)
@@ -2025,34 +2037,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             print_verbose ('import plugins ...')
             self.import_plugins()
 
-        print_verbose ('import scene ...')
-        self.import_scene(t0, body_class, shape_class, face_class, edge_class)
 
-        print(self._nslaws_data)
-        for name in self._nslaws_data:
-            print('self._nslaws_data[name].attrs[ type ]',self._nslaws_data[name].attrs['type'])
-            print(self._nslaws)
 
-        is_rolling_contact = False
-        for key in self._nslaws.keys():
-            #print('key', key)
-            #print('self._nslaws[key]', self._nslaws[key] )
-            
-            if isinstance(self._nslaws[key],NewtonImpactRollingFrictionNSL):
-                is_rolling_contact = True
-                #print('rolling contact is found')
-        # check that we have only one nslaw type compatible with Rolling
-        if is_rolling_contact:
-            osnspb=RollingFrictionContact(5)
-            solverOptions = osnspb.numericsSolverOptions()
-            solverOptions.iparam[0]=itermax
-            solverOptions.dparam[0] = tolerance
-            # Friction one-contact solver options
-            fc_index=0
-            fcOptions = solverOptions.internalSolvers[fc_index]
-            fcOptions.iparam[0] = 50 # Local solver iterations
-            #fcOptions.solverId =  Numerics.SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone
-        simulation.insertNonSmoothProblem(osnspb)
 
         #input()
         
