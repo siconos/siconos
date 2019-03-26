@@ -1691,7 +1691,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         print('SolverInfos at time :', time,
               'iterations= ', iterations,
-              'precision=', precision)
+              'precision={0:5.3e}'.format(precision))
 
     def import_plugins(self):
         """
