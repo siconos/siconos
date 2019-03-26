@@ -36,14 +36,14 @@ int main(int argc, char *argv[])
   M->matrix2->origin = NSM_TRIPLET;
 
   NM_MUMPS(M, -1);
+#ifdef HAVE_MPI
   if(rank > 0)
   {
-#ifdef HAVE_MPI
     MPI_Finalize();
     NM_free(M);
-#endif
     exit(0);
   }
+#endif
 
   assert (rank == 0);
   NM_MUMPS_set_verbosity(M, 1);
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
   for (unsigned int i=0; i<SIZE; ++i)
   {
-    printf("solution b[%d] = %g\n", i, b[i]);
+    printf("solution b[%u] = %g\n", i, b[i]);
   }
 
 #ifdef HAVE_MPI
