@@ -48,7 +48,7 @@ static int test_projection(double * reaction, double mu, double mur)
   double reaction_again[5];
   double ortho=0.0, diff =0.0;
   DEBUG_EXPR(NV_display(reaction,5););
-  
+
   for (int i =0; i<5; i++)  reaction_ori[i] = reaction[i];
   status = projectionOnRollingCone(reaction,mu,mur);
   DEBUG_EXPR(NV_display(reaction,5););
@@ -56,7 +56,7 @@ static int test_projection(double * reaction, double mu, double mur)
   ortho = orthogonality(reaction,reaction_ori);
   printf("ortho = %f\n", ortho);
   assert(ortho < 1e-14);
-  
+
   for (int i =0; i<5; i++)  reaction_again[i] = reaction[i];
   status_again = projectionOnRollingCone(reaction_again,mu,mur);
   DEBUG_EXPR(NV_display(reaction_again,5););
@@ -98,7 +98,7 @@ int main(void)
   {
     info+=1;
   }
-  
+
   reaction[0] = 1.0;
   reaction[1] = 2.0;
   reaction[2] = 0.0;
@@ -119,14 +119,17 @@ int main(void)
   reaction[3] = 2.0;
   reaction[4] = 0.0;
   status = test_projection(reaction, mu, mur);
-  
+
   reaction[0] = 1.0;
   reaction[1] = 2.0;
   reaction[2] = 1.0;
   reaction[3] = 2.0;
   reaction[4] = 1.0;
   status = test_projection(reaction, mu, mur);
-
+  if (status != PROJRCONE_BOUNDARY_FRICTION_ROLLING)
+  {
+    info+=1;
+  }
 
   return info;
 

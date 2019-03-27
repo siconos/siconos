@@ -63,21 +63,21 @@ using namespace std;
 int rollingFrictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
-  int k, info = -1 ;
+  int k;
   RollingFrictionContactProblem* problem = (RollingFrictionContactProblem *)malloc(sizeof(RollingFrictionContactProblem));
   /* numerics_set_verbose(1); */
 
-  info = rollingFrictionContact_newFromFile(problem, f);
+  int info1 = rollingFrictionContact_newFromFile(problem, f);
   rollingFrictionContact_display(problem);
 
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
-  info = rollingFrictionContact_printInFile(problem, foutput);
+  int info2 = rollingFrictionContact_printInFile(problem, foutput);
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
 
-
+  int info;
   double *reaction = (double*)malloc(dim * NC * sizeof(double));
   double *velocity = (double*)malloc(dim * NC * sizeof(double));
   for (k = 0 ; k < dim * NC; k++)

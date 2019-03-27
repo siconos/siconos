@@ -99,9 +99,10 @@ int rolling_fc3d_projectionOnCone_solve(
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
   //double an = 1./(MLocal[0]+mu_i);
-  double an = 1. / (MLocal[0]);
+  //double an = 1. / (MLocal[0]);
 
-  an=1.0;
+  double an=1.0;
+  
   /* int incx = 1, incy = 1; */
   double velocity[5];
   double normUT, normOmegaT;
@@ -192,7 +193,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
   /* at = an; */
   /* as = an; */
 
-  double rho=   options->dWork[options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]] , rho_k;
+  double rho=   options->dWork[options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]];
   DEBUG_PRINTF ("Contact options->iparam[4] = %i,\t",options->iparam[4] );
   DEBUG_PRINTF("saved rho = %14.7e\n",rho );
   assert(rho >0.0);
@@ -202,7 +203,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
 
 
   double velocity[5],velocity_k[5],reaction_k[5],worktmp[5];
-  double normUT, normOmegaT;
+
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
   int localiter = 0;
@@ -210,10 +211,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
 
   /* Variable for Line_search */
   double a1,a2;
-  int success = 0;
-  double localerror_k;
-  int ls_iter = 0;
-  int ls_itermax = 10;
+
   /* double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7]; */
   double tau=2.0/3.0, tauinv = 3.0/2.0,  L= 0.9, Lmin =0.3;
 
@@ -223,6 +221,9 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
     DEBUG_PRINT("\n Local iteration starts \n");
     localiter ++;
 
+    double rho_k;
+    double normUT, normOmegaT;
+    double localerror_k;
     /*    printf ("reaction[0] = %14.7e\n",reaction[0]); */
     /*    printf ("reaction[1] = %14.7e\n",reaction[1]); */
     /*    printf ("reaction[2] = %14.7e\n",reaction[2]); */
@@ -255,8 +256,9 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
                               + MLocal[i + 4 * 5] * reaction[4];
     DEBUG_EXPR(NV_display(velocity_k,5););
 
-    ls_iter = 0 ;
-    success =0;
+    int ls_iter = 0;
+    int ls_itermax = 10;
+    int success = 0;
     rho_k=rho / tau;
 
     /* normUT = sqrt(velocity_k[1] * velocity_k[1] + velocity_k[2] * velocity_k[2]); */

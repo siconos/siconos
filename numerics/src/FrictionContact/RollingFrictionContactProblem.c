@@ -249,7 +249,7 @@ void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProb
   /* int m = 3 * nc; */
 
 
-  int contact =0, pos =0;
+  int contact =0;
 
   int take_off_count=0;
   int closed_count=0;
@@ -261,6 +261,7 @@ void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProb
 
   for (contact =0; contact < nc; contact ++)
   {
+    int pos=0;
     pos=contact*3;
     if (velocity[pos] > tol)
     {
