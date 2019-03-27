@@ -107,11 +107,18 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   DEBUG_PRINT("lever arm skew matrix :\n");
   DEBUG_EXPR(_NPG1->display(););
 
+  /* The Jacobian matrix (H) is given by the product
+   * H = _RotationAbsToContactFrame
+   * for the translation part and 
+   * H = _RotationAbsToContactFrame * leverArmMatrix * rotationMatrixAbsToBody
+   * for the rotation part and
+   */
+  
   // Compute the rotation matrix from the absolute frame to the body-fixed frame
   computeRotationMatrix(q1,_rotationMatrixAbsToBody);
   DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
 
-  // Rotate the lever arm matrix from the absolute frame to the  body-fixed frame
+  // compose the body lever arm matrix with the rotation matrix to body-fixed frame
   prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
   DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
   DEBUG_EXPR(_AUX1->display(););
@@ -131,9 +138,15 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
+  prod(*_RotationAbsToContactFrame, *_rotationMatrixAbsToBody, *_AUX2, true);
+  DEBUG_EXPR(_AUX2->display(););
+
+
+
+
   for (unsigned int ii = 3; ii < 5; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
-      _jachqT->setValue(ii, jj, _RotationAbsToContactFrame->getValue(ii-2, jj-3));
+      _jachqT->setValue(ii, jj, _AUX2->getValue(ii-2, jj-3));
 
   DEBUG_EXPR(_jachqT->display(););
   
@@ -156,6 +169,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   //   vRes->display();
   //   );
   DEBUG_END("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)\n");
+  //getchar();
 }
 
 void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)
