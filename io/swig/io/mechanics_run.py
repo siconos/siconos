@@ -1917,7 +1917,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._contact_index_set = contact_index_set
 
         # (1) OneStepIntegrators
-        joints=list(self.joints())
+
 
         self._osi=osi(theta)
 
@@ -1929,8 +1929,23 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         nslaw_type_list =[]
         for name in self._nslaws_data:
             nslaw_type_list.append(self._nslaws_data[name].attrs['type'])
-        nb_of_nslaw_type =  len(set(nslaw_type_list))
+
+        #print(set(nslaw_type_list))
+
+        # This trick is used to add the EqualityConditionNSL to the list of nslaw type
+        # this must be improved by adding the EqualityConditionNSL in self._nslaws_data
+        # when a joint is imported.
+        # For the moment, the nslaw is implicitely added when we import_joint but is not stored
+        # self._nslaws_data
         
+        joints=list(self.joints())
+        if len(joints) > 0:
+            nslaw_type_list.append('EqualityConditionNSL')
+            
+            
+        nb_of_nslaw_type =  len(set(nslaw_type_list))
+        # print(set(nslaw_type_list))
+        # input()
         if (friction_contact_trace == False) :
             if (osi == Kernel.MoreauJeanGOSI):
                 if (nb_of_nslaw_type >1) or 'NewtonImpactFrictionNSL' not in set(nslaw_type_list):
@@ -1999,7 +2014,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
 
         osnspb.setNumericsVerboseMode(numerics_verbose)
-
+        #Numerics.numerics_set_verbose(3)
+        
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
 
@@ -2031,17 +2047,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
 
         self._simulation = simulation
-
+        # input()
 
         if len(self._plugins) > 0:
             print_verbose ('import plugins ...')
             self.import_plugins()
 
 
-
-
-        #input()
-        
         
         if len(self._external_functions) > 0:
             print_verbose ('import external functions ...')
