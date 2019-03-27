@@ -41,7 +41,7 @@ private:
   double _et;
   /** friction coefficient */
   double _mu;
-  
+
   /** friction coefficient */
   double _muR;
 
@@ -54,7 +54,7 @@ public:
   /** basic constructor
    *  \param size size of the ns law
    */
-  NewtonImpactRollingFrictionNSL(unsigned int size);
+  explicit NewtonImpactRollingFrictionNSL(unsigned int size);
 
   /** constructor with the value of the NewtonImpactRollingFrictionNSL attributes
    *  \param en double : normal e coefficient
@@ -114,7 +114,7 @@ public:
   {
     return _mu;
   };
-  
+
   /** getter of mu
    * \return the value of mu
    */
@@ -130,7 +130,7 @@ public:
   {
     _mu = newVal;
   };
-  
+
   /** setter of muR
    * \param newVal a double to set muR
    */
