@@ -15,7 +15,6 @@ import vtk
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtk.numpy_interface import dataset_adapter as dsa
 
-
 # Exports from this module
 __all__ = ['VView', 'VViewOptions', 'VExportOptions', 'VViewConfig']
 
@@ -260,7 +259,6 @@ class VExportOptions(VViewOptions):
         self.stride = 1
         self.nprocs = 1
         self.gen_para_script = False
-
     def usage(self, long=False):
         print(__doc__); print()
         print('Usage:  {0} [--help] [--version] [--ascii] <HDF5>'
@@ -324,7 +322,78 @@ class VExportOptions(VViewOptions):
         else:
             self.usage()
             exit(1)
+            
+class VRawDataExportOptions(VViewOptions):
+    def __init__(self, io_filename = None):
+        super(self.__class__, self).__init__()
+        self.export = True
+        self.ascii_mode = False
+        self.start_step = 0
+        self.end_step = None
+        self.stride = 1
+        self.nprocs = 1
+        self.gen_para_script = False
+        self.io_filename = io_filename 
+    def usage(self, long=False):
+        print(__doc__); print()
+        print('Usage:  {0} [--help] [--version] [--ascii] <HDF5>'
+              .format(os.path.split(sys.argv[0])[1]))
+        if long:
+            print()
+            print("""Options:
+            --help               display this message
+            --version            display version information
+            --start-step=n       integer, set the first simulation time step
+                                 number (default: 0)
+            --end-step=n         integer, set the last simulation time step
+                                 number (default: None)
+            --stride=n           integer, set export time step/simulation time step
+                                 (default: 1)
+            """)
 
+    def parse(self):
+        ## Parse command line
+        try:
+            opts, args = getopt.gnu_getopt(sys.argv[1:], '',
+                                           ['help', 'version', 'ascii',
+                                            'start-step=', 'end-step=',
+                                            'stride=', 'global-filter',
+                                            'gen-para-script='])
+            self.configure(opts, args)
+        except getopt.GetoptError as err:
+                sys.stderr.write('{0}\n'.format(str(err)))
+                self.usage()
+                exit(2)
+
+    def configure(self, opts, args):
+        for o, a in opts:
+            if o == '--help':
+                self.usage(long=True)
+                exit(0)
+            if o == '--version':
+                print('{0} @SICONOS_VERSION@'.format(
+                    os.path.split(sys.argv[0])[1]))
+                exit(0)
+            if o == '--global-filter':
+                self.global_filter = True
+            if o == '--start-step':
+                self.start_step = int(a)
+            if o == '--end-step':
+                self.end_step = int(a)
+            if o == '--stride':
+                self.stride = int(a)
+            if o == '--gen-para-script':
+                self.gen_para_script = True
+                self.nprocs = int(a)
+            if o in ('--ascii'):
+                self.ascii_mode = True
+
+        if len(args) > 0:
+            self.io_filename = args[0]
+
+        # else:
+        #     self.usage()
+        #     exit(1)
 
 ## Utilities
 
@@ -2261,7 +2330,83 @@ class VView(object):
                 big_data_writer.Write()
 
             big_data_writer.Write()
+            
+    def export_raw_data(self):
 
+        times = self.io_reader._times[
+                self.opts.start_step:self.opts.end_step:self.opts.stride]
+        ntime = len(times)
+
+
+        # export
+        k = self.opts.start_step
+        packet = int(ntime/100)+1
+
+        # ######## position output ########
+
+        # nvalue = ndyna*7+1
+
+        # position_output = numpy.empty((ntime,nvalue))
+        # #print('position_output shape', numpy.shape(position_output))
+        # position_output[:,0] = times[:]
+        position_output = {}
+        velocity_output = {}
+        
+        for time in times:
+            k = k + self.opts.stride
+            if (k % packet == 0):
+                sys.stdout.write('.')
+            self.io_reader.SetTime(time)
+
+            pos_data = self.io_reader.pos_data
+            velo_data = self.io_reader.velo_data
+            
+            ndyna=pos_data.shape[0]
+            
+
+            for i in range(ndyna):
+                bdy_id = int(pos_data[i,1])
+                
+                ######## position output ########
+                nvalue=pos_data.shape[1]
+                position_output_bdy = position_output.get(bdy_id)
+                if position_output_bdy is None:
+                    position_output[bdy_id] = []
+                position_output_body =  position_output[bdy_id]
+                position_output_body.append([])
+                position_output_body[-1].append(time)
+                position_output_body[-1].extend(pos_data[i,2:nvalue])
+                position_output_body[-1].append(bdy_id)
+
+                
+                ######## velocity output ########
+                nvalue=velo_data.shape[1]
+                velocity_output_bdy = velocity_output.get(bdy_id)
+                if velocity_output_bdy is None:
+                    velocity_output[bdy_id] = []
+                velocity_output_body =  velocity_output[bdy_id]
+                velocity_output_body.append([])
+                velocity_output_body[-1].append(time)
+                velocity_output_body[-1].extend(velo_data[i,2:nvalue])
+                velocity_output_body[-1].append(bdy_id)
+
+        for bdy_id in position_output.keys():
+            output = numpy.array(position_output[bdy_id])
+            filename_output = '{0}-position-body_{1}.dat'.format(
+                os.path.splitext(os.path.basename(self.opts.io_filename))[0],
+            bdy_id)
+            numpy.savetxt(filename_output, output)
+            
+        for bdy_id in velocity_output.keys():
+            output = numpy.array(velocity_output[bdy_id])
+            filename_output = '{0}-velocity-body_{1}.dat'.format(
+                os.path.splitext(os.path.basename(self.opts.io_filename))[0],
+            bdy_id)
+            numpy.savetxt(filename_output, output)
+
+        sys.stdout.write('\n')
+            
+            
     def initialize_vtk(self):
 
         if not self.opts.gen_para_script:
