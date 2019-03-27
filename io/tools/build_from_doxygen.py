@@ -47,16 +47,16 @@ def get_classes_conditional(doxy_xml_files, cond):
                     })
     return found
 
-def classes_from_build_path(build_path):
+def classes_from_build_path(build_path, targets):
     """Get classes and members from all Doxygen XML files found on the
        provided build path."""
-    doxy_xml_path = os.path.join(build_path,'Docs/build/html/doxygen/xml')
+    doxy_xml_path = os.path.join(build_path,'docs/build/doxygen/doxy2swig-xml')
     if not os.path.exists(doxy_xml_path):
         print('%s: Error, path "%s" does not exist.'%(sys.argv[0], doxy_xml_path))
         sys.exit(1)
-    doxy_xml_files = (
-        glob(os.path.join(doxy_xml_path, 'class*.xml'))
-        + glob(os.path.join(doxy_xml_path, 'struct*.xml')))
+    doxy_xml_files = [p for t in targets
+                      for p in (glob(os.path.join(doxy_xml_path, '%s/class*.xml'%t))
+                                + glob(os.path.join(doxy_xml_path, '%s/struct*.xml'%t)))]
 
     # We want only classes that contain calls to the
     # ACCEPT_SERIALIZATION macro.
@@ -142,8 +142,7 @@ if __name__=='__main__':
      build_path) = parse_args(need_build_path=True)
 
     all_headers = get_headers(targets)
-
-    doxygen_classes = classes_from_build_path(build_path)
+    doxygen_classes = classes_from_build_path(build_path, targets)
 
     header_classes = classes_from_headers(all_headers, include_paths)
 
@@ -159,7 +158,7 @@ if __name__=='__main__':
     classes = {k: v for k,v in doxygen_classes.items()
                if in_maybe_inner(k, header_classes) and not unwanted(k)}
 
-    print('{:} classes found.'.format(len(classes)))
+    print('{:} classes found for targets {:}.'.format(len(classes), ', '.join(targets)))
 
     if len(classes) < 10:
         print('%s: Error, not enough classes found.'%sys.argv[0])

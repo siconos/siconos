@@ -92,7 +92,7 @@ if(WITH_SERIALIZATION)
 
     ADD_CUSTOM_COMMAND(
       OUTPUT ${GENERATED_HEADER}
-      DEPENDS doxygen ${GENERATED_DEPENDENCIES}
+      DEPENDS kernel_xml4swig ${GENERATED_DEPENDENCIES}
       ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
       ${CMAKE_SOURCE_DIR}/io/tools/builder_common.py
       ${GENERATED_COMMAND})
@@ -104,7 +104,7 @@ if(WITH_SERIALIZATION)
 
     ADD_CUSTOM_COMMAND(
       OUTPUT ${GENERATED_HEADER_KERNEL}
-      DEPENDS doxygen ${GENERATED_DEPENDENCIES}
+      DEPENDS kernel_xml4swig ${GENERATED_DEPENDENCIES}
       ${GENERATED_COMMAND_KERNEL})
   endif()
 endif()
