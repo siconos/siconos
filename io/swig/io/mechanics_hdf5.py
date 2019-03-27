@@ -1015,7 +1015,7 @@ class MechanicsHdf5(object):
             nslaw.attrs['e']=e
             nslaw.attrs['gid1']=collision_group1
             nslaw.attrs['gid2']=collision_group2
-            
+
     def add_Newton_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
                                    collision_group2=0):
         """

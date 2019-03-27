@@ -15,7 +15,7 @@ import numpy as np
 import h5py
 import bisect
 import time
-import pickle
+
 
 import tempfile
 from contextlib import contextmanager
@@ -30,7 +30,7 @@ from siconos.kernel import \
 import siconos.kernel as Kernel
 
 # Siconos Mechanics imports
-from siconos.mechanics.collision.tools import Contactor, Volume, Shape
+from siconos.mechanics.collision.tools import Contactor, Shape
 from siconos.mechanics import joints
 from siconos.io.io_base import MechanicsIO
 
@@ -315,9 +315,9 @@ def quaternion_get(orientation):
     if len(orientation) == 2:
             # axis + angle
             axis=orientation[0]
-            assert len(axis) == 3
+            assert(len(axis) == 3)
             angle=orientation[1]
-            assert type(angle) is float
+            assert(isinstance(angle,float))
             n=sin(angle / 2.) / np.linalg.norm(axis)
 
             ori=[cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
@@ -382,7 +382,6 @@ def load_siconos_mesh(shape_filename, scale=None):
     num_points = points.GetNumberOfTuples()
     num_triangles = polydata.GetNumberOfCells()
 
-    keep = None
     shape = None
 
     if polydata.GetCellType(0) == 5:
@@ -479,7 +478,7 @@ class ShapeCollection():
                             mesh.setOutsideMargin(
                                 self.shape(shape_name).attrs.get('outsideMargin',0))
                     else:
-                        assert False
+                        assert(False)
                 elif self.attributes(shape_name)['type'] in ['step', 'stp']:
                     from OCC.STEPControl import STEPControl_Reader
                     from OCC.BRep import BRep_Builder
@@ -508,7 +507,7 @@ class ShapeCollection():
 
 
                             #ok = step_reader.TransferRoot(1)
-                            ok = step_reader.TransferRoots() # VA : We decide to loads all shapes in the step file
+                            step_reader.TransferRoots() # VA : We decide to loads all shapes in the step file
                             nbs = step_reader.NbShapes()
 
                             for i in range(1, nbs + 1):
@@ -529,7 +528,7 @@ class ShapeCollection():
                     comp = TopoDS_Compound()
                     builder.MakeCompound(comp)
 
-                    assert self.shape(shape_name).dtype == h5py.new_vlen(str)
+                    assert(self.shape(shape_name).dtype == h5py.new_vlen(str))
 
                     with tmpfile(contents=self.shape(shape_name)[:][0]) as tmpf:
                         iges_reader = IGESControl_Reader()
@@ -648,9 +647,6 @@ class ShapeCollection():
                         self.shape(shape_name).attrs.get('outsideMargin', 0))
                     self._shapes[shape_name] = convex
 
-                else:
-                    throw
-
             elif isinstance(self.url(shape_name), str) and \
                     os.path.exists(self.url(shape_name)):
                 self._tri[shape_name], self._shapes[shape_name] = loadMesh(
@@ -714,7 +710,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                  osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None, collision_margin=None,
                  use_compression=False, output_domains=False, verbose=True):
-        super(self.__class__, self).__init__(io_filename, mode,
+        super(MechanicsHdf5Runner, self).__init__(io_filename, mode,
                                              use_compression, output_domains, verbose)
         self._interman = interaction_manager
         self._nsds = nsds
@@ -743,7 +739,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._scheduled_births = []
 
     def __enter__(self):
-        super(self.__class__, self).__enter__()
+        super(MechanicsHdf5Runner, self).__enter__()
 
         if self._gravity_scale is None:
             self._gravity_scale = 1  # 1 => m, 1/100. => cm
@@ -787,7 +783,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             elif nslawClass == Kernel.RelayNSL:
                 nslaw = nslawClass(int(self._nslaws_data[name].attrs['size']),
                                    float(self._nslaws_data[name].attrs['lb']),
-                                   float(self._nslaws_data[name].attrs['ub']))            
+                                   float(self._nslaws_data[name].attrs['ub']))
             assert(nslaw)
             self._nslaws[name] = nslaw
             gid1 = int(self._nslaws_data[name].attrs['gid1'])
@@ -1206,7 +1202,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 ds2 = \
                       Kernel.cast_NewtonEulerDS(
                           topo.getDynamicalSystem(body2_name))
-            except:
+            except Exception as e:
                 ds2 = None
 
             # static object in second
@@ -1742,7 +1738,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                                                         plugin_function_name)
                 ds.setBoundaryConditions(bc)
 
-    def explode_Newton_solve(self, s, with_timer):
+    def explode_Newton_solve(self,  with_timer):
+        s = self._simulation
         log(s.initialize,with_timer)()
         log(s.resetLambdas,with_timer)()
         # Again the access to s._newtonTolerance generates a segfault due to director
@@ -1779,7 +1776,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration);
 
 
-            
+
     def run(self,
             with_timer=False,
             time_stepping=None,
@@ -1854,7 +1851,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         print_verbose ('load siconos module ...')
         from siconos.kernel import \
-            NonSmoothDynamicalSystem, OneStepNSProblem,\
+            NonSmoothDynamicalSystem,\
             TimeDiscretisation,\
             GenericMechanical, FrictionContact,\
             GlobalFrictionContact, RollingFrictionContact,\
@@ -1910,7 +1907,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # (0) NonSmooth Dynamical Systems definition
         self._nsds=NonSmoothDynamicalSystem(t0, T)
         nsds=self._nsds
-        
+
         print_verbose ('import scene ...')
         self.import_scene(t0, body_class, shape_class, face_class, edge_class)
 
@@ -1925,7 +1922,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         timedisc=TimeDiscretisation(t0, h)
 
 
-        # (3) choice of default OneStepNonSmoothProblem w.r.t the type of nslaws        
+        # (3) choice of default OneStepNonSmoothProblem w.r.t the type of nslaws
         nslaw_type_list =[]
         for name in self._nslaws_data:
             nslaw_type_list.append(self._nslaws_data[name].attrs['type'])
@@ -1937,12 +1934,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # when a joint is imported.
         # For the moment, the nslaw is implicitely added when we import_joint but is not stored
         # self._nslaws_data
-        
+
         joints=list(self.joints())
         if len(joints) > 0:
             nslaw_type_list.append('EqualityConditionNSL')
-            
-            
+
+
         nb_of_nslaw_type =  len(set(nslaw_type_list))
         # print(set(nslaw_type_list))
         # input()
@@ -1957,7 +1954,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             else:
                 if (nb_of_nslaw_type >1):
                     osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
-                    solverOptions = osnspb.numericsSolverOptions()                    
+                    solverOptions = osnspb.numericsSolverOptions()
                     fc_index=1
                     # Friction one-contact solver options
                     fcOptions = solverOptions.internalSolvers[fc_index]
@@ -1996,7 +1993,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,nsds)
                 osnspb.setMaxSize(30000)
                 osnspb.setMStorageType(1)
-                
+
 
         # Global solver options
         solverOptions = osnspb.numericsSolverOptions()
@@ -2015,7 +2012,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         osnspb.setNumericsVerboseMode(numerics_verbose)
         #Numerics.numerics_set_verbose(3)
-        
+
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
 
@@ -2054,7 +2051,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.import_plugins()
 
 
-        
+
         if len(self._external_functions) > 0:
             print_verbose ('import external functions ...')
             self.import_external_functions()
@@ -2100,7 +2097,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if explode_Newton_solve:
                 if(time_stepping == TimeStepping) :
-                    log(self.explode_Newton_solve, with_timer, before=False)(simulation, with_timer)
+                    log(self.explode_Newton_solve, with_timer, before=False)(with_timer)
                 else:
                     print('simulation of type', type(time_stepping),' has no exploded version' )
                     log(simulation.computeOneStep, with_timer)()
