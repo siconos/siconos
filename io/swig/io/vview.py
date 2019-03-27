@@ -327,16 +327,18 @@ class VRawDataExportOptions(VViewOptions):
     def __init__(self, io_filename = None):
         super(self.__class__, self).__init__()
         self.export = True
-        self.ascii_mode = False
+        self._export_position = True
+        self._export_velocity = True
+        self._export_cf = False
+        
         self.start_step = 0
         self.end_step = None
         self.stride = 1
-        self.nprocs = 1
-        self.gen_para_script = False
+        
         self.io_filename = io_filename 
     def usage(self, long=False):
         print(__doc__); print()
-        print('Usage:  {0} [--help] [--version] [--ascii] <HDF5>'
+        print('Usage:  {0} [--help]  <HDF5>'
               .format(os.path.split(sys.argv[0])[1]))
         if long:
             print()
@@ -349,6 +351,10 @@ class VRawDataExportOptions(VViewOptions):
                                  number (default: None)
             --stride=n           integer, set export time step/simulation time step
                                  (default: 1)
+            --no-export-position do not export position
+            --no-export-velocity do not export position
+            --export-cf          do export of contact friction data
+                                 
             """)
 
     def parse(self):
@@ -357,8 +363,10 @@ class VRawDataExportOptions(VViewOptions):
             opts, args = getopt.gnu_getopt(sys.argv[1:], '',
                                            ['help', 'version', 'ascii',
                                             'start-step=', 'end-step=',
-                                            'stride=', 'global-filter',
-                                            'gen-para-script='])
+                                            'stride=', 
+                                            'no-export-position',
+                                            'no-export-velocity',
+                                            'export-cf'])
             self.configure(opts, args)
         except getopt.GetoptError as err:
                 sys.stderr.write('{0}\n'.format(str(err)))
@@ -374,26 +382,25 @@ class VRawDataExportOptions(VViewOptions):
                 print('{0} @SICONOS_VERSION@'.format(
                     os.path.split(sys.argv[0])[1]))
                 exit(0)
-            if o == '--global-filter':
-                self.global_filter = True
             if o == '--start-step':
                 self.start_step = int(a)
             if o == '--end-step':
                 self.end_step = int(a)
             if o == '--stride':
                 self.stride = int(a)
-            if o == '--gen-para-script':
-                self.gen_para_script = True
-                self.nprocs = int(a)
-            if o in ('--ascii'):
-                self.ascii_mode = True
+            if o == '--no-export-position':
+                self._export_position = False
+            if o == '--no-export-velocity':
+                self._export_velocity = False
+            if o == '--export-cf':
+                self._export_cf = True
 
-        if len(args) > 0:
-            self.io_filename = args[0]
-
-        # else:
-        #     self.usage()
-        #     exit(1)
+        if self.io_filename is  None:
+            if len(args) > 0 :
+                self.io_filename = args[0]       
+            else:
+                self.usage()
+                exit(1)
 
 ## Utilities
 
@@ -2368,27 +2375,29 @@ class VView(object):
                 bdy_id = int(pos_data[i,1])
                 
                 ######## position output ########
-                nvalue=pos_data.shape[1]
-                position_output_bdy = position_output.get(bdy_id)
-                if position_output_bdy is None:
-                    position_output[bdy_id] = []
-                position_output_body =  position_output[bdy_id]
-                position_output_body.append([])
-                position_output_body[-1].append(time)
-                position_output_body[-1].extend(pos_data[i,2:nvalue])
-                position_output_body[-1].append(bdy_id)
+                if self.opts._export_position :
+                    nvalue=pos_data.shape[1]
+                    position_output_bdy = position_output.get(bdy_id)
+                    if position_output_bdy is None:
+                        position_output[bdy_id] = []
+                    position_output_body =  position_output[bdy_id]
+                    position_output_body.append([])
+                    position_output_body[-1].append(time)
+                    position_output_body[-1].extend(pos_data[i,2:nvalue])
+                    position_output_body[-1].append(bdy_id)
 
                 
                 ######## velocity output ########
-                nvalue=velo_data.shape[1]
-                velocity_output_bdy = velocity_output.get(bdy_id)
-                if velocity_output_bdy is None:
-                    velocity_output[bdy_id] = []
-                velocity_output_body =  velocity_output[bdy_id]
-                velocity_output_body.append([])
-                velocity_output_body[-1].append(time)
-                velocity_output_body[-1].extend(velo_data[i,2:nvalue])
-                velocity_output_body[-1].append(bdy_id)
+                if self.opts._export_velocity :
+                    nvalue=velo_data.shape[1]
+                    velocity_output_bdy = velocity_output.get(bdy_id)
+                    if velocity_output_bdy is None:
+                        velocity_output[bdy_id] = []
+                    velocity_output_body =  velocity_output[bdy_id]
+                    velocity_output_body.append([])
+                    velocity_output_body[-1].append(time)
+                    velocity_output_body[-1].extend(velo_data[i,2:nvalue])
+                    velocity_output_body[-1].append(bdy_id)
 
         for bdy_id in position_output.keys():
             output = numpy.array(position_output[bdy_id])
@@ -2403,7 +2412,44 @@ class VView(object):
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
             bdy_id)
             numpy.savetxt(filename_output, output)
+            
+        cf_output = {}
+        for time in times:
+            #print('time', time)
+            k = k + self.opts.stride
+            if (k % packet == 0):
+                sys.stdout.write('.')
+                
+            self.io_reader.SetTime(time)
 
+            cf_data = self.io_reader.cf_data
+            #print('cf_data', cf_data)
+
+            if cf_data is not None and self.opts._export_cf :
+                ncontact=cf_data.shape[0]
+
+                for i in range(ncontact):
+                    contact_id = int(cf_data[i,23])
+                    #print('contact_id', contact_id)
+                    ######## contact output ########
+                    nvalue=cf_data.shape[1]
+                    cf_output_contact = cf_output.get(contact_id)
+                    if cf_output_contact is None:
+                        cf_output[contact_id] = []
+                    cf_output_contact =  cf_output[contact_id]
+                    cf_output_contact.append([])
+                    cf_output_contact[-1].append(time)
+                    cf_output_contact[-1].extend(cf_data[i,2:nvalue])
+                    cf_output_contact[-1].append(contact_id)
+  
+        for contact_id in cf_output.keys():
+            output = numpy.array(cf_output[contact_id])
+            filename_output = '{0}-cf-contact_{1}.dat'.format(
+                os.path.splitext(os.path.basename(self.opts.io_filename))[0],
+            contact_id)
+            numpy.savetxt(filename_output, output)
+    
+            
         sys.stdout.write('\n')
             
             
