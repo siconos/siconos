@@ -218,7 +218,7 @@ def replace_latex(pyfile, latex_dir):
     #                      'replace_latex.sh')
 
     # temp file for outputs.
-    target = Path(pyfile).stem + '.copy'
+    target = Path(Path(pyfile).stem + '.copy').resolve()
     shutil.copyfile(pyfile, target)
 
     # Read input (.py)
@@ -256,4 +256,5 @@ def replace_latex(pyfile, latex_dir):
     with open(target, 'w') as f:
         for line in source_lines:
             f.write(line)
-    shutil.move(target, pyfile)
+    if target.exists():
+        shutil.move(target, pyfile)
