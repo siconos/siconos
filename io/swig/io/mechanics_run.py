@@ -315,14 +315,16 @@ def quaternion_get(orientation):
     if len(orientation) == 2:
             # axis + angle
             axis=orientation[0]
-            assert(len(axis) == 3)
+            if not (len(axis) == 3):
+                raise AssertionError("quaternion_get. axis in not a 3D vector")
             angle=orientation[1]
-            assert(isinstance(angle,float))
+            if not (isinstance(angle,float)):
+                raise AssertionError("quaternion_get. angle must be a float")
             n=sin(angle / 2.) / np.linalg.norm(axis)
-
             ori=[cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
     else:
-        assert(len(orientation)==4)
+        if not (len(orientation)==4):
+            raise AssertionError("quaternion_get. the quaternion must be of size 4")
         # a given quaternion
         ori=orientation
     return ori
@@ -528,7 +530,10 @@ class ShapeCollection():
                     comp = TopoDS_Compound()
                     builder.MakeCompound(comp)
 
-                    assert(self.shape(shape_name).dtype == h5py.new_vlen(str))
+                    if not (self.shape(shape_name).dtype == h5py.new_vlen(str)):
+                        raise AssertionError("ShapeCollection.get()")
+
+                    #assert(self.shape(shape_name).dtype == h5py.new_vlen(str))
 
                     with tmpfile(contents=self.shape(shape_name)[:][0]) as tmpf:
                         iges_reader = IGESControl_Reader()
@@ -1202,7 +1207,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 ds2 = \
                       Kernel.cast_NewtonEulerDS(
                           topo.getDynamicalSystem(body2_name))
-            except Exception as e:
+            except Exception :
                 ds2 = None
 
             # static object in second

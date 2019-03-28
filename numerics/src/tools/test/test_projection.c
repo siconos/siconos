@@ -105,6 +105,10 @@ int main(void)
   reaction[3] = 0.0;
   reaction[4] = 0.0;
   status = test_projection(reaction, mu, mur);
+  if (status != PROJRCONE_BOUNDARY_FRICTION)
+  {
+    info+=1;
+  }
 
   reaction[0] = 1.0;
   reaction[1] = 0.0;
@@ -112,6 +116,10 @@ int main(void)
   reaction[3] = 2.0;
   reaction[4] = 0.0;
   status = test_projection(reaction, mu, mur);
+  if (status != PROJRCONE_BOUNDARY_ROLLING)
+  {
+    info+=1;
+  }
 
   reaction[0] = 1.0;
   reaction[1] = 2.0;
@@ -119,6 +127,10 @@ int main(void)
   reaction[3] = 2.0;
   reaction[4] = 0.0;
   status = test_projection(reaction, mu, mur);
+  if (status != PROJRCONE_BOUNDARY_FRICTION_ROLLING)
+  {
+    info+=1;
+  }
 
   reaction[0] = 1.0;
   reaction[1] = 2.0;

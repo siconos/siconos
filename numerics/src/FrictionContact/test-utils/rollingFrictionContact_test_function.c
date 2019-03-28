@@ -67,12 +67,12 @@ int rollingFrictionContact_test_function(FILE * f, SolverOptions * options)
   RollingFrictionContactProblem* problem = (RollingFrictionContactProblem *)malloc(sizeof(RollingFrictionContactProblem));
   /* numerics_set_verbose(1); */
 
-  int info1 = rollingFrictionContact_newFromFile(problem, f);
+  rollingFrictionContact_newFromFile(problem, f);
   rollingFrictionContact_display(problem);
 
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
-  int info2 = rollingFrictionContact_printInFile(problem, foutput);
+  rollingFrictionContact_printInFile(problem, foutput);
 
   int NC = problem->numberOfContacts;
   int dim = problem->dimension;
