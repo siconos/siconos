@@ -480,7 +480,8 @@ class ShapeCollection():
                             mesh.setOutsideMargin(
                                 self.shape(shape_name).attrs.get('outsideMargin',0))
                     else:
-                        assert(False)
+                        raise AssertionError("ShapeCollection.get() self.attributes(shape_name)['type'] != 'vtp'")
+
                 elif self.attributes(shape_name)['type'] in ['step', 'stp']:
                     from OCC.STEPControl import STEPControl_Reader
                     from OCC.BRep import BRep_Builder
