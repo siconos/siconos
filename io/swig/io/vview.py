@@ -78,7 +78,8 @@ class VViewOptions(object):
         self.visible_mode = 'all'
         self.export = False
         self.gen_para_script = False
-
+        self.with_edges = False
+ 
     ## Print usage information
     def usage(self, long=False):
         print(__doc__); print()
@@ -93,7 +94,7 @@ class VViewOptions(object):
             [--normalcone-ratio = <float value>]
             [--advance=<'fps' or float value>] [--fps=float value]
             [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
-            [--visible=all,avatars,contactors]
+            [--visible=all,avatars,contactors] [--with-edges]
             """)
         else:
             print("""Options:
@@ -149,6 +150,8 @@ class VViewOptions(object):
        avatars: view only avatar if an avatar is defined (for each
        object) contactors: ignore avatars, view only contactors where
        avatars are contactors with collision_group=-1
+     --with_edges 
+       add edges in the rendering (experimental for primitives) 
     """)
 
     def parse(self):
@@ -164,7 +167,7 @@ class VViewOptions(object):
                                             'cf-scale=', 'normalcone-ratio=',
                                             'advance=', 'fps=', 'camera=',
                                             'lookat=',
-                                            'up=', 'ortho=', 'visible='])
+                                            'up=', 'ortho=', 'visible=', 'with-edges'])
             self.configure(opts, args)
         except getopt.GetoptError as err:
             sys.stderr.write('{0}\n'.format(str(err)))
@@ -237,6 +240,8 @@ class VViewOptions(object):
 
             elif o == '--visible':
                 self.visible_mode = a
+            elif o == '--with-edges':
+                self.with_edges = True
 
         if self.frames_per_second == 0:
             self.frames_per_second = 25
@@ -1639,6 +1644,14 @@ class VView(object):
                 mapper.ImmediateModeRenderingOff()
             mapper.SetInputConnection(source.GetOutputPort())
             self.mappers[shape_name] = (x for x in [mapper])
+            if self.opts.with_edges:
+                mapper_edge = vtk.vtkCompositePolyDataMapper()
+                if not self.opts.imr:
+                    mapper_edge.ImmediateModeRenderingOff()
+                    mapper_edge.SetInputConnection(source.GetOutputPort())
+                self.mappers_edges[shape_name] = (y for y in [mapper_edge])
+
+                
 
     def init_shapes(self):
         for shape_name in self.io.shapes():
@@ -1647,6 +1660,11 @@ class VView(object):
         for shape_name in self.mappers.keys():
             if shape_name not in self.unfrozen_mappers:
                 self.unfrozen_mappers[shape_name] = next(self.mappers[shape_name])
+        if self.opts.with_edges:
+            for shape_name in self.mappers_edges.keys():
+                if shape_name not in self.unfrozen_mappers_edges:
+                    self.unfrozen_mappers_edges[shape_name] = next(self.mappers_edges[shape_name])
+
 
     def init_contactor(self, contactor_instance_name, instance, instid):
         contactor = instance[contactor_instance_name]
@@ -1677,13 +1695,23 @@ class VView(object):
 
         if not (self.opts.global_filter or self.opts.export):
             actor = vtk.vtkActor()
+            if self.opts.with_edges:
+                actor_edge = vtk.vtkActor()
             if instance.attrs.get('mass', 0) > 0:
                 # objects that may move
                 self.dynamic_actors[instid].append((actor, contact_shape_indx,
                                                     collision_group))
-
                 actor.GetProperty().SetOpacity(
                     self.config.get('dynamic_opacity', 0.7))
+
+                if self.opts.with_edges:
+                    self.dynamic_actors[instid].append((actor_edge, contact_shape_indx,
+                                                    collision_group))
+                    actor_edge.GetProperty().SetOpacity(
+                        self.config.get('dynamic_opacity', 1.0))
+                    
+                    actor_edge.GetProperty().SetRepresentationToWireframe()
+                
             else:
                 # objects that are not supposed to move
                 self.static_actors[instid].append((actor, contact_shape_indx,
@@ -1693,11 +1721,15 @@ class VView(object):
                     self.config.get('static_opacity', 1.0))
 
             actor.GetProperty().SetColor(random_color())
-
             actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
+            if self.opts.with_edges:
+                actor_edge.GetProperty().SetColor(random_color())
+                actor_edge.SetMapper(self.unfrozen_mappers_edges[contact_shape_indx])
 
             if not (self.opts.global_filter or self.opts.export):
                 self.renderer.AddActor(actor)
+                if self.opts.with_edges:
+                    self.renderer.AddActor(actor_edge)
 
         transform = vtk.vtkTransform()
         transformer = vtk.vtkTransformFilter()
@@ -1721,10 +1753,14 @@ class VView(object):
             transformer.SetTransform(scale_transform)
             if not (self.opts.global_filter or self.opts.export):
                 actor.SetUserTransform(scale_transform)
+                if self.opts.with_edges:
+                    actor_edge.SetUserTransform(scale_transform)
         else:
             transformer.SetTransform(transform)
             if not (self.opts.global_filter or self.opts.export):
                 actor.SetUserTransform(transform)
+                if self.opts.with_edges:
+                    actor_edge.SetUserTransform(transform)
 
         self.transformers[contact_shape_indx] = transformer
 
@@ -2525,11 +2561,13 @@ class VView(object):
             self.readers = dict()
             self.datasets = dict()
             self.mappers = dict()
+            self.mappers_edges = dict()
             self.dynamic_actors = dict()
             self.static_actors = dict()
             self.vtk_reader = {'vtp': vtk.vtkXMLPolyDataReader,
                                'stl': vtk.vtkSTLReader}
             self.unfrozen_mappers = dict()
+            self.unfrozen_mappers_edges = dict()
 
             self.build_set_functions()
 
