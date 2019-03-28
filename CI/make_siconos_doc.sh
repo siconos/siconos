@@ -1,13 +1,38 @@
+# --- Config and build of Siconos documentation ---
+# 
+# Action :
+# - fetch and install all packages and tools required to build siconos doc
+# - configure siconos project with documentation on
+# - build siconos and build doc.
+#
+# The script is supposed to be called by ci (job in .gitlab-ci.yml)
+# and executed on a runner.
+#
+# It assumes that CI_PROJECT_DIR is set to siconos repository path (which is the case when called from gitlab-ci).
+#
+# Build directory will be $CI_PROJECT_DIR/build.
+# Documentation output path will be $CI_PROJECT_DIR/build/docs/build/html
+# Siconos configuration is described in siconos/CI/siconos_docs.cmake file.
+# 
+# This last path is supposed to be automatically fetched and published to https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos
+# thanks to job pages in gitlab-ci.yml.
+
+
 #!bin/bash
 apt update -qq && apt install -y -qq cmake git-core wget make \
 			      libboost-dev libgmp-dev swig gcc gfortran g++ liblapack-dev libatlas-base-dev \
 			      lp-solve liblpsolve55-dev python3-dev libpython3-dev bash swig doxygen python3-dev python3-pip graphviz htop
 
-pip3 install -U -r ./docs/requirements.txt
+# Check if CI_PROJECT_DIR is set AND not empty
+: ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with the path to 'siconos' repository (absolute) path."}
+
+DOC_CI_CONFIG_DIR=$CI_PROJECT_DIR/CI/docs
+
+pip3 install -U -r $CI_PROJECT_DIR/docs/requirements.txt
 pip3 install git+https://github.com/sphinx-contrib/youtube.git
-mkdir build
-cd build
+mkdir $CI_PROJECT_DIR/build
+cd $CI_PROJECT_DIR/build
 export LANG=C.UTF-8 # Required, else doxy2swig fails!
-cmake ../ -DUSER_OPTIONS_FILE=$PWD/../CI/siconos_docs.cmake
+cmake $CI_PROJECT_DIR -DUSER_OPTIONS_FILE=$CI_PROJECT_DIR/CI/docs/siconos_docs.cmake
 make -j 4
 make doc -j 4

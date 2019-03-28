@@ -52,7 +52,7 @@ endif()
 # Set target names from components list
 assert(COMPONENTS)
 set(AVAILABLE_COMPONENTS "externals numerics kernel control mechanics mechanisms io")
-foreach(component_name ${COMPONENTS})
+foreach(component_name IN LISTS COMPONENTS)
   string(TOUPPER ${component_name} upname)
   list(FIND ${AVAILABLE_COMPONENTS} ${component_name} comp_exists)
   if(NOT comp_exists)
@@ -60,7 +60,9 @@ foreach(component_name ${COMPONENTS})
   endif()
   set(HAVE_SICONOS_${upname} TRUE)
 endforeach()
-
+# Get last component in the list;
+# It might be usefull to set some dependencies in targets.
+list(GET COMPONENTS -1 last_component)
 # ============= The project =============
 # Set project name and project languages
 # => this automatically defines:
@@ -122,7 +124,7 @@ endif()
 add_subdirectory(docs)
 
 # ========= Setup each required component =========
-foreach(COMPONENT ${COMPONENTS})
+foreach(COMPONENT IN LISTS COMPONENTS)
   message("\n--------------------------------------------------")
   add_subdirectory(${COMPONENT})
 endforeach()

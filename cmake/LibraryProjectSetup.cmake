@@ -80,11 +80,19 @@ macro(LIBRARY_PROJECT_SETUP)
     ${CMAKE_CURRENT_BINARY_DIR}
     CACHE INTERNAL "Include directories for external dependencies.")
 
-  include(doxygen_tools)
+  include(doc_tools)
   # --- doxygen warnings ---
   include(doxygen_warnings)
 
   # --- documentation ---
+
+  if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG)
+    # Update list of source directories to be taken
+    # into account by doxygen for the current component
+    # --> set CACHE var ${COMPONENT}_DOXYGEN_INPUTS
+    # Required by doxy2swig_docstrings and doxy2rst_sphinx.
+    update_doxygen_inputs(${COMPONENT})
+  endif()
   
   # xml files for python docstrings ...
   # xml files are required to build docstrings target
@@ -96,8 +104,6 @@ macro(LIBRARY_PROJECT_SETUP)
   
   # update the main doxy file, without building the doc
   if(WITH_${COMPONENT}_DOCUMENTATION)
-    update_doxy_config_file(${COMPONENT})
-
     # Prepare target to generate rst files from xml
     doxy2rst_sphinx(${COMPONENT})
   endif()

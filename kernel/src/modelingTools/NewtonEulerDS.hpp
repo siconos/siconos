@@ -156,11 +156,6 @@ protected:
    */
   SP::SiconosVector _q;
 
-  //SP::SiconosVector _deltaq;
-
-  /** Initial position */
-  SP::SiconosVector _q0;
-
   /** Dimension of _q, is not necessary equal to _ndof. In our case, _qDim = 7 and  _ndof =6*/
   unsigned int _qDim;
 
@@ -467,14 +462,6 @@ public:
    *  \param newPtr
    */
   virtual void setQPtr(SP::SiconosVector newPtr);
-
-  /** get initial state (pointer link)
-   *  \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector q0() const
-  {
-    return _q0;
-  }
 
   /** set initial state (copy)
    *  \param newValue
