@@ -330,7 +330,7 @@ class VRawDataExportOptions(VViewOptions):
         self._export_position = True
         self._export_velocity = True
         self._export_cf = False
-        
+        self._export_velocity_in_absolute_frame = False
         self.start_step = 0
         self.end_step = None
         self.stride = 1
@@ -354,6 +354,7 @@ class VRawDataExportOptions(VViewOptions):
             --no-export-position do not export position
             --no-export-velocity do not export position
             --export-cf          do export of contact friction data
+            --export-velocity-in-absolute-frame          do export of contact friction data
                                  
             """)
 
@@ -366,7 +367,8 @@ class VRawDataExportOptions(VViewOptions):
                                             'stride=', 
                                             'no-export-position',
                                             'no-export-velocity',
-                                            'export-cf'])
+                                            'export-cf',
+                                            'export-velocity-in-absolute-frame'])
             self.configure(opts, args)
         except getopt.GetoptError as err:
                 sys.stderr.write('{0}\n'.format(str(err)))
@@ -394,6 +396,8 @@ class VRawDataExportOptions(VViewOptions):
                 self._export_velocity = False
             if o == '--export-cf':
                 self._export_cf = True
+            if o == '--export-velocity-in-absolute-frame':
+                self._export_velocity_in_absolute_frame = True
 
         if self.io_filename is  None:
             if len(args) > 0 :
@@ -2358,7 +2362,8 @@ class VView(object):
         # position_output[:,0] = times[:]
         position_output = {}
         velocity_output = {}
-        
+        velocity_absolute_output = {}
+                
         for time in times:
             k = k + self.opts.stride
             if (k % packet == 0):
@@ -2398,6 +2403,22 @@ class VView(object):
                     velocity_output_body[-1].append(time)
                     velocity_output_body[-1].extend(velo_data[i,2:nvalue])
                     velocity_output_body[-1].append(bdy_id)
+                    
+                ######## velocity in absolute frame output ########
+                if self.opts._export_velocity_in_absolute_frame :
+                    nvalue=velo_data.shape[1]
+                    [q1,q2,q3,q4] = pos_data[i,5:9]
+                    q = Quaternion((q1, q2, q3, q4))
+                    velo = q.rotate(velo_data[i,5:8])
+                    velocity_absolute_output_bdy = velocity_absolute_output.get(bdy_id)
+                    if velocity_absolute_output_bdy is None:
+                        velocity_absolute_output[bdy_id] = []
+                    velocity_absolute_output_body =  velocity_absolute_output[bdy_id]
+                    velocity_absolute_output_body.append([])
+                    velocity_absolute_output_body[-1].append(time)
+                    velocity_absolute_output_body[-1].extend(velo_data[i,2:5])
+                    velocity_absolute_output_body[-1].extend(velo[:])
+                    velocity_absolute_output_body[-1].append(bdy_id)
 
         for bdy_id in position_output.keys():
             output = numpy.array(position_output[bdy_id])
@@ -2409,6 +2430,13 @@ class VView(object):
         for bdy_id in velocity_output.keys():
             output = numpy.array(velocity_output[bdy_id])
             filename_output = '{0}-velocity-body_{1}.dat'.format(
+                os.path.splitext(os.path.basename(self.opts.io_filename))[0],
+            bdy_id)
+            numpy.savetxt(filename_output, output)
+
+        for bdy_id in velocity_absolute_output.keys():
+            output = numpy.array(velocity_absolute_output[bdy_id])
+            filename_output = '{0}-velocity-absolute-body_{1}.dat'.format(
                 os.path.splitext(os.path.basename(self.opts.io_filename))[0],
             bdy_id)
             numpy.savetxt(filename_output, output)
