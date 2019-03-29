@@ -86,7 +86,7 @@ macro(doxy2swig_docstrings COMP)
     # No doxy2swig but 
     # generate empty ${COMP}-docstrings.i file (required because of %include in swig files)
     add_custom_command(OUTPUT ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
-      COMMAND touch
+      COMMAND ${CMAKE_COMMAND} -E touch
       ARGS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       )
     add_custom_target(${COMP}_docstrings DEPENDS ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
