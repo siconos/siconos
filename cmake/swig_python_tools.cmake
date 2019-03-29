@@ -182,9 +182,15 @@ macro(add_siconos_swig_sub_module fullname)
   ENDIF()
 
   # Add a post-build step that prepends utf-8 coding indicator to .py files
-  add_custom_command(TARGET ${SWIG_MODULE_${_name}_REAL_NAME}
-    POST_BUILD COMMAND sh -c "(echo '# -*- coding: utf-8 -*-'; cat ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.py) > ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.tmp; mv ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.tmp ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.py" VERBATIM)
-
+  find_program(SH_COMMAND sh)
+  find_program(TAR_COMMAND tar)
+  find_program(MV_COMMAND mv)
+  if(SH_COMMAND AND TAR_COMMAND)
+    if(MV_COMMAND)
+      add_custom_command(TARGET ${SWIG_MODULE_${_name}_REAL_NAME}
+        POST_BUILD COMMAND sh -c "(echo '# -*- coding: utf-8 -*-'; cat ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.py) > ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.tmp; mv ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.tmp ${SICONOS_SWIG_ROOT_DIR}/${_path}/${_name}.py" VERBATIM)
+    endif()
+  endif()
   # Check dependencies and then link ...
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
   if(UNIX AND NOT APPLE)
