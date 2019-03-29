@@ -60,6 +60,18 @@ extern "C"
    */
   void NM_MUMPS_set_control_params(NumericsMatrix* A);
 
+  /** Set control of parallelism.
+   * \param A, the matrix holding the MUMPS config,
+   * \param par, value of MUMPS par, see MUMPS documentation.
+   */
+  void NM_MUMPS_set_par(NumericsMatrix* A, int par);
+
+  /** Set matrix symetry.
+   * \param A, the matrix holding the MUMPS config,
+   * \param sym, value for matrix symmetry, see MUMPS documentation.
+   */
+  void NM_MUMPS_set_sym(NumericsMatrix* A, int sym);
+
   /** Set icntl control.
    * \param A, the matrix holding the MUMPS config,
    * \param index, the fortran index in the icntl array,

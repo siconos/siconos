@@ -239,6 +239,16 @@ void NM_MUMPS_extra_display(NumericsMatrix* A)
     printf("MUMPS : condition number 2 %g\n", mumps_id->RINFOG(11));
   }
 }
+
+void NM_MUMPS_set_par(NumericsMatrix* A, int par)
+{
+  NM_MUMPS_id(A)->par = par;
+}
+
+void NM_MUMPS_set_sym(NumericsMatrix* A, int sym)
+{
+  NM_MUMPS_id(A)->sym = sym;
+}
 #endif
 
 #include <string.h>
