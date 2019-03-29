@@ -331,7 +331,8 @@ How does it work?
 *Config and sources:*
 
 * cmake/doc_tools.cmake : cmake macros and functions calling doxygen, sphinx or other tool related to documentation.
-* docs/doctools.py : python tools used to generate docs
+* docs/gendoctools/* : python tools used to generate docs. This python package will be installed in <CMAKE_BINARY_DIR>/share
+  at build time.
 * docs/config/doxyxml2sphinx.config.in : doxygen (xml output) for breathe/sphinx
 
 .. figure:: /figures/doc_process/build_breathe.*
@@ -354,7 +355,8 @@ Finally, rst files are generated, based on those docstrings, in autodoc format, 
 
 * cmake/swig_python_tools.cmake : python functions used to drive docstrings
   generation
-* docs/gendoctools : python tools used to generate docs
+* docs/gendoctools/* : python tools used to generate docs. This python package will be installed in <CMAKE_BINARY_DIR>/share
+  at build time.
 * docs/config/doxy2swig.config.in : doxygen (xml output) config, for swig and docstrings
 
 
@@ -382,7 +384,7 @@ All rst files (from source dir and generated for Python and C++ API) and process
 * docs/sphinx/index.rst.in : source for documentation main page
 * docs/sphinx/\*/\*.rst : inputs for sphinx doc (textbooks)
 * docs/sphinx/figures/\* : all figures used in sphinx doc
-* docs/doctools.py : python tools used to generate docs
+* docs/gendoctools/* : python tools used to generate docs.
 * docs/config/doxy.config.in : doxygen (html output) config
 * docs/config/doxy_warnings.config.in : doxygen (log output) config
 
@@ -491,30 +493,13 @@ See also the file CI/make_siconos_doc.sh that may be helpful to install siconos 
 More about Doxygen to sphinx rst
 --------------------------------
 
-Some other tools to generate rst from doxygen have been tested : Exhale and doxyrest. We prefer breathe, and notes below are just for the records.
+Some other tools to generate rst from doxygen have been tested : Exhale and doxyrest. We choose breathe, that seems more appropriate to our case. Exhale and doxyrest configs are kept for the records in siconos-junk/sandbox project.
 
 Existing tools (as far as we know ...):
 
 * Sphinx/Exhale(breathe) : https://github.com/svenevs/exhale`Sphinx/Exhale
 * doxyrest https://github.com/vovkos/doxyrest
 * https://bitbucket.org/trlandet/doxygen_to_sphinx_and_swig
-
-Both exhale and doxyrest are available in siconos, (use -DUSE_EXHALE=ON or -DUSE_DOXYREST=ON). 
-
-Exhale conf must be defined in conf.py.in (sphinx) and may also handle doxygen run (xml outputs + rst generations from those outputs).
-  
-Doxyrest works the same way but is not as convenient as exhale. Outputs are in CMAKE_BINARY_DIR/docs/sphinx/from_doxygen.
-
-Both (exhale and doxyrest) are quite slow and doc generation may take long time ...
-
-It seems that it strongly depends on the chosen theme for sphinx (avoid bootswatch).
-
-* USE_DOXYREST=ON, to generate rst files from xml outputs. Test purpose. Useful to produce rst files from "related pages" of doxygen.
-* USE_EXHALE=ON to generate rst files from xml outputs. Test purpose.  Warning : combining this option with EXTRACT_ALL ON    (USE_DEVEL_DOXYGEN=ON) may result in a very long time to build documentation.
-
-
-
-
 
 .. _Doxygen : http://www.stack.nl/~dimitri/doxygen/
 

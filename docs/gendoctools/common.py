@@ -188,19 +188,19 @@ def find_and_replace_math(content):
     return content
 
 
-def replace_latex(pyfile, latex_dir):
+def replace_latex(inoutfile, latex_sources):
     """Post processing of latex forms in docstrings.
 
     Parameters
     ----------
 
-    pyfile : Path()
+    inoutfile : Path()
        name (full path) of the python file to process
-    latex_dir : string
+    latex_sources : string or Path()
        directory which contains pickle files with latex forms
        (result of do_latex or do_verbatim call in sicodoxy2swig)
 
-    Usually : pyfile = some_component.py (e.g. numerics.py)
+    Usually : inoutfile = some_component.py (e.g. numerics.py)
     and latex_dir = wrap/siconos/tmp_component_name.
 
     This function is supposed to be called by a target
@@ -208,21 +208,21 @@ def replace_latex(pyfile, latex_dir):
 
     It is also called  by module_docstrings2rst.
     """
-    latex_dir = Path(latex_dir).resolve()
+    latex_sources = Path(latex_sources).resolve()
 
-    # Parse latex_dir and get all pickle files
-    formfiles = [f for f in latex_dir.glob('latex_*.pickle')]
+    # Parse latex_sources and get all pickle files
+    formfiles = [f for f in latex_sources.glob('latex_*.pickle')]
 
     # Runner : use sed rather than python replace. But less portable (?)
     #runner = os.path.join(os.path.dirname(os.path.abspath(__file__)),
     #                      'replace_latex.sh')
 
     # temp file for outputs.
-    target = Path(Path(pyfile).stem + '.copy').resolve()
-    shutil.copyfile(pyfile, target)
-
+    inoutfile = Path(inoutfile)
+    target = Path(inoutfile.parent, inoutfile.stem + '.copy').resolve()
+    shutil.copyfile(inoutfile, target)
     # Read input (.py)
-    with open(pyfile, "r") as f:
+    with open(inoutfile, "r") as f:
         source_lines = f.readlines()
     rst = []
     # Parse and replace :
@@ -256,5 +256,4 @@ def replace_latex(pyfile, latex_dir):
     with open(target, 'w') as f:
         for line in source_lines:
             f.write(line)
-    if target.exists():
-        shutil.move(target, pyfile)
+    shutil.move(target, inoutfile)

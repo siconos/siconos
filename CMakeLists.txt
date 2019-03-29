@@ -13,6 +13,7 @@ cmake_minimum_required(VERSION 3.0.2)
 
 # Set cmake modules directory (i.e. the one which contains all user-defined FindXXX.cmake files among other things)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/docs/cmake)
 
 # Force out-of-source build
 include(OutOfSourcesBuild)

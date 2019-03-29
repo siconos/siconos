@@ -254,7 +254,6 @@ def docstrings2rst(component_name, module_path, module_name,
     with open(features_filename, 'rb') as f:
         features = pickle.load(f)
 
-
     # Write rst files for python functions and classes of
     # the current component.
     all_files = collect_classes_and_functions(comp, module_name,
@@ -419,7 +418,7 @@ def create_autodoc(current, module_name):
     else:  # current is neither a class nor a function
         # try data ...
         kind = 'pydata'
-        gen = ''#'.. autodata:: ' + str(current) + '\n\n'
+        gen = ''  #'.. autodata:: ' + str(current) + '\n\n'
         name = 'Unknown'
         return gen, kind, name
 

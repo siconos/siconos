@@ -124,13 +124,6 @@ if with_python_wrapper:
     napoleon_use_param = True
     napoleon_use_rtype = False#True
     
-# ---- Start doxyrest conf ---
-# !! outdated / unstable !!
-with_doxyrest = @HAS_DOXYREST@
-if with_doxyrest:
-    sys.path.insert(1, os.path.abspath('@DOXYREST_SPHINX_DIR@'))
-    extensions += ['doxyrest', 'cpplexer']
-
 # ---- Start Breathe conf ---
 extensions += ['breathe']
 components = bt.parse_cmake_list("@COMPONENTS@")
@@ -141,45 +134,6 @@ for comp in components:
     # Path to doxygen outputs
 breathe_default_project = 'numerics' # "@PROJECT_NAME@"
 breathe_default_members = ('members', 'public-members')
-
-# --- Exhale conf --
-# !! outdated / unstable !!
-with_exhale = @HAS_EXHALE@
-if with_exhale:
-    extensions += ['exhale']
-    # Setup the exhale extension
-    exhale_args = {
-        # These arguments are required
-        "containmentFolder":     "./sphinx/api",
-        "rootFileName":          "library_root.rst",
-        "rootFileTitle":         "Library API",
-        "afterTitleDescription": textwrap.dedent('''
-           .. note::
-
-           The following documentation presents the C++ API.  The Python API
-           generally mirrors the C++ API, but some methods may not be available in
-           Python or may perform different actions.
-        '''),
-        "doxygenStripFromPath":  "@CMAKE_SOURCE_DIR@",
-        # Suggested optional arguments
-        "createTreeView":        True,
-        # TIP: if using the sphinx-bootstrap-theme, you need
-        #"createTreeView": True,
-        #"treeViewIsBootstrap": True,
-        #"treeViewBootstrapLevels": 4,
-        "exhaleExecutesDoxygen": True,
-        #"doxygenStripFromPath": "@CMAKE_SOURCE_DIR@",
-        "exhaleUseDoxyfile" : True,
-        # Uncomment when using exhale to call doxygen
-        # "exhaleDoxygenStdin": textwrap.dedent('''
-        #  INPUT = @DOXYGEN_INPUTS@
-        #  RECURSIVE = NO
-        #  EXTRACT_ALL= NO
-        #  EXTRACT_STATIC = NO
-        #  HIDE_UNDOC_MEMBERS = YES
-        #  HIDE_UNDOC_CLASSES = YES     
-        #''')
-    }
 
 # sphinx versioning option. Review this later (issue to be fixed :
 # https://github.com/CityOfZion/neon-js/issues/111)

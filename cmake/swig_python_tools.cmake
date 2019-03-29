@@ -73,7 +73,7 @@ macro(doxy2swig_docstrings COMP)
       )
     
     # -- command to build .i files from xml (doxygen outputs) for current component  --
-    # Call a python function from doctools.py (build_docstrings).
+    # Call a python function from gendoctools (build_docstrings).
     add_custom_command(OUTPUT  ${SICONOS_SWIG_ROOT_DIR}/${COMP}-docstrings.i
       DEPENDS ${COMP}_xml4swig
       COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c

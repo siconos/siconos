@@ -189,8 +189,6 @@ if(WITH_DOCUMENTATION)
 
   add_custom_target(doc DEPENDS html)
 
-  # Some outdated, unstable, on test ... options.
-  include(doc_devel)
   message("------ End global setup for documentation ------\n")
 
 
