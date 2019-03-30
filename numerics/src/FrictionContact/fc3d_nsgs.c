@@ -24,6 +24,7 @@
 #include "fc3d_local_problem_tools.h"
 #include "NCP_Solvers.h"
 #include "SiconosBlas.h"
+#include "NumericsArrays.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -254,23 +255,6 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
 }
 
 
-/* swap two indices */
-void uint_swap (unsigned int *a, unsigned int *b)
-{
-  unsigned int temp = *a;
-  *a = *b;
-  *b = temp;
-}
-
-/* shuffle an unsigned array */
-void uint_shuffle (unsigned int *a, unsigned int n) {
-
-  for (unsigned int i = 0; i < n - 1; i++)
-  {
-    uint_swap  (&a[i], &a[i + rand()%(n - i)]);
-  }
-}
-
 
 
 static
@@ -342,6 +326,7 @@ int file_exists(const char *fname)
   }
   return 0;
 }
+
 static
 void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
                                  SolverOptions *localsolver_options,

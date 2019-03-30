@@ -71,9 +71,10 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 
   double t[6];
   double * pt = t;
-
+  // Construction of the local contact frame form the normal vector 
   if (orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
     RuntimeException::selfThrow("NewtonEuler3DR::FC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
+  // Construction of the rotation matrix from the absolute frame to the local contact frame 
   pt = t;
   _RotationAbsToContactFrame->setValue(0, 0, Nx);
   _RotationAbsToContactFrame->setValue(1, 0, *pt);
@@ -84,12 +85,11 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   _RotationAbsToContactFrame->setValue(0, 2, Nz);
   _RotationAbsToContactFrame->setValue(1, 2, *(pt + 2));
   _RotationAbsToContactFrame->setValue(2, 2, *(pt + 5));
-
   DEBUG_PRINT("_RotationAbsToContactFrame:\n");
   DEBUG_EXPR(_RotationAbsToContactFrame->display(););
-
+  
+  // Construction of the lever arm matrix in  the absolute frame
   _NPG1->zero();
-
   (*_NPG1)(0, 0) = 0;
   (*_NPG1)(0, 1) = -(G1z - Pz);
   (*_NPG1)(0, 2) = (G1y - Py);
@@ -103,24 +103,22 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   DEBUG_PRINT("lever arm skew matrix :\n");
   DEBUG_EXPR(_NPG1->display(););
 
-
+  // Compute the rotation matrix from the absolute frame to the body-fixed frame
   computeRotationMatrix(q1,_rotationMatrixAbsToBody);
   DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
 
 
-
+  // Rotate the lever arm matrix from the absolute frame to the  body-fixed frame
   prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
-
   DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
   DEBUG_EXPR(_AUX1->display(););
 
+  // Rotate the lever arm matrix in the body frame to the contact frame
   prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
-
   DEBUG_EXPR(_RotationAbsToContactFrame->display(););
-  DEBUG_EXPR(_AUX1->display(););
   DEBUG_EXPR(_AUX2->display(););
 
-
+  // fill the Jacobian 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
       _jachqT->setValue(ii, jj, _RotationAbsToContactFrame->getValue(ii, jj));
