@@ -109,7 +109,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   double angle= 1e24;
   double angleref = 1e24;
 
-  angle = ::axisAngleFromQuaternion(q0, axis );
+  angle = ::axisAngleFromConfiguration(q0, axis );
   std::cout << "q0 angle : " <<angle<<std::endl;
   std::cout << "q0 axis : " << std::endl;
   axis->display();
@@ -148,7 +148,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionC : ", *(R) == Rref, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionC : ", *(v) == *(vref), true);
 
-  angle = ::axisAngleFromQuaternion(q01, axis);
+  angle = ::axisAngleFromConfiguration(q01, axis);
   std::cout << "q01 angle : " <<angle<<std::endl;
   std::cout << "q01 axis : " << std::endl;
   axis->display();
