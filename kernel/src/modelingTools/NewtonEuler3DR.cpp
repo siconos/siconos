@@ -18,8 +18,7 @@
 
 
 #include "NewtonEuler3DR.hpp"
-#include "NewtonEulerDS.hpp"
-#include <boost/math/quaternion.hpp>
+#include "RotationQuaternion.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
 
@@ -40,7 +39,7 @@ void NewtonEuler3DR::initialize(Interaction& inter)
   /*keep only the distance.*/
   _jachq.reset(new SimpleMatrix(3, qSize));
 
-  _RotationAbsToContactFrame.reset(new SimpleMatrix(3, 3));
+  _rotationAbsoluteToContactFrame.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
 }
@@ -71,24 +70,28 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 
   double t[6];
   double * pt = t;
-  // Construction of the local contact frame form the normal vector 
+
+  // 1 - Construction of the local contact frame from the normal vector
+
   if (orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
     RuntimeException::selfThrow("NewtonEuler3DR::FC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
-  // Construction of the rotation matrix from the absolute frame to the local contact frame 
+
+
+  // 2 - Construction of the rotation matrix from the absolute frame to the local contact frame
   pt = t;
-  _RotationAbsToContactFrame->setValue(0, 0, Nx);
-  _RotationAbsToContactFrame->setValue(1, 0, *pt);
-  _RotationAbsToContactFrame->setValue(2, 0, *(pt + 3));
-  _RotationAbsToContactFrame->setValue(0, 1, Ny);
-  _RotationAbsToContactFrame->setValue(1, 1, *(pt + 1));
-  _RotationAbsToContactFrame->setValue(2, 1, *(pt + 4));
-  _RotationAbsToContactFrame->setValue(0, 2, Nz);
-  _RotationAbsToContactFrame->setValue(1, 2, *(pt + 2));
-  _RotationAbsToContactFrame->setValue(2, 2, *(pt + 5));
-  DEBUG_PRINT("_RotationAbsToContactFrame:\n");
-  DEBUG_EXPR(_RotationAbsToContactFrame->display(););
+  _rotationAbsoluteToContactFrame->setValue(0, 0, Nx);
+  _rotationAbsoluteToContactFrame->setValue(1, 0, *pt);
+  _rotationAbsoluteToContactFrame->setValue(2, 0, *(pt + 3));
+  _rotationAbsoluteToContactFrame->setValue(0, 1, Ny);
+  _rotationAbsoluteToContactFrame->setValue(1, 1, *(pt + 1));
+  _rotationAbsoluteToContactFrame->setValue(2, 1, *(pt + 4));
+  _rotationAbsoluteToContactFrame->setValue(0, 2, Nz);
+  _rotationAbsoluteToContactFrame->setValue(1, 2, *(pt + 2));
+  _rotationAbsoluteToContactFrame->setValue(2, 2, *(pt + 5));
+  DEBUG_PRINT("_rotationAbsoluteToContactFrame:\n");
+  DEBUG_EXPR(_rotationAbsoluteToContactFrame->display(););
   
-  // Construction of the lever arm matrix in  the absolute frame
+  // 3 - Construction of the lever arm matrix in  the absolute frame
   _NPG1->zero();
   (*_NPG1)(0, 0) = 0;
   (*_NPG1)(0, 1) = -(G1z - Pz);
@@ -103,25 +106,32 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   DEBUG_PRINT("lever arm skew matrix :\n");
   DEBUG_EXPR(_NPG1->display(););
 
-  // Compute the rotation matrix from the absolute frame to the body-fixed frame
-  computeRotationMatrix(q1,_rotationMatrixAbsToBody);
-  DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
+  /* The Jacobian matrix (H) is given by the product
+   * H = _rotationAbsoluteToContactFrame
+   * for the translation part and
+   * H = _rotationAbsoluteToContactFrame * leverArmMatrix * _rotationBodyToAbsoluteFrame
+   * for the rotation part and
+   */
+
+  // 4 - Compute the rotation matrix from the body-fixed frame to the absolute frame
+  computeRotationMatrix(q1,_rotationBodyToAbsoluteFrame);
+  DEBUG_EXPR(_rotationBodyToAbsoluteFrame->display(););
 
 
-  // Rotate the lever arm matrix from the absolute frame to the  body-fixed frame
-  prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
-  DEBUG_EXPR(_rotationMatrixAbsToBody->display(););
+  // 5 - compose the body lever arm matrix with the rotation matrix 
+  prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
+  DEBUG_EXPR(_rotationBodyToAbsoluteFrame->display(););
   DEBUG_EXPR(_AUX1->display(););
 
-  // Rotate the lever arm matrix in the body frame to the contact frame
-  prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
-  DEBUG_EXPR(_RotationAbsToContactFrame->display(););
+  // 6 -  Rotate the resulting matric in the contact frame
+  prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
+  DEBUG_EXPR(_rotationAbsoluteToContactFrame->display(););
   DEBUG_EXPR(_AUX2->display(););
 
-  // fill the Jacobian 
+  // 7 - fill the Jacobian 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
-      _jachqT->setValue(ii, jj, _RotationAbsToContactFrame->getValue(ii, jj));
+      _jachqT->setValue(ii, jj, _rotationAbsoluteToContactFrame->getValue(ii, jj));
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
@@ -181,15 +191,15 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Sic
   if(orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
     RuntimeException::selfThrow("NewtonEuler3DR::FC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
   pt = t;
-  _RotationAbsToContactFrame->setValue(0, 0, Nx);
-  _RotationAbsToContactFrame->setValue(1, 0, *pt);
-  _RotationAbsToContactFrame->setValue(2, 0, *(pt + 3));
-  _RotationAbsToContactFrame->setValue(0, 1, Ny);
-  _RotationAbsToContactFrame->setValue(1, 1, *(pt + 1));
-  _RotationAbsToContactFrame->setValue(2, 1, *(pt + 4));
-  _RotationAbsToContactFrame->setValue(0, 2, Nz);
-  _RotationAbsToContactFrame->setValue(1, 2, *(pt + 2));
-  _RotationAbsToContactFrame->setValue(2, 2, *(pt + 5));
+  _rotationAbsoluteToContactFrame->setValue(0, 0, Nx);
+  _rotationAbsoluteToContactFrame->setValue(1, 0, *pt);
+  _rotationAbsoluteToContactFrame->setValue(2, 0, *(pt + 3));
+  _rotationAbsoluteToContactFrame->setValue(0, 1, Ny);
+  _rotationAbsoluteToContactFrame->setValue(1, 1, *(pt + 1));
+  _rotationAbsoluteToContactFrame->setValue(2, 1, *(pt + 4));
+  _rotationAbsoluteToContactFrame->setValue(0, 2, Nz);
+  _rotationAbsoluteToContactFrame->setValue(1, 2, *(pt + 2));
+  _rotationAbsoluteToContactFrame->setValue(2, 2, *(pt + 5));
 
   _NPG1->zero();
 
@@ -219,27 +229,27 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Sic
 
 
 
-  computeRotationMatrix(q1,_rotationMatrixAbsToBody);
-  prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
-  prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
+  computeRotationMatrix(q1,_rotationBodyToAbsoluteFrame);
+  prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
+  prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
-      _jachqT->setValue(ii, jj, _RotationAbsToContactFrame->getValue(ii, jj));
+      _jachqT->setValue(ii, jj, _rotationAbsoluteToContactFrame->getValue(ii, jj));
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
 
-  computeRotationMatrix(q2,_rotationMatrixAbsToBody);
-  prod(*_NPG2, *_rotationMatrixAbsToBody, *_AUX1, true);
-  prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
+  computeRotationMatrix(q2,_rotationBodyToAbsoluteFrame);
+  prod(*_NPG2, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
+  prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
-      _jachqT->setValue(ii, jj + 6, -_RotationAbsToContactFrame->getValue(ii, jj));
+      _jachqT->setValue(ii, jj + 6, -_rotationAbsoluteToContactFrame->getValue(ii, jj));
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)

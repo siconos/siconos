@@ -95,7 +95,7 @@
 // SiconosMemory
 %ignore swap;
 
-%warnfilter(509) rotateAbsToBody;
+%warnfilter(509) quaternionRotate;
 %warnfilter(509) changeFrameAbsToBody;
 %warnfilter(509) changeFrameBodyToAbs;
 

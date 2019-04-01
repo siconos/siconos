@@ -21,7 +21,8 @@
 
 #include "PrismaticJointR.hpp"
 #include <NewtonEulerDS.hpp>
-#include <Interaction.hpp>
+//#include <Interaction.hpp>
+#include <RotationQuaternion.hpp>
 #include <boost/math/quaternion.hpp>
 #include <BlockVector.hpp>
 
