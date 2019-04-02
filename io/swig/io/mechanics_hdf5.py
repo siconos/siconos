@@ -452,7 +452,6 @@ class MechanicsHdf5(object):
 
     def __init__(self, io_filename=None, mode='w',
                  use_compression=False, output_domains=False, verbose=True):
-
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
                 os.path.splitext(os.path.basename(sys.argv[0]))[0])
@@ -996,6 +995,26 @@ class MechanicsHdf5(object):
                 self._number_of_dynamic_objects += 1
 
             return obj
+
+    def add_Newton_impact_rolling_friction_nsl(self, name, mu, mu_r, e=0, collision_group1=0,
+                                   collision_group2=0):
+        """
+        Add a nonsmooth law for contact between 2 groups.
+        Only NewtonImpactFrictionNSL are supported.
+        name is an user identifiant and must be unique,
+        mu is the coefficient of friction,
+        e is the coefficient of restitution on the contact normal,
+        gid1 and gid2 define the group identifiants.
+
+        """
+        if name not in self._nslaws_data:
+            nslaw=self._nslaws_data.create_dataset(name, (0,))
+            nslaw.attrs['type']='NewtonImpactRollingFrictionNSL'
+            nslaw.attrs['mu']=mu
+            nslaw.attrs['mu_r']=mu_r
+            nslaw.attrs['e']=e
+            nslaw.attrs['gid1']=collision_group1
+            nslaw.attrs['gid2']=collision_group2
 
     def add_Newton_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
                                    collision_group2=0):

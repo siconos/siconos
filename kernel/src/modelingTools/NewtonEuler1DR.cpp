@@ -18,16 +18,12 @@
 
 
 #include "NewtonEuler1DR.hpp"
-#include <boost/math/quaternion.hpp>
-#include "NewtonEulerDS.hpp"
+#include "RotationQuaternion.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
 #include <boost/math/quaternion.hpp>
 
 //#define NERI_DEBUG
-
-
-
 
 //#define NEFC3D_DEBUG
 // #define DEBUG_NOCOLOR
@@ -56,9 +52,9 @@ void NewtonEuler1DR::NIcomputeJachqTFromContacts(SP::SiconosVector q1)
   printf("center of masse :\n");
   q1->display();
 #endif
-  _RotationAbsToContactFrame->setValue(0, 0, Nx);
-  _RotationAbsToContactFrame->setValue(0, 1, Ny);
-  _RotationAbsToContactFrame->setValue(0, 2, Nz);
+  _rotationAbsoluteToContactFrame->setValue(0, 0, Nx);
+  _rotationAbsoluteToContactFrame->setValue(0, 1, Ny);
+  _rotationAbsoluteToContactFrame->setValue(0, 2, Nz);
 
   _NPG1->zero();
 
@@ -73,14 +69,14 @@ void NewtonEuler1DR::NIcomputeJachqTFromContacts(SP::SiconosVector q1)
   (*_NPG1)(2, 2) = 0;
 
 
-  computeRotationMatrix(q1,_rotationMatrixAbsToBody);
-  prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
+  computeRotationMatrix(q1,_rotationBodyToAbsoluteFrame);
+  prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
 
-  prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
+  prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
 
   for (unsigned int jj = 0; jj < 3; jj++)
-    _jachqT->setValue(0, jj, _RotationAbsToContactFrame->getValue(0, jj));
+    _jachqT->setValue(0, jj, _rotationAbsoluteToContactFrame->getValue(0, jj));
 
   for (unsigned int jj = 3; jj < 6; jj++)
     _jachqT->setValue(0, jj, _AUX2->getValue(0, jj - 3));
@@ -103,9 +99,9 @@ void NewtonEuler1DR::NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Sicon
   double G1y = q1->getValue(1);
   double G1z = q1->getValue(2);
 
-  _RotationAbsToContactFrame->setValue(0, 0, Nx);
-  _RotationAbsToContactFrame->setValue(0, 1, Ny);
-  _RotationAbsToContactFrame->setValue(0, 2, Nz);
+  _rotationAbsoluteToContactFrame->setValue(0, 0, Nx);
+  _rotationAbsoluteToContactFrame->setValue(0, 1, Ny);
+  _rotationAbsoluteToContactFrame->setValue(0, 2, Nz);
 
   _NPG1->zero();
 
@@ -119,12 +115,12 @@ void NewtonEuler1DR::NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Sicon
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
 
-  computeRotationMatrix(q1,_rotationMatrixAbsToBody);
-  prod(*_NPG1, *_rotationMatrixAbsToBody, *_AUX1, true);
-  prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
+  computeRotationMatrix(q1,_rotationBodyToAbsoluteFrame);
+  prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
+  prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
   for (unsigned int jj = 0; jj < 3; jj++)
-    _jachqT->setValue(0, jj, _RotationAbsToContactFrame->getValue(0, jj));
+    _jachqT->setValue(0, jj, _rotationAbsoluteToContactFrame->getValue(0, jj));
 
 
   for (unsigned int jj = 3; jj < 6; jj++)
@@ -147,13 +143,13 @@ void NewtonEuler1DR::NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Sicon
 
 
 
-  computeRotationMatrix(q2,_rotationMatrixAbsToBody);
-  prod(*_NPG2, *_rotationMatrixAbsToBody, *_AUX1, true);
+  computeRotationMatrix(q2,_rotationBodyToAbsoluteFrame);
+  prod(*_NPG2, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
 
-  prod(*_RotationAbsToContactFrame, *_AUX1, *_AUX2, true);
+  prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
   for (unsigned int jj = 0; jj < 3; jj++)
-    _jachqT->setValue(0, jj + 6, -_RotationAbsToContactFrame->getValue(0, jj));
+    _jachqT->setValue(0, jj + 6, -_rotationAbsoluteToContactFrame->getValue(0, jj));
 
   for (unsigned int jj = 3; jj < 6; jj++)
     _jachqT->setValue(0, jj + 6, -_AUX2->getValue(0, jj - 3));
@@ -167,8 +163,8 @@ void NewtonEuler1DR::initialize(Interaction& inter)
   _jachq.reset(new SimpleMatrix(1, qSize));
 
   /* VA 12/04/2016 All of what follows should be put in WorkM*/
-  _RotationAbsToContactFrame.reset(new SimpleMatrix(1, 3));
-  _rotationMatrixAbsToBody.reset(new SimpleMatrix(3, 3));
+  _rotationAbsoluteToContactFrame.reset(new SimpleMatrix(1, 3));
+  _rotationBodyToAbsoluteFrame.reset(new SimpleMatrix(3, 3));
   _AUX1.reset(new SimpleMatrix(3, 3));
   _AUX2.reset(new SimpleMatrix(1, 3));
   _NPG1.reset(new SimpleMatrix(3, 3));
@@ -255,7 +251,7 @@ void NewtonEuler1DR::computeJachq(double time, Interaction& inter, SP::BlockVect
 void NewtonEuler1DR::computeJachqT(Interaction& inter, SP::BlockVector q0 )
 {
   DEBUG_BEGIN("NewtonEuler1DR::computeJachqT(Interaction& inter, SP::BlockVector q0 \n")
-    
+
   if (q0->numberOfBlocks()>1)
   {
     NIcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);

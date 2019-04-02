@@ -3,7 +3,7 @@
 #define MechanicsFwd_hpp
 #include <SiconosPointers.hpp>
 
-#define MECHANICS_CLASSES()\
+#define MECHANICS_CLASSES()                     \
   REGISTER(SpaceFilter)                         \
   REGISTER(SiconosBodies)                       \
   REGISTER(ExternalBody)                        \
@@ -50,9 +50,11 @@
   REGISTER(ContactShapeDistance)                \
   REGISTER(Geometer)                            \
   REGISTER(BulletR)                             \
+  REGISTER(Bullet5DR)                           \
   REGISTER(BulletFrom1DLocalFrameR)             \
-  REGISTER(RigidBodyDS)                              \
+  REGISTER(RigidBodyDS)                         \
   REGISTER(ContactR)                            \
+  REGISTER(Contact5DR)                          \
   REGISTER(SiconosContactor)                    \
   REGISTER(SiconosContactorSet)                 \
   REGISTER(SiconosContactorBase)                \
@@ -61,7 +63,7 @@
   REGISTER(SiconosBox)                          \
   REGISTER(SiconosCylinder)                     \
   REGISTER(SiconosCone)                         \
-  REGISTER(SiconosCapsule)                     \
+  REGISTER(SiconosCapsule)                      \
   REGISTER(SiconosConvexHull)                   \
   REGISTER(SiconosPlane)                        \
   REGISTER(SiconosMesh)                         \
@@ -73,8 +75,8 @@
 #include <SiconosVisitables.hpp>
 
 #undef SICONOS_VISITABLES
-#define SICONOS_VISITABLES() \
-  KERNEL_CLASSES() \
+#define SICONOS_VISITABLES()                    \
+  KERNEL_CLASSES()                              \
   MECHANICS_CLASSES()
 
 #undef REGISTER

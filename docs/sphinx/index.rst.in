@@ -6,7 +6,7 @@
    Build: @BUILD_TIMESTAMP@
 
 :github_url: https://github.com/siconos/siconos/
-:gitlab_url: https://gricad-gitlab.univ-grenoble-alpes.fr/perignfr/siconos-mirror/
+:gitlab_url: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/
    
 @PROJECT_NAME_CAP@: nonsmooth numerical simulation |licence|
 ============================================================
@@ -50,12 +50,10 @@
    :target: https://www.apache.org/licenses/LICENSE-2.0
    :alt: License
 
-.. |docbuild| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-mirror/badges/master/pipeline.svg
-   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-mirror/commits/master
+.. |docbuild| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg
+   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/commits/master
    :alt: Doc status
 	 
-
-
 Project status
 --------------
 

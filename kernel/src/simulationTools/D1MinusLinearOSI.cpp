@@ -309,7 +309,6 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   if (ds1 != ds2)
   {
-    VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == Lagrangian)
     {
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);

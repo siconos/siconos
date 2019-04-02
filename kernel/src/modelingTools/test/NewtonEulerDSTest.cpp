@@ -109,7 +109,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   double angle= 1e24;
   double angleref = 1e24;
 
-  angle = ::axisAngleFromQuaternion(q0, axis );
+  angle = ::axisAngleFromConfiguration(q0, axis );
   std::cout << "q0 angle : " <<angle<<std::endl;
   std::cout << "q0 axis : " << std::endl;
   axis->display();
@@ -136,7 +136,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   (*v)(2)=1.0;
 
 
-  ::rotateAbsToBody(q0, v );
+  ::quaternionRotate(q0, v );
   std::cout << "v : "<<std::endl;
   v->display();
   (*vref)(0)=1.0;
@@ -148,7 +148,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionC : ", *(R) == Rref, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionC : ", *(v) == *(vref), true);
 
-  angle = ::axisAngleFromQuaternion(q01, axis);
+  angle = ::axisAngleFromConfiguration(q01, axis);
   std::cout << "q01 angle : " <<angle<<std::endl;
   std::cout << "q01 axis : " << std::endl;
   axis->display();
@@ -162,7 +162,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   R->display();
   Rref.display();
 
-  ::rotateAbsToBody(q01, v );
+  ::quaternionRotate(q01, v );
   std::cout << "v : "<<std::endl;
   v->display();
   (*vref)(0)=1.0;
@@ -202,7 +202,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   Rref(0,2)=1.0;
   Rref.display();
 
-  ::rotateAbsToBody(q02, v );
+  ::quaternionRotate(q02, v );
   std::cout << "v : "<<std::endl;
   v->display();
   (*vref)(0)=-1.0;
@@ -248,7 +248,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion()
   Rref(2,2)=sqrt(2.0)/2.0;
   Rref.display();
 
-  ::rotateAbsToBody(q03, v);
+  ::quaternionRotate(q03, v);
   std::cout << "v : "<<std::endl;
   v->display();
   (*vref)(0)=-sqrt(2.0);
@@ -326,7 +326,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
   (*v)(0)=1.0;
   (*v)(1)=1.0;
   (*v)(2)=1.0;
-  ::rotateAbsToBody(q03, v);
+  ::quaternionRotate(q03, v);
   std::cout << "v : "<<std::endl;
   v->display();
 
@@ -348,7 +348,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix()
   (*mref)(0,2) = sqrt(2.0);
   (*mref)(1,2) = 1.0;
 
-  ::rotateAbsToBody(q03, m);
+  ::quaternionRotate(q03, m);
   std::cout << "m : "<<std::endl;
   m->display();
   std::cout << "mref : "<<std::endl;

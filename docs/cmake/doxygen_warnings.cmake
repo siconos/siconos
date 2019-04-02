@@ -15,7 +15,7 @@
 
 if(WITH_${COMPONENT}_DOXYGEN_WARNINGS)
   set(WITH_DOXYGEN_WARNINGS_INFILE "False" CACHE INTERNAL "Generate Doxygen warnings into a file.")
-  foreach(_F ${${COMPONENT}_SRCS})
+  foreach(_F IN LISTS ${COMPONENT}_SRCS)
     get_filename_component(_FP ${_F} PATH)
     get_filename_component(_FWE1 ${_F} NAME_WE)
     SET(_FWE ${_FP}/${_FWE1})

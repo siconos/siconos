@@ -230,7 +230,6 @@ pkgs:
     any:
       command:
         pip install sphinxcontrib-bibtex &&
-        pip install sphinxcontrib-doxylink &&
         pip install numpydoc &&
         pip install git+https://github.com/sphinx-contrib/youtube.git
 

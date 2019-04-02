@@ -87,6 +87,12 @@ protected:
   virtual SP::BulletR makeBulletR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
                                   SP::RigidBodyDS ds2, SP::SiconosShape shape2,
                                   const btManifoldPoint &);
+  
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet5DR makeBullet5DR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
+                                  SP::RigidBodyDS ds2, SP::SiconosShape shape2,
+                                  const btManifoldPoint &);
 
 public:
   StaticContactorSetID insertStaticContactorSet(

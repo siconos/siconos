@@ -8,9 +8,8 @@ used to generates .i files (swig docstring feature) from xml
 #3. .i files are used by swig to create docstrings in .py
 
 This file is to be copied into CMAKE_BINARY_DIR/share using configure_file
-"""
 
-""" Siconos is a program dedicated to modeling, simulation and control
+ Siconos is a program dedicated to modeling, simulation and control
  of non smooth dynamical systems.
 
  Copyright 2018 INRIA.
@@ -28,19 +27,18 @@ This file is to be copied into CMAKE_BINARY_DIR/share using configure_file
  limitations under the License.
 """
 
-from breathe import node_factory as nf
 from itertools import count
 import pickle
-import os, sys
 import textwrap
-
-try:
-    from doxy2swig import Doxy2SWIG
-except:
-    pass # 
+from pathlib import Path
+from breathe import node_factory as nf
 
 
+from gendoctools.doxy2swig import Doxy2SWIG
 
+# Map between names in siconos sources and names we want
+# in the documentation (python like).
+# Indeed, map between C++ types and python types.
 type_map = {
     'SiconosMatrix': 'array_like (np.float64, 2D)',
     'SimpleMatrix': 'array_like (np.float64, 2D)',
@@ -51,8 +49,8 @@ type_map = {
     r'double*': 'array_like (np.float64, 1D)',
     r'double *': 'array_like (np.float64, 1D)',
     'Index': 'array_like (int, 1D)',
-    'const' : '',
-    r'&' : '',
+    'const': '',
+    r'&': '',
     'unsigned': '',
     r'std::': '',
     r'SP::': '',
@@ -62,24 +60,43 @@ type_map = {
     'Siconos::': '',
     'UBLAS_TYPE': 'int',
     'false': 'False',
-    'true' : 'True',
-    }
+    'true': 'True',
+}
+
+
+def parse_typemap(source):
+    """Replace C types with python types in docstrings (func. prototypes)
+    """
+    for item in type_map:
+        source = source.replace(item, type_map[item])
+    return source
+
 
 class SiconosDoxy2Swig(Doxy2SWIG):
     """Converts Doxygen generated XML files into a file containing
     docstrings that can be used by swig (feature("docstring")).
-    Once the data is parsed it is stored in
-    self.pieces.
+    Once the data is parsed it is stored in self.pieces.
+
+    Usage :
+
+    p = SiconosDoxy2Swig(xml_file_name, swig_working_dir)
+    p.run()
+
+    Parameters
+    ----------
+
+    xmlfile : python pathlib.Path()
+         input xml file name
+    swig_working_dir : python pathlib.Path()
+         output directory for swig files.
     """
 
-    """Global (static var!) counter for latex formulas in doctrings/swig comments.
-    """
+    # Global (static var!) counter for latex formulas in doctrings comments
     __ids = count(0)
 
-    def __init__(self, xmlfile, component, swig_workdir):
+    def __init__(self, xmlfile, swig_workdir):
 
-        
-        with_function_signature = True # Replace 'c' like arg list in function
+        with_function_signature = True  # Replace 'c' like arg list in function
         # with something more pythonic
         with_type_info = True
         with_constructor_list = True
@@ -96,21 +113,22 @@ class SiconosDoxy2Swig(Doxy2SWIG):
                          textwidth, quiet)
 
         # dict to export latex formula, to be processed later
-        self.latex_forms = {} 
+        self.latex_forms = {}
         # dict to export enums, to be processed later
-        self.enums = {} 
+        self.enums = {}
         # dict to trace list of all features, used as input for autodoc
         # to sort functions doc by file of origin
         self.features = []
         # xml source file name
         self.xml_filename = xmlfile
 
-        self.name = os.path.basename(self.xml_filename).split('.')[0]
+        self.name = self.xml_filename.stem
         # name (full path) of the .i file that will be created
-        self.swig_outputname = os.path.join(swig_workdir, self.name + '.i')
+        self.swig_outputname = Path(swig_workdir, self.name + '.i')
         # pickle file used to save latex forms
-        self.swig_outputname = os.path.join(swig_workdir, self.name + '.i')
-        self.latex_filename = os.path.join(swig_workdir, 'latex_' + self.name + '.pickle')
+        self.swig_outputname = Path(swig_workdir, self.name + '.i')
+        self.latex_filename = Path(swig_workdir, 'latex_' +
+                                   self.name + '.pickle')
 
         self.ignores.append('author')
         self.ignores.append('date')
@@ -132,20 +150,12 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         descr = ' '.join(descr.split('\n'))
         self.replace_latex = True
         return name, kind, descr
-        
-        
+
     def add_separator(self):
         """add horizontal line in doc
         """
         self.add_text(['\n', 15 * '-', '\n'])
-        
-    def parse_typemap(self, source):
-        """Replace C types with python types in docstrings (func. prototypes)
-        """
-        for item in type_map:
-            source = source.replace(item, type_map[item])
-        return source
-    
+
     def parse_enum(self, node):
         """Parse memberdef node with kind=enum
         """
@@ -166,43 +176,46 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         # type
         old_type = self.extract_text(self.get_specific_subnodes(node, 'type'))
         # Description
-        edescr = self.extract_text(self.get_specific_subnodes(node, 'briefdescription'))
-        if len(edescr) > 0:
+        edescr = self.extract_text(
+            self.get_specific_subnodes(node, 'briefdescription'))
+        if edescr:
             self.enums[ename] = (old_type, edescr)
-            
+
     def write(self, fname):
+        """write current state (self.pieces) into fname
+        """
         with open(fname, 'w', encoding='utf8') as o:
-            if(sys.version_info > (3, 0)):
-                o.write(''.join(self.pieces))
-            else:
-                o.write(str(u''.join(self.pieces).encode('utf-8').strip()))
+            o.write(''.join(self.pieces))
             o.write('\n')
 
     def do_includes(self, node):
+        """Process includes
+        """
         # Get header file path
-        locnode = self.get_specific_subnodes(self.xmldoc, 'location', recursive=3)[0]
+        locnode = self.get_specific_subnodes(self.xmldoc,
+                                             'location', recursive=3)[0]
         headername = locnode.attributes['file'].value
         refname = headername.replace('/', '_')
         self.add_text(['\n', 'Generated class (swig), based on C++ header ',
                        ':ref:`pgm_' + refname + '`.', '\n\n'])
         # self.subnode_parse(node)
-        
+
     def do_formula(self, node):
         """Read latex formula from xml file
         and post-process it for swig/sphinx-apidoc.
-        
+
         Parameters
         ----------
         content : xml node
-    
+
         The current formula is appended to latex_forms.
-        
+
         Note
         ----
-        * latex formula in doxygen comments leads to a real mess 
+        * latex formula in doxygen comments leads to a real mess
         during xml->doxy2swig-->swig ... process.
-        
-        """    
+
+        """
         # ret = doctools.xml_formula_to_swig(node.firstChild.data.strip())
         # self.add_text(' ')
         # self.add_text(ret[0])
@@ -236,7 +249,7 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         rst_node["docname"] = None
         rst_node["number"] = None
         self.latex_forms[__id] = rst_node
-        # !!  '_' is required 
+        # !!  '_' is required
         # e.g. replace('FORMULA1') leads to wrong behavior because of FORMULA10
         # while 'FORMULA1_' works.
         id_formula = 'FORMULA' + str(__id) + '_'
@@ -248,7 +261,7 @@ class SiconosDoxy2Swig(Doxy2SWIG):
 
     def do_verbatim(self, node):
         """Read latex or other verbatim rst from xml file
-        and post-process it for swig/sphinx-apidoc.
+        and post-process it for swig sphinx-apidoc.
 
         Parameters
         ----------
@@ -258,11 +271,11 @@ class SiconosDoxy2Swig(Doxy2SWIG):
 
         Note
         ----
-        * latex formula in doxygen comments leads to a real mess 
-        during xml->doxy2swig-->swig ... process. 
+        * latex formula in doxygen comments leads to a real mess
+        during xml->doxy2swig-->swig ... process.
         Use \rst / \endrst in doxygen files to make it work!
 
-        """    
+        """
         self.start_new_paragraph()
 
         if not node.firstChild.data.strip().startswith("embed:rst"):
@@ -298,7 +311,7 @@ class SiconosDoxy2Swig(Doxy2SWIG):
     def get_memberdef_nodes_and_signatures(self, node, kind):
         """Collects the memberdef nodes and corresponding signatures that
         correspond to public function entries that are at most depth 2 deeper
-        than the current (compounddef) node. Returns a dictionary with 
+        than the current (compounddef) node. Returns a dictionary with
         function signatures (what swig expects after the %feature directive)
         as keys, and a list of corresponding memberdef nodes as values."""
         sig_dict = {}
@@ -316,7 +329,6 @@ class SiconosDoxy2Swig(Doxy2SWIG):
 
         md_nodes = self.get_specific_subnodes(node, 'memberdef', recursive=2)
         for n in md_nodes:
-            
             if n.attributes['prot'].value != 'public':
                 continue
             if n.attributes['kind'].value in ['variable']:
@@ -333,7 +345,6 @@ class SiconosDoxy2Swig(Doxy2SWIG):
                 sig_dict[sig] = [n]
         return sig_dict
 
-            
     def handle_typical_memberdefs(self, signature, memberdef_nodes):
         """Overload doxy2swig method to complete features list
         """
@@ -348,52 +359,53 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         self.add_text('\n')
         self.add_text('\n')
         text = 'multiple signatures available, check prototypes below.'
-        self.add_text(['.. centered:: **Warning -** :ref:`Overloaded function <overloaded_functions>` : ' + text, '\n','\n'])
+        self.add_text(['.. centered:: **Warning -** :ref:`Overloaded function <overloaded_functions>` : ' + text, '\n', '\n'])
         #self.add_text('.. rubric:: Function prototypes')
         self.add_text('\n')
         self.add_text('\n')
-        
         for n in memberdef_nodes:
             self.add_text('\n')
             # Function name and prototype
-            self.add_text(['.. py:function:: ', self.get_function_signature(n), '\n'] )
+            self.add_text(['.. py:function:: ', self.get_function_signature(n), '\n'])
             #self.add_text(['* **', self.get_function_signature(n), '**'])
-            #            self.add_line_with_subsequent_indent('* **' + self.get_function_signature(n) + '**')
+            #self.add_line_with_subsequent_indent('* **' + self.get_function_signature(n) + '**')
 
             # Parameters and descriptions
-            self.subnode_parse(n, pieces=[], indent=0, ignore=['definition', 'name'])
+            self.subnode_parse(n, pieces=[], indent=0,
+                               ignore=['definition', 'name'])
             self.add_text('\n')
         self.add_text(['";', '\n'])
-
 
     def get_function_signature(self, node):
         """Returns the function signature string for memberdef nodes."""
         name = self.extract_text(self.get_specific_subnodes(node, 'name'))
         if self.with_type_info:
-            argsstring = self.extract_text(self.get_specific_subnodes(node, 'argsstring'))
+            argsstring = self.extract_text(
+                self.get_specific_subnodes(node, 'argsstring'))
         else:
             argsstring = []
             param_id = 1
             for n_param in self.get_specific_subnodes(node, 'param'):
-                declname = self.extract_text(self.get_specific_subnodes(n_param, 'declname'))
+                declname = self.extract_text(
+                    self.get_specific_subnodes(n_param, 'declname'))
                 if not declname:
                     declname = 'arg' + str(param_id)
-                defval = self.extract_text(self.get_specific_subnodes(n_param, 'defval'))
+                defval = self.extract_text(
+                    self.get_specific_subnodes(n_param, 'defval'))
                 if defval:
                     defval = '=' + defval
                 argsstring.append(declname + defval)
                 param_id = param_id + 1
             argsstring = '(' + ', '.join(argsstring) + ')'
         rtype = self.extract_text(self.get_specific_subnodes(node, 'type'))
-        argsstring =  self.parse_typemap(argsstring)
+        argsstring = parse_typemap(argsstring)
         function_definition = name + argsstring
-        if rtype != '' : #and type != 'void':
-            rtype =  self.parse_typemap(' -> ' + rtype)
+        if rtype != '':  #and type != 'void':
+            rtype = parse_typemap(' -> ' + rtype)
             function_definition = function_definition + rtype
         return function_definition
 
-    
-    def make_constructor_list(self, constructor_nodes, classname):
+    def make_constructor_list(self, constructor_nodes):
         """Produces the "Constructors" section and the constructor signatures
         (since swig does not do so for classes) for class docstrings."""
         if constructor_nodes == []:
@@ -401,9 +413,11 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         self.add_text(['\n', '.. rubric:: Constructors', '\n', '\n'])
         for n in constructor_nodes:
             self.add_text('\n')
-            self.add_text(['.. py:function:: ', self.get_function_signature(n), '\n'] )
+            self.add_text(['.. py:function:: ',
+                           self.get_function_signature(n), '\n'])
             self.add_text('\n')
-            self.subnode_parse(n, pieces = [], indent=0, ignore=['definition', 'name'])
+            self.subnode_parse(n, pieces=[], indent=0,
+                               ignore=['definition', 'name'])
             self.add_text('\n')
 
     def make_attribute_list(self, node):
@@ -421,15 +435,14 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         for n in atr_nodes:
             name = self.extract_text(self.get_specific_subnodes(n, 'name'))
             self.add_text(['\n ', name, ' : '])
-            argstring = self.parse_typemap(self.extract_text(self.get_specific_subnodes(n, 'type')))
+            argstring = parse_typemap(self.extract_text(self.get_specific_subnodes(n, 'type')))
             self.add_text(['`', argstring, '`'])
             self.add_text('  \n')
             restrict = ['briefdescription', 'detaileddescription']
             self.subnode_parse(n, pieces=[''], indent=4, restrict=restrict)
 
-
-            
-    def handle_typical_memberdefs_no_overload(self, signature, memberdef_nodes):
+    def handle_typical_memberdefs_no_overload(self, signature,
+                                              memberdef_nodes):
         """Produce standard documentation for memberdef_nodes."""
         for n in memberdef_nodes:
             self.add_text(['\n', '%feature("docstring") ', signature, ' "'])
@@ -438,6 +451,8 @@ class SiconosDoxy2Swig(Doxy2SWIG):
             self.add_text(['";', '\n'])
 
     def do_simplesect(self, node):
+        """Parse doxygen sections
+        """
         kind = node.attributes['kind'].value
         # We do not need these informations in python doc
         # (neither anywhere else indeed ...)
@@ -445,9 +460,9 @@ class SiconosDoxy2Swig(Doxy2SWIG):
             return
         self.start_new_paragraph()
         if kind == 'warning':
-            self.subnode_parse(node, pieces=['**Warning**: ',''], indent=4)
+            self.subnode_parse(node, pieces=['**Warning**: ', ''], indent=4)
         elif kind == 'see':
-            self.subnode_parse(node, pieces=['See also: ',''], indent=4)
+            self.subnode_parse(node, pieces=['See also: ', ''], indent=4)
         elif kind == 'return':
             if self.indent == 0:
                 pieces = ['Returns', '\n', len('Returns') * '-', '\n', '']
@@ -455,13 +470,13 @@ class SiconosDoxy2Swig(Doxy2SWIG):
                 pieces = ['Returns:', '\n', '']
             self.subnode_parse(node, pieces=pieces)
         else:
-            self.subnode_parse(node, pieces=[kind + ': ',''], indent=4)
+            self.subnode_parse(node, pieces=[kind + ': ', ''], indent=4)
 
     def do_compounddef(self, node):
         """Overload doxy2swig method to complete features list
 
         "This produces %feature("docstring") entries for classes, and handles
-        class, namespace and file memberdef entries specially to allow for 
+        class, namespace and file memberdef entries specially to allow for
         overloaded functions. For other cases, passes parsing on to standard
         handlers (which may produce unexpected results).
 
@@ -496,30 +511,28 @@ class SiconosDoxy2Swig(Doxy2SWIG):
                 #    self.add_text('\n')
 
             # Get description of the class
-            names = ('briefdescription','detaileddescription')
+            names = ('briefdescription', 'detaileddescription')
             sub_dict = self.get_specific_nodes(node, names)
-            for n in ('briefdescription','detaileddescription'):
+            for n in names:
                 if n in sub_dict:
                     self.parse(sub_dict[n])
-                    
             # Name of the original (C/C++) header.
             sub_list = self.get_specific_subnodes(node, 'includes')
             if sub_list:
                 self.parse(sub_list[0])
 
-
             # List and prototypes for constructors
             if self.with_constructor_list:
                 # Create a list of constructors
-                self.make_constructor_list(constructor_nodes, classname)
+                self.make_constructor_list(constructor_nodes)
 
             if self.with_attribute_list:
                 self.make_attribute_list(node)
 
             self.add_text(['";', '\n'])
 
-            names = ['compoundname', 'briefdescription','detaileddescription', 'includes']
-            self.subnode_parse(node, ignore = names)
+            names = ['compoundname', 'briefdescription', 'detaileddescription', 'includes']
+            self.subnode_parse(node, ignore=names)
 
         elif kind in ('file', 'namespace'):
             nodes = node.getElementsByTagName('sectiondef')
@@ -527,7 +540,7 @@ class SiconosDoxy2Swig(Doxy2SWIG):
                 self.parse(n)
 
         # now explicitely handle possibly overloaded member functions.
-        if kind in ['class', 'struct','file', 'namespace', 'typedef']:
+        if kind in ['class', 'struct', 'file', 'namespace', 'typedef']:
             # Get a dictionnary of objects (memberdef nodes) in the node
             # - exclude private and protected
             # - exclude variables
@@ -543,11 +556,11 @@ class SiconosDoxy2Swig(Doxy2SWIG):
 
         # Process enums
         self.parse_enum(node)
-                
+
     def do_parameteritem(self, node):
         # Overload doxy2swig to remove '*'
-        self.subnode_parse(node, pieces=['\n',''])
-        
+        self.subnode_parse(node, pieces=['\n', ''])
+
     def do_parametername(self, node):
         # if self.pieces != [] and self.pieces != ['* ', '']:
         #     self.add_text(', ')
@@ -558,10 +571,10 @@ class SiconosDoxy2Swig(Doxy2SWIG):
         """Parses the file set in the initialization.  The resulting
         data is stored in `self.pieces`.
         """
-        self.generate()
-        
+        self.generate()  # call generate from base class, doxy2swig.
+
         # Save latex forms into python dict.
-        if len(self.latex_forms) > 0:
+        if self.latex_forms:
             with open(self.latex_filename, 'wb') as current:
                 pickle.dump(self.latex_forms, current)
 

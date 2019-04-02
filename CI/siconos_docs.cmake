@@ -59,6 +59,7 @@ option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead 
 option(WITH_XML "Enable xml files i/o. Default = OFF" OFF)
 
 # -- Installation setup ---
+#set(siconos_python_install "prefix" CACHE STRING "Install mode for siconos python package")
 set(siconos_python_install "prefix" CACHE STRING "Install mode for siconos python package")
 
 # If OFF, headers from libraries in externals will not be installed.

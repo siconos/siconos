@@ -10,6 +10,9 @@
 %include "VI_cst.h"
 %include "GenericMechanical_cst.h"
 
+%include "projectionOnCone.h"
+%include "projectionOnRollingCone.h"
+
 %extend SolverOptions
 {
   SolverOptions(enum FRICTION_SOLVER id)

@@ -1,3 +1,4 @@
+
 # Mechanics IO
 
 """Run a pre-configured Siconos "mechanics" HDF5 file."""
@@ -14,7 +15,7 @@ import numpy as np
 import h5py
 import bisect
 import time
-import pickle
+
 
 import tempfile
 from contextlib import contextmanager
@@ -29,7 +30,7 @@ from siconos.kernel import \
 import siconos.kernel as Kernel
 
 # Siconos Mechanics imports
-from siconos.mechanics.collision.tools import Contactor, Volume, Shape
+from siconos.mechanics.collision.tools import Contactor, Shape
 from siconos.mechanics import joints
 from siconos.io.io_base import MechanicsIO
 
@@ -314,14 +315,16 @@ def quaternion_get(orientation):
     if len(orientation) == 2:
             # axis + angle
             axis=orientation[0]
-            assert len(axis) == 3
+            if not (len(axis) == 3):
+                raise AssertionError("quaternion_get. axis in not a 3D vector")
             angle=orientation[1]
-            assert type(angle) is float
+            if not (isinstance(angle,float)):
+                raise AssertionError("quaternion_get. angle must be a float")
             n=sin(angle / 2.) / np.linalg.norm(axis)
-
             ori=[cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
     else:
-        assert(len(orientation)==4)
+        if not (len(orientation)==4):
+            raise AssertionError("quaternion_get. the quaternion must be of size 4")
         # a given quaternion
         ori=orientation
     return ori
@@ -381,7 +384,6 @@ def load_siconos_mesh(shape_filename, scale=None):
     num_points = points.GetNumberOfTuples()
     num_triangles = polydata.GetNumberOfCells()
 
-    keep = None
     shape = None
 
     if polydata.GetCellType(0) == 5:
@@ -478,7 +480,8 @@ class ShapeCollection():
                             mesh.setOutsideMargin(
                                 self.shape(shape_name).attrs.get('outsideMargin',0))
                     else:
-                        assert False
+                        raise AssertionError("ShapeCollection.get() self.attributes(shape_name)['type'] != 'vtp'")
+
                 elif self.attributes(shape_name)['type'] in ['step', 'stp']:
                     from OCC.STEPControl import STEPControl_Reader
                     from OCC.BRep import BRep_Builder
@@ -507,7 +510,7 @@ class ShapeCollection():
 
 
                             #ok = step_reader.TransferRoot(1)
-                            ok = step_reader.TransferRoots() # VA : We decide to loads all shapes in the step file
+                            step_reader.TransferRoots() # VA : We decide to loads all shapes in the step file
                             nbs = step_reader.NbShapes()
 
                             for i in range(1, nbs + 1):
@@ -528,7 +531,10 @@ class ShapeCollection():
                     comp = TopoDS_Compound()
                     builder.MakeCompound(comp)
 
-                    assert self.shape(shape_name).dtype == h5py.new_vlen(str)
+                    if not (self.shape(shape_name).dtype == h5py.new_vlen(str)):
+                        raise AssertionError("ShapeCollection.get()")
+
+                    #assert(self.shape(shape_name).dtype == h5py.new_vlen(str))
 
                     with tmpfile(contents=self.shape(shape_name)[:][0]) as tmpf:
                         iges_reader = IGESControl_Reader()
@@ -647,9 +653,6 @@ class ShapeCollection():
                         self.shape(shape_name).attrs.get('outsideMargin', 0))
                     self._shapes[shape_name] = convex
 
-                else:
-                    throw
-
             elif isinstance(self.url(shape_name), str) and \
                     os.path.exists(self.url(shape_name)):
                 self._tri[shape_name], self._shapes[shape_name] = loadMesh(
@@ -713,9 +716,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                  osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None, collision_margin=None,
                  use_compression=False, output_domains=False, verbose=True):
-        super(self.__class__, self).__init__(io_filename, mode,
+        super(MechanicsHdf5Runner, self).__init__(io_filename, mode,
                                              use_compression, output_domains, verbose)
-
         self._interman = interaction_manager
         self._nsds = nsds
         self._simulation = simulation
@@ -743,7 +745,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._scheduled_births = []
 
     def __enter__(self):
-        super(self.__class__, self).__enter__()
+        super(MechanicsHdf5Runner, self).__enter__()
 
         if self._gravity_scale is None:
             self._gravity_scale = 1  # 1 => m, 1/100. => cm
@@ -778,6 +780,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if nslawClass == Kernel.NewtonImpactFrictionNSL:
                 nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']), 0.,
                                    float(self._nslaws_data[name].attrs['mu']), 3)
+            elif nslawClass == Kernel.NewtonImpactRollingFrictionNSL:
+                nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']), 0.,
+                                   float(self._nslaws_data[name].attrs['mu']),
+                                   float(self._nslaws_data[name].attrs['mu_r']), 5)
             elif nslawClass == Kernel.NewtonImpactNSL:
                 nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']))
             elif nslawClass == Kernel.RelayNSL:
@@ -1202,7 +1208,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 ds2 = \
                       Kernel.cast_NewtonEulerDS(
                           topo.getDynamicalSystem(body2_name))
-            except:
+            except Exception :
                 ds2 = None
 
             # static object in second
@@ -1689,9 +1695,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             local_precision = so.dparam[2]
 
 
-        print('SolverInfos at time :', time,
-              'iterations= ', iterations,
-              'precision=', precision)
+        print('Numerics solver info at time : {0:10.6f}'.format(time),
+              'iterations = {0:8d}'.format(iterations),
+              'precision = {0:5.3e}'.format(precision))
 
     def import_plugins(self):
         """
@@ -1738,7 +1744,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                                                         plugin_function_name)
                 ds.setBoundaryConditions(bc)
 
-    def explode_Newton_solve(self, s, with_timer):
+    def explode_Newton_solve(self,  with_timer):
+        s = self._simulation
         log(s.initialize,with_timer)()
         log(s.resetLambdas,with_timer)()
         # Again the access to s._newtonTolerance generates a segfault due to director
@@ -1775,7 +1782,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration);
 
 
-            
+
     def run(self,
             with_timer=False,
             time_stepping=None,
@@ -1850,10 +1857,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         print_verbose ('load siconos module ...')
         from siconos.kernel import \
-            NonSmoothDynamicalSystem, OneStepNSProblem,\
+            NonSmoothDynamicalSystem,\
             TimeDiscretisation,\
-            GenericMechanical, FrictionContact, GlobalFrictionContact,\
-            NewtonImpactFrictionNSL
+            GenericMechanical, FrictionContact,\
+            GlobalFrictionContact, RollingFrictionContact,\
+            NewtonImpactFrictionNSL, NewtonImpactRollingFrictionNSL
 
         from siconos.numerics import SICONOS_FRICTION_3D_ONECONTACT_NSN
         from siconos.numerics import SICONOS_GLOBAL_FRICTION_3D_ADMM
@@ -1893,13 +1901,26 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             print_verbose('Simulation time {0} >= T={1}, exiting.'.format(t0,T))
             return
 
-        # Model
-        #
+        # Respect run() parameter for multipoints_iterations for
+        # backwards compatibility, but this is overridden by
+        # SiconosBulletOptions if one is provided.
+        if multipoints_iterations is not None and options is None:
+            options = SiconosBulletOptions()
+            options.perturbationIterations = 3*multipoints_iterations
+            options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
+        self._interman = interaction_manager(options)
+
+        # (0) NonSmooth Dynamical Systems definition
         self._nsds=NonSmoothDynamicalSystem(t0, T)
         nsds=self._nsds
 
+        print_verbose ('import scene ...')
+        self.import_scene(t0, body_class, shape_class, face_class, edge_class)
+
+        self._contact_index_set = contact_index_set
+
         # (1) OneStepIntegrators
-        joints=list(self.joints())
+
 
         self._osi=osi(theta)
 
@@ -1907,54 +1928,78 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         timedisc=TimeDiscretisation(t0, h)
 
 
+        # (3) choice of default OneStepNonSmoothProblem w.r.t the type of nslaws
+        nslaw_type_list =[]
+        for name in self._nslaws_data:
+            nslaw_type_list.append(self._nslaws_data[name].attrs['type'])
 
-        if (osi == Kernel.MoreauJeanGOSI):
-            if (friction_contact_trace == False) :
-                if len(joints) > 0:
-                    raise RuntimeError("MoreauJeanGOSI can not deal with joints")
+        #print(set(nslaw_type_list))
+
+        # This trick is used to add the EqualityConditionNSL to the list of nslaw type
+        # this must be improved by adding the EqualityConditionNSL in self._nslaws_data
+        # when a joint is imported.
+        # For the moment, the nslaw is implicitely added when we import_joint but is not stored
+        # self._nslaws_data
+
+        joints=list(self.joints())
+        if len(joints) > 0:
+            nslaw_type_list.append('EqualityConditionNSL')
+
+
+        nb_of_nslaw_type =  len(set(nslaw_type_list))
+        # print(set(nslaw_type_list))
+        # input()
+        if (friction_contact_trace == False) :
+            if (osi == Kernel.MoreauJeanGOSI):
+                if (nb_of_nslaw_type >1) or 'NewtonImpactFrictionNSL' not in set(nslaw_type_list):
+                    raise RuntimeError("MoreauJeanGOSI can deal only with NewtonImpactFrictionNSL nslaw")
                 else:
                     osnspb=GlobalFrictionContact(3,SICONOS_GLOBAL_FRICTION_3D_ADMM)
+                    osnspb.setMaxSize(30000)
+                    osnspb.setMStorageType(2)
             else:
-                from siconos.io.FrictionContactTrace import GlobalFrictionContactTrace
-                osnspb=GlobalFrictionContactTrace(3, SICONOS_GLOBAL_FRICTION_3D_ADMM,friction_contact_trace_params,nsds)
-            osnspb.setMaxSize(30000)
-            osnspb.setMStorageType(2)
-        else:
-            if (friction_contact_trace == False) :
-                if len(joints) > 0:
+                if (nb_of_nslaw_type >1):
                     osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
                     solverOptions = osnspb.numericsSolverOptions()
-                    # Friction one-contact solver options
                     fc_index=1
-                    fcOptions = solverOptions.internalSolvers[fc_index]
-                    fcOptions.iparam[0] = 100  # Local solver iterations
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
-                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
-                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP
-                else:
-                    osnspb=FrictionContact(3, solver)
-                    solverOptions = osnspb.numericsSolverOptions()
                     # Friction one-contact solver options
-                    fc_index=0
                     fcOptions = solverOptions.internalSolvers[fc_index]
                     fcOptions.iparam[0] = 100  # Local solver iterations
                     fcOptions.solverId = local_solver
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP
-                    #fcOptions.solverId = Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID
-                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP
-                    #fcOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = Numerics.SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP
+                else:
+                    if 'NewtonImpactFrictionNSL' in set(nslaw_type_list):
+                        osnspb=FrictionContact(3, solver)
+                        solverOptions = osnspb.numericsSolverOptions()
+                        fc_index=0
+                        # Friction one-contact solver options
+                        fcOptions = solverOptions.internalSolvers[fc_index]
+                        fcOptions.iparam[0] = 100  # Local solver iterations
+                        fcOptions.solverId = local_solver
+                        osnspb.setMaxSize(30000)
+                        osnspb.setMStorageType(1)
+                    elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
+                         osnspb=RollingFrictionContact(5)
+                         solverOptions = osnspb.numericsSolverOptions()
+                         solverOptions.iparam[0]=itermax
+                         solverOptions.dparam[0] = tolerance
+                    else:
+                        raise RuntimeError("Unknown nslaw type"+ str(set(nslaw_type_list)))
 
-
+        else:
+            if (osi == Kernel.MoreauJeanGOSI):
+                if (nb_of_nslaw_type >1) or 'NewtonImpactFrictionNSL' not in set(nslaw_type_list):
+                    raise RuntimeError("MoreauJeanGOSI can deal only with NewtonImpactFrictionNSL nslaw")
+                else:
+                    from siconos.io.FrictionContactTrace import GlobalFrictionContactTrace
+                    osnspb=GlobalFrictionContactTrace(3, SICONOS_GLOBAL_FRICTION_3D_ADMM,friction_contact_trace_params,nsds)
+                    osnspb.setMaxSize(30000)
+                    osnspb.setMStorageType(2)
             else:
                 from siconos.io.FrictionContactTrace import FrictionContactTrace
                 osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,nsds)
-            osnspb.setMaxSize(30000)
-            osnspb.setMStorageType(1)
+                osnspb.setMaxSize(30000)
+                osnspb.setMStorageType(1)
 
-        self._contact_index_set = contact_index_set
 
         # Global solver options
         solverOptions = osnspb.numericsSolverOptions()
@@ -1972,18 +2017,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
 
         osnspb.setNumericsVerboseMode(numerics_verbose)
+        #Numerics.numerics_set_verbose(3)
 
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)
-
-        # Respect run() parameter for multipoints_iteratinos for
-        # backwards compatibility, but this is overridden by
-        # SiconosBulletOptions if one is provided.
-        if multipoints_iterations is not None and options is None:
-            options = SiconosBulletOptions()
-            options.perturbationIterations = 3*multipoints_iterations
-            options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
-        self._interman = interaction_manager(options)
 
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if time_stepping == Kernel.TimeSteppingDirectProjection:
@@ -2002,8 +2039,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         else:
             simulation=time_stepping(nsds,timedisc)
             simulation.insertIntegrator(self._osi)
-            simulation.insertNonSmoothProblem(osnspb)
 
+        simulation.insertNonSmoothProblem(osnspb)
         simulation.insertInteractionManager(self._interman)
 
         simulation.setNewtonOptions(Newton_options)
@@ -2013,14 +2050,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
 
         self._simulation = simulation
-
+        # input()
 
         if len(self._plugins) > 0:
             print_verbose ('import plugins ...')
             self.import_plugins()
 
-        print_verbose ('import scene ...')
-        self.import_scene(t0, body_class, shape_class, face_class, edge_class)
+
 
         if len(self._external_functions) > 0:
             print_verbose ('import external functions ...')
@@ -2067,13 +2103,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if explode_Newton_solve:
                 if(time_stepping == TimeStepping) :
-                    log(self.explode_Newton_solve, with_timer, before=False)(simulation, with_timer)
+                    log(self.explode_Newton_solve, with_timer, before=False)(with_timer)
                 else:
                     print('simulation of type', type(time_stepping),' has no exploded version' )
                     log(simulation.computeOneStep, with_timer)()
             else:
                 log(simulation.computeOneStep, with_timer)()
-
 
 
             if (self._output_frequency and (k % self._output_frequency == 0)) or (k == 1):

@@ -190,3 +190,22 @@ void NA_display(size_t * arr1,  size_t n1)
       printf("%zu\t",arr1[j]);
   printf("]\n");
 }
+
+
+/* swap two indices */
+void uint_swap (unsigned int *a, unsigned int *b)
+{
+  unsigned int temp = *a;
+  *a = *b;
+  *b = temp;
+}
+
+/* shuffle an unsigned array */
+void uint_shuffle (unsigned int *a, unsigned int n) {
+
+  for (unsigned int i = 0; i < n - 1; i++)
+  {
+    uint_swap  (&a[i], &a[i + rand()%(n - i)]);
+  }
+}
+
