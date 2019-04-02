@@ -629,6 +629,14 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
     numerics_error("NM_zentry  ","unknown storageType %d for matrix\n", M->storageType);
   }
 
+  if (i>M->size0-1)
+  {
+    M->size0 = i+1;
+  }
+  if (j>M->size1-1)
+  {
+    M->size1 = j+1;
+  }
 }
 
 
@@ -1450,8 +1458,6 @@ NumericsMatrix* NM_eye(int size)
 }
 NumericsMatrix* NM_create(int storageType, int size0, int size1)
 {
-  assert(size0 > 0);
-  assert(size1 > 0);
   NumericsMatrix* M = NM_new();
 
   void* data;
@@ -1482,8 +1488,6 @@ void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* dat
 {
 
   assert(M);
-  assert(size0 > 0);
-  assert(size1 > 0);
   M->storageType = storageType;
   M->size0 = size0;
   M->size1 = size1;
