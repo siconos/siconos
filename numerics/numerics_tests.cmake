@@ -21,6 +21,11 @@ if(WITH_${COMPONENT}_TESTING)
   #  tests for NumericsMatrix
   NEW_TEST(tools_test_NumericsMatrix NM_test.c)
 
+  # MUMPS interface tests
+  if(WITH_MUMPS)
+    NEW_TEST(tools_test_MUMPS NM_MUMPS_test.c)
+  endif()
+  
   # Specific tests for SBM matrices
   NEW_TEST(tools_test_SBM SBM_test.c)
   NEW_TEST(tools_test_SBCM_to_SBM SBCM_to_SBM.c)

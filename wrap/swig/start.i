@@ -42,7 +42,8 @@ SWIG_init(void);
 #include <assert.h>
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
-#include <numerics_verbose.h>
+#include "SiconosConfig.h"
+#include "numerics_verbose.h"
 
 #if PY_VERSION_HEX < 0x02070000
 #ifndef PyBytes_Check
@@ -61,6 +62,8 @@ SWIG_init(void);
 
 #endif
 %}
+
+%include "SiconosConfig.h"
 
 %include target_datatypes.i
 

@@ -414,8 +414,11 @@ static int test_3(void)
 }
 
 
-int main(void)
+int main(int argc, char *argv[])
 {
+#ifdef HAVE_MPI
+  MPI_Init(&argc, &argv);
+#endif
 
   int i=0;
   printf("start test #%i ConvexQP_PG_FC3D \n",i);
@@ -463,6 +466,9 @@ int main(void)
     printf("end test #%i  not  sucessfull\n",i);
   }
 
+#ifdef HAVE_MPI
+  MPI_Finalize();
+#endif
 
   return info;
 }

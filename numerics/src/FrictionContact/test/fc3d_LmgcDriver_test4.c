@@ -22,8 +22,13 @@
 #include "numerics_verbose.h"
 #include "Friction_cst.h"
 
-int main(void)
+int main(int argc, char *argv[])
 {
+
+#ifdef HAVE_MPI
+  MPI_Init(&argc, &argv);
+#endif
+
   int info = 0 ;
 
 
@@ -99,4 +104,9 @@ int main(void)
   printf("info: %d\n", info);
 
   return info;
+
+#ifdef HAVE_MPI
+  MPI_Finalize();
+#endif
+
 }

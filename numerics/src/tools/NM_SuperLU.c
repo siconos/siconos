@@ -50,13 +50,13 @@ NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A)
 
   NSM_linear_solver_params* params = NSM_linearSolverParams(A);
 
-  if (params->solver_data)
+  if (params->linear_solver_data)
   {
-    return (NM_SuperLU_WS*) params->solver_data;
+    return (NM_SuperLU_WS*) params->linear_solver_data;
   }
 
-  params->solver_data = calloc(1, sizeof(NM_SuperLU_WS));
-  NM_SuperLU_WS* superlu_ws = (NM_SuperLU_WS*) params->solver_data;
+  params->linear_solver_data = calloc(1, sizeof(NM_SuperLU_WS));
+  NM_SuperLU_WS* superlu_ws = (NM_SuperLU_WS*) params->linear_solver_data;
 
   if (!superlu_ws->options) superlu_ws->options = (superlu_options_t*)malloc(sizeof(superlu_options_t));
 
@@ -160,7 +160,7 @@ void NM_SuperLU_free(void* p)
   assert(p);
   NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
   assert(params);
-  NM_SuperLU_WS* superlu_ws = (NM_SuperLU_WS*) params->solver_data;
+  NM_SuperLU_WS* superlu_ws = (NM_SuperLU_WS*) params->linear_solver_data;
   assert(superlu_ws);
 
   SUPERLU_FREE (superlu_ws->perm_r);
@@ -190,7 +190,7 @@ void NM_SuperLU_free(void* p)
 #endif
   /* Here we free superlu_ws ...  */
   free(superlu_ws);
-  params->solver_data = NULL;
+  params->linear_solver_data = NULL;
 
 }
 
