@@ -713,8 +713,9 @@ extern "C"
 
 
   /** Pass a NumericsMatrix through swig typemaps.
-   * This is only usefull in python.
+   * This is only useful in python.
    * \param A the matrix
+   * \return a NumericsMatrix
    */
   static inline NumericsMatrix* NM_convert(NumericsMatrix* A)
   {
