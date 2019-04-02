@@ -31,9 +31,19 @@ if(WITH_FCLIB)
   list(APPEND CMAKE_SWIG_FLAGS "-DFCLIB_NOT_HEADER_ONLY")
   ENDIF()
 else()
-   list(APPEND ${COMPONENT}_python_excluded_tests
-     ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_fclib.py)
+  list(APPEND ${COMPONENT}_python_excluded_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_fclib.py)
 endif()
+
+if(WITH_${COMPONENT}_TESTING)
+  if(WITH_MUMPS AND WITH_MPI4PY)
+    message(STATUS "add test python mumps + mpi4py")
+  else()
+    list(APPEND ${COMPONENT}_python_excluded_tests
+      ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_NM_MUMPS.py)
+  endif()
+endif()
+
 include(swig_python_tools)
 
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
