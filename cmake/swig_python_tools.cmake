@@ -157,6 +157,7 @@ macro(add_siconos_swig_sub_module fullname)
     set_source_files_properties(${swig_file}
       PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS_${_name}}" CPLUSPLUS ON)
   ELSE(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
+    # C compilation, pass SWIG_FLAGS.
     IF(${COMPONENT} MATCHES "numerics")
       set_source_files_properties(${swig_file}
         PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS_${_name}}")
