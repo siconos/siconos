@@ -48,12 +48,13 @@ enum SOCLCP_SOLVER
 
 
 
-extern const char* const   SICONOS_FRICTION_2D_NSGS_STR ;
-extern const char* const   SICONOS_FRICTION_2D_PGS_STR ;
-extern const char* const   SICONOS_FRICTION_2D_CPG_STR ;
-extern const char* const   SICONOS_FRICTION_2D_LATIN_STR ;
-extern const char* const   SICONOS_FRICTION_2D_LEMKE_STR ;
-extern const char* const   SICONOS_FRICTION_2D_ENUM_STR ;
+/* extern const char* const   SICONOS_FRICTION_2D_NSGS_STR ; */
+/* extern const char* const   SICONOS_FRICTION_2D_PGS_STR ; */
+/* extern const char* const   SICONOS_FRICTION_2D_CPG_STR ; */
+/* extern const char* const   SICONOS_FRICTION_2D_LATIN_STR ; */
+/* extern const char* const   SICONOS_FRICTION_2D_LEMKE_STR ; */
+/* extern const char* const   SICONOS_FRICTION_2D_ENUM_STR ; */
+
 extern const char* const   SICONOS_SOCLCP_NSGS_STR ;
 extern const char* const   SICONOS_SOCLCP_NSGSV_STR ;
 extern const char* const   SICONOS_SOCLCP_PROX_STR;
