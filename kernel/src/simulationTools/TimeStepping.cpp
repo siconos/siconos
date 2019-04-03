@@ -24,6 +24,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 //#include "Interaction.hpp"
 #include "OneStepIntegrator.hpp"
+#include "EulerMoreauOSI.hpp"
 #include "Interaction.hpp"
 #include "EventsManager.hpp"
 #include "FrictionContact.hpp"
@@ -78,6 +79,12 @@ TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
   if (osi) insertIntegrator(osi);
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
   if (osnspb) insertNonSmoothProblem(osnspb, SICONOS_OSNSP_TS_VELOCITY);
+  SP::EulerMoreauOSI euosi( std11::dynamic_pointer_cast<EulerMoreauOSI>(osi) );
+  if (euosi)
+  {
+    _computeResiduY = true;
+    _computeResiduR = true;
+  }
 
 }
 
