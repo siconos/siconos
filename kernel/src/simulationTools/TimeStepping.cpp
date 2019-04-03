@@ -106,6 +106,16 @@ TimeStepping::~TimeStepping()
 {
 }
 
+void TimeStepping::insertIntegrator(SP::OneStepIntegrator osi)
+{
+  _allOSI->insert(osi);
+  SP::EulerMoreauOSI euosi( std11::dynamic_pointer_cast<EulerMoreauOSI>(osi) );
+  if (euosi)
+  {
+    _computeResiduY = true;
+    _computeResiduR = true;
+  }
+}
 // bool TimeStepping::predictorDeactivate(SP::Interaction inter, unsigned int i)
 // {
 //   double h = timeStep();

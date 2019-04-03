@@ -148,6 +148,11 @@ public:
    */
   TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb =0);
 
+  /** insert an Integrator into the simulation list of integrators
+   *  \param osi the OneStepIntegrator to add
+   */
+  virtual void insertIntegrator(SP::OneStepIntegrator osi);
+
   /** Destructor.
   */
   virtual ~TimeStepping();
