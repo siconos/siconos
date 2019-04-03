@@ -51,7 +51,7 @@
   REGISTER(Geometer)                            \
   REGISTER(BulletR)                             \
   REGISTER(Bullet5DR)                           \
-  REGISTER(BulletFrom1DLocalFrameR)             \
+  REGISTER(Bullet1DR)             \
   REGISTER(RigidBodyDS)                         \
   REGISTER(ContactR)                            \
   REGISTER(Contact5DR)                          \

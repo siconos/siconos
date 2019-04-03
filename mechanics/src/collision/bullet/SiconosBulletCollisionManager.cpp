@@ -51,7 +51,7 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include "RigidBodyDS.hpp"
 #include "BulletR.hpp"
 #include "Bullet5DR.hpp"
-#include "BulletFrom1DLocalFrameR.hpp"
+#include "Bullet1DR.hpp"
 
 #include <map>
 #include <limits>
@@ -1763,8 +1763,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       {
         if (nslaw && nslaw->size() == 1)
         {
-          SP::BulletFrom1DLocalFrameR rel(
-            std11::make_shared<BulletFrom1DLocalFrameR>(
+          SP::Bullet1DR rel(
+            std11::make_shared<Bullet1DR>(
               createSPtrbtManifoldPoint(*it->point)));
           inter = std11::make_shared<Interaction>(nslaw, rel);
         }

@@ -16,17 +16,17 @@
  * limitations under the License.
 */
 
-#include "BulletFrom1DLocalFrameR.hpp"
+#include "Bullet1DR.hpp"
 
 #include <Interaction.hpp>
 #include <BulletCollision/NarrowPhaseCollision/btManifoldPoint.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
-BulletFrom1DLocalFrameR::BulletFrom1DLocalFrameR(SP::btManifoldPoint point) : NewtonEuler1DR(), _contactPoints(point)
+Bullet1DR::Bullet1DR(SP::btManifoldPoint point) : NewtonEuler1DR(), _contactPoints(point)
 {
 }
 
-void BulletFrom1DLocalFrameR::computeh(double time, BlockVector& q0, SiconosVector& y)
+void Bullet1DR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
   y.setValue(0, _contactPoints->getDistance());
   btVector3 posa = _contactPoints->getPositionWorldOnA();

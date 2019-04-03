@@ -16,23 +16,23 @@
  * limitations under the License.
 */
 
-#ifndef BulletFrom1DLocalFrameR_hpp
-#define BulletFrom1DLocalFrameR_hpp
+#ifndef Bullet1DR_hpp
+#define Bullet1DR_hpp
 
 #include "BulletSiconosFwd.hpp"
 #include <NewtonEuler1DR.hpp>
 
-class BulletFrom1DLocalFrameR : public NewtonEuler1DR
+class Bullet1DR : public NewtonEuler1DR
 {
 private:
   /** serialization hooks
   */
-  ACCEPT_SERIALIZATION(BulletFrom1DLocalFrameR);
+  ACCEPT_SERIALIZATION(Bullet1DR);
 
   SP::btManifoldPoint _contactPoints;
 
 public:
-  BulletFrom1DLocalFrameR(SP::btManifoldPoint);
+  Bullet1DR(SP::btManifoldPoint);
 
   SP::btManifoldPoint contactPoint() const
   {
