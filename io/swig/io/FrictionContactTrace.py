@@ -242,43 +242,44 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
         SO = self.numericsSolverOptions()
 
         info = self.solve()
-        
-        if self.condition(SO) and has_fclib:
-            # problem = self.getNumericsProblemPtr()
-            # print(problem, type(problem))
-            
-            problem = self.globalFrictionContactProblemPtr()
+        problem = self.globalFrictionContactProblemPtr()
+        if problem.numberOfContacts >0 :
+            if self.condition(SO) and has_fclib:
+                # problem = self.getNumericsProblemPtr()
+                # print(problem, type(problem))
 
-            solver_maxiter=SO.iparam[0]
-            n_format_string=len(str(solver_maxiter))
-            format_string = "{0}-i{1:0"+str(n_format_string)+"d}-{2}-{3}.hdf5"
-            filename = format_string.format(self._params._fileName,
-                                            SO.iparam[N.SICONOS_IPARAM_ITER_DONE],
-                                            problem.numberOfContacts,
-                                            self._counter)
-            
-            if os.path.exists(filename):
-                os.remove(filename)
-                print('WARNING: file '+filename+ ' was existing and has been replaced')
                 
-            self._counter += 1
-            N.globalFrictionContact_fclib_write(problem,
-                                                self._params._title,
-                                                self._params._description,
-                                                self._params._mathInfo,
-                                                filename)
-            guess = F.fclib_solution()
-            guess.u = w_backup
-            guess.r = z_backup
-            F.fclib_write_guesses(1, guess, filename)
+
+                solver_maxiter=SO.iparam[0]
+                n_format_string=len(str(solver_maxiter))
+                format_string = "{0}-i{1:0"+str(n_format_string)+"d}-{2}-{3}.hdf5"
+                filename = format_string.format(self._params._fileName,
+                                                SO.iparam[N.SICONOS_IPARAM_ITER_DONE],
+                                                problem.numberOfContacts,
+                                                self._counter)
+
+                if os.path.exists(filename):
+                    os.remove(filename)
+                    print('WARNING: file '+filename+ ' was existing and has been replaced')
+
+                self._counter += 1
+                N.globalFrictionContact_fclib_write(problem,
+                                                    self._params._title,
+                                                    self._params._description,
+                                                    self._params._mathInfo,
+                                                    filename)
+                guess = F.fclib_solution()
+                guess.u = w_backup
+                guess.r = z_backup
+                F.fclib_write_guesses(1, guess, filename)
 
 
 
-            
-            solution = F.fclib_solution()
-            solution.u = self.w()
-            solution.z = self.z()
-            F.fclib_write_solution(solution, filename)
+
+                solution = F.fclib_solution()
+                solution.u = self.w()
+                solution.z = self.z()
+                F.fclib_write_solution(solution, filename)
             
                 
         self.postCompute()
