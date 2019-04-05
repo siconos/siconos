@@ -215,7 +215,7 @@ foreach(opt ${common_options})
 endforeach()
 
 # ========= Documentation =========
-if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_DOXYGEN_WARNINGS)
+if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_DOXYGEN_WARNINGS OR WITH_GENERATION)
   set(USE_DOXYGEN TRUE)
 endif()
 

@@ -9,7 +9,8 @@
 # ============= Global 'standard' cmake Settings =============
 
 # Set minimum version for cmake
-cmake_minimum_required(VERSION 3.0.2)
+# We advise 3.12 at least, but 3.5 is authorized since it's the default version on current debian stable.
+cmake_minimum_required(VERSION 3.5)
 
 # Set cmake modules directory (i.e. the one which contains all user-defined FindXXX.cmake files among other things)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
@@ -51,9 +52,13 @@ else()
 endif()
 
 # Set target names from components list
-assert(COMPONENTS)
+if(NOT COMPONENTS)
+  message(WARNING "Components list is empty - Nothing will be built.")
+endif()
+
 set(AVAILABLE_COMPONENTS "externals numerics kernel control mechanics mechanisms io")
 foreach(component_name IN LISTS COMPONENTS)
+  # Check and set components list
   string(TOUPPER ${component_name} upname)
   list(FIND ${AVAILABLE_COMPONENTS} ${component_name} comp_exists)
   if(NOT comp_exists)

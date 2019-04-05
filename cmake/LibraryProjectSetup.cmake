@@ -86,7 +86,7 @@ macro(LIBRARY_PROJECT_SETUP)
 
   # --- documentation ---
 
-  if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG)
+  if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_GENERATION)
     # Update list of source directories to be taken
     # into account by doxygen for the current component
     # --> set CACHE var ${COMPONENT}_DOXYGEN_INPUTS
@@ -103,7 +103,7 @@ macro(LIBRARY_PROJECT_SETUP)
   endif()
   
   # update the main doxy file, without building the doc
-  if(WITH_${COMPONENT}_DOCUMENTATION)
+  if(WITH_${COMPONENT}_DOCUMENTATION OR WITH_GENERATION)
     # Prepare target to generate rst files from xml
     doxy2rst_sphinx(${COMPONENT})
   endif()

@@ -116,7 +116,7 @@ if(WITH_DOCUMENTATION)
   # List and copy all rst files from source dir to binary dir
   file(GLOB_RECURSE files_rst RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/sphinx
     ${CMAKE_CURRENT_SOURCE_DIR}/sphinx/*.rst)
-  foreach(filepath ${files_rst})
+  foreach(filepath IN LISTS files_rst)
     #get_filename_component(filename ${filepath} NAME)
     
     configure_file (

@@ -77,26 +77,28 @@ macro(doxy2rst_sphinx COMP)
     configure_file(${CMAKE_SOURCE_DIR}/docs/config/doxyxml2sphinx.config.in ${DOXY_CONFIG_XML} @ONLY)
 
     # Create a new target used to create doxygen outputs (xml).
+    # Required for documentation and/or for serialization.
     add_custom_target(${COMP}-doxy2xml
       COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG_XML}
       OUTPUT_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy4rst.log ERROR_FILE ${DOXYGEN_OUTPUT}/${COMP}doxy4rst.log
       COMMENT "Generate xml/doxygen files for ${COMP} (conf: ${DOXY_CONFIG_XML}).") 
 
-    # Path where rst files will be generated.
-    set(SPHINX_DIR "${CMAKE_BINARY_DIR}/docs/sphinx")
-    
-    # Create a new target used to create sphinx inputs (rst) from doxygen outputs (xml).
-    # It calls a python function defined in gendoctools (create_breathe_files)
-    add_custom_target(${COMP}-xml2rst
-      COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
-      "from gendoctools.cpp2rst import create_breathe_files as f; f('${${COMP}_HDRS}', '${CMAKE_SOURCE_DIR}', '${COMP}', '${SPHINX_DIR}','${DOXY_CONFIG_XML}')"
-      VERBATIM
-      DEPENDS ${COMP}-doxy2xml
-      )
-    
-    add_custom_command(TARGET  ${COMP}-xml2rst POST_BUILD
-      COMMENT "${COMP} : rst (c++ API) files have been generated in ${SPHINX_DIR}/reference/cpp.")
-
+    if(WITH_${COMPONENT}_DOCUMENTATION)
+      # Path where rst files will be generated.
+      set(SPHINX_DIR "${CMAKE_BINARY_DIR}/docs/sphinx")
+      
+      # Create a new target used to create sphinx inputs (rst) from doxygen outputs (xml).
+      # It calls a python function defined in gendoctools (create_breathe_files)
+      add_custom_target(${COMP}-xml2rst
+        COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${CMAKE_BINARY_DIR}/share ${PYTHON_EXECUTABLE} -c
+        "from gendoctools.cpp2rst import create_breathe_files as f; f('${${COMP}_HDRS}', '${CMAKE_SOURCE_DIR}', '${COMP}', '${SPHINX_DIR}','${DOXY_CONFIG_XML}')"
+        VERBATIM
+        DEPENDS ${COMP}-doxy2xml
+        )
+      
+      add_custom_command(TARGET  ${COMP}-xml2rst POST_BUILD
+        COMMENT "${COMP} : rst (c++ API) files have been generated in ${SPHINX_DIR}/reference/cpp.")
+    endif()
 endmacro()
 
 # --------------------------------------
