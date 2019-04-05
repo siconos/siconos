@@ -44,6 +44,7 @@ ubuntu_reg:install_siconos:
       - install-siconos
   only:
   - master
+  allow_failure: true
 
 # This job clone, build and install Siconos with serialization on
 # It uses a docker image from siconos repo registry.
