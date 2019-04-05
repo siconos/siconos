@@ -72,6 +72,9 @@ make_doc:
       - build/docs/build/html
   only:
   - master
+  - schedules
+
+  
 
 pages:
 
