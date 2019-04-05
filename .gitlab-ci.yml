@@ -1,3 +1,54 @@
+variables:
+  # Default os (docker image)
+  os: ubuntu:18.04
+  # Default 'reference' tag for siconos
+  tag: 4.2.0
+  # Default ctest model. Warning : overwritten if set in schedules variables (as we expect)
+  ctest_build_model: Continuous
+  # Siconos registries
+  REGISTRY: gricad-registry.univ-grenoble-alpes.fr
+  # Default image - We need this to be able to call docker login
+  # image: gitlab/dind
+
+
+# This job create a docker image with all required depedencies
+# for Siconos with serialization/generation option ON.
+# It's based on ubuntu 18.04 and should be launched manually.
+docker-build:ubuntu:
+  stage: build
+  image: docker
+  before_script:
+    - echo 'Build docker image ...'
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/serialization-ubuntu:18.04 - < ci_gitlab/Dockerfile
+    - docker push gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/serialization-ubuntu:18.04
+  when:
+    - manual
+  only:
+    - master
+#  only:
+#    variables:
+#      - $CI_COMMIT_MESSAGE =~ /^\[docker-build\].*/i
+      
+
+
+# This job clone, build and install Siconos.
+# It uses a docker image from siconos repo registry.
+ubuntu_reg:install_siconos:
+  image: gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/ubuntu4siconos:18.04
+  stage: build
+  script:
+    - "sh ci_gitlab/install_siconos.sh $os" 
+  artifacts:
+    paths:
+      - install-siconos
+  only:
+  - master
+
+  
 make_doc:
   stage: build
   image: ubuntu:18.04

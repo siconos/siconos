@@ -83,15 +83,26 @@ endif()
 
 string(TIMESTAMP BUILD_TIMESTAMP)
 
-# ---- Python ---
-# (interp and lib)
-# Warning FP : python is always required, at least
-# for siconos script.
-if(WITH_PYTHON_WRAPPER)
-  find_package(PythonFull REQUIRED)
-else()
-  find_package(PythonInterp REQUIRED)
+# ---- PYTHON SETUP ----
+# Python interpreter is always required.
+# We force Python3!
+# In addition, when WITH_PYTHON_WRAPPER is ON,
+# we need python libraries and numpy.
+if(${CMAKE_VERSION} VERSION_LESS "3.14")
+  # Our FindPython3 is just a copy of the one distributed
+  # with cmake = 3.14
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/extras)
 endif()
+
+if(WITH_PYTHON_WRAPPER)
+  find_package(Python3 COMPONENTS Development Interpreter NumPy REQUIRED)
+else()
+  find_package(${python_cmake_package} COMPONENTS Interpreter REQUIRED)
+endif()
+
+# For backward compat ...
+set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+
 get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
   include(FindPythonModule)

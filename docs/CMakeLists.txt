@@ -8,8 +8,6 @@
 include(FindPythonModule)
 include(FindSphinxModule)
 
-find_package(PythonFull REQUIRED)
-
 # Devel option : generate pure doxygen doc (no sphinx), extracting all and with graphs.
 option(USE_DEVEL_DOXYGEN "Build doxygen (html, latex ...) doc, extracting all. Devel purpose. Default = OFF" OFF)
 

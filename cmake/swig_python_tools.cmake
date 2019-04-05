@@ -192,7 +192,7 @@ macro(add_siconos_swig_sub_module fullname)
     # do not link against the Python library on unix, it is useless
     swig_link_libraries(${_name} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
   else()
-    swig_link_libraries(${_name} ${PYTHON_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
+    swig_link_libraries(${_name} ${Python3_LIBRARIES} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})
   endif()
 
   # set dependency of sphinx apidoc to this target
