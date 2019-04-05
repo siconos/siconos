@@ -6,7 +6,7 @@ variables:
   # Default ctest model. Warning : overwritten if set in schedules variables (as we expect)
   ctest_build_model: Continuous
   # Siconos registries
-  REGISTRY: gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/
+  REGISTRY: gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos
 
   
 # This job create a docker image with all required depedencies
@@ -26,6 +26,7 @@ docker-build:ubuntu:
   when: manual
   only:
     - master
+  allow_failure: true
 #  only:
 #    variables:
 #      - $CI_COMMIT_MESSAGE =~ /^\[docker-build\].*/i
@@ -59,7 +60,7 @@ ubuntu_reg:install_siconos_serialization:
   when: manual
   only:
   - master
-
+  allow_failure: true
   
   
 make_doc:
