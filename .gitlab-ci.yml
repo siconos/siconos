@@ -23,8 +23,7 @@ docker-build:ubuntu:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker build -t $REGISTRY/serialization-ubuntu:18.04 - < ci_gitlab/dockerfiles/ubuntu18.04-serialization
     - docker push $REGISTRY/serialization-ubuntu:18.04
-  when:
-    - manual
+  when: manual
   only:
     - master
 #  only:
@@ -56,8 +55,7 @@ ubuntu_reg:install_siconos_serialization:
   artifacts:
     paths:
       - install-siconos
-  when:
-    - manual
+  when: manual
   only:
   - master
 
