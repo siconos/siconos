@@ -2155,8 +2155,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     y=np.min(yplus,axis=1)
                     violation_max=np.max(-y)
                     print_verbose('  violation max :',violation_max)
-                    if  (violation_max >= self._collision_margin):
-                        print_verbose('  violation max is larger than the collision_margin')
+                    if self._collision_margin is not None:
+                        if  (violation_max >= self._collision_margin):
+                            print_verbose('  violation max is larger than the collision_margin')
                     lam=simulation.lambda_(1,0)
                     print_verbose('  lambda max :',np.max(lam))
                     #print(' lambda : ',lam)
