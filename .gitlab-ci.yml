@@ -1,94 +1,111 @@
 variables:
-  # Default os (docker image)
-  os: ubuntu:18.04
-  # Default 'reference' tag for siconos
-  tag: 4.2.0
   # Default ctest model. Warning : overwritten if set in schedules variables (as we expect)
   ctest_build_model: Continuous
-  # Siconos registries
-  REGISTRY: gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos
+  # Path to dockerfiles (relative to siconos repo)
+  docker_path: ci_gitlab/dockerfiles
+  # Default tag for docker images
+  docker_tag: latest
 
-  
-# This job create a docker image with all required depedencies
-# for Siconos with serialization/generation option ON.
+
+
+# Templates for ci jobs
+include: ci_gitlab/gitlab-ci-siconos-templates.yml
+
+ 
+# ---- Docker build jobs -----
+
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
+# It's based on ubuntu 18.04.
+# It uses tag 'docker-build' to enforce run on a dedicated runner.
+docker-build:ubuntu18.04:
+  variables:
+    IMAGE_NAME: ubuntu18.04
+  extends: .docker-build
+
+
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
 # It's based on ubuntu 18.04 and should be launched manually.
-docker-build:ubuntu:
-  stage: build
-  image: docker
-  before_script:
-    - echo 'Build docker image ...'
-  services:
-    - docker:dind
-  script:
-    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker build -t $REGISTRY/serialization-ubuntu:18.04 - < ci_gitlab/dockerfiles/ubuntu18.04-serialization
-    - docker push $REGISTRY/serialization-ubuntu:18.04
-  when: manual
-  only:
-    - master
-  allow_failure: true
-#  only:
-#    variables:
-#      - $CI_COMMIT_MESSAGE =~ /^\[docker-build\].*/i
-      
+# It uses tag 'docker-build' to enforce run on a dedicated runner.
+docker-build:ubuntu18.04-oce:
+  variables:
+    IMAGE_NAME: ubuntu18.04-oce
+  extends: .docker-build
+  stage: docker-build-layer2
+  dependencies:
+    - docker-build:ubuntu18.04
 
 
-# This job clone, build and install Siconos.
-# It uses a docker image from siconos repo registry.
-ubuntu_reg:install_siconos:
-  image: $REGISTRY/ubuntu4siconos:18.04
-  stage: build
-  script:
-    - "sh ci_gitlab/install_siconos.sh $os" 
+# This job create a docker image with all required dependencies
+# (including serialization, bullet but not OCE)
+# It's based on ubuntu 18.04.
+# It uses tag 'docker-build' to enforce run on a dedicated runner.
+docker-build:ubuntu18.04-no-python:
+  variables:
+    IMAGE_NAME: ubuntu18.04-no-python
+  extends: .docker-build
+
+
+# This job create a docker image with all required dependencies
+# (including serialization, bullet but not OCE)
+# It's based on ubuntu 18.04.
+# It uses tag 'docker-build' to enforce run on a dedicated runner.
+docker-build:ubuntu18.04-doc:
+  variables:
+    IMAGE_NAME: ubuntu18.04-doc
+  extends: .docker-build
+  stage: docker-layer-3
+  dependencies:
+    - docker-build:ubuntu18.04-oce
+
+
+# ---- Siconos build jobs -----
+
+# Siconos build and install, default config
+# (based on cmake/default_siconos.cmake)
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
+  extends: .siconos-build
   artifacts:
     paths:
-      - install-siconos
-  only:
-  - master
-  allow_failure: true
+      - build
 
-# This job clone, build and install Siconos with serialization on
-# It uses a docker image from siconos repo registry.
-ubuntu_reg:install_siconos_serialization:
-  image: $REGISTRY/serialization-ubuntu:18.04
+
+# Siconos build and install, without python wrappers
+# (default conf, WITH_PYTHON_WRAPPER=OFF)
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04-no-python:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-no-python
+  extends: .siconos-build
+
+# --- Build doc/web site and publish it ---
+# Image : ubuntu 18.04
+siconos:doc:
   stage: build
+  image: $CI_REGISTRY_IMAGE/ubuntu18.04-doc
   script:
-    - "sh ci_gitlab/install_siconos_with_serialization.sh $os" 
-  artifacts:
-    paths:
-      - install-siconos
-  when: manual
-  only:
-  - master
-  allow_failure: true
-  
-  
-make_doc:
-  stage: build
-  image: ubuntu:18.04
-  script:
-    - "sh CI/make_siconos_doc.sh"
+    - "sh ci_gitlab/make_siconos_doc.sh"
   artifacts:
     paths:
       - build/docs/build/html
   only:
-  - master
-  - schedules
-
-  
+    variables: # Run this job only when commit message starts with [doc-build]
+      - $CI_COMMIT_MESSAGE =~ /^\[doc-build\].*/i      
 
 pages:
 
   image: python:alpine
   script:
-  - pwd
-  - ls
   - mv build/docs/build/html public
   artifacts:
     paths:
     - public
   dependencies:
-  - make_doc
+  - siconos:doc
   only:
   - master
 
