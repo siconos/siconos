@@ -481,7 +481,7 @@ class MechanicsHdf5(object):
         self._number_of_static_objects = 0
         self._use_compression = use_compression
         self._should_output_domains = output_domains
-        self.verbose = verbose
+        self._verbose = verbose
 
     def __enter__(self):
         self._out = h5py.File(self._io_filename, self._mode)
@@ -517,6 +517,11 @@ class MechanicsHdf5(object):
 
     def __exit__(self, type_, value, traceback):
         self._out.close()
+
+    def print_verbose(self, *args, **kwargs):
+            if self._verbose:
+                print('[io.mechanics]', *args, **kwargs)
+
 
 # hdf5 structure
 
