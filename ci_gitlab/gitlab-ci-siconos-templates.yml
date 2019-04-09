@@ -1,0 +1,57 @@
+# 
+
+
+stages:
+  # --- Docker build stage ---
+  # The first stage contains jobs used to build
+  # docker images 'ready to use' for a Siconos build/install.
+  # Requirement for jobs in this stage :
+  # - should build and push a docker image to siconos project registry
+  # - should be allowed to failed (in order to avoid blocking of last stage jobs)
+  # - should run only when commit message contains [docker build]
+  # - use Dockerfile from ci_gitlab/dockerfiles/<image-name>
+  - docker-build
+  - docker-build-layer2
+  - docker-build-layer3
+  # --- Build stage ---
+  # Jobs that build, test (opt) and install siconos
+  # on images from siconos registry.
+  - build
+
+
+# -- Template for docker-build jobs --
+# - should build and push a docker image to siconos project registry
+#   image name : $CI_REGISTRY_IMAGE/$IMAGE_NAME
+# - should be allowed to failed (in order to avoid blocking of last stage jobs)
+# - should run only when commit message contains [docker build]
+# - use Dockerfile from ci_gitlab/dockerfiles/<IMAGE_NAME>
+# - will be tagged <IMAGE_NAME>:<docker_tag>. default tag is latest.
+.docker-build:
+  image: docker:stable
+  services:
+    - docker:dind
+  stage: docker-build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA $docker_path/$IMAGE_NAME > /dev/null
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE/$IMAGE_NAME:$docker_tag
+    - docker push $CI_REGISTRY_IMAGE/$IMAGE_NAME:$docker_tag
+  tags:
+    - docker-build
+  only:
+    variables: # Run this job only when commit message starts with [docker-build]
+      - $CI_COMMIT_MESSAGE =~ /^\[docker-build\].*/i      
+  allow_failure: true
+
+# -- Template for siconos build-test-install jobs --
+# - Pull an image (possibly from siconos registry)
+#   named  IMAGE_NAME
+# - Run for all branches and for all push
+.siconos-build:
+  image: $IMAGE_NAME
+  stage: build
+  script:
+    - "sh ci_gitlab/install_siconos.sh" 
+  tags:
+    - docker-build
+
