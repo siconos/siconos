@@ -55,7 +55,7 @@ docker-build:ubuntu18.04-doc:
   variables:
     IMAGE_NAME: ubuntu18.04-doc
   extends: .docker-build
-  stage: docker-layer-3
+  stage: docker-build-layer3
   dependencies:
     - docker-build:ubuntu18.04-oce
 
