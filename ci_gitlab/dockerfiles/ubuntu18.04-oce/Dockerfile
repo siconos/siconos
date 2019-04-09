@@ -1,4 +1,4 @@
-FROM gricad-registry.univ-grenoble-alpes.fr/nonsmooth/test-ci/ubuntu18.04
+FROM gricad-registry.univ-grenoble-alpes.fr/nonsmooth/siconos/ubuntu18.04
 RUN apt update  && apt install -y -qq \
         liboce-foundation-dev \
         liboce-modeling-dev \
