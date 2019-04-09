@@ -17,6 +17,8 @@ stages:
   # Jobs that build, test (opt) and install siconos
   # on images from siconos registry.
   - build
+  # Publish documentation
+  - deploy
 
 
 # -- Template for docker-build jobs --

@@ -104,6 +104,7 @@ pages:
   artifacts:
     paths:
     - public
+  stage: deploy
   dependencies:
   - siconos:doc
   only:
