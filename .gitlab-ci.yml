@@ -63,6 +63,19 @@ docker-build:ubuntu18.04-doc:
     - docker-build:ubuntu18.04-oce
 
 
+# This job create a docker image with all required dependencies
+# (including serialization, bullet but not OCE).
+# It also download, build and install fclib/hdf5.
+# It's based on ubuntu 18.04.
+# It uses tag 'docker-build' to enforce run on a dedicated runner.
+docker-build:ubuntu18.04-fclib:
+  variables:
+    IMAGE_NAME: ubuntu18.04-fclib
+  extends: .docker-build
+  stage: docker-build-layer2
+  dependencies:
+    - docker-build:ubuntu18.04
+
 # ---- Siconos build jobs -----
 
 # Siconos build and install, default config
@@ -96,6 +109,16 @@ install_siconos:ubuntu18.04-oce:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-oce
     cdash_submit: 1
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+  extends: .siconos-build
+
+
+# Siconos build and install, with fclib ON
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04-fclib:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-fclib
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_fclib.cmake
   extends: .siconos-build
 
 
