@@ -12,6 +12,7 @@ RUN apt update  && apt install -y -qq \
         libatlas-base-dev \
         lp-solve \
         liblpsolve55-dev \
+        python3 \
         libpython3-dev \
         libcppunit-dev \
         libbullet-dev \

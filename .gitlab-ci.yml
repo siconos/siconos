@@ -76,6 +76,18 @@ docker-build:ubuntu18.04-fclib:
   dependencies:
     - docker-build:ubuntu18.04
 
+
+# This job create a docker image with all required dependencies
+# (including serialization, bullet, OCE, pythonocc).
+# It's based on archlinux.
+# It uses tag 'docker-build' to enforce run on a dedicated runner.
+docker-build:archlinux-oce:
+  variables:
+    IMAGE_NAME: archlinux-oce
+  extends: .docker-build
+
+
+    
 # ---- Siconos build jobs -----
 
 # Siconos build and install, default config
@@ -85,6 +97,7 @@ install_siconos:ubuntu18.04:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
     cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends: .siconos-build
   artifacts:
     paths:
