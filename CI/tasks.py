@@ -42,7 +42,7 @@ empty = SiconosCiTask()
 base = empty.copy()(
     ci_config='default',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
-          'python-env'],
+          'python3-env'],
     srcs=['.'],
     targets={'.': ['all', 'test']})
 #
@@ -54,7 +54,7 @@ default = SiconosCiTask(
     ci_config='default',
     distrib='ubuntu:16.04',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
-          'python-env'],
+          'python3-env'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
@@ -63,7 +63,7 @@ minimal = SiconosCiTask(
     ci_config='minimal',
     distrib='ubuntu:16.10',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
-          'atlas-lapack', 'python-minimal'],
+          'atlas-lapack', 'python3-minimal'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
@@ -72,7 +72,7 @@ minimal_with_python = SiconosCiTask(
     ci_config='minimal_with_python',
     distrib='ubuntu:16.10',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
-          'atlas-lapack', 'python-env'],
+          'atlas-lapack', 'python3-env'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 

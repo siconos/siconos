@@ -84,7 +84,7 @@ docker-build:ubuntu18.04-fclib:
 install_siconos:ubuntu18.04:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
-    cdash_submit: 0
+    cdash_submit: 1
   extends: .siconos-build
   artifacts:
     paths:
