@@ -9,8 +9,8 @@
 # ============= Global 'standard' cmake Settings =============
 
 # Set minimum version for cmake
-# We advise 3.12 at least, but 3.5 is authorized since it's the default version on current debian stable.
-cmake_minimum_required(VERSION 3.5)
+# We advise 3.12 at least, but 3.7 is authorized since it's the default version on current debian stable.
+cmake_minimum_required(VERSION 3.7)
 
 # Set cmake modules directory (i.e. the one which contains all user-defined FindXXX.cmake files among other things)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)

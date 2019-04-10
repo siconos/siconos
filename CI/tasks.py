@@ -52,7 +52,7 @@ base = empty.copy()(
 default = SiconosCiTask(
     docker=True,
     ci_config='default',
-    distrib='ubuntu:16.04',
+    distrib='ubuntu:18.04',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
           'python3-env'],
     srcs=['.'],
@@ -61,7 +61,7 @@ default = SiconosCiTask(
 minimal = SiconosCiTask(
     docker=True,
     ci_config='minimal',
-    distrib='ubuntu:16.10',
+    distrib='ubuntu:18.04',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
           'atlas-lapack', 'python3-minimal'],
     srcs=['.'],
@@ -70,7 +70,7 @@ minimal = SiconosCiTask(
 minimal_with_python = SiconosCiTask(
     docker=True,
     ci_config='minimal_with_python',
-    distrib='ubuntu:16.10',
+    distrib='ubuntu:18.04',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
           'atlas-lapack', 'python3-env'],
     srcs=['.'],
@@ -92,17 +92,17 @@ siconos_default_nix = default.copy()(
 siconos_debian_latest = siconos_default.copy()(
     distrib='debian:latest')
 
-siconos_ubuntu_14_04 = siconos_default.copy()(
-    distrib='ubuntu:14.04')
+# siconos_ubuntu_14_04 = siconos_default.copy()(
+#     distrib='ubuntu:14.04')
 
-siconos_ubuntu_15_04 = siconos_default.copy()(
-    distrib='ubuntu:15.04')
+# siconos_ubuntu_15_04 = siconos_default.copy()(
+#     distrib='ubuntu:15.04')
 
-siconos_ubuntu_15_10 = siconos_default.copy()(
-    distrib='ubuntu:15.10')
+# siconos_ubuntu_15_10 = siconos_default.copy()(
+#     distrib='ubuntu:15.10')
 
-siconos_ubuntu_16_10 = siconos_default.copy()(
-    distrib='ubuntu:16.10')
+# siconos_ubuntu_16_10 = siconos_default.copy()(
+#     distrib='ubuntu:16.10')
 
 siconos_ubuntu_17_10 = siconos_default.copy()(
     distrib='ubuntu:17.10')
@@ -129,7 +129,7 @@ from os.path import expanduser
 home = expanduser("~")
 
 siconos_documentation = siconos_default.copy()(
-    distrib='ubuntu:16.10',
+    distrib='ubuntu:18.04',
     ci_config='with_documentation',
     add_pkgs=['documentation'],
     add_directories=[os.path.join(home, '.ssh:/root/.ssh')],
