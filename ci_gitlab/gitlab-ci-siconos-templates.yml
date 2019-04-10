@@ -54,6 +54,6 @@ stages:
   stage: build
   script:
     - "sh ci_gitlab/install_siconos.sh $user_file" 
-  tags:
-    - docker-build
+#  tags:
+#    - docker-build
 
