@@ -21,10 +21,6 @@ if(NOT SICONOS_INSTALL_DIR)
   set(SICONOS_INSTALL_DIR ../install-siconos/)
 endif()
 
-if(NOT USER_FILE)
-  set(USER_FILE siconos_default.cmake)
-endif()
-
 # -- job : build and install siconos --
 message("--- Start conf for siconos install.")
 # - Source dir and path to siconos install
@@ -47,7 +43,10 @@ if(NOT CTEST_BUILD_NAME)
 endif()
 
 
-set(SICONOS_CMAKE_OPTIONS -DUSER_OPTIONS_FILE=${USER_FILE})
+if(USER_FILE)
+  set(SICONOS_CMAKE_OPTIONS -DUSER_OPTIONS_FILE=${USER_FILE})
+endif()
+
 list(APPEND SICONOS_CMAKE_OPTIONS -DCMAKE_INSTALL_PREFIX=${SICONOS_INSTALL_DIR})
 list(APPEND SICONOS_CMAKE_OPTIONS -DCMAKE_CXX_STANDARD=11)
 list(APPEND SICONOS_CMAKE_OPTIONS -DSICONOS_USE_BOOST_FOR_CXX11=OFF)

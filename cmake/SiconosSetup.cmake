@@ -97,7 +97,7 @@ endif()
 if(WITH_PYTHON_WRAPPER)
   find_package(Python3 COMPONENTS Development Interpreter NumPy REQUIRED)
 else()
-  find_package(${python_cmake_package} COMPONENTS Interpreter REQUIRED)
+  find_package(Python3 COMPONENTS Interpreter REQUIRED)
 endif()
 
 # For backward compat ...

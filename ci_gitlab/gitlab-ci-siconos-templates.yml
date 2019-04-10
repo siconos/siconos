@@ -53,7 +53,7 @@ stages:
   image: $IMAGE_NAME
   stage: build
   script:
-    - "sh ci_gitlab/install_siconos.sh" 
+    - "sh ci_gitlab/install_siconos.sh $user_file" 
   tags:
     - docker-build
 

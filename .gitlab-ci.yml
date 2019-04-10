@@ -5,7 +5,10 @@ variables:
   docker_path: ci_gitlab/dockerfiles
   # Default tag for docker images
   docker_tag: latest
-
+  # Default behavior regarding cdash submission
+  cdash_submit: 0
+  # Default path to siconos conf. files
+  siconos_confs: ci_gitlab/siconos_confs
 
 
 # Templates for ci jobs
@@ -68,11 +71,11 @@ docker-build:ubuntu18.04-doc:
 install_siconos:ubuntu18.04:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
+    cdash_submit: 0
   extends: .siconos-build
   artifacts:
     paths:
       - build
-
 
 # Siconos build and install, without python wrappers
 # (default conf, WITH_PYTHON_WRAPPER=OFF)
@@ -80,7 +83,21 @@ install_siconos:ubuntu18.04:
 install_siconos:ubuntu18.04-no-python:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-no-python
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_no_python.cmake
   extends: .siconos-build
+
+
+# Siconos build and install, with mechanisms
+# (oce and pythonocc parts activated).
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04-oce:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-oce
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+  extends: .siconos-build
+
 
 # --- Build doc/web site and publish it ---
 # Image : ubuntu 18.04

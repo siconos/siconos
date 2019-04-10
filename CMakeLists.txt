@@ -31,23 +31,24 @@ set(PROJECT_NAME_CAP Siconos)
 # Get current year (for licence and other cartridges)
 execute_process(COMMAND date "+\"%Y\"" OUTPUT_VARIABLE YEAR)
 string(STRIP ${YEAR} YEAR)
+
+# Read user option file, if provided on command line
 if(USER_OPTIONS_FILE)
-  get_filename_component(input_file ${USER_OPTIONS_FILE} NAME)
-  get_filename_component(path_to_file ${USER_OPTIONS_FILE} PATH)
-  find_file(filefound NAMES ${input_file}
-    PATHS ${path_to_file} ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
-    )
-  if(NOT ${filefound}-NOTFOUND)
-    configure_file(${path_to_file}/${input_file} ${CMAKE_SOURCE_DIR}/${input_file})
-  else()
-    message(FATAL_ERROR "Cannot find file ${USER_OPTIONS_FILE}")
+  # Check for tilde in file name (not handled properly by cmake)
+  string(FIND ${USER_OPTIONS_FILE} "\~" res)
+  if(res EQUAL 0)
+    string(REPLACE "\~" "$ENV{HOME}" USER_OPTIONS_FILE ${USER_OPTIONS_FILE})
   endif()
-  message("\n !!!!! Load user-defined options set from file ${filefound} !!!!! \n")
-  include(${input_file})
-  # copy user file to binary dir, just for 'visual' check.
-  configure_file(${input_file} ${input_file} COPYONLY)
-  assert(WITH_FORTRAN "The option WITH_FORTRAN is not defined in the user options file")
+  if(NOT IS_ABSOLUTE ${USER_OPTIONS_FILE})
+    get_filename_component(USER_OPTIONS_FILE ${USER_OPTIONS_FILE} REALPATH
+      BASE_DIR ${CMAKE_CURRENT_BINARY_DIR})
+  endif()
+  message("\n !!!!! Load user-defined options set from file ${USER_OPTIONS_FILE} !!!!! \n")
+  # Configure to take into account any change in ${USER_OPTIONS_FILE}
+  configure_file(${USER_OPTIONS_FILE} current_options.cmake COPYONLY)
+  include(${CMAKE_CURRENT_BINARY_DIR}/current_options.cmake)
 else()
+  message("\n !!!!! Load default configuration set from file ${CMAKE_SOURCE_DIR}/cmake/default_options.cmake !!!!! \n")
   include(default_options)
 endif()
 
