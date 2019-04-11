@@ -16,6 +16,8 @@ variables:
   docker_tag: latest
   # Default behavior regarding cdash submission
   cdash_submit: 0
+  # Default path to siconos conf. files
+  siconos_confs: ci_gitlab/siconos_confs
 
 
 stages:
