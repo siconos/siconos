@@ -48,6 +48,6 @@ endif()
 build_python_tests()
 
 if(NOT NO_RUNTIME_BUILD_DEP)
-  find_python_module(pyhull REQUIRED)
+  find_python_module(pyhull)
 endif()
  
