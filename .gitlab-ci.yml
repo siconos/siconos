@@ -1,16 +1,3 @@
-variables:
-  # Default ctest model. Warning : overwritten if set in schedules variables (as we expect)
-  ctest_build_model: Continuous
-  # Path to dockerfiles (relative to siconos repo)
-  docker_path: ci_gitlab/dockerfiles
-  # Default tag for docker images
-  docker_tag: latest
-  # Default behavior regarding cdash submission
-  cdash_submit: 0
-  # Default path to siconos conf. files
-  siconos_confs: ci_gitlab/siconos_confs
-
-
 # Templates for ci jobs
 include: ci_gitlab/gitlab-ci-siconos-templates.yml
 

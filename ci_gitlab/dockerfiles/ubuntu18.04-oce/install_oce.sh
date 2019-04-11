@@ -38,20 +38,21 @@ fi
 mkdir -p $CI_PROJECT_DIR/install/
 
 # Build dir
-mkdir -p $CI_PROJECT_DIR/build
+mkdir -p $CI_PROJECT_DIR/build/pyocc
 
 # -- Python occ --
 # Clone last pythonocc version.
 # We assume it is complient with the installed oce version.
-# Maybe we should clone specific tags for oce and pythonocc? 
+# Maybe we should clone specific tags for oce and pythonocc?
+cd $CI_PROJECT_DIR
 git clone https://github.com/tpaviot/pythonocc-core.git  > /dev/null
-cd $CI_PROJECT_DIR/build
+cd $CI_PROJECT_DIR/build/pyocc
 # Requires (in calling script):
 # installpath=`python3 -c "import site;print(site.USER_SITE)"`# Unfortunately, this cannot work, artifacts must be
 # in CI_PROJECT_DIR ...
 export pyocc_installpath=$CI_PROJECT_DIR/install/site-packages
 # Mind the OCC at the end of the install path!
-cmake ../pythonocc-core -DCMAKE_BUILD_TYPE=Release -Wno-deprecated -DPYTHONOCC_INSTALL_DIRECTORY=$pyocc_installpath/OCC
+cmake $CI_PROJECT_DIR/pythonocc-core -DCMAKE_BUILD_TYPE=Release -Wno-deprecated -DPYTHONOCC_INSTALL_DIRECTORY=$pyocc_installpath/OCC
 echo "----> install pythonocc ..."
 
 make install -j $nbprocs > /dev/null

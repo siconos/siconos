@@ -163,7 +163,6 @@ macro(add_siconos_swig_sub_module fullname)
     set(ADDITIONAL_SWIG_DEFINES ${ADDITIONAL_SWIG_DEFINES} -DBOOST_NOEXCEPT)
     swig_add_library(${_name} LANGUAGE python SOURCES ${swig_file})
   endif()
-
   # WARNING ${swig_generated_file_fullname} is overriden 
   set(${_name}_generated_file_fullname ${swig_generated_file_fullname})
   set_source_files_properties( ${swig_generated_file_fullname}
@@ -188,7 +187,6 @@ macro(add_siconos_swig_sub_module fullname)
 
   # Check dependencies and then link ...
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
-
   if(UNIX AND NOT APPLE)
     # do not link against the Python library on unix, it is useless
     swig_link_libraries(${_name} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})

@@ -1,8 +1,7 @@
 #-----------------------------------------------
 # Ctest driver for siconos install.
 # Target : continuous integration on gitlab-ci,
-# aims at providing a proper install of siconos
-# to test examples.
+# aims at providing a proper install of siconos for a given configuration.
 #
 # Input variables :
 # - SICONOS_INSTALL_DIR : where to install siconos. Default : ../install-siconos
@@ -12,10 +11,6 @@
 #   using common commands (lsb_release ...)
 # ----------------------------------------------
 
-# Assumes :
-# - 'siconos' git repository is available in ../
-# - 'siconos-tutorials' git repository is available in ../.. (for ctest drivers)
-
 # used as CMAKE_INSTALL_PREFIX
 if(NOT SICONOS_INSTALL_DIR)
   set(SICONOS_INSTALL_DIR ../install-siconos/)
@@ -24,9 +19,6 @@ endif()
 # -- job : build and install siconos --
 message("--- Start conf for siconos install.")
 # - Source dir and path to siconos install
-# We assume CI setup, with build dir in siconos-tutorial repository and
-# siconos clone is in siconos-tutorial/siconos
-# The 'cmake' source dir is siconos.
 if(NOT CTEST_SOURCE_DIRECTORY)
   set(CTEST_SOURCE_DIRECTORY $ENV{CI_PROJECT_DIR})
 endif()

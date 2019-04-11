@@ -44,6 +44,11 @@ if(WITH_${COMPONENT}_TESTING)
   endif()
 endif()
 
+if(NOT NO_RUNTIME_BUILD_DEP)
+  # -- Scipy --
+  # It is required for sparse matrices in numerics
+  find_python_module(scipy  VERSION 0.15) # for sparse
+endif()
 include(swig_python_tools)
 
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
