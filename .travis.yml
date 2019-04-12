@@ -30,9 +30,6 @@ python: 3.6
 # is the name and the second the version.
 
 env:
-  - TASK=default:distrib=ubuntu,14.04
-  - TASK=default:distrib=ubuntu,16.04
-  - TASK=default:distrib=ubuntu,16.04:pkgs-=python-env,:pkgs+=python3-env,
   - TASK=default:distrib=ubuntu,18.04
   - TASK=default:distrib=debian,latest
   - TASK=default:distrib=fedora,latest:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
