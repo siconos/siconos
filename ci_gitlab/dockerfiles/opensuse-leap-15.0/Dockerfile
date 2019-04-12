@@ -14,6 +14,7 @@ RUN zypper install -n -y \
     liblpsolve55-0 \
     python3-devel \
     python3-pip \
+    swig \
     cppunit-devel \
     libbullet-devel \
     hdf5-devel \
