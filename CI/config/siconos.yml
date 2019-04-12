@@ -166,13 +166,13 @@ pkgs:
 
   pytest:
     opensuse:
-      python-pytest
+      python3-pytest
 
   scipy:
     opensuse:
-      python-numpy
-      python-numpy-devel
-      python-scipy
+      python3-numpy
+      python3-numpy-devel
+      python3-scipy
 
   python-modules:
     nix:

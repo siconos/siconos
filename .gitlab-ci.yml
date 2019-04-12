@@ -63,6 +63,14 @@ docker-build:ubuntu18.04-fclib:
   dependencies:
     - docker-build:ubuntu18.04
 
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
+# Based on opensuse/leap 15.0
+# It uses tag 'docker-build' to enforce run on a dedicated runner.
+docker-build:opensuse-leap-15.0:
+  variables:
+    IMAGE_NAME: opensuse-leap-15.0
+  extends: .docker-build
 
 # This job create a docker image with all required dependencies
 # (including serialization, bullet, OCE, pythonocc).
@@ -89,6 +97,20 @@ install_siconos:ubuntu18.04:
   artifacts:
     paths:
       - build
+
+# Siconos build and install, default config
+# (based on cmake/default_siconos.cmake)
+# on ubuntu 18.04.
+install_siconos:opensuse-leap-15.0:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/opensuse-leap-15.0
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+  extends: .siconos-build
+  artifacts:
+    paths:
+      - build
+
 
 # Siconos build and install, without python wrappers
 # (default conf, WITH_PYTHON_WRAPPER=OFF)
