@@ -179,29 +179,6 @@ def warn(msg):
     sys.stderr.write('{0}: {1}'.format(sys.argv[0], msg))
 
 
-def log(fun, with_timer=False, before=True):
-    if with_timer:
-        t = Timer()
-
-        def logged(*args):
-            t.update()
-            if before:
-                print('[io.mechanics]| {0:50s} ...'.format(fun.__name__), end='')
-            else:
-                print('[io.mechanics]|-->start {0:42s} ...'.format(fun.__name__))
-            output =fun(*args)
-            if not before:
-                print('[io.mechanics]|-->end {0:44s} ...'.format(fun.__name__), end='')
-            print('..... {0:6.2e} s'.format(t.elapsed()))
-            return output
-        return logged
-    else:
-        def silent(*args):
-            output = fun(*args)
-            return output
-        return silent
-
-
 def object_id(obj):
     """returns an unique object identifier"""
     return obj.__hash__()
@@ -772,6 +749,37 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             else:
                 self._shape = ShapeCollection(io=self._shape_filename)
         return self
+
+    def log(self, fun, with_timer=False, before=True):
+        if with_timer:
+            t = Timer()
+
+            def logged(*args):
+                t.update()
+                if before:
+                    print('[io.mechanics]| {0:50s} ...'.format(fun.__name__),
+                          end='', flush=True)
+                else:
+                    print('[io.mechanics]|-->start {0:42s} ...'.
+                          format(fun.__name__), flush=True)
+                output = fun(*args)
+                endt = t.elapsed()
+                if not before:
+                    print('[io.mechanics]|-->end {0:44s} ...'.
+                          format(fun.__name__), end='', flush=True)
+                print('..... {0:6.2e} s'.format(endt))
+                siconos.io.mechanics_hdf5.add_line(
+                    siconos.io.mechanics_hdf5.data(self.log_data()[str(fun)],
+                                                   'timing', 1))
+                current_log = self.log_data()[str(fun)].shape[0] - 1
+                self.log_data()[str(fun)][current_log, 0] = endt
+                return output
+            return logged
+        else:
+            def silent(*args):
+                output = fun(*args)
+                return output
+            return silent
 
     def apply_gravity(self, body):
         g = constants.g / self._gravity_scale
@@ -1756,8 +1764,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     def explode_Newton_solve(self,  with_timer):
         s = self._simulation
-        log(s.initialize,with_timer)()
-        log(s.resetLambdas,with_timer)()
+        self.log(s.initialize,with_timer)()
+        self.log(s.resetLambdas,with_timer)()
         # Again the access to s._newtonTolerance generates a segfault due to director
         newtonTolerance = s.newtonTolerance()
         newtonMaxIteration = s.newtonMaxIteration()
@@ -1768,26 +1776,26 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         newtonNbIterations =0
         isNewtonConverge =False
-        log(s.initializeNewtonLoop,with_timer)()
+        self.log(s.initializeNewtonLoop,with_timer)()
         while (not isNewtonConverge) and (newtonNbIterations <newtonMaxIteration):
             #self.print_verbose('newtonNbIterations',newtonNbIterations)
             info=0
             newtonNbIterations = newtonNbIterations+1
-            log(s.prepareNewtonIteration,with_timer)()
-            log(s.computeFreeState,with_timer)()
+            self.log(s.prepareNewtonIteration,with_timer)()
+            self.log(s.computeFreeState,with_timer)()
             if s.numberOfOSNSProblems() >0:
-                info = log(s.computeOneStepNSProblem,with_timer)(SICONOS_OSNSP_TS_VELOCITY)
-            log(s.DefaultCheckSolverOutput,with_timer)(info);
-            log(s.updateInput,with_timer)();
-            log(s.updateState,with_timer)();
+                info = self.log(s.computeOneStepNSProblem,with_timer)(SICONOS_OSNSP_TS_VELOCITY)
+            self.log(s.DefaultCheckSolverOutput,with_timer)(info);
+            self.log(s.updateInput,with_timer)();
+            self.log(s.updateState,with_timer)();
             if (not isNewtonConverge) and (newtonNbIterations <newtonMaxIteration):
-                log(s.updateOutput,with_timer)()
-            isNewtonConverge = log(s.newtonCheckConvergence,with_timer)(newtonTolerance)
+                self.log(s.updateOutput,with_timer)()
+            isNewtonConverge = self.log(s.newtonCheckConvergence,with_timer)(newtonTolerance)
             if s.displayNewtonConvergence():
                 s.displayNewtonConvergenceInTheLoop();
             if (not isNewtonConverge) and (not info):
                 if s.numberOfOSNSProblems() > 0:
-                    log(s.saveYandLambdaInOldVariables,with_timer)()
+                    self.log(s.saveYandLambdaInOldVariables,with_timer)()
         if s.displayNewtonConvergence():
             s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration);
 
@@ -2110,7 +2118,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.output_dynamic_objects()
 
         if self._should_output_domains:
-            log(self.output_domains, with_timer)()
+            self.log(self.output_domains, with_timer)()
 
         # nsds=model.nonSmoothDynamicalSystem()
         # nds= nsds.getNumberOfDS()
@@ -2125,12 +2133,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if verbose_progress:
                 self.print_verbose('step', k, 'of', k0 + int((T - t0) / h)-1)
 
-            log(self.import_births(body_class=body_class,
+            self.log(self.import_births(body_class=body_class,
                                   shape_class=shape_class,
                                   face_class=face_class,
                                   edge_class=edge_class))
 
-            log(self.execute_deaths())
+            self.log(self.execute_deaths())
 
             if controller is not None:
                 controller.step()
@@ -2141,36 +2149,36 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if explode_Newton_solve:
                 if(time_stepping == TimeStepping) :
-                    log(self.explode_Newton_solve, with_timer, before=False)(with_timer)
+                    self.log(self.explode_Newton_solve, with_timer, before=False)(with_timer)
                 else:
                     print('simulation of type', type(time_stepping),' has no exploded version' )
-                    log(simulation.computeOneStep, with_timer)()
+                    self.log(simulation.computeOneStep, with_timer)()
             else:
-                log(simulation.computeOneStep, with_timer)()
+                self.log(simulation.computeOneStep, with_timer)()
 
 
             if (self._output_frequency and (k % self._output_frequency == 0)) or (k == 1):
                 if verbose:
                     self.print_verbose ('output in hdf5 file at step ', k)
 
-                log(self.output_dynamic_objects, with_timer)()
+                self.log(self.output_dynamic_objects, with_timer)()
 
-                log(self.output_velocities, with_timer)()
+                self.log(self.output_velocities, with_timer)()
 
-                log(self.output_contact_forces, with_timer)()
+                self.log(self.output_contact_forces, with_timer)()
 
                 if self._should_output_domains:
-                    log(self.output_domains, with_timer)()
+                    self.log(self.output_domains, with_timer)()
 
-                log(self.output_solver_infos, with_timer)()
+                self.log(self.output_solver_infos, with_timer)()
 
-                log(self._out.flush)()
+                self.log(self._out.flush)()
 
             if self._output_backup:
                 if (k % self._output_backup_frequency == 0) or (k == 1):
                     shutil.copyfile(self._io_filename, self._io_filename_backup)
 
-            log(simulation.clearNSDSChangeLog, with_timer)()
+            self.log(simulation.clearNSDSChangeLog, with_timer)()
 
             # Note these are not the same and neither is correct.
             # "_interman.statistics" gives the number of contacts
@@ -2220,7 +2228,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 if (precision > exit_tolerance):
                     print('precision is larger exit_tolerance')
                     return False
-            log(simulation.nextStep, with_timer)()
+            self.log(simulation.nextStep, with_timer)()
 
             self.print_verbose ('')
             k += 1
