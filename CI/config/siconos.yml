@@ -197,7 +197,9 @@ pkgs:
       - python3-pytest
       - python3-scipy
       - python3-matplotlib
-
+    opensuse:
+      - python3-devel
+      
   # bullet & serialization for full doc
   documentation:
     nix:
@@ -299,7 +301,8 @@ pkgs:
     nix: gcc
     debian: g++
     fedora: gcc-c++
-
+    opensuse: gcc-c++
+    
   boost:
     nix: boost-1.63.0
     debian: libboost-dev
@@ -363,7 +366,7 @@ pkgs:
       - openblas-devel
       - lapack-devel
     opensuse:
-      -openblas-devel
+      - openblas-devel
         
   atlas-lapack:
     nix:
