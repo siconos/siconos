@@ -23,6 +23,7 @@ RUN pacman -Sy && pacman --noconfirm -S \
         freeglut \
         glu
 WORKDIR /home
-COPY install_oce.sh .
+ENV CI_PROJECT_DIR /home
+COPY install_oce.sh /home/install_oce.sh
 RUN sh /home/install_oce.sh
 
