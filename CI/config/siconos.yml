@@ -367,6 +367,7 @@ pkgs:
       - lapack-devel
     opensuse:
       - openblas-devel
+      - lapacke-devel
         
   atlas-lapack:
     nix:

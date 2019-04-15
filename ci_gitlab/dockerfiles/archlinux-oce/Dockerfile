@@ -1,4 +1,4 @@
-FROM base:archlinux
+FROM archlinux/base
 RUN pacman -Sy && pacman --noconfirm -S \
         git \
         boost \
