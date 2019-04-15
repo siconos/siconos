@@ -24,7 +24,7 @@ installer:
     fedora: dnf --setopt=deltarpm=false install -y
     debian: apt-get install -f -y
     nixos/nix: nix-env -i
-    opensuse: zypper install -y
+    opensuse/leap: zypper install -y
 
 updater:
   # specific installer for sicono package from launchpad
@@ -37,11 +37,11 @@ updater:
 
   any:
     debian: apt-get update -y
-    opensuse: zypper --gpg-auto-import-keys refresh
+    opensuse/leap: zypper --gpg-auto-import-keys refresh
 
   # science repo for opensuse (needed for mumps installation)
   mumps-seq:
-    opensuse: zypper addrepo https://download.opensuse.org/repositories/science/openSUSE_Leap_42.3/science.repo && zypper --gpg-auto-import-keys refresh
+    opensuse/leap: zypper addrepo https://download.opensuse.org/repositories/science/openSUSE_Leap_42.3/science.repo && zypper --gpg-auto-import-keys refresh
 
 
 ##############################################################################
