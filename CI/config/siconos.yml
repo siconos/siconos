@@ -12,6 +12,7 @@ match:
   nvidia/opengl: debian
   suse: opensuse
   opensuse: fedora
+  opensuse/leap: opensuse
 
 ##############################################################################
 # Set commands used to install and update packages
@@ -303,7 +304,7 @@ pkgs:
     nix: boost-1.63.0
     debian: libboost-dev
     fedora: boost-devel
-    opensuse: boost-devel
+    opensuse: libboost_headers1_66_0-devel
 
   serialization:
     nix:
@@ -313,6 +314,8 @@ pkgs:
     fedora:
       boost-filesystem
       boost-serialization
+    opensuse:
+      libboost_serialization1_66_0-devel
 
   gmp-pkg:
     nix: gmp-with-cxx
@@ -330,6 +333,8 @@ pkgs:
 
     fedora:
       - cppunit
+      - cppunit-devel
+    opensuse:
       - cppunit-devel
 
   hdf5:
@@ -357,7 +362,9 @@ pkgs:
     fedora:
       - openblas-devel
       - lapack-devel
-
+    opensuse:
+      -openblas-devel
+        
   atlas-lapack:
     nix:
       - blas
