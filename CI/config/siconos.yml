@@ -263,15 +263,6 @@ pkgs:
     nix:
       - gnumake
 
-  cmake:
-    ubuntu-12.04:
-      - python-software-properties
-      - cmake-3.0.2
-
-    ubuntu-14.04:
-      - zlib1g-dev
-      - libcurl4-openssl-dev
-      - cmake-3.11.4
 
   cmake-3.0.2:
     any:
@@ -476,13 +467,6 @@ pkgs:
       - clang-4.9.1
     debian-jessie:
       - clang-3.8
-  # Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
-  # has been compiled with a different string impl ...
-  cppunit_clang-3.9:
-    ubuntu-16.04:
-      command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-3.9-ubuntu-16.10.tar.xz &&
-                tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/ lib &&
-                tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/include/cppunit/ include
 
   # this is for msan. It also contains the so files for cppunit compiled with msan
   libcxx_msan:
