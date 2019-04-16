@@ -14,7 +14,7 @@
 #cmakedefine HAVE_MLCPSIMPLEX
 #cmakedefine HAVE_TIME_H
 #cmakedefine HAVE_SYSTIMES_H
-#cmakedefine HAVE_MPI
+#cmakedefine SICONOS_HAS_MPI
 #cmakedefine WITH_MPI4PY
 #cmakedefine WITH_MUMPS
 #cmakedefine WITH_UMFPACK

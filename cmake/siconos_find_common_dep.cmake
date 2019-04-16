@@ -75,20 +75,16 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/externals/optim_misc/ql0001/ql0001.f")
 endif()
 
 # --- Mumps ---
-if(WITH_MUMPS)
-  if(NOT IDONTWANTMPI)
-    compile_with(MPI REQUIRED SICONOS_COMPONENTS numerics)
-  endif(NOT IDONTWANTMPI)
-  if(MPI_FOUND)
-    set(HAVE_MPI TRUE)
-    # Fedora allow parallel install of MPI and vanilla version of MUMPS.
-    # This shouldn't hurt in any case ...
-    if(NOT MUMPS_LIBRARY_DIRECTORY)
-      get_filename_component(MUMPS_LIBRARY_DIRECTORY "${MPI_LIBRARY}" PATH)
-    endif()
-  endif()
-  compile_with(MUMPS REQUIRED SICONOS_COMPONENTS numerics)
-endif()
+# if(WITH_MUMPS)
+#   if(MPI_FOUND)
+#     # Fedora allow parallel install of MPI and vanilla version of MUMPS.
+#     # This shouldn't hurt in any case ...
+#     if(NOT MUMPS_LIBRARY_DIRECTORY)
+#       get_filename_component(MUMPS_LIBRARY_DIRECTORY "${MPI_LIBRARY}" PATH)
+#     endif()
+#   endif()
+#   compile_with(MUMPS REQUIRED SICONOS_COMPONENTS numerics)
+# endif()
 
 # --- UMFPACK ---
 if(WITH_UMFPACK)
@@ -189,14 +185,6 @@ if(WITH_PYTHON_WRAPPER)
   find_program(SWIG_EXECUTABLE NAMES swig swig3.0 swig2.0 PATHS ENV PATH)
   compile_with(SWIG 2.0.11 REQUIRED)
   include(${SWIG_USE_FILE})
-  if(NOT NO_RUNTIME_BUILD_DEP)
-    find_python_module(mpi4py)
-    if(mpi4py_FOUND)
-      message(STATUS "mpi4py found at ${python_MPI4PY}")
-      set(WITH_MPI4PY TRUE)
-      remember_include_directories(${python_MPI4PY}/include)
-    endif()
-  ENDIF(NOT NO_RUNTIME_BUILD_DEP)
 endif()
 
 # See if help2man is available

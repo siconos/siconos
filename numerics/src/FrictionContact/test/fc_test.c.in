@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 {
   int info =0 ;
 
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
 
@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
   printf("\nEnd of test on %s\n", filename);
   unsetenv("SICONOS_HDF5_NAME");
 
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
 

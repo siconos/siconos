@@ -199,6 +199,9 @@ pkgs:
       - python3-matplotlib
     opensuse:
       - python3-devel
+      - python3-pip
+      - python3-scipy
+      - python3-numpy
       
   # bullet & serialization for full doc
   documentation:

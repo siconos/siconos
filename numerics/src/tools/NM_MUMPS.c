@@ -84,7 +84,7 @@ void NM_MUMPS_set_id(NumericsMatrix* A, DMUMPS_STRUC_C* id)
 
 void NM_MUMPS(NumericsMatrix* A, int job)
 {
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
   if (NM_MPI_rank(A)==0)
   {
     NM_MUMPS_id(A)->job = job;
@@ -153,7 +153,7 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A)
   mumps_id->par = 1; /* host (rank=0) is also involved in computations */
   mumps_id->sym = 0; /* unsymmetric */
 
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
   if (NM_MPI_comm(A) == MPI_COMM_WORLD)
   {
     mumps_id->comm_fortran = (MUMPS_INT) USE_COMM_WORLD;

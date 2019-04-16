@@ -320,7 +320,7 @@ char ** data_collection(void);
   char ** _data_collection = data_collection();
   int n_data = 0;
 
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
 
@@ -433,7 +433,7 @@ char ** data_collection(void);
 
   }
 
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
 

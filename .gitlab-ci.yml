@@ -16,8 +16,7 @@ docker-build:ubuntu18.04:
 
 # This job create a docker image with all required dependencies
 # (including serialization, python wrapper, bullet but not OCE)
-# It's based on ubuntu 18.04 and should be launched manually.
-# It uses tag 'docker-build' to enforce run on a dedicated runner.
+# It's based on ubuntu 18.04.
 docker-build:ubuntu18.04-oce:
   variables:
     IMAGE_NAME: ubuntu18.04-oce
@@ -26,11 +25,20 @@ docker-build:ubuntu18.04-oce:
   dependencies:
     - docker-build:ubuntu18.04
 
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, mumps parallel)
+# It's based on ubuntu 18.04.
+docker-build:ubuntu18.04-mumps-par:
+  variables:
+    IMAGE_NAME: ubuntu18.04-mumps-par
+  extends: .docker-build
+  stage: docker-build-layer2 # layer 2 since it's based on docker-build:ubuntu18.04
+  dependencies:
+    - docker-build:ubuntu18.04
 
 # This job create a docker image with all required dependencies
 # (including serialization, bullet but not OCE)
 # It's based on ubuntu 18.04.
-# It uses tag 'docker-build' to enforce run on a dedicated runner.
 docker-build:ubuntu18.04-no-python:
   variables:
     IMAGE_NAME: ubuntu18.04-no-python
@@ -40,7 +48,6 @@ docker-build:ubuntu18.04-no-python:
 # This job create a docker image with all required dependencies
 # (including serialization, bullet but not OCE)
 # It's based on ubuntu 18.04.
-# It uses tag 'docker-build' to enforce run on a dedicated runner.
 docker-build:ubuntu18.04-doc:
   variables:
     IMAGE_NAME: ubuntu18.04-doc
@@ -54,7 +61,6 @@ docker-build:ubuntu18.04-doc:
 # (including serialization, bullet but not OCE).
 # It also download, build and install fclib/hdf5.
 # It's based on ubuntu 18.04.
-# It uses tag 'docker-build' to enforce run on a dedicated runner.
 docker-build:ubuntu18.04-fclib:
   variables:
     IMAGE_NAME: ubuntu18.04-fclib
@@ -66,7 +72,6 @@ docker-build:ubuntu18.04-fclib:
 # This job create a docker image with all required dependencies
 # (including serialization, python wrapper, bullet but not OCE)
 # Based on opensuse/leap 15.0
-# It uses tag 'docker-build' to enforce run on a dedicated runner.
 docker-build:opensuse-leap-15.0:
   variables:
     IMAGE_NAME: opensuse-leap-15.0
@@ -75,7 +80,6 @@ docker-build:opensuse-leap-15.0:
 # This job create a docker image with all required dependencies
 # (including serialization, bullet, OCE, pythonocc).
 # It's based on archlinux.
-# It uses tag 'docker-build' to enforce run on a dedicated runner.
 docker-build:archlinux-oce:
   variables:
     IMAGE_NAME: archlinux-oce
@@ -131,6 +135,15 @@ install_siconos:ubuntu18.04-oce:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-oce
     cdash_submit: 1
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+  extends: .siconos-build
+
+# Siconos build and install, with mumps parallel activated
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04-mumps-par:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-mumps-par
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mumps_par.cmake
   extends: .siconos-build
 
 

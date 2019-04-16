@@ -250,3 +250,17 @@ IF(WITH_CCACHE)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
   endif(CCACHE_FOUND)
 ENDIF()
+
+# =========== MPI ==========
+option(WITH_MPI "Use MPI" OFF)
+if(WITH_MPI)
+  find_package(MPI REQUIRED)
+  # https://cmake.org/cmake/help/v3.10/module/FindMPI.html
+  if(MPI_CXX_FOUND)
+    print_mpi_info(CXX)
+    set(SICONOS_HAS_MPI TRUE) # for config.h
+  endif()
+  # if(MPI_Fortran_FOUND) # Do we need mpi fortran ?
+  #   print_mpi_info(Fortran)
+  # endif()
+endif()

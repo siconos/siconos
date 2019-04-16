@@ -712,14 +712,20 @@ ENDMACRO(END_TEST)
 # Build plugins required for python tests
 macro(build_plugin plug)
   get_filename_component(plug_name ${plug} NAME_WE)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/)
   add_library(${plug_name} MODULE ${plug})
+  target_include_directories(${plug_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/)
+
   set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_target_properties(${plug_name} PROPERTIES PREFIX "")
   add_dependencies(${COMPONENT} ${plug_name})
   if(NOT WITH_CXX)
     set_source_files_properties(${plug} PROPERTIES LANGUAGE C)
   endif(NOT WITH_CXX)
+  if(WITH_MPI)
+    # Note FP : temporary fix, to deal with PRIVATE deps of some components.
+    # This will be reviewed later.
+    target_include_directories(${plug_name} PRIVATE ${MPI_C_INCLUDE_DIRS})
+  endif()
 endmacro()
 
 # ----------------------------------------
