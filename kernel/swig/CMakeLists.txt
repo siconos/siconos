@@ -29,17 +29,11 @@ if(NOT WITH_XML)
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py)
 endif()
 
-find_package(GMP REQUIRED)
-# target_link_libraries(_kernel PRIVATE GMP::GMP) Note FP : failed due to swig setup. Fix this later
-target_link_libraries(_kernel  GMP::GMP)
-# find_package(Boost 1.61 REQUIRED)
-# target_link_libraries(_kernel Boost::boost)
-
-
 if(NOT HAS_FORTRAN)
   list(APPEND ${COMPONENT}_python_excluded_tests
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_matrix_exp.py)
 endif()
+
 build_python_tests()
 
 configure_file(fromXml.py.in ${SICONOS_SWIG_ROOT_DIR}/fromXml.py @ONLY)

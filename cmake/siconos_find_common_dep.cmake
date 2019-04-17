@@ -74,6 +74,18 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/externals/optim_misc/ql0001/ql0001.f")
   set(HAVE_QL0001 TRUE)
 endif()
 
+# --- Mumps ---
+# if(WITH_MUMPS)
+#   if(MPI_FOUND)
+#     # Fedora allow parallel install of MPI and vanilla version of MUMPS.
+#     # This shouldn't hurt in any case ...
+#     if(NOT MUMPS_LIBRARY_DIRECTORY)
+#       get_filename_component(MUMPS_LIBRARY_DIRECTORY "${MPI_LIBRARY}" PATH)
+#     endif()
+#   endif()
+#   compile_with(MUMPS REQUIRED SICONOS_COMPONENTS numerics)
+# endif()
+
 # --- UMFPACK ---
 if(WITH_UMFPACK)
   compile_with(Umfpack REQUIRED SICONOS_COMPONENTS numerics)
@@ -112,6 +124,19 @@ ENDIF()
   ENDIF()
 ENDIF()
 
+# GMP
+compile_with(GMP REQUIRED SICONOS_COMPONENTS kernel)
+
+IF(WITH_CXX)
+  # --- Boost ---
+  compile_with(Boost 1.47 REQUIRED)
+ENDIF(WITH_CXX)
+
+#SET(WITH_BOOST_LOG TRUE)
+IF(WITH_BOOST_LOG)
+  compile_with(Boost 1.47 COMPONENTS log  REQUIRED)
+  APPEND_CXX_FLAGS("-DBOOST_LOG_DYN_LINK")
+ENDIF()
 
 # -- VTK --
 IF(WITH_VTK)
@@ -137,6 +162,21 @@ endif()
 IF(WITH_HDF5)
   COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL SICONOS_COMPONENTS numerics)
 ENDIF(WITH_HDF5)
+
+#
+# -- Serialization --
+#
+include(serialization_vector_test)
+if(WITH_SERIALIZATION)
+  COMPILE_WITH(Boost 1.47
+    COMPONENTS serialization filesystem REQUIRED)
+  if (Boost_VERSION GREATER 106100)
+    # If boost is recent enough, prefer system boost serialization to
+    # the one included in "externals/boost_serialization".
+    set(WITH_SYSTEM_BOOST_SERIALIZATION ON)
+  endif()
+  TEST_SERIALIZATION_VECTOR_BUG()
+endif()
 
 # -- Python bindings --
 if(WITH_PYTHON_WRAPPER)

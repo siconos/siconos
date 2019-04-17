@@ -5,6 +5,7 @@ RUN apt update  && apt install -y -qq \
         make \
         libboost-dev \
         libboost-serialization-dev \
+        libboost-filesystem-dev \
         libgmp-dev \
         swig \
         gcc \

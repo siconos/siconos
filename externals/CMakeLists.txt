@@ -158,8 +158,6 @@ endif()
 include(LibraryProjectSetup)
 library_project_setup()
 
-# externals needs blas.
-# target_link_libraries(externals PRIVATE BLAS::BLAS)
 
 
 # --- specific install ----
@@ -197,26 +195,21 @@ if(HAVE_SICONOS_MECHANICS AND WITH_RENDERER)
 
 endif()
 
-# Boost > 1.61 even for Debian stable, so it seems that this part is no more needed.
-# if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SERIALIZATION)
-#   install(FILES
-#     ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_collections_load_imp.hpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_collections_save_imp.hpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_map.hpp
-#     ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_set.hpp
-#     DESTINATION include/${PROJECT_NAME}/boost/serialization)
-# endif()
-
-
-# We don't want warnings from externals libraries.
-if(MSVC)
-  target_compile_options(externals PRIVATE /w)
-else()
-  target_compile_options(externals PRIVATE "-w")
+if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SERIALIZATION)
+  install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_collections_load_imp.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_collections_save_imp.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_map.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_set.hpp
+    DESTINATION include/${PROJECT_NAME}/boost/serialization)
 endif()
+
+
 
 
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
 
 
+# We don't want warnings from externals libraries.
+target_compile_options(externals PRIVATE "-w")

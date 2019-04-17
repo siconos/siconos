@@ -45,15 +45,6 @@ set(${PACKAGE_NAME}_EXTERNAL_LIBRARIES "@SICONOS_LINK_LIBRARIES@")
 # include siconos project targets
 include("@CMAKE_INSTALL_PREFIX@/share/@PROJECT_NAME@/cmake/@PROJECT_NAME@Targets.cmake")
 
-# Check for component dependencies that are required
-# at runtim
-include(CMakeFindDependencyMacro)
-
-if(@HAVE_SICONOS_KERNEL@)
-  find_dependency(Boost 1.61 REQUIRED)
-endif()
-
-
 set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
 
 

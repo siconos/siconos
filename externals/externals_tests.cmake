@@ -30,7 +30,6 @@ if(WITH_${COMPONENT}_TESTING)
     NEW_TEST(dr_rodas dr_rodas.f)
     NEW_TEST(dr_seulex dr_seulex.f)
     END_TEST()
-    
   endif()
 
 endif()

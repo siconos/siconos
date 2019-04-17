@@ -433,6 +433,8 @@ pkgs:
       - libscalapack-mpi-dev
       - libmetis-dev
       - libmumps-dev
+      - python3-mpi4py
+
 
     fedora:
       - ptscotch-openmpi

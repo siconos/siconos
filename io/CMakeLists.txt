@@ -7,6 +7,13 @@ message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 # Name used for the target to be built
 set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
+# --- Search component dependencies ---
+if(WITH_SERIALIZATION)
+  find_package(Boost 1.47 COMPONENTS serialization REQUIRED)
+  find_package(Boost 1.47 COMPONENTS filesystem REQUIRED)
+  # cmake 2.8.12.2 (ubuntu 14.04) need this
+  set(${COMPONENT}_LINK_LIBRARIES  "${${COMPONENT}_LINK_LIBRARIES};${Boost_LIBRARIES}")
+endif()
 # Right now boost::serialization does some nasty things... so we have to
 # disable some undefined behavior checks ...
 IF(USE_SANITIZER MATCHES "asan")
@@ -140,15 +147,6 @@ add_custom_target(SerializersGeneration ALL
 include(LibraryProjectSetup)
 
 library_project_setup()
-
-# --- Search component dependencies ---
-if(WITH_SERIALIZATION)
-  include(serialization_vector_test)
-  find_package(Boost 1.61 COMPONENTS serialization filesystem REQUIRED)
-  target_link_libraries(io PRIVATE Boost::filesystem)
-  target_link_libraries(io PRIVATE Boost::serialization)
-  TEST_SERIALIZATION_VECTOR_BUG()
-endif()
 
 add_dependencies(${COMPONENT} SerializersGeneration)
 

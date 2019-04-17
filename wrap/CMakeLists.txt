@@ -52,14 +52,12 @@ if(WITH_PYTHON_WRAPPER)
   set(SICONOS_SWIG_INCLUDE_DIRS ${SICONOS_SWIG_SRC_DIRS} ${SICONOS_SWIG_ROOT_DIR} ${Python3_INCLUDE_DIRS}
     CACHE INTERNAL "Directories required for swig includes.")
 
-  
   foreach(_dir ${SICONOS_SWIG_INCLUDE_DIRS})
     set(SWIG_DEFS "-I${_dir};${SWIG_DEFS}")
   endforeach()
 
   set(SWIG_DEFS "${SWIG_DEFS}" CACHE INTERNAL "Swig extra definitions.")
-  find_package(Boost 1.61 REQUIRED)
-  list(APPEND SWIG_DEFS "-I${Boost_INCLUDE_DIRS}")
+
   include_directories(${SICONOS_SWIG_INCLUDE_DIRS})
 
   # ------------- Tests -------------
