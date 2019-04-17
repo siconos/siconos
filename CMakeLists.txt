@@ -86,6 +86,7 @@ if(WITH_CXX)
     project(${PROJECT_NAME} CXX C)
     #unset(HAS_FORTRAN)
   endif()
+  set(CMAKE_CXX_STANDARD 11)
    # Set CXX compilation flags
   include(CXXCompilerSetup)
 else()

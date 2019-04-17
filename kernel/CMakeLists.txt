@@ -60,6 +60,7 @@ find_package(Boost 1.61 REQUIRED)
 # Boost must be set as a public dependency because of SiconosAlgebraTypeDefs.hpp
 # This has to be reviewed !!!
 target_link_libraries(kernel PUBLIC Boost::boost)
+
 if(WITH_BOOST_LOG)
   find_package(Boost 1.61 REQUIRED COMPONENTS log)
   target_compile_definition(kernel PRIVATE BOOST_LOG_DYN_LINK)

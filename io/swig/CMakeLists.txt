@@ -118,7 +118,6 @@ if(HAVE_SICONOS_MECHANISMS)
   endif()
 endif()
 
-
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 

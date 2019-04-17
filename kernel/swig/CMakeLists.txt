@@ -32,6 +32,8 @@ endif()
 find_package(GMP REQUIRED)
 # target_link_libraries(_kernel PRIVATE GMP::GMP) Note FP : failed due to swig setup. Fix this later
 target_link_libraries(_kernel  GMP::GMP)
+# find_package(Boost 1.61 REQUIRED)
+# target_link_libraries(_kernel Boost::boost)
 
 
 if(NOT HAS_FORTRAN)

@@ -12,7 +12,7 @@ if(NOT CMAKE_CXX_COMPILER OR NOT CMAKE_CXX_COMPILER_WORKS)
 endif()
 #add_definitions(-DBOOST_NOEXCEPT)
 # For SiconosConfig.h
-option(SICONOS_USE_BOOST_FOR_CXX11 "Prefer BOOST features over C++ standard features even if C++xy is enabled" ON)
+option(SICONOS_USE_BOOST_FOR_CXX11 "Prefer BOOST features over C++ standard features even if C++xy is enabled" OFF)
 option(SICONOS_USE_MAP_FOR_HASH "Prefer std::map to std::unordered_map even if C++xy is enabled" ON)
 
 include(cxxTools)

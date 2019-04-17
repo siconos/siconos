@@ -19,6 +19,7 @@ set(${COMPONENT}_PYTHON_MODULES
 
 set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
   ${CMAKE_SOURCE_DIR}/kernel/swig)
+
 set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
 
 include(swig_python_tools)

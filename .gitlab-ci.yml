@@ -156,6 +156,16 @@ install_siconos:ubuntu18.04-fclib:
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_fclib.cmake
   extends: .siconos-build
 
+# Siconos build and install, with serialization/generation ON
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04-serialization:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
+  extends: .siconos-build
+
+  
 
 # --- Build doc/web site and publish it ---
 # Image : ubuntu 18.04
