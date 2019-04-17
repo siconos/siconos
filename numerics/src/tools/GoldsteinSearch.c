@@ -48,7 +48,7 @@ double search_Goldstein_standalone(int n, double* theta, double preRHS, search_d
   void* data = ls_data->data;
   bool arcsearch = ls_data->searchtype == ARCSEARCH;
   void* set = ls_data->set;
-  double RHS;
+  // double RHS;
 
   goldstein_extra_params* gep = (goldstein_extra_params*) ls_data->extra_params;
   assert(gep);
@@ -73,16 +73,16 @@ double search_Goldstein_standalone(int n, double* theta, double preRHS, search_d
        cblas_dcopy(n, z, 1, F, 1);
        cblas_daxpy(n, -1.0, zc, 1, F, 1); /* F = z(0) - z(alpha) */
        /* warning desc_dir = -JacMerit !*/
-       double dotprod = cblas_ddot(n, desc_dir, 1, F, 1);
-       if (dotprod > 0.0)
-         RHS = ls_data->sigma*dotprod;
-       else
-         RHS = -alpha*ls_data->sigma*theta_ref;
+       // double dotprod = cblas_ddot(n, desc_dir, 1, F, 1);
+       /* if (dotprod > 0.0) */
+       /*   RHS = ls_data->sigma*dotprod; */
+       /* else */
+       /*   RHS = -alpha*ls_data->sigma*theta_ref; */
      }
-     else
-     {
-       RHS = alpha*preRHS;
-     }
+     /* else */
+     /* { */
+     /*   RHS = alpha*preRHS; */
+     /* } */
 
      // compute new F_merit
      ls_data->compute_F(data, zc, F);

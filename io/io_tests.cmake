@@ -4,7 +4,7 @@ if(WITH_${COMPONENT}_TESTING)
   # We don't use COMPILE_WITH since we don't want to link cppunit with the
   # kernel library
   if(WITH_SERIALIZATION)
-    find_package(Boost 1.47 COMPONENTS serialization filesystem REQUIRED)
+    find_package(Boost 1.61 COMPONENTS serialization filesystem REQUIRED)
   endif()
   find_package(CppUnit REQUIRED)
   set(TEST_LIBS ${TEST_LIBS} ${CPPUNIT_LIBRARIES} ${Boost_LIBRARIES})

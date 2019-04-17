@@ -3,7 +3,7 @@ include(tools4tests)
 set(TEST_WRAP FALSE)
 
 if(WITH_${COMPONENT}_TESTING)
-  
+
   # We don't use COMPILE_WITH since we don't want to link cppunit with the
   # kernel library
   find_package(CppUnit REQUIRED)

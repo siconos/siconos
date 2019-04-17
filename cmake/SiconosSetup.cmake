@@ -230,6 +230,12 @@ if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_DOXYGEN_WARNINGS OR WITH_GENERAT
   set(USE_DOXYGEN TRUE)
 endif()
 
+
+
+# ----- Dependencies that may be needed by any (or all) Siconos components -----
+find_package(BLASFull REQUIRED)
+
+
 # =========== OpenMP ==========
 OPTION (WITH_OPENMP "Use OpenMP" OFF)
 IF(WITH_OPENMP)

@@ -50,5 +50,38 @@ set(${COMPONENT}_EXCLUDE_DOXY
 include(LibraryProjectSetup)
 library_project_setup()
 
+# --- dependencies ---
+
+
+# boost
+# check https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=boost
+find_package(Boost 1.61 REQUIRED
+  COMPONENTS
+  OPTIONAL_COMPONENTS log)
+
+
+# Boost must be set as a public dependency because of SiconosAlgebraTypeDefs.hpp
+# This has to be reviewed !!!
+target_link_libraries(kernel PUBLIC Boost::boost)
+if(WITH_BOOST_LOG)
+  target_compile_definition(kernel PRIVATE BOOST_LOG_DYN_LINK)
+endif()
+
+
+# blas 
+target_link_libraries(kernel PRIVATE BLAS::BLAS)
+
+# gmp
+find_package(GMP REQUIRED)
+target_link_libraries(kernel PRIVATE GMP::GMP)
+
+# gmp
+find_package(GMP REQUIRED)
+target_link_libraries(kernel PRIVATE GMP::GMP)
+# target_link_libraries(_kernel PRIVATE GMP::GMP) Note FP : failed due to swig setup. Fix this later
+
+
+
+
 # --- tests ---
 include(${COMPONENT}_tests.cmake)

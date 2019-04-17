@@ -42,5 +42,9 @@ include(WindowsControlSetup)
 include(LibraryProjectSetup)
 library_project_setup()
 
+# boost (it seems that it's only for shared_array from SiconosPointers?)
+find_package(Boost 1.61 REQUIRED)
+target_link_libraries(control PRIVATE Boost::boost)
+
 # --- tests ---
 include(${COMPONENT}_tests.cmake)

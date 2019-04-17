@@ -458,4 +458,17 @@ if(WITH_${COMPONENT}_TESTING)
   windows_library_extra_setup("numerics-test" "numerics-test")
   target_link_libraries(numerics-test ${PRIVATE} ${COMPONENT})
   target_link_libraries(numerics-test ${PRIVATE} ${${COMPONENT}_LINK_LIBRARIES})
+
+  # Note FP : temporary fix, to deal with PRIVATE deps of some components.
+  # This will be reviewed later.
+  target_link_libraries(numerics-test PUBLIC BLAS::BLAS)
+  
+  if(WITH_MPI)
+    # Note FP : temporary fix, to deal with PRIVATE deps of some components.
+    # This will be reviewed later.
+    target_include_directories(numerics-test PUBLIC ${MPI_C_INCLUDE_DIRS})
+    target_link_libraries(numerics-test PUBLIC ${MPI_C_LIBRARIES})
+  endif()
+
+  
 endif()

@@ -45,6 +45,7 @@
 #include <boost/type_traits/is_polymorphic.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <RotationQuaternion.hpp>
 %}
 
 // ignores
@@ -237,6 +238,7 @@ typedef __mpz_struct mpz_t[1];
 
 %include "SiconosAlgebraTypeDef.hpp"
 %include "SiconosAlgebra.hpp"
+%include "RotationQuaternion.hpp"
 
 %import "RelationNamespace.hpp";
 

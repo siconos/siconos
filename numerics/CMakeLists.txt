@@ -84,6 +84,10 @@ if(BUILD_AS_CPP)
   set(${COMPONENT}_LINKER_LANGUAGE CXX)
 endif()
 
+
+# numerics needs blas and lapack
+target_link_libraries(numerics PRIVATE BLAS::BLAS)
+
 # mumps and mpi
 if(WITH_MPI)
   target_include_directories(numerics PRIVATE ${MPI_C_INCLUDE_DIRS})
@@ -102,9 +106,3 @@ endif()
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
 
-if(WITH_MPI)
-  # Note FP : temporary fix, to deal with PRIVATE deps of some components.
-  # This will be reviewed later.
-  target_include_directories(numerics-test PUBLIC ${MPI_C_INCLUDE_DIRS})
-  target_link_libraries(numerics-test PUBLIC ${MPI_C_LIBRARIES})
-endif()
