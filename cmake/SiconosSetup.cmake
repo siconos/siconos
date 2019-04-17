@@ -232,8 +232,8 @@ endif()
 
 
 
-# ----- Dependencies that may be needed by any (or all) Siconos components -----
-find_package(BLASFull REQUIRED)
+# # ----- Dependencies that may be needed by any (or all) Siconos components -----
+# find_package(BLASFull REQUIRED)
 
 
 # =========== OpenMP ==========
