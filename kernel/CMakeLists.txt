@@ -67,7 +67,7 @@ endif()
 
 
 # blas 
-target_link_libraries(kernel PRIVATE BLAS::BLAS)
+#target_link_libraries(kernel PRIVATE BLAS::BLAS)
 
 # gmp
 find_package(GMP REQUIRED)

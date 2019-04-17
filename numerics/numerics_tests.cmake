@@ -461,7 +461,7 @@ if(WITH_${COMPONENT}_TESTING)
 
   # Note FP : temporary fix, to deal with PRIVATE deps of some components.
   # This will be reviewed later.
-  target_link_libraries(numerics-test PUBLIC BLAS::BLAS)
+  #target_link_libraries(numerics-test PUBLIC BLAS::BLAS)
   
   if(WITH_MPI)
     # Note FP : temporary fix, to deal with PRIVATE deps of some components.

@@ -86,7 +86,7 @@ endif()
 
 
 # numerics needs blas and lapack
-target_link_libraries(numerics PRIVATE BLAS::BLAS)
+#target_link_libraries(numerics PRIVATE BLAS::BLAS)
 
 # mumps and mpi
 if(WITH_MPI)

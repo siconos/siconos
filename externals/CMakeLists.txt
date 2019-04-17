@@ -159,7 +159,7 @@ include(LibraryProjectSetup)
 library_project_setup()
 
 # externals needs blas.
-target_link_libraries(externals PRIVATE BLAS::BLAS)
+# target_link_libraries(externals PRIVATE BLAS::BLAS)
 
 
 # --- specific install ----
