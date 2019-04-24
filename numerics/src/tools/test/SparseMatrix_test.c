@@ -786,6 +786,52 @@ static int alloc_test(void)
   return (int)(info1+info2+info3+info4);
 }
 
+/* create an empty triplet matrix, insert 2 elements, print and free */
+static int inv_test(void)
+{
+  int size0 =10;
+  int size1 =10;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for (int i =0; i < size0; i++)
+  {
+    for (int j =i; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+
+  //NM_zentry(A, size0-1, size0-1, 10);
+
+  NM_display(A);
+  FILE * fileout = fopen("dataA.py", "w");
+  NM_write_in_file_python(A, fileout);
+  fclose(fileout);
+ 
+  NumericsMatrix * Ainv  = NM_new();
+  Ainv->size0 = size0;
+  Ainv->size1 = size1;
+  Ainv->storageType = NM_SPARSE;
+
+  NM_inv(A, Ainv);
+
+  NumericsMatrix* AAinv = NM_multiply(A,Ainv);
+  //NM_display(AAinv);
+
+  NumericsMatrix * Id  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(Id,0);
+  Id->matrix2->origin= NSM_TRIPLET;
+  for (int i =0; i < size0; i++)
+  {
+    NM_zentry(Id, i, i, 1.0);
+  }
+  //NM_display(Id);
+
+  
+  return  !NM_equal(AAinv, Id);
+}
+
 
 
 int main(void)
@@ -797,6 +843,8 @@ int main(void)
   info += gemm_test2();
 
   info += alloc_test();
+  
+  info += inv_test();
 
   return info;
 }
