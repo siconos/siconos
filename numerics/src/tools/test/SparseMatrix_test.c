@@ -7,12 +7,9 @@
 #include "CSparseMatrix.h"
 
 #include "CSparseMatrix_internal.h"
-
 #ifdef SICONOS_HAS_MPI
 #include <mpi.h>
 #endif
-
-
 int add_square_triplet(void);
 int add_square_csc(void);
 int add_square_triplet_into_csc(void);
@@ -840,14 +837,11 @@ static int inv_test(void)
 
 
 
-int main(int argc, char *argv[])
+int main()
 {
-
 #ifdef SICONOS_HAS_MPI
-  MPI_Init(&argc, &argv);
+  MPI_Init(NULL, NULL);
 #endif
-
-
   int info = add_test();
 
   info += gemm_test();
@@ -859,9 +853,8 @@ int main(int argc, char *argv[])
   info += inv_test();
 
 #ifdef SICONOS_HAS_MPI
-    MPI_Finalize();
+  MPI_Finalize();
 #endif
 
-  
   return info;
 }
