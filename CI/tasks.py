@@ -111,13 +111,12 @@ siconos_fedora_latest = siconos_default.copy()(
     distrib='fedora:latest')
 
 siconos_cxx_11_ubuntu_17_10 = siconos_default.copy()(
-    distrib='ubuntu:17.10',
-    ci_config='with_cxx11')
+    distrib='ubuntu:17.10')
 
 siconos_gazebo = siconos_default.copy()(
     distrib='nvidia/opengl:1.0-glvnd-devel-ubuntu16.04',
-    ci_config=('with_cxx11', 'with_bullet', 'with_py3'),
-    add_pkgs=['bullet','gazebo'],
+    ci_config=('with_bullet', 'with_py3'),
+    add_pkgs=['bullet', 'gazebo'],
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install', 'docker-cmd']})
 

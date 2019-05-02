@@ -1,8 +1,7 @@
 # =================================================================
 # siconos configuration file.
-# See http://www.cmake.org/cmake/help/git-master/manual/cmake-packages.7.html#creating-packages
-# 
-# This file have been generated during siconos install and
+# Check https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#creating-packages
+# This file has been generated during siconos install and
 # may be used by another cmake project to retrieve all the configuration variables
 # of siconos.
 #
@@ -26,13 +25,13 @@
 # 
 # 
 # Note : var names chosen as recommended here :
-# http://www.cmake.org/cmake/help/v3.0/manual/cmake-developer.7.html#manual:cmake-developer(7))
+# https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html#manual:cmake-developer(7)
 #
 
 @PACKAGE_INIT@
 
 # Name of the siconos package
-set(PACKAGE_NAME @PROJECT_NAME@)
+set(PACKAGE_NAME siconos)
 
 # set path to siconos installation
 set_and_check(siconos_ROOT_DIR "@CMAKE_INSTALL_PREFIX@")
@@ -42,32 +41,29 @@ set(installed_targets "@installed_targets@")
 
 # set list of external libraries
 set(${PACKAGE_NAME}_EXTERNAL_LIBRARIES "@SICONOS_LINK_LIBRARIES@")
-# include siconos project targets
-include("@CMAKE_INSTALL_PREFIX@/share/@PROJECT_NAME@/cmake/@PROJECT_NAME@Targets.cmake")
 
+# include siconos project targets
+include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")
+
+# --- Siconos extra components or options ---
+set(HAS_PYTHON_WRAPPER @WITH_PYTHON_WRAPPER@)
+set(SICONOS_PYTHON_EXECUTABLE @Python3_EXECUTABLE@)
+
+# --- Numerics component extras ---
 set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
 
-
-set(HAS_PYTHON_WRAPPER @WITH_PYTHON_WRAPPER@)
-set(SICONOS_PYTHON_EXECUTABLE @PYTHON_EXECUTABLE@)
-
-
-# --- Mechanics component setup ---
+# --- Mechanics component extras ---
 # mechanics component with bullet?
 set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
 # mechanics (and/or mechanisms) component with oce?
 set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
 
-
-# siconos libs are appended as targets.
-# Note that thanks to the include above, this will add all external libraries on which
-# the targets depend to the linker.
-set(${PACKAGE_NAME}_LIBRARIES ${installed_targets})
-
 # set list of include dirs for external libraries
 set(${PACKAGE_NAME}_INCLUDE_DIRECTORIES @SICONOS_INCLUDE_DIRECTORIES@)
-list(APPEND ${PACKAGE_NAME}_INCLUDE_DIRECTORIES @CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME@)
+list(APPEND ${PACKAGE_NAME}_INCLUDE_DIRECTORIES @CMAKE_INSTALL_PREFIX@/include/siconos)
 set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
-check_required_components(@PROJECT_NAME@)
+
+# --- Final check to set (or not) siconos_FOUND, siconos_numerics_FOUND and so on
+check_required_components(siconos)
 
 
