@@ -1397,12 +1397,29 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # import dynamical systems
         if self._interman is not None and 'input' in self._data:
 
+            # get pointers
             dpos_data = self.dynamic_data()
+            velocities = self.velocities_data()
+
+            # some dict to prefetch values in order to
+            # speedup cold start in the case of many objects
+            xdpos_data = dict()
+            xvelocities = dict()
+
             if dpos_data is not None and len(dpos_data) > 0:
 
                 max_time = max(dpos_data[:, 0])
                 id_last = np.where(
                     abs(dpos_data[:, 0] - max_time) < 1e-9)[0]
+                id_vlast = np.where(
+                            abs(velocities[:, 0] - max_time) < 1e-9)[0]
+
+                # prefetch positions and velocities in dictionaries
+                # this avoids calls to np.where for each object
+                for ldpos_data in dpos_data[id_last, :]:
+                    xdpos_data[ldpos_data[1]] = ldpos_data
+                for lvelocities in velocities[id_vlast, :]:
+                    xvelocities[lvelocities[1]] = lvelocities
 
             else:
                 # should not be used
@@ -1432,30 +1449,23 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     if (mass is not None and mass > 0
                         and dpos_data is not None and len(dpos_data) > 0):
 
-                        self.print_verbose ('Import  dynamic object name ', name,
-                                            'from current state')
-                        self.print_verbose ('imported object has id: {0}'.format(obj.attrs['id']))
+                        self.print_verbose('Import  dynamic object name ',
+                                           name,
+                                           'from current state')
+                        self.print_verbose('imported object has id: {0}'.
+                                           format(obj.attrs['id']))
 
-                        id_last_inst = np.where(
-                            dpos_data[id_last, 1] ==
-                            self.instances()[name].attrs['id'])[0]
-                        xpos = dpos_data[id_last[id_last_inst[0]], :]
+                        xpos = xdpos_data[obj.attrs['id']]
                         translation = (xpos[2], xpos[3], xpos[4])
                         orientation = (xpos[5], xpos[6], xpos[7], xpos[8])
 
-                        velocities = self.velocities_data()
-                        id_vlast = np.where(
-                            abs(velocities[:, 0] - max_time) < 1e-9)[0]
-
-                        id_vlast_inst = np.where(
-                            velocities[id_vlast, 1] ==
-                            self.instances()[name].attrs['id'])[0]
-                        xvel = velocities[id_vlast[id_vlast_inst[0]], :]
+                        xvel = xvelocities[obj.attrs['id']]
                         velocity = (xvel[2], xvel[3], xvel[4],
                                     xvel[5], xvel[6], xvel[7])
 
-                        self.print_verbose ('position:', list(translation)+list(orientation))
-                        self.print_verbose ('velocity:',  velocity)
+                        self.print_verbose('position:', list(translation) +
+                                           list(orientation))
+                        self.print_verbose('velocity:',  velocity)
 
 
                     else:
@@ -1903,6 +1913,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             options.perturbationIterations = 3*multipoints_iterations
             options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
         self._interman = interaction_manager(options)
+
+        if hasattr(self._interman, 'useEqualityConstraints') and len(joins)==0:
+            self._interman.useEqualityConstraints(False)
 
         # (0) NonSmooth Dynamical Systems definition
         self._nsds=NonSmoothDynamicalSystem(t0, T)
