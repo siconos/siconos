@@ -26,6 +26,15 @@ docker-build:ubuntu18.04-oce:
     - docker-build:ubuntu18.04
 
 # This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
+# It's based on debian stretch
+docker-build:debian-stretch:
+  variables:
+    IMAGE_NAME: debian-stretch
+  extends: .docker-build
+
+    
+# This job create a docker image with all required dependencies
 # (including serialization, python wrapper, mumps parallel)
 # It's based on ubuntu 18.04.
 docker-build:ubuntu18.04-mumps-par:
@@ -102,6 +111,20 @@ install_siconos:ubuntu18.04:
     paths:
       - build
 
+# Siconos build and install, default config
+# (based on cmake/default_siconos.cmake)
+# on debian stretch
+install_siconos:debian-stretch:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/debian-stretch
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+  extends: .siconos-build
+  artifacts:
+    paths:
+      - build
+
+      
 # Siconos build and install, default config
 # (based on cmake/default_siconos.cmake)
 # on ubuntu 18.04.
