@@ -218,3 +218,6 @@ if(WITH_MPI)
   #   print_mpi_info(Fortran)
   # endif()
 endif()
+
+# ----- Required dependencies (whatever Siconos components are) -----
+find_package(BLASFull REQUIRED)

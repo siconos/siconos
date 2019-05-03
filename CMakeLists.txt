@@ -17,6 +17,9 @@ cmake_minimum_required(VERSION 3.7)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/docs/cmake)
 
+# Improve cmake interface when current version is too old.
+include(new_cmake_functions)
+
 # Force out-of-source build
 if ("${CMAKE_SOURCE_DIR}" MATCHES "${CMAKE_BINARY_DIR}")
   message (SEND_ERROR "In source building not supported (not recommanded indeed). You need to :

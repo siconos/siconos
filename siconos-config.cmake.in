@@ -39,6 +39,9 @@ set_and_check(siconos_ROOT_DIR "@CMAKE_INSTALL_PREFIX@")
 # set list of targets build by siconos project
 set(installed_targets "@installed_targets@")
 
+# Path (relative to siconos install) to cmake extra tools
+set(ConfigPackageLocation @ConfigPackageLocation@)
+
 # set list of external libraries
 set(${PACKAGE_NAME}_EXTERNAL_LIBRARIES "@SICONOS_LINK_LIBRARIES@")
 

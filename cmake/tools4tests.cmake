@@ -2,6 +2,266 @@
 #
 # Some cmake macros to deal with tests.
 # =========================================================
+
+#========================================
+# Setup for tests in a given directory
+#
+# 
+# Usage :
+# begin_tests(<SOURCE_DIR> DEPS <dep1> <dep2>)
+#
+# SOURCE_DIR is relative to current component path
+# DEPS is optional and used to add dependencies to <COMPONENT>-test target.
+# Process :
+# - set CURRENT_TEST_DIR (Parent scope) to <SOURCE_DIR>
+# - copy all 'data' files found in <SOURCE_DIR> into <CMAKE_CURRENT_BINARY_DIR>/<SOURCE_DIR>
+# - create a library from test-utils files (if any), named <COMPONENT>-test,
+#   linked (PUBLIC) with <COMPONENT> lib.
+#
+function(begin_tests SOURCE_DIR)
+  
+  set(multiValueArgs DEPS)
+  cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  # Fix current test dir in parent scope.
+  set(CURRENT_TEST_DIR ${SOURCE_DIR} PARENT_SCOPE)
+  
+  if(CROSSCOMPILING_LINUX_TO_WINDOWS)
+    set(EMULATOR "wine")
+  else()
+    set(EMULATOR "")
+  endif()
+  
+  # find and copy data files in SOURCE_DIR (*.mat, *.dat and *.xml, ...) into test directory
+  file(GLOB_RECURSE _DATA_FILES 
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.mat
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.dat
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.hdf5
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.npz
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.xml
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.DAT
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.INI
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.ref)
+
+  # Copy data files from source to binary
+  foreach(_F IN LISTS _DATA_FILES)
+    #  log results into TESTS_LOGFILE
+    file(APPEND ${TESTS_LOGFILE} "Found ref file : ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/${_F} \n")
+    file(APPEND ${TESTS_LOGFILE} "Configuring file : ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_DIR}/${_F}\n")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_DIR}/${_F} COPYONLY)
+  endforeach()
+
+  # If a directory *-utils is found, its content is used
+  # to create a <COMPONENT>-test library.
+  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
+    file(GLOB_RECURSE TEST_UTILS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils/*.[ch])
+    if(NOT TARGET ${COMPONENT}-test) 
+      # Create the target ...
+      add_library(${COMPONENT}-test SHARED ${TEST_UTILS_SOURCES})
+    else()
+      # or just append sources if it already exists.
+      target_sources(${COMPONENT}-test PRIVATE ${TEST_UTILS_SOURCES})
+    endif()
+
+    # local includes, to build <component>-test only
+    target_include_directories(${COMPONENT}-test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
+    target_link_libraries(${COMPONENT}-test PUBLIC ${COMPONENT})
+    # All include dirs from component are taken into account in ${COMPONENT}-lib (and so propagated to tests)
+    foreach(dir IN LISTS ${COMPONENT}_DIRS)
+      target_include_directories(${COMPONENT}-test PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
+    endforeach()
+
+    # Link with extra deps, if any
+    foreach(libtarget IN LISTS TEST_DEPS)
+      target_link_libraries(${COMPONENT}-test PRIVATE ${libtarget})
+    endforeach()
+
+  endif()
+  
+endfunction()
+
+macro(test_windows_setup test_name test_sources)
+
+  # Use the proper linker for the proper language
+  # fortran -> gfortran; {c,cpp} -> link.exe
+  if(BUILD_AS_CPP)
+    set(EXE_FORTRAN FALSE) # Windows only
+    foreach(_file IN LISTS ${test_sources)
+      if(${_file} MATCHES "[.]c$")
+        set_source_files_properties(${_file} PROPERTIES LANGUAGE CXX)
+      endif()
+      if(${_file} MATCHES "[.]f$")
+        set(EXE_FORTRAN TRUE) # Windows only
+      endif()
+    endforeach()
+  endif()
+  # Windows stuff ...
+  if(MSVC AND EXE_FORTRAN)
+    target_link_options(${test_name} "LINKER:--as-needed")
+    if(NOT V2)
+      target_link_options(${_EXE} "LINKER:--subsystem,console")
+      set(CMAKE_CREATE_CONSOLE_EXE "")
+      # Note FP : this variable does not exist anymore in CMake.
+      # What was it used for??
+    endif()
+    # Linker flags to be used to create executables.
+    SET(CMAKE_EXE_LINKER_FLAGS "")
+    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+    SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
+    SET(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "")
+  endif()
+
+endmacro()
+
+
+
+# ========================================
+# Add a test into the ctest suite.
+#
+# Usage :
+# new_test(NAME <name> SOURCES <sources list> DEPS <dependencies list> DATA <data files list)
+#
+# required : SOURCES
+# others are optional.
+#
+# Process:
+# - Copy data files to binary dir
+# - Create executable from sources list
+# - link (PRIVATE) executable with <COMPONENT> lib
+# - add <COMPONENT> includes to executable (PRIVATE)
+# - link (PRIVATE) executable with all libs in DEPS
+# - link (PRIVATE) executable with <COMPONENT>-test (if it exists)
+# - add a test (ctest) named <name>. If NAME is not set, use name of first source file (without ext).
+# ========================================
+function(new_test_1)
+  set(oneValueArgs NAME)
+  set(multiValueArgs SOURCES DATA DEPS)
+  cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  # -- set test name --
+  # If not set in input args, we choose first source file name without extension.
+  if(NOT TEST_NAME)
+    list(GET TEST_SOURCES 0 TEST_NAME)
+    get_filename_component(TEST_NAME ${TEST_NAME} NAME_WE)
+  endif()
+
+  # -- log --
+  file(APPEND ${TESTS_LOGFILE} "Add test ${CURRENT_TEST_DIR}/${TEST_NAME} \n")
+
+  # -- Check if data files are required --
+  # If so, copy the corresponding file into the working directory
+  if(TEST_DATA)
+    foreach(_datafile IN LISTS TEST_DATA)
+      file(APPEND ${TESTS_LOGFILE} "Copy data file : ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${_datafile} \n")
+      configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${_datafile}
+        ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${_datafile} COPYONLY
+        )
+    endforeach()
+  endif()
+ 
+  # ---- Build test executable and set its properties ----
+  # Req : test sources
+  # !!! WARNING !!!
+  # Consider known limitations for Windows written
+  # here https://cmake.org/cmake/help/v3.13/prop_dir/COMPILE_DEFINITIONS.html
+  
+  foreach(source_file IN LISTS TEST_SOURCES)
+    # If source file path is not absolute, prepend current dir
+    if(NOT IS_ABSOLUTE ${source_file})
+      set(source_file ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${source_file})
+    endif()
+    list(APPEND TEST_SOURCES_ABSPATH ${source_file})
+  endforeach()
+  
+  if(CROSSCOMPILING_LINUX_TO_WINDOWS)
+    add_executable(${TEST_NAME} WIN32 ${TEST_SOURCES_ABSPATH})
+  else()
+    add_executable(${TEST_NAME} ${TEST_SOURCES_ABSPATH})
+  endif()
+  set_target_properties(${TEST_NAME} PROPERTIES COMPILE_DEFINITIONS "EMULATOR=\"${EMULATOR}\";WRAPPER=\"\"")
+  # Set path where exe should be generated
+  set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/)
+
+  test_windows_setup(${TEST_NAME} ${TEST_SOURCES})
+
+  # -- link with current component and its dependencies --
+  # --> add include and links
+  target_link_libraries(${TEST_NAME} PRIVATE ${COMPONENT})
+  foreach(dir IN LISTS ${COMPONENT}_DIRS)
+    target_include_directories(${TEST_NAME} PRIVATE
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
+  endforeach()
+
+  # Link with extra deps (set for each test in new_test call)
+  foreach(libtarget IN LISTS TEST_DEPS)
+    target_link_libraries(${TEST_NAME} PRIVATE ${libtarget})
+  endforeach()
+
+  # -- link with (optional) component-test lib.
+  # At the time, only numerics used such a lib.
+  if(TARGET ${COMPONENT}-test)
+    target_link_libraries(${TEST_NAME} PRIVATE ${COMPONENT}-test)
+  endif()
+  if(WITH_CXX)
+    set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+  endif()
+  
+  if (LDLIBPATH)
+    set_target_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
+  endif()
+
+  # ---- The exe is ready, let's turn to test(s) ----
+  # -- set test command --
+  set(command ${TEST_NAME})
+  if(CMAKE_SYSTEM_NAME MATCHES Windows)
+    set(command ${command}".exe")
+  endif()
+
+  # Add the test in the pipeline
+  add_test(NAME ${TEST_NAME} COMMAND ${command} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR})
+  set_siconos_test_properties(NAME ${TEST_NAME})
+  
+endfunction()
+
+function(set_siconos_test_properties)
+  set(oneValueArgs NAME)
+  set(multiValueArgs PROPERTIES)
+  cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  # if the test output matches one of specified expressions below, the test will fail
+  #set_tests_properties(${TEST_NAME} PROPERTIES
+  #  FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;test unsucceeded")
+  if (LDLIBPATH)
+    set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
+  endif()
+  
+  set(LOCAL_USE_SANITIZER "@USE_SANITIZER@")
+  if(LOCAL_USE_SANITIZER MATCHES "asan")
+    set_property(TEST ${TEST_NAME} APPEND PROPERTY ENVIRONMENT ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS})
+    set_property(TEST ${TEST_NAME} APPEND PROPERTY ENVIRONMENT LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS})
+  endif()
+  
+  # Extra tests properties (set in <component>_tests.cmake)
+  if(TEST_PROPERTIES)
+    set_tests_properties(${TEST_NAME} PROPERTIES "${TEST_PROPERTIES}")
+  endif()
+  
+  # Test timer
+  set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
+  
+endfunction()
+
+
+
+
+
+
+
+
+
 MACRO(BEGIN_TEST _D)
   SET(_CURRENT_TEST_DIRECTORY ${_D})
   FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_D})

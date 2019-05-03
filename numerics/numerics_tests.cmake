@@ -1,8 +1,5 @@
 include(tools4tests)
 
-# wrapper are not needed
-set(TEST_WRAP)
-
 if(WITH_${COMPONENT}_TESTING)
 
   BEGIN_TEST(src/tools/test)
