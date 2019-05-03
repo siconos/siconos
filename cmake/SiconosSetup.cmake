@@ -220,4 +220,4 @@ if(WITH_MPI)
 endif()
 
 # ----- Required dependencies (whatever Siconos components are) -----
-find_package(BLASFull REQUIRED)
+#find_package(BLASFull REQUIRED)
