@@ -1,7 +1,7 @@
 
 macro(TEST_SERIALIZATION_VECTOR_BUG)
   if(NOT "${SERIALIZATION_VECTOR_TEST}")
-    configure_file(cmake/serialization_vector_test.cpp
+    configure_file(${CMAKE_SOURCE_DIR}/cmake/serialization_vector_test.cpp
       ${CMAKE_BINARY_DIR}/CMakeFiles COPYONLY)
     TRY_RUN(SERIALIZATION_VECTOR_TEST_RUN SERIALIZATION_VECTOR_TEST_COMPILE
       ${CMAKE_BINARY_DIR}/CMakeFiles

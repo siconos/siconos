@@ -4,7 +4,6 @@
 #include <SiconosFwd.hpp>
 %}
 
-#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #define STD11 std
 #undef __cplusplus
 #define __cplusplus SICONOS_CXXVERSION
@@ -30,29 +29,6 @@ namespace STD11 {
       shared_from_this() const;
   };
  }
-#else
-#define SWIG_SHARED_PTR_NAMESPACE std11
-%include <boost_shared_ptr.i>
-#define STD11 boost
-%import "boost/version.hpp"
-//  boost >= 1.53
-// this sucks and will likely not work in C++11, but it is difficult to
-// deal with this properly
-#if (BOOST_VERSION >= 105300)
-#define BOOST_NOEXCEPT
-#endif
-// boost >= 1.40
-#if (BOOST_VERSION >= 104000)
-%ignore std11::enable_shared_from_this::operator=;
-// boost >= 1.64
-#if (BOOST_VERSION >= 106400)
-%import "boost/smart_ptr/detail/sp_noexcept.hpp"
-#endif
-%import "boost/smart_ptr/enable_shared_from_this.hpp"
-#else
-%import "boost/enable_shared_from_this.hpp"
-#endif
-#endif
 
 // fix some problems passing ref and null shared_ptr to directors
 %define FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SP,TYPE)

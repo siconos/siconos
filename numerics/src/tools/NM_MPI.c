@@ -17,7 +17,7 @@
 */
 #include "NM_MPI.h"
 #include <assert.h>
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
 MPI_Comm NM_MPI_comm(NumericsMatrix* A)
@@ -49,7 +49,7 @@ int NM_MPI_rank(NumericsMatrix* A)
 {
   assert(A);
   int myid;
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
   CHECK_MPI(NM_MPI_comm(A), MPI_Comm_rank(NM_MPI_comm(A), &myid));
 #else
   myid = 0;
@@ -61,7 +61,7 @@ void NM_MPI_copy(const NumericsMatrix* A, NumericsMatrix* B)
 {
   assert(A);
   assert(B);
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
   if (A->internalData && A->internalData->mpi_comm)
   {
     NM_MPI_set_comm(B, A->internalData->mpi_comm);

@@ -24,13 +24,8 @@
 #include "Relation.hpp"
 #include "EventsManager.hpp"
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <functional>
 using namespace std::placeholders;
-#else
-#include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
-#endif
 
 SP::VectorOfVectors
 OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
