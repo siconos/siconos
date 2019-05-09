@@ -9,60 +9,45 @@
 # ============= Global 'standard' cmake Settings =============
 
 # Set minimum version for cmake
-# We advise 3.12 at least, but 3.7 is authorized since it's the default version on current debian stable.
-cmake_minimum_required(VERSION 3.7)
+# We advise 3.12 at least, but 3.5 is authorized since it's the default version on current debian stable.
+cmake_minimum_required(VERSION 3.5)
 
-# Set cmake modules directories
-# (i.e. the those which contain all user-defined FindXXX.cmake files among other things)
+# Set cmake modules directory (i.e. the one which contains all user-defined FindXXX.cmake files among other things)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/docs/cmake)
 
-# Improve cmake interface when current version is too old.
-include(new_cmake_functions)
-
 # Force out-of-source build
-if ("${CMAKE_SOURCE_DIR}" MATCHES "${CMAKE_BINARY_DIR}")
-  message (SEND_ERROR "In source building not supported (not recommanded indeed). You need to :
-    * cleanup your source directory :  \"rm -rf ./CMakeFiles/ ./CMakeCache.txt\"
-    * try configure process again in a new directory
-    (e.g. mkdir <anywhere>/build ; cd <anywhere>/build ; cmake ${CMAKE_SOURCE_DIR}) ...")
-  return()
-endif()
+include(OutOfSourcesBuild)
 
-# If not given, turn build type to release mode.
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release." FORCE)
-endif()
-
-# Some useful macros and functions
+# Some useful macros
 include(SiconosTools)
-# Some python tools and functions, used to configure the project, called by cmake.
 configure_file(scripts/buildtools.py share/buildtools.py COPYONLY)
 
 # cmake project name
 set(PROJECT_NAME siconos)
+set(PROJECT_NAME_CAP Siconos)
+
 
 # Get current year (for licence and other cartridges)
 execute_process(COMMAND date "+\"%Y\"" OUTPUT_VARIABLE YEAR)
 string(STRIP ${YEAR} YEAR)
-
-# Read user option file, if provided on command line
 if(USER_OPTIONS_FILE)
-  # Check for tilde in file name (not handled properly by cmake)
-  string(FIND ${USER_OPTIONS_FILE} "\~" res)
-  if(res EQUAL 0)
-    string(REPLACE "\~" "$ENV{HOME}" USER_OPTIONS_FILE ${USER_OPTIONS_FILE})
+  get_filename_component(input_file ${USER_OPTIONS_FILE} NAME)
+  get_filename_component(path_to_file ${USER_OPTIONS_FILE} PATH)
+  find_file(filefound NAMES ${input_file}
+    PATHS ${path_to_file} ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR}
+    )
+  if(NOT ${filefound}-NOTFOUND)
+    configure_file(${path_to_file}/${input_file} ${CMAKE_SOURCE_DIR}/${input_file})
+  else()
+    message(FATAL_ERROR "Cannot find file ${USER_OPTIONS_FILE}")
   endif()
-  if(NOT IS_ABSOLUTE ${USER_OPTIONS_FILE})
-    get_filename_component(USER_OPTIONS_FILE ${USER_OPTIONS_FILE} REALPATH
-      BASE_DIR ${CMAKE_CURRENT_BINARY_DIR})
-  endif()
-  message("\n !!!!! Load user-defined options set from file ${USER_OPTIONS_FILE} !!!!! \n")
-  # Configure to take into account any change in ${USER_OPTIONS_FILE}
-  configure_file(${USER_OPTIONS_FILE} current_options.cmake COPYONLY)
-  include(${CMAKE_CURRENT_BINARY_DIR}/current_options.cmake)
+  message("\n !!!!! Load user-defined options set from file ${filefound} !!!!! \n")
+  include(${input_file})
+  # copy user file to binary dir, just for 'visual' check.
+  configure_file(${input_file} ${input_file} COPYONLY)
+  assert(WITH_FORTRAN "The option WITH_FORTRAN is not defined in the user options file")
 else()
-  message("\n !!!!! Load default configuration set from file ${CMAKE_SOURCE_DIR}/cmake/default_options.cmake !!!!! \n")
   include(default_options)
 endif()
 
@@ -86,30 +71,37 @@ endforeach()
 list(GET COMPONENTS -1 last_component)
 # ============= The project =============
 # Set project name and project languages
-# Languages:
-# - Fortran is optional, needed by ql0001, lsodar, hem5 solvers.
-# - CXX is required for kernel and following components
-# - C always required
-
+# => this automatically defines:
+#   - ${PROJECT_NAME}_BINARY_DIR : where you have run cmake, i.e. the place for compilation
+#   - ${PROJECT_NAME}_SOURCE_DIR : where sources (.f and .h and this CMakeLists.txt) are located
+# Note that because of OutOfSourceBuild, binary_dir and source_dir must be different.
 if(WITH_CXX)
-  project(${PROJECT_NAME} CXX C) # C or not C ?
-  set(CMAKE_CXX_STANDARD 11)
-  # Set CXX compilation flags
+  if (WITH_FORTRAN)
+    project(${PROJECT_NAME} CXX C Fortran)
+    # Fortran compiler configuration
+    include(FCompilerSetup)
+    set(HAS_FORTRAN TRUE)
+  else()
+    project(${PROJECT_NAME} CXX C)
+    #unset(HAS_FORTRAN)
+  endif()
+   # Set CXX compilation flags
   include(CXXCompilerSetup)
 else()
   # we may need to compile only numerics and only in C.
-  # Really???
-  project(${PROJECT_NAME} C)
+  if (WITH_FORTRAN)
+    project(${PROJECT_NAME} C Fortran)
+    # Fortran compiler configuration
+    include(FCompilerSetup)
+    set(HAS_FORTRAN TRUE)
+  else()
+    project(${PROJECT_NAME} C)
+    #unset(HAS_FORTRAN)
+  endif()
 endif()
-# Set C compilation flags. Include this only when cxx is off ? Check this.
-include(CCompilerSetup)
 
-# Activate fortran, if needed.
-if(WITH_FORTRAN)
-  enable_language(Fortran)
-  include(FCompilerSetup)
-  set(HAS_FORTRAN TRUE)
-endif()
+# Set C compilation flags
+include(CCompilerSetup)
 
 # Common setup
 include(SiconosSetup)
@@ -143,17 +135,41 @@ foreach(COMPONENT IN LISTS COMPONENTS)
   add_subdirectory(${COMPONENT})
 endforeach()
 
-# ========= Documentation setup =========
-# Finalize documentation setups.
-# Must be called AFTER each component config.
 finalize_doc()
 
 include(FeatureSummary)
 feature_summary(WHAT ALL)
 
-# ============= Siconos Package configuration =============
-# i.e. what should be generate, done, configure at install.
-include(SiconosPackageSetup)
+# =========== Generate siconos scripts ===========
+if(EXISTS ${CMAKE_SOURCE_DIR}/scripts/CMakeLists.txt.in)
+  configure_file(scripts/CMakeLists.txt.in scripts/CMakeLists-temp.txt @ONLY)
+  configure_file(${CMAKE_BINARY_DIR}/scripts/CMakeLists-temp.txt ${CMAKE_BINARY_DIR}/scripts/CMakeLists.txt @ONLY)
+  install(FILES ${CMAKE_BINARY_DIR}/scripts/CMakeLists.txt DESTINATION share/${PROJECT_NAME})
+endif()
+if(EXISTS ${CMAKE_SOURCE_DIR}/scripts/siconos.py.in)
+  message("-- Generate siconos script ...")
+  configure_file(scripts/siconos.py.in scripts/siconos @ONLY)
+  install(PROGRAMS ${CMAKE_BINARY_DIR}/scripts/siconos DESTINATION bin)
+endif()
+
+# ============= Save config for other cmake projects ============
+include(CMakePackageConfigHelpers)
+
+# Generate ${PROJECT_NAME}Config.cmake
+configure_package_config_file(Config.cmake.in ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+  INSTALL_DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/cmake)
+install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
+
+# Generate configVersion.cmake file.
+write_basic_package_version_file(
+  "${CMAKE_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+  VERSION ${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}
+  COMPATIBILITY ExactVersion
+  )
+
+# install both of them
+install(FILES ${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake ${CMAKE_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+  DESTINATION share/${PROJECT_NAME}/cmake)
 
 # ============= Summary =============
 message(STATUS "\n============================================ Summary ============================================")
@@ -179,10 +195,8 @@ if (USE_SYSTEM_SUITESPARSE)
 else()
   message(STATUS "CSparse headers : externals/SuiteSparse/CSparse")
 endif()
-message(STATUS "Python interpreter is ${Python3_EXECUTABLE}")
-if(WITH_PYTHON_WRAPPER)
-  message(STATUS "Python libraries are ${Python3_LIBRARIES}")
-endif()
+message(STATUS "Python interpreter is ${PYTHON_EXECUTABLE}")
+message(STATUS "Python libraries are ${PYTHON_LIBRARIES}")
 message(STATUS "All linking libraries are : ${SICONOS_LINK_LIBRARIES}.")
 message(STATUS "All include directories are : ${SICONOS_INCLUDE_DIRECTORIES}.")
 message(STATUS "The project will be installed in ${CMAKE_INSTALL_PREFIX}")

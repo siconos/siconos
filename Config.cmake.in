@@ -1,0 +1,73 @@
+# =================================================================
+# siconos configuration file.
+# See http://www.cmake.org/cmake/help/git-master/manual/cmake-packages.7.html#creating-packages
+# 
+# This file have been generated during siconos install and
+# may be used by another cmake project to retrieve all the configuration variables
+# of siconos.
+#
+#
+# Usage :
+# 
+# find_package(siconos)
+# include_directories(${siconos_INCLUDE_DIRECTORIES})
+# # ... define some target ...
+# target_link_libraries(my_target ${siconos_LIBRARIES})
+#
+# A call to find_package(siconos) 
+# will set the following variables :
+#
+# siconos_INCLUDE_DIR = where to find siconos headers
+# siconos_INCLUDE_DIRS : The final set of include directories listed in one variable for use by client code. It includes both path to siconos headers and path to external libraries headers
+# siconos_LIBRARIES : the libraries to link against to use siconos
+# siconos_EXTERNAL_LIBRARIES : the libraries on which siconos libs depend.
+# siconos_ROOT_DIR : where to find the base directory of siconos
+# siconos_FOUND : true if the find process went fine
+# 
+# 
+# Note : var names chosen as recommended here :
+# http://www.cmake.org/cmake/help/v3.0/manual/cmake-developer.7.html#manual:cmake-developer(7))
+#
+
+@PACKAGE_INIT@
+
+# Name of the siconos package
+set(PACKAGE_NAME @PROJECT_NAME@)
+
+# set path to siconos installation
+set_and_check(siconos_ROOT_DIR "@CMAKE_INSTALL_PREFIX@")
+
+# set list of targets build by siconos project
+set(installed_targets "@installed_targets@")
+
+# set list of external libraries
+set(${PACKAGE_NAME}_EXTERNAL_LIBRARIES "@SICONOS_LINK_LIBRARIES@")
+# include siconos project targets
+include("@CMAKE_INSTALL_PREFIX@/share/@PROJECT_NAME@/cmake/@PROJECT_NAME@Targets.cmake")
+
+set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
+
+
+set(HAS_PYTHON_WRAPPER @WITH_PYTHON_WRAPPER@)
+set(SICONOS_PYTHON_EXECUTABLE @PYTHON_EXECUTABLE@)
+
+
+# --- Mechanics component setup ---
+# mechanics component with bullet?
+set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
+# mechanics (and/or mechanisms) component with oce?
+set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
+
+
+# siconos libs are appended as targets.
+# Note that thanks to the include above, this will add all external libraries on which
+# the targets depend to the linker.
+set(${PACKAGE_NAME}_LIBRARIES ${installed_targets})
+
+# set list of include dirs for external libraries
+set(${PACKAGE_NAME}_INCLUDE_DIRECTORIES @SICONOS_INCLUDE_DIRECTORIES@)
+list(APPEND ${PACKAGE_NAME}_INCLUDE_DIRECTORIES @CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME@)
+set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
+check_required_components(@PROJECT_NAME@)
+
+

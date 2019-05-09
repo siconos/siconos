@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# You need the following extra package
+# doc, h5py
+
+
+WORK_DIR=$1
+
+cd $WORK_DIR/Front-End/doc/python
+
+export PYTHONPATH=$WORK_DIR/install-dir/lib/python2.7/site-packages/
+
+make clean
+make html
+make -ki doctest
+
+#requires testing
+rsync -OvrlgoD $WORK_DIR/Front-End/doc/python/_build/html siconos-ci@scm.gforge.inria.fr:/home/groups/siconos/htdocs/FrontEnd
+
+cd $WORK_DIR/build-dir
+cmake $WORK_DIR/Build -DON_DASHBOARD=0 -DWITH_DOCUMENTATION=1 -DONLY_DOCUMENTATION=1 -DWITH_TESTING=0
+make
+make
+
+rsync -OrlvgoD $WORK_DIR/build-dir/GeneratedDocs/ siconos-ci@scm.gforge.inria.fr:/home/groups/siconos/htdocs/

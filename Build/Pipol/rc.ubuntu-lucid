@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# cmake version is on pipol repository
+echo "deb http://fr.archive.ubuntu.com/ubuntu/ lucid-backports main restricted universe multiverse" >> /etc/apt/sources.list
+echo "deb http://ppa.launchpad.net/johannr/test-ppa/ubuntu lucid main" >> /etc/apt/sources.list
+
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 442D603E
+
+apt-get update
+
+apt-get -y install swig2.0
+
+sudo rm -rf `which cmake`
+sudo rm -rf `which cpack`
+sudo rm -rf `which ctest`
+tar xvf $PIPOL_HOMEDIR/src/cmake-2.8.4-rc1.tar.gz
+cd cmake-2.8.4-rc1; { 
+./bootstrap -j2
+make -j2
+sudo make install
+}

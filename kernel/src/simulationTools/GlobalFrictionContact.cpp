@@ -251,7 +251,7 @@ bool GlobalFrictionContact::preCompute(double time)
     _mu->clear();
 //    _mu.reserve(indexSet.size())
 
-#if !defined(SICONOS_USE_MAP_FOR_HASH)
+#if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
     typedef std::unordered_map<SP::DynamicalSystem, SiconosMatrix*> dsMatMap;
     typedef std::unordered_map<SP::DynamicalSystem, size_t> dsPosMap;
 #else

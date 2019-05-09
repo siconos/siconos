@@ -1,0 +1,3 @@
+#!/bin/sh
+
+bash "C:/Users/ci/deal-with-symlink.sh"

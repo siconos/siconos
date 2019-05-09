@@ -373,7 +373,7 @@ if __name__ == '__main__':
                     cmake_boolean = {True: '1', False: '0'}
                     configure_command = [
                         cmake_cmd, posixpath.join(siconos_prefix,
-                                                  '@ConfigPackageLocation@'),
+                                                  'share/siconos'),
                         '-DCALL_PWD={0}'.format(call_pwd),
                         '-DMAIN_SOURCE={0}'.format(main_source),
                         '-DBUILD_MAIN={0}'.format(cmake_boolean[

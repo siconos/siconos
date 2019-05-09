@@ -54,8 +54,19 @@ More documentation on smart pointers and reference counting:
 
 #include <SiconosConfig.h>
 
+// Case 1 : ref == shared pointers from c++ (>=11) standard
+// SICONOS_STD_SHARED_PTR is automatically set by cmake (CXXCompilerSetup.cmake)
+// while SICONOS_USE_BOOST_FOR_CXX11 is a user option.
+#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <memory>
 namespace std11 = std;
+#else
+// Case 2 : ref == boost shared pointers
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/enable_shared_from_this.hpp>
+namespace std11 = boost;
+#endif
 
 namespace SP {}
 namespace SPC {}

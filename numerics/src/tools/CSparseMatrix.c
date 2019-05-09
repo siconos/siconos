@@ -346,9 +346,7 @@ CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
         if (k==2)
         {
           if (1 == sscanf(token, "%lld", &val1))
-            {
-              DEBUG_PRINTF(" j- col = %i\n", j-val1);
-            }
+            DEBUG_PRINTF(" j- col = %i\n", j-val1);
           assert(j-val1 == 0);
         }
         if (k==5)
@@ -480,13 +478,13 @@ int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE* file)
 CS_INT CSparseMatrix_to_dense(const CSparseMatrix* const A, double * B)
 {
 
-  CS_INT p, j, m, n, nz, *Ap, *Ai ;
+  CS_INT p, j, m, n, nzmax, nz, *Ap, *Ai ;
   CS_ENTRY *Ax ;
 
   if (!A) { printf ("CSparseMatrix_to_dense :: A = null\n") ; return (0) ; }
 
   m = A->m ; n = A->n ;
-  nz = A->nz ;
+  nzmax = A->nzmax ; nz = A->nz ;
   Ap = A->p ; Ai = A->i ; Ax = A->x ;
   Ax = A->x;
 

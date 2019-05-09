@@ -4,6 +4,8 @@
 
 set(COMPONENT kernel)
 message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
+# Name used for the target to be built
+set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
 # --- Search component dependencies ---
 

@@ -1,0 +1,16 @@
+#! /bin/sh
+\rm -rf */.svn
+\rm -rf */*/.svn
+\rm -rf */*/*/.svn
+\rm -rf */*/*/*/.svn
+\rm -rf */*/*/*/*/.svn
+\rm -rf */*/*/*/*/*/.svn
+\rm -rf */*/*/*/*/*/*/.svn
+\rm -rf */*/*/*/*/*/*/*/.svn
+tar -zcvf Siconos-Numerics-v2.0.0.tgz Numerics
+tar -zcvf Siconos-Kernel-v2.0.0.tgz Kernel
+tar -zcvf Siconos-Front-End-v2.0.0.tgz Front-End
+tar -zcvf Siconos-Sample-v2.0.0.tgz sample
+
+
+

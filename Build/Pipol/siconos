@@ -1,0 +1,364 @@
+#!/bin/sh
+
+#PRE-PIPOL  src/git/siconos/Build/Pipol/pre-siconos
+
+#PIPOL fedora-core14 03:00 --silent
+
+#PIPOL fedora-core16 03:00 --silent
+
+#PIPOL fedora-core17 03:00 --silent
+
+#PIPOL ubuntu-lucid 03:00 --silent
+
+#PIPOL ubuntu-precise 03:00 --silent
+
+#PIPOL ubuntu-quantal 03:00 --silent
+
+#PIPOL ia64-linux-debian-squeeze 05:00 --silent
+
+#PIPOL mac 03:00 --silent
+
+release=false
+#release=true
+
+set -x
+#set -e
+mode=${1:-Nightly}
+
+# some local config
+[ -f $HOME/.pipol/siconos.conf ] && . $HOME/.pipol/siconos.conf
+
+# echo com | sudo -H -u $u -i (cf PipolBuild) does not work (system dependant?)
+. $HOME/.profile
+
+export PATH=/usr/local/bin:$PATH
+GFORGE_USER=${GFORGE_USER:-$USER}
+
+export LC_ALL=C
+
+id -u
+date
+cmake --version
+df -k
+
+head_revision=`cat $PIPOL_HOMEDIR/src/siconos/head_revision`
+local_revision=`cat $PIPOL_HOMEDIR/src/siconos/local_revision`
+
+echo HEAD : $head_revision
+echo LOCAL : $local_revision
+
+case $PIPOL_IMAGE in 
+    *windows*) nbcores=2; cp -r $HOME/.ssh /home/root/.ssh;;
+    *mac*) nbcores=2; export PATH=$PATH:/usr/local/bin
+        echo "which gfortran:"
+        which gfortran
+        ls -l /usr/bin/gfortran;;
+    *) nbcores=`cat /proc/cpuinfo  | grep processor | wc -l`;;
+esac
+
+env
+
+# a local copy because make Nightly will update this sources.
+setup_src() {
+    current_dir=$PWD
+    mkdir -p $PIPOL_WDIR
+    cd $PIPOL_WDIR; { 
+        git clone git+ssh://bremond@scm.gforge.inria.fr//gitroot/siconos/siconos.git
+#        for mod in Numerics Kernel Examples Front-End IO; do 
+#            [ -d $mod ] || git clone $HOME/src/git/siconos/$mod </dev/null
+#            cd $mod; { 
+#                git update $local_revision
+#            }; cd ..
+#        done
+    }; cd $current_dir
+}
+
+setup_3_1() {
+    current_dir=$PWD
+    mkdir -p $PIPOL_WDIR/siconos/branches/3.1.0
+    cd $PIPOL_WDIR/siconos/branches/3.1.0; { 
+        for mod in Numerics Kernel Examples ; do 
+            svn co svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/branches/3.1.0/$mod </dev/null
+        done
+    }; cd $current_dir
+}
+
+setup_3_2() {
+    current_dir=$PWD
+    mkdir -p $PIPOL_WDIR/siconos/branches/3.2.0
+    cd $PIPOL_WDIR/siconos/branches/3.2.0; { 
+        for mod in Numerics Kernel Examples ; do 
+            svn co -r2330 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
+        done
+    }; cd $current_dir
+}
+
+setup_3_3() {
+    current_dir=$PWD
+    mkdir -p $PIPOL_WDIR/siconos/branches/3.3.0
+    cd $PIPOL_WDIR/siconos/branches/3.3.0; { 
+        for mod in Numerics Kernel Examples ; do 
+            svn co -r2765 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
+        done
+    }; cd $current_dir
+}
+
+setup_3_4() {
+    current_dir=$PWD
+    mkdir -p $PIPOL_WDIR/siconos/branches/3.4.0
+    cd $PIPOL_WDIR/siconos/branches/3.4.0; { 
+        for mod in Numerics Kernel Examples Front-End; do 
+            svn co -r3194 svn+ssh://$GFORGE_USER@scm.gforge.inria.fr/svn/siconos/trunk/$mod </dev/null
+        done
+    }; cd $current_dir
+}
+
+
+setup_3_5() {
+    current_dir=$PWD
+    cd $PIPOL_WDIR/siconos; { 
+        git checkout 3.5.x
+    };
+}
+
+setup_3_6() {
+    current_dir=$PWD
+    cd $PIPOL_WDIR/siconos; { 
+        git checkout 3.6.x
+    }; 
+}
+
+make_1() {
+    mod=$1
+    btype=$2
+    shift; shift
+    args="$@"
+    cd $PIPOL_WDIR/build/$mod/$btype ;{
+        echo 'disk usage before make:'
+        df -k
+        make $args
+        echo 'disk usage after make:'
+        df -k
+    }; cd -
+}
+
+clean_1() { 
+    mod=$1
+    btype=$2
+    cd $PIPOL_WDIR/build/$mod/$btype ;{
+        echo 'disk usage before make clean:'
+        df -k
+        make clean
+        echo 'disk usage after make clean:'
+        df -k
+    }; cd -
+}
+
+make_2() {
+    mod=$1
+    btype=$2
+    shift; shift
+    args="$@"
+    cd $PIPOL_WDIR/build/$mod/$btype ;{
+        make -j $nbcores $args
+    }; cd -
+}
+
+
+configure_src() {
+    mod=$1
+    btype=$2
+    shift; shift
+    args="$@"
+    mkdir -p $PIPOL_WDIR/build/$mod/$btype
+    cd $PIPOL_WDIR/build/$mod/$btype; {
+        rm -f CMakeCache.txt
+        eval cmake $PIPOL_WDIR/siconos/$mod -DCMAKE_INSTALL_PREFIX=/usr -DWITH_GIT=TRUE -DWITH_TESTING=TRUE -DCMAKE_BUILD_TYPE=$btype $args
+    }; cd -
+
+}
+
+pack_src() {
+    cd $PIPOL_WDIR/build/$1/$2 ;{
+        cmake $PIPOL_WDIR/siconos/$1 -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=$2 -DWITH_TESTING=FALSE
+        cpack -G $PIPOL_CPACK_G 
+    }; cd -
+    
+}
+
+gforge_upload_3_2() { 
+    cd $PIPOL_HOMEDIR/src/gforge ;{
+        export GFORGE_WSDL=https://gforge.inria.fr/soap/index.php?wsdl 
+        $PIPOL_WDIR/siconos/trunk/Build/Pipol/gforge_cli-1.0.1/gforge.php -v login --username=sicupload --password='UPLOADplp!' --project=siconos
+        $PIPOL_WDIR/siconos/trunk/Build/Pipol/gforge_cli-1.0.1/gforge.php/gforge.php frs addfile --package=3058 --release=5666 --file=$1 
+    }; cd -
+}
+
+save_packed_1() {
+    cd $PIPOL_WDIR/build/$1/$2; {
+        cp *.$PIPOL_PACK_EXT $PIPOL_HOMEDIR/packages
+        rm *.$PIPOL_PACK_EXT
+    }; cd -
+}
+
+install_1() {
+    cd $PIPOL_WDIR/build/$1/$2 ;{
+        sudo make install
+        sudo chown $PIPOL_USER  install_manifest.txt
+        sudo chgrp $PIPOL_GROUP install_manifest.txt
+    }; cd -
+}
+
+nightly_build() {
+    make_1 $1 $2 ${mode}Start
+    make_1 $1 $2 ${mode}Update
+    make_1 $1 $2 ${mode}Configure
+    make_1 $1 $2 ${mode}Build
+}
+
+silent_nightly_build() {
+    make_1 $1 $2 
+}
+
+
+nightly_test() { 
+    make_1 $1 $2 ${mode}Test
+}
+
+nightly_coverage() { 
+    make_1 $1 $2 ${mode}Test
+    make_1 $1 $2 ${mode}Coverage
+}
+
+nightly_memcheck() {
+    # time consuming
+    make_1 $1 $2 ${mode}MemCheck
+}
+
+nightly_submit() {
+    make_1 $1 $2 ${mode}Submit
+}
+
+# post rc.*  (need pcre)
+swig_setup() { 
+    sudo rm -rf `which swig`
+    sudo rm -rf `which swig2.0`
+    sudo rm -rf `which swig1.3`
+    
+    tar zxvf $PIPOL_HOMEDIR/src/swig-2.0.9.tar.gz
+
+    cd swig-2.0.9; { 
+        ./configure
+        make
+        sudo make install
+    }
+    cd ..
+}
+
+#sudo rm -f /usr/local/bin/ctest
+
+# trunk tests
+swig_setup
+setup_src
+
+if [ $release = "true" ]; then
+    setup_3_6
+fi
+
+configure_src Numerics Release
+nightly_build Numerics Release
+nightly_test Numerics Release
+#nightly_memcheck Numerics Release
+nightly_submit Numerics Release
+install_1 Numerics Release
+clean_1 Numerics Release
+#
+configure_src Kernel Release
+nightly_build Kernel Release
+nightly_test Kernel Release
+#nightly_memcheck Kernel Release
+nightly_submit Kernel Release
+install_1 Kernel Release
+clean_1 Kernel Release
+#
+configure_src Mechanics Release
+nightly_build Mechanics Release
+nightly_test Mechanics Release
+#nightly_memcheck Mechanics Release
+nightly_submit Mechanics Release
+install_1 Mechanics Release
+clean_1 Mechanics Release
+#
+configure_src IO Release
+nightly_build IO Release
+nightly_test IO Release
+#nightly_memcheck IO Release
+nightly_submit IO Release
+install_1 IO Release
+clean_1 IO Release
+### Snapshot packages
+pack_src Numerics Release
+save_packed_1 Numerics Release
+## 
+pack_src Kernel Release
+save_packed_1 Kernel Release
+##
+pack_src IO Release
+save_packed_1 IO Release
+##
+### front-end (not with IO for a release)
+configure_src Front-End Release
+nightly_build Front-End Release
+nightly_test Front-End Release
+nightly_submit Front-End Release
+install_1 Front-End Release
+clean_1 Front-End Release
+pack_src Front-End Release
+save_packed_1 Front-End Release
+##
+### Coverage
+#setup_src
+configure_src Numerics Debug
+nightly_build Numerics Debug
+nightly_coverage Numerics Debug
+nightly_submit Numerics Debug
+install_1 Numerics Debug
+clean_1 Numerics Debug
+##
+#setup_src
+configure_src Kernel Debug
+nightly_build Kernel Debug
+nightly_coverage Kernel Debug
+nightly_submit Kernel Debug
+install_1 Kernel Debug
+clean_1 Kernel Debug
+##
+configure_src Mechanics Debug
+nightly_build Mechanics Debug
+nightly_coverage Mechanics Debug
+nightly_submit Mechanics Debug
+install_1 Mechanics Debug
+clean_1 Mechanics Debug
+##
+configure_src IO Debug
+nightly_build IO Debug
+nightly_coverage IO Debug
+nightly_submit IO Debug
+install_1 IO Debug
+clean_1 IO Debug
+### Examples
+rm -rf $PIPOL_WDIR/siconos/Numerics/src
+rm -rf $PIPOL_WDIR/siconos/Kernel/src
+rm -rf $PIPOL_WDIR/siconos/Mechanics/src
+rm -rf $PIPOL_WDIR/siconos/IO/src
+configure_src Examples Debug
+nightly_build Examples Debug
+nightly_test Examples Debug
+nightly_submit Examples Debug
+##
+#nightly_memcheck Examples Debug
+#nightly_submit Examples Debug
+# end
+date
+df -k
+

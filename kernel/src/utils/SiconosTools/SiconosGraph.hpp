@@ -40,7 +40,7 @@
 #include <boost/version.hpp>
 
 #include <SiconosConfig.h>
-#if !defined(SICONOS_USE_MAP_FOR_HASH)
+#if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
 #include <unordered_map>
 #else
 #include <map>
@@ -71,7 +71,11 @@ using std::size_t;
 #pragma clang diagnostic pop
 #endif
 
+#if defined(SICONOS_STD_TUPLE) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 namespace std11 = std;
+#else
+namespace std11 = boost;
+#endif
 
 #include "SiconosSerialization.hpp"
 
@@ -189,7 +193,7 @@ public:
   //  typedef typename
   //  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
-#if !defined(SICONOS_USE_MAP_FOR_HASH)
+#if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
   typedef typename std::unordered_map<V, VDescriptor> VMap;
 #else
   typedef typename std::map<V, VDescriptor> VMap;
@@ -701,7 +705,7 @@ public:
 
       if (vdx == vd2) endl = true;
 
-#if !defined(SICONOS_USE_MAP_FOR_HASH)
+#if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
       std::unordered_map<E, EDescriptor> Edone;
 #else
       std::map<E, EDescriptor> Edone;

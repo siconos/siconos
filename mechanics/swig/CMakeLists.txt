@@ -47,7 +47,3 @@ if(NOT WITH_OCE)
 endif()
 build_python_tests()
 
-if(NOT NO_RUNTIME_BUILD_DEP)
-  find_python_module(pyhull)
-endif()
- 

@@ -187,6 +187,7 @@ macro(add_siconos_swig_sub_module fullname)
 
   # Check dependencies and then link ...
   add_dependencies(${SWIG_MODULE_${_name}_REAL_NAME} ${COMPONENT})
+
   if(UNIX AND NOT APPLE)
     # do not link against the Python library on unix, it is useless
     swig_link_libraries(${_name} ${${COMPONENT}_LINK_LIBRARIES} ${COMPONENT})

@@ -1,0 +1,56 @@
+#! /bin/sh
+case $1 in -x) shift; set -x;; esac
+
+export PATH=/bin:/usr/bin
+set -e
+workdir=${workdir:-/tmp}
+mydir=`dirname \`readlink -f $0\``
+ndir=`mktemp -d ${workdir}/siconos-dist.XXXXX`
+
+get_rev () {
+    svn status -N -u $1 | sed 's/Status against revision:.*\([0-9]+\)/\1/p;d'
+}
+
+
+remove_tmp_dir () {
+    case $1 in
+	*siconos-dist.?????) rm -rf $1;;
+	*) echo "cannot remove this tmp dir : $1" >&2 ;;
+    esac
+}
+
+
+get_src () {
+    revarg=
+    if [ x$2 = x ]; then 
+	revarg="-r COMMITTED"
+    else 
+	revarg="-r$2"
+    fi
+    svn export $revarg $mydir/../../$1 $ndir/$1
+}
+
+make_dist () { 
+    get_src $1 $2
+    pushd ${ndir}/$1
+    ./autogen.sh
+    ./configure
+    make dist
+    mv siconos-*.tar.gz ${workdir}
+    popd
+}
+
+trap 'echo removing tmp dir... ; remove_tmp_dir ${ndir} ; exit 1' 2 3
+rev=
+while [ $# -gt 0 ] ; do
+    case $1 in 
+	-workdir) shift; workdir=$1; shift;;
+	-r) shift; rev=$1; shift;;
+	*) component=$1; shift;;
+    esac
+done
+
+make_dist $component $rev
+
+remove_tmp_dir $ndir
+

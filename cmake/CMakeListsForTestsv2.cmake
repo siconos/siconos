@@ -73,19 +73,19 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
   # -- link with current component and its dependencies --
   add_dependencies(${_EXE} @COMPONENT@)
-  target_link_libraries(${_EXE} PRIVATE @COMPONENT@)
-  target_link_libraries(${_EXE} PRIVATE ${@COMPONENT@_LINK_LIBRARIES})
+  target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT@)
+  target_link_libraries(${_EXE} ${PRIVATE} ${@COMPONENT@_LINK_LIBRARIES})
 
   set(COMPONENT_TEST_LIB_ @COMPONENT_TEST_LIB@)
   if(COMPONENT_TEST_LIB_)
     add_dependencies(${_EXE} @COMPONENT_TEST_LIB@)
-    target_link_libraries(${_EXE} PRIVATE @COMPONENT_TEST_LIB@)
+    target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT_TEST_LIB@)
   endif()
 
 
   # Link and include for tests libraries (e.g. cppunit ...)
   FOREACH(_L ${TEST_LIBS})
-    TARGET_LINK_LIBRARIES(${_EXE} PRIVATE ${_L})
+    TARGET_LINK_LIBRARIES(${_EXE} ${PRIVATE} ${_L})
   ENDFOREACH()
   FOREACH(_D ${TEST_INCLUDE_DIR})
     include_directories(${_D})

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# ctest experiment
+
+#PRE-PIPOL  src/git/siconos/Build/Pipol/pre-siconos
+
+#PIPOL ubuntu-quantal 03:00
+
+/bin/echo $PWD
+
+cmake $HOME/src/git/siconos/Build -DON_DASHBOARD=1 -DFROM_REPO=1 -DGIT_REPOSITORY=git+ssh://bremond@scm.gforge.inria.fr//gitroot/siconos/siconos.git -DMODE=Nightly -DWITH_IO=1 -DWITH_MECHANICS=1 -DWITH_EXAMPLES=1
+
+time make

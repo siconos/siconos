@@ -28,7 +28,13 @@
 #include "SimulationTypeDef.hpp"
 
 #include <SiconosConfig.h>
+#if defined(SICONOS_STD_TO_STRING) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #define TO_STR(x) std::to_string(x)
+#else
+#include <boost/lexical_cast.hpp>
+#define TO_STR(x) boost::lexical_cast<std::string>(x)
+#endif
+
 
 static inline std::pair<unsigned, std::string> getNumberOfStates(DynamicalSystemsGraph& DSG0, InteractionsGraph& IG0)
 {

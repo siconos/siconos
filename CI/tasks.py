@@ -42,7 +42,7 @@ empty = SiconosCiTask()
 base = empty.copy()(
     ci_config='default',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
-          'python3-env'],
+          'python-env'],
     srcs=['.'],
     targets={'.': ['all', 'test']})
 #
@@ -52,27 +52,27 @@ base = empty.copy()(
 default = SiconosCiTask(
     docker=True,
     ci_config='default',
-    distrib='ubuntu:18.04',
+    distrib='ubuntu:16.04',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
-          'python3-env'],
+          'python-env'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
 minimal = SiconosCiTask(
     docker=True,
     ci_config='minimal',
-    distrib='ubuntu:18.04',
+    distrib='ubuntu:16.10',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
-          'atlas-lapack', 'python3-minimal'],
+          'atlas-lapack', 'python-minimal'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
 minimal_with_python = SiconosCiTask(
     docker=True,
     ci_config='minimal_with_python',
-    distrib='ubuntu:18.04',
+    distrib='ubuntu:16.10',
     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
-          'atlas-lapack', 'python3-env'],
+          'atlas-lapack', 'python-env'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
@@ -92,17 +92,17 @@ siconos_default_nix = default.copy()(
 siconos_debian_latest = siconos_default.copy()(
     distrib='debian:latest')
 
-# siconos_ubuntu_14_04 = siconos_default.copy()(
-#     distrib='ubuntu:14.04')
+siconos_ubuntu_14_04 = siconos_default.copy()(
+    distrib='ubuntu:14.04')
 
-# siconos_ubuntu_15_04 = siconos_default.copy()(
-#     distrib='ubuntu:15.04')
+siconos_ubuntu_15_04 = siconos_default.copy()(
+    distrib='ubuntu:15.04')
 
-# siconos_ubuntu_15_10 = siconos_default.copy()(
-#     distrib='ubuntu:15.10')
+siconos_ubuntu_15_10 = siconos_default.copy()(
+    distrib='ubuntu:15.10')
 
-# siconos_ubuntu_16_10 = siconos_default.copy()(
-#     distrib='ubuntu:16.10')
+siconos_ubuntu_16_10 = siconos_default.copy()(
+    distrib='ubuntu:16.10')
 
 siconos_ubuntu_17_10 = siconos_default.copy()(
     distrib='ubuntu:17.10')
@@ -111,12 +111,13 @@ siconos_fedora_latest = siconos_default.copy()(
     distrib='fedora:latest')
 
 siconos_cxx_11_ubuntu_17_10 = siconos_default.copy()(
-    distrib='ubuntu:17.10')
+    distrib='ubuntu:17.10',
+    ci_config='with_cxx11')
 
 siconos_gazebo = siconos_default.copy()(
     distrib='nvidia/opengl:1.0-glvnd-devel-ubuntu16.04',
-    ci_config=('with_bullet', 'with_py3'),
-    add_pkgs=['bullet', 'gazebo'],
+    ci_config=('with_cxx11', 'with_bullet', 'with_py3'),
+    add_pkgs=['bullet','gazebo'],
     targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
                    'docker-make-install', 'docker-cmd']})
 
@@ -128,7 +129,7 @@ from os.path import expanduser
 home = expanduser("~")
 
 siconos_documentation = siconos_default.copy()(
-    distrib='ubuntu:18.04',
+    distrib='ubuntu:16.10',
     ci_config='with_documentation',
     add_pkgs=['documentation'],
     add_directories=[os.path.join(home, '.ssh:/root/.ssh')],
@@ -241,25 +242,24 @@ siconos_frama_c = siconos_default.copy()(
 #
 # 4. dispatch based on hostname and distrib type (to min. disk requirement)
 #
-known_tasks = {'siconos---vm0': (),
-               # (siconos_gcc_asan,
-               #  siconos_serialization,
-               #  siconos_profiling,
-               #  siconos_gcc_asan_latest,
-               #  siconos_debian_mechanisms),
+known_tasks = {'siconos---vm0':
+               (siconos_gcc_asan,
+                siconos_serialization,
+                siconos_profiling,
+                siconos_gcc_asan_latest,
+                siconos_debian_mechanisms),
 
-               'siconos---vm1': (),
-               # (minimal,
-               #  minimal_with_python,
-               #  siconos_documentation,
-               #  siconos_dev_mode_strict,
-               #  siconos_clang,
-               #  siconos_clang_asan),
+               'siconos---vm1':
+               (minimal,
+                minimal_with_python,
+                siconos_documentation,
+                siconos_dev_mode_strict,
+                siconos_clang,
+                siconos_clang_asan),
 
-               'siconos---vm2': (),
-               # (siconos_clang_msan,
-               #  siconos_ubuntu_15_10_with_mechanisms),
+               'siconos---vm2':
+               (siconos_clang_msan,
+                siconos_ubuntu_15_10_with_mechanisms),
 
-               'siconos---vm4': (),
-               # (siconos_numerics_only)}
-               }
+               'siconos---vm4':
+               (siconos_numerics_only)}

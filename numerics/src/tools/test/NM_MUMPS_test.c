@@ -6,7 +6,7 @@
 #define SIZE 2
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
 #include <mpi.h>
 #endif
 #include <math.h>
@@ -14,13 +14,13 @@ int main(int argc, char *argv[])
 {
   double b[SIZE];
 
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
   MPI_Init(&argc, &argv);
 #endif
 
   int rank;
 
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #else
   rank = 0;
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
   NumericsMatrix* M = NM_create(NM_SPARSE, SIZE, SIZE);
 
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
   NM_MPI_set_comm(M, MPI_COMM_WORLD);
 #endif
   NM_MUMPS_set_control_params(M);
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
   M->matrix2->origin = NSM_TRIPLET;
 
   NM_MUMPS(M, -1);
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
   if(rank > 0)
   {
     MPI_Finalize();
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     printf("solution b[%u] = %g\n", i, b[i]);
   }
 
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
   MPI_Finalize();
 #endif
   NM_free(M);

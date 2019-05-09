@@ -79,7 +79,6 @@ public:
   virtual ~SiconosBulletCollisionManager();
 
 protected:
-  bool _with_equality_constraints;
   SiconosBulletOptions _options;
   SiconosBulletStatistics _stats;
 
@@ -114,15 +113,6 @@ public:
   const SiconosBulletOptions &options() const { return _options; }
   const SiconosBulletStatistics &statistics() const { return _stats; }
   void resetStatistics() { _stats = SiconosBulletStatistics(); }
-
-  /** Set the usage of equality constraints. When the number
-      of objects is huge as in granular material, the usage
-      of equality constraint breaks scalability.
-      This have to be fixed.
-   * \param choice a boolean, default is True.
-   */
-  void useEqualityConstraints(bool choice=true)
-  { _with_equality_constraints = choice; };
 };
 
 #endif /* SiconosBulletCollisionManager.hpp */

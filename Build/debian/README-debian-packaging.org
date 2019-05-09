@@ -1,0 +1,148 @@
+#+TITLE: Packaging Siconos for Debian
+
+This document details how to generate Siconos .deb packages in a
+Debian Sid container.  This should be done whenever a new version of
+Siconos is released.  All steps should be followed in order.
+
+* Clone and set up siconos-deb
+
+Check out the repository siconos-deb.git.  It is a fork of siconos.git
+that has a branch called debian/sid.
+
+Ensure your checkout of siconos-deb has the 'upstream' remote set to
+http://github.com/siconos/siconos.  The 'origin' remote should be set
+to git@github.com:siconos/siconos-deb, and there should be a local
+branch 'debian/sid' tracking 'origin/debian/sid':
+
+  : git remote add upstream http://github.com/siconos/siconos
+  : git remote update
+  : git branch -D master
+  : git checkout -b upstream origin/master
+  : git checkout -b debian/sid origin/debian/sid
+
+* Export GPG keys
+
+To sign packages, the container needs your gpg signing keys.
+If you do not have a signing key, see instructions here:
+
+https://keyring.debian.org/creating-key.html
+
+You must export your keys to a file "gpg-secrets" before running docker build:
+
+  : cd ~/projects/siconos/Build/debian
+  : gpg --export -a -o gpg-secrets
+  : gpg --export-secret-keys -a -o - | cat >>gpg-secrets
+
+We cannot do "gpg --import" during "docker build" because it is unable
+to ask for the passphrase, so instead it is ADDed to the container we
+will do the import later during "docker run", below.
+
+IMPORTANT: Make sure to delete it after all this is over, both the
+original and the version copied to the image!  Do not push your Docker
+image to the cloud!
+
+* Build the Docker container
+
+Set up a clean Docker container based on Debian unstable (sid), using
+the Dockerfile found in Build/debian:
+
+  : cd ~/projects/siconos/Build/debian
+  : docker build -t sid-package .
+
+It has git and packaging tools already installed.  The rest should be
+installed during package building by the package build dependencies.
+Leaving all other packages uninstalled by default should help make
+sure dependencies are complete.
+
+Run it with a volume allowing access to the siconos-deb work dir and gpg-secrets:
+
+  : cd ~/projects/siconos-deb
+  : docker run -it -v $PWD:/root/siconos-deb sid-package
+
+* Import GPG secrets
+
+From within the container, we now need to import the secret signing key.
+
+  : root@c565375d37b8:~# gpg --import gpg-secrets
+  : root@c565375d37b8:~# rm gpg-secrets
+
+and enter the passphrase when prompted.
+
+* Install build dependencies
+
+Next, to install the build dependencies, here is the trick:
+
+  : root@c565375d37b8:/# cd ~/siconos-deb
+  : root@c565375d37b8:~/siconos-deb# mk-build-deps -i
+
+This will produce a .deb file with the dependencies listed in
+debian/rules, and attempt to install it, which will fail!  Then delete
+it and use apt-get to resolve the dependencies:
+
+  : root@c565375d37b8:~/siconos-deb# rm siconos-build-deps_4.0.0-1_all.deb
+  : root@c565375d37b8:~/siconos-deb# apt-get -y -f install
+
+* Build the packages
+
+Now building the packages should succeed.  We use "gbp" tools,
+i.e. "git buildpackage" to manage this:
+
+  : root@c565375d37b8:~/siconos-deb# gbp buildpackage --git-export-dir=../build
+
+Note that gbp buildpackage has some options in debian/gbp.conf that
+avoid needing to give the options by the command line.
+
+Relevant instructions to using gbp for this project can be found at:
+
+http://honk.sigxcpu.org/projects/git-buildpackage/manual-html/gbp.import.html
+
+starting at the section entitled, "When upstream uses Git", and the
+specific case "No upstream tarballs".  However, the following are some
+basic notes for how to update the package for a new version of Siconos.
+
+Now, fetch the latest from siconos:
+
+  : root@c565375d37b8:~/siconos-deb# git fetch upstream
+
+Say that debian/sid currently points to the tag 4.0.0, but the fetch
+told us that a new tag 4.1.0 now exists and we want to do a new
+package for it.  Checkout debian/sid (make sure it is up to date with
+origin/debian/sid, not shown here) and merge in 4.1.0:
+
+  : root@c565375d37b8:~/siconos-deb# git checkout debian/sid
+  : root@c565375d37b8:~/siconos-deb# git merge 4.1.0
+
+Check if anything needs to be changed in the debian/*.install files,
+e.g. if there are new tools, and debian/control if there are new
+dependencies.
+
+Build the package to create a new "pristine tar" for this version:
+
+  : root@c565375d37b8:~/siconos-deb# gbp buildpackage \
+  :   --git-export-dir=../build \
+  :   --git-pristine-tar-commit
+
+You can add the argument,
+
+  : --git-ignore-new
+
+to gdb buildpackage if you are working on the package and haven't
+committed changes yet, otherwise it will complain about changes to the
+git repository.  However, it is good practice to make commits as you
+go instead of using this option.
+
+Finally, update the changelog using "gbp dch" and re-build the package
+with "gbp buildpackage" as instructed above.
+
+  : root@c565375d37b8:~/siconos-deb# gbp dch --snapshot --auto debian/
+
+When you are ready to release the package, update the changelog using
+"--release" instead of "--snapshot", commit, and build the final
+package:
+
+  : gbp dch --release --auto
+  : git commit -m"Release 4.1.0" debian/changelog
+  : gbp buildpackage --git-export-dir=../build
+
+Make sure the name and email addresses are correct and correspond with
+your GPG key.

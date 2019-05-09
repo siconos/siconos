@@ -44,28 +44,8 @@ if(WITH_${COMPONENT}_TESTING)
   endif()
 endif()
 
-if(NOT NO_RUNTIME_BUILD_DEP)
-  # -- Scipy --
-  # It is required for sparse matrices in numerics
-  find_python_module(scipy  VERSION 0.15) # for sparse
-
-  # -- mpi4py -- 
-  if(WITH_MPI)
-    find_python_module(mpi4py REQUIRED INCLUDES)
-    set(WITH_MPI4PY TRUE)
-    set(numerics_SWIG_DEFS "-I${mpi4py_INCLUDE_DIR};-DWITH_MPI4PY")
-
-  endif()
-endif()
 include(swig_python_tools)
 
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
-
-
-if(WITH_MPI)
-  target_include_directories(_numerics PRIVATE ${mpi4py_INCLUDE_DIR})
-  target_include_directories(_numerics PRIVATE ${MPI_C_INCLUDE_DIRS})
-  target_link_libraries(_numerics  ${MPI_C_LIBRARIES})
-endif()
 
 build_python_tests()

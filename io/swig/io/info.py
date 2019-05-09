@@ -36,9 +36,7 @@ def summarize(io):
     print ('Time simulated: {0} to {1} = {2} steps'.format(t0, t1, len(times)))
 
     cf_times, cf_counts = np.unique(cf_data[:, 0], return_counts=True)
-    min_cf=0
-    if len(cf_counts) !=0:  
-        min_cf = cf_counts.min()
+    min_cf = cf_counts.min()
 
     # Are there times where there are no contact forces?
     if len(np.setdiff1d(times, cf_times, assume_unique=True)) > 0:
@@ -49,13 +47,8 @@ def summarize(io):
     print ('            {0:->10} {1:->10} {2:->10}'.format('','',''))
     print ('Objects:    {0: >10} {1: >10} {2: >10}'
            .format(counts.min(), int(counts.mean()), counts.max()))
-    if len(cf_counts) !=0:
-        print ('Contacts:   {0: >10} {1: >10} {2: >10}'
-               .format(min_cf, int(cf_counts.mean()), cf_counts.max()))
-    else:
-        print ('Contacts:   {0: >10} {1: >10} {2: >10}'
-               .format(min_cf, 0, 0))
-               
+    print ('Contacts:   {0: >10} {1: >10} {2: >10}'
+           .format(min_cf, int(cf_counts.mean()), cf_counts.max()))
     print ('Iterations: {0: >10} {1: >10} {2: >10}'
            .format(int(solv_data[:,1].min()), int(solv_data[:,1].mean()),
                    int(solv_data[:,1].max())))

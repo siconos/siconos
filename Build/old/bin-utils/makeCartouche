@@ -1,0 +1,61 @@
+#! /bin/csh -f
+foreach toto (*.cpp)
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.cpp $toto > `basename $toto .cpp`.tmp
+end
+foreach toto (*.tmp)
+mv $toto `basename $toto .tmp`.cpp
+end
+
+foreach toto (*.h)
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.cpp $toto > `basename $toto .h`.tmp
+end
+foreach toto (*.tmp)
+mv $toto `basename $toto .tmp`.h
+end
+
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.shell Makefile.am > tmp
+mv tmp Makefile.am
+
+foreach toto (*.xml)
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.xml $toto > `basename $toto .xml`.tmp
+end
+foreach toto (*.tmp)
+mv $toto `basename $toto .tmp`.xml
+end
+
+
+foreach toto (*.c)
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.cpp $toto > `basename $toto .c`.tmp
+end
+foreach toto (*.tmp)
+mv $toto `basename $toto .tmp`.c
+end
+
+foreach toto (*.f)
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.f $toto > `basename $toto .f`.tmp
+end
+foreach toto (*.tmp)
+mv $toto `basename $toto .tmp`.f
+end
+
+foreach toto (*.sh)
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.shell $toto > `basename $toto .sh`.tmp
+end
+foreach toto (*.tmp)
+mv $toto `basename $toto .tmp`.sh
+end
+
+foreach toto (*.csh)
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.shell $toto > `basename $toto .csh`.tmp
+end
+foreach toto (*.tmp)
+mv $toto `basename $toto .tmp`.csh
+end
+
+
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.shell reconf.sh > tmp
+mv tmp reconf.sh
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.shell configure.ac > tmp
+mv tmp configure.ac
+cat /scratch/Franck/New_Sico/siconos/trunk/cartouches/cartouche.shell Make-rules > tmp
+mv tmp Make-rules

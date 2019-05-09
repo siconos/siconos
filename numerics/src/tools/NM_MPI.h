@@ -17,7 +17,7 @@
 */
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
 #include <mpi.h>
 #endif
 
@@ -26,7 +26,7 @@ extern "C"
 {
 #endif
 
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
 MPI_Comm NM_MPI_comm(NumericsMatrix* A);
 void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm);
 #include <stdio.h>

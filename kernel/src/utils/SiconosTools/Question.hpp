@@ -44,8 +44,13 @@
 #include "SiconosVisitor.hpp"
 
 #include <SiconosConfig.h>
+#if defined(SICONOS_STD_ARRAY) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <type_traits>
 #include <array>
+#else
+#include <boost/type_traits/remove_reference.hpp>
+#include <boost/array.hpp>
+#endif
 
 /** a generic return value visitor */
 template <class AnswerType>

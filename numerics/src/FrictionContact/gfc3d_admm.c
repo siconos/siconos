@@ -189,17 +189,15 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   double norm_q = cblas_dnrm2(n , problem->q , 1);
 
   double norm_b = cblas_dnrm2(m , problem->b , 1);
-  if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] ==
-      SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_YES)
-  {
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - Problem information");
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
 
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of H = %g norm of b = %g ", NM_norm_1(problem->H), norm_b);
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of H = %g ", NM_norm_inf(problem->H));
-    numerics_printf_verbose(1,"---- GFC3D - ADMM -  M is symmetric = %i ", NM_is_symmetric(problem->M));
-  }
+  numerics_printf_verbose(1,"---- GFC3D - ADMM - Problem information");
+  numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
+  numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
+
+  numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of H = %g norm of b = %g ", NM_norm_1(problem->H), norm_b);
+  numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of H = %g ", NM_norm_inf(problem->H));
+  numerics_printf_verbose(1,"---- GFC3D - ADMM -  M is symmetric = %i ", NM_is_symmetric(problem->M));
+
 
   int internal_allocation=0;
   if (!options->dWork || options->dWorkSize != 2*m+n)
@@ -578,8 +576,6 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] =  SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] =
     SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT;
-  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] =
-    SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_NO;
 
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;

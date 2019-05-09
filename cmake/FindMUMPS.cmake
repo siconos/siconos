@@ -1,146 +1,143 @@
-#  Siconos is a program dedicated to modeling, simulation and control
-# of non smooth dynamical systems.
-#
-# Copyright 2018 INRIA.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# --
-# Find MUMPS libraries and headers
-#
-# Usage :
-# 
-# find_package(MUMPS REQUIRED)
-# target_link_libraries(yourlib PRIVATE MUMPS::MUMPS)
-#
-# It will handles both linking and include directories for your target.
-#
-# This module sets the following variables:
-#
-# MUMPS_FOUND - set to true if a library implementing the MUMPS interface
-#    is found
-# MUMPS_LIBRARIES - uncached list of libraries (using full path name) to
-#    link against to use MUMPS
-# MUMPS_INCLUDE_DIR - location of mumps headers found by cmake
+# Find MUMPS includes and libraries.
+# The following variables are set if MUMPS is found.  If MUMPS is not
+# found, MUMPS_FOUND is set to false.
+#  MUMPS_FOUND        - True when the MUMPS include directory is found.
+#  MUMPS_INCLUDE_DIRS - the path to where the Siconos MUMPS include files are.
+#  MUMPS_LIBRARY_DIRS - The path to where the Siconos library files are.
+#  MUMPS_LIBRARIES    - The libraries to link against Siconos MUMPS
 
-# Set MUMPS_DIR=<where mumps is installed> if it's not in a "classic" place or if you want a specific version
-
-include(FindPackageHandleStandardArgs)
+# One may want to use a specific MUMPS Library by setting
+# MUMPS_LIBRARY_DIRECTORY before FIND_PACKAGE(MUMPS)
+INCLUDE(FindPackageHandleStandardArgs)
 
 # On debian and Suse, both mpi and mpi-free version of MUMPS can be installed in parallel
 # The latter have a "_seq" suffix
-if(WITH_MPI)
-  set(__MUMPS_NAMES dmumps_ptscotch dmumps_scotch dmumps)
-else()
-  set(__MUMPS_NAMES dmumps_seq dmumps)
-  set(__SUFFIX seq)
-  # on debian systems one may have mumps+[pt]scotch packages also
-endif()
+IF(IDONTWANTMPI)
+  SET(__MUMPS_NAMES dmumps_seq dmumps)
+ELSE(IDONTWANTMPI)
+# on debian systems one may have mumps+[pt]scotch packages also
+  SET(__MUMPS_NAMES dmumps_ptscotch dmumps_scotch dmumps)
+ENDIF(IDONTWANTMPI)
+
+IF(MUMPS_LIBRARY_DIRECTORY)
+  MESSAGE(STATUS "Searching for ${__MUMPS_NAMES} in ${MUMPS_LIBRARY_DIRECTORY}")
+  FIND_LIBRARY(MUMPS_LIBRARY NAMES ${__MUMPS_NAMES} PATHS "${MUMPS_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+  IF(NOT MUMPS_LIBRARY)
+    SET(_MUMPS_DEFAULT_SEARCH_DIR TRUE)
+    MESSAGE("Could not find MUMPS in directory ${MUMPS_LIBRARY_DIRECTORY}")
+  ENDIF()
+ENDIF()
+
+IF(NOT MUMPS_LIBRARY)
+  MESSAGE(STATUS "Searching for ${__MUMPS_NAMES} in default directories")
+  FIND_LIBRARY(MUMPS_LIBRARY NAMES ${__MUMPS_NAMES})
+ENDIF()
+
+IF(MUMPS_LIBRARY)
+  MESSAGE(STATUS "Found ${MUMPS_LIBRARY}")
+ENDIF()
+
+# Try to be smart and detect whether the MUMPS lib file has a "_seq" suffix. If yes, we add it to all the other library
+IF(MUMPS_LIBRARY MATCHES "dmumps_seq")
+  SET(__MUMPS_COMMON_NAMES mumps_common_seq mumps_common)
+ELSE()
+  SET(__MUMPS_COMMON_NAMES mumps_common_ptscotch mumps_common_scotch mumps_common mumps_common_seq)
+ENDIF()
+
+IF(MUMPS_LIBRARY_DIRECTORY AND NOT _MUMPS_DEFAULT_SEARCH_DIR)
+  MESSAGE(STATUS "Searching for ${__MUMPS_COMMON_NAMES} in ${MUMPS_LIBRARY_DIRECTORY}")
+  FIND_LIBRARY(MUMPS_COMMON_LIBRARY NAMES ${__MUMPS_COMMON_NAMES} PATHS "${MUMPS_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+ENDIF()
+
+IF(NOT MUMPS_COMMON_LIBRARY)
+  MESSAGE(STATUS "Searching for ${__MUMPS_COMMON_NAMES} in default directories")
+  FIND_LIBRARY(MUMPS_COMMON_LIBRARY NAMES ${__MUMPS_COMMON_NAMES})
+ENDIF()
+
+IF(MUMPS_COMMON_LIBRARY)
+  MESSAGE(STATUS "Found ${MUMPS_COMMON_LIBRARY}")
+ENDIF()
+
+IF(MUMPS_LIBRARY_DIRECTORY)
+  FIND_LIBRARY(PTSCOTCH_LIBRARY ptscotch PATHS "${MUMPS_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+  IF(NOT PTSCOTCH_LIBRARY)
+    FIND_LIBRARY(PTSCOTCH_LIBRARY ptscotch)
+  ENDIF()
+ELSE(MUMPS_LIBRARY_DIRECTORY)
+  FIND_LIBRARY(PTSCOTCH_LIBRARY ptscotch)
+ENDIF(MUMPS_LIBRARY_DIRECTORY)
+
+IF(MUMPS_LIBRARY_DIRECTORY)
+  FIND_LIBRARY(SCOTCH_LIBRARY scotch PATHS "${MUMPS_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+  IF(NOT SCOTCH_LIBRARY)
+    FIND_LIBRARY(SCOTCH_LIBRARY scotch)
+  ENDIF()
+ELSE(MUMPS_LIBRARY_DIRECTORY)
+  FIND_LIBRARY(SCOTCH_LIBRARY scotch)
+ENDIF(MUMPS_LIBRARY_DIRECTORY)
 
 
-# ---- Search for mumps header(s) ---
+IF(MUMPS_LIBRARY_DIRECTORY)
+  FIND_LIBRARY(METIS_LIBRARY metis PATHS "${MUMPS_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+  IF(NOT METIS_LIBRARY)
+    FIND_LIBRARY(METIS_LIBRARY metis)
+  ENDIF()
+ELSE(MUMPS_LIBRARY_DIRECTORY)
+  FIND_LIBRARY(METIS_LIBRARY metis)
+ENDIF(MUMPS_LIBRARY_DIRECTORY)
 
-# -- First try : use MUMPS_DIR provided explicitely at cmake call
-if(MUMPS_DIR)
-  find_path(MUMPS_INCLUDE_DIR NAMES dmumps_c.h
-    PATHS ${MUMPS_DIR}
-    PATH_SUFFIXES include
+IF(MUMPS_LIBRARY_DIRECTORY)
+  FIND_LIBRARY(PORD_LIBRARY pord${__SUFFIX} PATHS "${MUMPS_LIBRARY_DIRECTORY}" NO_DEFAULT_PATH)
+  IF(NOT PORD_LIBRARY)
+    FIND_LIBRARY(PORD_LIBRARY pord${__SUFFIX})
+  ENDIF()
+ELSE(MUMPS_LIBRARY_DIRECTORY)
+  FIND_LIBRARY(PORD_LIBRARY pord${__SUFFIX})
+ENDIF(MUMPS_LIBRARY_DIRECTORY)
+
+IF((NOT MUMPS_INCLUDE_DIR) AND MUMPS_LIBRARY)
+  GET_FILENAME_COMPONENT(MUMPS_LIBRARY_DIR ${MUMPS_LIBRARY} PATH)
+  GET_FILENAME_COMPONENT(MUMPS_LIBRARY_DIR_DIR ${MUMPS_LIBRARY_DIR} PATH)
+
+  # Suse uses /usr/include/mumps
+  # Debian has /usr/include/mumps_seq for the MPI-free version
+  find_path(MUMPS_INCLUDE_DIR dmumps_c.h
+    HINTS
+    ${MUMPS_LIBRARY_DIR_DIR}/include
+    $ENV{MPI_INCLUDE}
     PATH_SUFFIXES MUMPS mumps mumps${__SUFFIX}
     )
-endif()
+ENDIF()
 
-# -- Second try : pkg-config
-# 
-find_package(PkgConfig)
-pkg_check_modules(PKGC_MUMPS mumps QUIET)
-if(PKGC_MUMPS_FOUND)
-  set(MUMPS_LIBRARIES "${PKGC_MUMPS_LINK_LIBRARIES}")
-endif()
 
-find_path(MUMPS_INCLUDE_DIR NAMES dmumps_c.h
-  PATHS ${PKGC_MUMPS_INCLUDE_DIRS})
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(MUMPS
+  REQUIRED_VARS MUMPS_LIBRARY MUMPS_INCLUDE_DIR)
 
-# -- Last try : default behavior ...
-find_path(MUMPS_INCLUDE_DIR NAMES dmumps_c.h)
+IF(MUMPS_LIBRARY)
+  GET_FILENAME_COMPONENT(MUMPS_LIBRARY_DIRS ${MUMPS_LIBRARY} PATH)
+  SET(MUMPS_LIBRARIES ${MUMPS_LIBRARY} ${MUMPS_COMMON_LIBRARY})
 
-# --- Search for mumps libraries ---
+  IF(PTSCOTCH_LIBRARY)
+    SET(MUMPS_LIBRARIES ${MUMPS_LIBRARIES} ${PTSCOTCH_LIBRARY})
+  ENDIF(PTSCOTCH_LIBRARY)
 
-if(NOT MUMPS_LIBRARY)
-  if(MUMPS_DIR)
-    find_library(MUMPS_LIBRARY NAMES ${__MUMPS_NAMES}
-    PATHS ${MUMPS_DIR} ENV LIBRARY_PATH ENV LD_LIBRARY_PATH
-    PATH_SUFFIXES lib lib64 
-    )
-    
-  endif()
-  find_library(MUMPS_LIBRARY NAMES ${__MUMPS_NAMES})
-  
-endif()
+  IF(SCOTCH_LIBRARY)
+    SET(MUMPS_LIBRARIES ${MUMPS_LIBRARIES} ${SCOTCH_LIBRARY})
+  ENDIF(SCOTCH_LIBRARY)
 
-# -- Search for extra libraries, required to link with mumps --
-# Try to be smart and detect whether the MUMPS lib file has a "_seq" suffix. If yes, we add it to all the other library
-if(MUMPS_LIBRARY MATCHES "dmumps_seq")
-  set(__MUMPS_COMMON_NAMES mumps_common_seq mumps_common)
-else()
-  set(__MUMPS_COMMON_NAMES mumps_common_ptscotch mumps_common_scotch mumps_common mumps_common_seq)
-endif()
+  IF(METIS_LIBRARY)
+    SET(MUMPS_LIBRARIES ${MUMPS_LIBRARIES} ${METIS_LIBRARY})
+  ENDIF(METIS_LIBRARY)
 
-if(MUMPS_DIR)
-  find_library(MUMPS_COMMON_LIBRARY NAMES ${__MUMPS_COMMON_NAMES}
-    PATHS ${MUMPS_DIR} ENV LIBRARY_PATH ENV LD_LIBRARY_PATH
-    PATH_SUFFIXES lib lib64 
-    )
-  
-endif()
-find_library(MUMPS_COMMON_LIBRARY NAMES ${__MUMPS_COMMON_NAMES})
+  IF(PORD_LIBRARY)
+    SET(MUMPS_LIBRARIES ${MUMPS_LIBRARIES} ${PORD_LIBRARY})
+  ENDIF()
 
-set(MUMPS_LIBRARIES ${MUMPS_LIBRARY} ${MUMPS_COMMON_LIBRARY})
+  SET(MUMPS_INCLUDE_DIRS ${MUMPS_INCLUDE_DIR})
 
-# Extras
-set(extras_libs ptscotch scotch metis pord${__SUFFIX})
-foreach(extra IN LISTS extras_libs)
-  if(MUMPS_DIR)
-    find_library(${extra}_LIBRARY NAMES ${extra}
-      PATHS ${MUMPS_DIR} ENV LIBRARY_PATH ENV LD_LIBRARY_PATH
-      PATH_SUFFIXES lib lib64 
-      )
-    
-  endif()
-  find_library(${extra}_LIBRARY NAMES ${extra})
-  if(${extra}_LIBRARY)
-    list(APPEND ${MUMPS_LIBRARIES} ${extra}_LIBRARY)
-  endif()
-    
-endforeach()
-
-# -- Library setup --
-find_package_handle_standard_args(MUMPS
-  REQUIRED_VARS MUMPS_LIBRARIES MUMPS_INCLUDE_DIR)
-
-if(MUMPS_FOUND)
-  
-  if(NOT TARGET MUMPS::MUMPS)
-    add_library(MUMPS::MUMPS IMPORTED INTERFACE)
-    set_property(TARGET MUMPS::MUMPS PROPERTY INTERFACE_LINK_LIBRARIES "${MUMPS_LIBRARIES}")
-    if(MUMPS_INCLUDE_DIR)
-      set_target_properties(MUMPS::MUMPS PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${MUMPS_INCLUDE_DIR}")
-    endif()
-    if(EXISTS "${MUMPS_LIBRARIES}")
-      set_target_properties(MUMPS::MUMPS PROPERTIES
-        IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
-        IMPORTED_LOCATION "${MUMPS_LIBRARIES}")
-    endif()
-  endif()
-endif()
-mark_as_advanced(MUMPS_LIBRARIES MUMPS_INCLUDE_DIR)
-
+ELSE(MUMPS_LIBRARY)
+  IF(MUMPS_FIND_REQUIRED)
+    MESSAGE(FATAL_ERROR
+      "Required MUMPS library not found. Please specify library location in MUMPS_LIBRARY_DIRECTORY")
+  ENDIF(MUMPS_FIND_REQUIRED)
+ENDIF(MUMPS_LIBRARY)

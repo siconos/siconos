@@ -1615,7 +1615,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
     // relation (e.g. EqualityCondition == they have a joint between
     // them), then don't create contact constraints, because it leads
     // to an ill-conditioned problem.
-    if (_with_equality_constraints && pairA->ds && pairB->ds)
+    if (pairA->ds && pairB->ds)
     {
       InteractionsGraph::VIterator ui, uiend;
       SP::InteractionsGraph indexSet0 = simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();

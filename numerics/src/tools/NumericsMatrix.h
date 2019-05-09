@@ -44,7 +44,7 @@ typedef struct
   double *dWork; /**< double workspace */
   bool isLUfactorized; /**<  true if the matrix has already been LU-factorized */
   bool isInversed; /**<  true if the matrix containes its inverse (in place inversion) */
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
   MPI_Comm mpi_comm; /**< optional mpi communicator */
 #endif
 } NumericsMatrixInternalData;
@@ -639,7 +639,7 @@ extern "C"
     M->internalData->dWork = NULL;
     M->internalData->dWorkSize = 0;
     M->internalData->isLUfactorized = 0;
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
     M->internalData->mpi_comm = MPI_COMM_NULL;
 #endif
   }

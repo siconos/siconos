@@ -4,13 +4,24 @@
 
 set(COMPONENT externals)
 message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
+# Name used for the target to be built
+set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
-# -- source directories for current component --
+# Define a Fortran interface file (FCMangle.hpp)
+#FortranCInterface_VERIFY(QUIET)
+if(NOT FortranCInterface_VERIFIED_C)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DefaultMangle.h.in ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h)
+else()
+  FortranCInterface_HEADER(${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h
+    MACRO_NAMESPACE "myF2C" 
+    SYMBOL_NAMESPACE "myF2C"
+    )
+endif()
 
-# What is needed by component to compile ?
-# List here all directories that contain sources files
-# for current component.
+# --- Sources and headers ---
+# source directories for externals
 set(${COMPONENT}_DIRS
+  .
   blas_lapack
   hairer
   netlib/dftemplates
@@ -190,7 +201,7 @@ if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SER
     ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_collections_save_imp.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_map.hpp
     ${CMAKE_CURRENT_SOURCE_DIR}/boost_serialization/boost/serialization/unordered_set.hpp
-    DESTINATION include/siconos/boost/serialization)
+    DESTINATION include/${PROJECT_NAME}/boost/serialization)
 endif()
 
 

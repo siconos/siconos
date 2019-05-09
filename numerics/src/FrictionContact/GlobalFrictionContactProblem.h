@@ -90,9 +90,6 @@ extern "C"
 
   int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file);
 
-  int globalFrictionContact_printInFileName(GlobalFrictionContactProblem*  problem,
-                                            char * filename);
-
   int globalFrictionContact_newFromFile(GlobalFrictionContactProblem*  problem, FILE* file);
 
   static inline void globalFrictionContact_null(GlobalFrictionContactProblem*  problem)

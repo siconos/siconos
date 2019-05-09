@@ -97,22 +97,6 @@ fail:
   return info;
 }
 
-int globalFrictionContact_printInFileName(GlobalFrictionContactProblem* problem, char* filename)
-{
-  int info = 0;
-  FILE * file = fopen(filename, "w");
-
-  if (!file)
-  {
-    return errno;
-  }
-
-  info = globalFrictionContact_printInFile(problem, file);
-
-  fclose(file);
-  return info;
-}
-
 void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
 {
 

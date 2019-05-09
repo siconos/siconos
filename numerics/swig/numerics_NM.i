@@ -1,6 +1,6 @@
  // Matrices
 
-#ifdef SICONOS_HAS_MPI
+#ifdef HAVE_MPI
 #ifdef WITH_MPI4PY
 %include mpi4py/mpi4py.i
 %mpi4py_typemap(Comm, MPI_Comm);

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+apt-get update
+
+apt-get -y --force-yes install cmake gfortran gcc g++ libboost-graph-dev libatlas-base-dev libgmp3-dev libcppunit-dev python-numpy python-scipy python-dev pytest swig2.0 doxygen libboost-filesystem-dev git python-lxml
+
+#free some space
+apt-get -y clean

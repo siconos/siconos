@@ -1,0 +1,23 @@
+This directory contains shell scripts used to add license header (makeCartouche) 
+and to update the version number in this header (updateVersionNumber).
+todo: improve this files to automate directory reading ... 
+
+
+To create a new release: 
+
+Change sed command (lines 13,18 and 20 in updateVersionNumber) to adapt it to the needed number version and title. 
+run updateVersionNumber in Numerics, Kernel, Front-End or Sample.
+update version numbers in configure.ac (for .so number). 
+update ChangeLog file
+commit 
+remove all .svn files
+
+-> create a tar.gz and upload it on gforge
+
+-> update Siconos download page  (see README in trunk/Web/)
+
+-> update doxygen html pages on gforge, so that they correspond to the published release
+	 (directory htdoc/Documentation/Kernel or Numerics_Doxygen on gforge)
+
+-> update dev/design html pages if needed (directory htdoc/docDev on gforge)
+
