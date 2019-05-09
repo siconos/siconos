@@ -11,10 +11,6 @@
 set(COMPONENT mechanics)
 message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 
-# Name used for the target to be built
-set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
-
-
 # --- Sources and headers for 'native' mechanics part ---
 set(${COMPONENT}_DIRS
   src/.

@@ -1,0 +1,6 @@
+numpy
+scipy
+pyhull
+pytest
+h5py
+lxml

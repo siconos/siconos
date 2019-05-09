@@ -41,11 +41,7 @@
 #include <boost/numeric/ublas/fwd.hpp>
 
 #include "SiconosConfig.h"
-#if defined(SICONOS_STD_ARRAY) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <array>
-#else
-#include <boost/array.hpp>
-#endif
 
 #include <complex>
 #include "SiconosPointers.hpp"

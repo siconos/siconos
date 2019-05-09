@@ -12,6 +12,7 @@ match:
   nvidia/opengl: debian
   suse: opensuse
   opensuse: fedora
+  opensuse/leap: opensuse
 
 ##############################################################################
 # Set commands used to install and update packages
@@ -24,7 +25,7 @@ installer:
     fedora: dnf --setopt=deltarpm=false install -y
     debian: apt-get install -f -y
     nixos/nix: nix-env -i
-    opensuse: zypper install -y
+    opensuse/leap: zypper install -y
 
 updater:
   # specific installer for sicono package from launchpad
@@ -37,11 +38,11 @@ updater:
 
   any:
     debian: apt-get update -y
-    opensuse: zypper --gpg-auto-import-keys refresh
+    opensuse/leap: zypper --gpg-auto-import-keys refresh
 
   # science repo for opensuse (needed for mumps installation)
   mumps-seq:
-    opensuse: zypper addrepo https://download.opensuse.org/repositories/science/openSUSE_Leap_42.3/science.repo && zypper --gpg-auto-import-keys refresh
+    opensuse/leap: zypper addrepo https://download.opensuse.org/repositories/science/openSUSE_Leap_42.3/science.repo && zypper --gpg-auto-import-keys refresh
 
 
 ##############################################################################
@@ -140,39 +141,39 @@ pkgs:
       run-command:
         /bin/echo *************************************************************************
 
-  python-minimal:
+  python3-minimal:
     nix:
-      - python-2.7.13
+      - python-3.6
 
   python-env:
     nix:
-      - python-2.7.13
+      - python-3.6
       - python-modules
 
     debian:
-      - python
-      - python-dev
-      - python-lxml
-      - python-pytest
-      - python-scipy
-      - python-matplotlib
+      - python3
+      - python3-dev
+      - python3-lxml
+      - python3-pytest
+      - python3-scipy
+      - python3-matplotlib
     fedora:
-      - python
-      - python-devel
-      - python-lxml
+      - python3
+      - python3-devel
+      - python3-lxml
       - pytest
       - scipy
-      - python-matplotlib
+      - python3-matplotlib
 
   pytest:
     opensuse:
-      python-pytest
+      python3-pytest
 
   scipy:
     opensuse:
-      python-numpy
-      python-numpy-devel
-      python-scipy
+      python3-numpy
+      python3-numpy-devel
+      python3-scipy
 
   python-modules:
     nix:
@@ -196,16 +197,21 @@ pkgs:
       - python3-pytest
       - python3-scipy
       - python3-matplotlib
-
+    opensuse:
+      - python3-devel
+      - python3-pip
+      - python3-scipy
+      - python3-numpy
+      
   # bullet & serialization for full doc
   documentation:
     nix:
     debian:
       - doxygen
       - graphviz
-      - python-sphinx
-      - python-sphinx-bootstrap-theme
-      - python-sphinx-rtd-theme
+      - python3-sphinx
+      - python3-sphinx-bootstrap-theme
+      - python3-sphinx-rtd-theme
       - sphinx-common
       - sphinx-doc
       - sphinx-rtd-theme-common
@@ -218,13 +224,13 @@ pkgs:
     nix:
       - python2.7-pip-9.0.1
     debian:
-      - python-pip
+      - python3-pip
       - pip-upgrade
 
   pip-upgrade:
     any:
       command:
-        pip install --upgrade pip
+        python3 -m pip install --upgrade pip
 
   siconos-doc-pip-pkgs:
     any:
@@ -238,7 +244,7 @@ pkgs:
       - valgrind
     debian:
       - valgrind
-      - python-dbg
+      - python3-dbg
     fedora:
       - valgrind
       - python-debuginfo
@@ -263,15 +269,6 @@ pkgs:
     nix:
       - gnumake
 
-  cmake:
-    ubuntu-12.04:
-      - python-software-properties
-      - cmake-3.0.2
-
-    ubuntu-14.04:
-      - zlib1g-dev
-      - libcurl4-openssl-dev
-      - cmake-3.11.4
 
   cmake-3.0.2:
     any:
@@ -307,12 +304,13 @@ pkgs:
     nix: gcc
     debian: g++
     fedora: gcc-c++
-
+    opensuse: gcc-c++
+    
   boost:
     nix: boost-1.63.0
     debian: libboost-dev
     fedora: boost-devel
-    opensuse: boost-devel
+    opensuse: libboost_headers1_66_0-devel
 
   serialization:
     nix:
@@ -322,6 +320,8 @@ pkgs:
     fedora:
       boost-filesystem
       boost-serialization
+    opensuse:
+      libboost_serialization1_66_0-devel
 
   gmp-pkg:
     nix: gmp-with-cxx
@@ -340,6 +340,8 @@ pkgs:
     fedora:
       - cppunit
       - cppunit-devel
+    opensuse:
+      - cppunit-devel
 
   hdf5:
     nix: hdf5
@@ -349,7 +351,7 @@ pkgs:
   h5py:
     nix: python2.7-h5py-2.6.0
     fedora: h5py
-    debian: python-h5py
+    debian: python3-h5py
 
   h5py3:
     nix: python3.5-h5py-2.6.0
@@ -366,7 +368,10 @@ pkgs:
     fedora:
       - openblas-devel
       - lapack-devel
-
+    opensuse:
+      - openblas-devel
+      - lapacke-devel
+        
   atlas-lapack:
     nix:
       - blas
@@ -428,6 +433,8 @@ pkgs:
       - libscalapack-mpi-dev
       - libmetis-dev
       - libmumps-dev
+      - python3-mpi4py
+
 
     fedora:
       - ptscotch-openmpi
@@ -476,13 +483,6 @@ pkgs:
       - clang-4.9.1
     debian-jessie:
       - clang-3.8
-  # Don't worry, this is a hack to get cppunit to work with clang on ubuntu 15.10, because the system cppunit
-  # has been compiled with a different string impl ...
-  cppunit_clang-3.9:
-    ubuntu-16.04:
-      command:  wget http://siconos.gforge.inria.fr/build-42/cppunit-clang-3.9-ubuntu-16.10.tar.xz &&
-                tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/lib/x86_64-linux-gnu/ lib &&
-                tar xJf cppunit-clang-3.9-ubuntu-16.10.tar.xz --strip-components=1 -C /usr/include/cppunit/ include
 
   # this is for msan. It also contains the so files for cppunit compiled with msan
   libcxx_msan:

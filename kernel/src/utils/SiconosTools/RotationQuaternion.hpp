@@ -94,14 +94,6 @@ void quaternionRotate(double q0, double q1, double q2, double q3, SP::SiconosVec
 void quaternionRotate(double q0, double q1, double q2, double q3, SP::SimpleMatrix m);
 
 /* For a given configuration vector q composed of a position and a quaternion,
- *  performs the rotation of the vector v
- * w.r.t the quaternion that parametrize the rotation in q
- * \param[in] q the position vector
- * \param[in,out] v the vector to be rotated
- */
-void quaternionRotate(SP::SiconosVector q, SP::SiconosVector v);
-
-/* For a given configuration vector q composed of a position and a quaternion,
  * performs the rotation of the matrix m
  * w.r.t the quaternion that parametrize the rotation in q
  * \param[in] q the position vector

@@ -36,7 +36,7 @@
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 //#define TEST_COND
-/* #define OUTPUT_DEBUG */
+#define OUTPUT_DEBUG */
 
 
 /* #define DEBUG_NOCOLOR */
@@ -205,7 +205,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 #ifdef OUTPUT_DEBUG
     FILE * fileout;
     fileout = fopen("dataW.sci", "w");
-    NM_write_in_file_scilab(W, fileout);
+    NM_write_in_file_scilab(localproblem->M, fileout);
     fclose(fileout);
 #endif
 
@@ -317,6 +317,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     Minv->size0 = n;
     Minv->size1 = n;
     Minv->storageType = NM_SPARSE;
+    numerics_printf_verbose(1,"inversion of the matrix M ...");
     NM_inv(M, Minv);
     DEBUG_EXPR(NM_display(Minv););
 
@@ -326,7 +327,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     /* MinvH->matrix2->origin = NSM_TRIPLET; */
     /* DEBUG_EXPR(NM_display(MinvH);); */
     /* NM_gemm(1.0, Minv, H, 0.0, MinvH); */
-
+    numerics_printf_verbose(1,"multiplication  H^T M^{-1} H ...");
     NumericsMatrix* MinvH = NM_multiply(Minv,H);
     DEBUG_EXPR(NM_display(MinvH););
 
@@ -353,6 +354,12 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     localproblem->M = NM_multiply(Htrans,MinvH);
     DEBUG_EXPR(NM_display(localproblem->M););
 
+#ifdef OUTPUT_DEBUG
+    fileout = fopen("dataW.py", "w");
+    NM_write_in_file_python(localproblem->M, fileout);
+    fclose(fileout);
+#endif
+    
     // compute localq = H^T M^(-1) q +b
 
     //Copy localq <- b
@@ -365,11 +372,14 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 
     // compute H^T M^(-1) q + b
     NM_gemv(1.0, Minv, problem->q, 0.0, qtmp);
+    DEBUG_EXPR(NV_display(qtmp,n););
+    DEBUG_EXPR(NV_display(problem->q,n););
     NM_gemv(1.0, Htrans, qtmp, 1.0, localproblem->q);
 
     // Copy mu
     localproblem->mu = problem->mu;
     DEBUG_EXPR(frictionContact_display(localproblem););
+    //getchar();
   }
   else
   {
@@ -503,10 +513,8 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , do
   {
     // Reformulation
     FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-    if (verbose)
-    {
-      printf("Reformulation info a reduced problem onto local variables ...\n");
-    }
+    
+    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
     gfc3d_reformulation_local_problem(problem, localproblem);
     DEBUG_EXPR(frictionContact_display(localproblem););
     if (verbose)

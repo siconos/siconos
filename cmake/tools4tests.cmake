@@ -2,6 +2,266 @@
 #
 # Some cmake macros to deal with tests.
 # =========================================================
+
+#========================================
+# Setup for tests in a given directory
+#
+# 
+# Usage :
+# begin_tests(<SOURCE_DIR> DEPS <dep1> <dep2>)
+#
+# SOURCE_DIR is relative to current component path
+# DEPS is optional and used to add dependencies to <COMPONENT>-test target.
+# Process :
+# - set CURRENT_TEST_DIR (Parent scope) to <SOURCE_DIR>
+# - copy all 'data' files found in <SOURCE_DIR> into <CMAKE_CURRENT_BINARY_DIR>/<SOURCE_DIR>
+# - create a library from test-utils files (if any), named <COMPONENT>-test,
+#   linked (PUBLIC) with <COMPONENT> lib.
+#
+function(begin_tests SOURCE_DIR)
+  
+  set(multiValueArgs DEPS)
+  cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  # Fix current test dir in parent scope.
+  set(CURRENT_TEST_DIR ${SOURCE_DIR} PARENT_SCOPE)
+  
+  if(CROSSCOMPILING_LINUX_TO_WINDOWS)
+    set(EMULATOR "wine")
+  else()
+    set(EMULATOR "")
+  endif()
+  
+  # find and copy data files in SOURCE_DIR (*.mat, *.dat and *.xml, ...) into test directory
+  file(GLOB_RECURSE _DATA_FILES 
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.mat
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.dat
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.hdf5
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.npz
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.xml
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.DAT
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.INI
+    ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/*.ref)
+
+  # Copy data files from source to binary
+  foreach(_F IN LISTS _DATA_FILES)
+    #  log results into TESTS_LOGFILE
+    file(APPEND ${TESTS_LOGFILE} "Found ref file : ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/${_F} \n")
+    file(APPEND ${TESTS_LOGFILE} "Configuring file : ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_DIR}/${_F}\n")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}/${_F} ${CMAKE_CURRENT_BINARY_DIR}/${SOURCE_DIR}/${_F} COPYONLY)
+  endforeach()
+
+  # If a directory *-utils is found, its content is used
+  # to create a <COMPONENT>-test library.
+  if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
+    file(GLOB_RECURSE TEST_UTILS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils/*.[ch])
+    if(NOT TARGET ${COMPONENT}-test) 
+      # Create the target ...
+      add_library(${COMPONENT}-test SHARED ${TEST_UTILS_SOURCES})
+    else()
+      # or just append sources if it already exists.
+      target_sources(${COMPONENT}-test PRIVATE ${TEST_UTILS_SOURCES})
+    endif()
+
+    # local includes, to build <component>-test only
+    target_include_directories(${COMPONENT}-test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
+    target_link_libraries(${COMPONENT}-test PUBLIC ${COMPONENT})
+    # All include dirs from component are taken into account in ${COMPONENT}-lib (and so propagated to tests)
+    foreach(dir IN LISTS ${COMPONENT}_DIRS)
+      target_include_directories(${COMPONENT}-test PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
+    endforeach()
+
+    # Link with extra deps, if any
+    foreach(libtarget IN LISTS TEST_DEPS)
+      target_link_libraries(${COMPONENT}-test PRIVATE ${libtarget})
+    endforeach()
+
+  endif()
+  
+endfunction()
+
+macro(test_windows_setup test_name test_sources)
+
+  # Use the proper linker for the proper language
+  # fortran -> gfortran; {c,cpp} -> link.exe
+  if(BUILD_AS_CPP)
+    set(EXE_FORTRAN FALSE) # Windows only
+    foreach(_file IN LISTS ${test_sources)
+      if(${_file} MATCHES "[.]c$")
+        set_source_files_properties(${_file} PROPERTIES LANGUAGE CXX)
+      endif()
+      if(${_file} MATCHES "[.]f$")
+        set(EXE_FORTRAN TRUE) # Windows only
+      endif()
+    endforeach()
+  endif()
+  # Windows stuff ...
+  if(MSVC AND EXE_FORTRAN)
+    target_link_options(${test_name} "LINKER:--as-needed")
+    if(NOT V2)
+      target_link_options(${_EXE} "LINKER:--subsystem,console")
+      set(CMAKE_CREATE_CONSOLE_EXE "")
+      # Note FP : this variable does not exist anymore in CMake.
+      # What was it used for??
+    endif()
+    # Linker flags to be used to create executables.
+    SET(CMAKE_EXE_LINKER_FLAGS "")
+    SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "")
+    SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "")
+    SET(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "")
+  endif()
+
+endmacro()
+
+
+
+# ========================================
+# Add a test into the ctest suite.
+#
+# Usage :
+# new_test(NAME <name> SOURCES <sources list> DEPS <dependencies list> DATA <data files list)
+#
+# required : SOURCES
+# others are optional.
+#
+# Process:
+# - Copy data files to binary dir
+# - Create executable from sources list
+# - link (PRIVATE) executable with <COMPONENT> lib
+# - add <COMPONENT> includes to executable (PRIVATE)
+# - link (PRIVATE) executable with all libs in DEPS
+# - link (PRIVATE) executable with <COMPONENT>-test (if it exists)
+# - add a test (ctest) named <name>. If NAME is not set, use name of first source file (without ext).
+# ========================================
+function(new_test_1)
+  set(oneValueArgs NAME)
+  set(multiValueArgs SOURCES DATA DEPS)
+  cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  # -- set test name --
+  # If not set in input args, we choose first source file name without extension.
+  if(NOT TEST_NAME)
+    list(GET TEST_SOURCES 0 TEST_NAME)
+    get_filename_component(TEST_NAME ${TEST_NAME} NAME_WE)
+  endif()
+
+  # -- log --
+  file(APPEND ${TESTS_LOGFILE} "Add test ${CURRENT_TEST_DIR}/${TEST_NAME} \n")
+
+  # -- Check if data files are required --
+  # If so, copy the corresponding file into the working directory
+  if(TEST_DATA)
+    foreach(_datafile IN LISTS TEST_DATA)
+      file(APPEND ${TESTS_LOGFILE} "Copy data file : ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${_datafile} \n")
+      configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${_datafile}
+        ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${_datafile} COPYONLY
+        )
+    endforeach()
+  endif()
+ 
+  # ---- Build test executable and set its properties ----
+  # Req : test sources
+  # !!! WARNING !!!
+  # Consider known limitations for Windows written
+  # here https://cmake.org/cmake/help/v3.13/prop_dir/COMPILE_DEFINITIONS.html
+  
+  foreach(source_file IN LISTS TEST_SOURCES)
+    # If source file path is not absolute, prepend current dir
+    if(NOT IS_ABSOLUTE ${source_file})
+      set(source_file ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${source_file})
+    endif()
+    list(APPEND TEST_SOURCES_ABSPATH ${source_file})
+  endforeach()
+  
+  if(CROSSCOMPILING_LINUX_TO_WINDOWS)
+    add_executable(${TEST_NAME} WIN32 ${TEST_SOURCES_ABSPATH})
+  else()
+    add_executable(${TEST_NAME} ${TEST_SOURCES_ABSPATH})
+  endif()
+  set_target_properties(${TEST_NAME} PROPERTIES COMPILE_DEFINITIONS "EMULATOR=\"${EMULATOR}\";WRAPPER=\"\"")
+  # Set path where exe should be generated
+  set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/)
+
+  test_windows_setup(${TEST_NAME} ${TEST_SOURCES})
+
+  # -- link with current component and its dependencies --
+  # --> add include and links
+  target_link_libraries(${TEST_NAME} PRIVATE ${COMPONENT})
+  foreach(dir IN LISTS ${COMPONENT}_DIRS)
+    target_include_directories(${TEST_NAME} PRIVATE
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
+  endforeach()
+
+  # Link with extra deps (set for each test in new_test call)
+  foreach(libtarget IN LISTS TEST_DEPS)
+    target_link_libraries(${TEST_NAME} PRIVATE ${libtarget})
+  endforeach()
+
+  # -- link with (optional) component-test lib.
+  # At the time, only numerics used such a lib.
+  if(TARGET ${COMPONENT}-test)
+    target_link_libraries(${TEST_NAME} PRIVATE ${COMPONENT}-test)
+  endif()
+  if(WITH_CXX)
+    set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+  endif()
+  
+  if (LDLIBPATH)
+    set_target_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
+  endif()
+
+  # ---- The exe is ready, let's turn to test(s) ----
+  # -- set test command --
+  set(command ${TEST_NAME})
+  if(CMAKE_SYSTEM_NAME MATCHES Windows)
+    set(command ${command}".exe")
+  endif()
+
+  # Add the test in the pipeline
+  add_test(NAME ${TEST_NAME} COMMAND ${command} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR})
+  set_siconos_test_properties(NAME ${TEST_NAME})
+  
+endfunction()
+
+function(set_siconos_test_properties)
+  set(oneValueArgs NAME)
+  set(multiValueArgs PROPERTIES)
+  cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  # if the test output matches one of specified expressions below, the test will fail
+  #set_tests_properties(${TEST_NAME} PROPERTIES
+  #  FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;test unsucceeded")
+  if (LDLIBPATH)
+    set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
+  endif()
+  
+  set(LOCAL_USE_SANITIZER "@USE_SANITIZER@")
+  if(LOCAL_USE_SANITIZER MATCHES "asan")
+    set_property(TEST ${TEST_NAME} APPEND PROPERTY ENVIRONMENT ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS})
+    set_property(TEST ${TEST_NAME} APPEND PROPERTY ENVIRONMENT LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS})
+  endif()
+  
+  # Extra tests properties (set in <component>_tests.cmake)
+  if(TEST_PROPERTIES)
+    set_tests_properties(${TEST_NAME} PROPERTIES "${TEST_PROPERTIES}")
+  endif()
+  
+  # Test timer
+  set_tests_properties(${TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
+  
+endfunction()
+
+
+
+
+
+
+
+
+
 MACRO(BEGIN_TEST _D)
   SET(_CURRENT_TEST_DIRECTORY ${_D})
   FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${_D})
@@ -89,34 +349,6 @@ MACRO(NEW_TEST)
   ENDIF(TEST_MAIN)
 
 ENDMACRO(NEW_TEST)
-
-# Removal of a siconos test (test fails or takes forever)
-# Warning: the test is still compiled
-MACRO(RM_TEST)
-  CAR(_EXE ${ARGV})
-  CDR(_SOURCES ${ARGV})
-  LIST(REMOVE_ITEM _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${_EXE})
-ENDMACRO(RM_TEST)
-
-MACRO(RM_TEST2)
-  SET(TEST_SOLVER ${ARGV0})
-  SET(TEST_DATA ${ARGV1})
-
-  SET(TEST_SBM ${ARGV2})
-  SET(TEST_SBM_C "_SBM")
-  IF(NOT DEFINED TEST_SBM)
-    SET(TEST_SBM 0)
-    SET(TEST_SBM_C "")
-  ENDIF(NOT DEFINED TEST_SBM)
-
-  STRING(REGEX REPLACE SICONOS_ "" TEST_SOLVER_NAME ${TEST_SOLVER})
-  STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
-  SET(TEST_EXE ${TEST_SOLVER_NAME}${TEST_SBM_C})
-  SET(TEST_NAME "test-${TEST_SOLVER_NAME}-${TEST_DATA_NAME}${TEST_SBM_C}")
-
-  LIST(REMOVE_ITEM ${TEST_EXE}_DATA_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_DATA})
-  LIST(REMOVE_ITEM ${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-ENDMACRO(RM_TEST2)
 
 # ====- Generate test file for 3D Fricton Contact Problem =====
 # Source file used to generate tests is fctest.c.in
@@ -403,15 +635,6 @@ macro(NEW_FC_3D_TEST_HDF5)
 endmacro()
 
 
-macro(NEW_FC_2D_TEST)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME fc_test.c.in )
-  set(TEST_NAME_PREFIX fc2d)
-  NEW_FC_TEST(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
 macro(NEW_FC_2D_TEST_COLLECTION)
   # Set name of the file used to generate tests (c)source files.
   set(SOURCE_FILE_NAME fc_test_collection.c.in )
@@ -425,15 +648,6 @@ endmacro()
 macro(NEW_GFC_3D_TEST)
   # Set name of the file used to generate tests (c)source files.
   set(SOURCE_FILE_NAME gfc3d_test.c.in )
-  set(TEST_NAME_PREFIX gfc3d)
-  NEW_FC_TEST(${ARGV})
-  unset(SOURCE_FILE_NAME)
-  unset(TEST_NAME_PREFIX)
-endmacro()
-
-macro(NEW_GFC_3D_TEST_HDF5)
-  # Set name of the file used to generate tests (c)source files.
-  set(SOURCE_FILE_NAME gfc3d_test_hdf5.c.in )
   set(TEST_NAME_PREFIX gfc3d)
   NEW_FC_TEST(${ARGV})
   unset(SOURCE_FILE_NAME)
@@ -459,50 +673,6 @@ macro(NEW_RFC_3D_TEST_COLLECTION)
   unset(SOURCE_FILE_NAME)
   unset(TEST_NAME_PREFIX)
 endmacro()
-
-MACRO(NEW_PB_TEST)
-  SET(FILE_TO_CONF ${ARGV0})
-  SET(TEST_SOLVER ${ARGV1})
-  SET(TEST_DATA ${ARGV2})
-
-  SET(TEST_SBM ${ARGV3})
-  SET(TEST_SBM_C "_SBM")
-  SET(TEST_SBM_PREFIX "LCP_NSGS_SBM_")
-  
-  IF(NOT DEFINED TEST_SBM)
-    SET(TEST_SBM 0)
-    SET(TEST_SBM_C "")
-    SET(TEST_SBM_PREFIX "")
-  ENDIF(NOT DEFINED TEST_SBM)
-
-
-  STRING(REGEX REPLACE SICONOS_ "" TEST_SOLVER_NAME ${TEST_SOLVER})
-  STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
-
-  SET(TEST_EXE ${TEST_SBM_PREFIX}${TEST_SOLVER_NAME}${TEST_SBM_C})
-  SET(TEST_NAME "test_${TEST_SBM_PREFIX}${TEST_SOLVER_NAME}_${TEST_DATA_NAME}")
-  STRING(TOLOWER ${TEST_NAME} TEST_NAME)
-
-  LIST(FIND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_EXE} ALREADY_CONF)
-  IF(ALREADY_CONF EQUAL -1)
-    SET(${TEST_EXE}_FSOURCES)
-
-    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/${FILE_TO_CONF}${TEST_SBM_C}.c.in
-      ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_EXE}.c)
-    LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_EXE})
-    LIST(APPEND ${TEST_EXE}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_EXE}.c)
-    SET(${TEST_EXE}_DATA_LIST_${_CURRENT_TEST_DIRECTORY})
-    SET(${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY})
-  ENDIF(ALREADY_CONF EQUAL -1)
-
-  LIST(APPEND ${TEST_EXE}_DATA_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_DATA})
-  LIST(APPEND ${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-
-ENDMACRO(NEW_PB_TEST)
-
-MACRO(NEW_LCP_TEST)
-  NEW_PB_TEST(lcptest ${ARGV})
-ENDMACRO(NEW_LCP_TEST)
 
 MACRO(NEW_LCP_TEST_1)
 
@@ -533,14 +703,6 @@ MACRO(NEW_LCP_TEST_COLLECTION)
   unset(TEST_NAME_PREFIX)
 endmacro()
 
-
-
-
-
-
-MACRO(NEW_RELAY_TEST)
-  NEW_PB_TEST(relaytest ${ARGV})
-ENDMACRO(NEW_RELAY_TEST)
 
 MACRO(NEW_RELAY_TEST_1)
 
@@ -589,85 +751,6 @@ MACRO(NEW_NCP_TEST)
   SET(${TEST_EXE}_NAME_LIST_${_CURRENT_TEST_DIRECTORY})
 ENDMACRO(NEW_NCP_TEST)
 
-MACRO(NEW_LS_TEST)
-  SET(TEST_SOLVER ${ARGV0})
-  SET(TEST_DATA ${ARGV1})
-
-  SET(TEST_SBM ${ARGV2})
-  SET(TEST_SBM_C "SBM")
-  IF(NOT DEFINED TEST_SBM)
-    SET(TEST_SBM 0)
-    SET(TEST_SBM_C "")
-  ENDIF(NOT DEFINED TEST_SBM)
-    
-  STRING(REGEX REPLACE SICONOS_ "" TEST_SOLVER_NAME ${TEST_SOLVER})
-  STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
-
-  SET(TEST_NAME "test-${TEST_SOLVER_NAME}-${TEST_DATA_NAME}${TEST_SBM_C}")
-
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/lstest.c.in 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-  SET(${TEST_NAME}_FSOURCES)
-
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-ENDMACRO(NEW_LS_TEST)
-
-MACRO(NEW_GMP_TEST)
-  SET(TEST_SOLVER ${ARGV0})
-  SET(TEST_DATA ${ARGV1})
-  SET(TEST_GMP_REDUCED 1)
-  
-  SET(TEST_TOLERANCE ${ARGV2})
-  IF(NOT DEFINED TEST_TOLERANCE)
-    SET(TEST_TOLERANCE 0)
-  ENDIF(NOT DEFINED TEST_TOLERANCE)
-  
-  SET(TEST_MAXITER ${ARGV3})
-  IF(NOT DEFINED TEST_MAXITER)
-    SET(TEST_MAXITER 0)
-  ENDIF(NOT DEFINED TEST_MAXITER)
-  
-  SET(TEST_INTERNAL_SOLVER ${ARGV4})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER)
-    SET(TEST_INTERNAL_SOLVER 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER)
-  
-  SET(TEST_INTERNAL_SOLVER_TOLERANCE ${ARGV5})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER_TOLERANCE)
-    SET(TEST_INTERNAL_SOLVER_TOLERANCE 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER_TOLERANCE)
-  
-  SET(TEST_INTERNAL_SOLVER_MAXITER ${ARGV6})
-  IF(NOT DEFINED TEST_INTERNAL_SOLVER_MAXITER)
-    SET(TEST_INTERNAL_SOLVER_MAXITER 0)
-  ENDIF(NOT DEFINED TEST_INTERNAL_SOLVER_MAXITER)
-
-  SET(TEST_GMP_REDUCED ${ARGV7})
-  IF(NOT DEFINED TEST_GMP_REDUCED)
-    SET(TEST_GMP_REDUCED 0)
-  ENDIF(NOT DEFINED TEST_GMP_REDUCED)
-  
-  STRING(REGEX REPLACE SICONOS_FRICTION_ "" TEST_SOLVER_NAME "REDUCED" ${TEST_GMP_REDUCED}_ ${TEST_SOLVER})
-  STRING(REGEX REPLACE SICONOS_FRICTION_ "" TEST_INTERNAL_SOLVER_NAME ${TEST_INTERNAL_SOLVER})
-  STRING(REGEX REPLACE "0" "" TEST_INTERNAL_SOLVER_NAME ${TEST_INTERNAL_SOLVER_NAME})
-  STRING(REGEX REPLACE "\\.dat" "" TEST_DATA_NAME ${TEST_DATA})
-
-  SET(TEST_NAME "test-GMP-${TEST_SOLVER_NAME}${TEST_INTERNAL_SOLVER_NAME}-${TEST_DATA_NAME}")
-
-  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/cmake/gmptest.c.in 
-    ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-  SET(${TEST_NAME}_FSOURCES)
-
-  LIST(APPEND _EXE_LIST_${_CURRENT_TEST_DIRECTORY} ${TEST_NAME})
-  LIST(APPEND ${TEST_NAME}_FSOURCES ${CMAKE_CURRENT_BINARY_DIR}/${_CURRENT_TEST_DIRECTORY}/${TEST_NAME}.c)
-
-ENDMACRO(NEW_GMP_TEST)
-
-
 MACRO(NEW_GMP_TEST_1)
 
   # check input file name
@@ -687,7 +770,7 @@ MACRO(NEW_GMP_TEST_1)
 
 ENDMACRO(NEW_GMP_TEST_1)
 
-MACRO(NEW_GMP_TEST_COLLECTION)
+macro(NEW_GMP_TEST_COLLECTION)
   # Set name of the file used to generate tests (c)source files.
   set(SOURCE_FILE_NAME gmp_test_collection.c.in )
   set(TEST_NAME_PREFIX gmp)
@@ -696,10 +779,6 @@ MACRO(NEW_GMP_TEST_COLLECTION)
   unset(SOURCE_FILE_NAME)
   unset(TEST_NAME_PREFIX)
 endmacro()
-
-
-
-
 
 
 
@@ -712,14 +791,20 @@ ENDMACRO(END_TEST)
 # Build plugins required for python tests
 macro(build_plugin plug)
   get_filename_component(plug_name ${plug} NAME_WE)
-  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/)
   add_library(${plug_name} MODULE ${plug})
+  target_include_directories(${plug_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/)
+
   set_property(TARGET ${plug_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_target_properties(${plug_name} PROPERTIES PREFIX "")
   add_dependencies(${COMPONENT} ${plug_name})
   if(NOT WITH_CXX)
     set_source_files_properties(${plug} PROPERTIES LANGUAGE C)
   endif(NOT WITH_CXX)
+  if(WITH_MPI)
+    # Note FP : temporary fix, to deal with PRIVATE deps of some components.
+    # This will be reviewed later.
+    target_include_directories(${plug_name} PRIVATE ${MPI_C_INCLUDE_DIRS})
+  endif()
 endmacro()
 
 # ----------------------------------------

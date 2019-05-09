@@ -1,7 +1,7 @@
 #!@PYTHON_EXECUTABLE@
 # -*- coding: utf-8 -*-
 #
-# @PROJECT_NAME_CAP@ documentation build configuration file, created by
+# Siconos documentation build configuration file, created by
 # sphinx-quickstart on Mon Mar 19 15:11:43 2018.
 #
 # This file is execfile()d with the current directory set to its
@@ -158,7 +158,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'@PROJECT_NAME_CAP@'
+project = u'Siconos'
 copyright = u@YEAR@ + u' - Siconos development team'
 author = u'Siconos development team'
 

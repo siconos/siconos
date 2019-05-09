@@ -34,10 +34,14 @@
 #include "SiconosLapack.h"
 #include "numerics_verbose.h"
 #include "sanitizer.h"
-/* /\* #define DEBUG_NOCOLOR *\/ */
+/* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
+
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
 
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"
@@ -2924,8 +2928,12 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
 
     for( int col_rhs =0; col_rhs < A->size1; col_rhs++ )
     {
-      if (col_rhs >0) b[col_rhs-1] = 0.0;
+      for (int i = 0; i < A->size0; ++i)
+      {
+        b[i]=0.0;
+      }
       b[col_rhs] = 1.0;
+      DEBUG_EXPR(NV_display(b,A->size1););
       //info = NM_gesv_expert(Atmp, b, NM_PRESERVE);
       info = NM_gesv_expert(Atmp, b, NM_KEEP_FACTORS);
 

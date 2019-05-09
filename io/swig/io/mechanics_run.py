@@ -1914,6 +1914,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
         self._interman = interaction_manager(options)
 
+        if hasattr(self._interman, 'useEqualityConstraints') and len(self.joints())==0:
+            self._interman.useEqualityConstraints(False)
+
         # (0) NonSmooth Dynamical Systems definition
         self._nsds=NonSmoothDynamicalSystem(t0, T)
         nsds=self._nsds

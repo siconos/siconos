@@ -25,7 +25,7 @@
 int main(int argc, char *argv[])
 {
 
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
   return info;
 
-#ifdef HAVE_MPI
+#ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
 

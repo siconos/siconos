@@ -21,19 +21,19 @@
 #
 #====================================================================================
 # Set minimum version for cmake
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.7)
 
 # Check path to the current install of @PROJECT_NAME@.
-set(@PROJECT_NAME@_ROOT_DIR @CMAKE_INSTALL_PREFIX@)
+set(siconos_ROOT_DIR @CMAKE_INSTALL_PREFIX@)
 
 # Set cmake modules directory (i.e. the one which contains all user-defined FindXXX.cmake files among other things)
-set(CMAKE_MODULE_PATH ${@PROJECT_NAME@_ROOT_DIR}/share/@PROJECT_NAME@/cmake)
+set(CMAKE_MODULE_PATH ${siconos_ROOT_DIR}/@ConfigPackageLocation@)
 include(SiconosTools)
 
-# Search @PROJECT_NAME@ package components
-# without @PROJECT_NAME@_DIR, the search for the config fails with a custom prefix
-set(@PROJECT_NAME@_DIR ${@PROJECT_NAME@_ROOT_DIR}/share/@PROJECT_NAME@/cmake)
-find_package(@PROJECT_NAME@ @MAJOR_VERSION@.@MINOR_VERSION@.@PATCH_VERSION@ CONFIG REQUIRED)
+# Search siconos package components
+# without siconos_DIR, the search for the config fails with a custom prefix
+set(siconos_DIR ${siconos_ROOT_DIR}/@ConfigPackageLocation@)
+find_package(siconos @MAJOR_VERSION@.@MINOR_VERSION@.@PATCH_VERSION@ CONFIG REQUIRED)
 
 # === Check required inputs ===
 # Get the name of the main file => name of the executable
@@ -42,9 +42,9 @@ if(NOT MAIN_SOURCE)
 endif()
 
 # use variables to avoid warnings
-# - CALL_PWD : path from which @PROJECT_NAME@ script is run (set in siconos.py)
-# - COMMAND_LINE_LINKER_OPTIONS : extra options set during call to @PROJECT_NAME@.py
-# - LINKER_LIBRARIES : extra libraries to be linked with, set during call to @PROJECT_NAME@.py
+# - CALL_PWD : path from which siconos script is run (set in siconos.py)
+# - COMMAND_LINE_LINKER_OPTIONS : extra options set during call to siconos.py
+# - LINKER_LIBRARIES : extra libraries to be linked with, set during call to siconos.py
 set(_use_ ${CALL_PWD};${COMMAND_LINE_LINKER_OPTIONS};${LINKER_LIBRARIES})
 
 # install target tracker
@@ -65,17 +65,17 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # =========== Build type ===========
-# if not specified, same as @PROJECT_NAME@ install
+# if not specified, same as siconos install
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE @CMAKE_BUILD_TYPE@)
 endif()
 
-# compiler selection : same as @PROJECT_NAME@ install
+# compiler selection : same as siconos install
 set(CMAKE_CXX_COMPILER "@CMAKE_CXX_COMPILER@")
 set(CMAKE_C_COMPILER "@CMAKE_C_COMPILER@")
 set(CMAKE_Fortran_COMPILER "@CMAKE_Fortran_COMPILER@")
 
-# compile time flags : same as @PROJECT_NAME@ install
+# compile time flags : same as siconos install
 set(CMAKE_CXX_FLAGS "@CMAKE_CXX_FLAGS@")
 set(CMAKE_C_FLAGS "@CMAKE_C_FLAGS@")
 set(CMAKE_Fortran_FLAGS "@CMAKE_FORTRAN_FLAGS@")
@@ -119,17 +119,18 @@ endif(_EXE)
 
 # --- External libraries setup ---
 # For a given target:
-# - link the target with the external libraries on which @PROJECT_NAME@ depends
+# - link the target with the external libraries on which siconos depends
 # - link the target with user-defined libraries (from option LINKER_LIBRARIES)
 # - add link flags (from option COMMAND_LINE_LINKER_OPTIONS)
 #
 macro(link_setup _TARGET)
-  # link with libraries required by @PROJECT_NAME@
-  target_link_libraries(${_TARGET} ${PRIVATE} ${${PACKAGE_NAME}_LIBRARIES})
-
+  # link with Siconos components
+  foreach(comp IN LISTS installed_targets)
+    target_link_libraries(${_TARGET} PRIVATE Siconos::${comp})
+  endforeach()
   # link with user-defined libraries
   foreach(_L ${LINKER_LIBRARIES})
-    target_link_libraries(${_TARGET} ${PRIVATE} ${_L})
+    target_link_libraries(${_TARGET} PRIVATE ${_L})
   endforeach()
 
   set(_LINKER_OPTIONS "@SICONOS_DEFAULT_LINKER_OPTIONS@")
@@ -143,7 +144,7 @@ endmacro()
 # === Include dirs ===
 # Required for 'exe' and for plugins
 #
-# Set include directory for @PROJECT_NAME@ headers and external libraries headers
+# Set include directory for siconos headers and external libraries headers
 include_directories(${${PACKAGE_NAME}_INCLUDE_DIRECTORIES})
 
 # === Path to user-defined external libraries ===
