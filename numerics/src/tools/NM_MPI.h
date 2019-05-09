@@ -34,7 +34,7 @@ void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm);
   do                                                                    \
   {                                                                     \
     int error_code = EXPR;                                              \
-    MPI_Errhandler_set(COMM, MPI_ERRORS_RETURN);                        \
+    MPI_Comm_set_errhandler(COMM, MPI_ERRORS_RETURN);                   \
     if (error_code != MPI_SUCCESS) {                                    \
       char error_string[1024];                                          \
       int length_of_error_string, error_class;                          \
