@@ -15,6 +15,7 @@ import numpy as np
 import h5py
 import bisect
 import time
+import shutil
 
 
 import tempfile
@@ -718,8 +719,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                  osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None, collision_margin=None,
                  use_compression=False, output_domains=False, verbose=True):
-        super(MechanicsHdf5Runner, self).__init__(io_filename, mode,
-                                             use_compression, output_domains, verbose)
+        super(MechanicsHdf5Runner, self).__init__(io_filename, mode, None,
+                                                  use_compression, output_domains, verbose)
         self._interman = interaction_manager
         self._nsds = nsds
         self._simulation = simulation
@@ -737,6 +738,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._gravity_scale = gravity_scale
         self._collision_margin = collision_margin
         self._output_frequency = 1
+        self._output_backup_frequency = 1
         self._keep = []
         self._scheduled_births = []
         self._scheduled_deaths = []
@@ -1823,6 +1825,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             verbose=True,
             verbose_progress=True,
             output_frequency=None,
+            output_backup=False,
+            output_backup_frequency=None,
             friction_contact_trace=False,
             friction_contact_trace_params=None,
             contact_index_set=1,
@@ -1879,6 +1883,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if output_frequency is not None:
             self._output_frequency=output_frequency
+
+        if output_backup_frequency is not None:
+            self._output_backup_frequency=output_backup_frequency
+
+
+
+        if output_backup is not None:
+            self._output_backup=output_backup
 
         if gravity_scale is not None:
             self._gravity_scale=gravity_scale
@@ -2151,6 +2163,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 log(self.output_solver_infos, with_timer)()
 
                 log(self._out.flush)()
+
+
+            if (self._output_backup and (k % self._output_backup_frequency== 0)) or (k == 1):
+                shutil.copyfile(self._io_filename, self._io_filename_backup)
 
             log(simulation.clearNSDSChangeLog, with_timer)()
 

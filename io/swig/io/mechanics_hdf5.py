@@ -450,13 +450,21 @@ class MechanicsHdf5(object):
     to be executed by MechanicsRunner.
     """
 
-    def __init__(self, io_filename=None, mode='w',
+    def __init__(self, io_filename=None, mode='w', io_filename_backup=None,
                  use_compression=False, output_domains=False, verbose=True):
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
                 os.path.splitext(os.path.basename(sys.argv[0]))[0])
         else:
             self._io_filename = io_filename
+
+        if io_filename_backup is None:
+            self._io_filename_backup = '{0}_last.hdf5'.format(
+                os.path.splitext(self._io_filename) [0])
+        else:
+            self._io_filename_backup= io_filename_backup
+
+        self._output_backup=False
         self._mode = mode
         self._static_data = None
         self._velocities_data = None
