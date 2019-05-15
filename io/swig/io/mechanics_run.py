@@ -1934,7 +1934,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
         self._interman = interaction_manager(options)
 
-        if hasattr(self._interman, 'useEqualityConstraints') and len(self.joints())==0:
+        joints = list(self.joints())
+        if hasattr(self._interman, 'useEqualityConstraints') and len(joints)==0:
             self._interman.useEqualityConstraints(False)
 
         # (0) NonSmooth Dynamical Systems definition
@@ -1969,7 +1970,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # For the moment, the nslaw is implicitely added when we import_joint but is not stored
         # self._nslaws_data
 
-        joints=list(self.joints())
         if len(joints) > 0:
             nslaw_type_list.append('EqualityConditionNSL')
 
