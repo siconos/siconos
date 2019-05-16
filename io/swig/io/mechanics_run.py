@@ -1,4 +1,4 @@
-
+ 
 # Mechanics IO
 
 """Run a pre-configured Siconos "mechanics" HDF5 file."""
@@ -768,11 +768,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     print('[io.mechanics]|-->end {0:44s} ...'.
                           format(fun.__name__), end='', flush=True)
                 print('..... {0:6.2e} s'.format(endt))
+                siconos.io.mechanics_hdf5.group(self.log_data(), fun.__name__)
                 siconos.io.mechanics_hdf5.add_line(
-                    siconos.io.mechanics_hdf5.data(self.log_data()[str(fun)],
-                                                   'timing', 1))
-                current_log = self.log_data()[str(fun)].shape[0] - 1
-                self.log_data()[str(fun)][current_log, 0] = endt
+                    siconos.io.mechanics_hdf5.data(self.log_data()[fun.__name__],
+                                                   'timing', 1), endt)
                 return output
             return logged
         else:
