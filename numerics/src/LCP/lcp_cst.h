@@ -57,7 +57,18 @@ enum SICONOS_LCP_IPARAM
   /** index in iparam to store type of pivoting methods */
   SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE =3,
   /** index in iparam to skip trivial solution */
-  SICONOS_LCP_IPARAM_SKIP_TRIVIAL =12,
+  SICONOS_LCP_IPARAM_SKIP_TRIVIAL =4,
+  /** index in iparam to store the number of solutions */
+  SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS =5,
+  /** index in iparam to store  the current enum */
+  SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM =6,
+  /** index in iparam to store the seed for starting enum*/
+  SICONOS_LCP_IPARAM_ENUM_SEED =7,
+  /** index in iparam to store the first seed for enum */
+  SICONOS_LCP_IPARAM_ENUM_USE_DGELS =8,
+  /** index in iparam to store to activate multiple solutions search */
+  SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS =9
+
 };
 
 

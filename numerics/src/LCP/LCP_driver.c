@@ -93,8 +93,8 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
         w[j] = q[j];
       }
       info = 0;
-      options->iparam[1] = 0;   /* Number of iterations done */
-      options->dparam[1] = 0.0; /* Error */
+      options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;   /* Number of iterations done */
+      options->dparam[SICONOS_DPARAM_RESIDU] = 0.0; /* Error */
       if (verbose > 0)
         printf("LCP_driver_SparseBlockMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
       DEBUG_END("lcp_driver_SparseBlockMatrix(...)\n");

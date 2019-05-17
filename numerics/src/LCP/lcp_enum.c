@@ -152,7 +152,7 @@ int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* op
 int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options)
 {
   int aux = 3 * (problem->size) + (problem->size) * (problem->size);
-  if (options->iparam[4])
+  if (options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS])
   {
     LWORK = -1;
     //int info = 0;
@@ -199,12 +199,12 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   lapack_int * ipiv;
   int check;
   lapack_int LAinfo = 0;
-  int useDGELS = options->iparam[4];
+  int useDGELS = options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS];
 
   /*OUTPUT param*/
-  sCurrentEnum = options->iparam[3];
-  tol = options->dparam[0];
-  int multipleSolutions = options->iparam[0];
+  sCurrentEnum = options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED];
+  tol = options->dparam[SICONOS_DPARAM_TOL];
+  int multipleSolutions = options->iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS];
   int numberofSolutions = 0;
 
 
@@ -307,8 +307,8 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
 
 
         lcp_fillSolution(z, w, sSize, sWZ, sQ);
-        options->iparam[1] = (int) sCurrentEnum - 1;
-        options->iparam[2] = numberofSolutions;
+        options->iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM ] = (int) sCurrentEnum - 1;
+        options->iparam[SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS] = numberofSolutions;
         if (!multipleSolutions)  return;
       }
     }
@@ -332,8 +332,8 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   for (i = 0; i < 5; i++)
@@ -352,7 +352,7 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
     options->iWork = NULL;
   }
 
-  options->dparam[0] = 1e-12;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
 
 
 

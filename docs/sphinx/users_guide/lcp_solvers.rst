@@ -193,12 +193,12 @@ function: :func:`lcp_enum()`
 
 parameters:
 
-* iparam[0] (in): search for multiple solutions if 1
-* iparam[1] (out): key of the solution
-* iparam[1] (out): number of solutions
-* iparam[3] (in):  starting key values (seed)
-* iparam[4] (in):  use DGELS (1) or DGESV (0).
-* dparam[0] (in): tolerance
+* iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS] (in): search for multiple solutions if 1
+* iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM] (out): key of the solution
+* iparam[SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS] (out): number of solutions
+* iparam[SICONOS_LCP_IPARAM_ENUM_SEED] (in):  starting key values (seed)
+* iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS] (in):  use DGELS (1) or DGESV (0).
+* dparam[SICONOS_DPARAM_TOL] (in): tolerance
 
 Latin Solver
 ------------
