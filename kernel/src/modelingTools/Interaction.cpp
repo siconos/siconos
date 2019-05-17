@@ -163,9 +163,17 @@ struct Interaction::_setLevels : public SiconosVisitor
       _interaction->setUpperLevelForInput(1);
 
     }
+    else if (relationType == FirstOrder)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(0);
+
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(0);
+    }
     else
     {
-	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
     ;
   }
