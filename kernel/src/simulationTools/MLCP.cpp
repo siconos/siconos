@@ -209,7 +209,8 @@ int MLCP::compute(double time)
 void MLCP::display() const
 {
   std::cout << "======= MLCP of size " << _sizeOutput << " with: " <<std::endl;
-  std::cout << "======= m " << _m << " _n " << _n <<std::endl;
+  std::cout << " m (number of inequality constraints)" << _m <<std::endl;
+  std::cout << " n (number of equality constraints)  " << _n <<std::endl;
   LinearOSNS::display();
 }
 
