@@ -87,11 +87,11 @@ int lcp_test_function(FILE * f, int solverId, char* filename)
 
   if (!info)
   {
-    printf("test succeeded err = %e \n", options.dparam[1]);
+    printf("test succeeded err = %e \n", options.dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful err =%e  \n", options.dparam[1]);
+    printf("test unsuccessful err =%e  \n", options.dparam[SICONOS_DPARAM_RESIDU]);
   }
   free(z);
   free(w);
@@ -155,11 +155,11 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
   if (!info)
   {
-    printf("test succeeded err=%e \n", options->dparam[1]);
+    printf("test succeeded err=%e \n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful err =%e \n", options->dparam[1]);
+    printf("test unsuccessful err =%e \n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   free(z);
   free(w);

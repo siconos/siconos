@@ -43,8 +43,8 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
   lapack_int info2 = 0;
   int itt, it_end;
   int incx, incy;
-  int itermax = options->iparam[0];
-  double tol = options->dparam[0];
+  int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
   double k_latin = options->dparam[2];
   double alpha, beta;
   double err1;
@@ -68,8 +68,8 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
 
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Allocations */
 
@@ -351,8 +351,8 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
 
     iter1  = iter1 + 1;
 
-    options->iparam[1] = it_end;
-    options->dparam[1] = res;
+    options->iparam[SICONOS_IPARAM_ITER_DONE] = it_end;
+    options->dparam[SICONOS_DPARAM_RESIDU] = res;
 
   }
 
@@ -426,8 +426,8 @@ int linearComplementarity_latin_setDefaultSolverOptions(SolverOptions* options)
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-4;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[2] = 0.3;
   options->dparam[3] = 1.0;
 

@@ -45,7 +45,7 @@ void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *
   /* size of the LCP */
   int n = problem->size;
 
-  double tol = options->dparam[0];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
   MCP_Termination termination;
 
   nnz = nbNonNulElems(n, M, 1.0e-18);

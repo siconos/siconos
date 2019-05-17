@@ -51,7 +51,7 @@ void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *
   int *iwar;
   double *war;
 
-  double tol = options->dparam[0];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
 
   /* / m :        total number of constraints.*/
   m = n;
@@ -182,7 +182,7 @@ int linearComplementarity_nsqp_setDefaultSolverOptions(SolverOptions* options)
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->dparam[0] = 1e-6;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
 
   return 0;

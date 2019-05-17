@@ -124,7 +124,7 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
    *  3 - Computes w = Mz + q and checks validity
    *************************************************/
   if (options->filterOn > 0)
-    info = lcp_compute_error(problem, z, w, options->dparam[0], &(options->dparam[1]));
+    info = lcp_compute_error(problem, z, w, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
   DEBUG_END("lcp_driver_SparseBlockMatrix(...)\n");
   return info;
 
@@ -155,7 +155,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
   double *q = problem->q;
   if (options->iparam[SICONOS_LCP_IPARAM_SKIP_TRIVIAL] == SICONOS_LCP_SKIP_TRIVIAL_NO)
   {
-    /*  if (!((options->solverId == SICONOS_LCP_ENUM) && (options->iparam[0] == 1 )))*/
+    /*  if (!((options->solverId == SICONOS_LCP_ENUM) && (options->iparam[SICONOS_IPARAM_MAX_ITER] == 1 )))*/
     {
       while ((i < (n - 1)) && (q[i] >= 0.)) i++;
       if ((i == (n - 1)) && (q[n - 1] >= 0.))
@@ -169,7 +169,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
           w[j] = q[j];
         }
         info = 0;
-        options->dparam[1] = 0.0; /* Error */
+        options->dparam[SICONOS_DPARAM_RESIDU] = 0.0; /* Error */
         if (verbose > 0)
           printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
         DEBUG_END("lcp_driver_DenseMatrix(...)\n")
@@ -184,7 +184,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
       w[0] = 0.;
       z[0] = -q[0] / M[0];
       info = 0;
-      options->dparam[1] = 0.0; /* Error */
+      options->dparam[SICONOS_DPARAM_RESIDU] = 0.0; /* Error */
       if (verbose > 0)
         printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (problem of size 1). \n");
       DEBUG_END("lcp_driver_DenseMatrix(...)\n")
@@ -338,7 +338,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
    *************************************************/
   if (options->filterOn > 0)
     {
-      int info_ = lcp_compute_error(problem, z, w, options->dparam[0], &(options->dparam[1]));
+      int info_ = lcp_compute_error(problem, z, w, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
       if (info <= 0) /* info was not set or the solver was happy */
 	info = info_;
     }

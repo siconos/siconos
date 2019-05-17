@@ -97,9 +97,9 @@ void lcp_ConvexQP_ProjectedGradient(LinearComplementarityProblem* problem, doubl
 
   /* **** Criterium convergence **** */
 
-  lcp_compute_error(problem, z , w, options->dparam[0], &error);
+  lcp_compute_error(problem, z , w, options->dparam[SICONOS_DPARAM_TOL], &error);
 
-  error = cqpsolver_options->dparam[1];
+  error = cqpsolver_options->dparam[SICONOS_DPARAM_RESIDU];
   iter = cqpsolver_options->iparam[7];
 
   options->dparam[SICONOS_DPARAM_RESIDU] = error;

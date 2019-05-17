@@ -54,8 +54,8 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
   double *JacH, *H, *A;
 
   double *rho;
-  int itermax = options->iparam[0];
-  double tol = options->dparam[0];
+  int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
 
   incx = 1;
   incy = 1;
@@ -63,8 +63,8 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
 
   /*output*/
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   for (i = 0; i < n; i++)
   {
@@ -163,8 +163,8 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
       {
         printf("Problem in DGESV\n");
       }
-      options->iparam[1] = iter;
-      options->dparam[1] = err;
+      options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+      options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
       free(H);
       free(A);
@@ -201,8 +201,8 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
 
   }
 
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
   if (err > tol)
   {
@@ -252,8 +252,8 @@ int linearComplementarity_newton_min_setDefaultSolverOptions(SolverOptions* opti
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-6;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
 
   return 0;

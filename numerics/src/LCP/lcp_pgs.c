@@ -53,12 +53,12 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
   double qs, zi;
 
   /* Solver parameters */
-  int itermax = options->iparam[0];
-  double tol = options->dparam[0];
+  int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   if (verbose > 0)
   {
@@ -129,8 +129,8 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
     }
   }
 
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
   if (err > tol)
   {
@@ -173,9 +173,9 @@ int linearComplementarity_pgs_setDefaultSolverOptions(SolverOptions* options)
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-6;
-  options->dparam[1] = 1.0;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 1.0;
 
 
   return 0;

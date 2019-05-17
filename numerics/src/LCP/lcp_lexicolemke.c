@@ -53,7 +53,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
   int ic, jc;
   int ITER;
   int nobasis;
-  int itermax = options->iparam[0];
+  int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
 
   i=0;
   int n = problem->size;
@@ -74,8 +74,8 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
       wlem[j] = q[j];
     }
     *info = 0;
-    options->iparam[1] = 0;   /* Number of iterations done */
-    options->dparam[1] = 0.0; /* Error */
+    options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;   /* Number of iterations done */
+    options->dparam[SICONOS_DPARAM_RESIDU] = 0.0; /* Error */
     if (verbose > 0)
       printf("lcp_lexicolemke: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
     return ;
@@ -89,7 +89,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
 
   /*output*/
 
-  options->iparam[1] = 0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
 
   /* Allocation */
 
@@ -474,7 +474,7 @@ int linearComplementarity_lexicolemke_setDefaultSolverOptions(SolverOptions* opt
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->dparam[0] = 1e-6;
-  options->iparam[0] = 10000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
   return 0;
 }

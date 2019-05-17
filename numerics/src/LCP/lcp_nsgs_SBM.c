@@ -91,8 +91,8 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
    */
 
   /* Global Solver parameters*/
-  int itermax = options[0].iparam[0];
-  double tolerance = options[0].dparam[0];
+  int itermax = options[0].iparam[SICONOS_IPARAM_MAX_ITER];
+  double tolerance = options[0].iparam[SICONOS_DPARAM_TOL];
 
   /* Matrix M/vector q of the LCP */
   SparseBlockStructuredMatrix* blmat = problem->M->matrix1;
@@ -169,9 +169,9 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
       pos += local_problem->size;
       /* sum of local number of iterations (output from local_driver)*/
       if (options[localSolverNum].iparam != NULL)
-        options[0].iparam[2] += internalSolvers[localSolverNum].iparam[1];
+        options[0].iparam[2] += internalSolvers[localSolverNum].iparam[SICONOS_IPARAM_ITER_DONE];
       /* sum of local errors (output from local_driver)*/
-      options[0].dparam[2] += internalSolvers[localSolverNum].dparam[1];
+      options[0].dparam[2] += internalSolvers[localSolverNum].iparam[SICONOS_DPARAM_RESIDU];
 
       if (infoLocal > 0)
       {
@@ -179,7 +179,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
         //free(local_problem->M);
         //free(local_problem);
         /* Number of GS iterations */
-        options[0].iparam[1] = iter;
+        options[0].iparam[SICONOS_IPARAM_ITER_DONE] = iter;
         fprintf(stderr, "lcp_NSGS_SBM error: Warning local LCP solver  at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
         //exit(EXIT_FAILURE);
 
@@ -202,9 +202,9 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
   }
   *info = hasNotConverged;
   /* Number of GS iterations */
-  options[0].iparam[1] = iter;
+  options[0].iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   /* Resulting error */
-  options[0].dparam[1] = error;
+  options[0].iparam[SICONOS_DPARAM_RESIDU] = error;
 
   free(local_problem->q);
   free(local_problem->M);
@@ -238,8 +238,8 @@ int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(SolverOptions* option
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-6;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
   options->internalSolvers = (SolverOptions*)malloc(options->numberOfInternalSolvers * sizeof(SolverOptions));
   linearComplementarity_psor_setDefaultSolverOptions(options->internalSolvers);
   return 0;

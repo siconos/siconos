@@ -14,7 +14,7 @@ For each solver, the input argument are:
 
 Remark: when the filterOn parameter (from :class:`SolverOptions`) is different from 0, lcp_compute_error() is called at the end of the
 process to check the validity of the solution. This function needs a tolerance value and returns an error.
-In that case, tolerance is dparam[0] and error output dparam[1]. Thus, in the following solvers, when dparam[0,1] are omitted, that means that they are not required inputs, and that if filter is on, some default values will be used.
+In that case, tolerance is iparam[SICONOS_DPARAM_TOL] and error output dparam[1]. Thus, in the following solvers, when dparam[0,1] are omitted, that means that they are not required inputs, and that if filter is on, some default values will be used.
 
 lexicographic Lemke
 -------------------
@@ -25,8 +25,8 @@ Direct solver for LCP based on pivoting method principle for degenerated problem
  
  parameters:
 
- * iparam[0] (in) : max. number of iterations
- * iparam[1] (out): number of iterations processed
+ * iparam[SICONOS_IPARAM_MAX_ITER] (in) : max. number of iterations
+ * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 
 QP Solver
 ----------
@@ -46,7 +46,7 @@ function: :func:`lcp_qp()`
 
 parameters:
 
-* dparam[0] (in): tolerance
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
 
 NSQP Solver
 -----------
@@ -58,7 +58,7 @@ function: :func:`lcp_nsqp()`
 
 parameters:
 
-* dparam[0] (in): tolerance
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
 
 CPG Solver
 ----------
@@ -71,10 +71,10 @@ function: :func:`lcp_cpg()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed
-* iparam[1] (out): number of iterations processed
-* dparam[0] (in): tolerance
-* dparam[1] (out): resulting error
+* iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
+* iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
+* iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 
 PGS Solver
 ----------
@@ -85,10 +85,10 @@ function: :func:`lcp_pgs()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed
-* iparam[1] (out): number of iterations processed
-* dparam[0] (in): tolerance
-* dparam[1] (out): resulting error
+* iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
+* iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
+* iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 
 RPGS Solver
 -----------
@@ -99,10 +99,10 @@ function: :func:`lcp_rpgs()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed
-* iparam[1] (out): number of iterations processed
-* dparam[0] (in): tolerance
-* dparam[1] (out): resulting error
+* iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
+* iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
+* iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 * dparam[2] (in): rho
 
 PSOR Solver
@@ -114,10 +114,10 @@ function: :func:`lcp_psor()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed
-* iparam[1] (out): number of iterations processed
-* dparam[0] (in): tolerance
-* dparam[1] (out): resulting error
+* iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
+* iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
+* iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 * dparam[2] (in): relaxation parameter
 
 NewtonMin Solver
@@ -129,13 +129,13 @@ function: :func:`lcp_newton_min()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed
-* iparam[1] (out): number of iterations processed
+* iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
+* iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 * iparam[2] (in): if > 0, keep the work vector (reduce the number of memory allocation if the same type of problem is solved multiple times)
 * iparam[3] (in): if > 0. use a non-monotone linear search
 * iparam[4] (in): if a non-monotone linear search is used, specify the number of merit values to remember
-* dparam[0] (in): tolerance
-* dparam[1] (out): resulting error
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
+* iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 
 NewtonFB Solver
 ---------------
@@ -147,13 +147,13 @@ function: :func:`lcp_newton_FB()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed
-* iparam[1] (out): number of iterations processed
+* iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
+* iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 * iparam[2] (in): if > 0, keep the work vector (reduce the number of memory allocation if the same type of problem is solved multiple times)
 * iparam[3] (in): if > 0. use a non-monotone linear search
 * iparam[4] (in): if a non-monotone linear search is used, specify the number of merit values to remember
-* dparam[0] (in): tolerance
-* dparam[1] (out): resulting error
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
+* iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 
 Newton min + FB Solver
 ----------------------
@@ -165,13 +165,13 @@ function: :func:`lcp_newton_minFB()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed
-* iparam[1] (out): number of iterations processed
+* iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
+* iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 * iparam[2] (in): if > 0, keep the work vector (reduce the number of memory allocation if the same type of problem is solved multiple times)
 * iparam[3] (in): if > 0. use a non-monotone linear search
 * iparam[4] (in): if a non-monotone linear search is used, specify the number of merit values to remember
-* dparam[0] (in): tolerance
-* dparam[1] (out): resulting error
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
+* iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 
 Path (Ferris) Solver
 --------------------
@@ -182,7 +182,7 @@ function: :func:`lcp_path()`
 
 parameters:
 
-* dparam[0] (in): tolerance
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
 
 Enumerative Solver
 ------------------
@@ -209,10 +209,10 @@ function: :func:`lcp_latin()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed
-* iparam[1] (out): number of iterations processed
-* dparam[0] (in): tolerance
-* dparam[1] (out): resulting error
+* iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
+* iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
+* iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 * dparam[2] (in): latin parameter
 
 Latin_w Solver
@@ -224,10 +224,10 @@ function: :func:`lcp_latin_w()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed
-* iparam[1] (out): number of iterations processed
-* dparam[0] (in): tolerance
-* dparam[1] (out): resulting error
+* iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
+* iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
+* iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 * dparam[2] (in): latin parameter
 * dparam[3] (in): relaxation parameter
 
@@ -242,10 +242,10 @@ function: :func:`lcp_nsgs_SBM()`
 
 parameters:
 
-* iparam[0] (in): maximum number of iterations allowed for GS process
-* iparam[1] (out): number of GS iterations processed
+* iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed for GS process
+* iparam[SICONOS_IPARAM_ITER_DONE] (out): number of GS iterations processed
 * iparam[2] (out): sum of all local number of iterations (if it has sense for the local solver)
-* dparam[0] (in): tolerance
-* dparam[1] (out): resulting error
+* iparam[SICONOS_DPARAM_TOL] (in): tolerance
+* iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 * dparam[2] (in): sum of all local error values
 
