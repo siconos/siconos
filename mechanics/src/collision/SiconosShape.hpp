@@ -224,6 +224,92 @@ public:
   ACCEPT_VISITORS();
 };
 
+class SiconosCone : public SiconosShape,
+                        public std11::enable_shared_from_this<SiconosCone>
+{
+private:
+  SiconosCone() : SiconosShape() {};
+
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosCone);
+  double _radius;
+  double _length;
+
+public:
+  SiconosCone(float radius, float length)
+    : SiconosShape(), _radius(radius), _length(length)
+  {
+  }
+
+  virtual ~SiconosCone() {}
+
+  void setRadius(double radius)
+  {
+    _radius = radius;
+    _version ++;
+  }
+
+  double radius() { return _radius; }
+
+  void setLength(double length)
+  {
+    _length = length;
+    _version ++;
+  }
+
+  double length() { return _length; }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
+class SiconosCapsule : public SiconosShape,
+                        public std11::enable_shared_from_this<SiconosCapsule>
+{
+private:
+  SiconosCapsule() : SiconosShape() {};
+
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosCapsule);
+  double _radius;
+  double _length;
+
+public:
+  SiconosCapsule(float radius, float length)
+    : SiconosShape(), _radius(radius), _length(length)
+  {
+  }
+
+  virtual ~SiconosCapsule() {}
+
+  void setRadius(double radius)
+  {
+    _radius = radius;
+    _version ++;
+  }
+
+  double radius() { return _radius; }
+
+  void setLength(double length)
+  {
+    _length = length;
+    _version ++;
+  }
+
+  double length() { return _length; }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
+
+
 class SiconosConvexHull : public SiconosShape,
                           public std11::enable_shared_from_this<SiconosConvexHull>
 {

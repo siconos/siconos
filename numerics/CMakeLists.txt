@@ -4,8 +4,6 @@
 
 set(COMPONENT numerics)
 message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
-# Name used for the target to be built
-set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
 # --- Numerics optional dependencies ---
 include(gams_setup)
@@ -84,5 +82,27 @@ if(BUILD_AS_CPP)
   set(${COMPONENT}_LINKER_LANGUAGE CXX)
 endif()
 
+# mumps and mpi
+if(WITH_MPI)
+  target_include_directories(numerics PRIVATE ${MPI_C_INCLUDE_DIRS})
+  # Note FP : PUBLIC for the moment since it's required by tests.
+  # This will be improved later.
+  target_link_libraries(numerics PRIVATE ${MPI_C_LIBRARIES})
+  #   target_include_directories(numerics PRIVATE ${MPI_Fortran_INCLUDE_DIRS})
+  #   target_link_libraries(numerics PRIVATE ${MPI_Fortran_LIBRARIES})
+  
+endif()
+if(WITH_MUMPS)
+  find_package(MUMPS REQUIRED)
+  target_link_libraries(numerics PRIVATE MUMPS::MUMPS)
+endif()
+ 
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
+
+if(WITH_MPI)
+  # Note FP : temporary fix, to deal with PRIVATE deps of some components.
+  # This will be reviewed later.
+  target_include_directories(numerics-test PUBLIC ${MPI_C_INCLUDE_DIRS})
+  target_link_libraries(numerics-test PUBLIC ${MPI_C_LIBRARIES})
+endif()

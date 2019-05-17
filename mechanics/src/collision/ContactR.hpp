@@ -21,9 +21,9 @@
 
 #include "MechanicsFwd.hpp"
 #include "SiconosVector.hpp"
-#include "NewtonEulerFrom3DLocalFrameR.hpp"
+#include "NewtonEuler3DR.hpp"
 
-class ContactR : public NewtonEulerFrom3DLocalFrameR
+class ContactR : public NewtonEuler3DR
 {
 private:
   /** serialization hooks
@@ -37,7 +37,7 @@ public:
   SP::SiconosVector base[2];
   SP::SiconosShape shape[2];
   SP::SiconosContactor contactor[2];
-  SP::BodyDS ds[2];
+  SP::RigidBodyDS ds[2];
 
   virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
 

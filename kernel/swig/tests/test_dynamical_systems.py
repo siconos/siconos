@@ -177,8 +177,8 @@ def test_lagrangian_tids():
     assert np.allclose(fref, ds.forces())
     ds.computeJacobianqForces(time)
     assert np.allclose(stiffness, ds.jacobianqForces())
-    ds.computeJacobianqDotForces(time)
-    assert np.allclose(damping, ds.jacobianqDotForces())
+    ds.computeJacobianvForces(time)
+    assert np.allclose(damping, ds.jacobianvForces())
 
 
 if __name__ == "__main__":

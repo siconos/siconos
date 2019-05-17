@@ -66,7 +66,7 @@ void FirstOrderLinearTIDS::computeJacobianRhsx(double time)
   // Nothing to be done: _jacxRhs is constant and computed during initialize. But this function is required to avoid call to base class function.
 }
 
-void FirstOrderLinearTIDS::display() const
+void FirstOrderLinearTIDS::display(bool brief) const
 {
   std::cout << "===> Linear Time-invariant First Order System display, " << _number << ")." <<std::endl;
   std::cout << "- A " <<std::endl;

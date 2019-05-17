@@ -4,8 +4,6 @@
 
 set(COMPONENT io)
 message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
-# Name used for the target to be built
-set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
 # --- Search component dependencies ---
 if(WITH_SERIALIZATION)
@@ -92,7 +90,7 @@ if(WITH_SERIALIZATION)
 
     ADD_CUSTOM_COMMAND(
       OUTPUT ${GENERATED_HEADER}
-      DEPENDS doxygen ${GENERATED_DEPENDENCIES}
+      DEPENDS kernel-doxy2xml ${GENERATED_DEPENDENCIES}
       ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
       ${CMAKE_SOURCE_DIR}/io/tools/builder_common.py
       ${GENERATED_COMMAND})
@@ -104,7 +102,7 @@ if(WITH_SERIALIZATION)
 
     ADD_CUSTOM_COMMAND(
       OUTPUT ${GENERATED_HEADER_KERNEL}
-      DEPENDS doxygen ${GENERATED_DEPENDENCIES}
+      DEPENDS kernel-doxy2xml ${GENERATED_DEPENDENCIES}
       ${GENERATED_COMMAND_KERNEL})
   endif()
 endif()

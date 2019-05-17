@@ -9,10 +9,10 @@
 //! It is a relation dedicated for the unilateral constraint with Coulomb friction.
 /*!
   Aggregation to the class MBTB_Contact, the member _pContact contains the CAD information.
-  It derivates from Siconos::NewtonEulerFrom3DLocalFrameR. This class does the link between CAD and Siconos.
+  It derivates from Siconos::NewtonEuler3DR. This class does the link between CAD and Siconos.
  */
 
-class MBTB_FC3DContactRelation : public NewtonEulerFrom3DLocalFrameR
+class MBTB_FC3DContactRelation : public NewtonEuler3DR
 {
 protected:
   //! The member containing the CAD properties.

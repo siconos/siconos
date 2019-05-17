@@ -70,8 +70,6 @@ void FirstOrderLinearTIR::initialize(Interaction& inter)
 void FirstOrderLinearTIR::checkSize(Interaction& inter)
 {
   DEBUG_PRINT("FirstOrderLinearTIR::checkSize(Interaction & inter)\n");
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-
   DEBUG_PRINTF("_C->size(0) = %i,\t inter.dimension() = %i\n ",_C->size(0),inter.dimension() );
   DEBUG_PRINTF("_C->size(1) = %i,\t inter.getSizeOfDS() = %i\n ",_C->size(1),inter.getSizeOfDS() );
 
@@ -86,7 +84,7 @@ void FirstOrderLinearTIR::checkSize(Interaction& inter)
 
 
   if (_F)
-    assert(((_F->size(0) != inter.dimension()) && (_F->size(1) != DSlink[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
+    assert(((_F->size(0) != inter.dimension()) && (_F->size(1) != (inter.linkToDSVariables())[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
   if (_e)
     assert(_e->size() == inter.dimension() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 

@@ -13,33 +13,17 @@ Build html documentation in siconos/build_dir/docs/build/html
 make latex
 ```
 
---> to create tex files
+--> to create tex files (experimental !)
 
 
-# Transfer to Gforge: 
+# To publish web site and documentation :
 
-
-scp -pr siconos_build_dir/build/docs/build/html/* login@scm.gforge.inria.fr:/home/groups/siconos/htdocs
-
--p option for first commit only => allow to keep same files permissions (rw|rw|r) after sending. 
-
-Warning: if you generate latex or xml do not transfer it! 
-
-
-
-# Tests: use gitlab to create and publish siconos doc
-
-!! Only in update_doc branch
-
-## Details:
-
-* A mirror of siconos project on gricad-gitlab : https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-mirror
+* A mirror of siconos project on gricad-gitlab : https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos
 * CI is configured to build and publish documentation (see files .gitlab-ci.yml and CI/make_siconos_doc.sh)
 
 	* gitlab-ci.yml : two jobs (make_doc and publish)
 	* make_siconos_doc.sh : describe building process (apt + install python packages from requirements.txt + cmake and make doc)
 	 Siconos conf is described in CI/siconos_docs.cmake
-
 
 * Check CI status : https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-mirror/pipelines
 * Check (public) website : https://nonsmooth.gricad-pages.univ-grenoble-alpes.fr/siconos-mirror
@@ -50,17 +34,15 @@ Warning: if you generate latex or xml do not transfer it!
 * Add remote repo:
 
 ```
-git remote add gitlab_for_doc git@gricad-gitlab.univ-grenoble-alpes.fr:nonsmooth/siconos-mirror.git
+git remote add sico-doc git@gricad-gitlab.univ-grenoble-alpes.fr:nonsmooth/siconos-mirror.git
 ```
 
 * To publish doc:
 
 ```
-git checkout update_doc
-git push gitlab_for_doc update_doc
+# Update your repo with github master
+git checkout master
+git pull --rebase origin master git checkout master
+# Push to gitlab (--> will automatically push to github master)
+git push sico-doc master
 
-
-
-
-Remark : automatic mirroring between github and gitlab (i.e. push to github -> trigger push to gitlab) is something
-that is supposed to be available "soon" ...

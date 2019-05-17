@@ -95,11 +95,8 @@ void NewtonEulerR::initialize(Interaction& inter)
 
 void NewtonEulerR::checkSize(Interaction& inter)
 {
-  unsigned int ySize = inter.dimension();
-  unsigned int xSize = inter.getSizeOfDS();
-  unsigned int qSize = 7 * (xSize / 6);
-  assert((_jachq->size(1) == qSize && _jachq->size(0) == ySize) ||
-         (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), qSize, _jachq->size(0), ySize) && false) ||
+  assert((_jachq->size(1) == 7 * (inter.getSizeOfDS() / 6) && _jachq->size(0) ==  inter.dimension()) ||
+         (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), 7 * (inter.getSizeOfDS() / 6), _jachq->size(0),  inter.dimension()) && false) ||
          ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between _jachq matrix and the interaction." && false));
 }
 
@@ -238,7 +235,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int le
     RuntimeException::selfThrow("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)  not yet implemented for level > 1");
   DEBUG_END("NewtonEulerR::computeInput(...)\n");
 }
-/*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEulerFrom3DLocalFrameR and NewtonEulerFrom1DLocalFrameR)*/
+/*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEuler3DR and NewtonEuler1DR)*/
 
 void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
 {

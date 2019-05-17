@@ -307,7 +307,7 @@ public:
 
   /** data display on screen
    */
-  void display() const;
+  void display(bool brief = true) const;
 
   /** True if the system is linear.
    * \return a boolean

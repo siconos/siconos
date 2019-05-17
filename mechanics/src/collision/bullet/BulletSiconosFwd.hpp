@@ -25,6 +25,8 @@
 DEFINE_SPTR(btCollisionShape);
 DEFINE_SPTR(btBoxShape);
 DEFINE_SPTR(btCylinderShape);
+DEFINE_SPTR(btConeShape);
+DEFINE_SPTR(btCapsuleShape);
 DEFINE_SPTR(btManifoldPoint);
 DEFINE_SPTR(btStaticPlaneShape);
 DEFINE_SPTR(btSphereShape);
@@ -53,7 +55,7 @@ DEFINE_SPTR(btPersistentManifold);
 DEFINE_SPTR(btBroadphaseInterface);
 
 //DEFINE_SPTR(BulletR);
-//DEFINE_SPTR(BulletFrom1DLocalFrameR);
+//DEFINE_SPTR(Bullet1DR);
 DEFINE_SPTR(CollisionObjects);
 DEFINE_SPTR_STRUCT(StaticObjects);
 

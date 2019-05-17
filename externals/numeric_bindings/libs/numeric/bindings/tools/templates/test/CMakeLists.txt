@@ -14,5 +14,5 @@ $ENTRIES
 
 $TEMPLATE[CMakeLists.entry]
 add_executable( $groupname $groupname.cpp )
-target_link_libraries( $groupname ${PRIVATE} ${LAPACK_LIBRARIES} )
+target_link_libraries( $groupname PRIVATE ${LAPACK_LIBRARIES} )
 $TEMPLATE[end]

@@ -45,6 +45,7 @@
 #include <boost/type_traits/is_polymorphic.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <RotationQuaternion.hpp>
 %}
 
 // ignores
@@ -95,7 +96,7 @@
 // SiconosMemory
 %ignore swap;
 
-%warnfilter(509) rotateAbsToBody;
+%warnfilter(509) quaternionRotate;
 %warnfilter(509) changeFrameAbsToBody;
 %warnfilter(509) changeFrameBodyToAbs;
 
@@ -237,6 +238,7 @@ typedef __mpz_struct mpz_t[1];
 
 %include "SiconosAlgebraTypeDef.hpp"
 %include "SiconosAlgebra.hpp"
+%include "RotationQuaternion.hpp"
 
 %import "RelationNamespace.hpp";
 
@@ -339,9 +341,9 @@ KERNEL_REGISTRATION()
     return std11::dynamic_pointer_cast<LagrangianDS>(ds);
   }
 
-  SP::NewtonEulerFrom1DLocalFrameR cast_NewtonEulerFrom1DLocalFrameR(SP::Relation r)
+  SP::NewtonEuler1DR cast_NewtonEuler1DR(SP::Relation r)
   {
-    return std11::dynamic_pointer_cast<NewtonEulerFrom1DLocalFrameR>(r);
+    return std11::dynamic_pointer_cast<NewtonEuler1DR>(r);
   }
 
 

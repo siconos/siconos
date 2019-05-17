@@ -123,7 +123,10 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "SiconosSets.h"
 #include "GAMSlink.h"
 #include "NumericsFwd.h"
-  %}
+
+#include "projectionOnCone.h"
+#include "projectionOnRollingCone.h"
+%}
 
 #ifdef WITH_SERIALIZATION
 %{
@@ -140,14 +143,8 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 // swig requires same namespace 'std11' is used.
 %{
 #ifdef __cplusplus
-#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 namespace std11 = std;
 #include <memory>
-#else
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-namespace std11 = boost;
-#endif
 #endif
 %}
 #ifdef __cplusplus

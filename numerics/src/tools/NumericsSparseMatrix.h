@@ -27,7 +27,7 @@
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"
 #include "CSparseMatrix.h" // for freeNSLSP
-
+#include "NM_MPI.h"
 
 /**\struct linalg_data_t NumericsSparseMatrix.h
  * generic data struct for linear algebra operations
@@ -62,8 +62,8 @@ extern "C"
   {
     NSM_linear_solver solver;
 
-    void* solver_data; /**< solver-specific data (or workspace) */
-    freeNSLSP solver_free_hook; /**< solver-specific hook to free solver_data  */
+    void* linear_solver_data; /**< solver-specific data (or workspace) */
+    freeNSLSP solver_free_hook; /**< solver-specific hook to free linear_solver_data  */
 
     int* iWork; /**< integer work vector array (internal) */
     int iWorkSize; /**< size of integer work vector array */
@@ -132,9 +132,9 @@ extern "C"
   /** Get the LU factors for cs_lusol
    * \param p the structure holding the data for the solver
    */
-  static inline void* NSM_solver_data(NSM_linear_solver_params* p)
+  static inline void* NSM_linear_solver_data(NSM_linear_solver_params* p)
   {
-    return p->solver_data;
+    return p->linear_solver_data;
   }
   /** Get the workspace for the sparse solver
    * \param p the structure holding the data for the solver

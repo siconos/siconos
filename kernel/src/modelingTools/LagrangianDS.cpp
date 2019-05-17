@@ -65,6 +65,17 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::Sicon
   _mass = newMass;
 }
 
+
+void LagrangianDS::allocateMass()
+{
+  if (!_mass)
+  {
+    _mass.reset(new SimpleMatrix(_ndof, _ndof));
+  }
+  
+}
+
+
 // From a set of data - Mass loaded from a plugin
 // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q = p \f$
 LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, const std::string& massName):
@@ -74,7 +85,7 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, const std
   _init(q0, v0);
   _hasConstantMass = false;
   // Mass
-  _mass.reset(new SimpleMatrix(_ndof, _ndof));
+  allocateMass();
   setComputeMassFunction(SSLH::getPluginName(massName), SSLH::getPluginFunctionName(massName));
 }
 
@@ -140,7 +151,7 @@ void LagrangianDS::update_inverse_mass()
 
 void LagrangianDS::init_forces()
 {
-  // Allocate memory for forces and its jacobians.
+  // Allocate memory for forces and its jacobians.void LagrangianDS::init_forces()
   // Needed only for integrators with first-order formulation.
   if(_fInt || _fExt || _fGyr)
   {
@@ -315,14 +326,7 @@ void LagrangianDS::computeMass()
 {
   DEBUG_BEGIN("LagrangianDS::computeMass()\n");
   DEBUG_EXPR(_q[0]->display());
-  if(!_hasConstantMass)
-  {
-    if(_mass && _pluginMass->fPtr)
-    {
-      ((FPtr7)_pluginMass->fPtr)(_ndof, &(*_q[0])(0), &(*_mass)(0, 0), _z->size(), &(*_z)(0));
-      _mass->resetLU();
-    }
-  }
+  computeMass(_q[0]);
   DEBUG_EXPR(_mass->display());
   DEBUG_END("LagrangianDS::computeMass()\n");
 }
@@ -575,7 +579,7 @@ void LagrangianDS::computeJacobianvForces(double time)
 //    RuntimeException::selfThrow("LagrangianDS::computeJacobianZFL - not implemented");
 // }
 
-void LagrangianDS::display() const
+void LagrangianDS::display(bool brief) const
 {
   std::cout << "=====> Lagrangian System display (number: " << _number << ")." <<std::endl;
   std::cout << "- _ndof : " << _ndof <<std::endl;
@@ -602,6 +606,35 @@ void LagrangianDS::display() const
   std::cout << "- p[2] " <<std::endl;
   if(_p[2]) _p[2]->display();
   else std::cout << "-> NULL" <<std::endl;
+
+  if (!brief)
+  {
+    std::cout << "- Mass " <<std::endl;
+    if (_mass) _mass ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    
+    std::cout << "- Forces " <<std::endl;
+    if (_forces) _forces ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    std::cout << "- FInt " <<std::endl;
+    if (_fInt) _fInt ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    
+    std::cout << "- jacobianqForces " <<std::endl;
+    if (_jacobianqForces) _jacobianqForces ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    std::cout << "- jacobianFIntq " <<std::endl;
+    if (_jacobianFIntq) _jacobianFIntq ->display();
+    else std::cout << "-> NULL" <<std::endl;
+
+    
+    std::cout << "- jacobianqDotForces " <<std::endl;
+    if (_jacobianqDotForces) _jacobianqDotForces ->display();
+    else std::cout << "-> NULL" <<std::endl;
+
+  }
+
+  
   std::cout << "===================================== " <<std::endl;
 }
 
@@ -672,6 +705,34 @@ void LagrangianDS::computePostImpactVelocity()
   *_q[1] += tmp;  // v+ = v- + p
   DEBUG_BEGIN("LagrangianDS::computePostImpactV() END \n");
 }
+void  LagrangianDS::allocateFExt()
+{
+  if(!_fExt)
+    _fExt.reset(new SiconosVector(_ndof));
+}
+void  LagrangianDS::allocateFInt()
+{
+  if(!_fInt)
+    _fInt.reset(new SiconosVector(_ndof));
+}
+
+void  LagrangianDS::setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
+{
+  _pluginFInt->setComputeFunction(pluginPath, functionName);
+  allocateFInt();
+  //    Plugin::setFunction(&computeFIntPtr, pluginPath,functionName);
+}
+
+void LagrangianDS::setComputeFIntFunction(FPtr6 fct)
+{
+  _pluginFInt->setComputeFunction((void*)fct);
+  allocateFInt();
+  //    computeFIntPtr = fct;
+}
+
+
+
+
 
 void LagrangianDS::setComputeFGyrFunction(const std::string& pluginPath, const std::string&  functionName)
 {
@@ -689,35 +750,44 @@ void LagrangianDS::setComputeFGyrFunction(FPtr5 fct)
   init_forces();
 }
 
+void LagrangianDS::allocateJacobianFIntq()
+{
+  if(!_jacobianFIntq)
+    _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
+}
+
 void LagrangianDS::setComputeJacobianFIntqFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqFInt->setComputeFunction(pluginPath, functionName);
-  if(!_jacobianFIntq)
-    _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
+  allocateJacobianFIntq();
   init_forces();
 }
+
+void LagrangianDS::allocateJacobianFIntqDot()
+{
+  if(!_jacobianFIntqDot)
+    _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
+}
+
 
 void LagrangianDS::setComputeJacobianFIntqDotFunction(const std::string&  pluginPath, const std::string&  functionName)
 {
   _pluginJacqDotFInt->setComputeFunction(pluginPath, functionName);
-  if(!_jacobianFIntqDot)
-    _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
+  allocateJacobianFIntqDot();
   init_forces();
 }
 
 void LagrangianDS::setComputeJacobianFIntqFunction(FPtr6 fct)
 {
   _pluginJacqFInt->setComputeFunction((void *)fct);
-  if(!_jacobianFIntq)
-    _jacobianFIntq.reset(new SimpleMatrix(_ndof, _ndof));
+  allocateJacobianFIntq();
   init_forces();
 }
 
 void LagrangianDS::setComputeJacobianFIntqDotFunction(FPtr6 fct)
 {
   _pluginJacqDotFInt->setComputeFunction((void *)fct);
-  if(!_jacobianFIntqDot)
-    _jacobianFIntqDot.reset(new SimpleMatrix(_ndof, _ndof));
+  allocateJacobianFIntqDot();
   init_forces();
 }
 

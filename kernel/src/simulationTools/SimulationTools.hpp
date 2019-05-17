@@ -43,6 +43,7 @@ Note that not all files from the current location are listed below, since some o
 #include "QP.hpp"
 #include "Relay.hpp"
 #include "FrictionContact.hpp"
+#include "RollingFrictionContact.hpp"
 #include "GlobalFrictionContact.hpp"
 
 #include "LsodarOSI.hpp"

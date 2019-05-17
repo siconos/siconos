@@ -29,6 +29,7 @@
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#include "NewtonImpactRollingFrictionNSL.hpp"
 #include "CxxStd.hpp"
 
 #include <boost/make_shared.hpp>
@@ -124,12 +125,11 @@ void MoreauJeanOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
          || dsType == Type::LagrangianLinearDiagonalDS);
 
   // Compute W (iteration matrix)
-  initializeIterationMatrixW(t, ds);
-
   SP::SecondOrderDS sods = std11::static_pointer_cast<SecondOrderDS> (ds);
+  initializeIterationMatrixW(t, sods);
   ds_work_vectors[MoreauJeanOSI::RESIDU_FREE].reset(new SiconosVector(sods->dimension()));
   ds_work_vectors[MoreauJeanOSI::VFREE].reset(new SiconosVector(sods->dimension()));
- 
+
   if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearDiagonalDS)
   {
     // buffers allocation (inside the graph)
@@ -151,8 +151,8 @@ void MoreauJeanOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
   sods->computeForces(t, sods->q(), sods->velocity());
   sods->swapInMemory();
 
-  
-  
+
+
 
 }
 void MoreauJeanOSI::initializeWorkVectorsForInteraction(Interaction &inter,
@@ -243,7 +243,7 @@ void MoreauJeanOSI::initialize_nonsmooth_problems()
   //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(_simulation);
 }
 
-void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem ds)
+void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::SecondOrderDS ds)
 {
   DEBUG_BEGIN("MoreauJeanOSI::initializeIterationMatrixW\n");
   // This function:
@@ -372,7 +372,7 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem 
 }
 
 
-void MoreauJeanOSI::_initializeIterationMatrixWBoundaryConditions(DynamicalSystem& ds, const DynamicalSystemsGraph::VDescriptor& dsv)
+void MoreauJeanOSI::_initializeIterationMatrixWBoundaryConditions(SecondOrderDS& ds, const DynamicalSystemsGraph::VDescriptor& dsv)
 {
   // This function:
   // - allocate memory for a matrix WBoundaryConditions
@@ -409,8 +409,11 @@ void MoreauJeanOSI::_initializeIterationMatrixWBoundaryConditions(DynamicalSyste
 }
 
 
-void MoreauJeanOSI::_computeWBoundaryConditions(DynamicalSystem& ds, SiconosMatrix& WBoundaryConditions, SiconosMatrix& iteration_matrix)
+void MoreauJeanOSI::_computeWBoundaryConditions(SecondOrderDS& ds,
+                                                SiconosMatrix& WBoundaryConditions,
+                                                SiconosMatrix& iteration_matrix)
 {
+  DEBUG_BEGIN("MoreauJeanOSI::_computeWBoundaryConditions\n");
   // Compute WBoundaryConditions matrix of the Dynamical System ds, at
   // time t and for the current ds state.
 
@@ -434,29 +437,33 @@ void MoreauJeanOSI::_computeWBoundaryConditions(DynamicalSystem& ds, SiconosMatr
         itindex != bc->velocityIndices()->end();
         ++itindex)
     {
-
+      if (!iteration_matrix.isSymmetric(1e-10))
+      {
+       // iteration_matrix.display();
+       std::cout <<"Warning, we apply boundary conditions assuming W symmetric" << std::endl;
+      }
       iteration_matrix.getCol(*itindex, *columntmp);
-      /*\warning we assume that W is symmetric in the Lagrangian case
+      /*\warning we assume that W is symmetric
         we store only the column and not the row */
 
       WBoundaryConditions.setCol(columnindex, *columntmp);
       double diag = (*columntmp)(*itindex);
       columntmp->zero();
       (*columntmp)(*itindex) = diag;
-
       iteration_matrix.setCol(*itindex, *columntmp);
       iteration_matrix.setRow(*itindex, *columntmp);
-
-
       columnindex ++;
     }
+    DEBUG_EXPR(iteration_matrix.display(););
+    DEBUG_EXPR(WBoundaryConditions.display(););
   }
   else
     RuntimeException::selfThrow("MoreauJeanOSI::computeWBoundaryConditions - not yet implemented for Dynamical system type : " +  Type::name(ds));
+  DEBUG_END("MoreauJeanOSI::_computeWBoundaryConditions\n");
 }
 
 
-void MoreauJeanOSI::computeW(double t, DynamicalSystem& ds, SiconosMatrix& W)
+void MoreauJeanOSI::computeW(double t, SecondOrderDS& ds, SiconosMatrix& W)
 {
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
   DEBUG_BEGIN("MoreauJeanOSI::computeW\n");
@@ -480,9 +487,9 @@ void MoreauJeanOSI::computeW(double t, DynamicalSystem& ds, SiconosMatrix& W)
     else
       W.eye();
 
-    if(d.jacobianqDotForces())
+    if(d.jacobianvForces())
     {
-      SiconosMatrix& C = *d.jacobianqDotForces(); // jacobian according to velocity
+      SiconosMatrix& C = *d.jacobianvForces(); // jacobian according to velocity
       d.computeJacobianqDotForces(t);
       scal(-h * _theta, C, W, false); // W -= h*_theta*C
     }
@@ -525,6 +532,7 @@ void MoreauJeanOSI::computeW(double t, DynamicalSystem& ds, SiconosMatrix& W)
   }
   else RuntimeException::selfThrow("MoreauJeanOSI::computeW - not yet implemented for Dynamical system of type : " +Type::name(ds));
 
+
   DEBUG_END("MoreauJeanOSI::computeW\n");
   // Remark: W is not LU-factorized here.
   // Function PLUForwardBackward will do that if required.
@@ -564,6 +572,7 @@ void MoreauJeanOSI::applyBoundaryConditions(SecondOrderDS& d,  SiconosVector& re
                                             DynamicalSystemsGraph::VIterator dsi, double t,
                                             const SiconosVector & v)
 {
+  DEBUG_BEGIN("MoreauJeanOSI::applyBoundaryConditions(...)\n");
   if(d.boundaryConditions())
   {
     d.boundaryConditions()->computePrescribedVelocity(t);
@@ -579,7 +588,8 @@ void MoreauJeanOSI::applyBoundaryConditions(SecondOrderDS& d,  SiconosVector& re
       double DeltaPrescribedVelocity =
         d.boundaryConditions()->prescribedVelocity()->getValue(columnindex)
         - v.getValue(*itindex);
-
+      DEBUG_PRINTF("index  = %i, value = %e\n", *itindex, d.boundaryConditions()->prescribedVelocity()->getValue(columnindex) );
+      DEBUG_PRINTF("DeltaPrescribedVelocity = %e\n", DeltaPrescribedVelocity);
       WBoundaryConditions.getCol(columnindex, *columntmp);
       residu -= *columntmp * (DeltaPrescribedVelocity);
 
@@ -588,6 +598,7 @@ void MoreauJeanOSI::applyBoundaryConditions(SecondOrderDS& d,  SiconosVector& re
       columnindex ++;
     }
   }
+  DEBUG_END("MoreauJeanOSI::applyBoundaryConditions(...)\n");
 }
 
 
@@ -1029,7 +1040,15 @@ void MoreauJeanOSI::computeFreeState()
       // Note: during computeW, mass and jacobians of forces will be computed/
       if(dsType == Type::LagrangianDS
          || dsType == Type:: NewtonEulerDS)
+      {
         computeW(t, d, W);
+        if(d.boundaryConditions())
+        {
+          _computeWBoundaryConditions(d, *_dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions,W);
+        }
+      }
+
+
       DEBUG_EXPR(W.display(););
       if (dsType == Type::LagrangianLinearDiagonalDS)
       {
@@ -1137,7 +1156,7 @@ void MoreauJeanOSI::computeFreeState()
     //   // with
     //   // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1)
     //   //                                        - h*(1-theta)*forces(ti,vi,qi)
-      
+
     //   // -- Convert the DS into a NewtonEuler one.
     //   NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
     //   // --- ResiduFree computation ---
@@ -1186,8 +1205,8 @@ void MoreauJeanOSI::prepareNewtonIteration(double time)
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
-    DynamicalSystem& ds = *_dynamicalSystemsGraph->bundle(*dsi);
-    computeW(time, ds, *_dynamicalSystemsGraph->properties(*dsi).W);
+    SecondOrderDS &sods = * (std11::static_pointer_cast<SecondOrderDS> (_dynamicalSystemsGraph->bundle(*dsi)));
+    computeW(time, sods, *_dynamicalSystemsGraph->properties(*dsi).W);
   }
 
   if(!_explicitNewtonEulerDSOperators)
@@ -1252,6 +1271,25 @@ struct MoreauJeanOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
+  {
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
+
+    // The normal part is multiplied depends on en
+    if (nslaw.en() > 0.0)
+    {
+      osnsp_rhs (0) +=  nslaw.en() * (*_inter.y_k(_osnsp->inputOutputLevel()))(0);
+    }
+    // The tangential part is multiplied depends on et
+    if (nslaw.et() > 0.0)
+    {
+      osnsp_rhs (1) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(1);
+      if (_inter.nonSmoothLaw()->size()>=2)
+      {
+        osnsp_rhs (2) +=  nslaw.et()  * (*_inter.y_k(_osnsp->inputOutputLevel()))(2);
+      }
+    }
+  }
+  void visit(const NewtonImpactRollingFrictionNSL& nslaw)
   {
     SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
 
@@ -1677,8 +1715,7 @@ void MoreauJeanOSI::updateState(const unsigned int )
         {
           _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(bc, *columntmp);
           /*\warning we assume that W is symmetric in the Lagrangian case*/
-          if (!_dynamicalSystemsGraph->properties(*dsi).W->isSymmetric(1e-10))
-            std::cout <<"Warning, we apply boundary conditions assuming W symmetric" << std::endl;
+
           double value = - inner_prod(*columntmp, v);
           if( d.p(_levelMaxForInput)&& d.p(_levelMaxForInput)->size() > 0)
           {

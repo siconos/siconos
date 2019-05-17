@@ -21,6 +21,8 @@ PY_REGISTER_WITHOUT_HEADER(SiconosSphere, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosPlane, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosBox, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosCylinder, Mechanics);
+PY_REGISTER_WITHOUT_HEADER(SiconosCone, Mechanics);
+PY_REGISTER_WITHOUT_HEADER(SiconosCapsule, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosConvexHull, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosMesh, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosHeightMap, Mechanics);
@@ -28,7 +30,7 @@ PY_FULL_REGISTER(SiconosShape, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosContactorSet, Mechanics);
 PY_FULL_REGISTER(SiconosContactor, Mechanics);
 PY_FULL_REGISTER(ContactR, Mechanics);
-PY_FULL_REGISTER(BodyDS, Mechanics);
+PY_FULL_REGISTER(RigidBodyDS, Mechanics);
 PY_FULL_REGISTER(SiconosCollisionQueryResult, Mechanics);
 PY_FULL_REGISTER(SiconosCollisionManager, Mechanics);
 

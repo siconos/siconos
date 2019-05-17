@@ -199,7 +199,7 @@ unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Intera
   {
     if (relationType == NewtonEuler)
     {
-      // SP::NewtonEulerFrom1DLocalFrameR ri = std11::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> (inter->relation());
+      // SP::NewtonEuler1DR ri = std11::static_pointer_cast<NewtonEuler1DR> (inter->relation());
       // if(ri->_isOnContact)
       //   equalitySize = 1;
       size = 1;

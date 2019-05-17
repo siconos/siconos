@@ -1002,10 +1002,13 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
 
 
   double norm_q = cblas_dnrm2(m , problem->q , 1);
-  numerics_printf_verbose(1,"---- FC3D - ADMM - Problem information");
-  numerics_printf_verbose(1,"---- FC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
-  numerics_printf_verbose(1,"---- FC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
-
+  if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] ==
+      SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_YES)
+  {
+    numerics_printf_verbose(1,"---- FC3D - ADMM - Problem information");
+    numerics_printf_verbose(1,"---- FC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
+    numerics_printf_verbose(1,"---- FC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
+}
   int internal_allocation=0;
   if(!(Fc3d_ADMM_data *)options->solverData)
   {

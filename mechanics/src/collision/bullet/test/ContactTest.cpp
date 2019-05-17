@@ -7,7 +7,7 @@
 #include "SiconosShape.hpp"
 #include "SiconosCollisionManager.hpp"
 #include "SiconosBulletCollisionManager.hpp"
-#include "BodyDS.hpp"
+#include "RigidBodyDS.hpp"
 
 #include "SiconosKernel.hpp"
 
@@ -135,8 +135,8 @@ BounceResult bounceTest(std::string moving,
     fflush(stdout);
 
     // Set up a Siconos Mechanics environment:
-    // A BodyDS with a contactor consisting of a single sphere.
-    SP::BodyDS body(new BodyDS(q0, v0, params.mass));
+    // A RigidBodyDS with a contactor consisting of a single sphere.
+    SP::RigidBodyDS body(new RigidBodyDS(q0, v0, params.mass));
     SP::SiconosContactorSet contactors(new SiconosContactorSet());
     SP::SiconosSphere sphere;
     if (moving=="sphere")

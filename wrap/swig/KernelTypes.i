@@ -1365,7 +1365,7 @@ if (!dcast) {
    int dcast = 0;
    %formacro(%_factory_dispatch_SP_output, FirstOrderLinearTIR, FirstOrderLinearR, FirstOrderType1R, FirstOrderType2R, FirstOrderNonLinearR, FirstOrderR)
    %formacro(%_factory_dispatch_SP_output, LagrangianLinearTIR, LagrangianCompliantR, LagrangianRheonomousR, LagrangianScleronomousR, LagrangianR)
-   %formacro(%_factory_dispatch_SP_output, NewtonEulerFrom3DLocalFrameR, NewtonEulerFrom1DLocalFrameR, NewtonEulerR)
+   %formacro(%_factory_dispatch_SP_output, NewtonEuler3DR, NewtonEuler1DR, NewtonEulerR)
    if (!dcast) {
       %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(SP::Type *), $owner | %newpointer_flags));
    }

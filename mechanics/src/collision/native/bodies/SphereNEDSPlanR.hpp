@@ -26,9 +26,9 @@
 #define SphereNEDSPlanR_h
 
 #include "MechanicsFwd.hpp"
-#include "NewtonEulerFrom3DLocalFrameR.hpp"
+#include "NewtonEuler3DR.hpp"
 
-class SphereNEDSPlanR : public NewtonEulerFrom3DLocalFrameR, public std11::enable_shared_from_this<SphereNEDSPlanR>
+class SphereNEDSPlanR : public NewtonEuler3DR, public std11::enable_shared_from_this<SphereNEDSPlanR>
 {
 private:
   /** serialization hooks

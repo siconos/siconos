@@ -256,7 +256,7 @@ void BlockCSRMatrix::fillH(InteractionsGraph& indexSet)
   _diagsize0->resize(involvedDS.size());
   _diagsize1->resize(involvedDS.size());
   
-  /* only NewtonEulerFrom3DLocalFrameR */
+  /* only NewtonEuler3DR */
   unsigned int index, ac0, ac1;
   for (index= 0, ac0 = 6, ac1 = 3; 
        index < involvedDS.size();

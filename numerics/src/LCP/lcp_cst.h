@@ -51,7 +51,24 @@ enum LCP_SOLVER
   SICONOS_LCP_CONVEXQP_PG = 222
 };
 
-enum LCP_PIVOT
+
+enum SICONOS_LCP_IPARAM
+{
+  /** index in iparam to store type of pivoting methods */
+  SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE =3,
+  /** index in iparam to skip trivial solution */
+  SICONOS_LCP_IPARAM_SKIP_TRIVIAL =12,
+};
+
+
+enum SICONOS_LCP_SKIP_TRIVIAL
+{
+  SICONOS_LCP_SKIP_TRIVIAL_NO=0,
+  SICONOS_LCP_SKIP_TRIVIAL_YES=1
+};
+
+
+enum SICONOS_LCP_PIVOT
 {
   SICONOS_LCP_PIVOT_BARD = 1,
   SICONOS_LCP_PIVOT_LEAST_INDEX = 2,

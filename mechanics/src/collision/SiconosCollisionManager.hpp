@@ -19,7 +19,7 @@
 /*! \file SiconosCollisionManager.hpp
 \brief A mechanics world is a Siconos InteractionManager that supports
   static contactors and dynamic contactors attached to special
-  Dynamical Systems (BodyDS, derived from NewtonEulerDS) found in the
+  Dynamical Systems (RigidBodyDS, derived from NewtonEulerDS) found in the
   NonSmoothDynamicalSystem.
 */
 
@@ -49,7 +49,7 @@ public:
    *  after removing a body from the NonSmoothDynamicalSystem
    *  otherwise contact will occur with a non-graph body which results
    *  in failure. */
-  virtual void removeBody(const SP::BodyDS& body) {}
+  virtual void removeBody(const SP::RigidBodyDS& body) {}
 
   /** Perform an intersection test on all shapes in the contactors and
    * return a vector of all results, ordered by distance from start.

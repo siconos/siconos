@@ -32,10 +32,6 @@
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
 void fc3d_FischerBurmeisterFunction(
   unsigned int problemSize,
   FischerBurmeisterFun3x3Ptr computeACFun3x3,
@@ -176,10 +172,6 @@ int fc3d_nonsmooth_Newton_FischerBurmeister_setDefaultSolverOptions(
 #endif
 
   options->internalSolvers = NULL;
-
-#ifdef HAVE_MPI
-  options->solverData = MPI_COMM_NULL;
-#endif
 
   return 0;
 }

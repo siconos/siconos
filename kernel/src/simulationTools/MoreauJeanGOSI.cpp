@@ -408,7 +408,7 @@ void MoreauJeanGOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix& W
 
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
-    SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
+    SP::SiconosMatrix C = d->jacobianvForces(); // jacobian according to velocity
 
     if(d->mass())
     {

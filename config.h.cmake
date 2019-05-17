@@ -7,6 +7,8 @@
 #cmakedefine HAVE_SICONOS_MECHANICS
 #cmakedefine HAVE_SICONOS_CONTROL
 #cmakedefine HAVE_SICONOS_MECHANISMS
+#cmakedefine HAVE_SICONOS_MECHANISMS
+#cmakedefine HAVE_SICONOS_IO
 #cmakedefine HAVE_PATHFERRIS
 #cmakedefine HAVE_PATHVI
 #cmakedefine HAVE_SORT
@@ -14,7 +16,8 @@
 #cmakedefine HAVE_MLCPSIMPLEX
 #cmakedefine HAVE_TIME_H
 #cmakedefine HAVE_SYSTIMES_H
-#cmakedefine HAVE_MPI
+#cmakedefine SICONOS_HAS_MPI
+#cmakedefine WITH_MPI4PY
 #cmakedefine WITH_MUMPS
 #cmakedefine WITH_UMFPACK
 #cmakedefine WITH_SUPERLU
@@ -80,14 +83,7 @@
 
 // Which version of C++ was used to compile siconos, needed for swig
 #define SICONOS_CXXVERSION @CXXVERSION@
-#cmakedefine SICONOS_USE_BOOST_FOR_CXX11
 #cmakedefine SICONOS_USE_MAP_FOR_HASH
-#cmakedefine SICONOS_STD_SHARED_PTR
-#cmakedefine SICONOS_STD_ARRAY
-#cmakedefine SICONOS_STD_UNORDERED_MAP
-#cmakedefine SICONOS_STD_TUPLE
-#cmakedefine SICONOS_STD_TO_STRING
-#cmakedefine SICONOS_STD_FUNCTIONAL
 
 // are int 64 bits longs
 #cmakedefine SICONOS_INT64

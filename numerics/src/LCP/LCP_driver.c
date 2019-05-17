@@ -78,25 +78,29 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
   int i = 0;
   int n = problem->size;
   double *q = problem->q;
-  while ((i < (n - 1)) && (q[i] >= 0.)) i++;
-  if ((i == (n - 1)) && (q[n - 1] >= 0.))
+
+  if (options->iparam[SICONOS_LCP_IPARAM_SKIP_TRIVIAL] == SICONOS_LCP_SKIP_TRIVIAL_NO)
+  {
+    while ((i < (n - 1)) && (q[i] >= 0.)) i++;
+    if ((i == (n - 1)) && (q[n - 1] >= 0.))
     {
       /* TRIVIAL CASE : q >= 0
        * z = 0 and w = q is solution of LCP(q,M)
        */
       for (int j = 0 ; j < n; j++)
-	{
-	  z[j] = 0.0;
-	  w[j] = q[j];
-	}
+      {
+        z[j] = 0.0;
+        w[j] = q[j];
+      }
       info = 0;
       options->iparam[1] = 0;   /* Number of iterations done */
       options->dparam[1] = 0.0; /* Error */
       if (verbose > 0)
-	printf("LCP_driver_SparseBlockMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
+        printf("LCP_driver_SparseBlockMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
       DEBUG_END("lcp_driver_SparseBlockMatrix(...)\n");
       return info;
     }
+  }
 
   /*************************************************
    *  2 - Call specific solver (if no trivial sol.)
@@ -149,30 +153,32 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
   int i = 0;
   int n = problem->size;
   double *q = problem->q;
-  /*  if (!((options->solverId == SICONOS_LCP_ENUM) && (options->iparam[0] == 1 )))*/
+  if (options->iparam[SICONOS_LCP_IPARAM_SKIP_TRIVIAL] == SICONOS_LCP_SKIP_TRIVIAL_NO)
   {
-    while ((i < (n - 1)) && (q[i] >= 0.)) i++;
-    if ((i == (n - 1)) && (q[n - 1] >= 0.))
+    /*  if (!((options->solverId == SICONOS_LCP_ENUM) && (options->iparam[0] == 1 )))*/
+    {
+      while ((i < (n - 1)) && (q[i] >= 0.)) i++;
+      if ((i == (n - 1)) && (q[n - 1] >= 0.))
       {
         /* TRIVIAL CASE : q >= 0
          * z = 0 and w = q is solution of LCP(q,M)
          */
         for (int j = 0 ; j < n; j++)
-	  {
-	    z[j] = 0.0;
-	    w[j] = q[j];
-	  }
+        {
+          z[j] = 0.0;
+          w[j] = q[j];
+        }
         info = 0;
         options->dparam[1] = 0.0; /* Error */
         if (verbose > 0)
           printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (positive vector q => z = 0 and w = q). \n");
         DEBUG_END("lcp_driver_DenseMatrix(...)\n")
-	  return info;
+          return info;
       }
-  }
+    }
 
-  // trivial solution : size-1 LCP
-  if(n == 1)
+    // trivial solution : size-1 LCP
+    if(n == 1)
     {
       double *M = problem->M->matrix0;
       w[0] = 0.;
@@ -180,11 +186,11 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
       info = 0;
       options->dparam[1] = 0.0; /* Error */
       if (verbose > 0)
-	printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (problem of size 1). \n");
+        printf("LCP_driver_DenseMatrix: found trivial solution for the LCP (problem of size 1). \n");
       DEBUG_END("lcp_driver_DenseMatrix(...)\n")
         return info;
     }
-
+  }
 
   /*************************************************
    *  2 - Call specific solver (if no trivial sol.)
@@ -301,11 +307,11 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
       lcp_pivot(problem, z , w , &info , options);
       break;
     case SICONOS_LCP_BARD:
-      options->iparam[3] = SICONOS_LCP_PIVOT_BARD;
+      options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_BARD;
       lcp_pivot(problem, z , w , &info , options);
       break;
     case SICONOS_LCP_MURTY:
-      options->iparam[3] = SICONOS_LCP_PIVOT_LEAST_INDEX;
+      options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEAST_INDEX;
       lcp_pivot(problem, z , w , &info , options);
       break;
     case SICONOS_LCP_PATHSEARCH:

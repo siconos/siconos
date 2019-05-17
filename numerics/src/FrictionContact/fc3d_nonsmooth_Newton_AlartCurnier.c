@@ -33,10 +33,6 @@
 #include "VI_cst.h"
 #include "SiconosLapack.h"
 
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
-
 #define DEBUG_MESSAGES
 #include "debug.h"
 
@@ -187,14 +183,8 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
   {
     numerics_error("fc3d_nonsmooth_Newton_AlartCurnier","Unknown nsn hybrid solver");
   }
-
-
-
-  
-
-
-
 }
+
 int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   SolverOptions* options)
 {
@@ -235,10 +225,6 @@ int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
 #endif
 
   options->internalSolvers = NULL;
-
-#ifdef HAVE_MPI
-  options->solverData = MPI_COMM_NULL;
-#endif
 
   return 0;
 }

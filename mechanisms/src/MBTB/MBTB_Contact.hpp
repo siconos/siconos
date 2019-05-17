@@ -28,7 +28,7 @@ protected:
     Built during the building of the MBTB_Contact.
     A link to the relation, either MBTB_ContactRelation or MBTB_FC3DContactRelation.
    */
-  SP::NewtonEulerFrom1DLocalFrameR _Relation;
+  SP::NewtonEuler1DR _Relation;
   /*!
     Built during the building of the MBTB_Contact.
     A link to the interaction.
@@ -51,9 +51,9 @@ public:
   MBTB_Contact(unsigned int id,const std::string& contactName, unsigned int indexBody1, int indexBody2,unsigned int indexCAD1,unsigned int indexCAD2,int withFriction);
 
   /** To get the relation. 
-   * \return SP::NewtonEulerFrom1DLocalFrameR the SP on the relation
+   * \return SP::NewtonEuler1DR the SP on the relation
    */
-  inline SP::NewtonEulerFrom1DLocalFrameR relation()
+  inline SP::NewtonEuler1DR relation()
   {
     return _Relation;
   }

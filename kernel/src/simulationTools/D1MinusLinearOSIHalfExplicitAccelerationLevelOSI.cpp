@@ -89,8 +89,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       std11::shared_ptr<SiconosVector> pqold(&*(SiconosVector*)&qold, null_deleter);
       std11::shared_ptr<SiconosVector> pvold(&*(SiconosVector*)&vold, null_deleter);
       DEBUG_EXPR(accFree.display());
-      DEBUG_EXPR(qold->display());
-      DEBUG_EXPR(vold->display());
+      DEBUG_EXPR(qold.display());
+      DEBUG_EXPR(vold.display());
 
       /* compute the force and store in accFree */
       d->computeForces(told, pqold, pvold);
@@ -128,8 +128,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       std11::shared_ptr<SiconosVector> pvold(&*(SiconosVector*)&vold, null_deleter);
 
       DEBUG_EXPR(accFree.display());
-      DEBUG_EXPR(qold->display());
-      DEBUG_EXPR(vold->display());
+      DEBUG_EXPR(qold.display());
+      DEBUG_EXPR(vold.display());
 
       work_tdg =  workVectors[D1MinusLinearOSI::FREE_TDG];
       work_tdg->zero();
@@ -276,8 +276,8 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       v.zero();
 
       DEBUG_EXPR(accFree.display());
-      DEBUG_EXPR(qold->display());
-      DEBUG_EXPR(vold->display());
+      DEBUG_EXPR(qold.display());
+      DEBUG_EXPR(vold.display());
 
 
       residuFree -= 0.5 * h*accFree;
@@ -677,6 +677,8 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
   VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
+  VectorOfBlockVectors& inter_work_block = *indexSet->properties(vertex_inter).workBlockVectors;
+
   // get relation and non smooth law information
   RELATION::TYPES relationType = inter->relation()->getType(); // relation
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -711,7 +713,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
     else if(relationType == NewtonEuler)
     {
       Xfree = DSlink[NewtonEulerR::velocity];
-      DEBUG_PRINT("Xfree = DSlink[LagrangianR::vecocity];\n");
+      DEBUG_PRINT("Xfree = DSlink[NewtonEulerR::velocity];\n");
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
@@ -725,15 +727,15 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitAccelerationLevel(Interactio
     /* get the "free" acceleration of the aggregated ds */
     if(relationType == Lagrangian)
     {
-      Xfree = DSlink[D1MinusLinearOSI::xfree];
+      Xfree = inter_work_block[D1MinusLinearOSI::xfree];
     }
     else if(relationType == NewtonEuler)
     {
-      Xfree = DSlink[D1MinusLinearOSI::xfree];
+      Xfree = inter_work_block[D1MinusLinearOSI::xfree];
     }
     else
       RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - unknown relation type.");
-    DEBUG_PRINT("Xfree = DSlink[LagrangianR::xfree];\n");
+    DEBUG_PRINT("Xfree = DSlink[D1MinusLinearOSI::FREE];\n");
     DEBUG_EXPR(Xfree->display());
     assert(Xfree);
   }

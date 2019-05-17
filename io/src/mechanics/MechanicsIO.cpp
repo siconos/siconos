@@ -7,18 +7,22 @@
 #undef OCC_CLASSES
 #undef MECHANISMS_CLASSES
 
-#include <BodyDS.hpp>
+#include <RigidBodyDS.hpp>
 
 #define XBULLET_CLASSES() \
-  REGISTER(BulletR)
+  REGISTER(BulletR)\
+  REGISTER(Bullet5DR)
 
 #ifdef SICONOS_HAS_BULLET
 #include <BulletR.hpp>
+#include <Bullet5DR.hpp>
 #else
 #include <NewtonEulerDS.hpp>
-#include <NewtonEulerFrom3DLocalFrameR.hpp>
+#include <NewtonEuler3DR.hpp>
+#include <NewtonEuler5DR.hpp>
 #include <SpaceFilter.hpp>
-DUMMY(BulletR, NewtonEulerFrom3DLocalFrameR);
+DUMMY(BulletR, NewtonEuler3DR);
+DUMMY(Bullet5DR, NewtonEuler5DR);
 #endif
 
 #define OCC_CLASSES() \
@@ -29,9 +33,9 @@ DUMMY(BulletR, NewtonEulerFrom3DLocalFrameR);
 #include <OccR.hpp>
 #else
 #include <NewtonEulerDS.hpp>
-#include <NewtonEulerFrom3DLocalFrameR.hpp>
+#include <NewtonEuler3DR.hpp>
 DUMMY(OccBody, NewtonEulerDS);
-DUMMY(OccR, NewtonEulerFrom3DLocalFrameR);
+DUMMY(OccR, NewtonEuler3DR);
 #endif
 
 #define MECHANISMS_CLASSES() \
@@ -42,13 +46,13 @@ DUMMY(OccR, NewtonEulerFrom3DLocalFrameR);
 #include <MBTB_FC3DContactRelation.hpp>
 #include <MBTB_ContactRelation.hpp>
 #else
-#include <NewtonEulerFrom3DLocalFrameR.hpp>
-#include <NewtonEulerFrom1DLocalFrameR.hpp>
-DUMMY(MBTB_FC3DContactRelation, NewtonEulerFrom3DLocalFrameR);
-DUMMY(MBTB_ContactRelation, NewtonEulerFrom1DLocalFrameR);
+#include <NewtonEuler3DR.hpp>
+#include <NewtonEuler1DR.hpp>
+DUMMY(MBTB_FC3DContactRelation, NewtonEuler3DR);
+DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
 #endif
 
-#define VISITOR_CLASSES() \
+#define VISITOR_CLASSES()                       \
   REGISTER(DynamicalSystem)                     \
   REGISTER(LagrangianDS)                        \
   REGISTER(NewtonEulerDS)                       \
@@ -56,12 +60,13 @@ DUMMY(MBTB_ContactRelation, NewtonEulerFrom1DLocalFrameR);
   REGISTER(Disk)                                \
   REGISTER(Circle)                              \
   REGISTER(NewtonEulerR)                        \
-  REGISTER(NewtonEulerFrom1DLocalFrameR)        \
-  REGISTER(NewtonEulerFrom3DLocalFrameR)        \
+  REGISTER(NewtonEuler1DR)                      \
+  REGISTER(NewtonEuler3DR)                      \
+  REGISTER(NewtonEuler5DR)                      \
   REGISTER(PivotJointR)                         \
   REGISTER(KneeJointR)                          \
   REGISTER(PrismaticJointR)                     \
-  REGISTER(BodyDS)                              \
+  REGISTER(RigidBodyDS)                         \
   MECHANISMS_CLASSES()                          \
   OCC_CLASSES()                                 \
   XBULLET_CLASSES()
@@ -137,8 +142,19 @@ struct GetVelocity : public SiconosVisitor
 
 struct ForMu : public Question<double>
 {
-    ANSWER(NewtonImpactFrictionNSL, mu());
-    ANSWER_V_NOUSING(NewtonImpactNSL, 0.);
+  using SiconosVisitor::visit;
+  void visit(const NewtonImpactFrictionNSL& nsl)
+  {
+    answer = nsl . mu();
+  }
+  void visit(const NewtonImpactRollingFrictionNSL& nsl)
+  {
+    answer = nsl . mu();
+  }
+  void visit(const NewtonImpactNSL& nsl)
+  {
+    answer = 0.;
+  }
 };
 
 /* template partial specilization is not possible inside struct, so we
@@ -249,6 +265,21 @@ void ContactPointDomainVisitor::operator()(const BulletR& rel)
   answer.setValue(1, inter->number());
 }
 
+template<>
+void ContactPointDomainVisitor::operator()(const Bullet5DR& rel)
+{
+  answer.resize(2);
+
+  /*
+   * TODO: contact point domain coloring (e.g. based on broadphase).
+   * currently, domain = (x>0):1?0
+   */
+  answer.setValue(0, rel.pc1()->getValue(0) > 0);
+
+  answer.setValue(1, inter->number());
+}
+
+
 template<typename T, typename G>
 SP::SimpleMatrix MechanicsIO::visitAllVerticesForVector(const G& graph) const
 {
@@ -326,8 +357,9 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
       typedef Visitor < Classes <
-                          NewtonEulerFrom1DLocalFrameR,
-                          NewtonEulerFrom3DLocalFrameR,
+                          NewtonEuler1DR,
+                          NewtonEuler3DR,
+                          NewtonEuler5DR,
                           PrismaticJointR,
                           KneeJointR,
                           PivotJointR>,
@@ -370,8 +402,8 @@ SP::SimpleMatrix MechanicsIO::domains(const NonSmoothDynamicalSystem& nsds) cons
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
       typedef Visitor < Classes <
-                          NewtonEulerFrom1DLocalFrameR,
-                          NewtonEulerFrom3DLocalFrameR,
+                          NewtonEuler1DR,
+                          NewtonEuler3DR,
                           PrismaticJointR,
                           KneeJointR,
                           PivotJointR>,

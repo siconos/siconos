@@ -88,7 +88,7 @@ void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 int frictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
-  int k, info = -1 ;
+  int info = -1 ;
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
   /* numerics_set_verbose(1); */
   info = frictionContact_newFromFile(problem, f);

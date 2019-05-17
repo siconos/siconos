@@ -403,7 +403,7 @@ public:
 
   /** print the data of the dynamical system on the standard output
    */
-  void display() const;
+  void display(bool brief = true) const;
   ///@}
 
 

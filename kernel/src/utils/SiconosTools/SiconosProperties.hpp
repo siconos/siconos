@@ -43,13 +43,8 @@
 
 
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <memory>
 namespace std11 = std;
-#else
-#include <boost/shared_ptr.hpp>
-namespace std11 = boost;
-#endif
 
 #include <map>
 

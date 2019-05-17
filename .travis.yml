@@ -30,14 +30,11 @@ python: 3.6
 # is the name and the second the version.
 
 env:
-  - TASK=default:distrib=ubuntu,14.04
-  - TASK=default:distrib=ubuntu,16.04
-  - TASK=default:distrib=ubuntu,16.04:pkgs-=python-env,:pkgs+=python3-env,
   - TASK=default:distrib=ubuntu,18.04
   - TASK=default:distrib=debian,latest
   - TASK=default:distrib=fedora,latest:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
-  - TASK=default:distrib=opensuse,42.3:ci_config=with_cxx11,with_isnan_workaround:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
-  - TASK=default:distrib=ubuntu,17.10:ci_config=with_cxx11
+  # - TASK=default:distrib=opensuse/leap,15.0:ci_config=with_cxx11,with_isnan_workaround:pkgs-=atlas-lapack,:pkgs+=openblas-lapacke,
+  - TASK=default:distrib=ubuntu,17.10
   - TASK=default:pkgs+=lpsolve,
   - TASK=default:pkgs-=atlas-lapack:pkgs+=openblas-lapacke,
   - TASK=default:ci_config=with_mumps_par:pkgs+=mumps-par,

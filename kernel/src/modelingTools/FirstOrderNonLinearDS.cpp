@@ -292,7 +292,7 @@ void FirstOrderNonLinearDS::computeJacobianRhsx(double time)
 
 // ===== MISCELLANEOUS ====
 
-void FirstOrderNonLinearDS::display() const
+void FirstOrderNonLinearDS::display(bool brief) const
 {
   std::cout << " =====> First Order Non Linear DS (number: " << _number << ")." <<std::endl;
   std::cout << "- n (size) : " << _n <<std::endl;

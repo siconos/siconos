@@ -38,8 +38,6 @@ extern "C"
 
 #if defined(HAS_MKL_CBLAS) 
 #include <mkl_cblas.h>
-#elif defined(HAS_ATLAS_CBLAS)
-#include <cblas.h>
 #elif defined(HAS_ACCELERATE)
 #include <Accelerate.h>
 #elif defined(HAS_MATLAB_BLAS)

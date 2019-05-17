@@ -173,7 +173,7 @@ NSM_linear_solver_params* NSM_linearSolverParams_new(void)
   p->solver = NSM_CS_LUSOL;
 #endif
 
-  p->solver_data = NULL;
+  p->linear_solver_data = NULL;
   p->solver_free_hook = NULL;
 
   p->iWorkSize = 0;
@@ -185,6 +185,7 @@ NSM_linear_solver_params* NSM_linearSolverParams_new(void)
 
   return p;
 }
+
 NSM_linear_solver_params* NSM_linearSolverParams(NumericsMatrix* A)
 {
   if(!numericsSparseMatrix(A)->linearSolverParams)
@@ -198,7 +199,7 @@ NSM_linear_solver_params* NSM_linearSolverParams(NumericsMatrix* A)
 
 NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* p)
 {
-  /* First free solver_data if some additional information has been given  */
+  /* First free linear_solver_data if some additional information has been given  */
   if (p->solver_free_hook)
   {
     (*p->solver_free_hook)(p);
@@ -219,10 +220,10 @@ NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* 
     p->dWork = NULL;
   }
 
-  if (p->solver_data)
+  if (p->linear_solver_data)
   {
-    free(p->solver_data);
-    p->solver_data = NULL;
+    free(p->linear_solver_data);
+    p->linear_solver_data = NULL;
   }
 
   if (p->linalg_data)
@@ -240,11 +241,11 @@ void NSM_free_p(void *p)
 {
   assert(p);
   NSM_linear_solver_params* ptr = (NSM_linear_solver_params*) p;
-  CSparseMatrix_lu_factors* cs_lu_A = (CSparseMatrix_lu_factors*)NSM_solver_data(ptr);
+  CSparseMatrix_lu_factors* cs_lu_A = (CSparseMatrix_lu_factors*)NSM_linear_solver_data(ptr);
 
   CSparseMatrix_free_lu_factors(cs_lu_A);
 
-  ptr->solver_data = NULL;
+  ptr->linear_solver_data = NULL;
 }
 
 size_t NSM_nnz(const CSparseMatrix* const A)

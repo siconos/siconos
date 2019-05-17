@@ -240,16 +240,28 @@ public:
   {
     return _isNewtonConverge;
   };
-
+  
+  bool displayNewtonConvergence()
+  {
+    return _displayNewtonConvergence;
+  };
   void setDisplayNewtonConvergence(bool newval)
   {
     _displayNewtonConvergence = newval;
   };
+  
   void setWarnOnNonConvergence(bool newval)
   {
     _warnOnNonConvergence = newval;
   };
-
+  bool warnOnNonConvergence()
+  {
+    return _warnOnNonConvergence;
+  };
+  void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
+  
+  void displayNewtonConvergenceInTheLoop();
+  
   void setResetAllLambda(bool newval)
   {
     _resetAllLambda = newval;

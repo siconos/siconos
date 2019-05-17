@@ -34,7 +34,7 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  * with unilateral contact, impact and Coulomb's friction with \f$\theta\f$ scheme
  *
  * For the linear Lagrangian system, the scheme reads as
- * 
+ *
  \rst
 
  .. math::
@@ -52,7 +52,7 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
     \end{cases}
 
  \endrst
- 
+
  * with  \f$\theta \in [0,1]\f$. The index set \f$\mathcal I_1\f$ is the discrete equivalent
  * to the rule that allows us to apply the Signorini  condition at the velocity level.
  * In the numerical practice, we choose to define this set by
@@ -292,15 +292,15 @@ public:
       linked to this OSI*/
   virtual void initialize_nonsmooth_problems();
 
-  /** initialization of the work vectors and matrices (properties) related to 
-   *  one dynamical system on the graph and needed by the osi 
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi
    * \param t time of initialization
-   * \param ds the dynamical system   
+   * \param ds the dynamical system
    */
   void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
-  /** initialization of the work vectors and matrices (properties) related to 
-   *  one interaction on the graph and needed by the osi 
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
    * \param inter the interaction
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
@@ -313,32 +313,32 @@ public:
    * \return unsigned int
    */
   unsigned int numberOfIndexSets() const {return 2;};
-  
+
   /** initialize iteration matrix W MoreauJeanOSI matrix at time t
    *  \param time
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
+  void initializeIterationMatrixW(double time, SP::SecondOrderDS ds);
 
   /** compute W MoreauJeanOSI matrix at time t
    *  \param time (double)
    *  \param ds a  DynamicalSystem
    *  \param W the result in W
    */
-  void computeW(double time , DynamicalSystem& ds, SiconosMatrix& W);
+  void computeW(double time , SecondOrderDS& ds, SiconosMatrix& W);
 
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem
    *  \param WBoundaryConditions write the result in WBoundaryConditions
    *  \param iteration_matrix the OSI iteration matrix (W)
    */
-  void _computeWBoundaryConditions(DynamicalSystem& ds, SiconosMatrix& WBoundaryConditions, SiconosMatrix& iteration_matrix);
+  void _computeWBoundaryConditions(SecondOrderDS& ds, SiconosMatrix& WBoundaryConditions, SiconosMatrix& iteration_matrix);
 
   /** initialize iteration matrix WBoundaryConditionsMap[ds] MoreauJeanOSI
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant)
    */
-  void _initializeIterationMatrixWBoundaryConditions(DynamicalSystem& ds, const DynamicalSystemsGraph::VDescriptor& dsv);
+  void _initializeIterationMatrixWBoundaryConditions(SecondOrderDS& ds, const DynamicalSystemsGraph::VDescriptor& dsv);
 
   void applyBoundaryConditions(SecondOrderDS& d,  SiconosVector& residu,
                                DynamicalSystemsGraph::VIterator dsi, double t,

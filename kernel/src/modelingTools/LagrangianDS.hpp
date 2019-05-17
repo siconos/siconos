@@ -142,9 +142,6 @@ protected:
   /** state of the system. See details on top of page. */
   VectorOfVectors _q;
 
-  /** initial coordinates of the system */
-  SP::SiconosVector _q0;
-
   /** initial velocity of the system */
   SP::SiconosVector _velocity0;
 
@@ -426,14 +423,6 @@ public:
    */
   void setQPtr(SP::SiconosVector newPtr);
 
-  /** return initial state of the system
-   *  \return pointer on a SiconosVector
-   */
-  inline SP::SiconosVector q0() const
-  {
-    return _q0;
-  }
-
   /** set initial state (copy)
    *  \param newValue
    */
@@ -553,7 +542,14 @@ public:
   {
     return _jacobianFIntqDot;
   }
+  void allocateMass();
+  void allocateJacobianFIntq();
+  void allocateJacobianFIntqDot();
+  void allocateFInt();
+  void allocateFExt();
 
+
+  
   /** set \f$\nabla_{q}F_{int}\f$, (pointer link)
    *  \param newPtr a SP SiconosMatrix
    */
@@ -625,13 +621,6 @@ public:
     return _jacobianqDotForces;
   }
 
-  /** get \f$ \nabla_{\dot q}F(v,q,t,z)\f$ (pointer  link)
-   *  \return pointer on a SiconosMatrix
-   */
-  virtual inline SP::SiconosMatrix jacobianqDotForces() const
-  {
-    return _jacobianqDotForces;
-  }
 
   ///@}
 
@@ -712,28 +701,17 @@ public:
     _hasConstantMass = false;
   }
 
+  
   /** allow to set a specified function to compute FInt
    *  \param pluginPath std::string : the complete path to the plugin
    *  \param functionName std::string : the name of the function to use in this plugin
    */
-  void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName)
-  {
-    _pluginFInt->setComputeFunction(pluginPath, functionName);
-    if(!_fInt)
-      _fInt.reset(new SiconosVector(_ndof));
-    //    Plugin::setFunction(&computeFIntPtr, pluginPath,functionName);
-  }
-
+  void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName);
+  
   /** set a specified function to compute fInt
    *  \param fct a pointer on the plugin function
    */
-  void setComputeFIntFunction(FPtr6 fct)
-  {
-    _pluginFInt->setComputeFunction((void*)fct);
-    if(!_fInt)
-      _fInt.reset(new SiconosVector(_ndof));
-    //    computeFIntPtr = fct;
-  }
+  void setComputeFIntFunction(FPtr6 fct);
 
   /** allow to set a specified function to compute Fext
    *  \param pluginPath std::string : the complete path to the plugin
@@ -912,7 +890,7 @@ public:
 
   /** print the data of the dynamical system on the standard output
    */
-  void display() const;
+  void display(bool brief = true) const;
 
   /** Computes post-impact velocity, using pre-impact velocity and impulse (p) value.
    * Used in EventDriven (LsodarOSI->updateState)

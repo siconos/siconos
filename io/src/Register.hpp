@@ -27,11 +27,7 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/nvp.hpp>
 
-#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <boost/serialization/ser_shared_ptr.hpp>
-#else
-#include <boost/serialization/shared_ptr.hpp>
-#endif
 
 #include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/vector.hpp>

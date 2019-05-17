@@ -79,13 +79,20 @@ public:
   virtual ~SiconosBulletCollisionManager();
 
 protected:
+  bool _with_equality_constraints;
   SiconosBulletOptions _options;
   SiconosBulletStatistics _stats;
 
   /** Provided so that creation of collision points can be overridden.
    * See modify_normals.py in examples/Mechanics/Hacks */
-  virtual SP::BulletR makeBulletR(SP::BodyDS ds1, SP::SiconosShape shape1,
-                                  SP::BodyDS ds2, SP::SiconosShape shape2,
+  virtual SP::BulletR makeBulletR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
+                                  SP::RigidBodyDS ds2, SP::SiconosShape shape2,
+                                  const btManifoldPoint &);
+  
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet5DR makeBullet5DR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
+                                  SP::RigidBodyDS ds2, SP::SiconosShape shape2,
                                   const btManifoldPoint &);
 
 public:
@@ -94,7 +101,7 @@ public:
 
   bool removeStaticContactorSet(StaticContactorSetID id);
 
-  void removeBody(const SP::BodyDS& body);
+  void removeBody(const SP::RigidBodyDS& body);
 
   void updateInteractions(SP::Simulation simulation);
 
@@ -107,6 +114,15 @@ public:
   const SiconosBulletOptions &options() const { return _options; }
   const SiconosBulletStatistics &statistics() const { return _stats; }
   void resetStatistics() { _stats = SiconosBulletStatistics(); }
+
+  /** Set the usage of equality constraints. When the number
+      of objects is huge as in granular material, the usage
+      of equality constraint breaks scalability.
+      This have to be fixed.
+   * \param choice a boolean, default is True.
+   */
+  void useEqualityConstraints(bool choice=true)
+  { _with_equality_constraints = choice; };
 };
 
 #endif /* SiconosBulletCollisionManager.hpp */
