@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "LCP.hpp"
 #include "OSNSMatrix.hpp"
 
@@ -41,7 +41,7 @@ int LCP::numericsCompute()
 {
   // Note FP : wrap call to numerics solver inside this function
   // for python API (e.g. to allow profiling without C struct handling)
-  
+
   // The LCP in Numerics format
   _numerics_problem->M = &*_M->numericsMatrix();
   _numerics_problem->q = _q->getArray();
@@ -49,21 +49,21 @@ int LCP::numericsCompute()
   int info  = 0;
   //const char * name = &*_numerics_solver_options->solverName;
   if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
-    {
-      lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
-      
-      
-    }
-  info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
-				      &*_numerics_solver_options);
-  
-  if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
-    {
-      lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);    
-    }
-  return info;
-  
+  {
+    lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
+
+
   }
+  info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
+                                      &*_numerics_solver_options);
+
+  if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
+  {
+    lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);
+  }
+  return info;
+
+}
 
 int LCP::compute(double time)
 {
