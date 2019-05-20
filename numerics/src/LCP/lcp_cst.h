@@ -54,23 +54,32 @@ enum LCP_SOLVER
 
 enum SICONOS_LCP_IPARAM
 {
+  /** index in iparam to store to the relaxation or regularization parameter */
+  SICONOS_LCP_IPARAM_RHO =3,
+  /** index in iparam to store the sum of local solver iterations number */
+  SICONOS_LCP_IPARAM_NSGS_ITERATIONS_SUM =4,
   /** index in iparam to store type of pivoting methods */
-  SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE =3,
+  SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE =5,
   /** index in iparam to skip trivial solution */
-  SICONOS_LCP_IPARAM_SKIP_TRIVIAL =4,
+  SICONOS_LCP_IPARAM_SKIP_TRIVIAL =6,
   /** index in iparam to store the number of solutions */
-  SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS =5,
+  SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS =7,
   /** index in iparam to store  the current enum */
-  SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM =6,
+  SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM =8,
   /** index in iparam to store the seed for starting enum*/
-  SICONOS_LCP_IPARAM_ENUM_SEED =7,
+  SICONOS_LCP_IPARAM_ENUM_SEED =9,
   /** index in iparam to store the first seed for enum */
-  SICONOS_LCP_IPARAM_ENUM_USE_DGELS =8,
+  SICONOS_LCP_IPARAM_ENUM_USE_DGELS =10,
   /** index in iparam to store to activate multiple solutions search */
-  SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS =9
-
+  SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS =11,
+  /** index in iparam to store to activate multiple solutions search */
+  SICONOS_LCP_IPARAM_LATIN_PARAMETER =12
 };
-
+enum SICONOS_LCP_DPARAM
+{
+  /** index in iparam to store the sum of local error values */
+  SICONOS_LCP_DPARAM_NSGS_LOCAL_ERROR_SUM =4
+};
 
 enum SICONOS_LCP_SKIP_TRIVIAL
 {
@@ -79,7 +88,7 @@ enum SICONOS_LCP_SKIP_TRIVIAL
 };
 
 
-enum SICONOS_LCP_PIVOT
+enum SICONOS_LCP_PIVOT_TYPE
 {
   SICONOS_LCP_PIVOT_BARD = 1,
   SICONOS_LCP_PIVOT_LEAST_INDEX = 2,

@@ -135,8 +135,8 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
   int hasNotConverged = 1;
 
   /* Output from local solver */
-  options[0].iparam[2] = 0;
-  options[0].dparam[2] = 0.0;
+  options[0].iparam[SICONOS_LCP_IPARAM_NSGS_ITERATIONS_SUM] = 0;
+  options[0].dparam[SICONOS_LCP_DPARAM_NSGS_LOCAL_ERROR_SUM] = 0.0;
 
   if (options->numberOfInternalSolvers < 1)
   {
@@ -169,9 +169,9 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
       pos += local_problem->size;
       /* sum of local number of iterations (output from local_driver)*/
       if (options[localSolverNum].iparam != NULL)
-        options[0].iparam[2] += internalSolvers[localSolverNum].iparam[SICONOS_IPARAM_ITER_DONE];
+        options[0].iparam[SICONOS_LCP_IPARAM_NSGS_ITERATIONS_SUM] += internalSolvers[localSolverNum].iparam[SICONOS_IPARAM_ITER_DONE];
       /* sum of local errors (output from local_driver)*/
-      options[0].dparam[2] += internalSolvers[localSolverNum].iparam[SICONOS_DPARAM_RESIDU];
+      options[0].dparam[SICONOS_LCP_DPARAM_NSGS_LOCAL_ERROR_SUM] += internalSolvers[localSolverNum].iparam[SICONOS_DPARAM_RESIDU];
 
       if (infoLocal > 0)
       {

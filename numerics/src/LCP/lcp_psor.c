@@ -48,7 +48,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
   double *ww, *diag;
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tol = options->dparam[SICONOS_DPARAM_TOL];
-  double omega = options->dparam[2]; // Not yet used
+  double omega = options->dparam[SICONOS_LCP_IPARAM_RHO]; // Not yet used
   printf("Warning : omega %f is not used !!!!!\n", omega);
 
   incxn = n;
@@ -211,7 +211,7 @@ int linearComplementarity_psor_setDefaultSolverOptions(SolverOptions* options)
   }
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-  options->dparam[2] = 0.1;
+  options->dparam[SICONOS_LCP_IPARAM_RHO] = 0.1;
 
 
   return 0;

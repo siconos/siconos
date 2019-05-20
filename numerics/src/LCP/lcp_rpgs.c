@@ -55,7 +55,7 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
   /*  buffer_errors = malloc( itermax*sizeof( double ) );*/
 
   double tol = options->dparam[SICONOS_DPARAM_TOL];
-  double rho = options->dparam[2];
+  double rho = options->dparam[SICONOS_LCP_IPARAM_RHO];
   // double omega = options->dparam[3]; // Not yet used
 
 
@@ -245,6 +245,7 @@ int linearComplementarity_rpgs_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
   options->dparam[SICONOS_DPARAM_RESIDU] = 1.0;
+  options->dparam[SICONOS_LCP_IPARAM_RHO] = 1.0;
 
 
   return 0;

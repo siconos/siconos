@@ -103,7 +103,7 @@ parameters:
 * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 * iparam[SICONOS_DPARAM_TOL] (in): tolerance
 * iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
-* dparam[2] (in): rho
+* dparam[SICONOS_LCP_IPARAM_RHO] (in): rho
 
 PSOR Solver
 -----------
@@ -118,7 +118,7 @@ parameters:
 * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 * iparam[SICONOS_DPARAM_TOL] (in): tolerance
 * iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
-* dparam[2] (in): relaxation parameter
+* dparam[SICONOS_LCP_IPARAM_RHO] (in): relaxation parameter
 
 NewtonMin Solver
 ----------------
@@ -131,9 +131,9 @@ parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
 * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
-* iparam[2] (in): if > 0, keep the work vector (reduce the number of memory allocation if the same type of problem is solved multiple times)
-* iparam[3] (in): if > 0. use a non-monotone linear search
-* iparam[4] (in): if a non-monotone linear search is used, specify the number of merit values to remember
+* iparam[] (in): if > 0, keep the work vector (reduce the number of memory allocation if the same type of problem is solved multiple times)
+* iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] (in): if > 0. use a non-monotone linear search
+* iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] (in): if a non-monotone linear search is used, specify the number of merit values to remember
 * iparam[SICONOS_DPARAM_TOL] (in): tolerance
 * iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 
@@ -150,8 +150,8 @@ parameters:
 * iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
 * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 * iparam[2] (in): if > 0, keep the work vector (reduce the number of memory allocation if the same type of problem is solved multiple times)
-* iparam[3] (in): if > 0. use a non-monotone linear search
-* iparam[4] (in): if a non-monotone linear search is used, specify the number of merit values to remember
+* iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] (in): if > 0. use a non-monotone linear search
+* iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] (in): if a non-monotone linear search is used, specify the number of merit values to remember
 * iparam[SICONOS_DPARAM_TOL] (in): tolerance
 * iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 
@@ -168,8 +168,8 @@ parameters:
 * iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed
 * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 * iparam[2] (in): if > 0, keep the work vector (reduce the number of memory allocation if the same type of problem is solved multiple times)
-* iparam[3] (in): if > 0. use a non-monotone linear search
-* iparam[4] (in): if a non-monotone linear search is used, specify the number of merit values to remember
+* iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] (in): if > 0. use a non-monotone linear search
+* iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] (in): if a non-monotone linear search is used, specify the number of merit values to remember
 * iparam[SICONOS_DPARAM_TOL] (in): tolerance
 * iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
 
@@ -213,7 +213,7 @@ parameters:
 * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 * iparam[SICONOS_DPARAM_TOL] (in): tolerance
 * iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
-* dparam[2] (in): latin parameter
+* dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER] (in): latin parameter
 
 Latin_w Solver
 --------------
@@ -244,8 +244,8 @@ parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] (in): maximum number of iterations allowed for GS process
 * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of GS iterations processed
-* iparam[2] (out): sum of all local number of iterations (if it has sense for the local solver)
+* iparam[SICONOS_LCP_IPARAM_NSGS_ITERATIONS_SUM] (out): sum of all local number of iterations (if it has sense for the local solver)
 * iparam[SICONOS_DPARAM_TOL] (in): tolerance
 * iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
-* dparam[2] (in): sum of all local error values
+* dparam[SICONOS_LCP_DPARAM_NSGS_LOCAL_ERROR_SUM] (in): sum of all local error values
 

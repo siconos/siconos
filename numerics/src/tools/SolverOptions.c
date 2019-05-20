@@ -393,7 +393,7 @@ void solver_options_set(SolverOptions* options, int solverId)
     iter_max = 1000;
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    options->dparam[2] = 1.0;
+    options->dparam[SICONOS_LCP_IPARAM_RHO] = 1.0;
     break;
   }
   case SICONOS_LCP_LATIN:
@@ -401,7 +401,7 @@ void solver_options_set(SolverOptions* options, int solverId)
     iter_max = 1000;
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    options->dparam[2] = 0.3;
+    options->dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER] = 0.3;
     break;
   }
   case SICONOS_LCP_LATIN_W:
@@ -409,8 +409,8 @@ void solver_options_set(SolverOptions* options, int solverId)
     iter_max = 1000;
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    options->dparam[2] = 0.3;
-    options->dparam[3] = 1.0;
+    options->dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER] = 0.3;
+    options->dparam[SICONOS_LCP_IPARAM_RHO] = 1.0;
     break;
   }
   case SICONOS_LCP_ENUM:
@@ -419,7 +419,7 @@ void solver_options_set(SolverOptions* options, int solverId)
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     /*use dgels:*/
-    options->iparam[4] = 0;
+    options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS] = 0;
     break;
   }
 
