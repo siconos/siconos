@@ -364,7 +364,10 @@ void solver_options_set(SolverOptions* options, int solverId)
  int dSize = 0;
  int iter_max = 0;
  double tol = 0.0;
-
+ 
+ iSize = 15;
+ dSize = 15;
+ 
  switch (solverId)
  {
   case SICONOS_LCP_PATH:
@@ -379,8 +382,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_LCP_NSQP:
   case SICONOS_LCP_CONVEXQP_PG:
   {
-    iSize = 2;
-    dSize = 2;
     iter_max = 1000;
     /* test here for the SICONOS_LCP_PATH case */
     tol = tol == 0. ? 1e-8 : tol;
@@ -389,8 +390,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   }
   case SICONOS_LCP_RPGS:
   {
-    iSize = 2;
-    dSize = 3;
     iter_max = 1000;
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -399,8 +398,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   }
   case SICONOS_LCP_LATIN:
   {
-    iSize = 2;
-    dSize = 3;
     iter_max = 1000;
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -409,8 +406,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   }
   case SICONOS_LCP_LATIN_W:
   {
-    iSize = 2;
-    dSize = 4;
     iter_max = 1000;
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -420,8 +415,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   }
   case SICONOS_LCP_ENUM:
   {
-    iSize = 5;
-    dSize = 2;
     iter_max = 0; /* this indicates the number of solutions ...  */
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -437,8 +430,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_LCP_NEWTON_FBLSA:
   case SICONOS_LCP_NEWTON_MINFBLSA:
   case SICONOS_VI_BOX_QI:
-    iSize = 7;
-    dSize = 3;
     iter_max = 1000;
     tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -446,8 +437,6 @@ void solver_options_set(SolverOptions* options, int solverId)
     break;
 
   case SICONOS_NCP_PATHSEARCH:
-    iSize = 9;
-    dSize = 8;
     iter_max = 100;
     tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -455,8 +444,6 @@ void solver_options_set(SolverOptions* options, int solverId)
     break;
 
   case SICONOS_VI_BOX_AVI_LSA:
-    iSize = 7;
-    dSize = 3;
     iter_max = 100;
     tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -467,8 +454,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_LCP_AVI_CAOFERRIS:
   case SICONOS_RELAY_AVI_CAOFERRIS:
   case SICONOS_RELAY_AVI_CAOFERRIS_TEST:
-    iSize = 6;
-    dSize = 3;
     iter_max = 10000;
     tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -480,8 +465,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_LCP_PIVOT:
   case SICONOS_LCP_PIVOT_LUMOD:
   case SICONOS_LCP_PATHSEARCH:
-    iSize = 6;
-    dSize = 3;
     iter_max = 10000;
     tol = 100*DBL_EPSILON;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -501,8 +484,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI:
   {
 #ifdef HAVE_GAMS_C_API
-    iSize = 5;
-    dSize = 4; // stupid thing in fc3d_checkTrivialCase in fc3d_driver.c
     iter_max = 10000;
     /* test here for the SICONOS_LCP_GAMS case */
     tol = tol == 0. ? 1e-9 : tol;
@@ -520,8 +501,6 @@ void solver_options_set(SolverOptions* options, int solverId)
 
   case SICONOS_NCP_PATH:
   case SICONOS_VI_BOX_PATH:
-    iSize = 6;
-    dSize = 3;
     iter_max = 10000;
     tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);

@@ -200,7 +200,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   int check;
   lapack_int LAinfo = 0;
   int useDGELS = options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS];
-
+  
   /*OUTPUT param*/
   sCurrentEnum = options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED];
   tol = options->dparam[SICONOS_DPARAM_TOL];
@@ -304,8 +304,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
         {
           numerics_printf("lcp_enum find %i solution with sCurrentEnum = %ld!", numberofSolutions, sCurrentEnum - 1);
         }
-
-
+        *info = 0;
         lcp_fillSolution(z, w, sSize, sWZ, sQ);
         options->iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM ] = (int) sCurrentEnum - 1;
         options->iparam[SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS] = numberofSolutions;
@@ -336,7 +335,7 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
   options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < options->iSize; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
