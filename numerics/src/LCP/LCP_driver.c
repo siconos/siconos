@@ -115,10 +115,10 @@ int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double *
   if ((options->solverId) == SICONOS_LCP_NSGS_SBM)
     lcp_nsgs_SBM(problem, z , w , &info , options);
   else
-    {
-      fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", solver_options_id_to_name(options->solverId));
-      exit(EXIT_FAILURE);
-    }
+  {
+    fprintf(stderr, "LCP_driver_SparseBlockMatrix error: unknown solver named: %s\n", solver_options_id_to_name(options->solverId));
+    exit(EXIT_FAILURE);
+  }
 
   /*************************************************
    *  3 - Computes w = Mz + q and checks validity
@@ -204,144 +204,144 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
      OUT: iter */
   int id = options->solverId;
   switch (id)
-    {
-    case SICONOS_LCP_LEMKE :
-      lcp_lexicolemke(problem, z , w , &info , options);
-      break;
-      /****** PGS Solver ******/
-      /* IN: itermax, tolerance
-	 OUT: iter, error */
-    case SICONOS_LCP_PGS :
-      lcp_pgs(problem, z , w , &info , options);
-      break;
-      /****** CPG Solver ******/
-      /* IN: itermax, tolerance
-	 OUT: iter, error */
-    case SICONOS_LCP_CPG:
-      lcp_cpg(problem, z , w , &info , options);
-      break;
-      /****** Latin Solver ******/
-      /* IN: itermax, tolerance, k_latin
-	 OUT: iter, error */
-    case SICONOS_LCP_LATIN:
-      lcp_latin(problem, z , w , &info , options);
-      break;
-      /****** Latin_w Solver ******/
-      /* IN: itermax, tolerance, k_latin, relax
-	 OUT: iter, error */
-    case SICONOS_LCP_LATIN_W:
-      lcp_latin_w(problem, z , w , &info , options);
-      break;
-      /****** QP Solver ******/
-      /* IN: tolerance
-	 OUT:
-      */
-      /* We assume that the LCP matrix M is symmetric*/
-    case SICONOS_LCP_QP:
-      lcp_qp(problem, z , w , &info , options);
-      break;
-      /****** NSQP Solver ******/
-      /* IN: tolerance
-	 OUT:
-      */
-    case SICONOS_LCP_NSQP:
-      lcp_nsqp(problem, z , w , &info , options);
-      break;
-      /****** Newton min ******/
-      /* IN: itermax, tolerance
-	 OUT: iter, error
-      */
-    case SICONOS_LCP_NEWTONMIN:
-      lcp_newton_min(problem, z , w , &info , options);
-      break;
-      /****** Newton Fischer-Burmeister ******/
-      /* IN: itermax, tolerance
-	 OUT: iter, error
-      */
-    case SICONOS_LCP_NEWTON_FBLSA:
-      lcp_newton_FB(problem, z , w , &info , options);
-      break;
-      /****** Newton min + Fischer-Burmeister ******/
-      /* IN: itermax, tolerance
-	 OUT: iter, error
-      */
-    case SICONOS_LCP_NEWTON_MINFBLSA:
-      lcp_newton_minFB(problem, z , w , &info , options);
-      break;
-      /****** PSOR Solver ******/
-      /* IN: itermax, tolerance, relax
-	 OUT: iter, error
-      */
-    case SICONOS_LCP_PSOR:
-      lcp_psor(problem, z , w , &info , options);
-      break;
-      /****** RPGS (Regularized Projected Gauss-Seidel) Solver ******/
-      /* IN: itermax, tolerance, rho
-	 OUT: iter, error
-      */
-    case SICONOS_LCP_RPGS:
-      lcp_rpgs(problem, z , w , &info , options);
-      break;
-      /****** PATH (Ferris) Solver ******/
-      /* IN: itermax, tolerance, rho
-	 OUT: iter, error
-      */
-    case SICONOS_LCP_PATH:
-      lcp_path(problem, z , w , &info , options);
-      break;
-      /****** Enumeratif Solver ******/
-      /* IN:  tolerance,
-	 OUT: key
-      */
-    case SICONOS_LCP_ENUM:
-      lcp_enum(problem, z , w , &info , options);
-      break;
-      /****** Reformulate as AVI and use a solver by Cao and Ferris ******/
-      /* IN:  tolerance, itermax
-	 OUT: iter, error
-      */
-    case SICONOS_LCP_AVI_CAOFERRIS:
-      lcp_avi_caoferris(problem, z , w , &info , options);
-      break;
-    case SICONOS_LCP_PIVOT:
-      lcp_pivot(problem, z , w , &info , options);
-      break;
-    case SICONOS_LCP_BARD:
-      options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_BARD;
-      lcp_pivot(problem, z , w , &info , options);
-      break;
-    case SICONOS_LCP_MURTY:
-      options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEAST_INDEX;
-      lcp_pivot(problem, z , w , &info , options);
-      break;
-    case SICONOS_LCP_PATHSEARCH:
-      lcp_pathsearch(problem, z , w , &info , options);
-      break;
-    case SICONOS_LCP_PIVOT_LUMOD:
-      lcp_pivot_lumod(problem, z , w , &info , options);
-      break;
-      /*error */
-    case SICONOS_LCP_GAMS:
-      lcp_gams(problem, z, w, &info, options);
-      break;
-    case SICONOS_LCP_CONVEXQP_PG:
-      lcp_ConvexQP_ProjectedGradient(problem, z, w, &info, options);
-      break;
-   default:
-      {
-	fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId));
-	exit(EXIT_FAILURE);
-      }
-    }
+  {
+  case SICONOS_LCP_LEMKE :
+    lcp_lexicolemke(problem, z , w , &info , options);
+    break;
+    /****** PGS Solver ******/
+    /* IN: itermax, tolerance
+       OUT: iter, error */
+  case SICONOS_LCP_PGS :
+    lcp_pgs(problem, z , w , &info , options);
+    break;
+    /****** CPG Solver ******/
+    /* IN: itermax, tolerance
+       OUT: iter, error */
+  case SICONOS_LCP_CPG:
+    lcp_cpg(problem, z , w , &info , options);
+    break;
+    /****** Latin Solver ******/
+    /* IN: itermax, tolerance, k_latin
+       OUT: iter, error */
+  case SICONOS_LCP_LATIN:
+    lcp_latin(problem, z , w , &info , options);
+    break;
+    /****** Latin_w Solver ******/
+    /* IN: itermax, tolerance, k_latin, relax
+       OUT: iter, error */
+  case SICONOS_LCP_LATIN_W:
+    lcp_latin_w(problem, z , w , &info , options);
+    break;
+    /****** QP Solver ******/
+    /* IN: tolerance
+       OUT:
+    */
+    /* We assume that the LCP matrix M is symmetric*/
+  case SICONOS_LCP_QP:
+    lcp_qp(problem, z , w , &info , options);
+    break;
+    /****** NSQP Solver ******/
+    /* IN: tolerance
+       OUT:
+    */
+  case SICONOS_LCP_NSQP:
+    lcp_nsqp(problem, z , w , &info , options);
+    break;
+    /****** Newton min ******/
+    /* IN: itermax, tolerance
+       OUT: iter, error
+    */
+  case SICONOS_LCP_NEWTONMIN:
+    lcp_newton_min(problem, z , w , &info , options);
+    break;
+    /****** Newton Fischer-Burmeister ******/
+    /* IN: itermax, tolerance
+       OUT: iter, error
+    */
+  case SICONOS_LCP_NEWTON_FBLSA:
+    lcp_newton_FB(problem, z , w , &info , options);
+    break;
+    /****** Newton min + Fischer-Burmeister ******/
+    /* IN: itermax, tolerance
+       OUT: iter, error
+    */
+  case SICONOS_LCP_NEWTON_MINFBLSA:
+    lcp_newton_minFB(problem, z , w , &info , options);
+    break;
+    /****** PSOR Solver ******/
+    /* IN: itermax, tolerance, relax
+       OUT: iter, error
+    */
+  case SICONOS_LCP_PSOR:
+    lcp_psor(problem, z , w , &info , options);
+    break;
+    /****** RPGS (Regularized Projected Gauss-Seidel) Solver ******/
+    /* IN: itermax, tolerance, rho
+       OUT: iter, error
+    */
+  case SICONOS_LCP_RPGS:
+    lcp_rpgs(problem, z , w , &info , options);
+    break;
+    /****** PATH (Ferris) Solver ******/
+    /* IN: itermax, tolerance, rho
+       OUT: iter, error
+    */
+  case SICONOS_LCP_PATH:
+    lcp_path(problem, z , w , &info , options);
+    break;
+    /****** Enumeratif Solver ******/
+    /* IN:  tolerance,
+       OUT: key
+    */
+  case SICONOS_LCP_ENUM:
+    lcp_enum(problem, z , w , &info , options);
+    break;
+    /****** Reformulate as AVI and use a solver by Cao and Ferris ******/
+    /* IN:  tolerance, itermax
+       OUT: iter, error
+    */
+  case SICONOS_LCP_AVI_CAOFERRIS:
+    lcp_avi_caoferris(problem, z , w , &info , options);
+    break;
+  case SICONOS_LCP_PIVOT:
+    lcp_pivot(problem, z , w , &info , options);
+    break;
+  case SICONOS_LCP_BARD:
+    options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_BARD;
+    lcp_pivot(problem, z , w , &info , options);
+    break;
+  case SICONOS_LCP_MURTY:
+    options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEAST_INDEX;
+    lcp_pivot(problem, z , w , &info , options);
+    break;
+  case SICONOS_LCP_PATHSEARCH:
+    lcp_pathsearch(problem, z , w , &info , options);
+    break;
+  case SICONOS_LCP_PIVOT_LUMOD:
+    lcp_pivot_lumod(problem, z , w , &info , options);
+    break;
+    /*error */
+  case SICONOS_LCP_GAMS:
+    lcp_gams(problem, z, w, &info, options);
+    break;
+  case SICONOS_LCP_CONVEXQP_PG:
+    lcp_ConvexQP_ProjectedGradient(problem, z, w, &info, options);
+    break;
+  default:
+  {
+    fprintf(stderr, "lcp_driver_DenseMatrix error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId));
+    exit(EXIT_FAILURE);
+  }
+  }
   /*************************************************
    *  3 - Computes w = Mz + q and checks validity
    *************************************************/
   if (options->filterOn > 0)
-    {
-      int info_ = lcp_compute_error(problem, z, w, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
-      if (info <= 0) /* info was not set or the solver was happy */
-	info = info_;
-    }
+  {
+    int info_ = lcp_compute_error(problem, z, w, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
+    if (info <= 0) /* info was not set or the solver was happy */
+      info = info_;
+  }
   DEBUG_END("lcp_driver_DenseMatrix(...)\n")
     return info;
 
@@ -353,11 +353,10 @@ int linearComplementarity_driver(LinearComplementarityProblem* problem, double *
   DEBUG_BEGIN("linearComplementarity_driver(...)\n");
   /* Checks inputs */
   assert(problem && z && w &&
-	 "lcp_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");
+         "lcp_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
-
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
 
@@ -365,13 +364,13 @@ int linearComplementarity_driver(LinearComplementarityProblem* problem, double *
   DEBUG_PRINTF("storageType = %i\n", storageType);
   /* Sparse Block Storage */
   if (storageType == 1)
-    {
-      info = lcp_driver_SparseBlockMatrix(problem, z , w, options);
-    }
+  {
+    info = lcp_driver_SparseBlockMatrix(problem, z , w, options);
+  }
   else
-    {
-      info = lcp_driver_DenseMatrix(problem, z , w, options);
-    }
+  {
+    info = lcp_driver_DenseMatrix(problem, z , w, options);
+  }
   DEBUG_END("linearComplementarity_driver(...)\n");
   return info;
 }
