@@ -99,13 +99,13 @@ int relay_enum_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* opt
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL ;/* (double*) malloc((3*problem->size +problem->size*problem->size)*sizeof(double)); */
   options->iWork = NULL ; /* (int*) malloc(2*problem->size*sizeof(int)); */
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 15; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
