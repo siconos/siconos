@@ -70,7 +70,7 @@ public:
 
   /** destructor
    */
-  ~LinearComplementaritySystemsNSDS();
+  ~LinearComplementaritySystemsNSDS(){};
 
   // --- GETTERS/SETTERS ---
   
