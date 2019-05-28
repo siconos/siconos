@@ -2147,8 +2147,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if verbose_progress:
                 self.print_verbose('step', k, 'of', k0 + int((T - t0) / h)-1)
 
-            if self.start_run_iteration_hook is not None:
-                self.log(self.start_run_iteration_hook(self))
+            if self._start_run_iteration_hook is not None:
+                self.log(self._start_run_iteration_hook(self))
                 
             self.log(self.import_births(body_class=body_class,
                                   shape_class=shape_class,
@@ -2247,8 +2247,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     return False
             self.log(simulation.nextStep, with_timer)()
 
-            if self.end_run_iteration_hook is not None:
-                self.log(self.end_run_iteration_hook(self))
+            if self._end_run_iteration_hook is not None:
+                self.log(self._end_run_iteration_hook(self))
 
             self.print_verbose ('')
             k += 1
