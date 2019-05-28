@@ -775,7 +775,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     siconos.io.mechanics_hdf5.data(self.log_data()
                                                    [fun.__name__],
                                                    'timing', 1), endt)
-                if (isinstance(output, numbers.Number))
+                if (isinstance(output, numbers.Number)):
                 siconos.io.mechanics_hdf5.add_line(
                     siconos.io.mechanics_hdf5.data(self.log_data()
                                                    [fun.__name__],
