@@ -16,7 +16,7 @@ import h5py
 import bisect
 import time
 import shutil
-
+import pickle
 
 import tempfile
 from contextlib import contextmanager
@@ -724,6 +724,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._initializing = True
         self._contact_index_set = 1
         self._scheduled_births = []
+        self._start_run_iteration_hook = None
+        self._end_run_iteration_hook = None
 
     def __enter__(self):
         super(MechanicsHdf5Runner, self).__enter__()
@@ -770,8 +772,14 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 print('..... {0:6.2e} s'.format(endt))
                 siconos.io.mechanics_hdf5.group(self.log_data(), fun.__name__)
                 siconos.io.mechanics_hdf5.add_line(
-                    siconos.io.mechanics_hdf5.data(self.log_data()[fun.__name__],
+                    siconos.io.mechanics_hdf5.data(self.log_data()
+                                                   [fun.__name__],
                                                    'timing', 1), endt)
+                siconos.io.mechanics_hdf5.add_line(
+                    siconos.io.mechanics_hdf5.data(self.log_data()
+                                                   [fun.__name__],
+                                                   'value', 1),
+                    pickle.dumps(output))
                 return output
             return logged
         else:
@@ -1642,6 +1650,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     np.concatenate((times,
                                     contact_points),
                                    axis=1)
+                # return the number of contacts
+                return len(contact_points)
+            return 0
+        return 0
 
     def output_domains(self):
         """
@@ -1841,7 +1853,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             osi=Kernel.MoreauJeanOSI,
             contraint_activation_threshold=0.0,
             explode_Newton_solve=False,
-            display_Newton_convergence=False):
+            display_Newton_convergence=False,
+            start_run_iteration_hook=None,
+            end_run_iteration_hook=None
+            ):
         """
         Run a simulation from inputs in hdf5 file.
         parameters are:
@@ -2132,6 +2147,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if verbose_progress:
                 self.print_verbose('step', k, 'of', k0 + int((T - t0) / h)-1)
 
+            if self.start_run_iteration_hook is not None:
+                self.log(self.start_run_iteration_hook(self))
+                
             self.log(self.import_births(body_class=body_class,
                                   shape_class=shape_class,
                                   face_class=face_class,
@@ -2228,6 +2246,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     print('precision is larger exit_tolerance')
                     return False
             self.log(simulation.nextStep, with_timer)()
+
+            if self.end_run_iteration_hook is not None:
+                self.log(self.end_run_iteration_hook(self))
 
             self.print_verbose ('')
             k += 1
