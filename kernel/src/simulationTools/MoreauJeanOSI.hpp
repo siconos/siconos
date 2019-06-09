@@ -119,14 +119,20 @@ protected:
   /** theta-scheme parameter */
   double _theta;
 
-  /** A gamma parameter for the integration scheme to each DynamicalSystem of the OSI
-   * This parameter is used to apply a theta-method to the input $r$
+  /** A gamma parameter for the forecast of activation of constraints
+   * leap-frog estimation of the constraints
+   * $\tilde y_k =  y_k + \gamma * h * ydot $
    */
   double _gamma;
 
   /** a boolean to know if the gamma-parameter must be used or not
    */
   bool _useGamma;
+
+  /** Constraint activation threshold 
+   *
+   */
+  double _contraintActivationThreshold;
 
   /** a boolean to know if the parameter must be used or not
    */
@@ -263,6 +269,17 @@ public:
     _useGammaForRelation = newUseGammaForRelation;
     if(_useGammaForRelation) _useGamma = false;
   };
+  /** set the constraint activation threshold */
+  inline void setContraintActivationThreshold (double v)
+  {
+    _contraintActivationThreshold = v;
+  }
+  
+  /** get the constraint activation threshold */
+  inline double contraintActivationThreshold ()
+  {
+    return _contraintActivationThreshold ;
+  }
 
   /** get boolean _explicitNewtonEulerDSOperators for the relation
    *  \return a Boolean
