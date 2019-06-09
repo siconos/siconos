@@ -1831,6 +1831,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             friction_contact_trace_params=None,
             contact_index_set=1,
             osi=Kernel.MoreauJeanOSI,
+            contraint_activation_threshold=0.0,
             explode_Newton_solve=False,
             display_Newton_convergence=False):
         """
@@ -1942,7 +1943,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
 
         self._osi=osi(theta)
-
+        if (osi == Kernel.MoreauJeanOSI):
+            self._osi.setContraintActivationThreshold(contraint_activation_threshold)
         # (2) Time discretisation --
         timedisc=TimeDiscretisation(t0, h)
 
@@ -2181,8 +2183,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     + self._interman.statistics().existing_interactions_processed)
             else:
                 number_of_contacts = osnspb.getSizeOutput()//3
+            
             if verbose and number_of_contacts > 0 :
-                number_of_contacts = osnspb.getSizeOutput()//3
                 self.print_verbose('number of contacts', number_of_contacts)
                 self.print_solver_infos()
 
