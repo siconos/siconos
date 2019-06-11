@@ -1888,8 +1888,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if output_backup_frequency is not None:
             self._output_backup_frequency=output_backup_frequency
 
-
-
         if output_backup is not None:
             self._output_backup=output_backup
 
@@ -2166,9 +2164,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 log(self._out.flush)()
 
-
-            if (self._output_backup and (k % self._output_backup_frequency== 0)) or (k == 1):
-                shutil.copyfile(self._io_filename, self._io_filename_backup)
+            if self._output_backup:
+                if (k % self._output_backup_frequency == 0) or (k == 1):
+                    shutil.copyfile(self._io_filename, self._io_filename_backup)
 
             log(simulation.clearNSDSChangeLog, with_timer)()
 
