@@ -613,6 +613,21 @@ static inline void cross3(double* restrict a, double* restrict b, double* restri
   *c   = *a0 * *b1 - *a1 * *b0;
 }
 
+/** norm : || a ||
+ *  may underflow & overflow
+ * \param[in] a a[2]
+ * \return the norm
+ */
+static inline double hypot2(double* a)
+{
+  double r;
+
+  r = *a * *a;
+  a++;
+  r += *a * *a;
+  return sqrt(r);
+}
+
 
 /** norm : || a ||
  *  may underflow & overflow
