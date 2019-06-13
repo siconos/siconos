@@ -395,7 +395,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(Solv
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-08;
 
   return 0;
 }
