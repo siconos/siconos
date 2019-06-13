@@ -108,17 +108,19 @@ int rolling_fc3d_projectionOnCone_solve(
   double normUT, normOmegaT;
   /* cblas_dcopy_msan(nLocal , qLocal, incx , velocity , incy); */
   /* cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocity, incy); */
-   for (int i = 0; i < 5; i++) velocity[i]
-                              = MLocal[i + 0 * 5] * reaction[0] + qLocal[i]
-                              + MLocal[i + 1 * 5] * reaction[1]
-                              + MLocal[i + 2 * 5] * reaction[2]
-                              + MLocal[i + 3 * 5] * reaction[3]
-                              + MLocal[i + 4 * 5] * reaction[4];
-   DEBUG_EXPR(NV_display(velocity,5););
-
+  for (int i = 0; i < 5; i++) velocity[i]
+                                = MLocal[i + 0 * 5] * reaction[0] + qLocal[i]
+                                + MLocal[i + 1 * 5] * reaction[1]
+                                + MLocal[i + 2 * 5] * reaction[2]
+                                + MLocal[i + 3 * 5] * reaction[3]
+                                + MLocal[i + 4 * 5] * reaction[4];
+  DEBUG_EXPR(NV_display(velocity,5););
   
-  normUT = hypot(velocity[1], velocity[2]);
-  normOmegaT = hypot(velocity[3], velocity[4]);
+  normUT = sqrt(velocity[1] * velocity[1] + velocity[2] * velocity[2]);
+  normOmegaT = sqrt(velocity[3] * velocity[3] + velocity[4] * velocity[4]);
+  /* hypot of libm is sure but really slow */
+  /* normUT = hypot(velocity[1], velocity[2]); */
+  /* normOmegaT = hypot(velocity[3], velocity[4]); */
   reaction[0] -= an * (velocity[0] + mu_i * normUT+ mu_r_i*normOmegaT);
   reaction[1] -= an * velocity[1];
   reaction[2] -= an * velocity[2];
@@ -261,10 +263,11 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
     int success = 0;
     rho_k=rho / tau;
 
-    /* normUT = sqrt(velocity_k[1] * velocity_k[1] + velocity_k[2] * velocity_k[2]); */
-    /* normOmegaT = sqrt(velocity_k[3] * velocity_k[3] + velocity_k[4] * velocity_k[4]); */
-    normUT = hypot(velocity_k[1], velocity_k[2]);
-    normOmegaT = hypot(velocity_k[3], velocity_k[4]);
+    normUT = sqrt(velocity_k[1] * velocity_k[1] + velocity_k[2] * velocity_k[2]);
+    normOmegaT = sqrt(velocity_k[3] * velocity_k[3] + velocity_k[4] * velocity_k[4]);
+    /* hypot of libm is sure but really slow */
+    /* normUT = hypot(velocity_k[1], velocity_k[2]); */
+    /* normOmegaT = hypot(velocity_k[3], velocity_k[4]); */
     /* ls_itermax=1; */
     DEBUG_PRINTF("ls_itermax =%i\n", ls_itermax);
     while (!success && (ls_iter < ls_itermax))

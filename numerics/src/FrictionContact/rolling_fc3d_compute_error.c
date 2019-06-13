@@ -52,7 +52,12 @@ void rolling_fc3d_unitary_compute_and_add_error(
   DEBUG_PRINTF(" tilde u[0] = %f\n", u[0] + mu *  hypot(u[1], u[2]) + mur * hypot(u[3], u[4] ));
   /* Compute the modified local velocity */
   //normUT = hypot(u[1], u[2]); // i.e sqrt(u[ic3p1]*u[ic3p1]+u[ic3p2]*u[ic3p2]);
-  worktmp[0] = r[0] -  u[0] - mu *  hypot(u[1], u[2]) - mur * hypot(u[3], u[4]);
+  /* hypot of libm is sure but really slow */
+  /* worktmp[0] = r[0] -  u[0] - mu *  hypot(u[1], u[2]) - mur * hypot(u[3], u[4]); */
+  
+  worktmp[0] = r[0] -  u[0]
+    - mu  * sqrt(u[1] * u[1] + u[2] * u[2])
+    - mur * sqrt(u[3] * u[3] + u[4] * u[4]);
   worktmp[1] = r[1] -  u[1] ;
   worktmp[2] = r[2] -  u[2] ;
   worktmp[3] = r[3] -  u[3] ;
