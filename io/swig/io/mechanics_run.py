@@ -1821,6 +1821,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             projection_tolerance=1e-8,
             projection_tolerance_unilateral=1e-8,
             numerics_verbose=False,
+            numerics_verbose_level=0,
             violation_verbose=False,
             verbose=True,
             verbose_progress=True,
@@ -2051,9 +2052,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         solverOptions.iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
         solverOptions.iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
 
-
+        
         osnspb.setNumericsVerboseMode(numerics_verbose)
-        #Numerics.numerics_set_verbose(3)
+        if numerics_verbose:
+            Numerics.numerics_set_verbose(numerics_verbose_level)
 
         # keep previous solution
         osnspb.setKeepLambdaAndYState(True)

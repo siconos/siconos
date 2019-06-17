@@ -218,6 +218,10 @@ public:
   /** Turn on/off verbose mode in numerics solver*/
   void setNumericsVerboseMode(bool vMode);
 
+  
+  /**  set the verbose level in numerics solver*/
+  void setNumericsVerboseLevel(int level);
+
   /** Check if the OSNSPb has interactions.
       \return bool = true if the  osnsp has interactions, i.e. indexSet(_indexSetLevel)->size >0 
    */
