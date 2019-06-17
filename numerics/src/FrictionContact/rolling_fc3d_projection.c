@@ -217,6 +217,10 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
   /* double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7]; */
   double tau=2.0/3.0, tauinv = 3.0/2.0,  L= 0.9, Lmin =0.3;
 
+  numerics_printf("--  rolling_fc3d_projectionOnConeWithLocalIteration_solve contact = %i", options->iparam[4] );
+  numerics_printf("--  rolling_fc3d_projectionOnConeWithLocalIteration_solve | localiter \t| rho \t\t\t| error\t\t\t|");
+  numerics_printf("--                                                        | %i \t\t| %.10e\t| %.10e\t|", localiter, rho, localerror);
+
   /*     printf ("localtolerance = %14.7e\n",localtolerance ); */
   while ((localerror > localtolerance) && (localiter < iparam[0]))
   {
@@ -356,15 +360,13 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
         rho =rho_k;
 
       /* rho_k=1.0; */
-      /* rho=1.0 */
+      /* rho=1.0; */
 
-        ;
-    if (verbose > 1)
-    {
-      printf("--  rolling_fc3d_projectionOnConeWithLocalIteration_solve localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
+      
+      
+      
+      numerics_printf("--                                                        | %i \t\t| %.10e\t| %.10e\t|", localiter, rho, localerror);
 
-    }
-    //getchar();
 
   }
   options->dWork[options->iparam[4]] =rho;
@@ -394,7 +396,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(Solv
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   solver_options_nullify(options);
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-08;
 
   return 0;
