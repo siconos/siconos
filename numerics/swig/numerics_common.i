@@ -33,6 +33,10 @@
     {
       gfc3d_setDefaultSolverOptions(SO, id);
     }
+    else if (id >= 3000 && id < 3100)
+    {
+      rolling_fc3d_setDefaultSolverOptions(SO, id);
+    }
     else
     {
       SWIG_Error(SWIG_RuntimeError, "Unknown friction contact problem solver");
