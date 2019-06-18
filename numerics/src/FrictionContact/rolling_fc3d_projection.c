@@ -178,8 +178,8 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
   double mu_i = localproblem->mu[0];
   double mu_r_i = localproblem->mu_r[0];  /* int nLocal = 5; */
 
-
-  /*   /\* Builds local problem for the current contact *\/ */
+  DEBUG_EXPR(NM_dense_display(MLocal, 5,5,5););
+  /*   /\* Build local problem for the current contact *\/ */
   /*   rolling_fc3d_projection_update(localproblem, reaction); */
 
 
@@ -283,8 +283,8 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
       reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
       reaction[3] = reaction_k[3] - rho_k * velocity_k[3];
       reaction[4] = reaction_k[4] - rho_k * velocity_k[4];
-      DEBUG_PRINT("r-rho tilde v before projection")
-      DEBUG_EXPR(NV_display(reaction,5););
+      /* DEBUG_PRINT("r-rho tilde v before projection") */
+      /* DEBUG_EXPR(NV_display(reaction,5);); */
 /* #ifdef DEBUG_MESSAGES */
 /*       display_status_rolling_cone(projectionOnRollingCone(&reaction[0], mu_i, mu_r_i)); */
 /* #else */
@@ -303,8 +303,22 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
                                 + MLocal[i + 2 * 5] * reaction[2]
                                 + MLocal[i + 3 * 5] * reaction[3]
                                 + MLocal[i + 4 * 5] * reaction[4];
-      DEBUG_EXPR(NV_display(velocity,5););
 
+      
+      /* double normUT_1 = sqrt(velocity[1] * velocity[1] + velocity[2] * velocity[2]); */
+      /* double normOmegaT_1 = sqrt(velocity[3] * velocity[3] + velocity[4] * velocity[4]); */
+      /* /\* velocity[0] = velocity[0] + mu_i * normUT_1 + mu_r_i*normOmegaT; *\/ */
+      
+      /* /\* DEBUG_EXPR(NV_display(velocity,5);); *\/ */
+
+
+      /* a1 = sqrt( */
+      /*   (velocity_k[0] + mu_i * normUT + mu_r_i*normOmegaT - velocity[0] - mu_i * normUT_1 - mu_r_i*normOmegaT_1) * */
+      /*   (velocity_k[0] + mu_i * normUT + mu_r_i*normOmegaT - velocity[0] - mu_i * normUT_1 - mu_r_i*normOmegaT_1) + */
+      /*   (velocity_k[1] - velocity[1]) * (velocity_k[1] - velocity[1]) + */
+      /*   (velocity_k[2] - velocity[2]) * (velocity_k[2] - velocity[2]) + */
+      /*   (velocity_k[3] - velocity[3]) * (velocity_k[3] - velocity[3]) + */
+      /*   (velocity_k[4] - velocity[4]) * (velocity_k[4] - velocity[4])); */
 
       a1 = sqrt(
         (velocity_k[0] - velocity[0]) * (velocity_k[0] - velocity[0]) +
@@ -313,6 +327,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
         (velocity_k[3] - velocity[3]) * (velocity_k[3] - velocity[3]) +
         (velocity_k[4] - velocity[4]) * (velocity_k[4] - velocity[4]));
 
+      
       a2 = sqrt(
         (reaction_k[0] - reaction[0]) * (reaction_k[0] - reaction[0]) +
         (reaction_k[1] - reaction[1]) * (reaction_k[1] - reaction[1]) +
@@ -327,7 +342,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
       DEBUG_PRINTF("rho_k = %12.8e\t", rho_k);
       DEBUG_PRINTF("a1 = %12.8e\t", a1);
       DEBUG_PRINTF("a2 = %12.8e\t", a2);
-      DEBUG_PRINTF("norm reaction = %12.8e\t",
+      DEBUG_PRINTF("norm reaction = %12.8e\n",
                    sqrt(reaction[0] * reaction[0] +
                         reaction[1] * reaction[1] +
                         reaction[2] * reaction[2] +
@@ -359,8 +374,8 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(RollingFrictionContact
       else
         rho =rho_k;
 
-      /* rho_k=1.0; */
-      /* rho=1.0; */
+      /* rho_k=1e-4; */
+      /* rho=1e-4; */
 
       numerics_printf_verbose(2,"--                                                        | %i \t\t| %.10e\t| %.10e\t|", localiter, rho, localerror);
 
@@ -393,7 +408,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(Solv
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   solver_options_nullify(options);
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-08;
 
   return 0;
