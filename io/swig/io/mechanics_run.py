@@ -1853,7 +1853,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             friction_contact_trace_params=None,
             contact_index_set=1,
             osi=Kernel.MoreauJeanOSI,
-            contraint_activation_threshold=0.0,
+            constraint_activation_threshold=0.0,
             explode_Newton_solve=False,
             display_Newton_convergence=False,
             start_run_iteration_hook=None,
@@ -1971,7 +1971,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         self._osi=osi(theta)
         if (osi == Kernel.MoreauJeanOSI):
-            self._osi.setContraintActivationThreshold(contraint_activation_threshold)
+            self._osi.setConstraintActivationThreshold(constraint_activation_threshold)
         # (2) Time discretisation --
         timedisc=TimeDiscretisation(t0, h)
 

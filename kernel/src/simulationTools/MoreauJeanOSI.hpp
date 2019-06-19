@@ -132,7 +132,7 @@ protected:
   /** Constraint activation threshold 
    *
    */
-  double _contraintActivationThreshold;
+  double _constraintActivationThreshold;
 
   /** a boolean to know if the parameter must be used or not
    */
@@ -270,15 +270,15 @@ public:
     if(_useGammaForRelation) _useGamma = false;
   };
   /** set the constraint activation threshold */
-  inline void setContraintActivationThreshold (double v)
+  inline void setConstraintActivationThreshold (double v)
   {
-    _contraintActivationThreshold = v;
+    _constraintActivationThreshold = v;
   }
   
   /** get the constraint activation threshold */
-  inline double contraintActivationThreshold ()
+  inline double constraintActivationThreshold ()
   {
-    return _contraintActivationThreshold ;
+    return _constraintActivationThreshold ;
   }
 
   /** get boolean _explicitNewtonEulerDSOperators for the relation
