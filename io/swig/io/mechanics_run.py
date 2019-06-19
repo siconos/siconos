@@ -1835,6 +1835,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             solver=Numerics.SICONOS_FRICTION_3D_NSGS,
             local_solver=Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID,
             itermax=100000,
+            osnspb_max_size=0,
             tolerance=1e-8,
             exit_tolerance=None,
             projection_itermax=20,
@@ -1881,6 +1882,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
           solver : OneStepNsProblem solver  (default Numerics.SICONOS_FRICTION_3D_NSGS)
           local_solver : OneStepNsProblem solver local solver (default Numerics.SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID)
           itermax : maximum number of iteration for solver (default 100000)
+          osnspb_max_size : estimation of maximum number of dynamical systems for memory pre-allocations.
+                            if 0, set to simulation().nonSmoothDynamicalSystem().topology().numberOfConstraints()
+                            (default 0)
           tolerance : friction contact solver tolerance (default 1e-8)
           exit_tolerance : if not None, the simulation will stop if precision >= exit_tolerance (default None)
           numerics_verbose : set verbose mode in numerics
@@ -2003,7 +2007,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     else:
                         osnspb=GlobalFrictionContact(3,solver)
                         osnspb.setMStorageType(1)
-                    osnspb.setMaxSize(30000)
+                    osnspb.setMaxSize(osnspb_max_size)
             else:
                 if (nb_of_nslaw_type >1):
                     osnspb=GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN)
@@ -2022,7 +2026,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         fc_internal_solver_options = solverOptions.internalSolvers[fc_index]
                         fc_internal_solver_options.iparam[0] = 100  # Local solver iterations
                         fc_internal_solver_options.solverId = local_solver
-                        osnspb.setMaxSize(30000)
+                        osnspb.setMaxSize(osnspb_max_size)
                         osnspb.setMStorageType(1)
                     elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
                          osnspb=RollingFrictionContact(5)
@@ -2053,11 +2057,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         fc_internal_solver_options.iparam[0] = itermax
                         fc_internal_solver_options.dparam[0] = tolerance
                         osnspb.setMStorageType(2)
-                    osnspb.setMaxSize(30000)
+                    osnspb.setMaxSize(osnspb_max_size)
             else:
                 from siconos.io.FrictionContactTrace import FrictionContactTrace
                 osnspb=FrictionContactTrace(3, solver,friction_contact_trace_params,nsds)
-                osnspb.setMaxSize(30000)
+                osnspb.setMaxSize(osnspb_max_size)
                 osnspb.setMStorageType(1)
 
 
@@ -2089,7 +2093,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             so_pos = osnspb.numericsSolverOptions()
             so_pos.iparam[0]=itermax
             so_pos.dparam[0]=tolerance
-            osnspb_pos.setMaxSize(30000)
+            osnspb_pos.setMaxSize(osnspb_max_size)
             osnspb_pos.setMStorageType(0) # "not yet implemented for sparse storage"
             osnspb_pos.setNumericsVerboseMode(numerics_verbose)
             osnspb_pos.setKeepLambdaAndYState(True)
