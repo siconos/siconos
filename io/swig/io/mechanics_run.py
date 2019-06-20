@@ -1776,8 +1776,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     def explode_Newton_solve(self,  with_timer):
         s = self._simulation
-        self.log(s.initialize,with_timer)()
-        self.log(s.resetLambdas,with_timer)()
+        self.log(s.initialize, with_timer)()
+        self.log(s.resetLambdas, with_timer)()
         # Again the access to s._newtonTolerance generates a segfault due to director
         newtonTolerance = s.newtonTolerance()
         newtonMaxIteration = s.newtonMaxIteration()
@@ -1788,26 +1788,27 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         newtonNbIterations =0
         isNewtonConverge =False
-        self.log(s.initializeNewtonLoop,with_timer)()
+        self.log(s.initializeNewtonLoop, with_timer)()
         while (not isNewtonConverge) and (newtonNbIterations <newtonMaxIteration):
             #self.print_verbose('newtonNbIterations',newtonNbIterations)
             info=0
             newtonNbIterations = newtonNbIterations+1
-            self.log(s.prepareNewtonIteration,with_timer)()
-            self.log(s.computeFreeState,with_timer)()
+            self.log(s.prepareNewtonIteration, with_timer)()
+            self.log(s.computeFreeState, with_timer)()
             if s.numberOfOSNSProblems() >0:
-                info = self.log(s.computeOneStepNSProblem,with_timer)(SICONOS_OSNSP_TS_VELOCITY)
-            self.log(s.DefaultCheckSolverOutput,with_timer)(info);
-            self.log(s.updateInput,with_timer)();
-            self.log(s.updateState,with_timer)();
+                info = self.log(s.computeOneStepNSProblem, with_timer)(SICONOS_OSNSP_TS_VELOCITY)
+            self.log(s.DefaultCheckSolverOutput, with_timer)(info);
+            self.log(s.updateInput, with_timer)();
+            self.log(s.updateState, with_timer)();
             if (not isNewtonConverge) and (newtonNbIterations <newtonMaxIteration):
-                self.log(s.updateOutput,with_timer)()
-            isNewtonConverge = self.log(s.newtonCheckConvergence,with_timer)(newtonTolerance)
+                self.log(s.updateOutput, with_timer)()
+            isNewtonConverge = self.log(s.newtonCheckConvergence, with_timer)
+            (newtonTolerance)
             if s.displayNewtonConvergence():
                 s.displayNewtonConvergenceInTheLoop();
             if (not isNewtonConverge) and (not info):
                 if s.numberOfOSNSProblems() > 0:
-                    self.log(s.saveYandLambdaInOldVariables,with_timer)()
+                    self.log(s.saveYandLambdaInOldVariables, with_timer)()
         if s.displayNewtonConvergence():
             s.displayNewtonConvergenceAtTheEnd(info, newtonMaxIteration);
 
@@ -2152,15 +2153,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if verbose_progress:
                 self.print_verbose('step', k, 'of', k0 + int((T - t0) / h)-1)
 
-            if self._start_run_iteration_hook is not None:
-                self.log(self._start_run_iteration_hook(self))
+            if start_run_iteration_hook is not None:
+                self.log(start_run_iteration_hook, with_timer)(self)
                 
-            self.log(self.import_births(body_class=body_class,
-                                  shape_class=shape_class,
-                                  face_class=face_class,
-                                  edge_class=edge_class))
+            self.log(self.import_births, with_timer)(body_class,
+                                                     shape_class,
+                                                     face_class,
+                                                     edge_class)
 
-            self.log(self.execute_deaths())
+            self.log(self.execute_deaths, with_timer)()
 
             if controller is not None:
                 controller.step()
@@ -2252,8 +2253,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     return False
             self.log(simulation.nextStep, with_timer)()
 
-            if self._end_run_iteration_hook is not None:
-                self.log(self._end_run_iteration_hook(self))
+            if end_run_iteration_hook is not None:
+                self.log(end_run_iteration_hook, with_timer) (self)
 
             self.print_verbose ('')
             k += 1
