@@ -65,10 +65,10 @@ int rollingFrictionContact_test_function(FILE * f, SolverOptions * options)
 
   int k;
   RollingFrictionContactProblem* problem = (RollingFrictionContactProblem *)malloc(sizeof(RollingFrictionContactProblem));
-  /* numerics_set_verbose(1); */
+  numerics_set_verbose(1);
 
   rollingFrictionContact_newFromFile(problem, f);
-  rollingFrictionContact_display(problem);
+  /* rollingFrictionContact_display(problem); */
 
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
