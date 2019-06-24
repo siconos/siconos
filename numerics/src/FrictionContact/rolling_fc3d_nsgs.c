@@ -64,6 +64,8 @@ void rolling_fc3d_nsgs_update(int contact, RollingFrictionContactProblem* proble
 
   /* Friction coefficient for current block*/
   localproblem->mu[0] = problem->mu[contact];
+  /* Rolling Friction coefficient for current block*/
+  localproblem->mu_r[0] = problem->mu_r[contact];
 
 
 }
@@ -413,7 +415,8 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
   localproblem = rolling_fc3d_local_problem_allocate(problem);
 
   rolling_fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
-                                            (RollingFreeSolverNSGSPtr *)&freeSolver, &computeError,
+                                            (RollingFreeSolverNSGSPtr *)&freeSolver,
+                                            &computeError,
                                             problem, localproblem, options);
 
   scontacts = allocShuffledContacts(problem, options);
