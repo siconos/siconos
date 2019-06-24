@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <float.h>
+#include <string.h>
 #include "SiconosLapack.h"
 #include "sanitizer.h"
 #include "numerics_verbose.h"
