@@ -381,10 +381,6 @@ pkgs:
       - liblapack-dev
       - libatlas-base-dev
       - libatlas-dev
-    ubuntu-17.10:
-      - libblas-dev
-      - liblapack-dev
-      - libatlas-base-dev
     ubuntu-18.04:
       - libblas-dev
       - liblapack-dev
