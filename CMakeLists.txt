@@ -43,9 +43,11 @@ configure_file(scripts/buildtools.py share/buildtools.py COPYONLY)
 set(PROJECT_NAME siconos)
 
 # Get current year (for licence and other cartridges)
-execute_process(COMMAND date "+\"%Y\"" OUTPUT_VARIABLE YEAR)
-string(STRIP ${YEAR} YEAR)
-
+find_program(DATE_COMMAND date)
+if(DATE_COMMAND)
+  execute_process(COMMAND date "+\"%Y\"" OUTPUT_VARIABLE YEAR)
+  string(STRIP ${YEAR} YEAR)
+endif()
 # Read user option file, if provided on command line
 if(USER_OPTIONS_FILE)
   # Check for tilde in file name (not handled properly by cmake)

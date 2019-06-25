@@ -472,6 +472,7 @@ class MechanicsHdf5(object):
         self._cf_data = None
         self._domain_data = None
         self._solv_data = None
+        self._log_data = None
         self._input = None
         self._nslaws_data = None
         self._nslaws = dict()
@@ -518,6 +519,7 @@ class MechanicsHdf5(object):
                                      use_compression = self._use_compression)
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression = self._use_compression)
+        self._log_data = group(self._data, 'log')
         self._input = group(self._data, 'input')
 
         self._nslaws_data = group(self._data, 'nslaws')
@@ -581,6 +583,12 @@ class MechanicsHdf5(object):
         Solver output
         """
         return self._solv_data
+
+    def log_data(self):
+        """
+        log output
+        """
+        return self._log_data
 
     def instances(self):
         """
