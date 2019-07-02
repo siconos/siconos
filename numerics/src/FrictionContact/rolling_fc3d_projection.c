@@ -336,6 +336,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(
     memcpy(reaction, reaction_k , 5*sizeof(double));
     /* NV_display(reaction,5); */
     /* NV_display(velocity_k,5); */
+    DEBUG_END("rolling_fc3d_projectionOnConeWithLocalIteration_solve(...)\n");
     return 0 ;
   }
   else
@@ -414,7 +415,6 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(
     while (!success && (ls_iter < ls_itermax))
     {
       rho_k = rho_k * tau ;
-      DEBUG_PRINTF("rho_k =%f\n", rho_k);
       reaction[0] = reaction_k[0] - rho_k * (velocity_k[0] + mu_i * normUT + mu_r_i*normOmegaT);
       reaction[1] = reaction_k[1] - rho_k * velocity_k[1];
       reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
@@ -481,6 +481,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(
       DEBUG_PRINTF("rho_k = %12.8e\t", rho_k);
       DEBUG_PRINTF("a1 = %12.8e\t", a1);
       DEBUG_PRINTF("a2 = %12.8e\t", a2);
+      DEBUG_PRINTF("a1/a2 = %12.8e\t", a1/a2);
       DEBUG_PRINTF("norm reaction = %12.8e\t", hypot5(reaction));
       DEBUG_PRINTF("norm velocity = %12.8e\n", hypot5(velocity));
       DEBUG_PRINTF("success = %i\n", success);
@@ -516,12 +517,6 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(
   numerics_printf_verbose(
     2,
     "--                                                        | %i \t\t| %.10e\t| %.10e\t|%i \t\t|", localiter, rho, localerror, status);
-  numerics_printf_verbose(
-    2,
-    "--                                                        | norm velocity = %12.8e",hypot5(velocity));
-  numerics_printf_verbose(
-    2,
-    "--                                                        | norm reaction = %12.8e\t",hypot5(reaction) );
   options->dWork[options->iparam[4]] =rho;
   options->dparam[1] = localerror ;
 
