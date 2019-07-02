@@ -519,7 +519,11 @@ class MechanicsHdf5(object):
                                      use_compression = self._use_compression)
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression = self._use_compression)
-        self._log_data = group(self._data, 'log')
+        try:
+            self._log_data = group(self._data, 'log')
+        except Exception as e :
+            print('Warning -  group(self._data, log ) : ',  e)
+
         self._input = group(self._data, 'input')
 
         self._nslaws_data = group(self._data, 'nslaws')
