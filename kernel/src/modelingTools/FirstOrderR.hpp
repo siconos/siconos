@@ -60,12 +60,20 @@ protected:
   */
   FirstOrderR(RELATION::SUBTYPES newType): Relation(RELATION::FirstOrder, newType) {}
 
+  /** The following matrices are used if the relation is linear w.r.t to some variables.
+   * If the matricesa are, the computation of the Jacobian is not done.
+   */
 
+  /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t X */
   SP::SimpleMatrix _C;
+  /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t lambda */
   SP::SimpleMatrix _D;
+  /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t Z */
   SP::SimpleMatrix _F;
 
+  /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t lambda */
   SP::SimpleMatrix _B;
+  /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t X */
   SP::SimpleMatrix _K;
 
   /** Continuous memory vector of size of x to call plugin */
