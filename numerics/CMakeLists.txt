@@ -100,7 +100,7 @@ endif()
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
 
-if(WITH_MPI)
+if(WITH_MPI AND WITH_${COMPONENT}_TESTING)
   # Note FP : temporary fix, to deal with PRIVATE deps of some components.
   # This will be reviewed later.
   target_include_directories(numerics-test PUBLIC ${MPI_C_INCLUDE_DIRS})
