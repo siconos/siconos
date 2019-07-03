@@ -670,8 +670,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+//      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+//        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = sphere->version();
@@ -813,8 +813,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBoxRecord &record)
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+//      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+//        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = box->version();
@@ -861,8 +861,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCylinderRecord &record)
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+//      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+//        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = cyl->version();
@@ -911,8 +911,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyConeRecord &record)
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+//      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+//        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = cone->version();
@@ -960,8 +960,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCapsuleRecord &record)
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+//      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+//        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = capsule->version();
