@@ -93,6 +93,11 @@ int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =    gfc3d_admm_wr_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_GLOBAL_FRICTION_3D_IPM:
+  {
+    info = gfc3d_IPM_setDefaultSolverOptions(options);
+    break;
+  }
 
   case SICONOS_GLOBAL_FRICTION_3D_VI_FPP:
   {

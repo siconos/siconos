@@ -42,7 +42,7 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSGS);
     test_nsgs[n][e++] = "0";
     test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
+    test_nsgs[n][e++] = "---";
     n++;
   }
   for ( int d =0; d <n_data_1; d++)
@@ -64,7 +64,7 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test_nsgs[n][e++] = "internal_dparam";
     test_nsgs[n][e++] = "0";
     test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
+    test_nsgs[n][e++] = "---";
     n++;
   }
   for ( int d =0; d <n_data_1; d++)
@@ -76,11 +76,11 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_VI_EG);
     test_nsgs[n][e++] = "0";
     test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
+    test_nsgs[n][e++] = "---";
     n++;
   }
 
-    for ( int d =0; d <n_data_1; d++)
+  for ( int d =0; d <n_data_1; d++)
   {
     int e=0;
     test_nsgs[n][e++] = data_collection_1[d];
@@ -89,11 +89,11 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_VI_FPP);
     test_nsgs[n][e++] = "0";
     test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
+    test_nsgs[n][e++] = "---";
     n++;
   }
 
-    for ( int d =0; d <n_data_1; d++)
+  for ( int d =0; d <n_data_1; d++)
   {
     int e=0;
     test_nsgs[n][e++] = data_collection_1[d];
@@ -102,10 +102,10 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ACLMFP);
     test_nsgs[n][e++] = "1e-5";
     test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
+    test_nsgs[n][e++] = "---";
     n++;
   }
-    for ( int d =0; d <n_data_1; d++)
+  for ( int d =0; d <n_data_1; d++)
   {
     int e=0;
     test_nsgs[n][e++] = data_collection_1[d];
@@ -114,10 +114,22 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
     test_nsgs[n][e++] = "1e-5";
     test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
+    test_nsgs[n][e++] = "---";
     n++;
   }
-    
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_nsgs[n][e++] = data_collection_1[d];
+    test_nsgs[n][e++] = "0";
+    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_IPM);
+    test_nsgs[n][e++] = "1e-5";
+    test_nsgs[n][e++] = "10000";
+    test_nsgs[n][e++] = "---";
+    n++;
+  }
+
   test_nsgs[n][0] ="---";
   return test_nsgs;
 

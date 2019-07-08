@@ -52,7 +52,7 @@ extern "C"
                                           SolverOptions* internalsolver_options,
                                           double error);
 
-  
+
   /** Check for trivial solution in the friction-contact 3D problem
        \param dim of the problem
        \param q global vector (n)
@@ -80,7 +80,7 @@ extern "C"
   void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
   int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options);
-  
+
   void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
   int gfc3d_admm_wr_setDefaultSolverOptions(SolverOptions* options);
@@ -187,7 +187,7 @@ extern "C"
     */
   void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem*  problem, double*  reaction, double*  velocity,
                             double*  globalVelocity, int*  info, SolverOptions* options);
-  
+
   int gfc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /** solver using PATH (via GAMS) for friction-contact 3D problem based on an AVI reformulation
@@ -214,13 +214,13 @@ extern "C"
   void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double *globalVelocity, int *info, SolverOptions* options);
 
   void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
-  
+
   int gfc3d_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options);
   void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int* info, SolverOptions* options);
-  
+
   int gfc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
 
-  
+
 
 
   void gfc3d_ADMM(GlobalFrictionContactProblem*  problem, double*  reaction,
@@ -228,11 +228,23 @@ extern "C"
                   int*  info, SolverOptions*  options);
 
   void gfc3d_ADMM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
-  
+
   void gfc3d_ADMM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
 
   int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options);
-  
+
+
+
+  void gfc3d_IPM(GlobalFrictionContactProblem*  problem, double*  reaction,
+                  double*  velocity, double*  globalVelocity,
+                  int*  info, SolverOptions*  options);
+
+  void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+  int gfc3d_IPM_setDefaultSolverOptions(SolverOptions* options);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
