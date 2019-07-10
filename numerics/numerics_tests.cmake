@@ -18,6 +18,9 @@ if(WITH_${COMPONENT}_TESTING)
   #  tests for NumericsMatrix
   NEW_TEST(tools_test_NumericsMatrix NM_test.c)
 
+  #  tests for JordanAlgebra
+  NEW_TEST(tools_test_JordanAlgebra JordanAlgebra_test.c)
+
   # MUMPS interface tests
   if(WITH_MUMPS)
     NEW_TEST(tools_test_MUMPS NM_MUMPS_test.c)
