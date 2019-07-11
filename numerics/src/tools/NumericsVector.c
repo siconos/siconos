@@ -76,3 +76,21 @@ bool NV_equal(double * x, double * y, int n, double tol)
   }
   return true;
 }
+
+void NV_insert(double * x, const unsigned int size_x,
+               const double * const y, const unsigned int size_y,
+               unsigned int i)
+{
+    if (size_x < size_y)
+    {
+        fprintf(stderr, "NV_insert ::  the vector to be inserted is greater than the given vector: size_x < size_y - %d < %d\n", size_x, size_y);
+        exit(EXIT_FAILURE);
+    }
+    if (i + size_y > size_x)
+    {
+        fprintf(stderr, "NV_insert ::  the vector to be inserted is too big for insertion from position %d\n", i);
+        exit(EXIT_FAILURE);
+    }
+    for (unsigned int j = i; j < i + size_y; ++j)
+        x[j] = y[j - i];
+}

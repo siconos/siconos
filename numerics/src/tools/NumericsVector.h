@@ -53,7 +53,18 @@ extern "C"
    */
   bool NV_equal(double * x, double * y, int nRow, double tol);
 
-  
+
+  /** Insert the vector y into the vector x starting from position i
+      \param x the vector
+      \param size_x the size of the vector x
+      \param y the vector to be inserted
+      \param size_y the size of the vector y
+      \param i the position of insertion
+   */
+  void NV_insert(double * x, const unsigned int size_x,
+                 const double * const y, const unsigned int size_y,
+                 unsigned int i);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
