@@ -2264,6 +2264,83 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
   }
 }
 
+/* Insert the submatrix B into the matrix A on the position defined in
+ * (start_i, start_j) position.
+ */
+void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
+               const unsigned int start_i, const unsigned int start_j)
+{
+    /* validation */
+    assert(A->size0 >= B->size0);
+    assert(A->size1 >= B->size1);
+
+    unsigned int end_i = start_i + B->size0;
+    unsigned int end_j = start_j + B->size1;
+    assert(start_i <= end_i);
+    assert(start_j <= end_j);
+    assert(end_i <= A->size0);
+    assert(end_j <= A->size1);
+
+    /* trivial case when size(A) == size(B) */
+    if (A->size0 == B->size0 && A->size1 == B->size1)
+    {
+        NM_copy(B, A);
+        return;
+    }
+
+    /* check the case when A is sparse block matrix */
+    switch (A->storageType)
+    {
+    case NM_SPARSE:
+    {
+        switch (A->matrix2->origin)
+        {
+        case NSM_TRIPLET:
+        {
+          break;
+        }
+        case NSM_CSC:
+        {
+          A->matrix2->triplet = NM_csc_to_triplet(A->matrix2->csc);
+          break;
+        }
+        case NSM_CSR:
+        {
+          A->matrix2->triplet = NM_csr_to_triplet(A->matrix2->csr);
+          break;
+        }
+        default:
+        {
+          fprintf(stderr, "NM_insert ::  unknown origin %d for matrix\n", A->matrix2->origin);
+        }
+        }
+        A->matrix2->origin = NSM_TRIPLET;
+        break;
+    }
+    case NM_DENSE:
+    {
+        break;
+    }
+    default:
+    {
+      fprintf(stderr, "NM_insert ::  unknown storageType %d for numerics matrix\n", A->storageType);
+    }
+    }
+
+    /* inserting loops */
+    double val;
+    for (unsigned int i = start_i; i < end_i; ++i)
+    {
+        for (unsigned int j = start_j; j < end_j; ++j)
+        {
+            val = NM_get_value(B, i - start_i, j - start_j);
+            NM_zentry(A, i, j, val);
+        }
+    }
+    return;
+}
+
+
 NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 {
   DEBUG_BEGIN("NM_multiply(...) \n")

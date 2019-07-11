@@ -330,6 +330,17 @@ extern "C"
    */
   void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
 
+
+  /** Set the submatrix B into the matrix A on the position defined in
+   *  (start_i, start_j) position.
+   * \param[in] A a pointer to NumerixMatrix
+   * \param[in] B a pointer toNumericsMatrix
+   * \param[in] start_i a start row index
+   * \param[in] start_j a start column index
+   */
+  void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
+                 const unsigned int start_i, const unsigned int start_j);
+
   /**************************************************/
   /** Matrix - vector product           *************/
   /**************************************************/
@@ -424,7 +435,6 @@ extern "C"
   void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
                 const double beta,
                 double *y);
-
 
   /**************************************************/
   /** matrix conversion display *********************/
