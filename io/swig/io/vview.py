@@ -39,6 +39,9 @@ class VViewConfig(dict):
         if os.path.exists(self.filename):
             try:
                 self.update(json.load(open(self.filename)))
+                print('Loaded configuration from ', self.filename)
+                for k in self:
+                    print('  ', k,': ', self[k])
                 self.should_save_config = True
             except:
                 self.should_save_config = False
@@ -79,7 +82,7 @@ class VViewOptions(object):
         self.export = False
         self.gen_para_script = False
         self.with_edges = False
- 
+        self.with_random_color = True
     ## Print usage information
     def usage(self, long=False):
         print(__doc__); print()
@@ -151,7 +154,9 @@ class VViewOptions(object):
        object) contactors: ignore avatars, view only contactors where
        avatars are contactors with collision_group=-1
      --with_edges 
-       add edges in the rendering (experimental for primitives) 
+       add edges in the rendering (experimental for primitives)
+     --with_fixed_color
+       use fixed color defined in the config file    
     """)
 
     def parse(self):
@@ -167,7 +172,7 @@ class VViewOptions(object):
                                             'cf-scale=', 'normalcone-ratio=',
                                             'advance=', 'fps=', 'camera=',
                                             'lookat=',
-                                            'up=', 'ortho=', 'visible=', 'with-edges'])
+                                            'up=', 'ortho=', 'visible=', 'with-edges', 'with-fixed-color'])
             self.configure(opts, args)
         except getopt.GetoptError as err:
             sys.stderr.write('{0}\n'.format(str(err)))
@@ -240,8 +245,12 @@ class VViewOptions(object):
 
             elif o == '--visible':
                 self.visible_mode = a
+                
             elif o == '--with-edges':
                 self.with_edges = True
+                
+            elif o == '--with-fixed-color':
+                self.with_random_color = False
 
         if self.frames_per_second == 0:
             self.frames_per_second = 25
@@ -1703,27 +1712,32 @@ class VView(object):
                                                     collision_group))
                 actor.GetProperty().SetOpacity(
                     self.config.get('dynamic_opacity', 0.7))
-
+                actor.GetProperty().SetColor(
+                    self.config.get('dynamic_bodies_color', [0.3,0.3,0.3]))
+                
                 if self.opts.with_edges:
                     self.dynamic_actors[instid].append((actor_edge, contact_shape_indx,
                                                     collision_group))
                     actor_edge.GetProperty().SetOpacity(
                         self.config.get('dynamic_opacity', 1.0))
-                    
                     actor_edge.GetProperty().SetRepresentationToWireframe()
                 
             else:
                 # objects that are not supposed to move
                 self.static_actors[instid].append((actor, contact_shape_indx,
                                                    collision_group))
-
                 actor.GetProperty().SetOpacity(
                     self.config.get('static_opacity', 1.0))
+                actor.GetProperty().SetColor(
+                        self.config.get('static_bodies_color', [0.5,0.5,0.5]))
+                
+            if self.opts.with_random_color :
+                actor.GetProperty().SetColor(random_color())
+                if self.opts.with_edges:
+                    actor_edge.GetProperty().SetColor(random_color())
 
-            actor.GetProperty().SetColor(random_color())
             actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
             if self.opts.with_edges:
-                actor_edge.GetProperty().SetColor(random_color())
                 actor_edge.SetMapper(self.unfrozen_mappers_edges[contact_shape_indx])
 
             if not (self.opts.global_filter or self.opts.export):
@@ -2064,8 +2078,7 @@ class VView(object):
     def setup_vtk_renderer(self):
         self.renderer_window.AddRenderer(self.renderer)
         self.interactor_renderer.SetRenderWindow(self.renderer_window)
-        self.interactor_renderer.GetInteractorStyle(
-        ).SetCurrentStyleToTrackballCamera()
+        self.interactor_renderer.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
 
         # http://www.itk.org/Wiki/VTK/Depth_Peeling
 
@@ -2099,7 +2112,7 @@ class VView(object):
             self.renderer.GetActiveCamera().ParallelProjectionOn()
             self.renderer.GetActiveCamera().SetParallelScale(
                 self.opts.initial_camera[3])
-
+        self.renderer.ResetCameraClippingRange()
         self.image_maker = vtk.vtkWindowToImageFilter()
         self.image_maker.SetInput(self.renderer_window)
 
