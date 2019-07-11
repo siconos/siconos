@@ -42,3 +42,23 @@ def test_mcp_FB():
     print("w = ", w)
     assert (np.linalg.norm(z-zsol) <= ztol)
     assert not info
+
+def test_mcp_newton_FBLSA():
+    mcp=N.MCP(1,1,mcp_function,mcp_Nablafunction)
+    z = np.array([0., 0.])
+    w = np.array([0., 0.])
+
+    SO=N.SolverOptions(mcp,N.SICONOS_MCP_FB)
+    N.mcp_driver_init(mcp, SO)
+    info = N.mcp_FischerBurmeister(mcp, z, w, SO)
+    N.mcp_driver_reset(mcp, SO)
+    print("z = ", z)
+    print("w = ", w)
+    assert (np.linalg.norm(z-zsol) <= ztol)
+    assert not info
+
+
+if __name__ == "__main__":
+    N.numerics_set_verbose(3)
+    test_mcp_FB()
+    test_mcp_newton_FBLSA()
