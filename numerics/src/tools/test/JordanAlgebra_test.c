@@ -23,7 +23,7 @@
 
 #include "JordanAlgebra.h"
 
-int Arrow_repr_3d_test()
+static int Arrow_repr_3d_test()
 {
     int varsCount = 2;
     int dimension = 3;
@@ -59,7 +59,7 @@ int Arrow_repr_3d_test()
     return 0;
 }
 
-int Arrow_repr_2d_test()
+static int Arrow_repr_2d_test()
 {
     int varsCount = 3;
     int dimension = 2;
