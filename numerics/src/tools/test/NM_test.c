@@ -779,6 +779,96 @@ static int NM_gemm_test_all(void)
 }
 
 
+static int NM_insert_dense_test()
+{
+    int info = 0;
+    size_t Asize0 = 5, Asize1 = 6;
+    size_t Bsize0 = 3, Bsize1 = 3;
+    size_t start_i = 1, start_j = 1;
+    size_t end_i = start_i + Bsize0;
+    size_t end_j = start_j + Bsize1;
+
+    /* create and fill the dense matrix A */
+    NumericsMatrix * A_dense = NM_create(NM_DENSE, Asize0, Asize1);
+    for (size_t i = 0; i < Asize0; ++i)
+        for (size_t j = 0; j < Asize1; ++j)
+            NM_zentry(A_dense, i, j, 10.0);
+
+    /* create and fill the dense matrix B */
+    NumericsMatrix * B_dense = NM_create(NM_DENSE, Bsize0, Bsize1);
+    for (size_t i = 0; i < Bsize0; ++i)
+        for (size_t j = 0; j < Bsize1; ++j)
+            NM_zentry(B_dense, i, j, 999.0);
+
+    /* create an expected result */
+    NumericsMatrix * AB_dense = NM_create(NM_DENSE, Asize0, Asize1);
+    NM_copy(A_dense, AB_dense);
+    for (size_t i = start_i; i < end_i; ++i)
+        for (size_t j = start_j; j < end_j; ++j)
+            NM_zentry(AB_dense, i, j, 999.0);
+
+    NM_insert(A_dense, B_dense, 1, 1);
+
+    //NM_display(A_dense);
+    if (!NM_equal(A_dense, AB_dense))
+        info = 1;
+
+    NM_free(A_dense);
+    NM_free(B_dense);
+    NM_free(AB_dense);
+    printf("== End of test NM_insert_dense_test(result = %d)\n", info);
+    return info;
+}
+
+static int NM_insert_sparse_test()
+{
+    int info = 0;
+    size_t Asize0 = 5, Asize1 = 6;
+    size_t Bsize0 = 3, Bsize1 = 3;
+    size_t start_i = 1, start_j = 1;
+    size_t end_i = start_i + Bsize0;
+    size_t end_j = start_j + Bsize1;
+
+    /* create and fill the dense matrix A */
+    NumericsMatrix * A_sparse = NM_create(NM_SPARSE, Asize0, Asize1);
+    NM_triplet_alloc(A_sparse, 12);
+    A_sparse->matrix2->origin = NSM_TRIPLET;
+
+    for (size_t i = 0; i < Asize0; i += 2)
+        for (size_t j = 0; j < Asize1; j += 2)
+            NM_zentry(A_sparse, i, j, 10.0);
+
+    /* create and fill the dense matrix B */
+    NumericsMatrix * B_sparse = NM_create(NM_SPARSE, Bsize0, Bsize1);
+    NM_triplet_alloc(B_sparse, 4);
+    B_sparse->matrix2->origin = NSM_TRIPLET;
+
+    for (size_t i = 0; i < Bsize0; i += 2)
+        for (size_t j = 0; j < Bsize1; j += 2)
+            NM_zentry(B_sparse, i, j, 999.0);
+
+    /* create an expected result */
+    NumericsMatrix * AB_sparse = NM_create(NM_SPARSE, Asize0, Asize1);
+    NM_copy(A_sparse, AB_sparse);
+    for (size_t i = start_i; i < end_i; i += 2)
+        for (size_t j = start_j; j < end_j; j += 2)
+            NM_zentry(AB_sparse, i, j, 999.0);
+
+    NM_insert(A_sparse, B_sparse, 1, 1);
+
+    //NM_display(A_sparse);
+    if (!NM_equal(A_sparse, AB_sparse))
+        info = 1;
+
+    NM_free(A_sparse);
+    NM_free(B_sparse);
+    NM_free(AB_sparse);
+
+    printf("== End of test NM_insert_sparse_test(result = %d)\n", info);
+    return info;
+}
+
+
 CS_INT cs_print (const cs *A, CS_INT brief);
 
 static int NM_gemv_test(NumericsMatrix** MM)
@@ -1565,19 +1655,24 @@ int main(void)
 
   info += NM_add_to_diag3_test_all();
 
-  info +=  to_dense_test();
+  info += to_dense_test();
 
-  info +=  NM_gemm_test_all();
+  info += NM_gemm_test_all();
 
-  info +=  NM_gemm_test_all2();
+  info += NM_gemm_test_all2();
 
   info += NM_row_prod_test();
 
-  info +=    NM_row_prod_no_diag_test_all();
+  info += NM_row_prod_no_diag_test_all();
 
-  info +=  NM_row_prod_no_diag_non_square_test();
+  info += NM_row_prod_no_diag_non_square_test();
 
-  info +=    test_NM_row_prod_non_square_test();
+  info += test_NM_row_prod_non_square_test();
+
+  info += NM_insert_dense_test();
+
+  info += NM_insert_sparse_test();
+
   return info;
 
 }
