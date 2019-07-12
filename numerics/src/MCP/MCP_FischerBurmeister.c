@@ -47,7 +47,7 @@ void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOpt
 
   int fullSize = localProblem->sizeEqualities + localProblem->sizeInequalities ;
   // Memory allocation for working vectors
-  int lwork = 3 * (problem->sizeEqualities + problem->sizeInequalities) ;
+  int lwork = (problem->sizeEqualities + problem->sizeInequalities) + fullSize*fullSize  ;
   options->dWork = (double *) malloc(lwork * sizeof(double));
   localProblem->nablaFmcp = &(options->dWork[fullSize]) ;
   localProblem->Fmcp = options->dWork ;
@@ -96,11 +96,13 @@ void mcp_FischerBurmeister(MixedComplementarityProblem* problem, double *z, doub
   // Call semi-smooth Newton solver
   *info = nonSmoothNewton(fullSize, z, &phi, &nablaPhi, options->iparam, options->dparam);
 
+  // Compute w 
+  problem->computeFmcp(fullSize, z, w);
   // todo : compute error function
 
   // Check output
   if (*info > 0)
-    fprintf(stderr, "Numerics, mcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[1]);
+    fprintf(stderr, "Numerics, mcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[SICONOS_DPARAM_RESIDU]);
 
   return;
 }
