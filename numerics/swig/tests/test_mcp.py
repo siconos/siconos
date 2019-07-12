@@ -43,10 +43,36 @@ def test_mcp_FB():
     assert (np.linalg.norm(z-zsol) <= ztol)
     assert not info
 
-def test_mcp_newton_FBLSA():
-    mcp=N.MCP(1,1,mcp_function,mcp_Nablafunction)
-    z = np.array([0., 0.])
-    w = np.array([0., 0.])
+
+n=10
+def build_problem(n):
+    M = np.zeros((n,n))
+    q = np.zeros(n)
+    
+    for i in range(n):
+        q[i] = -i-5
+        M[i,i] =2
+        if i < n-1 :
+            M[i,i+1] =1
+        if i > 0 :
+            M[i,i-1] =1
+            
+    return M,q
+
+
+
+def mcp_function_2(z):
+    M,q = build_problem(n)
+    return np.dot(M,z) + q
+
+def mcp_Nablafunction_2(z):
+    M,q = build_problem(n)
+    return M
+
+def test_mcp_FB_2():
+    mcp=N.MCP(n-3,3,mcp_function_2,mcp_Nablafunction_2)
+    z = np.zeros(n)
+    w = np.zeros(n)
 
     SO=N.SolverOptions(mcp,N.SICONOS_MCP_FB)
     N.mcp_driver_init(mcp, SO)
@@ -54,11 +80,9 @@ def test_mcp_newton_FBLSA():
     N.mcp_driver_reset(mcp, SO)
     print("z = ", z)
     print("w = ", w)
-    assert (np.linalg.norm(z-zsol) <= ztol)
-    assert not info
-
+    assert not info    
 
 if __name__ == "__main__":
     N.numerics_set_verbose(3)
     test_mcp_FB()
-    test_mcp_newton_FBLSA()
+    test_mcp_FB_2()
