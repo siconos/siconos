@@ -77,20 +77,54 @@ bool NV_equal(double * x, double * y, int n, double tol)
   return true;
 }
 
-void NV_insert(double * x, const unsigned int size_x,
-               const double * const y, const unsigned int size_y,
+void NV_insert(double * x, const unsigned int xSize,
+               const double * const y, const unsigned int ySize,
                unsigned int i)
 {
-    if (size_x < size_y)
+    if (xSize < ySize)
     {
-        fprintf(stderr, "NV_insert ::  the vector to be inserted is greater than the given vector: size_x < size_y - %d < %d\n", size_x, size_y);
+        fprintf(stderr, "NV_insert ::  the vector to be inserted is greater than the given vector: size_x < size_y - %d < %d\n", xSize, ySize);
         exit(EXIT_FAILURE);
     }
-    if (i + size_y > size_x)
+    if (i + ySize > xSize)
     {
         fprintf(stderr, "NV_insert ::  the vector to be inserted is too big for insertion from position %d\n", i);
         exit(EXIT_FAILURE);
     }
-    for (unsigned int j = i; j < i + size_y; ++j)
+    for (unsigned int j = i; j < i + ySize; ++j)
         x[j] = y[j - i];
+}
+
+double* NV_power2(const double * const vec, const unsigned int vecSize)
+{
+    double * out = (double*)malloc(vecSize * sizeof(double));
+    for (unsigned int i = 0; i < vecSize; ++i)
+        out[i] = vec[i] * vec[i];
+    return out;
+}
+
+
+double NV_reduce(const double * const vec, const unsigned int vecSize)
+{
+    register double sum = 0.0;
+    for (unsigned int i = 0; i < vecSize; ++i)
+        sum += vec[i];
+    return sum;
+}
+
+double* NV_prod(const double * const x, const double * const y, const unsigned int vecSize)
+{
+    double * out = (double*)malloc(vecSize * sizeof(double));
+    for (unsigned int i = 0; i < vecSize; ++i)
+        out[i] = x[i] * y[i];
+    return out;
+}
+
+double NV_min(const double * const vec, const unsigned int vecSize)
+{
+    double min_elem = DBL_MAX;
+    for (unsigned int i = 0; i < vecSize; ++i)
+        if (vec[i] < min_elem)
+            min_elem = vec[i];
+    return min_elem;
 }

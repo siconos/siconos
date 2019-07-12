@@ -61,9 +61,38 @@ extern "C"
       \param size_y the size of the vector y
       \param i the position of insertion
    */
-  void NV_insert(double * x, const unsigned int size_x,
-                 const double * const y, const unsigned int size_y,
+  void NV_insert(double * x, const unsigned int xSize,
+                 const double * const y, const unsigned int ySize,
                  unsigned int i);
+
+  /** Put all elements of vector to the suqre (element by element)
+      \param vec is the vector
+      \param vecSize the size of the vector vec
+      \return vector to power 2
+   */
+  double* NV_power2(const double * const vec, const unsigned int vecSize);
+
+  /** Sum all the elements in vector
+      \param vec is the vector
+      \param vecSize the size of the vector vec
+      \return sum of all the elements in vector
+   */
+  double NV_reduce(const double * const vec, const unsigned int vecSize);
+
+  /** Element by element product of two vectors
+      \param x is the vector
+      \param y is the vector
+      \param vecSize the size of the vector vec
+      \return product vector
+   */
+  double* NV_prod(const double * const x, const double * const y, const unsigned int vecSize);
+
+  /** Find a minimum value of vertor
+      \param vec is the vector
+      \param vecSize the size of the vector vec
+      \return a minimum value of vertor
+   */
+  double NV_min(const double * const vec, const unsigned int vecSize);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
