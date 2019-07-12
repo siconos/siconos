@@ -17,10 +17,15 @@
 */
 #include "numerics_verbose.h"
 #include "NonSmoothNewton.h"
+#include "SolverOptions.h"
 #include "SiconosLapack.h"
 #include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
+
+#define DEBUG_MESSAGES
+#include "debug.h"
+
 
 void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
                        double descentCondition, NewtonFunctionPtr* phi)
@@ -28,7 +33,7 @@ void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
   double * phiVector = (double*)malloc(n * sizeof(*phiVector));
   if (phiVector == NULL)
   {
-    fprintf(stderr, "NonSmoothNewton::linesearch_Armijo, memory allocation failed for phiVector\n");
+    fprintf(stderr, "NonSmoothNewton: linesearch_Armijo, memory allocation failed for phiVector\n");
     exit(EXIT_FAILURE);
   }
 
@@ -51,6 +56,7 @@ void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
 
   while (tk > tmin)
   {
+    numerics_printf_verbose(2,"Non Smooth Newton:\t\tlinesearch_Armijo. try tk = %e", tk);
     /* Computes merit function = 1/2*norm(phi(z_{k+1}))^2 */
     (*phi)(n, z, phiVector, 0);
     merit =  cblas_dnrm2(n, phiVector , incx);
@@ -64,8 +70,9 @@ void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
   }
   free(phiVector);
   if (tk <= tmin)
-    if (verbose > 0)
-      printf("NonSmoothNewton::linesearch_Armijo warning, resulting tk < tmin, linesearch stopped.\n");
+    numerics_printf("Non Smooth Newton:\t\t linesearch_Armijo warning, resulting tk < tmin, linesearch stopped.");
+  else
+    numerics_printf_verbose(2,"Non Smooth Newton:\t\tlinesearch_Armijo succeeded with tk = %e", tk);
 
 }
 
@@ -77,22 +84,21 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     exit(EXIT_FAILURE);
   }
 
-  int itermax = iparam[0]; // maximum number of iterations allowed
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER]; // maximum number of iterations allowed
   int niter = 0; // current iteration number
-  double tolerance = dparam[0];
-  if (verbose > 0)
-  {
-    printf(" ============= Starting of Newton process =============\n");
-    printf(" - tolerance: %14.7e\n - maximum number of iterations: %i\n", tolerance, itermax);
-  }
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
+
+  numerics_printf("Non Smooth Newton: ============= Starting of Newton process =============");
+  numerics_printf("   - tolerance: %14.7e ", tolerance);
+  numerics_printf("   - maximum number of iterations: %i", itermax);
 
   int incx = 1;
   int n2 = n * n;
   lapack_int infoDGESV;
 
   /* Memory allocation for phi and its jacobian */
-  double * phiVector = (double*)malloc(n * sizeof(*phiVector));
-  double *jacobianPhiMatrix = (double*)malloc(n2 * sizeof(*jacobianPhiMatrix));
+  double * phiVector = (double*)malloc(n * sizeof(double));
+  double *jacobianPhiMatrix = (double*)malloc(n2 * sizeof(double));
   /** merit function and its jacobian */
   double psi;
   double *jacobian_psi = (double*)malloc(n * sizeof(*jacobian_psi));
@@ -115,7 +121,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   double terminationCriterion = 1;
   if (jacobian_psi == NULL)
   {
-    fprintf(stderr, "NonSmoothNewton, memory allocation failed for jacobian_psi.\n");
+    fprintf(stderr, "NonSmoothNewton: memory allocation failed for jacobian_psi.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -164,17 +170,13 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     /* Step-3 Line search: computes z_k+1 */
     linesearch_Armijo(n, z, phiVector, psi, descentCondition, phi);
 
-    if (verbose > 0)
-    {
-      printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
-      printf(" -----------\n");
-    }
+    numerics_printf("Non Smooth Newton: iteration number %i, norm of the merit function = %14.7e .", niter, terminationCriterion);
   }
 
   /* Total number of iterations */
-  iparam[1] = niter;
+  iparam[SICONOS_IPARAM_ITER_DONE] = niter;
   /* Final error */
-  dparam[1] = terminationCriterion;
+  dparam[SICONOS_DPARAM_RESIDU] = terminationCriterion;
 
   /** Free memory*/
   free(phiVector);
@@ -182,17 +184,16 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
   free(jacobian_psi);
   free(ipiv);
 
-  if (verbose > 0)
-  {
-    if (dparam[1] > tolerance)
-      printf("Non Smooth Newton warning: no convergence after %i iterations\n" , niter);
 
-    else
-      printf("Non Smooth Newton: convergence after %i iterations\n" , niter);
-    printf(" The residue is : %e \n", dparam[1]);
-  }
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
+    numerics_printf("Non Smooth Newton:  warning. no convergence after %i iterations" , niter);
 
-  if (dparam[1] > tolerance)
+  else
+    numerics_printf("Non Smooth Newton: convergence after %i iterations" , niter);
+  numerics_printf("Non Smooth Newton:  residual = : %e ", dparam[1]);
+
+
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
     return 1;
   else return 0;
 }
@@ -205,14 +206,12 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
     exit(EXIT_FAILURE);
   }
 
-  int itermax = iparam[0]; // maximum number of iterations allowed
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER]; // maximum number of iterations allowed
   int niter = 0; // current iteration number
-  double tolerance = dparam[0];
-  if (verbose > 0)
-  {
-    printf(" ============= Starting of Newton process =============\n");
-    printf(" - tolerance: %14.7e\n - maximum number of iterations: %i\n", tolerance, itermax);
-  }
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
+  numerics_printf("Non Smooth Newton: ============= Starting of Newton process =============");
+  numerics_printf("   - tolerance: %14.7e ", tolerance);
+  numerics_printf("   - maximum number of iterations: %i", itermax);
 
   int incx = 1;
   int n2 = n * n;
@@ -276,19 +275,14 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
 
     cblas_daxpy(n , tk , phiVector , 1 , z , 1);
 
+    numerics_printf("Non Smooth Newton: iteration number %i, norm of the merit function = %14.7e .", niter, terminationCriterion);
 
-
-    if (verbose > 0)
-    {
-      printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
-      printf(" -----------\n");
-    }
   }
 
   /* Total number of iterations */
-  iparam[1] = niter;
+  iparam[SICONOS_IPARAM_ITER_DONE] = niter;
   /* Final error */
-  dparam[1] = terminationCriterion;
+  dparam[SICONOS_DPARAM_RESIDU] = terminationCriterion;
 
   /** Free memory*/
   free(phiVector);
@@ -296,17 +290,14 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
   free(jacobian_psi);
   free(ipiv);
 
-  if (verbose > 0)
-  {
-    if (dparam[1] > tolerance)
-      printf("Non Smooth Newton warning: no convergence after %i iterations\n" , niter);
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
+    numerics_printf("Non Smooth Newton:  warning. no convergence after %i iterations" , niter);
 
-    else
-      printf("Non Smooth Newton: convergence after %i iterations\n" , niter);
-    printf(" The residue is : %e \n", dparam[1]);
-  }
+  else
+    numerics_printf("Non Smooth Newton: convergence after %i iterations" , niter);
+  numerics_printf("Non Smooth Newton:  residual = : %e ", dparam[SICONOS_DPARAM_RESIDU]);
 
-  if (dparam[1] > tolerance)
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
     return 1;
   else return 0;
 }
