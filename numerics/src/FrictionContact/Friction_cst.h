@@ -477,7 +477,16 @@ enum SICONOS_FRICTION_3D_IPM_DPARAM_ENUM
   /** index in dparam to store the tau value for the balancing residual technique */
   SICONOS_FRICTION_3D_IPM_BALANCING_RESIDUAL_TAU = 5,
   /** index in dparam to store the phi value for the balancing residual technique */
-  SICONOS_FRICTION_3D_IPM_BALANCING_RESIDUAL_PHI = 6
+  SICONOS_FRICTION_3D_IPM_BALANCING_RESIDUAL_PHI = 6,
+
+  /** index in dparam to store the parameter for computation the power of sigma */
+  SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1 = 7,
+  SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2 = 8,
+  SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3 = 9,
+
+  /** index in dparam to store the parameter for computation the safity coefficient of step length */
+  SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1 = 10,
+  SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2 = 11,
 };
 
 enum SICONOS_FRICTION_3D_IPM_ACCELERATION_ENUM
