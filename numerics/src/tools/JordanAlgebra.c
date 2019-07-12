@@ -17,16 +17,24 @@
 */
 
 #include "JordanAlgebra.h"
+#include "cblas.h"
 
 
 RawNumericsMatrix* Arrow_repr(const unsigned int vecSize, const double* const vec, const size_t varsCount)
 {
     /* validation */
-    assert(varsCount > 1);
-    assert(vecSize % varsCount == 0);
+    if (vecSize % varsCount != 0)
+    {
+        fprintf(stderr, "Arrow_repr: %d variables can not be extracted from vector of size %d.\n", varsCount, vecSize);
+        exit(EXIT_FAILURE);
+    }
 
     size_t dimension = (size_t)(vecSize / varsCount);
-    assert(dimension > 1);
+    if (dimension < 2)
+    {
+        fprintf(stderr, "Arrow_repr: The dimension of variables can not be less than 2 but given %d.\n", dimension);
+        exit(EXIT_FAILURE);
+    }
 
     NumericsMatrix * Arw_mat = NM_create(NM_SPARSE, vecSize, vecSize);
     unsigned int nzmax = (dimension * 3 - 2) * varsCount;
@@ -48,4 +56,24 @@ RawNumericsMatrix* Arrow_repr(const unsigned int vecSize, const double* const ve
         }
     }
     return Arw_mat;
+}
+
+
+/* Jordan product of two vectors */
+double* JA_prod(const double * const x, const double * const y, const unsigned int vecSize, const int varsCount)
+{
+    assert(x);
+    assert(y);
+    double * out = (double *)calloc(vecSize, sizeof(double));
+    unsigned int dimension = (int)(vecSize / varsCount);
+
+    unsigned int pos;
+    for(size_t i = 0; i < varsCount; ++i)
+    {
+        pos = i * dimension;
+        out[pos] = cblas_ddot(dimension, x + pos, 1, y + pos, 1);
+        for(size_t j = 1; j < dimension; ++j)
+            out[pos + j] = x[pos] * y[pos + j] + y[pos] * x[pos + j];
+    }
+    return out;
 }

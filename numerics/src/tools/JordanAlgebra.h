@@ -34,5 +34,14 @@
  */
 RawNumericsMatrix* Arrow_repr(const unsigned int vecSize, const double* const vec, const size_t varsCount);
 
+/** Jordan product of two vectors.
+ * \param x is a vector;
+ * \param y is a vector;
+ * \param vecSize is the length of the vectors;
+ * \param varsCount is the count of variables (subvectors) in x and y.
+ * \return a pointer to a double vector of Jordan product.
+ */
+double* JA_prod(const double * const x, const double * const y, const unsigned int vecSize, const int varsCount);
+
 
 #endif
