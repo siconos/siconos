@@ -33,6 +33,7 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
+#include "float.h"
 const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_STR = "GFC3D IPM";
 
 typedef struct {
@@ -46,6 +47,199 @@ typedef struct {
   Gfc3d_IPM_data;
 
 
+typedef struct {
+    /* initial interior points */
+    double * globalVelocity0;
+    double * reaction0;
+    double * velocity0;
+
+    /* change of variable matrix */
+    NumericsMatrix* P_mu;
+    NumericsMatrix* P_mu_inv;
+
+    /* initial constant solver parameters */
+    double alpha_primal0;
+    double alpha_dual0;
+    double sigma0;
+    double mu0;
+}
+  Gfc3d_IPM_init_data;
+
+
+static double _getStepLength(const double * x, const double * dx, const unsigned int vecSize,
+                             const unsigned int varsCount, const double gamma)
+{
+    unsigned int dimension = (int)(vecSize / varsCount);
+    double * alpha_arr = (double*)calloc(varsCount, sizeof(double));
+
+    unsigned int pos;
+    double ai, bi, ci, di, alpha;
+    double *xi, *xi2, *dxi, *dxi2, *xi_dxi;
+    for (unsigned int i = 0; i < varsCount; ++i)
+    {
+        pos = i * dimension;
+        xi = x + pos;
+        dxi = dx + pos;
+
+        dxi2 = NV_power2(dxi, dimension);
+        ai = dxi2[0] - NV_reduce((dxi2 + 1), dimension - 1);
+
+        xi_dxi = NV_prod(xi, dxi, dimension);
+        bi = xi_dxi[0] - NV_reduce((xi_dxi + 1), dimension - 1);
+
+        xi2 = NV_power2(xi, dimension);
+        ci = xi2[0] - NV_reduce((xi2 + 1), dimension - 1);
+
+        di = bi * bi - ai * ci;
+
+        if (ai < 0 || (bi < 0 && ai < (bi * bi) / ci))
+        {
+            alpha = ((-bi - sqrt(di)) / ai);
+        }
+        else if ((fabs(ai) < 1e-12) && (bi < 0))
+        {
+            alpha = (-ci / (2 * bi));
+        }
+        else
+        {
+            alpha = DBL_MAX;
+        }
+
+        if (fabs(alpha) < 1e-12)
+            alpha = 0.0;
+
+        alpha_arr[i] = alpha;
+    }
+    double min_alpha = NV_min(alpha_arr, varsCount);
+
+    return gamma * min(1.0, min_alpha);
+}
+
+
+void gfc3d_IPM_init2(GlobalFrictionContactProblem* problem, SolverOptions* options)
+{
+    unsigned int m = problem->M->size0;
+    unsigned int nd = problem->H->size1;
+    unsigned int d = problem->dimension;
+    unsigned int n = (int)(nd / d);
+
+    if (!options->dWork || options->dWorkSize != m + nd + nd)
+    {
+      options->dWork = (double*)calloc(m + nd + nd, sizeof(double));
+      options->dWorkSize = m + nd + nd;
+    }
+
+    /* ------------- initialize starting point ------------- */
+    options->solverData=(Gfc3d_IPM_init_data *)malloc(sizeof(Gfc3d_IPM_init_data));
+    Gfc3d_IPM_init_data * data = (Gfc3d_IPM_init_data *)options->solverData;
+
+    /* 1. v */
+    data->globalVelocity0 = (double*)calloc(m, sizeof(double));
+    for (unsigned int i = 0; i < m; ++ i)
+        data->globalVelocity0[i] = 0.01;
+
+    /* 2. u */
+    data->velocity0 = (double*)calloc(nd, sizeof(double));
+    for (unsigned int i = 0; i < nd; ++ i)
+    {
+        data->velocity0[i] = 0.01;
+        if (i % d == 0)
+            data->velocity0[i] = 0.1;
+    }
+
+    /* 2. r */
+    data->reaction0 = (double*)calloc(nd, sizeof(double));
+    for (unsigned int i = 0; i < nd; ++ i)
+    {
+        data->reaction0[i] = 0.001;
+        if (i % d == 0)
+            data->reaction0[i] = 0.2;
+    }
+
+    /* ------ initialize the change of variable matrix P_mu ------- */
+    data->P_mu = NM_eye(nd);
+    for (unsigned int i = 0; i < n; ++i)
+        NM_zentry(data->P_mu, i*d, i*d, 1. / problem->mu[i]);
+
+    /* ------ initialize the inverse P_mu_inv of the change of variable matrix P_mu ------- */
+    data->P_mu_inv = NM_eye(nd);
+    for (unsigned int i = 0; i < n; ++i)
+        NM_zentry(data->P_mu_inv, i*d, i*d, problem->mu[i]);
+
+    /* ------ initial parameters initialization ---------- */
+    data->alpha_primal0 = 1.0;
+    data->alpha_dual0 = 1.0;
+    data->sigma0 = 0.0;
+    data->mu0 = 1.0;
+}
+
+void gfc3d_IPM_free2(GlobalFrictionContactProblem* problem, SolverOptions* options)
+{
+    if (options->dWork)
+    {
+      free(options->dWork);
+      options->dWork=NULL;
+      options->dWorkSize = 0;
+    }
+    if (options->solverData)
+    {
+      Gfc3d_IPM_init_data * data = (Gfc3d_IPM_init_data *)options->solverData;
+      free(data->globalVelocity0);
+      data->globalVelocity0 = NULL;
+
+      free(data->velocity0);
+      data->velocity0 = NULL;
+
+      free(data->reaction0);
+      data->reaction0 = NULL;
+
+      NM_free(data->P_mu);
+      data->P_mu = NULL;
+
+      NM_free(data->P_mu_inv);
+      data->P_mu_inv = NULL;
+    }
+
+}
+
+int gfc3d_IPM_setDefaultSolverOptions2(SolverOptions* options)
+{
+  if (verbose > 0)
+  {
+    printf("Set the Default SolverOptions for the IPM Solver\n");
+  }
+
+  solver_options_nullify(options);
+
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_ADMM;
+
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-5;
+  options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
+  options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
+  options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.9;
+  options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;
+
+  return 0;
+}
+
+void gfc3d_IPM2(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
+                double* restrict velocity, double* restrict globalVelocity,
+                int* restrict info, SolverOptions* restrict options)
+{
+
+}
 
 
 void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options)
