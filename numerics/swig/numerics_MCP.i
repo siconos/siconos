@@ -40,7 +40,7 @@
 
   void test_call_to_callback()
   {
-    printf("I am in test_call_to_callback()\n");
+    printf(" --- test_call_to_callback() starts\n");
 
     int size =   $self->sizeEqualities +  $self->sizeInequalities;
 
@@ -67,9 +67,8 @@
     free(F);
     free(nablaF);
 
+    printf(" --- test_call_to_callback() ends\n");
 
-
-    printf("I leave test_call_to_callback()\n");
   }
 
 

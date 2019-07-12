@@ -44,7 +44,7 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
     PyErr_PrintEx(0);
     return;
   }
-  if (result == NULL) /* something has fails in the call of the callback */
+  if (result == NULL) /* something has fails in the call of the callback (Python side) */
     return; /* Pass error back */
   
    // PyTuple_SetItem steals a reference to the object
@@ -140,7 +140,10 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     PyErr_PrintEx(0);
     return;
   }
-
+  if (result == NULL) /* something has fails in the call of the callback (Python side)  */
+  {
+    return; /* Pass error back */
+  }
   // PyTuple_SetItem steals a reference to the object
   // I'm leaving this commented so that people don't do the mistake twice -- xhub
   //Py_DECREF(pyarray);
