@@ -302,8 +302,8 @@ bool SN_logh5_csparse(CSparseMatrix* cs, const char* name, hid_t loc_id)
 
   if (sizeof(CS_INT) == sizeof(int64_t))
   {
-    result = SN_logh5_vec_int64(cs->n+1, cs->p, "p", mat_group);
-    result = SN_logh5_vec_int64(cs->p[cs->n], cs->i, "i", mat_group);
+    result = SN_logh5_vec_int64(cs->n+1, (int64_t*)cs->p, "p", mat_group);
+    result = SN_logh5_vec_int64(cs->p[cs->n], (int64_t*)cs->i, "i", mat_group);
   }
 /*   else if (sizeof(CS_INT) == sizeof(int32_t))
   {

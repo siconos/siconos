@@ -29,38 +29,6 @@
 extern "C"
 {
 #endif
-  /** Initialisation of the MCP solver (set problem, allocate working memory and so on. This routine must be called before any attempt to run the mcp_driver.
-      \param[in] problem the description of the MCP
-      \param[in] options for the solver
-  */
-  void mcp_driver_init(MixedComplementarityProblem * problem, SolverOptions* options);
-
-  /** Reset of the MCP solver
-     \param[in] problem the description of the MCP
-     \param[in] options for the solver
-  */
-  void mcp_driver_reset(MixedComplementarityProblem * problem, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
-      \param problem  the pointer to the array of options to set.
-      \param pOptions the pointer to the SolverOptions stucture.
-  */
-  int mixedComplementarity_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pOptions);
-
-  /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
-      \param problem  the pointer to the array of options to set.
-      \param pOptions the pointer to the SolverOptions stucture.
-  */
-  void  mixedComplementarity_default_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pOptions);
-
-  /** Fischer Burmeister solver
-      \param[in] problem a structure which represents the MCP
-      \param[in,out] z a m+n-vector, initial solution + returns the solution of the problem.
-      \param[out] w not used
-      \param[out] info termination value:   0 if success else >0.
-      \param[in,out] options structure used to define the solver and its parameters.
-  */
-  void mcp_FischerBurmeister(MixedComplementarityProblem* problem, double* z, double* w, int* info, SolverOptions* options);
 
   /** Solver based on Fischer-Burmeister reformulation and line search (VFBLSA
    * in Facchinei--Pang 2003 p. 834)
@@ -70,7 +38,7 @@ extern "C"
       \param[out] info termination value:   0 if success else >0.
       \param[in,out] options structure used to define the solver and its parameters.
   */
-  void mcp_newton_FBLSA(MixedComplementarityProblem2* problem, double* z, double* Fmcp, int* info, SolverOptions* options);
+  void mcp_newton_FB_FBLSA(MixedComplementarityProblem* problem, double* z, double* Fmcp, int* info, SolverOptions* options);
 
   /** Solver based on Fischer-Burmeister reformulation and line search. The
    * descent direction is found using a min reformulation (minFBLSA in
@@ -81,13 +49,53 @@ extern "C"
       \param[out] info termination value:   0 if success else >0.
       \param[in,out] options structure used to define the solver and its parameters.
   */
-  void mcp_newton_minFBLSA(MixedComplementarityProblem2* problem, double* z, double* Fmcp, int* info, SolverOptions* options);
+  void mcp_newton_min_FBLSA(MixedComplementarityProblem* problem, double* z, double* Fmcp, int* info, SolverOptions* options);
+
+
+
+  int mcp_compute_error(MixedComplementarityProblem* problem, double *z , double *w,  double * error);
+  /** Initialisation of the MCP solver (set problem, allocate working memory and so on. This routine must be called before any attempt to run the mcp_old_driver.
+      \param[in] problem the description of the MCP
+      \param[in] options for the solver
+  */
+  void mcp_old_driver_init(MixedComplementarityProblem_old * problem, SolverOptions* options);
+
+  /** Reset of the MCP solver
+     \param[in] problem the description of the MCP
+     \param[in] options for the solver
+  */
+  void mcp_old_driver_reset(MixedComplementarityProblem_old * problem, SolverOptions* options);
+
+  /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
+      \param problem  the pointer to the array of options to set.
+      \param pOptions the pointer to the SolverOptions stucture.
+  */
+  int mcp_old_setDefaultSolverOptions(MixedComplementarityProblem_old* problem, SolverOptions* pOptions);
+
+  /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
+      \param problem  the pointer to the array of options to set.
+      \param pOptions the pointer to the SolverOptions stucture.
+  */
+  void  mcp_old_default_setDefaultSolverOptions(MixedComplementarityProblem_old* problem, SolverOptions* pOptions);
+
+  /** Fischer Burmeister solver
+      \param[in] problem a structure which represents the MCP
+      \param[in,out] z a m+n-vector, initial solution + returns the solution of the problem.
+      \param[out] w not used
+      \param[out] info termination value:   0 if success else >0.
+      \param[in,out] options structure used to define the solver and its parameters.
+  */
+  void mcp_old_FischerBurmeister(MixedComplementarityProblem_old* problem, double* z, double* w, int* info, SolverOptions* options);
+
+
 
   /** set the default solver parameters and perform memory allocation for MixedLinearComplementarity
       \param problem  the pointer to the array of options to set.
       \param pSolver the pointer to the SolverOptions stucture.
   */
-  int mixedComplementarity_FB_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pSolver);
+  int mcp_old_FB_setDefaultSolverOptions(MixedComplementarityProblem_old* problem, SolverOptions* pSolver);
+
+  int mcp_old_compute_error(MixedComplementarityProblem_old* problem, double *z , double *w,  double * error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

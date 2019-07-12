@@ -26,6 +26,7 @@
 #include "Newton_methods.h"
 #include "FischerBurmeister.h"
 #include "min_merit.h"
+#include "numerics_verbose.h"
 #include "mcp_newton_FBLSA.h"
 
 //#define DEBUG_STDOUT
@@ -34,22 +35,23 @@
 
 static void mcp_min(void* data_opaque, double* z, double* F, double* Fmin)
 {
-  MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
+  MixedComplementarityProblem* data = (MixedComplementarityProblem *)data_opaque;
 
   F_min(data->n1, data->n2, z, F, Fmin);
 }
 
 static void min_compute_H_mcp(void* data_opaque, double* z, double* F, double* workV1, double* workV2, NumericsMatrix* H)
 {
-  MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
+  MixedComplementarityProblem* data = (MixedComplementarityProblem *)data_opaque;
 
   data->compute_nabla_Fmcp(data->env, data->n1 + data->n2, z, data->nabla_Fmcp);
 
   Jac_F_min(data->n1, data->n2, z, F, data->nabla_Fmcp, H);
 }
 
-void mcp_newton_minFBLSA(MixedComplementarityProblem2* problem, double *z, double* Fmcp, int *info , SolverOptions* options)
+void mcp_newton_min_FBLSA(MixedComplementarityProblem* problem, double *z, double* Fmcp, int *info , SolverOptions* options)
 {
+  numerics_printf("mcp_newton_min_FBLSA. starts");
   functions_LSA functions_minFBLSA_mcp;
   init_lsa_functions(&functions_minFBLSA_mcp, &FB_compute_F_mcp, &mcp_FB);
   functions_minFBLSA_mcp.compute_H = &FB_compute_H_mcp;
@@ -59,4 +61,5 @@ void mcp_newton_minFBLSA(MixedComplementarityProblem2* problem, double *z, doubl
 
   set_lsa_params_data(options, problem->nabla_Fmcp);
   newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_minFBLSA_mcp);
+  numerics_printf("mcp_newton_min_FBLSA. ends");
 }

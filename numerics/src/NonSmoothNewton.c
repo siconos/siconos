@@ -170,7 +170,7 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     /* Step-3 Line search: computes z_k+1 */
     linesearch_Armijo(n, z, phiVector, psi, descentCondition, phi);
 
-    numerics_printf("Non Smooth Newton: iteration number %i, norm of the merit function = %14.7e .", niter, terminationCriterion);
+    numerics_printf("Non Smooth Newton: iteration number %i, norm merit function = %e, norm grad. merit function = %14.7e .", niter, psi, terminationCriterion);
   }
 
   /* Total number of iterations */

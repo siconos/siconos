@@ -92,16 +92,16 @@
     return SO;
   }
 
-  SolverOptions(MixedComplementarityProblem* mlcp, enum MCP_SOLVER id)
+  SolverOptions(MixedComplementarityProblem_old* mlcp, enum MCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
     SO->solverId=id;
-    mixedComplementarity_setDefaultSolverOptions(mlcp, SO);
+    mcp_old_setDefaultSolverOptions(mlcp, SO);
     return SO;
   }
 
-  SolverOptions(MixedComplementarityProblem2* mcp, enum MCP_SOLVER id)
+  SolverOptions(MixedComplementarityProblem* mcp, enum MCP_SOLVER id)
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));

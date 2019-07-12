@@ -33,17 +33,17 @@ extern "C"
 #endif
 
 
-  /** Initialisation of the MCP Fischer solver (set problem, allocate working memory and so on. This routine must be called before any attempt to run the mcp_driver.
+  /** Initialisation of the MCP Fischer solver (set problem, allocate working memory and so on. This routine must be called before any attempt to run the mcp_old_driver.
    *   \param[in] problem  description of the MCP
    *   \param[in] options for the solver
    */
-  void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOptions* options);
+  void mcp_old_FischerBurmeister_init(MixedComplementarityProblem_old * problem, SolverOptions* options);
 
   /** Reset of the MCP Fischer solver (free local variable)
    *  \param[in] problem  description of the MCP
    *  \param[in] options for the solver
    */
-  void mcp_FischerBurmeister_reset(MixedComplementarityProblem * problem, SolverOptions* options);
+  void mcp_old_FischerBurmeister_reset(MixedComplementarityProblem_old * problem, SolverOptions* options);
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

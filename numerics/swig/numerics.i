@@ -161,6 +161,7 @@ namespace std11 = std;
  // more convenient
  %rename (LCP) LinearComplementarityProblem;
  %rename (MLCP) MixedLinearComplementarityProblem;
+ %rename (MCP_old) MixedComplementarityProblem_old;
  %rename (MCP) MixedComplementarityProblem;
  %rename (NCP) NonlinearComplementarityProblem;
  %rename (VI) VariationalInequality;

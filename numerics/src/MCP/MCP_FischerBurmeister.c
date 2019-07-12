@@ -26,6 +26,7 @@
 #include "FischerBurmeister.h"
 #include "MCP_Solvers.h"
 #include "MCP_FischerBurmeister.h"
+#include "numerics_verbose.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -33,12 +34,12 @@
 Ugly but required to deal with function pointer connection
 in  FischerFunc_MCP and its jacobian.
 */
-static MixedComplementarityProblem * localProblem = NULL;
+static MixedComplementarityProblem_old * localProblem = NULL;
 
 
-void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOptions* options)
+void mcp_old_FischerBurmeister_init(MixedComplementarityProblem_old * problem, SolverOptions* options)
 {
-  localProblem = (MixedComplementarityProblem *)malloc(sizeof(MixedComplementarityProblem));
+  localProblem = (MixedComplementarityProblem_old *)malloc(sizeof(MixedComplementarityProblem_old));
   /* Connect local static problem with the "real" MCP */
   localProblem->sizeEqualities = problem->sizeEqualities ;
   localProblem->sizeInequalities = problem->sizeInequalities ;
@@ -53,9 +54,9 @@ void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOpt
   localProblem->Fmcp = options->dWork ;
 }
 
-void mcp_FischerBurmeister_reset(MixedComplementarityProblem * problem, SolverOptions* options)
+void mcp_old_FischerBurmeister_reset(MixedComplementarityProblem_old * problem, SolverOptions* options)
 {
-  freeMixedComplementarityProblem(localProblem);
+  mixedComplementarityProblem_old_free(localProblem);
   localProblem = NULL;
 }
 
@@ -84,7 +85,7 @@ void nablaFischerFunc_MCP(int size, double* z, double* nablaPhi, int dummy)
   jacobianPhi_Mixed_FB(sizeEq, sizeIneq, z, localProblem->Fmcp, localProblem->nablaFmcp, nablaPhi) ;
 }
 
-void mcp_FischerBurmeister(MixedComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
+void mcp_old_FischerBurmeister(MixedComplementarityProblem_old* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   *info = 1;
   int fullSize = problem->sizeEqualities + problem->sizeInequalities ;
@@ -103,13 +104,28 @@ void mcp_FischerBurmeister(MixedComplementarityProblem* problem, double *z, doub
   // Check output
   if (*info > 0)
     fprintf(stderr, "Numerics, mcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[SICONOS_DPARAM_RESIDU]);
+  
+  double tolerance = options->dparam[SICONOS_DPARAM_TOL];
+  double  error =0.0;
+  
+  mcp_old_compute_error(problem, z , w, &error);
 
+  if (error > tolerance)
+  {
+    numerics_printf("mcp_old_FischerBurmeister : error = %e > tolerance = %e.", error, tolerance);
+    *info = 1;
+  }
+  else
+  {
+    numerics_printf("mcp_old_FischerBurmeister : error = %e < tolerance = %e.", error, tolerance);
+    *info = 0;
+  }
   return;
 }
 
-int mixedComplementarity_FB_setDefaultSolverOptions(MixedComplementarityProblem* problem, SolverOptions* pSolver)
+int mcp_old_FB_setDefaultSolverOptions(MixedComplementarityProblem_old* problem, SolverOptions* pSolver)
 {
-  mixedComplementarity_default_setDefaultSolverOptions(problem, pSolver);
+  mcp_old_default_setDefaultSolverOptions(problem, pSolver);
   return 0;
 }
 

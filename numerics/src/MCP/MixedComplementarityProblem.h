@@ -32,7 +32,7 @@ typedef void (*ptrFunctionMCP)(int size , double* z, double * F);
 typedef void (*ptrFunctionMCP2)(void* env, int n, double* z, double * F);
 typedef void (*ptrFunctionMCP_nabla)(void* env, int n, double* z, NumericsMatrix * F);
 
-/** \struct  MixedComplementarityProblem MixedComplementarityProblem.h
+/** \struct  MixedComplementarityProblem_old MixedComplementarityProblem.h
  * The structure that defines a Mixed Complementarity problem (MCP) : find two vectors \f$(z,w \in {{\mathrm{I\!R}}}^{n+m})\f$ such that:
 
   \f[
@@ -51,7 +51,23 @@ typedef void (*ptrFunctionMCP_nabla)(void* env, int n, double* z, NumericsMatrix
 
   and \f$F\f$ is a non linear function that must be user-defined.
  */
+
+/** \struct MixedComplementarityProblem MixedComplementarityProblem.h
+ * Structure that contains and defines a MixedComplementarityProblem
+ */
 struct MixedComplementarityProblem
+{
+  int n1; /**< number of equalities constraints */
+  int n2; /**< size of complementary variables */
+  ptrFunctionMCP2 compute_Fmcp; /**< pointer to the function used to compute \f$F_{mcp}(z) = (G(z), H(z))\f$ */
+  ptrFunctionMCP_nabla compute_nabla_Fmcp; /**< pointer to the function used to compute \f$\nabla_z F_{mcp}\f$ */
+  NumericsMatrix* nabla_Fmcp; /**< storage for \f$\nabla_z F_{mcp}\f$*/
+  void* env; /**< environment for the compute_Fmcp and compute_nabla_Fmcp function.
+               When called from Python, it contains an object with compute_Fmcp and compute_nabla_Fmcp as methods.
+               When called from C, it can reference a data struct containing variables needed for the computations.*/
+};
+
+struct MixedComplementarityProblem_old
 {
   int sizeEqualities; /**< size of equalities $z_e, w_e$ size */
   int sizeInequalities; /**< size of inequalities $z_i,w_i$ size */
@@ -64,41 +80,30 @@ struct MixedComplementarityProblem
 
 };
 
-/** \struct MixedComplementarityProblem2 MixedComplementarityProblem.h
- * Structure that contains and defines a MixedComplementarityProblem
- */
-struct MixedComplementarityProblem2
-{
-  int n1; /**< number of equalities constraints */
-  int n2; /**< size of complementary variables */
-  ptrFunctionMCP2 compute_Fmcp; /**< pointer to the function used to compute \f$F_{mcp}(z) = (G(z), H(z))\f$ */
-  ptrFunctionMCP_nabla compute_nabla_Fmcp; /**< pointer to the function used to compute \f$\nabla_z F_{mcp}\f$ */
-  NumericsMatrix* nabla_Fmcp; /**< storage for \f$\nabla_z F_{mcp}\f$*/
-  void* env; /**< environment for the compute_Fmcp and compute_nabla_Fmcp function.
-               When called from Python, it contains an object with compute_Fmcp and compute_nabla_Fmcp as methods.
-               When called from C, it can reference a data struct containing variables needed for the computations.*/
-};
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-  /** \fn  void freeMixedComplementarityProblem(MixedComplementarityProblem* problem)
-   *  \brief function to delete a MixedComplementarityProblem
-   *  \param problem  pointer to a MixedComplementarityProblem to delete
-   */
-  void freeMixedComplementarityProblem(MixedComplementarityProblem* problem);
 
-  /** free an MCP problem 
+  /** free an MCP problem
    * \param mcp structure to free
    */
-  void freeMCP(MixedComplementarityProblem2* mcp);
+  void mixedComplementarityProblem_free(MixedComplementarityProblem* mcp);
 
   /** create an empty MCP problem
    * \return an MixedComplementarityProblem instance
    */
-  MixedComplementarityProblem2* newMCP(void);
+  MixedComplementarityProblem* mixedComplementarityProblem_new(void);
+
+  /** \fn  void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem)
+   *  \brief function to delete a MixedComplementarityProblem_old
+   *  \param problem  pointer to a MixedComplementarityProblem_old to delete
+   */
+  void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem);
+
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -40,8 +40,8 @@ const char* const   SICONOS_LCP_LATIN_W_STR = "Latin_w";
 const char* const   SICONOS_LCP_QP_STR = "QP";
 const char* const   SICONOS_LCP_NSQP_STR = "NSQP";
 const char* const   SICONOS_LCP_NEWTONMIN_STR = "NewtonMin";
-const char* const   SICONOS_LCP_NEWTON_FBLSA_STR = "NewtonFB";
-const char* const   SICONOS_LCP_NEWTON_MINFBLSA_STR = "NewtonMinFB";
+const char* const   SICONOS_LCP_NEWTON_FB_FBLSA_STR = "NewtonFB";
+const char* const   SICONOS_LCP_NEWTON_MIN_FBLSA_STR = "NewtonMinFB";
 const char* const   SICONOS_LCP_PSOR_STR = "PSOR";
 const char* const   SICONOS_LCP_RPGS_STR = "RPGS";
 const char* const   SICONOS_LCP_PATH_STR = "PATH";
@@ -258,14 +258,14 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double *z , do
     /* IN: itermax, tolerance
        OUT: iter, error
     */
-  case SICONOS_LCP_NEWTON_FBLSA:
+  case SICONOS_LCP_NEWTON_FB_FBLSA:
     lcp_newton_FB(problem, z , w , &info , options);
     break;
     /****** Newton min + Fischer-Burmeister ******/
     /* IN: itermax, tolerance
        OUT: iter, error
     */
-  case SICONOS_LCP_NEWTON_MINFBLSA:
+  case SICONOS_LCP_NEWTON_MIN_FBLSA:
     lcp_newton_minFB(problem, z , w , &info , options);
     break;
     /****** PSOR Solver ******/

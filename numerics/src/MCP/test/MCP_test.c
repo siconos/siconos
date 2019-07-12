@@ -50,7 +50,7 @@ int main(void)
   options.solverId = SICONOS_MCP_FB;
 
   /* Create a MixedComplementarityProblem */
-  MixedComplementarityProblem* problem = (MixedComplementarityProblem *)malloc(sizeof(MixedComplementarityProblem));
+  MixedComplementarityProblem_old* problem = (MixedComplementarityProblem_old *)malloc(sizeof(MixedComplementarityProblem_old));
 
   problem->sizeEqualities = 2;
   problem->sizeInequalities = 3;
@@ -59,7 +59,7 @@ int main(void)
   problem->Fmcp = NULL;
   problem->nablaFmcp = NULL;
 
-  mixedComplementarity_setDefaultSolverOptions(problem, &options);
+  mcp_old_setDefaultSolverOptions(problem, &options);
 
   int size = 5;
   double z[4];
@@ -69,13 +69,13 @@ int main(void)
   problem->computeNablaFmcp(size, z, nablaF);
 
   /* Initialize the solver */
-  mcp_driver_init(problem, &options) ;
+  mcp_old_driver_init(problem, &options) ;
 
   /// TODO : write a real test ... ////
 
   printf("End of MCP solvers test. \n");
-  mcp_driver_reset(problem, &options);
-  freeMixedComplementarityProblem(problem);
+  mcp_old_driver_reset(problem, &options);
+  mixedComplementarityProblem_old_free(problem);
   solver_options_delete(&options);
 
   return info;
