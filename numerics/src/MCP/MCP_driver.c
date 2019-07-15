@@ -22,12 +22,14 @@
 
 #include "MCP_Solvers.h"
 #include "MCP_cst.h"
-#include "MCP_FischerBurmeister.h"
 
 #include "NonSmoothDrivers.h"
 #include "numerics_verbose.h"
 
-const char* const SICONOS_MCP_FB_STR = "NewtonFB";
+#include <stdio.h>
+#include <stdlib.h>
+
+const char* const SICONOS_MCP_OLD_FB_STR = "NewtonFB";
 const char* const SICONOS_MCP_NEWTON_FB_FBLSA_STR = "MCP Newton FBLSA";
 const char* const SICONOS_MCP_NEWTON_MIN_FBLSA_STR = "MCP Newton minFBLSA";
 
@@ -72,7 +74,7 @@ int mcp_old_driver(MixedComplementarityProblem_old* problem, double *z , double 
 
   switch (options->solverId)
   {
-  case SICONOS_MCP_FB: // Fischer-Burmeister/Newton
+  case SICONOS_MCP_OLD_FB: // Fischer-Burmeister/Newton
     mcp_old_FischerBurmeister(problem, z, w, &info, options);
     break;
 
@@ -89,7 +91,7 @@ void mcp_old_driver_init(MixedComplementarityProblem_old* problem, SolverOptions
 {
   switch (options->solverId)
   {
-  case SICONOS_MCP_FB :
+  case SICONOS_MCP_OLD_FB :
     mcp_old_FischerBurmeister_init(problem, options) ;
     break ;
   default :
@@ -103,7 +105,7 @@ void mcp_old_driver_reset(MixedComplementarityProblem_old* problem, SolverOption
 {
   switch (options->solverId)
   {
-  case SICONOS_MCP_FB :
+  case SICONOS_MCP_OLD_FB :
     mcp_old_FischerBurmeister_reset(problem, options) ;
     break ;
   default :

@@ -79,8 +79,8 @@ void mcp_newton_FB_FBLSA(MixedComplementarityProblem* problem, double *z, double
   /* function to compute the error (in our case the norm of the gradient of the merit function) */
   functions_FBLSA_mcp.compute_error = &FB_compute_error_mcp;
 
-  set_lsa_params_data(options, problem->nabla_Fmcp);
-  newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_FBLSA_mcp);
+  set_lsa_params_data(options->internalSolvers, problem->nabla_Fmcp);
+  newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options->internalSolvers, &functions_FBLSA_mcp);
 
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   double  error =0.0;
@@ -99,4 +99,31 @@ void mcp_newton_FB_FBLSA(MixedComplementarityProblem* problem, double *z, double
   }
 
   numerics_printf("mcp_newton_FB_FBLSA. ends");
+}
+
+int mcp_newton_FB_FBLSA_setDefaultSolverOptions(
+  MixedComplementarityProblem* problem,
+  SolverOptions* options)
+{
+  numerics_printf_verbose(1,"mcp_newton_FB_FBLSA_setDefaultSolverOptions");
+
+  options->solverId = SICONOS_MCP_NEWTON_FB_FBLSA;
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  options->dWork = NULL;
+  solver_options_nullify(options);
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
+  
+  newton_lsa_setDefaultSolverOptions(options->internalSolvers);
+
+  return 0;
 }

@@ -25,38 +25,32 @@
 #include "NonSmoothDrivers.h"
 #include "numerics_verbose.h"
 
-void  mcp_old_default_setDefaultSolverOptions(MixedComplementarityProblem_old* problem, SolverOptions* pOptions)
+
+int mcp_setDefaultSolverOptions(
+  MixedComplementarityProblem* problem,
+  SolverOptions* options)
 {
-  pOptions->isSet = 0;
-  pOptions->iSize = 10;
-  pOptions->iparam = 0;
-  pOptions->dSize = 10;
-  pOptions->dparam = 0;
-  pOptions->filterOn = 0;
-  pOptions->dWork = 0;
-  pOptions->iWork = 0;
-  pOptions->iparam = (int*)calloc(10, sizeof(int));
-  pOptions->dparam = (double*)calloc(10, sizeof(double));
-  pOptions->numberOfInternalSolvers = 0;
-  solver_options_nullify(pOptions);
+  int info = -1;
 
-
-  /*default tolerance of it*/
-  pOptions->dparam[0] = 10e-7;
-  /*default number of it*/
-  pOptions->iparam[0] = 10;
-
-
-
-
-  /* int sizeOfIwork = mcp_old_driver_get_iwork(problem, pOptions); */
-  /* if(sizeOfIwork) */
-  /*   pOptions->iWork = (int*)malloc(sizeOfIwork*sizeof(int)); */
-  /* int sizeOfDwork = mcp_old_driver_get_dwork(problem, pOptions); */
-  /* if(sizeOfDwork) */
-  /*   pOptions->dWork = (double*)malloc(sizeOfDwork*sizeof(double)); */
+  switch (options->solverId)
+  {
+  case SICONOS_MCP_NEWTON_FB_FBLSA:
+  {
+    info =     mcp_newton_FB_FBLSA_setDefaultSolverOptions(problem, options);
+    break;
+  }
+  case SICONOS_MCP_NEWTON_MIN_FBLSA:
+  {
+    info =     mcp_newton_min_FBLSA_setDefaultSolverOptions(problem, options);
+    break;
+  }
+  default:
+  {
+    numerics_error("mcp_setDefaultSolverOptions", "Unknown Solver");
+  }
+  }
+  return info;
 }
-
 
 
 int mcp_old_setDefaultSolverOptions(MixedComplementarityProblem_old* problem, SolverOptions* pOptions)
@@ -65,14 +59,14 @@ int mcp_old_setDefaultSolverOptions(MixedComplementarityProblem_old* problem, So
 
   switch (pOptions->solverId)
   {
-  case SICONOS_MCP_FB:
+  case SICONOS_MCP_OLD_FB:
   {
     info =    mcp_old_FB_setDefaultSolverOptions(problem, pOptions);
     break;
   }
   default:
   {
-    numerics_error("mixedLinearComplementarity_setDefaultSolverOptions", "Unknown Solver");
+    numerics_error("mcp_old_setDefaultSolverOptions", "Unknown Solver");
   }
   }
   return info;

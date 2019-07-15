@@ -25,7 +25,6 @@
 #include "NonSmoothNewton.h"
 #include "FischerBurmeister.h"
 #include "MCP_Solvers.h"
-#include "MCP_FischerBurmeister.h"
 #include "numerics_verbose.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
@@ -123,9 +122,34 @@ void mcp_old_FischerBurmeister(MixedComplementarityProblem_old* problem, double 
   return;
 }
 
-int mcp_old_FB_setDefaultSolverOptions(MixedComplementarityProblem_old* problem, SolverOptions* pSolver)
+int mcp_old_FB_setDefaultSolverOptions(MixedComplementarityProblem_old* problem, SolverOptions* options)
 {
-  mcp_old_default_setDefaultSolverOptions(problem, pSolver);
+  
+  options->isSet = 0;
+  options->iSize = 10;
+  options->iparam = 0;
+  options->dSize = 10;
+  options->dparam = 0;
+  options->filterOn = 0;
+  options->dWork = 0;
+  options->iWork = 0;
+  options->iparam = (int*)calloc(10, sizeof(int));
+  options->dparam = (double*)calloc(10, sizeof(double));
+  options->numberOfInternalSolvers = 0;
+  solver_options_nullify(options);
+
+  /*default tolerance of it*/
+  options->dparam[0] = 10e-7;
+  /*default number of it*/
+  options->iparam[0] = 10;
+ 
+  /* int sizeOfIwork = mcp_old_driver_get_iwork(problem, options); */
+  /* if(sizeOfIwork) */
+  /*   options->iWork = (int*)malloc(sizeOfIwork*sizeof(int)); */
+  /* int sizeOfDwork = mcp_old_driver_get_dwork(problem, options); */
+  /* if(sizeOfDwork) */
+  /*   options->dWork = (double*)malloc(sizeOfDwork*sizeof(double)); */
+
   return 0;
 }
 

@@ -105,7 +105,8 @@
   {
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
-    solver_options_set(SO, id);
+    SO->solverId=id;
+    mcp_setDefaultSolverOptions(mcp, SO);
     return SO;
   }
 

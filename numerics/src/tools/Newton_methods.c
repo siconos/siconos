@@ -489,8 +489,25 @@ newton_LSA_free:
   }
 }
 
-void newton_lsa_default_SolverOption(SolverOptions* options)
+void newton_lsa_setDefaultSolverOptions(SolverOptions* options)
 {
+
+  numerics_printf_verbose(1,"newton_lsa_setDefaultSolverOption");
+
+  options->solverId = SICONOS_NEWTON_LSA;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  options->dWork = NULL;
+  solver_options_nullify(options);
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
   options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;

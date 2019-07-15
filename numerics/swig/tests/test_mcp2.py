@@ -31,12 +31,12 @@ ztol = 1e-8
 
 
 def test_new():
-    mcp=SN.MixedComplementarityProblem(1, 1, mcp_function, mcp_Nablafunction)
+    mcp=SN.MCP(1, 1, mcp_function, mcp_Nablafunction)
 
 
 
 def test_mcp_newton_FB_FBLSA():
-    mcp = SN.MixedComplementarityProblem(0, 2, mcp_function, mcp_Nablafunction)
+    mcp = SN.MCP(0, 2, mcp_function, mcp_Nablafunction)
     z = np.array([0., 0.])
     w = np.array([0., 0.])
 
@@ -48,7 +48,7 @@ def test_mcp_newton_FB_FBLSA():
     assert not info
 
 def test_mcp_newton_min_FBLSA():
-    mcp = SN.MixedComplementarityProblem(0, 2, mcp_function, mcp_Nablafunction)
+    mcp = SN.MCP(0, 2, mcp_function, mcp_Nablafunction)
     z = np.array([0., 0.])
     w = np.array([0., 0.])
 
@@ -65,7 +65,7 @@ def build_problem(n):
     q = np.zeros(n)
     
     for i in range(n):
-        q[i] = -i-5
+        q[i] = -i+7
         M[i,i] =2
         if i < n-1 :
             M[i,i+1] =1
@@ -89,7 +89,7 @@ def mcp_Nablafunction_2(n, z, nablaF):
     return 
 
 def test_mcp_newton_FB_FBLSA_2():
-    mcp = SN.MixedComplementarityProblem(n-3, 3, mcp_function_2, mcp_Nablafunction_2)
+    mcp = SN.MCP(n-5, 5, mcp_function_2, mcp_Nablafunction_2)
     z = np.zeros(n)
     w = np.zeros(n)
     SO = SN.SolverOptions(mcp, SN.SICONOS_MCP_NEWTON_FB_FBLSA)
@@ -100,7 +100,7 @@ def test_mcp_newton_FB_FBLSA_2():
     assert not info
 
 def test_mcp_newton_min_FBLSA_2():
-    mcp = SN.MixedComplementarityProblem(n-3, 3, mcp_function_2, mcp_Nablafunction_2)
+    mcp = SN.MCP(n-5, 5, mcp_function_2, mcp_Nablafunction_2)
     z = np.zeros(n)
     w = np.zeros(n)
     SO = SN.SolverOptions(mcp, SN.SICONOS_MCP_NEWTON_MIN_FBLSA)

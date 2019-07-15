@@ -47,7 +47,7 @@ int main(void)
   SolverOptions options;
 
   /* FB solver */
-  options.solverId = SICONOS_MCP_FB;
+  options.solverId = SICONOS_MCP_OLD_FB;
 
   /* Create a MixedComplementarityProblem */
   MixedComplementarityProblem_old* problem = (MixedComplementarityProblem_old *)malloc(sizeof(MixedComplementarityProblem_old));

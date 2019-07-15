@@ -34,7 +34,7 @@ def test_mcp_FB():
     z = np.array([0., 0.])
     w = np.array([0., 0.])
 
-    SO=N.SolverOptions(mcp,N.SICONOS_MCP_FB)
+    SO=N.SolverOptions(mcp,N.SICONOS_MCP_OLD_FB)
     N.mcp_old_driver_init(mcp, SO)
     info = N.mcp_old_FischerBurmeister(mcp, z, w, SO)
     N.mcp_old_driver_reset(mcp, SO)
@@ -74,7 +74,7 @@ def test_mcp_FB_2():
     z = np.zeros(n)
     w = np.zeros(n)
 
-    SO=N.SolverOptions(mcp,N.SICONOS_MCP_FB)
+    SO=N.SolverOptions(mcp,N.SICONOS_MCP_OLD_FB)
     N.mcp_old_driver_init(mcp, SO)
     info = N.mcp_old_FischerBurmeister(mcp, z, w, SO)
     N.mcp_old_driver_reset(mcp, SO)

@@ -23,11 +23,13 @@
 #include "MixedComplementarityProblem.h"
 #include "SolverOptions.h"
 #include "MCP_Solvers.h"
-static double M[4] = {2.0, 1.0, 1.0, 2.0};
-static double q[4] = { -5.0, -6.0};
+#include "NumericsVerbose.h"
+#include "NumericsMatrix.h"
+static double * M;
+static double * q;
 
-void testF(int size, double *z, double * F);
-void testF(int size, double *z, double * F)
+void testF(void* env, int size, double *z, double * F);
+void testF(void* env, int size, double *z, double * F)
 {
   /* printf("call to MCP function F(z) ...\n");   */
   /* for (int i =0 ; i <size; i++) */
@@ -51,8 +53,8 @@ void testF(int size, double *z, double * F)
   /* printf("End call to MCP function F(z) ...\n");   */
 }
 
-void testNablaF(int size, double *z, double *nablaF);
-void testNablaF(int size, double *z, double *nablaF)
+void testNablaF(void * env, int size, double *z, NumericsMatrix* nablaF);
+void testNablaF(void * env, int size, double *z, NumericsMatrix* nablaF)
 {
   /* printf("call to MCP function nablaF(z) ...\n"); */
 
@@ -60,59 +62,78 @@ void testNablaF(int size, double *z, double *nablaF)
   {
     for (int j = 0 ; j < size ;  j++)
     {
-      nablaF[i + j * size] = M[i + j * size];
+      nablaF->matrix0[i + j * size] = M[i + j * size];
     }
   }
-
-
 }
 
-int main(void)
+static MixedComplementarityProblem * create_mcp_1(void)
 {
-  printf(" Start tests for MCP solvers.\n");
+  /* Create a MixedComplementarityProblem */
+  MixedComplementarityProblem* problem = (MixedComplementarityProblem *)malloc(sizeof(MixedComplementarityProblem));
 
-  int info = 0 ;
+  int n=10;
+  
+  problem->n1 = n-5;
+  problem->n2 = 5;
+  problem->compute_Fmcp = &testF ;
+  problem->compute_nabla_Fmcp = &testNablaF ;
+  problem->nabla_Fmcp =  NM_create(NM_DENSE, n, n); 
+  problem->env = NULL;
 
+  M = (double *) calloc(n*n,sizeof(double));
+  q = (double *) calloc(n,sizeof(double));
+
+  for (int i =0; i< n; i++)
+  {
+    q[i] = - i + 7.;
+    M[i+i*n] = 2.0 ;
+    if (i < n-1)
+      M[i+(i+1)*n] =1.0;
+    if (i >0)
+      M[i+(i-1)*n] =1.0;
+  }
+  //NM_dense_display(M,n,n,n);
+  return problem;
+}
+
+static void free_mcp_1(MixedComplementarityProblem * problem)
+{
+  free(M);
+  free(q);
+  mixedComplementarityProblem_free(problem);
+}
+
+static int test_mcp_newton(int solverId)
+{
+  printf("test_mcp_newton() starts for solver %s.\n", solver_options_id_to_name(solverId));
+
+  int info = 1 ;
+
+  MixedComplementarityProblem* problem = create_mcp_1();
+  
   /* Set solver options */
   SolverOptions options;
-
   /* FB solver */
-  options.solverId = SICONOS_MCP_OLD_FB;
-  /* Create a MixedComplementarityProblem */
-  MixedComplementarityProblem_old* problem = (MixedComplementarityProblem_old *)malloc(sizeof(MixedComplementarityProblem_old));
 
-  problem->sizeEqualities = 1;
-  problem->sizeInequalities = 1;
-  problem->computeFmcp = &testF ;
-  problem->computeNablaFmcp = &testNablaF ;
-  problem->Fmcp = NULL;
-  problem->nablaFmcp = NULL;
+  options.solverId = solverId;
+  mcp_setDefaultSolverOptions(problem, &options);
+  
+  numerics_set_verbose(1);
 
-
-
-
-  mcp_old_setDefaultSolverOptions(problem, &options);
-
-  int size = problem->sizeEqualities + problem->sizeInequalities ;
+  int size = problem->n1 + problem->n1 ;
   double * z = (double *)malloc(size * sizeof(double));
   double * w = (double *)malloc(size * sizeof(double));
+
   for (int i = 0 ; i < size; i++)
   {
     z[i] = 0.0;
     w[i] = 0.0;
   }
 
-  options.dparam[0] = 1e-10;
-  options.iparam[0] = 20;
+  info = mcp_driver(problem, z , w,  &options);
 
-
-  /* Initialize the solver */
-  mcp_old_driver_init(problem, &options) ;
-  info = mcp_old_driver(problem, z , w,  &options);
-  mcp_old_driver_reset(problem, &options) ;
   /// TODO : write a real test ... ////
-
-
   for (int i = 0 ; i < size; i++)
   {
     printf("z[%i]= %lf\t", i, z[i]);
@@ -126,8 +147,21 @@ int main(void)
   solver_options_delete(&options);
   free(z);
   free(w);
-  free(problem);
-  printf("End of MCP solvers test. \n");
+  free_mcp_1(problem);
+  printf("test_mcp_newton() starts for solver %s.\n\n", solver_options_id_to_name(solverId));
+  return info;
+}
 
+
+
+int main(void)
+{
+  printf("Start tests for MCP solvers.\n\n");
+  int info = 1 ;
+
+    
+  info = test_mcp_newton(SICONOS_MCP_NEWTON_MIN_FBLSA);
+  info += test_mcp_newton(SICONOS_MCP_NEWTON_FB_FBLSA);
+  printf("End of MCP solvers test. \n");
   return info;
 }

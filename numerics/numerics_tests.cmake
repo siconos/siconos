@@ -85,7 +85,7 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(MCP_test_0 MCP_test.c)
   NEW_TEST(MCP_test_1 MCP_test1.c)
   NEW_TEST(MCP_test_2 MCP_test2.c)
-  NEW_TEST(MCP_2_test_1 MCP_test1.c)
+  NEW_TEST(MCP_2_test_1 MCP_2_test1.c)
  END_TEST()
 
   BEGIN_TEST(src/NCP/test)

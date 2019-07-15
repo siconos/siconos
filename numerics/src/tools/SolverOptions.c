@@ -433,7 +433,7 @@ void solver_options_set(SolverOptions* options, int solverId)
     iter_max = 1000;
     tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    newton_lsa_default_SolverOption(options);
+    newton_lsa_setDefaultSolverOptions(options);
     break;
 
   case SICONOS_NCP_PATHSEARCH:
