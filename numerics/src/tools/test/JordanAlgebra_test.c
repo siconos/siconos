@@ -40,7 +40,7 @@ static int Arrow_repr_3d_test()
     vec[4] = 5.0;
     vec[5] = 6.0;
 
-    NumericsMatrix * Arw_mat = Arrow_repr(vecSize, vec, varsCount);
+    NumericsMatrix * Arw_mat = Arrow_repr(vec, vecSize, varsCount);
     NumericsMatrix * D_Arw_mat = NM_create(NM_DENSE, vecSize, vecSize);
     NM_to_dense(Arw_mat, D_Arw_mat);
     // NM_display(D_Arw_mat);
@@ -82,7 +82,7 @@ static int Arrow_repr_2d_test()
     vec[4] = 5.0;
     vec[5] = 6.0;
 
-    NumericsMatrix * Arw_mat = Arrow_repr(vecSize, vec, varsCount);
+    NumericsMatrix * Arw_mat = Arrow_repr(vec, vecSize, varsCount);
     NumericsMatrix * D_Arw_mat = NM_create(NM_DENSE, vecSize, vecSize);
     NM_to_dense(Arw_mat, D_Arw_mat);
     // NM_display(D_Arw_mat);
