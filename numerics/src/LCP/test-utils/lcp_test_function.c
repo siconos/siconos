@@ -43,6 +43,8 @@ static inline char* strdup(char* src)
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
 #include "SiconosCompat.h"
+#include "NumericsVerbose.h"
+
 
 #ifdef __cplusplus
 using namespace std;
@@ -50,7 +52,7 @@ using namespace std;
 
 int lcp_test_function(FILE * f, int solverId, char* filename)
 {
-
+  numerics_set_verbose(2);
   int i, info = 0 ;
   LinearComplementarityProblem* problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
 

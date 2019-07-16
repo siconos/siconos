@@ -38,8 +38,8 @@
 #include "Friction_cst.h"
 #include "hdf5_logger.h"
 
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
@@ -439,22 +439,23 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     norm_JacThetaF_merit = cblas_dnrm2(n, JacThetaF_merit, 1);
     // Error Evaluation
 
-    if (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_RESIDU)
+    if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_RESIDU)
     {
       err = norm_F_merit;
     }
-    else if (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_STATIONARITY)
+    else if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_STATIONARITY)
     {
       err = norm_JacThetaF_merit ;
     }
-    else if (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
+    else if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
              SICONOS_STOPPING_CRITERION_RESIDU_AND_STATIONARITY)
     {
       err = fmax(norm_F_merit, norm_JacThetaF_merit);
     }
-    else if  (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
+    else if  (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
               SICONOS_STOPPING_CRITERION_USER_ROUTINE)
     {
+      DEBUG_PRINT("user routine is used to compute the error\n");
       functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
     }
 

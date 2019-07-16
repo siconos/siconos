@@ -162,15 +162,15 @@ int nonSmoothNewton(
     psi = 0.5 * normPhi * normPhi;
 
     /* Stops if the termination criterion is satisfied */
-    if (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_RESIDU)
+    if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_RESIDU)
     {
       terminationCriterion = normPhi;
     }
-    else if (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_STATIONARITY)
+    else if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_STATIONARITY)
     {
       terminationCriterion = norm_gradient_psi;
     }
-    else if (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
+    else if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
              SICONOS_STOPPING_CRITERION_RESIDU_AND_STATIONARITY)
     {
       terminationCriterion = fmax(normPhi, norm_gradient_psi);
