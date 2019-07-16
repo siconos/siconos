@@ -20,7 +20,7 @@
 #include "cblas.h"
 
 
-RawNumericsMatrix* Arrow_repr(const unsigned int vecSize, const double* const vec, const size_t varsCount)
+RawNumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
 {
     /* validation */
     if (vecSize % varsCount != 0)
@@ -56,6 +56,21 @@ RawNumericsMatrix* Arrow_repr(const unsigned int vecSize, const double* const ve
         }
     }
     return Arw_mat;
+}
+
+
+double * JA_iden(const unsigned int vecSize, const size_t varsCount)
+{
+    if (vecSize % varsCount != 0)
+    {
+        fprintf(stderr, "JA_iden: %d variables can not be extracted from vector of size %d.\n", varsCount, vecSize);
+        exit(EXIT_FAILURE);
+    }
+    double * out = (double*)calloc(vecSize, sizeof(double));
+    unsigned int dimension = (int)(vecSize / varsCount);
+    for (unsigned int i = 0; i < vecSize; i += dimension)
+        out[i] = 1.0;
+    return out;
 }
 
 

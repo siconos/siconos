@@ -27,12 +27,19 @@
 #include "NumericsMatrix.h"
 
 /** Create the Arrow representation matrix from vector.
- * \param vecSize the length of the vector.
  * \param vec pointer to the vector data.
+ * \param vecSize the length of the vector.
  * \param varsCount the count of variables (subvectors) in vec.
  * \return a pointer to a NumericsMatrix
  */
-RawNumericsMatrix* Arrow_repr(const unsigned int vecSize, const double* const vec, const size_t varsCount);
+RawNumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount);
+
+/** Create the Arrow representation matrix from vector.
+ * \param vecSize the length of the vector.
+ * \param varsCount the count of variables (subvectors) in vec.
+ * \return a pointer to the identity element of the Jordan algebra
+ */
+double * JA_iden(const unsigned int vecSize, const size_t varsCount);
 
 /** Jordan product of two vectors.
  * \param x is a vector;
