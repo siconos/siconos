@@ -80,3 +80,10 @@ def test_ncp_path():
         except:
             assert 0
 
+if __name__ == "__main__":
+    SN.numerics_set_verbose(3)
+    test_new()
+    test_ncp_newton_FBLSA()
+    test_ncp_newton_minFBLSA()
+    test_ncp_path()
+

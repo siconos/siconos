@@ -9,7 +9,7 @@
 %include "mlcp_cst.h"
 %include "VI_cst.h"
 %include "GenericMechanical_cst.h"
-
+%include "Newton_methods.h"
 %include "projectionOnCone.h"
 %include "projectionOnRollingCone.h"
 

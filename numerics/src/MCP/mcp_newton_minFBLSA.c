@@ -59,11 +59,34 @@ void mcp_newton_min_FBLSA(MixedComplementarityProblem* problem, double *z, doubl
   functions_minFBLSA_mcp.compute_error = &FB_compute_error_mcp;
   functions_minFBLSA_mcp.compute_RHS_desc = &mcp_min;
   functions_minFBLSA_mcp.compute_H_desc = &min_compute_H_mcp;
+  
+  options->internalSolvers->dparam[0] = options->dparam[0];
+  options->internalSolvers->iparam[0] = options->iparam[0];
 
   set_lsa_params_data(options->internalSolvers, problem->nabla_Fmcp);
   newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem,
              options->internalSolvers,
              &functions_minFBLSA_mcp);
+  double tolerance = options->dparam[SICONOS_DPARAM_TOL];
+  double  error =0.0;
+
+  mcp_compute_error(problem, z , Fmcp, &error);
+
+  if (error > tolerance)
+  {
+    numerics_printf("mcp_newton_min_FBLSA : error = %e > tolerance = %e.", error, tolerance);
+    *info = 1;
+  }
+  else
+  {
+    numerics_printf("mcp_newton_min_FBLSA : error = %e < tolerance = %e.", error, tolerance);
+    *info = 0;
+  }
+ 
+  
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = options->internalSolvers->iparam[SICONOS_IPARAM_ITER_DONE];
+  options->dparam[SICONOS_DPARAM_RESIDU] = error;
+
   numerics_printf("mcp_newton_min_FBLSA. ends");
 }
 

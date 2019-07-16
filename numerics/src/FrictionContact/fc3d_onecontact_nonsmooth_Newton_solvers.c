@@ -296,7 +296,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
   }
   else
   {
-    info = nonSmoothDirectNewton(Fsize, local_reaction, &F, &jacobianF,  options->iparam,  options->dparam);
+    info = nonSmoothDirectNewton(Fsize, local_reaction, &F, &jacobianF,  options);
   }
   if (info > 0)
   {

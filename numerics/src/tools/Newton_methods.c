@@ -36,7 +36,6 @@
 #include "MCP_cst.h"
 #include "VI_cst.h"
 #include "Friction_cst.h"
-
 #include "hdf5_logger.h"
 
 #define DEBUG_STDOUT
@@ -48,6 +47,11 @@ typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_dat
 #ifdef __cplusplus
 using namespace std;
 #endif
+
+
+const char* const SICONOS_NEWTON_LSA_STR  = "Newton method LSA";
+
+
 
 void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverOptions* options, functions_LSA* functions)
 {
@@ -73,6 +77,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   int incx, incy;
   double theta, preRHS, tau, threshold;
   double theta_iter = 0.0;
+  double norm_F_merit =0.0, norm_JacThetaF_merit=0.0;
   double err;
 
   double *workV1, *workV2;
@@ -211,8 +216,8 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   functions->compute_F_merit(data, z, F, F_merit);
 
   // Merit Evaluation
-  theta = cblas_dnrm2(n , F_merit , incx);
-  theta = 0.5 * theta * theta;
+  norm_F_merit = cblas_dnrm2(n , F_merit , incx);
+  theta = 0.5 * norm_F_merit * norm_F_merit;
 
   functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
 
@@ -342,7 +347,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       else
       {
         numerics_printf("Problem in DGESV, info = %d", info_dir_search);
-        
+
         options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
         options->dparam[SICONOS_DPARAM_RESIDU] = theta;
         *info = 2;
@@ -428,11 +433,36 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
 
     // Merit Evaluation
-    theta = cblas_dnrm2(n , F_merit , incx);
-    theta = 0.5 * theta * theta;
+    norm_F_merit = cblas_dnrm2(n , F_merit , incx);
+    theta = 0.5 * norm_F_merit * norm_F_merit;
 
+    norm_JacThetaF_merit = cblas_dnrm2(n, JacThetaF_merit, 1);
     // Error Evaluation
-    functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
+
+    if (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_RESIDU)
+    {
+      err = norm_F_merit;
+    }
+    else if (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_STATIONARITY)
+    {
+      err = norm_JacThetaF_merit ;
+    }
+    else if (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
+             SICONOS_STOPPING_CRITERION_RESIDU_AND_STATIONARITY)
+    {
+      err = fmax(norm_F_merit, norm_JacThetaF_merit);
+    }
+    else if  (options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
+              SICONOS_STOPPING_CRITERION_USER_ROUTINE)
+    {
+      functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
+    }
+
+
+
+
+
+
 
     if (log_hdf5)
     {
@@ -450,7 +480,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       stats_iteration.status = 0;
       options->callback->collectStatsIteration(options->callback->env, n, z, F, err, &stats_iteration);
     }
-    numerics_printf_verbose(1,"--- newton_LSA :: iter = %i,  norm merit function = %e, norm grad. merit function = %e > tol = %e",iter, theta, err,tol);
+    numerics_printf_verbose(1,"--- newton_LSA :: iter = %i,  norm merit function = %e, norm grad. merit function = %e, err = %e > tol = %e",iter, norm_F_merit, norm_JacThetaF_merit , err, tol);
   }
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
@@ -492,7 +522,7 @@ newton_LSA_free:
 void newton_lsa_setDefaultSolverOptions(SolverOptions* options)
 {
 
-  numerics_printf_verbose(1,"newton_lsa_setDefaultSolverOption");
+  numerics_printf_verbose(1,"newton_lsa_setDefaultSolverOptions");
 
   options->solverId = SICONOS_NEWTON_LSA;
   options->numberOfInternalSolvers = 0;
@@ -511,6 +541,9 @@ void newton_lsa_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
   options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
+
+  options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_RESIDU;
+
 }
 
 void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat)

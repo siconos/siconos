@@ -79,6 +79,10 @@ void mcp_newton_FB_FBLSA(MixedComplementarityProblem* problem, double *z, double
   /* function to compute the error (in our case the norm of the gradient of the merit function) */
   functions_FBLSA_mcp.compute_error = &FB_compute_error_mcp;
 
+  
+  options->internalSolvers->dparam[0] = options->dparam[0];
+  options->internalSolvers->iparam[0] = options->iparam[0];
+  
   set_lsa_params_data(options->internalSolvers, problem->nabla_Fmcp);
   newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options->internalSolvers, &functions_FBLSA_mcp);
 
@@ -97,6 +101,8 @@ void mcp_newton_FB_FBLSA(MixedComplementarityProblem* problem, double *z, double
     numerics_printf("mcp_newton_FB_FBLSA : error = %e < tolerance = %e.", error, tolerance);
     *info = 0;
   }
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = options->internalSolvers->iparam[SICONOS_IPARAM_ITER_DONE];
+  options->dparam[SICONOS_DPARAM_RESIDU] = error;
 
   numerics_printf("mcp_newton_FB_FBLSA. ends");
 }
@@ -125,5 +131,6 @@ int mcp_newton_FB_FBLSA_setDefaultSolverOptions(
   
   newton_lsa_setDefaultSolverOptions(options->internalSolvers);
 
+  
   return 0;
 }
