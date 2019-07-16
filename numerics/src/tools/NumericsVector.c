@@ -30,6 +30,7 @@
 #include "debug.h"
 
 #include "NumericsVector.h"
+#include "math.h"
 void NV_display(double * m, int nRow)
 {
   int lin;
@@ -48,6 +49,15 @@ void NV_display(double * m, int nRow)
   }
 
 }
+
+double * NV_copy(double * vec, unsigned int vecSize)
+{
+    double * out = (double*)malloc(vecSize * sizeof(double));
+    for (unsigned int i = 0; i < vecSize; ++i)
+        out[i] = vec[i];
+    return out;
+}
+
 void NV_write_in_file_python(double * m,  int nRow, FILE* file)
 {
   if (! m)
@@ -120,6 +130,14 @@ double* NV_prod(const double * const x, const double * const y, const unsigned i
     return out;
 }
 
+double* NV_div(const double * const x, const double * const y, const unsigned int vecSize)
+{
+    double * out = (double*)malloc(vecSize * sizeof(double));
+    for (unsigned int i = 0; i < vecSize; ++i)
+        out[i] = x[i] / (y[i] + 1e-12);
+    return out;
+}
+
 double NV_min(const double * const vec, const unsigned int vecSize)
 {
     double min_elem = DBL_MAX;
@@ -127,4 +145,58 @@ double NV_min(const double * const vec, const unsigned int vecSize)
         if (vec[i] < min_elem)
             min_elem = vec[i];
     return min_elem;
+}
+
+double NV_max(const double * const vec, const unsigned int vecSize)
+{
+    double max_elem = DBL_MIN;
+    for (unsigned int i = 0; i < vecSize; ++i)
+        if (vec[i] > max_elem)
+            max_elem = vec[i];
+    return max_elem;
+}
+
+double * NV_abs(const double * const vec, const unsigned int vecSize)
+{
+    double * out = (double*)malloc(vecSize * sizeof(double));
+    for (unsigned int i = 0; i < vecSize; ++i)
+        out[i] = fabs(vec[i]);
+    return out;
+}
+
+double * NV_add(const double * const x, const double * const y, const unsigned int vecSize)
+{
+    double * out = (double*)malloc(vecSize * sizeof(double));
+    for (unsigned int i = 0; i < vecSize; ++i)
+        out[i] = x[i] + y[i];
+    return out;
+}
+
+double * NV_const_add(const double * const vec, const unsigned int vecSize, const double alpha, const double beta)
+{
+    double * out = (double*)malloc(vecSize * sizeof(double));
+    for (unsigned int i = 0; i < vecSize; ++i)
+        out[i] = alpha * vec[i] + beta;
+    return out;
+}
+
+double * NV_sub(const double * const x, const double * const y, const unsigned int vecSize)
+{
+    double * out = (double*)malloc(vecSize * sizeof(double));
+    for (unsigned int i = 0; i < vecSize; ++i)
+        out[i] = x[i] - y[i];
+    return out;
+}
+
+double NV_norm_inf(const double * const vec, const unsigned int vecSize)
+{
+    double * abs_vec = NV_abs(vec, vecSize);
+    return NV_max(abs_vec, vecSize);
+}
+
+double NV_norm_2(const double * const vec, const unsigned int vecSize)
+{
+    double * vec2 = NV_power2(vec, vecSize);
+    double sum = NV_reduce(vec2, vecSize);
+    return sqrt(sum);
 }

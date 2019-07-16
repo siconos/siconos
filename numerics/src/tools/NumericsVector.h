@@ -42,6 +42,8 @@ extern "C"
    */
   void NV_display(double * m, int n);
 
+  double * NV_copy(double * vec, unsigned int vecSize);
+
   void NV_write_in_file_python(double * m,  int nRow, FILE* file);
 
   /** Test if two vectors are equal up to a given tolerance
@@ -87,12 +89,75 @@ extern "C"
    */
   double* NV_prod(const double * const x, const double * const y, const unsigned int vecSize);
 
+  /** Element by element division of two vectors
+      \param x is the vector
+      \param y is the vector
+      \param vecSize the size of the vector vec
+      \return product vector
+   */
+  double* NV_div(const double * const x, const double * const y, const unsigned int vecSize);
+
   /** Find a minimum value of vertor
       \param vec is the vector
       \param vecSize the size of the vector vec
       \return a minimum value of vertor
    */
   double NV_min(const double * const vec, const unsigned int vecSize);
+
+  /** Find a maximum value of vertor
+      \param vec is the vector
+      \param vecSize the size of the vector vec
+      \return a minimum value of vertor
+   */
+  double NV_max(const double * const vec, const unsigned int vecSize);
+
+  /** Compute abs vector
+      \param vec is the vector
+      \param vecSize the size of the vector vec
+      \return elemet by element abs vector
+   */
+  double * NV_abs(const double * const vec, const unsigned int vecSize);
+
+  /** Compute element by element by element sum
+      \param x is the vector
+      \param y is the vector
+      \param vecSize the size of the vector vec
+      \return sum vector
+   */
+  double * NV_add(const double * const x, const double * const y, const unsigned int vecSize);
+
+  /** Compute y = alpha * x + beta
+      \param x is the vector
+      \param vecSize the size of the vector vec
+      \param alpha is a scalar
+      \param beta is a scalar
+      \return y = alpha * x + beta
+   */
+
+  double * NV_const_add(const double * const vec, const unsigned int vecSize, const double alpha, const double beta);
+
+  /** Compute element by element by element subtraction
+      \param x is the vector
+      \param y is the vector
+      \param vecSize the size of the vector vec
+      \return subtract vector
+   */
+
+  double * NV_sub(const double * const x, const double * const y, const unsigned int vecSize);
+
+  /** Find a L-inf norm of vertor ( max(abs(vec)) )
+      \param vec is the vector
+      \param vecSize the size of the vector vec
+      \return a minimum value of vertor
+   */
+  double NV_norm_inf(const double * const vec, const unsigned int vecSize);
+
+  /** Find a L-2 norm of vertor ( sqrt(sum(vec^2)) )
+      \param vec is the vector
+      \param vecSize the size of the vector vec
+      \return a minimum value of vertor
+   */
+  double NV_norm_2(const double * const vec, const unsigned int vecSize);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
