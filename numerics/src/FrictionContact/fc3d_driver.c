@@ -278,15 +278,12 @@ int fc3d_driver(FrictionContactProblem* problem,
   }
   default:
   {
-    numerics_printf("fc3d_driver failed. Unknown solver.");
-    fprintf(stderr, "Numerics, fc3d_driver failed. Unknown solver.\n");
-    exit(EXIT_FAILURE);
-
+    numerics_error("fc3d_driver", "Unknown solver.");
+    info = 1;
   }
   }
 
 exit:
-
   return info;
 
 }
