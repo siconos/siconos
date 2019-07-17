@@ -386,7 +386,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
         SN_LOG_SCALAR(log_hdf5,SN_logh5_scalar_double(params->sigma * theta, "theta_iter_threshold", logger_s->group));
       }
 
-      numerics_printf_verbose(2,"--- newton_LSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta\n", theta_iter, theta);
+      numerics_printf_verbose(2,"--- newton_LSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta", theta_iter, theta);
 
       // Computations for the line search
       // preRHS = <JacThetaF_merit, d>
