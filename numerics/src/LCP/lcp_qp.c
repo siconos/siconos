@@ -51,7 +51,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   int *iwar;
   double *war;
 
-  double tol = options->dparam[0]/10.0;
+  double tol = options->dparam[SICONOS_DPARAM_TOL]/10.0;
 
   /*/ m :        total number of constraints.*/
   m = 0;
@@ -155,18 +155,18 @@ int linearComplementarity_qp_setDefaultSolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 15; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->dparam[0] = 1e-6;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
 
   return 0;

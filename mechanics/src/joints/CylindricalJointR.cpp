@@ -20,11 +20,13 @@
 */
 
 #include "CylindricalJointR.hpp"
+//
 #include <NewtonEulerDS.hpp>
-#include <Interaction.hpp>
+// #include <Interaction.hpp>
 #include <boost/math/quaternion.hpp>
 #include <BlockVector.hpp>
-
+#include <SiconosVector.hpp>
+#include "RotationQuaternion.hpp"
 #include <iostream>
 
 // #define DEBUG_STDOUT

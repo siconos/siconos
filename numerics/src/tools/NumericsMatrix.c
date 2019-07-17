@@ -28,14 +28,20 @@
 #include "NumericsSparseMatrix.h"
 #include "SiconosCompat.h"
 #include "SparseBlockMatrix.h"
+#include "NM_MUMPS.h"
+#include "NM_MPI.h"
 #include "NM_conversions.h"
 #include "SiconosLapack.h"
 #include "numerics_verbose.h"
 #include "sanitizer.h"
-/* /\* #define DEBUG_NOCOLOR *\/ */
+/* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
+
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
 
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"
@@ -313,6 +319,7 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
   }
   }
 }
+
 void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init)
 {
   assert(A);
@@ -486,6 +493,7 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B )
       B->internalData->isLUfactorized = A->internalData->isLUfactorized;
       B->internalData->isInversed = A->internalData->isInversed;
     }
+
   }
 void NM_free(NumericsMatrix* m)
 {
@@ -626,6 +634,14 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
     numerics_error("NM_zentry  ","unknown storageType %d for matrix\n", M->storageType);
   }
 
+  if (i>M->size0-1)
+  {
+    M->size0 = i+1;
+  }
+  if (j>M->size1-1)
+  {
+    M->size1 = j+1;
+  }
 }
 
 
@@ -1181,7 +1197,6 @@ void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row
   }
   }
 }
-
 void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block)
 {
   int storageType = M->storageType;
@@ -1215,6 +1230,71 @@ void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double ** Block
   {
     size_t start_row = (size_t)block_row_nb + block_row_nb + block_row_nb;
     NSM_extract_block(M, *Block, start_row, start_row, 3, 3);
+    break;
+  }
+  default:
+  {
+    printf("NM_extract_diag_block :: unknown matrix storage");
+    exit(EXIT_FAILURE);
+  }
+  }
+}
+
+void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double ** Block)
+{
+  int storageType = M->storageType;
+  switch (storageType)
+  {
+  case NM_DENSE:
+  {
+    double* Mptr = M->matrix0 + (M->size0 + 1)*(block_row_nb
+                                                + block_row_nb
+                                                + block_row_nb
+                                                + block_row_nb
+                                                + block_row_nb);
+    double* Bmat = *Block;
+    /* The part of MM which corresponds to the current block is copied into MLocal */
+    Bmat[0] = Mptr[0];
+    Bmat[1] = Mptr[1];
+    Bmat[2] = Mptr[2];
+    Bmat[3] = Mptr[3];
+    Bmat[4] = Mptr[4];
+    Mptr += M->size0;
+    Bmat[5] = Mptr[0];
+    Bmat[6] = Mptr[1];
+    Bmat[7] = Mptr[2];
+    Bmat[8] = Mptr[3];
+    Bmat[9] = Mptr[4];
+    Mptr += M->size0;
+    Bmat[10] = Mptr[0];
+    Bmat[11] = Mptr[1];
+    Bmat[12] = Mptr[2];
+    Bmat[13] = Mptr[3];
+    Bmat[14] = Mptr[4];
+    Mptr += M->size0;
+    Bmat[15] = Mptr[0];
+    Bmat[16] = Mptr[1];
+    Bmat[17] = Mptr[2];
+    Bmat[18] = Mptr[3];
+    Bmat[19] = Mptr[4];
+    Mptr += M->size0;
+    Bmat[20] = Mptr[0];
+    Bmat[21] = Mptr[1];
+    Bmat[22] = Mptr[2];
+    Bmat[23] = Mptr[3];
+    Bmat[24] = Mptr[4];
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    int diagPos = SBM_diagonal_block_index(M->matrix1, block_row_nb);
+    (*Block) = M->matrix1->block[diagPos];
+    break;
+  }
+  case NM_SPARSE:
+  {
+    size_t start_row = (size_t)block_row_nb + block_row_nb + block_row_nb;
+    NSM_extract_block(M, *Block, start_row, start_row, 5, 5);
     break;
   }
   default:
@@ -1329,6 +1409,11 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
   /* The storageType  for C inherits from A except for NM_SPARSE_BLOCK */
   NumericsMatrix *C = NM_create(A->storageType, A->size0, A->size1);
 
+  /* should we copy the whole internal data ? */
+  /*NM_internalData_copy(A, C);*/
+  NM_MPI_copy(A, C);
+  NM_MUMPS_copy(A, C);
+
   switch (A->storageType)
   {
   case NM_DENSE:
@@ -1442,8 +1527,6 @@ NumericsMatrix* NM_eye(int size)
 }
 NumericsMatrix* NM_create(int storageType, int size0, int size1)
 {
-  assert(size0 > 0);
-  assert(size1 > 0);
   NumericsMatrix* M = NM_new();
 
   void* data;
@@ -1474,8 +1557,6 @@ void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* dat
 {
 
   assert(M);
-  assert(size0 > 0);
-  assert(size1 > 0);
   M->storageType = storageType;
   M->size0 = size0;
   M->size1 = size1;
@@ -1556,6 +1637,9 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
     exit(EXIT_FAILURE);
   }
   }
+  NM_MPI_copy(A, Atrans);
+  NM_MUMPS_copy(A, Atrans);
+
   return Atrans;
 }
 
@@ -1776,11 +1860,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   B->size0 = A->size0;
   B->size1 = A->size1;
 
-  /* NM_internalData_copy(A,B); */
   NM_internalData_free(B);
-
-
-  
 
   B->storageType = A->storageType;
   switch (A->storageType)
@@ -1884,17 +1964,12 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       exit(EXIT_FAILURE);
     }
     }
-
     CSparseMatrix_copy(A_, B_);
 
 
     /* invalidations */
     NM_clearDense(B);
     NM_clearSparseBlock(B);
-
-    if (numericsSparseMatrix(B)->linearSolverParams)
-      numericsSparseMatrix(B)->linearSolverParams = NSM_linearSolverParams_free(numericsSparseMatrix(B)->linearSolverParams);
-
 
     /* We remove diag_indx from B and  we copy it from A if it exists */
     if (numericsSparseMatrix(B)->diag_indx)
@@ -1924,6 +1999,9 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     break;
   }
   }
+  NM_internalData_copy(A, B);
+  NM_MPI_copy(A, B);
+  NM_MUMPS_copy(A, B);
 }
 
 NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A)
@@ -2546,10 +2624,10 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 
       if (keep == NM_KEEP_FACTORS)
       {
-        if (!(p->dWork && p->solver_data))
+        if (!(p->dWork && p->linear_solver_data))
         {
           assert(!NSM_workspace(p));
-          assert(!NSM_solver_data(p));
+          assert(!NSM_linear_solver_data(p));
           assert(!p->solver_free_hook);
 
           p->solver_free_hook = &NSM_free_p;
@@ -2558,11 +2636,11 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           CSparseMatrix_lu_factors* cs_lu_A = (CSparseMatrix_lu_factors*) malloc(sizeof(CSparseMatrix_lu_factors));
           numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it" );
           CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
-          p->solver_data = cs_lu_A;
+          p->linear_solver_data = cs_lu_A;
         }
 
         numerics_printf_verbose(2,"NM_gesv, we solve with given factors" );
-        info = !CSparseMatrix_solve((CSparseMatrix_lu_factors *)NSM_solver_data(p), NSM_workspace(p), b);
+        info = !CSparseMatrix_solve((CSparseMatrix_lu_factors *)NSM_linear_solver_data(p), NSM_workspace(p), b);
       }
       else
       {
@@ -2577,23 +2655,27 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       {
         printf("NM_gesv: using MUMPS\n" );
       }
-      /* the mumps instance is initialized (call with job=-1) */
-      DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+      if (!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+      {
+        /* the mumps instance is initialized (call with job=-1) */
+        NM_MUMPS_set_control_params(A);
+        NM_MUMPS(A, -1);
+        NM_MUMPS_set_verbosity(A, verbose);
+        NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
+        NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
+      }
+      NM_MUMPS_set_problem(A, b);
 
-      mumps_id->rhs = b;
+      DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
       if (keep != NM_KEEP_FACTORS|| mumps_id->job == -1)
       {
-        mumps_id->job = 6;
+        NM_MUMPS(A, 6); /* analyzis,factorization,solve*/
       }
       else
       {
-        mumps_id->job = 3;
+        NM_MUMPS(A, 3); /* solve */
       }
-
-
-      /* compute the solution */
-      dmumps_c(mumps_id);
 
       info = mumps_id->info[0];
 
@@ -2607,13 +2689,12 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       }
       if (keep != NM_KEEP_FACTORS)
       {
-        NM_MUMPS_free(p);
+        NM_MUMPS(A, -2);
       }
-      else if (!p->solver_free_hook)
+      if (!p->solver_free_hook)
       {
         p->solver_free_hook = &NM_MUMPS_free;
       }
-
       break;
     }
 #endif /* WITH_MUMPS */
@@ -2847,8 +2928,12 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
 
     for( int col_rhs =0; col_rhs < A->size1; col_rhs++ )
     {
-      if (col_rhs >0) b[col_rhs-1] = 0.0;
+      for (int i = 0; i < A->size0; ++i)
+      {
+        b[i]=0.0;
+      }
       b[col_rhs] = 1.0;
+      DEBUG_EXPR(NV_display(b,A->size1););
       //info = NM_gesv_expert(Atmp, b, NM_PRESERVE);
       info = NM_gesv_expert(Atmp, b, NM_KEEP_FACTORS);
 

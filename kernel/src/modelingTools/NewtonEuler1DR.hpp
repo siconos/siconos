@@ -65,10 +65,10 @@ protected:
   /* Rotation matrix converting the absolute coordinate to the contact frame coordinate.
    * This matrix contains the unit vector(s)of the contact frame in row.
    */
-  SP::SimpleMatrix _RotationAbsToContactFrame;
+  SP::SimpleMatrix _rotationAbsoluteToContactFrame;
 
   /* Matrix converting */
-  SP::SimpleMatrix _rotationMatrixAbsToBody;
+  SP::SimpleMatrix _rotationBodyToAbsoluteFrame;
 
   /* Cross product matrices that correspond the lever arm from
    * contact point to center of mass*/

@@ -22,6 +22,9 @@
 
 #include "SolverOptions.h"
 
+/** pathsearch specific data */
+#define SICONOS_IPARAM_PATHSEARCH_STACKSIZE 5
+
 void free_solverData_PathSearch(void* solverData)
 {
   assert(solverData);

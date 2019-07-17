@@ -41,10 +41,10 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
   int n = problem->size;
   int n2 = n * n;
 
-  int itermax = options->iparam[0];
-  double tol = options->dparam[0];
-  double k_latin = options->dparam[2];
-  double omega = options->dparam[3];
+  int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
+  double k_latin = options->dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER];
+  double omega = options->dparam[SICONOS_LCP_IPARAM_RHO];
 
   int i, j,  iter1, nrhs;
   lapack_int info2 = 0;
@@ -72,8 +72,8 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Allocations */
 
@@ -384,8 +384,8 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
     iter1  = iter1 + 1;
 
-    options->iparam[1] = it_end;
-    options->dparam[1] =  res;
+    options->iparam[SICONOS_IPARAM_ITER_DONE] = it_end;
+    options->dparam[SICONOS_DPARAM_RESIDU] =  res;
 
   }
 
@@ -449,21 +449,21 @@ int linearComplementarity_latin_w_setDefaultSolverOptions(SolverOptions* options
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 15; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-4;
-  options->dparam[2] = 0.3;
-  options->dparam[3] = 1.0;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+  options->dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER] = 0.3;
+  options->dparam[SICONOS_LCP_IPARAM_RHO] = 1.0;
 
 
   return 0;

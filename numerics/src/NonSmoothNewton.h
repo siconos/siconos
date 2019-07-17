@@ -32,6 +32,15 @@
 typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
 
 #include "SiconosConfig.h"
+#include "SolverOptions.h"
+
+enum NONSMOOTH_NEWTON_SOLVER
+{
+  SICONOS_NONSMOOTH_NEWTON_LSA = 11000
+};
+
+extern const char* const   SICONOS_NONSMOOTH_NEWTON_LSA_STR ;
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -64,7 +73,7 @@ extern "C"
   */
   int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi,
                       NewtonFunctionPtr* jacobianPhi,
-                      int* iparam, double* dparam);
+                      SolverOptions * options);
 
   /** Newton solver without line Search
   \param n size of the vector z
@@ -81,8 +90,9 @@ extern "C"
   */
   int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
                             NewtonFunctionPtr* jacobianPhi,
-                            int* iparam, double* dparam);
-
+                            SolverOptions * options);
+  
+  void nonSmoothNewton_setDefaultSolverOptions(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

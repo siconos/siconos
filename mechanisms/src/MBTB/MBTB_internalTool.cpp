@@ -6,7 +6,7 @@
 #include "MBTB_TimeSteppingProj.hpp"
 #include "MBTB_TimeSteppingCombinedProj.hpp"
 #include "NewtonEulerJointR.hpp"
-
+#include "RotationQuaternion.hpp"
 void _MBTB_updateContactFromDS()
 {
   for(unsigned int numC=0; numC<sNbOfContacts; numC++)

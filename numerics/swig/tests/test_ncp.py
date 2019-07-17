@@ -40,7 +40,7 @@ def test_ncp_newton_FBLSA():
     z = np.array([0., 0.])
     w = np.array([0., 0.])
 
-    SO = SN.SolverOptions(ncp, SN.SICONOS_NCP_NEWTON_FBLSA)
+    SO = SN.SolverOptions(ncp, SN.SICONOS_NCP_NEWTON_FB_FBLSA)
     info = SN.ncp_driver(ncp, z, w, SO)
     assert (np.linalg.norm(z-zsol) <= ztol)
     assert not info
@@ -51,7 +51,7 @@ def test_ncp_newton_minFBLSA():
     z = np.array([0., 0.])
     w = np.array([0., 0.])
 
-    SO = SN.SolverOptions(ncp, SN.SICONOS_NCP_NEWTON_MINFBLSA)
+    SO = SN.SolverOptions(ncp, SN.SICONOS_NCP_NEWTON_MIN_FBLSA)
     info = SN.ncp_driver(ncp, z, w, SO)
     #print("z = ", z)
     #print("w = ", w)
@@ -79,4 +79,11 @@ def test_ncp_path():
             pass
         except:
             assert 0
+
+if __name__ == "__main__":
+    SN.numerics_set_verbose(3)
+    test_new()
+    test_ncp_newton_FBLSA()
+    test_ncp_newton_minFBLSA()
+    test_ncp_path()
 

@@ -1,33 +1,53 @@
-# Search for a particular python module.
-# Sources : see http://www.cmake.org/pipermail/cmake/2011-January/041666.html
+# Search for a Python module.
 #
-# Usage : find_python_module(mpi4py REQUIRED)
+# Usage :
 #
+#  find_python_module(mpi4py REQUIRED)
+#  find_python_module(sphinx)
+#  find_python_module(mpi4py INCLUDE)
+# 
+#  Warning : use ${PYTHON_EXECUTABLE} as python interpreter
+#
+#  If INCLUDE options is provided, it means that the function
+#  is supposed to check for the existence of <path-to-module>/include
+#  and set ${module}_INCLUDE_DIR cache variable.
+
+
 include(FindPackageHandleStandardArgs)
 function(find_python_module module)
-	string(TOUPPER ${module} module_upper)
-	if(ARGC GREATER 1 AND ARGV1 STREQUAL "REQUIRED")
-	  set(${module}_FIND_REQUIRED TRUE)
-	endif()
-	# A module's location is usually a directory, but for binary modules
-	# it's a .so file.
-	execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-		"import re, ${module}; print(re.compile('/__init__.py.*').sub('',${module}.__file__))"
-		RESULT_VARIABLE _${module}_status
-		OUTPUT_VARIABLE _${module}_location
-		ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-	if(NOT _${module}_status)
-		set(python_${module_upper} ${_${module}_location} CACHE STRING
-			"Location of Python module ${module}")
-	endif(NOT _${module}_status)
-
-	execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-		"import ${module}; print(${module}.__version__)"
-	  OUTPUT_VARIABLE _${module}_version
-	  ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-	find_package_handle_standard_args(${module} REQUIRED_VARS _${module}_location VERSION_VAR _${module}_version)
-	set(${module}_FOUND ${${module_upper}_FOUND} PARENT_SCOPE)
-	set(${module}_VERSION ${_${module}_version} PARENT_SCOPE)
+  set(options REQUIRED INCLUDES) # If INCLUDE options is provided
+  set(oneValueArgs VERSION)
+  cmake_parse_arguments(${module}_FIND "${options}" "${oneValueArgs}" "" ${ARGN} )
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import ${module} as name; print(name.__file__)"
+    RESULT_VARIABLE ${module}_FIND_RESULT     # Return code from command above
+    OUTPUT_VARIABLE ${module}_FIND_OUTPUT     # Standard output form command above
+    ERROR_QUIET # Ignores quietly standard error
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  
+  if(NOT ${module}_FIND_RESULT) # Return code == 0 means that things have gone well
+    set(${module}_file ${${module}_FIND_OUTPUT} CACHE STRING "Python ${module} module file.")
+  endif()
+  # Save version
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import ${module} as name; print(name.__version__)"
+    RESULT_VARIABLE ${module}_FIND_RESULT     # Return code from command above
+    OUTPUT_VARIABLE ${module}_VERSION    # Standard output form command above
+    ERROR_QUIET # Ignores quietly standard error
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  if(${module}_FIND_INCLUDES)
+    get_filename_component(${module}_path ${${module}_file} DIRECTORY)
+    find_file(${module}_INCLUDE_DIR include PATHS ${${module}_path} NO_DEFAULT_PATH)
+    find_package_handle_standard_args(${module}
+      REQUIRED_VARS ${module}_file ${module}_INCLUDE_DIR 
+      VERSION_VAR ${module}_VERSION)
+  else()
+    find_package_handle_standard_args(${module}
+      REQUIRED_VARS ${module}_file VERSION_VAR ${module}_VERSION)
+  endif()
+  
+ 
+  if(${module}_FOUND)
+    message("-- Found python package ${${module}_file}, version ${${module}_VERSION}")
+  endif()
 endfunction(find_python_module)

@@ -94,7 +94,7 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
   optSetStrStr(Optr, "User2", solFileName);
 
   getGamsSolverOpt(solverOptPtr, sysdir, "path");
-  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
+  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[SICONOS_DPARAM_TOL]);
   optWriteParameterFile(solverOptPtr, "path.opt");
 
 

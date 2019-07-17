@@ -20,6 +20,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "NewtonEulerDS.hpp"
+#include "RotationQuaternion.hpp"
 #include "RuntimeException.hpp"
 
 class NewtonEulerDSTest : public CppUnit::TestFixture

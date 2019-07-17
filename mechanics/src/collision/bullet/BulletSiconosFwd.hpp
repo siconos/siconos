@@ -62,7 +62,7 @@ DEFINE_SPTR(btPersistentManifold);
 DEFINE_SPTR(btBroadphaseInterface);
 
 //DEFINE_SPTR(BulletR);
-//DEFINE_SPTR(BulletFrom1DLocalFrameR);
+//DEFINE_SPTR(Bullet1DR);
 DEFINE_SPTR(CollisionObjects);
 DEFINE_SPTR_STRUCT(StaticObjects);
 

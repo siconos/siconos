@@ -466,7 +466,11 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
       m->storageType = NM_SPARSE;
       m->matrix2 = NSM_new();
 
-      if (csm->nz > 0)
+      /* one may an empty matrix, for example:
+         numerics.NumericsMatrix(scipy.sparse.eye(0))
+         then add entries with NM_zentry.
+      */
+      if (csm->nz >= 0)
       {
         m->matrix2->triplet = csm;
         m->matrix2->origin = NSM_TRIPLET;

@@ -128,14 +128,14 @@ int lcp_nextEnum()
     sCurrentEnum = 0;
   }
   if (verbose)
-    printf("try enum :%d\n", (int)sCurrentEnum);
+    numerics_printf("try enum :%d\n", (int)sCurrentEnum);
   affectWZ();
   sCurrentEnum++;
   sCmpEnum++;
   if (verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
   {
     sProgress += 0.001;
-    printf("lcp_enum progress %f %d \n", sProgress, (int) sCurrentEnum);
+    numerics_printf("lcp_enum progress %f %d", sProgress, (int) sCurrentEnum);
   }
 
   return 1;
@@ -152,7 +152,7 @@ int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* op
 int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options)
 {
   int aux = 3 * (problem->size) + (problem->size) * (problem->size);
-  if (options->iparam[4])
+  if (options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS])
   {
     LWORK = -1;
     //int info = 0;
@@ -199,12 +199,12 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   lapack_int * ipiv;
   int check;
   lapack_int LAinfo = 0;
-  int useDGELS = options->iparam[4];
-
+  int useDGELS = options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS];
+  
   /*OUTPUT param*/
-  sCurrentEnum = options->iparam[3];
-  tol = options->dparam[0];
-  int multipleSolutions = options->iparam[0];
+  sCurrentEnum = options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED];
+  tol = options->dparam[SICONOS_DPARAM_TOL];
+  int multipleSolutions = options->iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS];
   int numberofSolutions = 0;
 
 
@@ -213,12 +213,12 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   sMref = problem->M->matrix0;
   if (!sMref)
   {
-    printf("lcp_enum failed, problem->M->matrix0 is null");
+    numerics_printf("lcp_enum failed, problem->M->matrix0 is null");
 
   }
 
   if (verbose)
-    printf("lcp_enum begin, size %d tol %e\n", sSize, tol);
+    numerics_printf("lcp_enum begin, size %d tol %e", sSize, tol);
 
   sM = workingFloat;
   sQ = sM + sSize * sSize;
@@ -243,17 +243,17 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
     {
       /* if (verbose) */
       /*   { */
-      /*     printf("call dgels on ||AX-B||\n"); */
-      /*     printf("A\n"); */
+      /*     numerics_printf("call dgels on ||AX-B||\n"); */
+      /*     numerics_printf("A\n"); */
       /*     NM_dense_display(sM,sSize,sSize,0); */
-      /*     printf("B\n"); */
+      /*     numerics_printf("B\n"); */
       /*     NM_dense_display(sQ,sSize,1,0); */
       /*   } */
 
       DGELS(LA_NOTRANS,sSize, sSize, NRHS, sM, sSize, sQ, sSize,&LAinfo);
       if (verbose)
       {
-        printf("Solution of dgels (info=%i)\n", LAinfo);
+        numerics_printf("Solution of dgels (info=%i)", LAinfo);
         NM_dense_display(sQ, sSize, 1, 0);
       }
     }
@@ -267,12 +267,12 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
       {
         int cc = 0;
         int ii;
-        printf("DGELS LAInfo=%i\n", LAinfo);
+        numerics_printf("DGELS LAInfo=%i", LAinfo);
         for (ii = 0; ii < sSize; ii++)
         {
           if (isnan(sQ[ii]) || isinf(sQ[ii]))
           {
-            printf("DGELS FAILED\n");
+            numerics_printf("DGELS FAILED");
             cc = 1;
             break;
           }
@@ -283,7 +283,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
 
       if (verbose)
       {
-        printf("lcp_enum LU factorization succeeded:\n");
+        numerics_printf("lcp_enum LU factorization succeeded:");
       }
 
       check = 1;
@@ -302,20 +302,19 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
         numberofSolutions++;
         if (verbose || multipleSolutions)
         {
-          printf("lcp_enum find %i solution with sCurrentEnum = %ld!\n", numberofSolutions, sCurrentEnum - 1);
+          numerics_printf("lcp_enum find %i solution with sCurrentEnum = %ld!", numberofSolutions, sCurrentEnum - 1);
         }
-
-
+        *info = 0;
         lcp_fillSolution(z, w, sSize, sWZ, sQ);
-        options->iparam[1] = (int) sCurrentEnum - 1;
-        options->iparam[2] = numberofSolutions;
+        options->iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM ] = (int) sCurrentEnum - 1;
+        options->iparam[SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS] = numberofSolutions;
         if (!multipleSolutions)  return;
       }
     }
   }
   *info = 1;
   if (verbose)
-    printf("lcp_enum has not found a solution!\n");
+    numerics_printf("lcp_enum has not found a solution!\n");
 }
 
 int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options)
@@ -323,7 +322,7 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
   int i;
   if (verbose > 0)
   {
-    printf("Set the Default SolverOptions for the ENUM Solver\n");
+    numerics_printf("Set the Default SolverOptions for the ENUM Solver\n");
   }
 
 
@@ -332,11 +331,11 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < options->iSize; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
@@ -352,7 +351,7 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
     options->iWork = NULL;
   }
 
-  options->dparam[0] = 1e-12;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
 
 
 

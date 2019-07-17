@@ -104,7 +104,7 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem, doub
   unsigned has_sol = 0;
   unsigned nb_iter = 0;
   unsigned leaving = 0;
-  unsigned itermax = options->iparam[0];
+  unsigned itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   unsigned preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
   unsigned pivot_selection_rule = options->iparam[SICONOS_IPARAM_PIVOT_RULE];
 
@@ -149,7 +149,7 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem, doub
   *info = 0;
 
   /*output*/
-  options->iparam[1] = 0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
 
   /* Allocation */
   SN_lumod_dense_data* lumod_data = SN_lumod_dense_allocate(dim, maxmod);
@@ -574,7 +574,7 @@ exit_lcp_pivot:
   DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { DEBUG_PRINTF("%e %e\n", u[i], s[i]) });
 
-  options->iparam[1] = nb_iter;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = nb_iter;
 
   /* update info */
   switch (pivot_selection_rule)
@@ -582,7 +582,7 @@ exit_lcp_pivot:
     /* Principal Pivoting Methods  */
     case SICONOS_LCP_PIVOT_BARD:
     case SICONOS_LCP_PIVOT_LEAST_INDEX:
-      *info = lcp_compute_error(problem, u, s, options->dparam[0], &tmp);
+      *info = lcp_compute_error(problem, u, s, options->dparam[SICONOS_DPARAM_TOL], &tmp);
       break;
     case SICONOS_LCP_PIVOT_PATHSEARCH:
       break; /* info should already be set */

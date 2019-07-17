@@ -29,6 +29,7 @@ Include files related to modeling part of Siconos.
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NormalConeNSL.hpp"
+#include "NewtonImpactRollingFrictionNSL.hpp"
 
 #include "Interaction.hpp"
 

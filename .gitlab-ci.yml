@@ -1,26 +1,221 @@
-make_doc:
+# Templates for ci jobs
+include: ci_gitlab/gitlab-ci-siconos-templates.yml
+
+ 
+# ---- Docker build jobs -----
+
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
+# It's based on ubuntu 18.04.
+# It uses tag 'docker-build' to enforce run on a dedicated runner.
+docker-build:ubuntu18.04:
+  variables:
+    IMAGE_NAME: ubuntu18.04
+  extends: .docker-build
+
+
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
+# It's based on ubuntu 18.04.
+docker-build:ubuntu18.04-oce:
+  variables:
+    IMAGE_NAME: ubuntu18.04-oce
+  extends: .docker-build
+  stage: docker-build-layer2
+  dependencies:
+    - docker-build:ubuntu18.04
+
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
+# It's based on debian stretch
+docker-build:debian-stretch:
+  variables:
+    IMAGE_NAME: debian-stretch
+  extends: .docker-build
+
+    
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, mumps parallel)
+# It's based on ubuntu 18.04.
+docker-build:ubuntu18.04-mumps-par:
+  variables:
+    IMAGE_NAME: ubuntu18.04-mumps-par
+  extends: .docker-build
+  stage: docker-build-layer2 # layer 2 since it's based on docker-build:ubuntu18.04
+  dependencies:
+    - docker-build:ubuntu18.04
+
+# This job create a docker image with all required dependencies
+# (including serialization, bullet but not OCE)
+# It's based on ubuntu 18.04.
+docker-build:ubuntu18.04-no-python:
+  variables:
+    IMAGE_NAME: ubuntu18.04-no-python
+  extends: .docker-build
+
+
+# This job create a docker image with all required dependencies
+# (including serialization, bullet but not OCE)
+# It's based on ubuntu 18.04.
+docker-build:ubuntu18.04-doc:
+  variables:
+    IMAGE_NAME: ubuntu18.04-doc
+  extends: .docker-build
+  stage: docker-build-layer3
+  dependencies:
+    - docker-build:ubuntu18.04-oce
+
+
+# This job create a docker image with all required dependencies
+# (including serialization, bullet but not OCE).
+# It also download, build and install fclib/hdf5.
+# It's based on ubuntu 18.04.
+docker-build:ubuntu18.04-fclib:
+  variables:
+    IMAGE_NAME: ubuntu18.04-fclib
+  extends: .docker-build
+  stage: docker-build-layer2
+  dependencies:
+    - docker-build:ubuntu18.04
+
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
+# Based on opensuse/leap 15.0
+docker-build:opensuse-leap-15.0:
+  variables:
+    IMAGE_NAME: opensuse-leap-15.0
+  extends: .docker-build
+
+# This job create a docker image with all required dependencies
+# (including serialization, bullet, OCE, pythonocc).
+# It's based on archlinux.
+docker-build:archlinux-oce:
+  variables:
+    IMAGE_NAME: archlinux-oce
+  extends: .docker-build
+
+
+    
+# ---- Siconos build jobs -----
+
+# Siconos build and install, default config
+# (based on cmake/default_siconos.cmake)
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+  extends: .siconos-build
+  artifacts:
+    paths:
+      - build
+
+# Siconos build and install, default config
+# (based on cmake/default_siconos.cmake)
+# on debian stretch
+install_siconos:debian-stretch:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/debian-stretch
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+  extends: .siconos-build
+  artifacts:
+    paths:
+      - build
+
+      
+# Siconos build and install, default config
+# (based on cmake/default_siconos.cmake)
+# on ubuntu 18.04.
+install_siconos:opensuse-leap-15.0:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/opensuse-leap-15.0
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
+  extends: .siconos-build
+  artifacts:
+    paths:
+      - build
+
+
+# Siconos build and install, without python wrappers
+# (default conf, WITH_PYTHON_WRAPPER=OFF)
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04-no-python:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-no-python
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_no_python.cmake
+  extends: .siconos-build
+
+
+# Siconos build and install, with mechanisms
+# (oce and pythonocc parts activated).
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04-oce:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-oce
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mechanisms.cmake
+  extends: .siconos-build
+
+# Siconos build and install, with mumps parallel activated
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04-mumps-par:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-mumps-par
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_mumps_par.cmake
+  extends: .siconos-build
+
+
+# Siconos build and install, with fclib ON
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04-fclib:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-fclib
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_fclib.cmake
+  extends: .siconos-build
+
+# Siconos build and install, with serialization/generation ON
+# on ubuntu 18.04.
+install_siconos:ubuntu18.04-serialization:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
+  extends: .siconos-build
+
+  
+
+# --- Build doc/web site and publish it ---
+# Image : ubuntu 18.04
+siconos:doc:
   stage: build
-  image: ubuntu:17.10
+  image: $CI_REGISTRY_IMAGE/ubuntu18.04-doc
   script:
-    - "sh CI/make_siconos_doc.sh"
+    - "sh ci_gitlab/make_siconos_doc.sh"
   artifacts:
     paths:
       - build/docs/build/html
   only:
-  - master
+    variables: # Run this job only when commit message starts with [doc-build]
+      - $CI_COMMIT_MESSAGE =~ /^\[doc-build\].*/i      
 
 pages:
 
   image: python:alpine
   script:
-  - pwd
-  - ls
   - mv build/docs/build/html public
   artifacts:
     paths:
     - public
+  stage: deploy
   dependencies:
-  - make_doc
+  - siconos:doc
   only:
-  - master
+    variables: # Run this job only when commit message starts with [doc-build]
+      - $CI_COMMIT_MESSAGE =~ /^\[doc-build\].*/i      
 

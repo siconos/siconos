@@ -43,13 +43,13 @@ CouplerJointR::CouplerJointR(SP::NewtonEulerJointR joint1, unsigned int dof1,
   : NewtonEulerJointR()
   , _joint1(joint1)
   , _joint2(joint2)
-  , _dof1(dof1)
-  , _dof2(dof2)
-  , _ratio(ratio)
   , _ref1(ref1)
   , _ref2(ref2)
+  , _dof1(dof1)
+  , _dof2(dof2)
   , _ref1_index(ref1_index)
   , _ref2_index(ref2_index)
+  , _ratio(ratio)
   , _offset(0.0)
 {
   assert( _dof1 < _joint1->numberOfDoF() );
@@ -71,13 +71,13 @@ CouplerJointR::CouplerJointR(SP::NewtonEulerJointR joint1, unsigned int dof1,
   : NewtonEulerJointR()
   , _joint1(joint1)
   , _joint2(joint2)
-  , _dof1(dof1)
-  , _dof2(dof2)
-  , _ratio(ratio)
   , _ref1(refds1->q())
   , _ref2(refds2->q())
+  , _dof1(dof1)
+  , _dof2(dof2)
   , _ref1_index(ref1_index)
   , _ref2_index(ref2_index)
+  , _ratio(ratio)
   , _offset(0.0)
 {
   assert( _dof1 < _joint1->numberOfDoF() );

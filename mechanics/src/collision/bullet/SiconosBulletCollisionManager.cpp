@@ -52,7 +52,8 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include "RigidBodyDS.hpp"
 #include "RigidBody2dDS.hpp"
 #include "BulletR.hpp"
-#include "BulletFrom1DLocalFrameR.hpp"
+#include "Bullet5DR.hpp"
+#include "Bullet1DR.hpp"
 
 #include <map>
 #include <limits>
@@ -725,8 +726,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+//      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+//        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = sphere->version();
@@ -869,8 +870,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBoxRecord &record)
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+//      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+//        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = box->version();
@@ -916,8 +917,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCylinderRecord &record)
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+//      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+//        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = cyl->version();
@@ -966,8 +967,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyConeRecord &record)
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+//      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+//        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = cone->version();
@@ -1015,8 +1016,8 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCapsuleRecord &record)
     if (record.btobject->getBroadphaseHandle())
     {
       _collisionWorld->updateSingleAabb(&*record.btobject);
-      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
-        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
+//      _collisionWorld->getBroadphase()->getOverlappingPairCache()->
+//        cleanProxyFromPairs(record.btobject->getBroadphaseHandle(), &*_dispatcher);
     }
 
     record.shape_version = capsule->version();
@@ -1685,6 +1686,14 @@ SP::BulletR SiconosBulletCollisionManager::makeBulletR(SP::RigidBodyDS ds1,
 {
   return std11::make_shared<BulletR>();
 }
+SP::Bullet5DR SiconosBulletCollisionManager::makeBullet5DR(SP::RigidBodyDS ds1,
+                                                       SP::SiconosShape shape1,
+                                                       SP::RigidBodyDS ds2,
+                                                       SP::SiconosShape shape2,
+                                                       const btManifoldPoint &p)
+{
+  return std11::make_shared<Bullet5DR>();
+}
 
 class CollisionUpdateVisitor : public SiconosVisitor
 {
@@ -1791,7 +1800,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
     // relation (e.g. EqualityCondition == they have a joint between
     // them), then don't create contact constraints, because it leads
     // to an ill-conditioned problem.
-    if (pairA->ds && pairB->ds)
+    if (_with_equality_constraints && pairA->ds && pairB->ds)
     {
       InteractionsGraph::VIterator ui, uiend;
       SP::InteractionsGraph indexSet0 = simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
@@ -1909,12 +1918,53 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         _stats.new_interactions_created ++;
       }
 
+      else if (nslaw && nslaw->size() == 5)
+      {
+        SP::Bullet5DR rel(makeBullet5DR(pairA->ds, pairA->sshape,
+                                        pairB->ds, pairB->sshape,
+                                        *it->point));
+
+        if (!rel) continue;
+
+        // Fill in extra contact information
+        rel->base[0] = pairA->base;
+        rel->base[1] = pairB->base;
+        rel->shape[0] = pairA->sshape;
+        rel->shape[1] = pairB->sshape;
+        rel->contactor[0] = pairA->contactor;
+        rel->contactor[1] = pairB->contactor;
+        rel->ds[0] = pairA->ds;
+        rel->ds[1] = pairB->ds;
+        rel->btObject[0] = pairA->btobject;
+        rel->btObject[1] = pairB->btobject;
+
+        // TODO cast down btshape from BodyShapeRecord-derived classes
+        // rel->btShape[0] = pairA->btshape;
+        // rel->btShape[1] = pairB->btshape;
+
+        rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
+                                                  flip, _options.worldScale,
+                                 pairA->ds ? pairA->ds : SP::NewtonEulerDS(),
+                                 pairB->ds ? pairB->ds : SP::NewtonEulerDS());
+
+        // We wish to be sure that no Interactions are created without
+        // sufficient warning before contact.  TODO: Replace with exception or
+        // flag.
+        if (rel->distance() < 0.0) {
+          DEBUG_PRINTF(stderr, "Interactions must be created with positive "
+                       "distance (%f).\n", rel->distance());
+          _stats.interaction_warnings ++;
+        }
+
+        inter = std11::make_shared<Interaction>(nslaw, rel);
+        _stats.new_interactions_created ++;
+      }
       else
       {
         if (nslaw && nslaw->size() == 1)
         {
-          SP::BulletFrom1DLocalFrameR rel(
-            std11::make_shared<BulletFrom1DLocalFrameR>(
+          SP::Bullet1DR rel(
+            std11::make_shared<Bullet1DR>(
               createSPtrbtManifoldPoint(*it->point)));
           inter = std11::make_shared<Interaction>(nslaw, rel);
         }

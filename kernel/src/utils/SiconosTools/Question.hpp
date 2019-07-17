@@ -44,13 +44,8 @@
 #include "SiconosVisitor.hpp"
 
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_ARRAY) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <type_traits>
 #include <array>
-#else
-#include <boost/type_traits/remove_reference.hpp>
-#include <boost/array.hpp>
-#endif
 
 /** a generic return value visitor */
 template <class AnswerType>
@@ -135,36 +130,5 @@ void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2)
   v.accept(t);
 
 }
-
-
-
-#define ANSWER_NOUSING(T,CODE)                  \
-  void visit(const T& ds)                       \
-  {                                             \
-    answer = ds . CODE;                         \
-  }
-
-#define ANSWER(T,CODE)                          \
-  using SiconosVisitor::visit;                  \
-  ANSWER_NOUSING(T,CODE)
-
-#define ANSWER_V_NOUSING(T,CODE)                \
-  void visit(const T& ds)                       \
-  {                                             \
-    answer = CODE;                              \
-  }
-
-#define ANSWER_V(T,CODE)                        \
-  using SiconosVisitor::visit;                  \
-  ANSWER_V_NOUSING(T,CODE)
-
-
-#define ANSWER_F(T,CODE)                        \
-  using SiconosVisitor::visit;                  \
-  void visit(const T& ds)                       \
-  {                                             \
-    answer = CODE(ds);                          \
-  }
-
 
 #endif

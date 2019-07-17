@@ -50,11 +50,13 @@
   REGISTER(ContactShapeDistance)                \
   REGISTER(Geometer)                            \
   REGISTER(BulletR)                             \
-  REGISTER(BulletFrom1DLocalFrameR)             \
+  REGISTER(Bullet5DR)                           \
+  REGISTER(Bullet1DR)                           \
   REGISTER(RigidBodyDS)                         \
   REGISTER(RigidBody2dDS)                       \
   REGISTER(ContactR)                            \
-  REGISTER(Contact2dR)                            \
+  REGISTER(Contact5DR)                          \
+  REGISTER(Contact2dR)                          \
   REGISTER(SiconosContactor)                    \
   REGISTER(SiconosContactorSet)                 \
   REGISTER(SiconosContactorBase)                \

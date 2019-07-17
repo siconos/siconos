@@ -496,3 +496,8 @@ void OneStepNSProblem::setNumericsVerboseMode(bool vMode)
 {
   numerics_set_verbose(vMode);
 }
+
+void OneStepNSProblem::setNumericsVerboseLevel(int level)
+{
+  numerics_set_verbose(level);
+}

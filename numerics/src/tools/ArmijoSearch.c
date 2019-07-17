@@ -53,6 +53,7 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
   assert(aep);
   preRHS *= aep->gamma;
 
+  int success = 1;
   while (alpha >= ls_data->alpha_min)
   {
     DEBUG_PRINTF("search_Armijo :: alpha %g, ls_data->alpha_min %g \n", alpha, ls_data->alpha_min);
@@ -105,8 +106,8 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
      // acceptance test
      if (theta_iter <= theta_ref + RHS)
      {
-       if (verbose > 1)
-         printf("search_Armijo :: alpha %g\n", alpha);
+       numerics_printf_verbose(2,"search_Armijo_standalone :: success alpha %g\n", alpha);
+       success = 0;
        break;
      }
      else
@@ -115,7 +116,11 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
        alpha /= 2.0;
      }
   }
+  if (success)
+    numerics_printf_verbose(2,"search_Armijo_standalone :: not successfull alpha %g\n", alpha);
+  
   *theta = theta_iter;
+ 
   return alpha;
 }
 

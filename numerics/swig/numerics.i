@@ -123,7 +123,10 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "SiconosSets.h"
 #include "GAMSlink.h"
 #include "NumericsFwd.h"
-  %}
+
+#include "projectionOnCone.h"
+#include "projectionOnRollingCone.h"
+%}
 
 #ifdef WITH_SERIALIZATION
 %{
@@ -140,14 +143,8 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 // swig requires same namespace 'std11' is used.
 %{
 #ifdef __cplusplus
-#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 namespace std11 = std;
 #include <memory>
-#else
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-namespace std11 = boost;
-#endif
 #endif
 %}
 #ifdef __cplusplus
@@ -164,6 +161,7 @@ namespace std11 = boost;
  // more convenient
  %rename (LCP) LinearComplementarityProblem;
  %rename (MLCP) MixedLinearComplementarityProblem;
+ %rename (MCP_old) MixedComplementarityProblem_old;
  %rename (MCP) MixedComplementarityProblem;
  %rename (NCP) NonlinearComplementarityProblem;
  %rename (VI) VariationalInequality;
@@ -297,6 +295,7 @@ namespace std11 = boost;
 #include "fc2d_Solvers.h"
 #include "fc3d_Solvers.h"
 #include "gfc3d_Solvers.h"
+#include "rolling_fc3d_Solvers.h"
 #include "MCP_Solvers.h"
 #include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"
@@ -471,6 +470,7 @@ namespace std11 = boost;
 %include numerics_FC.i
 %include GAMSlink.h
 %include numerics_GFC.i
+%include numerics_RFC.i
 
 %define STR_FIELD_COPY(field,strobj)
 {

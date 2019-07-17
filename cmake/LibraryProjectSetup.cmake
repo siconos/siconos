@@ -80,11 +80,19 @@ macro(LIBRARY_PROJECT_SETUP)
     ${CMAKE_CURRENT_BINARY_DIR}
     CACHE INTERNAL "Include directories for external dependencies.")
 
-  include(doxygen_tools)
+  include(doc_tools)
   # --- doxygen warnings ---
   include(doxygen_warnings)
 
   # --- documentation ---
+
+  if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_GENERATION)
+    # Update list of source directories to be taken
+    # into account by doxygen for the current component
+    # --> set CACHE var ${COMPONENT}_DOXYGEN_INPUTS
+    # Required by doxy2swig_docstrings and doxy2rst_sphinx.
+    update_doxygen_inputs(${COMPONENT})
+  endif()
   
   # xml files for python docstrings ...
   # xml files are required to build docstrings target
@@ -95,9 +103,7 @@ macro(LIBRARY_PROJECT_SETUP)
   endif()
   
   # update the main doxy file, without building the doc
-  if(WITH_${COMPONENT}_DOCUMENTATION)
-    update_doxy_config_file(${COMPONENT})
-
+  if(WITH_${COMPONENT}_DOCUMENTATION OR WITH_GENERATION)
     # Prepare target to generate rst files from xml
     doxy2rst_sphinx(${COMPONENT})
   endif()
@@ -120,7 +126,7 @@ macro(LIBRARY_PROJECT_SETUP)
   set(installed_targets ${installed_targets}
     CACHE INTERNAL "Include directories for external dependencies.")
   set_target_properties(${COMPONENT} PROPERTIES 
-    OUTPUT_NAME "${COMPONENT_LIBRARY_NAME}"
+    OUTPUT_NAME "siconos_${COMPONENT}"
     VERSION "${SICONOS_SOVERSION}"
     SOVERSION "${SICONOS_SOVERSION_MAJOR}"
     CLEAN_DIRECT_OUTPUT 1 # no clobbering
@@ -128,15 +134,15 @@ macro(LIBRARY_PROJECT_SETUP)
 
   # windows stuff ...
   include(WindowsLibrarySetup)
-  windows_library_extra_setup(${COMPONENT_LIBRARY_NAME} ${COMPONENT})
+  windows_library_extra_setup(siconos_${COMPONENT} ${COMPONENT})
   # Link target with external libs ...
-  target_link_libraries(${COMPONENT} ${PRIVATE} ${${COMPONENT}_LINK_LIBRARIES})
+  target_link_libraries(${COMPONENT} PRIVATE ${${COMPONENT}_LINK_LIBRARIES})
   
   if(BUILD_SHARED_LIBS)
     if(LINK_STATICALLY) # static linking is a nightmare
       set(REVERSE_LIST ${${COMPONENT}_LINK_LIBRARIES})
       LIST(REVERSE REVERSE_LIST)
-      target_link_libraries(${COMPONENT} ${PRIVATE} ${REVERSE_LIST})
+      target_link_libraries(${COMPONENT} PRIVATE ${REVERSE_LIST})
     endif()
   endif()    
 
@@ -148,10 +154,8 @@ macro(LIBRARY_PROJECT_SETUP)
   install(TARGETS ${COMPONENT}
     EXPORT ${PROJECT_NAME}Targets
     RUNTIME DESTINATION bin
-    ARCHIVE DESTINATION ${_install_lib}
-    LIBRARY DESTINATION ${_install_lib})
-  install(EXPORT ${PROJECT_NAME}Targets
-    DESTINATION share/${PROJECT_NAME}/cmake)
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
   # --- python bindings ---
   if(WITH_${COMPONENT}_PYTHON_WRAPPER)

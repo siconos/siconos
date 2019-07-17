@@ -50,19 +50,19 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
     FILE *ficbuffer_errors;*/
   /* Recup input */
 
-  int itermax = options->iparam[0];
+  int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
 
   /*  buffer_errors = malloc( itermax*sizeof( double ) );*/
 
-  double tol = options->dparam[0];
-  double rho = options->dparam[2];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
+  double rho = options->dparam[SICONOS_LCP_IPARAM_RHO];
   // double omega = options->dparam[3]; // Not yet used
 
 
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Allocation */
 
@@ -170,8 +170,8 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   }
 
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
   if (verbose > 0)
   {
@@ -231,20 +231,21 @@ int linearComplementarity_rpgs_setDefaultSolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 15; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-6;
-  options->dparam[1] = 1.0;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 1.0;
+  options->dparam[SICONOS_LCP_IPARAM_RHO] = 1.0;
 
 
   return 0;

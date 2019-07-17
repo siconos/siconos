@@ -27,10 +27,10 @@
 
 
 
-void rolling_fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
-                                                  SolverOptions* options,
-                                                  SolverOptions* internalsolver_options,
-                                                  double error)
+void rolling_fc3d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
+                                               SolverOptions* options,
+                                               SolverOptions* internalsolver_options,
+                                               double error)
 {
   int* iparam = options->iparam;
   if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE )

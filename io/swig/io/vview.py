@@ -15,7 +15,6 @@ import vtk
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtk.numpy_interface import dataset_adapter as dsa
 
-
 # Exports from this module
 __all__ = ['VView', 'VViewOptions', 'VExportOptions', 'VViewConfig']
 
@@ -40,6 +39,9 @@ class VViewConfig(dict):
         if os.path.exists(self.filename):
             try:
                 self.update(json.load(open(self.filename)))
+                print('Loaded configuration from ', self.filename)
+                for k in self:
+                    print('  ', k,': ', self[k])
                 self.should_save_config = True
             except:
                 self.should_save_config = False
@@ -79,7 +81,8 @@ class VViewOptions(object):
         self.visible_mode = 'all'
         self.export = False
         self.gen_para_script = False
-
+        self.with_edges = False
+        self.with_random_color = True
     ## Print usage information
     def usage(self, long=False):
         print(__doc__); print()
@@ -94,7 +97,7 @@ class VViewOptions(object):
             [--normalcone-ratio = <float value>]
             [--advance=<'fps' or float value>] [--fps=float value]
             [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
-            [--visible=all,avatars,contactors]
+            [--visible=all,avatars,contactors] [--with-edges]
             """)
         else:
             print("""Options:
@@ -150,6 +153,10 @@ class VViewOptions(object):
        avatars: view only avatar if an avatar is defined (for each
        object) contactors: ignore avatars, view only contactors where
        avatars are contactors with collision_group=-1
+     --with_edges 
+       add edges in the rendering (experimental for primitives)
+     --with_fixed_color
+       use fixed color defined in the config file    
     """)
 
     def parse(self):
@@ -165,7 +172,7 @@ class VViewOptions(object):
                                             'cf-scale=', 'normalcone-ratio=',
                                             'advance=', 'fps=', 'camera=',
                                             'lookat=',
-                                            'up=', 'ortho=', 'visible='])
+                                            'up=', 'ortho=', 'visible=', 'with-edges', 'with-fixed-color'])
             self.configure(opts, args)
         except getopt.GetoptError as err:
             sys.stderr.write('{0}\n'.format(str(err)))
@@ -238,6 +245,12 @@ class VViewOptions(object):
 
             elif o == '--visible':
                 self.visible_mode = a
+                
+            elif o == '--with-edges':
+                self.with_edges = True
+                
+            elif o == '--with-fixed-color':
+                self.with_random_color = False
 
         if self.frames_per_second == 0:
             self.frames_per_second = 25
@@ -260,7 +273,6 @@ class VExportOptions(VViewOptions):
         self.stride = 1
         self.nprocs = 1
         self.gen_para_script = False
-
     def usage(self, long=False):
         print(__doc__); print()
         print('Usage:  {0} [--help] [--version] [--ascii] <HDF5>'
@@ -324,7 +336,89 @@ class VExportOptions(VViewOptions):
         else:
             self.usage()
             exit(1)
+            
+class VRawDataExportOptions(VViewOptions):
+    def __init__(self, io_filename = None):
+        super(self.__class__, self).__init__()
+        self.export = True
+        self._export_position = True
+        self._export_velocity = True
+        self._export_cf = False
+        self._export_velocity_in_absolute_frame = False
+        self.start_step = 0
+        self.end_step = None
+        self.stride = 1
+        
+        self.io_filename = io_filename 
+    def usage(self, long=False):
+        print(__doc__); print()
+        print('Usage:  {0} [--help]  <HDF5>'
+              .format(os.path.split(sys.argv[0])[1]))
+        if long:
+            print()
+            print("""Options:
+            --help               display this message
+            --version            display version information
+            --start-step=n       integer, set the first simulation time step
+                                 number (default: 0)
+            --end-step=n         integer, set the last simulation time step
+                                 number (default: None)
+            --stride=n           integer, set export time step/simulation time step
+                                 (default: 1)
+            --no-export-position do not export position
+            --no-export-velocity do not export position
+            --export-cf          do export of contact friction data
+            --export-velocity-in-absolute-frame          do export of contact friction data
+                                 
+            """)
 
+    def parse(self):
+        ## Parse command line
+        try:
+            opts, args = getopt.gnu_getopt(sys.argv[1:], '',
+                                           ['help', 'version', 'ascii',
+                                            'start-step=', 'end-step=',
+                                            'stride=', 
+                                            'no-export-position',
+                                            'no-export-velocity',
+                                            'export-cf',
+                                            'export-velocity-in-absolute-frame'])
+            self.configure(opts, args)
+        except getopt.GetoptError as err:
+                sys.stderr.write('{0}\n'.format(str(err)))
+                self.usage()
+                exit(2)
+
+    def configure(self, opts, args):
+        for o, a in opts:
+            if o == '--help':
+                self.usage(long=True)
+                exit(0)
+            if o == '--version':
+                print('{0} @SICONOS_VERSION@'.format(
+                    os.path.split(sys.argv[0])[1]))
+                exit(0)
+            if o == '--start-step':
+                self.start_step = int(a)
+            if o == '--end-step':
+                self.end_step = int(a)
+            if o == '--stride':
+                self.stride = int(a)
+            if o == '--no-export-position':
+                self._export_position = False
+            if o == '--no-export-velocity':
+                self._export_velocity = False
+            if o == '--export-cf':
+                self._export_cf = True
+            if o == '--export-velocity-in-absolute-frame':
+                self._export_velocity_in_absolute_frame = True
+
+        if self.io_filename is  None:
+            if len(args) > 0 :
+                self.io_filename = args[0]       
+            else:
+                self.usage()
+                exit(1)
 
 ## Utilities
 
@@ -1559,6 +1653,14 @@ class VView(object):
                 mapper.ImmediateModeRenderingOff()
             mapper.SetInputConnection(source.GetOutputPort())
             self.mappers[shape_name] = (x for x in [mapper])
+            if self.opts.with_edges:
+                mapper_edge = vtk.vtkCompositePolyDataMapper()
+                if not self.opts.imr:
+                    mapper_edge.ImmediateModeRenderingOff()
+                    mapper_edge.SetInputConnection(source.GetOutputPort())
+                self.mappers_edges[shape_name] = (y for y in [mapper_edge])
+
+                
 
     def init_shapes(self):
         for shape_name in self.io.shapes():
@@ -1567,6 +1669,11 @@ class VView(object):
         for shape_name in self.mappers.keys():
             if shape_name not in self.unfrozen_mappers:
                 self.unfrozen_mappers[shape_name] = next(self.mappers[shape_name])
+        if self.opts.with_edges:
+            for shape_name in self.mappers_edges.keys():
+                if shape_name not in self.unfrozen_mappers_edges:
+                    self.unfrozen_mappers_edges[shape_name] = next(self.mappers_edges[shape_name])
+
 
     def init_contactor(self, contactor_instance_name, instance, instid):
         contactor = instance[contactor_instance_name]
@@ -1597,27 +1704,46 @@ class VView(object):
 
         if not (self.opts.global_filter or self.opts.export):
             actor = vtk.vtkActor()
+            if self.opts.with_edges:
+                actor_edge = vtk.vtkActor()
             if instance.attrs.get('mass', 0) > 0:
                 # objects that may move
                 self.dynamic_actors[instid].append((actor, contact_shape_indx,
                                                     collision_group))
-
                 actor.GetProperty().SetOpacity(
                     self.config.get('dynamic_opacity', 0.7))
+                actor.GetProperty().SetColor(
+                    self.config.get('dynamic_bodies_color', [0.3,0.3,0.3]))
+                
+                if self.opts.with_edges:
+                    self.dynamic_actors[instid].append((actor_edge, contact_shape_indx,
+                                                    collision_group))
+                    actor_edge.GetProperty().SetOpacity(
+                        self.config.get('dynamic_opacity', 1.0))
+                    actor_edge.GetProperty().SetRepresentationToWireframe()
+                
             else:
                 # objects that are not supposed to move
                 self.static_actors[instid].append((actor, contact_shape_indx,
                                                    collision_group))
-
                 actor.GetProperty().SetOpacity(
                     self.config.get('static_opacity', 1.0))
-
-            actor.GetProperty().SetColor(random_color())
+                actor.GetProperty().SetColor(
+                        self.config.get('static_bodies_color', [0.5,0.5,0.5]))
+                
+            if self.opts.with_random_color :
+                actor.GetProperty().SetColor(random_color())
+                if self.opts.with_edges:
+                    actor_edge.GetProperty().SetColor(random_color())
 
             actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
+            if self.opts.with_edges:
+                actor_edge.SetMapper(self.unfrozen_mappers_edges[contact_shape_indx])
 
             if not (self.opts.global_filter or self.opts.export):
                 self.renderer.AddActor(actor)
+                if self.opts.with_edges:
+                    self.renderer.AddActor(actor_edge)
 
         transform = vtk.vtkTransform()
         transformer = vtk.vtkTransformFilter()
@@ -1639,12 +1765,16 @@ class VView(object):
             scale_transform.Scale(scale, scale, scale)
             scale_transform.SetInput(transform)
             transformer.SetTransform(scale_transform)
-            if not (self.global_filter or self.opts.export):
+            if not (self.opts.global_filter or self.opts.export):
                 actor.SetUserTransform(scale_transform)
+                if self.opts.with_edges:
+                    actor_edge.SetUserTransform(scale_transform)
         else:
             transformer.SetTransform(transform)
             if not (self.opts.global_filter or self.opts.export):
                 actor.SetUserTransform(transform)
+                if self.opts.with_edges:
+                    actor_edge.SetUserTransform(transform)
 
         self.transformers[contact_shape_indx] = transformer
 
@@ -1948,8 +2078,7 @@ class VView(object):
     def setup_vtk_renderer(self):
         self.renderer_window.AddRenderer(self.renderer)
         self.interactor_renderer.SetRenderWindow(self.renderer_window)
-        self.interactor_renderer.GetInteractorStyle(
-        ).SetCurrentStyleToTrackballCamera()
+        self.interactor_renderer.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
 
         # http://www.itk.org/Wiki/VTK/Depth_Peeling
 
@@ -1983,7 +2112,7 @@ class VView(object):
             self.renderer.GetActiveCamera().ParallelProjectionOn()
             self.renderer.GetActiveCamera().SetParallelScale(
                 self.opts.initial_camera[3])
-
+        self.renderer.ResetCameraClippingRange()
         self.image_maker = vtk.vtkWindowToImageFilter()
         self.image_maker.SetInput(self.renderer_window)
 
@@ -2261,7 +2390,146 @@ class VView(object):
                 big_data_writer.Write()
 
             big_data_writer.Write()
+            
+    def export_raw_data(self):
 
+        times = self.io_reader._times[
+                self.opts.start_step:self.opts.end_step:self.opts.stride]
+        ntime = len(times)
+
+
+        # export
+        k = self.opts.start_step
+        packet = int(ntime/100)+1
+
+        # ######## position output ########
+
+        # nvalue = ndyna*7+1
+
+        # position_output = numpy.empty((ntime,nvalue))
+        # #print('position_output shape', numpy.shape(position_output))
+        # position_output[:,0] = times[:]
+        position_output = {}
+        velocity_output = {}
+        velocity_absolute_output = {}
+                
+        for time in times:
+            k = k + self.opts.stride
+            if (k % packet == 0):
+                sys.stdout.write('.')
+            self.io_reader.SetTime(time)
+
+            pos_data = self.io_reader.pos_data
+            velo_data = self.io_reader.velo_data
+            
+            ndyna=pos_data.shape[0]
+            
+
+            for i in range(ndyna):
+                bdy_id = int(pos_data[i,1])
+                
+                ######## position output ########
+                if self.opts._export_position :
+                    nvalue=pos_data.shape[1]
+                    position_output_bdy = position_output.get(bdy_id)
+                    if position_output_bdy is None:
+                        position_output[bdy_id] = []
+                    position_output_body =  position_output[bdy_id]
+                    position_output_body.append([])
+                    position_output_body[-1].append(time)
+                    position_output_body[-1].extend(pos_data[i,2:nvalue])
+                    position_output_body[-1].append(bdy_id)
+
+                
+                ######## velocity output ########
+                if self.opts._export_velocity :
+                    nvalue=velo_data.shape[1]
+                    velocity_output_bdy = velocity_output.get(bdy_id)
+                    if velocity_output_bdy is None:
+                        velocity_output[bdy_id] = []
+                    velocity_output_body =  velocity_output[bdy_id]
+                    velocity_output_body.append([])
+                    velocity_output_body[-1].append(time)
+                    velocity_output_body[-1].extend(velo_data[i,2:nvalue])
+                    velocity_output_body[-1].append(bdy_id)
+                    
+                ######## velocity in absolute frame output ########
+                if self.opts._export_velocity_in_absolute_frame :
+                    nvalue=velo_data.shape[1]
+                    [q1,q2,q3,q4] = pos_data[i,5:9]
+                    q = Quaternion((q1, q2, q3, q4))
+                    velo = q.rotate(velo_data[i,5:8])
+                    velocity_absolute_output_bdy = velocity_absolute_output.get(bdy_id)
+                    if velocity_absolute_output_bdy is None:
+                        velocity_absolute_output[bdy_id] = []
+                    velocity_absolute_output_body =  velocity_absolute_output[bdy_id]
+                    velocity_absolute_output_body.append([])
+                    velocity_absolute_output_body[-1].append(time)
+                    velocity_absolute_output_body[-1].extend(velo_data[i,2:5])
+                    velocity_absolute_output_body[-1].extend(velo[:])
+                    velocity_absolute_output_body[-1].append(bdy_id)
+
+        for bdy_id in position_output.keys():
+            output = numpy.array(position_output[bdy_id])
+            filename_output = '{0}-position-body_{1}.dat'.format(
+                os.path.splitext(os.path.basename(self.opts.io_filename))[0],
+            bdy_id)
+            numpy.savetxt(filename_output, output)
+            
+        for bdy_id in velocity_output.keys():
+            output = numpy.array(velocity_output[bdy_id])
+            filename_output = '{0}-velocity-body_{1}.dat'.format(
+                os.path.splitext(os.path.basename(self.opts.io_filename))[0],
+            bdy_id)
+            numpy.savetxt(filename_output, output)
+
+        for bdy_id in velocity_absolute_output.keys():
+            output = numpy.array(velocity_absolute_output[bdy_id])
+            filename_output = '{0}-velocity-absolute-body_{1}.dat'.format(
+                os.path.splitext(os.path.basename(self.opts.io_filename))[0],
+            bdy_id)
+            numpy.savetxt(filename_output, output)
+            
+        cf_output = {}
+        for time in times:
+            #print('time', time)
+            k = k + self.opts.stride
+            if (k % packet == 0):
+                sys.stdout.write('.')
+                
+            self.io_reader.SetTime(time)
+
+            cf_data = self.io_reader.cf_data
+            #print('cf_data', cf_data)
+
+            if cf_data is not None and self.opts._export_cf :
+                ncontact=cf_data.shape[0]
+
+                for i in range(ncontact):
+                    contact_id = int(cf_data[i,23])
+                    #print('contact_id', contact_id)
+                    ######## contact output ########
+                    nvalue=cf_data.shape[1]
+                    cf_output_contact = cf_output.get(contact_id)
+                    if cf_output_contact is None:
+                        cf_output[contact_id] = []
+                    cf_output_contact =  cf_output[contact_id]
+                    cf_output_contact.append([])
+                    cf_output_contact[-1].append(time)
+                    cf_output_contact[-1].extend(cf_data[i,2:nvalue])
+                    cf_output_contact[-1].append(contact_id)
+  
+        for contact_id in cf_output.keys():
+            output = numpy.array(cf_output[contact_id])
+            filename_output = '{0}-cf-contact_{1}.dat'.format(
+                os.path.splitext(os.path.basename(self.opts.io_filename))[0],
+            contact_id)
+            numpy.savetxt(filename_output, output)
+    
+            
+        sys.stdout.write('\n')
+            
+            
     def initialize_vtk(self):
 
         if not self.opts.gen_para_script:
@@ -2306,11 +2574,13 @@ class VView(object):
             self.readers = dict()
             self.datasets = dict()
             self.mappers = dict()
+            self.mappers_edges = dict()
             self.dynamic_actors = dict()
             self.static_actors = dict()
             self.vtk_reader = {'vtp': vtk.vtkXMLPolyDataReader,
                                'stl': vtk.vtkSTLReader}
             self.unfrozen_mappers = dict()
+            self.unfrozen_mappers_edges = dict()
 
             self.build_set_functions()
 

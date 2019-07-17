@@ -17,9 +17,10 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
-//#include "NonSmoothDrivers.h"
 #include "SiconosConfig.h"
 
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
 #define DEBUG_MESSAGES
 
 #include "CSparseMatrix_internal.h"
@@ -394,11 +395,17 @@ int globalFrictionContact_fclib_write(
 {
   int rinfo = 0;
 
-
+  DEBUG_PRINTF("construction of fclib_problem in %s with title = %s and description = %s\n", path, title, description);
+  if (problem->numberOfContacts == 0)
+  {
+    DEBUG_PRINT("zero contacts");
+    return rinfo;
+    
+  }
   /* globalFrictionContact_display(problem); */
   /* FILE * file  =  fopen("toto.dat", "w"); */
   /* globalFrictionContact_printInFile(problem, file); */
-  DEBUG_PRINTF("construction of fclib_problem in %s with title = %s and description = %s\n", path, title, description);
+ 
   struct fclib_global *fclib_problem;
   fclib_problem = (struct fclib_global*)malloc(sizeof(struct fclib_global));
 

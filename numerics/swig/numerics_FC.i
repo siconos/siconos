@@ -9,7 +9,6 @@
 #include "fclib_interface.h"
 #endif
 #include "fc2d_Solvers.h"
-#include "gfc3d_Solvers.h"
 #include "fc3d_AlartCurnier_functions.h"
 #include "AlartCurnierGenerated.h"
 #include "FischerBurmeisterGenerated.h"

@@ -612,7 +612,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     AWpB = (NumericsMatrix*) (rho + problemSize);
   }
 
-  /* just for allocations */
+  /* just for allocations, mumps_id and mpi communicator may be passed also */
   NM_copy(problem->M, AWpB);
 
   if (problem->M->storageType != NM_DENSE)
@@ -627,21 +627,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
       case 1:
         {
           NSM_linearSolverParams(AWpB)->solver = NSM_MUMPS;
-
-#ifdef HAVE_MPI
-
-          assert (options->solverData);
-
-          if ((MPI_Comm) options->solverData == MPI_COMM_NULL)
-          {
-            options->solverData = NM_MPI_com(MPI_COMM_NULL);
-          }
-          else
-          {
-            NM_MPI_com((MPI_Comm) options->solverData);
-          }
-
-#endif
           break;
         }
       default:

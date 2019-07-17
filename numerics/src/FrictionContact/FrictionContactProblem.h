@@ -24,7 +24,7 @@
 
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
-#include <stdio.h>
+#include "NumericsMatrix.h"
 
 /** \struct FrictionContactProblem FrictionContactProblem.h
  *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem.
@@ -37,7 +37,7 @@ struct FrictionContactProblem
   int numberOfContacts;
   /** \f${M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
      a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure */
-  NumericsMatrix* M;
+  RawNumericsMatrix* M;
   /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double* q;
   /** \f${\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients

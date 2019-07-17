@@ -43,6 +43,8 @@ static inline char* strdup(char* src)
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
 #include "SiconosCompat.h"
+#include "NumericsVerbose.h"
+
 
 #ifdef __cplusplus
 using namespace std;
@@ -50,7 +52,7 @@ using namespace std;
 
 int lcp_test_function(FILE * f, int solverId, char* filename)
 {
-
+  numerics_set_verbose(2);
   int i, info = 0 ;
   LinearComplementarityProblem* problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
 
@@ -87,11 +89,11 @@ int lcp_test_function(FILE * f, int solverId, char* filename)
 
   if (!info)
   {
-    printf("test succeeded err = %e \n", options.dparam[1]);
+    printf("test succeeded err = %e \n", options.dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful err =%e  \n", options.dparam[1]);
+    printf("test unsuccessful err =%e  \n", options.dparam[SICONOS_DPARAM_RESIDU]);
   }
   free(z);
   free(w);
@@ -155,11 +157,11 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
   if (!info)
   {
-    printf("test succeeded err=%e \n", options->dparam[1]);
+    printf("test succeeded err=%e \n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful err =%e \n", options->dparam[1]);
+    printf("test unsuccessful err =%e \n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   free(z);
   free(w);

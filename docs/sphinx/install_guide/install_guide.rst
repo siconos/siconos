@@ -280,7 +280,7 @@ Here is an example, to build numerics and kernel, with documentation, no tests .
   option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
   option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = OFF." OFF)
   option(WITH_TESTING "Enable 'make test' target" OFF)
-  option(WITH_GIT "Consider sources are under GIT" OFF)
+  option(WITH_GIT "If true, try to get info (commit sha ...) from siconos sources git repository." OFF)
 
   # --- Documentation setup ---
   option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" ON)

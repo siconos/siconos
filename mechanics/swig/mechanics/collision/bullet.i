@@ -198,7 +198,7 @@ typedef Interaction Interaction;
 
 %include "BulletSiconosFwd.hpp"
 PY_FULL_REGISTER(BulletR, Mechanics);
-PY_FULL_REGISTER(BulletFrom1DLocalFrameR, Mechanics);
+PY_FULL_REGISTER(Bullet1DR, Mechanics);
 
 
 

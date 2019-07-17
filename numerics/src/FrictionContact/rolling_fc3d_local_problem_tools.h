@@ -18,21 +18,21 @@
 #ifndef ROLLINGFRICTIONCONTACT3D_local_problem_tools_H
 #define ROLLINGFRICTIONCONTACT3D_local_problem_tools_H
 
-/*!\file
+/*!\file 
 
  */
-#include "FrictionContactProblem.h"
+#include "RollingFrictionContactProblem.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
-  FrictionContactProblem* rolling_fc3d_local_problem_allocate(FrictionContactProblem* problem);
-  void rolling_fc3d_local_problem_free(FrictionContactProblem* localproblem,
-                               FrictionContactProblem* problem);
-  void rolling_fc3d_local_problem_compute_q(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double *reaction, int contact);
-  void rolling_fc3d_local_problem_fill_M(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact);
-
+  RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(RollingFrictionContactProblem* problem);
+  void rolling_fc3d_local_problem_free(RollingFrictionContactProblem* localproblem,
+                               RollingFrictionContactProblem* problem);
+  void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem * problem, RollingFrictionContactProblem * localproblem, double *reaction, int contact);
+  void rolling_fc3d_local_problem_fill_M(RollingFrictionContactProblem * problem, RollingFrictionContactProblem * localproblem, int contact);
+  
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -2,6 +2,7 @@
 #include "NewtonEulerJointR.hpp"
 #include <boost/math/quaternion.hpp>
 #include "op3x3.h"
+#include "RotationQuaternion.hpp"
 //#define MBTB_JOINTR_DEBUG
 
 MBTB_JointR::MBTB_JointR()

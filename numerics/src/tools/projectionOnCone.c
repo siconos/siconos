@@ -20,7 +20,9 @@
 
 unsigned projectionOnCone(double* r, double  mu)
 {
-  double normT = hypot(r[1], r[2]);
+  double normT = sqrt(r[1] * r[1] + r[2] * r[2]);
+  /* hypot of libm is sure but really slow */
+  /* double normT = hypot(r[1], r[2]); */
   if (mu * normT <= - r[0])
   {
     r[0] = 0.0;
@@ -43,7 +45,10 @@ unsigned projectionOnCone(double* r, double  mu)
 }
 unsigned projectionOnDualCone(double* u, double  mu)
 {
-  double normT = hypot(u[1], u[2]);
+
+  double normT = sqrt(u[1] * u[1] + u[2] * u[2]);
+  /* hypot of libm is sure but really slow */
+  /* double normT = hypot(u[1], u[2]); */
   
   if (normT <= - mu * u[0])
   {

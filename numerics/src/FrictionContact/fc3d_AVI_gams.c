@@ -928,7 +928,7 @@ bad_angle:
           ri[1] = 0.;
           ri[2] = 0.;
 
-          /*  Pick 3 contraints as basis */
+          /*  Pick 3 constraints as basis */
           /*  The dual variable u is very likely to be non-zero
            *  y is then also likely to be non-zero
            *  Let's make our life easier dans choose as

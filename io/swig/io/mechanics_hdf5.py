@@ -450,14 +450,21 @@ class MechanicsHdf5(object):
     to be executed by MechanicsRunner.
     """
 
-    def __init__(self, io_filename=None, mode='w',
+    def __init__(self, io_filename=None, mode='w', io_filename_backup=None,
                  use_compression=False, output_domains=False, verbose=True):
-
         if io_filename is None:
             self._io_filename = '{0}.hdf5'.format(
                 os.path.splitext(os.path.basename(sys.argv[0]))[0])
         else:
             self._io_filename = io_filename
+
+        if io_filename_backup is None:
+            self._io_filename_backup = '{0}_last.hdf5'.format(
+                os.path.splitext(self._io_filename) [0])
+        else:
+            self._io_filename_backup= io_filename_backup
+
+        self._output_backup=False
         self._mode = mode
         self._static_data = None
         self._velocities_data = None
@@ -465,6 +472,7 @@ class MechanicsHdf5(object):
         self._cf_data = None
         self._domain_data = None
         self._solv_data = None
+        self._log_data = None
         self._input = None
         self._nslaws_data = None
         self._nslaws = dict()
@@ -482,7 +490,7 @@ class MechanicsHdf5(object):
         self._number_of_static_objects = 0
         self._use_compression = use_compression
         self._should_output_domains = output_domains
-        self.verbose = verbose
+        self._verbose = verbose
 
     def __enter__(self):
         self._out = h5py.File(self._io_filename, self._mode)
@@ -511,6 +519,11 @@ class MechanicsHdf5(object):
                                      use_compression = self._use_compression)
         self._solv_data = data(self._data, 'solv', 4,
                                use_compression = self._use_compression)
+        try:
+            self._log_data = group(self._data, 'log')
+        except Exception as e :
+            print('Warning -  group(self._data, log ) : ',  e)
+
         self._input = group(self._data, 'input')
 
         self._nslaws_data = group(self._data, 'nslaws')
@@ -518,6 +531,11 @@ class MechanicsHdf5(object):
 
     def __exit__(self, type_, value, traceback):
         self._out.close()
+
+    def print_verbose(self, *args, **kwargs):
+            if self._verbose:
+                print('[io.mechanics]', *args, **kwargs)
+
 
 # hdf5 structure
 
@@ -569,6 +587,12 @@ class MechanicsHdf5(object):
         Solver output
         """
         return self._solv_data
+
+    def log_data(self):
+        """
+        log output
+        """
+        return self._log_data
 
     def instances(self):
         """
@@ -996,6 +1020,26 @@ class MechanicsHdf5(object):
                 self._number_of_dynamic_objects += 1
 
             return obj
+
+    def add_Newton_impact_rolling_friction_nsl(self, name, mu, mu_r, e=0, collision_group1=0,
+                                   collision_group2=0):
+        """
+        Add a nonsmooth law for contact between 2 groups.
+        Only NewtonImpactFrictionNSL are supported.
+        name is an user identifiant and must be unique,
+        mu is the coefficient of friction,
+        e is the coefficient of restitution on the contact normal,
+        gid1 and gid2 define the group identifiants.
+
+        """
+        if name not in self._nslaws_data:
+            nslaw=self._nslaws_data.create_dataset(name, (0,))
+            nslaw.attrs['type']='NewtonImpactRollingFrictionNSL'
+            nslaw.attrs['mu']=mu
+            nslaw.attrs['mu_r']=mu_r
+            nslaw.attrs['e']=e
+            nslaw.attrs['gid1']=collision_group1
+            nslaw.attrs['gid2']=collision_group2
 
     def add_Newton_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
                                    collision_group2=0):

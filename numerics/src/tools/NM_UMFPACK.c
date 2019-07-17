@@ -29,13 +29,13 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 {
   NSM_linear_solver_params* params = NSM_linearSolverParams(A);
 
-  if (params->solver_data)
+  if (params->linear_solver_data)
   {
-    return (NM_UMFPACK_WS*) params->solver_data;
+    return (NM_UMFPACK_WS*) params->linear_solver_data;
   }
 
-  params->solver_data = calloc(1, sizeof(NM_UMFPACK_WS));
-  NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->solver_data;
+  params->linear_solver_data = calloc(1, sizeof(NM_UMFPACK_WS));
+  NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->linear_solver_data;
 
   UMFPACK_FN(defaults) (umfpack_ws->control);
 
@@ -90,7 +90,7 @@ void NM_UMFPACK_free(void* p)
   assert(p);
   NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
   assert(params);
-  NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->solver_data;
+  NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->linear_solver_data;
   assert(umfpack_ws);
 
   UMFPACK_FN(free_symbolic) (&(umfpack_ws->symbolic));
@@ -116,7 +116,7 @@ void NM_UMFPACK_free(void* p)
 
   /* Here we free umfpack_ws ...  */
   free(umfpack_ws);
-  params->solver_data = NULL;
+  params->linear_solver_data = NULL;
 
 }
 

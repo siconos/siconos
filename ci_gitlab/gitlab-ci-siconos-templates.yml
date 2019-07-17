@@ -1,0 +1,86 @@
+# ---  Siconos ci templates ---
+# 
+# This file contains common definitions and templates for
+# continuous integration job of siconos project.
+#
+# Usage :
+# add in .gitlab-ci.yml :
+# include: <path-to-this-file>/gitlab-ci-siconos-templates.yml
+
+variables:
+  # Default ctest model. Warning : overwritten if set in schedules variables (as we expect)
+  ctest_build_model: Continuous
+  # Path to dockerfiles (relative to siconos repo)
+  docker_path: ci_gitlab/dockerfiles
+  # Default tag for docker images
+  docker_tag: latest
+  # Default behavior regarding cdash submission
+  cdash_submit: 0
+  # Default path to siconos conf. files
+  siconos_confs: ci_gitlab/siconos_confs
+
+
+stages:
+  # --- Docker build stage ---
+  # The first stage contains jobs used to build
+  # docker images 'ready to use' for a Siconos build/install.
+  # Requirement for jobs in this stage :
+  # - should build and push a docker image to siconos project registry
+  # - should be allowed to failed (in order to avoid blocking of last stage jobs)
+  # - should run only when commit message contains [docker build]
+  # - use Dockerfile from ci_gitlab/dockerfiles/<image-name>
+  #
+  # Templates for these jobs : .docker-build (see below).
+  - docker-build
+  - docker-build-layer2
+  - docker-build-layer3
+  # --- Build stage ---
+  # jobs run on images generated in previous stage, available in siconos registry:
+  # https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/container_registry
+  # - configure, build Siconos
+  # - run tests
+  # - submit to cdash
+  #
+  # Templates for these jobs : .siconos-build (see below).
+  - build
+  # Publish documentation
+  - deploy
+
+
+# --- Templates definitions ---
+  
+# -- Template for docker-build jobs --
+# - should build and push a docker image to siconos project registry
+#   image name : $CI_REGISTRY_IMAGE/$IMAGE_NAME
+# - should be allowed to failed (in order to avoid blocking of last stage jobs)
+# - should run only when commit message contains [docker build]
+# - use Dockerfile from ci_gitlab/dockerfiles/<IMAGE_NAME>
+# - will be tagged <IMAGE_NAME>:<docker_tag>. The default tag is latest.
+# Warning : this kind of job can only run on 'privileged' runners.
+.docker-build:
+  image: docker:stable
+  services:
+    - docker:dind
+  tags:
+    - priv
+  stage: docker-build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA $docker_path/$IMAGE_NAME > /dev/null
+    - docker tag $CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE/$IMAGE_NAME:$docker_tag
+    - docker push $CI_REGISTRY_IMAGE/$IMAGE_NAME:$docker_tag
+  only:
+    variables: # Run this job only when commit message starts with [docker-build]
+      - $CI_COMMIT_MESSAGE =~ /^\[docker-build\].*/i      
+  allow_failure: true
+
+# -- Template for siconos build-test-install jobs --
+# - Pull an image (possibly from siconos registry)
+#   named  IMAGE_NAME
+# - Run for all branches and for all push
+.siconos-build:
+  image: $IMAGE_NAME
+  stage: build
+  script:
+    - "sh ci_gitlab/install_siconos.sh $user_file" 
+
