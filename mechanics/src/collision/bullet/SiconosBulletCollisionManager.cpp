@@ -1920,8 +1920,11 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       else if (nslaw && nslaw->size() == 5)
       {
-        SP::Bullet5DR rel(makeBullet5DR(pairA->ds, pairA->sshape,
-                                        pairB->ds, pairB->sshape,
+        SP::RigidBodyDS rbdsA =  std11::static_pointer_cast<RigidBodyDS>(pairA->ds);
+        SP::RigidBodyDS rbdsB =  std11::static_pointer_cast<RigidBodyDS>(pairB->ds);
+
+        SP::Bullet5DR rel(makeBullet5DR(rbdsA, pairA->sshape,
+                                        rbdsB, pairB->sshape,
                                         *it->point));
 
         if (!rel) continue;
@@ -1933,8 +1936,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         rel->shape[1] = pairB->sshape;
         rel->contactor[0] = pairA->contactor;
         rel->contactor[1] = pairB->contactor;
-        rel->ds[0] = pairA->ds;
-        rel->ds[1] = pairB->ds;
+        rel->ds[0] = rbdsA;
+        rel->ds[1] = rbdsB;
         rel->btObject[0] = pairA->btobject;
         rel->btObject[1] = pairB->btobject;
 
@@ -1944,8 +1947,8 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
         rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
                                                   flip, _options.worldScale,
-                                 pairA->ds ? pairA->ds : SP::NewtonEulerDS(),
-                                 pairB->ds ? pairB->ds : SP::NewtonEulerDS());
+                                 rbdsA ? rbdsA : SP::NewtonEulerDS(),
+                                 rbdsB ? rbdsB : SP::NewtonEulerDS());
 
         // We wish to be sure that no Interactions are created without
         // sufficient warning before contact.  TODO: Replace with exception or
