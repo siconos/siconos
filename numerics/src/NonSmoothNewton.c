@@ -27,7 +27,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 
-#define DEBUG_MESSAGES
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 
@@ -198,7 +198,7 @@ int nonSmoothNewton(
     DEBUG_PRINTF("criterion = %e\n", criterion );
     if (infoDGESV != 0 || descentCondition > criterion)
     {
-      DEBUG_PRINT("Newton descent direction is not good. Use the gradient direction\n");
+      numerics_printf("Newton descent direction is not good. Use the gradient direction");
       /* If the linear system is not solved correctly or the descent condition
        * is not satisfied, we fall back to the gradient for the descent direction
        * dk = - gradient_psi (remind that dk is saved in phiVector) */

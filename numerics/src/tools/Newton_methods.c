@@ -358,6 +358,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
     if (info_dir_search == 0) /* direction search succeeded */
     {
+      numerics_printf_verbose(2,"direction search suceeded");
       // workV1 contains the direction d
       cblas_dcopy(n, z, incx, workV2, incy);
       cblas_daxpy(n, 1.0, workV1, incx, workV2, incy);     //  z + d --> z
@@ -372,6 +373,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     }
     else /* direction search failed, backup to gradient step*/
     {
+      numerics_printf("direction search failed, backup to gradient step");
       cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
       cblas_dscal(n, -1.0, workV1, incx);
       theta_iter = INFINITY;
