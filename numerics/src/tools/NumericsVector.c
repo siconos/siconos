@@ -105,12 +105,10 @@ void NV_insert(double * x, const unsigned int xSize,
         x[j] = y[j - i];
 }
 
-double* NV_power2(const double * const vec, const unsigned int vecSize)
+void NV_power2(const double * const vec, const unsigned int vecSize, double * out)
 {
-    double * out = (double*)malloc(vecSize * sizeof(double));
     for (unsigned int i = 0; i < vecSize; ++i)
         out[i] = vec[i] * vec[i];
-    return out;
 }
 
 
@@ -122,12 +120,10 @@ double NV_reduce(const double * const vec, const unsigned int vecSize)
     return sum;
 }
 
-double* NV_prod(const double * const x, const double * const y, const unsigned int vecSize)
+void NV_prod(const double * const vec1, const double * const vec2, const unsigned int vecSize, double * out)
 {
-    double * out = (double*)malloc(vecSize * sizeof(double));
     for (unsigned int i = 0; i < vecSize; ++i)
-        out[i] = x[i] * y[i];
-    return out;
+        out[i] = vec1[i] * vec2[i];
 }
 
 double* NV_div(const double * const x, const double * const y, const unsigned int vecSize)
@@ -164,12 +160,10 @@ double * NV_abs(const double * const vec, const unsigned int vecSize)
     return out;
 }
 
-double * NV_add(const double * const x, const double * const y, const unsigned int vecSize)
+void NV_add(const double * const vec1, const double * const vec2, const unsigned int vecSize, double * out)
 {
-    double * out = (double*)malloc(vecSize * sizeof(double));
     for (unsigned int i = 0; i < vecSize; ++i)
-        out[i] = x[i] + y[i];
-    return out;
+        out[i] = vec1[i] + vec2[i];
 }
 
 double * NV_const_add(const double * const vec, const unsigned int vecSize, const double alpha, const double beta)
@@ -180,12 +174,10 @@ double * NV_const_add(const double * const vec, const unsigned int vecSize, cons
     return out;
 }
 
-double * NV_sub(const double * const x, const double * const y, const unsigned int vecSize)
+void NV_sub(const double * const vec1, const double * const vec2, const unsigned int vecSize, double * out)
 {
-    double * out = (double*)malloc(vecSize * sizeof(double));
     for (unsigned int i = 0; i < vecSize; ++i)
-        out[i] = x[i] - y[i];
-    return out;
+        out[i] = vec1[i] - vec2[i];
 }
 
 double NV_norm_inf(const double * const vec, const unsigned int vecSize)
@@ -196,7 +188,9 @@ double NV_norm_inf(const double * const vec, const unsigned int vecSize)
 
 double NV_norm_2(const double * const vec, const unsigned int vecSize)
 {
-    double * vec2 = NV_power2(vec, vecSize);
+    double * vec2 = (double*)calloc(vecSize, sizeof(double));
+    NV_power2(vec, vecSize, vec2);
     double sum = NV_reduce(vec2, vecSize);
+    free(vec2);
     return sqrt(sum);
 }

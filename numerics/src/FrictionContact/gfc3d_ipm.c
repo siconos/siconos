@@ -69,92 +69,165 @@ typedef struct {
 }
   Gfc3d_IPM_init_data;
 
+/** Returns the step length for variables update in IPM [1, p. 29]
+ * \param x is the initial point to update.
+ * \param dx is the Newton step.
+ * \param vecSize is the size of the vectors x and dx.
+ * \param varsCount is the count of variables concatenated into vector x.
+ * \param gamma is the safety parameter.
+ * \return scalar, the step length
+ *
+ * \cite 1. K.C. Toh, R.H. Tutuncu, M.J. Todd,
+ *          On the implementation and usage of SDPT3 - a Matlab software package
+ *          for semidefinite-quadratic-linear programming, version 4.0
+ *          Draft, 17 July 2006
+ */
+static double _getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
+                             const unsigned int varsCount, const double gamma);
 
-static double _getStepLength(const double * x, const double * dx, const unsigned int vecSize,
+/**
+ * Returns the primal constraint vector for global fricprob ( velocity - H @ globalVelocity - w )
+ * \param velocity is the vector of relative velocities.
+ * \param H is the constraint matrix.
+ * \param globalVelocity is the vector of generalized velocities.
+ * \param w is the constraint vector.
+ * \return velocity - H @ globalVelocity - w.
+ */
+static double * _getPrimalConstraint(const double * velocity, const NumericsMatrix * H,
+                                     const double * globalVelocity, const double * w);
+
+
+/**
+ * Returns the dual constraint vector for global fricprob ( M @ globalVelocity + f - H @ reaction )
+ * \param M is the mass matrix.
+ * \param globalVelocity is the vector of generalized velocities.
+ * \param H is the constraint matrix.
+ * \param reaction is the vector of reaction forces at each contact point.
+ * \param f is the constraint vector (vector of internal and external forces).
+ * \return M @ globalVelocity + f - H @ reaction.
+ */
+static double * _getDualConstraint(const NumericsMatrix * M, const double * globalVelocity,
+                                   const NumericsMatrix * H, const double * reaction, const double * f);
+
+/* Returns the step length for variables update in IPM */
+static double _getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
                              const unsigned int varsCount, const double gamma)
 {
     unsigned int dimension = (int)(vecSize / varsCount);
-    double * alpha_arr = (double*)calloc(varsCount, sizeof(double));
+    double * alpha_list = (double*)calloc(varsCount, sizeof(double));
 
     unsigned int pos;
-    double ai, bi, ci, di, alpha;
+    double ai, bi, ci, di, alpha, min_alpha;
     double *xi, *xi2, *dxi, *dxi2, *xi_dxi;
+
+    dxi2 = (double*)calloc(dimension, sizeof(double));
+    xi2 = (double*)calloc(dimension, sizeof(double));
+    xi_dxi = (double*)calloc(dimension, sizeof(double));
+
     for (unsigned int i = 0; i < varsCount; ++i)
     {
         pos = i * dimension;
         xi = x + pos;
         dxi = dx + pos;
 
-        dxi2 = NV_power2(dxi, dimension);
+        NV_power2(dxi, dimension, dxi2);
         ai = dxi2[0] - NV_reduce((dxi2 + 1), dimension - 1);
 
-        xi_dxi = NV_prod(xi, dxi, dimension);
+        NV_prod(xi, dxi, dimension, xi_dxi);
         bi = xi_dxi[0] - NV_reduce((xi_dxi + 1), dimension - 1);
 
-        xi2 = NV_power2(xi, dimension);
+        NV_power2(xi, dimension, xi2);
         ci = xi2[0] - NV_reduce((xi2 + 1), dimension - 1);
 
         di = bi * bi - ai * ci;
 
         if (ai < 0 || (bi < 0 && ai < (bi * bi) / ci))
-        {
             alpha = ((-bi - sqrt(di)) / ai);
-        }
         else if ((fabs(ai) < 1e-12) && (bi < 0))
-        {
             alpha = (-ci / (2 * bi));
-        }
         else
-        {
             alpha = DBL_MAX;
-        }
 
         if (fabs(alpha) < 1e-12)
             alpha = 0.0;
 
-        alpha_arr[i] = alpha;
+        alpha_list[i] = alpha;
     }
-    double min_alpha = NV_min(alpha_arr, varsCount);
+
+    min_alpha = NV_min(alpha_list, varsCount);
+
+    free(xi2);
+    free(dxi2);
+    free(xi_dxi);
+    free(alpha_list);
 
     return gamma * fmin(1.0, min_alpha);
 }
 
-static double * _getPrimalConstraint(const double * velocity, const NumericsMatrix * H, const double * globalVelocity, const double * w)
+/* Returns the primal constraint vector for global fricprob ( velocity - H @ globalVelocity - w ) */
+static double * _getPrimalConstraint(const double * velocity, const NumericsMatrix * H,
+                                     const double * globalVelocity, const double * w)
 {
-    double *Hv = (double*)calloc(H->size0, sizeof(double));
+    double nd = H->size0;
+
+    /* The memory for the result vectors should be allocated using calloc
+     * since H is a sparse matrix. In other case the behaviour will be undefined.*/
+    double *Hv = (double*)calloc(nd, sizeof(double));
+    double *u_minus_Hv = (double*)calloc(nd, sizeof(double));
+    double *u_minus_Hv_minus_w = (double*)calloc(nd, sizeof(double));
+
+    // Hv = H @ globalVelocity
     NM_gemv(1.0, H, globalVelocity, 0.0, Hv);
-    double * u_Hv = NV_sub(velocity, Hv, H->size0);
-    double * u_Hv_w = NV_sub(u_Hv, w, H->size0);
+
+    // u - Hv = velocity - H @ globalVelocity
+    NV_sub(velocity, Hv, nd, u_minus_Hv);
+
+    // u - Hv - w = velocity - H @ globalVelocity - w
+    NV_sub(u_minus_Hv, w, nd, u_minus_Hv_minus_w);
+
+    // free allocated memory
     free(Hv);
-    free(u_Hv);
-    return u_Hv_w;
+    free(u_minus_Hv);
+
+    return u_minus_Hv_minus_w;
 }
 
-static double * _getDualConstraint(const NumericsMatrix * M, const double * globalVelocity, const NumericsMatrix * H, const double * reaction, const double * f)
+/* Returns the dual constraint vector for global fricprob ( M @ globalVelocity + f - H @ reaction ) */
+static double * _getDualConstraint(const NumericsMatrix * M, const double * globalVelocity,
+                                   const NumericsMatrix * H, const double * reaction, const double * f)
 {
-//    printf("INSIDE getDualconstraint\n");
-    double *Mv = (double*)calloc(H->size1, sizeof(double));
-    double *HTr = (double*)calloc(H->size1, sizeof(double));
-    NM_gemv(1.0, M, globalVelocity, 0.0, Mv);
-    double * Mv_f = NV_add(Mv, f, H->size1);
-//    printf("DISPLAY Mv\n");
-//    NV_display(Mv, H->size1);
-    NumericsMatrix* HT = NM_transpose(H);
-//    printf("DISPLAY HT\n");
-//    NM_display(HT);
-//    printf("DISPLAY rection");
-//    NV_display(reaction, H->size0);
-    NM_gemv(1.0, HT, reaction, 0.0, HTr);
-//    printf("DISPLAY HTr\n");
-//    NV_display(HTr, H->size1);
+    double m = H->size1;
 
-    double * Mv_f_HTr = NV_sub(Mv_f, HTr, H->size1);
+    /* The memory for the result vectors should be allocated using calloc
+     * since H is a sparse matrix. In other case the behaviour will be undefined.*/
+    double *Mv = (double*)calloc(m, sizeof(double));
+    double *HTr = (double*)calloc(m, sizeof(double));
+    double * Mv_plus_f = (double*)calloc(m, sizeof(double));
+    double * Mv_plus_f_minus_HTr = (double*)calloc(m, sizeof(double));
+
+    // Mv = M @ globalVelocity
+    NM_gemv(1.0, M, globalVelocity, 0.0, Mv);
+
+    // Mv_plus_f = M @ globalVelocity + f
+    NV_add(Mv, f, m, Mv_plus_f);
+
+    // HT = H^T
+    NumericsMatrix* HT = NM_transpose(H);
+
+    // HTr = H^T @ reaction
+    NM_gemv(1.0, HT, reaction, 0.0, HTr);
+
+    // Mv_plus_f_minus_HTr = M @ globalVelocity + f - H^T @ reaction
+    NV_sub(Mv_plus_f, HTr, m, Mv_plus_f_minus_HTr);
+
+    // free allocated memory
     NM_free(HT);
+
     free(Mv);
     free(HTr);
-    free(Mv_f);
-//    printf("END getDualconstraint\n");
-    return Mv_f_HTr;
+    free(Mv_plus_f);
+
+    return Mv_plus_f_minus_HTr;
 }
 
 static double _getPrimalInfeasibility(const double * velocity, const NumericsMatrix * H, const double * globalVelocity, const double * w)
@@ -440,6 +513,12 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     double * rhs = (double*)malloc((m + nd + nd) * sizeof(double));
     double *vr_jprod, *dvdr_jprod, *vr_prod_sub_iden, *v_plus_dv, *r_plus_dr, *gv_plus_dgv;
+
+    v_plus_dv = (double*)calloc(nd, sizeof(double));
+    r_plus_dr = (double*)calloc(nd, sizeof(double));
+    gv_plus_dgv = (double*)calloc(m, sizeof(double));
+    vr_prod_sub_iden = (double*)calloc(nd, sizeof(double));
+
     NumericsMatrix *J;
     long H_nzmax, J_nzmax;
     H_nzmax = NM_triplet(H)->nzmax;
@@ -510,25 +589,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
         /*  2.1 Build predictor right-hand side */
 
-//        printf("DISPLAY globalVelocity\n");
-//        NV_display(globalVelocity, m);
-//        printf("DISPLAY reaction\n");
-//        NV_display(reaction, nd);
-//        printf("DISPLAY M\n");
-//        NM_display(M);
-
-//        printf("DISPLAY H\n");
-//        NM_display(H);
-
         primalConstraint = _getPrimalConstraint(velocity, H, globalVelocity, w);
         dualConstraint = _getDualConstraint(M, globalVelocity, H, reaction, f);
         complemConstraint = JA_prod(velocity, reaction, nd, n);
-//        printf("DISPLAY complemConstraint\n");
-//        NV_display(complemConstraint, nd);
-//        printf("DISPLAY dualConstraint\n");
-//        NV_display(dualConstraint, m);
-//        printf("DISPLAY primalConstraint\n");
-//        NV_display(primalConstraint, nd);
 
         NV_insert(rhs, m + nd + nd, dualConstraint, m, 0);
         NV_insert(rhs, m + nd + nd, complemConstraint, nd, m);
@@ -536,11 +599,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         cblas_dscal(m + nd + nd, -1.0, rhs, 1);
 
         /* Newton system solving */
-//        printf("BEFORE solving\n");
-//        NV_display(rhs, m + nd + nd);
         NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
-//        printf("AFTER solving\n");
-//        NV_display(rhs, m + nd + nd);
 
         d_globalVelocity = rhs;
         d_velocity = rhs + m;
@@ -558,12 +617,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         cblas_dscal(nd, alpha_primal, data->velocity_k, 1);
         cblas_dscal(nd, alpha_dual, data->reaction_k, 1);
 
-        v_plus_dv = NV_add(velocity, data->velocity_k, nd);
-        r_plus_dr = NV_add(reaction, data->reaction_k, nd);
+        NV_add(velocity, data->velocity_k, nd, v_plus_dv);
+        NV_add(reaction, data->reaction_k, nd, r_plus_dr);
 
         barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / nd;
-        free(v_plus_dv);
-        free(r_plus_dr);
 
         e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * fmin(alpha_primal, alpha_dual)) : sgmp3;
         sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
@@ -571,19 +628,14 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         iden = JA_iden(nd, n);
         cblas_dscal(nd, 2 * barr_param * sigma, iden, 1);
 
-        free(complemConstraint);
-
         vr_jprod = JA_prod(velocity, reaction, nd, n);
         dvdr_jprod = JA_prod(d_velocity, d_reaction, nd, n);
-        vr_prod_sub_iden = NV_sub(vr_jprod, iden, nd);
+        NV_sub(vr_jprod, iden, nd, vr_prod_sub_iden);
 
         free(iden);
 
-        complemConstraint = NV_add(vr_prod_sub_iden, dvdr_jprod, nd);
+        NV_add(vr_prod_sub_iden, dvdr_jprod, nd, complemConstraint);
 
-        free(vr_jprod);
-        free(dvdr_jprod);
-        free(vr_prod_sub_iden);
 
         NV_insert(rhs, m + nd + nd, dualConstraint, m, 0);
         NV_insert(rhs, m + nd + nd, complemConstraint, nd, m);
@@ -611,23 +663,17 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         cblas_dscal(nd, alpha_dual, d_reaction, 1);
         cblas_dscal(m, alpha_primal, d_globalVelocity, 1);
 
-        v_plus_dv = NV_add(velocity, d_velocity, nd);
-        r_plus_dr = NV_add(reaction, d_reaction, nd);
-        gv_plus_dgv = NV_add(globalVelocity, d_globalVelocity, m);
+        NV_add(velocity, d_velocity, nd, v_plus_dv);
+        NV_add(reaction, d_reaction, nd, r_plus_dr);
+        NV_add(globalVelocity, d_globalVelocity, m, gv_plus_dgv);
 
         cblas_dcopy(nd, v_plus_dv, 1, velocity, 1);
         cblas_dcopy(nd, r_plus_dr, 1, reaction, 1);
         cblas_dcopy(m, gv_plus_dgv, 1, globalVelocity, 1);
 
-        free(v_plus_dv);
-        free(r_plus_dr);
-        free(gv_plus_dgv);
-
         barr_param = cblas_ddot(nd, reaction, 1, velocity, 1) / nd;
 
         iteration++;
-        //NV_display(globalVelocity, m);
-
     }
 
     free(rhs);
@@ -639,6 +685,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     NM_free(minus_H);
     NM_free(H);
     free(w);
+    free(v_plus_dv);
+    free(r_plus_dr);
+    free(gv_plus_dgv);
+    free(vr_prod_sub_iden);
     *info = hasNotConverged;
 }
 
