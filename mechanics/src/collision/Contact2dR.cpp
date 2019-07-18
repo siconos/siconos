@@ -18,7 +18,7 @@
 
 
 // #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES 1
+// #define DEBUG_MESSAGES
 #include <debug.h>
 
 #include "Contact2dR.hpp"
@@ -27,7 +27,7 @@
 #include <BlockVector.hpp>
 
 Contact2dR::Contact2dR()
-  : Lagrangian2d1DR()
+  : Lagrangian2d2DR()
 {
 }
 
@@ -36,20 +36,22 @@ void Contact2dR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
   DEBUG_BEGIN("Contact2dR::computeh(...)\n");
 
   // Update contact points and distance if necessary
-  Lagrangian2d1DR::computeh(q, z, y);
+  Lagrangian2d2DR::computeh(q, z, y);
 
   y.setValue(0, distance());
 
-  DEBUG_PRINTF("position on A : %g,%g,%g\n", (*pc1())(0), (*pc1())(1));
-  DEBUG_PRINTF("position on B : %g,%g,%g\n", (*pc2())(0), (*pc2())(1));
-  DEBUG_PRINTF("normal on B   : %g,%g,%g\n", (*nc())(0), (*nc())(1));
+  
+  DEBUG_PRINTF("distance : %g \n", distance());
+  DEBUG_PRINTF("position on A : %g,%g\n", (*pc1())(0), (*pc1())(1));
+  DEBUG_PRINTF("position on B : %g,%g\n", (*pc2())(0), (*pc2())(1));
+  DEBUG_PRINTF("normal on B   : %g,%g\n", (*nc())(0), (*nc())(1));
 
   DEBUG_END("Contact2dR::computeh(...)\n");
 }
 
 void Contact2dR::updateContactPoints(const SiconosVector& pos1,
-                                   const SiconosVector& pos2,
-                                   const SiconosVector& normal)
+                                     const SiconosVector& pos2,
+                                     const SiconosVector& normal)
 {
   // Copy relative positions
   *_relPc1 = pos1;

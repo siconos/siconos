@@ -21,9 +21,9 @@
 
 #include "MechanicsFwd.hpp"
 #include "SiconosVector.hpp"
-#include "Lagrangian2d1DR.hpp"
+#include "Lagrangian2d2DR.hpp"
 
-class Contact2dR : public Lagrangian2d1DR
+class Contact2dR : public Lagrangian2d2DR
 {
 private:
   /** serialization hooks
