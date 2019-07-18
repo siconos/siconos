@@ -31,6 +31,8 @@ private:
   CPPUNIT_TEST(t1);
   // tests to be done ...
   CPPUNIT_TEST(t2);
+  // tests to be done ...
+  CPPUNIT_TEST(t3);
 
 
   CPPUNIT_TEST_SUITE_END();
@@ -38,6 +40,7 @@ private:
   // Members
   void t1();
   void t2();
+  void t3();
 
 
 public:

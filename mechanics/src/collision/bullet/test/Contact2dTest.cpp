@@ -156,18 +156,17 @@ BounceResult bounceTest(std::string moving,
       box->setOutsideMargin(params.outsideMargin);
       contactors->push_back(std11::make_shared<SiconosContactor>(box));
     }
-    else if (moving=="ch")
+    else if (moving=="ch2d")
     {
       float siz = params.size;
-      SP::SiconosMatrix pts(new SimpleMatrix(4,3));
-      (*pts)(0,0) = 0.0; (*pts)(0,1) = 0.0; (*pts)(0,2) = 0.0;
-      (*pts)(1,1) = siz; (*pts)(1,1) = 0.0; (*pts)(1,2) = 0.0;
-      (*pts)(2,0) = 0.0; (*pts)(2,1) = siz; (*pts)(2,2) = 0.0;
-      (*pts)(3,0) = 0.0; (*pts)(3,1) = 0.0; (*pts)(3,2) = siz;
-      SP::SiconosConvexHull ch(new SiconosConvexHull(pts));
-      ch->setInsideMargin(params.insideMargin);
-      ch->setOutsideMargin(params.outsideMargin);
-      contactors->push_back(std11::make_shared<SiconosContactor>(ch));
+      SP::SiconosMatrix pts(new SimpleMatrix(4,2));
+      (*pts)(0,0) = 0.0; (*pts)(0,1) = 0.0;
+      (*pts)(1,1) = siz; (*pts)(1,1) = 0.0;
+      (*pts)(2,0) = 0.0; (*pts)(2,1) = siz;
+      SP::SiconosConvexHull2d ch2d(new SiconosConvexHull2d(pts));
+      ch2d->setInsideMargin(params.insideMargin);
+      ch2d->setOutsideMargin(params.outsideMargin);
+      contactors->push_back(std11::make_shared<SiconosContactor>(ch2d));
     }
     body->setContactors(contactors);
 
@@ -407,6 +406,37 @@ void Contact2dTest::t2()
     params.options.dimension = SICONOS_BULLET_2D;
 
     BounceResult r = bounceTest("disk", "box", params);
+
+    fprintf(stderr, "\nSize: %g\n", params.size);
+    fprintf(stderr, "Final position: %g  (std=%g)\n\n",
+            r.final_position, r.final_position_std);
+  }
+  catch (SiconosException e)
+  {
+    std::cout << "SiconosException: " << e.report() << std::endl;
+    CPPUNIT_ASSERT(0);
+  }
+
+  CPPUNIT_ASSERT(1);
+}
+void Contact2dTest::t3()
+{
+  try
+  {
+    printf("\n==== t3\n");
+
+    BounceParams params;
+    params.trace = true;
+    params.dynamic = false;
+    params.size = 1.0;
+    params.mass = 1.0;
+    params.position = 1.0;
+    params.timestep = 0.005;
+    params.insideMargin = 0.0;
+    params.outsideMargin = 0.0;
+    params.options.dimension = SICONOS_BULLET_2D;
+
+    BounceResult r = bounceTest("ch2d", "box", params);
 
     fprintf(stderr, "\nSize: %g\n", params.size);
     fprintf(stderr, "Final position: %g  (std=%g)\n\n",
