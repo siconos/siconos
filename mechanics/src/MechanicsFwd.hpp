@@ -72,6 +72,8 @@
   REGISTER(SiconosMesh)                         \
   REGISTER(SiconosHeightMap)                    \
   REGISTER(SiconosDisk)                         \
+  REGISTER(SiconosBox2d)                         \
+  REGISTER(SiconosConvexHull2d)                  \
   REGISTER(SiconosCollisionQueryResult)         \
   REGISTER(SiconosCollisionManager)             \
   REGISTER(SiconosBulletCollisionManager)

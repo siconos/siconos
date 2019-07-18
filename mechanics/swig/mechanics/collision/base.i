@@ -27,6 +27,8 @@ PY_REGISTER_WITHOUT_HEADER(SiconosConvexHull, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosMesh, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosHeightMap, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosDisk, Mechanics);
+PY_REGISTER_WITHOUT_HEADER(SiconosBox2d, Mechanics);
+PY_REGISTER_WITHOUT_HEADER(SiconosConvexHull2d, Mechanics);
 
 PY_FULL_REGISTER(SiconosShape, Mechanics);
 

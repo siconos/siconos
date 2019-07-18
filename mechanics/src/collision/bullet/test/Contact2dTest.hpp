@@ -29,12 +29,15 @@ private:
 
   // tests to be done ...
   CPPUNIT_TEST(t1);
+  // tests to be done ...
+  CPPUNIT_TEST(t2);
 
 
   CPPUNIT_TEST_SUITE_END();
 
   // Members
   void t1();
+  void t2();
 
 
 public:

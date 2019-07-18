@@ -187,20 +187,13 @@ BounceResult bounceTest(std::string moving,
       (*pos)(3) = 1.0; //unit quaternion
       static_contactors->push_back(std11::make_shared<SiconosContactor>(floordisk, pos));
     }
-    else if (ground=="plane")
-    {
-      SP::SiconosPlane plane(new SiconosPlane());
-      plane->setInsideMargin(params.insideMargin);
-      plane->setOutsideMargin(params.outsideMargin);
-      static_contactors->push_back(std11::make_shared<SiconosContactor>(plane));
-    }
     else if (ground=="box")
     {
-      SP::SiconosBox floorbox(new SiconosBox(100,100,100));
+      SP::SiconosBox2d floorbox(new SiconosBox2d(100,1.));
       floorbox->setInsideMargin(params.insideMargin);
       floorbox->setOutsideMargin(params.outsideMargin);
       SP::SiconosVector pos(new SiconosVector(7));
-      (*pos)(1) = -50-params.size/2;
+      (*pos)(1) = -2.0;//-params.size/2;
       (*pos)(3) = 1.0;
       static_contactors->push_back(std11::make_shared<SiconosContactor>(floorbox, pos));
     }
@@ -383,6 +376,37 @@ void Contact2dTest::t1()
     params.options.dimension = SICONOS_BULLET_2D;
 
     BounceResult r = bounceTest("disk", "disk", params);
+
+    fprintf(stderr, "\nSize: %g\n", params.size);
+    fprintf(stderr, "Final position: %g  (std=%g)\n\n",
+            r.final_position, r.final_position_std);
+  }
+  catch (SiconosException e)
+  {
+    std::cout << "SiconosException: " << e.report() << std::endl;
+    CPPUNIT_ASSERT(0);
+  }
+
+  CPPUNIT_ASSERT(1);
+}
+void Contact2dTest::t2()
+{
+  try
+  {
+    printf("\n==== t2\n");
+
+    BounceParams params;
+    params.trace = true;
+    params.dynamic = false;
+    params.size = 1.0;
+    params.mass = 1.0;
+    params.position = 1.0;
+    params.timestep = 0.005;
+    params.insideMargin = 0.0;
+    params.outsideMargin = 0.0;
+    params.options.dimension = SICONOS_BULLET_2D;
+
+    BounceResult r = bounceTest("disk", "box", params);
 
     fprintf(stderr, "\nSize: %g\n", params.size);
     fprintf(stderr, "Final position: %g  (std=%g)\n\n",
