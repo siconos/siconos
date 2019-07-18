@@ -121,7 +121,7 @@ static double _getStepLength(const double * x, const double * dx, const unsigned
 
 static double * _getPrimalConstraint(const double * velocity, const NumericsMatrix * H, const double * globalVelocity, const double * w)
 {
-    double *Hv = (double*)malloc(H->size0 * sizeof(double));
+    double *Hv = (double*)calloc(H->size0, sizeof(double));
     NM_gemv(1.0, H, globalVelocity, 0.0, Hv);
     double * u_Hv = NV_sub(velocity, Hv, H->size0);
     double * u_Hv_w = NV_sub(u_Hv, w, H->size0);
@@ -132,34 +132,53 @@ static double * _getPrimalConstraint(const double * velocity, const NumericsMatr
 
 static double * _getDualConstraint(const NumericsMatrix * M, const double * globalVelocity, const NumericsMatrix * H, const double * reaction, const double * f)
 {
-    double *Mv = (double*)malloc(H->size1 * sizeof(double));
-    double *HTr = (double*)malloc(H->size1 * sizeof(double));
+//    printf("INSIDE getDualconstraint\n");
+    double *Mv = (double*)calloc(H->size1, sizeof(double));
+    double *HTr = (double*)calloc(H->size1, sizeof(double));
     NM_gemv(1.0, M, globalVelocity, 0.0, Mv);
     double * Mv_f = NV_add(Mv, f, H->size1);
-    NM_gemv(1.0, NM_transpose(H), reaction, 0.0, HTr);
+//    printf("DISPLAY Mv\n");
+//    NV_display(Mv, H->size1);
+    NumericsMatrix* HT = NM_transpose(H);
+//    printf("DISPLAY HT\n");
+//    NM_display(HT);
+//    printf("DISPLAY rection");
+//    NV_display(reaction, H->size0);
+    NM_gemv(1.0, HT, reaction, 0.0, HTr);
+//    printf("DISPLAY HTr\n");
+//    NV_display(HTr, H->size1);
+
     double * Mv_f_HTr = NV_sub(Mv_f, HTr, H->size1);
+    NM_free(HT);
     free(Mv);
     free(HTr);
     free(Mv_f);
+//    printf("END getDualconstraint\n");
     return Mv_f_HTr;
 }
 
 static double _getPrimalInfeasibility(const double * velocity, const NumericsMatrix * H, const double * globalVelocity, const double * w)
 {
     double * u_Hv_w = _getPrimalConstraint(velocity, H, globalVelocity, w);
-    return NV_norm_inf(u_Hv_w, H->size0) / (1 + NV_norm_2(w, H->size0));
+    double norm_inf = NV_norm_inf(u_Hv_w, H->size0);
+    free(u_Hv_w);
+    return norm_inf / (1 + NV_norm_2(w, H->size0));
 }
 
 static double _getDualInfeasibility(const NumericsMatrix * M, const double * globalVelocity, const NumericsMatrix * H, const double * reaction, const double * f)
 {
     double * Mv_f_HTr = _getDualConstraint(M, globalVelocity, H, reaction, f);
-    double norm_f = NV_norm_2(f, H->size1);
-    return NV_norm_inf(Mv_f_HTr, H->size1) / (1 + norm_f);
+    double norm_inf = NV_norm_inf(Mv_f_HTr, H->size1);
+    free(Mv_f_HTr);
+    return norm_inf / (1 + NV_norm_2(f, H->size1));
 }
 
 static double _getComplementarInfeasibility(const double * const velocity, const double * const reaction, const unsigned int vecSize, const unsigned int varsCount)
 {
-    return NV_norm_2(JA_prod(velocity, reaction, vecSize, varsCount), vecSize) / (double)varsCount;
+    double * vr_jprod = JA_prod(velocity, reaction, vecSize, varsCount);
+    double norm2 = NV_norm_2(vr_jprod, vecSize);
+    free(vr_jprod);
+    return norm2 / (double)varsCount;
 }
 
 void _setError(double * error, const double pinfeas, const double dinfeas, const double complem, const double barr_param)
@@ -182,6 +201,7 @@ static int saveMatrix(NumericsMatrix* m, const char * filename)
         for (int j = 0; j < m->size1; ++j)
             fwrite(&(md->matrix0[i+j*md->size0]), sizeof(double), 1, f);
     fclose(f);
+    NM_free(md);
     return 0;
 }
 
@@ -419,8 +439,12 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     double norm_w = cblas_dnrm2(nd , w , 1);
 
     double * rhs = (double*)malloc((m + nd + nd) * sizeof(double));
+    double *vr_jprod, *dvdr_jprod, *vr_prod_sub_iden, *v_plus_dv, *r_plus_dr, *gv_plus_dgv;
     NumericsMatrix *J;
     long H_nzmax, J_nzmax;
+    H_nzmax = NM_triplet(H)->nzmax;
+    free(H->matrix2->triplet);
+    H->matrix2->triplet = NULL;
 
     if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] ==
         SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_YES)
@@ -470,8 +494,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
          */
 
         J = NM_create(NM_SPARSE, m + nd + nd, m + nd + nd);
-        //CSparseMatrix* triplet = NM_triplet(H);
-        H_nzmax = NM_triplet(H)->nzmax;
         J_nzmax = (d * d) * (m / d) + H_nzmax + 2 * (d * 3 - 2) * n + H_nzmax + nd;
         NM_triplet_alloc(J, J_nzmax);
         J->matrix2->origin = NSM_TRIPLET;
@@ -487,9 +509,26 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         /* 2. ---- Predictor step of Mehrotra ---- */
 
         /*  2.1 Build predictor right-hand side */
+
+//        printf("DISPLAY globalVelocity\n");
+//        NV_display(globalVelocity, m);
+//        printf("DISPLAY reaction\n");
+//        NV_display(reaction, nd);
+//        printf("DISPLAY M\n");
+//        NM_display(M);
+
+//        printf("DISPLAY H\n");
+//        NM_display(H);
+
         primalConstraint = _getPrimalConstraint(velocity, H, globalVelocity, w);
         dualConstraint = _getDualConstraint(M, globalVelocity, H, reaction, f);
         complemConstraint = JA_prod(velocity, reaction, nd, n);
+//        printf("DISPLAY complemConstraint\n");
+//        NV_display(complemConstraint, nd);
+//        printf("DISPLAY dualConstraint\n");
+//        NV_display(dualConstraint, m);
+//        printf("DISPLAY primalConstraint\n");
+//        NV_display(primalConstraint, nd);
 
         NV_insert(rhs, m + nd + nd, dualConstraint, m, 0);
         NV_insert(rhs, m + nd + nd, complemConstraint, nd, m);
@@ -497,11 +536,16 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         cblas_dscal(m + nd + nd, -1.0, rhs, 1);
 
         /* Newton system solving */
-        NM_gesv_expert(J,rhs,NM_KEEP_FACTORS);
+//        printf("BEFORE solving\n");
+//        NV_display(rhs, m + nd + nd);
+        NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
+//        printf("AFTER solving\n");
+//        NV_display(rhs, m + nd + nd);
 
         d_globalVelocity = rhs;
         d_velocity = rhs + m;
         d_reaction = rhs + m + nd;
+
 
         cblas_dcopy(nd, d_velocity, 1, data->velocity_k, 1);
         cblas_dcopy(nd, d_reaction, 1, data->reaction_k, 1);
@@ -513,7 +557,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         /* ----- Corrector step of Mehrotra ----- */
         cblas_dscal(nd, alpha_primal, data->velocity_k, 1);
         cblas_dscal(nd, alpha_dual, data->reaction_k, 1);
-        barr_param_a = cblas_ddot(nd, NV_add(velocity, data->velocity_k, nd), 1, NV_add(reaction, data->reaction_k, nd), 1) / nd;
+
+        v_plus_dv = NV_add(velocity, data->velocity_k, nd);
+        r_plus_dr = NV_add(reaction, data->reaction_k, nd);
+
+        barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / nd;
+        free(v_plus_dv);
+        free(r_plus_dr);
 
         e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * fmin(alpha_primal, alpha_dual)) : sgmp3;
         sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
@@ -522,14 +572,26 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         cblas_dscal(nd, 2 * barr_param * sigma, iden, 1);
 
         free(complemConstraint);
-        complemConstraint = NV_add(NV_sub(JA_prod(velocity, reaction, nd, n), iden, nd), JA_prod(d_velocity, d_reaction, nd, n), nd);
+
+        vr_jprod = JA_prod(velocity, reaction, nd, n);
+        dvdr_jprod = JA_prod(d_velocity, d_reaction, nd, n);
+        vr_prod_sub_iden = NV_sub(vr_jprod, iden, nd);
+
+        free(iden);
+
+        complemConstraint = NV_add(vr_prod_sub_iden, dvdr_jprod, nd);
+
+        free(vr_jprod);
+        free(dvdr_jprod);
+        free(vr_prod_sub_iden);
+
         NV_insert(rhs, m + nd + nd, dualConstraint, m, 0);
         NV_insert(rhs, m + nd + nd, complemConstraint, nd, m);
         NV_insert(rhs, m + nd + nd, primalConstraint, nd, m + nd);
         cblas_dscal(m + nd + nd, -1.0, rhs, 1);
 
         /* Newton system solving */
-        NM_gesv_expert(J,rhs,NM_KEEP_FACTORS);
+        NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
 
         NM_free(J);
         free(primalConstraint);
@@ -547,27 +609,35 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         /* ----- Update variables ----- */
         cblas_dscal(nd, alpha_primal, d_velocity, 1);
         cblas_dscal(nd, alpha_dual, d_reaction, 1);
-        cblas_dscal(nd, alpha_primal, d_globalVelocity, 1);
+        cblas_dscal(m, alpha_primal, d_globalVelocity, 1);
 
-        cblas_dcopy(nd, NV_add(velocity, d_velocity, nd), 1, velocity, 1);
-        cblas_dcopy(nd, NV_add(reaction, d_reaction, nd), 1, reaction, 1);
-        cblas_dcopy(m, NV_add(globalVelocity, d_globalVelocity, m), 1, globalVelocity, 1);
+        v_plus_dv = NV_add(velocity, d_velocity, nd);
+        r_plus_dr = NV_add(reaction, d_reaction, nd);
+        gv_plus_dgv = NV_add(globalVelocity, d_globalVelocity, m);
+
+        cblas_dcopy(nd, v_plus_dv, 1, velocity, 1);
+        cblas_dcopy(nd, r_plus_dr, 1, reaction, 1);
+        cblas_dcopy(m, gv_plus_dgv, 1, globalVelocity, 1);
+
+        free(v_plus_dv);
+        free(r_plus_dr);
+        free(gv_plus_dgv);
 
         barr_param = cblas_ddot(nd, reaction, 1, velocity, 1) / nd;
 
         iteration++;
+        //NV_display(globalVelocity, m);
 
     }
 
     free(rhs);
-
-
     if (internal_allocation)
     {
       gfc3d_IPM_free(problem,options);
     }
     NM_free(H_tilde);
     NM_free(minus_H);
+    NM_free(H);
     free(w);
     *info = hasNotConverged;
 }
