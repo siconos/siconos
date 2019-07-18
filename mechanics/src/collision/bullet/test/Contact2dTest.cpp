@@ -42,7 +42,7 @@ struct BounceParams
   double outsideMargin;
   SiconosBulletOptions options;
 
-  void dump() {
+  void dump() const {
     printf("  trace:              %s\n", trace?"on":"off");
     printf("  dynamic:            %s\n", trace?"on":"off");
     printf("  size:               %.3g\n", size);
@@ -74,6 +74,8 @@ BounceResult bounceTest(std::string moving,
                         std::string ground,
                         const BounceParams &params)
 {
+
+  params.dump();
     // User-defined main parameters
     double t0 = 0;                   // initial computation time
     double T = 20.0;                 // end of computation time
@@ -131,7 +133,7 @@ BounceResult bounceTest(std::string moving,
     fflush(stdout);
 
     // Set up a Siconos Mechanics environment:
-    // A RigidBodyDS with a contactor consisting of a single sphere.
+    // A RigidBody2dDS with a contactor consisting of a single disk.
 
     SP::SiconosMatrix mass(new SimpleMatrix(3,3));
     mass->setValue(0,0,params.mass);
@@ -175,12 +177,14 @@ BounceResult bounceTest(std::string moving,
     
     if (ground=="disk")
     {
-      SP::SiconosDisk floordisk(new SiconosDisk(1.0));
+      SP::SiconosDisk floordisk(new SiconosDisk(params.size));
       floordisk->setInsideMargin(params.insideMargin);
       floordisk->setOutsideMargin(params.outsideMargin);
       SP::SiconosVector pos(new SiconosVector(7));
-      (*pos)(2) = -1-params.size/2;
-      (*pos)(3) = 1.0;
+      pos->zero();
+      (*pos)(1) =  -2.0;//-params.size/2;
+      
+      (*pos)(3) = 1.0; //unit quaternion
       static_contactors->push_back(std11::make_shared<SiconosContactor>(floordisk, pos));
     }
     else if (ground=="plane")
@@ -196,7 +200,7 @@ BounceResult bounceTest(std::string moving,
       floorbox->setInsideMargin(params.insideMargin);
       floorbox->setOutsideMargin(params.outsideMargin);
       SP::SiconosVector pos(new SiconosVector(7));
-      (*pos)(2) = -50-params.size/2;
+      (*pos)(1) = -50-params.size/2;
       (*pos)(3) = 1.0;
       static_contactors->push_back(std11::make_shared<SiconosContactor>(floorbox, pos));
     }
@@ -206,7 +210,7 @@ BounceResult bounceTest(std::string moving,
       floorsphere->setInsideMargin(params.insideMargin);
       floorsphere->setOutsideMargin(params.outsideMargin);
       SP::SiconosVector pos(new SiconosVector(7));
-      (*pos)(2) = -1-params.size/2;
+      (*pos)(1) = -1.0 -params.size/2;
       (*pos)(3) = 1.0;
       static_contactors->push_back(std11::make_shared<SiconosContactor>(floorsphere, pos));
     }
@@ -227,7 +231,7 @@ BounceResult bounceTest(std::string moving,
     SP::TimeDiscretisation timedisc(new TimeDiscretisation(t0, h));
 
     // -- OneStepNsProblem --
-    SP::FrictionContact osnspb(new FrictionContact(3));
+    SP::FrictionContact osnspb(new FrictionContact(2));
 
     // -- Some configuration
     osnspb->numericsSolverOptions()->iparam[0] = 1000;
@@ -273,7 +277,7 @@ BounceResult bounceTest(std::string moving,
     int k=0;
     double std=0, final_pos=0;
     double last_pos=position_init, last_vel=0;
-    while (simulation->hasNextEvent() and k <= 85)
+    while (simulation->hasNextEvent() and k <= 1000)
     {
       // // Update a property at step 500
       // if (params.dynamic && k==500 && moving=="disk") {
@@ -282,10 +286,13 @@ BounceResult bounceTest(std::string moving,
 
       // Update integrator and solve constraints
       simulation->computeOneStep();
-
+      // osnspb->setNumericsVerboseMode(true);
+      // osnspb->setNumericsVerboseLevel(1);
+      // if (nsds->getNumberOfInteractions()>0)
+      //   osnspb->display();
       double vel = (*body->velocity())(1);
       double pos = (*body->q())(1);
-
+      
       if (params.trace && (k+1) < steps) {
         printf("k, %i, pos, %f, %f, %f\n", k,  pos, last_pos - pos, vel);
       }
@@ -357,6 +364,7 @@ BounceResult bounceTest(std::string moving,
     return r;
 }
 
+
 void Contact2dTest::t1()
 {
   try
@@ -368,10 +376,11 @@ void Contact2dTest::t1()
     params.dynamic = false;
     params.size = 1.0;
     params.mass = 1.0;
-    params.position = 3.0;
+    params.position = 1.0;
     params.timestep = 0.005;
-    params.insideMargin = 0.3;
-    params.outsideMargin = 0.3;
+    params.insideMargin = 0.0;
+    params.outsideMargin = 0.0;
+    params.options.dimension = SICONOS_BULLET_2D;
 
     BounceResult r = bounceTest("disk", "disk", params);
 
