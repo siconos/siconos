@@ -40,8 +40,8 @@
 #include "BlockVector.hpp"
 
 //#define DEBUG_NOCOLOR
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 //#define DEBUG_BEGIN_END_ONLY
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
@@ -59,8 +59,8 @@ template <typename T> static std11::shared_ptr<T> ptr(const T& a) {
 // --- constructor from a set of data ---
 MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   OneStepIntegrator(OSI::MOREAUJEANOSI),
-  _useGammaForRelation(false),
   _constraintActivationThreshold(0.0),
+  _useGammaForRelation(false),
   _explicitNewtonEulerDSOperators(false)
 {
   _levelMinForOutput= 0;
@@ -1844,7 +1844,7 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   {
     gamma = _gamma;
   }
-  DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n", i,  y, yDot, y + gamma * h * yDot, _contraintActivationThreshold);
+  DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n", i,  y, yDot, y + gamma * h * yDot, _constraintActivationThreshold);
   y += gamma * h * yDot;
   assert(!isnan(y));
   DEBUG_EXPR(
