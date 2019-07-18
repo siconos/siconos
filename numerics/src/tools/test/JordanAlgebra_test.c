@@ -116,7 +116,8 @@ static int JA_prod_test()
     double x[] = {0.75, 0.35, 0.1, 0.78, 1.25, 0.78};
     double y[] = {0.27, 4.35, 1.02, 0.35, 0.78, 0.236};
 
-    double * res = JA_prod(&x, &y, n, 1);
+    double * res = (double*)calloc(n, sizeof(double));
+    JA_prod(&x, &y, n, 1, res);
     test_failed += (fabs(res[0] - 3.25908) > EPS);
     test_failed += (fabs(res[1] - 3.357) > EPS);
     test_failed += (fabs(res[2] - 0.792) > EPS);
@@ -128,9 +129,8 @@ static int JA_prod_test()
         info += 1;
 
     test_failed = 0;
-    free(res);
 
-    res = JA_prod(&x, &y, n, 2);
+    JA_prod(&x, &y, n, 2, res);
     test_failed += (fabs(res[0] - 1.827) > EPS);
     test_failed += (fabs(res[1] - 3.357) > EPS);
     test_failed += (fabs(res[2] - 0.792) > EPS);
@@ -142,6 +142,7 @@ static int JA_prod_test()
         info += 1;
 
     printf("== End of test JA_prod_test(result = %d)\n", info);
+    free(res);
     return info;
 }
 

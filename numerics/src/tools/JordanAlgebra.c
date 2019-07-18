@@ -75,20 +75,18 @@ double * JA_iden(const unsigned int vecSize, const size_t varsCount)
 
 
 /* Jordan product of two vectors */
-double* JA_prod(const double * const x, const double * const y, const unsigned int vecSize, const int varsCount)
+void JA_prod(const double * const vec1, const double * const vec2, const unsigned int vecSize, const int varsCount, double * out)
 {
-    assert(x);
-    assert(y);
-    double * out = (double *)calloc(vecSize, sizeof(double));
-    unsigned int dimension = (int)(vecSize / varsCount);
+    assert(vec1);
+    assert(vec2);
 
+    unsigned int dimension = (int)(vecSize / varsCount);
     unsigned int pos;
     for(size_t i = 0; i < varsCount; ++i)
     {
         pos = i * dimension;
-        out[pos] = cblas_ddot(dimension, x + pos, 1, y + pos, 1);
+        out[pos] = cblas_ddot(dimension, vec1 + pos, 1, vec2 + pos, 1);
         for(size_t j = 1; j < dimension; ++j)
-            out[pos + j] = x[pos] * y[pos + j] + y[pos] * x[pos + j];
+            out[pos + j] = vec1[pos] * vec2[pos + j] + vec2[pos] * vec1[pos + j];
     }
-    return out;
 }

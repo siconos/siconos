@@ -191,6 +191,7 @@ double NV_norm_2(const double * const vec, const unsigned int vecSize)
     double * vec2 = (double*)calloc(vecSize, sizeof(double));
     NV_power2(vec, vecSize, vec2);
     double sum = NV_reduce(vec2, vecSize);
+    double sum2 = NV_reduce(vec, vecSize);
     free(vec2);
     return sqrt(sum);
 }
