@@ -865,8 +865,8 @@ class MechanicsHdf5(object):
                    orientation=[1, 0, 0, 0],
                    velocity=[0, 0, 0, 0, 0, 0],
                    use_volume_centroid_as_initial_translation=False,
-                   mass=None, center_of_mass=[0, 0, 0],
-                   inertia=None, time_of_birth=-1, time_of_death=-1,
+                   mass=None, center_of_mass=[0, 0, 0], inertia=None,
+                   time_of_birth=-1, time_of_death=-1,
                    allow_self_collide=False):
         """Add an object with associated shapes as a list of Volume or
         Contactor objects. Contact detection and processing is
@@ -895,9 +895,9 @@ class MechanicsHdf5(object):
             z axis.  The default velocity is [0, 0, 0, 0, 0, 0].
 
         mass: float
-            The mass of the object, if it is zero the object is defined as
+            The mass of the object, if it is None the object is defined as
             a static object involved only in contact detection.
-            The default value is zero.
+            The default value is None.
 
         center_of_mass: array_like of length 3
             The position of the center of mass expressed in the body frame
@@ -965,7 +965,14 @@ class MechanicsHdf5(object):
             if time_of_death >= 0:
                 obj.attrs['time_of_death']=time_of_death
 
-            if mass is not None: obj.attrs['mass']=mass
+            if mass is not None:
+                obj.attrs['mass'] = mass
+                obj.attrs['type']='dynamic'
+                if mass <= 0. :
+                    print_verbose("The use of a mass equal to zero to define a static object is deprecated.")
+                    print_verbose("Do not give the mass or set mass=None to define a static object")
+            else:
+                obj.attrs['type']='static'
             obj.attrs['translation']=translation
             obj.attrs['orientation']=ori
             obj.attrs['velocity']=velocity
