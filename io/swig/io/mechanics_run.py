@@ -41,9 +41,6 @@ from siconos.mechanics.collision import RigidBodyDS, \
     SiconosConvexHull, SiconosContactor, SiconosContactorSet, \
     SiconosMesh, SiconosHeightMap
 
-
-
-
 # It is necessary to select a back-end, although currently only Bullet
 # is supported for general objects.
 backend = 'bullet'
@@ -821,7 +818,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         velocity, contactors, mass, given_inertia, body_class,
                         shape_class, face_class, edge_class, birth=False, number=None):
 
-        if mass is None or mass <= 0.:
+        if mass is None :
             # a static object
             body = None
 
@@ -924,9 +921,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if self._interman is not None and 'input' in self._data:
             body = None
-            if mass is None or mass == 0:
+            if mass is None :
                 # a static object
-
                 cset = SiconosContactorSet()
                 csetpos = (translation + orientation)
                 for c in contactors:
@@ -1324,7 +1320,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # bodyframe center of mass
         center_of_mass = floatv(obj.attrs.get('center_of_mass', [0,0,0]))
 
-        mass = obj.attrs.get('mass', 0)
+        mass = obj.attrs.get('mass', None)
         inertia = obj.attrs.get('inertia', None)
 
         input_ctrs = [ctr for _n_, ctr in obj.items()]
@@ -1372,7 +1368,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # Occ object
             body = self.import_occ_object(
                 name, floatv(translation), floatv(orientation),
-                floatv(velocity), contactors, float(mass),
+                floatv(velocity), contactors, mass,
                 inertia, body_class, shape_class, face_class,
                 edge_class, birth=birth,
                 number = self.instances()[name].attrs['id'])
@@ -1380,7 +1376,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # Bullet object
             body = self.import_bullet_object(
                 name, floatv(translation), floatv(orientation),
-                floatv(velocity), contactors, float(mass),
+                floatv(velocity), contactors, mass,
                 inertia, body_class, shape_class, birth=birth,
                 number = self.instances()[name].attrs['id'])
 
@@ -1464,7 +1460,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     # this is for now
                     #
                     # cold restart if output previously done
-                    if (mass is not None and mass > 0
+                    if (mass is not None
                         and dpos_data is not None and len(dpos_data) > 0):
 
                         self.print_verbose('Import  dynamic object name ',
