@@ -1,4 +1,3 @@
-
 #include "MechanicsFwd.hpp"
 #include "NewtonEulerDS.hpp"
 #include "RigidBodyDS.hpp"
