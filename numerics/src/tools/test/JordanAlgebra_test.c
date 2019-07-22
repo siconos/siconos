@@ -22,6 +22,7 @@
  */
 
 #include "JordanAlgebra.h"
+#include "NumericsVector.h"
 #include "math.h"
 
 static int Arrow_repr_3d_test()
@@ -147,11 +148,50 @@ static int JA_prod_test()
 }
 
 
+static int JA_eigenvals_test()
+{
+    const double EPS = 1e-8;
+    int info = 0;
+    int test_failed = 0;
+    double out1[4];
+    double vec[] = {1.256, 0.356, 0.874, 3.654, 0.154, 1.035};
+    JA_eigenvals(&vec, 6, 2, &out1);
+
+    test_failed += (fabs(out1[0] - 2.19972242) > EPS);
+    test_failed += (fabs(out1[1] - 0.31227758) > EPS);
+    test_failed += (fabs(out1[2] - 4.70039429) > EPS);
+    test_failed += (fabs(out1[3] - 2.60760571) > EPS);
+
+    if (test_failed > 0)
+        info += 1;
+
+    double out2[6];
+    JA_eigenvals(&vec, 6, 3, &out2);
+
+    test_failed += (fabs(out2[0] - 1.612) > EPS);
+    test_failed += (fabs(out2[1] - 0.9) > EPS);
+    test_failed += (fabs(out2[2] - 4.528) > EPS);
+    test_failed += (fabs(out2[3] - (-2.78)) > EPS);
+    test_failed += (fabs(out2[4] - 1.189) > EPS);
+    test_failed += (fabs(out2[5] - (-0.881)) > EPS);
+
+
+    if (test_failed > 0)
+        info += 1;
+
+    printf("== End of test JA_eigenvals_test(result = %d)\n", info);
+    return info;
+}
+
+
+
 int main(void)
 {
     int info = 0;
     info += Arrow_repr_2d_test();
     info += Arrow_repr_3d_test();
     info += JA_prod_test();
+    info += JA_eigenvals_test();
+
     return info;
 }

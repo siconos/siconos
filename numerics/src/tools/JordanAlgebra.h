@@ -52,4 +52,22 @@ void JA_prod(const double * const vec1, const double * const vec2,
              const unsigned int vecSize, const int varsCount, double * out);
 
 
+/** Returns the eigenvalues of each element in the vector.
+ * \param vec is the pointer to the vector data.
+ * \param vecSize is the length of the vector.
+ * \param varsCount is the count of variables (subvectors) in vec.
+ * \param out is the result vector of eigenvalues (out\in\mathbb{R}^{2*varsCount})..
+ */
+void JA_eigenvals(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out);
+
+
+/** Returns the eigenvectors of each element in the vector.
+ * \param vec is the pointer to the vector data.
+ * \param vecSize is the length of the vector.
+ * \param varsCount is the count of variables (subvectors) in vec.
+ * \param out is the result matrix of eigenvactors (out\in\mathbb{R}^{vecSize\times 2*varsCount}).
+ */
+void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const size_t varsCount, double ** out);
+
+
 #endif

@@ -18,6 +18,7 @@
 
 #include "JordanAlgebra.h"
 #include "cblas.h"
+#include "NumericsVector.h"
 
 
 RawNumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
@@ -88,5 +89,24 @@ void JA_prod(const double * const vec1, const double * const vec2, const unsigne
         out[pos] = cblas_ddot(dimension, vec1 + pos, 1, vec2 + pos, 1);
         for(size_t j = 1; j < dimension; ++j)
             out[pos + j] = vec1[pos] * vec2[pos + j] + vec2[pos] * vec1[pos + j];
+    }
+}
+
+
+/* Returns the eigenvalues of each element in the vector. */
+void JA_eigenvals(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out)
+{
+    unsigned int dimension = (int)(vecSize / varsCount);
+    unsigned register int pos;
+    for(size_t i = 0; i < 2*varsCount; i += 2)
+    {
+        pos = (i / 2.) * dimension;
+        out[i] = vec[pos] + NV_norm_2(vec + pos + 1, dimension - 1);
+    }
+
+    for(size_t i = 1; i < 2*varsCount; i += 2)
+    {
+        pos = ((i - 1) / 2.) * dimension;
+        out[i] = vec[pos] - NV_norm_2(vec + pos + 1, dimension - 1);
     }
 }
