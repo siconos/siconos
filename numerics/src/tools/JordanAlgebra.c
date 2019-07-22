@@ -18,6 +18,7 @@
 
 #include "JordanAlgebra.h"
 #include "cblas.h"
+#include "math.h"
 #include "NumericsVector.h"
 
 
@@ -133,4 +134,43 @@ void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const si
         out[i][0] = 0.5;
         NV_const_add(vec + pos + 1, dimension - 1, - 1. / (2 * xi_bar_norm + EPS), 0, out[i] + 1);
     }
+}
+
+void JA_sqrt(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out)
+{
+    unsigned int pos;
+    unsigned int dimension = (int)(vecSize / varsCount);
+    double * eigenvals = (double*)malloc(2 * varsCount * sizeof(double));
+    double ** eigenvecs = (double**)malloc(2 * varsCount * sizeof(double*));
+    for (int i = 0; i < 2 * varsCount; ++i)
+        eigenvecs[i] = (double*)calloc(dimension, sizeof(double));
+
+    double *tmp_vec1 = (double*)malloc(dimension * sizeof(double));
+    double *tmp_vec2 = (double*)malloc(dimension * sizeof(double));
+    double sqrt_eigenval1, sqrt_eigenval2;
+
+    JA_eigenvals(vec, vecSize, varsCount, eigenvals);
+    JA_eigenvecs(vec, vecSize, varsCount, eigenvecs);
+
+    for (size_t i = 0; i < 2 * varsCount; i += 2)
+    {
+        sqrt_eigenval1 = sqrt(eigenvals[i]);
+        sqrt_eigenval2 = sqrt(eigenvals[i + 1]);
+        pos = (i / 2) * dimension;
+        NV_const_add(eigenvecs[i], dimension, sqrt_eigenval1, 0, tmp_vec1);
+        NV_const_add(eigenvecs[i + 1], dimension, sqrt_eigenval2, 0, tmp_vec2);
+        NV_add(tmp_vec1, tmp_vec2, dimension, out + pos);
+    }
+
+    free(eigenvals);
+    for (int i = 0; i < 2 * varsCount; ++i)
+        free(eigenvecs[i]);
+    free(eigenvecs);
+    free(tmp_vec1);
+    free(tmp_vec2);
+}
+
+void JA_det(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out)
+{
+
 }

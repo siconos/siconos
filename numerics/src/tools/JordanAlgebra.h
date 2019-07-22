@@ -70,4 +70,22 @@ void JA_eigenvals(const double * const vec, const unsigned int vecSize, const si
 void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const size_t varsCount, double ** out);
 
 
+/** Compute element by element square root
+ * \param vec is the vector
+ * \param vecSize is the size of the vector vec
+ * \param varsCount is the count of variables (subvectors) in vec.
+ * \param out is the sqrt vector
+ */
+void JA_sqrt(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out);
+
+
+/** Compute element by element square root
+ * \param vec is the vector
+ * \param vecSize is the size of the vector vec
+ * \param varsCount is the count of variables (subvectors) in vec.
+ * \param out is the vector of determinants
+ */
+void JA_det(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out);
+
+
 #endif
