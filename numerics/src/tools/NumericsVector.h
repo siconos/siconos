@@ -137,8 +137,8 @@ extern "C"
   void NV_const_add(const double * const vec, const unsigned int vecSize, const double alpha, const double beta, double * out);
 
   /** Compute element by element by element subtraction
-      \param x is the vector
-      \param y is the vector
+      \param vec1 is the vector
+      \param vec2 is the vector
       \param vecSize the size of the vector vec
       \return subtract vector
    */
@@ -158,6 +158,13 @@ extern "C"
       \return a minimum value of vertor
    */
   double NV_norm_2(const double * const vec, const unsigned int vecSize);
+
+  /** Compute element by element square root
+      \param vec is the vector
+      \param vecSize is the size of the vector vec
+      \param out is the sqrt vector
+   */
+  void NV_sqrt(const double * const vec, const unsigned int vecSize, double * out);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
