@@ -172,5 +172,11 @@ void JA_sqrt(const double * const vec, const unsigned int vecSize, const size_t 
 
 void JA_det(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out)
 {
-
+    unsigned int dimension = (int)(vecSize / varsCount);
+    unsigned int pos;
+    for(size_t i = 0; i < varsCount; ++i)
+    {
+        pos = i * dimension;
+        out[i] = vec[pos] * vec[pos] - cblas_ddot(dimension - 1, vec + pos + 1, 1, vec + pos + 1, 1);
+    }
 }
