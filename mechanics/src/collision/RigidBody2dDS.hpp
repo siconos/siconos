@@ -39,6 +39,9 @@ protected:
 
   RigidBody2dDS() : LagrangianDS() {};
 
+  /** a scalar mass in the case of RigidBody2dDS */
+  double _scalarMass;
+
   SP::SiconosContactorSet _contactors;
   bool _useContactorInertia;
 
@@ -52,7 +55,18 @@ public:
                 SP::SiconosVector velocity,
                 SP::SiconosMatrix mass = SP::SimpleMatrix());
 
+  RigidBody2dDS(SP::SiconosVector position,
+		SP::SiconosVector velocity,
+		double mass,
+		double inertia);
+
   virtual ~RigidBody2dDS();
+
+  double scalarMass()
+  {
+    return _scalarMass;
+  };
+
 
   void setUseContactorInertia(bool use) { _useContactorInertia = use; }
 
