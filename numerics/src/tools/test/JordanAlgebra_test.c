@@ -249,6 +249,29 @@ static int JA_eigenvecs_test()
 }
 
 
+static int JA_sqrt_test()
+{
+    const double EPS = 1e-8;
+    int test_failed = 0;
+    int info = 0;
+    double vec[] = {1.256, 0.356, 0.874, 3.654, 0.154, 1.035};
+    double * out = (double*)malloc(6 * sizeof(double));
+    JA_sqrt(&vec, 6, 2, out);
+
+    test_failed += (fabs(out[0] - 1.02098207) > EPS);
+    test_failed += (fabs(out[1] - 0.17434194) > EPS);
+    test_failed += (fabs(out[2] - 0.42801927) > EPS);
+    test_failed += (fabs(out[3] - 1.89142377) > EPS);
+    test_failed += (fabs(out[4] - 0.04071007) > EPS);
+    test_failed += (fabs(out[5] - 0.27360341) > EPS);
+
+    if (test_failed > 0)
+        info += 1;
+
+    printf("== End of test JA_sqrt_test(result = %d)\n", info);
+    return info;
+}
+
 
 int main(void)
 {
@@ -258,6 +281,7 @@ int main(void)
     info += JA_prod_test();
     info += JA_eigenvals_test();
     info += JA_eigenvecs_test();
+    info += JA_sqrt_test();
 
     return info;
 }
