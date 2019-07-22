@@ -50,12 +50,10 @@ void NV_display(double * m, int nRow)
 
 }
 
-double * NV_copy(double * vec, unsigned int vecSize)
+void NV_copy(const double * const vec, unsigned int vecSize, double * out)
 {
-    double * out = (double*)malloc(vecSize * sizeof(double));
     for (unsigned int i = 0; i < vecSize; ++i)
         out[i] = vec[i];
-    return out;
 }
 
 void NV_write_in_file_python(double * m,  int nRow, FILE* file)
@@ -166,12 +164,10 @@ void NV_add(const double * const vec1, const double * const vec2, const unsigned
         out[i] = vec1[i] + vec2[i];
 }
 
-double * NV_const_add(const double * const vec, const unsigned int vecSize, const double alpha, const double beta)
+void NV_const_add(const double * const vec, const unsigned int vecSize, const double alpha, const double beta, double * out)
 {
-    double * out = (double*)malloc(vecSize * sizeof(double));
     for (unsigned int i = 0; i < vecSize; ++i)
         out[i] = alpha * vec[i] + beta;
-    return out;
 }
 
 void NV_sub(const double * const vec1, const double * const vec2, const unsigned int vecSize, double * out)

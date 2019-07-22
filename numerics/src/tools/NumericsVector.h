@@ -42,7 +42,7 @@ extern "C"
    */
   void NV_display(double * m, int n);
 
-  double * NV_copy(double * vec, unsigned int vecSize);
+  void NV_copy(const double * const vec, unsigned int vecSize, double * out);
 
   void NV_write_in_file_python(double * m,  int nRow, FILE* file);
 
@@ -131,10 +131,10 @@ extern "C"
       \param vecSize the size of the vector vec
       \param alpha is a scalar
       \param beta is a scalar
-      \return y = alpha * x + beta
+      \param out is y = alpha * x + beta
    */
 
-  double * NV_const_add(const double * const vec, const unsigned int vecSize, const double alpha, const double beta);
+  void NV_const_add(const double * const vec, const unsigned int vecSize, const double alpha, const double beta, double * out);
 
   /** Compute element by element by element subtraction
       \param x is the vector
