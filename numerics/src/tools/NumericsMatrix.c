@@ -2271,6 +2271,11 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 
   NumericsMatrix * C = NM_new();
 
+  /* should we copy the whole internal data ? */
+  /*NM_internalData_copy(A, C);*/
+  NM_MPI_copy(A, C);
+  NM_MUMPS_copy(A, C);
+
   /* At the time of writing, we are able to transform anything into NM_SPARSE,
    * hence we use this format whenever possible */
   if (A->storageType == NM_SPARSE || B->storageType == NM_SPARSE || C->storageType == NM_SPARSE)
@@ -2367,6 +2372,7 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
              const double beta, NumericsMatrix* C)
 {
   size_t storageType;
+
   /* At the time of writing, we are able to transform anything into NM_SPARSE,
    * hence we use this format whenever possible */
   if (A->storageType == NM_SPARSE || B->storageType == NM_SPARSE || C->storageType == NM_SPARSE)
@@ -2468,6 +2474,10 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
     assert(0 && "NM_gemm unknown storageType");
   }
   }
+
+  NM_MPI_copy(A, C);
+  NM_MUMPS_copy(A, C);
+
 }
 
 NumericsMatrixInternalData* NM_internalData(NumericsMatrix* A)
