@@ -110,3 +110,27 @@ void JA_eigenvals(const double * const vec, const unsigned int vecSize, const si
         out[i] = vec[pos] - NV_norm_2(vec + pos + 1, dimension - 1);
     }
 }
+
+void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const size_t varsCount, double ** out)
+{
+    const double EPS = 1e-12;
+    unsigned int dimension = (int)(vecSize / varsCount);
+    unsigned register int pos;
+    double xi_bar_norm;
+
+    for(size_t i = 0; i < 2*varsCount; i += 2)
+    {
+        pos = (i / 2.) * dimension;
+        xi_bar_norm = NV_norm_2(vec + pos + 1, dimension - 1);
+        out[i][0] = 0.5;
+        NV_const_add(vec + pos + 1, dimension - 1, 1. / (2 * xi_bar_norm + EPS), 0, out[i] + 1);
+    }
+
+    for(size_t i = 1; i < 2*varsCount; i += 2)
+    {
+        pos = ((i - 1) / 2.) * dimension;
+        xi_bar_norm = NV_norm_2(vec + pos + 1, dimension - 1);
+        out[i][0] = 0.5;
+        NV_const_add(vec + pos + 1, dimension - 1, - 1. / (2 * xi_bar_norm + EPS), 0, out[i] + 1);
+    }
+}
