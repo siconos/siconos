@@ -184,6 +184,71 @@ static int JA_eigenvals_test()
 }
 
 
+static int JA_eigenvecs_test()
+{
+    const double EPS = 1e-8;
+    int info = 0;
+    int test_failed = 0;
+    double ** out1 = (double**)malloc(4 * sizeof(double*));
+    for (int i = 0; i < 4; ++i)
+        out1[i] = (double*)calloc(3, sizeof(double));
+
+    double vec[] = {1.256, 0.356, 0.874, 3.654, 0.154, 1.035};
+    JA_eigenvecs(&vec, 6, 2, out1);
+
+    test_failed += (fabs(out1[0][0] - 0.5) > EPS);
+    test_failed += (fabs(out1[0][1] - 0.18861478) > EPS);
+    test_failed += (fabs(out1[0][2] - 0.46305989) > EPS);
+    test_failed += (fabs(out1[1][0] - 0.5) > EPS);
+    test_failed += (fabs(out1[1][1] + 0.18861478) > EPS);
+    test_failed += (fabs(out1[1][2] + 0.46305989) > EPS);
+
+    test_failed += (fabs(out1[2][0] - 0.5) > EPS);
+    test_failed += (fabs(out1[2][1] - 0.07358603) > EPS);
+    test_failed += (fabs(out1[2][2] - 0.49455545) > EPS);
+    test_failed += (fabs(out1[3][0] - 0.5) > EPS);
+    test_failed += (fabs(out1[3][1] + 0.07358603) > EPS);
+    test_failed += (fabs(out1[3][2] + 0.49455545) > EPS);
+
+    if (test_failed > 0)
+        info += 1;
+
+    for (int i = 0; i < 4; ++i)
+        free(out1[i]);
+    free(out1);
+
+    out1 = (double**)malloc(6 * sizeof(double*));
+    for (int i = 0; i < 6; ++i)
+        out1[i] = (double*)calloc(2, sizeof(double));
+
+    JA_eigenvecs(&vec, 6, 3, out1);
+
+    test_failed += (fabs(out1[0][0] - 0.5) > EPS);
+    test_failed += (fabs(out1[0][1] - 0.5) > EPS);
+    test_failed += (fabs(out1[1][0] - 0.5) > EPS);
+    test_failed += (fabs(out1[1][1] + 0.5) > EPS);
+    test_failed += (fabs(out1[2][0] - 0.5) > EPS);
+    test_failed += (fabs(out1[2][1] - 0.5) > EPS);
+    test_failed += (fabs(out1[3][0] - 0.5) > EPS);
+    test_failed += (fabs(out1[3][1] + 0.5) > EPS);
+    test_failed += (fabs(out1[4][0] - 0.5) > EPS);
+    test_failed += (fabs(out1[4][1] - 0.5) > EPS);
+    test_failed += (fabs(out1[5][0] - 0.5) > EPS);
+    test_failed += (fabs(out1[5][1] + 0.5) > EPS);
+
+
+    if (test_failed > 0)
+        info += 1;
+
+    for (int i = 0; i < 6; ++i)
+        free(out1[i]);
+    free(out1);
+
+    printf("== End of test JA_eigenvecs_test(result = %d)\n", info);
+    return info;
+}
+
+
 
 int main(void)
 {
@@ -192,6 +257,7 @@ int main(void)
     info += Arrow_repr_3d_test();
     info += JA_prod_test();
     info += JA_eigenvals_test();
+    info += JA_eigenvecs_test();
 
     return info;
 }
