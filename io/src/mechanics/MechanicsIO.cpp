@@ -13,6 +13,7 @@
 #define XBULLET_CLASSES() \
   REGISTER(BulletR)\
   REGISTER(Bullet5DR)\
+  REGISTER(Bullet2dR)
 
 
 #ifdef SICONOS_HAS_BULLET
@@ -224,7 +225,7 @@ void contactPointProcess<Lagrangian2d2DR>(SiconosVector& answer,
   const SiconosVector& posa = *rel.pc1();
   const SiconosVector& posb = *rel.pc2();
   const SiconosVector& nc = *rel.nc();
-  DEBUG_PRINTF("posa(0)=%g\n", posa(0));  DEBUG_PRINTF("posa(1)=%g\n", posa(1));  DEBUG_PRINTF("posa(2)=%g\n", posa(2));
+  DEBUG_PRINTF("posa(0)=%g\n", posa(0));  DEBUG_PRINTF("posa(1)=%g\n", posa(1));
 
   double id = inter.number();
   double mu = ask<ForMu>(*inter.nonSmoothLaw());
@@ -233,35 +234,33 @@ void contactPointProcess<Lagrangian2d2DR>(SiconosVector& answer,
   prod(*inter.lambda(1), jachq, cf, true);
 
 
-  answer.resize(23);
+  answer.resize(16);
 
   answer.setValue(0, mu);
   answer.setValue(1, posa(0));
   answer.setValue(2, posa(1));
-  answer.setValue(3, posa(2));
-  answer.setValue(4, posb(0));
-  answer.setValue(5, posb(1));
-  answer.setValue(6, posb(2));
-  answer.setValue(7, nc(0));
-  answer.setValue(8, nc(1));
-  answer.setValue(9, nc(2));
-  answer.setValue(10, cf(0));
-  answer.setValue(11, cf(1));
-  answer.setValue(12, cf(2));
-  answer.setValue(13,inter.y(0)->getValue(0));
-  answer.setValue(14,inter.y(0)->getValue(1));
-  answer.setValue(15,inter.y(0)->getValue(2));
-  answer.setValue(16,inter.y(1)->getValue(0));
-  answer.setValue(17,inter.y(1)->getValue(1));
-  answer.setValue(18,inter.y(1)->getValue(2));
-  answer.setValue(19,inter.lambda(1)->getValue(0));
-  answer.setValue(20,inter.lambda(1)->getValue(1));
-  answer.setValue(21,inter.lambda(1)->getValue(2));
-  answer.setValue(22, id);
+
+  answer.setValue(3, posb(0));
+  answer.setValue(4, posb(1));
+
+  answer.setValue(5, nc(0));
+  answer.setValue(6, nc(1));
+
+  answer.setValue(7, cf(0));
+  answer.setValue(8, cf(1));
+
+  answer.setValue(9,inter.y(0)->getValue(0));
+  answer.setValue(10,inter.y(0)->getValue(1));
+
+  answer.setValue(11,inter.y(1)->getValue(0));
+  answer.setValue(12,inter.y(1)->getValue(1));
+
+  answer.setValue(13,inter.lambda(1)->getValue(0));
+  answer.setValue(14,inter.lambda(1)->getValue(1));
+
+  answer.setValue(15, id);
 };
 
-/* template partial specilization is not possible inside struct, so we
- * need an helper function */
 template<>
 void contactPointProcess<Bullet2dR>(SiconosVector& answer,
                          const Interaction& inter,
@@ -306,15 +305,6 @@ void contactPointProcess<Bullet2dR>(SiconosVector& answer,
 
   answer.setValue(15, id);
 };
-
-
-
-
-
-
-
-
-
 
 
 template<>
