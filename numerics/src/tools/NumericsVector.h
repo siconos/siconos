@@ -28,6 +28,7 @@
 
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
+#include "NumericsMatrix.h"
 
 
 
@@ -165,6 +166,15 @@ extern "C"
       \param out is the sqrt vector
    */
   void NV_sqrt(const double * const vec, const unsigned int vecSize, double * out);
+
+  /**
+   * Compute scalar product x x^T which is a matrix of rank 1.
+   * \param vec1 is the vector
+   * \param vec2 is the vector
+   * \param vecSize is the size of the vector vec
+   * \param out is the resut matrix of rank 1.
+   */
+  void NV_dott(const double * const vec1, const double * const vec2, const unsigned int vecSize, NumericsMatrix* out);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
