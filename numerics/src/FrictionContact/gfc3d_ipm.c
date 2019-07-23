@@ -16,23 +16,17 @@
  * limitations under the License.
 */
 
-#include "fc3d_projection.h"
-//#include "gfc3d_projection.h"
+
 #include "gfc3d_Solvers.h"
-#include "gfc3d_compute_error.h"
-#include "projectionOnCone.h"
 #include "SiconosLapack.h"
 #include "SparseBlockMatrix.h"
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
-#include "sanitizer.h"
+
 #include "numerics_verbose.h"
 #include "NumericsVector.h"
 #include "float.h"
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
 #include "debug.h"
 #include "float.h"
 #include "JordanAlgebra.h"
@@ -450,8 +444,8 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
 
 
     /* ----- temporary vaults initialization ------- */
-    data->tmp_vault_nd = (double**)malloc(8 * sizeof(double*));
-    for (unsigned int i = 0; i < 8; ++i)
+    data->tmp_vault_nd = (double**)malloc(17 * sizeof(double*));
+    for (unsigned int i = 0; i < 17; ++i)
         data->tmp_vault_nd[i] = (double*)calloc(nd, sizeof(double));
 
     data->tmp_vault_m = (double**)malloc(2 * sizeof(double*));
@@ -491,7 +485,7 @@ void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* option
 
       free(data->P_mu);
 
-      for (unsigned int i = 0; i < 8; ++i)
+      for (unsigned int i = 0; i < 17; ++i)
           free(data->tmp_vault_nd[i]);
       free(data->tmp_vault_nd);
       data->tmp_vault_nd = NULL;
@@ -540,6 +534,8 @@ int gfc3d_IPM_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
           SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_YES;
+
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-5;
@@ -686,8 +682,33 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     /* ---- IPM iterations ---- */
     numerics_printf_verbose(-1, "---- GFC3D - IPM - | it  |   dgap   | pinfeas  | dinfeas  | complem  | alpha_p  | alpha_d  |  sigma   |");
     numerics_printf_verbose(-1, "---- GFC3D - IPM - ------------------------------------------------------------------------------------");
+
+    double * p = data->tmp_vault_nd[8];
+    double * p2 = data->tmp_vault_nd[9];
+    double * pinv = data->tmp_vault_nd[10];
+    NumericsMatrix* Qp = NULL;
+    NumericsMatrix* Qp2 = NULL;
+    NumericsMatrix* Qpinv = NULL;
+    double * velocity_t = data->tmp_vault_nd[11];
+    double * d_velocity_t = data->tmp_vault_nd[12];
+    double * d_reaction_t = data->tmp_vault_nd[13];
+    double * velocity_t_inv = data->tmp_vault_nd[14];
+    double * Qp_velocity_t_inv = data->tmp_vault_nd[15];
+    double * tmp1 = data->tmp_vault_nd[16];
+
+
     while (iteration < max_iter)
     {
+        if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])
+        {
+            NesterovToddVector(velocity, reaction, nd, n, p);
+            JA_power2(p, nd, n, p2);
+            Qp = Quad_repr(p, nd, n);
+            Qp2 = Quad_repr(p2, nd, n);
+            JA_inv(p, nd, n, pinv);
+            Qpinv = Quad_repr(pinv, nd, n);
+        }
+
         pinfeas = primalResidualNorm(velocity, H, globalVelocity, w);
         dinfeas = dualResidualNorm(M, globalVelocity, H, reaction, f);
         complem = complemResidualNorm(velocity, reaction, nd, n);
@@ -723,8 +744,16 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
         NM_insert(J, M, 0, 0);
         NM_insert(J, NM_transpose(minus_H), 0, m + nd);
-        NM_insert(J, Arrow_repr(reaction, nd, n), m, m);
-        NM_insert(J, Arrow_repr(velocity, nd, n), m, m + nd);
+        if (!options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])
+        {
+            NM_insert(J, Arrow_repr(reaction, nd, n), m, m);
+            NM_insert(J, Arrow_repr(velocity, nd, n), m, m + nd);
+        }
+        else
+        {
+            NM_insert(J, Qp2, m, m);
+            NM_insert(J, NM_eye(nd), m, m + nd);
+        }
         NM_insert(J, minus_H, m + nd, 0);
         NM_insert(J, NM_eye(nd), m + nd, m);
 
@@ -734,10 +763,17 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
         primalResidualVector(velocity, H, globalVelocity, w, primalConstraint);
         dualResidualVector(M, globalVelocity, H, reaction, f, dualConstraint);
-        JA_prod(velocity, reaction, nd, n, complemConstraint);
+
 
         NV_insert(rhs, m + nd + nd, dualConstraint, m, 0);
-        NV_insert(rhs, m + nd + nd, complemConstraint, nd, m);
+        if (!options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])
+        {
+            JA_prod(velocity, reaction, nd, n, complemConstraint);
+            NV_insert(rhs, m + nd + nd, complemConstraint, nd, m);
+        }
+        else
+            NV_insert(rhs, m + nd + nd, reaction, nd, m);
+
         NV_insert(rhs, m + nd + nd, primalConstraint, nd, m + nd);
         cblas_dscal(m + nd + nd, -1.0, rhs, 1);
 
@@ -768,16 +804,32 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * fmin(alpha_primal, alpha_dual)) : sgmp3;
         sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
 
-        iden = JA_iden(nd, n);
-        cblas_dscal(nd, 2 * barr_param * sigma, iden, 1);
+        if (!options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])
+        {
+            iden = JA_iden(nd, n);
+            cblas_dscal(nd, 2 * barr_param * sigma, iden, 1);
 
-        JA_prod(velocity, reaction, nd, n, vr_jprod);
-        JA_prod(d_velocity, d_reaction, nd, n, dvdr_jprod);
-        NV_sub(vr_jprod, iden, nd, vr_prod_sub_iden);
+            JA_prod(velocity, reaction, nd, n, vr_jprod);
+            JA_prod(d_velocity, d_reaction, nd, n, dvdr_jprod);
+            NV_sub(vr_jprod, iden, nd, vr_prod_sub_iden);
 
-        free(iden);
+            free(iden);
 
-        NV_add(vr_prod_sub_iden, dvdr_jprod, nd, complemConstraint);
+            NV_add(vr_prod_sub_iden, dvdr_jprod, nd, complemConstraint);
+        }
+        else
+        {
+            NM_gemv(1.0, Qp, velocity, 0.0, velocity_t);
+            NM_gemv(1.0, Qp, d_velocity, 0.0, d_velocity_t);
+            NM_gemv(1.0, Qpinv, d_reaction, 0.0, d_reaction_t);
+            JA_inv(velocity_t, nd, n, velocity_t_inv);
+            NM_gemv(1.0, Qp, velocity_t_inv, 0.0, Qp_velocity_t_inv);
+            cblas_dscal(nd, 2 * barr_param * sigma, Qp_velocity_t_inv, 1);
+            JA_prod(d_velocity_t, d_reaction_t, nd, n, dvdr_jprod);
+            NV_sub(reaction, Qp_velocity_t_inv, nd, tmp1);
+            NV_add(tmp1, dvdr_jprod, nd, complemConstraint);
+        }
+
 
         NV_insert(rhs, m + nd + nd, dualConstraint, m, 0);
         NV_insert(rhs, m + nd + nd, complemConstraint, nd, m);
