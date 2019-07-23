@@ -1559,7 +1559,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBox2dRecord &record)
     DEBUG_PRINTF("height=%f \n", height);
 
     DEBUG_PRINTF("_options.worldScale=%f \n", _options.worldScale);
-    btconvex2d->setLocalScaling(btVector3(width, height, (width+height)/50.0));
+    btconvex2d->setLocalScaling(btVector3(width/2.0, height/2.0, (width+height)/50.0));
     btconvex2d->setMargin((box2d->insideMargin() + box2d->outsideMargin()) * _options.worldScale);
 
 
