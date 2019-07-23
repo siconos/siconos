@@ -115,7 +115,7 @@ DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
 
 #include <VisitorMaker.hpp>
 
-#define DEBUG_MESSAGES 1
+// #define DEBUG_MESSAGES 1
 #include <debug.h>
 
 using namespace Experimental;
@@ -260,6 +260,54 @@ void contactPointProcess<Lagrangian2d2DR>(SiconosVector& answer,
   answer.setValue(22, id);
 };
 
+/* template partial specilization is not possible inside struct, so we
+ * need an helper function */
+template<>
+void contactPointProcess<Bullet2dR>(SiconosVector& answer,
+                         const Interaction& inter,
+                         const Bullet2dR& rel)
+{
+
+  const SiconosVector& posa = *rel.pc1();
+  const SiconosVector& posb = *rel.pc2();
+  const SiconosVector& nc = *rel.nc();
+  DEBUG_PRINTF("posa(0)=%g\n", posa(0));  DEBUG_PRINTF("posa(1)=%g\n", posa(1));
+
+  double id = inter.number();
+  double mu = ask<ForMu>(*inter.nonSmoothLaw());
+  const SimpleMatrix& jachq = *rel.jachq();
+  SiconosVector cf(jachq.size(1));
+  prod(*inter.lambda(1), jachq, cf, true);
+
+
+  answer.resize(16);
+
+  answer.setValue(0, mu);
+  answer.setValue(1, posa(0));
+  answer.setValue(2, posa(1));
+
+  answer.setValue(3, posb(0));
+  answer.setValue(4, posb(1));
+
+  answer.setValue(5, nc(0));
+  answer.setValue(6, nc(1));
+
+  answer.setValue(7, cf(0));
+  answer.setValue(8, cf(1));
+
+  answer.setValue(9,inter.y(0)->getValue(0));
+  answer.setValue(10,inter.y(0)->getValue(1));
+
+  answer.setValue(11,inter.y(1)->getValue(0));
+  answer.setValue(12,inter.y(1)->getValue(1));
+
+  answer.setValue(13,inter.lambda(1)->getValue(0));
+  answer.setValue(14,inter.lambda(1)->getValue(1));
+
+  answer.setValue(15, id);
+};
+
+
 
 
 
@@ -353,7 +401,6 @@ SP::SimpleMatrix MechanicsIO::visitAllVerticesForVector(const G& graph) const
   for(current_row=0,std11::tie(vi,viend)=graph.vertices();
       vi!=viend; ++vi, ++current_row)
   {
-    DEBUG_PRINTF("current_row = %i\n", current_row);
     T getter;
     graph.bundle(*vi)->accept(getter);
     const SiconosVector& data = *getter.result;
@@ -416,6 +463,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
 
     SP::DynamicalSystem ds1;
     SP::DynamicalSystem ds2;
+    int data_size =0;
     for(current_row=0, std11::tie(vi,viend) = graph.vertices();
         vi!=viend; ++vi)
     {
@@ -434,21 +482,29 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       inspector.inter = graph.bundle(*vi);
       graph.bundle(*vi)->relation()->accept(inspector);
       SiconosVector& data = inspector.answer;
-      if (data.size() == 23)
+      data_size = data.size();
+      data.resize(data_size+2);
+      ds1 = graph.properties(*vi).source;
+      ds2 = graph.properties(*vi).target;
+
+      data.setValue(data_size,ds1->number());
+      data.setValue(data_size+1,ds2->number());
+
+      if (result->size(1) != data.size())
       {
-        data.resize(23+2);
-        ds1 = graph.properties(*vi).source;
-        ds2 = graph.properties(*vi).target;
-        data.setValue(23,ds1->number());
-        data.setValue(24,ds2->number());
-        result->setRow(current_row++, data);
+	result->resize(graph.vertices_number(), data.size());
       }
+      result->setRow(current_row++, data);
+      data_size +=2;
+
     }
-    result->resize(current_row, 25);
-
-
-
+    result->resize(current_row, data_size);
   }
+
+
+
+
+
   return result;
 }
 
