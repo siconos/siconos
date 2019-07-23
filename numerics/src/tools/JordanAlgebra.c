@@ -61,6 +61,79 @@ RawNumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSiz
 }
 
 
+RawNumericsMatrix* Reflect_mat(const unsigned int size, NM_types type)
+{
+    NumericsMatrix * Refl_mat = NM_create(type, size, size);
+
+    if (type == NM_SPARSE)
+    {
+        NM_triplet_alloc(Refl_mat, size);
+        NM_fill(Refl_mat, NM_SPARSE, size, size, Refl_mat->matrix2);
+    }
+
+    NM_zentry(Refl_mat, 0, 0, 1.0);
+    for (int i = 1; i < size; ++i)
+        NM_zentry(Refl_mat, i, i, -1.0);
+    return Refl_mat;
+}
+
+RawNumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
+{
+    size_t dimension = (size_t)(vecSize / varsCount);
+    NumericsMatrix* out = NM_create(NM_SPARSE, vecSize, vecSize);
+    NM_triplet_alloc(out, dimension * dimension * varsCount);
+    NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
+    NumericsMatrix* quad_tmp = NM_create(NM_DENSE, dimension, dimension);
+
+    NumericsMatrix* R = Reflect_mat(dimension, NM_DENSE);
+
+    double * dets = (double*)malloc(varsCount * sizeof(double));
+    JA_det(vec, vecSize, varsCount, dets);
+
+    for (int i = 0; i < vecSize; i += dimension)
+    {
+        NV_dott(vec + i, vec + i, dimension, quad_tmp);
+
+        for (int j = 0; j < dimension; ++j)
+        {
+            for (int k = 0; k < dimension; ++k)
+                quad_tmp->matrix0[j+k*quad_tmp->size0] *= 2.0;
+            NM_zentry(quad_tmp, j, j, NM_get_value(quad_tmp, j, j) - dets[(int)(i / dimension)] * NM_get_value(R, j, j));
+        }
+        NM_insert(out, quad_tmp, i, i);
+    }
+
+    NM_free(R);
+    NM_free(quad_tmp);
+    free(dets);
+
+    return out;
+}
+
+
+void NesterovToddVector(const double* const vec1, const double* const vec2,
+                           const unsigned int vecSize, const size_t varsCount, double * out)
+{
+    NumericsMatrix* quad_repr;
+    double * x05 = (double*)malloc(vecSize * sizeof(double));
+    double * Qx05y = (double*)malloc(vecSize * sizeof(double));
+    double * Qx05yi = (double*)malloc(vecSize * sizeof(double));
+    double * _p = (double*)malloc(vecSize * sizeof(double));
+
+    JA_sqrt(vec1, vecSize, varsCount, x05);
+    quad_repr = Quad_repr(x05, vecSize, varsCount);
+    NM_gemv(1.0, quad_repr, vec2, 0.0, Qx05y);
+    JA_sqrt_inv(Qx05y, vecSize, varsCount, Qx05yi);
+    NM_gemv(1.0, quad_repr, Qx05yi, 0.0, _p);
+    JA_sqrt_inv(_p, vecSize, varsCount, out);
+
+    free(_p);
+    free(Qx05yi);
+    free(Qx05y);
+    free(x05);
+}
+
+
 double * JA_iden(const unsigned int vecSize, const size_t varsCount)
 {
     if (vecSize % varsCount != 0)
@@ -156,6 +229,41 @@ void JA_sqrt(const double * const vec, const unsigned int vecSize, const size_t 
     {
         sqrt_eigenval1 = sqrt(eigenvals[i]);
         sqrt_eigenval2 = sqrt(eigenvals[i + 1]);
+        pos = (i / 2) * dimension;
+        NV_const_add(eigenvecs[i], dimension, sqrt_eigenval1, 0, tmp_vec1);
+        NV_const_add(eigenvecs[i + 1], dimension, sqrt_eigenval2, 0, tmp_vec2);
+        NV_add(tmp_vec1, tmp_vec2, dimension, out + pos);
+    }
+
+    free(eigenvals);
+    for (int i = 0; i < 2 * varsCount; ++i)
+        free(eigenvecs[i]);
+    free(eigenvecs);
+    free(tmp_vec1);
+    free(tmp_vec2);
+}
+
+
+void JA_sqrt_inv(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out)
+{
+    unsigned int pos;
+    unsigned int dimension = (int)(vecSize / varsCount);
+    double * eigenvals = (double*)malloc(2 * varsCount * sizeof(double));
+    double ** eigenvecs = (double**)malloc(2 * varsCount * sizeof(double*));
+    for (int i = 0; i < 2 * varsCount; ++i)
+        eigenvecs[i] = (double*)calloc(dimension, sizeof(double));
+
+    double *tmp_vec1 = (double*)malloc(dimension * sizeof(double));
+    double *tmp_vec2 = (double*)malloc(dimension * sizeof(double));
+    double sqrt_eigenval1, sqrt_eigenval2;
+
+    JA_eigenvals(vec, vecSize, varsCount, eigenvals);
+    JA_eigenvecs(vec, vecSize, varsCount, eigenvecs);
+
+    for (size_t i = 0; i < 2 * varsCount; i += 2)
+    {
+        sqrt_eigenval1 = 1. / sqrt(eigenvals[i]);
+        sqrt_eigenval2 = 1. / sqrt(eigenvals[i + 1]);
         pos = (i / 2) * dimension;
         NV_const_add(eigenvecs[i], dimension, sqrt_eigenval1, 0, tmp_vec1);
         NV_const_add(eigenvecs[i + 1], dimension, sqrt_eigenval2, 0, tmp_vec2);

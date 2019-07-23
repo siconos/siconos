@@ -34,6 +34,32 @@
  */
 RawNumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount);
 
+/**
+ * Returns reflection matrix.
+
+            |1  0 ...  0|
+        R = |0 -1 ...  0|
+            | ........ 0|
+            |0  0 ... -1|
+
+ * \param size is the size of rectangular metrix
+ * \return reflection matrix.
+ */
+RawNumericsMatrix* Reflect_mat(const unsigned int size, NM_types type);
+
+/**
+ * Returns quadratic representation of the vector x by formula 2*xx^T - det(x)R
+ * \param vec pointer to the vector data.
+ * \param vecSize the length of the vector.
+ * \param varsCount the count of variables (subvectors) in vec.
+ * \return a pointer to a NumericsMatrix
+ */
+RawNumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount);
+
+
+void NesterovToddVector(const double* const vec1, const double* const vec2,
+                           const unsigned int vecSize, const size_t varsCount, double * out);
+
 /** Create the Arrow representation matrix from vector.
  * \param vecSize the length of the vector.
  * \param varsCount the count of variables (subvectors) in vec.
@@ -77,6 +103,15 @@ void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const si
  * \param out is the sqrt vector
  */
 void JA_sqrt(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out);
+
+
+/** Compute element by element inverse of square root
+ * \param vec is the vector
+ * \param vecSize is the size of the vector vec
+ * \param varsCount is the count of variables (subvectors) in vec.
+ * \param out is the inverse of sqrt vector
+ */
+void JA_sqrt_inv(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out);
 
 
 /** Compute element by element square root

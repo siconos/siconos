@@ -295,6 +295,98 @@ static int JA_det_test()
     return info;
 }
 
+
+static int JA_reflect_mat_test()
+{
+    const double EPS = 1e-8;
+    int info = 0;
+    int test_failed = 0;
+    NumericsMatrix* rm = Reflect_mat(5, NM_DENSE);
+
+    test_failed += (fabs(NM_get_value(rm, 0, 0) - 1.0) > EPS);
+    test_failed += (fabs(NM_get_value(rm, 1, 1) + 1.0) > EPS);
+    test_failed += (fabs(NM_get_value(rm, 2, 2) + 1.0) > EPS);
+    test_failed += (fabs(NM_get_value(rm, 3, 3) + 1.0) > EPS);
+    test_failed += (fabs(NM_get_value(rm, 4, 4) + 1.0) > EPS);
+
+    if (test_failed > 0)
+        info += 1;
+
+    printf("== End of test JA_reflect_mat_test(result = %d)\n", info);
+    return info;
+}
+
+
+static int JA_quad_repr_test()
+{
+    const double EPS = 1e-8;
+    int info = 0;
+    int test_failed = 0;
+    double vec[] = {1.256, 0.356, 0.874, 3.654, 0.154, 1.035};
+
+    NumericsMatrix* Qx = Quad_repr(&vec, 6, 2);
+
+    test_failed += (fabs(NM_get_value(Qx, 0, 0) - 2.468148) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 0, 1) - 0.894272) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 0, 2) - 2.195488) > EPS);
+
+    test_failed += (fabs(NM_get_value(Qx, 1, 0) - 0.894272) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 1, 1) - 0.940396) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 1, 2) - 0.622288) > EPS);
+
+    test_failed += (fabs(NM_get_value(Qx, 2, 0) - 2.195488) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 2, 1) - 0.622288) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 2, 2) - 2.214676) > EPS);
+
+
+    test_failed += (fabs(NM_get_value(Qx, 3, 3) - 14.446657) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 3, 4) - 1.125432) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 3, 5) - 7.56378) > EPS);
+
+    test_failed += (fabs(NM_get_value(Qx, 4, 3) - 1.125432) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 4, 4) - 12.304207) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 4, 5) - 0.31878) > EPS);
+
+    test_failed += (fabs(NM_get_value(Qx, 5, 3) - 7.56378) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 5, 4) - 0.31878) > EPS);
+    test_failed += (fabs(NM_get_value(Qx, 5, 5) - 14.399225) > EPS);
+
+    if (test_failed > 0)
+        info += 1;
+
+    NM_free(Qx);
+
+    printf("== End of test JA_quad_repr_test(result = %d)\n", info);
+    return info;
+}
+
+
+static int NT_test()
+{
+    const double EPS = 1e-8;
+    int info = 0;
+    int test_failed = 0;
+    double vec1[] = {1.256, 0.356, 0.874, 3.654, 0.154, 1.035};
+    double vec2[] = {7.325, 1.253, 0.653, 2.356, 0.986, 0.025};
+    double p[6];
+
+    NesterovToddVector(&vec1, &vec2, 6, 2, &p);
+
+    test_failed += (fabs(p[0] - 1.75325493) > EPS);
+    test_failed += (fabs(p[1] + 0.09197206) > EPS);
+    test_failed += (fabs(p[2] + 0.34729983) > EPS);
+    test_failed += (fabs(p[3] - 0.89052573) > EPS);
+    test_failed += (fabs(p[4] - 0.08776599) > EPS);
+    test_failed += (fabs(p[5] + 0.05978485) > EPS);
+
+    if (test_failed > 0)
+        info += 1;
+
+    printf("== End of test NT_test(result = %d)\n", info);
+    return info;
+}
+
+
 int main(void)
 {
     int info = 0;
@@ -305,6 +397,9 @@ int main(void)
     info += JA_eigenvecs_test();
     info += JA_sqrt_test();
     info += JA_det_test();
+    info += JA_reflect_mat_test();
+    info += JA_quad_repr_test();
+    info += NT_test();
 
     return info;
 }
