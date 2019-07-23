@@ -112,7 +112,7 @@ void Lagrangian2d2DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector
   // Update pc1 based on q and relPc1
 
   double angle= q(2);
-  DEBUG_PRINTF("angle = %e\n", angle);
+  DEBUG_PRINTF("angle (ds1)= %e\n", angle);
   (*_Pc1)(0) = q(0) + cos(angle) * (*_relPc1)(0)- sin(angle) * (*_relPc1)(1);
   (*_Pc1)(1) = q(1) + sin(angle) * (*_relPc1)(0)+ cos(angle) * (*_relPc1)(1);
   if (q.size() == 6)
@@ -120,9 +120,10 @@ void Lagrangian2d2DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector
     // To be checked
     DEBUG_PRINT("take into account second ds\n");
     angle = q(5);
+    DEBUG_PRINTF("angle (ds2) = %e\n", angle);
     (*_Pc2)(0) = q(3) + cos(angle) * (*_relPc2)(0)- sin(angle) * (*_relPc2)(1);
     (*_Pc2)(1) = q(4) + sin(angle) * (*_relPc2)(0)+ cos(angle) * (*_relPc2)(1);
-    (*_Nc)(0) =  cos(angle) * (*_relNc)(0)+ sin(angle) * (*_relNc)(1);
+    (*_Nc)(0) =  cos(angle) * (*_relNc)(0)- sin(angle) * (*_relNc)(1);
     (*_Nc)(1) =  sin(angle) * (*_relNc)(0)+ cos(angle) * (*_relNc)(1);
   }
   else
@@ -130,8 +131,9 @@ void Lagrangian2d2DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector
     *_Pc2 = *_relPc2;
     *_Nc = *_relNc;
   }
-
-
+  DEBUG_EXPR(_Pc1->display(););
+  DEBUG_EXPR(_Pc2->display(););
+  DEBUG_EXPR(_Nc->display(););
   // SP::SiconosVector q1 = (q0.getAllVect())[0];
   // ::boost::math::quaternion<double> qq1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6));
   // ::boost::math::quaternion<double> qpc1(0,(*_relPc1)(0),(*_relPc1)(1),(*_relPc1)(2));
