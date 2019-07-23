@@ -58,7 +58,7 @@ void copyQuatRot2d(boost::math::quaternion<double>& from, SiconosVector& to)
 static
 void copyQuatRot2d(const SiconosVector& from, boost::math::quaternion<double>& to)
 {
-  double half_angle = from(2);
+  double half_angle = from(2)/2.0;
 
   to = boost::math::quaternion<double>(cos(half_angle), 0.0, 0.0, sin(half_angle));
 }
@@ -123,7 +123,9 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   /* we build a unit quaternion from the angle */
   DEBUG_EXPR(ds1->q()->display(););
   copyQuatPos2d(*ds1->q(), pq1);
+
   copyQuatPos2d(point.getPositionWorldOnA() / scaling, posa);
+
   copyQuatRot2d(*ds1->q(), rq1);
 
 
@@ -142,7 +144,7 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
     posb = tmp;
   }
 
-  SiconosVector va(2), vb(2), vn(2);
+  SiconosVector va(2), vb(2);
   if (flip)
   {
     copyQuatPos2d((1.0/rq1) * (posb - pq1) * rq1, va);
@@ -165,6 +167,9 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
     }
   }
 
+
+
+  SiconosVector vn(3);
   // Get new normal
   if (ds2)
   {
@@ -181,6 +186,8 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   }
   else
     copyBtVector32d(point.m_normalWorldOnB, vn);
+
+  vn.resize(2);
   DEBUG_EXPR(va.display(););
   DEBUG_EXPR(vb.display(););
   DEBUG_EXPR(vn.display(););
