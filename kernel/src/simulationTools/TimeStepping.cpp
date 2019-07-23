@@ -486,23 +486,23 @@ void TimeStepping::displayNewtonConvergenceInTheLoop()
 {
   if (_displayNewtonConvergence)
   {
-    std::cout << "TimeStepping::newtonSolve --  _newtonNbIterations =" << _newtonNbIterations << std::endl;
-    std::cout << "TimeStepping::newtonSolve --  _newtonResiduDSMax =" << _newtonResiduDSMax << std::endl;
+    std::cout << "[kernel] TimeStepping::newtonSolve --  _newtonNbIterations =" << _newtonNbIterations << std::endl;
+    std::cout << "[kernel] TimeStepping::newtonSolve --  _newtonResiduDSMax =" << _newtonResiduDSMax << std::endl;
     if (_computeResiduY)
     {
-      std::cout << "TimeStepping::newtonSolve --  _newtonResiduYMax =" << _newtonResiduYMax << std::endl;
+      std::cout << "[kernel] TimeStepping::newtonSolve --  _newtonResiduYMax =" << _newtonResiduYMax << std::endl;
     }
     else
     {
-      std::cout << "TimeStepping::newtonSolve --  _newtonResiduYMax =" << "not computed" << std::endl;
+      std::cout << "[kernel] TimeStepping::newtonSolve --  _newtonResiduYMax =" << "not computed" << std::endl;
     }
     if (_computeResiduR)
     {
-      std::cout << "TimeStepping::newtonSolve --  _newtonResiduRMax =" << _newtonResiduRMax << std::endl;
+      std::cout << "[kernel] TimeStepping::newtonSolve --  _newtonResiduRMax =" << _newtonResiduRMax << std::endl;
     }
     else
     {
-      std::cout << "TimeStepping::newtonSolve --  _newtonResiduRMax =" << "not computed" << std::endl;
+      std::cout << "[kernel] TimeStepping::newtonSolve --  _newtonResiduRMax =" << "not computed" << std::endl;
     }
   }
   else
@@ -517,7 +517,7 @@ void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxSt
 {
   if (_displayNewtonConvergence)
   {
-    std::cout << "TimeStepping::newtonSolve --  _newtonCumulativeNbIterations =" << _newtonCumulativeNbIterations << std::endl;
+    std::cout << "[kernel] TimeStepping::newtonSolve --  _newtonCumulativeNbIterations =" << _newtonCumulativeNbIterations << std::endl;
   }
   else
   {
@@ -527,7 +527,7 @@ void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxSt
   if (!_isNewtonConverge)
   {
     if (_warnOnNonConvergence)
-      std::cout << "TimeStepping::newtonSolve -- Newton process stopped:"
+      std::cout << "[kernel] TimeStepping::newtonSolve -- Newton process stopped:"
                 << "max. number of steps ("
                 << maxStep
                 <<") reached at accuracy = "
@@ -535,7 +535,7 @@ void TimeStepping::displayNewtonConvergenceAtTheEnd(int info, unsigned int maxSt
                 <<"."
                   << std::endl ;
     if (info && _warnOnNonConvergence)
-      std::cout << "TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
+      std::cout << "[kernel] TimeStepping::newtonSolve -- nonsmooth solver failed." <<std::endl ;
   }
 }
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
