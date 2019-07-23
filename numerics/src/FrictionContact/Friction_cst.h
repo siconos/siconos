@@ -455,12 +455,7 @@ enum SICONOS_FRICTION_3D_ADMM_STRATEGY_ENUM
 
 enum SICONOS_FRICTION_3D_IPM_IPARAM_ENUM
 {
-  /** index in iparam to store the strategy for computing rho */
-  SICONOS_FRICTION_3D_IPM_IPARAM_RHO_STRATEGY = 9,
-  /** index in iparam to store the acceleration parameter */
-  SICONOS_FRICTION_3D_IPM_IPARAM_ACCELERATION= 10,
-  /** index in iparam to store the symmetry parameter */
-  SICONOS_FRICTION_3D_IPM_IPARAM_SYMMETRY= 11,
+  SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING= 11,
   /** index in iparam to store the sparse storage parameter */
   SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE= 12,
   /** index in iparam to get problem info */
@@ -470,15 +465,6 @@ enum SICONOS_FRICTION_3D_IPM_IPARAM_ENUM
 
 enum SICONOS_FRICTION_3D_IPM_DPARAM_ENUM
 {
-  /** index in dparam to store the rho value for projection formulation */
-  SICONOS_FRICTION_3D_IPM_RHO = 3,
-  /** index in dparam to store the eta value for the restarting criteria */
-  SICONOS_FRICTION_3D_IPM_RESTART_ETA = 4,
-  /** index in dparam to store the tau value for the balancing residual technique */
-  SICONOS_FRICTION_3D_IPM_BALANCING_RESIDUAL_TAU = 5,
-  /** index in dparam to store the phi value for the balancing residual technique */
-  SICONOS_FRICTION_3D_IPM_BALANCING_RESIDUAL_PHI = 6,
-
   /** index in dparam to store the parameter for computation the power of sigma */
   SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1 = 7,
   SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2 = 8,
@@ -489,19 +475,6 @@ enum SICONOS_FRICTION_3D_IPM_DPARAM_ENUM
   SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2 = 11,
 };
 
-enum SICONOS_FRICTION_3D_IPM_ACCELERATION_ENUM
-{
-  SICONOS_FRICTION_3D_IPM_NO_ACCELERATION= 0,
-  SICONOS_FRICTION_3D_IPM_ACCELERATION= 1,
-  SICONOS_FRICTION_3D_IPM_ACCELERATION_AND_RESTART= 2
-};
-
-enum SICONOS_FRICTION_3D_IPM_SYMMETRY_ENUM
-{
-  SICONOS_FRICTION_3D_IPM_CHECK_SYMMETRY= 0,
-  SICONOS_FRICTION_3D_IPM_FORCED_SYMMETRY= 1,
-  SICONOS_FRICTION_3D_IPM_FORCED_ASYMMETRY= 2
-};
 
 enum SICONOS_FRICTION_3D_IPM_STORAGE_ENUM
 {
@@ -515,17 +488,6 @@ enum SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_ENUM
   SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_YES= 1
 };
 
-enum SICONOS_FRICTION_3D_IPM_STRATEGY_ENUM
-{
-  /** A constant value given in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
-  SICONOS_FRICTION_3D_IPM_RHO_STRATEGY_CONSTANT = 0,
-  /** A computed value stored in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
-  SICONOS_FRICTION_3D_IPM_RHO_STRATEGY_NORM_INF =1,
-  /** An adaptive strategy for rho is used */
-  SICONOS_FRICTION_3D_IPM_RHO_STRATEGY_RESIDUAL_BALANCING =2,
-  /** An adaptive strategy for rho is used */
-  SICONOS_FRICTION_3D_IPM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING =3
-};
 
 
 
