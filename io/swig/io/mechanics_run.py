@@ -39,7 +39,7 @@ from siconos.io.io_base import MechanicsIO
 # Imports for mechanics 'collision' submodule
 from siconos.mechanics.collision import RigidBodyDS, RigidBody2dDS, \
     SiconosSphere, SiconosBox, SiconosCylinder, SiconosCone, SiconosCapsule, SiconosPlane,  SiconosConvexHull, \
-    SiconosDisk, SiconosBox2d, \
+    SiconosDisk, SiconosBox2d, SiconosConvexHull2d, \
     SiconosContactor, SiconosContactorSet, \
     SiconosMesh, SiconosHeightMap
 
@@ -617,10 +617,16 @@ class ShapeCollection():
                 elif self.attributes(shape_name)['type'] in ['convex']:
                     # a convex point set
                     points = self.shape(shape_name)
-                    convex = SiconosConvexHull(points)
-                    dims = [points[:,0].max() - points[:,0].min(),
-                            points[:,1].max() - points[:,1].min(),
-                            points[:,2].max() - points[:,2].min()]
+                    if self._io._dimension == 3:
+                        convex = SiconosConvexHull(points)
+                        dims = [points[:,0].max() - points[:,0].min(),
+                                points[:,1].max() - points[:,1].min(),
+                                points[:,2].max() - points[:,2].min()]
+                    elif self._io._dimension == 2:
+                        convex = SiconosConvexHull2d(points)
+                        dims = [points[:,0].max() - points[:,0].min(),
+                                points[:,1].max() - points[:,1].min()]
+                        
                     convex.setInsideMargin(
                         self.shape(shape_name).attrs.get('insideMargin',
                                                          min(dims)*0.02))
@@ -669,7 +675,7 @@ class ShapeCollection():
         return self._shapes[shape_name]
 
 
-class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
+class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     """a Hdf5 context manager reads at instantiation the translations and
        orientations of collision objects from hdf5 file
@@ -691,7 +697,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                  osi=None, shape_filename=None,
                  set_external_forces=None, gravity_scale=None, collision_margin=None,
                  use_compression=False, output_domains=False, verbose=True):
-
+        
         super(MechanicsHdf5Runner, self).__init__(io_filename, mode, None,
                                                   use_compression, output_domains, verbose)
         self._interman = interaction_manager
@@ -923,7 +929,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
 
         if self._dimension ==2:
             body_class = RigidBody2dDS
-
+            
         if self._interman is not None and 'input' in self._data:
             body = None
             if mass is None :
@@ -977,7 +983,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                         elif self._dimension ==2:
                             self.print_verbose('**** Warning inertia for object named {0} does not have the correct shape: {1} instead of (1, 1) or (1,) or scalar'.format(name, np.shape(inertia)))
                             self.print_verbose('**** Inertia will be computed with the shape of the first contactor')
-
+                            
                     body = body_class(translation + orientation,
                                       velocity, mass)
                     body.setUseContactorInertia(True)
@@ -1432,7 +1438,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
 
 
 
-
+        
         for shape_name in self._ref:
             self._number_of_shapes += 1
 
@@ -1609,7 +1615,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                      rotation[1],
                      rotation[2],
                      rotation[3]]
-
+           
             elif self._dimension ==2 :
                 # VA. change the position such that is corresponds to a 3D object
                 self._static_data[p, :] = \
@@ -1622,7 +1628,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                      0.0,
                      0.0,
                      sin(rotation[0]/2.0)]
-
+            
             p += 1
 
     def output_dynamic_objects(self, initial=False):
@@ -1637,12 +1643,12 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
         positions = self._io.positions(self._nsds)
 
         if positions is not None:
-
+            
             self._dynamic_data.resize(current_line + positions.shape[0], 0)
 
             times = np.empty((positions.shape[0], 1))
             times.fill(time)
-
+            
             if self._dimension == 3 :
                 self._dynamic_data[current_line:, :] = np.concatenate((times,
                                                                        positions),
@@ -1661,7 +1667,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                                                                        new_positions),
                                                                       axis=1)
 
-
+                
 
     def output_velocities(self):
         """
@@ -1689,7 +1695,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                 new_velocities=np.zeros((velocities.shape[0],7))
 
                 new_velocities[:,0]=velocities[:,0]
-
+                
                 new_velocities[:,1]=velocities[:,1]
                 new_velocities[:,2]=velocities[:,2]
 
@@ -1698,7 +1704,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                                                                        new_velocities),
                                                                       axis=1)
 
-
+                
     def output_contact_forces(self):
         """
         Outputs contact forces
@@ -1709,7 +1715,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
             time = self.current_time()
             contact_points = self._io.contactPoints(self._nsds,
                                                     self._contact_index_set)
-
+            
             if contact_points is not None:
                 current_line = self._cf_data.shape[0]
                 self._cf_data.resize(current_line + contact_points.shape[0], 0)
@@ -1717,18 +1723,18 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                 times.fill(time)
 
 
-
+                
                 if self._dimension == 3 :
                     self._cf_data[current_line:, :] = \
                         np.concatenate((times,
                                         contact_points),
                                        axis=1)
-
+  
                 elif self._dimension == 2 :
-
+                    
                     # VA. change the contact info such that is corresponds to a 3D object
                      new_contact_points=np.zeros((contact_points.shape[0],25))
-
+                     
                      new_contact_points[:,0] = contact_points[:,0] # mu
                      new_contact_points[:,1] = contact_points[:,1] # posa
                      new_contact_points[:,2] = contact_points[:,2]
@@ -1739,7 +1745,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                      new_contact_points[:,7] = contact_points[:,5] # nc
                      new_contact_points[:,8] = contact_points[:,6]
                      #new_contact_points[:,9]
-                     new_contact_points[:,10] = contact_points[:,7] # cf
+                     new_contact_points[:,10] = contact_points[:,7] # cf 
                      new_contact_points[:,11] = contact_points[:,8]
                      #new_contact_points[:,12]
                      new_contact_points[:,13] = contact_points[:,9] # gap
@@ -1758,15 +1764,15 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                          np.concatenate((times,
                                          new_contact_points),
                                         axis=1)
-
+                     
 
                 # return the number of contacts
                 return len(contact_points)
 
+            
 
 
-
-
+            
             return 0
         return 0
 
@@ -2033,7 +2039,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
 
         if output_backup is not None:
             self._output_backup=output_backup
-
+ 
         if gravity_scale is not None:
             self._gravity_scale=gravity_scale
 
@@ -2072,7 +2078,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
 
         if (self._dimension ==2) :
             options.dimension = SICONOS_BULLET_2D
-
+            
         self._interman = interaction_manager(options)
 
         joints = list(self.joints())
@@ -2151,7 +2157,7 @@ class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
                             fc_internal_solver_options.solverId = local_solver
                         elif self._dimension ==2:
                             osnspb=FrictionContact(2)
-
+                        
                         osnspb.setMaxSize(osnspb_max_size)
                         osnspb.setMStorageType(1)
                     elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):

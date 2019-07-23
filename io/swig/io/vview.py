@@ -1570,12 +1570,21 @@ class VView(object):
             points = vtk.vtkPoints()
             convex = vtk.vtkConvexPointSet()
             data = self.io.shapes()[shape_name][:]
-            convex.GetPointIds().SetNumberOfIds(data.shape[0])
-
-            for id_, vertice in enumerate(self.io.shapes()[shape_name][:]):
-                points.InsertNextPoint(vertice[0], vertice[1], vertice[2])
-                convex.GetPointIds().SetId(id_, id_)
-
+            if self.io.dimension() == 3:
+                convex.GetPointIds().SetNumberOfIds(data.shape[0])
+                for id_, vertice in enumerate(data):
+                    points.InsertNextPoint(vertice[0], vertice[1], vertice[2])
+                    convex.GetPointIds().SetId(id_, id_)
+            elif self.io.dimension() == 2:
+                print('self.io.shapes()[shape_name][:]', self.io.shapes()[shape_name][:])
+                number_of_vertices = data.shape[0]
+                convex.GetPointIds().SetNumberOfIds(data.shape[0]*2)
+                for id_, vertice in enumerate(self.io.shapes()[shape_name][:]):
+                    points.InsertNextPoint(vertice[0], vertice[1], 0.0)
+                    convex.GetPointIds().SetId(id_, id_)
+                    points.InsertNextPoint(vertice[0], vertice[1], 0.1)
+                    convex.GetPointIds().SetId(id_+number_of_vertices, id_+number_of_vertices)
+                    
             source = ConvexSource(convex, points)
             self.readers[shape_name] = source
 
@@ -1646,7 +1655,7 @@ class VView(object):
                 source = vtk.vtkMultiBlockDataGroupFilter()
                 add_compatiblity_methods(source)
                 source.AddInputData(data)
-
+                
             elif primitive == 'Disk':
                 source = vtk.vtkCylinderSource()
                 source.SetResolution(200)
@@ -1659,7 +1668,7 @@ class VView(object):
                 source.SetYLength(attrs[1])
                 source.SetZLength(0.1)
 
-
+                
             self.readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
             if not self.opts.imr:
@@ -1805,10 +1814,11 @@ class VView(object):
         # for disk, we change the offset since cylinder source are directed along the y axis by default
         # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
         # we propose to erase it.
-        if self.io.shapes()[contact_shape_name].attrs['primitive'] == 'Disk':
-             offset_orientation = [math.cos(pi/4.0), math.sin(pi/4.0), 0., 0.]
-
-
+        try:
+            if self.io.shapes()[contact_shape_name].attrs['primitive'] == 'Disk':
+                offset_orientation = [math.cos(pi/4.0), math.sin(pi/4.0), 0., 0.]
+        except:
+            pass
         self.offsets[instid].append(
             (numpy.subtract(contactor.attrs['translation'].astype(float),
                             center_of_mass),
