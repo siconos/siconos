@@ -1647,6 +1647,19 @@ class VView(object):
                 add_compatiblity_methods(source)
                 source.AddInputData(data)
 
+            elif primitive == 'Disk':
+                source = vtk.vtkCylinderSource()
+                source.SetResolution(200)
+                source.SetRadius(attrs[0])
+                source.SetHeight(0.1)
+
+            elif primitive == 'Box2d':
+                source = vtk.vtkCubeSource()
+                source.SetXLength(attrs[0])
+                source.SetYLength(attrs[1])
+                source.SetZLength(0.1)
+
+
             self.readers[shape_name] = source
             mapper = vtk.vtkCompositePolyDataMapper()
             if not self.opts.imr:
@@ -1727,6 +1740,7 @@ class VView(object):
                 self.static_actors[instid].append((actor, contact_shape_indx,
                                                    collision_group))
                 actor.GetProperty().SetOpacity(
+
                     self.config.get('static_opacity', 1.0))
                 actor.GetProperty().SetColor(
                         self.config.get('static_bodies_color', [0.5,0.5,0.5]))
@@ -1786,10 +1800,19 @@ class VView(object):
         else:
             center_of_mass = [0., 0., 0.]
 
+        offset_orientation= contactor.attrs['orientation'].astype(float)
+
+        # for disk, we change the offset since cylinder source are directed along the y axis by default
+        # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
+        # we propose to erase it.
+        if self.io.shapes()[contact_shape_name].attrs['primitive'] == 'Disk':
+             offset_orientation = [math.cos(pi/4.0), math.sin(pi/4.0), 0., 0.]
+
+
         self.offsets[instid].append(
             (numpy.subtract(contactor.attrs['translation'].astype(float),
                             center_of_mass),
-             contactor.attrs['orientation'].astype(float)))
+             offset_orientation))
 
         self.cell_connectors[instid] = CellConnector(
             instid,
@@ -1818,16 +1841,21 @@ class VView(object):
             self.mass[instid] = instance.attrs['id']
             if 'inertia' in instance.attrs:
                 inertia = instance.attrs['inertia']
-                if len(inertia.shape) > 1 and inertia.shape[0] == inertia.shape[1] == 3:
-                    self.inertia[instid] = inertia
-                else:
-                    self.inertia[instid] = numpy.zeros((3, 3))
-                    self.inertia[instid][0, 0] = inertia[0]
-                    self.inertia[instid][1, 1] = inertia[1]
-                    self.inertia[instid][2, 2] = inertia[2]
-
+                if self.io.dimension() ==3 :
+                    if len(inertia.shape) > 1 and inertia.shape[0] == inertia.shape[1] == 3:
+                        self.inertia[instid] = inertia
+                    else:
+                        self.inertia[instid] = numpy.zeros((3, 3))
+                        self.inertia[instid][0, 0] = inertia[0]
+                        self.inertia[instid][1, 1] = inertia[1]
+                        self.inertia[instid][2, 2] = inertia[2]
+                elif self.io.dimension() ==2 :
+                     self.inertia[instid] = inertia
             else:
-                self.inertia[instid] = numpy.eye(3)
+                if self.io.dimension() ==3 :
+                    self.inertia[instid] = numpy.eye(3)
+                elif self.io.dimension() ==2 :
+                    self.inertia[instid] = 1.0
 
         else:
             print('no mass for instance', instance_name)
