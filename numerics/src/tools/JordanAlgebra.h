@@ -114,6 +114,24 @@ void JA_sqrt(const double * const vec, const unsigned int vecSize, const size_t 
 void JA_sqrt_inv(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out);
 
 
+/** Compute element by element the square of the vector
+ * \param vec is the vector
+ * \param vecSize is the size of the vector vec
+ * \param varsCount is the count of variables (subvectors) in vec.
+ * \param out is the square of the vector
+ */
+void JA_power2(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out);
+
+
+/** Compute element by element the inverse of the vector
+ * \param vec is the vector
+ * \param vecSize is the size of the vector vec
+ * \param varsCount is the count of variables (subvectors) in vec.
+ * \param out is the inverse of the vector
+ */
+void JA_inv(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out);
+
+
 /** Compute element by element square root
  * \param vec is the vector
  * \param vecSize is the size of the vector vec
