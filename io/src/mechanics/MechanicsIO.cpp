@@ -13,7 +13,7 @@
 #define XBULLET_CLASSES() \
   REGISTER(BulletR)\
   REGISTER(Bullet5DR)\
-  REGISTER(Bullet2dR)
+
 
 #ifdef SICONOS_HAS_BULLET
 #include <BulletR.hpp>
