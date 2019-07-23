@@ -495,6 +495,8 @@ void SiconosBulletCollisionManager::initialize_impl()
                          &*impl->_collisionConfiguration));
 
 
+  DEBUG_PRINTF("_options.dimension = %i", _options.dimension);
+
   //2D specific
   if (_options.dimension == SICONOS_BULLET_2D)
   {
@@ -1553,7 +1555,7 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBox2dRecord &record)
     assert(width > 0);
     assert(height > 0);
     DEBUG_PRINTF("outside margin=%f \n", m);
-    DEBUG_PRINTF("witdh=%f \n", witdh);
+    DEBUG_PRINTF("width=%f \n", width);
     DEBUG_PRINTF("height=%f \n", height);
 
     DEBUG_PRINTF("_options.worldScale=%f \n", _options.worldScale);
