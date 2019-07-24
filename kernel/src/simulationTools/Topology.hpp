@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,6 @@
 
 /**  This class describes the topology of the non-smooth dynamical
  *  system. It holds all the "potential" Interactions".
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) July 20, 2005
  *
  *  Topology is built in NSDS constructors but initialized in
  *  Simulation->initialize(), ie when all Interactions have been
@@ -72,10 +68,6 @@ private:
       transformation) */
   std::vector<SP::InteractionsGraph> _IG;
 
-  /** check if topology has been updated since nsds modifications
-      occur */
-  bool _isTopologyUpToDate;
-
   /** check if topology is static or  not */
   bool _hasChanged;
 
@@ -102,13 +94,17 @@ private:
   \return a vertex descriptor of the new vertex in IndexSet0
   */
   std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
-  addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
+  __addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
-  /** remove the Interactions of the interactions from _IG and
-   * _DSG
-   * \param inter the Interaction to remove
+  /** remove an Interaction from _IG and _DSG
+   * \param inter a pointer to the Interaction to be removed
    */
-  void removeInteractionFromIndexSet(SP::Interaction inter);
+  void __removeInteractionFromIndexSet(SP::Interaction inter);
+
+  /** remove a DynamicalSystem from _IG and _DSG
+   * \param ds a pointer to the Dynamical System to be removed
+   */
+  void __removeDynamicalSystemFromIndexSet(SP::DynamicalSystem ds);
 
 public:
 
@@ -124,12 +120,18 @@ public:
 
   // === GETTERS/SETTERS ===
 
-  /** check if Interaction inter is in the set
-   *  \param inter an Interaction
-   *  \return a bool
+  /** check if an dynamical system is already a vertex of the DSs graph.
+   *  \param ds the DS to test
+   *  \return true if ds is in the graph
+   */
+  bool hasDynamicalSystem(SP::DynamicalSystem ds) const;
+
+  /** check if an interaction is already a vertex of the Interactions graph.
+   *  \param inter the Interaction to test
+   *  \return true if inter is in the graph
    */
   bool hasInteraction(SP::Interaction inter) const;
-
+  
   /** remove an Interaction from the topology. The interaction is
    *  removed from Dynamical Systems graph and Interactions Graph.
    *  The interaction is not removed from actives subgraphs : see updateIndexSet
@@ -142,11 +144,25 @@ public:
    */
   void insertDynamicalSystem(SP::DynamicalSystem ds);
 
+  /** remove a Dynamical System from the topology. The dynamical
+   *  system is removed from Dynamical Systems graph and Interactions
+   *  Graph.  The dynamical system is not removed from actives
+   *  subgraphs : see updateIndexSet
+   *  \param ds the dynamical system to remove
+   */
+  void removeDynamicalSystem(SP::DynamicalSystem ds);
+
   /** set the name for this Dynamical System
    * \param ds a pointer to the system
    * \param name the name of the DynamicalSystem
    */
   void setName(SP::DynamicalSystem ds, const std::string& name);
+
+  /** get the name for this Dynamical System
+   * \param ds a pointer to the system
+   * \return name the name of the DynamicalSystem, or empty string if not found.
+   */
+  std::string name(SP::DynamicalSystem ds);
 
   /** set the name for an Interaction
    * \param inter a pointer to the Interaction
@@ -154,13 +170,17 @@ public:
    */
   void setName(SP::Interaction inter, const std::string& name);
 
+  /** get the name for this Interaction
+   * \param inter a pointer to the Interaction
+   * \return name the name of the Interaction, or empty string if not found.
+   */
+  std::string name(SP::Interaction inter);
+
   /** set the OSI for this DynamicalSystem
    * \param ds the DynamicalSystem
    * \param OSI the integrator to use for this DS
    */
   void setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI);
-
-  void initDS(SP::Model m, double time, SP::DynamicalSystem ds, SP::OneStepIntegrator OSI);
 
    /** link two dynamical systems to a relation
    * \param inter a SP::Interaction
@@ -186,6 +206,13 @@ public:
   {
     return _IG[0];
   }
+
+  SP::InteractionProperties interaction_properties(unsigned int index, SP::Interaction inter)
+  {
+    InteractionsGraph::VDescriptor ui = indexSet(index)->descriptor(inter);
+    SP::InteractionProperties inter_prop(new InteractionProperties(indexSet(index)->properties(ui)));
+    return inter_prop;
+  };
 
   /** get a pointer to the graph at level num of Interactions
    * \param num the number of indexSet
@@ -247,6 +274,15 @@ public:
     return _IG.size();
   };
 
+  /** get the size of the  InteractionGraphs at a given level
+   * \param level
+   *  \return size of the  InteractionGraphs at a given level
+   */
+  inline unsigned int indexSetSize(unsigned int level) const
+  {
+    return _IG[level]->size();
+  };
+
   /** resize Interactions Graphs
    * \param newSize the new size
    */
@@ -255,15 +291,6 @@ public:
     _IG.resize(newSize);
   };
 
-  // --- isTopologyUpToDate ---
-
-  /** check if topology has been updated since modifications occurs on nsds
-  *  \return a bool
-  */
-  inline bool isUpToDate() const
-  {
-    return _isTopologyUpToDate;
-  }
 
   // --- _hasChanged ---
 
@@ -291,10 +318,6 @@ public:
     return _numberOfConstraints;
   };
 
-  /** initializes the topology (called in Simulation->initialize)
-  */
-  void initialize();
-
   void clear();
 
   /** set symmetry in the blocks computation
@@ -314,25 +337,46 @@ public:
    * \param requiredNumber the required number
    * \return a DynamicalSystem
    */
-  SP::DynamicalSystem getDynamicalSystem(unsigned int requiredNumber);
+  SP::DynamicalSystem getDynamicalSystem(unsigned int requiredNumber) const;
 
   /** Get a dynamical system using its name
    *  \warning O(n) complexity
    *  \param name the name of the dynamical system
    * \return a DynamicalSystem
    */
-  SP::DynamicalSystem getDynamicalSystem(std::string name);
-  
+  SP::DynamicalSystem getDynamicalSystem(std::string name) const;
 
   /** Get a interaction using its number
    *  \warning O(n) complexity
    *  \param requiredNumber the required number
-   *  \return a Interaction
+   *  \return an Interaction
    */
-  SP::Interaction getInteraction(unsigned int requiredNumber);
+  SP::Interaction getInteraction(unsigned int requiredNumber) const;
 
+  /** Get a interaction using its name
+   *  \warning O(n) complexity
+   *  \param name the name of the Interaction
+   *  \return an Interaction pointer
+   */
+  SP::Interaction getInteraction(std::string name) const;
 
-  
+  /** get Interactions for a given DS
+   * \return a vector of pointers to Interaction
+   */
+  std::vector<SP::Interaction> interactionsForDS(SP::DynamicalSystem) const;
+
+  /** get Interactions for a given pair of DSs
+   * \return a vector of pointers to Interaction
+   */
+  std::vector<SP::Interaction> interactionsForPairOfDS(
+    SP::DynamicalSystem ds1,
+    SP::DynamicalSystem ds2=SP::DynamicalSystem()) const;
+
+  /** get DynamicalSystems for a given Interaction
+   * \return a vector of pointers to DynamicalSystem
+   */
+  std::vector<SP::DynamicalSystem>
+    dynamicalSystemsForInteraction(SP::Interaction) const;
 
   /** Helper to get the descriptor in DSG0 from a DynamicalSystem
    *  \param ds DynamicalSystem of which we want the descriptor

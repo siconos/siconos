@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,13 +43,8 @@
 
 
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <memory>
 namespace std11 = std;
-#else
-#include <boost/shared_ptr.hpp>
-namespace std11 = boost;
-#endif
 
 #include <map>
 

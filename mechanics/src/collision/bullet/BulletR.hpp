@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,52 +20,30 @@
 #define BulletR_hpp
 
 #include "BulletSiconosFwd.hpp"
-#include "NewtonEulerFrom3DLocalFrameR.hpp"
+#include "ContactR.hpp"
 
-class BulletR : public NewtonEulerFrom3DLocalFrameR
+class BulletR : public ContactR
 {
 private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(BulletR);
 
-  SP::btManifoldPoint _contactPoints;
-
-  const double _y_correction_A;
-  const double _y_correction_B;
-  const double _scaling;
-
 public:
-  BulletR(const btManifoldPoint &,
-          bool flip=false,
-          double y_correction_A=0,
-          double y_correction_B=0,
-          double scaling=1);
+  BulletR();
 
-  bool _flip; /* if true, points A and B are swapped from the point
-               * view of the Relation. */
+  virtual ~BulletR() {}
 
-  double _contactDistance;
+  /* For users that may require extra information about contacts. */
+  SP::btCollisionObject btObject[2];
+  SP::btCollisionShape btShape[2];
 
-  // TODO used by BulletSpaceFilter
-  SP::btManifoldPoint contactPoint() const
-  {
-    return _contactPoints;
-  };
-
-  // TODO used by BulletSpaceFilter
-  void setContactPoint(SP::btManifoldPoint p)
-  {
-    _contactPoints = p;
-  };
-
-  double y_correction_A() { return _y_correction_A; }
-  double y_correction_B() { return _y_correction_A; }
-  double y_correction() { return _y_correction_A + _y_correction_B; }
-
-  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
-
-  void updateContactPoints(const btManifoldPoint& point);
+  virtual
+  void updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
+                                            const btManifoldPoint& point,
+                                            bool flip, double scaling,
+                                            SP::NewtonEulerDS ds1,
+                                            SP::NewtonEulerDS ds2);
 
   ACCEPT_STD_VISITORS();
 };

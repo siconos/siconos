@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 
 #include "EventDriven.hpp"
 #include "LsodarOSI.hpp"
-#include "Model.hpp"
 #include "EventsManager.hpp"
 #include "Event.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -40,14 +39,14 @@ ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
   ControlSimulation(t0, T, h)
 {
   _processIntegrator.reset(new LsodarOSI());
-  _processSimulation.reset(new EventDriven(_processTD, 0));
+  _processSimulation.reset(new EventDriven(_nsds, _processTD, 0));
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
   std11::static_pointer_cast<LsodarOSI>(_processIntegrator)->setExtraAdditionalTerms(
       std11::shared_ptr<ControlLinearAdditionalTermsED>(new ControlLinearAdditionalTermsED()));
 
-  _DSG0 = _model->nonSmoothDynamicalSystem()->topology()->dSG(0);
-  _IG0 = _model->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  _DSG0 = _nsds->topology()->dSG(0);
+  _IG0 = _nsds->topology()->indexSet0();
 
   // Control part
   _CM.reset(new ControlManager(_processSimulation));

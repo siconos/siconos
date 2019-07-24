@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,13 +21,6 @@
 
 /*! \file SiconosPointers.hpp
   Siconos interface to reference-counting pointers
-*/
-
-/** Siconos pointers
-
- \author SICONOS Development Team - copyright INRIA
- \version 3.0.0.
- \date (Creation) 2010
 
  Siconos pointers are reference counting pointers. Memory pointed by a
  Siconos pointer is automaticaly deallocated.
@@ -59,17 +52,10 @@ More documentation on smart pointers and reference counting:
 
  */
 
-#include <boost/shared_array.hpp>
-
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
-namespace std11 = std;
+
 #include <memory>
-#else
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-namespace std11 = boost;
-#endif
+namespace std11 = std;
 
 namespace SP {}
 namespace SPC {}
@@ -136,11 +122,15 @@ struct nullDeleter
   } \
   NAME_SPACE_SPTR(X)
 
-#define TYPEDEF_SAPTR(X) \
-  typedef boost::shared_array<X> X##SAPtr ;\
+// boost shared_arrays : at the time required
+// only in HEM5 and LSodar
+#include <boost/shared_array.hpp>
+#define TYPEDEF_SAPTR(X)                        \
+  typedef boost::shared_array<X> X##SAPtr ;     \
   NAME_SPACE_SAPTR(X)
 
-#define DEFINE_SPTR(X) \
+
+#define DEFINE_SPTR(X)                          \
   class X; \
   TYPEDEF_SPTR(X)
 

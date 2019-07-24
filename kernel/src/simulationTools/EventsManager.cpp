@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 #include "EventFactory.hpp"
 #include "TimeDiscretisationEvent.hpp"
 #include "TimeDiscretisationEventNoSaveInMemory.hpp"
-#include "Model.hpp"
 #include "Simulation.hpp"
 #include <cmath>
 #include <limits> // for ULONG_MAX
@@ -29,6 +28,12 @@
 #include <set>
 
 unsigned long int EventsManager::_GapLimit2Events = GAPLIMIT_DEFAULT;
+
+// #define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 EventsManager::EventsManager(SP::TimeDiscretisation td): _k(0), _td(td),
   _T(std::numeric_limits<double>::infinity()), _NSeventInsteadOfTD(false)
@@ -56,9 +61,11 @@ void EventsManager::initialize(double T)
 // Creation and insertion of a new event into the event set.
 Event& EventsManager::insertEvent(int type, double time)
 {
+  DEBUG_BEGIN("Event& EventsManager::insertEvent(int type, double time)\n");
   // Uses the events factory to insert the new event.
   EventFactory::Registry& regEvent(EventFactory::Registry::get());
   unsigned int pos = insertEv(regEvent.instantiate(time, type));
+  DEBUG_END("Event& EventsManager::insertEvent(int type, double time)\n");
   return *_events[pos];
 }
 
@@ -85,6 +92,8 @@ void EventsManager::noSaveInMemory(const Simulation& sim)
 
 void EventsManager::preUpdate(Simulation& sim)
 {
+  DEBUG_BEGIN("EventsManager::preUpdate(Simulation& sim)\n");
+  DEBUG_EXPR(display(););
   const mpz_t *t1 = _events[0]->getTimeOfEvent();
   _events[0]->process(sim);
   for (unsigned int i = 1; i < _events.size() ; i++)
@@ -102,6 +111,7 @@ void EventsManager::preUpdate(Simulation& sim)
     else
       break;
   }
+  DEBUG_END("EventsManager::preUpdate(Simulation& sim)\n");
 }
 
 double EventsManager::startingTime() const

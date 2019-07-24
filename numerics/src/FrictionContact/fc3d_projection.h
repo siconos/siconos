@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,6 @@
   Then a "local" (ie for one contact => size = 3) problem is built (update function) and solved (solve function).
 
   Two different storages are available for M: dense and sparse block.
-
-  \author INRIA Siconos Team
 
 */
 #include "NumericsMatrix.h"
@@ -92,6 +90,8 @@ extern "C"
    */
   void fc3d_projectionWithDiagonalization_update(int number,  FrictionContactProblem* problem, FrictionContactProblem* localproblem, double* reaction, SolverOptions* options);
 
+  int fc3d_projectionOnConeWithDiagonalization_setDefaultSolverOptions(SolverOptions* options);
+
   /** solve friction-contact 3D problem with projection on the Cone
    * \param localproblem :  the local problem to initialize
    * \param reaction
@@ -99,6 +99,8 @@ extern "C"
    * \return 0 if successfull
    */
   int fc3d_projectionOnCone_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions *options);
+
+  int fc3d_projectionOnCone_setDefaultSolverOptions(SolverOptions* options);
 
   /** Update friction-contact 3D projection solver: formalize local problem for one contact.
    * \param number (position in global matrix) of the considered contact
@@ -110,6 +112,7 @@ extern "C"
   */
   void fc3d_projectionOnCylinder_update(int number,  FrictionContactProblem* problem, FrictionContactProblem* localproblem, double* reaction, SolverOptions* options);
 
+  int fc3d_projectionOnCylinder_setDefaultSolverOptions(SolverOptions* options);
 
   /** solve friction-contact 3D problem with projection on the Cone with local
    *   iteration up to convergence of the local problem
@@ -121,7 +124,7 @@ extern "C"
   int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options);
   void fc3d_projectionOnConeWithLocalIteration_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
   void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
-
+  int fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(SolverOptions* options);
   /** solve friction-contact 3D problem with projection on the Cone
    * \param localproblem :  the local problem to initialize
    * \param reaction
@@ -131,15 +134,15 @@ extern "C"
   int fc3d_projectionOnCone_velocity_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
 
   /** solve friction-contact 3D problem with projection on the (Tresca Cylinder)
-   * \param localproblem :  the local problem to initialize
-   * \param reaction
    * \param options
    * \return 0 if successfull
    */
+  int fc3d_projectionOnCone_velocity_setDefaultSolverOptions(SolverOptions* options);
+  
   int fc3d_projectionOnCylinder_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options);
   void fc3d_projectionOnCylinder_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* options);
   void fc3d_projectionOnCylinder_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options );
-  
+
   /** solve friction-contact 3D problem with projection on the (Tresca Cylinder)
    * \param localproblem :  the local problem to initialize
    * \param reaction
@@ -151,6 +154,8 @@ extern "C"
   void fc3d_projectionOnCylinderWithLocalIteration_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* options, SolverOptions* localsolver_options);
 
   void fc3d_projectionOnCylinderWithLocalIteration_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options );
+  
+  int fc3d_projectionOnCylinderWithLocalIteration_setDefaultSolverOptions(SolverOptions* options);
   /** free memory for friction contact 3D projection solver
    * \param problem :  the  problem to free
    * \param localproblem :  the  problem to free
@@ -165,6 +170,7 @@ extern "C"
    */
   void fc3d_projection_with_regularization_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
 
+  int fc3d_projectionOnConeWithRegularization_setDefaultSolverOptions(SolverOptions* options);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

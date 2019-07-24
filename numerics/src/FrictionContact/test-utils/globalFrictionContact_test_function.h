@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,10 @@ extern "C"
 #endif
 
   int globalFrictionContact_test_function(FILE * f, SolverOptions *);
-
+  
+#if defined(WITH_FCLIB)
+  int gfc3d_test_function_hdf5(const char* path, SolverOptions* options);
+#endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

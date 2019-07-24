@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 #include "Actuator.hpp"
 #include "ActuatorEvent.hpp"
 #include "ControlSensor.hpp"
-#include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 #include "EventFactory.hpp"
 #include "Simulation.hpp"
@@ -35,6 +34,13 @@ Actuator::Actuator(unsigned int type, SP::ControlSensor sensor): _type(type), _i
 {
 }
 
+Actuator::Actuator(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B): _type(type), _id("none"), _B(B), _sensor(sensor)
+{
+  if (B) {
+    _u = std11::make_shared<SiconosVector>(B->size(1), 0);
+  }
+}
+
 Actuator::~Actuator()
 {
 }
@@ -44,7 +50,7 @@ void Actuator::addSensorPtr(SP::ControlSensor newSensor)
   _sensor = newSensor;
 }
 
-void Actuator::initialize(const Model& m)
+void Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 {
   if (!_sensor)
   {
@@ -52,7 +58,7 @@ void Actuator::initialize(const Model& m)
   }
 
   // Init the control variable and add the necessary properties
-  DynamicalSystemsGraph& DSG0 = *m.nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *nsds.topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(_sensor->getDS());
   if (_B)
   {
@@ -80,12 +86,15 @@ void Actuator::initialize(const Model& m)
 
 void Actuator::setSizeu(unsigned size)
 {
+  if (_B && size != _B->size(1)) {
+
+  }
   _u.reset(new SiconosVector(size, 0));
 }
 
-SP::Model Actuator::getInternalModel() const
+SP::NonSmoothDynamicalSystem Actuator::getInternalNSDS() const
 {
-  return std11::shared_ptr<Model>();
+  return std11::shared_ptr<NonSmoothDynamicalSystem>();
 }
 
 void Actuator::display() const

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,14 @@
 
 #include "SimulationGraphs.hpp"
 #include "ControlLinearAdditionalTermsED.hpp"
+#include "DynamicalSystem.hpp"
 
 #include "Topology.hpp"
 #include "MatrixIntegrator.hpp"
 
 typedef void (*AdditionalTermsEDfctU)(double, unsigned, double*, unsigned, double*, double*, unsigned, double*);
 
-void ControlLinearAdditionalTermsED::init(DynamicalSystemsGraph& DSG0, const Model& model)
+void ControlLinearAdditionalTermsED::init(DynamicalSystemsGraph& DSG0, const NonSmoothDynamicalSystem& nsds, const TimeDiscretisation& td)
 {
 
   DynamicalSystemsGraph::VIterator dsvi, dsvdend;

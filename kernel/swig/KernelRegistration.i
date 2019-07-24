@@ -2,68 +2,96 @@
 // You have to PY_REGISTER base classe before derivated classes
 #undef PY_REGISTER
 #define KERNEL_REGISTRATION()                                           \
-  PY_REGISTER(SiconosMemory)                                            \
-  PY_REGISTER(NonSmoothLaw);                                            \
-  PY_REGISTER(NewtonImpactNSL);                                         \
-  PY_REGISTER(NewtonImpactFrictionNSL);                                 \
-  PY_REGISTER(MixedComplementarityConditionNSL);                        \
-  PY_REGISTER(ComplementarityConditionNSL);                             \
-  PY_REGISTER(EqualityConditionNSL);                                    \
-  PY_REGISTER(MultipleImpactNSL);                                       \
-  PY_REGISTER(RelayNSL);                                                \
-  PY_REGISTER(NormalConeNSL);                                           \
-  PY_REGISTER(DynamicalSystem);                                         \
-  PY_REGISTER(NonSmoothDynamicalSystem);                                \
-  PY_REGISTER(Topology);                                                \
-  PY_REGISTER(LagrangianDS);                                            \
-  PY_REGISTER(LagrangianLinearTIDS);                                    \
-  PY_REGISTER(NewtonEulerDS);                                           \
-  PY_REGISTER(FirstOrderNonLinearDS);                                   \
-  PY_REGISTER(FirstOrderLinearDS);                                      \
-  PY_REGISTER(FirstOrderLinearTIDS);                                    \
-  PY_REGISTER(Relation);                                                \
-  PY_REGISTER(LagrangianR);                                             \
-  PY_REGISTER(LagrangianLinearTIR);                                     \
-  PY_REGISTER(LagrangianRheonomousR);                                   \
-  PY_REGISTER(LagrangianScleronomousR);                                 \
-  PY_REGISTER(LagrangianCompliantR);                                    \
-  PY_REGISTER(NewtonEulerR);                                            \
-  PY_REGISTER(NewtonEulerFrom1DLocalFrameR);                            \
-  PY_REGISTER(NewtonEulerFrom3DLocalFrameR);                            \
-  PY_REGISTER(FirstOrderR);                                             \
-  PY_REGISTER(FirstOrderNonLinearR);                                    \
-  PY_REGISTER(FirstOrderType1R);                                        \
-  PY_REGISTER(FirstOrderType2R);                                        \
-  PY_REGISTER(FirstOrderLinearR);                                       \
-  PY_REGISTER(FirstOrderLinearTIR);                                     \
-  PY_REGISTER(Interaction);                                             \
-  PY_REGISTER(TimeDiscretisation);                                      \
-  PY_REGISTER(OneStepNSProblem);                                        \
-  PY_REGISTER(OneStepIntegrator);                                       \
-  PY_REGISTER(LinearOSNS);                                              \
-  PY_REGISTER(LsodarOSI);                                               \
-  PY_REGISTER(LCP);                                                     \
-  PY_REGISTER(AVI);                                                     \
-  PY_REGISTER(QP);                                                      \
-  PY_REGISTER(Relay);                                                   \
-  PY_REGISTER(MLCP);                                                    \
-  PY_REGISTER(MLCPProjectOnConstraints);                                \
-  PY_REGISTER(GenericMechanical);                                       \
-  PY_REGISTER(FrictionContact);                                         \
-  PY_REGISTER(EulerMoreauOSI);                                          \
-  PY_REGISTER(MoreauJeanOSI);                                           \
-  PY_REGISTER(MoreauJeanCombinedProjectionOSI);                         \
-  PY_REGISTER(ZeroOrderHoldOSI);                                        \
-  PY_REGISTER(Simulation);                                              \
-  PY_REGISTER(TimeStepping);                                            \
-  PY_REGISTER(TimeSteppingCombinedProjection);                          \
-  PY_REGISTER(InteractionManager);                                      \
-  PY_REGISTER(EventDriven);                                             \
-  PY_REGISTER(EventsManager);                                           \
-  PY_REGISTER(Event);                                                   \
-  PY_REGISTER(Model);                                                   \
-  PY_REGISTER(BoundaryCondition);                                       \
-  PY_REGISTER(HarmonicBC);                                              \
-  PY_REGISTER(FixedBC);                                                 \
-  PY_REGISTER(OSNSMatrix);                                              \
-  PY_REGISTER(BlockCSRMatrix);
+  PY_REGISTER(SiconosMemory, Kernel)                                            \
+  PY_REGISTER(NonSmoothLaw, Kernel);                                            \
+  PY_REGISTER(NewtonImpactNSL, Kernel);                                         \
+  PY_REGISTER(NewtonImpactFrictionNSL, Kernel);                                 \
+  PY_REGISTER(NewtonImpactRollingFrictionNSL, Kernel);                  \
+  PY_REGISTER(MixedComplementarityConditionNSL, Kernel);                        \
+  PY_REGISTER(ComplementarityConditionNSL, Kernel);                             \
+  PY_REGISTER(EqualityConditionNSL, Kernel);                                    \
+  PY_REGISTER(MultipleImpactNSL, Kernel);                                       \
+  PY_REGISTER(RelayNSL, Kernel);                                                \
+  PY_REGISTER(NormalConeNSL, Kernel);                                           \
+  PY_REGISTER(DynamicalSystem, Kernel);                                         \
+  PY_REGISTER(NonSmoothDynamicalSystem, Kernel);                                \
+  PY_REGISTER(Topology, Kernel);                                                \
+  PY_REGISTER(SecondOrderDS, Kernel);                                   \
+  PY_REGISTER(LagrangianDS, Kernel);                                            \
+  PY_REGISTER(LagrangianLinearTIDS, Kernel);                                    \
+  PY_REGISTER(LagrangianLinearDiagonalDS, Kernel);                              \
+  PY_REGISTER(NewtonEulerDS, Kernel);                                           \
+  PY_REGISTER(FirstOrderNonLinearDS, Kernel);                                   \
+  PY_REGISTER(FirstOrderLinearDS, Kernel);                                      \
+  PY_REGISTER(FirstOrderLinearTIDS, Kernel);                                    \
+  PY_REGISTER(Relation, Kernel);                                                \
+  PY_REGISTER(LagrangianR, Kernel);                                             \
+  PY_REGISTER(LagrangianLinearTIR, Kernel);                                     \
+  PY_REGISTER(LagrangianRheonomousR, Kernel);                                   \
+  PY_REGISTER(LagrangianScleronomousR, Kernel);                                 \
+  PY_REGISTER(LagrangianCompliantR, Kernel);                                    \
+  PY_REGISTER(NewtonEulerR, Kernel);                                            \
+  PY_REGISTER(NewtonEuler1DR, Kernel);                                  \
+  PY_REGISTER(NewtonEuler3DR, Kernel);                                  \
+  PY_REGISTER(NewtonEuler5DR, Kernel);                                  \
+  PY_REGISTER(FirstOrderR, Kernel);                                             \
+  PY_REGISTER(FirstOrderNonLinearR, Kernel);                                    \
+  PY_REGISTER(FirstOrderType1R, Kernel);                                        \
+  PY_REGISTER(FirstOrderType2R, Kernel);                                        \
+  PY_REGISTER(FirstOrderLinearR, Kernel);                                       \
+  PY_REGISTER(FirstOrderLinearTIR, Kernel);                                     \
+  PY_REGISTER(Interaction, Kernel);                                             \
+  PY_REGISTER(TimeDiscretisation, Kernel);                                      \
+  PY_REGISTER(OneStepNSProblem, Kernel);                                        \
+  PY_REGISTER(OneStepIntegrator, Kernel);                                       \
+  PY_REGISTER(LinearOSNS, Kernel);                                              \
+  PY_REGISTER(LsodarOSI, Kernel);                                               \
+  PY_REGISTER(LCP, Kernel);                                                     \
+  PY_REGISTER(AVI, Kernel);                                                     \
+  PY_REGISTER(QP, Kernel);                                                      \
+  PY_REGISTER(Relay, Kernel);                                                   \
+  PY_REGISTER(MLCP, Kernel);                                                    \
+  PY_REGISTER(MLCPProjectOnConstraints, Kernel);                                \
+  PY_REGISTER(GenericMechanical, Kernel);                                       \
+  PY_REGISTER(FrictionContact, Kernel);                                         \
+  PY_REGISTER(GlobalFrictionContact, Kernel);                           \
+  PY_REGISTER(RollingFrictionContact, Kernel);                          \
+  PY_REGISTER(EulerMoreauOSI, Kernel);                                          \
+  PY_REGISTER(MoreauJeanOSI, Kernel);                                           \
+  PY_REGISTER(MoreauJeanBilbaoOSI, Kernel);                                     \
+  PY_REGISTER(MoreauJeanCombinedProjectionOSI, Kernel);                         \
+  PY_REGISTER(MoreauJeanDirectProjectionOSI, Kernel);                           \
+  PY_REGISTER(MoreauJeanGOSI, Kernel);                                          \
+  PY_REGISTER(ZeroOrderHoldOSI, Kernel);                                        \
+  PY_REGISTER(Simulation, Kernel);                                              \
+  PY_REGISTER(TimeStepping, Kernel);                                            \
+  PY_REGISTER(TimeSteppingCombinedProjection, Kernel);                          \
+  PY_REGISTER(TimeSteppingDirectProjection, Kernel);                            \
+  PY_REGISTER(InteractionManager, Kernel);                                      \
+  PY_REGISTER(EventDriven, Kernel);                                             \
+  PY_REGISTER(EventsManager, Kernel);                                           \
+  PY_REGISTER(Event, Kernel);                                                   \
+  PY_REGISTER(BoundaryCondition, Kernel);                                       \
+  PY_REGISTER(HarmonicBC, Kernel);                                              \
+  PY_REGISTER(FixedBC, Kernel);                                                 \
+  PY_REGISTER(OSNSMatrix, Kernel);                                              \
+  PY_REGISTER(BlockCSRMatrix, Kernel);
+
+%feature("nodirector") SecondOrderDS::dimension;
+%feature("nodirector") SecondOrderDS::q;
+%feature("nodirector") SecondOrderDS::q0;
+%feature("nodirector") SecondOrderDS::velocity;
+%feature("nodirector") SecondOrderDS::velocity0;
+%feature("nodirector") SecondOrderDS::acceleration;
+%feature("nodirector") SecondOrderDS::forces;
+%feature("nodirector") SecondOrderDS::jacobianqForces;
+%feature("nodirector") SecondOrderDS::jacobianvForces;
+%feature("nodirector") SecondOrderDS::p;
+%feature("nodirector") SecondOrderDS::mass;
+%feature("nodirector") SecondOrderDS::inverseMass;
+%feature("nodirector") SecondOrderDS::qMemory;
+%feature("nodirector") SecondOrderDS::velocityMemory;
+%feature("nodirector") SecondOrderDS::forcesMemory;
+%feature("nodirector") SecondOrderDS::reactionToBoundaryConditions;
+
+

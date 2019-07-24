@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,6 @@
 
 /** TimeSteppingD1Minus Timestepping Strategy
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) September 16, 2011
- *
  *  see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
  *  on Discontinuous Galerkin Methods: Definition and Outlook
  */
@@ -50,10 +46,11 @@ protected:
 public:
 
   /** constructor with the time-discretisation
-   *  \param td pointer to a TimeDiscretisation
-   *  \param nb number of non smooth problem
+   * \param nsds the current nonsmooth dynamical system
+   * \param td pointer to a TimeDiscretisation
+   * \param nb number of non smooth problem
    */
-  TimeSteppingD1Minus(SP::TimeDiscretisation td , int nb);
+  TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td , int nb);
 
   /** destructor */
   ~TimeSteppingD1Minus();
@@ -71,6 +68,11 @@ public:
 
   /** step from current event to next event of EventsManager */
   virtual void advanceToEvent();
+
+  /** update input
+   *  \param level lambda order used to compute input
+   */
+  void updateInput(unsigned int level);
 
   /** compute residu */
   void computeResidu();

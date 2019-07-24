@@ -83,7 +83,7 @@ inline void swap( const int n, double* x, const int incx, double* y,
 //
 inline void swap( const int n, std::complex<float>* x, const int incx,
         std::complex<float>* y, const int incy ) {
-    cblas_cswap( n, x, incx, y, incy );
+  cblas_cswap( n, OPENBLAS_FLOAT_CAST(x), incx, OPENBLAS_FLOAT_CAST(y), incy );
 }
 
 //
@@ -93,7 +93,7 @@ inline void swap( const int n, std::complex<float>* x, const int incx,
 //
 inline void swap( const int n, std::complex<double>* x, const int incx,
         std::complex<double>* y, const int incy ) {
-    cblas_zswap( n, x, incx, y, incy );
+  cblas_zswap( n, OPENBLAS_DOUBLE_CAST(x), incx, OPENBLAS_DOUBLE_CAST(y), incy );
 }
 
 #elif defined BOOST_NUMERIC_BINDINGS_BLAS_CUBLAS

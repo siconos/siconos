@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,19 +24,19 @@
 #include "SiconosBlas.h"
 #include "Newton_methods.h"
 #include "FischerBurmeister.h"
-
+#include "numerics_verbose.h"
 #include "mcp_newton_FBLSA.h"
 
 void FB_compute_F_mcp(void* data_opaque, double* z, double* Fmcp)
 {
   // Computation of the new value F(z)
-  MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
+  MixedComplementarityProblem* data = (MixedComplementarityProblem *)data_opaque;
   data->compute_Fmcp(data->env, data->n1 + data->n2, z, Fmcp);
 }
 
 void FB_compute_H_mcp(void* data_opaque, double* z, double* Fmcp, double* workV1, double* workV2, NumericsMatrix* H)
 {
-  MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
+  MixedComplementarityProblem* data = (MixedComplementarityProblem *)data_opaque;
 
   assert(data->nabla_Fmcp);
   data->compute_nabla_Fmcp(data->env, data->n1 + data->n2, z, data->nabla_Fmcp);
@@ -46,24 +46,91 @@ void FB_compute_H_mcp(void* data_opaque, double* z, double* Fmcp, double* workV1
 
 void FB_compute_error_mcp(void* data_opaque, double* z, double* w, double* Jac_F_merit, double tol, double* err)
 {
-  MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
+  MixedComplementarityProblem* data = (MixedComplementarityProblem *)data_opaque;
   unsigned int n = data->n1 + data->n2;
   err[0] = cblas_dnrm2(n, Jac_F_merit, 1);
+
+  /* If we want to control the convergence of the Newton solver up to the mcp criterion for
+     computing error */
+  /* mcp_compute_error(data, z , w, err); */
+
 }
 
 void mcp_FB(void* data_opaque, double* z, double* F, double* F_FB)
 {
-  MixedComplementarityProblem2* data = (MixedComplementarityProblem2 *)data_opaque;
+  MixedComplementarityProblem* data = (MixedComplementarityProblem *)data_opaque;
   phi_Mixed_FB(data->n1, data->n2, z, F, F_FB);
 }
 
-void mcp_newton_FBLSA(MixedComplementarityProblem2* problem, double *z, double* Fmcp, int *info , SolverOptions* options)
+void mcp_newton_FB_FBLSA(MixedComplementarityProblem* problem, double *z, double* Fmcp, int *info , SolverOptions* options)
 {
+  numerics_printf("mcp_newton_FB_FBLSA. starts");
   functions_LSA functions_FBLSA_mcp;
+
+  /* This call will set 
+   * functions_FBLSA_mcp.compute_F to FB_compute_F_mcp
+   * functions_FBLSA_mcp.compute_F_merit to mcp_FB
+   */
   init_lsa_functions(&functions_FBLSA_mcp, &FB_compute_F_mcp, &mcp_FB);
+
+  /* function to get an element H of T (in our case the clarke Jacobian of F) */
   functions_FBLSA_mcp.compute_H = &FB_compute_H_mcp;
+
+  /* function to compute the error (in our case the norm of the gradient of the merit function) */
   functions_FBLSA_mcp.compute_error = &FB_compute_error_mcp;
 
-  set_lsa_params_data(options, problem->nabla_Fmcp);
-  newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_FBLSA_mcp);
+  
+  options->internalSolvers->dparam[0] = options->dparam[0];
+  options->internalSolvers->iparam[0] = options->iparam[0];
+  
+  set_lsa_params_data(options->internalSolvers, problem->nabla_Fmcp);
+  newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options->internalSolvers, &functions_FBLSA_mcp);
+
+  double tolerance = options->dparam[SICONOS_DPARAM_TOL];
+  double  error =0.0;
+
+  mcp_compute_error(problem, z , Fmcp, &error);
+
+  if (error > tolerance)
+  {
+    numerics_printf("mcp_newton_FB_FBLSA : error = %e > tolerance = %e.", error, tolerance);
+    *info = 1;
+  }
+  else
+  {
+    numerics_printf("mcp_newton_FB_FBLSA : error = %e < tolerance = %e.", error, tolerance);
+    *info = 0;
+  }
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = options->internalSolvers->iparam[SICONOS_IPARAM_ITER_DONE];
+  options->dparam[SICONOS_DPARAM_RESIDU] = error;
+
+  numerics_printf("mcp_newton_FB_FBLSA. ends");
+}
+
+int mcp_newton_FB_FBLSA_setDefaultSolverOptions(
+  MixedComplementarityProblem* problem,
+  SolverOptions* options)
+{
+  numerics_printf_verbose(1,"mcp_newton_FB_FBLSA_setDefaultSolverOptions");
+
+  options->solverId = SICONOS_MCP_NEWTON_FB_FBLSA;
+  options->numberOfInternalSolvers = 1;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  options->dWork = NULL;
+  solver_options_nullify(options);
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
+  
+  newton_lsa_setDefaultSolverOptions(options->internalSolvers);
+
+  
+  return 0;
 }

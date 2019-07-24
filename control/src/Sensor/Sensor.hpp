@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,10 +45,6 @@
 //typedef std::map<SP::Event, VectorMap>  DataSet;
 
 /** Sensor Base Class
-
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) February 01, 2007
 
    Abstract class, interface to user-defined sensors.
 
@@ -187,9 +183,9 @@ public:
   //  {return _data;};
 
   /** initialize sensor data.
-   * \param m the Model
+   * \param nsds the Model
    */
-  virtual void initialize(const Model& m) {};
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds) {};
 
   /** capture data when the SensorEvent is processed => set data[SensorEvent]=...
    */

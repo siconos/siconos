@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,7 @@
 /** type of function used to post-treat output info from solver. */
 typedef void (*CheckSolverFPtr)(int, Simulation*);
 
-/** \class TimeStepping
-    \brief Event-capturing Time-Stepping simulation
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
+/** \brief Event-capturing Time-Stepping simulation
  *
  * This class implements the basic algorithm for Event-capturing Time-Stepping
  * simulations.
@@ -47,7 +43,6 @@ typedef void (*CheckSolverFPtr)(int, Simulation*);
 #define SICONOS_TS_LINEAR_IMPLICIT 2
 #define SICONOS_TS_NONLINEAR 3
 
-
 class TimeStepping : public Simulation
 {
 protected:
@@ -61,10 +56,10 @@ protected:
   /** Default maximum number of Newton iteration*/
   unsigned int _newtonMaxIteration;
 
-  /** Number of steps perfomed in the Newton Loop */
+  /** Number of steps performed in the Newton Loop */
   unsigned int _newtonNbIterations;
 
-  /** Cumulative number of steps perfomed in the Newton Loops */
+  /** Cumulative number of steps performed in the Newton Loops */
   unsigned int _newtonCumulativeNbIterations;
 
   /** unsigned int  _newtonOptions
@@ -74,7 +69,7 @@ protected:
    */
   unsigned int _newtonOptions;
 
-  
+
   /** Maximum Residual for the Dynamical system */
   double _newtonResiduDSMax;
 
@@ -98,17 +93,23 @@ protected:
    */
   bool _isNewtonConverge;
 
+  /** boolean variable indicating whether interactions should be
+   * updated within the Newton loop.
+   */
+  bool _newtonUpdateInteractionsPerIteration;
+
   /** boolean variable to display Newton info
    */
   bool _displayNewtonConvergence;
 
-  /** boolean variable to force an explicit evaluation of the Jacobians
-   * mapping of relations only at the beginning of the time--step and
-   * not in the Newton iteration
+  /** boolean variable to display warning on non-convergence
    */
+  bool _warnOnNonConvergence;
 
-  bool _explicitJacobiansOfRelation;
-  
+  /** boolean variable to resetAllLamda at each step (default true)
+   */
+  bool _resetAllLambda;
+
   /** Default Constructor
    */
   TimeStepping() :
@@ -116,28 +117,36 @@ protected:
     _computeResiduR(false),
     _isNewtonConverge(false) {};
 
+
+  /** newton algorithm
+   * \param criterion convergence criterion
+   * \param maxStep maximum number of Newton steps
+   */
+  virtual void newtonSolve(double criterion, unsigned int maxStep);
+
+
 public:
 
   /** initialisation specific to TimeStepping for OneStepNSProblem.
   */
   virtual void initOSNS();
 
-  /** Constructor with the time-discretisation.
-   *  \param td pointer to a timeDiscretisation used in the integration
-   *  (linked to the model that owns this simulation)
+  /** Standard constructor
+   * \param nsds NonSmoothDynamicalSystem to be simulated
+   * \param td pointer to a timeDiscretisation used in the integration
    *  \param osi one step integrator (default none)
    *  \param osnspb one step non smooth problem (default none)
    */
-  TimeStepping(SP::TimeDiscretisation td,
-               SP::OneStepIntegrator osi = SP::OneStepIntegrator(),
-               SP::OneStepNSProblem osnspb = SP::OneStepNSProblem());
+  TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td,
+               SP::OneStepIntegrator osi,
+               SP::OneStepNSProblem osnspb);
 
   /** Constructor with the time-discretisation.
-   *  \param td pointer to a timeDiscretisation used in the integration
-   *  (linked to the model that owns this simulation)
-   *  \param nb number of non smooth problem
+   * \param nsds NonSmoothDynamicalSystem to be simulated
+   * \param td pointer to a timeDiscretisation used in the integration
+   * \param nb number of non smooth problem
    */
-  TimeStepping(SP::TimeDiscretisation td, int nb);
+  TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb =0);
 
   /** Destructor.
   */
@@ -163,6 +172,9 @@ public:
   */
   void computeFreeState();
 
+  /** Reset all lambdas of all interactions */
+  void resetLambdas();
+  
   /** step from current event to next event of EventsManager
   */
   void advanceToEvent();
@@ -171,11 +183,7 @@ public:
   */
   void computeOneStep();
 
-  /** newton algorithm
-   * \param criterion convergence criterion
-   * \param maxStep maximum number of Newton steps
-   */
-  virtual void newtonSolve(double criterion, unsigned int maxStep);
+
 
   /** To known the number of steps performed by the Newton algorithm.
    * \return  the number of steps performed by the Newton algorithm
@@ -233,20 +241,33 @@ public:
     return _isNewtonConverge;
   };
   
+  bool displayNewtonConvergence()
+  {
+    return _displayNewtonConvergence;
+  };
   void setDisplayNewtonConvergence(bool newval)
   {
     _displayNewtonConvergence = newval;
   };
-  bool explicitJacobiansOfRelation()
-  {
-  return  _explicitJacobiansOfRelation;
-  }
   
-  void setExplicitJacobiansOfRelation(bool newval)
+  void setWarnOnNonConvergence(bool newval)
   {
-    _explicitJacobiansOfRelation = newval;
+    _warnOnNonConvergence = newval;
   };
+  bool warnOnNonConvergence()
+  {
+    return _warnOnNonConvergence;
+  };
+  void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
   
+  void displayNewtonConvergenceInTheLoop();
+  
+  void setResetAllLambda(bool newval)
+  {
+    _resetAllLambda = newval;
+  };
+
+
   /** To specify if the output interaction residu must be computed.
    *  \param v set to true when the output interaction residu must be computed
    */

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 /*!\file lcp_avi_caoferris.c
  \brief Solve an LCP by reformulating it as an AVI and the solver by Cao and
 Ferris solves the subsequent AVI.
- \author Olivier Huber
 */
 
 #include "AVI_Solvers.h"
@@ -47,7 +46,7 @@ void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *
   avi_pb.M = problem->M;
   avi_pb.q = problem->q;
   polyhedron poly;
-  avi_pb.poly = &poly;
+  avi_pb.poly.split = &poly;
 
   poly.id = SICONOS_SET_POLYHEDRON;
   poly.size_ineq = s;

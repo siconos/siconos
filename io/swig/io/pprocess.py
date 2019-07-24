@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env @PYTHON_EXECUTABLE@
 
 import OCC
 
@@ -26,8 +26,7 @@ from vtk.util import numpy_support
 
 import sys
 
-#from Siconos.Mechanics import IO
-import siconos.io.mechanics_io as IO
+import siconos.io.mechanics_run as IO
 
 from siconos.io.SimpleGui import get_backend,init_display
 

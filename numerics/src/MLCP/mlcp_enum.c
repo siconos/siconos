@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ dim(v)=nn
 #include <stdlib.h>
 #include <string.h>
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include "mlcp_tool.h"
 #include "NumericsMatrix.h"
 #include <math.h>
@@ -134,7 +135,7 @@ void printCurrentSystem()
   int npm = sNn + sMm;
   printf("printCurrentSystemM:\n");
   NM_dense_display(sM, sMl, npm, 0);
-  printf("printCurrentSystemQ (ie -Q from mlcp beause of linear system MZ=Q):\n");
+  printf("printCurrentSystemQ (ie -Q from mlcp because of linear system MZ=Q):\n");
   NM_dense_display(sQ, sMl, 1, 0);
 }
 void printRefSystem()
@@ -142,7 +143,7 @@ void printRefSystem()
   int npm = sNn + sMm;
   printf("ref M NbLines %d n %d  m %d :\n", sMl, sNn, sMm);
   NM_dense_display(sMref, sMl, npm, 0);
-  printf("ref Q (ie -Q from mlcp beause of linear system MZ=Q):\n");
+  printf("ref Q (ie -Q from mlcp because of linear system MZ=Q):\n");
   NM_dense_display(sQref, sMl, 1, 0);
 }
 int mlcp_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
@@ -207,6 +208,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   sU = z;
   sV = z + problem->n;
   tol = options->dparam[0];
+  int itermax = options->iparam[0];
 
   sMref = problem->M->matrix0;
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
@@ -236,7 +238,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   ipiv = sW2V + sMm;
 
   initEnum(problem->m);
-  while (nextEnum(sW2V))
+  while (nextEnum(sW2V) && itermax-- > 0)
   {
     mlcp_buildM(sW2V, sM, sMref, sNn, sMm, sMl);
     buildQ();
@@ -377,6 +379,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
   /*sW2=w+(sMl-problem->m); sW2 size :m */
   sU = z;
   tol = options->dparam[0];
+  int itermax = options->iparam[0];
 
   sMref = problem->M->matrix0;
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
@@ -411,7 +414,7 @@ void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *z, doub
   *info = 0;
   mlcp_buildIndexInBlock(problem, indexInBlock);
   initEnum(problem->m);
-  while (nextEnum(sW2V))
+  while (nextEnum(sW2V) && itermax-- > 0)
   {
     mlcp_buildM_Block(sW2V, sM, sMref, sNn, sMm, sMl, indexInBlock);
     buildQ();

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ int main(void)
   double W[] = {1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1};
 
 
-  SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(m, n, 3, row, column, W);
+  SparseBlockCoordinateMatrix* MC =  SBCM_new_3x3(m, n, 3, row, column, W);
 
-  SparseBlockStructuredMatrix* M = SBCMToSBM(MC);
+  SparseBlockStructuredMatrix* M = SBCM_to_SBM(MC);
 
-  NumericsMatrix* NM = newSparseNumericsMatrix(m * 3, n * 3, M);
+  NumericsMatrix* NM = NM_new_SBM(m * 3, n * 3, M);
 
-  FrictionContactProblem* FC = frictionContactProblem_new(3, 3, NM, q, mu);
+  FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, 3, NM, q, mu);
 
 //  frictionContact_display(FC);
 
@@ -57,7 +57,7 @@ int main(void)
   free(M->index1_data);
   free(M->index2_data);
   free(M);
-  freeSparseBlockCoordinateMatrix3x3fortran(MC);
+   SBCM_free_3x3(MC);
   free(MC);
   free(FC);
 

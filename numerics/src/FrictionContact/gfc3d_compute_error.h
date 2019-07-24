@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@
 
 /*!\file gfc3d_compute_error.h
   \brief functions related to error computation for friction-contact problems
-  \author Vincent Acary, 26/05/2008
 */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -30,16 +29,22 @@ extern "C"
 {
 #endif
 
-  /** Error computation for friction-contact 3D problem
+  /** Error computation for global friction-contact 3D problem
+   * The computation of the error uses as input the reaction (reaction) and the global velocity (globalVelocity)
+   * The value of the local velocity (velocity) is recomputed
    * \param problem the structure which defines the friction-contact problem
-   * \param reaction
-   * \param velocity
-   * \param globalVelocity
+   * \param[in] reaction
+   * \param[in] velocity
+   * \param[out] globalVelocity
    * \param tolerance value for error computation
+   * \param options pointer to SolverOptions
+   * \param norm normalisation coeff
    * \param[in,out] error value
    * \return 0 if successfull
    */
-  int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, double tolerance, double * error);
+  int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
+                          double* globalVelocity, double tolerance,  SolverOptions * options,
+                          double norm, double * error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

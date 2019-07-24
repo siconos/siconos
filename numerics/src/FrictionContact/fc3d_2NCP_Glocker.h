@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@
   velocity, reaction (the unknowns) and q are vectors of size n. M is a nXn matrix.
 
   and is formulate as:
-  Find \f$reaction_G \in \mathcal{R}^5\f$ such that:\n\n
+  Find \f$reaction_G \in \mathcal{R}^5\f$ such that:
   \f$
   0 \le F_G(reaction_G) \perp reaction_G \ge 0 \\
   \f$

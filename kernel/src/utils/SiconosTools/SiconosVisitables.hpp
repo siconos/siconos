@@ -18,6 +18,7 @@
   REGISTER(NewtonImpactNSL)                            \
   REGISTER(MultipleImpactNSL)                          \
   REGISTER(NewtonImpactFrictionNSL)                    \
+  REGISTER(NewtonImpactRollingFrictionNSL)             \
   REGISTER(Simulation)                                 \
   REGISTER(TimeStepping)                               \
   REGISTER(TimeSteppingD1Minus)                        \
@@ -27,6 +28,7 @@
   REGISTER(OneStepIntegrator)                          \
   REGISTER(EulerMoreauOSI)                             \
   REGISTER(MoreauJeanOSI)                              \
+  REGISTER(MoreauJeanBilbaoOSI)                        \
   REGISTER(MoreauJeanGOSI)                             \
   REGISTER(MoreauJeanDirectProjectionOSI)              \
   REGISTER(MoreauJeanCombinedProjectionOSI)            \
@@ -48,8 +50,10 @@
   REGISTER(SimpleMatrix)                               \
   REGISTER(BlockVector)                                \
   REGISTER(BlockMatrix)                                \
+  REGISTER(SecondOrderDS)                              \
   REGISTER(LagrangianDS)                               \
   REGISTER(LagrangianLinearTIDS)                       \
+  REGISTER(LagrangianLinearDiagonalDS)                 \
   REGISTER(FirstOrderLinearDS)                         \
   REGISTER(FirstOrderNonLinearDS)                      \
   REGISTER(FirstOrderLinearTIDS)                       \

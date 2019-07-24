@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-
+#include "numerics_verbose.h"
 #include "op3x3.h"
 #include "SparseBlockMatrix.h"
 #include "fc3d_Solvers.h"
@@ -31,10 +31,6 @@
 #include <assert.h>
 #include "Friction_cst.h"
 #include "SiconosLapack.h"
-
-#ifdef HAVE_MPI
-#include <mpi.h>
-#endif
 
 void fc3d_NaturalMapFunction(
   unsigned int problemSize,
@@ -176,10 +172,6 @@ int fc3d_nonsmooth_Newton_NaturalMap_setDefaultSolverOptions(
 #endif
 
   options->internalSolvers = NULL;
-
-#ifdef HAVE_MPI
-  options->solverData = MPI_COMM_NULL;
-#endif
 
   return 0;
 }

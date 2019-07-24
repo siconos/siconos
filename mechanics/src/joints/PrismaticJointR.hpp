@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 
 #include <MechanicsFwd.hpp>
 #include <SiconosFwd.hpp>
-#include <NewtonEulerR.hpp>
+#include <NewtonEulerJointR.hpp>
 
 /** \class PrismaticJointR
  *  \brief This class implements a prismatic joint between one or two Newton/Euler Dynamical system
@@ -34,16 +34,14 @@
  *
  *
  */
-class PrismaticJointR : public NewtonEulerR
+class PrismaticJointR : public NewtonEulerJointR
 {
 protected:
   /** serialization hooks
    */
   ACCEPT_SERIALIZATION(PrismaticJointR);
-  PrismaticJointR(): NewtonEulerR() {};
 
-public:
-  /** Axis of the prismatic point in the inertial frame of reference
+  /** Axis of the prismatic point in the q1 frame of reference
    */
   SP::SiconosVector _axis0;
 
@@ -74,32 +72,59 @@ public:
   double _G10G20d1y;
   double _G10G20d1z;
 
-  double _q1cq202;
-  double _q1cq203;
-  double _q1cq204;
+  double _cq2q101;
+  double _cq2q102;
+  double _cq2q103;
+  double _cq2q104;
 
-  /** constructor from two dynamical systems and an axis
-   *  \param d1 first  DynamicalSystem link by the  joint
-   *  \param d2 second  DynamicalSystem link by the joint
-   * \param axis SiconosVector of size 3 that defines the prismatic axis
-   *  in the body  frame of d1 ?
+  /** Return the normal of the linear DoF axis.
+   * \param ans
+   * \param q0
+   * \param axis must be 0
+   * \param absoluteRef
    */
-  PrismaticJointR(SP::NewtonEulerDS d1, SP::NewtonEulerDS d2, SP::SiconosVector axis);
+  virtual void _normalDoF(SiconosVector& ans, const BlockVector& q0, int axis,
+                          bool absoluteRef=true);
 
+public:
 
-  /** constructor from one dynamical systems and an axis
-   *  \param d1 the  DynamicalSystem link by the  joint
-   * \param axis SiconosVector of size 3 that defines the prismatic axis
-   *  in the inertial frame of reference
+  /** Empty constructor. The relation may be initialized later by
+   * setPoint, setAbsolute, and setBasePositions. */
+  PrismaticJointR();
+
+  /** Constructor based on one or two dynamical systems and an axis.
+   *  \param d1 first DynamicalSystem linked by the joint.
+   *  \param d2 second DynamicalSystem linked by the joint, or NULL
+   *            for absolute frame.
+   *  \param axis SiconosVector of size 3 that defines the prismatic axis.
+   *  \param absoluteRef if true, A is in the absolute frame,
+   *                     otherwise A is in d1 frame.
    */
-  PrismaticJointR(SP::NewtonEulerDS d1, SP::SiconosVector axis);
+  PrismaticJointR(SP::SiconosVector axis, bool absoluteRef,
+                  SP::NewtonEulerDS d1 = SP::NewtonEulerDS(),
+                  SP::NewtonEulerDS d2 = SP::NewtonEulerDS());
 
-
-  void computeFromInitialPosition(SP::SiconosVector q2, SP::SiconosVector q1=SP::SiconosVector());
+  /** Initialize the joint constants based on the provided base positions.
+   * \param q1 A SiconosVector of size 7 indicating translation and
+   *           orientation in inertial coordinates.
+   * \param q2 An optional SiconosVector of size 7 indicating
+   *           translation and orientation; if null, the inertial
+   *           frame will be considered as the second base. */
+  virtual void setBasePositions(SP::SiconosVector q1,
+                                SP::SiconosVector q2 = SP::SiconosVector());
 
   void displayInitialPosition();
 
   void computeV1V2FromAxis();
+
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(double time, BlockVector& q0, SiconosVector& y,
+                           unsigned int axis);
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(double time, Interaction& inter,
+                               SP::BlockVector q0, SimpleMatrix& jachq,
+                               unsigned int axis);
 
   /** destructor
    */
@@ -133,8 +158,7 @@ public:
   void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
              double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
 
-  void Jd2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
-           double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
+  void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13);
 
   void DotJd1d2(double Xdot1, double Ydot1, double Zdot1, double qdot10, double qdot11, double qdot12, double qdot13,
                 double Xdot2, double Ydot2, double Zdot2, double qdot20, double qdot21, double qdot22, double qdot23);
@@ -146,7 +170,19 @@ public:
   /** Get the number of constraints defined in the joint
       \return the number of constraints
    */
-  static unsigned int numberOfConstraints() { return 5; }
+  virtual unsigned int numberOfConstraints() { return 5; }
 
+  /** Return the number of degrees of freedom of this joint.
+      \return the number of degrees of freedom (DoF)
+   */
+  virtual unsigned int numberOfDoF() { return 2; }
+
+  /** Return the type of a degree of freedom of this joint.
+      \return the type of the degree of freedom (DoF)
+  */
+  virtual DoF_Type typeOfDoF(unsigned int axis) {
+    if (axis==0) return DOF_TYPE_LINEAR;
+    else return DOF_TYPE_INVALID;
+  };
 };
 #endif  //PrismaticJointRELATION_H

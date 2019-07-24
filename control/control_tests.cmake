@@ -1,7 +1,5 @@
 include(tools4tests)
 
-set(TEST_WRAP FALSE)
-
 if(WITH_${COMPONENT}_TESTING)
   # We don't use COMPILE_WITH since we don't want to link cppunit with the
   # kernel library
@@ -15,8 +13,12 @@ if(WITH_${COMPONENT}_TESTING)
   # Simulation tests
   BEGIN_TEST(src/tests)
   
-  NEW_TEST(tests PIDTest.cpp SMCTest.cpp ObserverTest.cpp)
+  NEW_TEST(tests)
   
+  IF(HAS_FORTRAN)
+    NEW_TEST(ControlTests PIDTest.cpp SMCTest.cpp ObserverTest.cpp TwistingTest.cpp)
+  ENDIF(HAS_FORTRAN)
+
   END_TEST()
   
 endif()

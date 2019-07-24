@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 
+#include "CSparseMatrix_internal.h"
 #include "SiconosMatrix.hpp"
 #include "SiconosAlgebra.hpp"
 #include <boost/numeric/ublas/matrix_sparse.hpp>
@@ -150,8 +151,8 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
 {
   assert(csc);
   double* Mx = csc->x; // data
-  csi* Mi = csc->i; // row indx
-  csi* Mp = csc->p; // column pointers
+  CS_INT* Mi = csc->i; // row indx
+  CS_INT* Mp = csc->p; // column pointers
 
   assert(Mp[col_off] >= 0);
   size_t nz = csc->p[col_off];
@@ -159,7 +160,7 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
   size_t nrow = size(0);
   size_t ncol = size(1);
 
-  csi pval = Mp[col_off];
+  CS_INT pval = Mp[col_off];
 
   if (_num == 1) //dense
   {
@@ -170,14 +171,19 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
       {
         // col-major
         double elt_val = arr[i + j*nrow];
+        // std::cout << " a(i=" << i << ",j=" << j << ") = "<< elt_val << std::endl;
         if (fabs(elt_val) > tol)
         {
           Mx[pval] = elt_val;
           Mi[pval] = i + row_off;
+          // std::cout << "Mx[" <<pval <<"] = " << Mx[pval]<<   std::endl;
+          // std::cout << "Mp[" <<pval <<"] = " << Mi[pval]<<   std::endl;
           ++pval;
         }
       }
+      // std::cout << "joff" << joff << std::endl;
       Mp[++joff] = pval;
+
     }
   }
   else if (_num == 4)
@@ -208,4 +214,38 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
   }
 
   return true;
+}
+
+bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t col_off, double tol)
+{
+  assert(triplet);
+  size_t nrow = size(0);
+  size_t ncol = size(1);
+
+  if (_num == 1) //dense
+  {
+    double* arr = getArray();
+    for (size_t j = 0; j < ncol; ++j)
+    {
+      for (size_t i = 0; i < nrow; ++i)
+      {
+        // col-major
+
+        CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow] );
+      }
+    }
+  }
+  else
+  {
+     SiconosMatrixException::selfThrow("SiconosMatrix::fillCSC not implemented for the given matrix type");
+  }
+
+  return true;
+}
+
+
+std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm)
+{
+  os << sm.toString();
+  return os;
 }

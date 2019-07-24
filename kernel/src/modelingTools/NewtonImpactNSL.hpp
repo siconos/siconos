@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,22 +24,24 @@
 #include "NonSmoothLaw.hpp"
 
 /** Newton impact Non Smooth Law
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) June 29, 2004
- *
- * This class formalizes the Newton Impact law together with a complementarity condition. i.e.
- * \f[
- * \left\{\begin{array}{l}
- * y \geq 0, \lambda \geq 0, y^{T} \lambda=0\\
- *  if y \leq 0 \quad \mbox{then} \quad \dot y(t^{+}) - e \dot y(t^{-}) \geq 0, \quad  \lambda \geq 0, (\dot y(t^{+}) - e \dot y(t^{-}))^{T} \lambda=0
- * \end{array}\right.
- * \f]
- *
- * nsLawSize is equal to 1.
- *
- */
+    
+  This class formalizes the Newton Impact law together with a complementarity condition. i.e.
+
+  \rst
+
+  .. math::
+      :nowrap:
+      
+      \left\{\begin{array}{l}
+      y \geq 0, \lambda \geq 0, y^{T} \lambda=0\\
+      if y \leq 0 \quad \mbox{then} \quad \\dot y(t^{+}) - e \\dot y(t^{-}) \geq 0, \quad  \lambda \geq 0, (\\dot y(t^{+}) - e \\dot y(t^{-}))^{T} \lambda=0
+      \end{array}\right.
+
+  \endrst
+ 
+  nsLawSize is equal to 1.
+ 
+*/
 class NewtonImpactNSL : public NonSmoothLaw
 {
 
@@ -61,6 +63,9 @@ public:
   *  \param e the value of the coefficient of restitution
   */
   NewtonImpactNSL(double e);
+
+  /** Apply multiple-axis impact */
+  NewtonImpactNSL(unsigned int size, double e);
 
   /** destructor
    */

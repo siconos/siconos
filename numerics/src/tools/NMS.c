@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -384,7 +384,7 @@ void free_NMS_data(NMS_data* data)
   free(data->checkpoint);
   free(data->bestpoint);
   free(data->workspace);
-  freeNumericsMatrix(data->H);
+  NM_free(data->H);
   free(data->H);
   free_siconos_set(data->set);
   free(data->set);

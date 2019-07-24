@@ -4,7 +4,7 @@ Test purpose --> compare with reference results.
 import os
 from siconos.tests_setup import working_dir
 from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
-    ComplementarityConditionNSL, Interaction, Model, EulerMoreauOSI, \
+    ComplementarityConditionNSL, Interaction, NonSmoothDynamicalSystem, EulerMoreauOSI, \
     TimeDiscretisation, LCP, TimeStepping
 from numpy import empty
 from siconos.kernel import SimpleMatrix, getMatrix
@@ -44,16 +44,16 @@ def test_diode_bridge():
     diode_bridge_relation.setDPtr(D)
 
     nslaw = ComplementarityConditionNSL(4)
-    bridge_interaction = Interaction(4, nslaw, diode_bridge_relation, 1)
+    bridge_interaction = Interaction(nslaw, diode_bridge_relation)
 
     # Model
-    diode_bridge = Model(t0, total_time, model_title)
-
+    diode_bridge = NonSmoothDynamicalSystem(t0, total_time)
+    diode_bridge.setTitle(model_title)
     #  add the dynamical system in the non smooth dynamical system
-    diode_bridge.nonSmoothDynamicalSystem().insertDynamicalSystem(bridge_ds)
+    diode_bridge.insertDynamicalSystem(bridge_ds)
 
     #   link the interaction and the dynamical system
-    diode_bridge.nonSmoothDynamicalSystem().link(bridge_interaction, bridge_ds)
+    diode_bridge.link(bridge_interaction, bridge_ds)
 
     # Simulation
 
@@ -67,16 +67,14 @@ def test_diode_bridge():
     non_smooth_problem = LCP()
 
     # (4) Simulation setup with (1) (2) (3)
-    bridge_simulation = TimeStepping(time_discretisation,
+    bridge_simulation = TimeStepping(diode_bridge,time_discretisation,
                                      integrator, non_smooth_problem)
 
-    # simulation initialization
-    diode_bridge.setSimulation(bridge_simulation)
-    diode_bridge.initialize()
+
     k = 0
     h = bridge_simulation.timeStep()
     # Number of time steps
-    N = (total_time - t0) / h
+    N = int((total_time - t0) / h)
 
     # Get the values to be plotted
     # ->saved in a matrix dataPlot

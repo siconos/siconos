@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 
 /*!\file fc3d_Path.h
   \brief Typedef and functions declarations related to NCP-Path solver for 3 dimension frictional contact problems.
-  \author Franck Perignon
 
   Each solver must have 4 functions in its interface:
   - initialize: link local static variables to the global ones (M,q,...)

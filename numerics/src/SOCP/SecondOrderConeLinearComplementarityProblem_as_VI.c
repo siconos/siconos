@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,6 @@ void Projection_VI_SOCLCP(void *viIn, double *x, double *PX)
   for (cone = 0 ; cone < soclcp->nc  ; ++cone)
   {
     dim=soclcp->coneIndex[cone+1]-soclcp->coneIndex[cone];
-    projectionOnSecondOrderCone(&PX[soclcp->coneIndex[cone]], soclcp->mu[cone], dim);
+    projectionOnSecondOrderCone(&PX[soclcp->coneIndex[cone]], soclcp->tau[cone], dim);
   }
 }

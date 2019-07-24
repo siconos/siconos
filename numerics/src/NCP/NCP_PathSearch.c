@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@
 #include "pivot-utils.h"
 #include "NMS.h"
 #include "NSSTools.h"
+
+#include "sanitizer.h"
 
 #include "NCP_PathSearch.h"
 
@@ -153,9 +155,9 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
 
   data_NMS->ref_merit = .5 * cblas_ddot(n, data_NMS->ls_data->F_merit, 1, data_NMS->ls_data->F_merit, 1);
   data_NMS->merit_bestpoint = data_NMS->ref_merit;
-  cblas_dcopy(n, z, 1, NMS_checkpoint_0(data_NMS, n), 1);
-  cblas_dcopy(n, z, 1, NMS_checkpoint_T(data_NMS, n), 1);
-  cblas_dcopy(n, z, 1, NMS_bestpoint(data_NMS, n), 1);
+  cblas_dcopy_msan(n, z, 1, NMS_checkpoint_0(data_NMS, n), 1);
+  cblas_dcopy_msan(n, z, 1, NMS_checkpoint_T(data_NMS, n), 1);
+  cblas_dcopy_msan(n, z, 1, NMS_bestpoint(data_NMS, n), 1);
   /* -------------------- end init ---------------------------*/
 
   int nms_failed = 0;
@@ -381,7 +383,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
 
   if (!preAlloc)
   {
-    freeNumericsMatrix(problem->nabla_F);
+    NM_free(problem->nabla_F);
     free(problem->nabla_F);
     problem->nabla_F = NULL;
     free(options->dWork);

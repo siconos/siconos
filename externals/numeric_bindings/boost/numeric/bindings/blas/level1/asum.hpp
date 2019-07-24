@@ -33,6 +33,7 @@
 // * for CUBLAS, define BOOST_NUMERIC_BINDINGS_BLAS_CUBLAS
 // * netlib-compatible BLAS is the default
 //
+
 #if defined BOOST_NUMERIC_BINDINGS_BLAS_CBLAS
 #include <boost/numeric/bindings/blas/detail/cblas.h>
 #include <boost/numeric/bindings/blas/detail/cblas_option.hpp>
@@ -55,6 +56,7 @@ namespace blas {
 //
 namespace detail {
 
+  
 #if defined BOOST_NUMERIC_BINDINGS_BLAS_CBLAS
 //
 // Overloaded function for dispatching to
@@ -81,7 +83,7 @@ inline double asum( const int n, const double* x, const int incx ) {
 //
 inline float asum( const int n, const std::complex<float>* x,
         const int incx ) {
-    return cblas_scasum( n, x, incx );
+  return cblas_scasum( n, OPENBLAS_CONST_FLOAT_CAST(x), incx );
 }
 
 //
@@ -91,7 +93,7 @@ inline float asum( const int n, const std::complex<float>* x,
 //
 inline double asum( const int n, const std::complex<double>* x,
         const int incx ) {
-    return cblas_dzasum( n, x, incx );
+  return cblas_dzasum( n, OPENBLAS_CONST_DOUBLE_CAST(x), incx );
 }
 
 #elif defined BOOST_NUMERIC_BINDINGS_BLAS_CUBLAS

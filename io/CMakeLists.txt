@@ -4,8 +4,6 @@
 
 set(COMPONENT io)
 message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
-# Name used for the target to be built
-set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
 # --- Search component dependencies ---
 if(WITH_SERIALIZATION)
@@ -47,10 +45,13 @@ set(${COMPONENT}_HDRS_EXCLUDE_DIR)
 
 # --- Serialization setup ---
 set(GENERATED_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
+set(GENERATED_HEADER_KERNEL ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullKernelGenerated.hpp)
+
 
 if(WITH_SERIALIZATION)
   if(WITH_GENERATION)
     FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
+    FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullKernelGenerated.hpp)
 
     set(io_targets ${COMPONENTS})
 
@@ -71,12 +72,12 @@ if(WITH_SERIALIZATION)
     if(HAVE_SICONOS_CONTROL)
       set(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES} ../control/src/SiconosControl.hpp)
     endif()
-    
+
     # append local headers directories to GENERATED_INCLUDES)
     foreach(_DIR ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES})
       list(APPEND GENERATED_INCLUDES -I${_DIR})
     endforeach()
-    
+
     if(MPI_FOUND)
       FOREACH(_DIR ${MPI_CXX_INCLUDE_PATH})
         SET(GENERATED_INCLUDES ${GENERATED_INCLUDES} -I${_DIR})
@@ -89,8 +90,20 @@ if(WITH_SERIALIZATION)
 
     ADD_CUSTOM_COMMAND(
       OUTPUT ${GENERATED_HEADER}
-      DEPENDS ${GENERATED_DEPENDENCIES}
+      DEPENDS kernel-doxy2xml ${GENERATED_DEPENDENCIES}
+      ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
+      ${CMAKE_SOURCE_DIR}/io/tools/builder_common.py
       ${GENERATED_COMMAND})
+
+    SET(GENERATED_COMMAND_KERNEL COMMAND ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
+      --targets=kernel ${GENERATED_INCLUDES}
+      --output=${GENERATED_HEADER_KERNEL}
+      --source="${CMAKE_CURRENT_SOURCE_DIR}/../" --build="${CMAKE_BINARY_DIR}")
+
+    ADD_CUSTOM_COMMAND(
+      OUTPUT ${GENERATED_HEADER_KERNEL}
+      DEPENDS kernel-doxy2xml ${GENERATED_DEPENDENCIES}
+      ${GENERATED_COMMAND_KERNEL})
   endif()
 endif()
 
@@ -105,9 +118,12 @@ endif()#
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
-set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-list(APPEND ${COMPONENT}_LINK_LIBRARIES kernel)
-list(APPEND ${COMPONENT}_LINK_LIBRARIES numerics)
+list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
+list(APPEND ${COMPONENT}_LINK_LIBRARIES kernel numerics)
+if (CMAKE_SKIP_RPATH)
+  # if no RPATH, then linking does not work for tests without specifying externals
+  list(APPEND ${COMPONENT}_LINK_LIBRARIES externals)
+endif()
 
 if(HAVE_SICONOS_CONTROL)
   list(APPEND ${COMPONENT}_LINK_LIBRARIES control)
@@ -115,20 +131,16 @@ endif()
 if(HAVE_SICONOS_MECHANICS)
   list(APPEND ${COMPONENT}_LINK_LIBRARIES mechanics)
 endif()
+if(HAVE_SICONOS_MECHANISMS)
+  list(APPEND ${COMPONENT}_LINK_LIBRARIES mechanisms)
+endif()
 
 # remove debug & optimized inside LINK_LIBRARIES...
-foreach(_L ${${COMPONENT}_LINK_LIBRARIES})
-  if(NOT ${_L} STREQUAL "debug")
-    if(NOT ${_L} STREQUAL "optimized")
-      list(APPEND _LL ${_L})
-    endif()
-  endif()
-endforeach()
-set(${COMPONENT}_LINK_LIBRARIES ${_LL})
+list(REMOVE_ITEM ${COMPONENT}_LINK_LIBRARIES "debug" "optimized")
 
 # add dependencies for header generation
 add_custom_target(SerializersGeneration ALL
-  DEPENDS ${GENERATED_HEADER})
+  DEPENDS ${GENERATED_HEADER} ${GENERATED_HEADER_KERNEL})
 
 include(LibraryProjectSetup)
 

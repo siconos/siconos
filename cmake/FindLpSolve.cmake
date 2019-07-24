@@ -43,12 +43,12 @@ ELSE()
   # Library == lpsolve55 
   # First, search in (optionnaly) user-defined LpSolve_DIR
   # Try:
-  # - Lp_Solve_DIR
-  # - Lp_Solve_DIR/lib
-  # - Lp_Solve_DIR/lib/CMAKE_LIBRARY_ARCHITECTURE (for example on Debian like system : lib/x86_64-linux-gnu
+  # - LpSolve_DIR
+  # - LpSolve_DIR/lib
+  # - LpSolve_DIR/lib/CMAKE_LIBRARY_ARCHITECTURE (for example on Debian like system : lib/x86_64-linux-gnu
   if(LpSolve_DIR)
     find_library(LpSolve_LIBRARY lpsolve55
-      PATHS ${Lp_Solve_DIR}
+      PATHS ${LpSolve_DIR}
       PATH_SUFFIXES lib lib/${CMAKE_LIBRARY_ARCHITECTURE} 
       )
   endif()

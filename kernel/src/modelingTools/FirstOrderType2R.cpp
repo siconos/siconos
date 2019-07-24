@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES 1
-
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include <debug.h>
 
 
@@ -54,33 +54,44 @@ FirstOrderType2R::FirstOrderType2R(const std::string& pluginh, const std::string
   setComputeJacglambdaFunction(SSLH::getPluginName(pluginJacobianglambda), SSLH::getPluginFunctionName(pluginJacobianglambda));
 }
 
-void FirstOrderType2R::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+
+void FirstOrderType2R::initialize(Interaction& inter)
 {
+  FirstOrderR::initialize(inter);
 
-  // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   unsigned int sizeDS = inter.getSizeOfDS();
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+
+  _vec_r.reset(new SiconosVector(sizeDS));
+  _vec_x.reset(new SiconosVector(sizeDS));
+  _vec_z.reset(new SiconosVector(sizeZ));
 
 
-//  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
-  workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderR::g_alpha].reset(new SiconosVector(sizeDS));
 
   if (!_C)
-    workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
+    relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
   if (!_D)
-    workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+    relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+  if (!_F)
+    relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
+  if (!_B)
+    relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
+  if (!_K)
+    relationMat[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
+
 //  if (!_jacgx)
 //  {
-//    workM[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
+//    relationMat[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
     // TODO add this back to workV of the DS -> needed for X partial NS
 //  }
-  if (!_B)
-    workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
-
-
 }
+
+
+
+void FirstOrderType2R::checkSize(Interaction& inter){}
 
 void FirstOrderType2R::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& y)
 {
@@ -92,121 +103,33 @@ void FirstOrderType2R::computeg(double time, SiconosVector& lambda, SiconosVecto
   ((Type2PtrG)(_pluging->fPtr))(lambda.size(), lambda.getArray(), r.size(), r.getArray());
 }
 
-
-void FirstOrderType2R::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned int level)
 {
-  DEBUG_PRINT("FirstOrderType2R::computeOutput \n");
-  // compute the new y  obtained by linearisation (see DevNotes)
-  // y_{alpha+1}_{k+1} = h(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
-  //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
-  //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
-  // or equivalently
-  // y_{alpha+1}_{k+1} = y_{alpha}_{k+1} - ResiduY_{k+1}^{alpha}
-  //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
-  //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
+  DEBUG_BEGIN("FirstOrderType2R::computeOutput \n");
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  BlockVector& x = *DSlink[FirstOrderR::x];
+  BlockVector& z = *DSlink[FirstOrderR::z];
+  // copy into Siconos continuous memory vector
+  SP::SiconosVector x_vec(new SiconosVector(x));
+  SP::SiconosVector z_vec(new SiconosVector(z));
   SiconosVector& y = *inter.y(level);
+  SiconosVector& lambda = *inter.lambda(level);
+  computeh(time, *x_vec, lambda, y);
   DEBUG_EXPR(y.display());
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-  SiconosMatrix& osnsM = *interProp.block;
-
-  if (_D)
-    prod(*_D, *(inter.lambdaOld(level)), y, true);
-  else
-    prod(*workM[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
-
-  y *= -1.0;
-  //SiconosVector yOld = *inter.yOld(0); // Retrieve  y_{alpha}_{k+1}
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : yOld(level) \n");
-  DEBUG_EXPR(inter.yOld(level)->display());
-
-  y += *inter.yOld(level);
-
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : ResiduY() \n");
-  DEBUG_EXPR(inter.residuY()->display());
-
-  y -= *inter.residuY();
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : y(level) \n");
-  DEBUG_EXPR(y.display());
-
-  BlockVector& deltax = *DSlink[FirstOrderR::deltax];
-  //  deltax -= *(DSlink[FirstOrderR::xold)];
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : deltax \n");
-  DEBUG_EXPR(deltax.display());
-
-  if (_C)
-    prod(*_C, deltax, y, false);
-  else
-    prod(*workM[FirstOrderR::mat_C], deltax, y, false);
-
-
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : y before osnsM\n");
-  DEBUG_EXPR(y.display());
-  prod(osnsM, *inter.lambda(level), y, false);
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : new linearized y \n");
-  DEBUG_EXPR(y.display());
-
-  SiconosVector& x = *workV[FirstOrderR::vec_x];
-  x = *DSlink[FirstOrderR::x];
-
-  computeh(time, x, *inter.lambda(level), *inter.Halpha());
-  DEBUG_PRINT("FirstOrderType2R::computeOutput : new Halpha \n");
-  DEBUG_EXPR(inter.Halpha()->display());
-
+  DEBUG_END("FirstOrderType2R::computeOutput \n");
 }
 
-void FirstOrderType2R::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned int level)
 {
-  DEBUG_PRINT("FirstOrderType2R::computeInput \n");
-  // compute the new r  obtained by linearisation
-  // r_{alpha+1}_{k+1} = g(lambda_{k+1}^{alpha},t_k+1)
-  //                     + B_{k+1}^alpha ( lambda_{k+1}^{alpha+1}- lambda_{k+1}^{alpha} )
-
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-
-  SiconosVector lambda = *inter.lambda(level);
-  lambda -= *(inter.lambdaOld(level));
-
-  //  std::cout<<"FirstOrderType2R::computeInput : diff lambda"<<endl;
-  //  inter.lambdaOld(level)->display();
-  //  lambda->display();
-  //  _lambda->display();
-  //  std::cout<<"FirstOrderType2R::computeInput : g_alpha"<<endl;
-  //  _workX->display();
-  if (_B)
-    prod(*_B, lambda, *workV[FirstOrderR::g_alpha], false);
-  else
-    prod(*workM[FirstOrderR::mat_B], lambda, *workV[FirstOrderR::g_alpha], false);
-  //  std::cout<<"FirstOrderType2R::computeInput : result g_alpha - B*diffL"<<endl;
-  //  _workX->display();
-
-  *DSlink[FirstOrderR::r] += *workV[FirstOrderR::g_alpha];
-
-  //compute the new g_alpha
-  computeg(time, *inter.lambda(level), *workV[FirstOrderR::g_alpha]);
-
-
-
-}
-
-void FirstOrderType2R::prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)
-{
-
-  /* compute the contribution in xPartialNS for the next iteration */
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-  DEBUG_PRINT("FirstOrderType2R::preparNewtonIteration\n");
-  if (_B)
-    prod(*_B, *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
-  else
-    prod(*workM[FirstOrderR::mat_B], *inter.lambda(0), *workV[FirstOrderR::vec_x], true);
-
-  *DSlink[FirstOrderR::xPartialNS] = *workV[FirstOrderR::g_alpha];
-  *DSlink[FirstOrderR::xPartialNS] -= *workV[FirstOrderR::vec_x];
+  DEBUG_BEGIN("FirstOrderType2R::computeInput \n");
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  // copy into Siconos continuous memory vector
+  SP::SiconosVector r_vec(new SiconosVector(*DSlink[FirstOrderR::r]));
+  SiconosVector& lambda = *inter.lambda(level);
+  computeg(time, lambda,  *r_vec);
+  *DSlink[FirstOrderR::r] = *r_vec;
+  DEBUG_EXPR(DSlink[FirstOrderR::r]->display());
+  DEBUG_END("FirstOrderType2R::computeInput \n");
 }
 
 void FirstOrderType2R::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D)
@@ -218,23 +141,23 @@ void FirstOrderType2R::computeJachx(double time, SiconosVector& x, SiconosVector
   RuntimeException::selfThrow("FirstOrderType2R::computeJachx must be overload.");
 }
 
-void FirstOrderType2R::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void FirstOrderType2R::computeJach(double time, Interaction& inter)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
+  DEBUG_BEGIN("FirstOrderType2R::computeJach\n");
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+
   if (!_C)
   {
-    SiconosVector& x = *workV[FirstOrderR::vec_x];
-    x = *DSlink[FirstOrderR::x];
-    computeJachx(time, x, *inter.lambda(0), *workM[FirstOrderR::mat_C]);
+    *_vec_x = *DSlink[FirstOrderR::x];
+    computeJachx(time, *_vec_x, *inter.lambda(0), *relationMat[FirstOrderR::mat_C]);
   }
   if (!_D)
   {
-    SiconosVector& x = *workV[FirstOrderR::vec_x];
-    x = *DSlink[FirstOrderR::x];
-    computeJachlambda(time, x, *inter.lambda(0), *workM[FirstOrderR::mat_D]);
+    *_vec_x = *DSlink[FirstOrderR::x];
+    computeJachlambda(time, *_vec_x, *inter.lambda(0), *relationMat[FirstOrderR::mat_D]);
   }
+  DEBUG_END("FirstOrderType2R::computeJach\n");
 }
 
 void FirstOrderType2R::computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B)
@@ -242,11 +165,13 @@ void FirstOrderType2R::computeJacglambda(double time, SiconosVector& lambda, Sim
   RuntimeException::selfThrow("FirstOrderType2R::computeJacglambda must be overload.");
 }
 
-void FirstOrderType2R::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+void FirstOrderType2R::computeJacg(double time, Interaction& inter)
 {
+  DEBUG_BEGIN("FirstOrderType2R::computeJacg\n");
   if (!_B)
   {
-    VectorOfSMatrices& workM = *interProp.workMatrices;
-    computeJacglambda(time, *inter.lambda(0), *workM[FirstOrderR::mat_B]);
+    VectorOfSMatrices& relationMat = inter.relationMatrices();
+    computeJacglambda(time, *inter.lambda(0), *relationMat[FirstOrderR::mat_B]);
   }
+  DEBUG_END("FirstOrderType2R::computeJacg\n");
 }

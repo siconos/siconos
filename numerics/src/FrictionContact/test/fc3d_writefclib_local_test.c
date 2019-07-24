@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ static int write_test_fclib(char * filename)
   /*...*/
 
   /* an attempt : we write the problem in the file and read it again
-     this does not work because sparseToSBM eliminates some zeros
+     this does not work because SBM_from_csparse eliminates some zeros
   FrictionContactProblem* problem_from_file = frictionContact_fclib_read(basename);
 
   frictionContact_fclib_write(problem1,
@@ -94,9 +94,9 @@ static int write_test_fclib(char * filename)
                               basename);
 
 
-  printSBM(problem1->M->matrix1);
+  SBM_print(problem1->M->matrix1);
 
-  printSBM(problem_from_file->M->matrix1);
+  SBM_print(problem_from_file->M->matrix1);
 
   info += !(problem_from_file->M->matrix1->filled1 == problem1->M->matrix1->filled1);
   info += !(problem_from_file->M->matrix1->filled2 == problem1->M->matrix1->filled2);
@@ -111,8 +111,8 @@ static int write_test_fclib(char * filename)
     info += !(problem_from_file->M->matrix1->index2_data[i] == problem1->M->matrix1->index2_data[i]);
     }*/
 
-  freeFrictionContactProblem(problem);
-  freeFrictionContactProblem(problem1);
+  frictionContactProblem_free(problem);
+  frictionContactProblem_free(problem1);
   free(basename);
   free(title);
   free(description);

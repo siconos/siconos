@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 */
 
 /*! \file BlockVector.hpp
-  \brief Object to handle vectors of vectors ( ... of vectors)
+  \brief Object to handle vectors of vectors
 */
 
 #ifndef BLOCKVECTOR_H
@@ -25,10 +25,7 @@
 
 #include "SiconosAlgebraTypeDef.hpp"
 
-/** Object to handle block-vectors (ie list of SP::SiconosVector)
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
+/** "Block" vector : container (list) of SiconosVector
  *
  * A block vector is a stl vector that handles pointers to SiconosVector.
  *
@@ -52,9 +49,23 @@ private:
   /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
   SP::Index _tabIndex;
 
+  /* recompute the _sizeV */
+  void updateSizeV();
+
+  /* recompute the _tabIndex */
+  void updateTabIndex();
+
+
+
 public:
 
-  void setBlock(const SiconosVector&, unsigned int, unsigned int, unsigned int);
+  /** Set a subblock of the current vector with the content (copy) of a SiconosVector
+      \param input the vector to be copied
+      \param size_block size of the block to be copied
+      \param start_in starting position in input vector of the block to be copied
+      \param start_out starting position in current vector of the block to be filled in.
+   */
+  void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in, unsigned int start_out);
 
   /** default contructor
    */
@@ -71,7 +82,17 @@ public:
    */
   BlockVector(SP::SiconosVector v1, SP::SiconosVector v2);
 
+  /** contructor with a BlockVector of n (numberOfBlocks) blocks
+   * of the same size (dim) filled with a new vector
+   *  \param numberOfBlocks number of blocks
+   *  \param dim dimension of the vector
+   */
   BlockVector(unsigned int numberOfBlocks, unsigned int dim);
+
+  /** contructor with a BlockVector of n (numberOfBlocks) blocks that point on NULL
+   *  \param numberOfBlocks number of blocks
+   */
+  BlockVector(unsigned int numberOfBlocks);
 
   /** destructor
    */
@@ -130,7 +151,7 @@ public:
   /** get the number of Blocks
    *  \return unsigned int
    */
-  inline unsigned int getNumberOfBlocks() const
+  inline unsigned int numberOfBlocks() const
   {
     return _tabIndex->size();
   };
@@ -149,6 +170,18 @@ public:
   /** display data on standard output
    */
   void display(void) const;
+
+  /** put data of the vector into a std::string
+   * \return std::string
+   */
+  std::string toString() const;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param bv a BlockVector
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
 
   /** return the element vector[i]
    *  \param i an unsigned int
@@ -203,6 +236,11 @@ public:
    * \param v a SiconosVector
    */
   void setVectorPtr(unsigned int pos, SP::SiconosVector v);
+
+  /** set the vector array of _vect
+   * \param v a VectorOfVectors
+   */
+  void setAllVect(VectorOfVectors& v);
 
   /** get the vector at position i(ie this for Simple and block i for BlockVector)
    *  \param pos block number

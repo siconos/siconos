@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ using namespace RELATION;
 LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacobianhq):
   LagrangianR(ScleronomousR)
 {
-  zeroPlugin();
+  _zeroPlugin();
   setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
 
   _pluginJachq->setComputeFunction(pluginJacobianhq);
@@ -51,7 +51,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, con
 LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginDotJacobianhq):
   LagrangianR(ScleronomousR)
 {
-  zeroPlugin();
+  _zeroPlugin();
   setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
 
   _pluginJachq->setComputeFunction(pluginJacobianhq);
@@ -61,24 +61,27 @@ LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, con
 
 
 
-void LagrangianScleronomousR::zeroPlugin()
+void LagrangianScleronomousR::_zeroPlugin()
 {
-  LagrangianR::zeroPlugin();
+  LagrangianR::_zeroPlugin();
   _pluginJachq.reset(new PluggedObject());
   _plugindotjacqh.reset(new PluggedObject());
 }
 
-void LagrangianScleronomousR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianScleronomousR::initialize(Interaction& inter)
 {
-  if (_plugindotjacqh && _plugindotjacqh->fPtr)
+  if (!_jachq)
   {
-    if (!_dotjachq)
-    {
-      unsigned int sizeY = inter.getSizeOfY();
-      unsigned int sizeDS = inter.getSizeOfDS();
-      _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
-    }
+    unsigned int sizeY = inter.dimension();
+    unsigned int sizeDS = inter.getSizeOfDS();
+    _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
   }
+}
+
+
+void LagrangianScleronomousR::checkSize(Interaction& inter)
+{
+
 }
 
 void LagrangianScleronomousR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
@@ -98,37 +101,19 @@ void LagrangianScleronomousR::computeh(SiconosVector& q, SiconosVector& z, Sicon
 }
 void LagrangianScleronomousR::computeJachq(SiconosVector& q, SiconosVector& z)
 {
-  if (_pluginJachq)
-  {
-    if (_pluginJachq->fPtr)
+  if (_jachq && _pluginJachq->fPtr)
     {
       // get vector lambda of the current interaction
       ((FPtr3)(_pluginJachq->fPtr))(q.size(), &(q)(0), _jachq->size(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
-   }
-  }
+    }
 }
 
 void LagrangianScleronomousR::computeDotJachq(SiconosVector& q, SiconosVector& z, SiconosVector& qDot)
 {
-  if (_plugindotjacqh)
-  {
-    if (_plugindotjacqh->fPtr)
+  if (_dotjachq && _plugindotjacqh->fPtr)
     {
-      // get vector _jachqDo of the current interaction
-      // else
-      // {
-      //   if (_dotjachq->size(0) == 0) // if the matrix dimension are null
-      //     _dotjachq->resize(sizeY, sizeDS);
-      //   else
-      //   {
-      //     if ((_dotjachq->size(1) != sizeDS && _dotjachq->size(0) != sizeY))
-      //       RuntimeException::selfThrow("LagrangianR::initComponents inconsistent sizes between Jach[1] matrix and the interaction.");
-      //   }
-      // }
-
       ((FPtr2)(_plugindotjacqh->fPtr))(q.size(), &(q)(0), qDot.size(), &(qDot)(0), &(*_dotjachq)(0, 0), z.size(), &(z)(0));
     }
-  }
 }
 
 void  LagrangianScleronomousR::computedotjacqhXqdot(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
@@ -147,16 +132,16 @@ void  LagrangianScleronomousR::computedotjacqhXqdot(double time, Interaction& in
   *DSlink[LagrangianR::z] = z;
 }
 
-void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
+void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber)
 {
 
   DEBUG_PRINTF("LagrangianScleronomousR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) with time = %f and derivativeNumber = %i\n", time, derivativeNumber);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector& y = *inter.y(derivativeNumber);
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   if (derivativeNumber == 0)
-  { 
+  {
     computeh(q, z, y);
   }
   else
@@ -164,11 +149,25 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, Int
    computeJachq(q, z);
 
     if (derivativeNumber == 1)
+    {
+      assert(_jachq);
       prod(*_jachq, *DSlink[LagrangianR::q1], y);
+    }
     else if (derivativeNumber == 2)
     {
+      if (!_dotjachq)
+      {
+        if (_plugindotjacqh && _plugindotjacqh->fPtr)
+        {
+          unsigned int sizeY = inter.dimension();
+          unsigned int sizeDS = inter.getSizeOfDS();
+          _dotjachq.reset(new SimpleMatrix(sizeY, sizeDS));
+        }
+      }
+
       SiconosVector qDot = *DSlink[LagrangianR::q1];
       computeDotJachq(q, z, qDot);
+      assert(_jachq);
       prod(*_jachq, *DSlink[LagrangianR::q2], y);
       prod(*_dotjachq, *DSlink[LagrangianR::q1], y, false);
     }
@@ -178,12 +177,13 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter, Int
   *DSlink[LagrangianR::z] = z;
 }
 
-void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+
+void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsigned int level)
 {
   DEBUG_BEGIN("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
 
   DEBUG_PRINTF("level = %i\n", level);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
@@ -199,9 +199,9 @@ void LagrangianScleronomousR::computeInput(double time, Interaction& inter, Inte
   DEBUG_END("void LagrangianScleronomousR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
 }
 
-void LagrangianScleronomousR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void LagrangianScleronomousR::computeJach(double time, Interaction& inter)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   SiconosVector qDot = *DSlink[LagrangianR::q1];
@@ -211,12 +211,4 @@ void LagrangianScleronomousR::computeJach(double time, Interaction& inter, Inter
   // computeJachlambda(time, inter);
   // computehDot(time,inter);
   *DSlink[LagrangianR::z] = z;
-}
-
-const std::string LagrangianScleronomousR::getJachqName() const
-{
-  if (_pluginJachq->fPtr)
-    return _pluginJachq->getPluginName();
-  return "unamed";
-
 }

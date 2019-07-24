@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -895,7 +895,7 @@ void do_pivot_lumod(SN_lumod_dense_data* restrict lumod_data, NumericsMatrix* re
       lumod_data->row_col_indx[entering_var_indx] = 0;
       break;
     default:
-      printf("do_pivot_lumod :: unkown update type occuring\n");
+      printf("do_pivot_lumod :: unknown update type occuring\n");
       exit(EXIT_FAILURE);
   }
 

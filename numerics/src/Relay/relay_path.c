@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,8 +130,8 @@ int relay_path_setDefaultSolverOptions(SolverOptions* options)
   options->internalSolvers = NULL;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 2;
-  options->dSize = 2;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;

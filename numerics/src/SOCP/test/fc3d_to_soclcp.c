@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 int main(void)
 {
   int info = 0 ;
-  printf("Test on ./data/Example1_Fc3D_SBM.dat\n");
+  printf("Test on ./data/FC3D_Example1_SBM.dat\n");
   FILE * finput  =  fopen("../../FrictionContact/test/data/Capsules-i122-1617.dat", "r");
 
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
@@ -59,12 +59,12 @@ int main(void)
   /* XXX should look for a better fix --xhub */
   soclcp->M = NULL;
   soclcp->q = NULL;
-  soclcp->mu = NULL;
+  soclcp->tau = NULL;
   freeSecondOrderConeLinearComplementarityProblem(soclcp);
-  freeFrictionContactProblem(problem);
+  frictionContactProblem_free(problem);
 
 
   fclose(finput);
-  printf("\nEnd of test on ./data/Example1_Fc3D_SBM.dat\n");
+  printf("\nEnd of test on ./data/FC3D_Example1_SBM.dat\n");
   return info;
 }

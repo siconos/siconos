@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 #include "BlockCSRMatrix.hpp"
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "NonSmoothLaw.hpp"
+#include "Interaction.hpp"
 
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
@@ -61,8 +62,8 @@ BlockCSRMatrix::BlockCSRMatrix(unsigned int nRow):
 {}
 
 // Basic constructor
-BlockCSRMatrix::BlockCSRMatrix(SP::InteractionsGraph indexSet):
-  _nr(indexSet->size()), 
+BlockCSRMatrix::BlockCSRMatrix(InteractionsGraph& indexSet):
+  _nr(indexSet.size()),
   _blockCSR(new CompressedRowMat(_nr, _nr)),
   _sparseBlockStructuredMatrix(new SparseBlockStructuredMatrix()),
   _diagsize0(new IndexInt(_nr)),
@@ -79,16 +80,14 @@ BlockCSRMatrix::~BlockCSRMatrix()
 {}
 
 // Fill the SparseMat
-void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
+void BlockCSRMatrix::fill(InteractionsGraph& indexSet)
 {
   // ======> Aim: find inter1 and inter2 both in indexSets[level] and which
   // have common DynamicalSystems.  Then get the corresponding matrix
   // from map blocks.
 
-  assert(indexSet);
-
   // Number of blocks in a row = number of active constraints.
-  _nr = indexSet->size();
+  _nr = indexSet.size();
 
   // (re)allocate memory for ublas matrix
   _blockCSR->resize(_nr, _nr, false);
@@ -103,80 +102,78 @@ void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet)
   int sizeV = 0;
 
   InteractionsGraph::VIterator vi, viend;
-  for (std11::tie(vi, viend) = indexSet->vertices();
+  for (std11::tie(vi, viend) = indexSet.vertices();
        vi != viend; ++vi)
   {
-    SP::Interaction inter = indexSet->bundle(*vi);
+    SP::Interaction inter = indexSet.bundle(*vi);
 
     assert(inter->nonSmoothLaw()->size() > 0);
 
     sizeV  += inter->nonSmoothLaw()->size();
-    (*_diagsize0)[indexSet->index(*vi)] = sizeV;
-    (*_diagsize1)[indexSet->index(*vi)] = sizeV;
-    assert((*_diagsize0)[indexSet->index(*vi)] > 0);
-    assert((*_diagsize1)[indexSet->index(*vi)] > 0);
+    (*_diagsize0)[indexSet.index(*vi)] = sizeV;
+    (*_diagsize1)[indexSet.index(*vi)] = sizeV;
+    assert((*_diagsize0)[indexSet.index(*vi)] > 0);
+    assert((*_diagsize1)[indexSet.index(*vi)] > 0);
 
-    (*_blockCSR)(indexSet->index(*vi), indexSet->index(*vi)) =
-      indexSet->properties(*vi).block->getArray();
+    (*_blockCSR)(indexSet.index(*vi), indexSet.index(*vi)) =
+      indexSet.properties(*vi).block->getArray();
   }
 
   InteractionsGraph::EIterator ei, eiend;
-  for (std11::tie(ei, eiend) = indexSet->edges();
+  for (std11::tie(ei, eiend) = indexSet.edges();
        ei != eiend; ++ei)
   {
-    InteractionsGraph::VDescriptor vd1 = indexSet->source(*ei);
-    InteractionsGraph::VDescriptor vd2 = indexSet->target(*ei);
-    SP::Interaction inter1 = indexSet->bundle(vd1);
-    SP::Interaction inter2 = indexSet->bundle(vd2);
+    InteractionsGraph::VDescriptor vd1 = indexSet.source(*ei);
+    InteractionsGraph::VDescriptor vd2 = indexSet.target(*ei);
+    SP::Interaction inter1 = indexSet.bundle(vd1);
+    SP::Interaction inter2 = indexSet.bundle(vd2);
 
-    assert(indexSet->index(vd1) < _nr);
-    assert(indexSet->index(vd2) < _nr);
+    assert(indexSet.index(vd1) < _nr);
+    assert(indexSet.index(vd2) < _nr);
 
-    assert(indexSet->is_vertex(inter2));
+    assert(indexSet.is_vertex(inter2));
 
-    assert(vd2 == indexSet->descriptor(inter2));
-    assert(indexSet->index(vd2) == indexSet->index(indexSet->descriptor(inter2)));
+    assert(vd2 == indexSet.descriptor(inter2));
+    assert(indexSet.index(vd2) == indexSet.index(indexSet.descriptor(inter2)));
 
 
-    unsigned int pos = indexSet->index(vd1);
-    unsigned int col = indexSet->index(vd2);
+    unsigned int pos = indexSet.index(vd1);
+    unsigned int col = indexSet.index(vd2);
 
     assert(pos != col);
 
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) =
-      indexSet->properties(*ei).upper_block->getArray();
+      indexSet.properties(*ei).upper_block->getArray();
 
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
-      indexSet->properties(*ei).lower_block->getArray();
+      indexSet.properties(*ei).lower_block->getArray();
   }
   DEBUG_EXPR(display(););
 }
 
-void BlockCSRMatrix::fillM(SP::InteractionsGraph indexSet)
+void BlockCSRMatrix::fillM(InteractionsGraph& indexSet)
 {
-  assert(indexSet);
-
   /* on adjoint graph a dynamical system may be on several edges */
   std::map<SP::DynamicalSystem, bool> involvedDS;
   InteractionsGraph::EIterator ei, eiend;
-  for(std11::tie(ei, eiend) = indexSet->edges();
+  for(std11::tie(ei, eiend) = indexSet.edges();
       ei != eiend; ++ei)
   {
-    if (Type::value(*indexSet->bundle(*ei)) != Type::NewtonEulerDS)
+    if (Type::value(*indexSet.bundle(*ei)) != Type::NewtonEulerDS)
     {
       RuntimeException::selfThrow("BlockCSRMatrix::fillM only for Newton EulerDS");
     }
 
     _nr = 0;
     
-    if (involvedDS.find(indexSet->bundle(*ei)) == involvedDS.end())
+    if (involvedDS.find(indexSet.bundle(*ei)) == involvedDS.end())
     {
       _nr++;
-      involvedDS[indexSet->bundle(*ei)] = true;
+      involvedDS[indexSet.bundle(*ei)] = true;
       _blockCSR->resize(_nr, _nr, false);
 
       (*_blockCSR)(_nr-1, _nr-1) = std11::static_pointer_cast<NewtonEulerDS>
-        (indexSet->bundle(*ei))->mass()->getArray();
+        (indexSet.bundle(*ei))->mass()->getArray();
     }
   }
   
@@ -196,25 +193,23 @@ void BlockCSRMatrix::fillM(SP::InteractionsGraph indexSet)
   
 }
 
-void BlockCSRMatrix::fillH(SP::InteractionsGraph indexSet)
+void BlockCSRMatrix::fillH(InteractionsGraph& indexSet)
 {
-  assert(indexSet);
-
   /* on adjoint graph a dynamical system may be on several edges */
   std::map<SP::DynamicalSystem, unsigned int> involvedDS;
   InteractionsGraph::EIterator ei, eiend;
   {
     unsigned int index;
-    for(std11::tie(ei, eiend) = indexSet->edges(), index=0;
+    for(std11::tie(ei, eiend) = indexSet.edges(), index=0;
         ei != eiend; ++ei, ++index)
     {
-      if (involvedDS.find(indexSet->bundle(*ei)) == involvedDS.end())
+      if (involvedDS.find(indexSet.bundle(*ei)) == involvedDS.end())
       {
-        if (Type::value(*indexSet->bundle(*ei)) != Type::NewtonEulerDS)
+        if (Type::value(*indexSet.bundle(*ei)) != Type::NewtonEulerDS)
         {
           RuntimeException::selfThrow("BlockCSRMatrix::fillH only for Newton EulerDS");
         }
-        involvedDS[indexSet->bundle(*ei)] = index;
+        involvedDS[indexSet.bundle(*ei)] = index;
       }
     }
   }
@@ -224,7 +219,7 @@ void BlockCSRMatrix::fillH(SP::InteractionsGraph indexSet)
   _blockCSR->resize(_nr, _nr, false);
 
   InteractionsGraph::VIterator vi, viend;
-  for(std11::tie(vi, viend) = indexSet->vertices();
+  for(std11::tie(vi, viend) = indexSet.vertices();
       vi != viend; ++vi)
   {
 
@@ -232,36 +227,36 @@ void BlockCSRMatrix::fillH(SP::InteractionsGraph indexSet)
     unsigned int pos=0, col=0;
     InteractionsGraph::EDescriptor ed1, ed2;
     InteractionsGraph::OEIterator oei, oeiend;
-    for(std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
+    for(std11::tie(oei, oeiend) = indexSet.out_edges(*vi);
         oei != oeiend; ++oei)
     {
       if (!first)
       {
-        first = indexSet->bundle(*oei);
+        first = indexSet.bundle(*oei);
         col = involvedDS[first];
         pos = involvedDS[first];
       }
       else
       {
-        if (indexSet->bundle(*oei) != first)
+        if (indexSet.bundle(*oei) != first)
         {
-          pos = involvedDS[indexSet->bundle(*oei)];
+          pos = involvedDS[indexSet.bundle(*oei)];
         }
       }
     }
 
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) = 
-      std11::static_pointer_cast<NewtonEulerR>(indexSet->bundle(*vi)->relation())->jachqT()->getArray();
+      std11::static_pointer_cast<NewtonEulerR>(indexSet.bundle(*vi)->relation())->jachqT()->getArray();
     
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) = 
-      std11::static_pointer_cast<NewtonEulerR>(indexSet->bundle(*vi)->relation())->jachqT()->getArray();
+      std11::static_pointer_cast<NewtonEulerR>(indexSet.bundle(*vi)->relation())->jachqT()->getArray();
     
   }
   
   _diagsize0->resize(involvedDS.size());
   _diagsize1->resize(involvedDS.size());
   
-  /* only NewtonEulerFrom3DLocalFrameR */
+  /* only NewtonEuler3DR */
   unsigned int index, ac0, ac1;
   for (index= 0, ac0 = 6, ac1 = 3; 
        index < involvedDS.size();
@@ -271,23 +266,6 @@ void BlockCSRMatrix::fillH(SP::InteractionsGraph indexSet)
     (*_diagsize1)[index] = ac1;
   }
   
-}
-
-
-// Fill the SparseMat
-void BlockCSRMatrix::fill(SP::DynamicalSystemsSet DSSet,
-                          MapOfDSMatrices& DSblocks)
-{
-  RuntimeException::selfThrow
-  (" BlockCSRMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
-}
-// Fill the SparseMat
-void BlockCSRMatrix::fill(SP::InteractionsGraph indexSet,
-                          SP::DynamicalSystemsSet DSSet,
-                          MapOfInteractionMapOfDSMatrices& interactionDSBlocks)
-{
-  RuntimeException::selfThrow
-  (" BlockCSRMatrix::fill(DynamicalSystemsSet* DSSet, MapOfDSMatrices& DSblocks), Not Yet Implemented");
 }
 
 
@@ -310,7 +288,11 @@ void BlockCSRMatrix::convert()
     _sparseBlockStructuredMatrix->index2_data = _blockCSR->index2_data().begin();
     _sparseBlockStructuredMatrix->block =  _blockCSR->value_data().begin();
   };
-
+  if (_sparseBlockStructuredMatrix->diagonal_blocks)
+  {
+    free(_sparseBlockStructuredMatrix->diagonal_blocks);
+    _sparseBlockStructuredMatrix->diagonal_blocks = NULL;
+  }
   //   // Loop through the non-null blocks
   //   for (SpMatIt1 i1 = _blockCSR->begin1(); i1 != _blockCSR->end1(); ++i1)
   //     {

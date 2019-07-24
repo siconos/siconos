@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,15 +38,6 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2()
   SP::LagrangianScleronomousR R1(new LagrangianScleronomousR("TestPlugin:hSclero", "TestPlugin:G0Sclero"));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3b : ", R1->getSubType() == RELATION::ScleronomousR, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3c : ", R1->gethName() == "TestPlugin:hSclero", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3d : ", R1->getJachqName() == "TestPlugin:G0Sclero", true);
   std::cout << " data Constructor LagrangianScleronomousR ok" <<std::endl;
 }
 
-
-void LagrangianScleronomousRTest::End()
-{
-  std::cout << "=================================================" <<std::endl;
-  std::cout << " ===== End of LagrangianScleronomousR tests ===== " <<std::endl;
-  std::cout << "=================================================" <<std::endl;
-}

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@
 #define OccTest_h
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "SiconosConfig.h"
 
 class OccTest : public CppUnit::TestFixture
 {
@@ -33,9 +34,9 @@ private:
   CPPUNIT_TEST(computeUVBounds);
 
   CPPUNIT_TEST(move);
-
+#ifdef HAS_FORTRAN
   CPPUNIT_TEST(distance);
-
+#endif
   CPPUNIT_TEST_SUITE_END();
 
   // Members
@@ -45,12 +46,13 @@ private:
 
   void move();
 
+#ifdef HAS_FORTRAN
   void distance();
-
+#endif
+  
 public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

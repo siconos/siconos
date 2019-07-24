@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ void siconos_io(Archive& ar, LinearComplementarityProblem& v, unsigned int versi
   if(Archive::is_loading::value)
   {
     v.q = (double *) malloc(v.size * sizeof(double));
-    v.M = newNumericsMatrix();
+    v.M = NM_new();
   }
   SERIALIZE(v, (M), ar);
   SERIALIZE_C_ARRAY(v.size, v, q, ar);
@@ -76,7 +76,7 @@ void siconos_io(Archive& ar, FrictionContactProblem& p, const unsigned int file_
   {
     p.q = (double *) malloc(p.dimension * p.numberOfContacts * sizeof(double));
     p.mu = (double *) malloc(p.numberOfContacts * sizeof(double));
-    p.M = newNumericsMatrix();
+    p.M = NM_new();
   }
 
   SERIALIZE(p, (M), ar);
@@ -84,6 +84,28 @@ void siconos_io(Archive& ar, FrictionContactProblem& p, const unsigned int file_
   SERIALIZE_C_ARRAY(p.dimension, p, mu, ar);
 }
 REGISTER_BOOST_SERIALIZATION(FrictionContactProblem);
+
+template <class Archive>
+void siconos_io(Archive& ar, GlobalFrictionContactProblem& p, const unsigned int file_version)
+{
+  SERIALIZE(p, (dimension)(numberOfContacts), ar);
+
+  if (Archive::is_loading::value)
+  {
+    p.q = (double *) malloc(p.dimension * p.numberOfContacts * sizeof(double));
+    p.b = (double *) malloc(p.dimension * p.numberOfContacts * sizeof(double));
+    p.mu = (double *) malloc(p.numberOfContacts * sizeof(double));
+    p.M = NM_new();
+    p.H = NM_new();
+  }
+
+  SERIALIZE(p, (M), ar);
+  SERIALIZE(p, (H), ar);
+  SERIALIZE_C_ARRAY(p.dimension * p.numberOfContacts, p, q, ar);
+  SERIALIZE_C_ARRAY(p.dimension * p.numberOfContacts, p, b, ar);
+  SERIALIZE_C_ARRAY(p.dimension, p, mu, ar);
+}
+REGISTER_BOOST_SERIALIZATION(GlobalFrictionContactProblem);
 
 template <class Archive>
 void siconos_io(Archive& ar, SparseBlockStructuredMatrix& v, unsigned int version)

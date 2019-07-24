@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,8 +81,8 @@ protected:
   /** Legend for the columns in the matrix _dataM*/
   std::string _dataLegend;
 
-  /** Model */
-  SP::Model _model;
+  /** NonSmoothDynamicalSystem */
+  SP::NonSmoothDynamicalSystem _nsds;
 
   /** TimeDiscretisation for the simulation*/
   SP::TimeDiscretisation _processTD;
@@ -160,12 +160,12 @@ public:
     return _processIntegrator;
   };
 
-  /** Return the Model
-   * \return the Model 
+  /** Return the NonSmoothDynamicalSystem
+   * \return the NonSmoothDynamicalSystem
   */
-  inline SP::Model model() const
+  inline SP::NonSmoothDynamicalSystem model() const
   {
-    return _model;
+    return _nsds;
   }
 
   /** Return the data matrix

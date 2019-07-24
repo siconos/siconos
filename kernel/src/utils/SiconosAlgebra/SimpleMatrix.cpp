@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@
 #include "SiconosAlgebra.hpp"
 // Useful function (print ...) from boost bindings examples.
 #include "bindings_utils.hpp"
+
+#include "Tools.hpp"
 
 using namespace Siconos;
 
@@ -677,10 +679,17 @@ void SimpleMatrix::display() const
 {
   std::cout.setf(std::ios::scientific);
   std::cout.precision(6);
-
+  
+  if (size(0) == 0 || size(1) ==0)
+  {
+    std::cout << "SimpleMatrix::display(): empty matrix" << std::endl;
+  }
+  std::cout << "SimpleMatrix storage type - num = " << _num << "\n";
   if (_num == 1)
+  {
     Siconos::algebra::print_m(*mat.Dense);
     //std::cout << *mat.Dense << std::endl;
+  }
   else if (_num == 2)
     std::cout << *mat.Triang << std::endl;
   else if (_num == 3)
@@ -695,8 +704,37 @@ void SimpleMatrix::display() const
     std::cout << *mat.Identity << std::endl;
 }
 
+//=====================
+// convert to a string
+//=====================
 
+std::string SimpleMatrix::toString() const
+{
+  return ::toString(*this);
+}
 
+//=====================
+// convert to an ostream
+//=====================
+
+std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm)
+{
+  if (sm._num == 1)
+    os << *sm.mat.Dense;
+  else if (sm._num == 2)
+    os << *sm.mat.Triang;
+  else if (sm._num == 3)
+    os << *sm.mat.Sym;
+  else if (sm._num == 4)
+    os << *sm.mat.Sparse;
+  else if (sm._num == 5)
+    os << *sm.mat.Banded;
+  else if (sm._num == 6)
+    os << *sm.mat.Zero;
+  else if (sm._num == 7)
+    os << *sm.mat.Identity;
+  return os;
+}
 
 void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init)
 {
@@ -793,7 +831,14 @@ void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, con
 
 void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool init)
 {
+
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+
+  if (A.size(0) != x.size())
+    SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and x.");
+
+  if (A.size(1) != y.size())
+    SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and y.");
   unsigned int startRow = 0;
   VectorOfVectors::const_iterator it;
   // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA being a submatrix of A corresponding to y[i] position.

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,47 +31,33 @@
 #include "SiconosAlgebraTypeDef.hpp"
 
 /** Container used to save vectors in SiconosMemory */
-typedef std::deque<SP::SiconosVector> MemoryContainer;
+typedef std::vector<SiconosVector> MemoryContainer;
+
 TYPEDEF_SPTR(MemoryContainer)
 
 /** This class is a backup for vectors of previous time step
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.0.0.
-    \date (Creation) 07/06/2004
 
     There is a max number of saved vector (memorySize) and all the vector (simple or block)
     should have the same size.
 
 */
-class SiconosMemory
+class SiconosMemory : public MemoryContainer
 {
 private:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(SiconosMemory);
 
-
-  /** the maximum size of the memory (i.e the max numbers of SiconosVectors it can store) */
-  unsigned int _size;
-
   /** the real number of SiconosVectors saved in the Memory (ie the ones for which memory has been allocated) */
-  unsigned int _nbVectorsInMemory;
-
-  /** the stl deque which contains the SiconosVectors kept in memory */
-  SP::MemoryContainer _vectorMemory;
+  MemoryContainer::size_type _nbVectorsInMemory;
 
   /** index to avoid removal and creation of vectors */
-  unsigned int _indx;
-
-  /** default constructor, private. */
-  SiconosMemory() {};
-
-  /** Assignment, private 
-   * \return SiconosMemory&
-   */
-  const SiconosMemory& operator=(const SiconosMemory&);
+  MemoryContainer::size_type _indx;
 
 public:
+
+  /** default constructor. */
+  SiconosMemory() : _nbVectorsInMemory(0), _indx(0) {};
 
   /** constructor with size parameter.
    * \param size size of the MemoryContainer
@@ -100,35 +86,51 @@ public:
   /** destructor */
   ~SiconosMemory();
 
+  /** Assignment
+   */
+  void operator=(const SiconosMemory&);
+
+  /** Assignment from container
+   * Assumes all entries are valid SiconosVectors
+   */
+  void operator=(const MemoryContainer& V);
+
   /*************************************************************************/
 
   /** fill the memory with a vector of siconosVector
    * \param v MemoryContainer
-   *       _size is set to the size of the deque given in parameters
+   * \param size of the input container
    */
-  void setVectorMemory(const MemoryContainer& v );
+  void setVectorMemory(const MemoryContainer& v, MemoryContainer::size_type size);
 
   /** To get SiconosVector number i of the memory
    * \param int i: the position in the memory of the wanted SiconosVector
    * \return a SP::SiconosVector
    */
-  SP::SiconosVector getSiconosVector(const unsigned int) const;
+  const SiconosVector& getSiconosVector(const unsigned int) const;
+
+  /** To get SiconosVector number i of the memory as mutable reference.
+   * Use should be avoided whenever possible.
+   * (Used in LinearSMC::actuate)
+   * \param int i: the position in the memory of the wanted SiconosVector
+   * \return a SP::SiconosVector
+   */
+  SiconosVector& getSiconosVectorMutable(const unsigned int);
 
   /** gives the size of the memory
    * \return int >= 0
    */
   inline unsigned int getMemorySize() const
   {
-    return _size;
+    return size();
   };
 
-  /** set the max size of the SiconosMemory
-   * \param max the max size for this SiconosMemory
+  /** set size of the SiconosMemory (number of vectors and size of vector)
+   * \param steps the max size for this SiconosMemory, size of the container
+   * \param vectorSize size of each vector of the container
    */
-  inline void setSiconosMemorySize(const unsigned int max)
-  {
-    _size = max;
-  }
+  void setMemorySize(const unsigned int steps,
+                     const unsigned int vectorSize);
 
   /** gives the numbers of SiconosVectors currently stored in the memory
    * \return int >= 0
@@ -138,18 +140,15 @@ public:
     return _nbVectorsInMemory;
   };
 
-  /** gives the vector of SiconosVectors of the memory
-   * \return stl deque of  SiconosVector
-   */
-  inline SP::MemoryContainer vectorMemory() const
-  {
-    return _vectorMemory;
-  };
-
   /** puts a SiconosVector into the memory
    * \param v the SiconosVector we want to put in memory
    */
   void swap(const SiconosVector& v);
+
+  /** puts a SiconosVector into the memory
+   * \param v the SiconosVector we want to put in memory, or do nothing if v is null
+   */
+  void swap(SP::SiconosVector v);
 
   /** displays the data of the memory object
    */
@@ -157,8 +156,7 @@ public:
 
 };
 
-
-typedef std::vector<SP::SiconosMemory> VectorOfMemories;
+typedef std::vector<SiconosMemory> VectorOfMemories;
 
 #endif
 

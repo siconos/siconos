@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,13 @@
 */
 
 
-
 // Proper definition of isnan
 #ifndef SICONOS_ISNAN
 #define SICONOS_ISNAN
-#if __cplusplus >= 201103L
+#include "SiconosConfig.h"
 #include <cmath>
+//#ifndef SICONOS_STD_ISNAN_ALREADY_HERE_AND_I_DO_NOT_KNOW_WHY
 using std::isnan;
 using std::isinf;
-#else
-#if ((!defined(_MSC_VER)) && (!defined( __SUNPRO_CC)))
-#include <cmath>
-using std::isnan;
-using std::isinf;
-#else
-#include <math.h>
-#endif
-#endif
+//#endif
 #endif

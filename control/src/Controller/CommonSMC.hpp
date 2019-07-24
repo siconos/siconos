@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 
 #include "Actuator.hpp"
 #include "SiconosAlgebraTypeDef.hpp"
+#include "SiconosFwd.hpp"
 
 #include <relay_cst.h>
 
@@ -80,8 +81,8 @@ protected:
   /** Numerical precision expected for the Relay solver */
   double _precision;
 
-  /** the Model for the controller */
-  SP::Model _SMC;
+  /** the nsds for the controller */
+  SP::NonSmoothDynamicalSystem _nsdsSMC;
 
   /** the DynamicalSystem for the controller */
   SP::FirstOrderNonLinearDS _DS_SMC; // XXX replace this by FirstOrderDS
@@ -130,7 +131,7 @@ protected:
 
 public:
 
-  /** Constructor with a TimeDiscretisation and a Model.
+  /**General constructor
    * \param type the type of the SMC Actuator
    * \param sensor the ControlSensor feeding the Actuator
    */
@@ -138,18 +139,15 @@ public:
     _indx(0), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS), _precision(1e-8),
     _thetaSMC(0.5), _noUeq(false), _computeResidus(true) {}
 
-  /** Constructor with a TimeDiscretisation, a Model and two matrices
+  /** Constructor for dynamics affine in control
    * \param type the type of the SMC Actuator
    * \param sensor the ControlSensor feeding the Actuator
-   * \param B the B matrix
-   * \param D the saturation matrix
+   * \param B the matrix multiplying the control input
+   * \param D the saturation matrix (optional)
    */
   CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std11::shared_ptr<SimpleMatrix>()):
-    Actuator(type, sensor), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS),
-    _precision(1e-8), _thetaSMC(0.5), _noUeq(false), _computeResidus(true)
-  {
-    _B = B;
-  }
+    Actuator(type, sensor, B), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS),
+    _precision(1e-8), _thetaSMC(0.5), _noUeq(false), _computeResidus(true) {}
 
 
   /** Compute the new control law at each event
@@ -157,9 +155,10 @@ public:
   virtual void actuate() = 0;
 
   /** Initialization
-   * \param m the Model
+   * \param nsds current nonsmooth dynamical system
+   * \param s current simulation setup
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
 
 
   void sete(const std::string& plugin);
@@ -278,10 +277,10 @@ public:
     _DS_SMC = ds;
   };
 
-  /** get the Model used in the SMC
-   * \return the Model used in the SMC
+  /** get the NSDS used in the SMC
+   * \return the NSDS used in the SMC
    */
-  virtual SP::Model getInternalModel() const { return _SMC; };
+  virtual SP::NonSmoothDynamicalSystem getInternalNSDS() const { return _nsdsSMC; };
 
   /** get the Integrator used in the SMC
    * \return the Integrator used in the SMC

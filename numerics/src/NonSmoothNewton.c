@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,19 @@
 */
 #include "numerics_verbose.h"
 #include "NonSmoothNewton.h"
+#include "SolverOptions.h"
 #include "SiconosLapack.h"
+#include "NumericsMatrix.h"
+
+
+#include "Newton_methods.h"
 #include "math.h"
 #include "stdio.h"
 #include "stdlib.h"
+
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+
 
 void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
                        double descentCondition, NewtonFunctionPtr* phi)
@@ -28,7 +37,7 @@ void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
   double * phiVector = (double*)malloc(n * sizeof(*phiVector));
   if (phiVector == NULL)
   {
-    fprintf(stderr, "NonSmoothNewton::linesearch_Armijo, memory allocation failed for phiVector\n");
+    fprintf(stderr, "NonSmoothNewton: linesearch_Armijo, memory allocation failed for phiVector\n");
     exit(EXIT_FAILURE);
   }
 
@@ -51,6 +60,7 @@ void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
 
   while (tk > tmin)
   {
+    numerics_printf_verbose(2,"Non Smooth Newton:\t\tlinesearch_Armijo. try tk = %e", tk);
     /* Computes merit function = 1/2*norm(phi(z_{k+1}))^2 */
     (*phi)(n, z, phiVector, 0);
     merit =  cblas_dnrm2(n, phiVector , incx);
@@ -64,12 +74,18 @@ void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
   }
   free(phiVector);
   if (tk <= tmin)
-    if (verbose > 0)
-      printf("NonSmoothNewton::linesearch_Armijo warning, resulting tk < tmin, linesearch stopped.\n");
+    numerics_printf("Non Smooth Newton:\t\t linesearch_Armijo warning, resulting tk < tmin, linesearch stopped.");
+  else
+    numerics_printf_verbose(2,"Non Smooth Newton:\t\tlinesearch_Armijo succeeded with tk = %e", tk);
 
 }
 
-int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr* jacobianPhi, int* iparam, double* dparam)
+int nonSmoothNewton(
+  int n,
+  double* z,
+  NewtonFunctionPtr* phi,
+  NewtonFunctionPtr* jacobianPhi,
+  SolverOptions * options)
 {
   if (phi == NULL || jacobianPhi == NULL)
   {
@@ -77,47 +93,49 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     exit(EXIT_FAILURE);
   }
 
-  int itermax = iparam[0]; // maximum number of iterations allowed
+  int * iparam = options->iparam;
+  double * dparam = options->dparam;
+  
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER]; // maximum number of iterations allowed
   int niter = 0; // current iteration number
-  double tolerance = dparam[0];
-  if (verbose > 0)
-  {
-    printf(" ============= Starting of Newton process =============\n");
-    printf(" - tolerance: %14.7e\n - maximum number of iterations: %i\n", tolerance, itermax);
-  }
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
+
+  numerics_printf("Non Smooth Newton: ============= Starting of Newton process =============");
+  numerics_printf("   - tolerance: %14.7e ", tolerance);
+  numerics_printf("   - maximum number of iterations: %i", itermax);
 
   int incx = 1;
-  int n2 = n * n;
+
   lapack_int infoDGESV;
 
   /* Memory allocation for phi and its jacobian */
-  double * phiVector = (double*)malloc(n * sizeof(*phiVector));
-  double *jacobianPhiMatrix = (double*)malloc(n2 * sizeof(*jacobianPhiMatrix));
-  /** merit function and its jacobian */
+  double * phiVector = (double*)malloc(n * sizeof(double));
+
+
+  NumericsMatrix * H = NM_create(NM_DENSE, n, n);
+  double * jacobianPhiMatrix = H->matrix0;
+
+  /** Memory allocation for the merit function and its gradient */
   double psi;
-  double *jacobian_psi = (double*)malloc(n * sizeof(*jacobian_psi));
+  double * gradient_psi = (double*)malloc(n * sizeof(*gradient_psi));
+
   lapack_int* ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
-  if (phiVector == NULL || jacobianPhiMatrix == NULL ||  jacobian_psi == NULL || ipiv == NULL)
+  if (phiVector == NULL || jacobianPhiMatrix == NULL ||  gradient_psi == NULL || ipiv == NULL)
   {
     fprintf(stderr, "NonSmoothNewton, memory allocation failed.\n");
     exit(EXIT_FAILURE);
   }
 
-  /** The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth Newton-type methods
-      for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).
-
-      We try to keep the same notations
-  */
+  /** The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel,
+   * "A new class of semismooth Newton-type methods for nonlinear complementarity problems",
+   * in Computational Optimization and Applications, 11, 227-251 (1998).
+   *   We try to keep the same notations
+   */
 
   double rho = 1e-8;
-  double descentCondition, criterion, norm_jacobian_psi, normPhi;
+  double descentCondition, criterion, norm_gradient_psi, normPhi;
   double p = 2.1;
   double terminationCriterion = 1;
-  if (jacobian_psi == NULL)
-  {
-    fprintf(stderr, "NonSmoothNewton, memory allocation failed for jacobian_psi.\n");
-    exit(EXIT_FAILURE);
-  }
 
   /** Iterations ... */
   while ((niter < itermax) && (terminationCriterion > tolerance))
@@ -126,121 +144,146 @@ int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr*
     /** Computes phi and its jacobian */
     (*phi)(n, z, phiVector, 0);
     (*jacobianPhi)(n, z, jacobianPhiMatrix, 1);
-    /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
-    cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, jacobianPhiMatrix, n, phiVector, incx, 0.0, jacobian_psi, incx);
-    norm_jacobian_psi = cblas_dnrm2(n, jacobian_psi, 1);
+
+    /* Computes the gradient of the merit function,
+     * gradient_psi = transpose(jacobianPhiMatrix).phiVector */
+
+    cblas_dgemv(CblasColMajor, CblasTrans, n, n, 1.0, jacobianPhiMatrix, n,
+                phiVector, incx, 0.0, gradient_psi, incx);
+    DEBUG_PRINTF("norm 1 of jacobianPhiMatrix = %e\n", NM_norm_1(H));
+
+    norm_gradient_psi = cblas_dnrm2(n, gradient_psi, 1);
 
     /* Computes norm2(phi) */
     normPhi = cblas_dnrm2(n, phiVector, 1);
+    DEBUG_PRINTF("norm of phiVector = %e\n",normPhi )
+
     /* Computes merit function */
     psi = 0.5 * normPhi * normPhi;
 
     /* Stops if the termination criterion is satisfied */
-    terminationCriterion = norm_jacobian_psi;
+    if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_RESIDU)
+    {
+      terminationCriterion = normPhi;
+    }
+    else if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_STATIONARITY)
+    {
+      terminationCriterion = norm_gradient_psi;
+    }
+    else if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
+             SICONOS_STOPPING_CRITERION_RESIDU_AND_STATIONARITY)
+    {
+      terminationCriterion = fmax(normPhi, norm_gradient_psi);
+    }
+      
     if (terminationCriterion < tolerance)
       break;
 
     /* Search direction calculation
-    Find a solution dk of jacobianPhiMatrix.d = -phiVector.
-    dk is saved in phiVector.
+     *
+     * Find a solution dk of jacobianPhiMatrix.d = -phiVector.
+     * dk is saved in phiVector.
     */
     cblas_dscal(n , -1.0 , phiVector, incx);
     DGESV(n, 1, jacobianPhiMatrix, n, ipiv, phiVector, n, &infoDGESV);
 
-    /* descentCondition = jacobian_psi.dk */
-    descentCondition = cblas_ddot(n, jacobian_psi,  1,  phiVector, 1);
+    /* descentCondition = gradient_psi^T dk */
+    descentCondition = cblas_ddot(n, gradient_psi,  1,  phiVector, 1);
 
     /* Criterion to be satisfied: error < -rho*norm(dk)^p */
     criterion = cblas_dnrm2(n, phiVector, 1);
     criterion = -rho * pow(criterion, p);
 
+    DEBUG_PRINTF("descentcondition = %e\n", descentCondition );
+    DEBUG_PRINTF("criterion = %e\n", criterion );
     if (infoDGESV != 0 || descentCondition > criterion)
     {
-      /* dk = - jacobian_psi (remind that dk is saved in phiVector) */
-      cblas_dcopy(n, jacobian_psi, 1, phiVector, 1);
+      numerics_printf("Newton descent direction is not good. Use the gradient direction");
+      /* If the linear system is not solved correctly or the descent condition
+       * is not satisfied, we fall back to the gradient for the descent direction
+       * dk = - gradient_psi (remind that dk is saved in phiVector) */
+      cblas_dcopy(n, gradient_psi, 1, phiVector, 1);
       cblas_dscal(n , -1.0 , phiVector, incx);
     }
 
     /* Step-3 Line search: computes z_k+1 */
     linesearch_Armijo(n, z, phiVector, psi, descentCondition, phi);
 
-    if (verbose > 0)
-    {
-      printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
-      printf(" -----------------------------------------------------------------------\n");
-    }
+    numerics_printf("Non Smooth Newton: iteration number %i, norm merit function = %e, norm grad. merit function = %14.7e .", niter, normPhi, norm_gradient_psi);
   }
 
   /* Total number of iterations */
-  iparam[1] = niter;
+  iparam[SICONOS_IPARAM_ITER_DONE] = niter;
   /* Final error */
-  dparam[1] = terminationCriterion;
+  dparam[SICONOS_DPARAM_RESIDU] = terminationCriterion;
 
   /** Free memory*/
   free(phiVector);
-  free(jacobianPhiMatrix);
-  free(jacobian_psi);
+  NM_free(H);
+  free(gradient_psi);
   free(ipiv);
 
-  if (verbose > 0)
-  {
-    if (dparam[1] > tolerance)
-      printf("Non Smooth Newton warning: no convergence after %i iterations\n" , niter);
 
-    else
-      printf("Non Smooth Newton: convergence after %i iterations\n" , niter);
-    printf(" The residue is : %e \n", dparam[1]);
-  }
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
+    numerics_printf("Non Smooth Newton:  warning. no convergence after %i iterations" , niter);
 
-  if (dparam[1] > tolerance)
+  else
+    numerics_printf("Non Smooth Newton: convergence after %i iterations" , niter);
+  numerics_printf("Non Smooth Newton:  residual = : %e ", dparam[1]);
+
+
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
     return 1;
   else return 0;
 }
 
-int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr* jacobianPhi, int* iparam, double* dparam)
+int nonSmoothDirectNewton(
+  int n,
+  double* z,
+  NewtonFunctionPtr* phi,
+  NewtonFunctionPtr* jacobianPhi,
+  SolverOptions * options)
 {
   if (phi == NULL || jacobianPhi == NULL)
   {
     fprintf(stderr, "NonSmoothNewton error: phi or its jacobian function = NULL pointer.\n");
     exit(EXIT_FAILURE);
   }
-
-  int itermax = iparam[0]; // maximum number of iterations allowed
+  int * iparam = options->iparam;
+  double * dparam = options->dparam;
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER]; // maximum number of iterations allowed
   int niter = 0; // current iteration number
-  double tolerance = dparam[0];
-  if (verbose > 0)
-  {
-    printf(" ============= Starting of Newton process =============\n");
-    printf(" - tolerance: %14.7e\n - maximum number of iterations: %i\n", tolerance, itermax);
-  }
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
+  numerics_printf("Non Smooth Newton: ============= Starting of Newton process =============");
+  numerics_printf("   - tolerance: %14.7e ", tolerance);
+  numerics_printf("   - maximum number of iterations: %i", itermax);
 
   int incx = 1;
-  int n2 = n * n;
   lapack_int infoDGESV = 0;
-
+  int n2 = n*n;
   /* Memory allocation for phi and its jacobian */
   double * phiVector = (double*)malloc(n * sizeof(*phiVector));
   double *jacobianPhiMatrix = (double*)malloc(n2 * sizeof(*jacobianPhiMatrix));
   /** merit function and its jacobian */
-  double *jacobian_psi = (double*)malloc(n * sizeof(*jacobian_psi));
+  double *gradient_psi = (double*)malloc(n * sizeof(*gradient_psi));
   lapack_int* ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
-  if (phiVector == NULL || jacobianPhiMatrix == NULL ||  jacobian_psi == NULL || ipiv == NULL)
+  if (phiVector == NULL || jacobianPhiMatrix == NULL ||  gradient_psi == NULL || ipiv == NULL)
   {
     fprintf(stderr, "NonSmoothNewton, memory allocation failed.\n");
     exit(EXIT_FAILURE);
   }
 
   /** The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth Newton-type methods
-      for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).
+   *  for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).
+   *
+   *   We try to keep the same notations
+   */
 
-      We try to keep the same notations
-  */
-
-  double norm_jacobian_psi;
+  double norm_gradient_psi;
   double terminationCriterion = 1;
-  if (jacobian_psi == NULL)
+  if (gradient_psi == NULL)
   {
-    fprintf(stderr, "NonSmoothNewton, memory allocation failed for jacobian_psi.\n");
+    fprintf(stderr, "NonSmoothNewton, memory allocation failed for gradient_psi.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -251,9 +294,9 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
     /** Computes phi and its jacobian */
     (*phi)(n, z, phiVector, 0);
     (*jacobianPhi)(n, z, jacobianPhiMatrix, 1);
-    /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
-    cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, jacobianPhiMatrix, n, phiVector, incx, 0.0, jacobian_psi, incx);
-    norm_jacobian_psi = cblas_dnrm2(n, jacobian_psi, 1);
+    /* Computes the jacobian of the merit function, gradient_psi = transpose(jacobianPhiMatrix).phiVector */
+    cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, jacobianPhiMatrix, n, phiVector, incx, 0.0, gradient_psi, incx);
+    norm_gradient_psi = cblas_dnrm2(n, gradient_psi, 1);
 
     /* Computes norm2(phi) */
     // normPhi = cblas_dnrm2(n, phiVector, 1);
@@ -261,7 +304,7 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
     //psi = 0.5 * normPhi * normPhi;
 
     /* Stops if the termination criterion is satisfied */
-    terminationCriterion = norm_jacobian_psi;
+    terminationCriterion = norm_gradient_psi;
     if (terminationCriterion < tolerance)
       break;
 
@@ -276,37 +319,53 @@ int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFuncti
 
     cblas_daxpy(n , tk , phiVector , 1 , z , 1);
 
+    numerics_printf("Non Smooth Newton: iteration number %i, norm of the merit function = %14.7e .", niter, terminationCriterion);
 
-
-    if (verbose > 0)
-    {
-      printf("Non Smooth Newton, iteration number %i, error equal to %14.7e .\n", niter, terminationCriterion);
-      printf(" -----------------------------------------------------------------------\n");
-    }
   }
 
   /* Total number of iterations */
-  iparam[1] = niter;
+  iparam[SICONOS_IPARAM_ITER_DONE] = niter;
   /* Final error */
-  dparam[1] = terminationCriterion;
+  dparam[SICONOS_DPARAM_RESIDU] = terminationCriterion;
 
   /** Free memory*/
   free(phiVector);
   free(jacobianPhiMatrix);
-  free(jacobian_psi);
+  free(gradient_psi);
   free(ipiv);
 
-  if (verbose > 0)
-  {
-    if (dparam[1] > tolerance)
-      printf("Non Smooth Newton warning: no convergence after %i iterations\n" , niter);
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
+    numerics_printf("Non Smooth Newton:  warning. no convergence after %i iterations" , niter);
 
-    else
-      printf("Non Smooth Newton: convergence after %i iterations\n" , niter);
-    printf(" The residue is : %e \n", dparam[1]);
-  }
+  else
+    numerics_printf("Non Smooth Newton: convergence after %i iterations" , niter);
+  numerics_printf("Non Smooth Newton:  residual = : %e ", dparam[SICONOS_DPARAM_RESIDU]);
 
-  if (dparam[1] > tolerance)
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
     return 1;
   else return 0;
+}
+
+
+void nonSmoothNewton_setDefaultSolverOptions(SolverOptions* options)
+{
+
+  numerics_printf_verbose(1,"nonSmoothNewton_setDefaultSolverOptions");
+
+  options->solverId = SICONOS_NONSMOOTH_NEWTON_LSA;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  options->dWork = NULL;
+  solver_options_nullify(options);
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+
+  options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_RESIDU;
+  
 }

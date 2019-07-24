@@ -2,6 +2,20 @@ from math import cos, sin
 from numpy.linalg import norm
 
 
+class Material(object):
+    """Some material properties that may be associated to shapes.
+
+    Parameter
+    ---------
+
+    :density: float, the material density.
+    """
+
+    def __init__(self,
+                 density=None):
+        self.density = density
+
+
 class MovedShape(object):
     """A shape with a reference to some shape data and that is moved by a
     given relative translation and relative orientation. The
@@ -14,19 +28,21 @@ class MovedShape(object):
     Parameters
     ----------
 
-    shape_data
-      some instance of an implementation of the shape.
+    :shape_name: a reference name
 
-    relative_translation: array_like of length 3
+    :shape_data: a pointer to actual shape representation
+
+    :relative_translation: array_like of length 3
       translation in the bodyframe coordinates.
 
-    relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
+    :relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
       The orientation of the shape in the bodyframe coordinates.
       It may be expressed with a quaternion [w, x, y, z] or a couple
       ([x, y, z], angle)
     """
     def __init__(self,
-                 shape_data,
+                 shape_name,
+                 shape_data=None,
                  relative_translation=[0, 0, 0],
                  relative_orientation=[1, 0, 0, 0]):
 
@@ -44,6 +60,7 @@ class MovedShape(object):
             assert len(relative_orientation) == 4
             ori = relative_orientation
 
+        self.shape_name = shape_name
         self.data = shape_data
         self.translation = relative_translation
         self.orientation = ori
@@ -56,29 +73,32 @@ class Shape(MovedShape):
     Parameters
     ----------
 
-    shape_data
-        Some instance of an implementation of the shape.
+    :shape_name: a reference name
 
-    instance_name: string, optional
+    :shape_data: a pointer to actual shape representation
+
+    :instance_name: string, optional
         The name of the instance for further reference.
 
-    relative_translation: array_like of length 3
+    :relative_translation: array_like of length 3
         Translation in the bodyframe coordinates.
 
-    relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
+    :relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
         The orientation of the shape in the bodyframe coordinates.
         It may be expressed with a quaternion [w, x, y, z] or a couple
         ([x, y, z], angle)
     """
 
     def __init__(self,
-                 shape_data,
+                 shape_name,
+                 shape_data=None,
                  instance_name=None,
                  relative_translation=[0, 0, 0],
                  relative_orientation=[1, 0, 0, 0]):
 
         self.instance_name = instance_name
-        super(Shape, self).__init__(shape_data,
+        super(Shape, self).__init__(shape_name,
+                                    shape_data,
                                     relative_translation,
                                     relative_orientation)
 
@@ -89,34 +109,42 @@ class Volume(Shape):
     Parameters
     ----------
 
-    shape_data
-        some instance of an implementation of the shape.
+    :shape_name: a reference name
 
-    instance_name: string, optional
+    :shape_data: a pointer to actual shape representation
+
+    :instance_name: string, optional
         The name of the instance for further reference.
 
-    parameters
-        The parameters associated to the volume.
-        This may be informations about the material and its density.
+    :mass:
+        The volume mass
 
-    relative_translation: array_like of length 3
+    :parameters:
+        The parameters associated to the volume.
+        This may be information about the material and its density.
+
+    :relative_translation: array_like of length 3
         translation in the bodyframe coordinates.
 
-    relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
+    :relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
         The orientation of the shape in the bodyframe coordinates.
         It may be expressed with a quaternion [w, x, y, z] or a couple
         ([x, y, z], angle)
     """
 
     def __init__(self,
-                 shape_data,
+                 shape_name,
+                 shape_data=None,
                  instance_name=None,
-                 parameters=None,
+                 mass=None,
+                 parameters=Material(density=1),
                  relative_translation=[0, 0, 0],
                  relative_orientation=[1, 0, 0, 0]):
         self.instance_name = instance_name
+        self.mass = mass
         self.parameters = parameters
-        super(Shape, self).__init__(shape_data,
+        super(Shape, self).__init__(shape_name,
+                                    shape_data,
                                     relative_translation,
                                     relative_orientation)
 
@@ -124,29 +152,30 @@ class Volume(Shape):
 class Contactor(Shape):
     """A Contactor is a Shape that belongs to a collision group and may
     have associated parameters. Depending on the geometrical engine
-    used, some informations may be added to the contactor, such as the
+    used, some information may be added to the contactor, such as the
     kind of contact and the concerned part of the shape.  Note that
     contact laws must then be defined between collision groups.
 
     Parameters
     ----------
 
-    shape_data
-        Some instance of an implementation of the shape.
+    :shape_name: a reference name
 
-    instance_name: string, optional
+    :shape_data: a pointer to actual shape representation
+
+    :instance_name: string, optional
         The name of the instance for further reference.
 
-    collision_group: int
+    :collision_group: int
         The collision group, an integer >= 0.
 
-    parameters: optional
+    :parameters: optional
         Parameters associated to the contactor.
 
-    relative_translation: array_like of length 3
+    :relative_translation: array_like of length 3
         Translation of in the bodyframe coordinates.
 
-    relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
+    :relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
         The orientation of the shape in the bodyframe coordinates.
         It may be expressed with a quaternion [w, x, y, z] or a couple
         ([x, y, z], angle)
@@ -154,7 +183,8 @@ class Contactor(Shape):
     """
 
     def __init__(self,
-                 shape_data,
+                 shape_name,
+                 shape_data=None,
                  instance_name=None,
                  collision_group=0,
                  parameters=None,
@@ -168,22 +198,10 @@ class Contactor(Shape):
         self.contact_type = contact_type
         self.contact_index = contact_index
 
-        super(Contactor, self).__init__(shape_data,
+        super(Contactor, self).__init__(shape_name,
+                                        shape_data,
                                         instance_name,
                                         relative_translation,
                                         relative_orientation)
 
 
-class Material(object):
-    """Some material properties that may be associated to shapes.
-
-    Parameter
-    ---------
-
-    density: float
-        The material density.
-    """
-
-    def __init__(self,
-                 density):
-        self.density = density

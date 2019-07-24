@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,37 +30,61 @@
 #include "pinv.h"
 #include <string.h>
 
+#include "NumericsSparseMatrix.h"
+#include "NumericsVector.h"
+
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 //#define TEST_COND
-//#define OUTPUT_DEBUG
-extern lapack_int *Global_ipiv;
-extern int  Global_MisInverse;
-extern int  Global_MisLU;
+#define OUTPUT_DEBUG */
 
 
+/* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "debug.h"
+
+//#define USE_LAPACK_DGETRS
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 /* Global Variable for the reformulation of the problem */
 
-int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, FrictionContactProblem* localproblem)
+int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, FrictionContactProblem* localproblem)
 {
   int info = -1;
 
   NumericsMatrix *M = problem->M;
   NumericsMatrix *H = problem->H;
 
+  int n = M->size0;
+  int m = H->size1;
 
   localproblem->numberOfContacts = problem->numberOfContacts;
   localproblem->dimension =  problem->dimension;
   localproblem->mu =  problem->mu;
 
-  assert(M);
-  assert(H);
+  /* assert(M); */
+  /* assert(H); */
+  /* NM_display(M); */
+  /* NM_display(H); */
+  /* NumericsMatrix *MMtmp = NM_new(); */
+  /* NumericsMatrix *HHtmp = NM_new(); */
+
+  /* NM_copy(M,MMtmp); */
+  /* NM_copy(H,HHtmp); */
+
+  /* NM_clearSparse(M); */
+  /* NM_clearSparse(H); */
+
+  /* M = NM_create(NM_DENSE, n, n); */
+  /* H = NM_create(NM_DENSE, n, m); */
+
+  /* NM_to_dense(MMtmp,M); */
+  /* NM_to_dense(HHtmp,H); */
+
+  /* NM_display(M); */
+  /* NM_display(H); */
 
   if (H->storageType != M->storageType)
   {
@@ -68,34 +92,38 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     printf(" ->storageType != M->storageType :This case is not taken into account\n");
     return info;
   }
-
-  if (M->storageType == 0)
+#ifdef OUTPUT_DEBUG
+  FILE * fileout;
+#endif
+  if (M->storageType == NM_DENSE)
   {
 
 
-    int n = M->size0;
-    int m = H->size1;
-    int nm = n * m;
-    lapack_int infoDGETRF = 0;
-    lapack_int infoDGETRS = 0;
-    Global_ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
 
+    int nm = n * m;
 
     double *Htmp = (double*)malloc(nm * sizeof(double));
     // compute W = H^T M^-1 H
     //Copy Htmp <- H
     cblas_dcopy_msan(nm,  H->matrix0 , 1, Htmp, 1);
-    //Compute Htmp   <- M^-1 Htmp
-    Global_MisLU = 0; /*  Assume that M is not already LU */
-    DGETRF(n, n, M->matrix0, n, Global_ipiv, &infoDGETRF);
-    assert(!infoDGETRF);
-    Global_MisLU = 1;
-    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, Global_ipiv, Htmp, n, &infoDGETRS);
 
-    assert(!infoDGETRS);
+    //Compute Htmp   <- M^-1 Htmp
+#ifdef USE_LAPACK_DGETRS
+    lapack_int* ipiv = (lapack_int*)NM_iWork(M, M->size0, sizeof(lapack_int));
+    lapack_int infoDGETRF;
+    lapack_int infoDGETRS;
+    DGETRF(n, n, M->matrix0, n, ipiv, &infoDGETRF);
+    assert(!infoDGETRF);
+    NM_internalData(M)->isLUfactorized = true;
+    DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, &infoDGETRS);
+#else
+    NM_gesv_expert_multiple_rhs(M,Htmp,m,NM_KEEP_FACTORS);
+#endif
+
+    /* assert(!infoDGETRS); */
     /*      DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
 
-    localproblem->M = newNumericsMatrix();
+    localproblem->M = NM_new();
     NumericsMatrix *Wnum = localproblem->M;
     Wnum->storageType = 0;
     Wnum-> size0 = m;
@@ -106,13 +134,9 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     Wnum->internalData = NULL;
     // Compute W <-  H^T M^1 H
 
-
-
     assert(H->matrix0);
     assert(Htmp);
     assert(Wnum->matrix0);
-
-
 
     cblas_dgemm(CblasColMajor,CblasTrans, CblasNoTrans, m, m, n, 1.0, H->matrix0, n, Htmp, n, 0.0, Wnum->matrix0, m);
     /*     DGEMM(CblasTrans,CblasNoTrans,m,m,n,1.0,H->matrix0,n,Htmp,n,0.0,Wnum->matrix0,m); */
@@ -127,17 +151,17 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
 
     // compute H^T M^(-1) q + b
-
-    assert(Global_MisLU);
-    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, Global_ipiv, qtmp , n, &infoDGETRS);
-
-    /*      DGESV(n, m, M->matrix0, n, ipiv, problem->q , n, infoDGESV); */
+#ifdef USE_LAPACK_DGETRS
+    DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, ipiv, qtmp, n, &infoDGETRS);
+#else
+    NM_gesv_expert(M,qtmp,NM_KEEP_FACTORS);
+#endif
 
     cblas_dgemv(CblasColMajor,CblasTrans, n, m, 1.0, H->matrix0 , n, qtmp, 1, 1.0, localproblem->q, 1);
     // Copy mu
     localproblem->mu = problem->mu;
 
-
+    frictionContact_display(localproblem);
 
     free(Htmp);
     free(qtmp);
@@ -145,90 +169,48 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 
   }
 
-  else
+  else if (M->storageType == NM_SPARSE_BLOCK)
   {
     int n = M->size0;
     int m = H->size1;
 
-    assert(!Global_ipiv);
-    Global_ipiv = (lapack_int *)malloc(n * sizeof(lapack_int));
-
     // compute W = H^T M^-1 H
-    //Copy Htmp <- H
-    SparseBlockStructuredMatrix *HtmpSBM = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
-    /* copySBM(H->matrix1 , HtmpSBM); */
+    // compute MinvH   <- M^-1 H
+
+
+    int infoMInv = 0;
+    infoMInv = NM_inverse_diagonal_block_matrix_in_place(M);
+    assert(!infoMInv);
+
+    DEBUG_PRINT("M inverse :");
+    DEBUG_EXPR(NM_display(M));
+
+
+    NumericsMatrix * MinvH = NM_multiply(M,H);
+    
+    /* NumericsMatrix * MinvH= NM_create(NM_SPARSE_BLOCK, m, m); */
+    /* double alpha = 1.0, beta = 0.0; */
+    /* NM_gemm(alpha, M, H, beta, MinvH); */
+
+    NumericsMatrix * Htrans= NM_create(NM_SPARSE_BLOCK, H->size1, H->size0);
+    SBM_transpose(H->matrix1, Htrans->matrix1);
+
+    /* localproblem->M = NM_create(NM_SPARSE_BLOCK, m, m ); */
+    /* NumericsMatrix *W = localproblem->M; */
+    /* NM_gemm(alpha, Htrans, MinvH, beta, W); */
+
+    localproblem->M =  NM_multiply(Htrans,MinvH);
+
 
 #ifdef OUTPUT_DEBUG
-    FILE* fileout;
-    fileout = fopen("dataM.sci", "w");
-    printInFileForScilab(M, fileout);
-    fclose(fileout);
-    printf("Display M\n");
-    printSBM(M->matrix1);
-#endif
-    //Compute Htmp   <- M^-1 HtmpSBM
-    /* DGESV(n, m, M->matrix0, n, ipiv, Htmp, n, infoDGESV); */
-    assert(!inverseDiagSBM(M->matrix1));
-    Global_MisInverse = 1;
-#ifdef OUTPUT_DEBUG
-    fileout = fopen("dataMinv.sci", "w");
-    printInFileForScilab(M, fileout);
-    fclose(fileout);
-    printf("Display Minv\n");
-    printSBM(M->matrix1);
-#endif
-    allocateMemoryForProdSBMSBM(M->matrix1, H->matrix1, HtmpSBM);
-    double alpha = 1.0, beta = 1.0;
-
-    prodSBMSBM(alpha, M->matrix1, H->matrix1, beta, HtmpSBM);
-#ifdef OUTPUT_DEBUG
-    fileout = fopen("dataH.sci", "w");
-    printInFileForScilab(H, fileout);
-    fclose(fileout);
-    printf("Display H\n");
-    printSBM(H->matrix1);
-
-    fileout = fopen("dataHtmpSBM.sci", "w");
-    printInFileSBMForScilab(HtmpSBM, fileout);
-    fclose(fileout);
-    printf("Display HtmpSBM\n");
-    printSBM(HtmpSBM);
-#endif
-
-
-
-
-
-    SparseBlockStructuredMatrix *Htrans = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
-    transposeSBM(H->matrix1, Htrans);
-#ifdef OUTPUT_DEBUG
-    fileout = fopen("dataHtrans.sci", "w");
-    printInFileSBMForScilab(Htrans, fileout);
-    fclose(fileout);
-    printf("Display Htrans\n");
-    printSBM(Htrans);
-#endif
-    localproblem->M = newNumericsMatrix();
-    NumericsMatrix *Wnum = localproblem->M;
-    Wnum->storageType = 1;
-    Wnum-> size0 = m;
-    Wnum-> size1 = m;
-    Wnum->matrix1 = (SparseBlockStructuredMatrix*)malloc(sizeof(SparseBlockStructuredMatrix));
-    Wnum->matrix0 = NULL;
-    SparseBlockStructuredMatrix *W =  Wnum->matrix1;
-
-    allocateMemoryForProdSBMSBM(Htrans, HtmpSBM, W);
-    prodSBMSBM(alpha, Htrans, HtmpSBM, beta, W);
-#ifdef OUTPUT_DEBUG
+    FILE * fileout;
     fileout = fopen("dataW.sci", "w");
-    printInFileForScilab(Wnum, fileout);
+    NM_write_in_file_scilab(localproblem->M, fileout);
     fclose(fileout);
-    printf("Display W\n");
-    printSBM(W);
 #endif
 
 #ifdef TEST_COND
-    NumericsMatrix *WnumInverse = newNumericsMatrix();
+    NumericsMatrix *WnumInverse = NM_new();
     WnumInverse->storageType = 0;
     WnumInverse-> size0 = m;
     WnumInverse-> size1 = m;
@@ -237,10 +219,10 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     WnumInverse->internalData = NULL;
     WnumInverse->matrix0 = (double*)malloc(m * m * sizeof(double));
     double * WInverse = WnumInverse->matrix0;
-    SBMtoDense(W, WnumInverse->matrix0);
+    SBM_to_dense(W, WnumInverse->matrix0);
 
     FILE * file1 = fopen("dataW.dat", "w");
-    printInFileForScilab(WnumInverse, file1);
+    NM_write_in_file_scilab(WnumInverse, file1);
     fclose(file1);
 
     double * WInversetmp = (double*)malloc(m * m * sizeof(double));
@@ -263,16 +245,13 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     double  condWInverse;
     condWInverse = cond(WInverse, m, m);
 
-
-
-
     FILE * file2 = fopen("dataWInverse.dat", "w");
-    printInFileForScilab(WnumInverse, file2);
+    NM_write_in_file_scilab(WnumInverse, file2);
     fclose(file2);
 
     double tol = 1e-24;
     pinv(WInversetmp, m, m, tol);
-    NumericsMatrix *WnumInversetmp = newNumericsMatrix();
+    NumericsMatrix *WnumInversetmp = NM_new();
     WnumInversetmp->storageType = 0;
     WnumInversetmp-> size0 = m;
     WnumInversetmp-> size1 = m;
@@ -282,7 +261,7 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
     WnumInversetmp->matrix0 = WInversetmp ;
 
     FILE * file3 = fopen("dataWPseudoInverse.dat", "w");
-    printInFileForScilab(WnumInversetmp, file3);
+    NM_write_in_file_scilab(WnumInversetmp, file3);
     fclose(file3);
 
 
@@ -292,36 +271,128 @@ int reformulationIntoLocalProblem(GlobalFrictionContactProblem* problem, Frictio
 #endif
 
     localproblem->q = (double*)malloc(m * sizeof(double));
-    //Copy q<- b
+
+    //Copy localq<- b
     cblas_dcopy_msan(m, problem->b  , 1, localproblem->q, 1);
+
     // compute H^T M^-1 q+ b
     double* qtmp = (double*)malloc(n * sizeof(double));
     for (int i = 0; i < n; i++) qtmp[i] = 0.0;
+    double alpha = 1.0, beta = 0.0; 
     double beta2 = 0.0;
-    prodSBM(n, n, alpha, M->matrix1, problem->q, beta2, qtmp);
-    prodSBM(n, m, alpha, Htrans, qtmp, beta, localproblem->q);
+    NM_gemv(alpha, M, problem->q, beta2, qtmp);
+    NM_gemv(alpha, Htrans, qtmp, beta, localproblem->q);
 
     localproblem->mu = problem->mu;
 
-    /*     FILE * filecheck = fopen("localproblemcheck.dat","w"); */
-    /*     frictionContact_printInFile(localproblem,filecheck); */
-    /*     fclose(filecheck); */
-
-    freeSBM(HtmpSBM);
-    freeSBM(Htrans);
-    free(HtmpSBM);
+    NM_free(MinvH);
+    NM_free(Htrans);
+    free(MinvH);
     free(Htrans);
     free(qtmp);
   }
+  else if (M->storageType == NM_SPARSE)
+  {
+
+#ifdef OUTPUT_DEBUG
+    fileout = fopen("dataM.py", "w");
+    NM_write_in_file_python(M, fileout);
+    fclose(fileout);
+    fileout = fopen("dataH.py", "w");
+    NM_write_in_file_python(H, fileout);
+    fclose(fileout);
+    fileout = fopen("dataq.py", "w");
+    NV_write_in_file_python(problem->q, M->size0  , fileout);
+    fclose(fileout);
+
+#endif
 
 
+
+
+    // Product M^-1 H
+    DEBUG_EXPR(NM_display(H););
+
+    NumericsMatrix * Minv  = NM_new();
+    Minv->size0 = n;
+    Minv->size1 = n;
+    Minv->storageType = NM_SPARSE;
+    numerics_printf_verbose(1,"inversion of the matrix M ...");
+    NM_inv(M, Minv);
+    DEBUG_EXPR(NM_display(Minv););
+
+
+    /* NumericsMatrix* MinvH = NM_create(NM_SPARSE,n,m); */
+    /* NM_triplet_alloc(MinvH, n); */
+    /* MinvH->matrix2->origin = NSM_TRIPLET; */
+    /* DEBUG_EXPR(NM_display(MinvH);); */
+    /* NM_gemm(1.0, Minv, H, 0.0, MinvH); */
+    numerics_printf_verbose(1,"multiplication  H^T M^{-1} H ...");
+    NumericsMatrix* MinvH = NM_multiply(Minv,H);
+    DEBUG_EXPR(NM_display(MinvH););
+
+    // Product H^T M^-1 H
+    NM_csc_trans(H);
+
+    
+    NumericsMatrix* Htrans = NM_new();
+    Htrans->storageType = NM_SPARSE;
+    Htrans-> size0 = m;
+    Htrans-> size1 = n;
+    NM_csc_alloc(Htrans, 0);
+    Htrans->matrix2->origin = NSM_CSC;
+    Htrans->matrix2->csc = NM_csc_trans(H);
+    DEBUG_EXPR(NM_display(Htrans););
+
+    /* localproblem->M = NM_create(NM_SPARSE, m, m); */
+    /* NumericsMatrix *W = localproblem->M; */
+    /* int nzmax= m*m; */
+    /* NM_csc_empty_alloc(W, nzmax); */
+    /* W->matrix2->origin = NSM_CSC; */
+    /* NM_gemm(1.0, Htrans, MinvH, 0.0, W); */
+    
+    localproblem->M = NM_multiply(Htrans,MinvH);
+    DEBUG_EXPR(NM_display(localproblem->M););
+
+#ifdef OUTPUT_DEBUG
+    fileout = fopen("dataW.py", "w");
+    NM_write_in_file_python(localproblem->M, fileout);
+    fclose(fileout);
+#endif
+    
+    // compute localq = H^T M^(-1) q +b
+
+    //Copy localq <- b
+    //DEBUG_PRINT("Compute locaproblem q\n");
+    localproblem->q = (double*)malloc(m * sizeof(double));
+    cblas_dcopy_msan(m, problem->b , 1, localproblem->q, 1);
+
+    double* qtmp = (double*)malloc(n * sizeof(double));
+    //cblas_dcopy_msan(n,  problem->q, 1, qtmp, 1);
+
+    // compute H^T M^(-1) q + b
+    NM_gemv(1.0, Minv, problem->q, 0.0, qtmp);
+    DEBUG_EXPR(NV_display(qtmp,n););
+    DEBUG_EXPR(NV_display(problem->q,n););
+    NM_gemv(1.0, Htrans, qtmp, 1.0, localproblem->q);
+
+    // Copy mu
+    localproblem->mu = problem->mu;
+    DEBUG_EXPR(frictionContact_display(localproblem););
+    //getchar();
+  }
+  else
+  {
+    printf("gfc3d_reformulation_local_problem :: unknown matrix storage");
+    exit(EXIT_FAILURE);
+  }
   return info;
 }
 int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reaction, double * globalVelocity)
 {
   int info = -1;
 
-  if (problem->M->storageType == 0)
+  if (problem->M->storageType == NM_DENSE)
   {
     int n = problem->M->size0;
     int m = problem->H->size1;
@@ -331,22 +402,28 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
 
     /* globalVelocity <- problem->q */
     cblas_dcopy(n,  problem->q , 1, globalVelocity, 1);
-    /* globalVelocity <-  H*reaction + globalVelocity*/
-    cblas_dgemv(CblasColMajor,CblasNoTrans, n, m, 1.0, problem->H->matrix0 , n, reaction , 1, 1.0, globalVelocity, 1);
+
+    // We compute only if the local problem has contacts
+    if (m>0)
+    {
+      /* globalVelocity <-  H*reaction + globalVelocity*/
+      cblas_dgemv(CblasColMajor,CblasNoTrans, n, m, 1.0, problem->H->matrix0 , n, reaction , 1, 1.0, globalVelocity, 1);
+    }
+
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
-    assert(Global_ipiv);
-    assert(Global_MisLU);
+
+    assert(NM_internalData(problem->M)->isLUfactorized);
+#ifdef USE_LAPACK_DGETRS
     lapack_int infoDGETRS = 0;
-    DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, Global_ipiv, globalVelocity , n, &infoDGETRS);
-
+    lapack_int* ipiv = (lapack_int*)NM_iWork(problem->M, problem->M->size0, sizeof(lapack_int));
+    DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, ipiv, globalVelocity , n, &infoDGETRS);
     assert(!infoDGETRS);
-
-    free(Global_ipiv);
-    Global_ipiv = NULL;
-
+#else
+    NM_gesv_expert(problem->M,globalVelocity,NM_KEEP_FACTORS);
+#endif
 
   }
-  else
+  else if (problem->M->storageType == NM_SPARSE_BLOCK)
   {
     int n = problem->M->size0;
     int m = problem->H->size1;
@@ -358,19 +435,44 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
     double beta = 1.0;
 
     cblas_dcopy_msan(n,  problem->q , 1, qtmp, 1);
-    prodSBM(m, n, alpha, problem->H->matrix1, reaction, beta, qtmp);
+    SBM_gemv(m, n, alpha, problem->H->matrix1, reaction, beta, qtmp);
     /* Compute global velocity = M^(-1) qtmp*/
 
 
-    /*      inverseDiagSBM(M->matrix1); We assume that M->matrix1 is already inverse*/
-    assert(Global_MisInverse);
+    /*      SBM_inverse_diagonal_block_matrix(M->matrix1); We assume that M->matrix1 is already inverse*/
+    assert(NM_internalData(problem->M)->isInversed);
 
     double beta2 = 0.0;
-    prodSBM(n, n, alpha,  problem->M->matrix1, qtmp, beta2, globalVelocity);
+    SBM_gemv(n, n, alpha,  problem->M->matrix1, qtmp, beta2, globalVelocity);
 
     free(qtmp);
-    free(Global_ipiv);
-    Global_ipiv = NULL;
+
+  }
+  else if (problem->M->storageType == NM_SPARSE)
+  {
+    int n = problem->M->size0;
+    int m = problem->H->size1;
+
+
+    /* Compute globalVelocity   <- H reaction + q*/
+
+    /* globalVelocity <- problem->q */
+    cblas_dcopy(n,  problem->q , 1, globalVelocity, 1);
+    // We compute only if the local problem has contacts
+    if (m>0)
+    {
+      /* globalVelocity <-  H*reaction + globalVelocity*/
+      NM_gemv(1.0, problem->H, reaction, 1.0, globalVelocity);
+      DEBUG_EXPR(NM_vector_display(reaction, m));
+    }
+    /* Compute globalVelocity <- M^(-1) globalVelocity*/
+    info = NM_gesv_expert(problem->M, globalVelocity, NM_PRESERVE);
+    DEBUG_EXPR(NM_vector_display(globalVelocity, n));
+  }
+  else
+  {
+    printf("gfc3d_reformulation_local_problem :: unknown matrix storage");
+    exit(EXIT_FAILURE);
   }
 
   return info;
@@ -389,7 +491,7 @@ int freeLocalProblem(FrictionContactProblem* localproblem)
   /*  { */
   if (localproblem->M->matrix1)
   {
-    freeSBM(localproblem->M->matrix1);
+    SBM_free(localproblem->M->matrix1);
     free(localproblem->M->matrix1);
   }
   /*  } */
@@ -403,162 +505,193 @@ int freeLocalProblem(FrictionContactProblem* localproblem)
 
 void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
+  DEBUG_BEGIN("gfc3d_nsgs_wr\n");
+  NumericsMatrix *H = problem->H;
+  // We compute only if the local problem has contacts
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
+  if (H->size1 > 0)
+  {
+    // Reformulation
+    FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    
+    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ...\n");
+    gfc3d_reformulation_local_problem(problem, localproblem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
+    if (verbose)
+    {
+      printf("Call to the fc3d solver ...\n");
+    }
+    fc3d_nsgs(localproblem, reaction , velocity , info , options->internalSolvers);
 
-  // Reformulation
-  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    options->iparam[1] =  options->internalSolvers->iparam[1];
+    options->dparam[1] =  options->internalSolvers->dparam[1];
+    computeGlobalVelocity(problem, reaction, globalVelocity);
 
-  reformulationIntoLocalProblem(problem, localproblem);
-
-  fc3d_nsgs(localproblem, reaction , velocity , info , options->internalSolvers);
-
-  computeGlobalVelocity(problem, reaction, globalVelocity);
-  freeLocalProblem(localproblem);
-
-
+    freeLocalProblem(localproblem);
+  }
+  else
+  {
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+    *info = 0 ;
+  }
+  DEBUG_END("gfc3d_nsgs_wr\n");
 }
 int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options)
 {
-
-
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the NSGS_WR Solver\n");
   }
-
+  fc3d_nsgs_setDefaultSolverOptions(options);
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSGS_WR;
-
   options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 0;
-  options->dSize = 0;
-  options->iparam = NULL;
-  options->dparam = NULL;
-  options->dWork = NULL;
-  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_nsgs_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
 
+void  gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
+{
+  DEBUG_BEGIN("gfc3d_admm_wr\n");
+  NumericsMatrix *H = problem->H;
+  // We compute only if the local problem has contacts
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
+  if (H->size1 > 0)
+  {
+    // Reformulation
+    FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    if (verbose)
+    {
+      printf("Reformulation info a reduced problem onto local variables ...\n");
+    }
+    gfc3d_reformulation_local_problem(problem, localproblem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
+    if (verbose)
+    {
+      printf("Call to the fc3d solver ...\n");
+    }
+    fc3d_admm(localproblem, reaction , velocity , info , options->internalSolvers);
+
+    options->iparam[1] =  options->internalSolvers->iparam[1];
+    options->dparam[1] =  options->internalSolvers->dparam[1];
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+
+    freeLocalProblem(localproblem);
+  }
+  else
+  {
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+    *info = 0 ;
+  }
+  DEBUG_END("gfc3d_admm_wr\n");
+}
+int gfc3d_admm_wr_setDefaultSolverOptions(SolverOptions* options)
+{
+  if (verbose > 0)
+  {
+    printf("Set the Default SolverOptions for the ADMM_WR Solver\n");
+  }
+  fc3d_admm_setDefaultSolverOptions(options);
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_ADMM_WR;
+  options->numberOfInternalSolvers = 1;
+  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
+  fc3d_admm_setDefaultSolverOptions(options->internalSolvers);
+  return 0;
+}
 
 
 void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
-  DEBUG_BEGIN("gfc3d_nonsmooth_Newton_AlartCurnier_wr(...)\n")
-  // Reformulation
-  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-
-  reformulationIntoLocalProblem(problem, localproblem);
-
-
-  // From StorageType==1 to Storage==0
-  if (localproblem->M->storageType == NM_SPARSE_BLOCK)
+  DEBUG_BEGIN("gfc3d_nonsmooth_Newton_AlartCurnier_wr(...)\n");
+  NumericsMatrix *H = problem->H;
+  // We compute only if the local problem has contacts
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
+  if (H->size1 > 0)
   {
-    printf("Warning: fc3d_globalAlartCurnier is only implemented for dense matrices.\n");
-    printf("Warning: The problem is reformulated.\n");
+    // Reformulation
+    FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    if (verbose)
+    {
+      printf("Reformulation info a reduced problem onto local variables ...\n");
+    }
+    gfc3d_reformulation_local_problem(problem, localproblem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
+    numerics_printf("gfc3d_nonsmooth_Newton_AlartCurnier_wr - Call to the fc3d solver ...\n");
 
-    localproblem->M->matrix0 = (double*)malloc(localproblem->M->size0 * localproblem->M->size1 * sizeof(double));
+    fc3d_nonsmooth_Newton_AlartCurnier(localproblem, reaction , velocity , info , options->internalSolvers);
 
-    SBMtoDense(localproblem->M->matrix1, localproblem->M->matrix0);
+    options->iparam[1] =  options->internalSolvers->iparam[1];
+    options->dparam[1] =  options->internalSolvers->dparam[1];
+    computeGlobalVelocity(problem, reaction, globalVelocity);
 
-    DEBUG_EXPR( NM_dense_display(localproblem->M->matrix0,localproblem->M->size0, localproblem->M->size1, 0 ););
-
-    freeSBM(localproblem->M->matrix1);
-    free(localproblem->M->matrix1);
-    localproblem->M->matrix1 = NULL;
-    localproblem->M->matrix2 = NULL;
-    localproblem->M->internalData = NULL;
-    localproblem->M->storageType = 0;
+    freeLocalProblem(localproblem);
+  }
+  else
+  {
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+    *info = 0 ;
   }
 
-
-  //
-  fc3d_nonsmooth_Newton_AlartCurnier(localproblem, reaction , velocity , info , options->internalSolvers);
-
-  computeGlobalVelocity(problem, reaction, globalVelocity);
-  freeLocalProblem(localproblem);
   DEBUG_END("gfc3d_nonsmooth_Newton_AlartCurnier_wr(...)\n")
+
 
 }
 int gfc3d_nonsmooth_Newton_AlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options)
 {
-
-
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the NSN_AC_WR Solver\n");
   }
-
+  gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options);
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR;
-
   options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 0;
-  options->dSize = 0;
-  options->iparam = NULL;
-  options->dparam = NULL;
-  options->dWork = NULL;
-  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
+  fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
 
 void  gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
-  // Reformulation
-  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-
-  reformulationIntoLocalProblem(problem, localproblem);
-
-  /* Change into dense if neccessary*/
-
-  int m = localproblem->M->size0;
-  assert(localproblem->M->size0 == localproblem->M->size1);
-
-  if (localproblem->M->storageType == 1)
+  NumericsMatrix *H = problem->H;
+  // We compute only if the local problem has contacts
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
+  if (H->size1 > 0)
   {
+    // Reformulation
+    FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    if (verbose)
+    {
+      printf("Reformulation info a reduced problem onto local variables ...\n");
+    }
+    gfc3d_reformulation_local_problem(problem, localproblem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
+    if (verbose)
+    {
+      printf("Call to the fc3d solver ...\n");
+    }
+    fc3d_nsgs_velocity(localproblem, reaction , velocity , info , options->internalSolvers);
 
-    localproblem->M->matrix0 = (double*)malloc(m * m * sizeof(double));
-    SBMtoDense(localproblem->M->matrix1, localproblem->M->matrix0);
-    freeSBM(localproblem->M->matrix1);
-    free(localproblem->M->matrix1);
-    localproblem->M->storageType = 0;
-    localproblem->M->matrix1 = NULL;
-    localproblem->M->matrix2 = NULL;
-    localproblem->M->internalData = NULL;
+    options->iparam[1] =  options->internalSolvers->iparam[1];
+    options->dparam[1] =  options->internalSolvers->dparam[1];
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+
+    freeLocalProblem(localproblem);
   }
-
-  fc3d_nsgs_velocity(localproblem, reaction , velocity , info , options->internalSolvers);
-
-  computeGlobalVelocity(problem, reaction, globalVelocity);
-  freeLocalProblem(localproblem);
-
+  else
+  {
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+    *info = 0 ;
+  }
 }
 int gfc3d_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options)
 {
-
-
-
-
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the NSGSV_WR Solver\n");
   }
-
+  fc3d_nsgs_velocity_setDefaultSolverOptions(options);
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR;
-
   options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 0;
-  options->dSize = 0;
-  options->iparam = NULL;
-  options->dparam = NULL;
-  options->dWork = NULL;
-  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_nsgs_velocity_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -567,57 +700,81 @@ int gfc3d_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options)
 
 void  gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
+  NumericsMatrix *H = problem->H;
+  // We compute only if the local problem has contacts
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
+  if (H->size1 > 0)
+  {
+    // Reformulation
+    FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    if (verbose)
+    {
+      printf("Reformulation info a reduced problem onto local variables ...\n");
+    }
+    gfc3d_reformulation_local_problem(problem, localproblem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
+    if (verbose)
+    {
+      printf("Call to the fc3d solver ...\n");
+    }
+    fc3d_proximal(localproblem, reaction , velocity , info , options->internalSolvers);
 
-  // Reformulation
-  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    options->iparam[1] =  options->internalSolvers->iparam[1];
+    options->dparam[1] =  options->internalSolvers->dparam[1];
+    computeGlobalVelocity(problem, reaction, globalVelocity);
 
-  reformulationIntoLocalProblem(problem, localproblem);
-
-  fc3d_proximal(localproblem, reaction , velocity , info , options->internalSolvers);
-
-  computeGlobalVelocity(problem, reaction, globalVelocity);
-  freeLocalProblem(localproblem);
-
-
+    freeLocalProblem(localproblem);
+  }
+  else
+  {
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+    *info = 0 ;
+  }
 }
 int gfc3d_proximal_wr_setDefaultSolverOptions(SolverOptions* options)
 {
-
-
   if (verbose > 0)
   {
     printf("Set the Default SolverOptions for the PROX_WR Solver\n");
   }
-
+  fc3d_proximal_setDefaultSolverOptions(options);
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_PROX_WR;
-
   options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 0;
-  options->dSize = 0;
-  options->iparam = NULL;
-  options->dparam = NULL;
-  options->dWork = NULL;
-  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_proximal_setDefaultSolverOptions(options->internalSolvers);
   return 0;
 }
 void  gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
+  NumericsMatrix *H = problem->H;
+  // We compute only if the local problem has contacts
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
+  if (H->size1 > 0)
+  {
+    // Reformulation
+    FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    if (verbose)
+    {
+      printf("Reformulation info a reduced problem onto local variables ...\n");
+    }
+    gfc3d_reformulation_local_problem(problem, localproblem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
+    if (verbose)
+    {
+      printf("Call to the fc3d solver ...\n");
+    }
+    fc3d_DeSaxceFixedPoint(localproblem, reaction , velocity , info , options->internalSolvers);
+    options->iparam[1] =  options->internalSolvers->iparam[1];
+    options->dparam[1] =  options->internalSolvers->dparam[1];
+    computeGlobalVelocity(problem, reaction, globalVelocity);
 
-  // Reformulation
-  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-
-  reformulationIntoLocalProblem(problem, localproblem);
-
-  fc3d_DeSaxceFixedPoint(localproblem, reaction , velocity , info , options->internalSolvers);
-
-  computeGlobalVelocity(problem, reaction, globalVelocity);
-  freeLocalProblem(localproblem);
-
-
+    freeLocalProblem(localproblem);
+  }
+  else
+  {
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+    *info = 0 ;
+  }
 }
 int gfc3d_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
 {
@@ -627,18 +784,9 @@ int gfc3d_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   {
     printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
   }
-
+  fc3d_DeSaxceFixedPoint_setDefaultSolverOptions(options);
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_DSFP_WR;
-
   options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 0;
-  options->dSize = 0;
-  options->iparam = NULL;
-  options->dparam = NULL;
-  options->dWork = NULL;
-  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_DeSaxceFixedPoint_setDefaultSolverOptions(options->internalSolvers);
   return 0;
@@ -646,16 +794,36 @@ int gfc3d_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
 
 void  gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
+  NumericsMatrix *H = problem->H;
+  // We compute only if the local problem has contacts
+  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
+  if (H->size1 > 0)
+  {
+    // Reformulation
+    FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    if (verbose)
+    {
+      printf("Reformulation info a reduced problem onto local variables ...\n");
+    }
+    gfc3d_reformulation_local_problem(problem, localproblem);
+    DEBUG_EXPR(frictionContact_display(localproblem););
+    if (verbose)
+    {
+      printf("Call to the fc3d solver ...\n");
+    }
+    fc3d_TrescaFixedPoint(localproblem, reaction , velocity , info , options->internalSolvers);
+    options->iparam[1] =  options->internalSolvers->iparam[1];
+    options->dparam[1] =  options->internalSolvers->dparam[1];
+    computeGlobalVelocity(problem, reaction, globalVelocity);
 
-  // Reformulation
-  FrictionContactProblem* localproblem = (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
+    freeLocalProblem(localproblem);
+  }
+  else
+  {
+    computeGlobalVelocity(problem, reaction, globalVelocity);
+    *info = 0 ;
+  }
 
-  reformulationIntoLocalProblem(problem, localproblem);
-
-  fc3d_TrescaFixedPoint(localproblem, reaction , velocity , info , options->internalSolvers);
-
-  computeGlobalVelocity(problem, reaction, globalVelocity);
-  freeLocalProblem(localproblem);
 
 
 }
@@ -667,18 +835,9 @@ int gfc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   {
     printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
   }
-
+  fc3d_TrescaFixedPoint_setDefaultSolverOptions(options);
   options->solverId = SICONOS_GLOBAL_FRICTION_3D_TFP_WR;
-
   options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 0;
-  options->dSize = 0;
-  options->iparam = NULL;
-  options->dparam = NULL;
-  options->dWork = NULL;
-  solver_options_nullify(options);
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   fc3d_TrescaFixedPoint_setDefaultSolverOptions(options->internalSolvers);
   return 0;

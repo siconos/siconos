@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,26 +29,18 @@ const std::string transpose = "transpose";
 
 /**  Matrix (embedded various types of Boost matrices of double)
  *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 07/21/2006
- *
  * SimpleMatrix is used in the platform to store matrices (mathematical object) of double.
  *
  * Possible types: Siconos::DENSE (default), TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, Siconos::IDENTITY.
  *
  * \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
- *
- * Notes:
- *  - to handle with sparse matrices see http://freenet-homepage.de/guwi17/ublas/matrix_sparse_usage.html#Q2, for operations improvments.
- *  - See SandBox/Algebra for comparison between ublas (direct call) and Siconos perf.
- *  - Different way to compute matrix-vector or matrix-matrix products are proposed (prod, axpy_prod, gem...) based either on ublas or boost numeric bindings.
- *   See SandBox/Algebra/TestOperators to know which the most performant op. on your system.
- *   axpy_prod is only efficient for sparse or for large objects. For small matrices and vectors it is slower.
- *
- *  See also Siconos Algebra's page in Users Guide.
- *
- *
+
+\rst
+
+See :ref:`siconos_algebra` in :ref:`siconos_users_guide`.
+
+\endrst
+
  */
 class SimpleMatrix: public SiconosMatrix
 {
@@ -194,7 +186,8 @@ public:
   SimpleMatrix(const SimpleMatrix& smat);
   
   /** copy constructor of a block given by the coord = [r0A r1A c0A c1A]
-   *  \param A the matrix for extracting the block
+   *  \param A the matrix which contains the block to extract
+   *  \param coord positions of the block to be extracted (row:start, row:end, col:start, col:end)
    */
   SimpleMatrix(const SimpleMatrix& A , const Index& coord );
 
@@ -379,7 +372,7 @@ public:
    */
   IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const;
 
-  /** return the adress of the array of double values of the matrix
+  /** return the address of the array of double values of the matrix
    *  \param row position for the required block ->useless for SimpleMatrix
    *  \param col position for the required block ->useless for SimpleMatrix
    *  \return double* : the pointer on the double array
@@ -443,6 +436,17 @@ public:
    */
   void display() const;
 
+  /** put data of the matrix into a std::string
+   * \return std::string
+   */
+  std::string toString() const;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sm a SimpleMatrix
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm);
 
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int 
@@ -483,25 +487,25 @@ public:
 
   friend void setBlock(SPC::SiconosMatrix , SP::SiconosMatrix , const Index&, const Index&);
 
-  /** get block at position row-col, ie return this in SimpleMatrix case
-   * \param row unsigned int
-   * \param col unsigned int col
-   * \return SP::SiconosMatrix
-   */
-  inline SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0)
-  {
-    return shared_from_this();
-  };
+  // /** get block at position row-col, (current matrix in SimpleMatrix case)
+  //  * \param row row index
+  //  * \param col column index
+  //  * \return a sub-matrix
+  //  */
+  // inline SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0)
+  // {
+  //   return shared_from_this();
+  // };
 
-  /** get block at position row-col, ie return this in SimpleMatrix case
-   *  \param row unsigned int
-   *  \param col unsigned int
-   * \return SPC::SiconosMatrix
-   */
-  inline SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
-  {
-    return shared_from_this();
-  };
+  // /** get block at position row-col, (current matrix in SimpleMatrix case)
+  //  * \param row row index
+  //  * \param col column index
+  //  * \return a sub-matrix
+  //  */
+  // inline SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
+  // {
+  //   return shared_from_this();
+  // };
 
   /** get row index of current matrix and save it into vOut
    *  \param row index row we want to get

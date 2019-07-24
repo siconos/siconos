@@ -3,7 +3,7 @@ import numpy as np
 
 # import Siconos.Numerics * fails with py.test!
 import siconos.numerics as N
-
+import siconos
 # basic interface
 # Murty88, p2
 M = np.array([[2., 1.],
@@ -32,11 +32,12 @@ def test_lcp_pgs():
     assert (np.linalg.norm(z-zsol) <= ztol)
     assert not info
 
-def test_lcp_qp():
-    SO=N.SolverOptions(lcp,N.SICONOS_LCP_QP)
-    info  = N.lcp_qp(lcp,z,w,SO)
-    assert (np.linalg.norm(z-zsol) <= ztol)
-    assert not info
+if siconos.WITH_FORTRAN and siconos.WITH_QL0001:
+    def test_lcp_qp():
+        SO=N.SolverOptions(lcp,N.SICONOS_LCP_QP)
+        info  = N.lcp_qp(lcp,z,w,SO)
+        assert (np.linalg.norm(z-zsol) <= ztol)
+        assert not info
 
 def test_lcp_lexicolemke():
     SO=N.SolverOptions(lcp, N.SICONOS_LCP_LEMKE)

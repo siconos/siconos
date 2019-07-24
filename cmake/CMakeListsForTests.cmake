@@ -3,6 +3,8 @@
 # built from @CMAKE_SOURCE_DIR@/cmake/CMakeListsForTests.cmake
 SET(SOURCE_DIR @CMAKE_CURRENT_SOURCE_DIR@/@_CURRENT_TEST_DIRECTORY@)
 
+set_ldlibpath()
+
 # Search for reference files and copy them to binary dir
 FILE(GLOB TESTS_REF ${SOURCE_DIR}/*.ref)
 FOREACH(_F ${TESTS_REF})
@@ -86,18 +88,18 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
   # -- link with current component and its dependencies --
   add_dependencies(${_EXE} @COMPONENT@)
-  target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT@)
-  target_link_libraries(${_EXE} ${PRIVATE} ${@COMPONENT@_LINK_LIBRARIES})
+  target_link_libraries(${_EXE} PRIVATE @COMPONENT@)
+  target_link_libraries(${_EXE} PRIVATE ${@COMPONENT@_LINK_LIBRARIES})
 
   set(COMPONENT_TEST_LIB_ @COMPONENT_TEST_LIB@)
   if(COMPONENT_TEST_LIB_)
     add_dependencies(${_EXE} @COMPONENT_TEST_LIB@)
-    target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT_TEST_LIB@)
+    target_link_libraries(${_EXE} PRIVATE @COMPONENT_TEST_LIB@)
   endif()
 
   # Link and include for tests libraries (e.g. cppunit ...)
   FOREACH(_L ${TEST_LIBS})
-    TARGET_LINK_LIBRARIES(${_EXE} ${PRIVATE} ${_L})
+    TARGET_LINK_LIBRARIES(${_EXE} PRIVATE ${_L})
   ENDFOREACH()
   FOREACH(_D ${TEST_INCLUDE_DIR})
     include_directories(${_D})
@@ -105,7 +107,8 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
   IF(CPPUNIT_FOUND)
     # each test in the test suite becomes a cmake test
-    
+
+
     IF(CROSSCOMPILING_LINUX_TO_WINDOWS)
       SET(EMULATOR "wine")
     ELSE()
@@ -125,6 +128,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
         COMMAND env 
         ARGS "LSAN_OPTIONS=suppressions=${CMAKE_SOURCE_DIR}/Build/ci-scripts/asan-supp.txt:$ENV{LSAN_OPTIONS}"
         "ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}"
+        ${LDLIBPATH}
         ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT}
         --cdash-prepare ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}${EXE_EXT} > ${CMAKE_CURRENT_BINARY_DIR}/${_EXE}.cmake
         COMMENT "Generating ${_EXE}.cmake")
@@ -136,8 +140,7 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  ADD_TEST(\${ARGV})\n")
     FILE(APPEND ${CMAKE_CURRENT_BINARY_DIR}/SiconosTestConfig.cmake "  SET(_EXE \${ARGV0})\n")
 
-    IF(CMAKE_SYSTEM_NAME MATCHES Windows)
-    ENDIF()
+    SET(ENV_PPTY "${LDLIBPATH}")
 
     IF(USE_SANITIZER MATCHES "asan")
       SET(ENV_PPTY "${ENV_PPTY};ASAN_OPTIONS=detect_stack_use_after_return=1:detect_leaks=1:$ENV{ASAN_OPTIONS}")
@@ -178,8 +181,9 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
       SET_TARGET_PROPERTIES(${_EXE} PROPERTIES LINKER_LANGUAGE CXX)
     ENDIF(WITH_CXX_)
 
-    if(CMAKE_SYSTEM_NAME MATCHES Windows)
-      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "Path=${COMPONENT_PATH}")
+    if (LDLIBPATH)
+      SET_TARGET_PROPERTIES(${_EXE} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
+      set_tests_properties(${_EXE} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
     endif()
 
     IF(USE_SANITIZER MATCHES "asan")
@@ -191,8 +195,12 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
       SET_TESTS_PROPERTIES(${_EXE} PROPERTIES ${${_EXE}_PROPERTIES})
     ENDIF(${_EXE}_PROPERTIES)
 
-    set_tests_properties(${_EXE} PROPERTIES TIMEOUT ${tests_timeout})
- 
+    if(${_EXE}_TIMEOUT)
+      set_tests_properties(${_EXE} PROPERTIES TIMEOUT ${${_EXE}_TIMEOUT})
+    else()
+      set_tests_properties(${_EXE} PROPERTIES TIMEOUT ${tests_timeout})
+    endif()
+
   ENDIF()
 
 ENDFOREACH()

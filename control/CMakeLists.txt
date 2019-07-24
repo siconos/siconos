@@ -4,8 +4,6 @@
 
 set(COMPONENT control)
 message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
-# Name used for the target to be built
-set(COMPONENT_LIBRARY_NAME ${PROJECT_NAME}_${COMPONENT})
 
 # --- Search component dependencies ---
 
@@ -30,8 +28,12 @@ set(${COMPONENT}_HDRS_EXCLUDE_DIR)
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)
-set(${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
-set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} numerics kernel)
+list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
+list(APPEND ${COMPONENT}_LINK_LIBRARIES numerics kernel)
+if (CMAKE_SKIP_RPATH)
+  # if no RPATH, then linking does not work for tests without specifying externals
+  list(APPEND ${COMPONENT}_LINK_LIBRARIES externals)
+endif()
 
 include(WindowsControlSetup)
 

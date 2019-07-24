@@ -16,18 +16,17 @@ if(CI_CONFIG)
 endif()
 
 message(STATUS "CI options are : ${CI_OPTIONS}")
+message(STATUS "Siconos CMake options are : ${SICONOS_OPTIONS}")
 
 # ---------- Docker or not docker ... ------------------------
 if(WITH_DOCKER)
-  find_program(HAVE_DOCKER docker)
-  if(HAVE_DOCKER)
+  find_program(DOCKER_COMMAND docker)
+  if(DOCKER_COMMAND)
     set(DOCKER_MKSENV_COMMAND ${CMAKE_SOURCE_DIR}/machinery/mksenv.py)
     set(DOCKER_MKSENV_INPUT ${CMAKE_SOURCE_DIR}/config/siconos.yml)
     set(DOCKER_REPOSITORY ci_driver)
-    set(DOCKER_CMAKE_FLAGS ${CI_OPTIONS};-DWITH_DOCKER=0;-V)
     set(DOCKER_CTEST_DRIVER ${CMAKE_SOURCE_DIR}/machinery/CTestDriver.cmake)
     set(DOCKER_CTEST_MODE ${MODE})
-    set(DOCKER_BUILD_CONFIGURATION ${BUILD_CONFIGURATION})
     include(Docker)
 
     add_docker_targets(
@@ -35,7 +34,6 @@ if(WITH_DOCKER)
       DOCKER_TEMPLATE ${DOCKER_TEMPLATE}
       DOCKER_IMAGE_DIR ${DOCKER_IMAGE_DIR}
       DOCKER_REPOSITORY ${DOCKER_REPOSITORY}
-      DOCKER_CMAKE_FLAGS ${DOCKER_CMAKE_FLAGS}
       DOCKER_CTEST_DRIVER ${DOCKER_CTEST_DRIVER}
       DOCKER_SHARED_DIRECTORIES ${DOCKER_SHARED_DIRECTORIES}
       DOCKER_PROJECT_SOURCE_DIR ${DOCKER_PROJECT_SOURCE_DIR})

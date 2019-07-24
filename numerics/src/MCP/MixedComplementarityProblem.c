@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,18 +26,18 @@
 #include "MixedComplementarityProblem.h"
 #include "NumericsMatrix.h"
 
-void freeMixedComplementarityProblem(MixedComplementarityProblem* problem)
+void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem)
 {
 //  if (problem->Fmcp) free(problem->Fmcp);
 //  if (problem->nablaFmcp) free(problem->nablaFmcp);
   free(problem);
 }
 
-void freeMCP(MixedComplementarityProblem2* mcp)
+void mixedComplementarityProblem_free(MixedComplementarityProblem* mcp)
 {
   if (mcp->nabla_Fmcp)
   {
-    freeNumericsMatrix(mcp->nabla_Fmcp);
+    NM_free(mcp->nabla_Fmcp);
     free(mcp->nabla_Fmcp);
     mcp->nabla_Fmcp = NULL;
   }
@@ -45,9 +45,9 @@ void freeMCP(MixedComplementarityProblem2* mcp)
   free(mcp);
 }
 
-MixedComplementarityProblem2* newMCP(void)
+MixedComplementarityProblem* mixedComplementarityProblem_new(void)
 {
-  MixedComplementarityProblem2* mcp = (MixedComplementarityProblem2*) malloc(sizeof(MixedComplementarityProblem2));
+  MixedComplementarityProblem* mcp = (MixedComplementarityProblem*) malloc(sizeof(MixedComplementarityProblem));
 
   mcp->n1 = 0;
   mcp->n2 = 0;

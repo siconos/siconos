@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,14 @@
 #include "TimeDiscretisation.hpp"
 #include "ActuatorFactory.hpp"
 
+//#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
+
+
+
 LinearSMC::LinearSMC(SP::ControlSensor sensor, unsigned int type):
   CommonSMC(type, sensor)
 {
@@ -45,20 +53,26 @@ LinearSMC::~LinearSMC()
 
 void LinearSMC::actuate()
 {
+  DEBUG_BEGIN("void LinearSMC::actuate()\n")
 
   if (!_noUeq)
   {
     computeUeq();
-    prod(*_B, *_ueq, *(_DS_SMC->b()));
+    FirstOrderLinearDS& LinearDS_SMC = *std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC);
+    prod(*_B, *_ueq, *(LinearDS_SMC.b()));
   }
 
+  DEBUG_EXPR(_DS_SMC->xMemory().display(););
+
   *(_DS_SMC->x()) = _sensor->y();
-  *(_DS_SMC->xMemory()->getSiconosVector(0)) = _sensor->y();
+
+  // SS: Really need to modify stored xMemory?
+  _DS_SMC->xMemory().getSiconosVectorMutable(0) = _sensor->y();
 
   Type::Siconos dsType = Type::value(*_DS_SMC);
   if (dsType == Type::FirstOrderNonLinearDS)
   {
-    _DS_SMC->computef(_simulationSMC->startingTime());
+    _DS_SMC->computef(_simulationSMC->startingTime(), _DS_SMC->x());
     _DS_SMC->swapInMemory();
 //    _DS_SMC->computef(_simulationSMC->startingTime());
 //    *_DS_SMC->fold() = *_DS_SMC->f();
@@ -75,8 +89,9 @@ void LinearSMC::actuate()
   *_us = *_lambda;
   *_u = *_us;
   *_u += *_ueq;
+  DEBUG_EXPR(_u->display(););
   _indx++;
-
+  DEBUG_END("void LinearSMC::actuate()\n")
 }
 
 AUTO_REGISTER_ACTUATOR(LINEAR_SMC, LinearSMC)

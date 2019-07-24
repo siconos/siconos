@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@
 #include "Geometer.hpp"
 
 #include <SiconosFwd.hpp>
-#include <NewtonEulerFrom3DLocalFrameR.hpp>
+#include <NewtonEuler3DR.hpp>
 
-class OccR : public NewtonEulerFrom3DLocalFrameR
+class OccR : public NewtonEuler3DR
 {
 public:
   /** Constructor from contact points.
@@ -47,15 +47,15 @@ public:
    */
   void computeh(double time, BlockVector& q0, SiconosVector& y);
 
-  /** Set offset.
+  /** Set offset1, offset from first contact.
    * \param val : the new value.
    */
-  void setOffset(double val) { _offset = val; };
+  void setOffset1(double val) { _offset1 = val; };
 
-  /** Set normalFromFace1.
+  /** Set offset2, offset from second contact.
    * \param val : the new value.
    */
-  void setNormalFromFace1(bool val) { _normalFromFace1 = val; };
+  void setOffset2(double val) { _offset2 = val; };
 
   /** Get geometer.
    * \return a SP::Geometer object.
@@ -77,9 +77,8 @@ protected:
 
   SP::Geometer _geometer;
 
-  bool _normalFromFace1;
-  bool _offsetp1;
-  double _offset;
+  double _offset1;
+  double _offset2;
 };
 
 #endif

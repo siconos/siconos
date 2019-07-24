@@ -40,6 +40,8 @@ def is_list(a):
 def is_dict(a):
     return isinstance(a, dict)
 
+def is_str(a):
+    return isinstance(a, str)
 
 def is_atom(a):
     return not (hasattr(a, '__iter__'))
@@ -47,13 +49,33 @@ def is_atom(a):
 
 def get_entry(spec=None, distrib=None, distrib_version=None, pkg=None,
               section=None):
-    """
-    Get one entry with precedence distrib with version > distrib >
-    match distrib > wildcard.
+    """Select and return entry in 'section' of spec (from yaml file) for a given
+    package
+
+    Parameters
+    ----------
+    spec : dictionnary
+        entry to be scanned (usually result of open(file.yaml))
+    distrib, distrib_version : strings
+        distribution name (ubuntu, debian, ...) and version
+    pkg : string
+        name of the package searched
+    section : string
+        name of the key searched in spec
+
+    Notes
+    -----
+    * precedence order is
+       1 distrib with version
+       2 distrib only (full name)
+       3 match with distrib
+       4 wildcard (as defined in spec)
+
     """
 
     distrib_full = '{0}-{1}'.format(distrib, distrib_version)
 
+    # Look for specific config matching
     if section in spec and pkg in spec[section]:
 
         if distrib_full in spec[section][pkg]:
@@ -75,9 +97,20 @@ def get_entry(spec=None, distrib=None, distrib_version=None, pkg=None,
 
 
 def pkg_entries(spec=None, distrib=None, distrib_version=None, pkg=None):
-    """
-    Find recursively entries for pkg and distribution distrib in a
-    specification spec.
+    """Select and return entries in section 'pkgs' of spec (from yaml file) for
+    a given distribution and a given package.
+    Recursive check, i.e. : for each pkgs:pkg:name,
+    check if pkgs:name exist and include its entries.
+
+    Parameters
+    ----------
+    spec : dictionnary
+        entry to be scanned (usually result of open(file.yaml))
+    distrib, distrib_version : strings
+        distribution name (ubuntu, debian, ...) and version
+    pkg : string
+        name of the package searched
+
     """
 
     result = None
@@ -92,7 +125,7 @@ def pkg_entries(spec=None, distrib=None, distrib_version=None, pkg=None):
         return [result]
     else:
 
-        if is_atom(result):
+        if is_str(result):
             result = [result]
         r = list()
 
@@ -124,8 +157,8 @@ def begin(distrib=None, distrib_version=None, output_mode=None):
 
 
 def env(definitions=None, output_mode=None):
-    """
-    Environment specification.
+    """Format definitions (from env section in yml file)
+    according to output mode.
     """
 
     if len(definitions) > 0:
@@ -141,46 +174,71 @@ def env(definitions=None, output_mode=None):
 
 
 def install(installer=None, command=None, pkg=None, pkgs=None,
+            run_command=None,
             output_mode=OutputMode.Script):
-    """
-    Format an install command according to output mode.
+    """Format an install command according to output mode.
+
+    Parameters
+    ----------
+    installer: string, optional
+        command line used to install (and possibly update) packages
+        'by installer'
+    command: string, optional
+        command line to install packages 'by command'
+    pkg: string
+        extra package to install
+    output_mode: int
+        chosen output type (vagrant, docker or script)
+        see :class:`OutputMode`
     """
 
-    if output_mode == OutputMode.Docker:
-        items = ['RUN']
+    if (run_command is not None or command is not None or pkg is not None or
+        (pkgs is not None and pkgs != [])):
 
-    else:
-        if output_mode == OutputMode.Script:
-            items = []
+        if output_mode == OutputMode.Docker:
+            if run_command is not None:
+                items = ['CMD']
+            else:
+                items = ['RUN']
 
         else:
-            sys.stderr.write('output mode {0} is not implemented\n'.format(
-                output_mode))
-            exit(1)
+            if output_mode == OutputMode.Script:
+                items = []
 
-    if installer is not None and pkgs is not None and len(pkgs) > 0:
-        items.append(installer)
+            else:
+                sys.stderr.write('output mode {0} is not implemented\n'.format(
+                    output_mode))
+                exit(1)
 
-    if command is not None:
-        if '&&' in command:
-            coms = command.split('&&')
-            items += ['{0} &&'.format(c.lstrip().rstrip()) for c in coms[:-1]]
-            items.append(coms[-1].lstrip().rstrip())
-        else:
-            items.append(command)
+        # format items according to command or installer
+        if installer is not None and pkgs is not None and len(pkgs) > 0:
+            items.append(installer)
 
-    if pkg is not None:
-        items.append(pkg)
+        if run_command is not None:
+            assert command is None
+            command = run_command
+        if command is not None:
+            if '&&' in command:
+                coms = command.split('&&')
+                items += ['{0} &&'.format(c.lstrip().rstrip()) for c in coms[:-1]]
+                items.append(coms[-1].lstrip().rstrip())
+            else:
+                items.append(command)
 
-    if pkgs is not None:
-        items += pkgs
+        if pkg is not None:
+            items.append(pkg)
 
-    sys.stdout.write('{0}\n'.format(' \\\n  '.join(items)))
+        if pkgs is not None:
+            items += pkgs
+
+        # write items into output
+        sys.stdout.write('{0}\n'.format(' \\\n  '.join(items)))
 
 
 class Options(object):
 
     def __init__(self, *args, **kwargs):
+
         if len(args) > 0:
             for arg in args:
                 self.set_options(arg)
@@ -249,22 +307,48 @@ def get_options():
 
 
 def print_commands(*args, **kwargs):
-
+    """
+    """
+    # Scan options name and values from args/kwargs
     if len(args) == 1:
         options = args[0]
     else:
         options = Options(kwargs)
 
+    # Read yaml file
     with open(options.specfilename) as specfile:
 
         spec = yaml.load(specfile.read())
 
         by_installer = list()
         by_command = list()
+        by_run_commands = list()
         definitions = list()
+        installer = None
+        updater = None
+
+        definition = get_entry(spec, options.distrib,
+                               options.distrib_version, wildcard(spec)
+                               , 'env')
+
+        if definition is not None:
+                if is_list(definition):
+                    for iter_def in definition:
+                        definitions.append(iter_def)
+                else:
+                    definitions.append(definition)
 
         for pkg in options.pkgs:
 
+            installer = get_entry(spec, options.distrib, options.distrib_version,
+                                  pkg, 'installer')
+
+            updater = get_entry(spec, options.distrib, options.distrib_version,
+                            pkg, 'updater')
+
+            # Get 'env' section from yaml file and check
+            # for specific config of pkg for the given
+            # distrib and save result in definitions
             definition = get_entry(spec, options.distrib,
                                    options.distrib_version, pkg, 'env')
 
@@ -275,15 +359,21 @@ def print_commands(*args, **kwargs):
                 else:
                     definitions.append(definition)
 
+            # Get 'pkgs' section from yaml file for
+            # a distrib and a package.
+            # Update by_installer and by_command according to the result.
             entries = pkg_entries(spec=spec, distrib=options.distrib,
                                   distrib_version=options.distrib_version,
                                   pkg=pkg)
 
             for entry in entries:
                 if entry is not None:
-                    if hasattr(entry, 'has_key'):
+                    if is_dict(entry):
                         if 'command' in entry:
                             by_command.append(entry['command'])
+                        else:
+                            if 'run-command' in entry:
+                                by_run_commands.append(entry['run-command'])
                     elif hasattr(entry, 'sort'):
                         by_installer += entry
                     else:
@@ -291,16 +381,28 @@ def print_commands(*args, **kwargs):
                 else:
                     by_installer.append(pkg)
 
+        # write preamble into file
+        # e.g. 'FROM fedora:latest' in a dockerfile
         begin(distrib=options.distrib, distrib_version=options.distrib_version,
               output_mode=options.output_mode)
 
-        installer = get_entry(spec, options.distrib, options.distrib_version,
-                              wildcard(spec), 'installer')
+        # write environment variables
+        env(definitions, options.output_mode)
+
+        # read and set command line to install package for the given distrib
+        # e.g. 'apt-get install ...' on a debian
+        if installer is None:
+            installer = get_entry(spec, options.distrib,
+                                  options.distrib_version,
+                                  wildcard(spec), 'installer')
 
         assert installer is not None
 
-        updater = get_entry(spec, options.distrib, options.distrib_version,
-                            wildcard(spec), 'updater')
+        # read and set command line to update package for the given distrib
+        # e.g. 'apt-get update ...' on a debian
+        if updater is None:
+            updater = get_entry(spec, options.distrib, options.distrib_version,
+                                wildcard(spec), 'updater')
 
         if updater:
             installer = '{0} && {1}'.format(updater, installer)
@@ -316,7 +418,10 @@ def print_commands(*args, **kwargs):
         for command in by_command:
             install(command=command, output_mode=options.output_mode)
 
-        env(definitions, options.output_mode)
+        run_command = '&&'.join(by_run_commands)
+        install(run_command=run_command, output_mode=options.output_mode)
+
+
 
 if __name__ == '__main__':
     print_commands(get_options())

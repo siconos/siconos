@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,13 @@
 #include "numerics_verbose.h"
 #include "Friction_cst.h"
 
-int main(void)
+int main(int argc, char *argv[])
 {
+
+#ifdef SICONOS_HAS_MPI
+  MPI_Init(&argc, &argv);
+#endif
+
   int info = 0 ;
 
 
@@ -99,4 +104,9 @@ int main(void)
   printf("info: %d\n", info);
 
   return info;
+
+#ifdef SICONOS_HAS_MPI
+  MPI_Finalize();
+#endif
+
 }

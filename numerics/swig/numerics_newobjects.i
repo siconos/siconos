@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2016 INRIA.
+// Copyright 2018 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,19 +30,19 @@
 %newobject variationalInequality_new;
 %newobject frictionContactProblem_new;
 %newobject genericMechanical_newFromFile;
-%newobject buildEmptyGenericMechanicalProblem;
+%newobject genericMechanicalProblem_new;
 
 // NumericsMatrix
-%newobject newNumericsSparseLinearSolverParams;
-%newobject newNumericsSparseMatrix;
-%newobject duplicateNumericsMatrix;
-%newobject newNumericsMatrix;
+%newobject newNSM_linear_solver_params;
+%newobject NSM_new;
+%newobject NM_duplicate;
+%newobject NM_new;
 %newobject NM_create;
 %newobject NM_create_from_data;
-%newobject newSparseNumericsMatrix;
-%newobject newSBM;
-%newobject SBCMToSBM;
-%newobject newSparseBlockCoordinateMatrix3x3fortran;
+%newobject NM_new_SBM;
+%newobject SBM_new;
+%newobject SBCM_to_SBM;
+%newobject  SBCM_new_3x3;
 
 // strange things
 %newobject create_NMS_data;

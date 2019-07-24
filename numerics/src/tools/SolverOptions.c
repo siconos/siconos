@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,15 @@
 #include "lcp_cst.h"
 #include "relay_cst.h"
 #include "Friction_cst.h"
+#include "GenericMechanical_cst.h"
 #include "AVI_cst.h"
 #include "VI_cst.h"
+#include "SOCLCP_cst.h"
+#include "ConvexQP_cst.h"
+#include "Newton_methods.h"
+
+
+
 #include "numerics_verbose.h"
 
 #include "Newton_methods.h"
@@ -52,6 +59,7 @@ const char* const SICONOS_NUMERICS_PROBLEM_FC2D_STR = "FC2D";
 const char* const SICONOS_NUMERICS_PROBLEM_FC3D_STR = "FC3D";
 const char* const SICONOS_NUMERICS_PROBLEM_VI_STR = "VI";
 const char* const SICONOS_NUMERICS_PROBLEM_AVI_STR = "AVI";
+const char* const SICONOS_NUMERICS_PROBLEM_RELAY_STR = "RELAY";
 
 static void recursive_solver_options_print(SolverOptions* options, int level);
 
@@ -111,56 +119,60 @@ void recursive_solver_options_print(SolverOptions* options, int level)
     marge[i] = ' ';
   marge[level] = '\0';
 
-  printf("%s\n ========== Numerics Non Smooth Solver parameters: \n", marge);
+  numerics_printf("%s========== solver parameters: ", marge);
   if (options->isSet == 0)
-    printf("%sThe solver parameters have not been set. \t options->isSet = %i \n", marge, options->isSet);
+    numerics_printf("%sThe solver parameters have not been set. \t options->isSet = %i ", marge, options->isSet);
   else
   {
-    printf("%sThe solver parameters below have  been set \t options->isSet = %i\n", marge, options->isSet);
-    printf("%sId of the solver\t\t\t\t options->solverId = %d \n", marge, options->solverId);
-    printf("%sName of the solver\t\t\t\t  %s \n", marge, solver_options_id_to_name(options->solverId));
+    numerics_printf("%sThe solver parameters below have  been set \t options->isSet = %i", marge, options->isSet);
+    numerics_printf("%sId of the solver\t\t\t\t options->solverId = %d ", marge, options->solverId);
+    numerics_printf("%sName of the solver\t\t\t\t %s ", marge, solver_options_id_to_name(options->solverId));
     if (options->iparam != NULL)
     {
-      printf("%sint parameters \t\t\t\t\t options->iparam\n", marge);
-      printf("%ssize of the int parameters\t\t\t options->iSize = %i\n", marge, options->iSize);
+      numerics_printf("%ssize of the int parameters\t\t\t options->iSize = %i", marge, options->iSize);
+      numerics_printf("%snon zero int parameters in options->iparam:", marge);
       for (int i = 0; i < options->iSize; ++i)
-        printf("%s\t\t\t\t\t\t options->iparam[%i] = %d\n", marge, i, options->iparam[i]);
+      {
+        if(options->iparam[i]) numerics_printf("%s\t\t\t\t\t\t options->iparam[%i] = %d", marge, i, options->iparam[i]);
+      }
     }
     if (options->dparam != NULL)
     {
-      printf("%sdouble parameters \t\t\t\t options->dparam\n", marge);
-      printf("%ssize of the double parameters\t\t\t options->dSize = %i\n", marge, options->dSize);
+      numerics_printf("%sdouble parameters \t\t\t\t options->dparam", marge);
+      numerics_printf("%ssize of the double parameters\t\t\t options->dSize = %i", marge, options->dSize);
+      numerics_printf("%snon zero double parameters in options->dparam:", marge);
       for (int i = 0; i < options->dSize; ++i)
-        printf("%s\t\t\t\t\t\t options->dparam[%i] = %.6le\n", marge, i, options->dparam[i]);
+      {
+        if(options->dparam[i]) numerics_printf("%s\t\t\t\t\t\t options->dparam[%i] = %.6le", marge, i, options->dparam[i]);
+      }
     }
   }
   if (options->iWork == NULL)
   {
-    printf("%sinteger work array have not been allocated. \t options->iWork = NULL \n", marge);
+    numerics_printf("%sinteger work array have not been allocated. \t options->iWork = NULL ", marge);
   }
   else
   {
-    printf("%sinteger work array have been allocated. \t options->iWork = %p \n", marge, options->iWork);
-    printf("%sinteger work array size \t\t\t options->iSize = %i \n", marge, options->iSize);
+    numerics_printf("%sinteger work array have been allocated. \t options->iWork = %p ", marge, options->iWork);
+    numerics_printf("%sinteger work array size \t\t\t options->iSize = %i ", marge, options->iSize);
   }
   if (options->dWork == NULL)
   {
-    printf("%sdouble work array have not been allocated. \t options->dWork = NULL \n", marge);
+    numerics_printf("%sdouble work array have not been allocated. \t options->dWork = NULL ", marge);
   }
   else
   {
-    printf("%sdouble work array have been allocated. \t options->dWork = %p \n", marge, options->dWork);
-    printf("%sdouble work array size \t\t\t options->dSize = %i \n", marge, options->dSize);
+    numerics_printf("%sdouble work array have been allocated. \t options->dWork = %p ", marge, options->dWork);
+    numerics_printf("%sdouble work array size \t\t\t options->dSize = %i ", marge, options->dSize);
   }
 
 
 
 
-  printf("%sSee %s documentation for parameters definition)\n", marge, solver_options_id_to_name(options->solverId));
+  numerics_printf("%sSee %s documentation for parameters definition)", marge, solver_options_id_to_name(options->solverId));
 
-  printf("\n");
 
-  printf("%snumber of internal (or local) solvers \t\t options->numberOfInternalSolvers = %i\n", marge, options->numberOfInternalSolvers);
+  numerics_printf("%snumber of internal (or local) solvers \t\t options->numberOfInternalSolvers = %i", marge, options->numberOfInternalSolvers);
   for (i = 0; i < options->numberOfInternalSolvers; i++)
   {
     recursive_solver_options_print(options->internalSolvers + i, level + 1);
@@ -325,7 +337,7 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
 
   options->numberOfInternalSolvers =  options_ori->numberOfInternalSolvers;
   if (options->numberOfInternalSolvers)
-    options->internalSolvers = (SolverOptions *)malloc(options->numberOfInternalSolvers*sizeof(SolverOptions));
+    options->internalSolvers = (SolverOptions *)calloc(options->numberOfInternalSolvers, sizeof(SolverOptions));
   for (int i = 0  ; i < options->numberOfInternalSolvers; i++ )
   {
     SolverOptions * internal_options_ori = options_ori->internalSolvers + i;
@@ -356,87 +368,80 @@ void solver_options_set(SolverOptions* options, int solverId)
  int dSize = 0;
  int iter_max = 0;
  double tol = 0.0;
-
+ 
+ iSize = 15;
+ dSize = 15;
+ 
  switch (solverId)
  {
   case SICONOS_LCP_PATH:
   {
     tol = 1e-12;
   }
+  /* FALLTHRU */
   case SICONOS_LCP_PGS:
   case SICONOS_LCP_CPG:
   case SICONOS_LCP_NEWTONMIN:
   case SICONOS_LCP_QP:
   case SICONOS_LCP_NSQP:
+  case SICONOS_LCP_CONVEXQP_PG:
   {
-    iSize = 2;
-    dSize = 2;
     iter_max = 1000;
+    /* test here for the SICONOS_LCP_PATH case */
     tol = tol == 0. ? 1e-8 : tol;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     break;
   }
   case SICONOS_LCP_RPGS:
   {
-    iSize = 2;
-    dSize = 3;
     iter_max = 1000;
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    options->dparam[2] = 1.0;
+    options->dparam[SICONOS_LCP_IPARAM_RHO] = 1.0;
     break;
   }
   case SICONOS_LCP_LATIN:
   {
-    iSize = 2;
-    dSize = 3;
     iter_max = 1000;
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    options->dparam[2] = 0.3;
+    options->dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER] = 0.3;
     break;
   }
   case SICONOS_LCP_LATIN_W:
   {
-    iSize = 2;
-    dSize = 4;
     iter_max = 1000;
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    options->dparam[2] = 0.3;
-    options->dparam[3] = 1.0;
+    options->dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER] = 0.3;
+    options->dparam[SICONOS_LCP_IPARAM_RHO] = 1.0;
     break;
   }
   case SICONOS_LCP_ENUM:
   {
-    iSize = 5;
-    dSize = 2;
     iter_max = 0; /* this indicates the number of solutions ...  */
     tol = 1e-8;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     /*use dgels:*/
-    options->iparam[4] = 0;
+    options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS] = 0;
     break;
   }
 
-  case SICONOS_NCP_NEWTON_FBLSA:
-  case SICONOS_NCP_NEWTON_MINFBLSA:
-  case SICONOS_MCP_NEWTON_FBLSA:
-  case SICONOS_MCP_NEWTON_MINFBLSA:
-  case SICONOS_LCP_NEWTON_FBLSA:
-  case SICONOS_LCP_NEWTON_MINFBLSA:
+  case SICONOS_NCP_NEWTON_FB_FBLSA:
+  case SICONOS_NCP_NEWTON_MIN_FBLSA:
+  case SICONOS_LCP_NEWTON_FB_FBLSA:
+  case SICONOS_LCP_NEWTON_MIN_FBLSA:
   case SICONOS_VI_BOX_QI:
-    iSize = 7;
-    dSize = 3;
     iter_max = 1000;
     tol = 1e-12;
+    //VA: should be taken into account by an internal solver.
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    newton_lsa_default_SolverOption(options);
+    newton_lsa_setDefaultSolverOptions(options);
+    options->solverId=solverId;
+    options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
     break;
 
   case SICONOS_NCP_PATHSEARCH:
-    iSize = 9;
-    dSize = 8;
     iter_max = 100;
     tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -444,8 +449,6 @@ void solver_options_set(SolverOptions* options, int solverId)
     break;
 
   case SICONOS_VI_BOX_AVI_LSA:
-    iSize = 7;
-    dSize = 3;
     iter_max = 100;
     tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -456,8 +459,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_LCP_AVI_CAOFERRIS:
   case SICONOS_RELAY_AVI_CAOFERRIS:
   case SICONOS_RELAY_AVI_CAOFERRIS_TEST:
-    iSize = 6;
-    dSize = 3;
     iter_max = 10000;
     tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -469,8 +470,6 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_LCP_PIVOT:
   case SICONOS_LCP_PIVOT_LUMOD:
   case SICONOS_LCP_PATHSEARCH:
-    iSize = 6;
-    dSize = 3;
     iter_max = 10000;
     tol = 100*DBL_EPSILON;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
@@ -481,6 +480,7 @@ void solver_options_set(SolverOptions* options, int solverId)
   {
     tol = 1e-12;
   }
+  /* FALLTHRU */
   case SICONOS_FRICTION_3D_GAMS_PATH:
   case SICONOS_FRICTION_3D_GAMS_PATHVI:
   case SICONOS_FRICTION_3D_GAMS_LCP_PATH:
@@ -489,9 +489,8 @@ void solver_options_set(SolverOptions* options, int solverId)
   case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI:
   {
 #ifdef HAVE_GAMS_C_API
-    iSize = 5;
-    dSize = 4; // stupid thing in checkTrivialCase in fc3d_driver.c
     iter_max = 10000;
+    /* test here for the SICONOS_LCP_GAMS case */
     tol = tol == 0. ? 1e-9 : tol;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     if (!options->solverParameters)
@@ -500,21 +499,19 @@ void solver_options_set(SolverOptions* options, int solverId)
     }
     break;
 #else
-    printf("solver_options_set :: GAMS was not enabled, exiting!\n");
+    printf("%s :: GAMS was not enabled, exiting!\n", __func__);
     exit(EXIT_FAILURE);
 #endif
   }
 
   case SICONOS_NCP_PATH:
   case SICONOS_VI_BOX_PATH:
-    iSize = 6;
-    dSize = 3;
     iter_max = 10000;
     tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
     break;
   default:
-   printf("solver_options_set not supported for solver id %d named %s\n", solverId, solver_options_id_to_name(solverId));
+   printf("%s solver id %d named %s, is not supported\n", __func__, solverId, solver_options_id_to_name(solverId));
    exit(EXIT_FAILURE);
  }
 
@@ -540,3 +537,15 @@ int solver_options_name_to_id(char * pName)
 SICONOS_REGISTER_SOLVERS()
   return 0;
 }
+
+SolverOptions * solver_options_get_internal_solver(SolverOptions * options, int n)
+{
+  if (n+1 > options->numberOfInternalSolvers || n < 0)
+  {
+    printf("solver_options_get_internal_solver : the index must be between 0 and  options->numberOfInternalSolvers -1 ");
+    return NULL;
+  }
+  else
+    return &options->internalSolvers[n];
+}
+

@@ -7,7 +7,7 @@
 #include "SiconosShape.hpp"
 #include "SiconosCollisionManager.hpp"
 #include "SiconosBulletCollisionManager.hpp"
-#include "BodyDS.hpp"
+#include "RigidBodyDS.hpp"
 
 #include "SiconosKernel.hpp"
 
@@ -53,7 +53,7 @@ struct BounceParams
     printf("  position:           %.3g\n", position);
     printf("  insideMargin:       %.3g\n", insideMargin);
     printf("  outsideMargin:      %.3g\n", outsideMargin);
-    printf("  breakingThreshold:  %.3g\n", options.breakingThreshold);
+    printf("  breakingThreshold:  %.3g\n", options.contactBreakingThreshold);
     printf("  worldScale:         %.3g\n", options.worldScale);
   }
 };
@@ -72,6 +72,7 @@ struct BounceResult
   double displacement_on_first_contact;
 };
 
+static
 BounceResult bounceTest(std::string moving,
                         std::string ground,
                         const BounceParams &params)
@@ -108,7 +109,7 @@ BounceResult bounceTest(std::string moving,
     osi.reset(new MoreauJeanOSI(theta));
 
     // -- Model --
-    SP::Model model(new Model(t0, T));
+    SP::NonSmoothDynamicalSystem nsds(new NonSmoothDynamicalSystem(t0, T));
 
     SP::SiconosVector q0(new SiconosVector(7));
     SP::SiconosVector v0(new SiconosVector(6));
@@ -134,8 +135,8 @@ BounceResult bounceTest(std::string moving,
     fflush(stdout);
 
     // Set up a Siconos Mechanics environment:
-    // A BodyDS with a contactor consisting of a single sphere.
-    SP::BodyDS body(new BodyDS(q0, v0, params.mass));
+    // A RigidBodyDS with a contactor consisting of a single sphere.
+    SP::RigidBodyDS body(new RigidBodyDS(q0, v0, params.mass));
     SP::SiconosContactorSet contactors(new SiconosContactorSet());
     SP::SiconosSphere sphere;
     if (moving=="sphere")
@@ -208,7 +209,7 @@ BounceResult bounceTest(std::string moving,
     body->setFExtPtr(FExt);
 
     // -- Add the dynamical systems into the non smooth dynamical system
-    model->nonSmoothDynamicalSystem()->insertDynamicalSystem(body);
+    nsds->insertDynamicalSystem(body);
 
     // -- Time discretisation --
     SP::TimeDiscretisation timedisc(new TimeDiscretisation(t0, h));
@@ -232,13 +233,11 @@ BounceResult bounceTest(std::string moving,
     int N = ceil((T - t0) / h); // Number of time steps
 
     // -- MoreauJeanOSI Time Stepping
-    SP::TimeStepping simulation(new TimeStepping(timedisc));
+    SP::TimeStepping simulation(new TimeStepping(nsds, timedisc));
 
     simulation->insertIntegrator(osi);
     simulation->insertNonSmoothProblem(osnspb);
 
-    model->setSimulation(simulation);
-    model->initialize();
 
     // Object to manage the Bullet implementation of collisionMan
     SP::SiconosBulletCollisionManager collisionMan(
@@ -386,7 +385,7 @@ void ContactTest::t2()
     BounceParams params;
     params.trace = false;
     params.dynamic = false;
-    params.size = 0.01;
+    params.size = 1.0;
     params.mass = 1.0;
     params.position = 3.0;
     params.timestep = 0.005;
@@ -443,14 +442,14 @@ void ContactTest::t3()
     printf("\n==== t3\n");
 
     BounceParams params[3];
-    params[0].trace = true;
+    params[0].trace = false;
     params[0].dynamic = false;
     params[0].size = 0.02;
     params[0].mass = 0.02;
     params[0].position = 10.0;
     params[0].timestep = 0.005;
-    params[0].insideMargin = 0.1;
-    params[0].outsideMargin = 0.1;
+    params[0].insideMargin = 0.005;
+    params[0].outsideMargin = 0.005;
 
     params[1] = params[0];
     params[1].size = 0.1;
@@ -501,7 +500,7 @@ void ContactTest::t4()
   params.outsideMargin = 0.1;
 
   SiconosBulletOptions options;
-  options.breakingThreshold = 0.4;
+  options.contactBreakingThreshold = 0.4;
   options.worldScale = 1.0;
   params.options = options;
 

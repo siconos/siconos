@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,6 @@ const unsigned int MOREAUCOMBINEDPROJECTIONOSISTEPSINMEMORY = 1;
 /**  \class MoreauJeanCombinedProjectionOSI
  *   \brief One Step time Integrator for First Order Dynamical Systems  for
  *    mechanical Systems (LagrangianDS and NewtonEulerDS) with  Combined Projection Algorithm
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.4.0.
- *  \date (Creation) May 02, 2012
  *
  * This class reimplement a special activation of constraints
  * in the MoreauJeanOSI for the Combined Projection Algorithm
@@ -74,35 +71,27 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** initialization of the integrator; for linear time
-      invariant systems, we compute time invariant operator (example :
-      W)
-  */
-  void initialize(Model& m);
- 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param t0 time of initialization
    * \param inter the interaction
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeInteraction(double t0, Interaction &inter,
-			     InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG);
+  void initializeWorkVectorsForInteraction(Interaction &inter,
+                     InteractionProperties& interProp,
+                     DynamicalSystemsGraph & DSG);
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
    */
-  unsigned int numberOfIndexSets() const {return 2;};
+  unsigned int numberOfIndexSets() const {return 3;};
 
 
   /** Apply the rule to one Interaction to known if is it should be included
@@ -119,7 +108,7 @@ public:
    * \param i level
    * \return bool
    */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
   /** visitors hook
   */

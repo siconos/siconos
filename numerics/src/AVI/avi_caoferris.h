@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,10 +43,8 @@ extern "C"
    * \param d the covering vector for Lemke
    * \param size_x dimension of the solution variable
    * \param A set of active constraints
-   * \param options struct used to define the solver(s) and its (their)
-   * parameters
+   * \param options struct used to define the solver(s) and its (their) parameters
    * \return 0 if success, 1 if failure
-   * \author Olivier Huber
    */
   int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* u, double* s, double* d, unsigned size_x, unsigned* A, SolverOptions* options);
 

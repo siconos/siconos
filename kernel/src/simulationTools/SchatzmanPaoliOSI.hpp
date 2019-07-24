@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +30,6 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 
 /**  SchatzmanPaoliOSI Time-Integrator for Dynamical Systems
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
- *
- *
  * SchatzmanPaoliOSI class is used to define some time-integrators methods for a
  * list of dynamical systems.
 
@@ -61,11 +56,20 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
  */
 class SchatzmanPaoliOSI : public OneStepIntegrator
 {
+public:
+
+  enum SchatzmanPaoliOSI_ds_workVector_id {RESIDU_FREE, FREE, LOCAL_BUFFER, WORK_LENGTH};
+
+  enum SchatzmanPaoliOSI_interaction_workVector_id{OSNSP_RHS, WORK_INTERACTION_LENGTH};
+
+  enum SchatzmanPaoliOSI_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
+
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(SchatzmanPaoliOSI);
 
+ 
 
   /** Stl map that associates a theta parameter for the integration
   *  scheme to each DynamicalSystem of the OSI */
@@ -236,26 +240,24 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  void initialize(Model& m);
+  //void initialize(Model& m);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param t0 time of initialization
    * \param inter the interaction
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeInteraction(double t0, Interaction &inter,
-			     InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG);
+  void initializeWorkVectorsForInteraction(Interaction &inter,
+		     InteractionProperties& interProp,
+		     DynamicalSystemsGraph & DSG);
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -264,9 +266,8 @@ public:
   /** initialize iteration matrix W SchatzmanPaoliOSI matrix at time t
    *  \param time (double)
    *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant)
    */
-  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
+  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
 
   /** compute W SchatzmanPaoliOSI matrix at time t
    *  \param time the time (double)

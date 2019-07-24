@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,10 +35,6 @@
 #include "SiconosControlFwd.hpp"
 
 /** Observers Base Class
-
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.6.0
-   \date (Creation) May 21, 2013
 
    Abstract class, interface to user-defined observers.
 
@@ -77,8 +73,11 @@ protected:
   /** id of the Observer */
   std::string _id;
 
-  /** Model for integration */
-  SP::Model _model;
+  // /** Model for integration */
+  // SP::Model _model;
+
+  // /** Model for integration */
+  SP::NonSmoothDynamicalSystem _nsds;
 
   /** Simulation for integration */
   SP::TimeStepping _simulation;
@@ -144,9 +143,10 @@ public:
   virtual void setTimeDiscretisation(const TimeDiscretisation& td);
 
   /** initialize observer data.
-   * \param m a SP::Model
+   * \param nsds current nonsmooth dynamical system
+   * \param s current simulation setup
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
 
   /** capture data when the ObserverEvent is processed
    */
@@ -183,7 +183,7 @@ public:
   /** get the Model used in the Observer
    * \return The Model used in the Observer
    */
-  virtual SP::Model getInternalModel() const { return _model; };
+  virtual SP::NonSmoothDynamicalSystem getInternalNSDS() const { return _nsds; };
 
 };
 

@@ -1,7 +1,5 @@
 include(tools4tests)
 
-set(TEST_WRAP FALSE)
-
 if(WITH_${COMPONENT}_TESTING)
   
   # We don't use COMPILE_WITH since we don't want to link cppunit with the
@@ -19,7 +17,7 @@ if(WITH_${COMPONENT}_TESTING)
     OUTPUT_NAME TestPlugin)
 
   # the main test driver
-  SET(TEST_MAIN src/model/test/TestMain.cpp)
+  SET(TEST_MAIN src/test/TestMain.cpp)
 
   # For Windows
   SET(PATH_FOR_PLUGIN
@@ -38,16 +36,11 @@ if(WITH_${COMPONENT}_TESTING)
   NEW_TEST(testSiconosMemory SiconosMemoryTest.cpp)
   END_TEST()
   
-  # model
-  BEGIN_TEST(src/model/test)
-  
-  NEW_TEST(testModel ModelTest.cpp)
-  
-  END_TEST()
   # modeling tools 
   BEGIN_TEST(src/modelingTools/test)
   
   NEW_TEST(testModelingTools
+    FirstOrderNonLinearDSTest.cpp
     FirstOrderLinearDSTest.cpp
     FirstOrderLinearTIRTest.cpp
     FirstOrderLinearRTest.cpp
@@ -56,8 +49,11 @@ if(WITH_${COMPONENT}_TESTING)
     LagrangianScleronomousRTest.cpp
     LagrangianRheonomousRTest.cpp
     LagrangianCompliantRTest.cpp
+    LagrangianCompliantLinearTIRTest.cpp
     LagrangianDSTest.cpp
-    NewtonEulerDSTest.cpp)
+    LagrangianLinearTIDSTest.cpp
+    NewtonEulerDSTest.cpp
+    NonSmoothDynamicalSystemTest.cpp)
   END_TEST()
   #FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp 
   #LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp)
@@ -72,9 +68,12 @@ if(WITH_${COMPONENT}_TESTING)
   # Simulation tests
   BEGIN_TEST(src/simulationTools/test)
 
-  NEW_TEST(testSimulationTools ZOHTest.cpp OSNSPTest.cpp)
-
-
+  IF(HAS_FORTRAN)
+   NEW_TEST(testSimulationTools OSNSPTest.cpp EulerMoreauTest.cpp LsodarTest.cpp ZOHTest.cpp)
+   ELSE()
+    NEW_TEST(testSimulationTools OSNSPTest.cpp EulerMoreauTest.cpp)
+  ENDIF()
+  
   END_TEST()
 
-endif()
+ endif()

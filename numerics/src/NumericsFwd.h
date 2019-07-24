@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,8 @@
 
 // Matrices storage
 TYPEDEF_STRUCT(NumericsMatrix)
-TYPEDEF_STRUCT(polyhedron)
 TYPEDEF_STRUCT(NumericsSparseMatrix)
-TYPEDEF_STRUCT(NumericsSparseLinearSolverParams)
+TYPEDEF_STRUCT(NSM_linear_solver_params)
 TYPEDEF_STRUCT(SparseBlockStructuredMatrix)
 TYPEDEF_STRUCT(SparseBlockStructuredMatrixPred)
 TYPEDEF_STRUCT(SparseBlockCoordinateMatrix)
@@ -43,16 +42,24 @@ TYPEDEF_STRUCT(SecondOrderConeLinearComplementarityProblem_as_VI)
 TYPEDEF_STRUCT(RelayProblem)
 TYPEDEF_STRUCT(NonlinearComplementarityProblem)
 TYPEDEF_STRUCT(MixedLinearComplementarityProblem)
+TYPEDEF_STRUCT(MixedComplementarityProblem_old)
 TYPEDEF_STRUCT(MixedComplementarityProblem)
-TYPEDEF_STRUCT(MixedComplementarityProblem2)
 TYPEDEF_STRUCT(LinearComplementarityProblem)
+TYPEDEF_STRUCT(LinearComplementarityProblem_as_ConvexQP)
 TYPEDEF_STRUCT(GlobalFrictionContactProblem)
+TYPEDEF_STRUCT(RollingFrictionContactProblem)
 TYPEDEF_STRUCT(GenericMechanicalProblem)
 TYPEDEF_STRUCT(listNumericsProblem)
 TYPEDEF_STRUCT(FrictionContactProblem_as_VI)
+TYPEDEF_STRUCT(FrictionContactProblem_as_ConvexQP)
+TYPEDEF_STRUCT(GlobalFrictionContactProblem_as_VI)
+TYPEDEF_STRUCT(GlobalFrictionContactProblem_as_ConvexQP)
 TYPEDEF_STRUCT(FrictionContactProblem)
+TYPEDEF_STRUCT(SplittedFrictionContactProblem)
 TYPEDEF_STRUCT(VariationalInequality)
 TYPEDEF_STRUCT(AffineVariationalInequalities)
+TYPEDEF_STRUCT(ConvexQP)
+TYPEDEF_STRUCT(ConvexQP_as_VI)
 
 
 

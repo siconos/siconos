@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ LinearSMCimproved::~LinearSMCimproved()
 {
 }
 
-void LinearSMCimproved::initialize(const Model& m)
+void LinearSMCimproved::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s)
 {
-  LinearSMC::initialize(m);
+  LinearSMC::initialize(nsds,s);
   _up.reset(new SiconosVector(_us->size()));
   _measuredPert.reset(new boost::circular_buffer<SP::SiconosVector>(0));
   _predictedPert.reset(new boost::circular_buffer<SP::SiconosVector>(0));

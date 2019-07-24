@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 /*!\file lcp_avi_caoferris.c
  \brief Solve an LCP by reformulating it as an AVI and the solver by Cao and
 Ferris solves the subsequent AVI.
- \author Olivier Huber
 */
 
 #include "AVI_Solvers.h"
@@ -43,7 +42,7 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   LinearComplementarityProblem lcplike_pb;
   lcplike_pb.size = s;
   NumericsMatrix num_mat;
-  fillNumericsMatrix(&num_mat, NM_DENSE, s, s, calloc(s*s, sizeof(double)));
+  NM_fill(&num_mat, NM_DENSE, s, s, calloc(s*s, sizeof(double)));
 
   lcplike_pb.M = &num_mat;
 
@@ -101,7 +100,7 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   free(s_vec);
   free(A);
   free(d_vec);
-  freeNumericsMatrix(lcplike_pb.M);
+  NM_free(lcplike_pb.M);
   free(lcplike_pb.q);
   free(b_bar);
 }

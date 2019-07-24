@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,31 @@
 
 #include "ModelingTools.hpp"
 #include "SimulationTools.hpp"
-#include "Model.hpp"
-
 #include "SlidingReducedOrderObserver.hpp"
 #include "ControlSensor.hpp"
 #include "ObserverFactory.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
 
+//#define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
-void SlidingReducedOrderObserver::initialize(const Model& m)
+void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsds,
+                                             const Simulation& s)
 {
+  DEBUG_BEGIN(" SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)\n");
   if (!_C)
   {
     RuntimeException::selfThrow("SlidingReducedOrderObserver::initialize - you have to set C before initializing the Observer");
   }
   else
   {
-    Observer::initialize(m);
+    Observer::initialize(nsds, s);
   }
   bool isDSinDSG0 = true;
-  DynamicalSystemsGraph& originalDSG0 = *m.nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& originalDSG0 = *nsds.topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor originaldsgVD;
   if (!_DS) // No DynamicalSystem was given
   {
@@ -53,10 +58,12 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
     // method
     if (dsType == Type::FirstOrderLinearDS)
     {
+      DEBUG_PRINT("dsType == Type::FirstOrderLinearDS\n");
       _DS.reset(new FirstOrderLinearDS(static_cast<FirstOrderLinearDS&>(observedDS)));
     }
     else if (dsType == Type::FirstOrderLinearTIDS)
     {
+      DEBUG_PRINT("dsType == Type::FirstOrderLinearTIDS\n");
       _DS.reset(new FirstOrderLinearTIDS(static_cast<FirstOrderLinearTIDS&>(observedDS)));
     }
     else
@@ -76,22 +83,21 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
 
   // Initialize with the guessed state
   _DS->setX0Ptr(_xHat);
-
+  _DS->resetToInitialState();
   _e.reset(new SiconosVector(_C->size(0)));
   _y.reset(new SiconosVector(_C->size(0)));
 
-  double t0 = m.t0();
-  double h = m.simulation()->currentTimeStep();
-  double T = m.finalT() + h;
-  _model.reset(new Model(t0, T));
+  double t0 = nsds.t0();
+  double h = s.currentTimeStep();
+  double T = nsds.finalT() + h;
+  _nsds.reset(new NonSmoothDynamicalSystem(t0, T));
   _integrator.reset(new ZeroOrderHoldOSI());
   std11::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
       std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
-  _model->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS);
-  _model->nonSmoothDynamicalSystem()->topology()->setOSI(_DS, _integrator);
+  _nsds->insertDynamicalSystem(_DS);
 
   // Add the necessary properties
-  DynamicalSystemsGraph& DSG0 = *_model->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DynamicalSystemsGraph& DSG0 = *_nsds->topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(_DS);
   // Observer part
   DSG0.L[dsgVD] = _L;
@@ -106,19 +112,21 @@ void SlidingReducedOrderObserver::initialize(const Model& m)
   }
 
   // all necessary things for simulation
-  _simulation.reset(new TimeStepping(_td, 0));
-  _simulation->insertIntegrator(_integrator);
-  _model->setSimulation(_simulation);
-  _model->initialize();
- 
+  _simulation.reset(new TimeStepping(_nsds, _td, 0));
+  _simulation->setName("Internal simultion of SlidingReducedOrderObserver");
+  _simulation->associate(_integrator, _DS);
+
   // initialize error
   *_y = _sensor->y();
+  DEBUG_END(" SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)\n");
 }
 
 void SlidingReducedOrderObserver::process()
 {
+  DEBUG_BEGIN("void SlidingReducedOrderObserver::process()\n");
   if (!_pass)
   {
+    DEBUG_PRINT("First pass \n ");
     _pass = true;
     //update the estimate using the first value of y, such that C\hat{x}_0 = y_0
     const SiconosVector& y = _sensor->y();
@@ -134,10 +142,14 @@ void SlidingReducedOrderObserver::process()
     tmpC.SolveByLeastSquares(tmpV);
     *(_xHat) -= tmpV;
     *(_DS->x()) -= tmpV;
+    _DS->initMemory(1);
     _DS->swapInMemory();
+    DEBUG_EXPR(_DS->display(););
+    DEBUG_EXPR(_DS->xMemory().display(););
   }
   else
   {
+    DEBUG_PRINT("Second pass\n");
     // get measurement from sensor
     const SiconosVector& y = _sensor->y();
     // update the current measured value
@@ -166,7 +178,8 @@ void SlidingReducedOrderObserver::process()
     //
     // But first we need to reset the state to the
     // previous value (at t_k)
-    _DS->setX(*_DS->xMemory()->getSiconosVector(0));
+    DEBUG_EXPR(_DS->xMemory().display(););
+    _DS->setX(_DS->xMemory().getSiconosVector(0));
     // integrate with the new innovation term
     _simulation->computeOneStep();
 
@@ -175,6 +188,7 @@ void SlidingReducedOrderObserver::process()
 
     *_xHat = _DS->getx();
   }
+  DEBUG_END("void SlidingReducedOrderObserver::process()\n");
 }
 
 AUTO_REGISTER_OBSERVER(SLIDING_REDUCED_ORDER, SlidingReducedOrderObserver);

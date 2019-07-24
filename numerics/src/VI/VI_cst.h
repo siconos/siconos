@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,16 +34,38 @@ enum VI_SOLVER
   SICONOS_VI_BOX_PATH = 1022
 };
 
-enum SICONOS_VI_ERROR_EVALUATION_ENUM
+enum SICONOS_VI_IPARAM
 {
   /** index in iparam to store the error evaluation method */
-  SICONOS_VI_ERROR_EVALUATION = 7,
+  SICONOS_VI_IPARAM_LINESEARCH_METHOD = 6,
+  /** index in iparam to store the error evaluation method */
+  SICONOS_VI_IPARAM_ERROR_EVALUATION = 7,
+  /** index in iparam to store the frequency of error evaluation method */
+  SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY = 8
+};
+
+enum SICONOS_VI_EG_DPARAM
+{
+  /** index in iparam to store the initial value of rho */
+  SICONOS_VI_EG_DPARAM_RHO = 3,
+  /** index in iparam to store the tau coeff of line-search */
+  SICONOS_VI_EG_DPARAM_LS_TAU = 4,
+  /** index in iparam to store the tauinv coeff of line-search */
+  SICONOS_VI_EG_DPARAM_LS_TAUINV = 5,
+  /** index in iparam to store the L coeff of line-search */
+  SICONOS_VI_EG_DPARAM_LS_L = 6,
+  /** index in iparam to store the LMIN coeff of line-search */
+  SICONOS_VI_EG_DPARAM_LS_LMIN = 7,
+};
+
+
+
+enum SICONOS_VI_ERROR_EVALUATION_ENUM
+{
   SICONOS_VI_ERROR_EVALUATION_FULL = 0,
   SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL = 1,
   SICONOS_VI_ERROR_EVALUATION_LIGHT = 2,
   SICONOS_VI_ERROR_EVALUATION_ADAPTIVE =3,
-  /** index in iparam to store the frequency of error evaluation method */
-  SICONOS_VI_ERROR_EVALUATION_FREQUENCY = 8 
 };
 
 

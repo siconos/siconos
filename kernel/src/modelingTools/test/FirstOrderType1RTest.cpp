@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,11 +71,4 @@ void FirstOrderType1RTest::testBuildFirstOrderType1R2()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ", R2->getJachName(0)=="TestPlugin:Jh0T1", true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2g : ", R2->getJacgName(0)=="TestPlugin:Jg0T1", true);
   std::cout << "--> Constructor2 test ended with success." <<std::endl;
-}
-
-void FirstOrderType1RTest::End()
-{
-  std::cout << "==========================================" <<std::endl;
-  std::cout << " ===== End of FirstOrderType1R Tests ===== " <<std::endl;
-  std::cout << "==========================================" <<std::endl;
 }

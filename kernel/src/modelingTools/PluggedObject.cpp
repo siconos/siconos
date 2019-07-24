@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 
 #include "SSLH.hpp"
 #include "PluggedObject.hpp"
-
+#include <assert.h>
 PluggedObject::PluggedObject(): _pluginName("unplugged")
 {
   fPtr = NULL;
@@ -31,7 +31,7 @@ PluggedObject::PluggedObject(const std::string& name): _pluginName(name)
   setComputeFunction();
 }
 
-PluggedObject::PluggedObject(const PluggedObject & PO):  _pluginName(PO.getPluginName())
+PluggedObject::PluggedObject(const PluggedObject & PO):  _pluginName(PO.pluginName())
 {
   // we don't copy the fPtr since we need to increment the number of times we opened the plugin file in the openedPlugins multimap
   fPtr = NULL;
@@ -68,6 +68,6 @@ void PluggedObject::setComputeFunction(const std::string& plugin)
 
 void PluggedObject::setComputeFunction(void)
 {
-  assert(_pluginName != "unplugged" && "PluggedObject::setComputeFunction error, try to plug an unamed function.");
+  assert(_pluginName != "unplugged" && "PluggedObject::setComputeFunction error, try to plug an unnamed function.");
   SSLH::setFunction(&fPtr, SSLH::getPluginName(_pluginName), SSLH::getPluginFunctionName(_pluginName));
 }

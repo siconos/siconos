@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <float.h>
 
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "SolverOptions.h"
@@ -29,6 +30,8 @@
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
 #include "projectionOnCone.h"
+#include "SiconosCompat.h"
+#include "numerics_verbose.h"
 
 #ifdef HAVE_GAMS_C_API
 
@@ -143,7 +146,7 @@ static void setDashedOptions(const char* optName, const char* optValue, const ch
   }
 }
 
-static csi SN_rm_normal_part(csi i, csi j, double val, void* env)
+static CS_INT SN_rm_normal_part(CS_INT i, CS_INT j, double val, void* env)
 {
   if (i%3 == 0)
   {
@@ -507,7 +510,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   DEBUG_PRINT("FC3D_AVI_GAMS :: Wt matrix constructed\n");
 
   Emat.storageType = NM_SPARSE;
-  NM_sparse(&Emat);
+  numericsSparseMatrix(&Emat);
   Emat.size0 = size;
   Emat.size1 = size;
 
@@ -519,7 +522,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   }
 
   Akmat.storageType = NM_SPARSE;
-  NM_sparse(&Akmat);
+  numericsSparseMatrix(&Akmat);
   Akmat.size0 = NB_APPROX*problem->numberOfContacts;
   Akmat.size1 = size;
   Akmat.matrix2->triplet = cs_spalloc(NB_APPROX*problem->numberOfContacts, size, NB_APPROX*problem->numberOfContacts*3, 1, 1);
@@ -925,7 +928,7 @@ bad_angle:
           ri[1] = 0.;
           ri[2] = 0.;
 
-          /*  Pick 3 contraints as basis */
+          /*  Pick 3 constraints as basis */
           /*  The dual variable u is very likely to be non-zero
            *  y is then also likely to be non-zero
            *  Let's make our life easier dans choose as
@@ -949,7 +952,8 @@ bad_angle:
           b[0] = ui[0];
           b[1] = ui[1];
           b[2] = ui[2];
-          solve_3x3_gepp(mat, b);
+
+          SOLVE_3X3_GEPP(mat, b);
 
           assert(isfinite(b[0]));
           assert(isfinite(b[1]));
@@ -974,7 +978,8 @@ bad_angle:
           /* now the dual var: A^T \lambda_y = (y_n, u_t) */
           b[0] = ui[0];
           /*  XXX mat is not changed, so we should not have any trouble here */
-          solve_3x3_gepp(mat, b);
+          SOLVE_3X3_GEPP(mat, b);
+
           assert(isfinite(b[0]));
           assert(isfinite(b[1]));
           assert(isfinite(b[2]));
@@ -1101,9 +1106,9 @@ TERMINATE:
 
   optFree(&Optr);
   optFree(&solverOptPtr);
-  freeNumericsMatrix(&Wtmat);
-  freeNumericsMatrix(&Emat);
-  freeNumericsMatrix(&Akmat);
+  NM_free(&Wtmat);
+  NM_free(&Emat);
+  NM_free(&Akmat);
 
   free(reaction_old);
   free(velocity_old);

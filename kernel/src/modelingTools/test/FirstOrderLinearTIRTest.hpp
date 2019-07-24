@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,8 +51,6 @@ private:
   //  CPPUNIT_TEST(testGetJac);
   CPPUNIT_TEST(testGetJacPtr);
 
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
@@ -72,7 +70,6 @@ private:
   void testSetBPtr();
   //  void testGetJac();
   void testGetJacPtr();
-  void End();
 
   // Members
 

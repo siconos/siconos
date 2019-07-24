@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,11 @@
 #include <sstream>
 #include <vector>
 #include <deque>
+
+#include "SiconosPointers.hpp"
+
+/** A vector of unsigned integers used in some cases in kernel */
+TYPEDEF_TPL1_SPTR(UnsignedIntVector, std::vector, unsigned int)
 
 /** Type used for inside-class allocation checking */
 typedef std::deque<bool> AllocationFlags;

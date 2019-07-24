@@ -1,7 +1,7 @@
 # - Find BLAS library
-# This module finds an installed library that implements the BLAS 
+# This module finds an installed library that implements the BLAS
 # with its C interface (cblas) and the classical fortran interface.
-# 
+#
 #
 # This module sets the following variables:
 #  BLAS_FOUND - set to true if a library implementing the BLAS interface
@@ -12,18 +12,18 @@
 #  BLAS_LIBRARY_DIR - location of the first blas lib found by cmake.
 #  BLAS_HEADER - name(s) of the header(s) required for cblas.
 #
-# To find a specific blas set : 
-#  WITH_BLAS  if set checks only a specific implementation of blas which may be : mkl, openblas, atlas, accelerate, veclib, generic. 
-# Or : 
-#  BLAS_DIR if set, cmake uses this path (absolute) to find a blas implementation in BLAS_DIR/include and/or BLAS_DIR/lib 
-# 
-# If neither WITH_BLAS nor BLAS_DIR is set, all implementation are searched in this order : mkl, openblas, accelerate, veclib, atlas, generic. 
+# To find a specific blas set :
+#  WITH_BLAS  if set checks only a specific implementation of blas which may be : mkl, openblas, atlas, accelerate, veclib, generic.
+# Or :
+#  BLAS_DIR if set, cmake uses this path (absolute) to find a blas implementation in BLAS_DIR/include and/or BLAS_DIR/lib
+#
+# If neither WITH_BLAS nor BLAS_DIR is set, all implementation are searched in this order : mkl, openblas, accelerate, veclib, atlas, generic.
 # If available, pkg-config system is used to give hints to cmake search process.
 #
 
 
 if(NOT BLAS_FOUND)
-  
+
   include(CheckFunctionExists)
   include(CheckFortranFunctionExists)
   find_package(PkgConfig)
@@ -54,16 +54,16 @@ if(NOT BLAS_FOUND)
     # flags given by _flags.  If the combination of libraries is found and passes
     # the link test, LIBRARIES is set to the list of complete library paths that
     # have been found.  Otherwise, LIBRARIES is set to FALSE.
-    
+
     # N.B. _prefix is the prefix applied to the names of all cached variables that
     # are generated internally and marked advanced by this macro.
-    
+
     set(_libdir ${ARGN})
-    
+
     set(_libraries_work TRUE)
     set(${LIBRARIES} "")
     set(_combined_name)
-    
+
     ## If no extra argument was given to the macro, default search path is
     ## filled with environment variables.
     if (NOT _libdir)
@@ -77,13 +77,13 @@ if(NOT BLAS_FOUND)
     endif ()
     foreach(_library ${_list})
       set(_combined_name ${_combined_name}_${_library})
-      
+
       if(_libraries_work)
-	
+
 	# HINTS are checked before PATHS, that's why we call
 	# find_library twice, to give priority to LD_LIBRARY_PATH or user-defined paths
 	# over pkg-config process.
-	# This first call should find _library in env. variables. 
+	# This first call should find _library in env. variables.
 	find_library(${_prefix}_${_library}_LIBRARIES
 	  NAMES ${_library}
 	  PATHS ${_libdir}
@@ -103,12 +103,12 @@ if(NOT BLAS_FOUND)
 	  foreach(PC_LIB ${PC_${_library}_LIBRARIES})
 	    find_library(${PC_LIB}_LIBRARY
 	      NAMES ${PC_LIB}
-	      HINTS ${PC_${_library}_LIBRARY_DIRS} 
+	      HINTS ${PC_${_library}_LIBRARY_DIRS}
 	      )
 	    if (NOT ${PC_LIB}_LIBRARY)
 	      message(FATAL_ERROR "Something is wrong in your pkg-config file - lib ${PC_LIB} not found in ${PC_${_library}_LIBRARY_DIRS}")
 	    endif (NOT ${PC_LIB}_LIBRARY)
-	    list(APPEND ${_prefix}_${_library}_LIBRARIES ${${PC_LIB}_LIBRARY}) 
+	    list(APPEND ${_prefix}_${_library}_LIBRARIES ${${PC_LIB}_LIBRARY})
 	  endforeach(PC_LIB)
 	  ## pkg-config may give some hints about headers location
 	  set(INCLUDE_DIR_HINTS ${PC_${_library}_INCLUDE_DIRS})
@@ -151,7 +151,7 @@ if(NOT BLAS_FOUND)
       set(${LIBRARIES} FALSE)
     endif()
   endmacro()
-  
+
   if (BLA_STATIC)
     if (WIN32)
       set(CMAKE_FIND_LIBRARY_SUFFIXES .lib ${CMAKE_FIND_LIBRARY_SUFFIXES})
@@ -171,22 +171,22 @@ if(NOT BLAS_FOUND)
   #### Start Blas search process ####
   set(WITH_BLAS "" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]")
   set(BLAS_DIR "" CACHE PATH "Blas implementation location.")
-  
-  ## If BLAS_DIR is provided by user, we add it to CMAKE_PREFIX_PATH. This should be the first place to be 
+
+  ## If BLAS_DIR is provided by user, we add it to CMAKE_PREFIX_PATH. This should be the first place to be
   # searched for blas libraries and headers.
-  if(BLAS_DIR) 
+  if(BLAS_DIR)
     set(CMAKE_PREFIX_PATH ${BLAS_DIR})
     string(TOLOWER ${BLAS_DIR} lowerblasdir)
   else()
     set(lowerblasdir)
   endif()
-  
+
   ## Then we use BLAS_DIR to get hints on the blas implementation and set WITH_BLAS
   if(BLAS_DIR MATCHES "mkl.*")
     set(WITH_BLAS "mkl" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
     set(INTEL_MKL_DIR ${BLAS_DIR})
     set(INTEL_COMPILER_DIR "${BLAS_DIR}/..")
-  elseif(lowerblasdir MATCHES "atlas.*") 
+  elseif(lowerblasdir MATCHES "atlas.*")
     set(WITH_BLAS "atlas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
   elseif(lowerblasdir MATCHES "openblas.*")
     set(WITH_BLAS "openblas" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
@@ -195,20 +195,20 @@ if(NOT BLAS_FOUND)
   elseif(lowerblasdir MATCHES "veclib.framework.*")
     set(WITH_BLAS "veclib" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
   endif()
-  
+
   message(STATUS "Start blas search with BLAS_DIR =${BLAS_DIR} and WITH_BLAS=${WITH_BLAS}.")
-  
-  
-  ## Now we will search for blas libraries in different implementations. 
-  ## If WITH_BLAS is not set, the first found will be set. 
-  ## We check for the fortran AND the c (cblas_) interface. 
+
+
+  ## Now we will search for blas libraries in different implementations.
+  ## If WITH_BLAS is not set, the first found will be set.
+  ## We check for the fortran AND the c (cblas_) interface.
   ## If something is found, we MUST set:
   # BLAS_LIBRARIES : list of libraries to link with
   # WITH_BLAS : name of the implementation found (mkl/openblas/atlas/accelerate/generic)
   # BLAS_HEADER : name of the header for cblas interface.
 
   set(BLAS_LIBRARIES)
-  ## Intel MKL ## 
+  ## Intel MKL ##
   if((NOT BLAS_LIBRARIES)
       AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "mkl")))
     message(STATUS "Try to find blas in intel/mkl ...")
@@ -222,7 +222,7 @@ if(NOT BLAS_FOUND)
       set(BLAS_HEADER mkl_cblas.h CACHE STRING "Blas header name")
     endif(MKL_FOUND)
   endif()
-  
+
   ## OpenBLAS ##
   if((NOT BLAS_LIBRARIES)
     AND ((NOT WITH_BLAS) OR (WITH_BLAS MATCHES "openblas")))
@@ -248,12 +248,17 @@ if(NOT BLAS_FOUND)
       # to ensure that std::complex<double> can be casted to double* and produces good results we should enfore std=c++11
       # Right now openblas ships with a cblas.h header which uses double* as type for pointer to double complex, which makes ublas cry since it
       # want to pass std::complex<double>*
-      set(BLAS_INCLUDE_SUFFIXES cblas_header)
-      set(INCLUDE_DIR_HINTS ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
+      #set(BLAS_INCLUDE_SUFFIXES cblas_header)
+      #set(INCLUDE_DIR_HINTS ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
+
+      get_filename_component(_bdir ${BLAS_LIBRARIES} DIRECTORY)
+      set(INCLUDE_DIR_HINTS "${_bdir}/../include/openblas/")
+      set(OPENBLAS_FOUND 1)
+
     endif(BLAS_LIBRARIES)
   endif()
-  
-  ## Apple Framework ## 
+
+  ## Apple Framework ##
   if((NOT BLAS_LIBRARIES)
       AND ((NOT WITH_BLAS) OR (WITH_BLAS STREQUAL "accelerate")))
     message(STATUS "Try to find blas in Accelerate framework ...")
@@ -270,7 +275,7 @@ if(NOT BLAS_FOUND)
       set(BLAS_INCLUDE_SUFFIXES Headers Frameworks)
     endif (BLAS_LIBRARIES)
   endif()
-  
+
   ## Atlas ##
   ## Rq : atlas is the "default" cblas environmment in some linux distrib (Debian, Ubuntu, Fedora ...)
   if((NOT BLAS_LIBRARIES)
@@ -340,7 +345,7 @@ if(NOT BLAS_FOUND)
       ""
       "cblas;blas"
       "")
-    
+
     if(BLAS_LIBRARIES)
       set(WITH_BLAS "generic" CACHE STRING "Blas implementation type [mkl/openblas/atlas/accelerate/generic]" FORCE)
       set(BLAS_HEADER cblas.h CACHE STRING "Blas header name")
@@ -353,7 +358,7 @@ if(NOT BLAS_FOUND)
   else(BLAS_LIBRARIES)
     set(BLAS_FOUND FALSE)
   endif(BLAS_LIBRARIES)
-  
+
   ## Now the headers ...
   if(BLAS_FOUND)
     message(STATUS "Blas libraries have been found : ${BLAS_LIBRARIES}. We now turn to headers.")
@@ -362,21 +367,21 @@ if(NOT BLAS_FOUND)
     list(GET BLAS_LIBRARIES 0 BLAS_LIB)
     get_filename_component(_bdir ${BLAS_LIB} PATH)
     set(BLAS_LIBRARY_DIR ${_bdir} CACHE PATH "Blas libraries location." FORCE)
-    
-    # Either BLAS_DIR has been set by user or we use BLAS_LIBRARIES location to set it. 
+
+    # Either BLAS_DIR has been set by user or we use BLAS_LIBRARIES location to set it.
     if(NOT BLAS_DIR)
       get_filename_component(_bdir ${BLAS_LIBRARY_DIR} PATH)
       set(BLAS_DIR ${_bdir} CACHE PATH "Blas implementation location." FORCE)
     endif()
 
     set(BLAS_INC_DIR ${BLAS_DIR}/include)
-    ## Use BLAS_DIR to set path for cmake search. 
+    ## Use BLAS_DIR to set path for cmake search.
     ## If pkg-config has been used, maybe it gives some hints about headers location ...
     message(STATUS pkg hints : ${INCLUDE_DIR_HINTS})
     message(STATUS BLAS_INC_DIR : ${BLAS_INC_DIR})
     ## Note Franck : it seems that find_path process does not work as expected on Macosx : it does not respect the search sequence described
     # in cmake doc (i.e. CMAKE_PREFIX, then HINTS, PATHS ... ) and always turn to find apple framework cblas if
-    # NO_DEFAULT_PATH is not set. 
+    # NO_DEFAULT_PATH is not set.
     if(APPLE) # First check in HINTS, no default, then global search.
       set(CMAKE_INCLUDE_PATH ${INCLUDE_DIR_HINTS} ${BLAS_INC_DIR})
       set(CMAKE_PREFIX_PATH ${BLAS_LIBRARIES})
@@ -405,7 +410,7 @@ if(NOT BLAS_FOUND)
       unset(_dir CACHE)
       set(BLAS_INCLUDE_DIRS ${BLAS_INCLUDE_DIRS} CACHE STRING "Blas headers location." FORCE)
     else() # The case which is supposed to always work
-      find_path(BLAS_INCLUDE_DIRS 
+      find_path(BLAS_INCLUDE_DIRS
 	NAMES ${BLAS_HEADER}
 	PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
         HINTS ${INCLUDE_DIR_HINTS}  ${BLAS_INC_DIR}
@@ -421,16 +426,16 @@ if(NOT BLAS_FOUND)
 
     if(WITH_BLAS STREQUAL "mkl")
       set(HAS_MKL_CBLAS 1 CACHE BOOL "Blas comes from Intel MKL.")
-   
+
     elseif(WITH_BLAS STREQUAL "accelerate")
       set(HAS_ACCELERATE 1 CACHE BOOL "Blas/Lapack come from Accelerate framework ")
-      
+
     elseif(WITH_BLAS STREQUAL "atlas")
       set(HAS_ATLAS_CBLAS 1 CACHE BOOL "Blas  comes from Atlas framework ")
 
     elseif(WITH_BLAS STREQUAL "openblas")
       set(HAS_OpenBLAS 1 CACHE BOOL "Blas/Lapack come from OpenBlas ")
-      
+
     else()
       set(HAS_GenericCBLAS 1 CACHE BOOL "Blas is available from an unknown version.")
 
@@ -450,6 +455,5 @@ if(NOT BLAS_FOUND)
       message(STATUS "Cannot find a library with BLAS API. Maybe you can try again using BLAS_DIR option or set your environment variables properly.")
     endif(BLAS_FOUND)
   endif(NOT BLAS_FIND_QUIETLY)
-  
-endif()
 
+endif()

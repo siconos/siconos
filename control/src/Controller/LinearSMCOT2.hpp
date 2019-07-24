@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ private:
   /** Next value of the state only with the influence of the dynamic \f$ \XPhi = \Phi x_k\f$*/
   SP::SiconosVector _XPhi;
   /** Model for the computation of _XPhi*/
-  SP::Model _modelPhi;
+  SP::NonSmoothDynamicalSystem _nsdsPhi;
   /** DynamicalSystem for the computation of _XPhi*/
   SP::FirstOrderLinearDS _DSPhi;
   /** TimeDiscretisation for the computation of _XPhi*/
@@ -50,7 +50,7 @@ private:
   /** Simulation for the computation of _XPhi*/
   SP::EventDriven _simulPhi;
   /** Model for the computation of Xhat*/
-  SP::Model _modelPred;
+  SP::NonSmoothDynamicalSystem _nsdsPred;
   /** TimeDiscretisation for the computation of Xhat*/
   SP::TimeDiscretisation _tdPred;
   /** OneSteoIntegrator for the computation of Xhat*/
@@ -78,9 +78,10 @@ public:
   virtual ~LinearSMCOT2();
 
   /** initialize actuator data.
-   * \param m the Model
+   * \param nsds current nonsmooth dynamical system
+   * \param s current simulation setup
   */
-  void initialize(const Model& m);
+  void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s);
 
   /** Compute the new control law at each event
    * Here we are using the following formula:

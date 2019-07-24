@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,25 +36,17 @@ private:
 
   // tests to be done ...
 
-  // CPPUNIT_TEST(testBuildLagrangianDS1);
-  // CPPUNIT_TEST(testBuildLagrangianDS2);
-  // CPPUNIT_TEST(testBuildLagrangianDS3);
+  CPPUNIT_TEST(testBuildLagrangianDS1);
   CPPUNIT_TEST(testBuildLagrangianDS4);
   CPPUNIT_TEST(testBuildLagrangianDS5);
-  CPPUNIT_TEST(testcomputeDS);
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  // void testBuildLagrangianDS1();
-  // void testBuildLagrangianDS2();
-  // void testBuildLagrangianDS3();
+  void testBuildLagrangianDS1();
   void testBuildLagrangianDS4();
   void testBuildLagrangianDS5();
-  void testcomputeDS();
-  void End();
+  //void testcomputeDS();
 
   // Members
 

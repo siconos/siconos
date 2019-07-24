@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1128,6 +1128,32 @@ void SiconosVectorTest::testSubscal()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys->sparse())(i) - (*yref->dense())(i)) < tol, true);
   }
   std::cout << "-->  subscal test ended with success." <<std::endl;
+}
+
+void SiconosVectorTest::testStdOstream()
+{
+  SP::SiconosVector y(new SiconosVector(2, 1.0));
+  std::cout << *y << std::endl;
+}
+
+void SiconosVectorTest::testStdVectorCast()
+{
+  SP::SiconosVector y(new SiconosVector(2, 1.0));
+  std::vector<double> d(*y);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testStdVectorCast : ", d.size() == y->size(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testStdVectorCast : ", d[0] == 1.0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testStdVectorCast : ", d[1] == 1.0, true);
+}
+
+void SiconosVectorTest::testIterators()
+{
+  SP::SiconosVector y(new SiconosVector(3, 1.0));
+  for (SiconosVector::iterator it=y->begin(); it!=y->end(); it++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testIterators : ", *it == 1.0, true);
+
+  SPC::SiconosVector z(new SiconosVector(3, 1.0));
+  for (SiconosVector::const_iterator it=z->begin(); it!=z->end(); it++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testIterators : ", *it == 1.0, true);
 }
 
 void SiconosVectorTest::End()

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 */
 
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 #include "float.h"
 #include "numerics_verbose.h"
@@ -53,8 +53,11 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
   assert(aep);
   preRHS *= aep->gamma;
 
+  int success = 1;
   while (alpha >= ls_data->alpha_min)
   {
+    DEBUG_PRINTF("search_Armijo :: alpha %g, ls_data->alpha_min %g \n", alpha, ls_data->alpha_min);
+
      // desc_dir contains the direction d
      cblas_dcopy(n, z, 1, zc, 1);
      cblas_daxpy(n, alpha, desc_dir, 1, zc, 1);     //  z + alpha*d --> z
@@ -103,8 +106,8 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
      // acceptance test
      if (theta_iter <= theta_ref + RHS)
      {
-       if (verbose > 1)
-         printf("search_Armijo :: alpha %g\n", alpha);
+       numerics_printf_verbose(2,"search_Armijo_standalone :: success alpha %g\n", alpha);
+       success = 0;
        break;
      }
      else
@@ -113,7 +116,11 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
        alpha /= 2.0;
      }
   }
+  if (success)
+    numerics_printf_verbose(2,"search_Armijo_standalone :: not successfull alpha %g\n", alpha);
+  
   *theta = theta_iter;
+ 
   return alpha;
 }
 

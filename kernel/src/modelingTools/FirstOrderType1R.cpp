@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,36 +44,38 @@ FirstOrderType1R::FirstOrderType1R(const std::string& pluginh, const std::string
   setComputeJacglambdaFunction(SSLH::getPluginName(pluginJacglambda), SSLH::getPluginFunctionName(pluginJacglambda));
 }
 
-void FirstOrderType1R::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+
+void FirstOrderType1R::initialize(Interaction& inter)
 {
 
+  FirstOrderR::initialize(inter);
+
   // Check if an Interaction is connected to the Relation.
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   unsigned int sizeDS = inter.getSizeOfDS();
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 
-
-  workV.resize(FirstOrderR::workVecSize);
-  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
-  workV[FirstOrderR::vec_x].reset(new SiconosVector(sizeDS));
-  workV[FirstOrderR::vec_r].reset(new SiconosVector(sizeDS));
-
-  workM.resize(FirstOrderR::mat_workMatSize);
-
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
   if (!_C)
-    workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
+    relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
   if (!_D)
-    workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+    relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
   if (!_F)
-    workM[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
+    relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
   if (!_B)
-    workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
+    relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
 }
 
+
+void FirstOrderType1R::checkSize(Interaction& inter)
+{
+
+}
 void FirstOrderType1R::computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y)
 {
   assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
-
+  
   ((Type1Ptr)(_pluginh->fPtr))(x.size(), &(x)(0), y.size(), &(y)(0), z.size(), &(z)(0));
 
 }
@@ -85,57 +87,54 @@ void FirstOrderType1R::computeg(double time, SiconosVector& lambda, SiconosVecto
   ((Type1Ptr)(_pluging->fPtr))(lambda.size(), &(lambda)(0), r.size(), &(r)(0), z.size(), &(z)(0));
 
 }
-
-void FirstOrderType1R::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned int level)
 {
   SiconosVector& y = *inter.y(0);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  BlockVector& x = *DSlink[FirstOrderR::x];
+  BlockVector& z = *DSlink[FirstOrderR::z];
+  // copy into Siconos continuous memory vector
+  SP::SiconosVector x_vec(new SiconosVector(x));
+  SP::SiconosVector z_vec(new SiconosVector(z));
+  
+  computeh(time, *x_vec, *z_vec, y);
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
-
-  SiconosVector& workX = *workV[FirstOrderR::vec_x];
-  workX = *DSlink[FirstOrderR::x];
-  SiconosVector& workZ = *workV[FirstOrderR::vec_z];
-  workZ = *DSlink[FirstOrderR::z];
-
-  computeh(time, workX, workZ, y);
-
-  *DSlink[FirstOrderR::z] = workZ;
+  *DSlink[FirstOrderR::z] = *z_vec;
 }
 
-void FirstOrderType1R::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned int level)
 {
   assert(_pluging && "FirstOrderType1R::computeInput() is not linked to a plugin function");
 
   SiconosVector& lambda = *inter.lambda(level);
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
+  BlockVector& r = *DSlink[FirstOrderR::r];
+  BlockVector& z = *DSlink[FirstOrderR::z];
+  // copy into Siconos continuous memory vector
+  SP::SiconosVector r_vec(new SiconosVector(r));
+  SP::SiconosVector z_vec(new SiconosVector(z));
 
-  SiconosVector& workR = *workV[FirstOrderR::vec_r];
-  workR = *DSlink[FirstOrderR::r];
-  SiconosVector& workZ = *workV[FirstOrderR::vec_z];
-  workZ = *DSlink[FirstOrderR::z];
+  computeg(time, lambda, *z_vec, *r_vec);
 
-  computeg(time, lambda, workZ, workR);
-
-  *DSlink[FirstOrderR::r] = workR;
-  *DSlink[FirstOrderR::z] = workZ;
+  *DSlink[FirstOrderR::r] = *r_vec;
+  *DSlink[FirstOrderR::z] = *z_vec;
 }
 
 void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C)
 {
   //
   assert(_pluginJachx && "FirstOrderType1R::computeJacobianH() failed; not linked to a plug-in function.");
-
-  ((Type1Ptr)(_pluginJachx->fPtr))(x.size(), &(x)(0), C.size(0), C.getArray(), z.size(), &(z)(0));
+  if(_C && _pluginJachx)
+    ((Type1Ptr)(_pluginJachx->fPtr))(x.size(), &(x)(0), C.size(0), C.getArray(), z.size(), &(z)(0));
 
 }
 
 void FirstOrderType1R::computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& F)
 {
-  if (_pluginJachz && _pluginJachz->fPtr)
+  if (_F && _pluginJachz && _pluginJachz->fPtr)
     ((Type1Ptr)(_pluginJachz->fPtr))(x.size(), &(x)(0), F.size(0), F.getArray(), z.size(), &(z)(0));
 
 }
@@ -143,40 +142,37 @@ void FirstOrderType1R::computeJachz(double time, SiconosVector& x, SiconosVector
 void FirstOrderType1R::computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B)
 {
   assert(_pluginJacglambda && "FirstOrderType1R::computeJacobiang() failed; not linked to a plug-in function.");
-
-  ((Type1Ptr)(_pluginJacglambda->fPtr))(lambda.size(), &(lambda)(0), B.size(0), B.getArray(), z.size(), &(z)(0));
+  if(_B && _pluginJacglambda)
+    ((Type1Ptr)(_pluginJacglambda->fPtr))(lambda.size(), &(lambda)(0), B.size(0), B.getArray(), z.size(), &(z)(0));
 }
 
-void FirstOrderType1R::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void FirstOrderType1R::computeJach(double time, Interaction& inter)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-  SiconosVector& x = *workV[FirstOrderR::vec_x];
-  x = *DSlink[FirstOrderR::x];
-  SiconosVector& z = *workV[FirstOrderR::vec_z];
-  z = *DSlink[FirstOrderR::z];
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+
+  *_vec_x = *DSlink[FirstOrderR::x];
+  *_vec_z = *DSlink[FirstOrderR::z];
   if (!_C)
   {
-    computeJachx(time, x, z, *workM[FirstOrderR::mat_C]);
+    computeJachx(time, *_vec_x, *_vec_z, *relationMat[FirstOrderR::mat_C]);
   }
   if (!_F)
   {
-    computeJachz(time, x, z, *workM[FirstOrderR::mat_F]);
+    computeJachz(time, *_vec_x, *_vec_z, *relationMat[FirstOrderR::mat_F]);
   }
-  *DSlink[FirstOrderR::z] = z;
+  *DSlink[FirstOrderR::z] = *_vec_z;
 }
 
-void FirstOrderType1R::computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+void FirstOrderType1R::computeJacg(double time, Interaction& inter)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-  SiconosVector& z = *workV[FirstOrderR::vec_z];
-  z = *DSlink[FirstOrderR::z];
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+
+  *_vec_z = *DSlink[FirstOrderR::z];
   if (!_B)
   {
-    computeJacglambda(time, *inter.lambda(0), z, *workM[FirstOrderR::mat_B]);
+    computeJacglambda(time, *inter.lambda(0), *_vec_z, *relationMat[FirstOrderR::mat_B]);
   }
-  *DSlink[FirstOrderR::z] = z;
+  *DSlink[FirstOrderR::z] = *_vec_z;
 }

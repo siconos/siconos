@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,81 +30,60 @@ using namespace RELATION;
 // constructor from a set of data
 LagrangianCompliantR::LagrangianCompliantR(const std::string& pluginh, const std::string& pluginJacobianhq, const std::string& pluginJacobianhlambda) : LagrangianR(CompliantR)
 {
-  zeroPlugin();
+  _zeroPlugin();
   setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
   _pluginJachq->setComputeFunction(SSLH::getPluginName(pluginJacobianhq), SSLH::getPluginFunctionName(pluginJacobianhq));
   _pluginJachlambda->setComputeFunction(SSLH::getPluginName(pluginJacobianhlambda), SSLH::getPluginFunctionName(pluginJacobianhlambda));
 }
 
-void LagrangianCompliantR::zeroPlugin()
+void LagrangianCompliantR::_zeroPlugin()
 {
   _pluginJachq.reset(new PluggedObject());
   _pluginJachlambda.reset(new PluggedObject());
 }
 
-const std::string LagrangianCompliantR::getJachlambdaName() const
-{
-  if (_pluginJachlambda->fPtr)
-    return _pluginJachlambda->getPluginName();
-  return "unamed";
 
-}
-const std::string LagrangianCompliantR::getJachqName() const
+void LagrangianCompliantR::initialize(Interaction& inter)
 {
-  if (_pluginJachq->fPtr)
-    return _pluginJachq->getPluginName();
-  return "unamed";
-}
-
-
-void LagrangianCompliantR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
-  LagrangianR::initComponents(inter, DSlink, workV, workM);
-  unsigned int sizeY = inter.getSizeOfY();
+  LagrangianR::initialize(inter);
+  unsigned int sizeY = inter.dimension();
 
   if (! _jachlambda)
     _jachlambda.reset(new SimpleMatrix(sizeY, sizeY));
   else
     _jachlambda->resize(sizeY, sizeY);
 }
-
+void LagrangianCompliantR::checkSize(Interaction& inter)
+{
+}
 void LagrangianCompliantR::computeh(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z, SiconosVector& y)
 {
   if (_pluginh->fPtr)
   {
-    // get vector y of the current interaction
-
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
     ((FPtr2)(_pluginh->fPtr))(q0.size(), &(q0)(0), y.size(), &(lambda)(0), &(y)(0), z.size(), &(z)(0));
-
   }
 }
 
 void LagrangianCompliantR::computeJachq(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z)
 {
 
-  if (_pluginJachq->fPtr)
+  if (_jachq && _pluginJachq->fPtr)
   {
-    // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-    // get vector lambda of the current interaction
     ((FPtr2)(_pluginJachq->fPtr))(q0.size(), &(q0)(0), lambda.size(), &(lambda)(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
-    // Copy data that might have been changed in the plug-in call.
   }
 }
 void LagrangianCompliantR::computeJachlambda(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z)
 {
 
-  if (_pluginJachlambda->fPtr)
+  if (_jachlambda && _pluginJachlambda->fPtr)
   {
-    // get vector lambda of the current interaction
     ((FPtr2)_pluginJachlambda->fPtr)(q0.size(), &(q0)(0), lambda.size(), &(lambda)(0), &(*_jachlambda)(0, 0), z.size(), &(z)(0));
-    // Copy data that might have been changed in the plug-in call.
   }
 }
 
-void LagrangianCompliantR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
+void LagrangianCompliantR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector workZ = *DSlink[LagrangianR::z];
   if (derivativeNumber == 0)
   {
@@ -136,11 +115,12 @@ void LagrangianCompliantR::computeOutput(double time, Interaction& inter, Intera
   *DSlink[LagrangianR::z] = workZ;
 }
 
-void LagrangianCompliantR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void LagrangianCompliantR::computeInput(double time, Interaction& inter , unsigned int level)
 {
   // get lambda of the concerned interaction
+  
   SiconosVector& lambda = *inter.lambda(level);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   SiconosVector workQ = *DSlink[LagrangianR::q0];
   SiconosVector workZ = *DSlink[LagrangianR::z];
@@ -150,10 +130,9 @@ void LagrangianCompliantR::computeInput(double time, Interaction& inter, Interac
   *DSlink[LagrangianR::z] = workZ;
 }
 
-
-void LagrangianCompliantR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void LagrangianCompliantR::computeJach(double time, Interaction& inter)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector q = *DSlink[LagrangianR::q0];
   SiconosVector z = *DSlink[LagrangianR::z];
   SiconosVector& lambda = *inter.lambda(0);

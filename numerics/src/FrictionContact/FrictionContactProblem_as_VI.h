@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,6 @@
 #ifndef FRICTIONCONTACTPROBLEM_AS_VI_H
 #define FRICTIONCONTACTPROBLEM_AS_VI_H
 
-/*! \page fcProblemVI Friction-contact problems (2D or 3D) as VI
- *
- *
- */
-
-
 /*!\file FrictionContactProblem_as_VI.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
@@ -36,13 +30,13 @@
  */
 struct FrictionContactProblem_as_VI
 {
-  /* the VI associated with the FC3D probelem */
+  /* the VI associated with the FC3D problem */
   VariationalInequality * vi;
   /* the FC3D associated with the VI  */
   FrictionContactProblem * fc3d;
+  /* the SolverOptions that might be used to pass some numerical parameters */
+  SolverOptions * options;
 };
-
-
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -52,6 +46,14 @@ extern "C"
   void Function_VI_FC3D(void * self, int n, double *x, double *F);
 
   void Projection_VI_FC3D(void *viIn, double *x, double *PX);
+
+  void Function_VI_FC3D_Cylinder(void * self, int n, double *x, double *F);
+
+  void Projection_VI_FC3D_Cylinder(void *viIn, double *x, double *PX);
+
+  void Function_VI_FC3D_Disk(void * self, int n, double *x, double *F);
+
+  void Projection_VI_FC3D_Disk(void *viIn, double *x, double *PX);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

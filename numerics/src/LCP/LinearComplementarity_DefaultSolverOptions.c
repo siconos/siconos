@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,13 +95,19 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
     info =    linearComplementarity_newton_min_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_LCP_CONVEXQP_PG:
+  {
+    info =    linearComplementarity_ConvexQP_ProjectedGradient_setDefaultSolverOptions(options);
+    break;
+  }
+  
   case SICONOS_LCP_PATH:
   case SICONOS_LCP_AVI_CAOFERRIS:
   case SICONOS_LCP_BARD:
   case SICONOS_LCP_MURTY:
   case SICONOS_LCP_PATHSEARCH:
-  case SICONOS_LCP_NEWTON_MINFBLSA:
-  case SICONOS_LCP_NEWTON_FBLSA:
+  case SICONOS_LCP_NEWTON_MIN_FBLSA:
+  case SICONOS_LCP_NEWTON_FB_FBLSA:
   case SICONOS_LCP_GAMS:
   case SICONOS_LCP_PIVOT:
   case SICONOS_LCP_PIVOT_LUMOD:

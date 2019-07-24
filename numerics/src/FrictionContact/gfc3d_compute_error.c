@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 */
 
 #include "gfc3d_compute_error.h"
+#include "fc3d_compute_error.h"
 
 #include "GlobalFrictionContactProblem.h"
 #include "gfc3d_Solvers.h"
@@ -28,69 +29,109 @@
 #include "sanitizer.h"
 #include "numerics_verbose.h"
 #include "NumericsMatrix.h"
-int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double* restrict reaction , double* restrict velocity, double* restrict globalVelocity, double tolerance, double* restrict error)
+#include "NumericsVector.h"
+
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"
+int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
+                        double*  reaction , double*  velocity,
+                        double*  globalVelocity,
+                        double tolerance,
+                        SolverOptions * options, double norm, double* restrict error)
+
 {
-
+  DEBUG_BEGIN("gfc3d_compute_error(...)\n");
   /* Checks inputs */
-  if (problem == NULL || reaction == NULL || velocity == NULL || globalVelocity == NULL)
+  if (problem == NULL || globalVelocity == NULL)
     numerics_error("gfc3d_compute_error", "null input");
+  
 
-  gfc3d_init_workspace(problem);
-  NumericsMatrix* factorized_M = problem->workspace->factorized_M;
-  double* globalVelocitytmp = problem->workspace->globalVelocity;
-
+  
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
   int m = nc * 3;
   int n = problem->M->size0;
   double *mu = problem->mu;
   double *q = problem->q;
+
+  DEBUG_EXPR(NV_display(globalVelocity,n));
+  DEBUG_EXPR(NV_display(reaction,m));
+  DEBUG_EXPR(NV_display(velocity,m));
+
+
+  
   NumericsMatrix *H = problem->H;
+  NumericsMatrix *M = problem->M;
 
-  cblas_dcopy_msan(n, q, 1, globalVelocitytmp, 1);
-
-  NM_gemv(1.0, H, reaction, 1.0, globalVelocitytmp);
-
-  CHECK_RETURN(!NM_gesv_expert(factorized_M, globalVelocitytmp, NM_KEEP_FACTORS));
-
-  cblas_daxpy(n , -1.0 , globalVelocity , 1 , globalVelocitytmp, 1);
-
-  /* We first accumulate the square terms and at the end we take the square
-   * root */
-  *error = cblas_ddot(n, globalVelocitytmp, 1, globalVelocitytmp, 1);
-
-  cblas_dcopy(m, problem->b, 1, velocity, 1);
-  NM_tgemv(1, H, globalVelocity, 1, velocity);
-
-  double worktmp[3];
-  double normUT;
-  double rho = 1.0;
-  for (int ic = 0 ; ic < nc ; ic++)
+  if (!options->dWork)
   {
-    /* Compute the modified local velocity */
-    normUT = sqrt(velocity[ic * 3 + 1] * velocity[ic * 3 + 1] + velocity[ic * 3 + 2] * velocity[ic * 3 + 2]);
-    worktmp[0] = reaction[ic * 3] - rho * (velocity[ic * 3] + mu[ic] * normUT);
-    worktmp[1] = reaction[ic * 3 + 1] - rho * velocity[ic * 3 + 1] ;
-    worktmp[2] = reaction[ic * 3 + 2] - rho * velocity[ic * 3 + 2] ;
-    projectionOnCone(worktmp, mu[ic]);
-    worktmp[0] = reaction[ic * 3] -  worktmp[0];
-    worktmp[1] = reaction[ic * 3 + 1] -  worktmp[1];
-    worktmp[2] = reaction[ic * 3 + 2] -  worktmp[2];
-    *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+    options->dWork = (double *)calloc(n,sizeof(double));
+  }
+  double* tmp = options->dWork;
+
+  
+
+  cblas_dcopy_msan(n, q, 1, tmp , 1);
+  if (nc >0)
+  {
+    NM_gemv(1.0, H, reaction, 1.0, tmp);
+  }
+  DEBUG_EXPR(NV_display(tmp,n));
+
+  NM_gemv(-1.0, M, globalVelocity, 1.0, tmp);
+  *error = cblas_dnrm2(n,tmp,1);
+  *error = *error * *error;
+  DEBUG_PRINTF("square norm of -M v + H R + q = %e\n", *error);
+  
+  /* CHECK_RETURN(!NM_gesv_expert(problem->M, globalVelocity, NM_KEEP_FACTORS)); */
+ 
+
+  if (nc >0)
+  {
+    /* Checks inputs */
+    if (reaction == NULL || velocity == NULL)
+      numerics_error("gfc3d_compute_error", "null input");
+
+    cblas_dcopy(m, problem->b, 1, velocity, 1);
+    NM_tgemv(1, H, globalVelocity, 1, velocity);
+
+    double worktmp[3];
+    for (int ic = 0 ; ic < nc ; ic++)
+    {
+      fc3d_unitary_compute_and_add_error(&reaction[ic * 3], &velocity[ic * 3], mu[ic],
+                                         error,  worktmp);
+    }
   }
 
+  DEBUG_PRINTF("square of the error = %e\n", *error);
+  
   /* Done, taking the square root */
   *error = sqrt(*error);
 
-  /* Computes error */
-  double norm_q = cblas_dnrm2(n , problem->q , 1);
-  *error = *error / (norm_q + 1.0);
+  DEBUG_PRINTF("error before normalization = %e\n", *error);
+  
+  DEBUG_PRINTF("norm = %12.8e\n", norm);
+  if (fabs(norm) > DBL_EPSILON)
+    *error /= norm;
 
+  if (verbose)
+  {
+    if (tolerance * norm <  DBL_EPSILON)
+      numerics_warning("gfc3d_compute_error", "The required relative precision (tolerance * norm = %e) is below  the machine accuracy", tolerance * norm);
+  }
+
+  
   if (*error > tolerance)
   {
-    /*       if (verbose > 0) printf(" Numerics - gfc3d_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
+    /*       if (verbose > 0) printf("Numerics - gfc3d_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance); */
+    DEBUG_END("gfc3d_compute_error(...)");
     return 1;
   }
   else
+  {
+    DEBUG_END("gfc3d_compute_error(...)");
     return 0;
+  }
 }

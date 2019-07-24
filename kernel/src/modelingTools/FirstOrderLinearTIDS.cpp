@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,6 @@
 #include "FirstOrderLinearTIDS.hpp"
 
 #include <iostream>
-
-// --- Constructors ---
-
-// From a minimum set of data: A
-FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A):
-  FirstOrderLinearDS(x0, A)
-{
-  checkDynamicalSystem();
-}
-
-// From a set of data: A and B
-FirstOrderLinearTIDS::FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A, SP::SiconosVector b):
-  FirstOrderLinearDS(x0, A, b)
-{
-  checkDynamicalSystem();
-}
 
 void FirstOrderLinearTIDS::initRhs(double time)
 {
@@ -56,7 +40,7 @@ void FirstOrderLinearTIDS::initRhs(double time)
   }
 }
 
-void FirstOrderLinearTIDS::computeRhs(double time, const bool isDSup)
+void FirstOrderLinearTIDS::computeRhs(double time)
 {
 
   *_x[1] = * _r; // Warning: r update is done in Interactions/Relations
@@ -69,15 +53,20 @@ void FirstOrderLinearTIDS::computeRhs(double time, const bool isDSup)
     *_x[1] += *_b;
 
   if (_M)
-    _invM->PLUForwardBackwardInPlace(*_x[1]);
+    {
+      // allocate invM at the first call of the present function
+      if (! _invM)
+	_invM.reset(new SimpleMatrix(*_M));
+      _invM->PLUForwardBackwardInPlace(*_x[1]);
+    }
 }
 
-void FirstOrderLinearTIDS::computeJacobianRhsx(double time, const bool isDSup)
+void FirstOrderLinearTIDS::computeJacobianRhsx(double time)
 {
   // Nothing to be done: _jacxRhs is constant and computed during initialize. But this function is required to avoid call to base class function.
 }
 
-void FirstOrderLinearTIDS::display() const
+void FirstOrderLinearTIDS::display(bool brief) const
 {
   std::cout << "===> Linear Time-invariant First Order System display, " << _number << ")." <<std::endl;
   std::cout << "- A " <<std::endl;
@@ -90,6 +79,15 @@ void FirstOrderLinearTIDS::display() const
   std::cout << "- M: " <<std::endl;
   if (_M) _M->display();
   else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- x " <<std::endl;
+  if(_x[0]) _x[0]->display();
+  else std::cout << "-> NULL" <<std::endl;
+  std::cout << "- x0 " <<std::endl;
+  if(_x0) _x0->display();
+  std::cout << "- x[1] " <<std::endl;
+  if(_x[1]) _x[1]->display();
+  else std::cout << "-> NULL" <<std::endl;
 
+  
   std::cout << "============================================" <<std::endl;
 }

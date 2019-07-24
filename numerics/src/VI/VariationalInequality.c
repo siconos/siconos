@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ void freeVariationalInequalityProblem(VariationalInequality* vi)
 {
   if (vi->nabla_F)
   {
-    freeNumericsMatrix(vi->nabla_F);
+    NM_free(vi->nabla_F);
     free(vi->nabla_F);
     vi->nabla_F = NULL;
   }

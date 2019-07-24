@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,18 @@
   Subroutines used when the friction-contact 3D problem is written
   using Alart-Curnier formulation:
 
-  \f{eqnarray*}
-  F(reaction)=\left[\begin{array}{c}
-  velocity - M.reaction - q  \\
-  1/rn*[velocity_N - (velocity_N - rn*reaction_N)^+]
-  1/rt*[velocity_T - proj(velocity_T - rt*reaction_T)]
-  \end{array}\right]
-  \f}
+  \rst
+
+  .. math::
+     :nowrap:
+
+     F(reaction)=\left[\begin{array}{c}
+     velocity - M.reaction - q  \\
+     1/rn*[velocity_N - (velocity_N - rn*reaction_N)^+]
+     1/rt*[velocity_T - proj(velocity_T - rt*reaction_T)]
+     \end{array}\right]
+
+  \endrst
 
   where M is an n by n matrix, q an n-dimensional vector, reaction an
   n-dimensional vector and velocity an n-dimensional vector.
@@ -44,8 +49,6 @@
 
   Two different storages are available for M: dense and sparse block.
 
-  \author Houari Khenous, Franck Perignon
-
  */
 #include "FrictionContactProblem.h"
 #include "SparseBlockMatrix.h"
@@ -55,7 +58,11 @@ extern "C"
 {
 #endif
 
-  void computerho(FrictionContactProblem* localproblem, double * rho);
+  void compute_rho_split_spectral_norm_cond(FrictionContactProblem* localproblem, double * rho);
+
+  void compute_rho_split_spectral_norm(FrictionContactProblem* localproblem, double * rho);
+
+  void compute_rho_spectral_norm(FrictionContactProblem* localproblem, double * rho);
 
   void computeAlartCurnierSTD(double reaction[3], double velocity[3],
                               double mu, double rho[3],

@@ -48,12 +48,13 @@ enum SOCLCP_SOLVER
 
 
 
-extern const char* const   SICONOS_FRICTION_2D_NSGS_STR ;
-extern const char* const   SICONOS_FRICTION_2D_PGS_STR ;
-extern const char* const   SICONOS_FRICTION_2D_CPG_STR ;
-extern const char* const   SICONOS_FRICTION_2D_LATIN_STR ;
-extern const char* const   SICONOS_FRICTION_2D_LEMKE_STR ;
-extern const char* const   SICONOS_FRICTION_2D_ENUM_STR ;
+/* extern const char* const   SICONOS_FRICTION_2D_NSGS_STR ; */
+/* extern const char* const   SICONOS_FRICTION_2D_PGS_STR ; */
+/* extern const char* const   SICONOS_FRICTION_2D_CPG_STR ; */
+/* extern const char* const   SICONOS_FRICTION_2D_LATIN_STR ; */
+/* extern const char* const   SICONOS_FRICTION_2D_LEMKE_STR ; */
+/* extern const char* const   SICONOS_FRICTION_2D_ENUM_STR ; */
+
 extern const char* const   SICONOS_SOCLCP_NSGS_STR ;
 extern const char* const   SICONOS_SOCLCP_NSGSV_STR ;
 extern const char* const   SICONOS_SOCLCP_PROX_STR;
@@ -79,13 +80,6 @@ extern const char* const   SICONOS_SOCLCP_projectionOnCylinder_STR;
 extern const char* const   SICONOS_SOCLCP_ProjectionOnCone_velocity_STR;
 extern const char* const   SICONOS_SOCLCP_PGoC_STR;
 extern const char* const   SICONOS_SOCLCP_DeSaxceFixedPoint_STR;
-extern const char* const   SICONOS_SOCLCP_GLOBAL_NSGS_WR_STR ;
-extern const char* const   SICONOS_SOCLCP_GLOBAL_NSGSV_WR_STR ;
-extern const char* const   SICONOS_SOCLCP_GLOBAL_PROX_WR_STR ;
-extern const char* const   SICONOS_SOCLCP_GLOBAL_DSFP_WR_STR ;
-extern const char* const   SICONOS_SOCLCP_GLOBAL_TFP_WR_STR ;
-extern const char* const   SICONOS_SOCLCP_GLOBAL_NSGS_STR ;
-extern const char* const   SICONOS_SOCLCP_GLOBAL_NSN_AC_WR_STR ;
 extern const char* const   SICONOS_SOCLCP_QUARTIC_STR ;
 extern const char* const   SICONOS_SOCLCP_QUARTIC_NU_STR ;
 

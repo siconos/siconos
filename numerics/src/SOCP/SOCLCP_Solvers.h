@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,7 @@
 #define SOCLCPSOLVERS_H
 
 /*!\file SOCLCP_Solvers.h
-  \brief Subroutines for the resolution of Second Order Cone Linear Complementarity Problem (SOCLCP).\n
-
-*/
-
-/*! \page SecondOrderConeLinearComplementarityProblemSolvers  Second Order Cone Linear Complementarity Problem (SOCLCP) solvers
-
-This page gives an overview of the available solvers for Second Order Cone Linear Complementarity Problem (SOCLCP) and their required parameters.
-
-For each solver, the input argument are:
-- a SecondOrderConeLinearComplementarityProblem
-- the unknowns (r,v)
-- info, the termination value (0: convergence, >0 problem which depends on the solver)
-- a SolverOptions structure, which handles iparam and dparam
-
-\section soclcp nsgs Non-Smooth Gauss Seidel Solver
-
- function: secondOrderConeLinearComplementarity_nsgs(problem, r , v , &info , options);
- parameters:
-
+  \brief Subroutines for the resolution of Second Order Cone Linear Complementarity Problem (SOCLCP).
 
 */
 
@@ -54,7 +36,6 @@ For each solver, the input argument are:
 /* #include "soclcp_unitary_enumerative.h" */
 
 #include "SOCLCP_cst.h"
-#include "SiconosCompat.h"
 
 
 /** pointer to function used to call local solver */

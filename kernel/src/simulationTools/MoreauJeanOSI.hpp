@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,30 +27,32 @@
 
 const unsigned int MOREAUSTEPSINMEMORY = 1;
 
-/**  \class MoreauJeanOSI
- *   \brief One Step time Integrator for First Order Dynamical Systems  for
- *    mechanical Systems (LagrangianDS and NewtonEulerDS)
- *   \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) Apr 26, 2004
- *
+/** One Step time Integrator, Moreau-Jean algorithm.
  * This integrator is the work horse of the event--capturing time stepping schemes
  * for mechanical systems.  It is mainly based on the pioneering works of M. Jean and
  * J.J. Moreau for the time integration of mechanical systems
  * with unilateral contact, impact and Coulomb's friction with \f$\theta\f$ scheme
  *
- * For the linear Lagrangina system, the scheme reads as
- * \f{equation}{
- * \begin{cases}
- *  M (v_{k+1}-v_k)
- *  + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G P_{k+1},\label{eq:MoreauTS-motion}\\[1mm]
- *  q_{k+1} = q_{k} + h v_{k+\theta}, \quad \\[1mm]
- *  U_{k+1} = G^\top\, v_{k+1}, \\[1mm]
- *  \begin{array}{lcl}
- *    0 \leq U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha \in \mathcal I_1, \\[1mm]
- *    P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I \setminus \mathcal I_1,
- * \end{array}
- * \end{cases} \f}
+ * For the linear Lagrangian system, the scheme reads as
+ *
+ \rst
+
+ .. math::
+    :nowrap:
+
+    \begin{cases}
+     M (v_{k+1}-v_k)
+     + h K q_{k+\theta} + h C v_{k+\theta}     -   h F_{k+\theta} = p_{k+1} = G P_{k+1},\label{eq:MoreauTS-motion}\\[1mm]
+     q_{k+1} = q_{k} + h v_{k+\theta}, \quad \\[1mm]
+     U_{k+1} = G^\top\, v_{k+1}, \\[1mm]
+     \begin{array}{lcl}
+      0 \leq U^\alpha_{k+1} + e  U^\alpha_{k} \perp P^\alpha_{k+1}  \geq 0,& \quad&\alpha \in \mathcal I_1, \\[1mm]
+      P^\alpha_{k+1}  =0,&\quad& \alpha \in \mathcal I \setminus \mathcal I_1,
+    \end{array}
+    \end{cases}
+
+ \endrst
+
  * with  \f$\theta \in [0,1]\f$. The index set \f$\mathcal I_1\f$ is the discrete equivalent
  * to the rule that allows us to apply the Signorini  condition at the velocity level.
  * In the numerical practice, we choose to define this set by
@@ -114,18 +116,23 @@ protected:
   */
   ACCEPT_SERIALIZATION(MoreauJeanOSI);
 
-  /** Stl map that associates a theta parameter for the integration
-  *  scheme to each DynamicalSystem of the OSI */
+  /** theta-scheme parameter */
   double _theta;
 
-  /** A gamma parameter for the integration scheme to each DynamicalSystem of the OSI
-   * This parameter is used to apply a theta-method to the input $r$
+  /** A gamma parameter for the forecast of activation of constraints
+   * leap-frog estimation of the constraints
+   * $\tilde y_k =  y_k + \gamma * h * ydot $
    */
   double _gamma;
 
-  /** a boolean to know if the parameter must be used or not
+  /** a boolean to know if the gamma-parameter must be used or not
    */
   bool _useGamma;
+
+  /** Constraint activation threshold 
+   *
+   */
+  double _constraintActivationThreshold;
 
   /** a boolean to know if the parameter must be used or not
    */
@@ -141,6 +148,12 @@ protected:
   friend struct _NSLEffectOnFreeOutput;
 
 public:
+
+  enum MoreauJeanOSI_ds_workVector_id{RESIDU_FREE, VFREE, BUFFER, QTMP, WORK_LENGTH};
+
+  enum MoreauJeanOSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+  enum MoreauJeanOSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
 
   /** constructor from theta value only
    *  \param theta value for all linked DS (default = 0.5).
@@ -256,6 +269,17 @@ public:
     _useGammaForRelation = newUseGammaForRelation;
     if(_useGammaForRelation) _useGamma = false;
   };
+  /** set the constraint activation threshold */
+  inline void setConstraintActivationThreshold (double v)
+  {
+    _constraintActivationThreshold = v;
+  }
+  
+  /** get the constraint activation threshold */
+  inline double constraintActivationThreshold ()
+  {
+    return _constraintActivationThreshold ;
+  }
 
   /** get boolean _explicitNewtonEulerDSOperators for the relation
    *  \return a Boolean
@@ -266,7 +290,7 @@ public:
   };
 
   /** set the boolean to indicate that we use gamma for the relation
-   *  \param newUseGammaForRelation a Boolean
+   *  \param newExplicitNewtonEulerDSOperators a Boolean
    */
   inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators)
   {
@@ -279,57 +303,63 @@ public:
       invariant systems, we compute time invariant operator (example :
       W)
    */
-  virtual void initialize(Model& m);
+  //virtual void initialize(Model& m);
 
-  /** initialization of the work vectors and matrices (properties) related to 
-   *  one dynamical system on the graph and needed by the osi 
-   * \param m the Model
+  /** Initialization process of the nonsmooth problems
+      linked to this OSI*/
+  virtual void initialize_nonsmooth_problems();
+
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one dynamical system on the graph and needed by the osi
    * \param t time of initialization
-   * \param ds the dynamical system   
+   * \param ds the dynamical system
    */
-  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
-  /** initialization of the work vectors and matrices (properties) related to 
-   *  one interaction on the graph and needed by the osi 
-   * \param t0 time of initialization
+  /** initialization of the work vectors and matrices (properties) related to
+   *  one interaction on the graph and needed by the osi
    * \param inter the interaction
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeInteraction(double t0, Interaction &inter,
-			     InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG);
+  virtual void initializeWorkVectorsForInteraction(Interaction &inter,
+                             InteractionProperties& interProp,
+                             DynamicalSystemsGraph & DSG);
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
    */
   unsigned int numberOfIndexSets() const {return 2;};
-  
+
   /** initialize iteration matrix W MoreauJeanOSI matrix at time t
    *  \param time
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
+  void initializeIterationMatrixW(double time, SP::SecondOrderDS ds);
 
   /** compute W MoreauJeanOSI matrix at time t
    *  \param time (double)
    *  \param ds a  DynamicalSystem
    *  \param W the result in W
    */
-  void computeW(double time , DynamicalSystem& ds, SiconosMatrix& W);
+  void computeW(double time , SecondOrderDS& ds, SiconosMatrix& W);
 
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *  \param ds a pointer to DynamicalSystem
    *  \param WBoundaryConditions write the result in WBoundaryConditions
+   *  \param iteration_matrix the OSI iteration matrix (W)
    */
-  void computeWBoundaryConditions(SP::DynamicalSystem ds, SiconosMatrix& WBoundaryConditions);
+  void _computeWBoundaryConditions(SecondOrderDS& ds, SiconosMatrix& WBoundaryConditions, SiconosMatrix& iteration_matrix);
 
   /** initialize iteration matrix WBoundaryConditionsMap[ds] MoreauJeanOSI
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant)
    */
-  void initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv);
+  void _initializeIterationMatrixWBoundaryConditions(SecondOrderDS& ds, const DynamicalSystemsGraph::VDescriptor& dsv);
 
+  void applyBoundaryConditions(SecondOrderDS& d,  SiconosVector& residu,
+                               DynamicalSystemsGraph::VIterator dsi, double t,
+                               const SiconosVector & v);
 
   /** compute the initial state of the Newton loop.
    */
@@ -352,21 +382,19 @@ public:
    */
   virtual void computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp);
 
-  /** Apply the rule to one Interaction to known if is it should be included
-   * in the IndexSet of level i
+  /** Apply the rule to one Interaction to know if it should be included in the IndexSet of level i
    * \param inter the Interaction to test
    * \param i level of the IndexSet
    * \return Boolean
    */
   virtual bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i);
 
-  /** Apply the rule to one Interaction to known if is it should be removed
-   * in the IndexSet of level i
+  /** Apply the rule to one Interaction to know if it should be removed from the IndexSet of level i
    * \param inter the Interaction to test
    * \param i level of the IndexSet
    * \return Boolean
    */
-  virtual bool removeInteractionInIndexSet(SP::Interaction inter, unsigned int i);
+  virtual bool removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i);
 
 
   /** method to prepare the fist Newton iteration

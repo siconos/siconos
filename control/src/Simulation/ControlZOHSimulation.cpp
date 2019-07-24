@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@
 
 #include "TimeStepping.hpp"
 #include "ZeroOrderHoldOSI.hpp"
-#include "Model.hpp"
 #include "EventsManager.hpp"
 #include "Event.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -32,18 +31,25 @@
 #include <boost/progress.hpp>
 #include <boost/timer.hpp>
 
+//#define DEBUG_BEGIN_END_ONLY
+//#define DEBUG_NOCOLOR
+//#define DEBUG_STDOUT
+//#define DEBUG_MESSAGES
+#include "debug.h"
+
+
 ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
   ControlSimulation(t0, T, h)
 {
   _processIntegrator.reset(new ZeroOrderHoldOSI());
   std11::static_pointer_cast<ZeroOrderHoldOSI>(_processIntegrator)->setExtraAdditionalTerms(
       std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
-  _processSimulation.reset(new TimeStepping(_processTD, 0));
+  _processSimulation.reset(new TimeStepping(_nsds,_processTD, 0));
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
 
-  _DSG0 = _model->nonSmoothDynamicalSystem()->topology()->dSG(0);
-  _IG0 = _model->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  _DSG0 = _nsds->topology()->dSG(0);
+  _IG0 = _nsds->topology()->indexSet0();
 
   // Control part
   _CM.reset(new ControlManager(_processSimulation));
@@ -51,6 +57,7 @@ ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
 
 void ControlZOHSimulation::run()
 {
+  DEBUG_BEGIN("void ControlZOHSimulation::run()\n");
   EventsManager& eventsManager = *_processSimulation->eventsManager();
   unsigned k = 0;
   boost::progress_display show_progress(_N);
@@ -88,4 +95,5 @@ void ControlZOHSimulation::run()
 
   _elapsedTime = time.elapsed();
   _dataM->resize(k, _nDim + 1);
+  DEBUG_END("void ControlZOHSimulation::run()\n");
 }

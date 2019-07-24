@@ -8,16 +8,18 @@
 #include <iostream>
 #include <boost/typeof/typeof.hpp>
 
+#undef DEBUG_MESSAGES
+#include "debug.h"
+
 OccR::OccR(const ContactPoint& contact1,
            const ContactPoint& contact2,
            const DistanceCalculatorType& distance_calculator) :
-  NewtonEulerFrom3DLocalFrameR(),
+  NewtonEuler3DR(),
   _contact1(contact1),
   _contact2(contact2),
   _geometer(),
-  _normalFromFace1(true),
-  _offsetp1(true),
-  _offset(0.1)
+  _offset1(0.),
+  _offset2(0.)
 {
   switch (Type::value(distance_calculator))
   {
@@ -40,48 +42,23 @@ void OccR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
   ContactShapeDistance& dist = this->_geometer->answer;
 
-  // printf("---->%g P1=(%g, %g, %g) P2=(%g,%g,%g) N=(%g, %g, %g)\n", dist.value,
-  //        dist.x1, dist.y1, dist.z1,
-  //        dist.x2, dist.y2, dist.z2,
-  //        dist.nx, dist.ny, dist.nz);
+  DEBUG_PRINTF("---->%g P1=(%g, %g, %g) P2=(%g,%g,%g) N=(%g, %g, %g)\n", dist.value,
+               dist.x1, dist.y1, dist.z1,
+               dist.x2, dist.y2, dist.z2,
+               dist.nx, dist.ny, dist.nz);
 
-  double& X1 = dist.x1;
-  double& Y1 = dist.y1;
-  double& Z1 = dist.z1;
+  _Pc1->setValue(0, dist.x1 + _offset1*dist.nx);
+  _Pc1->setValue(1, dist.y1 + _offset1*dist.ny);
+  _Pc1->setValue(2, dist.z1 + _offset1*dist.nz);
+  _Pc2->setValue(0, dist.x2 - _offset2*dist.nx);
+  _Pc2->setValue(1, dist.y2 - _offset2*dist.ny);
+  _Pc2->setValue(2, dist.z2 - _offset2*dist.nz);
 
-  double& X2 = dist.x2;
-  double& Y2 = dist.y2;
-  double& Z2 = dist.z2;
+  _Nc->setValue(0, dist.nx);
+  _Nc->setValue(1, dist.ny);
+  _Nc->setValue(2, dist.nz);
 
-  double& n1x = dist.nx;
-  double& n1y = dist.ny;
-  double& n1z = dist.nz;
-
-  if(_offsetp1)
-  {
-    _Pc1->setValue(0, X1+_offset*n1x);
-    _Pc1->setValue(1, Y1+_offset*n1y);
-    _Pc1->setValue(2, Z1+_offset*n1z);
-    _Pc2->setValue(0, X2);
-    _Pc2->setValue(1, Y2);
-    _Pc2->setValue(2, Z2);
-  }
-  else
-  {
-    _Pc1->setValue(0, X1);
-    _Pc1->setValue(1, Y1);
-    _Pc1->setValue(2, Z1);
-    _Pc2->setValue(0, X2-_offset*n1x);
-    _Pc2->setValue(1, Y2-_offset*n1y);
-    _Pc2->setValue(2, Z2-_offset*n1z);
-  }
-
-  /* cf comments from O. Bonnefon */
-  _Nc->setValue(0, n1x);
-  _Nc->setValue(1, n1y);
-  _Nc->setValue(2, n1z);
-
-  dist.value -= _offset;
+  dist.value -= (_offset1+_offset2);
 
   y.setValue(0, dist.value);
 

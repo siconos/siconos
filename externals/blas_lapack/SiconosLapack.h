@@ -1,4 +1,4 @@
-/* Siconos-Numerics, Copyright INRIA 2005-2011.
+/* Siconos-Numerics, Copyright INRIA 2005-2018.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+#if defined(__cplusplus)
 extern "C"
 {
 #endif
@@ -289,7 +289,7 @@ extern "C"
 #endif // No atlas
 
 
-#if defined(__cplusplus) && !defined (_NUMERICS_INTERNAL_CXX_)
+#if defined(__cplusplus)
 }
 #endif
 

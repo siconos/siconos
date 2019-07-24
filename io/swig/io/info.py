@@ -1,19 +1,29 @@
-#!/usr/bin/env python
+#!/usr/bin/env @PYTHON_EXECUTABLE@
+"""
+Description: Show information about a Siconos mechanics-IO HDF5 file.
+"""
 
-from siconos.io.mechanics_io import Hdf5
+# Lighter imports before command line parsing
+from __future__ import print_function
 import sys, argparse
-import numpy as np
 
 parser = argparse.ArgumentParser(
-    description = 'Show information about a Siconos HDF5 file.')
+    description = __doc__)
 parser.add_argument('file', metavar='input', type=str, nargs='+',
                     help = 'input file(s) (HDF5)')
 parser.add_argument('-O','--list-objects', action = 'store_true',
                     help = 'List object names in the file')
 parser.add_argument('-C','--list-contactors', action = 'store_true',
                     help = 'List contactor names in the file')
+parser.add_argument('-V','--version', action='version',
+                    version='@SICONOS_VERSION@')
 
-args = parser.parse_args()
+if __name__=='__main__':
+    args = parser.parse_args()
+
+# Heavier imports after command line parsing
+from siconos.io.mechanics_hdf5 import MechanicsHdf5
+import numpy as np
 
 def summarize(io):
     spos_data = io.static_data()
@@ -26,7 +36,9 @@ def summarize(io):
     print ('Time simulated: {0} to {1} = {2} steps'.format(t0, t1, len(times)))
 
     cf_times, cf_counts = np.unique(cf_data[:, 0], return_counts=True)
-    min_cf = cf_counts.min()
+    min_cf=0
+    if len(cf_counts) !=0:  
+        min_cf = cf_counts.min()
 
     # Are there times where there are no contact forces?
     if len(np.setdiff1d(times, cf_times, assume_unique=True)) > 0:
@@ -37,8 +49,13 @@ def summarize(io):
     print ('            {0:->10} {1:->10} {2:->10}'.format('','',''))
     print ('Objects:    {0: >10} {1: >10} {2: >10}'
            .format(counts.min(), int(counts.mean()), counts.max()))
-    print ('Contacts:   {0: >10} {1: >10} {2: >10}'
-           .format(min_cf, int(cf_counts.mean()), cf_counts.max()))
+    if len(cf_counts) !=0:
+        print ('Contacts:   {0: >10} {1: >10} {2: >10}'
+               .format(min_cf, int(cf_counts.mean()), cf_counts.max()))
+    else:
+        print ('Contacts:   {0: >10} {1: >10} {2: >10}'
+               .format(min_cf, 0, 0))
+               
     print ('Iterations: {0: >10} {1: >10} {2: >10}'
            .format(int(solv_data[:,1].min()), int(solv_data[:,1].mean()),
                    int(solv_data[:,1].max())))
@@ -77,9 +94,9 @@ def list_contactors(io):
 
 if __name__=='__main__':
     try:
-        with Hdf5(mode='r', io_filename=args.file[0]) as io:
+        with MechanicsHdf5(mode='r', io_filename=args.file[0]) as io:
             if io.dynamic_data() is None or len(io.dynamic_data()) == 0:
-                print 'Empty simulation found.'
+                print ('Empty simulation found.')
             else:
                 print ('')
                 print ('Filename: "{0}"'.format(args.file[0]))
@@ -88,6 +105,6 @@ if __name__=='__main__':
                     list_objects(io)
                 if args.list_contactors:
                     list_contactors(io)
-    except IOError, e:
+    except IOError as e:
         print ('Error reading "{0}"'.format(args.file[0]))
         print (e)

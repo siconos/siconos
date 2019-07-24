@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,19 +26,11 @@
 
 /**  Lagrangian Linear Relation.
 
-\author SICONOS Development Team - copyright INRIA
-\version 3.0.0.
-\date (Creation) Apr 27, 2004
-
 Lagrangian Relation with:
 
-\f[
-y= Cq + e + Fz
-\f]
+\f$y= Cq + e + Fz\f$
 
-\f[
-p = C^t \lambda
-\f]
+\f$ p = C^t \lambda \f$
 
 C is the only required input to built a LagrangianLinearTIR.
 
@@ -47,12 +39,8 @@ class LagrangianLinearTIR : public LagrangianR
 {
 
 protected:
-  /** serialization hooks
-  */
+  /* serialization hooks */
   ACCEPT_SERIALIZATION(LagrangianLinearTIR);
-
-  /** C*/
-  //SP::SimpleMatrix C;
 
   /** F matrix, coefficient of z */
   SP::SimpleMatrix _F;
@@ -90,35 +78,33 @@ public:
 
   /** initialize LagrangianLinearTIR specific operators.
    * \param inter an Interaction using this relation
-   * \param DSlink
-   * \param workV
-   * \param workM
    */
-  void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
-                      VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  void checkSize(Interaction& inter);
 
   /** default function to compute y
   *  \param time not used
   *  \param inter the Interaction we want to update
-  *  \param interProp interaction properties
   *  \param derivativeNumber the derivative of y we want to compute
   */
-  void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
+  void computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber = 0);
 
   /** default function to compute r
   *  \param time not used
   *  \param inter the Interaction we want to update
-  *  \param interProp interaction properties
   *  \param level the derivative of lambda we want to compute
   */
-  void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /* compute all the H Jacobian
    *  \param time not used
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
-  void computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+  void computeJach(double time, Interaction& inter)
   {
     ;
   }
@@ -129,7 +115,7 @@ public:
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
-  void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+  void computeJacg(double time, Interaction& inter)
   {
     ;
   }

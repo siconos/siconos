@@ -19,6 +19,7 @@
   #include "mlcp_cst.h"
   #include "MixedLinearComplementarityProblem.h"
   #include "MLCP_Solvers.h"
+  #include "SiconosCompat.h"
   
   %}
 

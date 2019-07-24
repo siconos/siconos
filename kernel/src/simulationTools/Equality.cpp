@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ int Equality::compute(double time)
     double* q_ = q()->getArray();
     double* z_ =  _z->getArray();
     for (size_t i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
-    info = NM_gesv(&*_M->getNumericsMatrix(), z_, true);
+    info = NM_gesv(&*_M->numericsMatrix(), z_, true);
     // --- Recovering of the desired variables from EQUALITY output ---
     postCompute();
 
@@ -57,24 +57,24 @@ void Equality::initialize(SP::Simulation sim)
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
   //SP::InteractionsGraph indexSet = simulation()->indexSet(levelMin());
-  //_M.reset(new OSNSMatrix(indexSet,_MStorageType));
+  //_M.reset(new OSNSMatrix(indexSet,_numericsMatrixStorageType));
 }
 
 void Equality::updateM()
 {
   assert(0);
   // Get index set from Simulation
-  SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
+  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
 
   if (!_M)
   {
     // Creates and fills M using Interactionof indexSet
-    _M.reset(new OSNSMatrix(indexSet, _MStorageType));
+    _M.reset(new OSNSMatrix(indexSet, _numericsMatrixStorageType));
   }
   else
   {
-    _M->setStorageType(_MStorageType);
-    _M->fill(indexSet);
+    _M->setStorageType(_numericsMatrixStorageType);
+    _M->fillW(indexSet);
 
   }
   _sizeOutput = _M->size();

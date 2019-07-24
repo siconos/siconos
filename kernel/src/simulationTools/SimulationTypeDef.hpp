@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,37 +26,26 @@
 #include <vector>
 #include <map>
 #include <set>
-
+#include "SiconosVector.hpp"
 #include "SiconosPointers.hpp"
 
-#include "Interaction.hpp"
-
 /** double precision machine */
-/*  eq dlmach('e'),  DBL_EPSILON,  fabs(a-b) <  */
 #define MACHINE_PREC std::numeric_limits<double>::epsilon()
 
 // ================== Objects to handle DS ==================
 
-/** Map of SP::SimpleMatrix; key = the number of the related DS*/
+/** Map of SP::SimpleMatrix; used only in MoreauJeanGOSI. key = the number(id) of the related DS*/
 typedef std::map<unsigned int, SP::SimpleMatrix> MapOfDSMatrices;
-
-// ================== Objects to handle Interactions ==================
-
-/** Map of MapOfInteractionMapOfDSMatrices with a DynamicalSystem as a key - Used for interactionBlock-terms indexed by a DynamicalSystem and an Interaction in assembled matrices of LCP etc ..*/
-typedef std::map< SP::Interaction , MapOfDSMatrices >  MapOfInteractionMapOfDSMatrices;
 
 /** list of indices */
 typedef std::vector<unsigned int> IndexInt;
 TYPEDEF_SPTR(IndexInt)
-TYPEDEF_SPTR(VectorOfBlockVectors)
-TYPEDEF_SPTR(VectorOfVectors)
-TYPEDEF_SPTR(VectorOfMatrices)
-TYPEDEF_SPTR(VectorOfSMatrices)
 
 // ================== Objects to handle OSI ==================
 
 /** Vector of OneStepIntegrator */
 typedef std::set<SP::OneStepIntegrator> OSISet;
+TYPEDEF_SPTR(OSISet)
 
 /** Iterator through vector of OSI*/
 typedef OSISet::iterator OSIIterator;
@@ -68,6 +57,7 @@ typedef std::vector<SP::OneStepNSProblem> OneStepNSProblems;
 
 /** Iterator through OneStepNSProblems */
 typedef OneStepNSProblems::iterator OSNSIterator;
+TYPEDEF_SPTR(OneStepNSProblems)
 
 // ================== Misc ==================
 
@@ -96,7 +86,5 @@ const int SICONOS_NB_OSNSP_TSP = 2;
 #define TD_EVENT 1
 #define NS_EVENT 2
 
-TYPEDEF_SPTR(OSISet)
-TYPEDEF_SPTR(OneStepNSProblems)
 
 #endif

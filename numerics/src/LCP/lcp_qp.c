@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #include "NumericsMatrix.h"
 
 #include "QP_Solvers.h"
+#include "SiconosFortran.h"
 #include "numerics_verbose.h"
 #include "sanitizer.h"
 
@@ -50,7 +51,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   int *iwar;
   double *war;
 
-  double tol = options->dparam[0];
+  double tol = options->dparam[SICONOS_DPARAM_TOL]/10.0;
 
   /*/ m :        total number of constraints.*/
   m = 0;
@@ -112,10 +113,16 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   iwar = (int *)malloc(liwar * sizeof(int));
   iwar[0] = 1;
 
-
-  /* / call ql0001_ */
+#ifdef HAVE_QL0001
+#ifdef HAS_FORTRAN
   ql0001_(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
           z, lambda, &iout, info, &un, war, &lwar, iwar, &liwar, &tol);
+#else
+  numerics_error("lcp_qp","Fortran language is not enabled in siconos numerics");
+#endif
+#else
+  numerics_error("lcp_qp","ql0001 is not available in siconos numerics");
+#endif
   /* /    printf("tol = %10.4e\n",*tol);
   //for (i=0;i<mnn;i++) printf("lambda[%i] = %g\n",i,lambda[i]);
 
@@ -148,18 +155,18 @@ int linearComplementarity_qp_setDefaultSolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 15; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->dparam[0] = 1e-6;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
 
   return 0;

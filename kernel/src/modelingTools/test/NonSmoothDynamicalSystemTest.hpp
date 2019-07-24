@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,21 +37,18 @@ private:
   // tests to be done ...
 
   //CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem);
-  CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem1);
-  CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem2);
   CPPUNIT_TEST(testinsertDynamicalSystem);
   CPPUNIT_TEST(testinsertInteraction);
-  CPPUNIT_TEST(End);
-
+  CPPUNIT_TEST(testremoveDynamicalSystem);
+  CPPUNIT_TEST(testremoveInteraction);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildNonSmoothDynamicalSystem1();
-  void testBuildNonSmoothDynamicalSystem2();
   void testinsertDynamicalSystem();
   void testinsertInteraction();
-  void End();
+  void testremoveDynamicalSystem();
+  void testremoveInteraction();
 
 public:
   void setUp();

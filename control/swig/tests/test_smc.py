@@ -4,7 +4,7 @@ import os
 
 # this test is taken almost ve@rbatim from RelayBiSimulation_OT2_noCplugin.py
 def test_smc1():
-    from siconos.kernel import FirstOrderLinearDS, Model, TimeDiscretisation, \
+    from siconos.kernel import FirstOrderLinearDS, NonSmoothDynamicalSystem, TimeDiscretisation, \
         TimeStepping, ZeroOrderHoldOSI, TD_EVENT
     from siconos.control.simulation import ControlManager
     from siconos.control.sensor import LinearSensor
@@ -19,7 +19,7 @@ def test_smc1():
             t = sin(50*time)
             # XXX fix this !
             u = [t, -t]
-            self.setb(u)
+            self.setbPtr(u)
 
     # variable declaration
     ndof = 2   # Number of degrees of freedom of your system
@@ -28,7 +28,7 @@ def test_smc1():
     h = 1.0e-4  # time step for simulation
     hControl = 1.0e-2  # time step for control
     Xinit = 1.0  # initial position
-    N = ceil((T-t0)/h + 10)  # number of time steps
+    N = int(ceil((T-t0)/h + 10))  # number of time steps
     outputSize = 4  # number of variable to store at each time step
 
     # Matrix declaration
@@ -49,19 +49,19 @@ def test_smc1():
     # XXX b is not automatically created ...
 #    processDS.setb([0, 0])
     # Model
-    process = Model(t0, T)
-    process.nonSmoothDynamicalSystem().insertDynamicalSystem(processDS)
+    process = NonSmoothDynamicalSystem(t0, T)
+    process.insertDynamicalSystem(processDS)
     # time discretization
     processTD = TimeDiscretisation(t0, h)
     tSensor = TimeDiscretisation(t0, hControl)
     tActuator = TimeDiscretisation(t0, hControl)
     # Creation of the Simulation
-    processSimulation = TimeStepping(processTD, 0)
+    processSimulation = TimeStepping(process,processTD, 0)
     processSimulation.setName("plant simulation")
+
     # Declaration of the integrator
     processIntegrator = ZeroOrderHoldOSI()
-    process.nonSmoothDynamicalSystem().topology().setOSI(processDS, processIntegrator)
-    processSimulation.insertIntegrator(processIntegrator)
+    processSimulation.associate(processIntegrator, processDS)
     # Actuator, Sensor & ControlManager
     control = ControlManager(processSimulation)
     sens = LinearSensor(processDS, sensorC, sensorD)
@@ -73,8 +73,6 @@ def test_smc1():
     control.addActuatorPtr(act, tActuator)
 
     # Initialization.
-    process.setSimulation(processSimulation)
-    process.initialize()
     control.initialize(process)
     # This is not working right now
     # eventsManager = s.eventsManager()
@@ -118,7 +116,7 @@ def test_smc2():
         def computeb(self, time):
             t = sin(50*time)
             u = [t, -t]
-            self.setb(u)
+            self.setbPtr(u)
 
     # variable declaration
     ndof = 2   # Number of degrees of freedom of your system
@@ -144,7 +142,7 @@ def test_smc2():
     # Declaration of the Dynamical System
     processDS = MyFOLDS(x0, A)
     # XXX b is not automatically created ...
-    processDS.setb([0, 0])
+    processDS.setbPtr([0, 0])
     sim = ControlZOHSimulation(t0, T, h)
     sim.addDynamicalSystem(processDS)
     # time discretisation
@@ -170,3 +168,9 @@ def test_smc2():
         print(dataPlot - ref)
         print("ERROR: The result is rather different from the reference file.")
     assert norm(dataPlot - ref) < 5e-12
+
+if __name__ == '__main__':
+    print('test_smc1')
+    test_smc1()
+    test_smc2()
+    

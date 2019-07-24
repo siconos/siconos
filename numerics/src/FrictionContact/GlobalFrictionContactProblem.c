@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,8 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FI
   fprintf(file, "%d\n", d);
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
-  printInFile(problem->M, file);
-  printInFile(problem->H, file);
+  NM_write_in_file(problem->M, file);
+  NM_write_in_file(problem->H, file);
   for (i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
@@ -69,13 +69,10 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
   problem->dimension = d;
   CHECK_IO(fscanf(file, "%d\n", &nc), &info);
   problem->numberOfContacts = nc;
-  problem->M = newNumericsMatrix();
-
-  info = newFromFile(problem->M, file);
+  problem->M = NM_new_from_file( file);
   if (info) goto fail;
 
-  problem->H = newNumericsMatrix();
-  info = newFromFile(problem->H, file);
+  problem->H =  NM_new_from_file(file);
   if (info) goto fail;
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
@@ -97,7 +94,22 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
 
 fail:
   problem->env = NULL;
-  problem->workspace = NULL;
+  return info;
+}
+
+int globalFrictionContact_printInFileName(GlobalFrictionContactProblem* problem, char* filename)
+{
+  int info = 0;
+  FILE * file = fopen(filename, "w");
+
+  if (!file)
+  {
+    return errno;
+  }
+
+  info = globalFrictionContact_printInFile(problem, file);
+
+  fclose(file);
   return info;
 }
 
@@ -106,14 +118,14 @@ void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
 
   if (problem->M)
   {
-    freeNumericsMatrix(problem->M);
+    NM_free(problem->M);
     free(problem->M);
     problem->M = NULL;
   }
 
   if (problem->H)
   {
-    freeNumericsMatrix(problem->H);
+    NM_free(problem->H);
     free(problem->H);
     problem->H = NULL;
   }
@@ -137,8 +149,6 @@ void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
   }
 
   if (problem->env) assert(0 && "freeGlobalFrictionContactProblem :: problem->env != NULL, don't know what to do");
-
-  gfc3d_free_workspace(problem);
 
   free(problem);
 
@@ -193,53 +203,3 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem)
 
 }
 
-void gfc3d_init_workspace(GlobalFrictionContactProblem* problem)
-{
-  DEBUG_BEGIN("gfc3d_init_workspace(GlobalFrictionContactProblem* problem)\n");
-  assert(problem);
-  assert(problem->M);
-
-  if (!problem->workspace)
-  {
-    problem->workspace = (GFC3D_workspace*) malloc(sizeof(GFC3D_workspace));
-    problem->workspace->factorized_M = NULL;
-    problem->workspace->globalVelocity = NULL;
-  }
-
-  if (!problem->workspace->factorized_M)
-  {
-    problem->workspace->factorized_M = NM_create(problem->M->storageType,
-                                                            problem->M->size0,
-                                                            problem->M->size1);
-    NM_copy(problem->M, problem->workspace->factorized_M);
-    DEBUG_EXPR(NM_display(problem->workspace->factorized_M));
-  }
-
-  if (!problem->workspace->globalVelocity)
-  {
-    problem->workspace->globalVelocity = (double*)malloc(problem->M->size1 * sizeof(double));
-  }
-  DEBUG_END("gfc3d_init_workspace(GlobalFrictionContactProblem* problem)\n");
-}
-
-void gfc3d_free_workspace(GlobalFrictionContactProblem* problem)
-{
-  if (problem->workspace)
-  {
-    if (problem->workspace->factorized_M)
-    {
-      freeNumericsMatrix(problem->workspace->factorized_M);
-      free(problem->workspace->factorized_M);
-      problem->workspace->factorized_M = NULL;
-    }
-
-    if (problem->workspace->globalVelocity)
-    {
-      free(problem->workspace->globalVelocity);
-      problem->workspace->globalVelocity = NULL;
-    }
-
-    free(problem->workspace);
-    problem->workspace = NULL;
-  }
-}

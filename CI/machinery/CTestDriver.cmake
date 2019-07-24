@@ -9,6 +9,12 @@ if(NOT MODE)
   set(MODE "Experimental")
 endif()
 
+# -- Get config --
+# i.e. set extra options/values (cmake -Doption=value ...)
+# either from file default.cmake or
+# from file CI_CONFIG.cmake
+# --> may set SICONOS_CMAKE_OPTIONS
+# --> may set DSICONOS_COMPONENTS
 if(CI_CONFIG)
   string(REPLACE "," ";" CI_CONFIG_LIST ${CI_CONFIG})
   foreach(_CI ${CI_CONFIG_LIST})
@@ -21,7 +27,7 @@ endif()
 
 string(REPLACE "," "-" CI_CONFIG_NAME ${CI_CONFIG})
 
-foreach(option ${CI_OPTIONS})
+foreach(option ${SICONOS_CMAKE_OPTIONS})
   set(CI_CONFIGURE_OPTIONS "${CI_CONFIGURE_OPTIONS} ${option}")
 endforeach()
 
@@ -87,20 +93,26 @@ if(CTEST_BUILD_CONFIGURATION MATCHES "Profiling")
 endif()
 
 #######################################################################
-ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY}/)
+# this usually fails for some reasons and ctest may returns a fail code.
+# ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY}/)
+# cf discussions here:
+# https://gitlab.kitware.com/cmake/cmake/issues/17000
 
-# !!
-#file(REMOVE_RECURSE ${CTEST_BINARY_DIRECTORY})
+if(SUBMIT EQUAL 0)
+  if(CTEST_BINARY_DIRECTORY)
+    file(REMOVE_RECURSE ${CTEST_BINARY_DIRECTORY})
+  endif()
+endif()
 
 find_program(CTEST_GIT_COMMAND NAMES git)
 find_program(CTEST_COVERAGE_COMMAND NAMES gcov)
 find_program(CTEST_MEMORYCHECK_COMMAND NAMES valgrind)
 
-set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-leak-kinds=definite,possible --track-origins=yes --error-limit=no --gen-suppressions=all") 
-#set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-reachable=yes --error-limit=no --gen-suppressions=all") 
+set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-leak-kinds=definite,possible --track-origins=yes --error-limit=no --gen-suppressions=all")
+#set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "--quiet --leak-check=full --show-reachable=yes --error-limit=no --gen-suppressions=all")
 set(CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${CTEST_SOURCE_DIRECTORY}/cmake/valgrind.supp)
 
-set(CTEST_NOTES_FILES ${CTEST_BINARY_DIRECTORY}/Testing/Notes/Build)
+#set(CTEST_NOTES_FILES ${CTEST_BINARY_DIRECTORY}/Testing/Notes/Build)
 
 if(TEST_TIMEOUT)
   set(CTEST_TEST_TIMEOUT ${TEST_TIMEOUT})
@@ -114,8 +126,13 @@ if(WITH_COVERAGE)
   set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} -DWITH_TESTS_COVERAGE:BOOL=ON")
 endif()
 
-set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${CI_CONFIGURE_OPTIONS}")
+
 set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${CTEST_SOURCE_DIRECTORY}")
+set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${CI_CONFIGURE_OPTIONS}")
+if(SICONOS_COMPONENTS)
+  message("ooi ${SICONOS_COMPONENTS}")
+  set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} -DCOMPONENTS=${SICONOS_COMPONENTS}")
+endif()
 
 set( dashboard_cache "
      BUILD_TESTING:BOOL=ON
@@ -130,19 +147,48 @@ set( dashboard_cache "
 include(ProcessorCount)
 ProcessorCount(NP)
 set(CTEST_PARALLEL_LEVEL ${NP})
+if(NOT NP EQUAL 0)
+set(CTEST_BUILD_FLAGS -j${NP})
+set(ctest_test_args ${ctest_test_args} PARALLEL_LEVEL ${NP})
+endif()
 
 ctest_start("${MODE}")
-if(FROM_REPO)
-  ctest_update()
+
+if(SUBMIT EQUAL 0)
+
+  if(FROM_REPO)
+    ctest_update()
+  endif()
+  ctest_configure()
+  ctest_build()
+  ctest_test(PARALLEL_LEVEL ${NP} RETURN_VALUE TEST_RETURN_VAL)
+
+  if (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
+    ctest_coverage()
+  endif (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
+  if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+    ctest_memcheck()
+  endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+
+  if(NOT TEST_RETURN_VAL EQUAL 0)
+    message(FATAL_ERROR " *** test failure *** ")
+  endif()
 endif()
-ctest_configure()
-ctest_build()
-ctest_test(PARALLEL_LEVEL ${NP})
-if (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
-  ctest_coverage()
-endif (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
-if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
-  ctest_memcheck()
-endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
-ctest_submit()
+
+if(SUBMIT EQUAL 1)
+  # note: if the submission process experiences some slow-down, then we
+  # may get a return-code error, so we do it in a second phase.
+
+  # we need to get all the previously built files as ctest_start may
+  # begin with another tag
+  file(GLOB SUBMIT_FILES ${CMAKE_BINARY_DIR}/Testing/*/*)
+  message(STATUS "submit files : ${SUBMIT_FILES}")
+  ctest_submit(FILES ${SUBMIT_FILES} RETURN_VALUE SUBMIT_RETURN_VAL)
+
+  if(NOT SUBMIT_RETURN_VAL EQUAL 0)
+    message(WARNING " *** submission failure *** ")
+  endif()
+endif()
+
+
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 int main(void)
 {
   int info = 0 ;
-  char filename[50] = "./data/CubeH8.hdf5";
+  char filename[50] = "./data/LMGC_GFC3D_CubeH8.hdf5";
   printf("Test on %s\n", filename);
 
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));

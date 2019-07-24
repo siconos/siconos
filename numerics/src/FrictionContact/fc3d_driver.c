@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
+#include <assert.h>
 
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
@@ -28,7 +29,9 @@
 const char* const   SICONOS_FRICTION_3D_NSGS_STR = "FC3D_NSGS";
 const char* const   SICONOS_FRICTION_3D_NSGSV_STR = "FC3D_NSGSV";
 const char* const   SICONOS_FRICTION_3D_TFP_STR = "FC3D_TFP";
+const char* const   SICONOS_FRICTION_3D_PFP_STR = "FC3D_PFP";
 const char* const   SICONOS_FRICTION_3D_NSN_AC_STR = "FC3D_NSN_AC";
+const char* const   SICONOS_FRICTION_3D_NSN_AC_TEST_STR = "FC3D_NSN_AC_TEST";
 const char* const   SICONOS_FRICTION_3D_NSN_FB_STR = "FC3D_NSN_FB";
 const char* const   SICONOS_FRICTION_3D_NSN_NM_STR = "FC3D_NSN_NM";
 const char* const   SICONOS_FRICTION_3D_DSFP_STR = "FC3D_DeSaxceFixedPoint";
@@ -45,7 +48,10 @@ const char* const  SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR = "FC3D_NCPGlockerFB
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR = "FC3D_projectionOnCylinder";
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration_STR =  "FC3D_projectionOnCylinderWithLocalIteration";
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR = "FC3D_ProjectionOnCone_velocity";
-const char* const  SICONOS_FRICTION_3D_PGoC_STR = "FC3D_PGoC";
+const char* const  SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder_STR = "FC3D ConvexQP PG solver";
+const char* const  SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR = "FC3D_VI_FPP_Cylinder";
+
+
 const char* const  SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR = "FC3D_DeSaxceFixedPoint";
 const char* const  SICONOS_FRICTION_3D_EG_STR = "FC3D_ExtraGradient";
 const char* const  SICONOS_FRICTION_3D_FPP_STR = "FC3D_FixedPointProjection";
@@ -82,16 +88,14 @@ int fc3d_driver(FrictionContactProblem* problem,
     numerics_error("fc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
   /* Check for trivial case */
-  info = checkTrivialCase(problem, velocity, reaction, options);
+  info = fc3d_checkTrivialCase(problem, velocity, reaction, options);
   if (info == 0)
   {
     /* If a trivial solution is found, we set the number of iterations to 0
        and the reached acuracy to 0.0 .
-       Since the indexing of parameters is non uniform, this may have side 
-       effects for some solvers. The two main return parameters iparam[7] and 
-       dparam[1] have to be defined and protected by means of enum*/ 
-    options->iparam[7] = 0;
-    options->dparam[1] = 0.0;
+    */ 
+    options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+    options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
     goto exit;
   }
 
@@ -111,6 +115,13 @@ int fc3d_driver(FrictionContactProblem* problem,
     fc3d_nsgs_velocity(problem, reaction , velocity , &info , options);
     break;
   }
+  /* ADMM*/
+  case SICONOS_FRICTION_3D_ADMM:
+  {
+    numerics_printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
+    fc3d_admm(problem, reaction , velocity , &info , options);
+    break;
+  }
   /* Proximal point algorithm */
   case SICONOS_FRICTION_3D_PROX:
   {
@@ -123,6 +134,13 @@ int fc3d_driver(FrictionContactProblem* problem,
   {
     numerics_printf(" ========================== Call TFP (Tresca Fixed Point) solver for Friction-Contact 3D problem ==========================\n");
     fc3d_TrescaFixedPoint(problem, reaction , velocity , &info , options);
+    break;
+  }
+  /* Panagiotopoulos Fixed point algorithm */
+  case SICONOS_FRICTION_3D_PFP:
+  {
+    numerics_printf(" ========================== Call PFP (Panagiotopoulos Fixed Point) solver for Friction-Contact 3D problem ==========================\n");
+    fc3d_Panagiotopoulos_FixedPoint(problem, reaction , velocity , &info , options);
     break;
   }
   /* ACLM Fixed point algorithm */
@@ -218,6 +236,7 @@ int fc3d_driver(FrictionContactProblem* problem,
   }
   case SICONOS_FRICTION_3D_ONECONTACT_NSN:
   case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:
   {
     numerics_printf(" ========================== Call Newton-based solver for one contact Friction-Contact 3D problem ==========================\n");
     fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, problem, options);
@@ -259,19 +278,17 @@ int fc3d_driver(FrictionContactProblem* problem,
   }
   default:
   {
-    fprintf(stderr, "Numerics, fc3d_driver failed. Unknown solver.\n");
-    exit(EXIT_FAILURE);
-
+    numerics_error("fc3d_driver", "Unknown solver.");
+    info = 1;
   }
   }
 
 exit:
-
   return info;
 
 }
 
-int checkTrivialCase(FrictionContactProblem* problem, double* velocity,
+int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity,
                      double* reaction, SolverOptions* options)
 {
   /* Number of contacts */
@@ -291,8 +308,7 @@ int checkTrivialCase(FrictionContactProblem* problem, double* velocity,
     velocity[i] = q[i];
     reaction[i] = 0.;
   }
-
-  if (verbose == 1)
-    printf("fc3d driver, take off, trivial solution reaction = 0, velocity = q.\n");
+  
+  numerics_printf("fc3d fc3d_checkTrivialCase, take off, trivial solution reaction = 0, velocity = q.\n");
   return 0;
 }

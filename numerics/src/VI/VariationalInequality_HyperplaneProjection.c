@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,7 +189,7 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
 
       if (verbose > 0)
       {
-        printf("----------------------------------- VI - Hyperplane Projection (HP) - Iteration %i tau = %14.7e \t rhoequiv = %14.7e \tError = %14.7e\n", iter, tau, rhoequiv, error);
+        printf("--------------- VI - Hyperplane Projection (HP) - Iteration %i tau = %14.7e \t rhoequiv = %14.7e \tError = %14.7e\n", iter, tau, rhoequiv, error);
       }
       if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
@@ -200,7 +200,7 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
 
   if (verbose > 0)
   {
-    printf("----------------------------------- VI - Hyperplane Projection (HP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- VI - Hyperplane Projection (HP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
   dparam[0] = tolerance;
   dparam[1] = error;

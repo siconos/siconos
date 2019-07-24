@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,15 +28,15 @@
  */
 enum NCP_SOLVER
 {
-  SICONOS_NCP_NEWTON_FBLSA = 900,
-  SICONOS_NCP_NEWTON_MINFBLSA = 901,
+  SICONOS_NCP_NEWTON_FB_FBLSA = 900,
+  SICONOS_NCP_NEWTON_MIN_FBLSA = 901,
   SICONOS_NCP_PATHSEARCH = 902,
   SICONOS_NCP_PATH = 903
 };
 
 
-extern const char* const  SICONOS_NCP_NEWTON_FBLSA_STR;
-extern const char* const  SICONOS_NCP_NEWTON_MINFBLSA_STR;
+extern const char* const  SICONOS_NCP_NEWTON_FB_FBLSA_STR;
+extern const char* const  SICONOS_NCP_NEWTON_MIN_FBLSA_STR;
 extern const char* const  SICONOS_NCP_PATHSEARCH_STR;
 extern const char* const  SICONOS_NCP_PATH_STR;
 

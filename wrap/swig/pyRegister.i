@@ -7,7 +7,7 @@
 
 
 // without include
-%define PY_REGISTER_WITHOUT_HEADER(TYPE)
+%define PY_REGISTER_WITHOUT_HEADER(TYPE, COMPONENT)
 %rename  (__getitem__) TYPE ## ::operator[];
 %rename  (__add__) TYPE ## ::operator+;
 %rename  (__mul__) TYPE ## ::operator*;
@@ -22,41 +22,21 @@
 %ignore STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(STD11::enable_shared_from_this<TYPE>); // warning 520 suppression
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
-%typemap(directorin) (TYPE&) ()
-%{
-  // %typemap(directorin) (TYPE&) ()
-  // swig issue shared pointer check in wrappers even if arg is a ref
-  {
-    SP::TYPE myptemp = createSPtr##TYPE($1);
-      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
-                                  SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0);
-  }
-%}
-
-%typemap(directorin) (const TYPE&) ()
-%{
-  // %typemap(directorin) (const TYPE&) ()
-  // swig issue shared pointer check in wrappers even if arg is a ref
-  {
-    SPC::TYPE myptemp = createSPtrConst##TYPE($1);
-      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
-                                  SWIGTYPE_p_std11__shared_ptrT_##TYPE##_const_t, 0);
-  }
-%}
-
 %shared_ptr(TYPE);
-%make_picklable(TYPE, Kernel);
+FIX_DIRECTOR_TYPEMAPS(TYPE)
+%make_picklable(TYPE, COMPONENT);
+REF_PTR(TYPE)
 %enddef
 
-%define PY_REGISTER(TYPE)
+%define PY_REGISTER(TYPE, COMPONENT)
 %inline
 %{
 #include <TYPE.hpp>
 %}
-PY_REGISTER_WITHOUT_HEADER(TYPE)
+PY_REGISTER_WITHOUT_HEADER(TYPE, COMPONENT)
 %enddef
 
-%define PY_FULL_REGISTER(TYPE)
+%define PY_FULL_REGISTER(TYPE, COMPONENT)
 %inline
 %{
 #include <TYPE.hpp>
@@ -75,34 +55,14 @@ PY_REGISTER_WITHOUT_HEADER(TYPE)
 %ignore STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(STD11::enable_shared_from_this<TYPE>); // warning 520 suppression
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
-%typemap(directorin) (TYPE&) ()
-%{
-  // %typemap(directorin) (TYPE&) ()
-  // swig issue shared pointer check in wrappers even if arg is a ref
-  {
-    SP::TYPE myptemp = createSPtr##TYPE($1);
-      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
-                                  SWIGTYPE_p_std11__shared_ptrT_##TYPE##_t, 0);
-  }
-%}
-
-%typemap(directorin) (const TYPE&) ()
-%{
-  // %typemap(directorin) (const TYPE&) ()
-  // swig issue shared pointer check in wrappers even if arg is a ref
-  {
-    SPC::TYPE myptemp = createSPtrConst##TYPE($1);
-      $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
-                                  SWIGTYPE_p_std11__shared_ptrT_##TYPE##_const_t, 0);
-  }
-%}
-
 %shared_ptr(TYPE);
+FIX_DIRECTOR_TYPEMAPS(TYPE)
 %include TYPE.hpp
-%make_picklable(TYPE, Kernel);
+%make_picklable(TYPE, COMPONENT);
+REF_PTR(TYPE)
 %enddef
 
-%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE)
+%define PY_REGISTER_WITHOUT_DIRECTOR(TYPE, COMPONENT)
 %inline
 %{
 #include <TYPE.hpp>
@@ -121,5 +81,6 @@ PY_REGISTER_WITHOUT_HEADER(TYPE)
 %shared_ptr(STD11::enable_shared_from_this<TYPE>); // warning 520 suppression
 %template (shared ## TYPE) STD11::enable_shared_from_this<TYPE>;
 %shared_ptr(TYPE);
-%make_picklable(TYPE, Kernel);
+%make_picklable(TYPE, COMPONENT);
+REF_PTR(TYPE)
 %enddef

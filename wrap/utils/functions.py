@@ -20,12 +20,12 @@ def compute_dt_matrices(A, B, h, TV=False):
     else:
         process_ds = SK.FirstOrderLinearTIDS(x0, A)
     # Model
-    process = SK.Model(t0, T)
-    process.nonSmoothDynamicalSystem().insertDynamicalSystem(process_ds)
+    process = SK.NonSmoothDynamicalSystem(t0, T)
+    process.insertDynamicalSystem(process_ds)
     # time discretisation
     process_time_discretisation = SK.TimeDiscretisation(t0, h)
     # Creation of the Simulation
-    process_simu = SK.TimeStepping(process_time_discretisation, 0)
+    process_simu = SK.TimeStepping(process,process_time_discretisation,0)
     process_simu.setName("plant simulation")
     # Declaration of the integrator
     process_integrator = SK.ZeroOrderHoldOSI()
@@ -33,14 +33,12 @@ def compute_dt_matrices(A, B, h, TV=False):
 
     rel = SK.FirstOrderLinearTIR(Csurface, B)
     nslaw = SK.RelayNSL(m)
-    inter = SK.Interaction(m, nslaw, rel)
+    inter = SK.Interaction(nslaw, rel)
 
     #process.nonSmoothDynamicalSystem().insertInteraction(inter, True)
-    process.nonSmoothDynamicalSystem().link(inter, process_ds)
-    process.nonSmoothDynamicalSystem().setControlProperty(inter, True)
-    # Initialization
-    process.setSimulation(process_simu)
-    process.initialize()
+    process.link(inter, process_ds)
+    process.setControlProperty(inter, True)
+
 
     # Main loop
     process_simu.computeOneStep()

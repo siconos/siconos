@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@
 #include <float.h>
 
 #include "fc3d_Solvers.h"
+
 #include "NonSmoothDrivers.h"
 #include "Newton_methods.h"
 
@@ -42,6 +43,11 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =    fc3d_nsgs_velocity_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_ADMM:
+  {
+    info =    fc3d_admm_setDefaultSolverOptions(options);
+    break;
+  }
   case SICONOS_FRICTION_3D_PROX:
   {
     info =    fc3d_proximal_setDefaultSolverOptions(options);
@@ -50,6 +56,11 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
   case SICONOS_FRICTION_3D_TFP:
   {
     info =    fc3d_TrescaFixedPoint_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_PFP:
+  {
+    info =    fc3d_Panagiotopoulos_FixedPoint_setDefaultSolverOptions(options);
     break;
   }
   case SICONOS_FRICTION_3D_ACLMFP:
@@ -104,7 +115,8 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     size_t iter_max = 200;
     double tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    newton_lsa_default_SolverOption(options);
+    newton_lsa_setDefaultSolverOptions(options);
+    options->solverId = solverId;
 //    options->iparam[5] = 1;
 //    options->iparam[7] = 1;
     options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED;
@@ -122,6 +134,18 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     info =    fc3d_nonsmooth_Newton_NaturalMap_setDefaultSolverOptions(options);
     break;
   }
+  case SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder:
+  {
+    info =    fc3d_ConvexQP_ProjectedGradient_Cylinder_setDefaultSolverOptions(options);
+    options->solverId = SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder;
+    break;
+  }
+   case SICONOS_FRICTION_3D_VI_FPP_Cylinder:
+  {
+    info =    fc3d_VI_FixedPointProjection_Cylinder_setDefaultSolverOptions(options);
+    options->solverId = SICONOS_FRICTION_3D_VI_FPP_Cylinder;
+    break;
+  }
   case SICONOS_FRICTION_3D_ONECONTACT_QUARTIC:
   {
     info =    fc3d_unitary_enumerative_setDefaultSolverOptions(options);
@@ -133,6 +157,58 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     options->solverId = SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU;
     break;
   }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization:
+  {
+    info =    fc3d_projectionOnConeWithDiagonalization_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization:
+  {
+    info =    fc3d_projectionOnConeWithRegularization_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone:
+  {
+    info =    fc3d_projectionOnCone_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration:
+  {
+    info =    fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity:
+  {
+    info =    fc3d_projectionOnCone_velocity_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder:
+  {
+    info =    fc3d_projectionOnCylinder_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration:
+  {
+    info =    fc3d_projectionOnCylinderWithLocalIteration_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN:
+  {
+    info =  fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
+  {
+    info =  fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(options);
+    break;
+  }
+  case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:
+  {
+    info =  fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(options);
+    options->solverId=SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID;
+    break;
+  }
+
   default:
   {
     solver_options_set(options, solverId);

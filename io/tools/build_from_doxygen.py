@@ -67,6 +67,12 @@ def classes_from_build_path(build_path):
 
     return get_classes_conditional(doxy_xml_files, pred)
 
+def assign_targets(classes, source_dir):
+    """For each class, figure out which target it is associated with based
+       on the file path."""
+    for cl in classes.values():
+        cl['target'] = get_target(source_dir, cl['filepath'])
+
 def assign_priorities(classes, source_dir):
     """For each class, get its priority to help in ordering the
        declarations in the generated file."""
@@ -141,15 +147,25 @@ if __name__=='__main__':
 
     header_classes = classes_from_headers(all_headers, include_paths)
 
+    # Allow for inner classes
+    def in_maybe_inner(k,h):
+        if '::' in k:
+            # (a bit loose but we can't forward-declare them so match
+            # individual elements instead)
+            return all([c in h for c in k.split('::')])
+        return k in h
+
     # Find the join of the two lists
     classes = {k: v for k,v in doxygen_classes.items()
-               if k in header_classes and not unwanted(k)}
+               if in_maybe_inner(k, header_classes) and not unwanted(k)}
 
     print('{:} classes found.'.format(len(classes)))
 
     if len(classes) < 10:
         print('%s: Error, not enough classes found.'%sys.argv[0])
         sys.exit(1)
+
+    assign_targets(classes, source_dir)
 
     assign_priorities(classes, source_dir)
 
@@ -161,19 +177,22 @@ if __name__=='__main__':
         write_header(dest_file, ' '.join(sys.argv), generated_header)
         write_includes(dest_file, all_headers)
 
+        sorted_classes = sorted(classes.values(),
+                                key = lambda k: (k['priority'], k['name']))
+
         class_list = [
             (cl['name'],
              cl['resolved_bases'],
              [m for m in cl['members'] if not unwanted(m)]
              )
-            for cl in sorted(classes.values(),
-                             key = lambda k: (k['priority'], k['name']))]
+            for cl in sorted_classes]
 
         write_classes(dest_file, class_list)
 
         with_base = [(cl['name'],
-                      cl['priority'])
-                     for cl in classes.values()
+                      cl['priority'],
+                      cl['target'])
+                     for cl in sorted_classes
                      if not cl['abstract']]
 
         # Note: This was the condition before, but noticed that

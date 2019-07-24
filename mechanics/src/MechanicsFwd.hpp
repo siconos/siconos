@@ -3,7 +3,7 @@
 #define MechanicsFwd_hpp
 #include <SiconosPointers.hpp>
 
-#define MECHANICS_CLASSES()\
+#define MECHANICS_CLASSES()                     \
   REGISTER(SpaceFilter)                         \
   REGISTER(SiconosBodies)                       \
   REGISTER(ExternalBody)                        \
@@ -24,6 +24,12 @@
   REGISTER(KneeJointR)                          \
   REGISTER(PivotJointR)                         \
   REGISTER(PrismaticJointR)                     \
+  REGISTER(CylindricalJointR)                   \
+  REGISTER(NewtonEulerJointR)                   \
+  REGISTER(FixedJointR)                         \
+  REGISTER(CouplerJointR)                       \
+  REGISTER(JointStopR)                          \
+  REGISTER(JointFrictionR)                      \
   REGISTER(FMatrix)                             \
   REGISTER(NSLawMatrix)                         \
   REGISTER(OccR)                                \
@@ -43,16 +49,12 @@
   REGISTER(ContactPoints)                       \
   REGISTER(ContactShapeDistance)                \
   REGISTER(Geometer)                            \
-  REGISTER(BulletDS)                            \
   REGISTER(BulletR)                             \
-  REGISTER(BulletFrom1DLocalFrameR)             \
-  REGISTER(BulletSpaceFilter)                   \
-  REGISTER(BulletTimeStepping)                  \
-  REGISTER(MBTB_FC3DContactRelation)            \
-  REGISTER(MBTB_ContactRelation)                \
-                                                \
-  /* Proposed new Mechanics API */              \
-  REGISTER(BodyDS)                              \
+  REGISTER(Bullet5DR)                           \
+  REGISTER(Bullet1DR)             \
+  REGISTER(RigidBodyDS)                         \
+  REGISTER(ContactR)                            \
+  REGISTER(Contact5DR)                          \
   REGISTER(SiconosContactor)                    \
   REGISTER(SiconosContactorSet)                 \
   REGISTER(SiconosContactorBase)                \
@@ -60,18 +62,21 @@
   REGISTER(SiconosSphere)                       \
   REGISTER(SiconosBox)                          \
   REGISTER(SiconosCylinder)                     \
+  REGISTER(SiconosCone)                         \
+  REGISTER(SiconosCapsule)                      \
   REGISTER(SiconosConvexHull)                   \
   REGISTER(SiconosPlane)                        \
   REGISTER(SiconosMesh)                         \
   REGISTER(SiconosHeightMap)                    \
+  REGISTER(SiconosCollisionQueryResult)         \
   REGISTER(SiconosCollisionManager)             \
   REGISTER(SiconosBulletCollisionManager)
 
 #include <SiconosVisitables.hpp>
 
 #undef SICONOS_VISITABLES
-#define SICONOS_VISITABLES() \
-  KERNEL_CLASSES() \
+#define SICONOS_VISITABLES()                    \
+  KERNEL_CLASSES()                              \
   MECHANICS_CLASSES()
 
 #undef REGISTER

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,6 @@
 
 /** \class ControlSensor
  *  \brief Generic control Sensor to get the output of the system
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.4.0.
- *  \date (Creation) november 09, 2011
  *
  * A generic control sensor
  *
@@ -66,7 +63,7 @@ protected:
 
 public:
 
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds);
 
   /** Get the dimension of the output
    * \return an unsigned int

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,51 +26,29 @@
 #include "Relation.hpp"
 #include "Interaction.hpp"
 
-/** FirstOrder Non Linear Relation.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27, 2004
+/** FirstOrder Relation
  *
- *  Relation for First Order Dynamical Systems, with:
- * \f{eqnarray}
- * y &=& h(X,t,\lambda,Z)\\
- * R &=& g(X,t,\lambda,Z)
- * \f}
- *  X, Z, R corresponds to DynamicalSystem variables.
- *  If DS1 and DS2 are involved in the linked Interaction, then X =[x1 x2], Z=[z1 z2] ...
+ * This is an abstract class for all relation operating on first order systems.
+ * It should not be used. Rather, the following classes should be used:
  *
- *  \f$ y \ and \ \lambda \f$ are specific variables of the interaction (see this class for more details).
- *  h and g are plugged on external functions, via plug-in mechanism (see SiconosSharedLibrary).
+ * - FirstOrderNonlinearR: for fully nonlinear relations: $\f y = h(t, X, \lambda, Z)\f$, $\f$ R = g(t, X, \lambda, Z)\f$.
+ * - FirstOrderType2R: specialization with $\f y = h(t, X, \lambda, Z)\f$, $\f$ R = g(t, \lambda, Z)\f$.
+ * - FirstOrderType1R: further specialization with $\f y = h(t, X, Z)\f$, $\f$ R = g(t, \lambda, Z)\f$.
+ * - FirstOrderLinearR: linear case: $\f y = C(t)x + D(t)\lambda + F(t) z + e$, $\f$ R = B(t)\lambda\f$.
+ * - FirstOrderLinearR: time-invariant linear case: $\f y = Cx + D\lambda + F z + e$, $\f$ R = B\lambda\f$.
  *
- * h <=> output
+ * If the relation involves only one DynamicalSystem, then \f$R = r\f$, \f$X = x\f$, and \f$Z = z\f$.
+ * With two, then \f$R = [r_1, r_2] \f$, \f$X = [x_1 x_2] \f$, and \f$Z = [z_1 z_2]\f$.
  *
- * g <=> input
- *
- * Operators (and their corresponding plug-in):
-- h: saved in Interaction as y (plug-in: output[0])
-- \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
-- \f$ \nabla_\lambda h \f$: jacobianH[1] ( output[2] )
-- g: saved in DS as r ( input[0])
-- \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
-
-
-Note: we use a vector for jacobianG while there is only one jacobian. Just for future changes and to allow easy new implementations if some other
-variables are required in g.
-
+ * Remember that $y$ and $\lambda$ are relation from the Interaction, and have the same size.
  *
  */
-// namespace FirstOrderR {enum {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};}
-// namespace FirstOrderRVec {enum {xfree, z, x, r, e, g_alpha, residuR, workVecSize};}
-// namespace FirstOrderRMat {enum {C, D, F, B, K, Ktilde, Khat, workMatSize};}
-
-
 class FirstOrderR : public Relation
 {
 public:
-  enum FirstOrderRDS {xfree, z, x, r, deltax, xPartialNS, DSlinkSize};
-  enum FirstOrderRVec {vec_xfree, vec_z, vec_x, vec_r, e, g_alpha, vec_residuR, workVecSize};
-  enum FirstOrderRMat  {mat_C, mat_D, mat_F, mat_B, mat_K, mat_Ktilde, mat_Khat, mat_workMatSize};
-
+  enum FirstOrderRDS  {x,z,r, DSlinkSize};
+  enum FirstOrderRVec {e,  relationVectorsSize};
+  enum FirstOrderRMat {mat_C, mat_D, mat_F, mat_B, mat_K, relationMatricesSize};
 
 protected:
   /** serialization hooks
@@ -82,14 +60,30 @@ protected:
   */
   FirstOrderR(RELATION::SUBTYPES newType): Relation(RELATION::FirstOrder, newType) {}
 
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
+  /** The following matrices are used if the relation is linear w.r.t to some variables.
+   * If the matricesa are, the computation of the Jacobian is not done.
+   */
 
+  /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t X */
   SP::SimpleMatrix _C;
+  /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t lambda */
   SP::SimpleMatrix _D;
+  /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t Z */
   SP::SimpleMatrix _F;
 
+  /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t lambda */
   SP::SimpleMatrix _B;
+  /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t X */
   SP::SimpleMatrix _K;
+
+  /** Continuous memory vector of size of x to call plugin */
+  SP::SiconosVector _vec_x;
+  /** Continuous memory vector of size of z to call plugin */
+  SP::SiconosVector _vec_z;
+  /** Continuous memory vector of size of r to call plugin */
+  SP::SiconosVector _vec_r;
+
+
 
 public:
 
@@ -97,13 +91,16 @@ public:
   */
   virtual ~FirstOrderR() {};
 
+
   /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction that owns this relation
-   * \param DSlink
-   * \param workV
-   * \param workM
+   * \param inter the interaction using this relation
    */
-  virtual void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+  virtual void initialize(Interaction& inter);
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter) = 0;
 
   /** set C to pointer newC
   *  \param newC the C matrix
@@ -176,7 +173,6 @@ public:
   {
     return _K;
   }
-
 
 };
 #endif

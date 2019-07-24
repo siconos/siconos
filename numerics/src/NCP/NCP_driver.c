@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,15 @@
 #include "SolverOptions.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "NonSmoothDrivers.h"
 #include "NCP_Solvers.h"
 #include "NCP_cst.h"
 #include "sn_error_handling.h"
 
-const char* const  SICONOS_NCP_NEWTON_FBLSA_STR = "NCP Newton FBLSA";
-const char* const  SICONOS_NCP_NEWTON_MINFBLSA_STR = "NCP Newton minFBLSA";
+const char* const  SICONOS_NCP_NEWTON_FB_FBLSA_STR = "NCP Newton FBLSA";
+const char* const  SICONOS_NCP_NEWTON_MIN_FBLSA_STR = "NCP Newton minFBLSA";
 const char* const  SICONOS_NCP_PATHSEARCH_STR = "NCP Path search";
 const char* const  SICONOS_NCP_PATH_STR = "NCP PATH";
 
@@ -45,10 +46,10 @@ int ncp_driver(NonlinearComplementarityProblem* problem, double *z , double *F, 
   {
     switch (options->solverId)
     {
-    case SICONOS_NCP_NEWTON_FBLSA: // Fischer-Burmeister + Newton w/ LS
+    case SICONOS_NCP_NEWTON_FB_FBLSA: // Fischer-Burmeister + Newton w/ LS
       ncp_newton_FBLSA(problem, z, F, &info, options);
       break;
-    case SICONOS_NCP_NEWTON_MINFBLSA: // min (+ FB as backup) + Newton w/ LS
+    case SICONOS_NCP_NEWTON_MIN_FBLSA: // min (+ FB as backup) + Newton w/ LS
       ncp_newton_minFBLSA(problem, z, F, &info, options);
       break;
     case SICONOS_NCP_PATHSEARCH: // pathsearch method

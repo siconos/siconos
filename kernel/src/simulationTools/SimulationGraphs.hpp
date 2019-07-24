@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,10 +76,13 @@ struct InteractionProperties
   unsigned int source_pos;
   SP::DynamicalSystem target;
   unsigned int target_pos;
+  unsigned int absolute_position;      /**< Absolute position of the interaction variables in the unknown vector in osnsp*/
+  unsigned int absolute_position_proj; /**< Absolute position of the interaction variables in the unknown vector in osnsp
+                                          for projection*/
   bool forControl;                     /**< true if the relation is used to add a control input to a DS */
-  SP::VectorOfBlockVectors DSlink;     /**< pointer links to DS variables needed for computation, mostly x (or q), z, r (or p) */
-  SP::VectorOfVectors workVectors;     /**< set of SiconosVector, mostly to have continuous memory vectors (not the case with BlockVector in DSlink) */
-  SP::VectorOfSMatrices workMatrices;  /**< To store jacobians */
+  SP::VectorOfVectors workVectors;     /**< set of SiconosVector, useful to ensure contiguous memory vectors, used as buffers in OneStepIntegrator classes. */
+  SP::VectorOfBlockVectors workBlockVectors;     /**< set of BlockVector, used as buffers in OneStepIntegrator classes. */
+  SP::VectorOfSMatrices workMatrices;  /**< Internal buffers used on simulation size, to store jacobians or other temporary matrices. */
 
   ACCEPT_SERIALIZATION(InteractionProperties);
 };
@@ -90,14 +93,17 @@ struct DynamicalSystemProperties
   SP::SiconosMatrix upper_block;          /**< i,j block i<j */
   SP::SiconosMatrix lower_block;          /**< i,j block i>j */
   SP::VectorOfVectors workVectors;        /**< Used for instance in Newton iteration */
-  SP::VectorOfMatrices workMatrices;      /**< Mostly for Lagrangian system */
+  SP::VectorOfMatrices workMatrices;      /**< Mostly for Lagrangian system.*/
   SP::OneStepIntegrator osi;              /**< Integrator used for the given DynamicalSystem */
-  SP::SimpleMatrix W;                    /**< Matrix for integration */
-  SP::SimpleMatrix WBoundaryConditions;  /**< Matrix for integration of boundary conditions*/
+  SP::SimpleMatrix W;                     /**< Matrix for integration */
+  SP::SimpleMatrix WBoundaryConditions;   /**< Matrix for integration of boundary conditions*/
+  unsigned int absolute_position;         /**< Absolute position of the ds variables in the unknown vector in osnsp*/
 //  SP::SiconosMemory _xMemory            /**< old value of x, TBD */
 
   ACCEPT_SERIALIZATION(DynamicalSystemProperties);
 };
+
+// Note FP : workMatrices in DSProperties is used only in  NewmarkAlphaOSI => maybe it should be replaced with interprop workMat?
 
 struct GraphProperties
 {

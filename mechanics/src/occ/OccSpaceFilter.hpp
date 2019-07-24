@@ -6,9 +6,9 @@
 class OccSpaceFilter : public SpaceFilter
 {
 public:
-  OccSpaceFilter(SP::Model model) : SpaceFilter(model) {};
+  OccSpaceFilter() : SpaceFilter() {};
 
-  virtual void buildInteractions(double time) {};
+  virtual void updateInteractions(SP::Simulation) {};
 
 };
 

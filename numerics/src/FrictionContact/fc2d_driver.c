@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #include <string.h>
 #include <time.h>
 #include "NumericsMatrix.h"
+#include "SparseBlockMatrix.h"
 #include "fc2d_Solvers.h"
 #include "NonSmoothDrivers.h"
 #include "numerics_verbose.h"
@@ -90,9 +91,24 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     }
     else
     {
-      fprintf(stderr, "fc2d_driver error: unknown solver named: %s\n", solver_options_id_to_name(options->solverId));
-      exit(EXIT_FAILURE);
+
+      SparseBlockStructuredMatrix * M =  problem->M->matrix1;
+      int n = M->blocksize0[M->blocknumber0 - 1];
+      int m = M->blocksize1[M->blocknumber1 - 1];
+      double * denseMat = (double*)malloc(n*m*sizeof(double));
+      SBM_to_dense(M, denseMat);
+
+      problem->M->matrix0  = denseMat;
+      problem->M->storageType =0;
+      info = fc2d_driver(problem, reaction , velocity, options);
+
+      NM_clearDense(problem->M);
+      problem->M->matrix1  = M;
+      problem->M->storageType =1;
+        
+        
     }
+
   }
   else if (problem->M->storageType == 0)
   {

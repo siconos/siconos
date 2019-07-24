@@ -1,7 +1,0 @@
-#!/bin/sh
-
-# note: it does not work anymore with atlas-devel alone 
-dnf install -y cmake gcc gcc-c++ gcc-gfortran boost-devel openblas-devel lapack-devel gmp gmp-devel cppunit cppunit-devel scipy numpy python-devel swig git python-lxml pytest doxygen
-
-# try to free some space
-find /var/cache/yum/ -name '*.rpm' -delete

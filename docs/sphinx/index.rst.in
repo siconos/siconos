@@ -1,0 +1,69 @@
+.. Siconos documentation master file, created by
+   sphinx-quickstart on Thu Sep 24 16:40:52 2015.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+   Git SHA-1: @SOURCE_ABBREV_GIT_SHA1@
+   Build: @BUILD_TIMESTAMP@
+
+:github_url: https://github.com/siconos/siconos/
+:gitlab_url: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/
+   
+Siconos : nonsmooth numerical simulation |licence|
+============================================================
+.. toctree::
+   :hidden:
+   :maxdepth: 3
+   
+   getting_started/index
+   install_guide/index
+   examples/index
+   reference/index
+   complete_documentation
+   search_index
+   license
+   
+
+.. |imag1| image::  /figures/buck.*
+   :height: 150
+
+.. |imag2| image::  /figures/C60.*
+   :height: 150
+
+.. |imag3| image:: /figures/Exomars.24.10.small.*
+   :height: 150
+
+========================================= =========================
+  .. include:: about.rst                   .. include:: video.rst   
+========================================= =========================
+
+
+.. csv-table:: 
+
+   .. include:: teaser.rst, |imag1|, |imag2|, |imag3|, .. include:: contacts.rst
+
+
+.. |travis| image:: https://travis-ci.org/siconos/siconos.svg?branch=master
+   :target: https://travis-ci.org/siconos/siconos
+   :alt: Build Status
+
+.. |licence| image:: https://img.shields.io/badge/licence-apache2-yellow.svg
+   :target: https://www.apache.org/licenses/LICENSE-2.0
+   :alt: License
+
+.. |docbuild| image:: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/badges/master/pipeline.svg
+   :target: https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/commits/master
+   :alt: Doc status
+	 
+Project status
+--------------
+
+.. csv-table:: 
+
+   `Siconos CI on Travis`_ |travis| and `Jenkins`_, `Cdash reports`_, Documentation build |docbuild|
+ 
+.. _Siconos CI on Travis: https://travis-ci.org/siconos/siconos
+
+.. _Cdash reports: https://cdash-tripop.inrialpes.fr/index.php?project=Siconos
+
+ 
+.. _Jenkins: https://ci.inria.fr/siconos--

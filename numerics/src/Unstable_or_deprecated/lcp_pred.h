@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,6 @@ extern "C"
      - 0 : successful\n
      - >0 : otherwise (see specific solvers for more information about the log info)
 
-     \author Nineb Sheherazade & Mathieu Renouf & Pascal Denoyelle
   */
   int lcp_solver_pred(double *vec, double *q , int *n , method_lcp * ptvec ,
                       double *z , double *w ,
@@ -148,7 +147,6 @@ extern "C"
    *   blmat.block[1] = {3,4,0,0,-1,1,0,6}\n
    *   ...\n
    *   blmat.block[5] = {2,-1,2,2}
-   * \author Pascal Denoyelle
    */
   int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
                                 SparseBlockStructuredMatrixPred *blmatpred,

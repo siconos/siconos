@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
  * limitations under the License.
 */
 
-#include "NumericsMatrix_private.h"
-#include "NumericsMatrix.h"
+#include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "debug.h"
 #include "numerics_verbose.h"
@@ -26,7 +25,7 @@
 
 #include <slu_mt_ddefs.h>
 
-/** \struct NM_SuperLU_MT_WS NumericsMatrix_private.h
+/** \struct NM_SuperLU_MT_WS NumericsMatrix_internal.h
  * Structure for holding the data SuperLU needs
  */
 struct NM_SuperLU_MT_WS {
@@ -45,15 +44,15 @@ NM_SuperLU_MT_WS* NM_SuperLU_MT_factorize(NumericsMatrix* A)
 
   int status;
 
-  NumericsSparseLinearSolverParams* params = NM_linearSolverParams(A);
+  NSM_linear_solver_params* params = NSM_linearSolverParams(A);
 
-  if (params->solver_data)
+  if (params->linear_solver_data)
   {
-    return (NM_SuperLU_MT_WS*) params->solver_data;
+    return (NM_SuperLU_MT_WS*) params->linear_solver_data;
   }
 
-  params->solver_data = calloc(1, sizeof(NM_SuperLU_MT_WS));
-  NM_SuperLU_MT_WS* superlu_mt_ws = (NM_SuperLU_MT_WS*) params->solver_data;
+  params->linear_solver_data = calloc(1, sizeof(NM_SuperLU_MT_WS));
+  NM_SuperLU_MT_WS* superlu_mt_ws = (NM_SuperLU_MT_WS*) params->linear_solver_data;
 
   if (!superlu_mt_ws->options) superlu_mt_ws->options = (superlumt_options_t*)SUPERLU_MALLOC(sizeof(superlumt_options_t));
   if (!superlu_mt_ws->stat) superlu_mt_ws->stat = (Gstat_t*)SUPERLU_MALLOC(sizeof(Gstat_t));
@@ -68,7 +67,7 @@ NM_SuperLU_MT_WS* NM_SuperLU_MT_factorize(NumericsMatrix* A)
   /* Symbolic part  */
   int_t* indices;
   int_t* pointers;
-  size_t nnz = NM_sparse_nnz(C);
+  size_t nnz = NSM_nnz(C);
   assert(C->n > 0);
 
   if (sizeof(*C->i) != sizeof(*indices))
@@ -204,9 +203,9 @@ int NM_SuperLU_MT_solve(NumericsMatrix* A, double* b, NM_SuperLU_MT_WS* superlu_
 void NM_SuperLU_MT_free(void* p)
 {
   assert(p);
-  NumericsSparseLinearSolverParams* params = (NumericsSparseLinearSolverParams*) p;
+  NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
   assert(params);
-  NM_SuperLU_MT_WS* superlu_mt_ws = (NM_SuperLU_MT_WS*) params->solver_data;
+  NM_SuperLU_MT_WS* superlu_mt_ws = (NM_SuperLU_MT_WS*) params->linear_solver_data;
   assert(superlu_mt_ws);
 
   SUPERLU_FREE (superlu_mt_ws->perm_r);
@@ -243,7 +242,7 @@ void NM_SuperLU_MT_free(void* p)
 
   /* Here we free superlu_mt_ws ...  */
   free(superlu_mt_ws);
-  params->solver_data = NULL;
+  params->linear_solver_data = NULL;
 
 }
 

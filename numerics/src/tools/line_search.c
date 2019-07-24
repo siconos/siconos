@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,13 @@
 
 #include <assert.h>
 #include "line_search.h"
+#include <math.h>
+#include "SiconosCompat.h"
 
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
+using namespace std;
 #endif
 
 double line_search_generic(int n, double theta, double preRHS, search_data* ls_data, unsigned searchtype, sn_ls_fn ls_fn)
@@ -73,7 +76,7 @@ void get_non_monotone_ref(void* nm_ref_data, double* theta_ref)
     case NM_LS_MAX: // classical nonmonotone theta_ref = max theta_j
       data_max = (nm_ref_struct*) nm_ref_data;
       local_theta_ref = *theta_ref;
-      for (size_t i = 0; i < data_max->m; ++i)
+      for (int i = 0; i < data_max->m; ++i)
       {
         if (data_max->previous_thetas[i] > local_theta_ref)
         {
@@ -87,7 +90,7 @@ void get_non_monotone_ref(void* nm_ref_data, double* theta_ref)
       data_mean = (nm_ref_struct*)nm_ref_data;
       if (data_mean->m > 0)
       {
-        for (size_t i = 0; i < data_mean->m; ++i)
+        for (int i = 0; i < data_mean->m; ++i)
         {
           local_theta_ref += data_mean->previous_thetas[i];
         }

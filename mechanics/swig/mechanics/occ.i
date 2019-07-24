@@ -1,9 +1,10 @@
 // -*- c++ -*-
 // SWIG interface for Siconos Mechanics/Occ
-%module(package="mechanics", directors="1", allprotected="1") occ
+%module(package="siconos.mechanics", directors="1", allprotected="1") occ
 
-%include collision/base.i
-%include collision/native.i
+%include MechanicsBase.i
+
+%import collision/native.i
 
 // do not wrap visitor visit : this leads to a huge amount of wrapper
 // code generation and this fails at compile time on shared_ptr freearg
@@ -19,7 +20,7 @@
 %typecheck(SWIG_TYPECHECK_INTEGER) (const TopoDS_Shape& shape) ()
 %{
   int res;
-  res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_std11__shared_ptrT_TopoDS_Shape_t, 0);
+  res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_std__shared_ptrT_TopoDS_Shape_t, 0);
   _v = SWIG_CheckState(res);
   if(!_v)
   {
@@ -82,7 +83,7 @@ typedef Interaction Interaction;
 %{
   // director mess
   int res;
-  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std11__shared_ptrT_OccContactFace_t, 0);
+  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__shared_ptrT_OccContactFace_t, 0);
   _v = SWIG_CheckState(res);
   if(!_v)
   {
@@ -94,7 +95,7 @@ typedef Interaction Interaction;
 %{
   // director mess
   int res;
-  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std11__shared_ptrT_OccContactShape_t, 0);
+  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__shared_ptrT_OccContactShape_t, 0);
   _v = SWIG_CheckState(res);
   if(!_v)
   {
@@ -106,7 +107,7 @@ typedef Interaction Interaction;
 %{
   // director mess
   int res;
-  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std11__shared_ptrT_OccContactShape_const_t, 0);
+  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__shared_ptrT_OccContactShape_const_t, 0);
   _v = SWIG_CheckState(res);
   if(!_v)
   {
@@ -118,7 +119,7 @@ typedef Interaction Interaction;
 %{
   // director mess
   int res;
-  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std11__shared_ptrT_OccContactFace_const_t, 0);
+  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__shared_ptrT_OccContactFace_const_t, 0);
   _v = SWIG_CheckState(res);
   if(!_v)
   {
@@ -127,37 +128,37 @@ typedef Interaction Interaction;
 %}
 
 %feature("nodirector") Geometer;
-PY_FULL_REGISTER(Geometer);
+PY_FULL_REGISTER(Geometer, Mechanics);
 
 %feature("nodirector") ContactShapeDistance;
-PY_FULL_REGISTER(ContactShapeDistance);
+PY_FULL_REGISTER(ContactShapeDistance, Mechanics);
 
 %feature("nodirector") OccContactShape;
-PY_FULL_REGISTER(OccContactShape);
+PY_FULL_REGISTER(OccContactShape, Mechanics);
 
 %feature("nodirector") OccContactFace;
-PY_FULL_REGISTER(OccContactFace);
+PY_FULL_REGISTER(OccContactFace, Mechanics);
 
 %feature("nodirector") OccContactEdge;
-PY_FULL_REGISTER(OccContactEdge);
+PY_FULL_REGISTER(OccContactEdge, Mechanics);
 
 %feature("nodirector") Geometer::visit;
-PY_FULL_REGISTER(Geometer);
+PY_FULL_REGISTER(Geometer, Mechanics);
 
 %feature("nodirector") ContactPoint;
-PY_FULL_REGISTER(ContactPoint);
+PY_FULL_REGISTER(ContactPoint, Mechanics);
 
 %feature("nodirector") OccBody;
-PY_FULL_REGISTER(OccBody);
+PY_FULL_REGISTER(OccBody, Mechanics);
 
 %feature("nodirector") OccR;
-PY_FULL_REGISTER(OccR);
+PY_FULL_REGISTER(OccR, Mechanics);
 
 %feature("nodirector") OccTimeStepping;
-PY_FULL_REGISTER(OccTimeStepping);
+PY_FULL_REGISTER(OccTimeStepping, Mechanics);
 
 %feature("nodirector") OccSpaceFilter;
-PY_FULL_REGISTER(OccSpaceFilter);
+PY_FULL_REGISTER(OccSpaceFilter, Mechanics);
 
 %{
 #include <cadmbtb.hpp>

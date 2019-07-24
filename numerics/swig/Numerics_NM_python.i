@@ -18,12 +18,9 @@
   VAR = PyInt_AsLong(_TEMP##VAR);                                   \
   Py_DECREF(_TEMP##VAR)
 
-// XXX this is a hack --xhub
-#undef SICONOS_INT64
-
 %inline %{
 
-#include "csparse.h"
+#include "CSparseMatrix.h"
 
 static inline bool sane_pyseq_check(PyObject *o)
 {
@@ -56,7 +53,7 @@ static inline void _sn_check_nnz(PyObject** mat, CSparseMatrix *M)
 {
   if (!*mat) { return; }
   PyObject *auto_nnz = PyObject_GetAttrString(*mat, "nnz");
-  csi nz;
+  CS_INT nz;
   if (M->nz >= 0) { nz = M->nz; } else { nz = M->nzmax; }
   if(PyInt_AsLong(auto_nnz) != nz) {  PyErr_SetString(PyExc_RuntimeError, "number of nnz is inconsistent"); *mat = NULL; }
   Py_XDECREF(auto_nnz);
@@ -81,6 +78,12 @@ static inline void _sn_check_shape(PyObject** mat, CSparseMatrix *M) {};
 #endif
 
 #include "SiconosConfig.h"
+#include "debug.h"
+// Work-around for "disappearing" SICONOS_INT64 problem in use of
+// %#ifdef below
+#ifdef SICONOS_INT64
+#define _SICONOS_INT64
+#endif
 
 #if defined(SICONOS_INT64) && !defined(SICONOS_FORCE_NPY_INT32)
 #define NPY_INT_TYPE NPY_INT64
@@ -104,11 +107,11 @@ static inline void _sn_check_shape(PyObject** mat, CSparseMatrix *M) {};
 
 #define INT_TO_NPY_INT(dim, intp, out, copy) \
   { \
-  csi * int_p; \
+  CS_INT * int_p; \
   if (copy) \
   { \
-    int_p = (csi*)malloc(dim[0] * sizeof(csi)); \
-    memcpy(int_p, intp, dim[0] * sizeof(csi)); \
+    int_p = (CS_INT*)malloc(dim[0] * sizeof(CS_INT)); \
+    memcpy(int_p, intp, dim[0] * sizeof(CS_INT)); \
   } \
   else \
   { \
@@ -219,10 +222,11 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
         array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT32, indvar);
         if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable" #pyvar); PyObject_Print(pyvar, stderr, 0); return 0; }
 
-%#ifdef SICONOS_INT64
+%#ifdef _SICONOS_INT64
         PyErr_Warn(PyExc_UserWarning, "Performance warning: the vector of indices or pointers is in int32, but siconos has 64-bits integers: we have to perform a conversion. Consider given sparse matrix in the right format");
-        dest_array = (int64_t*) malloc(len * sizeof(int64_t));
+        dest_array = (CS_INT*) malloc(len * sizeof(CS_INT));
         if(!dest_array) { PyErr_SetString(PyExc_RuntimeError, "Allocation of i or p failed (triggered by conversion to int32)"); return 0; }
+        
         for(unsigned i = 0; i < len; ++i)
         {
           dest_array[i] = ((int32_t *) array_data(array_pyvar)) [i];
@@ -231,7 +235,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
         *indvar = 0;
         alloc = true;
 %#else
-        dest_array = (int32_t *) array_data(array_pyvar);
+        dest_array = (CS_INT *) array_data(array_pyvar);
 %#endif
         break;
       }
@@ -240,11 +244,11 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
         array_pyvar = obj_to_array_allow_conversion(pyvar, NPY_INT64, indvar);
         if (!array_pyvar) { PyErr_SetString(PyExc_RuntimeError, "Could not get array for variable " #pyvar);  PyObject_Print(pyvar, stderr, 0); return 0; }
 
-%#ifdef SICONOS_INT64
-        dest_array = (int64_t *) array_data(array_pyvar);
+%#ifdef _SICONOS_INT64
+        dest_array = (CS_INT*) array_data(array_pyvar);
 %#else
         PyErr_Warn(PyExc_UserWarning, "Performance warning: the vector of indices or pointers is in int64, but siconos has 32-bits integers: we have to perform a conversion. Consider given sparse matrix in the right format");
-        dest_array = (int32_t*) malloc(len * sizeof(int32_t));
+        dest_array = (CS_INT*) malloc(len * sizeof(CS_INT));
         if(!dest_array) { PyErr_SetString(PyExc_RuntimeError, "Allocation of i or p failed (triggered by conversion to int64)"); return 0; }
         for(unsigned i = 0; i < len; ++i)
         {
@@ -313,7 +317,8 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     if (is_csc)
     {
       // csc
-
+      //PyErr_Warn(PyExc_UserWarning, "The matrix is csc");
+      
       PyObject* nnz_ = PyObject_GetAttrString(obj, "nnz");
       size_t nzmax = PyInt_AsLong(nnz_);
       Py_DECREF(nnz_);
@@ -346,7 +351,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
 
       return 1;
     }
-
+//#define WITH_CSR
 #ifdef WITH_CSR
     res = PyObject_CallMethodObjArgs(scipy_mod, PyString_FromString("isspmatrix_csr"), obj, NULL);
     bool is_csr = (res == Py_True);
@@ -355,7 +360,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     if (is_csr)
     {
       // csr
-
+      //PyErr_Warn(PyExc_UserWarning, "The matrix is csr");
       PyObject* nnz_ = PyObject_GetAttrString(obj, "nnz");
       size_t nzmax = PyInt_AsLong(nnz_);
       Py_DECREF(nnz_);
@@ -399,7 +404,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     int coo_new_alloc;
     if (!is_coo)
     {
-      PyErr_Warn(PyExc_UserWarning, "Performance warning: the given sparse matrix is neither csc or coo, we have to perform a conversion to coo");
+      PyErr_Warn(PyExc_UserWarning, "Performance warning: the given sparse matrix is neither csc or coo (most probably csr), we have to perform a conversion to coo");
       coo = PyObject_CallMethodObjArgs(scipy_mod, PyString_FromString("coo_matrix"), obj, NULL);
       if (!coo) { if (!PyErr_Occurred()) { PyErr_SetString(PyExc_RuntimeError, "Conversion to coo failed!"); }; return 0; }
       coo_new_alloc = 1;
@@ -459,22 +464,26 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
     if (res > 0)
     {
       m->storageType = NM_SPARSE;
-      m->matrix2 = newNumericsSparseMatrix();
+      m->matrix2 = NSM_new();
 
-      if (csm->nz > 0)
+      /* one may an empty matrix, for example:
+         numerics.NumericsMatrix(scipy.sparse.eye(0))
+         then add entries with NM_zentry.
+      */
+      if (csm->nz >= 0)
       {
         m->matrix2->triplet = csm;
-        m->matrix2->origin = NS_TRIPLET;
+        m->matrix2->origin = NSM_TRIPLET;
       }
       else if (csm->nz == -1)
       {
         m->matrix2->csc = csm;
-        m->matrix2->origin = NS_CSC;
+        m->matrix2->origin = NSM_CSC;
       }
       else if (csm->nz == -2)
       {
         m->matrix2->csr = csm;
-        m->matrix2->origin = NS_CSR;
+        m->matrix2->origin = NSM_CSR;
       }
       else
       {
@@ -500,7 +509,7 @@ static inline bool is_Pyobject_scipy_sparse_matrix(PyObject* o, PyObject* scipy_
   }
   else
   {
-    *tmpmat = newNumericsMatrix();
+    *tmpmat = NM_new();
     out = *tmpmat;
     if (is_array(obj) || sane_pyseq_check(obj))
     {
@@ -670,15 +679,15 @@ static PyObject* cs_sparse_to_coo_matrix(CSparseMatrix *M, bool copy)
     {
       switch(m->matrix2->origin)
       {
-      case NS_CSC:
+      case NSM_CSC:
       {
        return cs_sparse_to_csc_matrix(NM_csc(m), false);
       }
-      case NS_TRIPLET:
+      case NSM_TRIPLET:
       {
         return cs_sparse_to_coo_matrix(NM_triplet(m), false);
       }
-      case NS_CSR:
+      case NSM_CSR:
       {
         return cs_sparse_to_csr_matrix(NM_csr(m), false);
       }

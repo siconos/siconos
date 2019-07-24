@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,31 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
   /*        printf("\n"); */
   double error;
   *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[0], &error);
+
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = lcp_options->iparam[SICONOS_IPARAM_ITER_DONE];
+  options->dparam[SICONOS_DPARAM_RESIDU] = error;
+
+  if (error > options->iparam[SICONOS_DPARAM_TOL])
+  {
+
+    if (verbose > 0)
+      printf("--------------- FC2D - LEMKE - No convergence after %i iterations"
+             " residual = %14.7e < %7.3e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], error,
+             options->dparam[SICONOS_DPARAM_TOL] );
+
+  }
+  else
+  {
+
+    if (verbose > 0)
+      printf("--------------- FC2D - LEMKE - Convergence after %i iterations"
+             " residual = %14.7e < %7.3e\n", options->iparam[SICONOS_IPARAM_ITER_DONE],
+             error, options->dparam[SICONOS_DPARAM_TOL]);
+
+    *info = 0;
+  }
+
+
   free(zlcp);
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);

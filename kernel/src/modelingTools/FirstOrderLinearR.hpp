@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,21 +33,19 @@ typedef void (*FOVecPtr)(double, unsigned int, double*, unsigned int, double*);
 
 /** First Order Linear Relation
 
-\author SICONOS Development Team - copyright INRIA
-\version 3.0.0.
-\date Apr 15, 2007
 
 Linear Relation for First Order Dynamical Systems:
 
-\f{eqnarray}
-y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
+\rst
 
-R &=& B(t,z) \lambda
-\f}
+.. math::
 
-All coefficients can be plugged or not. Use isPlugged[name] to check if name ( = "C", "F" etc) is plugged.
+    y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
+    R &=& B(t,z) \lambda
 
-Note: the connections (pointers equalities) between C, D, B and jacobianH and jacobianG of FirstOrderR class are done during initialize.
+\endrst
+
+The following operators can be plugged: \f$ B(t,z), C(t,z), D(t,z), e(t,z), F(t,z)\f$
 
  */
 class FirstOrderLinearR : public FirstOrderR
@@ -58,13 +56,7 @@ protected:
   */
   ACCEPT_SERIALIZATION(FirstOrderLinearR);
 
-  /** initialize the relation (check sizes, memory allocation in workV and workM ...)
-  *  \param inter Interaction using this Relation
-  *  \param DSlink
-  *  \param workV
-  *  \param workM
-  */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 
   SP::SiconosVector _e;
 
@@ -136,7 +128,15 @@ public:
   {
     setComputeJacglambdaFunction(pluginPath,  functionName);
   }
+  /** initialize the relation (check sizes, memory allocation in workV and workM ...)
+   *  \param inter Interaction using this Relation
+   */
+  virtual void initialize(Interaction& inter);
 
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
   /** Function to compute the matrix C
    * \param time the current time
    * \param z the auxiliary input vector
@@ -174,40 +174,36 @@ public:
 
   /** default function to compute h
   *  \param time current time
-  *  \param workV
-  *  \param workM
   *  \param x XXX
-  *  \param z XXX
   *  \param lambda
+  *  \param z XXX
   *  \param y value of h
   */
-  void computeh(double time, VectorOfVectors& workV, VectorOfSMatrices& workM,
-                BlockVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y);
+  void computeh(double time, 
+                BlockVector& x, SiconosVector& lambda,
+                SiconosVector& z, SiconosVector& y);
 
   /** default function to compute g
   *  \param time current time
-  *  \param workM
   *  \param lambda XXX
   *  \param z XXX
   *  \param r non-smooth input
   */
-  void computeg(double time, VectorOfSMatrices& workM, SiconosVector& lambda, SiconosVector& z, BlockVector& r);
+  void computeg(double time, SiconosVector& lambda, SiconosVector& z, BlockVector& r);
 
   /** default function to compute y
   *  \param time current time
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
 
   /** default function to compute r
   *  \param time current time
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /** print the data to the screen
   */
@@ -237,8 +233,8 @@ public:
     return true;
   }
 
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) {};
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) {};
+  virtual void computeJach(double time, Interaction& inter) {};
+  virtual void computeJacg(double time, Interaction& inter) {};
 
 
   ACCEPT_STD_VISITORS();

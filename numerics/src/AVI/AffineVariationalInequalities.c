@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ int AVI_printInFile(AffineVariationalInequalities*  avi, FILE* file)
   int i;
   int n = avi->size;
   fprintf(file, "%d\n", n);
-  printInFile(avi->M, file);
+  NM_write_in_file(avi->M, file);
   for (i = 0; i < avi->M->size1; i++)
   {
     fprintf(file, "%32.24e ", avi->q[i]);
@@ -90,9 +90,7 @@ int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file)
 
   CHECK_IO(fscanf(file, "%d\n", &n));
   avi->size = n;
-  avi->M = newNumericsMatrix();
-
-  newFromFile(avi->M, file);
+  avi->M = NM_new_from_file(file);
 
   avi->q = (double *) malloc(avi->M->size1 * sizeof(double));
   for (i = 0; i < avi->M->size1; i++)
@@ -114,29 +112,30 @@ int AVI_newFromFilename(AffineVariationalInequalities* avi, char* filename)
 
 void freeAVI(AffineVariationalInequalities* avi)
 {
+  assert(avi);
   if (avi->M)
   {
-    freeNumericsMatrix(avi->M);
+    NM_free(avi->M);
     free(avi->M);
     avi->M = NULL;
   }
 
-  if (avi->q)
+  if (avi->poly.set->id == SICONOS_SET_POLYHEDRON)
   {
-    free(avi->q);
+    free_polyhedron(avi->poly.split);
+    avi->poly.split = NULL;
+  }
+  else if (avi->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED)
+  {
+    free_polyhedron_unified(avi->poly.unif);
+    avi->poly.unif = NULL;
   }
 
-  if (avi->poly)
-  {
-    free_polyhedron(avi->poly);
-    avi->poly = NULL;
-  }
+  if (avi->q) { free(avi->q); avi->q = NULL; }
+  if (avi->d) { free(avi->d); avi->d = NULL; }
+  if (avi->lb) { free(avi->lb); avi->lb = NULL; }
+  if (avi->ub) { free(avi->ub); avi->ub = NULL; }
 
-  if (avi->d)
-  {
-    free(avi->d);
-    avi->d = NULL;
-  }
   free(avi);
 }
 
@@ -148,7 +147,10 @@ AffineVariationalInequalities* newAVI(void)
   avi->M = NULL;
   avi->q = NULL;
   avi->d = NULL;
-  avi->poly = NULL;
+  avi->poly.set = NULL;
+  avi->lb = NULL;
+  avi->ub = NULL;
+  avi->cones = NULL;
 
   return avi;
 }

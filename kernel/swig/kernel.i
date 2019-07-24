@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2016 INRIA.
+// Copyright 2018 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 //
 
 // SWIG interface for Siconos Kernel
-%module(directors="1", allprotected="1") kernel
+%module(package="siconos", directors="1", allprotected="1") kernel
 
 %include start.i
 
@@ -29,9 +29,11 @@
 #ifdef WITH_SERIALIZATION
 %{
 #define KERNEL_ONLY
-#include <SiconosFull.hpp>
 %}
 #endif
+
+%include serialization.i
+
 %include picklable.i
 
 %{
@@ -43,6 +45,7 @@
 #include <boost/type_traits/is_polymorphic.hpp>
 #include <boost/mpl/eval_if.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <RotationQuaternion.hpp>
 %}
 
 // ignores
@@ -88,10 +91,12 @@
 %ignore getWMap;
 %ignore getWBoundaryConditionsMap;
 %ignore getDSBlocks;
-%ignore getInvMSimple;
 %ignore getInvMBlock;
 
-%warnfilter(509) rotateAbsToBody;
+// SiconosMemory
+%ignore swap;
+
+%warnfilter(509) quaternionRotate;
 %warnfilter(509) changeFrameAbsToBody;
 %warnfilter(509) changeFrameBodyToAbs;
 
@@ -143,6 +148,7 @@ namespace std
 // yes, undefined private copy constructors
 %feature("notabstract") TimeStepping;
 %feature("notabstract") TimeSteppingCombinedProjection;
+%feature("notabstract") TimeSteppingDirectProjection;
 %feature("notabstract") EventDriven;
 
 // common declarations with Numerics
@@ -152,7 +158,7 @@ namespace std
 %shared_ptr(NumericsMatrix);
 %shared_ptr(CSparseMatrix);
 %shared_ptr(SparseBlockStructuredMatrix);
-%shared_ptr(GlobalFrictionContactProblem);
+//%shared_ptr(GlobalFrictionContactProblem);
 
 %include solverOptions.i
 
@@ -190,7 +196,7 @@ namespace std
   }
 }
 %import NumericsMatrix.h
-%import SparseMatrix.h
+%import CSparseMatrix.h
 %import SparseBlockMatrix.h
 
  // segfaults...
@@ -232,41 +238,10 @@ typedef __mpz_struct mpz_t[1];
 
 %include "SiconosAlgebraTypeDef.hpp"
 %include "SiconosAlgebra.hpp"
+%include "RotationQuaternion.hpp"
 
 %import "RelationNamespace.hpp";
 
-
-
-
-%inline
-%{
-
-  /* Note: without the PyCObject stuff the python
-   * wrapper fail on this, the numpy vector points on a deleted
-   * memory!*/
-
-  const SP::SiconosVector getVector(SP::SiconosVector v)
-  {
-    return v;
-  };
-
-  const SP::SiconosMatrix getMatrix(SP::SiconosMatrix v)
-  {
-    return v;
-  };
-
-  /* to make swig define SWIGTYPE_p_PyArrayObject */
-  const PyArrayObject* getVector(PyArrayObject* v)
-  {
-    return v;
-  };
-
-  SP::NewtonImpactFrictionNSL cast_NewtonImpactFrictionNSL(SP::NonSmoothLaw nslaw)
-  {
-    return std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
-  }
-
-%}
 
 //namespace std {
 
@@ -301,6 +276,9 @@ typedef __mpz_struct mpz_t[1];
 
 %ignore OSNSMatrix::updateSizeAndPositions;
 
+%include std_vector.i
+%template (MemoryContainer) std::vector<SiconosVector>;
+
 // registered classes in KernelRegistration.i
 
 %include KernelRegistration.i
@@ -315,4 +293,64 @@ KERNEL_REGISTRATION()
 
 %fragment("StdMapTraits");
 
+%inline
+%{
 
+  /* Note: without the PyCObject stuff the python
+   * wrapper fail on this, the numpy vector points on a deleted
+   * memory!*/
+
+  const SP::SiconosVector getVector(SP::SiconosVector v)
+  {
+    return v;
+  };
+
+  const SP::SiconosMatrix getMatrix(SP::SiconosMatrix v)
+  {
+    return v;
+  };
+
+  /* to make swig define SWIGTYPE_p_PyArrayObject */
+  const PyArrayObject* getVector(PyArrayObject* v)
+  {
+    return v;
+  };
+
+  SP::NewtonImpactFrictionNSL cast_NewtonImpactFrictionNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
+  }
+
+  SP::RelayNSL cast_RelayNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<RelayNSL>(nslaw);
+  }
+
+  SP::NewtonImpactNSL cast_NewtonImpactNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std11::dynamic_pointer_cast<NewtonImpactNSL>(nslaw);
+  }
+
+  SP::NewtonEulerDS cast_NewtonEulerDS(SP::DynamicalSystem ds)
+  {
+    return std11::dynamic_pointer_cast<NewtonEulerDS>(ds);
+  }
+
+  SP::LagrangianDS cast_LagrangianDS(SP::DynamicalSystem ds)
+  {
+    return std11::dynamic_pointer_cast<LagrangianDS>(ds);
+  }
+
+  SP::NewtonEuler1DR cast_NewtonEuler1DR(SP::Relation r)
+  {
+    return std11::dynamic_pointer_cast<NewtonEuler1DR>(r);
+  }
+
+
+  // Required to get size of a graph of interactions in python interp
+  size_t size_graph(const InteractionsGraph& index_set)
+  {
+    return index_set.size();
+  }
+
+%}

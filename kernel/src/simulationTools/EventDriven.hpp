@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,15 +23,8 @@
 
 #include "Simulation.hpp"
 #include "SiconosFwd.hpp"               // for OneStepIntegrator, etc
-#include "f2c.h"                        // for doublereal, integer
-
-#define DEFAULT_TOL_ED 1000 * DEFAULT_TOLERANCE
 
 /** Simulation based on event driven method, ie events detection (see theoretical manual for more details).
- *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
  *
  * WARNING: at the time only written for Lagrangian systems !!!
  *
@@ -69,7 +62,7 @@ protected:
   /** Default maximum number of Newton iteration*/
   unsigned int _newtonMaxIteration;
 
-  /** Number of steps perfomed is the Newton Loop */
+  /** Number of steps performed is the Newton Loop */
   unsigned int _newtonNbIterations;
 
   /** Maximum Residual for the Dynamical system */
@@ -95,15 +88,17 @@ protected:
 
 public:
   /** defaut constructor
-   *  \param td time discretisation
+   * \param nsds current nonsmooth dynamical system
+   * \param td time discretisation
    */
-  EventDriven(SP::TimeDiscretisation td);
+  EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
 
   /** constructor with data
+   *  \param nsds current nonsmooth dynamical system
    *  \param td time discretisation
    *  \param nb number of NSProblem
    */
-  EventDriven(SP::TimeDiscretisation td, int nb);
+  EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb);
 
   /** defaut constructor (needed for serialization)
    */
@@ -113,11 +108,8 @@ public:
   */
   ~EventDriven() {};
 
-  /** Overload Simulation::initialize
-   * \param m the Model
-   * \param withOSI
-   */
-  void initialize(SP::Model m, bool withOSI = true);
+  /** Overload Simulation::initialize */
+  void initialize();
 
   /* Getters and setters */
 

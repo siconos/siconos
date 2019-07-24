@@ -3,6 +3,8 @@
 # built from @CMAKE_SOURCE_DIR@/cmake/CMakeListsForTests.cmake.in 
 SET(SOURCE_DIR @CMAKE_CURRENT_SOURCE_DIR@/@_CURRENT_TEST_DIRECTORY@)
 
+set_ldlibpath()
+
 # Search for reference files and copy them to binary dir
 FILE(GLOB TESTS_REF ${SOURCE_DIR}/*.ref)
 FOREACH(_F ${TESTS_REF})
@@ -71,19 +73,19 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
   # -- link with current component and its dependencies --
   add_dependencies(${_EXE} @COMPONENT@)
-  target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT@)
-  target_link_libraries(${_EXE} ${PRIVATE} ${@COMPONENT@_LINK_LIBRARIES})
+  target_link_libraries(${_EXE} PRIVATE @COMPONENT@)
+  target_link_libraries(${_EXE} PRIVATE ${@COMPONENT@_LINK_LIBRARIES})
 
   set(COMPONENT_TEST_LIB_ @COMPONENT_TEST_LIB@)
   if(COMPONENT_TEST_LIB_)
     add_dependencies(${_EXE} @COMPONENT_TEST_LIB@)
-    target_link_libraries(${_EXE} ${PRIVATE} @COMPONENT_TEST_LIB@)
+    target_link_libraries(${_EXE} PRIVATE @COMPONENT_TEST_LIB@)
   endif()
 
 
   # Link and include for tests libraries (e.g. cppunit ...)
   FOREACH(_L ${TEST_LIBS})
-    TARGET_LINK_LIBRARIES(${_EXE} ${PRIVATE} ${_L})
+    TARGET_LINK_LIBRARIES(${_EXE} PRIVATE ${_L})
   ENDFOREACH()
   FOREACH(_D ${TEST_INCLUDE_DIR})
     include_directories(${_D})
@@ -111,8 +113,8 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
 
     SET_TESTS_PROPERTIES(${_TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;failed;ERROR;test unsucceeded")
 
-    if(CMAKE_SYSTEM_NAME MATCHES Windows)
-      set(ENV_PPTY "Path=${COMPONENT_BIN_DIR}\;@ENV_PATH@")
+    if (LDLIBPATH)
+      set(ENV_PPTY "${LDLIBPATH}")
     endif()
 
     SET(LOCAL_USE_SANITIZER "@USE_SANITIZER@")
@@ -130,7 +132,13 @@ FOREACH(_EXE ${_EXE_LIST_${_CURRENT_TEST_DIRECTORY}})
     IF(${_TEST_NAME}_PROPERTIES)
       SET_TESTS_PROPERTIES(${_TEST_NAME} PROPERTIES ${${_TEST_NAME}_PROPERTIES})
     ENDIF(${_TEST_NAME}_PROPERTIES)
-    set_tests_properties(${_TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
+
+    if(${_EXE}_TIMEOUT)
+      set_tests_properties(${_TEST_NAME} PROPERTIES TIMEOUT ${${_EXE}_TIMEOUT})
+    else()
+      set_tests_properties(${_TEST_NAME} PROPERTIES TIMEOUT ${tests_timeout})
+    endif()
+
 
   ENDFOREACH(i RANGE ${count})
 

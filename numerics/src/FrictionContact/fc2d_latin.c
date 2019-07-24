@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -499,14 +499,12 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 
     err1   = sqrt(err0);
 
-    options->iparam[1] = iter1;
-    options->dparam[1] = err1;
-
     iter1   = iter1 + 1;
 
 
   }
-
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter1;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err1;
 
   if (err1 > errmax)
   {

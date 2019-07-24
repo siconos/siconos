@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,16 +215,17 @@ static inline void SN_GAMS_add_NV_from_gdx(SN_GAMS_gdx* gdx_data, double* vec, c
 
 #ifdef HAVE_GAMS_C_API
 
-#include "gclgms.h"
-#include "gamsxcc.h"
-#include "idxcc.h"
-#include "optcc.h"
-#include "gevmcc.h"
-#include "gmomcc.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include "gamsxcc.h"
+#include "gclgms.h"
+#include "gevmcc.h"
+#include "gmomcc.h"
+#include "idxcc.h"
+#include "optcc.h"
+
 
 #define idxerror(i, s) { idxErrorStr(Xptr, i, msg, GMS_SSSIZE); \
   printf("%s failed: %s\n",s,msg); return; }
@@ -400,64 +401,7 @@ static inline int NV_to_GDX(idxHandle_t Xptr, const char* name, const char* desc
   return 0;
 }
 
-static inline int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMatrix* M)
-{
-  char msg[GMS_SSSIZE];
-
-  int dims[2];
-  dims[0] = M->size0;
-  dims[1] = M->size1;
-  if (idxDataWriteStart(Xptr, name, descr, 2, dims, msg, GMS_SSSIZE) == 0)
-    idxerrorR(idxGetLastError(Xptr), "idxDataWriteStart");
-
-  switch (M->storageType)
-  {
-  case NM_DENSE:
-  {
-    assert(M->matrix0);
-    idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);
-    break;
-  }
-  case NM_SPARSE_BLOCK: /* Perform a conversion to sparse storage */
-  case NM_SPARSE:
-  {
-    CSparseMatrix* cs = NM_csc(M);
-    assert(cs->p);
-    assert(cs->i);
-    assert(cs->x);
-    int* p_int = (int*)malloc((cs->n+1) * sizeof(int));
-    int* i_int = (int*)malloc(cs->nzmax * sizeof(int));
-    assert(cs->n == M->size1);
-    assert(cs->m == M->size0);
-    for (unsigned i = 0; i < cs->n+1; ++i)
-    {
-      p_int[i] = (int) cs->p[i];
-    }
-
-    for (unsigned i = 0; i < cs->nzmax; ++i)
-    {
-      i_int[i] = (int) cs->i[i];
-    }
-
-    idxDataWriteSparseColMajor(Xptr, p_int, i_int, cs->x);
-
-    free(p_int);
-    free(i_int);
-    break;
-  }
-  default:
-  {
-    printf("NM_to_GDX :: unsupported matrix storage\n");
-    exit(EXIT_FAILURE);
-  }
-  }
-
-
-  if (0==idxDataWriteDone(Xptr))
-    idxerrorR(idxGetLastError(Xptr), "idxDataWriteDone");
-
-  return 0;
-}
+int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMatrix* M);
 
 static inline int GDX_to_NV(idxHandle_t Xptr, const char* name, double* vector, unsigned size)
 {
@@ -502,7 +446,7 @@ extern "C"
   /** Add a string option to the GAMS parameters
    * \param GP the GAMS parameter struct
    * \param name the name of the option
-   * \param value the option value
+   * \param value_orig the option value
    * \param type the type of the option
    */
   void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value_orig, unsigned type);

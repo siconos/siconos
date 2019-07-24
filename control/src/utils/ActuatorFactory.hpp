@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,10 +53,6 @@ template<class SubType> SP::Actuator factory(SP::ControlSensor sensor)
 
 /** Registry Class for Actuators.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 01, 2007
- *
  * Actuator factory.
  * Use:
  *
@@ -100,10 +96,6 @@ public :
 } ;
 
 /** Registration Class for Actuators.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) February 01, 2007
  *
  * Class used for auto-registration of Actuator-type objects.
  *

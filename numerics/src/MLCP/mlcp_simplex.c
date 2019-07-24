@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ dim(v)=nn
 #include <string.h>
 #include "SiconosConfig.h"
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include <math.h>
 
 #ifdef HAVE_MLCPSIMPLEX

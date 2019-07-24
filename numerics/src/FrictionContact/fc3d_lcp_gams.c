@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <float.h>
 
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
 #include "fc3d_Solvers.h"
@@ -128,7 +129,7 @@ static int cp(const char *to, const char *from)
 
 static inline double rad2deg(double rad) { return rad*180/M_PI; }
 
-static csi SN_rm_normal_part(csi i, csi j, double val, void* env)
+static CS_INT SN_rm_normal_part(CS_INT i, CS_INT j, double val, void* env)
 {
   if (i%3 == 0)
   {
@@ -783,7 +784,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
 
 
   Emat.storageType = NM_SPARSE;
-  NM_sparse(&Emat);
+  numericsSparseMatrix(&Emat);
   Emat.size0 = size;
   Emat.size1 = size;
 
@@ -795,7 +796,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
   }
 
   Akmat.storageType = NM_SPARSE;
-  NM_sparse(&Akmat);
+  numericsSparseMatrix(&Akmat);
   Akmat.size0 = NB_APPROX*problem->numberOfContacts;
   Akmat.size1 = size;
   Akmat.matrix2->triplet = cs_spalloc(NB_APPROX*problem->numberOfContacts, size, NB_APPROX*problem->numberOfContacts*3, 1, 1);
@@ -811,8 +812,8 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
   NM_csc_alloc(&Ab, 3*Ab.size0);
 
   /* Let the dark magic begin: we create the indices and colptr  */
-  csi* Ab_rowindx = NM_sparse(&Ab)->csc->i;
-  csi* Ab_colptr = NM_sparse(&Ab)->csc->p;
+  CS_INT* Ab_rowindx = numericsSparseMatrix(&Ab)->csc->i;
+  CS_INT* Ab_colptr = numericsSparseMatrix(&Ab)->csc->p;
 
   for (unsigned i = 0, i3 = 0, data_indx = 0; i3 < 3*problem->numberOfContacts; i3 += 3, i += 9)
   {
@@ -910,20 +911,20 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     /* Compute tildeW and tildeWt*/
     NM_gemm(1., problem->M, &Ab, 0., tmpWmat);
 
-    CSparseMatrix* AbT = cs_transpose(NM_sparse(&Ab)->csc, 1);
-    NM_sparse(&tildeW)->csc = cs_multiply(AbT, NM_csc(tmpWmat));
+    CSparseMatrix* AbT = cs_transpose(numericsSparseMatrix(&Ab)->csc, 1);
+    numericsSparseMatrix(&tildeW)->csc = cs_multiply(AbT, NM_csc(tmpWmat));
     NM_update_size(&tildeW);
 
     /* Now compute tildeWt */
     cs_fkeep(NM_csc(tmpWmat), &SN_rm_normal_part, NULL);
-    NM_sparse(&tildeWt)->csc = cs_multiply(AbT, NM_csc(tmpWmat));
+    numericsSparseMatrix(&tildeWt)->csc = cs_multiply(AbT, NM_csc(tmpWmat));
     NM_update_size(&tildeWt);
 
 #ifndef  NDEBUG
     NumericsMatrix* NM_AbT = NM_create(NM_SPARSE, AbT->m,  AbT->n);
-    NM_sparse(NM_AbT)->csc = AbT;
+    numericsSparseMatrix(NM_AbT)->csc = AbT;
     SN_logh5_NM(NM_AbT, "AbT", logger_s);
-    freeNumericsMatrix(NM_AbT);
+    NM_free(NM_AbT);
 #else
     cs_spfree(AbT);
 #endif
@@ -1317,10 +1318,10 @@ TERMINATE:
 
   optFree(&Optr);
   optFree(&solverOptPtr);
-  freeNumericsMatrix(&Wtmat);
-  freeNumericsMatrix(&Emat);
-  freeNumericsMatrix(&Akmat);
-  freeNumericsMatrix(tmpWmat);
+  NM_free(&Wtmat);
+  NM_free(&Emat);
+  NM_free(&Akmat);
+  NM_free(tmpWmat);
 
   free(reaction_old);
   free(velocity_old);

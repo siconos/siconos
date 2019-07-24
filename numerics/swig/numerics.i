@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2016 INRIA.
+// Copyright 2018 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 {
   strncpy(error_msg, msg1, strlen(msg1)+1);
   strncat(error_msg, "\n", 2);
-  strncat(error_msg, msg2, strlen(msg2) - 1);
+  strncat(error_msg, msg2, strlen(msg2));
   return error_msg;
 }
 
@@ -104,10 +104,10 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 %enddef
 
 %{
-#include "SiconosNumerics.h"
 #include "SiconosConfig.h"
+#include "SiconosNumerics.h"
 #include "SolverOptions.h"
-#include "SparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -123,7 +123,10 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "SiconosSets.h"
 #include "GAMSlink.h"
 #include "NumericsFwd.h"
-  %}
+
+#include "projectionOnCone.h"
+#include "projectionOnRollingCone.h"
+%}
 
 #ifdef WITH_SERIALIZATION
 %{
@@ -140,14 +143,8 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 // swig requires same namespace 'std11' is used.
 %{
 #ifdef __cplusplus
-#if defined(SICONOS_STD_SHARED_PTR) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 namespace std11 = std;
 #include <memory>
-#else
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
-namespace std11 = boost;
-#endif
 #endif
 %}
 #ifdef __cplusplus
@@ -156,7 +153,7 @@ namespace std11 = boost;
 #endif
 
 // put needed shared_ptrs here
-// commented-out for now, swig insists on calling freeFrictionContactProblem()
+// commented-out for now, swig insists on calling frictionContactProblem_free()
 // instead of respecting the shared_ptr!
 // %shared_ptr(FrictionContactProblem)
 
@@ -164,6 +161,7 @@ namespace std11 = boost;
  // more convenient
  %rename (LCP) LinearComplementarityProblem;
  %rename (MLCP) MixedLinearComplementarityProblem;
+ %rename (MCP_old) MixedComplementarityProblem_old;
  %rename (MCP) MixedComplementarityProblem;
  %rename (NCP) NonlinearComplementarityProblem;
  %rename (VI) VariationalInequality;
@@ -220,6 +218,7 @@ namespace std11 = boost;
 %include NonSmoothDrivers.h
 %include solverOptions.i
 %import tlsdef.h
+%include NumericsVerbose.h
 %include numerics_verbose.h
 
 // this has to die --xhub
@@ -281,6 +280,7 @@ namespace std11 = boost;
 // solverOptions.i, numerics_common and fwd decl
 // all this because of SolverOptions extend.
 %begin %{
+#include "CSparseMatrix_internal.h" // must be before NumericsMatrix.h
 #include "relay_cst.h"
 #include "AVI_cst.h"
 #include "SOCLCP_cst.h"
@@ -290,13 +290,18 @@ namespace std11 = boost;
 #include "NCP_cst.h"
 #include "mlcp_cst.h"
 #include "VI_cst.h"
+#include "ConvexQP_cst.h"
 #include "GenericMechanical_cst.h"
 #include "fc2d_Solvers.h"
 #include "fc3d_Solvers.h"
 #include "gfc3d_Solvers.h"
+#include "rolling_fc3d_Solvers.h"
 #include "MCP_Solvers.h"
 #include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"
+#include "ConvexQP_Solvers.h"
+#include "SiconosCompat.h"
+#include "SOCLCP_Solvers.h"
 #include "NonSmoothDrivers.h"
   %}
 
@@ -428,6 +433,8 @@ namespace std11 = boost;
 %include Numerics_MCP2.i
 %include Numerics_NCP.i
 %include Numerics_VI.i
+%include Numerics_ConvexQP.i
+%include Numerics_SOCLCP.i
 
 
 
@@ -463,6 +470,7 @@ namespace std11 = boost;
 %include numerics_FC.i
 %include GAMSlink.h
 %include numerics_GFC.i
+%include numerics_RFC.i
 
 %define STR_FIELD_COPY(field,strobj)
 {

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
 #include "RelayNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#include "NewtonImpactRollingFrictionNSL.hpp"
 #include "DynamicalSystem.hpp"
 
 #include "LagrangianDS.hpp"
@@ -47,7 +48,7 @@ using namespace std;
 using namespace RELATION;
 
 
-
+unsigned int Interaction::__count = 0;
 
 // --- CONSTRUCTORS ---
 struct Interaction::_setLevels : public SiconosVisitor
@@ -89,8 +90,34 @@ struct Interaction::_setLevels : public SiconosVisitor
       RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
-  
+
   void visit(const RelayNSL& nslaw)
+  {
+    RELATION::TYPES relationType = _interaction->relation()->getType();
+    if (relationType == FirstOrder)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(0);
+
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(0);
+    }
+    else if (relationType == Lagrangian || relationType == NewtonEuler)
+    {
+      // For friction
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(1);
+
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(1);
+    }
+    else
+    {
+      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+    };
+  }
+
+ void visit(const NormalConeNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
     if (relationType == FirstOrder)
@@ -106,7 +133,7 @@ struct Interaction::_setLevels : public SiconosVisitor
       RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
-  
+
   void visit(const MixedComplementarityConditionNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -123,7 +150,7 @@ struct Interaction::_setLevels : public SiconosVisitor
       RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     };
   }
-  
+
   void visit(const EqualityConditionNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -136,9 +163,17 @@ struct Interaction::_setLevels : public SiconosVisitor
       _interaction->setUpperLevelForInput(1);
 
     }
+    else if (relationType == FirstOrder)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(0);
+
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(0);
+    }
     else
     {
-	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+      RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
     ;
   }
@@ -177,6 +212,23 @@ struct Interaction::_setLevels : public SiconosVisitor
 	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
     }
   }
+    void visit(const NewtonImpactRollingFrictionNSL& nslaw)
+  {
+    RELATION::TYPES relationType = _interaction->relation()->getType();
+    if (relationType == Lagrangian || relationType == NewtonEuler)
+    {
+      _interaction->setLowerLevelForOutput(0);
+      _interaction->setUpperLevelForOutput(1);
+
+      _interaction->setLowerLevelForInput(0);
+      _interaction->setUpperLevelForInput(1);
+
+    }
+    else
+    {
+	RuntimeException::selfThrow("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+    }
+  }
   void visit(const MultipleImpactNSL& nslaw)
   {
     RELATION::TYPES relationType = _interaction->relation()->getType();
@@ -197,25 +249,32 @@ struct Interaction::_setLevels : public SiconosVisitor
 };
 
 
-void Interaction::init()
+void Interaction::reset()
 {
-  // Memory allocation for y and lambda
+  // Check levels values and
+  // resize all containers-like attributes according to these levels.
+
+  // This function must be called at the first instanciation of
+  // an interaction (in __init) and may be called by simulation and/or
+  // OSI if levels are updated.
 
   //  assert(_upperLevelForOutput >=0);
   assert(_upperLevelForOutput >= _lowerLevelForOutput);
   //  assert(_upperLevelForInput >=0);
   assert(_upperLevelForInput >= _lowerLevelForInput);
 
+  // --  Memory allocation for y and lambda --
    // in order to simplify we size from 0 to _upperLevelForXXX
   _y.resize(_upperLevelForOutput + 1) ;
+  _lambda.resize(_upperLevelForInput + 1);
+
+  // -- Memory allocation for buffers (OSI related ! Must be moved to the graph)
   _yOld.resize(_upperLevelForOutput + 1);
   _y_k.resize(_upperLevelForOutput + 1);
-
-  _lambda.resize(_upperLevelForInput + 1);
   _lambdaOld.resize(_upperLevelForInput + 1);
 
   // get the dimension of the non smooth law, ie the size of an Interaction blocks (one per relation)
-  unsigned int nslawSize = nslaw()->size();
+  unsigned int nslawSize = _nslaw->size();
 
   for (unsigned int i = _lowerLevelForOutput ;
        i < _upperLevelForOutput + 1 ;
@@ -230,116 +289,88 @@ void Interaction::init()
     _y_k[i]->zero();
   }
 
-
+  
   for (unsigned int i = _lowerLevelForInput ;
        i < _upperLevelForInput + 1 ;
        i++)
   {
-    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
-    _lambda[i].reset(new SiconosVector(nslawSize));
+    DEBUG_PRINTF("Interaction::reset(). _lambda[%i].reset()\n",i)
+      _lambda[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i].reset(new SiconosVector(nslawSize));
     _lambdaOld[i]->zero();
   }
 }
 
 
-
-/* initialisation with empty set */
-Interaction::Interaction(unsigned int interactionSize,
-                         SP::NonSmoothLaw NSL,
-                         SP::Relation rel,
-                         unsigned int number) :
-  _number(number), _interactionSize(interactionSize),
-  _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
+void Interaction::__init()
 {
+  // -- Delagated constructor --
+  // i.e. what should be done when (and only there) the interaction
+  // is instanciated.
+  // Other operations (like levels review and y, lambda resizing)
+  // occur in reset function, potentially called during
+  // simulation phase (in OSI indeed).
+
+  assert(_relation && "Interaction::__init failed, relation() == NULL");
+  assert(_nslaw && "Interaction::__inits, non smooth law == NULL");
+
+  // -- Set upper/lower levels, according to the nslaw --
   std11::shared_ptr<_setLevels> setLevels;
   setLevels.reset(new _setLevels(this));
   _nslaw->accept(*(setLevels.get()));
 
-  init();
+  // Ensure consistency between interaction and nslaw sizes
+  if (_interactionSize != _nslaw->size())
+    RuntimeException::selfThrow("Interaction::__init - Nonsmooth law and relation are not consistent.");
+
+  // Check levels and resize attributes (y, lambda ...) if needed.
+  reset();
+
 }
 
 Interaction::Interaction(SP::NonSmoothLaw NSL,
-                         SP::Relation rel,
-                         unsigned int number) :
-  _number(number), _interactionSize(NSL->size()),
+                         SP::Relation rel):
+  _number(__count++), _interactionSize(NSL->size()),
   _sizeOfDS(0), _has2Bodies(false), _y(2),  _nslaw(NSL), _relation(rel)
 {
-  std11::shared_ptr<_setLevels> setLevels;
-  setLevels.reset(new _setLevels(this));
-  _nslaw->accept(*(setLevels.get()));
-  init();
+  __init();
 }
 
 
-void Interaction::setDSLinkAndWorkspace(InteractionProperties& interProp,
-					DynamicalSystem& ds1, VectorOfVectors& workV1,
-					DynamicalSystem& ds2, VectorOfVectors& workV2)
+void Interaction::initializeLinkToDsVariables(DynamicalSystem& ds1,
+                                              DynamicalSystem& ds2)
 {
-  DEBUG_BEGIN("Interaction::setDSLinkAndWorkspace(...)\n");
+  VectorOfBlockVectors& DSlink = _linkToDSVariables;
+  
+  // The dynamical systems linked to the interaction (2 at most, ds2 may be equal to ds1).
+  RELATION::TYPES relationType = _relation->getType();
 
-  assert(relation() && "Interaction::initialize failed, relation() == NULL");
-  assert(nslaw() && "Interaction::initialize failed, non smooth law == NULL");
+  if (relationType == FirstOrder)
+    __initDataFirstOrder(DSlink, ds1, ds2);
+  
+  else if (relationType == Lagrangian)
+    __initDataLagrangian(DSlink, ds1, ds2);
 
-  // compute number of relations.
+  else if (relationType == NewtonEuler)
+    __initDataNewtonEuler(DSlink, ds1, ds2);
 
-  if (_interactionSize != nslaw()->size())
-    {
-      RuntimeException::selfThrow("Interaction::initialize() - _interactionSize != nslaw()->size() . Obsolete !");
-    }
+  else
+    RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
+        a relation of type: " + relationType);
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workVInter = *interProp.workVectors;
-  VectorOfSMatrices& workMInter = *interProp.workMatrices;
-
-  initData(DSlink);
-  // Initialize interaction work vectors, depending on Dynamical systems
-  // linked to the interaction.
-
-  initDSData(ds1, workV1, DSlink);
-
-  if(&ds1 != &ds2)
-    {
-      DEBUG_PRINT("ds1 != ds2\n");
-      DEBUG_PRINTF("ds1 number %i", ds1.number())
-      DEBUG_PRINTF("ds2 number %i", ds2.number())
-      initDSData(ds2, workV2, DSlink);
-    }
-
-  bool computeResidu = _relation->requireResidu();
-
-  // Relation initializes the work vectors and matrices
-  _relation->initialize(*this, DSlink, workVInter, workMInter);
-
-  if (computeResidu)
-    {
-      RELATION::TYPES relationType = _relation->getType();
-      if (relationType == FirstOrder)
-	{
-	  if (!workVInter[FirstOrderR::g_alpha])
-	    workVInter[FirstOrderR::g_alpha].reset(new SiconosVector(_sizeOfDS));
-	  if (!workVInter[FirstOrderR::vec_residuR])
-	    workVInter[FirstOrderR::vec_residuR].reset(new SiconosVector(_sizeOfDS));
-	}
-      else if (relationType == Lagrangian)
-        RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for LagrangianR is not implemented");
-      else if (relationType == NewtonEuler)
-        RuntimeException::selfThrow("Interaction::initialize() - computeResiduR for NewtonEulerR is not implemented");
-    }
-
-  DEBUG_END(" Interaction::setDSLinkAndWorkspace(...)\n");
+  _relation->initialize(*this);
+  
 }
-
 
 
 // Initialize and InitializeMemory are separated in two functions
 // since we need to know the relative degree to know
 // "numberOfDerivatives", while numberOfRelations and the size of the
 // non smooth law are required inputs to compute the relative degree.
-void Interaction::initializeMemory(bool computeResidu, unsigned int steps)
+void Interaction::initializeMemory(unsigned int steps)
 {
 
-  DEBUG_PRINT("Interaction::initializeMemory() \n");
+  DEBUG_BEGIN("Interaction::initializeMemory() \n");
   // Warning: this function is called from Simulation initialize,
   // since we need to know :
   // the levels _lowerLevelForOutput and _upperLevelForOutput to size Y
@@ -354,29 +385,24 @@ void Interaction::initializeMemory(bool computeResidu, unsigned int steps)
   //  assert(_upperLevelForInput >=0);
   assert(_upperLevelForInput >= _lowerLevelForInput);
 
+
   _yMemory.resize(_upperLevelForOutput + 1);
   _lambdaMemory.resize(_upperLevelForInput + 1);
-  unsigned int nslawSize = nslaw()->size();
+  unsigned int nslawSize = _nslaw->size();
 
   for (unsigned int i = _lowerLevelForOutput ; i < _upperLevelForOutput + 1 ; i++)
-    _yMemory[i].reset(new SiconosMemory(steps, nslawSize));
+    _yMemory[i].setMemorySize(steps, nslawSize);
 
   for (unsigned int i = _lowerLevelForInput ; i < _upperLevelForInput + 1 ; i++)
   {
-    DEBUG_PRINTF("Interaction::initializeMemory(). _lambda[%i].reset()\n",i)
-    _lambdaMemory[i].reset(new SiconosMemory(steps, nslawSize));
+    DEBUG_PRINTF("Interaction::initializeMemory(). _lambdaMemory[%i].setMemorySize()\n",i)
+    _lambdaMemory[i].setMemorySize(steps, nslawSize);
   }
 
-  // XXX hm hm -- xhub
-  if (computeResidu)
-  {
-    _h_alpha.reset(new SiconosVector(nslawSize));
-    _residuY.reset(new SiconosVector(nslawSize));
-  }
-
-  _yForNSsolver.reset(new SiconosVector(nslawSize));
+  DEBUG_END("Interaction::initializeMemory() \n");
 
 }
+
 void Interaction::resetAllLambda()
 {
    for (unsigned int i = _lowerLevelForInput ;
@@ -396,67 +422,46 @@ void Interaction::resetLambda(unsigned int level)
     _lambda[level]->zero();
 }
 
-void Interaction::initData(VectorOfBlockVectors& DSlink)
-{
-  RELATION::TYPES relationType = _relation->getType();
-  if (relationType == FirstOrder)
-    initDataFirstOrder(DSlink);
-  else if (relationType == Lagrangian)
-    initDataLagrangian(DSlink);
-  else if (relationType == NewtonEuler)
-    initDataNewtonEuler(DSlink);
-  else
-    RuntimeException::selfThrow("Interaction::initData unknown initialization procedure for \
-        a relation of type: " + relationType);
-
-}
-
-void Interaction::initDSData(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)
-{
-  RELATION::TYPES relationType = _relation->getType();
-  if (relationType == FirstOrder)
-    initDSDataFirstOrder(ds, workVDS, DSlink);
-  else if (relationType == Lagrangian)
-    initDSDataLagrangian(ds, workVDS, DSlink);
-  else if (relationType == NewtonEuler)
-    initDSDataNewtonEuler(ds, workVDS, DSlink);
-  else
-    RuntimeException::selfThrow("Interaction::initDSData unknown initialization procedure for \
-        a relation of type: " + relationType);
-}
 
 // It could be interesting to make Interaction a pure virtual class and to derive 3
 // classes, one for each type of relation
-void Interaction::initDataFirstOrder(VectorOfBlockVectors& DSlink)
+ void Interaction::__initDataFirstOrder(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2)
 {
-  // Get the DS concerned by the interaction of this relation
+
   DSlink.resize(FirstOrderR::DSlinkSize);
   DSlink[FirstOrderR::x].reset(new BlockVector());
-  DSlink[FirstOrderR::xfree].reset(new BlockVector());
-  DSlink[FirstOrderR::xPartialNS].reset(new BlockVector());
-  DSlink[FirstOrderR::deltax].reset(new BlockVector()); // displacements
   DSlink[FirstOrderR::r].reset(new BlockVector());
   DSlink[FirstOrderR::z].reset(new BlockVector());
+  RELATION::SUBTYPES relationSubType = _relation->getSubType();
+
+  if(relationSubType != LinearTIR)
+  {
+    //we need extra continuous memory vector
+    //todo 
+  }
+
+
+  
+  __initDSDataFirstOrder(ds1, DSlink);
+  if(&ds1 != &ds2)
+    __initDSDataFirstOrder(ds2, DSlink);
+ 
 }
 
-void Interaction::initDSDataFirstOrder(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)
+void Interaction::__initDSDataFirstOrder(DynamicalSystem& ds, VectorOfBlockVectors& DSlink)
 {
   // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
   FirstOrderNonLinearDS& lds = static_cast<FirstOrderNonLinearDS&>(ds);
   DSlink[FirstOrderR::x]->insertPtr(lds.x());
-  DSlink[FirstOrderR::xfree]->insertPtr(workVDS[FirstOrderDS::xfree]);
-  DSlink[FirstOrderR::xPartialNS]->insertPtr(workVDS[FirstOrderDS::xPartialNS]);
-  DSlink[FirstOrderR::deltax]->insertPtr(workVDS[FirstOrderDS::deltaxForRelation]);
   DSlink[FirstOrderR::r]->insertPtr(lds.r());
   DSlink[FirstOrderR::z]->insertPtr(lds.z());
 }
 
-void Interaction::initDataLagrangian(VectorOfBlockVectors& DSlink)
+void Interaction::__initDataLagrangian(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2)
 {
 
   DEBUG_PRINT("Interaction::initDataLagrangian()\n");
   DSlink.resize(LagrangianR::DSlinkSize);
-  //DSlink[LagrangianR::xfree].reset(new BlockVector());
   DSlink[LagrangianR::q0].reset(new BlockVector()); // displacement
   DSlink[LagrangianR::q1].reset(new BlockVector()); // velocity
   DSlink[LagrangianR::q2].reset(new BlockVector()); // acceleration
@@ -464,43 +469,47 @@ void Interaction::initDataLagrangian(VectorOfBlockVectors& DSlink)
   DSlink[LagrangianR::p1].reset(new BlockVector());
   DSlink[LagrangianR::p2].reset(new BlockVector());
   DSlink[LagrangianR::z].reset(new BlockVector());
+  RELATION::SUBTYPES relationSubType = _relation->getSubType();
+  if(relationSubType != LinearTIR)
+  {
+    //we need extra continuous memory vector
+    //todo 
+  }
+
+
+  
+  __initDSDataLagrangian(ds1, DSlink);
+  if(&ds1 != &ds2)
+    __initDSDataLagrangian(ds2, DSlink);
+
 }
 
-void Interaction::initDSDataLagrangian(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)
+void Interaction::__initDSDataLagrangian(DynamicalSystem& ds, VectorOfBlockVectors& DSlink)
 {
   // check dynamical system type
   assert((Type::value(ds) == Type::LagrangianLinearTIDS ||
-          Type::value(ds) == Type::LagrangianDS));
+          Type::value(ds) == Type::LagrangianDS ||
+          Type::value(ds) == Type::LagrangianLinearDiagonalDS));
 
   // convert vDS systems into LagrangianDS and put them in vLDS
   LagrangianDS& lds = static_cast<LagrangianDS&> (ds);
 
   // Put q, velocity and acceleration of each DS into a block. (Pointers links, no copy!!)
-
-  //DSlink[LagrangianR::xfree]->insertPtr(workVDS[OneStepIntegrator::free]);
-  //DSlink[LagrangianR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
-
   DSlink[LagrangianR::q0]->insertPtr(lds.q());
 
-  DEBUG_PRINTF("DSlink[LagrangianR::q0]->insertPtr(lds.q()) with LagrangianR::q0 = %i\n",LagrangianR::q0);
-  DEBUG_EXPR(DSlink[LagrangianR::q0]->display());
-  DEBUG_EXPR(lds.q()->display());
-  DEBUG_EXPR(std::cout << DSlink[LagrangianR::q0] << std::endl;);
-
   DSlink[LagrangianR::q1]->insertPtr(lds.velocity());
-  DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
+  if(lds.acceleration())
+    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
   DSlink[LagrangianR::z]->insertPtr(lds.z());
 
-  // Put NonsmoothInput _p of each DS into a block. (Pointers links, no copy!!)
   for (unsigned int k = 0; k < 3; k++)
   {
-    assert(lds.p(k));
-    assert(DSlink[LagrangianR::p0 + k]);
-    DSlink[LagrangianR::p0 + k]->insertPtr(lds.p(k));
+    if(lds.p(k) && DSlink[LagrangianR::p0 + k])
+      DSlink[LagrangianR::p0 + k]->insertPtr(lds.p(k));
   }
 }
 
-void Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)
+void Interaction::__initDataNewtonEuler(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2)
 {
   DEBUG_BEGIN("Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)\n");
   DSlink.resize(NewtonEulerR::DSlinkSize);
@@ -515,19 +524,21 @@ void Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)
   DSlink[NewtonEulerR::p1].reset(new BlockVector());
   DSlink[NewtonEulerR::p2].reset(new BlockVector());
   DEBUG_END("Interaction::initDataNewtonEuler(VectorOfBlockVectors& DSlink)\n");
+  __initDSDataNewtonEuler(ds1, DSlink);
+  if(&ds1 != &ds2)
+    __initDSDataNewtonEuler(ds2, DSlink);
 
 }
 
-void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)
+void Interaction::__initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfBlockVectors& DSlink)
 {
-  DEBUG_BEGIN("Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)\n");
+  DEBUG_BEGIN("Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfBlockVectors& DSlink)\n");
   // check dynamical system type
   assert((Type::value(ds) == Type::NewtonEulerDS) && "Interaction initDSData failed, not implemented for dynamical system of that type.\n");
 
   // convert vDS systems into NewtonEulerDS and put them in vLDS
   NewtonEulerDS& neds = static_cast<NewtonEulerDS&>(ds);
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-  //DSlink[NewtonEulerR::xfree]->insertPtr(ds.workspace(DynamicalSystem::free));
   DSlink[NewtonEulerR::q0]->insertPtr(neds.q());
   DSlink[NewtonEulerR::velocity]->insertPtr(neds.twist());
   //  DSlink[NewtonEulerR::deltaq]->insertPtr(neds.deltaq());
@@ -541,7 +552,7 @@ void Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& wo
     DSlink[NewtonEulerR::p2]->insertPtr(neds.p(2));
 
   DSlink[NewtonEulerR::z]->insertPtr(neds.z());
-  DEBUG_END("Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfVectors& workVDS, VectorOfBlockVectors& DSlink)\n");
+  DEBUG_END("Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfBlockVectors& DSlink)\n");
 
 }
 // --- GETTERS/SETTERS ---
@@ -763,21 +774,25 @@ void Interaction::swapInOldVariables()
 
 void Interaction::swapInMemory()
 {
+  DEBUG_BEGIN("void Interaction::swapInMemory()\n");
   // i corresponds to the derivative number and j the relation number.
+  DEBUG_EXPR(display(false));
   for (unsigned int  i = _lowerLevelForOutput; i < _upperLevelForOutput + 1 ; i++)
   {
     *(_y_k[i]) = *(_y[i]) ;
-    _yMemory[i]->swap(*_y[i]);
+    _yMemory[i].swap(*_y[i]);
+    DEBUG_PRINTF("swap level i = %i",i);
+    DEBUG_EXPR(_yMemory[i].display(););
   }
-
+  
   for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1  ; i++)
   {
-    _lambdaMemory[i]->swap(*_lambda[i]);
+    _lambdaMemory[i].swap(*_lambda[i]);
   }
-
+  DEBUG_END("void Interaction::swapInMemory()\n");
 }
 
-void Interaction::display() const
+void Interaction::display(bool brief) const
 {
   std::cout << "======= Interaction display number " << _number <<" =======" <<std::endl;
 
@@ -790,75 +805,83 @@ void Interaction::display() const
 
   cout << "| "  ; _relation->display();
   for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
-    {
+  {
 
-      std::cout << "| y[" << i  << "] : ";
-      if (_y[i])
-	{
-	  if (_y[i]->size() >= 5) std::cout <<std::endl;
-	  _y[i]->display();
-	}
-      else std::cout << "->NULL" <<std::endl;
-    }
-  for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
+    std::cout << "| y[" << i  << "] : ";
+    if (_y[i])
     {
-      std::cout << "| yOld[" << i  << "] : ";
-      if (_yOld[i])
-	{
-	  if (_yOld[i]->size() >= 5) std::cout <<std::endl;
-	  _yOld[i]->display();
-	}
-      else std::cout << "->NULL" <<std::endl;
+      if (_y[i]->size() >= 5) std::cout <<std::endl;
+      _y[i]->display();
     }
+    else std::cout << "->NULL" <<std::endl;
+  }
   for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
+  {
+    std::cout << "| yOld[" << i  << "] : ";
+    if (_yOld[i])
+    {
+      if (_yOld[i]->size() >= 5) std::cout <<std::endl;
+      _yOld[i]->display();
+    }
+    else std::cout << "->NULL" <<std::endl;
+  }
+  for (unsigned int i = 0; i < _upperLevelForInput + 1; i++)
+  {
+    std::cout << "| lambda[" << i  << "] : ";
+    if (_lambda[i])
+    {
+      if (_lambda[i]->size() >= 5) std::cout <<std::endl;
+      _lambda[i]->display();
+    }
+    else std::cout << "->NULL" <<std::endl;
+  }
+  if(!brief)
+  {
+    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
       std::cout << "| y_k[" << i  << "] : ";
       if (_y_k[i])
-	{
-	  if (_y_k[i]->size() >= 5) std::cout <<std::endl;
-	  _y_k[i]->display();
-	}
+      {
+        if (_y_k[i]->size() >= 5) std::cout <<std::endl;
+        _y_k[i]->display();
+      }
       else std::cout << "->NULL" <<std::endl;
     }
-  for (unsigned int i = 0; i < _upperLevelForInput + 1; i++)
+    std::cout << "| _yMemory size: " << _yMemory.size() <<std::endl;;
+    for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
     {
-      std::cout << "| lambda[" << i  << "] : ";
-      if (_lambda[i])
-	{
-	  if (_lambda[i]->size() >= 5) std::cout <<std::endl;
-	  _lambda[i]->display();
-	}
-      else std::cout << "->NULL" <<std::endl;
+      std::cout << "| y_Memory[" << i  << "] : ";
+      _yMemory[i].display();
     }
-
+  }
 
   std::cout << "===================================" <<std::endl;
 }
 
-void Interaction::computeOutput(double time, InteractionProperties& interProp, unsigned int derivativeNumber)
+void Interaction::computeOutput(double time, unsigned int derivativeNumber)
 {
 
   DEBUG_BEGIN("Interaction::computeOutput(...)\n");
   DEBUG_PRINTF("time= %f\t",time);
   DEBUG_PRINTF("derivativeNumber= %i\n",derivativeNumber);
-  relation()->computeOutput(time, *this, interProp, derivativeNumber);
+  relation()->computeOutput(time, *this, derivativeNumber);
   DEBUG_END("Interaction::computeOutput(...)\n");
 
 }
 
-void Interaction::computeInput(double time, InteractionProperties& interProp, unsigned int level)
+void Interaction::computeInput(double time,  unsigned int level)
 {
   DEBUG_BEGIN("Interaction::computeInput(...)\n");
   DEBUG_PRINTF("time= %f\t",time);
   DEBUG_PRINTF("level= %i\n",level);
-  relation()->computeInput(time, *this, interProp, level);
+  relation()->computeInput(time, *this, level);
   DEBUG_END("Interaction::computeInput(...)\n");
 }
 
 
 
 
-void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const
+void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
   SP::SiconosMatrix originalMatrix;
   RELATION::TYPES relationType = relation()->getType();
@@ -870,7 +893,7 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
     if (CMat)
       originalMatrix = CMat;
     else if (relationSubType != LinearTIR)
-      originalMatrix = workM[FirstOrderR::mat_C];
+      originalMatrix = _relationMatrices[FirstOrderR::mat_C];
   }
   else if (relationType == Lagrangian)
   {
@@ -900,37 +923,6 @@ void Interaction::getLeftInteractionBlockForDS(unsigned int pos, SP::SiconosMatr
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-SiconosMatrix& Interaction::getLeftInteractionBlock(VectorOfSMatrices& workM) const
-{
-  RELATION::TYPES relationType = relation()->getType();
-  RELATION::SUBTYPES relationSubType = relation()->getSubType();
-
-  if (relationType == FirstOrder)
-  {
-    SP::SiconosMatrix CMat = std11::static_pointer_cast<FirstOrderR> (relation())->C();
-    if (CMat)
-      return *CMat;
-    else if (relationSubType != LinearTIR)
-      return *workM[FirstOrderR::mat_C];
-  }
-  else if (relationType == Lagrangian)
-  {
-    SP::LagrangianR r = std11::static_pointer_cast<LagrangianR> (relation());
-    return *r->jachq();
-  }
-  else if (relationType == NewtonEuler)
-  {
-    SP::NewtonEulerR r = std11::static_pointer_cast<NewtonEulerR> (relation());
-    return *r->jachqT();
-  }
-  else
-  {
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
-  }
-  // stupid compiler check
-  return *workM[FirstOrderR::mat_C];
-
-}
 void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
   DEBUG_PRINT("Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) \n");
@@ -968,7 +960,7 @@ void Interaction::getLeftInteractionBlockForDSProjectOnConstraints(unsigned int 
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const
+void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMatrix InteractionBlock) const
 {
   SP::SiconosMatrix originalMatrix; // Complete matrix, Relation member.
   RELATION::TYPES relationType = relation()->getType();
@@ -980,7 +972,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
     if (BMat)
       originalMatrix = BMat;
     else if (relationSubType != LinearTIR)
-      originalMatrix = workM[FirstOrderR::mat_B];
+      originalMatrix = _relationMatrices[FirstOrderR::mat_B];
     else
        RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, FirstOrderLinearTIR relation but no B matrix found!");
   }
@@ -1009,7 +1001,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
   setBlock(originalMatrix, InteractionBlock, subDim, subPos);
 }
 
-void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, VectorOfSMatrices& workM) const
+void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) const
 {
   // !!! Warning: we suppose that D is interactionBlock diagonal, ie that
   // there is no coupling between Interaction through D !!!  Any
@@ -1026,7 +1018,7 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, V
     if (DMat)
       D = DMat;
     else if (relationSubType != LinearTIR)
-      D = workM[FirstOrderR::mat_D];
+      D = _relationMatrices[FirstOrderR::mat_D];
   }
   else if (relationType == Lagrangian)
   {
@@ -1037,7 +1029,7 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, V
     D = std11::static_pointer_cast<NewtonEulerR> (relation())->jachlambda();
   }
   else
-    RuntimeException::selfThrow("Interaction::getLeftInteractionBlockForDS, not yet implemented for relations of type " + relationType);
+    RuntimeException::selfThrow("Interaction::getExtraInteractionBlockForDS, not yet implemented for relations of type " + relationType);
 
   if (!D)
   {
@@ -1045,49 +1037,6 @@ void Interaction::getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock, V
     return; //ie no extra interactionBlock
   }
 
-  // copy sub-interactionBlock of originalMatrix into InteractionBlock
-  // dim of the sub-interactionBlock
-  Index subDim(2);
-  subDim[0] = InteractionBlock->size(0);
-  subDim[1] = InteractionBlock->size(1);
-  // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in InteractionBlock
-  Index subPos(4);
-  subPos[0] = 0;//_relativePosition;
-  subPos[1] = 0;//_relativePosition;
-  subPos[2] = 0;
-  subPos[3] = 0;
-  setBlock(D, InteractionBlock, subDim, subPos);
+  *InteractionBlock = *D;
 }
 
-void Interaction::computeKhat(SiconosMatrix& m, VectorOfSMatrices& workM, double h) const
-{
-  RELATION::TYPES relationType = relation()->getType();
-
-  if ((relationType == FirstOrder) && (workM[FirstOrderR::mat_Khat]))
-  {
-    SP::SiconosMatrix K = std11::static_pointer_cast<FirstOrderR>(_relation)->K();
-    if (!K) K = workM[FirstOrderR::mat_K];
-    prod(*K, m, *workM[FirstOrderR::mat_Khat], true);
-    *workM[FirstOrderR::mat_Khat] *= h;
-  }
-}
-
-void Interaction::computeResiduY(double time)
-{
-  //Residu_y = y_alpha_k+1 - H_alpha;
-  *_residuY = *_h_alpha;
-  scal(-1, *_residuY, *_residuY);
-
-  (*_residuY) += *(y(0));
-
-}
-
-void Interaction::computeResiduR(double time, VectorOfBlockVectors& DSlink, VectorOfVectors& workV)
-{
-  //Residu_r = r_alpha_k+1 - g_alpha;
-  *workV[FirstOrderR::vec_residuR] = *DSlink[FirstOrderR::r];
-  *workV[FirstOrderR::vec_residuR] -= *workV[FirstOrderR::g_alpha];
-
-//RuntimeException::selfThrow("Interaction::computeResiduR do not use this function");
-}

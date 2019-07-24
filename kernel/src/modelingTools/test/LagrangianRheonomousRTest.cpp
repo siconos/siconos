@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,16 +38,6 @@ void LagrangianRheonomousRTest::testBuildLagrangianRheonomousR0()
   SP::LagrangianRheonomousR R1(new LagrangianRheonomousR("TestPlugin:hRheo", "TestPlugin:G0Rheo", "TestPlugin:hDot"));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3a : ", R1->getType() == RELATION::Lagrangian, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3b : ", R1->getSubType() == RELATION::RheonomousR, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3c : ", R1->gethName() == "TestPlugin:hRheo", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3d : ", R1->getJachqName() == "TestPlugin:G0Rheo", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianRheonomousR3d : ", R1->gethDotName() == "TestPlugin:hDot", true);
   std::cout << " data Constructor LagrangianRheonomousR ok" <<std::endl;
 }
 
-
-void LagrangianRheonomousRTest::End()
-{
-  std::cout << "=================================================" <<std::endl;
-  std::cout << " ===== End of LagrangianRheonomousR tests ===== " <<std::endl;
-  std::cout << "=================================================" <<std::endl;
-}

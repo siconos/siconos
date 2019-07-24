@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@
 #define InteractionManager_h
 
 #include "Interaction.hpp"
-#include "Model.hpp"
 #include "DynamicalSystem.hpp"
 #include "SiconosVisitor.hpp"
 #include "NSLawMatrix.hpp"
@@ -35,25 +34,27 @@ public:
   InteractionManager() : _nslaws(1) {}
   virtual ~InteractionManager() {}
 
-  /** Called by Simulation prior to advancing to the next Event */
+  /** Called by Simulation after updating positions prior to starting
+   * the Newton loop. */
   virtual void updateInteractions(SP::Simulation simulation) {}
 
   /** Specify a non-smooth law to use for a given combination of
    *  interaction groups.
-   * \param nsl a SP::NonSmoothLaw
-   * \param group1 first group
-   * \param group2 second group */
+   * \param nslaw the new nonsmooth law
+   * \param group1 id of the fisrt group of interactions
+   * \param group2  id of the second group of interactions
+   */
   virtual void insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
-                                  long unsigned int group1,
-                                  long unsigned int group2);
+                                  unsigned long int group1,
+                                  unsigned long int group2);
 
   /** Retrieve a non-smooth law to use for a given combination of
    *  interaction groups.
    * \return nsl a SP::NonSmoothLaw
    * \param group1 first group
    * \param group2 second group */
-  virtual SP::NonSmoothLaw nonSmoothLaw(long unsigned int group1,
-                                        long unsigned int group2);
+  virtual SP::NonSmoothLaw nonSmoothLaw(unsigned long int group1,
+                                        unsigned long int group2);
 
 protected:
 

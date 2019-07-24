@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@
  */
 enum GENERIC_MECHANICAL_SOLVER
 {
-  SICONOS_GENERIC_MECHANICAL_NSGS = 1000
+  SICONOS_GENERIC_MECHANICAL_NSGS = 2000
 };
 
-//extern const char* const  SICONOS_GENERIC_MECHANICAL_NSGS_STR;
+extern const char* const  SICONOS_GENERIC_MECHANICAL_NSGS_STR;
 
 #endif

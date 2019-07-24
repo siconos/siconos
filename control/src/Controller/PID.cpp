@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,27 +24,31 @@
 #include "TimeDiscretisation.hpp"
 #include "ControlSensor.hpp"
 #include "SimpleMatrix.hpp"
-#include "Model.hpp"
 #include "Simulation.hpp"
 #include "EventsManager.hpp"
 
 #include <iostream>
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+//#define DEBUG_WHERE_MESSAGES
+#include "debug.h"
 
-PID::PID(SP::ControlSensor sensor, SP::SimpleMatrix B): Actuator(PID_, sensor), _ref(0), _curDeltaT(0)
+
+PID::PID(SP::ControlSensor sensor, SP::SimpleMatrix B): Actuator(PID_, sensor, B), _ref(0), _curDeltaT(0)
 {
-  _B = B;
+  _u.reset(new SiconosVector(1, 0));
 }
 
 PID::~PID()
 {
 }
 
-void PID::initialize(const Model& m)
+void PID::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 {
-  _u.reset(new SiconosVector(1, 0));
-  Actuator::initialize(m);
+  Actuator::initialize(nsds,s);
 
-  _curDeltaT = m.simulation()->eventsManager()->timeDiscretisation()->currentTimeStep(0);
+  _curDeltaT = s.currentTimeStep();
 
   // initialize _err
   _err.reset(new boost::circular_buffer<double> (3));
@@ -54,6 +58,7 @@ void PID::initialize(const Model& m)
 
 void PID::actuate()
 {
+  DEBUG_BEGIN("void PID::actuate()\n");
   /** \todo We have to distinguish two cases : linear or nonlinear
    *  support the nonlinear case
    */
@@ -61,10 +66,17 @@ void PID::actuate()
   // Compute the new error
 
   (*_err).push_front(_ref - _sensor->y()(0));
-
+  DEBUG_PRINTF("_curDeltaT = %g\n", _curDeltaT);
+  DEBUG_PRINTF("_ref = %g\n", _ref);
+  DEBUG_EXPR(_sensor->y().display(););
+  DEBUG_EXPR(_u->display(););
+  DEBUG_PRINTF("added term  = %g\n", ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
+               (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] + (*_K)(2) / _curDeltaT * (*_err)[2]);
   // compute the new control and update it
   (*_u)(0) += ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
               (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] + (*_K)(2) / _curDeltaT * (*_err)[2];
+  DEBUG_EXPR(_u->display(););
+  DEBUG_END("void PID::actuate()\n");
 }
 
 void PID::setK(SP::SiconosVector K)

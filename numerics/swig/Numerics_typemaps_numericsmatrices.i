@@ -28,21 +28,21 @@
       assert(M->matrix2);
       switch (M->matrix2->origin)
       {
-      case NS_CSC:
+      case NSM_CSC:
       {
         NM_clean_cs(M->matrix2->csc, alloc_ctrl);
         free(M->matrix2->csc);
         M->matrix2->csc = NULL;
         break;
       }
-      case NS_CSR:
+      case NSM_CSR:
       {
         NM_clean_cs(M->matrix2->csr, alloc_ctrl);
         free(M->matrix2->csr);
         M->matrix2->csr = NULL;
         break;
       }
-      case NS_TRIPLET:
+      case NSM_TRIPLET:
       {
         NM_clean_cs(M->matrix2->triplet, alloc_ctrl);
         free(M->matrix2->triplet);
@@ -128,7 +128,7 @@
   if (nummat$argnum)
   {
     if (!NM_clean(nummat$argnum, alloc_ctrl_$argnum)) { return SN_SWIG_ERROR_CODE; }
-    freeNumericsMatrix(nummat$argnum);
+    NM_free(nummat$argnum);
     free(nummat$argnum);
   }
 
@@ -149,6 +149,11 @@
     $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), $descriptor(NumericsMatrix *), SWIG_POINTER_NEW |  0 );
   }
 }
+%typemap(out) (RawNumericsMatrix*) {
+  $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), $descriptor(NumericsMatrix *), 0 |  0 );
+ }
+
+
 
 %typemap(freearg) (double *z)
 {
@@ -193,7 +198,7 @@
 }
 
 // FIX: do not work
-%newobject SBMtoDense(const SparseBlockStructuredMatrix* const A, double *denseMat);
+%newobject SBM_to_dense(const SparseBlockStructuredMatrix* const A, double *denseMat);
 %typemap(newfree) (double *denseMat)
 {
   // %typemap(newfree) (double *denseMat)
@@ -243,13 +248,8 @@
 
 %typemap(in, numinputs=0) (SparseBlockStructuredMatrix* outSBM) 
 {
-  $1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
+  $1 = SBM_new();
   if(!$1) SWIG_fail;
-
-  $1->block = NULL;
-  $1->index1_data = NULL;
-  $1->index2_data = NULL;
-
 }
 
 %typemap(argout) (SparseBlockStructuredMatrix* outSBM)
@@ -260,11 +260,20 @@
                                      SWIG_NewPointerObj(SWIG_as_voidptr($1), $1_descriptor, SWIG_POINTER_OWN));
 }
 
-
 #ifdef __cplusplus
-#define CSparseMatrix cs_sparse
+// SWIG gives syntax error for CS_NAME(_sparse)
+#ifdef SICONOS_INT64
+#define CSparseMatrix cs_dl_sparse
 #else
-#define CSparseMatrix struct cs_sparse
+#define CSparseMatrix cs_di_sparse
+#endif
+#else
+// SWIG gives syntax error for CS_NAME(_sparse)
+#ifdef SICONOS_INT64
+#define CSparseMatrix struct cs_dl_sparse
+#else
+#define CSparseMatrix struct cs_di_sparse
+#endif
 #endif
 
 
@@ -279,7 +288,7 @@
     $2 = (CSparseMatrix*) malloc(sizeof(CSparseMatrix));
     if(!$2) SWIG_fail;
 
-    SBMtoSparseInitMemory($1,$2);
+    SBM_to_sparse_init_memory($1,$2);
   }
   else
     SWIG_fail;
@@ -298,7 +307,7 @@
 
   if (!csrm) { SWIG_fail; }
   $result = SWIG_AppendOutput($result, csrm);
-  free($1);
+  cs_spfree($1);
 }
 
 %typemap(out) (CSparseMatrix *)
@@ -356,8 +365,8 @@
 %typemap(memberin) (CSparseMatrix*)
 {
  // perform a deep copy
- if (!$1) { $1 = NM_csparse_alloc_for_copy($input); }
- NM_copy_sparse($input, $1);
+ if (!$1) { $1 = CSparseMatrix_alloc_for_copy($input); }
+ CSparseMatrix_copy($input, $1);
 }
 
 %typemap(freearg) (CSparseMatrix*)
@@ -382,4 +391,6 @@
 
 // issue with typemap out and is useless for now
 // convert matrix to scipy.sparse.csc and do the job there
-%ignore SBMRowToDense;
+%ignore SBM_row_to_dense;
+
+

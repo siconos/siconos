@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,17 @@ extern "C" DLLEXPORT void computeJacobianfx(double time, unsigned int sizeOfX, d
   for (unsigned int i = 0; i < sizeOfX * sizeOfX; i++)
     jacob[i] = i + 1;
 }
+
+extern "C" DLLEXPORT void computeM(double time, unsigned int sizeOfX, double* x, double* M, unsigned int sizeZ, double* z);
+extern "C" DLLEXPORT void computeM(double time, unsigned int sizeOfX, double* x, double* M, unsigned int sizeZ, double* z)
+{
+  for (unsigned int i = 0; i < sizeOfX * sizeOfX; ++i)
+    M[i] = 0;
+  M[0] = 1 * time;
+  M[4] = 2 * time;
+  M[8] = 3 * time;
+}
+
 
 // ===== Lagrangian DS  =====
 

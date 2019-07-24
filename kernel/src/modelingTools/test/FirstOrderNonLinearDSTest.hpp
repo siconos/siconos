@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,15 +41,13 @@ private:
   CPPUNIT_TEST(testBuildFirstOrderNonLinearDS3);
   CPPUNIT_TEST(testSetX0);
   CPPUNIT_TEST(testSetX0Ptr);
-  CPPUNIT_TEST(testSetX);
-  CPPUNIT_TEST(testSetXPtr);
+  CPPUNIT_TEST(testSetx);
+  CPPUNIT_TEST(testSetxPtr);
   CPPUNIT_TEST(testSetR);
   CPPUNIT_TEST(testSetRPtr);
-  CPPUNIT_TEST(testSetJacobianfx);
   CPPUNIT_TEST(testSetJacobianfxPtr);
   CPPUNIT_TEST(testInitMemory);
   CPPUNIT_TEST(testSwap);
-  CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -61,18 +59,16 @@ private:
   void testSetX0();
   void testSetX0Ptr();
   void testSetx();
-  void testSetXPtr();
+  void testSetxPtr();
   void testSetR();
   void testSetRPtr();
-  void testSetJacobianfx();
   void testSetJacobianfxPtr();
   void testInitMemory();
   void testSwap();
-  void End();
 
   // Members
 
-  SP::SiconosVector x0;
+  SP::SiconosVector x0, xnull;
   SP::SiconosMatrix J0, M;
 public:
   void setUp();

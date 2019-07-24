@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ protected:
 
   SiconosShape()
     : _inside_margin(0.1)
-    , _outside_margin(0.1)
+    , _outside_margin(0.0)
     , _version(0)
     {}
 
@@ -51,12 +51,21 @@ public:
 
   virtual ~SiconosShape() {}
 
+  /** Set the inside margin of the shape.  This is a distance that the
+   * contour should be shrunk to improve contact detection robustness.
+   * It will have an effect on the roundness of corners. */
   void setInsideMargin (double margin)
   {
     _inside_margin = margin;
     _version ++;
   }
 
+  /** Set the outside margin of the shape.  This is the distance from
+    * the contact shell to an external shell used to detect contacts
+    * in advance.  The implementation will detect contact points on
+    * the external shell and project them back to the contact shell.
+    * Note: Currently not working in Bullet implementation!  Better to
+    * leave at zero. */
   void setOutsideMargin(double margin)
   {
     _outside_margin = margin;
@@ -215,6 +224,92 @@ public:
   ACCEPT_VISITORS();
 };
 
+class SiconosCone : public SiconosShape,
+                        public std11::enable_shared_from_this<SiconosCone>
+{
+private:
+  SiconosCone() : SiconosShape() {};
+
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosCone);
+  double _radius;
+  double _length;
+
+public:
+  SiconosCone(float radius, float length)
+    : SiconosShape(), _radius(radius), _length(length)
+  {
+  }
+
+  virtual ~SiconosCone() {}
+
+  void setRadius(double radius)
+  {
+    _radius = radius;
+    _version ++;
+  }
+
+  double radius() { return _radius; }
+
+  void setLength(double length)
+  {
+    _length = length;
+    _version ++;
+  }
+
+  double length() { return _length; }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
+class SiconosCapsule : public SiconosShape,
+                        public std11::enable_shared_from_this<SiconosCapsule>
+{
+private:
+  SiconosCapsule() : SiconosShape() {};
+
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosCapsule);
+  double _radius;
+  double _length;
+
+public:
+  SiconosCapsule(float radius, float length)
+    : SiconosShape(), _radius(radius), _length(length)
+  {
+  }
+
+  virtual ~SiconosCapsule() {}
+
+  void setRadius(double radius)
+  {
+    _radius = radius;
+    _version ++;
+  }
+
+  double radius() { return _radius; }
+
+  void setLength(double length)
+  {
+    _length = length;
+    _version ++;
+  }
+
+  double length() { return _length; }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
+
+
 class SiconosConvexHull : public SiconosShape,
                           public std11::enable_shared_from_this<SiconosConvexHull>
 {
@@ -273,7 +368,7 @@ public:
   {
     if (!_indexes || (_indexes->size() % 3) != 0)
       throw SiconosException("Mesh indexes size must be divisible by 3.");
-    if (!_vertices || _vertices->size(1) != 3)
+    if (!_vertices || _vertices->size(0) != 3)
       throw SiconosException("Mesh vertices matrix must have 3 columns.");
   }
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@
 #include "SimulationGraphs.hpp"
 
 // #define DEBUG_BEGIN_END_ONLY
+// #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 
@@ -35,18 +36,23 @@
 
 
 #include <iostream>
+// NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR)
+// {
 
 
-void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+// }
+
+void NewtonEulerR::initialize(Interaction& inter)
 {
 
-  DEBUG_BEGIN("NewtonEulerR::initComponents(Interaction& inter, ...)\n");
 
-  unsigned int ySize = inter.getSizeOfY();
+  DEBUG_BEGIN("NewtonEulerR::initialize(Interaction& inter)\n");
+
+  unsigned int ySize = inter.dimension();
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
 
-  if (! _jachq)
+  if (!_jachq)
     _jachq.reset(new SimpleMatrix(ySize, qSize));
   else
   {
@@ -58,8 +64,8 @@ void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
     else
     {
       assert((_jachq->size(1) == qSize && _jachq->size(0) == ySize) ||
-             (printf("NewtonEuler::initComponents _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), qSize, _jachq->size(0), ySize) && false) ||
-             ("NewtonEuler::initComponents inconsistent sizes between _jachq matrix and the interaction." && false));
+             (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), qSize, _jachq->size(0), ySize) && false) ||
+             ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between _jachq matrix and the interaction." && false));
     }
   }
 
@@ -67,8 +73,6 @@ void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
 
   if (! _jachqT)
     _jachqT.reset(new SimpleMatrix(ySize, xSize));
-
-  //_jachqT.reset(new SimpleMatrix(ySize, xSize));
 
   if (! _T)
   {
@@ -79,10 +83,24 @@ void NewtonEulerR::initComponents(Interaction& inter, VectorOfBlockVectors& DSli
     _T->setValue(2, 2, 1.0);
   }
   DEBUG_EXPR(_jachqT->display());
-
-
-  DEBUG_END("NewtonEulerR::initComponents(Interaction& inter)\n");
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  if (!_contactForce)
+  {
+    _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
+    _contactForce->zero();
+  }
+  DEBUG_END("NewtonEulerR::initialize(Interaction& inter)\n");
 }
+
+
+void NewtonEulerR::checkSize(Interaction& inter)
+{
+  assert((_jachq->size(1) == 7 * (inter.getSizeOfDS() / 6) && _jachq->size(0) ==  inter.dimension()) ||
+         (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), 7 * (inter.getSizeOfDS() / 6), _jachq->size(0),  inter.dimension()) && false) ||
+         ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between _jachq matrix and the interaction." && false));
+}
+
+
 
 void NewtonEulerR::setJachq(SP::SimpleMatrix newJachq)
 {
@@ -95,15 +113,6 @@ void NewtonEulerR::setJachqPtr(SP::SimpleMatrix newPtr)
 }
 
 
-void NewtonEulerR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
-{
- // Memory allocation for G[i], if required (depends on the chosen constructor).
-  initComponents(inter, DSlink, workV, workM);
-
-  _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
-  _contactForce->zero();
-}
-
 
 void NewtonEulerR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
@@ -114,13 +123,13 @@ void NewtonEulerR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
 
 
-void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber)
+void NewtonEulerR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
 
   DEBUG_BEGIN("NewtonEulerR::computeOutput(...)\n");
   DEBUG_PRINTF("with time = %f and derivativeNumber = %i starts\n", time, derivativeNumber);
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector& y = *inter.y(derivativeNumber);
   BlockVector& q = *DSlink[NewtonEulerR::q0];
 
@@ -155,21 +164,23 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionPro
       RuntimeException::selfThrow("NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) derivativeNumber out of range or not yet implemented.");
   }
   DEBUG_END("NewtonEulerR::computeOutput(...)\n");
-
 }
+
+
 
 /** to compute p
 *  \param double : current time
 *  \Param unsigned int: "derivative" order of lambda used to compute input
 */
-void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int level)
 {
 
   DEBUG_BEGIN("NewtonEulerR::computeInput(...)\n")
   DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level);
   DEBUG_EXPR(printf("interaction %p\n",&inter););
   DEBUG_EXPR(inter.display(););
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
 
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
@@ -179,6 +190,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProp
 
   if (level == 1) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
+
     prod(lambda, *_jachqT, *_contactForce, true);
 
     DEBUG_PRINT("NewtonEulerR::computeInput contact force :\n");
@@ -199,6 +211,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProp
 
   else if (level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
+
     prod(lambda, *_jachqT, *_contactForce, true);
     DEBUG_EXPR(_contactForce->display(););
 
@@ -222,8 +235,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProp
     RuntimeException::selfThrow("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)  not yet implemented for level > 1");
   DEBUG_END("NewtonEulerR::computeInput(...)\n");
 }
-
-/*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEulerFrom3DLocalFrameR and NewtonEulerFrom1DLocalFrameR)*/
+/*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEuler3DR and NewtonEuler1DR)*/
 
 void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
 {
@@ -232,13 +244,13 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
   DEBUG_EXPR(inter.display());
 
   unsigned int k = 0;
-  unsigned int ySize = inter.getSizeOfY();
+  unsigned int ySize = inter.dimension();
   SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
   SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));
   Index dimIndex(2);
   Index startIndex(4);
 
-  for (unsigned int i =0 ; i < q0->getNumberOfBlocks()  ; i++)
+  for (unsigned int i =0 ; i < q0->numberOfBlocks()  ; i++)
   {
     SP::SiconosVector q = (q0->getAllVect())[i];
     startIndex[0] = 0;
@@ -271,14 +283,13 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
   DEBUG_END("NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
 }
 
-void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionProperties& interProp)
+void NewtonEulerR::computeJach(double time, Interaction& inter)
 {
   DEBUG_BEGIN("NewtonEulerR::computeJachq(double time, Interaction& inter, ...) \n");
   DEBUG_PRINTF("with time =  %f\n",time);
   DEBUG_PRINTF("with inter =  %p\n",&inter);
 
-
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   computeJachq(time, inter, DSlink[NewtonEulerR::q0]);
   computeJachqT(inter, DSlink[NewtonEulerR::q0]);
@@ -291,14 +302,10 @@ void NewtonEulerR::computeJach(double time, Interaction& inter, InteractionPrope
 
 void NewtonEulerR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
-  if (_plugindotjacqh)
-  {
-    if (_plugindotjacqh->fPtr)
+  if (_dotjachq && _plugindotjacqh->fPtr)
     {
       ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_dotjachq)(0, 0), workZ.size(), &(workZ)(0));
-      // Copy data that might have been changed in the plug-in call.
     }
-  }
 }
 
 void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, VectorOfBlockVectors& DSlink, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
@@ -308,7 +315,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   // Compute the time derivative of the Jacobian
     if (!_dotjachq) // lazy initialization
   {
-    unsigned int sizeY = inter.getSizeOfY();
+    unsigned int sizeY = inter.dimension();
     unsigned int xSize = inter.getSizeOfDS();
     unsigned int qSize = 7 * (xSize / 6);
 
@@ -333,8 +340,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   // Compute the product of jachq and Tdot --> jachqTdot
 
   unsigned int k = 0;
-  DSIterator itDS;
-  unsigned int ySize = inter.getSizeOfY();
+  unsigned int ySize = inter.dimension();
   unsigned int xSize = inter.getSizeOfDS();
   SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
   SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,17 +46,17 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   double qs, err;
   double *ww, *diag;
-  int itermax = options->iparam[0];
-  double tol = options->dparam[0];
-  double omega = options->dparam[2]; // Not yet used
+  int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
+  double omega = options->dparam[SICONOS_LCP_IPARAM_RHO]; // Not yet used
   printf("Warning : omega %f is not used !!!!!\n", omega);
 
   incxn = n;
 
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Allocation */
 
@@ -159,8 +159,8 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
     /* **** ********************* **** */
   }
 
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
   if (err > tol)
   {
@@ -198,20 +198,20 @@ int linearComplementarity_psor_setDefaultSolverOptions(SolverOptions* options)
   options->numberOfInternalSolvers = 0;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  for (i = 0; i < 5; i++)
+  for (i = 0; i < 15; i++)
   {
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-6;
-  options->dparam[2] = 0.1;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+  options->dparam[SICONOS_LCP_IPARAM_RHO] = 0.1;
 
 
   return 0;

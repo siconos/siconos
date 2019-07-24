@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,6 @@ TYPEDEF_SPTR(SparseBlockStructuredMatrix)
 /** Definition of a compressed sparse row matrix of SiconosMatrix,
  * used in OneStepNSProblem to store the M matrix.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) 29/11/2007
- *
  * This class defines a specific compressed row sparse storage for
  * blocks matrices, each block being a SiconosMatrix*.
  *
@@ -74,14 +70,18 @@ TYPEDEF_SPTR(SparseBlockStructuredMatrix)
  * resulting matrix has 4 X 4 blocks, with 8 non-null blocks and looks
  * like:
  *
- * \f{equation*}
-   M=\left\lbrace\begin{array}{cccc}
+ \rst
+
+ .. math::
+    :nowrap:
+
+    M=\left\lbrace\begin{array}{cccc}
     b11 & b13 & 0 & b18 \\
     b31 & b22 & 0 & 0 \\
     0   & 0   & b33&0 \\
     b81 & 0   & 0 & b44
     \end{array}\right.
-    \f}
+ 
  *
  * with nc = 4, nbNonNullBlocks = 8, RowPos = [0 0 0 1 1 2 3 3],
  * RowCol = [0 1 3 0 1 2 0 3]\n and _diagsize0 = [3 6 9 12].
@@ -150,7 +150,7 @@ public:
   /** Constructor from index set
       \param indexSet the index set of the active constraints
   */
-  BlockCSRMatrix(SP::InteractionsGraph indexSet);
+  BlockCSRMatrix(InteractionsGraph& indexSet);
 
   /** destructor
    */
@@ -159,7 +159,7 @@ public:
   /** get size (in block-components) 
    * \return unsigned int NumberOfBlocksInARow
    */
-  inline unsigned int getNumberOfBlocksInARow() const
+  inline unsigned int numberOfBlocksInARow() const
   {
     return _nr;
   };
@@ -208,37 +208,20 @@ public:
   /** fill the current class using an index set
    *  \param indexSet set of the active constraints
    */
-  void fill(SP::InteractionsGraph indexSet);
+  void fill(InteractionsGraph& indexSet);
 
 
   /** fill the matrix with the Mass matrix 
    * \warning only for NewtonEulerDS
    * \param indexSet of the active constraints
    */
-  void fillM(SP::InteractionsGraph indexSet);
+  void fillM(InteractionsGraph& indexSet);
 
   /** fill the matrix with the H matrix 
-   * \warning only for NewtonEulerFrom3DLocalFrameR
+   * \warning only for NewtonEuler3DR
    * \param indexSet of the active constraints
    */
-  void fillH(SP::InteractionsGraph indexSet);
-
-  /** fill the current class using an index set and a map of DSblocks
-   *    \param DSSet DynamicalSystemsSet*, the set of DynamicalSystem
-   *    \param DSblocks MapOfDSMatrices, the list of matrices linked to a
-   *   DynamicalSystem
-   */
-  void fill(SP::DynamicalSystemsSet DSSet, MapOfDSMatrices& DSblocks);
-
-  /** fill the current class using an index set and a map of DSblocks
-       \param indexSet DynamicalSystemsSet*, the set of DynamicalSystem
-       \param DSSet InteractionsGraph*, the index set of the active
-       constraints
-       \param interactionDSBlocks MapOfInteractionMapOfDSMatrices, the list of matrices linked
-       to a DynamicalSystem
-   */
-  void fill(SP::InteractionsGraph indexSet, SP::DynamicalSystemsSet DSSet,
-            MapOfInteractionMapOfDSMatrices& interactionDSBlocks);
+  void fillH(InteractionsGraph& indexSet);
 
   /** fill the numerics structure _sparseBlockStructuredMatrix using _blockCSR */
   void convert();

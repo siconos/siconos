@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 /*! \file SimpleLCP.h
 
   \brief Interface for Path(Ferris) Solver
-  \author Olivier Bonnefond
 */
 
 /* \page FerrisPath Path (Ferris) Solver Interface
@@ -51,9 +50,11 @@
 #include "SiconosConfig.h"
 #include <stdint.h>
 
-
+#ifdef HAVE_PATHFERRIS
 #include "PATH_SDK/include/Types.h"
-
+#else
+typedef void MCP_Termination;
+#endif
 
 //const unsigned short int *__ctype_b;
 //const int32_t *__ctype_tolower ;

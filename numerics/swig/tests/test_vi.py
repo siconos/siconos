@@ -1,4 +1,4 @@
-# Copyright (C) 2005, 2014 by INRIA
+# Copyright (C) 2005, 2018 by INRIA
 #!/usr/bin/env python
 
 import numpy as np
@@ -146,6 +146,8 @@ def test_vi_C_interface():
                  double gamma;
                  double g;
                  double kappa;
+                 unsigned int f_eval;
+                 unsigned int nabla_eval;
                   } data;
                  ''')
 
@@ -185,7 +187,7 @@ def test_vi_C_interface():
         sol[0, :] = xk
 
         k = 0
-        #SN.setNumericsVerbose(3)
+        #SN.numerics_set_verbose(3)
 
         while t <= T:
             k += 1

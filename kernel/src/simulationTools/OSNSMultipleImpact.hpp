@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@
 
 #include "LinearOSNS.hpp"
 #include <string>
-
-using namespace RELATION;
 
 #define DEFAULT__tolImpact MACHINE_PREC
 #define DEFAULT_TOL_VEL MACHINE_PREC
@@ -343,7 +341,7 @@ public:
    * \param col position starting to write
    */
 
-  void WriteVectorIntoMatrix(const SiconosVector v, const unsigned int row, const unsigned int col);
+  void WriteVectorIntoMatrix(const SiconosVector& v, const unsigned int row, const unsigned int col);
 
   /** Save data for each step
    * \param i pointer to be save */

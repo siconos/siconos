@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,6 @@
 
 /** NewtonEuler (Non Linear) Relation (generic interface)
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date Apr 27, 2004
- *
- * \class NewtonEulerR
  * Relations for NewtonEuler Dynamical Systems. This class is only an
  * interface for specific (Linear, Scleronomous ...)  NewtonEuler
  * Relations (see derived classes).
@@ -48,9 +43,7 @@ class NewtonEulerR : public Relation
 {
 public:
 // add deltaq ??? -- xhub 30/03/2014
-  enum NewtonEulerRDS  {xfree, z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};
-  // enum NewtonEulerRVec {xfree, z, q0, dotq, p0, p1, p2, workVecSize};
-  // enum NewtonEulerRMat {C, D, F, workMatSize};
+  enum NewtonEulerRDS  {z, q0, velocity, dotq, p0, p1, p2, DSlinkSize};
 
 protected:
   /** serialization hooks
@@ -101,16 +94,11 @@ protected:
   */
   NewtonEulerR(RELATION::SUBTYPES lagType): Relation(RELATION::NewtonEuler, lagType) {}
 
-  /** initialize components specific to derived classes.
-   * \param inter  Interaction associated with the Relation
-   * \param DSlink
-   * \param workV
-   * \param workM
-   */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
 
 public:
-  NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR) {}
+  NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR){};
+
 
   /** destructor
   */
@@ -185,13 +173,16 @@ public:
    */
   SP::SiconosVector _secondOrderTimeDerivativeTerms;
 
-  /** initialize the relation (check sizes, memory allocation ...)
-   * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV the work vectors
-   * \param workM work matrices
-  */
-  void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+
+  /** initialize components specific to derived classes.
+   * \param inter  Interaction associated with the Relation
+   */
+  virtual void initialize(Interaction& inter);
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
 
   /** to compute y = h(q,v,t) using plug-in mechanism
   * \param time current time
@@ -272,16 +263,14 @@ public:
   /** compute all the jacobian of h
    * \param time current time
    * \param inter the interaction using this relation
-   * \param interProp Interaction properties
    */
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJach(double time, Interaction& inter);
 
   /** compute all the jacobian of g
    * \param time current time
    * \param inter the interaction using this relation
-   * \param interProp Interaction properties
    */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+  virtual void computeJacg(double time, Interaction& inter)
   {
     computeJacgq(time, inter);
     computeJacgqDot(time, inter);
@@ -302,18 +291,16 @@ public:
   /** to compute output
    * \param time current time
    * \param inter the interaction using this relation
-   * \param interProp Interaction properties
    * \param derivativeNumber number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
+  virtual void computeOutput(double time, Interaction& inter, unsigned int derivativeNumber = 0);
 
   /** to compute the input
    * \param time current time
    * \param inter the interaction using this relation
-   * \param interProp Interaction properties
    * \param level number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /**
   * return a SP on the C matrix.

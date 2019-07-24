@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,6 @@
 typedef std::vector<double> TkVector;
 
 /** A time discretisation scheme
-
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.0.0.
-    \date (Creation) Apr 26, 2004
 
     A TimeDiscretisation object is used to discretized a given time interval. \n
     TimeDiscretisation are used:

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
       if (numM == 3)
         noalias(*(mat.Sym)) = *m.sym();
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::bad assignment of matrix (symetric one = dense or ...)");
+        SiconosMatrixException::selfThrow("SimpleMatrix::bad assignment of matrix (symmetric one = dense or ...)");
       break;
     case 4:
       switch (numM)
@@ -275,7 +275,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
     if (numM == 3)
       noalias(*(mat.Sym)) = *m.sym();
     else
-      SiconosMatrixException::selfThrow("SimpleMatrix::bad assignment of matrix (symetric one = dense or ...)");
+      SiconosMatrixException::selfThrow("SimpleMatrix::bad assignment of matrix (symmetric one = dense or ...)");
     break;
   case 4:
     switch (numM)
@@ -441,7 +441,7 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
       else if (numM == 7)
         noalias(*(mat.Sym)) += *m.identity();
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::op+= bad assignment of matrix (symetric one = dense or ...)");
+        SiconosMatrixException::selfThrow("SimpleMatrix::op+= bad assignment of matrix (symmetric one = dense or ...)");
       break;
     case 4:
       switch (numM)
@@ -593,7 +593,7 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
       else if (numM == 7)
         noalias(*(mat.Sym)) -= *m.identity();
       else
-        SiconosMatrixException::selfThrow("SimpleMatrix::op-= bad assignment of matrix (symetric one = dense or ...)");
+        SiconosMatrixException::selfThrow("SimpleMatrix::op-= bad assignment of matrix (symmetric one = dense or ...)");
       break;
     case 4:
       switch (numM)

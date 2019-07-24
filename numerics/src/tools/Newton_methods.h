@@ -1,7 +1,7 @@
  /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@
  *
  * More precisely, the function newton_LSA() is algorithm VFBLSA.
  *
- * \author Olivier Huber
  */
 
 #include "SolverOptions.h"
@@ -81,6 +80,67 @@ typedef struct {
   NumericsMatrix* H; /**< matrix */
 } newton_LSA_data;
 
+
+enum NEWTON_SOLVER
+{
+  SICONOS_NEWTON_LSA = 10000
+};
+
+extern const char* const   SICONOS_NEWTON_LSA_STR ;
+
+enum SICONOS_NEWTON_IPARAM
+{
+/** line search based algo use this */
+  SICONOS_IPARAM_LSA_NONMONOTONE_LS = 3,
+  SICONOS_IPARAM_LSA_NONMONOTONE_LS_M = 4,
+  SICONOS_IPARAM_LSA_FORCE_ARCSEARCH = 5,
+  SICONOS_IPARAM_LSA_SEARCH_CRITERION=6,
+  SICONOS_IPARAM_STOPPING_CRITERION=10
+};
+
+enum SICONOS_STOPPING_CRITERION
+{
+  SICONOS_STOPPING_CRITERION_RESIDU=0,
+  SICONOS_STOPPING_CRITERION_STATIONARITY=1,
+  SICONOS_STOPPING_CRITERION_RESIDU_AND_STATIONARITY=2,
+  SICONOS_STOPPING_CRITERION_USER_ROUTINE=3
+};
+
+
+enum SICONOS_GOLDSTEIN_IPARAM
+{
+  SICONOS_IPARAM_GOLDSTEIN_ITERMAX=7
+};
+
+enum SICONOS_NMS_IPARAM
+{
+  /** non-monotone specific part */
+  SICONOS_IPARAM_NMS_WATCHDOG_TYPE=7,
+  SICONOS_IPARAM_NMS_PROJECTED_GRADIENT_TYPE=8,
+  SICONOS_IPARAM_NMS_N_MAX=9
+};
+
+enum SICONOS_NEWTON_DPARAM{
+/** line-search */
+  SICONOS_DPARAM_LSA_ALPHA_MIN=2,
+  SICONOS_DPARAM_GOLDSTEIN_C=3,
+  SICONOS_DPARAM_GOLDSTEIN_ALPHAMAX=4
+};
+
+enum SICONOS_NMS_DPARAM
+{
+/** non-monotone specific part */
+ SICONOS_DPARAM_NMS_DELTA = 2,
+ SICONOS_DPARAM_NMS_DELTA_VAR = 3,
+ SICONOS_DPARAM_NMS_SIGMA = 4,
+ SICONOS_DPARAM_NMS_ALPHA_MIN_WATCHDOG = 5, 
+ SICONOS_DPARAM_NMS_ALPHA_MIN_PGRAD = 6,
+ SICONOS_DPARAM_NMS_MERIT_INCR=7
+};
+
+
+
+
 // status of the newton step
 #define NEWTON_STATS_NEWTON_STEP 1
 #define NEWTON_STATS_DESC_DIR 2
@@ -105,7 +165,7 @@ extern "C"
   /** Set some default values in the SolverOption when the solver is based on newton_LSA()
    * \param options the struct to modify
    */
-  void newton_lsa_default_SolverOption(SolverOptions* options);
+  void newton_lsa_setDefaultSolverOptions(SolverOptions* options);
 
   /** Set the functions to compute F and F_merit and all the other pointers to NULL
    * \param functions structure to fill

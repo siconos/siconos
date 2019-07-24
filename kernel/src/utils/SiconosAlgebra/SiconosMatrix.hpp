@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,8 +46,6 @@ TYPEDEF_SPTR(VInt)
 
 /** Abstract class to provide interface for matrices handling
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \date (creation) 07/21/2006
  *  Matrices can be either block or Simple.
  *  See Derived classes for details.
  *
@@ -56,7 +54,7 @@ TYPEDEF_SPTR(VInt)
  * You can find an overview on how to build and use vectors and matrices in siconos users guide .
  *
  */
-class SiconosMatrix : public std11::enable_shared_from_this<SiconosMatrix>
+class SiconosMatrix //: public std11::enable_shared_from_this<SiconosMatrix>
 {
 protected:
   /** serialization hooks
@@ -147,7 +145,7 @@ public:
    *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int. 1 as default for SimpleMatrix.
    */
-  inline virtual unsigned int getNumberOfBlocks(unsigned int i) const
+  inline virtual unsigned int numberOfBlocks(unsigned int i) const
   {
     return 1;
   };
@@ -260,7 +258,7 @@ public:
    */
   virtual IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const = 0;
 
-  /** return the adress of the array of double values of the matrix 
+  /** return the address of the array of double values of the matrix 
    *   ( for block(i,j) if this is a block matrix)
    *  \param row position for the required block
    *  \param col position for the required block
@@ -303,6 +301,18 @@ public:
    */
   virtual void display() const = 0;
 
+  /** put data of the matrix into a std::string
+   * \return std::string
+   */
+  virtual std::string toString() const = 0;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sm a SiconosMatrix
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
+
   // Note: in the following functions, row and col are general;
   // that means that for a SimpleMatrix m, m(i,j) is index (i,j) element but
   // for a BlockMatrix w that contains 2 SiconosMatrix of size 3
@@ -340,14 +350,23 @@ public:
    *  \param col unsigned int col
    * \return SP::SiconosMatrix
    */
-  virtual SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) = 0;
+  virtual SP::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0)
+  {
+    RuntimeException::selfThrow("SP::SiconosMatrix block(...) must be implemented");
+    return SP::SiconosMatrix();
+  };
+  
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
    *  \param row unsigned int row
    *  \param col unsigned int col
    * \return SPC::SiconosMatrix
    */
-  virtual SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const = 0;
+  virtual SPC::SiconosMatrix block(unsigned int row = 0, unsigned int col = 0) const
+  {
+    RuntimeException::selfThrow("SP::SiconosMatrix block(...) must be implemented");
+    return SPC::SiconosMatrix();
+  };
 
   /** get row index of current matrix and save it into vOut
    *  \param index row we want to get
@@ -464,12 +483,23 @@ public:
    */
   virtual size_t nnz(double tol = 1e-14);
 
-  /** return the number of non-zero in the matrix
-   * \param csm the compressed column sparse matrix
-   * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
-   * \return the number of non-zeros
+  /** Fill sparse matrix
+   *  \param csc the compressed column sparse matrix
+   *  \param row_off
+   *  \param col_off
+   *  \param tol the tolerance under which a number is considered as equal to zero 
+   *  \return true if function worked.
    */
   bool fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
+
+  /** return the number of non-zero in the matrix
+   *  \param csc the compressed column sparse matrix
+   *  \param row_off
+   *  \param col_off
+   *  \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
+   *  \return the number of non-zeros
+   */
+  bool fillTriplet(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
 
   /** Visitors hook
    */

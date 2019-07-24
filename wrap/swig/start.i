@@ -1,5 +1,7 @@
 // signatures
-%feature("autodoc", 2);
+// docstrings are generated from doxygen thanks to an external tool
+// (doxy2swig.py)
+//%feature("autodoc", 0);
 
 // named parameters (broken with overloaded function)
 // %feature("kwargs");
@@ -40,7 +42,8 @@ SWIG_init(void);
 #include <assert.h>
 //#define DEBUG_MESSAGES 1
 #include <debug.h>
-#include <numerics_verbose.h>
+#include "SiconosConfig.h"
+#include "numerics_verbose.h"
 
 #if PY_VERSION_HEX < 0x02070000
 #ifndef PyBytes_Check
@@ -59,6 +62,8 @@ SWIG_init(void);
 
 #endif
 %}
+
+%include "SiconosConfig.h"
 
 %include target_datatypes.i
 
@@ -89,5 +94,7 @@ SWIG_init(void);
 #ifdef __cplusplus
 
 %include ignored_functions.i
+
+%include stl.i
 
 #endif

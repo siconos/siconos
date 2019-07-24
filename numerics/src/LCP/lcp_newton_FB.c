@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,4 +78,5 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
   set_lsa_params_data(options, problem->M);
   newton_LSA(problem->size, z, w, info, (void *)problem, options, &functions_FBLSA_lcp);
+  
 }

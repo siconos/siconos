@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,39 +25,24 @@
 #include "SiconosConst.hpp"
 #include "SimulationTypeDef.hpp"
 #include "SiconosFwd.hpp"
-// #include "EventsManager.hpp"
-// #include "SiconosPointers.hpp"
-// #include "DynamicalSystemsSet.hpp"
 #include <fstream>
-// #include "Model.hpp"
-// #include "NonSmoothDynamicalSystem.hpp"
-// #include "Topology.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 #include "InteractionManager.hpp"
 
-
 /** Description of the simulation process (integrators, time
-    discretisation and so on) - Base class for TimeStepping or
-    EventDriven.
-
-    \author SICONOS Development Team - copyright INRIA
-    \version 3.8.0.
-    \date (Creation) Apr 26, 2004
-
+    discretisation and so on).
+    
     !!! This is an abstract class !!!
-
-    The available simulations are TimeStepping and EventDriven. See
-    derived classes for more details.
-
-  Rules:
-  - A Model must be given to the constructor, otherwise an exception is thrown.
+    
+    The available simulations are TimeStepping, EventDriven and TimeSteppingD1Minus.  
 */
+
 class Simulation : public std11::enable_shared_from_this<Simulation>
 {
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(Simulation);
-
 
   /** name or id of the Simulation */
   std::string _name;
@@ -73,7 +58,7 @@ protected:
 
   /** real ending time for integration (different from tend in case of
       stop during integrate, for example when a root is found in
-      LsodarOSI procedure)
+      an EventDriven strategy)
   */
   double _tout;
 
@@ -95,26 +80,25 @@ protected:
   SP::InteractionManager _interman;
 
   /** _numberOfIndexSets is the number of index sets that we need for
-   * simulation. It corresponds for most of the simulation to
-   * _numberOfIndexSets = _levelMaxForOutput + 1
-   * Nevetheless, some simulation needs more sets of indices that the number
-   * of output that we considered.
+   * simulation. It corresponds for most of the simulations to levelMaxForOutput + 1.
+   * Nevertheless, some simulations need more sets of indices that the number
+   * of outputs that we considered.
    */
   unsigned int _numberOfIndexSets;
 
-  /** tolerance value used to compute the index sets - Default: equal
-      to machine double precision (from dlamch lapack routine).*/
+  /** tolerance value used to compute the index sets.
+      Default: equal to 10 x machine double precision (std::numeric_limits<double>::epsilon)
+  */
   double _tolerance;
 
-  /** Flag for optional output. True if output display for solver stat
-      required, else false.*/
+  /** Output setup: if true, display solver stats */
   bool _printStat;
 
   /** _staticLevels : do not recompute levels once they have been
    * initialized */
   bool _staticLevels;
 
-  /**Output file for stats*/
+  /** File id for stats outputs.*/
   std::ofstream statOut;
 
   /**
@@ -134,14 +118,13 @@ protected:
    */
   double _relativeConvergenceTol;
 
-  /**
-   * track whether link() or unlink() has been called
-   */
-  bool _linkOrUnlink;
+  bool _isInitialized;
 
-  /** default constructor.
-   */
-  Simulation() {};
+  /** current NSDS changelog position */
+  NonSmoothDynamicalSystem::ChangeLogIter _nsdsChangeLogPosition;
+
+  /** map of not-yet-initialized DS variables for each OSI */
+  std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
 
   /** Call the interaction manager one if is registered, otherwise do nothing. */
   void updateInteractions();
@@ -153,6 +136,17 @@ protected:
     ;
   };
 
+  /** initialize OSI-DS links in the NSDS graph. */
+  void initializeOSIAssociations();
+
+  /** initialize objects (DSs and Interations) found in the NSDS
+   * Changelog and update the changelog iterator.
+   */
+  void initializeNSDSChangelog();
+
+  /** initialize index sets for OSIs */
+  void initializeIndexSets();
+
 private:
 
   /** copy constructor. Private => no copy nor pass-by value.
@@ -163,11 +157,19 @@ private:
    */
   Simulation& operator=(const Simulation&);
 
-
 public:
 
+  /** default constructor, for serialization
+   */
+  Simulation() {};
 
   /** default constructor
+   *  \param nsds current nonsmooth dynamical system
+   *  \param td the timeDiscretisation for this Simulation
+   */
+  Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td);
+
+  /** constructor with only a TimeDiscretisation
    *  \param td the timeDiscretisation for this Simulation
    */
   Simulation(SP::TimeDiscretisation td);
@@ -205,14 +207,7 @@ public:
     _name = newName;
   }
 
-  /** set the TimeDiscretisation of the Simulation
-   *  \param[in] td the new TimeDiscretisation
-   */
-  void setTimeDiscretisationPtr(SP::TimeDiscretisation td);
-
-  /** get time instant k of the time discretisation
-   *  \return the time instant t_k
-   */
+  /** returns time instant k of the time discretisation  */
   double getTk() const;
 
   /** get time instant k+1 of the time discretisation
@@ -229,13 +224,10 @@ public:
    */
   double getTkp2() const;
 
-  /** Get current timestep
-   * \return the current timestep
-   */
+  /** returns current timestep  */
   double currentTimeStep() const;
 
-  /** get the EventsManager
-   *  \return a pointer to EventsManager
+  /** returns a pointer to the EventsManager
    */
   inline SP::EventsManager eventsManager() const
   {
@@ -244,14 +236,14 @@ public:
 
   /** get "current time" (ie starting point for current integration,
       time of currentEvent of eventsManager.)
-   *  \return a double.
-   */
+      \return a double.
+  */
   double startingTime() const;
 
   /** get "next time" (ie ending point for current integration, time
       of nextEvent of eventsManager.)
-   *  \return a double.
-   */
+      \return a double.
+  */
   double nextTime() const;
 
   /** get the current time step size ("next time"-"current time")
@@ -262,10 +254,9 @@ public:
     return (nextTime() - startingTime());
   };
 
-  /** check if a future event is to be treated or not (ie if some
+  /** true if a future event is to be treated or not (ie if some
       events remain in the eventsManager).
-   *  \return a bool.
-   */
+  */
   bool hasNextEvent() const;
 
   /** get all the Integrators of the Simulation
@@ -288,6 +279,9 @@ public:
    *  \param osi the OneStepIntegrator to add
    */
   virtual void insertIntegrator(SP::OneStepIntegrator osi);
+
+  /** associate an OSI with a DS */
+  void associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
 
   /** get a pointer to indexSets[i]
       \param i number of the required index set
@@ -312,18 +306,7 @@ public:
     return _allNSProblems->size();
   }
 
-  /* get a OSNSP by number.
-   * \param unsigned int number of OSNSP
-   * \return SP::Onestepnsproblem
-   */
-  inline SP::OneStepNSProblem oneStepNSProblem(unsigned int number) const
-  {
-    return (*_allNSProblems)[number];
-  }
-
-
-
-  /** get allNSProblems[name], a specific OneStepNSProblem
+  /** get a OneStep nonsmooth problem of the simulation, identify with its number.
       \param id number of the required osnspb
       \return a pointer to OneStepNSProblem
    */
@@ -344,6 +327,14 @@ public:
   inline SP::NonSmoothDynamicalSystem nonSmoothDynamicalSystem() const
   {
     return _nsds;
+  }
+  /** set the NonSmoothDynamicalSystem of the Simulation
+   *  \param newPtr a pointer on NonSmoothDynamicalSystem
+   */
+  void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
+  {
+    _nsdsChangeLogPosition = _nsds->changeLogBegin();
+    _nsds = newPtr;
   }
 
   /** get tolerance
@@ -392,19 +383,19 @@ public:
 
   /** Complete initialisation of the Simulation (OneStepIntegrators,
       OneStepNSProblem, TImediscretisation).
-      \param m the model to be linked to this Simulation
-      \param init optional flag for partial initialization
   */
-  virtual void initialize(SP::Model m, bool init = true);
+  virtual void initialize();
 
   /** Initialize a single Interaction for this Simulation, used for dynamic
    *  topology updates. */
   virtual void initializeInteraction(double time, SP::Interaction inter);
 
-  /** Set an object to automatically manage interactions during the simulation */
+  /** Set an object to automatically manage interactions during the simulation
+   * \param manager 
+   */
   void insertInteractionManager(SP::InteractionManager manager)
     { _interman = manager; }
-
+  
   /** computes a one step NS problem
    *  \param nb the id of the OneStepNSProblem to be computed
    *  \return information about the solver convergence.
@@ -447,6 +438,14 @@ public:
   /** step from current event to next event of EventsManager
    */
   virtual void advanceToEvent() = 0;
+
+
+  /** clear the NSDS changelog up to current position.  If you have a
+   * particularly dynamic simulation (DS and Interactions created and
+   * destroyed frequently), then it is important to call this
+   * periodically.
+   */
+  void clearNSDSChangeLog();
 
 
   /* Set the option to specify if a relative convergence criterion must

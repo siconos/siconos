@@ -14,7 +14,7 @@ static PyObject * set_my_callback_NablaFmcp(PyObject *o)
   Py_XINCREF(o);         /* Add a reference to new callback */
   Py_XDECREF(my_callback_NablaFmcp);  /* Dispose of previous callback */
   my_callback_NablaFmcp = o;       /* Remember new callback */
-  
+
   /* Boilerplate to return "None" */
   Py_INCREF(Py_None);
   result = Py_None;
@@ -23,20 +23,20 @@ static PyObject * set_my_callback_NablaFmcp(PyObject *o)
 }
 
 static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
-{  
+{
 //  printf("I am in my_call_to_callback_NablaFmcp (int size, double *z, double *NablaF)\n");
 
   npy_intp this_matrix_dim[1];
   this_matrix_dim[0]=size;
-  
-  PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);   
+
+  PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);
   PyObject* tuple = PyTuple_New(1);
-  PyTuple_SetItem(tuple, 0, pyarray);  
-  PyObject* result; 
+  PyTuple_SetItem(tuple, 0, pyarray);
+  PyArrayObject* result;
 
   if (PyCallable_Check(my_callback_NablaFmcp))
   {
-    result = PyObject_CallObject(my_callback_NablaFmcp, tuple);
+    result = (PyArrayObject*)PyObject_CallObject(my_callback_NablaFmcp, tuple);
   }
   else
   {
@@ -44,7 +44,9 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
     PyErr_PrintEx(0);
     return;
   }
-
+  if (result == NULL) /* something has fails in the call of the callback (Python side) */
+    return; /* Pass error back */
+  
    // PyTuple_SetItem steals a reference to the object
    // I'm leaving this commented so that people don't do the mistake twice -- xhub
    //Py_DECREF(pyarray);
@@ -67,9 +69,9 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
       PyErr_SetString(PyExc_RuntimeError,message);
     }
     else
-    { 
+    {
 
-      int is_new_object0=0;      
+      int is_new_object0=0;
       PyArrayObject* result2 = make_fortran((PyArrayObject *)result, &is_new_object0);
       // if (is_new_object0)
       // {
@@ -77,14 +79,14 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
       //   printf ("the object is new !!\n");
       // }
       memcpy(nablaF, (double *)array_data(result2), size*size * sizeof(double));
-      
+
     }
    Py_DECREF(result);
   }
   else
-  {      
+  {
     const char * desired_type = typecode_string(NPY_DOUBLE);
-    const char * actual_type  = pytype_string(result);
+    const char * actual_type  = pytype_string((PyObject*)result);
     PyErr_Format(PyExc_TypeError,
                  "Array of type '%s' required as return value fo callback function. A '%s' was returned",
                    desired_type, actual_type);
@@ -107,7 +109,7 @@ static PyObject * set_my_callback_Fmcp(PyObject *o1)
   Py_XINCREF(o1);         /* Add a reference to new callback */
   Py_XDECREF(my_callback_Fmcp);  /* Dispose of previous callback */
   my_callback_Fmcp = o1;       /* Remember new callback */
-  
+
   /* Boilerplate to return "None" */
   Py_INCREF(Py_None);
   result = Py_None;
@@ -122,15 +124,15 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
 
   npy_intp this_matrix_dim[1];
   this_matrix_dim[0]=size;
-  
-  PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);   
+
+  PyObject* pyarray = FPyArray_SimpleNewFromData(1,this_matrix_dim, NPY_DOUBLE, z);
   PyObject* tuple = PyTuple_New(1);
-  PyTuple_SetItem(tuple, 0, pyarray);  
-  PyObject* result; 
+  PyTuple_SetItem(tuple, 0, pyarray);
+  PyArrayObject* result;
 
   if (PyCallable_Check(my_callback_Fmcp))
   {
-    result = PyObject_CallObject(my_callback_Fmcp, tuple);
+    result = (PyArrayObject*)PyObject_CallObject(my_callback_Fmcp, tuple);
   }
   else
   {
@@ -138,7 +140,10 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     PyErr_PrintEx(0);
     return;
   }
-
+  if (result == NULL) /* something has fails in the call of the callback (Python side)  */
+  {
+    return; /* Pass error back */
+  }
   // PyTuple_SetItem steals a reference to the object
   // I'm leaving this commented so that people don't do the mistake twice -- xhub
   //Py_DECREF(pyarray);
@@ -159,8 +164,8 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
       PyErr_SetString(PyExc_RuntimeError,message);
     }
     else
-    { 
-      int is_new_object0=0;      
+    {
+      int is_new_object0=0;
       PyArrayObject* result2 = make_fortran((PyArrayObject *)result, &is_new_object0);
       memcpy(F, (double *)array_data(result2), size * sizeof(double));
     }
@@ -169,13 +174,13 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   else
   {
     const char * desired_type = typecode_string(NPY_DOUBLE);
-    const char * actual_type  = pytype_string(result);
+    const char * actual_type  = pytype_string((PyObject*)result);
     PyErr_Format(PyExc_TypeError,
                  "Array of type '%s' required as return value fo callback function. A '%s' was returned",
                    desired_type, actual_type);
     if (result != NULL) Py_DECREF(result); // things can go really south ...
   }
-  
+
   return;
 
 }
@@ -357,5 +362,3 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
   }
 */
 %}
-
-

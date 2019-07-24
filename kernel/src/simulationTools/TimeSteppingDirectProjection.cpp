@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,26 +21,28 @@
 #include "TimeSteppingDirectProjection.hpp"
 #include "LagrangianDS.hpp"
 #include "NewtonEulerDS.hpp"
-#include "NewtonEulerFrom1DLocalFrameR.hpp"
+#include "NewtonEuler1DR.hpp"
 #include "OneStepIntegrator.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
+#include "MoreauJeanOSI.hpp"
 
 static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
 //#define CORRECTIONSVELOCITIES
-TimeSteppingDirectProjection::TimeSteppingDirectProjection(SP::TimeDiscretisation td,
-    SP::OneStepIntegrator osi,
-    SP::OneStepNSProblem osnspb_velo,
-    SP::OneStepNSProblem osnspb_pos,
-    unsigned int level)
-  : TimeStepping(td, osi, osnspb_velo)
+TimeSteppingDirectProjection::TimeSteppingDirectProjection(
+  SP::NonSmoothDynamicalSystem nsds,
+  SP::TimeDiscretisation td,
+  SP::OneStepIntegrator osi,
+  SP::OneStepNSProblem osnspb_velo,
+  SP::OneStepNSProblem osnspb_pos,
+  unsigned int level)
+  : TimeStepping(nsds,td, osi, osnspb_velo)
 {
 
   //if (Type::value(osi) != Type::MoreauJeanDirectProjectionOSI)
@@ -98,16 +100,17 @@ void TimeSteppingDirectProjection::nextStep()
 
 void TimeSteppingDirectProjection::advanceToEvent()
 {
+
+  initialize();
+  
   /** First step, Solve the standard velocity formulation.*/
 
-  DEBUG_PRINT("TimeStepping::newtonSolve begin :\n");
-
-  // Update interactions if a manager was provided
-  updateInteractions();
+  DEBUG_BEGIN("TimeStepping::newtonSolve\n");
 
   if (!_doOnlyProj)
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
-
+  else
+    updateInteractions();
 
   DEBUG_EXPR_WE(std::cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbIterations() << "\n";
 		std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
@@ -144,7 +147,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //   double criteria = (*it)->relation()->y(0)->getValue(0);
   //   if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
   //  Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL){
-  //     SP::NewtonEulerFrom1DLocalFrameR ri = std11::static_pointer_cast<NewtonEulerFrom1DLocalFrameR> ((*it)->relation());
+  //     SP::NewtonEuler1DR ri = std11::static_pointer_cast<NewtonEuler1DR> ((*it)->relation());
   //     if (criteria < -1e-7){
   //  ri->_isOnContact=true;
   //     }else{
@@ -177,12 +180,12 @@ void TimeSteppingDirectProjection::advanceToEvent()
     if (dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
-      *workVectors[OneStepIntegrator::qtmp] = *neds->q();
+      *workVectors[MoreauJeanOSI::QTMP] = *neds->q();
     }
     else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      *workVectors[OneStepIntegrator::qtmp] = * d->q();
+      *workVectors[MoreauJeanOSI::QTMP] = * d->q();
 
     }
     else
@@ -213,10 +216,9 @@ void TimeSteppingDirectProjection::advanceToEvent()
     DEBUG_EXPR(oneStepNSProblem(SICONOS_OSNSP_TS_POS)->display());
 
 
-    if (info)
+    if (info && _warnOnNonConvergence)
     {
       std::cout << " TimeSteppingDirectProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
-      return;
     }
     _nsds->updateInput(nextTime(),0);
 
@@ -248,7 +250,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       {
         SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
         SP::SiconosVector q = neds->q();
-        SP::SiconosVector qtmp =  workVectors[OneStepIntegrator::qtmp];
+        SP::SiconosVector qtmp =  workVectors[MoreauJeanOSI::QTMP];
 
 	DEBUG_EXPR_WE(std ::cout << "qtmp before  update " << std::endl;
 		       qtmp->display();
@@ -272,7 +274,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
         SP::SiconosVector q = d->q();
-        SP::SiconosVector qtmp =  workVectors[OneStepIntegrator::qtmp];
+        SP::SiconosVector qtmp =  workVectors[MoreauJeanOSI::QTMP];
 
         if (d->p(0))
         {
@@ -284,8 +286,6 @@ void TimeSteppingDirectProjection::advanceToEvent()
         RuntimeException::selfThrow("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
 
     }
-
-    updateWorldFromDS();
 
     computeCriteria(&runningProjection);
 
@@ -340,13 +340,13 @@ void TimeSteppingDirectProjection::advanceToEvent()
         {
           SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
           double time = nextTime();
-          neds->computeForces(time);
+          neds->computeForces(time, neds->q(), neds->twist());
         }
         else if (dsType == Type::LagrangianDS)
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
           double time = nextTime();
-          d->computeForces(time);
+          d->computeForces(time, d->q(), d->velocity());
         }
         else if (dsType == Type::LagrangianLinearTIDS)
         {
@@ -361,19 +361,15 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
 
 
-  if (_nbProjectionIteration == _projectionMaxIteration)
+  if (_nbProjectionIteration == _projectionMaxIteration && _warnOnNonConvergence)
   {
     std::cout << "TimeSteppingDirectProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
     printf("              max criteria equality =  %e.\n", _maxViolationEquality);
     printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
-    RuntimeException::selfThrow("youyou");
   }
 
 
-
-
-  DEBUG_PRINT("TimeSteppingDirectProjection::newtonSolve end projection:\n");
-
+  DEBUG_END("TimeSteppingDirectProjection::newtonSolve()\n");
 
   return;
   //#ifdef TSPROJ_CORRECTIONVELOCITIES
@@ -483,9 +479,6 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //     }
   //   }
   //#endif
-#ifdef TSPROJ_DEBUG
-  std::cout << "TimeSteppingDirectProjection::newtonSolve end projection:\n";
-#endif
 
 }
 
@@ -506,8 +499,8 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
        aVi != viend; ++aVi)
   {
     SP::Interaction inter = indexSet->bundle(*aVi);
-    inter->computeOutput(getTkp1(), indexSet->properties(*aVi), 0);
-    inter->relation()->computeJach(getTkp1(), *inter, indexSet->properties(*aVi));
+    inter->computeOutput(getTkp1(), 0);
+    inter->relation()->computeJach(getTkp1(), *inter);
 
     if (Type::value(*(inter->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactNSL)
@@ -591,8 +584,6 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       computeFreeState();
       // updateOutput(0);
       // updateIndexSets();
-      if (info)
-        std::cout << "new loop because of info\n" <<std::endl;
 
       // if there is not any Interaction at
       // the beginning of the simulation _allNSProblems may not be
@@ -605,8 +596,6 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       {
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
       }
-      if (info)
-        std::cout << "info!" <<std::endl;
       // Check output from solver (convergence or not ...)
       if (!checkSolverOutputProjectOnConstraints)
         DefaultCheckSolverOutput(info);
@@ -624,12 +613,18 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       }
     }
     if (!isNewtonConverge)
-      std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." <<std::endl ;
-    else if (info)
+    {
+      if (_warnOnNonConvergence) {
+        std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." <<std::endl ;
+      }
+    }
+    else if (info && _warnOnNonConvergence)
+    {
       std::cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." <<std::endl ;
+    }
     //    else
     //      std::cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbIterations<<"maxStep="<<maxStep<<endl;
   }
   else
-    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknow newtonOptions: " + _newtonOptions);
+    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + _newtonOptions);
 }

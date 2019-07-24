@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2016 INRIA.
+// Copyright 2018 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ extern "C"
 %}
 
  /* fclib_solution */
-%typemap(in) (double *v) (SN_ARRAY_TYPE* array=NULL, int is_new_object) {
+%typemap(in) (double *v) (SN_ARRAY_TYPE* array=NULL, int is_new_object = 0) {
   array = obj_to_array_allow_conversion($input, NPY_DOUBLE, &is_new_object);
   $1 = (double *) array_data(array);
  }

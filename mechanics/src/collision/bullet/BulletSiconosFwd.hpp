@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@
 DEFINE_SPTR(btCollisionShape);
 DEFINE_SPTR(btBoxShape);
 DEFINE_SPTR(btCylinderShape);
+DEFINE_SPTR(btConeShape);
+DEFINE_SPTR(btCapsuleShape);
 DEFINE_SPTR(btManifoldPoint);
 DEFINE_SPTR(btStaticPlaneShape);
 DEFINE_SPTR(btSphereShape);
@@ -52,12 +54,8 @@ DEFINE_SPTR(btPersistentManifold);
 
 DEFINE_SPTR(btBroadphaseInterface);
 
-//DEFINE_SPTR(BulletDS);
-DEFINE_SPTR(BulletWeightedShape);
 //DEFINE_SPTR(BulletR);
-//DEFINE_SPTR(BulletFrom1DLocalFrameR);
-//DEFINE_SPTR(BulletSpaceFilter);
-//DEFINE_SPTR(BulletTimeStepping);
+//DEFINE_SPTR(Bullet1DR);
 DEFINE_SPTR(CollisionObjects);
 DEFINE_SPTR_STRUCT(StaticObjects);
 

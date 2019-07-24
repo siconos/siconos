@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,25 +24,14 @@
 
 #include <iostream>
 
-void LagrangianR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianR::checkSize(Interaction& inter)
 {
   // do nothing here, overload this if you need something done
 }
 
-void LagrangianR::initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void LagrangianR::_zeroPlugin()
 {
-  // Memory allocation for G[i], if required (depends on the chosen constructor).
-  unsigned int sizeY = inter.getSizeOfY();
-  unsigned int sizeDS = inter.getSizeOfDS();
-
-  if (! _jachq)
-    _jachq.reset(new SimpleMatrix(sizeY, sizeDS));
-  initComponents(inter, DSlink, workV, workM);
-}
-
-void LagrangianR::zeroPlugin()
-{
-  Relation::zeroPlugin();
+  Relation::_zeroPlugin();
   _pluginJachq.reset(new PluggedObject());
 }
 void LagrangianR::display() const

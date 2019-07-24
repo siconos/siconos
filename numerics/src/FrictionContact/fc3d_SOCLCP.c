@@ -2,7 +2,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
   soclcp->nc= problem->numberOfContacts;
   soclcp->M = problem->M;
   soclcp->q = (double *) malloc(soclcp->n * sizeof(double));
-  soclcp->mu = problem->mu;
+  soclcp->tau = problem->mu;
   soclcp->coneIndex = (unsigned int *) malloc((soclcp->nc+1) * sizeof(unsigned int));
 
   memcpy(soclcp->q, problem->q, (soclcp->n) * sizeof(double));
@@ -121,9 +121,9 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
   if (verbose > 0)
   {
-    printf("----------------------------------- FC3D - SOCLCP - # Iteration %i Final Residual = %14.7e\n", internalsolver_options->iparam[7], error);
-    printf("----------------------------------- FC3D - SOCLCP - #              error of the real problem = %14.7e\n", real_error );
-    printf("----------------------------------- FC3D - SOCLCP - #              gap with the real problem = %14.7e\n", fabs(real_error-error) );
+    printf("--------------- FC3D - SOCLCP - # Iteration %i Final Residual = %14.7e\n", internalsolver_options->iparam[7], error);
+    printf("--------------- FC3D - SOCLCP - #              error of the real problem = %14.7e\n", real_error );
+    printf("--------------- FC3D - SOCLCP - #              gap with the real problem = %14.7e\n", fabs(real_error-error) );
   }
 
   free(soclcp->q);

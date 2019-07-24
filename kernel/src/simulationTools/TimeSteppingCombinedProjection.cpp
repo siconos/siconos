@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@
 #include "TimeSteppingCombinedProjection.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianDS.hpp"
-#include "NewtonEulerFrom1DLocalFrameR.hpp"
+#include "NewtonEuler1DR.hpp"
 #include "OneStepIntegrator.hpp"
 #include "MLCPProjectOnConstraints.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Topology.hpp"
+#include "MoreauJeanOSI.hpp"
 
 
 
@@ -44,12 +44,14 @@
 
 
 
-TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(SP::TimeDiscretisation td,
-    SP::OneStepIntegrator osi,
-    SP::OneStepNSProblem osnspb_velo,
-    SP::OneStepNSProblem osnspb_pos,
-    unsigned int level)
-  : TimeStepping(td, osi, osnspb_velo)
+TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(
+  SP::NonSmoothDynamicalSystem nsds,
+  SP::TimeDiscretisation td,
+  SP::OneStepIntegrator osi,
+  SP::OneStepNSProblem osnspb_velo,
+  SP::OneStepNSProblem osnspb_pos,
+  unsigned int level)
+  : TimeStepping(nsds,td, osi, osnspb_velo)
 {
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
@@ -141,6 +143,7 @@ void TimeSteppingCombinedProjection::initOSNS()
 void TimeSteppingCombinedProjection::advanceToEventOLD()
 {
 
+  initialize();
 
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
 
@@ -155,6 +158,11 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   DEBUG_PRINT("================================================");
   DEBUG_PRINT("TimeSteppingCombinedProjection::advanceToEvent()");
   DEBUG_PRINT("================================================\n");
+
+
+  initialize();
+
+  
   _isIndexSetsStable = false;
   _maxViolationUnilateral = 0.0;
   _maxViolationEquality = 0.0;
@@ -408,12 +416,12 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       if (dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
-        *workVectors[OneStepIntegrator::qtmp] = *neds->q();
+        *workVectors[MoreauJeanOSI::QTMP] = *neds->q();
       }
       else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-        *workVectors[OneStepIntegrator::qtmp] = * d->q();
+        *workVectors[MoreauJeanOSI::QTMP] = * d->q();
       }
       else
         RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
@@ -475,7 +483,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
           SP::SiconosVector q = neds->q();
           
           
-          SP::SiconosVector qtmp = workVectors[OneStepIntegrator::qtmp];
+          SP::SiconosVector qtmp = workVectors[MoreauJeanOSI::QTMP];
           if (neds->p(0))
           {
             //*q = * qtmp +  *neds->p(0);
@@ -494,7 +502,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
           SP::SiconosVector q = d->q();
-          SP::SiconosVector qtmp = workVectors[OneStepIntegrator::qtmp];
+          SP::SiconosVector qtmp = workVectors[MoreauJeanOSI::QTMP];
           if (d->p(0))
           {
             //*q = * qtmp +  *d->p(0);
@@ -575,13 +583,13 @@ void TimeSteppingCombinedProjection::advanceToEvent()
         {
           SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
           double time = nextTime();
-          neds->computeForces(time);
+          neds->computeForces(time, neds->q(), neds->twist());
         }
         else if (dsType == Type::LagrangianDS)
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
           double time = nextTime();
-          d->computeForces(time);
+          d->computeForces(time, d->q(),d->velocity());
         }
         else if (dsType == Type::LagrangianLinearTIDS)
         {
@@ -665,8 +673,8 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
   {
     SP::Interaction interac = indexSet->bundle(*aVi);
 
-    interac->computeOutput(getTkp1(), indexSet->properties(*aVi), 0);
-    interac->relation()->computeJach(getTkp1(), *interac, indexSet->properties(*aVi));
+    interac->computeOutput(getTkp1(),  0);
+    interac->relation()->computeJach(getTkp1(), *interac);
 
     if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)

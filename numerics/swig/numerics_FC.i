@@ -4,10 +4,11 @@
 #include "FrictionContactProblem.h"
 #include "fc3d_compute_error.h"
 #ifdef WITH_FCLIB
+// avoid a conflict with old csparse.h in case fclib.h includes it
+#define _CS_H
 #include "fclib_interface.h"
 #endif
 #include "fc2d_Solvers.h"
-#include "gfc3d_Solvers.h"
 #include "fc3d_AlartCurnier_functions.h"
 #include "AlartCurnierGenerated.h"
 #include "FischerBurmeisterGenerated.h"
@@ -16,6 +17,8 @@
 
 %include "FrictionContactProblem.h"
 #ifdef WITH_FCLIB
+// avoid a conflict with old csparse.h in case fclib.h includes it
+#define _CS_H
 %include fclib_interface.h
 #endif
 
@@ -37,7 +40,7 @@
 {
   FrictionContactProblem()
   {
-    return newFCP();
+    return frictionContactProblem_new();
   }
 
 
@@ -49,7 +52,7 @@
 
     %SN_INPUT_CHECK_RETURN(o, fcp, FrictionContactProblem);
 
-    FCP = newFCP();
+    FCP = frictionContactProblem_new();
     FCP->dimension = fcp->dimension;
 
     FCP->M = NM_create(fcp->M->storageType, fcp->M->size0, fcp->M->size1);
@@ -71,7 +74,7 @@
   /* */
   FrictionContactProblem(SN_OBJ_TYPE *dim, SN_OBJ_TYPE *numberOfContacts, SN_OBJ_TYPE *M, SN_OBJ_TYPE *q, SN_OBJ_TYPE *mu)
   {
-    FrictionContactProblem * FC = newFCP();
+    FrictionContactProblem * FC = frictionContactProblem_new();
     SWIG_AsVal_int(dim, &FC->dimension);
     SWIG_AsVal_int(numberOfContacts, &FC->numberOfContacts);
 
@@ -98,7 +101,7 @@
 
   FrictionContactProblem(SN_OBJ_TYPE *dim, SN_OBJ_TYPE * M, SN_OBJ_TYPE * q, SN_OBJ_TYPE * mu)
   {
-    FrictionContactProblem * FC = newFCP();
+    FrictionContactProblem * FC = frictionContactProblem_new();
 
     SWIG_AsVal_int(dim, &FC->dimension);
 
@@ -127,7 +130,7 @@
 
   ~FrictionContactProblem()
   {
-    freeFrictionContactProblem($self);
+    frictionContactProblem_free($self);
   }
 
 };

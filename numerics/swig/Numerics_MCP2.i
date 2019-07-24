@@ -1,18 +1,18 @@
-%extend MixedComplementarityProblem2
+%extend MixedComplementarityProblem
 {
   CALL_COMPUTE_F(mcp, (void*))
 
   CALL_COMPUTE_NABLA_F(mcp, (void*))
 
-  MixedComplementarityProblem2()
+  MixedComplementarityProblem()
    {
-     MixedComplementarityProblem2* MCP = newMCP();
+     MixedComplementarityProblem* MCP = mixedComplementarityProblem_new();
      return MCP;
    }
 
-  MixedComplementarityProblem2(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2)
+  MixedComplementarityProblem(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2)
   {
-     MixedComplementarityProblem2* MCP = newMCP();
+     MixedComplementarityProblem* MCP = mixedComplementarityProblem_new();
 
      SWIG_AsVal_int(n1, &MCP->n1);
      SWIG_AsVal_int(n2, &MCP->n2);
@@ -34,9 +34,9 @@
 
 
 #ifdef SWIGPYTHON
-  MixedComplementarityProblem2(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2, SN_OBJ_TYPE* py_compute)
+  MixedComplementarityProblem(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2, SN_OBJ_TYPE* py_compute)
   {
-     MixedComplementarityProblem2* MCP = newMCP();
+     MixedComplementarityProblem* MCP = mixedComplementarityProblem_new();
 
      MCP->compute_Fmcp = &call_py_compute_Fmcp;
      MCP->compute_nabla_Fmcp = &call_py_compute_nabla_Fmcp;
@@ -73,7 +73,7 @@
        target_mem_mgmtX_instr(method_compute_F);
        target_mem_mgmtX_instr(method_compute_nabla_F);
        SWIG_Error(SWIG_TypeError, "argument 2 must be have a method compute_F and a method compute_nabla_F");
-       freeNumericsMatrix(MCP->nabla_Fmcp);
+       NM_free(MCP->nabla_Fmcp);
        free(MCP->nabla_Fmcp);
        free(MCP);
        return NULL;
@@ -83,9 +83,9 @@
    }
 #endif /* SWIGPYTHON */
 
-  MixedComplementarityProblem2(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2, SN_OBJ_TYPE* compute_F, SN_OBJ_TYPE* compute_nabla_F)
+  MixedComplementarityProblem(SN_OBJ_TYPE* n1, SN_OBJ_TYPE* n2, SN_OBJ_TYPE* compute_F, SN_OBJ_TYPE* compute_nabla_F)
   {
-     MixedComplementarityProblem2* MCP = newMCP();
+     MixedComplementarityProblem* MCP = mixedComplementarityProblem_new();
 
      SWIG_AsVal_int(n1, &MCP->n1);
      SWIG_AsVal_int(n2, &MCP->n2);
@@ -102,8 +102,8 @@
        MCP->nabla_Fmcp = NM_create(NM_DENSE, size, size);
      }
 
-     check_save_target_fn(compute_F, MCP->env, env_compute_function, MixedComplementarityProblem2_call_compute_F, MCP->compute_Fmcp, 2);
-     check_save_target_fn(compute_nabla_F, MCP->env, env_compute_jacobian, MixedComplementarityProblem2_call_compute_nabla_F, MCP->compute_nabla_Fmcp, 3);
+     check_save_target_fn(compute_F, MCP->env, env_compute_function, MixedComplementarityProblem_call_compute_F, MCP->compute_Fmcp, 2);
+     check_save_target_fn(compute_nabla_F, MCP->env, env_compute_jacobian, MixedComplementarityProblem_call_compute_nabla_F, MCP->compute_nabla_Fmcp, 3);
 
      return MCP;
    }
@@ -139,7 +139,7 @@
       return SWIG_From_long((uintptr_t)&$self->env);
     }
 
-  ~MixedComplementarityProblem2()
+  ~MixedComplementarityProblem()
   {
     if ($self->env)
     {
@@ -149,7 +149,7 @@
         $self->env = NULL;
       }
     }
-    freeMCP($self);
+    mixedComplementarityProblem_free($self);
   }
 };
 

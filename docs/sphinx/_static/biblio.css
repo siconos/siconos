@@ -1,0 +1,16 @@
+table.citation
+{
+    border: hidden !important;
+    background-color: rgb(254, 246, 252);
+}
+
+table
+{
+    border: hidden !important;
+}
+
+.label {
+    color: #849d2f;
+    border: hidden !important;
+    
+}

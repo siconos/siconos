@@ -2,8 +2,6 @@
 # Some convenience macros
 #
 
-include(CMakeParseArguments)
-
 # -- Basic list manipulation --
 # Get first element of list var
 MACRO(CAR var)
@@ -53,7 +51,10 @@ macro(get_sources)
     endforeach()
   endforeach()
   if(SOURCES_FILES)
-    list(REMOVE_DUPLICATES SOURCES_FILES)
+    list(LENGTH SOURCES_FILES _SOURCES_FILES_LEN)
+    if (_SOURCES_FILES_LEN GREATER 1)
+      list(REMOVE_DUPLICATES SOURCES_FILES)
+    endif()
   endif()
 endmacro()
 
@@ -69,12 +70,24 @@ macro(get_headers DIRS)
   foreach(DIR ${ARGV})
     foreach(_EXT ${HDR_EXTS})
       file(GLOB FILES_LIST ${DIR}/*.${_EXT})
-      if(FILES_LIST)
-	list(APPEND HDRS_FILES ${FILES_LIST})
+      if (INSTALL_INTERNAL_HEADERS AND FILES_LIST)
+	    list(APPEND HDRS_FILES ${FILES_LIST})
+      else()
+        # filter out header paths containing the word "internal"
+        # (stemming from component dir.. otherwise we'd have trouble
+        # if workdir path contains the string "internal")
+        foreach(_HDR ${FILES_LIST})
+          if (_HDR AND NOT "${_HDR}" MATCHES "${_COMPONENT}/.*internal")
+	        list(APPEND HDRS_FILES ${_HDR})
+          endif()
+        endforeach()
       endif()
     endforeach()
   endforeach()
-  list(REMOVE_DUPLICATES HDRS_FILES)
+  list(LENGTH HDRS_FILES _HDRS_FILES_LEN)
+  if (_HDRS_FILES_LEN GREATER 1)
+    list(REMOVE_DUPLICATES HDRS_FILES)
+  endif()
 endmacro()
 
 # -- returns a list of source files extension --
@@ -116,11 +129,17 @@ ENDMACRO(PRINT_VAR V)
 # with the same 'options' as find_package
 # (see http://www.cmake.org/cmake/help/v3.0/command/find_package.html?highlight=find_package)
 MACRO(COMPILE_WITH)
-  
-  set(options REQUIRED)
-  set(oneValueArgs ONLY)
-  set(multiValueArgs COMPONENTS)
-  
+
+  # Options for this command:
+  set(options REQUIRED)          # REQUIRED is a boolean flag (present or not)
+  set(oneValueArgs)              # there are no arguments that take only one value
+  set(multiValueArgs             # arguments that take multiple values:
+    COMPONENTS                   # - which components of the requested package are needed
+    SICONOS_COMPONENTS           # - to which Siconos components does this dependency apply
+    )
+  # If SICONOS_COMPONENTS is not specified, it is assumed it is a
+  # dependency for all Siconos components
+
   cmake_parse_arguments(COMPILE_WITH "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   set(_NAME)
@@ -193,10 +212,12 @@ MACRO(COMPILE_WITH)
   if(_LINK_LIBRARIES)
     list(REMOVE_DUPLICATES _LINK_LIBRARIES)
   endif()
-  if(COMPILE_WITH_ONLY)
-    set(_sico_component ${COMPILE_WITH_ONLY})
-    set(${_sico_component}_LINK_LIBRARIES ${${_sico_component}_LINK_LIBRARIES}
-      ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries for ${_sico_component}.")
+  if(COMPILE_WITH_SICONOS_COMPONENTS)
+    FOREACH(_O ${COMPILE_WITH_SICONOS_COMPONENTS})
+      set(_sico_component ${_O})
+      set(${_sico_component}_LINK_LIBRARIES ${${_sico_component}_LINK_LIBRARIES}
+        ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries for ${_sico_component}.")
+    ENDFOREACH()
   else()
     set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES}
       ${_LINK_LIBRARIES} CACHE INTERNAL "List of external libraries.")
@@ -274,13 +295,15 @@ MACRO(WRITE_NOTES)
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "cmake version : ${CMAKE_VERSION}\n")
     # the default buildname
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "System name : ${CMAKE_SYSTEM_NAME}\n")
+    site_name(_SITE_NAME)
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Site Name: ${_SITE_NAME}\n")
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Processor   : ${CMAKE_SYSTEM_PROCESSOR}\n")
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler : ${CMAKE_C_COMPILER}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler version : ${C_COMPILER_VERSION}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler version : ${CMAKE_C_COMPILER_VERSION}\n")
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler : ${CMAKE_CXX_COMPILER}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler version : ${CXX_COMPILER_VERSION}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler version : ${CMAKE_CXX_COMPILER_VERSION}\n")
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler : ${CMAKE_Fortran_COMPILER}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler version : ${Fortran_COMPILER_VERSION}\n")
+    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler version : ${CMAKE_Fortran_COMPILER_VERSION}\n")
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "BLAS libraries : ${BLAS_LIBRARIES}\n")
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "LAPACK libraries : ${LAPACK_LIBRARIES}\n")
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "all libraries : ${SICONOS_LINK_LIBRARIES}\n")
@@ -365,3 +388,33 @@ macro(get_subdirectories result current_dir)
   endforeach()
   set(${result} ${dirs})
 endmacro()
+
+
+# Replacement for list(FILTER ...) (see cmake doc)
+# when current cmake version < 3.6)
+# Usage :
+# list_filter(<listname> <matching expr>)
+# example:
+# set(mylist name src plugin)
+# list_filter(mylist src)
+# ==> mylist contains only name and plugin
+function(list_filter inout_list_name regex)
+  foreach(name IN LISTS ${inout_list_name})
+    string(FIND ${name} ${regex} result)
+    if(${result} GREATER -1)
+      list(REMOVE_ITEM ${inout_list_name} ${name})
+    endif()
+  endforeach()
+  set(${inout_list_name} ${${inout_list_name}} PARENT_SCOPE)
+endfunction()
+
+# Display MPI search results
+function(print_mpi_info lang)
+  message("\n--------------------------- MPI ${lang} config ---------------------------")
+  message("- compiler: ${MPI_${lang}_COMPILER}")
+  message("- compile flags: ${MPI_${lang}_COMPILE_FLAGS}")
+  message("- include path: ${MPI_${lang}_INCLUDE_PATH}")
+  message("- link flags: ${MPI_${lang}_LINK_FLAGS}")
+  message("- libraries: ${MPI_${lang}_LIBRARIES}")
+  message("-------------------------------------------------------------------------\n")
+endfunction()

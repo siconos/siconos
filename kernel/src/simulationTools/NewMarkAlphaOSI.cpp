@@ -1,8 +1,7 @@
-
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "NewMarkAlphaOSI.hpp"
 #include "Simulation.hpp"
 #include "LagrangianLinearTIDS.hpp"
@@ -23,7 +22,6 @@
 #include "LagrangianR.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NewtonEulerR.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
@@ -42,6 +40,11 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double new_gamma, double new_a
   _alpha_f = new_alpha_f;
   _orderDenseOutput = 5.0;
   _IsVelocityLevel = flag;
+  // Set levels. This may depend on the nonsmooth law and will be updated during initializeWorkVectorsForInteraction(...) call.
+  _levelMinForOutput=0;
+  _levelMaxForOutput=2;
+  _levelMinForInput=1;
+  _levelMaxForInput=2;
 }
 
 NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool flag = false):
@@ -54,6 +57,11 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool flag = false):
   _beta = 0.25 * std::pow((_gamma + 0.5), 2);
   _orderDenseOutput = 5.0;
   _IsVelocityLevel = flag;
+  // Set levels. This may depend on the nonsmooth law and will be updated during initializeWorkVectorsForInteraction(...) call.
+  _levelMinForOutput=0;
+  _levelMaxForOutput=2;
+  _levelMinForInput=1;
+  _levelMaxForInput=2;
 }
 
 const SimpleMatrix NewMarkAlphaOSI::getW(SP::DynamicalSystem ds)
@@ -102,18 +110,16 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds, SiconosMatrix& W)
   SP::SiconosMatrix C;
   if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
   {
+    SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(ds);
     if(dsType == Type::LagrangianDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
-      d->computeMass(); // update mass matrix
-      M = d->mass();    // mass matrix
-      K = d->jacobianqForces(); // jacobian according to q
-      C = d->jacobianqDotForces(); // jacobian according to velocity
+      K = lds->jacobianqForces(); // jacobian according to q
+      C = lds->jacobianvForces(); // jacobian according to velocity
+      lds->computeMass(lds->q());
     }
     else // LagrangianLinearTIDS
     {
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS>(ds);
-      M = d->mass();    // mass matrix
       K = d->K();       // matrix K
       if(K)
         *K *= -1.0;     // K = -K
@@ -122,7 +128,13 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds, SiconosMatrix& W)
         *C *= -1.0;     // C = -C
     }
     // Compute W = (beta_prime/h^2)*M - (gamma_prime/h)*C - K
-    scal(beta_prime / (h * h), *M, W, true);
+    if(lds->mass())
+      scal(beta_prime / (h * h), *(lds->mass()), W, true);
+    else
+    {
+      W.eye();
+      W *= beta_prime/( h * h);
+    }
     if(C)
       scal(-gamma_prime / h, *C, W, false);
     if(K)
@@ -165,12 +177,10 @@ double NewMarkAlphaOSI::computeResidu()
     VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     dsType = Type::value(*ds); // Its type
-//    SP::SiconosVector freeR = ds->workspace(DynamicalSystem::freeresidu);
-//    freeR->zero();
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
 
-      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
+      SiconosVector& residuFree = *workVectors[NewMarkAlphaOSI::RESIDU_FREE];
       // -- Convert the DS into a Lagrangian one.
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
       // get position, velocity and acceleration
@@ -178,39 +188,41 @@ double NewMarkAlphaOSI::computeResidu()
       SP::SiconosVector v = d->velocity();
       SP::SiconosVector a = d->acceleration();
       SP::SiconosVector F;
-      SP::SiconosMatrix M = d->mass();
       // get the reaction force p
       SP::SiconosVector p = d->p(2);
       // Compute free residual
       residuFree.zero();
-      prod(*M, *a, residuFree, true); // freeR = M*a
+      if(d->mass())
+        prod(*d->mass(), *a, residuFree, true); // freeR = M*a
+      else
+        residuFree = *a;
       // For LagrangianDS (non linear Lagrangian DS)
       if(dsType == Type::LagrangianDS)
-      {
-        // Update mass matrix
-        d->computeMass();
-        F = d->forces();
-        if(F)
+	    {
+	      // Update mass matrix
+	      d->computeMass();
+	      F = d->forces();
+	      if(F)
           // Compute F = F_ext - F_int - F_Gyr
-          d->computeForces(t);
-      }
+          d->computeForces(t, d->q(), d->velocity());
+	    }
       // For LagrangianLinearTIDS
       if(dsType == Type::LagrangianLinearTIDS)
-      {
-        // We need to add F_int = Cv + Kq to freeR
-        SP::LagrangianLinearTIDS dtids = std11::static_pointer_cast<LagrangianLinearTIDS>(ds);
-        SP::SiconosMatrix K = dtids->K();
-        SP::SiconosMatrix C = dtids->C();
-        F = dtids->fExt(); // Note that for LagrangianLinearTIDS, F = F_ext
-        if(F)
+	    {
+	      // We need to add F_int = Cv + Kq to freeR
+	      SP::LagrangianLinearTIDS dtids = std11::static_pointer_cast<LagrangianLinearTIDS>(ds);
+	      SP::SiconosMatrix K = dtids->K();
+	      SP::SiconosMatrix C = dtids->C();
+	      F = dtids->fExt(); // Note that for LagrangianLinearTIDS, F = F_ext
+	      if(F)
         {
           dtids->computeFExt(t);
         }
-        if(K)
+	      if(K)
           prod(*K, *q, residuFree, false); // f = M*a + C*v + K*q
-        if(C)
+	      if(C)
           prod(*C, *v, residuFree, false); // freeR = M*a + C*v
-      }
+	    }
 
       residuFree -= *F;            // freeR = _workspace[freeresidu] - F
       // Compute residual
@@ -220,9 +232,9 @@ double NewMarkAlphaOSI::computeResidu()
       normResidu = _residu->norm2();
       // Take maximum value of norm over all DS
       if(normResidu > maxResidu)
-      {
-        maxResidu = normResidu;
-      }
+	    {
+	      maxResidu = normResidu;
+	    }
       //
 
       DEBUG_EXPR(residuFree.display(););
@@ -260,8 +272,8 @@ void NewMarkAlphaOSI::computeFreeState()
     W = _dynamicalSystemsGraph->properties(*dsi).W; // Its W matrix of iteration.
 
 
-    SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
-    SiconosVector& qfree = *workVectors[OneStepIntegrator::free];
+    SiconosVector& residuFree = *workVectors[NewMarkAlphaOSI::RESIDU_FREE];
+    SiconosVector& qfree = *workVectors[NewMarkAlphaOSI::FREE];
 
     // -- Convert the DS into a Lagrangian one.
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
@@ -285,13 +297,13 @@ void NewMarkAlphaOSI::computeFreeState()
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)
 {
-   DEBUG_BEGIN("NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
+  DEBUG_BEGIN("NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
   double t = _simulation->nextTime();
   SP::InteractionsGraph indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   SP::Interaction inter = indexSet->bundle(vertex_inter);
 
-  VectorOfBlockVectors& DSlink = *indexSet->properties(vertex_inter).DSlink;
-
+  VectorOfBlockVectors& DSlink = inter->linkToDSVariables();
+  VectorOfBlockVectors& workBlockV = *indexSet->properties(vertex_inter).workBlockVectors;
   // Get the type of relation
   RELATION::TYPES relationType = inter->relation()->getType();
   RELATION::SUBTYPES relationSubType = inter->relation()->getSubType();
@@ -304,13 +316,16 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   SP::BlockVector q_free;
   if(relationType == Lagrangian)
   {
-    q_free = DSlink[LagrangianR::xfree];
+    q_free = workBlockV[NewMarkAlphaOSI::xfree];
   }
   assert(q_free);
   DEBUG_EXPR(q_free->display(););
 
   // get pointer to yForNSsolver vector
-  SiconosVector& yForNSsolver = *inter->yForNSsolver();
+
+
+  SiconosVector& osnsp_rhs = *(*indexSet->properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
+
   assert(q_free && "In NewMarkAlphaOSI::computeFreeOutput: pointer q_free has not initialized yet");
   assert(inter->relation() && "In NewMarkAlphaOSI::computeFreeOutput, relation associated with the interaction does not exist.");
   SP::SiconosMatrix C = inter->relation()->C();
@@ -334,49 +349,50 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
       coord[6] = 0;
       coord[7] = sizeY;
       if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)  // LCP at acceleration level
-      {
-        subprod(*C, *q_free, yForNSsolver, coord, true);
-        SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
-        ID->eye();
-        Index xcoord(8);
-        xcoord[0] = 0;
-        xcoord[1] = sizeY;
-        xcoord[2] = 0;
-        xcoord[3] = sizeY;
-        xcoord[4] = 0;
-        xcoord[5] = sizeY;
-        xcoord[6] = 0;
-        xcoord[7] = sizeY;
-        SP::LagrangianScleronomousR _SclerR = std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation());
-        _SclerR->computedotjacqhXqdot(t, *inter, DSlink);
-        subprod(*ID, *(_SclerR->dotjacqhXqdot()), yForNSsolver, xcoord, false); // y += NonLinearPart
-      }
+	    {
+	      subprod(*C, *q_free, osnsp_rhs, coord, true);
+	      SP::SiconosMatrix ID(new SimpleMatrix(sizeY, sizeY));
+	      ID->eye();
+	      Index xcoord(8);
+	      xcoord[0] = 0;
+	      xcoord[1] = sizeY;
+	      xcoord[2] = 0;
+	      xcoord[3] = sizeY;
+	      xcoord[4] = 0;
+	      xcoord[5] = sizeY;
+	      xcoord[6] = 0;
+	      xcoord[7] = sizeY;
+	      SP::LagrangianScleronomousR _SclerR = std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation());
+	      _SclerR->computedotjacqhXqdot(t, *inter, DSlink);
+	      subprod(*ID, *(_SclerR->dotjacqhXqdot()), osnsp_rhs, xcoord, false); // y += NonLinearPart
+	    }
       else if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_POS]).get() == osnsp)  // LCP at position level
       {
         // Update Jacobian matrix
-        inter->relation()->computeJach(t, *inter, indexSet->properties(vertex_inter));
-        // compute yForNSsolver = y_{n,k} + G*q_free
+        inter->relation()->computeJach(t, *inter);
+        // compute osnsp_rhs = y_{n,k} + G*q_free
         if(!_IsVelocityLevel)  // output at the position level y_{n,k} = g_{n,k}
         {
-          inter->computeOutput(t, indexSet->properties(vertex_inter), 0); // Update output of level 0
-          yForNSsolver = *(inter->y(0)); //g_{n,k}
+          inter->computeOutput(t, 0); // Update output of level 0
+          osnsp_rhs = *(inter->y(0)); //g_{n,k}
         }
         else                  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
         {
           double h = _simulation->nextTime() - _simulation->startingTime();
           double gamma_prime = _gamma / _beta;
-          inter->computeOutput(t, indexSet->properties(vertex_inter), 1); // Update output of level 1
-          yForNSsolver = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
+          inter->computeOutput(t, 1); // Update output of level 1
+          osnsp_rhs = (h / gamma_prime) * (*(inter->y(1))); //(h/gamma_prime)*dotg_{n,k}
         }
-        subprod(*C, *q_free, yForNSsolver, coord, false);
+        subprod(*C, *q_free, osnsp_rhs, coord, false);
       }
       else
-      {
-        RuntimeException::selfThrow("NewMarkAlphaOSI::computeFreeOutput, this OSNSP does not exist");
-      }
+	    {
+        osnsp->display();
+	      RuntimeException::selfThrow("NewMarkAlphaOSI::computeFreeOutput, this OSNSP does not exist");
+	    }
     }
 
-    DEBUG_EXPR(yForNSsolver.display(););
+    DEBUG_EXPR(osnsp_rhs.display(););
   }
   else
   {
@@ -385,138 +401,149 @@ void NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_i
   DEBUG_END("NewMarkAlphaOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, OneStepNSProblem* osnsp)\n");
 }
 
-void NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void NewMarkAlphaOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
-  DEBUG_BEGIN("NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n")
+  DEBUG_BEGIN("NewMarkAlphaOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n")
 
+  // Get work buffers from the graph
+  VectorOfVectors& ds_work_vectors = *_initializeDSWorkVectors(ds);
+
+  // Get work matrices from the graph
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
   VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(dsv).workMatrices;
+  // Initialize memory buffers
+  // _dynamicalSystemsGraph->bundle(dsv)->initMemory(getSizeMem());
+  // // Force dynamical system to its initial state
+  // _dynamicalSystemsGraph->bundle(dsv)->resetToInitialState();
+  // Check dynamical system type
+  Type::Siconos dsType = Type::value(*ds);
+  assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS);
 
-
-  ds->resetToInitialState();
-
-  // W initialization
+  // Compute W (iteration matrix)
   initializeIterationMatrixW(ds);
   // allocate memory for work space for Newton iteration procedure
   assert(_dynamicalSystemsGraph->properties(dsv).W && "W is NULL");
-  // ds->allocateWorkVector(DynamicalSystem::local_buffer,   _dynamicalSystemsGraph->properties(dsv).W->size(0));
   //Allocate the memory to stock the acceleration-like variable
-  Type::Siconos dsType = Type::value(*ds);
   if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
   {
 
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
     d->initRhs(t);
 
-    workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
-    workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(d->dimension()));
-    //workVectors[OneStepIntegrator::free].reset(new SiconosVector(d->dimension()));
-    workVectors[OneStepIntegrator::free].reset(new SiconosVector(*(d->acceleration())));
-
-
-    workVectors[OneStepIntegrator::acce_like].reset(new SiconosVector(*(d->acceleration()))); // set a0 = ddotq0
-    workVectors[OneStepIntegrator::acce_memory].reset(new SiconosVector(*(d->acceleration()))); // set a0 = ddotq0
+    ds_work_vectors.resize(NewMarkAlphaOSI::WORK_LENGTH);
+    ds_work_vectors[NewMarkAlphaOSI::RESIDU_FREE].reset(new SiconosVector(d->dimension()));
+    //ds_work_vectors[NewMarkAlphaOSI::FREE].reset(new SiconosVector(d->dimension()));
+    ds_work_vectors[NewMarkAlphaOSI::FREE].reset(new SiconosVector(*(d->acceleration())));
+    ds_work_vectors[NewMarkAlphaOSI::ACCE_LIKE].reset(new SiconosVector(*(d->acceleration()))); // set a0 = ddotq0
+    ds_work_vectors[NewMarkAlphaOSI::ACCE_MEMORY].reset(new SiconosVector(*(d->acceleration()))); // set a0 = ddotq0
 
     // Allocate the memory to stock coefficients of the polynomial for the dense output
-    workMatrices.resize(OneStepIntegrator::work_vector_of_matrix_size);
-    workMatrices[OneStepIntegrator::dense_output_coefficients].reset(new SimpleMatrix(ds->dimension(), (getOrderDenseOutput() + 1)));
+    workMatrices.resize(NewMarkAlphaOSI::MAT_WORK_LENGTH);
+    workMatrices[NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS].reset(new SimpleMatrix(ds->dimension(), (getOrderDenseOutput() + 1)));
 
     //*(d->workspace(DynamicalSystem::acce_like)) = *(d->acceleration());
     // ds->allocateWorkVector(DynamicalSystem::acce_like, ds->dimension()); // allocate memory for the acceleration-like of DS
     // ds->allocateWorkVector(DynamicalSystem::acce_memory, ds->dimension()); // allocate memory to stock acceleration
 
-//          d->allocateWorkMatrix(OneStepIntegrator::dense_output_coefficients, ds->dimension(), (osi_NewMark->getOrderDenseOutput() + 1));
+    //          d->allocateWorkMatrix(NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS, ds->dimension(), (osi_NewMark->getOrderDenseOutput() + 1));
     DEBUG_EXPR(d->display());
+
+    d->swapInMemory();
   }
   else
   {
     RuntimeException::selfThrow("In NewMarkAlphaOSI::initialize: this type of DS is not yet implemented");
   }
-  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-  {
-    ds->initializeNonSmoothInput(k);
-  }
-  DEBUG_END("NewMarkAlphaOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)\n")
+
+  DEBUG_END("NewMarkAlphaOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n")
 
 
-}
-void NewMarkAlphaOSI::initializeInteraction(double t0, Interaction &inter,
-                                             InteractionProperties& interProp,
-                                             DynamicalSystemsGraph & DSG)
+    }
+void NewMarkAlphaOSI::initializeWorkVectorsForInteraction(Interaction &inter,
+                                  InteractionProperties& interProp,
+                                  DynamicalSystemsGraph & DSG)
 {
-  DEBUG_BEGIN("NewMarkAlphaOSI::initializeInteraction(...)\n");
+  DEBUG_BEGIN("NewMarkAlphaOSI::initializeWorkVectorsForInteraction(...)\n")
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
+  assert(ds1);
+  assert(ds2);
 
-  assert(interProp.DSlink);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  // VectorOfVectors& workVInter = *interProp.workVectors;
-  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
+  if (!interProp.workVectors)
+  {
+    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors->resize(NewMarkAlphaOSI::WORK_INTERACTION_LENGTH);
+  }
+
+  if (!interProp.workBlockVectors)
+  {
+    interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+    interProp.workBlockVectors->resize(NewMarkAlphaOSI::BLOCK_WORK_LENGTH);
+  }
+
+  if (!interProp.workMatrices)
+  {
+    interProp.workMatrices.reset(new VectorOfSMatrices);
+    interProp.workBlockVectors->resize(NewMarkAlphaOSI::MAT_WORK_LENGTH);
+  }
+  
+  VectorOfVectors& inter_work = *interProp.workVectors;
+  VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
 
   Relation &relation =  *inter.relation();
-  NonSmoothLaw & nslaw = *inter.nslaw();
   RELATION::TYPES relationType = relation.getType();
-  Type::Siconos nslType = Type::value(nslaw);
 
-  unsigned int lowerLevelForOutput=0;
-  unsigned int upperLevelForOutput=2;
-  unsigned int lowerLevelForInput=1;
-  unsigned int upperLevelForInput=2;
+  inter_work[NewMarkAlphaOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
+
+
+  NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
+  Type::Siconos nslType = Type::value(nslaw);
 
   if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
   {
-    lowerLevelForOutput = 0;
-    upperLevelForOutput = 2 ;
-    lowerLevelForInput = 1;
-    upperLevelForInput = 2;
+    _levelMinForOutput = 0;
+    _levelMaxForOutput = 2 ;
+    _levelMinForInput = 1;
+    _levelMaxForInput = 2;
   }
   else if (nslType ==  Type::NewtonImpactFrictionNSL)
   {
-    lowerLevelForOutput = 0;
-    upperLevelForOutput = 4;
-    lowerLevelForInput = 1;
-    upperLevelForInput = 2;
-    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
+    _levelMinForOutput = 0;
+    _levelMaxForOutput = 4;
+    _levelMinForInput = 1;
+    _levelMaxForInput = 2;
+    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeWorkVectorsForInteraction  not yet implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   }
   else
-    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeInteraction not yet implemented  for nonsmooth of type");
+    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeWorkVectorsForInteraction not yet implemented  for nonsmooth of type");
 
-  bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= lowerLevelForOutput && inter.upperLevelForOutput()  >= upperLevelForOutput ))
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  _check_and_update_interaction_levels(inter);
+  // Initialize/allocate memory buffers in interaction.
+  inter.initializeMemory(_steps);
+
+  /* allocate and set work vectors for the osi */
+  if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
-    //  RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _y");
-    inter.setUpperLevelForOutput(upperLevelForOutput);
-    inter.setLowerLevelForOutput(lowerLevelForOutput);
-    isInitializationNeeded = true;
+    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
-  if (!(inter.lowerLevelForInput() <= lowerLevelForInput && inter.upperLevelForInput() >= upperLevelForInput ))
-  {
-    //RuntimeException::selfThrow("D1MinusLinearOSI::initializeInteraction, we must resize _lambda");
-     inter.setUpperLevelForInput(upperLevelForInput);
-     inter.setLowerLevelForInput(lowerLevelForInput);
-     isInitializationNeeded = true;
-  }
-
-  if (isInitializationNeeded)
-    inter.init();
-
-  bool computeResidu = relation.requireResidu();
-  inter.initializeMemory(computeResidu,_steps);
-
-  /* allocate ant set work vectors for the osi */
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == Lagrangian)
   {
-    DSlink[LagrangianR::xfree].reset(new BlockVector());
-    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
+    inter_work_block[NewMarkAlphaOSI::xfree].reset(new BlockVector());
+    inter_work_block[NewMarkAlphaOSI::xfree]->insertPtr(workVds1[NewMarkAlphaOSI::FREE]);
+    DSlink[LagrangianR::p2].reset(new BlockVector());
+    DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
+    DSlink[LagrangianR::q2].reset(new BlockVector());
+    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
   }
   // else if (relationType == NewtonEuler)
   // {
-  //   DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-  //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+  //   inter_work_block[NewMarkAlphaOSI::xfree].reset(new BlockVector());
+  //   inter_work_block[NewMarkAlphaOSI::xfree]->insertPtr(workVds1[NewMarkAlphaOSI::FREE]);
   // }
 
   if (ds1 != ds2)
@@ -524,57 +551,24 @@ void NewMarkAlphaOSI::initializeInteraction(double t0, Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == Lagrangian)
     {
-      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
+      inter_work_block[NewMarkAlphaOSI::xfree]->insertPtr(workVds2[NewMarkAlphaOSI::FREE]);
+      DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
+      DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {
-    //   DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
+    //   inter_work_block[NewMarkAlphaOSI::xfree]->insertPtr(workVds2[NewMarkAlphaOSI::FREE]);
     // }
   }
 
 
-  // Compute a first value for the output
-  inter.computeOutput(t0, interProp, 0);
-
-  // prepare the gradients
-  relation.computeJach(t0, inter, interProp);
-  for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-  {
-    inter.computeOutput(t0, interProp, i);
-  }
-  inter.swapInMemory();
-  DEBUG_END("NewMarkAlphaOSI::initializeInteraction(...)\n");
+  DEBUG_END("NewMarkAlphaOSI::initializeWorkVectorsForInteraction(...)\n")
 }
 
-
-//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void NewMarkAlphaOSI::initialize(Model& m)
-{
-  // Initialize OneStepIntegrator
-  OneStepIntegrator::initialize(m);
-  // Initialize W, acceleration-like for all ds
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m, m.t0(), ds);
-  }
-
-  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
-  InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-    initializeInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
-  }
-
-
-}
-
-//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void NewMarkAlphaOSI::prepareNewtonIteration(double time)
 {
+  DEBUG_BEGIN("NewMarkAlphaOSI::prepareNewtonIteration(double time)\n");
   // Compute matrix W for all Dynamical Systems
   DynamicalSystemsGraph::VIterator dsi, dsend;
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
@@ -584,6 +578,11 @@ void NewMarkAlphaOSI::prepareNewtonIteration(double time)
     SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
     computeW(ds, W);
   }
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
+  }
+  DEBUG_END("NewMarkAlphaOSI::prepareNewtonIteration(double time)\n");
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -602,7 +601,7 @@ void NewMarkAlphaOSI::prediction()
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+    VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
 
     dsType = Type::value(*ds); // Its type
@@ -613,12 +612,12 @@ void NewMarkAlphaOSI::prediction()
       _q = d->q();                // generalized coordinate
       _dotq = d->velocity();      // generalized velocity
       _ddotq = d->acceleration(); // generalized acceleration
-      SiconosVector& acce_like = *workVectors[OneStepIntegrator::acce_like];
+      SiconosVector& acce_like = *ds_work_vectors[NewMarkAlphaOSI::ACCE_LIKE];
       // Save the acceleration before the prediction
       acce_like = *(_ddotq);
 
       DEBUG_PRINT("Before prediction :\n")
-      DEBUG_EXPR(_q->display(););
+        DEBUG_EXPR(_q->display(););
       DEBUG_EXPR(_dotq->display(););
       DEBUG_EXPR(_ddotq->display(););
       DEBUG_EXPR(acce_like.display(););
@@ -631,7 +630,7 @@ void NewMarkAlphaOSI::prediction()
       _ddotq->zero();
 
       DEBUG_PRINT("After prediction :\n")
-      DEBUG_EXPR(_q->display(););
+        DEBUG_EXPR(_q->display(););
       DEBUG_EXPR(_dotq->display(););
       DEBUG_EXPR(_ddotq->display(););
       DEBUG_EXPR(acce_like.display(););
@@ -659,12 +658,12 @@ void NewMarkAlphaOSI::correction()
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+    VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     SP::SimpleMatrix W = _dynamicalSystemsGraph->properties(*dsi).W; // Its W matrix of iteration.
     ; // Iteration matrix W_{n+1,k} computed at kth iteration
-    SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
-    SiconosVector& acce_like = *workVectors[OneStepIntegrator::acce_like];
+    SiconosVector& residuFree = *ds_work_vectors[NewMarkAlphaOSI::RESIDU_FREE];
+    SiconosVector& acce_like = *ds_work_vectors[NewMarkAlphaOSI::ACCE_LIKE];
 
 
     dsType = Type::value(*ds); // Its type
@@ -738,57 +737,59 @@ void NewMarkAlphaOSI::computeCoefsDenseOutput(SP::DynamicalSystem ds)
 {
   double h = _simulation->nextTime() - _simulation->startingTime();
   Type::Siconos dsType = Type::value(*ds);    // Type of the current DS
-  SP::SiconosVector q_n, dotq_n, ddotq_n, q_np1, dotq_np1, ddotq_np1;
   SP::SiconosVector _vec(new SiconosVector(ds->dimension()));
   VectorOfMatrices& workMatrices = *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workMatrices;
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workVectors;
+  VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).workVectors;
   if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
-    q_n = d->qMemory()->getSiconosVector(0); // q_n
-    dotq_n = d->velocityMemory()->getSiconosVector(0); // dotq_n
-    //ddotq_n = d->workspace(DynamicalSystem::acce_memory); // ddotq_n
-    SiconosVector& ddotq_n = *workVectors[OneStepIntegrator::acce_memory];
 
-    q_np1 = d->q(); // q_{n+1}
-    dotq_np1 = d->velocity(); // dotq_{n+1}
-    ddotq_np1 = d->acceleration(); // ddotq_{n+1}
-    SP::SiconosMatrix _CoeffsDense = workMatrices[OneStepIntegrator::dense_output_coefficients];
-    //d->workMatrix(OneStepIntegrator::dense_output_coefficients); // matrix of coefficients [a0 a1 a2 a3 a4 a5]
-    if(_CoeffsDense->size(1) != 6)
+    const SiconosVector&
+      q_n( d->qMemory().getSiconosVector(0) ),                // q_n
+      dotq_n( d->velocityMemory().getSiconosVector(0) ),      // dotq_n
+      //ddotq_n = d->workspace(DynamicalSystem::acce_memory); // ddotq_n
+      q_np1( *d->q() ),                                       // q_{n+1}
+      dotq_np1( *d->velocity() ),                             // dotq_{n+1}
+      ddotq_np1( *d->acceleration() );                        // ddotq_{n+1}
+
+    SiconosVector& ddotq_n = *ds_work_vectors[NewMarkAlphaOSI::ACCE_MEMORY];
+
+    SP::SiconosMatrix _CoeffsDense = workMatrices[NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS];
+    //d->workMatrix(NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS); // matrix of coefficients [a0 a1 a2 a3 a4 a5]
+    if (_CoeffsDense->size(1) != 6)
     {
       RuntimeException::selfThrow("In NewMarkAlphaOSI::computeCoefsDenseOutput: the number of polynomial coeffcients considered here must equal to 6 (dense output polynomial of order 5)");
     }
     //a0 = q_n
-    (*_vec) = (*q_n);
+    (*_vec) = q_n;
     _CoeffsDense->setCol(0, (*_vec));
-    std::cout << "a0: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a0: ";
+               _vec->display(););
     //a1 = h*dotq_n
-    (*_vec) = h * (*dotq_n);
+    (*_vec) = h * dotq_n;
     _CoeffsDense->setCol(1, (*_vec));
-    std::cout << "a1: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a1: ";
+               _vec->display(););
     //a2 = 0.5*h^2*ddotq_n
-    (*_vec) = (0.5 * h * h) * (ddotq_n);
+    (*_vec) = (0.5 * h * h) * ddotq_n;
     _CoeffsDense->setCol(2, (*_vec));
-    std::cout << "a2: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a2: ";
+               _vec->display(););
     //a3 = -10*q_n - 6*h*dotq_n - 1.5*h^2*ddotq_n + 10*q_{n+1} - 4*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
-    (*_vec) = (-10.0) * (*q_n) - (6.0 * h) * (*dotq_n) - (1.5 * h * h) * (ddotq_n) + 10.0 * (*q_np1) - (4.0 * h) * (*dotq_np1) + (0.5 * h *h) * (*ddotq_np1);
+    (*_vec) = (-10.0) * q_n - (6.0 * h) * dotq_n - (1.5 * h * h) * ddotq_n + 10.0 * q_np1 - (4.0 * h) * dotq_np1 + (0.5 * h *h ) * ddotq_np1;
     _CoeffsDense->setCol(3, (*_vec));
-    std::cout << "a3: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a3: ";
+               _vec->display(););
     //a4 = 15*q_n + 8*h*dotq_n + 1.5*h^2*ddotq_n - 15*q_{n+1} + 7*h*dotq_{n+1} - h^2*ddotq_{n+1}
-    (*_vec) = 15.0 * (*q_n) + (8.0 * h) * (*dotq_n) + (1.5 * h *h) * (ddotq_n) - 15.0 * (*q_np1) + (7.0 * h) * (*dotq_np1) - h*h * (*ddotq_np1);
+    (*_vec) = 15.0 * q_n + (8.0 * h) * dotq_n + (1.5 * h *h) * ddotq_n - 15.0 * q_np1 + (7.0 * h) * dotq_np1 - h*h * ddotq_np1;
     _CoeffsDense->setCol(4, (*_vec));
-    std::cout << "a4: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a4: ";
+               _vec->display(););
     //a5 = -6*q_n - 3*h*dotq_n - 0.5*h^2*ddotq_n + 6*q_{n+1} - 3*h*dotq_{n+1} + 0.5*h^2*ddotq_{n+1}
-    (*_vec) = (-6.0) * (*q_n) - (3.0 * h) * (*dotq_n) - (0.5 * h*h) * (ddotq_n) + 6.0 * (*q_np1) - (3.0 * h) * (*dotq_np1) + (0.5 * h*h) * (*ddotq_np1);
+    (*_vec) = (-6.0) * q_n - (3.0 * h) * dotq_n - (0.5 * h*h) * ddotq_n + 6.0 * q_np1 - (3.0 * h) * dotq_np1 + (0.5 * h*h) * ddotq_np1;
     _CoeffsDense->setCol(5, (*_vec));
-    std::cout << "a5: ";
-    _vec->display();
+    DEBUG_EXPR(std::cout << "a5: ";
+               _vec->display(););
     //
 #ifdef DEBUG_NEWMARK
     std::cout << "==================== In NewMarkAlphaOSI::computeCoefsDenseOutput ================" <<std::endl;
@@ -875,7 +876,7 @@ void NewMarkAlphaOSI::DenseOutputallDSs(double t)
     if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
     {
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS>(ds);
-      SiconosMatrix &coeffsDense = *workMatrices[OneStepIntegrator::dense_output_coefficients];
+      SiconosMatrix &coeffsDense = *workMatrices[NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS];
       prod(coeffsDense, *_vec1, *(d->q()), true); // q = Matrix_coeffs*_vec1
       prod(coeffsDense, *_vec2, *(d->velocity()), true); // dotq = Matrix_coeffs*_vec2
       prod(coeffsDense, *_vec3, *(d->acceleration()), true); // ddotq = Matrix_coeffs*_vec3

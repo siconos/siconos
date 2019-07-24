@@ -5,8 +5,6 @@
 // generated docstrings from doxygen xml output
 %include mechanics-docstrings.i
 
-%include path.i
-
 %include sharedPointers.i
 
 %{
@@ -14,11 +12,8 @@
 %}
 %include <MechanicsFwd.hpp>
 
-#ifdef WITH_SERIALIZATION
-%{
-#include <SiconosFull.hpp>
-%}
-#endif
+%include serialization.i
+
 %include picklable.i
 
 %include handleException.i

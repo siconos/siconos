@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,17 @@
 #ifndef Hem5OSI_H
 #define Hem5OSI_H
 
-#include"OneStepIntegrator.hpp"
-#include<vector>
-
-#include <hairer.h>
+#include "OneStepIntegrator.hpp"
+#include <vector>
 
 #define HEM5_ATOL_DEFAULT 100 * MACHINE_PREC;
 #define HEM5_RTOL_DEFAULT 10 * MACHINE_PREC;
 
+class Hem5OSI_impl;
+TYPEDEF_SPTR(Hem5OSI_impl);
+
 /** Hem5OSI solver (odepack)
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
  *
  * Many parameters are required as input/output for LSODAR. See the documentation of this function
  * in externals/odepack/opkdmain.f to have a full description of these parameters.  \n
@@ -109,6 +107,14 @@ private:
 
 
 public:
+  SP::Hem5OSI_impl _impl;
+  friend class Hem5OSI_impl;
+
+  enum Hem5OSI_ds_workVector_id{FREE, WORK_LENGTH};
+
+  enum Hem5OSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+  enum Hem5OSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
 
   /** constructor from a minimum set of data
    */
@@ -237,10 +243,6 @@ public:
 
   unsigned int numberOfConstraints();
 
-  fprobfunction fprob;
-
-  soloutfunction solout;
-
   void f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot);
 
   void g(integer* nEq, doublereal* time, doublereal* x, integer* ng, doublereal* gOut);
@@ -249,25 +251,23 @@ public:
 
   /** initialization of the integrator
    */
-  void initialize(Model& m);
+  void initialize();
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param t0 time of initialization
    * \param inter the interaction
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeInteraction(double t0, Interaction &inter,
-			     InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG);
+  void initializeWorkVectorsForInteraction(Interaction &inter,
+		     InteractionProperties& interProp,
+		     DynamicalSystemsGraph & DSG);
 
   /** get the number of index sets required for the simulation
    * \return unsigned int

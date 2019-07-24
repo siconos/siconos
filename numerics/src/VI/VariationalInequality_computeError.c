@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 
 #include <math.h>
 #include <assert.h>
+#include <float.h>
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -80,7 +81,10 @@ int variationalInequality_computeError(
   *error = cblas_dnrm2(n , wtmp , incx);
 
   /* Computes error */
-  *error = *error / (norm_q + 1.0);
+  if (fabs(norm_q) > DBL_EPSILON)
+    *error /= norm_q;
+
+  DEBUG_PRINTF("error = %e\n",*error);
   if (*error > tolerance)
   {
     if (verbose > 1)

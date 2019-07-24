@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,16 +33,19 @@ TYPEDEF_SPTR(GlobalFrictionContactProblem)
 
 /** Formalization and Resolution of a Friction-Contact Problem
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Dec 15, 2005
- *
  * This class is devoted to the formalization and the resolution of
  * primal friction contact problems defined by :
- * \f{eqnarray*}
- *  M velocity =  q + H reaction \\
- *  globalVelocities = H^T velocity + tildeGlobalVelocities\\
- * \f}
+ *
+
+ \rst
+ 
+ .. math::
+  
+   M velocity =  q + H reaction \\
+   globalVelocities = H^T velocity + tildeGlobalVelocities
+
+ \endrst
+
  * and \f$globalVelocities, reaction\f$ belongs to the Coulomb friction law with unilateral contact.
  *
  * With:
@@ -103,6 +106,7 @@ protected:
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   GFC3D_Driver _gfc_driver;
 
+  GlobalFrictionContactProblem _numerics_problem;
 public:
 
   /** constructor from data
@@ -181,11 +185,32 @@ public:
   }
 
   // --- Others functions ---
+  /** initialize the _M and _H matrix */
+  virtual void initOSNSMatrix();
+
+  /** Memory allocation or resizing for z,w,q,b, globalVelocities */
+  void initVectorsMemory();
 
   /** initialize the GlobalFrictionContact problem(compute topology ...)
-    \param the simulation, owner of this OSNSPB
-    */
+   * \param sim the simulation, owner of this OSNSPB
+   */
   virtual void initialize(SP::Simulation sim);
+
+  /**
+   * \return the friction contact problem from Numerics
+   */
+  SP::GlobalFrictionContactProblem globalFrictionContactProblem();
+
+  /**
+   * \return the friction contact problem from Numerics (raw ptr, do not free)
+   */
+  GlobalFrictionContactProblem *globalFrictionContactProblemPtr();
+
+  /** solve a friction contact problem
+   * \param problem the friction contact problem
+   * \return info solver information result
+   */
+  int solve(SP::GlobalFrictionContactProblem problem = SP::GlobalFrictionContactProblem());
 
   /** Construction of the problem
    *  \param time current time
@@ -193,8 +218,7 @@ public:
   virtual bool preCompute(double time);
 
   /** Compute the unknown reaction and velocity and update the Interaction (y and lambda )
-   *  \param double current time
-   *  \return int information about the solver convergence (0: ok, >0 problem, see Numerics documentation)
+   *  \param time current time
    */
   virtual int compute(double time);
 
@@ -203,6 +227,10 @@ public:
    */
   virtual void postCompute();
 
+
+  
+  void updateMu();
+  
   /** print the data to the screen */
   void display() const;
 };

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ void freeNCP(NonlinearComplementarityProblem* ncp)
 {
   if (ncp->nabla_F)
   {
-    freeNumericsMatrix(ncp->nabla_F);
+    NM_free(ncp->nabla_F);
     free(ncp->nabla_F);
     ncp->nabla_F = NULL;
   }

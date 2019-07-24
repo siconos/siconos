@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,18 +21,14 @@
 #ifndef LsodarOSI_H
 #define LsodarOSI_H
 
-#include"OneStepIntegrator.hpp"
-#include "f2c.h"                        // for doublereal, integer
+#include "OneStepIntegrator.hpp"
 
-#include<vector>
+#include <vector>
+
 #define ATOL_DEFAULT 100 * MACHINE_PREC;
 #define RTOL_DEFAULT 10 * MACHINE_PREC;
 
 /** LsodarOSI solver (odepack)
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 26, 2004
  *
  * Many parameters are required as input/output for LSODAR. See the documentation of this function
  * in externals/odepack/opkdmain.f to have a full description of these parameters.  \n
@@ -57,6 +53,12 @@ private:
    * See opkdmain.f and lsodar routine for details on those variables.
    */
   std::vector<integer> _intData;
+  /** _sizeTol size of the vector ot tolerances */
+  unsigned int _sizeTol;
+
+  /** Type of tolerances */
+  unsigned int _itol;
+  
   /** relative tolerance */
   SA::doublereal rtol;
   /** absolute tolerance */
@@ -77,6 +79,13 @@ private:
   friend struct _NSLEffectOnFreeOutput;
 
 public:
+
+  enum LsodarOSI_ds_workVector_id{FREE, WORK_LENGTH};
+
+  enum LsodarOSI_interaction_workVector_id{OSNSP_RHS,WORK_INTERACTION_LENGTH};
+
+  enum LsodarOSI_interaction_workBlockVector_id{xfree, BLOCK_WORK_LENGTH};
+
   /** Lsodar counter : Number of steps taken for the problem so far. */
   static int count_NST;
   /** Number of RHS evaluations for the problem so far. */
@@ -223,9 +232,8 @@ public:
 
   /** compute rhs(t) for all dynamical systems in the set
    * \param t current time of simulation
-   * \param DSG0 the graph of DynamicalSystem
    */
-  void computeRhs(double t, DynamicalSystemsGraph& DSG0);
+  void computeRhs(double t);
 
   /** compute jacobian of the rhs at time t for all dynamical systems in the set
    * \param t current time of simulation
@@ -241,26 +249,24 @@ public:
 
   /** initialization of the integrator
    */
-  void initialize(Model& m);
+  void initialize();
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
-   * \param m the Model
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds);
+  void initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds);
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
-   * \param t0 time of initialization
    * \param inter the interaction
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeInteraction(double t0, Interaction &inter,
-			     InteractionProperties& interProp,
-			     DynamicalSystemsGraph & DSG);
+  void initializeWorkVectorsForInteraction(Interaction &inter,
+		     InteractionProperties& interProp,
+		     DynamicalSystemsGraph & DSG);
 
   /** get the number of index sets required for the simulation
    * \return unsigned int

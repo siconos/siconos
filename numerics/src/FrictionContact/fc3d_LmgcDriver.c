@@ -4,11 +4,23 @@
 #include <time.h>
 #include <float.h>
 #include "SiconosBlas.h"
+#include "CSparseMatrix_internal.h"
 #include "fc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
+
+// avoid a conflict with old csparse.h in case fclib includes it
+#define _CS_H
+
 #include "fclib_interface.h"
 #include "numerics_verbose.h"
+#include "SiconosCompat.h"
 static int fccounter = -1;
+
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
+
 
 int fc3d_LmgcDriver(double *reaction,
                     double *velocity,
@@ -30,13 +42,13 @@ int fc3d_LmgcDriver(double *reaction,
 
   numerics_set_verbose(verbose);
 
-  SparseBlockCoordinateMatrix* MC = newSparseBlockCoordinateMatrix3x3fortran(nc, nc, nb, row, column, W);
+  SparseBlockCoordinateMatrix* MC =  SBCM_new_3x3(nc, nc, nb, row, column, W);
 
-  SparseBlockStructuredMatrix* M = SBCMToSBM(MC);
+  SparseBlockStructuredMatrix* M = SBCM_to_SBM(MC);
 
-  NumericsMatrix* NM = newSparseNumericsMatrix(nc * 3, nc * 3, M);
+  NumericsMatrix* NM = NM_new_SBM(nc * 3, nc * 3, M);
 
-  FrictionContactProblem* FC = frictionContactProblem_new(3, nc, NM, q, mu);
+  FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, nc, NM, q, mu);
 
   /* frictionContact_display(FC); */
 
@@ -46,7 +58,7 @@ int fc3d_LmgcDriver(double *reaction,
 
   if (solver_id == SICONOS_FRICTION_3D_NSGS)
   {
-    numerics_solver_options.iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+    numerics_solver_options.iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   }
   else if  (solver_id == SICONOS_FRICTION_3D_NSN_AC)
   {
@@ -71,6 +83,7 @@ int fc3d_LmgcDriver(double *reaction,
 
   }
 
+  DEBUG_EXPR(frictionContact_display(FC););
 
   int info = fc3d_driver(FC, reaction , velocity, &numerics_solver_options);
 
@@ -190,7 +203,7 @@ int fc3d_LmgcDriver(double *reaction,
 
 
 
-  freeSparseBlockCoordinateMatrix3x3fortran(MC);
+   SBCM_free_3x3(MC);
 
   free(M->index1_data);
   free(M->index2_data);

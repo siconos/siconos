@@ -1,14 +1,14 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ *ßfailed
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,7 +69,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
   unsigned has_sol = 0;
   unsigned nb_iter = 0;
   unsigned leaving = 0;
-  unsigned itermax = options->iparam[0];
+  unsigned itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   unsigned preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
   unsigned pivot_selection_rule = options->iparam[SICONOS_IPARAM_PIVOT_RULE];
 
@@ -86,7 +86,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
 
   /*output*/
 
-  options->iparam[1] = 0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
 
   /* Allocation */
   switch (pivot_selection_rule)
@@ -359,9 +359,10 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
           case SICONOS_LCP_PIVOT_LEMKE:
           case SICONOS_LCP_PIVOT_PATHSEARCH:
             *info = LCP_PIVOT_RAY_TERMINATION;
-            DEBUG_PRINT("The pivot column is nonpositive ! We are on ray !\n"
-                "It either means that the algorithm failed or that the LCP is infeasible\n"
+            printf("The pivot column is nonpositive ! We are on ray !\n"
+                "It either means that the algorithm is not able to finish or that the LCP is infeasible\n"
                 "Check the class of the M matrix to find out the meaning of this\n");
+            goto _exit;
           default:
             bck_drive = drive < dim + 1 ? drive - 1 : drive - dim - 2;
         }
@@ -527,7 +528,7 @@ exit_lcp_pivot:
   DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { DEBUG_PRINTF("%e %e\n", u[i], s[i]) });
 
-  options->iparam[1] = nb_iter;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = nb_iter;
 
   /* update info */
   switch (pivot_selection_rule)
@@ -535,7 +536,7 @@ exit_lcp_pivot:
     /* Principal Pivoting Methods  */
     case SICONOS_LCP_PIVOT_BARD:
     case SICONOS_LCP_PIVOT_LEAST_INDEX:
-      *info = lcp_compute_error(problem, u, s, options->dparam[0], &tmp);
+      *info = lcp_compute_error(problem, u, s, options->dparam[SICONOS_DPARAM_TOL], &tmp);
       break;
     case SICONOS_LCP_PIVOT_PATHSEARCH:
       break; /* info should already be set */
@@ -548,6 +549,8 @@ exit_lcp_pivot:
         else *info = 1;
       }
   }
+
+_exit:
 
   if (*info > 0)
   {

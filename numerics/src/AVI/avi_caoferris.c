@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@
 #include "pivot-utils.h"
 #include "LinearComplementarityProblem.h"
 #include "vertex_extraction.h"
+#include "numerics_verbose.h"
 
 #include "SiconosLapack.h"
 
@@ -38,9 +39,18 @@
 
 int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, SolverOptions* options)
 {
+  assert(problem);
+  assert(problem->M);
+  assert(problem->q);
+  assert(problem->poly.set);
+  if (problem->poly.set->id != SICONOS_SET_POLYHEDRON)
+  {
+    numerics_error_nonfatal("avi_caoferris", "unsupported set type %d", problem->poly.set->id);
+    return -1;
+  }
   unsigned n = problem->size;
   assert(n > 0);
-  unsigned nrows = problem->poly->size_ineq;
+  unsigned nrows = problem->poly.split->size_ineq;
   assert(nrows - n > 0);
   unsigned n_I = nrows - n; /* Number of inactive constraints */
 
@@ -48,7 +58,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   LinearComplementarityProblem lcplike_pb;
   lcplike_pb.size = nrows;
   NumericsMatrix num_mat;
-  fillNumericsMatrix(&num_mat, NM_DENSE, nrows, nrows, calloc(nrows*nrows, sizeof(double)));
+  NM_fill(&num_mat, NM_DENSE, nrows, nrows, calloc(nrows*nrows, sizeof(double)));
 
   lcplike_pb.M = &num_mat;
 
@@ -61,11 +71,11 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   double* d_vec = (double *)malloc(nrows*sizeof(double));
   lapack_int* basis = (lapack_int *)malloc((2*nrows+1)*sizeof(lapack_int));
 
-  siconos_find_vertex(problem->poly, n, basis);
+  siconos_find_vertex(problem->poly.split, n, basis);
   DEBUG_PRINT_VEC_INT(basis, nrows+1);
-  const double* H = problem->poly->H->matrix0;
+  const double* H = problem->poly.split->H->matrix0;
   assert(H);
-  const double* K = problem->poly->K;
+  const double* K = problem->poly.split->K;
   /* Set of active constraints */
   unsigned* A = (unsigned*)malloc(n*sizeof(unsigned));
   lapack_int* active_constraints = &basis[nrows+1];
@@ -225,7 +235,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   free(B_I_T);
   free(copyA);
   free(B_A_T);
-  freeNumericsMatrix(lcplike_pb.M);
+  NM_free(lcplike_pb.M);
   free(lcplike_pb.q);
   free(a_bar);
 

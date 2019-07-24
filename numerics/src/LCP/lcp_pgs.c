@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,10 +30,16 @@
 #include <assert.h>
 #include "SiconosBlas.h"
 #include "numerics_verbose.h"
+
+
+
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
 void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
-  double * M = problem->M->matrix0;
+  NumericsMatrix * M = problem->M;
   double * q = problem->q;
 
   assert(M);
@@ -47,12 +53,12 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
   double qs, zi;
 
   /* Solver parameters */
-  int itermax = options->iparam[0];
-  double tol = options->dparam[0];
+  int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   if (verbose > 0)
   {
@@ -65,9 +71,11 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
   /* Preparation of the diagonal of the inverse matrix */
   double * diag = (double*)malloc(n * sizeof(double));
+  double diag_i = 0.0;
   for (i = 0 ; i < n ; ++i)
   {
-    if (fabs(M[i * n + i]) < DBL_EPSILON)
+    diag_i = NM_get_value(M,i,i);
+    if (fabs(diag_i) < DBL_EPSILON)
     {
       if (verbose > 0)
       {
@@ -79,7 +87,7 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
       free(diag);
       return;
     }
-    else diag[i] = 1.0 / M[i * n + i];
+    else diag[i] = 1.0 / diag_i;
   }
 
   /* Iterations*/
@@ -96,8 +104,15 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     for (i = 0 ; i < n ; ++i)
     {
-      z[i] = 0.0;
-      zi = -(q[i] + cblas_ddot(n , &M[i] , n , z , 1)) * diag[i];
+      //z[i] = 0.0;
+
+      zi =q[i];
+      DEBUG_PRINTF("zi = %e\n", zi);
+      NM_row_prod_no_diag1x1(n, i, i, M, z, &zi, false);
+      DEBUG_PRINTF("diag[i] = %e\t zi = %e\n",diag[i], zi);
+      zi = -(zi) * diag[i];
+
+      
       if (zi < 0) z[i] = 0.0;
       else z[i] = zi;
       /* z[i]=fmax(0.0,-( q[i] + ddot_( (integer *)&n , &M[i] , (integer *)&incxn , z , (integer *)&incy ))*diag[i]);*/
@@ -114,13 +129,16 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
     }
   }
 
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
   if (err > tol)
   {
-    printf("Siconos/Numerics: lcp_pgs: No convergence of PGS after %d iterations\n" , iter);
-    printf("The residue is : %g \n", err);
+    if (verbose > 0)
+    {
+      printf("Siconos/Numerics: lcp_pgs: No convergence of PGS after %d iterations\n" , iter);
+      printf("The residue is : %g \n", err);
+    }
     *info = 1;
   }
   else
@@ -149,15 +167,15 @@ int linearComplementarity_pgs_setDefaultSolverOptions(SolverOptions* options)
   options->internalSolvers = NULL;
   options->isSet = 1;
   options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
+  options->iSize = 15;
+  options->dSize = 15;
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-6;
-  options->dparam[1] = 1.0;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 1.0;
 
 
   return 0;

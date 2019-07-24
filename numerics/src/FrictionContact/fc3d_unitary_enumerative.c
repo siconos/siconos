@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <math.h>
 
+#include "numerics_verbose.h"
 #include "fc3d_Solvers.h"
 #include "Friction_cst.h"
 #include "op3x3.h"
@@ -81,7 +82,7 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
   }
   else
   {
-    printf("FC3D_unitary_enumerative: degre of polynom is 0.");
+    if (verbose) printf("FC3D_unitary_enumerative: degre of polynom is 0.");
     degp1 = 1;
   }
   (*nbRealRacines) = 0;
@@ -244,9 +245,13 @@ int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem, d
   }
 
   /*sticking ? 0=MR+q*/
-  int info = solv3x3(M, reaction, Q);
-  if(info)
-    numerics_warning("fc3d_unitary_enumerative_test_non_sliding", "NaN output in solv3x3");
+  //int info = solv3x3(M, reaction, Q);
+  reaction[0] = Q[0];
+  reaction[1] = Q[1];
+  reaction[2] = Q[2];
+  int info = solve_3x3_gepp(M, reaction);
+  if(info && (verbose > 0))
+    numerics_warning("fc3d_unitary_enumerative_test_non_sliding", "NaN output in solve_3x3_gepp");
   M = M00;
   reaction = reaction0;
   Q = Q0;
@@ -749,11 +754,11 @@ int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* probl
 #ifdef FC3D_UE_DEBUG
 
 #endif
-  printf("fc3d_unitary_enumerative_poly_nu (FAILED) M:\n");
-  print3x3(M);
+  if (verbose) printf("fc3d_unitary_enumerative_poly_nu (FAILED) M:\n");
+  if (verbose) print3x3(M);
   M = M00;
-  printf("fc3d_unitary_enumerative_poly_nu (FAILED) Q:\n");
-  print3(Q);
+  if (verbose) printf("fc3d_unitary_enumerative_poly_nu (FAILED) Q:\n");
+  if (verbose) print3(Q);
   Q = Q0;
   return -1;
 }

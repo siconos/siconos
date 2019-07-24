@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #define SiconosBulletCollisionManager_h
 
 #include <MechanicsFwd.hpp>
+#include <BulletSiconosFwd.hpp>
 
 #include <SiconosCollisionManager.hpp>
 #include <SiconosShape.hpp>
@@ -42,8 +43,11 @@ struct SiconosBulletOptions
   double contactProcessingThreshold;
   double worldScale;
   bool useAxisSweep3;
+  bool clearOverlappingPairCache;
   unsigned int perturbationIterations;
   unsigned int minimumPointsPerturbationThreshold;
+  bool enableSatConvex;
+  bool enablePolyhedralContactClipping;
 };
 
 struct SiconosBulletStatistics
@@ -75,8 +79,21 @@ public:
   virtual ~SiconosBulletCollisionManager();
 
 protected:
+  bool _with_equality_constraints;
   SiconosBulletOptions _options;
   SiconosBulletStatistics _stats;
+
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::BulletR makeBulletR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
+                                  SP::RigidBodyDS ds2, SP::SiconosShape shape2,
+                                  const btManifoldPoint &);
+  
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet5DR makeBullet5DR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
+                                  SP::RigidBodyDS ds2, SP::SiconosShape shape2,
+                                  const btManifoldPoint &);
 
 public:
   StaticContactorSetID insertStaticContactorSet(
@@ -84,11 +101,28 @@ public:
 
   bool removeStaticContactorSet(StaticContactorSetID id);
 
+  void removeBody(const SP::RigidBodyDS& body);
+
   void updateInteractions(SP::Simulation simulation);
+
+  std::vector<SP::SiconosCollisionQueryResult>
+  lineIntersectionQuery(const SiconosVector& start, const SiconosVector& end,
+                        bool closestOnly=false, bool sorted=true);
+
+  void clearOverlappingPairCache();
 
   const SiconosBulletOptions &options() const { return _options; }
   const SiconosBulletStatistics &statistics() const { return _stats; }
   void resetStatistics() { _stats = SiconosBulletStatistics(); }
+
+  /** Set the usage of equality constraints. When the number
+      of objects is huge as in granular material, the usage
+      of equality constraint breaks scalability.
+      This have to be fixed.
+   * \param choice a boolean, default is True.
+   */
+  void useEqualityConstraints(bool choice=true)
+  { _with_equality_constraints = choice; };
 };
 
 #endif /* SiconosBulletCollisionManager.hpp */

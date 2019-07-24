@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,15 +25,16 @@
 #include <string>
 #include "SiconosSerialization.hpp"
 
+#ifdef __clang_analyzer__
+#define NO_RETURN  __attribute__((analyzer_noreturn))
+#else
+#define NO_RETURN
+#endif
+
 /** General Siconos Exception
  *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 05/25/2004
- *
- *
  * SiconosException should not be throws directly; prefer to use an inherit class
- * This exception can be catched by "catch(SiconosException)"
+ * This exception can be caught by "catch(SiconosException)"
  *
  */
 class SiconosException

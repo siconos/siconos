@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,18 @@
  * limitations under the License.
 */
 #include "NonSmoothDynamicalSystem.hpp"
-#include "Topology.hpp"
 #include "Interaction.hpp"
-#include "LagrangianLinearTIDS.hpp"
-#include "FirstOrderLinearTIDS.hpp"
 #include "Relation.hpp"
 
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <functional>
 using namespace std::placeholders;
-#else
-#include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
-#endif
 
+#include <limits>
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
 #include "debug.h"
 
 
@@ -39,17 +36,84 @@ using namespace RELATION;
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // Default constructor
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(): _BVP(false), _mIsLinear(true)
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem():
+  _t(0.0), _t0(0.0), _T(0.0), _title("none"), _author("nobody"), _description("none"),
+  _date("none"), _BVP(false) , _mIsLinear(true)
 {
   // === Builds an empty topology ===
   _topology.reset(new Topology());
-};
 
+  // we push a first element in the list to avoid acces to null when
+  // we call --_changeLog.end();
+  _changeLog.push_back(Change(clearTopology));
+  DEBUG_EXPR((--_changeLog.end())->display(););
+
+  // see Simulation::initialize() for an explanation of why we
+  // implement this changelog
+};
+//  constructor
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0, double T):
+  _t(t0), _t0(t0), _T(T),
+  _title("none"), _author("nobody"), _description("none"),
+  _date("none"), _BVP(false), _mIsLinear(true)
+{
+  // === Builds an empty topology ===
+  _topology.reset(new Topology());
+  // we push a first element in the list to avoid acces to null when
+  // we call --_changeLog.end();
+  _changeLog.push_back(Change(clearTopology));
+  DEBUG_EXPR((--_changeLog.end())->display());
+
+  // see Simulation::initialize() for an explanation of why we
+  // implement this changelog
+};
 
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
   clear();
 }
+
+// changelog
+void NonSmoothDynamicalSystem::Change::display() const
+{
+  std::cout << "Changes display   " << this <<std::endl;
+  if (typeOfChange == addDynamicalSystem)
+  {
+    std::cout << "typeOfChange : " << typeOfChange << " : addDynamicalSystem" << std::endl;
+  }
+  else if (typeOfChange == rmDynamicalSystem)
+  {
+    std::cout << "typeOfChange : " << typeOfChange << " : rmDynamicalSystem" << std::endl;
+  }
+  else if (typeOfChange == addInteraction)
+  {
+    std::cout << "typeOfChange : " << typeOfChange << " : addInteraction" << std::endl;
+  }
+  else if (typeOfChange == rmInteraction)
+  {
+    std::cout << "typeOfChange : " << typeOfChange << " : rmInteraction" << std::endl;
+  }
+  else if (typeOfChange == clearTopology)
+  {
+    std::cout << "typeOfChange : " << typeOfChange << " : clearTopology" << std::endl;
+  }
+}
+
+void NonSmoothDynamicalSystem::clearChangeLogTo(const ChangeLogIter& it)
+{
+  /* Given an interator into the changelog list, clear everything that
+   * comes before it. User must be careful calling this if he has two
+   * simulations, but in the one-simulation case (currently 100% of
+   * cases), calling this will prevent changelog from building up
+   * forever. Important especially for simulations using an
+   * InteractionManager, e.g. mechanics_run.py. */
+  while (_changeLog.begin() != it.it) {
+    _changeLog.pop_front();
+    assert((_changeLog.end() != it.it) && (_changeLog.begin() != _changeLog.end())
+           && "NSDS::clearChangeLogTo: iterator not in list!");
+  }
+}
+
 
 // === DynamicalSystems management ===
 
@@ -59,34 +123,50 @@ void NonSmoothDynamicalSystem::display() const
   std::cout << "---> isBVP = " << _BVP <<std::endl;
   dynamicalSystems()->begin();
   _topology->indexSet0()->display();
+  std::cout << "---> last change : " <<std::endl;
+  (--_changeLog.end())->display();
   std::cout << "===================================================" <<std::endl;
 }
 
-#include <limits>
-double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
+void  NonSmoothDynamicalSystem::insertDynamicalSystem(SP::DynamicalSystem ds)
 {
-  // calculate the max value of all DS convergence indicators
-  double convergenceIndicator = -std::numeric_limits<double>::infinity();
-  double dsIndic ;
-  DynamicalSystemsGraph::VIterator vi;
-  for (vi = dynamicalSystems()->begin(); vi != dynamicalSystems()->end(); ++vi)
-  {
-    dsIndic = dynamicalSystems()->bundle(*vi)->dsConvergenceIndicator();
-    if (dsIndic > convergenceIndicator) convergenceIndicator = dsIndic;
+  // some checks here ...
+  if (!ds) {
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem::insertDynamicalSystem :: DS is nul");
   }
-  return(convergenceIndicator);
+
+  // Do not insert the same ds several times : results in errors in initialisation process.
+  if(! _topology->hasDynamicalSystem(ds))
+    {
+      _topology->insertDynamicalSystem(ds);
+      _changeLog.push_back(Change(addDynamicalSystem,ds));
+      _mIsLinear = ((ds)->isLinear() && _mIsLinear);
+    }
+}
+
+void  NonSmoothDynamicalSystem::removeDynamicalSystem(SP::DynamicalSystem ds)
+{
+  _topology->removeDynamicalSystem(ds);
+  _changeLog.push_back(Change(rmDynamicalSystem,ds));
+}
+void  NonSmoothDynamicalSystem::removeInteraction(SP::Interaction inter)
+{
+  _topology->removeInteraction(inter);
+  _changeLog.push_back(Change(rmInteraction,inter));
 }
 
 void NonSmoothDynamicalSystem::link(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
-  _mIsLinear = ((inter)->relation()->isLinear() && _mIsLinear);
+  _mIsLinear = (inter->relation()->isLinear() && _mIsLinear);
   _topology->link(inter, ds1, ds2);
+  _changeLog.push_back(Change(addInteraction,inter));
 };
 
 
 void NonSmoothDynamicalSystem::clear()
 {
   _topology->clear();
+  _changeLog.push_back(Change(clearTopology));
 }
 
 void NonSmoothDynamicalSystem::setSymmetric(bool val)
@@ -164,7 +244,7 @@ void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForInput() <= level);
     assert(inter->upperLevelForInput() >= level);
-    inter->computeInput(time, indexSet0->properties(*ui), level);
+    inter->computeInput(time, level);
   }
 
   DEBUG_END("Nonsmoothdynamicalsystem::updateInput(double time, unsigned int level)\n");
@@ -188,12 +268,61 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    inter->computeOutput(time, indexSet0->properties(*ui), level);
+    inter->computeOutput(time, level);
   }
   DEBUG_END("NonSmoothDynamicalSystem::updateOutput(unsigned int level)\n");
-
 }
 
+
+void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level_min, unsigned int level_max)
+{
+
+  // To compute output(level) (ie with y[level]) for all Interactions in I0
+  // and for a range of levels in a single pass through I0.
+  //  assert(level>=0);
+  
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = _topology->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    assert(inter->lowerLevelForOutput() <= level_max);
+    assert(inter->upperLevelForOutput() >= level_min);
+    for(unsigned int level = level_min; level<=level_max; ++level)
+      inter->computeOutput(time, level);
+  }
+}
+
+void NonSmoothDynamicalSystem::computeInteractionJacobians(double time)
+{
+
+  DEBUG_BEGIN("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  SP::InteractionsGraph indexSet0 = _topology->indexSet0();
+  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet0->bundle(*ui);
+    inter->relation()->computeJach(time, *inter);
+    inter->relation()->computeJacg(time, *inter);
+  }
+  DEBUG_END("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+}
+
+void NonSmoothDynamicalSystem::computeInteractionJacobians(double time, InteractionsGraph& indexSet)
+{
+  DEBUG_BEGIN("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+  InteractionsGraph::VIterator ui, uiend;
+  SP::Interaction inter;
+  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  {
+    inter = indexSet.bundle(*ui);
+    inter->relation()->computeJach(time, *inter);
+    inter->relation()->computeJacg(time, *inter);
+  }
+  DEBUG_END("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
+}
 
 void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)
 {

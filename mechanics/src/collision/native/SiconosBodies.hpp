@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,10 @@
 */
 #ifndef SiconosBodies_hpp
 #define SiconosBodies_hpp
-
-#include "MechanicsFwd.hpp"
+#include <MechanicsFwd.hpp>
 #include <SiconosFwd.hpp>
 #include <SiconosSerialization.hpp>
+#include <Simulation.hpp>
 
 /** SiconosBodies : a Siconos Model, some plans and space filtering capabilities
  */
@@ -40,7 +40,7 @@ protected:
 
   SP::FMatrix _moving_plans;
   SP::SiconosMatrix _plans;
-  SP::Model _model;
+  SP::Simulation _sim;
   SP::SpaceFilter _playground;
 
 public:
@@ -49,9 +49,9 @@ public:
 
   virtual void compute();
 
-  SP::Model model()
+  SP::Simulation simulation()
   {
-    return _model;
+    return _sim;
   }
 
 

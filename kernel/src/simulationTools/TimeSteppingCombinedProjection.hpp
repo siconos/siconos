@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,6 @@
 
 /** Time-Stepping scheme
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.4.0.
- *  \date (Creation) May 2012
- *
  */
 class TimeSteppingCombinedProjection : public TimeStepping
 {
@@ -44,7 +40,7 @@ protected:
    */
   unsigned int _indexSetLevelForProjection;
 
-  /** Cumulated Number of steps perfomed is the Newton Loop */
+  /** Cumulated Number of steps performed is the Newton Loop */
   unsigned int _cumulatedNewtonNbIterations;
 
   /** Number of iteration of projection
@@ -118,6 +114,7 @@ public:
 
 
   /** Constructor with the time-discretisation.
+   * \param nsds the nsds that we want to simulate
    *  \param td a pointer to a timeDiscretisation (linked to the model
    *  that owns this simulation)
    *  \param osi a one step integrator
@@ -125,11 +122,13 @@ public:
    *  \param osnspb_pos a one step non smooth problem for the position formulation
    *  \param _level
    */
-  TimeSteppingCombinedProjection(SP::TimeDiscretisation td,
-                                 SP::OneStepIntegrator osi,
-                                 SP::OneStepNSProblem osnspb_velo,
-                                 SP::OneStepNSProblem osnspb_pos,
-                                 unsigned int _level = 2);
+  TimeSteppingCombinedProjection(
+    SP::NonSmoothDynamicalSystem nsds,
+    SP::TimeDiscretisation td,
+    SP::OneStepIntegrator osi,
+    SP::OneStepNSProblem osnspb_velo,
+    SP::OneStepNSProblem osnspb_pos,
+    unsigned int _level = 2);
 
 
   /** default constructor
@@ -157,7 +156,7 @@ public:
     return _nbCumulatedProjectionIteration;
   }
 
-  /** get the  Cumulated Number of steps perfomed in the Newton Loop
+  /** get the  Cumulated Number of steps performed in the Newton Loop
    * \return unsigned int
    */
   inline unsigned int cumulatedNewtonNbIterations()

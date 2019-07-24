@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 #define FRICTIONCONTACT3DSOLVERS_H
 
 /*!\file fc3d_Solvers.h
-  \brief Subroutines for the resolution of contact problems with friction (3-dimensional case).\n
+  \brief Subroutines for the resolution of contact problems with friction (3-dimensional case).
 
 */
 
@@ -34,8 +34,8 @@
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
 #include "fc3d_unitary_enumerative.h"
 #include "Friction_cst.h"
-#include "SiconosCompat.h"
 #include "fc3d_nonsmooth_Newton_natural_map.h"
+#include "fc3d_local_problem_tools.h"
 
 /** pointer to function used to call local solver */
 typedef int (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions *);
@@ -80,7 +80,7 @@ extern "C"
       \param options the solver options :
       [in] iparam[0] : Maximum iteration number
 
-      [in] iparam[SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION (7)] : error computation method :
+      [in] iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION (7)] : error computation method :
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL (0) : Full error computation with velocity computation
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL (1) : Light error computation with incremental values on reaction verification of absolute error at the end
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT (2) : only light error computation (velocity not computed)
@@ -114,22 +114,22 @@ extern "C"
   */
   void fc3d_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
-  void fc3d_nsgs_fillMLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact);
-
-  void fc3d_nsgs_computeqLocal(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double * reaction, int contact);
-
   void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update, FreeSolverNSGSPtr* freeSolver, ComputeErrorPtr* computeError,
-                                FrictionContactProblem* problem, FrictionContactProblem* localproblem,
-                                         SolverOptions * options, SolverOptions * localsolver_options);
+                                         FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+                                         SolverOptions * options);
 
   /** set the default solver parameters and perform memory allocation for NSGS
       \param options the pointer to the array of options to set
   */
   int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options);
 
+  void fc3d_admm(FrictionContactProblem*  problem, double*  reaction,
+                 double*  velocity,
+                 int*  info, SolverOptions*  options);
 
-
-
+  void fc3d_admm_init(FrictionContactProblem* problem, SolverOptions* options);
+  void fc3d_admm_free(FrictionContactProblem* problem, SolverOptions* options);
+  int fc3d_admm_setDefaultSolverOptions(SolverOptions* options);
   /** Non-Smooth Gauss Seidel in velocity solver for friction-contact 3D problem
      \param problem the friction-contact 3D problem to solve
      \param velocity global vector (n), in-out parameter
@@ -163,6 +163,8 @@ extern "C"
   */
   int fc3d_proximal_setDefaultSolverOptions(SolverOptions* options);
 
+
+  
   /** Fixed point solver for friction-contact 3D problem based on the Tresca
   problem with fixed friction threshold
     \param problem the friction-contact 3D problem to solve
@@ -180,6 +182,24 @@ extern "C"
    *  \param options the pointer to the array of options to set
    */
   int fc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options);
+
+  /** Fixed point solver for friction-contact 3D problem based on the Panagiotopoulos
+  method based on an alternative technique between the normal problem and the tangential one.
+    \param problem the friction-contact 3D problem to solve
+    \param velocity global vector (n), in-out parameter
+    \param reaction global vector (n), in-out parameters
+    \param info return 0 if the solution is found
+    \param options the solver options :
+    iparam[0] : Maximum iteration number
+    The internal (local) solver must set by the SolverOptions options[1] : possible internal solvers is NSGS.
+  */
+  void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+
+  /** set the default solver parameters and perform memory allocation for PFP
+   *  \param options the pointer to the array of options to set
+   */
+  int fc3d_Panagiotopoulos_FixedPoint_setDefaultSolverOptions(SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for SOCLCP
    *  \param options the pointer to the array of options to set
@@ -216,13 +236,13 @@ extern "C"
    *   if dparam[3] <= 0 then  a line-search is performed. iparam[2] is the maximum number of iteration is the line--search.
    *   The internal (local) solver must set by the SolverOptions options->internalsolvers.
   */
-  void fc3d_ProjectedGradientOnCylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for NSGS
       \param options the pointer to the array of options to set
   */
-  int fc3d_ProjectedGradientOnCylinder_setDefaultSolverOptions(SolverOptions* options);
-
+  int fc3d_ConvexQP_ProjectedGradient_Cylinder_setDefaultSolverOptions(SolverOptions* options);
+  
   /**Fixed Point solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem : the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter
@@ -265,11 +285,13 @@ extern "C"
       dparam[3] : rho . if dparam[3] >0 then rho=dparam[3] otherwise a computataion of rho is assumed.
   */
   void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+  void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   /** set the default solver parameters and perform memory allocation for DSFP
     \param options the pointer to the array of options to set
   */
   int fc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options);
+  int fc3d_VI_FixedPointProjection_Cylinder_setDefaultSolverOptions(SolverOptions* options);
 
   /**Extra Gradient solver for friction-contact 3D problem based on the De Saxce Formulation
       \param problem the friction-contact 3D problem to solve
@@ -363,10 +385,16 @@ extern "C"
       \param options the pointer to the array of options to set
       \return info  =0 if a trivial solution has been found, else = -1
   */
-  int checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
+  int fc3d_checkTrivialCase(FrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
 
 
   void fc3d_nonsmooth_Newton_AlartCurnier2(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
+
+  
+  void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
+                                         SolverOptions* options,
+                                         SolverOptions* internalsolver_options,
+                                         double error);
 
   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,12 +100,12 @@ void SMCTest::test_iSMC_ZOH()
   simZOH->run();
   SimpleMatrix& data = *simZOH->data();
   ioMatrix::write("iSMC_ZOH.dat", "ascii", data, "noDim");
-  // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("iSMC.ref", "ascii", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_iSMC_ZOH : ", (data - dataRef).normInf() < _tol, true);
+
+  double error =0.0;
+  bool test = !((error=ioMatrix::compareRefFile(data, "iSMC.ref", _tol)) >= 0.0
+                && error > _tol);
+  std::cout << "------- Integration done -------" << test <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
 }
 
 void SMCTest::test_iSMC_Lsodar()
@@ -120,12 +120,11 @@ void SMCTest::test_iSMC_Lsodar()
   simLsodar->run();
   SimpleMatrix& data = *simLsodar->data();
   ioMatrix::write("iSMC_Lsodar.dat", "ascii", data, "noDim");
-  // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("iSMC.ref", "ascii", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_iSMC_Lsodar : ", (data - dataRef).normInf() < _tol, true);
+  double error =0.0;
+  bool test = !((error=ioMatrix::compareRefFile(data, "iSMC.ref", _tol)) >= 0.0
+                && error > _tol);
+  std::cout << "------- Integration done -------" << test <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
 }
 
 void SMCTest::test_eSMC_ZOH()
@@ -140,12 +139,11 @@ void SMCTest::test_eSMC_ZOH()
   simZOH->run();
   SimpleMatrix& data = *simZOH->data();
   ioMatrix::write("eSMC_ZOH.dat", "ascii", data, "noDim");
-  // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("eSMC.ref", "ascii", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_iSMC_ZOH : ", (data - dataRef).normInf() < _tol, true);
+  double error =0.0;
+  bool test = !((error=ioMatrix::compareRefFile(data, "eSMC.ref", _tol)) >= 0.0
+                && error > _tol);
+  std::cout << "------- Integration done -------" << test <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
 }
 
 void SMCTest::test_eSMC_Lsodar()
@@ -160,12 +158,11 @@ void SMCTest::test_eSMC_Lsodar()
   simLsodar->run();
   SimpleMatrix& data = *simLsodar->data();
   ioMatrix::write("eSMC_Lsodar.dat", "ascii", data, "noDim");
-  // Reference Matrix
-  SimpleMatrix dataRef(data);
-  dataRef.zero();
-  ioMatrix::read("eSMC.ref", "ascii", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------" <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_iSMC_Lsodar : ", (data - dataRef).normInf() < _tol, true);
+  double error =0.0;
+  bool test = !((error=ioMatrix::compareRefFile(data, "eSMC.ref", _tol)) >= 0.0
+                && error > _tol);
+  std::cout << "------- Integration done -------" << test <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
 }
 
 #ifdef HAS_EXTREME_POINT_ALGO

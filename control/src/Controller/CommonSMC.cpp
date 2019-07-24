@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,18 @@
 #include "SimulationTools.hpp"
 #include "CommonSMC.hpp"
 #include "ControlSensor.hpp"
-#include "Model.hpp"
 #include "FirstOrderR_helpers.hpp"
 
 #include <string>
 
-void CommonSMC::initialize(const Model& m)
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
+
+void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulation & s)
 {
+  DEBUG_BEGIN("CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulation & s)\n");
   if (!_Csurface && _pluginhName.empty())
   {
     RuntimeException::selfThrow("CommonSMC::initialize - you have to set either _Csurface or h(.) before initializing the Actuator");
@@ -36,7 +41,7 @@ void CommonSMC::initialize(const Model& m)
     if (_Csurface && !_u)
       _u.reset(new SiconosVector(_Csurface->size(0), 0));
 
-    Actuator::initialize(m);
+    Actuator::initialize(nsds,s);
   }
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
   // We can use the Visitor mighty power to check if we have the right type
@@ -52,9 +57,6 @@ void CommonSMC::initialize(const Model& m)
   if (dsType == Type::FirstOrderNonLinearDS)
   {
     _DS_SMC.reset(new FirstOrderNonLinearDS(*(std11::static_pointer_cast<FirstOrderNonLinearDS>(DS))));
-  // We have to reset the _pluginb
-  SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderNonLinearDS>(_DS_SMC)->setb(dummyb);
   }
   else if (dsType == Type::FirstOrderLinearDS)
   {
@@ -62,27 +64,32 @@ void CommonSMC::initialize(const Model& m)
     std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setComputebFunction(NULL);
   // We have to reset the _pluginb
   SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setb(dummyb);
+  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else if (dsType == Type::FirstOrderLinearTIDS)
   {
     _DS_SMC.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
   // We have to reset the _pluginb
   SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
-  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setb(dummyb);
+  std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   }
   else
   {
     RuntimeException::selfThrow("LinearSMC is not yet implemented for system of type" + dsType);
   }
+  _DS_SMC->setNumber(999999);
+  _DS_SMC->initMemory(1);
+  _DS_SMC->swapInMemory();
+
+
   // Get the dimension of the output
   // XXX What if there is more than one sensor ...
-  double t0 = m.t0();
-  double T = m.finalT() + _td->currentTimeStep(0);
+  double t0 = nsds.t0();
+  double T = nsds.finalT() + _td->currentTimeStep(0);
   // create the SMC Model
-  _SMC.reset(new Model(t0, T));
+  _nsdsSMC.reset(new NonSmoothDynamicalSystem(t0, T));
   // Set up the simulation
-  _simulationSMC.reset(new TimeStepping(_td));
+  _simulationSMC.reset(new TimeStepping(_nsdsSMC,_td));
 
   unsigned int sDim = _u->size();
   // create the interaction
@@ -92,6 +99,7 @@ void CommonSMC::initialize(const Model& m)
       RuntimeException::selfThrow("LinearSMC::initialize - the Controller has a function g set but _pluginhName is not set\n You must supply a function to compute y=h(x,...)");
     if (!_pluginJacgxName.empty()) // Is the relation the most generic NL one ?
     {
+      DEBUG_PRINT("A FirstOrderNonLinearR is created for the _relationSMC\n");
       _relationSMC.reset(new FirstOrderNonLinearR());
       _relationSMC->setComputeJacgxFunction(SSLH::getPluginName(_pluginJacgxName), SSLH::getPluginFunctionName(_pluginJacgxName));
 
@@ -104,6 +112,7 @@ void CommonSMC::initialize(const Model& m)
     }
     else if (!_pluginJachlambdaName.empty() || _D) // Type2R ?
     {
+      DEBUG_PRINT("A FirstOrderType2R is created for the _relationSMC\n");
       _relationSMC.reset(new FirstOrderType2R());
       FirstOrderRHelpers::JacglambdaSetter(*_relationSMC, _B, _pluginJacglambdaName);
       FirstOrderRHelpers::JachxSetter(*_relationSMC, _Csurface, _pluginJachxName);
@@ -111,6 +120,7 @@ void CommonSMC::initialize(const Model& m)
     }
     else // Type1R
     {
+      DEBUG_PRINT("A FirstOrderType1R is created for the _relationSMC\n");
       _relationSMC.reset(new FirstOrderType1R());
       FirstOrderRHelpers::JacglambdaSetter(*_relationSMC, _B, _pluginJacglambdaName);
       FirstOrderRHelpers::JachxSetter(*_relationSMC, _Csurface, _pluginJachxName);
@@ -130,11 +140,13 @@ void CommonSMC::initialize(const Model& m)
   {
     if (!_plugineName.empty())
     {
+      DEBUG_PRINT("A FirstOrderLinearR is created for the _relationSMC\n");
       _relationSMC.reset(new FirstOrderLinearR(_Csurface, _B));
       _relationSMC->setComputeEFunction(SSLH::getPluginName(_plugineName), SSLH::getPluginFunctionName(_plugineName));
     }
     else
     {
+      DEBUG_PRINT("A FirstOrderLinearTIR is created for the _relationSMC\n");
       _relationSMC.reset(new FirstOrderLinearTIR(_Csurface, _B));
     }
       std11::static_pointer_cast<FirstOrderLinearTIR>(_relationSMC)->setDPtr(_D);
@@ -144,7 +156,7 @@ void CommonSMC::initialize(const Model& m)
   if (!_nsLawSMC)  _nsLawSMC.reset(new RelayNSL(sDim, -_alpha, _alpha));
   if (!_OSNSPB_SMC) _OSNSPB_SMC.reset(new Relay(_numericsSolverId));
 
-  _interactionSMC.reset(new Interaction(sDim, _nsLawSMC, _relationSMC));
+  _interactionSMC.reset(new Interaction(_nsLawSMC, _relationSMC));
 
   if (dsType == Type::FirstOrderNonLinearDS)
   {
@@ -155,21 +167,24 @@ void CommonSMC::initialize(const Model& m)
     _integratorSMC.reset(new ZeroOrderHoldOSI());
   }
 
-  _SMC->nonSmoothDynamicalSystem()->insertDynamicalSystem(_DS_SMC);
-  _SMC->nonSmoothDynamicalSystem()->topology()->setOSI(_DS_SMC, _integratorSMC);
-  _SMC->nonSmoothDynamicalSystem()->setName(_DS_SMC, "plant_SMC");
-  _SMC->nonSmoothDynamicalSystem()->link(_interactionSMC, _DS_SMC);
-  _SMC->nonSmoothDynamicalSystem()->setControlProperty(_interactionSMC, true);
-  _SMC->nonSmoothDynamicalSystem()->topology()->setName(_interactionSMC, "Sgn_SMC");
+  _nsdsSMC->insertDynamicalSystem(_DS_SMC);
+  _nsdsSMC->setName(_DS_SMC, "plant_SMC");
+  _nsdsSMC->link(_interactionSMC, _DS_SMC);
+  _nsdsSMC->setControlProperty(_interactionSMC, true);
+  _nsdsSMC->topology()->setName(_interactionSMC, "Sgn_SMC");
+
   _simulationSMC->setName("linear sliding mode controller simulation");
   _simulationSMC->insertIntegrator(_integratorSMC);
+  _simulationSMC->associate(_integratorSMC, _DS_SMC);
+
   // OneStepNsProblem
   _OSNSPB_SMC->numericsSolverOptions()->dparam[0] = _precision;
-  //    std::cout << _OSNSPB_SMC->numericsSolverOptions()->dparam[0] <<std::endl;
   _simulationSMC->insertNonSmoothProblem(_OSNSPB_SMC);
   // Finally we can initialize everything ...
-  _SMC->setSimulation(_simulationSMC);
-  _SMC->initialize();
+  _simulationSMC->associate(_integratorSMC,_DS_SMC);
+
+  // _SMC->setSimulation(_simulationSMC);
+   _simulationSMC->initialize();
 
   // Handy
   _eventsManager = _simulationSMC->eventsManager();
@@ -185,10 +200,12 @@ void CommonSMC::initialize(const Model& m)
     prod(*_Csurface, *_B, *tmpM);
     invertMatrix(*tmpM, *_invCB);
   }
+  DEBUG_END("CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulation & s)\n");
 }
 
 void CommonSMC::computeUeq()
 {
+  DEBUG_BEGIN("void CommonSMC::computeUeq()\n");
   assert(Type::value(*_DS_SMC) != Type::FirstOrderNonLinearDS && "CommonSMC::computeUeq the DS should be linear");
   assert(_Csurface && "CommonSMC::computeUeq the sliding variable should be linear subpsace of the state");
   FirstOrderLinearDS& LinearDS_SMC = *std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC);
@@ -222,6 +239,7 @@ void CommonSMC::computeUeq()
   tmpW->PLUForwardBackwardInPlace(*xTk);
   // add the contribution from the implicit part to ueq
   prod(-_thetaSMC, *quasiProjB_A, *xTk, *_ueq, false);
+  DEBUG_END("void CommonSMC::computeUeq()\n");
 
 }
 
@@ -279,5 +297,3 @@ void CommonSMC::setJacglambda(const std::string& plugin)
 {
   _pluginJacglambdaName = plugin;
 }
-
-

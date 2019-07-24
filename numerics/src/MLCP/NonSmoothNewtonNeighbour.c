@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -519,7 +519,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     if (verbose > 0)
     {
       printf("Non Smooth Newton, iteration number %i, norm grad psi= %14.7e , psi = %14.7e, normPhi = %e .\n", niter, norm_jacobian_psi_z, psi_z, normPhi_z);
-      printf(" -----------------------------------------------------------------------\n");
+      printf(" -----------\n");
     }
 
     NbLookingForANewZ++;
@@ -759,7 +759,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     /*      if( 1 || verbose>0)
     {
      printf("Non Smooth Newton, iteration number %i, error grad equal to %14.7e , psi value is %14.7e .\n",niter, terminationCriterion,psi_z);
-       printf(" -----------------------------------------------------------------------\n");
+       printf(" -----------\n");
        }*/
   }
 

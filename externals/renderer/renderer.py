@@ -49,7 +49,7 @@ from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion,gp_Vec, gp_XYZ
 from OCC.TopLoc import TopLoc_Location
 
 #from Siconos.Mechanics import IO
-import siconos.io.mechanics_io as IO
+import siconos.io.mechanics_run as IO
 from Quaternion import Quat
 from collections import Counter, defaultdict
 from itertools import groupby
@@ -590,11 +590,11 @@ BODY = """
     </div>
 <!---------------------------Progression Bar (end)----------------------------->
 
-    <script type="text/javascript" src="@SHARE_PATH@/threeJS_libraries/Three.js"></script>
-    <script type="text/javascript" src="@SHARE_PATH@/threeJS_libraries/OrbitControls.js"></script>
-    <script type="text/javascript" src="@SHARE_PATH@/threeJS_libraries/TrackballControls.js"></script>
-    <script type="text/javascript" src="@SHARE_PATH@/threeJS_libraries/JQuery.js"></script>
-    <script type="text/javascript" src="@SHARE_PATH@/threeJS_libraries/Stats.js"></script>
+    <script type="text/javascript" src="@SHARE_PATH@/node_modules/three/build/three.js"></script>
+    <script type="text/javascript" src="@SHARE_PATH@/node_modules/three/examples/js/controls/OrbitControls.js"></script>
+    <script type="text/javascript" src="@SHARE_PATH@/node_modules/three/examples/js/controls/TrackballControls.js"></script>
+    <script type="text/javascript" src="@SHARE_PATH@/node_modules/jquery/dist/jquery.js"></script>
+    <script type="text/javascript" src="@SHARE_PATH@/node_modules/stats.js/build/stats.min.js"></script>
     <script src="@REN_PATH@/interstellarVectors.json"></script>
     <script src="@REN_PATH@/interstellar.json"></script>@SCRIPTS@
     @VertexShaderDefinition@

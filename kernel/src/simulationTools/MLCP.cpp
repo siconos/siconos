@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,15 @@
 #include "EqualityConditionNSL.hpp"
 #include "Simulation.hpp"
 #include "OSNSMatrix.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
 // --- Numerics headers ---
 #include "NonSmoothDrivers.h"
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 
 using namespace RELATION;
+// #define DEBUG_NCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
@@ -184,7 +185,7 @@ int MLCP::compute(double time)
     }
     catch (...)
     {
-      std::cout << "exception catched" <<std::endl;
+      std::cout << "exception caught" <<std::endl;
       info = 1;
     }
 
@@ -208,7 +209,8 @@ int MLCP::compute(double time)
 void MLCP::display() const
 {
   std::cout << "======= MLCP of size " << _sizeOutput << " with: " <<std::endl;
-  std::cout << "======= m " << _m << " _n " << _n <<std::endl;
+  std::cout << " m (number of inequality constraints)" << _m <<std::endl;
+  std::cout << " n (number of equality constraints)  " << _n <<std::endl;
   LinearOSNS::display();
 }
 
@@ -217,7 +219,7 @@ void MLCP::initialize(SP::Simulation sim)
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
 
-  _numerics_problem.M = &*_M->getNumericsMatrix();
+  _numerics_problem.M = &*_M->numericsMatrix();
 }
 void  MLCP::updateInteractionBlocks()
 {

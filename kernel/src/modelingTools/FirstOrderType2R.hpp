@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 */
 
 /*! \file FirstOrderType2R.hpp
-  \brief non linear relations: \f$y=h(x,\lambda,z)\quadr=g(\lambda,z)\f$
+  \brief non linear relations: \f$y=h(x,\lambda,z), r=g(\lambda,z)\f$
  */
 
 #ifndef FirstOrderType2R_H
@@ -28,24 +28,24 @@
 typedef void (*Type2PtrH)(unsigned int, double*, unsigned int, double*, unsigned int, double*);
 typedef void (*Type2PtrG)(unsigned int, double*,  unsigned int, double*);
 
-/** FirstOrder Non Linear Relation.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27
- *
- * Derived from FirstOrderR - See this class for more comments.
+/** First order non linear Relation.
  *
  *  Relation for First Order Dynamical Systems, with:
- * \f{eqnarray}
- * y &=& h(x,\lambda,z)\\
- * r &=& g(\lambda,z)
- * \f}
+ *
+ * \rststar
+ *
+ * .. math::
+ *
+ *   y &= h(x,\lambda,z)\\
+ *   r &= g(\lambda,z)
+ *
+ * \endrststar
  *
  * Operators (and their corresponding plug-in):
-- h: saved in Interaction as y (plug-in: output[0])
-- \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
-- g: saved in DS as r ( input[0])
-- \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
+ * - h: saved in Interaction as y (plug-in: output[0])
+ * - \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
+ * - g: saved in DS as r ( input[0])
+ * - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
  *
  */
 class FirstOrderType2R : public FirstOrderR
@@ -55,14 +55,11 @@ protected:
   */
   ACCEPT_SERIALIZATION(FirstOrderType2R);
 
-//  /** \f$\nabla_x g\f$ aka K*/
-//  SP::SimpleMatrix _jacgx;
-
 public:
-  
+
   /** Basic contructor */
   FirstOrderType2R();
-  
+
   /** data constructor
    *  \param pluginh name of the plugin to compute h
    *  \param pluging name of the plugin to compute g
@@ -81,14 +78,15 @@ public:
   */
   ~FirstOrderType2R() {};
 
-
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
-   * \param DSlink link to DS variable
-   * \param workV work vectors to initialize
-   * \param workM work matrices to initialize
-  */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+   */
+  virtual void initialize(Interaction& inter);
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
 
   /** default function to compute y = h(x, lambda, t)
   * \param time the current time
@@ -112,11 +110,6 @@ public:
   *  \param C the matrix used to store the jacobian
   */
   virtual void computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& C);
-//  virtual void computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C);
-
-
-//  virtual void computeJachz(double time, Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-//  virtual void computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& D);
 
   /** default function to compute jacobianG according to lambda
   *  \param time current time (not used)
@@ -124,23 +117,30 @@ public:
   *  \param B the matrix used to store the jacobian
   */
   virtual void computeJacglambda(double time, SiconosVector& lambda, SimpleMatrix& B);
-//  virtual void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B);
+
+  /** default function to compute jacobianh according to lambda
+  *  \param time current time (not used)
+  *  \param x the state used to evaluate the jacobian
+  *  \param lambda the nonsmooth input used to evaluate the jacobian
+  *  \param D the matrix used to store the jacobian
+  */
+  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
 
   /** default function to compute y, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeOutput(double time, Interaction& inter,
+                             unsigned int level = 0);
 
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter,
+                            unsigned int level = 0);
 
   /** return true if the relation requires the computation of residu
       \return true if residu are required, false otherwise
@@ -150,13 +150,9 @@ public:
     return true;
   }
 
-  virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJach(double time, Interaction& inter);
 
-  virtual void computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SimpleMatrix& D);
-
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
-
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJacg(double time, Interaction& inter);
 
   ACCEPT_STD_VISITORS();
 

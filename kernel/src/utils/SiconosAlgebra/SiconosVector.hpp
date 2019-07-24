@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,9 @@
 #include "SiconosVectorFriends.hpp"
 #include "SiconosVectorException.hpp"
 
+struct SiconosVectorIterator;
+struct SiconosVectorConstIterator;
+
 /** Union of DenseVect and SparseVect pointers -
     Siconos::DENSE, num = 1,
     SPARSE, num = 4
@@ -37,10 +40,6 @@ union VECTOR_UBLAS_TYPE
 };
 
 /** Vectors of double. (Interface to various types of Boost-Ublas vectors).
- *
- * \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 07/21/2006
  *
  * Used to handle vectors of double.
  *
@@ -108,9 +107,9 @@ public:
 
   /** constructor with an input file
    *  \param filename a std::string which contain the file path
-   *  \param b a boolean to indicate if the file is in ascii
+   *  \param is_ascii a boolean to indicate if the file is in ascii
    */
-  SiconosVector(const std::string& filename, bool b = true);
+  SiconosVector(const std::string& filename, bool is_ascii);
 
   /** constructor for the concatenation of two vectors
    * \param v1 the first vector
@@ -248,7 +247,35 @@ public:
   /** put data of the vector into a std::string
    * \return std::string
    */
-  const std::string toString() const;
+  std::string toString() const;
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sv a SiconosVector
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SiconosVector& sv);
+
+  /** for iterator interface */
+  typedef SiconosVectorIterator iterator;
+
+  /** for iterator interface */
+  typedef SiconosVectorConstIterator const_iterator;
+
+  /** for iterator interface */
+  iterator begin();
+
+  /** for iterator interface */
+  const_iterator begin() const;
+
+  /** for iterator interface */
+  iterator end();
+
+  /** for iterator interface */
+  const_iterator end() const;
+
+  /** cast an SiconosVector to an std::vector<double> (performs copy) */
+  operator std::vector<double>();
 
   //************************** VECTORS HANDLING AND OPERATORS *******************************
 
@@ -372,6 +399,15 @@ public:
   SiconosVector& operator -=(const SiconosVector& v);
   SiconosVector& operator -=(const BlockVector& v);
 
+  /** component-wise exponential of a vector
+      \param input vector such that result (this) = exp(input)
+  */
+  void exp(SiconosVector& input);
+
+  /** component-wise exponential of a vector, in-place.
+      this = exp(this)
+  */
+  void exp_in_place();
 
   friend SiconosVector& operator *= (SiconosVector& v, const double& s);
 
@@ -442,6 +478,6 @@ public:
 
 };
 
-
+#include "SiconosVectorIterator.hpp"
 
 #endif

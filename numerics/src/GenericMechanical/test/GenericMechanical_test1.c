@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ int main(void)
   FILE * finput  =  0;
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
 
-  genericMechanicalProblem_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+  gmp_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
   options->iparam[0] = 100000000;
   //options->iparam[2]=1;
   printf("Test on ./data/GMP.dat\n");

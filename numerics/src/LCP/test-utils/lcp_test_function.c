@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ static inline char* strdup(char* src)
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include "NonSmoothDrivers.h"
 #include "lcp_test_function.h"
@@ -41,10 +42,17 @@ static inline char* strdup(char* src)
 #include "LCP_Solvers.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"
+#include "SiconosCompat.h"
+#include "NumericsVerbose.h"
+
+
+#ifdef __cplusplus
+using namespace std;
+#endif
 
 int lcp_test_function(FILE * f, int solverId, char* filename)
 {
-
+  numerics_set_verbose(2);
   int i, info = 0 ;
   LinearComplementarityProblem* problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
 
@@ -81,11 +89,11 @@ int lcp_test_function(FILE * f, int solverId, char* filename)
 
   if (!info)
   {
-    printf("test succeeded err = %e \n", options.dparam[1]);
+    printf("test succeeded err = %e \n", options.dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful err =%e  \n", options.dparam[1]);
+    printf("test unsuccessful err =%e  \n", options.dparam[SICONOS_DPARAM_RESIDU]);
   }
   free(z);
   free(w);
@@ -121,7 +129,7 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
   info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSGS_SBM);
 
-  solver_options_set(options->internalSolvers, solverId);
+  //solver_options_set(options->internalSolvers, solverId);
 
 #ifdef HAVE_GAMS_C_API
   if (solverId == SICONOS_LCP_GAMS)
@@ -149,11 +157,11 @@ int lcp_test_function_SBM(FILE * f, int solverId)
 
   if (!info)
   {
-    printf("test succeeded err=%e \n", options->dparam[1]);
+    printf("test succeeded err=%e \n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful err =%e \n", options->dparam[1]);
+    printf("test unsuccessful err =%e \n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   free(z);
   free(w);

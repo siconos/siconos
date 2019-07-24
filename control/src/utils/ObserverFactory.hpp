@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,10 +54,6 @@ template<class SubType> SP::Observer factory(SP::ControlSensor sensor, const Sic
 
 /** Registry Class for Observers.
  *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.6.0.
- *  \date (Creation) June 15, 2013
- *
  * Observer factory.
  * Use:
  *     ObserverFactory::Registry& regObserver(ObserverFactory::Registry::get()) ;
@@ -99,10 +95,6 @@ public :
 } ;
 
 /** Registration Class for Observers.
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.6.0.
- *  \date (Creation) June 15, 2013
  *
  * Class used for auto-registration of Observer-type objects.
  *

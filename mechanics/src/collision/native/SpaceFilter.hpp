@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@
 #include <SiconosFwd.hpp>
 #include <SiconosSerialization.hpp>
 #include <SiconosVisitor.hpp>
+#include <InteractionManager.hpp>
 
 /* local forwards (see SpaceFilter_impl.hpp) */
 DEFINE_SPTR(space_hash);
@@ -47,7 +48,8 @@ DEFINE_SPTR(DiskPlanRDeclaredPool);
 DEFINE_SPTR(CircleCircleRDeclaredPool);
 DEFINE_SPTR(Hashed);
 
-class SpaceFilter : public std11::enable_shared_from_this<SpaceFilter>
+class SpaceFilter : public InteractionManager,
+                    public std11::enable_shared_from_this<SpaceFilter>
 {
 
 protected:
@@ -63,23 +65,11 @@ protected:
   /** the cell size */
   unsigned int _cellsize;
 
-  /** interaction counter */
-  unsigned int _interID;
-
-  /** the siconos model */
-  SP::Model _model;
-
-  /** nslaws */
-  SP::NSLawMatrix _nslaws;
-
   /** plans */
   SP::SiconosMatrix _plans;
 
   /** moving plans */
   SP::FMatrix _moving_plans;
-
-  /* kee track of one step ns integrator initialization */
-  bool _osnsinit;
 
   /* the hash table */
   SP::space_hash _hash_table;
@@ -89,18 +79,22 @@ protected:
   SP::DiskPlanRDeclaredPool  diskplan_relations;
   SP::CircleCircleRDeclaredPool circlecircle_relations;
 
-  void _PlanCircularFilter(double A, double B, double C,
+  void _PlanCircularFilter(SP::Simulation,
+                           double A, double B, double C,
                            double xCenter, double yCenter, double width,
                            SP::CircularDS ds);
 
-  void _MovingPlanCircularFilter(unsigned int i,
+  void _MovingPlanCircularFilter(SP::Simulation,
+                                 unsigned int i,
                                  SP::CircularDS ds,
                                  double time);
 
-  void _PlanSphereLDSFilter(double A, double B, double C, double D,
+  void _PlanSphereLDSFilter(SP::Simulation,
+                            double A, double B, double C, double D,
                             SP::SphereLDS ds);
 
-  void _PlanSphereNEDSFilter(double A, double B, double C, double D,
+  void _PlanSphereNEDSFilter(SP::Simulation,
+                             double A, double B, double C, double D,
                              SP::SphereNEDS ds);
 
   /* visitors defined as Inner class */
@@ -142,16 +136,12 @@ public:
 
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
-              SP::Model model,
               SP::SiconosMatrix plans,
               SP::FMatrix moving_plans);
 
   SpaceFilter(unsigned int bboxfactor,
               unsigned int cellsize,
-              SP::Model model,
               SP::SiconosMatrix plans);
-
-  SpaceFilter(SP::Model model);
 
   SpaceFilter();
 
@@ -170,14 +160,6 @@ public:
    */
   void insert(SP::Hashed);
 
-  /* Insert a NonSmoothLaw between contactors i & contactors j.
-   * \param nslaw the non smooth law
-   * \param class1 contactor id
-   * \param class2 contactor id
-   */
-  void insert(SP::NonSmoothLaw nslaw, long unsigned int class1,
-              long unsigned int class2);
-
   /** get parameters
    */
 
@@ -188,37 +170,6 @@ public:
   inline unsigned int cellsize()
   {
     return _cellsize;
-  };
-
-  /** Get the model.
-      \return a Model object.
-   */
-  SP::Model model()
-  {
-    return _model;
-  };
-
-  /** Get non smooth laws.
-      \return a non smooth laws matrix : SP::NSLawMatrix
-   */
-  SP::NSLawMatrix nslaws()
-  {
-    return _nslaws;
-  };
-
-  /** Get a non smooth law.
-   * \param class1 collision group id of first contactor
-   * \param class2 collision group id of second contactor
-   * \return a pointer on a NonSmoothLaw object
-   */
-  SP::NonSmoothLaw nslaw(long unsigned int class1, long unsigned class2);
-
-  /** Get an interaction id.
-      \return an unsigned int
-   * */
-  unsigned int newInteractionId()
-  {
-    return _interID++;
   };
 
   /** get the neighbours
@@ -237,9 +188,9 @@ public:
   double minDistance(SP::Hashed h);
 
   /** Broadphase contact detection: add interactions in indexSet 0.
-   *  \param time the current time.
+   *  \param simulation the current simulation setup
    */
-  virtual void buildInteractions(double time);
+  virtual void updateInteractions(SP::Simulation simulation);
 
   /** Destructor.
    */

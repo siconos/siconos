@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* pr
       fprintf(file, "%d ", problem->blocksIsComp[i]);
     }
     fprintf(file, "\n");
-    printInFile(problem->M, file);
+    NM_write_in_file(problem->M, file);
 
     for (i = 0; i < problem->M->size1; i++)
     {
@@ -291,8 +291,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
     }
 
     //fprintf(file,"\n");
-    problem->M = newNumericsMatrix();
-    newFromFile(problem->M, file);
+    problem->M = NM_new_from_file(file);
     problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
 
     for (i = 0; i < problem->M->size1; i++)
@@ -494,7 +493,7 @@ void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* pr
 {
   if (problem->isStorageType1)
   {
-    freeNumericsMatrix(problem->M);
+    NM_free(problem->M);
     free(problem->M);
     free(problem->q);
     free(problem->blocksRows);

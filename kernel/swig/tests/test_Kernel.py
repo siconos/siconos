@@ -5,12 +5,12 @@ import siconos.kernel as K
 def test_autocast():
     dsA = K.LagrangianDS([0],[0],[[1]])
     dsB = K.FirstOrderLinearDS([0],[[1]])
-    model = K.Model(0, 0)
-    model.nonSmoothDynamicalSystem().insertDynamicalSystem(dsA)
-    model.nonSmoothDynamicalSystem().insertDynamicalSystem(dsB)
+    nsds = K.NonSmoothDynamicalSystem(0, 0)
+    nsds.insertDynamicalSystem(dsA)
+    nsds.insertDynamicalSystem(dsB)
 
-    assert(type(model.nonSmoothDynamicalSystem().dynamicalSystem(dsA.number())) == K.LagrangianDS)
-    assert(type(model.nonSmoothDynamicalSystem().dynamicalSystem(dsB.number())) == K.FirstOrderLinearDS)
+    assert(type(nsds.dynamicalSystem(dsA.number())) == K.LagrangianDS)
+    assert(type(nsds.dynamicalSystem(dsB.number())) == K.FirstOrderLinearDS)
 
 
 def test_getVector():
@@ -28,6 +28,34 @@ def test_getVector():
     v2 = K.SiconosVector(np.asarray([1, 2, 3]))
 
     assert (K.getVector(v1) == K.getVector(v2)).all()
+
+
+def test_castVector():
+    i = [1.0,4.0,3.0]
+    v = K.SiconosVector([1,2,3])
+    assert str(v) == '[3](1,2,3)'
+    repr(v)
+    assert v[0] == 1.0
+    try:
+        v[5]
+        raise Exception("expected IndexError")
+    except IndexError:
+        pass
+    v[1] = 4
+    assert v[1] == 4.0
+    try:
+        v[4] = 5
+        raise Exception("expected IndexError")
+    except IndexError:
+        pass
+    for x,y in zip(v,i):
+        assert x == y
+    for x,y in zip(list(v),i):
+        assert x == y
+    for x,y in zip(np.array(v),i):
+        assert x == y
+    assert 3.0 in v
+    assert 5.0 not in v
 
 
 def test_getMatrix():

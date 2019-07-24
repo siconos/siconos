@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@
 
 #include <boost/filesystem.hpp>
 
-#include "RegisterModel.hpp"
+#include "Simulation.hpp"
+#include "RegisterSimulation.hpp"
 
-#include <Model.hpp>
 
 namespace Siconos
 {
 
-  void save(SP::Model model, std::string filename)
+  void save(SP::Simulation s, const std::string& filename)
   {
     boost::filesystem::path tempf =
       boost::filesystem::path(filename + ".tmp");
@@ -41,12 +41,12 @@ namespace Siconos
     {
       if (destf.extension() == ".xml")
       {
-        RegisterModelOxml(ofs, model);
+        RegisterSimulationOxml(ofs, s);
       }
 
       else if (destf.extension() == ".bin")
       {
-        RegisterModelObin(ofs, model);
+        RegisterSimulationObin(ofs, s);
       }
     }
 
@@ -57,22 +57,23 @@ namespace Siconos
 /** load Siconos model from file
  * \param filename
  */
-  SP::Model load(std::string filename)
+  SP::Simulation load(const std::string& filename)
   {
-    SP::Model model(new Model());
+    //SP::Simulation s(new Simulation());
+    SP::Simulation s;
 
     std::ifstream ifs(filename.c_str());
     {
       if (boost::filesystem::path(filename).extension() == ".xml")
       {
-        RegisterModelIxml(ifs, model);
+        RegisterSimulationIxml(ifs, s);
       }
       else if (boost::filesystem::path(filename).extension() == ".bin")
       {
-        RegisterModelIbin(ifs, model);
+        RegisterSimulationIbin(ifs, s);
       }
     }
-    return model;
+    return s;
   }
 }
 #else
@@ -81,16 +82,16 @@ namespace Siconos
 namespace Siconos
 {
 
-  void save(SP::Model model, std::string filename)
+  void save(SP::Simulation s, const std::string& filename)
   {
     RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
   }
 
-  SP::Model load(std::string filename)
+  SP::Simulation load(const std::string& filename)
   {
     RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
     /* Dummy return to make every compiler happy  */
-    return std11::shared_ptr<Model>();
+    return std11::shared_ptr<Simulation>();
   }
 }
 #endif

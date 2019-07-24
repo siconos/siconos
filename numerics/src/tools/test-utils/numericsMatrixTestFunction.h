@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,25 @@
 extern "C"
 {
 #endif
-  int test_BuildNumericsMatrix(NumericsMatrix** MM);
-  int test_prodNumericsMatrix(NumericsMatrix** MM);
-  int test_prodNumericsMatrixNumericsMatrix(NumericsMatrix** MM);
-  int test_NM_row_prod(NumericsMatrix* M1, NumericsMatrix* M2);
-  int test_NM_row_prod_no_diag(NumericsMatrix* M1, NumericsMatrix* M2);
-  int test_NM_row_prod_non_square(NumericsMatrix* M3, NumericsMatrix* M4);
-  int test_NM_row_prod_no_diag_non_square(NumericsMatrix* M3, NumericsMatrix* M4);
-  int test_SBMRowToDense(SparseBlockStructuredMatrix *M);
-  int test_RowPermutationSBM(SparseBlockStructuredMatrix *M);
-  int test_ColPermutationSBM(SparseBlockStructuredMatrix *M);
+  NumericsMatrix * test_matrix_1(void);
+  NumericsMatrix * test_matrix_2(void);
+  NumericsMatrix * test_matrix_3(void);
+  NumericsMatrix * test_matrix_4(void);
+  NumericsMatrix * test_matrix_5(void);
+  NumericsMatrix * test_matrix_6(void);
+  
+  NumericsMatrix * test_matrix_9(void);
+  NumericsMatrix * test_matrix_10(void);
+  NumericsMatrix * test_matrix_20(void);
+  
+  int SBM_dense_equal(SparseBlockStructuredMatrix * M, double * m, double tol);
+  int NM_dense_equal(NumericsMatrix * M, double * m, double tol);
+  int test_build_first_4_NM(NumericsMatrix** MM);
+
+  
+  int test_SBM_row_to_dense(SparseBlockStructuredMatrix *M);
+  int test_SBM_row_permutation(SparseBlockStructuredMatrix *M);
+  int test_SBM_column_permutation(SparseBlockStructuredMatrix *M);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

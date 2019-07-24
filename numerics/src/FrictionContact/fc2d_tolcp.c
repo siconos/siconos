@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * l
   }
   int nc = problem->numberOfContacts;
   lcp_problem->size = 3 * nc ;
-  lcp_problem->M = newNumericsMatrix();
+  lcp_problem->M = NM_new();
   lcp_problem->M->size0 = 3 * nc ;
   lcp_problem->M->size1 = 3 * nc ;
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,23 +28,20 @@
 #include "NewtonEulerR.hpp"
 #include "TypeName.hpp"
 #include "NonSmoothLaw.hpp"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "debug.h"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "EventsManager.hpp"
+#include "OneStepNSProblem.hpp"
 
 #include <ciso646>
 
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_FUNCTIONAL) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #include <functional>
 using namespace std::placeholders;
-#else
-#include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
-#endif
 
 
 using namespace RELATION;
@@ -52,7 +49,6 @@ using namespace RELATION;
 void TimeSteppingD1Minus::initOSNS()
 {
   // initialize OSNS for InteractionsGraph from Topology
-  assert(_nsds->topology()->isUpToDate());
   SP::Topology topo =  _nsds->topology();
 
   // there is at least one OSNP
@@ -69,7 +65,7 @@ void TimeSteppingD1Minus::initOSNS()
   }
 }
 
-TimeSteppingD1Minus::TimeSteppingD1Minus(SP::TimeDiscretisation td, int nb) : Simulation(td)
+TimeSteppingD1Minus::TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb) : Simulation(nsds, td)
 {
   (*_allNSProblems).resize(nb);
 }
@@ -179,6 +175,10 @@ void TimeSteppingD1Minus::run()
 
 void TimeSteppingD1Minus::advanceToEvent()
 {
+
+  initialize();
+
+  
   // Update interactions if a manager was provided
   updateInteractions();
 
@@ -252,6 +252,25 @@ void TimeSteppingD1Minus::advanceToEvent()
 
   // indexset (I_{k+1}^+) is calculated in Simulation::processEvent
 }
+
+
+void TimeSteppingD1Minus::updateInput(unsigned int level)
+{
+  DEBUG_BEGIN("TimeSteppingD1Minus::updateInput(unsigned int level)\n");
+  OSIIterator itOSI;
+  // 1 - compute input (lambda -> r)
+  if (!_allNSProblems->empty())
+  {
+    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+      (*itOSI)->updateInput(nextTime(),level);
+    //_nsds->updateInput(nextTime(),levelInput);
+  }
+  DEBUG_END("TimeSteppingD1Minus::updateInput(unsigned int level)\n");
+
+}
+
+
+
 
 // void TimeSteppingD1Minus::updateInput(unsigned int level)
 // {

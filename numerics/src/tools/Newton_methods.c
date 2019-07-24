@@ -1,7 +1,7 @@
  /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 */
 
 #include "SiconosConfig.h"
+#include "SiconosCompat.h"
 
 #include "Newton_methods.h"
 
@@ -35,14 +36,22 @@
 #include "MCP_cst.h"
 #include "VI_cst.h"
 #include "Friction_cst.h"
-
 #include "hdf5_logger.h"
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "debug.h"
 
 typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
+
+#ifdef __cplusplus
+using namespace std;
+#endif
+
+
+const char* const SICONOS_NEWTON_LSA_STR  = "Newton method LSA";
+
+
 
 void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverOptions* options, functions_LSA* functions)
 {
@@ -63,11 +72,12 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
 
   unsigned int iter;
-
-
+  /* if (verbose) */
+  /*   solver_options_print(options); */
   int incx, incy;
   double theta, preRHS, tau, threshold;
   double theta_iter = 0.0;
+  double norm_F_merit =0.0, norm_JacThetaF_merit=0.0;
   double err;
 
   double *workV1, *workV2;
@@ -79,8 +89,8 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   incy = 1;
 
   /*output*/
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   // Maybe there is a better way to initialize
 //  for (unsigned int i = 0; i < n; i++) z[i] = 0.0;
@@ -180,7 +190,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   if (options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH])
   {
     assert(functions->get_set_from_problem_data && \
-        "newton_LSA :: arc search selected but no et_set_from_problem_data provided!");
+        "newton_LSA :: arc search selected but no get_set_from_problem_data provided!");
     ls_data.set = functions->get_set_from_problem_data(data);
     ls_data.searchtype = ARCSEARCH;
   }
@@ -206,14 +216,14 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
   functions->compute_F_merit(data, z, F, F_merit);
 
   // Merit Evaluation
-  theta = cblas_dnrm2(n , F_merit , incx);
-  theta = 0.5 * theta * theta;
+  norm_F_merit = cblas_dnrm2(n , F_merit , incx);
+  theta = 0.5 * norm_F_merit * norm_F_merit;
 
   functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
 
-  unsigned log_hdf5 = SN_logh5_loglevel(SN_LOGLEVEL_NO);
+  unsigned log_hdf5 = SN_logh5_loglevel(SN_LOGLEVEL_ALL);
 
-  char* hdf5_filename = getenv("SICONOS_HDF5_NAME");
+  const char* hdf5_filename = getenv("SICONOS_HDF5_NAME");
   if (!hdf5_filename) hdf5_filename = "test.hdf5";
   SN_logh5* logger_s = NULL;
   if (log_hdf5)
@@ -222,13 +232,15 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     SN_logh5_scalar_uinteger(0, "version", logger_s->file);
   }
 
+
+  numerics_printf_verbose(1,"--- newton_LSA :: start iterations");
   // Newton Iteration
   while ((iter < itermax) && (err > tol))
   {
     ++iter;
     int info_dir_search = 0;
 
-    functions->compute_F(data, z, F);
+    //functions->compute_F(data, z, F);
 
     if (log_hdf5)
     {
@@ -238,7 +250,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     }
 
     /**************************************************************************
-     * START COMPUTATION DESCENTE DIRECTION
+     * START COMPUTATION DESCENT DIRECTION
      */
     if (functions->compute_descent_direction)
     {
@@ -260,8 +272,9 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       } /* No computation of JacThetaFF_merit, this will come later */
       else
       {
+        DEBUG_PRINT("Compute JacThetaF_merit. use merit function as descent computation. \n");
         functions->compute_H(data, z, F, workV1, workV2, H);
-        functions->compute_F_merit(data, z, F, F_merit);
+        //functions->compute_F_merit(data, z, F, F_merit);
         NM_tgemv(1., H, F_merit, 0., JacThetaF_merit);
         if (log_hdf5)
         {
@@ -277,7 +290,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       info_dir_search = NM_gesv(H, workV1, params->keep_H);
     }
     /**************************************************************************
-     * END COMPUTATION DESCENTE DIRECTION
+     * END COMPUTATION DESCENT DIRECTION
      */
 
     if (!info_dir_search && log_hdf5)  SN_LOG_VEC(log_hdf5,SN_logh5_vec_double(n, workV1, "desc_direction", logger_s->group));
@@ -320,7 +333,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     {
       if (functions->compute_RHS_desc) // we are safe here
       {
-        DEBUG_PRINT("functions->compute_RHS_desc : no  descent direction found! searching for merit descent direction\n");
+        numerics_printf("functions->compute_RHS_desc : no  descent direction found! searching for merit descent direction");
         cblas_dcopy(n, F_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
         info_dir_search = NM_gesv(H, workV1, params->keep_H);
@@ -333,12 +346,10 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       }
       else
       {
-        if (verbose > 0)
-        {
-          printf("Problem in DGESV, info = %d\n", info_dir_search);
-        }
-        options->iparam[1] = iter;
-        options->dparam[1] = theta;
+        numerics_printf("Problem in DGESV, info = %d", info_dir_search);
+
+        options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+        options->dparam[SICONOS_DPARAM_RESIDU] = theta;
         *info = 2;
 
         goto newton_LSA_free;
@@ -347,6 +358,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
     if (info_dir_search == 0) /* direction search succeeded */
     {
+      numerics_printf_verbose(2,"direction search suceeded");
       // workV1 contains the direction d
       cblas_dcopy(n, z, incx, workV2, incy);
       cblas_daxpy(n, 1.0, workV1, incx, workV2, incy);     //  z + d --> z
@@ -361,6 +373,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
     }
     else /* direction search failed, backup to gradient step*/
     {
+      numerics_printf("direction search failed, backup to gradient step");
       cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
       cblas_dscal(n, -1.0, workV1, incx);
       theta_iter = INFINITY;
@@ -375,8 +388,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
         SN_LOG_SCALAR(log_hdf5,SN_logh5_scalar_double(params->sigma * theta, "theta_iter_threshold", logger_s->group));
       }
 
-      if (verbose > 1)
-        printf("newton_LSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta\n", theta_iter, theta);
+      numerics_printf_verbose(2,"--- newton_LSA :: pure Newton direction not acceptable theta_iter = %g > %g = theta", theta_iter, theta);
 
       // Computations for the line search
       // preRHS = <JacThetaF_merit, d>
@@ -395,8 +407,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
       if (params->check_dir_quality && preRHS > threshold)
       {
-        if (verbose > 1)
-          printf("newton_LSA :: direction not acceptable %g > %g\n", preRHS, threshold);
+        numerics_printf_verbose(2,"newton_LSA :: direction not acceptable %g > %g\n", preRHS, threshold);
 
         cblas_dcopy(n, JacThetaF_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
@@ -418,15 +429,43 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       cblas_daxpy(n, 1., workV1 , incx , z , incy);        // hack (restart)
 
     // Construction of the RHS for the next iterate
+    /* VA : What happens if we use  functions->compute_RHS_desc(data, z, F, F_merit); above */
     functions->compute_F(data, z, F);
     functions->compute_F_merit(data, z, F, F_merit);
 
-    // Merit Evaluation
-    theta = cblas_dnrm2(n , F_merit , incx);
-    theta = 0.5 * theta * theta;
 
+    // Merit Evaluation
+    norm_F_merit = cblas_dnrm2(n , F_merit , incx);
+    theta = 0.5 * norm_F_merit * norm_F_merit;
+
+    norm_JacThetaF_merit = cblas_dnrm2(n, JacThetaF_merit, 1);
     // Error Evaluation
-    functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
+
+    if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_RESIDU)
+    {
+      err = norm_F_merit;
+    }
+    else if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] == SICONOS_STOPPING_CRITERION_STATIONARITY)
+    {
+      err = norm_JacThetaF_merit ;
+    }
+    else if (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
+             SICONOS_STOPPING_CRITERION_RESIDU_AND_STATIONARITY)
+    {
+      err = fmax(norm_F_merit, norm_JacThetaF_merit);
+    }
+    else if  (options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] ==
+              SICONOS_STOPPING_CRITERION_USER_ROUTINE)
+    {
+      DEBUG_PRINT("user routine is used to compute the error\n");
+      functions->compute_error(data, z, F, JacThetaF_merit, tol, &err);
+    }
+
+
+
+
+
+
 
     if (log_hdf5)
     {
@@ -444,33 +483,24 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       stats_iteration.status = 0;
       options->callback->collectStatsIteration(options->callback->env, n, z, F, err, &stats_iteration);
     }
-
+    numerics_printf_verbose(1,"--- newton_LSA :: iter = %i,  norm merit function = %e, norm grad. merit function = %e, err = %e > tol = %e",iter, norm_F_merit, norm_JacThetaF_merit , err, tol);
   }
 
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
 
-  if (verbose > 0)
+  if (err > tol)
   {
-    if (err > tol)
-    {
-      printf(" No convergence of the Newton algo after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", theta);
-      *info = 1;
-    }
-    else
-    {
-      printf(" Convergence of the Newton algo after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", theta);
-      *info = 0;
-    }
+    numerics_printf_verbose(1,"--- newton_LSA :: No convergence of the Newton algo after %d iterations and residue = %g " , iter, theta);
+    *info = 1;
   }
   else
   {
-    if (err > tol) *info = 1;
-    else *info = 0;
+    numerics_printf_verbose(1,"--- newton_LSA :: Convergence of the Newton algo after %d iterations and residue = %g " , iter, theta);
+    *info = 0;
   }
+
 
 newton_LSA_free:
 
@@ -486,17 +516,37 @@ newton_LSA_free:
   if (log_hdf5)
   {
     SN_logh5_scalar_uinteger(iter, "nb_iter", logger_s->file);
-    SN_logh5_scalar_uinteger(err, "residual", logger_s->file);
+    SN_logh5_scalar_double(err, "residual", logger_s->file);
     if (logger_s->group) SN_logh5_end_iter(logger_s);
     SN_logh5_end(logger_s);
   }
 }
 
-void newton_lsa_default_SolverOption(SolverOptions* options)
+void newton_lsa_setDefaultSolverOptions(SolverOptions* options)
 {
+
+  numerics_printf_verbose(1,"newton_lsa_setDefaultSolverOptions");
+
+  options->solverId = SICONOS_NEWTON_LSA;
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+  options->dWork = NULL;
+  solver_options_nullify(options);
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
-  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 0.;
+  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
+
+  options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_RESIDU;
+
 }
 
 void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat)
@@ -523,7 +573,7 @@ void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat)
   {
     options->solverData = malloc(sizeof(newton_LSA_data));
     newton_LSA_data* sd = (newton_LSA_data*) options->solverData;
-    sd->H = duplicateNumericsMatrix(mat);
+    sd->H = NM_duplicate(mat);
   }
 }
 
@@ -531,12 +581,12 @@ bool newton_LSA_check_solverId(int solverId)
 {
   switch (solverId)
   {
-    case SICONOS_NCP_NEWTON_FBLSA:
-    case SICONOS_NCP_NEWTON_MINFBLSA:
-    case SICONOS_MCP_NEWTON_FBLSA:
-    case SICONOS_MCP_NEWTON_MINFBLSA:
-    case SICONOS_LCP_NEWTON_FBLSA:
-    case SICONOS_LCP_NEWTON_MINFBLSA:
+    case SICONOS_NCP_NEWTON_FB_FBLSA:
+    case SICONOS_NCP_NEWTON_MIN_FBLSA:
+    case SICONOS_MCP_NEWTON_FB_FBLSA:
+    case SICONOS_MCP_NEWTON_MIN_FBLSA:
+    case SICONOS_LCP_NEWTON_FB_FBLSA:
+    case SICONOS_LCP_NEWTON_MIN_FBLSA:
     case SICONOS_VI_BOX_QI:
     case SICONOS_VI_BOX_AVI_LSA:
     case SICONOS_FRICTION_3D_NSN_AC_TEST:
@@ -558,7 +608,7 @@ void newton_LSA_free_solverOptions(SolverOptions* options)
   {
     newton_LSA_data* sd = (newton_LSA_data*) options->solverData;
     assert(sd->H);
-    freeNumericsMatrix(sd->H);
+    NM_free(sd->H);
     free(sd->H);
     free(sd);
     options->solverData = NULL;

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,17 @@
 */
 #include "FirstOrderLinearR.hpp"
 #include "Interaction.hpp"
-
+#include "PluggedObject.hpp"
+#include "SimpleMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
 
 #include <iostream>
 
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include <debug.h>
 using namespace RELATION;
 
 FirstOrderLinearR::FirstOrderLinearR():
@@ -71,35 +76,44 @@ FirstOrderLinearR::FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP:
   _e = E;
 }
 
-void FirstOrderLinearR::initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM)
+void FirstOrderLinearR::initialize(Interaction& inter)
 {
-  // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
+
+  FirstOrderR::initialize(inter);
 
   // get interesting size
-  unsigned int sizeY = inter.getSizeOfY();
+  unsigned int sizeY = inter.dimension();
   unsigned int sizeX = inter.getSizeOfDS();
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
-
-  // Update workV (copy of DS variables)
-  workV.resize(FirstOrderR::workVecSize);
-  workV[FirstOrderR::vec_z].reset(new SiconosVector(sizeZ));
-
-  workM.resize(FirstOrderR::mat_workMatSize);
+  VectorOfSMatrices& relationMat = inter.relationMatrices();
+  VectorOfVectors & relationVec= inter.relationVectors();
 
   if (!_C && _pluginJachx->fPtr)
-    workM[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeX));
+    relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeX));
   if (!_D && _pluginJachlambda->fPtr)
-    workM[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
+    relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
   if (!_B && _pluginJacglambda->fPtr)
-    workM[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeX, sizeY));
+    relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeX, sizeY));
   if (!_F && _pluginf->fPtr)
-  {
-    workM[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
-  }
+    relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
   if (!_e && _plugine->fPtr)
-  {
-    workV[FirstOrderR::e].reset(new SiconosVector(sizeY));
-  }
+    relationVec[FirstOrderR::e].reset(new SiconosVector(sizeY));
+
+  checkSize(inter);
+}
+
+
+void FirstOrderLinearR::checkSize(Interaction& inter)
+{
+
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+
+  // get interesting size
+  unsigned int sizeY = inter.dimension();
+  unsigned int sizeX = inter.getSizeOfDS();
+  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
@@ -144,7 +158,6 @@ void FirstOrderLinearR::initComponents(Interaction& inter, VectorOfBlockVectors&
       assert(_e->size() == sizeY && "FirstOrderLinearR::initialize , inconsistent size between C and e.");
   }
 }
-
 void FirstOrderLinearR::computeC(double time, SiconosVector& z, SimpleMatrix& C)
 {
   if (_pluginJachx->fPtr)
@@ -186,34 +199,35 @@ void FirstOrderLinearR::computeB(double time, SiconosVector& z, SimpleMatrix& B)
   }
 }
 
-void FirstOrderLinearR::computeh(double time, VectorOfVectors& workV, VectorOfSMatrices& workM, BlockVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y)
+void FirstOrderLinearR::computeh(double time, BlockVector& x, SiconosVector& lambda,
+                                 SiconosVector& z, SiconosVector& y)
 {
 
   y.zero();
 
   if (_pluginJachx->fPtr)
   {
-    SimpleMatrix& C = *workM[FirstOrderR::mat_C];
-    computeC(time, z, C);
-    prod(C, x, y, false);
+    if (!_C)
+      _C.reset(new SimpleMatrix(y.size(),x.size()));
+    computeC(time, z, *_C);
   }
   if (_pluginJachlambda->fPtr)
   {
-    SimpleMatrix& D = *workM[FirstOrderR::mat_D];
-    computeD(time, z, D);
-    prod(D, lambda, y, false);
+    if (!_D)
+      _D.reset(new SimpleMatrix(y.size(),lambda.size()));
+    computeD(time, z, *_D);
   }
   if (_pluginf->fPtr)
   {
-    SimpleMatrix& F = *workM[FirstOrderR::mat_F];
-    computeF(time, z, F);
-    prod(F, z, y, false);
+    if (!_F)
+      _F.reset(new SimpleMatrix(y.size(),z.size()));
+    computeF(time, z, *_F);
   }
   if (_plugine->fPtr)
   {
-    SiconosVector& e = *workV[FirstOrderR::e];
-    computee(time, z, e);
-    y+= e;
+    if (!_e)
+      _e.reset(new SiconosVector(y.size()));
+    computee(time, z, *_e);
   }
 
   if (_C)
@@ -230,50 +244,50 @@ void FirstOrderLinearR::computeh(double time, VectorOfVectors& workV, VectorOfSM
 
 }
 
-void FirstOrderLinearR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
+void FirstOrderLinearR::computeOutput(double time, Interaction& inter, unsigned int level)
 {
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-  SiconosVector& z = *workV[FirstOrderR::vec_z];
-  z = *DSlink[FirstOrderR::z];
-  // We get y and lambda of the interaction (pointers)
-  SiconosVector& y = *inter.y(0);
-  SiconosVector& lambda = *inter.lambda(0);
+  DEBUG_BEGIN("FirstOrderLinearR::computeOutput \n");
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  BlockVector& z = *DSlink[FirstOrderR::z];
+  BlockVector& x = *DSlink[FirstOrderR::x];
 
-  computeh(time, workV, workM, *DSlink[FirstOrderR::x], lambda, z, y);
-
-  *DSlink[FirstOrderR::z] = z;
-}
-
-void FirstOrderLinearR::computeg(double time, VectorOfSMatrices& workM, SiconosVector& lambda, SiconosVector& z, BlockVector& r)
-{
-  if (_B)
-  {
-    prod(*_B, lambda, r, false);
-  }
-  else
-  {
-    SimpleMatrix& B = *workM[FirstOrderR::mat_B];
-    computeB(time, z, B);
-    prod(B, lambda, r, false);
-  }
-}
-
-
-void FirstOrderLinearR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)
-{
+  SP::SiconosVector z_vec(new SiconosVector(z));
+  SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  VectorOfVectors& workV = *interProp.workVectors;
-  VectorOfSMatrices& workM = *interProp.workMatrices;
-  SiconosVector& z = *workV[FirstOrderR::z];
-  z = *DSlink[FirstOrderR::z];
 
-  computeg(time, workM, lambda, z, *DSlink[FirstOrderR::r]);
+  computeh(time, x, lambda, *z_vec, y);
 
-  *DSlink[FirstOrderR::z] = z;
+  *DSlink[FirstOrderR::z] = *z_vec;
+
+  DEBUG_END("FirstOrderLinearR::computeOutput \n");
 }
+
+void FirstOrderLinearR::computeg(double time, SiconosVector& lambda, SiconosVector& z, BlockVector& r)
+{
+  if (_pluginJacglambda->fPtr)
+  {
+    if (!_B)
+      _B.reset(new SimpleMatrix(r.size(),lambda.size()));
+    computeB(time, z, *_B);
+  }
+
+  prod(*_B, lambda, r, false);
+
+}
+
+
+void FirstOrderLinearR::computeInput(double time, Interaction& inter, unsigned int level)
+{
+
+  
+  SiconosVector& lambda = *inter.lambda(level);
+  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  BlockVector& z = *DSlink[FirstOrderR::z];
+  SP::SiconosVector z_vec(new SiconosVector(z));
+  computeg(time, lambda, *z_vec, *DSlink[FirstOrderR::r]);
+  *DSlink[FirstOrderR::z] = *z_vec;
+}
+
 
 void FirstOrderLinearR::display() const
 {

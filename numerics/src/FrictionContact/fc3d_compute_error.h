@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@
 /*!\file fc3d_compute_error.h
   \brief functions related to error computation for friction-contact problems
 
-  \author Vincent Acary, 26/05/2008
-
 */
+
+#include "FrictionContactProblem.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -79,10 +79,11 @@ extern "C"
       \param w vector
       \param tolerance value for error computation
       \param options
+      \param norm normalisation coeff
       \param[in,out] error value
       \return 0 if ok
    */
-  int fc3d_Tresca_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
+  int fc3d_Tresca_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options,  double norm, double * error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

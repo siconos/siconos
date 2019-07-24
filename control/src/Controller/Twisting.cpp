@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,14 +74,15 @@ void Twisting::setNSdata(double hControl)
   _numericsSolverId = SICONOS_AVI_CAOFERRIS;
 }
 
-void Twisting::initialize(const Model& m)
+void Twisting::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 {
   // basic check
   if (!_nsLawSMC || !_OSNSPB_SMC)
   {
     RuntimeException::selfThrow("Twisting::initialize - nslaw or osnsp not set. If you used the constructor with only the ControlSensor as argument, you need to manually call setNSdata");
   }
-  CommonSMC::initialize(m);
+
+  CommonSMC::initialize(nsds, s);
 }
 
 

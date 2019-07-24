@@ -1,3 +1,3 @@
 include(default)
-set_option(WITH_MECHANISMS ON)
+set_components(externals;numerics;kernel;mechanisms;io)
 

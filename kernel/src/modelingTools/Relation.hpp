@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,6 @@
 #include "SiconosAlgebraTypeDef.hpp"
 
 /** General Non Linear Relation (Virtual Base class for Relations).
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27, 2004
  *
  *  A relation is a link between global variables of the Dynamical
  * Systems and some local ones, named y and lambda; belonging to one
@@ -97,7 +94,7 @@ protected:
   SP::PluggedObject _plugine;
   /** To initialize all the plugin functions with NULL.
    */
-  virtual void zeroPlugin();
+  virtual void _zeroPlugin();
 
   /** type of the Relation: FirstOrder or Lagrangian */
   RELATION::TYPES _relationType;
@@ -130,7 +127,7 @@ public:
 
   /** destructor
    */
-  virtual ~Relation();
+  virtual ~Relation(){};
 
   /** To get the type of the Relation (FirstOrder or Lagrangian)
    *  \return the type of the Relation
@@ -147,27 +144,6 @@ public:
   {
     return _subType;
   }
-
-  /** To get the name of h plugin
-   *  \return a std::string
-   */
-  const std::string gethName() const ;
-
-  /** To get the name of g plugin
-   *  \return a std::string
-   */
-  const std::string getgName() const;
-
-  /** To get the name of Jach[i] plugin
-   *  \return a std::string
-   */
-  virtual const std::string getJachxName() const ;
-
-  /** To get the name of Jacg[i] plugin
-      \param i index number of the required plugin
-      \return : a std::string
-  */
-  virtual const std::string getJacgName(unsigned int i) const;
 
   /** To set a plug-in function to compute output function h
    *  \param pluginPath the complete path to the plugin
@@ -224,42 +200,43 @@ public:
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction using this relation
-   * \param DSlink the container of the link to DynamicalSystem attributes
-   * \param workV work vectors
-   * \param workM work matrices
    */
-  virtual void initialize(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM) = 0;
-  
+  virtual void initialize(Interaction& inter) = 0;
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter) = 0;
+
+
   /** compute all the H Jacobian
    * \param time the current time
    * \param inter the interaction using this relation
-   * \param interProp
    */
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) = 0;
+  virtual void computeJach(double time, Interaction& inter) = 0;
 
   /* compute all the G Jacobian
    * \param time the current time
    * \param inter the interaction using this relation
    * \param interProp
    */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) = 0;
+  virtual void computeJacg(double time, Interaction& inter) = 0;
 
 
   /** default function to compute y
    *  \param time the current time
    *  \param inter the interaction using this relation
-   *  \param interProp
    *  \param derivativeNumber number of the derivative to compute (optional, default = 0)
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0) = 0;
-
+  virtual void computeOutput(double time, Interaction& inter,
+                             unsigned int derivativeNumber = 0) = 0;
   /** default function to compute r
    *  \param time the current time
    *  \param inter the interaction using this relation
-   *  \param interProp
    *  \param level the input "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0) = 0;
+  virtual void computeInput(double time, Interaction& inter,
+                            unsigned int level = 0) = 0;
 
   virtual SP::SimpleMatrix C() const = 0;
 
@@ -279,46 +256,11 @@ public:
     return false;
   }
 
-  /** main relation members display 
+  /** main relation members display
    */
   virtual void display() const;
 
-  /** Check if _pluginh is correctly set 
-      \return a bool
-   */
-  bool ishPlugged() const;
-
-  /** Check if _pluginJachx is correctly set
-      \return a bool
-  */
-  bool isJachxPlugged() const;
-
-  /** Check if _pluginJachlambda is correctly set
-      \return a bool
-  */
-  bool isJachlambdaPlugged() const;
-
-  /** Check if _pluging is correctly set
-      \return a bool
-   */
-  bool isgPlugged() const;
-
-  /** Check if _pluginJacglambda is correctly set
-      \return a bool
-  */
-  bool isJacLgPlugged() const;
-
-  /** Check if _pluginf is correctly set
-      \return a bool
-  */
-  bool isfPlugged() const;
-
-  /** Check if _plugine is correctly set
-      \return a bool
-  */
-  bool isePlugged() const;
-
-  /** Get _pluginh 
+  /** Get _pluginh
       \return a shared pointer to the plugin
   */
   inline SP::PluggedObject getPluginh() const
@@ -373,14 +315,7 @@ public:
   {
     return _plugine;
   };
-  /** visitors hook
-   *  \param inter  interaction 
-   *  \param interProp
-   */
-  virtual void prepareNewtonIteration(Interaction& inter, InteractionProperties& interProp)
-  {
-    ;
-  };
+
   VIRTUAL_ACCEPT_VISITORS(Relation);
 
 };

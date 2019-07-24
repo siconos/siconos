@@ -81,7 +81,7 @@
        target_mem_mgmtX_instr(method_compute_F);
        target_mem_mgmtX_instr(method_compute_nabla_F);
        SWIG_Error(SWIG_TypeError, "argument 2 must be have a method compute_F and a method compute_nabla_F");
-       freeNumericsMatrix(NCP->nabla_F);
+       NM_free(NCP->nabla_F);
        free(NCP->nabla_F);
        free(NCP);
        return NULL;
@@ -149,7 +149,7 @@
   {
     if ($self->nabla_F)
     {
-      freeNumericsMatrix($self->nabla_F);
+      NM_free($self->nabla_F);
       free($self->nabla_F);
     }
     if ($self->env)

@@ -3,7 +3,7 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2016 INRIA.
+# Copyright 2018 INRIA.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ def silent_try(command, *_args):
 def cartridge():
     sys.stdout.write("""
 |=============================================================================|
-|          Siconos-Kernel version {0}.{1}.{2}      Copyright INRIA 2005-2016      |
+|          Siconos-Kernel version {0}.{1}.{2}      Copyright 2018 INRIA       |
 |                                                                             |
 |                    Free software under Apache License.                      |
 |=============================================================================|
@@ -128,11 +128,11 @@ Options are:
 
  -D key | -D key=value : to define a 'cmake' and a 'cpp' variable.
 
- -g : to compile with debug informations.
+ -g : to compile with debug information.
 
  -h | --help : to print this help.
 
- -j<n>   : parrallel compilation with n jobs
+ -j<n>   : parallel compilation with n jobs
 
  -I<dir> : add directory <dir> to the list of paths to include headers.
 
@@ -373,7 +373,7 @@ if __name__ == '__main__':
                     cmake_boolean = {True: '1', False: '0'}
                     configure_command = [
                         cmake_cmd, posixpath.join(siconos_prefix,
-                                                  'share/siconos'),
+                                                  '@ConfigPackageLocation@'),
                         '-DCALL_PWD={0}'.format(call_pwd),
                         '-DMAIN_SOURCE={0}'.format(main_source),
                         '-DBUILD_MAIN={0}'.format(cmake_boolean[

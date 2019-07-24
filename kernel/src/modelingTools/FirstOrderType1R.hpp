@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,18 +30,18 @@ typedef void (*Type1Ptr)(unsigned int, double*, unsigned int, double*, unsigned 
 
 
 /** FirstOrder Non Linear Relation.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Apr 27, 2004
  *
  * Derived from FirstOrderR - See this class for more comments.
  *
  *  Relation for First Order Dynamical Systems, with:
- * \f{eqnarray}
- * y &=& h(x,z)\\
- * r &=& g(\lambda,z)
- * \f}
+ * \rststar
+ * .. math::
  *
+ *    y &= h(x,z)\\
+ *    r &= g(\lambda,z)
+ *
+ * \endrststar
+ * 
  * Operators (and their corresponding plug-in):
 - h: saved in Interaction as y (plug-in: output[0])
 - \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
@@ -55,20 +55,20 @@ protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(FirstOrderType1R);
-  
+
 
 public:
 
   /** default constructor */
   FirstOrderType1R() : FirstOrderR(RELATION::Type1R) {};
 
-  /** data constructor
+  /** build from plugin for \f$h(x,z)\f$ and \f$g(\lambda, z)\f$
   *  \param pluginh the plugin to compute h
   *  \param pluging the plugin to compute g
   */
   FirstOrderType1R(const std::string& pluginh, const std::string& pluging);
 
-  /** data constructor
+  /** build from plugin for \f$h(x,z)\f$,\f$g(\lambda, z) \f$ and their gradients
   *  \param pluginh the plugin to compute h
   *  \param pluging the plugin to compute g
   *  \param pluginJachx the plugin to compute \f$\nabla_x h\f$
@@ -76,17 +76,18 @@ public:
   */
   FirstOrderType1R(const std::string& pluginh, const std::string& pluging, const std::string& pluginJachx, const std::string& pluginJacglambda);
 
-  /** destructor
-  */
+  /** destructor */
   ~FirstOrderType1R() {};
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
-   * \param DSlink link to DS variable
-   * \param workV work vectors to initialize
-   * \param workM work matrices to initialize
-  */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
+   */
+  virtual void initialize(Interaction& inter);
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
 
   /** default function to compute y = h(x, z, t)
   * \param time the current time
@@ -94,7 +95,7 @@ public:
   * \param z the external input
   * \param y the "output" vector
   */
-void computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y);
+  void computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y);
 
   /** default function to compute g
   * \param time the current time
@@ -131,22 +132,21 @@ void computeJacglambda(double time, SiconosVector& lambda, SiconosVector& z, Sim
   /** default function to compute y, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeOutput(double time, Interaction& inter, unsigned int level = 0);
 
   /** default function to compute r, using the data from the Interaction and DS
   *  \param time current time (not used)
   *  \param inter Interaction using this Relation
-  *  \param interProp
   *  \param level not used
   */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter,
+                            unsigned int level = 0);
 
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJach(double time, Interaction& inter);
 
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp);
+  virtual void computeJacg(double time, Interaction& inter);
 
   /** return true if the relation requires the computation of residu
       \return true if residu are required, false otherwise

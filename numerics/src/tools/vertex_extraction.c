@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis)
   int info = solve(lp);
   if (info != 0)
   {
-    printf("find_vertex_lpsolve: failure in the LP solver\n");
+    printf("find_vertex_lpsolve: failure in the LP solver: info = %d\n", info);
     exit(EXIT_FAILURE);
   }
 

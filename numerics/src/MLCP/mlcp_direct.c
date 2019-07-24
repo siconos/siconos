@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ dim(v)=nn
 #include <stdlib.h>
 #include <string.h>
 #include "MLCP_Solvers.h"
+#include "SiconosCompat.h"
 #include <math.h>
 #include "mlcp_direct.h"
 #include "mlcp_tool.h"
@@ -196,7 +197,7 @@ int internalAddConfig(MixedLinearComplementarityProblem* problem, int * zw, int 
   if (verbose)
   {
     printf("mlcp_direct internalAddConfig\n");
-    printf("-----------------------------\n");
+    printf("---------\n");
     for (i = 0; i < problem->m; i++)
       printf("zw[%d]=%d\t", i, zw[i]);
     printf("\n");

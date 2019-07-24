@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,7 @@
  *   2013, 256, pp. 224-250
  *
  * 
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date (Creation) Aug 2010
- *  
- 
+ * 
  */
 class TimeSteppingDirectProjection : public TimeStepping
 {
@@ -91,6 +86,7 @@ protected:
 public:
 
   /** Constructor with the time-discretisation.
+   * \param nsds the nsds that we want to simulate
    *  \param td a pointer to a timeDiscretisation (linked to the model
    *     that owns this simulation)
    *  \param osi a one step integrator
@@ -98,7 +94,8 @@ public:
    *  \param osnspb_pos a one step non smooth problem for the position formulation
    *  \param _level
   */
-  TimeSteppingDirectProjection(SP::TimeDiscretisation td,
+  TimeSteppingDirectProjection(SP::NonSmoothDynamicalSystem nsds,
+                               SP::TimeDiscretisation td,
                                SP::OneStepIntegrator osi,
                                SP::OneStepNSProblem osnspb_velo,
                                SP::OneStepNSProblem osnspb_pos,

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,17 +25,16 @@
 
 /** Linear Time Invariant Relation, derived from class FirstOrderR
 
-\author SICONOS Development Team - copyright INRIA
-\version 3.0.0.
-\date Apr 15, 2007
-
 Linear Relation for First Order Dynamical Systems:
 
-\f{eqnarray}
-y &=& Cx(t) + Fz + D\lambda + e\\
+\rst
 
-R &=& B\lambda
-\f}
+ .. math::
+
+     y &=& Cx(t) + Fz + D\lambda + e\\
+     R &=& B\lambda
+
+\endrst
 
  */
 class FirstOrderLinearTIR : public FirstOrderR
@@ -48,12 +47,13 @@ protected:
 
   /** initialize the relation (check sizes, memory allocation ...)
    * \param inter the interaction that owns this relation
-   * \param DSlink
-   * \param workV
-   * \param workM
    */
-  virtual void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink,
-                              VectorOfVectors& workV, VectorOfSMatrices& workM);
+  virtual void initialize(Interaction& inter);
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
 
   SP::SiconosVector _e;
 
@@ -101,18 +101,16 @@ public:
   /** default function to compute y
    *  \param time current time
    *  \param inter Interaction using this Relation
-   *  \param interProp
-   *  \param level not used
+   *  \param level
    */
-  virtual void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-
+  virtual void computeOutput(double time, Interaction& inter,  unsigned int level = 0);
+  
   /** default function to compute r
    *  \param time current time
    *  \param inter Interaction using this Relation
-   *  \param interProp
-   *  \param level not used
+   *  \param level
    */
-  virtual void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0);
 
   /** print the data to the screen
    */
@@ -121,16 +119,14 @@ public:
   /** compute the jacobian of h: nothing to be done here
    *  \param time current time
    *  \param inter Interaction using this Relation
-   *  \param interProp
    */
-  virtual void computeJach(double time, Interaction& inter, InteractionProperties& interProp) {};
+  virtual void computeJach(double time, Interaction& inter) {};
 
   /** compute the jacobian of g: nothing to be done here
    *  \param time current time
    *  \param inter Interaction using this Relation
-   *  \param interProp
    */
-  virtual void computeJacg(double time, Interaction& inter, InteractionProperties& interProp) {};
+  virtual void computeJacg(double time, Interaction& inter) {};
  
 
   /** set e

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,6 @@
 #include "SiconosControlFwd.hpp"
 
 /** Actuators Base Class
-
-   \author SICONOS Development Team - copyright INRIA
-   \version 3.0.0.
-   \date (Creation) February 09, 2007
 
    Abstract class, interface to user-defined actuators.
 
@@ -115,11 +111,17 @@ protected:
 
 public:
 
-  /** Constructor with a TimeDiscretisation.
+  /** General Constructor
    * \param type the type of the Actuator, which corresponds to the class type
    * \param sensor the ControlSensor feeding the Actuator
    */
   Actuator(unsigned int type, SP::ControlSensor sensor);
+
+  /** General Constructor with dynamics affine in control
+   * \param type the type of the Actuator, which corresponds to the class type
+   * \param sensor the ControlSensor feeding the Actuator
+   */
+  Actuator(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B);
 
   /** destructor
    */
@@ -187,9 +189,10 @@ public:
   virtual void setTimeDiscretisation(const TimeDiscretisation& td) {};
 
   /** initialize actuator data.
-   * \param m the Model
+   * \param nsds the NonSmoothDynamicalSystem
+   * \param s the simulation
    */
-  virtual void initialize(const Model& m);
+  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s);
 
   /** capture data when the ActuatorEvent is processed
    */
@@ -199,10 +202,10 @@ public:
    */
   virtual void display() const;
 
-  /** get the Model used in the Controller, if there is one
+  /** get the NSDS used in the Controller, if there is one
    * \return "NULL" shared_ptr if there is no internal simulation, otherwise
    * it return the Model hoding the simulation
    */
-  virtual SP::Model getInternalModel() const;
+  virtual SP::NonSmoothDynamicalSystem getInternalNSDS() const;
 };
 #endif

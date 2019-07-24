@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,16 @@
 #include "NonSmoothDrivers.h"
 #include "numerics_verbose.h"
 
+
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
+
+#ifdef  DEBUG_MESSAGES
+#include "NumericsVector.h"
+#include "NumericsMatrix.h"
+#endif
 int * Global_ipiv = NULL;
 int  Global_MisInverse = 0;
 int  Global_MisLU = 0;
@@ -40,12 +50,17 @@ const char* const SICONOS_GLOBAL_FRICTION_3D_NSGS_STR = "GFC3D_NSGS";
 const char* const SICONOS_GLOBAL_FRICTION_3D_NSN_AC_STR = "GFC3D_NSN_AC";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH_STR = "GFC3D_GAMS_PATH";
 const char* const  SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI_STR = "GFC3D_GAMS_PATHVI";
+const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR = "GFC3D_VI_EG";
+const char* const  SICONOS_GLOBAL_FRICTION_3D_ACLMFP_STR = "GFC3D_ACLMFP";
+const char* const  SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR = "GFC3D_VI_FPP";
+const char* const SICONOS_GLOBAL_FRICTION_3D_ADMM_WR_STR = "GFC3D_ADMM_WR";
 
 
-int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity,  SolverOptions* options)
+int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
+                 double* globalVelocity,  SolverOptions* options)
 {
   assert(options->isSet);
-
+  DEBUG_EXPR(NV_display(globalVelocity,problem->M->size0););
   if (verbose > 0)
     solver_options_print(options);
 
@@ -64,8 +79,8 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   {
   case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR:
   {
-    if (verbose == 1)
-      printf(" ========================== Call NSGS_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+
+    numerics_printf_verbose(1," ========================== Call NSGS_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
     Global_ipiv = NULL;
     Global_MisInverse = 0;
     Global_MisLU = 0;
@@ -75,8 +90,8 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   }
   case SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR:
   {
-    if (verbose == 1)
-      printf(" ========================== Call NSGSV_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+
+    numerics_printf_verbose(1," ========================== Call NSGSV_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
     Global_ipiv = NULL;
     Global_MisInverse = 0;
     Global_MisLU = 0;
@@ -85,8 +100,8 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   }
   case SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR:
   {
-    if (verbose == 1)
-      printf(" ========================== Call NSN_AC_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+
+    numerics_printf_verbose(1," ========================== Call NSN_AC_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
     Global_ipiv = NULL;
     Global_MisInverse = 0;
     Global_MisLU = 0;
@@ -96,8 +111,8 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   }
   case SICONOS_GLOBAL_FRICTION_3D_PROX_WR:
   {
-    if (verbose == 1)
-      printf(" ========================== Call PROX_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+
+    numerics_printf_verbose(1," ========================== Call PROX_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
     Global_ipiv = NULL;
     Global_MisInverse = 0;
     Global_MisLU = 0;
@@ -107,8 +122,8 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   }
   case SICONOS_GLOBAL_FRICTION_3D_DSFP_WR:
   {
-    if (verbose == 1)
-      printf(" ========================== Call DSFP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+
+    numerics_printf_verbose(1," ========================== Call DSFP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
     Global_ipiv = NULL;
     Global_MisInverse = 0;
     Global_MisLU = 0;
@@ -118,8 +133,8 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   }
   case SICONOS_GLOBAL_FRICTION_3D_TFP_WR:
   {
-    if (verbose == 1)
-      printf(" ========================== Call TFP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+
+    numerics_printf_verbose(1," ========================== Call TFP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
     Global_ipiv = NULL;
     Global_MisInverse = 0;
     Global_MisLU = 0;
@@ -132,29 +147,68 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
     Global_ipiv = NULL;
     Global_MisInverse = 0;
     Global_MisLU = 0;
-    gfc3d_nsgs(problem, reaction , velocity, globalVelocity, 
-                                 &info , options);
+    gfc3d_nsgs(problem, reaction , velocity, globalVelocity,
+               &info , options);
     break;
 
   }
   case SICONOS_GLOBAL_FRICTION_3D_NSN_AC:
   {
     gfc3d_nonsmooth_Newton_AlartCurnier(problem, reaction , velocity,
-                                         globalVelocity, &info , options);
+                                        globalVelocity, &info , options);
     break;
 
   }
   case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH:
   {
-    printf(" ========================== Call PATH solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
+    numerics_printf_verbose(1," ========================== Call PATH solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
     gfc3d_AVI_gams_path(problem, reaction , velocity, &info, options);
     break;
   }
   case SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI:
   {
-    printf(" ========================== Call PATHVI solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
+    numerics_printf_verbose(1," ========================== Call PATHVI solver via GAMS for an AVI Friction-Contact 3D problem ==========================\n");
     gfc3d_AVI_gams_pathvi(problem, reaction , globalVelocity, &info, options);
     break;
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_VI_FPP:
+  {
+    gfc3d_VI_FixedPointProjection(problem, reaction , velocity,
+                                  globalVelocity, &info , options);
+    break;
+
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_VI_EG:
+  {
+    gfc3d_VI_ExtraGradient(problem, reaction , velocity,
+                           globalVelocity, &info , options);
+    break;
+
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_ACLMFP:
+  {
+    gfc3d_ACLMFixedPoint(problem, reaction , velocity,
+                         globalVelocity, &info , options);
+    break;
+
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_ADMM:
+  {
+    gfc3d_ADMM(problem, reaction , velocity,
+               globalVelocity, &info , options);
+    break;
+
+  }
+  case SICONOS_GLOBAL_FRICTION_3D_ADMM_WR:
+  {
+
+    numerics_printf_verbose(1," ========================== Call NSGS_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
+    Global_ipiv = NULL;
+    Global_MisInverse = 0;
+    Global_MisLU = 0;
+    gfc3d_admm_wr(problem, reaction , velocity, globalVelocity, &info, options);
+    break;
+
   }
   default:
   {
@@ -168,7 +222,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
 
 }
 
-int checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, SolverOptions* options)
+int gfc3d_checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction, double * globalVelocity, SolverOptions* options)
 {
   /* norm of vector q */
   /*   double qs = cblas_dnrm2( n , q , 1 ); */
@@ -193,4 +247,3 @@ int checkTrivialCaseGlobal(int n, double* q, double* velocity, double* reaction,
   /*     } */
   return info;
 }
-

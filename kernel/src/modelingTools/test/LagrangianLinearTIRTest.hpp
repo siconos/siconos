@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,12 +43,9 @@ private:
   //  CPPUNIT_TEST(testBuildLagrangianLinearTIR5);
   //  CPPUNIT_TEST(testBuildLagrangianLinearTIR6);
   CPPUNIT_TEST(testSetCPtr);
-  CPPUNIT_TEST(testSetDPtr);
   CPPUNIT_TEST(testSetFPtr);
   CPPUNIT_TEST(testSetEPtr);
   CPPUNIT_TEST(testGetJacPtr);
-  CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
@@ -60,15 +57,13 @@ private:
   void testBuildLagrangianLinearTIR4();
 
   void testSetCPtr();
-  void testSetDPtr();
   void testSetFPtr();
   void testSetEPtr();
   void testGetJacPtr();
-  void End();
 
   // Members
 
-  SP::SimpleMatrix C, B, F, D;
+  SP::SimpleMatrix C, B, F;
   SP::SiconosVector e;
   SP::NonSmoothDynamicalSystem nsds;
 

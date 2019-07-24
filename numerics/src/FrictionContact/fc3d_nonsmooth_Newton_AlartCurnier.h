@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ extern "C"
       \param rho3D the rho parameters (size : 3 x problemSize)
       \param output_blocklist3 the computed Alart & Curnier function (size : 3 x problemSize)
       \param output_blocklist3x3_1 the computed A part of gradient (size : 9 x problemSize)
-      \param output_blocklist3x3_2 the computed B param of gradient (size : 9 x problemSize)
+      \param output_blocklist3x3_2 the computed B part of gradient (size : 9 x problemSize)
   */
   void fc3d_AlartCurnierFunction(
     unsigned int problemSize,

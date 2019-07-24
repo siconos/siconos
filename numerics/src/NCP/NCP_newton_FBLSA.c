@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,6 @@ void ncp_newton_FBLSA(NonlinearComplementarityProblem* problem, double *z, doubl
 /*
 void ncp_newton_FBLSA_setDefaultSolverOptions(SolverOptions* options)
 {
-  solver_options_fill(options, SICONOS_NCP_NEWTON_FBLSA, 5, 5, 100, 1e-16);
+  solver_options_fill(options, SICONOS_NCP_NEWTON_FB_FBLSA, 5, 5, 100, 1e-16);
 }
 */

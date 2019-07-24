@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
 #include "SiconosAlgebra.hpp"
+#include "Tools.hpp"
 
 using  std::cout;
 using std::endl;
@@ -41,8 +42,8 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
   if (m.isBlock())
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
-    unsigned int nbRows = m.getNumberOfBlocks(0);
-    unsigned int nbCols = m.getNumberOfBlocks(1);
+    unsigned int nbRows = m.numberOfBlocks(0);
+    unsigned int nbCols = m.numberOfBlocks(1);
     _tabRow->reserve(nbRows);
     _tabCol->reserve(nbCols);
 
@@ -93,8 +94,8 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
 
 BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), _dimRow(0), _dimCol(0)
 {
-  unsigned int nbRows = m.getNumberOfBlocks(0);
-  unsigned int nbCols = m.getNumberOfBlocks(1);
+  unsigned int nbRows = m.numberOfBlocks(0);
+  unsigned int nbCols = m.numberOfBlocks(1);
   _tabRow.reset(new Index());
   _tabCol.reset(new Index());
   _tabRow->reserve(nbRows);
@@ -220,7 +221,7 @@ BlockMatrix::~BlockMatrix()
 //    get number of blocks
 // =================================================
 
-unsigned int BlockMatrix::getNumberOfBlocks(unsigned int dim) const
+unsigned int BlockMatrix::numberOfBlocks(unsigned int dim) const
 {
   if (dim == 0)
     return _tabRow->size();
@@ -494,7 +495,7 @@ double BlockMatrix::normInf()const
 
 void BlockMatrix::display(void)const
 {
-  std::cout << "==========> BlockMatrix (" << getNumberOfBlocks(0) << " X " << getNumberOfBlocks(1) << " blocks): " << std::endl;
+  std::cout << "==========> BlockMatrix (" << numberOfBlocks(0) << " X " << numberOfBlocks(1) << " blocks): " << std::endl;
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
   for (it = _mat->begin1(); it != _mat->end1(); ++it)
@@ -505,6 +506,36 @@ void BlockMatrix::display(void)const
     }
   }
   std::cout << "===========================================================================================" << std::endl;
+}
+
+//=====================
+// convert to a string
+//=====================
+
+std::string BlockMatrix::toString() const
+{
+  return ::toString(*this);
+}
+
+//=====================
+// convert to an ostream
+//=====================
+
+std::ostream& operator<<(std::ostream& os, const BlockMatrix& bm)
+{
+  BlocksMat::iterator1 it;
+  BlocksMat::iterator2 it2;
+  os << "[" << bm.numberOfBlocks(0) << "," << bm.numberOfBlocks(1) << "](";
+  for (it = bm._mat->begin1(); it != bm._mat->end1(); ++it)
+  {
+    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    {
+      if (it2 != it.begin()) os << ",";
+      if (*it2) os << **it2; else os << "(nil)";
+    }
+  }
+  os << ")";
+  return os;
 }
 
 //=============================
@@ -609,31 +640,6 @@ void BlockMatrix::setValue(unsigned int row, unsigned int col, double value)
 //============================================
 // Access (get or set) to blocks of elements
 //============================================
-
-// void BlockMatrix::getBlock (unsigned int row, unsigned int col, SiconosMatrix * m) const
-// {
-//   SiconosMatrixException::selfThrow("BlockMatrix::getBlock, not yet implemented or useless for BlockMatrices.");
-// }
-
-// void BlockMatrix::setBlock(unsigned int row, unsigned int col, const SiconosMatrix *m)
-// {
-//   // Set current matrix elements, starting from row row_min and column col_min, with the values of the matrix m.
-//   // m may be a BlockMatrix.
-
-//   if(m == this)
-//     SiconosMatrixException::selfThrow("BlockMatrix::setBlock(pos,..., m): m = this.");
-
-//   if(m->isBlock ())
-//     SiconosMatrixException::selfThrow("BlockMatrix::setBlock of a block into an other block is forbidden.");
-
-//   if(row > _dimRow || col > _dimCol )
-//     SiconosMatrixException::selfThrow("BlockMatrix::setBlock(i,j,m), i or j is out of range.");
-
-//   // Check dim
-//   if( tmp->size(0)!=m->size(0) || tmp->size(1) != m->size(1) )
-//     SiconosMatrixException::selfThrow("BlockMatrix::setBlock(x,y,m), block(x,y) of current matrix and m have inconsistent sizes.");
-//   *((*_mat)(row,col)) = *m; // copy
-// }
 
 void BlockMatrix::getRow(unsigned int r, SiconosVector &v) const
 {

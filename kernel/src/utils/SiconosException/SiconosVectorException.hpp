@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,11 @@
 #define __SiconosVectorException__
 
 #include "SiconosException.hpp"
-#include "numerics_verbose.h"
 
 /** Exception caused by a SiconosVector
  *
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 3.0.0.
- *   \date (Creation) 05/25/2004
- *
- *
- *
  * SiconosVectorException must be throws when an error is find in a SiconosVector
- * This exception can be catched by "catch(SiconosVectorException)" or "catch(SiconosException)"
+ * This exception can be caught by "catch(SiconosVectorException)" or "catch(SiconosException)"
  *
  */
 class SiconosVectorException : public SiconosException

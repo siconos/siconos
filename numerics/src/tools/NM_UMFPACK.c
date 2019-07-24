@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
  * limitations under the License.
 */
 
-#include "NumericsMatrix_private.h"
+#include "CSparseMatrix_internal.h"
+#include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "debug.h"
@@ -26,15 +27,15 @@
 
 NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 {
-  NumericsSparseLinearSolverParams* params = NM_linearSolverParams(A);
+  NSM_linear_solver_params* params = NSM_linearSolverParams(A);
 
-  if (params->solver_data)
+  if (params->linear_solver_data)
   {
-    return (NM_UMFPACK_WS*) params->solver_data;
+    return (NM_UMFPACK_WS*) params->linear_solver_data;
   }
 
-  params->solver_data = calloc(1, sizeof(NM_UMFPACK_WS));
-  NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->solver_data;
+  params->linear_solver_data = calloc(1, sizeof(NM_UMFPACK_WS));
+  NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->linear_solver_data;
 
   UMFPACK_FN(defaults) (umfpack_ws->control);
 
@@ -44,7 +45,7 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 
   CSparseMatrix* C = NM_csc(A);
 
-  csi status;
+  CS_INT status;
 
   status = UMFPACK_FN(symbolic) (C->m, C->n, C->p, C->i, C->x, &(umfpack_ws->symbolic), umfpack_ws->control, umfpack_ws->info);
 
@@ -64,9 +65,9 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
     return NULL;
   }
 
-  umfpack_ws->wi = (csi*)malloc(C->n * sizeof(csi));
+  umfpack_ws->wi = (CS_INT*)malloc(C->n * sizeof(CS_INT));
 
-  csi size_wd;
+  CS_INT size_wd;
   if (umfpack_ws->control[UMFPACK_IRSTEP] > 0)
   {
     size_wd = 5 * C->n;
@@ -87,9 +88,9 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 void NM_UMFPACK_free(void* p)
 {
   assert(p);
-  NumericsSparseLinearSolverParams* params = (NumericsSparseLinearSolverParams*) p;
+  NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
   assert(params);
-  NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->solver_data;
+  NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->linear_solver_data;
   assert(umfpack_ws);
 
   UMFPACK_FN(free_symbolic) (&(umfpack_ws->symbolic));
@@ -115,7 +116,7 @@ void NM_UMFPACK_free(void* p)
 
   /* Here we free umfpack_ws ...  */
   free(umfpack_ws);
-  params->solver_data = NULL;
+  params->linear_solver_data = NULL;
 
 }
 

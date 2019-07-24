@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "MoreauJeanGOSI.hpp"
 #include "Simulation.hpp"
-#include "Model.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
@@ -28,28 +27,37 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "CxxStd.hpp"
 
+#include <boost/make_shared.hpp>
+
 #include "TypeName.hpp"
 
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 
 
-//#define DEBUG_STDOUT
-//#define DEBUG_NOCOLOR
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_NOCOLOR
+// #define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
 
 
 using namespace RELATION;
 
+/// for non-owned shared pointers (passing const SiconosVector into
+/// functions that take SP::SiconosVector without copy -- warning
+/// const abuse!)
+static void null_deleter(const SiconosVector *) {}
+template <typename T> static std11::shared_ptr<T> ptr(const T& a) {
+  return std11::shared_ptr<SiconosVector>(&*(T*)&a, null_deleter); }
+
 // --- constructor from a set of data ---
 MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
-  OneStepIntegrator(OSI::MOREAUJEANOSI2), _useGammaForRelation(false), _explicitNewtonEulerDSOperators(false)
+  OneStepIntegrator(OSI::MOREAUJEANGOSI), _useGammaForRelation(false), _explicitNewtonEulerDSOperators(false)
 {
   _levelMinForOutput= 0;
   _levelMaxForOutput =1;
-  _levelMinForInput =0;
+  _levelMinForInput =1;
   _levelMaxForInput =1;
   _steps=1;
   _theta = theta;
@@ -64,192 +72,162 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
     _useGamma = false;
   }
 }
-void MoreauJeanGOSI::initializeDynamicalSystem(Model& m, double t, SP::DynamicalSystem ds)
+void MoreauJeanGOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 {
+  // Get work buffers from the graph
+  VectorOfVectors& ds_work_vectors = *_initializeDSWorkVectors(ds);
 
-  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(dsv).workVectors;
+  // Check dynamical system type
+  Type::Siconos dsType = Type::value(*ds);
 
-    // W initialization
-    initializeIterationMatrixW(t, ds, dsv);
-    Type::Siconos dsType = Type::value(*ds);
-    if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
-    {
-      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
+  // Compute W (iteration matrix)
+  initializeIterationMatrixW(t, ds);
+  if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
+  {
+    SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
 
-      workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
-      workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(lds->dimension()));
-      workVectors[OneStepIntegrator::free].reset(new SiconosVector(lds->dimension()));
-      workVectors[OneStepIntegrator::local_buffer].reset(new SiconosVector(lds->dimension()));
+    ds_work_vectors.resize(MoreauJeanGOSI::WORK_LENGTH);
+    ds_work_vectors[MoreauJeanGOSI::RESIDU_FREE].reset(new SiconosVector(lds->dimension()));
+    ds_work_vectors[MoreauJeanGOSI::FREE].reset(new SiconosVector(lds->dimension()));
+    ds_work_vectors[MoreauJeanGOSI::LOCAL_BUFFER].reset(new SiconosVector(lds->dimension()));
 
-      lds->computeForces(m.t0());
-      lds->swapInMemory();
-    }
-    else if(dsType == Type::NewtonEulerDS)
-    {
-      SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      workVectors.resize(OneStepIntegrator::work_vector_of_vector_size);
-      workVectors[OneStepIntegrator::residu_free].reset(new SiconosVector(neds->dimension()));
-      workVectors[OneStepIntegrator::free].reset(new SiconosVector(neds->dimension()));
-      //Compute a first value of the dotq  to store it in  _dotqMemory
-      SP::SiconosMatrix T = neds->T();
-      SP::SiconosVector dotq = neds->dotq();
-      SP::SiconosVector v = neds->twist();
-      prod(*T, *v, *dotq, true);
+    lds->computeForces(t, lds->q(), lds->velocity());
+    lds->swapInMemory();
+  }
+  else if(dsType == Type::NewtonEulerDS)
+  {
+    SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS> (ds);
+    ds_work_vectors.resize(MoreauJeanGOSI::WORK_LENGTH);
+    ds_work_vectors[MoreauJeanGOSI::RESIDU_FREE].reset(new SiconosVector(neds->dimension()));
+    ds_work_vectors[MoreauJeanGOSI::FREE].reset(new SiconosVector(neds->dimension()));
+    //Compute a first value of the dotq  to store it in  _dotqMemory
+    SP::SiconosMatrix T = neds->T();
+    SP::SiconosVector dotq = neds->dotq();
+    SP::SiconosVector v = neds->twist();
+    prod(*T, *v, *dotq, true);
 
-      //Compute a first value of the forces to store it in _forcesMemory
-      neds->computeForces(m.t0());
-      neds->swapInMemory();
-    }
-    for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
-    {
-      ds->initializeNonSmoothInput(k);
-    }
+    //Compute a first value of the forces to store it in _forcesMemory
+    neds->computeForces(t, neds->q(), v);
+    neds->swapInMemory();
+  }
 }
 
-void MoreauJeanGOSI::initializeInteraction(double t0, Interaction &inter,
-                                          InteractionProperties& interProp,
-                                          DynamicalSystemsGraph & DSG)
+void MoreauJeanGOSI::initializeWorkVectorsForInteraction(Interaction &inter,
+                                 InteractionProperties& interProp,
+                                 DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
+  assert(ds1);
+  assert(ds2);
 
-  assert(interProp.DSlink);
-
-  VectorOfBlockVectors& DSlink = *interProp.DSlink;
-  // VectorOfVectors& workVInter = *interProp.workVectors;
-  // VectorOfSMatrices& workMInter = *interProp.workMatrices;
-
-  Relation &relation =  *inter.relation();
-  RELATION::TYPES relationType = relation.getType();
-  /* Check that the interaction has the correct initialization for y and lambda */
-  bool isInitializationNeeded = false;
-  if (!(inter.lowerLevelForOutput() <= _levelMinForOutput && inter.upperLevelForOutput()  >= _levelMaxForOutput))
+  if (!interProp.workVectors)
   {
-    //RuntimeException::selfThrow("MoreauJeanGOSI::initializeInteraction, we must resize _y");
-    inter.setLowerLevelForOutput(_levelMinForOutput);
-    inter.setUpperLevelForOutput(_levelMaxForOutput);
-    isInitializationNeeded = true;
-  }
-  if (!(inter.lowerLevelForInput() <= _levelMinForInput && inter.upperLevelForInput() >= _levelMaxForInput ))
-  {
-    // RuntimeException::selfThrow("MoreauJeanGOSI::initializeInteraction, we must resize _lambda");
-    inter.setLowerLevelForInput(_levelMinForInput);
-    inter.setUpperLevelForInput(_levelMaxForInput);
-    isInitializationNeeded = true;
+    interProp.workVectors.reset(new VectorOfVectors);
+    interProp.workVectors->resize(MoreauJeanGOSI::WORK_INTERACTION_LENGTH);
   }
 
-  if (isInitializationNeeded)
-    inter.init();
-
-
-  bool computeResidu = relation.requireResidu();
-  inter.initializeMemory(computeResidu,_steps);
-
-  /* allocate ant set work vectors for the osi */
-  VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-  if (relationType == Lagrangian)
+  if (!interProp.workBlockVectors)
   {
-    DSlink[LagrangianR::xfree].reset(new BlockVector());
-    DSlink[LagrangianR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
+    interProp.workBlockVectors.reset(new VectorOfBlockVectors);
+    interProp.workBlockVectors->resize(MoreauJeanGOSI::BLOCK_WORK_LENGTH);
   }
-  else if (relationType == NewtonEuler)
-  {
-    DSlink[NewtonEulerR::xfree].reset(new BlockVector());
-    DSlink[NewtonEulerR::xfree]->insertPtr(workVds1[OneStepIntegrator::free]);
-  }
+
+  VectorOfVectors& inter_work = *interProp.workVectors;
+  VectorOfBlockVectors& inter_block_work = *interProp.workBlockVectors;
+
+
+  if (!inter_work[MoreauJeanGOSI::OSNSP_RHS])
+    inter_work[MoreauJeanGOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
+
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  _check_and_update_interaction_levels(inter);
+  // Initialize/allocate memory buffers in interaction.
+  inter.initializeMemory(_steps);
+
+
+  /* allocate and set work vectors for the osi */
+  unsigned int xfree = MoreauJeanGOSI::xfree;
 
   if (ds1 != ds2)
   {
-    VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-    if (relationType == Lagrangian)
-    {
-      DSlink[LagrangianR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
-    }
-    else if (relationType == NewtonEuler)
-    {
-      DSlink[NewtonEulerR::xfree]->insertPtr(workVds2[OneStepIntegrator::free]);
-    }
+    DEBUG_PRINT("ds1 != ds2\n");
+    if ((!inter_block_work[xfree]) || (inter_block_work[xfree]->numberOfBlocks() !=2 ))
+      inter_block_work[xfree].reset(new BlockVector(2));
+  }
+  else
+  {
+    if ((!inter_block_work[xfree]) || (inter_block_work[xfree]->numberOfBlocks() !=1 ))
+      inter_block_work[xfree].reset(new BlockVector(1));
   }
 
-  // Compute a first value for the output
-    inter.computeOutput(t0, interProp, 0);
+  if(checkOSI(DSG.descriptor(ds1)))
+  {
+    DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
+    assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
+    VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+    inter_block_work[xfree]->setVectorPtr(0,workVds1[MoreauJeanGOSI::FREE]);
+  }
+  DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
+  DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
 
-    // prepare the gradients
-    relation.computeJach(t0, inter, interProp);
-    for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-      {
-      inter.computeOutput(t0, interProp, i);
+
+  if (ds1 != ds2)
+  {
+    DEBUG_PRINT("ds1 != ds2\n");
+    if(checkOSI(DSG.descriptor(ds2)))
+    {
+      DEBUG_PRINTF("ds2->number() %i is taken into account\n",ds2->number());
+      assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
+      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+      inter_block_work[xfree]->setVectorPtr(1,workVds2[MoreauJeanGOSI::FREE]);
     }
-    inter.swapInMemory();
-
+  }
 
 }
 
-
-void MoreauJeanGOSI::initialize(Model& m)
+void MoreauJeanGOSI::initialize_nonsmooth_problems()
 {
-  OneStepIntegrator::initialize(m);
-  // Get initial time
-  double t0 = m.t0();
-  // Compute W(t0) for all ds
-
-
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    // Memory allocation for workX. workX[ds*] corresponds to xfree (or vfree in lagrangian case).
-    // workX[*itDS].reset(new SiconosVector((*itDS)->dimension()));
-
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    initializeDynamicalSystem(m, t0, ds);
-  }
-
-
   SP::OneStepNSProblems  allOSNS  = _simulation->oneStepNSProblems();
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setIndexSetLevel(1);
   ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->setInputOutputLevel(1);
   //  ((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY])->initialize(_simulation);
-
-
-  SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
-  InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *indexSet0->bundle(*ui);
-
-    initializeInteraction(t0, inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
-  }
-
-
-
-
 }
 
-void MoreauJeanGOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor& dsv)
+void MoreauJeanGOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem ds)
 {
   DEBUG_PRINT("MoreauJeanGOSI::initializeIterationMatrixW starts\n");
   // This function:
-  // - allocate memory for a matrix W
+  // - allocate memory for the matrix W
+  // - update its content for the current (initial) state of the dynamical system, depending on its type.
 
-  if(!ds || !dsv)
+  if(!ds)
     RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixW(t, ds, dsv) - ds == NULL or dsv == NULL");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
+
+  const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
 
   if(_dynamicalSystemsGraph->properties(dsv).W)
     RuntimeException::selfThrow("MoreauJeanGOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
 
   double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
-
-
+  unsigned int sizeW = ds->dimension();
   if(dsType == Type::LagrangianDS)
   {
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass()));
+    if(d->mass())
+    {
+      d->computeMass(d->q());
+      _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
+    }
+    else
+    {
+      _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(sizeW, sizeW));
+      _dynamicalSystemsGraph->properties(dsv).W->eye();
+    }
     // Compute the W matrix
     computeW(t, ds, *_dynamicalSystemsGraph->properties(dsv).W);
     // WBoundaryConditions initialization
@@ -430,10 +408,15 @@ void MoreauJeanGOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix& W
 
     SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
     SP::SiconosMatrix K = d->jacobianqForces(); // jacobian according to q
-    SP::SiconosMatrix C = d->jacobianqDotForces(); // jacobian according to velocity
+    SP::SiconosMatrix C = d->jacobianvForces(); // jacobian according to velocity
 
-    d->computeMass();
-    W = *d->mass();
+    if(d->mass())
+    {
+      d->computeMass(d->q());
+      W = *d->mass();
+    }
+    else
+      W.zero();
 
     if(C)
     {
@@ -488,18 +471,18 @@ void MoreauJeanGOSI::computeInitialNewtonState()
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
+    DynamicalSystem &ds = *_dynamicalSystemsGraph->bundle(*dsi);
 
     if(_explicitNewtonEulerDSOperators)
     {
-      if(Type::value(*ds) == Type::NewtonEulerDS)
+      if(Type::value(ds) == Type::NewtonEulerDS)
       {
         // The goal is to update T() one time at the beginning of the Newton Loop
         // We want to be explicit on this function since we do not compute their Jacobians.
-        SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-        SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-        //SP::SiconosVector q = d->q();
-        computeT(qold,d->T());
+        NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
+        const SiconosVector& qold = d.qMemory().getSiconosVector(0);
+        //SP::SiconosVector q = d.q();
+        computeT(ptr(qold),d.T());
       }
     }
     // The goal is to converge in one iteration of the system is almost linear
@@ -548,7 +531,7 @@ double MoreauJeanGOSI::computeResidu()
   {
     if(!checkOSI(dsi)) continue;
     ds = _dynamicalSystemsGraph->bundle(*dsi);
-    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+    VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     dsType = Type::value(*ds); // Its type
 
@@ -557,124 +540,77 @@ double MoreauJeanGOSI::computeResidu()
     {
       DEBUG_PRINT("MoreauJeanGOSI::computeResidu(), dsType == Type::LagrangianDS\n");
       // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t_i+1,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi) - p_i+1
-      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
-      SiconosVector& free = *workVectors[OneStepIntegrator::free];
+      SiconosVector& residu = *ds_work_vectors[MoreauJeanGOSI::RESIDU_FREE];
+      SiconosVector& free_rhs = *ds_work_vectors[MoreauJeanGOSI::FREE];
 
       // -- Convert the DS into a Lagrangian one.
       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
+      // const SiconosVector& qold = d->qMemory().getSiconosVector(0);
+      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0);
       SP::SiconosVector q = d->q();
 
-
-      d->computeMass();
-      SP::SiconosMatrix M = d->mass();
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
-      //residuFree.zero();
-      DEBUG_EXPR(residuFree.display());
+      //residu.zero();
+      DEBUG_EXPR(residu.display());
 
-      DEBUG_EXPR(qold->display());
-      DEBUG_EXPR(vold->display());
+      // DEBUG_EXPR(qold.display());
+      DEBUG_EXPR(vold.display());
       DEBUG_EXPR(q->display());
       DEBUG_EXPR(v->display());
+      free_rhs.zero();
+      SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
+      prod(W, vold, free_rhs);
 
-      DEBUG_EXPR(M->display());
 
-
-      //    std::cout << "(*v-*vold)->norm2()" << (*v-*vold).norm2() << std::endl;
-
-      prod(*M, (*v - *vold), residuFree); // residuFree = M(v - vold)
 
       if(d->forces())
       {
         // Cheaper version: get forces(ti,vi,qi) from memory
-        SP::SiconosVector fold = d->forcesMemory()->getSiconosVector(0);
-        double coef = -h * (1 - _theta);
-        scal(coef, *fold, residuFree, false);
+        const SiconosVector& fold = d->forcesMemory().getSiconosVector(0);
+        double coef = h * (1 - _theta);
+        scal(coef, fold, free_rhs, false);
 
         // Expensive computes forces(ti,vi,qi)
         // d->computeForces(told, qold, vold);
         // double coef = -h * (1 - _theta);
-        // // residuFree += coef * fL_i
-        // scal(coef, *d->forces(), *residuFree, false);
+        // // residu += coef * fL_i
+        // scal(coef, *d->forces(), *residu, false);
 
         // computes forces(ti+1, v_k,i+1, q_k,i+1) = forces(t,v,q)
         d->computeForces(t,q,v);
-        coef = -h * _theta;
-        scal(coef, *d->forces(), residuFree, false);
+        coef = h * _theta;
+        scal(coef, *d->forces(), free_rhs, false);
 
         // or  forces(ti+1, v_k,i+\theta, q(v_k,i+\theta))
         //SP::SiconosVector qbasedonv(new SiconosVector(*qold));
         //*qbasedonv +=  h * ((1 - _theta)* *vold + _theta * *v);
         //d->computeForces(t, qbasedonv, v);
         //coef = -h * _theta;
-        // residuFree += coef * fL_k,i+1
-        //scal(coef, *d->forces(), residuFree, false);
+        // residu += coef * fL_k,i+1
+        //scal(coef, *d->forces(), residu, false);
 
 
       }
 
-      if(d->boundaryConditions())
-      {
-        d->boundaryConditions()->computePrescribedVelocity(t);
 
-        unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
+      residu =  -1.0* free_rhs;
+      prod(1.0, W, *v, residu, false);
 
-        for(std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-            itindex != d->boundaryConditions()->velocityIndices()->end();
-            ++itindex)
-        {
-          double DeltaPrescribedVelocity =
-            d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - v->getValue(*itindex);
-
-          WBoundaryConditions->getCol(columnindex, *columntmp);
-          residuFree -= *columntmp * (DeltaPrescribedVelocity);
-
-          residuFree.setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
-
-          columnindex ++;
-        }
-      }
-
-      free = residuFree; // copy residuFree in Workfree
-
-      //       std::cout << "MoreauJeanGOSI::ComputeResidu LagrangianDS residufree :"  << std::endl;
-      DEBUG_EXPR(residuFree.display());
+      DEBUG_EXPR(residu.display());
 
       if(d->p(1))
-        free -= *d->p(1); // Compute Residu in Workfree Notation !!
-      // We use DynamicalSystem::free as tmp buffer
+        residu -= *d->p(1); // Compute Residu in Workfree Notation !!
 
       if(d->boundaryConditions())
       {
-        unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
-
-        for(std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-            itindex != d->boundaryConditions()->velocityIndices()->end();
-            ++itindex)
-        {
-          double DeltaPrescribedVelocity =
-            d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - v->getValue(*itindex);
-
-          WBoundaryConditions->getCol(columnindex, *columntmp);
-
-          free.setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
-
-          columnindex ++;
-        }
+        RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
       }
 
 
-      DEBUG_EXPR(free.display());
-      normResidu = free.norm2();
+      DEBUG_EXPR(residu.display());
+      normResidu = residu.norm2();
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
     }
     // 4 - Lagrangian Linear Systems
@@ -693,33 +629,36 @@ double MoreauJeanGOSI::computeResidu()
       SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0); // qi
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //vi
+      const SiconosVector& qold = d->qMemory().getSiconosVector(0); // qi
+      const SiconosVector& vold = d->velocityMemory().getSiconosVector(0); //vi
 
-      DEBUG_EXPR(qold->display(););
-      DEBUG_EXPR(vold->display(););
+      DEBUG_EXPR(qold.display(););
+      DEBUG_EXPR(vold.display(););
       DEBUG_EXPR(d->q()->display(););
       DEBUG_EXPR(d->velocity()->display(););
 
-      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
-      SiconosVector& free = *workVectors[OneStepIntegrator::free];
+      SiconosVector& residu = *ds_work_vectors[MoreauJeanGOSI::RESIDU_FREE];
+      SiconosVector& free_rhs = *ds_work_vectors[MoreauJeanGOSI::FREE];
       // --- ResiduFree computation Equation (1) ---
-      residuFree.zero();
+      residu.zero();
+      SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
+      prod(W, vold, free_rhs);
+
       double coeff;
       // -- No need to update W --
 
       SP::SiconosVector v = d->velocity(); // v = v_k,i+1
 
       SP::SiconosMatrix C = d->C();
-      if(C)
-        prod(h, *C, *vold, residuFree, false); // vfree += h*C*vi
+      if (C)
+        prod(h, *C, vold, free_rhs, false); // vfree += h*C*vi
 
       SP::SiconosMatrix K = d->K();
       if(K)
       {
-        coeff = h * h * _theta;
-        prod(coeff, *K, *vold, residuFree, false); // vfree += h^2*_theta*K*vi
-        prod(h, *K, *qold, residuFree, false); // vfree += h*K*qi
+        coeff = -h * h * _theta;
+        prod(coeff, *K, vold, residu, false); // vfree += -h^2*_theta*K*vi
+        prod(-h, *K, qold, free_rhs, false); // vfree += -h*K*qi
       }
 
       SP::SiconosVector Fext = d->fExt();
@@ -727,115 +666,66 @@ double MoreauJeanGOSI::computeResidu()
       {
         // computes Fext(ti)
         d->computeFExt(told);
-        coeff = -h * (1 - _theta);
-        scal(coeff, *(d->fExt()), residuFree, false); // vfree -= h*(1-_theta) * fext(ti)
+        coeff = h * (1 - _theta);
+        scal(coeff, *(d->fExt()), free_rhs, false); // vfree += h*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
         d->computeFExt(t);
-        coeff = -h * _theta;
-        scal(coeff, *(d->fExt()), residuFree, false); // vfree -= h*_theta * fext(ti+1)
+        coeff = h * _theta;
+        scal(coeff, *(d->fExt()), free_rhs, false); // vfree += h*_theta * fext(ti+1)
       }
-
-
-      // Computation of the complete residual Equation (2)
-      //   ResiduFree = M(v - vold) + h*((1-theta)*(C v_i + K q_i) +theta * ( C*v + K(q_i+h(1-theta)v_i+h theta v)))
-      //                     +hFext_theta     (2)
-      //       SP::SiconosMatrix M = d->mass();
-      //       SP::SiconosVector realresiduFree (new SiconosVector(*residuFree));
-      //       realresiduFree->zero();
-      //       prod(*M, (*v-*vold), *realresiduFree); // residuFree = M(v - vold)
-      //       SP::SiconosVector qkplustheta (new SiconosVector(*qold));
-      //       qkplustheta->zero();
-      //       *qkplustheta = *qold + h *((1-_theta)* *vold + _theta* *v);
-      //       if (C){
-      //         double coef = h*(1-_theta);
-      //         prod(coef, *C, *vold , *realresiduFree, false);
-      //         coef = h*(_theta);
-      //         prod(coef,*C, *v , *realresiduFree, false);
-      //       }
-      //       if (K){
-      //         double coef = h*(1-_theta);
-      //         prod(coef,*K , *qold , *realresiduFree, false);
-      //         coef = h*(_theta);
-      //         prod(coef,*K , *qkplustheta , *realresiduFree, false);
-      //       }
-
-      //       if (Fext)
-      //       {
-      //         // computes Fext(ti)
-      //         d->computeFExt(told);
-      //         coeff = -h*(1-_theta);
-      //         scal(coeff, *Fext, *realresiduFree, false); // vfree -= h*(1-_theta) * fext(ti)
-      //         // computes Fext(ti+1)
-      //         d->computeFExt(t);
-      //         coeff = -h*_theta;
-      //         scal(coeff, *Fext, *realresiduFree, false); // vfree -= h*_theta * fext(ti+1)
-      //       }
 
 
       if(d->boundaryConditions())
       {
-        d->boundaryConditions()->computePrescribedVelocity(t);
-
-        unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
-
-        for(std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-            itindex != d->boundaryConditions()->velocityIndices()->end();
-            ++itindex)
-        {
-
-          double DeltaPrescribedVelocity =
-            d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - vold->getValue(*itindex);
-
-          WBoundaryConditions->getCol(columnindex, *columntmp);
-          residuFree += *columntmp * (DeltaPrescribedVelocity);
-
-          residuFree.setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
-
-          columnindex ++;
-
-        }
+        RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
       }
 
-      free = residuFree; // copy residuFree in Workfree
-      if(d->p(1))
-        free -= *d->p(1); // Compute Residu in Workfree Notation !!
-      // We use DynamicalSystem::free as tmp buffer
+      // residu = -1.0*free_rhs;
+      // prod(1.0, W, *v, residu, false);
+      // DEBUG_EXPR(free_rhs.display());
+      // if(d->p(1))
+      //   residu -= *d->p(1); // Compute Residu in Workfree Notation !!
 
-      //      std::cout << "MoreauJeanGOSI::ComputeResidu LagrangianLinearTIDS residu :"  << std::endl;
-      //      d->workspace(DynamicalSystem::free)->display();
-
-
-      //     normResidu = d->workspace(DynamicalSystem::free)->norm2();
       normResidu = 0.0; // we assume that v = vfree + W^(-1) p
-      //     normResidu = realresiduFree->norm2();
-      //DEBUG_PRINTF("normResidu (really computed) = %e\n", d->workspace(DynamicalSystem::free)->norm2() );
     }
+
+
+
     else if(dsType == Type::NewtonEulerDS)
     {
       DEBUG_PRINT("MoreauJeanGOSI::computeResidu(), dsType == Type::NewtonEulerDS\n");
       // residu = M (v_k,i+1 - v_i) - h*_theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*forces(ti,vi,qi) - pi+1
 
+
       // -- Convert the DS into a Lagrangian one.
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
-      SiconosVector& free = *workVectors[OneStepIntegrator::free];
+      DEBUG_EXPR(d->display());
+      SiconosVector& residu = *ds_work_vectors[MoreauJeanGOSI::RESIDU_FREE];
+      SiconosVector& free_rhs = *ds_work_vectors[MoreauJeanGOSI::FREE];
       // Get the state  (previous time step) from memory vector
       // -> var. indexed with "Old"
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0);
+      const SiconosVector& vold = d->twistMemory().getSiconosVector(0);
 
 
       // Get the current state vector
       SP::SiconosVector q = d->q();
       SP::SiconosVector v = d->twist(); // v = v_k,i+1
 
+      DEBUG_EXPR(vold.display());
+      DEBUG_EXPR(q->display());
+      DEBUG_EXPR(v->display());
+
+
+      residu.zero();
       // Get the (constant mass matrix)
-      SP::SiconosMatrix massMatrix = d->mass();
-      prod(*massMatrix, (*v - *vold), residuFree, true); // residuFree = M(v - vold)
-      DEBUG_EXPR(residuFree.display(););
+      // SP::SiconosMatrix massMatrix = d->mass();
+      // prod(*massMatrix, (*v - vold), residu, true); // residu = M(v - vold)
+      // DEBUG_EXPR(residu.display(););
+      free_rhs.zero();
+      SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
+      prod(W, vold, free_rhs);
+
+
 
       if(d->forces())   // if fL exists
       {
@@ -843,94 +733,55 @@ double MoreauJeanGOSI::computeResidu()
         DEBUG_PRINTF("MoreauJeanGOSI:: h = %e\n",h);
 
         // Cheaper version: get forces(ti,vi,qi) from memory
-        SP::SiconosVector fold = d->forcesMemory()->getSiconosVector(0);
-        double coef = -h * (1 - _theta);
-        scal(coef, *fold, residuFree, false);
+        const SiconosVector& fold = d->forcesMemory().getSiconosVector(0);
+        double coef = h * (1 - _theta);
+        scal(coef, fold, free_rhs, false);
 
         // Expensive version to check ...
         //d->computeForces(told,qold,vold);
         //double coef = -h * (1.0 - _theta);
-        //scal(coef, *d->forces(), residuFree, false);
+        //scal(coef, *d->forces(), residu, false);
 
         DEBUG_PRINT("MoreauJeanGOSI:: old forces :\n");
         DEBUG_EXPR(d->forces()->display(););
-        DEBUG_EXPR(residuFree.display(););
+        DEBUG_EXPR(residu.display(););
 
         // computes forces(ti,v,q)
         d->computeForces(t,q,v);
-        coef = -h * _theta;
-        scal(coef, *d->forces(), residuFree, false);
+        coef = h * _theta;
+        scal(coef, *d->forces(), free_rhs, false);
         DEBUG_PRINT("MoreauJeanGOSI:: new forces :\n");
         DEBUG_EXPR(d->forces()->display(););
-        DEBUG_EXPR(residuFree.display(););
+        DEBUG_EXPR(residu.display(););
 
       }
 
 
       if(d->boundaryConditions())
       {
-        d->boundaryConditions()->computePrescribedVelocity(t);
-
-        unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
-
-        for(std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-            itindex != d->boundaryConditions()->velocityIndices()->end();
-            ++itindex)
-        {
-
-          DEBUG_PRINTF("columnindex = %i\n",columnindex);
-          DEBUG_PRINTF("*itindex = %i\n",*itindex);
-          double DeltaPrescribedVelocity =
-            d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - v->getValue(*itindex);
-
-          DEBUG_EXPR(d->boundaryConditions()->prescribedVelocity()->display());
-
-          WBoundaryConditions->getCol(columnindex, *columntmp);
-          residuFree -= *columntmp * (DeltaPrescribedVelocity);
-
-
-          residuFree.setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
-
-          columnindex ++;
-        }
+        RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
       }
 
-      free = residuFree;
+      residu =  -1.0* free_rhs;
+
+      prod(1.0, W, *v, residu, false);
+
+
       if(d->p(1))
-        free -= *d->p(1);// We use DynamicalSystem::free as tmp buffer
+        residu -= *d->p(1);
 
 
       if(d->boundaryConditions())
       {
-        unsigned int columnindex = 0;
-        SP::SimpleMatrix WBoundaryConditions = _WBoundaryConditionsMap[ds->number()];
-        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
-
-        for(std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-            itindex != d->boundaryConditions()->velocityIndices()->end();
-            ++itindex)
-        {
-          double DeltaPrescribedVelocity =
-            d->boundaryConditions()->prescribedVelocity()->getValue(columnindex)
-            - v->getValue(*itindex);
-
-          WBoundaryConditions->getCol(columnindex, *columntmp);
-
-          free.setValue(*itindex, - columntmp->getValue(*itindex)   * (DeltaPrescribedVelocity));
-
-          columnindex ++;
-        }
+        RuntimeException::selfThrow("MoreauJeanGOSI::computeResidu - boundary conditions not yet implemented for Dynamical system of type: " + Type::name(*ds));
       }
 
       DEBUG_PRINT("MoreauJeanGOSI::computeResidu :\n");
-      DEBUG_EXPR(residuFree.display(););
+      DEBUG_EXPR(residu.display(););
       DEBUG_EXPR(if(d->p(1)) d->p(1)->display(););
-      DEBUG_EXPR(free.display(););
+      DEBUG_EXPR(free_rhs.display(););
 
-      normResidu = free.norm2();
+      normResidu = residu.norm2();
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
     }
     else
@@ -944,171 +795,9 @@ double MoreauJeanGOSI::computeResidu()
 
 void MoreauJeanGOSI::computeFreeState()
 {
-  DEBUG_PRINT("\nMoreauJeanGOSI::computeFreeState() starts\n");
-  // This function computes "free" states of the DS belonging to this Integrator.
-  // "Free" means without taking non-smooth effects into account.
+  DEBUG_BEGIN("\nMoreauJeanGOSI::computeFreeState()\n");
 
-  double t = _simulation->nextTime(); // End of the time step
-
-  // Operators computed at told have index i, and (i+1) at t.
-
-  //  Note: integration of r with a theta method has been removed
-  //  SiconosVector *rold = static_cast<SiconosVector*>(d->rMemory()->getSiconosVector(0));
-
-  // Iteration through the set of Dynamical Systems.
-  //
-
-
-  SP::DynamicalSystem ds; // Current Dynamical System.
-  SP::SiconosMatrix W; // W MoreauJeanGOSI matrix of the current DS.
-  Type::Siconos dsType ; // Type of the current DS.
-
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!checkOSI(dsi)) continue;
-    ds = _dynamicalSystemsGraph->bundle(*dsi);
-    dsType = Type::value(*ds); // Its type
-    SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
-    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-
-    // 3 - Lagrangian Non Linear Systems
-    if(dsType == Type::LagrangianDS)
-    {
-      DEBUG_PRINT("MoreauJeanGOSI::computeFreeState(), dsType == Type::LagrangianDS\n");
-      // IN to be updated at current time: W, M, q, v, fL
-      // IN at told: qi,vi, fLi
-
-      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
-      // Index k stands for Newton iteration and thus corresponds to the last computed
-      // value, ie the one saved in the DynamicalSystem.
-      // "i" values are saved in memory vectors.
-
-      // vFree = v_k,i+1 - W^{-1} ResiduFree
-      // with
-      // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-theta)*forces(ti,vi,qi)
-
-      // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
-      SP::SiconosVector v = d->velocity(); // v = v_k,i+1
-      DEBUG_EXPR(vold->display());
-      DEBUG_EXPR(v->display());
-
-
-      // --- ResiduFree computation ---
-      // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
-      //
-      // vFree pointer is used to compute and save ResiduFree in this first step.
-      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
-      SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
-
-      vfree = residuFree;
-
-      computeW(t, d, W);
-
-      // -- vfree =  v - W^{-1} ResiduFree --
-      // At this point vfree = residuFree
-      // -> Solve WX = vfree and set vfree = X
-      W.PLUForwardBackwardInPlace(vfree);
-      // -> compute real vfree
-      vfree *= -1.0;
-      vfree += *v;
-      DEBUG_EXPR(vfree.display());
-
-    }
-    // 4 - Lagrangian Linear Systems
-    else if(dsType == Type::LagrangianLinearTIDS)
-    {
-      DEBUG_PRINT("MoreauJeanGOSI::computeFreeState(), dsType == Type::LagrangianLinearTIDS\n");
-      // IN to be updated at current time: Fext
-      // IN at told: qi,vi, fext
-      // IN constants: K,C
-
-      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
-      // "i" values are saved in memory vectors.
-
-      // vFree = v_i + W^{-1} ResiduFree    // with
-      // ResiduFree = (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
-
-      // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
-
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0); //vi
-
-      // --- ResiduFree computation ---
-      // vFree pointer is used to compute and save ResiduFree in this first step.
-
-      // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
-      SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
-      vfree = residuFree;
-
-      W.PLUForwardBackwardInPlace(vfree);
-      vfree *= -1.0;
-      vfree += *vold;
-
-      DEBUG_EXPR(vfree->display());
-
-
-    }
-    else if(dsType == Type::NewtonEulerDS)
-    {
-      // IN to be updated at current time: W, M, q, v, fL
-      // IN at told: qi,vi, fLi
-
-      // Note: indices i/i+1 corresponds to value at the beginning/end of the time step.
-      // Index k stands for Newton iteration and thus corresponds to the last computed
-      // value, ie the one saved in the DynamicalSystem.
-      // "i" values are saved in memory vectors.
-
-      // vFree = v_k,i+1 - W^{-1} ResiduFree
-      // with
-      // ResiduFree = M(q_k,i+1)(v_k,i+1 - v_i) - h*theta*forces(t,v_k,i+1, q_k,i+1)
-      //                                        - h*(1-theta)*forces(ti,vi,qi)
-
-      // -- Convert the DS into a NewtonEuler one.
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      SP::SiconosVector vold = d->twistMemory()->getSiconosVector(0);
-
-      // --- ResiduFree computation ---
-      // ResFree = M(v-vold) - h*[theta*forces(t) + (1-theta)*forces(told)]
-      //
-      // vFree pointer is used to compute and save ResiduFree in this first step.
-      SiconosVector& residuFree = *workVectors[OneStepIntegrator::residu_free];
-      SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
-      vfree = residuFree;
-
-      // -- Update W --
-      // Note: during computeW, mass and jacobians of forces will be computed/
-      computeW(t, d, W);
-      SP::SiconosVector v = d->twist(); // v = v_k,i+1
-
-      // -- vfree =  v - W^{-1} ResiduFree --
-      // At this point vfree = residuFree
-      // -> Solve WX = vfree and set vfree = X
-      //    std::cout<<"MoreauJeanGOSI::computeFreeState residu free"<<endl;
-      //    vfree->display();
-      W.PLUForwardBackwardInPlace(vfree);
-      //    std::cout<<"MoreauJeanGOSI::computeFreeState -WRfree"<<endl;
-      //    vfree->display();
-      //    scal(h,*vfree,*vfree);
-      // -> compute real vfree
-      vfree *= -1.0;
-      vfree += *v;
-    }
-    else
-      RuntimeException::selfThrow("MoreauJeanGOSI::computeFreeState - not yet implemented for Dynamical system of type: " +  Type::name(*ds));
-  }
-  DEBUG_PRINT("MoreauJeanGOSI::computeFreeState() ends\n");
-
+  DEBUG_END("MoreauJeanGOSI::computeFreeState()\n");
 }
 
 void MoreauJeanGOSI::prepareNewtonIteration(double time)
@@ -1141,7 +830,10 @@ void MoreauJeanGOSI::prepareNewtonIteration(double time)
         computeT(d->q(),d->T());
       }
     }
-
+  }
+  if(!_explicitJacobiansOfRelation)
+  {
+    _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
 
 
@@ -1156,9 +848,10 @@ struct MoreauJeanGOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
 
   OneStepNSProblem& _osnsp;
   Interaction& _inter;
+  InteractionProperties& _interProp;
 
-  _NSLEffectOnFreeOutput(OneStepNSProblem& p, Interaction& inter) :
-    _osnsp(p), _inter(inter) {};
+  _NSLEffectOnFreeOutput(OneStepNSProblem& p, Interaction& inter, InteractionProperties& interProp) :
+    _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const NewtonImpactNSL& nslaw)
   {
@@ -1169,7 +862,8 @@ struct MoreauJeanGOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     subCoord[1] = _inter.nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    subscal(e, *_inter.y_k(_osnsp.inputOutputLevel()), *(_inter.yForNSsolver()), subCoord, true);
+    SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanGOSI::OSNSP_RHS];
+    subscal(e, *_inter.y_k(_osnsp.inputOutputLevel()), osnsp_rhs, subCoord, true);
   }
 
   void visit(const NewtonImpactFrictionNSL& nslaw)
@@ -1177,7 +871,12 @@ struct MoreauJeanGOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
-    (*_inter.yForNSsolver())(0) =  e * (*_inter.y_k(_osnsp.inputOutputLevel()))(0);
+    DEBUG_PRINTF("e= %e\n", e)
+      SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanGOSI::OSNSP_RHS];
+    DEBUG_PRINTF("y_k = %e\n", (*_inter.y_k(_osnsp.inputOutputLevel()))(0));
+    DEBUG_PRINTF("level = %i\n", _osnsp.inputOutputLevel() );
+
+    osnsp_rhs(0) =  e * (*_inter.y_k(_osnsp.inputOutputLevel()))(0);
 
   }
   void visit(const EqualityConditionNSL& nslaw)
@@ -1190,149 +889,90 @@ struct MoreauJeanGOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
   }
 };
 
-void MoreauJeanGOSI::NSLcontrib(Interaction& inter, OneStepNSProblem& osnsp)
+void MoreauJeanGOSI::NSLcontrib(SP::Interaction inter, OneStepNSProblem& osnsp)
 {
-  if(inter.relation()->getType() == Lagrangian || inter.relation()->getType() == NewtonEuler)
+  if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)
   {
-    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, inter);
-    inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
+    InteractionsGraph& indexSet = *osnsp.simulation()->indexSet(osnsp.indexSetLevel());
+    InteractionsGraph::VDescriptor ivd = indexSet.descriptor(inter);
+    _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd) );
+    inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
 }
 
 void MoreauJeanGOSI::integrate(double& tinit, double& tend, double& tout, int& notUsed)
 {
-  // Last parameter is not used (required for LsodarOSI but not for MoreauJeanGOSI).
-
-  double h = tend - tinit;
-  tout = tend;
-
-
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-
-    Type::Siconos dsType = Type::value(*ds);
-
-    if(dsType == Type::LagrangianLinearTIDS)
-    {
-      SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
-      // get the ds
-      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
-      // get velocity pointers for current time step
-      SP::SiconosVector v = d->velocity();
-      // get q and velocity pointers for previous time step
-      SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
-      SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
-      // get p pointer
-
-      SP::SiconosVector p = d->p(1);
-
-      // velocity computation :
-      //
-      // v = vi + W^{-1}[ -h*C*vi - h*h*theta*K*vi - h*K*qi + h*theta*Fext(t) + h*(1-theta) * Fext(ti) ] + W^{-1}*pi+1
-      //
-
-      *v = *p; // v = p
-
-      double coeff;
-      // -- No need to update W --
-      SP::SiconosMatrix C = d->C();
-      if(C)
-        prod(-h, *C, *vold, *v, false); // v += -h*C*vi
-
-      SP::SiconosMatrix K = d->K();
-      if(K)
-      {
-        coeff = -h * h * _theta;
-        prod(coeff, *K, *vold, *v, false); // v += -h^2*theta*K*vi
-        prod(-h, *K, *qold, *v, false); // v += -h*K*qi
-      }
-
-      SP::SiconosVector Fext = d->fExt();
-      if(Fext)
-      {
-        // computes Fext(ti)
-        d->computeFExt(tinit);
-        coeff = h * (1 - _theta);
-        scal(coeff, *Fext, *v, false); // v += h*(1-theta) * fext(ti)
-        // computes Fext(ti+1)
-        d->computeFExt(tout);
-        coeff = h * _theta;
-        scal(coeff, *Fext, *v, false); // v += h*theta * fext(ti+1)
-      }
-      // -> Solve WX = v and set v = X
-      W.PLUForwardBackwardInPlace(*v);
-      *v += *vold;
-    }
-    else RuntimeException::selfThrow("MoreauJeanGOSI::integrate - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
-  }
 }
-void MoreauJeanGOSI::updatePosition(SP::DynamicalSystem ds)
-{
-  DEBUG_PRINT("\nMoreauJeanGOSI::updateState(SP::DynamicalSystem ds)\n");
 
+void MoreauJeanGOSI::updatePosition(DynamicalSystem& ds)
+{
+  DEBUG_END("MoreauJeanGOSI::updatePosition(const unsigned int )\n");
   double h = _simulation->timeStep();
 
-  Type::Siconos dsType = Type::value(*ds);
+  Type::Siconos dsType = Type::value(ds);
 
   // 1 - Lagrangian Systems
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     // get dynamical system
-    SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+
+    LagrangianDS& d = static_cast<LagrangianDS&> (ds);
 
     // Compute q
-    SP::SiconosVector v = d->velocity();
-    SP::SiconosVector q = d->q();
+    SiconosVector& v = *d.velocity();
+    SiconosVector& q = *d.q();
+    DEBUG_EXPR(v.display());
+    DEBUG_EXPR(q.display());
+
     //  -> get previous time step state
-    SP::SiconosVector vold = d->velocityMemory()->getSiconosVector(0);
-    SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+    const SiconosVector& vold = d.velocityMemory().getSiconosVector(0);
+    const SiconosVector& qold = d.qMemory().getSiconosVector(0);
     // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
     double coeff = h * _theta;
-    scal(coeff, *v, *q) ; // q = h*theta*v
+    scal(coeff, v, q) ; // q = h*theta*v
     coeff = h * (1 - _theta);
-    scal(coeff, *vold, *q, false); // q += h(1-theta)*vold
-    *q += *qold;
+    scal(coeff, vold, q, false); // q += h(1-theta)*vold
+    q += qold;
+    DEBUG_EXPR(v.display());
+    DEBUG_EXPR(q.display());
+
   }
   else if(dsType == Type::NewtonEulerDS)
   {
     // get dynamical system
-    SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-    SP::SiconosVector v = d->twist();
+    NewtonEulerDS& d = static_cast<NewtonEulerDS&> (ds);
+    const SiconosVector& v = *d.twist();
     DEBUG_PRINT("MoreauJeanGOSI::updateState()\n ")
-    DEBUG_EXPR(d->display());
-    DEBUG_PRINT("MoreauJeanGOSI::updateState() prev v\n")
-    DEBUG_EXPR(v->display());
+      DEBUG_EXPR(d.display());
 
     //compute q
     //first step consists in computing  \dot q.
     //second step consists in updating q.
     //
-    SP::SiconosMatrix T = d->T();
-    SP::SiconosVector dotq = d->dotq();
-    prod(*T, *v, *dotq, true);
+    SP::SiconosMatrix T = d.T();
+    SiconosVector& dotq = *d.dotq();
+    prod(*T, v, dotq, true);
 
     DEBUG_PRINT("MoreauJeanGOSI::updateState v\n");
-    DEBUG_EXPR(v->display());
-    DEBUG_EXPR(dotq->display());
+    DEBUG_EXPR(v.display());
+    DEBUG_EXPR(dotq.display());
 
-    SP::SiconosVector q = d->q();
+    SiconosVector& q = *d.q();
 
     //  -> get previous time step state
-    SP::SiconosVector dotqold = d->dotqMemory()->getSiconosVector(0);
-    SP::SiconosVector qold = d->qMemory()->getSiconosVector(0);
+    const SiconosVector& dotqold = d.dotqMemory().getSiconosVector(0);
+    const SiconosVector& qold = d.qMemory().getSiconosVector(0);
     // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
     double coeff = h * _theta;
-    scal(coeff, *dotq, *q) ; // q = h*theta*v
+    scal(coeff, dotq, q) ; // q = h*theta*v
     coeff = h * (1 - _theta);
-    scal(coeff, *dotqold, *q, false); // q += h(1-theta)*vold
-    *q += *qold;
+    scal(coeff, dotqold, q, false); // q += h(1-theta)*vold
+    q += qold;
     DEBUG_PRINT("new q before normalizing\n");
-    DEBUG_EXPR(q->display());
+    DEBUG_EXPR(q.display());
 
     //q[3:6] must be normalized
-    d->normalizeq();
+    d.normalizeq();
 
     /* \warning VA 02/06/2013.
      * What is the reason of doing the following computation ?
@@ -1345,6 +985,8 @@ void MoreauJeanGOSI::updatePosition(SP::DynamicalSystem ds)
     // d->computeT(); //  VA 09/06/2015. We prefer only compute T() every time--step for Newton convergence reasons.
 
   }
+  DEBUG_END("MoreauJeanGOSI::updatePosition(const unsigned int )\n");
+
 }
 
 void MoreauJeanGOSI::updateState(const unsigned int )
@@ -1361,162 +1003,43 @@ void MoreauJeanGOSI::updateState(const unsigned int )
   for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
-    SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
-    VectorOfVectors& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+    DynamicalSystem& ds = *_dynamicalSystemsGraph->bundle(*dsi);
+    VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
     // Get the DS type
 
-    Type::Siconos dsType = Type::value(*ds);
+    Type::Siconos dsType = Type::value(ds);
 
     // 3 - Lagrangian Systems
     if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      DEBUG_PRINT("MoreauJeanGOSI::updateState(const unsigned int ), dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS \n");
-      // get dynamical system
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-      SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
-
-      //    SiconosVector *vfree = d->velocityFree();
-      SP::SiconosVector v = d->velocity();
+      LagrangianDS& d = static_cast<LagrangianDS&> (ds);
       bool baux = dsType == Type::LagrangianDS && useRCC && _simulation->relativeConvergenceCriterionHeld();
 
-      if( d->p(_levelMaxForInput) && d->p(_levelMaxForInput)->size() > 0)
-      {
-
-        assert(((d->p(_levelMaxForInput)).get()) &&
-               " MoreauJeanGOSI::updateState() *d->p(_levelMaxForInput) == NULL.");
-        *v = *d->p(_levelMaxForInput); // v = p
-        if(d->boundaryConditions())
-          for(std::vector<unsigned int>::iterator
-              itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-              itindex != d->boundaryConditions()->velocityIndices()->end();
-              ++itindex)
-            v->setValue(*itindex, 0.0);
-        W.PLUForwardBackwardInPlace(*v);
-
-        *v +=  vfree;
-      }
-      else
-      {
-        *v =  vfree;
-      }
-      DEBUG_EXPR(v->display());
-
-
-
-      if(d->boundaryConditions())
-      {
-        int bc = 0;
-        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
-
-        for(std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-            itindex != d->boundaryConditions()->velocityIndices()->end();
-            ++itindex)
-        {
-          _WBoundaryConditionsMap[ds->number()]->getCol(bc, *columntmp);
-          /*\warning we assume that W is symmetric in the Lagrangian case*/
-          double value = - inner_prod(*columntmp, *v);
-          if( d->p(_levelMaxForInput)&& d->p(_levelMaxForInput)->size() > 0)
-          {
-            value += (d->p(_levelMaxForInput))->getValue(*itindex);
-          }
-          /* \warning the computation of reactionToBoundaryConditions take into
-             account the contact impulse but not the external and internal forces.
-             A complete computation of the residu should be better */
-          d->reactionToBoundaryConditions()->setValue(bc, value) ;
-          bc++;
-        }
-      }
-
-      SP::SiconosVector q = d->q();
-      SiconosVector& local_buffer = *workVectors[OneStepIntegrator::local_buffer];
+      SiconosVector &q = *d.q();
+      SiconosVector& local_buffer = *ds_work_vectors[MoreauJeanGOSI::LOCAL_BUFFER];
 
       // Save value of q in stateTmp for future convergence computation
       if(baux)
-        local_buffer = *q;
-
+        local_buffer = q;
 
       updatePosition(ds);
 
       if(baux)
       {
-        local_buffer -= *q;
-        double aux = ((ds->workspace(DynamicalSystem::local_buffer))->norm2()) / (ds->normRef());
+        double ds_norm_ref = 1. + ds.x0()->norm2(); // Should we save this in the graph?
+        local_buffer -= q;
+        double aux = (local_buffer.norm2()) / ds_norm_ref;
         if(aux > RelativeTol)
           _simulation->setRelativeConvergenceCriterionHeld(false);
       }
-
     }
     else if(dsType == Type::NewtonEulerDS)
     {
       DEBUG_PRINT("MoreauJeanGOSI::updateState(const unsigned int ), dsType == Type::NewtonEulerDS \n");
-
-      // get dynamical system
-      SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
-      SiconosVector& vfree = *workVectors[OneStepIntegrator::free];
-
-      SP::SiconosVector v = d->twist();
-      DEBUG_PRINT("MoreauJeanGOSI::updateState()\n ")
-      DEBUG_EXPR(d->display());
-      DEBUG_PRINT("MoreauJeanGOSI::updateState() prev v\n")
-      DEBUG_EXPR(v->display());
-
-      if(d->p(_levelMaxForInput) && d->p(_levelMaxForInput)->size() > 0)
-      {
-        /*d->p has been fill by the Relation->computeInput, it contains
-          B \lambda _{k+1}*/
-        *v = *d->p(_levelMaxForInput); // v = p
-        if(d->boundaryConditions())
-          for(std::vector<unsigned int>::iterator
-              itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-              itindex != d->boundaryConditions()->velocityIndices()->end();
-              ++itindex)
-            v->setValue(*itindex, 0.0);
-
-        W.PLUForwardBackwardInPlace(*v);
-
-        DEBUG_EXPR(d->p(_levelMaxForInput)->display());
-        DEBUG_PRINT("MoreauJeanGOSI::updatestate W CT lambda\n");
-        DEBUG_EXPR(v->display());
-        *v +=  vfree;
-      }
-      else
-        *v =  vfree;
-
-      DEBUG_PRINT("MoreauJeanGOSI::updatestate work free\n");
-      DEBUG_EXPR(free->display());
-      DEBUG_PRINT("MoreauJeanGOSI::updatestate new v\n");
-      DEBUG_EXPR(v->display());
-
-      if(d->boundaryConditions())
-      {
-        int bc = 0;
-        SP::SiconosVector columntmp(new SiconosVector(ds->dimension()));
-
-        for(std::vector<unsigned int>::iterator  itindex = d->boundaryConditions()->velocityIndices()->begin() ;
-            itindex != d->boundaryConditions()->velocityIndices()->end();
-            ++itindex)
-        {
-          _WBoundaryConditionsMap[ds->number()]->getCol(bc, *columntmp);
-          /*\warning we assume that W is symmetric in the Lagrangian case*/
-          double value = - inner_prod(*columntmp, *v);
-          if(d->p(_levelMaxForInput) && d->p(_levelMaxForInput)->size() > 0)
-          {
-            value += (d->p(_levelMaxForInput))->getValue(*itindex);
-          }
-          /* \warning the computation of reactionToBoundaryConditions take into
-             account the contact impulse but not the external and internal forces.
-             A complete computation of the residu should be better */
-          d->reactionToBoundaryConditions()->setValue(bc, value) ;
-          bc++;
-        }
-      }
-
       updatePosition(ds);
-
     }
-    else RuntimeException::selfThrow("MoreauJeanGOSI::updateState - not yet implemented for Dynamical system of type: " +  Type::name(*ds));
+    else RuntimeException::selfThrow("MoreauJeanGOSI::updateState - not yet implemented for Dynamical system of type: " +  Type::name(ds));
 
   }
 }
@@ -1536,18 +1059,26 @@ bool MoreauJeanGOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned in
   {
     gamma = _gamma;
   }
-  DEBUG_PRINTF("MoreauJeanGOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.\n", i,  y, yDot, y + gamma * h * yDot);
+  DEBUG_PRINTF("MoreauJeanGOSI::addInteractionInIndexSet of level = %i y=%e, yDot=%e, y_estimated=%e.\n", i,  y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
+
+  DEBUG_PRINTF("y = %e\n", y);
   assert(!isnan(y));
-  DEBUG_EXPR(
+  DEBUG_EXPR_WE(
     if(y <= 0)
-    DEBUG_PRINT("MoreauJeanGOSI::addInteractionInIndexSet ACTIVATE.\n");
-  );
+    {
+      DEBUG_PRINT("MoreauJeanGOSI::addInteractionInIndexSet ACTIVATED.\n");
+    }
+    else
+    {
+      DEBUG_PRINT("MoreauJeanGOSI::addInteractionInIndexSet NOT ACTIVATED.\n");
+    }
+    );
   return (y <= 0.0);
 }
 
 
-bool MoreauJeanGOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned int i)
+bool MoreauJeanGOSI::removeInteractionFromIndexSet(SP::Interaction inter, unsigned int i)
 {
   assert(i == 1);
   double h = _simulation->timeStep();
@@ -1564,8 +1095,8 @@ bool MoreauJeanGOSI::removeInteractionInIndexSet(SP::Interaction inter, unsigned
 
   DEBUG_EXPR(
     if(y > 0)
-    DEBUG_PRINT("MoreauJeanGOSI::removeInteractionInIndexSet DEACTIVATE.\n");
-  );
+      DEBUG_PRINT("MoreauJeanGOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
+    );
   return (y > 0.0);
 }
 

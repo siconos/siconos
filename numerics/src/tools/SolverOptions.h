@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@
 
 /*!\file SolverOptions.h
   Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
-  \author Franck Perignon
 */
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"
@@ -79,59 +78,29 @@ enum SICONOS_NUMERICS_PROBLEM_TYPE
   SICONOS_NUMERICS_PROBLEM_NCP = 5,
   SICONOS_NUMERICS_PROBLEM_MCP = 6,
   SICONOS_NUMERICS_PROBLEM_VI = 7,
-  SICONOS_NUMERICS_PROBLEM_AVI = 8
+  SICONOS_NUMERICS_PROBLEM_AVI = 8,
+  SICONOS_NUMERICS_PROBLEM_RELAY = 9,
 };
 
 
 /** Some value for iparam index */
-/* #define SICONOS_IPARAM_MAX_ITER 0 */
-/* #define SICONOS_IPARAM_ITER_DONE 1 */
-/* #define SICONOS_IPARAM_PREALLOC 2 */
-
-
 enum SICONOS_IPARAM
 {
   SICONOS_IPARAM_MAX_ITER = 0,
-  SICONOS_IPARAM_ITER_DONE = 1,
-  SICONOS_IPARAM_PREALLOC = 2
+  SICONOS_IPARAM_ITER_DONE = 1
+  ,
+  SICONOS_IPARAM_PREALLOC =2
 };
-
-/** for pivot based algorithm */
-#define SICONOS_IPARAM_PIVOT_RULE 3
-
-/** pathsearch specific data */
-#define SICONOS_IPARAM_PATHSEARCH_STACKSIZE 5
-
-/** line search based algo use this */
-#define SICONOS_IPARAM_LSA_NONMONOTONE_LS 3
-#define SICONOS_IPARAM_LSA_NONMONOTONE_LS_M 4
-#define SICONOS_IPARAM_LSA_FORCE_ARCSEARCH 5
-#define SICONOS_IPARAM_LSA_SEARCH_CRITERION 6
-#define SICONOS_IPARAM_GOLDSTEIN_ITERMAX 4
-
-/** non-monotone specific part */
-#define SICONOS_IPARAM_NMS_WATCHDOG_TYPE 7
-#define SICONOS_IPARAM_NMS_PROJECTED_GRADIENT_TYPE 8
-#define SICONOS_IPARAM_NMS_N_MAX 9
-
 /** Some values for dparam index */
 enum SICONOS_DPARAM
 {
   SICONOS_DPARAM_TOL = 0,
   SICONOS_DPARAM_RESIDU = 1
 };
-/** line-search */
-#define SICONOS_DPARAM_LSA_ALPHA_MIN 2
-#define SICONOS_DPARAM_GOLDSTEIN_C 3
-#define SICONOS_DPARAM_GOLDSTEIN_ALPHAMAX 4
 
-/** non-monotone specific part */
-#define SICONOS_DPARAM_NMS_DELTA 2
-#define SICONOS_DPARAM_NMS_DELTA_VAR 3
-#define SICONOS_DPARAM_NMS_SIGMA 4
-#define SICONOS_DPARAM_NMS_ALPHA_MIN_WATCHDOG 5
-#define SICONOS_DPARAM_NMS_ALPHA_MIN_PGRAD 6
-#define SICONOS_DPARAM_NMS_MERIT_INCR 7
+/** for pivot based algorithm should be moved in a enum */
+#define SICONOS_IPARAM_PIVOT_RULE 3
+#define SICONOS_IPARAM_PATHSEARCH_STACKSIZE 5
 
 
 extern const char* const SICONOS_NUMERICS_PROBLEM_LCP_STR;
@@ -143,6 +112,7 @@ extern const char* const SICONOS_NUMERICS_PROBLEM_FC2D_STR;
 extern const char* const SICONOS_NUMERICS_PROBLEM_FC3D_STR;
 extern const char* const SICONOS_NUMERICS_PROBLEM_VI_STR;
 extern const char* const SICONOS_NUMERICS_PROBLEM_AVI_STR;
+extern const char* const SICONOS_NUMERICS_PROBLEM_RELAY_STR;
 
 
 #include "SolverOptions_helpers.h"
@@ -216,6 +186,9 @@ extern "C"
    */
   void solver_options_copy(SolverOptions* options_ori, SolverOptions* options);
 
+  SolverOptions * solver_options_get_internal_solver(SolverOptions * options, int n);
+  
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,38 @@
 #include <float.h>
 #include <stdlib.h>
 
-#include "numerics_verbose.h"
-#include "SiconosCompat.h"
+#ifndef M_PI
+#define M_PI        3.14159265358979323846264338327950288   /* pi             */
+#define M_PI_2      1.57079632679489661923132169163975144   /* pi/2           */
+#endif
+
+#ifndef MAYBE_UNUSED
+#ifdef __GNUC__
+#define MAYBE_UNUSED __attribute__((unused))
+#else
+#define MAYBE_UNUSED
+#endif
+#endif
+
+#ifndef WARN_RESULT_IGNORED
+#ifdef __GNUC__
+#define WARN_RESULT_IGNORED __attribute__ ((warn_unused_result))
+#else
+#define WARN_RESULT_IGNORED
+#endif
+#endif
 
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
 #endif
+
+#define SOLVE_3X3_GEPP(MAT, X) \
+{ \
+  int res = solve_3x3_gepp(mat, X); \
+  if (res) { printf("%s :: Call solve_3x3_gepp(" #MAT ", " #X " failed!. "\
+                    "No pivot could be selected for column %d\n", __func__, res); } }
+
 
 /** OP3X3(EXPR) do EXPR 9 times
  * \param EXPR a C expression that should contains self incrementing
@@ -50,7 +75,7 @@
     EXPR;                                       \
     EXPR;                                       \
   } while(0)                                    \
- 
+
 /** OP3(EXPR) do EXPR 3 times
  * \param EXPR a C expression that should contains self incrementing
  *        pointers on arrays[9] */
@@ -185,7 +210,7 @@ static inline void scal3x3(double scal, double m[9])
 
 /** diagonal scaling of a vector
  * \param[in] scal_coeffs diagonal part of a matrix
- * \param[in,out] v a 3D vector 
+ * \param[in,out] v a 3D vector
  */
 static inline void diag_scal3(double* restrict scal_coeffs, double* restrict v)
 {
@@ -280,7 +305,7 @@ static inline void mtv3x3(double* restrict a, double* restrict v, double* restri
 /** add a matrix vector multiplication
  * \param[in] a a[9]
  * \param[in] v v[3]
- * \param[out] r r[3]
+ * \param[out] r r[3] the result of r += av
  */
 static inline void mvp3x3(const double* restrict a, const double* restrict v, double* restrict r)
 {
@@ -306,6 +331,83 @@ static inline void mvp3x3(const double* restrict a, const double* restrict v, do
   *pr++ += *a++ * *v++;
 }
 
+static inline void mvp5x5(const double* restrict a, const double* restrict v, double* restrict r)
+{
+
+  double* pr;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+
+}
+
+/** add a matrix vector multiplication scaled by alpha 
+ * \param[in] alpha scalar coeff
+ * \param[in] a a[9]
+ * \param[in] v v[3]
+ * \param[out] r r[3] the result of r += av
+ */
+static inline void mvp_alpha3x3(double alpha, const double* restrict a, const double* restrict v, double* restrict r)
+{
+
+  double* pr;
+
+  pr = r;
+
+  *pr++ += alpha * *a++ * *v;
+  *pr++ += alpha * *a++ * *v;
+  *pr++ += alpha * *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += alpha *  *a++ * *v;
+  *pr++ += alpha *  *a++ * *v;
+  *pr++ += alpha *  *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += alpha *  *a++ * *v;
+  *pr++ += alpha *  *a++ * *v;
+  *pr++ += alpha *  *a++ * *v++;
+}
 /** minux the result a matrix vector multiplication
  * \param[in] a matrix
  * \param[in] v vector
@@ -559,6 +661,21 @@ static inline void cross3(double* restrict a, double* restrict b, double* restri
   *c   = *a0 * *b1 - *a1 * *b0;
 }
 
+/** norm : || a ||
+ *  may underflow & overflow
+ * \param[in] a a[2]
+ * \return the norm
+ */
+static inline double hypot2(double* a)
+{
+  double r;
+
+  r = *a * *a;
+  a++;
+  r += *a * *a;
+  return sqrt(r);
+}
+
 
 /** norm : || a ||
  *  may underflow & overflow
@@ -576,7 +693,22 @@ static inline double hypot3(double* a)
   r += *a * *a;
   return sqrt(r);
 }
+static inline double hypot5(double* a)
+{
+  double r;
 
+  r = *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+
+  return sqrt(r);
+}
 static inline double hypot9(double* a)
 {
   double r;
@@ -681,6 +813,7 @@ void print3(double* v);
  * \param[out] A2x first component of the vector A
  * \param[out] A2y second component of the vector A
  * \param[out] A2z third component of the vector A
+ *
  * \return 0 if success, 1 if there is a problem
 */
 WARN_RESULT_IGNORED
@@ -748,8 +881,10 @@ static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
 
 /** solve Ax = b by partial pivoting Gaussian elimination. This function is 10
  * to 20 times faster than calling LAPACK (tested with netlib and atlas).
+ *
  * \param a column-major matrix (not modified)
  * \param[in,out] b on input, the right-hand side; on output the solution x
+ *
  * \return 0 if ok, otherwise the column where no pivot could be selected
  */
 WARN_RESULT_IGNORED
@@ -836,7 +971,7 @@ static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
   double aln1 = fabs(ln1);
   pivot2 = alm1 >= aln1 ? 0 : 1;
 
-  /* We now solve the system 
+  /* We now solve the system
    * | lm1 lm2 ; bm |
    * | ln1 ln2 ; bn |
    */
@@ -873,5 +1008,117 @@ static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
 
   return info;
 }
+
+
+#define mat_elem(a, y, x, n) (a + ((y) * (n) + (x)))
+
+static void swap_row(double *a, double *b, int r1, int r2, int n)
+{
+	double tmp, *p1, *p2;
+	int i;
+
+	if (r1 == r2) return;
+	for (i = 0; i < n; i++) {
+		p1 = mat_elem(a, r1, i, n);
+		p2 = mat_elem(a, r2, i, n);
+		tmp = *p1, *p1 = *p2, *p2 = tmp;
+	}
+	tmp = b[r1], b[r1] = b[r2], b[r2] = tmp;
+}
+
+static inline  void solve_nxn_gepp(int n, double *a, double *b, double *x)
+{
+#define A(y, x) (*mat_elem(a, y, x, n))
+	int  j, col, row, max_row,dia;
+	double max, tmp;
+
+	for (dia = 0; dia < n; dia++) {
+		max_row = dia, max = A(dia, dia);
+
+		for (row = dia + 1; row < n; row++)
+			if ((tmp = fabs(A(row, dia))) > max)
+				max_row = row, max = tmp;
+
+		swap_row(a, b, dia, max_row, n);
+
+		for (row = dia + 1; row < n; row++) {
+			tmp = A(row, dia) / A(dia, dia);
+			for (col = dia+1; col < n; col++)
+				A(row, col) -= tmp * A(dia, col);
+			A(row, dia) = 0;
+			b[row] -= tmp * b[dia];
+		}
+	}
+	for (row = n - 1; row >= 0; row--) {
+		tmp = b[row];
+		for (j = n - 1; j > row; j--)
+			tmp -= x[j] * A(row, j);
+		x[row] = tmp / A(row, row);
+	}
+#undef A
+}
+
+/** Computation of the eigenvalues of a symmetric 3x3 real matrix
+ *
+ * \param a symmetric column-major matrix (not modified)
+ * \param b a 3x3 work matrix
+ * \param[in,out] eig eigenvalie in decreasing order
+ *
+ * \return 0 all the time
+ */
+WARN_RESULT_IGNORED
+static inline int eig_3x3(double* restrict a, double* restrict b, double* restrict eig)
+{
+  SET3X3(a);
+  SET3X3(b);
+  double pi = M_PI;
+  double p1 =  *a01* *a01 +  *a02* *a02 +  *a12* *a12;
+  if (p1 == 0)
+  {
+    /* A is diagonal. */
+    eig[0] =  *a00;
+    eig[1] =  *a11;
+    eig[2] =  *a22;
+  }
+  else
+  {
+    double q = ( *a00+ *a11+ *a22)/3.0;
+    double  p2 = ( *a00 - q)*( *a00 - q) + ( *a11 - q)*( *a11 - q) + ( *a22 - q)*( *a22 - q) + 2 * p1;
+    double p = sqrt(p2 / 6.0);
+    *b00 = (1 / p) * ( *a00 - q);
+    *b11 = (1 / p) * ( *a11 - q);
+    *b22 = (1 / p) * ( *a22 - q);
+    *b01 = (1 / p) * ( *a01);
+    *b02 = (1 / p) * ( *a02);
+    *b10 = (1 / p) * ( *a10);
+    *b12 = (1 / p) * ( *a12);
+    *b20 = (1 / p) * ( *a20);
+    *b21 = (1 / p) * ( *a21);
+    //B = (1 / p) * ( *A - q * I)       % I is the identity matrix
+    double det =
+      *b00 * *b11 * *b22 + *b01 * *b12 * *b20 + *b02 * *b10 * *b21 -
+      *b00 * *b12 * *b21 - *b01 * *b10 * *b22 - *b02 * *b11 * *b20;
+    double r = det/2.0;
+
+    /* % In exact arithmetic for a symmetric matrix  -1 <= r <= 1 */
+    /* % but computation error can leave it slightly outside this range. */
+    double phi;
+    if (r <= -1)
+      phi = pi / 3.0;
+    else if (r >= 1)
+      phi = 0.0;
+    else
+      phi = acos(r) / 3;
+
+   /* % the eigenvalues satisfy eig3 <= eig2 <= eig1 */
+    eig[0] = q + 2 * p * cos(phi);
+    eig[2] = q + 2 * p * cos(phi + (2*pi/3));
+    eig[1] = 3 * q - eig[0] - eig[2];    /* % since trace(A) = eig1 + eig2 + eig3; */
+  }
+
+  return 0;
+}
+
+
 
 #endif

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,29 +25,25 @@
 
 /** Lagrangian Compliant Relation: Scleronomous, Non-Holonomic (function of lambda).
  *
- * \author SICONOS Development Team - copyright INRIA
- *  \version 3.0.0.
- *  \date Apr 27, 2004
- *
- * \f[
+ * \f$
  * Y[0] = y = h(q,\lambda(t),z)
- * \f]
+ * \f$
  *
- * \f[
+ * \f$
  * Y[1] = \dot y = G0(q,\lambda(t),z)\dot q + G1((q,\lambda(t),z)\dot\lambda(t)
- * \f]
+ * \f$
  *
- * \f[
+ * \f$
  * p = G0^t(q,\lambda(t),z)\lambda(t)
- * \f]
+ * \f$
  *
  * with
- * \f[
+ * \f$
  * G0(q,\lambda(t),z) = \nabla_q h(q,\lambda(t),z)
- * \f]
- * \f[
+ * \f$
+ * \f$
  * G1(q,\lambda(t),z) = \nabla_{\lambda}h(q,\lambda(t),z)
- * \f]
+ * \f$
  *
  * h, G0 and G1 are connected to user-defined functions.
  *
@@ -78,12 +74,15 @@ protected:
 
   /** initialize G matrices or components specific to derived classes.
    * \param inter : the Interaction
-   * \param DSlink : block vectors from dynamical systems
-   * \param workV : work vectors
-   * \param workM : work vectors
-  */
-  void initComponents(Interaction& inter, VectorOfBlockVectors& DSlink, VectorOfVectors& workV, VectorOfSMatrices& workM);
-  void zeroPlugin();
+   */
+  void initialize(Interaction& inter);
+
+  /** check sizes of the relation specific operators.
+   * \param inter an Interaction using this relation
+   */
+  virtual void checkSize(Interaction& inter);
+
+  void _zeroPlugin();
 
 public:
 
@@ -123,31 +122,24 @@ public:
   */
   virtual void computeJachlambda(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z);
 
-  const std::string getJachlambdaName() const;
-  const std::string getJachqName() const;
-
   /** to compute output
   *  \param time the current time
   *  \param inter the Interaction owning y
-  *  \param interProp Interaction properties
   *  \param derivativeNumber the number of the derivative to compute,
   *  optional, default = 0.
   */
-  void computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber = 0);
-
+  void computeOutput(double time, Interaction& inter,  unsigned int derivativeNumber = 0);
   /** to compute the input
   *  \param time the current time
   *  \param inter the Interaction owning lambda
-  *  \param interProp Interaction properties
   *  \param level "derivative" order of lambda used to compute input
   */
-  void computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level = 0);
-
+  void computeInput(double time, Interaction& inter, unsigned int level = 0);
   /* compute all the H Jacobian */
-  void computeJach(double time, Interaction& inter, InteractionProperties& interProp);
+  void computeJach(double time, Interaction& inter);
 
   /* compute all the G Jacobian */
-  void computeJacg(double time, Interaction& inter, InteractionProperties& interProp)
+  void computeJacg(double time, Interaction& inter)
   {
     ;
   }

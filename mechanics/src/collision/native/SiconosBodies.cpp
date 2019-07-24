@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@
  * limitations under the License.
 */
 
-
 #include "SiconosBodies.hpp"
-
 #include <Simulation.hpp>
-#include <Model.hpp>
 #include "SpaceFilter.hpp"
 
 #include <iostream>
@@ -29,12 +26,8 @@ void SiconosBodies::compute()
 {
   try
   {
-    _playground->buildInteractions(_model->currentTime());
-
-    _model->simulation()->advanceToEvent();
-
-    _model->simulation()->processEvents();
-
+    _sim->advanceToEvent();
+    _sim->processEvents();
   }
 
   catch (SiconosException e)

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,13 @@
 #include <boost/version.hpp>
 
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
+#if !defined(SICONOS_USE_MAP_FOR_HASH)
 #include <unordered_map>
 #else
 #include <map>
 #endif
+
+#include <limits>
 
 /* gccxml 0.9 complains about ambiguous usage of size_t or std::size_t
  * in some boost headers, so we specify which one we want. It seems
@@ -54,6 +56,8 @@ using std::size_t;
 
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graph_concepts.hpp>
+#include <boost/graph/directed_graph.hpp>
 
 #if (BOOST_VERSION >= 104000)
 #include <boost/property_map/property_map.hpp>
@@ -67,11 +71,7 @@ using std::size_t;
 #pragma clang diagnostic pop
 #endif
 
-#if defined(SICONOS_STD_TUPLE) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 namespace std11 = std;
-#else
-namespace std11 = boost;
-#endif
 
 #include "SiconosSerialization.hpp"
 
@@ -189,7 +189,7 @@ public:
   //  typedef typename
   //  boost::property_map<graph_t, graph_properties_t >::type GraphPropertiesAccess;
 
-#if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
+#if !defined(SICONOS_USE_MAP_FOR_HASH)
   typedef typename std::unordered_map<V, VDescriptor> VMap;
 #else
   typedef typename std::map<V, VDescriptor> VMap;
@@ -266,7 +266,7 @@ public:
     return ret;
   }
 
-  /* parrallel edges : edge_range needs multisetS as
+  /* parallel edges : edge_range needs multisetS as
      OutEdgesList and with multisetS remove_out_edges_if cannot
      compile as with listS.
      This is only needed for AdjointGraph where only 2 edges may be in
@@ -626,6 +626,7 @@ public:
 #endif
   }
 
+
   EDescriptor add_edge(const VDescriptor& vd1,
                        const VDescriptor& vd2,
                        const E& e_bundle)
@@ -700,7 +701,7 @@ public:
 
       if (vdx == vd2) endl = true;
 
-#if defined(SICONOS_STD_UNORDERED_MAP) && !defined(SICONOS_USE_MAP_FOR_HASH)
+#if !defined(SICONOS_USE_MAP_FOR_HASH)
       std::unordered_map<E, EDescriptor> Edone;
 #else
       std::map<E, EDescriptor> Edone;
@@ -810,6 +811,47 @@ public:
           }
         }
     */
+    /*  debug */
+#ifndef NDEBUG
+    assert(state_assert());
+#endif
+  }
+
+
+  /** Remove all the in-edges of vertex u for which the predicate p
+   * returns true. This expression is only required when the graph
+   * also models IncidenceGraph.
+   */
+  template<class Predicate>
+  void remove_in_edge_if(const VDescriptor& vd,
+                          const Predicate& pred)
+  //                      Predicate pred)
+  {
+
+    BOOST_CONCEPT_ASSERT((boost::IncidenceGraphConcept<graph_t>));
+    BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
+
+    boost::remove_in_edge_if(vd, pred, g);
+    /*  debug */
+#ifndef NDEBUG
+    assert(state_assert());
+#endif
+  }
+
+  /** Remove all the in-edges of vertex u for which the predicate p
+   * returns true. This expression is only required when the graph
+   * also models IncidenceGraph.
+   */
+  template<class Predicate>
+  void remove_edge_if(const VDescriptor& vd,
+                      const Predicate& pred)
+  //                  Predicate pred)
+  {
+
+    BOOST_CONCEPT_ASSERT((boost::IncidenceGraphConcept<graph_t>));
+    BOOST_CONCEPT_ASSERT((boost::MutableGraphConcept<graph_t>));
+
+    boost::remove_edge_if(pred, g);
     /*  debug */
 #ifndef NDEBUG
     assert(state_assert());

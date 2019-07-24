@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,9 +63,9 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
 
   /** compute error for friction-contact 3D problem with Newton
    *  \param dimension of the global problem
-   *   \param[in,out] velocity vector (\warning in-out parameter )
-   *   \param reaction global reaction vector
-   *   \param output_error
+   *  \param[in,out] velocity vector
+   *  \param reaction global reaction vector
+   *  \param output_error
    */
   void fc3d_onecontact_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity, double*reaction, double * output_error);
 
@@ -83,12 +83,12 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
                                    double * reaction, SolverOptions* options);
 
   int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem* localproblem,
-                                 double * R, int *iparam, double *dparam);
+                                                            double * R, SolverOptions * options);
 
   int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem* localproblem,
-                                       double * R, int *iparam, double *dparam);
+                                                            double * R, SolverOptions * options);
 
-  int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid_pli_nsn_loop(FrictionContactProblem* localproblem,
+  int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem* localproblem,
                                                             double * local_reaction, SolverOptions* options);
 
   /* Set the default solver options for the ONECONTACT_NSN Solver
@@ -100,7 +100,8 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
    * options.dparam[0] = 1e-3 precision.
    * \param options  the solver options
    */
-  int fc3d_onecontact_nonsmooth_Newtow_setDefaultSolverOptions(SolverOptions* options);
+  int fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(SolverOptions* options);
+  int fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

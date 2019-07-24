@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,7 @@
 #include "SimulationTypeDef.hpp"
 
 #include <SiconosConfig.h>
-#if defined(SICONOS_STD_TO_STRING) && !defined(SICONOS_USE_BOOST_FOR_CXX11)
 #define TO_STR(x) std::to_string(x)
-#else
-#include <boost/lexical_cast.hpp>
-#define TO_STR(x) boost::lexical_cast<std::string>(x)
-#endif
-
 
 static inline std::pair<unsigned, std::string> getNumberOfStates(DynamicalSystemsGraph& DSG0, InteractionsGraph& IG0)
 {
@@ -46,39 +40,30 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(DynamicalSystem
   {
     SiconosVector& x = *DSG0.bundle(*dsvi)->x();
     nb += x.size();
+
     std::string nameDS;
-    if (DSG0.name.hasKey(*dsvi))
-    {
+    if (DSG0.name.hasKey(*dsvi)) {
       nameDS = DSG0.name[*dsvi];
-    }
-    else
-    {
+    } else {
       nameDS = "unknownDS" + TO_STR(counter);
       ++counter;
     }
 
-    for (unsigned i = 0; i < x.size(); ++i)
-    {
+    for (unsigned i = 0; i < x.size(); ++i) {
       legend.append(" " + nameDS + "_" + TO_STR(i));
     }
 
-
-
-    if (DSG0.u.hasKey(*dsvi))
-    {
+    if (DSG0.u.hasKey(*dsvi)) {
       unsigned sizeU = DSG0.u[*dsvi]->size();
       nb += sizeU;
-      for (unsigned i = 0; i < sizeU; ++i)
-      {
+      for (unsigned i = 0; i < sizeU; ++i) {
         legend.append(" " + nameDS + "_u_" + TO_STR(i));
       }
     }
 
-    if (DSG0.e.hasKey(*dsvi))
-    {
+    if (DSG0.e.hasKey(*dsvi)) {
       unsigned sizeE = DSG0.e[*dsvi]->size();
-      for (unsigned i = 0; i < sizeE; ++i)
-      {
+      for (unsigned i = 0; i < sizeE; ++i) {
         legend.append(" " + nameDS + "_e_" + TO_STR(i));
       }
       nb += DSG0.e[*dsvi]->size();

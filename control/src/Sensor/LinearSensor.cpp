@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2018 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@
 #include "SensorFactory.hpp"
 #include "SiconosVector.hpp"
 #include "DynamicalSystem.hpp"
-#include "Model.hpp"
 #include "TimeDiscretisation.hpp"
 
 
@@ -35,10 +34,10 @@ LinearSensor::~LinearSensor()
 {
 }
 
-void LinearSensor::initialize(const Model& m)
+void LinearSensor::initialize(const NonSmoothDynamicalSystem& nsds)
 {
   // Call initialize of base class
-  ControlSensor::initialize(m);
+  ControlSensor::initialize(nsds);
 
   // consistency checks
   if (!_matC)
