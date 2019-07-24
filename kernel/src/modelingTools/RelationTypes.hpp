@@ -39,4 +39,5 @@ Include files related to the different types of relations
 #include "LagrangianCompliantR.hpp"
 #include "LagrangianCompliantLinearTIR.hpp"
 #include "Lagrangian2d1DR.hpp"
+#include "Lagrangian2d2DR.hpp"
 #endif
