@@ -275,7 +275,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Si
 
   for (unsigned int ii = 3; ii < 5; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
-      _jachqT->setValue(ii, jj, _AUX2->getValue(ii-2, jj-3));
+      _jachqT->setValue(ii, jj, -_AUX2->getValue(ii-2, jj-3));
 
   DEBUG_EXPR(_jachqT->display(););
 
