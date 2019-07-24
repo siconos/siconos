@@ -1576,10 +1576,9 @@ class VView(object):
                     points.InsertNextPoint(vertice[0], vertice[1], vertice[2])
                     convex.GetPointIds().SetId(id_, id_)
             elif self.io.dimension() == 2:
-                print('self.io.shapes()[shape_name][:]', self.io.shapes()[shape_name][:])
                 number_of_vertices = data.shape[0]
                 convex.GetPointIds().SetNumberOfIds(data.shape[0]*2)
-                for id_, vertice in enumerate(self.io.shapes()[shape_name][:]):
+                for id_, vertice in enumerate(data):
                     points.InsertNextPoint(vertice[0], vertice[1], 0.0)
                     convex.GetPointIds().SetId(id_, id_)
                     points.InsertNextPoint(vertice[0], vertice[1], 0.1)
@@ -1868,7 +1867,7 @@ class VView(object):
                     self.inertia[instid] = 1.0
 
         else:
-            print('no mass for instance', instance_name)
+            pass
 
         if instid >= 0:
             self.dynamic_actors[instid] = list()
