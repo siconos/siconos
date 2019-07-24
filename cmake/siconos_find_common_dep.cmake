@@ -200,12 +200,6 @@ if(UNIX)
   endif()
 endif()
 
-# SiconosConfig.h generation and include
-if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
-  configure_file(${CMAKE_SOURCE_DIR}/config.h.cmake
-    ${CMAKE_BINARY_DIR}/SiconosConfig.h)
-endif()
-
 # man pages
 IF(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
   CONFIGURE_FILE(man/siconos.1.in man/siconos.1)
