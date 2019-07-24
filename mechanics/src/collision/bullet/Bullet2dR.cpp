@@ -47,13 +47,12 @@
 
 #include <boost/math/quaternion.hpp>
 
-static
-void copyQuatRot2d(boost::math::quaternion<double>& from, SiconosVector& to)
-{
-
-  double angle = 2.0 * acos(from.R_component_1());
-  to(2) = angle;
-}
+//static
+//void copyQuatRot2d(boost::math::quaternion<double>& from, SiconosVector& to)
+//{
+//  double angle = 2.0 * acos(from.R_component_1());
+//  to(2) = angle;
+//}
 
 static
 void copyQuatRot2d(const SiconosVector& from, boost::math::quaternion<double>& to)
