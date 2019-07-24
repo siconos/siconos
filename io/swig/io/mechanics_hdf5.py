@@ -1017,6 +1017,7 @@ class MechanicsHdf5(object):
                 obj.attrs['mass'] = mass
                 obj.attrs['type']='dynamic'
                 if np.isscalar(mass) and mass <= 0. :
+
                     print_verbose("The use of a mass equal to zero to define a static object is deprecated.")
                     print_verbose("Do not give the mass or set mass=None to define a static object")
             else:
