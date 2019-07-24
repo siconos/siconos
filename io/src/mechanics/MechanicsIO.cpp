@@ -21,15 +21,13 @@
 #include <Bullet5DR.hpp>
 #include <Bullet2dR.hpp>
 #else
-#include <NewtonEulerDS.hpp>
 #include <NewtonEuler3DR.hpp>
 #include <NewtonEuler5DR.hpp>
-#include <RigidBody2dDS.hpp>
 #include <SpaceFilter.hpp>
-DUMMY(RigidBody2dDS, LagrangianDS)
 DUMMY(BulletR, NewtonEuler3DR);
 DUMMY(Bullet5DR, NewtonEuler5DR);
-toot
+#include <Lagrangian2d2DR.cpp>
+DUMMY(Bullet2dR, Lagrangian2d2DR);
 #endif
 
 #define OCC_CLASSES() \
@@ -66,11 +64,11 @@ DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
   REGISTER(LagrangianR)                         \
   REGISTER(Disk)                                \
   REGISTER(Circle)                              \
-  REGISTER(NewtonEulerR)                        \
+  REGISTER(Lagrangian2d2DR)			\
+  REGISTER(NewtonEulerR)			\
   REGISTER(NewtonEuler1DR)                      \
   REGISTER(NewtonEuler3DR)                      \
   REGISTER(NewtonEuler5DR)                      \
-  REGISTER(Lagrangian2d2DR)                      \
   REGISTER(PivotJointR)                         \
   REGISTER(KneeJointR)                          \
   REGISTER(PrismaticJointR)                     \
