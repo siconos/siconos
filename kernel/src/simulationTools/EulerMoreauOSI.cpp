@@ -417,17 +417,17 @@ void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds,
   //  if (_useGamma)
   {
 
-    InteractionsGraph& indexSet = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0);
+//    InteractionsGraph& indexSet = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0);
 
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    InteractionsGraph::VDescriptor ivd;
+//    InteractionsGraph::VDescriptor ivd;
     SP::SiconosMatrix K;
     SP::Interaction inter;
     for(std11::tie(oei, oeiend) = _dynamicalSystemsGraph->out_edges(dsv); oei != oeiend; ++oei)
     {
       inter = _dynamicalSystemsGraph->bundle(*oei);
       VectorOfSMatrices& relationMat = inter->relationMatrices();
-      ivd = indexSet.descriptor(inter);
+//      ivd = indexSet.descriptor(inter);
       FirstOrderR& rel = static_cast<FirstOrderR&>(*inter->relation());
       K = rel.K();
       if(!K) K = relationMat[FirstOrderR::mat_K];

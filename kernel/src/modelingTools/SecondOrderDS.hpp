@@ -328,7 +328,7 @@ public:
   /** get velocity vector (pointer link)
    *  \return pointer on a SiconosVector
    */
-  virtual inline SP::SiconosVector velocity() const =0;
+  virtual SP::SiconosVector velocity() const =0;
 
   /** set velocity vector (copy)
    *  \param newValue

@@ -26,6 +26,7 @@
 #include "SiconosBlas.h"
 #include "AlartCurnierGenerated.h"
 #include "NumericsVector.h"
+#include "numerics_verbose.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -880,8 +881,8 @@ void compute_rho_spectral_norm(FrictionContactProblem* localproblem, double * rh
   double * MLocal = localproblem->M->matrix0;
   double worktmp[9] = {0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0};
   double eig[3]= {0.0, 0.0, 0.0};
-  int info_eig;
-  info_eig = eig_3x3(MLocal, worktmp, eig);
+  if (eig_3x3(MLocal, worktmp, eig))
+     numerics_printf("compute_rho_spectral_norm : failed");
   DEBUG_PRINTF("eig[0] = %4.2e, eig[1] = %4.2e, eig[2] = %4.2e", eig[0], eig[1], eig[2]);
   DEBUG_PRINTF("1/eig[0] = %4.2e, 1/eig[1] = %4.2e, 1/eig[2] = %4.2e", 1.0/eig[0], 1.0/eig[1], 1.0/eig[2]);
   rho[0]=1.0/eig[0];
