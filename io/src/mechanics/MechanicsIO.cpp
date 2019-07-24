@@ -10,7 +10,7 @@
 #include <RigidBodyDS.hpp>
 #include <RigidBody2dDS.hpp>
 
-#define XBULLET_CLASSES() \
+#define BULLET_CLASSES() \
   REGISTER(BulletR)\
   REGISTER(Bullet5DR)\
   REGISTER(Bullet2dR)
@@ -57,6 +57,8 @@ DUMMY(MBTB_FC3DContactRelation, NewtonEuler3DR);
 DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
 #endif
 
+
+/* all the classes that may be visited */
 #define VISITOR_CLASSES()                       \
   REGISTER(DynamicalSystem)                     \
   REGISTER(LagrangianDS)                        \
@@ -76,7 +78,7 @@ DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
   REGISTER(RigidBody2dDS)			\
   MECHANISMS_CLASSES()                          \
   OCC_CLASSES()                                 \
-  XBULLET_CLASSES()
+  BULLET_CLASSES()
 
 
 #undef SICONOS_VISITABLES
@@ -112,6 +114,7 @@ DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
 #include <KneeJointR.hpp>
 #include <PrismaticJointR.hpp>
 
+/* all the visitable classes must have been included at this point */
 #include <VisitorMaker.hpp>
 
 // #define DEBUG_MESSAGES 1
@@ -164,26 +167,36 @@ struct ForMu : public Question<double>
   }
 };
 
-/* template partial specilization is not possible inside struct, so we
- * need an helper function */
-template<typename T>
-void contactPointProcess(SiconosVector& answer,
-                         const Interaction& inter,
-                         const T& rel)
-{
 
+/* Get contact informations */
+/* default: a visitor that do nothing */
+struct ContactPointVisitor : public SiconosVisitor
+{
+  SP::Interaction inter;
+  SiconosVector answer;
+
+  template<typename T>
+  void operator()(const T& rel)
+  {
+  }
+
+};
+
+/* then specializations : */
+template<>
+void ContactPointVisitor::operator()(const NewtonEuler3DR& rel)
+{
   const SiconosVector& posa = *rel.pc1();
   const SiconosVector& posb = *rel.pc2();
   const SiconosVector& nc = *rel.nc();
   DEBUG_PRINTF("posa(0)=%g\n", posa(0));  DEBUG_PRINTF("posa(1)=%g\n", posa(1));  DEBUG_PRINTF("posa(2)=%g\n", posa(2));
 
-  double id = inter.number();
-  double mu = ask<ForMu>(*inter.nonSmoothLaw());
+  double id = inter->number();
+  double mu = ask<ForMu>(*inter->nonSmoothLaw());
   const SimpleMatrix& jachqT = *rel.jachqT();
   SiconosVector cf(jachqT.size(1));
-  prod(*inter.lambda(1), jachqT, cf, true);
+  prod(*inter->lambda(1), jachqT, cf, true);
   answer.resize(23);
-
 
   answer.setValue(0, mu);
   answer.setValue(1, posa(0));
@@ -198,38 +211,31 @@ void contactPointProcess(SiconosVector& answer,
   answer.setValue(10, cf(0));
   answer.setValue(11, cf(1));
   answer.setValue(12, cf(2));
-  answer.setValue(13,inter.y(0)->getValue(0));
-  answer.setValue(14,inter.y(0)->getValue(1));
-  answer.setValue(15,inter.y(0)->getValue(2));
-  answer.setValue(16,inter.y(1)->getValue(0));
-  answer.setValue(17,inter.y(1)->getValue(1));
-  answer.setValue(18,inter.y(1)->getValue(2));
-  answer.setValue(19,inter.lambda(1)->getValue(0));
-  answer.setValue(20,inter.lambda(1)->getValue(1));
-  answer.setValue(21,inter.lambda(1)->getValue(2));
+  answer.setValue(13,inter->y(0)->getValue(0));
+  answer.setValue(14,inter->y(0)->getValue(1));
+  answer.setValue(15,inter->y(0)->getValue(2));
+  answer.setValue(16,inter->y(1)->getValue(0));
+  answer.setValue(17,inter->y(1)->getValue(1));
+  answer.setValue(18,inter->y(1)->getValue(2));
+  answer.setValue(19,inter->lambda(1)->getValue(0));
+  answer.setValue(20,inter->lambda(1)->getValue(1));
+  answer.setValue(21,inter->lambda(1)->getValue(2));
   answer.setValue(22, id);
-};
+}
 
-
-
-/* template partial specilization is not possible inside struct, so we
- * need an helper function */
 template<>
-void contactPointProcess<Lagrangian2d2DR>(SiconosVector& answer,
-                         const Interaction& inter,
-                         const Lagrangian2d2DR& rel)
+void ContactPointVisitor::operator()(const Lagrangian2d2DR& rel)
 {
-
   const SiconosVector& posa = *rel.pc1();
   const SiconosVector& posb = *rel.pc2();
   const SiconosVector& nc = *rel.nc();
   DEBUG_PRINTF("posa(0)=%g\n", posa(0));  DEBUG_PRINTF("posa(1)=%g\n", posa(1));
 
-  double id = inter.number();
-  double mu = ask<ForMu>(*inter.nonSmoothLaw());
+  double id = inter->number();
+  double mu = ask<ForMu>(*inter->nonSmoothLaw());
   const SimpleMatrix& jachq = *rel.jachq();
   SiconosVector cf(jachq.size(1));
-  prod(*inter.lambda(1), jachq, cf, true);
+  prod(*inter->lambda(1), jachq, cf, true);
 
 
   answer.resize(16);
@@ -247,97 +253,18 @@ void contactPointProcess<Lagrangian2d2DR>(SiconosVector& answer,
   answer.setValue(7, cf(0));
   answer.setValue(8, cf(1));
 
-  answer.setValue(9,inter.y(0)->getValue(0));
-  answer.setValue(10,inter.y(0)->getValue(1));
+  answer.setValue(9,inter->y(0)->getValue(0));
+  answer.setValue(10,inter->y(0)->getValue(1));
 
-  answer.setValue(11,inter.y(1)->getValue(0));
-  answer.setValue(12,inter.y(1)->getValue(1));
+  answer.setValue(11,inter->y(1)->getValue(0));
+  answer.setValue(12,inter->y(1)->getValue(1));
 
-  answer.setValue(13,inter.lambda(1)->getValue(0));
-  answer.setValue(14,inter.lambda(1)->getValue(1));
-
-  answer.setValue(15, id);
-};
-
-template<>
-void contactPointProcess<Bullet2dR>(SiconosVector& answer,
-                         const Interaction& inter,
-                         const Bullet2dR& rel)
-{
-
-  const SiconosVector& posa = *rel.pc1();
-  const SiconosVector& posb = *rel.pc2();
-  const SiconosVector& nc = *rel.nc();
-  DEBUG_PRINTF("posa(0)=%g\n", posa(0));  DEBUG_PRINTF("posa(1)=%g\n", posa(1));
-
-  double id = inter.number();
-  double mu = ask<ForMu>(*inter.nonSmoothLaw());
-  const SimpleMatrix& jachq = *rel.jachq();
-  SiconosVector cf(jachq.size(1));
-  prod(*inter.lambda(1), jachq, cf, true);
-
-
-  answer.resize(16);
-
-  answer.setValue(0, mu);
-  answer.setValue(1, posa(0));
-  answer.setValue(2, posa(1));
-
-  answer.setValue(3, posb(0));
-  answer.setValue(4, posb(1));
-
-  answer.setValue(5, nc(0));
-  answer.setValue(6, nc(1));
-
-  answer.setValue(7, cf(0));
-  answer.setValue(8, cf(1));
-
-  answer.setValue(9,inter.y(0)->getValue(0));
-  answer.setValue(10,inter.y(0)->getValue(1));
-
-  answer.setValue(11,inter.y(1)->getValue(0));
-  answer.setValue(12,inter.y(1)->getValue(1));
-
-  answer.setValue(13,inter.lambda(1)->getValue(0));
-  answer.setValue(14,inter.lambda(1)->getValue(1));
+  answer.setValue(13,inter->lambda(1)->getValue(0));
+  answer.setValue(14,inter->lambda(1)->getValue(1));
 
   answer.setValue(15, id);
 };
 
-
-template<>
-void contactPointProcess<PivotJointR>(SiconosVector& answer,
-                                      const Interaction& inter,
-                                      const PivotJointR& rel)
-{
-};
-
-template<>
-void contactPointProcess<KneeJointR>(SiconosVector& answer,
-                                     const Interaction& inter,
-                                     const KneeJointR& rel)
-{
-};
-
-template<>
-void contactPointProcess<PrismaticJointR>(SiconosVector& answer,
-                                          const Interaction& inter,
-                                          const PrismaticJointR& rel)
-{
-};
-
-struct ContactPointVisitor : public SiconosVisitor
-{
-  SP::Interaction inter;
-  SiconosVector answer;
-
-  template<typename T>
-  void operator()(const T& rel)
-  {
-    contactPointProcess<T>(answer, *inter, rel);
-  }
-
-};
 
 struct ContactPointDomainVisitor : public SiconosVisitor
 {
@@ -352,7 +279,7 @@ struct ContactPointDomainVisitor : public SiconosVisitor
 };
 
 template<>
-void ContactPointDomainVisitor::operator()(const BulletR& rel)
+void ContactPointDomainVisitor::operator()(const NewtonEuler3DR& rel)
 {
   answer.resize(2);
 
@@ -364,21 +291,6 @@ void ContactPointDomainVisitor::operator()(const BulletR& rel)
 
   answer.setValue(1, inter->number());
 }
-
-template<>
-void ContactPointDomainVisitor::operator()(const Bullet5DR& rel)
-{
-  answer.resize(2);
-
-  /*
-   * TODO: contact point domain coloring (e.g. based on broadphase).
-   * currently, domain = (x>0):1?0
-   */
-  answer.setValue(0, rel.pc1()->getValue(0) > 0);
-
-  answer.setValue(1, inter->number());
-}
-
 
 template<typename T, typename G>
 SP::SimpleMatrix MechanicsIO::visitAllVerticesForVector(const G& graph) const
@@ -449,22 +361,18 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
     unsigned int current_row;
     result->resize(graph.vertices_number(), 25);
 
-    SP::DynamicalSystem ds1;
-    SP::DynamicalSystem ds2;
     int data_size =0;
     for(current_row=0, std11::tie(vi,viend) = graph.vertices();
         vi!=viend; ++vi)
     {
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
+      /* create a visitor for specified classes */
       typedef Visitor < Classes <
                           NewtonEuler1DR,
                           NewtonEuler3DR,
                           NewtonEuler5DR,
-                          Lagrangian2d2DR,
-                          PrismaticJointR,
-                          KneeJointR,
-                          PivotJointR>,
+                          Lagrangian2d2DR>,
                         ContactPointVisitor>::Make ContactPointInspector;
       ContactPointInspector inspector;
       inspector.inter = graph.bundle(*vi);
@@ -472,15 +380,16 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       SiconosVector& data = inspector.answer;
       data_size = data.size();
       data.resize(data_size+2);
-      ds1 = graph.properties(*vi).source;
-      ds2 = graph.properties(*vi).target;
 
-      data.setValue(data_size,ds1->number());
-      data.setValue(data_size+1,ds2->number());
+      DynamicalSystem& ds1 = *graph.properties(*vi).source;
+      DynamicalSystem& ds2 = *graph.properties(*vi).target;
+
+      data.setValue(data_size, ds1.number());
+      data.setValue(data_size+1, ds2.number());
 
       if (result->size(1) != data.size())
       {
-	result->resize(graph.vertices_number(), data.size());
+        result->resize(graph.vertices_number(), data.size());
       }
       result->setRow(current_row++, data);
       data_size +=2;
@@ -488,10 +397,6 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
     }
     result->resize(current_row, data_size);
   }
-
-
-
-
 
   return result;
 }
@@ -527,3 +432,6 @@ SP::SimpleMatrix MechanicsIO::domains(const NonSmoothDynamicalSystem& nsds) cons
   }
   return result;
 }
+
+
+
