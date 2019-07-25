@@ -25,7 +25,13 @@
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
-int fc2d_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error)
+int fc2d_compute_error(
+  FrictionContactProblem* problem,
+  double *z ,
+  double *w,
+  double tolerance,
+  double norm,
+  double * error)
 {
 
   /* Checks inputs */
@@ -80,7 +86,8 @@ int fc2d_compute_error(FrictionContactProblem* problem, double *z , double *w, d
   }
 
   *error = sqrt(*error);
-  *error /= (cblas_dnrm2(n, problem->q, 1) + 1.0);
+  if (fabs(norm) > DBL_EPSILON)
+    *error /= norm;
 
   if (*error > tolerance)
   {

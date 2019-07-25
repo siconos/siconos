@@ -21,11 +21,14 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include <assert.h>
+
 #include "NonSmoothDrivers.h"
 #include "fc2d_Solvers.h"
 #include "fc2d_compute_error.h"
 #include "LCP_Solvers.h"
-#include <assert.h>
+#include "SiconosBlas.h"
+
 #include "numerics_verbose.h"
 
 
@@ -66,6 +69,7 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
 
   /*       printf("\n"); */
   int nc = problem->numberOfContacts;
+  double norm_q = cblas_dnrm2(nc*2 , problem->q , 1);
   // Conversion of result
   for (i = 0; i < nc; i++)
   {
@@ -94,7 +98,7 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
 
   /*        printf("\n"); */
   double error;
-  *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[0], &error);
+  *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[0], norm_q, &error);
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = lcp_options->iparam[SICONOS_IPARAM_ITER_DONE];
   options->dparam[SICONOS_DPARAM_RESIDU] = error;

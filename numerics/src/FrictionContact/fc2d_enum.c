@@ -21,11 +21,15 @@
 #include <string.h>
 #include <math.h>
 #include <float.h>
+#include <assert.h>
+
+
 #include "NonSmoothDrivers.h"
 #include "fc2d_Solvers.h"
 #include "fc2d_compute_error.h"
 #include "LCP_Solvers.h"
-#include <assert.h>
+#include "SiconosBlas.h"
+
 #include "numerics_verbose.h"
 
 void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
@@ -66,6 +70,7 @@ void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *veloci
 
   /*       printf("\n"); */
   int nc = problem->numberOfContacts;
+  double norm_q = cblas_dnrm2(nc*2 , problem->q , 1);
   // Conversion of result
   for (i = 0; i < nc; i++)
   {
@@ -117,7 +122,7 @@ void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *veloci
     *info = 0;
   }
   double error;
-  *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[0], &error);
+  *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[0], norm_q, &error);
   free(zlcp);
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);
