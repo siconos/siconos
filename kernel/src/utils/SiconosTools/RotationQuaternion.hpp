@@ -47,6 +47,10 @@ void quaternionFromAxisAngle(SP::SiconosVector axis, double angle, SP::SiconosVe
 /* For a given  rotation vector, compute the quaternion
  */
 void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosVector q);
+
+void quaternionFromTwistVector(SiconosVector& twist, SiconosVector& q);
+
+
 /* For a given quaternion q, compute the unit quaternion by normalization
  */
 void normalizeq(SP::SiconosVector q);
@@ -120,8 +124,8 @@ void changeFrameBodyToAbs(const SiconosVector& q, SiconosVector& v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SiconosVector v);
 void changeFrameBodyToAbs(SP::SiconosVector q, SP::SimpleMatrix m);
 
+void compositionLawLieGroup(const SiconosVector& a, SiconosVector& b, SiconosVector& ab);
 
-
-
+void compositionLawLieGroup(const SiconosVector& a, SiconosVector& b);
 
 #endif // ROTATIONQUATERNION_H

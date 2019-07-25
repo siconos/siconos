@@ -19,6 +19,7 @@
 #include "Simulation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"
+#include "RotationQuaternion.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
 
@@ -655,7 +656,7 @@ double MoreauJeanOSI::computeResidu()
       LagrangianDS& d = static_cast<LagrangianDS&> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      SiconosVector &vold = d.velocityMemory()->getSiconosVector(0);
+      const SiconosVector &vold = d.velocityMemory().getSiconosVector(0);
 
       const SiconosVector &v = *d.velocity(); // v = v_k,i+1
       //residuFree.zero();
@@ -1641,8 +1642,8 @@ void MoreauJeanOSI::updatePosition(DynamicalSystem& ds)
     // DEBUG_EXPR(q.display());
 
 
-    SiconosVector& qold = *d.qMemory()->getSiconosVector(0);
-    SiconosVector& vold = *d.twistMemory()->getSiconosVector(0);
+    const SiconosVector& qold = d.qMemory().getSiconosVector(0);
+    const SiconosVector& vold = d.twistMemory().getSiconosVector(0);
 
 
     SiconosVector& q = *d.q();

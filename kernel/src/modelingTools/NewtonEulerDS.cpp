@@ -26,48 +26,6 @@
 #include <iostream>
 
 
-void compositionLawLieGroup(SiconosVector& a, SiconosVector& b, SiconosVector& ab)
-{
-
-  assert(a.size() == 7);
-  assert(b.size() == 7);
-  assert(ab.size()== 7);
-
-  // For the translational component, the composition law is the addition
-  ab.setValue(0,a.getValue(0)+b.getValue(0));
-  ab.setValue(1,a.getValue(1)+b.getValue(1));
-  ab.setValue(2,a.getValue(2)+b.getValue(2));
-
-  // For the quaternion that encodes rotation, the composition law is the quaternion product.
-  ::boost::math::quaternion<double>    quat_a(a.getValue(3), a.getValue(4), a.getValue(5), a.getValue(6));
-  ::boost::math::quaternion<double>    quat_b(b.getValue(3), b.getValue(4), b.getValue(5), b.getValue(6));
-  ::boost::math::quaternion<double>    quat_ab = quat_a * quat_b;
-  ab.setValue(3,quat_ab.R_component_1());
-  ab.setValue(4,quat_ab.R_component_2());
-  ab.setValue(5,quat_ab.R_component_3());
-  ab.setValue(6,quat_ab.R_component_4());
-}
-
-void compositionLawLieGroup(SiconosVector& a, SiconosVector& b)
-{
-
-  assert(a.size() == 7);
-  assert(b.size() == 7);
-
-  // For the translational component, the composition law is the addition
-  b.setValue(0,a.getValue(0)+b.getValue(0));
-  b.setValue(1,a.getValue(1)+b.getValue(1));
-  b.setValue(2,a.getValue(2)+b.getValue(2));
-
-  // For the quaternion that encodes rotation, the composition law is the quaternion product.
-  ::boost::math::quaternion<double>    quat_a(a.getValue(3), a.getValue(4), a.getValue(5), a.getValue(6));
-  ::boost::math::quaternion<double>    quat_b(b.getValue(3), b.getValue(4), b.getValue(5), b.getValue(6));
-  ::boost::math::quaternion<double>    quat_ab = quat_a * quat_b;
-  b.setValue(3,quat_ab.R_component_1());
-  b.setValue(4,quat_ab.R_component_2());
-  b.setValue(5,quat_ab.R_component_3());
-  b.setValue(6,quat_ab.R_component_4());
-}
 
 
 
