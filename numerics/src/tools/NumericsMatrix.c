@@ -645,7 +645,7 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
 }
 
 
-double NM_get_value(NumericsMatrix* M, int i, int j)
+double NM_get_value(const NumericsMatrix* const M, int i, int j)
 {
   assert(M);
 

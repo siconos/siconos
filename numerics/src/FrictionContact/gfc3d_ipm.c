@@ -278,7 +278,6 @@ static void dualResidualVector(const NumericsMatrix * M, const double * globalVe
     free(HTr);
     free(Mv_plus_f);
 
-    return out;
 }
 
 /* Returns the Inf-norm of primal residual vecor ( velocity - H @ globalVelocity - w ) */
@@ -321,7 +320,7 @@ static double complemResidualNorm(const double * const velocity, const double * 
     return norm2 / (double)varsCount;
 }
 
-void setErrorArray(double * error, const double pinfeas, const double dinfeas,
+static void setErrorArray(double * error, const double pinfeas, const double dinfeas,
                const double complem, const double barr_param)
 {
     error[0] = pinfeas;

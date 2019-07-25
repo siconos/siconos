@@ -269,7 +269,7 @@ extern "C"
    * \param j column index
    * \return  the value to be inserted.
    */
-  double NM_get_value(NumericsMatrix* M, int i, int j);
+  double NM_get_value(const NumericsMatrix* const M, int i, int j);
 
   /** compare to NumericsMatrix up to machine accuracy (DBL_EPSILON)
    * \param A the NumericsMatrix
