@@ -849,6 +849,15 @@ class MechanicsHdf5(object):
         """
         Add a convex shape defined by a list of points.
         """
+        # infer the dimension of the problem
+        if np.shape(points)[1] == 2 :
+            self._dimension = 2
+        else:
+            if self._dimension == 2:
+                raise ValueError('It is not yet possible to mix 2D and 3D primitives shapes')
+            self._dimension ==3
+        self._out.attrs['dimension'] = self._dimension
+
         if name not in self._ref:
             shape = self._ref.create_dataset(name,
                                              (np.shape(points)[0],
@@ -868,7 +877,7 @@ class MechanicsHdf5(object):
         Add a primitive shape.
         """
         # infer the dimension of the problem
-        if primitive =='Disk' or primitive =='Box2d' or primitive =='ch2d':
+        if primitive =='Disk' or primitive =='Box2d':
             self._dimension = 2
         else:
             if self._dimension == 2:

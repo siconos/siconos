@@ -1579,9 +1579,9 @@ class VView(object):
                 number_of_vertices = data.shape[0]
                 convex.GetPointIds().SetNumberOfIds(data.shape[0]*2)
                 for id_, vertice in enumerate(data):
-                    points.InsertNextPoint(vertice[0], vertice[1], 0.0)
+                    points.InsertNextPoint(vertice[0], vertice[1], -0.05)
                     convex.GetPointIds().SetId(id_, id_)
-                    points.InsertNextPoint(vertice[0], vertice[1], 0.1)
+                    points.InsertNextPoint(vertice[0], vertice[1], 0.05)
                     convex.GetPointIds().SetId(id_+number_of_vertices, id_+number_of_vertices)
                     
             source = ConvexSource(convex, points)
