@@ -21,6 +21,7 @@
 #include "FrictionContactProblem.h"
 #include "SiconosBlas.h"
 #include <math.h>
+#include <float.h>
 #include "numerics_verbose.h"
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
