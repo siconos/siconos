@@ -372,12 +372,14 @@ def get_feature_headername(name, features):
         featname = features[name.split('::')[-1]]
     else:
         keys = list(features.keys())
+        found = False
         for k in keys:
-            if k.count(name) > -1:
+            if k.count(name) > 0:
                 featname = features[k]
+                found = True
                 break
-            else:
-                raise Exception('Unknown feature name : ', name)
+        if not found:
+            raise Exception('Unknown feature name : ', name)
     return featname
 
 
