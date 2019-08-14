@@ -154,19 +154,19 @@ include(FeatureSummary)
 feature_summary(WHAT ALL)
 
 # ============= Siconos Package configuration =============
-# i.e. what should be generate, done, configure at install.
+# i.e. what should be generated/configured at install.
 include(SiconosPackageSetup)
-
 
 # SiconosConfig.h generation and include
 if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
-  message(STATUS "configuration and installation of SiconosConfig.h")
+  # Warning : strongly depends on find_package(...) results.
   configure_file(${CMAKE_SOURCE_DIR}/config.h.cmake
     ${CMAKE_BINARY_DIR}/SiconosConfig.h)
   if(SHOW_ME_SICONOS_CONFIG)
     file(READ ${CMAKE_BINARY_DIR}/SiconosConfig.h SICONOS_CONFIG_H)
     message(${SICONOS_CONFIG_H})
   endif()
+  install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
 endif()
 
 # ============= Summary =============
