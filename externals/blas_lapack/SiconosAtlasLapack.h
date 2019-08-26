@@ -54,7 +54,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7)
   
 // --- DGELS ---
-#if defined(HAS_LAPACK_dgels)
+#if defined(HAS_LAPACK_DGELS)
 #define WRAP_DGELS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)    \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8)
 #else
@@ -75,7 +75,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5)
 
 // --- DTRTRS ---
-#if defined(HAS_LAPACK_dtrtrs)
+#if defined(HAS_LAPACK_DTRTRS)
 #define WRAP_DTRTRS(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO)  \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8,A9)
 #else

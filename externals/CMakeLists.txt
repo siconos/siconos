@@ -147,9 +147,7 @@ endif()
 include(LibraryProjectSetup)
 library_project_setup()
 
-# externals needs blas/lapack
-target_link_libraries(externals PUBLIC BLAS::BLAS)
-target_include_directories(externals PUBLIC blas_lapack)
+
 
 # --- specific install ----
 #install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h DESTINATION include/${PROJECT_NAME})
