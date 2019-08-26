@@ -77,7 +77,7 @@ class VViewOptions(object):
         self.maximum_number_of_peels = 100
         self.occlusion_ratio = 0.1
         self.global_filter = False
-        self.initial_camera = [None] * 4
+        self.initial_camera = [None] * 5
         self.visible_mode = 'all'
         self.export = False
         self.gen_para_script = False
@@ -96,7 +96,7 @@ class VViewOptions(object):
             [--occlusion-ratio=<float value>]
             [--normalcone-ratio = <float value>]
             [--advance=<'fps' or float value>] [--fps=float value]
-            [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--ortho=scale]
+            [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z] [--clipping=near,far] [--ortho=scale]
             [--visible=all,avatars,contactors] [--with-edges]
             """)
         else:
@@ -170,9 +170,8 @@ class VViewOptions(object):
                                             'maximum-number-of-peels=',
                                             'occlusion-ratio=',
                                             'cf-scale=', 'normalcone-ratio=',
-                                            'advance=', 'fps=', 'camera=',
-                                            'lookat=',
-                                            'up=', 'ortho=', 'visible=', 'with-edges', 'with-fixed-color'])
+                                            'advance=', 'fps=',
+                                            'camera=', 'lookat=', 'up=', 'clipping=', 'ortho=', 'visible=', 'with-edges', 'with-fixed-color'])
             self.configure(opts, args)
         except getopt.GetoptError as err:
             sys.stderr.write('{0}\n'.format(str(err)))
@@ -239,6 +238,9 @@ class VViewOptions(object):
 
             elif o == '--up':
                 self.initial_camera[2] = map(float, a.split(','))
+
+            elif o == '--clipping':
+                self.initial_camera[4] = map(float, a.split(','))
 
             elif o == '--ortho':
                 self.initial_camera[3] = float(a)
@@ -611,7 +613,7 @@ class InputObserver():
         if key == 'c':
             print('camera position:', self._renderer.GetActiveCamera().GetPosition())
             print('camera focal point', self._renderer.GetActiveCamera().GetFocalPoint())
-            print('camera clipping plane', self._renderer.GetActiveCamera().GetClippingRange())
+            print('camera clipping range', self._renderer.GetActiveCamera().GetClippingRange())
             print('camera up vector', self._renderer.GetActiveCamera().GetViewUp())
             if self._renderer.GetActiveCamera().GetParallelProjection() != 0:
                 print('camera parallel scale', self._renderer.GetActiveCamera().GetParallelScale())
@@ -654,6 +656,9 @@ class InputObserver():
                     self._view_cycle = -1
             self._renderer.ResetCameraClippingRange()
 
+        if key == 'C':
+            self._renderer.ResetCameraClippingRange()
+
         if key == 's':
             self.toggle_recording(True)
 
@@ -663,8 +668,7 @@ class InputObserver():
             # documentation.
             self.toggle_recording(False)
 
-        if key == 'C':
-                this_view.action(self)
+
 
         self.update()
 
@@ -2145,11 +2149,15 @@ class VView(object):
             self.renderer.GetActiveCamera().SetFocalPoint(*self.opts.initial_camera[1])
         if self.opts.initial_camera[2] is not None:
             self.renderer.GetActiveCamera().SetViewUp(*self.opts.initial_camera[2])
+        if self.opts.initial_camera[4] is not None:
+            self.renderer.GetActiveCamera().SetClippingRange(*self.opts.initial_camera[4])
+        else:
+            self.renderer.ResetCameraClippingRange()
         if self.opts.initial_camera[3] is not None:
             self.renderer.GetActiveCamera().ParallelProjectionOn()
             self.renderer.GetActiveCamera().SetParallelScale(
                 self.opts.initial_camera[3])
-        self.renderer.ResetCameraClippingRange()
+
         self.image_maker = vtk.vtkWindowToImageFilter()
         self.image_maker.SetInput(self.renderer_window)
 
