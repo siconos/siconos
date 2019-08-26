@@ -28,6 +28,7 @@ function(begin_tests SOURCE_DIR)
   
   if(CROSSCOMPILING_LINUX_TO_WINDOWS)
     set(EMULATOR "wine")
+    set(DRIVE_LETTER "Z:")
   else()
     set(EMULATOR "")
   endif()
@@ -53,7 +54,7 @@ function(begin_tests SOURCE_DIR)
   endforeach()
 
   # If a directory *-utils is found, its content is used
-  # to create a <COMPONENT>-test library.
+  # to create/expand the <COMPONENT>-test library.
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
     file(GLOB_RECURSE TEST_UTILS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils/*.[ch])
     if(NOT TARGET ${COMPONENT}-test) 
@@ -75,9 +76,13 @@ function(begin_tests SOURCE_DIR)
 
     # Link with extra deps, if any
     foreach(libtarget IN LISTS TEST_DEPS)
-      target_link_libraries(${COMPONENT}-test PRIVATE ${libtarget})
+      target_link_libraries(${COMPONENT}-test PUBLIC ${libtarget})
     endforeach()
 
+  else()
+    # If there is no ${COMPONENT}-test but some extra DEPS.
+    unset(GLOBAL_TEST_DEPS)
+    set(GLOBAL_TEST_DEPS ${TEST_DEPS} PARENT_SCOPE)
   endif()
   
 endfunction()
@@ -114,8 +119,6 @@ macro(test_windows_setup test_name test_sources)
   endif()
 
 endmacro()
-
-
 
 # ========================================
 # Add a test into the ctest suite.
@@ -199,6 +202,13 @@ function(new_test_1)
   foreach(libtarget IN LISTS TEST_DEPS)
     target_link_libraries(${TEST_NAME} PRIVATE ${libtarget})
   endforeach()
+  # ... or with GLOBAL_TEST_DEPS variable. GLOBAL_TEST_DEPS is
+  # set during call to begin_test and useful only
+  # when some dependencies are required by all tests
+  # and if there is no <component>-test lib.
+  foreach(libtarget IN LISTS GLOBAL_TEST_DEPS) 
+    target_link_libraries(${TEST_NAME} PRIVATE ${libtarget})
+  endforeach()
 
   # -- link with (optional) component-test lib.
   # At the time, only numerics used such a lib.
@@ -254,6 +264,44 @@ function(set_siconos_test_properties)
   
 endfunction()
 
+# ================================================
+# Build a test for a set of data and/or solvers.
+#
+# It usually needs :
+# - a driver (.c.in file)
+# - a formulation name (eg fc2d, LCP ...)
+# - a 'collection' name, something to identify the set of data files
+# - a list of sources files (in addition to the .c generated from the driver)
+#
+# Usage :
+#
+# Process :
+# - generate <COLLECTION><SUFFIX>.c file from <DRIVER>
+#   variables required (@XX@ in .c.in) : PROBLEM_FORMULATION, the formulation and PROBLEM_COLLECTION, the collection.
+# - create the test named <NAME>_<COLLECTION><SUFFIX> from sources and data set.
+function(new_tests_collection)
+  set(options)
+  set(oneValueArgs DRIVER NAME COLLECTION SUFFIX FORMULATION)
+  set(multiValueArgs DATASET EXTRA_SOURCES)
+  cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  # set(TEST_SOLVER SICONOS_${PROBLEM_NAME}_${PROBLEM_SOLVER}) # Required for configure below!
+  # This value is replaced in solver call in .c file.
+  # Generate source file
+  set(generated_driver_name ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}.c)
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${PROBLEM_DRIVER}
+    ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name})
+
+  set(TEST_NAME_PREFIX ${PROBLEM_FORMULATION})
+  set(TEST_COLLECTION ${PROBLEM_COLLECTION})
+  new_test(
+    SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name} ${PROBLEM_EXTRA_SOURCES}
+    NAME ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}
+    DATA_SET "${PROBLEM_DATASET}"
+    )
+ 
+endfunction()
 
 
 
@@ -704,6 +752,19 @@ MACRO(NEW_LCP_TEST_COLLECTION)
 endmacro()
 
 
+# Specialisation of tests_collection to lcp formulation.
+function(new_lcp_tests_collection)
+  set(options)
+  set(oneValueArgs COLLECTION SUFFIX)
+  set(multiValueArgs DATASET EXTRA_SOURCES)
+  cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  new_tests_collection(
+    DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION ${PROBLEM_COLLECTION}
+    EXTRA_SOURCES ${PROBLEM_EXTRA_SOURCES})
+  
+endfunction()
+
 MACRO(NEW_RELAY_TEST_1)
 
   # check input file name
@@ -807,6 +868,52 @@ macro(build_plugin plug)
   endif()
 endmacro()
 
+macro(set_ldlibpath)
+  # In certain cases, ex. no rpath, or running tests with plugins,
+  # libraries cannot be found at link or test time, so we add the
+  # LD_LIBRARY_PATH variable.
+  SET(LDLIBPATH)
+  if (CMAKE_SKIP_RPATH)
+    foreach(_C IN LISTS COMPONENTS)
+      LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
+    ENDFOREACH()
+  else()
+    # Otherwise, still need the path to current component dir for tests
+    # that load plugins.
+    LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${COMPONENT}")
+  endif()
+  LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/wrap/siconos/tests")
+  if (NOT CMAKE_SYSTEM_NAME MATCHES WINDOWS)
+    STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
+  endif()
+  if (CMAKE_SYSTEM_NAME MATCHES APPLE)
+    if ($ENV{DYLD_LIBRARY_PATH})
+      set(LDLIBPATH "${LDLIBPATH}:$ENV{DYLD_LIBRARY_PATH}")
+    endif()
+    SET(LDLIBPATH "DYLD_LIBRARY_PATH=${LDLIBPATH}")
+  else()
+    if (CMAKE_SYSTEM_NAME MATCHES WINDOWS)
+      SET(LDLIBPATH "Path=${LDLIBPATH};$ENV{Path}")
+    else()
+      if ($ENV{LD_LIBRARY_PATH})
+        set(LDLIBPATH "${LDLIBPATH}:$ENV{LD_LIBRARY_PATH}")
+      endif()
+      SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
+    endif()
+  endif()
+endmacro()
+
+# Declaration of a siconos test based on python bindings
+macro(add_python_test test_name test_file)
+  add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
+  set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
+  set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
+  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BINARY_DIR}/wrap")
+  if(LDLIBPATH)
+    set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
+  endif()
+endmacro()
+
 # ----------------------------------------
 # Prepare python tests for the current
 # component
@@ -881,48 +988,3 @@ macro(build_python_tests)
   endif()
 endmacro()
 
-macro(set_ldlibpath)
-  # In certain cases, ex. no rpath, or running tests with plugins,
-  # libraries cannot be found at link or test time, so we add the
-  # LD_LIBRARY_PATH variable.
-  SET(LDLIBPATH)
-  if (CMAKE_SKIP_RPATH)
-    FOREACH(_C ${COMPONENTS})
-      LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${_C}")
-    ENDFOREACH()
-  else()
-    # Otherwise, still need the path to current component dir for tests
-    # that load plugins.
-    LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/${COMPONENT}")
-  endif()
-  LIST(APPEND LDLIBPATH "${CMAKE_BINARY_DIR}/wrap/siconos/tests")
-  if (NOT CMAKE_SYSTEM_NAME MATCHES WINDOWS)
-    STRING(REPLACE ";" ":" LDLIBPATH "${LDLIBPATH}")
-  endif()
-  if (CMAKE_SYSTEM_NAME MATCHES APPLE)
-    if ($ENV{DYLD_LIBRARY_PATH})
-      set(LDLIBPATH "${LDLIBPATH}:$ENV{DYLD_LIBRARY_PATH}")
-    endif()
-    SET(LDLIBPATH "DYLD_LIBRARY_PATH=${LDLIBPATH}")
-  else()
-    if (CMAKE_SYSTEM_NAME MATCHES WINDOWS)
-      SET(LDLIBPATH "Path=${LDLIBPATH};$ENV{Path}")
-    else()
-      if ($ENV{LD_LIBRARY_PATH})
-        set(LDLIBPATH "${LDLIBPATH}:$ENV{LD_LIBRARY_PATH}")
-      endif()
-      SET(LDLIBPATH "LD_LIBRARY_PATH=${LDLIBPATH}")
-    endif()
-  endif()
-endmacro()
-
-# Declaration of a siconos test based on python bindings
-macro(add_python_test test_name test_file)
-  add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
-  set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
-  set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
-  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BINARY_DIR}/wrap")
-  if(LDLIBPATH)
-    set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
-  endif()
-endmacro()
