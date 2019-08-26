@@ -76,6 +76,11 @@ set(COMPONENT_TEST_LIB "numerics-test")
 include(LibraryProjectSetup)
 library_project_setup()
 
+# numerics needs blas and lapack
+target_link_libraries(numerics PUBLIC LAPACK::LAPACK)
+
+
+
 if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
   set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
