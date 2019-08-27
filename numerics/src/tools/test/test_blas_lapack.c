@@ -78,6 +78,7 @@ static int test_dgemm(void)
 #define LDB M
 
 /* Main program */
+#ifdef HAS_LAPACK_dgels
 static int test_dgels(void)
 {
         /* Locals */
@@ -115,6 +116,7 @@ static int test_dgels(void)
         print_matrix( "Details of QR factorization", m, n, a, lda );
         exit( 0 );
 } /* End of LAPACKE_dgels Example */
+#endif
 
 /* Parameters */
 #undef N
@@ -280,6 +282,7 @@ static int test_dpotrf(void)
 #define LDVT N
 
 /* Main program */
+#ifdef HAS_LAPACK_dgesvd
 static int test_dgesvd(void)
 {
         /* Locals */
@@ -341,7 +344,7 @@ static int test_dgesvd(void)
         print_matrix( "Right singular vectors (stored rowwise)", n, n, vt, ldvt );
         exit( 0 );
 } /* End of LAPACKE_dgesvd Example */
-
+#endif
 
 
 
@@ -352,10 +355,10 @@ int main(void)
   info += test_dgesv();
   info += test_dgetrf();
   info += test_dpotrf();
-#ifdef HAS_LAPACK_DGESVD
+#ifdef HAS_LAPACK_dgesvd
   info += test_dgesvd();
 #endif
-#ifdef  HAS_LAPACK_DGELS
+#ifdef  HAS_LAPACK_dgels
   info += test_dgels();
 #endif
   return info;
