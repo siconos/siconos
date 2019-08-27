@@ -25,9 +25,6 @@
 #include "Actuator.hpp"
 #include "Observer.hpp"
 #include "ControlSimulation.hpp"
-#include <boost/progress.hpp>
-#include <boost/timer.hpp>
-
 #include "ControlSimulation_impl.hpp"
 
 ControlSimulation::ControlSimulation(double t0, double T, double h):

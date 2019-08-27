@@ -76,6 +76,9 @@ set(COMPONENT_TEST_LIB "numerics-test")
 include(LibraryProjectSetup)
 library_project_setup()
 
+# tmp
+target_include_directories(numerics PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>/externals/blas_lapack)
+
 if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
   set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)

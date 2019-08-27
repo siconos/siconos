@@ -11,7 +11,6 @@ message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 # List here all directories that contain sources files
 # for current component.
 set(${COMPONENT}_DIRS
-  blas_lapack
   hairer
   netlib/dftemplates
   netlib/odepack
@@ -41,7 +40,7 @@ set(${COMPONENT}_Unstable_SRCS)
 set(${COMPONENT}_HDRS_EXCLUDE_DIR PATH_SDK/include SOL/lumod-c)
 if(NOT INSTALL_EXTERNAL_HEADERS)
   list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
-    blas_lapack
+    # blas_lapack
     hairer
     netlib/dftemplates
     netlib/odepack
@@ -74,12 +73,6 @@ set_source_files_properties(SOL/lumod-c/lumod_dense.c PROPERTIES COMPILE_FLAGS -
 set_source_files_properties(SOL/lumod-c/commonlib.c PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
 if (NOT USE_SYSTEM_SUITESPARSE)
   set_source_files_properties(SuiteSparse/CSparse/csparse.c PROPERTIES COMPILE_FLAGS -Wno-unused)
-endif()
-
-
-
-if(NOT HAS_ATLAS_LAPACK)
-  set(${COMPONENT}_EXCLUDE_SRCS ${${COMPONENT}_EXCLUDE_SRCS} "blas_lapack/clapack_dtrtrs.c")
 endif()
 
 # ---- Final setup for the library ----
@@ -147,41 +140,25 @@ endif()
 include(LibraryProjectSetup)
 library_project_setup()
 
+# If dtrtrs is not defined in blas/lapack (which is the case in atlas) add it to the sources
+if(NOT HAS_LAPACK_dtrtrs)
+  target_sources(externals PRIVATE blas_lapack/clapack_dtrtrs.c)
+endif()
+
+# externals needs blas
+# externals tests need blas AND lapack
+# To be tested later : link externals with blas only, private mode
+# link tests with lapack.
+target_link_libraries(externals PUBLIC LAPACK::LAPACK) # Later : turn this to private (to be tested ...).
+target_include_directories(externals PRIVATE blas_lapack)
 
 
 # --- specific install ----
 #install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h DESTINATION include/${PROJECT_NAME})
 
-if(HAVE_SICONOS_MECHANICS AND WITH_RENDERER)
-  # This files is not installed as a program, even though it is one.
-  # Remove the comment if you know how it should be installed --xhub
-  #  configure_file(io/SimpleGui.py ${SICONOS_SWIG_ROOT_DIR}/io/SimpleGui.py @ONLY) 
-
-
-  file(GLOB rendererFiles RELATIVE ${CMAKE_SOURCE_DIR}/externals/renderer  ${CMAKE_SOURCE_DIR}/externals/renderer/img/*.*)
-  foreach(rendererFile ${rendererFiles})
-    set(srcRendererPath ${CMAKE_SOURCE_DIR}/externals/renderer/${rendererFile})
-    if(NOT IS_DIRECTORY ${srcRendererPath})     
-      install(FILES  ${srcRendererPath} DESTINATION share/siconos/renderer/img)
-    endif(NOT IS_DIRECTORY ${srcRendererPath})
-  endforeach(rendererFile)
-
-  file(GLOB rendererFiles RELATIVE ${CMAKE_SOURCE_DIR}/externals/renderer/  ${CMAKE_SOURCE_DIR}/externals/renderer/threeJS_libraries/*.*)
-  foreach(rendererFile ${rendererFiles})
-    set(srcRendererPath ${CMAKE_SOURCE_DIR}/externals/renderer/${rendererFile})
-    if(NOT IS_DIRECTORY ${srcRendererPath})     
-      install(FILES  ${srcRendererPath} DESTINATION share/siconos/renderer/threeJS_libraries  )
-    endif(NOT IS_DIRECTORY ${srcRendererPath})
-  endforeach(rendererFile)
-
-  if(INSTALL_PYTHON_SYMLINKS)
-    message("Setting up symlink install targets for externals Python executables")
-    install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_renderer' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/renderer/renderer.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_renderer'\")")
-  else()
-    install(PROGRAMS renderer/renderer.py
-      DESTINATION bin RENAME siconos_renderer)
-  endif()
-
+# - Optional OCE Renderer setup (install only) -
+if(WITH_OCE)
+  include(oce_renderer)
 endif()
 
 if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SERIALIZATION)
