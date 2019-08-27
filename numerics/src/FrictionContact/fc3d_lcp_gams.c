@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include <float.h>
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
 #include "fc3d_Solvers.h"

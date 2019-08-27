@@ -41,6 +41,13 @@
 #endif
 #endif
 
+/* Siconos does not need "complex" part of CXSparse, so avoid
+ * compilation C++-related problems with this flag (complex_t vs
+ * std::complex). */
+#define NCOMPLEX
+
+#include "cs.h"
+
 #ifndef CS_INT
 
 /* From cs.h */

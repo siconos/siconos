@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "SiconosMatrix.hpp"
 #include "SiconosAlgebra.hpp"
 #include <boost/numeric/ublas/matrix_sparse.hpp>

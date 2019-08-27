@@ -23,7 +23,7 @@ static inline char* strdup(const char* src)
 #include <stdbool.h>
 #include <float.h>
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
 #include "SolverOptions.h"

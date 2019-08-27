@@ -219,7 +219,6 @@ void NewtonEuler1DR::computeJachq(double time, Interaction& inter, SP::BlockVect
     DEBUG_PRINTF("NewtonEuler1DR::computeJachq :Q :%e,%e, %e, %e\n", q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
     ::boost::math::quaternion<double>    quatQ(q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
     ::boost::math::quaternion<double>    quatcQ(q->getValue(3), -q->getValue(4), -q->getValue(5), -q->getValue(6));
-    ::boost::math::quaternion<double>    quat0(1, 0, 0, 0);
     ::boost::math::quaternion<double>    quatBuff;
     ::boost::math::quaternion<double>    _2qiquatGP;
     _2qiquatGP = quatGP;

@@ -59,8 +59,8 @@ template <typename T> static std11::shared_ptr<T> ptr(const T& a) {
 // --- constructor from a set of data ---
 MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   OneStepIntegrator(OSI::MOREAUJEANOSI),
-  _useGammaForRelation(false),
   _constraintActivationThreshold(0.0),
+  _useGammaForRelation(false),
   _explicitNewtonEulerDSOperators(false)
 {
   _levelMinForOutput= 0;

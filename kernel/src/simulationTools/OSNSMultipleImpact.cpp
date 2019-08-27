@@ -21,7 +21,6 @@
 #include "Simulation.hpp"
 #include "ioMatrix.hpp"
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/progress.hpp>
 #include "OSNSMatrix.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
