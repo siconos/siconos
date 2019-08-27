@@ -30,9 +30,10 @@
 #include "debug.h"
 #include "float.h"
 #include "JordanAlgebra.h"
-#include "cs.h"
+//#include "cs.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
-#include "CSparseMatrix.h"
+
 const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_STR = "GFC3D IPM";
 
 
@@ -111,7 +112,7 @@ static double getNewtonStepLength(const double * const x, const double * const d
  * \param w is the constraint vector.
  * \param out is the result velocity - H @ globalVelocity - w vector.
  */
-static void primalResidualVector(const double * velocity, const NumericsMatrix * H,
+static void primalResidualVector(const double * velocity, NumericsMatrix * H,
                                  const double * globalVelocity, const double * w, double * out);
 
 
@@ -124,8 +125,8 @@ static void primalResidualVector(const double * velocity, const NumericsMatrix *
  * \param f is the constraint vector (vector of internal and external forces).
  * \param out os the result M @ globalVelocity + f - H @ reaction vector.
  */
-static void dualResidualVector(const NumericsMatrix * M, const double * globalVelocity,
-                               const NumericsMatrix * H, const double * reaction, const double * f,
+static void dualResidualVector(NumericsMatrix * M, const double * globalVelocity,
+                               NumericsMatrix * H, const double * reaction, const double * f,
                                double * out);
 
 /**
@@ -135,7 +136,7 @@ static void dualResidualVector(const NumericsMatrix * M, const double * globalVe
  * \param globalVelocity is the vector of generalized velocities.
  * \param w is the constraint vector.
  */
-static double primalResidualNorm(const double * velocity, const NumericsMatrix * H,
+static double primalResidualNorm(const double * velocity, NumericsMatrix * H,
                                  const double * globalVelocity, const double * w);
 
 /**
@@ -146,8 +147,8 @@ static double primalResidualNorm(const double * velocity, const NumericsMatrix *
  * \param reaction is the vector of reaction forces at each contact point.
  * \param f is the constraint vector (vector of internal and external forces).
  */
-static double dualResidualNorm(const NumericsMatrix * M, const double * globalVelocity,
-                               const NumericsMatrix * H, const double * reaction, const double * f);
+static double dualResidualNorm(NumericsMatrix * M, const double * globalVelocity,
+                               NumericsMatrix * H, const double * reaction, const double * f);
 
 /**
  * Returns the Inf-norm of the cemplementarity residual vector ( velocity o reaction )
@@ -172,8 +173,10 @@ static double getNewtonStepLength(const double * const x, const double * const d
 
     unsigned int pos;
     double ai, bi, ci, di, alpha, min_alpha;
-    double *xi, *xi2, *dxi, *dxi2, *xi_dxi;
+    double  *xi2, *dxi2, *xi_dxi;
 
+    const double *dxi, *xi;
+    
     dxi2 = (double*)calloc(dimension, sizeof(double));
     xi2 = (double*)calloc(dimension, sizeof(double));
     xi_dxi = (double*)calloc(dimension, sizeof(double));
@@ -219,7 +222,7 @@ static double getNewtonStepLength(const double * const x, const double * const d
 }
 
 /* Returns the primal constraint vector for global fricprob ( velocity - H @ globalVelocity - w ) */
-static void primalResidualVector(const double * velocity, const NumericsMatrix * H,
+static void primalResidualVector(const double * velocity, NumericsMatrix * H,
                                  const double * globalVelocity, const double * w, double * out)
 {
     double nd = H->size0;
@@ -244,8 +247,8 @@ static void primalResidualVector(const double * velocity, const NumericsMatrix *
 }
 
 /* Returns the dual constraint vector for global fricprob ( M @ globalVelocity + f - H @ reaction ) */
-static void dualResidualVector(const NumericsMatrix * M, const double * globalVelocity,
-                               const NumericsMatrix * H, const double * reaction, const double * f,
+static void dualResidualVector(NumericsMatrix * M, const double * globalVelocity,
+                               NumericsMatrix * H, const double * reaction, const double * f,
                                double * out)
 {
     double m = H->size1;
@@ -281,7 +284,7 @@ static void dualResidualVector(const NumericsMatrix * M, const double * globalVe
 }
 
 /* Returns the Inf-norm of primal residual vecor ( velocity - H @ globalVelocity - w ) */
-static double primalResidualNorm(const double * velocity, const NumericsMatrix * H,
+static double primalResidualNorm(const double * velocity, NumericsMatrix * H,
                                  const double * globalVelocity, const double * w)
 {
     double * resid = (double*)calloc(H->size0, sizeof(double));
@@ -295,8 +298,8 @@ static double primalResidualNorm(const double * velocity, const NumericsMatrix *
 }
 
 /* Returns the Inf-norm of the dual residual vector ( M @ globalVelocity + f - H @ reaction ) */
-static double dualResidualNorm(const NumericsMatrix * M, const double * globalVelocity,
-                               const NumericsMatrix * H, const double * reaction, const double * f)
+static double dualResidualNorm(NumericsMatrix * M, const double * globalVelocity,
+                               NumericsMatrix * H, const double * reaction, const double * f)
 {
     double * resid = (double*)calloc(H->size1, sizeof(double));
     dualResidualVector(M, globalVelocity, H, reaction, f, resid);
@@ -321,7 +324,7 @@ static double complemResidualNorm(const double * const velocity, const double * 
 }
 
 static void setErrorArray(double * error, const double pinfeas, const double dinfeas,
-               const double complem, const double barr_param)
+                          const double complem, const double barr_param)
 {
     error[0] = pinfeas;
     error[1] = dinfeas;
@@ -329,33 +332,34 @@ static void setErrorArray(double * error, const double pinfeas, const double din
     error[3] = barr_param;
 }
 
-static int saveMatrix(NumericsMatrix* m, const char * filename)
-{
-    NumericsMatrix * md = NM_create(NM_DENSE, m->size0, m->size1);
-    NM_to_dense(m, md);
-    FILE *f;
-    f = fopen(filename, "wb");
-    if (!f)
-        return 1;
-    for (int i = 0; i < m->size0; ++i)
-        for (int j = 0; j < m->size1; ++j)
-            fwrite(&(md->matrix0[i+j*md->size0]), sizeof(double), 1, f);
-    fclose(f);
-    NM_free(md);
-    return 0;
-}
+/* static int saveMatrix(NumericsMatrix* m, const char * filename) */
+/* { */
+/*     NumericsMatrix * md = NM_create(NM_DENSE, m->size0, m->size1); */
+/*     NM_to_dense(m, md); */
+/*     FILE *f; */
+/*     f = fopen(filename, "wb"); */
+/*     if (!f) */
+/*         return 1; */
+/*     for (int i = 0; i < m->size0; ++i) */
+/*         for (int j = 0; j < m->size1; ++j) */
+/*             fwrite(&(md->matrix0[i+j*md->size0]), sizeof(double), 1, f); */
+/*     fclose(f); */
+/*     NM_free(md); */
+/*     return 0; */
+/* } */
 
-static int saveVector(double * vec, const unsigned int vecSize, const char * filename)
-{
-    FILE *f;
-    f = fopen(filename, "wb");
-    if (!f)
-        return 1;
-    for (int i = 0; i < vecSize; ++i)
-        fwrite(&(vec[i]), sizeof(double), 1, f);
-    fclose(f);
-    return 0;
-}
+
+/* static int saveVector(double * vec, const unsigned int vecSize, const char * filename) */
+/* { */
+/*     FILE *f; */
+/*     f = fopen(filename, "wb"); */
+/*     if (!f) */
+/*         return 1; */
+/*     for (unsigned int i = 0; i < vecSize; ++i) */
+/*         fwrite(&(vec[i]), sizeof(double), 1, f); */
+/*     fclose(f); */
+/*     return 0; */
+/* } */
 
 
 
@@ -373,7 +377,7 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
     unsigned int nd = problem->H->size1;
     unsigned int d = problem->dimension;
 
-    if (!options->dWork || options->dWorkSize != m + nd + nd)
+    if (!options->dWork || options->dWorkSize != (int)(m + nd + nd))
     {
       options->dWork = (double*)calloc(m + nd + nd, sizeof(double));
       options->dWorkSize = m + nd + nd;
@@ -587,7 +591,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     // initialize solver if it is not set
     int internal_allocation=0;
-    if (!options->dWork || (options->dWorkSize != m + nd + nd))
+    if (!options->dWork || (options->dWorkSize != (int)(m + nd + nd)))
     {
       gfc3d_IPM_init(problem, options);
       internal_allocation = 1;
@@ -637,7 +641,12 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     double pinfeas = -1.;
     double dinfeas = -1.;
     double complem = -1.;
-    double error[] = {pinfeas, dinfeas, complem, barr_param};
+    double error[4];
+    error[0] = pinfeas;
+    error[1] = dinfeas;
+    error[2] = complem;
+    error[3] = barr_param;
+    
     double gmm, barr_param_a, e;
     double norm_f = cblas_dnrm2(m , f , 1);
     double norm_w = cblas_dnrm2(nd , w , 1);
@@ -712,13 +721,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         dinfeas = dualResidualNorm(M, globalVelocity, H, reaction, f);
         complem = complemResidualNorm(velocity, reaction, nd, n);
 
-        setErrorArray(&error, pinfeas, dinfeas, complem, barr_param);
+        setErrorArray(error, pinfeas, dinfeas, complem, barr_param);
 
         numerics_printf_verbose(-1, "---- GFC3D - IPM - | %3i | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e | %.2e |",
                                 iteration, barr_param, pinfeas, dinfeas, complem, alpha_primal, alpha_dual, sigma);
 
         // check exit condition
-        if (NV_max(&error, 4) < tol)
+        if (NV_max(error, 4) < tol)
         {
             hasNotConverged = 0;
             break;
@@ -873,7 +882,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     NM_gemv(1.0, P_mu, reaction, 0.0, data->tmp_point->t_reaction);
     cblas_dcopy(nd, data->tmp_point->t_reaction, 1, reaction, 1);
 
-    options->dparam[SICONOS_DPARAM_RESIDU] = NV_max(&error, 4);
+    options->dparam[SICONOS_DPARAM_RESIDU] = NV_max(error, 4);
     options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
 
     if (internal_allocation)

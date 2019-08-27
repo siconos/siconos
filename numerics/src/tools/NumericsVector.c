@@ -199,7 +199,7 @@ void NV_sqrt(const double * const vec, const unsigned int vecSize, double * out)
 
 void NV_dott(const double * const vec1, const double * const vec2, const unsigned int vecSize, NumericsMatrix* out)
 {
-    for (int i = 0; i < vecSize; ++i)
-        for (int j = 0; j < vecSize; ++j)
+    for (unsigned int i = 0; i < vecSize; ++i)
+        for (unsigned int j = 0; j < vecSize; ++j)
             NM_zentry(out, i, j, vec1[i] * vec2[j]);
 }

@@ -21,20 +21,19 @@
 #include "math.h"
 #include "NumericsVector.h"
 
-
 RawNumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
 {
     /* validation */
     if (vecSize % varsCount != 0)
     {
-        fprintf(stderr, "Arrow_repr: %d variables can not be extracted from vector of size %d.\n", varsCount, vecSize);
+        fprintf(stderr, "Arrow_repr: %zu variables can not be extracted from vector of size %d.\n", varsCount, vecSize);
         exit(EXIT_FAILURE);
     }
 
     size_t dimension = (size_t)(vecSize / varsCount);
     if (dimension < 2)
     {
-        fprintf(stderr, "Arrow_repr: The dimension of variables can not be less than 2 but given %d.\n", dimension);
+        fprintf(stderr, "Arrow_repr: The dimension of variables can not be less than 2 but given %zu.\n", dimension);
         exit(EXIT_FAILURE);
     }
 
@@ -72,7 +71,7 @@ RawNumericsMatrix* Reflect_mat(const unsigned int size, NM_types type)
     }
 
     NM_zentry(Refl_mat, 0, 0, 1.0);
-    for (int i = 1; i < size; ++i)
+    for (unsigned int i = 1; i < size; ++i)
         NM_zentry(Refl_mat, i, i, -1.0);
     return Refl_mat;
 }
@@ -90,13 +89,13 @@ RawNumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize
     double * dets = (double*)malloc(varsCount * sizeof(double));
     JA_det(vec, vecSize, varsCount, dets);
 
-    for (int i = 0; i < vecSize; i += dimension)
+    for (unsigned int i = 0; i < vecSize; i += dimension)
     {
         NV_dott(vec + i, vec + i, dimension, quad_tmp);
 
-        for (int j = 0; j < dimension; ++j)
+        for (unsigned int j = 0; j < dimension; ++j)
         {
-            for (int k = 0; k < dimension; ++k)
+            for (unsigned int k = 0; k < dimension; ++k)
                 quad_tmp->matrix0[j+k*quad_tmp->size0] *= 2.0;
             NM_zentry(quad_tmp, j, j, NM_get_value(quad_tmp, j, j) - dets[(int)(i / dimension)] * NM_get_value(R, j, j));
         }
@@ -138,7 +137,7 @@ double * JA_iden(const unsigned int vecSize, const size_t varsCount)
 {
     if (vecSize % varsCount != 0)
     {
-        fprintf(stderr, "JA_iden: %d variables can not be extracted from vector of size %d.\n", varsCount, vecSize);
+        fprintf(stderr, "JA_iden: %zu variables can not be extracted from vector of size %u.\n", varsCount, vecSize);
         exit(EXIT_FAILURE);
     }
     double * out = (double*)calloc(vecSize, sizeof(double));
@@ -157,11 +156,11 @@ void JA_prod(const double * const vec1, const double * const vec2, const unsigne
 
     unsigned int dimension = (int)(vecSize / varsCount);
     unsigned int pos;
-    for(size_t i = 0; i < varsCount; ++i)
+    for(int i = 0; i < varsCount; ++i)
     {
         pos = i * dimension;
         out[pos] = cblas_ddot(dimension, vec1 + pos, 1, vec2 + pos, 1);
-        for(size_t j = 1; j < dimension; ++j)
+        for(unsigned int j = 1; j < dimension; ++j)
             out[pos + j] = vec1[pos] * vec2[pos + j] + vec2[pos] * vec1[pos + j];
     }
 }
@@ -215,7 +214,7 @@ void JA_sqrt(const double * const vec, const unsigned int vecSize, const size_t 
     unsigned int dimension = (int)(vecSize / varsCount);
     double * eigenvals = (double*)malloc(2 * varsCount * sizeof(double));
     double ** eigenvecs = (double**)malloc(2 * varsCount * sizeof(double*));
-    for (int i = 0; i < 2 * varsCount; ++i)
+    for (unsigned int i = 0; i < 2 * varsCount; ++i)
         eigenvecs[i] = (double*)calloc(dimension, sizeof(double));
 
     double *tmp_vec1 = (double*)malloc(dimension * sizeof(double));
@@ -236,7 +235,7 @@ void JA_sqrt(const double * const vec, const unsigned int vecSize, const size_t 
     }
 
     free(eigenvals);
-    for (int i = 0; i < 2 * varsCount; ++i)
+    for (size_t i = 0; i < 2 * varsCount; ++i)
         free(eigenvecs[i]);
     free(eigenvecs);
     free(tmp_vec1);
@@ -250,7 +249,7 @@ void JA_sqrt_inv(const double * const vec, const unsigned int vecSize, const siz
     unsigned int dimension = (int)(vecSize / varsCount);
     double * eigenvals = (double*)malloc(2 * varsCount * sizeof(double));
     double ** eigenvecs = (double**)malloc(2 * varsCount * sizeof(double*));
-    for (int i = 0; i < 2 * varsCount; ++i)
+    for (size_t i = 0; i < 2 * varsCount; ++i)
         eigenvecs[i] = (double*)calloc(dimension, sizeof(double));
 
     double *tmp_vec1 = (double*)malloc(dimension * sizeof(double));
@@ -271,7 +270,7 @@ void JA_sqrt_inv(const double * const vec, const unsigned int vecSize, const siz
     }
 
     free(eigenvals);
-    for (int i = 0; i < 2 * varsCount; ++i)
+    for (size_t i = 0; i < 2 * varsCount; ++i)
         free(eigenvecs[i]);
     free(eigenvecs);
     free(tmp_vec1);
@@ -284,7 +283,7 @@ void JA_power2(const double * const vec, const unsigned int vecSize, const size_
     unsigned int dimension = (int)(vecSize / varsCount);
     double * eigenvals = (double*)malloc(2 * varsCount * sizeof(double));
     double ** eigenvecs = (double**)malloc(2 * varsCount * sizeof(double*));
-    for (int i = 0; i < 2 * varsCount; ++i)
+    for (size_t i = 0; i < 2 * varsCount; ++i)
         eigenvecs[i] = (double*)calloc(dimension, sizeof(double));
 
     double *tmp_vec1 = (double*)malloc(dimension * sizeof(double));
@@ -305,7 +304,7 @@ void JA_power2(const double * const vec, const unsigned int vecSize, const size_
     }
 
     free(eigenvals);
-    for (int i = 0; i < 2 * varsCount; ++i)
+    for (size_t i = 0; i < 2 * varsCount; ++i)
         free(eigenvecs[i]);
     free(eigenvecs);
     free(tmp_vec1);
@@ -318,7 +317,7 @@ void JA_inv(const double * const vec, const unsigned int vecSize, const size_t v
     unsigned int dimension = (int)(vecSize / varsCount);
     double * eigenvals = (double*)malloc(2 * varsCount * sizeof(double));
     double ** eigenvecs = (double**)malloc(2 * varsCount * sizeof(double*));
-    for (int i = 0; i < 2 * varsCount; ++i)
+    for (size_t i = 0; i < 2 * varsCount; ++i)
         eigenvecs[i] = (double*)calloc(dimension, sizeof(double));
 
     double *tmp_vec1 = (double*)malloc(dimension * sizeof(double));
@@ -339,7 +338,7 @@ void JA_inv(const double * const vec, const unsigned int vecSize, const size_t v
     }
 
     free(eigenvals);
-    for (int i = 0; i < 2 * varsCount; ++i)
+    for (size_t i = 0; i < 2 * varsCount; ++i)
         free(eigenvecs[i]);
     free(eigenvecs);
     free(tmp_vec1);

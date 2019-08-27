@@ -118,7 +118,7 @@ static int JA_prod_test()
     double y[] = {0.27, 4.35, 1.02, 0.35, 0.78, 0.236};
 
     double * res = (double*)calloc(n, sizeof(double));
-    JA_prod(&x, &y, n, 1, res);
+    JA_prod(x, y, n, 1, res);
     test_failed += (fabs(res[0] - 3.25908) > EPS);
     test_failed += (fabs(res[1] - 3.357) > EPS);
     test_failed += (fabs(res[2] - 0.792) > EPS);
@@ -131,7 +131,7 @@ static int JA_prod_test()
 
     test_failed = 0;
 
-    JA_prod(&x, &y, n, 2, res);
+    JA_prod(x, y, n, 2, res);
     test_failed += (fabs(res[0] - 1.827) > EPS);
     test_failed += (fabs(res[1] - 3.357) > EPS);
     test_failed += (fabs(res[2] - 0.792) > EPS);
@@ -155,7 +155,7 @@ static int JA_eigenvals_test()
     int test_failed = 0;
     double out1[4];
     double vec[] = {1.256, 0.356, 0.874, 3.654, 0.154, 1.035};
-    JA_eigenvals(&vec, 6, 2, &out1);
+    JA_eigenvals(vec, 6, 2, out1);
 
     test_failed += (fabs(out1[0] - 2.19972242) > EPS);
     test_failed += (fabs(out1[1] - 0.31227758) > EPS);
@@ -166,7 +166,7 @@ static int JA_eigenvals_test()
         info += 1;
 
     double out2[6];
-    JA_eigenvals(&vec, 6, 3, &out2);
+    JA_eigenvals(vec, 6, 3, out2);
 
     test_failed += (fabs(out2[0] - 1.612) > EPS);
     test_failed += (fabs(out2[1] - 0.9) > EPS);
@@ -194,7 +194,7 @@ static int JA_eigenvecs_test()
         out1[i] = (double*)calloc(3, sizeof(double));
 
     double vec[] = {1.256, 0.356, 0.874, 3.654, 0.154, 1.035};
-    JA_eigenvecs(&vec, 6, 2, out1);
+    JA_eigenvecs(vec, 6, 2, out1);
 
     test_failed += (fabs(out1[0][0] - 0.5) > EPS);
     test_failed += (fabs(out1[0][1] - 0.18861478) > EPS);
@@ -221,7 +221,7 @@ static int JA_eigenvecs_test()
     for (int i = 0; i < 6; ++i)
         out1[i] = (double*)calloc(2, sizeof(double));
 
-    JA_eigenvecs(&vec, 6, 3, out1);
+    JA_eigenvecs(vec, 6, 3, out1);
 
     test_failed += (fabs(out1[0][0] - 0.5) > EPS);
     test_failed += (fabs(out1[0][1] - 0.5) > EPS);
@@ -256,7 +256,7 @@ static int JA_sqrt_test()
     int info = 0;
     double vec[] = {1.256, 0.356, 0.874, 3.654, 0.154, 1.035};
     double * out = (double*)malloc(6 * sizeof(double));
-    JA_sqrt(&vec, 6, 2, out);
+    JA_sqrt(vec, 6, 2, out);
 
     test_failed += (fabs(out[0] - 1.02098207) > EPS);
     test_failed += (fabs(out[1] - 0.17434194) > EPS);
@@ -281,7 +281,7 @@ static int JA_det_test()
     int info = 0;
     double vec[] = {1.256, 0.356, 0.874, 3.654, 0.154, 1.035};
     double * out = (double*)malloc(2 * sizeof(double));
-    JA_det(&vec, 6, 2, out);
+    JA_det(vec, 6, 2, out);
 
     test_failed += (fabs(out[0] - 0.686924) > EPS);
     test_failed += (fabs(out[1] - 12.256775) > EPS);
@@ -324,7 +324,7 @@ static int JA_quad_repr_test()
     int test_failed = 0;
     double vec[] = {1.256, 0.356, 0.874, 3.654, 0.154, 1.035};
 
-    NumericsMatrix* Qx = Quad_repr(&vec, 6, 2);
+    NumericsMatrix* Qx = Quad_repr(vec, 6, 2);
 
     test_failed += (fabs(NM_get_value(Qx, 0, 0) - 2.468148) > EPS);
     test_failed += (fabs(NM_get_value(Qx, 0, 1) - 0.894272) > EPS);
@@ -370,7 +370,7 @@ static int NT_test()
     double vec2[] = {7.325, 1.253, 0.653, 2.356, 0.986, 0.025};
     double p[6];
 
-    NesterovToddVector(&vec1, &vec2, 6, 2, &p);
+    NesterovToddVector(vec1, vec2, 6, 2, p);
 
     test_failed += (fabs(p[0] - 1.75325493) > EPS);
     test_failed += (fabs(p[1] + 0.09197206) > EPS);
