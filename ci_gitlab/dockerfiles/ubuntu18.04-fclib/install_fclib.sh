@@ -4,6 +4,7 @@
 
 # -- Fclib download --
 cd $HOME
+rm -rf $HOME/fclib
 git clone https://github.com/FrictionalContactLibrary/fclib.git
 
 # Creates a directory to build libs.

@@ -14,8 +14,8 @@ if(WITH_${COMPONENT}_TESTING)
   begin_tests(src/test DEPS "CPPUNIT::CPPUNIT")
   
   if(WITH_SERIALIZATION)
-    new_test_1(SOURCES BasicTest.cpp ${SIMPLE_TEST_MAIN})
-    new_test_1(SOURCES KernelTest.cpp ${SIMPLE_TEST_MAIN})
+    new_test(SOURCES BasicTest.cpp ${SIMPLE_TEST_MAIN})
+    new_test(SOURCES KernelTest.cpp ${SIMPLE_TEST_MAIN})
   endif()
   
 endif()

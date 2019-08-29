@@ -13,37 +13,37 @@ if(WITH_${COMPONENT}_TESTING)
 
   begin_tests(src/tools/test)
 
-  new_test_1(SOURCES test_op3x3.c DEPS "externals;LAPACK::LAPACK")
+  new_test(SOURCES test_op3x3.c DEPS "externals;LAPACK::LAPACK")
 
-  new_test_1(SOURCES test_timers_interf.c)
+  new_test(SOURCES test_timers_interf.c)
 
-  new_test_1(SOURCES test_blas_lapack.c DEPS "externals;LAPACK::LAPACK")
+  new_test(SOURCES test_blas_lapack.c DEPS "externals;LAPACK::LAPACK")
 
   if(HAS_LAPACK_dgesvd) # Some lapack versions (e.g. Atlas) miss dgesvd
-    new_test_1(SOURCES test_pinv.c)# DEPS "externals")
+    new_test(SOURCES test_pinv.c)# DEPS "externals")
   endif()
   
-  new_test_1(NAME tools_projection SOURCES test_projection.c)
+  new_test(NAME tools_projection SOURCES test_projection.c)
 
-  new_test_1(SOURCES NumericsArrays.c)
+  new_test(SOURCES NumericsArrays.c)
 
   #  tests for NumericsMatrix
-  new_test_1(SOURCES NM_test.c DEPS "externals;BLAS::BLAS;${suitesparse}")
+  new_test(SOURCES NM_test.c DEPS "externals;BLAS::BLAS;${suitesparse}")
 
   # MUMPS interface tests
   if(WITH_MUMPS)
-    new_test_1(SOURCES NM_MUMPS_test.c)
+    new_test(SOURCES NM_MUMPS_test.c)
   endif()
   
   # Specfic tests for SBM matrices 
-  new_test_1(SOURCES SBM_test.c DEPS "externals;BLAS::BLAS;${suitesparse}")
-  new_test_1(SOURCES SBCM_to_SBM.c)
+  new_test(SOURCES SBM_test.c DEPS "externals;BLAS::BLAS;${suitesparse}")
+  new_test(SOURCES SBCM_to_SBM.c)
 
   # Specfic tests for sparse matrices 
-  new_test_1(SOURCES SparseMatrix_test.c DEPS "externals;${suitesparse}")
+  new_test(SOURCES SparseMatrix_test.c DEPS "externals;${suitesparse}")
 
   if(HAS_ONE_LP_SOLVER)
-    new_test_1(SOURCES vertex_problem.c)
+    new_test(SOURCES vertex_problem.c)
   endif(HAS_ONE_LP_SOLVER)
 
   # ----------- LCP solvers tests -----------
@@ -60,7 +60,7 @@ if(WITH_${COMPONENT}_TESTING)
   #  in data_collection* files.
   #  Use new_tests_collection function as below.
   
-  new_test_1(NAME lcp_test_DefaultSolverOptions SOURCES LinearComplementarity_DefaultSolverOptions_test.c)
+  new_test(NAME lcp_test_DefaultSolverOptions SOURCES LinearComplementarity_DefaultSolverOptions_test.c)
 
   new_tests_collection(
     DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION TEST_LCP_COLLECTION_1
@@ -79,11 +79,11 @@ if(WITH_${COMPONENT}_TESTING)
   # Start tests for Relay dir.
   begin_tests(src/Relay/test)
 
-  new_test_1(SOURCES relay_test20.c)
-  new_test_1(SOURCES step_test1.c)
-  new_test_1(SOURCES step_test2.c)
-  new_test_1(SOURCES step_test3.c)
-  new_test_1(SOURCES step_test4.c)
+  new_test(SOURCES relay_test20.c)
+  new_test(SOURCES step_test1.c)
+  new_test(SOURCES step_test2.c)
+  new_test(SOURCES step_test3.c)
+  new_test(SOURCES step_test4.c)
 
   new_tests_collection(
     DRIVER relay_test_collection.c.in FORMULATION relay COLLECTION TEST_RELAY_COLLECTION_1
@@ -93,16 +93,16 @@ if(WITH_${COMPONENT}_TESTING)
   begin_tests(src/MLCP/test)
   
   if(HAVE_SYSTIMES_H AND WITH_CXX)
-    new_test_1(NAME MLCPtest SOURCES main_mlcp.cpp)
+    new_test(NAME MLCPtest SOURCES main_mlcp.cpp)
   endif()
-  new_test_1(SOURCES MixedLinearComplementarity_ReadWrite_test.c DEPS "externals")
+  new_test(SOURCES MixedLinearComplementarity_ReadWrite_test.c DEPS "externals")
 
   # ----------- MCP solvers tests -----------
   begin_tests(src/MCP/test)
-  new_test_1(SOURCES MCP_test.c)
-  new_test_1(SOURCES MCP_test1.c)
-  new_test_1(SOURCES MCP_test2.c)
-  new_test_1(SOURCES MCP_2_test1.c)
+  new_test(SOURCES MCP_test.c)
+  new_test(SOURCES MCP_test1.c)
+  new_test(SOURCES MCP_test2.c)
+  new_test(SOURCES MCP_2_test1.c)
 
   # ----------- NCP solvers tests -----------
   begin_tests(src/NCP/test)
@@ -203,12 +203,12 @@ if(WITH_${COMPONENT}_TESTING)
   #  ENDIF()
   
   # --- LMGC driver ---
-  new_test_1(SOURCES fc3d_newFromFortranData.c)
-  new_test_1(SOURCES fc3d_LmgcDriver_test1.c)
-  new_test_1(SOURCES fc3d_LmgcDriver_test2.c)
-  new_test_1(SOURCES fc3d_LmgcDriver_test3.c)
-  new_test_1(SOURCES fc3d_LmgcDriver_test4.c)
-  new_test_1(SOURCES fc3d_LmgcDriver_test5.c)
+  new_test(SOURCES fc3d_newFromFortranData.c)
+  new_test(SOURCES fc3d_LmgcDriver_test1.c)
+  new_test(SOURCES fc3d_LmgcDriver_test2.c)
+  new_test(SOURCES fc3d_LmgcDriver_test3.c)
+  new_test(SOURCES fc3d_LmgcDriver_test4.c)
+  new_test(SOURCES fc3d_LmgcDriver_test5.c)
 
   # # --- Quartic ---
   # # NEW_FC_3D_TEST(FrictionContact3D_1c.dat SICONOS_FRICTION_3D_ONECONTACT_QUARTIC)
@@ -235,11 +235,11 @@ if(WITH_${COMPONENT}_TESTING)
   #  ENDIF()
 
   # Alart Curnier functions
-  new_test_1(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)
+  new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)
   
   if(WITH_FCLIB)
 
-    new_test_1(NAME FCLIB_test1 SOURCES fc3d_writefclib_local_test.c DEPS FCLIB::fclib)
+    new_test(NAME FCLIB_test1 SOURCES fc3d_writefclib_local_test.c DEPS FCLIB::fclib)
 
     new_tests_collection(
       DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_6
@@ -312,13 +312,13 @@ if(WITH_${COMPONENT}_TESTING)
     DRIVER gmp_test_collection.c.in FORMULATION gmp COLLECTION TEST_NSGS_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_solvers_1.c)
 
-  # new_test_1(NAME GMP_FAILED SOURCES GenericMechanical_test1.c)
+  # new_test(NAME GMP_FAILED SOURCES GenericMechanical_test1.c)
 
   # ----------- Variationnal inequalities solvers tests -----------
   begin_tests(src/VI/test)
 
-  new_test_1(SOURCES VI_test_collection_1.c)
-  new_test_1(SOURCES VI_fc3d_test_collection_1.c DEPS "externals;BLAS::BLAS")
+  new_test(SOURCES VI_test_collection_1.c)
+  new_test(SOURCES VI_fc3d_test_collection_1.c DEPS "externals;BLAS::BLAS")
 
   set(SICONOS_VI_SOLVERS
     SICONOS_VI_BOX_QI
@@ -338,27 +338,27 @@ if(WITH_${COMPONENT}_TESTING)
   # ----------- QP solvers tests -----------
   begin_tests(src/QP/test)
 
-  new_test_1(NAME ConvexQP_test_collection SOURCES ConvexQP_test.c)
-  new_test_1(NAME ConvexQP_FC3D_test_collection SOURCES  ConvexQP_FC3D_test.c DEPS "externals;BLAS::BLAS")
+  new_test(NAME ConvexQP_test_collection SOURCES ConvexQP_test.c)
+  new_test(NAME ConvexQP_FC3D_test_collection SOURCES  ConvexQP_FC3D_test.c DEPS "externals;BLAS::BLAS")
   
   # ----------- AVI solvers tests -----------
   begin_tests(src/AVI/test)
 
   if(HAS_ONE_LP_SOLVER)
-    new_test_1(NAME AVI_twisting SOURCES implicit_twisting.c)
+    new_test(NAME AVI_twisting SOURCES implicit_twisting.c)
   endif()
 
   # ----------- SOCP solvers tests -----------
   begin_tests(src/SOCP/test)
-  new_test_1(SOURCES soclcp_test1.c)
-  new_test_1(SOURCES soclcp_test2.c)
-  new_test_1(SOURCES soclcp_test3.c)
+  new_test(SOURCES soclcp_test1.c)
+  new_test(SOURCES soclcp_test2.c)
+  new_test(SOURCES soclcp_test3.c)
   # timeout on all machines, see
   # http://cdash-bipop.inrialpes.fr/testSummary.php?project=1&name=SOCLCP_test4&date=2015-09-03
   # Feel free to remove this once it is fixed --xhub
-  #new_test_1(SOURCES soclcp_test4.c)
-  #new_test_1(SOURCES soclcp_test5.c)
-  new_test_1(SOURCES fc3d_to_soclcp.c DEPS LAPACK::LAPACK)
+  #new_test(SOURCES soclcp_test4.c)
+  #new_test(SOURCES soclcp_test5.c)
+  new_test(SOURCES fc3d_to_soclcp.c DEPS LAPACK::LAPACK)
 
   # ---- Extra conf for ${COMPONENT}-test library ---
   if(TARGET numerics-test)

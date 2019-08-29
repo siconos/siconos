@@ -137,7 +137,7 @@ endmacro()
 # - link (PRIVATE) executable with <COMPONENT>-test (if it exists)
 # - add a test (ctest) named <name>. If NAME is not set, use name of first source file (without ext).
 # ========================================
-function(new_test_1)
+function(new_test)
   set(oneValueArgs NAME HDF5)
   set(multiValueArgs SOURCES DATA DEPS)
   cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
@@ -298,7 +298,7 @@ function(new_tests_collection)
 
   set(TEST_NAME_PREFIX ${PROBLEM_FORMULATION})
   set(TEST_COLLECTION ${PROBLEM_COLLECTION})
-  new_test_1(
+  new_test(
     SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name} ${PROBLEM_EXTRA_SOURCES}
     NAME ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}
     DATA_SET "${PROBLEM_DATASET}"
