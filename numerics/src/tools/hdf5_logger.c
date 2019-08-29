@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "hdf5_logger.h"
 #include "NumericsSparseMatrix.h"
 

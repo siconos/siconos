@@ -42,7 +42,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "NumericsMatrix.h"
 #include "NumericsVector.h"

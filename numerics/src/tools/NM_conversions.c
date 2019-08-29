@@ -21,7 +21,7 @@
 #include <stdio.h>
 
 #include "SiconosConfig.h"
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NM_conversions.h"
 
 #ifdef WITH_MKL_SPBLAS

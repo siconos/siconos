@@ -6,7 +6,7 @@
 #include "NumericsSparseMatrix.h"
 #include "CSparseMatrix.h"
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #ifdef SICONOS_HAS_MPI
 #include <mpi.h>
 #endif

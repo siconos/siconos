@@ -4,7 +4,7 @@
 #include <time.h>
 #include <float.h>
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 
 // avoid a conflict with old csparse.h
 #define _CS_H

@@ -22,7 +22,7 @@
 #include <math.h>
 #include <float.h>
 #include <stdbool.h>
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "SiconosCompat.h"
 #include "NumericsSparseMatrix.h"
 #include "numerics_verbose.h"

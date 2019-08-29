@@ -78,7 +78,7 @@ function(begin_tests SOURCE_DIR)
     foreach(libtarget IN LISTS TEST_DEPS)
       target_link_libraries(${COMPONENT}-test PUBLIC ${libtarget})
     endforeach()
-
+    
   else()
     # If there is no ${COMPONENT}-test but some extra DEPS.
     unset(GLOBAL_TEST_DEPS)
@@ -140,7 +140,7 @@ endmacro()
 # ========================================
 function(new_test_1)
   set(oneValueArgs NAME)
-  set(multiValueArgs SOURCES DATA DEPS)
+  set(multiValueArgs SOURCES DATA DEPS FLAGS)
   cmake_parse_arguments(TEST "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   # -- set test name --
@@ -188,6 +188,12 @@ function(new_test_1)
   # Set path where exe should be generated
   set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/)
 
+  # Set some compilation flags for the current target
+  foreach(flag IN LISTS TEST_FLAGS)
+    target_compile_options(${TEST_NAME} PUBLIC ${flag})
+  endforeach()
+
+  
   test_windows_setup(${TEST_NAME} ${TEST_SOURCES})
 
   # -- link with current component and its dependencies --
@@ -904,7 +910,7 @@ macro(set_ldlibpath)
 endmacro()
 
 # Declaration of a siconos test based on python bindings
-macro(add_python_test test_name test_file)
+function(add_python_test test_name test_file)
   add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
   set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
@@ -912,7 +918,8 @@ macro(add_python_test test_name test_file)
   if(LDLIBPATH)
     set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
   endif()
-endmacro()
+endfunction()
+
 
 # ----------------------------------------
 # Prepare python tests for the current

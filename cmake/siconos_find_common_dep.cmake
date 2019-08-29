@@ -4,17 +4,6 @@
 #
 #================================================================
 
-# --- Blas Lapack ---
-# include(BlasLapackSetup)
-#compile_with(BLAS REQUIRED SICONOS_COMPONENTS kernel numerics externals)
-#compile_with(LAPACK REQUIRED SICONOS_COMPONENTS kernel numerics externals)
-# if(NOT BLAS_INCLUDE_DIRS)
-#   message(FATAL_ERROR "cannot find blas include directories")
-# endif()
-# if(NOT LAPACK_INCLUDE_DIRS)
-#   message(FATAL_ERROR "cannot find lapack include directories")
-# endif()
-
 # --- Numerics optional dependencies ---
 compile_with(MlcpSimplex SICONOS_COMPONENTS numerics)
 compile_with(Pthread SICONOS_COMPONENTS numerics)

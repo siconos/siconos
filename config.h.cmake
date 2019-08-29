@@ -51,8 +51,6 @@
 #cmakedefine HAS_MKL_LAPACKE
 #cmakedefine HAS_ATLAS_LAPACK
 #cmakedefine HAS_MATLAB_LAPACK
-// #cmakedefine HAS_LAPACKE // lapacke.h has been found
-// #cmakedefine HAS_CLAPACK  // clapack.h has been found
 
 // Which functions are defined in lapack? 
 #cmakedefine HAS_LAPACK_dgesvd

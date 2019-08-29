@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "SiconosCompat.h"
