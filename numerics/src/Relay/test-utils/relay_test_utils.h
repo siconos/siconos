@@ -15,24 +15,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#ifndef RELAY_TEST_UTILS_H
+#define RELAY_TEST_UTILS_H
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "relay_test_function.h"
+#include "relay_cst.h"
 #include "SolverOptions.h"
 
-int main(void)
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
 {
-  int info = 0 ;
-  printf("Test on ./data/relay_2x2.dat\n");
+#endif
+  void relay_fillParamWithRespectToSolver(SolverOptions *options, char * solvername, RelayProblem* problem);
+  int relay_test_function(FILE * f, int solverId);
 
-  FILE * finput  =  fopen("./data/relay_2x2.dat", "r");
+  /** Defines the list of data files
+      returns an array of char
+  */
+  char ** data_collection(void);
+  
+  /** Defines the set of tests (including parameters)
+      returns an 'array' of tests, some kind of dict.
+  */
+  char *** test_collection(int, char **);
 
-  char solvername[20] = "RELAY_LEMKE";
-  info = relay_test_function(finput, solver_options_name_to_id(solvername));
+  
 
-  fclose(finput);
-
-
-  return info;
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
+#endif
+
+#endif
+
+

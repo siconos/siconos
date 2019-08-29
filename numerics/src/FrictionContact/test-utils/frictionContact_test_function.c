@@ -25,7 +25,7 @@
 #define _CS_H
 
 #include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
+#include "frictionContact_test_utils.h"
 #include "fc3d_Solvers.h"
 #include "fc3d_solvers_wr.h"
 #include "gfc3d_Solvers.h"
@@ -91,6 +91,7 @@ int frictionContact_test_function(FILE * f, SolverOptions * options)
   int info = -1 ;
   FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
   /* numerics_set_verbose(1); */
+  printf("OK 8888 ");
   info = frictionContact_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("checkinput.dat", "w");

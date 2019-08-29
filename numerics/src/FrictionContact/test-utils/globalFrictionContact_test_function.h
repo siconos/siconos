@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifndef GLOBALFRICTIONCONTACT_TEST_FUNCTION_H
-#define GLOBALFRICTIONCONTACT_TEST_FUNCTION_H
+#ifndef GLOBALFRICTIONCONTACT_TEST_UTILS_H
+#define GLOBALFRICTIONCONTACT_TEST_UTILS_H
 #include "SolverOptions.h"
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

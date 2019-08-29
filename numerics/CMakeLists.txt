@@ -72,12 +72,41 @@ list(APPEND ${COMPONENT}_LINK_LIBRARIES ${CMAKE_DL_LIBS})
 list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
 list(APPEND ${COMPONENT}_LINK_LIBRARIES externals)
 
-set(COMPONENT_TEST_LIB "numerics-test")
 include(LibraryProjectSetup)
 library_project_setup()
 
-# tmp
+
+# --- Extra setup for the component ---
+
+# -- Required deps --
+# tmp for Blas/Lapack
 target_include_directories(numerics PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>/externals/blas_lapack)
+
+# -- Optional deps --
+# Fclib
+if(WITH_FCLIB)
+  find_package(FCLIB 3.0.0 CONFIG REQUIRED)
+  if(FCLIB_NOT_FOUND)
+    message(FATAL_ERROR "Can not find fclib package. Try to set FCLIB_ROOT.")
+  endif()
+  target_link_libraries(numerics PUBLIC FCLIB::fclib)
+endif()
+
+# SuiteSparse
+# numerics possibly needs suite sparse installed on the system.
+if(WITH_SYSTEM_SUITESPARSE)
+  #   Note : the CSparse data structures are referred to in
+  #   kernel, but the functions are only called from numerics, so it is
+  #   not a link-time dependency for kernel.
+  # We should turn public to private later.
+  find_package(SuiteSparse REQUIRED COMPONENTS CXSparse)
+  if (NOT SuiteSparse_FOUND OR NOT SuiteSparse_CXSparse_FOUND)
+    message(FATAL_ERROR "\n!!! Cannot find suite sparse and/or cxsparse. Please install it or use internal (provided by Siconos) suite sparse by setting WITH_SYSTEM_SUITESPARSE to OFF !!!\n")
+  endif()
+  target_link_libraries(numerics PUBLIC SuiteSparse::CXSparse)
+endif()
+
+
 
 if(BUILD_AS_CPP)
   file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)

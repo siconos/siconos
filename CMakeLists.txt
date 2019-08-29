@@ -11,6 +11,10 @@
 # Set minimum version for cmake
 # We advise 3.12 at least, but 3.7 is authorized since it's the default version on current debian stable.
 cmake_minimum_required(VERSION 3.7)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12")
+  cmake_policy(SET CMP0074 NEW)
+endif()
+
 
 # Set cmake modules directories
 # (i.e. the those which contain all user-defined FindXXX.cmake files among other things)
@@ -187,11 +191,13 @@ message("    Blas headers : ${BLAS_HEADER} in ${BLAS_INCLUDE_DIR}.")
 message(STATUS "Lapack is ${WITH_LAPACK}.")
 message("    Lapack libraries : ${LAPACK_LIBRARIES}.")
 message("    Lapack headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIR}.")
-if (USE_SYSTEM_SUITESPARSE)
-  message(STATUS "CXSparse headers : ${CXSparse_INCLUDE_DIR}")
-  message(STATUS "CXSparse library : ${CXSparse_LIBRARY}")
+if(WITH_SYSTEM_SUITESPARSE)
+  message(STATUS "Use system-provided SuiteSparse library, with:")
+  message("    - CXSparse headers path: ${SuiteSparse_CXSparse_INCLUDE_DIR}")
+  message("    - CXSparse library : ${SuiteSparse_CXSparse_LIBRARY}")
 else()
-  message(STATUS "CSparse headers : externals/SuiteSparse/CSparse")
+  message(STATUS "Use Siconos-provided SuiteSparse, with")
+  message(STATUS "CSparse headers path : externals/SuiteSparse/CXSparse")
 endif()
 message(STATUS "Python interpreter is ${Python3_EXECUTABLE}")
 if(WITH_PYTHON_WRAPPER)

@@ -31,14 +31,10 @@ static inline char* strdup(char* src)
 }
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
-
+#include "lcp_test_utils.h"
 #include "NonSmoothDrivers.h"
-#include "lcp_test_function.h"
 #include "GAMSlink.h"
-#include "lcp_cst.h"
 #include "LCP_Solvers.h"
 #include "LinearComplementarityProblem.h"
 #include "SolverOptions.h"

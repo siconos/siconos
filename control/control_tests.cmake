@@ -1,24 +1,18 @@
 include(tools4tests)
 
 if(WITH_${COMPONENT}_TESTING)
-  # We don't use COMPILE_WITH since we don't want to link cppunit with the
-  # kernel library
-  find_package(CppUnit REQUIRED)
-  set(TEST_LIBS ${TEST_LIBS} ${CPPUNIT_LIBRARIES})
-  set(TEST_INCLUDE_DIR ${TEST_INCLUDE_DIR} ${CPPUNIT_INCLUDE_DIR})
+  find_package(CPPUNIT REQUIRED)
   
-  # the main test driver
-  SET(TEST_MAIN src/tests/TestMain.cpp)
-  
-  # Simulation tests
-  BEGIN_TEST(src/tests)
-  
-  NEW_TEST(tests)
-  
-  IF(HAS_FORTRAN)
-    NEW_TEST(ControlTests PIDTest.cpp SMCTest.cpp ObserverTest.cpp TwistingTest.cpp)
-  ENDIF(HAS_FORTRAN)
+  set(SIMPLE_TEST_MAIN ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosMemory/test/TestMain.cpp)
 
-  END_TEST()
+  # ----  Control tests ----
+  begin_tests(src/tests DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
+
+  if(HAS_FORTRAN)
+    new_test_1(SOURCES PIDTest.cpp ${SIMPLE_TEST_MAIN})
+    new_test_1(SOURCES SMCTest.cpp ${SIMPLE_TEST_MAIN})
+    new_test_1(SOURCES ObserverTest.cpp ${SIMPLE_TEST_MAIN})
+    new_test_1(SOURCES TwistingTest.cpp ${SIMPLE_TEST_MAIN})
+  endif()
   
 endif()

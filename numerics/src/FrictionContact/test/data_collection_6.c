@@ -16,13 +16,7 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-
-
-#define TEST_HDF5 1
-char ** data_collection(void);
+#include "frictionContact_test_utils.h"
 
 char ** data_collection()
 {

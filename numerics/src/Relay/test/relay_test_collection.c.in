@@ -16,26 +16,16 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "relay_test_function.h"
-#include "relay_cst.h"
+/* #include "NonSmoothDrivers.h" */
+#include "relay_test_utils.h"
+/* #include "relay_cst.h" */
 
 #include "SolverOptions.h"
-#define @TEST_COLLECTION@ 1
-
-#ifdef TEST_RELAY_COLLECTION_1
-#include "data_collection_1.c"
-#include "test_solvers_collection_1.c"
-#endif
-
-
+#define @PROBLEM_COLLECTION@ 1
 
 static int relay_test_single(char ** test)
 {

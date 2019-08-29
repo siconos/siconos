@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
+#include "genericMechanical_test_utils.h"
+#include "GenericMechanical_cst.h"
+#include "Friction_cst.h"
 
 char *** test_collection(int n_data_1, char ** data_collection_1)
 {
@@ -53,7 +53,7 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
   }
 
 
-#ifdef HAS_LAPACK_DGESVD
+#ifdef HAS_LAPACK_dgesvd
   for ( int d =0; d <n_data_1; d++)
   {
     int e=0;
@@ -210,7 +210,7 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test_nsgs[n][e++] = "---";
     n++;
   }
-#ifdef HAS_LAPACK_DGESVD
+#ifdef HAS_LAPACK_dgesvd
   test_nsgs[5][1] = "1";
   test_nsgs[6][1] = "1";
   test_nsgs[19][1] = "1";

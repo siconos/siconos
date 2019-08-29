@@ -16,11 +16,8 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-
-char ** data_collection(void);
+#include "genericMechanical_test_utils.h"
+#include "stdlib.h"
 
 char ** data_collection()
 {

@@ -8,7 +8,6 @@ include(SiconosTools)
 include(WindowsSiconosSetup)
 
 # --------- CMake project internal variables ---------
-
 # Siconos current version
 include(SiconosVersion)
 

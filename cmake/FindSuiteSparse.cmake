@@ -5,7 +5,6 @@
 #  SuiteSparse_FOUND - System has SuiteSparse
 #  SuiteSparse_INCLUDE_DIRS - The SuiteSparse include directories
 #  SuiteSparse_LIBRARIES - The libraries needed to use SuiteSparse
-#  SuiteSparse_DEFINITIONS - Compiler switches required for using SuiteSparse
 
 # For each component (currently only "CXSparse"):
 #  SuiteSparse_(component)_FOUND
@@ -13,49 +12,62 @@
 #  SuiteSparse_(component)_INCLUDE_DIR
 #  SuiteSparse_(component)_DEFINITIONS
 
-set(SuiteSparse_DEFINITIONS)
 
-if( SuiteSparse_FIND_COMPONENTS )
-  foreach( component ${SuiteSparse_FIND_COMPONENTS} )
-    set( SuiteSparse_USE_${component} 1 )
-  endforeach()
-endif()
+# Required :
+# - header : cs.h
+# - libs : colamd, cxsparse (for cxsparse)
 
+include(FindPackageHandleStandardArgs)
+
+
+# Provide SuiteSparse_<C> variables for each component.
+foreach(component IN LISTS SuiteSparse_FIND_COMPONENTS)
+  set(SuiteSparse_USE_${component} 1 )
+endforeach()
+
+set(_SUITESPARSE_REQUIRED_VARS)
+
+# -- cxsparse component --
 if (SuiteSparse_USE_CXSparse)
-  find_path(CXSparse_INCLUDE_DIR cs.h
+  find_path(SuiteSparse_CXSparse_INCLUDE_DIR cs.h
     PATH_SUFFIXES SuiteSparse suitesparse
     DOC "Directory containing CXSparse header")
 
-  find_library(CXSparse_LIBRARY NAMES cxsparse)
-  set(SuiteSparse_CXSparse_DEFINITIONS)
-  if (CXSparse_INCLUDE_DIR AND CXSparse_LIBRARY)
-      set(SuiteSparse_CXSparse_FOUND TRUE)
-  endif()
+  find_library(SuiteSparse_CXSparse_LIBRARY NAMES cxsparse)
+  # if (CXSparse_INCLUDE_DIR AND CXSparse_LIBRARY)
+  #     set(SuiteSparse_CXSparse_FOUND TRUE)
+  # endif()
 
   # At least on some systems we need to link to libcolamd which is
   # another output from suitesparse.
   find_library(colamd_LIBRARY NAMES colamd)
+
+  list(APPEND _SUITESPARSE_REQUIRED_VARS
+    SuiteSparse_CXSparse_LIBRARY SuiteSparse_CXSparse_INCLUDE_DIR)  
+  set(SuiteSparse_CXSparse_LIBRARIES ${SuiteSparse_CXSparse_LIBRARY} ${colamd_LIBRARY})
+  if(SuiteSparse_CXSparse_INCLUDE_DIR AND  SuiteSparse_CXSparse_LIBRARY)
+    set(SuiteSparse_CXSparse_FOUND TRUE)
+  endif()
 endif ()
 
-include(FindPackageHandleStandardArgs)
-# handle the QUIETLY and REQUIRED arguments and set SuiteSparse_FOUND to TRUE
-# if all listed variables are TRUE
-find_package_handle_standard_args(SuiteSparse DEFAULT_MSG
-                                  CXSparse_LIBRARY CXSparse_INCLUDE_DIR)
-
-if (SuiteSparse_USE_CXSparse AND CXSparse_LIBRARY)
-  mark_as_advanced(CXSparse_INCLUDE_DIR CXSparse_LIBRARY)
-endif ()
-
-set(SuiteSparse_LIBRARIES ${CXSparse_LIBRARY} ${colamd_LIBRARY})
-set(SuiteSparse_INCLUDE_DIRS ${CXSparse_INCLUDE_DIR})
-
-# If at least one component was found, SuiteSparse was found.
-# Users must check each component FOUND individually.
-if( SuiteSparse_FIND_COMPONENTS )
-  foreach( component ${SuiteSparse_FIND_COMPONENTS} )
-    if (${component}_LIBRARY)
-      set(SuiteSparse_FOUND TRUE)
-    endif()
-  endforeach()
+if(_SUITESPARSE_REQUIRED_VARS)
+  find_package_handle_standard_args(SuiteSparse
+    REQUIRED_VARS ${_SUITESPARSE_REQUIRED_VARS}
+    HANDLE_COMPONENTS)
+else()
+  set(SuiteSparse_FOUND)
 endif()
+
+foreach(_component IN LISTS SuiteSparse_FIND_COMPONENTS)
+  if(SuiteSparse_${_component}_FOUND AND NOT TARGET SuiteSparse::${_component})
+    add_library(SuiteSparse::${_component} UNKNOWN IMPORTED)
+    set_target_properties(SuiteSparse::${_component} PROPERTIES
+      IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+      IMPORTED_LOCATION "${SuiteSparse_${_component}_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${SuiteSparse_${_component}_INCLUDE_DIR}"
+      INTERFACE_LINK_LIBRARIES "${SuiteSparse_${_component}_LIBRARIES}")
+    mark_as_advanced(SuiteSparse_${_component}_LIBRARIES SuiteSparse_${_component}_INCLUDE_DIR)
+  endif()
+endforeach()
+
+

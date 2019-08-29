@@ -41,11 +41,17 @@ configure_file(mechanics/collision/convexhull.py  ${SICONOS_SWIG_ROOT_DIR}/mecha
 configure_file(mechanics/collision/__init__.py  ${SICONOS_SWIG_ROOT_DIR}/mechanics/collision/__init__.py )
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
-if(NOT WITH_OCE)
-  list(APPEND ${COMPONENT}_python_excluded_tests
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_occ_inertia.py)
+
+
+# --- Tests ---
+if(WITH_${COMPONENT}_TESTING)
+  if(NOT WITH_OCE)
+    list(APPEND python_excluded_tests tests/test_occ_inertia.py)
+  endif()
+  build_python_tests(
+    # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
+    EXCLUDE ${python_excluded_tests})
 endif()
-build_python_tests()
 
 if(NOT NO_RUNTIME_BUILD_DEP)
   find_python_module(pyhull)

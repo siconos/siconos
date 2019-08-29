@@ -22,7 +22,7 @@
 #include "FrictionContactProblem.h"
 #include "SecondOrderConeLinearComplementarityProblem.h"
 
-#include "../FrictionContact/test-utils/frictionContact_test_function.h"
+#include "../FrictionContact/test-utils/frictionContact_test_utils.h"
 
 
 

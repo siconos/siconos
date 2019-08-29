@@ -24,16 +24,21 @@ set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
 
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
-if(NOT WITH_XML)
-  list(APPEND ${COMPONENT}_python_excluded_tests
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_xml.py)
-endif()
 
-if(NOT HAS_FORTRAN)
-  list(APPEND ${COMPONENT}_python_excluded_tests
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_matrix_exp.py)
+# --- Tests ---
+if(WITH_${COMPONENT}_TESTING)
+  if(NOT WITH_XML)
+    list(APPEND python_excluded_tests tests/test_xml.py)
+  endif()
+  
+  if(NOT HAS_FORTRAN)
+    list(APPEND python_excluded_tests tests/test_matrix_exp.py)
+  endif()
+  
+  find_python_module(lxml REQUIRED)
+  build_python_tests(
+    # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
+    EXCLUDE ${python_excluded_tests})
 endif()
-
-build_python_tests()
 
 configure_file(fromXml.py.in ${SICONOS_SWIG_ROOT_DIR}/fromXml.py @ONLY)
