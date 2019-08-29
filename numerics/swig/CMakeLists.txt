@@ -54,7 +54,7 @@ swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 # -- mpi4py -- 
 if(WITH_MPI)
   target_include_directories(_numerics PRIVATE ${MPI_C_INCLUDE_DIRS})
-  target_link_libraries(_numerics PRIVATE ${MPI_C_LIBRARIES})
+  target_link_libraries(_numerics ${MPI_C_LIBRARIES})
   find_python_module(mpi4py REQUIRED INCLUDES)
   target_include_directories(_numerics PRIVATE ${mpi4py_INCLUDE_DIR})
   set(WITH_MPI4PY TRUE)

@@ -135,12 +135,26 @@ pkgs:
       - swig
       - cppunit
       - start-command
+      - suitesparse-dev
 
   start-command:
     any:
       run-command:
         /bin/echo *************************************************************************
 
+  suitesparse-dev:
+    debian:
+      - libsuitesparse-dev
+
+    ubuntu:
+      - libsuitesparse-dev
+
+    fedora:
+      - suitesparse-devel
+
+    opensuse:
+      - suitesparse-devel
+      
   python3-minimal:
     nix:
       - python-3.6
@@ -219,7 +233,7 @@ pkgs:
       - siconos-doc-pip-pkgs
       - bullet
       - serialization
-
+      
   pip-command:
     nix:
       - python2.7-pip-9.0.1
@@ -368,6 +382,7 @@ pkgs:
     fedora:
       - openblas-devel
       - lapack-devel
+      
     opensuse:
       - openblas-devel
       - lapacke-devel
