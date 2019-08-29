@@ -27,7 +27,7 @@ Include files related to Siconos Kernel
 #include "SimulationTools.hpp"
 #include "PluginTypes.hpp"
 #include <time.h>
-#include <boost/timer.hpp>
-#include <boost/progress.hpp>
+#include <boost/timer/timer.hpp>
+
 
 #endif

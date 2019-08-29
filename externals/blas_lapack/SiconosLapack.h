@@ -76,7 +76,7 @@ extern "C"
 #include "SiconosMATLABLapack.h"
 
 // --- Atlas ---
-#elif defined(HAS_ATLAS_LAPACK) || !defined(HAS_LAPACKE)
+#elif defined(HAS_ATLAS_LAPACK)// || !defined(HAS_LAPACKE)
 #include "SiconosAtlasLapack.h"
 
 #elif defined(HAS_CLAPACK)
@@ -171,14 +171,14 @@ extern "C"
 */
   static inline void DGELS(const enum CBLAS_TRANSPOSE trans, lapack_int M, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, double* B, lapack_int LDB, lapack_int* INFO)
   {
-    /* lapack_int C_M = M; */
-    /* lapack_int C_N = N; */
-    /* lapack_int C_NRHS = NRHS; */
-    /* lapack_int C_LDA = LDA; */
-    /* lapack_int C_LDB = LDB; */
-    /* lapack_int C_INFO = 0 =*INFO; */
+    lapack_int C_M = M;
+    lapack_int C_N = N;
+    lapack_int C_NRHS = NRHS;
+    lapack_int C_LDA = LDA;
+    lapack_int C_LDB = LDB;
+    lapack_int C_INFO = 0;
     WRAP_DGELS(LAPACK_NAME(dgels),trans, INTEGER(C_M), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA), B, INTEGER(C_LDB),INTEGER(C_INFO));
-    /* *INFO = C_INFO; */
+    *INFO = C_INFO;
   }
 
   /* DPOTRF - compute the Cholesky factorization of a real symmetric

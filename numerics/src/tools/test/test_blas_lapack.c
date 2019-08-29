@@ -71,7 +71,6 @@ static int test_dgemm(void)
 #define M 6
 #undef N
 #define N 4
-#define NRHS
 #define NRHS 2
 #undef LDA
 #define LDA M

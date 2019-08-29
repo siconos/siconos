@@ -54,7 +54,7 @@
 #endif
 
 // --- DGESVD ---
-#if defined(HAS_LAPACK_DGESVD)
+#if defined(HAS_LAPACK_dgesvd)
 #define WRAP_DGESVD(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,INFO)      \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)
 #else
@@ -71,7 +71,7 @@
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7)
      
 // --- DGELS ---
-#if defined(HAS_LAPACK_DGELS)
+#if defined(HAS_LAPACK_dgels)
 #define WRAP_DGELS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)    \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8)
 #else
@@ -92,7 +92,7 @@
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5)
  
 // --- DTRTRS ---
-#if defined(HAS_LAPACK_DTRTRS)
+#if defined(HAS_LAPACK_dtrtrs)
 #define WRAP_DTRTRS(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO)  \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8,A9)
 #else

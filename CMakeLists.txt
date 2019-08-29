@@ -154,19 +154,19 @@ include(FeatureSummary)
 feature_summary(WHAT ALL)
 
 # ============= Siconos Package configuration =============
-# i.e. what should be generate, done, configure at install.
+# i.e. what should be generated/configured at install.
 include(SiconosPackageSetup)
-
 
 # SiconosConfig.h generation and include
 if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
-  message(STATUS "configuration and installation of SiconosConfig.h")
+  # Warning : strongly depends on find_package(...) results.
   configure_file(${CMAKE_SOURCE_DIR}/config.h.cmake
     ${CMAKE_BINARY_DIR}/SiconosConfig.h)
   if(SHOW_ME_SICONOS_CONFIG)
     file(READ ${CMAKE_BINARY_DIR}/SiconosConfig.h SICONOS_CONFIG_H)
     message(${SICONOS_CONFIG_H})
   endif()
+  install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
 endif()
 
 # ============= Summary =============
@@ -181,12 +181,12 @@ message(STATUS "Fortran Compiler : ${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_COM
 message(STATUS "Fortran flags : ${CMAKE_Fortran_FLAGS}")
 message(STATUS "Compilation mode is : ${CMAKE_BUILD_TYPE}")
 message(STATUS "Code Sources are in : ${CMAKE_SOURCE_DIR}")
-message(STATUS "Blas is ${WITH_BLAS}. ")
+message(STATUS "Blas from ${BLAS_NAME}.")
 message("    Blas libraries : ${BLAS_LIBRARIES}.")
-message("    Blas headers : ${BLAS_HEADER} in ${BLAS_INCLUDE_DIRS}.")
+message("    Blas headers : ${BLAS_HEADER} in ${BLAS_INCLUDE_DIR}.")
 message(STATUS "Lapack is ${WITH_LAPACK}.")
 message("    Lapack libraries : ${LAPACK_LIBRARIES}.")
-message("    Lapack headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIRS}.")
+message("    Lapack headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIR}.")
 if (USE_SYSTEM_SUITESPARSE)
   message(STATUS "CXSparse headers : ${CXSparse_INCLUDE_DIR}")
   message(STATUS "CXSparse library : ${CXSparse_LIBRARY}")

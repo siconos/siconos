@@ -57,8 +57,6 @@ include(CMakePackageConfigHelpers)
 configure_package_config_file(siconos-config.cmake.in ${CMAKE_BINARY_DIR}/siconos-config.cmake
   INSTALL_DESTINATION ${ConfigPackageLocation})
 
-install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
-
 # Generate siconos-config-version.cmake file.
 write_basic_package_version_file(
   "${CMAKE_BINARY_DIR}/siconos-config-version.cmake"
