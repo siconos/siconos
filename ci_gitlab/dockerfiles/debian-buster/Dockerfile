@@ -12,6 +12,7 @@ RUN apt update  && apt install -y -qq \
         gfortran \
         g++ \
         libopenblas-dev \
+        liblapacke-dev \
         lp-solve \
         liblpsolve55-dev \
         libpython3-dev \
