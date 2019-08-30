@@ -33,6 +33,14 @@ docker-build:debian-stretch:
     IMAGE_NAME: debian-stretch
   extends: .docker-build
 
+# This job create a docker image with all required dependencies
+# (including serialization, python wrapper, bullet but not OCE)
+# It's based on debian stretch
+docker-build:debian-buster:
+  variables:
+    IMAGE_NAME: debian-buster
+  extends: .docker-build
+
     
 # This job create a docker image with all required dependencies
 # (including serialization, python wrapper, mumps parallel)
@@ -114,9 +122,9 @@ install_siconos:ubuntu18.04:
 # Siconos build and install, default config
 # (based on cmake/default_siconos.cmake)
 # on debian stretch
-install_siconos:debian-stretch:
+install_siconos:debian-buster:
   variables:
-    IMAGE_NAME: $CI_REGISTRY_IMAGE/debian-stretch
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/debian-buster
     cdash_submit: 1
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends: .siconos-build

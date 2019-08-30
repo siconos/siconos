@@ -41,7 +41,7 @@ empty = SiconosCiTask()
 
 base = empty.copy()(
     ci_config='default',
-    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'openblas-lapacke',
           'python3-env'],
     srcs=['.'],
     targets={'.': ['all', 'test']})
@@ -53,28 +53,11 @@ default = SiconosCiTask(
     docker=True,
     ci_config='default',
     distrib='ubuntu:18.04',
-    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack',
+    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'openblas-lapacke',
           'python3-env'],
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
-minimal = SiconosCiTask(
-    docker=True,
-    ci_config='minimal',
-    distrib='ubuntu:18.04',
-    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
-          'atlas-lapack', 'python3-minimal'],
-    srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
-
-minimal_with_python = SiconosCiTask(
-    docker=True,
-    ci_config='minimal_with_python',
-    distrib='ubuntu:18.04',
-    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++',
-          'atlas-lapack', 'python3-env'],
-    srcs=['.'],
-    targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
 #
 # 3. all the tasks
@@ -91,18 +74,6 @@ siconos_default_nix = default.copy()(
 
 siconos_debian_latest = siconos_default.copy()(
     distrib='debian:latest')
-
-# siconos_ubuntu_14_04 = siconos_default.copy()(
-#     distrib='ubuntu:14.04')
-
-# siconos_ubuntu_15_04 = siconos_default.copy()(
-#     distrib='ubuntu:15.04')
-
-# siconos_ubuntu_15_10 = siconos_default.copy()(
-#     distrib='ubuntu:15.10')
-
-# siconos_ubuntu_16_10 = siconos_default.copy()(
-#     distrib='ubuntu:16.10')
 
 siconos_ubuntu_18_04 = siconos_default.copy()(
     distrib='ubuntu:18.04')
@@ -126,22 +97,6 @@ siconos_with_lpsolve = siconos_default.copy()(
 import os
 from os.path import expanduser
 home = expanduser("~")
-
-siconos_documentation = siconos_default.copy()(
-    distrib='ubuntu:18.04',
-    ci_config='with_documentation',
-    add_pkgs=['documentation'],
-    add_directories=[os.path.join(home, '.ssh:/root/.ssh')],
-    targets={'.': ['docker-build', 'docker-cmake', 'docker-make',
-                   'docker-make-install',
-                   'docker-make-doc', 'docker-make-upload']})
-
-siconos_ubuntu_15_10_with_mechanisms = siconos_default.copy()(
-    ci_config='with_mechanisms_conda_version',
-    add_pkgs=['pythonocc-conda', 'wget', 'bash', 'bzip2',
-              'pythonocc-conda-dep'],
-    cmake_cmd='Build/ci-scripts/conda.sh',
-    distrib='debian:stretch')
 
 siconos_debian_mechanisms = siconos_default.copy()(
     ci_config='with_mechanisms',
@@ -213,8 +168,6 @@ siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
     build_configuration='Debug',
     fast=False)
 
-# There is a bug in boost 1.58 distributed with Xenial (Ubuntu LTS 16.04).
-# As long as it is not patched, we have to build on a newer ubuntu
 siconos_serialization = siconos_ubuntu_18_04.copy()(
     ci_config='with_serialization',
     add_pkgs=['serialization'])

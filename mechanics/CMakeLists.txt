@@ -68,8 +68,8 @@ if(WITH_OCE)
   # 'private' add limited to current target would be better.
   # But those headers are missing during swig process. Todo : find a proper
   # way to deal with this.
-  # target_include_directories(${COMPONENT} PRIVATE ${OCE_INCLUDE_DIRS})
-  include_directories(${OCE_INCLUDE_DIRS})
+  #target_include_directories(${COMPONENT} PUBLIC ${OCE_INCLUDE_DIRS})
+  #include_directories(${OCE_INCLUDE_DIRS})
   # Add oce libs to components links
   set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} ${OCE_LIBRARIES})
 
@@ -113,7 +113,10 @@ if(SICONOS_HAS_BULLET)
     target_compile_options(${COMPONENT} PUBLIC "-DBT_USE_DOUBLE_PRECISION")
   endif()
 endif()
-
+if(SICONOS_HAS_OCE)
+  target_link_libraries(mechanics PUBLIC ${OCE_LIBRARIES})
+  target_include_directories(mechanics PUBLIC ${OCE_INCLUDE_DIRS})
+endif()
 
 # --- tests ---
 include(${COMPONENT}_tests.cmake)

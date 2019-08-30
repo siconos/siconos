@@ -17,6 +17,11 @@ set(${COMPONENT}_PYTHON_MODULES
 
 if(WITH_OCE)
   list(APPEND ${COMPONENT}_PYTHON_MODULES "mechanics/occ")
+  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")
+    set_property(SOURCE occ.i PROPERTY USE_TARGET_INCLUDE_DIRECTORIES ON)
+  else() #USE_TARGET_INCLUDE property is not available in old cmake versions.
+    list(APPEND CMAKE_SWIG_FLAGS "-I${OCE_INCLUDE_DIRS}")
+  endif()
 endif()
 
 if(WITH_BULLET)
