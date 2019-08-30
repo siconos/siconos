@@ -26,14 +26,14 @@
 #include "MixedComplementarityProblem.h"
 #include "NumericsMatrix.h"
 
-void freeMixedComplementarityProblem(MixedComplementarityProblem* problem)
+void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem)
 {
 //  if (problem->Fmcp) free(problem->Fmcp);
 //  if (problem->nablaFmcp) free(problem->nablaFmcp);
   free(problem);
 }
 
-void freeMCP(MixedComplementarityProblem2* mcp)
+void mixedComplementarityProblem_free(MixedComplementarityProblem* mcp)
 {
   if (mcp->nabla_Fmcp)
   {
@@ -45,9 +45,9 @@ void freeMCP(MixedComplementarityProblem2* mcp)
   free(mcp);
 }
 
-MixedComplementarityProblem2* newMCP(void)
+MixedComplementarityProblem* mixedComplementarityProblem_new(void)
 {
-  MixedComplementarityProblem2* mcp = (MixedComplementarityProblem2*) malloc(sizeof(MixedComplementarityProblem2));
+  MixedComplementarityProblem* mcp = (MixedComplementarityProblem*) malloc(sizeof(MixedComplementarityProblem));
 
   mcp->n1 = 0;
   mcp->n2 = 0;

@@ -130,5 +130,3 @@ int rolling_fc3d_compute_error(
 
   return 0;
 }
-
-

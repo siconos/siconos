@@ -66,14 +66,13 @@ int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double 
   NM_gemv(1.0, problem->M, z, 1.0, w);
   double norm_q = cblas_dnrm2(n , problem->q , incx);
   lcp_compute_error_only(n, z, w, error);
+
   if (fabs(norm_q) > DBL_EPSILON)
     *error /= norm_q;
 
-  
-  //*error = *error / (norm_q + 1.0); /* Need some comments on why this is needed */
   if (*error > tolerance)
   {
-    if (verbose > 0) printf(" Numerics - lcp_compute_error : error = %g > tolerance = %g.\n", *error, tolerance);
+    numerics_printf("lcp_compute_error : error = %g > tolerance = %g.\n", *error, tolerance);
     return 1;
   }
   else

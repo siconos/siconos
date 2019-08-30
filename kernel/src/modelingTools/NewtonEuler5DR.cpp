@@ -21,6 +21,7 @@
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
 #include "RotationQuaternion.hpp"
+
 #include "op3x3.h"
 
 // #define DEBUG_NOCOLOR
@@ -43,6 +44,7 @@ void NewtonEuler5DR::initialize(Interaction& inter)
   _AUX2.reset(new SimpleMatrix(3, 3));
   //  _isContact=1;
   DEBUG_END("NewtonEuler5DR::NewtonEuler5DR::initialize(Interaction& inter)\n");
+
 }
 void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 {
@@ -72,6 +74,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   double t[6];
   double * pt = t;
 
+
   // 1 - Construction of the local contact frame from the normal vector
   
   if (orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
@@ -92,6 +95,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   DEBUG_EXPR(_rotationAbsoluteToContactFrame->display(););
 
   // 3 - Construction of the lever arm matrix in  the absolute frame
+
   _NPG1->zero();
   (*_NPG1)(0, 0) = 0;
   (*_NPG1)(0, 1) = -(G1z - Pz);
@@ -105,6 +109,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 
   DEBUG_PRINT("lever arm skew matrix :\n");
   DEBUG_EXPR(_NPG1->display(););
+
 
   /* The Jacobian matrix (H) is given by the product
    * H = _rotationAbsoluteToContactFrame
@@ -133,6 +138,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
     for (unsigned int jj = 0; jj < 3; jj++)
       _jachqT->setValue(ii, jj, _rotationAbsoluteToContactFrame->getValue(ii, jj));
 
+
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
@@ -145,6 +151,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii-2, jj-3));
 
   DEBUG_EXPR(_jachqT->display(););
+
 
   // DEBUG_EXPR_WE(
   //   SP::SimpleMatrix jaux(new SimpleMatrix(*_jachqT));
@@ -165,12 +172,14 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   //   vRes->display();
   //   );
   DEBUG_END("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1)\n");
-  //getchar();
+
 }
 
 void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)
 {
+
   DEBUG_BEGIN("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)\n");
+
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
   double Nz = _Nc->getValue(2);
@@ -198,6 +207,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Si
   if(orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
     RuntimeException::selfThrow("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
   pt = t;
+
   _rotationAbsoluteToContactFrame->setValue(0, 0, Nx);
   _rotationAbsoluteToContactFrame->setValue(1, 0, *pt);
   _rotationAbsoluteToContactFrame->setValue(2, 0, *(pt + 3));
@@ -207,6 +217,7 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Si
   _rotationAbsoluteToContactFrame->setValue(0, 2, Nz);
   _rotationAbsoluteToContactFrame->setValue(1, 2, *(pt + 2));
   _rotationAbsoluteToContactFrame->setValue(2, 2, *(pt + 5));
+
 
   _NPG1->zero();
 
@@ -235,15 +246,16 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Si
 
 
 
-
   computeRotationMatrix(q1,_rotationBodyToAbsoluteFrame);
   prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
   prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
 
+
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
       _jachqT->setValue(ii, jj, _rotationAbsoluteToContactFrame->getValue(ii, jj));
+
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
@@ -266,20 +278,23 @@ void NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Si
     for (unsigned int jj = 0; jj < 3; jj++)
       _jachqT->setValue(ii, jj + 6, -_rotationAbsoluteToContactFrame->getValue(ii, jj));
 
+
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj + 6, -_AUX2->getValue(ii, jj - 3));
+
 
   prod(*_rotationAbsoluteToContactFrame, *_rotationBodyToAbsoluteFrame, *_AUX2, true);
   DEBUG_EXPR(_AUX2->display(););
 
   for (unsigned int ii = 3; ii < 5; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
-      _jachqT->setValue(ii, jj, _AUX2->getValue(ii-2, jj-3));
+      _jachqT->setValue(ii, jj, -_AUX2->getValue(ii-2, jj-3));
 
   DEBUG_EXPR(_jachqT->display(););
 
   DEBUG_END("NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2)\n");
+
 
 }
 

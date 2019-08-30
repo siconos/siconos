@@ -69,53 +69,56 @@ ds->accept(getVelocity)->display();
 
 namespace Experimental {
 
-template<typename T, typename Action>
-struct Call : public Action
-{
-  typedef Call<T, Action> type;
+  struct TypeNotFound {};
 
-  using Action::visit;
-
-  virtual void visit(const T& x)
+  /* final visitor from Action for class T with base type BaseType */
+  template<typename T, typename Action, typename BaseType>
+  struct Call : public Action
   {
-    (*this)(x);
-  }
-};
+    typedef Call<T, Action, BaseType> type;
 
-template<typename T, typename Action>
-struct NoCall : public Action
-{
-  typedef NoCall type;
+    using Action::visit;
 
-  using Action::visit;
+    virtual void visit(const T& x)
+    {
+      (*this)(static_cast<const BaseType&>(x));
+    }
+  };
 
-  virtual void visit(const T& x)
+  /* if base type is not found then the visitor is an empty
+     function */
+  template<typename T, typename Action>
+  struct Call<T, Action, TypeNotFound> : public Action
   {
-  }
-};
+    typedef Call<T, Action, TypeNotFound> type;
 
+    using Action::visit;
 
-template<typename T, typename Pred>
-class VisitMaker
-{
-private:
-  typedef typename
-  boost::mpl::fold<
-  typename Pred::Action::Base,
-  boost::mpl::false_,
-  boost::mpl::if_<boost::is_base_of<boost::mpl::_2, T>,
-                  boost::mpl::true_,
-                  boost::mpl::_1> >::type Condition;
+    virtual void visit(const T& x)
+    {
+    }
+  };
 
-public:
-  typedef typename
-  boost::mpl::eval_if<Condition,
-                      Call<T, typename Pred::Action>,
-                      NoCall<T, typename Pred::Action> >::type Action;
+  /* search for a base type of T in Pred::Action::Base and creation
+     of a visitor */
+  template<typename T, typename Pred>
+  class VisitMaker
+  {
+  private:
+    typedef typename
+    boost::mpl::fold<
+    typename Pred::Action::Base,
+    TypeNotFound,
+    boost::mpl::if_<boost::is_base_of<boost::mpl::_2, T>,
+                    boost::mpl::_2,
+                    boost::mpl::_1> >::type BaseType;
 
-};
+  public:
 
+    typedef typename Call<T, typename Pred::Action, BaseType>::type Action;
+  };
 
+  /* build the global visitor for all specified classes */
 #undef REGISTER
 #undef REGISTER_STRUCT
 #undef REGISTER_BASE
@@ -147,90 +150,90 @@ public:
   };
 
 
-/* hide mpl::vector */
-struct empty{};
+  /* hide mpl::vector */
+  struct empty{};
 
-template<typename T1 = empty, typename T2 = empty, typename T3 = empty,
-         typename T4 = empty, typename T5 = empty, typename T6 = empty,
-         typename T7 = empty, typename T8 = empty, typename T9 = empty>
-struct Classes
-{
-  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7, T8, T9> Base;
-};
-
-template<typename T1>
-struct Classes<T1, empty, empty, empty, empty, empty, empty, empty, empty>
-{
-  typedef typename boost::mpl::vector<T1> Base;
-};
-
-template<typename T1, typename T2>
-struct Classes<T1, T2, empty, empty, empty, empty, empty, empty, empty>
-{
-  typedef typename boost::mpl::vector<T1, T2> Base;
-};
-
-template<typename T1, typename T2, typename T3>
-struct Classes<T1, T2, T3, empty, empty, empty, empty, empty, empty>
-{
-  typedef typename boost::mpl::vector<T1, T2, T3> Base;
+  template<typename T1 = empty, typename T2 = empty, typename T3 = empty,
+           typename T4 = empty, typename T5 = empty, typename T6 = empty,
+           typename T7 = empty, typename T8 = empty, typename T9 = empty>
+  struct Classes
+  {
+    typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7, T8, T9> Base;
   };
 
-template<typename T1, typename T2, typename T3, typename T4>
-struct Classes<T1, T2, T3, T4, empty, empty, empty, empty, empty>
-{
-  typedef typename boost::mpl::vector<T1, T2, T3, T4> Base;
-};
+  template<typename T1>
+  struct Classes<T1, empty, empty, empty, empty, empty, empty, empty, empty>
+  {
+    typedef typename boost::mpl::vector<T1> Base;
+  };
 
-template<typename T1, typename T2, typename T3, typename T4, typename T5>
-struct Classes<T1, T2, T3, T4, T5, empty, empty, empty, empty>
+  template<typename T1, typename T2>
+  struct Classes<T1, T2, empty, empty, empty, empty, empty, empty, empty>
+  {
+    typedef typename boost::mpl::vector<T1, T2> Base;
+  };
+
+  template<typename T1, typename T2, typename T3>
+  struct Classes<T1, T2, T3, empty, empty, empty, empty, empty, empty>
+  {
+    typedef typename boost::mpl::vector<T1, T2, T3> Base;
+  };
+
+  template<typename T1, typename T2, typename T3, typename T4>
+  struct Classes<T1, T2, T3, T4, empty, empty, empty, empty, empty>
+  {
+    typedef typename boost::mpl::vector<T1, T2, T3, T4> Base;
+  };
+
+  template<typename T1, typename T2, typename T3, typename T4, typename T5>
+  struct Classes<T1, T2, T3, T4, T5, empty, empty, empty, empty>
 {
   typedef typename boost::mpl::vector<T1, T2, T3, T4, T5> Base;
-};
-
-template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
-struct Classes<T1, T2, T3, T4, T5, T6, empty, empty, empty>
-{
-  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6> Base;
-};
-
-template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
-struct Classes<T1, T2, T3, T4, T5, T6, T7, empty, empty>
-{
-  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7> Base;
-};
-
-template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
-struct Classes<T1, T2, T3, T4, T5, T6, T7, T8, empty>
-{
-  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7, T8> Base;
-};
-
-/* build final visitor */
-template<typename C, typename T>
-struct Filter
-{
-  struct _T : public T, public C
-  {
-    typedef _T Action;
   };
 
-  typedef typename
-  boost::mpl::fold<
-    typename C::Base,
-    _T,
-    VisitMaker<boost::mpl::_2, boost::mpl::_1 >
-    >::type Make;
-};
+  template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
+  struct Classes<T1, T2, T3, T4, T5, T6, empty, empty, empty>
+  {
+    typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6> Base;
+  };
 
-template<typename C, typename T>
-struct Visitor
-{
-  typedef typename Filter<C, T>::Make LocalFilter;
+  template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
+  struct Classes<T1, T2, T3, T4, T5, T6, T7, empty, empty>
+  {
+    typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7> Base;
+  };
 
-  typedef typename GlobalVisitor<LocalFilter>::Make Make;
+  template<typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+  struct Classes<T1, T2, T3, T4, T5, T6, T7, T8, empty>
+  {
+    typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7, T8> Base;
+  };
 
-};
+  /* build final visitor */
+  template<typename C, typename T>
+  struct Filter
+  {
+    struct _T : public T, public C
+    {
+      typedef _T Action;
+    };
+
+    typedef typename
+    boost::mpl::fold<
+      typename C::Base,
+      _T,
+      VisitMaker<boost::mpl::_2, boost::mpl::_1 >
+      >::type Make;
+  };
+
+  template<typename C, typename T>
+  struct Visitor
+  {
+    typedef typename Filter<C, T>::Make LocalFilter;
+
+    typedef typename GlobalVisitor<LocalFilter>::Make Make;
+
+  };
 
 }
 

@@ -15,10 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
 #include "RollingFrictionContactProblem.h"
+
 #include "rolling_fc3d_local_problem_tools.h"
 #include "NumericsMatrix.h"
-
 
 void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem * problem, RollingFrictionContactProblem * localproblem, double *reaction, int contact)
 {
@@ -28,6 +29,7 @@ void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem * proble
 
 
   int in = 5 * contact, it = in + 1, is = it + 1, iv = is + 1, iw = iv + 1;
+
 
   /* qLocal computation*/
   qLocal[0] = problem->q[in];
@@ -69,6 +71,7 @@ RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(RollingFricti
   }
   return localproblem;
 }
+
 
 void rolling_fc3d_local_problem_free(RollingFrictionContactProblem* localproblem,
                       RollingFrictionContactProblem* problem)

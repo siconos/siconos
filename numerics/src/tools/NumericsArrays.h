@@ -60,8 +60,7 @@ extern "C"
   void uint_swap (unsigned int *a, unsigned int *b);
   /* shuffle an unsigned array */
   void uint_shuffle (unsigned int *a, unsigned int n);
-  
-  
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

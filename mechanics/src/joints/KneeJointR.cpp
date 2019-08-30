@@ -112,20 +112,19 @@ static ::boost::math::quaternion<double> rotquat(const SP::SiconosVector& v)
     return ::boost::math::quaternion<double>(1, 0, 0, 0);
 }
 
-static ::boost::math::quaternion<double> rotquat(const SiconosVector& v)
-{
-  return ::boost::math::quaternion<double>(v(3),v(4),v(5),v(6));
-}
+//static ::boost::math::quaternion<double> rotquat(const SiconosVector& v)
+//{
+//  return ::boost::math::quaternion<double>(v(3),v(4),v(5),v(6));
+//}
 
 static ::boost::math::quaternion<double> posquat(const SP::SiconosVector& v)
 {
   return ::boost::math::quaternion<double>(0, (*v)(0),(*v)(1),(*v)(2));
 }
-
-static ::boost::math::quaternion<double> posquat(const SiconosVector& v)
-{
-  return ::boost::math::quaternion<double>(0, v(0),v(1),v(2));
-}
+//static ::boost::math::quaternion<double> posquat(const SiconosVector& v)
+//{
+// return ::boost::math::quaternion<double>(0, v(0),v(1),v(2));
+//}
 
 void KneeJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
 {

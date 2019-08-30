@@ -31,7 +31,7 @@
 
 
 #include "numerics_verbose.h"
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "SiconosCompat.h"
 
 #if defined(__cplusplus)

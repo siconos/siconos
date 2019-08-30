@@ -77,9 +77,9 @@ int main(void)
   SolverOptions options;
 
   /* FB solver */
-  options.solverId = SICONOS_MCP_FB;
+  options.solverId = SICONOS_MCP_OLD_FB;
   /* Create a MixedComplementarityProblem */
-  MixedComplementarityProblem* problem = (MixedComplementarityProblem *)malloc(sizeof(MixedComplementarityProblem));
+  MixedComplementarityProblem_old* problem = (MixedComplementarityProblem_old *)malloc(sizeof(MixedComplementarityProblem_old));
 
   problem->sizeEqualities = 1;
   problem->sizeInequalities = 1;
@@ -91,7 +91,7 @@ int main(void)
 
 
 
-  mixedComplementarity_setDefaultSolverOptions(problem, &options);
+  mcp_old_setDefaultSolverOptions(problem, &options);
 
   int size = problem->sizeEqualities + problem->sizeInequalities ;
   double * z = (double *)malloc(size * sizeof(double));
@@ -107,9 +107,9 @@ int main(void)
 
 
   /* Initialize the solver */
-  mcp_driver_init(problem, &options) ;
-  info = mcp_driver(problem, z , w,  &options);
-  mcp_driver_reset(problem, &options) ;
+  mcp_old_driver_init(problem, &options) ;
+  info = mcp_old_driver(problem, z , w,  &options);
+  mcp_old_driver_reset(problem, &options) ;
   /// TODO : write a real test ... ////
 
 

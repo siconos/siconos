@@ -1,29 +1,26 @@
 include(tools4tests)
 
 if(WITH_${COMPONENT}_TESTING)
-
-  # We don't use COMPILE_WITH since we don't want to link cppunit with the
-  # kernel library
-  find_package(CppUnit REQUIRED)
+  find_package(CPPUNIT REQUIRED)
   set(TEST_LIBS ${TEST_LIBS} ${CPPUNIT_LIBRARIES})
   set(TEST_INCLUDE_DIR ${TEST_INCLUDE_DIR} ${CPPUNIT_INCLUDE_DIR})
 
   # the main test driver
-  SET(TEST_MAIN src/collision/native/test/TestMain.cpp)
+  set(SIMPLE_TEST_MAIN ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosMemory/test/TestMain.cpp)
 
-  BEGIN_TEST(src/collision/native/test)
-  NEW_TEST(testMultiBody MultiBodyTest.cpp)
-  END_TEST()
+  # ---- Collision/native tests ----
+  begin_tests(src/collision/native/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
+  new_test(SOURCES MultiBodyTest.cpp ${SIMPLE_TEST_MAIN})
 
   if(WITH_BULLET)
-	BEGIN_TEST(src/collision/bullet/test)
-	NEW_TEST(testContact ContactTest.cpp)
-	END_TEST()
+    begin_tests(src/collision/bullet/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
+    new_test(SOURCES  ContactTest.cpp ${SIMPLE_TEST_MAIN})
+    new_test(SOURCES  Contact2dTest.cpp ${SIMPLE_TEST_MAIN})
   endif()
-  IF(WITH_OCE)
-    BEGIN_TEST(src/occ/test)
-    NEW_TEST(testOcc OccTest.cpp)
-    END_TEST()
-  ENDIF()
   
+  if(WITH_OCE)
+    begin_tests(src/occ/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT;${OCE_LIBRARIES}")
+    new_test(SOURCES  OccTest.cpp ${SIMPLE_TEST_MAIN})
+  endif()
+
 endif()

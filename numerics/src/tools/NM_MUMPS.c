@@ -17,7 +17,7 @@
 */
 #include "NM_MUMPS.h"
 #ifdef WITH_MUMPS
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"

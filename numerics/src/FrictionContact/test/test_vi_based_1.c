@@ -15,11 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
+#include "frictionContact_test_utils.h"
 
 char *** test_collection(int n_data_1, char ** data_collection)
 {

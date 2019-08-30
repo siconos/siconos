@@ -51,10 +51,13 @@
   REGISTER(Geometer)                            \
   REGISTER(BulletR)                             \
   REGISTER(Bullet5DR)                           \
-  REGISTER(Bullet1DR)             \
+  REGISTER(Bullet1DR)                           \
+  REGISTER(Bullet2dR)                           \
   REGISTER(RigidBodyDS)                         \
+  REGISTER(RigidBody2dDS)                       \
   REGISTER(ContactR)                            \
   REGISTER(Contact5DR)                          \
+  REGISTER(Contact2dR)                          \
   REGISTER(SiconosContactor)                    \
   REGISTER(SiconosContactorSet)                 \
   REGISTER(SiconosContactorBase)                \
@@ -68,6 +71,9 @@
   REGISTER(SiconosPlane)                        \
   REGISTER(SiconosMesh)                         \
   REGISTER(SiconosHeightMap)                    \
+  REGISTER(SiconosDisk)                         \
+  REGISTER(SiconosBox2d)                         \
+  REGISTER(SiconosConvexHull2d)                  \
   REGISTER(SiconosCollisionQueryResult)         \
   REGISTER(SiconosCollisionManager)             \
   REGISTER(SiconosBulletCollisionManager)

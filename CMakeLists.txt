@@ -11,6 +11,10 @@
 # Set minimum version for cmake
 # We advise 3.12 at least, but 3.7 is authorized since it's the default version on current debian stable.
 cmake_minimum_required(VERSION 3.7)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12")
+  cmake_policy(SET CMP0074 NEW)
+endif()
+
 
 # Set cmake modules directories
 # (i.e. the those which contain all user-defined FindXXX.cmake files among other things)
@@ -154,8 +158,20 @@ include(FeatureSummary)
 feature_summary(WHAT ALL)
 
 # ============= Siconos Package configuration =============
-# i.e. what should be generate, done, configure at install.
+# i.e. what should be generated/configured at install.
 include(SiconosPackageSetup)
+
+# SiconosConfig.h generation and include
+if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
+  # Warning : strongly depends on find_package(...) results.
+  configure_file(${CMAKE_SOURCE_DIR}/config.h.cmake
+    ${CMAKE_BINARY_DIR}/SiconosConfig.h)
+  if(SHOW_ME_SICONOS_CONFIG)
+    file(READ ${CMAKE_BINARY_DIR}/SiconosConfig.h SICONOS_CONFIG_H)
+    message(${SICONOS_CONFIG_H})
+  endif()
+  install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
+endif()
 
 # ============= Summary =============
 message(STATUS "\n============================================ Summary ============================================")
@@ -169,17 +185,19 @@ message(STATUS "Fortran Compiler : ${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_COM
 message(STATUS "Fortran flags : ${CMAKE_Fortran_FLAGS}")
 message(STATUS "Compilation mode is : ${CMAKE_BUILD_TYPE}")
 message(STATUS "Code Sources are in : ${CMAKE_SOURCE_DIR}")
-message(STATUS "Blas is ${WITH_BLAS}. ")
+message(STATUS "Blas from ${BLAS_NAME}.")
 message("    Blas libraries : ${BLAS_LIBRARIES}.")
-message("    Blas headers : ${BLAS_HEADER} in ${BLAS_INCLUDE_DIRS}.")
+message("    Blas headers : ${BLAS_HEADER} in ${BLAS_INCLUDE_DIR}.")
 message(STATUS "Lapack is ${WITH_LAPACK}.")
 message("    Lapack libraries : ${LAPACK_LIBRARIES}.")
-message("    Lapack headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIRS}.")
-if (USE_SYSTEM_SUITESPARSE)
-  message(STATUS "CXSparse headers : ${CXSparse_INCLUDE_DIR}")
-  message(STATUS "CXSparse library : ${CXSparse_LIBRARY}")
+message("    Lapack headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIR}.")
+if(WITH_SYSTEM_SUITESPARSE)
+  message(STATUS "Use system-provided SuiteSparse library, with:")
+  message("    - CXSparse headers path: ${SuiteSparse_CXSparse_INCLUDE_DIR}")
+  message("    - CXSparse library : ${SuiteSparse_CXSparse_LIBRARY}")
 else()
-  message(STATUS "CSparse headers : externals/SuiteSparse/CSparse")
+  message(STATUS "Use Siconos-provided SuiteSparse, with:")
+  message("    - CXSparse headers path : externals/SuiteSparse/CXSparse")
 endif()
 message(STATUS "Python interpreter is ${Python3_EXECUTABLE}")
 if(WITH_PYTHON_WRAPPER)

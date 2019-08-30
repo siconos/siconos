@@ -31,15 +31,15 @@ extern "C"
 {
 #endif
 
-  /** Compute F(z) = Mz + q
-   * \param data_opaque a LinearComplementarityProblem but casted
+  /** Compute w=F(z)
+   * \param data_opaque a MixedComplementarityProblem but casted
    * \param[in] z non-basic variable
    * \param[out] w basic variable (result)
    */
   void FB_compute_F_mcp(void* data_opaque, double* z, double* w);
 
   /** Compute an element of JacF_FB, see Facchinei--Pang p. 808
-   * \param data_opaque a LinearComplementarityProblem but casted
+   * \param data_opaque a MixedComplementarityProblem but casted
    * \param[in] z non-basic variable
    * \param[in] w basic variable
    * \param workV1 work vector which contains "z"

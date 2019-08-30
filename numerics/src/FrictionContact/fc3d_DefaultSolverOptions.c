@@ -115,7 +115,8 @@ int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
     size_t iter_max = 200;
     double tol = 1e-12;
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    newton_lsa_default_SolverOption(options);
+    newton_lsa_setDefaultSolverOptions(options);
+    options->solverId = solverId;
 //    options->iparam[5] = 1;
 //    options->iparam[7] = 1;
     options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED;

@@ -38,7 +38,7 @@
 #include "NumericsSparseMatrix.h"
 
 #include "CSparseMatrix.h"
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "numerics_verbose.h"
 
 /* #define DEBUG_NOCOLOR */

@@ -145,6 +145,15 @@ extern "C"
   int avi_driver(AffineVariationalInequalities* problem, double* z, double* w, SolverOptions* options);
 
   /** General interface to solver for MCP problems
+      \param[in] problem the MixedComplementarityProblem_old structure which handles the problem
+      \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and its(their) parameters
+      \return info termination value  0 : successful, else error.
+  */
+  int mcp_old_driver(MixedComplementarityProblem_old* problem, double *z, double *w, SolverOptions* options);
+
+  /** General interface to solver for MCP problems -- new version
       \param[in] problem the MixedComplementarityProblem structure which handles the problem
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
@@ -152,15 +161,6 @@ extern "C"
       \return info termination value  0 : successful, else error.
   */
   int mcp_driver(MixedComplementarityProblem* problem, double *z, double *w, SolverOptions* options);
-
-  /** General interface to solver for MCP problems -- new version
-      \param[in] problem the MixedComplementarityProblem2 structure which handles the problem
-      \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
-      \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
-      \param[in,out] options structure used to define the solver(s) and its(their) parameters
-      \return info termination value  0 : successful, else error.
-  */
-  int mcp_driver2(MixedComplementarityProblem2* problem, double *z, double *w, SolverOptions* options);
 
   /** General interface to solver for NCP problems
       \param[in] problem the NonlinearComplementarityProblem structure which handles the problem

@@ -113,12 +113,12 @@ def xml2swig(header_name, xml_path, swig_working_dir,
         p = SiconosDoxy2Swig(f, swig_working_dir)
         p.run()
         hpp_name = p.get_specific_subnodes(p.xmldoc, 'location', recursive=4)
-        hpp_name = hpp_name[0].attributes['file'].value
+        hpp_name = Path(hpp_name[0].attributes['file'].value)
         featname, kind, descr = p.get_xml_compound_infos()
         if kind in ('class', 'struct'):
             all_index[featname] = descr
         elif kind == 'file':
-            all_index[hpp_name.split('/')[-1]] = descr
+            all_index[hpp_name.name] = descr
         for feat in p.features:
             docstrings_features[feat] = hpp_name
         if p.enums:
@@ -327,14 +327,14 @@ def collect_classes_and_functions(module, module_name, sphinx_directory,
                 out.write(gen)
                 out.write('\n')
 
-        # Trick to remove duplicates
-        # (since we create one rst files by header, whatever is the
-        # number of functions it contains)
-        pyfunc_files = list(set(pyfunc_files))
-        insert_header_in_functionfiles(pyfunc_files)
-        class_files += pyfunc_files
-        class_files.sort()
-        return class_files
+    # Trick to remove duplicates
+    # (since we create one rst files by header, whatever is the
+    # number of functions it contains)
+    pyfunc_files = list(set(pyfunc_files))
+    insert_header_in_functionfiles(pyfunc_files)
+    class_files += pyfunc_files
+    class_files.sort()
+    return class_files
 
 
 def get_feature_headername(name, features):
@@ -372,12 +372,14 @@ def get_feature_headername(name, features):
         featname = features[name.split('::')[-1]]
     else:
         keys = list(features.keys())
+        found = False
         for k in keys:
-            if k.count(name) > -1:
+            if k.count(name) > 0:
                 featname = features[k]
+                found = True
                 break
-            else:
-                raise Exception('Unknown feature name : ', name)
+        if not found:
+            raise Exception('Unknown feature name : ', name)
     return featname
 
 
@@ -486,7 +488,7 @@ def write_python_module_toc(module_name, all_files, sphinx_directory,
                 realname = name.split('_pyfile')[0]
                 shorttitle = realname + ' (functions) '
                 text = '* :doc:`' + shorttitle + '<'
-                text += Path(basename, name) + '>` : '
+                text += Path(basename, name).as_posix() + '>` : '
                 if realname + '.h' in all_index:
                     text += all_index[realname + '.h'] + ' \n'
                 elif realname + '.hpp' in all_index:

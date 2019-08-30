@@ -26,8 +26,8 @@
 #include "NCP_cst.h"
 #include "sn_error_handling.h"
 
-const char* const  SICONOS_NCP_NEWTON_FBLSA_STR = "NCP Newton FBLSA";
-const char* const  SICONOS_NCP_NEWTON_MINFBLSA_STR = "NCP Newton minFBLSA";
+const char* const  SICONOS_NCP_NEWTON_FB_FBLSA_STR = "NCP Newton FBLSA";
+const char* const  SICONOS_NCP_NEWTON_MIN_FBLSA_STR = "NCP Newton minFBLSA";
 const char* const  SICONOS_NCP_PATHSEARCH_STR = "NCP Path search";
 const char* const  SICONOS_NCP_PATH_STR = "NCP PATH";
 
@@ -46,10 +46,10 @@ int ncp_driver(NonlinearComplementarityProblem* problem, double *z , double *F, 
   {
     switch (options->solverId)
     {
-    case SICONOS_NCP_NEWTON_FBLSA: // Fischer-Burmeister + Newton w/ LS
+    case SICONOS_NCP_NEWTON_FB_FBLSA: // Fischer-Burmeister + Newton w/ LS
       ncp_newton_FBLSA(problem, z, F, &info, options);
       break;
-    case SICONOS_NCP_NEWTON_MINFBLSA: // min (+ FB as backup) + Newton w/ LS
+    case SICONOS_NCP_NEWTON_MIN_FBLSA: // min (+ FB as backup) + Newton w/ LS
       ncp_newton_minFBLSA(problem, z, F, &info, options);
       break;
     case SICONOS_NCP_PATHSEARCH: // pathsearch method

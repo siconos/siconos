@@ -16,10 +16,9 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
+
+#include "frictionContact_test_utils.h"
+#include "SOCLCP_cst.h"
 
 char *** test_collection(int n_data_1, char ** data_collection)
 {

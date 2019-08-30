@@ -85,8 +85,7 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
 
     if (options->solverId == SICONOS_FRICTION_2D_NSGS)
     {
-      if (verbose)
-        printf(" ======================= Call Sparse NSGS solver for Friction-Contact 2D problem ======================\n");
+      numerics_printf(" ======================= Call Sparse NSGS solver for Friction-Contact 2D problem ======================");
       fc2d_sparse_nsgs(problem, reaction , velocity , &info , options);
     }
     else

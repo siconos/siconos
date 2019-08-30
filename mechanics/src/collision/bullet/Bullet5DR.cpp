@@ -47,14 +47,14 @@
 
 #include <boost/math/quaternion.hpp>
 
-static
-void copyQuatRot(boost::math::quaternion<double>& from, SiconosVector& to)
-{
-  to(3) = from.R_component_1();
-  to(4) = from.R_component_2();
-  to(5) = from.R_component_3();
-  to(6) = from.R_component_4();
-}
+//static
+//void copyQuatRot(boost::math::quaternion<double>& from, SiconosVector& to)
+//{
+//  to(3) = from.R_component_1();
+//  to(4) = from.R_component_2();
+//  to(5) = from.R_component_3();
+//  to(6) = from.R_component_4();
+//}
 
 static
 void copyQuatRot(const SiconosVector& from, boost::math::quaternion<double>& to)

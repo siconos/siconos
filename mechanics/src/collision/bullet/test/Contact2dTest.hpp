@@ -15,24 +15,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "relay_test_function.h"
-#include "SolverOptions.h"
+#ifndef Test2dContact_h
+#define Test2dContact_h
 
-int main(void)
+#include <cppunit/extensions/HelperMacros.h>
+
+class Contact2dTest : public CppUnit::TestFixture
 {
-  int info = 0 ;
-  printf("Test on ./data/relay_2x2.dat\n");
+private:
 
-  FILE * finput  =  fopen("./data/relay_2x2.dat", "r");
+  // Name of the tests suite
+  CPPUNIT_TEST_SUITE(Contact2dTest);
 
-  char solvername[20] = "RELAY_LEMKE";
-  info = relay_test_function(finput, solver_options_name_to_id(solvername));
+  // tests to be done ...
+  CPPUNIT_TEST(t1);
+  // tests to be done ...
+  CPPUNIT_TEST(t2);
+  // tests to be done ...
+  CPPUNIT_TEST(t3);
 
-  fclose(finput);
+
+  CPPUNIT_TEST_SUITE_END();
+
+  // Members
+  void t1();
+  void t2();
+  void t3();
 
 
-  return info;
-}
+public:
+  void setUp();
+  void tearDown();
+};
+
+#endif

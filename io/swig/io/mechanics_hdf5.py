@@ -135,6 +135,7 @@ def data(h, name, nbcolumns, use_compression=False):
                                 compression_opts=[None,9][comp])
 
 
+
 def add_line(dataset, line):
     dataset.resize(dataset.shape[0] + 1, 0)
     dataset[dataset.shape[0] - 1, :] = line
@@ -464,6 +465,7 @@ class MechanicsHdf5(object):
         else:
             self._io_filename_backup= io_filename_backup
 
+
         self._output_backup=False
         self._mode = mode
         self._static_data = None
@@ -494,6 +496,7 @@ class MechanicsHdf5(object):
 
     def __enter__(self):
         self._out = h5py.File(self._io_filename, self._mode)
+        self._dimension=self._out.attrs.get('dimension', 3)
         self._data = group(self._out, 'data')
         self._ref = group(self._data, 'ref')
         self._permanent_interactions = group(self._data, 'permanent_interactions',
@@ -508,12 +511,23 @@ class MechanicsHdf5(object):
             print('Warning -  group(self._data, boundary_conditions ) : ',  e)
         self._static_data = data(self._data, 'static', 9,
                                  use_compression = self._use_compression)
+
         self._velocities_data = data(self._data, 'velocities', 8,
                                      use_compression = self._use_compression)
+        if self._mode=='w':
+            self._velocities_data.attrs['info'] = 'time,  ds id  ,  translational velocities ,  angular velocities'
+
         self._dynamic_data = data(self._data, 'dynamic', 9,
                                   use_compression = self._use_compression)
+        if self._mode=='w':
+            self._dynamic_data.attrs['info'] = 'time,  ds id  ,   translation ,  orientation'
+
         self._cf_data = data(self._data, 'cf', 26,
                              use_compression = self._use_compression)
+        if self._mode=='w':
+            self._cf_data.attrs['info'] = 'time,  mu ,  contact point A ,  contact point B ,  contact normal , '+ \
+                'relative gap ,  relative velocity ,  reaction impulse ,  interaction id ,  ds 1 number ,  ds 2 number '
+
         if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
                                      use_compression = self._use_compression)
@@ -538,6 +552,11 @@ class MechanicsHdf5(object):
 
 
 # hdf5 structure
+    def dimension(self):
+        """
+        dimension : get the dimension (2 or 3) of the scene
+        """
+        return self._dimension
 
     def shapes(self):
         """
@@ -830,6 +849,15 @@ class MechanicsHdf5(object):
         """
         Add a convex shape defined by a list of points.
         """
+        # infer the dimension of the problem
+        if np.shape(points)[1] == 2 :
+            self._dimension = 2
+        else:
+            if self._dimension == 2:
+                raise ValueError('It is not yet possible to mix 2D and 3D primitives shapes')
+            self._dimension ==3
+        self._out.attrs['dimension'] = self._dimension
+
         if name not in self._ref:
             shape = self._ref.create_dataset(name,
                                              (np.shape(points)[0],
@@ -848,6 +876,16 @@ class MechanicsHdf5(object):
         """
         Add a primitive shape.
         """
+        # infer the dimension of the problem
+        if primitive =='Disk' or primitive =='Box2d':
+            self._dimension = 2
+        else:
+            if self._dimension == 2:
+                raise ValueError('It is not yet possible to mix 2D and 3D primitives shapes')
+            self._dimension ==3
+        self._out.attrs['dimension'] = self._dimension
+
+
         if name not in self._ref:
             shape=self._ref.create_dataset(name, (1, len(params)))
             shape.attrs['id'] = self._number_of_shapes
@@ -861,12 +899,12 @@ class MechanicsHdf5(object):
             self._number_of_shapes += 1
 
     def add_object(self, name, shapes,
-                   translation =[0, 0, 0],
-                   orientation=[1, 0, 0, 0],
-                   velocity=[0, 0, 0, 0, 0, 0],
+                   translation,
+                   orientation = None,
+                   velocity= None,
                    use_volume_centroid_as_initial_translation=False,
-                   mass=None, center_of_mass=[0, 0, 0],
-                   inertia=None, time_of_birth=-1, time_of_death=-1,
+                   mass=None, center_of_mass=[0, 0, 0], inertia=None,
+                   time_of_birth=-1, time_of_death=-1,
                    allow_self_collide=False):
         """Add an object with associated shapes as a list of Volume or
         Contactor objects. Contact detection and processing is
@@ -885,19 +923,26 @@ class MechanicsHdf5(object):
         shapes: iterable
             The list of associated Contactor or Volume objects.
 
-        translation: array_like of length 3
+        translation: array_like of length 3 or 2 (dimension =2)
             Initial translation of the object (mandatory)
 
-        velocity: array_like of length 6
-            Initial velocity of the object.
-            The components are those of the translation velocity along
-            x, y and z axis and the rotation velocity around x, y and
-            z axis.  The default velocity is [0, 0, 0, 0, 0, 0].
+        orientation: array_like of length 3 (Euler Angles) or 4 (unit quaternion), or 1 (dimension =2)
+            Initial orientiation of the object. By default, identity
+
+        velocity: array_like of length 6,  or 3 (dimension =2)
+            Initial velocity of the object. The default velocity is zero.
+            dimension =3 :
+               The components are those of the translation velocity along
+               x, y and z axis and the rotation velocity around x, y and
+               z axis.
+            dimension =2 :
+               The components are those of the translation velocity along
+               x, y and the rotation velocity z axis.
 
         mass: float
-            The mass of the object, if it is zero the object is defined as
+            The mass of the object, if it is None the object is defined as
             a static object involved only in contact detection.
-            The default value is zero.
+            The default value is None.
 
         center_of_mass: array_like of length 3
             The position of the center of mass expressed in the body frame
@@ -912,10 +957,22 @@ class MechanicsHdf5(object):
             the volume centroid is used as initial translation.
         """
         # print(arguments())
-        ori = quaternion_get(orientation)
 
-        assert (len(translation)==3)
-        assert (len(ori)==4)
+
+        if (self._dimension ==3):
+            if orientation is None  : orientation= [1,0,0,0]
+            if velocity is None  : velocity= [0,0,0]
+            ori = quaternion_get(orientation)
+            assert (len(translation)==3)
+            assert (len(ori)==4)
+
+        elif (self._dimension == 2):
+            if orientation is None  : orientation= [0.]
+            if velocity is None  : velocity= [0,0,0]
+            assert (len(translation)==2)
+            ori = orientation
+
+
         is_center_of_mass_computed=False
         if name not in self._input:
 
@@ -965,7 +1022,15 @@ class MechanicsHdf5(object):
             if time_of_death >= 0:
                 obj.attrs['time_of_death']=time_of_death
 
-            if mass is not None: obj.attrs['mass']=mass
+            if mass is not None:
+                obj.attrs['mass'] = mass
+                obj.attrs['type']='dynamic'
+                if np.isscalar(mass) and mass <= 0. :
+
+                    print_verbose("The use of a mass equal to zero to define a static object is deprecated.")
+                    print_verbose("Do not give the mass or set mass=None to define a static object")
+            else:
+                obj.attrs['type']='static'
             obj.attrs['translation']=translation
             obj.attrs['orientation']=ori
             obj.attrs['velocity']=velocity

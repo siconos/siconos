@@ -390,13 +390,13 @@ extern "C"
 
   void fc3d_nonsmooth_Newton_AlartCurnier2(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
-  
+
   void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
                                          SolverOptions* options,
                                          SolverOptions* internalsolver_options,
                                          double error);
 
-  
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

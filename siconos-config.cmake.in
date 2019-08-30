@@ -30,6 +30,8 @@
 
 @PACKAGE_INIT@
 
+include(CMakeFindDependencyMacro)
+
 # Name of the siconos package
 set(PACKAGE_NAME siconos)
 
@@ -65,6 +67,19 @@ set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
 set(${PACKAGE_NAME}_INCLUDE_DIRECTORIES @SICONOS_INCLUDE_DIRECTORIES@)
 list(APPEND ${PACKAGE_NAME}_INCLUDE_DIRECTORIES @CMAKE_INSTALL_PREFIX@/include/siconos)
 set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
+
+
+#find_dependency(LAPACKDEV)
+
+#if(@WITH_SYSTEM_SUITESPARSE@)
+#  find_dependency(SuiteSparse)
+#endif()
+
+if(@WITH_FCLIB@)
+  set_and_check(FCLIB_ROOT @FCLIB_ROOT@)
+  find_dependency(FCLIB 3.0.0 CONFIG REQUIRED)
+endif()
+
 
 # --- Final check to set (or not) siconos_FOUND, siconos_numerics_FOUND and so on
 check_required_components(siconos)

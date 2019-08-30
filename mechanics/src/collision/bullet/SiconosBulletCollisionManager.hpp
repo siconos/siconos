@@ -35,10 +35,18 @@
 
 DEFINE_SPTR(SiconosBulletCollisionManager_impl);
 
+
+enum SiconosBulletDimension
+{
+  SICONOS_BULLET_3D=0,
+  SICONOS_BULLET_2D=1
+};
+
 struct SiconosBulletOptions
 {
   SiconosBulletOptions();
 
+  int dimension;
   double contactBreakingThreshold;
   double contactProcessingThreshold;
   double worldScale;
@@ -92,8 +100,14 @@ protected:
   /** Provided so that creation of collision points can be overridden.
    * See modify_normals.py in examples/Mechanics/Hacks */
   virtual SP::Bullet5DR makeBullet5DR(SP::RigidBodyDS ds1, SP::SiconosShape shape1,
-                                  SP::RigidBodyDS ds2, SP::SiconosShape shape2,
-                                  const btManifoldPoint &);
+                                      SP::RigidBodyDS ds2, SP::SiconosShape shape2,
+                                      const btManifoldPoint &);
+
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet2dR makeBullet2dR(SP::RigidBody2dDS ds1, SP::SiconosShape shape1,
+                                      SP::RigidBody2dDS ds2, SP::SiconosShape shape2,
+                                      const btManifoldPoint &);
 
 public:
   StaticContactorSetID insertStaticContactorSet(

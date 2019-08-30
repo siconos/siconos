@@ -26,12 +26,6 @@
 #include "SecondOrderDS.hpp"
 #include "BoundaryCondition.hpp"
 
-//#define DEBUG_NOCOLOR
-//#define DEBUG_BEGIN_END_ONLY
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
-#include <debug.h>
-
 /** Pointer to function for plug-in. */
 typedef void (*FInt_NE)(double t, double* q, double* v, double *f, unsigned int size_z,  double* z);
 typedef void (*FExt_NE)(double t, double* f, unsigned int size_z, double *z);

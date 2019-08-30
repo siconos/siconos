@@ -115,10 +115,7 @@ enum FRICTION_SOLVER
   SICONOS_ROLLING_FRICTION_3D_NSGS = 3000,
   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone= 3001,
   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration = 3002
- 
 
-
-  
 };
 
 
@@ -257,7 +254,7 @@ enum SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ENUM
       the incremental toleranve to reach the requred accuracy **/
   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL = 2,
   /** Evaluation of the error with the expensive function fc3d_compute_error and
-      an adaptive frequncy for calling the error function  **/
+      an adaptive frequency for calling the error function  **/
   SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE =3,
 };
 enum SICONOS_FRICTION_3D_NSGS_SHUFFLE_ENUM

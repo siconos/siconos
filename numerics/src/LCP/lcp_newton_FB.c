@@ -78,4 +78,5 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
   set_lsa_params_data(options, problem->M);
   newton_LSA(problem->size, z, w, info, (void *)problem, options, &functions_FBLSA_lcp);
+  
 }

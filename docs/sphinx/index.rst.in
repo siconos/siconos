@@ -59,11 +59,10 @@ Project status
 
 .. csv-table:: 
 
-   `Siconos CI on Travis`_ |travis| and `Jenkins`_, `Cdash reports`_, Documentation build |docbuild|
+   `Siconos CI on Travis`_ |travis|, `Cdash reports`_, Documentation build |docbuild|
  
 .. _Siconos CI on Travis: https://travis-ci.org/siconos/siconos
 
-.. _Cdash reports: https://cdash-tripop.inrialpes.fr/index.php?project=Siconos
-
+.. _Cdash reports: https://my.cdash.org/index.php?project=Siconos
  
 .. _Jenkins: https://ci.inria.fr/siconos--

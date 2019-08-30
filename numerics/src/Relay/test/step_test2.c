@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "NonSmoothDrivers.h"
-#include "relay_test_function.h"
+#include "relay_test_utils.h"
 #include "SolverOptions.h"
 
 int main(void)

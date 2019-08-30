@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "SiconosLapack.h"
 #include <math.h>

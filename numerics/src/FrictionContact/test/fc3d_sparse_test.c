@@ -23,7 +23,7 @@
 
 
 #include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
+#include "frictionContact_test_utils.h"
 #include "SolverOptions.h"
 #include "FrictionContactProblem.h"
 #include "Friction_cst.h"

@@ -103,7 +103,7 @@ int main(void)
   /* Set solver options */
   SolverOptions options;
 
-  solver_options_set(&options, @SOLVER_ID@);
+  solver_options_set(&options, @PROBLEM_COLLECTION@);
 
   /* Create a VariationalInequality */
 
@@ -167,7 +167,7 @@ int main(void)
       if (info > 0)
       {
         printf("step %d, iter = %d, error = %le\n", k, options.iparam[1], options.dparam[1]);
-        printf("VI_ZIT1 with solver @SOLVER_ID@ failed completly\n");
+        printf("VI_ZIT1 with solver @PROBLEM_COLLECTION@ failed completly\n");
         printf("VI_ZIT1 failure at xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
       }
 

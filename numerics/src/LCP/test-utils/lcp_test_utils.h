@@ -15,24 +15,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#ifndef LCP_TEST_UTILS_H
+#define LCP_TEST_UTILS_H
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "relay_test_function.h"
-#include "SolverOptions.h"
+#include "lcp_cst.h"
 
-int main(void)
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C"
 {
-  int info = 0 ;
-  printf("Test on ./data/relay1.dat\n");
+#endif
+  int lcp_test_function(FILE * f, int solverid, char* filename);
+  int lcp_test_function_SBM(FILE * f, int solverid);
 
-  FILE * finput  =  fopen("./data/relay1.dat", "r");
-
-  char solvername[20] = "RELAY_PGS";
-  info = relay_test_function(finput, solver_options_name_to_id(solvername));
-
-  fclose(finput);
-
-
-  return info;
+  /** Defines the list of data files
+      returns an array of char
+  */
+  char ** data_collection(void);
+  
+  /** Defines the set of tests (including parameters)
+      returns an 'array' of tests, some kind of dict.
+  */
+  char *** test_collection(int, char **);
+   
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
+#endif
+
+#endif
+
+

@@ -312,9 +312,9 @@ static
 void accumulateLightErrorSum(double *light_error_sum, double localreaction[3],
                              double *oldreaction)
 {
-  *light_error_sum += ( pow(oldreaction[0] - localreaction[0], 2) +
-                        pow(oldreaction[1] - localreaction[1], 2) +
-                        pow(oldreaction[2] - localreaction[2], 2) );
+  *light_error_sum += ( (oldreaction[0] - localreaction[0])*(oldreaction[0] - localreaction[0]) +
+			(oldreaction[1] - localreaction[1])*(oldreaction[1] - localreaction[1]) +
+			(oldreaction[2] - localreaction[2])*(oldreaction[2] - localreaction[2]) );
 }
 int file_exists(const char *fname)
 {

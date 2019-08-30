@@ -8,7 +8,6 @@ include(SiconosTools)
 include(WindowsSiconosSetup)
 
 # --------- CMake project internal variables ---------
-
 # Siconos current version
 include(SiconosVersion)
 
@@ -220,4 +219,10 @@ if(WITH_MPI)
 endif()
 
 # ----- Required dependencies (whatever Siconos components are) -----
-#find_package(BLASFull REQUIRED)
+
+# =========== Blas/Lapack ===========
+# Find package stuff provided by cmake deals
+# only with blas/lapack libraries.
+# Since headers are also required for Siconos
+# we use our own cmake "find package" stuff.
+find_package(LAPACKDEV REQUIRED)

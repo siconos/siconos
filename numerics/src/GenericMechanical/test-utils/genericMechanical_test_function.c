@@ -17,8 +17,9 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "NonSmoothDrivers.h"
-#include "genericMechanical_test_function.h"
+#include "genericMechanical_test_utils.h"
 #include "GenericMechanicalProblem.h"
 #include "SolverOptions.h"
 #include "GenericMechanical_Solvers.h"

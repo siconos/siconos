@@ -106,8 +106,8 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
   case SICONOS_LCP_BARD:
   case SICONOS_LCP_MURTY:
   case SICONOS_LCP_PATHSEARCH:
-  case SICONOS_LCP_NEWTON_MINFBLSA:
-  case SICONOS_LCP_NEWTON_FBLSA:
+  case SICONOS_LCP_NEWTON_MIN_FBLSA:
+  case SICONOS_LCP_NEWTON_FB_FBLSA:
   case SICONOS_LCP_GAMS:
   case SICONOS_LCP_PIVOT:
   case SICONOS_LCP_PIVOT_LUMOD:

@@ -107,7 +107,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "SiconosConfig.h"
 #include "SiconosNumerics.h"
 #include "SolverOptions.h"
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -161,6 +161,7 @@ namespace std11 = std;
  // more convenient
  %rename (LCP) LinearComplementarityProblem;
  %rename (MLCP) MixedLinearComplementarityProblem;
+ %rename (MCP_old) MixedComplementarityProblem_old;
  %rename (MCP) MixedComplementarityProblem;
  %rename (NCP) NonlinearComplementarityProblem;
  %rename (VI) VariationalInequality;
@@ -279,7 +280,7 @@ namespace std11 = std;
 // solverOptions.i, numerics_common and fwd decl
 // all this because of SolverOptions extend.
 %begin %{
-#include "CSparseMatrix_internal.h" // must be before NumericsMatrix.h
+#include "CSparseMatrix.h" // must be before NumericsMatrix.h
 #include "relay_cst.h"
 #include "AVI_cst.h"
 #include "SOCLCP_cst.h"

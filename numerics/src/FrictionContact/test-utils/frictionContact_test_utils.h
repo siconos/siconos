@@ -15,18 +15,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifndef GENERICMECHANICAL_TEST_FUNCTION_H
-#define GENERICMECHANICAL_TEST_FUNCTION_H
+#ifndef FRICTIONCONTACT_TEST_UTILS_H
+#define FRICTIONCONTACT_TEST_UTILS_H
+
+#include "GAMSlink.h"
+#include "Friction_cst.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-  int genericMechanical_test_function(FILE * f, SolverOptions * options);
+  int frictionContact_test_function(FILE * f, SolverOptions * options);
+  void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId);
 
+#if defined(WITH_FCLIB)
+  int frictionContact_test_function_hdf5(const char * path, SolverOptions * options);
+  int gfc3d_test_function_hdf5(const char* path, SolverOptions* options);
+#endif
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+  /** Defines the list of data files
+      returns an array of char
+  */
+  char ** data_collection(void);
+  
+  /** Defines the set of tests (including parameters)
+      returns an 'array' of tests, some kind of dict.
+  */
+  char *** test_collection(int, char **);
+
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP) 
 }
 #endif
 

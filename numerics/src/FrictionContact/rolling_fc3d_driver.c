@@ -30,6 +30,7 @@ const char* const   SICONOS_ROLLING_FRICTION_3D_NSGS_STR = "RFC3D_NSGS";
 
 const char* const  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR = "RFC3D_ProjectionOnConeWithLocalIteration";
 
+
 const char* const  SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR = "RFC3D_ProjectionOnCone";
 
 int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
@@ -39,6 +40,7 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
   /* verbose=3; */
   /* rollingFrictionContact_display(problem); */
   /* rollingFrictionContact_printInFilename(problem, "rfc3d_sphere_1.dat"); */
+
 
 
   if (options == NULL)
@@ -89,6 +91,7 @@ exit:
   return info;
 
 }
+
 
 int rolling_fc3d_checkTrivialCase(RollingFrictionContactProblem* problem, double* velocity,
                                   double* reaction, SolverOptions* options)

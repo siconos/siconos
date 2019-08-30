@@ -23,7 +23,7 @@
 #define DEBUG_STDOUT
 #define DEBUG_MESSAGES
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H

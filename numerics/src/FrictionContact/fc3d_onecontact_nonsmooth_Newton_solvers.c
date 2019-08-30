@@ -296,7 +296,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve(FrictionContactProblem* local
   }
   else
   {
-    info = nonSmoothDirectNewton(Fsize, local_reaction, &F, &jacobianF,  options->iparam,  options->dparam);
+    info = nonSmoothDirectNewton(Fsize, local_reaction, &F, &jacobianF,  options);
   }
   if (info > 0)
   {
@@ -780,7 +780,6 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
   double t_opt = 1.;
   double t_init = 1.;
 
-  int infoLS;
   int LSitermax = iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER];
   for (inew = 0 ; inew < itermax ; ++inew)
   {
@@ -811,8 +810,8 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_damped(FrictionContactProblem
       /* Perform Line Search */
 
       t_opt = t_init;
-      infoLS= LineSearchGP(localproblem, Function, &t_opt, R, dR,
-                           rho, LSitermax, F, A, B, velocity);
+      LineSearchGP(localproblem, Function, &t_opt, R, dR,
+		   rho, LSitermax, F, A, B, velocity);
       t = t_opt;
     }
 

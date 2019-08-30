@@ -26,14 +26,17 @@
  */
 enum MCP_SOLVER
 {
-  SICONOS_MCP_FB = 700,
-  SICONOS_MCP_NEWTON_FBLSA = 701,
-  SICONOS_MCP_NEWTON_MINFBLSA = 702
+
+  SICONOS_MCP_NEWTON_FB_FBLSA = 700,
+  SICONOS_MCP_NEWTON_MIN_FBLSA = 701,
+
+  /* old interface for MCP */
+  SICONOS_MCP_OLD_FB = 710,
 };
 
 
-extern const char* const SICONOS_MCP_FB_STR;
-extern const char* const SICONOS_MCP_NEWTON_FBLSA_STR;
-extern const char* const SICONOS_MCP_NEWTON_MINFBLSA_STR;
+extern const char* const SICONOS_MCP_OLD_FB_STR;
+extern const char* const SICONOS_MCP_NEWTON_FB_FBLSA_STR;
+extern const char* const SICONOS_MCP_NEWTON_MIN_FBLSA_STR;
 
 #endif

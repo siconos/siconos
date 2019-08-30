@@ -16,10 +16,7 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
+#include "lcp_test_utils.h"
 
 char *** test_collection(int n_data_1, char ** data_collection_1)
 {
@@ -142,7 +139,7 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test_lcp[n][e++] = data_collection_1[d];
     test_lcp[n][e++] = "0";
     test_lcp[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_NEWTON_FBLSA);
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_NEWTON_FB_FBLSA);
     test_lcp[n][e++] = "---";
     n++;
   }
@@ -152,7 +149,7 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test_lcp[n][e++] = data_collection_1[d];
     test_lcp[n][e++] = "0";
     test_lcp[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_NEWTON_MINFBLSA);
+    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_NEWTON_MIN_FBLSA);
     test_lcp[n][e++] = "---";
     n++;
   }

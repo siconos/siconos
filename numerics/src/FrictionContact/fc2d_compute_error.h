@@ -40,7 +40,7 @@ extern "C"
       \param[in,out] error value
       \return 0 if ok
    */
-  int fc2d_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double * error);
+  int fc2d_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double norm, double * error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

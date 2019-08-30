@@ -19,6 +19,7 @@ RUN zypper install -n -y \
     libbullet-devel \
     hdf5-devel \
     doxygen \
+    suitesparse-devel \
     valgrind
 RUN zypper clean --all
 WORKDIR /home

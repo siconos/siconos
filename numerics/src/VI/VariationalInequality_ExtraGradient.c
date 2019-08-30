@@ -165,7 +165,8 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
   /* Variable for Line_search */
   int success =0;
-  double error_k, light_error_sum =0.0;
+  DEBUG_EXPR_WE(double error_k;);
+  double light_error_sum =0.0;
   int ls_iter = 0;
   int ls_itermax = 10;
   double tau=dparam[SICONOS_VI_EG_DPARAM_LS_TAU],
@@ -253,7 +254,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
 
         /* Store the error */
-        error_k = error;
+        DEBUG_EXPR_WE(error_k = error;);
 
         /* x_k <-- x store the x at the beginning of the iteration */
         cblas_dcopy(n , x , 1 , x_k, 1);
@@ -353,7 +354,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
 
         /* Store the error */
-        error_k = error;
+        DEBUG_EXPR_WE(error_k = error;);
 
         /* x_k <-- x store the x at the beginning of the iteration */
         cblas_dcopy(n , x , 1 , x_k, 1);

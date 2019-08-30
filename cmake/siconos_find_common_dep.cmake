@@ -4,17 +4,6 @@
 #
 #================================================================
 
-# --- Blas Lapack ---
-# include(BlasLapackSetup)
-compile_with(BLAS REQUIRED SICONOS_COMPONENTS kernel numerics externals)
-compile_with(LAPACK REQUIRED SICONOS_COMPONENTS kernel numerics externals)
-if(NOT BLAS_INCLUDE_DIRS)
-  message(FATAL_ERROR "cannot find blas include directories")
-endif()
-if(NOT LAPACK_INCLUDE_DIRS)
-  message(FATAL_ERROR "cannot find lapack include directories")
-endif()
-
 # --- Numerics optional dependencies ---
 compile_with(MlcpSimplex SICONOS_COMPONENTS numerics)
 compile_with(Pthread SICONOS_COMPONENTS numerics)
@@ -33,24 +22,6 @@ IF(GAMSCAPI_FOUND)
   #    SET(SICONOS_DEFAULT_LINKER_OPTIONS "${SICONOS_DEFAULT_LINKER_OPTIONS} -Wl,-rpath-link,${GAMS_DIR}")
   #  ENDIF(UNIX AND NOT APPLE)
 ENDIF(GAMSCAPI_FOUND)
-
-# --- SuiteSparse ---
-# Look for system-installed SuiteSparse/CSparse
-if (WITH_SYSTEM_SUITESPARSE)
-  compile_with(SuiteSparse COMPONENTS CXSparse
-    SICONOS_COMPONENTS externals numerics)
-  # Note on the above: The CSparse data structures are referred to in
-  # kernel, but the functions are only called from numerics, so it is
-  # not a link-time dependency for kernel.
-  if (NOT SuiteSparse_FOUND OR NOT SuiteSparse_CXSparse_FOUND)
-    set(_sys_CXSparse FALSE)
-    message(STATUS "System SuiteSparse was requested (WITH_SYSTEM_SUITESPARSE=${WITH_SYSTEM_SUITESPARSE})\ 
-    but not found! Using the internal copy of suitesparse")
-  else()
-    set(_sys_CXSparse TRUE)
-  endif()
-  set(USE_SYSTEM_SUITESPARSE ${_sys_CXSparse} CACHE INTERNAL "flag to check to systemwide SuiteSparse install")
-endif()
 
 # --- Other solvers ---
 compile_with(PathFerris SICONOS_COMPONENTS numerics)
@@ -109,20 +80,20 @@ endif()
 #  compile_with(SuperLU_dist REQUIRED SICONOS_COMPONENTS numerics)
 #endif()
 
-# --- Fclib ---
-IF(WITH_FCLIB)
-  COMPILE_WITH(FCLIB REQUIRED SICONOS_COMPONENTS numerics)
-  IF(FCLib_FCLIB_HEADER_ONLY)
-    COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL SICONOS_COMPONENTS numerics )
-  ELSE()
-    APPEND_C_FLAGS("-DFCLIB_NOT_HEADER_ONLY")
-ENDIF()
-  IF(FCLIB_NOTFOUND)
-    # try the package stuff
-    # need FCLib_DIR !!
-    COMPILE_WITH(FCLib 1.0 REQUIRED SICONOS_COMPONENTS numerics)
-  ENDIF()
-ENDIF()
+# # --- Fclib ---
+# IF(WITH_FCLIB)
+#   COMPILE_WITH(FCLIB REQUIRED SICONOS_COMPONENTS numerics)
+#   IF(FCLib_FCLIB_HEADER_ONLY)
+#     COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL SICONOS_COMPONENTS numerics )
+#   ELSE()
+#     APPEND_C_FLAGS("-DFCLIB_NOT_HEADER_ONLY")
+# ENDIF()
+#   IF(FCLIB_NOTFOUND)
+#     # try the package stuff
+#     # need FCLib_DIR !!
+#     COMPILE_WITH(FCLib 1.0 REQUIRED SICONOS_COMPONENTS numerics)
+#   ENDIF()
+# ENDIF()
 
 # GMP
 compile_with(GMP REQUIRED SICONOS_COMPONENTS kernel)
@@ -198,12 +169,6 @@ if(UNIX)
   if(C_HAVE_LINKER_M)
     set(SICONOS_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES} "m" CACHE INTERNAL "List of external libraries")
   endif()
-endif()
-
-# SiconosConfig.h generation and include
-if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
-  configure_file(${CMAKE_SOURCE_DIR}/config.h.cmake
-    ${CMAKE_BINARY_DIR}/SiconosConfig.h)
 endif()
 
 # man pages

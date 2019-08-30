@@ -31,6 +31,10 @@
 #include "VI_cst.h"
 #include "SOCLCP_cst.h"
 #include "ConvexQP_cst.h"
+#include "Newton_methods.h"
+
+
+
 #include "numerics_verbose.h"
 
 #include "Newton_methods.h"
@@ -423,17 +427,18 @@ void solver_options_set(SolverOptions* options, int solverId)
     break;
   }
 
-  case SICONOS_NCP_NEWTON_FBLSA:
-  case SICONOS_NCP_NEWTON_MINFBLSA:
-  case SICONOS_MCP_NEWTON_FBLSA:
-  case SICONOS_MCP_NEWTON_MINFBLSA:
-  case SICONOS_LCP_NEWTON_FBLSA:
-  case SICONOS_LCP_NEWTON_MINFBLSA:
+  case SICONOS_NCP_NEWTON_FB_FBLSA:
+  case SICONOS_NCP_NEWTON_MIN_FBLSA:
+  case SICONOS_LCP_NEWTON_FB_FBLSA:
+  case SICONOS_LCP_NEWTON_MIN_FBLSA:
   case SICONOS_VI_BOX_QI:
     iter_max = 1000;
     tol = 1e-12;
+    //VA: should be taken into account by an internal solver.
     solver_options_fill(options, solverId, iSize, dSize, iter_max, tol);
-    newton_lsa_default_SolverOption(options);
+    newton_lsa_setDefaultSolverOptions(options);
+    options->solverId=solverId;
+    options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
     break;
 
   case SICONOS_NCP_PATHSEARCH:

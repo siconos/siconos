@@ -25,7 +25,9 @@
 #include "RotationQuaternion.hpp"
 #include <iostream>
 
-
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "debug.h"
 
 
 static

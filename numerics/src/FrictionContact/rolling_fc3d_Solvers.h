@@ -50,6 +50,7 @@ typedef void (*RollingFreeSolverNSGSPtr)(RollingFrictionContactProblem*, Rolling
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*internalRollingSolverPtr)(RollingFrictionContactProblem*, double*, double*, int *, SolverOptions *);
 
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -104,6 +105,7 @@ extern "C"
       The internal (local) solver must set by the SolverOptions options[1]
 
   */
+
   void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options);
 
   void  rolling_fc3d_nsgs_initialize_local_solver(RollingSolverPtr* solve,
@@ -113,6 +115,7 @@ extern "C"
                                                   RollingFrictionContactProblem* problem,
                                                   RollingFrictionContactProblem* localproblem,
                                                   SolverOptions * options);
+
 
   /** set the default solver parameters and perform memory allocation for NSGS
       \param options the pointer to the array of options to set
@@ -126,12 +129,13 @@ extern "C"
       \param options the pointer to the array of options to set
       \return info  =0 if a trivial solution has been found, else = -1
   */
+
   int rolling_fc3d_checkTrivialCase(RollingFrictionContactProblem* problem , double* velocity, double* reaction, SolverOptions* options);
 
   void rolling_fc3d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
-                                         SolverOptions* options,
-                                         SolverOptions* internalsolver_options,
-                                         double error);
+                                                 SolverOptions* options,
+                                                 SolverOptions* internalsolver_options,
+                                                 double error);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

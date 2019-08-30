@@ -135,12 +135,26 @@ pkgs:
       - swig
       - cppunit
       - start-command
+      - suitesparse-dev
 
   start-command:
     any:
       run-command:
         /bin/echo *************************************************************************
 
+  suitesparse-dev:
+    debian:
+      - libsuitesparse-dev
+
+    ubuntu:
+      - libsuitesparse-dev
+
+    fedora:
+      - suitesparse-devel
+
+    opensuse:
+      - suitesparse-devel
+      
   python3-minimal:
     nix:
       - python-3.6
@@ -157,6 +171,7 @@ pkgs:
       - python3-pytest
       - python3-scipy
       - python3-matplotlib
+
     fedora:
       - python3
       - python3-devel
@@ -219,7 +234,7 @@ pkgs:
       - siconos-doc-pip-pkgs
       - bullet
       - serialization
-
+      
   pip-command:
     nix:
       - python2.7-pip-9.0.1
@@ -268,25 +283,6 @@ pkgs:
   make:
     nix:
       - gnumake
-
-
-  cmake-3.0.2:
-    any:
-      command:
-        wget http://www.cmake.org/files/v3.0/cmake-3.0.2.tar.gz&&
-        tar xf cmake-3.0.2.tar.gz&&
-        cd cmake-3.0.2&&
-        ./configure&&
-        make install
-
-  cmake-3.11.4:
-    any:
-      command:
-        wget http://www.cmake.org/files/v3.11/cmake-3.11.4.tar.gz&&
-        tar xf cmake-3.11.4.tar.gz&&
-        cd cmake-3.11.4&&
-        ./bootstrap --system-curl&&
-        make install
 
   swig:
     nix:
@@ -361,13 +357,19 @@ pkgs:
     nix:
       - openblas
       - pfff_lapacke_is_missing
+      
     debian:
       - libopenblas-dev
       - liblapacke-dev
 
+    ubuntu18.04:
+      - libopenblas-dev
+      - liblapacke-dev 
+      
     fedora:
       - openblas-devel
       - lapack-devel
+      
     opensuse:
       - openblas-devel
       - lapacke-devel
@@ -376,13 +378,12 @@ pkgs:
     nix:
       - blas
       - atlas-with-lapack
+      
     debian:
-      - libblas-dev
       - liblapack-dev
       - libatlas-base-dev
-      - libatlas-dev
+      
     ubuntu-18.04:
-      - libblas-dev
       - liblapack-dev
       - libatlas-base-dev
 
@@ -468,9 +469,10 @@ pkgs:
 
   fclib:
     any:
-      command: svn checkout svn://scm.gforge.inria.fr/svnroot/fclib/ &&
-               cd fclib/trunk &&
-               cmake . -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release &&
+      command: git clone https://github.com/FrictionalContactLibrary/fclib.git
+               mkdir build-fclib &&
+               cd build-fclib
+               cmake ../fclib  -DFCLIB_HEADER_ONLY=OFF -DCMAKE_BUILD_TYPE=Release &&
                make &&
                make install
 

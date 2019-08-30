@@ -71,6 +71,7 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   double t[6];
   double * pt = t;
 
+
   // 1 - Construction of the local contact frame from the normal vector
 
   if (orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
@@ -92,6 +93,7 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   DEBUG_EXPR(_rotationAbsoluteToContactFrame->display(););
   
   // 3 - Construction of the lever arm matrix in  the absolute frame
+
   _NPG1->zero();
   (*_NPG1)(0, 0) = 0;
   (*_NPG1)(0, 1) = -(G1z - Pz);
@@ -129,6 +131,7 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   DEBUG_EXPR(_AUX2->display(););
 
   // 7 - fill the Jacobian 
+
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
       _jachqT->setValue(ii, jj, _rotationAbsoluteToContactFrame->getValue(ii, jj));

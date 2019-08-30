@@ -23,8 +23,12 @@ set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
 
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
-if(NOT HAS_FORTRAN)
-  list(APPEND ${COMPONENT}_python_excluded_tests
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_smc.py)
+
+if(WITH_${COMPONENT}_TESTING)
+  if(NOT HAS_FORTRAN)
+    list(APPEND python_excluded_tests tests/test_smc.py)
+  endif()
+  build_python_tests(
+    # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
+    EXCLUDE ${python_excluded_tests})
 endif()
-build_python_tests()

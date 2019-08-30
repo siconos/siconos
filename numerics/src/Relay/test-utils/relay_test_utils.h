@@ -15,39 +15,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#ifndef RELAY_TEST_UTILS_H
+#define RELAY_TEST_UTILS_H
 
-#ifndef MCPFB_H
-#define MCPFB_H
-
-#include "FischerBurmeister.h"
-
-/*!\file MCP_FischerBurmeister.h
-
-  routines required for the MCP solver based on Fischer-Burmeister functions and Semi-Smooth Newton solver.
-
-*/
+#include <stdio.h>
+#include <stdlib.h>
+#include "relay_cst.h"
+#include "SolverOptions.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
+  void relay_fillParamWithRespectToSolver(SolverOptions *options, char * solvername, RelayProblem* problem);
+  int relay_test_function(FILE * f, int solverId);
 
+  /** Defines the list of data files
+      returns an array of char
+  */
+  char ** data_collection(void);
+  
+  /** Defines the set of tests (including parameters)
+      returns an 'array' of tests, some kind of dict.
+  */
+  char *** test_collection(int, char **);
 
-  /** Initialisation of the MCP Fischer solver (set problem, allocate working memory and so on. This routine must be called before any attempt to run the mcp_driver.
-   *   \param[in] problem  description of the MCP
-   *   \param[in] options for the solver
-   */
-  void mcp_FischerBurmeister_init(MixedComplementarityProblem * problem, SolverOptions* options);
-
-  /** Reset of the MCP Fischer solver (free local variable)
-   *  \param[in] problem  description of the MCP
-   *  \param[in] options for the solver
-   */
-  void mcp_FischerBurmeister_reset(MixedComplementarityProblem * problem, SolverOptions* options);
-
+  
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
 #endif
+
+
