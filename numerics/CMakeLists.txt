@@ -80,7 +80,7 @@ library_project_setup()
 
 # -- Required deps --
 # tmp for Blas/Lapack
-target_include_directories(numerics PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>/externals/blas_lapack)
+target_include_directories(numerics PRIVATE $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>/externals/blas_lapack)
 
 # -- Optional deps --
 # Fclib

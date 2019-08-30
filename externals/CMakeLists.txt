@@ -97,7 +97,7 @@ endif()
 # externals tests need blas AND lapack
 # To be tested later : link externals with blas only, private mode
 # link tests with lapack.
-target_link_libraries(externals PUBLIC LAPACK::LAPACK) # Later : turn this to private (to be tested ...).
+target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:LAPACK::LAPACK>) # Later : turn this to private (to be tested ...).
 target_include_directories(externals PRIVATE blas_lapack)
 
 # We don't want warnings from externals libraries.

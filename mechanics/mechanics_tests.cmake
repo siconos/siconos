@@ -19,7 +19,7 @@ if(WITH_${COMPONENT}_TESTING)
   endif()
   
   if(WITH_OCE)
-    begin_tests(src/occ/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT")
+    begin_tests(src/occ/test DEPS "numerics;kernel;CPPUNIT::CPPUNIT;${OCE_LIBRARIES}")
     new_test(SOURCES  OccTest.cpp ${SIMPLE_TEST_MAIN})
   endif()
 
