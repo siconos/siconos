@@ -30,8 +30,7 @@
 #include "debug.h"
 #include "float.h"
 #include "JordanAlgebra.h"
-//#include "cs.h"
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsSparseMatrix.h"
 
 const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_STR = "GFC3D IPM";

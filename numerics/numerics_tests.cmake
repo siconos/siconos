@@ -31,7 +31,7 @@ if(WITH_${COMPONENT}_TESTING)
   new_test(SOURCES NM_test.c DEPS "externals;BLAS::BLAS;${suitesparse}")
 
   #  tests for JordanAlgebra
-  NEW_TEST(tools_test_JordanAlgebra JordanAlgebra_test.c)
+  NEW_TEST(NAME tools_test_JordanAlgebra SOURCES JordanAlgebra_test.c)
 
   # MUMPS interface tests
   if(WITH_MUMPS)
