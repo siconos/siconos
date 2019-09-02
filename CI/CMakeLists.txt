@@ -1,21 +1,24 @@
-# Configurations used for continuous integration
-cmake_minimum_required(VERSION 2.6)
+# Cmake file used to for continuous integration to:
+# - create docker container on Travis runner
+# - configure, build and test Siconos on this runner.
+#
+# Called from python script (driver.py).
+
+cmake_minimum_required(VERSION 3.7)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake;${CMAKE_SOURCE_DIR}/config)
 
 include(Tools)
 
-# Check/set uninitialized cache variables
-get_uninitialized_vars(CI_OPTIONS)
-
+# Read and include siconos options from one or more files.
+# 
 if(CI_CONFIG)
   string(REPLACE "," ";" CI_CONFIG_LIST ${CI_CONFIG})
-  foreach(_CI ${CI_CONFIG_LIST})
+  foreach(_CI IN LISTS CI_CONFIG_LIST)
     include(config/${_CI}.cmake)
-  endforeach(_CI CI_CONFIG_LIST)
+  endforeach()
 endif()
 
-message(STATUS "CI options are : ${CI_OPTIONS}")
 message(STATUS "Siconos CMake options are : ${SICONOS_OPTIONS}")
 
 # ---------- Docker or not docker ... ------------------------

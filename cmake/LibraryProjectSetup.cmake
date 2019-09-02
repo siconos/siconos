@@ -10,7 +10,6 @@
 # <COMPONENT>_SRCS : [optional] Project SRCS on per files basis
 # <COMPONENT>_LIBS_NAME : [optional] libraries name. if it is empty the libs name are the same as COMPONENT.
 # <COMPONENT>_DIRS : sources directories
-# <COMPONENT>_Unstable_SRCS : built only if -DWITH_UNSTABLE=ON
 # <COMPONENT>_VERSION : version of the library
 # <COMPONENT>_HDRS : installation headers  (if none all headers)
 # <COMPONENT>_HDRS_EXCLUDE_DIR : exclude headers from this dir from installation
@@ -20,22 +19,9 @@ macro(LIBRARY_PROJECT_SETUP)
 
   # --- Collect source files from given directories ---
   # --> set ${COMPONENT}_SRCS
-  get_sources("${${COMPONENT}_DIRS}")
+  get_sources(${COMPONENT} DIRS ${${COMPONENT}_DIRS} EXCLUDE ${${COMPONENT}_EXCLUDE_SRCS})
+#  get_sources("${${COMPONENT}_DIRS}")
   set(${COMPONENT}_SRCS ${${COMPONENT}_SRCS} ${SOURCES_FILES})
-  # Unstable sources
-  if(NOT WITH_${COMPONENT}_UNSTABLE)
-    if(${COMPONENT}_Unstable_SRCS)
-      foreach(_FILE ${${COMPONENT}_Unstable_SRCS})
-        file(GLOB _GFILE ${_FILE})
-        if(_GFILE)
-          message("--  Source file excluded : ${_GFILE}")
-          list(REMOVE_ITEM ${COMPONENT}_SRCS ${_GFILE})
-        else()
-          message("WARNING : Unstable file NOT FOUND : ${_FILE}")
-	endif()
-      endforeach()
-    endif()
-  endif()
 
   if(${COMPONENT}_EXCLUDE_SRCS)
     foreach(_FILE ${${COMPONENT}_EXCLUDE_SRCS})
@@ -103,7 +89,7 @@ macro(LIBRARY_PROJECT_SETUP)
   endif()
   
   # update the main doxy file, without building the doc
-  if(WITH_${COMPONENT}_DOCUMENTATION OR WITH_GENERATION)
+  if(WITH_${COMPONENT}_DOCUMENTATION)
     # Prepare target to generate rst files from xml
     doxy2rst_sphinx(${COMPONENT})
   endif()
@@ -128,9 +114,8 @@ macro(LIBRARY_PROJECT_SETUP)
   set_target_properties(${COMPONENT} PROPERTIES 
     OUTPUT_NAME "siconos_${COMPONENT}"
     VERSION "${SICONOS_SOVERSION}"
-    SOVERSION "${SICONOS_SOVERSION_MAJOR}"
-    CLEAN_DIRECT_OUTPUT 1 # no clobbering
-    LINKER_LANGUAGE ${${COMPONENT}_LINKER_LANGUAGE})
+    SOVERSION "${SICONOS_SOVERSION_MAJOR}")
+  #LINKER_LANGUAGE ${${COMPONENT}_LINKER_LANGUAGE})
 
   # windows stuff ...
   include(WindowsLibrarySetup)

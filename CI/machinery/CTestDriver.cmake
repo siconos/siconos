@@ -17,9 +17,9 @@ endif()
 # --> may set DSICONOS_COMPONENTS
 if(CI_CONFIG)
   string(REPLACE "," ";" CI_CONFIG_LIST ${CI_CONFIG})
-  foreach(_CI ${CI_CONFIG_LIST})
+  foreach(_CI IN LISTS CI_CONFIG_LIST)
     include(${_CI})
-  endforeach(_CI CI_CONFIG_LIST)
+  endforeach()
 else()
   set(CI_CONFIG default)
   include(${CI_CONFIG})
@@ -27,7 +27,7 @@ endif()
 
 string(REPLACE "," "-" CI_CONFIG_NAME ${CI_CONFIG})
 
-foreach(option ${SICONOS_CMAKE_OPTIONS})
+foreach(option IN LISTS SICONOS_CMAKE_OPTIONS)
   set(CI_CONFIGURE_OPTIONS "${CI_CONFIGURE_OPTIONS} ${option}")
 endforeach()
 
@@ -48,10 +48,8 @@ endif()
 
 set(CMAKE_MODULE_PATH ${CTEST_SOURCE_DIRECTORY}/cmake)
 
-if(NOT BUILD_CONFIGURATION)
+if(NOT CTEST_BUILD_CONFIGURATION)
   set(CTEST_BUILD_CONFIGURATION "Profiling")
-else()
-  set(CTEST_BUILD_CONFIGURATION ${BUILD_CONFIGURATION})
 endif()
 
 message(STATUS "Siconos CTest driver")

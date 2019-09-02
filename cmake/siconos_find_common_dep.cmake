@@ -33,18 +33,6 @@ if(LpSolve_FOUND)
   set(WITH_LPSOLVE TRUE)
 endif(LpSolve_FOUND)
 
-# --- Sort ---
-if(EXISTS "${CMAKE_SOURCE_DIR}/externals/sort/sort.h")
-  if(EXISTS "${CMAKE_SOURCE_DIR}/externals/sort/sort_common.h")
-    set(HAVE_SORT TRUE)
-  endif()
-endif()
-
-# --- ql0001 ---
-if(EXISTS "${CMAKE_SOURCE_DIR}/externals/optim_misc/ql0001/ql0001.f")
-  set(HAVE_QL0001 TRUE)
-endif()
-
 # --- Mumps ---
 # if(WITH_MUMPS)
 #   if(MPI_FOUND)
@@ -79,21 +67,6 @@ endif()
 #if(WITH_SUPERLU_dist)
 #  compile_with(SuperLU_dist REQUIRED SICONOS_COMPONENTS numerics)
 #endif()
-
-# # --- Fclib ---
-# IF(WITH_FCLIB)
-#   COMPILE_WITH(FCLIB REQUIRED SICONOS_COMPONENTS numerics)
-#   IF(FCLib_FCLIB_HEADER_ONLY)
-#     COMPILE_WITH(HDF5 REQUIRED COMPONENTS C HL SICONOS_COMPONENTS numerics )
-#   ELSE()
-#     APPEND_C_FLAGS("-DFCLIB_NOT_HEADER_ONLY")
-# ENDIF()
-#   IF(FCLIB_NOTFOUND)
-#     # try the package stuff
-#     # need FCLib_DIR !!
-#     COMPILE_WITH(FCLib 1.0 REQUIRED SICONOS_COMPONENTS numerics)
-#   ENDIF()
-# ENDIF()
 
 # GMP
 compile_with(GMP REQUIRED SICONOS_COMPONENTS kernel)

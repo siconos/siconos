@@ -109,7 +109,10 @@ class CiTask(object):
         self._mode = mode
         self._build_configuration = build_configuration
         self._ci_config = ci_config
-        self._pkgs = pkgs
+        if pkgs is None:
+            self._pkgs = []
+        else:
+            self._pkgs = pkgs
         self._srcs = srcs
         self._targets = targets
         self._cmake_cmd = cmake_cmd
@@ -256,7 +259,7 @@ class CiTask(object):
                 cmake_args += ['-DMODE={0}'.format(self._mode),
                                '-DCI_CONFIG={0}'.format(ci_config_args),
                                '-DWITH_DOCKER=1',
-                               '-DBUILD_CONFIGURATION={0}'.format(
+                               '-DCTEST_BUILD_CONFIGURATION={0}'.format(
                                    self._build_configuration),
                                '-DDOCKER_DISTRIB={0}'.format(self._distrib),
                                '-DDOCKER_TEMPLATES={0}'.format(self.templates()),
@@ -288,7 +291,8 @@ class CiTask(object):
                         return_code += call([self._make_cmd] + make_args +
                                             [target], cwd=bdir)
                 else:
-                    msg = 'Would call: \n  - {:}'.format(' '.join(full_cmd))
+                    msg = 'Dry-run mode. If executed with --run, this script '
+                    msg += 'would call: \n  - {:}'.format(' '.join(full_cmd))
                     msg += '\n  - make target, \n for target in '
                     msg += '{:}'.format(' '.join(self._targets[src]))
                     msg += '\n both from path ' + bdir

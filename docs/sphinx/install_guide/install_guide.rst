@@ -275,7 +275,6 @@ Here is an example, to build numerics and kernel, with documentation, no tests .
   option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)
   option(NO_RUNTIME_BUILD_DEP "Do not check for runtime dependencies. Useful only for packaging. Default = OFF" OFF)
   option(WITH_DOCKER "Build inside a docker container. Default = OFF" OFF)
-  option(WITH_UNSTABLE "Enable this to include all 'unstable' sources. Default=OFF" OFF)
   option(WITH_UNSTABLE_TEST "Enable this to include all 'unstable' test. Default=OFF" OFF)
   option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
   option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = OFF." OFF)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #
 # Build shell commands from package specifications in a yml database.
@@ -19,6 +19,7 @@ def usage():
 
 class OutputMode:
     Script, Docker, Vagrant = range(3)
+
 
 output_mode_spec = dict()
 output_mode_spec['script'] = OutputMode.Script
@@ -318,8 +319,7 @@ def print_commands(*args, **kwargs):
     # Read yaml file
     with open(options.specfilename) as specfile:
 
-        spec = yaml.load(specfile.read())
-
+        spec = yaml.load(specfile.read(), Loader=yaml.FullLoader)
         by_installer = list()
         by_command = list()
         by_run_commands = list()

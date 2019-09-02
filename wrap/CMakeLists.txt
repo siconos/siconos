@@ -14,6 +14,14 @@ if(WITH_PYTHON_WRAPPER)
   #  ----------- swig -----------
 
   # -- Swig flags --
+  # get system architecture 
+  # https://raw.github.com/petroules/solar-cmake/master/TargetArch.cmake
+  include(TargetArch)
+  target_architecture(SYSTEM_ARCHITECTURE)
+  if(WITH_SYSTEM_INFO) # User defined option, default = off
+    include(CMakePrintSystemInformation)
+    message(STATUS "SYSTEM ARCHITECTURE: ${SYSTEM_ARCHITECTURE}")
+  endif()
   if(SYSTEM_ARCHITECTURE)
     list(APPEND CMAKE_SWIG_FLAGS "-D__${SYSTEM_ARCHITECTURE}__")
   endif()

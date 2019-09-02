@@ -195,6 +195,8 @@ install_siconos:ubuntu18.04-serialization:
     cdash_submit: 1
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
   extends: .siconos-build
+  allow_failure: true
+
 
   
 

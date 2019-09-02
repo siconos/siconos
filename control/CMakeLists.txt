@@ -18,13 +18,6 @@ set(${COMPONENT}_DIRS
   src/Simulation
 )
 
-# Unstable sources. Will be included only
-# if WITH_${COMPONENT}_UNSTABLE is true.
-set(${COMPONENT}_Unstable_SRCS)
-
-# List of directories of headers not to be installed
-set(${COMPONENT}_HDRS_EXCLUDE_DIR)
-
 # ---- Final setup for the library ----
 # --- set linked libraries and linker language ---
 set(${COMPONENT}_LINKER_LANGUAGE CXX)

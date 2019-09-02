@@ -14,17 +14,6 @@ include(SiconosVersion)
 # File used to print tests setup messages.
 set(TESTS_LOGFILE ${CMAKE_BINARY_DIR}/tests.log)
 
-# get system architecture 
-# https://raw.github.com/petroules/solar-cmake/master/TargetArch.cmake
-include(TargetArch)
-target_architecture(SYSTEM_ARCHITECTURE) # This variable seems to be required
-# to set CMAKE_SWIG_FLAGS in wrap/CMakeLists.txt.
-
-if(WITH_SYSTEM_INFO) # User defined option, default = off
-  include(CMakePrintSystemInformation)
-  message(STATUS "SYSTEM ARCHITECTURE: ${SYSTEM_ARCHITECTURE}")
-endif()
-
 # -- Set include directories that are required by ALL components
 # and only those!
 # Other includes must be specified to individual targets only.
@@ -33,9 +22,6 @@ include_directories($<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
 
 # extensions of headers files that must be taken into account
 set(HDR_EXTS h hpp)
-
-# To include or not unstable source files
-set(WITH_UNSTABLE FALSE)
 
 # dirs of 'local' headers. Must be filled by each component.
 set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
@@ -51,10 +37,6 @@ set(${PROJECT_NAME}_LOCAL_LIBRARIES
   CACHE INTERNAL "List of siconos components libraries.")
 
 set(tests_timeout 120 CACHE INTERNAL "Limit time for tests (in seconds)")
-
-# extensions of source files that must be taken into account
-get_standard_ext()
-set(SRC_EXTS ${ALL_EXTS})
 
 if(WITH_GIT) # User defined option, default = off
   # Check if git is available

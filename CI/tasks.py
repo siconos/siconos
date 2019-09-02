@@ -10,15 +10,17 @@ A task, see :class:`machinery.ci_tasks.CiTask` must be defined with at least:
 """
 from machinery.ci_task import CiTask
 import os
+from os.path import expanduser
 
 # not generic, to be moved somewhere else
 #
+
 
 class SiconosCiTask(CiTask):
 
     def __init__(self, *args, **kwargs):
         return super(SiconosCiTask, self).__init__(*args, **kwargs)
-    
+
     def template_maker(self):
         unwanted_for_sitename = [
             'build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz',
@@ -28,28 +30,15 @@ class SiconosCiTask(CiTask):
                          for p in self._pkgs if p not in
                          unwanted_for_sitename])
 
+
 # PLEASE KEEP CONFIGS AS WHAT THEY MEAN.
 # DO NOT ADD PACKAGES IF THEY ARE NOT NECESSARY.
 
-#
-# 1. where the packages configurations are defined
-# Used in driver.py.
-database = os.path.join('config', 'siconos.yml')
-
-
 empty = SiconosCiTask()
 
-base = empty.copy()(
-    ci_config='default',
-    pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'openblas-lapacke',
-          'python3-env'],
-    srcs=['.'],
-    targets={'.': ['all', 'test']})
+# 1. Define a default task
 #
-# 2. the default task
-#
-
-default = SiconosCiTask(
+siconos_default = SiconosCiTask(
     docker=True,
     ci_config='default',
     distrib='ubuntu:18.04',
@@ -58,17 +47,11 @@ default = SiconosCiTask(
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
-
 #
-# 3. all the tasks
+# 2. Define all the tasks
 #
 
-siconos_default = default
-
-print (default.template_maker())
-
-
-siconos_default_nix = default.copy()(
+siconos_default_nix = siconos_default.copy()(
     ci_config='nix',
     distrib='nixos/nix:latest')
 
@@ -81,9 +64,6 @@ siconos_ubuntu_18_04 = siconos_default.copy()(
 siconos_fedora_latest = siconos_default.copy()(
     distrib='fedora:latest')
 
-siconos_cxx_11_ubuntu_18_04 = siconos_default.copy()(
-    distrib='ubuntu:18.04')
-
 siconos_gazebo = siconos_default.copy()(
     distrib='nvidia/opengl:1.0-glvnd-devel-ubuntu16.04',
     ci_config=('with_bullet', 'with_py3'),
@@ -94,8 +74,6 @@ siconos_gazebo = siconos_default.copy()(
 siconos_with_lpsolve = siconos_default.copy()(
     add_pkgs=['lpsolve'])
 
-import os
-from os.path import expanduser
 home = expanduser("~")
 
 siconos_debian_mechanisms = siconos_default.copy()(
@@ -123,20 +101,18 @@ siconos_profiling = siconos_ubuntu_18_04.copy()(
 siconos_fedora_latest_with_umfpack = siconos_default.copy()(
     distrib='fedora:latest',
     ci_config=('with_umfpack',),
-    remove_pkgs=['atlas-lapack', 'python-env'],
-    add_pkgs=['openblas-lapacke', 'python3-env', 'umfpack'])
-
-siconos_openblas_lapacke = siconos_default.copy()(
-    remove_pkgs=['atlas-lapack'],
-    add_pkgs=['openblas-lapacke'])
+    remove_pkgs=['python-env'],
+    add_pkgs=['python3-env', 'umfpack'])
 
 siconos_clang = siconos_ubuntu_18_04.copy()(
     ci_config=('with_bullet', 'with_py3'),
     remove_pkgs=['python-env'],
-    add_pkgs=['clang-3.9', 'bullet', 'cppunit_clang-3.9', 'wget', 'xz', 'python3-env', 'path', 'h5py3'])  # h5py-3 for mechanics.io
+    add_pkgs=['clang-3.9', 'bullet', 'cppunit_clang-3.9', 'wget', 'xz',
+              'python3-env', 'path', 'h5py3'])  # h5py-3 for mechanics.io
 
 siconos_clang_asan = siconos_clang.copy()(
-    ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5', 'with_serialization', 'with_py3'),
+    ci_config=('with_asan_clang', 'with_mumps', 'with_hdf5',
+               'with_serialization', 'with_py3'),
     add_pkgs=['mumps', 'hdf5', 'serialization'],
     build_configuration='Debug',)
 
@@ -156,15 +132,17 @@ siconos_clang_cfi = siconos_default.copy()(
 
 siconos_gcc_asan = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
-#    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
-    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
+    #    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
+    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],
+    # wget for path
     build_configuration='Debug')
 
 siconos_gcc_asan_latest = siconos_fedora_latest.copy()(
     ci_config=('with_asan', 'with_mumps', 'with_hdf5', 'with_serialization'),
     distrib='fedora:rawhide',
-#    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
-    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],   # wget for path
+    #    cmake_cmd='Build/ci-scripts/fedora-mpi.sh',
+    add_pkgs=['mumps', 'hdf5', 'asan', 'serialization', 'path', 'wget'],
+    # wget for path
     build_configuration='Debug',
     fast=False)
 
@@ -181,7 +159,6 @@ siconos_with_umfpack = siconos_default.copy()(
     add_pkgs=['umfpack'])
 
 
-
 siconos_dev_mode_strict = siconos_default.copy()(
     ci_config='with_dev_mode_strict')
 
@@ -191,28 +168,3 @@ siconos_frama_c = siconos_default.copy()(
               'libgnomecanvas2-dev', 'aspcud', 'm4',
               'unzip', 'coq', 'ocaml', 'z3'])
 
-#
-# 4. dispatch based on hostname and distrib type (to min. disk requirement)
-#
-known_tasks = {'siconos---vm0': (),
-               # (siconos_gcc_asan,
-               #  siconos_serialization,
-               #  siconos_profiling,
-               #  siconos_gcc_asan_latest,
-               #  siconos_debian_mechanisms),
-
-               'siconos---vm1': (),
-               # (minimal,
-               #  minimal_with_python,
-               #  siconos_documentation,
-               #  siconos_dev_mode_strict,
-               #  siconos_clang,
-               #  siconos_clang_asan),
-
-               'siconos---vm2': (),
-               # (siconos_clang_msan,
-               #  siconos_ubuntu_15_10_with_mechanisms),
-
-               'siconos---vm4': (),
-               # (siconos_numerics_only)}
-               }

@@ -122,6 +122,8 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
   # SiconosConfig.h setup
   if(BLAS_NAME STREQUAL "mkl")
     set(HAS_MKL_LAPACKE 1 CACHE BOOL "Blas comes from Intel MKL.")
+  elseif(BLAS_NAME STREQUAL "OpenBlas")
+    set(HAS_OpenBLAS 1 CACHE BOOL "Blas comes from OpenBLAS.")   
   elseif(BLAS_NAME STREQUAL "Accelerate")
     set(HAS_ACCELERATE 1 CACHE BOOL "Blas/Lapack come from Accelerate framework ")
   elseif(BLAS_NAME STREQUAL "Matlab")

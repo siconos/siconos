@@ -33,18 +33,43 @@ MACRO(APPEND_Fortran_FLAGS)
   APPEND_FLAGS(CMAKE_Fortran_FLAGS ${ARGV})
 ENDMACRO(APPEND_Fortran_FLAGS)
 
-# Scans DIRS (list of directories) and returns a list of all files in those dirs
-# matching extensions defined in SRC_EXTS list.
-# Results are saved in SOURCES_FILES
-#
+# Collect source files.
+# 
 # Usage:
-# set(src_dirs dir1 dir2)
-# get_sources(src_dirs)
-macro(get_sources)
-  set(SOURCES_FILES)
-  foreach(DIR ${ARGV})
-    foreach(_EXT ${SRC_EXTS})
-      file(GLOB FILES_LIST ${DIR}/*.${_EXT})
+#
+# get_sources(<COMPONENT> DIRS <dirs list> EXCLUDE <files list>)
+#
+# Result : set (parent scope) <COMPONENT>_SRCS with files in
+# dir1, dir2 matching standard extension for C,C++ and Fortran.
+# Do not include files listed after EXCLUDE option.
+#
+# Remarks:
+# - dir1, dir2 ... are relative to CMAKE_CURRENT_SOURCE_DIR
+# 
+function(get_sources COMPONENT)
+  
+  set(multiValueArgs DIRS EXCLUDE)
+  cmake_parse_arguments(source "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  # Get list of extensions to be taken into account
+  foreach(_EXT
+      ${CMAKE_CXX_SOURCE_FILE_EXTENSIONS}
+      ${CMAKE_C_SOURCE_FILE_EXTENSIONS}
+      ${CMAKE_Fortran_SOURCE_FILE_EXTENSIONS})
+    list(APPEND SRC_EXTS ${_EXT})
+  endforeach()
+  list(REMOVE_DUPLICATES SRC_EXTS)
+
+  # Scan all dirs and check all exts ...
+  foreach(DIR IN LISTS source_DIRS)
+    foreach(_EXT IN LISTS SRC_EXTS)
+      if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
+        file(GLOB FILES_LIST
+          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
+          ${DIR}/*.${_EXT})
+      else()
+        file(GLOB FILES_LIST RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${DIR}/*.${_EXT})
+      endif()
       if(FILES_LIST)
 	list(APPEND SOURCES_FILES ${FILES_LIST})
       endif()
@@ -56,7 +81,24 @@ macro(get_sources)
       list(REMOVE_DUPLICATES SOURCES_FILES)
     endif()
   endif()
-endmacro()
+
+  # Check if some sources are to be excluded from build
+  foreach(_FILE IN LISTS source_EXCLUDE)
+    if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
+      file(GLOB _GFILE CONFIGURE_DEPENDS ${_FILE})
+    else()
+      file(GLOB _GFILE ${_FILE})
+    endif()
+    
+    if(_GFILE)
+      list(REMOVE_ITEM SOURCES_FILES ${_GFILE})
+    else()
+      message(WARNING "file to be excluded NOT FOUND : ${_FILE}")
+    endif()
+  endforeach()
+  
+  set(${COMPONENT}_SRCS ${SOURCES_FILES} PARENT_SCOPE)
+endfunction()
 
 # Scans DIRS (list of directories) and returns a list of all files in those dirs
 # matching extensions defined in HDR_EXTS list.
@@ -71,14 +113,14 @@ macro(get_headers DIRS)
     foreach(_EXT ${HDR_EXTS})
       file(GLOB FILES_LIST ${DIR}/*.${_EXT})
       if (INSTALL_INTERNAL_HEADERS AND FILES_LIST)
-	    list(APPEND HDRS_FILES ${FILES_LIST})
+	list(APPEND HDRS_FILES ${FILES_LIST})
       else()
         # filter out header paths containing the word "internal"
         # (stemming from component dir.. otherwise we'd have trouble
         # if workdir path contains the string "internal")
         foreach(_HDR ${FILES_LIST})
           if (_HDR AND NOT "${_HDR}" MATCHES "${_COMPONENT}/.*internal")
-	        list(APPEND HDRS_FILES ${_HDR})
+	    list(APPEND HDRS_FILES ${_HDR})
           endif()
         endforeach()
       endif()
@@ -90,20 +132,6 @@ macro(get_headers DIRS)
   endif()
 endmacro()
 
-# -- returns a list of source files extension --
-# Results in var ALL_EXTS
-macro(get_standard_ext)
-  set(ALL_EXTS)
-  foreach(_EXT
-      ${CMAKE_CXX_SOURCE_FILE_EXTENSIONS}
-      ${CMAKE_C_SOURCE_FILE_EXTENSIONS}
-      ${CMAKE_Fortran_SOURCE_FILE_EXTENSIONS}
-      ${CMAKE_Java_SOURCE_FILE_EXTENSIONS}
-      ${CMAKE_RC_SOURCE_FILE_EXTENSIONS})
-    list(APPEND ALL_EXTS ${_EXT})
-  endforeach()
-  list(REMOVE_DUPLICATES ALL_EXTS)
-endmacro()
 
 # Print cmake variable 'V' value
 MACRO(PRINT_VAR V)

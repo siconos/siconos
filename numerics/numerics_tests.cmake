@@ -13,11 +13,11 @@ if(WITH_${COMPONENT}_TESTING)
 
   begin_tests(src/tools/test)
 
-  new_test(SOURCES test_op3x3.c DEPS "externals;LAPACK::LAPACK")
+  new_test(SOURCES test_op3x3.c)
 
   new_test(SOURCES test_timers_interf.c)
 
-  new_test(SOURCES test_blas_lapack.c DEPS "externals;LAPACK::LAPACK")
+  new_test(SOURCES test_blas_lapack.c)
 
   if(HAS_LAPACK_dgesvd) # Some lapack versions (e.g. Atlas) miss dgesvd
     new_test(SOURCES test_pinv.c)# DEPS "externals")
@@ -28,7 +28,7 @@ if(WITH_${COMPONENT}_TESTING)
   new_test(SOURCES NumericsArrays.c)
 
   #  tests for NumericsMatrix
-  new_test(SOURCES NM_test.c DEPS "externals;BLAS::BLAS;${suitesparse}")
+  new_test(SOURCES NM_test.c DEPS "${suitesparse}")
 
   # MUMPS interface tests
   if(WITH_MUMPS)
@@ -36,11 +36,11 @@ if(WITH_${COMPONENT}_TESTING)
   endif()
   
   # Specfic tests for SBM matrices 
-  new_test(SOURCES SBM_test.c DEPS "externals;BLAS::BLAS;${suitesparse}")
+  new_test(SOURCES SBM_test.c DEPS "${suitesparse}")
   new_test(SOURCES SBCM_to_SBM.c)
 
   # Specfic tests for sparse matrices 
-  new_test(SOURCES SparseMatrix_test.c DEPS "externals;${suitesparse}")
+  new_test(SOURCES SparseMatrix_test.c DEPS "${suitesparse}")
 
   if(HAS_ONE_LP_SOLVER)
     new_test(SOURCES vertex_problem.c)
@@ -95,7 +95,7 @@ if(WITH_${COMPONENT}_TESTING)
   if(HAVE_SYSTIMES_H AND WITH_CXX)
     new_test(NAME MLCPtest SOURCES main_mlcp.cpp)
   endif()
-  new_test(SOURCES MixedLinearComplementarity_ReadWrite_test.c DEPS "externals")
+  new_test(SOURCES MixedLinearComplementarity_ReadWrite_test.c)
 
   # ----------- MCP solvers tests -----------
   begin_tests(src/MCP/test)
@@ -318,7 +318,7 @@ if(WITH_${COMPONENT}_TESTING)
   begin_tests(src/VI/test)
 
   new_test(SOURCES VI_test_collection_1.c)
-  new_test(SOURCES VI_fc3d_test_collection_1.c DEPS "externals;BLAS::BLAS")
+  new_test(SOURCES VI_fc3d_test_collection_1.c)
 
   set(SICONOS_VI_SOLVERS
     SICONOS_VI_BOX_QI
@@ -339,7 +339,7 @@ if(WITH_${COMPONENT}_TESTING)
   begin_tests(src/QP/test)
 
   new_test(NAME ConvexQP_test_collection SOURCES ConvexQP_test.c)
-  new_test(NAME ConvexQP_FC3D_test_collection SOURCES  ConvexQP_FC3D_test.c DEPS "externals;BLAS::BLAS")
+  new_test(NAME ConvexQP_FC3D_test_collection SOURCES  ConvexQP_FC3D_test.c)
   
   # ----------- AVI solvers tests -----------
   begin_tests(src/AVI/test)
@@ -358,7 +358,7 @@ if(WITH_${COMPONENT}_TESTING)
   # Feel free to remove this once it is fixed --xhub
   #new_test(SOURCES soclcp_test4.c)
   #new_test(SOURCES soclcp_test5.c)
-  new_test(SOURCES fc3d_to_soclcp.c DEPS LAPACK::LAPACK)
+  new_test(SOURCES fc3d_to_soclcp.c)
 
   # ---- Extra conf for ${COMPONENT}-test library ---
   if(TARGET numerics-test)
@@ -371,7 +371,7 @@ if(WITH_${COMPONENT}_TESTING)
 
   # For SiconosLapack.h 
   target_link_libraries(numerics-test PRIVATE externals)
-  target_link_libraries(numerics-test PUBLIC BLAS::BLAS)
+  target_link_libraries(numerics-test PUBLIC LAPACK::LAPACK)
   target_include_directories(numerics-test PUBLIC ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
 
 endif()

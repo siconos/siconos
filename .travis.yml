@@ -22,7 +22,7 @@ python: 3.6
 #   - <kwd>-= is the same as remove_<kwd>=
 #
 # If kwd is present several times, associated values must be lists. In
-# this case a dictionay is incrementally built with the first element of the list as
+# this case a dictionary is incrementally built with the first element of the list as
 # the key, and the remaining as the associated internal value. This
 # concerns the targets keyword.
 #

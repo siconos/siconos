@@ -27,10 +27,6 @@ ENDIF(USE_SANITIZER MATCHES "asan")
 set(${COMPONENT}_DIRS
   src/.)
 
-# Unstable sources. Will be included only
-# if WITH_${COMPONENT}_UNSTABLE is true.
-set(${COMPONENT}_Unstable_SRCS
-  )
 if(HAVE_SICONOS_MECHANICS)
   list(APPEND ${COMPONENT}_DIRS src/mechanics)
 endif()

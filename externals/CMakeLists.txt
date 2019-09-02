@@ -1,12 +1,24 @@
 #================================================================
 # cmake utilities to build external component
 #================================================================
+#
+# The objective is to call component_setup to create the target <COMPONENT>.
+# Before, it's necessary to set:
+# 
+# - COMPONENT component name
+# - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
+#   contain source files
+# - <COMPONENT>_EXCLUDE_SRCS: the list of files, in <COMPONENT>_DIRS, that must be excluded
+#   from build.
+# - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
+#   to populate the interface of the target for include directories at build time
 
+
+# Component name (i.e. target name)
 set(COMPONENT externals)
 message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 
-# -- source directories for current component --
-
+# ------ source directories for current component ------
 # What is needed by component to compile ?
 # List here all directories that contain sources files
 # for current component.
@@ -21,6 +33,7 @@ set(${COMPONENT}_DIRS
   tools
 )
 
+# boost extras, when c++ is on only
 if(WITH_CXX)
   list(APPEND ${COMPONENT}_DIRS numeric_bindings boost_contribs)
   if(NOT WITH_SYSTEM_BOOST_SERIALIZATION)
@@ -28,52 +41,32 @@ if(WITH_CXX)
   endif()
 endif()
 
-# Unstable sources. Will be included only
-# if WITH_${COMPONENT}_UNSTABLE is true.
-set(${COMPONENT}_Unstable_SRCS)
+# -- Source files to be excluded from build --
+set(${COMPONENT}_EXCLUDE_SRCS "SOL/lumod-c/sparselib.c" "SOL/lumod-c/lumod_sparse.c")
 
-# List of directories of headers not to be installed
-set(${COMPONENT}_HDRS_EXCLUDE_DIR PATH_SDK/include SOL/lumod-c)
-if(NOT INSTALL_EXTERNAL_HEADERS)
-  list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
-    # blas_lapack
-    hairer
-    netlib/dftemplates
-    netlib/odepack
-    optim_misc
-    optim_misc/ql0001
-    sort
-    boost_contribs
-    tools)
+# --- Sort ---
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sort/sort.h")
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sort/sort_common.h")
+    set(HAVE_SORT TRUE CACHE INTERNAL "True if sort is available in externals.")
+  endif()
 endif()
 
-# List of specific headers not to be installed
-set(${COMPONENT}_HDRS_EXCLUDE tools/SiconosCompat.h)
+# --- ql0001 ---
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/optim_misc/ql0001/ql0001.f")
+  set(HAVE_QL0001 TRUE CACHE INTERNAL "True if ql0001 is available in externals.")
+endif()
 
+# -- Documentation --
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
 # No docs for externals.
-set(${COMPONENT}_EXCLUDE_DOXY
-  # .
-  ${${COMPONENT}_DIRS}
-  )
-
-SET(${COMPONENT}_EXCLUDE_SRCS "SOL/lumod-c/sparselib.c" "SOL/lumod-c/lumod_sparse.c")
-
-set_source_files_properties(SOL/lumod-c/lumod_dense.c PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
-set_source_files_properties(SOL/lumod-c/commonlib.c PROPERTIES COMPILE_FLAGS -Wno-unused-variable)
+set(${COMPONENT}_EXCLUDE_DOXY ${${COMPONENT}_DIRS})
 
 # ---- Final setup for the library ----
-# --- set linked libraries and linker language ---
-set(${COMPONENT}_LINKER_LANGUAGE C)
-# but CXX may be needed with MlcpSimplex
-if(MLCPSIMPLEX_FOUND) 
-  set(${COMPONENT}_LINKER_LANGUAGE CXX)
-endif()
-list(APPEND ${COMPONENT}_LINK_LIBRARIES ${CMAKE_DL_LIBS}) # needed by GAMS
+
 list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
 
-# Windows stuff
+# Windows stuff --> should probably be reviewed and updated
 include(WindowsExternalsSetup)
 
 if(BUILD_AS_CPP)
@@ -83,21 +76,28 @@ if(BUILD_AS_CPP)
   set(${COMPONENT}_LINKER_LANGUAGE CXX)
 endif()
 
+# -- create/setup component target --
 include(LibraryProjectSetup)
 library_project_setup()
 
-
+# - Extra setup for the component -
+if(GAMSCAPI_FOUND AND CMAKE_DL_LIBS) # needed by GAMS (?). Here or in numerics ?
+  target_link_libraries(externals PRIVATE ${CMAKE_DL_LIBS})
+endif()
 
 # If dtrtrs is not defined in blas/lapack (which is the case in atlas) add it to the sources
 if(NOT HAS_LAPACK_dtrtrs)
   target_sources(externals PRIVATE blas_lapack/clapack_dtrtrs.c)
 endif()
 
-# externals needs blas
-# externals tests need blas AND lapack
-# To be tested later : link externals with blas only, private mode
-# link tests with lapack.
-target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:LAPACK::LAPACK>) # Later : turn this to private (to be tested ...).
+if(MLCPSIMPLEX_FOUND OR BUILD_AS_CPP) 
+  set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
+else()
+  set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
+endif()
+
+# externals lib needs blas while tests need Blas AND lapack
+target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
 target_include_directories(externals PRIVATE blas_lapack)
 
 # We don't want warnings from externals libraries.
@@ -136,8 +136,25 @@ if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SER
     DESTINATION include/siconos/boost/serialization)
 endif()
 
-
-
-
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
+
+
+# List of directories of headers not to be installed
+set(${COMPONENT}_HDRS_EXCLUDE_DIR PATH_SDK/include SOL/lumod-c)
+if(NOT INSTALL_EXTERNAL_HEADERS)
+  list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
+    # blas_lapack
+    hairer
+    netlib/dftemplates
+    netlib/odepack
+    optim_misc
+    optim_misc/ql0001
+    sort
+    boost_contribs
+    tools)
+endif()
+
+# List of specific headers not to be installed
+set(${COMPONENT}_HDRS_EXCLUDE tools/SiconosCompat.h)
+
