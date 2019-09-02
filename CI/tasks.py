@@ -47,6 +47,7 @@ siconos_default = SiconosCiTask(
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
+default = siconos_default # needed by Travis ...
 #
 # 2. Define all the tasks
 #
