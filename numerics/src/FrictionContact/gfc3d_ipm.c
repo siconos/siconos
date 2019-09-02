@@ -27,11 +27,15 @@
 #include "numerics_verbose.h"
 #include "NumericsVector.h"
 #include "float.h"
-#include "debug.h"
-#include "float.h"
 #include "JordanAlgebra.h"
 #include "CSparseMatrix.h"
 #include "NumericsSparseMatrix.h"
+
+
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "debug.h"
+
 
 const char* const   SICONOS_GLOBAL_FRICTION_3D_IPM_STR = "GFC3D IPM";
 
@@ -175,7 +179,7 @@ static double getNewtonStepLength(const double * const x, const double * const d
     double  *xi2, *dxi2, *xi_dxi;
 
     const double *dxi, *xi;
-    
+
     dxi2 = (double*)calloc(dimension, sizeof(double));
     xi2 = (double*)calloc(dimension, sizeof(double));
     xi_dxi = (double*)calloc(dimension, sizeof(double));
@@ -535,7 +539,7 @@ int gfc3d_IPM_setDefaultSolverOptions(SolverOptions* options)
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
-          SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_YES;
+          SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
 
@@ -564,7 +568,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     /* if SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE,
        we force the copy into a NM_SPARSE storageType */
-
+    DEBUG_PRINTF("problem->M->storageType : %i\n",problem->M->storageType  );
     if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] == SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE
        && problem->M->storageType == NM_SPARSE_BLOCK)
     {
@@ -576,6 +580,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     {
         M = problem->M;
     }
+    DEBUG_PRINTF("problem->M->storageType : %i\n",problem->H->storageType  );
     if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_SPARSE_STORAGE] == SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE
        && problem->H->storageType == NM_SPARSE_BLOCK)
     {
@@ -616,7 +621,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     NM_copy(H, minus_H);
     NM_gemm(-1.0, H, NM_eye(H->size1), 0.0, minus_H);
 
-
     double alpha_primal = data->internal_params->alpha_primal;
     double alpha_dual = data->internal_params->alpha_dual;
     double barr_param = data->internal_params->barr_param;
@@ -645,7 +649,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     error[1] = dinfeas;
     error[2] = complem;
     error[3] = barr_param;
-    
+
     double gmm, barr_param_a, e;
     double norm_f = cblas_dnrm2(m , f , 1);
     double norm_w = cblas_dnrm2(nd , w , 1);
