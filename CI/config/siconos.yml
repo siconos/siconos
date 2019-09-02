@@ -30,7 +30,6 @@ installer:
 updater:
   # specific installer for sicono package from launchpad
   siconos-source:
-    ubuntu-16.04: printf "deb http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/siconos-daily/ubuntu xenial main\ndeb http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main\ndeb-src http://ppa.launchpad.net/siconos/fclib-daily/ubuntu xenial main " >> /etc/apt/sources.list && apt-get update -y
     fedora:  dnf --setopt=deltarpm=false install -y dnf-plugins-core && dnf -y copr enable xhub/siconos-git
   llvm-toolchain:
     debian-sid: printf "deb http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main\ndeb-src http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main" >> /etc/apt/sources.list && apt-get update -y

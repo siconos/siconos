@@ -146,6 +146,10 @@ include(LibraryProjectSetup)
 
 library_project_setup()
 
+if(SICONOS_HAS_OCE)
+  target_link_libraries(io PRIVATE ${OCE_LIBRARIES})
+endif()
+
 add_dependencies(${COMPONENT} SerializersGeneration)
 
 # --- specific install ----
@@ -166,3 +170,4 @@ endif()
 
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
+

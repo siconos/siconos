@@ -156,6 +156,11 @@ macro(add_siconos_swig_sub_module fullname)
     ENDIF()
   ENDIF()
 
+  if(WITH_SERIALIZATION)
+    set_source_files_properties(${swig_file}
+      PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS_${_name}}" CPLUSPLUS ON)
+  endif()
+
   # --- build swig module ---
   if(CMAKE_VERSION VERSION_LESS 3.8.0)
     swig_add_module(${_name} python ${swig_file})

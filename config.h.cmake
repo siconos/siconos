@@ -46,6 +46,7 @@
 // Where does cblas comes from? 
 #cmakedefine HAS_MKL_CBLAS
 #cmakedefine HAS_ACCELERATE // includes also lapack from Accelerate
+#cmakedefine HAS_OpenBLAS 
 
 // Which Lapack? 
 #cmakedefine HAS_MKL_LAPACKE
