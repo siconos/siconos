@@ -56,8 +56,8 @@ before_script:
 
 script:
   - if test "$TRAVIS" = true; then
-      ../CI/driver.py --run --root-dir=.. --task="$TASK" --packages-db=../CI/config/siconos.yml;
+      ../CI/driver.py --run --root-dir=.. --task="$TASK";
     else
-      ../CI/driver.py --run --root-dir=.. --packages-db=../CI/config/siconos.yml;
+      ../CI/driver.py --run --root-dir=..;
     fi
 
