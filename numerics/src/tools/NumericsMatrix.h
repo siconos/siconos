@@ -480,6 +480,11 @@ extern "C"
    */
   void NM_display(const NumericsMatrix* const M);
 
+  /** Screen display of the matrix storage
+      \param M the matrix to be displayed
+   */
+  void NM_display_storageType(const NumericsMatrix* const M);
+
 
   /** Screen display raw by raw of the matrix content
       \param m the matrix to be displayed

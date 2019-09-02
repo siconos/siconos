@@ -778,6 +778,79 @@ void NM_vector_display(double * m, int nRow)
 
 }
 
+void NM_display_storageType(const NumericsMatrix* const m)
+{
+  if (! m)
+  {
+    fprintf(stderr, "Numerics, NumericsMatrix display failed, NULL input.\n");
+    exit(EXIT_FAILURE);
+  }
+  printf("========== Numerics Matrix\n");
+
+  printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
+
+  switch (m->storageType)
+  {
+  case NM_DENSE:
+  {
+    printf("========== storageType = NM_DENSE\n");
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    assert(m->matrix1);
+    printf("========== storageType =  NM_SPARSE_BLOCK\n");
+    break;
+  }
+  case NM_SPARSE:
+  {
+    assert(m->matrix2);
+    printf("========== storageType = NM_SPARSE\n");
+    switch (m->matrix2->origin)
+    {
+    case NSM_TRIPLET:
+    {
+      printf("========== origin =  NSM_TRIPLET\n");
+      break;
+    }
+    case NSM_CSC:
+    {
+      printf("========== origin =  NSM_CSC\n");
+      break;
+    }
+    case NSM_CSR:
+    {
+      printf("========== origin =  NSM_CSR\n");
+      break;
+    }
+    default:
+    {
+      fprintf(stderr, "NM_display ::  unknown origin %d for sparse matrix\n", m->matrix2->origin);
+    }
+    }
+
+    printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
+    if (m->matrix2->triplet)
+    {
+      printf("========== a matrix in format triplet is stored\n" );
+    }
+    if (m->matrix2->csc)
+    {
+      printf("========== a matrix in format csc is stored\n" );
+    }
+    if (m->matrix2->trans_csc)
+    {
+      printf("========== a matrix in format trans_csc is stored\n" );
+    }
+    
+    break;
+  }
+  default:
+  {
+    fprintf(stderr, "display_storageType for NumericsMatrix: matrix type %d not supported!\n", m->storageType);
+  }
+  }
+}
 void NM_display(const NumericsMatrix* const m)
 {
   if (! m)
@@ -1628,7 +1701,7 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
     Atrans->matrix2->origin = NSM_CSC;
     // \todo should be a copy */
     CSparseMatrix_copy(NM_csc_trans(A), NM_csc(Atrans));
-    DEBUG_EXPR(NM_display(Atrans););
+    //DEBUG_EXPR(NM_display(Atrans););
     break;
   }
   default:
@@ -2270,74 +2343,131 @@ void NM_tgemv(const double alpha, NumericsMatrix* A, const double *x,
 void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
                const unsigned int start_i, const unsigned int start_j)
 {
-    /* validation */
-    assert(A->size0 >= B->size0);
-    assert(A->size1 >= B->size1);
+  DEBUG_BEGIN("NM_insert\n");
 
-    unsigned int end_i = start_i + B->size0;
-    unsigned int end_j = start_j + B->size1;
-    assert(start_i <= end_i);
-    assert(start_j <= end_j);
-    assert(end_i <= A->size0);
-    assert(end_j <= A->size1);
+  DEBUG_EXPR(NM_display_storageType(A););
+  DEBUG_EXPR(NM_display_storageType(B););
+    
+  /* validation */
+  assert(A->size0 >= B->size0);
+  assert(A->size1 >= B->size1);
 
-    /* trivial case when size(A) == size(B) */
-    if (A->size0 == B->size0 && A->size1 == B->size1)
+  unsigned int end_i = start_i + B->size0;
+  unsigned int end_j = start_j + B->size1;
+  assert(start_i <= end_i);
+  assert(start_j <= end_j);
+  assert(end_i <= A->size0);
+  assert(end_j <= A->size1);
+
+  /* trivial case when size(A) == size(B) */
+  if (A->size0 == B->size0 && A->size1 == B->size1)
+  {
+    NM_copy(B, A);
+    DEBUG_END("NM_insert\n");
+    return;
+  }
+  /* DEBUG_PRINTF("NM_insert -- A->storageType = %i\n", A->storageType); */
+  /* check the case when A is sparse block matrix */
+  switch (A->storageType)
+  {
+  case NM_SPARSE:
+  {
+    switch (A->matrix2->origin)
     {
-        NM_copy(B, A);
-        return;
+    case NSM_TRIPLET:
+    {
+      break;
     }
-
-    /* check the case when A is sparse block matrix */
-    switch (A->storageType)
+    case NSM_CSC:
     {
-    case NM_SPARSE:
-    {
-        switch (A->matrix2->origin)
-        {
-        case NSM_TRIPLET:
-        {
-          break;
-        }
-        case NSM_CSC:
-        {
-          A->matrix2->triplet = NM_csc_to_triplet(A->matrix2->csc);
-          break;
-        }
-        case NSM_CSR:
-        {
-          A->matrix2->triplet = NM_csr_to_triplet(A->matrix2->csr);
-          break;
-        }
-        default:
-        {
-          fprintf(stderr, "NM_insert ::  unknown origin %d for matrix\n", A->matrix2->origin);
-        }
-        }
-        A->matrix2->origin = NSM_TRIPLET;
-        break;
+      A->matrix2->triplet = NM_csc_to_triplet(A->matrix2->csc);
+      break;
     }
-    case NM_DENSE:
+    case NSM_CSR:
     {
-        break;
+      A->matrix2->triplet = NM_csr_to_triplet(A->matrix2->csr);
+      break;
     }
     default:
     {
-      fprintf(stderr, "NM_insert ::  unknown storageType %d for numerics matrix\n", A->storageType);
+      numerics_error("NM_insert","unknown origin %d for matrix A\n", A->matrix2->origin);
     }
     }
-
-    /* inserting loops */
+    A->matrix2->origin = NSM_TRIPLET;
+    break;
+  }
+  case NM_DENSE:
+  {
+    break;
+  }
+  default:
+  {
+    numerics_error("NM_insert", "unknown storageType %d for numerics matrix A\n", A->storageType);
+  }
+  }
+  /* DEBUG_PRINTF("NM_insert -- B->storageType = %i\n", B->storageType); */
+  
+  /* We transform B into triplet to simplify: could be optimized */
+  switch (B->storageType)
+  {
+  case NM_SPARSE:
+  {
+    switch (B->matrix2->origin)
+    {
+    case NSM_TRIPLET:
+    {
+      assert(B->matrix2->triplet);
+      break;
+    }
+    case NSM_CSC:
+    {
+      B->matrix2->triplet = NM_csc_to_triplet(B->matrix2->csc);
+      break;
+    }
+    case NSM_CSR:
+    {
+      B->matrix2->triplet = NM_csr_to_triplet(B->matrix2->csr);
+      break;
+    }
+    default:
+    {
+      numerics_error("NM_insert","unknown origin %d for matrix B\n", B->matrix2->origin);
+    }
+    }
+    B->matrix2->origin = NSM_TRIPLET;
+    
+    CS_INT * Bi =   B->matrix2->triplet->i;
+    CS_INT * Bp =   B->matrix2->triplet->p;
+    double * Bx =   B->matrix2->triplet->x;
+    // loop over the values of B
+    for (int idx = 0 ; idx < B->matrix2->triplet->nz  ; idx++ )
+    {
+      NM_zentry(A, Bi[idx] + start_i, Bp[idx] + start_j, Bx[idx]);
+    }
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  case NM_DENSE:
+  {
+    /* could be optimized */
     double val;
     for (unsigned int i = start_i; i < end_i; ++i)
     {
-        for (unsigned int j = start_j; j < end_j; ++j)
-        {
-            val = NM_get_value(B, i - start_i, j - start_j);
-            NM_zentry(A, i, j, val);
-        }
+      for (unsigned int j = start_j; j < end_j; ++j)
+      {
+        val = NM_get_value(B, i - start_i, j - start_j);
+        NM_zentry(A, i, j, val);
+      }
     }
-    return;
+    break;
+  }
+  default:
+  {
+    numerics_error("NM_insert","unknown storageType %d for numerics matrix B\n", B->storageType);
+  }
+  }
+  DEBUG_END("NM_insert\n");
+  return;
 }
 
 
