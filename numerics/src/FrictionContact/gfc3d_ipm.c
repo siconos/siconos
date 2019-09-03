@@ -774,6 +774,16 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
         /*  2.1 Build predictor right-hand side */
 
+
+        /** Correction of w to take into account the dependence 
+            on the tangential velocity */
+        for (unsigned int i = 0; i < nd; ++ i)
+        {
+          if (i % d == 0)
+            w[i] = w_tilde[i]/(problem->mu[(int)(i/d)])
+              + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
+        }
+
         primalResidualVector(velocity, H, globalVelocity, w, primalConstraint);
         dualResidualVector(M, globalVelocity, H, reaction, f, dualConstraint);
 
