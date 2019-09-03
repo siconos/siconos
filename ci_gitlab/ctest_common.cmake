@@ -68,7 +68,7 @@ ctest_start(${model})
 
 # Set CTEST_CONFIGURE_COMMAND to cmake followed by siconos options 
 set(CTEST_CONFIGURE_COMMAND ${CMAKE_COMMAND})
-foreach(option ${SICONOS_CMAKE_OPTIONS})
+foreach(option IN LISTS SICONOS_CMAKE_OPTIONS)
   set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${option}")
 endforeach()
 set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${CTEST_SOURCE_DIRECTORY}")
@@ -81,18 +81,11 @@ else()
   message("- Results won't be submitted to a cdash server.\n")
 endif()
 
-if(${CMAKE_VERSION} VERSION_GREATER "3.6.3") 
-  ctest_configure(
-    RETURN_VALUE CONFIGURE_RESULT
-    CAPTURE_CMAKE_ERROR CONFIGURE_STATUS
-    QUIET
-    )
-else()
-  ctest_configure(
-    RETURN_VALUE CONFIGURE_RESULT
-    QUIET)
-  set(CONFIGURE_STATUS ${CONFIGURE_RESULT})
-endif()
+ctest_configure(
+  RETURN_VALUE CONFIGURE_RESULT
+  CAPTURE_CMAKE_ERROR CONFIGURE_STATUS
+  QUIET
+  )
 
 message("=============== End of ctest_configure =============== ")
 message("------> Configure status/result : ${CONFIGURE_STATUS}/${CONFIGURE_RESULT}")
@@ -111,21 +104,12 @@ endif()
 
 message("\n\n=============== Start ctest_build =============== ")
 
-if(${CMAKE_VERSION} VERSION_GREATER "3.6.3") 
-  ctest_build(
-      PROJECT_NAME ${current_project}
-      CAPTURE_CMAKE_ERROR BUILD_STATUS
-      RETURN_VALUE BUILD_RESULT
-      QUIET
-      )
-else()
-  ctest_build(
-      PROJECT_NAME ${current_project}
-      RETURN_VALUE BUILD_RESULT
-      QUIET
-      )
-    set(BUILD_STATUS ${BUILD_RESULT})
-  endif()
+ctest_build(
+  PROJECT_NAME ${current_project}
+  CAPTURE_CMAKE_ERROR BUILD_STATUS
+  RETURN_VALUE BUILD_RESULT
+  QUIET
+  )
 message("=============== End of ctest_build =============== ")
 message("------> Build status/result : ${BUILD_STATUS}/${BUILD_RESULT}")
 if(NOT BUILD_STATUS EQUAL 0 OR NOT BUILD_RESULT EQUAL 0)
@@ -138,23 +122,13 @@ endif()
 
 # -- Tests --
 message("\n\n=============== Start ctest_test (nbprocs = ${NP}) =============== ")
-if(${CMAKE_VERSION} VERSION_GREATER "3.6.3") 
-  ctest_test(
-    PARALLEL_LEVEL NP
-    CAPTURE_CMAKE_ERROR TEST_STATUS
-    SCHEDULE_RANDOM ON
-    RETURN_VALUE TEST_RESULT
-    QUIET
-    )
-else()
-  ctest_test(
-    PARALLEL_LEVEL NP
-    RETURN_VALUE TEST_STATUS
-    SCHEDULE_RANDOM ON
-    QUIET
-    )
-  set(TEST_STATUS ${TEST_RESULT})
-endif()
+ctest_test(
+  PARALLEL_LEVEL NP
+  CAPTURE_CMAKE_ERROR TEST_STATUS
+  SCHEDULE_RANDOM ON
+  RETURN_VALUE TEST_RESULT
+  QUIET
+  )
 message("=============== End of ctest_test =============== ")
 message("------> Test status/result : ${TEST_STATUS}/${TEST_RESULT}")
 # error status check later, we try to submit even if tests failed.
