@@ -102,8 +102,6 @@ endif()
 # Path to main source file
 get_filename_component(_MAIN_DIR ${MAIN_SOURCE} PATH)
 assert(_MAIN_DIR)
-get_standard_ext()
-set(SRC_EXTS ${ALL_EXTS})
 
 # === Include target ===
 if(_EXE)
@@ -158,7 +156,7 @@ if(_EXE)
   # if some extra directories for sources have
   # been defined by user, collect input files
   if(SOURCES_DIRECTORIES)
-    get_sources(${SOURCES_DIRECTORIES})
+    get_sources(${_EXE} DIRS ${SOURCES_DIRECTORIES})
   endif()
   
   if(CMAKE_SYSTEM_NAME MATCHES Windows)
@@ -166,16 +164,16 @@ if(_EXE)
   endif()
 
   # Set 'all sources list' with collected files and main source.
-  set(_ALL_EXE_SRCS ${SOURCES_FILES} ${MAIN_SOURCE})
-  list(REMOVE_DUPLICATES _ALL_EXE_SRCS)
+  list(APPEND ${_EXE}_SRCS ${MAIN_SOURCE})
+  list(REMOVE_DUPLICATES ${_EXE}_SRCS)
 
+  add_executable("${_EXE}" ${${_EXE}_SRCS})
   # set includes ...
   # === Include dirs ===
   # 'local' sources
-  include_directories(${SOURCES_DIRECTORIES})
-  include_directories(${_MAIN_DIR})
+  target_include_directories(${_EXE} PUBLIC ${SOURCES_DIRECTORIES})
+  target_include_directories(${_EXE} PUBLIC ${_MAIN_DIR})
   
-  add_executable("${_EXE}" ${_ALL_EXE_SRCS})
 
   # === Linked libraries ===
   link_setup(${_EXE})
@@ -190,9 +188,9 @@ endif()
 if(PLUGIN_DIRECTORIES)
   foreach(_D ${PLUGIN_DIRECTORIES})
     get_filename_component(_PLUGINNAME ${_D} NAME_WE)
-    get_sources("${_D}")
+    get_sources(${_PLUGINNAME} "${_D}")
     if(SOURCES_FILES)
-      add_library(${_PLUGINNAME} MODULE ${SOURCES_FILES})
+      add_library(${_PLUGINNAME} MODULE ${${_PLUGINNAME}_SRCS})
       set_target_properties(${_PLUGINNAME} PROPERTIES PREFIX "")
       link_setup(${_PLUGINNAME})
       install(TARGETS ${_PLUGINNAME} DESTINATION ${CALL_PWD})
@@ -202,5 +200,7 @@ if(PLUGIN_DIRECTORIES)
 endif()
 
 if(NOT _install)
-  add_custom_target(install COMMAND cmake -E echo 'nothing to install')
+  # fake install
+  install(FILES ${MAIN_SOURCE} DESTINATION /tmp)
+
 endif()

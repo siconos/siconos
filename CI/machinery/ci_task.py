@@ -265,7 +265,7 @@ class CiTask(object):
                                '-DDOCKER_TEMPLATES={0}'.format(self.templates()),
                                '-DDOCKER_TEMPLATE={0}'.format(self.template_maker()),
                                '-DDOCKER_PROJECT_SOURCE_DIR={0}'.format(full_src)]
-
+                
             if self._docker and self._directories is not None:
                 cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={0}'.format(
                     ';'.join(self._directories)))
