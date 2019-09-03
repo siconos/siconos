@@ -18,6 +18,7 @@
 
 
 #include "gfc3d_Solvers.h"
+#include "gfc3d_compute_error.h"
 #include "SiconosLapack.h"
 #include "SparseBlockMatrix.h"
 #include <stdio.h>
@@ -260,13 +261,13 @@ static void dualResidualVector(NumericsMatrix * M, const double * globalVelocity
      * since H is a sparse matrix. In other case the behaviour will be undefined.*/
     double *Mv = (double*)calloc(m, sizeof(double));
     double *HTr = (double*)calloc(m, sizeof(double));
-    double * Mv_plus_f = (double*)calloc(m, sizeof(double));
+    double * Mv_minus_f = (double*)calloc(m, sizeof(double));
 
     // Mv = M @ globalVelocity
     NM_gemv(1.0, M, globalVelocity, 0.0, Mv);
 
-    // Mv_plus_f = M @ globalVelocity + f
-    NV_add(Mv, f, m, Mv_plus_f);
+    // Mv_minus_f = M @ globalVelocity - f
+    NV_sub(Mv, f, m, Mv_minus_f);
 
     // HT = H^T
     NumericsMatrix* HT = NM_transpose(H);
@@ -274,19 +275,19 @@ static void dualResidualVector(NumericsMatrix * M, const double * globalVelocity
     // HTr = H^T @ reaction
     NM_gemv(1.0, HT, reaction, 0.0, HTr);
 
-    // Mv_plus_f_minus_HTr = M @ globalVelocity + f - H^T @ reaction
-    NV_sub(Mv_plus_f, HTr, m, out);
+    // Mv_plus_f_minus_HTr = M @ globalVelocity - f - H^T @ reaction
+    NV_sub(Mv_minus_f, HTr, m, out);
 
     // free allocated memory
     NM_free(HT);
 
     free(Mv);
     free(HTr);
-    free(Mv_plus_f);
+    free(Mv_minus_f);
 
 }
 
-/* Returns the Inf-norm of primal residual vecor ( velocity - H @ globalVelocity - w ) */
+/* Returns the Inf-norm of primal residual vector ( velocity - H @ globalVelocity - w ) */
 static double primalResidualNorm(const double * velocity, NumericsMatrix * H,
                                  const double * globalVelocity, const double * w)
 {
@@ -309,7 +310,7 @@ static double dualResidualNorm(NumericsMatrix * M, const double * globalVelocity
 
     double norm_inf = NV_norm_inf(resid, H->size1);
     free(resid);
-
+    
     return norm_inf / (1 + NV_norm_2(f, H->size1));
 }
 
@@ -608,6 +609,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     double *w_tilde = problem->b;
     double *w = data->tmp_vault_nd[0];
     double *f = problem->q;
+    
     double *iden;
 
     // change of variable
@@ -885,6 +887,14 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     NM_gemv(1.0, P_mu, reaction, 0.0, data->tmp_point->t_reaction);
     cblas_dcopy(nd, data->tmp_point->t_reaction, 1, reaction, 1);
 
+
+    /* check the full criterion */
+    double norm_q = cblas_dnrm2(n , problem->q , 1);
+    double err;
+    gfc3d_compute_error(problem,  reaction, velocity, globalVelocity,  tol, options, norm_q, &err);
+    numerics_printf_verbose(-1,"---- GFC3D - IPM  - Iteration %i, full error = %14.7e", iteration, err);
+
+
     options->dparam[SICONOS_DPARAM_RESIDU] = NV_max(error, 4);
     options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
 
@@ -892,6 +902,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     {
       gfc3d_IPM_free(problem,options);
     }
+
     NM_free(H_tilde);
     NM_free(minus_H);
     NM_free(H);
