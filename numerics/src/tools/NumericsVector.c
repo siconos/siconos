@@ -31,7 +31,7 @@
 
 #include "NumericsVector.h"
 #include "math.h"
-void NV_display(double * m, int nRow)
+void NV_display(const double * const m, int nRow)
 {
   int lin;
   printf("vector of size\t%d\t =\n[", nRow);

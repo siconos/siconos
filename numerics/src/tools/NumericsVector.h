@@ -41,7 +41,7 @@ extern "C"
       \param m the vector to be displayed
       \param n the size of the vector
    */
-  void NV_display(double * m, int n);
+  void NV_display(const double * const m, int n);
 
   void NV_copy(const double * const vec, unsigned int vecSize, double * out);
 
