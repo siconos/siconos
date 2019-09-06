@@ -62,9 +62,41 @@ endif()
 # No docs for externals.
 set(${COMPONENT}_EXCLUDE_DOXY ${${COMPONENT}_DIRS})
 
-# ---- Final setup for the library ----
 
-list(APPEND ${COMPONENT}_LINK_LIBRARIES ${SICONOS_LINK_LIBRARIES})
+# TEST TEST TEST
+# ------ include interface ------
+# What is needed at build time
+# by other targets (numerics etc) to compile with externals.
+# It means that a call to
+#  target_link_libraries(truc PRIVATE externals)
+# will imply -I<dirs> with dirs listed in
+# ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES.
+set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
+  netlib
+   netlib/odepack  # For odepack.h in tests and kernel
+   tools           # For SiconosCompat.h in numerics 
+   blas_lapack     # For SiconosLapack.h in numerics
+   SOL/lumod-c # For lumod_dense.h in numerics
+   hairer # For kernel
+   )
+
+if(WITH_CXX)
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
+    numeric_bindings boost_contribs) # SiconosAlgebra needs this
+endif()
+
+if(HAVE_SORT)
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES sort) # NumericsSparseMatrix needs this
+endif()
+
+if(NOT WITH_SYSTEM_SUITESPARSE)
+  # else suite sparse is an external dependency of numerics and handled in numerics
+  # CMakeLists.txt.
+  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES SuiteSparse/CXSparse)
+endif()
+# TEST TEST TEST
+
+# ---- Final setup for the library ----
 
 # Windows stuff --> should probably be reviewed and updated
 include(WindowsExternalsSetup)
@@ -77,8 +109,17 @@ if(BUILD_AS_CPP)
 endif()
 
 # -- create/setup component target --
-include(LibraryProjectSetup)
-library_project_setup()
+include(ComponentSetup)
+create_siconos_component(${COMPONENT})
+
+# --- python bindings ---
+if(WITH_${COMPONENT}_PYTHON_WRAPPER)
+  add_subdirectory(swig)
+endif()
+  
+if(WITH_PYTHON_WRAPPER)
+  add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
+endif()  
 
 # - Extra setup for the component -
 if(GAMSCAPI_FOUND AND CMAKE_DL_LIBS) # needed by GAMS (?). Here or in numerics ?
@@ -90,20 +131,20 @@ if(NOT HAS_LAPACK_dtrtrs)
   target_sources(externals PRIVATE blas_lapack/clapack_dtrtrs.c)
 endif()
 
-if(MLCPSIMPLEX_FOUND OR BUILD_AS_CPP) 
+if(BUILD_AS_CPP) 
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
 else()
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
 endif()
 
-# externals lib needs blas while tests need Blas AND lapack
+# externals lib needs blas while tests need Blas AND lapack.
+# Link only at build time.
 target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
 target_include_directories(externals PRIVATE blas_lapack)
 
 # We don't want warnings from externals libraries.
 target_compile_options(externals PRIVATE "-w")
 target_compile_options(externals PRIVATE "-Wno-unused-variable")
-target_link_options(externals PRIVATE "--warn-once") # Limit linker warnings
 target_link_options(externals PRIVATE "-Wl,-no_compact_unwind") 
 
 # - Extras, optional -
@@ -119,8 +160,19 @@ if(NOT WITH_SYSTEM_SUITESPARSE)
 endif()
 
 
-# --- specific install ----
-#install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FCMangle.h DESTINATION include/${PROJECT_NAME})
+# ---- Installation ----
+# Call siconos_component_install_setup(<COMPONENT>)
+# to prepare installation of the current target.
+# Before, it's necessary to set:
+# 
+# - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
+#    that contain headers files that must be installed.
+# 
+# common install
+# No headers installed for externals.
+set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES)
+# set(${COMPONENT}_HDRS_EXCLUDE tools/SiconosCompat.h)
+siconos_component_install_setup(${COMPONENT})
 
 # - Optional OCE Renderer setup (install only) -
 if(WITH_OCE)
@@ -140,21 +192,21 @@ endif()
 include(${COMPONENT}_tests.cmake)
 
 
-# List of directories of headers not to be installed
-set(${COMPONENT}_HDRS_EXCLUDE_DIR PATH_SDK/include SOL/lumod-c)
-if(NOT INSTALL_EXTERNAL_HEADERS)
-  list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
-    # blas_lapack
-    hairer
-    netlib/dftemplates
-    netlib/odepack
-    optim_misc
-    optim_misc/ql0001
-    sort
-    boost_contribs
-    tools)
-endif()
+# # List of directories of headers not to be installed
+# set(${COMPONENT}_HDRS_EXCLUDE_DIR PATH_SDK/include SOL/lumod-c)
+# if(NOT INSTALL_EXTERNAL_HEADERS)
+#   list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
+#     blas_lapack
+#     hairer
+#     netlib/dftemplates
+#     netlib/odepack
+#     optim_misc
+#     optim_misc/ql0001
+#     sort
+#     boost_contribs
+#     tools)
+# endif()
 
-# List of specific headers not to be installed
-set(${COMPONENT}_HDRS_EXCLUDE tools/SiconosCompat.h)
+# # List of specific headers not to be installed
+# set(${COMPONENT}_HDRS_EXCLUDE tools/SiconosCompat.h)
 

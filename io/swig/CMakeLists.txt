@@ -11,8 +11,13 @@ set(${COMPONENT}_PYTHON_MODULES "io/io_base")
 set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)
 
 set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
-set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
-  ${CMAKE_SOURCE_DIR}/kernel/swig)
+
+list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/kernel/swig)
+# TMP fix 
+if(${CMAKE_VERSION} VERSION_LESS "3.13")
+  # Notice that with last cmake versions, it's possible to propagate includes to swig in a better way.
+  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/numerics/src/tools")
+endif()
 
 
 
@@ -56,6 +61,9 @@ if(HAVE_SICONOS_MECHANICS)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_run      DESTINATION bin)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_compare  DESTINATION bin)
     # automatic manpages using help2man
+
+    # See if help2man is available
+    find_program(HELP2MAN help2man)
     if (HELP2MAN)
       # all other components must be built first so that tools don't fail to run
       set(_OTHER_COMPONENTS ${COMPONENTS})
@@ -118,6 +126,11 @@ if(HAVE_SICONOS_MECHANISMS)
   endif()
 endif()
 
+# TMP fix 
+if(${CMAKE_VERSION} VERSION_LESS "3.13")
+  # Notice that with last cmake versions, it's possible to propagate includes to swig in a better way.
+  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIR}")
+endif()
 
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)

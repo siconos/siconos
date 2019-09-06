@@ -1,85 +1,95 @@
-# -----------------------------------------
-# Search for lpsolve header and library
-# --> lp_lib.h
-# --> liblpsolve
+#  Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 #
-# User hint : LpSolve_DIR --> try cmake -DLpSolve_DIR=path-to-lpsolve-install
+# Copyright 2019 INRIA.
 #
-# header is searched for in 'standard' path + optional suffix lpsolve, LpSolve_DIR/include
-# LpSolve_DIR/lpsolve
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# Please note that we are using lpsolve 5.5
-# -----------------------------------------
-include(LibFindMacros)
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# --
+#[=======================================================================[.rst:
+FindLPSOLVE
+-----------
 
-# ----------------------------------------
-# Header == lp_lib.h 
-# First, search in (optionnaly) user-defined LpSolve_DIR
-# Try : 
-# LpSolve_DIR/
-# LpSolve_DIR/include
-# LpSolve_DIR/lpsolve
-# ----------------------------------------
-if(LpSolve_DIR)
-  find_path(LpSolve_INCLUDE_DIR
-    NAMES lp_lib.h
-    PATHS ${LpSolve_DIR}
-    PATH_SUFFIXES lpsolve include
-    NO_DEFAULT_PATH)
+Find lpsolve libraries and headers
+
+Usage :
+ 
+find_package(LPSOLVE REQUIRED)
+target_link_libraries(yourlib PRIVATE LPSOLVE::LPSOLVE)
+
+Set LPSOLVE_ROOT=<where lpsolve is installed>
+if it's not in a "classic" place or if you want a specific version
+
+Header : lp_lib.h
+Lib : <prefix>lpsolve55.<suffix>
+
+#]=======================================================================]
+
+include(FindPackageHandleStandardArgs)
+
+if(NOT LPSOLVE_ROOT)
+  set(LPSOLVE_ROOT $ENV{LPSOLVE_ROOT})
 endif()
 
-# if LpSolve_DIR not set or header not found, try standard path
-# 
-find_path(
-  LpSolve_INCLUDE_DIR
-  NAMES lp_lib.h
+if(LPSOLVE_ROOT)
+  set(_LPSOLVE_SEARCH_OPTS
+    HINTS ${LPSOLVE_ROOT}
+    NO_DEFAULT_PATH)
+else()
+  # Try pkgconfig
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PKGC_LPSOLVE lpsolve QUIET)
+  if(PKGC_LPSOLVE_FOUND)
+    set(LPSOLVE_LIBRARIES "${PKGC_LPSOLVE_LINK_LIBRARIES}")
+  endif()
+  set(_LPSOLVE_SEARCH_OPTS
+    HINTS ${PKGC_LPSOLVE_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
+endif()
+
+find_path(LPSOLVE_INCLUDE_DIR NAMES lp_lib.h
   PATH_SUFFIXES lpsolve include
+  ${_LPSOLVE_SEARCH_OPTS}
   )
 
-IF (NOT LpSolve_INCLUDE_DIR)
-  MESSAGE(STATUS "Cannot find LPSOLVE headers")
-ELSE()
-  # ----------------------------------------
-  # Library == lpsolve55 
-  # First, search in (optionnaly) user-defined LpSolve_DIR
-  # Try:
-  # - LpSolve_DIR
-  # - LpSolve_DIR/lib
-  # - LpSolve_DIR/lib/CMAKE_LIBRARY_ARCHITECTURE (for example on Debian like system : lib/x86_64-linux-gnu
-  if(LpSolve_DIR)
-    find_library(LpSolve_LIBRARY lpsolve55
-      PATHS ${LpSolve_DIR}
-      PATH_SUFFIXES lib lib/${CMAKE_LIBRARY_ARCHITECTURE} 
-      )
-  endif()
-  # If not found, try standard path.
-  
-  # debian nonsense: see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=503314
+if(NOT LPSOLVE_LIBRARIES)
+  # Fix debian nonsense:
+  # see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=503314
   if(EXISTS "/etc/debian_version")
-    FIND_LIBRARY(LpSolve_LIBRARY lpsolve55 PATH_SUFFIXES "lp_solve")
-    IF(LpSolve_LIBRARY AND "${LpSolve_LIBRARY}" MATCHES ".a$" AND NOT I_WANT_STATIC_LPSOLVE)
-      SET(LpSolve_LIBRARY FALSE)
-    ENDIF()
-  ELSE()
-    FIND_LIBRARY(LpSolve_LIBRARY
-      lpsolve55
-      PATHS ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH
-      )
-  ENDIF()
-
-  # Set LpSolve_LIBRARY_DIRS and LpSolve_LIBRARIES for libfindprocess
-  # see Using LibFindMacros : https://cmake.org/Wiki/CMake:How_To_Find_Libraries
-  IF (LpSolve_LIBRARY)
-    GET_FILENAME_COMPONENT(LpSolve_LIBRARY_DIRS ${LpSolve_LIBRARY} PATH)
-    GET_FILENAME_COMPONENT(LpSolve_LIBRARIES ${LpSolve_LIBRARY} REALPATH)
+    find_library(LPSOLVE_LIBRARIES NAMES liblpsolve55.so
+      ${_LPSOLVE_SEARCH_OPTS}
+      PATH_SUFFIXES lib/lp_solve lib)
+  else()
+    find_library(LPSOLVE_LIBRARIES NAMES lpsolve55
+      ${_LPSOLVE_SEARCH_OPTS}
+      PATH_SUFFIXES lib lib64)
   endif()
-  IF (NOT LpSolve_FIND_QUIETLY)
-    MESSAGE(STATUS "Found LpSolve: ${LpSolve_LIBRARY}")
-    MESSAGE(STATUS "LpSolve_LIBRARIES: ${LpSolve_LIBRARIES}")
-  ENDIF (NOT LpSolve_FIND_QUIETLY)
+endif()
+
+
+
+# -- Library setup --
+find_package_handle_standard_args(LPSOLVE
+  REQUIRED_VARS LPSOLVE_LIBRARIES LPSOLVE_INCLUDE_DIR)
+
+if(LPSOLVE_FOUND)
   
-ENDIF (NOT LpSolve_INCLUDE_DIR)
-# Final check :
-set(LpSolve_PROCESS_LIBS LpSolve_LIBRARIES)
-set(LpSolve_PROCESS_INCLUDES LpSolve_INCLUDE_DIR)
-libfind_process(LpSolve)
+  if(NOT TARGET LPSOLVE::LPSOLVE)
+    add_library(LPSOLVE::LPSOLVE IMPORTED INTERFACE)
+    set_property(TARGET LPSOLVE::LPSOLVE PROPERTY INTERFACE_LINK_LIBRARIES ${LPSOLVE_LIBRARIES})
+    if(LPSOLVE_INCLUDE_DIR)
+      set_target_properties(LPSOLVE::LPSOLVE PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${LPSOLVE_INCLUDE_DIR}")
+    endif()
+  endif()
+endif()
+
+

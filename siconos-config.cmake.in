@@ -75,6 +75,11 @@ set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
 #  find_dependency(SuiteSparse)
 #endif()
 
+if(@WITH_CXX@)
+  find_dependency(Boost 1.61 REQUIRED)
+endif()
+  
+
 if(@WITH_FCLIB@)
   set_and_check(FCLIB_ROOT @FCLIB_ROOT@)
   find_dependency(FCLIB 3.0.0 CONFIG REQUIRED)

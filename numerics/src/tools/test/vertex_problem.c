@@ -20,7 +20,7 @@
 #include "SiconosConfig.h"
 #include "NumericsMatrix.h"
 
-#ifdef WITH_LPSOLVE
+#ifdef HAS_ONE_LP_SOLVER
 #include "vertex_extraction.h"
 
 int main(void)

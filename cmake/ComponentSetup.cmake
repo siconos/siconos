@@ -139,15 +139,14 @@ function(siconos_component_install_setup COMPONENT)
     RUNTIME DESTINATION bin
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    INCLUDES DESTINATION include
+    INCLUDES DESTINATION include/siconos
     )
 
   # Required for SiconosConfig.h
   target_include_directories(${COMPONENT} INTERFACE
-    $<INSTALL_INTERFACE:include>)
+    $<INSTALL_INTERFACE:include/siconos>)
 
-  # Setup include dirs for install interface
-  # Must be relocatable, i.e. no abs path!
+  # Setup the list of all headers to be installed.
   foreach(dir IN LISTS ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES)
 
     if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
@@ -159,32 +158,25 @@ function(siconos_component_install_setup COMPONENT)
     endif()
     list(APPEND _all_headers ${_headers})
     
-    # Append component source dirs to include directories
-    # for targets linked to current target from install path.
-    # target_include_directories(${COMPONENT} INTERFACE
-    #   $<INSTALL_INTERFACE:include/${COMPONENT}/${dir}>)
-    
     # And each include path in install interface must obviously be installed ...
     # Note FP :  maybe we should have an explicit list of headers to be installed,
     # for each component, instead of a list of dirs?
   endforeach()
-  
-  # # Do not install files listed in ${COMPONENT}_HDRS_EXCLUDE
-  # if(_all_headers)
-  #   foreach(_file IN LISTS ${COMPONENT}_HDRS_EXCLUDE)
-  #     list(REMOVE_ITEM  _all_headers "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
-  #   endforeach()
-  # endif()
+
   if(_all_headers)
+    # Do not install files listed in ${COMPONENT}_HDRS_EXCLUDE
+    foreach(_file IN LISTS ${COMPONENT}_HDRS_EXCLUDE)
+      list(REMOVE_ITEM _all_headers "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
+    endforeach()
     # install files collected in _all_headers
     install(
       FILES ${_all_headers}
-      DESTINATION include/${COMPONENT}
+      DESTINATION include/siconos/${COMPONENT}
       )
 
     # Add include dirs in target interface 
     target_include_directories(${COMPONENT} INTERFACE
-      $<INSTALL_INTERFACE:include/${COMPONENT}>)
+      $<INSTALL_INTERFACE:include/siconos/${COMPONENT}>)
   endif()
 
   # Set installed_targets list (for siconos-config.cmake file)

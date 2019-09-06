@@ -10,6 +10,7 @@ RUN apt update  && apt install -y -qq \
         swig \
         gcc \
         gfortran \
+        libgfortran3 \
         g++ \
         liblapack-dev \
         libatlas-base-dev \

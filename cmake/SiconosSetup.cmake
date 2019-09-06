@@ -208,3 +208,15 @@ endif()
 # Since headers are also required for Siconos
 # we use our own cmake "find package" stuff.
 find_package(LAPACKDEV REQUIRED)
+
+# =========== Boost ===========
+# check https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=boost
+if(WITH_CXX)
+  find_package(Boost 1.61 REQUIRED)
+endif()
+#
+# -- Python bindings --
+if(WITH_PYTHON_WRAPPER)
+  find_package(SWIG 3.0 REQUIRED)
+  include(${SWIG_USE_FILE})
+endif()

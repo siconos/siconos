@@ -165,10 +165,8 @@ static int fc_test(char ** test)
 
       
 #ifdef TEST_HDF5
-      printf("HDHDFJHSDJDHSJHD Stest ");
       info = frictionContact_test_function_hdf5(filename,options);
 #else
-      printf("HDHDFJHSDJDHSJHD NOOOOOOON  Stest ");
       info = frictionContact_test_function(finput,options);
 #endif
 

@@ -3,7 +3,6 @@
 
 
 # Compilation flags setup
-# Note FP / 
 include(CheckCCompilerFlag)
 check_c_compiler_flag("-Wno-error=float-conversion" W_no_error_float_conversion_flag)
 check_c_compiler_flag("-Wno-error=conversion" W_no_error_conversion_flag)
@@ -15,7 +14,7 @@ if(BUILD_AS_CPP)
     list(APPEND _flags "-Wno-error=float-conversion")
   endif()
   if(W_no_error_conversion_flag)
-    list(APPEND_flags "-Wno-error=conversion")
+    list(APPEND _flags "-Wno-error=conversion")
   endif()
   if(W_no_conversion_flag)
     list(APPEND _flags "-Wno-conversion")
@@ -46,6 +45,5 @@ foreach(csfile IN LISTS CXSPARSE_FILES)
   foreach(flag IN LISTS _flags)
     set_source_files_properties(${csfile} PROPERTIES COMPILE_OPTIONS ${flag})
   endforeach()
-
 endforeach()
 

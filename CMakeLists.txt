@@ -120,9 +120,6 @@ endif()
 # Common setup
 include(SiconosSetup)
 
-# ========= Search for 'common' dependencies =========
-include(siconos_find_common_dep)
-
 # ========= Python bindings =========
 if(WITH_PYTHON_WRAPPER)
   add_subdirectory(wrap)
@@ -171,6 +168,13 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
     message(${SICONOS_CONFIG_H})
   endif()
   install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
+endif()
+
+
+# man pages
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
+  configure_file(man/siconos.1.in man/siconos.1)
+  install(FILES ${CMAKE_BINARY_DIR}/man/siconos.1 DESTINATION share/man/man1)
 endif()
 
 # ============= Summary =============

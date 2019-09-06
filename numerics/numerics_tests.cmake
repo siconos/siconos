@@ -369,9 +369,9 @@ if(WITH_${COMPONENT}_TESTING)
     endif()
   endif()
 
-  # For SiconosLapack.h 
-  target_link_libraries(numerics-test PRIVATE externals)
+  # For SuiteSparse and SiconosLapack.h 
+  target_link_libraries(numerics-test PUBLIC externals)
   target_link_libraries(numerics-test PUBLIC LAPACK::LAPACK)
-  target_include_directories(numerics-test PUBLIC ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
+  #target_include_directories(numerics-test PUBLIC ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
 
 endif()
