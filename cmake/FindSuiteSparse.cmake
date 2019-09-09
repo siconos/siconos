@@ -47,19 +47,8 @@ if(NOT SuiteSparse_ROOT)
   set(SuiteSparse_ROOT $ENV{SuiteSparse_ROOT})
 endif()
 
-if(SuiteSparse_ROOT)
-  set(_SuiteSparse_SEARCH_OPTS
-    "HINTS ${SuiteSparse_ROOT} NO_DEFAULT_PATH")
-else()
-  # Try pkgconfig
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(PKGC_SuiteSparse suitesparse QUIET)
-  if(PKGC_SuiteSparse_FOUND)
-    set(SuiteSparse_LIBRARIES "${PKGC_SuiteSparse_LIBRARIES}")
-  endif()
-  set(_SuiteSparse_SEARCH_OPTS
-    "HINTS ${PKGC_SuiteSparse_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH")
-endif()
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME SuiteSparse MODULE suitesparse)
 
 
 set(_CXSparse_header cs.h)
@@ -74,7 +63,7 @@ set(_UMFPACK_lib umfpack)
 foreach(_component IN LISTS SuiteSparse_FIND_COMPONENTS)
   find_path(SuiteSparse_${_component}_INCLUDE_DIR NAMES ${_${_component}_header}
     PATH_SUFFIXES SuiteSparse suitesparse include 
-    ${_SuiteSparse_SEARCH_OPTS}
+    ${_SuiteSparse_INC_SEARCH_OPTS}
     )
   
   find_library(SuiteSparse_${_component}_LIBRARY NAMES ${_${_component}_lib}

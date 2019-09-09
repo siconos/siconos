@@ -20,22 +20,6 @@ set(TESTS_LOGFILE ${CMAKE_BINARY_DIR}/tests.log)
 # Current binary dir, for generated headers. Only at build time!
 include_directories($<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
 
-# extensions of headers files that must be taken into account
-set(HDR_EXTS h hpp)
-
-# dirs of 'local' headers. Must be filled by each component.
-set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
-  CACHE INTERNAL "Local include directories.")
-
-set(SICONOS_INCLUDE_DIRECTORIES
-  CACHE INTERNAL "Include directories for external dependencies.")
-
-set(SICONOS_LINK_LIBRARIES
-  CACHE INTERNAL "List of external libraries.")
-
-set(${PROJECT_NAME}_LOCAL_LIBRARIES
-  CACHE INTERNAL "List of siconos components libraries.")
-
 set(tests_timeout 120 CACHE INTERNAL "Limit time for tests (in seconds)")
 
 if(WITH_GIT) # User defined option, default = off

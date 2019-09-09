@@ -40,19 +40,8 @@ if(NOT PathVI_ROOT)
     set(PathVI_ROOT $ENV{PathVI_ROOT})
 endif()
 
-if(PathVI_ROOT)
-  set(_PathVI_SEARCH_OPTS
-    "HINTS ${PathVI_ROOT} NO_DEFAULT_PATH")
-else()
-  # Try pkgconfig
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(PKGC_PathVI pathvi QUIET)
-  if(PKGC_PathVI_FOUND)
-    set(PathVI_LIBRARIES "${PKGC_PathVI_LIBRARIES}")
-  endif()
-  set(_PathVI_SEARCH_OPTS
-    "HINTS ${PKGC_PathVI_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH")
-endif()
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME PathVI MODULE pathvi)
 
 if(NOT PathVI_LIBRARIES)
   find_library(PathVI_LIBRARIES NAMES pathvi${PathVI_VERSION}

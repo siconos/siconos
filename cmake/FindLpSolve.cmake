@@ -40,23 +40,12 @@ if(NOT LPSOLVE_ROOT)
   set(LPSOLVE_ROOT $ENV{LPSOLVE_ROOT})
 endif()
 
-if(LPSOLVE_ROOT)
-  set(_LPSOLVE_SEARCH_OPTS
-    "HINTS ${LPSOLVE_ROOT} NO_DEFAULT_PATH")
-else()
-  # Try pkgconfig
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(PKGC_LPSOLVE lpsolve QUIET)
-  if(PKGC_LPSOLVE_FOUND)
-    set(LPSOLVE_LIBRARIES "${PKGC_LPSOLVE_LIBRARIES}")
-  endif()
-  set(_LPSOLVE_SEARCH_OPTS
-    "HINTS ${PKGC_LPSOLVE_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH")
-endif()
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME LPSOLVE MODULE lpsolve)
 
 find_path(LPSOLVE_INCLUDE_DIR NAMES lp_lib.h
   PATH_SUFFIXES lpsolve include
-  ${_LPSOLVE_SEARCH_OPTS}
+  ${_LPSOLVE_INC_SEARCH_OPTS}
   )
 
 if(NOT LPSOLVE_LIBRARIES)
