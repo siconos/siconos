@@ -45,17 +45,16 @@ endif()
 
 if(PathFerris_ROOT)
   set(_PathFerris_SEARCH_OPTS
-    HINTS ${PathFerris_ROOT}
-    NO_DEFAULT_PATH)
+    "HINTS ${PathFerris_ROOT} NO_DEFAULT_PATH")
 else()
   # Try pkgconfig
   find_package(PkgConfig QUIET)
   pkg_check_modules(PKGC_PathFerris path{PathFerris_VERSION} QUIET)
   if(PKGC_PathFerris_FOUND)
-    set(PathFerris_LIBRARIES "${PKGC_PathFerris_LINK_LIBRARIES}")
+    set(PathFerris_LIBRARIES "${PKGC_PathFerris_LIBRARIES}")
   endif()
   set(_PathFerris_SEARCH_OPTS
-    HINTS ${PKGC_PathFerris_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
+    "HINTS ${PKGC_PathFerris_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH")
 endif()
 
 if(NOT PathFerris_LIBRARIES)

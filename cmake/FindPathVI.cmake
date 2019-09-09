@@ -42,17 +42,16 @@ endif()
 
 if(PathVI_ROOT)
   set(_PathVI_SEARCH_OPTS
-    HINTS ${PathVI_ROOT}
-    NO_DEFAULT_PATH)
+    "HINTS ${PathVI_ROOT} NO_DEFAULT_PATH")
 else()
   # Try pkgconfig
   find_package(PkgConfig QUIET)
   pkg_check_modules(PKGC_PathVI pathvi QUIET)
   if(PKGC_PathVI_FOUND)
-    set(PathVI_LIBRARIES "${PKGC_PathVI_LINK_LIBRARIES}")
+    set(PathVI_LIBRARIES "${PKGC_PathVI_LIBRARIES}")
   endif()
   set(_PathVI_SEARCH_OPTS
-    HINTS ${PKGC_PathVI_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
+    "HINTS ${PKGC_PathVI_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH")
 endif()
 
 if(NOT PathVI_LIBRARIES)

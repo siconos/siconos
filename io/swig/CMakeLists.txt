@@ -107,7 +107,9 @@ endif()
 
 if(HAVE_SICONOS_MECHANISMS)
   list(APPEND ${COMPONENT}_SWIG_DEFS "-DWITH_MECHANISMS")
-
+  if(${CMAKE_VERSION} VERSION_LESS "3.13")
+    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/mechanisms/src/")
+  endif()
   if(INSTALL_PYTHON_SYMLINKS)
     message("Making symlinks for io Python modules")
     execute_process(COMMAND sh -c "mkdir -p '${SICONOS_SWIG_ROOT_DIR}/io'")

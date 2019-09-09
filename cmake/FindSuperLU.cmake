@@ -73,17 +73,16 @@ endif()
 
 if(SuperLU_ROOT)
   set(_SuperLU_SEARCH_OPTS
-    HINTS ${SuperLU_ROOT}
-    NO_DEFAULT_PATH)
+    "HINTS ${SuperLU_ROOT} NO_DEFAULT_PATH")
 else()
   # Try pkgconfig
   find_package(PkgConfig)
   pkg_check_modules(PKGC_SuperLU ${SuperLU_LIBNAME} QUIET)
   if(PKGC_SuperLU_FOUND)
-    set(SuperLU_LIBRARIES "${PKGC_SuperLU_LINK_LIBRARIES}")
+    set(SuperLU_LIBRARIES "${PKGC_SuperLU_LIBRARIES}")
   endif()
   set(_SuperLU_SEARCH_OPTS
-    HINTS ${PKGC_SuperLU_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
+    "HINTS ${PKGC_SuperLU_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH")
 endif()
 
 find_path(SuperLU_INCLUDE_DIR NAMES ${SuperLU_HEADER}

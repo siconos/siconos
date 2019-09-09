@@ -145,7 +145,6 @@ target_include_directories(externals PRIVATE blas_lapack)
 # We don't want warnings from externals libraries.
 target_compile_options(externals PRIVATE "-w")
 target_compile_options(externals PRIVATE "-Wno-unused-variable")
-target_link_options(externals PRIVATE "-Wl,-no_compact_unwind") 
 
 # - Extras, optional -
 # --- SuiteSparse ---

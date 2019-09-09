@@ -49,17 +49,16 @@ endif()
 
 if(SuiteSparse_ROOT)
   set(_SuiteSparse_SEARCH_OPTS
-    HINTS ${SuiteSparse_ROOT}
-    NO_DEFAULT_PATH)
+    "HINTS ${SuiteSparse_ROOT} NO_DEFAULT_PATH")
 else()
   # Try pkgconfig
   find_package(PkgConfig QUIET)
   pkg_check_modules(PKGC_SuiteSparse suitesparse QUIET)
   if(PKGC_SuiteSparse_FOUND)
-    set(SuiteSparse_LIBRARIES "${PKGC_SuiteSparse_LINK_LIBRARIES}")
+    set(SuiteSparse_LIBRARIES "${PKGC_SuiteSparse_LIBRARIES}")
   endif()
   set(_SuiteSparse_SEARCH_OPTS
-    HINTS ${PKGC_SuiteSparse_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
+    "HINTS ${PKGC_SuiteSparse_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH")
 endif()
 
 

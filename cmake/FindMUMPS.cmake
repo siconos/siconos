@@ -63,7 +63,7 @@ endif()
 find_package(PkgConfig)
 pkg_check_modules(PKGC_MUMPS mumps QUIET)
 if(PKGC_MUMPS_FOUND)
-  set(MUMPS_LIBRARIES "${PKGC_MUMPS_LINK_LIBRARIES}")
+  set(MUMPS_LIBRARIES "${PKGC_MUMPS_LIBRARIES}")
 endif()
 
 find_path(MUMPS_INCLUDE_DIR NAMES dmumps_c.h
