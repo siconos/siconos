@@ -483,7 +483,7 @@ CS_INT CSparseMatrix_to_dense(const CSparseMatrix* const A, double * B)
   CS_INT p, j, m, n, nz, *Ap, *Ai ;
   CS_ENTRY *Ax ;
 
-  if (!A) { printf ("CSparseMatrix_to_dense :: A = null\n") ; return (0) ; }
+  if (!A) { printf ("CSparseMatrix_to_dense :: A = null\n") ; return (1) ; }
 
   m = A->m ; n = A->n ;
   nz = A->nz ;
@@ -513,7 +513,7 @@ CS_INT CSparseMatrix_to_dense(const CSparseMatrix* const A, double * B)
       }
     }
   }
-  return (1) ;
+  return (0) ;
 }
 
 CSparseMatrix* CSparseMatrix_alloc_for_copy(const CSparseMatrix* const m)

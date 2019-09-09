@@ -437,10 +437,11 @@ extern "C"
 
   void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
 
+  /** Copy a NumericsMatrix into another with dense storage.
+      \param A source matrix (any kind of storage)
+      \param B targeted matrix, must be dense with the same dimension as A
+  */
   int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B);
-
-
-
 
   /** Screen display of the matrix content stored as a double * array in Fortran style
       \param m the matrix to be displayed

@@ -13,14 +13,6 @@ set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)
 set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
 
 list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/kernel/swig)
-# TMP fix 
-if(${CMAKE_VERSION} VERSION_LESS "3.13")
-  # Notice that with last cmake versions, it's possible to propagate includes to swig in a better way.
-  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/numerics/src/tools")
-endif()
-
-
-
 if(HAVE_SICONOS_MECHANICS)
   list(APPEND ${COMPONENT}_SWIG_DEFS "-DWITH_MECHANICS")
 
@@ -129,8 +121,12 @@ endif()
 # TMP fix 
 if(${CMAKE_VERSION} VERSION_LESS "3.13")
   # Notice that with last cmake versions, it's possible to propagate includes to swig in a better way.
+  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/numerics/src/tools")
   list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIR}")
 endif()
+
+
+
 
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
