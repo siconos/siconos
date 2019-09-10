@@ -22,6 +22,9 @@
 set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
 
 option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
+
+# -- Serialization --
+# Warning : this is highly unstable. Developers only !
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
 option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 

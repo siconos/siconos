@@ -208,20 +208,20 @@ function(set_find_package_hints)
 
   if(${pkg_NAME}_ROOT)
     set(_${pkg_NAME}_SEARCH_OPTS
-      "HINTS ${${pkg_NAME}_ROOT} NO_DEFAULT_PATH" PARENT_SCOPE)
+      HINTS ${${pkg_NAME}_ROOT} NO_DEFAULT_PATH PARENT_SCOPE)
     set(_${pkg_NAME}_INC_SEARCH_OPTS
-      "HINTS ${${pkg_NAME}_ROOT} NO_DEFAULT_PATH" PARENT_SCOPE)
+      HINTS ${${pkg_NAME}_ROOT} NO_DEFAULT_PATH PARENT_SCOPE)
   else()
     # Try pkgconfig
-    find_package(PkgConfig)
+    find_package(PkgConfig QUIET)
     pkg_check_modules(PKGC_${pkg_NAME} ${pkg_MODULE} QUIET)
     if(PKGC_${pkg_NAME}_FOUND)
       set(_${pkg_NAME}_INC_SEARCH_OPTS "HINTS ${PKGC_${pkg_NAME}_INCLUDE_DIRS}"
         PARENT_SCOPE)
-      set(_${pkg_NAME}_SEARCH_OPTS
-        "HINTS ${PKGC_${pkg_NAME}_LIBRARY_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH"
-        PARENT_SCOPE)
     endif()
+    set(_${pkg_NAME}_SEARCH_OPTS
+      HINTS ${PKGC_${pkg_NAME}_LIBRARY_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH
+      PARENT_SCOPE)
   endif()
   
 endfunction()

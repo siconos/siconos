@@ -30,13 +30,13 @@ if(WITH_VTK)
 endif()
 
 # --- Serialization setup ---
-set(GENERATED_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
-set(GENERATED_HEADER_KERNEL ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullKernelGenerated.hpp)
 
 if(WITH_SERIALIZATION)
   if(WITH_GENERATION)
-    FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
-    FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullKernelGenerated.hpp)
+    set(GENERATED_HEADER ${CMAKE_CURRENT_BINARY_DIR}/SiconosFullGenerated.hpp)
+    set(GENERATED_HEADER_KERNEL ${CMAKE_CURRENT_BINARY_DIR}/SiconosFullKernelGenerated.hpp)
+    # FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
+    # FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullKernelGenerated.hpp)
 
     set(io_targets ${COMPONENTS})
 
@@ -47,24 +47,19 @@ if(WITH_SERIALIZATION)
     set(GENERATED_TARGETS --targets=${io_targets_list})
 
     if(HAVE_SICONOS_KERNEL)
-      set(GENERATED_DEPENDENCIES ../kernel/src/SiconosKernel.hpp)
+      list(APPEND GENERATED_DEPENDENCIES ${CMAKE_SOURCE_DIR}/kernel/src/SiconosKernel.hpp)
     endif()
     if(HAVE_SICONOS_MECHANICS)
-      set(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES}
-        ../mechanics/src/collision/native/SpaceFilter.hpp)
+      list(APPEND GENERATED_DEPENDENCIES ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native/SpaceFilter.hpp)
     endif()
     if(HAVE_SICONOS_CONTROL)
-      set(GENERATED_DEPENDENCIES ${GENERATED_DEPENDENCIES} ../control/src/SiconosControl.hpp)
+      list(APPEND GENERATED_DEPENDENCIES ${CMAKE_SOURCE_DIR}/control/src/SiconosControl.hpp)
     endif()
-
-    # # append local headers directories to GENERATED_INCLUDES)
-    # foreach(_DIR IN LISTS ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES)
-    #   list(APPEND GENERATED_INCLUDES -I${_DIR})
-    # endforeach()
-
+    list(APPEND GENERATED_INCLUDES -I${CMAKE_BINARY_DIR}) # For SiconosConfig.h
+    
     if(MPI_FOUND)
       foreach(_DIR IN LISTS MPI_CXX_INCLUDE_PATH)
-        set(GENERATED_INCLUDES ${GENERATED_INCLUDES} -I${_DIR})
+        list(APPEND GENERATED_INCLUDES -I${_DIR})
       endforeach()
     endif()
 
@@ -118,9 +113,6 @@ if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   set(${COMPONENT}_PYTHON_MODULES "${COMPONENT}")
 endif()#
 
-# add dependencies for header generation
-add_custom_target(SerializersGeneration ALL
-  DEPENDS ${GENERATED_HEADER} ${GENERATED_HEADER_KERNEL})
 
 # ---- Final setup for the library ----
 include(ComponentSetup)
@@ -134,6 +126,15 @@ if(USE_SANITIZER MATCHES "asan")
   target_compile_options(io PRIVATE "-fno-sanitize=null")
 endif()
 
+if(WITH_GENERATION)
+  # add dependencies for header generation
+  add_custom_target(SerializersGeneration ALL
+    DEPENDS ${GENERATED_HEADER} ${GENERATED_HEADER_KERNEL})
+  add_dependencies(_kernel SerializersGeneration)
+  add_dependencies(${COMPONENT} SerializersGeneration)
+endif()
+
+
 # Links with other Siconos components
 
 list(APPEND ${COMPONENT}_LINK_LIBRARIES kernel numerics)
@@ -141,6 +142,7 @@ if (CMAKE_SKIP_RPATH)
   # if no RPATH, then linking does not work for tests without specifying externals
   target_link_libraries(io PRIVATE externals)
 endif()
+
 target_link_libraries(io PRIVATE numerics)
 target_link_libraries(io PUBLIC kernel)
 
@@ -179,7 +181,6 @@ if(WITH_VTK)
   target_link_libraries(io PRIVATE vtkIO;vtkCommon;vtkGraphics;vtkRendering)
 endif()
 
-add_dependencies(${COMPONENT} SerializersGeneration)
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)

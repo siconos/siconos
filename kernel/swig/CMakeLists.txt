@@ -38,6 +38,18 @@ swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
 target_link_libraries(_kernel numerics)
 
+## FP : when serialization is ON, we need includes from io in kernel ...
+# This has to be reviewed.
+if(WITH_SERIALIZATION)
+  if(WITH_GENERATION)
+    target_include_directories(_kernel PRIVATE ${CMAKE_BINARY_DIR}/io/)
+  else()
+    target_include_directories(_kernel PRIVATE ${CMAKE_SOURCE_DIR}/io/src/generation)
+  endif()
+  # for f2c.h in SiconosFull.h ...
+  target_include_directories(_kernel PRIVATE ${CMAKE_SOURCE_DIR}/externals/tools/)
+endif()
+
 # --- Tests ---
 if(WITH_${COMPONENT}_TESTING)
   if(NOT WITH_XML)

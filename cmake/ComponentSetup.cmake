@@ -59,10 +59,20 @@ function(create_siconos_component COMPONENT)
     OUTPUT_NAME "siconos_${COMPONENT}"
     VERSION "${SICONOS_SOVERSION}"
     SOVERSION "${SICONOS_SOVERSION_MAJOR}")
-
-    # windows stuff : this should be reviewed.
-    include(WindowsLibrarySetup)
-    windows_library_extra_setup(siconos_${COMPONENT} ${COMPONENT})
+  
+  # windows stuff : this should be reviewed.
+  include(WindowsLibrarySetup)
+  windows_library_extra_setup(siconos_${COMPONENT} ${COMPONENT})
+  
+  if(WITH_GENERATION)
+    # includes to be sent to python script for serialization/generation ...
+    # Unstable and to be reviewed.
+    foreach(_dir IN LISTS ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES)
+      list(APPEND ${COMPONENT}_GENERATED_INCLUDES -I${CMAKE_CURRENT_SOURCE_DIR}/${_dir})
+    endforeach()
+    set(GENERATED_INCLUDES "${GENERATED_INCLUDES};${${COMPONENT}_GENERATED_INCLUDES}"
+      CACHE INTERNAL "")
+  endif()
   
   configure_component_documentation(${COMPONENT})
   
@@ -112,7 +122,7 @@ function(configure_component_documentation COMPONENT)
   endif()
   
   # update the main doxy file, without building the doc
-  if(WITH_${COMPONENT}_DOCUMENTATION)
+  if(WITH_${COMPONENT}_DOCUMENTATION  OR WITH_SERIALIZATION)
     # Prepare target to generate rst files from xml
     doxy2rst_sphinx(${COMPONENT})
   endif()
