@@ -50,7 +50,7 @@
   REGISTER(BodyDiskRecord)                      \
   REGISTER(BodyBox2dRecord)                     \
   REGISTER(BodyCH2dRecord)                      \
-  
+
 
 DEFINE_SPTR(UpdateShapeVisitor)
 
@@ -741,7 +741,15 @@ void SiconosBulletCollisionManager_impl::updateContactorInertia(
   SP::NewtonEulerDS ds, SP::btCollisionShape btshape)
 {
   btVector3 localinertia;
+  double scale_factor;
+  scale_factor = 1./(_options.worldScale*_options.worldScale);
+  localinertia[0] = std::numeric_limits<double>::signaling_NaN();
+  localinertia[1] = std::numeric_limits<double>::signaling_NaN();
+  localinertia[2] = std::numeric_limits<double>::signaling_NaN();
   btshape->calculateLocalInertia(ds->scalarMass(), localinertia);
+  localinertia[0]*=scale_factor;
+  localinertia[1]*=scale_factor;
+  localinertia[2]*=scale_factor;
   assert( ! ((localinertia.x() == 0.0
               && localinertia.y() == 0.0
               && localinertia.z() == 0.0)
@@ -749,7 +757,9 @@ void SiconosBulletCollisionManager_impl::updateContactorInertia(
              || isinf(localinertia.y())
              || isinf(localinertia.z()))
           && "calculateLocalInertia() returned garbage" );
-  ds->setInertia(localinertia[0], localinertia[1], localinertia[2]);
+  ds->setInertia(localinertia[0],
+                 localinertia[1],
+                 localinertia[2]);
 }
 
 void SiconosBulletCollisionManager_impl::update2DContactorInertia(
@@ -777,7 +787,9 @@ void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
 #endif
     SP::RigidBodyDS rbds=std11::static_pointer_cast<RigidBodyDS>(record.ds);
     if (record.ds && rbds->useContactorInertia())
+    {
       updateContactorInertia(rbds, btsphere);
+    }
 
     if (record.btobject->getBroadphaseHandle())
     {
