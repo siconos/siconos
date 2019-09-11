@@ -9,9 +9,6 @@
 include(cTools)
 include(CheckSymbolExists)
 
-detect_c_version(C_VERSION)
-
-
 # ==== Warnings ===
 # activate warnings
 # and turn some of them to errors
@@ -78,19 +75,6 @@ elseif(USE_SANITIZER MATCHES "msan")
   APPEND_C_FLAGS("-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer")
 elseif(USE_SANITIZER MATCHES "cfi")
   APPEND_C_FLAGS("-fsanitize=cfi -flto -fno-omit-frame-pointer -B ${CLANG_LD_HACK}")
-endif()
-
-# === Others options ===
-if(C_VERSION STRLESS "201112L")
-  set(C_STD_VERSION "c99")
-else()
-  # default C standart is c11 or newer
-  set(C_STD_VERSION "c11")
-endif()
-
-if(NOT MSVC)
-  add_c_options("-std=${C_STD_VERSION}")
-  add_c_options("-x${C_STD_VERSION}")
 endif()
 
 if(LLVM_ANALYSE)

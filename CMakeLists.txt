@@ -87,6 +87,12 @@ foreach(component_name IN LISTS COMPONENTS)
   endif()
   set(HAVE_SICONOS_${upname} TRUE)
 endforeach()
+if(HAVE_SICONOS_KERNEL AND NOT WITH_CXX)
+  message(FATAL_ERROR "You can not build kernel component without C++. Please set WITH_CXX=ON.")
+endif()
+  
+
+
 # Get last component in the list;
 # It might be usefull to set some dependencies in targets.
 list(GET COMPONENTS -1 last_component)
@@ -217,4 +223,3 @@ message(STATUS "================================================================
 
 # Log build info into ${CMAKE_BINARY_DIR}/Testing/Notes/Build
 write_notes()
-

@@ -91,6 +91,12 @@ macro(add_siconos_swig_sub_module fullname)
   # Python and numpy
   target_link_libraries(${SWIG_MODULE_${_name}_REAL_NAME} Python3::NumPy)
 
+  # List of siconos modules, used in __init__.py.
+  # --> fix this to have 'real' modules names (e.g. control.observer ...)
+  set(current_module ${SWIG_MODULE_${_name}_REAL_NAME})
+  set(SICONOS_PYTHON_MODULES "${SICONOS_PYTHON_MODULES}, '${current_module}'"
+    CACHE INTERNAL "Modules available in Siconos Python package.")
+  
   if(${CMAKE_VERSION} VERSION_LESS "3.13")
     foreach(_dir IN LISTS ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)
       target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE ${_dir})
@@ -163,7 +169,7 @@ macro(swig_module_setup modules_list)
     # we should use lowercase name for python module (pep8 ...)
     message(" -- Prepare python bindings for component ${COMPONENT} ...")
     # build python bindings
-     include_directories(${SICONOS_SWIG_INCLUDE_DIRS})
+    include_directories(${SICONOS_SWIG_INCLUDE_DIRS})
     include_directories(${CMAKE_CURRENT_SOURCE_DIR}/)
     if(HAVE_SICONOS_IO)
       include_directories(${CMAKE_SOURCE_DIR}/io/src)
@@ -171,6 +177,7 @@ macro(swig_module_setup modules_list)
 	include_directories(${CMAKE_SOURCE_DIR}/io/src/mechanics)
       endif()
     endif()
+    
     foreach(module IN LISTS ${COMPONENT}_PYTHON_MODULES)
       add_siconos_swig_sub_module(${module})
     endforeach()

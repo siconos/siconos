@@ -101,13 +101,6 @@ endif()
 # Windows stuff --> should probably be reviewed and updated
 include(WindowsExternalsSetup)
 
-if(BUILD_AS_CPP)
-  file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
-  set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX
-    COMPILE_FLAGS -fpermissive)
-  set(${COMPONENT}_LINKER_LANGUAGE CXX)
-endif()
-
 # -- create/setup component target --
 include(ComponentSetup)
 create_siconos_component(${COMPONENT})
@@ -132,9 +125,15 @@ if(NOT HAS_LAPACK_dtrtrs)
 endif()
 
 if(BUILD_AS_CPP) 
+  file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
+  set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX
+    COMPILE_FLAGS -fpermissive)
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
+  # We require C++ 11. PUBLIC to propagate to numerics.
+  target_compile_features(externals PUBLIC cxx_std_11)
 else()
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
+  target_compile_features(externals PUBLIC c_std_11)
 endif()
 
 # externals lib needs blas while tests need Blas AND lapack.

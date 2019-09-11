@@ -209,10 +209,13 @@ if(WITH_MPI)
 endif()
 
 if(WITH_MUMPS)
-  find_package(MUMPS REQUIRED)
+  if(WITH_MPI)
+    find_package(MUMPS REQUIRED COMPONENTS PAR)
+  else()
+    find_package(MUMPS REQUIRED COMPONENTS SEQ)
+  endif()
   target_link_libraries(numerics PRIVATE MUMPS::MUMPS)
 endif()
-
 
 # -- HDF5 --
 # For logging
@@ -223,6 +226,18 @@ if(WITH_HDF5)
   target_link_libraries(${PROJECT_NAME} PRIVATE ${HDF5_HL_LIBRARIES})
 endif()
 
+# -- OpenMP --
+if(WITH_OPENMP)
+  find_package(OpenMP REQUIRED)
+  # Notice : cmake  >= 3.9.6 is advised for a proper handling of openmp
+  if(${CMAKE_VERSION} VERSION_GREATER "3.9.6")
+    target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_C)
+    target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_CXX)
+  else()
+    message("Openmp flags : ${OpenMP_C_FLAGS}")
+    target_compile_options(numerics PRIVATE  ${OpenMP_C_FLAGS})
+  endif()
+endif()
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)

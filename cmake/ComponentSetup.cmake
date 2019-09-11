@@ -59,7 +59,7 @@ function(create_siconos_component COMPONENT)
     OUTPUT_NAME "siconos_${COMPONENT}"
     VERSION "${SICONOS_SOVERSION}"
     SOVERSION "${SICONOS_SOVERSION_MAJOR}")
-  
+
   # windows stuff : this should be reviewed.
   include(WindowsLibrarySetup)
   windows_library_extra_setup(siconos_${COMPONENT} ${COMPONENT})

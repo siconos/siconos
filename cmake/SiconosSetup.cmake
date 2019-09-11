@@ -149,19 +149,36 @@ if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_DOXYGEN_WARNINGS OR WITH_GENERAT
   set(USE_DOXYGEN TRUE)
 endif()
 
+# ----- Required dependencies (whatever Siconos components are) -----
+
+# =========== Blas/Lapack ===========
+# Find package stuff provided by cmake deals
+# only with blas/lapack libraries.
+# Since headers are also required for Siconos
+# we use our own cmake "find package" stuff.
+find_package(LAPACKDEV REQUIRED)
+
+# =========== Boost ===========
+# check https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=boost
+if(WITH_CXX)
+  find_package(Boost 1.61 REQUIRED)
+endif()
+#
+# -- Python bindings --
+if(WITH_PYTHON_WRAPPER)
+  find_package(SWIG 3.0 REQUIRED)
+  include(${SWIG_USE_FILE})
+endif()
+
+# ---- Extra 'developers only' options ----
+# -- The options below should be used with caution
+# and preferably by developers or advanced users --
+
 # =========== OpenMP ==========
-OPTION (WITH_OPENMP "Use OpenMP" OFF)
-IF(WITH_OPENMP)
-  FIND_PACKAGE(OpenMP)
-  IF(OPENMP_FOUND)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    # Only applies to numerics code, which is in C (for now)
-    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  ENDIF()
-ENDIF()
+option(WITH_OPENMP "Use OpenMP" OFF)
 
 # =========== use ccache if available ===========
-OPTION (WITH_CCACHE "Use ccache" OFF)
+option(WITH_CCACHE "Use ccache" OFF)
 if(WITH_CCACHE)
   find_program(CCACHE_FOUND ccache)
   if(CCACHE_FOUND)
@@ -184,23 +201,12 @@ if(WITH_MPI)
   # endif()
 endif()
 
-# ----- Required dependencies (whatever Siconos components are) -----
+# ==== Python symlinks ===
+# Useful during io installation, to use links for python scripts rather
+# that copying files.
+# FP : in which case do we need this ? If anyone knows, please document it ...
+option(INSTALL_PYTHON_SYMLINKS "Install Python .py files as symlinks" OFF)
 
-# =========== Blas/Lapack ===========
-# Find package stuff provided by cmake deals
-# only with blas/lapack libraries.
-# Since headers are also required for Siconos
-# we use our own cmake "find package" stuff.
-find_package(LAPACKDEV REQUIRED)
+# For SiconosConfig.h
+option(SICONOS_USE_MAP_FOR_HASH "Prefer std::map to std::unordered_map even if C++xy is enabled" ON)
 
-# =========== Boost ===========
-# check https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=boost
-if(WITH_CXX)
-  find_package(Boost 1.61 REQUIRED)
-endif()
-#
-# -- Python bindings --
-if(WITH_PYTHON_WRAPPER)
-  find_package(SWIG 3.0 REQUIRED)
-  include(${SWIG_USE_FILE})
-endif()
