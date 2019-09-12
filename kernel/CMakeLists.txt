@@ -65,7 +65,11 @@ include(ComponentSetup)
 create_siconos_component(${COMPONENT})
 
 # We require C++ 11. PUBLIC to propagate to other components.
-target_compile_features(kernel PUBLIC cxx_std_11)
+if(${CMAKE_VERSION} VERSION_GREATER "3.7.0")
+  target_compile_features(kernel PUBLIC cxx_std_11)
+else()
+  target_compile_option(kernel PUBLIC "-std=c++11")
+endif()
 
 # --- Extra setup for the component ---
 

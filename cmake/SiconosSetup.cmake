@@ -11,16 +11,11 @@ include(WindowsSiconosSetup)
 # Siconos current version
 include(SiconosVersion)
 
-# File used to print tests setup messages.
-set(TESTS_LOGFILE ${CMAKE_BINARY_DIR}/tests.log)
-
 # -- Set include directories that are required by ALL components
 # and only those!
 # Other includes must be specified to individual targets only.
 # Current binary dir, for generated headers. Only at build time!
 include_directories($<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
-
-set(tests_timeout 120 CACHE INTERNAL "Limit time for tests (in seconds)")
 
 if(WITH_GIT) # User defined option, default = off
   # Check if git is available
@@ -161,7 +156,12 @@ find_package(LAPACKDEV REQUIRED)
 # =========== Boost ===========
 # check https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=boost
 if(WITH_CXX)
-  find_package(Boost 1.61 REQUIRED)
+  if(WITH_SERIALIZATION)
+    find_package(Boost 1.61 COMPONENTS serialization filesystem REQUIRED)
+    set(WITH_SYSTEM_BOOST_SERIALIZATION ON CACHE INTERNAL "Siconos uses boost serialization lib.")
+  else()
+    find_package(Boost 1.61 REQUIRED)
+  endif()
 endif()
 #
 # -- Python bindings --
@@ -200,6 +200,28 @@ if(WITH_MPI)
   #   print_mpi_info(Fortran)
   # endif()
 endif()
+
+# =========== Tests env ==========
+if(WITH_TESTING)
+  # File used to print tests setup messages.
+  set(TESTS_LOGFILE ${CMAKE_BINARY_DIR}/tests.log)
+
+  set(tests_timeout 120 CACHE INTERNAL "Limit time for tests (in seconds)")
+  if(HAVE_SICONOS_KERNEL)
+    find_package(CPPUNIT REQUIRED)
+    # File used as main driver for cppunit tests
+    set(SIMPLE_TEST_MAIN ${CMAKE_SOURCE_DIR}/kernel/tests-common/TestMain.cpp CACHE INTERNAL "")
+  endif()
+  if(WITH_PYTHON_WRAPPER)
+    find_python_module(pytest REQUIRED)
+    if(WITH_AGGRESSIVE_PYTHON_TESTS)
+      set(pytest_opt "-s -v -pep8" CACHE INTERNAL "extra options for py.test")
+    else()
+      set(pytest_opt "-v" CACHE INTERNAL "extra options for py.test")
+    endif()
+  endif()
+endif()
+
 
 # ==== Python symlinks ===
 # Useful during io installation, to use links for python scripts rather

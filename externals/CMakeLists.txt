@@ -36,7 +36,8 @@ set(${COMPONENT}_DIRS
 # boost extras, when c++ is on only
 if(WITH_CXX)
   list(APPEND ${COMPONENT}_DIRS numeric_bindings boost_contribs)
-  if(NOT WITH_SYSTEM_BOOST_SERIALIZATION)
+  if(WITH_SERIALIZATION AND NOT WITH_SYSTEM_BOOST_SERIALIZATION)
+    # FP : in which case do we need this, since boost serialization is required ??
     list(APPEND ${COMPONENT}_DIRS boost_serialization)
   endif()
 endif()
@@ -130,10 +131,21 @@ if(BUILD_AS_CPP)
     COMPILE_FLAGS -fpermissive)
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
   # We require C++ 11. PUBLIC to propagate to numerics.
-  target_compile_features(externals PUBLIC cxx_std_11)
+  if(${CMAKE_VERSION} VERSION_GREATER "3.7.0")
+    target_compile_features(externals PUBLIC cxx_std_11)
+  else()
+    target_compile_option(externals PUBLIC "-std=c++11")
+  endif()
 else()
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
-  target_compile_features(externals PUBLIC c_std_11)
+  if(${CMAKE_VERSION} VERSION_GREATER "3.7.0")
+    target_compile_features(externals PUBLIC c_std_11)
+  else()
+    if(NOT MSVC)
+      target_compile_option(externals PUBLIC "-std=c11")
+      target_compile_option(externals PUBLIC "-xc11")
+    endif()
+  endif()
 endif()
 
 # externals lib needs blas while tests need Blas AND lapack.

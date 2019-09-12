@@ -38,7 +38,7 @@ endif()
 
 # Current testing model. Priority: 
 # Nightly
-# Continuous -> set for in task (ci_task.py)
+# Continuous -> set in task (ci_task.py)
 # Experimental : default
 if(NOT MODE)
   message(STATUS "set mode to Experimental")

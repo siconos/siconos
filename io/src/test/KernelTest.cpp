@@ -14,7 +14,7 @@
 #include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
 
 #define DEBUG_MESSAGES 1
-#include "../SiconosFull.hpp"
+#include "SiconosFull.hpp"
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>

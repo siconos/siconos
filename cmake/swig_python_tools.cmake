@@ -94,8 +94,10 @@ macro(add_siconos_swig_sub_module fullname)
   # List of siconos modules, used in __init__.py.
   # --> fix this to have 'real' modules names (e.g. control.observer ...)
   set(current_module ${SWIG_MODULE_${_name}_REAL_NAME})
-  set(SICONOS_PYTHON_MODULES "${SICONOS_PYTHON_MODULES}, '${current_module}'"
+  set(SICONOS_PYTHON_MODULES ""
     CACHE INTERNAL "Modules available in Siconos Python package.")
+  # set(SICONOS_PYTHON_MODULES "${SICONOS_PYTHON_MODULES}, '${current_module}'"
+  #   CACHE INTERNAL "Modules available in Siconos Python package.")
   
   if(${CMAKE_VERSION} VERSION_LESS "3.13")
     foreach(_dir IN LISTS ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)

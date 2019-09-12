@@ -13,36 +13,43 @@
 # - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
 #   to populate the interface of the target for include directories at build time
 
+# Component name (i.e. target name)
 set(COMPONENT io)
 message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
 
-# --- Sources and headers ---
-# source directories for numerics
-set(${COMPONENT}_DIRS
-  src/.)
+# ------ source directories for current component ------
+# What is needed by component to compile ?
+# List here all directories that contain sources files
+# for current component.
+# Path must be relative to component path (i.e. to CMAKE_CURRENT_SOURCE_DIR)
+set(${COMPONENT}_DIRS)
+
+# By default this component has no sources, everything is optional :
+# - serialization/generation part : sources in serialization and generation
+# - mechanicsIO : sources in mechanics 
 
 if(HAVE_SICONOS_MECHANICS)
   list(APPEND ${COMPONENT}_DIRS src/mechanics) 
 endif()
 
-if(WITH_VTK)
-  list(APPEND ${COMPONENT}_DIRS VTK)
-endif()
-
 # --- Serialization setup ---
 
 if(WITH_SERIALIZATION)
-  if(WITH_GENERATION)
+  list(APPEND ${COMPONENT}_DIRS src/serialization)
+  
+  if(NOT WITH_GENERATION)
+    # in that case, we use headers in src/generation.
+    # Warning : they must regularly updated (build siconos with generation ON!)
+    # to take into account all changes in siconos interface.
+    # --- Some headers are generated in current binary dir ---
+    list(APPEND ${COMPONENT}_DIRS src/generation)
+  else()
     set(GENERATED_HEADER ${CMAKE_CURRENT_BINARY_DIR}/SiconosFullGenerated.hpp)
     set(GENERATED_HEADER_KERNEL ${CMAKE_CURRENT_BINARY_DIR}/SiconosFullKernelGenerated.hpp)
-    # FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullGenerated.hpp)
-    # FILE(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullKernelGenerated.hpp)
 
+    # list components 'targeted' by generation
     set(io_targets ${COMPONENTS})
-
     list(REMOVE_ITEM io_targets numerics io externals)
-    print_var(io_targets)
-
     string(REPLACE ";" "," io_targets_list "${io_targets}")
     set(GENERATED_TARGETS --targets=${io_targets_list})
 
@@ -89,9 +96,7 @@ endif()
 # -- Documentation --
 # List of directories for which no doxygen doc will be generated
 # By default all directories matching "test" are excluded.
-set(${COMPONENT}_EXCLUDE_DOXY src/utils/SiconosTools
-  # if included, it breaks swig process for mechanics
-  )
+# set(${COMPONENT}_EXCLUDE_DOXY)
 
 # ------ include interface ------
 # What is needed at build time
@@ -104,126 +109,108 @@ set(${COMPONENT}_EXCLUDE_DOXY src/utils/SiconosTools
 #
 # If all dirs are required, just set
 # set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES ${${COMPONENT}_DIRS})
-set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES ${${COMPONENT}_DIRS})
-
-# wrap - Set extra dependencies
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  set(SWIG_MODULE_${COMPONENT}_EXTRA_DEPS)
-  # List of modules to be built in the python bindings
-  set(${COMPONENT}_PYTHON_MODULES "${COMPONENT}")
-endif()#
-
+# set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES ${${COMPONENT}_DIRS})
 
 # ---- Final setup for the library ----
-include(ComponentSetup)
-create_siconos_component(${COMPONENT})
-# --- Extra setup for the component ---
-# Right now boost::serialization does some nasty things... so we have to
-# disable some undefined behavior checks ...
-if(USE_SANITIZER MATCHES "asan")
-  target_compile_options(io PRIVATE "-fno-sanitize=vptr")
-  target_compile_options(io PRIVATE "-fno-sanitize=alignment")
-  target_compile_options(io PRIVATE "-fno-sanitize=null")
+if(io_DIRS) # the component may be empty if mechanics and serialization are off
+  include(ComponentSetup)
+  create_siconos_component(${COMPONENT})
+  
+  # --- Extra setup for the component ---
+  # Right now boost::serialization does some nasty things... so we have to
+  # disable some undefined behavior checks ...
+  if(USE_SANITIZER MATCHES "asan")
+    target_compile_options(io PRIVATE "-fno-sanitize=vptr")
+    target_compile_options(io PRIVATE "-fno-sanitize=alignment")
+    target_compile_options(io PRIVATE "-fno-sanitize=null")
+  endif()
+  
+  if(WITH_GENERATION)
+    # add dependencies for header generation
+    add_custom_target(SerializersGeneration ALL
+      DEPENDS ${GENERATED_HEADER} ${GENERATED_HEADER_KERNEL})
+    add_dependencies(_kernel SerializersGeneration)
+    add_dependencies(${COMPONENT} SerializersGeneration)
+  endif()
+  
+  # Links with other Siconos components
+  
+  if (CMAKE_SKIP_RPATH)
+    # if no RPATH, then linking does not work for tests without specifying externals
+    target_link_libraries(io PRIVATE externals)
+  endif()
+  
+  target_link_libraries(io PRIVATE numerics)
+  target_link_libraries(io PUBLIC kernel)
+  
+  if(HAVE_SICONOS_CONTROL)
+    target_link_libraries(io PRIVATE control)
+  endif()
+  
+  if(HAVE_SICONOS_MECHANICS)
+    target_link_libraries(io PUBLIC mechanics)
+  endif()
+  
+  if(HAVE_SICONOS_MECHANISMS)
+    # FP : do we really need this link?
+    target_link_libraries(io PUBLIC mechanisms)
+  endif()
+
+  # Links with non-Siconos libraries
+  if(SICONOS_HAS_OCE)
+    if(HAVE_SICONOS_MECHANICS OR HAVE_SICONOS_MECHANISMS)
+      target_link_libraries(io PRIVATE ${OCE_LIBRARIES})
+    endif()
+  endif()
+  
+  # --- Search component dependencies ---
+  if(WITH_SERIALIZATION)
+    # boost must have been searched for in SiconosSetup ...
+    target_link_libraries(io PUBLIC Boost::boost Boost::serialization Boost::filesystem)
+    # TEST_SERIALIZATION_VECTOR_BUG() : not needed anymore, since we required boost >= 1.61
+    # These test macros have been moved to siconos-junk.
+  endif()
+  
+  if(WITH_VTK)
+    # https://cmake.org/cmake/help/latest/module/FindVTK.html
+    find_package(VTK )
+    target_link_libraries(io PRIVATE vtkIO;vtkCommon;vtkGraphics;vtkRendering)
+  endif()
+
+  # --- python bindings ---
+  if(WITH_${COMPONENT}_PYTHON_WRAPPER)
+    add_subdirectory(swig)
+  endif()
+  
+  if(WITH_PYTHON_WRAPPER)
+    add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
+  endif()
+  
+  # ---- Installation ----
+  # Call siconos_component_install_setup(<COMPONENT>)
+  # to prepare installation of the current target.
+  #
+  # Before, it's necessary to set:
+  # 
+  # - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
+  #    that contain headers files that must be installed.
+  # 
+  # set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES)
+  if(WITH_SERIALIZATION)
+    list(APPEND ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES src/serialization)
+    if(NOT WITH_GENERATION)
+      list(APPEND ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES src/generation)
+    endif()
+  endif()
+  
+  if(HAVE_SICONOS_MECHANICS)
+    list(APPEND ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES src/mechanics)
+  endif()
+  siconos_component_install_setup(${COMPONENT})
+  
+  # --- tests ---
+  include(${COMPONENT}_tests.cmake)
 endif()
-
-if(WITH_GENERATION)
-  # add dependencies for header generation
-  add_custom_target(SerializersGeneration ALL
-    DEPENDS ${GENERATED_HEADER} ${GENERATED_HEADER_KERNEL})
-  add_dependencies(_kernel SerializersGeneration)
-  add_dependencies(${COMPONENT} SerializersGeneration)
-endif()
-
-
-# Links with other Siconos components
-
-list(APPEND ${COMPONENT}_LINK_LIBRARIES kernel numerics)
-if (CMAKE_SKIP_RPATH)
-  # if no RPATH, then linking does not work for tests without specifying externals
-  target_link_libraries(io PRIVATE externals)
-endif()
-
-target_link_libraries(io PRIVATE numerics)
-target_link_libraries(io PUBLIC kernel)
-
-if(HAVE_SICONOS_CONTROL)
-  target_link_libraries(io PRIVATE control)
-endif()
-
-if(HAVE_SICONOS_MECHANICS)
-  target_link_libraries(io PUBLIC mechanics)
-endif()
-
-if(HAVE_SICONOS_MECHANISMS)
-  target_link_libraries(io PUBLIC mechanisms)
-endif()
-# # remove debug & optimized inside LINK_LIBRARIES...
-# list(REMOVE_ITEM ${COMPONENT}_LINK_LIBRARIES "debug" "optimized")
-
-# Links with non-Siconos libraries
-
-if(SICONOS_HAS_OCE)
-  target_link_libraries(io PRIVATE ${OCE_LIBRARIES})
-endif()
-# --- Search component dependencies ---
-if(WITH_SERIALIZATION)
-  include(serialization_vector_test)
-  find_package(Boost 1.61 COMPONENTS serialization REQUIRED)
-  find_package(Boost 1.61 COMPONENTS filesystem REQUIRED)
-  target_link_libraries(io PUBLIC Boost::boost)
-  set(WITH_SYSTEM_BOOST_SERIALIZATION ON)
-  TEST_SERIALIZATION_VECTOR_BUG()
-endif()
-
-if(WITH_VTK)
-  # https://cmake.org/cmake/help/latest/module/FindVTK.html
-  find_package(VTK )
-  target_link_libraries(io PRIVATE vtkIO;vtkCommon;vtkGraphics;vtkRendering)
-endif()
-
-
-# --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
-endif()
-
-if(WITH_PYTHON_WRAPPER)
-  add_dependencies(${COMPONENT} ${COMPONENT}_docstrings)
-endif()
-
-# ---- Installation ----
-# Call siconos_component_install_setup(<COMPONENT>)
-# to prepare installation of the current target.
-#
-# Before, it's necessary to set:
-# 
-# - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
-#    that contain headers files that must be installed.
-# 
-set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
-  )
-
-siconos_component_install_setup(${COMPONENT})
-
-# --- specific install ----
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullGenerated.hpp
-  DESTINATION include/${PROJECT_NAME})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFullNumerics.hpp
-    DESTINATION include/${PROJECT_NAME})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/Register.hpp
-    DESTINATION include/${PROJECT_NAME})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosRestart.hpp
-    DESTINATION include/${PROJECT_NAME})
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/SiconosFull.hpp
-    DESTINATION include/${PROJECT_NAME})
-if(HAVE_SICONOS_MECHANICS)
-  install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/mechanics/MechanicsIO.hpp
-    DESTINATION include/${PROJECT_NAME})
-endif()
-
-# --- tests ---
-include(${COMPONENT}_tests.cmake)
-
 
 
 
