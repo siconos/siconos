@@ -131,7 +131,7 @@ if(BUILD_AS_CPP)
     COMPILE_FLAGS -fpermissive)
   set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
   # We require C++ 11. PUBLIC to propagate to numerics.
-  if(${CMAKE_VERSION} VERSION_GREATER "3.7.0")
+  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.8.0")
     target_compile_features(externals PUBLIC cxx_std_11)
   else()
     target_compile_option(externals PUBLIC "-std=c++11")
