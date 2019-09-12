@@ -37,24 +37,13 @@ if(NOT GMP_ROOT)
     set(GMP_ROOT $ENV{GMP_ROOT})
 endif()
 
-if(GMP_ROOT)
-  set(_GMP_SEARCH_OPTS
-    HINTS ${GMP_ROOT}
-    NO_DEFAULT_PATH)
-else()
-  # Try pkgconfig
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(PKGC_GMP gmp QUIET)
-  if(PKGC_GMP_FOUND)
-    set(GMP_LIBRARIES "${PKGC_GMP_LINK_LIBRARIES}")
-  endif()
-  set(_GMP_SEARCH_OPTS
-    HINTS ${PKGC_GMP_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
-endif()
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME GMP MODULE gmp)
+
 
 find_path(GMP_INCLUDE_DIR NAMES gmp.h
   PATH_SUFFIXES include
-  ${_GMP_SEARCH_OPTS}
+  ${_GMP_INC_SEARCH_OPTS}
   )
 
 if(NOT GMP_LIBRARIES)

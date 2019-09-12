@@ -40,24 +40,12 @@ if(NOT MlcpSimplex_ROOT)
   set(MlcpSimplex_ROOT $ENV{MlcpSimplex_ROOT})
 endif()
 
-if(MlcpSimplex_ROOT)
-  set(_MlcpSimplex_SEARCH_OPTS
-    HINTS ${MlcpSimplex_ROOT}
-    NO_DEFAULT_PATH)
-else()
-  # Try pkgconfig
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(PKGC_MlcpSimplex MlcpSimplex QUIET)
-  if(PKGC_MlcpSimplex_FOUND)
-    set(MlcpSimplex_LIBRARIES "${PKGC_MlcpSimplex_LINK_LIBRARIES}")
-  endif()
-  set(_MlcpSimplex_SEARCH_OPTS
-    HINTS ${PKGC_MlcpSimplex_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
-endif()
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME MlcpSimplex MODULE MlcpSimplex)
 
 find_path(MlcpSimplex_INCLUDE_DIR NAMES external_mlcp_simplex.h
   PATH_SUFFIXES include
-  ${_MlcpSimplex_SEARCH_OPTS}
+  ${_MlcpSimplex_INC_SEARCH_OPTS}
   )
 
 if(NOT MlcpSimplex_LIBRARIES)

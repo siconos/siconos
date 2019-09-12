@@ -135,9 +135,6 @@ endmacro()
 # === Include dirs ===
 # Required for 'exe' and for plugins
 #
-# Set include directory for siconos headers and external libraries headers
-include_directories(${${PACKAGE_NAME}_INCLUDE_DIRECTORIES})
-
 # === Path to user-defined external libraries ===
 foreach(_D ${LINKER_DIRECTORIES})
   link_directories(${_D})

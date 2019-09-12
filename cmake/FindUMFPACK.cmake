@@ -56,25 +56,13 @@ if(NOT UMFPACK_ROOT)
   set(UMFPACK_ROOT $ENV{UMFPACK_ROOT})
 endif()
 
-if(UMFPACK_ROOT)
-  set(_UMFPACK_SEARCH_OPTS
-    HINTS ${UMFPACK_ROOT}
-    NO_DEFAULT_PATH)
-else()
-  # Try pkgconfig
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(PKGC_UMFPACK umfpack QUIET)
-  if(PKGC_UMFPACK_FOUND)
-    set(UMFPACK_LIBRARIES "${PKGC_UMFPACK_LINK_LIBRARIES}")
-  endif()
-  set(_UMFPACK_SEARCH_OPTS
-    HINTS ${PKGC_UMFPACK_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
-endif()
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME UMFPACK MODULE umfpack)
 
 if(NOT UMFPACK_INCLUDE_DIR)
   find_path(UMFPACK_INCLUDE_DIR NAMES umfpack.h
     PATH_SUFFIXES include ufsparse
-    ${_UMFPACK_SEARCH_OPTS}
+    ${_UMFPACK_INC_SEARCH_OPTS}
     )
 endif()
 

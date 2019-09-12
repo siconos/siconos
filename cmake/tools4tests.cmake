@@ -384,9 +384,23 @@ macro(set_ldlibpath)
   endif()
 endmacro()
 
-# Declaration of a siconos test based on python bindings
+# ----------------------------------------
+# Declaration of a siconos test run with python.
+#
+# Usage :
+#
+#  add_pythons_test(<name> <file>)
+#
+# Result :
+#
+#  Add a test :
+#  - named <name>
+#  - that will be run using python
+#  - with PYTHONPATH set to ${CMAKE_BINARY_DIR}/wrap
+# 
 function(add_python_test test_name test_file)
-  add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
+  # add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
+  add_test(${test_name} ${PYTHON_EXECUTABLE} ${DRIVE_LETTER}${test_file})
   set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
   set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BINARY_DIR}/wrap")
@@ -424,7 +438,9 @@ endfunction()
 #  * DEPS : list of targets that must be linked with c/c++ plugins used by python tests
 #  * EXCLUDE : list of python files (path relative to current source dir) that
 #    must not be run as tests.
-# Both DEPS and EXCLUDE are optional.
+# 
+# both DEPS and EXCLUDE are optional.
+#
 function(build_python_tests)
   set(multiValueArgs DEPS EXCLUDE)
   cmake_parse_arguments(test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
@@ -457,6 +473,7 @@ function(build_python_tests)
 	${SICONOS_SWIG_ROOT_DIR}/tests/CAD/${datafile} COPYONLY)
     endforeach()
   endif()
+
   if(CROSSCOMPILING_LINUX_TO_WINDOWS)
     set(EMULATOR "wine")
     set(DRIVE_LETTER "Z:")
@@ -472,9 +489,7 @@ function(build_python_tests)
     foreach(file ${testfiles})
       get_filename_component(testname ${file} NAME_WE)
       get_filename_component(exename ${file} NAME)
-      # Each file is copy to siconos/tests.
-      # Maybe we can create a 'tests' dir for each subpackage?
-      # --> Easier to deal with plugins and data if only one package
+      # Each file is copied into siconos/tests.
       configure_file(${file} ${SICONOS_SWIG_ROOT_DIR}/tests COPYONLY)
       set(name "python_${testname}")
       set(exename ${SICONOS_SWIG_ROOT_DIR}/tests/${exename})

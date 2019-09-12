@@ -1715,22 +1715,50 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             time = self.current_time()
             contact_points = self._io.contactPoints(self._nsds,
                                                     self._contact_index_set)
-            
+
             if contact_points is not None:
                 current_line = self._cf_data.shape[0]
+                # Increase the number of lines in cf_data
+                # (h5 dataset with chunks)
                 self._cf_data.resize(current_line + contact_points.shape[0], 0)
                 times = np.empty((contact_points.shape[0], 1))
                 times.fill(time)
 
-
-                
-                if self._dimension == 3 :
+                if self._dimension == 3:
+                    new_contact_points = np.zeros((contact_points.shape[0],25))
+                     
+                    new_contact_points[:, 0] = contact_points[:,0] # mu
+                    new_contact_points[:, 1] = contact_points[:,1] # posa
+                    new_contact_points[:, 2] = contact_points[:,2]
+                    #new_contact_points[:,3]
+                    new_contact_points[:,4] = contact_points[:,3] # posb
+                    new_contact_points[:,5] = contact_points[:,4]
+                    #new_contact_points[:,6]
+                    new_contact_points[:,7] = contact_points[:,5] # nc
+                    new_contact_points[:,8] = contact_points[:,6]
+                    #new_contact_points[:,9]
+                    new_contact_points[:,10] = contact_points[:,7] # cf 
+                    new_contact_points[:,11] = contact_points[:,8]
+                    #new_contact_points[:,12]
+                    new_contact_points[:,13] = contact_points[:,9] # gap
+                    new_contact_points[:,14] = contact_points[:,10]
+                    #new_contact_points[:,15]
+                    new_contact_points[:,16] = contact_points[:,11] # relative velocity
+                    new_contact_points[:,17] = contact_points[:,12]
+                    #new_contact_points[:,18]
+                    new_contact_points[:,19] = contact_points[:,13] # reaction impulse
+                    new_contact_points[:,20] = contact_points[:,14]
+                    #new_contact_points[:,21]
+                    new_contact_points[:,22] = contact_points[:,15] # inter id
+                    new_contact_points[:,23] = contact_points[:,16] # ds 1
+                    new_contact_points[:,24] = contact_points[:,17] # ds 2
+        
                     self._cf_data[current_line:, :] = \
                         np.concatenate((times,
                                         contact_points),
                                        axis=1)
-  
-                elif self._dimension == 2 :
+
+                elif self._dimension == 2:
                     
                     # VA. change the contact info such that is corresponds to a 3D object
                      new_contact_points=np.zeros((contact_points.shape[0],25))

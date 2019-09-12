@@ -9,24 +9,12 @@
 # Usage :
 # 
 # find_package(siconos)
-# include_directories(${siconos_INCLUDE_DIRECTORIES})
-# # ... define some target ...
+#  ... define some target ...
 # target_link_libraries(my_target ${siconos_LIBRARIES})
 #
-# A call to find_package(siconos) 
-# will set the following variables :
-#
-# siconos_INCLUDE_DIR = where to find siconos headers
-# siconos_INCLUDE_DIRS : The final set of include directories listed in one variable for use by client code. It includes both path to siconos headers and path to external libraries headers
-# siconos_LIBRARIES : the libraries to link against to use siconos
-# siconos_EXTERNAL_LIBRARIES : the libraries on which siconos libs depend.
-# siconos_ROOT_DIR : where to find the base directory of siconos
-# siconos_FOUND : true if the find process went fine
+# A call to find_package(siconos) will define targets
+# Siconos::<component> with component = externals, numerics, kernel ...
 # 
-# 
-# Note : var names chosen as recommended here :
-# https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html#manual:cmake-developer(7)
-#
 
 @PACKAGE_INIT@
 
@@ -44,9 +32,6 @@ set(installed_targets "@installed_targets@")
 # Path (relative to siconos install) to cmake extra tools
 set(ConfigPackageLocation @ConfigPackageLocation@)
 
-# set list of external libraries
-set(${PACKAGE_NAME}_EXTERNAL_LIBRARIES "@SICONOS_LINK_LIBRARIES@")
-
 # include siconos project targets
 include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")
 
@@ -63,9 +48,6 @@ set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
 # mechanics (and/or mechanisms) component with oce?
 set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
 
-# set list of include dirs for external libraries
-set(${PACKAGE_NAME}_INCLUDE_DIRECTORIES @SICONOS_INCLUDE_DIRECTORIES@)
-list(APPEND ${PACKAGE_NAME}_INCLUDE_DIRECTORIES @CMAKE_INSTALL_PREFIX@/include/siconos)
 set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
 
 

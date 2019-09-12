@@ -147,16 +147,16 @@ endif()
 # -- Submission to cdash --
 message("\n\n=============== Start ctest_submit =============== ")
 ctest_submit(
-  PARTS Configure
-  CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS)
+#   PARTS Configure
+#   CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS)
 
-ctest_submit(
-  PARTS Build
-  CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS)
+# ctest_submit(
+#   PARTS Build
+#   CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS)
 
 
-ctest_submit(
-  PARTS Test
+# ctest_submit(
+#   PARTS Test
   CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS
 #RETRY_COUNT 4 # Retry 4 times, if submission failed ...)
 #  RETRY_DELAY 1 # seconds

@@ -112,7 +112,7 @@ if(GAMS_ROOT)
 endif()
 
 # --- Path Ferris --
-find_package(PathFerris QUIET)
+find_package(PathFerris)
 if(PathFerris_FOUND)
   set(HAVE_PATHFERRIS TRUE CACHE INTERNAL "True if Path solver has been found and is activated.")
   target_link_libraries(numerics PRIVATE PathFerris::PathFerris)
@@ -123,7 +123,7 @@ if(PathFerris_FOUND)
 endif()
 
 # --- Path VI ---
-find_package(PathVI QUIET)
+find_package(PathVI)
 if(PathVI_FOUND)
   set(HAVE_PATHVI TRUE CACHE INTERNAL "True if Path solver has been found and is activated.")
   target_link_libraries(numerics PRIVATE PathVI::PathVI)

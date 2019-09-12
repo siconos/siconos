@@ -43,24 +43,12 @@ if(NOT CPLEX_ROOT)
     set(CPLEX_ROOT $ENV{CPLEX_ROOT})
 endif()
 
-if(CPLEX_ROOT)
-  set(_CPLEX_SEARCH_OPTS
-    HINTS ${CPLEX_ROOT}
-    NO_DEFAULT_PATH)
-else()
-  # Try pkgconfig
-  find_package(PkgConfig QUIET)
-  pkg_check_modules(PKGC_CPLEX cplex QUIET)
-  if(PKGC_CPLEX_FOUND)
-    set(CPLEX_LIBRARIES "${PKGC_CPLEX_LINK_LIBRARIES}")
-  endif()
-  set(_CPLEX_SEARCH_OPTS
-    HINTS ${PKGC_CPLEX_INCLUDE_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH)
-endif()
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME CPLEX MODULE cplex)
 
 find_path(CPLEX_INCLUDE_DIR NAMES CPLEX.h
   PATH_SUFFIXES include
-  ${_CPLEX_SEARCH_OPTS}
+  ${_CPLEX_INC_SEARCH_OPTS}
   )
 
 if(NOT CPLEX_LIBRARIES)

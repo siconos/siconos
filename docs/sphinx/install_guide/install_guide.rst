@@ -216,7 +216,7 @@ Developers or advanced users options
 
 * WITH_GENERATION:
 
-* WITH_CXX=ON/OFF : to enable/disable c++ compilation of the numerics package
+* WITH_CXX=ON/OFF : to enable/disable c++ compilation of the numerics package. Must be ON if kernel component is used.
 
 * BUILD_SHARED_LIBS=ON/OFF : to build shared (ON) or static (OFF) for the siconos package.
 

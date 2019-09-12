@@ -64,6 +64,9 @@ include(WindowsKernelSetup)
 include(ComponentSetup)
 create_siconos_component(${COMPONENT})
 
+# We require C++ 11. PUBLIC to propagate to other components.
+target_compile_features(kernel PUBLIC cxx_std_11)
+
 # --- Extra setup for the component ---
 
 # Links with other Siconos components

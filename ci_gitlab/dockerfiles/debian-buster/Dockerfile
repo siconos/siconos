@@ -16,6 +16,7 @@ RUN apt update  && apt install -y -qq \
         lp-solve \
         liblpsolve55-dev \
         libpython3-dev \
+        libsuitesparse-dev \
         doxygen \
         libcppunit-dev \
         libbullet-dev \

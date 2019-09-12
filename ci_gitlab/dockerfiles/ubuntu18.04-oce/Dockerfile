@@ -8,4 +8,5 @@ WORKDIR /home
 COPY install_oce.sh .
 ENV CI_PROJECT_DIR /home
 RUN sh /home/install_oce.sh
+ENV PYTHONPATH /home/install/site-packages
 RUN apt clean && apt autoremove

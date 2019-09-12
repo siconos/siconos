@@ -1784,7 +1784,7 @@ int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B)
   case NM_SPARSE:
   {
     assert(A->matrix2);
-    info = NSM_to_dense(A->matrix2, B->matrix0);
+    info  = NSM_to_dense(A->matrix2, B->matrix0);
     break;
   }
   default:

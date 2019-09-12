@@ -35,7 +35,7 @@ docker-build:debian-stretch:
 
 # This job create a docker image with all required dependencies
 # (including serialization, python wrapper, bullet but not OCE)
-# It's based on debian stretch
+# It's based on debian buster
 docker-build:debian-buster:
   variables:
     IMAGE_NAME: debian-buster
@@ -121,16 +121,16 @@ install_siconos:ubuntu18.04:
 
 # Siconos build and install, default config
 # (based on cmake/default_siconos.cmake)
-# on debian stretch
+# on debian buster
 install_siconos:debian-buster:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/debian-buster
     cdash_submit: 1
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends: .siconos-build
-  artifacts:
-    paths:
-      - build
+  # artifacts:
+  #   paths:
+  #     - build
 
       
 # Siconos build and install, default config
@@ -142,9 +142,9 @@ install_siconos:opensuse-leap-15.0:
     cdash_submit: 1
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends: .siconos-build
-  artifacts:
-    paths:
-      - build
+  # artifacts:
+  #   paths:
+  #     - build
 
 
 # Siconos build and install, without python wrappers
@@ -192,12 +192,10 @@ install_siconos:ubuntu18.04-fclib:
 install_siconos:ubuntu18.04-serialization:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
-    cdash_submit: 1
+    cdash_submit: 0 # No submit to cdash : too unstable.
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
   extends: .siconos-build
   allow_failure: true
-
-
   
 
 # --- Build doc/web site and publish it ---

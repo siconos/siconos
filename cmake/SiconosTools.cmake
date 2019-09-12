@@ -100,65 +100,9 @@ function(get_sources COMPONENT)
   set(${COMPONENT}_SRCS ${SOURCES_FILES} PARENT_SCOPE)
 endfunction()
 
-# Scans DIRS (list of directories) and returns a list of all files in those dirs
-# matching extensions defined in HDR_EXTS list.
-# Results are saved in HDRS_FILES
-#
-# Usage:
-# set(src_dirs dir1 dir2)
-# get_headers(src_dirs)
-macro(get_headers DIRS)
-  set(HDRS_FILES)
-  foreach(DIR ${ARGV})
-    foreach(_EXT ${HDR_EXTS})
-      file(GLOB FILES_LIST ${DIR}/*.${_EXT})
-      if (INSTALL_INTERNAL_HEADERS AND FILES_LIST)
-	list(APPEND HDRS_FILES ${FILES_LIST})
-      else()
-        # filter out header paths containing the word "internal"
-        # (stemming from component dir.. otherwise we'd have trouble
-        # if workdir path contains the string "internal")
-        foreach(_HDR ${FILES_LIST})
-          if (_HDR AND NOT "${_HDR}" MATCHES "${_COMPONENT}/.*internal")
-	    list(APPEND HDRS_FILES ${_HDR})
-          endif()
-        endforeach()
-      endif()
-    endforeach()
-  endforeach()
-  list(LENGTH HDRS_FILES _HDRS_FILES_LEN)
-  if (_HDRS_FILES_LEN GREATER 1)
-    list(REMOVE_DUPLICATES HDRS_FILES)
-  endif()
-endmacro()
-
-
 # Print cmake variable 'V' value
 macro(PRINT_VAR V)
   message(STATUS "${V} = ${${V}}")
-endmacro()
-
-
-# ==== Save directories required for include_directory ===
-# 
-# Set variable ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES with the list
-# of directories of headers of each siconos component.
-#
-# Usage :
-# set(dirs d1 d2 d3)
-# remember_local_include(${dirs})
-#  --> save d1, d2, d3 into ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
-#
-# mind the ${CMAKE_CURRENT_SOURCE_DIR} below!
-macro(remember_local_include_directories _DIRS)
-  foreach(_D ${_DIRS})
-    list(APPEND ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
-      ${CMAKE_CURRENT_SOURCE_DIR}/${_D})
-  endforeach()
-  list(REMOVE_DUPLICATES ${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES)
-  set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
-    ${${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES}
-    CACHE INTERNAL "Include directories for external dependencies.")
 endmacro()
 
 
@@ -181,7 +125,6 @@ MACRO(WRITE_NOTES)
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler version : ${CMAKE_Fortran_COMPILER_VERSION}\n")
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "BLAS libraries : ${BLAS_LIBRARIES}\n")
     FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "LAPACK libraries : ${LAPACK_LIBRARIES}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "all libraries : ${SICONOS_LINK_LIBRARIES}\n")
   ENDIF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
 ENDMACRO(WRITE_NOTES)
 
@@ -241,3 +184,60 @@ function(print_mpi_info lang)
   message("- libraries: ${MPI_${lang}_LIBRARIES}")
   message("-------------------------------------------------------------------------\n")
 endfunction()
+
+
+# Try to provide some hints for a find_package call.
+# 
+# Usage:
+#
+# set_find_package_hints(NAME <name> MODULE <mod>)
+#
+# 
+# Result : set (parent scope) _<NAME>_SEARCH_OPTS and _<NAME>_INC_SEARCH_OPTS
+# that can be used in find_path (INC_SEARCH) and find_library calls.
+#
+# These variables are filled either with <NAME>_ROOT value if set
+# or using pkg-config information, if available.
+#
+# See examples of use in FindCPPUNIT.cmake or FindSuperLU.cmake.
+# 
+function(set_find_package_hints)
+  set(oneValueArgs NAME MODULE)
+
+  cmake_parse_arguments(pkg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  if(${pkg_NAME}_ROOT)
+    set(_${pkg_NAME}_SEARCH_OPTS
+      HINTS ${${pkg_NAME}_ROOT} NO_DEFAULT_PATH PARENT_SCOPE)
+    set(_${pkg_NAME}_INC_SEARCH_OPTS
+      HINTS ${${pkg_NAME}_ROOT} NO_DEFAULT_PATH PARENT_SCOPE)
+  else()
+    # Try pkgconfig
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(PKGC_${pkg_NAME} ${pkg_MODULE} QUIET)
+    if(PKGC_${pkg_NAME}_FOUND)
+      set(_${pkg_NAME}_INC_SEARCH_OPTS "HINTS ${PKGC_${pkg_NAME}_INCLUDE_DIRS}"
+        PARENT_SCOPE)
+    endif()
+    set(_${pkg_NAME}_SEARCH_OPTS
+      HINTS ${PKGC_${pkg_NAME}_LIBRARY_DIRS} ENV LD_LIBRARY_PATH ENV DYLD_LIBRARY_PATH
+      PARENT_SCOPE)
+  endif()
+  
+endfunction()
+
+# ------------------------------------
+# Get the list of subdirectories
+# of a given dir
+# Useful only in examples ...
+# ------------------------------------
+macro(get_subdirectories result current_dir)
+  file(GLOB subdirs RELATIVE ${current_dir} ${current_dir}/*)
+  set(dirs "")
+  foreach(_dir ${subdirs})
+    if(IS_DIRECTORY ${current_dir}/${_dir})
+      list(APPEND dirs ${_dir})
+    endif()
+  endforeach()
+  set(${result} ${dirs})
+endmacro()
