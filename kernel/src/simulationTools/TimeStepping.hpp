@@ -329,8 +329,9 @@ public:
   /** get the maximum number of Newton iteration
    *  \return maximum number of Newton solver iterations
    */
-  double newtonMaxIteration()
+  unsigned int newtonMaxIteration()
   {
+
     return _newtonMaxIteration;
   };
 
