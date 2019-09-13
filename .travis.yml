@@ -67,8 +67,8 @@ before_script:
 
 script:
   - if test "$TRAVIS" = true; then
-      ../CI/driver.py --run --root-dir=.. --task="$TASK";
+      ../ci_travis/driver.py --run --root-dir=.. --task="$TASK";
     else
-      ../CI/driver.py --run --root-dir=..;
+      ../ci_travis/driver.py --run --root-dir=..;
     fi
 
