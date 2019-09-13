@@ -18,7 +18,6 @@ macro(add_docker_targets)
 
   if(DOCKER_TEMPLATES)
     string(REPLACE "," ";" DOCKER_TEMPLATES_LIST ${DOCKER_TEMPLATES})
-
     string(REPLACE "," "-" DOCKER_IMAGE ${DOCKER_TEMPLATES})
     string(REPLACE "+" "x" DOCKER_IMAGE ${DOCKER_IMAGE})
     string(REPLACE "/" "-" DOCKER_IMAGE ${DOCKER_IMAGE})
@@ -50,14 +49,15 @@ macro(add_docker_targets)
 
   # Default behavior: use all components but mechanisms
   if(NOT SICONOS_COMPONENTS)
-	include(Tools)
-	set_components(externals;numerics;kernel;control;mechanics;io)
+    include(Tools)
+    set_components(externals;numerics;kernel;control;mechanics;io)
   endif()
+  
   # ================== Create Dockerfile ==================
   #
   # Set Dockerfile name
   set(GENERATED_DOCKER_FILE ${CMAKE_CURRENT_BINARY_DIR}/Docker/Context/${DOCKER_REPOSITORY}/${DOCKER_IMAGE_AS_DIR}/Dockerfile)
-
+  
   file(REMOVE ${GENERATED_DOCKER_FILE})
 
   message(STATUS "Docker templates list is : ${DOCKER_TEMPLATES_LIST}")
@@ -98,7 +98,7 @@ macro(add_docker_targets)
   # like SITE, config file ...
   set(CTEST_OPTIONS -DWITH_DOCKER=0;-V)
 
-
+  
   foreach(_f ${CTEST_OPTIONS})
 	string(REGEX MATCH "^-DDOCKER_.*" _mf ${_f})
 	if (NOT _mf)
@@ -138,7 +138,7 @@ macro(add_docker_targets)
 
 
   # ================== Create targets ==================
-
+  set(ENV{CI_PROJECT_DIR} ${CMAKE_SOURCE_DIR}/..)
   #
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-clean-usr-local
@@ -195,68 +195,77 @@ macro(add_docker_targets)
     COMMENT "Docker cmd : ${DOCKER_IMAGE}"
     COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --env SOURCE_DIR=${DOCKER_PROJECT_SOURCE_DIR} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} )
 
+  set(DOCKER_COMMAND_FULL
+    ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR})
+
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-cmake
     COMMENT "Docker cmake : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ${DOCKER_CMAKE_WRAPPER} ${DOCKER_PROJECT_SOURCE_DIR} ${SICONOS_CMAKE_OPTIONS} -DCOMPONENTS=${SICONOS_COMPONENTS} VERBATIM)
+    COMMAND ${DOCKER_COMMAND_FULL} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ${DOCKER_CMAKE_WRAPPER} ${DOCKER_PROJECT_SOURCE_DIR} ${SICONOS_CMAKE_OPTIONS} -DCOMPONENTS=${SICONOS_COMPONENTS} VERBATIM)
 
   # == target to run make inside previously created docker container ==
   # Build siconos inside docker container
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make
     COMMENT "Docker make : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_FLAGS})
+    COMMAND ${DOCKER_COMMAND_FULL} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_FLAGS})
 
   # == target to run make test inside previously created docker container ==
   # Make test (siconos) inside docker container
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make-test
     COMMENT "Docker make test : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_TEST_FLAGS} test)
+    COMMAND ${DOCKER_COMMAND_FULL} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_TEST_FLAGS} test)
 
   # == target to install siconos inside previously created docker container ==
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make-install
     COMMENT "Docker make install : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_INSTALL_FLAGS} -ki install)
+    COMMAND ${DOCKER_COMMAND_FULL} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_INSTALL_FLAGS} -ki install)
 
   # == target to uninstall siconos inside previously created docker container ==
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make-uninstall
     COMMENT "Docker make uninstall : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_INSTALL_FLAGS} -ki uninstall)
-
-  # == target to create doc inside previously created docker container ==
-  add_custom_target(
-    ${DOCKER_IMAGE_AS_DIR}-make-doc
-    COMMENT "Docker make doc : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_DOC_FLAGS} -ki doc)
+    COMMAND ${DOCKER_COMMAND_FULL} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_INSTALL_FLAGS} -ki uninstall)
 
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make-upload
     COMMENT "Docker make upload : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_UPLOAD_FLAGS} -ki upload)
+    COMMAND ${DOCKER_COMMAND_FULL} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_UPLOAD_FLAGS} -ki upload)
 
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-make-clean
     COMMENT "Docker make clean : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_CLEAN_FLAGS} clean)
+    COMMAND ${DOCKER_COMMAND_FULL} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} make ${DOCKER_MAKE_CLEAN_FLAGS} clean)
 
+  # --- ctest targets ---
+  set(CTEST_COMMAND ctest
+    -DCTEST_SOURCE_DIRECTORY=${DOCKER_PROJECT_SOURCE_DIR} # default = env(CI_PROJECT_DIR)
+    -DCTEST_BINARY_DIRECTORY=${DOCKER_WORKDIR}            # default = .
+    -DCTEST_BUILD_CONFIGURATION=${BUILD_CONFIGURATION}    # default = release
+    -S ${DOCKER_CTEST_DRIVER}                             # ctest driver file
+    -DCTEST_SITE=${DOCKER_HOSTNAME}                       # site name for cdash
+    -Dmodel=${DOCKER_CTEST_MODE}                          # ctest model (Exp, Continuous ...)
+    )
+
+  # Run ctest, no submission
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-ctest
     COMMENT "Docker ctest : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ctest -DCTEST_SOURCE_DIRECTORY=${DOCKER_PROJECT_SOURCE_DIR} -DCTEST_BINARY_DIRECTORY=${DOCKER_WORKDIR} -S ${DOCKER_CTEST_DRIVER} -DSUBMIT=0 -DSITE=${DOCKER_HOSTNAME} -DCMAKE_WRAPPER=${DOCKER_CMAKE_WRAPPER} ${CTEST_OPTIONS_WITHOUT_DOCKER})
+    COMMAND ${DOCKER_COMMAND_FULL} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ${CTEST_COMMAND} -DCDASH_SUBMIT=0 ${CTEST_OPTIONS_WITHOUT_DOCKER})
 
   # submit to cdash, without recording failures
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-submit
     COMMENT "Docker ctest : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ctest -DCTEST_SOURCE_DIRECTORY=${DOCKER_PROJECT_SOURCE_DIR} -DCTEST_BINARY_DIRECTORY=${DOCKER_WORKDIR} -S ${DOCKER_CTEST_DRIVER} -DSUBMIT=1 -DSITE=${DOCKER_HOSTNAME} -DCMAKE_WRAPPER=${DOCKER_CMAKE_WRAPPER} ${CTEST_OPTIONS_WITHOUT_DOCKER} || /bin/true)
+    COMMAND ${DOCKER_COMMAND_FULL} -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} ${CTEST_COMMAND} -DCDASH_SUBMIT=1 ${CTEST_OPTIONS_WITHOUT_DOCKER} || /bin/true)
 
+  # Start container, interactive modex
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-interactive
     COMMENT "Docker interactive : ${DOCKER_IMAGE}"
-    COMMAND ${DOCKER_COMMAND} run -h ${DOCKER_HOSTNAME} --rm=true ${DOCKER_VFLAGS} --volumes-from=${DOCKER_WORKDIR_VOLUME} --volumes-from=${DOCKER_REPOSITORY}-${DOCKER_IMAGE}-usr-local --workdir=${DOCKER_WORKDIR} -i -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} /bin/bash)
+    COMMAND  ${DOCKER_COMMAND_FULL}  -ti ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} /bin/bash)
 
   add_custom_target(
     docker-hard-clean
@@ -378,7 +387,6 @@ macro(add_docker_targets)
   add_dependencies(docker-make-test ${DOCKER_IMAGE_AS_DIR}-make-test)
   add_dependencies(docker-make-install ${DOCKER_IMAGE_AS_DIR}-make-install)
   add_dependencies(docker-make-uninstall ${DOCKER_IMAGE_AS_DIR}-make-uninstall)
-  add_dependencies(docker-make-doc ${DOCKER_IMAGE_AS_DIR}-make-doc)
   add_dependencies(docker-make-upload ${DOCKER_IMAGE_AS_DIR}-make-upload)
   add_dependencies(docker-make-clean ${DOCKER_IMAGE_AS_DIR}-make-clean)
   add_dependencies(docker-ctest ${DOCKER_IMAGE_AS_DIR}-ctest)

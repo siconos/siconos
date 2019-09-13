@@ -4,6 +4,9 @@ import sys
 from tasks import siconos_default
 from getopt import gnu_getopt, GetoptError
 from pathlib import Path
+from machinery.mksenv import print_commands, output_mode_spec
+import tasks  # Import pre-defined tasks for siconos/travis jobs.
+from machinery.ci_task import CiTask
 
 import functools
 
@@ -59,7 +62,6 @@ for o, a in opts:
         root_dir = Path(a).resolve()
 
     if o in ('--task',):
-        import tasks
 
         def arg_check(acc, kv):
             k, v = kv.split('=')
@@ -99,8 +101,6 @@ for o, a in opts:
         task = getattr(tasks, task_name).copy()(**task_parameters)
 
     if o in ('--list-tasks',):
-        import tasks
-        from machinery.ci_task import CiTask
         for s in dir(tasks):
             if isinstance(getattr(tasks, s), CiTask):
                 print(s)
@@ -117,20 +117,18 @@ for o, a in opts:
         dry_run = True
 
 if root_dir is None:
+    # Assumes Siconos is in the parent dir of this file.
     root_dir = Path(__file__).parents[1]
-
 
 # Set tasks list : read task from command line
 # (provided by TASK env variable in Travis)
 if task is None:
-    tasks = [siconos_default]
+    tasks_list = [siconos_default]
 else:
-    tasks = [task]
+    tasks_list = [task]
 
 if print_mode:
-    from machinery.mksenv import print_commands, output_mode_spec
-
-    for task in tasks:
+    for task in tasks_list:
         # For each task, print the 'command' file (dockerfile, script ...)
         # for the given configuration
         distrib, distrib_version = task._distrib.split(':')
@@ -140,14 +138,11 @@ if print_mode:
                        output_mode=output_mode_spec[output_mode_str],
                        split=False)
 
-for task in tasks:
-
+for task in tasks_list:
     return_code += task.run(root_dir, dry_run=dry_run)
-
     print('return code {0}'.format(return_code))
 
-if run:
-    for task in tasks:
+    if run:
         try:
             return_code += task.clean()
             print('return code {0}'.format(return_code))

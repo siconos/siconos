@@ -8,36 +8,23 @@ A task, see :class:`machinery.ci_tasks.CiTask` must be defined with at least:
 * a list of dependencies (pkgs)
 
 """
-from machinery.ci_task import CiTask
-import os
+from machinery.ci_task import SiconosCiTask
 from os.path import expanduser
-
-# not generic, to be moved somewhere else
-#
-
-
-class SiconosCiTask(CiTask):
-
-    def __init__(self, *args, **kwargs):
-        return super(SiconosCiTask, self).__init__(*args, **kwargs)
-
-    def template_maker(self):
-        unwanted_for_sitename = [
-            'build-base', 'gfortran', 'gnu-c++', 'lpsolve', 'wget', 'xz',
-            'asan', 'cppunit_clang', 'python-env', 'profiling', 'path',
-            'h5py3']
-        return '-'.join([p.replace('+', 'x')
-                         for p in self._pkgs if p not in
-                         unwanted_for_sitename])
-
 
 # PLEASE KEEP CONFIGS AS WHAT THEY MEAN.
 # DO NOT ADD PACKAGES IF THEY ARE NOT NECESSARY.
 
 empty = SiconosCiTask()
 
-# 1. Define a default task
-#
+# 1. Define a default task, that will be used as basis for all other tasks.
+# - build a docker container
+# - distrib : docker image name
+# - ci_config : siconos config(s) name(s)
+# - pkgs : list of deps to be installed
+# - srcs : path to main CMakeLists.txt
+# - targets : list of cmake targets to be executed.
+# - fast : default = True, set false to clean properly docker containers before
+#          run.
 siconos_default = SiconosCiTask(
     docker=True,
     ci_config='default',
@@ -47,7 +34,8 @@ siconos_default = SiconosCiTask(
     srcs=['.'],
     targets={'.': ['docker-build', 'docker-ctest', 'docker-submit']})
 
-default = siconos_default # needed by Travis ...
+default = siconos_default  # shortcut for .travis.yml
+
 #
 # 2. Define all the tasks
 #

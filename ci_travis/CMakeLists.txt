@@ -28,7 +28,8 @@ if(WITH_DOCKER)
     set(DOCKER_MKSENV_COMMAND ${CMAKE_SOURCE_DIR}/machinery/mksenv.py)
     set(DOCKER_MKSENV_INPUT ${CMAKE_SOURCE_DIR}/config/siconos.yml)
     set(DOCKER_REPOSITORY ci_driver)
-    set(DOCKER_CTEST_DRIVER ${CMAKE_SOURCE_DIR}/machinery/CTestDriver.cmake)
+    # ctest driver file
+    set(DOCKER_CTEST_DRIVER ${CMAKE_SOURCE_DIR}/ctest_driver_install_siconos.cmake)
     set(DOCKER_CTEST_MODE ${MODE})
     include(Docker)
 

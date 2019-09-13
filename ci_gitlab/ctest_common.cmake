@@ -27,6 +27,7 @@ if(NOT CTEST_CMAKE_GENERATOR)
 endif()
 
 # -- Query host system information --
+# --> to set ctest site for cdash.
 #include(cmake_host_system_information)
 cmake_host_system_information(RESULT hostname QUERY HOSTNAME)
 cmake_host_system_information(RESULT fqdn QUERY FQDN)
@@ -99,7 +100,7 @@ endif()
 # --- Build ---
 
 if(NOT CTEST_BUILD_CONFIGURATION)
-  set(CTEST_BUILD_CONFIGURATION "Profiling")
+  set(CTEST_BUILD_CONFIGURATION "Release")
 endif()
 
 message("\n\n=============== Start ctest_build =============== ")
@@ -131,6 +132,14 @@ ctest_test(
   )
 message("=============== End of ctest_test =============== ")
 message("------> Test status/result : ${TEST_STATUS}/${TEST_RESULT}")
+
+if (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
+  ctest_coverage()
+endif (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
+if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+  ctest_memcheck()
+endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+
 # error status check later, we try to submit even if tests failed.
 
 # -- memory check -- Skip this to 'enlight' submit process, since cdash inria is overbooked ...
@@ -146,7 +155,10 @@ endif()
 
 # -- Submission to cdash --
 message("\n\n=============== Start ctest_submit =============== ")
+# file(GLOB SUBMIT_FILES ${CMAKE_BINARY_DIR}/Testing/*/*)
+# message(STATUS "submit files : ${SUBMIT_FILES}")
 ctest_submit(
+#  FILES ${SUBMIT_FILES}
 #   PARTS Configure
 #   CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS)
 # ctest_submit(
