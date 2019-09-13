@@ -961,7 +961,7 @@ class MechanicsHdf5(object):
 
         if (self._dimension ==3):
             if orientation is None  : orientation= [1,0,0,0]
-            if velocity is None  : velocity= [0,0,0]
+            if velocity is None  : velocity= [0,0,0,0,0,0]
             ori = quaternion_get(orientation)
             assert (len(translation)==3)
             assert (len(ori)==4)
