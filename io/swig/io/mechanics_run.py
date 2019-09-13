@@ -28,7 +28,8 @@ import siconos.numerics as Numerics
 from siconos.kernel import \
     EqualityConditionNSL, \
     Interaction, DynamicalSystem, TimeStepping,\
-    SICONOS_OSNSP_TS_VELOCITY
+    SICONOS_OSNSP_TS_VELOCITY,\
+    cast_FrictionContact
 import siconos.kernel as Kernel
 
 # Siconos Mechanics imports
@@ -86,6 +87,8 @@ def setup_default_classes():
     default_simulation_class = TimeStepping
     default_body_class = RigidBodyDS
     if backend == 'bullet':
+        if not have_bullet:
+            print('[mechanics_run] WARNING : The backend for collision is bullet but it seems that bullet is not linked with siconos')
         def m(options):
             if options is None:
                 options = SiconosBulletOptions()
@@ -1936,6 +1939,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         newtonNbIterations =0
         isNewtonConverge =False
+        explode_computeOneStep = False
+
         self.log(s.initializeNewtonLoop, with_timer)()
         while (not isNewtonConverge) and (newtonNbIterations <newtonMaxIteration):
             #self.print_verbose('newtonNbIterations',newtonNbIterations)
@@ -1944,7 +1949,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.log(s.prepareNewtonIteration, with_timer)()
             self.log(s.computeFreeState, with_timer)()
             if s.numberOfOSNSProblems() >0:
-                info = self.log(s.computeOneStepNSProblem, with_timer)(SICONOS_OSNSP_TS_VELOCITY)
+                if explode_computeOneStep:
+                    # experimental
+                    osnsp=s.oneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY)
+                    #info = self.log(osnsp.compute, with_timer)(s.nextTime())
+                    fc = cast_FrictionContact(osnsp)
+                    #self.log(fc.updateInteractionBlocks, with_timer)()
+                    self.log(fc.preCompute, with_timer)(s.nextTime())
+                    self.log(fc.updateMu, with_timer)()
+                    info = self.log(fc.solve, with_timer)()
+                    self.log(fc.postCompute, with_timer)()
+                else:
+                    info = self.log(s.computeOneStepNSProblem, with_timer)(SICONOS_OSNSP_TS_VELOCITY)
             self.log(s.DefaultCheckSolverOutput, with_timer)(info);
             self.log(s.updateInput, with_timer)();
             self.log(s.updateState, with_timer)();
@@ -2372,12 +2388,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 number_of_contacts = (
                     self._interman.statistics().new_interactions_created
                     + self._interman.statistics().existing_interactions_processed)
+                if verbose and number_of_contacts > 0 :
+                    self.print_verbose('number of contacts', number_of_contacts, '(detected)', osnspb.getSizeOutput()//3, '(active at velocity level. approx)')
+                    self.print_solver_infos()
+
             else:
                 number_of_contacts = osnspb.getSizeOutput()//3
+                if verbose and number_of_contacts > 0 :
+                    self.print_verbose('number of active contacts  at the velocity level (approx)', number_of_contacts)
+                    self.print_solver_infos()
             
-            if verbose and number_of_contacts > 0 :
-                self.print_verbose('number of contacts', number_of_contacts)
-                self.print_solver_infos()
 
             if violation_verbose and number_of_contacts > 0 :
                 if len(simulation.y(0,0)) >0 :
