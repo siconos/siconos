@@ -346,6 +346,10 @@ KERNEL_REGISTRATION()
     return std11::dynamic_pointer_cast<NewtonEuler1DR>(r);
   }
 
+  SP::FrictionContact cast_FrictionContact(SP::OneStepNSProblem osnpb)
+  {
+    return std11::dynamic_pointer_cast<FrictionContact>(osnpb);
+  }
 
   // Required to get size of a graph of interactions in python interp
   size_t size_graph(const InteractionsGraph& index_set)
