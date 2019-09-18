@@ -57,7 +57,7 @@ extern "C"
     }
     for (i =0; i <  PyObject_Length(input); i++) {
       PyObject *o = PySequence_GetItem(input,i);
-      res1 = SWIG_ConvertPtrAndOwn(o, &argp1, SWIGTYPE_p_fclib_solution, 0 |  0 , &newmem);
+      res1 = SWIG_ConvertPtrAndOwn(o, &argp1, $descriptor(fclib_solution *), 0 |  0 , &newmem);
       if (!SWIG_IsOK(res1)) {
         Py_XDECREF(o);
         PyErr_SetString(PyExc_ValueError,"Expecting a sequence of fclib_solution");
