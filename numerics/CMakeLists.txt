@@ -109,7 +109,8 @@ target_link_libraries(numerics PRIVATE externals)
 
 # Blas/Lapack from externals
 target_include_directories(numerics PRIVATE $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>/externals/blas_lapack)
-target_link_libraries(numerics INTERFACE $<BUILD_INTERFACE:LAPACK::LAPACK>)
+target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:LAPACK::LAPACK>)
+#target_link_libraries(numerics INTERFACE LAPACK::LAPACK)
 
 if(CMAKE_DL_LIBS)
   # CMAKE_DL_LIBS needed for dlopen or equivalent

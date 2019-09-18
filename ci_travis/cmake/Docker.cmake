@@ -96,7 +96,7 @@ macro(add_docker_targets)
   # Warning : these are not siconos conf. options for cmake but
   # the options needed by ctest to prepare the pipeline (cmake, make ...)
   # like SITE, config file ...
-  set(CTEST_OPTIONS -VV)
+  set(CTEST_OPTIONS -V)
 
   
   foreach(_f ${CTEST_OPTIONS})
@@ -247,7 +247,8 @@ macro(add_docker_targets)
     -S ${DOCKER_CTEST_DRIVER}                             # ctest driver file
     -DCTEST_SITE=${DOCKER_HOSTNAME}                       # site name for cdash
     -Dmodel=${DOCKER_CTEST_MODE}                          # ctest model (Exp, Continuous ...)
-    -DCMAKE_VERBOSE_MAKEFILE=ON)
+    # -DCMAKE_VERBOSE_MAKEFILE=ON
+    )
 
   # Run ctest, no submission
   add_custom_target(
