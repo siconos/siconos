@@ -26,7 +26,7 @@
 
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"
-#include "CSparseMatrix.h" // for freeNSLSP
+//#include "CSparseMatrix.h" // for freeNSLSP
 #include "NM_MPI.h"
 
 /**\struct linalg_data_t NumericsSparseMatrix.h

@@ -129,9 +129,9 @@ if(WITH_OCE)
   # 'private' add limited to current target would be better.
   # But those headers are missing during swig process. Todo : find a proper
   # way to deal with this.
-  target_include_directories(${COMPONENT} PUBLIC ${OCE_INCLUDE_DIRS})
+  target_include_directories(${COMPONENT} PUBLIC $<BUILD_INTERFACE:${OCE_INCLUDE_DIRS}>)
   # Add oce libs to components links
-  target_link_libraries(${COMPONENT} PUBLIC ${OCE_LIBRARIES})
+  target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:${OCE_LIBRARIES}>)
 endif()
 
 # --- python bindings ---

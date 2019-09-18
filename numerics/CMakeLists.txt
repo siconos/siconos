@@ -152,6 +152,24 @@ endif()
 
 # - SuiteSparse -
 # numerics possibly needs suite sparse installed on the system.
+# -- Check size_t value --> choice of CSparse/CXSparse integer size
+if(NOT DEFINED SICONOS_INT64)
+  if(NOT SIZE_OF_CSI)
+    include(CheckTypeSize)
+    check_type_size("size_t" SIZE_OF_CSI)
+    if(NOT SIZE_OF_CSI) # This won't happen with c11
+      message(FATAL_ERROR
+        "Could not get size of size_t, please specify SICONOS_INT64.")
+    endif()
+  endif()
+
+  if("${SIZE_OF_CSI}" EQUAL 8)
+    set(SICONOS_INT64 TRUE CACHE INTERNAL "")
+  else()
+    set(SICONOS_INT64 FALSE CACHE INTERNAL "")
+  endif()
+endif()
+
 if(WITH_SYSTEM_SUITESPARSE)
   #   Note : the CSparse data structures are referred to in
   #   kernel, but the functions are only called from numerics, so it is
@@ -160,6 +178,7 @@ if(WITH_SYSTEM_SUITESPARSE)
   # We should turn public to private later (?)
   # SuiteSparse headers are required by kernel
   target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
+  target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_CXSparse_INCLUDE_DIR}>)
 endif()
 
 # - MLCP Simplex -

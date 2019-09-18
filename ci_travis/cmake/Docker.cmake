@@ -96,7 +96,7 @@ macro(add_docker_targets)
   # Warning : these are not siconos conf. options for cmake but
   # the options needed by ctest to prepare the pipeline (cmake, make ...)
   # like SITE, config file ...
-  set(CTEST_OPTIONS -DWITH_DOCKER=0;-V)
+  set(CTEST_OPTIONS -VV)
 
   
   foreach(_f ${CTEST_OPTIONS})
@@ -165,7 +165,7 @@ macro(add_docker_targets)
   add_custom_target(
     ${DOCKER_IMAGE_AS_DIR}-build
     COMMENT "Docker Build : ${DOCKER_IMAGE}"
-    COMMAND cd Docker/Context/${DOCKER_REPOSITORY}/${DOCKER_IMAGE_AS_DIR} && docker build -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} .
+    COMMAND cd Docker/Context/${DOCKER_REPOSITORY}/${DOCKER_IMAGE_AS_DIR} && docker build -t ${DOCKER_REPOSITORY}/${DOCKER_IMAGE} . > /dev/null
     )
 
   # bind DOCKER_WORKDIR inside container
@@ -247,7 +247,7 @@ macro(add_docker_targets)
     -S ${DOCKER_CTEST_DRIVER}                             # ctest driver file
     -DCTEST_SITE=${DOCKER_HOSTNAME}                       # site name for cdash
     -Dmodel=${DOCKER_CTEST_MODE}                          # ctest model (Exp, Continuous ...)
-    )
+    -DCMAKE_VERBOSE_MAKEFILE=ON)
 
   # Run ctest, no submission
   add_custom_target(

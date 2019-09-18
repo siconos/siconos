@@ -28,7 +28,7 @@ if(NOT CTEST_BUILD_NAME)
   # Get hash for commit of current version of Siconos
   # Saved by CI in CI_COMMIT_SHORT_SHA.
   include(${CTEST_SOURCE_DIRECTORY}/cmake/SiconosVersion.cmake)
-  set(CTEST_BUILD_NAME "Siconos (${SICONOS_VERSION}-devel, branch/commit=$ENV{CI_COMMIT_REF_NAME}/$ENV{CI_COMMIT_SHORT_SHA})")
+  set(CTEST_BUILD_NAME "Siconos (${SICONOS_VERSION}-devel, branch/commit=$ENV{TRAVIS_BRANCH}/$ENV{TRAVIS_COMMIT})")
   if(EXTRA_NAME)
     set(CTEST_BUILD_NAME "${CTEST_BUILD_NAME} - ${EXTRA_NAME}.")
   endif()

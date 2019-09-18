@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "CSparseMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "SiconosLapack.h"
 #include <math.h>
@@ -33,7 +32,6 @@
 /* #define DEBUG_MESSAGES 1 */
 
 #include "debug.h"
-#include "CSparseMatrix.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsMatrix.h"

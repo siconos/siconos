@@ -68,7 +68,7 @@ create_siconos_component(${COMPONENT})
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.8.0")
   target_compile_features(kernel PUBLIC cxx_std_11)
 else()
-  target_compile_option(kernel PUBLIC "-std=c++11")
+  set_property(TARGET kernel PROPERTY CXX_STANDARD 11)
 endif()
 
 # --- Extra setup for the component ---

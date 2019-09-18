@@ -34,12 +34,6 @@ include(SiconosTools)
 # without siconos_DIR, the search for the config fails with a custom prefix
 set(siconos_DIR ${siconos_ROOT_DIR}/@ConfigPackageLocation@)
 find_package(siconos @MAJOR_VERSION@.@MINOR_VERSION@.@PATCH_VERSION@ CONFIG REQUIRED)
-find_package(Boost 1.61 COMPONENTS timer)
-
-# boost timer, optional, mostly useful at runtime.
-# Warning : new timer interface is not compatible with old progress_bar.
-  
-
 
 # === Check required inputs ===
 # Get the name of the main file => name of the executable
@@ -177,6 +171,13 @@ if(_EXE)
     message(STATUS "Including ${_MAIN_DIR}/${_EXE}.cmake")
     include(${_MAIN_DIR}/${_EXE}.cmake)
   endif()
+
+  # == Runtime dependencies ==
+  find_package(Boost 1.61 COMPONENTS timer)
+  if(Boost_TIMER_FOUND)
+    target_link_libraries(${_EXE} PUBLIC Boost::timer)
+  endif()
+  # Warning : new timer interface is not compatible with old progress_bar.
 
   # === install ===
   install(TARGETS ${_EXE} DESTINATION ${CALL_PWD})
