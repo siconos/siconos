@@ -82,16 +82,17 @@ void numerics_set_verbose(int newVerboseMode)
 void numerics_error(const char* fn_name, const char* msg, ...)
 {
   char output[2048] = "[Numerics][fatal error] ";
-  size_t fn_name_len = strlen(fn_name);
-
-  strncat(output, fn_name, fn_name_len - 1);
-  strncat(output, "::\t", 3);
   size_t cur_len = strlen(output);
+  strncat(output, fn_name, 2048 - cur_len - 1);
+  cur_len = strlen(output);
+  strncat(output, "::\t", 2048 - cur_len - 1);
+  cur_len = strlen(output);
   va_list args;
+
   va_start(args, msg);
   vsnprintf(&output[cur_len], 2048 - cur_len - 4, msg, args);
   va_end(args);
-  strncat(output, ".\n", 3);
+  strncat(output, ".\n", 2048 - cur_len);
   sn_fatal_error(SN_UNKOWN_ERROR, output);
 }
 

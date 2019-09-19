@@ -1,4 +1,4 @@
-#================================================================
+
 # cmake utilities to build mechanics component
 #================================================================
 #
@@ -42,12 +42,11 @@ set(${COMPONENT}_DIRS
 # -- Bullet --
 # - add collision/bullet to the build process
 if(WITH_BULLET)
-  
   list(APPEND ${COMPONENT}_DIRS src/collision/bullet)
 endif()
 
 # -- OCE --
-# - add occ to the build process
+# - add extra mechanics sources, depending on occ/oce, to the build process
 if(WITH_OCE)
   list(APPEND ${COMPONENT}_DIRS src/occ)
 endif()
@@ -101,37 +100,25 @@ if(WITH_BULLET)
   if(BULLET_FOUND)
     # Set var for cmakedefine (config.h.cmake) and tests.
     set(SICONOS_HAS_BULLET TRUE CACHE INTERNAL "True if Bullet API has been found and is activated.")
-    # Add bullet headers to search path
-    # 'private' add limited to current target would be better.
-    # But those headers are missing during swig process. Todo : find a proper
-    # way to deal with this.
-    target_include_directories(${COMPONENT} PUBLIC ${BULLET_INCLUDE_DIRS}) # Required for io/mechanicsIO
+    create_target(NAME BULLET::BULLET
+      LIBRARIES "${BULLET_LIBRARIES}"
+      INCLUDE_DIRS "${BULLET_INCLUDE_DIRS}")
+    # Add bullet headers and libs to the build.
     # first draft ... turn this to private later
-    target_link_libraries(${COMPONENT} PUBLIC ${BULLET_LIBRARIES})
+    target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:BULLET::BULLET>)
+    if(BULLET_USE_DOUBLE_PRECISION)
+      # Do we need this as public or private? Check if mechanics io needs this option?
+      target_compile_definitions(${COMPONENT} PUBLIC $<BUILD_INTERFACE:BT_USE_DOUBLE_PRECISION>)
+    endif()
   endif()
-
-  if(BULLET_USE_DOUBLE_PRECISION)
-    # Do we need this as public or private? Check if mechanics io needs this option?
-    target_compile_options(${COMPONENT} PUBLIC "-DBT_USE_DOUBLE_PRECISION")
-  endif()
-
 endif()
 
 # -- OCE --
-# Must :
-# - check if oce is available on the system
-# Will:
 # - add occ to the build process
 # - set SICONOS_HAS_OCE var (distributed in siconosConfig.cmake)
 if(WITH_OCE)
-  include(oce_setup)
-  # Add oce headers to search path
-  # 'private' add limited to current target would be better.
-  # But those headers are missing during swig process. Todo : find a proper
-  # way to deal with this.
-  target_include_directories(${COMPONENT} PUBLIC $<BUILD_INTERFACE:${OCE_INCLUDE_DIRS}>)
-  # Add oce libs to components links
-  target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:${OCE_LIBRARIES}>)
+  # Add oce headers and libs to components build
+  target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OCE::OCE>)
 endif()
 
 # --- python bindings ---

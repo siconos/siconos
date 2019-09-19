@@ -96,7 +96,7 @@ macro(add_docker_targets)
   # Warning : these are not siconos conf. options for cmake but
   # the options needed by ctest to prepare the pipeline (cmake, make ...)
   # like SITE, config file ...
-  set(CTEST_OPTIONS -V)
+  set(CTEST_OPTIONS --progress -V)
 
   
   foreach(_f ${CTEST_OPTIONS})

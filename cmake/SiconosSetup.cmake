@@ -144,7 +144,12 @@ if(WITH_CXX)
     find_package(Boost 1.61 REQUIRED)
   endif()
 endif()
-#
+
+# -- Open Cascade Community Edition --
+if(WITH_OCE)
+  include(oce_setup)
+endif()
+
 # -- Python bindings --
 if(WITH_PYTHON_WRAPPER)
   find_package(SWIG 3.0 REQUIRED)

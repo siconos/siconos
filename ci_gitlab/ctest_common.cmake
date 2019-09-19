@@ -109,7 +109,7 @@ ctest_build(
   PROJECT_NAME ${current_project}
   CAPTURE_CMAKE_ERROR BUILD_STATUS
   RETURN_VALUE BUILD_RESULT
-  QUIET
+  #QUIET if quiet, travis failed because of missing outputs during a long time ...
   )
 message("=============== End of ctest_build =============== ")
 message("------> Build status/result : ${BUILD_STATUS}/${BUILD_RESULT}")

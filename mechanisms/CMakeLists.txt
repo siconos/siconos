@@ -62,14 +62,8 @@ target_link_libraries(mechanisms PUBLIC
 if(NOT WITH_OCE)
   message(FATAL_ERROR "Please run cmake again with option WITH_OCE=ON (required for mechanisms) or do not setup Siconos with mechanisms component.")
 endif()
-include(oce_setup)
-# Add oce headers to search path
-# 'private' add limited to current target would be better.
-# But those headers are missing during swig process. Todo : find a proper
-# way to deal with this.
-target_include_directories(${COMPONENT} PUBLIC $<BUILD_INTERFACE:${OCE_INCLUDE_DIRS}>)
-# Add oce libs to components links
-target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:${OCE_LIBRARIES}>)
+# Add oce headers and libs to component build.
+target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OCE::OCE>)
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)

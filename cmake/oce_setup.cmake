@@ -18,7 +18,7 @@ if(WITH_OCE)
   #  OCE_ALL_FOUND    - set to TRUE if all requested COMPONENTS are specified (see below), false otherwise
   #  OCE_MISSING_TOOLKITS - when OCE_ALL_FOUND is FALSE, contains a list of missing toolkits
   #  OCE_ALL_BUILT_MODULES - the list of source directories compiled (mostly useful when running swig to generate wrappers)
-  find_package(OCE 0.16 REQUIRED COMPONENTS ${OCE_TOOLKITS})
+  find_package(OCE 0.17 REQUIRED COMPONENTS ${OCE_TOOLKITS})
 
   if(OCE_ALL_FOUND)
     message(STATUS "OCE found.")
@@ -34,9 +34,21 @@ if(WITH_OCE)
   # some toolkits are detected (through OCEConfig.cmake) but the
   # libraries are not available. We must not link them with the component.
   #if(OCE_VERSION VERSION_LESS 0.18)
-    set(UNNEEDED_OCE_TOOLKITS "DRAWEXE" "TKDraw" "TKTopTest" "TKViewerTest" "TKXSDRAW" "TKDCAF" "TKXDEDRAW" "TKTObjDRAW" "TKQADraw"   )
-    foreach(_T ${UNNEEDED_OCE_TOOLKITS})
-      list(REMOVE_ITEM OCE_LIBRARIES  ${_T})
-    endforeach()
+  set(UNNEEDED_OCE_TOOLKITS "DRAWEXE" "TKDraw" "TKTopTest" "TKViewerTest" "TKXSDRAW" "TKDCAF" "TKXDEDRAW" "TKTObjDRAW" "TKQADraw")
+  foreach(_T IN LISTS UNNEEDED_OCE_TOOLKITS)
+    list(REMOVE_ITEM OCE_LIBRARIES  ${_T})
+  endforeach()
   #endif()
+
+  if(OCE_ALL_FOUND)
+  
+    if(NOT TARGET OCE::OCE)
+      add_library(OCE::OCE IMPORTED INTERFACE)
+      set_property(TARGET OCE::OCE PROPERTY INTERFACE_LINK_LIBRARIES ${OCE_LIBRARIES})
+      if(OCE_INCLUDE_DIRS)
+	set_target_properties(OCE::OCE PROPERTIES
+          INTERFACE_INCLUDE_DIRECTORIES "${OCE_INCLUDE_DIRS}")
+      endif()
+    endif()
+  endif()
 endif()

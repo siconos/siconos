@@ -241,3 +241,35 @@ macro(get_subdirectories result current_dir)
   endforeach()
   set(${result} ${dirs})
 endmacro()
+
+# Create a target from find_package results.
+#
+# This is useful for packages with
+# an 'old-way' find_package cmake routine.
+# 
+# Usage:
+# 
+# find_package(<name>)
+# create_target(NAME <name> LIBRARIES <list of libs>  INCLUDE_DIR <list of includes>)
+# target_link_libraries(some_other_target PRIVATE name)
+# 
+# Result : create a target <name>.
+# some_other_target will be linked with <list of libs> and use <list of includes>
+# to search for headers.
+#
+# See example in mechanics/CMakeLists.txt, for Bullet setup.
+# 
+function(create_target)
+  set(oneValueArgs NAME)
+  set(multiValueArgs LIBRARIES INCLUDE_DIRS)
+  cmake_parse_arguments(target "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  if(NOT TARGET ${target_NAME})
+    add_library(${target_NAME} IMPORTED INTERFACE)
+    set_property(TARGET ${target_NAME} PROPERTY INTERFACE_LINK_LIBRARIES ${target_LIBRARIES})
+    if(target_INCLUDE_DIRS)
+      set_target_properties(${target_NAME} PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${target_INCLUDE_DIRS}")
+    endif()
+  endif()
+endfunction()

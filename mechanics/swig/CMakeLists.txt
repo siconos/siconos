@@ -77,7 +77,6 @@ if(WITH_${COMPONENT}_TESTING)
     list(APPEND python_excluded_tests tests/test_occ_inertia.py)
   else()
     find_python_module(OCC REQUIRED)
-    message("ALORS ??? ")
   endif()
   build_python_tests(
     # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
