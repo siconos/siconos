@@ -23,7 +23,7 @@ import tempfile
 from contextlib import contextmanager
 
 # Siconos imports
-import siconos.io.mechanics_hdf5
+import mechanics_hdf5
 import siconos.numerics as Numerics
 from siconos.kernel import \
     EqualityConditionNSL, \
@@ -678,7 +678,7 @@ class ShapeCollection():
         return self._shapes[shape_name]
 
 
-class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
+class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
 
     """a Hdf5 context manager reads at instantiation the translations and
        orientations of collision objects from hdf5 file
@@ -2112,6 +2112,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # get dimension
         self._dimension=self._out.attrs.get('dimension', 3)
         print("###################  self._dimension",  self._dimension)
+
         # Respect run() parameter for multipoints_iterations for
         # backwards compatibility, but this is overridden by
         # SiconosBulletOptions if one is provided.
@@ -2121,6 +2122,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
 
         if (self._dimension ==2) :
+            if  options is None:
+                options = SiconosBulletOptions()
             options.dimension = SICONOS_BULLET_2D
             
         self._interman = interaction_manager(options)
