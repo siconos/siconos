@@ -30,9 +30,7 @@
 #include "Observer.hpp"
 #include "Actuator.hpp"
 
-#include <boost/progress.hpp>
-#include <boost/timer.hpp>
-
+#include <boost/timer/timer.hpp>
 
 
 ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
@@ -56,9 +54,7 @@ void ControlLsodarSimulation::run()
 {
   EventsManager& eventsManager = *_processSimulation->eventsManager();
   unsigned k = 0;
-  boost::progress_display show_progress(_N);
-  boost::timer time;
-  time.restart();
+  boost::timer::cpu_timer time;
   EventDriven& sim = static_cast<EventDriven&>(*_processSimulation);
 
   while (sim.hasNextEvent())
@@ -79,10 +75,6 @@ void ControlLsodarSimulation::run()
       (*_dataM)(k, 0) = sim.startingTime();
       storeData(k);
       ++k;
-      if (!_silent)
-      {
-       ++show_progress;
-      }
     }
   }
 
@@ -91,6 +83,10 @@ void ControlLsodarSimulation::run()
   storeData(k);
   ++k;
 
-  _elapsedTime = time.elapsed();
+  // Warning FP : with the new interface boost::timer, the
+  // result of elpased is in ns while it was in seconds
+  // in the old interface.
+  // elapsed is a tuple with wall, user and system times.
+  _elapsedTime = time.elapsed().user * 1e-9; 
   _dataM->resize(k, _nDim + 1);
 }

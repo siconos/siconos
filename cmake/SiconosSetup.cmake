@@ -137,11 +137,29 @@ find_package(LAPACKDEV REQUIRED)
 # =========== Boost ===========
 # check https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=boost
 if(WITH_CXX)
+
+  # From boost 1.71, something is wrong in cmake and boost support for multithread 
+  # https://github.com/boostorg/boost_install/issues/13
+  # https://gitlab.kitware.com/cmake/cmake/issues/19714
+  # set(Boost_USE_MULTITHREADED ON)
+  set(Boost_NO_BOOST_CMAKE 1)
+
+  # Set the list of required boost components
   if(WITH_SERIALIZATION)
-    find_package(Boost 1.61 COMPONENTS serialization filesystem REQUIRED)
+    list(APPEND boost_required_components serialization filesystem)
+  endif()
+  if(HAVE_SICONOS_CONTROL)
+    list(APPEND boost_required_components timer)
+  endif()
+  if(boost_required_components)
+    set(boost_opts COMPONENTS ${boost_required_components})
+  endif()
+
+  # Search boost ...
+  find_package(Boost 1.61 ${boost_opts} REQUIRED)
+
+  if(WITH_SERIALIZATION)
     set(WITH_SYSTEM_BOOST_SERIALIZATION ON CACHE INTERNAL "Siconos uses boost serialization lib.")
-  else()
-    find_package(Boost 1.61 REQUIRED)
   endif()
 endif()
 

@@ -184,9 +184,9 @@ public:
     return _dataLegend;
   }
 
-  /** Return the elapsed time computing
-   * \return the elapsed time computing
-   */
+  /**
+     \return the elapsed time computing in seconds
+  */
   inline double elapsedTime() const
   {
     return _elapsedTime;

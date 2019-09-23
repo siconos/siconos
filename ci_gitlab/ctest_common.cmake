@@ -133,12 +133,12 @@ ctest_test(
 message("=============== End of ctest_test =============== ")
 message("------> Test status/result : ${TEST_STATUS}/${TEST_RESULT}")
 
-if (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
+if(WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
   ctest_coverage()
-endif (WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
-if (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+endif()
+if(WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
   ctest_memcheck()
-endif (WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+endif()
 
 # error status check later, we try to submit even if tests failed.
 

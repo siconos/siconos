@@ -4,6 +4,7 @@ RUN apt update  && apt install -y -qq \
         git-core \
         make \
         libboost-dev \
+        libboost-timer-dev \
         libgmp-dev \
         gcc \
         gfortran \
