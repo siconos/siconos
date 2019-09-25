@@ -58,9 +58,16 @@
 // --- DGETRS ---
 #define WRAP_DGETRS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO) \
   F(A1,A2,A3,A4,A5,A6,A7,A8,INFO)
-  
+// --- DPOTRS ---
+#define WRAP_DPOTRS(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
+  F(A1,A2,A3,A4,A5,A6,A7,INFO)
+
 // --- DGESV ---
 #define WRAP_DGESV(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
+  F(A1,A2,A3,A4,A5,A6,A7,INFO)
+
+// --- DPOSV ---
+#define WRAP_DPOSV(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
   F(A1,A2,A3,A4,A5,A6,A7,INFO)
   
 // --- DGELS ---

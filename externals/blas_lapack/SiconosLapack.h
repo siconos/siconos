@@ -110,6 +110,17 @@ extern "C"
     *INFO = C_INFO;
   }
 
+  static inline void DPOSV( char UPLO, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, double* B, lapack_int LDB, lapack_int* INFO)
+  {
+    lapack_int C_N = N;
+    lapack_int C_NRHS = NRHS;
+    lapack_int C_LDA = LDA;
+    lapack_int C_LDB = LDB;
+    lapack_int C_INFO = 0;
+    WRAP_DPOSV(LAPACK_NAME(dposv), CHAR(UPLO), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA),  B, INTEGER(C_LDB), INTEGER(C_INFO));
+    *INFO = C_INFO;
+  }
+
 /* DGETRF - LU factorization */
   static inline void DGETRF(lapack_int M, lapack_int N, double* A, lapack_int LDA, lapack_int* IPIV, lapack_int* INFO)
   {
@@ -273,7 +284,21 @@ extern "C"
     WRAP_DPOTRF(LAPACK_NAME(dpotrf), CHAR(UPLO), INTEGER(C_N), A , INTEGER(C_LDA), INTEGER(C_INFO));
     *INFO = C_INFO;
   }
-
+/* DPOTRS solves a system of linear equations
+ *     A * X = B  or  A' * X = B
+ *  with a general N-by-N matrix A using the LU factorization computed
+ *  by DGETRF.
+ */
+  static inline void DPOTRS(char UPLO, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, double* B, lapack_int LDB, lapack_int* INFO)
+  {
+    lapack_int C_N = N;
+    lapack_int C_NRHS = NRHS;
+    lapack_int C_LDA = LDA;
+    lapack_int C_LDB = LDB;
+    lapack_int C_INFO = 0;
+    WRAP_DPOTRS(LAPACK_NAME(dpotrs), CHAR(UPLO), INTEGER(C_N), INTEGER(C_NRHS), A, INTEGER(C_LDA),  B, INTEGER(C_LDB), INTEGER(C_INFO));
+    *INFO = C_INFO;
+  }
   /* DTRTRS - solve a triangular system of the form  A * X = B or A**T * X = B,
    */
   static inline void DTRTRS(char UPLO, char TRANS, char DIAG, lapack_int N, lapack_int NRHS, double* A, lapack_int LDA, double* B, lapack_int LDB, lapack_int* INFO)

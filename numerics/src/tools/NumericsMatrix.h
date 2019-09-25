@@ -590,6 +590,7 @@ extern "C"
    * used
    */
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
+  int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 

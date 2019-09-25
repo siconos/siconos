@@ -187,7 +187,7 @@ CSparseMatrix* CSparseMatrix_spfree_on_stack(CSparseMatrix* A)
   return NULL;
 }
 
-int CSparsematrix_lu_factorization(CS_INT order, const cs *A, double tol, CSparseMatrix_lu_factors * cs_lu_A )
+int CSparsematrix_lu_factorization(CS_INT order, const cs *A, double tol, CSparseMatrix_factors * cs_lu_A )
 {
   assert(A);
   cs_lu_A->n = A->n;
@@ -197,8 +197,18 @@ int CSparsematrix_lu_factorization(CS_INT order, const cs *A, double tol, CSpars
 
   return (S && cs_lu_A->N);
 }
+int CSparsematrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_chol_A )
+{
+  assert(A);
+  cs_chol_A->n = A->n;
+  css* S = cs_schol (order, A);
+  cs_chol_A->S = S;
+  cs_chol_A->N = cs_chol(A, S);
 
-void CSparseMatrix_free_lu_factors(CSparseMatrix_lu_factors* cs_lu_A)
+  return (S && cs_chol_A->N);
+}
+
+void CSparseMatrix_free_lu_factors(CSparseMatrix_factors* cs_lu_A)
 {
   assert(cs_lu_A);
   if (cs_lu_A)
@@ -217,7 +227,7 @@ void CSparseMatrix_free_lu_factors(CSparseMatrix_lu_factors* cs_lu_A)
 
 /* Solve Ax = b with the factorization of A stored in the cs_lu_A
  * This is extracted from cs_lusol, you need to synchronize any changes! */
-CS_INT CSparseMatrix_solve(CSparseMatrix_lu_factors* cs_lu_A, double* x, double *b)
+CS_INT CSparseMatrix_solve(CSparseMatrix_factors* cs_lu_A, double* x, double *b)
 {
   assert(cs_lu_A);
 
