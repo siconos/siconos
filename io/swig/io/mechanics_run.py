@@ -1,4 +1,5 @@
- 
+
+
 # Mechanics IO
 
 """Run a pre-configured Siconos "mechanics" HDF5 file."""
@@ -23,7 +24,7 @@ import tempfile
 from contextlib import contextmanager
 
 # Siconos imports
-import mechanics_hdf5
+import siconos.io.mechanics_hdf5
 import siconos.numerics as Numerics
 from siconos.kernel import \
     EqualityConditionNSL, \
@@ -678,7 +679,7 @@ class ShapeCollection():
         return self._shapes[shape_name]
 
 
-class MechanicsHdf5Runner(mechanics_hdf5.MechanicsHdf5):
+class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
     """a Hdf5 context manager reads at instantiation the translations and
        orientations of collision objects from hdf5 file

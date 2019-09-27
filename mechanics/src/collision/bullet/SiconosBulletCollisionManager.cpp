@@ -75,7 +75,8 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include <NonSmoothLaw.hpp>
 #include <OneStepIntegrator.hpp>
 #include <NewtonImpactFrictionNSL.hpp>
-#include <FrictionContact.hpp>
+#include <NewtonImpactRollingFrictionNSL.hpp>
+
 #include <SiconosMatrix.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <NewtonEulerJointR.hpp>
@@ -1784,7 +1785,20 @@ void SiconosBulletCollisionManager::removeBody(const SP::RigidBodyDS& body)
 
   impl->bodyShapeMap.erase(it);
 }
+void SiconosBulletCollisionManager::removeBody(const SP::RigidBody2dDS& body)
+{
+  BodyShapeMap::iterator it( impl->bodyShapeMap.find(&*body) );
+  if (it == impl->bodyShapeMap.end())
+    return;
 
+  std::vector<std11::shared_ptr<BodyShapeRecord> >::iterator it2;
+  for (it2 = it->second.begin(); it2 != it->second.end(); it2++)
+  {
+    impl->_collisionWorld->removeCollisionObject( &* (*it2)->btobject );
+  }
+
+  impl->bodyShapeMap.erase(it);
+}
 /** This class allows to iterate over all the contact points in a
  *  btCollisionWorld, returning a tuple containing the two btCollisionObjects
  *  and the btManifoldPoint.  To be called after
@@ -2124,143 +2138,159 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       int g1 = pairA->contactor->collision_group;
       int g2 = pairB->contactor->collision_group;
       SP::NonSmoothLaw nslaw = nonSmoothLaw(g1,g2);
+
+      /* test nslaw type and then deduce the type of relation to be created */
+      nslaw->display();
+      SP::NewtonImpactFrictionNSL nslaw_NewtonImpactFrictionNSL(std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw));
+      SP::NewtonImpactRollingFrictionNSL nslaw_NewtonImpactRollingFrictionNSL(std11::dynamic_pointer_cast<NewtonImpactRollingFrictionNSL>(nslaw));
+      
+      DEBUG_EXPR(std::cout << nslaw_NewtonImpactFrictionNSL << std::endl;);
+      DEBUG_EXPR(std::cout << nslaw_NewtonImpactRollingFrictionNSL << std::endl;);
+      
       DEBUG_PRINTF("SiconosBulletCollisionManager ::  nslaw->size() = %i\n", nslaw->size() );
       // we assume that this test checks if  we deal with 3D problem with RigidBodies
       // Clearly, it will not be sufficient with meshed FE bodies.
-      if (nslaw && nslaw->size() == 3)
+      if (nslaw && nslaw_NewtonImpactFrictionNSL)
       {
+        if (nslaw->size() == 3)
+        {
+          DEBUG_PRINT("Creation of a relation for 3D frictional contact\n");
+          SP::RigidBodyDS rbdsA =  std11::static_pointer_cast<RigidBodyDS>(pairA->ds);
+          SP::RigidBodyDS rbdsB =  std11::static_pointer_cast<RigidBodyDS>(pairB->ds);
 
-        SP::RigidBodyDS rbdsA =  std11::static_pointer_cast<RigidBodyDS>(pairA->ds);
-        SP::RigidBodyDS rbdsB =  std11::static_pointer_cast<RigidBodyDS>(pairB->ds);
+          SP::BulletR rel(makeBulletR(rbdsA, pairA->sshape,
+                                      rbdsB, pairB->sshape,
+                                      *it->point));
 
-        SP::BulletR rel(makeBulletR(rbdsA, pairA->sshape,
-                                    rbdsB, pairB->sshape,
-                                    *it->point));
+          if (!rel) continue;
 
-        if (!rel) continue;
+          // Fill in extra contact information
+          rel->base[0] = pairA->base;
+          rel->base[1] = pairB->base;
+          rel->shape[0] = pairA->sshape;
+          rel->shape[1] = pairB->sshape;
+          rel->contactor[0] = pairA->contactor;
+          rel->contactor[1] = pairB->contactor;
+          rel->ds[0] = rbdsA;
+          rel->ds[1] = rbdsB;
+          rel->btObject[0] = pairA->btobject;
+          rel->btObject[1] = pairB->btobject;
 
-        // Fill in extra contact information
-        rel->base[0] = pairA->base;
-        rel->base[1] = pairB->base;
-        rel->shape[0] = pairA->sshape;
-        rel->shape[1] = pairB->sshape;
-        rel->contactor[0] = pairA->contactor;
-        rel->contactor[1] = pairB->contactor;
-        rel->ds[0] = rbdsA;
-        rel->ds[1] = rbdsB;
-        rel->btObject[0] = pairA->btobject;
-        rel->btObject[1] = pairB->btobject;
+          // TODO cast down btshape from BodyShapeRecord-derived classes
+          // rel->btShape[0] = pairA->btshape;
+          // rel->btShape[1] = pairB->btshape;
 
-        // TODO cast down btshape from BodyShapeRecord-derived classes
-        // rel->btShape[0] = pairA->btshape;
-        // rel->btShape[1] = pairB->btshape;
+          rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
+                                                    flip, _options.worldScale,
+                                                    rbdsA ? rbdsA : SP::NewtonEulerDS(),
+                                                    rbdsB ? rbdsB : SP::NewtonEulerDS());
 
-        rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                  flip, _options.worldScale,
-                                                  rbdsA ? rbdsA : SP::NewtonEulerDS(),
-                                                  rbdsB ? rbdsB : SP::NewtonEulerDS());
+          // We wish to be sure that no Interactions are created without
+          // sufficient warning before contact.  TODO: Replace with exception or
+          // flag.
+          if (rel->distance() < 0.0) {
+            DEBUG_PRINTF("SiconosBulletCollisionManager :: Interactions must be created with positive "
+                         "distance (%f).\n", rel->distance());
+            _stats.interaction_warnings ++;
+          }
 
-        // We wish to be sure that no Interactions are created without
-        // sufficient warning before contact.  TODO: Replace with exception or
-        // flag.
-        if (rel->distance() < 0.0) {
-          DEBUG_PRINTF("SiconosBulletCollisionManager :: Interactions must be created with positive "
-                       "distance (%f).\n", rel->distance());
-          _stats.interaction_warnings ++;
+          inter = std11::make_shared<Interaction>(nslaw, rel);
+          _stats.new_interactions_created ++;
         }
+        else if (nslaw && nslaw->size() == 2)
+        {
+          DEBUG_PRINT("Creation of a relation for 2D frictional contact\n");
+          SP::RigidBody2dDS rbdsA =  std11::static_pointer_cast<RigidBody2dDS>(pairA->ds);
+          SP::RigidBody2dDS rbdsB =  std11::static_pointer_cast<RigidBody2dDS>(pairB->ds);
 
-        inter = std11::make_shared<Interaction>(nslaw, rel);
-        _stats.new_interactions_created ++;
+          SP::Bullet2dR rel(makeBullet2dR(rbdsA, pairA->sshape,
+                                          rbdsB, pairB->sshape,
+                                          *it->point));
+
+          if (!rel) continue;
+
+          // Fill in extra contact information
+          rel->base[0] = pairA->base;
+          rel->base[1] = pairB->base;
+          rel->shape[0] = pairA->sshape;
+          rel->shape[1] = pairB->sshape;
+          rel->contactor[0] = pairA->contactor;
+          rel->contactor[1] = pairB->contactor;
+          rel->ds[0] = rbdsA;
+          rel->ds[1] = rbdsB;
+          rel->btObject[0] = pairA->btobject;
+          rel->btObject[1] = pairB->btobject;
+
+          // TODO cast down btshape from BodyShapeRecord-derived classes
+          // rel->btShape[0] = pairA->btshape;
+          // rel->btShape[1] = pairB->btshape;
+
+          rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
+                                                    flip, _options.worldScale,
+                                                    rbdsA ? rbdsA : SP::RigidBody2dDS(),
+                                                    rbdsB ? rbdsB : SP::RigidBody2dDS());
+
+          // We wish to be sure that no Interactions are created without
+          // sufficient warning before contact.  TODO: Replace with exception or
+          // flag.
+          if (rel->distance() < 0.0) {
+            DEBUG_PRINTF("SiconosBulletCollisionManager :: Interactions must be created with positive "
+                         "distance (%f).\n", rel->distance());
+            _stats.interaction_warnings ++;
+          }
+          DEBUG_PRINT("SiconosBulletCollisionManager :: create 2d interaction\n");
+          inter = std11::make_shared<Interaction>(nslaw, rel);
+          _stats.new_interactions_created ++;
+        }
+        
       }
-      else if (nslaw && nslaw->size() == 2)
+      else if (nslaw && nslaw_NewtonImpactRollingFrictionNSL)
       {
+        if (nslaw && nslaw->size() == 5)
+        {
+          DEBUG_PRINT("Creation of a relation for 3D Rolling frictional contact\n");
+          SP::RigidBodyDS rbdsA =  std11::static_pointer_cast<RigidBodyDS>(pairA->ds);
+          SP::RigidBodyDS rbdsB =  std11::static_pointer_cast<RigidBodyDS>(pairB->ds);
 
-        SP::RigidBody2dDS rbdsA =  std11::static_pointer_cast<RigidBody2dDS>(pairA->ds);
-        SP::RigidBody2dDS rbdsB =  std11::static_pointer_cast<RigidBody2dDS>(pairB->ds);
+          SP::Bullet5DR rel(makeBullet5DR(rbdsA, pairA->sshape,
+                                          rbdsB, pairB->sshape,
+                                          *it->point));
 
-        SP::Bullet2dR rel(makeBullet2dR(rbdsA, pairA->sshape,
-                                        rbdsB, pairB->sshape,
-                                        *it->point));
+          if (!rel) continue;
 
-        if (!rel) continue;
+          // Fill in extra contact information
+          rel->base[0] = pairA->base;
+          rel->base[1] = pairB->base;
+          rel->shape[0] = pairA->sshape;
+          rel->shape[1] = pairB->sshape;
+          rel->contactor[0] = pairA->contactor;
+          rel->contactor[1] = pairB->contactor;
+          rel->ds[0] = rbdsA;
+          rel->ds[1] = rbdsB;
+          rel->btObject[0] = pairA->btobject;
+          rel->btObject[1] = pairB->btobject;
 
-        // Fill in extra contact information
-        rel->base[0] = pairA->base;
-        rel->base[1] = pairB->base;
-        rel->shape[0] = pairA->sshape;
-        rel->shape[1] = pairB->sshape;
-        rel->contactor[0] = pairA->contactor;
-        rel->contactor[1] = pairB->contactor;
-        rel->ds[0] = rbdsA;
-        rel->ds[1] = rbdsB;
-        rel->btObject[0] = pairA->btobject;
-        rel->btObject[1] = pairB->btobject;
+          // TODO cast down btshape from BodyShapeRecord-derived classes
+          // rel->btShape[0] = pairA->btshape;
+          // rel->btShape[1] = pairB->btshape;
 
-        // TODO cast down btshape from BodyShapeRecord-derived classes
-        // rel->btShape[0] = pairA->btshape;
-        // rel->btShape[1] = pairB->btshape;
+          rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
+                                                    flip, _options.worldScale,
+                                                    rbdsA ? rbdsA : SP::NewtonEulerDS(),
+                                                    rbdsB ? rbdsB : SP::NewtonEulerDS());
 
-        rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                  flip, _options.worldScale,
-                                                  rbdsA ? rbdsA : SP::RigidBody2dDS(),
-                                                  rbdsB ? rbdsB : SP::RigidBody2dDS());
+          // We wish to be sure that no Interactions are created without
+          // sufficient warning before contact.  TODO: Replace with exception or
+          // flag.
+          if (rel->distance() < 0.0) {
+            DEBUG_PRINTF("Interactions must be created with positive "
+                         "distance (%f).\n", rel->distance());
+            _stats.interaction_warnings ++;
+          }
 
-        // We wish to be sure that no Interactions are created without
-        // sufficient warning before contact.  TODO: Replace with exception or
-        // flag.
-        if (rel->distance() < 0.0) {
-          DEBUG_PRINTF("SiconosBulletCollisionManager :: Interactions must be created with positive "
-                       "distance (%f).\n", rel->distance());
-          _stats.interaction_warnings ++;
+          inter = std11::make_shared<Interaction>(nslaw, rel);
+          _stats.new_interactions_created ++;
         }
-        DEBUG_PRINT("SiconosBulletCollisionManager :: create 2d interaction\n");
-        inter = std11::make_shared<Interaction>(nslaw, rel);
-        _stats.new_interactions_created ++;
-      }
-
-      else if (nslaw && nslaw->size() == 5)
-      {
-        SP::RigidBodyDS rbdsA =  std11::static_pointer_cast<RigidBodyDS>(pairA->ds);
-        SP::RigidBodyDS rbdsB =  std11::static_pointer_cast<RigidBodyDS>(pairB->ds);
-
-        SP::Bullet5DR rel(makeBullet5DR(rbdsA, pairA->sshape,
-                                        rbdsB, pairB->sshape,
-                                        *it->point));
-
-        if (!rel) continue;
-
-        // Fill in extra contact information
-        rel->base[0] = pairA->base;
-        rel->base[1] = pairB->base;
-        rel->shape[0] = pairA->sshape;
-        rel->shape[1] = pairB->sshape;
-        rel->contactor[0] = pairA->contactor;
-        rel->contactor[1] = pairB->contactor;
-        rel->ds[0] = rbdsA;
-        rel->ds[1] = rbdsB;
-        rel->btObject[0] = pairA->btobject;
-        rel->btObject[1] = pairB->btobject;
-
-        // TODO cast down btshape from BodyShapeRecord-derived classes
-        // rel->btShape[0] = pairA->btshape;
-        // rel->btShape[1] = pairB->btshape;
-
-        rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
-                                                  flip, _options.worldScale,
-                                 rbdsA ? rbdsA : SP::NewtonEulerDS(),
-                                 rbdsB ? rbdsB : SP::NewtonEulerDS());
-
-        // We wish to be sure that no Interactions are created without
-        // sufficient warning before contact.  TODO: Replace with exception or
-        // flag.
-        if (rel->distance() < 0.0) {
-          DEBUG_PRINTF("Interactions must be created with positive "
-                       "distance (%f).\n", rel->distance());
-          _stats.interaction_warnings ++;
-        }
-
-        inter = std11::make_shared<Interaction>(nslaw, rel);
-        _stats.new_interactions_created ++;
       }
       else
       {
