@@ -19,6 +19,7 @@ RUN pacman -Sy && pacman --noconfirm -S \
         python-h5py \
         python-pip \
         python-lxml \
+        python-packaging \
         cppunit \
         bullet \
         freetype2 \

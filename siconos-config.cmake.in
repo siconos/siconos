@@ -24,7 +24,7 @@ include(CMakeFindDependencyMacro)
 set(PACKAGE_NAME siconos)
 
 # set path to siconos installation
-set_and_check(siconos_ROOT_DIR "@CMAKE_INSTALL_PREFIX@")
+set_and_check(siconos_ROOT "@CMAKE_INSTALL_PREFIX@")
 
 # set list of targets build by siconos project
 set(installed_targets "@installed_targets@")
@@ -35,9 +35,14 @@ set(ConfigPackageLocation @ConfigPackageLocation@)
 # include siconos project targets
 include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")
 
+set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
+
 # --- Siconos extra components or options ---
 set(HAS_PYTHON_WRAPPER @WITH_PYTHON_WRAPPER@)
-set(SICONOS_PYTHON_EXECUTABLE @Python3_EXECUTABLE@)
+if(HAS_PYTHON_WRAPPER)
+  set(PYTHON_EXECUTABLE  @PYTHON_EXECUTABLE@)
+  set(Python3_EXECUTABLE @Python3_EXECUTABLE@)
+endif()
 
 # --- Numerics component extras ---
 set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
@@ -45,11 +50,9 @@ set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
 # --- Mechanics component extras ---
 # mechanics component with bullet?
 set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
+
 # mechanics (and/or mechanisms) component with oce?
 set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
-
-set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
-
 
 #find_dependency(LAPACKDEV)
 
@@ -58,7 +61,8 @@ set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
 #endif()
 
 if(@WITH_CXX@)
-  find_dependency(Boost 1.61 REQUIRED)
+  set(Boost_NO_BOOST_CMAKE 1)
+  find_dependency(Boost @boost_min_version@ @boost_opts@ REQUIRED)
 endif()
   
 

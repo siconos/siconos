@@ -56,7 +56,7 @@ if(WITH_PYTHON_WRAPPER)
 else()
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
 endif()
-
+find_python_module(argparse REQUIRED) # for siconos runtime
 # For backward compat ...
 set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
 
@@ -143,12 +143,14 @@ if(WITH_CXX)
   # https://gitlab.kitware.com/cmake/cmake/issues/19714
   # set(Boost_USE_MULTITHREADED ON)
   set(Boost_NO_BOOST_CMAKE 1)
-
+  set(boost_min_version 1.61)
   # Set the list of required boost components
   if(WITH_SERIALIZATION)
     list(APPEND boost_required_components serialization filesystem)
   endif()
   if(HAVE_SICONOS_CONTROL)
+    # Should we always look for timer ? This a requirement for many examples
+    # but not for siconos components, except control.
     list(APPEND boost_required_components timer)
   endif()
   if(boost_required_components)
@@ -156,7 +158,7 @@ if(WITH_CXX)
   endif()
 
   # Search boost ...
-  find_package(Boost 1.61 ${boost_opts} REQUIRED)
+  find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED)
 
   if(WITH_SERIALIZATION)
     set(WITH_SYSTEM_BOOST_SERIALIZATION ON CACHE INTERNAL "Siconos uses boost serialization lib.")

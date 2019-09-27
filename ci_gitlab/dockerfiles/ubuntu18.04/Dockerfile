@@ -26,7 +26,8 @@ RUN apt update  && apt install -y -qq \
         python3-pip\
         python3-scipy \
         python3-pytest \
-        valgrind \
+	python3-packaging \
+	valgrind \
         python3-lxml \
         python3-h5py \
         vim
