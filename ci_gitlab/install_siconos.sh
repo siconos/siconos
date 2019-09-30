@@ -24,7 +24,8 @@
 # Create build dir
 mkdir -p $CI_PROJECT_DIR/build
 cd $CI_PROJECT_DIR/build
-
+#tmp fix
+python3 -m pip  install packaging
 # --- Run ctest for Siconos ---
 # configure, build, test and submit to cdash.
 # 

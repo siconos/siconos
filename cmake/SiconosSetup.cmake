@@ -56,13 +56,13 @@ if(WITH_PYTHON_WRAPPER)
 else()
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
 endif()
-find_python_module(argparse REQUIRED) # for siconos runtime
 # For backward compat ...
 set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+include(FindPythonModule)
+find_python_module(packaging REQUIRED) # for siconos runtime
 
 get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
-  include(FindPythonModule)
   # --- xml schema. Used in tests. ---
   if(WITH_XML)
     set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/kernel/swig/SiconosModelSchema-V3.7.xsd")

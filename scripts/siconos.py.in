@@ -1,11 +1,11 @@
-#!/usr/bin/env @PYTHON_EXE_NAME@
+#!/usr/bin/env @Python3_EXECUTABLE@
 """Classes and functions used at runtime
 to configure, build and execute siconos examples
 
 Siconos is a program dedicated to modeling, simulation and control
 of non smooth dynamical systems.
 
-Copyright 2018 INRIA.
+Copyright 2019 INRIA.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -159,9 +159,9 @@ def main():
             # for python modules
             if('PYTHONPATH') in env:
                 env['PYTHONPATH'] += ':' + \
-                    siconos_python_path.resolve().as_posix()
+                    siconos_pythonpath.resolve().as_posix()
             else:
-                env['PYTHONPATH'] = siconos_python_path.resolve().as_posix()
+                env['PYTHONPATH'] = siconos_pythonpath.resolve().as_posix()
 
         cmd += [Path(args.exe_full_name).as_posix()]
 
@@ -182,14 +182,15 @@ def main():
 # ------------ Siconos config ------------
 # Read info from siconos setup and install files.
 
-# Path to siconos install, i.e. this file parent path
+# Path to siconos install #
+# (this file is supposed to be in <siconos_root_dir>/bin)
 siconos_root_dir = Path(__file__).resolve().parent.parent
 
 # Path to cmake setup for siconos (e.g. Find...cmake files)
 siconos_package_dir = Path(siconos_root_dir, '@ConfigPackageLocation@')
 
 # Path to siconos python package
-siconos_python_path = Path('@SICONOS_PYTHON_INSTALL_DIR@')
+siconos_pythonpath = Path('@SICONOS_PYTHON_INSTALL_DIR@')
 
 # Check platform
 is_windows = 'Windows' in platform.uname()
@@ -228,7 +229,7 @@ Usage :
 
   driver_name : .cpp or .py file name (with absolute or relative path).\n
 
-or 
+or
 
 >> siconos --build-plugins
 
@@ -254,7 +255,8 @@ For python driver :
 
 For --build-plugins options :
 
-  build all plugins from 'plugin'-like sources available in the current directory.
+  build all plugins from 'plugin'-like sources available
+  in the current directory.
 
 
 
@@ -798,7 +800,7 @@ def print_siconos_info():
     """
     cartridge()
     root = siconos_root_dir
-    py_root = siconos_python_path
+    py_root = siconos_pythonpath
     print('- Siconos root (install dir) is : {}.\n'.format(root))
     print('- Siconos runner is : {}.\n'.format(__file__))
     print('- Siconos includes : {}/include/siconos .\n'.format(root))

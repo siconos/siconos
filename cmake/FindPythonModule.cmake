@@ -30,6 +30,7 @@ function(find_python_module module)
   else()
     set(${module}_file ${module}-NOTFOUND)
   endif()
+
   # Save version
   execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import ${module} as name; print(name.__version__)"
     RESULT_VARIABLE ${module}_FIND_RESULT     # Return code from command above
@@ -59,7 +60,6 @@ function(find_python_module module)
       list(APPEND ${module}_REQUIRED_VARS ${module}_INCLUDE_DIR)
     endif()
   endif()
-  
   find_package_handle_standard_args(${module}
     REQUIRED_VARS ${${module}_REQUIRED_VARS}
     VERSION_VAR ${module}_VERSION)

@@ -56,6 +56,7 @@ if(WITH_${COMPONENT}_TESTING)
   endforeach()
   
   build_python_tests(
-    # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
+    DEPS Boost::boost # for quaternions
+    # ${COMPONENT} # some plugins in tests need to be linked with kernel
     )
 endif()
