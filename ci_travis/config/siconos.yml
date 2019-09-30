@@ -310,6 +310,7 @@ pkgs:
     nix: boost-1.63.0
     debian:
       - libboost-dev
+      - libboost-system-dev
       - libboost-timer-dev
       - libboost-chrono-dev
     fedora: boost-devel

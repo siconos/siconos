@@ -282,8 +282,8 @@ def create_build_dir(args):
 
     """
     if args.tmp_dir:
-        tmpdir = tempfile.TemporaryDirectory()
-        args.build_dir = Path(tmpdir.name).resolve()
+        args.tmpdir = tempfile.TemporaryDirectory()
+        args.build_dir = Path(args.tmpdir.name).resolve()
     # or a default value
     elif not args.build_dir:
         args.build_dir = Path('.siconos').resolve()

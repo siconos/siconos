@@ -102,6 +102,10 @@ docker-build:archlinux-oce:
     IMAGE_NAME: archlinux-oce
   extends: .docker-build
 
+docker-clean:
+  stage: docker-clean
+  script: "sh ci_gitlab/docker-clean-images.sh"
+
 
     
 # ---- Siconos build jobs -----
