@@ -7,6 +7,7 @@ RUN apt update  && apt install -y -qq \
         libboost-serialization-dev \
         libboost-filesystem-dev \
         libboost-timer-dev \
+        libboost-chrono-dev \
         libgmp-dev \
         swig \
         gcc \

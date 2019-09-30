@@ -308,7 +308,10 @@ pkgs:
     
   boost:
     nix: boost-1.63.0
-    debian: libboost-dev
+    debian:
+      - libboost-dev
+      - libboost-timer-dev
+      - libboost-chrono-dev
     fedora: boost-devel
     opensuse: libboost_headers1_66_0-devel
 
