@@ -67,7 +67,8 @@ endif()
   
 
 if(@WITH_FCLIB@)
-  set_and_check(FCLIB_ROOT @FCLIB_ROOT@)
+  # Look for fclib in default path, FCLIB_DIR (cmake <3.12)
+  # and/or FCLIB_ROOT (cmake >= 3.12).
   find_dependency(FCLIB 3.0.0 CONFIG REQUIRED)
 endif()
 

@@ -7,14 +7,15 @@ RUN apt update  && apt install -y -qq \
         libboost-serialization-dev \
         libboost-filesystem-dev \
         libboost-timer-dev \
+        libboost-chrono-dev \
         libgmp-dev \
         swig \
         gcc \
         gfortran \
         libgfortran3 \
         g++ \
-        liblapack-dev \
-        libatlas-base-dev \
+        libopenblas-dev \
+        liblapacke-dev \
         lp-solve \
         liblpsolve55-dev \
         libpython3-dev \
