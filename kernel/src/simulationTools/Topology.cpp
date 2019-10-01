@@ -64,7 +64,7 @@ std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
 Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
   // !! Private function !!
-  // 
+  //
   // This function must
   // - insert interaction and ds into IG/DSG
   // - update graph properties related to modeling (DSlink ...)
@@ -131,7 +131,7 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
 
 
 
-  
+
   return std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
 }
 
@@ -400,6 +400,20 @@ SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber) co
   return ds;
 }
 
+
+void Topology::displayDynamicalSystems() const
+{
+  DynamicalSystemsGraph::VIterator vi, vdend;
+  SP::DynamicalSystem ds;
+  unsigned int currentNumber;
+  for (std11::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi)
+  {
+    ds = _DSG[0]->bundle(*vi);
+    currentNumber = ds->number();
+    std::cout << "Dynamical system number : " << currentNumber << std::endl;
+    ds->display();
+  }
+}
 
 SP::DynamicalSystem Topology::getDynamicalSystem(std::string name) const
 {
