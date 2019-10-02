@@ -58,15 +58,20 @@ void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
   /* construct tangent vector */
   double Tx = Ny;
   double Ty = - Nx;
-  
+
+
+  double lever_arm_x = G1x-Px ;
+  double lever_arm_y = G1y-Py ;
+  DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
   
   _jachq->setValue(0,0,Nx);
   _jachq->setValue(0,1,Ny);
-  _jachq->setValue(0,2,(G1y-Py)*Nx - (G1x-Px)*Ny);
+  _jachq->setValue(0,2,lever_arm_y*Nx - lever_arm_x*Ny);
 
   _jachq->setValue(1,0,Tx);
   _jachq->setValue(1,1,Ty);
-  _jachq->setValue(1,2,(G1y-Py)*Tx - (G1x-Px)*Ty);
+  _jachq->setValue(1,2,lever_arm_y*Tx - lever_arm_x*Ty);
+
 
 
   if (q.size() ==6)
