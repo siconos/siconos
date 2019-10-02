@@ -238,3 +238,19 @@ option(INSTALL_PYTHON_SYMLINKS "Install Python .py files as symlinks" OFF)
 # For SiconosConfig.h
 option(SICONOS_USE_MAP_FOR_HASH "Prefer std::map to std::unordered_map even if C++xy is enabled" ON)
 
+# Check Siconos compilation with include-what-you-use
+# See https://github.com/include-what-you-use/include-what-you-use
+# Set WITH_IWYU=path/to/iwyu binary file
+if(WITH_IWYU)
+  # Clang is required for iwyu. This is a devel option, so we assume that
+  # you know what you are doing and that you use the same version of clang
+  # for both iwyu and Siconos.
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
+    message(FATAL_ERROR "You must compile Siconos with clang to use include-what-you-use.")
+  endif()
+  if(NOT CMAKE_C_COMPILER_ID STREQUAL Clang AND NOT CMAKE_C_COMPILER_ID STREQUAL AppleClang)
+    message(FATAL_ERROR "You must compile Siconos with clang to use include-what-you-use.")
+  endif()
+  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${WITH_IWYU};-Xiwyu;any;-Xiwyu;iwyu;-Xiwyu;args" CACHE INTERNAL "iwyu setup")
+  set(CMAKE_C_INCLUDE_WHAT_YOU_USE "${WITH_IWYU};-Xiwyu;any;-Xiwyu;iwyu;-Xiwyu;args" CACHE INTERNAL "iwyu setup")
+endif()

@@ -569,12 +569,12 @@ def write_plugin(plugin, extra_args):
         result += prepare_target(plugin.name, extra_args)
         result += 'set_target_properties({}'.format(plugin.name)
         result += ' PROPERTIES PREFIX "")\n'
-        if 'Clang' in compiler_id and cmake_version > version.parse("3.13"):
-            result += 'target_link_options({}'.format(plugin.name)
-            result += ' PRIVATE -undefined dynamic_lookup)\n'
-        elif 'Clang' in compiler_id:
-            result += 'set_target_properties({} '.format(plugin.name)
-            result += 'PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")\n'
+        #f 'Clang' in compiler_id and cmake_version > version.parse("3.13"):
+        #    result += 'target_link_options({}'.format(plugin.name)
+        #    result += ' PRIVATE "-undefined dynamic_lookup")\n'
+        #elif 'Clang' in compiler_id:
+        #    result += 'set_target_properties({} '.format(plugin.name)
+        #    result += 'PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")\n'
         result += 'install(TARGETS {}'.format(plugin.name)
         result += ' DESTINATION {})\n'.format(extra_args.rundir)
 

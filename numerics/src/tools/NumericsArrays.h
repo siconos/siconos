@@ -16,10 +16,10 @@
  * limitations under the License.
 */
 
-#ifndef NSSTOOLS_H
-#define NSSTOOLS_H
+#ifndef NUMERICSARRAYS_H
+#define NUMERICSARRAY_H
 
-/*!\file NSSTools.h
+/*!\file NumericsArrays.h
   Header to collect basic tools for integer arrays
 */
 
