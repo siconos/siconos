@@ -50,7 +50,7 @@
   REGISTER(BodyDiskRecord)                      \
   REGISTER(BodyBox2dRecord)                     \
   REGISTER(BodyCH2dRecord)                      \
-  
+
 
 DEFINE_SPTR(UpdateShapeVisitor)
 
@@ -683,10 +683,12 @@ void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyShapeReco
     DEBUG_EXPR(record.base->display(););
     if (record.base->size() ==7)
     {
+      DEBUG_PRINT("3D DS\n");
       q = *record.base;
     }
     else if (record.base->size() ==3)
     {
+      DEBUG_PRINT("2D DS\n");
       q(0) = record.base->getValue(0);
       q(1) = record.base->getValue(1);
       q(2) = 0.0;
@@ -701,11 +703,13 @@ void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyShapeReco
     q.zero();
     q(3) = 1;
   }
-
-  DEBUG_EXPR(q.display(););
+  DEBUG_PRINT("Position of the shape given to bullet:")
+  DEBUG_EXPR_WE(q.display(););
 
   btTransform t = offsetTransform(q, *record.contactor->offset);
   t.setOrigin(t.getOrigin() * _options.worldScale);
+  DEBUG_PRINTF("transformation = %f,%f,%f\n", float(t.getOrigin().getX()), float(t.getOrigin().getY()), float(t.getOrigin().getZ()));
+  DEBUG_PRINTF("Rotation axis = %f,%f,%f\n", float(t.getRotation().getAxis().getX()), float(t.getRotation().getAxis().getY()), float(t.getRotation().getAxis().getZ()));
   record.btobject->setWorldTransform( t );
   DEBUG_END("SiconosBulletCollisionManager_impl::updateShapePosition(...)\n");
 }
@@ -1581,6 +1585,9 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyBox2dRecord &record)
   updateShapePosition(record);
   DEBUG_END("SiconosBulletCollisionManager_impl::updateShape(BodyBox2dRecord &record)\n");
 }
+
+
+
 void SiconosBulletCollisionManager_impl::createCollisionObject(
   const SP::SiconosVector base,
   const SP::RigidBody2dDS ds,
@@ -1595,7 +1602,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
 
   if (ch2d->vertices()->size(1) != 2)
     throw SiconosException("2d Convex hull vertices matrix must have 2 columns.");
-  
+
   // Copy and scale the points
   int rows = ch2d->vertices()->size(0);
   std::vector<btScalar> pts;
@@ -1605,10 +1612,21 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
     pts[r*3+1] = (*ch2d->vertices())(r, 1) * _options.worldScale;
     pts[r*3+2] = 0.0 * _options.worldScale;
   }
+  DEBUG_EXPR_WE(
+    for (int r=0; r < rows; r++)
+    {
+      printf("pts[r*3+0] = %8.4e, pts[r*3+1] =%8.4e, pts[r*3+2] =%8.4e\n",pts[r*3+0], pts[r*3+1], pts[r*3+2] );
+    }
+    );
+
 
   //This version is ok
   btConvexHullShape* childShape1 = new btConvexHullShape(&pts[0],rows, sizeof(btScalar)*3);
   SP::btConvex2dShape btconvex2d(new btConvex2dShape(childShape1));
+
+
+  DEBUG_PRINTF("ch2d->insideMargin() = %8.4e\t, ch2d->outsideMargin() = %8.4e\n", ch2d->insideMargin(), ch2d->outsideMargin()  );
+
   
   btconvex2d->setMargin((ch2d->insideMargin() + ch2d->outsideMargin()) * _options.worldScale);
   childShape1->recalcLocalAabb();
@@ -1616,13 +1634,14 @@ void SiconosBulletCollisionManager_impl::createCollisionObject(
   // Warning inside margin is not taken into account as in 3D
 
 
-  
+
   // initialization
   createCollisionObjectHelper<SP::SiconosConvexHull2d,
                               SP::btConvex2dShape,
                               SP::RigidBody2dDS,
                               BodyCH2dRecord>
     (base, ds, ch2d, btconvex2d, bodyShapeMap, contactor);
+  //getchar();
   DEBUG_END("void SiconosBulletCollisionManager_impl::createCollisionObject(..., ch2d, ..) \n");
 }
 
@@ -1635,14 +1654,17 @@ void SiconosBulletCollisionManager_impl::updateShape(BodyCH2dRecord &record)
   // Update shape parameters
   if (ch2d->version() != record.shape_version)
   {
-
+    DEBUG_PRINT("We update the shape parameters");
     // TODO
     //btbox->setLocalScaling(btVector3(sx, sy, sz));
     btconvex2d->setMargin((ch2d->insideMargin() + ch2d->outsideMargin()) * _options.worldScale);
 
     SP::RigidBody2dDS rbds=std11::static_pointer_cast<RigidBody2dDS>(record.ds);
     if (record.ds && rbds->useContactorInertia())
+    {
+      DEBUG_PRINT("We update the inertia using the contactor inertia");
       update2DContactorInertia(rbds, btconvex2d);
+    }
 
     if (record.btobject->getBroadphaseHandle())
     {
@@ -2011,7 +2033,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
   IterateContactPoints t(impl->_collisionWorld);
   IterateContactPoints::iterator it, itend=t.end();
   DEBUG_PRINT("SiconosBulletCollisionManager :: iterating contact points:\n");
-
+  //getchar();
   for (it=t.begin(); it!=itend; ++it)
   {
     DEBUG_PRINTF("SiconosBulletCollisionManager ::   -- %p, %p, %p\n", it->objectA, it->objectB, it->point);
@@ -2030,7 +2052,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       pairB = reinterpret_cast<const BodyShapeRecord*>(it->objectA->getUserPointer());
       flip = true;
     }
-
+    DEBUG_PRINTF("flip = %i \n", flip);
     // If both collision objects belong to the same body (or no body),
     // no interaction is created.
     if (pairA->ds == pairB->ds)
@@ -2143,10 +2165,10 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       nslaw->display();
       SP::NewtonImpactFrictionNSL nslaw_NewtonImpactFrictionNSL(std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw));
       SP::NewtonImpactRollingFrictionNSL nslaw_NewtonImpactRollingFrictionNSL(std11::dynamic_pointer_cast<NewtonImpactRollingFrictionNSL>(nslaw));
-      
+
       DEBUG_EXPR(std::cout << nslaw_NewtonImpactFrictionNSL << std::endl;);
       DEBUG_EXPR(std::cout << nslaw_NewtonImpactRollingFrictionNSL << std::endl;);
-      
+
       DEBUG_PRINTF("SiconosBulletCollisionManager ::  nslaw->size() = %i\n", nslaw->size() );
       // we assume that this test checks if  we deal with 3D problem with RigidBodies
       // Clearly, it will not be sufficient with meshed FE bodies.
@@ -2242,7 +2264,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
           inter = std11::make_shared<Interaction>(nslaw, rel);
           _stats.new_interactions_created ++;
         }
-        
+
       }
       else if (nslaw && nslaw_NewtonImpactRollingFrictionNSL)
       {
@@ -2314,6 +2336,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
         simulation->link(inter, pairA->ds, pairB->ds);
       }
     }
+    //getchar();
   }
   DEBUG_END("SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation)\n");
 }
