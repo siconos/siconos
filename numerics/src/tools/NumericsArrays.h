@@ -17,7 +17,7 @@
 */
 
 #ifndef NUMERICSARRAYS_H
-#define NUMERICSARRAY_H
+#define NUMERICSARRAYS_H
 
 /*!\file NumericsArrays.h
   Header to collect basic tools for integer arrays
