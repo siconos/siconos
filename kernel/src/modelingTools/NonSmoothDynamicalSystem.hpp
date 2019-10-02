@@ -327,13 +327,13 @@ public:
    * \param nb the identifier of the DynamicalSystem to get
    * \return a pointer on DynamicalSystem
    */
-  inline SP::DynamicalSystem dynamicalSystems(int nb) const
+  inline SP::DynamicalSystem dynamicalSystem(int nb) const
   {
-    return _topology->getDynamicalSystems(nb);
+    return _topology->getDynamicalSystem(nb);
   }
-  inline void displayDynamicalSystem() const
+  inline void displayDynamicalSystems() const
   {
-    _topology->displayDynamicalSystem();
+    _topology->displayDynamicalSystems();
   }
 
   /** remove a dynamical system
