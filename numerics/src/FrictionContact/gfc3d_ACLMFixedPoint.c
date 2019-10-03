@@ -49,6 +49,9 @@ typedef void (*internalSolverPtr)(ConvexQP* ,
 void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double* restrict reaction, double* restrict velocity,
                           double* restrict globalVelocity, int* restrict info, SolverOptions* restrict options)
 {
+
+  verbose=1;
+  
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;

@@ -46,7 +46,7 @@ void fc3d_unitary_compute_and_add_error(double* restrict r , double* restrict u,
   //double worktmp[3];
   /* Compute the modified local velocity */
   /* worktmp[0] = r[0] - u[0] - mu *  hypot(u[1], u[2]); */
-  worktmp[0] = r[0] -  u[0]- mu  * sqrt(u[1] * u[1] + u[2] * u[2]);
+  worktmp[0] = r[0] -  u[0] - mu  * sqrt(u[1] * u[1] + u[2] * u[2]);
   worktmp[1] = r[1] -  u[1] ;
   worktmp[2] = r[2] -  u[2] ;
   projectionOnCone(worktmp, mu);

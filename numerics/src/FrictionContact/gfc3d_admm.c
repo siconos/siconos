@@ -29,9 +29,11 @@
 #include "numerics_verbose.h"
 #include "NumericsVector.h"
 #include "float.h"
+
+#include "NumericsSparseMatrix.h"
 /* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 const char* const   SICONOS_GLOBAL_FRICTION_3D_ADMM_STR = "GFC3D ADMM";
 
@@ -120,11 +122,41 @@ static double gfc3d_admm_select_rho(NumericsMatrix* M, NumericsMatrix* H, int * 
   return rho;
 }
 
+static inline void gfc3d_ADMM_compute_H_correction(int nc, double * u, double * mu,
+                                                   NumericsMatrix * H_correction)
+{
+
+  for (int contact =0; contact < nc; contact ++)
+  {
+    int pos = contact * 3;
+    double normUT = sqrt(u[pos + 1] * u[pos + 1] +
+                  u[pos + 2] * u[pos + 2]);
+
+    NM_zentry(H_correction,pos,pos, 1.0);
+    NM_zentry(H_correction,pos+1,pos+1, 1.0);
+    NM_zentry(H_correction,pos+2,pos+2, 1.0);
+    
+    if (normUT > DBL_EPSILON)
+    {
+      NM_zentry(H_correction,pos,pos+1, mu[contact]* u[pos+1]/normUT);
+      NM_zentry(H_correction,pos,pos+2, mu[contact]* u[pos+2]/normUT);
+    }
+    else
+    {
+      NM_zentry(H_correction,pos,pos+1, 0.0);
+      NM_zentry(H_correction,pos,pos+2, 0.0);
+   }
+  }
+  DEBUG_EXPR(NM_display(H_correction););
+  /* getchar();  */
+}
+
+
 void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
                 double* restrict velocity, double* restrict globalVelocity,
                 int* restrict info, SolverOptions* restrict options)
 {
-  /* verbose=3; */
+  verbose=1; 
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -217,12 +249,19 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
 
   if (rho <= DBL_EPSILON)
-    numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
+    numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be positive");
 
   /* Compute M + rho H H^T (storage in M)*/
   NumericsMatrix *Htrans =  NM_transpose(H);
-
+  NumericsMatrix *H_modified = NM_create(NM_SPARSE,n,m);
+  NM_triplet_alloc(H_modified, n); 
+  H_modified->matrix2->origin = NSM_TRIPLET;
+  
+  
   NumericsMatrix *W = NM_new();
+  
+  /* NSM_linear_solver_params* p = NSM_linearSolverParams(W); */
+  /* p->solver = NSM_CS_CHOLSOL; */
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
@@ -263,55 +302,123 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   rho_k=rho;
   int has_rho_changed = 1;
 
+  int has_normUT_changed = 1;
 
+  
+  for (contact = 0 ; contact < nc ; ++contact)
+  {
+    problem->mu[contact] =  0.01;
+  }
+
+
+  double * normUT_old  = (double *) malloc(nc*sizeof(double));
+  double * normUT_current  = (double *) malloc(nc*sizeof(double));
+  double *mu_k  = (double *) malloc(nc*sizeof(double));
+
+  for (contact = 0 ; contact < nc ; ++contact)
+  {
+
+    mu_k[contact] =  0.1;
+    mu_k[contact] = problem->mu[contact];
+  }
+
+  
   while ((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
 
-      if (has_rho_changed)
-      {
-        NM_copy(M, W);
-        DEBUG_PRINT("copy of M: "); DEBUG_EXPR(NM_display(W));
-        NM_gemm(rho, H, Htrans, 1.0, W);
-        DEBUG_PRINT("M + rho H H^T: ");DEBUG_EXPR(NM_display(W));
-      }
+
+ 
 
       /********************/
       /*  0 - Compute b   */
       /********************/
 
       cblas_dcopy(m,problem->b,1,b_s,1);
-      for (contact = 0 ; contact < nc ; ++contact)
+      /* if (iter % 50) */
+      /* { */
+      /* if (iter % 300 == 0) */
+      /* { */
+      /*   for (contact = 0 ; contact < nc ; ++contact) */
+      /*   { */
+      /*     mu_k[contact]+=  0.1; */
+      /*     mu_k[contact] =  fmin(problem->mu[contact],mu_k[contact]); */
+      /*   } */
+      /*   //getchar(); */
+      /* } */
+      
+      double * u_current = u;
+     /* if (iter % 300 == 0) */
       {
-        pos = contact * 3;
-        normUT = sqrt(u[pos + 1] * u[pos + 1] + u[pos + 2] * u[pos + 2]);
-        b_s[pos] +=  problem->mu[contact]*normUT;
+        for (contact = 0 ; contact < nc ; ++contact)
+        {
+          pos = contact * 3;
+          normUT = sqrt(u_current[pos + 1] * u_current[pos + 1] +
+                        u_current[pos + 2] * u_current[pos + 2]);
+          normUT_old[contact] = normUT_current[contact];
+          normUT_current[contact] = normUT;
+          //printf("contact %i  normUT %4.2e \n", contact, normUT);
+          b_s[pos] += mu_k[contact]*normUT;
+        }
       }
-
-
+      /* } */
+      cblas_daxpy(nc, -1.0, normUT_current, 1, normUT_old, 1);
+      
+      printf("cblas_dnrm2(nc, normUT_old, 1\n = %8.4e, mu = %2.5e\n", cblas_dnrm2(nc, normUT_old, 1), mu_k[0]);
       /********************/
       /*  1 - Compute v */
       /********************/
 
+      /* Compute iteration matrix */
+      if (has_normUT_changed || has_rho_changed )
+      {
+        
+        NM_copy(M, W);
+        if(has_normUT_changed)
+        {
+            NumericsMatrix* H_correction = NM_create(NM_SPARSE,m,m);
+            NM_triplet_alloc(H_correction, m); 
+            H_correction->matrix2->origin = NSM_TRIPLET;
+            gfc3d_ADMM_compute_H_correction(nc, u, mu, H_correction);
+            DEBUG_EXPR(NM_display(H));
+            NM_gemm(1.0, H, H_correction, 0.0, H_modified);
+            DEBUG_EXPR(NM_display(H_modified));
+            NM_free(H_correction);
+            NM_gemm(rho, H_modified, Htrans, 1.0, W);
+        }
+        else
+        {
+          NM_gemm(rho, H, Htrans, 1.0, W);
+        }
+        DEBUG_PRINT("M + rho H H^T: ");DEBUG_EXPR(NM_display(W));
+      }
+      
       /* compute the rhs */
-      /* q --> v */
-      cblas_dcopy(n , q , 1 , v, 1);
-      //cblas_dscal(n, -1, v,1);
-
       /* q +  rho H*( u -b + reaction_k) --> v */
-
       cblas_dcopy(m , u_hat , 1 , tmp_m, 1);
       cblas_daxpy(m, -1.0, b_s, 1, tmp_m, 1);
       cblas_daxpy(m, 1.0, reaction_hat, 1, tmp_m , 1);
-      NM_gemv(rho, H, tmp_m, 1.0, v);
+      cblas_dcopy(n , q , 1 , v, 1); /* q --> v */
 
+      if (has_normUT_changed)
+      {
+        NM_gemv(rho, H_modified, tmp_m, 1.0, v);
+      }
+      else
+      {
+        NM_gemv(rho, H, tmp_m, 1.0, v);
+      }
 
       DEBUG_PRINT("rhs: ");
       DEBUG_EXPR(NV_display(v,n));
 
       /* Linear system solver */
+
+      
       /* cblas_dcopy(n , w_k , 1 , v, 1); */
       NM_gesv_expert(W,v,NM_KEEP_FACTORS);
+      
+      /* NM_posv_expert(W,v,NM_KEEP_FACTORS); */
       DEBUG_PRINT("v:");
       DEBUG_EXPR(NV_display(v,n));
 
@@ -340,8 +447,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       /**********************/
       /*  3 - Compute reaction */
       /**********************/
-
-
       /* - H^T v_k + u_k -b_s ->  reaction (residual) */
       if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
           SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
@@ -436,9 +541,9 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       {
         tau_k=1.0;
         e_k = e_k /eta;
-        numerics_printf_verbose(2,"Restart tau_k  = %e  \n", tau_k);
-        cblas_dcopy(2*m , reaction_k , 1 , reaction_hat, 1);
-        cblas_dcopy(2*m , u_k , 1 , u_hat, 1);
+        numerics_printf_verbose(2,"tau_k  = %e  \n", tau_k);
+        cblas_dcopy(m , reaction_k , 1 , reaction_hat, 1);
+        cblas_dcopy(m , u_k , 1 , u_hat, 1);
       }
       else
       {
@@ -485,6 +590,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       {
         has_rho_changed = 0;
       }
+
       numerics_printf_verbose(2, "gfc3d_admm. rho = %5.2e\t, rho_k = %5.2e\t ", rho, rho_k);
       rho_ratio = rho_k/rho;
 
@@ -505,14 +611,31 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       residual = sqrt(e);
       if (fabs(norm_q) > DBL_EPSILON)
         residual /= norm_q;
-
+      for (int contact =0; contact < nc; contact++)
+      {
+        pos=contact*3;
+        double normRT = sqrt(reaction[pos+1]*reaction[pos+1]+
+                             reaction[pos+2]*reaction[pos+2]);
+        printf("rho*normRT = %5.8e\n\n\n", mu[contact]*rho*normRT);
+      }
       numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e, residual = %14.7e, tol = %14.7e", iter, rho, residual, tolerance);
 
       if (residual < tolerance)
       {
         /* check the full criterion */
         cblas_dscal(m, rho, reaction, 1);
+
+        for (int contact =0; contact < nc; contact++)
+        {
+          pos=contact*3;
+          double normRT = sqrt(reaction[pos+1]*reaction[pos+1]+
+                               reaction[pos+2]*reaction[pos+2]);
+          reaction[pos] -= mu[contact] * normRT;
+          printf("normRT = %5.8e\n\n\n", mu[contact]*normRT);
+        }
+        
         gfc3d_compute_error(problem,  reaction, velocity, v,  tolerance, options, norm_q, &error);
+
         if (error < dparam[SICONOS_DPARAM_TOL])
         {
           hasNotConverged = 0;
@@ -523,7 +646,20 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
           numerics_printf_verbose(1,"---- GFC3D - ADMM  - The tolerance on the  residual is not sufficient to reach accuracy (error =  %14.7e)", error);
           tolerance = tolerance * residual/error;
           numerics_printf_verbose(1,"---- GFC3D - ADMM  - We reduce the tolerance on the residual to %14.7e", tolerance);
+          getchar();
+          for (int contact =0; contact < nc; contact++)
+          {
+            pos=contact*3;
+            double normRT = sqrt(reaction[pos+1]*reaction[pos+1]+
+                                 reaction[pos+2]*reaction[pos+2]);
+            reaction[pos] += mu[contact] * normRT;
+            printf("rho*normRT = %5.8e\n\n\n", mu[contact]*rho*normRT);
+          }
+
+          
           cblas_dscal(m, 1.0/rho, reaction, 1);
+          
+          //getchar();
         }
       }
       *info = hasNotConverged;
@@ -583,7 +719,7 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
 
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-  options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
+  options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = .1;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=10.0;
