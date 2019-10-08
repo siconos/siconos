@@ -121,7 +121,7 @@ def main():
     # Set log file
     # no need to log if build dir is automatically removed
 
-    logfile = Path(args.build_dir, '{}.log'.format(args.exe_name))
+    logfile = Path(args.build_dir, '{}.log'.format(args.exe_name)).as_posix()
     logging.basicConfig(filename=logfile, level=logging.DEBUG)
     msg = 'Try to execute siconos on driver file : {}.'.format(args.driver)
     logging.info(msg)
@@ -286,13 +286,13 @@ def create_build_dir(args):
         args.build_dir = Path(args.tmpdir.name).resolve()
     # or a default value
     elif not args.build_dir:
-        args.build_dir = Path('.siconos').resolve()
+        args.build_dir = Path('.siconos')
         args.build_dir.mkdir(parents=False, exist_ok=True)
     # or the value provided at command line (--build-dir)
     else:
-        args.build_dir = Path(args.build_dir).expanduser().resolve()
+        args.build_dir = Path(args.build_dir).expanduser()
         args.build_dir.mkdir(parents=False, exist_ok=True)
-
+    args.build_dir = args.build_dir.resolve().as_posix()
 
 def siconos_clean(build_dir=None, quiet=True):
     """clean  binary dir
@@ -310,7 +310,7 @@ def siconos_clean(build_dir=None, quiet=True):
     if build_dir.exists():
         format_msg('Clean build directory ({})'.format(build_dir), quiet)
         try:
-            shutil.rmtree(build_dir)
+            shutil.rmtree(build_dir.as_posix())
         except OSError:
             raise
 
@@ -684,10 +684,13 @@ def generate_cmakelists(args):
 
         # == Other runtime dependencies ==
         # boost timer is required in many examples.
-        result += 'find_package(Boost 1.61 COMPONENTS timer)\n'
+        result += 'if(@WITH_CXX@)\n'
+        result += 'set(Boost_NO_BOOST_CMAKE 1)\n'
+        result += 'find_package(Boost @boost_min_version@ COMPONENTS timer @boost_required_components@)\n'
         result += 'if(Boost_TIMER_FOUND)\n'
         result += '\t target_link_libraries({}'.format(args.exe_name)
         result += ' PUBLIC Boost::timer)\n endif()\n'
+        result += 'endif()\n'
 
         # == install binary ==
         result += 'install(TARGETS {}'.format(args.exe_name)
@@ -701,7 +704,7 @@ def generate_cmakelists(args):
 
     format_msg('Generate CMakeLists.txt file in {}'.format(args.build_dir),
                args.quiet)
-    filename = Path(args.build_dir, 'CMakeLists.txt')
+    filename = Path(args.build_dir, 'CMakeLists.txt').as_posix()
     with open(filename, 'w') as f:
         f.write(result)
 
