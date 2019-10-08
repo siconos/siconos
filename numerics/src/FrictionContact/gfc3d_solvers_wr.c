@@ -312,13 +312,8 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 
     // Product M^-1 H
     DEBUG_EXPR(NM_display(H););
-
-    NumericsMatrix * Minv  = NM_new();
-    Minv->size0 = n;
-    Minv->size1 = n;
-    Minv->storageType = NM_SPARSE;
     numerics_printf_verbose(1,"inversion of the matrix M ...");
-    NM_inv(M, Minv);
+    NumericsMatrix * Minv  = NM_inv(M);
     DEBUG_EXPR(NM_display(Minv););
 
 

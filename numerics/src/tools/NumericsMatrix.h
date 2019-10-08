@@ -595,9 +595,9 @@ extern "C"
 
   /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    * \param[in,out] A a NumericsMatrix.
-   * \param[out] Ainv the matrix inverse.
+   * \return the matrix inverse.
    */
-  int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv);
+  NumericsMatrix* NM_inv(NumericsMatrix* A);
 
   int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
 
@@ -735,7 +735,7 @@ extern "C"
   {
     return A;
   };
-
+  double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

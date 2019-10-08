@@ -2901,7 +2901,7 @@ int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs
   }
   return info;
 }
-int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
+NumericsMatrix* NM_inv(NumericsMatrix* A)
 {
 
   DEBUG_BEGIN("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
@@ -2916,7 +2916,11 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
   NumericsMatrix* Atmp = NM_new();
   NM_copy(A,Atmp);
 
-   int info =-1;
+  NumericsMatrix * Ainv  = NM_new();
+  Ainv->size0 =  A->size0;
+  Ainv->size1 =  A->size0;
+
+  int info =-1;
 
   switch (A->storageType)
   {
@@ -2928,11 +2932,8 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
   case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
   case NM_SPARSE:
   {
-    // We clear Ainv
-    NM_clearSparse(Ainv);
+
     Ainv->storageType = NM_SPARSE;
-    Ainv->size0 = A->size0;
-    Ainv->size1 = A->size1;
     NM_triplet_alloc(Ainv,  A->size0);
     Ainv->matrix2->origin = NSM_TRIPLET;
 
@@ -2946,7 +2947,10 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
       DEBUG_EXPR(NV_display(b,A->size1););
       //info = NM_gesv_expert(Atmp, b, NM_PRESERVE);
       info = NM_gesv_expert(Atmp, b, NM_KEEP_FACTORS);
-
+      if (info)
+      {
+        numerics_warning("NM_inv", "problem in NM_gesv_expert");
+      }
       for (int i = 0; i < A->size0; ++i)
       {
         CHECK_RETURN(CSparseMatrix_zentry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
@@ -2962,7 +2966,7 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
   free(Atmp);
   free(b);
   DEBUG_END("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
-  return (int)info;
+  return Ainv;
 
 }
 
@@ -3218,4 +3222,50 @@ double NM_symmetry_discrepancy(NumericsMatrix* A)
     }
   }
   return d;
+}
+#include "time.h"
+double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
+{
+  int n = A->size0;
+  int m = A->size1;
+  DEBUG_EXPR(
+    FILE* foutput = fopen("toto.py", "w");
+    NM_write_in_file_python(A, foutput);
+    fclose(foutput);
+    );
+  
+  double eig = 0.0, eig_old = 2*tol;
+
+  double * q = (double *) malloc(n*sizeof(double));
+  double * z = (double *) malloc(n*sizeof(double));
+  srand(time(NULL));
+  for (int i = 0; i < n ; i++)
+  {
+    q[i] = (rand()/(double)RAND_MAX);
+    DEBUG_PRINTF("q[%i] = %e \t",i, q[i]);
+  }
+  double norm = cblas_dnrm2(n , q, 1);
+  cblas_dscal(m, 1.0/norm, q, 1);
+  DEBUG_PRINTF("\n");
+
+  NM_gemv(1, A, q, 0.0, z);
+
+  int k =0;
+  while ((fabs((eig-eig_old)/eig_old) > tol) && k < itermax)
+  {
+    norm = cblas_dnrm2(n , z, 1);
+    cblas_dscal(m, 1.0/norm, z, 1);
+    cblas_dcopy(n , z  , 1 , q, 1);
+
+    NM_gemv(1.0, A, q, 0.0, z);
+
+    eig_old=eig;
+    eig = cblas_ddot(n, q, 1, z, 1);
+
+    DEBUG_PRINTF("eig[%i] = %32.24e \t error = %e\n",k, eig, fabs(eig-eig_old)/eig_old );
+    k++;
+  }
+  free(q);
+  free(z);
+  return eig;
 }
