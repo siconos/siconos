@@ -386,18 +386,20 @@ enum SICONOS_FRICTION_3D_ADMM_IPARAM_ENUM
 {
   /** index in iparam to store the strategy for computing rho */
   SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY = 9,
+  /** index in iparam to store the strategy for computing rho */
+  SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO = 10,
   /** index in iparam to store the acceleration parameter */
-  SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION= 10,
+  SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION= 11,
   /** index in iparam to store the symmetry parameter */
-  SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY= 11,
+  SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY= 12,
   /** index in iparam to store the sparse storage parameter */
-  SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE= 12,
+  SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE= 13,
   /** index in iparam to get problem info */
-  SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO= 13,
+  SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO= 14,
   /** index in iparam to get problem info */
-  SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S= 14,
+  SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S= 15,
   /** index in iparam to get problem info */
-  SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H= 16
+  SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H= 17
 
 };
 
@@ -451,16 +453,24 @@ enum SICONOS_FRICTION_3D_ADMM_FULL_H_ENUM
   SICONOS_FRICTION_3D_ADMM_FULL_H_YES= 1
 };
 
-enum SICONOS_FRICTION_3D_ADMM_STRATEGY_ENUM
+enum SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_ENUM
 {
   /** A constant value given in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
   SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT = 0,
-  /** A computed value stored in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
-  SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF =1,
   /** An adaptive strategy for rho is used */
   SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING =2,
   /** An adaptive strategy for rho is used */
   SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING =3
+};
+
+enum SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_ENUM
+{
+  /** A constant value given in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
+  SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN = 0,
+  /** A computed value stored in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */
+  SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_NORM_INF =1,
+  /** An adaptive strategy for rho is used */
+  SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_EIGENVALUES =2
 };
 
 

@@ -112,13 +112,16 @@ void gfc3d_ADMM_free(GlobalFrictionContactProblem* problem, SolverOptions* optio
 static double gfc3d_admm_select_rho(NumericsMatrix* M, NumericsMatrix* H, int * is_rho_variable, SolverOptions* restrict options)
 {
   double rho=0.0;
-  if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-      SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT)
+
+
+  /* initial rho */
+  if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] ==
+      SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN)
   {
     rho = options->dparam[SICONOS_FRICTION_3D_ADMM_RHO];
   }
-  else if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-           SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF)
+  else if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] ==
+           SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_NORM_INF)
   {
     double norm_1_M =   NM_norm_1(M);
     double norm_1_H =   NM_norm_1(H);
@@ -127,14 +130,17 @@ static double gfc3d_admm_select_rho(NumericsMatrix* M, NumericsMatrix* H, int * 
     else
       rho = options->dparam[SICONOS_FRICTION_3D_ADMM_RHO];
   }
-  else if  (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-            SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING||
-            options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-            SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
+
+  /* rho adaptive from initial rho */
+  if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
+       SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING||
+       options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
+       SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
   {
-    rho = options->dparam[SICONOS_FRICTION_3D_ADMM_RHO];
     *is_rho_variable = 1 ;
   }
+  else
+     *is_rho_variable = 0 ;
   return rho;
 }
 
@@ -789,6 +795,12 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] =
     SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] =  SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE;
+
+  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] =
+    SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN;
+  /* SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_NORM_INF; */
+  /* SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_EIGENVALUES; */
+  
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] =
     SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT;
     //SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
