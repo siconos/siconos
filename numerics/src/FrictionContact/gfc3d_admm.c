@@ -63,7 +63,8 @@ void gfc3d_ADMM_init(GlobalFrictionContactProblem* problem, SolverOptions* optio
     options->dWorkSize = m+n;
   }
   if  (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] == SICONOS_FRICTION_3D_ADMM_ACCELERATION ||
-       options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] == SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART )
+       options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] == SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART ||
+       options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] == SICONOS_FRICTION_3D_ADMM_NO_ACCELERATION) /* Could be optimized */
   {
     options->solverData=(Gfc3d_ADDM_data *)malloc(sizeof(Gfc3d_ADDM_data));
     Gfc3d_ADDM_data * data = (Gfc3d_ADDM_data *)options->solverData;
@@ -313,7 +314,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of H = %g norm of b = %g ", NM_norm_1(problem->H), norm_b);
     numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of H = %g ", NM_norm_inf(problem->H));
     NM_gemm(1.0, H, Htrans, 0.0, W);
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of HH^T = %g ", NM_iterated_power_method(W, 1e-08, 100));
+    /* numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of HH^T = %g ", NM_iterated_power_method(W, 1e-08, 100)); */
     /* numerics_printf_verbose(1,"---- GFC3D - ADMM - smallest eigenvalue of HH^T = %g ", NM_iterated_power_method(NM_inv(W), 1e-08, 100)); */
     numerics_printf_verbose(1,"---- GFC3D - ADMM -  M is symmetric = %i ", NM_is_symmetric(problem->M));
     // getchar();
@@ -337,9 +338,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   if (rho <= DBL_EPSILON)
     numerics_error("gfc3d_ADMM", "dparam[SICONOS_FRICTION_3D_ADMM_RHO] must be nonzero");
-
-
-
 
   /* for full Jacobian */
   NumericsMatrix *H_full = NM_create(NM_SPARSE,n,m);
@@ -582,13 +580,13 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       NM_gemv(1.0*rho, H, tmp_m, 1.0, tmp_n);
       s = cblas_dnrm2(n , tmp_n , 1);
       
-      cblas_dcopy(m , u_k , 1 , tmp_m, 1);
-      cblas_daxpy(m, -1.0, u, 1, tmp_m , 1);
+      /* cblas_dcopy(m , u_k , 1 , tmp_m, 1); */
+      /* cblas_daxpy(m, -1.0, u, 1, tmp_m , 1); */
 
-      cblas_dscal(n, 0.0, tmp_n, 1);
+      /* cblas_dscal(n, 0.0, tmp_n, 1); */
 
-      NM_gemv(1.0*rho, H, tmp_m, 1.0, tmp_n);
-      double s_k = cblas_dnrm2(n , tmp_n , 1);
+      /* NM_gemv(1.0*rho, H, tmp_m, 1.0, tmp_n); */
+      /* double s_k = cblas_dnrm2(n , tmp_n , 1); */
 
 
 
@@ -608,7 +606,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       DEBUG_PRINTF("residual r = %e \n", r);
       DEBUG_PRINTF("residual s = %e \n", s);
       DEBUG_PRINTF("residual e_k = %e \n", e_k);
-      DEBUG_PRINTF("residual s_k = %e \n", s_k);
+      /* DEBUG_PRINTF("residual s_k = %e \n", s_k); */
       DEBUG_PRINTF("eta  = %e \n", eta);
       if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] == SICONOS_FRICTION_3D_ADMM_ACCELERATION ||
           options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] == SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART)
@@ -646,7 +644,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       {
         tau_k=1.0;
         e_k = e_k /eta;
-        numerics_printf_verbose(2,"Restart tau_k  = %e  \n", tau_k);
+        numerics_printf_verbose(2,"No acceleration tau_k  = %e  \n", tau_k);
         cblas_dcopy(2*m , reaction_k , 1 , reaction_hat, 1);
         cblas_dcopy(2*m , u_k , 1 , u_hat, 1);
       }
@@ -657,7 +655,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
 
       rho_k = rho ;
-      numerics_printf_verbose(2, "gfc3d_admm. residuals : r  = %e, \t  s = %e \t s_k = %e", r, s, s_k);
+      /* numerics_printf_verbose(2, "gfc3d_admm. residuals : r  = %e, \t  s = %e \t s_k = %e", r, s, s_k); */
+      numerics_printf_verbose(2, "gfc3d_admm. residuals : r  = %e, \t  s = %e ", r, s);
 
       if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
           SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
