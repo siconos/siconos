@@ -18,10 +18,11 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
 #include "NumericsMatrix.h"
 #include "GlobalFrictionContactProblem.h"
 #include "numerics_verbose.h"
-
+#include "SiconosLapack.h"
 
 
 /* #define DEBUG_MESSAGES */
@@ -200,6 +201,50 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem)
   }
   else
     printf("No mu vector:\n");
+
+}
+GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactProblem* problem)
+{
+  assert(problem);
+
+  int nc = problem->numberOfContacts;
+  int n = problem->M->size0;
+  int m = 3 * nc;
+  
+  GlobalFrictionContactProblem* new = (GlobalFrictionContactProblem*) malloc(sizeof(GlobalFrictionContactProblem));
+  new->dimension = problem->dimension;
+  new->numberOfContacts = problem->numberOfContacts;
+  new->M = NM_new();
+  NM_copy(problem->M, new->M);
+  new->H = NM_new();
+  NM_copy(problem->H, new->H);
+  new->q = (double*)malloc(n*sizeof(double));
+  memcpy(new->q, problem->q, n*sizeof(double));
+  new->b = (double*)malloc(m*sizeof(double));
+  memcpy(new->b, problem->b, m*sizeof(double));
+  new->mu = (double*)malloc(nc*sizeof(double));
+  memcpy(new->mu, problem->mu, nc*sizeof(double));
+  new->env = NULL;
+  return new;
+}
+void globalFrictionContact_rescaling(
+  GlobalFrictionContactProblem* problem,
+  double alpha,
+  double beta,
+  double gamma)
+{
+  int nc = problem->numberOfContacts;
+  int n = problem->M->size0;
+  int m = 3 * nc;
+
+  /* scaling of M */
+  NM_scal(alpha*gamma*gamma, problem->M);
+  /* scaling of H */
+  NM_scal(beta*gamma, problem->H);
+  /* scaling of q */
+  cblas_dscal(n,alpha*gamma,problem->q,1);
+  /* scaling of b */
+  cblas_dscal(m,beta,problem->b,1);
 
 }
 
