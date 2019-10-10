@@ -2953,7 +2953,7 @@ NumericsMatrix* NM_inv(NumericsMatrix* A)
 
   NumericsMatrix * Ainv  = NM_new();
   Ainv->size0 =  A->size0;
-  Ainv->size1 =  A->size0;
+  Ainv->size1 =  A->size1;
 
   int info =-1;
 
@@ -2961,7 +2961,28 @@ NumericsMatrix* NM_inv(NumericsMatrix* A)
   {
   case NM_DENSE:
   {
-    assert (0 && "NM_inv :  not implemented");
+    Ainv->storageType = NM_DENSE;
+    Ainv->matrix0 = (double *)malloc(A->size0*A->size1*sizeof(double));
+    for( int col_rhs =0; col_rhs < A->size1; col_rhs++ )
+    {
+      for (int i = 0; i < A->size0; ++i)
+      {
+        b[i]=0.0;
+      }
+      b[col_rhs] = 1.0;
+      DEBUG_EXPR(NV_display(b,A->size1););
+      //info = NM_gesv_expert(Atmp, b, NM_PRESERVE);
+      info = NM_gesv_expert(Atmp, b, NM_KEEP_FACTORS);
+      DEBUG_EXPR(NV_display(b,A->size1););
+      if (info)
+      {
+        numerics_warning("NM_inv", "problem in NM_gesv_expert");
+      }
+      for (int i = 0; i < A->size0; ++i)
+      {
+        Ainv->matrix0[i+col_rhs*A->size0]  = b[i];
+      }
+    }
     break;
   }
   case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
@@ -3281,7 +3302,7 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
   }
   double norm = cblas_dnrm2(n , q, 1);
   cblas_dscal(m, 1.0/norm, q, 1);
-  DEBUG_PRINTF("\n");
+  DEBUG_PRINT("\n");
 
   NM_gemv(1, A, q, 0.0, z);
 

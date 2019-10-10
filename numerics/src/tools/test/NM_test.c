@@ -1634,7 +1634,7 @@ static int test_NM_iterated_power_method(void)
 static int test_NM_scal(void)
 {
 
-  printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
+  printf("========= Starts Numerics tests for NumericsMatrix NM_scal========= \n");
 
   int i, nmm = 4 ;
   NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
@@ -1678,7 +1678,7 @@ static int test_NM_scal(void)
   /* NM_display(B); */
   NM_scal(1e-03,B);
   /* NM_display(B); */
-  printf("End of NM_scal...\n");
+
 
 
   /* free memory */
@@ -1692,7 +1692,79 @@ static int test_NM_scal(void)
   NM_free(I);
   NM_free(B);
 
-  printf("========= End Numerics tests for NumericsMatrix ========= \n");
+  printf("========= End Numerics tests for NumericsMatrix NM_scal========= \n");
+  return info;
+}
+static int test_NM_inv(void)
+{
+
+  printf("========= Starts Numerics tests for NumericsMatrix NM_inv ========= \n");
+
+  int i, nmm = 4 ;
+  NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
+  int info = test_build_first_4_NM(NMM);
+
+  if (info != 0)
+  {
+    printf("Construction failed ...\n");
+    return info;
+  }
+  printf("Construction ok ...\n");
+
+  NumericsMatrix * I = NM_eye(50);
+  NumericsMatrix * Iinv = NM_inv(I);
+  NumericsMatrix* IIinv = NM_multiply(I,Iinv);
+  info = !NM_equal(IIinv, I);
+  printf("info : %i\n", info);
+  if (info != 0) return info;
+  printf("end if test I  ...\n");
+
+  NumericsMatrix * A = NMM[0];
+  NumericsMatrix * Ainv = NM_inv(A);
+  NumericsMatrix* AAinv = NM_multiply(A,Ainv);
+  NumericsMatrix * IA = NM_eye(A->size0);
+  info = !NM_compare(AAinv, IA, 1e-14);
+  if (info != 0) return info;
+  printf("end if test A dense  ...\n");
+
+  NumericsMatrix * B = NMM[1];
+  NumericsMatrix * Binv = NM_inv(B);
+  NumericsMatrix* BBinv = NM_multiply(B,Binv);
+  NumericsMatrix * IB = NM_eye(B->size0);
+  info = !NM_compare(BBinv, IB, 1e-14);
+  if (info != 0) return info;
+  printf("end if test B  SBM ...\n");
+
+  NumericsMatrix * C = test_matrix_5();
+  NumericsMatrix * Cinv = NM_inv(C);
+  NumericsMatrix* CCinv = NM_multiply(C,Cinv);
+  NumericsMatrix * IC = NM_eye(C->size0);
+  info = !NM_compare(CCinv, IC, 1e-14);
+  if (info != 0) return info;
+  printf("end if test C  Sparse ...\n");
+
+  for (i = 0 ; i < nmm; i++)
+  {
+    NM_free(NMM[i]);
+    free(NMM[i]);
+  }
+  free(NMM);
+  NM_free(I);
+  NM_free(Iinv);
+  NM_free(IIinv);
+
+  NM_free(AAinv);
+  NM_free(Ainv);
+  NM_free(IA);
+  NM_free(BBinv);
+  NM_free(Binv);
+  NM_free(IB);
+  NM_free(CCinv);
+  NM_free(Cinv);
+  NM_free(IC);
+  NM_free(C);
+
+  printf("========= End Numerics tests for NumericsMatrix NM_inv ========= \n");
   return info;
 }
 
@@ -1720,6 +1792,8 @@ int main(void)
   info +=    test_NM_iterated_power_method();
 
   info +=    test_NM_scal();
+
+  info +=    test_NM_inv();
   return info;
 
 }
