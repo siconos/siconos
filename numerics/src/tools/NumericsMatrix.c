@@ -1479,11 +1479,11 @@ void  NM_scal(double alpha, NumericsMatrix* A)
     cblas_dscal(nm, alpha, A->matrix0,1);
     break;
   }
-  /* case NM_SPARSE_BLOCK: */
-  /* { */
-  /*   SBM_scal(alpha, A->matrix1); */
-  /*   break; */
-  /* } */
+  case NM_SPARSE_BLOCK:
+  {
+    SBM_scal(alpha, A->matrix1);
+    break;
+  }
   case NM_SPARSE:
   {
     CSparseMatrix_scal(alpha, NM_csc(A));

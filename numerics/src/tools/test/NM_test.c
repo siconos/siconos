@@ -1665,6 +1665,14 @@ static int test_NM_scal(void)
     info =1;
   if (info != 0) return info;
 
+  NumericsMatrix * A_SBM = NMM[1];
+  NM_scal(1e-03, A_SBM);
+  printf("End of NM_scal...\n");
+
+  if (fabs(NM_get_value(A_SBM,3,0) - 5e-03) > 1e-10)
+    info =1;
+  if (info != 0) return info;
+
 
   NumericsMatrix * B = test_matrix_5();
   /* NM_display(B); */

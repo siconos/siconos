@@ -738,6 +738,36 @@ void SBM_add_without_allocation(SparseBlockStructuredMatrix * A, SparseBlockStru
   DEBUG_END("SBM_add_without_allocation(...)\n");
 
 }
+void SBM_scal(double alpha, SparseBlockStructuredMatrix * A)
+{
+  DEBUG_BEGIN("SBM_scal(...)\n");
+  unsigned int currentRowNumber ;
+  size_t colNumber;
+  unsigned int nbRows, nbColumns;
+  
+  for (currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
+  {
+    for (size_t blockNum = A->index1_data[currentRowNumber];
+         blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < A->filled2);
+      colNumber = A->index2_data[blockNum];
+      /* Get dim. of the current block */
+      nbRows = A->blocksize0[currentRowNumber];
+      if (currentRowNumber != 0)
+        nbRows -= A->blocksize0[currentRowNumber - 1];
+      nbColumns = A->blocksize1[colNumber];
+
+      if (colNumber != 0)
+        nbColumns -= A->blocksize1[colNumber - 1];
+
+      cblas_dscal(nbRows * nbColumns, alpha, A->block[blockNum], 1);
+    }
+  }
+
+  DEBUG_END("SBM_scal(...)\n");
+
+}
 
 SparseBlockStructuredMatrix * SBM_add(SparseBlockStructuredMatrix * A, SparseBlockStructuredMatrix * B, double alpha, double beta)
 {
