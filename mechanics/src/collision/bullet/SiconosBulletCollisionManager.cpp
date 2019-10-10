@@ -2162,7 +2162,6 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       SP::NonSmoothLaw nslaw = nonSmoothLaw(g1,g2);
 
       /* test nslaw type and then deduce the type of relation to be created */
-      nslaw->display();
       SP::NewtonImpactFrictionNSL nslaw_NewtonImpactFrictionNSL(std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw));
       SP::NewtonImpactRollingFrictionNSL nslaw_NewtonImpactRollingFrictionNSL(std11::dynamic_pointer_cast<NewtonImpactRollingFrictionNSL>(nslaw));
 
