@@ -1468,6 +1468,41 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
 
 }
 
+void  NM_scal(double alpha, NumericsMatrix* A)
+{
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    int nm= A->size0*A->size1;
+    cblas_dscal(nm, alpha, A->matrix0,1);
+    break;
+  }
+  /* case NM_SPARSE_BLOCK: */
+  /* { */
+  /*   SBM_scal(alpha, A->matrix1); */
+  /*   break; */
+  /* } */
+  case NM_SPARSE:
+  {
+    CSparseMatrix_scal(alpha, NM_csc(A));
+    A->matrix2->origin = NSM_CSC;
+    /* Invalidations */
+    NM_clearTriplet(A);
+    NM_clearCSCTranspose(A);
+    NM_clearCSR(A);
+    break;
+  }
+  default:
+  {
+    numerics_error("NM_scal:","unsupported matrix storage %d", A->storageType);
+  }
+  }
+  return;
+
+}
+
 
 NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data)
 {

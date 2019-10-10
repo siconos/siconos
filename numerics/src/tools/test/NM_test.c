@@ -1586,24 +1586,24 @@ static int test_NM_iterated_power_method(void)
   if (fabs(eig - 1.0) > 1e-10)
     info =1;
   if (info != 0) return info;
-  
+
   NumericsMatrix * A = NMM[0];
   NumericsMatrix * Atrans =  NM_transpose(A);
-  NumericsMatrix * AAT = NM_add(1/2., A, 1/2., Atrans);  
+  NumericsMatrix * AAT = NM_add(1/2., A, 1/2., Atrans);
   eig = NM_iterated_power_method(AAT, 1e-14, 100);
   printf("largest eigenvalue = %e\n", eig);
   printf("End of iterated power method...\n");
 
-  
-  
+
+
   if (fabs(eig - 9.983560005532535086558710) > 1e-10)
     info =1;
   if (info != 0) return info;
-  
+
 
   NumericsMatrix * B = NMM[1];
   NumericsMatrix * Btrans =  NM_transpose(A);
-  NumericsMatrix * BBT = NM_add(1/2., B, 1/2., Btrans);  
+  NumericsMatrix * BBT = NM_add(1/2., B, 1/2., Btrans);
   eig = NM_iterated_power_method(BBT, 1e-14, 100);
   printf("largest eigenvalue = %e\n", eig);
   printf("End of iterated power method...\n");
@@ -1631,6 +1631,62 @@ static int test_NM_iterated_power_method(void)
   printf("========= End Numerics tests for NumericsMatrix ========= \n");
   return info;
 }
+static int test_NM_scal(void)
+{
+
+  printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
+
+  int i, nmm = 4 ;
+  NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
+  int info = test_build_first_4_NM(NMM);
+
+  if (info != 0)
+  {
+    printf("Construction failed ...\n");
+    return info;
+  }
+  printf("Construction ok ...\n");
+
+  NumericsMatrix * I = NM_eye(50);
+  NM_scal(1e-03,I);
+  printf("NM_get_value(I,0,0) =%e \n", NM_get_value(I,0,0));
+  printf("End of NM_scal...\n");
+
+
+  if (fabs(NM_get_value(I,0,0) - 1e-03) > 1e-10)
+    info =1;
+  if (info != 0) return info;
+
+  NumericsMatrix * A = NMM[0];
+  NM_scal(1e-03,A);
+  printf("End of NM_scal...\n");
+
+  if (fabs(NM_get_value(A,3,0) - 5e-03) > 1e-10)
+    info =1;
+  if (info != 0) return info;
+
+
+  NumericsMatrix * B = test_matrix_5();
+  /* NM_display(B); */
+  NM_scal(1e-03,B);
+  /* NM_display(B); */
+  printf("End of NM_scal...\n");
+
+
+  /* free memory */
+
+  for (i = 0 ; i < nmm; i++)
+  {
+    NM_free(NMM[i]);
+    free(NMM[i]);
+  }
+  free(NMM);
+  NM_free(I);
+  NM_free(B);
+
+  printf("========= End Numerics tests for NumericsMatrix ========= \n");
+  return info;
+}
 
 
 int main(void)
@@ -1654,6 +1710,8 @@ int main(void)
   info +=    test_NM_row_prod_non_square_test();
 
   info +=    test_NM_iterated_power_method();
+
+  info +=    test_NM_scal();
   return info;
 
 }
