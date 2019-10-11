@@ -30,74 +30,15 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
   }
 
   int n =0;
+  
   for ( int d =0; d <n_data_1; d++)
   {
     int e=0;
     test[n][e++] = data_collection_1[d];
     test[n][e++] = "0";
     test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSGS);
-    test[n][e++] = "0";
-    test[n][e++] = "10000";
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSGS);
-    test[n][e++] = "0";
-    test[n][e++] = "10000";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-    test[n][e++] = "0.0";
-    test[n][e++] = "0";
-    test[n][e++] = "internal_iparam";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "internal_dparam";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_VI_EG);
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "---";
-    n++;
-  }
-
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_VI_FPP);
-    test[n][e++] = "40000";
-    test[n][e++] = "0";
-    test[n][e++] = "---";
-    n++;
-  }
-
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ACLMFP);
-    test[n][e++] = "1e-5";
+    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
+    test[n][e++] = "1e-06";
     test[n][e++] = "10000";
     test[n][e++] = "---";
     n++;
@@ -109,20 +50,8 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test[n][e++] = "0";
     test[n][e] = (char *)malloc(50*sizeof(char));
     sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test[n][e++] = "1e-12";
-    test[n][e++] = "100000";
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test[n][e++] = "1e-12";
-    test[n][e++] = "100000";
+    test[n][e++] = "1e-06";
+    test[n][e++] = "10000";
     test[n][e++] = "0";
     test[n][e++] = "0";
     test[n][e++] = "0";

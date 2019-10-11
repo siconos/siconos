@@ -272,7 +272,10 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   }
 
   double* q = problem->q;
+  double* b = problem->b;
   double* mu = problem->mu;
+  
+
 
   assert((int)H->size1 == problem->numberOfContacts * problem->dimension);
   assert((int)M->size0 == M->size1);
@@ -280,7 +283,42 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
                                       * Htrans*globalVelocity */
 
 
+  NumericsMatrix *Htrans =  NM_transpose(H);
+  /* Compute M + rho H H^T (storage in W)*/
+  NumericsMatrix *W = NM_create(NM_SPARSE,n,n);
+  NM_triplet_alloc(W, n);
+  W->matrix2->origin = NSM_TRIPLET;
 
+  double alpha_r=0.0, beta_r=0.0;
+  GlobalFrictionContactProblem *  rescaled_problem =  problem;
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_YES)
+  {
+    alpha_r = NM_norm_inf(M);
+    NM_gemm(1.0, H, Htrans, 0.0, W);
+    beta_r = NM_norm_inf(H);
+    printf("alpha_r = %e\t beta_r= %e\n", alpha_r, beta_r);
+    rescaled_problem =  globalFrictionContact_copy(problem);
+ 
+
+    
+    globalFrictionContact_rescaling(rescaled_problem, 1./alpha_r, 1.0/beta_r, 1.0);
+   
+    M = rescaled_problem->M;
+    H = rescaled_problem->H;
+    q = rescaled_problem->q;
+    b = rescaled_problem->b;
+    
+
+    
+    NM_free(Htrans);
+    Htrans =  NM_transpose(H);
+ 
+  }
+  NM_free(W);
+
+
+
+  
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
@@ -292,32 +330,31 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   if (*info == 0)
     return;
 
-  double norm_q = cblas_dnrm2(n , problem->q , 1);
+  double norm_q = cblas_dnrm2(n , q , 1);
 
-  double norm_b = cblas_dnrm2(m , problem->b , 1);
+  double norm_b = cblas_dnrm2(m , b , 1);
   
-  NumericsMatrix *Htrans =  NM_transpose(H);
-    /* Compute M + rho H H^T (storage in W)*/
-  NumericsMatrix *W = NM_create(NM_SPARSE,n,n);
-  NM_triplet_alloc(W, n);
-  W->matrix2->origin = NSM_TRIPLET;
+
   
   if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] ==
       SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_YES)
   {
     numerics_printf_verbose(1,"---- GFC3D - ADMM - Problem information");
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of M = %g ", NM_iterated_power_method(problem->M, 1e-08, 100));
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - smallest eigenvalue of M = %g ", NM_iterated_power_method(NM_inv(problem->M), 1e-08, 100));
+    numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(M), norm_q);
+    numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(M));
+    numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of M = %g ", NM_iterated_power_method(M, 1e-08, 100));
+    numerics_printf_verbose(1,"---- GFC3D - ADMM - smallest eigenvalue of M = %g ", NM_iterated_power_method(NM_inv(M), 1e-08, 100));
 
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of H = %g norm of b = %g ", NM_norm_1(problem->H), norm_b);
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of H = %g ", NM_norm_inf(problem->H));
+    numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of H = %g norm of b = %g ", NM_norm_1(H), norm_b);
+    numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of H = %g ", NM_norm_inf(H));
+    W = NM_create(NM_SPARSE,n,n);
+    NM_triplet_alloc(W, n);
+    W->matrix2->origin = NSM_TRIPLET;
     NM_gemm(1.0, H, Htrans, 0.0, W);
+    numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of HH^T = %g  ", NM_norm_1(W));
     /* numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of HH^T = %g ", NM_iterated_power_method(W, 1e-08, 100)); */
     /* numerics_printf_verbose(1,"---- GFC3D - ADMM - smallest eigenvalue of HH^T = %g ", NM_iterated_power_method(NM_inv(W), 1e-08, 100)); */
-    numerics_printf_verbose(1,"---- GFC3D - ADMM -  M is symmetric = %i ", NM_is_symmetric(problem->M));
-    // getchar();
+    numerics_printf_verbose(1,"---- GFC3D - ADMM -  M is symmetric = %i ", NM_is_symmetric(M));
     NM_free(W);
   }
 
@@ -409,7 +446,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       /********************/
       /*  0 - Compute b   */
       /********************/
-      gfc3d_ADMM_compute_full_b(nc, u, problem->mu, problem->b, b_full, options);
+      gfc3d_ADMM_compute_full_b(nc, u, mu, b, b_full, options);
 
 
       /********************/
@@ -480,7 +517,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
       cblas_dcopy(m , u_hat , 1 , tmp_m, 1);
 
-      gfc3d_ADMM_compute_full_b(nc, u_hat, problem->mu, problem->b, b_full, options);
+      gfc3d_ADMM_compute_full_b(nc, u_hat, mu, b, b_full, options);
 
       cblas_daxpy(m, -1.0, b_full, 1, tmp_m, 1);
       //cblas_daxpy(m, 1.0, reaction_hat, 1, tmp_m , 1);
@@ -512,7 +549,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       /********************/
 
       /* H^T v_k - reaction_k + b */
-      gfc3d_ADMM_compute_full_b(nc, u, problem->mu, problem->b,  b_full, options);
+      gfc3d_ADMM_compute_full_b(nc, u, mu, b,  b_full, options);
 
       cblas_dcopy(m , b_full , 1 , u, 1);
       cblas_daxpy(m, -1.0, reaction_hat, 1, u , 1);
@@ -543,7 +580,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
         NM_gemv(-1.0, Htrans, v, 1.0, reaction);
         norm_HTv = cblas_dnrm2(m , reaction , 1);
 
-        gfc3d_ADMM_compute_full_b(nc, u, problem->mu, problem->b, b_full, options);
+        gfc3d_ADMM_compute_full_b(nc, u, mu, b, b_full, options);
 
         cblas_daxpy(m, -1.0, b_full, 1, reaction , 1);
         cblas_daxpy(m, 1.0, u, 1, reaction , 1);
@@ -552,7 +589,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       }
       else
       {
-        gfc3d_ADMM_compute_full_b(nc, u, problem->mu, problem->b, b_full, options);
+        gfc3d_ADMM_compute_full_b(nc, u, mu, b, b_full, options);
 
         cblas_dcopy(m , u, 1 , reaction, 1);
         cblas_daxpy(m, -1.0, b_full, 1, reaction , 1);
@@ -728,7 +765,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       {
         /* check the full criterion */
         cblas_dscal(m, rho, reaction, 1);
-        gfc3d_compute_error(problem,  reaction, velocity, v,  tolerance, options, norm_q, &error);
+        gfc3d_compute_error(rescaled_problem,  reaction, velocity, v,  tolerance, options, norm_q, &error);
+
         if (error < dparam[SICONOS_DPARAM_TOL])
         {
           hasNotConverged = 0;
@@ -741,12 +779,20 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
           numerics_printf_verbose(1,"---- GFC3D - ADMM  - We reduce the tolerance on the residual to %14.7e", tolerance);
           cblas_dscal(m, 1.0/rho, reaction, 1);
         }
+
         //getchar();
       }
       *info = hasNotConverged;
       //getchar();
     }
-
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_YES)
+  {
+    cblas_dscal(m, alpha_r/beta_r, reaction, 1);
+    norm_q=norm_q/alpha_r;
+    norm_q = cblas_dnrm2(n , problem->q , 1);
+    gfc3d_compute_error(problem,  reaction, velocity, v,  tolerance, options, norm_q, &error);
+    numerics_printf_verbose(1,"---- GFC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
+  }
   if (iter==itermax)
   {
     cblas_dscal(m, rho, reaction, 1);
@@ -805,6 +851,7 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
     //SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] =
     SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_NO;
+  
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H] =
     SICONOS_FRICTION_3D_ADMM_FULL_H_NO;
  
@@ -817,6 +864,9 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=2.0;
 
+
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]=SICONOS_FRICTION_3D_RESCALING_NO;
+  
   options->internalSolvers = NULL;
 
 

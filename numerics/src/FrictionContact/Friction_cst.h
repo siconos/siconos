@@ -190,6 +190,8 @@ enum SICONOS_FRICTION_3D_IPARAM
 {
   /** index in iparam to store the error strategy for the internal solver */
   SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY =2,
+  /** index in iparam to store the rescaling  */
+  SICONOS_FRICTION_3D_IPARAM_RESCALING =3,
   /** index in iparam to store the error evaluation method */
   SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION = 7,
   /** index in iparam to store the frequency of error evaluation method */
@@ -202,6 +204,14 @@ enum SICONOS_FRICTION_INTERNAL_ERROR_STRATEGY
   SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE =1,
   SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT =2
 };
+
+enum SICONOS_FRICTION_3D_RESCALING_ENUM
+{
+  SICONOS_FRICTION_3D_RESCALING_NO =0,
+  SICONOS_FRICTION_3D_RESCALING_YES=1
+};
+
+
 
 enum SICONOS_FRICTION_3D_DPARAM
 {

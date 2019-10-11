@@ -190,16 +190,9 @@ static int gfc_test(char ** test)
     }
     printf("number of tests = %i\n", n_test);
 
-#ifdef TEST_NSGS_COLLECTION_1
-    _test_collection[18][1]="1"; /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
-#endif
-#ifdef TEST_NSGS_COLLECTION_2
-    _test_collection[1][1]="1"; /* GFC3D_NSGS	./data/LMGC_GFC3D-i00001-1-00000.hdf5  */
-    _test_collection[4][1]="1";
+#ifdef TEST_FIRST_ORDER_COLLECTION_2
     _test_collection[6][1]="1";
     _test_collection[8][1]="1";
-    _test_collection[9][1]="1";
-    _test_collection[11][1]="1";
 #endif
 
 #ifdef TEST_NSN_COLLECTION_1
