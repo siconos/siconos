@@ -1578,8 +1578,8 @@ static int test_NM_iterated_power_method(void)
   }
   printf("Construction ok ...\n");
 
-  NumericsMatrix * I = NM_eye(50);
-  double eig = NM_iterated_power_method(I, 1e-14, 100);
+  NumericsMatrix * Id = NM_eye(50);
+  double eig = NM_iterated_power_method(Id, 1e-14, 100);
   printf("eigenvalue = %e\n", eig);
   printf("End of iterated power method...\n");
 
@@ -1620,7 +1620,7 @@ static int test_NM_iterated_power_method(void)
     free(NMM[i]);
   }
   free(NMM);
-  NM_free(I);
+  NM_free(Id);
   NM_free(Atrans);
   NM_free(Btrans);
   NM_free(AAT);
@@ -1647,13 +1647,13 @@ static int test_NM_scal(void)
   }
   printf("Construction ok ...\n");
 
-  NumericsMatrix * I = NM_eye(50);
-  NM_scal(1e-03,I);
-  printf("NM_get_value(I,0,0) =%e \n", NM_get_value(I,0,0));
+  NumericsMatrix * Id = NM_eye(50);
+  NM_scal(1e-03,Id);
+  printf("NM_get_value(Id,0,0) =%e \n", NM_get_value(Id,0,0));
   printf("End of NM_scal...\n");
 
 
-  if (fabs(NM_get_value(I,0,0) - 1e-03) > 1e-10)
+  if (fabs(NM_get_value(Id,0,0) - 1e-03) > 1e-10)
     info =1;
   if (info != 0) return info;
 
@@ -1689,8 +1689,9 @@ static int test_NM_scal(void)
     free(NMM[i]);
   }
   free(NMM);
-  NM_free(I);
+  NM_free(Id);
   NM_free(B);
+
 
   printf("========= End Numerics tests for NumericsMatrix NM_scal========= \n");
   return info;
@@ -1711,10 +1712,10 @@ static int test_NM_inv(void)
   }
   printf("Construction ok ...\n");
 
-  NumericsMatrix * I = NM_eye(50);
-  NumericsMatrix * Iinv = NM_inv(I);
-  NumericsMatrix* IIinv = NM_multiply(I,Iinv);
-  info = !NM_equal(IIinv, I);
+  NumericsMatrix * Id = NM_eye(50);
+  NumericsMatrix * Iinv = NM_inv(Id);
+  NumericsMatrix* IIinv = NM_multiply(Id,Iinv);
+  info = !NM_equal(IIinv, Id);
   printf("info : %i\n", info);
   if (info != 0) return info;
   printf("end if test I  ...\n");
@@ -1749,7 +1750,7 @@ static int test_NM_inv(void)
     free(NMM[i]);
   }
   free(NMM);
-  NM_free(I);
+  NM_free(Id);
   NM_free(Iinv);
   NM_free(IIinv);
 
