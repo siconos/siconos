@@ -54,9 +54,9 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   double *mu = problem->mu;
   double *q = problem->q;
 
-  DEBUG_EXPR(NV_display(globalVelocity,n));
-  DEBUG_EXPR(NV_display(reaction,m));
-  DEBUG_EXPR(NV_display(velocity,m));
+  /* DEBUG_EXPR(NV_display(globalVelocity,n)); */
+  /* DEBUG_EXPR(NV_display(reaction,m)); */
+  /* DEBUG_EXPR(NV_display(velocity,m)); */
 
   NumericsMatrix *H = problem->H;
   NumericsMatrix *M = problem->M;
@@ -72,7 +72,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   {
     NM_gemv(1.0, H, reaction, 1.0, tmp);
   }
-  DEBUG_EXPR(NV_display(tmp,n));
+  /* DEBUG_EXPR(NV_display(tmp,n)); */
 
   NM_gemv(-1.0, M, globalVelocity, 1.0, tmp);
   *error = cblas_dnrm2(n,tmp,1);
