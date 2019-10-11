@@ -153,11 +153,11 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  error = visolver_options->dparam[1];
-  iter = visolver_options->iparam[7];
+  error = visolver_options->dparam[SICONOS_DPARAM_RESIDU];
+  iter = visolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
 
-  options->dparam[1] = error;
-  options->iparam[7] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = error;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
 
   if (verbose > 0)
