@@ -16,18 +16,16 @@
  * limitations under the License.
 */
 
-#include "NonSmoothNewton.h"
-#include "fc3d_Solvers.h"
-#include "SiconosBlas.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include "Friction_cst.h"
-
-#include "PathAlgebra.h"
-#include "NonlinearComplementarityProblem.h"
-
-#include "NCP_Solvers.h"
+#include <stdio.h>                            // for NULL, fprintf, stderr
+#include <stdlib.h>                           // for exit, EXIT_FAILURE
+#include "Friction_cst.h"                     // for SICONOS_FRICTION_3D_NCP...
+#include "NCP_Solvers.h"                      // for ncp_path
+#include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
+#include "NumericsFwd.h"                      // for FrictionContactProblem
+#include "SolverOptions.h"                    // for SolverOptions
+#include "fc3d_2NCP_Glocker.h"                // for computeFGlocker, NCPGlo...
+#include "fc3d_NCPGlockerFixedPoint.h"        // for fc3d_Path_computeError
+#include "SiconosBlas.h"                            // for cblas_dcopy
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

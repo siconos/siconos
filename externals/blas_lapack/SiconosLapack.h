@@ -24,11 +24,13 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 
 // Definition of the interface to cblas library. 
-#include "SiconosBlas.h"
+//#include "SiconosBlas.h"
 
-#include <stdlib.h>
+#include <stdlib.h> 
 #include <assert.h>
 #include <stdio.h>
+
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus)
 extern "C"

@@ -15,22 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include <assert.h>
-
-#include "NonSmoothDrivers.h"
-#include "fc2d_Solvers.h"
-#include "fc2d_compute_error.h"
-#include "LCP_Solvers.h"
-#include "SiconosBlas.h"
-
-#include "numerics_verbose.h"
-
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for malloc, calloc, free
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "Friction_cst.h"                  // for SICONOS_FRICTION_2D_LEMKE
+#include "LCP_Solvers.h"                   // for lcp_compute_error, linearC...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NonSmoothDrivers.h"              // for linearComplementarity_driver
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
+#include "fc2d_Solvers.h"                  // for fc2d_tolcp, fc2d_lexicolemke
+#include "fc2d_compute_error.h"            // for fc2d_compute_error
+#include "numerics_verbose.h"              // for verbose
+#include "SiconosBlas.h"                         // for cblas_dnrm2
 
 void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {

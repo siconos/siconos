@@ -15,18 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
 #include "SecondOrderConeLinearComplementarityProblem_as_VI.h"
-
-#include "projectionOnCone.h"
-#include "numerics_verbose.h"
-#include "SiconosBlas.h"
-
+#include "NumericsMatrix.h"                               // for NM_gemv
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "VariationalInequality.h"                        // for Variational...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                                        // for DEBUG_PRINT
+#include "projectionOnCone.h"                             // for projectionO...
+#include "SiconosBlas.h"                                        // for cblas_dcopy
 
 void Function_VI_SOCLCP(void * self, int n_notused, double *x, double *F)
 {

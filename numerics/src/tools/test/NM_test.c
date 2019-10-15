@@ -21,16 +21,25 @@
 
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "NumericsMatrix.h"
-#include <math.h>
-#include "numericsMatrixTestFunction.h"
-#include "numerics_verbose.h"
+#include <assert.h>                      // for assert
+#include <math.h>                        // for fabs
+#include <stdint.h>                      // for SIZE_MAX
+#include <stdio.h>                       // for printf, fclose, fopen, NULL
+#include <stdlib.h>                      // for free, malloc, calloc
+#include <float.h>                       // for DBL_EPSILON
+#include "SiconosBlas.h"                 // for cblas_ddot, cblas_dgemv, cbl...
+#include "CSparseMatrix.h"               // for CS_INT, cs_print, cs
+#include "NumericsFwd.h"                 // for NumericsMatrix, SparseBlockS...
+#include "NumericsMatrix.h"              // for NumericsMatrix, NM_clear, NM_...
+#include "NumericsSparseMatrix.h"        // for NumericsSparseMatrix, NSM_TR...
+#include "NumericsVector.h"              // for NV_equal
+#include "SparseBlockMatrix.h"           // for SBM_zero_matrix_for_multiply
+#include "debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
+#include "numericsMatrixTestFunction.h"  // for test_build_first_4_NM, NM_de...
+#include "numerics_verbose.h"            // for numerics_error
+#include "sanitizer.h"                   // for MSAN_INIT_VAR
 
-#include <float.h>
-#include <limits.h>
+
 #ifndef SIZE_MAX
 # ifdef __SIZE_MAX__
 #  define SIZE_MAX __SIZE_MAX__
@@ -38,24 +47,6 @@
 #  define SIZE_MAX std::numeric_limits<size_t>::max()
 # endif
 #endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "CSparseMatrix.h"
-#include "NumericsSparseMatrix.h"
-#include "NumericsMatrix.h"
-#include "NumericsVector.h"
-#include <math.h>
-#include "numericsMatrixTestFunction.h"
-#include "SiconosLapack.h"
-#include "SparseBlockMatrix.h"
-#include "sanitizer.h"
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-#include "debug.h"
-
 static int NM_read_write_test(void)
 {
 
@@ -168,7 +159,8 @@ static int NM_add_to_diag3_test(NumericsMatrix* M, double alpha)
   else
   {
     printf("Step 0 (C = C + alpha*I, NM_SPARSE_BLOCK storage, square matrix) failed ...\n");
-    goto exit_0;
+    free(Id);
+    NM_clear(Cref);
   }
 
   /***********************************************************/
@@ -185,12 +177,10 @@ static int NM_add_to_diag3_test(NumericsMatrix* M, double alpha)
   else
   {
     printf("Step 1 (C = C + alpha*I, NM_SPARSE storage, square matrix) failed ...\n");
-    goto exit_1;
+    NM_clear(C2);
   }
 
-exit_1:
   NM_clear(C2);
-exit_0:
   free(Id);
   NM_clear(Cref);
 
@@ -236,7 +226,7 @@ int triplet_to_dense(void)
 {
   int info =1;
   NumericsMatrix *A;
-  char * filename =  "./data/NSM_triplet_162x162.dat";
+  const char * filename =  "./data/NSM_triplet_162x162.dat";
   A = NM_create_from_filename(filename);
   /* NM_display(A); */
 
@@ -267,7 +257,7 @@ int csc_to_dense(void)
   /* NM_write_in_filename(A_CSC, "./data/NSM_csc_162x162.dat"); */
 
 
-  char * filename =  "./data/NSM_csc_162x162.dat";
+  const char * filename =  "./data/NSM_csc_162x162.dat";
   A = NM_new_from_filename(filename);
   /* NM_display(A); */
 
@@ -455,7 +445,8 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   else
   {
     printf("Step 0 ( C = alpha*A*B + beta*C, double* storage, square matrix) failed ...\n");
-    goto exit_1;
+    NM_clear(Cref);
+    free(C.matrix0);
   }
 
   /***********************************************************/
@@ -491,7 +482,8 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   else
   {
     printf("Step 1 ( C = alpha*A*B + beta*C, double* storage, non square) failed ...\n");
-    goto exit_2;
+    free(C2.matrix0);
+    NM_clear(C2ref);
   }
 
   /***********************************************************/
@@ -522,7 +514,7 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   else
   {
     printf("Step 2 ( C = alpha*A*B + beta*C, SBM storage) failed ...\n");
-    goto exit_3;
+    NM_clear(&C3);
   }
 
   /***********************************************************/
@@ -552,7 +544,7 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   else
   {
     printf("Step 3 ( C = alpha*A*B + beta*C, SBM storage, non square) failed ...\n");
-    goto exit_4;
+    NM_clear(&C4);
   }
 
   /***********************************************************/
@@ -577,7 +569,8 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   else
   {
     printf("Step 4 ( C = alpha*A*B + beta*C, NM_SPARSE storage, square) failed ...\n");
-    goto exit_5;
+    NM_clear(M5);
+    NM_clear(C5);
   }
 
   /***********************************************************/
@@ -602,7 +595,8 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   else
   {
     printf("Step 5 ( C = alpha*A*B + beta*C, NM_SPARSE storage, non square) failed ...\n");
-    goto exit_6;
+    NM_clear(M6);
+    NM_clear(C6);
   }
 
 
@@ -638,7 +632,8 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   else
   {
     printf("Step 6 ( C = alpha*A*B + beta*C, double* storage, square matrix, empty column of blocks) failed ...\n");
-    goto exit_7;
+    NM_clear(M9);
+    NM_clear(C7);
   }
 
 
@@ -667,7 +662,8 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   else
   {
     printf("Step 7 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks) failed ...\n");
-    goto exit_8;
+    NM_clear(M10);
+    NM_clear(C8);
   }
 
 
@@ -693,31 +689,22 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   else
   {
     printf("Step 8 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks, extra blocks) failed ...\n");
-    goto exit_9;
+    NM_clear(C20);
   }
 
-exit_9:
   NM_clear(C20);
-exit_8:
   NM_clear(M10);
   NM_clear(C8);
-exit_7:
   NM_clear(M9);
   NM_clear(C7);
-exit_6:
   NM_clear(M6);
   NM_clear(C6);
-exit_5:
   NM_clear(M5);
   NM_clear(C5);
-exit_4:
   NM_clear(&C4);
-exit_3:
   NM_clear(&C3);
-exit_2:
   free(C2.matrix0);
   NM_clear(C2ref);
-exit_1:
   NM_clear(Cref);
   free(C.matrix0);
   return info;
@@ -1131,7 +1118,7 @@ static int NM_row_prod_test(void)
     /*    if (NMM[i]->matrix0) */
     /*        free(NMM[i]->matrix0); */
     /*    if (NMM[i]->matrix1) */
-    /*        SBM_clear(NMM[i]->matrix1); */
+    /*        SBM_free(NMM[i]->matrix1); */
     free(NMM[i]);
   }
 
@@ -1811,7 +1798,6 @@ static int test_NM_gesv_expert(void)
   double * b = NULL;
 
   int n =0;
-  double res;
 
   M1 = NMM[0];
   n = M1->size0;
@@ -1957,7 +1943,6 @@ static int test_NM_posv_expert(void)
   double * b = NULL;
 
   int n =0;
-  double res;
 
   NumericsMatrix *Id = NM_eye(10);
   //NM_scal(Id, 5.0);

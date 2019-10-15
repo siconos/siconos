@@ -33,17 +33,17 @@ dim(v)=nn
 *
 **************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <math.h>
 #include "mlcp_direct.h"
-#include "mlcp_tool.h"
-#include "SiconosLapack.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
+#include <stdio.h>                              // for printf
+#include <stdlib.h>                             // for malloc, exit, free
+#include "MLCP_Solvers.h"                       // for mlcp_direct
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NumericsMatrix.h"                     // for NM_dense_display, Num...
+#include "SolverOptions.h"                      // for SolverOptions
+#include "mlcp_tool.h"                          // for mlcp_buildM, mlcp_fil...
+#include "numerics_verbose.h"                   // for verbose
+#include "SiconosBlas.h"                              // for cblas_dgemv, CblasCol...
+#include "SiconosLapack.h"                      // for lapack_int, DGETRF
 
 #define DIRECT_SOLVER_USE_DGETRI
 double * sVBuf;

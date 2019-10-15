@@ -16,20 +16,22 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "SiconosBlas.h"
-#include "fc2d_Solvers.h"
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
-
+#include <float.h>                   // for DBL_EPSILON
+#include <math.h>                    // for fabs, sqrt, INFINITY
+#include <stdio.h>                   // for printf
+#include <stdlib.h>                  // for free, calloc, malloc, exit, rand
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_2D_NSGS
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                   // for DEBUG_PRINTF
+#include "fc2d_Solvers.h"            // for fc2d_nsgs, fc2d_nsgs_setDefaultS...
+#include "numerics_verbose.h"        // for verbose
+#include "SiconosBlas.h"                   // for cblas_ddot, cblas_daxpy, cblas_d...
 
 void shuffle(int size, int * randnum);
 void shuffle(int size, int * randnum) //size is the given range

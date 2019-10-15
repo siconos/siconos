@@ -13,19 +13,22 @@
 
 /* GAMS stuff */
 
-#include "NumericsMatrix.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "SolverOptions.h"
+#include <stdio.h>        // for printf
+#include <stdlib.h>       // for exit, EXIT_FAILURE
+#include "LCP_Solvers.h"  // for lcp_gams
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
+
 
 #ifdef HAVE_GAMS_C_API
 
 #include "GAMSlink.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <stdlib.h>
+
+#include "NumericsMatrix.h"
+#include "LinearComplementarityProblem.h"
+#include "SolverOptions.h"
 
 
 void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)

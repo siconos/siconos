@@ -16,28 +16,24 @@
  * limitations under the License.
  */
 
-
-#include "ConvexQP_Solvers.h"
-#include "ConvexQP_computeError.h"
-#include "NumericsMatrix.h"
-#include "SparseBlockMatrix.h"
-#include "NumericsMatrix.h"
-#include "NumericsVector.h"
-#include "NumericsSparseMatrix.h"
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include <float.h>
-#include "ConvexQP_cst.h"
-#include "numerics_verbose.h"
-
+#include <float.h>                  // for DBL_EPSILON
+#include <math.h>                   // for sqrt, fabs, INFINITY
+#include <stdio.h>                  // for NULL, printf
+#include <stdlib.h>                 // for calloc, free, malloc
+#include "ConvexQP.h"               // for ConvexQP
+#include "ConvexQP_Solvers.h"       // for convexQP_ADMM, convexQP_ADMM_free
+#include "ConvexQP_computeError.h"  // for convexQP_compute_error
+#include "ConvexQP_cst.h"           // for SICONOS_CONVEXQP_ADMM_IPARAM_ACCE...
+#include "NumericsFwd.h"            // for SolverOptions, ConvexQP, Numerics...
+#include "NumericsMatrix.h"         // for NM_gemv, NM_free, NM_gesv_expert
+#include "NumericsSparseMatrix.h"   // for NSM_TRIPLET, NumericsSparseMatrix
+#include "SolverOptions.h"          // for SolverOptions, solver_options_nul...
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "debug.h"
+#include "debug.h"                  // for DEBUG_EXPR, DEBUG_PRINT, DEBUG_PR...
+#include "numerics_verbose.h"       // for numerics_printf_verbose, numerics...
+#include "SiconosBlas.h"                  // for cblas_daxpy, cblas_dcopy, cblas_d...
 
 const char* const   SICONOS_CONVEXQP_ADMM_STR = "CONVEXQP ADMM";
 typedef struct {

@@ -32,12 +32,6 @@ extern "C"
 {
 #endif
 
-  /** set the default solver parameters and perform memory allocation for fc3d
-      \param options   the pointer to the options to set
-      \param solverId  the identifier of the solver
-  */
-  int fc2d_setDefaultSolverOptions(SolverOptions* options, int solverId);
-
   /**  cpg (conjugated projected gradient) solver for global contact problems with friction (2D)
        \param[in]  problem the friction-contact problem
        \param[out] reaction vector

@@ -17,34 +17,27 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
  */
 #define _POSIX_C_SOURCE 200112L
-#include <stdio.h>
-#include <stdlib.h>
 
-#include <assert.h>
-#include <math.h>
-#include <float.h>
-
-
-
-#include <string.h>
-
-
-
-#include "numerics_verbose.h"
 #include "CSparseMatrix.h"
-#include "SiconosCompat.h"
+#include <assert.h>            // for assert
+#include <cs.h>                // for CS_INT, CS_ID, cs_dl_spalloc, cs_dl_free
+#include <float.h>             // for DBL_EPSILON
+#include <math.h>              // for fabs
+#include <stdio.h>             // for fprintf, sscanf, printf, NULL, fgets
+#include <stdlib.h>            // for realloc, exit, free, malloc, EXIT_FAILURE
+#include <string.h>            // for strtok_r, memcpy, strncmp
+#include "SiconosCompat.h"     // for SN_PTRDIFF_T_F
+#include "numerics_verbose.h"  // for CHECK_IO
 
 #if defined(__cplusplus)
 #undef restrict
+#include <sys/cdefs.h> // for __restrict
 #define restrict __restrict
 #endif
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
-
-
-#include "debug.h"
+#include "debug.h" // for DEBUG_PRINTF
 
 /* y = alpha*A*x+beta*y */
 int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A,
@@ -180,12 +173,12 @@ int CSparseMatrix_check_csc(CSparseMatrix *T)
     {
       if (Ti[p] <= max_indx)
       {
-        printf("CSparseMatrix_check_csc :: matrix element ("SN_PTRDIFF_T_F","SN_PTRDIFF_T_F") at index " SN_PTRDIFF_T_F " has a row number < " SN_PTRDIFF_T_F " the previous max\n", Ti[p], j, p, max_indx);
+        printf("CSparseMatrix_check_csc :: matrix element (" SN_PTRDIFF_T_F"," SN_PTRDIFF_T_F") at index " SN_PTRDIFF_T_F " has a row number < " SN_PTRDIFF_T_F " the previous max\n", Ti[p], j, p, max_indx);
         info = 1;
       }
       else if (Ti[p] >= nb_row)
       {
-        printf("CSparseMatrix_check_csc :: matrix element ("SN_PTRDIFF_T_F","SN_PTRDIFF_T_F") at index " SN_PTRDIFF_T_F " has a row number > " SN_PTRDIFF_T_F " the max\n", Ti[p], j, p, nb_row);
+        printf("CSparseMatrix_check_csc :: matrix element (" SN_PTRDIFF_T_F"," SN_PTRDIFF_T_F") at index " SN_PTRDIFF_T_F " has a row number > " SN_PTRDIFF_T_F " the max\n", Ti[p], j, p, nb_row);
         info = 1;
       }
       else

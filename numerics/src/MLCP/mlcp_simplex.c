@@ -25,16 +25,18 @@ dim(u)=mm
 dim(v)=nn
 
 **************************************************************************/
+#include "MLCP_Solvers.h"  // for mixedLinearComplementarity_simplex_setDefa...
+#include "NumericsFwd.h"   // for MixedLinearComplementarityProblem, SolverO...
+#include "mlcp_simplex.h"  // for mlcp_simplex_init, mlcp_simplex_reset
+#include "SiconosConfig.h" // for HAVE_MLCPSIMPLEX  // IWYU pragma: keep
+
+#ifdef HAVE_MLCPSIMPLEX
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "SiconosConfig.h"
-#include "MLCP_Solvers.h"
 #include "SiconosCompat.h"
 #include <math.h>
-
-#ifdef HAVE_MLCPSIMPLEX
 /*import external implementation*/
 #include "external_mlcp_simplex.h"
 

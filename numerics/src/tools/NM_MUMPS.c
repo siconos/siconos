@@ -15,8 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
 #include "NM_MUMPS.h"
 #ifdef WITH_MUMPS
+#include <string.h> // for memcpy
 #include "CSparseMatrix.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
@@ -251,7 +253,6 @@ void NM_MUMPS_set_sym(NumericsMatrix* A, int sym)
 }
 #endif
 
-#include <string.h>
 void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B)
 {
 #ifdef WITH_MUMPS

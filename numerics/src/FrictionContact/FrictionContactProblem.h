@@ -21,10 +21,10 @@
 /*!\file FrictionContactProblem.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
-
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-#include "NumericsMatrix.h"
+#include <stdio.h>           // for FILE
+#include "NumericsFwd.h"     // for FrictionContactProblem, NumericsMatrix
+#include "NumericsMatrix.h"  // for RawNumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct FrictionContactProblem FrictionContactProblem.h
  *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem.
@@ -117,7 +117,7 @@ extern "C"
    * \param filename the name of the target file
    * \return 0 if successfull
    */
-  int frictionContact_newFromFilename(FrictionContactProblem*  problem, char * filename);
+  int frictionContact_newFromFilename(FrictionContactProblem*  problem, const char * filename);
 
 
 

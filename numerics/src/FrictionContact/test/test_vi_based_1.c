@@ -15,163 +15,136 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "frictionContact_test_utils.h"
 
-char *** test_collection(int n_data_1, char ** data_collection)
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
+#include "VI_cst.h"   // for SICONOS_VI_EG_...
+#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_test_colle...
+#include "test_utils.h"                  // for TestCase
+
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
+  *number_of_tests = 8; //n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+
+  int current = 0;
+
   {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
+    int d = 0; // FC3D_Example1.dat
+    // rho = -1
+    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_VI_EG_DPARAM_RHO}; 
+    double dparam[] = {1e-8, -1.};
+    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+    int iparam[] = {10000};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+  }
+  {
+    int d = 0; // FC3D_Example1.da
+    // rho = 1
+    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_VI_EG_DPARAM_RHO}; 
+    double dparam[] = {1e-8, 1.};
+    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+    int iparam[] = {10000};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
   }
 
-  int n =0;
-  int e=0;
 
-  int d=2;/* "./data/Confeti-ex13-4contact-Fc3D-SBM.dat"; */
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_EG);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "-3e-3";
-  test_nsgs[n][e++] = "---";
-  n++;
+  {
+    int d = 2; // FrictionContact3D_1c.dat
+    // rho = -3e-3
+    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_VI_EG_DPARAM_RHO}; 
+    double dparam[] = {1e-8, -3.e-3};
+    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+    int iparam[] = {10000};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail = 1;
+  }
+  {
+    int d = 2; // FrictionContact3D_1c.dat
+    // rho = -1
+    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_VI_EG_DPARAM_RHO}; 
+    double dparam[] = {1e-10, -1.};
+    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+    int iparam[] = {10000};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+  }
+  {
+    int d = 2; // FrictionContact3D_1c.dat
+    // rho = -10
+    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_VI_EG_DPARAM_RHO}; 
+    double dparam[] = {1e-10, -10.};
+    int ipos[] = {3, SICONOS_IPARAM_MAX_ITER, 2, 3};
+    // 2 for IPARAM_PREALLOC ? or SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY ?// 3? 
+    int iparam[] = {1000, 0, 0};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_HP, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail = 1;
+  }
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_EG);
-  test_nsgs[n][e++] = "1e-10";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "-1.0";
-  test_nsgs[n][e++] = "---";
-  n++;
+  {
+    int d = 6; // Capsules-i101-404.dat
+    int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+    double dparam[] = {1e-10};
+    int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 2};
+    // 2 for IPARAM_PREALLOC ? or SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY ?
+    int iparam[] = {1000, 1};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_VI_FPP, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail = 1;
+  }
 
+  {
+    int d = 6; // Capsules-i101-404.dat
+    int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+    double dparam[] = {1e-8};
+    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+    int iparam[] = {100000};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_FPP, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail = 1;
+  }
 
+{
+    int d = 6; // Capsules-i101-404.dat
+    int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+    double dparam[] = {1e-8};
+    int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 2};
+    // 2 for IPARAM_PREALLOC ? or SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY ?
+    int iparam[] = {100000, 1};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_VI_EG, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail = 1;
+  }
 
-  d=0;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_EG);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "-1.0";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_EG);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "1.0";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-
-  d=2;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_HP);
-  test_nsgs[n][e++] = "1e-03";
-  test_nsgs[n][e++] = "1000";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "2";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "2";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "-10.0";
-  test_nsgs[n][e++] = "---";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-
-  d=6;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_VI_FPP);
-  test_nsgs[n][e++] = "1e-03";
-  test_nsgs[n][e++] = "100000";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "2";
-  test_nsgs[n][e++] = "1";  
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_FPP);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "100000";
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_VI_EG);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "100000";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "2";
-  test_nsgs[n][e++] = "1";  
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+  *number_of_tests = current;
+  return tests_list;
 
 }

@@ -16,16 +16,18 @@
  * limitations under the License.
 */
 
-
-#include <stdio.h>
-
-#include "MCP_Solvers.h"
-#include "MCP_cst.h"
-#include "SiconosBlas.h"
-#include "Newton_methods.h"
-#include "FischerBurmeister.h"
-#include "numerics_verbose.h"
 #include "mcp_newton_FBLSA.h"
+#include <assert.h>                       // for assert
+#include <stdio.h>                        // for NULL
+#include <stdlib.h>                       // for calloc, malloc
+#include "FischerBurmeister.h"            // for Jac_F_FB, phi_Mixed_FB
+#include "MCP_Solvers.h"                  // for mcp_compute_error, mcp_newt...
+#include "MCP_cst.h"                      // for SICONOS_MCP_NEWTON_FB_FBLSA
+#include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem
+#include "Newton_methods.h"               // for functions_LSA, init_lsa_fun...
+#include "SolverOptions.h"                // for SolverOptions, solver_optio...
+#include "numerics_verbose.h"             // for numerics_printf, numerics_p...
+#include "SiconosBlas.h" // for cblas_dnrm2
 
 void FB_compute_F_mcp(void* data_opaque, double* z, double* Fmcp)
 {

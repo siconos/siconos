@@ -16,18 +16,23 @@
  * limitations under the License.
 */
 
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
-#include "NCP_Solvers.h"
-#include "SiconosBlas.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
+#include <math.h>                                     // for fabs, pow
+#include <stdio.h>                                    // for printf, fprintf
+#include <stdlib.h>                                   // for calloc, exit
+#include "FrictionContactProblem.h"                   // for FrictionContact...
+#include "Friction_cst.h"                             // for SICONOS_FRICTIO...
+#include "NumericsFwd.h"                              // for SolverOptions
+#include "NumericsMatrix.h"                           // for NM_add_to_diag3
+#include "SolverOptions.h"                            // for SolverOptions
+#include "fc3d_Solvers.h"                             // for fc3d_set_intern...
+#include "fc3d_compute_error.h"                       // for fc3d_compute_error
+#include "fc3d_nonsmooth_Newton_AlartCurnier.h"       // for fc3d_nonsmooth_...
+#include "fc3d_nonsmooth_Newton_FischerBurmeister.h"  // for fc3d_nonsmooth_...
+#include "numerics_verbose.h"                         // for numerics_error
+#include "SiconosBlas.h"                                    // for cblas_daxpy
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include <math.h>
-#include "numerics_verbose.h"
+#include "debug.h"                                    // for DEBUG_PRINTF
 
 void fc3d_proximal(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {

@@ -16,25 +16,22 @@
  * limitations under the License.
 */
 
-#include "LCP_Solvers.h"
-#include "lcp_pivot.h"
-
-#include <assert.h>
-
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "SiconosBlas.h"
-#include "NSSTools.h"
-
+#include <assert.h>                        // for assert
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_pivot_covering_vector
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NCP_PathSearch.h"                // for ncp_pathsearch_compute_x_f...
+#include "NSSTools.h"                      // for pos_part
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NM_gemv
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
-
-#include "NCP_PathSearch.h"
+#include "debug.h"                         // for DEBUG_PRINT, DEBUG_EXPR_WE
+#include "lcp_cst.h"                       // for SICONOS_LCP_PIVOT_PATHSEARCH
+#include "lcp_pivot.h"                     // for LCP_PATHSEARCH_LEAVING_T
+#include "SiconosBlas.h"              // for cblas_dcopy, cblas_daxpy
 
 /* This function is here to test the pivotal code of the path search */
 void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)

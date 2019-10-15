@@ -15,16 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-
-#include "SOCLCP_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
-
+#include <stdio.h>             // for NULL
+#include "NumericsFwd.h"       // for SolverOptions
+#include "SOCLCP_Solvers.h"    // for soclcp_VI_ExtraGradient_setDefaultSolv...
+#include "SOCLCP_cst.h"        // for SICONOS_SOCLCP_NSGS, SICONOS_SOCLCP_VI_EG
+#include "SolverOptions.h"     // for solver_options_nullify, SolverOptions
+#include "numerics_verbose.h"  // for numerics_error
 
 int soclcp_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {

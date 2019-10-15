@@ -16,18 +16,13 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "NonSmoothDrivers.h"
-#include "SecondOrderConeLinearComplementarityProblem.h"
-#include "SOCLCP_Solvers.h"
 #include "soclcp_test_function.h"
-#include "SiconosCompat.h"
-
-#ifdef __cplusplus
-using namespace std;
-#endif
+#include <math.h>                                         // for isfinite
+#include <stdio.h>                                        // for printf, fclose
+#include <stdlib.h>                                       // for calloc, free
+#include "NonSmoothDrivers.h"                             // for soclcp_driver
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for freeSecondO...
+#include "assert.h"                                       // for assert
 
 int soclcp_test_function(FILE * f, SolverOptions * options)
 {

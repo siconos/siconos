@@ -16,23 +16,17 @@
  * limitations under the License.
 */
 
-
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-
-#include "MCP_Solvers.h"
-#include "MCP_cst.h"
-#include "SiconosLapack.h"
-#include "Newton_methods.h"
-#include "FischerBurmeister.h"
-#include "min_merit.h"
-#include "numerics_verbose.h"
-#include "mcp_newton_FBLSA.h"
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
+#include <stdio.h>                        // for NULL
+#include <stdlib.h>                       // for calloc, malloc
+#include "MCP_Solvers.h"                  // for mcp_compute_error, mcp_newt...
+#include "MCP_cst.h"                      // for SICONOS_MCP_NEWTON_MIN_FBLSA
+#include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem
+#include "Newton_methods.h"               // for functions_LSA, init_lsa_fun...
+#include "NumericsFwd.h"                  // for SolverOptions, MixedComplem...
+#include "SolverOptions.h"                // for SolverOptions, SICONOS_DPAR...
+#include "mcp_newton_FBLSA.h"             // for FB_compute_F_mcp, FB_comput...
+#include "min_merit.h"                    // for F_min, Jac_F_min
+#include "numerics_verbose.h"             // for numerics_printf, numerics_p...
 
 static void mcp_min(void* data_opaque, double* z, double* F, double* Fmin)
 {

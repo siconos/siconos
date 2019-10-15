@@ -19,13 +19,12 @@
 #define RELAY_PROBLEM_C
 
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-
 #include "RelayProblem.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
+#include <assert.h>            // for assert
+#include <stdio.h>             // for printf, fprintf, fscanf, FILE, stderr
+#include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
+#include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_free
+#include "numerics_verbose.h"  // for CHECK_IO
 
 void Relay_display(RelayProblem* p)
 {
@@ -127,6 +126,23 @@ int relay_newFromFile(RelayProblem* problem, FILE* file)
   return 1;
 }
 
+int relay_newFromFilename(RelayProblem* problem, const char* filename)
+{
+  int info = 0;
+  FILE * file = fopen(filename, "r");
+  if (file == NULL)
+  {
+    printf("Error! Could not open filename %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
+
+  info = relay_newFromFile(problem, file);
+
+  fclose(file);
+  return info;
+}
+
+
 void freeRelay_problem(RelayProblem* problem)
 {
   assert(problem);
@@ -140,6 +156,7 @@ void freeRelay_problem(RelayProblem* problem)
   if (problem->ub) { free(problem->ub); }
   free(problem);
 }
+
 
 
 

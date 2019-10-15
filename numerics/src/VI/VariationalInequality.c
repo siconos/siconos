@@ -15,11 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
 #include "VariationalInequality.h"
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
+#include <assert.h>          // for assert
+#include <stdlib.h>          // for free, malloc, exit, EXIT_FAILURE
+#include "NumericsMatrix.h"  // for NM_free
 
 
 void variationalInequality_display(VariationalInequality* vi)

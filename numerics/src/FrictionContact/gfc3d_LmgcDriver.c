@@ -1,32 +1,45 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2018 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+#include <assert.h>                        // for assert
+#include <math.h>                          // for fabs
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for malloc, free, abs
+#include <string.h>                        // for NULL, memcpy
+#include "CSparseMatrix.h"                 // for CSparseMatrix, CS_INT
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "NonSmoothDrivers.h"              // for gfc3d_driver, gfc3d_LmgcDr...
+#include "NumericsFwd.h"                   // for NumericsMatrix, GlobalFric...
+#include "NumericsMatrix.h"                // for NumericsMatrix, NM_free
+#include "NumericsSparseMatrix.h"          // for NSM_new, NumericsSparseMatrix
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "debug.h"                         // for DEBUG_PRINTF
+#include "gfc3d_Solvers.h"                 // for gfc3d_setDefaultSolverOptions
+#include "numerics_verbose.h"              // for verbose
 
-#include "CSparseMatrix.h"
+#include "SiconosConfig.h" // for WITH_FCLIB  // IWYU pragma: keep
 
-// avoid a conflict with old csparse.h
-#define _CS_H
 
-#include "fc3d_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "fclib_interface.h"
-#include "GlobalFrictionContactProblem.h"
-#include "gfc3d_Solvers.h"
-#include "NumericsSparseMatrix.h"
-#include "numerics_verbose.h"
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
 
 #ifdef WITH_FCLIB
+// avoid a conflict with old csparse.h
+#define _CS_H
+#include <sys/stat.h>                      // for stat, mkdir
 static int gfccounter =-1;
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #endif
 

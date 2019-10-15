@@ -15,14 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include "VariationalInequality_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
+#include <stdio.h>                          // for printf, NULL
+#include <stdlib.h>                         // for malloc
+#include "NumericsFwd.h"                    // for SolverOptions
+#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
+#include "VI_cst.h"                         // for SICONOS_VI_BOX_QI, SICONO...
+#include "VariationalInequality_Solvers.h"  // for variationalInequality_Ext...
+#include "numerics_verbose.h"               // for numerics_error, verbose
 
 int variationalInequality_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {

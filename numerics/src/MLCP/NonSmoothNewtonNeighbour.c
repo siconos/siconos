@@ -15,18 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "NonSmoothNewton.h"
 #include "NonSmoothNewtonNeighbour.h"
-//#include "MixedLinearComplementarityProblem.h"
-#include <string.h>
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "SiconosLapack.h"
-#include "mlcp_enum_tool.h"
-#include "numerics_verbose.h"
-
-
+#include <stdio.h>             // for FILE
+#include <stdlib.h>            // for free, malloc
+#include <string.h>            // for NULL, memcpy, strcpy
+#include "NonSmoothNewton.h"   // for NewtonFunctionPtr
+#include "math.h"              // for fabs, pow
+#include "numerics_verbose.h"  // for verbose
+#include "stdio.h"             // for printf, fprintf, fclose, fopen, stderr
+#include "stdlib.h"            // for exit, rand, EXIT_FAILURE
+#include "SiconosBlas.h"       // for cblas_dnrm2, cblas_dcopy, cblas_daxpy
+#include "SiconosLapack.h"     // for DGESV, lapack_int
 
 static  int sN ;
 static  int sN2 ;

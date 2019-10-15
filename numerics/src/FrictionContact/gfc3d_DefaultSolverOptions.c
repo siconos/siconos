@@ -15,16 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include "gfc3d_Solvers.h"
-#include "fc3d_Solvers.h"
-#include "NonSmoothDrivers.h"
-
-#include "numerics_verbose.h"
+#include "Friction_cst.h"                         // for SICONOS_GLOBAL_FRIC...
+#include "NumericsFwd.h"                          // for SolverOptions
+#include "SolverOptions.h"                        // for SolverOptions
+#include "fc3d_Solvers.h"                         // for fc3d_nsgs_setDefaul...
+#include "gfc3d_Solvers.h"                        // for gfc3d_ACLMFixedPoin...
+#include "gfc3d_nonsmooth_Newton_AlartCurnier.h"  // for gfc3d_nonsmooth_New...
+#include "numerics_verbose.h"                     // for numerics_error
 
 int gfc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {

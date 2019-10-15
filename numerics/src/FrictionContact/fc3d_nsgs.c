@@ -15,27 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
-#include "fc3d_Path.h"
-#include "fc3d_NCPGlockerFixedPoint.h"
-#include "fc3d_projection.h"
-#include "fc3d_unitary_enumerative.h"
-#include "fc3d_compute_error.h"
-#include "fc3d_local_problem_tools.h"
-#include "NCP_Solvers.h"
-#include "SiconosBlas.h"
-#include "NumericsArrays.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-#include <time.h>
-#include <float.h>
-#include <string.h>
+#include <assert.h>                                    // for assert
+#include <float.h>                                     // for DBL_EPSILON
+#include <math.h>                                      // for fabs, sqrt
+#include <stdio.h>                                     // for fclose, fopen
+#include <stdlib.h>                                    // for calloc, malloc
+#include <string.h>                                    // for NULL, memcpy
+#include "FrictionContactProblem.h"                    // for FrictionContac...
+#include "Friction_cst.h"                              // for SICONOS_FRICTI...
+#include "NumericsArrays.h"                            // for uint_shuffle
+#include "NumericsFwd.h"                               // for SolverOptions
+#include "SolverOptions.h"                             // for SolverOptions
+#include "fc3d_2NCP_Glocker.h"                         // for NCPGlocker_update
+#include "fc3d_NCPGlockerFixedPoint.h"                 // for fc3d_FixedP_in...
+#include "fc3d_Path.h"                                 // for fc3d_Path_init...
+#include "fc3d_Solvers.h"                              // for ComputeErrorPtr
+#include "fc3d_compute_error.h"                        // for fc3d_compute_e...
+#include "fc3d_local_problem_tools.h"                  // for fc3d_local_pro...
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for fc3d_onecontac...
+#include "fc3d_projection.h"                           // for fc3d_projectio...
+#include "fc3d_unitary_enumerative.h"                  // for fc3d_unitary_e...
+#include "numerics_verbose.h"                          // for numerics_printf
+#include "SiconosBlas.h"                                     // for cblas_dnrm2
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include "numerics_verbose.h"
+#include "debug.h"                                     // for DEBUG_EXPR
 
 
 //#define FCLIB_OUTPUT

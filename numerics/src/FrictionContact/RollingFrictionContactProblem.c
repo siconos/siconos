@@ -15,17 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
 #include "RollingFrictionContactProblem.h"
-#include "NumericsMatrix.h"
-#include <stdio.h>
-#include "numerics_verbose.h"
-#include "SparseBlockMatrix.h"
-#include <math.h>
+#include <assert.h>            // for assert
+#include <math.h>              // for fabs
+#include <stdio.h>             // for printf, fprintf, fscanf, NULL, fclose
+#include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
+#include <sys/errno.h>         // for errno
+#include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_free
+#include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "debug.h"             // for DEBUG_PRINT, DEBUG_PRINTF
 
 void rollingFrictionContact_display(RollingFrictionContactProblem* problem)
 {

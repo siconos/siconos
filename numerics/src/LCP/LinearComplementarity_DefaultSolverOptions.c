@@ -15,21 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
+#include "LCP_Solvers.h"       // for linearComplementarity_ConvexQP_Project...
+#include "NumericsFwd.h"       // for LinearComplementarityProblem, SolverOp...
+#include "SolverOptions.h"     // for solver_options_set
+#include "lcp_cst.h"           // for SICONOS_LCP_AVI_CAOFERRIS, SICONOS_LCP...
+#include "numerics_verbose.h"  // for numerics_error
 
-
-#include "numerics_verbose.h"
-
-int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options, int solverId)
+int linearComplementarity_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
 
   int info = -1;
@@ -87,7 +79,7 @@ int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* 
   }
   case SICONOS_LCP_ENUM:
   {
-    info =    linearComplementarity_enum_setDefaultSolverOptions(problem, options);
+    info =    linearComplementarity_enum_setDefaultSolverOptions(options);
     break;
   }
   case SICONOS_LCP_NEWTONMIN:

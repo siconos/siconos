@@ -16,15 +16,16 @@
  * limitations under the License.
 */
 
+#include "SiconosConfig.h" // for WITH_SUPERLU, SUPERLU_MAJOR_VERSION ... // IWYU pragma: keep
+#ifdef WITH_SUPERLU
+
+#include <slu_ddefs.h>
 #include "debug.h"
 #include "CSparseMatrix.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "numerics_verbose.h"
 
-#ifdef WITH_SUPERLU
-
-#include <slu_ddefs.h>
 
 /** \struct NM_SuperLU_WS NumericsMatrix_internal.h
  * Structure for holding the data SuperLU needs

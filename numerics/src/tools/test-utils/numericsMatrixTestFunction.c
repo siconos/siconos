@@ -22,20 +22,13 @@
 
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
-#include <math.h>
-
-#include "SiconosConfig.h"
-#include "NumericsMatrix.h"
-#include "SiconosLapack.h"
 #include "numericsMatrixTestFunction.h"
-#include "sanitizer.h"
-#include "SparseBlockMatrix.h"
-#include "NumericsSparseMatrix.h"
-
+#include <math.h>                  // for fabs
+#include <stdio.h>                 // for printf
+#include <stdlib.h>                // for malloc, size_t, free, rand, calloc
+#include "NumericsMatrix.h"        // for NumericsMatrix, NM_new, NM_clearDense
+#include "NumericsSparseMatrix.h"  // for NSM_CSC, NumericsSparseMatrix
+#include "SparseBlockMatrix.h"     // for SparseBlockStructuredMatrix, SBM_new
 
 NumericsMatrix * test_matrix_1()
 {

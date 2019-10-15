@@ -17,10 +17,10 @@
 */
 
 #include "PathSearch.h"
-
-#include <assert.h>
-
-#include "SolverOptions.h"
+#include <assert.h>         // for assert
+#include <stdlib.h>         // for free
+#include "SolverOptions.h"  // for SolverOptions
+#include "line_search.h"    // for ARCSEARCH, LINESEARCH, NM_LS_MEAN
 
 /** pathsearch specific data */
 #define SICONOS_IPARAM_PATHSEARCH_STACKSIZE 5

@@ -21,10 +21,10 @@
 /*!\file LinearComplementarityProblem.h
 */
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
+#include <stdio.h>        // for FILE
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
-#include <stdio.h>
 /** Structure that contains and defines a LCP Problem.
 
     \rst 
@@ -76,7 +76,7 @@ extern "C"
    *  \param filename that contains the lcp
    *  \return 0 if ok
   */
-  int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, char* filename);
+  int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, const char* filename);
 
   /** \fn  void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
    *  \brief function to delete a LinearComplementarityProblem

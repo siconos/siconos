@@ -34,14 +34,13 @@ FrictionContact::FrictionContact(int dimPb, int numericsSolverId):
   if (dimPb == 2 && numericsSolverId == SICONOS_FRICTION_3D_NSGS)
     _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
 
+  fc3d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
   if (dimPb == 2)
   {
-    fc2d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
     _frictionContact_driver = &fc2d_driver;
   }
   else if (dimPb == 3)
   {
-    fc3d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
     _frictionContact_driver = &fc3d_driver;
   }
   else

@@ -15,38 +15,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
 #include "SolverOptions.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include "mlcp_cst.h"
-#include "MCP_cst.h"
-#include "NCP_cst.h"
-#include "lcp_cst.h"
-#include "relay_cst.h"
-#include "Friction_cst.h"
-#include "GenericMechanical_cst.h"
-#include "AVI_cst.h"
-#include "VI_cst.h"
-#include "SOCLCP_cst.h"
-#include "ConvexQP_cst.h"
-#include "Newton_methods.h"
+#include <assert.h>                         // for assert
+#include <float.h>                          // for DBL_EPSILON
+#include <stdio.h>                          // for NULL, printf
+#include <stdlib.h>                         // for free, calloc, exit, malloc
+#include <string.h>                         // for strcmp
+#include "AVI_cst.h"                        // for SICONOS_AVI_CAOFERRIS_STR
+#include "ConvexQP_cst.h"                   // for SICONOS_CONVEXQP_ADMM_STR
+#include "Friction_cst.h"                   // for SICONOS_FRICTION_2D_CPG_STR
+#include "GenericMechanical_cst.h"          // for SICONOS_GENERIC_MECHANICA...
+#include "MCP_cst.h"                        // for SICONOS_MCP_NEWTON_FB_FBL...
+#include "NCP_cst.h"                        // for SICONOS_NCP_NEWTON_FB_FBL...
+#include "Newton_methods.h"                 // for newton_LSA_check_solverId
+#include "PathSearch.h"                     // for free_solverData_PathSearch
+#include "SOCLCP_cst.h"                     // for SICONOS_SOCLCP_NSGS_STR
+#include "SiconosNumerics_Solvers.h"        // for SICONOS_REGISTER_SOLVERS
+#include "VI_cst.h"                         // for SICONOS_VI_BOX_AVI_LSA
+#include "VariationalInequality_Solvers.h"  // for vi_box_AVI_extra_SolverOp...
+#include "lcp_cst.h"                        // for SICONOS_LCP_AVI_CAOFERRIS...
+#include "mlcp_cst.h"                       // for SICONOS_MLCP_DIRECT_ENUM_STR
+#include "numerics_verbose.h"               // for numerics_printf
+#include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERR...
 
-
-
-#include "numerics_verbose.h"
-
-#include "Newton_methods.h"
-#include "PathSearch.h"
-#include "VariationalInequality_Solvers.h"
-
-#include "GAMSlink.h"
-
-#include "SiconosNumerics_Solvers.h"
-
-//#define DEBUG_MESSAGES 1
-#include "debug.h"
+#include "SiconosConfig.h"   // for HAVE_GAMS_C_API  // IWYU pragma: keep
+#ifdef HAVE_GAMS_C_API
+#include "GAMSlink.h"        // for deleteGAMSparams
+#endif
 
 #define MAX_ENV_SIZE 200
 
@@ -530,7 +526,7 @@ SICONOS_REGISTER_SOLVERS()
   }
 }
 
-int solver_options_name_to_id(char * pName)
+int solver_options_name_to_id(const char * pName)
 {
 #undef SICONOS_SOLVER_MACRO
 #define SICONOS_SOLVER_MACRO(X) if (strcmp(X ## _STR, pName) == 0) return X;

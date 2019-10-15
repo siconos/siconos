@@ -15,17 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "rolling_fc3d_Solvers.h"
-#include "Friction_cst.h"
-#include "numerics_verbose.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-
-
+#include <math.h>                           // for fmax
+#include "Friction_cst.h"                   // for SICONOS_FRICTION_3D_IPARA...
+#include "NumericsFwd.h"                    // for SolverOptions, RollingFri...
+#include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
+#include "SolverOptions.h"                  // for SolverOptions
+#include "numerics_verbose.h"               // for numerics_printf_verbose
+#include "rolling_fc3d_Solvers.h"           // for rolling_fc3d_set_internal...
 
 void rolling_fc3d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
                                                SolverOptions* options,

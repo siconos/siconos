@@ -15,17 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-
-#include "Relay_Solvers.h"
-#include "LCP_Solvers.h"
-#include <assert.h>
-#include "NumericsMatrix.h"
+#include <stdlib.h>                        // for malloc
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NumericsMatrix, NM_fill
+#include "RelayProblem.h"                  // for RelayProblem
+#include "Relay_Solvers.h"                 // for relay_to_lcp
 
 void relay_to_lcp(RelayProblem* problem, LinearComplementarityProblem * lcp_problem)
 {

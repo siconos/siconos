@@ -16,23 +16,17 @@
  * limitations under the License.
 */
 
-
-
 #include "GenericMechanicalProblem.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
-#include "FrictionContactProblem.h"
-#include "LinearComplementarityProblem.h"
-#include "RelayProblem.h"
-#include "GenericMechanical_Solvers.h"
-#include "NumericsMatrix.h"
-#include "SparseBlockMatrix.h"
-//#define GMP_DEBUG
-
-/* void * solverFC3D; */
-/* void * solverEquality; */
-/* void * solverLCP; */
-/* void * solverMLCP; */
+#include <assert.h>                        // for assert
+#include <stdlib.h>                        // for malloc, free, exit, EXIT_F...
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "GenericMechanical_Solvers.h"     // for NUMERICS_GMP_FREE_GMP, NUM...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NumericsMatrix, NM_new
+#include "RelayProblem.h"                  // for RelayProblem
+#include "SolverOptions.h"                 // for SICONOS_NUMERICS_PROBLEM_FC3D
+#include "SparseBlockMatrix.h"             // for SBMfree, SparseBlockStruct...
+#include "numerics_verbose.h"              // for CHECK_IO
 
 GenericMechanicalProblem * genericMechanicalProblem_new()
 {
@@ -94,9 +88,9 @@ void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int
     free(pGMP->q);
     free(pGMP->M);
   }
+
   if (level & NUMERICS_GMP_FREE_GMP)
     free(pGMP);
-
 }
 void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size)
 {
@@ -222,16 +216,12 @@ void genericMechanicalProblem_printInFile(GenericMechanicalProblem*  pGMP, FILE*
   }
 }
 
-GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
+int genericMechanical_newFromFile(GenericMechanicalProblem * pGMP, FILE* file)
 {
   size_t nsubProb = 0;
   int prbType = 0;
   int i, posInX, localSize;
   void * prb;
-
-  GenericMechanicalProblem*  pGMP = genericMechanicalProblem_new();
-
-  //fscanf(file,"%d\n",&nsubProb);
 
   pGMP->M = NM_new_from_file(file);
   SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
@@ -261,6 +251,21 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
 #ifdef GMP_DEBUG
   genericMechanicalProblem_display(pGMP);
 #endif
+  return 0;
+}
 
-  return pGMP;
+int genericMechanical_newFromFilename(GenericMechanicalProblem* problem, const char* filename)
+{
+  int info = 0;
+  FILE * file = fopen(filename, "r");
+  if (file == NULL)
+  {
+    printf("Error! Could not open filename %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
+
+  info = genericMechanical_newFromFile(problem, file);
+
+  fclose(file);
+  return info;
 }

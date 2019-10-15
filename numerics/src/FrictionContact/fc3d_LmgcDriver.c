@@ -1,26 +1,44 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include "SiconosBlas.h"
-#include "CSparseMatrix.h"
-#include "fc3d_Solvers.h"
-#include "NonSmoothDrivers.h"
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2018 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+#include <stdio.h>                   // for fprintf, fclose, fopen, printf
+#include <stdlib.h>                  // for free, malloc
+#include "FrictionContactProblem.h"  // for frictionContactProblem_new_with_...
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_IPARAM_ERROR...
+#include "NonSmoothDrivers.h"        // for fc3d_driver, fc3d_LmgcDriver
+#include "NumericsFwd.h"             // for SolverOptions, SparseBlockStruct...
+#include "NumericsMatrix.h"          // for NM_new_SBM
+#include "NumericsVerbose.h"         // for numerics_set_verbose
+#include "SiconosConfig.h"           // for WITH_FCLIB
+#include "SolverOptions.h"           // for SolverOptions, SICONOS_IPARAM_IT...
+#include "SparseBlockMatrix.h"       // for SBCM_free_3x3, SBCM_new_3x3, SBC...
+#include "debug.h"                   // for DEBUG_EXPR
+#include "fc3d_Solvers.h"            // for fc3d_setDefaultSolverOptions
+
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H
 
-#include "fclib_interface.h"
-#include "numerics_verbose.h"
-#include "SiconosCompat.h"
+#ifdef WITH_FCLIB
+#include "string.h"                  // for strcpy, strcat
+#include "fclib_interface.h"         // for frictionContact_fclib_write, fri...
+#endif
+
 static int fccounter = -1;
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
-
 
 int fc3d_LmgcDriver(double *reaction,
                     double *velocity,

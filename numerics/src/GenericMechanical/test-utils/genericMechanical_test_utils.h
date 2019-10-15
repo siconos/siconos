@@ -18,25 +18,24 @@
 #ifndef GENERICMECHANICAL_TEST_UTILS_H
 #define GENERICMECHANICAL_TEST_UTILS_H
 
+#include "SiconosConfig.h" // for BUILD_AS_CPP
 #include <stdio.h>
-#include "SolverOptions.h"
+#include "test_utils.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-  int genericMechanical_test_function(FILE * f, SolverOptions * options);
+  TestCase * build_test_collection(int n_data, const char ** data_collection, int*);
 
-  /** Defines the list of data files
-      returns an array of char
-  */
-  char ** data_collection(void);
   
-  /** Defines the set of tests (including parameters)
-      returns an 'array' of tests, some kind of dict.
-  */
-  char *** test_collection(int, char **);
+  int gmp_test_function(TestCase*);
+
+  void build_gmp_test(const char * filename,
+                        int solver_id, int* d_ind, double* dparam, int * i_ind, int* iparam,
+                        int internal_solver_id, int * i_d_ind, double * internal_dparam, int * i_i_ind, int * internal_iparam,
+                        TestCase* testname);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

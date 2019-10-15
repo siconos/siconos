@@ -16,26 +16,29 @@
  * limitations under the License.
 */
 
-#include "NonSmoothDrivers.h"
-#include "pinv.h"
-#include "SiconosBlas.h"
 #include "GMPReduced.h"
-#include "numerics_verbose.h"
-#include "GenericMechanicalProblem.h"
-#include "GenericMechanical_Solvers.h"
-#include "FrictionContactProblem.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "MixedLinearComplementarityProblem.h"
-#include "mlcp_cst.h"
-#include "lcp_cst.h"
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include "SparseBlockMatrix.h"
-#include "NumericsMatrix.h"
-#include <string.h>
-//#define GMP_DEBUG_REDUCED
-//#define GMP_DEBUG_GMPREDUCED_SOLVE
+#include <assert.h>                             // for assert
+#ifndef __cplusplus
+#include <stdbool.h>                            // for true
+#endif
+#include <stdio.h>                              // for printf, size_t, NULL
+#include <stdlib.h>                             // for free, malloc, calloc
+#include <string.h>                             // for memcpy
+#include "SiconosBlas.h"                              // for cblas_dgemv, CblasNoT...
+#include "FrictionContactProblem.h"             // for FrictionContactProblem
+#include "GenericMechanicalProblem.h"           // for listNumericsProblem
+#include "GenericMechanical_Solvers.h"          // for gmp_gauss_seidel, gmp...
+#include "LCP_Solvers.h"                        // for lcp_enum_init, lcp_en...
+#include "LinearComplementarityProblem.h"       // for LinearComplementarity...
+#include "MLCP_Solvers.h"                       // for mixedLinearComplement...
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NonSmoothDrivers.h"                   // for linearComplementarity...
+#include "NumericsMatrix.h"                     // for NumericsMatrix, NM_fill
+#include "SolverOptions.h"                      // for SICONOS_NUMERICS_PROB...
+#include "SparseBlockMatrix.h"                  // for SparseBlockStructured...
+#include "lcp_cst.h"                            // for SICONOS_LCP_ENUM
+#include "mlcp_cst.h"                           // for SICONOS_MLCP_ENUM
+#include "pinv.h"                               // for pinv
 
 void _GMPReducedEquality(GenericMechanicalProblem* pInProblem, double * reducedProb, double * Qreduced, int * Me_size, int* Mi_size);
 void _GMPReducedGetSizes(GenericMechanicalProblem* pInProblem, int * Me_size, int* Mi_size);
@@ -723,7 +726,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double
     aLCP.size = Mi_size;
     aLCP.q = Qreduced;
     aLCP.M = &M;
-    linearComplementarity_setDefaultSolverOptions(&aLCP, &aLcpOptions, SICONOS_LCP_ENUM);
+    linearComplementarity_setDefaultSolverOptions(&aLcpOptions, SICONOS_LCP_ENUM);
     lcp_enum_init(&aLCP, &aLcpOptions, 1);
     *info = linearComplementarity_driver(&aLCP, reaction, velocity, &aLcpOptions);
     lcp_enum_reset(&aLCP, &aLcpOptions, 1);

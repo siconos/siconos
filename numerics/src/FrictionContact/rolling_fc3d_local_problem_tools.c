@@ -16,10 +16,13 @@
  * limitations under the License.
 */
 
-#include "RollingFrictionContactProblem.h"
-
 #include "rolling_fc3d_local_problem_tools.h"
-#include "NumericsMatrix.h"
+#ifndef __cplusplus
+#include <stdbool.h>                        // for false
+#endif
+#include <stdlib.h>                         // for malloc, NULL
+#include "NumericsMatrix.h"                 // for NM_create_from_data, Nume...
+#include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 
 void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem * problem, RollingFrictionContactProblem * localproblem, double *reaction, int contact)
 {

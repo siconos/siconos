@@ -16,19 +16,18 @@
  * limitations under the License.
 */
 
-#include "SiconosLapack.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "numerics_verbose.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "numerics_verbose.h"
+#include <math.h>                          // for fabs
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_compute_error_only
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_LATIN_P...
+#include "numerics_verbose.h"              // for verbose
+#include "SiconosBlas.h"  // for cblas_dcopy, cblas_daxpy
+#include "SiconosLapack.h"                 // for DTRTRS, DPOTRF, lapack_int, LA_UP, LA_NONUNIT, LA_NOTRANS
 
 void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {

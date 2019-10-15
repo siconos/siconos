@@ -17,23 +17,19 @@
 */
 
 #define _XOPEN_SOURCE 700
-
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
-#include <math.h>
-
-#include "numerics_verbose.h"
-#include "fc3d_Solvers.h"
-#include "Friction_cst.h"
-#include "op3x3.h"
 #include "fc3d_unitary_enumerative.h"
+#include <math.h>                    // for fabs, sqrt, cos, pow, M_PI, atan
+#include <stdio.h>                   // for printf, NULL
+#include <stdlib.h>                  // for calloc, free, malloc
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ONECONTACT_Q...
+#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
+#include "numerics_verbose.h"        // for verbose, numerics_warning
+#include "op3x3.h"                   // for SET3, print3, print3x3, SET3X3
+#include "projectionOnCone.h"        // for projectionOnCone
+#include "quartic.h"                 // for BIQUADROOTS, CUBICROOTS, QUADROOTS
 //#define FC3D_UE_DEBUG
-
-#include "quartic.h"
-#include "projectionOnCone.h"
-#include "fc3d_compute_error.h"
 
 #define FC3D_UE_TEST_NULL(EXPR)  (fabs(EXPR)<1e-15)
 
@@ -624,7 +620,7 @@ int fc3d_unitary_enumerative_setDefaultSolverOptions(
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->dparam[0] = 1e-9;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-9;
 
   options->internalSolvers = NULL;
 

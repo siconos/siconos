@@ -16,15 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include "NumericsMatrix.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
+#include <stdio.h>                              // for printf, NULL
+#include "MLCP_Solvers.h"                       // for mlcp_compute_error
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NumericsFwd.h"                        // for MixedLinearComplement...
+#include "NumericsMatrix.h"                     // for NM_gemv, NumericsMatrix
+#include "numerics_verbose.h"                   // for numerics_error, verbose
+#include "SiconosBlas.h"                              // for cblas_dnrm2, cblas_dgemv
+
 
 /*
  * (input) double *z : size n+m

@@ -25,17 +25,13 @@ dim(u)=mm
 dim(v)=nn
 
 **************************************************************************/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <math.h>
 #include "mlcp_direct_path_enum.h"
-#include "mlcp_direct.h"
-#include "mlcp_path_enum.h"
-#include "mlcp_tool.h"
+#include <stdio.h>                              // for printf
+#include "MLCP_Solvers.h"                       // for mixedLinearComplement...
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "SolverOptions.h"                      // for SolverOptions
+#include "mlcp_direct.h"                        // for mlcp_direct_getNbDWork
+#include "mlcp_path_enum.h"                     // for mlcp_path_enum, mlcp_...
 
 static int sN;
 static int sM;

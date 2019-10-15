@@ -16,30 +16,26 @@
  * limitations under the License.
 */
 
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-
-#include "GlobalFrictionContactProblem_as_VI.h"
-#include "GlobalFrictionContactProblem.h"
-#include "VariationalInequality_Solvers.h"
-#include "gfc3d_Solvers.h"
-#include "gfc3d_compute_error.h"
-#include "NumericsMatrix.h"
-
-#include "SolverOptions.h"
-#include "numerics_verbose.h"
-
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
+#include <stdio.h>                               // for printf
+#include <stdlib.h>                              // for free, malloc, calloc
+#include <string.h>                              // for memcpy, NULL
+#include "Friction_cst.h"                        // for SICONOS_GLOBAL_FRICT...
+#include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
+#include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
+#include "NumericsFwd.h"                         // for SolverOptions, Varia...
+#include "NumericsMatrix.h"                      // for NumericsMatrix
+#include "SolverOptions.h"                       // for SolverOptions, solve...
+#include "VI_cst.h"                              // for SICONOS_VI_EG
+#include "VariationalInequality.h"               // for VariationalInequality
+#include "VariationalInequality_Solvers.h"       // for variationalInequalit...
+#include "debug.h"                               // for DEBUG_EXPR, DEBUG_BEGIN
+#include "gfc3d_Solvers.h"                       // for gfc3d_VI_ExtraGradient
+#include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
+#include "numerics_verbose.h"                    // for verbose
+#include "SiconosBlas.h"                               // for cblas_dnrm2
 
 #ifdef  DEBUG_MESSAGES
 #include "NumericsVector.h"
-#include "NumericsMatrix.h"
 #endif
 
 void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,

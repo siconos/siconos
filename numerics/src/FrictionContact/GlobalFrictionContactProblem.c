@@ -15,19 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+<<<<<<< variant A
 #include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
 #include "NumericsMatrix.h"
+>>>>>>> variant B
+####### Ancestor
+#include <stdlib.h>
+#include <assert.h>
+#include <errno.h>
+#include "NumericsMatrix.h"
+======= end
 #include "GlobalFrictionContactProblem.h"
-#include "numerics_verbose.h"
-#include "SiconosLapack.h"
-
-
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
+#include <assert.h>            // for assert
+#include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
+#include <sys/errno.h>         // for errno
+#include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_free
+#include "numerics_verbose.h"  // for CHECK_IO
 
 int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file)
 {

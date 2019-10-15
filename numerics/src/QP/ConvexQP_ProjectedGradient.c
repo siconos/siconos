@@ -16,23 +16,18 @@
  * limitations under the License.
 */
 
-
-#include "ConvexQP_Solvers.h"
-#include "ConvexQP_computeError.h"
-#include "NumericsMatrix.h"
-#include "SiconosCompat.h"
-
-
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include "ConvexQP_cst.h"
-#include "numerics_verbose.h"
-
-#include "debug.h"
+#include <stdio.h>                  // for printf, NULL
+#include <stdlib.h>                 // for free, malloc, calloc
+#include "ConvexQP.h"               // for ConvexQP
+#include "ConvexQP_Solvers.h"       // for convexQP_ProjectedGradient, conve...
+#include "ConvexQP_computeError.h"  // for convexQP_compute_error_reduced
+#include "ConvexQP_cst.h"           // for SICONOS_CONVEXQP_PGOC_RHO, SICONO...
+#include "NumericsFwd.h"            // for SolverOptions, ConvexQP, Numerics...
+#include "NumericsMatrix.h"         // for NM_gemv
+#include "SolverOptions.h"          // for SolverOptions, solver_options_nul...
+#include "debug.h"                  // for DEBUG_PRINTF
+#include "numerics_verbose.h"       // for numerics_error, verbose, numerics...
+#include "SiconosBlas.h"                  // for cblas_dcopy, cblas_daxpy, cblas_ddot
 
 //#define VERBOSE_DEBUG
 const char* const   SICONOS_CONVEXQP_PG_STR = "CONVEXQP PG";

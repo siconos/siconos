@@ -17,24 +17,18 @@
 */
 
 #include "gfc3d_compute_error.h"
-#include "fc3d_compute_error.h"
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs, sqrt
+#include <stdlib.h>                        // for NULL, calloc
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "NumericsMatrix.h"                // for NM_gemv, NM_tgemv, Numeric...
+#include "SolverOptions.h"                 // for SolverOptions
+#include "debug.h"                         // for DEBUG_EXPR, DEBUG_PRINTF
+#include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
+#include "numerics_verbose.h"              // for numerics_error, numerics_w...
+#include "sanitizer.h"                     // for cblas_dcopy_msan
+#include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dnrm2
 
-#include "GlobalFrictionContactProblem.h"
-#include "gfc3d_Solvers.h"
-#include "projectionOnCone.h"
-#include "SiconosLapack.h"
-#include <math.h>
-#include <assert.h>
-#include <float.h>
-#include "sanitizer.h"
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
-#include "NumericsVector.h"
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-#include "debug.h"
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
                         double*  reaction , double*  velocity,
                         double*  globalVelocity,

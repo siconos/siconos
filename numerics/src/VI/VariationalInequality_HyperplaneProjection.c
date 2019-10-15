@@ -15,20 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-//#include "projectionOnCone.h"
-#include "VariationalInequality_Solvers.h"
-#include "VariationalInequality_computeError.h"
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
-#include "numerics_verbose.h"
-#include <assert.h>
+#include <assert.h>                              // for assert
+#include <math.h>                                // for pow, NAN
+#include <stdio.h>                               // for printf, NULL
+#include <stdlib.h>                              // for calloc, free, malloc
+#include "NumericsFwd.h"                         // for SolverOptions, Varia...
+#include "SolverOptions.h"                       // for SolverOptions, solve...
+#include "VI_cst.h"                              // for SICONOS_VI_HP
+#include "VariationalInequality.h"               // for VariationalInequality
+#include "VariationalInequality_Solvers.h"       // for variationalInequalit...
+#include "VariationalInequality_computeError.h"  // for variationalInequalit...
+#include "debug.h"                               // for DEBUG_PRINTF, DEBUG_...
+#include "numerics_verbose.h"                    // for verbose
+#include "SiconosBlas.h"                               // for cblas_dcopy, cblas_d...
 
 void variationalInequality_HyperplaneProjection(VariationalInequality* problem, double *x, double *w, int* info, SolverOptions* options)
 {

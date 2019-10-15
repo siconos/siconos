@@ -15,18 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include <assert.h>            // for assert
+#include <float.h>             // for DBL_EPSILON
+#include <math.h>              // for fabs
+#include <stdio.h>             // for printf, NULL
+#include <stdlib.h>            // for malloc, free
+#include "NumericsFwd.h"       // for SolverOptions, RelayProblem, NumericsM...
+#include "NumericsMatrix.h"    // for NumericsMatrix
+#include "RelayProblem.h"      // for RelayProblem
+#include "Relay_Solvers.h"     // for relay_compute_error, relay_pgs, relay_...
+#include "SolverOptions.h"     // for SolverOptions, solver_options_nullify
+#include "numerics_verbose.h"  // for verbose
+#include "relay_cst.h"         // for SICONOS_RELAY_PGS
+#include "SiconosBlas.h"             // for cblas_dcopy, cblas_ddot
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "Relay_Solvers.h"
-#include "relay_cst.h"
-#include <assert.h>
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
 void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 

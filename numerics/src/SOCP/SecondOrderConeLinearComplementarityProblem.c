@@ -15,14 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
 #include "SecondOrderConeLinearComplementarityProblem.h"
-#include "numerics_verbose.h"
-
+#include <assert.h>            // for assert
+#include <stdlib.h>            // for free, malloc, NULL, exit, EXIT_FAILURE
+#include <sys/errno.h>         // for errno
+#include "NumericsMatrix.h"    // for NM_display, NM_free, NM_new_from_file
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "debug.h"             // for DEBUG_PRINT
+#include "numerics_verbose.h"  // for CHECK_IO
 
 void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearComplementarityProblem* problem)
 {

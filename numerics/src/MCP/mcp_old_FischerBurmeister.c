@@ -15,17 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-
-#include "MixedComplementarityProblem.h"
-#include "SolverOptions.h"
-#include "NonSmoothNewton.h"
-#include "FischerBurmeister.h"
-#include "MCP_Solvers.h"
-#include "numerics_verbose.h"
+#include <stdio.h>                        // for fprintf, NULL, stderr
+#include <stdlib.h>                       // for malloc, calloc
+#include "FischerBurmeister.h"            // for jacobianPhi_Mixed_FB, phi_M...
+#include "MCP_Solvers.h"                  // for mcp_old_compute_error, mcp_...
+#include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem...
+#include "NonSmoothNewton.h"              // for nonSmoothNewton, nonSmoothN...
+#include "NumericsFwd.h"                  // for MixedComplementarityProblem...
+#include "SolverOptions.h"                // for SolverOptions, solver_optio...
+#include "numerics_verbose.h"             // for numerics_printf
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

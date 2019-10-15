@@ -16,12 +16,18 @@
  * limitations under the License.
 */
 
-#include "NonSmoothDrivers.h"
-#include "AVI_Solvers.h"
-#include "AVI_cst.h"
-#include "numerics_verbose.h"
-#include "assert.h"
-#include "NumericsMatrix.h"
+#include <stdio.h>                          // for fprintf, printf, stderr
+#include <stdlib.h>                         // for exit, EXIT_FAILURE
+#include "AVI_Solvers.h"                    // for avi_caoferris, avi_pathavi
+#include "AVI_cst.h"                        // for SICONOS_AVI_CAOFERRIS
+#include "AffineVariationalInequalities.h"  // for AffineVariationalInequali...
+#include "NonSmoothDrivers.h"               // for avi_driver
+#include "NumericsFwd.h"                    // for SolverOptions, AffineVari...
+#include "NumericsMatrix.h"                 // for NM_DENSE, NumericsMatrix
+#include "SolverOptions.h"                  // for solver_options_id_to_name
+#include "assert.h"                         // for assert
+#include "numerics_verbose.h"               // for numerics_error_nonfatal
+
 
 const char* const SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
 const char* const SICONOS_AVI_PATHAVI_STR = "PATHVI";

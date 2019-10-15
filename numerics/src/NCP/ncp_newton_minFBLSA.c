@@ -16,21 +16,12 @@
  * limitations under the License.
 */
 
-
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-
-#include "NCP_Solvers.h"
-#include "SiconosLapack.h"
-#include "Newton_methods.h"
-#include "FischerBurmeister.h"
-#include "min_merit.h"
-#include "ncp_newton_FBLSA.h"
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
+#include "NCP_Solvers.h"                      // for ncp_newton_minFBLSA
+#include "Newton_methods.h"                   // for functions_LSA, init_lsa...
+#include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
+#include "NumericsFwd.h"                      // for NonlinearComplementarit...
+#include "min_merit.h"                        // for F_min, Jac_F_min
+#include "ncp_newton_FBLSA.h"                 // for FB_compute_F_ncp, FB_co...
 
 static void ncp_min(void* data_opaque, double* z, double* F, double* Fmin)
 {

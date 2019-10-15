@@ -16,18 +16,16 @@
  * limitations under the License.
 */
 
-
-#include <stdio.h>
-#include <math.h>
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include "SiconosLapack.h"
-#include "Newton_methods.h"
-#include "FischerBurmeister.h"
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
+#include <assert.h>                             // for assert
+#include <stdio.h>                              // for printf
+#include <stdlib.h>                             // for exit
+#include "FischerBurmeister.h"                  // for phi_Mixed_FB
+#include "MLCP_Solvers.h"                       // for mlcp_compute_error
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "Newton_methods.h"                     // for functions_LSA, init_l...
+#include "NumericsFwd.h"                        // for MixedLinearComplement...
+#include "NumericsMatrix.h"                     // for NumericsMatrix
+#include "SiconosBlas.h"                              // for cblas_dgemv, cblas_dcopy
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

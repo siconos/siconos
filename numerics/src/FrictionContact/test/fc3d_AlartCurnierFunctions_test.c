@@ -1,19 +1,17 @@
 #undef NDEBUG
-#include <assert.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "SiconosConfig.h"
+#include "SiconosConfig.h" // for WITH_TIMERS // IWYU pragma: keep
 #ifdef WITH_TIMERS
 #define TIMER_FFTW_CYCLE
 #endif
-#include "timers_interf.h"
-#include "op3x3.h"
-#include "NonSmoothDrivers.h"
-#include "fc3d_AlartCurnier_functions.h"
-#include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-#include "AlartCurnierGenerated.h"
+#include <assert.h>                       // for assert
+#include <math.h>                         // for NAN, isnan
+#include <stdio.h>                        // for fscanf, fclose, fopen, FILE
+#include <stdlib.h>                       // for free, malloc
+#include "AlartCurnierGenerated.h"        // for fc3d_AlartCurnierFunctionGe...
+#include "fc3d_AlartCurnier_functions.h"  // for computeAlartCurnierSTD
+#include "op3x3.h"                        // for OP3X3, sub3x3, OP3, sub3
+#include "timers_interf.h"                // for DECL_TIMER, PRINT_ELAPSED
+
 
 void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9]);
 

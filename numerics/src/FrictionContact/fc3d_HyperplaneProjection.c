@@ -15,15 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "projectionOnCone.h"
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "numerics_verbose.h"
+#include <math.h>                    // for pow, sqrt, NAN
+#include <stdio.h>                   // for printf, NULL
+#include <stdlib.h>                  // for calloc, free
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_HP
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NM_gemv
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
+#include "fc3d_Solvers.h"            // for fc3d_HyperplaneProjection, fc3d_...
+#include "fc3d_compute_error.h"      // for fc3d_compute_error
+#include "numerics_verbose.h"        // for verbose
+#include "projectionOnCone.h"        // for projectionOnCone
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_daxpy, cblas_...
 
 //#define VERBOSE_DEBUG
 
@@ -225,9 +229,9 @@ int fc3d_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options)
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 2000000;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000000;
   options->iparam[1] = 50;
-  options->dparam[0] = 1e-3;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
   options->dparam[3] = 1.0;
   options->dparam[4] = 0.99;
 

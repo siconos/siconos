@@ -16,20 +16,18 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <float.h>
+#include <float.h>                  // for DECIMAL_DIG, DBL_EPSILON
+#include <math.h>                   // for copysign
+#include <stdio.h>                  // for printf, NULL
+#include <stdlib.h>                 // for free
+#include "NonSmoothDrivers.h"       // for variationalInequality_driver
+#include "NumericsFwd.h"            // for VariationalInequality, SolverOptions
+#include "NumericsMatrix.h"         // for NM_create_from_data, NM_DENSE
+#include "SiconosSets.h"            // for box_constraints, SICONOS_SET_BOX
+#include "SolverOptions.h"          // for SolverOptions, solver_options_delete
+#include "VI_cst.h"                 // for SICONOS_VI_BOX_AVI_LSA
+#include "VariationalInequality.h"  // for VariationalInequality, VI_get_env
 
-#include "debug.h"
-#include "NonSmoothDrivers.h"
-#include "VI_cst.h"
-#include "SiconosSets.h"
-
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-#include "VariationalInequality.h"
-#include "VariationalInequality_Solvers.h"
 #define N 2
 
 #ifdef __cplusplus

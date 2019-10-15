@@ -16,95 +16,58 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
+#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_test_colle...
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_prox = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
+  *number_of_tests = 3; //n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  
+  int current = 0;
+  
   {
-    test_prox[n] = (char **)malloc(n_entry*sizeof(char *));
+    int d = 0; // FC3D_Example1_SBM.dat
+    // Prox, default
+    int dpos[] = {1, SICONOS_DPARAM_TOL};
+    double dparam[] = {1e-8};
+    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+    int iparam[] = {100};
+    
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_PROX, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
   }
-
-  int n =0;
-  int e=0;
-  
-  int d=0;/* "./data/FC3D_Example1_SBM.dat"; */
-  e=0;
-  test_prox[n][e++] = data_collection[d];
-  test_prox[n][e++] = "0";
-  test_prox[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_prox[n][e++], "%d", SICONOS_FRICTION_3D_PROX);
-  test_prox[n][e++] = "1e-08";
-  test_prox[n][e++] = "100";
-  test_prox[n][e++] = "---";
-  n++;
-
-  d=9;
-  e=0;
-  test_prox[n][e++] = data_collection[d];
-  test_prox[n][e++] = "0";
-  test_prox[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_prox[n][e++], "%d", SICONOS_FRICTION_3D_PROX);
-  test_prox[n][e++] = "1e-08";
-  test_prox[n][e++] = "1000000";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "dparam";
-  test_prox[n][e++] = "3";
-  test_prox[n][e++] = "1e4";
-  test_prox[n][e++] = "iparam";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_prox[n][e++] = data_collection[d];
-  test_prox[n][e++] = "0";
-  test_prox[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_prox[n][e++], "%d", SICONOS_FRICTION_3D_PROX);
-  test_prox[n][e++] = "1e-08";
-  test_prox[n][e++] = "1000000";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "dparam";
-  test_prox[n][e++] = "3";
-  test_prox[n][e++] = "1e4";
-  test_prox[n][e++] = "iparam";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "---";
-  n++;
-  
-  d=6;
-  e=0;
-  test_prox[n][e++] = data_collection[d];
-  test_prox[n][e++] = "0";
-  test_prox[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_prox[n][e++], "%d", SICONOS_FRICTION_3D_PROX);
-  test_prox[n][e++] = "1e-08";
-  test_prox[n][e++] = "1000000";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "0";
-  test_prox[n][e++] = "dparam";
-  test_prox[n][e++] = "3";
-  test_prox[n][e++] = "1e4";
-  test_prox[n][e++] = "iparam";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "1";
-  test_prox[n][e++] = "---";
-  n++;
-
- 
-
-  test_prox[n][0] ="---";
-  return test_prox;
+  {
+    int d = 6;// BoxesStack1-i100000-32.hdf5.dat
+    // Prox, set d[3], i[1], many iter.
+    int dpos[] = {2, SICONOS_DPARAM_TOL, 3};
+    double dparam[] = {1e-8, 1.e4};
+    int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 1};
+    int iparam[] = {1000000, 1};
+    
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_PROX, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+  }
+  {
+    int d = 9; // OneObject-i100000-499.hdf5.dat
+    // Prox, set d[3], i[1], many iter.
+    int dpos[] = {2, SICONOS_DPARAM_TOL, 3};
+    double dparam[] = {1e-8, 1.e4};
+    int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 1};
+    int iparam[] = {1000000, 1};
+    
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_PROX, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+  }
+  *number_of_tests = current;
+  return tests_list;
 
 }

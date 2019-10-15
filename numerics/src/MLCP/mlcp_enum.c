@@ -25,23 +25,23 @@ dim(u)=mm
 dim(v)=nn
 
 **************************************************************************/
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include "mlcp_tool.h"
-#include "NumericsMatrix.h"
-#include <math.h>
-#include "mlcp_enum.h"
-#include "mlcp_enum_tool.h"
-#include "SiconosLapack.h"
-#include "numerics_verbose.h"
 
-//#ifdef HAVE_DGELS
-//#define ENUM_USE_DGELS
-//#endif
+#include "mlcp_enum.h"
+#include <assert.h>                             // for assert
+#include <math.h>                               // for isinf, isnan
+#include <stdio.h>                              // for printf
+#include <stdlib.h>                             // for free, malloc
+#include <string.h>                             // for NULL, memcpy
+#include "MLCP_Solvers.h"                       // for mlcp_compute_error
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NumericsMatrix.h"                     // for NM_dense_display, Num...
+#include "SolverOptions.h"                      // for SolverOptions
+#include "mlcp_enum_tool.h"                     // for initEnum, nextEnum
+#include "mlcp_tool.h"                          // for mlcp_DisplaySolution
+#include "numerics_verbose.h"                   // for verbose
+#include "SiconosBlas.h"                        // for cblas_dnrm2
+#include "SiconosLapack.h"                      // for DGELS, DGESV, lapack_int, LA_NOTRANS
+
 
 #ifdef MLCP_DEBUG
 static int *sLastIWork;

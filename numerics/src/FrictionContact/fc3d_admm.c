@@ -15,30 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "fc3d_projection.h"
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
-#include "projectionOnCone.h"
-
-#include "SiconosLapack.h"
-
-#include <stdio.h>
-#include <assert.h>
-#include <math.h>
-#include <float.h>
-
-#include "sanitizer.h"
-
-
-#include "numerics_verbose.h"
-#include "NumericsVector.h"
-#include "NumericsSparseMatrix.h"
-
-
+#include <assert.h>                  // for assert
+#include <float.h>                   // for DBL_EPSILON
+#include <math.h>                    // for sqrt, fabs, fmax, INFINITY
+#include <stdio.h>                   // for NULL, printf
+#include <stdlib.h>                  // for calloc, free, malloc
+#include "CSparseMatrix.h"           // for CSparseMatrix_zentry, CSparseMatrix
+#include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NM_gemv, NM_free, NM_copy, NM_new
+#include "NumericsSparseMatrix.h"    // for NSM_diag_indices
+#include "SolverOptions.h"           // for SolverOptions, SICONOS_DPARAM_TOL
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                   // for DEBUG_EXPR, DEBUG_PRINTF, DEBUG_...
+#include "fc3d_Solvers.h"            // for fc3d_checkTrivialCase, fc3d_admm
+#include "fc3d_compute_error.h"      // for fc3d_compute_error
+#include "numerics_verbose.h"        // for numerics_printf_verbose, numeric...
+#include "projectionOnCone.h"        // for projectionOnCone, projectionOnDu...
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_daxpy, cblas_...
+
 const char* const   SICONOS_FRICTION_3D_ADMM_STR = "FC3D ADMM";
 
 typedef struct

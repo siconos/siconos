@@ -32,11 +32,10 @@ extern "C"
 #endif
 
   /** set the default solver parameters and perform memory allocation for LinearComplementarity
-      \param[in] problem the LinearComplementarityProblem structure which handles the problem (M,q)
       \param options the pointer to the array of options to set
       \return info termination value
   */
-  int linearComplementarity_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options, int);
+  int linearComplementarity_setDefaultSolverOptions(SolverOptions* options, int);
 
   /** lcp_qp uses a quadratic programm formulation for solving a LCP
    * \param[in] problem structure that represents the LCP (M, q...)
@@ -338,7 +337,7 @@ extern "C"
       \param problem structure that represents the LCP (M, q...)
       \param  options  the pointer to the array of options to set
   */
-  int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options);
+  int linearComplementarity_enum_setDefaultSolverOptions(SolverOptions* options);
 
   /** lcp_avi_caoferris is a direct solver for LCP based on an Affine Variational Inequalities (AVI) reformulation
    * The AVI solver is here the one from Cao and Ferris 

@@ -16,18 +16,19 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "NonSmoothDrivers.h"
-#include "Relay_Solvers.h"
-#include "LCP_Solvers.h"
-#include <assert.h>
-#include "relay_cst.h"
-#include "numerics_verbose.h"
-#include "lcp_cst.h"
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for malloc, free
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_enu...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NonSmoothDrivers.h"              // for linearComplementarity_driver
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "RelayProblem.h"                  // for RelayProblem
+#include "Relay_Solvers.h"                 // for relay_to_lcp, relay_enum
+#include "SolverOptions.h"                 // for SolverOptions
+#include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
+#include "numerics_verbose.h"              // for verbose
+#include "relay_cst.h"                     // for SICONOS_RELAY_ENUM
+
 void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   int i;
@@ -86,7 +87,7 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
 
 }
 
-int relay_enum_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options)
+int relay_enum_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
@@ -103,8 +104,8 @@ int relay_enum_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* opt
   options->dSize = 15;
   options->iparam = (int *)malloc(options->iSize * sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL ;/* (double*) malloc((3*problem->size +problem->size*problem->size)*sizeof(double)); */
-  options->iWork = NULL ; /* (int*) malloc(2*problem->size*sizeof(int)); */
+  options->dWork = NULL ;
+  options->iWork = NULL ;
   for (i = 0; i < 15; i++)
   {
     options->iparam[i] = 0;

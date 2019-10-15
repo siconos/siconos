@@ -22,8 +22,8 @@
 #ifndef LCP_ENUM_H
 #define LCP_ENUM_H
 
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

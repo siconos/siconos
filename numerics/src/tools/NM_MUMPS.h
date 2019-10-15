@@ -19,8 +19,8 @@
 #ifndef NM_MUMPS_h
 #define NM_MUMPS_h
 
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
+#include "NumericsFwd.h"  // for NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP, WITH_MUMPS // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

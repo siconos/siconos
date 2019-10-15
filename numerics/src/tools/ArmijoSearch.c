@@ -19,18 +19,18 @@
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include "float.h"
-#include "numerics_verbose.h"
-#include <assert.h>
-
-#include "SiconosBlas.h"
 #include "ArmijoSearch.h"
-#include "SiconosSets.h"
+#include <assert.h>            // for assert
+#include "SiconosSets.h"       // for project_on_set
+#include "debug.h"             // for DEBUG_EXPR_WE, DEBUG_PRINT, DEBUG_PRINTF
+#include "numerics_verbose.h"  // for numerics_printf_verbose
+#include "SiconosBlas.h"       // for cblas_daxpy, cblas_dcopy, cblas_ddot
 
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
+#else
+#include <stdbool.h>           // for bool, only required in C
 #endif
 
 double search_Armijo_standalone(int n, double* theta, double preRHS, search_data* ls_data)

@@ -16,21 +16,23 @@
  * limitations under the License.
 */
 
-
-#include "SOCLCP_Solvers.h"
-#include "projectionOnCone.h"
-#include "projectionOnCylinder.h"
-#include "soclcp_compute_error.h"
 #include "soclcp_projection.h"
-#include "SparseBlockMatrix.h"
-#include "SiconosBlas.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-#include "numerics_verbose.h"
+#include <math.h>                                         // for sqrt, pow
+#include <stdio.h>                                        // for printf, NULL
+#include <stdlib.h> // for malloc, free, calloc
+#include "NumericsMatrix.h"                               // for NumericsMatrix
+#include "SOCLCP_Solvers.h"                               // for soclcp_nsgs...
+#include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "NSSTools.h"                                  // for max
+#include "SolverOptions.h"                                // for SolverOptions
+#include "numerics_verbose.h"                             // for verbose
+#include "projectionOnCone.h"                             // for projectionO...
+#include "projectionOnCylinder.h"                         // for projectionO...
+#include "sanitizer.h"                                    // for cblas_dcopy...
+#include "soclcp_compute_error.h"                         // for soclcp_unit...
+#include "SiconosBlas.h"                                  // for cblas_dgemv
 
-#include "sanitizer.h"
 #define VERBOSE_DEBUG
 
 void soclcp_projection_initialize(SecondOrderConeLinearComplementarityProblem * problem,
@@ -349,7 +351,6 @@ int soclcp_projectionOnCylinder_solve(SecondOrderConeLinearComplementarityProble
 
 int soclcp_projection_setDefaultSolverOptions(SolverOptions* options)
 {
-  int i;
   if(verbose > 0)
   {
     printf("Set the Default SolverOptions for the local SOCLCP Solver\n");
@@ -362,15 +363,10 @@ int soclcp_projection_setDefaultSolverOptions(SolverOptions* options)
   options->filterOn = 1;
   options->iSize = 5;
   options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  for(i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
 
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-16;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
   return 0;
 }

@@ -17,7 +17,8 @@
 */
 
 #include "NonlinearComplementarityProblem.h"
-#include "NumericsMatrix.h"
+#include <stdlib.h>          // for free, NULL, malloc
+#include "NumericsMatrix.h"  // for NM_free
 
 
 void freeNCP(NonlinearComplementarityProblem* ncp)

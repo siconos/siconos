@@ -17,7 +17,10 @@
 */
 #ifndef ROLLINGFRICTIONCONTACT_TEST_UTILS_H
 #define ROLLINGFRICTIONCONTACT_TEST_UTILS_H
-#include "SolverOptions.h"
+#include <stdio.h>          // for FILE
+#include "NumericsFwd.h"    // for SolverOptions
+#include "SiconosConfig.h"  // for BUILD_AS_CPP
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

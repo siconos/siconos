@@ -1,16 +1,14 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "NonSmoothDrivers.h"
-#include "projectionOnCone.h"
-#include "ConvexQP.h"
-#include "FrictionContactProblem.h"
-#include "SolverOptions.h"
-#include "ConvexQP_cst.h"
-#include "ConvexQP_Solvers.h"
-#include "SiconosBlas.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
+#include <stdio.h>                   // for printf, fopen, FILE, NULL
+#include <stdlib.h>                  // for free, calloc, malloc
+#include "ConvexQP.h"                // for ConvexQP, convexQP_clear
+#include "ConvexQP_Solvers.h"        // for convexQP_ADMM, convexQP_ADMM_set...
+#include "ConvexQP_cst.h"            // for SICONOS_CONVEXQP_ADMM_IPARAM_ACC...
+#include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
+#include "NumericsFwd.h"             // for FrictionContactProblem, ConvexQP
+#include "SolverOptions.h"           // for SolverOptions, solver_options_de...
+#include "numerics_verbose.h"        // for verbose
+#include "projectionOnCone.h"        // for projectionOnCone
+#include "SiconosBlas.h"             // for cblas_dcopy
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 typedef struct {

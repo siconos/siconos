@@ -16,38 +16,31 @@
  * limitations under the License.
 */
 
-#include "SiconosConfig.h"
-#include "SiconosCompat.h"
-
 #include "Newton_methods.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "numerics_verbose.h"
-#include "SiconosLapack.h"
-#include "ArmijoSearch.h"
-#include "GoldsteinSearch.h"
-#include "SolverOptions.h"
-#include "lcp_cst.h"
-#include "NCP_cst.h"
-#include "MCP_cst.h"
-#include "VI_cst.h"
-#include "Friction_cst.h"
-#include "hdf5_logger.h"
-
+#include <assert.h>            // for assert
+#include <float.h>             // for DBL_MAX
+#include <math.h>              // for fmax, pow, INFINITY, isfinite
+#include <stdio.h>             // for NULL, fprintf, stderr
+#include <stdlib.h>            // for calloc, free, malloc, getenv, atoi
+#include "ArmijoSearch.h"      // for linesearch_Armijo2, armijo_extra_params
+#include "Friction_cst.h"      // for SICONOS_FRICTION_3D_NSN_AC_TEST
+#include "GoldsteinSearch.h"   // for goldstein_extra_params, search_Goldste...
+#include "MCP_cst.h"           // for SICONOS_MCP_NEWTON_FB_FBLSA, SICONOS_M...
+#include "NCP_cst.h"           // for SICONOS_NCP_NEWTON_FB_FBLSA, SICONOS_N...
+#include "NumericsMatrix.h"    // for NM_gesv, NM_tgemv, NM_duplicate, NM_free
+#include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
+#include "VI_cst.h"            // for SICONOS_VI_BOX_AVI_LSA, SICONOS_VI_BOX_QI
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"             // for DEBUG_PRINT
+#include "hdf5_logger.h"       // for SN_logh5_scalar_double, SN_logh5_vec_d...
+#include "lcp_cst.h"           // for SICONOS_LCP_NEWTON_FB_FBLSA, SICONOS_L...
+#include "line_search.h"       // for search_data, fill_nm_data, free_ls_data
+#include "numerics_verbose.h"  // for numerics_printf_verbose, numerics_printf
+#include "sn_logger.h"         // for SN_LOG_SCALAR, SN_LOG_VEC, SN_LOG_MAT
+#include "SiconosBlas.h"       // for cblas_dcopy, cblas_dnrm2, cblas_dscal
 
 typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
-
-#ifdef __cplusplus
-using namespace std;
-#endif
-
 
 const char* const SICONOS_NEWTON_LSA_STR  = "Newton method LSA";
 

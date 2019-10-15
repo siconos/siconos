@@ -16,21 +16,17 @@
  * limitations under the License.
 */
 
-#include "numerics_verbose.h"
-#include "op3x3.h"
-#include "SparseBlockMatrix.h"
-#include "fc3d_Solvers.h"
-#include "FrictionContactProblem.h"
-#include "fc3d_compute_error.h"
-#include "NaturalMapGenerated.h"
-#include "fc3d_nonsmooth_Newton_solvers.h"
 #include "fc3d_nonsmooth_Newton_natural_map.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include "Friction_cst.h"
-#include "SiconosLapack.h"
+#include <assert.h>                         // for assert
+#include <math.h>                           // for sqrt
+#include <stdio.h>                          // for printf, NULL
+#include <stdlib.h>                         // for calloc, free, malloc
+#include "FrictionContactProblem.h"         // for FrictionContactProblem
+#include "Friction_cst.h"                   // for SICONOS_FRICTION_3D_NSN_NM
+#include "NaturalMapGenerated.h"            // for fc3d_NaturalMapFunctionGe...
+#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
+#include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
+#include "numerics_verbose.h"               // for verbose
 
 void fc3d_NaturalMapFunction(
   unsigned int problemSize,
@@ -152,12 +148,12 @@ int fc3d_nonsmooth_Newton_NaturalMap_setDefaultSolverOptions(
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 200;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
   options->iparam[7] = 1;      /* erritermax */
-  options->dparam[0] = 1e-3;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
   options->dparam[3] = 1;      /* default rho */
 
   options->iparam[8] = -1;     /* mpi com fortran */

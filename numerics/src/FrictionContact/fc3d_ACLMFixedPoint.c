@@ -16,24 +16,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
-#include "SOCLCP_Solvers.h"
-#include "VI_cst.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-//#define VERBOSE_DEBUG
-#include "Friction_cst.h"
-#include "sanitizer.h"
-
+#include <math.h>                                         // for sqrt
+#include <stdio.h>                                        // for printf, NULL
+#include <stdlib.h>                                       // for malloc, free
+#include "FrictionContactProblem.h"                       // for FrictionCon...
+#include "Friction_cst.h"                                 // for SICONOS_FRI...
+#include "NumericsFwd.h"                                  // for SolverOptions
+#include "SOCLCP_Solvers.h"                               // for soclcp_nsgs...
+#include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "SolverOptions.h"                                // for SolverOptions
+#include "VI_cst.h"                                       // for SICONOS_VI_...
 #define DEBUG_MESSAGES
 #define DEBUG_STDOUT
-#include "debug.h"
-#include "numerics_verbose.h"
+#include "debug.h"  // lines 35-35
+#include "fc3d_Solvers.h"                                 // for fc3d_set_in...
+#include "fc3d_compute_error.h"                           // for fc3d_comput...
+#include "numerics_verbose.h"                             // for verbose
+#include "SiconosBlas.h"                                        // for cblas_dnrm2
 
 
 

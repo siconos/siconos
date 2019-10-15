@@ -16,12 +16,23 @@
  * limitations under the License.
 */
 #define _XOPEN_SOURCE 700
+#include <math.h>                          // for isfinite
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for free, calloc, malloc
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NonSmoothDrivers.h"              // for linearComplementarity_driver
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "lcp_cst.h"                       // for SICONOS_LCP_GAMS
+#include "lcp_test_utils.h"                // for lcp_test_function
+#include "test_utils.h"                    // for TestCase
+#include "SiconosConfig.h" // for HAVE_GAMS_C_API // IWYU pragma: keep
+#ifdef HAVE_GAMS_C_API
 #include <string.h>
-
 #if (__linux ||  __APPLE__)
 #elif _MSC_VER
 #define strdup _strdup
-#else
+#else // to convert char to const char ... 
 static inline char* strdup(char* src)
 {
   size_t len = strlen(src) + 1;
@@ -30,51 +41,30 @@ static inline char* strdup(char* src)
   return dest;
 }
 #endif
-
-#include <math.h>
-#include "lcp_test_utils.h"
-#include "NonSmoothDrivers.h"
-#include "GAMSlink.h"
-#include "LCP_Solvers.h"
-#include "LinearComplementarityProblem.h"
-#include "SolverOptions.h"
-#include "SiconosCompat.h"
-#include "NumericsVerbose.h"
-
-
-#ifdef __cplusplus
-using namespace std;
 #endif
 
-int lcp_test_function(FILE * f, int solverId, char* filename)
+int lcp_test_function(TestCase * current)
 {
-  numerics_set_verbose(2);
+  //numerics_set_verbose(2);
   int i, info = 0 ;
   LinearComplementarityProblem* problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
-
-  info = linearComplementarity_newFromFile(problem, f);
-
-  FILE * foutput  =  fopen("./lcp_mmc.verif", "w");
-  info = linearComplementarity_printInFile(problem, foutput);
-  fclose(foutput);
-  SolverOptions options;
-  solver_options_set(&options, solverId);
-
+  info = linearComplementarity_newFromFilename(problem, current->filename);
+  
 #ifdef HAVE_GAMS_C_API
-  if (solverId == SICONOS_LCP_GAMS)
+  if (current->options->solverId == SICONOS_LCP_GAMS)
   {
-    SN_GAMSparams* GP = (SN_GAMSparams*)options.solverParameters;
+    SN_GAMSparams* GP = (SN_GAMSparams*)current->options->solverParameters;
     assert(GP);
     GP->model_dir = strdup(GAMS_MODELS_SOURCE_DIR);
-    assert(filename);
-    GP->filename = filename;
+    assert(current->filename);
+    GP->filename = current->filename;
   }
 #endif
 
   double * z = (double *)calloc(problem->size, sizeof(double));
   double * w = (double *)calloc(problem->size, sizeof(double));
 
-  info = linearComplementarity_driver(problem, z , w, &options);
+  info = linearComplementarity_driver(problem, z , w, current->options);
 
   for (i = 0 ; i < problem->size ; i++)
   {
@@ -82,96 +72,24 @@ int lcp_test_function(FILE * f, int solverId, char* filename)
     info = info == 0 ? !(isfinite(z[i]) && isfinite(w[i])): info;
   }
 
-
   if (!info)
-  {
-    printf("test succeeded err = %e \n", options.dparam[SICONOS_DPARAM_RESIDU]);
-  }
+    printf("test succeeded err = %e \n", current->options->dparam[SICONOS_DPARAM_RESIDU]);
   else
-  {
-    printf("test unsuccessful err =%e  \n", options.dparam[SICONOS_DPARAM_RESIDU]);
-  }
+    printf("test unsuccessful err =%e  \n", current->options->dparam[SICONOS_DPARAM_RESIDU]);
   free(z);
   free(w);
 
-  solver_options_delete(&options);
-
-  if (solverId == SICONOS_LCP_GAMS)
+  if (current->options->solverId == SICONOS_LCP_GAMS)
   {
-    free(options.solverParameters);
-    options.solverParameters = NULL;
+    free(current->options->solverParameters);
+    current->options->solverParameters = NULL;
   }
-
+  solver_options_delete(current->options);
+  solver_options_nullify(current->options);
   freeLinearComplementarityProblem(problem);
   printf("End of test.\n");
-
-
   return info;
 }
 
-int lcp_test_function_SBM(FILE * f, int solverId)
-{
 
-  int i, info = 0 ;
-  LinearComplementarityProblem* problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
-
-  info = linearComplementarity_newFromFile(problem, f);
-
-  FILE * foutput  =  fopen("./lcp_mmc.verif", "w");
-  info = linearComplementarity_printInFile(problem, foutput);
-  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
-
-
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSGS_SBM);
-
-  //solver_options_set(options->internalSolvers, solverId);
-
-#ifdef HAVE_GAMS_C_API
-  if (solverId == SICONOS_LCP_GAMS)
-  {
-    // no testing for now
-    solver_options_delete(options);
-    free(options);
-    freeLinearComplementarityProblem(problem);
-    fclose(foutput);
-    return 0;
-  }
-#endif
-
-
-
-  double * z = (double *)calloc(problem->size, sizeof(double));
-  double * w = (double *)calloc(problem->size, sizeof(double));
-
-  info = linearComplementarity_driver(problem, z , w, options);
-
-  for (i = 0 ; i < problem->size ; i++)
-  {
-    printf("z[%i] = %12.8e\t,w[%i] = %12.8e\n", i, z[i], i, w[i]);
-  }
-
-  if (!info)
-  {
-    printf("test succeeded err=%e \n", options->dparam[SICONOS_DPARAM_RESIDU]);
-  }
-  else
-  {
-    printf("test unsuccessful err =%e \n", options->dparam[SICONOS_DPARAM_RESIDU]);
-  }
-  free(z);
-  free(w);
-  // info = linearComplementarity_deleteDefaultSolverOptions(&options,solvername);
-
-  solver_options_delete(options);
-  free(options);
-
-  freeLinearComplementarityProblem(problem);
-  fclose(foutput);
-
-  return info;
-
-
-}
-
-
+  

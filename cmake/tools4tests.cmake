@@ -92,7 +92,7 @@ macro(test_windows_setup test_name test_sources)
   # fortran -> gfortran; {c,cpp} -> link.exe
   if(BUILD_AS_CPP)
     set(EXE_FORTRAN FALSE) # Windows only
-    foreach(_file IN LISTS ${test_sources)
+    foreach(_file IN LISTS ${test_sources})
       if(${_file} MATCHES "[.]c$")
         set_source_files_properties(${_file} PROPERTIES LANGUAGE CXX)
       endif()
@@ -191,7 +191,7 @@ function(new_test)
   
   # Set path where exe should be generated
   set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/)
-
+  
   test_windows_setup(${TEST_NAME} ${TEST_SOURCES})
 
   # -- link with current component and its dependencies --
@@ -292,6 +292,9 @@ function(new_tests_collection)
   # This value is replaced in solver call in .c file.
   # Generate source file
   set(generated_driver_name ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}.c)
+  if(BUILD_AS_CPP)
+    set(generated_driver_name ${generated_driver_name}xx)
+  endif()
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${PROBLEM_DRIVER}
     ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name})

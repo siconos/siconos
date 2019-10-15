@@ -15,15 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-
-#include "SOCLCP_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
+#include <assert.h>                                       // for assert
+#include <float.h>                                        // for DBL_EPSILON
+#include <stdio.h>                                        // for fprintf
+#include <stdlib.h>                                       // for exit, EXIT_...
+#include "NonSmoothDrivers.h"                             // for soclcp_driver
+#include "NumericsFwd.h"                                  // for SolverOptions
+#include "SOCLCP_Solvers.h"                               // for soclcp_VI_E...
+#include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "SolverOptions.h"                                // for SolverOptions
+#include "numerics_verbose.h"                             // for numerics_pr...
 
 const char* const   SICONOS_SOCLCP_NSGS_STR = "SOCLCP_NSGS";
 const char* const   SICONOS_SOCLCP_NSGSV_STR = "SOCLCP_NSGSV";

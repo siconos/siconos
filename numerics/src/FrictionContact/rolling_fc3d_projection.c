@@ -16,31 +16,26 @@
  * limitations under the License.
 */
 
-
-#include "rolling_fc3d_Solvers.h"
-#include "projectionOnRollingCone.h"
-#include "rolling_fc3d_compute_error.h"
-#include "op3x3.h"
-
-#include "SiconosBlas.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-#include <string.h>
-#include "SiconosLapack.h"
-#include "sanitizer.h"
-#include "numerics_verbose.h"
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
+#include <assert.h>                            // for assert
+#include <math.h>                              // for sqrt
+#include <stdlib.h>                            // for calloc, realloc, free
+#include <string.h>                            // for memcpy, NULL
+#include "Friction_cst.h"                      // for SICONOS_FRICTION_3D_NS...
+#include "NumericsFwd.h"                       // for SolverOptions, Rolling...
+#include "NumericsMatrix.h"                    // for NumericsMatrix
+#include "RollingFrictionContactProblem.h"     // for RollingFrictionContact...
+#include "SiconosLapack.h"                     // for DGETRF, DGETRS, LA_NOTRANS
+#include "SolverOptions.h"                     // for SolverOptions, solver_...
+#include "debug.h"                             // for DEBUG_PRINTF, DEBUG_END
+#include "numerics_verbose.h"                  // for numerics_printf_verbose
+#include "projectionOnRollingCone.h"           // for projectionOnRollingCone
+#include "rolling_fc3d_local_problem_tools.h"  // for rolling_fc3d_local_pro...
+#include "rolling_fc3d_projection.h"           // for rolling_fc3d_projectio...
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
-#include "NumericsVector.h"
+
 void rolling_fc3d_projection_update(int contact, RollingFrictionContactProblem* problem,
                                     RollingFrictionContactProblem* localproblem, double* reaction, SolverOptions* options)
 {

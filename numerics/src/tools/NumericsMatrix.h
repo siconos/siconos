@@ -22,15 +22,17 @@
 /*!\file NumericsMatrix.h
   \brief Structure definition and functions related to matrix storage in Numerics
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <stdbool.h>
-#include <stdio.h>
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-#include "CSparseMatrix.h" // for CS_INT
-#include "NM_MPI.h"
+#include <assert.h>         // for assert
+#include <stdio.h>          // for size_t, FILE, NULL
+#include <stdlib.h>         // for malloc
+#include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
+#include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
+#include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
+
+#ifndef __cplusplus
+#include <stdbool.h>        // for bool
+#endif
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
@@ -126,7 +128,7 @@ extern "C"
    * \return a pointer to a NumericsMatrix
    */
   RawNumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
-  RawNumericsMatrix* NM_create_from_filename(char *filename);
+  RawNumericsMatrix* NM_create_from_filename(const char *filename);
   RawNumericsMatrix* NM_create_from_file(FILE *file);
 
 
@@ -520,7 +522,7 @@ extern "C"
      \return 0 if the matrix
   */
   RawNumericsMatrix*  NM_new_from_file(FILE *file);
-  RawNumericsMatrix*  NM_new_from_filename(char * filename);
+  RawNumericsMatrix*  NM_new_from_filename(const char * filename);
 
   /**  NM_write_in_file_scilab of the matrix content
    \param M the matrix to be printed

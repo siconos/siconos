@@ -1,17 +1,17 @@
 
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-#include "commonlib.h"
-#include "lumod_dense.h"
-
 #include "SiconosBlas.h"
+#include "lumod_dense.h"
+#include <assert.h>     // for assert
+#include <math.h>       // for fabs
+#include <stdlib.h>     // for abs
+#include "commonlib.h"  // for subvec, MACHINEPREC, TINYNUMBER
 
 /* TODO kill this */
 #define ADDR_OFFSET 1
 
 #ifdef __cplusplus
 #undef restrict
+#include <sys/cdefs.h>  // for __restrict
 #define restrict __restrict
 #endif
 

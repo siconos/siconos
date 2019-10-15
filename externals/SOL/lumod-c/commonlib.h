@@ -1,10 +1,10 @@
 #ifndef HEADER_commonlib
 #define HEADER_commonlib
 
-#include <stdlib.h>
-#include <stdio.h>
-
-#include "SiconosCompat.h"
+#include <stdio.h>          // for size_t, NULL, FILE
+#include <stdlib.h>         // for free
+#include <string.h>         // for memcpy
+#include "SiconosCompat.h"  // for SN_SIZE_T_F
 
 static char SpaceChars[3] = {" " "\7"};
 static char NumChars[14]  = {"0123456789-+."};

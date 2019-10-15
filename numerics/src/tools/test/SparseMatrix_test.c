@@ -1,13 +1,9 @@
-#include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
-#include "CSparseMatrix.h"
+#include <stdio.h>                 // for printf, fclose, fopen, FILE, NULL
+#include "CSparseMatrix.h"         // for cs_dl_entry, CS_INT, cs_dl_print
+#include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
+#include "NumericsMatrix.h"        // for NM_zentry, NM_create, NM_display
+#include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
 
-#include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
-#include "CSparseMatrix.h"
-#include "NumericsVector.h"
-
-#include "CSparseMatrix.h"
 #ifdef SICONOS_HAS_MPI
 #include <mpi.h>
 #endif

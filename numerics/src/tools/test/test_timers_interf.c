@@ -2,16 +2,15 @@
 /* to be compared with :
    valgrind --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes  --simulate-cache=yes */
 
-#include "SiconosConfig.h"
+#include "SiconosConfig.h" // for WITH_TIMERS // IWYU pragma: keep
 
 #ifdef WITH_TIMERS
 #define TIMER_FFTW_CYCLE
 #endif
 
-#include <stdlib.h>
-#include <math.h>
-#include "timers_interf.h"
-
+#include <math.h>           // for pow
+#include <stdlib.h>         // for free, malloc, exit
+#include "timers_interf.h"  // for DECL_TIMER, PRINT_ELAPSED, START_TIMER
 
 #define SIZE 1000000
 

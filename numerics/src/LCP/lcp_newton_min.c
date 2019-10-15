@@ -16,19 +16,19 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
+#include <assert.h>                        // for assert
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_new...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "lcp_cst.h"                       // for SICONOS_LCP_NEWTONMIN
+#include "numerics_verbose.h"              // for verbose
+#include "SiconosBlas.h"                   // for cblas_daxpy, cblas_dcopy
+#include "SiconosLapack.h"                 // for lapack_int, DGESV
 
-#include "SiconosLapack.h"
-#include <assert.h>
-#include "numerics_verbose.h"
 void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */

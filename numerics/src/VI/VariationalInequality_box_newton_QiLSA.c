@@ -16,12 +16,15 @@
  * limitations under the License.
 */
 
-#include "VariationalInequality_Solvers.h"
-#include "VariationalInequality_computeError.h"
-#include "Qi_merit.h"
-#include "SiconosSets.h"
-#include "Newton_methods.h"
-#include "VI_Newton.h"
+#include "Newton_methods.h"                      // for functions_LSA, init_...
+#include "NumericsFwd.h"                         // for VariationalInequality
+#include "Qi_merit.h"                            // for Jac_F_Qi, phi_Qi
+#include "SiconosSets.h"                         // for box_constraints
+#include "SolverOptions.h"                       // for SolverOptions
+#include "VI_Newton.h"                           // for VI_compute_F, VI_com...
+#include "VariationalInequality.h"               // for VariationalInequality
+#include "VariationalInequality_Solvers.h"       // for variationalInequalit...
+#include "VariationalInequality_computeError.h"  // for variationalInequalit...
 
 void VI_compute_F(void* data_opaque, double* x, double* F)
 {

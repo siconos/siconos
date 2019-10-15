@@ -15,19 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-//#include "SolverOptions.h"
-//#include "MixedComplementarityProblem.h"
-#include <assert.h>
-
-#include "MCP_Solvers.h"
-#include "MCP_cst.h"
-
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
-
-#include <stdio.h>
-#include <stdlib.h>
+#include <assert.h>            // for assert
+#include <stdio.h>             // for fprintf, NULL, stderr
+#include <stdlib.h>            // for exit, EXIT_FAILURE
+#include "MCP_Solvers.h"       // for mcp_newton_FB_FBLSA, mcp_newton_min_FBLSA
+#include "MCP_cst.h"           // for SICONOS_MCP_OLD_FB, SICONOS_MCP_NEWTON...
+#include "NonSmoothDrivers.h"  // for mcp_driver, mcp_old_driver
+#include "NumericsFwd.h"       // for SolverOptions, MixedComplementarityPro...
+#include "SolverOptions.h"     // for SolverOptions
+#include "numerics_verbose.h"  // for numerics_error
 
 const char* const SICONOS_MCP_OLD_FB_STR = "NewtonFB";
 const char* const SICONOS_MCP_NEWTON_FB_FBLSA_STR = "MCP Newton FBLSA";

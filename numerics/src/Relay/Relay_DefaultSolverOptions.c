@@ -15,17 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include "Relay_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "relay_cst.h"
-#include "numerics_verbose.h"
 
-int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int solverId)
+#include "NumericsFwd.h"       // for SolverOptions
+#include "Relay_Solvers.h"     // for relay_avi_caoferris_setDefaultSolverOp...
+#include "numerics_verbose.h"  // for numerics_error
+#include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
+
+int relay_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {
 
   int info = -1;
@@ -43,7 +39,7 @@ int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options,
   }
   case SICONOS_RELAY_ENUM:
   {
-    info =    relay_enum_setDefaultSolverOptions(problem, options);
+    info =    relay_enum_setDefaultSolverOptions(options);
     break;
   }
   case SICONOS_RELAY_PATH:

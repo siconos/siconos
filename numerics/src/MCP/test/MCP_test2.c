@@ -16,15 +16,15 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "MCP_cst.h"
-#include "MixedComplementarityProblem.h"
-#include "SolverOptions.h"
-#include "MCP_Solvers.h"
-#include "NumericsVerbose.h"
-#include "NumericsMatrix.h"
+#include <stdio.h>                        // for printf, NULL
+#include <stdlib.h>                       // for free, malloc, calloc
+#include "MCP_Solvers.h"                  // for mcp_old_driver_init, mcp_ol...
+#include "MCP_cst.h"                      // for SICONOS_MCP_OLD_FB
+#include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem...
+#include "NonSmoothDrivers.h"             // for mcp_old_driver
+#include "NumericsFwd.h"                  // for MixedComplementarityProblem...
+#include "NumericsVerbose.h"              // for numerics_set_verbose
+#include "SolverOptions.h"                // for SolverOptions, solver_optio...
 static double * M;
 static double * q;
 

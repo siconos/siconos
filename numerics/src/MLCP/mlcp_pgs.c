@@ -15,16 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include <float.h>                              // for DBL_EPSILON
+#include <stdio.h>                              // for printf
+#include <stdlib.h>                             // for free, malloc
+#include <math.h>                               // for fabs
+#include "MLCP_Solvers.h"                       // for mlcp_compute_error
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NumericsFwd.h"                        // for MixedLinearComplement...
+#include "SolverOptions.h"                      // for SolverOptions
+#include "SiconosBlas.h"                              // for cblas_ddot
 
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
 /*
  *
  * double *z : size n+m

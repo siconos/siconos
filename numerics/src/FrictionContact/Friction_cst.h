@@ -152,6 +152,7 @@ extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLo
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization_STR;
 extern const char* const   SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR;
+extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR;
 extern const char* const   SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder_STR;
 extern const char* const   SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR;

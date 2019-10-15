@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2019 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,99 +15,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "frictionContact_test_utils.h"
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_HYBR...
+#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "test_utils.h"                  // for TestCase
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
+  int solvers[] = {SICONOS_GLOBAL_FRICTION_3D_NSGS_WR, SICONOS_GLOBAL_FRICTION_3D_PROX_WR,
+                   SICONOS_GLOBAL_FRICTION_3D_DSFP_WR, SICONOS_GLOBAL_FRICTION_3D_TFP_WR,
+                   SICONOS_GLOBAL_FRICTION_3D_ADMM_WR};
+  int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
-
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSGS_WR);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_PROX_WR);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_DSFP_WR);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-    
-  /* for ( int d =0; d <n_data_1; d++) */
-  /* { */
-  /*   int e=0; */
-  /*   test_nsgs[n][e++] = data_collection_1[d]; */
-  /*   test_nsgs[n][e++] = "0"; */
-  /*   test_nsgs[n][e] = (char *)malloc(50*sizeof(char)); */
-  /*   sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR); */
-  /*   test_nsgs[n][e++] = "1e-5"; */
-  /*   test_nsgs[n][e++] = "10000"; */
-  /*   test_nsgs[n][e++] = "---";  */
-  /*   n++; */
-  /* } */
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_TFP_WR);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM_WR);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-
+  *number_of_tests = n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
-    
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+  int current = 0;
+
+  // tol and maxiter used in tests are the same for all solvers.
+  int dpos[] = {1, SICONOS_DPARAM_TOL};
+  double dparam[] = {1e-5};
+  int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+  int iparam[] = {10000}; 
+
+
+  for(int s=0;s<n_solvers;++s)
+    {
+      for(int d =0; d <n_data; d++)
+        {
+          // set tol and maxiter, default values for other parameters.
+          build_gfc3d_test(data_collection[d],
+                           solvers[s], dpos, dparam, ipos, iparam,
+                           -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+        }
+
+    }
+
+  tests_list[7].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_Example1.dat 
+  tests_list[9].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
+
+  return tests_list;
 
 }

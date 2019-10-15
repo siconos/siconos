@@ -15,37 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include <assert.h>
-
-#include "SiconosLapack.h"
-#include "gfc3d_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "fc3d_Solvers.h"
-#include "cond.h"
-#include "pinv.h"
-#include <string.h>
-#include "gfc3d_compute_error.h"
-
-#include "NumericsSparseMatrix.h"
-#include "NumericsVector.h"
-
-#include "sanitizer.h"
-#include "numerics_verbose.h"
-//#define TEST_COND
+#include <assert.h>                               // for assert
+#include <stdio.h>                                // for printf, fclose, fopen
+#include <stdlib.h>                               // for malloc, free, exit
+#include "FrictionContactProblem.h"               // for FrictionContactProblem
+#include "Friction_cst.h"                         // for SICONOS_GLOBAL_FRIC...
+#include "GlobalFrictionContactProblem.h"         // for GlobalFrictionConta...
+#include "NumericsFwd.h"                          // for SolverOptions, Nume...
+#include "NumericsMatrix.h"                       // for NumericsMatrix, NM_...
+#include "NumericsSparseMatrix.h"                 // for NumericsSparseMatrix
+#include "NumericsVector.h"                       // for NV_write_in_file_py...
+#include "SolverOptions.h"                        // for SolverOptions
+#include "SparseBlockMatrix.h"                    // for SBM_gemv, SBM_free
 #define OUTPUT_DEBUG */
+#include "debug.h"                                // for DEBUG_EXPR, DEBUG_P...
+#include "fc3d_Solvers.h"                         // for fc3d_DeSaxceFixedPo...
+#include "fc3d_nonsmooth_Newton_AlartCurnier.h"   // for fc3d_nonsmooth_Newt...
+#include "gfc3d_Solvers.h"                        // for gfc3d_DeSaxceFixedP...
+#include "gfc3d_nonsmooth_Newton_AlartCurnier.h"  // for gfc3d_nonsmooth_New...
+#include "numerics_verbose.h"                     // for verbose, numerics_p...
+#include "SiconosBlas.h"                                // for cblas_dcopy, cblas_...
+#include "sanitizer.h"                            // for cblas_dcopy_msan
+//#define TEST_COND
 
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
-
-//#define USE_LAPACK_DGETRS
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

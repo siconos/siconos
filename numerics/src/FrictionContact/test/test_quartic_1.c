@@ -16,43 +16,35 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ONECONTA...
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
+  *number_of_tests = 2; //n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  
+  int current = 0;
+  
   {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
+    int d = 8; // KaplasTower-i1061-4.hdf5.dat
+    // Quartic, default
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, NULL, NULL, NULL, NULL,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
   }
+  {
+    int d = 9; // OneObject-i100000-499.hdf5.dat
+    // Quartic, default
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, NULL, NULL, NULL, NULL,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+  }
+  *number_of_tests = current;
+  return tests_list;
 
-  int n =0;
-  int e=0;
-  int d=8;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  d=9;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
-  
 }

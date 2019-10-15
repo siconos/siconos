@@ -15,28 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-/* #ifndef MEXFLAG */
-/* #include "NonSmoothDrivers.h" */
-/* #endif */
-#include <assert.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "SparseBlockMatrix.h"
-#include "SiconosBlas.h"
-
-#include "sanitizer.h"
+#include <assert.h>                        // for assert
+#include <stdio.h>                         // for fprintf, NULL, printf, stderr
+#include <stdlib.h>                        // for malloc, free, exit, EXIT_F...
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_dri...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
+#include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
-#include "debug.h"
-#include "numerics_verbose.h"
+#include "debug.h"                         // for DEBUG_BEGIN, DEBUG_END
+#include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_NSGS_LO...
+#include "numerics_verbose.h"              // for numerics_error, verbose
+#include "sanitizer.h"                     // for cblas_dcopy_msan
+
 void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
 

@@ -15,13 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include <assert.h>                  // for assert
+#include <math.h>                    // for sqrt
+#include <stdio.h>                   // for printf
+#include <stdlib.h>                  // for free, malloc, calloc, NULL
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_2D_CPG
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
+#include "fc2d_Solvers.h"            // for fc2d_projf, fc2d_projc, fc2d_cpg
+#include "numerics_verbose.h"        // for verbose
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot, cblas_d...
 
-#include "fc2d_Solvers.h"
-#include "NumericsMatrix.h"
-#include <assert.h>
-#include <math.h>
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
 void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;

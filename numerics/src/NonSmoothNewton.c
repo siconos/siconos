@@ -15,17 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "numerics_verbose.h"
 #include "NonSmoothNewton.h"
-#include "SolverOptions.h"
-#include "SiconosLapack.h"
-#include "NumericsMatrix.h"
-
-
-#include "Newton_methods.h"
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdlib.h>            // for free, malloc, NULL, calloc
+#include "Newton_methods.h"    // for SICONOS_IPARAM_STOPPING_CRITERION, SIC...
+#include "NumericsMatrix.h"    // for NM_create, NM_free, NM_DENSE, Numerics...
+#include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
+#include "math.h"              // for fmax, pow
+#include "numerics_verbose.h"  // for numerics_printf, numerics_printf_verbose
+#include "stdio.h"             // for fprintf, stderr
+#include "stdlib.h"            // for exit, EXIT_FAILURE
+#include "SiconosBlas.h"             // for cblas_dnrm2, cblas_daxpy, cblas_dscal
+#include "SiconosLapack.h"     // for lapack_int, DGESV
 
 /* #define DEBUG_MESSAGES */
 #include "debug.h"

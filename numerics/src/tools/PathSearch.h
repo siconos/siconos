@@ -22,8 +22,10 @@
 #ifndef PATHSEARCH_H
 #define PATHSEARCH_H
 
-#include "NMS.h"
-#include "Newton_methods.h"
+#include "NMS.h"             // for NMS_data
+#include "Newton_methods.h"  // for functions_LSA
+#include "NumericsFwd.h"     // for SolverOptions
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** struct ncp_pathsearch_data NCP_PathSearch.h
  * solver specific data
@@ -33,8 +35,6 @@ typedef struct
   NMS_data* data_NMS; /**< struct for the NMS scheme */
   functions_LSA* lsa_functions; /**< functions for the search */
 } pathsearch_data;
-
-#include "SiconosConfig.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

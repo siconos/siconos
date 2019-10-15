@@ -16,14 +16,17 @@
  * limitations under the License.
 */
 
-#include "NCP_FixedP.h"
-#include "NonSmoothNewton.h"
-#include "fc3d_Solvers.h"
-#include "fc3d_2NCP_Glocker.h"
-#include "SiconosBlas.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include "numerics_verbose.h"
+#include <stdio.h>                      // for NULL, fprintf, stderr
+#include <stdlib.h>                     // for exit, EXIT_FAILURE
+#include "Friction_cst.h"               // for SICONOS_FRICTION_3D_NCPGlocke...
+#include "NCP_FixedP.h"                 // for Fixe
+#include "NumericsFwd.h"                // for SolverOptions, FrictionContac...
+#include "SolverOptions.h"              // for SolverOptions
+#include "fc3d_2NCP_Glocker.h"          // for NCPGlocker_initialize, comput...
+#include "fc3d_NCPGlockerFixedPoint.h"  // for F_GlockerFixedP, fc3d_FixedP_...
+#include "fc3d_Solvers.h"               // for FreeSolverPtr, PostSolverPtr
+#include "SiconosBlas.h"                      // for cblas_dcopy
+
 /* Pointer to function used to update the solver, to formalize the local problem for example. */
 typedef void (*UpdateSolverPtr)(int, double*);
 

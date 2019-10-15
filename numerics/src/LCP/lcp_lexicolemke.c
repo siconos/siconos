@@ -16,28 +16,23 @@
  * limitations under the License.
  */
 
-#include <math.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <float.h>
-#include "pivot-utils.h"
-#include "numerics_verbose.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "numerics_verbose.h"
+#include <assert.h>                        // for assert
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for free, malloc, calloc
+#include "LCP_Solvers.h"                   // for lcp_lexicolemke, linearCom...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-
 //#define MAX_PIVOT
 //#define INV_PIVOT
-
-#include "debug.h"
+#include "debug.h"                         // for DEBUG_EXPR_WE, DEBUG_PRINT
+#include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_PIVOTIN...
+#include "numerics_verbose.h"              // for verbose
 
 void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , double *wlem , int *info , SolverOptions* options)
 {

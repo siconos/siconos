@@ -16,55 +16,43 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_NSGS
+#include "frictionContact_test_utils.h"  // for build_gfc3d_test, build_test...
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
+  int n_solvers = 2;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  
+  int current = 0;
+  for(int d =0; d <n_data; d++)
+    {
+      int dpos[] = {1, SICONOS_DPARAM_TOL};
+      double dparam[] = {1.e-12};
+      double internal_dparam[] = {1e-14};
+      int internal_ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+      int internal_iparam[] = {50};
+      build_rfc3d_test(data_collection[d],
+                       SICONOS_ROLLING_FRICTION_3D_NSGS, dpos, dparam, NULL, NULL,
+                       SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
+                       dpos, internal_dparam, internal_pos, internal_iparam, &tests_list[current++]);
+    }
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+  for(int d =0; d <n_data; d++)
+    {
+      int dpos[] = {1, SICONOS_DPARAM_TOL};
+      double dparam[] = {1.e-10};
+      build_rfc3d_test(data_collection[d],
+                          SICONOS_ROLLING_FRICTION_3D_NSGS, dpos, dparam, NULL, NULL,
+                          SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone, NULL,  NULL, NULL, NULL,
+                          &tests_list[current++]);
+    }
 
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_ROLLING_FRICTION_3D_NSGS);
-    test_nsgs[n][e++] = "1.e-12";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-    test_nsgs[n][e++] = "1e-14";
-    test_nsgs[n][e++] = "50";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_ROLLING_FRICTION_3D_NSGS);
-    test_nsgs[n][e++] = "1.e-10";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+  *number_of_tests = current;
+  return tests_list;
 
 }

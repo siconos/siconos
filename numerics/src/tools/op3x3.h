@@ -49,6 +49,7 @@
 
 #ifdef __cplusplus
 #undef restrict
+#include <sys/cdefs.h>  // for __restrict
 #define restrict __restrict
 #endif
 

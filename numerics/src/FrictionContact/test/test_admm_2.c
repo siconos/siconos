@@ -16,111 +16,62 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ADMM_IPA...
+#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_admm = (char ***)malloc(n_test*sizeof(char **));
-
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_admm[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
-
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-
-    int e=0;
-    test_admm[n][e++] = data_collection_1[d];
-    test_admm[n][e++] = "0";
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM);
-    test_admm[n][e++] = "1e-5";
-    test_admm[n][e++] = "10000";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "iparam";
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO );
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_NORM_INF);
-    test_admm[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_admm[n][e++] = data_collection_1[d];
-    test_admm[n][e++] = "0";
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM);
-    test_admm[n][e++] = "1e-5";
-    test_admm[n][e++] = "10000";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "iparam";
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING);
-    test_admm[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_admm[n][e++] = data_collection_1[d];
-    test_admm[n][e++] = "0";
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM);
-    test_admm[n][e++] = "1e-5";
-    test_admm[n][e++] = "10000";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "iparam";
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d",  SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY );
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY);
-    test_admm[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_admm[n][e++] = data_collection_1[d];
-    test_admm[n][e++] = "0";
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM);
-    test_admm[n][e++] = "1e-5";
-    test_admm[n][e++] = "10000";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "0";
-    test_admm[n][e++] = "iparam";
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d",  SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING);
-    test_admm[n][e++] = "iparam";
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d",  SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY );
-    test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY);
-    test_admm[n][e++] = "---"; 
-    n++;
-  }
+  int n_solvers = 3;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
 
+
+  int current = 0;
+  for(int d =0; d <n_data; d++)
+    {
+      // rho strat = norm inf
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-5};
+      int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY};
+      int iparam[] = {10000, SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF};
+      // 
+      build_friction_test(data_collection[d],
+                 SICONOS_FRICTION_3D_ADMM, dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
   
+  for(int d =0; d <n_data; d++)
+    {
+      // rho strat = residual balancing
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-5};
+      int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY};
+      int iparam[] = {10000, SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING};
+      // 
+      build_friction_test(data_collection[d],
+                 SICONOS_FRICTION_3D_ADMM, dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
+  
+  for(int d =0; d <n_data; d++)
+    {
+      // forced symm
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-5};
+      int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY};
+      int iparam[] = {10000, SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY};
+      // 
+      build_friction_test(data_collection[d],
+                 SICONOS_FRICTION_3D_ADMM, dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
 
-  test_admm[n][0] ="---";
-  return test_admm;
+  *number_of_tests = current;
+  return tests_list;
 
 }

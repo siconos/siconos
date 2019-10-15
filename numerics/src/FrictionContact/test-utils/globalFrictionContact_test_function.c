@@ -17,56 +17,35 @@
 */
 
 #define _XOPEN_SOURCE 700
-#include <string.h>
 
-#if (__linux ||  __APPLE__)
-#elif _MSC_VER
-#define strdup _strdup
-#else
-static inline char* strdup(char* src)
-{
-  size_t len = strlen(src) + 1;
-  char* dest = (char*)malloc(len * sizeof(char));
-  strcpy(dest, src, len);
-  return dest;
-}
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include "CSparseMatrix.h"
-
-// avoid a conflict with old csparse.h in case fclib includes it
-#define _CS_H
-
-#include "NonSmoothDrivers.h"
 #include "globalFrictionContact_test_function.h"
-#include "gfc3d_Solvers.h"
-#include "GlobalFrictionContactProblem.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
-#include "NumericsVector.h"
-#include "SiconosCompat.h"
+#include <math.h>                          // for isfinite
+#include <stdio.h>                         // for printf, fclose, fopen, FILE
+#include <stdlib.h>                        // for malloc, free
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "gfc3d_Solvers.h"  // for GlobalFrictionContactProblem
+#include "NonSmoothDrivers.h"              // for gfc3d_driver
+#include "NumericsFwd.h"                   // for GlobalFrictionContactProblem
+#include "NumericsMatrix.h"                // for NumericsMatrix
+// #include "NumericsVector.h"                // for NV_display
+#include "SolverOptions.h"                 // for solver_options_delete, sol...
+#include "test_utils.h"                    // for TestCase
 
-#include <string.h>
 #if defined(WITH_FCLIB)
 #include <fclib.h>
 #include <fclib_interface.h>
+#include <string.h>
 #endif
 
-#ifdef __cplusplus
-using namespace std;
-#endif
-
-int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
+int globalFrictionContact_test_function(TestCase* current)
 {
 
   int k, info = -1 ;
+  GlobalFrictionContactProblem* problem = (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
   /* numerics_set_verbose(1); */
-  GlobalFrictionContactProblem* problem = globalFrictionContact_newFromFile(f);
-  /* globalFrictionContact_display(problem); */
+
+  info = globalFrictionContact_newFromFilename(problem, current->filename);
+  globalFrictionContact_display(problem);
 
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
@@ -97,36 +76,18 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   {
     info = gfc3d_driver(problem,
 			reaction , velocity, globalvelocity,
-			options);
+			current->options);
   }
-  int print_size = 10;
-
-  if  (dim * NC >= print_size)
-  {
-    printf("First values (%i)\n", print_size);
-    for (k = 0 ; k < print_size; k++)
-    {
-      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
-    }
-    printf(" ..... \n");
-    for (k = 0 ; k < print_size; k++)
-  {
-    printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
-  }
-  }
-  else
-  {
-    for (k = 0 ; k < dim * NC; k++)
-    {
-      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
-    }
-    printf("\n");
-    for (k = 0 ; k < dim*NC; k++)
-    {
-      printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
-    }
-  }
-  printf("\n");
+  /* printf("\n"); */
+  /* for (k = 0 ; k < dim * NC; k++) */
+  /* { */
+  /*   printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]); */
+  /* } */
+  /* for (k = 0 ; k < n; k++) */
+  /* { */
+  /*   printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]); */
+  /* } */
+  /* printf("\n"); */
 
   for (k = 0; k < dim * NC; ++k)
   {
@@ -140,19 +101,19 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 
   if (!info)
   {
-    printf("test successful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
+    printf("test succeeded\n");
   }
   else
   {
-    printf("test unsuccessful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
-    //getchar();
+    printf("test unsuccessful\n");
   }
   free(reaction);
   free(velocity);
   free(globalvelocity);
   fclose(foutput);
-
-  globalFrictionContact_free(problem);
+  solver_options_delete(current->options);
+  solver_options_nullify(current->options);
+  freeGlobalFrictionContactProblem(problem);
 
 
   return info;
@@ -175,7 +136,7 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
 
 
     /* remove the extension */
-    char * path_copy = strdup(path);
+    const char * path_copy = path;
     printf("path_copy = %s \n", path_copy);
 
 
@@ -238,10 +199,6 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
       printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
     }
     printf(" ..... \n");
-    for (k = 0 ; k < print_size; k++)
-  {
-    printf("GlocalVelocity[%i] = %12.8e\n", k, global_velocity[k]);
-  }
   }
   else
   {
@@ -260,21 +217,61 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
 
   if (!info)
   {
-    printf("test successful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
+    printf("test successful, residual = %g\n", options->dparam[1]);
   }
   else
   {
-    printf("test unsuccessful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
-    //getchar();
+    printf("test unsuccessful, residual = %g\n", options->dparam[1]);
   }
   free(reaction);
   free(velocity);
   free(global_velocity);
 
-  globalFrictionContact_free(problem);
+  freeGlobalFrictionContactProblem(problem);
 
 
   return info;
 
 }
 #endif
+
+void build_gfc3d_test(const char * filename,
+                int solver_id, int* d_ind, double* dparam, int * i_ind, int* iparam,
+                int internal_solver_id, int * i_d_ind, double * internal_dparam, int * i_i_ind, int * internal_iparam,
+                TestCase* testname)
+{
+  // reference file name
+  testname->filename = filename;
+  // By default, test is expected to succeed.
+  testname->will_fail = 0;
+
+  // Set solver options to default.
+  testname->options = (SolverOptions *)malloc(sizeof(SolverOptions));
+  gfc3d_setDefaultSolverOptions(testname->options, solver_id);
+  // Fill iparam and dparam in.
+  if(iparam)
+    for(int i=0; i<i_ind[0]; ++i)
+      testname->options->iparam[i_ind[i+1]] = iparam[i];
+
+  // dparam
+  if(dparam)
+    for(int i=0; i<d_ind[0]; ++i)
+      testname->options->dparam[d_ind[i+1]] = dparam[i];
+
+  // Internal solver setup
+  if(internal_solver_id>0)
+    {
+      testname->options->internalSolvers[0].solverId=internal_solver_id;
+      // internal iparam
+      if(internal_iparam)
+        for(int i=0; i<i_i_ind[0]; ++i)
+          testname->options->internalSolvers[0].iparam[i_i_ind[i+1]] = internal_iparam[i];
+      // internal dparam
+      if(internal_dparam)
+        for(int i=0; i<i_d_ind[0]; ++i)
+          testname->options->internalSolvers[0].dparam[i_d_ind[i+1]] = internal_dparam[i];
+    }
+}
+
+
+

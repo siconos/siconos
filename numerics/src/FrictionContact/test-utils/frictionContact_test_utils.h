@@ -18,32 +18,42 @@
 #ifndef FRICTIONCONTACT_TEST_UTILS_H
 #define FRICTIONCONTACT_TEST_UTILS_H
 
+#include "SiconosConfig.h" // for BUILD_AS_CPP
 #include "GAMSlink.h"
 #include "Friction_cst.h"
+#include "test_utils.h" // for TestCase
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-  int frictionContact_test_function(FILE * f, SolverOptions * options);
+  /** Solve lcp using parameters and reference from a pre-defined TestCase
+      return 1 if the test has succeeded.
+  */
+  int frictionContact_test_function(TestCase*);
+
+
+  
   void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId);
 
 #if defined(WITH_FCLIB)
   int frictionContact_test_function_hdf5(const char * path, SolverOptions * options);
   int gfc3d_test_function_hdf5(const char* path, SolverOptions* options);
 #endif
+ 
+  TestCase * build_test_collection(int n_data, const char ** data_collection, int*);
 
-  /** Defines the list of data files
-      returns an array of char
-  */
-  char ** data_collection(void);
+  void build_friction_test(const char *,
+                  int solver_id, int* d_ind, double* dparam, int * i_ind, int* iparam,
+                  int internal_solver_id, int * i_d_ind, double * internal_dparam, int * i_i_ind, int * internal_iparam,
+                  TestCase* testname);
+
+  void build_gfc3d_test(const char * filename,
+                        int solver_id, int* d_ind, double* dparam, int * i_ind, int* iparam,
+                        int internal_solver_id, int * i_d_ind, double * internal_dparam, int * i_i_ind, int * internal_iparam,
+                        TestCase* testname);
   
-  /** Defines the set of tests (including parameters)
-      returns an 'array' of tests, some kind of dict.
-  */
-  char *** test_collection(int, char **);
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP) 
 }
 #endif

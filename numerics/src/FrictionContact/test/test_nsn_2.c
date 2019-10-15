@@ -16,146 +16,73 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
+#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_test_colle...
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=200;
-  int n_entry = 50;
-  char *** test_nsn = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
+  *number_of_tests = 9; //n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+
+  int solvers[] = {SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_AC_TEST,
+                   SICONOS_FRICTION_3D_NSN_FB, SICONOS_FRICTION_3D_NSN_NM};
+  int current = 0;
+
+  int d= 7; // RockPile_tob1.dat
+  for(int s=0;s<4;++s)
+    {
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {5e-2};
+      int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+      int iparam[] = {1000};
+      // 
+      build_friction_test(data_collection[d],
+                 solvers[s], dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
+
+  // AC_TEST expected to fail
+  tests_list[1].will_fail= 1;
+  
   {
-    test_nsn[n] = (char **)malloc(n_entry*sizeof(char *));
+    d = 8; // KaplasTower-i1061-4.hdf5.dat
+    int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+    double dparam[] = {1e-5};
+    int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 1};
+    int iparam[] = {100, 1};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_NSN_AC_TEST, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+
+    //#ifdef WITH_UMFPACK
+    // expected to fail
+    tests_list[current - 1].will_fail = 1;
+    //#endif
   }
 
-  int n =0;
-  int d= 7;
-
-  int e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "5e-2";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC_TEST);
-  test_nsn[n][e++] = "5e-2";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_FB);
-  test_nsn[n][e++] = "5e-2";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_NM);
-  test_nsn[n][e++] = "5e-2";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  d=8;
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "1e-5";
-  test_nsn[n][e++] = "100";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "iparam";
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e++] = "1";
-  
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC_TEST);
-  test_nsn[n][e++] = "1e-5";
-  test_nsn[n][e++] = "100";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "iparam";
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "5e-2";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC_TEST);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "10";
-  test_nsn[n][e++] = "---";
-  n++;
-
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_FB);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_NM);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-
-#ifdef WITH_UMFPACK
-  test_nsn[5][1] = "1";
-  test_nsn[8][1] = "1";
-#endif
-
-
-
-  
-  test_nsn[n][0] ="---";
-  return test_nsn;
+  d = 8;// KaplasTower-i1061-4.hdf5.dat
+  for(int s=0;s<4;++s)
+    {
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-3};
+      int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+      int iparam[] = {1000};
+      // 
+      build_friction_test(data_collection[d],
+                 solvers[s], dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
+  //#ifdef WITH_UMFPACK
+  // AC_TEST for KaplasTower expected to fail
+  tests_list[6].will_fail = 1;
+  //#endif  
+  *number_of_tests = current;
+  return tests_list;
 
 }

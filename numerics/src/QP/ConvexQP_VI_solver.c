@@ -16,22 +16,22 @@
  * limitations under the License.
 */
 
-#include "ConvexQP.h"
-#include "ConvexQP_as_VI.h"
-#include "VariationalInequality_Solvers.h"
-#include "ConvexQP_Solvers.h"
-#include "ConvexQP_computeError.h"
-#include "SiconosCompat.h"
-
-#include "SolverOptions.h"
-#include "numerics_verbose.h"
-
-  
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <math.h>                           // for fabs
+#include <stdio.h>                          // for printf
+#include <stdlib.h>                         // for free, malloc
+#include "ConvexQP.h"                       // for ConvexQP
+#include "ConvexQP_Solvers.h"               // for convexQP_VI_solver, conve...
+#include "ConvexQP_as_VI.h"                 // for ConvexQP_as_VI, Function_...
+#include "ConvexQP_computeError.h"          // for convexQP_compute_error_re...
+#include "ConvexQP_cst.h"                   // for SICONOS_CONVEXQP_VI_FPP
+#include "NumericsFwd.h"                    // for SolverOptions, Variationa...
+#include "NSSTools.h"                    // for min
+#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
+#include "VI_cst.h"                         // for SICONOS_VI_EG, SICONOS_VI...
+#include "VariationalInequality.h"          // for VariationalInequality
+#include "VariationalInequality_Solvers.h"  // for variationalInequality_set...
+#include "numerics_verbose.h"               // for numerics_error, verbose
+#include "SiconosBlas.h"                          // for cblas_dnrm2
 
 const char* const   SICONOS_CONVEXQP_VI_FPP_STR = "CONVEXQP VI FPP";
 const char* const   SICONOS_CONVEXQP_VI_EG_STR = "CONVEXQP VI EG";

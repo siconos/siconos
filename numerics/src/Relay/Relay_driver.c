@@ -16,20 +16,19 @@
  * limitations under the License.
 */
 
+#include <stdio.h>             // for fprintf, NULL, printf, stderr
+#include <stdlib.h>            // for exit, EXIT_FAILURE
+#include "NumericsFwd.h"       // for SolverOptions, RelayProblem, NumericsM...
+#include "NumericsMatrix.h"    // for NumericsMatrix
+#include "RelayProblem.h"      // for RelayProblem
+#include "Relay_Solvers.h"     // for relay_avi_caoferris, relay_avi_caoferr...
+#include "SolverOptions.h"     // for SolverOptions, solver_options_id_to_name
+#include "numerics_verbose.h"  // for numerics_error, verbose
+#include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #ifndef MEXFLAG
-#include "NonSmoothDrivers.h"
+#include "NonSmoothDrivers.h" // for relay_driver
 #endif
-#include "RelayProblem.h"
-#include "SolverOptions.h"
-#include "Relay_Solvers.h"
-#include "relay_cst.h"
-#include "NumericsMatrix.h"
-#include <time.h>
-#include "numerics_verbose.h"
 
 const char* const   SICONOS_RELAY_PGS_STR = "RELAY_PGS";
 const char* const   SICONOS_RELAY_PATH_STR = "RELAY_PATH";

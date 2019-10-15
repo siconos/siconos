@@ -19,10 +19,12 @@
 #ifndef QI_MERIT_H
 #define QI_MERIT_H
 
-#include "SiconosConfig.h"
-#include "NumericsMatrix.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix
+
 
 #ifdef __cplusplus
+#include <sys/cdefs.h>      // for __restrict
 #define restrict __restrict
 #endif
 

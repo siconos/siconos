@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 #ifndef GLOBALFRICTIONCONTACTPROBLEM_H
 #define GLOBALFRICTIONCONTACTPROBLEM_H
 
@@ -22,9 +22,10 @@
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-#include <stdio.h>
+#include <stdio.h>        // for NULL, FILE
+#include "NumericsFwd.h"  // for GlobalFrictionContactProblem, NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
 
 /** \struct GlobalFrictionContactProblem GlobalFrictionContactProblem.h
  *
@@ -56,7 +57,7 @@
  *
  * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
  *
- */
+*/
 struct GlobalFrictionContactProblem
 {
   /** dimension \f$d=2\f$ or \f$d=3\f$ of the contact space (3D or 2D ) */
@@ -67,7 +68,7 @@ struct GlobalFrictionContactProblem
       a matrix with \f$ n\f$ stored in NumericsMatrix structure */
   NumericsMatrix* M;
   /**  \f${H} \in {{\mathrm{I\!R}}}^{n \times m} \f$,
-       a matrix with \f$ m = d  n_c\f$ stored in NumericsMatrix structure */
+      a matrix with \f$ m = d  n_c\f$ stored in NumericsMatrix structure */
   NumericsMatrix* H;
   /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double* q;
@@ -85,25 +86,27 @@ extern "C"
 {
 #endif
   
-  /** display a GlobalFrictionContactProblem
-   * \param problem the problem to display
+  /** displays the problem onto screen 
+   * \param[in] problem to be displayed
    */
   void globalFrictionContact_display(GlobalFrictionContactProblem*  problem);
 
-  /** print a GlobalFrictionContactProblem in a file (numerics .dat format)
-   * \param problem the problem to print out
-   * \param file the dest file
-   * \return 0 if successfull
+
+  /** Saves problem struct into a file.
+      \param[in] problem structure
+      \param[in] file, file descriptor
+      \return file status (1 if everything has worked properly)
    */
   int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file);
-  
-  /** print a GlobalFrictionContactProblem in a file (numerics .dat format) from its filename
-   * \param problem the problem to print out
-   * \param filename the dest file
-   * \return 0 if successfull
+
+
+  /** Saves problem struct into a file.
+      \param[in] problem structure
+      \param[in] filename, name of the input file
+      \return file status (1 if everything has worked properly)
    */
   int globalFrictionContact_printInFileName(GlobalFrictionContactProblem*  problem,
-                                            char * filename);
+                                            const char * filename);
 
   /** read and create a GlobalFrictionContactProblem in a file (numerics .dat format)
    * \param problem the problem to read
@@ -112,6 +115,9 @@ extern "C"
    */
   GlobalFrictionContactProblem * globalFrictionContact_newFromFile(FILE* file);
 
+  /** nullify all pointer components of the problem structure
+      \param[inout] problem, global-friction problem structure
+  */
   static inline void globalFrictionContact_null(GlobalFrictionContactProblem*  problem)
   {
     problem->M = NULL;
@@ -125,6 +131,9 @@ extern "C"
 
   }
 
+  /** Release memory for the problem structure
+      \param[inout] problem, global-Friction problem structure to be freed.
+  */
   void globalFrictionContact_free(GlobalFrictionContactProblem* problem);
 
   GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactProblem* problem);

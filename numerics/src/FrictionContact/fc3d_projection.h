@@ -32,9 +32,9 @@
   Two different storages are available for M: dense and sparse block.
 
 */
-#include "NumericsMatrix.h"
-#include "SolverOptions.h"
-#include "fc3d_Solvers.h"
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

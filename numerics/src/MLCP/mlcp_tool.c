@@ -17,9 +17,9 @@
 */
 
 #include "mlcp_tool.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h>                              // for printf
+#include <string.h>                             // for memcpy
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 
 /*
  *if sW2V[i]==0

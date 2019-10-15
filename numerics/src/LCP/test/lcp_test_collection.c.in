@@ -19,269 +19,126 @@
 #include <string.h>
 #include <time.h>
 #include "lcp_test_utils.h"
+#include "LCP_Solvers.h"
 #include "SolverOptions.h"
+#include "lcp_cst.h"
 
-// Set TEST_LCP_COLLECTION_XX value (XX = 1,2,3 or 4, depending on cmake test setup).
+// Set TEST_LCP_COLLECTION_XX value (XX = 1,2,3,4 or 5, depending on cmake test setup).
 #define @PROBLEM_COLLECTION@ 1
-
-#ifdef TEST_LCP_COLLECTION_3 /* SBM */
-static int lcp_test_single(char ** test)
-{
-  int info = 0;
-
-  char * filename = test[0];
-  printf("\n Test on %s\t ",filename);
-  printf("Test on %s\n", filename);
-
-  FILE * finput  =  fopen(filename, "r");
-  if (finput == NULL)
-  {
-    printf("Error! Could not open filename %s\n", filename);
-    exit(EXIT_FAILURE);
-  }
-
-
-  int will_failed =0;
-
-  will_failed  = atoi(test[1]);
-
-  int  solver = atoi(test[2]);
-  printf("with solver %i\n ",solver);
-
-  info = lcp_test_function_SBM(finput, solver);
-
-  fclose(finput);
-  printf("\nEnd of test on %s\n", filename);
-  return info;
-}
-
-#else
-static int lcp_test_single(char ** test)
-{
-  int info = 0;
-
-  char * filename = test[0];
-  printf("\n Test on %s\t ",filename);
-  printf("Test on %s\n", filename);
-
-  FILE * finput  =  fopen(filename, "r");
-  if (finput == NULL)
-  {
-    printf("Error! Could not open filename %s\n", filename);
-    exit(EXIT_FAILURE);
-  }
-
-
-  int will_failed =0;
-
-  will_failed  = atoi(test[1]);
-
-  int  solver = atoi(test[2]);
-  printf("with solver %i\n ",solver);
-
-  info = lcp_test_function(finput, solver, filename);
-
-  fclose(finput);
-  printf("\nEnd of test on %s\n", filename);
-  return info;
-}
-
-#endif
-
-
-
-
-
 
 int main(void)
 {
-  int out =0;
-  int n_failed_test=0;
-  int n_succeeded_test=0;
-  char ** _data_collection = data_collection();
+  // Remind that data_collection depends on current PROBLEM_COLLECTION value.
+  const char ** _data_collection = data_collection();
   int n_data = 0;
   while (strcmp(_data_collection[n_data], "---") !=0)
-  {
     n_data++;
-  }
-  printf("number of data = %i\n", n_data);
 
-  char *** _test_collection = test_collection(n_data, _data_collection);
-  int n_test = 0;
-  char * foo =  _test_collection[n_test][0];
-  while (strcmp(foo , "---") != 0)
-  {
-    n_test++;
-    foo =  _test_collection[n_test][0];
-  }
-  printf("number of tests = %i\n", n_test);
+  // Set solvers list for each collection of data.
+#if defined(TEST_LCP_COLLECTION_1) or defined(TEST_LCP_COLLECTION_2)
+  // same solvers for data collections 1 and 2
+  int solvers[] = {SICONOS_LCP_LEMKE, SICONOS_LCP_CPG, SICONOS_LCP_PGS,
+                   SICONOS_LCP_RPGS, SICONOS_LCP_LATIN, SICONOS_LCP_LATIN_W,
+                   SICONOS_LCP_AVI_CAOFERRIS, SICONOS_LCP_NEWTONMIN,
+                   SICONOS_LCP_NEWTON_FB_FBLSA, SICONOS_LCP_NEWTON_MIN_FBLSA,
+                   SICONOS_LCP_BARD, SICONOS_LCP_MURTY, SICONOS_LCP_PIVOT,
+                   SICONOS_LCP_PIVOT_LUMOD, SICONOS_LCP_PATHSEARCH};
+#elif TEST_LCP_COLLECTION_3
+  int solvers[] = {SICONOS_LCP_NSGS_SBM};
+#elif TEST_LCP_COLLECTION_4
+  int solvers[] = {SICONOS_LCP_ENUM, SICONOS_LCP_LEMKE};
+#elif TEST_LCP_COLLECTION_5
+  int solvers[] =
+    {SICONOS_LCP_PIVOT
+#ifdef HAVE_PATHFERRIS
+     , SICONOS_LCP_PATH
+#endif
+#ifdef HAVE_GAMS_C_API
+     , SICONOS_LCP_GAMS
+#endif
+    };
+#endif
+
+  int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
+
+  printf("Test %i data files with %i solvers.\n", n_data, n_solvers);
+
+  TestCase * collection = build_test_collection(n_data, _data_collection,
+                                                n_solvers, solvers, linearComplementarity_setDefaultSolverOptions);
 
 #ifdef TEST_LCP_COLLECTION_1
-  _test_collection[28][1] = "1";
-  _test_collection[29][1] = "1";
-  _test_collection[34][1] = "1";
-  _test_collection[35][1] = "1";
-  _test_collection[78][1] = "1";
-  _test_collection[94][1] = "1";
-  _test_collection[95][1] = "1";
-
-  _test_collection[10][1] = "2";
-  _test_collection[27][1] = "2";
-  _test_collection[33][1] = "2";
-  _test_collection[40][1] = "2";
-  _test_collection[42][1] = "2";
-  
-  
+  // some solvers are expected to fail ...
+  collection[28].will_fail = 1;  // Latin, lcp_exp_murty.dat
+  collection[29].will_fail = 1;  // Latin, lcp_exp_murty2.dat
+  collection[34].will_fail = 1;  // Latin_w, lcp_exp_murty.dat
+  collection[35].will_fail = 1;  // Latin_w, lcp_exp_murty2.dat
+  collection[78].will_fail = 1;  // Pivot based method with BLU updates using LUMOD, on ./data/lcp_mmc.dat
+  // some others are unstable
+  collection[10].will_fail = 2;
+  collection[27].will_fail = 2;
+  collection[33].will_fail = 2;
+  collection[40].will_fail = 2;
+  collection[42].will_fail = 2;
+#elif TEST_LCP_COLLECTION_2
+  collection[3].will_fail = 1;
+  collection[7].will_fail = 1;
+  collection[9].will_fail = 1;
+  collection[11].will_fail = 1;
+  collection[12].will_fail = 1;
+  collection[14].will_fail = 1;
+  collection[16].will_fail = 1;
+  collection[17].will_fail = 1;
+  collection[18].will_fail = 1;
+  collection[19].will_fail = 1;
+  collection[23].will_fail = 1;
+  collection[24].will_fail = 1;
+  collection[28].will_fail = 1;
+  collection[30].will_fail = 1;
+  collection[31].will_fail = 1;
+  collection[32].will_fail = 1;
+  collection[33].will_fail = 1;
+  collection[35].will_fail = 1;
+  collection[37].will_fail = 1;
+  collection[38].will_fail = 1;
+  collection[39].will_fail = 1;
+  collection[40].will_fail = 1;
+  collection[45].will_fail = 1;
+  collection[49].will_fail = 1;
+  collection[50].will_fail = 1;
+  collection[51].will_fail = 1;
+  collection[53].will_fail = 1;
+  collection[54].will_fail = 1;
+  collection[55].will_fail = 1;
+  collection[57].will_fail = 1;
+  collection[70].will_fail = 1;
+  collection[72].will_fail = 1;
+  collection[73].will_fail = 1;
+  collection[74].will_fail = 1;
+  collection[75].will_fail = 1;
+  collection[79].will_fail = 1;
+  collection[80].will_fail = 1;
+  collection[81].will_fail = 1;
+  collection[82].will_fail = 1;
+  collection[87].will_fail = 1;
+  collection[94].will_fail = 1;
+  collection[101].will_fail = 1;
+  collection[105].will_fail = 1;
+  collection[107].will_fail = 1;
+  collection[108].will_fail = 1;
+  collection[109].will_fail = 1;
+  collection[110].will_fail = 1;
+#elif TEST_LCP_COLLECTION_4
+  collection[1].will_fail = 1;
+  collection[4].will_fail = 1;
+#elif TEST_LCP_COLLECTION_5
+  collection[0].will_fail = 1;
 #endif
 
-#ifdef TEST_LCP_COLLECTION_2
-  _test_collection[3][1] = "1";
-  _test_collection[7][1] = "1";
-  _test_collection[9][1] = "1";
-  _test_collection[11][1] = "1";
-  _test_collection[12][1] = "1";
-  _test_collection[14][1] = "1";
-  _test_collection[16][1] = "1";
-  _test_collection[17][1] = "1";
-  _test_collection[18][1] = "1";
-  _test_collection[19][1] = "1";
-  _test_collection[23][1] = "1";
-  _test_collection[24][1] = "1";
-  _test_collection[28][1] = "1";
-  _test_collection[30][1] = "1";
-  _test_collection[31][1] = "1";
-  _test_collection[32][1] = "1";
-  _test_collection[33][1] = "1";
-  _test_collection[35][1] = "1";
-  _test_collection[37][1] = "1";
-  _test_collection[38][1] = "1";
-  _test_collection[39][1] = "1";
-  _test_collection[40][1] = "1";
-  _test_collection[45][1] = "1";
-  _test_collection[49][1] = "1";
-  _test_collection[50][1] = "1";
-  _test_collection[51][1] = "1";
-  _test_collection[53][1] = "1";
-  _test_collection[54][1] = "1";
-  _test_collection[55][1] = "1";
-  _test_collection[57][1] = "1";
-  _test_collection[70][1] = "1";
-  _test_collection[72][1] = "1";
-  _test_collection[73][1] = "1";
-  _test_collection[74][1] = "1";
-  _test_collection[75][1] = "1";
-  _test_collection[79][1] = "1";
-  _test_collection[80][1] = "1";
-  _test_collection[81][1] = "1";
-  _test_collection[82][1] = "1";
-  _test_collection[87][1] = "1";
-  _test_collection[94][1] = "1";
-  _test_collection[101][1] = "1";
-  _test_collection[105][1] = "1";
-  _test_collection[107][1] = "1";
-  _test_collection[108][1] = "1";
-  _test_collection[109][1] = "1";
-  _test_collection[110][1] = "1";
-#endif
+  
+  int number_of_tests = n_data * n_solvers;
+  int out = run_test_collection(collection, number_of_tests, lcp_test_function);
+  free_test_collection(collection, number_of_tests);
 
-
-
-
-
-  int * failed_tests = (int*)calloc(n_test, sizeof(int));
-  int * succeeded_tests = (int*)calloc(n_test, sizeof(int));
-  clock_t t1, t2;
-  long clk_tck = CLOCKS_PER_SEC;
-  for (int n_t =0; n_t < n_test ; n_t++)
-  {
-    printf("\n################# start of test # %i #######################\n", n_t);
-    printf("%s\t", solver_options_id_to_name(atoi(_test_collection[n_t][2])));
-    int e=0;
-    while(strcmp(_test_collection[n_t][e], "---") !=0)
-    {
-      printf("%s \t ",_test_collection[n_t][e]);
-      e++;
-    }
-    t1 = clock();
-    int info = lcp_test_single(_test_collection[n_t]);
-    t2 = clock();
-    (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
-
-    if (info)
-    {
-
-      failed_tests[n_failed_test]  = n_t;
-      n_failed_test++;
-      if (strcmp(_test_collection[n_t][1],"0") == 0 )
-        out = 1;
-    }
-    else
-    {
-      e=0;
-      succeeded_tests[n_failed_test]  = n_t;
-      n_succeeded_test++;
-      while(strcmp(_test_collection[n_t][e], "---") !=0)
-      {
-        printf("%s \t ",_test_collection[n_t][e]);
-        e++;
-      }
-    }
-    printf("\n################# end of  test # %i #######################\n", n_t);
-  }
-  printf("\n Failed tests : [ ");
-  for (int t =0; t < n_failed_test; t++)
-  {
-    printf("%i \t", failed_tests[t]);
-  }
-  printf("] :\n");
-  for (int t =0; t < n_failed_test; t++)
-  {
-    if (strcmp(_test_collection[failed_tests[t]][1],"1") ==0 )
-    {
-      printf("test %i \t should fail : \t %s\t",
-             failed_tests[t],
-             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
-    }
-    else if (strcmp(_test_collection[failed_tests[t]][1],"0") ==0)
-    {
-      printf("test %i \t should not fail : \t %s\t",
-             failed_tests[t],
-             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
-    }
-    else if (strcmp(_test_collection[failed_tests[t]][1],"2") ==0)
-    {
-      printf("test %i \t unstable : \t %s\t",
-             failed_tests[t],
-             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
-    }
-    int e=0;
-    while(strcmp(_test_collection[failed_tests[t]][e], "---") !=0)
-    {
-      printf("%s \t ",_test_collection[failed_tests[t] ] [e]);
-      e++;
-    }
-    printf("\n");
-  }
-  for (int t =0; t < n_succeeded_test; t++)
-  {
-    if (strcmp(_test_collection[succeeded_tests[t]][1],"1") ==0)
-    {
-      printf("test %i \t should fail but finally not : \t %s\t",
-             failed_tests[t],
-             solver_options_id_to_name(atoi(_test_collection[succeeded_tests[t]][2])));
-      int e=0;
-      while(strcmp(_test_collection[succeeded_tests[t]][e], "---") !=0)
-      {
-        printf("%s \t ",_test_collection[failed_tests[t] ] [e]);
-        e++;
-      }
-      printf("\n");
-    }
-
-  }
-
-
-
+  
   return out;
-
 }

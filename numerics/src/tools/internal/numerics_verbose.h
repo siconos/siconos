@@ -118,7 +118,7 @@ extern "C"
    * \param fn_name name of the function where warning occurs
    * \param msg formatted output message
    */
-  void numerics_warning(const char * fn_name, char* msg, ...);
+  void numerics_warning(const char * fn_name, const char* msg, ...);
 
   /** log message (if verbosity is on)
    *

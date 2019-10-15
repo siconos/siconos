@@ -16,32 +16,22 @@
  * limitations under the License.
  */
 
-#include "lcp_test_utils.h"
+#include "frictionContact_test_utils.h"
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+const char ** data_collection()
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_lcp = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_lcp[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+  int n_data_1=150;
 
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_lcp[n][e++] = data_collection_1[d];
-    test_lcp[n][e++] = "0";
-    test_lcp[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_lcp[n][e++], "%d", SICONOS_LCP_NSGS_SBM);
-    test_lcp[n][e++] = "---"; 
-    n++;
-  }
+  const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
+  int n_data=0;
 
-  test_lcp[n][0] ="---";
-  return test_lcp;
+  
+  data_collection_1[n_data++] = "./data/Capsules-i125-1213.hdf5";
+  data_collection_1[n_data++] = "./data/LMGC_100_PR_PerioBox-i00361-60-03000.hdf5";
+  
+  data_collection_1[n_data++] = "---";
 
+
+  return data_collection_1;
 }

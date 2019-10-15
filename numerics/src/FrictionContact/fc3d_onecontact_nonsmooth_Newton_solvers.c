@@ -15,28 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "NonSmoothNewton.h"
-#include "NCP_Solvers.h"
-#include "fc3d_Solvers.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include "FischerBurmeister.h"
-#include "SiconosBlas.h"
-#include "AlartCurnierGenerated.h"
-#include "fc3d_GlockerFischerBurmeister_functions.h"
-#include "numerics_verbose.h"
-#include "op3x3.h"
-#include "fc3d_compute_error.h"
-
+#include <float.h>                                     // for DBL_EPSILON
+#include <math.h>                                      // for sqrt, fabs, isinf
+#include <stdio.h>                                     // for NULL, printf
+#include <stdlib.h>                                    // for calloc, realloc
+#include "AlartCurnierGenerated.h"                     // for fc3d_AlartCurn...
+#include "FrictionContactProblem.h"                    // for FrictionContac...
+#include "Friction_cst.h"                              // for SICONOS_FRICTI...
+#include "NonSmoothNewton.h"                           // for nonSmoothDirec...
+#include "NumericsFwd.h"                               // for SolverOptions
+#include "NumericsMatrix.h"                            // for NumericsMatrix
+#include "SolverOptions.h"                             // for SolverOptions
+#include "fc3d_2NCP_Glocker.h"                         // for NCPGlocker_ini...
+#include "fc3d_AlartCurnier_functions.h"               // for compute_rho_sp...
+#include "fc3d_GlockerFischerBurmeister_functions.h"   // for F_GlockerFisch...
+#include "fc3d_Solvers.h"                              // for FreeSolverNSGSPtr
+#include "fc3d_compute_error.h"                        // for fc3d_unitary_c...
+#include "fc3d_local_problem_tools.h"                  // for fc3d_local_pro...
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...
+#include "fc3d_projection.h"                           // for fc3d_projectio...
+#include "numerics_verbose.h"                          // for numerics_print...
+#include "op3x3.h"                                     // for cpy3, mvp3x3
+#include "SiconosBlas.h"                                     // for cblas_ddot
+#include "NSSTools.h"   // for max
 
 /* #define DEBUG_CHECK */
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "debug.h"
-#include <string.h>
-#include <float.h>
+#include "debug.h"                                     // for DEBUG_PRINTF
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"

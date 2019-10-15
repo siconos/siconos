@@ -14,11 +14,16 @@
 /* GAMS stuff */
 
 #define _XOPEN_SOURCE 700
+#include <stdio.h>         // for printf
+#include <stdlib.h>        // for exit, EXIT_FAILURE
+#include "NumericsFwd.h"   // for FrictionContactProblem, SolverOptions
+#include "fc3d_Solvers.h"  // for fc3d_lcp_gams_path, fc3d_lcp_gams_pathvi
 
-#include <stdio.h>
+#if 0
+//#ifdef HAVE_GAMS_C_API
+
 #include <string.h>
 #include <assert.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <float.h>
 
@@ -28,9 +33,6 @@
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
 #include "projectionOnCone.h"
-
-#if 0
-//#ifdef HAVE_GAMS_C_API
 
 #include "GAMSlink.h"
 

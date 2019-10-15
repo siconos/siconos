@@ -15,24 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "rolling_fc3d_projection.h"
-#include "rolling_fc3d_local_problem_tools.h"
-#include "rolling_fc3d_compute_error.h"
-#include "SiconosBlas.h"
-#include "NumericsArrays.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-#include <time.h>
-#include <float.h>
-#include <string.h>
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include "numerics_verbose.h"
-
+#include <assert.h>                            // for assert
+#include <float.h>                             // for DBL_EPSILON
+#include <math.h>                              // for pow, fabs, sqrt, isinf
+#include <stdlib.h>                            // for calloc, malloc, srand
+#include <string.h>                            // for NULL, memcpy
+#include "SiconosBlas.h"                             // for cblas_dnrm2
+#include "Friction_cst.h"                      // for SICONOS_FRICTION_3D_IP...
+#include "NumericsArrays.h"                    // for uint_shuffle
+#include "NumericsFwd.h"                       // for SolverOptions, Rolling...
+#include "RollingFrictionContactProblem.h"     // for RollingFrictionContact...
+#include "SolverOptions.h"                     // for SolverOptions, SICONOS...
+#include "debug.h"                             // for DEBUG_PRINTF, DEBUG_BEGIN
+#include "numerics_verbose.h"                  // for numerics_printf, numer...
+#include "rolling_fc3d_Solvers.h"              // for RollingComputeErrorPtr
+#include "rolling_fc3d_compute_error.h"        // for rolling_fc3d_compute_e...
+#include "rolling_fc3d_local_problem_tools.h"  // for rolling_fc3d_local_pro...
+#include "rolling_fc3d_projection.h"           // for rolling_fc3d_projectio...
 
 //#define FCLIB_OUTPUT
 

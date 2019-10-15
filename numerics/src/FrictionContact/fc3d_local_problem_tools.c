@@ -15,9 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "FrictionContactProblem.h"
 #include "fc3d_local_problem_tools.h"
-#include "NumericsMatrix.h"
+#ifndef __cplusplus
+#include <stdbool.h>                 // for false
+#endif
+#include <stdlib.h>                  // for malloc, NULL
+#include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
+#include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
 
 
 void fc3d_local_problem_compute_q(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double *reaction, int contact)

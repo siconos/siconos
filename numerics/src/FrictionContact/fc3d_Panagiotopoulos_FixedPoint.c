@@ -16,33 +16,25 @@
  * limitations under the License.
 */
 
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
-#include "SiconosBlas.h"
-#include "Friction_cst.h"
-#include "numerics_verbose.h"
-
-
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-
-#include "ConvexQP.h"
-#include "ConvexQP_Solvers.h"
-#include "SiconosCompat.h"
-#include "FrictionContactProblem_as_ConvexQP.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-#include <string.h>
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
-#ifdef DEBUG_MESSAGES
-#include "NumericsVector.h"
-#endif
-#include "debug.h"
+#include <math.h>                                // for fmax
+#include <stdio.h>                               // for printf, NULL
+#include <stdlib.h>                              // for malloc, calloc, free
+#include "ConvexQP.h"                            // for ConvexQP
+#include "ConvexQP_Solvers.h"                    // for convexQP_VI_solver_s...
+#include "ConvexQP_cst.h"                        // for SICONOS_CONVEXQP_PG
+#include "FrictionContactProblem.h"              // for SplittedFrictionCont...
+#include "FrictionContactProblem_as_ConvexQP.h"  // for FrictionContactProbl...
+#include "Friction_cst.h"                        // for SICONOS_FRICTION_3D_...
+#include "LCP_Solvers.h"                         // for linearComplementarit...
+#include "LinearComplementarityProblem.h"        // for LinearComplementarit...
+#include "NumericsFwd.h"                         // for SolverOptions, ConvexQP
+#include "NumericsMatrix.h"                      // for NM_gemv
+#include "SolverOptions.h"                       // for SolverOptions, SICON...
+#include "fc3d_Solvers.h"                        // for fc3d_set_internalsol...
+#include "fc3d_compute_error.h"                  // for fc3d_compute_error
+#include "lcp_cst.h"                             // for SICONOS_LCP_CONVEXQP_PG
+#include "numerics_verbose.h"                    // for numerics_error, verbose
+#include "SiconosBlas.h"                               // for cblas_dcopy, cblas_d...
 
 /** pointer to function used to call internal solver for proximal point solver */
 typedef void (*normalInternalSolverPtr)(LinearComplementarityProblem*, double*, double*, int *, SolverOptions *);

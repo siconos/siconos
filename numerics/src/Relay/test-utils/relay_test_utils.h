@@ -18,9 +18,11 @@
 #ifndef RELAY_TEST_UTILS_H
 #define RELAY_TEST_UTILS_H
 
+#include "SiconosConfig.h" // for BUILD_AS_CPP
 #include <stdio.h>
 #include <stdlib.h>
 #include "relay_cst.h"
+#include "test_utils.h" // for TestCase
 #include "SolverOptions.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -28,20 +30,9 @@ extern "C"
 {
 #endif
   void relay_fillParamWithRespectToSolver(SolverOptions *options, char * solvername, RelayProblem* problem);
-  int relay_test_function(FILE * f, int solverId);
+  int relay_test_function(TestCase*);
 
-  /** Defines the list of data files
-      returns an array of char
-  */
-  char ** data_collection(void);
-  
-  /** Defines the set of tests (including parameters)
-      returns an 'array' of tests, some kind of dict.
-  */
-  char *** test_collection(int, char **);
-
-  
-
+  //TestCase*  build_test_collection(int, const char **, int, int*);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

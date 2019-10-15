@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2019 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,87 +16,40 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include "frictionContact_test_utils.h"
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_N...
+#include "frictionContact_test_utils.h"  // for build_gfc3d_test, build_test...
+#include "test_utils.h"                  // for TestCase
+#include "SolverOptions.h"
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
-
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
-
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_2D_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =0; d < 2; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_2D_CPG);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =0; d <2; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_2D_LATIN);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_2D_LEMKE);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =6; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_2D_ENUM);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-
+  int solvers[] = {SICONOS_FRICTION_2D_NSGS, SICONOS_FRICTION_2D_CPG, SICONOS_FRICTION_2D_LATIN,
+                   SICONOS_FRICTION_2D_LEMKE};
   
+  int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  
+  int current = 0;
+  // tol and maxiter used in tests are the same for all solvers.
+  int dpos[] = {1, SICONOS_DPARAM_TOL};
+  double dparam[] = {1e-5};
+  int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+  int iparam[] = {10000}; 
 
+  for(int s=0;s<n_solvers;++s)
+    {
+      for(int d =0; d <n_data; d++)
+        {
+          // default values for all parameters.
+          build_friction_test(data_collection[d],
+                              solvers[s], dpos, dparam, ipos, iparam,
+                              -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+        }
+    }
+  
+  return tests_list;
 }

@@ -16,16 +16,11 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <math.h>
 #include "mlcp_direct_simplex.h"
-#include "mlcp_direct.h"
-#include "mlcp_simplex.h"
-#include "mlcp_tool.h"
+#include "MLCP_Solvers.h"                       // for mixedLinearComplement...
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "mlcp_direct.h"                        // for mlcp_direct_addConfig...
+#include "mlcp_simplex.h"                       // for mlcp_simplex_init
 
 static int sN;
 static int sM;

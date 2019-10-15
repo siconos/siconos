@@ -29,8 +29,8 @@
 
 */
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

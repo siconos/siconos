@@ -16,16 +16,20 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include <assert.h>
-#include "NumericsMatrix.h"
-#include "fc2d_Solvers.h"
-#include "SiconosLapack.h"
-#include "numerics_verbose.h"
+#include <assert.h>                  // for assert
+#include <float.h>                   // for DBL_EPSILON
+#include <math.h>                    // for fabs, sqrt
+#include <stdio.h>                   // for printf, size_t, NULL
+#include <stdlib.h>                  // for free, malloc, calloc
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_2D_LATIN
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
+#include "fc2d_Solvers.h"            // for fc2d_latin, fc2d_latin_setDefaul...
+#include "numerics_verbose.h"        // for verbose
+#include "SiconosBlas.h"             // for cblas_dgemv, cblas_dcopy, cblas_...
+#include "SiconosLapack.h"           // for DTRTRS, DPOTRF, lapack_int, LA_UP, LA_NONUNIT, LA_NOTRANS
 
 
 void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)

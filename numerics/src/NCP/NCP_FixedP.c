@@ -15,16 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "NonSmoothNewton.h"
-#include "fc3d_NCPGlockerFixedPoint.h"
-#include "SiconosBlas.h"
-#include "fc3d_2NCP_Glocker.h"
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
 #include "NCP_FixedP.h"
-#include "numerics_verbose.h"
-
+#include <stdlib.h>             // for free, malloc
+#include "fc3d_2NCP_Glocker.h"  // for compute_Z_GlockerFixedP
+#include "numerics_verbose.h"   // for verbose
+#include "stdio.h"              // for printf
+#include "SiconosBlas.h"              // for cblas_dnrm2
 
 /*============================ Fixed point Solver ==================================*/
 

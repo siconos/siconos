@@ -17,29 +17,32 @@
 */
 
 /* Factorisation with Newton_methods.c is needed */
-
 #include "fc3d_nonsmooth_Newton_solvers.h"
-
-#include "NumericsMatrix_internal.h"
-
+#include <assert.h>                                   // for assert
+#include <math.h>                                     // for isnan, isinf, pow
+#ifndef __cplusplus
+#include <stdbool.h>                                  // for true
+#endif
+#include <stdio.h>                                    // for printf, NULL
+#include <stdlib.h>                                   // for free, calloc, exit
+#include "CSparseMatrix.h"                            // for CSparseMatrix_z...
+#include "FrictionContactProblem.h"                   // for FrictionContact...
+#include "Friction_cst.h"                             // for SICONOS_FRICTIO...
+#include "NumericsMatrix.h"                           // for NumericsMatrix
+#include "NumericsSparseMatrix.h"                     // for NSM_linearSolve...
+#include "SolverOptions.h"                            // for SolverOptions
+#include "SparseBlockMatrix.h"                        // for SparseBlockStru...
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "debug.h"
-#include "op3x3.h"
-#include "SparseBlockMatrix.h"
-#include "fc3d_Solvers.h"
-#include "FrictionContactProblem.h"
-#include "fc3d_compute_error.h"
-#include "AlartCurnierGenerated.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include "Friction_cst.h"
-#include "SiconosLapack.h"
-#include "NumericsSparseMatrix.h"
-#include "sanitizer.h"
-#include "numerics_verbose.h"
+#include "debug.h"                                    // for DEBUG_EXPR_WE
+#include "fc3d_AlartCurnier_functions.h"              // for compute_rho_spe...
+#include "fc3d_compute_error.h"                       // for fc3d_compute_error
+#include "fc3d_local_problem_tools.h"                 // for fc3d_local_prob...
+#include "fc3d_nonsmooth_Newton_FischerBurmeister.h"  // for fc3d_FischerBur...
+#include "numerics_verbose.h"                         // for verbose, numeri...
+#include "op3x3.h"                                    // for extract3x3, add3x3
+#include "sanitizer.h"                                // for cblas_dcopy_msan
+#include "SiconosBlas.h"                                    // for cblas_dcopy
 
 static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block_row_size, size_t block_col_size)
 {

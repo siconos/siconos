@@ -28,8 +28,9 @@
  *
  */
 
-#include "Newton_methods.h"
-#include "line_search.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include <stddef.h>       // for size_t
+#include "line_search.h"  // for line_search_generic, search_data, ARCSEARCH
 
 /** \struct goldstein_extra_params GoldsteinSearch.h
  * Struct to hold together the extra parameters needed by the Goldstein line search

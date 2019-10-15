@@ -23,9 +23,9 @@
 
 */
 
-#include <stdio.h>
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
+#include <stdio.h>        // for FILE
+#include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, Numerics...
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct MixedLinearComplementarityProblem MixedLinearComplementarityProblem.h
  *  The Structure that contains and defines MLCProblem. Find \f$(z,w)\f$ such that:

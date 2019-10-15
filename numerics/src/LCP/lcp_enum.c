@@ -18,19 +18,18 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "SiconosLapack.h"
 #include "lcp_enum.h"
-#include "numerics_verbose.h"
+#include <math.h>                          // for isinf, isnan
+#include <stdlib.h>                        // for malloc, free
+#include <string.h>                        // for NULL, memcpy
+#include "LCP_Solvers.h"                   // for lcp_enum, lcp_enum_init
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NM_dense_display, Numerics...
+#include "SiconosLapack.h"                 // for DGELS, DGESV, lapack_int, LA_NOTRANS
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_ENUM_US...
+#include "numerics_verbose.h"              // for numerics_printf, verbose
+
 
 static unsigned long  int sCurrentEnum = 0;
 static unsigned long  int sCmpEnum = 0;
@@ -165,7 +164,7 @@ int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* op
 }
 void lcp_enum_init(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc)
 {
-  if (withMemAlloc)
+  //  if (withMemAlloc)
   {
     options->dWork = (double *) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
     options->iWork = (int *) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
@@ -317,7 +316,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
     numerics_printf("lcp_enum has not found a solution!\n");
 }
 
-int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProblem* problem, SolverOptions* options)
+int linearComplementarity_enum_setDefaultSolverOptions(SolverOptions* options)
 {
   int i;
   if (verbose > 0)
@@ -340,16 +339,10 @@ int linearComplementarity_enum_setDefaultSolverOptions(LinearComplementarityProb
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  if (problem)
-  {
-    options->dWork = (double*) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
-    options->iWork = (int*) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
-  }
-  else
-  {
-    options->dWork = NULL;
-    options->iWork = NULL;
-  }
+  // initialisation of working arrays will be done thanks to lcp_enum_init call
+  // during first call of lcp_enum driver.
+  options->dWork = NULL;
+  options->iWork = NULL;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
 

@@ -15,18 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "fc3d_Solvers.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include "Friction_cst.h"
-#include "op3x3.h"
-#include "SiconosBlas.h"
-#include "AlartCurnierGenerated.h"
-#include "NumericsVector.h"
-#include "numerics_verbose.h"
+#include <assert.h>                                    // for assert
+#include <math.h>                                      // for sqrt
+#include "FrictionContactProblem.h"                    // for FrictionContac...
+#include "NumericsFwd.h"                               // for FrictionContac...
+#include "NumericsMatrix.h"                            // for NumericsMatrix
+#include "debug.h"                                     // for DEBUG_PRINTF
+#include "fc3d_AlartCurnier_functions.h"               // for computeAlartCu...
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...
+#include "numerics_verbose.h"                          // for numerics_printf
+#include "op3x3.h"                                     // for SET3, eig_3x3
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -37,10 +35,6 @@ extern computeNonsmoothFunction Function;
 /* #define AC_Generated */
 /* #define AC_JeanMoreau  Christensen & Pang */
 
-
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
 
 /*Static variables */
 /* Local problem operators */

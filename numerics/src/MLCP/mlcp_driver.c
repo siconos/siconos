@@ -16,20 +16,28 @@
  * limitations under the License.
 */
 
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
+#include <stdio.h>                              // for NULL, fprintf, stderr
+#include <stdlib.h>                             // for exit, EXIT_FAILURE
+#include "MLCP_Solvers.h"                       // for mlcp_FB, mlcp_direct_FB
+#include "MixedLinearComplementarityProblem.h"  // for mixedLinearComplement...
+#include "NumericsFwd.h"                        // for SolverOptions, MixedL...
+#include "NumericsMatrix.h"                     // for NumericsMatrix
+#include "SolverOptions.h"                      // for SolverOptions
+#include "mlcp_FB.h"                            // for mlcp_FB_getNbDWork
+#include "mlcp_cst.h"                           // for SICONOS_MLCP_DIRECT_ENUM
+#include "mlcp_direct_FB.h"                     // for mlcp_direct_FB_getNbD...
+#include "mlcp_direct_enum.h"                   // for mlcp_direct_enum_getN...
+#include "mlcp_direct_path.h"                   // for mlcp_direct_path_getN...
+#include "mlcp_direct_path_enum.h"              // for mlcp_direct_path_enum
+#include "mlcp_direct_simplex.h"                // for mlcp_direct_simplex_g...
+#include "mlcp_enum.h"                          // for mlcp_enum_alloc_worki...
+#include "mlcp_path_enum.h"                     // for mlcp_path_enum, mlcp_...
+#include "mlcp_simplex.h"                       // for mlcp_simplex_init
+#include "numerics_verbose.h"                   // for numerics_error, verbose
 
 #ifndef MEXFLAG
-#include "NonSmoothDrivers.h"
+#include "NonSmoothDrivers.h"    // for mlcp_driver
 #endif
-#include "mlcp_cst.h"
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
 
 const char* const   SICONOS_NONAME_STR = "NONAME";
 const char* const   SICONOS_MLCP_PGS_STR = "MLCP_PGS";

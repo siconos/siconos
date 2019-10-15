@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <float.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include "SiconosLapack.h"
-
 #include "cond.h"
+#include <stdio.h>          // for printf, NULL, size_t
+#include <stdlib.h>         // for free, malloc
+#include <string.h>         // for memcpy
+#include "NSSTools.h"  // for min
+#include "SiconosLapack.h"  // for DGESVD, lapack_int
 
 double cond(double * A, int n, int m)
 {

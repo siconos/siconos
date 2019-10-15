@@ -15,16 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
-
+#include <stdlib.h>            // for free, malloc
+#include "MLCP_Solvers.h"      // for mixedLinearComplementarity_directEnum_...
+#include "NumericsFwd.h"       // for SolverOptions, MixedLinearComplementar...
+#include "SolverOptions.h"     // for SolverOptions, solver_options_nullify
+#include "mlcp_cst.h"          // for SICONOS_MLCP_DIRECT_ENUM, SICONOS_MLCP...
+#include "numerics_verbose.h"  // for numerics_error
 
 void  mixedLinearComplementarity_default_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pOptions)
 {

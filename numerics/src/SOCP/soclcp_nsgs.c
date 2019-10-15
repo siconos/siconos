@@ -15,28 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "soclcp_projection.h"
-/* #include "soclcp_Newton.h" */
-/* #include "soclcp_Path.h" */
-/* #include "soclcp_NCPGlockerFixedPoint.h" */
-/* #include "soclcp_unitary_enumerative.h" */
-#include "soclcp_compute_error.h"
-#include "NCP_Solvers.h"
-#include "SiconosBlas.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-#include <time.h>
-#include <string.h>
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-
-#include "debug.h"
-#include "numerics_verbose.h"
-
+#include <assert.h>                                       // for assert
+#include <math.h>                                         // for pow, sqrt
+#ifndef __cplusplus
+#include <stdbool.h>                                      // for false
+#endif
+#include <stdio.h>                                        // for printf, NULL
+#include <stdlib.h>                                       // for malloc, free
+#include <string.h>                                       // for memcpy
+#include "NumericsFwd.h"                                  // for SecondOrder...
+#include "NumericsMatrix.h"                               // for NumericsMatrix
+#include "SOCLCP_Solvers.h"                               // for FreeSolverN...
+#include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "SolverOptions.h"                                // for SolverOptions
+#include "numerics_verbose.h"                             // for verbose
+#include "soclcp_compute_error.h"                         // for soclcp_comp...
+#include "soclcp_projection.h"                            // for soclcp_proj...
+#include "NSSTools.h" // for max
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* problem, SecondOrderConeLinearComplementarityProblem* localproblem, double * r, SolverOptions* options)
@@ -609,8 +605,8 @@ int soclcp_nsgs_setDefaultSolverOptions(SolverOptions* options)
     options->iparam[i] = 0;
     options->dparam[i] = 0.0;
   }
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-4;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   soclcp_projection_setDefaultSolverOptions(options->internalSolvers);
 

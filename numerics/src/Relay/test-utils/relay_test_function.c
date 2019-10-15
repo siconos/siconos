@@ -15,38 +15,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <math.h>
-#include "relay_test_utils.h"
-#include "NonSmoothDrivers.h"
-#include "RelayProblem.h"
-#include "SolverOptions.h"
-#include "Relay_Solvers.h"
-#include "SiconosCompat.h"
+#include <math.h>              // for isfinite
+#include <stdio.h>             // for printf, fclose, fopen, FILE
+#include <stdlib.h>            // for calloc, free, malloc
+#include "NonSmoothDrivers.h"  // for relay_driver
+#include "NumericsFwd.h"       // for RelayProblem, SolverOptions
+#include "RelayProblem.h"      // for RelayProblem, freeRelay_problem, relay...
+#include "SolverOptions.h"     // for solver_options_delete, SolverOptions
+#include "relay_test_utils.h"  // for relay_test_function
+#include "test_utils.h"        // for TestCase
 
-int relay_test_function(FILE * f, int  solverId)
+int relay_test_function(TestCase * current)
 {
-
   int i, info = 0 ;
   RelayProblem* problem = (RelayProblem *)malloc(sizeof(RelayProblem));
 
-  info = relay_newFromFile(problem, f);
+  info = relay_newFromFilename(problem, current->filename);
 
   FILE * foutput  =  fopen("./relay.verif", "w");
   info = relay_printInFile(problem, foutput);
-  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
-
-  relay_setDefaultSolverOptions(problem, options, solverId);
+  fclose(foutput);
 
   int maxIter = 50000;
   double tolerance = 1e-8;
-  options->iparam[0] = maxIter;
-  options->dparam[0] = tolerance;
+  current->options->iparam[SICONOS_IPARAM_MAX_ITER] = maxIter;
+  current->options->dparam[SICONOS_DPARAM_TOL] = tolerance;
 
 
   double * z = (double *)calloc(problem->size, sizeof(double));
   double * w = (double *)calloc(problem->size, sizeof(double));
 
-  info = relay_driver(problem, z , w, options);
+  info = relay_driver(problem, z , w, current->options);
 
   for (i = 0 ; i < problem->size ; i++)
   {
@@ -64,17 +63,35 @@ int relay_test_function(FILE * f, int  solverId)
   }
   free(z);
   free(w);
-
-  solver_options_delete(options);
-
-  free(options);
-
+  solver_options_delete(current->options);
   freeRelay_problem(problem);
-
-  fclose(foutput);
 
   return info;
 
 
 }
+
+/* static void build_relay_test(const char * datafile, int will_faill, int solver_id, TestCase* testname) */
+/* { */
+/*   testname->filename = datafile; */
+/*   testname->will_fail = 0; */
+/*   testname->options = (SolverOptions *)malloc(sizeof(SolverOptions)); */
+/*   relay_setDefaultSolverOptions(testname->options, solver_id); */
+/* } */
+
+/* TestCase * build_test_collection(int n_data, const char ** data_collection, int n_solvers, int * solvers_ids) */
+/* { */
+/*   int number_of_tests = n_data * n_solvers; */
+/*   TestCase * tests_list = (TestCase*)malloc(number_of_tests * sizeof(TestCase)); */
+
+/*   int current; */
+/*   for(int s=0; s <n_solvers;++s) */
+/*     { */
+/*       current = s * n_data; */
+/*       for(int d=0; d <n_data; ++d) */
+/*         build_relay_test(data_collection[d], 0, solvers_ids[s], &tests_list[current++]); */
+/*     } */
+/*   return tests_list; */
+/* } */
+
 

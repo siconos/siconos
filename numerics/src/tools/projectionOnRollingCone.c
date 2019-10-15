@@ -15,13 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <math.h>
 #include "projectionOnRollingCone.h"
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
+#include <math.h>   // for sqrt
+#include <stdio.h>  // for printf
 
 unsigned int projectionOnRollingCone(double* r, double  mu, double mur)
 {

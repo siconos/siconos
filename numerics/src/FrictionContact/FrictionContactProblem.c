@@ -15,19 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
 #include "FrictionContactProblem.h"
-#include "NumericsMatrix.h"
-#include <stdio.h>
-#include "numerics_verbose.h"
-#include "SparseBlockMatrix.h"
-#include <math.h>
-#include <string.h>
-#include "SiconosLapack.h"
+#include <assert.h>             // for assert
+#include <math.h>               // for fabs
+#include <stdio.h>              // for printf, fprintf, fscanf, NULL, fclose
+#include <stdlib.h>             // for malloc, free, exit, EXIT_FAILURE
+#include <sys/errno.h>          // for errno
+#include "NumericsMatrix.h"     // for NumericsMatrix, NM_create, RawNumeric...
+#include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "debug.h"              // for DEBUG_PRINT, DEBUG_PRINTF
+#include "numerics_verbose.h"   // for CHECK_IO, numerics_error, numerics_pr...
 
 void frictionContact_display(FrictionContactProblem* problem)
 {
@@ -140,7 +139,7 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
   return 0;
 }
 
-int frictionContact_newFromFilename(FrictionContactProblem* problem, char* filename)
+int frictionContact_newFromFilename(FrictionContactProblem* problem, const char* filename)
 {
   int info = 0;
   FILE * file = fopen(filename, "r");

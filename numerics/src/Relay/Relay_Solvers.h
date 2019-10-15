@@ -38,11 +38,10 @@ extern "C"
 #endif
 
   /** set the default solver parameters and perform memory allocation for Relay
-      \param[in] problem the RelayProblem structure which handles the problem (M,q)
       \param options the pointer to options to set
       \param solverId the identifier of the solver
   */
-  int relay_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options, int solverId);
+  int relay_setDefaultSolverOptions(SolverOptions* options, int solverId);
 
 
   /** relay_pgs is a projected Gauss-Seidel solver for relay problems.
@@ -95,7 +94,7 @@ extern "C"
    * \param[in] problem structure that represents the Relay (M, q...)
    * \param options SolverOptions * the pointer to options to set
   */
-  int relay_enum_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options);
+  int relay_enum_setDefaultSolverOptions(SolverOptions* options);
 
   /** relay_path is a resolution of the Relay with its inherent MCP formulation and using path.
    * \param[in] problem structure that represents the Relay (M, q...)

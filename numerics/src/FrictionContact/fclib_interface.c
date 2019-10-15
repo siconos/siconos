@@ -15,29 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "SiconosConfig.h"
+#include "SiconosConfig.h" // for WITH_FCLIB // IWYU pragma: keep
 
+#ifdef WITH_FCLIB
 #define DEBUG_NOCOLOR
 #define DEBUG_STDOUT
 #define DEBUG_MESSAGES
-
-#include "CSparseMatrix.h"
+#include "fclib_interface.h"
+#include <assert.h>                        // for assert
+#include <fclib.h>                         // for fclib_matrix, fclib_global
+#include <stdio.h>                         // for NULL, fprintf, stderr
+#include <stdlib.h>                        // for malloc, free, exit, EXIT_F...
+#include "CSparseMatrix.h"                 // for CSparseMatrix, CS_INT, cs_...
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "NumericsMatrix.h"                // for NumericsMatrix, RawNumeric...
+#include "NumericsSparseMatrix.h"          // for NumericsSparseMatrix, NSM_CSC
+#include "SiconosConfig.h"                 // for WITH_FCLIB
+#include "SparseBlockMatrix.h"             // for SBM_from_csparse, SBM_to_s...
+#include "debug.h"                         // for DEBUG_PRINT, DEBUG_PRINTF
+#include "timers_interf.h"                 // for MAYBE_UNUSED
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H
-
-#include "debug.h"
-#ifdef WITH_FCLIB
-#include "CSparseMatrix.h"
-#include "fclib_interface.h"
-#include "FrictionContactProblem.h"
-#include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
-#include "SparseBlockMatrix.h"
-#include "timers_interf.h"
-#include "GlobalFrictionContactProblem.h"
 
 
 static void int_to_csi(int* o, CS_INT* d, unsigned int n)
@@ -58,7 +58,7 @@ static void csi_to_int(CS_INT* o, int* d, unsigned int n)
 
 
 
-FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem)
+FrictionContactProblem* from_fclib_local(const fclib_local* fclib_problem)
 {
   FrictionContactProblem* problem;
 
@@ -121,7 +121,7 @@ FrictionContactProblem* from_fclib_local(const struct fclib_local* fclib_problem
 FrictionContactProblem* frictionContact_fclib_read(const char *path)
 {
 
-  struct fclib_local   *fclib_problem;
+  fclib_local   *fclib_problem;
 
   fclib_problem = fclib_read_local(path);
 
@@ -138,9 +138,9 @@ int frictionContact_fclib_write(FrictionContactProblem* problem, char * title, c
 {
   int info = 0;
 
-  struct fclib_local   *fclib_problem;
+  fclib_local   *fclib_problem;
 
-  fclib_problem = (struct fclib_local*)malloc(sizeof(struct fclib_local));
+  fclib_problem = (fclib_local*)malloc(sizeof(fclib_local));
 
   fclib_problem->spacedim = problem->dimension;
   fclib_problem->mu =  problem->mu;
@@ -253,7 +253,7 @@ int frictionContact_fclib_write_guess( double * reaction, double * velocity,
 {
   int info = 0;
   int number_of_guesses = 1;
-  struct fclib_solution *guesses = ( struct fclib_solution *) malloc(number_of_guesses*sizeof( struct fclib_solution));
+  fclib_solution *guesses = (fclib_solution *) malloc(number_of_guesses*sizeof(fclib_solution));
   guesses->v = NULL;
   guesses->l = NULL;
   guesses->u = velocity;
@@ -264,7 +264,7 @@ int frictionContact_fclib_write_guess( double * reaction, double * velocity,
 
 }
 
-GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib_problem)
+GlobalFrictionContactProblem* from_fclib_global(const fclib_global* fclib_problem)
 {
   GlobalFrictionContactProblem* problem;
 
@@ -366,7 +366,7 @@ GlobalFrictionContactProblem* from_fclib_global(const struct fclib_global* fclib
 GlobalFrictionContactProblem* globalFrictionContact_fclib_read(const char *path)
 {
 
-  struct fclib_global   *fclib_problem;
+  fclib_global   *fclib_problem;
 
   fclib_problem = fclib_read_global(path);
 
@@ -406,8 +406,8 @@ int globalFrictionContact_fclib_write(
   /* FILE * file  =  fopen("toto.dat", "w"); */
   /* globalFrictionContact_printInFile(problem, file); */
  
-  struct fclib_global *fclib_problem;
-  fclib_problem = (struct fclib_global*)malloc(sizeof(struct fclib_global));
+  fclib_global *fclib_problem;
+  fclib_problem = (fclib_global*)malloc(sizeof(fclib_global));
 
   fclib_problem->info = (struct fclib_info*)malloc(sizeof(struct fclib_info)) ;
 

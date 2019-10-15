@@ -1,15 +1,8 @@
-#include "math.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
-
-#include <string.h>
-#include <projectionOnRollingCone.h>
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
+#include <assert.h>                   // for assert
+#include <projectionOnRollingCone.h>  // for display_status_rolling_cone
+#include <stdio.h>                    // for printf
+#include "debug.h"                    // for DEBUG_EXPR
+#include "math.h"                     // for sqrt
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"

@@ -16,122 +16,107 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
+#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_test_colle...
+#include "test_utils.h"                  // for TestCase
+
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=200;
-  int n_entry = 50;
-  char *** test_nsn = (char ***)malloc(n_test*sizeof(char **));
+  int n_solvers = 6;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_nsn[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+  int current = 0;
+  for(int d =0; d <n_data; d++)
+    {
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-5};
+      int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 1};
+      int iparam[] = {10000, 1};
+      // 
+      build_friction_test(data_collection[d],
+                 SICONOS_FRICTION_3D_NSN_AC, dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
 
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-    test_nsn[n][e++] = "1e-5";
-    test_nsn[n][e++] = "10000";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "iparam";
-    test_nsn[n][e++] = "1";
-    test_nsn[n][e++] = "1";
-    test_nsn[n][e++] = "---";
-
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC_TEST);
-    test_nsn[n][e++] = "1e-5";
-    test_nsn[n][e++] = "10000";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "iparam";
-    test_nsn[n][e++] = "1";
-    test_nsn[n][e++] = "1";
-    test_nsn[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-    test_nsn[n][e++] = "1e-3";
-    test_nsn[n][e++] = "1000";
-    test_nsn[n][e++] = "---";
-    n++;
-  }
-
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC_TEST);
-    test_nsn[n][e++] = "1e-3";
-    test_nsn[n][e++] = "1000";
-    test_nsn[n][e++] = "---";
-    n++;
-  }
-   for ( int d =0; d <n_data_1; d++)
-  {
-    int e =0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_FB);
-    test_nsn[n][e++] = "1e-3";
-    test_nsn[n][e++] = "1000";
-    test_nsn[n][e++] = "---";
-    n++;
-  }
-
-   for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_NM);
-    test_nsn[n][e++] = "1e-3";
-    test_nsn[n][e++] = "1000";
-    test_nsn[n][e++] = "---";
-    n++;
-  }
-
-#ifndef WITH_MUMPS /* Works only with MUMPS */
-   test_nsn[29][1] ="1";
-   test_nsn[30][1] ="1";
-   test_nsn[31][1] ="1";
-   test_nsn[32][1] ="1";
-   test_nsn[33][1] ="1";
-   test_nsn[79][1] ="1";
-   test_nsn[80][1] ="1";
-   test_nsn[81][1] ="1";
-   test_nsn[82][1] ="1";
-   test_nsn[83][1] ="1";
+  for(int d =0; d <n_data; d++)
+    {
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-5};
+      int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 1};
+      int iparam[] = {10000, 1};
+      // 
+      build_friction_test(data_collection[d],
+                 SICONOS_FRICTION_3D_NSN_AC_TEST, dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+#ifndef WITH_MUMPS
+      if(d>=4 && d<9) // Capsules tests work only with mumps
+        tests_list[current - 1].will_fail = 1;
 #endif
+    }
 
-  test_nsn[n][0] ="---";
-  return test_nsn;
+  for(int d =0; d <n_data; d++)
+    {
+      // change tol and max iter, other params = default.
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-3};
+      int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+      int iparam[] = {1000, 1};
+      // 
+      build_friction_test(data_collection[d],
+                 SICONOS_FRICTION_3D_NSN_AC, dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
+
+  for(int d =0; d <n_data; d++)
+    {
+      // change tol and max iter, other params = default.
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-3};
+      int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+      int iparam[] = {1000, 1};
+      // 
+      build_friction_test(data_collection[d],
+                 SICONOS_FRICTION_3D_NSN_AC_TEST, dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+#ifndef WITH_MUMPS
+      if(d>=4 && d<9) // Capsules tests work only with mumps
+        tests_list[current - 1].will_fail = 1;
+#endif
+    }
+
+  for(int d =0; d <n_data; d++)
+    {
+      // change tol and max iter, other params = default.
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-3};
+      int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+      int iparam[] = {1000, 1};
+      // 
+      build_friction_test(data_collection[d],
+                 SICONOS_FRICTION_3D_NSN_FB, dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
+
+  for(int d =0; d <n_data; d++)
+    {
+      // change tol and max iter, other params = default.
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-3};
+      int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+      int iparam[] = {1000, 1};
+      // 
+      build_friction_test(data_collection[d],
+                 SICONOS_FRICTION_3D_NSN_NM, dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
+
+
+  *number_of_tests = current;
+  return tests_list;
 
 }

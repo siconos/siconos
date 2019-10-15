@@ -15,54 +15,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include <math.h>
-
-#include "GenericMechanical_Solvers.h"
-#include "GenericMechanical_cst.h"
-
-#include "NonSmoothDrivers.h"
-
-#include "GMPReduced.h"
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
-
-#include "LCP_Solvers.h"
-
-#include "FrictionContactProblem.h"
-#include "Friction_cst.h"
-#include "fc3d_compute_error.h"
-#include "fc3d_unitary_enumerative.h"
-#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
-
-#include "Relay_Solvers.h"
-#include "RelayProblem.h"
-#include "relay_cst.h"
-
-#include "NumericsMatrix.h"
-
-#include "numerics_verbose.h"
-/* #define GENERICMECHANICAL_DEBUG  */
-/* #define GENERICMECHANICAL_DEBUG2  */
-/* #define GENERICMECHANICAL_DEBUG_CMP */
-/* #define GENERICMECHANICAL_DEBUG_COMPUTE_ERROR */
-/* #define GENERICMECHANICAL_FC3D */
-/* #define GMP_WRITE_FAILED_PRB */
-/* #define GMP_WRITE_PRB */
-
+#include <assert.h>                                    // for assert
+#include <math.h>                                      // for fabs, sqrt, isnan
+#ifndef __cplusplus
+#include <stdbool.h> // for true
+#endif
+#include <stdio.h>                                     // for printf, size_t
+#include <stdlib.h>                                    // for malloc, free
+#include <string.h>                                    // for NULL, memcpy
+#include "SiconosBlas.h"                                     // for cblas_dnrm2
+#include "FrictionContactProblem.h"                    // for FrictionContac...
+#include "Friction_cst.h"                              // for SICONOS_FRICTI...
+#include "GMPReduced.h"                                // for gmp_as_mlcp
+#include "GenericMechanicalProblem.h"                  // for listNumericsPr...
+#include "GenericMechanical_Solvers.h"                 // for gmp_compute_error
+#include "GenericMechanical_cst.h"                     // for SICONOS_GENERI...
+#include "LCP_Solvers.h"                               // for lcp_compute_er...
+#include "LinearComplementarityProblem.h"              // for LinearCompleme...
+#include "NonSmoothDrivers.h"                          // for fc3d_driver
+#include "NumericsFwd.h"                               // for SolverOptions
+#include "NumericsMatrix.h"                            // for NM_row_prod_no...
+#include "RelayProblem.h"                              // for RelayProblem
+#include "Relay_Solvers.h"                             // for relay_compute_...
+#include "SolverOptions.h"                             // for SolverOptions
+#include "debug.h"                                     // for DEBUG_PRINTF
+#include "fc3d_compute_error.h"                        // for fc3d_unitary_c...
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for fc3d_onecontac...
+#include "fc3d_unitary_enumerative.h"                  // for fc3d_unitary_e...
+#include "lcp_cst.h"                                   // for SICONOS_LCP_LEMKE
+#include "numerics_verbose.h"                          // for verbose
+#include "relay_cst.h"                                 // for SICONOS_RELAY_...
 
 const char* const   SICONOS_GENERIC_MECHANICAL_NSGS_STR = "GMP_NSGS";
-
-
-//#define DEBUG_MESSAGES
-//#define DEBUG_STDOUT
-#include "debug.h"
-#include "LinearComplementarityProblem.h"
-#include "lcp_cst.h"
 
 int gmp_compute_error(GenericMechanicalProblem* pGMP, double *reaction , double *velocity, double tol, SolverOptions* options, double * err)
 {
@@ -244,11 +228,11 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
   listNumericsProblem * curProblem = 0;
   int storageType = pGMP->M->storageType;
   NumericsMatrix* numMat = pGMP->M;
-  int iterMax = options->iparam[0];
+  int iterMax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   int it = 0;
   int currentRowNumber = 0;
   //  int diagBlockNumber =0;
-  double tol = options->dparam[0];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
   double * err = &(options->dparam[2]);
   double * errLS = &(options->dparam[3]);
   int tolViolate = 1;
@@ -494,18 +478,12 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
     free(bufForLocalProblemDense);
 }
 
-/*
- * options->iparam[2] == 0 then GS on all blocks
- * options->iparam[2] == 1 The equalities are substituated
- * options->iparam[2] == 2 Equalities are assemblated in one block
- * options->iparam[2] == 3 Try to solve like a MLCP (==> No FC3d)
- */
+/* See allowed values for iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] 
+   in GenericalMechanical_cst.h (GENERIC_MECHANICAL_ISREDUCED enum)
+*/
 int gmp_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity,
                              SolverOptions* options)
 {
-  // if (options == NULL )
-  //  numerics_error("fc3d_driver", "null input for solver options");
-
   /* If the options for solver have not been set, read default values in .opt file */
 
   int info = 0;
@@ -513,25 +491,25 @@ int gmp_driver(GenericMechanicalProblem* problem, double *reaction , double *vel
     NM_display(problem->M);
     genericMechanicalProblem_display(problem);
     );
-  if (!options->iparam[2])
+  if (options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS)
   {
     gmp_gauss_seidel(problem, reaction, velocity, &info, options);
   }
-  else if (options->iparam[2] == 1)
+  else if (options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_SUBS_EQUALITIES)
   {
     gmp_reduced_solve(problem, reaction, velocity, &info, options);
   }
-  else if (options->iparam[2] == 2)
+  else if (options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES)
   {
     gmp_reduced_equality_solve(problem, reaction, velocity, &info, options);
   }
-  else if (options->iparam[2] == 3)
+  else if (options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_MLCP_LIKE)
   {
     gmp_as_mlcp(problem, reaction, velocity, &info, options);
   }
   else
   {
-    printf("gmp_driver error, options->iparam[2] wrong value. (0, 1 or 2).\n");
+    printf("gmp_driver error, options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] wrong value.\n");
   }
 
   return info;
@@ -551,11 +529,11 @@ void gmp_setDefaultSolverOptions(SolverOptions* options, int id)
   solver_options_nullify(options);
   options->iparam = (int *)calloc(options->iSize, sizeof(int));
   options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->iparam[0] = 10000;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
   /*with Line search 1 without 0.*/
   options->iparam[1] = 0;
 
-  options->dparam[0] = 1e-4;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   /*Useful parameter for LS*/
   options->dparam[1] = 1.0;
   options->dparam[2] = 1e-7;
@@ -563,8 +541,8 @@ void gmp_setDefaultSolverOptions(SolverOptions* options, int id)
 
   options->internalSolvers = (SolverOptions *)malloc(3 * sizeof(SolverOptions));;
 
-  linearComplementarity_setDefaultSolverOptions(0, options->internalSolvers, SICONOS_LCP_LEMKE);
-  relay_setDefaultSolverOptions(0, &options->internalSolvers[2], SICONOS_RELAY_LEMKE);
+  linearComplementarity_setDefaultSolverOptions(options->internalSolvers, SICONOS_LCP_LEMKE);
+  relay_setDefaultSolverOptions(&options->internalSolvers[2], SICONOS_RELAY_LEMKE);
 
   switch (id)
   {

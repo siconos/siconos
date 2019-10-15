@@ -16,16 +16,14 @@
  * limitations under the License.
 */
 
-#include "Newton_methods.h"
+#include "SiconosBlas.h"                            // for cblas_dnrm2
+#include "FischerBurmeister.h"                // for Jac_F_FB, phi_FB
+#include "NCP_Solvers.h"                      // for ncp_newton_FBLSA
+#include "Newton_methods.h"                   // for functions_LSA, init_lsa...
+#include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
+#include "NumericsFwd.h"                      // for NonlinearComplementarit...
+#include "ncp_newton_FBLSA.h"                 // for FB_compute_F_ncp, FB_co...
 
-#include "NCP_cst.h"
-#include "NonlinearComplementarityProblem.h"
-#include "FischerBurmeister.h"
-#include "SiconosBlas.h"
-
-#include "NCP_Solvers.h"
-
-#include "ncp_newton_FBLSA.h"
 
 void ncp_FB(void* data_opaque, double* z, double* F, double* F_FB)
 {

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2016 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "relay_test_utils.h"
-#include "SolverOptions.h"
+#include <errno.h>
+#include "frictionContact_test_utils.h"
 
-int main(void)
+const char ** data_collection()
 {
-  int info = 0 ;
-  char filename[50] = "./data/step_4x4.dat";
 
-  printf("Test on %s\n", filename);
+  int n_data_1=150;
 
-  FILE * finput  =  fopen(filename, "r");
+  const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
+  int n_data=0;
+  data_collection_1[n_data++] = "./data/LMGC_GFC3D_CubeH8.hdf5";
+  data_collection_1[n_data++] = "./data/LMGC_GFC3D-i00001-1-00000.hdf5";
+  data_collection_1[n_data++] = "./data/LMGC_GFC3D-i00501-4-00000.hdf5";
+  
+  data_collection_1[n_data++] = "---";
 
-  char solvername[20] = "RELAY_PGS";
-  info = relay_test_function(finput, solver_options_name_to_id(solvername));
 
-  fclose(finput);
-
-  printf("End of test on %s\n", filename);
-
-  return info;
+  return data_collection_1;
 }
 

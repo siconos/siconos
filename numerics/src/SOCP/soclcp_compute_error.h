@@ -23,6 +23,8 @@
   \brief functions related to error computation for SOCLCP
 
 */
+#include "NumericsFwd.h"  // for SecondOrderConeLinearComplementarityProblem
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

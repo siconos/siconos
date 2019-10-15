@@ -15,18 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "SiconosConfig.h"
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-#include "SiconosBlas.h"
-#include "NonSmoothNewtonNeighbour.h"
-#include "FischerBurmeister.h"
-#include "numerics_verbose.h"
+#include <stdio.h>                              // for printf, fprintf, stderr
+#include <stdlib.h>                             // for exit
+#include "FischerBurmeister.h"                  // for jacobianPhi_Mixed_FB
+#include "MLCP_Solvers.h"                       // for mixedLinearComplement...
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NonSmoothNewton.h"                    // for NewtonFunctionPtr
+#include "NonSmoothNewtonNeighbour.h"           // for NSNN_reset, nonSmooth...
+#include "NumericsFwd.h"                        // for MixedLinearComplement...
+#include "NumericsMatrix.h"                     // for NM_gemv, NumericsMatrix
+#include "SolverOptions.h"                      // for SolverOptions
+#include "mlcp_FB.h"                            // for mlcp_FB_getNbDWork
+#include "numerics_verbose.h"                   // for verbose
+#include "SiconosBlas.h"                              // for cblas_dcopy
 
 static int sN = 0;
 static int sM = 0;
@@ -149,7 +150,7 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
 
   if (err > sMaxError)
     sMaxError = err;
-  if (verbose || 1)
+  if (verbose)
     printf("FB : MLCP Solved, error %10.10f   and max error  %10.10f \n", err, sMaxError);
 
   return;

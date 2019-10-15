@@ -16,235 +16,159 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_HYBR...
+#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
+  *number_of_tests = 9;//n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  for (int n =0 ; n <n_test ; n++)
+
+  // "External" solver parameters
+  // -> same values for all tests.
+  // The differences between tests are only for internal solvers and input data.
+  int topsolver = SICONOS_FRICTION_3D_NSGS;
+  int dpos[] = {1, SICONOS_DPARAM_TOL};  // ipos = [number of values in parameters list, indices]
+  double dparam[] = {1e-5};
+  int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};  // ipos = [number of values in parameters list, indices]
+  int iparam[] = {2000};
+
+  int current = 0;
+
+  
+
   {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
+    int d = 6; // BoxesStack1-i100000-32.hdf5.dat
+    // nonsmooth newton 'damped', Moreau-Jean formulation. Default for other parameters
+    int intern_ipos[] = {1, SICONOS_FRICTION_3D_NSN_FORMULATION};
+    int internal_iparam[] = {SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD};
+    dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
+    build_friction_test(data_collection[d],
+               topsolver, dpos, dparam, ipos, iparam,
+               SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL,  NULL, intern_ipos, internal_iparam,
+               &tests_list[current++]);
+    tests_list[current-1].will_fail=1;
+  }
+  {
+    int d = 6; // BoxesStack1-i100000-32.hdf5.dat
+    // nonsmooth newton 'damped', change hybrid strategy. Default for other parameters
+    int intern_ipos[] = {1, SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY};
+    int internal_iparam[] = {SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP};
+    dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
+    build_friction_test(data_collection[d],
+               topsolver, dpos, dparam, ipos, iparam,
+               SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL,  NULL, intern_ipos, internal_iparam,
+               &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail=1;
+
+  }
+  {
+    int d = 8; // KaplasTower-i1061-4.hdf5.dat";
+    
+    // Nonsmooth Newton "damped", default values.
+    dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
+    build_friction_test(data_collection[d],
+               topsolver, dpos, dparam, ipos, iparam,
+               SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL, NULL, NULL, NULL,
+               &tests_list[current++]);
+  }
+  {
+    int d = 8; // KaplasTower-i1061-4.hdf5.dat";
+   
+    // nonsmooth newton 'damped', Moreau-Jean formulation. Default for other parameters
+    int intern_ipos[] = {1, SICONOS_FRICTION_3D_NSN_FORMULATION};
+    int internal_iparam[] = {SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD};
+    dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
+    build_friction_test(data_collection[d],
+               topsolver, dpos, dparam, ipos, iparam,
+               SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL,  NULL, intern_ipos, internal_iparam,
+               &tests_list[current++]);
+
+  }
+  {
+    int d = 8; // KaplasTower-i1061-4.hdf5.dat";
+    // nonsmooth newton 'damped', change hybrid strategy. Default for other parameters
+    int intern_ipos[] = {1, SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY};
+    int internal_iparam[] = {SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP};
+    dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
+    build_friction_test(data_collection[d],
+               topsolver, dpos, dparam, ipos, iparam,
+               SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL,  NULL, intern_ipos, internal_iparam,
+               &tests_list[current++]);
   }
 
-  int n =0;
-  int e=0;
-  int d=8;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "2000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "---";
-  n++;
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "---";
-  n++;
+  {
+    int d = 9; // OneObject-i100000-499.hdf5.dat
+    // Nonsmooth Newton "damped", default values.
+    dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+    build_friction_test(data_collection[d],
+               topsolver, dpos, dparam, ipos, iparam,
+               SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL, NULL, NULL, NULL,
+               &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail=1;
+  }
+  {
+    int d = 9; // OneObject-i100000-499.hdf5.dat
+    // nonsmooth newton 'damped', Moreau-Jean formulation. Default for other parameters
+    int intern_ipos[] = {1, SICONOS_FRICTION_3D_NSN_FORMULATION};
+    int internal_iparam[] = {SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD};
+    dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
+    build_friction_test(data_collection[d],
+               topsolver, dpos, dparam, ipos, iparam,
+               SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL,  NULL, intern_ipos, internal_iparam,
+               &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail=1;
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY);
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP );
-  test_nsgs[n][e++] = "---";
-  n++;
+  }  
+  {
+    int d = 9; // OneObject-i100000-499.hdf5.dat
+    // nonsmooth newton 'damped', change hybrid strategy. Default for other parameters
+    int intern_ipos[] = {1, SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY};
+    int internal_iparam[] = {SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP};
+    dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    build_friction_test(data_collection[d],
+               topsolver, dpos, dparam, ipos, iparam,
+               SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL,  NULL, intern_ipos, internal_iparam,
+               &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail=1;
+  }
 
-  d=9;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "100000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY);
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP );
-  test_nsgs[n][e++] = "---";
-  n++;  
-
-
-  d=6;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "1";
-
-  test_nsgs[n][e++] = "---";
-  n++;
+  {
+    int d = 9; // OneObject-i100000-499.hdf5.dat
+    // Projection on cone with local iteration, set tol and max iter.
+    dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    double internal_dparam[] = {1e-12};
+    int internal_iparam[] = {10};
+    build_friction_test(data_collection[d],
+               topsolver, dpos, dparam, ipos, iparam,
+               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
+               dpos, internal_dparam, ipos, internal_iparam,
+               &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail=1;
+    
+  }
   
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY);
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP );
-  test_nsgs[n][e++] = "---";
-  n++;  
+  *number_of_tests = current;
+  return tests_list;
 
-  d=9;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  /* test_nsgs[n][e++] = "internal_iparam"; */
-  /* test_nsgs[n][e] = (char *)malloc(50*sizeof(char)); */
-  /* sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY); */
-  /* test_nsgs[n][e] = (char *)malloc(50*sizeof(char)); */
-  /* sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ); */
-  test_nsgs[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "---";
-  n++; 
-
-   e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-  test_nsgs[n][e++] = "1e-12";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-
-   e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY);
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP);
-  test_nsgs[n][e++] = "---";
-  n++; 
-
-
-  
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
-  
 }

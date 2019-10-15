@@ -15,20 +15,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include <math.h>
-#include <assert.h>
-#include "VariationalInequality_Solvers.h"
-#include "VariationalInequality_computeError.h"
-
-#include "NonSmoothDrivers.h"
-#include "SiconosBlas.h"
-#include "SiconosSets.h"
-#include "numerics_verbose.h"
+#include <assert.h>                              // for assert
+#include <math.h>                                // for fmin
+#include <stdio.h>                               // for printf, fprintf, NULL
+#include <stdlib.h>                              // for exit, EXIT_FAILURE
+#include "SiconosBlas.h"                               // for cblas_dnrm2, cblas_d...
+#include "NonSmoothDrivers.h"                    // for variationalInequalit...
+#include "NumericsFwd.h"                         // for VariationalInequality
+#include "SiconosSets.h"                         // for project_on_set
+#include "SolverOptions.h"                       // for SolverOptions, solve...
+#include "VI_cst.h"                              // for SICONOS_VI_BOX_AVI_LSA
+#include "VariationalInequality.h"               // for VariationalInequality
+#include "VariationalInequality_Solvers.h"       // for variationalInequalit...
+#include "VariationalInequality_computeError.h"  // for variationalInequalit...
+#include "debug.h"                               // for DEBUG_PRINTF
+#include "numerics_verbose.h"                    // for numerics_printf_verbose
 
 const char* const   SICONOS_VI_EG_STR = "VI_EG";
 const char* const   SICONOS_VI_FPP_STR = "VI_FPP";
@@ -36,13 +37,6 @@ const char* const   SICONOS_VI_HP_STR = "VI_HP";
 const char* const   SICONOS_VI_BOX_QI_STR = "Box VI solver based on Qi C-function";
 const char* const   SICONOS_VI_BOX_AVI_LSA_STR = "Box VI solver based on the Newton-Josephy method";
 const char* const   SICONOS_VI_BOX_PATH_STR = "Box VI solver based on PATH solver";
-
-/* #define DEBUG_MESSAGES */
-/* #define DEBUT_STDOUT */
-#include "debug.h"
-
-
-
 
 int variationalInequality_driver(VariationalInequality* problem, 
                                  double *x, double *w, 

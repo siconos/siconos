@@ -16,13 +16,15 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "numerics_verbose.h"
-#include "sn_error_handling.h"
+#include <stdarg.h>             // for va_list, va_end, va_start
+#include <stdio.h>              // for fputs, printf, size_t, NULL, vfprintf
+#include <stdlib.h>             // for free, malloc
+#include <string.h>             // for strlen, strncat
+#include "NumericsVerbose.h"    // for NUMERICS_LOG_TO_SCREEN, NUMERICS_EXTE...
+#include "numerics_verbose.h"   // for numerics_error, numerics_error_nonfatal
+#include "sn_error_handling.h"  // for sn_fatal_error, SN_UNKOWN_ERROR
+#include "tlsdef.h"             // for tlsvar
 
-#include <stdarg.h>
 /* the warning on vprintf is reported as a bug of clang ... --vacary */
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -114,7 +116,7 @@ void numerics_error_nonfatal(const char* fn_name, const char* msg, ...)
 
 }
 
-void numerics_warning(const char * fn_name, char* msg, ...)
+void numerics_warning(const char * fn_name, const char* msg, ...)
 {
   size_t fn_name_len = strlen(fn_name);
   const char* start_str = "[warning]. %s :: ";

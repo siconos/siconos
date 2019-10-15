@@ -1,21 +1,17 @@
-
-#include <sys/types.h>
-
 #ifdef INTEGERTIME
 # include <time.h>
 #else
 # include <sys/timeb.h>
 #endif
+#include "commonlib.h"
+#include <_ctype.h>     // for tolower, toupper
+#include <stdio.h>      // for fprintf, NULL, printf, FILE
+#include <stdlib.h>     // for malloc
+#include <string.h>     // for strlen, strcat, strcmp, strncmp, strrchr, strcpy
 
-#include <stdlib.h>
-#include <stdio.h>
 #ifdef WIN32
 # include <io.h>       /* Used in file search functions */
 #endif
-#include <ctype.h>
-#include <string.h>
-#include <math.h>
-#include "commonlib.h"
 
 #ifdef FORTIFY
 # include "lp_fortify.h"

@@ -16,101 +16,63 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
+#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_test_colle...
+#include "test_utils.h"                  // for TestCase
+
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=200;
-  int n_entry = 50;
-  char *** test_nsn = (char ***)malloc(n_test*sizeof(char **));
+  *number_of_tests = 7; //n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  for (int n =0 ; n <n_test ; n++)
+  int solvers[] = {SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_FB, SICONOS_FRICTION_3D_NSN_NM};
+  int current = 0;
+
+  int d= 6; // BoxesStack1-i100000-32.hdf5.dat
+  for(int s=0;s<3;++s)
+    {
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-3};
+      int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+      int iparam[] = {1500};
+      // 
+      build_friction_test(data_collection[d],
+                 solvers[s], dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
+  // NSN_FB expected to fail
+  tests_list[1].will_fail = 1;
+
+  
   {
-    test_nsn[n] = (char **)malloc(n_entry*sizeof(char *));
+    d = 10; // Rover4396.dat
+    int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+    double dparam[] = {1e-5};
+    int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 1};
+    int iparam[] = {1000, 1, 1};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_NSN_AC, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
   }
 
-  int n =0;
-  int d= 6;
-
-  int e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1500";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_FB);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_NM);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-
-  d=10;
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "1e-5";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "iparam";
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_FB);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_NM);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  test_nsn[n][0] ="---";
-  return test_nsn;
+  d = 10; // Rover4396.dat
+  for(int s=0;s<3;++s)
+    {
+      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
+      double dparam[] = {1e-3};
+      int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+      int iparam[] = {1000};
+      // 
+      build_friction_test(data_collection[d],
+                 solvers[s], dpos, dparam, ipos, iparam,
+                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
+  *number_of_tests = current;
+  return tests_list;
 
 }

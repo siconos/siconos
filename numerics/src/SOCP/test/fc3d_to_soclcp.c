@@ -15,16 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "soclcp_test_function.h"
-#include "FrictionContactProblem.h"
-#include "SecondOrderConeLinearComplementarityProblem.h"
-
-#include "../FrictionContact/test-utils/frictionContact_test_utils.h"
-
-
+#include <stdio.h>                                        // for fopen, printf
+#include <stdlib.h>                                       // for malloc
+#include "FrictionContactProblem.h"                       // for FrictionCon...
+#include "NumericsFwd.h"                                  // for FrictionCon...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 
 int main(void)
 {

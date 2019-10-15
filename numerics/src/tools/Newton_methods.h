@@ -29,11 +29,12 @@
  *
  */
 
-#include "SolverOptions.h"
-#include "SiconosConfig.h"
-#include "NumericsMatrix.h"
-
-#include <stdbool.h>
+#include <stddef.h>       // for NULL, size_t
+#include "NumericsFwd.h"  // for SolverOptions, NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#ifndef __cplusplus
+#include <stdbool.h>      // for bool
+#endif
 
 typedef void (*compute_F_ptr) (void* data_opaque, double* z, double* F);
 typedef void (*compute_F_merit_ptr) (void* data_opaque, double* z, double* F, double* F_merit);

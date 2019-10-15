@@ -25,6 +25,8 @@
 
 #include "NumericsFwd.h"
 #include <stdio.h>
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
 /* void * solverFC3D; */
 /* void * solverEquality; */
 /* void * solverLCP; */
@@ -110,12 +112,20 @@ extern "C"
    */
   void genericMechanicalProblem_printInFile(GenericMechanicalProblem*  problem, FILE* file);
 
-  /*To build a GenericMechanicalProblem from a file.
-   * \parm[in] file, a file containing the GenericMechanicalProblem.
-   * \return the GenericMechanicalProblem.
-   */
-  GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file);
+  /** build a problem from a file handler.
+      \param[inout] problem generic-mechanical problem structure
+      \param[in] file, file descriptor
+      \return file status (1 if everything has worked properly)
+  */
+  int genericMechanical_newFromFile(GenericMechanicalProblem* problem, FILE* file);
 
+  /** build a problem from a file.
+      \param[inout] problem, generic mechanical problem structure
+      \param[in] filename, name of the input file
+      \return file status (1 if everything has worked properly)
+  */
+  int genericMechanical_newFromFilename(GenericMechanicalProblem* problem, const char * filename);
+  
   /* A recursive displaying method.
    *  \param[in], pGMP the displayed problem.
    */

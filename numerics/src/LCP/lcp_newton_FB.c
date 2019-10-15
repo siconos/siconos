@@ -17,25 +17,15 @@
 */
 
 
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "SiconosLapack.h"
-#include "Newton_methods.h"
-#include "FischerBurmeister.h"
-
 #include "lcp_newton_FB.h"
+#include <assert.h>                        // for assert
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dgemv
+#include "FischerBurmeister.h"             // for Jac_F_FB, phi_FB
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_new...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "Newton_methods.h"                // for functions_LSA, init_lsa_fu...
+#include "NumericsMatrix.h"                // for NumericsMatrix
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
 
 void FB_compute_F_lcp(void* data_opaque, double* z, double* w)
 {

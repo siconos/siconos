@@ -16,17 +16,20 @@
  * limitations under the License.
 */
 
+#include "AVI_Solvers.h"       // for avi_pathavi
+#include "NumericsFwd.h"       // for AffineVariationalInequalities, SolverO...
+#include "numerics_verbose.h"  // for numerics_error_nonfatal
+
+
+
+#ifdef HAVE_PATHVI
 
 #include <string.h>
 
 #include "CSparseMatrix.h"
 #include "AffineVariationalInequalities.h"
-#include "AVI_Solvers.h"
 #include "NumericsMatrix.h"
-#include "numerics_verbose.h"
 #include "SiconosSets.h"
-
-#ifdef HAVE_PATHVI
 
 #include "PATHVI_helpers.h"
 #include "PATHVI_SDK/include/vi_consts.h"

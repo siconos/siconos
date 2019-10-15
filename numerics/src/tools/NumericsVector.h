@@ -22,14 +22,11 @@
 /*!\file NumericsVector.h
   \brief Structure definition and functions related to vector storage in Numerics
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <stdbool.h>
-
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-
-
+#ifndef __cplusplus
+#include <stdbool.h>  // for bool
+#endif
+#include <stdio.h>    // for FILE
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

@@ -15,15 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include "NumericsFwd.h"    // for SolverOptions, RelayProblem
+#include "Relay_Solvers.h"  // for relay_path, relay_path_setDefaultSolverOp...
+
+
+#ifdef HAVE_PATHFERRIS
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "Relay_Solvers.h"
 #include "relay_cst.h"
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
-#ifdef HAVE_PATHFERRIS
 #include "tools/InterfaceToPathFerris/SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/
 

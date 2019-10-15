@@ -1,11 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "stdlib.h"
-#include "VariationalInequality.h"
-#include "SolverOptions.h"
-#include "VI_cst.h"
-#include "VariationalInequality_Solvers.h"
+#include <stdio.h>                          // for printf
+#include <stdlib.h>                         // for free, malloc
+#include "NonSmoothDrivers.h"               // for variationalInequality_driver
+#include "NumericsFwd.h"                    // for VariationalInequality
+#include "SolverOptions.h"                  // for solver_options_delete
+#include "VI_cst.h"                         // for SICONOS_VI_HP, SICONOS_VI_EG
+#include "VariationalInequality.h"          // for VariationalInequality
+#include "VariationalInequality_Solvers.h"  // for variationalInequality_set...
 
 
 static void Ftest_0(void * viIn, int n, double *x, double *F)

@@ -16,40 +16,39 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSGS
+#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
+  int n_solvers = 1;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+  // "External" solver parameters
+  // -> same values for all tests.
+  // The differences between tests are only for internal solvers and input data.
+  int topsolver = SICONOS_FRICTION_3D_NSGS;
+  int dpos[] = {1, SICONOS_DPARAM_TOL};  // ipos = [number of values in parameters list, indices]
+  double dparam[] = {1e-5};
+  int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};  // ipos = [number of values in parameters list, indices]
+  int iparam[] = {10000};
 
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
-    test_nsgs[n][e++] = "1e-6";
-    test_nsgs[n][e++] = "10";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-  
-  
+  int current = 0;
+  for(int d =0; d <n_data; d++)
+    {
+      // Quartic solver, set tol and max iter.
+      double internal_dparam[] = {1e-6};
+      int internal_iparam[] = {10};
+      build_friction_test(data_collection[d],
+                 topsolver, dpos, dparam, ipos, iparam,
+                 SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, dpos, internal_dparam, ipos, internal_iparam,
+                 &tests_list[current++]);
+    }
 
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+  return tests_list;
 
 }

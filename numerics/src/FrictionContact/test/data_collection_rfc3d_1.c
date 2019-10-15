@@ -18,12 +18,12 @@
 
 #include "frictionContact_test_utils.h"
 
-char ** data_collection()
+const char ** data_collection()
 {
 
   int n_data_1=150;
 
-  char ** data_collection_1 = (char **)malloc(n_data_1*sizeof(char *));
+  const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
   data_collection_1[n_data++] = "./data/RFC3D_sphere_1.dat";
   data_collection_1[n_data++] = "./data/RFC3D_sphere_2.dat";

@@ -16,16 +16,13 @@
  * limitations under the License.
 */
 
-#include "fc3d_Solvers.h"
-#include "Friction_cst.h"
-#include "numerics_verbose.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-
-
+#include <math.h>                    // for fmax
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_IPARAM_INTER...
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "SolverOptions.h"           // for SolverOptions
+#include "fc3d_Solvers.h"            // for fc3d_set_internalsolver_tolerance
+#include "numerics_verbose.h"        // for numerics_printf_verbose, numeric...
 
 void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
                                                   SolverOptions* options,

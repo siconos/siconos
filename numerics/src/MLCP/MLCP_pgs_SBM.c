@@ -15,26 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-#include <float.h>
-/* #ifndef MEXFLAG */
-/* #include "NonSmoothDrivers.h" */
-/* #endif */
-#include "SparseBlockMatrix.h"
-#include "LinearComplementarityProblem.h"
-#include "MixedLinearComplementarityProblem.h"
-#include "NumericsMatrix.h"
-#include "SolverOptions.h"
-#include "SiconosBlas.h"
-#include "LCP_Solvers.h"
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <assert.h>
-#include "numerics_verbose.h"
+#include <assert.h>                             // for assert
+#include <float.h>                              // for DBL_EPSILON
+#include <math.h>                               // for fabs
+#include <stdio.h>                              // for printf, fprintf, NULL
+#include <stdlib.h>                             // for malloc, exit, free
+#include "LCP_Solvers.h"                        // for lcp_driver_DenseMatrix
+#include "LinearComplementarityProblem.h"       // for LinearComplementarity...
+#include "MLCP_Solvers.h"                       // for mlcp_compute_error
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NumericsFwd.h"                        // for SolverOptions, Linear...
+#include "NumericsMatrix.h"                     // for NumericsMatrix
+#include "SolverOptions.h"                      // for SolverOptions, solver...
+#include "SparseBlockMatrix.h"                  // for SparseBlockStructured...
+#include "mlcp_cst.h"                           // for SICONOS_MLCP_PGS_SBM
+#include "numerics_verbose.h"                   // for numerics_error, verbose
+#include "SiconosBlas.h"                              // for cblas_dcopy
+
 
 static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {

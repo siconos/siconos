@@ -16,14 +16,14 @@
  * limitations under the License.
 */
 
+#include "SiconosConfig.h"  // IWYU pragma: keep
+#ifdef WITH_UMFPACK
 #include "CSparseMatrix.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "debug.h"
 #include "numerics_verbose.h"
-
-#ifdef WITH_UMFPACK
 
 NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 {

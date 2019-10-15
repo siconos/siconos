@@ -16,172 +16,73 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_NSGS
+#include "frictionContact_test_utils.h"  // for build_gfc3d_test, build_test...
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test = (char ***)malloc(n_test*sizeof(char **));
+  int n_solvers = 6;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  
+  int current = 0;
+  for(int d =0; d <n_data; d++)
+    {
+      // GFC3D, NSGS, default values.
+      build_gfc3d_test(data_collection[d],
+                          SICONOS_GLOBAL_FRICTION_3D_NSGS, NULL, NULL, NULL, NULL,
+                          -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+  for(int d =0; d <n_data; d++)
+    {
+      // GFC3D, NSGS, default values.
+      // projection on cone for the internal solver, with default values.
+      build_gfc3d_test(data_collection[d],
+                          SICONOS_GLOBAL_FRICTION_3D_NSGS, NULL, NULL, NULL, NULL,
+                          SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone, NULL,  NULL, NULL, NULL,
+                          &tests_list[current++]);
+    }
+  
+  for ( int d =0; d <n_data; d++)
+    {
+      // GFC3D, VI_EG, default values.
+      build_gfc3d_test(data_collection[d],
+                          SICONOS_GLOBAL_FRICTION_3D_VI_EG, NULL, NULL, NULL, NULL,
+                          -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
 
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSGS);
-    test[n][e++] = "0";
-    test[n][e++] = "10000";
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSGS);
-    test[n][e++] = "0";
-    test[n][e++] = "10000";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-    test[n][e++] = "0.0";
-    test[n][e++] = "0";
-    test[n][e++] = "internal_iparam";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "internal_dparam";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_VI_EG);
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "---";
-    n++;
-  }
+  for ( int d =0; d <n_data; d++)
+    {
+      // GFC3D, VI_FPP, default values.
+      build_gfc3d_test(data_collection[d],
+                          SICONOS_GLOBAL_FRICTION_3D_VI_FPP, NULL, NULL, NULL, NULL,
+                          -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+      // Expected to fail
+      tests_list[18].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
 
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_VI_FPP);
-    test[n][e++] = "40000";
-    test[n][e++] = "0";
-    test[n][e++] = "---";
-    n++;
-  }
+    }
 
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ACLMFP);
-    test[n][e++] = "1e-5";
-    test[n][e++] = "1000";
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test[n][e++] = "1e-12";
-    test[n][e++] = "100000";
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test[n][e++] = "1e-12";
-    test[n][e++] = "100000";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "iparam";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING);
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test[n][e++] = "1e-12";
-    test[n][e++] = "100000";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "iparam";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d",SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S);
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d",SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO);
-    test[n][e++] = "---";
-    n++;
-  }
-  /* for ( int d =0; d <n_data_1; d++) */
-  /* { */
-  /*   int e=0; */
-  /*   test[n][e++] = data_collection_1[d]; */
-  /*   test[n][e++] = "0"; */
-  /*   test[n][e] = (char *)malloc(50*sizeof(char)); */
-  /*   sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM); */
-  /*   test[n][e++] = "1e-12"; */
-  /*   test[n][e++] = "1000"; */
-  /*   test[n][e++] = "0"; */
-  /*   test[n][e++] = "0"; */
-  /*   test[n][e++] = "0"; */
-  /*   test[n][e++] = "iparam"; */
-  /*   test[n][e] = (char *)malloc(50*sizeof(char)); */
-  /*   sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY); */
-  /*   test[n][e] = (char *)malloc(50*sizeof(char)); */
-  /*   sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING); */
-  /*   test[n][e++] = "iparam"; */
-  /*   test[n][e] = (char *)malloc(50*sizeof(char)); */
-  /*   sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION); */
-  /*   test[n][e] = (char *)malloc(50*sizeof(char)); */
-  /*   sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_NO_ACCELERATION); */
-  /*   test[n][e++] = "---";  */
-  /*   n++; */
-  /* } */
-    
-    
-  test[n][0] ="---";
-  return test;
+  for ( int d =0; d <n_data; d++)
+    {
+      // GFC3D, ACLMFP, default values.
+      build_gfc3d_test(data_collection[d],
+                          SICONOS_GLOBAL_FRICTION_3D_ACLMFP, NULL, NULL, NULL, NULL,
+                          -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
+
+  for ( int d =0; d <n_data; d++)
+    {
+      // GFC3D, ADMM, default values.
+      build_gfc3d_test(data_collection[d],
+                          SICONOS_GLOBAL_FRICTION_3D_ADMM, NULL, NULL, NULL, NULL,
+                          -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    }
+
+
+  return tests_list;
 
 }

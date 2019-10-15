@@ -15,16 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-
-#include "rolling_fc3d_Solvers.h"
-
-#include "NonSmoothDrivers.h"
-#include "Newton_methods.h"
+#include "Friction_cst.h"          // for SICONOS_ROLLING_FRICTION_3D_NSGS
+#include "NumericsFwd.h"           // for SolverOptions
+#include "SolverOptions.h"         // for solver_options_nullify, solver_opt...
+#include "rolling_fc3d_Solvers.h"  // for rolling_fc3d_nsgs_setDefaultSolver...
 
 int rolling_fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId)
 {

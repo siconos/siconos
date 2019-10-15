@@ -15,20 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-//#include "projectionOnCone.h"
-#include "VariationalInequality_Solvers.h"
-#include "VariationalInequality_computeError.h"
-#include "SiconosBlas.h"
 
-#include <float.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "numerics_verbose.h"
-
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include <float.h>                               // for DBL_EPSILON
+#include <math.h>                                // for fabs, NAN
+#include <stdio.h>                               // for printf, NULL
+#include <stdlib.h>                              // for calloc, free, malloc
+#include "SiconosBlas.h"                               // for cblas_daxpy, cblas_d...
+#include "NumericsFwd.h"                         // for SolverOptions, Varia...
+#include "SolverOptions.h"                       // for SolverOptions, SICON...
+#include "VI_cst.h"                              // for SICONOS_VI_IPARAM_ER...
+#include "VariationalInequality.h"               // for VariationalInequality
+#include "VariationalInequality_Solvers.h"       // for variationalInequalit...
+#include "VariationalInequality_computeError.h"  // for variationalInequalit...
+#include "debug.h"                               // for DEBUG_PRINTF, DEBUG_...
+#include "numerics_verbose.h"                    // for verbose, numerics_error
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -111,7 +111,8 @@ double compute_error(VariationalInequality* problem,
   else
   {
     return NAN;
-    numerics_error("compute_error(VariationalInequality* problem, ...)", "unknown error evaluation strategy");
+    // unreachable code => comment.
+    // numerics_error("compute_error(VariationalInequality* problem, ...)", "unknown error evaluation strategy");
   }
   return error;
 }

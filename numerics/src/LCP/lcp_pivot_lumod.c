@@ -16,36 +16,34 @@
  * limitations under the License.
 */
 
+#define NO_LEXICO_MAT
+#define WARN_ONLY_SMALL_PIVOT
+#define LEXICO_TOL 1e3*DBL_EPSILON
 
-#include <math.h>
-#include <float.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "pivot-utils.h"
-#include "lumod_wrapper.h"
-#include "numerics_verbose.h"
-#include "SiconosLapack.h"
-
+#include <assert.h>                        // for assert
+#include <float.h>                         // for DBL_EPSILON
+#include <limits.h>                        // for INT_MAX
+#include <math.h>                          // for fabs
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for free, malloc, calloc, exit
+#include <string.h>                        // for memset
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_piv...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_NO_MATRIX
-#include "debug.h"
+#include "debug.h"                         // for DEBUG_EXPR_WE, DEBUG_PRINT
+#include "lcp_cst.h"                       // for SICONOS_LCP_PIVOT_LEMKE
+#include "lcp_pivot.h"                     // for LCP_PATHSEARCH_LEAVING_T
+#include "lumod_wrapper.h"                 // for SN_lumod_dense_solve, SN_l...
+#include "numerics_verbose.h"              // for verbose
+#include "pivot-utils.h"                   // for do_pivot_lumod
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_daxpy
 
-#define NO_LEXICO_MAT
-
-#define WARN_ONLY_SMALL_PIVOT
-#include "lcp_pivot.h"
-#include "pivot-utils.h"
-#define LEXICO_TOL 1e3*DBL_EPSILON
+#define BASIS_OFFSET 1
 
 DEBUG_GLOBAL_VAR_DECL(unsigned * basis_global;);
 

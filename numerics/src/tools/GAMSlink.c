@@ -1,7 +1,6 @@
 /* GAMS stuff */
 
 #define _XOPEN_SOURCE 700
-#include <string.h>
 
 #if (__linux ||  __APPLE__)
 #elif _MSC_VER
@@ -16,6 +15,8 @@ static inline char* strdup(const char* src)
 }
 #endif
 
+
+#ifdef HAVE_GAMS_C_API
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -27,8 +28,6 @@ static inline char* strdup(const char* src)
 #include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
 #include "SolverOptions.h"
-
-#ifdef HAVE_GAMS_C_API
 
 #include "GAMSlink.h"
 

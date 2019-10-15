@@ -17,24 +17,21 @@
  * limitations under the License.
 */
 
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
-#include "SOCLCP_Solvers.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-#include <string.h>
-
-//#define VERBOSE_DEBUG
-#include "Friction_cst.h"
-#include "SiconosBlas.h"
-
-#define DEBUG_MESSAGES
-#define DEBUG_STDOUT
-#include "debug.h"
-#include "numerics_verbose.h"
+#include <math.h>                                         // for fabs
+#include <stdio.h>                                        // for printf, NULL
+#include <stdlib.h>                                       // for malloc, free
+#include <string.h>                                       // for memcpy
+#include "FrictionContactProblem.h"                       // for FrictionCon...
+#include "Friction_cst.h"                                 // for SICONOS_FRI...
+#include "NumericsFwd.h"                                  // for SolverOptions
+#include "SOCLCP_Solvers.h"                               // for soclcp_nsgs...
+#include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "SolverOptions.h"                                // for SolverOptions
+#include "fc3d_Solvers.h"                                 // for fc3d_SOCLCP
+#include "fc3d_compute_error.h"                           // for fc3d_comput...
+#include "numerics_verbose.h"                             // for verbose
+#include "SiconosBlas.h"                                        // for cblas_dnrm2
 
 
 /** pointer to function used to call internal solver for proximal point solver */
@@ -50,7 +47,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
   int nc = problem->numberOfContacts;
 
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
  
 
@@ -101,8 +98,8 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
     fprintf(stderr, "Numerics, fc3d_SOCLCP failed. Unknown internal solver.\n");
     exit(EXIT_FAILURE);
   }
-  internalsolver_options->dparam[0]=options->dparam[0];
-  internalsolver_options->iparam[0]=options->iparam[0];
+  internalsolver_options->dparam[SICONOS_DPARAM_TOL]=options->dparam[SICONOS_DPARAM_TOL];
+  internalsolver_options->iparam[SICONOS_IPARAM_MAX_ITER]=options->iparam[SICONOS_IPARAM_MAX_ITER];
 
   (*internalsolver)(soclcp, reaction , velocity , info , internalsolver_options);
 
@@ -134,7 +131,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
   if (internalsolver_options->internalSolvers != NULL)
     internalsolver_options->internalSolvers->dWork = NULL;
 
-  dparam[0] = tolerance;
+  dparam[SICONOS_DPARAM_TOL] = tolerance;
   dparam[1] = error;
   dparam[2] = fabs(real_error-error);
   iparam[7] = internalsolver_options->iparam[7];
@@ -160,11 +157,11 @@ int fc3d_SOCLCP_setDefaultSolverOptions(SolverOptions* options)
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-4;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
 
   soclcp_nsgs_setDefaultSolverOptions(options->internalSolvers);
-  options->internalSolvers->iparam[0] =10000;
+  options->internalSolvers->iparam[SICONOS_IPARAM_MAX_ITER] =10000;
   return 0;
 }

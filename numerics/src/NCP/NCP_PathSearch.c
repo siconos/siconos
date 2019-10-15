@@ -15,35 +15,64 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include <assert.h>
-
-#include "NCP_Solvers.h"
-#include "LCP_Solvers.h"
-#include "SolverOptions.h"
-#include "SiconosBlas.h"
-
-#include "lcp_pivot.h"
-#include "pivot-utils.h"
-#include "NMS.h"
-#include "NSSTools.h"
-
-#include "sanitizer.h"
-
 #include "NCP_PathSearch.h"
+#include <assert.h>                           // for assert
+#include <float.h>                            // for DBL_EPSILON, DECIMAL_DIG
+#include <math.h>                             // for fmax, sqrt, fmin
+#include <stdio.h>                            // for printf, NULL
+#include <stdlib.h>                           // for malloc, free, exit, EXI...
+#include <string.h>                           // for memset
+#include "ArmijoSearch.h"                     // for armijo_extra_params
+#include "LCP_Solvers.h"                      // for lcp_compute_error, lcp_...
+#include "LinearComplementarityProblem.h"     // for LinearComplementarityPr...
+#include "NCP_Solvers.h"                      // for ncp_compute_error, ncp_...
+#include "NMS.h"                              // for NMS_data, NMS, NMS_best...
+#include "NSSTools.h"                         // for pos_part
+#include "Newton_methods.h"                   // for functions_LSA, init_lsa...
+#include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
+#include "NumericsFwd.h"                      // for SolverOptions, Nonlinea...
+#include "NumericsMatrix.h"                   // for NM_display, NM_free
+#include "PathSearch.h"                       // for pathsearch_data
+#include "SiconosBlas.h"                      // for cblas_daxpy, cblas_ddot
+#include "SiconosSets.h"                      // for set_set_id, SICONOS_SET...
+#include "SolverOptions.h"                    // for SolverOptions, SICONOS_...
+#include "debug.h"                            // for DEBUG_PRINT, DEBUG_PRINTF
+#include "lcp_cst.h"                          // for SICONOS_LCP_PIVOT_PATHS...
+#include "lcp_pivot.h"                        // for LCP_PATHSEARCH_LEAVING_T
+#include "line_search.h"                      // for search_data
+#include "ncp_newton_FBLSA.h"                 // for FB_compute_F_ncp, FB_co...
+#include "pivot-utils.h"                      // for lcp_pivot_diagnose_info
+#include "sanitizer.h"                        // for cblas_dcopy_msan
 
-#include "ncp_newton_FBLSA.h"
 
-#include "SiconosCompat.h"
-#include "lcp_cst.h"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
+/** update the lcp subproblem: M, q and r
+ * \param problem the NCP problem to solve
+ * \param lcp_subproblem the lcp problem to fill
+ * \param n size of the NCP problem
+ * \param x_plus positive part of x
+ * \param x current newton iterate
+   * \param r value of the normal map
+   */
+static void ncp_pathsearch_update_lcp_data(NonlinearComplementarityProblem* problem, LinearComplementarityProblem* lcp_subproblem, unsigned n, double* restrict x_plus, double* restrict x, double* restrict r)
+{
+  /* compute M = nabla F(x_plus) */
+  problem->compute_nabla_F(problem->env, n, x_plus, problem->nabla_F);
+  
+  /* r = F_+(x) = F(x_+) + x - x_+ */
+  /* the real q = q - r = x_+ - x - M x_plus */
+  /* q = -M x_plus */
+  NM_gemv(-1.0, problem->nabla_F, x_plus, 0.0, lcp_subproblem->q);
+  
+  /* first compute r = x - x_+ */
+  cblas_dcopy(n, x, 1, r, 1); /* r = x */
+  cblas_daxpy(n, -1.0, x_plus, 1, r, 1); /* r -= x_plus */
+  /* we factorized computations */
+  cblas_daxpy(n, -1.0, r, 1, lcp_subproblem->q, 1); /* q -= x - x_plus */
+  /* Finish r */
+  problem->compute_F(problem->env, n, x_plus, x); /* compute F(x_plus) */
+  cblas_daxpy(n, 1.0, x, 1, r, 1); /* r += F(x_plus) */
+  
+}
 
 void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double* F, int *info , SolverOptions* options)
 {

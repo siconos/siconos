@@ -16,91 +16,77 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdio.h>                       // for NULL
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
+#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "frictionContact_test_utils.h"  // for build_friction_test, build_test_colle...
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_fp = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
+  *number_of_tests = 4; //n_data * n_solvers;
+  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  
+  int current = 0;
+  
   {
-    test_fp[n] = (char **)malloc(n_entry*sizeof(char *));
+    int d = 0; // FC3D_Example1_SBM.dat
+    // DeSaxce FP, rho  = 2.
+    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_FRICTION_3D_ADMM_RHO};
+    double dparam[] = {1e-8, 2.};
+    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+    int iparam[] = {100000};
+    
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_DSFP, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail = 1;
   }
 
-  int n =0;
-  int e=0;
   
-  int d=6;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_DSFP);
-  test_fp[n][e++] = "1e-03";
-  test_fp[n][e++] = "100000";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "dparam";
-  test_fp[n][e++] = "3";
-  test_fp[n][e++] = "8e4";
-  test_fp[n][e++] = "---";
-  n++;
-
-  d=5;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_DSFP);
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "dparam";
-  test_fp[n][e++] = "3";
-  test_fp[n][e++] = "1e2";
-  test_fp[n][e++] = "---";
-  n++;
+  {
+    int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
+    // DeSaxce FP, rho  = 5e-3, default for others.
+    int dpos[] = {1, SICONOS_FRICTION_3D_ADMM_RHO};
+    double dparam[] = {5e3};    
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_DSFP, dpos, dparam, NULL, NULL,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail = 1;
+  }
   
-  d=2;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_DSFP);
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "dparam";
-  test_fp[n][e++] = "3";
-  test_fp[n][e++] = "5e3";
-  test_fp[n][e++] = "---";
-  n++;
-
-  d=0;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_DSFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "100000";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "dparam";
-  test_fp[n][e++] = "3";
-  test_fp[n][e++] = "2.0";
-  test_fp[n][e++] = "---";
-  n++;
+  {
+    int d = 5;  // Confeti-ex03-Fc3D-SBM.dat
+    // DeSaxce FP, rho  = 1e-2, default for others.
+    int dpos[] = {1, SICONOS_FRICTION_3D_ADMM_RHO};
+    double dparam[] = {1e2};    
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_DSFP, dpos, dparam, NULL, NULL,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail = 1;
+  }
   
-  test_fp[n][0] ="---";
-  return test_fp;
+  {
+    int d = 6; // BoxesStack1-i100000-32.hdf5.dat
+    // DeSaxce FP, rho  = 8e4.
+    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_FRICTION_3D_ADMM_RHO};
+    double dparam[] = {1.e-3, 8.e4};
+    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
+    int iparam[] = {100000};
+    // 
+    build_friction_test(data_collection[d],
+               SICONOS_FRICTION_3D_DSFP, dpos, dparam, ipos, iparam,
+               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+    // expected to fail
+    tests_list[current-1].will_fail = 1;
+  }
+  *number_of_tests = current;
+  return tests_list;
 
 }

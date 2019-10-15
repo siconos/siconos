@@ -17,47 +17,17 @@
 */
 
 #define _XOPEN_SOURCE 700
-#include <string.h>
-
-#if (__linux ||  __APPLE__)
-#elif _MSC_VER
-#define strdup _strdup
-#else
-static inline char* strdup(char* src)
-{
-  size_t len = strlen(src) + 1;
-  char* dest = (char*)malloc(len * sizeof(char));
-  strcpy(dest, src, len);
-  return dest;
-}
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include "CSparseMatrix.h"
-
-// avoid a conflict with old csparse.h in case fclib includes it
-#define _CS_H
-
-#include "NonSmoothDrivers.h"
 #include "rollingFrictionContact_test_function.h"
-#include "gfc3d_Solvers.h"
-#include "RollingFrictionContactProblem.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
-#include "NumericsVector.h"
-#include "SiconosCompat.h"
-
-#include <string.h>
+#include <math.h>                           // for isfinite
+#include <stdio.h>                          // for printf, fclose, fopen, FILE
+#include <stdlib.h>                         // for malloc, free
+#include "NonSmoothDrivers.h"               // for rolling_fc3d_driver
+#include "NumericsVerbose.h"                // for numerics_set_verbose
+#include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
+#include "SiconosConfig.h" // for WITH_FCLIB // IWYU pragma: keep
 #if defined(WITH_FCLIB)
 #include <fclib.h>
 #include <fclib_interface.h>
-#endif
-
-#ifdef __cplusplus
-using namespace std;
 #endif
 
 int rollingFrictionContact_test_function(FILE * f, SolverOptions * options)

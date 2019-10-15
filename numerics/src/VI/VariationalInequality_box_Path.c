@@ -16,14 +16,16 @@
  * limitations under the License.
 */
 
+#include <stdio.h>                          // for printf
+#include "NumericsFwd.h"                    // for SolverOptions, Variationa...
+#include "VariationalInequality_Solvers.h"  // for vi_box_path
+#include "SiconosConfig.h" // for HAVE_PATHFERRIS // IWYU pragma: keep
 
-#include <stdio.h>
-#include "VariationalInequality.h"
-#include "SolverOptions.h"
 
-#include "VariationalInequality_Solvers.h"
 
 #ifdef HAVE_PATHFERRIS
+#include "VariationalInequality.h"
+#include "SolverOptions.h"
 
 #include <limits.h>
 #include <assert.h>

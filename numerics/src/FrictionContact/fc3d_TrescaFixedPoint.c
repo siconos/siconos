@@ -15,18 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
-#include "SiconosBlas.h"
-#include "Friction_cst.h"
-#include "numerics_verbose.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-
+#include <math.h>                    // for fmax
+#include <stdio.h>                   // for printf, NULL
+#include <stdlib.h>                  // for calloc, malloc, free
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ConvexQP_PG_...
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "SolverOptions.h"           // for SolverOptions, SICONOS_IPARAM_MA...
+#include "fc3d_Solvers.h"            // for fc3d_nsgs_setDefaultSolverOptions
+#include "fc3d_compute_error.h"      // for fc3d_compute_error
+#include "numerics_verbose.h"        // for numerics_error, verbose, numeric...
+#include "SiconosBlas.h"                   // for cblas_dnrm2
 
 void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {

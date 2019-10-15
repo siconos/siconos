@@ -18,13 +18,12 @@
 #ifndef MLCP_PROBLEM_C
 #define MLCP_PROBLEM_C
 
-
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
 #include "MixedLinearComplementarityProblem.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
+#include <assert.h>            // for assert
+#include <stdio.h>             // for printf, fprintf, fscanf, NULL, FILE
+#include <stdlib.h>            // for malloc, atof, free, exit, EXIT_FAILURE
+#include "NumericsMatrix.h"    // for NM_dense_display, NumericsMatrix, NM_c...
+#include "numerics_verbose.h"  // for CHECK_IO
 
 void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
 {

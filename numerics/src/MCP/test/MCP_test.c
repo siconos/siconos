@@ -16,14 +16,13 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "MCP_cst.h"
-#include "MixedComplementarityProblem.h"
-#include "SolverOptions.h"
-#include "MCP_Solvers.h"
-
+#include <stdio.h>                        // for printf, NULL
+#include <stdlib.h>                       // for malloc
+#include "MCP_Solvers.h"                  // for mcp_old_driver_init, mcp_ol...
+#include "MCP_cst.h"                      // for SICONOS_MCP_OLD_FB
+#include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem...
+#include "NumericsFwd.h"                  // for MixedComplementarityProblem...
+#include "SolverOptions.h"                // for solver_options_delete, Solv...
 
 void testF(int size, double *z, double * F);
 void testF(int size, double *z, double * F)

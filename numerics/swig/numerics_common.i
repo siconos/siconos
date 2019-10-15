@@ -21,11 +21,7 @@
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
 
     /* cf Friction_cst.h */
-    if(id >= 400 && id < 500)
-    {
-      fc2d_setDefaultSolverOptions(SO, id);
-    }
-    else if (id >= 500 && id < 600)
+    if(id >= 400 && id < 600)
     {
       fc3d_setDefaultSolverOptions(SO, id);
     }

@@ -15,18 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "projectionOnCone.h"
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "SiconosBlas.h"
+#include <math.h>                    // for sqrt, pow
+#include <stdio.h>                   // for printf, NULL
+#include <stdlib.h>                  // for calloc, free, malloc
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_FPP
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NM_gemv
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include "numerics_verbose.h"
+#include "debug.h"                   // for DEBUG_EXPR_WE, DEBUG_PRINTF
+#include "fc3d_Solvers.h"            // for fc3d_fixedPointProjection, fc3d_...
+#include "fc3d_compute_error.h"      // for fc3d_compute_error
+#include "numerics_verbose.h"        // for verbose
+#include "projectionOnCone.h"        // for projectionOnCone
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2, cblas_...
 
 void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -262,8 +267,8 @@ int fc3d_fixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
   options->dparam = (double *)calloc(options->dSize, sizeof(double));
   options->dWork = NULL;
   solver_options_nullify(options);
-  options->iparam[0] = 20000;
-  options->dparam[0] = 1e-3;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
   options->dparam[3] = 1.0; /* Default value for rho (line search activated)*/
 
   options->internalSolvers = NULL;

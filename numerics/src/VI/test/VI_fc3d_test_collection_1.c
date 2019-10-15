@@ -1,17 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "NonSmoothDrivers.h"
-#include "projectionOnCone.h"
-#include "VariationalInequality.h"
-#include "FrictionContactProblem.h"
-#include "SolverOptions.h"
-#include "SiconosBlas.h"
-#include "VariationalInequality.h"
-#include "SolverOptions.h"
-#include "VI_cst.h"
-#include "VariationalInequality_Solvers.h"
-#include "NumericsMatrix.h"
+#include <math.h>                           // for sqrt
+#include <stdio.h>                          // for printf, fopen, NULL, FILE
+#include <stdlib.h>                         // for free, malloc, calloc
+#include "FrictionContactProblem.h"         // for FrictionContactProblem
+#include "NonSmoothDrivers.h"               // for variationalInequality_driver
+#include "NumericsFwd.h"                    // for FrictionContactProblem
+#include "NumericsMatrix.h"                 // for NM_gemv
+#include "SolverOptions.h"                  // for solver_options_delete
+#include "VI_cst.h"                         // for SICONOS_VI_EG, SICONOS_VI...
+#include "VariationalInequality.h"          // for VariationalInequality
+#include "VariationalInequality_Solvers.h"  // for variationalInequality_set...
+#include "projectionOnCone.h"               // for projectionOnCone
+#include "SiconosBlas.h"   // for cblas_dcopy
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

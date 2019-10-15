@@ -15,19 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "Relay_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "LCP_Solvers.h"
-#include "relay_cst.h"
-
-#include <assert.h>
-#include "numerics_verbose.h"
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for malloc, free
+#include "LCP_Solvers.h"                   // for lcp_compute_error, linearC...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NonSmoothDrivers.h"              // for linearComplementarity_driver
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "RelayProblem.h"                  // for RelayProblem
+#include "Relay_Solvers.h"                 // for relay_to_lcp, relay_lexico...
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "numerics_verbose.h"              // for verbose
+#include "relay_cst.h"                     // for SICONOS_RELAY_LEMKE
 
 void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {

@@ -16,23 +16,21 @@
  * limitations under the License.
 */
 
-
-#include "ConvexQP.h"
-#include "SolverOptions.h"
 #include "ConvexQP_computeError.h"
-#include "NumericsMatrix.h"
-#include "SiconosLapack.h"
-#include "SiconosSets.h"
-#include "NumericsVector.h"
-#include <math.h>
-#include <assert.h>
-#include <float.h>
-
+#include <assert.h>            // for assert
+#include <float.h>             // for DBL_EPSILON
+#include <math.h>              // for fabs, sqrt
+#include <stdio.h>             // for printf
+#include <stdlib.h>            // for calloc
+#include "ConvexQP.h"          // for ConvexQP
+#include "NumericsMatrix.h"    // for NM_gemv, NM_tgemv
+#include "SolverOptions.h"     // for SolverOptions
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include "numerics_verbose.h"
+#include "debug.h"             // for DEBUG_EXPR, DEBUG_PRINTF
+#include "numerics_verbose.h"  // for verbose
+#include "SiconosBlas.h"             // for cblas_dcopy, cblas_daxpy, cblas_dnrm2
 
 int convexQP_compute_error_reduced(
   ConvexQP* problem,

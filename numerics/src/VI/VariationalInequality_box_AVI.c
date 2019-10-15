@@ -16,14 +16,20 @@
  * limitations under the License.
 */
 
-#include "VariationalInequality_Solvers.h"
-#include "VariationalInequality_computeError.h"
-#include "Relay_Solvers.h"
-#include "SiconosSets.h"
-#include "SiconosBlas.h"
-#include "Newton_methods.h"
-#include "VI_Newton.h"
-#include "sanitizer.h"
+#include <assert.h>                         // for assert
+#include <stdlib.h>                         // for malloc, free, NULL
+#include "SiconosBlas.h"                          // for cblas_daxpy
+#include "Newton_methods.h"                 // for functions_LSA, init_lsa_f...
+#include "NumericsFwd.h"                    // for RelayProblem, SolverOptions
+#include "NumericsMatrix.h"                 // for NM_assert, NM_create_from...
+#include "RelayProblem.h"                   // for RelayProblem, freeRelay_p...
+#include "Relay_Solvers.h"                  // for relay_avi_caoferris, rela...
+#include "SiconosSets.h"                    // for box_constraints
+#include "SolverOptions.h"                  // for SolverOptions
+#include "VI_Newton.h"                      // for VI_compute_F, VI_compute_...
+#include "VariationalInequality.h"          // for VariationalInequality
+#include "VariationalInequality_Solvers.h"  // for vi_box_AVI_LSA, vi_box_AV...
+#include "sanitizer.h"                      // for cblas_dcopy_msan
 
 typedef struct {
   NumericsMatrix* mat;

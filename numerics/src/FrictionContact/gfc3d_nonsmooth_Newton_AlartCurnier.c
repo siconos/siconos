@@ -20,38 +20,31 @@
 /* /!\ work in progress */
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
-
-#include "SiconosConfig.h"
-#include "CSparseMatrix.h"
 #include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
-#include "gfc3d_Solvers.h"
-#include "gfc3d_compute_error.h"
-#include "AlartCurnierGenerated.h"
-#include "fc3d_AlartCurnier_functions.h"
-#include "op3x3.h"
-#include "SparseBlockMatrix.h"
-#include "numerics_verbose.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-#include <string.h>
-
-#include "sanitizer.h"
-
-#include "CSparseMatrix.h"
-#include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-
-#include "gfc3d_compute_error.h"
-#include "SiconosBlas.h"
-#include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
-#include "NumericsVector.h"
-#include "cond.h"
-
-/* #define DEBUG_MESSAGES 1 */
-/* #define DEBUG_STDOUT */
-#include <debug.h>
+#include <assert.h>                              // for assert
+#include <debug.h>                               // for DEBUG_PRINTF, DEBUG_...
+#include <float.h>                               // for DBL_EPSILON
+#include <math.h>                                // for fabs, INFINITY
+#ifndef __cplusplus
+#include <stdbool.h>                             // for true
+#endif
+#include <stdio.h>                               // for NULL, printf, fprintf
+#include <stdlib.h>                              // for calloc, free, malloc
+#include <string.h>                              // for memcpy
+#include "AlartCurnierGenerated.h"               // for fc3d_AlartCurnierFun...
+#include "CSparseMatrix.h"                       // for CSparseMatrix, CSpar...
+#include "Friction_cst.h"                        // for SICONOS_FRICTION_3D_...
+#include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
+#include "NumericsMatrix.h"                      // for NM_triplet, Numerics...
+#include "NumericsSparseMatrix.h"                // for NSM_new, NumericsSpa...
+#include "SolverOptions.h"                       // for SolverOptions, SICON...
+#include "fc3d_AlartCurnier_functions.h"         // for computeAlartCurnierJ...
+#include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for fc3d_AlartCurnierFun...
+#include "gfc3d_Solvers.h"                       // for gfc3d_nonsmooth_Newt...
+#include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
+#include "numerics_verbose.h"                    // for numerics_printf_verbose
+#include "sanitizer.h"                           // for cblas_dcopy_msan
+#include "SiconosBlas.h"                               // for cblas_daxpy, cblas_d...
 
 /* compute psi function */
 void ACPsi(
@@ -699,8 +692,9 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     {
       fprintf(stderr, "---- GFC3D - NSN_AC - solver failed info = %d\n", info_solver);
       break;
-      info[0] = 2;
-      CHECK_RETURN(!CSparseMatrix_check_triplet(NM_triplet(AA)));
+      // Unreachable code => comment.
+      /* info[0] = 2; */
+      /* CHECK_RETURN(!CSparseMatrix_check_triplet(NM_triplet(AA))); */
     }
 
     /* Check the quality of the solution */

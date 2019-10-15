@@ -38,66 +38,66 @@ int main(void)
   fclose(finput);
 
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSGS_SBM);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_NSGS_SBM);
   assert(options->internalSolvers);
   solver_options_set(options->internalSolvers, SICONOS_LCP_LEMKE);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_PGS);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_PGS);
   solver_options_print(options);
   solver_options_delete(options);
 
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_RPGS);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_RPGS);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_QP);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_QP);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSQP);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_NSQP);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_CPG);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_CPG);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_PSOR);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_PSOR);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_LATIN);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_LATIN);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_LATIN_W);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_LATIN_W);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_LEMKE);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_LEMKE);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_PATH);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_PATH);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_ENUM);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_ENUM);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NEWTONMIN);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_NEWTONMIN);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_AVI_CAOFERRIS);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_AVI_CAOFERRIS);
   solver_options_print(options);
   solver_options_delete(options);
 
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_PIVOT);
+  info = linearComplementarity_setDefaultSolverOptions(options, SICONOS_LCP_PIVOT);
   solver_options_print(options);
   solver_options_delete(options);
 

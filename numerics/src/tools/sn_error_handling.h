@@ -22,10 +22,8 @@
 #ifndef ERROR_HANDLING_H
 #define ERROR_HANDLING_H
 
-#include "SiconosConfig.h"
-#include "tlsdef.h"
-#include <setjmp.h>
-#include <stdbool.h>
+#include <setjmp.h>  // for jmp_buf
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #define SN_SETJMP_INTERNAL_START setjmp(*sn_get_internal_jmp_buf())
 #define SN_SETJMP_INTERNAL_STOP sn_release_internal_jmp_buf();

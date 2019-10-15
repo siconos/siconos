@@ -16,16 +16,18 @@
  * limitations under the License.
 */
 
-#include "SiconosConfig.h"
+#include "NCP_Solvers.h"        // for ncp_path
+#include "NumericsFwd.h"        // for NonlinearComplementarityProblem, Solv...
+#include "sn_error_handling.h"  // for sn_fatal_error, SN_NOT_COMPILED_ERROR
 
+#include "SiconosConfig.h" // for HAVE_PATHFERRIS // IWYU pragma: keep
+
+
+#ifdef HAVE_PATHFERRIS
 #include <stdio.h>
 
 #include "NonlinearComplementarityProblem.h"
 #include "SolverOptions.h"
-#include "NCP_Solvers.h"
-#include "sn_error_handling.h"
-
-#ifdef HAVE_PATHFERRIS
 
 #include <limits.h>
 #include <assert.h>

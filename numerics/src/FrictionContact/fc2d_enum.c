@@ -16,21 +16,20 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include <assert.h>
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for malloc, calloc, free
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "Friction_cst.h"                  // for SICONOS_FRICTION_2D_ENUM
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_enu...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NonSmoothDrivers.h"              // for linearComplementarity_driver
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "fc2d_Solvers.h"                  // for fc2d_tolcp, fc2d_enum, fc2...
+#include "fc2d_compute_error.h"            // for fc2d_compute_error
+#include "numerics_verbose.h"              // for verbose
+#include "SiconosBlas.h"                         // for cblas_dnrm2
 
-
-#include "NonSmoothDrivers.h"
-#include "fc2d_Solvers.h"
-#include "fc2d_compute_error.h"
-#include "LCP_Solvers.h"
-#include "SiconosBlas.h"
-
-#include "numerics_verbose.h"
 
 void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {
@@ -148,8 +147,7 @@ int fc2d_enum_setDefaultSolverOptions(SolverOptions* options)
   solver_options_nullify(options);
   options->dparam[0] = 1e-6;
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  LinearComplementarityProblem* problem = NULL;
-  linearComplementarity_enum_setDefaultSolverOptions(problem, options->internalSolvers);
+  linearComplementarity_enum_setDefaultSolverOptions(options->internalSolvers);
 
   return 0;
 }

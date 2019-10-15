@@ -28,11 +28,12 @@
 
  */
 
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SolverOptions
+
+
 /* Pointer to function that corresponds to the function \f$ \phi \f$ */
 typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
-
-#include "SiconosConfig.h"
-#include "SolverOptions.h"
 
 enum NONSMOOTH_NEWTON_SOLVER
 {

@@ -16,23 +16,15 @@
  * limitations under the License.
 */
 
-
-#include "FrictionContactProblem.h"
-#include "SolverOptions.h"
 #include "rolling_fc3d_compute_error.h"
-#include "rolling_fc3d_projection.h"
-#include "projectionOnRollingCone.h"
-#include "SiconosLapack.h"
-#include "numerics_verbose.h"
-
-#include <math.h>
-#include <assert.h>
-#include <float.h>
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include <assert.h>                         // for assert
+#include <float.h>                          // for DBL_EPSILON
+#include <math.h>                           // for sqrt, fabs
+#include "SiconosBlas.h"                          // for cblas_dcopy
+#include "NumericsMatrix.h"                 // for NM_gemv
+#include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
+#include "debug.h"                          // for DEBUG_EXPR, DEBUG_PRINTF
+#include "projectionOnRollingCone.h"        // for projectionOnRollingCone
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif

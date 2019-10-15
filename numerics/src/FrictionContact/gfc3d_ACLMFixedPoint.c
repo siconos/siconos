@@ -16,30 +16,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "gfc3d_Solvers.h"
-#include "gfc3d_compute_error.h"
-
-#include "ConvexQP.h"
-#include "ConvexQP_cst.h"
-#include "ConvexQP_Solvers.h"
-#include "GlobalFrictionContactProblem_as_ConvexQP.h"
-#include "VI_cst.h"
-#include "NumericsMatrix.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-//#define VERBOSE_DEBUG
-#include "Friction_cst.h"
-#include "sanitizer.h"
-
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
-#include "numerics_verbose.h"
-
+#include <math.h>                                      // for sqrt
+#include <stdio.h>                                     // for fprintf, printf
+#include <stdlib.h>                                    // for malloc, free
+#include "SiconosBlas.h"                               // for cblas_dcopy
+#include "ConvexQP.h"                                  // for ConvexQP
+#include "ConvexQP_Solvers.h"                          // for convexQP_ADMM_...
+#include "ConvexQP_cst.h"                              // for SICONOS_CONVEX...
+#include "Friction_cst.h"                              // for SICONOS_FRICTI...
+#include "GlobalFrictionContactProblem.h"              // for GlobalFriction...
+#include "GlobalFrictionContactProblem_as_ConvexQP.h"  // for GlobalFriction...
+#include "NumericsFwd.h"                               // for SolverOptions
+#include "NumericsMatrix.h"                            // for NM_free, NM_tr...
+#include "SolverOptions.h"                             // for SolverOptions
+#include "debug.h"                                     // for DEBUG_EXPR
+#include "gfc3d_Solvers.h"                             // for gfc3d_set_inte...
+#include "gfc3d_compute_error.h"                       // for gfc3d_compute_...
+#include "numerics_verbose.h"                          // for numerics_print...
 
 
 /** pointer to function used to call internal solver for proximal point solver */

@@ -15,16 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include "MCP_Solvers.h"
-#include "MCP_cst.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
-
+#include "MCP_Solvers.h"       // for mcp_newton_FB_FBLSA_setDefaultSolverOp...
+#include "MCP_cst.h"           // for SICONOS_MCP_NEWTON_FB_FBLSA, SICONOS_M...
+#include "NumericsFwd.h"       // for SolverOptions, MixedComplementarityPro...
+#include "SolverOptions.h"     // for SolverOptions
+#include "numerics_verbose.h"  // for numerics_error
 
 int mcp_setDefaultSolverOptions(
   MixedComplementarityProblem* problem,

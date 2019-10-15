@@ -16,25 +16,21 @@
  * limitations under the License.
 */
 
-#include "debug.h"
-#include "numerics_verbose.h"
-#include "op3x3.h"
-#include "SparseBlockMatrix.h"
-#include "fc3d_Solvers.h"
-#include "FrictionContactProblem.h"
-#include "fc3d_compute_error.h"
-#include "AlartCurnierGenerated.h"
-#include "fc3d_nonsmooth_Newton_solvers.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include "Friction_cst.h"
-#include "VI_cst.h"
-#include "SiconosLapack.h"
-
-#define DEBUG_MESSAGES
-#include "debug.h"
+#include <assert.h>                              // for assert
+#include <math.h>                                // for sqrt
+#include <stdio.h>                               // for printf, NULL
+#include <stdlib.h>                              // for calloc, free, malloc
+#include "AlartCurnierGenerated.h"               // for fc3d_AlartCurnierFun...
+#include "FrictionContactProblem.h"              // for FrictionContactProblem
+#include "Friction_cst.h"                        // for SICONOS_FRICTION_3D_...
+#include "NumericsFwd.h"                         // for SolverOptions, Frict...
+#include "SolverOptions.h"                       // for SolverOptions, solve...
+#include "VI_cst.h"                              // for SICONOS_VI_ERROR_EVA...
+#include "fc3d_AlartCurnier_functions.h"         // for computeAlartCurnierJ...
+#include "fc3d_Solvers.h"                        // for fc3d_VI_ExtraGradient
+#include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for AlartCurnierParams
+#include "fc3d_nonsmooth_Newton_solvers.h"       // for fc3d_nonsmooth_Newto...
+#include "numerics_verbose.h"                    // for numerics_error, verbose
 
 void fc3d_AlartCurnierFunction(
   unsigned int problemSize,

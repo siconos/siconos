@@ -1,20 +1,10 @@
 #include "ConvexQP.h"
-#include "stdlib.h"
-#include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
-#include "CSparseMatrix.h"
-#include "ConvexQP_cst.h"
-#include "ConvexQP_Solvers.h"
-
-#include "SolverOptions.h"
-#include "numerics_verbose.h"
-
-
-//#define DEBUG_NOCOLOR
-//#define DEBUG_MESSAGES
-//#define DEBUG_STDOUT
-#include "debug.h"
-
+#include <stdlib.h>                // for malloc, free
+#include "ConvexQP_Solvers.h"      // for convexQP_ADMM, convexQP_ADMM_setDe...
+#include "ConvexQP_cst.h"          // for SICONOS_CONVEXQP_ADMM_RHO, SICONOS...
+#include "NumericsMatrix.h"        // for NM_create, NM_triplet_alloc, NM_ze...
+#include "NumericsSparseMatrix.h"  // for NSM_TRIPLET, NumericsSparseMatrix
+#include "SolverOptions.h"         // for SolverOptions, solver_options_delete
 
 
 static void PXtest_0(void *cqpIn, double *x, double *PX)

@@ -1,23 +1,43 @@
-#include "fc3d_Solvers.h"
-#include "FrictionContactProblem.h"
-#include "fc3d_compute_error.h"
-#include "AlartCurnierGenerated.h"
-#include "fc3d_nonsmooth_Newton_solvers.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
-#include "Friction_cst.h"
-#include "VI_cst.h"
-
-#include "Newton_methods.h"
-#include "line_search.h"
-
-#define DEBUG_MESSAGES
-#include "debug.h"
-
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2019 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+#include <assert.h>                              // for assert
+#include <math.h>                                // for sqrt
+#ifndef __cplusplus
+#include <stdbool.h>                             // for false, bool, true
+#endif
+#include <stdio.h>                               // for size_t, NULL
+#include <stdlib.h>                              // for free, calloc, malloc
+#include "SiconosBlas.h"                         // for cblas_dcopy, cblas_d...
+#include "AlartCurnierGenerated.h"               // for fc3d_AlartCurnierFun...
+#include "FrictionContactProblem.h"              // for FrictionContactProblem
+#include "Friction_cst.h"                        // for SICONOS_FRICTION_3D_...
+#include "Newton_methods.h"                      // for newton_LSA, function...
+#include "NumericsFwd.h"                         // for FrictionContactProblem
+#include "NumericsMatrix.h"                      // for NM_gemv, NumericsMatrix
+#include "SolverOptions.h"                       // for SolverOptions, solve...
+#include "VI_cst.h"                              // for SICONOS_VI_ERROR_EVA...
+#include "fc3d_AlartCurnier_functions.h"         // for computeAlartCurnierJ...
+#include "fc3d_Solvers.h"                        // for fc3d_VI_ExtraGradient
+#include "fc3d_compute_error.h"                  // for fc3d_compute_error
+#include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for AlartCurnierParams
+#include "fc3d_nonsmooth_Newton_solvers.h"       // for fc3d_nonsmooth_Newto...
+#include "line_search.h"                         // for SICONOS_LSA_GOLDSTEIN
+#include "numerics_verbose.h"                    // for numerics_error
 
 typedef struct {
   FrictionContactProblem* problem;

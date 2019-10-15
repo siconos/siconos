@@ -15,17 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-
-
 #ifndef SolverOptions_H
 #define SolverOptions_H
 
 /*!\file SolverOptions.h
   Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
 */
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SolverOptions
 
 /** \struct Callback SolverOptions.h
 Structure used to store user callbacks inside solvers
@@ -115,8 +112,6 @@ extern const char* const SICONOS_NUMERICS_PROBLEM_AVI_STR;
 extern const char* const SICONOS_NUMERICS_PROBLEM_RELAY_STR;
 
 
-#include "SolverOptions_helpers.h"
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
@@ -161,7 +156,7 @@ extern "C"
    * \param pName the name of the solver
    * \return the id of the solver or 0 if it failed
    */
-  int solver_options_name_to_id(char * pName);
+  int solver_options_name_to_id(const char * pName);
 
   /** return the name of a solver given its id
    * \param Id the id of the solver
@@ -188,6 +183,14 @@ extern "C"
 
   SolverOptions * solver_options_get_internal_solver(SolverOptions * options, int n);
   
+  /** set the default solver parameters and perform memory allocation.
+      This is a generic routine, that calls the specific setDefault routine
+      for each solver.
+      \param options the pointer to the options to be set
+      \param solverId the identifier of the solver
+      \return 1 if everything has worked properly.
+  */
+  int setDefaultSolverOptions(SolverOptions* options, int solverId);
   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

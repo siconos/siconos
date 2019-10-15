@@ -15,8 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "SiconosConfig.h"
-#include "MLCP_Solvers.h"
+#include "MLCP_Solvers.h"  // for mixedLinearComplementarity_path_setDefault...
+#include "NumericsFwd.h"   // for MixedLinearComplementarityProblem, SolverO...
+#include "SiconosConfig.h" // for HAVE_PATHFERRIS // IWYU pragma: keep
+
+#ifdef HAVE_PATHFERRIS
+#include "tools/InterfaceToPathFerris/SimpleLCP.h"
 #include "SiconosCompat.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,8 +28,6 @@
 #include <math.h>
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
-#ifdef HAVE_PATHFERRIS
-#include "tools/InterfaceToPathFerris/SimpleLCP.h"
 #endif
 /*
 Warning: this function requires MLCP with M and q, not (A,B,C,D).

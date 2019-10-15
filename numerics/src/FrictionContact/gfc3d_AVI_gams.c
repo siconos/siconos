@@ -14,18 +14,19 @@
 /* GAMS stuff */
 
 #define _XOPEN_SOURCE 700
+#include <stdio.h>          // for printf
+#include <stdlib.h>         // for exit, EXIT_FAILURE
+#include "NumericsFwd.h"    // for GlobalFrictionContactProblem, SolverOptions
+#include "gfc3d_Solvers.h"  // for gfc3d_AVI_gams_path, gfc3d_AVI_gams_pathvi
+#include "SiconosConfig.h"  // for HAVE_GAMS_C_API // IWYU pragma: keep
+
+#ifdef HAVE_GAMS_C_API
 
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "GlobalFrictionContactProblem.h"
-#include "gfc3d_Solvers.h"
-
-#ifdef HAVE_GAMS_C_API
-
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <stdlib.h>
 #include <math.h>
 
 #include "GAMSlink.h"
