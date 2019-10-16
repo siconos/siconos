@@ -194,6 +194,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   }
   case SICONOS_GLOBAL_FRICTION_3D_ADMM:
   {
+    /* globalFrictionContact_rescaling(problem, 1.0/1.512808e-04, 1.0/1.407230e+01, 1.0); */
     gfc3d_ADMM(problem, reaction , velocity,
                globalVelocity, &info , options);
     break;

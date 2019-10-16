@@ -147,6 +147,7 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   else
   {
     printf("test unsuccessful\n");
+    //getchar();
   }
   free(reaction);
   free(velocity);
@@ -264,6 +265,7 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
   else
   {
     printf("test unsuccessful, residual = %g\n", options->dparam[1]);
+    /* getchar(); */
   }
   free(reaction);
   free(velocity);

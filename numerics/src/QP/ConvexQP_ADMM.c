@@ -147,7 +147,7 @@ void convexQP_ADMM(ConvexQP* problem,
     DEBUG_PRINTF("problem->norm ConvexQP= %12.8e\n", problem->normConvexQP);
     problem->istheNormConvexQPset=1;
   }
-  double norm_q =problem->normConvexQP;
+  double norm_q = problem->normConvexQP;
   DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
 
   if (!A) /* A is considered to be the identity and b =0 */
@@ -172,9 +172,9 @@ void convexQP_ADMM(ConvexQP* problem,
     b = problem->b;
     AisIdentity = 1;
   }
-
-
   int m =  problem->m;
+  double norm_b = cblas_dnrm2(m , b , 1);
+
 
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
@@ -186,10 +186,10 @@ void convexQP_ADMM(ConvexQP* problem,
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  
+
   int is_rho_variable=0;
   double rho = convexQP_ADMM_select_rho(M, A,  &is_rho_variable, options);
-  
+
   if (rho <= DBL_EPSILON)
     numerics_error("ConvexQP_ADMM", "dparam[SICONOS_CONVEXQP_ADMM_RHO] must be positive");
 
@@ -213,7 +213,7 @@ void convexQP_ADMM(ConvexQP* problem,
     }
   }
 
-  /* Compute M + rho A A^T (storage in W)*/
+  /* Compute M + rho A^T A (storage in W)*/
   NumericsMatrix *W = NM_new();
 
   NM_copy(M, W);
@@ -227,7 +227,7 @@ void convexQP_ADMM(ConvexQP* problem,
     Atrans = NM_transpose(A);
     NM_gemm(rho, Atrans, A, 1.0, W);
   }
-  
+
   double eta = dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_CONVEXQP_ADMM_BALANCING_RESIDUAL_TAU];
   double br_phi = dparam[SICONOS_CONVEXQP_ADMM_BALANCING_RESIDUAL_PHI];
@@ -243,7 +243,7 @@ void convexQP_ADMM(ConvexQP* problem,
   cblas_dcopy(m , u , 1 , u_k, 1);
   cblas_dcopy(m , xi , 1 , xi_hat, 1);
   cblas_dcopy(m , u , 1 , u_hat, 1);
-  
+
   double rho_k=0.0, rho_ratio=0.0;
   double e_k = INFINITY, e,  alpha, r, s,  residual, r_scaled, s_scaled;
   double tau , tau_k = 1.0;
@@ -324,27 +324,55 @@ void convexQP_ADMM(ConvexQP* problem,
     problem->ProjectionOnC(problem,tmp,u);
 
     DEBUG_EXPR(NV_display(u,m));
+    double norm_u =  cblas_dnrm2(m , u , 1);
 
     /**********************/
     /*  3 - Compute xi */
     /**********************/
 
 
-    /* - A z_k + u_k -b ->  xi (residual) */
-    cblas_dcopy(m , u, 1 , xi, 1);
-    cblas_daxpy(m, -1.0, b, 1, xi , 1);
+    /* - A z_k + u_k -b ->  xi (We use xi for storing the residual for a while) */
+
     if (AisIdentity)
     {
+      cblas_dscal(m, 0.0, xi, 1);
       cblas_daxpy(m, -1.0, z, 1, xi , 1);
     }
     else
     {
-      NM_gemv(-1.0, A, z, 1.0, xi);
+      NM_gemv(-1.0, A, z, 0.0, xi);
     }
+    double norm_Az = cblas_dnrm2(m , xi , 1);
+    cblas_daxpy(m, -1.0, b, 1, xi , 1);
+    cblas_daxpy(m, 1.0, u, 1, xi , 1);
+
+    /* double norm_Az = 1.0; */
+    /* cblas_dcopy(m , u, 1 , xi, 1); */
+    /* cblas_daxpy(m, -1.0, b, 1, xi , 1); */
+    /* if (AisIdentity) */
+    /*  { */
+    /*    cblas_daxpy(m, -1.0, z, 1.0, xi , 1); */
+    /*  } */
+    /*  else */
+    /*  { */
+    /*   NM_gemv(-1.0, A, z, 1.0, xi); */
+    /*  } */
+
     r = cblas_dnrm2(m , xi , 1);
 
     /* xi_hat -  A z_k + u_k -b ->  xi */
     cblas_daxpy(m, 1.0, xi_hat, 1, xi , 1);
+
+    if (AisIdentity)
+    {
+      cblas_dscal(n, 0.0, tmp, 1);
+      cblas_daxpy(n, 1.0*rho, xi, 1, tmp , 1);
+    }
+    else
+    {
+      NM_gemv(1.0*rho, Atrans, xi, 0.0, tmp);
+    }
+    double norm_ATxi = cblas_dnrm2(n , tmp , 1);
 
     /*********************************/
     /*  3 - Acceleration and restart */
@@ -354,7 +382,7 @@ void convexQP_ADMM(ConvexQP* problem,
     cblas_dcopy(m , u_hat , 1 , tmp, 1);
     cblas_daxpy(m, -1.0, u, 1, tmp , 1);
     s = cblas_dnrm2(m , tmp , 1);
-    
+
     e =r*r+s*s;
 
     DEBUG_PRINTF("residual e = %e \n", e);
@@ -407,7 +435,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
     rho_k = rho ;
     numerics_printf_verbose(2, "gfc3d_admm. residuals : r  = %e, \t  s = %e", r, s);
-    
+
     r_scaled = r;
     s_scaled = s;
 
@@ -438,23 +466,34 @@ void convexQP_ADMM(ConvexQP* problem,
 
     cblas_dscal(m, rho_ratio, xi,1);
     cblas_dscal(m, rho_ratio, xi_hat,1);
-    
-    
-    
+
+
+
     cblas_dcopy(m , xi , 1 , xi_k, 1);
     cblas_dcopy(m , u , 1 , u_k, 1);
-    
+
     /*********************************/
     /*  4 - Stopping criterium       */
     /*********************************/
 
+    int stopping_criterion =0;
+
+    /* old version */
+
     residual = sqrt(e);
-    if (fabs(norm_q) > DBL_EPSILON)
-      residual /= norm_q;
-
+    /* if (fabs(norm_q) > DBL_EPSILON) */
+    /*   residual /= norm_q; */
+    /* if (residual < tolerance) */
+    /*   stopping_criterion =1; */
+    double epsilon_primal = tolerance * fmax(norm_u,(fmax(norm_Az, norm_b))) +  sqrt(m)* tolerance ;
+    double epsilon_dual =  tolerance * norm_ATxi + sqrt(n)* tolerance ;
+    if (r < epsilon_primal && s < epsilon_dual)
+       stopping_criterion =1;
     numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \t residual = %14.7e, tol = %14.7e", iter, rho, residual, tolerance);
+    numerics_printf_verbose(1,"---- ConvexQP - ADMM  -                            primal residual = %14.7e, epsilon_primal = %14.7e", r,  epsilon_primal);
+    numerics_printf_verbose(1,"---- ConvexQP - ADMM  -                            dual residual = %14.7e, epsilon_dual = %14.7e", s,  epsilon_dual);
 
-    if (residual < tolerance)
+    if (stopping_criterion)
     {
       /* check the full criterion */
       //cblas_dscal(m, rho, xi, 1);

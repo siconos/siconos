@@ -50,7 +50,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
                           double* restrict globalVelocity, int* restrict info, SolverOptions* restrict options)
 {
 
-  verbose=1;
+  /* verbose=1; */
   
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -65,7 +65,8 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(m , problem->q , 1);
+  double norm_q = cblas_dnrm2(n , problem->q , 1);
+  double norm_b = cblas_dnrm2(m , problem->b , 1);
 
 
 
@@ -147,7 +148,8 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
     cumul_iter +=  internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
     /* **** Criterium convergence **** */
 
-    gfc3d_compute_error(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, &error);
+    gfc3d_compute_error(problem, reaction , velocity, globalVelocity, tolerance, options,
+                        norm_q, norm_b, &error);
 
     numerics_printf_verbose(1,"---- GFC3D - ACLMFP - Iteration %i Residual = %14.7e", iter, error);
 
@@ -197,7 +199,7 @@ int gfc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =2.0;
+  options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =100.0;
 
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   convexQP_ADMM_setDefaultSolverOptions(options->internalSolvers);

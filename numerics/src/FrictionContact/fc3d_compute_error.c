@@ -73,13 +73,18 @@ int fc3d_compute_error(
   int n = nc * 3;
   double *mu = problem->mu;
 
+  /* Compute the current velocity */
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
-  // Compute the current velocity
-  NM_prod_mv_3x3(n, n, problem->M, z, w);
-  DEBUG_EXPR(NV_display(problem->q,n););
-  DEBUG_EXPR(NV_display(w,n););
-  DEBUG_EXPR(NV_display(z,n););
-  
+  NM_prod_mv_3x3(n, n, problem->M, z, w); // w = Mz +q
+
+  double norm_r= cblas_dnrm2(n, z, 1);
+  double norm_w= cblas_dnrm2(n, w, 1);
+  DEBUG_PRINTF("norm of the reaction %e\n", norm_r);
+  DEBUG_PRINTF("norm of the velocity %e\n", norm_w);
+  DEBUG_PRINTF("norm of q = %12.8e\n", norm);
+  /* DEBUG_EXPR(NV_display(problem->q,n);); */
+  /* DEBUG_EXPR(NV_display(w,n);); */
+  /* DEBUG_EXPR(NV_display(z,n);); */
 
   *error = 0.;
   int ic, ic3;
@@ -87,16 +92,20 @@ int fc3d_compute_error(
   for (ic = 0, ic3 = 0 ; ic < nc ; ic++, ic3 += 3)
   {
     fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], error, worktmp);
-    DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);
+    /*DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);*/
   }
   *error = sqrt(*error);
-  DEBUG_PRINTF("absolute error = %12.8e\n", *error);
-  /* Compute relative error with respect to norm */
-  DEBUG_PRINTF("norm = %12.8e\n", norm);
-  if (fabs(norm) > DBL_EPSILON)
-    *error /= norm;
-  /* *error = *error / (norm + 1.0); old version */
-  DEBUG_PRINTF("relative error = %12.8e\n", *error);
+  DEBUG_PRINTF("absolute error in complementarity = %12.8e\n", *error);
+
+  /* Compute relative error */
+  /* double relative_scaling = fmax(norm, fmax(norm_r,norm_w)); */
+  /* double relative_scaling = fmax(norm_r,norm_w); */
+  double relative_scaling = norm;
+
+  if (fabs(relative_scaling) > DBL_EPSILON)
+    *error /= relative_scaling;
+
+  DEBUG_PRINTF("relative error in complementarity = %12.8e\n", *error);
   DEBUG_END("fc3d_compute_error(...)\n");
   if (*error > tolerance)
     return 1;
@@ -175,7 +184,7 @@ void fc3d_Tresca_unitary_compute_and_add_error(double *z , double *w, double R, 
 int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
                               double *z, double * w,
                               double tolerance, SolverOptions * options,
-                              double norm, 
+                              double norm,
                               double* error)
 {
   /* Checks inputs */
@@ -205,7 +214,7 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
   DEBUG_PRINTF("norm = %12.8e\n", norm);
   if (fabs(norm) > DBL_EPSILON)
     *error /= norm;
-  
+
   if (*error > tolerance)
   {
     /* if (verbose > 0) printf(" Numerics - fc3d_Tresca_compute_error failed: error = %g > tolerance = %g.\n",*error, tolerance);  */

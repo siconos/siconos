@@ -70,6 +70,32 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test_admm[n][e++] = "---"; 
     n++;
   }
+  for ( int d =0; d <n_data_1; d++)
+  {
+    int e=0;
+    test_admm[n][e++] = data_collection_1[d];
+    test_admm[n][e++] = "0";
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM);
+    test_admm[n][e++] = "1e-5";
+    test_admm[n][e++] = "10000";
+    test_admm[n][e++] = "0";
+    test_admm[n][e++] = "0";
+    test_admm[n][e++] = "0";
+    test_admm[n][e++] = "iparam";
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING);
+    test_admm[n][e++] = "iparam";
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_IPARAM_RESCALING);
+    test_admm[n][e] = (char *)malloc(50*sizeof(char));
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_RESCALING_YES);
+
+    test_admm[n][e++] = "---";
+    n++;
+  }
 
   test_admm[24][1] = "1";  /* FC3D ADMM	./data/Confeti-ex13-Fc3D-SBM.dat */
 

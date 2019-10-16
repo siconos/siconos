@@ -120,9 +120,6 @@ int convexQP_compute_error(
   double *utmp1 = &(options->dWork[m]) ;
   double *wtmp =  &(options->dWork[m+m]);
 
-
-
-
   DEBUG_EXPR(NV_display(z,n));
   DEBUG_EXPR(NV_display(xi,m));
   DEBUG_EXPR(NV_display(u,m));
