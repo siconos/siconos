@@ -2112,7 +2112,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # get dimension
         self._dimension=self._out.attrs.get('dimension', 3)
-        print("###################  self._dimension",  self._dimension)
 
         # Respect run() parameter for multipoints_iterations for
         # backwards compatibility, but this is overridden by
@@ -2292,7 +2291,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         simulation.setNewtonOptions(Newton_options)
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
-        simulation.setDisplayNewtonConvergence(True)
+        if verbose:
+            simulation.setDisplayNewtonConvergence(True)
 
 
         self._simulation = simulation

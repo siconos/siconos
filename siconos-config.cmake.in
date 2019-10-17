@@ -54,18 +54,6 @@ set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
 # mechanics (and/or mechanisms) component with oce?
 set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
 
-#find_dependency(LAPACKDEV)
-
-#if(@WITH_SYSTEM_SUITESPARSE@)
-#  find_dependency(SuiteSparse)
-#endif()
-
-if(@WITH_CXX@)
-  set(Boost_NO_BOOST_CMAKE 1)
-  find_dependency(Boost @boost_min_version@ @boost_opts@ REQUIRED)
-endif()
-  
-
 if(@WITH_FCLIB@)
   # Look for fclib in default path, FCLIB_DIR (cmake <3.12)
   # and/or FCLIB_ROOT (cmake >= 3.12).
