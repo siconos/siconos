@@ -232,7 +232,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
                 double* restrict velocity, double* restrict globalVelocity,
                 int* restrict info, SolverOptions* restrict options)
 {
-  /* verbose=1; */
+  /* verbose=1;  */
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -409,7 +409,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   double rho_k=0.0, rho_ratio=0.0;
   double e_k = INFINITY, e, alpha, r, s, residual, r_scaled, s_scaled;
-  double norm_Hr=0.0, norm_HTv=0.0, norm_b_full=0.0, norm_u=0.0;
+  double norm_b_full=0.0;
   double tau , tau_k = 1.0;
 
   rho_k=rho;
@@ -417,8 +417,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   int with_full_Jacobian = options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H];
   int has_full_H_changed = 1;
-
-
 
   double * b_full = data->b_full;
 
@@ -553,7 +551,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
         projectionOnDualCone(&u[pos], mu[contact]);
       }
 
-      norm_u =  cblas_dnrm2(m , u , 1);
+      double norm_u =  cblas_dnrm2(m , u , 1);
       DEBUG_EXPR(NV_display(u,m));
 
       /*************************/
@@ -564,7 +562,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       /* - H^T v_k + u_k -b_full ->  reaction (We use reaction for storing the residual for a while) */
       /* cblas_dscal(m, 0.0, reaction, 1);  */
       NM_gemv(-1.0, Htrans, v, 0.0, reaction);
-      norm_HTv = cblas_dnrm2(m , reaction , 1);
+      double norm_HTv = cblas_dnrm2(m , reaction , 1);
 
       gfc3d_ADMM_compute_full_b(nc, u, mu, b, b_full, options);
       norm_b_full =  cblas_dnrm2(m , b_full , 1);
@@ -581,7 +579,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
       /* cblas_dscal(n, 0.0, tmp_n, 1); */
       NM_gemv(1.0*rho, H, reaction, 0.0, tmp_n);
-      norm_Hr = cblas_dnrm2(n , tmp_n , 1);
+      double norm_rhoHr = cblas_dnrm2(n , tmp_n , 1);
 
       /*********************************/
       /*  3 - Acceleration and restart */
@@ -650,8 +648,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
         tau_k=1.0;
         e_k = e_k /eta;
         numerics_printf_verbose(2,"No acceleration tau_k  = %e  \n", tau_k);
-        cblas_dcopy(2*m , reaction_k , 1 , reaction_hat, 1);
-        cblas_dcopy(2*m , u_k , 1 , u_hat, 1);
+        cblas_dcopy(m , reaction_k , 1 , reaction_hat, 1);
+        cblas_dcopy(m , u_k , 1 , u_hat, 1);
       }
       else
       {
@@ -667,8 +665,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
           SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
       {
         r_scaled = r / fmax(norm_u,(fmax(norm_HTv, norm_b_full)));
-        s_scaled = s / (rho*norm_Hr);
-        numerics_printf_verbose(2, "gfc3d_admm. scaling : norm_u  = %e, \t norm_HTv  = %e, \t norm_b = %e, norm_Hr = %e\t", norm_u,  norm_HTv, norm_b, norm_Hr);
+        s_scaled = s / (norm_rhoHr);
+        numerics_printf_verbose(2, "gfc3d_admm. scaling : norm_u  = %e, \t norm_HTv  = %e, \t norm_b = %e, norm_rhoHr = %e\t", norm_u,  norm_HTv, norm_b, norm_rhoHr);
         numerics_printf_verbose(2, "gfc3d_admm. scaled residuals : r_scaled  = %e, \t  s_scaled = %e", r_scaled, s_scaled);
       }
       else
@@ -724,7 +722,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       /* if (residual < tolerance) */
       /*   stopping_criterion =1; */
       double epsilon_primal = tolerance * fmax(norm_u,(fmax(norm_HTv, norm_b_full))) +  sqrt(m)* tolerance ;
-      double epsilon_dual =  tolerance * norm_Hr + sqrt(n)* tolerance ;
+      double epsilon_dual =  tolerance * norm_rhoHr + sqrt(n)* tolerance ;
       if (r < epsilon_primal && s < epsilon_dual)
         stopping_criterion =1;
 
