@@ -233,7 +233,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
   double rho_k=0.0, rho_ratio=0.0;
   double e_k = INFINITY, e,  alpha, r, s, residual, r_scaled, s_scaled;
-  double norm_r=0.0, norm_z=0.0, norm_xi=0.0;
+  double norm_r=0.0, norm_z=0.0;
   double tau , tau_k = 1.0;
   int pos;
   double normUT;
@@ -345,7 +345,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     cblas_daxpy(m, -1, z, 1, tmp , 1);
 
     s = rho*cblas_dnrm2(m , tmp , 1);
-    norm_xi = cblas_dnrm2(m , xi , 1);
+    double norm_rhoxi = rho*cblas_dnrm2(m , xi , 1);
 
     e =r*r+s*s;
 
@@ -417,8 +417,8 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
         SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
     {
       r_scaled = r / (fmax(norm_z,norm_r));
-      s_scaled = s / (rho*norm_xi);
-      numerics_printf_verbose(2, "fc3d_admm. scaling : norm_r  = %e, \t norm_z  = %e, \t norm_xi = %e, \t", norm_r,  norm_z, norm_xi);
+      s_scaled = s / (norm_rhoxi);
+      numerics_printf_verbose(2, "fc3d_admm. scaling : norm_r  = %e, \t norm_z  = %e, \t norm_rhoxi = %e, \t", norm_r,  norm_z, norm_rhoxi);
       numerics_printf_verbose(2, "fc3d_admm. residuals : r  = %e, \t  s = %e", r, s);
       numerics_printf_verbose(2, "fc3d_admm. scaled residuals : r_scaled  = %e, \t  s_scaled = %e", r_scaled, s_scaled);
     }
@@ -473,7 +473,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     /* if (residual < tolerance) */
     /*   stopping_criterion =1; */
     double epsilon_primal = tolerance * fmax(norm_z,norm_r) +  sqrt(m)* tolerance ;
-    double epsilon_dual =  tolerance * norm_xi + sqrt(m)* tolerance ;
+    double epsilon_dual =  tolerance * norm_rhoxi + sqrt(m)* tolerance ;
     if (r < epsilon_primal && s < epsilon_dual)
         stopping_criterion =1;
 
