@@ -217,6 +217,11 @@ static int gfc_test(char ** test)
     _test_collection[10][1]="1";
 #endif
 
+#ifdef TEST_ADMM_COLLECTION_3
+    _test_collection[1][1]="1";
+    _test_collection[2][1]="1";
+#endif
+
 
 
     int * failed_tests = (int*)calloc(n_test, sizeof(int));

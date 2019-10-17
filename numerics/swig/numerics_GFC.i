@@ -112,7 +112,7 @@
 
   ~GlobalFrictionContactProblem()
   {
-    freeGlobalFrictionContactProblem($self);
+    globalFrictionContact_free($self);
   }
 
 };

@@ -108,7 +108,7 @@ extern "C"
 
   }
 
-  void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem);
+  void globalFrictionContact_free(GlobalFrictionContactProblem* problem);
 
   GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactProblem* problem);
   

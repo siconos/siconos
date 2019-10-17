@@ -154,7 +154,7 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   free(globalvelocity);
   fclose(foutput);
 
-  freeGlobalFrictionContactProblem(problem);
+  globalFrictionContact_free(problem);
 
 
   return info;
@@ -271,7 +271,7 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
   free(velocity);
   free(global_velocity);
 
-  freeGlobalFrictionContactProblem(problem);
+  globalFrictionContact_free(problem);
 
 
   return info;

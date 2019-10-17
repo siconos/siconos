@@ -114,7 +114,7 @@ int globalFrictionContact_printInFileName(GlobalFrictionContactProblem* problem,
   return info;
 }
 
-void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
+void globalFrictionContact_free(GlobalFrictionContactProblem* problem)
 {
 
   if (problem->M)
@@ -149,7 +149,7 @@ void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem)
     problem->b = NULL;
   }
 
-  if (problem->env) assert(0 && "freeGlobalFrictionContactProblem :: problem->env != NULL, don't know what to do");
+  if (problem->env) assert(0 && "globalFrictionContact_free :: problem->env != NULL, don't know what to do");
 
   free(problem);
 

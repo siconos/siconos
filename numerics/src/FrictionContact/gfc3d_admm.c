@@ -794,6 +794,10 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   {
     gfc3d_ADMM_free(problem,options);
   }
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_YES)
+  {
+    globalFrictionContact_free(rescaled_problem);
+  }
 }
 
 
