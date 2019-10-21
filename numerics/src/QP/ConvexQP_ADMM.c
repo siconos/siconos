@@ -408,6 +408,7 @@ void convexQP_ADMM(ConvexQP* problem,
         cblas_daxpy(m, -alpha, xi_k, 1, xi_hat , 1);
         DEBUG_EXPR(NV_display(xi_hat,m));
         DEBUG_PRINTF("tau  = %e, \t tau_k  = %e \t alpha  = %e   \n", tau, tau_k, alpha);
+        numerics_printf_verbose(2, "Accelerate :tau  = %e, \t tau_k  = %e, \t alpha  = %e ", tau, tau_k, alpha);
         tau_k=tau;
         e_k=e;
       }
@@ -416,6 +417,7 @@ void convexQP_ADMM(ConvexQP* problem,
         tau_k=1.0;
         e_k = e_k /eta;
         DEBUG_PRINTF("tau_k  = %e \t alpha  = %e   \n", tau_k);
+        numerics_printf_verbose(2,"Restart tau_k  = %e, e = %e\t, e_k = %e, e/e_k = %e\t", tau_k, e, e_k, e/e_k);
         cblas_dcopy(m , xi_k , 1 , xi_hat, 1);
         cblas_dcopy(m , u_k , 1 , u_hat, 1);
       }
@@ -485,8 +487,11 @@ void convexQP_ADMM(ConvexQP* problem,
     /*   residual /= norm_q; */
     /* if (residual < tolerance) */
     /*   stopping_criterion =1; */
-    double epsilon_primal = tolerance * fmax(norm_u,(fmax(norm_Az, norm_b))) +  sqrt(m)* tolerance ;
-    double epsilon_dual =  tolerance * norm_ATxi + sqrt(n)* tolerance ;
+
+    double scaling_error_primal  =  fmax(norm_u,(fmax(norm_Az, norm_b))) +  sqrt(m);
+    double epsilon_primal = tolerance *  scaling_error_primal;
+    double scaling_error_dual = norm_ATxi + sqrt(n);
+    double epsilon_dual =  tolerance * scaling_error_dual ;
     if (r < epsilon_primal && s < epsilon_dual)
        stopping_criterion =1;
     numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \t residual = %14.7e, tol = %14.7e", iter, rho, residual, tolerance);
@@ -506,7 +511,7 @@ void convexQP_ADMM(ConvexQP* problem,
       else
       {
         numerics_printf_verbose(1,"---- ConvexQP - ADMM  - The tolerance on the  residual is not sufficient to reach accuracy (error =  %14.7e)", error);
-        tolerance = tolerance * residual/error;
+        tolerance = tolerance * fmax(epsilon_dual/scaling_error_dual ,epsilon_primal/scaling_error_primal )/error;
         numerics_printf_verbose(1,"---- ConvexQP - ADMM  - We reduce the tolerance on the residual to %14.7e", tolerance);
         //getchar();
         //cblas_dscal(m, 1.0/rho, xi, 1);
@@ -589,7 +594,8 @@ int convexQP_ADMM_setDefaultSolverOptions(SolverOptions* options)
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART; /* 0 Acceleration */
-
+  options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_RHO_STRATEGY] =
+    SICONOS_CONVEXQP_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 

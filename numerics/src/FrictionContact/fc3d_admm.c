@@ -472,8 +472,10 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     /*   residual /= norm_q; */
     /* if (residual < tolerance) */
     /*   stopping_criterion =1; */
-    double epsilon_primal = tolerance * fmax(norm_z,norm_r) +  sqrt(m)* tolerance ;
-    double epsilon_dual =  tolerance * norm_rhoxi + sqrt(m)* tolerance ;
+    double scaling_error_primal  = fmax(norm_z,norm_r) +  sqrt(m);
+    double epsilon_primal = tolerance *  scaling_error_primal ;
+    double scaling_error_dual = norm_rhoxi + sqrt(m);
+    double epsilon_dual =  tolerance * scaling_error_dual;
     if (r < epsilon_primal && s < epsilon_dual)
         stopping_criterion =1;
 
@@ -505,7 +507,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
       else
       {
         numerics_printf_verbose(1,"---- FC3D - ADMM  - The tolerance on the  residual is not sufficient to reach accuracy (error =  %14.7e)", error);
-        tolerance = tolerance * residual/error;
+        tolerance = tolerance * fmax(epsilon_dual/scaling_error_dual ,epsilon_primal/scaling_error_primal )/error;
         numerics_printf_verbose(1,"---- FC3D - ADMM  - We reduce the tolerance on the residual to %14.7e", tolerance);
         if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_YES)
         {

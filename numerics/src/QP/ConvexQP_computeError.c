@@ -79,9 +79,8 @@ int convexQP_compute_error_reduced(
   DEBUG_PRINTF("error = %e\n",*error);
   if (*error > tolerance)
   {
-    if (verbose > 1)
-      printf(" Numerics - convexQP_compute_error: error = %g > tolerance = %g.\n",
-             *error, tolerance);
+    numerics_printf_verbose(2," Numerics - convexQP_compute_error: error = %g > tolerance = %g.\n",
+                            *error, tolerance);
     return 1;
   }
   else
