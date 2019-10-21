@@ -3249,19 +3249,29 @@ double NM_norm_inf(NumericsMatrix* A)
 }
 int NM_is_symmetric(NumericsMatrix* A)
 {
-  int n = A->size0;
-  int m = A->size1;
 
 
-  for (int i =0; i < n ; i++)
+  NumericsMatrix * Atrans = NM_transpose(A);
+  NumericsMatrix * AplusATrans = NM_add(1/2.0, A, -1/2.0, Atrans);
+  double norm_inf = NM_norm_inf(AplusATrans);
+  NM_free(Atrans); free(Atrans);
+  NM_free(AplusATrans);  free(AplusATrans);
+  
+  if (norm_inf <= DBL_EPSILON*10)
   {
-    for (int j =0 ; j < m ; j++)
-    {
-      if (fabs(NM_get_value(A,i,j)-NM_get_value(A,j,i)) >= DBL_EPSILON)
-        return 0;
-    }
+    return 1;
   }
-  return 1;
+  /* int n = A->size0; */
+  /* int m = A->size1; */
+  /* for (int i =0; i < n ; i++) */
+  /* { */
+  /*   for (int j =0 ; j < m ; j++) */
+  /*   { */
+  /*     if (fabs(NM_get_value(A,i,j)-NM_get_value(A,j,i)) >= DBL_EPSILON) */
+  /*       return 0; */
+  /*   } */
+  /* }   */
+  return 0;
 }
 
 double NM_symmetry_discrepancy(NumericsMatrix* A)
@@ -3289,7 +3299,7 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
     NM_write_in_file_python(A, foutput);
     fclose(foutput);
     );
-  
+
   double eig = 0.0, eig_old = 2*tol;
 
   double * q = (double *) malloc(n*sizeof(double));
