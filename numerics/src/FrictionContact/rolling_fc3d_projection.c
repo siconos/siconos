@@ -144,7 +144,7 @@ void rolling_fc3d_projectionOnConeWithLocalIteration_initialize(
   RollingFrictionContactProblem * localproblem,
   SolverOptions* localsolver_options )
 {
-  int nc = problem->numberOfContacts;
+  size_t nc = problem->numberOfContacts;
   localsolver_options->iparam[17]=nc;
   /* printf("rolling_fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
   if (!localsolver_options->dWork

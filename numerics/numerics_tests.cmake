@@ -218,7 +218,6 @@ if(WITH_${COMPONENT}_TESTING)
       EXTRA_SOURCES data_collection_fclib.c test_nsgs_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
-    #target_compile_definitions(fc3d_TEST_NSGS_COLLECTION_6 PUBLIC TEST_HDF5)
 
     new_tests_collection(
       DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB
@@ -227,7 +226,7 @@ if(WITH_${COMPONENT}_TESTING)
       )
 
     new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_NSGS_COLLECTION_2
+      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_NSGS_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_first_order_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
@@ -238,13 +237,13 @@ if(WITH_${COMPONENT}_TESTING)
       HDF5 ON
       )
     new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_2
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_solvers_wr_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
     
     new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_2
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
@@ -254,8 +253,8 @@ if(WITH_${COMPONENT}_TESTING)
     # ---------------------------------------------------
     
     new_tests_collection(
-      DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_NSGS_COLLECTION_1
-      EXTRA_SOURCES data_collection_rfc3d_1.c test_first_order_rfc3d_1.c DEPS FCLIB::fclib)
+      DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_NSGS_COLLECTION_FCLIB
+      EXTRA_SOURCES data_collection_rfc3d_fclib.c test_first_order_rfc3d_1.c DEPS FCLIB::fclib)
     
   endif()
 

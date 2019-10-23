@@ -16,12 +16,13 @@
  * limitations under the License.
  */
 
-#include <string.h>
-#include <time.h>
-#include "lcp_test_utils.h"
+#include <stdio.h>           // for printf
+#include <string.h>          // for strcmp
+#include "lcp_cst.h"         // for SICONOS_LCP_PIVOT
+#include "lcp_test_utils.h"  // for lcp_test_function
+#include "test_utils.h"      // for TestCase, build_test_collection_1, data_...
+#include "SiconosConfig.h"   // for HAVE_GAMS_C_API // IWYU pragma: keep
 #include "LCP_Solvers.h"
-#include "SolverOptions.h"
-#include "lcp_cst.h"
 
 // Set TEST_LCP_COLLECTION_XX value (XX = 1,2,3,4 or 5, depending on cmake test setup).
 #define @PROBLEM_COLLECTION@ 1
@@ -35,7 +36,7 @@ int main(void)
     n_data++;
 
   // Set solvers list for each collection of data.
-#if defined(TEST_LCP_COLLECTION_1) or defined(TEST_LCP_COLLECTION_2)
+#if defined(TEST_LCP_COLLECTION_1) || defined(TEST_LCP_COLLECTION_2)
   // same solvers for data collections 1 and 2
   int solvers[] = {SICONOS_LCP_LEMKE, SICONOS_LCP_CPG, SICONOS_LCP_PGS,
                    SICONOS_LCP_RPGS, SICONOS_LCP_LATIN, SICONOS_LCP_LATIN_W,
@@ -63,7 +64,7 @@ int main(void)
 
   printf("Test %i data files with %i solvers.\n", n_data, n_solvers);
 
-  TestCase * collection = build_test_collection(n_data, _data_collection,
+  TestCase * collection = build_test_collection_1(n_data, _data_collection,
                                                 n_solvers, solvers, linearComplementarity_setDefaultSolverOptions);
 
 #ifdef TEST_LCP_COLLECTION_1

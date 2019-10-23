@@ -26,7 +26,7 @@
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
   *number_of_tests = 25;//n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
 
   // "External" solver parameters
@@ -50,7 +50,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     build_friction_test(data_collection[d],
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone, NULL, NULL, NULL, NULL,
-               &tests_list[current++]);
+               &collection[current++]);
   }
 
   {
@@ -61,7 +61,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     build_friction_test(data_collection[d],
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization, NULL, NULL, NULL, NULL,
-               &tests_list[current++]);
+               &collection[current++]);
   }
   
   {
@@ -75,7 +75,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
   }
 
   {
@@ -90,7 +90,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization,
                intern_dpos, internal_dparam,  NULL, NULL,
-               &tests_list[current++]);
+               &collection[current++]);
   }
 
   {
@@ -108,9 +108,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
                intern_dpos, internal_dparam, intern_ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
     // Expected to fail ...
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
   }
   
   {
@@ -127,9 +127,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone,
                intern_dpos, internal_dparam, intern_ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
     // Expected to fail ...
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
   }
 
   {
@@ -145,7 +145,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_NSN,
                dpos, internal_dparam, intern_ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
   }
 
   
@@ -161,7 +161,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
   }
 
   
@@ -174,7 +174,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization,
                NULL, NULL, NULL, NULL,
-               &tests_list[current++]);
+               &collection[current++]);
   }
   
   {
@@ -186,7 +186,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone,
                NULL, NULL, NULL, NULL,
-               &tests_list[current++]);
+               &collection[current++]);
   }
 
   {
@@ -200,7 +200,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_NSN,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
     }
 
   {
@@ -215,14 +215,14 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
 
     internal_dparam[SICONOS_DPARAM_TOL] = 1e-16;
     build_friction_test(data_collection[d],
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
   }
 
   {
@@ -237,7 +237,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_NSN,
                dpos, internal_dparam, intern_ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
   }
   
 
@@ -253,7 +253,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_NSN,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
   }
 
   {
@@ -265,9 +265,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone,
                NULL, NULL, NULL, NULL,
-               &tests_list[current++]);
+               &collection[current++]);
     // Expected to fail ...
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
   }
 
   {
@@ -281,9 +281,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_NSN,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
     // Expected to fail ...
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
   }
 
   {
@@ -298,7 +298,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
   }
  
 
@@ -313,9 +313,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
     // Expected to fail ...
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
   }
 
 
@@ -331,18 +331,18 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
     // Expected to fail ...
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
 
     internal_iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
     build_friction_test(data_collection[d],
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
     // Expected to fail ...
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
   }
 
   {
@@ -356,18 +356,18 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_NSN,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
     // Expected to fail ...
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
 
     internal_iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
     build_friction_test(data_collection[d],
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_NSN,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
     // Expected to fail ...
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
   }
 
   {
@@ -382,12 +382,12 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                topsolver, dpos, dparam, ipos, iparam,
                SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
                dpos, internal_dparam, ipos, internal_iparam,
-               &tests_list[current++]);
+               &collection[current++]);
     // Expected to fail ...
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
   }
 
   *number_of_tests = current;
-  return tests_list;
+  return collection;
 
 }

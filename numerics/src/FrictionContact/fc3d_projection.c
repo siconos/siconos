@@ -255,7 +255,7 @@ int fc3d_projectionWithDiagonalization_solve(FrictionContactProblem* localproble
 
 void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options )
 {
-  int nc = problem->numberOfContacts;
+  size_t nc = problem->numberOfContacts;
   /* printf("fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
   if (!localsolver_options->dWork
       || localsolver_options->dWorkSize < nc)
@@ -264,7 +264,7 @@ void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem *
                                                    nc * sizeof(double));
     localsolver_options->dWorkSize = nc ;
   }
-  for (int i = 0; i < nc; i++)
+  for (size_t i = 0; i < nc; i++)
   {
     localsolver_options->dWork[i]=1.0;
   }

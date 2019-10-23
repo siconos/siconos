@@ -26,7 +26,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
   int n_solvers = 1;
   *number_of_tests = n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   // "External" solver parameters
   // -> same values for all tests.
@@ -46,9 +46,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       build_friction_test(data_collection[d],
                  topsolver, dpos, dparam, ipos, iparam,
                  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, dpos, internal_dparam, ipos, internal_iparam,
-                 &tests_list[current++]);
+                 &collection[current++]);
     }
 
-  return tests_list;
+  return collection;
 
 }

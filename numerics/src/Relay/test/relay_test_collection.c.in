@@ -16,15 +16,14 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "Relay_Solvers.h"     // for relay_setDefaultSolverOptions
+#include <stdio.h>             // for printf
+#include <string.h>            // for strcmp
+#include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
+#include "relay_test_utils.h"  // for relay_test_function
+#include "test_utils.h"        // for build_test_collection_1, data_collection
+#include "SiconosConfig.h"     // for HAVE_PATHFERRIS // IWYU pragma: keep
+#include "Relay_Solvers.h"
 
-#include "relay_test_utils.h"
-/* #include "relay_cst.h" */
-
-#include "SolverOptions.h"
 #define @PROBLEM_COLLECTION@ 1
 
 int main(void)
@@ -50,8 +49,8 @@ int main(void)
 
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
-  TestCase * collection = build_test_collection(n_data, _data_collection,
-                                                n_solvers, solvers, relay_setDefaultSolverOptions);
+  TestCase * collection = build_test_collection_1(n_data, _data_collection,
+                                                  n_solvers, solvers, relay_setDefaultSolverOptions);
 
   printf("Test %i data files with %i solvers.\n", n_data, n_solvers);
   int number_of_tests = n_data * n_solvers;

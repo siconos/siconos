@@ -17,16 +17,17 @@
 */
 #ifndef ROLLINGFRICTIONCONTACT_TEST_UTILS_H
 #define ROLLINGFRICTIONCONTACT_TEST_UTILS_H
-#include <stdio.h>          // for FILE
+
 #include "NumericsFwd.h"    // for SolverOptions
-#include "SiconosConfig.h"  // for BUILD_AS_CPP
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "test_utils.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-  int rollingFrictionContact_test_function(FILE * f, SolverOptions *);
+  int rollingFrictionContact_test_function(TestCase*);
   
 #if defined(WITH_FCLIB)
   int rfc3d_test_function_hdf5(const char* path, SolverOptions* options);

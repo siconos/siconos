@@ -27,7 +27,7 @@
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
   *number_of_tests = 7; //n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int solvers[] = {SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_FB, SICONOS_FRICTION_3D_NSN_NM};
   int current = 0;
@@ -42,10 +42,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // 
       build_friction_test(data_collection[d],
                  solvers[s], dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
   // NSN_FB expected to fail
-  tests_list[1].will_fail = 1;
+  collection[1].will_fail = 1;
 
   
   {
@@ -57,7 +57,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_NSN_AC, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
   }
 
   d = 10; // Rover4396.dat
@@ -70,9 +70,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // 
       build_friction_test(data_collection[d],
                  solvers[s], dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
   *number_of_tests = current;
-  return tests_list;
+  return collection;
 
 }

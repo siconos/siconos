@@ -27,7 +27,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
   int n_solvers = 5;
   *number_of_tests = n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
 
   // "External" solver parameters
@@ -46,7 +46,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // Default values for internal solver.
       build_friction_test(data_collection[d],
                  topsolver, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
 
   for(int d =0; d <n_data; d++)
@@ -58,7 +58,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       build_friction_test(data_collection[d],
                  topsolver, dpos, dparam, ipos, iparam,
                  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL,  NULL, intern_ipos, internal_iparam,
-                 &tests_list[current++]);
+                 &collection[current++]);
     }
   
   for ( int d =0; d <n_data; d++)
@@ -72,7 +72,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                  topsolver, dpos, dparam, ipos, iparam,
                  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
                  dpos, internal_dparam, ipos, internal_iparam,
-                 &tests_list[current++]);
+                 &collection[current++]);
     }
   
   for ( int d =0; d <n_data; d++)
@@ -86,7 +86,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                  topsolver, dpos, dparam, ipos, iparam,
                  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
                  NULL, NULL, intern_ipos, internal_iparam,
-                 &tests_list[current++]);
+                 &collection[current++]);
     }
 
   for ( int d =0; d <n_data; d++)
@@ -99,10 +99,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
                  topsolver, dpos, dparam, ipos, iparam,
                  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
                  NULL, NULL, intern_ipos, internal_iparam,
-                 &tests_list[current++]);
+                 &collection[current++]);
     }
 
 
-  return tests_list;
+  return collection;
 
 }

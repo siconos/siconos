@@ -108,12 +108,17 @@ extern "C"
   int globalFrictionContact_printInFileName(GlobalFrictionContactProblem*  problem,
                                             const char * filename);
 
-  /** read and create a GlobalFrictionContactProblem in a file (numerics .dat format)
-   * \param problem the problem to read
-   * \param file the target file
-   * \return NULL if not successfull
+  /** read a GlobalFrictionContactProblem from a file descriptor
+   * \param file descriptor
+   * \return problem the problem to read
    */
-  GlobalFrictionContactProblem * globalFrictionContact_newFromFile(FILE* file);
+  GlobalFrictionContactProblem*  globalFrictionContact_newFromFile(FILE* file);
+
+  /** read a GlobalFrictionContactProblem from a file (.dat or hdf5 if fclib is on) from its filename
+   * \param filename the name of the input file
+   * \return problem the problem to read
+   */
+  GlobalFrictionContactProblem* globalFrictionContact_new_from_filename(const char * filename);
 
   /** nullify all pointer components of the problem structure
       \param[inout] problem, global-friction problem structure
@@ -130,7 +135,7 @@ extern "C"
     problem->dimension = 0;
 
   }
-
+  
   /** Release memory for the problem structure
       \param[inout] problem, global-Friction problem structure to be freed.
   */

@@ -28,7 +28,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
   int n_solvers = 6;
   *number_of_tests = n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
   for(int d =0; d <n_data; d++)
@@ -40,7 +40,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // 
       build_friction_test(data_collection[d],
                  SICONOS_FRICTION_3D_NSN_AC, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
 
   for(int d =0; d <n_data; d++)
@@ -52,10 +52,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // 
       build_friction_test(data_collection[d],
                  SICONOS_FRICTION_3D_NSN_AC_TEST, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
 #ifndef WITH_MUMPS
       if(d>=4 && d<9) // Capsules tests work only with mumps
-        tests_list[current - 1].will_fail = 1;
+        collection[current - 1].will_fail = 1;
 #endif
     }
 
@@ -69,7 +69,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // 
       build_friction_test(data_collection[d],
                  SICONOS_FRICTION_3D_NSN_AC, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
 
   for(int d =0; d <n_data; d++)
@@ -82,10 +82,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // 
       build_friction_test(data_collection[d],
                  SICONOS_FRICTION_3D_NSN_AC_TEST, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
 #ifndef WITH_MUMPS
       if(d>=4 && d<9) // Capsules tests work only with mumps
-        tests_list[current - 1].will_fail = 1;
+        collection[current - 1].will_fail = 1;
 #endif
     }
 
@@ -99,7 +99,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // 
       build_friction_test(data_collection[d],
                  SICONOS_FRICTION_3D_NSN_FB, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
 
   for(int d =0; d <n_data; d++)
@@ -112,11 +112,11 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // 
       build_friction_test(data_collection[d],
                  SICONOS_FRICTION_3D_NSN_NM, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
 
 
   *number_of_tests = current;
-  return tests_list;
+  return collection;
 
 }

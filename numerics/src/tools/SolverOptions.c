@@ -109,9 +109,8 @@ const char * ns_problem_id_to_name(int id)
 void recursive_solver_options_print(SolverOptions* options, int level)
 {
   char* marge;
-  int i;
   marge = (char*) malloc((level + 1) * sizeof(char));
-  for (i = 0; i < level; i++)
+  for (int i = 0; i < level; i++)
     marge[i] = ' ';
   marge[level] = '\0';
 
@@ -169,7 +168,7 @@ void recursive_solver_options_print(SolverOptions* options, int level)
 
 
   numerics_printf("%snumber of internal (or local) solvers \t\t options->numberOfInternalSolvers = %i", marge, options->numberOfInternalSolvers);
-  for (i = 0; i < options->numberOfInternalSolvers; i++)
+  for (size_t i = 0; i < options->numberOfInternalSolvers; i++)
   {
     recursive_solver_options_print(options->internalSolvers + i, level + 1);
   }
@@ -231,7 +230,7 @@ void solver_options_delete(SolverOptions* op)
   if(op)
   {
     assert(op->numberOfInternalSolvers >= 0);
-    for (int i = 0; i < op->numberOfInternalSolvers; i++)
+    for (size_t i = 0; i < op->numberOfInternalSolvers; i++)
       solver_options_delete(&(op->internalSolvers[i]));
     if (op->numberOfInternalSolvers && op->internalSolvers)
     {
@@ -287,6 +286,7 @@ void solver_options_fill(SolverOptions* options, int solverId, int iSize, int dS
   options->dparam[0] = tol;
 
 }
+
 void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
 {
   options->solverId =  options_ori->solverId;
@@ -314,7 +314,7 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
     assert(options->iWorkSize > 0);
     options->iWorkSize = options_ori->iWorkSize;
     options->iWork = (int *)calloc(options->iWorkSize, sizeof(int));
-    for (int i = 0  ; i < options->iWorkSize; i++ )
+    for (size_t i = 0  ; i < options->iWorkSize; i++ )
     {
       options->iWork[i] =  options_ori->iWork[i];
     }
@@ -325,7 +325,7 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
     assert(options->dWorkSize > 0);
     options->dWorkSize = options_ori->dWorkSize;
     options->dWork = (double *)calloc(options->dWorkSize, sizeof(double));
-    for (int i = 0  ; i < options->dWorkSize; i++ )
+    for (size_t i = 0  ; i < options->dWorkSize; i++ )
     {
       options->dWork[i] =  options_ori->dWork[i];
     }
@@ -334,7 +334,7 @@ void solver_options_copy(SolverOptions* options_ori, SolverOptions* options)
   options->numberOfInternalSolvers =  options_ori->numberOfInternalSolvers;
   if (options->numberOfInternalSolvers)
     options->internalSolvers = (SolverOptions *)calloc(options->numberOfInternalSolvers, sizeof(SolverOptions));
-  for (int i = 0  ; i < options->numberOfInternalSolvers; i++ )
+  for (size_t i = 0  ; i < options->numberOfInternalSolvers; i++ )
   {
     SolverOptions * internal_options_ori = options_ori->internalSolvers + i;
     SolverOptions * internal_options = options->internalSolvers + i;
@@ -534,7 +534,7 @@ SICONOS_REGISTER_SOLVERS()
   return 0;
 }
 
-SolverOptions * solver_options_get_internal_solver(SolverOptions * options, int n)
+SolverOptions * solver_options_get_internal_solver(SolverOptions * options, size_t n)
 {
   if (n+1 > options->numberOfInternalSolvers || n < 0)
   {

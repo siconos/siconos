@@ -51,17 +51,17 @@ void print_vector_norm( const char* desc, int m, int n, double* a, int lda ) {
         printf( "\n" );
 }
 
-void free_test_collection(TestCase* tests_list, int nb_tests)
+void free_test_collection(TestCase* collection, int nb_tests)
 {
   for(int i=0;i<nb_tests;++i)
     {
-      // solver_options_delete(tests_list[i].options); //called at the end of the test
-      free(tests_list[i].options);
-      tests_list[i].options = NULL;
+      // solver_options_delete(collection[i].options); //called at the end of the test
+      free(collection[i].options);
+      collection[i].options = NULL;
     }
 
-  free(tests_list);
-  tests_list = NULL;
+  free(collection);
+  collection = NULL;
 }
 
 void print_test_info(int test_id, TestCase* current, const char* msg)
@@ -75,7 +75,7 @@ void print_test_info(int test_id, TestCase* current, const char* msg)
 
 
 
-void print_tests_collection_report(TestCase * tests_list, int n_failed, int * failed_tests,
+void print_tests_collection_report(TestCase * collection, int n_failed, int * failed_tests,
                                    int n_succeeded, int * succeeded_tests)
 {
   printf("\n Failed tests ids: [ ");
@@ -86,26 +86,26 @@ void print_tests_collection_report(TestCase * tests_list, int n_failed, int * fa
   for (int t =0; t < n_failed; t++)
   {
     // was it expected to fail?
-    if (tests_list[failed_tests[t]].will_fail == 1)
-      print_test_info(failed_tests[t], &tests_list[failed_tests[t]], " was expected to fail");
-    else if (tests_list[failed_tests[t]].will_fail == 0) // Or not ...
-      print_test_info(failed_tests[t], &tests_list[failed_tests[t]], " was expected to succeed");
-    else if (tests_list[failed_tests[t]].will_fail == 2) // Or is unstable.
-      print_test_info(failed_tests[t], &tests_list[failed_tests[t]], " is unstable and has failed");
+    if (collection[failed_tests[t]].will_fail == 1)
+      print_test_info(failed_tests[t], &collection[failed_tests[t]], " was expected to fail");
+    else if (collection[failed_tests[t]].will_fail == 0) // Or not ...
+      print_test_info(failed_tests[t], &collection[failed_tests[t]], " was expected to succeed");
+    else if (collection[failed_tests[t]].will_fail == 2) // Or is unstable.
+      print_test_info(failed_tests[t], &collection[failed_tests[t]], " is unstable and has failed");
   }
   
   for (int t =0; t < n_succeeded; t++)
     {
-      if (tests_list[succeeded_tests[t]].will_fail == 1)
-        print_test_info(succeeded_tests[t], &tests_list[succeeded_tests[t]], " was expected to fail but has succeeded");
+      if (collection[succeeded_tests[t]].will_fail == 1)
+        print_test_info(succeeded_tests[t], &collection[succeeded_tests[t]], " was expected to fail but has succeeded");
     }
 }
 
-TestCase * build_test_collection(int n_data, const char ** data_collection, int n_solvers, int * solvers_ids,
+TestCase * build_test_collection_1(int n_data, const char ** data_collection, int n_solvers, int * solvers_ids,
                                  int (*set_default_solver)(SolverOptions*, int) )
 {
   int number_of_tests = n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc(number_of_tests * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc(number_of_tests * sizeof(TestCase));
 
   int current;
   for(int s=0; s <n_solvers;++s)
@@ -113,14 +113,14 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int 
       current = s * n_data;
       for(int d=0; d <n_data; ++d)
         {
-          tests_list[current].filename = data_collection[d];
-          tests_list[current].will_fail = 0;
-          tests_list[current].options = (SolverOptions *)malloc(sizeof(SolverOptions));
-          set_default_solver(tests_list[current].options, solvers_ids[s]);
+          collection[current].filename = data_collection[d];
+          collection[current].will_fail = 0;
+          collection[current].options = (SolverOptions *)malloc(sizeof(SolverOptions));
+          set_default_solver(collection[current].options, solvers_ids[s]);
           current ++;
         }
     }
-  return tests_list;
+  return collection;
 }
 
 
@@ -140,7 +140,8 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
     {
       // print solver details
       printf("\n################# start of test # %i #######################\n", test_num);
-      printf("Solver : %s \n", solver_options_id_to_name(collection[test_num].options->solverId));
+      printf("Solver : %s (id: %d) \n", solver_options_id_to_name(collection[test_num].options->solverId),
+             collection[test_num].options->solverId);
       if(collection[test_num].options->internalSolvers)
         {
           const char * internal_name = solver_options_id_to_name(collection[test_num].options->internalSolvers[0].solverId);

@@ -82,11 +82,8 @@ static int test_0(void)
   int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_EG);
   options->dparam[0]=1e-8;
 
-  FILE * finput  =  fopen("./data/FC3D_Example1_SBM.dat", "r");
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-  info = frictionContact_newFromFile(problem, finput);
-  // frictionContact_display(problem);
-
+  char filename[50] = "./data/FC3D_Example1_SBM.dat";
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
   Problems *pb= (Problems *)malloc(sizeof(Problems));
   vi.env = pb;
 
@@ -185,11 +182,9 @@ static int test_1(void)
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_FPP);
   options->dparam[0]=1e-8;
-  
-  FILE * finput  =  fopen("./data/FC3D_Example1_SBM.dat", "r");
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-  info = frictionContact_newFromFile(problem, finput);
-  // frictionContact_display(problem);
+
+  char filename[50] = "./data/FC3D_Example1_SBM.dat";
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
   Problems *pb= (Problems *)malloc(sizeof(Problems));
   vi.env = pb;
@@ -291,12 +286,7 @@ static int test_2(void)
   options->dparam[0]=1e-8;
   //char filename[50] = "./data/Confeti-ex13-Fc3D-SBM.dat";
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  
-  FILE * finput  =  fopen(filename, "r");
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-  info = frictionContact_newFromFile(problem, finput);
-  // frictionContact_display(problem);
-
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
   Problems *pb= (Problems *)malloc(sizeof(Problems));
   vi.env = pb;
 

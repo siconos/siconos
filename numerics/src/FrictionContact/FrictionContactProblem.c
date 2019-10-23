@@ -27,6 +27,10 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"              // for DEBUG_PRINT, DEBUG_PRINTF
 #include "numerics_verbose.h"   // for CHECK_IO, numerics_error, numerics_pr...
+#include "io_tools.h"
+#if defined(WITH_FCLIB)
+#include "fclib_interface.h"
+#endif
 
 void frictionContact_display(FrictionContactProblem* problem)
 {
@@ -110,8 +114,10 @@ int frictionContact_printInFilename(FrictionContactProblem* problem, char* filen
   return info;
 }
 
-int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
+FrictionContactProblem *  frictionContact_newFromFile(FILE* file)
 {
+
+  FrictionContactProblem* problem = frictionContactProblem_new();
   assert(file);
   DEBUG_PRINT("Start -- int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
   int nc = 0, d = 0;
@@ -136,23 +142,36 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
   }
   DEBUG_PRINT("End --  int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
 
-  return 0;
+  return problem;
 }
 
-int frictionContact_newFromFilename(FrictionContactProblem* problem, const char* filename)
+FrictionContactProblem * frictionContact_new_from_filename(const char* filename)
 {
-  int info = 0;
-  FILE * file = fopen(filename, "r");
 
-  if (!file)
-  {
-    return errno;
-  }
+  FrictionContactProblem* problem = NULL;
+  int is_hdf5 = check_hdf5_file(filename);
+  // if the input file is an hdf5 file, we try to read it with fclib interface function.
+  if(is_hdf5)
+    {
+#if defined(WITH_FCLIB)
+      problem = frictionContact_fclib_read(filename);
+#else
+      numerics_error("FrictionContactProblem",
+                     "Try to read an hdf5 file, while fclib interface is not active. Recompile Siconos with fclib.",
+                     filename);
+#endif
+    }
+  else
+    {
+      FILE * file = fopen(filename, "r");
+      if (!file)
+        numerics_error("FrictionContactProblem", "Can not open file ", filename);
+      
+      problem = frictionContact_newFromFile(file);
+      fclose(file);
+    }
+  return problem;
 
-  info = frictionContact_newFromFile(problem, file);
-
-  fclose(file);
-  return info;
 }
 
 void frictionContactProblem_free(FrictionContactProblem* problem)

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2019 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
-#include "frictionContact_test_utils.h"
 
-const char ** data_collection()
+#include "io_tools.h"
+#include <string.h>  // for strcmp, strrchr
+
+int check_hdf5_file(const char * filename)
 {
+  // get last occurence of dot in the file name
+  // and shift one char forward to get the extension
+  const char * ext = strrchr(filename, '.') + 1;
+  // compare ext with standard ext for hdf5 files.
+  int res = strcmp(ext, "hdf5");
+  if (res != 0)
+    res = strcmp(ext+1, "h5");
 
-  int n_data_1=150;
-
-  const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
-  int n_data=0;
-  data_collection_1[n_data++] = "./data/RFC3D_sphere_1.dat";
-  data_collection_1[n_data++] = "./data/RFC3D_sphere_2.dat";
-  data_collection_1[n_data++] = "./data/RFC3D_cube_1.dat";
-  data_collection_1[n_data++] = "---";
-
-
-  return data_collection_1;
+  return !res;
 }
+
 

@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdlib.h>      // for malloc
+#include "test_utils.h"  // for data_collection
 
 const char ** data_collection()
 {

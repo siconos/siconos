@@ -63,6 +63,12 @@ extern "C"
 {
 #endif
 
+  /** set the default solver parameters and perform memory allocation for fc3d
+      \param options the pointer to the options to set
+      \param solverId the identifier of the solver
+  */
+  int fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId);
+
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
       \param velocity global vector (n), in-out parameter

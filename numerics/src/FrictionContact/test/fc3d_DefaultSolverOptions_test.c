@@ -28,39 +28,19 @@ int main(void)
   printf("\n Start of test on Default SolverOptions\n");
   int info = 0 ;
   SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
+  int solvers[] = {SICONOS_FRICTION_3D_NSGS, SICONOS_FRICTION_3D_NSGSV, SICONOS_FRICTION_3D_PROX,
+                   SICONOS_FRICTION_3D_TFP, SICONOS_FRICTION_3D_DSFP, SICONOS_FRICTION_3D_EG, SICONOS_FRICTION_3D_HP};
 
 
-
-  info = fc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGS);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = fc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_NSGSV);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = fc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_PROX);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = fc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_TFP);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = fc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_DSFP);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = fc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_EG);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = fc3d_setDefaultSolverOptions(options, SICONOS_FRICTION_3D_HP);
-  solver_options_print(options);
-  solver_options_delete(options);
-
+  int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
+  
+  for(int s=0; s<n_solvers; ++s)
+    {
+      info = fc3d_setDefaultSolverOptions(options, solvers[s]);
+      solver_options_print(options);
+      solver_options_delete(options);
+    }
   free(options);
-
   printf("\n End of test on Default SolverOptions\n");
   return info;
 }

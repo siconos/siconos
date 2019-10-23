@@ -25,13 +25,14 @@
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int solvers[] = {SICONOS_FRICTION_2D_NSGS, SICONOS_FRICTION_2D_CPG, SICONOS_FRICTION_2D_LATIN,
-                   SICONOS_FRICTION_2D_LEMKE};
+  int solvers[] = {SICONOS_FRICTION_2D_NSGS, SICONOS_FRICTION_2D_LEMKE, SICONOS_FRICTION_2D_CPG};
   
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
-  *number_of_tests = n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  // only 5 tests for Latin method. We exlude SliderCranks input files.
+  int n_latin = 5;
+  *number_of_tests = n_data * n_solvers + n_latin;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
   int current = 0;
   // tol and maxiter used in tests are the same for all solvers.
@@ -47,9 +48,18 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
           // default values for all parameters.
           build_friction_test(data_collection[d],
                               solvers[s], dpos, dparam, ipos, iparam,
-                              -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                              -1, NULL, NULL, NULL, NULL, &collection[current++]);
         }
     }
+
+  for(int d =0; d <n_latin; d++)
+    {
+      // default values for all parameters.
+      build_friction_test(data_collection[d],
+                          SICONOS_FRICTION_2D_LATIN, dpos, dparam, ipos, iparam,
+                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
+    }
+
   
-  return tests_list;
+  return collection;
 }

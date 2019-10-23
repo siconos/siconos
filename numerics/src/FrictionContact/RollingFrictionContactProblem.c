@@ -122,8 +122,9 @@ int rollingFrictionContact_printInFilename(RollingFrictionContactProblem* proble
   return info;
 }
 
-int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, FILE* file)
+RollingFrictionContactProblem* rollingFrictionContact_newFromFile(FILE* file)
 {
+  RollingFrictionContactProblem* problem = rollingFrictionContactProblem_new();
   assert(file);
   DEBUG_PRINT("Start -- int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, FILE* file)\n");
   int nc = 0, d = 0;
@@ -153,23 +154,19 @@ int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, F
   }
   DEBUG_PRINT("End --  int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, FILE* file)\n");
 
-  return 0;
+  return problem;
 }
 
-int rollingFrictionContact_newFromFilename(RollingFrictionContactProblem* problem, char* filename)
+RollingFrictionContactProblem* rollingFrictionContact_new_from_filename(const char* filename)
 {
-  int info = 0;
+  RollingFrictionContactProblem* problem = NULL;
   FILE * file = fopen(filename, "r");
-
   if (!file)
-  {
-    return errno;
-  }
-
-  info = rollingFrictionContact_newFromFile(problem, file);
-
+    numerics_error("RollingFrictionContactProblem", "Can not open file ", filename);
+  
+  problem = rollingFrictionContact_newFromFile(file);
   fclose(file);
-  return info;
+  return problem;
 }
 
 void rollingFrictionContactProblem_free(RollingFrictionContactProblem* problem)

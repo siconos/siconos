@@ -27,12 +27,10 @@
 #include "NonSmoothDrivers.h"              // for gfc3d_driver
 #include "NumericsFwd.h"                   // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix
-// #include "NumericsVector.h"                // for NV_display
 #include "SolverOptions.h"                 // for solver_options_delete, sol...
 #include "test_utils.h"                    // for TestCase
-
+#include "frictionContact_test_utils.h"
 #if defined(WITH_FCLIB)
-#include <fclib.h>
 #include <fclib_interface.h>
 #include <string.h>
 #endif
@@ -41,10 +39,7 @@ int globalFrictionContact_test_function(TestCase* current)
 {
 
   int k, info = -1 ;
-  GlobalFrictionContactProblem* problem = (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
-  /* numerics_set_verbose(1); */
-
-  info = globalFrictionContact_newFromFilename(problem, current->filename);
+  GlobalFrictionContactProblem* problem = globalFrictionContact_new_from_filename(current->filename);
   globalFrictionContact_display(problem);
 
 
@@ -126,6 +121,7 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
 {
 
   int k, info = -1 ;
+  // Read gfc problem from an hdf5 file, using fclib interface.
   GlobalFrictionContactProblem* problem = globalFrictionContact_fclib_read(path);
 
   int check_input=1;
@@ -134,27 +130,27 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
     int nLen;
     nLen = strlen (path);
 
-
     /* remove the extension */
-    const char * path_copy = path;
+    char * path_copy = (char *) malloc(400*sizeof(char));;
+    strcpy(path_copy, path);
     printf("path_copy = %s \n", path_copy);
-
 
     if ((nLen > 0) && (nLen < 400)) {
 
       while (nLen) {
 
-           // Check for extension character !!!
-           if (path_copy [nLen] == '.') {
+        // Check for extension character !!!
+        if (path_copy [nLen] == '.') {
 
-                path_copy [nLen] = '\0';
-                break;
-           }
+          path_copy [nLen] = '\0';
+          break;
+        }
 
            nLen --;
 
       }
       printf("path_copy = %s \n", path_copy);
+      free(path_copy);
     }
     free(path_copy);
 

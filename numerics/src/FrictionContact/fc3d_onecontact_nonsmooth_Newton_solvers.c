@@ -96,7 +96,7 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
   }
 
   /* Compute and store default value of rho value */
-  int nc = problem->numberOfContacts;
+  size_t nc = problem->numberOfContacts;
 
   double avg_rho[3] = {0.0, 0.0, 0.0};
 

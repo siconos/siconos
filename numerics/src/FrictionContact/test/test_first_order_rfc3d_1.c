@@ -18,6 +18,7 @@
 
 #include <stdio.h>                       // for NULL
 #include <stdlib.h>                      // for malloc
+#include "SolverOptions.h"
 #include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_NSGS
 #include "frictionContact_test_utils.h"  // for build_gfc3d_test, build_test...
 #include "test_utils.h"                  // for TestCase
@@ -26,7 +27,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
   int n_solvers = 2;
   *number_of_tests = n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
   int current = 0;
   for(int d =0; d <n_data; d++)
@@ -39,7 +40,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       build_rfc3d_test(data_collection[d],
                        SICONOS_ROLLING_FRICTION_3D_NSGS, dpos, dparam, NULL, NULL,
                        SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
-                       dpos, internal_dparam, internal_pos, internal_iparam, &tests_list[current++]);
+                       dpos, internal_dparam, internal_ipos, internal_iparam, &collection[current++]);
     }
 
   for(int d =0; d <n_data; d++)
@@ -49,10 +50,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       build_rfc3d_test(data_collection[d],
                           SICONOS_ROLLING_FRICTION_3D_NSGS, dpos, dparam, NULL, NULL,
                           SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone, NULL,  NULL, NULL, NULL,
-                          &tests_list[current++]);
+                          &collection[current++]);
     }
 
   *number_of_tests = current;
-  return tests_list;
+  return collection;
 
 }

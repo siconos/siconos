@@ -26,13 +26,25 @@ const char ** data_collection()
 
   const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
-  data_collection_1[n_data++] = "./data/LMGC_GFC3D_CubeH8.hdf5";
-  data_collection_1[n_data++] = "./data/LMGC_GFC3D-i00001-1-00000.hdf5";
-  data_collection_1[n_data++] = "./data/LMGC_GFC3D-i00501-4-00000.hdf5";
   
+  data_collection_1[n_data++] = "./data/Rover1039.dat";
+  data_collection_1[n_data++] = "./data/Rover1040.dat";
+  data_collection_1[n_data++] = "./data/Rover1041.dat";
+  data_collection_1[n_data++] = "./data/Rover3865.dat";
+  data_collection_1[n_data++] = "./data/Rover4144.dat";
+  data_collection_1[n_data++] = "./data/Rover4396.dat";
+  data_collection_1[n_data++] = "./data/Rover4493.dat";
+  data_collection_1[n_data++] = "./data/Rover4516.dat";
+  data_collection_1[n_data++] = "./data/Rover4609.dat";
+  data_collection_1[n_data++] = "./data/Rover4613.dat";
+  data_collection_1[n_data++] = "./data/Rover4622.dat";
+  data_collection_1[n_data++] = "./data/Rover9770.dat";
+  data_collection_1[n_data++] = "./data/Rover11035.dat";
+  data_collection_1[n_data++] = "./data/Rover11211.dat";
+
+
   data_collection_1[n_data++] = "---";
 
 
   return data_collection_1;
 }
-

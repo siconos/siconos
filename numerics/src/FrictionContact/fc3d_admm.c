@@ -58,12 +58,12 @@ Fc3d_ADMM_data;
 
 void fc3d_admm_init(FrictionContactProblem* problem, SolverOptions* options)
 {
-  int nc = problem->numberOfContacts;
+  size_t nc = problem->numberOfContacts;
   /* int n = problem->M->size0; */
-  int m = 3 * nc;
+  size_t m = 3 * nc;
 
 
-  int nb_constraints =m;
+  size_t nb_constraints =m;
   options->solverData=(Fc3d_ADMM_data *)malloc(sizeof(Fc3d_ADMM_data));
   Fc3d_ADMM_data * data = (Fc3d_ADMM_data *)options->solverData;
   if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY||

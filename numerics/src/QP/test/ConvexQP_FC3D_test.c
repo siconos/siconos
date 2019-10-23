@@ -54,11 +54,7 @@ static int test_0(void)
   options->dparam[0]=1e-13;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FILE * finput  =  fopen(filename, "r");
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-  info = frictionContact_newFromFile(problem, finput);
-  // frictionContact_display(problem);
-
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
   Problems *pb= (Problems *)malloc(sizeof(Problems));
   cqp.env = pb;
@@ -142,12 +138,9 @@ static int test_1(void)
   options->dparam[0]=1e-13;
   options->dparam[3]=0.8;
 
+  
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FILE * finput  =  fopen(filename, "r");
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-  info = frictionContact_newFromFile(problem, finput);
-  // frictionContact_display(problem);
-
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
   Problems *pb= (Problems *)malloc(sizeof(Problems));
   cqp.env = pb;
@@ -247,11 +240,7 @@ static int test_2(void)
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_CONVEXQP_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FILE * finput  =  fopen(filename, "r");
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-  info = frictionContact_newFromFile(problem, finput);
-  // frictionContact_display(problem);
-
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
   Problems *pb= (Problems *)malloc(sizeof(Problems));
   cqp.env = pb;
@@ -350,12 +339,7 @@ static int test_3(void)
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
-  FILE * finput  =  fopen(filename, "r");
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-  info = frictionContact_newFromFile(problem, finput);
-  // frictionContact_display(problem);
-
-
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
   Problems *pb= (Problems *)malloc(sizeof(Problems));
   cqp.env = pb;
 

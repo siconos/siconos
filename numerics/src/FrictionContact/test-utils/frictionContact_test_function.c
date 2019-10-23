@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include <math.h>                        // for isfinite
 #include <stdio.h>                       // for printf, fclose, fopen, fprintf
 #include <stdlib.h>                      // for calloc, free, malloc, exit
 #include "FrictionContactProblem.h"      // for FrictionContactProblem, fric...
@@ -32,8 +33,9 @@
 #define _CS_H
 
 #if defined(WITH_FCLIB)
-#include <fclib.h>
+#include <time.h>
 #include <fclib_interface.h>
+#include "fc3d_solvers_wr.h"
 #endif
 
 void build_friction_test(const char * filename,
@@ -126,12 +128,11 @@ void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 int frictionContact_test_function(TestCase* current)
 {
   int info = -1 ;
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-  /* numerics_set_verbose(1); */
-  info = frictionContact_newFromFilename(problem, current->filename);
 
+  FrictionContactProblem * problem  = frictionContact_new_from_filename(current->filename);
   FILE * foutput  =  fopen("checkinput.dat", "w");
   info = frictionContact_printInFile(problem, foutput);
+
 #ifdef WITH_FCLIB
   int global_hdf5_output =0;
   
@@ -184,6 +185,11 @@ int frictionContact_test_function(TestCase* current)
     }
   else
     info = 1;
+
+  for (int k = 0; k < dim * NC; ++k)
+  {
+    info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
+  }
   
   if (!info)
     printf("test successful, residual = %g\t, iteration = %i \n", current->options->dparam[1], current->options->iparam[1]);
@@ -262,11 +268,6 @@ int frictionContact_test_function_hdf5(const char * path, SolverOptions * option
   {
     info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
   }
-  /* for (k = 0 ; k < dim * NC; k++) */
-  /* { */
-  /*   printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]); */
-  /* } */
-  /* printf("\n"); */
 
   if (!info)
   {

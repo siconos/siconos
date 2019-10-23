@@ -31,7 +31,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
   *number_of_tests = n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
   int current = 0;
 
@@ -49,14 +49,14 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
           // set tol and maxiter, default values for other parameters.
           build_gfc3d_test(data_collection[d],
                            solvers[s], dpos, dparam, ipos, iparam,
-                           -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                           -1, NULL, NULL, NULL, NULL, &collection[current++]);
         }
 
     }
 
-  tests_list[7].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_Example1.dat 
-  tests_list[9].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
+  collection[7].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_Example1.dat 
+  collection[9].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
 
-  return tests_list;
+  return collection;
 
 }

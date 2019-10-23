@@ -143,7 +143,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
 
 
   /*Number of the local solver */
-  int localSolverNum = options->numberOfInternalSolvers ;
+  size_t localSolverNum = options->numberOfInternalSolvers ;
   SolverOptions * internalSolvers = options->internalSolvers ;
 
   int pos = 0;

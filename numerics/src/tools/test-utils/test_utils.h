@@ -30,11 +30,11 @@ extern "C"
   void print_vector_norm( const char* desc, int m, int n, double* a, int lda );
   
   void print_test_info(int test_id, TestCase* current, const char* msg);
-  void free_test_collection(TestCase* tests_list, int nb_tests);
+  void free_test_collection(TestCase* collection, int nb_tests);
 
-  void print_tests_collection_report(TestCase * tests_list, int, int * failed_tests, int, int * succeeded_test);
-  //TestCase*  build_test_collection(int, const char **, int, int*);
-  TestCase*  build_test_collection(int, const char **, int, int*, int (*set_default_solver)(SolverOptions*, int) );
+  void print_tests_collection_report(TestCase * collection, int, int * failed_tests, int, int * succeeded_test);
+
+  TestCase*  build_test_collection_1(int, const char **, int, int*, int (*set_default_solver)(SolverOptions*, int) );
 
   int run_test_collection(TestCase * collection, int number_of_tests, int (*test_function)(TestCase*));
 

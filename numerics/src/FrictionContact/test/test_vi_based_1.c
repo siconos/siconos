@@ -28,7 +28,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
 
   *number_of_tests = 8; //n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
 
@@ -42,7 +42,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
   }
   {
     int d = 0; // FC3D_Example1.da
@@ -54,7 +54,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
   }
 
 
@@ -68,9 +68,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
     // expected to fail
-    tests_list[current-1].will_fail = 1;
+    collection[current-1].will_fail = 1;
   }
   {
     int d = 2; // FrictionContact3D_1c.dat
@@ -82,7 +82,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
   }
   {
     int d = 2; // FrictionContact3D_1c.dat
@@ -95,9 +95,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_HP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
     // expected to fail
-    tests_list[current-1].will_fail = 1;
+    collection[current-1].will_fail = 1;
   }
 
   {
@@ -110,9 +110,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_VI_FPP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
     // expected to fail
-    tests_list[current-1].will_fail = 1;
+    collection[current-1].will_fail = 1;
   }
 
   {
@@ -124,9 +124,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_FPP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
     // expected to fail
-    tests_list[current-1].will_fail = 1;
+    collection[current-1].will_fail = 1;
   }
 
 {
@@ -139,12 +139,12 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_VI_EG, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
     // expected to fail
-    tests_list[current-1].will_fail = 1;
+    collection[current-1].will_fail = 1;
   }
 
   *number_of_tests = current;
-  return tests_list;
+  return collection;
 
 }

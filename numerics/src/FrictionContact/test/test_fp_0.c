@@ -27,7 +27,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
 
   *number_of_tests = 4; //n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
   int current = 0;
   
@@ -41,9 +41,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_DSFP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
     // expected to fail
-    tests_list[current-1].will_fail = 1;
+    collection[current-1].will_fail = 1;
   }
 
   
@@ -54,9 +54,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     double dparam[] = {5e3};    
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_DSFP, dpos, dparam, NULL, NULL,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
     // expected to fail
-    tests_list[current-1].will_fail = 1;
+    collection[current-1].will_fail = 1;
   }
   
   {
@@ -67,9 +67,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_DSFP, dpos, dparam, NULL, NULL,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
     // expected to fail
-    tests_list[current-1].will_fail = 1;
+    collection[current-1].will_fail = 1;
   }
   
   {
@@ -82,11 +82,11 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_DSFP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
     // expected to fail
-    tests_list[current-1].will_fail = 1;
+    collection[current-1].will_fail = 1;
   }
   *number_of_tests = current;
-  return tests_list;
+  return collection;
 
 }

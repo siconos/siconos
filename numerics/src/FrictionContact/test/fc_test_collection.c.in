@@ -17,23 +17,13 @@
  */
 
 #define _XOPEN_SOURCE 700
-#include <string.h>
-#include "SiconosConfig.h" // for SICONOS_HAS_MPI
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <time.h>
+#include <stdio.h>                       // for printf
+#include <string.h>                      // for strcmp
+#include "frictionContact_test_utils.h"  // for build_test_collection, frict...
+#include "test_utils.h"                  // for data_collection, free_test_c...
+#include "SiconosConfig.h" // for SICONOS_HAS_MPI // IWYU pragma: keep
 
-#include "frictionContact_test_utils.h"
-#include "GAMSlink.h"
-#include "SolverOptions.h"
-#include "@PROBLEM_FORMULATION@_Solvers.h"
-
-/* For internal solvers based on other formulation */
-#include "SOCLCP_Solvers.h"
-#include "SOCLCP_cst.h"
-#include "ConvexQP_cst.h"
-#include "VI_cst.h"
+//#include "@PROBLEM_FORMULATION@_Solvers.h"
 
 #define @PROBLEM_COLLECTION@ 1
 
@@ -55,13 +45,12 @@ int main (int argc, char *argv[])
   
   int number_of_tests;
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
-  
-/* #ifdef TEST_ADMM_COLLECTION_3  */
-/*     _test_collection[1][1] = "1";  /\*FC3D ADMM	./data/LMGC_100_PR_PerioBox-i00361-60-03000.hdf5 *\/ */
-/*     _test_collection[3][1] = "1";  /\*FC3D ADMM	./data/LMGC_100_PR_PerioBox-i00361-60-03000.hdf5 *\/ */
-/* #endif  */
 
-  
+#if defined(TEST_ADMM_COLLECTION_FCLIB)
+  collection[1].will_fail = 1;  // FC3D ADMM LMGC_100_PR_PerioBox-i00361-60-03000.hdf5
+  collection[3].will_fail = 1;  // FC3D ADMM LMGC_100_PR_PerioBox-i00361-60-03000.hdf5
+#endif
+
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
   int out = run_test_collection(collection, number_of_tests, frictionContact_test_function);
   free_test_collection(collection, number_of_tests);

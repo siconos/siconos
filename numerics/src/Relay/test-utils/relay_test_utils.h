@@ -31,8 +31,6 @@ extern "C"
 #endif
   void relay_fillParamWithRespectToSolver(SolverOptions *options, char * solvername, RelayProblem* problem);
   int relay_test_function(TestCase*);
-
-  //TestCase*  build_test_collection(int, const char **, int, int*);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

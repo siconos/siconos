@@ -30,7 +30,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
   *number_of_tests = n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
   int current = 0;
 
@@ -41,15 +41,15 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
           // default values for all parameters.
           build_gfc3d_test(data_collection[d],
                            solvers[s], NULL, NULL, NULL, NULL,
-                           -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                           -1, NULL, NULL, NULL, NULL, &collection[current++]);
         }
     }
 
   // expected to fail
-  tests_list[3].will_fail = 1; // NSN_AC on data/GFC3D_OneContact.dat
+  collection[3].will_fail = 1; // NSN_AC on data/GFC3D_OneContact.dat
 # ifndef WITH_MUMPS 
-  tests_list[4].will_fail = 1; // NSN_AC on data/GFC3D_TwoRods1.dat, mumps only
+  collection[4].will_fail = 1; // NSN_AC on data/GFC3D_TwoRods1.dat, mumps only
 #endif 
   
-  return tests_list;
+  return collection;
 }

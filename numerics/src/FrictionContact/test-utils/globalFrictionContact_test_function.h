@@ -18,7 +18,8 @@
 #ifndef GLOBALFRICTIONCONTACT_TEST_UTILS_H
 #define GLOBALFRICTIONCONTACT_TEST_UTILS_H
 
-#include "SiconosConfig.h"  // for BUILD_AS_CPP
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for SolverOptions
 #include "test_utils.h"     // for TestCase#include <stdio.h>
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

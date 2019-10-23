@@ -27,7 +27,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
 
   *number_of_tests = 3; //n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
   int current = 0;
   
@@ -41,7 +41,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_PROX, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
   }
   {
     int d = 6;// BoxesStack1-i100000-32.hdf5.dat
@@ -53,7 +53,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_PROX, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
   }
   {
     int d = 9; // OneObject-i100000-499.hdf5.dat
@@ -65,9 +65,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_PROX, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
   }
   *number_of_tests = current;
-  return tests_list;
+  return collection;
 
 }

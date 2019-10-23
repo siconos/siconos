@@ -105,22 +105,17 @@ extern "C"
    */
   int frictionContact_printInFilename(FrictionContactProblem*  problem, char * filename);
 
-  /** read a FrictionContactProblem in a file (numerics .dat format)
-   * \param problem the problem to read
-   * \param file the target file
-   * \return 0 if successfull
+  /** read a FrictionContactProblem from a file descriptor
+   * \param file descriptor
+   * \return problem the problem to read
    */
-  int frictionContact_newFromFile(FrictionContactProblem*  problem, FILE* file);
+  FrictionContactProblem*  frictionContact_newFromFile(FILE* file);
 
-  /** read a FrictionContactProblem in a file (numerics .dat format) from its filename
-   * \param problem the problem to read
-   * \param filename the name of the target file
-   * \return 0 if successfull
+  /** read a FrictionContactProblem from a file (.dat or hdf5 if fclib is on) from its filename
+   * \param filename the name of the input file
+   * \return problem the problem to read
    */
-  int frictionContact_newFromFilename(FrictionContactProblem*  problem, const char * filename);
-
-
-
+  FrictionContactProblem* frictionContact_new_from_filename(const char * filename);
 
 
 

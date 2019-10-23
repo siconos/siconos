@@ -26,7 +26,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
   int n_solvers = 6;
   *number_of_tests = n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
   int current = 0;
   for(int d =0; d <n_data; d++)
@@ -34,7 +34,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // GFC3D, NSGS, default values.
       build_gfc3d_test(data_collection[d],
                           SICONOS_GLOBAL_FRICTION_3D_NSGS, NULL, NULL, NULL, NULL,
-                          -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
 
   for(int d =0; d <n_data; d++)
@@ -44,7 +44,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       build_gfc3d_test(data_collection[d],
                           SICONOS_GLOBAL_FRICTION_3D_NSGS, NULL, NULL, NULL, NULL,
                           SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone, NULL,  NULL, NULL, NULL,
-                          &tests_list[current++]);
+                          &collection[current++]);
     }
   
   for ( int d =0; d <n_data; d++)
@@ -52,7 +52,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // GFC3D, VI_EG, default values.
       build_gfc3d_test(data_collection[d],
                           SICONOS_GLOBAL_FRICTION_3D_VI_EG, NULL, NULL, NULL, NULL,
-                          -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
 
   for ( int d =0; d <n_data; d++)
@@ -60,9 +60,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // GFC3D, VI_FPP, default values.
       build_gfc3d_test(data_collection[d],
                           SICONOS_GLOBAL_FRICTION_3D_VI_FPP, NULL, NULL, NULL, NULL,
-                          -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
       // Expected to fail
-      tests_list[18].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
+      collection[18].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
 
     }
 
@@ -71,7 +71,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // GFC3D, ACLMFP, default values.
       build_gfc3d_test(data_collection[d],
                           SICONOS_GLOBAL_FRICTION_3D_ACLMFP, NULL, NULL, NULL, NULL,
-                          -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
 
   for ( int d =0; d <n_data; d++)
@@ -79,10 +79,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // GFC3D, ADMM, default values.
       build_gfc3d_test(data_collection[d],
                           SICONOS_GLOBAL_FRICTION_3D_ADMM, NULL, NULL, NULL, NULL,
-                          -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
 
 
-  return tests_list;
+  return collection;
 
 }

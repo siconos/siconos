@@ -21,6 +21,7 @@
 /*!\file SolverOptions.h
   Structure used to send options (name, parameters and so on) to a specific solver-driver (mainly from Kernel to Numerics).
 */
+#include <stdio.h> // for size_t
 #include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 #include "NumericsFwd.h"  // for SolverOptions
 
@@ -43,26 +44,24 @@ typedef struct
 */
 struct SolverOptions
 {
-  int solverId;                            /**< solverId Id of the solver (see ) */
-  int isSet;                               /**< isSet int equal to false(0) if the parameters below have not been set (ie need to read default values) else true(1)*/
+  int solverId;                            /**< id number of the solver. */
+  int isSet;                               /**< true(1) if the structure is ready to be used by a numerics driver. */
   int iSize;                               /**< iSize size of vector iparam */
-  int * iparam;                            /**< iparam a list of int parameters (depends on each solver, see solver doc)*/
-  int dSize;                               /**< dSize size of vector dparam */
-  double * dparam;                         /**< dparam a list of double parameters (depends on each solver, see solver doc)*/
-  int filterOn;                            /**< filterOn 1 to check solution validity after the driver call, else 0. Default = 1. (For example if
-                                            * filterOn = 1 for a LCP, lcp_compute_error() will be called at the end of the process) */
-  int dWorkSize;                           /**< dWorkSize size of vector iWork */
-  double * dWork;                          /**< dWork is a pointer on a working memory zone (for doubles) reserved for the solver .*/
-  int iWorkSize;                           /**< iWorkSize size of vector iWork */
-  int * iWork;                             /**< iWork is a pointer on a working memory zone (for integers) reserved for the solver .*/
-  int numberOfInternalSolvers;             /**< numberOfInternalSolvers the number of internal or local 'sub-solvers' used by the solver*/
-  struct SolverOptions * internalSolvers; /**< internalSolvers pointer to sub-solvers*/
-  Callback * callback;                     /**< callback a pointer to user Callback*/
-
-  void * solverParameters;                 /**< additional parameters specific to the solver */
-
+  int * iparam;                            /**< list of solver parameters (integer type); Check solvers doc for details. */
+  int dSize;                               /**< size of vector dparam */
+  double * dparam;                         /**< list of solver parameters (double type); Check solvers doc for details. */
+  int filterOn;                             /**< if true (1), check solution validity after the driver call. Default = 1. 
+                                              For example if filterOn = 1 for a LCP, lcp_compute_error() 
+                                              will be called at the end of the process). */
+  size_t dWorkSize;                        /**< size of double type internal work array.*/
+  double * dWork;                          /**< internal (double type) work array.*/
+  size_t iWorkSize;                        /**< size of integer type internal work array.*/
+  int * iWork;                          /**< internal (integer type) work array.*/
+  size_t numberOfInternalSolvers;          /**< the number of internal or local 'sub-solvers' used by the solver.*/
+  SolverOptions * internalSolvers;         /**< pointer to sub-solvers*/
+  Callback * callback;                     /**< pointer to user-defined callback*/
+  void * solverParameters;                 /**< additional parameters specific to the solver (GAMS and NewtonMethod only) */
   void * solverData;                       /**< additional data specific to the solver */
-
 };
 
 enum SICONOS_NUMERICS_PROBLEM_TYPE
@@ -122,8 +121,8 @@ extern "C"
   */
   void solver_options_print(SolverOptions* options);
 
-  /** free some SolverOptions fields;
-   *   \param options the structure to clean
+  /** Clear and free all pointer members of the structure.
+   *   \param options the structure to be cleared.
    */
   void solver_options_delete(SolverOptions * options);
 
@@ -181,16 +180,8 @@ extern "C"
    */
   void solver_options_copy(SolverOptions* options_ori, SolverOptions* options);
 
-  SolverOptions * solver_options_get_internal_solver(SolverOptions * options, int n);
+  SolverOptions * solver_options_get_internal_solver(SolverOptions * options, size_t n);
   
-  /** set the default solver parameters and perform memory allocation.
-      This is a generic routine, that calls the specific setDefault routine
-      for each solver.
-      \param options the pointer to the options to be set
-      \param solverId the identifier of the solver
-      \return 1 if everything has worked properly.
-  */
-  int setDefaultSolverOptions(SolverOptions* options, int solverId);
   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

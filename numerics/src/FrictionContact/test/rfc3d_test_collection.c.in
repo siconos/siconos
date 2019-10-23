@@ -17,18 +17,12 @@
  */
 
 #define _XOPEN_SOURCE 700
-#include <string.h>
-#include "SiconosConfig.h" // for HAVE_GAMS_C_API
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <time.h>
-
-#include "frictionContact_test_utils.h"
-#include "GAMSlink.h"
-#include "rollingFrictionContact_test_function.h"
-#include "SolverOptions.h"
-#include "@PROBLEM_FORMULATION@_Solvers.h"
+#include <stdio.h>                                 // for printf
+#include <string.h>                                // for strcmp
+#include "frictionContact_test_utils.h"            // for build_test_collection
+#include "rollingFrictionContact_test_function.h"  // for rollingFrictionCon...
+#include "test_utils.h"                            // for data_collection
+#include "SiconosConfig.h" // for HAVE_GAMS_C_API // IWYU pragma: keep
 
 #define @PROBLEM_COLLECTION@ 1
 

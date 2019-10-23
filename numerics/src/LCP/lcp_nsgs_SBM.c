@@ -140,7 +140,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
 
   /*Number of the local solver */
-  int localSolverNum = options->numberOfInternalSolvers ;
+  size_t localSolverNum = options->numberOfInternalSolvers ;
   SolverOptions * internalSolvers = options->internalSolvers ;
 
   int pos = 0;

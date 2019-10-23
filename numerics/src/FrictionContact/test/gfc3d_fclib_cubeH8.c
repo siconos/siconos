@@ -30,8 +30,8 @@ int main(void)
 
   SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
   info = gfc3d_setDefaultSolverOptions(options, SICONOS_GLOBAL_FRICTION_3D_NSGS);
-  options->dparam[0] = 1e-08;
-  options->iparam[0] = 100000;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-08;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
 
   info = gfc3d_test_function_hdf5(filename, options);
 

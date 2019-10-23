@@ -179,7 +179,7 @@ static int convert_darray(PyObject *input, double *ptr) {
  }
 
 %typemap(out) (SolverOptions* internalSolvers) {
-  int i = arg1->numberOfInternalSolvers;
+  size_t i = arg1->numberOfInternalSolvers;
   $result = PyList_New(i);
   for (--i; i >= 0; --i) {
     PyObject *o = SWIG_NewPointerObj(SWIG_as_voidptr(& $1[i]),
@@ -194,7 +194,7 @@ static int convert_darray(PyObject *input, double *ptr) {
     // Typecheck whole sequence before touching the target data structure
     if (!PySequence_Check($input) || PySequence_Length($input)<0)
       %argument_fail(SWIG_ValueError, "sequence of $type", $symname, $argnum);
-    int i, len = PySequence_Length($input);
+    size_t i, len = PySequence_Length($input);
     for (i=0; i < len; i++) {
       $ltype so;
       PyObject *o = PySequence_GetItem($input, i);

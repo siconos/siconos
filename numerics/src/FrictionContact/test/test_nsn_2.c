@@ -27,7 +27,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
 
   *number_of_tests = 9; //n_data * n_solvers;
-  TestCase * tests_list = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int solvers[] = {SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_AC_TEST,
                    SICONOS_FRICTION_3D_NSN_FB, SICONOS_FRICTION_3D_NSN_NM};
@@ -43,11 +43,11 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // 
       build_friction_test(data_collection[d],
                  solvers[s], dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
 
   // AC_TEST expected to fail
-  tests_list[1].will_fail= 1;
+  collection[1].will_fail= 1;
   
   {
     d = 8; // KaplasTower-i1061-4.hdf5.dat
@@ -58,11 +58,11 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // 
     build_friction_test(data_collection[d],
                SICONOS_FRICTION_3D_NSN_AC_TEST, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+               -1, NULL, NULL, NULL, NULL, &collection[current++]);
 
     //#ifdef WITH_UMFPACK
     // expected to fail
-    tests_list[current - 1].will_fail = 1;
+    collection[current - 1].will_fail = 1;
     //#endif
   }
 
@@ -76,13 +76,13 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       // 
       build_friction_test(data_collection[d],
                  solvers[s], dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &tests_list[current++]);
+                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
     }
   //#ifdef WITH_UMFPACK
   // AC_TEST for KaplasTower expected to fail
-  tests_list[6].will_fail = 1;
+  collection[6].will_fail = 1;
   //#endif  
   *number_of_tests = current;
-  return tests_list;
+  return collection;
 
 }

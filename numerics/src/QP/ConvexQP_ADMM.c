@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 #include <float.h>                  // for DBL_EPSILON
 #include <math.h>                   // for sqrt, fabs, INFINITY
@@ -46,8 +46,8 @@ typedef struct {
 
 void convexQP_ADMM_init(ConvexQP* problem, SolverOptions* options)
 {
-  int n = problem->size;
-  int m = problem->m;
+  size_t n = problem->size;
+  size_t m = problem->m;
   if (!options->dWork || options->dWorkSize != 2*m+n)
   {
     options->dWork = (double*)calloc(2*m+n,sizeof(double));
@@ -135,7 +135,7 @@ void convexQP_ADMM(ConvexQP* problem,
   double * b = problem->b;
 
   /* Dimension of the problem */
-  int n =  problem->size;
+  size_t n =  problem->size;
   int AisIdentity = 0;
   if (!problem->istheNormConvexQPset)
   {
@@ -154,7 +154,7 @@ void convexQP_ADMM(ConvexQP* problem,
     NM_triplet_alloc(problem->A,0);
     problem->A->matrix2->origin= NSM_TRIPLET;
 
-    for (int k =0; k< n; k++)
+    for (size_t k =0; k< n; k++)
     {
       NM_zentry(problem->A, k, k, 1);
     }
@@ -168,7 +168,7 @@ void convexQP_ADMM(ConvexQP* problem,
     b = problem->b;
     AisIdentity = 1;
   }
-  int m =  problem->m;
+  size_t m =  problem->m;
   double norm_b = cblas_dnrm2(m , b , 1);
 
 
