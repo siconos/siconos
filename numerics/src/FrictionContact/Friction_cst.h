@@ -320,6 +320,12 @@ enum SICONOS_FRICTION_3D_NSN_DPARAM
   SICONOS_FRICTION_3D_NSN_RHO = 3,
 };
 
+enum SICONOS_FRICTION_2D_LATIN
+{
+ /** index in dparam to store the klatin coeff value. Same index as rho in fc3d !*/
+ SICONOS_FRICTION_2D_K_LATIN = 3,
+};
+  
 enum SICONOS_FRICTION_3D_NSN_RHO_STRATEGY_ENUM
 {
   /** A constant value given in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */

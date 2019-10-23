@@ -174,7 +174,7 @@ void rolling_fc3d_projectionOnConeWithLocalIteration_initialize(
     }
   }
 
-  for (int i = 0; i < nc; i++)
+  for (size_t i = 0; i < nc; i++)
   {
     localsolver_options->dWork[i]=1.0;
 

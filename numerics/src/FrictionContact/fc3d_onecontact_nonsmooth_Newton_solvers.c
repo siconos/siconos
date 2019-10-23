@@ -125,7 +125,7 @@ static void fc3d_AC_initialize(FrictionContactProblem* problem,
   
 
   double  * rho;
-  for (int contact =0; contact <nc ; contact++)
+  for (size_t contact =0; contact <nc ; contact++)
   {
     if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN ||
         options->solverId == SICONOS_FRICTION_3D_ONECONTACT_NSN_GP)
