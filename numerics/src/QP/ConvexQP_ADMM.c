@@ -436,7 +436,7 @@ void convexQP_ADMM(ConvexQP* problem,
     }
 
     rho_k = rho ;
-    numerics_printf_verbose(2, "gfc3d_admm. residuals : r  = %e, \t  s = %e", r, s);
+    numerics_printf_verbose(2, "convexqp_admm. residuals : r  = %e, \t  s = %e", r, s);
 
     r_scaled = r;
     s_scaled = s;
@@ -463,13 +463,11 @@ void convexQP_ADMM(ConvexQP* problem,
     {
       has_rho_changed = 0;
     }
-    numerics_printf_verbose(2, "gfc3d_admm. rho = %5.2e\t, rho_k = %5.2e\t ", rho, rho_k);
+    numerics_printf_verbose(2, "convexQP_admm. rho = %5.2e\t, rho_k = %5.2e\t ", rho, rho_k);
     rho_ratio = rho_k/rho;
 
     cblas_dscal(m, rho_ratio, xi,1);
     cblas_dscal(m, rho_ratio, xi_hat,1);
-
-
 
     cblas_dcopy(m , xi , 1 , xi_k, 1);
     cblas_dcopy(m , u , 1 , u_k, 1);
@@ -502,7 +500,7 @@ void convexQP_ADMM(ConvexQP* problem,
     {
       /* check the full criterion */
       //cblas_dscal(m, rho, xi, 1);
-      convexQP_compute_error(problem, z , xi, w, u, tolerance, rho, options, norm_q, &error);
+      convexQP_compute_error(problem, z , xi, w, u, tolerance, rho, options, norm_q, norm_b, &error);
       if (error < dparam[SICONOS_DPARAM_TOL])
       {
         hasNotConverged = 0;
@@ -524,7 +522,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
   /* check the full criterion */
   /* **** Criterium convergence **** */
-  convexQP_compute_error(problem, z , xi, w, u, tolerance, rho, options, norm_q, &error);
+  convexQP_compute_error(problem, z , xi, w, u, tolerance, rho, options, norm_q, norm_b, &error);
   numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \t error = %14.7e", iter, rho, error);
 
   if (error < tolerance) hasNotConverged = 0;
@@ -535,11 +533,12 @@ void convexQP_ADMM(ConvexQP* problem,
   if (iter==itermax)
   {
     cblas_dscal(m, rho, xi, 1);
-    convexQP_compute_error(problem, z , xi, w, u, tolerance, rho, options, norm_q, &error);
+    convexQP_compute_error(problem, z , xi, w, u, tolerance, rho, options, norm_q, norm_b, &error);
     numerics_printf_verbose(1,"---- ConvexQP - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
   }
 
-
+  /* we return the unscaled multiplier */
+  cblas_dscal(m, rho, xi, 1);
 
   //verbose=1;
 
