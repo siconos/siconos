@@ -199,7 +199,7 @@ int gfc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =100.0;
+  options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =2.0;
 
   options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
   convexQP_ADMM_setDefaultSolverOptions(options->internalSolvers);
