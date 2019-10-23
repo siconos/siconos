@@ -142,11 +142,11 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 
   if (!info)
   {
-    printf("test succeeded\n");
+    printf("test successful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful\n");
+    printf("test unsuccessful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
     //getchar();
   }
   free(reaction);
@@ -260,12 +260,12 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
 
   if (!info)
   {
-    printf("test successful, residual = %g\n", options->dparam[1]);
+    printf("test successful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful, residual = %g\n", options->dparam[1]);
-    /* getchar(); */
+    printf("test unsuccessful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
+    //getchar();
   }
   free(reaction);
   free(velocity);
