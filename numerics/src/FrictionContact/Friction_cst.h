@@ -192,6 +192,8 @@ enum SICONOS_FRICTION_3D_IPARAM
   SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY =2,
   /** index in iparam to store the rescaling  */
   SICONOS_FRICTION_3D_IPARAM_RESCALING =3,
+  /** index in iparam to store the rescaling  */
+  SICONOS_FRICTION_3D_IPARAM_RESCALING_CONE =4,
   /** index in iparam to store the error evaluation method */
   SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION = 7,
   /** index in iparam to store the frequency of error evaluation method */
@@ -211,7 +213,11 @@ enum SICONOS_FRICTION_3D_RESCALING_ENUM
   SICONOS_FRICTION_3D_RESCALING_YES=1
 };
 
-
+enum SICONOS_FRICTION_3D_RESCALING_CONE_ENUM
+{
+  SICONOS_FRICTION_3D_RESCALING_CONE_NO =0,
+  SICONOS_FRICTION_3D_RESCALING_CONE_YES=1
+};
 
 enum SICONOS_FRICTION_3D_DPARAM
 {
