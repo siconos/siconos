@@ -62,8 +62,12 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FI
   return 0;
 }
 
-int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FILE* file)
+GlobalFrictionContactProblem *  globalFrictionContact_newFromFile(FILE* file)
 {
+
+  GlobalFrictionContactProblem *  problem = malloc(sizeof(GlobalFrictionContactProblem));
+  globalFrictionContact_null(problem);
+  
   int nc = 0, d = 0;
   int info = 0;
   CHECK_IO(fscanf(file, "%d\n", &d), &info);
@@ -74,7 +78,6 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
   if (info) goto fail;
 
   problem->H =  NM_new_from_file(file);
-  if (info) goto fail;
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
   for (int i = 0; i < problem->M->size1; ++i)
@@ -94,11 +97,11 @@ int globalFrictionContact_newFromFile(GlobalFrictionContactProblem* problem, FIL
   }
 
 fail:
-  problem->env = NULL;
-  return info;
+  problem = NULL;
+  return problem;
 }
 
-int globalFrictionContact_printInFileName(GlobalFrictionContactProblem* problem, char* filename)
+int globalFrictionContact_printInFileName(GlobalFrictionContactProblem * problem, char* filename)
 {
   int info = 0;
   FILE * file = fopen(filename, "w");
@@ -210,7 +213,7 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactPr
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;
   int m = 3 * nc;
-  
+
   GlobalFrictionContactProblem* new = (GlobalFrictionContactProblem*) malloc(sizeof(GlobalFrictionContactProblem));
   new->dimension = problem->dimension;
   new->numberOfContacts = problem->numberOfContacts;
@@ -248,3 +251,33 @@ void globalFrictionContact_rescaling(
 
 }
 
+
+
+
+int globalFrictionContact_computeGlobalVelocity(
+  GlobalFrictionContactProblem* problem,
+  double * reaction,
+  double * globalVelocity)
+{
+  int info = -1;
+
+  int n = problem->M->size0;
+  int m = problem->H->size1;
+
+  /* globalVelocity <- problem->q */
+  cblas_dcopy(n,  problem->q , 1, globalVelocity, 1);
+
+  // We compute only if the problem has contacts
+  if (m>0)
+  {
+    /* globalVelocity <-  H*reaction + globalVelocity*/
+    NM_gemv(1.0, problem->H, reaction, 1.0, globalVelocity);
+    DEBUG_EXPR(NM_vector_display(reaction, m));
+  }
+
+  /* Compute globalVelocity <- M^(-1) globalVelocity*/
+  info = NM_gesv_expert(problem->M, globalVelocity, NM_PRESERVE);
+  DEBUG_EXPR(NM_vector_display(globalVelocity, n));
+
+  return info;
+}

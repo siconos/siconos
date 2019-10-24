@@ -142,8 +142,8 @@ def test_convert():
 
     mat = []
 
-    fcp = sn.GlobalFrictionContactProblem()
-    sn.globalFrictionContact_newFromFile(fcp, data_dir + 'GFC3D_TwoRods1.dat')
+    #fcp = sn.GlobalFrictionContactProblem()
+    fcp = sn.globalFrictionContact_newFromFile(data_dir + 'GFC3D_TwoRods1.dat')
 
     mat.append(fcp.M)
     mat.append(fcp.H)

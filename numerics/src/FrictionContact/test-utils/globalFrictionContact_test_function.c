@@ -64,10 +64,8 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
   int k, info = -1 ;
-  GlobalFrictionContactProblem* problem = (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
   /* numerics_set_verbose(1); */
-
-  info = globalFrictionContact_newFromFile(problem, f);
+  GlobalFrictionContactProblem* problem = globalFrictionContact_newFromFile(f);
   /* globalFrictionContact_display(problem); */
 
 
