@@ -75,7 +75,7 @@ GlobalFrictionContactProblem *  globalFrictionContact_newFromFile(FILE* file)
   CHECK_IO(fscanf(file, "%d\n", &nc), &info);
   problem->numberOfContacts = nc;
   problem->M = NM_new_from_file( file);
-  if (info) goto fail;
+ 
 
   problem->H =  NM_new_from_file(file);
 
@@ -95,9 +95,12 @@ GlobalFrictionContactProblem *  globalFrictionContact_newFromFile(FILE* file)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])), &info);
   }
+  
+  if (info)
+  {
+    problem = NULL;
+  }
 
-fail:
-  problem = NULL;
   return problem;
 }
 
