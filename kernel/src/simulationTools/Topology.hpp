@@ -131,7 +131,7 @@ public:
    *  \return true if inter is in the graph
    */
   bool hasInteraction(SP::Interaction inter) const;
-  
+
   /** remove an Interaction from the topology. The interaction is
    *  removed from Dynamical Systems graph and Interactions Graph.
    *  The interaction is not removed from actives subgraphs : see updateIndexSet
@@ -338,6 +338,10 @@ public:
    * \return a DynamicalSystem
    */
   SP::DynamicalSystem getDynamicalSystem(unsigned int requiredNumber) const;
+
+  /** list and display all dynamical systems
+   */
+  void displayDynamicalSystems() const;
 
   /** Get a dynamical system using its name
    *  \warning O(n) complexity

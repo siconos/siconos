@@ -56,13 +56,13 @@ if(WITH_PYTHON_WRAPPER)
 else()
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
 endif()
-
 # For backward compat ...
 set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+include(FindPythonModule)
+find_python_module(packaging REQUIRED) # for siconos runtime
 
 get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
-  include(FindPythonModule)
   # --- xml schema. Used in tests. ---
   if(WITH_XML)
     set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/kernel/swig/SiconosModelSchema-V3.7.xsd")
@@ -137,11 +137,31 @@ find_package(LAPACKDEV REQUIRED)
 # =========== Boost ===========
 # check https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=boost
 if(WITH_CXX)
+
+  # From boost 1.71, something is wrong in cmake and boost support for multithread 
+  # https://github.com/boostorg/boost_install/issues/13
+  # https://gitlab.kitware.com/cmake/cmake/issues/19714
+  # set(Boost_USE_MULTITHREADED ON)
+  set(Boost_NO_BOOST_CMAKE 1)
+  set(boost_min_version 1.61)
+  # Set the list of required boost components
   if(WITH_SERIALIZATION)
-    find_package(Boost 1.61 COMPONENTS serialization filesystem REQUIRED)
+    list(APPEND boost_required_components serialization filesystem)
+  endif()
+  if(HAVE_SICONOS_CONTROL)
+    # Should we always look for timer ? This a requirement for many examples
+    # but not for siconos components, except control.
+    list(APPEND boost_required_components timer)
+  endif()
+  if(boost_required_components)
+    set(boost_opts COMPONENTS ${boost_required_components})
+  endif()
+
+  # Search boost ...
+  find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED)
+
+  if(WITH_SERIALIZATION)
     set(WITH_SYSTEM_BOOST_SERIALIZATION ON CACHE INTERNAL "Siconos uses boost serialization lib.")
-  else()
-    find_package(Boost 1.61 REQUIRED)
   endif()
 endif()
 
@@ -218,3 +238,19 @@ option(INSTALL_PYTHON_SYMLINKS "Install Python .py files as symlinks" OFF)
 # For SiconosConfig.h
 option(SICONOS_USE_MAP_FOR_HASH "Prefer std::map to std::unordered_map even if C++xy is enabled" ON)
 
+# Check Siconos compilation with include-what-you-use
+# See https://github.com/include-what-you-use/include-what-you-use
+# Set WITH_IWYU=path/to/iwyu binary file
+if(WITH_IWYU)
+  # Clang is required for iwyu. This is a devel option, so we assume that
+  # you know what you are doing and that you use the same version of clang
+  # for both iwyu and Siconos.
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
+    message(FATAL_ERROR "You must compile Siconos with clang to use include-what-you-use.")
+  endif()
+  if(NOT CMAKE_C_COMPILER_ID STREQUAL Clang AND NOT CMAKE_C_COMPILER_ID STREQUAL AppleClang)
+    message(FATAL_ERROR "You must compile Siconos with clang to use include-what-you-use.")
+  endif()
+  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${WITH_IWYU};-Xiwyu;any;-Xiwyu;iwyu;-Xiwyu;args" CACHE INTERNAL "iwyu setup")
+  set(CMAKE_C_INCLUDE_WHAT_YOU_USE "${WITH_IWYU};-Xiwyu;any;-Xiwyu;iwyu;-Xiwyu;args" CACHE INTERNAL "iwyu setup")
+endif()

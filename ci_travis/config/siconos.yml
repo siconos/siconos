@@ -170,6 +170,7 @@ pkgs:
       - python3-pytest
       - python3-scipy
       - python3-matplotlib
+      - python3-packaging
 
     fedora:
       - python3
@@ -178,6 +179,7 @@ pkgs:
       - pytest
       - scipy
       - python3-matplotlib
+      - python3-packaging
 
   pytest:
     opensuse:
@@ -203,6 +205,7 @@ pkgs:
       - python3-pytest
       - python3-scipy
       - python3-matplotlib
+      - python3-packaging
     fedora:
       - python3
       - python3-devel
@@ -211,11 +214,13 @@ pkgs:
       - python3-pytest
       - python3-scipy
       - python3-matplotlib
+      - python3-packaging
     opensuse:
       - python3-devel
       - python3-pip
       - python3-scipy
       - python3-numpy
+      - python3-packaging
       
   # bullet & serialization for full doc
   documentation:
@@ -303,7 +308,11 @@ pkgs:
     
   boost:
     nix: boost-1.63.0
-    debian: libboost-dev
+    debian:
+      - libboost-dev
+      - libboost-system-dev
+      - libboost-timer-dev
+      - libboost-chrono-dev
     fedora: boost-devel
     opensuse: libboost_headers1_66_0-devel
 

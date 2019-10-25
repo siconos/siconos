@@ -102,8 +102,6 @@ docker-build:archlinux-oce:
     IMAGE_NAME: archlinux-oce
   extends: .docker-build
 
-
-    
 # ---- Siconos build jobs -----
 
 # Siconos build and install, default config

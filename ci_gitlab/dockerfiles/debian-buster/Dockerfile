@@ -6,6 +6,8 @@ RUN apt update  && apt install -y -qq \
         libboost-dev \
         libboost-serialization-dev \
         libboost-filesystem-dev \
+        libboost-timer-dev \
+        libboost-chrono-dev \
         libgmp-dev \
         swig \
         gcc \
@@ -25,7 +27,9 @@ RUN apt update  && apt install -y -qq \
         python3-pip\
         python3-scipy \
         python3-pytest \
+        python3-packaging \
         valgrind \
         python3-lxml \
-        python3-h5py
+        python3-h5py \
+        vim
 RUN apt clean && apt autoremove
