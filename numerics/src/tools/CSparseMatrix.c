@@ -246,6 +246,25 @@ CS_INT CSparseMatrix_solve(CSparseMatrix_factors* cs_lu_A, double* x, double *b)
   return (ok);
 }
 
+CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b)
+{
+  assert(cs_chol_A);
+
+  CS_INT ok;
+  CS_INT n = cs_chol_A->n;
+  css* S = cs_chol_A->S;
+  csn* N = cs_chol_A->N;
+  ok = (S && N && x) ;
+  if (ok)
+  {
+    cs_ipvec (S->pinv, b, x, n) ;   /* x = P*b */
+    cs_lsolve (N->L, x) ;           /* x = L\x */
+    cs_ltsolve (N->L, x) ;          /* x = L'\x */
+    cs_pvec (S->pinv, x, b, n) ;    /* b = P'*x */
+  }
+  return (ok);
+}
+
 CSparseMatrix * CSparseMatrix_new_from_file(FILE* file)
 {
   CS_INT m, n, nzmax, nz, p, j, *Ap, *Ai ;
