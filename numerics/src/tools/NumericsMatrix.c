@@ -2898,7 +2898,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
   assert(A->size0 == A->size1);
 
   lapack_int info = 1;
-
+  /* verbose=2; */
   switch (A->storageType)
   {
   case NM_DENSE:
@@ -2917,7 +2917,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
         numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it" );
         DEBUG_PRINT("Start to call DPOTRF for NM_DENSE storage\n");
         //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
-        DPOTRF(A->size0, A->size1, A->matrix0, A->size0, &info);
+        DPOTRF(LA_UP, A->size1, A->matrix0, A->size0, &info);
         DEBUG_PRINT("end of call DPOTRF for NM_DENSE storage\n");
         if (info > 0)
         {
@@ -2937,7 +2937,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
       }
       DEBUG_PRINT("Start to call DPOTRS for NM_DENSE storage\n");
       numerics_printf_verbose(2,"NM_posv_expert, we solve with given factors" );
-      DPOTRS(LA_NOTRANS, A->size0, 1, A->matrix0, A->size0, b, A->size0, &info);
+      DPOTRS(LA_UP, A->size0, 1, A->matrix0, A->size0, b, A->size0, &info);
       DEBUG_PRINT("End of call DPOTRS for NM_DENSE storage\n");
       if (info < 0)
       {
@@ -2960,7 +2960,18 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
         mat = A->matrix0;
       }
       DPOSV(LA_UP, A->size0, 1, mat, A->size0, b,
-          A->size0, &info);
+            A->size0, &info);
+      if (info > 0)
+      {
+        if (verbose >= 2)
+        {
+          printf("NM_posv: Cholesky solver DPOSV failed. The %d-th diagonal element is 0\n", info);
+        }
+      }
+      else if (info < 0)
+      {
+        fprintf(stderr, "NM_posv: Cholesky solver DPOSV failed. The %d-th argument has an illegal value, stopping\n", -info);
+      }
     }
     break;
   }
@@ -2987,16 +2998,22 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
           p->dWorkSize = A->size1;
           CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
           numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it" );
-          CHECK_RETURN(CSparsematrix_chol_factorization(1, NM_csc(A),  cs_chol_A));
+          CHECK_RETURN(CSparsematrix_chol_factorization(0, NM_csc(A),  cs_chol_A));
           p->linear_solver_data = cs_chol_A;
         }
 
         numerics_printf_verbose(2,"NM_posv, we solve with given factors" );
-        info = !CSparseMatrix_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), b);
+        info = !CSparseMatrix_chol_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), b);
       }
       else
       {
+        numerics_printf_verbose(2,"NM_posv" );
         info = !cs_cholsol(1, NM_csc(A), b);
+        if (info > 0)
+        {
+          printf("NM_posv: cs_cholsol failed. info = %i\n", info);
+        }
+        //DEBUG_EXPR(NV_display)
       }
       break;
 
