@@ -1770,6 +1770,275 @@ static int test_NM_inv(void)
 }
 
 
+static int test_NM_gesv_expert_unit(NumericsMatrix * M1, double * b)
+{
+  int n = M1->size0;
+  int info =-1;
+  double * y = (double*)malloc(n* sizeof(double));
+  for (int j=0; j < n; j++)
+    y[j] = b[j];
+  NM_gesv_expert(M1, b, NM_PRESERVE);
+  NV_display(b,n);
+  NM_gemv(-1.0, M1, b, 1.0, y);
+  double res = cblas_dnrm2(n,y,1);
+  free(y);
+  printf("residual = %e\n", res);
+  if (fabs(res) >= sqrt(DBL_EPSILON))
+    info = 1;
+  else
+    info=0;
+  return info;
+}
+
+static int test_NM_gesv_expert(void)
+{
+
+  printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
+
+  int i, nmm = 4 ;
+  NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
+  int info = test_build_first_4_NM(NMM);
+
+  if (info != 0)
+  {
+    printf("Construction failed ...\n");
+    return info;
+  }
+  printf("Construction ok ...\n");
+
+
+  NumericsMatrix * M1 = NULL;
+  double * b = NULL;
+
+  int n =0;
+  double res;
+
+  M1 = NMM[0];
+  n = M1->size0;
+  b = (double*)malloc(n* sizeof(double));
+  for (int j=0; j < n; j++)
+    b[j] =1.0;
+  info = test_NM_gesv_expert_unit(M1, b);
+  if (info != 0) return info;
+
+  M1=NMM[1];
+  n = M1->size0;
+  b = (double*)malloc(n* sizeof(double));
+  for (int j=0; j < n; j++)
+    b[j] =1.0;
+  info = test_NM_gesv_expert_unit(M1, b);
+  if (info != 0) return info;
+
+  M1 = test_matrix_5();
+  n = M1->size0;
+  b = (double*)malloc(n* sizeof(double));
+  for (int j=0; j < n; j++)
+    b[j] =1.0;
+  info = test_NM_gesv_expert_unit(M1, b);
+  if (info != 0) return info;
+
+  free(b);
+
+
+
+  printf("End of NM_gesv...\n");
+  if (info != 0) return info;
+
+  /* free memory */
+
+  for (i = 0 ; i < nmm; i++)
+  {
+    NM_free(NMM[i]);
+    free(NMM[i]);
+  }
+  free(NMM);
+  printf("========= End Numerics tests for NumericsMatrix ========= \n");
+  return info;
+}
+
+
+static int test_NM_posv_expert_unit(NumericsMatrix * M, double * b)
+{
+  int n = M->size0;
+  int info =-1;
+  double * y_save = (double*)malloc(n* sizeof(double));
+  for (int j=0; j < n; j++)
+    y_save[j] = b[j];
+
+
+  printf("Cholesky solve preserving matrix\n");
+  double * y = (double*)malloc(n* sizeof(double));
+  for (int j=0; j < n; j++)
+    y[j] = b[j];
+  NSM_linear_solver_params* p = NSM_linearSolverParams(M);
+  p->solver = NSM_CS_CHOLSOL;
+  NM_posv_expert(M, b, NM_PRESERVE);
+  NV_display(b,n);
+  NM_gemv(-1.0, M, b, 1.0, y);
+  double res = cblas_dnrm2(n,y,1);
+
+  printf("residual = %e\n", res);
+  if (fabs(res) >= sqrt(DBL_EPSILON))
+  {
+    info = 1;
+    return info;
+  }
+  else
+    info=0;
+
+
+  printf("Cholesky solve keeping factors\n");
+  for (int j=0; j < n; j++)
+  {
+    b[j] = y_save[j];
+    y[j]=b[j];
+  }
+  NumericsMatrix * M_copy = NM_create(NM_SPARSE,M->size0, M->size1);
+  NM_copy(M, M_copy);
+  NM_posv_expert(M, b, NM_KEEP_FACTORS);
+  NV_display(b,n);
+  NM_gemv(-1.0, M_copy, b, 1.0, y);
+  res = cblas_dnrm2(n,y,1);
+  printf("residual = %e\n", res);
+  if (fabs(res) >= sqrt(DBL_EPSILON))
+  {
+    info = 1;
+    return info;
+  }
+  else
+    info=0;
+
+  printf("Cholesky solve with given factors\n");
+
+  for (int j=0; j < n; j++)
+  {
+    y[j]  = 3.0*y_save[j];
+    b[j] = y[j];
+  }
+  NM_posv_expert(M, b, NM_KEEP_FACTORS);
+  NV_display(b,n);
+  NM_gemv(-1.0, M_copy, b, 1.0, y);
+  res = cblas_dnrm2(n,y,1);
+  printf("residual = %e\n", res);
+  if (fabs(res) >= sqrt(DBL_EPSILON))
+  {
+    info = 1;
+    return info;
+  }
+  else
+    info=0;
+
+
+  free(y);
+  free(y_save);
+
+
+  return info;
+}
+
+static int test_NM_posv_expert(void)
+{
+
+  printf("========= Starts Numerics tests for NumericsMatrix ========= \n");
+
+  int i, nmm = 4 ;
+  NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
+  int info = test_build_first_4_NM(NMM);
+
+  if (info != 0)
+  {
+    printf("Construction failed ...\n");
+    return info;
+  }
+  printf("Construction ok ...\n");
+
+
+  NumericsMatrix * M1 = NULL;
+  double * b = NULL;
+
+  int n =0;
+  double res;
+
+  NumericsMatrix *Id = NM_eye(10);
+  //NM_scal(Id, 5.0);
+  n = Id->size0;
+  b = (double*)malloc(n* sizeof(double));
+  for (int j=0; j < n; j++){
+    b[j] =2.0*j;
+    //NM_set_value(Id, j,j, 2.0*j);
+  }
+  info = test_NM_posv_expert_unit(Id, b);
+  if (info != 0) return info;
+  NM_free(Id);
+  free(Id);
+
+  NumericsMatrix * Z = NM_create(NM_SPARSE,2,2);
+  NM_triplet_alloc(Z,0);
+  Z->matrix2->origin= NSM_TRIPLET;
+  NM_zentry(Z,0,0,2.0);
+  NM_zentry(Z,1,1,2.0);
+  NM_zentry(Z,0,1,1.0);
+  NM_zentry(Z,1,0,1.0);
+  info = test_NM_posv_expert_unit(Z, b);
+  if (info != 0) return info;
+  NM_free(Z);
+  free(Z);
+
+  M1 = NMM[0];
+  NumericsMatrix * M1T = NM_transpose(M1);
+  NumericsMatrix * C = NM_create(NM_DENSE,M1->size0,M1->size1);
+  NM_gemm(1.0, M1, M1T, 0.0, C);
+  n = M1->size0;
+  b = (double*)malloc(n* sizeof(double));
+  for (int j=0; j < n; j++)
+    b[j] =1.0;
+  info = test_NM_posv_expert_unit(C, b);
+  if (info != 0) return info;
+  NM_free(M1T);
+  NM_free(C);
+
+  /* M1=NMM[1]; */
+  /* M1T = NM_transpose(M1); */
+  /* C = NM_create(NM_SPARSE_BLOCK,M1->size0,M1->size1); */
+  /* NM_gemm(1.0, M1, M1T, 0.0, C); */
+  /* n = M1->size0; */
+  /* b = (double*)malloc(n* sizeof(double)); */
+  /* for (int j=0; j < n; j++) */
+  /*   b[j] =1.0; */
+  /* info = test_NM_posv_expert_unit(C, b); */
+  /* if (info != 0) return info; */
+
+  M1 = test_matrix_5();
+  M1T = NM_transpose(M1);
+  C = NM_create(NM_SPARSE,M1->size0,M1->size1);
+  NM_triplet_alloc(C,0);
+  C->matrix2->origin= NSM_TRIPLET;
+  NM_gemm(1.0, M1, M1T, 0.0, C);
+  n = M1->size0;
+  b = (double*)malloc(n* sizeof(double));
+  for (int j=0; j < n; j++)
+    b[j] =1.0;
+  info = test_NM_posv_expert_unit(C, b);
+  if (info != 0) return info;
+
+  free(b);
+
+
+
+  printf("End of NM_posv...\n");
+
+  /* free memory */
+
+  for (i = 0 ; i < nmm; i++)
+  {
+    NM_free(NMM[i]);
+    free(NMM[i]);
+  }
+  free(NMM);
+  printf("========= End Numerics tests for NumericsMatrix ========= \n");
+  return info;
+}
+
 int main(void)
 {
   int info = NM_read_write_test();
@@ -1790,11 +2059,17 @@ int main(void)
 
   info +=    test_NM_row_prod_non_square_test();
 
+
   info +=    test_NM_iterated_power_method();
 
   info +=    test_NM_scal();
 
   info +=    test_NM_inv();
+
+  info += test_NM_gesv_expert();
+
+  info += test_NM_posv_expert();
+
   return info;
 
 }

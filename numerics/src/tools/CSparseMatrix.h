@@ -132,13 +132,13 @@ extern "C"
 {
 #endif
 
-  /** \struct CSparseMatrix_lu_factors
+  /** \struct CSparseMatrix_factors
    * Information used and produced by CSparse for an LU factorization*/
   typedef struct {
     CS_INT n;       /**< size of linear system */
     css* S;      /**< symbolic analysis */
     csn* N;      /**< numerics factorization */
-  } CSparseMatrix_lu_factors;
+  } CSparseMatrix_factors;
 
  /** compute a LU factorization of A and store it in a workspace
    * \param order control if ordering is used
@@ -147,19 +147,34 @@ extern "C"
    * \param cs_lu_A the parameter structure that eventually holds the factors
    * \return 1 if the factorization was successful, 1 otherwise
    */
-  int CSparsematrix_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, CSparseMatrix_lu_factors * cs_lu_A);
+  int CSparsematrix_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, CSparseMatrix_factors * cs_lu_A);
+
+ /** compute a Cholesky factorization of A and store it in a workspace
+   * \param order control if ordering is used
+   * \param A the sparse matrix
+   * \param cs_chol_A the parameter structure that eventually holds the factors
+   * \return 1 if the factorization was successful, 1 otherwise
+   */
+  int CSparsematrix_chol_factorization(CS_INT order, const CSparseMatrix *A,  CSparseMatrix_factors * cs_chol_A);
 
   /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
    * \param cs_lu_A contains the LU factors of A, permutation information
    * \param x workspace
    * \param[in,out] b on input RHS of the linear system; on output the solution
    * \return 0 if failed, 1 otherwise*/
-  CS_INT CSparseMatrix_solve(CSparseMatrix_lu_factors* cs_lu_A, double* x, double *b);
+  CS_INT CSparseMatrix_solve(CSparseMatrix_factors* cs_lu_A, double* x, double *b);
+
+  /** reuse a Cholesky factorization (stored in the cs_chols_A) to solve a linear system Ax = b
+   * \param cs_chol_A contains the Cholesky factors of A, permutation information
+   * \param x workspace
+   * \param[in,out] b on input RHS of the linear system; on output the solution
+   * \return 0 if failed, 1 otherwise*/
+  CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b);
 
   /** Free a workspace related to a LU factorization
    * \param cs_lu_A the structure to free
    */
-  void CSparseMatrix_free_lu_factors(CSparseMatrix_lu_factors* cs_lu_A);
+  void CSparseMatrix_free_lu_factors(CSparseMatrix_factors* cs_lu_A);
 
   /** Matrix vector multiplication : y = alpha*A*x+beta*y
    * \param[in] alpha matrix coefficient

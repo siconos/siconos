@@ -241,7 +241,7 @@ void NSM_free_p(void *p)
 {
   assert(p);
   NSM_linear_solver_params* ptr = (NSM_linear_solver_params*) p;
-  CSparseMatrix_lu_factors* cs_lu_A = (CSparseMatrix_lu_factors*)NSM_linear_solver_data(ptr);
+  CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*)NSM_linear_solver_data(ptr);
 
   CSparseMatrix_free_lu_factors(cs_lu_A);
 

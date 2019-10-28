@@ -2678,14 +2678,14 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           p->solver_free_hook = &NSM_free_p;
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
-          CSparseMatrix_lu_factors* cs_lu_A = (CSparseMatrix_lu_factors*) malloc(sizeof(CSparseMatrix_lu_factors));
+          CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
           numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it" );
           CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
           p->linear_solver_data = cs_lu_A;
         }
 
         numerics_printf_verbose(2,"NM_gesv, we solve with given factors" );
-        info = !CSparseMatrix_solve((CSparseMatrix_lu_factors *)NSM_linear_solver_data(p), NSM_workspace(p), b);
+        info = !CSparseMatrix_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), b);
       }
       else
       {
@@ -2923,6 +2923,200 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
    * problems, but the calling function has to check the return code.*/
 //  CHECK_RETURN(info);
   DEBUG_END("NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)\n");
+  return (int)info;
+}
+
+int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
+{
+
+  DEBUG_BEGIN("NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)\n");
+  assert(A->size0 == A->size1);
+
+  lapack_int info = 1;
+  /* verbose=2; */
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    assert(A->matrix0);
+
+    if (keep == NM_KEEP_FACTORS)
+    {
+      numerics_printf_verbose(2,"NM_posv_expert, using LAPACK" );
+      //double* wkspace = NM_dWork(A, A->size0*A->size1);
+
+      DEBUG_PRINTF("iwork and dwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
+
+      if (!NM_internalData(A)->isLUfactorized)
+      {
+        numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it" );
+        DEBUG_PRINT("Start to call DPOTRF for NM_DENSE storage\n");
+        //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
+        DPOTRF(LA_UP, A->size1, A->matrix0, A->size0, &info);
+        DEBUG_PRINT("end of call DPOTRF for NM_DENSE storage\n");
+        if (info > 0)
+        {
+          if (verbose >= 2)
+          {
+            printf("NM_posv: Cholesky factorisation DPOTRF failed. The %d-th diagonal element is 0\n", info);
+          }
+        }
+        else if (info < 0)
+        {
+          fprintf(stderr, "NM_posv: Cholesky factorisation DPOTRF failed. The %d-th argument has an illegal value, stopping\n", -info);
+        }
+
+        if (info) { NM_internalData_free(A); return info; }
+
+        NM_internalData(A)->isLUfactorized = true;
+      }
+      DEBUG_PRINT("Start to call DPOTRS for NM_DENSE storage\n");
+      numerics_printf_verbose(2,"NM_posv_expert, we solve with given factors" );
+      DPOTRS(LA_UP, A->size0, 1, A->matrix0, A->size0, b, A->size0, &info);
+      DEBUG_PRINT("End of call DPOTRS for NM_DENSE storage\n");
+      if (info < 0)
+      {
+        if (verbose >= 2)
+        {
+          printf("NM_posv: dense LU solve DGETRS failed. The %d-th argument has an illegal value, stopping\n", -info);
+        }
+      }
+    }
+    else
+    {
+      double* mat;
+      if (keep == NM_PRESERVE)
+      {
+        mat = NM_dWork(A, A->size0*A->size1);
+        cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, mat, 1);
+      }
+      else
+      {
+        mat = A->matrix0;
+      }
+      DPOSV(LA_UP, A->size0, 1, mat, A->size0, b,
+            A->size0, &info);
+      if (info > 0)
+      {
+        if (verbose >= 2)
+        {
+          printf("NM_posv: Cholesky solver DPOSV failed. The %d-th diagonal element is 0\n", info);
+        }
+      }
+      else if (info < 0)
+      {
+        fprintf(stderr, "NM_posv: Cholesky solver DPOSV failed. The %d-th argument has an illegal value, stopping\n", -info);
+      }
+    }
+    break;
+  }
+
+  case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+  case NM_SPARSE:
+  {
+    NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+    switch (p->solver)
+    {
+    case NSM_CS_CHOLSOL:
+      numerics_printf_verbose(2,"NM_posv, using CSparse cholsol" );
+
+      if (keep == NM_KEEP_FACTORS)
+      {
+        if (!(p->dWork && p->linear_solver_data))
+        {
+          assert(!NSM_workspace(p));
+          assert(!NSM_linear_solver_data(p));
+          assert(!p->solver_free_hook);
+
+          p->solver_free_hook = &NSM_free_p;
+          p->dWork = (double*) malloc(A->size1 * sizeof(double));
+          p->dWorkSize = A->size1;
+          CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+          numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it" );
+          CHECK_RETURN(CSparsematrix_chol_factorization(0, NM_csc(A),  cs_chol_A));
+          p->linear_solver_data = cs_chol_A;
+        }
+
+        numerics_printf_verbose(2,"NM_posv, we solve with given factors" );
+        info = !CSparseMatrix_chol_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), b);
+      }
+      else
+      {
+        numerics_printf_verbose(2,"NM_posv" );
+        info = !cs_cholsol(1, NM_csc(A), b);
+        if (info > 0)
+        {
+          printf("NM_posv: cs_cholsol failed. info = %i\n", info);
+        }
+        //DEBUG_EXPR(NV_display)
+      }
+      break;
+
+#ifdef WITH_MUMPS
+    case NSM_MUMPS:
+    {
+      if (verbose >= 2)
+      {
+        printf("NM_gesv: using MUMPS\n" );
+      }
+      if (!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+      {
+        /* the mumps instance is initialized (call with job=-1) */
+        NM_MUMPS_set_control_params(A);
+        NM_MUMPS(A, -1);
+        NM_MUMPS_set_verbosity(A, verbose);
+        NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
+        NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
+      }
+      NM_MUMPS_set_problem(A, b);
+
+      DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+      if (keep != NM_KEEP_FACTORS|| mumps_id->job == -1)
+      {
+        NM_MUMPS(A, 6); /* analyzis,factorization,solve*/
+      }
+      else
+      {
+        NM_MUMPS(A, 3); /* solve */
+      }
+
+      info = mumps_id->info[0];
+
+      /* MUMPS can return info codes with negative value */
+      if (info)
+      {
+        if (verbose > 0)
+        {
+          printf("NM_posv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+        }
+      }
+      if (keep != NM_KEEP_FACTORS)
+      {
+        NM_MUMPS(A, -2);
+      }
+      if (!p->solver_free_hook)
+      {
+        p->solver_free_hook = &NM_MUMPS_free;
+      }
+      break;
+    }
+#endif /* WITH_MUMPS */
+
+    default:
+    {
+      fprintf(stderr, "NM_posv: unknown sparse linearsolver %d\n", p->solver);
+      exit(EXIT_FAILURE);
+    }
+    }
+    break;
+  }
+
+  default:
+    assert (0 && "NM_posv unknown storageType");
+  }
+
+  DEBUG_END("NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)\n");
   return (int)info;
 }
 
