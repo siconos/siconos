@@ -236,7 +236,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
                 double* restrict velocity, double* restrict globalVelocity,
                 int* restrict info, SolverOptions* restrict options)
 {
-  /* verbose=2;   */
+  /* verbose=1; */
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -576,7 +576,17 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
 
       /* Linear system solver */
       /* cblas_dcopy(n , w_k , 1 , v, 1); */
-      NM_gesv_expert(W,v,NM_KEEP_FACTORS);
+      if(with_full_Jacobian)
+      {
+        NM_gesv_expert(W,v,NM_KEEP_FACTORS);
+      }
+      else
+      {
+        /* NM_gesv_expert(W,v,NM_KEEP_FACTORS); */
+        NSM_linear_solver_params* p = NSM_linearSolverParams(W);
+        p->solver =  NSM_CS_CHOLSOL;
+        NM_posv_expert(W,v,NM_KEEP_FACTORS);
+      }
       DEBUG_PRINT("v:");
       DEBUG_EXPR(NV_display(v,n));
 
