@@ -3031,9 +3031,12 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
           p->solver_free_hook = &NSM_free_p;
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
+
           CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+
           numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it" );
-          CHECK_RETURN(CSparsematrix_chol_factorization(0, NM_csc(A),  cs_chol_A));
+          CHECK_RETURN(CSparsematrix_chol_factorization(1, NM_csc(A),  cs_chol_A));
+
           p->linear_solver_data = cs_chol_A;
         }
 
@@ -3046,7 +3049,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
         info = !cs_cholsol(1, NM_csc(A), b);
         if (info > 0)
         {
-          printf("NM_posv: cs_cholsol failed. info = %i\n", info);
+          numerics_printf("NM_posv: cs_cholsol failed. info = %i\n", info);
         }
         //DEBUG_EXPR(NV_display)
       }
