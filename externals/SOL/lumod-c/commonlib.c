@@ -4,7 +4,7 @@
 # include <sys/timeb.h>
 #endif
 #include "commonlib.h"
-#include <_ctype.h>     // for tolower, toupper
+#include <ctype.h>     // for tolower, toupper
 #include <stdio.h>      // for fprintf, NULL, printf, FILE
 #include <stdlib.h>     // for malloc
 #include <string.h>     // for strlen, strcat, strcmp, strncmp, strrchr, strcpy
