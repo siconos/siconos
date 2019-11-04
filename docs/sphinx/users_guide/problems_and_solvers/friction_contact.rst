@@ -1,17 +1,22 @@
-.. index:: single: Friction-contact problems (2D or 3D)
-.. _doxid-fc_problem:
+.. index::
+   single: Friction-contact problems (2 or 3D)
 
-Friction-contact problems (2D or 3D)
-====================================
+.. contents::
 
-.. _doxid-fc_problem_1fcIntro:
-.. rubric:: Problem statement:
+.. _fc_problem:
+
+Friction-contact problems (2 or 3D)
+***********************************
+
+Problem statement
+=================
+
 
 Given
 
 * a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
 
-* a vector :math:` {q} \in {{\mathrm{I\!R}}}^n`
+* a vector :math:`{q} \in {{\mathrm{I\!R}}}^n`
 
 * a vector of coefficients of friction :math:`\mu \in{{\mathrm{I\!R}}}^{n_c}`
 
@@ -19,7 +24,10 @@ the (reduced or dual) frictional contact problem is to find two vectors :math:`u
 
 .. math::
 
-    \begin{eqnarray*} \begin{cases} u = M r + q \\ \hat u = u +\left[ \left[\begin{array}{c} \mu^\alpha \|u^\alpha_{T}\|\\ 0 \\ 0 \end{array}\right]^T, \alpha = 1 \ldots n_c \right]^T \\ \ \ C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu} \end{cases} \end{eqnarray*}
+    \begin{eqnarray*} \begin{cases}
+    u = M r + q \\
+    \hat u = u +\left[ \left[\begin{array}{c} \mu^\alpha \|u^\alpha_{T}\|\\ 0 \\ 0 \end{array}\right]^T, \alpha = 1 \ldots n_c \right]^T \\ \ \ C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
+    \end{cases} \end{eqnarray*}
 
 where the Coulomb friction cone is defined by :math:`C_{\mu} = \prod\limits_{\alpha=1\ldots n_c} C^{\alpha}_{\mu^\alpha}`
 
@@ -45,12 +53,72 @@ This problem models any instance of discretized frictional contact problem obtai
 
 * the modeling of static contact problems. In this last case, :math:`u` plays the role of the relative displacement at contact
 
-The problem is stored and given to the solver in Siconos/Numerics thanks to a C structure :ref:`FrictionContactProblem <doxid-struct_friction_contact_problem>` .
+Implementation in numerics
+==========================
 
-.. _doxid-fc_problem_1fc3DSolversList:
-.. rubric:: Available solvers for Friction Contact 3D:
+Structure to define the problem: :class:`FrictionContactProblem`.
 
-see ``Friction_cst.h`` for solver ids. Use the generic function :ref:`fc3d_driver() <doxid-_non_smooth_drivers_8h_1ae89ab73414684ab73c0974d1a146bdc8>` to call one the the specific solvers listed below:
+Solvers list  :enum:`FRICTION_SOLVER`
+
+The generic drivers for friction-contact problems are:
+
+* :func:`fc2d_driver` (id contains FRICTION_2D)
+* :func:`fc3d_driver` (id contains FRICTION_3D)
+* :func:`gfc3d_driver` (id contains GLOBAL_FRICTION_2D)
+* :func:`rolling_fc3d_driver` (id contains ROLLING_FRICTION_3D)
+
+  
+.. _fc2d_solvers:
+
+Friction 2D available solvers
+=============================
+
+Nonsmooth Gauss-Seidel (:enumerator:`SICONOS_FRICTION_2D_NSGS`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+direct solver for LCP based on pivoting method principle for degenerate problem: the choice of pivot variable is performed via lexicographic ordering.
+
+driver :func:`lcp_lexicolemke`
+
+parameters:
+
+* iparam[SICONOS_IPARAM_MAX_ITER] = 10000
+* iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = 0
+* dparam[SICONOS_DPARAM_TOL] = 1e-6
+* dparam[2] = 0.0 
+* dparam[3] = 0.0
+
+Nonsmooth Gauss-Seidel (:enumerator:`SICONOS_FRICTION_2D_PGS`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Conjugated projected gradient (:enumerator:`SICONOS_FRICTION_2D_CPG`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Latin method (:enumerator:`SICONOS_FRICTION_2D_LATIN`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Lemke solver (:enumerator:`SICONOS_FRICTION_2D_LEMKE`)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Enumerative solver (:enumerator:`SICONOS_FRICTION_2D_ENUM`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  
+.. _fc3d_solvers:
+
+Friction 3D available solvers
+=============================
+
+.. _gfc3d_solvers:
+
+Global Friction 3D available solvers
+====================================
+
+.. _rfc3d_solvers:
+
+Rolling-Friction 3D available solvers
+=====================================
+
+
+
+
 
 * :ref:`fc3d_nsgs() <doxid-fc3d___solvers_8h_1ad5fdf1a37ff65852645b460ada37cb71>` : non-smooth Gauss-Seidel solver. SolverId : SICONOS_FRICTION_3D_NSGS =500,
 

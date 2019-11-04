@@ -1,17 +1,21 @@
-.. index:: single: Second Order Cone Linear Complementarity Problem
-.. _doxid-soclcp_problem:
+.. index::
+   single: Second Order Cone Linear Complementarity Problem (SOCLCP)
+   
+.. contents::
 
-Second Order Cone Linear Complementarity Problem
-================================================
+.. _soclcp_problem:
 
-.. _doxid-soclcp_problem_1soclcpIntro:
-.. rubric:: Problem statement:
+Second Order Cone Linear Complementarity Problem (SOCLCP)
+*********************************************************
+
+Problem statement
+=================
 
 Given
 
 * a symmetric positive semi definite matrix :math:`{M} \in {{\mathrm{I\!R}}}^{n \times n}`
 
-* a vector :math:` {q} \in {{\mathrm{I\!R}}}^n`
+* a vector :math:`{q} \in {{\mathrm{I\!R}}}^n`
 
 * a vector of coefficients :math:`\mu \in{{\mathrm{I\!R}}}^{n_c}`
 
@@ -19,7 +23,10 @@ the second order cone linear complementarity problem (SOCLCP) is to find two vec
 
 .. math::
 
-    \begin{eqnarray*} \begin{cases} u = M r + q \\ \ C^\star_{\mu} \ni {u} \perp r \in C_{\mu} \end{cases} \end{eqnarray*}
+    \begin{eqnarray*} \begin{cases}
+    u = M r + q \\
+    \ C^\star_{\mu} \ni {u} \perp r \in C_{\mu}
+    \end{cases} \end{eqnarray*}
 
 and the set :math:`C^{\alpha,\star}_{\mu^\alpha}` is its dual.
 
@@ -27,53 +34,103 @@ The set C is the second order cone given by
 
 .. math::
 
-    \begin{eqnarray} C_{\mu} = \{ r \} = \prod_{\alpha =1}^{n_c} C^\alpha_{\mu} \end{eqnarray}
+    \begin{eqnarray}
+    C_{\mu} = \{ r \} = \prod_{\alpha =1}^{n_c} C^\alpha_{\mu}
+    \end{eqnarray}
 
 with
 
 .. math::
 
-    \begin{eqnarray} C^\alpha_{\mu} = \{ r \mid \|[r_1, \ldots, r_{n^\alpha}]\| \leq \mu^\alpha * r_0 \} \subset {\mathrm{I\!R}}^{n^\alpha} \end{eqnarray}
+    \begin{eqnarray}
+    C^\alpha_{\mu} = \{ r \mid \|[r_1, \ldots, r_{n^\alpha}]\| \leq \mu^\alpha * r_0 \} \subset {\mathrm{I\!R}}^{n^\alpha}
+    \end{eqnarray}
 
-The problem is stored and given to the solver in numerics thanks to the C structure :class:`SecondOrderConeLinearComplementarityProblem` .
+Implementation in numerics
+==========================
 
-.. _doxid-soclcp_problem_1SOCLCPSolversList:
-.. rubric:: Available solvers for SOCCLP:
+Structure to define the problem: :class:`SecondOrderConeLinearComplementarityProblem`.
 
-see ``SOCLCP_cst.h`` for solver ids.
+The generic driver for all SOCLCP problems is :func:`soclcp_driver()`.
 
-Use the generic function :func:`soclcp_driver()` to call one the the specific solvers listed below:
+Solvers list  :enum:`SOCLCP_SOLVER`
 
-* :func:`soclcp_nsgs()` : PSOR (Gauss-Seidel with overrelaxation) solver. SolverId : SICONOS_SOCLCP_NSGS ,
+.. _soclcp_solvers:
 
-* soclcp_VI_FixedPointProjection() : VI formulation and fixed point projection. SolverId : SICONOS_SOCLCP_VI_FPP ,
+SOCLCP available solvers
+========================
 
-* :func:`soclcp_VI_ExtraGradient()` : VI formulation and extra-gradient solver. SolverId : SICONOS_SOCLCP_VI_EG ,
+Gauss-Seidel (:enumerator:`SICONOS_SOCLCP_NSGS`)
+""""""""""""""""""""""""""""""""""""""""""""""""
 
-See the related functions/solvers list in ``SOCLCP_Solvers.h`` .
+PSOR (Gauss-Seidel with overrelaxation) solver.
 
-.. index:: single: Second Order Cone Linear Complementarity Problem (SOCLCP) solvers
-.. _doxid-_second_order_cone_linear_complementarity_problem_solvers:
+driver: :func:`soclcp_nsgs()`
 
-.. rubric:: Second Order Cone Linear Complementarity Problem (SOCLCP) solvers:
+parameters:
+
+* iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+* iparam[SICONOS_IPARAM_ERROR_EVALUATION] : error computation method,
+  
+    * SICONOS_ERROR_FULL_EVALUATION Complete error computation with v computation (Default)
+    * SICONOS_ERROR_LIGHT_EVALUATION for Light error computation with incremental values on r verification of absolute error at the end 
+    * SICONOS_ERROR_LIGHT_EVALUATION_NO_UPDATE for light error computation, without update for v
+
+* iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] = 0;
+* iparam[7] = iter number of performed iterations (out)
+* iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] : method uses overrelaxation
+* iparam[SICONOS_IPARAM_NSGS_SHUFFLE] : if 1, shuffle the contact indices in the loop
+* dparam[SICONOS_DPARAM_TOL] = 1e-4;
+* dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION] = 1., relaxation parameter value
+  
+internal solver: :enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration`.
 
 
-This page gives an overview of the available solvers for Second Order Cone Linear Complementarity Problem (SOCLCP) and their required parameters.
+VI, fixed-point (:enumerator:`SICONOS_SOCLCP_VI_FPP`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-This page gives an overview of the available solvers for Second Order Cone Linear Complementarity Problem (SOCLCP) and their required parameters.
+VI formulation and fixed point projection.
 
-For each solver, the input argument are:
+driver: :func:`soclcp_VI_FixedPointProjection()`
 
-* a :class:`SecondOrderConeLinearComplementarityProblem`
+parameters: same as :enumerator:`SICONO_VI_FPP`, see :ref:`vi_solvers`.
 
-* the unknowns (r,v)
 
-* info, the termination value (0: convergence, >0 problem which depends on the solver)
+VI, Extra-gradient (:enumerator:`SICONOS_SOCLCP_VI_EG`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-* a SolverOptions structure, which handles iparam and dparam
+VI formulation and extra-gradient solver.
 
-.. _doxid-_second_order_cone_linear_complementarity_problem_solvers_1soclcp:
-.. rubric:: nsgs Non-Smooth Gauss Seidel Solver:
+driver: :func:`soclcp_VI_ExtraGradient()`
 
-function: secondOrderConeLinearComplementarity_nsgs(problem, r , v , &info , options); parameters:
+parameters: same as :enumerator:`SICONO_VI_EG`, see :ref:`vi_solvers`.
+
+VI, Extra-gradient (:enumerator:`SICONOS_SOCLCP_VI_EG`)
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+VI formulation and extra-gradient solver.
+
+driver: :func:`soclcp_VI_ExtraGradient()`
+
+parameters: same as :enumerator:`SICONO_VI_EG`, see :ref:`vi_solvers`.
+
+Projections
+"""""""""""
+
+Used as internal solver for :enumerator:`SICONOS_SOCLCP_NSGS`.
+
+ids: :enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration`,
+:enumerator:`SICONOS_SOCLCP_ProjectionOnCone`,
+   :enumerator:`SICONOS_SOCLCP_ProjectionOnConeWithRegularization`.
+
+drivers:
+
+* :func:`soclcp_projectionOnCone_solve` for ProjectionOnCone and ProjectionOnConeWithRegularization,
+* :func:`soclcp_projectionOnConeWithLocalIteration` for ProjectionOnConeWithLocalIteration.
+
+
+parameters:
+
+* iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] (set by soclcp_nsgs)
+* dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.
 

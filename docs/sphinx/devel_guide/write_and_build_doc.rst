@@ -27,7 +27,8 @@ It consists in
 
   Source files and sphinx configuration file are all in docs/sphinx directory.
 
-* **Siconos APIs** (Python and C++) documentation, automatically generated from inline comments in source files ( *.h/ *.hpp).
+* **Siconos APIs** (Python and C++) documentation, automatically generated from inline comments in source files ( .h and .hpp).
+  
   Rules and best practices to write comments leading to a proper html documentation are detailed in :ref:`documenting_source_code`.
 
 
