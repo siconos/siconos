@@ -149,6 +149,7 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
     dgesv
     dgetrs
     dpotrf
+    dpotrs
     )
 
   # Functions that are optional
