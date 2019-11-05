@@ -63,6 +63,6 @@ Project status
  
 .. _Siconos CI on Travis: https://travis-ci.org/siconos/siconos
 
-.. _Cdash reports: https://my.cdash.org/index.php?project=Siconos
+.. _Cdash reports: https://my.cdash.org/index.php?project=Siconos-Dashboard
  
 .. _Jenkins: https://ci.inria.fr/siconos--
