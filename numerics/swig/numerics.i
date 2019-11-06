@@ -282,7 +282,6 @@ namespace std11 = std;
 // solverOptions.i, numerics_common and fwd decl
 // all this because of SolverOptions extend.
 %begin %{
-#include "CSparseMatrix_internal.h"
 #include "CSparseMatrix.h" // must be before NumericsMatrix.h
 #include "relay_cst.h"
 #include "AVI_cst.h"
