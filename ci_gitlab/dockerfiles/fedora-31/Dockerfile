@@ -1,5 +1,6 @@
 FROM fedora:31
 RUN dnf --setopt=deltarpm=false install -y \
+	make \
         cmake \
         python3 \
         python3-devel \
