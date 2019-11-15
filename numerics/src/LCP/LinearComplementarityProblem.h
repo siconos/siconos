@@ -29,7 +29,7 @@
 
     \rst 
     
-    See :ref:`lc_problem`_ 
+    See the detailed documentation in :ref:`lcp_problem`
     
     \endrst
 

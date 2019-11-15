@@ -33,7 +33,7 @@ void AVI_display(AffineVariationalInequalities* avi)
   assert(avi);
   int i, n = avi->size;
   printf("AffineVariationalInequalities Display :\n-------------\n");
-  printf("size :%d \n", avi->size);
+  printf("size :%zu \n", avi->size);
   if (avi->M)
   {
     printf("M matrix:\n");

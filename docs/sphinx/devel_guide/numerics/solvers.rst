@@ -56,8 +56,7 @@ Adding a new solver in numerics
 
    // Use default setup :
    int id = SICONOS_LCP_ENUM
-   SolverOptions * options =(SolverOptions *)malloc(sizeof(SolverOptions));
-   solver_options_create(options, id);
+   SolverOptions * options = solver_options_create(id);
    // optional : set parameters
    options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS] = 1;
    // ...
@@ -65,6 +64,5 @@ Adding a new solver in numerics
    lcp_enum(problem, z, w, info, options);
    // ...
    // clear memory
-   solver_options_clear(options);
-   free(options);
+   solver_options_clear(&options);
    

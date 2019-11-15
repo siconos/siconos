@@ -444,10 +444,10 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *re
   //    printDenseMatrice("V2",file,velocity,nbRow,1);
 #endif
     double err;
-    int tolViolate = gmp_compute_error(pInProblem, reaction, velocity, options->dparam[0], options, &err);
+    int tolViolate = gmp_compute_error(pInProblem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options, &err);
     if (tolViolate)
     {
-      printf("GMPReduced2, warnning, reduced problem solved, but error of initial probleme violated tol = %e, err= %e\n", options->dparam[0], err);
+      printf("GMPReduced2, warnning, reduced problem solved, but error of initial probleme violated tol = %e, err= %e\n", options->dparam[SICONOS_DPARAM_TOL], err);
     }
   }
 
@@ -601,10 +601,10 @@ void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction , 
   #endif
     gmp_reduced_convert_solution(pInProblem, reaction, velocity, Re, Rreduced, Vreduced);
     double err;
-    int tolViolate = gmp_compute_error(pInProblem, reaction, velocity, options->dparam[0], options, &err);
+    int tolViolate = gmp_compute_error(pInProblem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options, &err);
     if (tolViolate)
     {
-      printf("GMPReduced, warnning, reduced problem solved, but error of initial probleme violated tol = %e, err= %e\n", options->dparam[0], err);
+      printf("GMPReduced, warnning, reduced problem solved, but error of initial probleme violated tol = %e, err= %e\n", options->dparam[SICONOS_DPARAM_TOL], err);
     }
     free(Re);
     free(Rbuf);
@@ -716,7 +716,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double
   {
     /*it is a lcp.*/
     LinearComplementarityProblem aLCP;
-    SolverOptions aLcpOptions;
+    SolverOptions *aLcpOptions = solver_options_create(SICONOS_LCP_ENUM);
     NumericsMatrix M;
     M.storageType = 0;
     M.size0 = Mi_size;
@@ -726,10 +726,11 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double
     aLCP.size = Mi_size;
     aLCP.q = Qreduced;
     aLCP.M = &M;
-    linearComplementarity_setDefaultSolverOptions(&aLcpOptions, SICONOS_LCP_ENUM);
-    lcp_enum_init(&aLCP, &aLcpOptions, 1);
-    *info = linearComplementarity_driver(&aLCP, reaction, velocity, &aLcpOptions);
-    lcp_enum_reset(&aLCP, &aLcpOptions, 1);
+    lcp_enum_init(&aLCP, aLcpOptions, 1);
+    *info = linearComplementarity_driver(&aLCP, reaction, velocity, aLcpOptions);
+    lcp_enum_reset(&aLCP, aLcpOptions, 1);
+    solver_options_clear(&aLcpOptions);
+
     goto END_GMP3;
   }
   if (!Mi_size)
@@ -746,7 +747,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double
   }
   /*it is a MLCP*/
   MixedLinearComplementarityProblem aMLCP;
-  SolverOptions aMlcpOptions;
+  SolverOptions * aMlcpOptions = solver_options_create(SICONOS_MLCP_ENUM);
   aMLCP.n = Me_size;
   aMLCP.m = Mi_size;
   aMLCP.blocksRows = 0;
@@ -768,14 +769,12 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double
   M.matrix0 = reducedProb;
   M.matrix1 = 0;
   aMLCP.M = &M;
-  aMlcpOptions.solverId = SICONOS_MLCP_ENUM;
-  mixedLinearComplementarity_setDefaultSolverOptions(&aMLCP, &aMlcpOptions);
-  mlcp_driver_init(&aMLCP, &aMlcpOptions);
-  aMlcpOptions.dparam[0] = options->dparam[0];
-  *info = mlcp_driver(&aMLCP, reaction, velocity, &aMlcpOptions);
+  mlcp_driver_init(&aMLCP, aMlcpOptions);
+  aMlcpOptions->dparam[SICONOS_DPARAM_TOL] = options->dparam[SICONOS_DPARAM_TOL];
+  *info = mlcp_driver(&aMLCP, reaction, velocity, aMlcpOptions);
 
-  mlcp_driver_reset(&aMLCP, &aMlcpOptions);
-  mixedLinearComplementarity_deleteDefaultSolverOptions(&aMLCP, &aMlcpOptions);
+  mlcp_driver_reset(&aMLCP, aMlcpOptions);
+  solver_options_clear(&aMlcpOptions);
 END_GMP3:
   ;
 

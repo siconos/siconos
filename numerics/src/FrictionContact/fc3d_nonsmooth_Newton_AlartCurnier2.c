@@ -116,24 +116,24 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
 
   AlartCurnierParams acparams;
 
-  switch (options->iparam[10])
+  switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
-  case 0:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
     acparams.computeACFun3x3 = &computeAlartCurnierSTD;
     break;
   }
-  case 1:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD:
   {
     acparams.computeACFun3x3 = &computeAlartCurnierJeanMoreau;
     break;
   };
-  case 2:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED:
   {
     acparams.computeACFun3x3 = &fc3d_AlartCurnierFunctionGenerated;
     break;
   }
-  case 3:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_GENERATED:
   {
     acparams.computeACFun3x3 = &fc3d_AlartCurnierJeanMoreauFunctionGenerated;
     break;
@@ -179,15 +179,12 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
 
   if(options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN)
   {
-    SolverOptions * options_vi_eg =(SolverOptions *)malloc(sizeof(SolverOptions));
-    fc3d_VI_ExtraGradient_setDefaultSolverOptions(options_vi_eg);
-    options_vi_eg->iparam[0] = 50;
-    options_vi_eg->dparam[0] = sqrt(options->dparam[0]);
+    SolverOptions * options_vi_eg = solver_options_create(SICONOS_FRICTION_3D_VI_EG);
+    options_vi_eg->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
+    options_vi_eg->dparam[SICONOS_DPARAM_TOL] = sqrt(options->dparam[SICONOS_DPARAM_TOL]);
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
     fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
-    solver_options_delete(options_vi_eg);
-    free(options_vi_eg);
-
+    solver_options_clear(&options_vi_eg);
     newton_LSA(problemSize, reaction, velocity, info, (void *)&opaque_data, options, &functions_AC);
   }
   else if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO)

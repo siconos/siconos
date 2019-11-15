@@ -47,12 +47,10 @@ static int test_0(void)
   //cqp.env = &cqp;
   cqp.ProjectionOnC = &PXtest_0;
 
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_PG);
   verbose=1;
-  int info = convexQP_ProjectedGradient_setDefaultSolverOptions(options);
-  options->dparam[0]=1e-13;
-
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-13;
+  
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
   FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
@@ -80,7 +78,7 @@ static int test_0(void)
 
 
   PXtest_0(&cqp, z,w);
-
+  int info;
   convexQP_ProjectedGradient(&cqp, z, w, &info, options);
   int i =0;
   for (i =0; i< n ; i++)
@@ -88,8 +86,7 @@ static int test_0(void)
     printf("x[%i]=%f\t",i,z[i]);    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
   }
 
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
   free(problem);
   free(z);
   free(w);
@@ -130,13 +127,11 @@ static int test_1(void)
   //cqp.env = &cqp;
   cqp.ProjectionOnC = &PXtest_1;
 
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   verbose=1;
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION]=SICONOS_CONVEXQP_ADMM_NO_ACCELERATION;
-  options->dparam[0]=1e-13;
-  options->dparam[3]=0.8;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-13;
+  options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 0.8;
 
   
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
@@ -167,7 +162,7 @@ static int test_1(void)
   double *xi = (double*)calloc(n, sizeof(double));
 
   PXtest_1(&cqp, z,w);
-
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
 
   int i =0;
@@ -183,14 +178,13 @@ static int test_1(void)
   }
   if (!info)
   {
-    printf("test successful, residual = %g\n", options->dparam[1]);
+    printf("test successful, residual = %g\n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful, residual = %g\n", options->dparam[1]);
+    printf("test unsuccessful, residual = %g\n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
   free(problem);
   free(z);
   free(w);
@@ -230,12 +224,10 @@ static int test_2(void)
   //cqp.env = &cqp;
   cqp.ProjectionOnC = &PXtest_2;
 
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   verbose=1;
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
-  options->dparam[0]=1e-13;
-  options->dparam[3]=500;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-13;
+  options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 0.8;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_CONVEXQP_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
 
@@ -267,7 +259,7 @@ static int test_2(void)
   double *xi = (double*)calloc(n, sizeof(double));
 
   PXtest_2(&cqp, z,w);
-
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
 
   int i =0;
@@ -283,14 +275,13 @@ static int test_2(void)
   }
   if (!info)
   {
-    printf("test successful, residual = %g\n", options->dparam[1]);
+    printf("test successful, residual = %g\n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful, residual = %g\n", options->dparam[1]);
+    printf("test unsuccessful, residual = %g\n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
   free(problem);
   free(z);
   free(w);
@@ -330,12 +321,9 @@ static int test_3(void)
   //cqp.env = &cqp;
   cqp.ProjectionOnC = &PXtest_3;
 
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-  verbose=1;
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
-  options->dparam[0]=1e-13;
-  options->dparam[3]=1.0;
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
+  options->dparam[SICONOS_DPARAM_TOL]=1e-13;
+  options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
@@ -365,7 +353,7 @@ static int test_3(void)
   double *xi = (double*)calloc(n, sizeof(double));
 
   PXtest_3(&cqp, z,w);
-
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
 
   int i =0;
@@ -387,8 +375,7 @@ static int test_3(void)
   {
     printf("test unsuccessful, residual = %g\n", options->dparam[1]);
   }
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
   free(problem);
   free(z);
   free(w);
@@ -402,7 +389,7 @@ int main(int argc, char *argv[])
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
-  verbose=2;
+
   int i=0;
   printf("start test #%i ConvexQP_PG_FC3D \n",i);
   int info = test_0();

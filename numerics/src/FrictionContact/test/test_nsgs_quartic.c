@@ -19,7 +19,7 @@
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSGS
 #include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
-#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
@@ -32,21 +32,20 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   // -> same values for all tests.
   // The differences between tests are only for internal solvers and input data.
   int topsolver = SICONOS_FRICTION_3D_NSGS;
-  int dpos[] = {1, SICONOS_DPARAM_TOL};  // ipos = [number of values in parameters list, indices]
-  double dparam[] = {1e-5};
-  int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};  // ipos = [number of values in parameters list, indices]
-  int iparam[] = {10000};
 
   int current = 0;
   for(int d =0; d <n_data; d++)
     {
       // Quartic solver, set tol and max iter.
-      double internal_dparam[] = {1e-6};
-      int internal_iparam[] = {10};
-      build_friction_test(data_collection[d],
-                 topsolver, dpos, dparam, ipos, iparam,
-                 SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, dpos, internal_dparam, ipos, internal_iparam,
-                 &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+      solver_options_update_internal(collection[current].options, 0,SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+      collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+      collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+      current++;
     }
 
   return collection;

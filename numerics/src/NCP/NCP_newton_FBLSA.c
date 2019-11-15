@@ -62,10 +62,3 @@ void ncp_newton_FBLSA(NonlinearComplementarityProblem* problem, double *z, doubl
   set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->n, z, F, info, (void *)problem, options, &functions_FBLSA_ncp);
 }
-
-/*
-void ncp_newton_FBLSA_setDefaultSolverOptions(SolverOptions* options)
-{
-  solver_options_fill(options, SICONOS_NCP_NEWTON_FB_FBLSA, 5, 5, 100, 1e-16);
-}
-*/

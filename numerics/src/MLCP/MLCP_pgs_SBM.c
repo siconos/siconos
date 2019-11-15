@@ -31,7 +31,7 @@
 #include "mlcp_cst.h"                           // for SICONOS_MLCP_PGS_SBM
 #include "numerics_verbose.h"                   // for numerics_error, verbose
 #include "SiconosBlas.h"                              // for cblas_dcopy
-
+#include "lcp_cst.h"
 
 static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* const blmat, LinearComplementarityProblem* local_problem, double* q, double* z)
 {
@@ -87,8 +87,8 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
    */
 
   /* Global Solver parameters*/
-  int itermax = options[0].iparam[0];
-  double tolerance = options[0].dparam[0];
+  int itermax = options[0].iparam[SICONOS_IPARAM_MAX_ITER];
+  double tolerance = options[0].dparam[SICONOS_DPARAM_TOL];
 
   /* Matrix M/vector q of the MLCP */
   SparseBlockStructuredMatrix* blmat = problem->M->matrix1;
@@ -132,8 +132,8 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
   int hasNotConverged = 1;
 
   /* Output from local solver */
-  options[0].iparam[2] = 0;
-  options[0].dparam[2] = 0.0;
+  options[0].iparam[SICONOS_IPARAM_MLCP_PGS_SUM_ITER] = 0;
+  options[0].dparam[SICONOS_DPARAM_MLCP_PGS_SUM_ERRORS] = 0.0;
 
   if (options->numberOfInternalSolvers < 1)
   {
@@ -142,9 +142,8 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
 
 
 
-  /*Number of the local solver */
-  size_t localSolverNum = options->numberOfInternalSolvers ;
-  SolverOptions * internalSolvers = options->internalSolvers ;
+  // Current local solver options
+  SolverOptions * current_local_options = NULL;
 
   int pos = 0;
   /* Output from local solver */
@@ -154,17 +153,18 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
   {
     ++iter;
     /* Loop over the rows of blocks in blmat */
-    localSolverNum = 0;
+    size_t solverid = 0;
     pos = 0;
     /*       cblas_dcopy(problem->size,w,1,wBackup,1); */
     for (rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber)
     {
+      current_local_options = options[0].internalSolvers[solverid];
       /* Local problem formalization */
       mlcp_pgs_sbm_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
       /* Solve local problem */
       if (problem->blocksIsComp[rowNumber])
       {
-      infoLocal = lcp_driver_DenseMatrix(local_problem, &z[pos], &w[pos], &internalSolvers[localSolverNum]);
+      infoLocal = lcp_driver_DenseMatrix(local_problem, &z[pos], &w[pos], current_local_options);
       }
       else /* Solve a linear system*/
       {
@@ -188,10 +188,9 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
       }
       pos += local_problem->size;
       /* sum of local number of iterations (output from local_driver)*/
-      if (options[localSolverNum].iparam != NULL)
-        options[0].iparam[2] += internalSolvers[localSolverNum].iparam[1];
+      options[0].iparam[SICONOS_IPARAM_MLCP_PGS_SUM_ITER] += current_local_options->iparam[SICONOS_IPARAM_ITER_DONE];
       /* sum of local errors (output from local_driver)*/
-      options[0].dparam[2] += internalSolvers[localSolverNum].dparam[1];
+      options[0].dparam[SICONOS_DPARAM_MLCP_PGS_SUM_ERRORS] += current_local_options->dparam[SICONOS_DPARAM_RESIDU];
 
       if (infoLocal > 0)
       {
@@ -199,7 +198,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
         //free(local_problem->M);
         //free(local_problem);
         /* Number of GS iterations */
-        options[0].iparam[1] = iter;
+        options[0].iparam[SICONOS_IPARAM_ITER_DONE] = iter;
         fprintf(stderr, "MCLP_PGS_SBM error: Warning local LCP solver  at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
         //exit(EXIT_FAILURE);
 
@@ -207,8 +206,8 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
 
       }
 
-      while (localSolverNum < options->numberOfInternalSolvers - 1)
-        localSolverNum++;
+      while (solverid < options->numberOfInternalSolvers - 1)
+        solverid++;
     }
 
     /*       cblas_dcopy(problem->size , problem->q , 1 , w , 1); */
@@ -222,9 +221,9 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
   }
   *info = hasNotConverged;
   /* Number of GS iterations */
-  options[0].iparam[1] = iter;
+  options[0].iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   /* Resulting error */
-  options[0].dparam[1] = error;
+  options[0].dparam[SICONOS_DPARAM_RESIDU] = error;
 
   free(local_problem->q);
   free(local_problem->M);
@@ -234,34 +233,8 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
 
 
 
-int mixedLinearComplementarity_pgs_SBM_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* options)
+void mlcp_pgs_sbm_set_options(SolverOptions* options)
 {
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the MLCP_PGS_SBM Solver\n");
-  }
-
-  options->solverId = SICONOS_MLCP_PGS_SBM;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-6;
-  options->internalSolvers = (SolverOptions*)malloc(options->numberOfInternalSolvers * sizeof(SolverOptions));
-
-  linearComplementarity_pgs_setDefaultSolverOptions(options->internalSolvers);
-
-  return 0;
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PGS);
 }

@@ -55,6 +55,22 @@ struct listNumericsProblem
 };
 
 
+/** \enum ids for the possible/allowed numerics problem formulations
+ */
+enum SICONOS_NUMERICS_PROBLEM_TYPE
+{
+  SICONOS_NUMERICS_PROBLEM_LCP = 0,
+  SICONOS_NUMERICS_PROBLEM_MLCP = 1,
+  SICONOS_NUMERICS_PROBLEM_EQUALITY = 2,
+  SICONOS_NUMERICS_PROBLEM_FC2D = 3,
+  SICONOS_NUMERICS_PROBLEM_FC3D = 4,
+  SICONOS_NUMERICS_PROBLEM_NCP = 5,
+  SICONOS_NUMERICS_PROBLEM_MCP = 6,
+  SICONOS_NUMERICS_PROBLEM_VI = 7,
+  SICONOS_NUMERICS_PROBLEM_AVI = 8,
+  SICONOS_NUMERICS_PROBLEM_RELAY = 9,
+};
+
 /** \struct GenericMechanicalProblem GenericMechanicalProblem.h
  * \param numberOfBlockLine The number of  line of blocks.
  * \param M : NumericsMatrix sparseblock matrix set by the user
@@ -112,19 +128,17 @@ extern "C"
    */
   void genericMechanicalProblem_printInFile(GenericMechanicalProblem*  problem, FILE* file);
 
-  /** build a problem from a file handler.
-      \param[inout] problem generic-mechanical problem structure
-      \param[in] file, file descriptor
-      \return file status (1 if everything has worked properly)
-  */
-  int genericMechanical_newFromFile(GenericMechanicalProblem* problem, FILE* file);
+  /** read a GenericMechanicalProblem from a file descriptor
+   * \param file descriptor
+   * \return problem the problem to read
+   */
+  GenericMechanicalProblem*  genericMechanical_newFromFile(FILE* file);
 
-  /** build a problem from a file.
-      \param[inout] problem, generic mechanical problem structure
-      \param[in] filename, name of the input file
-      \return file status (1 if everything has worked properly)
-  */
-  int genericMechanical_newFromFilename(GenericMechanicalProblem* problem, const char * filename);
+  /** read a GenericMechanicalProblem from a file (.dat or hdf5 if fclib is on) from its filename
+   * \param filename the name of the input file
+   * \return problem the problem to read
+   */
+  GenericMechanicalProblem* genericMechanical_new_from_filename(const char * filename);
   
   /* A recursive displaying method.
    *  \param[in], pGMP the displayed problem.
@@ -140,6 +154,14 @@ extern "C"
    * \ return the localProblem (either lcp, linearSystem of fc3d
    */
   void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size);
+  
+  /** returns nonsmooth problem formulation name, from its id number.
+   \param id problem id (must be one of the allowed values in SICONOS_NUMERICS_PROBLEM_TYPE enum).
+   \return const char
+  */
+  const char * ns_problem_id_to_name(enum SICONOS_NUMERICS_PROBLEM_TYPE id);
+
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

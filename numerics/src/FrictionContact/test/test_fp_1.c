@@ -19,9 +19,9 @@
 #include <stdio.h>                       // for NULL
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
-#include "SOCLCP_cst.h"                // for SICONOS_SOCLCP_VI_EG
+#include "SOCLCP_cst.h"                  // for SICONOS_SOCLCP_VI_EG
 #include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
-#include "frictionContact_test_utils.h"  // for build_friction_test, build_test_colle...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
@@ -31,75 +31,65 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
   int current = 0;
-  
-  {
-    int d = 0; // FC3D_Example1_SBM.dat
-    // ACLM fixed point + VI EG as internal solver.
-    int dpos[] = {1, SICONOS_DPARAM_TOL};
-    double dparam[] = {1e-8};
-    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-    int iparam[] = {200};
-    
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_ACLMFP, dpos, dparam, ipos, iparam,
-               SICONOS_SOCLCP_VI_EG, NULL, NULL, NULL, NULL, &collection[current++]);
-    // expected to fail
-    collection[current-1].will_fail = 1;
-  }
-  {
-    int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
-    // ACLM fixed point + VI FPP as internal solver.
-    int dpos[] = {1, SICONOS_DPARAM_TOL};
-    double dparam[] = {1e-8};
-    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-    int iparam[] = {200};
-    
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_ACLMFP, dpos, dparam, ipos, iparam,
-               SICONOS_SOCLCP_VI_FPP, NULL, NULL, NULL, NULL, &collection[current++]);
-    // expected to fail
-    collection[current-1].will_fail = 1;
-  }
-  
-  {
-    int d = 5;  // Confeti-ex03-Fc3D-SBM.dat
-    // ACLM fixed point 
-    int dpos[] = {1, SICONOS_DPARAM_TOL};
-    double dparam[] = {1e-8};
-    int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 1};
-    int iparam[] = {200, 1};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_ACLMFP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-    // expected to fail
-    collection[current-1].will_fail = 1;
-  }
 
-  {
-    int d = 5; // Confeti-ex03-Fc3D-SBM.dat
-    // SOCLCP, default for all values.
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_SOCLCP,  NULL, NULL, NULL, NULL,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-    // expected to fail
-    collection[current-1].will_fail = 1;
-  }
+  int d;
+  // ===== FC3D_Example1_SBM.dat =====
+  d = 0; 
+  // ACLM fixed point + VI EG as internal solver.
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ACLMFP);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   
-  {
-    int d = 6; // BoxesStack1-i100000-32.hdf5.dat
-    // ACLM fixed point 
-    int dpos[] = {1, SICONOS_DPARAM_TOL}; 
-    double dparam[] = {1e-6};
-    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-    int iparam[] = {200};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_ACLMFP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-    // expected to fail
-    collection[current-1].will_fail = 1;
-  }
+  solver_options_update_internal(collection[current].options, 0, SICONOS_SOCLCP_VI_EG);
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  // ===== Confeti-ex13-4contact-Fc3D-SBM.dat =====
+  d = 2; 
+  // ACLM fixed point + VI FPP as internal solver.
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ACLMFP);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+  
+  solver_options_update_internal(collection[current].options, 0, SICONOS_SOCLCP_VI_FPP);
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  // ===== Confeti-ex03-Fc3D-SBM.dat =====
+  d = 5;
+  // ACLM fixed point 
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ACLMFP);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+  collection[current].options->iparam[1] = 1;
+  
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  // SOCLCP, default for all values.
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_SOCLCP);    
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  // ===== BoxesStack1-i100000-32.hdf5.dat =====
+  d = 6;
+  // ACLM fixed point 
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ACLMFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+  
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
 
   *number_of_tests = current;
   return collection;

@@ -66,6 +66,7 @@ No generic driver.
 
 solvers list  :enum:`CONVEXQP_SOLVER`
 
+.. _convex_qp_solvers:
 
 Available solvers
 =================
@@ -78,7 +79,7 @@ driver :func:`convexQP_ProjectedGradient()`
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 20000
-* iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAXITER] =20
+* iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAX_ITER] =20
 * dparam[SICONOS_CONVEXQP_PGOC_RHO] = -1.e-3 /* rho is variable by default */
 * dparam[SICONOS_CONVEXQP_PGOC_RHOMIN] = 1e-9
 * dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] =0.9

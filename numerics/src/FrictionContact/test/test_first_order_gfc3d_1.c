@@ -19,8 +19,9 @@
 #include <stdio.h>                       // for NULL
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_NSGS
-#include "frictionContact_test_utils.h"  // for build_gfc3d_test, build_test...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
+#include "SolverOptions.h"               // for solver_options_create
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
@@ -32,54 +33,54 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   for(int d =0; d <n_data; d++)
     {
       // GFC3D, NSGS, default values.
-      build_gfc3d_test(data_collection[d],
-                          SICONOS_GLOBAL_FRICTION_3D_NSGS, NULL, NULL, NULL, NULL,
-                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS);
+      current++;
     }
 
   for(int d =0; d <n_data; d++)
     {
       // GFC3D, NSGS, default values.
       // projection on cone for the internal solver, with default values.
-      build_gfc3d_test(data_collection[d],
-                          SICONOS_GLOBAL_FRICTION_3D_NSGS, NULL, NULL, NULL, NULL,
-                          SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone, NULL,  NULL, NULL, NULL,
-                          &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS);
+      solver_options_update_internal(collection[current].options, 0,
+                                     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+      current++;
     }
   
   for ( int d =0; d <n_data; d++)
     {
       // GFC3D, VI_EG, default values.
-      build_gfc3d_test(data_collection[d],
-                          SICONOS_GLOBAL_FRICTION_3D_VI_EG, NULL, NULL, NULL, NULL,
-                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_VI_EG);
+      current++;
     }
 
   for ( int d =0; d <n_data; d++)
     {
       // GFC3D, VI_FPP, default values.
-      build_gfc3d_test(data_collection[d],
-                          SICONOS_GLOBAL_FRICTION_3D_VI_FPP, NULL, NULL, NULL, NULL,
-                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_VI_FPP);
+      current++;
       // Expected to fail
       collection[18].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
-
     }
 
   for ( int d =0; d <n_data; d++)
     {
       // GFC3D, ACLMFP, default values.
-      build_gfc3d_test(data_collection[d],
-                          SICONOS_GLOBAL_FRICTION_3D_ACLMFP, NULL, NULL, NULL, NULL,
-                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ACLMFP);
+      current++;
     }
 
   for ( int d =0; d <n_data; d++)
     {
       // GFC3D, ADMM, default values.
-      build_gfc3d_test(data_collection[d],
-                          SICONOS_GLOBAL_FRICTION_3D_ADMM, NULL, NULL, NULL, NULL,
-                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+      current++;
     }
 
 

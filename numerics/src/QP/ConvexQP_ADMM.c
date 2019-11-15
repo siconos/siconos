@@ -70,9 +70,10 @@ void convexQP_ADMM_free(ConvexQP* problem, SolverOptions* options)
   if (options->dWork)
   {
     free(options->dWork);
-    options->dWork=NULL;
     options->dWorkSize = 0;
   }
+  options->dWork=NULL;
+
   if (options->solverData)
   {
     ConvexQP_ADDM_data * data = (ConvexQP_ADDM_data *)options->solverData;
@@ -82,6 +83,7 @@ void convexQP_ADMM_free(ConvexQP* problem, SolverOptions* options)
     free(data->u_k);
     free(data);
   }
+  options->solverData = NULL;
 
 }
 static double convexQP_ADMM_select_rho(NumericsMatrix* M, NumericsMatrix* A, int * is_rho_variable, SolverOptions* restrict options)
@@ -567,35 +569,25 @@ void convexQP_ADMM(ConvexQP* problem,
 }
 
 
-int convexQP_ADMM_setDefaultSolverOptions(SolverOptions* options)
+void convexQP_ADMM_set_options(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ADMM Solver\n");
-  }
-
-  options->solverId = SICONOS_CONVEXQP_ADMM;
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART; /* 0 Acceleration */
+<<<<<<< variant A
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_RHO_STRATEGY] =
     SICONOS_CONVEXQP_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
 
+>>>>>>> variant B
+####### Ancestor
+
+
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+
+======= end
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA] = 0.999;
+<<<<<<< variant A
   options->dparam[SICONOS_CONVEXQP_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
   options->dparam[SICONOS_CONVEXQP_ADMM_BALANCING_RESIDUAL_PHI]=10.0;
 
@@ -603,4 +595,12 @@ int convexQP_ADMM_setDefaultSolverOptions(SolverOptions* options)
 
 
   return 0;
+>>>>>>> variant B
+####### Ancestor
+
+  options->internalSolvers = NULL;
+
+
+  return 0;
+======= end
 }

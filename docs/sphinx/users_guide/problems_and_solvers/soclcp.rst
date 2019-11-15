@@ -77,7 +77,6 @@ parameters:
     * SICONOS_ERROR_LIGHT_EVALUATION_NO_UPDATE for light error computation, without update for v
 
 * iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] = 0;
-* iparam[7] = iter number of performed iterations (out)
 * iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] : method uses overrelaxation
 * iparam[SICONOS_IPARAM_NSGS_SHUFFLE] : if 1, shuffle the contact indices in the loop
 * dparam[SICONOS_DPARAM_TOL] = 1e-4;

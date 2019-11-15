@@ -79,13 +79,12 @@ int lcp_test_function(TestCase * current)
   free(z);
   free(w);
 
-  if (current->options->solverId == SICONOS_LCP_GAMS)
-  {
-    free(current->options->solverParameters);
-    current->options->solverParameters = NULL;
-  }
-  solver_options_delete(current->options);
-  solver_options_nullify(current->options);
+  /* if (current->options->solverId == SICONOS_LCP_GAMS) */
+  /* { */
+  /*   free(current->options->solverParameters); */
+  /*   current->options->solverParameters = NULL; */
+  /* } */
+  // solver_options_clear(current->options);
   freeLinearComplementarityProblem(problem);
   printf("End of test.\n");
   return info;

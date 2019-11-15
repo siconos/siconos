@@ -79,7 +79,7 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
   /* end update M, q and r */
 
   options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 1;
-  options->iparam[SICONOS_IPARAM_PIVOT_RULE] = SICONOS_LCP_PIVOT_PATHSEARCH;
+  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_PATHSEARCH;
 
   DEBUG_PRINT("x_plus r q\n");
   DEBUG_EXPR_WE(for (unsigned i = 0; i < n; ++i)
@@ -116,4 +116,11 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
   free(x);
   free(x_plus);
   free(r);
+}
+
+
+void lcp_pathsearch_set_options(SolverOptions* options)
+{
+  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE;
+  options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 0;
 }

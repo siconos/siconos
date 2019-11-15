@@ -452,24 +452,9 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
 }
 
 
-int linearComplementarity_lexicolemke_setDefaultSolverOptions(SolverOptions* options)
+void lcp_lexicolemke_set_options(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the Lemke Solver\n");
-  }
-
-  options->solverId = SICONOS_LCP_LEMKE;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-  return 0;
+  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = 0;
+  options->dparam[2] = 0.0 ;
+  options->dparam[3] = 0.0 ;
 }

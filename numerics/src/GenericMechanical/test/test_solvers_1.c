@@ -36,121 +36,149 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
 
-  // "External" solver parameters
-  // -> same values for tol and max iter in all tests.
-  // is_reduced parameters set in each test.
-  // The differences between tests are only for internal solvers and input data.
   int topsolver = SICONOS_GENERIC_MECHANICAL_NSGS;
-  int dpos[] = {1, SICONOS_DPARAM_TOL};  // ipos = [number of values in parameters list, indices]
-  double dparam[] = {1e-5};
-  int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED};
-
   int current = 0;
 
-  
   for(int d =0; d <n_data; d++)
     {
-      int iparam[] = {10000, SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS};
       // internal = fc3d quartic. 
-      build_gmp_test(data_collection[d],
-                     topsolver, dpos, dparam, ipos, iparam,
-                     SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, NULL, NULL, NULL, NULL,
-                     &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS;  
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+      
+      current++;
       // expected to fail
       collection[5].will_fail = 1;  // GMP5.dat
       collection[6].will_fail = 1;  // GMP6.dat
-      
     }
 
 #ifdef HAS_LAPACK_dgesvd
   for(int d =0; d <n_data; d++)
     {
-      int iparam[] = {10000, SICONOS_GENERIC_MECHANICAL_SUBS_EQUALITIES};
       // internal = fc3d quartic.
-      build_gmp_test(data_collection[d],
-                     topsolver, dpos, dparam, ipos, iparam,
-                     SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, NULL, NULL, NULL, NULL,
-                     &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_SUBS_EQUALITIES;  
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+      current++;
     }
 #endif
 
   for(int d =0; d <n_data; d++)
     {
-      int iparam[] = {10000, SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES};
       // internal = fc3d quartic.
-      build_gmp_test(data_collection[d],
-                     topsolver, dpos, dparam, ipos, iparam,
-                     SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, NULL, NULL, NULL, NULL,
-                     &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+      current++;
     }
 
   for(int d =0; d <n_data-3; d++) // warning : ignore GMP 4 to 6 .dat
     {
-      int iparam[] = {10000, SICONOS_GENERIC_MECHANICAL_MLCP_LIKE};
       // internal = fc3d quartic.
-      build_gmp_test(data_collection[d],
-                     topsolver, dpos, dparam, ipos, iparam,
-                     SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, NULL, NULL, NULL, NULL,
-                     &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_MLCP_LIKE;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+      current++;
     }
 
   for(int d =0; d <n_data; d++)
     {
-      int iparam[] = {10000, SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS};
       // internal = fc3d nsn gp
-      build_gmp_test(data_collection[d],
-                     topsolver, dpos, dparam, ipos, iparam,
-                     SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL, NULL, NULL, NULL,
-                     &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS;
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+      collection[current].options->internalSolvers[1]->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND;
+      current++;
     }
 
   for(int d =0; d <n_data; d++)
     {
-      int iparam[] = {10000, SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES};
       // internal = fc3d nsn gp
-      build_gmp_test(data_collection[d],
-                     topsolver, dpos, dparam, ipos, iparam,
-                     SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL, NULL, NULL, NULL,
-                     &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES;
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+      collection[current].options->internalSolvers[1]->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND;
+      current++;
     }
+
+  
   for(int d =0; d <n_data; d++)
     {
-      int iparam[] = {10000, SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS};
       // internal = fc3d nsn
-      build_gmp_test(data_collection[d],
-                     topsolver, dpos, dparam, ipos, iparam,
-                     SICONOS_FRICTION_3D_ONECONTACT_NSN, NULL, NULL, NULL, NULL,
-                     &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_NSN);
+      current++;
     }
 
   for(int d =0; d <n_data; d++)
     {
-      int iparam[] = {10000, SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES};
       // internal = fc3d nsn
-      build_gmp_test(data_collection[d],
-                     topsolver, dpos, dparam, ipos, iparam,
-                     SICONOS_FRICTION_3D_ONECONTACT_NSN, NULL, NULL, NULL, NULL,
-                     &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_NSN);
+      current++;
     }
 
   for(int d =0; d <n_data; d++)
     {
-      int iparam[] = {10000, SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS};
       // internal = fc3d projection on cone with local iterations
-      build_gmp_test(data_collection[d],
-                     topsolver, dpos, dparam, ipos, iparam,
-                     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration, NULL, NULL, NULL, NULL,
-                     &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+      collection[current].options->internalSolvers[1]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+      collection[current].options->internalSolvers[1]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+        
+      current++;
     }
 
   for(int d =0; d <n_data; d++)
     {
-      int iparam[] = {10000, SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES};
       // internal = fc3d projection on cone with local iterations
-      build_gmp_test(data_collection[d],
-                     topsolver, dpos, dparam, ipos, iparam,
-                     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration, NULL, NULL, NULL, NULL,
-                     &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+      collection[current].options->internalSolvers[1]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+      collection[current].options->internalSolvers[1]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+      current++;
     }
 
   *number_of_tests = current;

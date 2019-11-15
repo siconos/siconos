@@ -111,7 +111,7 @@ void soclcp_projection_update_with_regularization(int cone, SecondOrderConeLinea
      excluding the block corresponding to the current cone. ****/
   soclcp_nsgs_computeqLocal(problem, localproblem, reaction, cone, options);
 
-  double rho = options->dparam[3];
+  double rho = options->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO];
   for(int i = 0 ; i < 3 ; i++) localproblem->M->matrix0[i + 3 * i] += rho ;
 
   double *qLocal = localproblem->q;
@@ -185,9 +185,9 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   /* double as = 1.0 / (MLocal[8] + mu_i); */
   /* at = an; */
   /* as = an; */
-  double rho=   options->dWork[options->iparam[4]+options->iWork[0]] , rho_k;
+  double rho=   options->dWork[options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX]+options->iWork[0]] , rho_k;
   /* printf ("saved rho = %14.7e\n",rho );  */
-  /* printf ("options->iparam[4] = %i\n",options->iparam[4] );  */
+  /* printf ("options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] = %i\n",options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] );  */
 
   int incx = 1, incy = 1;
 
@@ -198,7 +198,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
   int localiter = 0;
-  double localtolerance = dparam[0];
+  double localtolerance = dparam[SICONOS_DPARAM_TOL];
 
 
   /* Variable for Line_search */
@@ -213,7 +213,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
 
 
   /*     printf ("localtolerance = %14.7e\n",localtolerance ); */
-  while((localerror > localtolerance) && (localiter < iparam[0]))
+  while((localerror > localtolerance) && (localiter < iparam[SICONOS_IPARAM_MAX_ITER]))
   {
     localiter ++;
 
@@ -296,7 +296,7 @@ int soclcp_projectionOnConeWithLocalIteration_solve(SecondOrderConeLinearComplem
       printf("--  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho, localerror);
     }
 
-    options->dWork[options->iparam[4]+options->iWork[0]] =rho;
+    options->dWork[options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX]+options->iWork[0]] =rho;
 
   }
 
@@ -346,27 +346,7 @@ int soclcp_projectionOnCylinder_solve(SecondOrderConeLinearComplementarityProble
 
 }
 
-
-
-
-int soclcp_projection_setDefaultSolverOptions(SolverOptions* options)
+void soclcp_projection_set_options(SolverOptions* options)
 {
-  if(verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the local SOCLCP Solver\n");
-  }
-
-  solver_options_nullify(options);
-  options->solverId = SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
-  return 0;
+  options->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
 }

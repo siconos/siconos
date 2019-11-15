@@ -37,20 +37,18 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
   /* Number of contacts */
   int n = problem->size;
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Maximum number of iterations in Line--search */
-  int lsitermax = iparam[1];
+  int lsitermax = iparam[SICONOS_VI_IPARAM_LS_MAX_ITER]; 
   assert(lsitermax >0);
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
 
   /*****  Fixed point iterations *****/
   int iter = 0; /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-  dparam[0] = dparam[2]; // set the tolerance for the local solver
-
 
   double * xtmp = (double *)calloc(n , sizeof(double));
   double * wtmp = (double *)calloc(n , sizeof(double));
@@ -62,9 +60,9 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
   double tau = 1.0;
   double sigma = 0.99;
 
-  if (dparam[3] > 0.0)
+  if (dparam[SICONOS_VI_DPARAM_LS_TAU] > 0.0)
   {
-    tau = dparam[3];
+    tau = dparam[SICONOS_VI_DPARAM_LS_TAU];
   }
   else
   {
@@ -72,9 +70,9 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
     printf("Hyperplane Projection method. tau is set to 1.0\n");
   }
 
-  if (dparam[4] > 0.0 && dparam[4] < 1.0)
+  if (dparam[SICONOS_VI_DPARAM_SIGMA] > 0.0 && dparam[SICONOS_VI_DPARAM_SIGMA] < 1.0)
   {
-    sigma = dparam[4];
+    sigma = dparam[SICONOS_VI_DPARAM_SIGMA];
   }
   else
   {
@@ -201,9 +199,8 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
   {
     printf("--------------- VI - Hyperplane Projection (HP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
-  dparam[0] = tolerance;
-  dparam[1] = error;
-  iparam[7] = iter;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   free(xtmp);
   free(xtmp2);
   free(xtmp3);
@@ -212,37 +209,9 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
 }
 
 
-int variationalInequality_HyperplaneProjection_setDefaultSolverOptions(SolverOptions* options)
+void variationalInequality_HyperplaneProjection_set_options(SolverOptions* options)
 {
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the HyperplaneProjection Solver\n");
-  }
-
-  options->solverId = SICONOS_VI_HP;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 8; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[0] = 20000;
-  options->iparam[1] = 100;
-
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1.0; /*tau */
-  options->dparam[4] = 0.8; /* sigma */
-
-  options->internalSolvers = NULL;
-
-  return 0;
+  options->iparam[SICONOS_VI_IPARAM_LS_MAX_ITER] = 100;
+  options->dparam[SICONOS_VI_DPARAM_LS_TAU] = 1.0; /*tau */
+  options->dparam[SICONOS_VI_DPARAM_SIGMA] = 0.8; /* sigma */
 }

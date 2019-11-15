@@ -130,22 +130,22 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
 
   switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
-  case 0:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
     acparams.computeACFun3x3 = &computeAlartCurnierSTD;
     break;
   }
-  case 1:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD:
   {
     acparams.computeACFun3x3 = &computeAlartCurnierJeanMoreau;
     break;
   };
-  case 2:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED:
   {
     acparams.computeACFun3x3 = &fc3d_AlartCurnierFunctionGenerated;
     break;
   }
-  case 3:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_GENERATED:
   {
     acparams.computeACFun3x3 = &fc3d_AlartCurnierJeanMoreauFunctionGenerated;
     break;
@@ -160,16 +160,14 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
 
   if(options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN)
   {
-    SolverOptions * options_vi_eg =(SolverOptions *)malloc(sizeof(SolverOptions));
-    fc3d_VI_ExtraGradient_setDefaultSolverOptions(options_vi_eg);
+    SolverOptions * options_vi_eg = solver_options_create(SICONOS_FRICTION_3D_VI_EG);
     options_vi_eg->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
-    options_vi_eg->dparam[SICONOS_DPARAM_TOL] = sqrt(options->dparam[0]);
+    options_vi_eg->dparam[SICONOS_DPARAM_TOL] = sqrt(options->dparam[SICONOS_DPARAM_TOL]);
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
     fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
 
     fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info, options);
-    solver_options_delete(options_vi_eg);
-    free(options_vi_eg);
+    solver_options_clear(&options_vi_eg);
   }
   else if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO)
   {
@@ -181,46 +179,24 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
   }
 }
 
-int fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
-  SolverOptions* options)
+void fc3d_nsn_ac_set_options(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the default solver options for the NSN_AC Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_NSN_AC;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
-  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = 1;      /* erritermax */
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
   options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPECTRAL_NORM;
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1;      /* default rho */
 
-  options->iparam[8] = -1;     /* mpi com fortran */
+  options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;     /* mpi com fortran */
   options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED;
   /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;     /* 0 GoldsteinPrice line search, 1 FBLSA */
-  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER] = 100;   /* max iter line search */
-
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100;   /* max iter line search */
+  options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO;
 #ifdef WITH_MUMPS
-  options->iparam[13] = 1;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER] = SICONOS_FRICTION_3D_NSN_USE_MUMPS;
 #else
-  options->iparam[13] = 0;     /* Linear solver used at each Newton iteration. 0: cs_lusol, 1 mumps */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER] = SICONOS_FRICTION_3D_NSN_USE_CSLUSOL;
 #endif
 
-  options->internalSolvers = NULL;
-
-  return 0;
 }

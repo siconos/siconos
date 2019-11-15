@@ -174,14 +174,14 @@ void AVI::display() const
 void AVI::setSolverId(int solverId)
 {
   // clear previous Solveroptions
-  solver_options_delete(_numerics_solver_options.get());
+  solver_options_clear(_numerics_solver_options.get());
   solver_options_set(_numerics_solver_options.get(), solverId);
 }
 
 
 AVI::~AVI()
 {
-  solver_options_delete(&*_numerics_solver_options);
+  solver_options_clear(&*_numerics_solver_options);
   delete _numerics_problem->poly.split;
 }
 

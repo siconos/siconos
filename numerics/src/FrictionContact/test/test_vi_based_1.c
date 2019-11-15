@@ -21,7 +21,7 @@
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
 #include "VI_cst.h"   // for SICONOS_VI_EG_...
 #include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
-#include "frictionContact_test_utils.h"  // for build_friction_test, build_test_colle...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
@@ -31,118 +31,84 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
+  int d;
+  // ========== FC3D_Example1_SBM.dat ========
+  d = 0; 
+  // rho = -1
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = -1.;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+  current++;
 
-  {
-    int d = 0; // FC3D_Example1.dat
-    // rho = -1
-    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_VI_EG_DPARAM_RHO}; 
-    double dparam[] = {1e-8, -1.};
-    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-    int iparam[] = {10000};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-  }
-  {
-    int d = 0; // FC3D_Example1.da
-    // rho = 1
-    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_VI_EG_DPARAM_RHO}; 
-    double dparam[] = {1e-8, 1.};
-    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-    int iparam[] = {10000};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-  }
+  // rho = 1
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = 1.;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+  current++;
+
+  // ========== Confeti-ex13-4contact-Fc3D-SBM.dat ========
+  d = 2; 
+  // EG, rho = -3e-3
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = -3.e-3;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  // EG, rho = -1
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = -1;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+  current++;
 
 
-  {
-    int d = 2; // FrictionContact3D_1c.dat
-    // rho = -3e-3
-    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_VI_EG_DPARAM_RHO}; 
-    double dparam[] = {1e-8, -3.e-3};
-    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-    int iparam[] = {10000};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-    // expected to fail
-    collection[current-1].will_fail = 1;
-  }
-  {
-    int d = 2; // FrictionContact3D_1c.dat
-    // rho = -1
-    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_VI_EG_DPARAM_RHO}; 
-    double dparam[] = {1e-10, -1.};
-    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-    int iparam[] = {10000};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_EG, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-  }
-  {
-    int d = 2; // FrictionContact3D_1c.dat
-    // rho = -10
-    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_VI_EG_DPARAM_RHO}; 
-    double dparam[] = {1e-10, -10.};
-    int ipos[] = {3, SICONOS_IPARAM_MAX_ITER, 2, 3};
-    // 2 for IPARAM_PREALLOC ? or SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY ?// 3? 
-    int iparam[] = {1000, 0, 0};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_HP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-    // expected to fail
-    collection[current-1].will_fail = 1;
-  }
+  // HP
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_HP);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+  
+  // ========== Capsules-i101-404.dat ========
+  d = 6; 
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_VI_FPP);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000000;
+  collection[current].options->iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 1;
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
 
-  {
-    int d = 6; // Capsules-i101-404.dat
-    int dpos[] = {1, SICONOS_DPARAM_TOL}; 
-    double dparam[] = {1e-10};
-    int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 2};
-    // 2 for IPARAM_PREALLOC ? or SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY ?
-    int iparam[] = {1000, 1};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_VI_FPP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-    // expected to fail
-    collection[current-1].will_fail = 1;
-  }
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_FPP);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
 
-  {
-    int d = 6; // Capsules-i101-404.dat
-    int dpos[] = {1, SICONOS_DPARAM_TOL}; 
-    double dparam[] = {1e-8};
-    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-    int iparam[] = {100000};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_FPP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-    // expected to fail
-    collection[current-1].will_fail = 1;
-  }
 
-{
-    int d = 6; // Capsules-i101-404.dat
-    int dpos[] = {1, SICONOS_DPARAM_TOL}; 
-    double dparam[] = {1e-8};
-    int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 2};
-    // 2 for IPARAM_PREALLOC ? or SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY ?
-    int iparam[] = {100000, 1};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_VI_EG, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-    // expected to fail
-    collection[current-1].will_fail = 1;
-  }
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_VI_EG);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+  collection[current].options->iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 1;
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
 
   *number_of_tests = current;
   return collection;

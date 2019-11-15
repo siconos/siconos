@@ -125,6 +125,8 @@ void fc3d_admm_free(FrictionContactProblem* problem, SolverOptions* options)
     free(data->b);
     free(data);
   }
+  options->solverData = NULL;
+  
 
 }
 
@@ -150,6 +152,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
   /* if SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE,
      we force the copy into a NM_SPARSE storageType */
+
   if(iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] == SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE
      && problem->M->storageType == NM_SPARSE_BLOCK)
   {
@@ -194,7 +197,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
@@ -559,7 +562,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
@@ -1019,8 +1022,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     numerics_printf_verbose(1,"---- FC3D - ADMM - Problem information");
     numerics_printf_verbose(1,"---- FC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
     numerics_printf_verbose(1,"---- FC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
-    /* getchar(); */
-  }
+}
   int internal_allocation=0;
   if(!(Fc3d_ADMM_data *)options->solverData)
   {
@@ -1084,26 +1086,8 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
 
 
 
-int fc3d_admm_setDefaultSolverOptions(SolverOptions* options)
+void fc3d_admm_set_options(SolverOptions* options)
 {
-  if(verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ADMM Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_ADMM;
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] = SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY;
@@ -1125,10 +1109,4 @@ int fc3d_admm_setDefaultSolverOptions(SolverOptions* options)
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=2.0;
 
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]=SICONOS_FRICTION_3D_RESCALING_NO;
-
-
-  options->internalSolvers = NULL;
-  options->solverData = NULL;
-
-  return 0;
 }

@@ -28,14 +28,8 @@ extern "C"
 #endif
 
   TestCase * build_test_collection(int n_data, const char ** data_collection, int*);
-
   
   int gmp_test_function(TestCase*);
-
-  void build_gmp_test(const char * filename,
-                        int solver_id, int* d_ind, double* dparam, int * i_ind, int* iparam,
-                        int internal_solver_id, int * i_d_ind, double * internal_dparam, int * i_i_ind, int * internal_iparam,
-                        TestCase* testname);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

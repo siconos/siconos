@@ -91,17 +91,6 @@ typedef void (*computeNonsmoothFunction)(double *, double * , double , double * 
   int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem* localproblem,
                                                             double * local_reaction, SolverOptions* options);
 
-  /* Set the default solver options for the ONECONTACT_NSN Solver
-   * Some default values:
-   * options.iparam[0] = 200 is the maximum number of iterations.
-   * options.iparam[3] = 100000 is the nzmax parameter for sparse matrices.
-   * options.iparam[10] = 0 : stands for STD Alart & Curnier function
-   *  (other values may be 1 for JeanMoreau, 2 for STD generated, 3 for JeanMoreau generated)
-   * options.dparam[0] = 1e-3 precision.
-   * \param options  the solver options
-   */
-  int fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(SolverOptions* options);
-  int fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

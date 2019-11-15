@@ -31,14 +31,6 @@
  * double *z : size n+m
  * double *w : size n+m
  */
-int mixedLinearComplementarity_rpsor_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-  pSolver->dparam[2] = 0.5; /*rho*/
-  pSolver->dparam[3] = 2; /*ohmega*/
-  return 0;
-}
 
 void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -64,17 +56,17 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
 
   /* Recup input */
 
-  itermax = options->iparam[0];
-  tol   = options->dparam[0];
-  rho   = options->dparam[2];
-  omega = options->dparam[3];
+  itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  tol   = options->dparam[SICONOS_DPARAM_TOL];
+  rho   = options->dparam[SICONOS_DPARAM_MLCP_RHO];
+  omega = options->dparam[SICONOS_DPARAM_MLCP_OMEGA];
   printf("omega %f\n", omega);
   printf("rho %f\n", rho);
 
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Allocation */
 
@@ -188,8 +180,8 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
 
   }
 
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
   if (err > tol)
   {
@@ -211,3 +203,11 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
   free(diagB);
 
 }
+
+void mlcp_rpsor_set_options(SolverOptions* options)
+{
+  options->dparam[SICONOS_DPARAM_MLCP_RHO] = 0.5;
+  options->dparam[SICONOS_DPARAM_MLCP_OMEGA] = 2.;
+  options->filterOn = false;
+}
+

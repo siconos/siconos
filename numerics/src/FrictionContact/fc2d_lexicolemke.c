@@ -28,6 +28,7 @@
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
 #include "numerics_verbose.h"              // for verbose
 #include "SiconosBlas.h"                         // for cblas_dnrm2
+#include "lcp_cst.h" // for SICONOS_LCP_LEMKE
 
 void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {
@@ -41,28 +42,15 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
 
 
 
-  double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
-  double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
-
-  for (i = 0; i < lcp_problem->size; i++)
-  {
-    zlcp[i] = 0.0;
-    wlcp[i] = 0.0;
-  }
-
-
-  /*  FILE * fcheck = fopen("lcp_relay.dat","w"); */
-  /*  info = linearComplementarity_printInFile(lcp_problem,fcheck); */
+  double *zlcp = (double*)calloc(lcp_problem->size, sizeof(double));
+  double *wlcp = (double*)calloc(lcp_problem->size, sizeof(double));
 
   // Call the lcp_solver
 
-  SolverOptions * lcp_options = options->internalSolvers;
-
-
-
-  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, lcp_options);
+  options->solverId = SICONOS_LCP_LEMKE;
+  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options);
   if (options->filterOn > 0)
-    lcp_compute_error(lcp_problem, zlcp, wlcp, lcp_options->dparam[0], &(lcp_options->dparam[1]));
+    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
   /*       printf("\n"); */
   int nc = problem->numberOfContacts;
@@ -95,9 +83,8 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
 
   /*        printf("\n"); */
   double error;
-  *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[0], norm_q, &error);
+  *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[SICONOS_DPARAM_TOL], norm_q, &error);
 
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = lcp_options->iparam[SICONOS_IPARAM_ITER_DONE];
   options->dparam[SICONOS_DPARAM_RESIDU] = error;
 
   if (error > options->iparam[SICONOS_DPARAM_TOL])
@@ -124,30 +111,5 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
   free(zlcp);
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);
-}
-
-
-int fc2d_lexicolemke_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the Lemke Solver for fc2d\n");
-  }
-  /*  strcpy(options->solverName,"Lemke");*/
-  options->solverId = SICONOS_FRICTION_2D_LEMKE;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->dparam[0] = 1e-6;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  linearComplementarity_lexicolemke_setDefaultSolverOptions(options->internalSolvers);
-
-  return 0;
 }
 

@@ -61,8 +61,18 @@ void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, doub
   functions_QiLSA.compute_H = &VI_compute_H_box_Qi;
   functions_QiLSA.compute_error = &VI_compute_error_box;
   functions_QiLSA.get_set_from_problem_data = &vi_get_set;
-  options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
+  
 
   set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->size, x, F, info, (void *)problem, options, &functions_QiLSA);
+}
+
+
+void variationalInequality_BOX_QI_set_options(SolverOptions* options)
+{
+  options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
+  options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
+  options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
+  options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
+  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
 }

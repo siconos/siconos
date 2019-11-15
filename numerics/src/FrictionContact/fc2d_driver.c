@@ -29,7 +29,6 @@
 #include "numerics_verbose.h"        // for numerics_error, verbose, numeric...
 
 const char* const   SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
-const char* const   SICONOS_FRICTION_2D_PGS_STR  = "F2D_PGS";
 const char* const   SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
 const char* const   SICONOS_FRICTION_2D_LATIN_STR  = "F2D_LATIN";
 const char* const   SICONOS_FRICTION_2D_LEMKE_STR  = "F2D_LEMKE";
@@ -120,7 +119,6 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     switch (options->solverId)
     {
       /****** NLGS algorithm ******/
-    case SICONOS_FRICTION_2D_PGS:
     case SICONOS_FRICTION_2D_NSGS:
     {
       if (verbose)

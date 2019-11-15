@@ -133,10 +133,10 @@ void KernelTest::t3()
 {
   SP::SolverOptions so(new SolverOptions);
   SP::SolverOptions sor(new SolverOptions);
-  solver_options_fill(so.get(), SICONOS_FRICTION_3D_NSN_AC, 10, 10, 0, 0.);
+  solver_options_initialize(so.get(), SICONOS_FRICTION_3D_NSN_AC, 0, 0.);
   so->numberOfInternalSolvers = 1;
   so->internalSolvers = (SolverOptions *) malloc(sizeof(SolverOptions) * so->numberOfInternalSolvers);
-  solver_options_fill(so->internalSolvers, SICONOS_FRICTION_3D_NSN_AC, 10, 10, 0, 0.);
+  solver_options_initialize(so->internalSolvers, SICONOS_FRICTION_3D_NSN_AC, 0, 0.);
 
   std::ofstream ofs("SolverOptions.xml");
   {
@@ -152,8 +152,8 @@ void KernelTest::t3()
 
   CPPUNIT_ASSERT((so->iSize == sor->iSize));
 
-  solver_options_delete(so.get());
-  solver_options_delete(sor.get());
+  solver_options_clear(so.get());
+  solver_options_clear(sor.get());
 
 }
 

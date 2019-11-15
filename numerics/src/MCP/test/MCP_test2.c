@@ -77,10 +77,8 @@ int main(void)
   int n=10;
 
   /* Set solver options */
-  SolverOptions options;
-
+  SolverOptions * options = solver_options_create(SICONOS_MCP_OLD_FB);
   /* FB solver */
-  options.solverId = SICONOS_MCP_OLD_FB;
   /* Create a MixedComplementarityProblem */
   MixedComplementarityProblem_old* problem = (MixedComplementarityProblem_old *)malloc(sizeof(MixedComplementarityProblem_old));
 
@@ -107,8 +105,6 @@ int main(void)
 
   numerics_set_verbose(1);
 
-  mcp_old_setDefaultSolverOptions(problem, &options);
-
   int size = problem->sizeEqualities + problem->sizeInequalities ;
   double * z = (double *)malloc(size * sizeof(double));
   double * w = (double *)malloc(size * sizeof(double));
@@ -119,14 +115,12 @@ int main(void)
     w[i] = 0.0;
   }
 
-  options.dparam[0] = 1e-10;
-  options.iparam[0] = 1000;
 
 
   /* Initialize the solver */
-  mcp_old_driver_init(problem, &options) ;
-  info = mcp_old_driver(problem, z , w,  &options);
-  mcp_old_driver_reset(problem, &options) ;
+  mcp_old_driver_init(problem, options) ;
+  info = mcp_old_driver(problem, z , w,  options);
+  mcp_old_driver_reset(problem, options) ;
   /// TODO : write a real test ... ////
 
 
@@ -140,7 +134,7 @@ int main(void)
     printf("w[%i]= %lf\t", i, w[i]);
   }
   printf("\n");
-  solver_options_delete(&options);
+  solver_options_clear(&options);
   free(z);
   free(w);
   free(problem);

@@ -93,17 +93,7 @@ extern "C"
     double *output_blocklist3x3_1,
     double *output_blocklist3x3_2);
 
-  /* Set the default solver options for the NSN_FB Solver
-   * Some default values:
-   * options.iparam[0] = 200 is the maximum number of iterations.
-   * options.iparam[3] = 100000 is the nzmax parameter for sparse matrices.
-   * options.dparam[0] = 1e-3 precision.
-   * \param options  the solver options
-   */
-  int fc3d_nonsmooth_Newton_FischerBurmeister_setDefaultSolverOptions(
-    SolverOptions* options);
-
-
+ 
   int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(
     FrictionContactProblem* problem,
     double *z , double *w, double tolerance,

@@ -140,32 +140,33 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
 
   /*Number of the local solver */
-  size_t localSolverNum = options->numberOfInternalSolvers ;
-  SolverOptions * internalSolvers = options->internalSolvers ;
 
   int pos = 0;
   /* Output from local solver */
   int infoLocal = -1;
-
+  SolverOptions * current_local_options = NULL;
+  
   while ((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
+    // current internal solver number
+    size_t solverid = 0;
+    
     /* Loop over the rows of blocks in blmat */
-    localSolverNum = 0;
     pos = 0;
     /*       cblas_dcopy(problem->size,w,1,wBackup,1); */
     for (rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber)
     {
+      current_local_options = options[0].internalSolvers[solverid];
       /* Local problem formalization */
       lcp_nsgs_SBM_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
       /* Solve local problem */
-      infoLocal = lcp_driver_DenseMatrix(local_problem, &z[pos], &w[pos], &internalSolvers[localSolverNum]);
+      infoLocal = lcp_driver_DenseMatrix(local_problem, &z[pos], &w[pos], current_local_options);
       pos += local_problem->size;
       /* sum of local number of iterations (output from local_driver)*/
-      if (options[localSolverNum].iparam != NULL)
-        options[0].iparam[SICONOS_LCP_IPARAM_NSGS_ITERATIONS_SUM] += internalSolvers[localSolverNum].iparam[SICONOS_IPARAM_ITER_DONE];
+      options[0].iparam[SICONOS_LCP_IPARAM_NSGS_ITERATIONS_SUM] += current_local_options->iparam[SICONOS_IPARAM_ITER_DONE];
       /* sum of local errors (output from local_driver)*/
-      options[0].dparam[SICONOS_LCP_DPARAM_NSGS_LOCAL_ERROR_SUM] += internalSolvers[localSolverNum].iparam[SICONOS_DPARAM_RESIDU];
+      options[0].dparam[SICONOS_LCP_DPARAM_NSGS_LOCAL_ERROR_SUM] += current_local_options->iparam[SICONOS_DPARAM_RESIDU];
 
       if (infoLocal > 0)
       {
@@ -181,8 +182,8 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
       }
 
-      while (localSolverNum < options->numberOfInternalSolvers - 1)
-        localSolverNum++;
+      while (solverid < options->numberOfInternalSolvers - 1)
+        solverid++;
     }
 
     /*       cblas_dcopy(problem->size , problem->q , 1 , w , 1); */
@@ -209,32 +210,8 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
 
 
-int linearComplementarity_nsgs_SBM_setDefaultSolverOptions(SolverOptions* options)
+void lcp_nsgs_sbm_set_options(SolverOptions* options)
 {
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NSGS Solver\n");
-  }
-
-  options->solverId = SICONOS_LCP_NSGS_SBM;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-  options->internalSolvers = (SolverOptions*)malloc(options->numberOfInternalSolvers * sizeof(SolverOptions));
-  linearComplementarity_psor_setDefaultSolverOptions(options->internalSolvers);
-  return 0;
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PSOR);
 }

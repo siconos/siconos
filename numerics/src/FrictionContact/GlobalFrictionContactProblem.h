@@ -31,32 +31,11 @@
  *
  * The structure that defines a Friction-Contact (3D or 2D ) problem
  *
- * Details in :ref:`global_fc_problem`
- *
- * \f$\mathrm{PFC}(M,H,q,b,\mu)\f$  such that
- *
- * \rststar
- * 
- *  ..math::
- *    :nowrap:
- *    
- *     \begin{cases}
- *      M v =  q +  H r \\
- *      u = H^\top v + b \\
- *      \hat u = u +\left[
- *      \left[\begin{array}{c}
- *          \mu^\alpha \|u^\alpha_{T}\|\\
- *         0 \\
- *         0
- *        \end{array}\right]^T, \alpha = 1 \ldots n_c
- *      \right]^T \\ \\
- *       C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
- *      \end{cases}
- * 
- * \endrststar
- *
- * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
- *
+ \rst
+ 
+ Details in :ref:`global_fc_problem`.
+ \endrst
+
 */
 struct GlobalFrictionContactProblem
 {

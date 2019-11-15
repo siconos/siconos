@@ -40,7 +40,7 @@ const char* const   SICONOS_SOCLCP_NCPGlockerFBNewton_STR = "SOCLCP_NCPGlockerFB
 const char* const  SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization_STR = "SOCLCP_ProjectionOnConeWithDiagonalization";
 const char* const  SICONOS_SOCLCP_ProjectionOnCone_STR = "SOCLCP_ProjectionOnCone";
 const char* const  SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration_STR = "SOCLCP_ProjectionOnConeWithLocalIteration";
-const char* const  SICONOS_SOCLCP_projectionOnConeWithRegularization_STR = "SOCLCP_projectionOnConeWithRegularization";
+const char* const  SICONOS_SOCLCP_ProjectionOnConeWithRegularization_STR = "SOCLCP_ProjectionOnConeWithRegularization";
 const char* const  SICONOS_SOCLCP_NCPGlockerFBPATH_STR = "SOCLCP_NCPGlockerFBPATH";
 const char* const  SICONOS_SOCLCP_projectionOnCylinder_STR = "SOCLCP_projectionOnCylinder";
 const char* const  SICONOS_SOCLCP_ProjectionOnCone_velocity_STR = "SOCLCP_ProjectionOnCone_velocity";
@@ -204,7 +204,7 @@ int soclcp_checkTrivialCase(SecondOrderConeLinearComplementarityProblem* problem
   }
   options->iparam[2] = 0;
   options->iparam[4] = 0;
-  options->dparam[1] = 0.0;
+  options->dparam[SICONOS_IPARAM_ITER_DONE] = 0.0;
   options->dparam[3] = 0.0;
   if(verbose == 1)
     printf("SecondOrderConeLinearComplementarity driver, trivial solution r = 0, v = q.\n");

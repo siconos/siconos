@@ -21,7 +21,7 @@
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_HYBR...
 #include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
 #include "test_utils.h"                  // for TestCase
-#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
@@ -34,22 +34,15 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
   int current = 0;
-
-  // tol and maxiter used in tests are the same for all solvers.
-  int dpos[] = {1, SICONOS_DPARAM_TOL};
-  double dparam[] = {1e-5};
-  int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-  int iparam[] = {10000}; 
-
-
   for(int s=0;s<n_solvers;++s)
     {
       for(int d =0; d <n_data; d++)
         {
-          // set tol and maxiter, default values for other parameters.
-          build_gfc3d_test(data_collection[d],
-                           solvers[s], dpos, dparam, ipos, iparam,
-                           -1, NULL, NULL, NULL, NULL, &collection[current++]);
+          collection[current].filename = data_collection[d];
+          collection[current].options = solver_options_create(solvers[s]);
+          collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+          collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+          current++;
         }
 
     }

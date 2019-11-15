@@ -22,8 +22,8 @@
   \brief Constants to define the list of available AVI solvers. See the solver list \ref aviSolversList
 */
 /**\enum AVI_SOLVER
-   Each SICONOS_AVI_XXX refers to number of the solver XXX for an AVI. See the solver list \ref aviSolversList
- */
+   List of available ids for AVI solvers.
+*/
 enum AVI_SOLVER
 {
   SICONOS_AVI_CAOFERRIS = 800,

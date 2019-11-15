@@ -104,7 +104,7 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem, doub
   unsigned leaving = 0;
   unsigned itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   unsigned preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
-  unsigned pivot_selection_rule = options->iparam[SICONOS_IPARAM_PIVOT_RULE];
+  unsigned pivot_selection_rule = options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE];
 
   assert(itermax > 0 && "lcp_pivot_lumod_covering_vector itermax == 0, the algorithm will not run");
   double pivot;
@@ -610,16 +610,7 @@ exit_lcp_pivot:
   free(candidate_indx);
 }
 
-
-/*
-int linearComplementarity_pivot_lumod_setDefaultSolverOptions(SolverOptions* options)
+void lcp_pivot_lumod_set_options(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the generic pivot Solver\n");
-  }
-
-  solver_options_set(options, SICONOS_LCP_PIVOT_LUMOD);
-  return 0;
+  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE;
 }
-*/

@@ -21,16 +21,14 @@
 #include "NonSmoothDrivers.h"  // for relay_driver
 #include "NumericsFwd.h"       // for RelayProblem, SolverOptions
 #include "RelayProblem.h"      // for RelayProblem, freeRelay_problem, relay...
-#include "SolverOptions.h"     // for solver_options_delete, SolverOptions
+#include "SolverOptions.h"     // for solver_options_clear, SolverOptions
 #include "relay_test_utils.h"  // for relay_test_function
 #include "test_utils.h"        // for TestCase
 
 int relay_test_function(TestCase * current)
 {
   int i, info = 0 ;
-  RelayProblem* problem = (RelayProblem *)malloc(sizeof(RelayProblem));
-
-  info = relay_newFromFilename(problem, current->filename);
+  RelayProblem* problem = relay_new_from_filename(current->filename);
 
   FILE * foutput  =  fopen("./relay.verif", "w");
   info = relay_printInFile(problem, foutput);
@@ -63,35 +61,8 @@ int relay_test_function(TestCase * current)
   }
   free(z);
   free(w);
-  solver_options_delete(current->options);
   freeRelay_problem(problem);
 
   return info;
-
-
 }
-
-/* static void build_relay_test(const char * datafile, int will_faill, int solver_id, TestCase* testname) */
-/* { */
-/*   testname->filename = datafile; */
-/*   testname->will_fail = 0; */
-/*   testname->options = (SolverOptions *)malloc(sizeof(SolverOptions)); */
-/*   relay_setDefaultSolverOptions(testname->options, solver_id); */
-/* } */
-
-/* TestCase * build_test_collection(int n_data, const char ** data_collection, int n_solvers, int * solvers_ids) */
-/* { */
-/*   int number_of_tests = n_data * n_solvers; */
-/*   TestCase * tests_list = (TestCase*)malloc(number_of_tests * sizeof(TestCase)); */
-
-/*   int current; */
-/*   for(int s=0; s <n_solvers;++s) */
-/*     { */
-/*       current = s * n_data; */
-/*       for(int d=0; d <n_data; ++d) */
-/*         build_relay_test(data_collection[d], 0, solvers_ids[s], &tests_list[current++]); */
-/*     } */
-/*   return tests_list; */
-/* } */
-
 

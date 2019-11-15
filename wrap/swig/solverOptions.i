@@ -206,7 +206,7 @@ static int convert_darray(PyObject *input, double *ptr) {
 
     // Free previous solver options memory
     for (i=0; i < arg1->numberOfInternalSolvers; i++)
-      solver_options_delete(&arg1->internalSolvers[i]);
+      solver_options_clear(&arg1->internalSolvers[i]);
     if (len <= 0 || $input==Py_None)
     {
       arg1->numberOfInternalSolvers = 0;
@@ -405,7 +405,7 @@ static int convert_darray(PyObject *input, double *ptr) {
   {
     free(arg1->callback);
   }
-  pycallback = (Callback*) malloc(sizeof(Callback)); // free in solver_options_delete
+  pycallback = (Callback*) malloc(sizeof(Callback)); // free in solver_options_clear
   pycallback->env = $input;
   pycallback->collectStatsIteration = &collectStatsIterationCallback;
 

@@ -100,43 +100,6 @@ int rfc3d_test_function_hdf5(const char* path, SolverOptions* options)
 #endif
 
 
-void build_rfc3d_test(const char * filename,
-                int solver_id, int* d_ind, double* dparam, int * i_ind, int* iparam,
-                int internal_solver_id, int * i_d_ind, double * internal_dparam, int * i_i_ind, int * internal_iparam,
-                TestCase* testname)
-{
-  // reference file name
-  testname->filename = filename;
-  // By default, test is expected to succeed.
-  testname->will_fail = 0;
-
-  // Set solver options to default.
-  testname->options = (SolverOptions *)malloc(sizeof(SolverOptions));
-  rolling_fc3d_setDefaultSolverOptions(testname->options, solver_id);
-  // Fill iparam and dparam in.
-  if(iparam)
-    for(int i=0; i<i_ind[0]; ++i)
-      testname->options->iparam[i_ind[i+1]] = iparam[i];
-
-  // dparam
-  if(dparam)
-    for(int i=0; i<d_ind[0]; ++i)
-      testname->options->dparam[d_ind[i+1]] = dparam[i];
-
-  // Internal solver setup
-  if(internal_solver_id>0)
-    {
-      testname->options->internalSolvers[0].solverId=internal_solver_id;
-      // internal iparam
-      if(internal_iparam)
-        for(int i=0; i<i_i_ind[0]; ++i)
-          testname->options->internalSolvers[0].iparam[i_i_ind[i+1]] = internal_iparam[i];
-      // internal dparam
-      if(internal_dparam)
-        for(int i=0; i<i_d_ind[0]; ++i)
-          testname->options->internalSolvers[0].dparam[i_d_ind[i+1]] = internal_dparam[i];
-    }
-}
 
 
 

@@ -97,8 +97,23 @@ int relay_printInFile(RelayProblem*  problem, FILE* file)
   return 1;
 }
 
-int relay_newFromFile(RelayProblem* problem, FILE* file)
+RelayProblem* relayProblem_new(void)
 {
+  RelayProblem* rp = (RelayProblem*) malloc(sizeof(RelayProblem));
+  rp->size = 0;
+  rp->M = NULL;
+  rp->q = NULL;
+  rp->lb = NULL;
+  rp->ub = NULL;
+
+  return rp;
+}
+
+
+RelayProblem* relay_newFromFile(FILE* file)
+{
+  RelayProblem* problem = relayProblem_new();
+  
   int n = 0;
   int i;
 
@@ -123,23 +138,21 @@ int relay_newFromFile(RelayProblem* problem, FILE* file)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->ub[i])));
   }
-  return 1;
+  return problem;
 }
 
-int relay_newFromFilename(RelayProblem* problem, const char* filename)
+RelayProblem * relay_new_from_filename(const char* filename)
 {
-  int info = 0;
+  RelayProblem* problem = NULL;
+  
   FILE * file = fopen(filename, "r");
   if (file == NULL)
-  {
-    printf("Error! Could not open filename %s\n", filename);
-    exit(EXIT_FAILURE);
-  }
+    numerics_error("RelayProblem", "Can not open file ", filename);
 
-  info = relay_newFromFile(problem, file);
+  problem = relay_newFromFile(file);
 
   fclose(file);
-  return info;
+  return problem;
 }
 
 

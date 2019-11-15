@@ -55,9 +55,7 @@ void free_test_collection(TestCase* collection, int nb_tests)
 {
   for(int i=0;i<nb_tests;++i)
     {
-      // solver_options_delete(collection[i].options); //called at the end of the test
-      free(collection[i].options);
-      collection[i].options = NULL;
+      solver_options_clear(&collection[i].options); //called at the end of the test
     }
 
   free(collection);
@@ -101,8 +99,7 @@ void print_tests_collection_report(TestCase * collection, int n_failed, int * fa
     }
 }
 
-TestCase * build_test_collection_1(int n_data, const char ** data_collection, int n_solvers, int * solvers_ids,
-                                 int (*set_default_solver)(SolverOptions*, int) )
+TestCase * build_test_collection_generic(int n_data, const char ** data_collection, int n_solvers, int * solvers_ids)
 {
   int number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc(number_of_tests * sizeof(TestCase));
@@ -115,14 +112,12 @@ TestCase * build_test_collection_1(int n_data, const char ** data_collection, in
         {
           collection[current].filename = data_collection[d];
           collection[current].will_fail = 0;
-          collection[current].options = (SolverOptions *)malloc(sizeof(SolverOptions));
-          set_default_solver(collection[current].options, solvers_ids[s]);
+          collection[current].options = solver_options_create(solvers_ids[s]);
           current ++;
         }
     }
   return collection;
 }
-
 
 int run_test_collection(TestCase * collection, int number_of_tests, int (*test_function)(TestCase*))
 {
@@ -142,10 +137,11 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
       printf("\n################# start of test # %i #######################\n", test_num);
       printf("Solver : %s (id: %d) \n", solver_options_id_to_name(collection[test_num].options->solverId),
              collection[test_num].options->solverId);
-      if(collection[test_num].options->internalSolvers)
+      for(int i=0;i<collection[test_num].options->numberOfInternalSolvers;++i)
         {
-          const char * internal_name = solver_options_id_to_name(collection[test_num].options->internalSolvers[0].solverId);
-          printf("Internal solver : %s \n", internal_name);
+          int sid = collection[test_num].options->internalSolvers[i]->solverId;
+          const char * internal_name = solver_options_id_to_name(sid);
+          printf("Internal solver : %s (id: %d) \n", internal_name, sid);        
         }
       printf("Data file : %s \n", collection[test_num].filename);
       t1 = clock();

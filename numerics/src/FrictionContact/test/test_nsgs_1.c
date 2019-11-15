@@ -20,88 +20,88 @@
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_HYBR...
 #include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
-#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
   int n_solvers = 5;
   *number_of_tests = n_data * n_solvers;
-  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = malloc((*number_of_tests) * sizeof(TestCase));
 
 
   // "External" solver parameters
   // -> same values for all tests.
+
   // The differences between tests are only for internal solvers and input data.
   int topsolver = SICONOS_FRICTION_3D_NSGS;
-  int dpos[] = {1, SICONOS_DPARAM_TOL};  // ipos = [number of values in parameters list, indices]
-  double dparam[] = {1e-5};
-  int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};  // ipos = [number of values in parameters list, indices]
-  int iparam[] = {10000};
-
   int current = 0;
+  
+  // nsgs + default values for internal solver.
   for(int d =0; d <n_data; d++)
     {
-      dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      // Default values for internal solver.
-      build_friction_test(data_collection[d],
-                 topsolver, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      current++;
     }
 
+  // nonsmooth newton 'damped', Moreau-Jean formulation. Default for other parameters
   for(int d =0; d <n_data; d++)
     {
-      // nonsmooth newton 'damped', Moreau-Jean formulation. Default for other parameters
-      int intern_ipos[] = {1, SICONOS_FRICTION_3D_NSN_FORMULATION};
-      int internal_iparam[] = {SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD};
-      dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      build_friction_test(data_collection[d],
-                 topsolver, dpos, dparam, ipos, iparam,
-                 SICONOS_FRICTION_3D_ONECONTACT_NSN_GP, NULL,  NULL, intern_ipos, internal_iparam,
-                 &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      
+      solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+      collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
+
+      current++;
     }
   
+  // Projection on cone with local iteration, set tol and max iter.
   for ( int d =0; d <n_data; d++)
     {
-      // Projection on cone with local iteration, set tol and max iter.
-      double internal_dparam[] = {1e-12};
-      int internal_iparam[] = {10};
-      dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      iparam[0] = 10000;
-      build_friction_test(data_collection[d],
-                 topsolver, dpos, dparam, ipos, iparam,
-                 SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
-                 dpos, internal_dparam, ipos, internal_iparam,
-                 &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+
+      solver_options_update_internal(collection[current].options, 0,
+                                     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+      collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+      collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
+      current++;
     }
   
+  // nonsmooth Newton 'damped', set hybrid strategy
   for ( int d =0; d <n_data; d++)
     {
-      // nonsmooth Newton 'damped', set hybrid strategy
-      int intern_ipos[] = {1, SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY};
-      int internal_iparam[] = {SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP};
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+
+      solver_options_update_internal(collection[current].options, 0,
+                                     SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+      collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP;
+      current++;
       // notice that this strategy is the default one.
-      dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      build_friction_test(data_collection[d],
-                 topsolver, dpos, dparam, ipos, iparam,
-                 SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
-                 NULL, NULL, intern_ipos, internal_iparam,
-                 &collection[current++]);
     }
 
+  // nonsmooth Newton 'damped', set hybrid strategy
   for ( int d =0; d <n_data; d++)
     {
-      // nonsmooth Newton 'damped', set hybrid strategy
-      int intern_ipos[] = {1, SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY};
-      int internal_iparam[] = {SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP};
-      dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      build_friction_test(data_collection[d],
-                 topsolver, dpos, dparam, ipos, iparam,
-                 SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
-                 NULL, NULL, intern_ipos, internal_iparam,
-                 &collection[current++]);
-    }
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
 
+      solver_options_update_internal(collection[current].options, 0,
+                                     SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+      collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
+      current++;
+    }
 
   return collection;
 

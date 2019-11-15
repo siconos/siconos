@@ -20,7 +20,7 @@
 #include <string.h>          // for strcmp
 #include "lcp_cst.h"         // for SICONOS_LCP_PIVOT
 #include "lcp_test_utils.h"  // for lcp_test_function
-#include "test_utils.h"      // for TestCase, build_test_collection_1, data_...
+#include "test_utils.h"      // for TestCase, build_test_collection_generic, data_...
 #include "SiconosConfig.h"   // for HAVE_GAMS_C_API // IWYU pragma: keep
 #include "LCP_Solvers.h"
 
@@ -64,8 +64,7 @@ int main(void)
 
   printf("Test %i data files with %i solvers.\n", n_data, n_solvers);
 
-  TestCase * collection = build_test_collection_1(n_data, _data_collection,
-                                                n_solvers, solvers, linearComplementarity_setDefaultSolverOptions);
+  TestCase * collection = build_test_collection_generic(n_data, _data_collection, n_solvers, solvers);
 
 #ifdef TEST_LCP_COLLECTION_1
   // some solvers are expected to fail ...

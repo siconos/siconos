@@ -61,8 +61,10 @@ parameters:
 * iparam[SICONOS_IPARAM_MAX_ITER] = 20000
 * iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL
 * iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY] (set but not used)
-* iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = SICONOS_VI_LS_SOLODOV
+* iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = SICONOS_VI_LS_ARMIJO
+  
   allowed values :
+
   * SICONOS_VI_LS_ARMIJO : Armijo rule with Khotbotov ratio (default)
   * SICONOS_VI_LS_SOLODOV : Armijo rule with Solodov.Tseng ratio
   * SICONOS_VI_LS_HANSUN : Armijo rule with Han.Sun ratio
@@ -70,8 +72,8 @@ parameters:
 * iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 0;
 * iparam[SICONOS_VI_IPARAM_DECREASE_RHO] = 0;
 
-* dparam[SICONOS_DPARAM_TOL] = 1e-3
-* dparam[SICONOS_VI_DPARAM_RHO] = -1.
+* dparam[SICONOS_DPARAM_TOL] = 1e-3, in-out parameter
+* dparam[SICONOS_VI_DPARAM_RHO] = -1., in-out parameter
 * dparam[SICONOS_VI_DPARAM_LS_TAU] = 2/3
 * dparam[SICONOS_VI_DPARAM_LS_TAUINV] = 3/2
 * dparam[SICONOS_VI_DPARAM_LS_L] = 0.9

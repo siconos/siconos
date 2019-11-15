@@ -19,7 +19,7 @@
 #include <stdio.h>                       // for NULL
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_N...
-#include "frictionContact_test_utils.h"  // for build_gfc3d_test, build_test...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 #include "SolverOptions.h"
 
@@ -36,30 +36,30 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   
   int current = 0;
   // tol and maxiter used in tests are the same for all solvers.
-  int dpos[] = {1, SICONOS_DPARAM_TOL};
-  double dparam[] = {1e-5};
-  int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-  int iparam[] = {10000}; 
-
+  
   for(int s=0;s<n_solvers;++s)
     {
       for(int d =0; d <n_data; d++)
         {
-          // default values for all parameters.
-          build_friction_test(data_collection[d],
-                              solvers[s], dpos, dparam, ipos, iparam,
-                              -1, NULL, NULL, NULL, NULL, &collection[current++]);
+          collection[current].filename = data_collection[d];
+          collection[current].options = solver_options_create(solvers[s]);
+          collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+          collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+          current++;
         }
     }
 
   for(int d =0; d <n_latin; d++)
     {
       // default values for all parameters.
-      build_friction_test(data_collection[d],
-                          SICONOS_FRICTION_2D_LATIN, dpos, dparam, ipos, iparam,
-                          -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_FRICTION_2D_LATIN);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+      current++;
     }
 
+  *number_of_tests = current;
   
   return collection;
 }

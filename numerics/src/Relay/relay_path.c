@@ -53,7 +53,7 @@ void relay_path(RelayProblem* problem, double *z, double *w, int *info , SolverO
   /* size of the RELAY */
   int n = problem->size;
 
-  //  double tol = options->dparam[0];
+  //  double tol = options->dparam[SICONOS_DPARAM_TOL];
   MCP_Termination termination;
 
   nnz = nbNonNulElems(n, M, 1.0e-18);
@@ -118,30 +118,5 @@ void relay_path(RelayProblem* problem, double *z, double *w, int *info , SolverO
 
 
   return;
-}
-int relay_path_setDefaultSolverOptions(SolverOptions* options)
-{
-#ifdef HAVE_PATHFERRIS
-  //  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the PATH Solver\n");
-  }
-  /*  strcpy(options->solverName,"PATH");*/
-  options->solverId = SICONOS_RELAY_PATH;
-  options->numberOfInternalSolvers = 0;
-  options->internalSolvers = NULL;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->dparam[0] = 1e-8;
-  options->dparam[1] = 1.0;
-#endif /*HAVE_PATHFERRIS*/
-  return 0;
 }
 

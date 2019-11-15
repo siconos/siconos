@@ -25,7 +25,7 @@
 #include "SOCLCP_Solvers.h"              // for soclcp_setDefaultSolverOptions
 #include "SolverOptions.h"               // for SolverOptions, solver_option...
 #include "fc3d_Solvers.h"                // for fc3d_setDefaultSolverOptions
-#include "frictionContact_test_utils.h"  // for build_friction_test, frictio...
+#include "frictionContact_test_utils.h"  // for frictionContact_test_function
 #include "test_utils.h"                  // for TestCase
 #include "SiconosConfig.h" // for WITH_FCLIB, HAVE_GAMS_C_API // IWYU pragma: keep
 
@@ -37,52 +37,6 @@
 #include <fclib_interface.h>
 #include "fc3d_solvers_wr.h"
 #endif
-
-void build_friction_test(const char * filename,
-                int solver_id, int* d_ind, double* dparam, int * i_ind, int* iparam,
-                int internal_solver_id, int * i_d_ind, double * internal_dparam, int * i_i_ind, int * internal_iparam,
-                TestCase* testname)
-{
-  // reference file name
-  testname->filename = filename;
-  // By default, test is expected to succeed.
-  testname->will_fail = 0;
-
-  // Set solver options to default.
-  testname->options = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_setDefaultSolverOptions(testname->options, solver_id);
-  // Fill iparam and dparam in.
-  if(iparam)
-    for(int i=0; i<i_ind[0]; ++i)
-      testname->options->iparam[i_ind[i+1]] = iparam[i];
-
-  // dparam
-  if(dparam)
-    for(int i=0; i<d_ind[0]; ++i)
-      testname->options->dparam[d_ind[i+1]] = dparam[i];
-
-  // Internal solver setup
-  if(internal_solver_id>0)
-    {
-      if (internal_solver_id >= 400 && internal_solver_id < 700)
-        fc3d_setDefaultSolverOptions(testname->options->internalSolvers, internal_solver_id);
-      else if (internal_solver_id >= 1100 && internal_solver_id < 1200)
-        soclcp_setDefaultSolverOptions(testname->options->internalSolvers, internal_solver_id);
-      else
-        {
-          fprintf(stderr, "unknown internal solver\n");
-          exit(EXIT_FAILURE);
-        }
-      // internal iparam
-      if(internal_iparam)
-        for(int i=0; i<i_i_ind[0]; ++i)
-          testname->options->internalSolvers[0].iparam[i_i_ind[i+1]] = internal_iparam[i];
-      // internal dparam
-      if(internal_dparam)
-        for(int i=0; i<i_d_ind[0]; ++i)
-          testname->options->internalSolvers[0].dparam[i_d_ind[i+1]] = internal_dparam[i];
-    }
-}
 
 void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
 {
@@ -192,99 +146,16 @@ int frictionContact_test_function(TestCase* current)
   }
   
   if (!info)
-    printf("test successful, residual = %g\t, iteration = %i \n", current->options->dparam[1], current->options->iparam[1]);
+    printf("test successful, residual = %g\t, number of iterations = %i \n", current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   else
-    printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", current->options->dparam[1], info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+    printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", current->options->dparam[SICONOS_DPARAM_RESIDU], info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
 
   free(reaction);
   free(velocity);
   frictionContactProblem_free(problem);
-  solver_options_delete(current->options);
-  solver_options_nullify(current->options);
   fclose(foutput);
 
   return info;
 }
 
 
-#if defined(WITH_FCLIB)
-int frictionContact_test_function_hdf5(const char * path, SolverOptions * options)
-{
-
-  int k, info = -1 ;
-  /* FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem)); */
-  /* info = frictionContact_newFromFile(problem, f); */
-
-  FrictionContactProblem* problem = frictionContact_fclib_read(path);
-  FILE * foutput  =  fopen("checkinput.dat", "w");
-  info = frictionContact_printInFile(problem, foutput);
-
-  int NC = problem->numberOfContacts;
-  int dim = problem->dimension;
-  //int dim = problem->numberOfContacts;
-
-  double *reaction = (double*)calloc(dim * NC, sizeof(double));
-  double *velocity = (double*)calloc(dim * NC, sizeof(double));
-
-  if (dim == 2)
-  {
-    info = fc2d_driver(problem,
-		       reaction , velocity,
-		       options);
-  }
-  else if (dim == 3)
-  {
-    info = fc3d_driver(problem,
-		       reaction , velocity,
-		       options);
-  }
-  else
-  {
-    info = 1;
-  }
-  printf("\n");
-
-  int print_size =10;
-
-  if  (dim * NC >= print_size)
-  {
-    printf("First values (%i)\n", print_size);
-    for (k = 0 ; k < print_size; k++)
-    {
-      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
-    }
-    printf(" ..... \n");
-  }
-  else
-  {
-    for (k = 0 ; k < dim * NC; k++)
-    {
-      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
-    }
-    printf("\n");
-  }
-
-  for (k = 0; k < dim * NC; ++k)
-  {
-    info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
-  }
-
-  if (!info)
-  {
-    printf("test successful, residual = %g\n", options->dparam[1]);
-  }
-  else
-  {
-    printf("test unsuccessful, residual = %g\n", options->dparam[1]);
-  }
-  free(reaction);
-  free(velocity);
-
-  frictionContactProblem_free(problem);
-  fclose(foutput);
-
-  return info;
-
-}
-
-#endif

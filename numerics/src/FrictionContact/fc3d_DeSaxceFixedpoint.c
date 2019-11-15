@@ -53,14 +53,13 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
   int hasNotConverged = 1;
   int contact; /* Number of the current row of blocks in M */
   int nLocal = 3;
-  dparam[SICONOS_DPARAM_TOL] = dparam[2]; // set the tolerance for the local solver
   double * velocitytmp = (double *)calloc(n, sizeof(double));
 
   double rho = 0.0;
 
-  if (dparam[3] > 0.0)
+  if (dparam[SICONOS_FRICTION_3D_NSN_RHO] > 0.0)
   {
-    rho = dparam[3];
+    rho = dparam[SICONOS_FRICTION_3D_NSN_RHO];
     if (verbose > 0)
     {
       printf("--------------- FC3D - DeSaxce Fixed Point (DSFP) - Fixed stepsize with  rho = %14.7e \n", rho);
@@ -117,37 +116,14 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
 
   if (verbose > 0)
     printf("--------------- FC3D - DeSaxce Fixed point (DSFP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
-  iparam[7] = iter;
-  dparam[SICONOS_DPARAM_TOL] = tolerance;
-  dparam[1] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
   free(velocitytmp);
 
 }
 
 
-int fc3d_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
+void fc3d_dsfp_set_options(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the DSFP Solver\n");
-  }
-
-  /*strcpy(options->solverName,"DSFP");*/
-  options->solverId = SICONOS_FRICTION_3D_DSFP;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-  options->dparam[3] = 1.0;
-
-  options->internalSolvers = NULL;
-
-  return 0;
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.0;
 }

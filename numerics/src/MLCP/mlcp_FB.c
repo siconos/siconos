@@ -39,13 +39,6 @@ static void computeFz(double* z);
 static void F_MCPFischerBurmeister(int size, double* z, double* FBz, int a);
 static void jacobianF_MCPFischerBurmeister(int size, double* z, double* jacobianFMatrix, int a);
 
-
-int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-  return 0;
-}
-
 /*
 Warning: this function requires MLCP with M and q, not (A,B,C,D).
 The input structure MixedLinearComplementarityProblem is supposed to fit with this form.
@@ -122,7 +115,7 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
   NewtonFunctionPtr F = &F_MCPFischerBurmeister;
   NewtonFunctionPtr jacobianF = &jacobianF_MCPFischerBurmeister;
   double err;
-  double tol = options->dparam[0];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
   int i;
   /*only for debug
   double * zz = (double *)malloc((sN+sM)*sizeof(double));
@@ -132,7 +125,7 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
   *info = nonSmoothNewtonNeigh(sN + sM, z, &F, &jacobianF, options->iparam, options->dparam);
   if (*info > 0)
   {
-    fprintf(stderr, "Numerics, mlcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[1]);
+    fprintf(stderr, "Numerics, mlcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[SICONOS_DPARAM_RESIDU]);
     /*ONLY FOR DEBUG
       mixedLinearComplementarity_display(problem);
     printf("with z init;\n");

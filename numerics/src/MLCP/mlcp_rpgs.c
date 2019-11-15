@@ -26,14 +26,6 @@
 #include "SiconosBlas.h"                        // for cblas_ddot
 #define EPSDIAG DBL_EPSILON
 
-int mixedLinearComplementarity_rpgs_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-  pSolver->dparam[2] = 0.5; /*rho*/
-  return 0;
-}
-
-
 /*
  *
  * double *z : size n+m
@@ -62,14 +54,14 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   incy = 1;
   /* Recup input */
 
-  itermax = options->iparam[0];
-  tol   = options->dparam[0];
-  rho   = options->dparam[2];
+  itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  tol   = options->dparam[SICONOS_DPARAM_TOL];
+  rho   = options->dparam[SICONOS_DPARAM_MLCP_RHO];
 
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Allocation */
 
@@ -183,8 +175,8 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
     /* **** ********************* **** */
 
   }
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_TOL] = err;
 
   if (err > tol)
   {
@@ -206,3 +198,10 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   free(diagB);
   return;
 }
+
+void mlcp_rpgs_set_options(SolverOptions* options)
+{
+  options->dparam[SICONOS_DPARAM_MLCP_RHO] = 0.5; /*rho*/
+  options->filterOn = false;
+}
+

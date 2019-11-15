@@ -188,7 +188,7 @@ int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem, d
   double * M = problem->M->matrix0;
   double * Q = problem->q;
   double * mu = problem->mu;
-  double tol = options->dparam[0];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
   SET3X3(M);
   M = M00;
   SET3(reaction);
@@ -333,7 +333,7 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
   double * mu = problem->mu;
   double D1, D2;
   double alpha;
-  double tol = options->dparam[0];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
   SET3X3(M);
   M = M00;
   SET3(reaction);
@@ -602,30 +602,7 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
   projectionOnCone(reaction, *mu);
   return -1;
 }
-int fc3d_unitary_enumerative_setDefaultSolverOptions(
-  SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Setting default options for unitary enumerative solver.\n");
-  }
 
-  options->solverId =  SICONOS_FRICTION_3D_ONECONTACT_QUARTIC;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-9;
-
-  options->internalSolvers = NULL;
-
-  return 0;
-}
 /*ax+by+c=0
   a1x+b1y+c1=0*/
 void solve2x2(double *a, double *b, double *c, double *a1, double *b1, double *c1, double *x, double *y)

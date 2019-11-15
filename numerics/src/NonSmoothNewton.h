@@ -92,8 +92,11 @@ extern "C"
   int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
                             NewtonFunctionPtr* jacobianPhi,
                             SolverOptions * options);
-  
-  void nonSmoothNewton_setDefaultSolverOptions(SolverOptions* options);
+  /** @addtogroup SetSolverOptions
+      @{
+  */
+  void nonSmoothNewton_set_options(SolverOptions* options); 
+  /** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

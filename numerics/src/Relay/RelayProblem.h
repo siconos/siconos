@@ -56,23 +56,26 @@ extern "C"
    */
   int relay_printInFile(RelayProblem*  problem, FILE* file);
 
-  /** build a relay problem from a file handler.
-      \param[inout] problem relay problem structure
-      \param[in] file, file descriptor
-      \return file status (1 if everything has worked properly)
+  /* create a new Relay Problem (ptr) and set structure member to null.
+   * \return a pointer to a relay 
    */
-  int relay_newFromFile(RelayProblem* problem, FILE* file);
+  RelayProblem* relayProblem_new(void);
+  
+  /** read a RelayProblem from a file descriptor
+   * \param file descriptor
+   * \return problem the problem to read
+   */
+  RelayProblem*  relay_newFromFile(FILE* file);
 
-  /** build a relay problem from a file.
-      \param[inout] problem, relay problem structure
-      \param[in] filename, name of the input file
-      \return file status (1 if everything has worked properly)
-  */
-  int relay_newFromFilename(RelayProblem* problem, const char * filename);
+  /** read a RelayProblem from a file (.dat or hdf5 if fclib is on) from its filename
+   * \param filename the name of the input file
+   * \return problem the problem to read
+   */
+  RelayProblem* relay_new_from_filename(const char * filename);
 
   /** Release memory for the problem structure
       \param[inout] problem, Relay problem structure to be freed.
-   */
+  */
   void freeRelay_problem(RelayProblem* problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

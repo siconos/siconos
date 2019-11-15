@@ -104,9 +104,7 @@ int main(void)
   int info = 0;
 
   /* Set solver options */
-  SolverOptions options;
-
-  solver_options_set(&options, @PROBLEM_COLLECTION@);
+  SolverOptions * options = solver_options_create(@PROBLEM_COLLECTION@);
 
   /* Create a NonlinearComplementarityProblem */
   NonlinearComplementarityProblem* problem = (NonlinearComplementarityProblem *)malloc(sizeof(NonlinearComplementarityProblem));
@@ -133,12 +131,9 @@ int main(void)
   sim_data.g = 9.81;
   sim_data.kappa = .7;
 
- options.dparam[0] = N*DBL_EPSILON;
- options.iparam[SICONOS_IPARAM_PREALLOC] = 1;
- options.iparam[0] = 250;
-
-//  options.iparam[3] = 2;
-//  options.iparam[4] = 10;
+ options->dparam[SICONOS_DPARAM_TOL] = N*DBL_EPSILON;
+ options->iparam[SICONOS_IPARAM_PREALLOC] = 1;
+ options->iparam[SICONOS_IPARAM_MAX_ITER] = 250;
 
  verbose=0;
 
@@ -151,21 +146,21 @@ int main(void)
   {
     k++;
     info = ncp_driver(problem, z, F, &options);
-    printf("test_NCP_ZI1 :: step %d, iter = %d, t = %le, error = %le\n", k, options.iparam[1], t,  options.dparam[1]);
+    printf("test_NCP_ZI1 :: step %d, iter = %d, t = %le, error = %le\n", k, options->iparam[SICONOS_IPARAM_ITER_DONE], t,  options->dparam[SICONOS_DPARAM_RESIDU]);
     if (info > 0)
     {
       //printf("NCP_ZI1 info = %d\n", info);
       /* do some magic shit to force the algo to fix a solution */
       if(@PROBLEM_COLLECTION@ == SICONOS_NCP_NEWTON_FB_FBLSA)
       {
-       while (options.dparam[0] < 1e-12)
+       while (options->dparam[SICONOS_DPARAM_TOL] < 1e-12)
        {
          /* do some magic shit to force the algo to fix a solution */
          if (verbose)
-           printf("test_NCP_ZI1 :: I - Solution not found at tolerance %g \n", options.dparam[0] );
-         options.dparam[0] *= 1.1;
+           printf("test_NCP_ZI1 :: I - Solution not found at tolerance %g \n", options->dparam[SICONOS_DPARAM_TOL] );
+         options->dparam[SICONOS_DPARAM_TOL] *= 1.1;
          if (verbose)
-           printf("test_NCP_ZI1 ::  we increase tolerance at %g \n",options.dparam[0] );
+           printf("test_NCP_ZI1 ::  we increase tolerance at %g \n",options->dparam[SICONOS_DPARAM_TOL] );
          info = ncp_driver(problem, z, F, &options);
          if (!info)
            goto almostgood;
@@ -204,15 +199,15 @@ int main(void)
 
 #if @PROBLEM_COLLECTION@ == SICONOS_NCP_NEWTON_FB_FBLSA
       {
-      options.dparam[0] = N*DBL_EPSILON;
-       while (options.dparam[0] < 1e-12)
+      options->dparam[SICONOS_DPARAM_TOL] = N*DBL_EPSILON;
+       while (options->dparam[SICONOS_DPARAM_TOL] < 1e-12)
        {
          if (verbose)
-           printf("test_NCP_ZI1 ::  II - Solution not found at tolerance %g \n ", options.dparam[0] );
-         options.dparam[0] *= 1.1;
+           printf("test_NCP_ZI1 ::  II - Solution not found at tolerance %g \n ", options->dparam[SICONOS_DPARAM_TOL] );
+         options->dparam[SICONOS_DPARAM_TOL] *= 1.1;
          if (verbose)
-           printf("test_NCP_ZI1 ::  we increase tolerance at %g \n",options.dparam[0] );
-         options.dparam[0] *= 1.1;
+           printf("test_NCP_ZI1 ::  we increase tolerance at %g \n",options->dparam[SICONOS_DPARAM_TOL] );
+         options->dparam[SICONOS_DPARAM_TOL] *= 1.1;
          info = ncp_driver(problem, z, F, &options);
          if (!info)
            goto almostgood;
@@ -225,10 +220,10 @@ int main(void)
 #endif
       if (info > 0)
       {
-        if (options.dparam[1] > options.dparam[0])
+        if (options->dparam[SICONOS_DPARAM_RESIDU] > options->dparam[SICONOS_DPARAM_TOL])
         {
 #if @PROBLEM_COLLECTION@ != SICONOS_NCP_NEWTON_FB_FBLSA
-          printf("step %d, iter = %d, error = %le, tol = %g; info = %d\n", k, options.iparam[1], options.dparam[1], options.dparam[0], info);
+          printf("step %d, iter = %d, error = %le, tol = %g; info = %d\n", k, options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU], options->dparam[SICONOS_DPARAM_TOL], info);
           printf("NCP_ZI1 with solver @PROBLEM_COLLECTION@ failed completly\n");
           printf("NCP_ZI1 failure at xk[0] =  %.*e; xk[1] =  %.*e\n", DECIMAL_DIG, xk[0], DECIMAL_DIG, xk[1]);
 #endif
@@ -244,9 +239,9 @@ almostgood:
     xk[0] = F[0] - z[1];
     xk[1] = F[2] - z[3];
     t = k*sim_data.h;
-    options.dparam[0] = N*DBL_EPSILON;
+    options->dparam[SICONOS_DPARAM_TOL] = N*DBL_EPSILON;
   }
-  solver_options_delete(&options);
+  solver_options_clear(options);
 
   free(problem->nabla_F);
   free(problem);

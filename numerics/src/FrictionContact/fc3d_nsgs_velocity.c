@@ -114,7 +114,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   }
 
 
-  SolverOptions * localsolver_options = options->internalSolvers;
+  SolverOptions * localsolver_options = options->internalSolvers[0];
 
   /* Connect local solver */
 
@@ -160,34 +160,15 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   }
   printf("--------------- FC3D - NSGS_VELOCITY - # Iteration %i Final Residual = %14.7e\n", iter, error);
   dparam[SICONOS_DPARAM_TOL] = tolerance;
-  dparam[1] = error;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[7] = iter;
 
   /***** Free memory *****/
   (*freeSolver)();
 }
-int fc3d_nsgs_velocity_setDefaultSolverOptions(SolverOptions* options)
+
+void fc3d_nsgs_velocity_set_options(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NSGSV Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_NSGSV;
-
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(options->internalSolvers);
-
-  return 0;
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN);
 }

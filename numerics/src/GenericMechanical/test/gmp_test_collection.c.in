@@ -17,24 +17,11 @@
  */
 
 #define _XOPEN_SOURCE 700
-#include <string.h>
-#include "SiconosConfig.h" // for HAVE_GAMS_C_API
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <time.h>
-
-#include "genericMechanical_test_utils.h"
-#include "SolverOptions.h"
-//#include "Friction_cst.h"
-#include "GenericMechanical_Solvers.h"
-#include "GenericMechanical_cst.h"
-
-/* For internal solvers based on other formulation */
-#include "SOCLCP_Solvers.h"
-#include "SOCLCP_cst.h"
-#include "ConvexQP_cst.h"
-#include "VI_cst.h"
+#include <stdio.h>                         // for printf
+#include <string.h>                        // for strcmp
+#include "genericMechanical_test_utils.h"  // for build_test_collection, gmp...
+#include "test_utils.h"                    // for data_collection, free_test...
+#include "SiconosConfig.h" // for HAVE_GAMS_C_API // IWYU pragma: keep
 
 #define @PROBLEM_COLLECTION@ 1
 

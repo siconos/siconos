@@ -5,7 +5,7 @@
 #include "NonSmoothDrivers.h"               // for variationalInequality_driver
 #include "NumericsFwd.h"                    // for FrictionContactProblem
 #include "NumericsMatrix.h"                 // for NM_gemv
-#include "SolverOptions.h"                  // for solver_options_delete
+#include "SolverOptions.h"                  // for solver_options_clear
 #include "VI_cst.h"                         // for SICONOS_VI_EG, SICONOS_VI...
 #include "VariationalInequality.h"          // for VariationalInequality
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_set...
@@ -78,9 +78,8 @@ static int test_0(void)
   vi.istheNormVIset = 0;
   vi.set = NULL;
   vi.nabla_F = NULL;
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_EG);
-  options->dparam[0]=1e-8;
+  SolverOptions * options = solver_options_create(SICONOS_VI_EG);
+  options->dparam[SICONOS_DPARAM_TOL]=1e-8;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
   FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
@@ -100,19 +99,15 @@ static int test_0(void)
 
   PXtest_0(&vi, x,w);
 
- 
-  info = variationalInequality_driver(&vi, 
-                                      x, 
-                                      w, 
-                                      options);
+  
+  int info = variationalInequality_driver(&vi, x, w, options);
   int i =0;
   for (i =0; i< n ; i++)
   {
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
   }
  
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
   free(problem);
   free(x);
   free(w);
@@ -179,9 +174,8 @@ static int test_1(void)
   vi.istheNormVIset = 0;
   vi.set = NULL;
   vi.nabla_F = NULL;
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_FPP);
-  options->dparam[0]=1e-8;
+  SolverOptions * options = solver_options_create(SICONOS_VI_FPP);
+  options->dparam[SICONOS_DPARAM_TOL]=1e-8;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
   FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
@@ -203,18 +197,14 @@ static int test_1(void)
   PXtest_1(&vi, x,w);
 
  
-  info = variationalInequality_driver(&vi, 
-                                      x, 
-                                      w, 
-                                      options);
+  int info = variationalInequality_driver(&vi, x, w, options);
   int i =0;
   for (i =0; i< n ; i++)
   {
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
   }
  
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
   free(problem);
   free(x);
   free(w);
@@ -281,9 +271,8 @@ static int test_2(void)
   vi.istheNormVIset = 0;
   vi.set = NULL;
   vi.nabla_F = NULL;
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_HP);
-  options->dparam[0]=1e-8;
+  SolverOptions * options = solver_options_create(SICONOS_VI_HP);
+  options->dparam[SICONOS_DPARAM_TOL]=1e-8;
   //char filename[50] = "./data/Confeti-ex13-Fc3D-SBM.dat";
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
   FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
@@ -304,18 +293,14 @@ static int test_2(void)
   PXtest_2(&vi, x,w);
 
  
-  info = variationalInequality_driver(&vi, 
-                                      x, 
-                                      w, 
-                                      options);
+  int info = variationalInequality_driver(&vi, x, w, options);
   int i =0;
   for (i =0; i< n ; i++)
   {
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
   }
  
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
   free(problem);
   free(x);
   free(w);

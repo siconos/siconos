@@ -34,7 +34,7 @@ LCP::LCP(int numericsSolverId):
   LinearOSNS(numericsSolverId)
 {
   _numerics_problem.reset(new LinearComplementarityProblem);
-  linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
+  linearComplementarity_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
 }
 
 int LCP::numericsCompute()
@@ -105,5 +105,5 @@ int LCP::compute(double time)
 
 LCP::~LCP()
 {
-  solver_options_delete(&*_numerics_solver_options);
+  solver_options_clear(&*_numerics_solver_options);
 }

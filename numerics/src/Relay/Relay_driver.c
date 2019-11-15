@@ -33,9 +33,7 @@
 const char* const   SICONOS_RELAY_PGS_STR = "RELAY_PGS";
 const char* const   SICONOS_RELAY_PATH_STR = "RELAY_PATH";
 const char* const   SICONOS_RELAY_ENUM_STR = "RELAY_ENUM";
-const char* const   SICONOS_RELAY_NLGS_STR = "RELAY_NLGS";
 const char* const   SICONOS_RELAY_LEMKE_STR = "RELAY_LEMKE";
-const char* const   SICONOS_RELAY_LATIN_STR = "RELAY_LATIN";
 const char* const   SICONOS_RELAY_AVI_CAOFERRIS_STR = "RELAY_AVI_CAOFERRIS";
 const char* const   SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR = "test version of the solver by Cao & Ferris; DO NOT USE!";
 
@@ -86,12 +84,7 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
     relay_pgs(problem, z , w , &info , options);
     break;
   }
-  case SICONOS_RELAY_NLGS:
-  {
-    fprintf(stderr, "Relay_driver error: NLGS solver obsolete use PGS:\n");
-    break;
-  }
-  case SICONOS_RELAY_LEMKE:
+ case SICONOS_RELAY_LEMKE:
   {
 
 #ifdef DEBUG_RELAY
@@ -132,7 +125,7 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   }
   }
   if (options[0].filterOn > 0)
-    info = relay_compute_error(problem, z, w, options[0].dparam[0], &(options[0].dparam[1]));
+    info = relay_compute_error(problem, z, w, options[0].dparam[SICONOS_DPARAM_TOL], &(options[0].dparam[SICONOS_DPARAM_RESIDU]));
 
   return info;
 }

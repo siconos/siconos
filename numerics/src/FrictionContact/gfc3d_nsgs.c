@@ -83,7 +83,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   /* Check for trivial case */
   *info = gfc3d_checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);

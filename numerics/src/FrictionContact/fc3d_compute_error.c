@@ -189,7 +189,8 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
     numerics_error("fc3d_Tresca_compute_error", "null input for problem and/or z and/or w");
-
+  assert(options->dWork);
+  
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;

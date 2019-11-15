@@ -33,31 +33,10 @@ extern "C"
   */
   int frictionContact_test_function(TestCase*);
 
-
-  
   void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId);
 
-#if defined(WITH_FCLIB)
-  int frictionContact_test_function_hdf5(const char * path, SolverOptions * options);
-  int gfc3d_test_function_hdf5(const char* path, SolverOptions* options);
-#endif
- 
   TestCase * build_test_collection(int n_data, const char ** data_collection, int*);
 
-  void build_friction_test(const char *,
-                  int solver_id, int* d_ind, double* dparam, int * i_ind, int* iparam,
-                  int internal_solver_id, int * i_d_ind, double * internal_dparam, int * i_i_ind, int * internal_iparam,
-                  TestCase* testname);
-
-  void build_gfc3d_test(const char * filename,
-                        int solver_id, int* d_ind, double* dparam, int * i_ind, int* iparam,
-                        int internal_solver_id, int * i_d_ind, double * internal_dparam, int * i_i_ind, int * internal_iparam,
-                        TestCase* testname);
-
-  void build_rfc3d_test(const char * filename,
-                        int solver_id, int* d_ind, double* dparam, int * i_ind, int* iparam,
-                        int internal_solver_id, int * i_d_ind, double * internal_dparam, int * i_i_ind, int * internal_iparam,
-                        TestCase* testname);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP) 
 }

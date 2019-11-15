@@ -60,9 +60,8 @@ static bool skip(int solver_id, char* problem)
 static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, double* u, char* problem)
 {
   if (skip(solver_id, problem)) return 0;
-  SolverOptions SO;
-  fc3d_setDefaultSolverOptions(&SO, solver_id);
-  SO.dparam[0] = set_tol(solver_id, problem);
+  SolverOptions * SO = solver_options_create(solver_id);
+  SO->dparam[SICONOS_DPARAM_TOL] = set_tol(solver_id, problem);
   int info;
   if (FC)
     info = fc3d_driver(FC, r, u, &SO);
@@ -101,23 +100,22 @@ static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, do
 
   if (info)
   {
-    fprintf(stderr, "Solver %s (sparse) FAILED with error %d on problem %s. Residual is %e\n", solver_options_id_to_name(solver_id), info, problem, SO.dparam[1]);
+    fprintf(stderr, "Solver %s (sparse) FAILED with error %d on problem %s. Residual is %e\n", solver_options_id_to_name(solver_id), info, problem, SO->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
     printf("Solver %s (sparse) succeded with %d iterations on problem %s\n", solver_options_id_to_name(solver_id), GET_ITER(SO), problem);
   }
 
-  solver_options_delete(&SO);
+  solver_options_clear(SO);
   return info;
 }
 
 static int solve_dense(int solver_id, FrictionContactProblem* FC, double* r, double* u, char* problem)
 {
   if (skip(solver_id, problem)) return 0;
-  SolverOptions SO;
-  fc3d_setDefaultSolverOptions(&SO, solver_id);
-  SO.dparam[0] = set_tol(solver_id, problem);
+  SolverOptions * SO = solver_options_create(solver_id);
+  SO->dparam[SICONOS_DPARAM_TOL] = set_tol(solver_id, problem);
   int info;
   if (FC)
     info = fc3d_driver(FC, r, u, &SO);
@@ -149,13 +147,13 @@ static int solve_dense(int solver_id, FrictionContactProblem* FC, double* r, dou
 
   if (info)
   {
-    fprintf(stderr, "Solver %s (dense) FAILED with error %d on problem %s. Residual is %e\n", solver_options_id_to_name(solver_id), info, problem, SO.dparam[1]);
+    fprintf(stderr, "Solver %s (dense) FAILED with error %d on problem %s. Residual is %e\n", solver_options_id_to_name(solver_id), info, problem, SO->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
     printf("Solver %s (dense) succeded with %d iterations on problem %s\n", solver_options_id_to_name(solver_id), GET_ITER(SO), problem);
   }
-  solver_options_delete(&SO);
+  solver_options_clear(SO);
   return info;
 }
 

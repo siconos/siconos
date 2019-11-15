@@ -41,13 +41,6 @@ static int * siWorkPath = 0;
 static double * sdWorkEnum = 0;
 static double * sdWorkPath = 0;
 
-int mixedLinearComplementarity_pathEnum_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-  return 0;
-}
-
-
 int mlcp_path_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   return mlcp_enum_getNbIWork(problem, options);
@@ -57,16 +50,6 @@ int mlcp_path_enum_getNbDWork(MixedLinearComplementarityProblem* problem, Solver
   return mlcp_enum_getNbDWork(problem, options);
 }
 
-
-
-/*
- *options->iparam[5] : n0 number of possible configuration.
- * dparam[5] : (in) a positive value, tolerane about the sign.
- *options->iWork : double work memory of  mlcp_direct_enum_getNbIWork() integers  (2(nn+mm))+((n + m)*(n0+1) + nO*m)
- *options->dWork : double work memory of mlcp_direct_enum_getNbDWork() doubles  ((nn+mm)*(nn+mm) + 3*(nn+mm))+(n + m + n0*(n+m)*(n+m))
- *
- *
- */
 
 void mlcp_path_enum_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
@@ -90,20 +73,6 @@ void mlcp_path_enum_reset()
   sdWorkPath = 0;
 }
 
-/*
- * The are no memory allocation in mlcp_direct, all necessary memory must be allocated by the user.
- *
- *options:
- * iparam[0] : (in) verbose.
- * dparam[0] : (in) a positive value, tolerane about the sign used by the enum algo.
- * iparam[5] : (in)  n0 number of possible configuration.
- * dparam[5] : (in) a positive value, tolerane about the sign.
- * dWork : working float zone size : n + m + n0*(n+m)*(n+m)  . MUST BE ALLOCATED BY THE USER.
- * iWork : working int zone size : (n + m)*(n0+1) + nO*m. MUST BE ALLOCATED BY THE USER.
- * double *z : size n+m
- * double *w : size n+m
- * info : output. info == 0 if success
- */
 void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   if (!siWorkEnum)
@@ -115,10 +84,6 @@ void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double *z, doubl
   /*First, try direct solver*/
   //  options->dWork = sdWorkDirect;
   //  options->iWork = siWorkDirect;
-  if (options->iparam[8] == 761727)
-  {
-    mixedLinearComplementarity_display(problem);
-  }
   mlcp_path(problem, z, w, info, options);
   if (*info)
   {
@@ -129,3 +94,4 @@ void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double *z, doubl
     mlcp_enum(problem, z, w, info, options);
   }
 }
+

@@ -108,5 +108,4 @@ void mcp_old_driver_reset(MixedComplementarityProblem_old* problem, SolverOption
     fprintf(stderr, "mcp_old_driver_init error: unknown solver id: %d\n", options->solverId);
     exit(EXIT_FAILURE);
   }
-
 }

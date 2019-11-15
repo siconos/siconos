@@ -274,33 +274,3 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   free(zz);
 
 }
-int linearComplementarity_cpg_setDefaultSolverOptions(SolverOptions* options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the CPG Solver\n");
-  }
-  options->solverId = SICONOS_LCP_CPG;
-
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-
-
-  return 0;
-}

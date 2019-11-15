@@ -45,13 +45,7 @@ extern "C"
    * algorithm is used
    * \param options the structure to be modified
    */
-  void pathsearch_default_SolverOption(SolverOptions* options);
-
-  /** free solverData specific for the path search
-   * \param solverData the struct to free
-   */
-  void free_solverData_PathSearch(void* solverData);
-
+  void pathsearch_set_options(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

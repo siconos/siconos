@@ -25,34 +25,6 @@
 static int sN;
 static int sM;
 
-
-int mixedLinearComplementarity_directSimplex_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-  return 0;
-}
-
-
-int mlcp_direct_simplex_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
-{
-  return mlcp_direct_getNbIWork(problem, options); //+mlcp_simplex_getNbIWork(problem,options);
-}
-int mlcp_direct_simplex_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
-{
-  return mlcp_direct_getNbDWork(problem, options); //+mlcp_simplex_getNbDWork(problem,options);
-}
-
-
-
-/*
- *options->iparam[5] : n0 number of possible configuration.
- * dparam[5] : (in) a positive value, tolerane about the sign.
- *options->iWork : double work memory of  mlcp_direct_simplex_getNbIWork() integers
- *options->dWork : double work memory of mlcp_direct_simplex_getNbDWork() doubles
- *
- *
- */
-
 void mlcp_direct_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   sN = problem->n;
@@ -68,13 +40,6 @@ void mlcp_direct_simplex_reset()
 }
 
 /*
- * The are no memory allocation in mlcp_direct, all necessary memory must be allocated by the user.
- *
- *options:
- * iparam[0] : (in) verbose.
- * dparam[0] : (in) a positive value, tolerane about the sign used by the simplex algo.
- * iparam[5] : (in)  n0 number of possible configuration.
- * dparam[5] : (in) a positive value, tolerane about the sign.
  * dWork : working float zone size : n + m + n0*(n+m)*(n+m)  . MUST BE ALLOCATED BY THE USER.
  * iWork : working int zone size : (n + m)*(n0+1) + nO*m. MUST BE ALLOCATED BY THE USER.
  * double *z : size n+m
@@ -98,3 +63,5 @@ void mlcp_direct_simplex(MixedLinearComplementarityProblem* problem, double *z, 
     }
   }
 }
+
+

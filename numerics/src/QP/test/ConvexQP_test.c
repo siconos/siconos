@@ -4,7 +4,7 @@
 #include "ConvexQP_cst.h"          // for SICONOS_CONVEXQP_ADMM_RHO, SICONOS...
 #include "NumericsMatrix.h"        // for NM_create, NM_triplet_alloc, NM_ze...
 #include "NumericsSparseMatrix.h"  // for NSM_TRIPLET, NumericsSparseMatrix
-#include "SolverOptions.h"         // for SolverOptions, solver_options_delete
+#include "SolverOptions.h"         // for SolverOptions, solver_options_clear
 
 
 static void PXtest_0(void *cqpIn, double *x, double *PX)
@@ -141,14 +141,11 @@ static int test_1(void)
   {
     printf("x[%i]=%f\t",i,x[i]);     printf("PX[%i]=%f\n",i,PX[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_PG);
   /* verbose=1; */
-  int info = convexQP_ProjectedGradient_setDefaultSolverOptions(options);
-
-  options->dparam[0]=1e-12;
-  options->dparam[3]=1.0;
-
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+  options->dparam[SICONOS_CONVEXQP_PGOC_RHO] = 1.0;
+  int info;
   convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
 
@@ -157,9 +154,7 @@ static int test_1(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=w[%i]=%f\n",i,i,w[i]);
   }
 
-  solver_options_delete(options);
-  free(options);
-
+  solver_options_clear(&options);
   return info;
 }
 
@@ -231,15 +226,12 @@ static int test_2(void)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-  /* verbose=1; */
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   printf("test step 1\n");
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
@@ -249,9 +241,7 @@ static int test_2(void)
     printf("z[%i]=%f\t",i,z[i]); printf("w[%i]=%f\t",i,w[i]);    printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
   }
 
-  solver_options_delete(options);
-  free(options);
-
+  solver_options_clear(&options);
   return info;
 }
 
@@ -343,16 +333,14 @@ static int test_3(void)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-  /* verbose=1; */
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
 
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION]=SICONOS_CONVEXQP_ADMM_NO_ACCELERATION;
   printf("test step 1\n");
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
@@ -366,9 +354,7 @@ static int test_3(void)
     printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
   }
 
-  solver_options_delete(options);
-  free(options);
-
+  solver_options_clear(&options);
   return info;
 }
 
@@ -461,16 +447,13 @@ static int test_4(void)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-  /* verbose=1; */
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION;
   printf("test step 1\n");
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
@@ -484,9 +467,7 @@ static int test_4(void)
     printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
   }
 
-  solver_options_delete(options);
-  free(options);
-
+  solver_options_clear(&options);
   return info;
 }
 
@@ -578,16 +559,13 @@ static int test_5(void)
   {
     printf("q[%i]=%f\t",i,q[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-  /* verbose=1; */
-  int info = convexQP_ADMM_setDefaultSolverOptions(options);
-
+  SolverOptions * options = solver_options_create(SICONOS_CONVEXQP_ADMM);
   options->dparam[SICONOS_DPARAM_TOL]=1e-14;
   //options->iparam[0]=30;
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO]=1.0;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART;
   printf("test step 1\n");
+  int info;
   convexQP_ADMM(&cqp, z, w, xi, u, &info, options);
   //convexQP_ProjectedGradient(&cqp, x, w, &info, options);
 
@@ -601,8 +579,7 @@ static int test_5(void)
     printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
   }
 
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
 
   return info;
 }

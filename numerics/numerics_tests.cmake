@@ -142,8 +142,8 @@ if(WITH_${COMPONENT}_TESTING)
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_3
     EXTRA_SOURCES data_collection_3.c test_nsgs_3.c)
   new_tests_collection(
-    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_4
-    EXTRA_SOURCES rover_collection.c test_nsgs_4.c)
+    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_QUARTIC
+    EXTRA_SOURCES rover_collection.c test_nsgs_quartic.c)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_5
     EXTRA_SOURCES data_collection_3.c test_nsgs_5.c)
@@ -167,8 +167,8 @@ if(WITH_${COMPONENT}_TESTING)
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_VI_BASED_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_vi_based_1.c)
   new_tests_collection(
-    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_FP_COLLECTION_0
-    EXTRA_SOURCES data_collection_3.c test_fp_0.c)
+    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_DSFP_COLLECTION
+    EXTRA_SOURCES data_collection_3.c test_dsfp.c)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_FP_COLLECTION_1
     EXTRA_SOURCES data_collection_3.c test_fp_1.c)

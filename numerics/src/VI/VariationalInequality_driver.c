@@ -58,7 +58,7 @@ int variationalInequality_driver(VariationalInequality* problem,
   info = checkTrivialCase_vi(problem, x, w, options);
   if (info == 0){
     double error;
-    variationalInequality_computeError(problem, x , w, options->dparam[0], options, &error);
+    variationalInequality_computeError(problem, x , w, options->dparam[SICONOS_DPARAM_TOL], options, &error);
     printf("variationalInequality_driver. error = %8.4e\n", error);
     return info;
   }
@@ -132,14 +132,14 @@ int checkTrivialCase_vi(VariationalInequality* problem, double* x,
   double nnorm = cblas_dnrm2(n,w,1);
   DEBUG_PRINTF("checkTrivialCase_vi, nnorm = %6.4e\n",nnorm);
   
-  if (nnorm > fmin(options->dparam[0], 1e-12))
+  if (nnorm > fmin(options->dparam[SICONOS_DPARAM_TOL], 1e-12))
     return 1;
 
   problem->F(problem,n,x,w);
   nnorm = cblas_dnrm2(n,w,1);
   DEBUG_PRINTF("checkTrivialCase_vi, nnorm = %6.4e\n",nnorm);
 
-  if (nnorm > fmin(options->dparam[0], 1e-12))
+  if (nnorm > fmin(options->dparam[SICONOS_DPARAM_TOL], 1e-12))
     return 1;
 
   if (verbose == 1)

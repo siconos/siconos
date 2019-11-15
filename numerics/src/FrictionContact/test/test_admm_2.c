@@ -20,14 +20,14 @@
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ADMM_IPA...
 #include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
-#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_solvers = 3;
+  int n_solvers = 4;
   *number_of_tests = n_data * n_solvers;
-  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  TestCase * collection = malloc((*number_of_tests) * sizeof(TestCase));
 
 
 
@@ -35,42 +35,48 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   for(int d =0; d <n_data; d++)
     {
       // rho strat = norm inf
-      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
-      double dparam[] = {1e-5};
-      int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY};
-      int iparam[] = {10000, SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF};
-      // 
-      build_friction_test(data_collection[d],
-                 SICONOS_FRICTION_3D_ADMM, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ADMM);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF;
+      current++;
     }
   
   for(int d =0; d <n_data; d++)
     {
       // rho strat = residual balancing
-      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
-      double dparam[] = {1e-5};
-      int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY};
-      int iparam[] = {10000, SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING};
-      // 
-      build_friction_test(data_collection[d],
-                 SICONOS_FRICTION_3D_ADMM, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ADMM);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING;
+      current++;
     }
   
   for(int d =0; d <n_data; d++)
     {
       // forced symm
-      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
-      double dparam[] = {1e-5};
-      int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY};
-      int iparam[] = {10000, SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY};
-      // 
-      build_friction_test(data_collection[d],
-                 SICONOS_FRICTION_3D_ADMM, dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ADMM);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY;
+      current++;
     }
 
+  for(int d =0; d <n_data; d++)
+    {
+      // forced symm + residual balancing
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ADMM);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY;
+      current++;
+    }
+  
   *number_of_tests = current;
   return collection;
 

@@ -55,10 +55,9 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
 
   * info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options);
   if (options->filterOn > 0)
-    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[0], &(options->dparam[1]));
+    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
   lcp_enum_reset(lcp_problem, options, 1);
-  options->solverId = SICONOS_RELAY_ENUM;
 
   // Conversion of result
   for (i = 0; i < problem->size; i++)
@@ -85,37 +84,5 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);
 
-}
-
-int relay_enum_setDefaultSolverOptions(SolverOptions* options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ENUM Solver\n");
-  }
-
-  /*  strcpy(options->solverName,"ENUM");*/
-  options->solverId = SICONOS_RELAY_ENUM;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL ;
-  options->iWork = NULL ;
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->dparam[0] = 1e-12;
-
-
-
-
-  return 0;
 }
 

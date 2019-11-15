@@ -113,12 +113,8 @@ static int test_mcp_newton(int solverId)
 
   MixedComplementarityProblem* problem = create_mcp_1();
   
-  /* Set solver options */
-  SolverOptions options;
-  /* FB solver */
-
-  options.solverId = solverId;
-  mcp_setDefaultSolverOptions(problem, &options);
+  /* Set solver options, FB solver */
+  SolverOptions * options = solver_options_create(solverId);
   
   numerics_set_verbose(1);
 
@@ -132,7 +128,7 @@ static int test_mcp_newton(int solverId)
     w[i] = 0.0;
   }
 
-  info = mcp_driver(problem, z , w,  &options);
+  info = mcp_driver(problem, z , w,  options);
 
   /// TODO : write a real test ... ////
   for (int i = 0 ; i < size; i++)
@@ -145,7 +141,7 @@ static int test_mcp_newton(int solverId)
     printf("w[%i]= %lf\t", i, w[i]);
   }
   printf("\n");
-  solver_options_delete(&options);
+  solver_options_clear(&options);
   free(z);
   free(w);
   free_mcp_1(problem);

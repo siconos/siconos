@@ -2,7 +2,7 @@
 #include <stdlib.h>                         // for free, malloc
 #include "NonSmoothDrivers.h"               // for variationalInequality_driver
 #include "NumericsFwd.h"                    // for VariationalInequality
-#include "SolverOptions.h"                  // for solver_options_delete
+#include "SolverOptions.h"                  // for solver_options_clear
 #include "VI_cst.h"                         // for SICONOS_VI_HP, SICONOS_VI_EG
 #include "VariationalInequality.h"          // for VariationalInequality
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_set...
@@ -116,13 +116,11 @@ static int test_1(void)
   {
     printf("x[%i]=%f\t",i,x[i]);    printf("F[%i]=%f\t",i,F[i]);    printf("PX[%i]=%f\n",i,PX[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-
-  int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_EG);
-  options->dparam[0]=1e-10;
+  SolverOptions * options = solver_options_create(SICONOS_VI_EG);
+  options->dparam[SICONOS_DPARAM_TOL]=1e-10;
   
 
-  info = variationalInequality_driver(&vi,
+  int info = variationalInequality_driver(&vi,
                                       x,
                                       F,
                                       options);
@@ -132,8 +130,7 @@ static int test_1(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
 
   return info;
 }
@@ -188,11 +185,10 @@ static int test_2(void)
   {
     printf("x[%i]=%f\t",i,x[i]);    printf("F[%i]=%f\t",i,F[i]);    printf("PX[%i]=%f\n",i,PX[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_FPP);
-  options->dparam[0]=1e-10;
+  SolverOptions * options = solver_options_create(SICONOS_VI_FPP);
+  options->dparam[SICONOS_DPARAM_TOL]=1e-10;
 
-  info = variationalInequality_driver(&vi,
+  int info = variationalInequality_driver(&vi,
                                       x,
                                       F,
                                       options);
@@ -202,8 +198,7 @@ static int test_2(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
 
   return info;
 }
@@ -260,13 +255,12 @@ static int test_3(void)
   {
     printf("x[%i]=%f\t",i,x[i]);    printf("F[%i]=%f\t",i,F[i]);    printf("PX[%i]=%f\n",i,PX[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_HP);
-  options->dparam[0]=1e-02;
-  options->iparam[0]=100000; 
+  SolverOptions * options = solver_options_create(SICONOS_VI_HP);
+  options->dparam[SICONOS_DPARAM_TOL]=1e-02;
+  options->iparam[SICONOS_IPARAM_MAX_ITER]=100000; 
   
 
-  info = variationalInequality_driver(&vi,
+  int info = variationalInequality_driver(&vi,
                                       x,
                                       F,
                                       options);
@@ -276,8 +270,7 @@ static int test_3(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
 
   return info;
 }
@@ -332,13 +325,13 @@ static int test_4(void)
   {
     printf("x[%i]=%f\t",i,x[i]);    printf("F[%i]=%f\t",i,F[i]);    printf("PX[%i]=%f\n",i,PX[i]);
   }
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  int info = variationalInequality_setDefaultSolverOptions(options, SICONOS_VI_HP);
-  options->dparam[0]=1e-10;
-  options->iparam[0]=50000000;
+  SolverOptions * options = solver_options_create(SICONOS_VI_HP);
+
+  options->dparam[SICONOS_DPARAM_TOL]=1e-10;
+  options->iparam[SICONOS_IPARAM_MAX_ITER]=50000000;
   
 
-  info = variationalInequality_driver(&vi,
+  int info = variationalInequality_driver(&vi,
                                       x,
                                       F,
                                       options);
@@ -348,8 +341,7 @@ static int test_4(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
 
   return info;
 }

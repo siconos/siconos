@@ -62,38 +62,7 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* proble
   soclcp_as_vi->soclcp = problem;
   /* soclcp_display(fc3d_as_vi->fc3d); */
 
-  SolverOptions * visolver_options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  variationalInequality_setDefaultSolverOptions(visolver_options,
-                                                SICONOS_VI_EG);
-
-  int isize = options->iSize;
-  int dsize = options->dSize;
-  int vi_isize = visolver_options->iSize;
-  int vi_dsize = visolver_options->dSize;
-
-  if (isize != vi_isize )
-  {
-    printf("size problem in soclcp_VI_ExtraGradient\n");
-  }
-  if (dsize != vi_dsize )
-  {
-    printf("size problem in soclcp_VI_ExtraGradient\n");
-  }
-  int i;
-  for (i = 0; i < min(isize,vi_isize); i++)
-  {
-    if (options->iparam[i] != 0 )
-      visolver_options->iparam[i] = options->iparam[i] ;
-  }
-  for (i = 0; i < min(dsize,vi_dsize); i++)
-  {
-    if (fabs(options->dparam[i]) >= 1e-24 )
-      visolver_options->dparam[i] = options->dparam[i] ;
-  }
-
-  variationalInequality_ExtraGradient(vi, reaction, velocity , info , visolver_options);
-
-
+  variationalInequality_ExtraGradient(vi, reaction, velocity , info , options);
 
   /* **** Criterium convergence **** */
   soclcp_compute_error(problem, reaction , velocity, options->dparam[0], options, &error);
@@ -103,37 +72,13 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* proble
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  error = visolver_options->dparam[SICONOS_DPARAM_RESIDU];
-  iter = visolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
-
-  options->dparam[SICONOS_DPARAM_RESIDU] = error;
-  options->dparam[SICONOS_VI_EG_DPARAM_RHO] = visolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-
   if (verbose > 0)
   {
-    printf("--------------- SOCLCP - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- SOCLCP - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n",
+           options->dparam[SICONOS_IPARAM_MAX_ITER], options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   free(vi);
 
-  solver_options_delete(visolver_options);
-  free(visolver_options);
-  visolver_options=NULL;
   free(soclcp_as_vi);
-
-
-
 }
 
-
-int soclcp_VI_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ExtraGradient Solver\n");
-  }
-  variationalInequality_ExtraGradient_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_SOCLCP_VI_EG;
-  options->iparam[SICONOS_IPARAM_MAX_ITER] =2000;
-  return 0;
-}

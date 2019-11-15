@@ -49,10 +49,10 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
   double    *fric1, *v, *w, *Ap, *xi, *z;
 
 
-  int maxit = options->iparam[0];
-  double tol = options->dparam[0];
-  options->iparam[1]  = 0;
-  options->dparam[1]  = 0.0;
+  int maxit = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
+  options->iparam[SICONOS_IPARAM_ITER_DONE]  = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU]  = 0.0;
 
 
   r       = (double*) malloc(n * sizeof(double));
@@ -254,8 +254,8 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
     res     = normr;
 
 
-    options->iparam[1] = it_end;
-    options->dparam[1] = res;
+    options->iparam[SICONOS_IPARAM_ITER_DONE] = it_end;
+    options->dparam[SICONOS_DPARAM_RESIDU] = res;
 
 
     iter = iter + 1;
@@ -306,28 +306,5 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
 
 
-}
-int fc2d_cpg_setDefaultSolverOptions(SolverOptions *options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the CPG Solver\n");
-  }
-
-  /*  strcpy(options->solverName,"CPG");*/
-  options->solverId =  SICONOS_FRICTION_2D_CPG;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-4;
-  options ->internalSolvers = NULL;
-  return 0;
 }
 

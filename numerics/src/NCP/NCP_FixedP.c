@@ -21,15 +21,16 @@
 #include "numerics_verbose.h"   // for verbose
 #include "stdio.h"              // for printf
 #include "SiconosBlas.h"              // for cblas_dnrm2
+#include "SolverOptions.h"
 
 /*============================ Fixed point Solver ==================================*/
 
 int Fixe(int n, double* z, int* iparam, double* dparam)
 {
 
-  int itermax = iparam[0]; // maximum number of iterations allowed
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER]; // maximum number of iterations allowed
   int niter = 0; // current iteration number
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
   if (verbose > 0)
   {
     printf(" ============= Starting of Newton process =============\n");
@@ -65,24 +66,24 @@ int Fixe(int n, double* z, int* iparam, double* dparam)
   }
 
   /* Total number of iterations */
-  iparam[1] = niter;
+  iparam[SICONOS_IPARAM_ITER_DONE] = niter;
   /* Final error */
-  dparam[1] = terminationCriterion;
+  dparam[SICONOS_DPARAM_RESIDU] = terminationCriterion;
 
   /** Free memory*/
   free(www);
 
   if (verbose > 0)
   {
-    if (dparam[1] > tolerance)
+    if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
       printf("Non Smooth Newton warning: no convergence after %i iterations\n" , niter);
 
     else
       printf("Non Smooth Newton: convergence after %i iterations\n" , niter);
-    printf(" The residue is : %e \n", dparam[1]);
+    printf(" The residue is : %e \n", dparam[SICONOS_DPARAM_RESIDU]);
   }
 
-  if (dparam[1] > tolerance)
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
     return 1;
   else return 0;
 }

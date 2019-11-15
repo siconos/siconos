@@ -83,6 +83,10 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   assert(problem->numberOfContacts > 0);
   assert(problem->M);
   assert(problem->q);
+  if (!options->solverParameters)
+    {
+      options->solverParameters = createGAMSparams(GAMS_MODELS_SHARE_DIR, GAMS_DIR);
+    }
 
   /* Handles to the Option objects */
   optHandle_t Optr = NULL;
@@ -159,7 +163,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   }
 
   getGamsSolverOpt(solverOptPtr, sysdir, solverName);
-  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
+  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[SICONOS_DPARAM_TOL]);
 //  strncpy(msg, "./", sizeof(deffile));
   strncpy(msg, solverName, sizeof(msg));
   strncat(msg, ".opt", sizeof(msg) - strlen(msg) - 1);
@@ -228,6 +232,8 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   NM_clear(&Akmat);
   optFree(&Optr);
   optFree(&solverOptPtr);
+  deleteGAMSparams((SN_GAMSparams *)options->solverParameters);
+
   return status;
 }
 

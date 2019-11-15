@@ -151,31 +151,4 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
   free(diag);
 }
-int linearComplementarity_pgs_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the PGS Solver\n");
-  }
-
-
-  /*  strcpy(options->solverName,"PGS");*/
-  options->solverId = SICONOS_LCP_PGS;
-  options->numberOfInternalSolvers = 0;
-  options->internalSolvers = NULL;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-  options->dparam[SICONOS_DPARAM_RESIDU] = 1.0;
-
-
-  return 0;
-}
 

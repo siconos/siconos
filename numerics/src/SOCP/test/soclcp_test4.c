@@ -37,8 +37,7 @@ int main(void)
   options->iparam[0] = 2000000;
   info = soclcp_test_function(finput, options);
 
-  solver_options_delete(options);
-  free(options);
+  solver_options_clear(&options);
   fclose(finput);
   printf("\nEnd of test on ./data/Capsules-i122-1617.dat \n");
   return info;

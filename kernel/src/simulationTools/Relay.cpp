@@ -37,7 +37,7 @@ Relay::Relay(int numericsSolverId):
 {
   _numerics_problem.reset(new RelayProblem);
 
-  relay_setDefaultSolverOptions(NULL, &*_numerics_solver_options, numericsSolverId);
+  relay_setDefaultSolverOptions(&*_numerics_solver_options, numericsSolverId);
 
 
 }
@@ -178,8 +178,8 @@ int Relay::compute(double time)
 void Relay::setSolverId(int solverId)
 {
   // clear previous Solveroptions
-  solver_options_delete(_numerics_solver_options.get());
-  relay_setDefaultSolverOptions(NULL, _numerics_solver_options.get(), solverId);
+  solver_options_clear(_numerics_solver_options.get());
+  relay_setDefaultSolverOptions(_numerics_solver_options.get(), solverId);
 }
 
 void Relay::display() const
@@ -195,6 +195,6 @@ void Relay::display() const
 
 Relay::~Relay()
 {
-  solver_options_delete(&*_numerics_solver_options);
+  solver_options_clear(&*_numerics_solver_options);
 }
 

@@ -8,7 +8,6 @@ enum FRICTION_SOLVER
 {
   /** 2D Frictional Contact solvers */
   SICONOS_FRICTION_2D_NSGS = 400,
-  SICONOS_FRICTION_2D_PGS = 401,
   SICONOS_FRICTION_2D_CPG = 402,
   SICONOS_FRICTION_2D_LATIN = 403,
   SICONOS_FRICTION_2D_LEMKE = 404,
@@ -88,7 +87,7 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration = 564,
   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID = 565,
   SICONOS_FRICTION_3D_VI_FPP_Cylinder = 566,
-  SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder = 567,
+  SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER = 567,
 
   /** 3D Frictional contact local solvers on global formulation */
   SICONOS_GLOBAL_FRICTION_3D_NSGS_WR = 600,
@@ -120,7 +119,6 @@ enum FRICTION_SOLVER
 
 
 extern const char* const   SICONOS_FRICTION_2D_NSGS_STR ;
-extern const char* const   SICONOS_FRICTION_2D_PGS_STR ;
 extern const char* const   SICONOS_FRICTION_2D_CPG_STR ;
 extern const char* const   SICONOS_FRICTION_2D_LATIN_STR ;
 extern const char* const   SICONOS_FRICTION_2D_LEMKE_STR ;
@@ -154,7 +152,7 @@ extern const char* const   SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration_STR;
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR;
-extern const char* const   SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder_STR;
+extern const char* const   SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER_STR;
 extern const char* const   SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR;
 extern const char* const   SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR;
 extern const char* const   SICONOS_FRICTION_3D_GAMS_PATH_STR;
@@ -195,10 +193,13 @@ enum SICONOS_FRICTION_3D_IPARAM
   SICONOS_FRICTION_3D_IPARAM_RESCALING =3,
   /** index in iparam to store the rescaling  */
   SICONOS_FRICTION_3D_IPARAM_RESCALING_CONE =4,
+  /** current contact number (example of use: one contact solvers) **/
+  SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER =5,
   /** index in iparam to store the error evaluation method */
   SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION = 7,
   /** index in iparam to store the frequency of error evaluation method */
   SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY = 8,
+  SICONOS_FRICTION_3D_NUMBER_OF_CONTACTS = 17,
 };
 
 enum SICONOS_FRICTION_INTERNAL_ERROR_STRATEGY
@@ -222,7 +223,7 @@ enum SICONOS_FRICTION_3D_RESCALING_CONE_ENUM
 
 enum SICONOS_FRICTION_3D_DPARAM
 {
-  /** index in iparam to store the internal solver error ratio*/
+  /** index in dparam to store the internal solver error ratio*/
   SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO = 2
 };
 
@@ -247,7 +248,6 @@ enum SICONOS_FRICTION_3D_NSGS_DPARAM
 
 enum SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM
 {
-  SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER = 4,
   SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION=10
 };
 
@@ -300,19 +300,27 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM
   /** index in iparam to store the line-search */
   SICONOS_FRICTION_3D_NSN_LINESEARCH = 11,
   /** index in iparam to store the maximum number of iterations */
-  SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER = 12,
+  SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER = 12,
+  /** index in iparam to set the linear solver used at each Newton iteration 
+   cs_lusol or mumps */
+  SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER = 13,
   /** index in iparam to store the strategy for the hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY = 14,
   /** index in iparam to store the maximum number of loop for the hybrid solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_MAX_LOOP = 15,
   /** index in iparam to store the maximum number of iterations for the projection solver */
   SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER = 16,
-  /** index in iparam to store the boolean to know if allocation of dwork is needed */
-  SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATION= 17,
+  /** index in iparam used to check if memory allocation has already be done (if true/1) or not (if 0/false) for internal work array. */
+  SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED= 17,
   /** index in iparam to store the boolean to know if allocation of dwork is needed */
   SICONOS_FRICTION_3D_NSN_MPI_COM= 18
-
 };
+
+enum SICONOS_FC3D_NSN_LINEAR_SOLVER
+  {
+   SICONOS_FRICTION_3D_NSN_USE_CSLUSOL = 0,
+   SICONOS_FRICTION_3D_NSN_USE_MUMPS = 1
+  };
 
 enum SICONOS_FRICTION_3D_NSN_DPARAM
 {
@@ -320,7 +328,7 @@ enum SICONOS_FRICTION_3D_NSN_DPARAM
   SICONOS_FRICTION_3D_NSN_RHO = 3,
 };
 
-enum SICONOS_FRICTION_2D_LATIN
+enum SICONOS_FRICTION_2D_LATIN_DPARAM
 {
  /** index in dparam to store the klatin coeff value. Same index as rho in fc3d !*/
  SICONOS_FRICTION_2D_K_LATIN = 3,
@@ -375,13 +383,13 @@ enum SICONOS_FRICTION_3D_NSN_HYBRID_ENUM
 enum SICONOS_FRICTION_3D_PROXIMAL_IPARAM
 {
   /** index in iparam to store the error strategy for the internal solver */
-  SICONOS_FRICTION_3D_FP_ERROR_STRATEGY =2,
+  SICONOS_FRICTION_3D_FP_ERROR_STRATEGY = 2,
   /** index in iparam to store the relaxation strategy*/
-  SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE =6,
+  SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE = 6,
   /** index in iparam to store the relaxation strategy*/
-  SICONOS_FRICTION_3D_PROXIMAL_IPARAM_RELAXATION =8,
+  SICONOS_FRICTION_3D_PROXIMAL_IPARAM_RELAXATION = 8,
   /** index in iparam to store the proximal strategy*/
-  SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY =9,
+  SICONOS_FRICTION_3D_PROXIMAL_IPARAM_STRATEGY = 9,
 };
 
 

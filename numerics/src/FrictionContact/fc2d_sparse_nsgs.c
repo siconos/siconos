@@ -313,7 +313,7 @@ void fc2d_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w,
         free(local_problem->M);
         free(local_problem);
         /* Number of GS iterations */
-        options[0].iparam[1] = iter;
+        options[0].iparam[SICONOS_IPARAM_ITER_DONE] = iter;
         fprintf(stderr, "fc2d_nsgs error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
 
         *info = infoLocal;
@@ -381,30 +381,5 @@ void fc2d_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w,
   free(local_problem);
 }
 
+// options setup is done through fc2d_nsgs_set_options.
 
-int fc2d_sparse_nsgs_setDefaultSolverOptions(SolverOptions *options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NSGS Solver\n");
-  }
-
-  /*strcpy(options->solverName,"NSGS");*/
-  options->solverId = SICONOS_FRICTION_2D_NSGS;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-
-  options ->internalSolvers = NULL;
-  return 0;
-}

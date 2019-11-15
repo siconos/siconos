@@ -66,7 +66,7 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolver
 }
 GlobalFrictionContact::~GlobalFrictionContact()
 {
-  solver_options_delete(&*_numerics_solver_options);
+  solver_options_clear(&*_numerics_solver_options);
 }
 
 void GlobalFrictionContact::initVectorsMemory()

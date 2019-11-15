@@ -21,7 +21,7 @@
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
 #include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
-#include "frictionContact_test_utils.h"  // for build_friction_test, build_test_colle...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
@@ -32,45 +32,39 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   int solvers[] = {SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_FB, SICONOS_FRICTION_3D_NSN_NM};
   int current = 0;
 
-  int d= 6; // BoxesStack1-i100000-32.hdf5.dat
+  int d;
+
+
+  // ===== BoxesStack1-i100000-32.hdf5.dat =====
+  d = 6;
   for(int s=0;s<3;++s)
     {
-      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
-      double dparam[] = {1e-3};
-      int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-      int iparam[] = {1500};
-      // 
-      build_friction_test(data_collection[d],
-                 solvers[s], dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(solvers[s]);    
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
+      current++;
     }
   // NSN_FB expected to fail
   collection[1].will_fail = 1;
 
   
-  {
-    d = 10; // Rover4396.dat
-    int dpos[] = {1, SICONOS_DPARAM_TOL}; 
-    double dparam[] = {1e-5};
-    int ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 1};
-    int iparam[] = {1000, 1, 1};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_NSN_AC, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-  }
+  // ===== Rover4396.dat =====
+  d = 10;
+  
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  current++;
 
-  d = 10; // Rover4396.dat
   for(int s=0;s<3;++s)
     {
-      int dpos[] = {1, SICONOS_DPARAM_TOL}; 
-      double dparam[] = {1e-3};
-      int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-      int iparam[] = {1000};
-      // 
-      build_friction_test(data_collection[d],
-                 solvers[s], dpos, dparam, ipos, iparam,
-                 -1, NULL, NULL, NULL, NULL, &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(solvers[s]);    
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
     }
   *number_of_tests = current;
   return collection;

@@ -20,7 +20,7 @@
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
 #include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
-#include "frictionContact_test_utils.h"  // for build_friction_test, build_test_colle...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
@@ -34,57 +34,54 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   {
     int d = 0; // FC3D_Example1_SBM.dat
     // DeSaxce FP, rho  = 2.
-    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_FRICTION_3D_ADMM_RHO};
-    double dparam[] = {1e-8, 2.};
-    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-    int iparam[] = {100000};
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_DSFP);
     
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_DSFP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+    collection[current].options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 2.;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
     // expected to fail
-    collection[current-1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
 
   
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // DeSaxce FP, rho  = 5e-3, default for others.
-    int dpos[] = {1, SICONOS_FRICTION_3D_ADMM_RHO};
-    double dparam[] = {5e3};    
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_DSFP, dpos, dparam, NULL, NULL,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_DSFP);
+    
+    collection[current].options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 5e3;
     // expected to fail
-    collection[current-1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
   
   {
     int d = 5;  // Confeti-ex03-Fc3D-SBM.dat
     // DeSaxce FP, rho  = 1e-2, default for others.
-    int dpos[] = {1, SICONOS_FRICTION_3D_ADMM_RHO};
-    double dparam[] = {1e2};    
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_DSFP, dpos, dparam, NULL, NULL,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_DSFP);
+    
+    collection[current].options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1e2;
     // expected to fail
-    collection[current-1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
   
   {
     int d = 6; // BoxesStack1-i100000-32.hdf5.dat
     // DeSaxce FP, rho  = 8e4.
-    int dpos[] = {2, SICONOS_DPARAM_TOL, SICONOS_FRICTION_3D_ADMM_RHO};
-    double dparam[] = {1.e-3, 8.e4};
-    int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};
-    int iparam[] = {100000};
-    // 
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_DSFP, dpos, dparam, ipos, iparam,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_DSFP);
+    
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 8.e4;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
     // expected to fail
-    collection[current-1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
   *number_of_tests = current;
   return collection;

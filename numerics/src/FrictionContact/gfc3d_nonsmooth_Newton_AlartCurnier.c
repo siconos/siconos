@@ -394,7 +394,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
   unsigned int iter = 0;
   unsigned int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
-  unsigned int erritermax = options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION];
+  unsigned int erritermax = options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY];
 
   if (erritermax == 0)
   {
@@ -482,7 +482,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   }
   }
 
-  if(options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATION] == 0)
+  if(options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] == 0)
   {
     /* allocate memory */
     assert(options->dWork == NULL);
@@ -507,7 +507,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
                         3 * m)  /* pB */
                        * sizeof(CS_INT));
 
-    options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATION] = 1;
+    options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] = 1;
 
   }
 
@@ -730,12 +730,12 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
                                           solution,
                                           rhs,
                                           problem->mu, rho, F, psi, Jcsc,
-                                          tmp2, &alpha, options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]);
+                                          tmp2, &alpha, options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER]);
       break;
     /* case SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO: */
     /*   /\* FBLSA *\/ */
     /*   info_ls = frictionContactFBLSA(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx, */
-    /*                                  problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]); */
+    /*                                  problem->M, problem->q, AWpB, tmp1, tmp2, &alpha, options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER]); */
     /*   break; */
     default:
     {
@@ -778,7 +778,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     if(options->dparam[SICONOS_DPARAM_RESIDU] >= tolerance)
     {
       numerics_printf_verbose(1, "---- GFC3D - NSN_AC iteration %d, residual = %g >= %g" ,
-                              iter, options->dparam[1], tolerance);
+                              iter, options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
     }
     else 
     {
@@ -802,11 +802,11 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   {
     if(!info[0])
       printf("---- GFC3D - NSN_AC - convergence after %d iterations, residual = %g\n",
-             iter, options->dparam[1]);
+             iter, options->dparam[SICONOS_DPARAM_RESIDU]);
     else
     {
       printf("---- GFC3D - NSN_AC - no convergence after %d iterations, residual = %g\n",
-             iter, options->dparam[1]);
+             iter, options->dparam[SICONOS_DPARAM_RESIDU]);
     }
   }
 
@@ -829,54 +829,18 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   free(AA);
 }
 
-int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
-  SolverOptions* options)
+void gfc3d_nsn_ac_set_options(SolverOptions* options)
 {
-  if(verbose > 0)
-  {
-    printf("Set the default solver options for the GLOBAL_AC Solver\n");
-  }
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
 
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSN_AC;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *) calloc(options->iSize, sizeof(int));
-  options->dparam = (double *) calloc(options->dSize,  sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
+  options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;
 
-
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;    /* input :  itermax */
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = 1;      /* output : #iter */
-
-  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = 1;      /* erritermax */
-
-  options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;     /* mpi com fortran */
-
-  options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATION] = 0;      /* > 0 memory is allocated */
-
-  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
-  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;     /* 0 STD AlartCurnier, 1 JeanMoreau, 2 STD generated, 3 JeanMoreau generated */
+  options->iparam[SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED] = 0;      /* > 0 memory is allocated */
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
-  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAXITER]=1000;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER]=1000;
+
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.;      /* default rho */
 
 
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
-  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1e+0;      /* default rho */
-
-
-  options->internalSolvers = NULL;
-
-  if(verbose > 0)
-  {
-    solver_options_print(options);
-  }
-
-
-  return 0;
 }

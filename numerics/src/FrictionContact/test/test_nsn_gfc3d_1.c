@@ -19,9 +19,10 @@
 #include <stdio.h>                       // for NULL
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_N...
-#include "frictionContact_test_utils.h"  // for build_gfc3d_test, build_test...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 #include "SiconosConfig.h" // for WITH_MUMPS // IWYU pragma: keep
+#include "SolverOptions.h"               // for solver_options_create
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
@@ -39,9 +40,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
       for(int d =0; d <n_data; d++)
         {
           // default values for all parameters.
-          build_gfc3d_test(data_collection[d],
-                           solvers[s], NULL, NULL, NULL, NULL,
-                           -1, NULL, NULL, NULL, NULL, &collection[current++]);
+          collection[current].filename = data_collection[d];
+          collection[current].options = solver_options_create(solvers[s]);    
+          current++;
         }
     }
 

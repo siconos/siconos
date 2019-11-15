@@ -91,7 +91,7 @@ int fc3d_FixedP_solve(FrictionContactProblem * localproblem , double* reaction, 
 
   if (info > 0)
   {
-    fprintf(stderr, "Numerics, fc3d_FixedP failed, reached max. number of iterations without convergence. Residual = %f\n", dparam[1]);
+    fprintf(stderr, "Numerics, fc3d_FixedP failed, reached max. number of iterations without convergence. Residual = %f\n", dparam[SICONOS_DPARAM_RESIDU]);
     exit(EXIT_FAILURE);
   }
   return info;

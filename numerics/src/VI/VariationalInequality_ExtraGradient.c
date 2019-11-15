@@ -34,8 +34,7 @@
 #include "NumericsVector.h"
 #endif
 
-static
-int determine_convergence(double error, double *tolerance, int iter,
+static int determine_convergence(double error, double *tolerance, int iter,
                           SolverOptions *options,
                           VariationalInequality* problem,
                           double *z , double *w, double rho)
@@ -144,9 +143,9 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
   double rho = 0.0, rho_k =0.0;
   int isVariable = 0;
 
-  if (dparam[SICONOS_VI_EG_DPARAM_RHO] > 0.0)
+  if (dparam[SICONOS_VI_DPARAM_RHO] > 0.0)
   {
-    rho = dparam[SICONOS_VI_EG_DPARAM_RHO];
+    rho = dparam[SICONOS_VI_DPARAM_RHO];
     if (verbose > 0)
     {
       printf("--------------- VI - Extra Gradient (EG) - Fixed stepsize with  rho = %14.7e \n", rho);
@@ -156,7 +155,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
   {
     /* Variable step in iterations*/
     isVariable = 1;
-    rho = -dparam[3];
+    rho = -dparam[SICONOS_VI_DPARAM_RHO];
     if (verbose > 0)
     {
       printf("--------------- VI - Extra Gradient (EG) - Variable stepsize with starting rho = %14.7e \n", rho);
@@ -170,9 +169,9 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
   double light_error_sum =0.0;
   int ls_iter = 0;
   int ls_itermax = 10;
-  double tau=dparam[SICONOS_VI_EG_DPARAM_LS_TAU],
-    tauinv=dparam[SICONOS_VI_EG_DPARAM_LS_TAUINV],
-    L= dparam[SICONOS_VI_EG_DPARAM_LS_L], Lmin = dparam[SICONOS_VI_EG_DPARAM_LS_LMIN];
+  double tau=dparam[SICONOS_VI_DPARAM_LS_TAU],
+    tauinv=dparam[SICONOS_VI_DPARAM_LS_TAUINV],
+    L= dparam[SICONOS_VI_DPARAM_LS_L], Lmin = dparam[SICONOS_VI_DPARAM_LS_LMIN];
   double a1=0.0, a2=0.0;
   double * x_k =0;
   double * w_k =0;
@@ -247,7 +246,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
   if (isVariable)
   {
-    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==0)/* Armijo rule with Khotbotov ratio (default)   */
+    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==SICONOS_VI_LS_ARMIJO) /* Armijo rule with Khotbotov ratio (default)   */
     {
       while ((iter < itermax) && (hasNotConverged > 0))
       {
@@ -268,11 +267,11 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
         while (!success && (ls_iter < ls_itermax))
         {
-          /* if (iparam[3] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2/(rho_k*a1)); */
+          /* if (iparam[SICONOS_VI_IPARAM_DECREASE_RHO] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2/(rho_k*a1)); */
           /* else */ rho_k = rho_k * tau ;
 
           /* x <- x_k  for the std approach*/
-          if (iparam[2]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
+          if (iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
           cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
@@ -347,7 +346,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
       }
     }// end iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==0
 
-    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==1) /* Armijo rule with Solodov.Tseng ratio */
+    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==SICONOS_VI_LS_SOLODOV) /* Armijo rule with Solodov.Tseng ratio */
     {
       while ((iter < itermax) && (hasNotConverged > 0))
       {
@@ -369,11 +368,11 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
         while (!success && (ls_iter < ls_itermax))
         {
 
-          /* if (iparam[3] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2*a2/(rho_k*a1)); */
+          /* if (iparam[SICONOS_VI_IPARAM_DECREASE_RHO] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2*a2/(rho_k*a1)); */
           /* else */ rho_k = rho_k * tau ;
 
            /* x <- x_k  for the std approach*/
-          if (iparam[2]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
+          if (iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
           cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
@@ -455,9 +454,9 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 
       }
 
-    }// end iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==1
+    }// end iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD]==SICONOS_VI_LS_SOLODOV
     /* we return the negative value of rho for multiple call to the solver */
-    dparam[SICONOS_VI_EG_DPARAM_RHO] = -rho;
+    dparam[SICONOS_VI_DPARAM_RHO] = -rho;
 
     free(x_k);
     free(w_k);
@@ -478,45 +477,17 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 }
 
 
-int variationalInequality_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
+void variationalInequality_ExtraGradient_set_options(SolverOptions* options)
 {
-
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ExtraGradient Solver\n");
-  }
-
-  options->solverId = SICONOS_VI_EG;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 10;
-  options->dSize = 10;
-  options->iparam = (int *)calloc(options->iSize,sizeof(int));
-  options->dparam = (double *)calloc(options->dSize,sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
-
-  options->iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = 0;
-
+  options->iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = SICONOS_VI_LS_ARMIJO;
   /* options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_FULL; */
-  options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
-  options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY]=0;
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-  options->dparam[SICONOS_VI_EG_DPARAM_RHO] = -1.0; // rho is variable by default
-  options->dparam[SICONOS_VI_EG_DPARAM_LS_TAU] = 2/3.0;  /* tau */
-  options->dparam[SICONOS_VI_EG_DPARAM_LS_TAUINV] = 3.0/2.0;  /*tauinv */
-  options->dparam[SICONOS_VI_EG_DPARAM_LS_L] = 0.9;  /* L */
-  options->dparam[SICONOS_VI_EG_DPARAM_LS_LMIN] = 0.3;  /* Lmin */
-
-  options->internalSolvers = NULL;
-
-  DEBUG_EXPR(solver_options_print(options););
-
-
-  return 0;
+  options->iparam[SICONOS_VI_IPARAM_DECREASE_RHO] = 0; // use rho_k * tau * min(1.0,a2/(rho_k*a1)) to decrease rho; commented in the code
+  options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+  options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY]=0; // Rk FP : set but not used
+  options->iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 0; // activate the update in the loop (0:false default choice)
+  options->dparam[SICONOS_VI_DPARAM_RHO] = -1.0; // in-out parameter
+  options->dparam[SICONOS_VI_DPARAM_LS_TAU] = 2/3.0;  /* tau */
+  options->dparam[SICONOS_VI_DPARAM_LS_TAUINV] = 3.0/2.0;  /*tauinv */
+  options->dparam[SICONOS_VI_DPARAM_LS_L] = 0.9;  /* L */
+  options->dparam[SICONOS_VI_DPARAM_LS_LMIN] = 0.3;  /* Lmin */
 }

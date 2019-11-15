@@ -27,7 +27,7 @@ int main(void)
 {
   printf("\n Start of test on Default SolverOptions\n");
   int info = 0 ;
-  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
+  SolverOptions * options = NULL;
   int solvers[] = {SICONOS_FRICTION_3D_NSGS, SICONOS_FRICTION_3D_NSGSV, SICONOS_FRICTION_3D_PROX,
                    SICONOS_FRICTION_3D_TFP, SICONOS_FRICTION_3D_DSFP, SICONOS_FRICTION_3D_EG, SICONOS_FRICTION_3D_HP};
 
@@ -36,11 +36,10 @@ int main(void)
   
   for(int s=0; s<n_solvers; ++s)
     {
-      info = fc3d_setDefaultSolverOptions(options, solvers[s]);
+      options = solver_options_create(solvers[s]);
       solver_options_print(options);
-      solver_options_delete(options);
+      solver_options_clear(&options);
     }
-  free(options);
   printf("\n End of test on Default SolverOptions\n");
   return info;
 }

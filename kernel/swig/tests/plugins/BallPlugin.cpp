@@ -20,7 +20,6 @@
 #else 
 #define SICONOS_EXPORT extern "C" 
 #endif  
-#include <stdio.h>
 
 const double m = 1; // ball mass
 const double g = 9.8; // gravity

@@ -26,6 +26,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "numerics_verbose.h"              // for verbose
 #include "relay_cst.h"                     // for SICONOS_RELAY_LEMKE
+#include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
 
 void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -50,13 +51,11 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
   /*  FILE * fcheck = fopen("lcp_relay.dat","w"); */
   /*  info = linearComplementarity_printInFile(lcp_problem,fcheck); */
 
-  // Call the lcp_solver
-
-  SolverOptions * lcp_options = options->internalSolvers;
-
-  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, lcp_options);
+  // Call the lcp_solver 
+  options->solverId = SICONOS_LCP_LEMKE;
+  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options);
   if (options->filterOn > 0)
-    lcp_compute_error(lcp_problem, zlcp, wlcp, lcp_options->dparam[0], &(lcp_options->dparam[1]));
+    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
   // Conversion of result
   for (i = 0; i < problem->size; i++)
@@ -90,34 +89,4 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
 
 }
 
-
-int relay_lexicolemke_setDefaultSolverOptions(SolverOptions* options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the Lemke Solver for Relay\n");
-  }
-  /*  strcpy(options->solverName,"Lemke");*/
-  options->solverId = SICONOS_RELAY_LEMKE;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->dparam[0] = 1e-6;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  linearComplementarity_lexicolemke_setDefaultSolverOptions(options->internalSolvers);
-
-  return 0;
-}
 

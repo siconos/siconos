@@ -19,8 +19,9 @@
 #include <stdio.h>                       // for NULL
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ONECONTA...
-#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+#include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
+#include "SolverOptions.h"               // for solver_options_create
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
@@ -30,20 +31,19 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   
   int current = 0;
   
-  {
-    int d = 8; // KaplasTower-i1061-4.hdf5.dat
-    // Quartic, default
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, NULL, NULL, NULL, NULL,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-  }
-  {
-    int d = 9; // OneObject-i100000-499.hdf5.dat
-    // Quartic, default
-    build_friction_test(data_collection[d],
-               SICONOS_FRICTION_3D_ONECONTACT_QUARTIC, NULL, NULL, NULL, NULL,
-               -1, NULL, NULL, NULL, NULL, &collection[current++]);
-  }
+  int d;
+  
+  d = 8; // KaplasTower-i1061-4.hdf5.dat
+  // Quartic, default
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);    
+  current++;
+
+  d = 9; // OneObject-i100000-499.hdf5.dat
+  // Quartic, default
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);    
+
   *number_of_tests = current;
   return collection;
 

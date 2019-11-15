@@ -68,7 +68,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
     numerics_error("gfc3d_ACLMFixedpoint", "The ACLM Fixed Point method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
-  SolverOptions * internalsolver_options = options->internalSolvers;
+  SolverOptions * internalsolver_options = options->internalSolvers[0];
 
   if (verbose > 0)
   {
@@ -111,7 +111,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
   {
     numerics_printf_verbose(1," ========================== set ADMM solver internal ConveQP problem ==========================\n");
     internalsolver = &convexQP_ADMM;
-    convexQP_ADMM_init(cqp, options->internalSolvers);
+    convexQP_ADMM_init(cqp, options->internalSolvers[0]);
   }
   else
   {
@@ -162,7 +162,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
 
  if (internalsolver_options->solverId == SICONOS_CONVEXQP_ADMM  )
   {
-    convexQP_ADMM_free(cqp, options->internalSolvers);
+    convexQP_ADMM_free(cqp, options->internalSolvers[0]);
   }
 
   dparam[SICONOS_DPARAM_RESIDU] = error;
@@ -172,30 +172,12 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
 
 
 
-int gfc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
+void gfc3d_aclmfp_set_options(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ACLMFP Solver\n");
-  }
-
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_ACLMFP;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  solver_options_nullify(options);
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =2.0;
 
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  convexQP_ADMM_setDefaultSolverOptions(options->internalSolvers);
-  options->internalSolvers->iparam[SICONOS_IPARAM_MAX_ITER] =1000;
-  return 0;
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_CONVEXQP_ADMM);
+  options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] =1000;
 }

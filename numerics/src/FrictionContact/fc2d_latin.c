@@ -523,28 +523,8 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 
 
 }
-int fc2d_latin_setDefaultSolverOptions(SolverOptions *options)
+
+void fc2d_latin_set_options(SolverOptions *options)
 {
-
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the Latin Solver\n");
-  }
-
-  /*  strcpy(options->solverName,"Latin");*/
-  options->solverId = SICONOS_FRICTION_2D_LATIN;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[SICONOS_FRICTION_2D_K_LATIN] = 0.3;
-  options ->internalSolvers = NULL;
-  return 0;
 }

@@ -27,6 +27,7 @@
 #include "SolverOptions.h"                  // for SolverOptions, solver_opt...
 #include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
 #include "numerics_verbose.h"               // for verbose
+#include "fc3d_Solvers.h"
 
 void fc3d_NaturalMapFunction(
   unsigned int problemSize,
@@ -88,9 +89,9 @@ int fc3d_nonsmooth_Newton_NaturalMap_compute_error(
 
   NaturalMapFun3x3Ptr computeACFun3x3;
 
-  switch (options->iparam[10])
+  switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
-  case 0:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
 
     computeACFun3x3 = &fc3d_NaturalMapFunctionGenerated;
@@ -130,46 +131,26 @@ int fc3d_nonsmooth_Newton_NaturalMap_compute_error(
   }
 }
 
-int fc3d_nonsmooth_Newton_NaturalMap_setDefaultSolverOptions(
-  SolverOptions* options)
+void fc3d_nsn_nm_set_options(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the default solver options for the NSN_NM Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_NSN_NM;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 14;
-  options->dSize = 14;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
-  options->iparam[7] = 1;      /* erritermax */
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-  options->dparam[3] = 1;      /* default rho */
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1;      /* erritermax */
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
 
-  options->iparam[8] = -1;     /* mpi com fortran */
-  options->iparam[10] = 0;
-  options->iparam[11] = 0;     /* 0 GoldsteinPrice line search, 1 FBLSA */
-  options->iparam[12] = 100;   /* max iter line search */
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.;
+
+  options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100;
 
 #ifdef WITH_MUMPS
-  options->iparam[13] = 1;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER ] = SICONOS_FRICTION_3D_NSN_USE_MUMPS;
 #else
-  options->iparam[13] = 0;     /* Linear solver used at each Newton iteration. 0: cs_lusol, 1 mumps */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER ] = SICONOS_FRICTION_3D_NSN_USE_CSLUSOL;
 #endif
-
-  options->internalSolvers = NULL;
-
-  return 0;
 }
 
 
@@ -239,9 +220,9 @@ void fc3d_nonsmooth_Newton_NaturalMap(
 
   NaturalMapParams acparams;
 
-  switch (options->iparam[10])
+  switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
-  case 0:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
     acparams.computeACFun3x3 = &fc3d_NaturalMapFunctionGenerated;
     break;

@@ -27,7 +27,7 @@
 
 #define @PROBLEM_COLLECTION@ 1
 
-
+#include "SolverOptions.h"
 int main (int argc, char *argv[])
 {
   const char ** _data_collection = data_collection();
@@ -44,15 +44,21 @@ int main (int argc, char *argv[])
   printf("number of data = %i\n", n_data);
   
   int number_of_tests;
+  
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
 
 #if defined(TEST_ADMM_COLLECTION_FCLIB)
   collection[1].will_fail = 1;  // FC3D ADMM LMGC_100_PR_PerioBox-i00361-60-03000.hdf5
   collection[3].will_fail = 1;  // FC3D ADMM LMGC_100_PR_PerioBox-i00361-60-03000.hdf5
 #endif
+#if defined(TEST_ADMM_COLLECTION_1)
+  collection[24].will_fail = 1;   /* FC3D ADMM	./data/Confeti-ex13-Fc3D-SBM.dat */
+#endif
 
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
+
   int out = run_test_collection(collection, number_of_tests, frictionContact_test_function);
+
   free_test_collection(collection, number_of_tests);
   
 #ifdef SICONOS_HAS_MPI

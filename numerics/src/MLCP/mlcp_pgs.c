@@ -31,13 +31,6 @@
  * double *w : size n+m
  */
 
-int mixedLinearComplementarity_pgs_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-  pSolver->iparam[2] = 0; //implicit
-  return 0;
-}
 void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 
@@ -74,14 +67,14 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
   incy = 1;
   /* Recup input */
 
-  itermax = options->iparam[0];
-  pgsExplicit = options->iparam[2];
-  tol   = options->dparam[0];
+  itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  pgsExplicit = options->iparam[SICONOS_IPARAM_MLCP_PGS_EXPLICIT];
+  tol   = options->dparam[SICONOS_DPARAM_TOL];
 
   /* Initialize output */
 
-  options->iparam[1] = 0;
-  options->dparam[1] = 0.0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Allocation */
 
@@ -227,8 +220,8 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
 
   }
 
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
   if (err > tol)
   {
@@ -250,3 +243,10 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
   free(diagB);
   return;
 }
+
+void mlcp_pgs_set_options(SolverOptions* options)
+{
+  options->filterOn = false;
+  options->iparam[SICONOS_IPARAM_MLCP_PGS_EXPLICIT] = 0; //implicit
+}
+

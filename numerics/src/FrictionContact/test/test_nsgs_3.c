@@ -20,12 +20,12 @@
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_HYBR...
 #include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
-#include "frictionContact_test_utils.h"  // for build_friction_test, build_t...
+#include "frictionContact_test_utils.h"  // for  build_test_collection
 #include "test_utils.h"                  // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  *number_of_tests = 25;//n_data * n_solvers;
+  *number_of_tests = 22;//n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
 
@@ -33,211 +33,223 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   // -> same values for all tests.
   // The differences between tests are only for internal solvers and input data.
   int topsolver = SICONOS_FRICTION_3D_NSGS;
-  int dpos[] = {1, SICONOS_DPARAM_TOL};  // ipos = [number of values in parameters list, indices]
-  double dparam[] = {1e-16};
-  int ipos[] = {1, SICONOS_IPARAM_MAX_ITER};  // ipos = [number of values in parameters list, indices]
-  int iparam[] = {10000};
-
   int current = 0;
 
   
   {
-    int d = 0; // FC3D_Example1_SBM.dat
-    
     // Projection on cone, default values.
-    dparam[SICONOS_DPARAM_TOL] = 1e-16;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone, NULL, NULL, NULL, NULL,
-               &collection[current++]);
+    int d = 0; // FC3D_Example1_SBM.dat
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+
+    current++;
   }
 
   {
     int d = 0; // FC3D_Example1_SBM.dat
     // Projection on cone with diagonalization, default value.
-    dparam[SICONOS_DPARAM_TOL] = 1e-16;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization, NULL, NULL, NULL, NULL,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization);
+
+    current++;
   }
   
   {
     int d = 0; // FC3D_Example1_SBM.dat
     // Projection on cone with local iteration, set tol and max iter.
-    dparam[SICONOS_DPARAM_TOL] = 1e-16;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    double internal_dparam[] = {1e-3};
-    int internal_iparam[] = {10};
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    current++;
   }
 
   {
     int d= 0; // FC3D_Example1_SBM.dat
-    dparam[SICONOS_DPARAM_TOL] = 1e-16;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     // Projection on cone with regularization, set rho
-    int intern_dpos[] = {1, SICONOS_FRICTION_3D_NSN_RHO};
-    double internal_dparam[] = {0.1}; // rho value
-    
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization,
-               intern_dpos, internal_dparam,  NULL, NULL,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 0.1;
+    current++;
   }
+
 
   {
     int d=1; // "./data/Capsules-i122-1617.dat"
 
     // Projection on cone with local iteration, set tol, itermax, d[9], i[8]
-    dparam[SICONOS_DPARAM_TOL] = 1e-16;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    int intern_dpos[] = {2, SICONOS_DPARAM_TOL, 9};
-    double internal_dparam[] = {1e-16, 1.};
-    int intern_ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 8};
-    int internal_iparam[] = {20, 1};
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
     
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
-               intern_dpos, internal_dparam, intern_ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 20;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->internalSolvers[0]->dparam[9] = 1.; // ???
+    collection[current].options->internalSolvers[0]->iparam[8] = 1;  // ???
     // Expected to fail ...
-    collection[current - 1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
   
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // Projection on cone set d[9], i[8]
-    dparam[SICONOS_DPARAM_TOL] = 1e-5;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    int intern_dpos[] = {1, 9};
-    double internal_dparam[] = { 1.};
-    int intern_ipos[] = {1, 8};
-    int internal_iparam[] = { 1};
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
     
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone,
-               intern_dpos, internal_dparam, intern_ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].options->internalSolvers[0]->dparam[9] = 1.; // ???
+    collection[current].options->internalSolvers[0]->iparam[8] = 1;  // ???
     // Expected to fail ...
-    collection[current - 1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
 
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // nonsmooth newton. Set tol, max iter and i[1]. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
     
-    dparam[SICONOS_DPARAM_TOL] = 1e-12;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    double internal_dparam[] = {1e-18};
-    int intern_ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 1};  // current iteration number ???
-    int internal_iparam[] = {10, 1};
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_NSN,
-               dpos, internal_dparam, intern_ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-18;
+    collection[current].options->internalSolvers[0]->iparam[1] = 1;  // ???
+    current++;  
   }
 
   
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // Projection on cone with local iteration, set tol and maxiter
-    dparam[SICONOS_DPARAM_TOL] = 1e-12;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    double internal_dparam[] = { 1e-6};
-    int internal_iparam[] = { 100};
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
     
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 100;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+    current++;  
   }
 
   
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // Projection on cone with regularization, default values.
-    dparam[SICONOS_DPARAM_TOL] = 1e-12;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization,
-               NULL, NULL, NULL, NULL,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
+    
+    current++;  
   }
   
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // Projection on cone, default values.
-    dparam[SICONOS_DPARAM_TOL] = 1e-2;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone,
-               NULL, NULL, NULL, NULL,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-2;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+    
+    current++;  
   }
 
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // nonsmooth newton. Set tol and i[1]. Default for other parameters
-    dparam[SICONOS_DPARAM_TOL] = 1e-5;
-    iparam[SICONOS_IPARAM_MAX_ITER]= 1000;
-    double internal_dparam[] = {1e-16};
-    int internal_iparam[] = {10};
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_NSN,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
-    }
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    current++;
+  }
 
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // Projection on cone with local iteration, set tol and maxiter
-    dparam[SICONOS_DPARAM_TOL] = 1e-12;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    double internal_dparam[] = { 1e-6};
-    int internal_iparam[] = { 100};
-    
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-    internal_dparam[SICONOS_DPARAM_TOL] = 1e-16;
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 100;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+    current++;
+
+    
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 100;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    current++;
   }
 
   {
     int d = 3; // GFC3D_TwoRods1-condensed.dat
     // nonsmooth newton. Set tol and i[1]. Default for other parameters
-    dparam[SICONOS_DPARAM_TOL] = 1e-12;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    double internal_dparam[] = {1e-18};
-    int intern_ipos[] = {2, SICONOS_IPARAM_MAX_ITER, 1};  // current iteration number ???
-    int internal_iparam[] = {10, 1};
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_NSN,
-               dpos, internal_dparam, intern_ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-18;
+    current++;
   }
   
 
@@ -245,77 +257,81 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     int d  = 4; // FC3D_Example1.dat
     
     // nonsmooth newton. Set tol and max iter. Default for other parameters
-    dparam[SICONOS_DPARAM_TOL] = 1e-12;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    double internal_dparam[] = {1e-18};
-    int internal_iparam[] = {10};
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_NSN,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-18;
+    current++;
   }
 
   {
     int d = 5; // Confeti-ex03-Fc3D-SBM.dat
     // Projection on cone, default values.
-    dparam[SICONOS_DPARAM_TOL] = 1e-5;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone,
-               NULL, NULL, NULL, NULL,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
     // Expected to fail ...
-    collection[current - 1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
 
   {
     int d = 5;
     // nonsmooth newton. Set tol and max iter. Default for other parameters
-    dparam[SICONOS_DPARAM_TOL] = 1e-5;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    double internal_dparam[] = {1e-16};
-    int internal_iparam[] = {10};
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_NSN,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
     // Expected to fail ...
-    collection[current - 1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
 
   {
     int d = 5;
     // Projection on cone with local iteration, set tol and maxiter
-    dparam[SICONOS_DPARAM_TOL] = 1e-5;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    double internal_dparam[] = { 1e-12};
-    int internal_iparam[] = { 10};
-    
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    current++;
   }
  
 
   {
     int d = 5;
     // Projection on cone with regularization, set tol and maxiter
-    dparam[SICONOS_DPARAM_TOL] = 1e-5;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-    double internal_dparam[] = { 1e-8};
-    int internal_iparam[] = { 10};
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-8;
     // Expected to fail ...
-    collection[current - 1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
 
 
@@ -323,68 +339,52 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   {
     int d = 7;
     // nonsmooth newton 'damped'. Set tol and max iter. Default for other parameters
-    dparam[SICONOS_DPARAM_TOL] = 1e-3;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-    double internal_dparam[] = {1e-16};
-    int internal_iparam[] = {100};
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
-    // Expected to fail ...
-    collection[current - 1].will_fail = 1;
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
 
-    internal_iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_NSN_GP,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
     // Expected to fail ...
-    collection[current - 1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
 
   {
     int d = 7;
     // nonsmooth newton. Set tol and max iter. Default for other parameters
-    dparam[SICONOS_DPARAM_TOL] = 1e-3;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
-    double internal_dparam[] = {1e-16};
-    int internal_iparam[] = {100};
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_NSN,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
-    // Expected to fail ...
-    collection[current - 1].will_fail = 1;
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
 
-    internal_iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_NSN,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
     // Expected to fail ...
-    collection[current - 1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
 
   {
     int d = 7;
     // Projection on cone with local iteration, set tol and maxiter
-    dparam[SICONOS_DPARAM_TOL] = 1e-3;
-    iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
-    double internal_dparam[] = { 1e-6};
-    int internal_iparam[] = { 100};
-    
-    build_friction_test(data_collection[d],
-               topsolver, dpos, dparam, ipos, iparam,
-               SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration,
-               dpos, internal_dparam, ipos, internal_iparam,
-               &collection[current++]);
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 100;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
     // Expected to fail ...
-    collection[current - 1].will_fail = 1;
+    collection[current].will_fail = 1;
+    current++;
   }
 
   *number_of_tests = current;

@@ -18,17 +18,18 @@
 
 #include <assert.h>                         // for assert
 #include <stdlib.h>                         // for malloc, free, NULL
-#include "SiconosBlas.h"                          // for cblas_daxpy
 #include "Newton_methods.h"                 // for functions_LSA, init_lsa_f...
 #include "NumericsFwd.h"                    // for RelayProblem, SolverOptions
 #include "NumericsMatrix.h"                 // for NM_assert, NM_create_from...
 #include "RelayProblem.h"                   // for RelayProblem, freeRelay_p...
-#include "Relay_Solvers.h"                  // for relay_avi_caoferris, rela...
+#include "Relay_Solvers.h"                  // for relay_avi_caoferris
+#include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERRIS
+#include "SiconosBlas.h"                    // for cblas_daxpy
 #include "SiconosSets.h"                    // for box_constraints
-#include "SolverOptions.h"                  // for SolverOptions
+#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
 #include "VI_Newton.h"                      // for VI_compute_F, VI_compute_...
 #include "VariationalInequality.h"          // for VariationalInequality
-#include "VariationalInequality_Solvers.h"  // for vi_box_AVI_LSA, vi_box_AV...
+#include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
 #include "sanitizer.h"                      // for cblas_dcopy_msan
 
 typedef struct {
@@ -51,7 +52,7 @@ static int vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, dou
   NM_gemv(-1.0, relay_pb->M, z, 1.0, relay_pb->q);
 
   int local_info = 0;
-  relay_avi_caoferris(relay_pb, descent_dir, F, &local_info, options->internalSolvers);
+  relay_avi_caoferris(relay_pb, descent_dir, F, &local_info, options->internalSolvers[0]);
 
   cblas_daxpy(n, -1.0, z, 1, descent_dir, 1);
 
@@ -65,6 +66,30 @@ static int vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, dou
 void * vi_get_set(void* problem)
 {
   return ((VariationalInequality*) problem)->set;
+}
+
+
+/** Release memory used by SolverOptions member solverData.
+
+    Internal stuff. Must be called at the end of ncp_pathsearch.
+    This concerns only options parameters which management is
+    specific to this solver. All others (iparam ...) are handled
+    in solver_options_delete generic function.
+ */ 
+static void vi_box_AVI_free(SolverOptions* options)
+{
+  if(options->solverData)
+    {
+      vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)options->solverData;
+      NM_free(sData->mat);
+      free(sData->mat);
+      sData->mat = NULL;
+      sData->relay_pb->lb = NULL;
+      sData->relay_pb->ub = NULL;
+      freeRelay_problem(sData->relay_pb);
+      free(sData);
+    }
+  options->solverData = NULL;
 }
 
 void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* info, SolverOptions* options)
@@ -93,34 +118,19 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   functions_AVI_LSA.compute_H = &VI_compute_H_box_Qi;
   functions_AVI_LSA.compute_error = &VI_compute_error_box;
   functions_AVI_LSA.compute_descent_direction = &vi_compute_decent_dir_by_avi;
-  functions_AVI_LSA.get_set_from_problem_data = &vi_get_set;
-  options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
-
+  functions_AVI_LSA.get_set_from_problem_data = &vi_get_set;  
   set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->size, z, F, info, (void *)problem, options, &functions_AVI_LSA);
 
+  vi_box_AVI_free(options);
+
 }
 
-void vi_box_AVI_extra_SolverOptions(SolverOptions* options)
+void variationalInequality_BOX_AVI_set_default(SolverOptions* options)
 {
-  options->numberOfInternalSolvers = 1;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  relay_avi_caoferris_setDefaultSolverOptions(options->internalSolvers);
+  options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
+
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_RELAY_AVI_CAOFERRIS);
 }
 
-void vi_box_AVI_free_solverData(SolverOptions* options)
-{
-  assert(options);
-  assert(options->solverData);
-
-  vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)options->solverData;
-  NM_clear(sData->mat);
-  free(sData->mat);
-  sData->mat = NULL;
-  sData->relay_pb->lb = NULL;
-  sData->relay_pb->ub = NULL;
-  freeRelay_problem(sData->relay_pb);
-
-  free(sData);
-  options->solverData = NULL;
-}

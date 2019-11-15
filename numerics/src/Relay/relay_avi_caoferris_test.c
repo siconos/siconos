@@ -95,9 +95,3 @@ void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *
   free_polyhedron(&poly);
 }
 
-int relay_avi_caoferris_test_setDefaultSolverOptions(SolverOptions* options)
-{
-  solver_options_set(options, SICONOS_RELAY_AVI_CAOFERRIS_TEST);
-  return 0;
-}
-

@@ -164,21 +164,23 @@ int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* op
 }
 void lcp_enum_init(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc)
 {
-  //  if (withMemAlloc)
-  {
-    options->dWork = (double *) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
-    options->iWork = (int *) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
-  }
+  if (withMemAlloc)
+    {
+      options->dWork = (double *) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
+      options->iWork = (int *) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
+    }
 }
 void lcp_enum_reset(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc)
 {
   if (withMemAlloc)
   {
-    free(options->dWork);
-    free(options->iWork);
+    if(options->dWork)
+      free(options->dWork);
+    if(options->iWork)
+      free(options->iWork);
   }
   options->dWork = NULL;
-  solver_options_nullify(options);
+  options->iWork = NULL;
 }
 
 
@@ -316,37 +318,12 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
     numerics_printf("lcp_enum has not found a solution!\n");
 }
 
-int linearComplementarity_enum_setDefaultSolverOptions(SolverOptions* options)
+void lcp_enum_set_options(SolverOptions* options)
 {
-  int i;
-  if (verbose > 0)
-  {
-    numerics_printf("Set the Default SolverOptions for the ENUM Solver\n");
-  }
-
-
-  solver_options_nullify(options);
-  options->solverId = SICONOS_LCP_ENUM;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  for (i = 0; i < options->iSize; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  // initialisation of working arrays will be done thanks to lcp_enum_init call
-  // during first call of lcp_enum driver.
-  options->dWork = NULL;
-  options->iWork = NULL;
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
-
-
-
-  return 0;
+  options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS] = 0;
+  options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED] = 0;
+  options->iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS] = 0;
+  // SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM (out)
+  // SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS (out)
+ 
 }

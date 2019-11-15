@@ -284,7 +284,7 @@ int avi_pathavi(AffineVariationalInequalities* problem, double *z, double *w, So
   // bug youngdae
   pathvi_register_options(pathvi_obj->opt);
 
-  option_set_d(pathvi_obj->opt, "convergence_tolerance", options->dparam[0]);
+  option_set_d(pathvi_obj->opt, "convergence_tolerance", options->dparam[SICONOS_DPARAM_TOL]);
 
 
   // Solve the problem

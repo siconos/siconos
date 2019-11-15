@@ -44,6 +44,7 @@ dim(v)=nn
 #include "numerics_verbose.h"                   // for verbose
 #include "SiconosBlas.h"                              // for cblas_dgemv, CblasCol...
 #include "SiconosLapack.h"                      // for lapack_int, DGETRF
+#include "mlcp_cst.h"
 
 #define DIRECT_SOLVER_USE_DGETRI
 double * sVBuf;
@@ -104,33 +105,23 @@ static lapack_int * myiMalloc2(int n)
 
 int mlcp_direct_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  return (problem->n + problem->m) * (options->iparam[5] + 1) + options->iparam[5] * problem->m;
-}
-int mlcp_direct_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
-{
-  return  problem->n + problem->m + (options->iparam[5]) * ((problem->n + problem->m) * (problem->n + problem->m)) + (problem->n + problem->m);
+  return (problem->n + problem->m) * (options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS] + 1) + options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS] * problem->m;
 }
 
-/*
- *options->iparam[5] : n0 number of possible configuration
- *options->dparam[5] : tol
- *options->iparam[7] : number of failed
- *options->iparam[8] : mlcp problem hab been changed since the previous execution.
- *options->iWork : double work memory of size (n + m)*(n0+1) + nO*m
- *options->dWork : double work memory of size n + m + n0*(n+m)*(n+m)
- *
- *
- */
+int mlcp_direct_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
+{
+  return  problem->n + problem->m + (options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS]) * ((problem->n + problem->m) * (problem->n + problem->m)) + (problem->n + problem->m);
+}
 
 void mlcp_direct_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
   spCurDouble = options->dWork;
   spCurInt = options->iWork;
-  sMaxNumberOfCC = options->iparam[5];
-  sTolneg = options->dparam[5];
-  sTolpos = options->dparam[6];
+  sMaxNumberOfCC = options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS];
+  sTolneg = options->dparam[SICONOS_DPARAM_MLCP_SIGN_TOL_NEG];
+  sTolpos = options->dparam[SICONOS_DPARAM_MLCP_SIGN_TOL_POS];
   options->iparam[7] = 0;
-  sProblemChanged = options->iparam[8];
+  sProblemChanged = options->iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED];
   sN = problem->n;
   sM = problem->m;
   sNbLines = problem->n + problem->m;
@@ -151,6 +142,7 @@ void mlcp_direct_init(MixedLinearComplementarityProblem* problem, SolverOptions*
   sVBuf = mydMalloc(sNpM);
   spIntBuf = myiMalloc(sNpM);
 }
+
 void mlcp_direct_reset()
 {
   struct dataComplementarityConf * aux;
@@ -161,6 +153,7 @@ void mlcp_direct_reset()
     free(aux);
   }
 }
+
 int internalPrecompute(MixedLinearComplementarityProblem* problem)
 {
   lapack_int INFO = 0;
@@ -190,6 +183,7 @@ int internalPrecompute(MixedLinearComplementarityProblem* problem)
 #endif
   return 1;
 }
+
 /*memory management about floatWorkingMem and intWorkingMem*/
 int internalAddConfig(MixedLinearComplementarityProblem* problem, int * zw, int init)
 {
@@ -325,32 +319,6 @@ int solveWithCurConfig(MixedLinearComplementarityProblem* problem)
       printf("solveWithCurConfig Success\n");*/
   return 1;
 }
-/*
- * The are no memory allocation in mlcp_direct, all necessary memory must be allocated by the user.
- *
- *options:
- * iparam[5] : (in)  n0 number of possible configuration.
- * dparam[5] : (in) a positive value, tolerane about the sign.
- * dWork : working float zone size : n + m + n0*(n+m)*(n+m)  . MUST BE ALLOCATED BY THE USER.
- * iWork : working int zone size : (n + m)*(n0+1) + nO*m. MUST BE ALLOCATED BY THE USER.
- * double *z : size n+m
- * double *w : size n+m
- * info : output. info == 0 if success
- */
-/*int nbConfig(struct dataComplementarityConf * pC)
-{
-  struct dataComplementarityConf * paux = pC;
-  int nb = 0;
-  while (paux)
-  {
-    nb++;
-    paux = paux->next;
-  }
-  printf("number of conf :%d\n", nb);
-  return nb;
-
-}
-*/
 
 void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -410,4 +378,13 @@ void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *
       *info = 1;
     }
   }
+}
+
+void mlcp_direct_set_options(SolverOptions* options)
+{
+  options->dparam[SICONOS_DPARAM_MLCP_SIGN_TOL_POS] = 1e-12;
+  options->dparam[SICONOS_DPARAM_MLCP_SIGN_TOL_NEG] = 1e-12;
+  options->iparam[SICONOS_IPARAM_MLCP_NUMBER_OF_CONFIGURATIONS] = 3;
+  options->iparam[SICONOS_IPARAM_MLCP_UPDATE_REQUIRED] = 0;
+  options->filterOn = false;
 }

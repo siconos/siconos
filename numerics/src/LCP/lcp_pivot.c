@@ -67,7 +67,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
   unsigned leaving = 0;
   unsigned itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   unsigned preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
-  unsigned pivot_selection_rule = options->iparam[SICONOS_IPARAM_PIVOT_RULE];
+  unsigned pivot_selection_rule = options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE];
 
   double pivot;
   double tmp;
@@ -558,4 +558,13 @@ _exit:
     free(basis);
     free(mat);
   }
+}
+
+
+void lcp_pivot_set_options(SolverOptions* options)
+{
+  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE; // default
+  // the pivoting method should be overwritten for BARD or MURTY before calling solver.
+  
+  options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 0;
 }

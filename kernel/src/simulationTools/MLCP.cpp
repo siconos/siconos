@@ -64,7 +64,7 @@ void  MLCP::reset()
     free(_numerics_problem.blocksIsComp);
   _numerics_problem.blocksIsComp = 0;
   mlcp_driver_reset(&_numerics_problem, &*_numerics_solver_options);
-  solver_options_delete(&*_numerics_solver_options);
+  solver_options_clear(&*_numerics_solver_options);
   _numerics_solver_options.reset();
 }
 
@@ -158,7 +158,7 @@ int MLCP::compute(double time)
   DEBUG_PRINTF("MLCP::compute m n :%d,%d\n", _n, _m);
 
   /*If user has not allocted the working memory, do it. */
-  int allocated = mlcp_alloc_working_memory(&_numerics_problem, &*_numerics_solver_options);
+  mlcp_driver_init(&_numerics_problem, &*_numerics_solver_options);
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)
@@ -200,8 +200,6 @@ int MLCP::compute(double time)
   {
     DEBUG_PRINT("MLCP::compute : sizeoutput is null\n");
   }
-  if (allocated)
-    mlcp_free_working_memory(&_numerics_problem, &*_numerics_solver_options);
   DEBUG_END("MLCP::compute(double time)\n");
   return info;
 }

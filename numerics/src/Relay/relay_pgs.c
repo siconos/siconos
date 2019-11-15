@@ -24,7 +24,7 @@
 #include "NumericsMatrix.h"    // for NumericsMatrix
 #include "RelayProblem.h"      // for RelayProblem
 #include "Relay_Solvers.h"     // for relay_compute_error, relay_pgs, relay_...
-#include "SolverOptions.h"     // for SolverOptions, solver_options_nullify
+#include "SolverOptions.h"     // for SolverOptions
 #include "numerics_verbose.h"  // for verbose
 #include "relay_cst.h"         // for SICONOS_RELAY_PGS
 #include "SiconosBlas.h"             // for cblas_dcopy, cblas_ddot
@@ -47,8 +47,8 @@ void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOpt
 
 
 
-  int itermax = options->iparam[0];
-  double tol = options->dparam[0];
+  int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
 
 
   int i;
@@ -106,8 +106,8 @@ void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOpt
     }
   }
 
-  options->iparam[1] = iter;
-  options->dparam[1] = err;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
 
   if (err > tol)
@@ -133,35 +133,5 @@ void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOpt
 
 
 
-}
-int relay_pgs_setDefaultSolverOptions(SolverOptions* options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the PGS Solver\n");
-  }
-  /*  strcpy(options->solverName,"PGS");*/
-  options->solverId = SICONOS_RELAY_PGS;
-  options->numberOfInternalSolvers = 0;
-  options->internalSolvers = NULL;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-6;
-  options->dparam[1] = 1.0;
-
-  return 0;
 }
 

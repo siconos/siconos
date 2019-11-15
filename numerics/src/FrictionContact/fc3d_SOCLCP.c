@@ -49,23 +49,6 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
- 
-
-
-  if (options->numberOfInternalSolvers < 1)
-  {
-    numerics_error("fc3d_SOCLCP", "The SOCLCP for FrictionContactProblem needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
-  }
-
-  SolverOptions * internalsolver_options = options->internalSolvers;
-
-  if (verbose > 0)
-  {
-    printf("Local solver data :");
-    solver_options_print(internalsolver_options);
-  }
-
-
   /*****  Fixed Point Iterations *****/
   double error = 1.; /* Current error */
 
@@ -86,26 +69,23 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
     soclcp->coneIndex[i] = 3*i;
   }
 
-  if (internalsolver_options->solverId == SICONOS_SOCLCP_NSGS)
+  options->solverId = SICONOS_SOCLCP_NSGS;
+  // if (options->solverId == SICONOS_SOCLCP_NSGS)
+  // This is the only allowed option, at the time
   {
     if (verbose == 1)
       printf(" ========================== Call NSGS solver SOCLCP problem ==========================\n");
     internalsolver = &soclcp_nsgs;
     //internalsolver_options->internalSolvers->dWork = options->dWork;
   }
-  else
-  {
-    fprintf(stderr, "Numerics, fc3d_SOCLCP failed. Unknown internal solver.\n");
-    exit(EXIT_FAILURE);
-  }
-  internalsolver_options->dparam[SICONOS_DPARAM_TOL]=options->dparam[SICONOS_DPARAM_TOL];
-  internalsolver_options->iparam[SICONOS_IPARAM_MAX_ITER]=options->iparam[SICONOS_IPARAM_MAX_ITER];
+  /* else */
+  /* { */
+  /*   fprintf(stderr, "Numerics, fc3d_SOCLCP failed. Unknown internal solver.\n"); */
+  /*   exit(EXIT_FAILURE); */
+  /* } */
+  (*internalsolver)(soclcp, reaction , velocity , info , options);
 
-  (*internalsolver)(soclcp, reaction , velocity , info , internalsolver_options);
-
-  error = internalsolver_options->dparam[1];
-
-
+  error = options->dparam[SICONOS_DPARAM_RESIDU];
   double real_error=0.0;
 
   fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &real_error);
@@ -118,7 +98,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
   if (verbose > 0)
   {
-    printf("--------------- FC3D - SOCLCP - # Iteration %i Final Residual = %14.7e\n", internalsolver_options->iparam[7], error);
+    printf("--------------- FC3D - SOCLCP - # Iteration %i Final Residual = %14.7e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], error);
     printf("--------------- FC3D - SOCLCP - #              error of the real problem = %14.7e\n", real_error );
     printf("--------------- FC3D - SOCLCP - #              gap with the real problem = %14.7e\n", fabs(real_error-error) );
   }
@@ -126,42 +106,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
   free(soclcp->q);
   free(soclcp->coneIndex);
   free(soclcp);
-
-
-  if (internalsolver_options->internalSolvers != NULL)
-    internalsolver_options->internalSolvers->dWork = NULL;
-
-  dparam[SICONOS_DPARAM_TOL] = tolerance;
-  dparam[1] = error;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
   dparam[2] = fabs(real_error-error);
-  iparam[7] = internalsolver_options->iparam[7];
 
-}
-
-
-
-int fc3d_SOCLCP_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the SOCLCP Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_SOCLCP;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-
-  soclcp_nsgs_setDefaultSolverOptions(options->internalSolvers);
-  options->internalSolvers->iparam[SICONOS_IPARAM_MAX_ITER] =10000;
-  return 0;
 }
