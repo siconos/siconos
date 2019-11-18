@@ -281,6 +281,17 @@ const SparseMat  BlockMatrix::getSparse(unsigned int row, unsigned int col) cons
   return (tmp->getSparse());
 }
 
+// return the boost sparse matrix of the block (i, j)
+const SparseCoordinateMat  BlockMatrix::getSparseCoordinate(unsigned int row, unsigned int col) const
+{
+
+  SP::SiconosMatrix tmp = (*_mat)(row, col);
+  if (tmp->num() != 4)
+  {
+    SiconosMatrixException::selfThrow("SparseMat BlockMatrix::getSparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
+  }
+  return (tmp->getSparseCoordinate());
+}
 // return the boost banded matrix of the block (i, j)
 const BandedMat  BlockMatrix::getBanded(unsigned int row, unsigned int col) const
 {
@@ -361,6 +372,16 @@ SparseMat*  BlockMatrix::sparse(unsigned int row, unsigned int col) const
     SiconosMatrixException::selfThrow("SparseMat* BlockMatrix::sparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
   }
   return (tmp->sparse());
+}
+SparseCoordinateMat*  BlockMatrix::sparseCoordinate(unsigned int row, unsigned int col) const
+{
+
+  SP::SiconosMatrix tmp = (*_mat)(row, col);
+  if (tmp->num() != Siconos::SPARSE_COORDINATE)
+  {
+    SiconosMatrixException::selfThrow("SparseCoordinateMat* BlockMatrix::sparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse coordinate matrix");
+  }
+  return (tmp->sparseCoordinate());
 }
 
 BandedMat*  BlockMatrix::banded(unsigned int row, unsigned int col) const

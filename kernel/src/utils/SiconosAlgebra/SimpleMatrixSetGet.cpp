@@ -37,13 +37,13 @@ double SimpleMatrix::getValue(unsigned int row, unsigned int col) const
   if (row >= size(0) || col >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix:getValue(index): Index out of range");
 
-  if (_num == 1)
+  if (_num == Siconos::DENSE)
     return (*mat.Dense)(row, col);
-  else if (_num == 2)
+  else if (_num == Siconos::TRIANGULAR)
     return (*mat.Triang)(row, col);
-  else if (_num == 3)
+  else if (_num == Siconos::SYMMETRIC)
     return (*mat.Sym)(row, col);
-  else if (_num == 4)
+  else if (_num == Siconos::SPARSE)
   {
     double * d = (*mat.Sparse).find_element(row, col);
     if (d)
@@ -51,11 +51,19 @@ double SimpleMatrix::getValue(unsigned int row, unsigned int col) const
     else
       return 0.0;
   }
-  else if (_num == 5)
+  else if (_num == Siconos::SPARSE_COORDINATE)
+  {
+    double * d = (*mat.SparseCoordinate).find_element(row, col);
+    if (d)
+      return *d;
+    else
+      return 0.0;
+  }
+  else if (_num == Siconos::BANDED)
     return (*mat.Banded)(row, col);
-  else if (_num == 6)
+  else if (_num == Siconos::ZERO)
     return 0;
-  else //if (_num==7)
+  else //if (_num == Siconos::IDENTITY)
     return(row == col);
 }
 
@@ -64,13 +72,13 @@ void SimpleMatrix::setValue(unsigned int row, unsigned int col, double value)
   if (row >= size(0) || col >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix:setValue: Index out of range");
 
-  if (_num == 1)
+  if (_num == Siconos::DENSE)
     (*mat.Dense)(row, col) = value;
-  else if (_num == 2)
+  else if (_num == Siconos::TRIANGULAR)
     (*mat.Triang)(row, col) = value;
-  else if (_num == 3)
+  else if (_num == Siconos::SYMMETRIC)
     (*mat.Sym)(row, col) = value ;
-  else if (_num == 4)
+  else if (_num == Siconos::SPARSE)
   {
     double * d = (*mat.Sparse).find_element(row, col);
     if (d)
@@ -82,9 +90,22 @@ void SimpleMatrix::setValue(unsigned int row, unsigned int col, double value)
       (*mat.Sparse).insert_element(row, col, value);
     }
   }
-  else if (_num == 5)
+  else if (_num == Siconos::SPARSE_COORDINATE)
+  {
+    // double * d = (*mat.Sparse).find_element(row, col);
+    // if (d)
+    // {
+    //   *d = value;
+    // }
+    // else
+    // {
+      (*mat.SparseCoordinate).insert_element(row, col, value);
+    // }
+  }
+  
+  else if (_num == Siconos::BANDED)
     (*mat.Banded)(row, col) = value;
-  else if (_num == 6 || _num == 7)
+  else if (_num == Siconos::ZERO || _num == Siconos::IDENTITY)
     SiconosMatrixException::selfThrow("SimpleMatrix:setValue: forbidden for Identity or Zero type matrices.");
   resetLU();
 
@@ -145,17 +166,17 @@ void SimpleMatrix::setBlock(unsigned int row_min, unsigned int col_min, const Si
     if (numM != _num)
       SiconosMatrixException::selfThrow("SimpleMatrix::setBlock(i,j,m), inconsistent types.");
 
-    if (_num == 1)
+    if (_num == Siconos::DENSE)
       noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) = *(m.dense());
-    else if (_num == 2)
+    else if (_num == Siconos::TRIANGULAR)
       noalias(ublas::subrange(*mat.Triang, row_min, row_max, col_min, col_max)) = *(m.triang());
-    else if (_num == 3)
+    else if (_num == Siconos::SYMMETRIC)
       noalias(ublas::subrange(*mat.Sym, row_min, row_max, col_min, col_max)) = *(m.sym());
-    else if (_num == 4)
+    else if (_num == Siconos::SPARSE)
       noalias(ublas::subrange(*mat.Sparse, row_min, row_max, col_min, col_max)) = *(m.sparse());
-    else if (_num == 5)
+    else if (_num == Siconos::BANDED)
       noalias(ublas::subrange(*mat.Banded, row_min, row_max, col_min, col_max)) = *(m.banded());
-    else // if(_num==6) or _num == 7 nothing to do
+    else // if(_num == Siconos::ZERO) or _num == Siconos::IDENTITY nothing to do
     {}
     resetLU();
   }
@@ -542,40 +563,40 @@ void SimpleMatrix::getRow(unsigned int r, SiconosVector &vOut) const
   if (vOut.size() != size(1))
     SiconosMatrixException::selfThrow("getRow(row,v): inconsistent sizes between this and v.");
 
-  if (_num == 7) // identity matrix
+  if (_num == Siconos::IDENTITY) // identity matrix
   {
     vOut.zero();
     vOut(r) = 1.0;
   }
-  else if (_num == 6) // Zero matrix
+  else if (_num == Siconos::ZERO) // Zero matrix
     vOut.zero();
   else
   {
     unsigned int numV = vOut.num();
     if (numV == 1)
     {
-      if (_num == 1)
+      if (_num == Siconos::DENSE)
       {
         noalias(*(vOut.dense())) = ublas::row(*mat.Dense, r);
       }
-      else if (_num == 2)
+      else if (_num == Siconos::TRIANGULAR)
       {
         noalias(*(vOut.dense())) = ublas::row(*mat.Triang, r);
       }
-      else if (_num == 3)
+      else if (_num == Siconos::SYMMETRIC)
       {
         noalias(*(vOut.dense())) = ublas::row(*mat.Sym, r);
       }
-      else if (_num == 4)
+      else if (_num == Siconos::SPARSE)
       {
         noalias(*(vOut.dense())) = ublas::row(*mat.Sparse, r);
       }
-      else //if(_num==5){
+      else //if(_num == Siconos::BANDED){
         noalias(*(vOut.dense())) = ublas::row(*mat.Banded, r);
     }
     else // if numV == 4
     {
-      if (_num == 4)
+      if (_num == Siconos::SPARSE)
       {
         noalias(*(vOut.sparse())) = ublas::row(*mat.Sparse, r);
       }
@@ -595,11 +616,11 @@ void SimpleMatrix::setRow(unsigned int r, const SiconosVector& vIn)
   if (vIn.size() != size(1))
     SiconosMatrixException::selfThrow("setRow(row,v): inconsistent sizes between this and v.");
 
-  if (_num == 6 || _num == 7)
+  if (_num == Siconos::ZERO || _num == Siconos::IDENTITY)
     SiconosMatrixException::selfThrow("setRow(row,v): current matrix is read-only (zero or identity).");
 
   {
-    if (_num == 1)
+    if (_num == Siconos::DENSE)
     {
       if (numV == 1)
       {
@@ -610,7 +631,7 @@ void SimpleMatrix::setRow(unsigned int r, const SiconosVector& vIn)
         noalias(ublas::row(*mat.Dense, r)) = *vIn.sparse();
       }
     }
-    else if (_num == 4 && numV == 4)
+    else if (_num == Siconos::SPARSE && numV == 4)
       noalias(ublas::row(*mat.Sparse, r)) = *vIn.sparse();
     else
       SiconosMatrixException::selfThrow("setRow(row,v): inconsistent types between current matrix and v.");
@@ -628,12 +649,12 @@ void SimpleMatrix::getCol(unsigned int r, SiconosVector &vOut)const
   if (vOut.size() != size(0))
     SiconosMatrixException::selfThrow("getCol(col,v): inconsistent sizes between this and v.");
 
-  if (_num == 7) // identity matrix
+  if (_num == Siconos::IDENTITY) // identity matrix
   {
     vOut.zero();
     vOut(r) = 1.0;
   }
-  else if (_num == 6) // Zero matrix
+  else if (_num == Siconos::ZERO) // Zero matrix
     vOut.zero();
   else
   {
@@ -642,28 +663,28 @@ void SimpleMatrix::getCol(unsigned int r, SiconosVector &vOut)const
     if (numV == 1)
     {
 
-      if (_num == 1)
+      if (_num == Siconos::DENSE)
       {
         noalias(*(vOut.dense())) = ublas::column(*mat.Dense, r);
       }
-      else if (_num == 2)
+      else if (_num == Siconos::TRIANGULAR)
       {
         noalias(*(vOut.dense())) = ublas::column(*mat.Triang, r);
       }
-      else if (_num == 3)
+      else if (_num == Siconos::SYMMETRIC)
       {
         noalias(*(vOut.dense())) = ublas::column(*mat.Sym, r);
       }
-      else if (_num == 4)
+      else if (_num == Siconos::SPARSE)
       {
         noalias(*(vOut.dense())) = ublas::column(*mat.Sparse, r);
       }
-      else //if(_num==5){
+      else //if(_num == Siconos:BANDED){
         noalias(*(vOut.dense())) = ublas::column(*mat.Banded, r);
     }
     else // if _numV == 4
     {
-      if (_num == 4)
+      if (_num == Siconos::SPARSE)
       {
         noalias(*(vOut.sparse())) = ublas::column(*mat.Sparse, r);
       }
@@ -683,11 +704,11 @@ void SimpleMatrix::setCol(unsigned int r, const SiconosVector &vIn)
   if (vIn.size() != size(0))
     SiconosMatrixException::selfThrow("setCol(col,v): inconsistent sizes between this and v.");
 
-  if (_num == 6 || _num == 7)
+  if (_num == Siconos::ZERO || _num == Siconos::IDENTITY)
     SiconosMatrixException::selfThrow("setCol(col,v): current matrix is read-only (zero or identity).");
 
   {
-    if (_num == 1)
+    if (_num == Siconos::DENSE)
     {
       if (numV == 1)
       {
@@ -698,7 +719,7 @@ void SimpleMatrix::setCol(unsigned int r, const SiconosVector &vIn)
         noalias(ublas::column(*mat.Dense, r)) = *vIn.sparse();
       }
     }
-    else if (_num == 4 && numV == 4)
+    else if (_num == Siconos::SPARSE && numV == 4)
       noalias(ublas::column(*mat.Sparse, r)) = *vIn.sparse();
     else
       SiconosMatrixException::selfThrow("setCol(col,v): inconsistent types between current matrix and v.");
@@ -716,13 +737,13 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
   if (vOut->size() > size(1) - pos)
     SiconosMatrixException::selfThrow("getSubRow(row,pos,v): inconsistent sizes between this and v.");
 
-  if (_num == 7) // identity matrix
+  if (_num == Siconos::IDENTITY) // identity matrix
   {
     vOut->zero();
     if (r >= pos)
       (*vOut)(r - pos) = 1.0;
   }
-  else if (_num == 6) // Zero matrix
+  else if (_num == Siconos::ZERO) // Zero matrix
     vOut->zero();
   else
   {
@@ -731,20 +752,20 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
 
     if (numV == 1)
     {
-      if (_num == 1)
+      if (_num == Siconos::DENSE)
       {
         //      noalias(*(vOut->dense())) = ublas::row(ublas::subrange(*mat.Dense, r, r+1,pos, endPos),0);
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
       }
-      else if (_num == 2)
+      else if (_num == Siconos::TRIANGULAR)
       {
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<TriangMat >(*mat.Triang, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
       }
-      else if (_num == 3)
+      else if (_num == Siconos::SYMMETRIC)
       {
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<SymMat >(*mat.Sym, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
       }
-      else if (_num == 4)
+      else if (_num == Siconos::SPARSE)
       {
         // #ifdef BOOST_LIMITATION
         //         SiconosMatrixException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
@@ -752,12 +773,12 @@ void SimpleMatrix::getSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
         // #endif
       }
-      else //if(_num==5){
+      else //if(_num == Siconos::BANDED){
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<BandedMat >(*mat.Banded, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl));
     }
     else // if numV == 4
     {
-      if (_num == 4)
+      if (_num == Siconos::SPARSE)
       {
 #ifdef BOOST_LIMITATION
         SiconosMatrixException("SimpleMatrix::getSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
@@ -782,12 +803,12 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
   if (vIn->size() > size(1) - pos)
     SiconosMatrixException::selfThrow("setSubRow(row,v): inconsistent sizes between this and v.");
 
-  if (_num == 6 || _num == 7)
+  if (_num == Siconos::ZERO || _num == Siconos::IDENTITY)
     SiconosMatrixException::selfThrow("setSubRow(row,v): current matrix is read-only (zero or identity).");
 
   {
     unsigned int nbEl = vIn->size();
-    if (_num == 1)
+    if (_num == Siconos::DENSE)
     {
       if (numV == 1)
       {
@@ -798,7 +819,7 @@ void SimpleMatrix::setSubRow(unsigned int r, unsigned int pos, SP::SiconosVector
         ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(r, 0, nbEl), ublas::slice(pos, 1, nbEl)) = *vIn->sparse();
       }
     }
-    else if (_num == 4 && numV == 4)
+    else if (_num == Siconos::SPARSE && numV == 4)
 #ifdef BOOST_LIMITATION
       SiconosMatrixException("SimpleMatrix::setSubRow warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
@@ -820,13 +841,13 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
   if (vOut->size() > size(0) - pos)
     SiconosMatrixException::selfThrow("getSubCol(col,pos,v): inconsistent sizes between this and v.");
 
-  if (_num == 7) // identity matrix
+  if (_num == Siconos::IDENTITY) // identity matrix
   {
     vOut->zero();
     if (r >= pos)
       (*vOut)(r - pos) = 1.0;
   }
-  else if (_num == 6) // Zero matrix
+  else if (_num == Siconos::ZERO) // Zero matrix
     vOut->zero();
   else
   {
@@ -835,20 +856,20 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
 
     if (numV == 1)
     {
-      if (_num == 1)
+      if (_num == Siconos::DENSE)
       {
         //      noalias(*(vOut->dense())) = ublas::row(ublas::subrange(*mat.Dense, r, r+1,pos, endPos),0);
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
       }
-      else if (_num == 2)
+      else if (_num == Siconos::TRIANGULAR)
       {
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<TriangMat >(*mat.Triang, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
       }
-      else if (_num == 3)
+      else if (_num == Siconos::SYMMETRIC)
       {
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<SymMat >(*mat.Sym, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
       }
-      else if (_num == 4)
+      else if (_num == Siconos::SPARSE)
       {
 #ifdef BOOST_LIMITATION
         SiconosMatrixException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
@@ -856,12 +877,12 @@ void SimpleMatrix::getSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<SparseMat >(*mat.Sparse, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
 #endif
       }
-      else //if(_num==5){
+      else //if(_num == Siconos::BANDED){
         noalias(*(vOut->dense())) = ublas::matrix_vector_slice<BandedMat >(*mat.Banded, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl));
     }
     else // if numV == 4
     {
-      if (_num == 4)
+      if (_num == Siconos::SPARSE)
       {
 #ifdef BOOST_LIMITATION
         SiconosMatrixException("SimpleMatrix::getSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
@@ -886,12 +907,12 @@ void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
   if (vIn->size() > size(0) - pos)
     SiconosMatrixException::selfThrow("setSubCol(col,v): inconsistent sizes between this and v.");
 
-  if (_num == 6 || _num == 7)
+  if (_num == Siconos::ZERO || _num == Siconos::IDENTITY)
     SiconosMatrixException::selfThrow("setSubCol(col,v): current matrix is read-only (zero or identity).");
 
   {
     unsigned int nbEl = vIn->size();
-    if (_num == 1)
+    if (_num == Siconos::DENSE)
     {
       if (numV == 1)
       {
@@ -902,7 +923,7 @@ void SimpleMatrix::setSubCol(unsigned int r, unsigned int pos, SP::SiconosVector
         ublas::matrix_vector_slice<DenseMat >(*mat.Dense, ublas::slice(pos, 1, nbEl), ublas::slice(r, 0, nbEl)) = *vIn->sparse();
       }
     }
-    else if (_num == 4 && numV == 4)
+    else if (_num == Siconos::SPARSE && numV == 4)
 #ifdef BOOST_LIMITATION
       SiconosMatrixException("SimpleMatrix::setSubCol warning - ublas::matrix_vector_slice<SparseMat> does not exist for your boost distribution and your architecture.");
 #else

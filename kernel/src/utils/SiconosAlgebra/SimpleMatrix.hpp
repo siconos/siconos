@@ -31,7 +31,10 @@ const std::string transpose = "transpose";
  *
  * SimpleMatrix is used in the platform to store matrices (mathematical object) of double.
  *
- * Possible types: Siconos::DENSE (default), TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, Siconos::IDENTITY.
+ * Possible types: Siconos::DENSE (default), 
+ *                          TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO,
+ *                          Siconos::IDENTITY, 
+ *                          Siconos::SPARSE_COORDINATE.
  *
  * \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
 
@@ -308,6 +311,13 @@ public:
    *  \return a SparseMat
    */
   const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0) const;
+  
+  /** get SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
+   *  \return a SparseCoordinateMat
+   */
+  const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get ZeroMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
@@ -357,6 +367,13 @@ public:
    *  \return a SparseMat*
    */
   SparseMat* sparse(unsigned int row = 0, unsigned int col = 0) const;
+  
+  /** get a pointer on SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
+   *  \return a SparseCoordinateMat*
+   */
+  SparseCoordinateMat* sparseCoordinate(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get a pointer on ZeroMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
