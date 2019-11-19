@@ -86,7 +86,6 @@ AVI::AVI(int numericsSolverId): LinearOSNS(numericsSolverId)
 {
   _numerics_problem.reset(new AffineVariationalInequalities);
   _numerics_problem->poly.split = new polyhedron;
-  solver_options_set(_numerics_solver_options.get(), numericsSolverId);
 }
 
 void AVI::initialize(SP::Simulation sim)
@@ -171,17 +170,8 @@ void AVI::display() const
   LinearOSNS::display();
 }
 
-void AVI::setSolverId(int solverId)
-{
-  // clear previous Solveroptions
-  solver_options_clear(_numerics_solver_options.get());
-  solver_options_set(_numerics_solver_options.get(), solverId);
-}
-
-
 AVI::~AVI()
 {
-  solver_options_clear(&*_numerics_solver_options);
   delete _numerics_problem->poly.split;
 }
 

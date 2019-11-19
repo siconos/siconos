@@ -15,16 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>                         // for printf, FILE
-#include <stdlib.h>                        // for calloc, free
-#include <assert.h>                        // for assert
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for free, calloc
 #include "GenericMechanicalProblem.h"      // for GenericMechanicalProblem
 #include "GenericMechanical_Solvers.h"     // for gmp_compute_error, gmp_driver
 #include "NumericsFwd.h"                   // for SolverOptions, GenericMech...
-#include "SolverOptions.h"                 // for SolverOptions
-#include "genericMechanical_test_utils.h"  // for genericMechanical_test_fun...
-#include "test_utils.h"
-
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
+#include "genericMechanical_test_utils.h"  // for gmp_test_function
+#include "test_utils.h"                    // for TestCase
 int gmp_test_function(TestCase* current)
 {
 

@@ -16,22 +16,19 @@
  * limitations under the License.
 */
 
-#include <math.h>                           // for fabs
 #include <stdio.h>                          // for printf
 #include <stdlib.h>                         // for free, malloc
 #include "ConvexQP.h"                       // for ConvexQP
-#include "ConvexQP_Solvers.h"               // for convexQP_VI_solver, conve...
+#include "ConvexQP_Solvers.h"               // for convexQP_VI_solver
 #include "ConvexQP_as_VI.h"                 // for ConvexQP_as_VI, Function_...
 #include "ConvexQP_computeError.h"          // for convexQP_compute_error_re...
-#include "ConvexQP_cst.h"                   // for SICONOS_CONVEXQP_VI_FPP
+#include "ConvexQP_cst.h"                   // for SICONOS_CONVEXQP_VI_EG
 #include "NumericsFwd.h"                    // for SolverOptions, Variationa...
-#include "NSSTools.h"                    // for min
-#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
-#include "VI_cst.h"                         // for SICONOS_VI_EG, SICONOS_VI...
+#include "SiconosBlas.h"                    // for cblas_dnrm2
+#include "SolverOptions.h"                  // for SolverOptions, SICONOS_DP...
 #include "VariationalInequality.h"          // for VariationalInequality
-#include "VariationalInequality_Solvers.h"  // for variationalInequality_set...
+#include "VariationalInequality_Solvers.h"  // for variationalInequality_Ext...
 #include "numerics_verbose.h"               // for numerics_error, verbose
-#include "SiconosBlas.h"                          // for cblas_dnrm2
 
 const char* const   SICONOS_CONVEXQP_VI_FPP_STR = "CONVEXQP VI FPP";
 const char* const   SICONOS_CONVEXQP_VI_EG_STR = "CONVEXQP VI EG";
@@ -57,7 +54,6 @@ void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, Solv
   vi->F = &Function_VI_CQP;
   vi->ProjectionOnX = &Projection_VI_CQP;
 
-  int iter=0;
   double error=1e24;
 
   ConvexQP_as_VI *convexQP_as_vi= (ConvexQP_as_VI*)malloc(sizeof(ConvexQP_as_VI));

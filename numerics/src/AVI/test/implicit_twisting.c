@@ -73,8 +73,7 @@ int main(void)
   avi.d = NULL;
   avi.poly.split = &poly;
 
-  SolverOptions options;
-  solver_options_set(&options, SICONOS_AVI_CAOFERRIS);
+  SolverOptions * options = solver_options_create(SICONOS_AVI_CAOFERRIS);
 
   _Bool c1, c2, c3, c4;
   unsigned N = 0;
@@ -89,7 +88,7 @@ int main(void)
     sigma[0] = 0.0;
     sigma[1] = 0.0;
 
-    info = avi_caoferris(&avi, lambda, sigma, &options);
+    info = avi_caoferris(&avi, lambda, sigma, options);
     if (info) fprintf(stderr, "SOLVER FAILED!\tinfo=%d\n", info);
 
 /* /    printf("x_k: %2.6e %2.6e\n", x[0], x[1]);
@@ -140,7 +139,7 @@ int main(void)
 
   printf("final x: %2.6e %2.6e\n", sigma[0], sigma[1]);
 
-  solver_options_clear(&options);
+  solver_options_clear(options);
   return info;
 
 expose_failure:

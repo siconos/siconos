@@ -69,7 +69,6 @@ public:
   virtual ~AVI();
 
   void initialize(SP::Simulation sim);
-  virtual void setSolverId(int solverId);
 
   /** Compute the unknown z and update the Interaction (y and lambda)
    *  \param time current time

@@ -31,7 +31,7 @@
 
   ~SolverOptions()
   {
-    solver_options_clear(&$self);
+    solver_options_clear($self);
   }
 
 };

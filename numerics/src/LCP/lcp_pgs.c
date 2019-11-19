@@ -22,17 +22,16 @@
 #ifndef __cplusplus
 #include <stdbool.h>                       // for false
 #endif
-#include <stdio.h>                         // for printf, NULL
-#include <stdlib.h>                        // for calloc, free, malloc
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for free, malloc
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_pgs
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "debug.h"                         // for DEBUG_PRINTF
-#include "lcp_cst.h"                       // for SICONOS_LCP_PGS
 #include "numerics_verbose.h"              // for verbose
-#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 
 void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {

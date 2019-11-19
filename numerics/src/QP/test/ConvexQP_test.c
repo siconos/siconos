@@ -154,7 +154,7 @@ static int test_1(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=w[%i]=%f\n",i,i,w[i]);
   }
 
-  solver_options_clear(&options);
+  solver_options_clear(options);
   return info;
 }
 
@@ -241,7 +241,7 @@ static int test_2(void)
     printf("z[%i]=%f\t",i,z[i]); printf("w[%i]=%f\t",i,w[i]);    printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
   }
 
-  solver_options_clear(&options);
+  solver_options_clear(options);
   return info;
 }
 
@@ -354,7 +354,7 @@ static int test_3(void)
     printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
   }
 
-  solver_options_clear(&options);
+  solver_options_clear(options);
   return info;
 }
 
@@ -467,7 +467,7 @@ static int test_4(void)
     printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
   }
 
-  solver_options_clear(&options);
+  solver_options_clear(options);
   return info;
 }
 
@@ -579,8 +579,8 @@ static int test_5(void)
     printf("u[%i]=%f\t",i,u[i]); printf("xi[%i]=%f\n",i,xi[i]);
   }
 
-  solver_options_clear(&options);
-
+  solver_options_clear(options);
+  options = NULL;
   return info;
 }
 

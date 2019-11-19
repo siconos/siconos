@@ -625,6 +625,9 @@ def generate_cmakelists(args):
     result = 'project({} CXX C)\n'.format(args.exe_name)
     # cmake minimum version
     result += 'cmake_minimum_required(VERSION 3.7)\n'
+    if cmake_version >= version.parse("3.12"):
+        result += 'cmake_policy(SET CMP0074 NEW)\n'
+        
     if args.debug:
         build_type = 'Debug'
     else:

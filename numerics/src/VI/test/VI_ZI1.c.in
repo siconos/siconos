@@ -168,8 +168,8 @@ int main(void)
     xk[1] = F[1];
     t = k*sim_data.h;
   }
-  solver_options_clear(&options);
-
+  solver_options_clear(options);
+  options = NULL;
   free(problem->nabla_F);
   problem->nabla_F = NULL;
   free(problem);

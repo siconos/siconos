@@ -30,11 +30,7 @@ Ferris solves the subsequent AVI.
 #include "RelayProblem.h"                   // for RelayProblem
 #include "Relay_Solvers.h"                  // for relay_avi_caoferris_test
 #include "SiconosSets.h"                    // for polyhedron, free_polyhedron
-#include "SolverOptions.h"                  // for solver_options_set
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
 #include "debug.h"                          // for DEBUG_EXPR_WE, DEBUG_PRINT
-#include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERR...
 
 void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {

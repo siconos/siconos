@@ -34,17 +34,21 @@ dim(v)=nn
 **************************************************************************/
 
 #include "mlcp_direct.h"
+#ifndef __cplusplus
+#include <stdbool.h>                       // for false
+#endif
 #include <stdio.h>                              // for printf
 #include <stdlib.h>                             // for malloc, exit, free
-#include "MLCP_Solvers.h"                       // for mlcp_direct
+#include "MLCP_Solvers.h"                       // for mlcp_direct, mlcp_dir...
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "NumericsMatrix.h"                     // for NM_dense_display, Num...
+#include "SiconosBlas.h"                        // for cblas_dgemv, CblasCol...
+#include "SiconosLapack.h"                      // for lapack_int, DGETRF
 #include "SolverOptions.h"                      // for SolverOptions
+#include "mlcp_cst.h"                           // for SICONOS_IPARAM_MLCP_N...
 #include "mlcp_tool.h"                          // for mlcp_buildM, mlcp_fil...
 #include "numerics_verbose.h"                   // for verbose
-#include "SiconosBlas.h"                              // for cblas_dgemv, CblasCol...
-#include "SiconosLapack.h"                      // for lapack_int, DGETRF
-#include "mlcp_cst.h"
+#include "SiconosConfig.h"                      // for DIRECT_SOLVER_USE_DGETRI // IWYU pragma: keep
 
 #define DIRECT_SOLVER_USE_DGETRI
 double * sVBuf;

@@ -23,12 +23,10 @@
 #include "NumericsFwd.h"             // for SolverOptions, SparseBlockStruct...
 #include "NumericsMatrix.h"          // for NM_new_SBM
 #include "NumericsVerbose.h"         // for numerics_set_verbose
-#include "SiconosConfig.h"           // for WITH_FCLIB
+#include "SiconosConfig.h"           // for WITH_FCLIB // IWYU pragma: keep
 #include "SolverOptions.h"           // for SolverOptions, SICONOS_IPARAM_IT...
 #include "SparseBlockMatrix.h"       // for SBCM_free_3x3, SBCM_new_3x3, SBC...
 #include "debug.h"                   // for DEBUG_EXPR
-#include "fc3d_Solvers.h"            // for fc3d_setDefaultSolverOptions
-
 
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H
@@ -226,7 +224,8 @@ int fc3d_LmgcDriver(double *reaction,
   free(M->block);
   free(M);
   free(FC);
-  solver_options_clear(&numerics_solver_options);
+  solver_options_clear(numerics_solver_options);
+  numerics_solver_options = NULL;
   free(NM);
   free(MC);
 

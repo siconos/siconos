@@ -16,20 +16,20 @@
  * limitations under the License.
 */
 
-#include <stdio.h>                                     // for printf, fprintf
-#include <stdlib.h>                                    // for calloc, exit
-#include "FrictionContactProblem.h"                    // for FrictionContac...
-#include "Friction_cst.h"                              // for SICONOS_FRICTI...
-#include "NumericsFwd.h"                               // for SolverOptions
-#include "NumericsMatrix.h"                            // for NumericsMatrix
-#include "SolverOptions.h"                             // for SolverOptions
-#include "fc3d_Solvers.h"                              // for ComputeErrorPtr
-#include "fc3d_compute_error.h"                        // for fc3d_compute_e...
-#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for fc3d_onecontac...
-#include "fc3d_projection.h"                           // for fc3d_projectio...
-#include "numerics_verbose.h"                          // for numerics_error
-#include "pinv.h"                                      // for pinv
-#include "SiconosBlas.h"                                     // for cblas_dnrm2
+#include <assert.h>                  // for assert
+#include <stdio.h>                   // for printf, fprintf, NULL, stderr
+#include <stdlib.h>                  // for exit, EXIT_FAILURE
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ONECONTACT_NSN
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NumericsMatrix
+#include "SiconosBlas.h"             // for cblas_dnrm2
+#include "SolverOptions.h"           // for SolverOptions, SICONOS_DPARAM_TOL
+#include "fc3d_Solvers.h"            // for ComputeErrorPtr, FreeSolverPtr
+#include "fc3d_compute_error.h"      // for fc3d_compute_error_velocity
+#include "fc3d_projection.h"         // for fc3d_projection_initialize, fc3d...
+#include "numerics_verbose.h"        // for numerics_error, verbose
+#include "pinv.h"                    // for pinv
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

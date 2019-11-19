@@ -40,7 +40,7 @@ GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
 {
   _numericsMatrixStorageType = NM_SPARSE_BLOCK;
   _pnumerics_GMP = genericMechanicalProblem_new();
-  gmp_setDefaultSolverOptions(&*_numerics_solver_options, FC3D_Solver_Id);
+  solver_options_update_internal(&*_numerics_solver_options, 1, FC3D_Solver_Id);
 }
 
 
@@ -205,7 +205,6 @@ GenericMechanical::~GenericMechanical()
 {
   genericMechanicalProblem_free(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
   _pnumerics_GMP = 0;
-  solver_options_clear(&*_numerics_solver_options);
 }
 
 

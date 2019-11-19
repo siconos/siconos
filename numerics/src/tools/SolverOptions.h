@@ -125,9 +125,9 @@ extern "C"
 
   /** Clear and free all pointer members of the structure, then
       release memory
-      \param options the structure to be cleared, NULL on exit.
+      \param options the structure to be cleared.
   */
-  void solver_options_clear(SolverOptions ** options);
+  void solver_options_clear(SolverOptions * options);
 
   /** Create and initialize a SolverOptions struct:
       allocate internal memories, set default values 
@@ -176,15 +176,12 @@ extern "C"
    * \return the name of the solver
    */
   const char * solver_options_id_to_name(int Id);
-
-  /** copy SolverOptions
-   * \param options_ori the structure to copy
-   * \param options the output structure 
-   */
-  // void solver_options_copy(SolverOptions* options_ori, SolverOptions* options);
-
-
   
+  /** return the an internal solver options set
+      \param options parent options
+      \param number of the targeted solver
+      \return a pointer to the internal solver options set 
+   */
   SolverOptions * solver_options_get_internal_solver(SolverOptions * options, size_t n);
   
   

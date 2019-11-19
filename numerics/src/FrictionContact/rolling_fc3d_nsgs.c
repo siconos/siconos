@@ -44,30 +44,30 @@ static int fccounter = -1;
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-static void rolling_fc3d_nsgs_update(int contact, RollingFrictionContactProblem* problem, RollingFrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
-{
-  /* Build a local problem for a specific contact
-     reaction corresponds to the global vector (size n) of the global problem.
-  */
-  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  /* Build a local problem for a specific contact
-     reaction corresponds to the global vector (size n) of the global problem.
-  */
+/* static void rolling_fc3d_nsgs_update(int contact, RollingFrictionContactProblem* problem, RollingFrictionContactProblem* localproblem, double * reaction, SolverOptions* options) */
+/* { */
+/*   /\* Build a local problem for a specific contact */
+/*      reaction corresponds to the global vector (size n) of the global problem. */
+/*   *\/ */
+/*   /\* Call the update function which depends on the storage for MGlobal/MBGlobal *\/ */
+/*   /\* Build a local problem for a specific contact */
+/*      reaction corresponds to the global vector (size n) of the global problem. */
+/*   *\/ */
 
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  rolling_fc3d_local_problem_fill_M(problem, localproblem, contact);
+/*   /\* The part of MGlobal which corresponds to the current block is copied into MLocal *\/ */
+/*   rolling_fc3d_local_problem_fill_M(problem, localproblem, contact); */
 
-  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
-         excluding the block corresponding to the current contact. ****/
-  rolling_fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
+/*   /\****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock, */
+/*          excluding the block corresponding to the current contact. ****\/ */
+/*   rolling_fc3d_local_problem_compute_q(problem, localproblem, reaction, contact); */
 
-  /* Friction coefficient for current block*/
-  localproblem->mu[0] = problem->mu[contact];
-  /* Rolling Friction coefficient for current block*/
-  localproblem->mu_r[0] = problem->mu_r[contact];
+/*   /\* Friction coefficient for current block*\/ */
+/*   localproblem->mu[0] = problem->mu[contact]; */
+/*   /\* Rolling Friction coefficient for current block*\/ */
+/*   localproblem->mu_r[0] = problem->mu_r[contact]; */
 
 
-}
+/* } */
 
 void rolling_fc3d_nsgs_initialize_local_solver(RollingSolverPtr* solve, RollingUpdatePtr* update,
                                                RollingFreeSolverNSGSPtr* freeSolver,

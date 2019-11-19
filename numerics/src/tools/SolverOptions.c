@@ -19,41 +19,36 @@
 #include "SolverOptions.h"
 #include <assert.h>                         // for assert
 #include <float.h>                          // for DBL_EPSILON
-#include <stdio.h>                          // for NULL, printf
-#include <stdlib.h>                         // for free, calloc, exit, malloc
+#include <math.h>                           // for INFINITY
+#include <stdio.h>                          // for NULL, size_t, printf
+#include <stdlib.h>                         // for free, calloc, malloc
 #include <string.h>                         // for strcmp
 #include "AVI_cst.h"                        // for SICONOS_AVI_CAOFERRIS_STR
+#include "ConvexQP_Solvers.h"               // for convexQP_ADMM_set_options
 #include "ConvexQP_cst.h"                   // for SICONOS_CONVEXQP_ADMM_STR
 #include "Friction_cst.h"                   // for SICONOS_FRICTION_2D_CPG_STR
-#include "fc3d_Solvers.h"                   // for fc3d_ACLMFP_set_options ...
-#include "fc2d_Solvers.h"                   // for fc2d_nsgs_set_options ...
-#include "GenericMechanical_cst.h"          // for SICONOS_GENERIC_MECHANICA...
 #include "GenericMechanical_Solvers.h"      // for gmp_set_options
+#include "GenericMechanical_cst.h"          // for SICONOS_GENERIC_MECHANICA...
+#include "LCP_Solvers.h"                    // for lcp_pivot_set_options
 #include "MCP_cst.h"                        // for SICONOS_MCP_NEWTON_FB_FBL...
+#include "MLCP_Solvers.h"                   // for mlcp_direct_set_options
 #include "NCP_cst.h"                        // for SICONOS_NCP_NEWTON_FB_FBL...
-#include "Newton_methods.h"                 // for newton_LSA_check_solverId
-#include "PathSearch.h"                     // for free_solverData_PathSearch
+#include "Newton_methods.h"                 // for newton_lsa_set_options
+#include "NonSmoothNewton.h"                // for nonSmoothNewton_set_options
+#include "PathSearch.h"                     // for pathsearch_set_options
+#include "SOCLCP_Solvers.h"                 // for soclcp_nsgs_set_options
 #include "SOCLCP_cst.h"                     // for SICONOS_SOCLCP_NSGS_STR
-#include "SOCLCP_Solvers.h"                     // for soclcp_nsgs_set_options
 #include "SiconosNumerics_Solvers.h"        // for SICONOS_REGISTER_SOLVERS
-#include "VI_cst.h"                         // for SICONOS_VI_BOX_AVI_LSA
-#include "VariationalInequality_Solvers.h"  // for vi_box_AVI_extra_SolverOp...
+#include "VI_cst.h"                         // for SICONOS_VI_BOX_AVI_LSA_STR
+#include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
+#include "fc2d_Solvers.h"                   // for fc2d_latin_set_options
+#include "fc3d_Solvers.h"                   // for fc3d_nsgs_set_options
+#include "gfc3d_Solvers.h"                  // for gfc3d_aclmfp_set_options
 #include "lcp_cst.h"                        // for SICONOS_LCP_AVI_CAOFERRIS...
-#include "LCP_Solvers.h"
-#include "ConvexQP_Solvers.h"
 #include "mlcp_cst.h"                       // for SICONOS_MLCP_DIRECT_ENUM_STR
-#include "numerics_verbose.h"               // for numerics_printf
+#include "numerics_verbose.h"               // for numerics_printf, numerics...
 #include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERR...
-#include "ConvexQP_cst.h"                   // for SICONOS_CONVEXQP_ADMM
-#include "SiconosConfig.h"   // for HAVE_GAMS_C_API  // IWYU pragma: keep
-#include "Newton_methods.h"
-#include "MLCP_Solvers.h"
-#include "NonSmoothNewton.h"
-#include "gfc3d_Solvers.h"
-#include "rolling_fc3d_Solvers.h"
-#ifdef HAVE_GAMS_C_API
-#include "GAMSlink.h"        // for deleteGAMSparams
-#endif
+#include "rolling_fc3d_Solvers.h"           // for rfc3d_poc_set_options
 
 /** Create a struct SolverOptions and initialize its content.
     
@@ -191,9 +186,8 @@ void solver_options_print(SolverOptions* options)
 
 
 
-void solver_options_clear(SolverOptions** options)
+void solver_options_clear(SolverOptions* op)
 {
-  SolverOptions * op = *options;
   if(op)
   {
     // Clear solverParameters and solverData, before anything.
@@ -218,7 +212,7 @@ void solver_options_clear(SolverOptions** options)
     if(op->internalSolvers)
       {
         for(size_t i = 0; i < op->numberOfInternalSolvers; i++)
-          solver_options_clear(&op->internalSolvers[i]);
+          solver_options_clear(op->internalSolvers[i]);
         op->numberOfInternalSolvers = 0;
         free(op->internalSolvers);
       }
@@ -245,7 +239,6 @@ void solver_options_clear(SolverOptions** options)
     op->isSet = false;
   }
   free(op);
-  op = NULL;
 }
 
 SolverOptions * solver_options_copy(SolverOptions* source)
@@ -903,7 +896,7 @@ void solver_options_update_internal(SolverOptions* parent, size_t internal_solve
   assert(parent->numberOfInternalSolvers > internal_solver_number);
 
   // Destroy current internal solver and create a new one with the new id.
-  solver_options_clear(&parent->internalSolvers[internal_solver_number]);
+  solver_options_clear(parent->internalSolvers[internal_solver_number]);
   parent->internalSolvers[internal_solver_number] = solver_options_create(solver_id);
 }
 

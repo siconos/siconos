@@ -18,20 +18,19 @@
 */
 
 #include <math.h>                                         // for fabs
-#include <stdio.h>                                        // for printf, NULL
-#include <stdlib.h>                                       // for malloc, free
-#include <string.h>                                       // for memcpy
+#include <stdio.h>                                        // for printf
+#include <stdlib.h>                                       // for free, malloc
+#include <string.h>                                       // for NULL, memcpy
 #include "FrictionContactProblem.h"                       // for FrictionCon...
-#include "Friction_cst.h"                                 // for SICONOS_FRI...
-#include "NumericsFwd.h"                                  // for SolverOptions
-#include "SOCLCP_Solvers.h"                               // for soclcp_nsgs...
+#include "NumericsFwd.h"                                  // for SecondOrder...
+#include "SOCLCP_Solvers.h"                               // for soclcp_nsgs
 #include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "SiconosBlas.h"                                  // for cblas_dnrm2
 #include "SolverOptions.h"                                // for SolverOptions
 #include "fc3d_Solvers.h"                                 // for fc3d_SOCLCP
 #include "fc3d_compute_error.h"                           // for fc3d_comput...
 #include "numerics_verbose.h"                             // for verbose
-#include "SiconosBlas.h"                                        // for cblas_dnrm2
 
 
 /** pointer to function used to call internal solver for proximal point solver */
@@ -40,7 +39,6 @@ typedef void (*soclcp_InternalSolverPtr)(SecondOrderConeLinearComplementarityPro
 void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
   /* int and double parameters */
-  int* iparam = options->iparam;
   double* dparam = options->dparam;
 
   /* Number of contacts */

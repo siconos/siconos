@@ -73,7 +73,7 @@ public:
   LCP(int numericsSolverId = SICONOS_LCP_LEMKE);
 
   /** destructor */
-  ~LCP();
+  ~LCP(){};
 
   /** Call numerics solver.
       \return int information about the solver convergence

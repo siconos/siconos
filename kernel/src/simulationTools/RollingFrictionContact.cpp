@@ -30,11 +30,8 @@ using namespace RELATION;
 RollingFrictionContact::RollingFrictionContact(int dimPb, int numericsSolverId):
   LinearOSNS(numericsSolverId), _contactProblemDim(dimPb)
 {
-  // if (dimPb == 2 && numericsSolverId == SICONOS_FRICTION_3D_NSGS)
-  //   _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
   if (dimPb == 5)
   {
-    rolling_fc3d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
     _rolling_frictionContact_driver = &rolling_fc3d_driver;
   }
   else
@@ -179,9 +176,4 @@ void RollingFrictionContact::display() const
   std::cout << "===== " << _contactProblemDim << "D Rolling Friction Contact Problem " <<std::endl;
   std::cout << "of size " << _sizeOutput << "(ie " << _sizeOutput / _contactProblemDim << " contacts)." <<std::endl;
   LinearOSNS::display();
-}
-
-RollingFrictionContact::~RollingFrictionContact()
-{
-  solver_options_clear(&*_numerics_solver_options);
 }

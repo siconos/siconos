@@ -15,22 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <math.h>                           // for fabs
-#include <stdio.h>                          // for printf, NULL
+
+#include <stdio.h>                          // for printf
 #include <stdlib.h>                         // for free, malloc
 #include "FrictionContactProblem.h"         // for FrictionContactProblem
 #include "FrictionContactProblem_as_VI.h"   // for FrictionContactProblem_as_VI
-#include "Friction_cst.h"                   // for SICONOS_FRICTION_3D_VI_EG
-#include "NumericsFwd.h"                    // for SolverOptions, Variationa...
-#include "NSSTools.h"                    // for min
-#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
-#include "VI_cst.h"                         // for SICONOS_VI_EG, SICONOS_VI...
+#include "NumericsFwd.h"                    // for VariationalInequality
+#include "SiconosBlas.h"                    // for cblas_dnrm2
+#include "SolverOptions.h"                  // for SolverOptions, SICONOS_DP...
+#include "VI_cst.h"                         // for SICONOS_VI_FPP
 #include "VariationalInequality.h"          // for VariationalInequality
-#include "VariationalInequality_Solvers.h"  // for variationalInequality_Ext...
-#include "fc3d_Solvers.h"                   // for fc3d_VI_ExtraGradient
-#include "fc3d_compute_error.h"             // for fc3d_compute_error
+#include "VariationalInequality_Solvers.h"  // for variationalInequality_Fix...
+#include "fc3d_Solvers.h"                   // for fc3d_VI_FixedPointProjection
+#include "fc3d_compute_error.h"             // for fc3d_Tresca_compute_error
 #include "numerics_verbose.h"               // for verbose
-#include "SiconosBlas.h"                          // for cblas_dnrm2
 
 void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -96,7 +94,6 @@ void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, doub
   vi->F = &Function_VI_FC3D_Cylinder;
   vi->ProjectionOnX = &Projection_VI_FC3D_Cylinder;
 
-  int iter=0;
   double error=1e24;
 
   FrictionContactProblem_as_VI *fc3d_as_vi= (FrictionContactProblem_as_VI*)malloc(sizeof(FrictionContactProblem_as_VI));

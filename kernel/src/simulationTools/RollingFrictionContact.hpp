@@ -97,7 +97,7 @@ public:
 
   /** destructor
    */
-  virtual ~RollingFrictionContact();
+  virtual ~RollingFrictionContact(){};
 
   // GETTERS/SETTERS
 

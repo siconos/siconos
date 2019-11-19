@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
-
-#include <stdio.h>                       // for NULL
 #include <stdlib.h>                      // for malloc
-#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
-#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, Solve...
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 

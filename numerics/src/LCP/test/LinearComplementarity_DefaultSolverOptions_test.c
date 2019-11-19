@@ -15,11 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>                         // for printf, fclose, fopen, FILE
-#include <stdlib.h>                        // for malloc, free
-#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
-#include "SolverOptions.h"                 // for solver_options_initialize
-#include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE, SICONOS...
+#include <stdio.h>          // for printf, NULL
+#include "NumericsFwd.h"    // for SolverOptions
+#include "SolverOptions.h"  // for solver_options_clear, solver_options_create
+#include "lcp_cst.h"        // for SICONOS_LCP_NSGS_SBM, SICONOS_LCP_AVI_CAO...
 
 int main(void)
 {
@@ -39,7 +38,9 @@ int main(void)
     {
       options = solver_options_create(solvers[s]);
       solver_options_print(options);
-      solver_options_clear(&options);
+      solver_options_clear(options);
+      options = NULL;
+        
     }
 
   printf("\n End of test on Default SolverOptions\n");

@@ -55,7 +55,8 @@ void free_test_collection(TestCase* collection, int nb_tests)
 {
   for(int i=0;i<nb_tests;++i)
     {
-      solver_options_clear(&collection[i].options); //called at the end of the test
+      solver_options_clear(collection[i].options);
+      collection[i].options = NULL;
     }
 
   free(collection);
@@ -137,7 +138,7 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
       printf("\n################# start of test # %i #######################\n", test_num);
       printf("Solver : %s (id: %d) \n", solver_options_id_to_name(collection[test_num].options->solverId),
              collection[test_num].options->solverId);
-      for(int i=0;i<collection[test_num].options->numberOfInternalSolvers;++i)
+      for(size_t i=0;i<collection[test_num].options->numberOfInternalSolvers;++i)
         {
           int sid = collection[test_num].options->internalSolvers[i]->solverId;
           const char * internal_name = solver_options_id_to_name(sid);

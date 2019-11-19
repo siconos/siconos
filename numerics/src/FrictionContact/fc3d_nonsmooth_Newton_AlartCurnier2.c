@@ -184,7 +184,9 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
     options_vi_eg->dparam[SICONOS_DPARAM_TOL] = sqrt(options->dparam[SICONOS_DPARAM_TOL]);
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
     fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
-    solver_options_clear(&options_vi_eg);
+    solver_options_clear(options_vi_eg);
+    options_vi_eg = NULL;
+
     newton_LSA(problemSize, reaction, velocity, info, (void *)&opaque_data, options, &functions_AC);
   }
   else if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO)

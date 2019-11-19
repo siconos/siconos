@@ -17,13 +17,17 @@
 */
 #include <float.h>                              // for DBL_EPSILON
 #include <math.h>                               // for fabs
+#ifndef __cplusplus
+#include <stdbool.h>                       // for false
+#endif
 #include <stdio.h>                              // for printf
 #include <stdlib.h>                             // for free, malloc, exit
 #include "MLCP_Solvers.h"                       // for mlcp_compute_error
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
-#include "NumericsFwd.h"                        // for MixedLinearComplement...
-#include "SolverOptions.h"                      // for SolverOptions
-#include "SiconosBlas.h"                              // for cblas_ddot
+#include "NumericsFwd.h"                        // for SolverOptions, MixedL...
+#include "SiconosBlas.h"                        // for cblas_ddot
+#include "SolverOptions.h"                      // for SolverOptions, SICONO...
+#include "mlcp_cst.h"                           // for SICONOS_DPARAM_MLCP_O...
 
 /*
  *

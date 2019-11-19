@@ -18,7 +18,6 @@
 
 #include <stdio.h>                        // for printf, NULL
 #include <stdlib.h>                       // for free, malloc, calloc
-#include "MCP_Solvers.h"                  // for mcp_setDefaultSolverOptions
 #include "MCP_cst.h"                      // for SICONOS_MCP_NEWTON_FB_FBLSA
 #include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem
 #include "NonSmoothDrivers.h"             // for mcp_driver
@@ -141,7 +140,8 @@ static int test_mcp_newton(int solverId)
     printf("w[%i]= %lf\t", i, w[i]);
   }
   printf("\n");
-  solver_options_clear(&options);
+  solver_options_clear(options);
+  options = NULL;
   free(z);
   free(w);
   free_mcp_1(problem);

@@ -15,21 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <math.h>                                // for fabs
 #include <stdio.h>                               // for printf, NULL
 #include <stdlib.h>                              // for free, malloc
 #include "ConvexQP.h"                            // for ConvexQP
 #include "ConvexQP_Solvers.h"                    // for convexQP_ProjectedGr...
+#include "ConvexQP_cst.h"                        // for SICONOS_CONVEXQP_PG
 #include "FrictionContactProblem.h"              // for FrictionContactProblem
 #include "FrictionContactProblem_as_ConvexQP.h"  // for FrictionContactProbl...
-#include "Friction_cst.h"                        // for SICONOS_FRICTION_3D_...
-#include "NumericsFwd.h"                         // for SolverOptions, ConvexQP
-#include "NSSTools.h"                         // for min
-#include "SolverOptions.h"                       // for SolverOptions, solve...
+#include "NumericsFwd.h"                         // for ConvexQP, SolverOptions
+#include "SiconosBlas.h"                         // for cblas_dnrm2
+#include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "fc3d_Solvers.h"                        // for fc3d_ConvexQP_Projec...
 #include "fc3d_compute_error.h"                  // for fc3d_Tresca_compute_...
 #include "numerics_verbose.h"                    // for verbose
-#include "SiconosBlas.h"                               // for cblas_dnrm2
 
 void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {

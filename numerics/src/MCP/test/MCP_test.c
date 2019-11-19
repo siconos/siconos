@@ -69,7 +69,9 @@ int main(void)
   printf("End of MCP solvers test. \n");
   mcp_old_driver_reset(problem, options);
   mixedComplementarityProblem_old_free(problem);
-  solver_options_clear(&options);
+  solver_options_clear(options);
+  options = NULL;
+
 
   return info;
 }

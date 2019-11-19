@@ -16,9 +16,7 @@
  * limitations under the License.
 */
 #include <stdio.h>                 // for printf, fclose, fopen, FILE
-#include <stdlib.h>                // for free, malloc
 #include "NumericsFwd.h"           // for SolverOptions
-#include "SOCLCP_Solvers.h"        // for soclcp_setDefaultSolverOptions
 #include "SOCLCP_cst.h"            // for SICONOS_SOCLCP_NSGS, SICONOS_SOCLC...
 #include "SolverOptions.h"         // for SolverOptions, solver_options_clear
 #include "soclcp_test_function.h"  // for soclcp_test_function
@@ -35,7 +33,9 @@ int main(void)
   printf(" atroizeoieo zi e %d %d", options->solverId, options->internalSolvers[0]->solverId);
   info = soclcp_test_function(finput, options);
 
-  solver_options_clear(&options);
+  solver_options_clear(options);
+  options = NULL;
+
   fclose(finput);
   printf("\nEnd of test on ./data/Example1_SOCLCP_SBM.dat\n");
   return info;

@@ -20,9 +20,8 @@
 #include <stdio.h>                                 // for printf
 #include <string.h>                                // for strcmp
 #include "frictionContact_test_utils.h"            // for build_test_collection
-#include "rollingFrictionContact_test_function.h"  // for rollingFrictionCon...
 #include "test_utils.h"                            // for data_collection
-#include "SiconosConfig.h" // for HAVE_GAMS_C_API // IWYU pragma: keep
+#include "SiconosConfig.h" // for SICONOS_HAS_MPI // IWYU pragma: keep
 
 #define @PROBLEM_COLLECTION@ 1
 

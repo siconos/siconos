@@ -16,20 +16,19 @@
  * limitations under the License.
 */
 
-#include <stdio.h>                         // for printf, NULL
-#include <stdlib.h>                        // for malloc, calloc, free
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for calloc, free, malloc
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
-#include "Friction_cst.h"                  // for SICONOS_FRICTION_2D_ENUM
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_enu...
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "SiconosBlas.h"                   // for cblas_dnrm2
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "fc2d_Solvers.h"                  // for fc2d_tolcp, fc2d_enum, fc2...
+#include "fc2d_Solvers.h"                  // for fc2d_tolcp, fc2d_enum
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
+#include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
 #include "numerics_verbose.h"              // for verbose
-#include "SiconosBlas.h"                         // for cblas_dnrm2
-#include "lcp_cst.h" // for SICONOS_LCP_ENUM
 
 void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {

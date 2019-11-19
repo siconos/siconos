@@ -29,19 +29,22 @@ dim(v)=nn
 #include "mlcp_enum.h"
 #include <assert.h>                             // for assert
 #include <math.h>                               // for isinf, isnan
+#ifndef __cplusplus
+#include <stdbool.h>                       // for false
+#endif
 #include <stdio.h>                              // for printf
-#include <stdlib.h>                             // for free, malloc
-#include <string.h>                             // for NULL, memcpy
+#include <string.h>                             // for memcpy
 #include "MLCP_Solvers.h"                       // for mlcp_compute_error
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "NumericsMatrix.h"                     // for NM_dense_display, Num...
 #include "SiconosBlas.h"                        // for cblas_dnrm2
 #include "SiconosLapack.h"                      // for DGELS, DGESV, lapack_int
-#include "SolverOptions.h"                      // for SolverOptions
-#include "mlcp_cst.h"                           // for SICONOS_IPARAM_...
+#include "SolverOptions.h"                      // for SolverOptions, SICONO...
+#include "mlcp_cst.h"                           // for SICONOS_IPARAM_MLCP_E...
 #include "mlcp_enum_tool.h"                     // for initEnum, nextEnum
 #include "mlcp_tool.h"                          // for mlcp_DisplaySolution
 #include "numerics_verbose.h"                   // for verbose
+#include "SiconosConfig.h"                      // for MLCP_DEBUG // IWYU pragma: keep
 
 #ifdef MLCP_DEBUG
 static int *sLastIWork;

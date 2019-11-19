@@ -18,21 +18,19 @@
 
 #include <stdio.h>                               // for printf
 #include <stdlib.h>                              // for free, malloc, calloc
-#include <string.h>                              // for memcpy, NULL
-#include "Friction_cst.h"                        // for SICONOS_GLOBAL_FRICT...
+#include <string.h>                              // for memcpy
 #include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 #include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
-#include "NumericsFwd.h"                         // for SolverOptions, Varia...
+#include "NumericsFwd.h"                         // for VariationalInequality
 #include "NumericsMatrix.h"                      // for NumericsMatrix
-#include "SolverOptions.h"                       // for SolverOptions, solve...
-#include "VI_cst.h"                              // for SICONOS_VI_EG
+#include "SiconosBlas.h"                         // for cblas_dnrm2
+#include "SolverOptions.h"                       // for SolverOptions, SICON...
 #include "VariationalInequality.h"               // for VariationalInequality
 #include "VariationalInequality_Solvers.h"       // for variationalInequalit...
 #include "debug.h"                               // for DEBUG_EXPR, DEBUG_BEGIN
 #include "gfc3d_Solvers.h"                       // for gfc3d_VI_FixedPointP...
 #include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
 #include "numerics_verbose.h"                    // for verbose
-#include "SiconosBlas.h"                               // for cblas_dnrm2
 
 #ifdef  DEBUG_MESSAGES
 #include "NumericsVector.h"
@@ -60,7 +58,6 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   vi->F = &Function_VI_GFC3D;
   vi->ProjectionOnX = &Projection_VI_GFC3D;
 
-  int iter=0;
   double error=1e24;
 
   GlobalFrictionContactProblem_as_VI *gfc3d_as_vi= (GlobalFrictionContactProblem_as_VI*)malloc(sizeof(GlobalFrictionContactProblem_as_VI));

@@ -29,7 +29,6 @@ extern "C"
 
 int soclcp_test_function(FILE * f, SolverOptions * options);
 
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

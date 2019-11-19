@@ -41,9 +41,6 @@
 OneStepNSProblem::OneStepNSProblem():
   _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _hasBeenUpdated(false)
 {
-  _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
-  _numerics_solver_options->dWork = NULL;
 }
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
@@ -53,11 +50,8 @@ OneStepNSProblem::OneStepNSProblem(int numericsSolverId):
   _numerics_solver_id(numericsSolverId), _sizeOutput(0),
   _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _hasBeenUpdated(false)
 {
-
-  _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
-  _numerics_solver_options->dWork = NULL;
-  _numerics_solver_options->solverId = numericsSolverId;
+  _numerics_solver_options.reset(solver_options_create(_numerics_solver_id),
+                                 solver_options_clear);
 }
 
 bool OneStepNSProblem::hasInteractions() const
@@ -489,7 +483,9 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
 
 void OneStepNSProblem::setSolverId(int solverId)
 {
-  RuntimeException::selfThrow("OneStepNSProblem::setSolverId - this virtual method should be implemented in all derived classes!");
+  // And create a new one, with default parameters values.
+  _numerics_solver_options.reset(solver_options_create(_numerics_solver_id),
+                                 solver_options_clear);
 }
 
 void OneStepNSProblem::setNumericsVerboseMode(bool vMode)

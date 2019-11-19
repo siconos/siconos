@@ -16,20 +16,21 @@
  * limitations under the License.
 */
 
+#include <assert.h>                                   // for assert
 #include <math.h>                                     // for fabs, pow
 #include <stdio.h>                                    // for printf, fprintf
-#include <stdlib.h>                                   // for calloc, exit
+#include <stdlib.h>                                   // for exit, free, malloc
 #include "FrictionContactProblem.h"                   // for FrictionContact...
 #include "Friction_cst.h"                             // for SICONOS_FRICTIO...
 #include "NumericsFwd.h"                              // for SolverOptions
 #include "NumericsMatrix.h"                           // for NM_add_to_diag3
+#include "SiconosBlas.h"                              // for cblas_daxpy
 #include "SolverOptions.h"                            // for SolverOptions
 #include "fc3d_Solvers.h"                             // for fc3d_set_intern...
 #include "fc3d_compute_error.h"                       // for fc3d_compute_error
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"       // for fc3d_nonsmooth_...
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"  // for fc3d_nonsmooth_...
 #include "numerics_verbose.h"                         // for numerics_error
-#include "SiconosBlas.h"                                    // for cblas_daxpy
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"                                    // for DEBUG_PRINTF

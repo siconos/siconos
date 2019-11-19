@@ -16,14 +16,14 @@
  * limitations under the License.
  */
 
-#include <stdio.h>                       // for NULL
-#include <stdlib.h>                      // for malloc
-#include "Friction_cst.h"
-#include "GenericMechanical_cst.h"                // for SICONOS_FRICTION_3D_NSN_HYBR...
-#include "SolverOptions.h"               // for SICONOS_DPARAM_TOL, SICONOS_...
-#include "genericMechanical_test_utils.h"
-#include "test_utils.h"                  // for TestCase
-#include "SiconosConfig.h" // for HAS_LAPACK_dgesvd
+#include <stdlib.h>                        // for malloc
+#include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_ONECON...
+#include "GenericMechanical_cst.h"         // for SICONOS_GENERIC_MECHANICAL...
+#include "NumericsFwd.h"                   // for SolverOptions
+#include "SiconosConfig.h"                 // for HAS_LAPACK_dgesvd
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "genericMechanical_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                    // for TestCase
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {

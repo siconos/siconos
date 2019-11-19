@@ -15,14 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <stdio.h>             // for printf
 #include <string.h>            // for strcmp
 #include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
 #include "relay_test_utils.h"  // for relay_test_function
-#include "test_utils.h"        // for build_test_collection_generic, data_collection
+#include "test_utils.h"        // for build_test_collection_generic, data_co...
 #include "SiconosConfig.h"     // for HAVE_PATHFERRIS // IWYU pragma: keep
-#include "Relay_Solvers.h"
+
 
 #define @PROBLEM_COLLECTION@ 1
 

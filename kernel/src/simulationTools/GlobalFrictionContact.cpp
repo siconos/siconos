@@ -45,6 +45,7 @@
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolverId):
   LinearOSNS(numericsSolverId), _contactProblemDim(dimPb)
 {
+  
   // Connect to the right function according to dim. of the problem
   if (_contactProblemDim == 2)
   {
@@ -52,7 +53,6 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolver
   }
   else if(_contactProblemDim == 3)
   {
-    gfc3d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
     _gfc_driver = &gfc3d_driver;
   }
   else
@@ -63,10 +63,6 @@ GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolver
   _numericsMatrixStorageType = NM_SPARSE;
 
 
-}
-GlobalFrictionContact::~GlobalFrictionContact()
-{
-  solver_options_clear(&*_numerics_solver_options);
 }
 
 void GlobalFrictionContact::initVectorsMemory()

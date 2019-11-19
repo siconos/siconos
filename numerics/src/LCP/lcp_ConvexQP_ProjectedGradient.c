@@ -16,21 +16,17 @@
  * limitations under the License.
 */
 
-#include <math.h>                                      // for fabs
 #include <stdio.h>                                     // for printf
 #include <stdlib.h>                                    // for free, malloc
-#include "SiconosBlas.h"     // for cblas_dnrm2
 #include "ConvexQP.h"                                  // for ConvexQP
 #include "ConvexQP_Solvers.h"                          // for convexQP_Proje...
 #include "LCP_Solvers.h"                               // for lcp_compute_error
 #include "LinearComplementarityProblem.h"              // for LinearCompleme...
 #include "LinearComplementarityProblem_as_ConvexQP.h"  // for LinearCompleme...
-#include "NumericsFwd.h"                               // for SolverOptions
-#include "NSSTools.h"   // for min
+#include "NumericsFwd.h"                               // for ConvexQP, Line...
+#include "SiconosBlas.h"                               // for cblas_dnrm2
 #include "SolverOptions.h"                             // for SolverOptions
-#include "lcp_cst.h"                                   // for SICONOS_LCP_CO...
 #include "numerics_verbose.h"                          // for verbose
-
 
 void lcp_ConvexQP_ProjectedGradient(LinearComplementarityProblem* problem, double *z, double *w, int* info, SolverOptions* options)
 {

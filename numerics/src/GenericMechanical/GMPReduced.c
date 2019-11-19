@@ -729,7 +729,8 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double
     lcp_enum_init(&aLCP, aLcpOptions, 1);
     *info = linearComplementarity_driver(&aLCP, reaction, velocity, aLcpOptions);
     lcp_enum_reset(&aLCP, aLcpOptions, 1);
-    solver_options_clear(&aLcpOptions);
+    solver_options_clear(aLcpOptions);
+    aLcpOptions = NULL;
 
     goto END_GMP3;
   }
@@ -774,7 +775,8 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double
   *info = mlcp_driver(&aMLCP, reaction, velocity, aMlcpOptions);
 
   mlcp_driver_reset(&aMLCP, aMlcpOptions);
-  solver_options_clear(&aMlcpOptions);
+  solver_options_clear(aMlcpOptions);
+  aMlcpOptions = NULL;
 END_GMP3:
   ;
 

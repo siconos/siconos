@@ -53,18 +53,19 @@ static int fccounter = -1;
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-static void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, SolverOptions  *options,  double* error)
-{
-  int n = 3 * problem->numberOfContacts;
-  *error = 0.;
-  int i, m;
-  m = 5 * n / 3;
-  double err = INFINITY;
-  for (i = 0 ; i < m ; ++i)
-  {
-    *error += Compute_NCP_error1(i, err);
-  }
-}
+/* static void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, SolverOptions  *options,  double* error) */
+/* { */
+/*   int n = 3 * problem->numberOfContacts; */
+/*   *error = 0.; */
+/*   int i, m; */
+/*   m = 5 * n / 3; */
+/*   double err = INFINITY; */
+/*   for (i = 0 ; i < m ; ++i) */
+/*   { */
+/*     *error += Compute_NCP_error1(i, err); */
+/*   } */
+/* } */
+
 void fc3d_nsgs_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
 {
   /* Build a local problem for a specific contact

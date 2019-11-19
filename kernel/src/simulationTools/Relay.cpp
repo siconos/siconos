@@ -36,10 +36,6 @@ Relay::Relay(int numericsSolverId):
   LinearOSNS(numericsSolverId)
 {
   _numerics_problem.reset(new RelayProblem);
-
-  relay_setDefaultSolverOptions(&*_numerics_solver_options, numericsSolverId);
-
-
 }
 /* nslaw dispatch on bounds */
 
@@ -175,13 +171,6 @@ int Relay::compute(double time)
   return info;
 }
 
-void Relay::setSolverId(int solverId)
-{
-  // clear previous Solveroptions
-  solver_options_clear(_numerics_solver_options.get());
-  relay_setDefaultSolverOptions(_numerics_solver_options.get(), solverId);
-}
-
 void Relay::display() const
 {
   std::cout << "======= Relay of size " << _sizeOutput << " with: " <<std::endl;
@@ -191,10 +180,5 @@ void Relay::display() const
   std::cout<< "upper bound : (_ub)"<<std::endl;
   _ub->display();
   
-}
-
-Relay::~Relay()
-{
-  solver_options_clear(&*_numerics_solver_options);
 }
 

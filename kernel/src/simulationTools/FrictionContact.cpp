@@ -32,9 +32,13 @@ FrictionContact::FrictionContact(int dimPb, int numericsSolverId):
   LinearOSNS(numericsSolverId), _contactProblemDim(dimPb)
 {
   if (dimPb == 2 && numericsSolverId == SICONOS_FRICTION_3D_NSGS)
-    _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
+    {
+      
+     _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
+     _numerics_solver_options.reset(solver_options_create(_numerics_solver_id),
+                                    solver_options_clear);
+    }
 
-  fc3d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
   if (dimPb == 2)
   {
     _frictionContact_driver = &fc2d_driver;
@@ -178,7 +182,3 @@ void FrictionContact::display() const
   LinearOSNS::display();
 }
 
-FrictionContact::~FrictionContact()
-{
-  solver_options_clear(&*_numerics_solver_options);
-}

@@ -16,15 +16,13 @@
  * limitations under the License.
 */
 #include <math.h>                        // for isfinite
-#include <stdio.h>                       // for printf, fclose, fopen, fprintf
-#include <stdlib.h>                      // for calloc, free, malloc, exit
-#include "FrictionContactProblem.h"      // for FrictionContactProblem, fric...
-#include "GAMSlink.h"                    // for SN_GAMSparams
+#include <stdio.h>                       // for printf, fclose, fopen, FILE
+#include <stdlib.h>                      // for calloc, free, rand, srand
+#include "FrictionContactProblem.h"      // for frictionContactProblem_free
 #include "NonSmoothDrivers.h"            // for fc2d_driver, fc3d_driver
 #include "NumericsFwd.h"                 // for SolverOptions, FrictionConta...
-#include "SOCLCP_Solvers.h"              // for soclcp_setDefaultSolverOptions
+#include "SiconosConfig.h"               // for WITH_FCLIB
 #include "SolverOptions.h"               // for SolverOptions, solver_option...
-#include "fc3d_Solvers.h"                // for fc3d_setDefaultSolverOptions
 #include "frictionContact_test_utils.h"  // for frictionContact_test_function
 #include "test_utils.h"                  // for TestCase
 #include "SiconosConfig.h" // for WITH_FCLIB, HAVE_GAMS_C_API // IWYU pragma: keep
@@ -33,51 +31,68 @@
 #define _CS_H
 
 #if defined(WITH_FCLIB)
-#include <time.h>
-#include <fclib_interface.h>
-#include "fc3d_solvers_wr.h"
+#include <fclib_interface.h>             // for globalFrictionContact_fclib_...
+#include <time.h>                        // for time
+#include "fc3d_solvers_wr.h"             // for fc3d_reformulation_global_pr...
 #endif
 
-void frictionContact_test_gams_opts(SN_GAMSparams* GP, int solverId)
-{
+// --- Extra setup for options when the solver belongs to GAMS family ---
 #ifdef HAVE_GAMS_C_API
-  if (solverId == SICONOS_FRICTION_3D_GAMS_PATHVI ||
-      solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI ||
-      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI)
+#include "GAMSlink.h"                    // for SN_GAMSparams
+void frictionContact_test_gams_opts(SolverOptions * options)
+{
+  int solverId = options->solverId;
+  if(solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
+     solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
+     solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH||
+     solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
+     solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
+     solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
+     solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
+     solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI
+     )
     {
-    add_GAMS_opt_str(GP, "avi_start", "ray_first", GAMS_OPT_SOLVER);
-    add_GAMS_opt_str(GP, "ratio_tester", "expand", GAMS_OPT_SOLVER);
-    add_GAMS_opt_double(GP, "expand_eps", 0., GAMS_OPT_SOLVER);
-    add_GAMS_opt_bool(GP, "ratio_tester_tfirst", false, GAMS_OPT_SOLVER);
-//    add_GAMS_opt_int(GP, "scheduler_decompose", 1, GAMS_OPT_SOLVER);
-//    add_GAMS_opt_str(GP, "lemke_factorization_method", "minos_blu", GAMS_OPT_SOLVER);
-  }
-  else if (solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
-      solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
-      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH
-      )
-  {
-    add_GAMS_opt_int(GP, "linear_model_perturb", 0, GAMS_OPT_SOLVER);
-    add_GAMS_opt_double(GP, "proximal_perturbation", 0., GAMS_OPT_SOLVER);
-    add_GAMS_opt_double(GP, "proximal_initial_maximum", 0., GAMS_OPT_SOLVER);
-    add_GAMS_opt_str(GP, "crash_method", "none", GAMS_OPT_SOLVER);
-    add_GAMS_opt_int(GP, "crash_perturb", 0, GAMS_OPT_SOLVER);
-    add_GAMS_opt_int(GP, "restart_limit", 0, GAMS_OPT_SOLVER);
-//    add_GAMS_opt_str(GP, "lemke_start", "first", GAMS_OPT_SOLVER);
-//    add_GAMS_opt_int(GP, "output_linear_model", 1, GAMS_OPT_SOLVER);
-//    add_GAMS_opt_int(GP, "output_minor_iterations_frequency", 1, GAMS_OPT_SOLVER);
-//    add_GAMS_opt_int(GP, "output_linear_model", 1, GAMS_OPT_SOLVER);
-
-  }
+      assert(options->solverParameters);
+      SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
+      GP->model_dir = strdup(GAMS_MODELS_SOURCE_DIR);
+      GP->filename = current->filename;
+      
+      if (solverId == SICONOS_FRICTION_3D_GAMS_PATHVI ||
+          solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI ||
+          solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI)
+        {
+          add_GAMS_opt_str(GP, "avi_start", "ray_first", GAMS_OPT_SOLVER);
+          add_GAMS_opt_str(GP, "ratio_tester", "expand", GAMS_OPT_SOLVER);
+          add_GAMS_opt_double(GP, "expand_eps", 0., GAMS_OPT_SOLVER);
+          add_GAMS_opt_bool(GP, "ratio_tester_tfirst", false, GAMS_OPT_SOLVER);
+          //    add_GAMS_opt_int(GP, "scheduler_decompose", 1, GAMS_OPT_SOLVER);
+          //    add_GAMS_opt_str(GP, "lemke_factorization_method", "minos_blu", GAMS_OPT_SOLVER);
+        }
+      else if (solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
+               solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
+               solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH
+               )
+        {
+          add_GAMS_opt_int(GP, "linear_model_perturb", 0, GAMS_OPT_SOLVER);
+          add_GAMS_opt_double(GP, "proximal_perturbation", 0., GAMS_OPT_SOLVER);
+          add_GAMS_opt_double(GP, "proximal_initial_maximum", 0., GAMS_OPT_SOLVER);
+          add_GAMS_opt_str(GP, "crash_method", "none", GAMS_OPT_SOLVER);
+          add_GAMS_opt_int(GP, "crash_perturb", 0, GAMS_OPT_SOLVER);
+          add_GAMS_opt_int(GP, "restart_limit", 0, GAMS_OPT_SOLVER);
+          //    add_GAMS_opt_str(GP, "lemke_start", "first", GAMS_OPT_SOLVER);
+          //    add_GAMS_opt_int(GP, "output_linear_model", 1, GAMS_OPT_SOLVER);
+          //    add_GAMS_opt_int(GP, "output_minor_iterations_frequency", 1, GAMS_OPT_SOLVER);
+          //    add_GAMS_opt_int(GP, "output_linear_model", 1, GAMS_OPT_SOLVER);
+        }
+      add_GAMS_opt_int(GP, "minor_iteration_limit", 100000, GAMS_OPT_SOLVER);
+      add_GAMS_opt_int(GP, "major_iteration_limit", 20, GAMS_OPT_SOLVER);
+      add_GAMS_opt_double(GP, "expand_delta", 1e-10, GAMS_OPT_SOLVER);
+    }
   else
-  {
-    fprintf(stderr, "frictionContact_test_gams_opts :: ERROR unknown solverId = %d e.g. solver named %s", solverId, solver_options_id_to_name(solverId));
-  }
-  add_GAMS_opt_int(GP, "minor_iteration_limit", 100000, GAMS_OPT_SOLVER);
-  add_GAMS_opt_int(GP, "major_iteration_limit", 20, GAMS_OPT_SOLVER);
-  add_GAMS_opt_double(GP, "expand_delta", 1e-10, GAMS_OPT_SOLVER);
-#endif
+    {// nothing, just pass
+    }
 }
+#endif
 
 int frictionContact_test_function(TestCase* current)
 {
@@ -125,6 +140,11 @@ int frictionContact_test_function(TestCase* current)
 
   solver_options_print(current->options);
 
+// --- Extra setup for options when the solver belongs to GAMS family ---
+#ifdef HAVE_GAMS_C_API
+  frictionContact_test_gams_opts(current->options);
+#endif
+  
   if (dim == 2)
     {
       info = fc2d_driver(problem,

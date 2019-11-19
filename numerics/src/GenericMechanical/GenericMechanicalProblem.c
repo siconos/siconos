@@ -257,7 +257,6 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
 GenericMechanicalProblem * genericMechanical_new_from_filename(const char* filename)
 {
   GenericMechanicalProblem * problem = NULL;
-  int info = 0;
   FILE * file = fopen(filename, "r");
   if (file == NULL)
   {

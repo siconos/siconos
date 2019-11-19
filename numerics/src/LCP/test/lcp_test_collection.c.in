@@ -15,14 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <stdio.h>           // for printf
 #include <string.h>          // for strcmp
-#include "lcp_cst.h"         // for SICONOS_LCP_PIVOT
+#include "lcp_cst.h"         // for SICONOS_LCP_AVI_CAOFERRIS, SICONOS_LCP_BARD
 #include "lcp_test_utils.h"  // for lcp_test_function
-#include "test_utils.h"      // for TestCase, build_test_collection_generic, data_...
+#include "test_utils.h"      // for TestCase, build_test_collection_generic
 #include "SiconosConfig.h"   // for HAVE_GAMS_C_API // IWYU pragma: keep
-#include "LCP_Solvers.h"
 
 // Set TEST_LCP_COLLECTION_XX value (XX = 1,2,3,4 or 5, depending on cmake test setup).
 #define @PROBLEM_COLLECTION@ 1

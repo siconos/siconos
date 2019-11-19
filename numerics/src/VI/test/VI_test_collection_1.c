@@ -1,12 +1,26 @@
-#include <stdio.h>                          // for printf
-#include <stdlib.h>                         // for free, malloc
-#include "NonSmoothDrivers.h"               // for variationalInequality_driver
-#include "NumericsFwd.h"                    // for VariationalInequality
-#include "SolverOptions.h"                  // for solver_options_clear
-#include "VI_cst.h"                         // for SICONOS_VI_HP, SICONOS_VI_EG
-#include "VariationalInequality.h"          // for VariationalInequality
-#include "VariationalInequality_Solvers.h"  // for variationalInequality_set...
-
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2019 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+#include <stdio.h>                  // for printf
+#include "NonSmoothDrivers.h"       // for variationalInequality_driver
+#include "NumericsFwd.h"            // for VariationalInequality, SolverOptions
+#include "SolverOptions.h"          // for solver_options_clear, solver_opti...
+#include "VI_cst.h"                 // for SICONOS_VI_HP, SICONOS_VI_EG, SIC...
+#include "VariationalInequality.h"  // for VariationalInequality, variationa...
 
 static void Ftest_0(void * viIn, int n, double *x, double *F)
 {
@@ -130,7 +144,7 @@ static int test_1(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_clear(&options);
+  solver_options_clear(options);
 
   return info;
 }
@@ -198,7 +212,7 @@ static int test_2(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_clear(&options);
+  solver_options_clear(options);
 
   return info;
 }
@@ -270,7 +284,7 @@ static int test_3(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_clear(&options);
+  solver_options_clear(options);
 
   return info;
 }
@@ -341,7 +355,8 @@ static int test_4(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_clear(&options);
+  solver_options_clear(options);
+  options = NULL;
 
   return info;
 }

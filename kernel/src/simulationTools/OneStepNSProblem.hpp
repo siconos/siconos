@@ -286,10 +286,18 @@ public:
    */
   virtual void postCompute() = 0;
 
-  /** change the solver type. This requires a reset of the Solveroption struct
-   * \param solverId the new solver
+  /** change the solver type and its default parameters.
+
+      - clear memory for the existing options set
+      - create and initialize a new one
+
+      \rst
+      Check the available solvers id in :ref:`problems_and_solvers`.
+      \endrst
+
+      \param solverId the new solver. 
    */
-  virtual void setSolverId(int solverId);
+  void setSolverId(int solverId);
 
   /** get the OSI-related matrices used to compute the current InteractionBlock
       (Ex: for MoreauJeanOSI, W)

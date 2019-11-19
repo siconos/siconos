@@ -17,17 +17,16 @@
 */
 
 #define _XOPEN_SOURCE 700
-#include "rollingFrictionContact_test_function.h"
 #include <math.h>                           // for isfinite
 #include <stdio.h>                          // for printf, fclose, fopen, FILE
-#include <stdlib.h>                         // for malloc, free
+#include <stdlib.h>                         // for calloc, free
 #include "NonSmoothDrivers.h"               // for rolling_fc3d_driver
+#include "NumericsFwd.h"                    // for RollingFrictionContactPro...
 #include "NumericsVerbose.h"                // for numerics_set_verbose
-#include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
-#include "SiconosConfig.h" // for WITH_FCLIB // IWYU pragma: keep
-#include "SolverOptions.h"
-#include "rolling_fc3d_Solvers.h"
-#include "frictionContact_test_utils.h"
+#include "RollingFrictionContactProblem.h"  // for rollingFrictionContactPro...
+#include "frictionContact_test_utils.h"     // for rollingFrictionContact_te...
+#include "test_utils.h"                     // for TestCase
+
 int rollingFrictionContact_test_function(TestCase* current)
 {
 
@@ -42,13 +41,9 @@ int rollingFrictionContact_test_function(TestCase* current)
   int dim = problem->dimension;
 
   int info;
-  double *reaction = (double*)malloc(dim * NC * sizeof(double));
-  double *velocity = (double*)malloc(dim * NC * sizeof(double));
-  for (k = 0 ; k < dim * NC; k++)
-  {
-    velocity[k] = 0.0;
-    reaction[k] = 0.0;
-  }
+  double *reaction = (double*)calloc(dim * NC, sizeof(double));
+  double *velocity = (double*)calloc(dim * NC, sizeof(double));
+
   if (dim == 2)
   {
     info = 1;
@@ -87,19 +82,5 @@ int rollingFrictionContact_test_function(TestCase* current)
 
   return info;
 }
-
-#if defined(WITH_FCLIB)
-
-int rfc3d_test_function_hdf5(const char* path, SolverOptions* options)
-{
-  int info =0;
-
-  return info;
-
-}
-#endif
-
-
-
 
 

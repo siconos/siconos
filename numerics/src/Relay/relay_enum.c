@@ -16,18 +16,15 @@
  * limitations under the License.
 */
 
-#include <stdio.h>                         // for printf, NULL
 #include <stdlib.h>                        // for malloc, free
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_enu...
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver
-#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "RelayProblem.h"                  // for RelayProblem
 #include "Relay_Solvers.h"                 // for relay_to_lcp, relay_enum
-#include "SolverOptions.h"                 // for SolverOptions
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
-#include "numerics_verbose.h"              // for verbose
-#include "relay_cst.h"                     // for SICONOS_RELAY_ENUM
 
 void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {

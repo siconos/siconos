@@ -23,11 +23,8 @@
 #include "test_utils.h"                  // for data_collection, free_test_c...
 #include "SiconosConfig.h" // for SICONOS_HAS_MPI // IWYU pragma: keep
 
-//#include "@PROBLEM_FORMULATION@_Solvers.h"
-
 #define @PROBLEM_COLLECTION@ 1
 
-#include "SolverOptions.h"
 int main (int argc, char *argv[])
 {
   const char ** _data_collection = data_collection();

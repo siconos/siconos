@@ -37,7 +37,6 @@ using namespace RELATION;
 MLCP::MLCP(int numericsSolverId):
   LinearOSNS(numericsSolverId)
 {
-  mixedLinearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options);
   _n = 0;
   _m = 0;
   _numerics_problem.blocksRows = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
@@ -64,7 +63,6 @@ void  MLCP::reset()
     free(_numerics_problem.blocksIsComp);
   _numerics_problem.blocksIsComp = 0;
   mlcp_driver_reset(&_numerics_problem, &*_numerics_solver_options);
-  solver_options_clear(&*_numerics_solver_options);
   _numerics_solver_options.reset();
 }
 

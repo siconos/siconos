@@ -17,16 +17,17 @@
 */
 #define _XOPEN_SOURCE 700
 #include <math.h>                          // for isfinite
-#include <stdio.h>                         // for printf, NULL
-#include <stdlib.h>                        // for free, calloc, malloc
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for calloc, free, malloc
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
-#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "lcp_cst.h"                       // for SICONOS_LCP_GAMS
+#include "SolverOptions.h"                 // for SICONOS_DPARAM_RESIDU, Sol...
 #include "lcp_test_utils.h"                // for lcp_test_function
 #include "test_utils.h"                    // for TestCase
 #include "SiconosConfig.h" // for HAVE_GAMS_C_API // IWYU pragma: keep
+
+// --------- GAMS stuff ---------
 #ifdef HAVE_GAMS_C_API
 #include <string.h>
 #if (__linux ||  __APPLE__)
@@ -42,6 +43,7 @@ static inline char* strdup(char* src)
 }
 #endif
 #endif
+// --------- End of GAMS stuff ---------
 
 int lcp_test_function(TestCase * current)
 {
@@ -78,13 +80,6 @@ int lcp_test_function(TestCase * current)
     printf("test unsuccessful err =%e  \n", current->options->dparam[SICONOS_DPARAM_RESIDU]);
   free(z);
   free(w);
-
-  /* if (current->options->solverId == SICONOS_LCP_GAMS) */
-  /* { */
-  /*   free(current->options->solverParameters); */
-  /*   current->options->solverParameters = NULL; */
-  /* } */
-  // solver_options_clear(current->options);
   freeLinearComplementarityProblem(problem);
   printf("End of test.\n");
   return info;

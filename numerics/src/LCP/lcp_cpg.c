@@ -17,17 +17,15 @@
 */
 #include <float.h>                         // for DBL_EPSILON
 #include <math.h>                          // for fabs
-#include <stdio.h>                         // for printf, NULL
+#include <stdio.h>                         // for printf
 #include <stdlib.h>                        // for free, malloc
-
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_cpg
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
-#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
-#include "lcp_cst.h"                       // for SICONOS_LCP_CPG
-#include "numerics_verbose.h"              // for verbose
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "numerics_verbose.h"              // for verbose
 
 void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {

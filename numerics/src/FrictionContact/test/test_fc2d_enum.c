@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 
-#include <stdio.h>                       // for NULL
 #include <stdlib.h>                      // for malloc
-#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_N...
+#include "Friction_cst.h"                // for SICONOS_FRICTION_2D_ENUM
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, Solve...
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
-#include "SolverOptions.h"
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {

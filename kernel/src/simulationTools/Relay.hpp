@@ -82,7 +82,7 @@ public:
 
   /** destructor
    */
-  ~Relay();
+  ~Relay(){};
 
   // --- lb ---
   /** get the value of lb, the   lower bounds of the Relay system
@@ -136,8 +136,6 @@ public:
   }
 
   void initialize(SP::Simulation sim);
-
-  virtual void setSolverId(int solverId);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param time current time

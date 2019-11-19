@@ -15,18 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>                         // for printf, NULL
-#include <stdlib.h>                        // for malloc, free
-#include "LCP_Solvers.h"                   // for lcp_nsqp, linearComplement...
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_nsqp
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
-#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "QP_Solvers.h"                    // for ql0001_
 #include "SiconosConfig.h"                 // for HAS_FORTRAN, HAVE_QL0001
 #include "SiconosFortran.h"                // for CNAME
-#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "lcp_cst.h"                       // for SICONOS_LCP_NSQP
-#include "numerics_verbose.h"              // for verbose
+#include "SolverOptions.h"                 // for SICONOS_DPARAM_TOL, Solver...
 
 void lcp_nsqp(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {

@@ -26,12 +26,15 @@ dim(v)=nn
 
 **************************************************************************/
 #include "mlcp_direct_enum.h"
+#ifndef __cplusplus
+#include <stdbool.h>                       // for false
+#endif
 #include <stdio.h>                              // for printf
-#include "MLCP_Solvers.h"                       // for mixedLinearComplement...
+#include "MLCP_Solvers.h"                       // for mlcp_direct, mlcp_enum
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "SolverOptions.h"                      // for SolverOptions
-#include "mlcp_direct.h"                        // for mlcp_direct_getNbDWork
-#include "mlcp_enum.h"                          // for mlcp_enum_getNbDWork
+#include "mlcp_cst.h"                           // for SICONOS_DPARAM_MLCP_S...
+#include "mlcp_direct.h"                        // for mlcp_direct_addConfig...
 
 static int sN;
 static int sM;

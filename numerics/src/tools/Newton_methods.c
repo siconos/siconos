@@ -20,19 +20,18 @@
 #include <assert.h>            // for assert
 #include <float.h>             // for DBL_MAX
 #include <math.h>              // for fmax, pow, INFINITY, isfinite
-#include <stdio.h>             // for NULL, fprintf, stderr
-#include <stdlib.h>            // for calloc, free, malloc, getenv, atoi
+#include <stdio.h>             // for fprintf, stderr
+#include <stdlib.h>            // for free, calloc, malloc, getenv, atoi
 #include "ArmijoSearch.h"      // for linesearch_Armijo2, armijo_extra_params
-#include "Friction_cst.h"      // for SICONOS_FRICTION_3D_NSN_AC_TEST
 #include "GoldsteinSearch.h"   // for goldstein_extra_params, search_Goldste...
 #include "NumericsMatrix.h"    // for NM_gesv, NM_tgemv, NM_duplicate, NM_free
+#include "SiconosBlas.h"       // for cblas_dcopy, cblas_dnrm2, cblas_dscal
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
 #include "debug.h"             // for DEBUG_PRINT
 #include "hdf5_logger.h"       // for SN_logh5_scalar_double, SN_logh5_vec_d...
 #include "line_search.h"       // for search_data, fill_nm_data, free_ls_data
 #include "numerics_verbose.h"  // for numerics_printf_verbose, numerics_printf
 #include "sn_logger.h"         // for SN_LOG_SCALAR, SN_LOG_VEC, SN_LOG_MAT
-#include "SiconosBlas.h"       // for cblas_dcopy, cblas_dnrm2, cblas_dscal
 
 typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
 
