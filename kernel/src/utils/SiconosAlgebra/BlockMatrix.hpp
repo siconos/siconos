@@ -270,6 +270,10 @@ public:
   /** display data on standard output
    */
   void display() const;
+  
+  /** display data on standard output
+   */
+  void displayExpert(bool brief = true) const;
 
   /** put data of the matrix into a std::string
    * \return std::string

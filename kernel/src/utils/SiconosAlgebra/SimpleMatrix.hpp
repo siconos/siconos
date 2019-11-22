@@ -461,7 +461,7 @@ public:
    */
   void display() const;
   
-  void displayExpert(bool  brief) const;
+  void displayExpert(bool  brief = true) const;
   /** put data of the matrix into a std::string
    * \return std::string
    */

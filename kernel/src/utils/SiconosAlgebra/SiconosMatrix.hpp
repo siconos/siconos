@@ -315,6 +315,10 @@ public:
   /** display data on standard output
    */
   virtual void display() const = 0;
+  
+  /** display data on standard output
+   */
+  virtual void displayExpert(bool brief = true ) const = 0;
 
   /** put data of the matrix into a std::string
    * \return std::string

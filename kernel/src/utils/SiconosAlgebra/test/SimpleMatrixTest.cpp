@@ -622,7 +622,7 @@ void SimpleMatrixTest::testAssignment0()
   tRef.reset(new SimpleMatrix(*SP));
   tRef->zero();
   *tRef = *ref;
-  tRef->display();
+  tRef->displayExpert();
 
   SP::SimpleMatrix A(new SimpleMatrix(*SP_coor));
   A->displayExpert(true);

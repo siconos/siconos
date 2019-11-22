@@ -767,7 +767,7 @@ void SimpleMatrix::display() const
   else if (_num == Siconos::IDENTITY)
     std::cout << *mat.Identity << std::endl;
 }
-void SimpleMatrix::displayExpert(bool brief = true) const
+void SimpleMatrix::displayExpert(bool brief) const
 {
   std::cout.setf(std::ios::scientific);
   std::cout.precision(6);
@@ -794,25 +794,26 @@ void SimpleMatrix::displayExpert(bool brief = true) const
     std::cout << "filled2 = " <<  mat.Sparse->filled2() << std::endl;
 
     std::cout << "index_data1 = [ " ;
-    for (size_t i = 0; i < mat.Sparse->filled1() ; i++)
+    size_t i=0;
+    for (i = 0; i < mat.Sparse->filled1()-1 ; i++)
     {
-      std::cout << mat.Sparse->index1_data()[i] << "   " ;
+      std::cout << mat.Sparse->index1_data()[i] << ", " ;
     }
-    std::cout << "]" <<  std::endl;
+    std::cout << mat.Sparse->index1_data()[i] << "]" <<  std::endl;
 
     std::cout << "index_data2 = [" ;
-    for (size_t i = 0; i < mat.Sparse->filled2() ; i++)
+    for (i = 0; i < mat.Sparse->filled2()-1 ; i++)
     {
-      std::cout << mat.Sparse->index2_data()[i] << "   " ;
+      std::cout << mat.Sparse->index2_data()[i] << ", " ;
     }
-    std::cout << "]" << std::endl;
+    std::cout << mat.Sparse->index2_data()[i] << "]" << std::endl;
 
     std::cout << "value_data = [" ;
-    for (size_t i = 0; i < mat.Sparse->filled2() ; i++)
+    for (i = 0; i < mat.Sparse->filled2()-1 ; i++)
     {
-      std::cout << mat.Sparse->value_data()[i] << "   " ;
+      std::cout << mat.Sparse->value_data()[i] << ", " ;
     }
-    std::cout << "]" << std::endl;
+    std::cout << mat.Sparse->value_data()[i] << "]" << std::endl;
 
     std::cout << *mat.Sparse << std::endl;
   }
