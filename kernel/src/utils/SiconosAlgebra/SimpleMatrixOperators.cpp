@@ -132,13 +132,13 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
   {
     switch (_num)
     {
-    case 1:
+    case DENSE:
       switch (numM)
       {
-      case 1:
+      case DENSE:
         noalias(*(mat.Dense)) = *m.dense();
         break;
-      case 2:
+      case TRIANGULAR:
         noalias(*(mat.Dense)) = *m.triang();
         break;
       case 3:
@@ -155,10 +155,10 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
         break;
       }
       break;
-    case 2:
+    case TRIANGULAR:
       switch (numM)
       {
-      case 2:
+      case TRIANGULAR:
         noalias(*(mat.Triang)) = *m.triang();
         break;
       default:
@@ -175,7 +175,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
     case 4:
       switch (numM)
       {
-      case 2:
+      case TRIANGULAR:
         noalias(*(mat.Sparse)) = *m.triang();
         break;
       case 3:
@@ -184,8 +184,31 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
       case 4:
         noalias(*(mat.Sparse)) = *m.sparse();
         break;
+      case SPARSE_COORDINATE:
+        noalias(*(mat.Sparse)) = *m.sparseCoordinate();
+        break;
       case 5:
         noalias(*(mat.Sparse)) = *m.banded();
+        break;
+      default:
+        SiconosMatrixException::selfThrow("SimpleMatrix::op= (const SimpleMatrix): invalid type of matrix");
+        break;
+      }
+      break;
+    case SPARSE_COORDINATE:
+      switch (numM)
+      {
+      case TRIANGULAR:
+        noalias(*(mat.SparseCoordinate)) = *m.triang();
+        break;
+      case 3:
+        noalias(*(mat.SparseCoordinate)) = *m.sym();
+        break;
+      case 4:
+        noalias(*(mat.SparseCoordinate)) = *m.sparse();
+        break;
+      case 5:
+        noalias(*(mat.SparseCoordinate)) = *m.banded();
         break;
       default:
         SiconosMatrixException::selfThrow("SimpleMatrix::op= (const SimpleMatrix): invalid type of matrix");
@@ -237,13 +260,13 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
 
   switch (_num)
   {
-  case 1:
+  case DENSE:
     switch (numM)
     {
-    case 1:
+    case DENSE:
       noalias(*(mat.Dense)) = *m.dense();
       break;
-    case 2:
+    case TRIANGULAR:
       noalias(*(mat.Dense)) = *m.triang();
       break;
     case 3:
@@ -260,10 +283,10 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
       break;
     }
     break;
-  case 2:
+  case TRIANGULAR:
     switch (numM)
     {
-    case 2:
+    case TRIANGULAR:
       noalias(*(mat.Triang)) = *m.triang();
       break;
     default:
@@ -280,7 +303,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
   case 4:
     switch (numM)
     {
-    case 2:
+    case TRIANGULAR:
       noalias(*(mat.Sparse)) = *m.triang();
       break;
     case 3:
@@ -345,10 +368,10 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
   {
     switch (_num)
     {
-    case 1:
+    case DENSE:
       *mat.Dense += *mat.Dense;
       break;
-    case 2:
+    case TRIANGULAR:
       *mat.Triang += *mat.Triang;
       break;
     case 3:
@@ -395,13 +418,13 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
   {
     switch (_num)
     {
-    case 1:
+    case DENSE:
       switch (numM)
       {
-      case 1:
+      case DENSE:
         noalias(*(mat.Dense)) += *m.dense();
         break;
-      case 2:
+      case TRIANGULAR:
         noalias(*(mat.Dense)) += *m.triang();
         break;
       case 3:
@@ -421,10 +444,10 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
         break;
       }
       break;
-    case 2:
+    case TRIANGULAR:
       switch (numM)
       {
-      case 2:
+      case TRIANGULAR:
         noalias(*(mat.Triang)) += *m.triang();
         break;
       case 7:
@@ -446,7 +469,7 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
     case 4:
       switch (numM)
       {
-      case 2:
+      case TRIANGULAR:
         noalias(*(mat.Sparse)) += *m.triang();
         break;
       case 3:
@@ -500,10 +523,10 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
   {
     switch (_num)
     {
-    case 1:
+    case DENSE:
       *mat.Dense -= *mat.Dense;
       break;
-    case 2:
+    case TRIANGULAR:
       *mat.Triang -= *mat.Triang;
       break;
     case 3:
@@ -547,13 +570,13 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
   {
     switch (_num)
     {
-    case 1:
+    case DENSE:
       switch (numM)
       {
-      case 1:
+      case DENSE:
         noalias(*(mat.Dense)) -= *m.dense();
         break;
-      case 2:
+      case TRIANGULAR:
         noalias(*(mat.Dense)) -= *m.triang();
         break;
       case 3:
@@ -573,10 +596,10 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
         break;
       }
       break;
-    case 2:
+    case TRIANGULAR:
       switch (numM)
       {
-      case 2:
+      case TRIANGULAR:
         noalias(*(mat.Triang)) -= *m.triang();
         break;
       case 7:
@@ -598,7 +621,7 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
     case 4:
       switch (numM)
       {
-      case 2:
+      case TRIANGULAR:
         noalias(*(mat.Sparse)) -= *m.triang();
         break;
       case 3:

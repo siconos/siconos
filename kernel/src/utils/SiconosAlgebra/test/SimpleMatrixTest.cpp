@@ -57,6 +57,7 @@ void SimpleMatrixTest::setUp()
   for (unsigned i = 0; i < D->size1(); ++ i)
     for (unsigned j = 0; j < D->size2(); ++ j)
       (*D)(i, j) = 3 * i + j;
+
   // Triang
   T.reset(new TriangMat(3, 3));
   for (unsigned i = 0; i < T->size1(); ++ i)
@@ -66,6 +67,7 @@ void SimpleMatrixTest::setUp()
   for (unsigned i = 0; i < T2->size1(); ++ i)
     for (unsigned j = i; j < T2->size2(); ++ j)
       (*T2)(i, j) = 3 * i + j;
+
   // Sym
   S.reset(new SymMat(3, 3));
   for (unsigned i = 0; i < S->size1(); ++ i)
@@ -75,11 +77,24 @@ void SimpleMatrixTest::setUp()
   for (unsigned i = 0; i < S2->size1(); ++ i)
     for (unsigned j = i; j < S2->size2(); ++ j)
       (*S2)(i, j) = 3 * i + j;
+  
   // Sparse
   SP.reset(new SparseMat(4, 4));
   for (unsigned i = 0; i < SP->size1(); ++ i)
     for (unsigned j = 0; j < SP->size2(); ++ j)
       (*SP)(i, j) = 3 * i + j;
+  
+  SP2.reset(new SparseMat(4, 4));
+  for (unsigned i = 0; i < SP2->size1(); ++ i)
+    for (unsigned j = 0; j < SP->size2()-1; ++ j)
+      if (i != j)
+        (*SP2)(i, j) = 3 * i + j;
+
+  // Sparse Coordinate
+  SP_coor.reset(new SparseCoordinateMat(4, 4));
+  for (unsigned i = 0; i < SP->size1(); ++ i)
+    for (unsigned j = 0; j < SP->size2(); ++ j)
+      (*SP_coor)(i, j) = 3 * i + j;
 
   // Banded
   Band.reset(new BandedMat(4, 4, 1, 1));
@@ -165,13 +180,6 @@ void SimpleMatrixTest::testConstructor3() // Copy constructor, from a BlockMatri
   std::cout << "--> Constructor 3 (copy) test ended with success." <<std::endl;
 }
 
-// void SimpleMatrixTest::testConstructor3()
-// {
-//   std::cout << "--> Test: constructor 3." <<std::endl;
-//   SP::SimpleMatrix test(new SimpleMatrix(Siconos::SPARSE);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ",test->num() == 4, true);
-//   std::cout << "--> Constructor 3 test ended with success." <<std::endl;
-// }
 
 void SimpleMatrixTest::testConstructor4()
 {
@@ -259,6 +267,22 @@ void SimpleMatrixTest::testConstructor12()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->num() == 7, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->normInf() == 1, true);
 }
+
+void SimpleMatrixTest::testConstructor13()
+{
+  std::cout << "--> Test: constructor 13." <<std::endl;
+  SP::SimpleMatrix test(new SimpleMatrix(4,4,Siconos::SPARSE));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ",test->num() == 4, true);
+  std::cout << "--> Constructor 13 test ended with success." <<std::endl;
+}
+void SimpleMatrixTest::testConstructor14()
+{
+  std::cout << "--> Test: constructor 14." <<std::endl;
+  SP::SimpleMatrix test(new SimpleMatrix(4,4,Siconos::SPARSE_COORDINATE));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor14 : ",test->num() == Siconos::SPARSE_COORDINATE, true);
+  std::cout << "--> Constructor 14 test ended with success." <<std::endl;
+}
+// Add tests with getDense ...
 
 // Add tests with getDense ...
 
@@ -579,7 +603,8 @@ void SimpleMatrixTest::testAssignment0()
   ref.reset(new SimpleMatrix(*I));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  // Sparse = Sparse or Zero
+  
+  // Sparse => Sparse or Zero
   ref.reset(new SimpleMatrix(*SP));
   tRef.reset(new SimpleMatrix(*SP));
   tRef->zero();
@@ -588,7 +613,29 @@ void SimpleMatrixTest::testAssignment0()
 
   ref.reset(new SimpleMatrix(*Z2));
   *tRef = *ref;
+  
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
+
+  // // Sparse coordinate => Sparse
+  ref.reset(new SimpleMatrix(*SP_coor));
+  ref->display();
+  tRef.reset(new SimpleMatrix(*SP));
+  tRef->zero();
+  *tRef = *ref;
+  tRef->display();
+
+  SP::SimpleMatrix A(new SimpleMatrix(*SP_coor));
+  A->displayExpert(true);
+  
+  SP::SimpleMatrix B(new SimpleMatrix(*SP));
+  B->displayExpert(true);
+  
+  SP::SimpleMatrix C(new SimpleMatrix(*SP2));
+  C->displayExpert(true);
+  getchar();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
+
+  
   // Banded = Banded, Id or Zero
   ref.reset(new SimpleMatrix(*Band));
   tRef.reset(new SimpleMatrix(*Band));
@@ -601,6 +648,8 @@ void SimpleMatrixTest::testAssignment0()
   ref.reset(new SimpleMatrix(*I2));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
+
+
 
   std::cout << "-->  test assignment0 ended with success." <<std::endl;
 }

@@ -223,7 +223,12 @@ public:
    *  \param m a SparseMat
    */
   SimpleMatrix(const SparseMat& m);
-
+  
+  /** constructor with a SparseCoordinateMat matrix (see SiconosMatrix.h for details)
+   *  \param m a SparseMat
+   */
+  SimpleMatrix(const SparseCoordinateMat& m);
+  
   /** constructor with a ZeroMat matrix (see SiconosMatrix.h for details)
    *  \param m a ZeroMat
    */
@@ -419,6 +424,9 @@ public:
    */
   unsigned copyData(double* data) const;
 
+  void assign(const SimpleMatrix &smat);
+
+  
   /** get the number of rows or columns of the matrix
    *  \param index 0 for rows, 1 for columns
    *  \return the size
@@ -452,7 +460,8 @@ public:
   /** display data on standard output
    */
   void display() const;
-
+  
+  void displayExpert(bool  brief) const;
   /** put data of the matrix into a std::string
    * \return std::string
    */

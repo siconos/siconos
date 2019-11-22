@@ -309,7 +309,7 @@ SimpleMatrix::SimpleMatrix(const SiconosMatrix &m): SiconosMatrix(m.num()), _isP
 
   else if (_num == Siconos::SPARSE)
     mat.Sparse = new SparseMat(*m.sparse());
-  
+
   else if (_num == Siconos::SPARSE_COORDINATE)
     mat.SparseCoordinate = new SparseCoordinateMat(*m.sparseCoordinate());
 
@@ -341,6 +341,11 @@ SimpleMatrix::SimpleMatrix(const SymMat& m): SiconosMatrix(3), _isPLUFactorized(
 SimpleMatrix::SimpleMatrix(const SparseMat& m): SiconosMatrix(4), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
 {
   mat.Sparse = new SparseMat(m);
+}
+
+SimpleMatrix::SimpleMatrix(const SparseCoordinateMat& m): SiconosMatrix(SPARSE_COORDINATE), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
+{
+  mat.SparseCoordinate = new SparseCoordinateMat(m);
 }
 
 SimpleMatrix::SimpleMatrix(const BandedMat& m): SiconosMatrix(5), _isPLUFactorized(false), _isQRFactorized(false), _isPLUInversed(false)
@@ -575,7 +580,7 @@ void SimpleMatrix::zero()
 
   else if (_num == Siconos::SPARSE)
     *mat.Sparse = ublas::zero_matrix<double>(size1, size2);
-  
+
   else if (_num == Siconos::SPARSE_COORDINATE)
     *mat.SparseCoordinate = ublas::zero_matrix<double>(size1, size2);
 
@@ -731,7 +736,7 @@ void SimpleMatrix::display() const
 {
   std::cout.setf(std::ios::scientific);
   std::cout.precision(6);
-  
+
   if (size(0) == 0 || size(1) ==0)
   {
     std::cout << "SimpleMatrix::display(): empty matrix" << std::endl;
@@ -748,21 +753,12 @@ void SimpleMatrix::display() const
     std::cout << *mat.Sym << std::endl;
   else if (_num == Siconos::SPARSE)
   {
-    std::cout << "non zero element (nnz) = " <<  mat.SparseCoordinate->nnz() << std::endl;
-    
+    std::cout << "non zero element (nnz) = " <<  mat.Sparse->nnz() << std::endl;
+
     std::cout << *mat.Sparse << std::endl;
   }
     else if (_num == Siconos::SPARSE_COORDINATE)
   {
-    
-    std::cout << "non zero element (nnz) = " <<  mat.SparseCoordinate->nnz() << std::endl;
-    for (size_t i = 0; i < mat.SparseCoordinate->nnz(); ++i)
-    {
-      //std::cout << i << std::endl;
-      std::cout << "M(" << mat.SparseCoordinate->index1_data()[i] << ", " ;
-      std::cout << mat.SparseCoordinate->index2_data()[i] << ") =  " ;
-      std::cout << mat.SparseCoordinate->value_data()[i] << std::endl; 
-    }
     std::cout << *mat.SparseCoordinate << std::endl;
   }else if (_num == Siconos::BANDED)
     std::cout << *mat.Banded << std::endl;
@@ -771,6 +767,77 @@ void SimpleMatrix::display() const
   else if (_num == Siconos::IDENTITY)
     std::cout << *mat.Identity << std::endl;
 }
+void SimpleMatrix::displayExpert(bool brief = true) const
+{
+  std::cout.setf(std::ios::scientific);
+  std::cout.precision(6);
+
+  if (size(0) == 0 || size(1) ==0)
+  {
+    std::cout << "SimpleMatrix::display(): empty matrix" << std::endl;
+  }
+  std::cout << "SimpleMatrix storage type - num = " << _num << "\n";
+  if (_num == Siconos::DENSE)
+  {
+    Siconos::algebra::print_m(*mat.Dense);
+    //std::cout << *mat.Dense << std::endl;
+  }
+  else if (_num == Siconos::TRIANGULAR)
+    std::cout << *mat.Triang << std::endl;
+  else if (_num == Siconos::SYMMETRIC)
+    std::cout << *mat.Sym << std::endl;
+  else if (_num == Siconos::SPARSE)
+  {
+    std::cout << "non zero element (nnz) = " <<  mat.Sparse->nnz() << std::endl;
+    std::cout << "non zero element (nnz_capacity) = " <<  mat.Sparse->nnz_capacity() << std::endl;
+    std::cout << "filled1 = " <<  mat.Sparse->filled1() << std::endl;
+    std::cout << "filled2 = " <<  mat.Sparse->filled2() << std::endl;
+
+    std::cout << "index_data1 = [ " ;
+    for (size_t i = 0; i < mat.Sparse->filled1() ; i++)
+    {
+      std::cout << mat.Sparse->index1_data()[i] << "   " ;
+    }
+    std::cout << "]" <<  std::endl;
+
+    std::cout << "index_data2 = [" ;
+    for (size_t i = 0; i < mat.Sparse->filled2() ; i++)
+    {
+      std::cout << mat.Sparse->index2_data()[i] << "   " ;
+    }
+    std::cout << "]" << std::endl;
+
+    std::cout << "value_data = [" ;
+    for (size_t i = 0; i < mat.Sparse->filled2() ; i++)
+    {
+      std::cout << mat.Sparse->value_data()[i] << "   " ;
+    }
+    std::cout << "]" << std::endl;
+
+    std::cout << *mat.Sparse << std::endl;
+  }
+    else if (_num == Siconos::SPARSE_COORDINATE)
+  {
+    std::cout << "non zero element (nnz) = " <<  mat.SparseCoordinate->nnz() << std::endl;
+
+
+
+    for (size_t i = 0; i < mat.SparseCoordinate->nnz(); ++i)
+    {
+      //std::cout << i << std::endl;
+      std::cout << "M(" << mat.SparseCoordinate->index1_data()[i] << ", " ;
+      std::cout << mat.SparseCoordinate->index2_data()[i] << ") =  " ;
+      std::cout << mat.SparseCoordinate->value_data()[i] << std::endl;
+    }
+  }else if (_num == Siconos::BANDED)
+    std::cout << *mat.Banded << std::endl;
+  else if (_num == Siconos::ZERO)
+    std::cout << *mat.Zero << std::endl;
+  else if (_num == Siconos::IDENTITY)
+    std::cout << *mat.Identity << std::endl;
+}
+
+
 
 //=====================
 // convert to a string
@@ -803,6 +870,38 @@ std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm)
     os << *sm.mat.Identity;
   return os;
 }
+
+
+void SimpleMatrix::assign(const SimpleMatrix &smat)
+{
+
+  switch (_num)
+  {
+  case Siconos::SPARSE:
+  {
+
+
+    switch (smat.num())
+    {
+    case Siconos::SPARSE:
+    {
+      mat.Sparse->assign(smat.getSparse());
+      break;
+    }
+    default:
+    {
+    }
+
+    }
+  }
+  default:
+    {
+    SiconosMatrixException::selfThrow("SimpleMatrix::assign(const SimpleMatrix& A) : do not know how to assign for the given storage type ");
+    }
+  }
+}
+
+
 
 void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init)
 {
