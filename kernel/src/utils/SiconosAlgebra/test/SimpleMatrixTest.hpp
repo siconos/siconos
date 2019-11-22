@@ -67,6 +67,7 @@ private:
   CPPUNIT_TEST(testOperators2);
   CPPUNIT_TEST(testOperators3);
   CPPUNIT_TEST(testOperators4);
+  CPPUNIT_TEST(testOperators4bis);
   CPPUNIT_TEST(testOperators5);
   CPPUNIT_TEST(testOperators6);
   CPPUNIT_TEST(testOperators6Bis);
@@ -127,6 +128,7 @@ private:
   void testOperators2();
   void testOperators3();
   void testOperators4();
+  void testOperators4bis();
   void testOperators5();
   void testOperators6();
   void testOperators6Bis();

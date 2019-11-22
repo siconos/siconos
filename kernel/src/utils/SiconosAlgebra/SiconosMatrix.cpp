@@ -22,6 +22,7 @@
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "BlockMatrix.hpp"
 
+using namespace Siconos;
 // Constructor with the type-number
 SiconosMatrix::SiconosMatrix(unsigned int type): _num(type)
 {}
@@ -52,7 +53,7 @@ bool isComparableTo(const  SiconosMatrix& m1, const  SiconosMatrix& m2)
   // - true if both are block but with blocks which are facing each other of the same size.
   // - false in other cases
 
-  if ((!m1.isBlock() || !m2.isBlock()) && (m1.size(0) == m2.size(0)) && (m1.size(1) == m2.size(1)))
+  if((!m1.isBlock() || !m2.isBlock()) && (m1.size(0) == m2.size(0)) && (m1.size(1) == m2.size(1)))
     return true;
 
   const SP::Index I1R = m1.tabRow();
@@ -65,28 +66,30 @@ bool isComparableTo(const  SiconosMatrix& m1, const  SiconosMatrix& m2)
 
 SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
 {
-  if (m._num == 0) // BlockMatrix
+  if(m._num == 0)  // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
     BlocksMat::iterator2 it2;
-    for (it = mB._mat->begin1(); it != mB._mat->end1(); ++it)
+    for(it = mB._mat->begin1(); it != mB._mat->end1(); ++it)
     {
-      for (it2 = it.begin(); it2 != it.end(); ++it2)
+      for(it2 = it.begin(); it2 != it.end(); ++it2)
         (**it2) *= s;
     }
   }
-  else if (m._num == 1)
+  else if(m._num == DENSE)
     *m.dense() *= s;
-  else if (m._num == 2)
+  else if(m._num == TRIANGULAR)
     *m.triang() *= s;
-  else if (m._num == 3)
+  else if(m._num == SYMMETRIC)
     *m.sym() *= s;
-  else if (m._num == 4)
+  else if(m._num == SPARSE)
     *m.sparse() *= s;
-  else if (m._num == 5)
+  else if(m._num == SPARSE_COORDINATE)
+    *m.sparseCoordinate() *= s;
+  else if(m._num == BANDED)
     *m.banded() *= s;
-  else if (m._num == 6) {} // nothing!
+  else if(m._num == ZERO) {}  // nothing!
   else //if(_num == 7)
     SiconosMatrixException::selfThrow(" SP::SiconosMatrix = (double) : invalid type of matrix");
 
@@ -95,28 +98,30 @@ SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
 
 SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
 {
-  if (m._num == 0) // BlockMatrix
+  if(m._num == 0)  // BlockMatrix
   {
     BlockMatrix& mB = static_cast<BlockMatrix&>(m);
     BlocksMat::iterator1 it;
     BlocksMat::iterator2 it2;
-    for (it = mB._mat->begin1(); it != mB._mat->end1(); ++it)
+    for(it = mB._mat->begin1(); it != mB._mat->end1(); ++it)
     {
-      for (it2 = it.begin(); it2 != it.end(); ++it2)
+      for(it2 = it.begin(); it2 != it.end(); ++it2)
         (**it2) /= s;
     }
   }
-  else if (m._num == 1)
+  else if(m._num == DENSE)
     *m.dense() /= s;
-  else if (m._num == 2)
+  else if(m._num == TRIANGULAR)
     *m.triang() /= s;
-  else if (m._num == 3)
+  else if(m._num == SYMMETRIC)
     *m.sym() /= s;
-  else if (m._num == 4)
+  else if(m._num == SPARSE)
     *m.sparse() /= s;
-  else if (m._num == 5)
+  else if(m._num == SPARSE_COORDINATE)
+    *m.sparseCoordinate() /= s;
+  else if(m._num == BANDED)
     *m.banded() /= s;
-  else if (m._num == 6) {} // nothing!
+  else if(m._num == ZERO) {}  // nothing!
   else //if(_num == 7)
     SiconosMatrixException::selfThrow(" SiconosMatrix *= (double) : invalid type of matrix");
 
@@ -126,21 +131,24 @@ SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
 size_t SiconosMatrix::nnz(double tol)
 {
   size_t nnz = 0;
-  if (_num == 1) //dense
+  if(_num == DENSE)  //dense
   {
     double* arr = getArray();
-    for (size_t i = 0; i < size(0)*size(1); ++i)
+    for(size_t i = 0; i < size(0)*size(1); ++i)
     {
-      if (fabs(arr[i]) > tol) { nnz++; }
+      if(fabs(arr[i]) > tol)
+      {
+        nnz++;
+      }
     }
   }
-  else if (_num == 4)
+  else if(_num == SPARSE)
   {
     nnz = sparse()->nnz();
   }
   else
   {
-     SiconosMatrixException::selfThrow("SiconosMatrix::nnz not implemented for the given matrix type");
+    SiconosMatrixException::selfThrow("SiconosMatrix::nnz not implemented for the given matrix type");
   }
 
   return nnz;
@@ -162,17 +170,17 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
 
   CS_INT pval = Mp[col_off];
 
-  if (_num == 1) //dense
+  if(_num == DENSE)  //dense
   {
     double* arr = getArray();
-    for (size_t j = 0, joff = col_off; j < ncol; ++j)
+    for(size_t j = 0, joff = col_off; j < ncol; ++j)
     {
-      for (size_t i = 0; i < nrow; ++i)
+      for(size_t i = 0; i < nrow; ++i)
       {
         // col-major
         double elt_val = arr[i + j*nrow];
         // std::cout << " a(i=" << i << ",j=" << j << ") = "<< elt_val << std::endl;
-        if (fabs(elt_val) > tol)
+        if(fabs(elt_val) > tol)
         {
           Mx[pval] = elt_val;
           Mi[pval] = i + row_off;
@@ -186,7 +194,7 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
 
     }
   }
-  else if (_num == 4)
+  else if(_num == SPARSE)
   {
     const Index& ptr = sparse()->index1_data();
     const Index& indx = sparse()->index2_data();
@@ -198,19 +206,19 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
     assert(indx.size() == nnz);
     assert(vals.size() == nnz);
 
-    for (size_t i = 0; i < nnz; ++i)
+    for(size_t i = 0; i < nnz; ++i)
     {
       Mx[pval] = vals[i];
       Mi[pval++] = row_off + indx[i];
     }
-    for (size_t j = 1, joff = col_off + 1; j < ncol+1; ++j, ++joff)
+    for(size_t j = 1, joff = col_off + 1; j < ncol+1; ++j, ++joff)
     {
       Mp[joff] = nz + ptr[j];
     }
   }
   else
   {
-     SiconosMatrixException::selfThrow("SiconosMatrix::fillCSC not implemented for the given matrix type");
+    SiconosMatrixException::selfThrow("SiconosMatrix::fillCSC not implemented for the given matrix type");
   }
 
   return true;
@@ -222,22 +230,22 @@ bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t c
   size_t nrow = size(0);
   size_t ncol = size(1);
 
-  if (_num == 1) //dense
+  if(_num == DENSE)  //dense
   {
     double* arr = getArray();
-    for (size_t j = 0; j < ncol; ++j)
+    for(size_t j = 0; j < ncol; ++j)
     {
-      for (size_t i = 0; i < nrow; ++i)
+      for(size_t i = 0; i < nrow; ++i)
       {
         // col-major
 
-        CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow] );
+        CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j*nrow]);
       }
     }
   }
   else
   {
-     SiconosMatrixException::selfThrow("SiconosMatrix::fillCSC not implemented for the given matrix type");
+    SiconosMatrixException::selfThrow("SiconosMatrix::fillCSC not implemented for the given matrix type");
   }
 
   return true;

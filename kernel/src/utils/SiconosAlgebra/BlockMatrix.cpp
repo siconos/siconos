@@ -39,7 +39,7 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
 {
   _tabRow.reset(new Index());
   _tabCol.reset(new Index());
-  if (m.isBlock())
+  if(m.isBlock())
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     unsigned int nbRows = m.numberOfBlocks(0);
@@ -55,20 +55,20 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
     ConstBlocksIterator2 it2;
     bool firstLoop = true;
     // We scan all the blocks of m ...
-    for (it1 = mB._mat->begin1(); it1 != mB._mat->end1(); ++it1)
+    for(it1 = mB._mat->begin1(); it1 != mB._mat->end1(); ++it1)
     {
       _dimRow += (*(it1.begin()))->size(0);
       _tabRow->push_back(_dimRow);
-      for (it2 = it1.begin(); it2 != it1.end(); ++it2)
+      for(it2 = it1.begin(); it2 != it1.end(); ++it2)
       {
         i = it2.index1();
         j = it2.index2();
-        if ((*it2)->isBlock())  // if the current matrix is a blockMatrix
+        if((*it2)->isBlock())   // if the current matrix is a blockMatrix
           _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new BlockMatrix(**it2)));
         else
           _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new SimpleMatrix(**it2)));
         // _dimCol must be incremented only at first "column-loop"
-        if (firstLoop)
+        if(firstLoop)
         {
           _dimCol += (*it2)->size(1);
           _tabCol->push_back(_dimCol);
@@ -110,21 +110,21 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), _dimRow(0), _d
   ConstBlocksIterator2 it2;
   bool firstLoop = true;
   // We scan all the blocks of m ...
-  for (it1 = m._mat->begin1(); it1 != m._mat->end1(); ++it1)
+  for(it1 = m._mat->begin1(); it1 != m._mat->end1(); ++it1)
   {
     _dimRow += (*(it1.begin()))->size(0);
     _tabRow->push_back(_dimRow);
-    for (it2 = it1.begin(); it2 != it1.end(); ++it2)
+    for(it2 = it1.begin(); it2 != it1.end(); ++it2)
     {
       i = it2.index1();
       j = it2.index2();
-      if ((*it2)->isBlock())  // if the current _matrix is a blockMatrix
+      if((*it2)->isBlock())   // if the current _matrix is a blockMatrix
         _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new BlockMatrix(**it2)));
       else
         _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new SimpleMatrix(**it2)));
 
       // _dimCol must be incremented only at first "column-loop"
-      if (firstLoop)
+      if(firstLoop)
       {
         _dimCol += (*it2)->size(1);
         _tabCol->push_back(_dimCol);
@@ -137,7 +137,7 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), _dimRow(0), _d
 BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int row, unsigned int col):
   SiconosMatrix(0), _dimRow(0), _dimCol(0)
 {
-  if (m.size() != (row * col))
+  if(m.size() != (row * col))
     SiconosMatrixException::selfThrow("BlockMatrix constructor from a vector<SiconosMatrix*>, number of blocks inconsistent with provided dimensions.");
 
   _tabRow.reset(new Index());
@@ -152,19 +152,19 @@ BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int 
   bool firstRowLoop = true;
   bool firstColLoop = true;
 
-  for (unsigned int i = 0; i < row; ++i)
+  for(unsigned int i = 0; i < row; ++i)
   {
-    for (unsigned int j = 0; j < col; ++j)
+    for(unsigned int j = 0; j < col; ++j)
     {
       (*_mat)(i, j) = m[k++];
 
       // _dimCol must be incremented only at first "column-loop"
-      if (firstColLoop)
+      if(firstColLoop)
       {
         _dimCol += m[k - 1]->size(1);
         _tabCol->push_back(_dimCol);
       }
-      if (firstRowLoop)
+      if(firstRowLoop)
       {
         _dimRow += m[k - 1]->size(0);
         _tabRow->push_back(_dimRow);
@@ -179,7 +179,7 @@ BlockMatrix::BlockMatrix(const std::vector<SP::SiconosMatrix >& m, unsigned int 
 BlockMatrix::BlockMatrix(SP::SiconosMatrix A, SP::SiconosMatrix B, SP::SiconosMatrix C, SP::SiconosMatrix D):
   SiconosMatrix(0), _dimRow(0), _dimCol(0)
 {
-  if (A->size(0) != B->size(0) || C->size(0) != D->size(0) ||  A->size(1) != C->size(1) ||  B->size(1) != D->size(1))
+  if(A->size(0) != B->size(0) || C->size(0) != D->size(0) ||  A->size(1) != C->size(1) ||  B->size(1) != D->size(1))
     SiconosMatrixException::selfThrow("BlockMatrix constructor(A,B,C,D), inconsistent sizes between A, B, C or D SiconosMatrices.");
 
   // _mat = [ A B ]
@@ -223,7 +223,7 @@ BlockMatrix::~BlockMatrix()
 
 unsigned int BlockMatrix::numberOfBlocks(unsigned int dim) const
 {
-  if (dim == 0)
+  if(dim == 0)
     return _tabRow->size();
   else
     return _tabCol->size();
@@ -240,7 +240,7 @@ const DenseMat  BlockMatrix::getDense(unsigned int row, unsigned int col) const
   SP::SiconosMatrix tmp;
   tmp = (*_mat)(row, col);
 
-  if (tmp->num() != 1)
+  if(tmp->num() != 1)
     SiconosMatrixException::selfThrow("DenseMat BlockMatrix::getDense(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Dense matrix");
 
   return (tmp->getDense());
@@ -250,7 +250,7 @@ const DenseMat  BlockMatrix::getDense(unsigned int row, unsigned int col) const
 const TriangMat BlockMatrix::getTriang(unsigned int row, unsigned int col) const
 {
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 2)
+  if(tmp->num() != 2)
   {
     SiconosMatrixException::selfThrow("TriangMat BlockMatrix::getTriang(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
   }
@@ -262,7 +262,7 @@ const SymMat BlockMatrix::getSym(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 3)
+  if(tmp->num() != 3)
   {
     SiconosMatrixException::selfThrow("SymMat BlockMatrix::getSym(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
   }
@@ -274,7 +274,7 @@ const SparseMat  BlockMatrix::getSparse(unsigned int row, unsigned int col) cons
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 4)
+  if(tmp->num() != 4)
   {
     SiconosMatrixException::selfThrow("SparseMat BlockMatrix::getSparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
   }
@@ -286,7 +286,7 @@ const SparseCoordinateMat  BlockMatrix::getSparseCoordinate(unsigned int row, un
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 4)
+  if(tmp->num() != 4)
   {
     SiconosMatrixException::selfThrow("SparseMat BlockMatrix::getSparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
   }
@@ -297,7 +297,7 @@ const BandedMat  BlockMatrix::getBanded(unsigned int row, unsigned int col) cons
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 5)
+  if(tmp->num() != 5)
   {
     SiconosMatrixException::selfThrow("BandedMat BlockMatrix::getBanded(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
   }
@@ -309,7 +309,7 @@ const ZeroMat  BlockMatrix::getZero(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 5)
+  if(tmp->num() != 5)
   {
     SiconosMatrixException::selfThrow("ZeroMat BlockMatrix::getZero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
   }
@@ -321,7 +321,7 @@ const IdentityMat  BlockMatrix::getIdentity(unsigned int row, unsigned int col) 
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 5)
+  if(tmp->num() != 5)
   {
     SiconosMatrixException::selfThrow("IdentityMat BlockMatrix::getIdentity(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
   }
@@ -334,7 +334,7 @@ DenseMat*  BlockMatrix::dense(unsigned int row, unsigned int col) const
 
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 1)
+  if(tmp->num() != 1)
   {
     SiconosMatrixException::selfThrow("DenseMat* BlockMatrix::dense(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Dense matrix");
   }
@@ -346,7 +346,7 @@ TriangMat* BlockMatrix::triang(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 2)
+  if(tmp->num() != 2)
   {
     SiconosMatrixException::selfThrow("TriangMat* BlockMatrix::triang(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
   }
@@ -356,7 +356,7 @@ SymMat* BlockMatrix::sym(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 3)
+  if(tmp->num() != 3)
   {
     SiconosMatrixException::selfThrow("SymMat* BlockMatrix::sym(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
   }
@@ -367,7 +367,7 @@ SparseMat*  BlockMatrix::sparse(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 4)
+  if(tmp->num() != 4)
   {
     SiconosMatrixException::selfThrow("SparseMat* BlockMatrix::sparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
   }
@@ -377,7 +377,7 @@ SparseCoordinateMat*  BlockMatrix::sparseCoordinate(unsigned int row, unsigned i
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != Siconos::SPARSE_COORDINATE)
+  if(tmp->num() != Siconos::SPARSE_COORDINATE)
   {
     SiconosMatrixException::selfThrow("SparseCoordinateMat* BlockMatrix::sparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse coordinate matrix");
   }
@@ -388,7 +388,7 @@ BandedMat*  BlockMatrix::banded(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 5)
+  if(tmp->num() != 5)
   {
     SiconosMatrixException::selfThrow("BandedMat* BlockMatrix::banded(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
   }
@@ -399,7 +399,7 @@ ZeroMat*  BlockMatrix::zero_mat(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 6)
+  if(tmp->num() != 6)
   {
     SiconosMatrixException::selfThrow("ZeroMat* BlockMatrix::zero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
   }
@@ -410,7 +410,7 @@ IdentityMat*  BlockMatrix::identity(unsigned int row, unsigned int col) const
 {
 
   SP::SiconosMatrix tmp = (*_mat)(row, col);
-  if (tmp->num() != 5)
+  if(tmp->num() != 5)
   {
     SiconosMatrixException::selfThrow("IdentityMat* BlockMatrix::identity(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
   }
@@ -431,9 +431,9 @@ void BlockMatrix::zero()
 {
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
-  for (it = _mat->begin1(); it != _mat->end1(); ++it)
+  for(it = _mat->begin1(); it != _mat->end1(); ++it)
   {
-    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    for(it2 = it.begin(); it2 != it.end(); ++it2)
     {
       (*it2)->zero();
     }
@@ -444,9 +444,9 @@ void BlockMatrix::randomize()
 {
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
-  for (it = _mat->begin1(); it != _mat->end1(); ++it)
+  for(it = _mat->begin1(); it != _mat->end1(); ++it)
   {
-    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    for(it2 = it.begin(); it2 != it.end(); ++it2)
     {
       (*it2)->randomize();
     }
@@ -463,11 +463,11 @@ void BlockMatrix::eye()
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
 
-  for (it = _mat->begin1(); it != _mat->end1(); ++it)
+  for(it = _mat->begin1(); it != _mat->end1(); ++it)
   {
-    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    for(it2 = it.begin(); it2 != it.end(); ++it2)
     {
-      if (it2.index1() == it2.index2())
+      if(it2.index1() == it2.index2())
         (*it2)->eye();
       else
         (*it2)->zero();
@@ -477,7 +477,7 @@ void BlockMatrix::eye()
 
 unsigned int BlockMatrix::size(unsigned int index) const
 {
-  if (index == 0) return _dimRow;
+  if(index == 0) return _dimRow;
   else return _dimCol;
 };
 
@@ -498,13 +498,13 @@ void BlockMatrix::resize(unsigned int, unsigned int, unsigned int, unsigned int,
 double BlockMatrix::normInf()const
 {
   double sum = 0, norm = 0;
-  for (unsigned int i = 0; i < size(0); i++)
+  for(unsigned int i = 0; i < size(0); i++)
   {
-    for (unsigned int j = 0; j < size(1); j++)
+    for(unsigned int j = 0; j < size(1); j++)
     {
       sum += (*this)(i, j);
     }
-    if (fabs(sum) > norm) norm = fabs(sum);
+    if(fabs(sum) > norm) norm = fabs(sum);
     sum = 0;
   }
   return norm;
@@ -519,9 +519,9 @@ void BlockMatrix::display(void)const
   std::cout << "==========> BlockMatrix (" << numberOfBlocks(0) << " X " << numberOfBlocks(1) << " blocks): " << std::endl;
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
-  for (it = _mat->begin1(); it != _mat->end1(); ++it)
+  for(it = _mat->begin1(); it != _mat->end1(); ++it)
   {
-    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    for(it2 = it.begin(); it2 != it.end(); ++it2)
     {
       (*it2)->display();
     }
@@ -533,9 +533,9 @@ void BlockMatrix::displayExpert(bool brief)const
   std::cout << "==========> BlockMatrix (" << numberOfBlocks(0) << " X " << numberOfBlocks(1) << " blocks): " << std::endl;
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
-  for (it = _mat->begin1(); it != _mat->end1(); ++it)
+  for(it = _mat->begin1(); it != _mat->end1(); ++it)
   {
-    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    for(it2 = it.begin(); it2 != it.end(); ++it2)
     {
       (*it2)->displayExpert(brief);
     }
@@ -561,12 +561,13 @@ std::ostream& operator<<(std::ostream& os, const BlockMatrix& bm)
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
   os << "[" << bm.numberOfBlocks(0) << "," << bm.numberOfBlocks(1) << "](";
-  for (it = bm._mat->begin1(); it != bm._mat->end1(); ++it)
+  for(it = bm._mat->begin1(); it != bm._mat->end1(); ++it)
   {
-    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    for(it2 = it.begin(); it2 != it.end(); ++it2)
     {
-      if (it2 != it.begin()) os << ",";
-      if (*it2) os << **it2; else os << "(nil)";
+      if(it2 != it.begin()) os << ",";
+      if(*it2) os << **it2;
+      else os << "(nil)";
     }
   }
   os << ")";
@@ -582,18 +583,18 @@ double& BlockMatrix::operator()(unsigned int row, unsigned int col)
   unsigned int nbRow = 0;
   unsigned int nbCol = 0;
 
-  while (row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size())
+  while(row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size())
     nbRow ++;
 
-  while (col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size())
+  while(col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size())
     nbCol ++;
 
   unsigned int posRow = row;
   unsigned int posCol = col;
 
-  if (nbRow != 0)
+  if(nbRow != 0)
     posRow -= (*_tabRow)[nbRow - 1];
-  if (nbCol != 0)
+  if(nbCol != 0)
     posCol -= (*_tabCol)[nbCol - 1];
 
 
@@ -607,18 +608,18 @@ double BlockMatrix::operator()(unsigned int row, unsigned int col) const
   unsigned int nbRow = 0;
   unsigned int nbCol = 0;
 
-  while (row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size())
+  while(row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size())
     nbRow ++;
 
-  while (col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size())
+  while(col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size())
     nbCol ++;
 
   unsigned int posRow = row;
   unsigned int posCol = col;
 
-  if (nbRow != 0)
+  if(nbRow != 0)
     posRow -= (*_tabRow)[nbRow - 1];
-  if (nbCol != 0)
+  if(nbCol != 0)
     posCol -= (*_tabCol)[nbCol - 1];
 
   SP::SiconosMatrix tmp = (*_mat)(nbRow, nbCol);
@@ -630,18 +631,18 @@ double BlockMatrix::getValue(unsigned int row, unsigned int col) const
   unsigned int nbRow = 0;
   unsigned int nbCol = 0;
 
-  while (row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size())
+  while(row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size())
     nbRow ++;
 
-  while (col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size())
+  while(col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size())
     nbCol ++;
 
   unsigned int posRow = row;
   unsigned int posCol = col;
 
-  if (nbRow != 0)
+  if(nbRow != 0)
     posRow -= (*_tabRow)[nbRow - 1];
-  if (nbCol != 0)
+  if(nbCol != 0)
     posCol -= (*_tabCol)[nbCol - 1];
 
 
@@ -654,18 +655,18 @@ void BlockMatrix::setValue(unsigned int row, unsigned int col, double value)
   unsigned int nbRow = 0;
   unsigned int nbCol = 0;
 
-  while (row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size())
+  while(row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size())
     nbRow ++;
 
-  while (col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size())
+  while(col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size())
     nbCol ++;
 
   unsigned int posRow = row;
   unsigned int posCol = col;
 
-  if (nbRow != 0)
+  if(nbRow != 0)
     posRow -= (*_tabRow)[nbRow - 1];
-  if (nbCol != 0)
+  if(nbCol != 0)
     posCol -= (*_tabCol)[nbCol - 1];
 
   SP::SiconosMatrix tmp = (*_mat)(nbRow, nbCol);
@@ -680,22 +681,22 @@ void BlockMatrix::getRow(unsigned int r, SiconosVector &v) const
 {
   unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
 
-  if (r > _dimRow)
+  if(r > _dimRow)
     SiconosMatrixException::selfThrow("BlockMatrix:getRow : row number is out of range");
 
   // Verification of the size of the result vector
-  if (v.size() != _dimCol)
+  if(v.size() != _dimCol)
     SiconosMatrixException::selfThrow("BlockMatrix:getRow : inconsistent sizes");
 
   // Find the row-block number where "r" is
-  while (r >= (*_tabRow)[numRow] && numRow < _tabRow->size())
+  while(r >= (*_tabRow)[numRow] && numRow < _tabRow->size())
     numRow ++;
 
   // Computation of the value of the index row into this block
-  if (numRow != 0)
+  if(numRow != 0)
     posRow -= (*_tabRow)[numRow - 1];
 
-  for (unsigned int j = 0; j < _tabCol->size(); j++)
+  for(unsigned int j = 0; j < _tabCol->size(); j++)
   {
     start = stop;
     SP::SiconosMatrix tmp = (*_mat)(numRow, j);
@@ -708,22 +709,22 @@ void BlockMatrix::getCol(unsigned int c, SiconosVector &v) const
 {
   unsigned int numCol = 0, posCol = c, start = 0, stop = 0;
 
-  if (c > _dimCol)
+  if(c > _dimCol)
     SiconosMatrixException::selfThrow("BlockMatrix:getCol : column number is out of range");
 
   // Verification of the size of the result vector
-  if (v.size() != _dimRow)
+  if(v.size() != _dimRow)
     SiconosMatrixException::selfThrow("BlockMatrix:getcol : inconsistent sizes");
 
   // Find the column-block number where "c" is
-  while (c >= (*_tabCol)[numCol] && numCol < _tabCol->size())
+  while(c >= (*_tabCol)[numCol] && numCol < _tabCol->size())
     numCol ++;
 
   // Computation of the value of the index column into this block
-  if (numCol != 0)
+  if(numCol != 0)
     posCol -= (*_tabCol)[numCol - 1];
 
-  for (unsigned int i = 0; i < _tabRow->size(); i++)
+  for(unsigned int i = 0; i < _tabRow->size(); i++)
   {
     start = stop;
     SP::SiconosMatrix tmp = (*_mat)(i, numCol);
@@ -737,16 +738,16 @@ void BlockMatrix::setRow(unsigned int r, const SiconosVector &v)
 
   unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
 
-  if (v.size() != _dimCol)
+  if(v.size() != _dimCol)
     SiconosMatrixException::selfThrow("BlockMatrix:setRow : inconsistent sizes");
 
-  while (r >= (*_tabRow)[numRow] && numRow < _tabRow->size())
+  while(r >= (*_tabRow)[numRow] && numRow < _tabRow->size())
     numRow ++;
 
-  if (numRow != 0)
+  if(numRow != 0)
     posRow -= (*_tabRow)[numRow - 1];
 
-  for (unsigned int j = 0; j < _tabCol->size(); j++)
+  for(unsigned int j = 0; j < _tabCol->size(); j++)
   {
     start = stop;
     SP::SiconosMatrix tmp = (*_mat)(numRow, j);
@@ -760,16 +761,16 @@ void BlockMatrix::setCol(unsigned int col, const SiconosVector &v)
 
   unsigned int numCol = 0, posCol = col, start = 0, stop = 0;
 
-  if (v.size() != _dimRow)
+  if(v.size() != _dimRow)
     SiconosMatrixException::selfThrow("BlockMatrix:setCol : inconsistent sizes");
 
-  while (col >= (*_tabCol)[numCol] && numCol < _tabCol->size())
+  while(col >= (*_tabCol)[numCol] && numCol < _tabCol->size())
     numCol ++;
 
-  if (numCol != 0)
+  if(numCol != 0)
     posCol -= (*_tabCol)[numCol - 1];
 
-  for (unsigned int i = 0; i < _tabRow->size(); i++)
+  for(unsigned int i = 0; i < _tabRow->size(); i++)
   {
     start = stop;
     SP::SiconosMatrix tmp = (*_mat)(i, numCol);
@@ -789,19 +790,19 @@ void BlockMatrix::addSimple(unsigned int& indRow, unsigned int& indCol, const Si
   unsigned int col = m.size(1) - indCol; // number of columns of the block to be added.
   unsigned int initCol = indCol;
 
-  if (row > _dimRow || col > _dimCol) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : invalid ranges");
+  if(row > _dimRow || col > _dimCol) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : invalid ranges");
 
   unsigned int numM = m.num();
 
   // iterators through this
   BlocksMat::iterator1 it1;
   BlocksMat::iterator2 it2;
-  unsigned int currentRow = 0 , currentCol = 0, currentNum;
-  for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
+  unsigned int currentRow = 0, currentCol = 0, currentNum;
+  for(it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
   {
-    for (it2 = it1.begin(); it2 != it1.end(); ++it2)
+    for(it2 = it1.begin(); it2 != it1.end(); ++it2)
     {
-      if ((*it2)->isBlock())  // if the sub-block is also a BlockMatrix ...
+      if((*it2)->isBlock())   // if the sub-block is also a BlockMatrix ...
         (std11::static_pointer_cast<BlockMatrix>(*it2))->addSimple(indRow, indCol, m);
 
       else
@@ -809,19 +810,19 @@ void BlockMatrix::addSimple(unsigned int& indRow, unsigned int& indCol, const Si
         currentCol = (*it2)->size(1);
         currentRow = (*it2)->size(0);
         currentNum = (*it2)->num();
-        if (numM != currentNum) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : inconsistent types.");
+        if(numM != currentNum) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : inconsistent types.");
 
-        if (numM == 1)
+        if(numM == 1)
           noalias(*(*it2)->dense()) += ublas::subrange(*m.dense(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == 2)
+        else if(numM == 2)
           noalias(*(*it2)->triang()) += ublas::subrange(*m.triang(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == 3)
+        else if(numM == 3)
           noalias(*(*it2)->sym()) += ublas::subrange(*m.sym(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == 4)
+        else if(numM == 4)
           noalias(*(*it2)->sparse()) += ublas::subrange(*m.sparse(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == 5)
+        else if(numM == 5)
           noalias(*(*it2)->banded()) += ublas::subrange(*m.banded(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == 6) {}
+        else if(numM == 6) {}
         else
           SiconosMatrixException::selfThrow("BlockMatrix::addSimple : inconsistent types.");
       }
@@ -842,7 +843,7 @@ void BlockMatrix::subSimple(unsigned int& indRow, unsigned int& indCol, const Si
   unsigned int row = m.size(0) - indRow; // number of rows of the block to be added.
   unsigned int col = m.size(1) - indCol; // number of columns of the block to be added.
   unsigned int initCol = indCol;
-  if (row > _dimRow || col > _dimCol) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : invalid ranges");
+  if(row > _dimRow || col > _dimCol) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : invalid ranges");
 
   unsigned int numM = m.num();
 
@@ -850,11 +851,11 @@ void BlockMatrix::subSimple(unsigned int& indRow, unsigned int& indCol, const Si
   BlocksMat::iterator1 it1;
   BlocksMat::iterator2 it2;
   unsigned int currentRow = 0, currentCol = 0, currentNum;
-  for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
+  for(it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
   {
-    for (it2 = it1.begin(); it2 != it1.end(); ++it2)
+    for(it2 = it1.begin(); it2 != it1.end(); ++it2)
     {
-      if ((*it2)->isBlock())  // if the sub-block is also a BlockMatrix ...
+      if((*it2)->isBlock())   // if the sub-block is also a BlockMatrix ...
         (std11::static_pointer_cast<BlockMatrix>(*it2))->subSimple(indRow, indCol, m);
 
       else
@@ -862,19 +863,19 @@ void BlockMatrix::subSimple(unsigned int& indRow, unsigned int& indCol, const Si
         currentCol = (*it2)->size(1);
         currentRow = (*it2)->size(0);
         currentNum = (*it2)->num();
-        if (numM != currentNum) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : inconsistent types.");
+        if(numM != currentNum) SiconosMatrixException::selfThrow("BlockMatrix::addSimple : inconsistent types.");
 
-        if (numM == 1)
+        if(numM == 1)
           noalias(*(*it2)->dense()) -= ublas::subrange(*m.dense(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == 2)
+        else if(numM == 2)
           noalias(*(*it2)->triang()) -= ublas::subrange(*m.triang(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == 3)
+        else if(numM == 3)
           noalias(*(*it2)->sym()) -= ublas::subrange(*m.sym(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == 4)
+        else if(numM == 4)
           noalias(*(*it2)->sparse()) -= ublas::subrange(*m.sparse(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == 5)
+        else if(numM == 5)
           noalias(*(*it2)->banded()) -= ublas::subrange(*m.banded(), indRow, indRow + currentRow, indCol, indCol + currentCol);
-        else if (numM == 6) {}
+        else if(numM == 6) {}
         else
           SiconosMatrixException::selfThrow("BlockMatrix::addSimple : inconsistent types.");
       }
@@ -892,9 +893,9 @@ void BlockMatrix::subSimple(unsigned int& indRow, unsigned int& indCol, const Si
 
 BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
 {
-  if (&m == this) return *this; // auto-assignment.
+  if(&m == this) return *this;  // auto-assignment.
 
-  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
+  if(m.size(0) != _dimRow || m.size(1) != _dimCol)
     SiconosMatrixException::selfThrow("operator = (const SiconosMatrix&): Left and Right values have inconsistent sizes.");
 
   // Warning: we do not reallocate the blocks, but only copy the values. This means that
@@ -902,9 +903,9 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
   // Thus, _tabRow and _tabCol remains unchanged.
   // If m and mat are not "block-consistent", we use the () operator for a component-wise copy.
 
-  if (m.isBlock())
+  if(m.isBlock())
   {
-    if (isComparableTo(*this, m))
+    if(isComparableTo(*this, m))
     {
       const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
       // iterators through this
@@ -914,10 +915,10 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
       ConstBlocksIterator1 itM1 = mB._mat->begin1();
       ConstBlocksIterator2 itM2;
 
-      for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
+      for(it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
       {
         itM2 = itM1.begin();
-        for (it2 = it1.begin(); it2 != it1.end(); ++it2)
+        for(it2 = it1.begin(); it2 != it1.end(); ++it2)
         {
           (**it2) = (**itM2);
           itM2++; // increment column pos. in m.
@@ -927,8 +928,8 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
     }
     else
     {
-      for (unsigned int i = 0; i < _dimRow; ++i)
-        for (unsigned int j = 0; j < _dimCol; ++j)
+      for(unsigned int i = 0; i < _dimRow; ++i)
+        for(unsigned int j = 0; j < _dimCol; ++j)
           (*this)(i, j) = m(i, j);
     }
   }
@@ -941,9 +942,9 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
     Index subDim(2);
     Index subPos(4);
 
-    for (it = _mat->begin1(); it != _mat->end1(); ++it)
+    for(it = _mat->begin1(); it != _mat->end1(); ++it)
     {
-      for (it2 = it.begin(); it2 != it.end(); ++it2)
+      for(it2 = it.begin(); it2 != it.end(); ++it2)
       {
         // a sub-block of m is copied into this
         subDim[0] = (*it2)->size(0);
@@ -965,9 +966,9 @@ BlockMatrix& BlockMatrix::operator = (const SiconosMatrix &m)
 
 BlockMatrix& BlockMatrix::operator = (const BlockMatrix &m)
 {
-  if (&m == this) return *this; // auto-assignment.
+  if(&m == this) return *this;  // auto-assignment.
 
-  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
+  if(m.size(0) != _dimRow || m.size(1) != _dimCol)
     SiconosMatrixException::selfThrow("operator = (const SiconosMatrix&): Left and Right values have inconsistent sizes.");
 
   // Warning: we do not reallocate the blocks, but only copy the values. This means that
@@ -975,7 +976,7 @@ BlockMatrix& BlockMatrix::operator = (const BlockMatrix &m)
   // Thus, _tabRow and _tabCol remains unchanged.
   // If m and mat are not "block-consistent", we use the () operator for a componet-wise copy.
 
-  if (isComparableTo(*this, m))
+  if(isComparableTo(*this, m))
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     // iterators through this
@@ -985,10 +986,10 @@ BlockMatrix& BlockMatrix::operator = (const BlockMatrix &m)
     ConstBlocksIterator1 itM1 = mB._mat->begin1();
     ConstBlocksIterator2 itM2;
 
-    for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
+    for(it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
     {
       itM2 = itM1.begin();
-      for (it2 = it1.begin(); it2 != it1.end(); ++it2)
+      for(it2 = it1.begin(); it2 != it1.end(); ++it2)
       {
         (**it2) = (**itM2);
         itM2++; // increment column pos. in m.
@@ -998,8 +999,8 @@ BlockMatrix& BlockMatrix::operator = (const BlockMatrix &m)
   }
   else
   {
-    for (unsigned int i = 0; i < _dimRow; ++i)
-      for (unsigned int j = 0; j < _dimCol; ++j)
+    for(unsigned int i = 0; i < _dimRow; ++i)
+      for(unsigned int j = 0; j < _dimCol; ++j)
         (*this)(i, j) = m(i, j);
   }
   return *this;
@@ -1017,13 +1018,13 @@ BlockMatrix& BlockMatrix::operator = (const DenseMat &m)
 
 BlockMatrix& BlockMatrix::operator += (const SiconosMatrix &m)
 {
-  if (&m == this)
+  if(&m == this)
   {
     BlocksMat::iterator1 it1;
     BlocksMat::iterator2 it2;
-    for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
+    for(it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
     {
-      for (it2 = it1.begin(); it2 != it1.end(); ++it2)
+      for(it2 = it1.begin(); it2 != it1.end(); ++it2)
       {
         **it2 += **it2;
       }
@@ -1031,12 +1032,12 @@ BlockMatrix& BlockMatrix::operator += (const SiconosMatrix &m)
     return *this;
   }
 
-  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
+  if(m.size(0) != _dimRow || m.size(1) != _dimCol)
     SiconosMatrixException::selfThrow("BlockMatrix::operator += Left and Right values have inconsistent sizes.");
 
-  if (m.isBlock())
+  if(m.isBlock())
   {
-    if (isComparableTo(m, *this))
+    if(isComparableTo(m, *this))
     {
       const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
       // iterators through this
@@ -1046,10 +1047,10 @@ BlockMatrix& BlockMatrix::operator += (const SiconosMatrix &m)
       BlocksMat::const_iterator1 itM1 = mB._mat->begin1();
       BlocksMat::const_iterator2 itM2;
 
-      for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
+      for(it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
       {
         itM2 = itM1.begin();
-        for (it2 = it1.begin(); it2 != it1.end(); ++it2)
+        for(it2 = it1.begin(); it2 != it1.end(); ++it2)
         {
           (**it2) += (**itM2);
           itM2++; // increment column pos. in m.
@@ -1059,8 +1060,8 @@ BlockMatrix& BlockMatrix::operator += (const SiconosMatrix &m)
     }
     else
     {
-      for (unsigned int i = 0; i < _dimRow; ++i)
-        for (unsigned int j = 0; j < _dimCol; ++j)
+      for(unsigned int i = 0; i < _dimRow; ++i)
+        for(unsigned int j = 0; j < _dimCol; ++j)
           (*this)(i, j) += m(i, j);
     }
   }
@@ -1074,13 +1075,13 @@ BlockMatrix& BlockMatrix::operator += (const SiconosMatrix &m)
 
 BlockMatrix& BlockMatrix::operator -= (const SiconosMatrix &m)
 {
-  if (&m == this)
+  if(&m == this)
   {
     BlocksMat::iterator1 it1;
     BlocksMat::iterator2 it2;
-    for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
+    for(it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
     {
-      for (it2 = it1.begin(); it2 != it1.end(); ++it2)
+      for(it2 = it1.begin(); it2 != it1.end(); ++it2)
       {
         **it2 -= **it2;
       }
@@ -1088,12 +1089,12 @@ BlockMatrix& BlockMatrix::operator -= (const SiconosMatrix &m)
     return *this;
   }
 
-  if (m.size(0) != _dimRow || m.size(1) != _dimCol)
+  if(m.size(0) != _dimRow || m.size(1) != _dimCol)
     SiconosMatrixException::selfThrow("BlockMatrix::operator += Left and Right values have inconsistent sizes.");
 
-  if (m.isBlock())
+  if(m.isBlock())
   {
-    if (isComparableTo(m, *this))
+    if(isComparableTo(m, *this))
     {
       const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
       // iterators through this
@@ -1103,10 +1104,10 @@ BlockMatrix& BlockMatrix::operator -= (const SiconosMatrix &m)
       BlocksMat::const_iterator1 itM1 = mB._mat->begin1();
       BlocksMat::const_iterator2 itM2;
 
-      for (it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
+      for(it1 = _mat->begin1(); it1 != _mat->end1(); ++it1)
       {
         itM2 = itM1.begin();
-        for (it2 = it1.begin(); it2 != it1.end(); ++it2)
+        for(it2 = it1.begin(); it2 != it1.end(); ++it2)
         {
           (**it2) -= (**itM2);
           itM2++; // increment column pos. in m.
@@ -1116,8 +1117,8 @@ BlockMatrix& BlockMatrix::operator -= (const SiconosMatrix &m)
     }
     else
     {
-      for (unsigned int i = 0; i < _dimRow; ++i)
-        for (unsigned int j = 0; j < _dimCol; ++j)
+      for(unsigned int i = 0; i < _dimRow; ++i)
+        for(unsigned int j = 0; j < _dimCol; ++j)
           (*this)(i, j) -= m(i, j);
     }
   }
@@ -1174,9 +1175,9 @@ size_t BlockMatrix::nnz(double tol)
   size_t nnz = 0;
   BlocksMat::iterator1 it;
   BlocksMat::iterator2 it2;
-  for (it = _mat->begin1(); it != _mat->end1(); ++it)
+  for(it = _mat->begin1(); it != _mat->end1(); ++it)
   {
-    for (it2 = it.begin(); it2 != it.end(); ++it2)
+    for(it2 = it.begin(); it2 != it.end(); ++it2)
       nnz += (**it2).nnz();
   }
   return nnz;

@@ -64,91 +64,116 @@ const SimpleMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
-  if ((A.size(1) != B.size(0)))
+  if((A.size(1) != B.size(0)))
     SiconosMatrixException::selfThrow("Matrix function C=prod(A,B): inconsistent sizes");
 
   unsigned int numA = A.num();
   unsigned int numB = B.num();
 
   // == TODO: implement block product ==
-  if (numA == 0 || numB == 0)
+  if(numA == 0 || numB == 0)
     SiconosMatrixException::selfThrow("Matrix product ( C=prod(A,B) ): not yet implemented for BlockMatrix objects.");
 
-  if (numA == 7 || numB == 6) // A = identity or B = 0
+  if(numA == IDENTITY || numB == 6)  // A = identity or B = 0
     return SimpleMatrix(B);
 
-  else if (numB == 7 || numA == 6) // B = identity or A = 0
+  else if(numB == IDENTITY || numA == ZERO)  // B = identity or A = 0
     return SimpleMatrix(A);
 
   else // neither A or B is equal to identity or zero.
   {
-    if (numB == 1)
+    if(numB == DENSE)
     {
-      if (numA == 1)
+      if(numA == DENSE)
       {
         DenseMat p(A.size(0), B.size(1));
         siconosBindings::blas::gemm(1.0, *A.dense(), *B.dense(), 1.0, p);
         //      return (DenseMat)(prod(*A.dense(),*B.dense()));
         return p;
       }
-      else if (numA == 2)
+      else if(numA == TRIANGULAR)
         return (DenseMat)(prod(*A.triang(), *B.dense()));
-      else if (numA == 3)
+      else if(numA == SYMMETRIC)
         return (DenseMat)(prod(*A.sym(), *B.dense()));
-      else if (numA == 4)
+      else if(numA == SPARSE)
         return (DenseMat)(prod(*A.sparse(), *B.dense()));
+      else if(numA == SPARSE_COORDINATE)
+        return (DenseMat)(prod(*A.sparseCoordinate(), *B.dense()));
       else// if(numA==5)
         return (DenseMat)(prod(*A.banded(), *B.dense()));
     }
-    else if (numB == 2)
+    else if(numB == TRIANGULAR)
     {
-      if (numA == 1)
+      if(numA == DENSE)
         return (DenseMat)(prod(*A.dense(), *B.triang()));
-      else if (numA == 2)
+      else if(numA == TRIANGULAR)
         return (TriangMat)(prod(*A.triang(), *B.triang()));
-      else if (numA == 3)
+      else if(numA == SYMMETRIC)
         return (DenseMat)(prod(*A.sym(), *B.triang()));
-      else if (numA == 4)
+      else if(numA == SPARSE)
         return (DenseMat)(prod(*A.sparse(), *B.triang()));
+      else if(numA == SPARSE_COORDINATE)
+        return (DenseMat)(prod(*A.sparseCoordinate(), *B.triang()));
       else //if(numA==5)
         return (DenseMat)(prod(*A.banded(), *B.triang()));
     }
-    else if (numB == 3)
+    else if(numB == SYMMETRIC)
     {
-      if (numA == 1)
+      if(numA == DENSE)
         return (DenseMat)(prod(*A.dense(), *B.sym()));
-      else if (numA == 2)
+      else if(numA == TRIANGULAR)
         return (DenseMat)(prod(*A.triang(), *B.sym()));
-      else if (numA == 3)
+      else if(numA == SYMMETRIC)
         return (SymMat)(prod(*A.sym(), *B.sym()));
-      else if (numA == 4)
+      else if(numA == SPARSE)
         return (DenseMat)(prod(*A.sparse(), *B.sym()));
-      else // if (numA == 5)
+      else if(numA == SPARSE_COORDINATE)
+        return (DenseMat)(prod(*A.sparseCoordinate(), *B.sym()));
+      else // if (numA == BANDED)
         return (DenseMat)(prod(*A.banded(), *B.sym()));
     }
-    else if (numB == 4)
+    else if(numB == SPARSE)
     {
-      if (numA == 1)
+      if(numA == DENSE)
         return (DenseMat)(prod(*A.dense(), *B.sparse()));
-      else if (numA == 2)
+      else if(numA == TRIANGULAR)
         return (DenseMat)(prod(*A.triang(), *B.sparse()));
-      else if (numA == 3)
+      else if(numA == SYMMETRIC)
         return (DenseMat)(prod(*A.sym(), *B.sparse()));
-      else if (numA == 4)
+      else if(numA == SPARSE)
         return (SparseMat)(prod(*A.sparse(), *B.sparse()));
+      else if(numA == SPARSE_COORDINATE)
+        return (SparseMat)(prod(*A.sparseCoordinate(), *B.sparse()));
       else //if(numA==5){
         return (DenseMat)(prod(*A.banded(), *B.sparse()));
     }
+    else if(numB == SPARSE_COORDINATE)
+    {
+      if(numA == DENSE)
+        return (DenseMat)(prod(*A.dense(), *B.sparseCoordinate()));
+      else if(numA == TRIANGULAR)
+        return (DenseMat)(prod(*A.triang(), *B.sparseCoordinate()));
+      else if(numA == SYMMETRIC)
+        return (DenseMat)(prod(*A.sym(), *B.sparseCoordinate()));
+      else if(numA == SPARSE)
+        return (SparseMat)(prod(*A.sparse(), *B.sparseCoordinate()));
+      else if(numA == SPARSE_COORDINATE)
+        return (SparseMat)(prod(*A.sparseCoordinate(), *B.sparseCoordinate()));
+      else //if(numA==5){
+        return (DenseMat)(prod(*A.banded(), *B.sparseCoordinate()));
+    }
     else //if(numB==5)
     {
-      if (numA == 1)
+      if(numA == DENSE)
         return (DenseMat)(prod(*A.dense(), *B.banded()));
-      else if (numA == 2)
+      else if(numA == TRIANGULAR)
         return (DenseMat)(prod(*A.triang(), *B.banded()));
-      else if (numA == 3)
+      else if(numA == SYMMETRIC)
         return (DenseMat)(prod(*A.sym(), *B.banded()));
-      else if (numA == 4)
+      else if(numA == SPARSE)
         return (DenseMat)(prod(*A.sparse(), *B.banded()));
+      else if(numA == SPARSE_COORDINATE)
+        return (DenseMat)(prod(*A.sparseCoordinate(), *B.banded()));
       else //if(numA==5)
         return (DenseMat)(prod(*A.banded(), *B.banded()));
     }
@@ -175,8 +200,8 @@ dim : dim[0] number of raw, dim[1] number of col
 //     SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C,index) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
 
-//   if (numA == 7 || numC == 6) // A = identity or 0
-//     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C,index): numA == 7 || numC == 6 not yet implemented");
+//   if (numA == IDENTITY || numC == 6) // A = identity or 0
+//     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C,index): numA == IDENTITY || numC == 6 not yet implemented");
 
 //   int rawB = B.size(0);
 //   int colB = B.size(1);
@@ -185,15 +210,15 @@ dim : dim[0] number of raw, dim[1] number of col
 void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init)
 {
   // To compute C = A * B
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!" );
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
   if(!C.isBlock())
     C.resetLU();
 
-  if ((A.size(1) != B.size(0)))
+  if((A.size(1) != B.size(0)))
     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
 
-  if (A.size(0) != C.size(0) || B.size(1) != C.size(1))
+  if(A.size(0) != C.size(0) || B.size(1) != C.size(1))
     SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): inconsistent sizes");
 
   unsigned int numA = A.num();
@@ -201,43 +226,43 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
   unsigned int numC = C.num();
 
   // == TODO: implement block product ==
-  if (numA == 0 || numB == 0)
+  if(numA == 0 || numB == 0)
     SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C) ): not yet implemented for BlockMatrix objects.");
 
   // === if C is zero or identity => read-only ===
-  if (numC == 6 || numC == 7)
+  if(numC == 6 || numC == 7)
     SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
 
-  if (numA == 7) // A = identity ...
+  if(numA == IDENTITY)  // A = identity ...
   {
-    if (init)
+    if(init)
     {
-      if (&C != &B) C = B; // if C and B are two different objects.
+      if(&C != &B) C = B;  // if C and B are two different objects.
       // else nothing
     }
     else
       C += B;
   }
 
-  else if (numB == 7) // B = identity
+  else if(numB == IDENTITY)  // B = identity
   {
-    if (init)
+    if(init)
     {
-      if (&C != &A) C = A; // if C and A are two different objects.
+      if(&C != &A) C = A;  // if C and A are two different objects.
       // else nothing
     }
     else
       C += A;
   }
 
-  else if (numA == 6 || numB == 6) // if A or B = 0
+  else if(numA == ZERO || numB == ZERO)  // if A or B = 0
   {
-    if (init)
+    if(init)
       C.zero();
     //else nothing
   }
-  else if (numC == 0) // if C is Block - Temp. solution
+  else if(numC == 0)  // if C is Block - Temp. solution
   {
     SimpleMatrix tmp(C);
     prod(A, B, tmp, init);
@@ -245,39 +270,39 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
   }
   else // neither A or B is equal to identity or zero.
   {
-    if (init)
+    if(init)
     {
-      if (&C == &A) // if common memory between A and C
+      if(&C == &A)  // if common memory between A and C
       {
-        switch (numA)
+        switch(numA)
         {
         case 1:
-          if (numB == 1)
+          if(numB == DENSE)
           {
             *C.dense()  = prod(*A.dense(), *B.dense());
             //siconosBindings::blas::gemm(1.0, *A.dense(), *B.dense(), 0.0, *C.dense());
           }
-          else if (numB == 2)
+          else if(numB == TRIANGULAR)
             *C.dense()  = prod(*A.dense(), *B.triang());
-          else if (numB == 3)
+          else if(numB == SYMMETRIC)
             *C.dense()  = prod(*A.dense(), *B.sym());
-          else if (numB == 4)
+          else if(numB == SPARSE)
             *C.dense()  = prod(*A.dense(), *B.sparse());
           else //if(numB==5)
             *C.dense() = prod(*A.dense(), *B.banded());
           break;
         case 2:
-          if (numB != 2)
+          if(numB != 2)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.triang() = prod(*A.triang(), *B.triang());
           break;
         case 3:
-          if (numB != 3)
+          if(numB != 3)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.sym() = prod(*A.sym(), *B.sym());
           break;
         case 4:
-          if (numB != 4)
+          if(numB != 4)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.sparse() = prod(*A.sparse(), *B.sparse());
           break;
@@ -285,34 +310,34 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
           SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
         }
       }
-      else if (&C == &B)
+      else if(&C == &B)
       {
-        switch (numB)
+        switch(numB)
         {
         case 1:
-          if (numA == 1)
+          if(numA == DENSE)
             *C.dense() = prod(*A.dense(), *B.dense());
-          else if (numA == 2)
+          else if(numA == TRIANGULAR)
             *C.dense()  = prod(*A.triang(), *B.dense());
-          else if (numA == 3)
+          else if(numA == SYMMETRIC)
             *C.dense()  = prod(*A.sym(), *B.dense());
-          else if (numA == 4)
+          else if(numA == SPARSE)
             *C.dense()  = prod(*A.sparse(), *B.dense());
           else //if(numB==5)
             *C.dense() = prod(*A.banded(), *B.dense());
           break;
         case 2:
-          if (numA != 2)
+          if(numA != 2)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.triang() = prod(*A.triang(), *B.triang());
           break;
         case 3:
-          if (numA != 3)
+          if(numA != 3)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.sym() = prod(*A.sym(), *B.sym());
           break;
         case 4:
-          if (numA != 4)
+          if(numA != 4)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.sparse() = prod(*A.sparse(), *B.sparse());
           break;
@@ -322,87 +347,87 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       }
       else // if no alias between C and A or B.
       {
-        switch (numC)
+        switch(numC)
         {
         case 1:
-          if (numB == 1)
+          if(numB == DENSE)
           {
-            if (numA == 1)
+            if(numA == DENSE)
               noalias(*C.dense()) = prod(*A.dense(), *B.dense());
-            else if (numA == 2)
+            else if(numA == TRIANGULAR)
               noalias(*C.dense()) = prod(*A.triang(), *B.dense());
-            else if (numA == 3)
+            else if(numA == SYMMETRIC)
               noalias(*C.dense())  = prod(*A.sym(), *B.dense());
-            else if (numA == 4)
+            else if(numA == SPARSE)
               noalias(*C.dense()) = prod(*A.sparse(), *B.dense());
             else// if(numA==5)
               noalias(*C.dense())  = prod(*A.banded(), *B.dense());
           }
-          else if (numB == 2)
+          else if(numB == TRIANGULAR)
           {
-            if (numA == 1)
+            if(numA == DENSE)
               noalias(*C.dense())  = prod(*A.dense(), *B.triang());
-            else if (numA == 2)
+            else if(numA == TRIANGULAR)
               noalias(*C.dense())  = prod(*A.triang(), *B.triang());
-            else if (numA == 3)
+            else if(numA == SYMMETRIC)
               noalias(*C.dense())  = prod(*A.sym(), *B.triang());
-            else if (numA == 4)
+            else if(numA == SPARSE)
               noalias(*C.dense())  = prod(*A.sparse(), *B.triang());
             else //if(numA==5)
               noalias(*C.dense())  = prod(*A.banded(), *B.triang());
           }
-          else if (numB == 3)
+          else if(numB == SYMMETRIC)
           {
-            if (numA == 1)
+            if(numA == DENSE)
               noalias(*C.dense())  = prod(*A.dense(), *B.sym());
-            else if (numA == 2)
+            else if(numA == TRIANGULAR)
               noalias(*C.dense())  = prod(*A.triang(), *B.sym());
-            else if (numA == 3)
+            else if(numA == SYMMETRIC)
               noalias(*C.dense())  = prod(*A.sym(), *B.sym());
-            else if (numA == 4)
+            else if(numA == SPARSE)
               noalias(*C.dense())  = prod(*A.sparse(), *B.sym());
-            else // if (numA == 5)
+            else // if (numA == BANDED)
               noalias(*C.dense())  = prod(*A.banded(), *B.sym());
           }
-          else if (numB == 4)
+          else if(numB == SPARSE)
           {
-            if (numA == 1)
+            if(numA == DENSE)
               noalias(*C.dense()) = prod(*A.dense(), *B.sparse());
-            else if (numA == 2)
+            else if(numA == TRIANGULAR)
               noalias(*C.dense()) = prod(*A.triang(), *B.sparse());
-            else if (numA == 3)
+            else if(numA == SYMMETRIC)
               noalias(*C.dense()) = prod(*A.sym(), *B.sparse());
-            else if (numA == 4)
+            else if(numA == SPARSE)
               noalias(*C.dense()) = prod(*A.sparse(), *B.sparse());
             else //if(numA==5){
               noalias(*C.dense()) = prod(*A.banded(), *B.sparse());
           }
           else //if(numB==5)
           {
-            if (numA == 1)
+            if(numA == DENSE)
               noalias(*C.dense()) = prod(*A.dense(), *B.banded());
-            else if (numA == 2)
+            else if(numA == TRIANGULAR)
               noalias(*C.dense()) = prod(*A.triang(), *B.banded());
-            else if (numA == 3)
+            else if(numA == SYMMETRIC)
               noalias(*C.dense()) = prod(*A.sym(), *B.banded());
-            else if (numA == 4)
+            else if(numA == SPARSE)
               noalias(*C.dense()) = prod(*A.sparse(), *B.banded());
             else //if(numA==5)
               noalias(*C.dense()) = prod(*A.banded(), *B.banded());
           }
           break;
         case 2:
-          if (numA != 2 || numB != 2)
+          if(numA != 2 || numB != 2)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           noalias(*C.triang()) = prod(*A.triang(), *B.triang());
           break;
         case 3:
-          if (numA != 3 || numB != 3)
+          if(numA != 3 || numB != 3)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           noalias(*C.sym()) = prod(*A.sym(), *B.sym());
           break;
         case 4:
-          if (numA != 4 || numB != 4)
+          if(numA != 4 || numB != 4)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           noalias(*C.sparse()) = prod(*A.sparse(), *B.sparse());
           break;
@@ -413,34 +438,34 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
     }
     else // += case
     {
-      if (&C == &A) // if common memory between A and C
+      if(&C == &A)  // if common memory between A and C
       {
-        switch (numA)
+        switch(numA)
         {
         case 1:
-          if (numB == 1)
+          if(numB == DENSE)
             *C.dense() += prod(*A.dense(), *B.dense());
-          else if (numB == 2)
+          else if(numB == TRIANGULAR)
             *C.dense()  += prod(*A.dense(), *B.triang());
-          else if (numB == 3)
+          else if(numB == SYMMETRIC)
             *C.dense()  += prod(*A.dense(), *B.sym());
-          else if (numB == 4)
+          else if(numB == SPARSE)
             *C.dense()  += prod(*A.dense(), *B.sparse());
           else //if(numB==5)
             *C.dense() += prod(*A.dense(), *B.banded());
           break;
         case 2:
-          if (numB != 2)
+          if(numB != 2)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.triang() += prod(*A.triang(), *B.triang());
           break;
         case 3:
-          if (numB != 3)
+          if(numB != 3)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.sym() += prod(*A.sym(), *B.sym());
           break;
         case 4:
-          if (numB != 4)
+          if(numB != 4)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.sparse() += prod(*A.sparse(), *B.sparse());
           break;
@@ -448,34 +473,34 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
           SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
         }
       }
-      else if (&C == &B)
+      else if(&C == &B)
       {
-        switch (numB)
+        switch(numB)
         {
         case 1:
-          if (numA == 1)
+          if(numA == DENSE)
             *C.dense() += prod(*A.dense(), *B.dense());
-          else if (numA == 2)
+          else if(numA == TRIANGULAR)
             *C.dense()  += prod(*A.triang(), *B.dense());
-          else if (numA == 3)
+          else if(numA == SYMMETRIC)
             *C.dense()  += prod(*A.sym(), *B.dense());
-          else if (numA == 4)
+          else if(numA == SPARSE)
             *C.dense()  += prod(*A.sparse(), *B.dense());
           else //if(numB==5)
             *C.dense() += prod(*A.banded(), *B.dense());
           break;
         case 2:
-          if (numA != 2)
+          if(numA != 2)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.triang() += prod(*A.triang(), *B.triang());
           break;
         case 3:
-          if (numA != 3)
+          if(numA != 3)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.sym() += prod(*A.sym(), *B.sym());
           break;
         case 4:
-          if (numA != 4)
+          if(numA != 4)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           *C.sparse() += prod(*A.sparse(), *B.sparse());
           break;
@@ -485,87 +510,87 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       }
       else // if no alias between C and A or B.
       {
-        switch (numC)
+        switch(numC)
         {
         case 1:
-          if (numB == 1)
+          if(numB == DENSE)
           {
-            if (numA == 1)
+            if(numA == DENSE)
               noalias(*C.dense()) += prod(*A.dense(), *B.dense());
-            else if (numA == 2)
+            else if(numA == TRIANGULAR)
               noalias(*C.dense()) += prod(*A.triang(), *B.dense());
-            else if (numA == 3)
+            else if(numA == SYMMETRIC)
               noalias(*C.dense())  += prod(*A.sym(), *B.dense());
-            else if (numA == 4)
+            else if(numA == SPARSE)
               noalias(*C.dense()) += prod(*A.sparse(), *B.dense());
             else// if(numA==5)
               noalias(*C.dense())  += prod(*A.banded(), *B.dense());
           }
-          else if (numB == 2)
+          else if(numB == TRIANGULAR)
           {
-            if (numA == 1)
+            if(numA == DENSE)
               noalias(*C.dense())  += prod(*A.dense(), *B.triang());
-            else if (numA == 2)
+            else if(numA == TRIANGULAR)
               noalias(*C.dense())  += prod(*A.triang(), *B.triang());
-            else if (numA == 3)
+            else if(numA == SYMMETRIC)
               noalias(*C.dense())  += prod(*A.sym(), *B.triang());
-            else if (numA == 4)
+            else if(numA == SPARSE)
               noalias(*C.dense())  += prod(*A.sparse(), *B.triang());
             else //if(numA==5)
               noalias(*C.dense())  += prod(*A.banded(), *B.triang());
           }
-          else if (numB == 3)
+          else if(numB == SYMMETRIC)
           {
-            if (numA == 1)
+            if(numA == DENSE)
               noalias(*C.dense())  += prod(*A.dense(), *B.sym());
-            else if (numA == 2)
+            else if(numA == TRIANGULAR)
               noalias(*C.dense())  += prod(*A.triang(), *B.sym());
-            else if (numA == 3)
+            else if(numA == SYMMETRIC)
               noalias(*C.dense())  += prod(*A.sym(), *B.sym());
-            else if (numA == 4)
+            else if(numA == SPARSE)
               noalias(*C.dense())  += prod(*A.sparse(), *B.sym());
-            else // if (numA == 5)
+            else // if (numA == BANDED)
               noalias(*C.dense())  += prod(*A.banded(), *B.sym());
           }
-          else if (numB == 4)
+          else if(numB == SPARSE)
           {
-            if (numA == 1)
+            if(numA == DENSE)
               noalias(*C.dense()) += prod(*A.dense(), *B.sparse());
-            else if (numA == 2)
+            else if(numA == TRIANGULAR)
               noalias(*C.dense()) += prod(*A.triang(), *B.sparse());
-            else if (numA == 3)
+            else if(numA == SYMMETRIC)
               noalias(*C.dense()) += prod(*A.sym(), *B.sparse());
-            else if (numA == 4)
+            else if(numA == SPARSE)
               noalias(*C.dense()) += prod(*A.sparse(), *B.sparse());
             else //if(numA==5){
               noalias(*C.dense()) += prod(*A.banded(), *B.sparse());
           }
           else //if(numB==5)
           {
-            if (numA == 1)
+            if(numA == DENSE)
               noalias(*C.dense()) += prod(*A.dense(), *B.banded());
-            else if (numA == 2)
+            else if(numA == TRIANGULAR)
               noalias(*C.dense()) += prod(*A.triang(), *B.banded());
-            else if (numA == 3)
+            else if(numA == SYMMETRIC)
               noalias(*C.dense()) += prod(*A.sym(), *B.banded());
-            else if (numA == 4)
+            else if(numA == SPARSE)
               noalias(*C.dense()) += prod(*A.sparse(), *B.banded());
             else //if(numA==5)
               noalias(*C.dense()) += prod(*A.banded(), *B.banded());
           }
           break;
         case 2:
-          if (numA != 2 || numB != 2)
+          if(numA != 2 || numB != 2)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           noalias(*C.triang()) += prod(*A.triang(), *B.triang());
           break;
         case 3:
-          if (numA != 3 || numB != 3)
+          if(numA != 3 || numB != 3)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           noalias(*C.sym()) += prod(*A.sym(), *B.sym());
           break;
         case 4:
-          if (numA != 4 || numB != 4)
+          if(numA != 4 || numB != 4)
             SiconosMatrixException::selfThrow("Matrix function prod(A,B,C): wrong type for C (according to A and B types).");
           noalias(*C.sparse()) += prod(*A.sparse(), *B.sparse());
           break;
@@ -574,8 +599,8 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
         }
       }
     }
-  if(!C.isBlock())
-    C.resetLU();
+    if(!C.isBlock())
+      C.resetLU();
   }
 }
 
@@ -590,53 +615,53 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   // See http://www.boost.org/doc/libs/1_63_0/libs/numeric/ublas/doc/products.html
   //
 
-  if ((A.size(1) != B.size(0)))
+  if((A.size(1) != B.size(0)))
     SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): inconsistent sizes");
 
-  if (A.size(0) != C.size(0) || B.size(1) != C.size(1))
+  if(A.size(0) != C.size(0) || B.size(1) != C.size(1))
     SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): inconsistent sizes");
 
   if(&A == &C || &B == &C)
     SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): C must be different from A and B.");
 
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!" );
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
   if(!C.isBlock())
     C.resetLU();
   unsigned int numA = A.num();
   unsigned int numB = B.num();
   unsigned int numC = C.num();
   // == TODO: implement block product ==
-  if (numA == 0 || numB == 0)
+  if(numA == 0 || numB == 0)
     SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C) ): not yet implemented for BlockMatrix objects.");
 
   // === if C is zero or identity => read-only ===
-  if (numC == 6 || numC == 7)
+  if(numC == 6 || numC == 7)
     SiconosMatrixException::selfThrow("Matrix product ( prod(A,B,C) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
 
-  if (numA == 7) // A = identity ...
+  if(numA == IDENTITY)  // A = identity ...
   {
-    if (!init)
+    if(!init)
       C += B;
     else
       C = B; // if C and B are two different objects.
   }
 
-  else if (numB == 7) // B = identity
+  else if(numB == IDENTITY)  // B = identity
   {
-    if (!init)
+    if(!init)
       C += A;
     else
       C = A; // if C and A are two different objects.
   }
 
 
-  else if (numA == 6 || numB == 6) // if A or B = 0
+  else if(numA == ZERO || numB == ZERO)  // if A or B = 0
   {
-    if (init) C.zero(); // else nothing
+    if(init) C.zero();  // else nothing
   }
-  else if (numC == 0) // if C is Block - Temp. solution
+  else if(numC == 0)  // if C is Block - Temp. solution
   {
     SimpleMatrix tmp(C);
     axpy_prod(A, B, tmp, init);
@@ -644,70 +669,70 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   }
   else // neither A or B is equal to identity or zero.
   {
-    switch (numC)
+    switch(numC)
     {
     case 1:
-      if (numB == 1)
+      if(numB == DENSE)
       {
-        if (numA == 1)
+        if(numA == DENSE)
           ublas::axpy_prod(*A.dense(), *B.dense(), *C.dense(), init);
-        else if (numA == 2)
+        else if(numA == TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.dense(), *C.dense(), init);
-        else if (numA == 3)
+        else if(numA == SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.dense(), *C.dense(), init);
-        else if (numA == 4)
+        else if(numA == SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.dense(), *C.dense(), init);
         else// if(numA==5)
           ublas::axpy_prod(*A.banded(), *B.dense(), *C.dense(), init);
       }
-      else if (numB == 2)
+      else if(numB == TRIANGULAR)
       {
-        if (numA == 1)
+        if(numA == DENSE)
           ublas::axpy_prod(*A.dense(), *B.triang(), *C.dense(), init);
-        else if (numA == 2)
+        else if(numA == TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.triang(), *C.dense(), init);
-        else if (numA == 3)
+        else if(numA == SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.triang(), *C.dense(), init);
-        else if (numA == 4)
+        else if(numA == SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.triang(), *C.dense(), init);
         else //if(numA==5)
           ublas::axpy_prod(*A.banded(), *B.triang(), *C.dense(), init);
       }
-      else if (numB == 3)
+      else if(numB == SYMMETRIC)
       {
-        if (numA == 1)
+        if(numA == DENSE)
           ublas::axpy_prod(*A.dense(), *B.sym(), *C.dense(), init);
-        else if (numA == 2)
+        else if(numA == TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.sym(), *C.dense(), init);
-        else if (numA == 3)
+        else if(numA == SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.sym(), *C.dense(), init);
-        else if (numA == 4)
+        else if(numA == SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.sym(), *C.dense(), init);
-        else // if (numA == 5)
+        else // if (numA == BANDED)
           ublas::axpy_prod(*A.banded(), *B.sym(), *C.dense(), init);
       }
-      else if (numB == 4)
+      else if(numB == SPARSE)
       {
-        if (numA == 1)
+        if(numA == DENSE)
           ublas::axpy_prod(*A.dense(), *B.sparse(), *C.dense(), init);
-        else if (numA == 2)
+        else if(numA == TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.sparse(), *C.dense(), init);
-        else if (numA == 3)
+        else if(numA == SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.sparse(), *C.dense(), init);
-        else if (numA == 4)
+        else if(numA == SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.sparse(), *C.dense(), init);
         else //if(numA==5){
           ublas::axpy_prod(*A.banded(), *B.sparse(), *C.dense(), init);
       }
       else //if(numB==5)
       {
-        if (numA == 1)
+        if(numA == DENSE)
           ublas::axpy_prod(*A.dense(), *B.banded(), *C.dense(), init);
-        else if (numA == 2)
+        else if(numA == TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.banded(), *C.dense(), init);
-        else if (numA == 3)
+        else if(numA == SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.banded(), *C.dense(), init);
-        else if (numA == 4)
+        else if(numA == SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.banded(), *C.dense(), init);
         else //if(numA==5)
           ublas::axpy_prod(*A.banded(), *B.banded(), *C.dense(), init);
@@ -724,7 +749,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
       //ublas::axpy_prod(*A.sym(), *B.sym(),*C.sym(),init);
       break;
     case 4:
-      if (numA != 4 || numB != 4)
+      if(numA != 4 || numB != 4)
         SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
       ublas::sparse_prod(*A.sparse(), *B.sparse(), *C.sparse(), init);
       break;
@@ -738,12 +763,12 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 
 void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 {
-  if (A.isBlock() || B.isBlock() || C.isBlock())
+  if(A.isBlock() || B.isBlock() || C.isBlock())
     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
   unsigned int numA = A.num();
   unsigned int numB = B.num();
   unsigned int numC = C.num();
-  if (numA != 1 || numB != 1 || numC != 1)
+  if(numA != 1 || numB != 1 || numC != 1)
     SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
 
   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
@@ -766,17 +791,17 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
   C.resetLU();
 
-  // At the time, only dense output allowed 
+  // At the time, only dense output allowed
   DenseMat * tmpC = NULL;
-  if (numA == 0 || numB == 0 || numC == 0)
+  if(numA == 0 || numB == 0 || numC == 0)
     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
 
-  if (numA == 1 && numB == 1 && numC == 1)
+  if(numA == DENSE && numB == DENSE && numC == 1)
     siconosBindings::blas::gemm(a, *A.dense(), *B.dense(), b, *C.dense());
-  else if (numA == 1 && numB == 1 && numC != 1)
+  else if(numA == DENSE && numB == DENSE && numC != 1)
   {
-    // Copy C into tmpC ... 
-    tmpC = new DenseMat(*C.dense());    
+    // Copy C into tmpC ...
+    tmpC = new DenseMat(*C.dense());
     siconosBindings::blas::gemm(a, *A.dense(), *B.dense(), b, *tmpC);
     std::cout << *tmpC << std::endl;
     noalias(*C.dense()) = *tmpC;
@@ -790,13 +815,13 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
 void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
 {
   // To compute B = a * A (init = true) or B += a*A (init = false).
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!" );
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
   if(!B.isBlock())
     B.resetLU();
 
-  if (&A == &B)
+  if(&A == &B)
   {
-    if (init) B *= a;
+    if(init) B *= a;
     else B *= (1.0 + a);
   }
   else
@@ -804,16 +829,16 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
     unsigned int numA = A.num();
     unsigned int numB = B.num();
 
-    if (numB == 6 || numB == 7) // B = 0 or identity.
+    if(numB == ZERO || numB == IDENTITY)  // B = 0 or identity.
       SiconosMatrixException::selfThrow("scal(a,A,B) : forbidden for B being a zero or identity matrix.");
 
-    if (numA == 6)
+    if(numA == ZERO)
     {
-      if (init) B.zero(); // else nothing
+      if(init) B.zero();  // else nothing
     }
-    else if (numA == 7)
+    else if(numA == IDENTITY)
     {
-      if (init)
+      if(init)
       {
         B.eye();
         B *= a;
@@ -821,19 +846,19 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
       else
       {
         // Assuming B is square ...
-        for (unsigned int i = 0; i < B.size(0); ++i)
+        for(unsigned int i = 0; i < B.size(0); ++i)
           B(i, i) += a;
       }
     }
     else
     {
-      if (numA == numB) // if A and B are of the same type ...
+      if(numA == numB)  // if A and B are of the same type ...
       {
-        switch (numA)
+        switch(numA)
         {
 
         case 0: // A and B are block
-          if (isComparableTo(A, B))
+          if(isComparableTo(A, B))
           {
             const BlockMatrix& Aref = static_cast<const BlockMatrix&>(A);
             BlockMatrix& Bref = static_cast<BlockMatrix&>(B);
@@ -841,10 +866,10 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
             BlocksIterator2 itB2;
             ConstBlocksIterator1 itA1 = Aref._mat->begin1();
             ConstBlocksIterator2 itA2;
-            for (itB1 = Bref._mat->begin1(); itB1 != Bref._mat->end1(); ++itB1)
+            for(itB1 = Bref._mat->begin1(); itB1 != Bref._mat->end1(); ++itB1)
             {
               itA2 = itA1.begin();
-              for (itB2 = itB1.begin(); itB2 != itB1.end(); ++itB2)
+              for(itB2 = itB1.begin(); itB2 != itB1.end(); ++itB2)
               {
                 scal(a, **itA2++, **itB2, init);
               }
@@ -853,47 +878,47 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
           }
           else // if A and B are not "block-consistent"
           {
-            if (init)
+            if(init)
             {
-              for (unsigned int i = 0; i < A.size(0); ++i)
-                for (unsigned int j = 0; j < A.size(1); ++j)
+              for(unsigned int i = 0; i < A.size(0); ++i)
+                for(unsigned int j = 0; j < A.size(1); ++j)
                   B(i, j) = a * A(i, j);
             }
             else
             {
-              for (unsigned int i = 0; i < A.size(0); ++i)
-                for (unsigned int j = 0; j < A.size(1); ++j)
+              for(unsigned int i = 0; i < A.size(0); ++i)
+                for(unsigned int j = 0; j < A.size(1); ++j)
                   B(i, j) += a * A(i, j);
             }
           }
           break;
 
         case 1: // if both are dense
-          if (init)
+          if(init)
             noalias(*B.dense()) = a ** A.dense();
           else
             noalias(*B.dense()) += a ** A.dense();
           break;
         case 2:
-          if (init)
+          if(init)
             noalias(*B.triang()) = a ** A.triang();
           else
             noalias(*B.triang()) += a ** A.triang();
           break;
         case 3:
-          if (init)
+          if(init)
             noalias(*B.sym()) = a ** A.sym();
           else
             noalias(*B.sym()) += a ** A.sym();
           break;
         case 4:
-          if (init)
+          if(init)
             noalias(*B.sparse()) = a ** A.sparse();
           else
             noalias(*B.sparse()) += a ** A.sparse();
           break;
         case 5:
-          if (init)
+          if(init)
             noalias(*B.banded()) = a ** A.banded();
           else
             noalias(*B.banded()) += a ** A.banded();
@@ -902,9 +927,9 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
       }
       else // if A and B are of different types.
       {
-        if (numA == 0 || numB == 0) // if A or B is block
+        if(numA == 0 || numB == 0)  // if A or B is block
         {
-          if (init)
+          if(init)
           {
             B = A;
             B *= a;
@@ -918,12 +943,12 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
         }
         else
         {
-          if (numB != 1)
+          if(numB != 1)
             SiconosMatrixException::selfThrow("scal(a,A,B) failed. A and B types do not fit together.");
 
-          if (init)
+          if(init)
           {
-            switch (numB)
+            switch(numB)
             {
             case 1:
               noalias(*B.dense()) = a ** A.dense();
@@ -945,7 +970,7 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
           else
 
           {
-            switch (numB)
+            switch(numB)
             {
             case 1:
               noalias(*B.dense()) += a ** A.dense();
