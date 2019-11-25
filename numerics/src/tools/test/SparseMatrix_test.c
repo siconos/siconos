@@ -812,23 +812,14 @@ static int inv_test(void)
   NM_write_in_file_python(A, fileout);
   fclose(fileout);
  
-  NumericsMatrix * Ainv  = NM_new();
-  Ainv->size0 = size0;
-  Ainv->size1 = size1;
-  Ainv->storageType = NM_SPARSE;
+  NumericsMatrix * Ainv  = NM_inv(A);
 
-  NM_inv(A, Ainv);
 
   NumericsMatrix* AAinv = NM_multiply(A,Ainv);
   //NM_display(AAinv);
 
-  NumericsMatrix * Id  = NM_create(NM_SPARSE, size0, size1);
-  NM_triplet_alloc(Id,0);
-  Id->matrix2->origin= NSM_TRIPLET;
-  for (int i =0; i < size0; i++)
-  {
-    NM_zentry(Id, i, i, 1.0);
-  }
+  NumericsMatrix * Id  = NM_eye(size0);
+
   //NM_display(Id);
 
   

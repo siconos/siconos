@@ -132,6 +132,11 @@ extern "C"
                                                  double tol,
                                                  int do_print)  ;
 
+
+  FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem);
+
+  void frictionContact_rescaling(FrictionContactProblem* problem,  double alpha,  double gamma);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

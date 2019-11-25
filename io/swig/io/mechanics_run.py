@@ -2255,9 +2255,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         #solverOptions.iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
         #solverOptions.iparam[8]=1
         # -- light error evaluation with full final
-        if self._dimension ==3: # ugly
-            solverOptions.iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
-            solverOptions.iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+        if self._dimension ==3 and solver == Numerics.SICONOS_FRICTION_3D_NSGS: # ugly
+            solverOptions.iparam[Numerics.SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
+            solverOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
 
         
         osnspb.setNumericsVerboseMode(numerics_verbose)

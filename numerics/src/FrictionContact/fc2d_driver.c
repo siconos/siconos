@@ -55,6 +55,9 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
   fclose(foutput);
 #endif
 
+
+  
+
   if (options == NULL)
     numerics_error("fc2d_driver", "null input for solver options");
 

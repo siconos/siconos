@@ -29,6 +29,7 @@
 #include "cond.h"
 #include "pinv.h"
 #include <string.h>
+#include "gfc3d_compute_error.h"
 
 #include "NumericsSparseMatrix.h"
 #include "NumericsVector.h"
@@ -312,13 +313,8 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 
     // Product M^-1 H
     DEBUG_EXPR(NM_display(H););
-
-    NumericsMatrix * Minv  = NM_new();
-    Minv->size0 = n;
-    Minv->size1 = n;
-    Minv->storageType = NM_SPARSE;
     numerics_printf_verbose(1,"inversion of the matrix M ...");
-    NM_inv(M, Minv);
+    NumericsMatrix * Minv  = NM_inv(M);
     DEBUG_EXPR(NM_display(Minv););
 
 
@@ -526,6 +522,16 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , do
     options->iparam[1] =  options->internalSolvers->iparam[1];
     options->dparam[1] =  options->internalSolvers->dparam[1];
     computeGlobalVelocity(problem, reaction, globalVelocity);
+    /* Number of contacts */
+    int nc = problem->numberOfContacts;
+    /* Dimension of the problem */
+    int m = 3 * nc;
+    int n = problem->M->size0;
+    double norm_q = cblas_dnrm2(n , problem->q , 1);
+    double norm_b = cblas_dnrm2(m , problem->b , 1);
+    double error;
+    gfc3d_compute_error(problem,  reaction, velocity, globalVelocity,  options->dparam[SICONOS_DPARAM_TOL], options, norm_q, norm_b, &error);
+
 
     freeLocalProblem(localproblem);
   }

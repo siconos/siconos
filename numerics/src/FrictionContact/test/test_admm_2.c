@@ -45,9 +45,9 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test_admm[n][e++] = "0";
     test_admm[n][e++] = "iparam";
     test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO );
     test_admm[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF);
+    sprintf(test_admm[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_NORM_INF);
     test_admm[n][e++] = "---"; 
     n++;
   }

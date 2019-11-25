@@ -284,6 +284,13 @@ extern "C"
                                   SparseBlockStructuredMatrix * C,
                                   double gamma);
 
+  
+  /** Multiply a matrix with a double alpha*A --> A
+   * \param alpha the  coefficient
+   * \param A the   matrix
+   */
+  void SBM_scal(double alpha, SparseBlockStructuredMatrix * A);
+  
 
   /** Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks of A
       \param[in] sizeX dim of the vector x

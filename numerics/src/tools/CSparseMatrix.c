@@ -80,6 +80,28 @@ int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A,
   return 1;
 
 }
+/* A <-- alpha*A */
+int CSparseMatrix_scal(const double alpha, const CSparseMatrix *A)
+{
+
+  CS_INT n, *Ap;
+  double *Ax ;
+  if(!CS_CSC(A)) return (0);	     /* check inputs */
+  {
+    n = A->n;
+    Ap = A->p;
+    Ax = A->x;
+    for(int j=0 ; j<n ; j++)
+    {
+      for(CS_INT p = Ap [j] ; p < Ap [j+1] ; p++)
+      {
+        Ax [p] = alpha * Ax [p];
+      }
+    }
+
+  }
+  return 1;
+}
 
 int CSparseMatrix_check_triplet(CSparseMatrix *T)
 {

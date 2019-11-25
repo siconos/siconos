@@ -551,7 +551,7 @@ void statsIterationCallback(FrictionContactProblem *problem,
 void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
                double *velocity, int* info, SolverOptions* options)
 {
-  /* verbose=1; */
+  verbose=1;
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;

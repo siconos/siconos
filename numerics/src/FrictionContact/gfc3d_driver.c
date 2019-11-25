@@ -24,6 +24,7 @@
 #include "SiconosConfig.h"
 #include "gfc3d_Solvers.h"
 #include "NonSmoothDrivers.h"
+#include "NumericsMatrix.h"
 #include "numerics_verbose.h"
 
 
@@ -73,6 +74,14 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   if (problem->dimension != 3)
     numerics_error("gfc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
+  /* if there is no contact, we compute directly the global velocity as M^{-1}q */
+  int m = problem->H->size1;
+  if (m ==0)
+  {
+    numerics_printf_verbose(1,"---- GFC3D - DRIVER . No contact case. Direct computation of global velocity");
+    globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+    return 0;
+  }
 
   /* Non Smooth Gauss Seidel (NSGS) */
   switch (options->solverId)
@@ -194,6 +203,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction , doubl
   }
   case SICONOS_GLOBAL_FRICTION_3D_ADMM:
   {
+    /* globalFrictionContact_rescaling(problem, 1.0/1.512808e-04, 1.0/1.407230e+01, 1.0); */
     gfc3d_ADMM(problem, reaction , velocity,
                globalVelocity, &info , options);
     break;

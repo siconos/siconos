@@ -312,7 +312,7 @@ extern "C"
    */
 
   void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-  
+
   /** get a 5x5 diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
    * \param[in] block_row_nb the number of the block row
@@ -320,7 +320,7 @@ extern "C"
    *   In case of SBM case **Bout contains the resulting block (from the SBM).
    */
   void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double **Block);
-  
+
   /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
    * \param[in] block_row_nb the number of the block row
@@ -378,10 +378,10 @@ extern "C"
       \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
-  
 
 
-  
+
+
   void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
   /** Matrix vector multiplication : y = alpha A x + beta y
@@ -596,9 +596,9 @@ extern "C"
 
   /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    * \param[in,out] A a NumericsMatrix.
-   * \param[out] Ainv the matrix inverse.
+   * \return the matrix inverse.
    */
-  int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv);
+  NumericsMatrix* NM_inv(NumericsMatrix* A);
 
   int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
 
@@ -682,11 +682,17 @@ extern "C"
    */
   RawNumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B);
 
+  /** Multiply a matrix with a double alpha*A --> A
+   * \param alpha the  coefficient
+   * \param A the   matrix
+   */
+  void  NM_scal(double alpha, NumericsMatrix* A);
+
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type
    * \param M the matrix to check
    */
-  static inline void NM_assert(const int type, NumericsMatrix* M)
+    static inline void NM_assert(const int type, NumericsMatrix* M)
   {
 #ifndef NDEBUG
     assert(M && "NM_assert :: the matrix is NULL");
@@ -736,7 +742,7 @@ extern "C"
   {
     return A;
   };
-
+  double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

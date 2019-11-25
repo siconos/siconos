@@ -219,7 +219,7 @@ if(WITH_${COMPONENT}_TESTING)
   # ---------------------------------------------------
 
   new_tests_collection(
-    DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_NSGS_COLLECTION_1
+    DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_first_order_gfc3d_1.c)
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_1
@@ -249,7 +249,7 @@ if(WITH_${COMPONENT}_TESTING)
     #target_compile_definitions(fc3d_TEST_NSGS_COLLECTION_6 PUBLIC TEST_HDF5)
 
     new_tests_collection(
-      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_3
+      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_6
       EXTRA_SOURCES data_collection_6.c test_admm_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
@@ -269,8 +269,14 @@ if(WITH_${COMPONENT}_TESTING)
     #    #   IPARAM SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE  SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE)
 
     new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_NSGS_COLLECTION_2
+      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_2
       EXTRA_SOURCES data_collection_gfc3d_2.c test_first_order_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
+    
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_3
+      EXTRA_SOURCES data_collection_gfc3d_3.c test_admm_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
     new_tests_collection(

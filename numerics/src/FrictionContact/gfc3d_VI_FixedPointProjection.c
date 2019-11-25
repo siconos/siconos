@@ -140,7 +140,10 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
 
   /* **** Criterium convergence **** */
   double norm_q = cblas_dnrm2(n , problem->q , 1);
-  gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[0], options, norm_q, &error);
+  double norm_b = cblas_dnrm2(m , problem->b , 1);
+
+  gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[0],
+                      options, norm_q, norm_b, &error);
 
   DEBUG_EXPR(NM_vector_display(reaction,m));
   DEBUG_EXPR(NM_vector_display(velocity,m));
@@ -151,16 +154,16 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  error = visolver_options->dparam[1];
-  iter = visolver_options->iparam[7];
+  error = visolver_options->dparam[SICONOS_DPARAM_RESIDU];
+  iter = visolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
 
-  options->dparam[1] = error;
-  options->iparam[7] = iter;
+  options->dparam[SICONOS_DPARAM_RESIDU] = error;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
 
   if (verbose > 0)
   {
-    printf("--------------- GFC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("--------------- GFC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], error);
   }
   free(vi);
 
@@ -170,7 +173,6 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   free(gfc3d_as_vi);
 
   DEBUG_END("gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, ... \n")
-
 
 }
 

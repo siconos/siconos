@@ -1468,6 +1468,41 @@ NumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsM
 
 }
 
+void  NM_scal(double alpha, NumericsMatrix* A)
+{
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    int nm= A->size0*A->size1;
+    cblas_dscal(nm, alpha, A->matrix0,1);
+    break;
+  }
+  case NM_SPARSE_BLOCK:
+  {
+    SBM_scal(alpha, A->matrix1);
+    break;
+  }
+  case NM_SPARSE:
+  {
+    CSparseMatrix_scal(alpha, NM_csc(A));
+    A->matrix2->origin = NSM_CSC;
+    /* Invalidations */
+    NM_clearTriplet(A);
+    NM_clearCSCTranspose(A);
+    NM_clearCSR(A);
+    break;
+  }
+  default:
+  {
+    numerics_error("NM_scal:","unsupported matrix storage %d", A->storageType);
+  }
+  }
+  return;
+
+}
+
 
 NumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data)
 {
@@ -2996,9 +3031,12 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
           p->solver_free_hook = &NSM_free_p;
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
+
           CSparseMatrix_factors* cs_chol_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+
           numerics_printf_verbose(2,"NM_posv_expert, we compute factors and keep it" );
-          CHECK_RETURN(CSparsematrix_chol_factorization(0, NM_csc(A),  cs_chol_A));
+          CHECK_RETURN(CSparsematrix_chol_factorization(1, NM_csc(A),  cs_chol_A));
+
           p->linear_solver_data = cs_chol_A;
         }
 
@@ -3011,7 +3049,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
         info = !cs_cholsol(1, NM_csc(A), b);
         if (info > 0)
         {
-          printf("NM_posv: cs_cholsol failed. info = %i\n", info);
+          numerics_printf("NM_posv: cs_cholsol failed. info = %i\n", info);
         }
         //DEBUG_EXPR(NV_display)
       }
@@ -3095,7 +3133,7 @@ int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs
   }
   return info;
 }
-int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
+NumericsMatrix* NM_inv(NumericsMatrix* A)
 {
 
   DEBUG_BEGIN("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
@@ -3110,23 +3148,45 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
   NumericsMatrix* Atmp = NM_new();
   NM_copy(A,Atmp);
 
-   int info =-1;
+  NumericsMatrix * Ainv  = NM_new();
+  Ainv->size0 =  A->size0;
+  Ainv->size1 =  A->size1;
+
+  int info =-1;
 
   switch (A->storageType)
   {
   case NM_DENSE:
   {
-    assert (0 && "NM_inv :  not implemented");
+    Ainv->storageType = NM_DENSE;
+    Ainv->matrix0 = (double *)malloc(A->size0*A->size1*sizeof(double));
+    for( int col_rhs =0; col_rhs < A->size1; col_rhs++ )
+    {
+      for (int i = 0; i < A->size0; ++i)
+      {
+        b[i]=0.0;
+      }
+      b[col_rhs] = 1.0;
+      DEBUG_EXPR(NV_display(b,A->size1););
+      //info = NM_gesv_expert(Atmp, b, NM_PRESERVE);
+      info = NM_gesv_expert(Atmp, b, NM_KEEP_FACTORS);
+      DEBUG_EXPR(NV_display(b,A->size1););
+      if (info)
+      {
+        numerics_warning("NM_inv", "problem in NM_gesv_expert");
+      }
+      for (int i = 0; i < A->size0; ++i)
+      {
+        Ainv->matrix0[i+col_rhs*A->size0]  = b[i];
+      }
+    }
     break;
   }
   case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
   case NM_SPARSE:
   {
-    // We clear Ainv
-    NM_clearSparse(Ainv);
+
     Ainv->storageType = NM_SPARSE;
-    Ainv->size0 = A->size0;
-    Ainv->size1 = A->size1;
     NM_triplet_alloc(Ainv,  A->size0);
     Ainv->matrix2->origin = NSM_TRIPLET;
 
@@ -3140,7 +3200,10 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
       DEBUG_EXPR(NV_display(b,A->size1););
       //info = NM_gesv_expert(Atmp, b, NM_PRESERVE);
       info = NM_gesv_expert(Atmp, b, NM_KEEP_FACTORS);
-
+      if (info)
+      {
+        numerics_warning("NM_inv", "problem in NM_gesv_expert");
+      }
       for (int i = 0; i < A->size0; ++i)
       {
         CHECK_RETURN(CSparseMatrix_zentry(Ainv->matrix2->triplet, i, col_rhs, b[i]));
@@ -3156,7 +3219,7 @@ int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv)
   free(Atmp);
   free(b);
   DEBUG_END("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
-  return (int)info;
+  return Ainv;
 
 }
 
@@ -3383,19 +3446,29 @@ double NM_norm_inf(NumericsMatrix* A)
 }
 int NM_is_symmetric(NumericsMatrix* A)
 {
-  int n = A->size0;
-  int m = A->size1;
 
 
-  for (int i =0; i < n ; i++)
+  NumericsMatrix * Atrans = NM_transpose(A);
+  NumericsMatrix * AplusATrans = NM_add(1/2.0, A, -1/2.0, Atrans);
+  double norm_inf = NM_norm_inf(AplusATrans);
+  NM_free(Atrans); free(Atrans);
+  NM_free(AplusATrans);  free(AplusATrans);
+  
+  if (norm_inf <= DBL_EPSILON*10)
   {
-    for (int j =0 ; j < m ; j++)
-    {
-      if (fabs(NM_get_value(A,i,j)-NM_get_value(A,j,i)) >= DBL_EPSILON)
-        return 0;
-    }
+    return 1;
   }
-  return 1;
+  /* int n = A->size0; */
+  /* int m = A->size1; */
+  /* for (int i =0; i < n ; i++) */
+  /* { */
+  /*   for (int j =0 ; j < m ; j++) */
+  /*   { */
+  /*     if (fabs(NM_get_value(A,i,j)-NM_get_value(A,j,i)) >= DBL_EPSILON) */
+  /*       return 0; */
+  /*   } */
+  /* }   */
+  return 0;
 }
 
 double NM_symmetry_discrepancy(NumericsMatrix* A)
@@ -3412,4 +3485,50 @@ double NM_symmetry_discrepancy(NumericsMatrix* A)
     }
   }
   return d;
+}
+#include "time.h"
+double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
+{
+  int n = A->size0;
+  int m = A->size1;
+  DEBUG_EXPR(
+    FILE* foutput = fopen("toto.py", "w");
+    NM_write_in_file_python(A, foutput);
+    fclose(foutput);
+    );
+
+  double eig = 0.0, eig_old = 2*tol;
+
+  double * q = (double *) malloc(n*sizeof(double));
+  double * z = (double *) malloc(n*sizeof(double));
+  srand(time(NULL));
+  for (int i = 0; i < n ; i++)
+  {
+    q[i] = (rand()/(double)RAND_MAX);
+    DEBUG_PRINTF("q[%i] = %e \t",i, q[i]);
+  }
+  double norm = cblas_dnrm2(n , q, 1);
+  cblas_dscal(m, 1.0/norm, q, 1);
+  DEBUG_PRINT("\n");
+
+  NM_gemv(1, A, q, 0.0, z);
+
+  int k =0;
+  while ((fabs((eig-eig_old)/eig_old) > tol) && k < itermax)
+  {
+    norm = cblas_dnrm2(n , z, 1);
+    cblas_dscal(m, 1.0/norm, z, 1);
+    cblas_dcopy(n , z  , 1 , q, 1);
+
+    NM_gemv(1.0, A, q, 0.0, z);
+
+    eig_old=eig;
+    eig = cblas_ddot(n, q, 1, z, 1);
+
+    DEBUG_PRINTF("eig[%i] = %32.24e \t error = %e\n",k, eig, fabs(eig-eig_old)/eig_old );
+    k++;
+  }
+  free(q);
+  free(z);
+  return eig;
 }

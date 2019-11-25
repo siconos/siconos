@@ -64,11 +64,9 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 {
 
   int k, info = -1 ;
-  GlobalFrictionContactProblem* problem = (GlobalFrictionContactProblem *)malloc(sizeof(GlobalFrictionContactProblem));
   /* numerics_set_verbose(1); */
-
-  info = globalFrictionContact_newFromFile(problem, f);
-  globalFrictionContact_display(problem);
+  GlobalFrictionContactProblem* problem = globalFrictionContact_newFromFile(f);
+  /* globalFrictionContact_display(problem); */
 
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
@@ -91,7 +89,6 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
   {
     globalvelocity[k] = 0.0;
   }
-  NV_display(globalvelocity,n);
   if (dim == 2)
   {
     info = 1;
@@ -102,14 +99,32 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 			reaction , velocity, globalvelocity,
 			options);
   }
-  printf("\n");
-  for (k = 0 ; k < dim * NC; k++)
+  int print_size = 10;
+
+  if  (dim * NC >= print_size)
   {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
-  }
-  for (k = 0 ; k < n; k++)
+    printf("First values (%i)\n", print_size);
+    for (k = 0 ; k < print_size; k++)
+    {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    }
+    printf(" ..... \n");
+    for (k = 0 ; k < print_size; k++)
   {
     printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
+  }
+  }
+  else
+  {
+    for (k = 0 ; k < dim * NC; k++)
+    {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    }
+    printf("\n");
+    for (k = 0 ; k < dim*NC; k++)
+    {
+      printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
+    }
   }
   printf("\n");
 
@@ -125,18 +140,19 @@ int globalFrictionContact_test_function(FILE * f, SolverOptions * options)
 
   if (!info)
   {
-    printf("test succeeded\n");
+    printf("test successful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful\n");
+    printf("test unsuccessful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
+    //getchar();
   }
   free(reaction);
   free(velocity);
   free(globalvelocity);
   fclose(foutput);
 
-  freeGlobalFrictionContactProblem(problem);
+  globalFrictionContact_free(problem);
 
 
   return info;
@@ -220,6 +236,10 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
       printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
     }
     printf(" ..... \n");
+    for (k = 0 ; k < print_size; k++)
+  {
+    printf("GlocalVelocity[%i] = %12.8e\n", k, global_velocity[k]);
+  }
   }
   else
   {
@@ -238,17 +258,18 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
 
   if (!info)
   {
-    printf("test successful, residual = %g\n", options->dparam[1]);
+    printf("test successful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   else
   {
-    printf("test unsuccessful, residual = %g\n", options->dparam[1]);
+    printf("test unsuccessful with %i iterations and residual = %e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
+    //getchar();
   }
   free(reaction);
   free(velocity);
   free(global_velocity);
 
-  freeGlobalFrictionContactProblem(problem);
+  globalFrictionContact_free(problem);
 
 
   return info;
