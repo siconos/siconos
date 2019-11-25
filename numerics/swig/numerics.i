@@ -37,15 +37,15 @@ static char* format_exception_msg(const char* first_line)
   strncpy(error_msg, first_line, strlen(first_line)+1);
   strncat(error_msg, "\n", 2);
   const char* sn_msg = sn_fatal_error_msg();
-  strncat(error_msg, sn_msg, strlen(sn_msg) - 1);
+  strncat(error_msg, sn_msg, sizeof(error_msg) - strlen(error_msg) - 1);
   return error_msg;
 }
 
 static char* format_msg_concat(const char* msg1, const char* msg2)
 {
-  strncpy(error_msg, msg1, strlen(msg1)+1);
-  strncat(error_msg, "\n", 2);
-  strncat(error_msg, msg2, strlen(msg2));
+  strncpy(error_msg, msg1, sizeof(error_msg));
+  strncat(error_msg, "\n", sizeof(error_msg)-strlen(error_msg)-1);
+  strncat(error_msg, msg2, sizeof(error_msg)-strlen(error_msg)-1);
   return error_msg;
 }
 
@@ -94,6 +94,8 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 
 %include <typemaps/swigmacros.swg>
 
+// we should be using descriptor or such here, however this doesn't directly work
+// maybe the caller should put the type as arg too
 %define %SN_INPUT_CHECK_RETURN(var, output, type_)
 { void* _ptr = NULL; if (!SWIG_IsOK(SWIG_ConvertPtr(var, &_ptr, SWIGTYPE_p_##type_, 0 |  0 ))) {
     char errmsg[1024];

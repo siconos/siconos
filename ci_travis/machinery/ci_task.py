@@ -260,22 +260,22 @@ class CiTask(object):
             cmake_args = self._cmake_args
             make_args = self._make_args
             if self._docker:
-                cmake_args += [f'-DMODE={self._mode}',
-                               f'-DCI_CONFIG={ci_config_args}',
-                               f'-DWITH_DOCKER=1',
-                               f'-DBUILD_CONFIGURATION={self._build_configuration}',
-                               f'-DDOCKER_DISTRIB={self._distrib}',
-                               f'-DDOCKER_TEMPLATES={self.templates()}',
-                               f'-DDOCKER_TEMPLATE={self.template_maker()}',
-                               f'-DDOCKER_PROJECT_SOURCE_DIR={full_src}']
+                cmake_args += ['-DMODE={}'.format(self._mode),
+                               '-DCI_CONFIG={}'.format(ci_config_args),
+                               '-DWITH_DOCKER=1',
+                               '-DBUILD_CONFIGURATION={}'.format(self._build_configuration),
+                               '-DDOCKER_DISTRIB={}'.format(self._distrib),
+                               '-DDOCKER_TEMPLATES={}'.format(self.templates()),
+                               '-DDOCKER_TEMPLATE={}'.format(self.template_maker()),
+                               '-DDOCKER_PROJECT_SOURCE_DIR={}'.format(full_src)]
 
             if self._docker and self._directories is not None:
                 shared_dir = ';'.join(self._directories)
-                cmake_args.append(f'-DDOCKER_SHARED_DIRECTORIES={shared_dir}')
+                cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={}'.format(shared_dir))
 
             # for other source directories
             if self._docker and not os.path.samefile(root_dir, full_src):
-                cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={root_dir}')
+                cmake_args.append('-DDOCKER_SHARED_DIRECTORIES={}'.format(root_dir))
 
             try:
                 if os.path.exists(os.path.join(full_src, 'ci_travis')):

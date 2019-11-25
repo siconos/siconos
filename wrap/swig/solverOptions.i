@@ -183,7 +183,7 @@ static int convert_darray(PyObject *input, double *ptr) {
   $result = PyList_New(i);
   for (--i; i >= 0; --i) {
     PyObject *o = SWIG_NewPointerObj(SWIG_as_voidptr(& $1[i]),
-                                     SWIGTYPE_p_SolverOptions, 0);
+                                     $1_descriptor, 0);
     PyList_SetItem($result,i,o);
   }
 }
