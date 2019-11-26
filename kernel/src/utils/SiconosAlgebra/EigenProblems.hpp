@@ -23,7 +23,9 @@
   Usage : see EigenProblemsTest.cpp.
 */
 
-#include "SiconosMatrix.hpp"
+#include "SiconosAlgebraTypeDef.hpp"  // for complex_matrix, complex_vector
+class SiconosMatrix;
+class SiconosVector;
 
 namespace Siconos {
   namespace eigenproblems {

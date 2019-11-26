@@ -23,7 +23,11 @@
 #ifndef BLOCKVECTOR_H
 #define BLOCKVECTOR_H
 
-#include "SiconosAlgebraTypeDef.hpp"
+#include <iosfwd>                     // fwd decl. for ostream
+#include <memory>                     // for __shared_ptr_access
+#include "SiconosSerialization.hpp" // for ACCEPT_SERIALIZATION
+#include "SiconosAlgebraTypeDef.hpp" // for VectorOfVectors, Index
+#include "SiconosVisitor.hpp" // for ACCEPT_NONVIRTUAL_VISITORS
 
 /** "Block" vector : container (list) of SiconosVector
  *

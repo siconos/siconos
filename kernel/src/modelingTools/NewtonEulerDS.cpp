@@ -17,6 +17,7 @@
 */
 #include "CxxStd.hpp"
 
+#include "SimpleMatrixFriends.hpp" // for prod, setBlock ...
 #include "NewtonEulerDS.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"

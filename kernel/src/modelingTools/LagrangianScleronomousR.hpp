@@ -22,6 +22,7 @@
 #define LagrangianScleronomousR_H
 
 #include "LagrangianR.hpp"
+#include "SimpleMatrixFriends.hpp"
 /** \brief   Scleronomic Lagrangian (Non Linear) Relations
  
   Scleronomic Relation (constraint) :

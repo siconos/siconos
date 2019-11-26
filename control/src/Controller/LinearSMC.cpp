@@ -17,6 +17,8 @@
 */
 
 #include "FirstOrderLinearTIDS.hpp"
+#include "SiconosVectorFriends.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include "TimeStepping.hpp"
 #include "Relay.hpp"
 #include "EventsManager.hpp"

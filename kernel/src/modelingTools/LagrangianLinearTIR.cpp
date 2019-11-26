@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "LagrangianLinearTIR.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include "Interaction.hpp"
 //
 #include "LagrangianDS.hpp"

@@ -23,6 +23,8 @@
 #include "BlockMatrixTest.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "SimpleMatrixFriends.hpp"
+#include "SiconosVectorFriends.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);

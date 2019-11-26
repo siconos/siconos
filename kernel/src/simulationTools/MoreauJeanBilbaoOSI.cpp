@@ -17,6 +17,7 @@
  */
 #include "CxxStd.hpp"
 
+#include "SimpleMatrixFriends.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
 #include "BlockVector.hpp"

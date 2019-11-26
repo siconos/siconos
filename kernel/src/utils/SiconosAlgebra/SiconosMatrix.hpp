@@ -24,8 +24,17 @@
 #ifndef __SiconosMatrix__
 #define __SiconosMatrix__
 
-#include "SiconosAlgebraTypeDef.hpp"
-#include "SiconosMatrixException.hpp"
+#include <stddef.h>                    // for size_t
+#include <iosfwd>                      // for ostream
+#include "CSparseMatrix.h"             // for CSparseMatrix
+#include "RuntimeException.hpp"        // for RuntimeException
+#include "SiconosAlgebraTypeDef.hpp"   // for DenseMat, BandedMat, IdentityMat
+#include "SiconosFwd.hpp"              // for SiconosMatrix
+#include "SiconosMatrixException.hpp"  // for SiconosMatrixException
+#include "SiconosSerialization.hpp"    // for ACCEPT_SERIALIZATION
+#include "SiconosVisitor.hpp"          // for VIRTUAL_ACCEPT_VISITORS
+class BlockVector;
+
 
 /** Union of DenseMat pointer, TriangMat pointer BandedMat, SparseMat, SymMat, Zero and Identity mat pointers.
  */
@@ -40,10 +49,6 @@ union MATRIX_UBLAS_TYPE
   IdentityMat *Identity; // num = 7
   SparseCoordinateMat *SparseCoordinate; // num = 8
 };
-/** A STL vector of int */
-typedef std::vector<int> VInt;
-TYPEDEF_SPTR(VInt)
-
 
 /** Abstract class to provide interface for matrices handling
  *
@@ -62,8 +67,6 @@ protected:
   */
   ACCEPT_SERIALIZATION(SiconosMatrix);
 
-
-
   /** A number to specify the type of the matrix: (block or ublas-type)
    * 0-> BlockMatrix, 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat, 6->zeroMat, 7->IdentityMat
    */
@@ -77,8 +80,27 @@ protected:
    */
   SiconosMatrix(unsigned int type);
 
-  //SiconosMatrix(unsigned int, unsigned int, unsigned int);
-
+  /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
+   *  If x is a block vector, it call the present function for all blocks.
+   * \param A a pointer to SiconosMatrix 
+   * \param startRow an int, sub-block position
+   * \param x a pointer to a SiconosVector
+   * \param y a pointer to a SiconosVector
+   * \param init a bool
+   */
+  void private_prod(unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init) const;
+  
+  
+  /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
+   * If x is a block vector, it call the present function for all blocks.
+   * \param A a pointer to SiconosMatrix 
+   * \param startRow an int, sub-block position
+   * \param startCol an int, sub-block position
+   * \param x a pointer to a SiconosVector
+   * \param res a DenseVect
+   */
+  void private_addprod(unsigned int startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& res) const;
+  
 public:
 
   /** Destructor. */
@@ -520,10 +542,16 @@ public:
    */
   bool fillTriplet(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
 
+  friend void prod(const SiconosMatrix&, const SiconosVector&, BlockVector&, bool);
+
+
+  
   /** Visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(SiconosMatrix);
 
+
+  
 };
 
 #endif

@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "MultiBodyTest.hpp"
+#include "SolverOptions.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 
@@ -272,11 +273,11 @@ void Disks::init(std::string disks_input)
     // -- OneStepNsProblem --
     osnspb_.reset(new FrictionContact(2));
 
-    osnspb_->numericsSolverOptions()->iparam[0] = 100; // Max number of
+    osnspb_->numericsSolverOptions()->iparam[SICONOS_IPARAM_MAX_ITER] = 100; // Max number of
     // iterations
-    osnspb_->numericsSolverOptions()->iparam[1] = 20; // compute error
+    //osnspb_->numericsSolverOptions()->iparam[SICONOS_IPARAM_ITER_DONE] = 20; // compute error
     // iterations
-    osnspb_->numericsSolverOptions()->dparam[0] = 1e-3; // Tolerance
+    osnspb_->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] = 1e-3; // Tolerance
 
 
     osnspb_->setMaxSize(6 * ((3 * Ll * Ll + 3 * Ll) / 2 - Ll));

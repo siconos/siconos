@@ -16,6 +16,8 @@
  * limitations under the License.
 */
 #include "OSNSMultipleImpact.hpp"
+#include "SimpleMatrixFriends.hpp"
+#include "SiconosVectorFriends.hpp"
 #include "LagrangianDS.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "Simulation.hpp"

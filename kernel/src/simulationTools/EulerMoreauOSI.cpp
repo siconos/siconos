@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 #include "EulerMoreauOSI.hpp"
+#include "SimpleMatrixFriends.hpp" // for scal
+#include "SiconosVectorFriends.hpp" // for scal
 #include "Simulation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "FirstOrderLinearTIDS.hpp"

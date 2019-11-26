@@ -23,6 +23,7 @@
 #define LinearOSNS_H
 
 #include "OneStepNSProblem.hpp"
+#include "SiconosVector.hpp"
 
 /** stl vector of double */
 typedef std::vector<double> MuStorage;

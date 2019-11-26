@@ -295,8 +295,6 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   double* b = problem->b;
   double* mu = problem->mu;
 
-
-
   assert((int)H->size1 == problem->numberOfContacts * problem->dimension);
   assert((int)M->size0 == M->size1);
   assert((int)M->size0 == H->size0); /* size(velocity) ==

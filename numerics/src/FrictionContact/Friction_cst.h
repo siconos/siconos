@@ -314,6 +314,7 @@ enum SICONOS_FRICTION_3D_NSN_IPARAM
   SICONOS_FRICTION_3D_NSN_MEMORY_ALLOCATED= 17,
   /** index in iparam to store the boolean to know if allocation of dwork is needed */
   SICONOS_FRICTION_3D_NSN_MPI_COM= 18
+
 };
 
 enum SICONOS_FC3D_NSN_LINEAR_SOLVER
@@ -427,11 +428,8 @@ enum SICONOS_FRICTION_3D_ADMM_IPARAM_ENUM
   SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE= 13,
   /** index in iparam to get problem info */
   SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO= 14,
-  /** index in iparam to get problem info */
   SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S= 15,
-  /** index in iparam to get problem info */
   SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H= 17
-
 };
 
 enum SICONOS_FRICTION_3D_ADMM_DPARAM_ENUM
@@ -503,8 +501,6 @@ enum SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_ENUM
   /** An adaptive strategy for rho is used */
   SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_EIGENVALUES =2
 };
-
-
 
 
 #endif

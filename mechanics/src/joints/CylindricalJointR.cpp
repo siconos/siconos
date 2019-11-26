@@ -20,6 +20,7 @@
 */
 
 #include "CylindricalJointR.hpp"
+#include "SiconosVectorFriends.hpp"
 //
 #include <NewtonEulerDS.hpp>
 // #include <Interaction.hpp>

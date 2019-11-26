@@ -18,6 +18,8 @@
 
 #include "SimulationGraphs.hpp"
 #include "ControlLinearAdditionalTermsTS.hpp"
+#include "SimpleMatrixFriends.hpp"
+#include "SiconosVectorFriends.hpp"
 
 #include "Topology.hpp"
 #include "MatrixIntegrator.hpp"

@@ -17,9 +17,14 @@
 */
 
 #include "AlgebraTools.hpp"
-#include "SiconosMatrix.hpp"
-#include <boost/numeric/ublas/io.hpp>
-#include "expm.hpp"
+#include <assert.h>                                      // for assert
+#include <algorithm>                                     // for max, copy, fill
+#include <boost/numeric/ublas/matrix.hpp>                // for matrix
+#include <boost/numeric/ublas/matrix_expression.hpp>     // for norm_inf
+#include "SiconosAlgebraTypeDef.hpp"                     // for DenseMat
+#include "SiconosMatrix.hpp"                             // for SiconosMatrix
+#include "expm.hpp"                                      // for expm_pad
+
 
 namespace Siconos
 {

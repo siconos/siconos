@@ -18,6 +18,7 @@
 */
 
 #include "LagrangianRheonomousR.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 

@@ -20,6 +20,8 @@
 #include "SimpleMatrixTest.hpp"
 #include "SiconosAlgebra.hpp"
 #include <boost/numeric/ublas/matrix_sparse.hpp>
+#include "SimpleMatrixFriends.hpp"
+#include "SiconosVectorFriends.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -3040,15 +3042,15 @@ void SimpleMatrixTest::testProdBis()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*y)(i) - sum) < tol, true);
   }
 
-  // Block = Simple * Simple
-  prod(*A , *x, *yB);
-  for (unsigned int i = 0; i < size; ++i)
-  {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j)
-      sum += (*A)(i, j) * (*x)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*yB)(i) - sum) < tol, true);
-  }
+  // // Block = Simple * Simple // Not used in siconos. Uncomment this if required.
+  // prod(*A , *x, *yB);
+  // for (unsigned int i = 0; i < size; ++i)
+  // {
+  //   sum = 0;
+  //   for (unsigned int j = 0; j < A->size(1); ++j)
+  //     sum += (*A)(i, j) * (*x)(j);
+  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*yB)(i) - sum) < tol, true);
+  // }
 
   // Block = Simple * Block
   //  prod(*A ,*xB,*yB);

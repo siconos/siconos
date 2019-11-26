@@ -17,6 +17,8 @@
 */
 
 #include "ZeroOrderHoldOSI.hpp"
+#include "SiconosVectorFriends.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include "EventDriven.hpp"
 #include "EventsManager.hpp"
 #include "NonSmoothDynamicalSystem.hpp"

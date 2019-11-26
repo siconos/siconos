@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 #include "MoreauJeanOSI.hpp"
+#include "SiconosVectorFriends.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include "Simulation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"

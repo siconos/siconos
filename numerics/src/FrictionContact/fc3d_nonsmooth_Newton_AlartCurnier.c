@@ -19,6 +19,7 @@
 #include "fc3d_nonsmooth_Newton_AlartCurnier.h"
 #include <assert.h>                         // for assert
 #include <math.h>                           // for sqrt
+#include <stddef.h>                         // for NULL
 #include "AlartCurnierGenerated.h"          // for fc3d_AlartCurnierFunction...
 #include "FrictionContactProblem.h"         // for FrictionContactProblem
 #include "Friction_cst.h"                   // for SICONOS_FRICTION_3D_NSN_H...

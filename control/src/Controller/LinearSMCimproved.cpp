@@ -19,6 +19,8 @@
 
 #include "FirstOrderLinearDS.hpp"
 #include "TimeStepping.hpp"
+#include "SiconosVectorFriends.hpp"
+#include "SimpleMatrixFriends.hpp"
 
 #include "LinearSMCimproved.hpp"
 #include "SiconosVector.hpp"

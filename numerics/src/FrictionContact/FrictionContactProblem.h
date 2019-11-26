@@ -127,9 +127,24 @@ extern "C"
                                                  double tol,
                                                  int do_print)  ;
 
-
+  
+  /** Creates a new FrictionContact problem and initialize its content by copying
+      an existing problem.
+      \param problem the source problem to be copied
+      \return a pointer to a new FrictionContactProblem
+  */
   FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem);
 
+  /** Rescales M matrix and q vector of a given FrictionContactProblem.
+
+      \rst
+      :math:`M = \alpha\gamma^2 M, q=\alpha\gamma q`
+      \endrst
+
+      \param problem to be rescaled
+      \param alpha rescaling factor
+      \param gamma rescaling factor
+  */
   void frictionContact_rescaling(FrictionContactProblem* problem,  double alpha,  double gamma);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

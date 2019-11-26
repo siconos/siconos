@@ -23,6 +23,7 @@
 #define ONESTEPNSPROBLEM_H
 
 #include "SiconosFwd.hpp"
+#include "SiconosVisitor.hpp"
 #include "SimulationTypeDef.hpp"
 #include "SimulationGraphs.hpp"
 

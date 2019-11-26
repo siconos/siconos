@@ -17,20 +17,19 @@
 */
 
 #include "BlockVector.hpp"
-
-#include <boost/numeric/ublas/vector_proxy.hpp>  // for project
-#include <boost/numeric/ublas/vector_sparse.hpp>
-#include <vector>
-
-#include "SiconosVector.hpp"
-
-#include "SiconosAlgebra.hpp"
-#include "Tools.hpp"
-
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
+#include <assert.h>                               // for assert
+#include <math.h>                                 // for fmax, pow, sqrt
+#include <algorithm>                              // for lower_bound
+#include <boost/numeric/ublas/detail/config.hpp>  // for noalias, noalias_proxy
+#include <boost/numeric/ublas/vector.hpp>         // for vector
+#include <boost/numeric/ublas/vector_proxy.hpp>   // for vector_range, subrange
+#include <boost/numeric/ublas/vector_sparse.hpp>  // for compressed_vector
+#include <iostream>                               // for operator<<, ostream
+#include <vector>                                 // for vector, vector<>::i...
+#include "SiconosVector.hpp"                      // for SiconosVector, oper...
+#include "SiconosVectorException.hpp"             // for SiconosVectorException
+#include "Tools.hpp"                              // for toString
+#include "debug.h"                                // for DEBUG_EXPR
 
 
 // =================================================

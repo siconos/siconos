@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "AVI.hpp"
+#include "NumericsMatrix.h"
 #include <assert.h>
 #include "Simulation.hpp"
 #include "NormalConeNSL.hpp"

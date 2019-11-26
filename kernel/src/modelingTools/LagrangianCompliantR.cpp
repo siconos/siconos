@@ -19,6 +19,7 @@
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianCompliantR.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 

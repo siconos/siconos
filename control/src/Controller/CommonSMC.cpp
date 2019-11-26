@@ -21,7 +21,7 @@
 #include "CommonSMC.hpp"
 #include "ControlSensor.hpp"
 #include "FirstOrderR_helpers.hpp"
-
+#include "SolverOptions.h"
 #include <string>
 
 // #define DEBUG_NOCOLOR
@@ -178,7 +178,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   _simulationSMC->associate(_integratorSMC, _DS_SMC);
 
   // OneStepNsProblem
-  _OSNSPB_SMC->numericsSolverOptions()->dparam[0] = _precision;
+  _OSNSPB_SMC->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] = _precision;
   _simulationSMC->insertNonSmoothProblem(_OSNSPB_SMC);
   // Finally we can initialize everything ...
   _simulationSMC->associate(_integratorSMC,_DS_SMC);

@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "OneStepNSProblem.hpp"
+#include "SolverOptions.h"
 #include "NonSmoothDynamicalSystem.hpp"
 //#include "Interaction.hpp"
 #include "Interaction.hpp"

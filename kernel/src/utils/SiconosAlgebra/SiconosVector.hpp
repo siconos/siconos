@@ -22,9 +22,13 @@
 #ifndef __SiconosVector__
 #define __SiconosVector__
 
+#include <iosfwd>                      // for ostream
+#include <memory>                      // for enable_shared_from_this
 #include "SiconosAlgebraTypeDef.hpp"
-#include "SiconosVectorFriends.hpp"
 #include "SiconosVectorException.hpp"
+#include "SiconosSerialization.hpp" // for ACCEPT_SERIALIZATION
+#include "SiconosVisitor.hpp" // for ACCEPT_NONVIRTUAL_VISITORS
+#include "SiconosFwd.hpp"
 
 struct SiconosVectorIterator;
 struct SiconosVectorConstIterator;
@@ -63,6 +67,26 @@ protected:
    */
   VECTOR_UBLAS_TYPE vect;
 
+  /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of trans(A) (all columns, and rows between start and start+sizeY).
+   *    If x is a block vector, it call the present function for all blocks.
+   *    \param x a pointer to a SiconosVector
+   *    \param A a pointer to SiconosMatrix 
+   *    \param start an int, sub-block position
+   *    \param y a pointer to a SiconosVector
+   *    \param init a bool
+  */
+  void private_prod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int start, bool init);
+
+  /**  computes res = subA*x +res, subA being a submatrix of trans(A) (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
+   *  If x is a block vector, it call the present function for all blocks.
+   * \param x a pointer to a SiconosVector
+   * \param A a pointer to SiconosMatrix
+   * \param startRow an int, sub-block position
+   * \param startCol an int, sub-block position
+   * \param res a DenseVect, res.
+   */
+  void private_addprod(SPC::SiconosVector x , SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol);
+  
 public:
   /** Default constructor
    */
@@ -249,13 +273,6 @@ public:
    */
   std::string toString() const;
 
-  /** send data of the matrix to an ostream
-   * \param os An output stream
-   * \param sv a SiconosVector
-   * \return The same output stream
-   */
-  friend std::ostream& operator<<(std::ostream& os, const SiconosVector& sv);
-
   /** for iterator interface */
   typedef SiconosVectorIterator iterator;
 
@@ -409,10 +426,6 @@ public:
   */
   void exp_in_place();
 
-  friend SiconosVector& operator *= (SiconosVector& v, const double& s);
-
-  friend SiconosVector& operator /= (SiconosVector& v, const double& s);
-
   /** Copy a part of a vector into a sublock of another vector
    *   \param vIn SiconosVector input vector (read only)
    *   \param vOut SiconosVector vector to be overwritten
@@ -420,9 +433,17 @@ public:
    *   \param startIn int starting index of the block to be copied (in input vector)
    *   \param startOut int starting index of the block to be overwritten (in output vector)
    */
-  friend void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut,
-                       unsigned int sizeB, unsigned int startIn, unsigned int startOut);
+  
+  /** \defgroup SiconosVectorFriends
+      
+      List of friend functions of the SiconosVector class
 
+      Declared in SiconosVectorFriends.hpp.
+      Implemented in SiconosVectorFriends.cpp.
+
+      @{
+  */
+  
   friend bool operator ==(const SiconosVector&, const SiconosVector&);
 
   friend SiconosVector operator * (double, const SiconosVector&);
@@ -443,6 +464,15 @@ public:
 
   friend void axpy(double, const SiconosVector&, SiconosVector&);
 
+  friend std::ostream& operator<<(std::ostream& os, const SiconosVector& sv);
+
+  friend SiconosVector& operator *= (SiconosVector& v, const double& s);
+
+  friend SiconosVector& operator /= (SiconosVector& v, const double& s);
+
+  friend void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut,
+                       unsigned int sizeB, unsigned int startIn, unsigned int startOut);
+
   friend double inner_prod(const SiconosVector&, const SiconosVector&);
 
   friend SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
@@ -459,13 +489,9 @@ public:
 
   friend void  getMin(const SiconosVector&, double &, unsigned int &);
 
-  /*
-  friend SiconosVector abs_wise(const SiconosVector&);
+  friend void prod(const SiconosVector&, const SiconosMatrix&, BlockVector&, bool);
 
-  friend void getMax(const SiconosVector&, double &,unsigned int &);
-
-  friend void  getMin(const SiconosVector&, double &, unsigned int &);
-  */
+  friend void prod(const SiconosVector&, const SiconosMatrix&, SiconosVector&, bool);
 
   friend struct IsDense;
 
@@ -473,11 +499,11 @@ public:
 
   friend struct IsBlock;
 
+  /** End of Friend functions group @} */
+
   //  temporary workaround, the visitor has to be removed or rework -- xhub
   ACCEPT_NONVIRTUAL_VISITORS();
 
 };
-
-#include "SiconosVectorIterator.hpp"
 
 #endif

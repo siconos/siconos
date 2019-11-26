@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "SiconosPointers.hpp"
+#include "NumericsMatrix.h"
 #include "GlobalFrictionContact.hpp"
 #include "Simulation.hpp"
 //#include "Interaction.hpp"

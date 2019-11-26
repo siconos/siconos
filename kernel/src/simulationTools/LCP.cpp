@@ -17,6 +17,7 @@
  */
 #include "LCP.hpp"
 #include "OSNSMatrix.hpp"
+#include "SolverOptions.h"
 
 // --- numerics headers ---
 #include "NonSmoothDrivers.h"

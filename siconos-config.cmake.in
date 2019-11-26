@@ -56,7 +56,6 @@ set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
 
 if(@WITH_FCLIB@)
   if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
-    cmake_policy(SET CMP0074 NEW)
     set(FCLIB_ROOT @FCLIB_ROOT@)
   else()
     set(FCLIB_DIR @FCLIB_DIR@)

@@ -16,6 +16,8 @@
  * limitations under the License.
 */
 
+#include "SimpleMatrixFriends.hpp"
+
 #include "BlockMatrixIterators.hpp"
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 

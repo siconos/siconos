@@ -8,7 +8,7 @@
 #include "SiconosCollisionManager.hpp"
 #include "SiconosBulletCollisionManager.hpp"
 #include "RigidBodyDS.hpp"
-
+#include "SolverOptions.h"
 #include "SiconosKernel.hpp"
 
 #include <string>
@@ -218,8 +218,8 @@ BounceResult bounceTest(std::string moving,
     SP::FrictionContact osnspb(new FrictionContact(3));
 
     // -- Some configuration
-    osnspb->numericsSolverOptions()->iparam[0] = 1000;
-    osnspb->numericsSolverOptions()->dparam[0] = 1e-5;
+    osnspb->numericsSolverOptions()->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    osnspb->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] = 1e-5;
 
     osnspb->setMaxSize(16384);
     osnspb->setMStorageType(1);

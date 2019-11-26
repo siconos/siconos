@@ -21,6 +21,7 @@
 #include <stdio.h>              // for printf, fprintf, fscanf, NULL, fclose
 #include <stdlib.h>             // for malloc, free, exit, EXIT_FAILURE
 #include <sys/errno.h>          // for errno
+#include <string.h>             // for memcpy
 #include "NumericsMatrix.h"     // for NumericsMatrix, NM_create, RawNumeric...
 #include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3
 //#define DEBUG_STDOUT
@@ -378,6 +379,7 @@ void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
   numerics_printf_verbose(do_print, "---- FC3D - STAT  - Number of contact = %i\t,  take off = %i\t, closed = %i\t, sliding = %i\t,sticking = %i\t, ambiguous take off = %i\t, ambiguous closed = %i",nc ,take_off_count,closed_count,sliding_count,sticking_count, ambiguous_take_off_count,ambiguous_closed_count);
 
 }
+
 FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem)
 {
   assert(problem);
@@ -395,6 +397,7 @@ FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem)
   memcpy(new->mu, problem->mu, nc*sizeof(double));
   return new;
 }
+
 void frictionContact_rescaling(
   FrictionContactProblem* problem,
   double alpha,

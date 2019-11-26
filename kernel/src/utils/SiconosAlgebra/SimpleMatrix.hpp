@@ -22,10 +22,14 @@
 #ifndef __SimpleMatrix__
 #define __SimpleMatrix__
 
-#include "SimpleMatrixFriends.hpp"
+#include <iosfwd>                     // for ostream
+#include "SiconosSerialization.hpp" // For ACCEPT_SERIALIZATION
+#include "SiconosVisitor.hpp" // for ACCEPT_STD_VISITORS
+#include "SiconosAlgebraTypeDef.hpp"  // for DENSE, DenseMat, Index, BandedMat
+#include "SiconosFwd.hpp"             // for SiconosVector, SiconosMatrix
+#include "SiconosMatrix.hpp"          // for SiconosMatrix, MATRIX_UBLAS_TYPE ...
+#include "SiconosVector.hpp"          // for SiconosVector
 
-/**Input parameter for copy and transpose constructor.*/
-const std::string transpose = "transpose";
 
 /**  Matrix (embedded various types of Boost matrices of double)
  *
@@ -79,29 +83,6 @@ private:
    */
   bool _isPLUInversed;
 
-  /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
-   * If x is a block vector, it call the present function for all blocks.
-   * \param A a pointer to SiconosMatrix 
-   * \param startRow an int, sub-block position
-   * \param startCol an int, sub-block position
-   * \param x a pointer to a SiconosVector
-   * \param res a DenseVect
-   */
-  friend void private_addprod(const SiconosMatrix& A, unsigned int startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& res);
-
- 
-  /**  computes res = subA*x +res, subA being a submatrix of trans(A) (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
-   *  If x is a block vector, it call the present function for all blocks.
-   * \param x a pointer to a SiconosVector
-   * \param A a pointer to SiconosMatrix
-   * \param startRow an int, sub-block position
-   * \param startCol an int, sub-block position
-   * \param res a DenseVect, res.
-   */
-  friend void private_addprod(SPC::SiconosVector x , SPC::SiconosMatrix A,
-                              unsigned int startRow, unsigned int startCol,
-                              SP::SiconosVector res);
-
   /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
    *  If x is a block vector, it call the present function for all blocks.
    * \param A a pointer to SiconosMatrix 
@@ -110,51 +91,23 @@ private:
    * \param y a pointer to a SiconosVector
    * \param init a bool
    */
-  friend void private_prod(const SiconosMatrix& A, unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init);
+  void private_prod(unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init);
   
-  friend void private_prod(const SiconosMatrix& A, unsigned int, BlockVector&, const SiconosVector&, bool);
-  friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::SiconosVector , SP::BlockVector, bool);
-  friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::BlockVector , SP::BlockVector, bool);
-
-
-   /**  computes res = a*subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
-    *   If x is a block vector, it call the present function for all blocks.
-    *   \param a a double
-    *   \param A a pointer to SiconosMatrix
-    *   \param startRow an int, sub-block position
-    *   \param startCol an int, sub-block position
-    *   \param x a pointer to a SiconosVector
-    *   \param res a DenseVect
-    */
-  friend void private_addprod(double a, SPC::SiconosMatrix A,
-                              unsigned int startRow, unsigned int startCol,
-                              SPC::SiconosVector x, SP::SiconosVector res);
-
-
-  /**  computes y = a*subA*x (init =true) or += a*subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
-   *   If x is a block vector, it call the present function for all blocks.
-   *    \param a a double
-   *    \param A a pointer to SiconosMatrix
-   *    \param start an int, sub-block position
-   *    \param x a pointer to a SiconosVector
-   *    \param y a pointer to a SiconosVector
-   *    \param init, a bool
+  
+  /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
+   * If x is a block vector, it call the present function for all blocks.
+   * \param A a pointer to SiconosMatrix 
+   * \param startRow an int, sub-block position
+   * \param startCol an int, sub-block position
+   * \param x a pointer to a SiconosVector
+   * \param res a DenseVect
    */
-  friend void private_prod(double a, SPC::SiconosMatrix A, unsigned int start,
-                           SPC::SiconosVector x, SP::SiconosVector y, bool init);
+  void private_addprod(unsigned int startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& res);
 
-  /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of trans(A) (all columns, and rows between start and start+sizeY).
-   *    If x is a block vector, it call the present function for all blocks.
-   *    \param x a pointer to a SiconosVector
-   *    \param A a pointer to SiconosMatrix 
-   *    \param start an int, sub-block position
-   *    \param y a pointer to a SiconosVector
-   *    \param init a bool
-  */
-  friend void private_prod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int start, SP::SiconosVector y, bool init);
-  friend void private_prod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, SP::SiconosVector, bool);
-  friend void private_prod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);
-  friend void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);
+
+
+  
+
 
 public:
   /** Default constructor
@@ -467,13 +420,6 @@ public:
    */
   std::string toString() const;
 
-  /** send data of the matrix to an ostream
-   * \param os An output stream
-   * \param sm a SimpleMatrix
-   * \return The same output stream
-   */
-  friend std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm);
-
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int 
    *  \param j an unsigned int 
@@ -510,8 +456,6 @@ public:
    *  \param m a ref to a SiconosMatrix  m
    */
   void setBlock(unsigned int posRow, unsigned int posCol, const SiconosMatrix& m);
-
-  friend void setBlock(SPC::SiconosMatrix , SP::SiconosMatrix , const Index&, const Index&);
 
   // /** get block at position row-col, (current matrix in SimpleMatrix case)
   //  * \param row row index
@@ -687,7 +631,61 @@ public:
   /** Visitors hook
    */
   ACCEPT_STD_VISITORS();
-  
+
+    /** \defgroup SimpleMatrixFriends
+      
+      List of friend functions of the SimpleMatrix class
+
+      Declared in SimpleMatrixFriends.hpp.
+      Implemented in SimpleMatrixFriends.cpp.
+
+      @{
+  */
+
+  /**  computes res = a*subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
+   *   If x is a block vector, it call the present function for all blocks.
+   *   \param a a double
+    *   \param A a pointer to SiconosMatrix
+    *   \param startRow an int, sub-block position
+    *   \param startCol an int, sub-block position
+    *   \param x a pointer to a SiconosVector
+    *   \param res a DenseVect
+    */
+  // friend void private_addprod(double a, SPC::SiconosMatrix A,
+  //                             unsigned int startRow, unsigned int startCol,
+  //                             SPC::SiconosVector x, SP::SiconosVector res);
+
+
+  /**  computes y = a*subA*x (init =true) or += a*subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
+   *   If x is a block vector, it call the present function for all blocks.
+   *    \param a a double
+   *    \param A a pointer to SiconosMatrix
+   *    \param start an int, sub-block position
+   *    \param x a pointer to a SiconosVector
+   *    \param y a pointer to a SiconosVector
+   *    \param init, a bool
+   */
+  // friend void private_prod(double a, SPC::SiconosMatrix A, unsigned int start,
+  //                          SPC::SiconosVector x, SP::SiconosVector y, bool init);
+
+  /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of trans(A) (all columns, and rows between start and start+sizeY).
+   *    If x is a block vector, it call the present function for all blocks.
+   *    \param x a pointer to a SiconosVector
+   *    \param A a pointer to SiconosMatrix 
+   *    \param start an int, sub-block position
+   *    \param y a pointer to a SiconosVector
+   *    \param init a bool
+  */
+  // friend void private_prod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, SP::SiconosVector, bool);  /// OK
+  // friend void private_prod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);  /// OK
+  // friend void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);
+
+  // friend void private_prod(const SiconosMatrix& A, unsigned int, BlockVector&, const SiconosVector&, bool);
+  // friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::SiconosVector , SP::BlockVector, bool);
+  // friend void private_prod(SPC::SiconosMatrix, unsigned int, SPC::BlockVector , SP::BlockVector, bool);
+
+  friend std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm);
+
   friend const SimpleMatrix operator * (const SiconosMatrix&, double);
   //  friend const SimpleMatrix operator * (const SimpleMatrix&,const SimpleMatrix&);
 
@@ -715,6 +713,8 @@ public:
 
   friend const SimpleMatrix matrix_pow(const SimpleMatrix&, unsigned int);
 
+  friend void setBlock(SPC::SiconosMatrix , SP::SiconosMatrix , const Index&, const Index&);
+  
   friend const SimpleMatrix prod(const SiconosMatrix&, const SiconosMatrix&);
 
   friend void prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&, bool);
@@ -725,15 +725,13 @@ public:
 
   friend void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init);
 
-  friend void prod(const SiconosMatrix&, const BlockVector&, SiconosVector&, bool);
+  // friend void prod(const SiconosMatrix&, const BlockVector&, SiconosVector&, bool);
 
-  friend void prod(const SiconosMatrix&, const SiconosVector&, BlockVector&, bool);
+  // friend void prod(const SiconosMatrix&, const SiconosVector&, BlockVector&, bool);
 
   friend void prod(double, const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool);
 
   friend void prod(const SiconosVector&, const SiconosMatrix&, SiconosVector&, bool);
-
-  friend void prod(const SiconosVector&, const SiconosMatrix&, BlockVector&, bool);
 
   friend void subprod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, const Index&, bool);
 
@@ -751,13 +749,12 @@ public:
 
   friend void invertMatrix(const SimpleMatrix&, SimpleMatrix&);
 
-  /** returns a vector of maximum relative error for each column
-   * \param data the matrix filled with simulation results
-   * \param ref the matrix filled with the reference values
-   * \return  a pointer filled with the maximum relative error for each value in data
-   */
   friend SP::SiconosVector compareMatrices(const SimpleMatrix& data, const SimpleMatrix& ref);
 
+  /** End of Friend functions group @} */
+
+
+  
 };
 
 

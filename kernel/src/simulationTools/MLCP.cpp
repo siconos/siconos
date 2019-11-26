@@ -39,30 +39,32 @@ MLCP::MLCP(int numericsSolverId):
 {
   _n = 0;
   _m = 0;
-  _numerics_problem.blocksRows = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
-  _numerics_problem.blocksIsComp = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
-  _numerics_problem.blocksRows[0] = 0;
+  _numerics_problem.reset(new MixedLinearComplementarityProblem);
+
+  _numerics_problem->blocksRows = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
+  _numerics_problem->blocksIsComp = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
+  _numerics_problem->blocksRows[0] = 0;
   _curBlock = 0;
 
-  _numerics_problem.A = 0;
-  _numerics_problem.B = 0;
-  _numerics_problem.C = 0;
-  _numerics_problem.D = 0;
-  _numerics_problem.a = 0;
-  _numerics_problem.b = 0;
-  _numerics_problem.isStorageType1 = 1;
-  _numerics_problem.isStorageType2 = 0;
+  _numerics_problem->A = 0;
+  _numerics_problem->B = 0;
+  _numerics_problem->C = 0;
+  _numerics_problem->D = 0;
+  _numerics_problem->a = 0;
+  _numerics_problem->b = 0;
+  _numerics_problem->isStorageType1 = 1;
+  _numerics_problem->isStorageType2 = 0;
 }
 
 void  MLCP::reset()
 {
-  if (_numerics_problem.blocksRows)
-    free(_numerics_problem.blocksRows);
-  _numerics_problem.blocksRows = 0;
-  if (_numerics_problem.blocksIsComp)
-    free(_numerics_problem.blocksIsComp);
-  _numerics_problem.blocksIsComp = 0;
-  mlcp_driver_reset(&_numerics_problem, &*_numerics_solver_options);
+  if (_numerics_problem->blocksRows)
+    free(_numerics_problem->blocksRows);
+  _numerics_problem->blocksRows = 0;
+  if (_numerics_problem->blocksIsComp)
+    free(_numerics_problem->blocksIsComp);
+  _numerics_problem->blocksIsComp = 0;
+  mlcp_driver_reset(&*_numerics_problem, &*_numerics_solver_options);
   _numerics_solver_options.reset();
 }
 
@@ -91,15 +93,15 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
     /*add an equality block.*/
     if (equalitySize1 > 0)
     {
-      _numerics_problem.blocksRows[_curBlock + 1] = _numerics_problem.blocksRows[_curBlock] + equalitySize1;
-      _numerics_problem.blocksIsComp[_curBlock] = 0;
+      _numerics_problem->blocksRows[_curBlock + 1] = _numerics_problem->blocksRows[_curBlock] + equalitySize1;
+      _numerics_problem->blocksIsComp[_curBlock] = 0;
       _curBlock++;
     }
     /*add a complementarity block.*/
     if (nslawSize1 - equalitySize1 > 0)
     {
-      _numerics_problem.blocksRows[_curBlock + 1] = _numerics_problem.blocksRows[_curBlock] + nslawSize1 - equalitySize1;
-      _numerics_problem.blocksIsComp[_curBlock] = 1;
+      _numerics_problem->blocksRows[_curBlock + 1] = _numerics_problem->blocksRows[_curBlock] + nslawSize1 - equalitySize1;
+      _numerics_problem->blocksIsComp[_curBlock] = 1;
       _curBlock++;
     }
   }
@@ -138,8 +140,8 @@ void MLCP::computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&
 bool MLCP::preCompute(double time)
 {
   bool res = LinearOSNS::preCompute(time);
-  _numerics_problem.n = _n;
-  _numerics_problem.m = _m;
+  _numerics_problem->n = _n;
+  _numerics_problem->m = _m;
   return res;
 }
 
@@ -156,7 +158,7 @@ int MLCP::compute(double time)
   DEBUG_PRINTF("MLCP::compute m n :%d,%d\n", _n, _m);
 
   /*If user has not allocted the working memory, do it. */
-  mlcp_driver_init(&_numerics_problem, &*_numerics_solver_options);
+  mlcp_driver_init(&*_numerics_problem, &*_numerics_solver_options);
   // --- Call Numerics driver ---
   // Inputs:
   // - the problem (M,q ...)
@@ -166,19 +168,19 @@ int MLCP::compute(double time)
 
   if (_sizeOutput != 0)
   {
-    _numerics_problem.q = _q->getArray();
+    _numerics_problem->q = _q->getArray();
 
     // Call MLCP Driver
     DEBUG_PRINT("MLCP display");
     //printf("n %d m %d",n,m);
-    //displayNM(_numerics_problem.M);
+    //displayNM(_numerics_problem->M);
     //      exit(1);
     //mlcpDefaultSolver *pSolver = new mlcpDefaultSolver(m,n);
     DEBUG_EXPR(display(););
 
     try
     {
-      info = mlcp_driver(&_numerics_problem, _z->getArray(), _w->getArray(),
+      info = mlcp_driver(&*_numerics_problem, _z->getArray(), _w->getArray(),
                          &*_numerics_solver_options);
     }
     catch (...)
@@ -215,7 +217,7 @@ void MLCP::initialize(SP::Simulation sim)
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
 
-  _numerics_problem.M = &*_M->numericsMatrix();
+  _numerics_problem->M = &*_M->numericsMatrix();
 }
 void  MLCP::updateInteractionBlocks()
 {

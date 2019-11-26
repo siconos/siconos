@@ -75,7 +75,7 @@ protected:
   int _curBlock;
 
   /** The MLCP instance */
-  MixedLinearComplementarityProblem _numerics_problem;
+  SP::MixedLinearComplementarityProblem _numerics_problem;
 
 public:
 
@@ -114,7 +114,7 @@ public:
   */
   inline SP::MixedLinearComplementarityProblem getNumericsMLCP()
   {
-    return createSPtrMixedLinearComplementarityProblem(_numerics_problem);
+    return _numerics_problem;
   }
 
   /** Reninitialize numerics driver.

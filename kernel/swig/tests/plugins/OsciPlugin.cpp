@@ -20,7 +20,6 @@
 #else 
 #define SICONOS_EXPORT extern "C" 
 #endif  
-#include <stdio.h>
 #include <math.h>
 const double omega = 1.4;
 const double g = 10;

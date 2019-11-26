@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "FirstOrderLinearTIDS.hpp"
+#include "SimpleMatrixFriends.hpp" // for prod
 
 #include <iostream>
 

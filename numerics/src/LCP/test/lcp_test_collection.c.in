@@ -120,11 +120,6 @@ int main(void)
   collection[87].will_fail = 1;
   collection[94].will_fail = 1;
   collection[101].will_fail = 1;
-  collection[105].will_fail = 1;
-  collection[107].will_fail = 1;
-  collection[108].will_fail = 1;
-  collection[109].will_fail = 1;
-  collection[110].will_fail = 1;
 #elif TEST_LCP_COLLECTION_4
   collection[1].will_fail = 1;
   collection[4].will_fail = 1;

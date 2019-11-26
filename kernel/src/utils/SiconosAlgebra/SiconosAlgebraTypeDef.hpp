@@ -18,9 +18,9 @@
 
 
 /** ! \file SiconosAlgebraTypeDef.hpp
-    \brief Header file for Siconos Algebra objects
+    \brief List of typedefs related to vectors and matrices types (dense, sparse ...)
+    used in Siconos.
 
-    This file provides typedef for matrix and vector objects, const values and so on ...
 */
 
 #ifndef SiconosAlgebraTypeDef
@@ -37,23 +37,18 @@
 #endif
 
 #include <vector>
-#include <limits>
-#include <boost/numeric/ublas/fwd.hpp>
+#include <boost/numeric/ublas/fwd.hpp> // Boost forward declarations 
 
-#include "SiconosConfig.h"
-#include <array>
-
+// #include <array>
 #include <complex>
-#include "SiconosPointers.hpp"
 
+//#include "SiconosPointers.hpp"
 #include "SiconosFwd.hpp"
 
-#include "SiconosVisitor.hpp"
+// #include "SiconosVisitor.hpp"
 
-/** Const from old version of SiconosVector - To be reviewed */
-const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ DEPENDS ON MACHINE
-const unsigned int M_MAXSIZEFORDISPLAY = 10;
-const std::string DEFAULT_FORMAT = "ascii";
+
+namespace ublas = boost::numeric::ublas;
 
 namespace Siconos
 {
@@ -84,113 +79,87 @@ namespace Siconos
 // T: value type
 // A: storage type
 
-/** Objects used to define block matrices and vectors:*/
-
-
-
 /** Some containers for vectors - Used for example to handle x and its
     derivatives in DynamicalSystem. */
 typedef std::vector<SP::SiconosVector> VectorOfVectors;
+TYPEDEF_SPTR(VectorOfVectors)
 
 /** Some containers for vectors - Used for example in Relation to compute y and r
  * when there are 2 DS*/
 typedef std::vector<SP::BlockVector> VectorOfBlockVectors;
+TYPEDEF_SPTR(VectorOfBlockVectors)
 
 /** Some containers for matrices - Used for example to handle the
     various jacobian in LagrangianDS. */
 typedef std::vector<SP::SiconosMatrix> VectorOfMatrices;
-
+TYPEDEF_SPTR(VectorOfMatrices)
 
 /** Some containers for matrices - Used for example to handle the
     various jacobian in LagrangianDS. */
 typedef std::vector<SP::SimpleMatrix> VectorOfSMatrices;
-
-//typedef std::vector<SP::SimpleMatrix> VectorOfSimpleMatrices;
-
-/** Iterator through vector of matrices */
-typedef VectorOfMatrices::iterator VectorOfMatricesIterator;
-
-/** const Iterator through vector of matrices */
-typedef VectorOfMatrices::const_iterator VectorOfMatricesConstIterator;
-
-/** type of object used to save indices */
-typedef std::vector<std::size_t> Index;
-TYPEDEF_SPTR(Index)
-TYPEDEF_SPTR(VectorOfBlockVectors)
-TYPEDEF_SPTR(VectorOfVectors)
-TYPEDEF_SPTR(VectorOfMatrices)
 TYPEDEF_SPTR(VectorOfSMatrices)
 
-namespace ublas = boost::numeric::ublas;
+/** Vector of indices (size_t type) */
+typedef std::vector<std::size_t> Index;
+TYPEDEF_SPTR(Index)
 
-/* Various matrix types available in Siconos */
+/** Vector of indices (int type) */
+typedef std::vector<int> VInt;
+TYPEDEF_SPTR(VInt)
 
-/** DenseMat is a typedef of boost::ublas::numeric::matrix<double, column_major, std::vector<double> >  */
+/* ---  Definition of the matrices types available in Siconos  --- */
+
+/** Dense matrix */
 typedef ublas::matrix<double, ublas::column_major, std::vector<double> > DenseMat;
-
 TYPEDEF_SPTR(DenseMat)
 
-/** TriangMat is a typedef of boost::ublas::numeric::triangular_matrix<double, upper, column_major, std::vector<double> >
- */
+/** Triangular matrix */
 typedef ublas::triangular_matrix<double, ublas::upper, ublas::column_major> TriangMat;
-
 TYPEDEF_SPTR(TriangMat)
 
-/** SymMat is a typedef of boost::ublas::numeric::symmetric_matrix<double, upper, column_major, std::vector<double> >
- */
+/** Symmetric matrix */
 typedef ublas::symmetric_matrix<double, ublas::upper, ublas::column_major> SymMat;
 
 TYPEDEF_SPTR(SymMat)
 
-/** BandedMat is a typedef of boost::ublas::numeric::banded_matrix<double, column_major, std::vector<double> >
- */
+/** Banded matrix */
 typedef ublas::banded_matrix<double, ublas::column_major > BandedMat;
 TYPEDEF_SPTR(BandedMat)
 
-/** SparseMat is a typedef of boost::ublas::numeric::compressed_matrix<double>
- */
+/** Sparse matrix */
 typedef ublas::compressed_matrix<double, ublas::column_major, 0, Index > SparseMat;
 TYPEDEF_SPTR(SparseMat)
 
-/** SparseMat is a typedef of boost::ublas::numeric::mapped_matrix<double>
- */
+/** Sparse matrix (coordinate) */
 typedef ublas::coordinate_matrix<double, ublas::column_major, 0, Index > SparseCoordinateMat;
 TYPEDEF_SPTR(SparseCoordinateMat)
 
-/** ZeroMat is a typedef of boost::ublas::numeric::zero_matrix, ie null matrix.
- */
+/** Null matrix */
 typedef ublas::zero_matrix<double> ZeroMat;
 TYPEDEF_SPTR(ZeroMat)
 
-/** IdentityMat is a typedef of boost::ublas::identity_matrix ie identity matrix.
- */
+/** Identity matrix */
 typedef ublas::identity_matrix<double> IdentityMat;
 TYPEDEF_SPTR(IdentityMat)
 
-/** A collection of pointers to matrices ; blocksMat is a typedef of
-    boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */
+/** Sparse block matrix */
 typedef ublas::compressed_matrix<SP::SiconosMatrix> BlocksMat;
 TYPEDEF_SPTR(BlocksMat)
 
-/** Complex matrix
- */
+/** Complex dense matrix  */
 typedef ublas::matrix<std::complex<double>, ublas::column_major> complex_matrix;
 TYPEDEF_SPTR(complex_matrix)
 
-/** Various vector types available in Siconos **/
-
-/** DenseVect is a typedef of boost::ublas::numeric::vector<double, std::vector<double> >
- */
+/* ---  Definition of the vectors types available in Siconos  --- */
+/** Dense vector */
 typedef ublas::vector<double, std::vector<double> > DenseVect;
 TYPEDEF_SPTR(DenseVect)
 
-/** SparseVect is a typedef of boost::ublas::numeric::mapped<double>
- */
+/** Sparse vector */
 typedef ublas::compressed_vector<double> SparseVect;
 TYPEDEF_SPTR(SparseVect)
 
-/** Complex vector
- */
+/** Complex dense vector */
 typedef ublas::vector<std::complex<double> > complex_vector;
 TYPEDEF_SPTR(complex_vector)
 

@@ -518,6 +518,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     }
     *info = hasNotConverged;
   }
+
   if(iter==itermax)
   {
     norm_q = cblas_dnrm2(m , problem->q , 1);
@@ -646,8 +647,6 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   int pos;
   double normUT;
   int admm_has_converged=0;
-
-
 
   rho_k=rho;
   int has_rho_changed = 1;

@@ -23,16 +23,8 @@
 #ifndef __SiconosVectorFriends__
 #define __SiconosVectorFriends__
 
-
-/** Copy a subBlock of size sizeB of vIn (from index startIn) into a subBlock
- *  of vOut (from index startOut)
- * \param vIn block to copy
- * \param vOut vector to change (destination)
- * \param sizeB size of the block to copy
- * \param startIn starting position for the block (vIn)
- * \param startOut starting position for the destination (vOut)
- */
-void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut);
+#include "SiconosFwd.hpp"
+#include "SiconosAlgebraTypeDef.hpp" // for Index
 
 /** A==B when (A-B).normInf()<tolerance
  * \param 2 SiconosVector
@@ -105,6 +97,22 @@ void axpby(double, const SiconosVector&, double, SiconosVector&);
 */
 void axpy(double, const SiconosVector&, SiconosVector&);
 
+std::ostream& operator<<(std::ostream& os, const SiconosVector& sv);
+
+SiconosVector& operator *= (SiconosVector& v, const double& s);
+
+SiconosVector& operator /= (SiconosVector& v, const double& s);
+
+/** Copy a subBlock of size sizeB of vIn (from index startIn) into a subBlock
+ *  of vOut (from index startOut)
+ * \param vIn block to copy
+ * \param vOut vector to change (destination)
+ * \param sizeB size of the block to copy
+ * \param startIn starting position for the block (vIn)
+ * \param startOut starting position for the destination (vOut)
+ */
+void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB, unsigned int startIn, unsigned int startOut);
+
 /** compute dot product m1.m2
  *  \param 2 SiconosVectors
  *  \return a double
@@ -147,7 +155,6 @@ void cross_product(const SiconosVector& V1, const SiconosVector& V2, SiconosVect
  *  \param V a SiconosVector (Input).
  *  \param Vabs a SiconosVector (Output)
  */
-
 void abs_wise(const SiconosVector& V, SiconosVector& Vabs);
 
 /** get maximal element of a vector
@@ -155,7 +162,6 @@ void abs_wise(const SiconosVector& V, SiconosVector& Vabs);
  *  \param 2, a double variable giving the maximum element (Output).
  *  \param 3, an unsigned int variable giving the position of the maximum element (Output)
  */
-
 void getMax(const SiconosVector&, double &, unsigned int &);
 
 /** get minimum element of a vector
@@ -163,8 +169,27 @@ void getMax(const SiconosVector&, double &, unsigned int &);
  *  \param 2, a double variable giving the minimum element (Output).
  *  \param 3, an unsigned int variable giving the position of the minimum element (Output)
  */
-
 void getMin(const SiconosVector&, double &, unsigned int &);
+
+
+/** prod(x, A, y) computes y = trans(A)*x (init = true) or y += trans(A)*x (init = false)
+  \param x a SiconosVector
+  \param A a SiconosMatrix
+  \param[in,out] y a BlockVector
+  \param init a bool (default = true)
+  */
+void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool init = true);
+
+
+
+/** prod(x, A, y) computes y = trans(A)*x (init = true) or y += trans(A)*x (init = false)
+  \param x a SiconosVector
+  \param A a SiconosMatrix
+  \param[in,out] y a SiconosVector
+  \param init a bool (default = true)
+*/
+void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool init = true);
+
 
 
 #endif

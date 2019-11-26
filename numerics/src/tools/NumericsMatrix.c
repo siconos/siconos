@@ -2251,7 +2251,7 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
   assert(A);
   assert(x);
   assert(y);
-
+  
   switch (A->storageType)
   {
   case NM_DENSE:

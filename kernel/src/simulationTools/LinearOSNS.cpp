@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 #include "LinearOSNS.hpp"
+#include "NumericsMatrix.h"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "MoreauJeanOSI.hpp"

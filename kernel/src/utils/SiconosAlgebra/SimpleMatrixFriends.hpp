@@ -17,21 +17,21 @@
 */
 
 /*! \file SimpleMatrixFriends.hpp
-  List of friend functions for SimpleMatrix.
+  Declaration of all friend functions for SimpleMatrix.
   */
 
 #ifndef __SimpleMatrixFriends__
 #define __SimpleMatrixFriends__
-#include "SiconosMatrix.hpp"
 
-/** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are given in dim and start.
- * \param MIn a SPC::SiconosMatrix
- * \param[in,out] MOut a SP::SiconosMatrix
- * \param dim an Index, dim[0], dim[1]: number of rows and columns of the sub-block
- * \param start an Index, start[0], start[1]: position (row, column) of the first element of the sub-block in MIn
- *  start[2], start[3]: position (row, column) of the first element of the sub-block in MOut.
+#include "SiconosFwd.hpp"
+#include "SiconosAlgebraTypeDef.hpp" // For Index
+
+/** send data of the matrix to an ostream
+ * \param os An output stream
+ * \param sm a SimpleMatrix
+ * \return The same output stream
  */
-void setBlock(SPC::SiconosMatrix MIn, SP::SiconosMatrix MOut, const Index& dim, const Index& start);
+std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm);
 
 /** multiplication of a matrix by a double
  *  \param A a SiconosMatrix
@@ -39,13 +39,6 @@ void setBlock(SPC::SiconosMatrix MIn, SP::SiconosMatrix MOut, const Index& dim, 
  *  \return a SimpleMatrix
  */
 const SimpleMatrix operator * (const SiconosMatrix& A, double a);
-
-/** multiplication of a SimpleMatrix by a SimpleMatrix
- *  \param a const SiconosMatrix&
- *  \param a const SimpleMatrix&
- *  \return a const SimpleMatrix
- */
-//  const SimpleMatrix operator * (const SimpleMatrix&,const SimpleMatrix&);
 
 /** multiplication of a SP::SimpleMatrix by a SP::SimpleMatrix
  *  \param A a SP::SiconosMatrix
@@ -80,18 +73,23 @@ const SimpleMatrix operator /(const SiconosMatrix& A, double a);
  * \return a SimpleMatrix C
  */
 const SimpleMatrix operator +(const SiconosMatrix& A, const SiconosMatrix& B);
+
 /** Addition of two matrices, C = A+B
  * \param A a SP::SiconosMatrix
  * \param B a SP::SiconosMatrix
  * \return a SP::SimpleMatrix
  */
 SP::SimpleMatrix operator +(const SP::SimpleMatrix A, const SP::SimpleMatrix B);
+
 SimpleMatrix operator +(const SimpleMatrix& A, const SimpleMatrix& B);
 
 /** Addition of two matrices C = A+B
- *  \param A a SiconosMatrix
- *  \param B a SiconosMatrix
- *  \param[in,out] C a SiconosMatrix
+
+    Implem: SimpleMatrixArithmetic.cpp
+
+    \param A a SiconosMatrix
+    \param B a SiconosMatrix
+    \param[in,out] C a SiconosMatrix
  */
 void add(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
 
@@ -101,13 +99,16 @@ void add(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
  * \return a SimpleMatrix
  */
 const SimpleMatrix operator -(const SiconosMatrix& A, const SiconosMatrix& B);
-//  const SimpleMatrix operator -(const SimpleMatrix&,const SimpleMatrix&);
 
 /** Subtraction of two matrices C = A-B
- *  \param A a SiconosMatrix
- *  \param B a SiconosMatrix
- *  \param[in,out] C a SiconosMatrix
- */
+    
+    Implem: SimpleMatrixArithmetic.cpp
+
+
+    \param A a SiconosMatrix
+    \param B a SiconosMatrix
+    \param[in,out] C a SiconosMatrix
+*/
 void sub(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C);
 
 /**: A==B when (A-B).normInf()<tolerance
@@ -130,6 +131,15 @@ bool operator != (const SiconosMatrix& A, const SiconosMatrix& B);
  * \return a SimpleMatrix
  */
 const SimpleMatrix matrix_pow(const SimpleMatrix& A, unsigned int e);
+
+/** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are given in dim and start.
+ * \param MIn a SPC::SiconosMatrix
+ * \param[in,out] MOut a SP::SiconosMatrix
+ * \param dim an Index, dim[0], dim[1]: number of rows and columns of the sub-block
+ * \param start an Index, start[0], start[1]: position (row, column) of the first element of the sub-block in MIn
+ *  start[2], start[3]: position (row, column) of the first element of the sub-block in MOut.
+ */
+void setBlock(SPC::SiconosMatrix MIn, SP::SiconosMatrix MOut, const Index& dim, const Index& start);
 
 /** product of two matrices, C = A*B
   \param A a SiconosMatrix
@@ -169,21 +179,21 @@ const SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x);
   */
 void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init = true);
 
-/** prod(A, x, y, init) computes y = A*x or y += A*x if init = false
-  \param A a SiconosMatrix
-  \param x a SiconosVector
-  \param[in,out] y a SiconosVector
-  \param init a bool (default = true)
-  */
-void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init = true);
+// /** prod(A, x, y, init) computes y = A*x or y += A*x if init = false
+//   \param A a SiconosMatrix
+//   \param x a SiconosVector
+//   \param[in,out] y a SiconosVector
+//   \param init a bool (default = true)
+//   */
+// void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init = true);
 
-/** prod(A, x, y, init) computes y = A*x or y += A*x if init = false
-  \param A a SiconosMatrix
-  \param x a SiconosVector
-  \param[in,out] y a SiconosVector
-  \param init a bool (default = true)
-  */
-void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool init = true);
+// /** prod(A, x, y, init) computes y = A*x or y += A*x if init = false
+//   \param A a SiconosMatrix
+//   \param x a SiconosVector
+//   \param[in,out] y a SiconosVector
+//   \param init a bool (default = true)
+//   */
+// void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool init = true);
 
 /** prod(a, A, x, y, init) computes y = a*A*x or y += a*A*x if init = false
   \param a a double
@@ -193,15 +203,6 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool i
   \param init a bool (default = true)
   */
 void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init = true);
-
-/** prod(x, A, y) computes y = trans(A)*x (init = true) or y += trans(A)*x (init = false)
-  \param x a SiconosVector
-  \param A a SiconosMatrix
-  \param[in,out] y a SiconosVector
-  \param init a bool (default = true)
-  */
-void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool init = true);
-void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool init = true);
 
 /** subprod(A, x, y) computes sub_y = sub_A*sub_x or sub_y += sub_A*sub_x if init = false
   \param A a SiconosMatrix
@@ -213,6 +214,8 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool i
   \param init a bool (default = true)
   */
 void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, const Index& coord, bool init = true);
+
+//// NEVER DECLARED ?????
 
 /** subprod(A, x, y) computes sub_y = sub_A*sub_x or sub_y += sub_A*sub_x if init = false
   \param A a SiconosMatrix
@@ -281,19 +284,14 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
  */
 void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool = true);
 
-void private_addprod(const SiconosMatrix& , unsigned int, unsigned int, const SiconosVector&, SiconosVector&);
-void private_addprod(double, SPC::SiconosMatrix, unsigned int, unsigned int, SPC::SiconosVector, SP::SiconosVector);
-void private_addprod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, unsigned int, SP::SiconosVector);
-void private_addprod(const SiconosMatrix& , unsigned int, unsigned int, const BlockVector&, SiconosVector&);
-void private_addprod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, unsigned int, SP::SiconosVector);
-void private_prod(const SiconosMatrix& A, unsigned int, const SiconosVector&, SiconosVector&, bool);
-void private_prod(const SiconosMatrix& A, unsigned int, const BlockVector& , SiconosVector&, bool);
-void private_prod(SPC::SiconosMatrix, unsigned int, SPC::SiconosVector , SP::BlockVector, bool);
-void private_prod(SPC::SiconosMatrix, unsigned int, SPC::BlockVector , SP::BlockVector, bool);
-void private_prod(double, SPC::SiconosMatrix, unsigned int, SPC::SiconosVector, SP::SiconosVector, bool);
-void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::SiconosVector, bool);
-void private_prod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, SP::SiconosVector, bool);
-void private_prod(SPC::BlockVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);
-void private_prod(SPC::SiconosVector, SPC::SiconosMatrix, unsigned int, SP::BlockVector, bool);
+void invertMatrix(const SimpleMatrix&, SimpleMatrix&);
+
+/** returns a vector of maximum relative error for each column
+ * \param data the matrix filled with simulation results
+ * \param ref the matrix filled with the reference values
+ * \return  a pointer filled with the maximum relative error for each value in data
+ */
+SP::SiconosVector compareMatrices(const SimpleMatrix& data, const SimpleMatrix& ref);
 
 #endif
+

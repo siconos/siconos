@@ -21,6 +21,7 @@
 #include <cstdio>
 
 #include "NewtonEulerR.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"
 
