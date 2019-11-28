@@ -19,8 +19,6 @@
 
 #include "EigenProblemsTest.hpp"
 #include "SiconosAlgebra.hpp"
-#include "SiconosVectorTest.hpp"
-#include "SimpleMatrixFriends.hpp"
 #include "bindings_utils.hpp"
 #include <limits>
 #include <iostream>

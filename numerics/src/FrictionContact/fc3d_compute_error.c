@@ -76,10 +76,8 @@ int fc3d_compute_error(
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   NM_prod_mv_3x3(n, n, problem->M, z, w); // w = Mz +q
 
-  double norm_r= cblas_dnrm2(n, z, 1);
-  double norm_w= cblas_dnrm2(n, w, 1);
-  DEBUG_PRINTF("norm of the reaction %e\n", norm_r);
-  DEBUG_PRINTF("norm of the velocity %e\n", norm_w);
+  DEBUG_PRINTF("norm of the reaction %e\n", cblas_dnrm2(n, z, 1));
+  DEBUG_PRINTF("norm of the velocity %e\n", cblas_dnrm2(n, w, 1));
   DEBUG_PRINTF("norm of q = %12.8e\n", norm);
   /* DEBUG_EXPR(NV_display(problem->q,n);); */
   /* DEBUG_EXPR(NV_display(w,n);); */
@@ -189,8 +187,7 @@ int fc3d_Tresca_compute_error(FrictionContactProblem* problem,
   /* Checks inputs */
   if (problem == NULL || z == NULL || w == NULL)
     numerics_error("fc3d_Tresca_compute_error", "null input for problem and/or z and/or w");
-  assert(options->dWork);
-  
+
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;

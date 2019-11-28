@@ -39,9 +39,7 @@ GlobalFrictionContactProblem*  fc3d_reformulation_global_problem(FrictionContact
 
 
 
-  GlobalFrictionContactProblem*  globalproblem = (GlobalFrictionContactProblem*) malloc(sizeof(GlobalFrictionContactProblem));
-  globalFrictionContact_null(globalproblem);
-
+  GlobalFrictionContactProblem*  globalproblem = globalFrictionContactProblem_new();
 
   globalproblem->numberOfContacts = problem->numberOfContacts;
   globalproblem->dimension =  problem->dimension;

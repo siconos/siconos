@@ -22,7 +22,7 @@
   Utilities to perform operations on matrices (exponantial ...)
 */
 
-class SiconosMatrix;
+#include "SiconosFwd.hpp"
 
 
 namespace Siconos {

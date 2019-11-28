@@ -238,8 +238,6 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
   double tau , tau_k = 1.0;
   int pos;
   double normUT;
-  int admm_has_converged=0;
-
   rho_k=rho;
   int has_rho_changed = 1;
 

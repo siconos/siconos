@@ -17,15 +17,15 @@
 */
 
 #include "BlockMatrixIterators.hpp"
-#include <iostream>                                 // for operator<<, ostream
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/vector_proxy.hpp>
-#include "SiconosAlgebra.hpp"
 #include "BlockMatrix.hpp"
 #include "SimpleMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosMatrixException.hpp"
-#include "SimpleMatrixFriends.hpp" // for setBlock
+
+#include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/vector_proxy.hpp>
+
+#include "SiconosAlgebra.hpp"
 #include "Tools.hpp"
 
 using  std::cout;

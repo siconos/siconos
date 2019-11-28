@@ -572,35 +572,12 @@ void convexQP_ADMM(ConvexQP* problem,
 void convexQP_ADMM_set_options(SolverOptions* options)
 {
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART; /* 0 Acceleration */
-<<<<<<< variant A
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_RHO_STRATEGY] =
     SICONOS_CONVEXQP_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-
->>>>>>> variant B
-####### Ancestor
-
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-
-======= end
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA] = 0.999;
-<<<<<<< variant A
   options->dparam[SICONOS_CONVEXQP_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
   options->dparam[SICONOS_CONVEXQP_ADMM_BALANCING_RESIDUAL_PHI]=10.0;
-
-  options->internalSolvers = NULL;
-
-
-  return 0;
->>>>>>> variant B
-####### Ancestor
-
-  options->internalSolvers = NULL;
-
-
-  return 0;
-======= end
 }

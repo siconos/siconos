@@ -22,6 +22,7 @@
 #include <stdlib.h>             // for malloc, free, exit, EXIT_FAILURE
 #include <sys/errno.h>          // for errno
 #include <string.h>             // for memcpy
+#include "SiconosBlas.h"        // for cblas_dscal
 #include "NumericsMatrix.h"     // for NumericsMatrix, NM_create, RawNumeric...
 #include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3
 //#define DEBUG_STDOUT

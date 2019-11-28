@@ -65,6 +65,11 @@ extern "C"
 {
 #endif
   
+  /* creates an empty GlobalFrictionContactProblem
+     \return a pointer to a GlobalFrictionContactProblem
+  */
+  GlobalFrictionContactProblem* globalFrictionContactProblem_new(void);
+
   /** displays the problem onto screen 
    * \param[in] problem to be displayed
    */
@@ -99,22 +104,6 @@ extern "C"
    */
   GlobalFrictionContactProblem* globalFrictionContact_new_from_filename(const char * filename);
 
-  /** nullify all pointer components of the problem structure
-      \param[inout] problem, global-friction problem structure
-  */
-  static inline void globalFrictionContact_null(GlobalFrictionContactProblem*  problem)
-  {
-    problem->M = NULL;
-    problem->H = NULL;
-    problem->q = NULL;
-    problem->b = NULL;
-    problem->mu = NULL;
-    problem->env = NULL;
-    problem->numberOfContacts = 0;
-    problem->dimension = 0;
-
-  }
-  
   /** Release memory for the problem structure
       \param[inout] problem, global-Friction problem structure to be freed.
   */

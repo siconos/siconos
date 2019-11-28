@@ -106,8 +106,8 @@ int convexQP_compute_error(
   assert(error);
 
   int incx = 1;
-  int n = problem->size;
-  int m = problem->m;
+  size_t n = problem->size;
+  size_t m = problem->m;
 
   DEBUG_PRINTF("scaling= %12.8e\n", scaling);
   DEBUG_PRINTF("norm_b = %12.8e\n", norm_b);

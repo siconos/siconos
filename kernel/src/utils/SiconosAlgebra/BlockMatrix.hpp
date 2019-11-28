@@ -24,14 +24,7 @@
 #ifndef __BlockMatrix__
 #define __BlockMatrix__
 
-#include <stddef.h>                   // for size_t
-#include <iosfwd>                     // for ostream
-#include <memory>                     // for __shared_ptr_access
-#include "SiconosAlgebraTypeDef.hpp"  // for Index, DenseMat, BandedMat, Ide...
-#include "SiconosFwd.hpp"             // for SiconosMatrix
-#include "SiconosMatrix.hpp"          // for SiconosMatrix
-#include "SiconosSerialization.hpp"   // for ACCEPT_SERIALIZATION
-#include "SiconosVisitor.hpp"         // for ACCEPT_STD_VISITORS
+#include "SiconosMatrix.hpp"
 
 /** "Block" matrix, ie container of matrices 
  *

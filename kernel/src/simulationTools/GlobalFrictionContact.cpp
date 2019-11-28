@@ -183,8 +183,7 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
 
 SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactProblem()
 {
-  SP::GlobalFrictionContactProblem numerics_problem(new GlobalFrictionContactProblem());
-  globalFrictionContact_null(numerics_problem.get());
+  SP::GlobalFrictionContactProblem numerics_problem(globalFrictionContactProblem_new());
   numerics_problem->M = &*_M->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
@@ -198,7 +197,6 @@ SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactPro
 GlobalFrictionContactProblem *GlobalFrictionContact::globalFrictionContactProblemPtr()
 {
   GlobalFrictionContactProblem *numerics_problem = &_numerics_problem;
-  globalFrictionContact_null(numerics_problem);
   numerics_problem->M = &*_M->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();

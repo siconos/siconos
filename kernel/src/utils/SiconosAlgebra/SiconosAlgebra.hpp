@@ -18,13 +18,15 @@
 
 
 /** ! \file SiconosAlgebra.hpp
-    \brief boost ublas includes related to matrices.
-    
+    \brief Header file for Siconos Algebra objects
+
+    This file provides typedef for matrix and vector objects, const values and so on ...
 */
 
 #ifndef SiconosAlgebra
 #define SiconosAlgebra
 
+//#include "SiconosConfig.h"
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/triangular.hpp>

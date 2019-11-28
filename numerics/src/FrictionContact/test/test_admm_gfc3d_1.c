@@ -16,143 +16,76 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_ADMM
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, Solve...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+  int n_solvers = 5;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+  
+  int current = 0;
+  for(int d =0; d <n_data; d++)
+    {
+      // GFC3D, NSGS_WR.
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS_WR);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+      current++;
+    }
 
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSGS_WR);
-    test[n][e++] = "1e-05";
-    test[n][e++] = "10000";
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test[n][e++] = "1e-05";
-    test[n][e++] = "1000";
-    test[n][e++] = "---";
-    n++;
-  }
+  for(int d =0; d <n_data; d++)
+    {
+      // GFC3D, ADMM.
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+      collection[current].will_fail = 1; // expected to fail
+      current++;
+    }
 
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test[n][e++] = "1e-05";
-    test[n][e++] = "10000";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "iparam";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING);
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test[n][e++] = "1e-05";
-    test[n][e++] = "10000";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "iparam";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY);
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING);
-    test[n][e++] = "---";
-    n++;
-  }
+  for(int d =0; d <n_data; d++)
+    {
+      // GFC3D, ADMM, set rho strategy
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
+      collection[current].will_fail = 1; // expected to fail
+      current++;
+    }
 
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test[n][e++] = "1e-05";
-    test[n][e++] = "30000";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "iparam";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING);
-    test[n][e++] = "iparam";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_IPARAM_RESCALING);
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_RESCALING_YES);
-    test[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
-    test[n][e++] = "1e-08";
-    test[n][e++] = "10000";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "0";
-    test[n][e++] = "iparam";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S);
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO);
-    test[n][e++] = "iparam";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY );
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING);
-    test[n][e++] = "iparam";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_IPARAM_RESCALING);
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_FRICTION_3D_RESCALING_YES);
-    test[n][e++] = "---";
-    n++;
-  }
+    for(int d =0; d <n_data; d++)
+    {
+      // GFC3D, ADMM, set rho strategy.
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING;
+      current++;
+    }
 
-  test[n][0] ="---";
-  return test;
+    for(int d =0; d <n_data; d++)
+    {
+      // GFC3D, ADMM, set rho strategy and rescaling
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 30000;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
+      collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_YES;
+      current++;
+    }
 
+    return collection; 
 }

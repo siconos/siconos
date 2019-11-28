@@ -232,7 +232,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* else */ rho_k = rho_k * tau ;
 
           /* x <- x_k  for the std approach*/
-          if (iparam[SICONOS_IPARAM_PREALLOC]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
+          if (iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
           cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
@@ -337,7 +337,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* else */ rho_k = rho_k * tau ;
 
            /* x <- x_k  for the std approach*/
-          if (iparam[SICONOS_IPARAM_PREALLOC]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
+          if (iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
           cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
@@ -436,7 +436,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           /* else */ rho_k = rho_k * tau ;
 
           /* x <- x_k  for the std approach*/
-          if (iparam[SICONOS_IPARAM_PREALLOC]==0)  cblas_dcopy(n, x_k, 1, x , 1) ;
+          if (iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0)  cblas_dcopy(n, x_k, 1, x , 1) ;
 
           /* x <- x - rho_k*  w_k */
           cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
@@ -539,7 +539,7 @@ void variationalInequality_FixedPointProjection_set_options(SolverOptions* optio
   /* options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_FULL; */
   options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY]=0;
-  options->iparam[SICONOS_IPARAM_PREALLOC] = 0;
+  options->iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 0;
   options->iparam[SICONOS_VI_IPARAM_DECREASE_RHO] = 0;
   options->dparam[SICONOS_VI_DPARAM_RHO] = -1.0; // rho is variable by default
   options->dparam[SICONOS_VI_DPARAM_LS_TAU] = 2/3.0;  /* tau */

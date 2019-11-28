@@ -26,29 +26,6 @@ using namespace Siconos;
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-//=====================
-// convert to an ostream
-//=====================
-
-std::ostream& operator<<(std::ostream& os, const SimpleMatrix& sm)
-{
-  if (sm._num == 1)
-    os << *sm.mat.Dense;
-  else if (sm._num == 2)
-    os << *sm.mat.Triang;
-  else if (sm._num == 3)
-    os << *sm.mat.Sym;
-  else if (sm._num == 4)
-    os << *sm.mat.Sparse;
-  else if (sm._num == 5)
-    os << *sm.mat.Banded;
-  else if (sm._num == 6)
-    os << *sm.mat.Zero;
-  else if (sm._num == 7)
-    os << *sm.mat.Identity;
-  return os;
-}
-
 SP::SimpleMatrix operator * (const SP::SimpleMatrix A, const SP::SimpleMatrix B)
 {
   SP::SimpleMatrix aux(new SimpleMatrix((DenseMat)prod(*(*A).dense(), *(*B).dense())));

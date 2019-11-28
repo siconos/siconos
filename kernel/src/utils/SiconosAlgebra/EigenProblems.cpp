@@ -17,21 +17,26 @@
 */
 
 #pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+// All the boost bindings required includes ...
+#include <boost/numeric/bindings/lapack.hpp>
+//#include <boost/numeric/bindings/noop.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/bindings/ublas/matrix_proxy.hpp>
+#include <boost/numeric/bindings/ublas/symmetric.hpp>
+#include <boost/numeric/bindings/ublas/vector.hpp>
+#include <boost/numeric/bindings/ublas/vector_proxy.hpp>
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/bindings/std/vector.hpp>
 
-#include "EigenProblems.hpp"
-#include <boost/numeric/ublas/fwd.hpp>                             // for lower
-#include <boost/numeric/ublas/symmetric.hpp>
-#include <iostream>
+#include "SiconosConfig.h"
+
+// Typedef to define interface to boost ublas.
+//#include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "boost/numeric/bindings/lapack.hpp"
-#include "boost/numeric/bindings/ublas/matrix.hpp"
-#include "boost/numeric/bindings/ublas/matrix_proxy.hpp"
-#include "boost/numeric/bindings/ublas/symmetric.hpp"
-#include "boost/numeric/bindings/ublas/vector.hpp"
-#include "boost/numeric/bindings/ublas/vector_proxy.hpp"
-#include "boost/numeric/bindings/std/vector.hpp"
 
+#include "EigenProblems.hpp"
+// Some utilities (print ...)
 
 namespace lapack = boost::numeric::bindings::lapack;
 

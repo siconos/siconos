@@ -20,17 +20,12 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "AlgebraTools.hpp"
-#include "SiconosFwd.hpp"
 
 class AlgebraToolsTest : public CppUnit::TestFixture
 {
 
 
 private:
-  /** serialization hooks // 
-   */
-  // ACCEPT_SERIALIZATION(AlgebraToolsTest);
-
   // test suite
   CPPUNIT_TEST_SUITE(AlgebraToolsTest);
 

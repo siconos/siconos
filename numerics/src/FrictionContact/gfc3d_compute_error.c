@@ -46,7 +46,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
   int nc = problem->numberOfContacts;
   int m = nc * 3;
-  int n = problem->M->size0;
+  size_t n = problem->M->size0;
   double *mu = problem->mu;
   double *q = problem->q;
 

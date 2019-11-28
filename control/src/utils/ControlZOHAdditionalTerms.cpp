@@ -20,7 +20,7 @@
 #include "ControlZOHAdditionalTerms.hpp"
 #include "SimpleMatrixFriends.hpp"
 #include "SiconosVectorFriends.hpp"
-
+#include "SiconosVector.hpp"
 #include "Topology.hpp"
 #include "MatrixIntegrator.hpp"
 #include "SimpleMatrix.hpp"

@@ -75,8 +75,6 @@ enum FRICTION_SOLVER
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization = 555,
   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity = 558,
 
-  /** De Saxce fixed point, one contact solver */
-  SICONOS_FRICTION_3D_DeSaxceFixedPoint = 560,
   /** Fischer Burmeister/Path, Glocker formulation, one contact solver */
   SICONOS_FRICTION_3D_NCPGlockerFBPATH = 556,
   /** Newton/Fischer Burmeister, Glocker formulation, one contact solver */
@@ -154,7 +152,6 @@ extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWi
 extern const char* const   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR;
 extern const char* const   SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER_STR;
 extern const char* const   SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR;
-extern const char* const   SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR;
 extern const char* const   SICONOS_FRICTION_3D_GAMS_PATH_STR;
 extern const char* const   SICONOS_FRICTION_3D_GAMS_PATHVI_STR;
 extern const char* const   SICONOS_FRICTION_3D_GAMS_LCP_PATH_STR;

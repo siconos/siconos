@@ -91,7 +91,6 @@ BounceResult bounceTest(std::string moving,
     // Statistics of this run
     int bounce_counter = 0;
     const int n_desired_bounces = 6;
-    double desired_bounce_times[6]  = { 2.585, 4.645, 6.290, 7.610, 8.660, 9.505 };
     double desired_bounce_ratios[6] = { 0.6358, 0.4048, 0.2577, 0.1630, 0.1033, 0.0647 };
     double actual_bounce_times[6]   = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     double actual_bounce_ratios[6]  = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
@@ -238,8 +237,6 @@ BounceResult bounceTest(std::string moving,
 
     // --- Simulation initialization ---
 
-    int N = ceil((T - t0) / h); // Number of time steps
-
     // -- MoreauJeanOSI Time Stepping
     SP::TimeStepping simulation(new TimeStepping(nsds, timedisc));
 
@@ -259,10 +256,6 @@ BounceResult bounceTest(std::string moving,
     // Add a non-smooth law
     SP::NonSmoothLaw nslaw(new NewtonImpactFrictionNSL(0.8, 0., 0.0, 2));
     collisionMan->insertNonSmoothLaw(nslaw, 0, 0);
-
-    ///////
-
-    int new_interaction_total = 0;
 
     ///////
 

@@ -20,11 +20,7 @@
 #include "SiconosAlgebraTypeDef.hpp"
 #include "SiconosAlgebra.hpp"
 #include "SiconosVectorTest.hpp"
-#include "SimpleMatrixFriends.hpp"
-#include "SiconosVectorFriends.hpp"
-#include "SiconosVectorIterator.hpp"
-#include "SiconosVector.hpp"
-#include "BlockVector.hpp"
+
 
 using namespace boost::numeric::ublas;
 

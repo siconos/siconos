@@ -75,7 +75,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
 
   DEBUG_EXPR(NV_display(reaction,m););
   DEBUG_EXPR(NV_display(globalVelocity,n););
-
+  
   double * z = (double*)malloc((n+m)*sizeof(double));
   double * Fz = (double*)calloc((n+m),sizeof(double));
 
@@ -83,6 +83,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   memcpy(&z[n], reaction, m * sizeof(double));
   DEBUG_EXPR(NV_display(z,m+n););
   DEBUG_EXPR(NV_display(Fz,m+n););
+  // Warning : tolerance might be updated by VI determine_convergence function !
   variationalInequality_FixedPointProjection(vi, z, Fz , info , options);
 
   memcpy(globalVelocity, z,  n * sizeof(double)  );

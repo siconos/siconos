@@ -26,7 +26,7 @@
 #include "debug.h"                         // for DEBUG_EXPR
 #include "gfc3d_Solvers.h"                 // for gfc3d_ACLMFixedPoint, gfc3...
 #include "numerics_verbose.h"              // for numerics_printf_verbose
-
+#include "NumericsMatrix.h" 
 #ifdef  DEBUG_MESSAGES
 #include "NumericsVector.h"
 #include "NumericsMatrix.h"
