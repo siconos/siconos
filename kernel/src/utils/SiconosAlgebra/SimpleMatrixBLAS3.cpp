@@ -61,8 +61,8 @@ using namespace Siconos;
 const SimpleMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
 {
   // To compute C = A * B
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorized in place in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorized in place in prod !!");
 
   if((A.size(1) != B.size(0)))
     SiconosMatrixException::selfThrow("Matrix function C=prod(A,B): inconsistent sizes");
@@ -210,8 +210,8 @@ dim : dim[0] number of raw, dim[1] number of col
 void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init)
 {
   // To compute C = A * B
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorized in place in prod !!");
+  assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorized in place in prod !!");
   if(!C.isBlock())
     C.resetLU();
 
@@ -624,8 +624,8 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   if(&A == &C || &B == &C)
     SiconosMatrixException::selfThrow("Matrix function axpy_prod(A,B,C): C must be different from A and B.");
 
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorized in place in prod !!");
+  assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorized in place in prod !!");
   if(!C.isBlock())
     C.resetLU();
   unsigned int numA = A.num();
@@ -771,8 +771,8 @@ void gemmtranspose(double a, const SiconosMatrix& A, const SiconosMatrix& B, dou
   if(numA != 1 || numB != 1 || numC != 1)
     SiconosMatrixException::selfThrow("gemm(...) failed: reserved to dense matrices.");
 
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorized in place in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorized in place in prod !!");
 
 
   siconosBindings::blas::gemm(a, siconosBindings::trans(*A.dense()), siconosBindings::trans(*B.dense()), b, *C.dense());
@@ -787,8 +787,8 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
   unsigned int numA = A.num();
   unsigned int numB = B.num();
   unsigned int numC = C.num();
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorized in place in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorized in place in prod !!");
   C.resetLU();
 
   // At the time, only dense output allowed
@@ -815,7 +815,7 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
 void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
 {
   // To compute B = a * A (init = true) or B += a*A (init = false).
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorized in place in prod !!");
   if(!B.isBlock())
     B.resetLU();
 

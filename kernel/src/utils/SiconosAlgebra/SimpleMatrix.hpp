@@ -65,9 +65,14 @@ private:
   SP::VInt _ipiv;
 
   /** bool _isPLUFactorized;
-   *  Boolean = true if the Matrix has been PLU Factorized in place.
+   *  Boolean = true if the Matrix is PLU Factorized.
    */
   bool _isPLUFactorized;
+
+  /** bool _isPLUFactorizedInPlace;
+   *  Boolean = true if the Matrix is PLU Factorized in place.
+   */
+  bool _isPLUFactorizedInPlace;
 
   /** bool _isQRFactorized;
    *  Boolean = true if the Matrix has been QR Factorized in place.
@@ -79,6 +84,14 @@ private:
    */
   bool _isPLUInversed;
 
+  /** Numerics Matrix structure
+   * This matrix is used to perform  computation using Numerics,
+   * for instance, the LU factorization of a sparse matrix.
+   * It may contains copy or pointer on the SimpleMatrix.
+   */
+  SP::NumericsMatrix _numericsMatrix;
+
+  
   /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
    * If x is a block vector, it call the present function for all blocks.
    * \param A a pointer to SiconosMatrix 
@@ -264,6 +277,14 @@ public:
   inline bool isPLUFactorized() const
   {
     return _isPLUFactorized;
+  }
+  
+ /** determines if the matrix has been factorized
+   *  \return true if the matrix is factorized
+   */
+  inline bool isPLUFactorizedInPlace() const
+  {
+    return _isPLUFactorizedInPlace;
   }
 
   /** determines if the matrix has been factorized
@@ -642,6 +663,11 @@ public:
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
    */
   void PLUFactorizationInPlace();
+  
+  /** computes an LU factorization of a general M-by-N matrix 
+   *  using partial pivoting with row interchanges.
+   */
+  void PLUFactorize();
 
   /**  compute inverse of this thanks to LU factorization with Partial pivoting.
    * This method inverts U and then computes inv(A) by solving the system
@@ -654,12 +680,14 @@ public:
    *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
   void PLUForwardBackwardInPlace(SiconosMatrix& B);
+  void PLUSolve(SiconosMatrix& B);
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
    *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
   void PLUForwardBackwardInPlace(SiconosVector& B);
+  void PLUSolve(SiconosVector& B);
 
   /** solves a system of linear equations A * X = B  (A=this)
       with a general N-by-N matrix A using the Least squares method

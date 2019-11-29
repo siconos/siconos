@@ -34,9 +34,9 @@
 #include "SiconosLapack.h"
 #include "numerics_verbose.h"
 #include "sanitizer.h"
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
+//#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 
 #ifdef DEBUG_MESSAGES
@@ -2584,6 +2584,185 @@ double* NM_dWork(NumericsMatrix* A, int size)
   return A->internalData->dWork;
 }
 
+int NM_LU_factorize(NumericsMatrix* A, unsigned keep)
+{
+  verbose=2;
+  lapack_int info = 1;
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    assert(A->matrix0);
+
+    if (keep == NM_KEEP_FACTORS)
+    {
+      numerics_printf_verbose(2,"NM_LU_factorize, using LAPACK" );
+
+      lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
+      DEBUG_PRINTF("iwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
+
+      if (!NM_internalData(A)->isLUfactorized)
+      {
+        numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep it in place" );
+        DEBUG_PRINT("Start to call DGETRF for NM_DENSE storage\n");
+        //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
+        DGETRF(A->size0, A->size1, A->matrix0, A->size0, ipiv, &info);
+        DEBUG_PRINT("end of call DGETRF for NM_DENSE storage\n");
+        if (info > 0)
+          numerics_printf_verbose(2,"NM_LU_factorize: LU factorisation DGETRF failed. The %d-th diagonal element is 0\n", info);
+        else if (info < 0)
+        {
+          fprintf(stderr, "NM_LU_factorize: LU factorisation DGETRF failed. The %d-th argument has an illegal value, stopping\n", -info);
+        }
+        if (info) { NM_internalData_free(A); return info; }
+        NM_internalData(A)->isLUfactorized = true;
+      }
+    }
+    break;
+  }
+  case NM_SPARSE:
+  {
+    NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+    switch (p->solver)
+    {
+    case NSM_CS_LUSOL:
+      numerics_printf_verbose(2,"NM_LU_factorize, using CSparse" );
+
+      /* if (keep == NM_KEEP_FACTORS) */
+      {
+        if (!(p->dWork && p->linear_solver_data))
+        {
+          assert(!NSM_workspace(p));
+          assert(!NSM_linear_solver_data(p));
+          assert(!p->solver_free_hook);
+
+          p->solver_free_hook = &NSM_free_p;
+          p->dWork = (double*) malloc(A->size1 * sizeof(double));
+          p->dWorkSize = A->size1;
+          CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+          numerics_printf_verbose(2,"NM_LU_factorize,, we compute factors and keep it" );
+          DEBUG_EXPR(cs_print(NM_csc(A),0));
+          CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
+          p->linear_solver_data = cs_lu_A;
+        }
+      }
+      /* else */
+      /* { */
+      /*   numerics_printf_verbose(2,"NM_LU_factorize: We always keep factors with sparse implementation\n"); */
+      /* } */
+      break;
+    default:
+    {
+      
+    }
+    }
+    break;
+  }
+  default:
+    assert (0 && "NM_LU_factors: unknown storageType");
+  }
+
+  return info;
+}
+
+int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs, unsigned keep)
+{
+
+  DEBUG_BEGIN("NM_LU_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
+  assert(A->size0 == A->size1);
+
+  lapack_int info = 1;
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  {
+    assert(A->matrix0);
+
+    if (keep == NM_KEEP_FACTORS)
+    {
+      numerics_printf_verbose(2,"NM_LU_solve, using LAPACK" );
+
+      NM_LU_factorize(A, keep);
+
+      DEBUG_PRINT("Start to call DGETRS for NM_DENSE storage\n");
+
+      numerics_printf_verbose(2,"NM_LU_solve, we solve with given factors" );
+      lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
+      DGETRS(LA_NOTRANS, A->size0, nrhs, A->matrix0, A->size0, ipiv, b, A->size0, &info);
+
+      DEBUG_PRINT("End of call DGETRS for NM_DENSE storage\n");
+      if (info < 0)
+      {
+        numerics_printf_verbose(2,"NM_LU_solve: dense LU solve DGETRS failed. The %d-th argument has an illegal value, stopping\n", -info);
+      }
+    }
+    else
+    {
+      double* mat;
+      if (keep == NM_PRESERVE)
+      {
+        mat = NM_dWork(A, A->size0*A->size1);
+        cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, mat, 1);
+      }
+      else
+      {
+        mat = A->matrix0;
+      }
+      DGESV(A->size0, nrhs, mat, A->size0, (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int)), b,
+          A->size0, &info);
+    }
+    break;
+  }
+
+  case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+  case NM_SPARSE:
+  {
+    NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+    switch (p->solver)
+    {
+    case NSM_CS_LUSOL:
+      numerics_printf_verbose(2,"NM_gesv, using CSparse" );
+
+      if (keep == NM_KEEP_FACTORS)
+      {
+        NM_LU_factorize(A, keep);
+
+        numerics_printf_verbose(2,"NM_gesv, we solve with given factors" );
+        for(unsigned int j=0; j < nrhs ; j++ )
+        {
+          info = !CSparseMatrix_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
+        }
+      }
+      else
+      {
+        for(unsigned int j=0; j < nrhs ; j++ )
+        {
+          info = !cs_lusol(1, NM_csc(A), &b[j*nrhs], DBL_EPSILON);
+        }
+      }
+      break;
+    default:
+    {
+      fprintf(stderr, "NM_LU_solve: unknown sparse linearsolver %d\n", p->solver);
+      exit(EXIT_FAILURE);
+    }
+    }
+    break;
+  }
+  default:
+    assert (0 && "NM_LU_solve unknown storageType");
+  }
+
+  /* some time we cannot find a solution to a linear system, and its fine, for
+   * instance with the minFBLSA. Therefore, we should not check here for
+   * problems, but the calling function has to check the return code.*/
+//  CHECK_RETURN(info);
+  DEBUG_END("NM_LU_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
+  return (int)info;
+}
+
+
 int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
 {
 
@@ -2680,6 +2859,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           p->dWorkSize = A->size1;
           CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
           numerics_printf_verbose(2,"NM_gesv_expert, we compute factors and keep it" );
+          DEBUG_EXPR(cs_print(NM_csc(A),0));
           CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
           p->linear_solver_data = cs_lu_A;
         }
@@ -3453,7 +3633,7 @@ int NM_is_symmetric(NumericsMatrix* A)
   double norm_inf = NM_norm_inf(AplusATrans);
   NM_free(Atrans); free(Atrans);
   NM_free(AplusATrans);  free(AplusATrans);
-  
+
   if (norm_inf <= DBL_EPSILON*10)
   {
     return 1;

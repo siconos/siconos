@@ -28,6 +28,10 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SimpleMatrixTest);
 
 using namespace Siconos;
 
+#define DEBUG_MESSAGES
+#include "debug.h"
+
+
 // Note FP: tests are (rather) complete for Dense objects but many are missing for other cases (Triang, Symm etc ...).
 
 void SimpleMatrixTest::setUp()
@@ -89,6 +93,24 @@ void SimpleMatrixTest::setUp()
     for (unsigned j = 0; j < SP->size2()-1; ++ j)
       if (i != j)
         (*SP2)(i, j) = 3 * i + j;
+  
+  SP3.reset(new SparseMat(3, 3));
+  (*SP3)(0,0) = 1.0;
+  (*SP3)(0,2) = 2.0;
+  (*SP3)(1,2) = 3.0;
+  (*SP3)(2,0) = 4.0;
+  (*SP3)(2,1) = 5.0;
+  (*SP3)(2,2) = 5.0;
+  
+  SP4.reset(new SparseMat(3, 3));
+  (*SP4)(0,0) = 1.0;
+  (*SP4)(0,2) = 4.0;
+  (*SP4)(1,1) = 1.0;
+  (*SP4)(1,2) = 5.0;
+  (*SP4)(2,0) = 4.0;
+  (*SP4)(2,1) = 5.0;
+  (*SP4)(2,2) = 77.0;
+
 
   // Sparse Coordinate
   SP_coor.reset(new SparseCoordinateMat(4, 4));
@@ -3507,6 +3529,116 @@ void SimpleMatrixTest::testGemm()
   gemmtranspose(a, *A, *B, b, *C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm (trans): ", norm_inf(*C->dense() - a * prod(trans(*A->dense()), trans(*B->dense())) - b**backUp->dense()) < tol, true);
   std::cout << "-->  test gemm ended with success." <<std::endl;
+}
+
+void SimpleMatrixTest::testPLUFactorizationInPlace()
+{
+  std::cout << "--> Test: PLUFactorizationInPlace." <<std::endl;
+
+  SP::SiconosMatrix Dense(new SimpleMatrix(*D));
+  Dense->display();
+  Dense->PLUFactorizationInPlace();
+  Dense->display();
+  //CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUFactorizationInPlace: ",  < tol, true);
+
+  SP::SiconosMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
+  Sparse->eye();
+  Sparse->display();
+  Sparse->PLUFactorizationInPlace();
+  Sparse->display();
+
+  SP::SimpleMatrix Sparse2(new SimpleMatrix(*SP4));
+  DEBUG_EXPR(Sparse2->display(););
+  Sparse2->PLUFactorizationInPlace();
+  DEBUG_EXPR(Sparse2->display(););
+  
+  std::cout << "-->  test PLUFactorizationInPlace ended with success." <<std::endl;
+}
+
+void SimpleMatrixTest::testPLUFactorize()
+{
+  std::cout << "--> Test: PLUFactorize." <<std::endl;
+
+  SP::SiconosMatrix Dense(new SimpleMatrix(*D));
+  Dense->display();
+  Dense->PLUFactorize();
+  Dense->display();
+  //CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUFactorize: ",  < tol, true);
+
+  
+  SP::SiconosMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
+  Sparse->eye();
+  Sparse->display();
+  Sparse->PLUFactorize();
+
+
+  Sparse.reset(new SimpleMatrix(*SP3));
+  Sparse->display();
+  Sparse->displayExpert();
+  Sparse->PLUFactorize();
+  Sparse->display();
+
+
+  /* A last column full of zero caused memory corruption in cs_lusol
+     since ublas does not fill the last entry correctly*/
+  // Sparse.reset(new SimpleMatrix(*SP2));
+  // Sparse->display();
+  // Sparse->displayExpert();
+  // Sparse->PLUFactorizationInPlace();
+  // Sparse->display();
+
+  std::cout << "-->  test PLUFactorize ended with success." <<std::endl;
+}
+void SimpleMatrixTest::testPLUSolve()
+{
+  std::cout << "\n\n--> Test: PLUSolve." <<std::endl;
+
+
+  SP::SiconosMatrix Dense(new SimpleMatrix(*D));
+  SP::SiconosVector b (new SiconosVector(Dense->size(0)));
+  for( int i =0; i <Dense->size(0); i++)
+  {
+    (*b)(i)=1.0;
+  }
+  SP::SiconosVector backup (new SiconosVector(*b));
+  SP::SiconosMatrix D_backup (new SimpleMatrix(*Dense));
+  Dense->display();
+  Dense->PLUSolve(*b);
+  Dense->display();
+  b->display();
+  
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*D_backup,*b) - *backup).norm2()  < tol, true);
+
+  
+  SP::SiconosMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
+  b.reset(new SiconosVector(Sparse->size(0)));
+  for( int i =0; i <Sparse->size(0); i++)
+  {
+    (*b)(i)=1.0;
+  }
+  backup.reset (new SiconosVector(*b));
+
+  Sparse->eye();
+  Sparse->display();
+  Sparse->PLUSolve(*b);
+  b->display();
+  
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
+
+
+  Sparse.reset(new SimpleMatrix(*SP3));
+  b.reset(new SiconosVector(Sparse->size(0)));
+  for( int i =0; i <Sparse->size(0); i++)
+  {
+    (*b)(i)=1.0;
+  }
+  backup.reset (new SiconosVector(*b));
+  Sparse->PLUSolve(*b);
+  b->display();
+  
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
+
+  std::cout << "-->  test PLUSolve ended with success." <<std::endl;
 }
 
 

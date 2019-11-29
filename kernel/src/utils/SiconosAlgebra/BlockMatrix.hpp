@@ -444,7 +444,10 @@ public:
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
    */
   void PLUFactorizationInPlace();
+  
+  void PLUFactorize();
 
+ 
   /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
    *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
    */
@@ -455,13 +458,16 @@ public:
    *  \param[in,out] B on input the RHS matrix b; on output: the result x
    */
   void PLUForwardBackwardInPlace(SiconosMatrix &B);
-
+  void PLUSolve(SiconosMatrix &B);
+  
+  
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
    *  \param[in,out] B on input the RHS matrix b; on output: the result x
    */
   void PLUForwardBackwardInPlace(SiconosVector &B);
-
+  void PLUSolve(SiconosVector &B);
+  
   /** visitors hook
    */
   ACCEPT_STD_VISITORS();

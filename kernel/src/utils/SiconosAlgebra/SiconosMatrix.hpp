@@ -105,10 +105,17 @@ public:
    */
   virtual bool isSymmetric(double tol) const =0;
 
-  /** determines if the matrix has been PLU factorized in place
+  /** determines if the matrix has been PLU factorized 
    *  \return true if the matrix is factorized
    */
   inline virtual bool isPLUFactorized() const
+  {
+    return false;
+  };
+  /** determines if the matrix has been PLU factorized in place
+   *  \return true if the matrix is factorized
+   */
+  inline virtual bool isPLUFactorizedInPlace() const
   {
     return false;
   };
@@ -462,6 +469,7 @@ public:
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
    */
   virtual void PLUFactorizationInPlace() = 0;
+  virtual void PLUFactorize() = 0;
 
   /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
    *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
@@ -473,12 +481,14 @@ public:
    *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
   virtual void  PLUForwardBackwardInPlace(SiconosMatrix &B) = 0;
+  virtual void  PLUSolve(SiconosMatrix &B) = 0;
 
   /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
    *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
   virtual void   PLUForwardBackwardInPlace(SiconosVector &B) = 0;
+  virtual void   PLUSolve(SiconosVector &B) = 0;
 
   /** set to false all LU indicators. Useful in case of
       assignment for example.
@@ -508,8 +518,11 @@ public:
    *  \param col_off
    *  \param tol the tolerance under which a number is considered as equal to zero 
    *  \return true if function worked.
+   *  \warning not clear that it works for an empty csr matrix with row_off =0  and col_off =0
    */
   bool fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
+
+  bool fillCSC(CSparseMatrix* csc, double tol = 1e-14);
 
   /** return the number of non-zero in the matrix
    *  \param csc the compressed column sparse matrix

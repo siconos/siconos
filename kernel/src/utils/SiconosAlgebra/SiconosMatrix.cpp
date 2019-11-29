@@ -224,6 +224,75 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
   return true;
 }
 
+bool SiconosMatrix::fillCSC(CSparseMatrix* csc, double tol)
+{
+  assert(csc);
+  double* Mx = csc->x; // data
+  CS_INT* Mi = csc->i; // row indx
+  CS_INT* Mp = csc->p; // column pointers
+
+  size_t nrow = size(0);
+  size_t ncol = size(1);
+
+  CS_INT pval = 0;
+
+  if(_num == DENSE)  //dense
+  {
+    double* arr = getArray();
+    for(size_t j = 0, joff = 0; j < ncol; ++j)
+    {
+      for(size_t i = 0; i < nrow; ++i)
+      {
+        // col-major
+        double elt_val = arr[i + j*nrow];
+        // std::cout << " a(i=" << i << ",j=" << j << ") = "<< elt_val << std::endl;
+        if(fabs(elt_val) > tol)
+        {
+          Mx[pval] = elt_val;
+          Mi[pval] = i;
+          // std::cout << "Mx[" <<pval <<"] = " << Mx[pval]<<   std::endl;
+          // std::cout << "Mp[" <<pval <<"] = " << Mi[pval]<<   std::endl;
+          ++pval;
+        }
+      }
+      // std::cout << "joff" << joff << std::endl;
+      Mp[++joff] = pval;
+
+    }
+  }
+  else if(_num == SPARSE)
+  {
+    const Index& ptr = sparse()->index1_data();
+    const Index& indx = sparse()->index2_data();
+    const ublas::unbounded_array<double>& vals = sparse()->value_data();
+
+    size_t nnz =  sparse()->nnz();
+    
+    printf("nnz = %i", nnz);
+    printf(" indx.size() = %i", indx.size());
+    
+    assert(ptr.size() == ncol + 1);
+    assert(indx.size() >= nnz);
+    assert(vals.size() >= nnz);
+
+    for(size_t i = 0; i < nnz; ++i)
+    {
+      Mx[pval] = vals[i];
+      Mi[pval++] = indx[i];
+    }
+    for(size_t j = 0; j < ncol+1; ++j)
+    {
+      Mp[j] = ptr[j];
+    }
+  }
+  else
+  {
+    SiconosMatrixException::selfThrow("SiconosMatrix::fillCSC not implemented for the given matrix type");
+  }
+
+  return true;
+}
+
 bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t col_off, double tol)
 {
   assert(triplet);

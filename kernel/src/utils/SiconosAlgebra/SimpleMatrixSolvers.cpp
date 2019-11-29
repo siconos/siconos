@@ -45,44 +45,67 @@ namespace lapack = boost::numeric::bindings::lapack;
 
 #include "SiconosAlgebra.hpp"
 
+#include "NumericsMatrix.h"
+                          #include "NumericsSparseMatrix.h"
+#include "CSparseMatrix.h"
+
+#define DEBUG_MESSAGES
+#include "debug.h"
+
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
+
 using namespace Siconos;
 
 void SimpleMatrix::PLUFactorizationInPlace()
 {
-  if(_isPLUFactorized)
+  if (_isPLUFactorized)
   {
     std::cout << "SimpleMatrix::PLUFactorizationInPlace warning: this matrix is already PLUFactorized. " << std::endl;
     return;
   }
-  if(_num == 1)
+  if (_num == 1)
   {
-    if(!_ipiv)
+    if (!_ipiv)
       _ipiv.reset(new VInt(size(0)));
     else
       _ipiv->resize(size(0));
     int info = lapack::getrf(*mat.Dense, *_ipiv);
-    if(info != 0)
+    if (info != 0)
     {
       _isPLUFactorized = false;
+      _isPLUFactorizedInPlace = true;
       SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorizationInPlace failed: the matrix is singular.");
     }
-    else _isPLUFactorized = true;
+    else
+    {
+      _isPLUFactorized = true;
+      _isPLUFactorizedInPlace = true;
+    }
   }
   else
   {
     int info = cholesky_decompose(*sparse());
     // \warning: VA 24/11/2010: work only for symmetric matrices. Should be replaced by efficient implementatation (e.g. mumps )
-    if(info != 0)
+    if (info != 0)
     {
       display();
       _isPLUFactorized = false;
+      _isPLUFactorizedInPlace = false;
       std::cout << "Problem in Cholesky Decomposition for the row number" << info   << std::endl;
       SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorizationInPlace failed. ");
     }
-    else _isPLUFactorized = true;
+    else
+    {
+      _isPLUFactorized = true;
+      _isPLUFactorizedInPlace = false;
+    }
   }
 
 }
+
+
 
 void SimpleMatrix::PLUInverseInPlace()
 {
@@ -132,10 +155,11 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       // B now contains solution:
     }
     else // call getrs: only solve using previous lu-factorization
-      if(B.num() == 1)
+      if(B.num() == DENSE)
         info = lapack::getrs(*mat.Dense, *_ipiv, *(B.dense()));
       else
         SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices in RHS.");
+        
   }
   else
   {
@@ -193,7 +217,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
         ublas::matrix<double> COPY(*mat.Dense);
         ublas::vector<double> S(std::max(size(0),size(1)));
         ublas::matrix<double, ublas::column_major> U(size(0),size(1));
-        ublas::matrix<double, ublas::column_major> VT(size(0),size(1));
+`        ublas::matrix<double, ublas::column_major> VT(size(0),size(1));
 
         int ierr = lapack::gesdd(COPY, S, U, VT);
         printf("info = %d, ierr = %d, emax = %f, emin = %f , cond = %f\n",info,ierr,S(0),S(2),S(0)/S(2));
@@ -226,6 +250,7 @@ void SimpleMatrix::resetLU()
 {
   if(_ipiv) _ipiv->clear();
   _isPLUFactorized = false;
+  _isPLUFactorizedInPlace = false;
   _isPLUInversed = false;
 }
 
@@ -299,3 +324,222 @@ void polePlacement(const SiconosMatrix& A, const SiconosVector& B, SiconosVector
   noalias(BB) = prod(Q, *B.dense());
 }
 */
+
+
+void SimpleMatrix::PLUFactorize()
+{
+  DEBUG_BEGIN("void SimpleMatrix::PLUFactorize()\n");
+  if(_isPLUFactorized)
+  {
+    std::cout << "SimpleMatrix::PLUFactorize warning: this matrix is already PLUFactorized. " << std::endl;
+    return;
+  }
+  if(_num == DENSE)
+  {
+    _numericsMatrix.reset(NM_new());
+    NumericsMatrix * NM = _numericsMatrix.get();
+    double * data = (double*)(getArray());
+    DEBUG_EXPR(NV_display(data,size(0)*size(1)););
+    NM_fill(NM, NM_DENSE, size(0), size(1), data ); // Pointer link
+    DEBUG_EXPR(NM_display(NM));
+
+    int info  = NM_LU_factorize(NM,NM_KEEP_FACTORS);
+    DEBUG_EXPR(NM_display(NM));
+
+    if(info != 0)
+    {
+      _isPLUFactorized = false;
+      _isPLUFactorizedInPlace = true;
+      SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
+    }
+    else
+    {
+      _isPLUFactorized = true;
+      _isPLUFactorizedInPlace = true;
+    }
+  }
+  else
+  {
+    // We build a sparse matrix and we call numerics for the LU factorization of a sparse matrix.
+    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)));
+    NumericsMatrix * NM = _numericsMatrix.get();
+    _numericsMatrix->matrix2->origin = NSM_CSC;
+    NM_csc_alloc(NM, nnz());
+
+    DEBUG_EXPR(NM_display(NM););
+
+    fillCSC(numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
+
+    DEBUG_EXPR(cs_print(numericsSparseMatrix(NM)->csc, 0););
+
+    NM_LU_factorize(NM, NM_KEEP_FACTORS);
+
+    NSM_linear_solver_params* p = NSM_linearSolverParams(NM);
+    CSparseMatrix_factors* cs_lu_A =  (CSparseMatrix_factors*)p->linear_solver_data;
+
+    int info = 1;
+    if (cs_lu_A)
+    {
+      info = 0;
+
+      DEBUG_EXPR(CSparseMatrix * L = cs_lu_A->N->L; cs_print(L,0););
+      DEBUG_EXPR(CSparseMatrix * U = cs_lu_A->N->U; cs_print(U,0););
+      DEBUG_EXPR(
+        CS_INT * pinv = cs_lu_A->N->pinv;
+        for (int i =0; i < size(0) ; i++)
+          printf("pinv[%i] = %i\n", i, pinv[i])
+        );
+    }
+
+    if(info != 0)
+    {
+      _isPLUFactorized = false;
+      _isPLUFactorizedInPlace = false;
+      std::cout << "Problem in LU Factorization" << std::endl;
+      SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorize failed. ");
+    }
+    else
+    {
+      _isPLUFactorized = true;
+      _isPLUFactorizedInPlace = false;
+    }
+  }
+  DEBUG_END("void SimpleMatrix::PLUFactorize()\n");
+}
+void SimpleMatrix::PLUSolve(SiconosMatrix &B)
+{
+  if(B.isBlock())
+    SiconosMatrixException::selfThrow("SimpleMatrix PLUSolve(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
+  int info = 0;
+
+  if(_num == DENSE)
+  {
+    if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
+    {
+      PLUFactorize();
+    }
+    else 
+    {
+      if(B.num() == 1)
+      {
+        NumericsMatrix * NM = _numericsMatrix.get();
+        double * b = B.getArray();
+        info = NM_LU_solve(NM, b, B.size(1), NM_KEEP_FACTORS);
+      }
+      else
+        SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense matrices in RHS.");
+    }
+  }
+  else
+  {
+    if(!_isPLUFactorized)  // call first PLUFactorizationInPlace
+    {
+      PLUFactorize();
+    }
+    // and then solve
+    if(B.num() == DENSE)
+    {
+      NumericsMatrix * NM = _numericsMatrix.get();
+      double * b = B.getArray();
+      info = NM_LU_solve(NM, b, B.size(1), NM_KEEP_FACTORS);
+    }
+    else if(B.num() == SPARSE)
+    {
+      // First way. We copy to dense since our sparse solver is not able to take into account sparse r.h.s
+      SP::SimpleMatrix Bdense (new SimpleMatrix(size(0),size(1)));
+      * Bdense= B ;
+      double * b = &(*Bdense->getArray());
+      NumericsMatrix * NM = _numericsMatrix.get();
+      info = NM_LU_solve(NM, b, B.size(1), NM_KEEP_FACTORS);
+      B = *Bdense ;
+      // Second way use inplace_solve of ublas
+      // For that, we need to fill our factorization given by NM_LU_factorise into a ublas sparse matrix
+      //inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
+      //inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
+    }
+    else
+      SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense and sparse matrices in RHS.");
+    info = 0 ;
+  }
+  //  SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense matrices.");
+
+
+
+  if(info != 0)
+    SiconosMatrixException::selfThrow("SimpleMatrix::PLUSolve failed.");
+}
+void SimpleMatrix::PLUSolve(SiconosVector &B)
+{
+  DEBUG_BEGIN("SimpleMatrix::PLUSolve(SiconosVector &B)\n");
+  if(B.isBlock())
+    SiconosMatrixException::selfThrow("SimpleMatrix PLUSolve(V) failed. Not yet implemented for V being a BlockVector.");
+
+  int info;
+
+  if(_num == DENSE)
+  {
+    if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
+    {
+      PLUFactorize();
+    }
+    else
+    {
+      DEBUG_PRINTF("B.num() = %i", B.num());
+      if(B.num() == 0)
+      {
+        NumericsMatrix * NM = _numericsMatrix.get();
+        DEBUG_EXPR(NM_display(NM););
+        double * b = B.getArray();
+        DEBUG_EXPR(NV_display(b, B.size()););
+        DEBUG_EXPR(B.display(););
+        info = NM_LU_solve(NM, b, B.size(), NM_KEEP_FACTORS);
+        DEBUG_EXPR(NV_display(b, B.size()););
+        DEBUG_EXPR(B.display(););
+      }
+      else
+        SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense matrices in RHS.");
+    }
+  }
+  else
+  {
+    if(!_isPLUFactorized)  // call first PLUFactorizationInPlace
+    {
+      PLUFactorize();
+    }
+    // and then solve
+    if(B.num() == 0)
+    {
+      NumericsMatrix * NM = _numericsMatrix.get();
+      double * b = B.getArray();
+      info = NM_LU_solve(NM, b, 1, NM_KEEP_FACTORS);
+      DEBUG_EXPR(NV_display(b, B.size()););
+      DEBUG_EXPR(B.display(););
+    }
+    else if(B.num() == 1)
+    {
+      // First way. We copy to dense since our sparse solver is not able to take into account sparse r.h.s
+      SP::SiconosVector Bdense (new SiconosVector(size(0)));
+      * Bdense= B ;
+      double * b = &(*Bdense->getArray());
+      NumericsMatrix * NM = _numericsMatrix.get();
+      info = NM_LU_solve(NM, b, 1, NM_KEEP_FACTORS);
+      B = *Bdense ;
+      
+      // Second way use inplace_solve of ublas
+      // For that, we need to fill our factorization given by NM_LU_factorize into a ublas sparse matrix
+      //inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
+      //inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
+    }
+    else
+      SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense and sparse matrices in RHS.");
+  }
+  if(info != 0)
+    SiconosMatrixException::selfThrow("SimpleMatrix::PLUSolve failed.");
+  // else
+  // {
+  //   noalias(*(B.dense())) = ublas::column(tmpB, 0);
+  // }
+  DEBUG_END("SimpleMatrix::PLUSolve(SiconosVector &B)\n");
+}
+
+
