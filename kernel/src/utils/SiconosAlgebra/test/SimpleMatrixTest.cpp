@@ -3638,6 +3638,15 @@ void SimpleMatrixTest::testPLUSolve()
   
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
 
+  
+  Sparse.reset(new SimpleMatrix(*SP3));
+  SP::SiconosMatrix Sparse_rhs (new SimpleMatrix(*SP3));
+  Sparse->PLUSolve(*Sparse_rhs);
+  SP::SiconosMatrix Id (new SimpleMatrix());
+  Id->eye();
+  
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*Sparse_rhs) - *Id ).normInf()  < tol, true);
+
   std::cout << "-->  test PLUSolve ended with success." <<std::endl;
 }
 

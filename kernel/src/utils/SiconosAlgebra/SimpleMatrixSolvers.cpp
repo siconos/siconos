@@ -411,59 +411,35 @@ void SimpleMatrix::PLUSolve(SiconosMatrix &B)
   if(B.isBlock())
     SiconosMatrixException::selfThrow("SimpleMatrix PLUSolve(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
   int info = 0;
-
-  if(_num == DENSE)
+  if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
   {
-    if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
-    {
-      PLUFactorize();
-    }
-    else 
-    {
-      if(B.num() == 1)
-      {
-        NumericsMatrix * NM = _numericsMatrix.get();
-        double * b = B.getArray();
-        info = NM_LU_solve(NM, b, B.size(1), NM_KEEP_FACTORS);
-      }
-      else
-        SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense matrices in RHS.");
-    }
+    PLUFactorize();
+  }
+  // and then solve
+  if(B.num() == DENSE)
+  {
+    NumericsMatrix * NM = _numericsMatrix.get();
+    double * b = B.getArray();
+    info = NM_LU_solve(NM, b, B.size(1), NM_KEEP_FACTORS);
+  }
+  else if(B.num() == SPARSE)
+  {
+    // First way. We copy to dense since our sparse solver is not able to take into account sparse r.h.s
+    SP::SimpleMatrix Bdense (new SimpleMatrix(size(0),size(1)));
+    * Bdense= B ;
+    DEBUG_EXPR(Bdense->display(););
+    double * b = &(*Bdense->getArray());
+    DEBUG_EXPR(NV_display(b,size(0)*size(1)););
+    NumericsMatrix * NM = _numericsMatrix.get();
+    info = NM_LU_solve(NM, b, B.size(1), NM_KEEP_FACTORS);
+    B = *Bdense ;
+    // Second way use inplace_solve of ublas
+    // For that, we need to fill our factorization given by NM_LU_factorise into a ublas sparse matrix
+    //inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
+    //inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
   }
   else
-  {
-    if(!_isPLUFactorized)  // call first PLUFactorizationInPlace
-    {
-      PLUFactorize();
-    }
-    // and then solve
-    if(B.num() == DENSE)
-    {
-      NumericsMatrix * NM = _numericsMatrix.get();
-      double * b = B.getArray();
-      info = NM_LU_solve(NM, b, B.size(1), NM_KEEP_FACTORS);
-    }
-    else if(B.num() == SPARSE)
-    {
-      // First way. We copy to dense since our sparse solver is not able to take into account sparse r.h.s
-      SP::SimpleMatrix Bdense (new SimpleMatrix(size(0),size(1)));
-      * Bdense= B ;
-      double * b = &(*Bdense->getArray());
-      NumericsMatrix * NM = _numericsMatrix.get();
-      info = NM_LU_solve(NM, b, B.size(1), NM_KEEP_FACTORS);
-      B = *Bdense ;
-      // Second way use inplace_solve of ublas
-      // For that, we need to fill our factorization given by NM_LU_factorise into a ublas sparse matrix
-      //inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
-      //inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
-    }
-    else
-      SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense and sparse matrices in RHS.");
-    info = 0 ;
-  }
-  //  SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense matrices.");
-
-
+    SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense and sparse matrices in RHS.");
 
   if(info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUSolve failed.");
@@ -475,64 +451,41 @@ void SimpleMatrix::PLUSolve(SiconosVector &B)
     SiconosMatrixException::selfThrow("SimpleMatrix PLUSolve(V) failed. Not yet implemented for V being a BlockVector.");
 
   int info;
-
-  if(_num == DENSE)
+  if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
   {
-    if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
-    {
-      PLUFactorize();
-    }
-    else
-    {
-      DEBUG_PRINTF("B.num() = %i", B.num());
-      if(B.num() == 0)
-      {
-        NumericsMatrix * NM = _numericsMatrix.get();
-        DEBUG_EXPR(NM_display(NM););
-        double * b = B.getArray();
-        DEBUG_EXPR(NV_display(b, B.size()););
-        DEBUG_EXPR(B.display(););
-        info = NM_LU_solve(NM, b, B.size(), NM_KEEP_FACTORS);
-        DEBUG_EXPR(NV_display(b, B.size()););
-        DEBUG_EXPR(B.display(););
-      }
-      else
-        SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense matrices in RHS.");
-    }
+    PLUFactorize();
+  }
+
+ 
+  // and then solve
+  if(B.num() == 0)
+  {
+    NumericsMatrix * NM = _numericsMatrix.get();
+    double * b = B.getArray();
+    DEBUG_EXPR(NV_display(b, B.size()););
+    DEBUG_EXPR(B.display(););
+    info = NM_LU_solve(NM, b, 1, NM_KEEP_FACTORS);
+    DEBUG_EXPR(NV_display(b, B.size()););
+    DEBUG_EXPR(B.display(););
+  }
+  else if(B.num() == 1)
+  {
+    // First way. We copy to dense since our sparse solver is not able to take into account sparse r.h.s
+    SP::SiconosVector Bdense (new SiconosVector(size(0)));
+    * Bdense= B ;
+    double * b = &(*Bdense->getArray());
+    NumericsMatrix * NM = _numericsMatrix.get();
+    info = NM_LU_solve(NM, b, 1, NM_KEEP_FACTORS);
+    B = *Bdense ;
+      
+    // Second way use inplace_solve of ublas
+    // For that, we need to fill our factorization given by NM_LU_factorize into a ublas sparse matrix
+    //inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
+    //inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
   }
   else
-  {
-    if(!_isPLUFactorized)  // call first PLUFactorizationInPlace
-    {
-      PLUFactorize();
-    }
-    // and then solve
-    if(B.num() == 0)
-    {
-      NumericsMatrix * NM = _numericsMatrix.get();
-      double * b = B.getArray();
-      info = NM_LU_solve(NM, b, 1, NM_KEEP_FACTORS);
-      DEBUG_EXPR(NV_display(b, B.size()););
-      DEBUG_EXPR(B.display(););
-    }
-    else if(B.num() == 1)
-    {
-      // First way. We copy to dense since our sparse solver is not able to take into account sparse r.h.s
-      SP::SiconosVector Bdense (new SiconosVector(size(0)));
-      * Bdense= B ;
-      double * b = &(*Bdense->getArray());
-      NumericsMatrix * NM = _numericsMatrix.get();
-      info = NM_LU_solve(NM, b, 1, NM_KEEP_FACTORS);
-      B = *Bdense ;
-      
-      // Second way use inplace_solve of ublas
-      // For that, we need to fill our factorization given by NM_LU_factorize into a ublas sparse matrix
-      //inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
-      //inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
-    }
-    else
-      SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense and sparse matrices in RHS.");
-  }
+    SiconosMatrixException::selfThrow(" SimpleMatrix::PLUSolve: only implemented for dense and sparse matrices in RHS.");
+
   if(info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUSolve failed.");
   // else
