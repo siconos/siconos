@@ -102,6 +102,13 @@ docker-build:archlinux-oce:
     IMAGE_NAME: archlinux-oce
   extends: .docker-build
 
+# Centos distrib
+docker-build:centos-7:
+  variables:
+    IMAGE_NAME: centos-7
+  extends: .docker-build
+
+
 # ---- Siconos build jobs -----
 
 # Siconos build and install, default config
@@ -194,7 +201,16 @@ install_siconos:ubuntu18.04-serialization:
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
   extends: .siconos-build
   allow_failure: true
-  
+
+# Siconos build and install, default setup
+# on centos 7
+install_siconos:centos-7:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/centos-7
+  extends: .siconos-build
+  script: 
+     - "sh ci_gitlab/install_siconos_centos.sh"
+
 
 # --- Build doc/web site and publish it ---
 # Image : ubuntu 18.04
