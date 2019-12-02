@@ -114,7 +114,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   }
 
   double norm_q = cblas_dnrm2(n , problem->q , 1);
-
+  double norm_b = cblas_dnrm2(m , problem->b , 1);
   /* verbose=1; */
   while ((iter < itermax) && (hasNotConverged > 0))
   {
@@ -165,12 +165,12 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
       if (!(iter % options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY]))
       {
         /* computeGlobalVelocity(problem, reaction, globalVelocity); */
-        (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, &error);
+        (computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, norm_b, &error);
       }
     }
     else
     {
-      (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, &error);
+      (computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, norm_b, &error);
    
       numerics_printf_verbose(1,"----- GFC3D - NSGS - Iteration %i Residual = %14.7e; Tol = %g", iter, error, tolerance);
     }
@@ -181,7 +181,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /*  One last error computation in case where are at the very end */
   if (iter == itermax)
   {
-    (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, &error);
+    (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, norm_b, &error);
   }
 
   dparam[SICONOS_DPARAM_TOL] = tolerance;

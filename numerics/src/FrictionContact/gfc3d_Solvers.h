@@ -30,10 +30,15 @@
 
 typedef void (*SolverGlobalPtr)(int, int, double*, int*, double*);
 typedef void (*PostSolverGlobalPtr)(int, double*);
-typedef void (*ComputeErrorGlobalPtr)(GlobalFrictionContactProblem*, double*, double*, double *, double, SolverOptions*, double, double*);
+
 typedef void (*FreeSolverGlobalPtr)(GlobalFrictionContactProblem*);
 
-
+/** pointer to function used to update velocity and compute error */
+typedef void (* ComputeErrorGlobalPtr)(GlobalFrictionContactProblem* ,
+                                      double * , double *,
+                                      double* , double ,
+                                      SolverOptions * ,
+                                      double, double,  double * );
 
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
