@@ -3474,7 +3474,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
       {
         /* the mumps instance is initialized (call with job=-1) */
         NM_MUMPS_set_control_params(A);
-        NM_MUMPS_set_sym(A, 1);
+        NM_MUMPS_set_sym(A, 2); /* general symmetric */
         NM_MUMPS(A, -1);
         NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
