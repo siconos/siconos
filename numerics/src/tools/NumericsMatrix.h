@@ -156,6 +156,12 @@ extern "C"
    */
   CSparseMatrix* NM_triplet(NumericsMatrix* A);
 
+   /** Creation, if needed, of half triplet storage from sparse block storage.
+   * \param[in,out] A a NumericsMatrix initialized with sparsed block storage.
+   * \return the triplet sparse Matrix created in A.
+   */
+  CSparseMatrix* NM_half_triplet(NumericsMatrix* A);
+
   /** Creation, if needed, of compress column storage of a NumericsMatrix.
    * \param[in,out] A a NumericsMatrix with sparse block storage initialized
    * \return the compressed column CSparseMatrix created in A.
@@ -551,6 +557,11 @@ extern "C"
    * \param[in,out] A a Numericsmatrix
    */
   void NM_clearTriplet(NumericsMatrix* A);
+
+  /** Clear half triplet storage, if it is existent.
+   * \param[in,out] A a Numericsmatrix
+   */
+  void NM_clearHalfTriplet(NumericsMatrix* A);
 
   /** Clear compressed column storage, if it is existent.
    * \param[in,out] A a Numericsmatrix

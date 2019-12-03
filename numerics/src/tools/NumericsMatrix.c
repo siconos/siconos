@@ -432,7 +432,7 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B )
       }
 
 
-      size_t sizeof_elt = A->internalData->sizeof_elt;
+      size_t sizeof_elt = max(A->internalData->sizeof_elt,sizeof(int));
 
       if (A->internalData->iWork)
       {
@@ -605,6 +605,12 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
       CHECK_RETURN(CSparseMatrix_zentry(M->matrix2->triplet, i, j, val));
       break;
     }
+    case NSM_HALF_TRIPLET:
+    {
+      assert(M->matrix2->half_triplet);
+      CHECK_RETURN(CSparseMatrix_symmetric_zentry(M->matrix2->triplet, i, j, val));
+      break;
+    }
     case NSM_CSC:
     {
       assert(M->matrix2->csc);
@@ -618,6 +624,7 @@ void NM_zentry(NumericsMatrix* M, int i, int j, double val)
 
       M->matrix2->origin= NSM_CSC;
       NM_clearTriplet(M);
+      NM_clearHalfTriplet(M);
 
       //NM_display(M);
       break;
@@ -683,6 +690,25 @@ double NM_get_value(NumericsMatrix* M, int i, int j)
       for (int idx = 0 ; idx < M->matrix2->triplet->nz  ; idx++ )
       {
         if (Mi[idx] ==i && Mp[idx] == j)
+        {
+          return Mx[idx];
+        }
+      }
+      return 0.0;
+      break;
+    }
+    case NSM_HALF_TRIPLET:
+    {
+      assert(M->matrix2->triplet);
+      assert(i <M->matrix2->triplet->m );
+      assert(j <M->matrix2->triplet->n );
+      CS_INT * Mi =   M->matrix2->triplet->i;
+      CS_INT * Mp =   M->matrix2->triplet->p;
+      double * Mx =   M->matrix2->triplet->x;
+
+      for (int idx = 0 ; idx < M->matrix2->triplet->nz  ; idx++ )
+      {
+        if ((Mi[idx] ==i && Mp[idx] == j)||(Mi[idx] ==j && Mp[idx] == i))
         {
           return Mx[idx];
         }
@@ -813,6 +839,11 @@ void NM_display(const NumericsMatrix* const m)
     case NSM_TRIPLET:
     {
       printf("========== origin =  NSM_TRIPLET\n");
+      break;
+    }
+    case NSM_HALF_TRIPLET:
+    {
+      printf("========== origin =  NSM_HALF_TRIPLET\n");
       break;
     }
     case NSM_CSC:
@@ -1490,6 +1521,7 @@ void  NM_scal(double alpha, NumericsMatrix* A)
     A->matrix2->origin = NSM_CSC;
     /* Invalidations */
     NM_clearTriplet(A);
+    NM_clearHalfTriplet(A);
     NM_clearCSCTranspose(A);
     NM_clearCSR(A);
     break;
@@ -1615,6 +1647,7 @@ void NM_fill(NumericsMatrix* M, int storageType, int size0, int size1, void* dat
           if (M->matrix2->origin == NSM_UNKNOWN)
           {
             if (M->matrix2->triplet) { M->matrix2->origin = NSM_TRIPLET; }
+            else if (M->matrix2->half_triplet) { M->matrix2->origin = NSM_HALF_TRIPLET; }
             else if (M->matrix2->csc) { M->matrix2->origin = NSM_CSC; }
             else if (M->matrix2->csr) { M->matrix2->origin = NSM_CSR; }
           }
@@ -1720,6 +1753,18 @@ void NM_clearTriplet(NumericsMatrix* A)
   }
 }
 
+void NM_clearHalfTriplet(NumericsMatrix* A)
+{
+  if (A->matrix2)
+  {
+    if (A->matrix2->half_triplet)
+    {
+      cs_spfree(A->matrix2->half_triplet);
+      A->matrix2->half_triplet = NULL;
+    }
+  }
+}
+
 void NM_clearCSC(NumericsMatrix* A)
 {
   if (A->matrix2)
@@ -1764,6 +1809,7 @@ void NM_clearSparseStorage(NumericsMatrix *A)
       A->matrix2->linearSolverParams = NSM_linearSolverParams_free(A->matrix2->linearSolverParams);
   }
   NM_clearTriplet(A);
+  NM_clearHalfTriplet(A);
   NM_clearCSC(A);
   NM_clearCSCTranspose(A);
   NM_clearCSR(A);
@@ -1965,6 +2011,18 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
       B_ = B->matrix2->triplet;
       break;
     }
+    case NSM_HALF_TRIPLET:
+    {
+      A_ = A->matrix2->half_triplet;
+
+      if (!B->matrix2->half_triplet)
+      {
+        B->matrix2->half_triplet = cs_spalloc(A_->m, A_->n, A_->nzmax, 0, 1);
+      }
+
+      B_ = B->matrix2->half_triplet;
+      break;
+    }
     case NSM_CSC:
     {
       assert (A->matrix2->csc);
@@ -2027,6 +2085,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
     else
     {
       NM_clearTriplet(B);
+      NM_clearHalfTriplet(B);
       if (A->matrix2->origin == NSM_CSC) { NM_clearCSR(B); }
       else { NM_clearCSC(B); }
     }
@@ -2100,7 +2159,7 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
               for(unsigned i = 0; i < inbr; ++i)
               {
                 CHECK_RETURN(CSparseMatrix_zentry(A->matrix2->triplet, i + roffset, j + coffset,
-                                       A->matrix1->block[bn][i + j*inbr]));
+                                                  A->matrix1->block[bn][i + j*inbr]));
               }
             }
           }
@@ -2153,6 +2212,113 @@ CSparseMatrix* NM_triplet(NumericsMatrix* A)
   assert (A->matrix2->triplet);
 
   return A->matrix2->triplet;
+}
+
+
+CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
+{
+  if (!numericsSparseMatrix(A)->half_triplet)
+  {
+    switch(A->storageType)
+    {
+    case NM_DENSE:
+    case NM_SPARSE_BLOCK:
+    {
+
+      /* Invalidation of previously constructed csc storage. */
+      /* If we want to avoid this -> rewrite cs_compress with reallocation. */
+      NM_clearCSC(A);
+      NM_clearCSR(A);
+      NM_clearCSCTranspose(A);
+
+      A->matrix2->origin = NSM_HALF_TRIPLET;
+
+      A->matrix2->half_triplet = cs_spalloc(0,0,1,1,1);
+
+      if (A->matrix1)
+      {
+
+        /* iteration on row, cr : current row */
+        for(unsigned int cr = 0; cr < A->matrix1->filled1-1; ++cr)
+        {
+          for(size_t bn = A->matrix1->index1_data[cr];
+              bn < A->matrix1->index1_data[cr + 1]; ++bn)
+          {
+            /* cc : current column */
+            size_t cc = A->matrix1->index2_data[bn];
+            unsigned int inbr = A->matrix1->blocksize0[cr];
+            unsigned int roffset = 0;
+            unsigned int coffset = 0;
+            if(cr != 0)
+            {
+              roffset = A->matrix1->blocksize0[cr - 1];
+              inbr -= roffset;
+            }
+            unsigned int inbc = A->matrix1->blocksize1[cc];
+            if(cc != 0)
+            {
+              coffset = A->matrix1->blocksize1[cc - 1];
+              inbc -= coffset;
+            }
+            for(unsigned j = 0; j < inbc; ++j)
+            {
+              for(unsigned i = 0; i < inbr; ++i)
+              {
+                CHECK_RETURN(CSparseMatrix_symmetric_zentry(A->matrix2->half_triplet, i + roffset, j + coffset,
+                                                            A->matrix1->block[bn][i + j*inbr]));
+              }
+            }
+          }
+        }
+      }
+      else if (A->matrix0)
+      {
+        fprintf(stderr, "NM_half_triplet: conversion is not implemented");
+        exit(EXIT_FAILURE);
+      }
+      break;
+    }
+    case NM_SPARSE:
+    {
+      switch (A->matrix2->origin)
+      {
+      case NSM_TRIPLET:
+      {
+        A->matrix2->half_triplet = NM_csc_to_half_triplet(NM_csc(A));
+        break;
+      }
+      case NSM_CSC:
+      {
+        assert(A->matrix2->csc);
+        A->matrix2->half_triplet = NM_csc_to_half_triplet(A->matrix2->csc);
+        break;
+      }
+      case NSM_CSR:
+      {
+        fprintf(stderr, "NM_half_triplet: conversion is not implemented");
+        exit(EXIT_FAILURE);
+        break;
+      }
+      default:
+      case NSM_UNKNOWN:
+      {
+        NSM_UNKNOWN_ERR("NM_half_triplet", A->matrix2->origin);
+        exit(EXIT_FAILURE);
+      }
+      }
+      break;
+    default:
+    {
+      fprintf(stderr, "NM_half_triplet: unknown matrix type\n");
+      exit(EXIT_FAILURE);
+    }
+    }
+
+    }
+  }
+  assert (A->matrix2->half_triplet);
+
+  return A->matrix2->half_triplet;
 }
 
 CSparseMatrix* NM_csc(NumericsMatrix *A)
@@ -2705,7 +2871,6 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
         /* the mumps instance is initialized (call with job=-1) */
         NM_MUMPS_set_control_params(A);
         NM_MUMPS(A, -1);
-        NM_MUMPS_set_verbosity(A, verbose);
         NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
@@ -2727,10 +2892,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
       /* MUMPS can return info codes with negative value */
       if (info)
       {
-        if (verbose > 0)
-        {
-          printf("NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
-        }
+        fprintf(stderr,"NM_gesv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
       }
       if (keep != NM_KEEP_FACTORS)
       {
@@ -3060,17 +3222,19 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
     {
       if (verbose >= 2)
       {
-        printf("NM_gesv: using MUMPS\n" );
+        printf("NM_posv: using MUMPS\n" );
       }
+      /* construction of lower triangular matrix */
       if (!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
       {
         /* the mumps instance is initialized (call with job=-1) */
         NM_MUMPS_set_control_params(A);
+        NM_MUMPS_set_sym(A, 1);
         NM_MUMPS(A, -1);
-        NM_MUMPS_set_verbosity(A, verbose);
         NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
+
       NM_MUMPS_set_problem(A, b);
 
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
@@ -3089,10 +3253,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
       /* MUMPS can return info codes with negative value */
       if (info)
       {
-        if (verbose > 0)
-        {
-          printf("NM_posv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
-        }
+        fprintf(stderr, "NM_posv: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
       }
       if (keep != NM_KEEP_FACTORS)
       {
@@ -3294,6 +3455,12 @@ void NM_update_size(NumericsMatrix* A)
     {
       A->size0 = (int)A->matrix2->triplet->m;
       A->size1 = (int)A->matrix2->triplet->n;
+      break;
+    }
+    case NSM_HALF_TRIPLET:
+    {
+      A->size0 = (int)A->matrix2->half_triplet->m;
+      A->size1 = (int)A->matrix2->half_triplet->n;
       break;
     }
     default:

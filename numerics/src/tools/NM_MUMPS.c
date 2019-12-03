@@ -38,7 +38,14 @@ void NM_MUMPS_set_irn_jcn(NumericsMatrix* A)
 {
   /* MUMPS works on triplet format. */
 
-  CSparseMatrix* triplet = NM_triplet(A);
+  CSparseMatrix* triplet;
+  if (NM_MUMPS_id(A)->sym)
+  {
+    triplet=NM_half_triplet(A);
+  } else
+  {
+    triplet=NM_triplet(A);
+  }
   CS_INT nz = triplet->nz;
   assert(nz > 0);
 
@@ -55,7 +62,7 @@ void NM_MUMPS_set_irn_jcn(NumericsMatrix* A)
   iWork [2*nz] = (MUMPS_INT) nz;
 
   NM_MUMPS_id(A)->irn = (MUMPS_INT*)NM_iWork(A, 0, 0);
-  NM_MUMPS_id(A)->jcn = &((MUMPS_INT*)NM_iWork(A, 0, 0))[numericsSparseMatrix(A)->triplet->nz];
+  NM_MUMPS_id(A)->jcn = &((MUMPS_INT*)NM_iWork(A, 0, 0))[nz];
 }
 
 
@@ -207,13 +214,21 @@ void NM_MUMPS_set_problem(NumericsMatrix* A, double *b)
   if (NM_MPI_rank(A) == 0)
   {
     DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
-    mumps_id->n = (MUMPS_INT) NM_triplet(A)->n;
+    CSparseMatrix* triplet;
+    if (mumps_id->sym)
+    {
+      triplet=NM_half_triplet(A);
+    } else
+    {
+      triplet=NM_triplet(A);
+    }
+    mumps_id->n = (MUMPS_INT) triplet->n;
     NM_MUMPS_set_irn_jcn(A);
 
     MUMPS_INT nz;
-    nz = (MUMPS_INT) NM_triplet(A)->nz;
+    nz = (MUMPS_INT) triplet->nz;
     mumps_id->nz = nz;
-    mumps_id->a = NM_triplet(A)->x;
+    mumps_id->a = triplet->x;
     mumps_id->rhs = b;
   }
 }
