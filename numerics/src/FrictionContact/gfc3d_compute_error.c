@@ -268,6 +268,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
 
   *error += error_complementarity;
   DEBUG_PRINTF("relative error = %e\n", *error);
+  numerics_printf_verbose(1,"---- GFC3D - Compute Error Convex case");
   if (*error > tolerance)
   {
     DEBUG_END("gfc3d_compute_error_convex(...)\n");

@@ -668,6 +668,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       /* Compute dual residual */
       cblas_dcopy(m , u_hat , 1 , tmp_m, 1);
       cblas_daxpy(m, -1.0, u, 1, tmp_m , 1);
+
       /* cblas_dscal(n, 0.0, tmp_n, 1); */
       double s_restart =  rho * cblas_dnrm2(m , tmp_m , 1);
 
@@ -816,6 +817,17 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       numerics_printf_verbose(1,"---- GFC3D - ADMM  -                            primal residual = %14.7e, epsilon_primal = %14.7e", r,  epsilon_primal);
       numerics_printf_verbose(1,"---- GFC3D - ADMM  -                            dual residual = %14.7e, epsilon_dual = %14.7e", s,  epsilon_dual);
 
+
+      int adapt_tolerance = 1;
+      /* We check the full criterion at a given frequency */
+      /* by forcing the stopping criterion at 1 but keeping the tolerance */
+      if ((options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY]>0) &&
+          (iter % options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] == 0))
+      {
+        stopping_criterion =1;
+        adapt_tolerance = 0;
+      }
+
       if (stopping_criterion)
       {
         /* check the full criterion */
@@ -826,6 +838,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
           cblas_dscal(m, alpha_r/beta_r, reaction, 1);
           norm_q = cblas_dnrm2(n , problem->q , 1);
         }
+
         if (rescaling_cone)
         {
           for (int contact = 0 ; contact < nc ; ++contact)
@@ -847,8 +860,14 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
         else
         {
           numerics_printf_verbose(1,"---- GFC3D - ADMM  - The tolerance on the  residual is not sufficient to reach accuracy (error =  %14.7e)", error);
-          tolerance = tolerance * fmax(epsilon_dual/scaling_error_dual ,epsilon_primal/scaling_error_primal )/error;
-          numerics_printf_verbose(1,"---- GFC3D - ADMM  - We reduce the tolerance on the residual to %14.7e", tolerance);
+          if (adapt_tolerance){
+            tolerance = tolerance * fmax(epsilon_dual/scaling_error_dual ,epsilon_primal/scaling_error_primal )/error;
+            numerics_printf_verbose(1,"---- GFC3D - ADMM  - We reduce the tolerance on the residual to %14.7e", tolerance);
+          }
+          else
+          {
+            numerics_printf_verbose(1,"---- GFC3D - ADMM  - We keep the tolerance on the residual to %14.7e", tolerance);
+          }
           if (rescaling_cone)
           {
             for (int contact = 0 ; contact < nc ; ++contact)
@@ -934,6 +953,9 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
   solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
+
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 50;
+
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] =
     SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] =  SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE;
@@ -954,13 +976,13 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
     SICONOS_FRICTION_3D_ADMM_FULL_H_NO;
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]=
-    SICONOS_FRICTION_3D_ADMM_UPDATE_S_YES;
+    SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 0.1;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
-  options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=2.0;
+  options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=10.0;
 
 
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]=SICONOS_FRICTION_3D_RESCALING_NO;
