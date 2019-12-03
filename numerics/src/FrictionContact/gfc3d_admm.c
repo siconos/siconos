@@ -582,9 +582,12 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
       }
       else
       {
-        /* NM_gesv_expert(W,v,NM_KEEP_FACTORS); */
         NSM_linear_solver_params* p = NSM_linearSolverParams(W);
-        p->solver =  NSM_CS_CHOLSOL;
+#ifdef WITH_MUMPS
+        p->solver = NSM_MUMPS;
+#else
+        p->solver = NSM_CS_CHOLSOL;
+#endif
         NM_posv_expert(W,v,NM_KEEP_FACTORS);
       }
       DEBUG_PRINT("v:");
