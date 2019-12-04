@@ -3599,41 +3599,13 @@ double NM_norm_1(NumericsMatrix* A)
 double NM_norm_inf(NumericsMatrix* A)
 {
   assert(A);
-
-
-  switch (A->storageType)
-  {
-  case NM_DENSE:
-  {
-    assert(A->storageType == NM_DENSE);
-    double norm = cs_norm(cs_transpose(NM_csc(A), 1));
-    assert(norm >=0);
-    return norm;
-
-  }
-  case NM_SPARSE_BLOCK:
-  {
-    assert(A->storageType == NM_SPARSE_BLOCK);
-    double norm = cs_norm(cs_transpose(NM_csc(A), 1));
-    assert(norm >=0);
-    return norm;
-
-  }
-  case NM_SPARSE:
-  {
-    assert(A->storageType == NM_SPARSE);
-    double norm = cs_norm(cs_transpose(NM_csc(A), 1));
-    assert(norm >=0);
-    return norm;
-
-  }
-  default:
-    {
-      assert(0 && "NM_norm unknown storageType");
-    }
-  }
-  return NAN;
+  CSparseMatrix* Acsct = cs_transpose(NM_csc(A), 1);
+  double norm = cs_norm(Acsct);
+  assert(norm >=0);
+  cs_spfree(Acsct);
+  return norm;
 }
+
 int NM_is_symmetric(NumericsMatrix* A)
 {
 
@@ -3643,7 +3615,7 @@ int NM_is_symmetric(NumericsMatrix* A)
   double norm_inf = NM_norm_inf(AplusATrans);
   NM_free(Atrans); free(Atrans);
   NM_free(AplusATrans);  free(AplusATrans);
-  
+
   if (norm_inf <= DBL_EPSILON*10)
   {
     return 1;
