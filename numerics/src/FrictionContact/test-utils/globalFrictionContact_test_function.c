@@ -195,6 +195,7 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
       }
       printf("path_copy = %s \n", path_copy);
     }
+    free(path_copy);
 
     char * path_out = (char *)calloc((nLen+10), sizeof(char));
     sprintf(path_out, "%s.dat", path); /* finally we keep the extension .hdf5.dat */
@@ -202,6 +203,7 @@ int gfc3d_test_function_hdf5(const char* path, SolverOptions* options)
     FILE * foutput  =  fopen(path_out, "w");
     info = globalFrictionContact_printInFile(problem, foutput);
     fclose(foutput);
+    free(path_out);
   }
 
 
