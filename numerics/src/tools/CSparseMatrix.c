@@ -480,10 +480,7 @@ CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, doub
       return cs_entry(T, i, j, x);
     }
   }
-  else
-  {
-    return 1;
-  }
+  return 1;
 }
 
 
