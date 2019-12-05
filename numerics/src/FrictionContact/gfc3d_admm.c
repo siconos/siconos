@@ -312,6 +312,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     q = rescaled_problem->q;
     b = rescaled_problem->b;
     NM_clear(Htrans);
+    free(Htrans);
     Htrans =  NM_transpose(H);
     DEBUG_EXPR
       (double norm_q = cblas_dnrm2(n , problem->q , 1);
