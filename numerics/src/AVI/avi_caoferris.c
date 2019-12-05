@@ -235,7 +235,7 @@ int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, 
   free(B_I_T);
   free(copyA);
   free(B_A_T);
-  NM_free(lcplike_pb.M);
+  NM_clear(lcplike_pb.M);
   free(lcplike_pb.q);
   free(a_bar);
 

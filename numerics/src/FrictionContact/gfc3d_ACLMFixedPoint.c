@@ -160,7 +160,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
   numerics_printf_verbose(1,"---- GFC3D - ACLMFP - # Iteration %i Final Residual = %14.7e", iter, error);
   numerics_printf_verbose(1,"---- GFC3D - ACLMFP - #              internal iteration = %i", cumul_iter);
 
-  NM_free(cqp->A);
+  NM_clear(cqp->A);
   free(cqp->b);
   free(cqp->q);
   free(w);

@@ -286,8 +286,8 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 
     localproblem->mu = problem->mu;
 
-    NM_free(MinvH);
-    NM_free(Htrans);
+    NM_clear(MinvH);
+    NM_clear(Htrans);
     free(MinvH);
     free(Htrans);
     free(qtmp);
@@ -487,7 +487,7 @@ int freeLocalProblem(FrictionContactProblem* localproblem)
   /*  { */
   if (localproblem->M->matrix1)
   {
-    SBM_free(localproblem->M->matrix1);
+    SBM_clear(localproblem->M->matrix1);
     free(localproblem->M->matrix1);
   }
   /*  } */

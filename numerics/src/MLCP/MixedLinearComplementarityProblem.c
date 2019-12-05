@@ -493,7 +493,7 @@ void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* pr
 {
   if (problem->isStorageType1)
   {
-    NM_free(problem->M);
+    NM_clear(problem->M);
     free(problem->M);
     free(problem->q);
     free(problem->blocksRows);

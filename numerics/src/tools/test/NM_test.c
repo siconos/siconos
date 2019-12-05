@@ -113,9 +113,9 @@ static int NM_read_write_test(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
-    NM_free(Mread[i]);
+    NM_clear(Mread[i]);
     free(Mread[i]);
   }
 
@@ -189,10 +189,10 @@ static int NM_add_to_diag3_test(NumericsMatrix* M, double alpha)
   }
 
 exit_1:
-  NM_free(C2);
+  NM_clear(C2);
 exit_0:
   free(Id);
-  NM_free(Cref);
+  NM_clear(Cref);
 
   return info;
 }
@@ -223,7 +223,7 @@ static int  NM_add_to_diag3_test_all(void)
   /* free memory */
 
 
-  NM_free(M);
+  NM_clear(M);
 
   printf("========= End Numerics tests for NM_add_to_diag3 ========= \n");
   return info;
@@ -697,28 +697,28 @@ static int NM_gemm_test(NumericsMatrix** MM, double alpha, double beta)
   }
 
 exit_9:
-  NM_free(C20);
+  NM_clear(C20);
 exit_8:
-  NM_free(M10);
-  NM_free(C8);
+  NM_clear(M10);
+  NM_clear(C8);
 exit_7:
-  NM_free(M9);
-  NM_free(C7);
+  NM_clear(M9);
+  NM_clear(C7);
 exit_6:
-  NM_free(M6);
-  NM_free(C6);
+  NM_clear(M6);
+  NM_clear(C6);
 exit_5:
-  NM_free(M5);
-  NM_free(C5);
+  NM_clear(M5);
+  NM_clear(C5);
 exit_4:
-  NM_free(&C4);
+  NM_clear(&C4);
 exit_3:
-  NM_free(&C3);
+  NM_clear(&C3);
 exit_2:
   free(C2.matrix0);
-  NM_free(C2ref);
+  NM_clear(C2ref);
 exit_1:
-  NM_free(Cref);
+  NM_clear(Cref);
   free(C.matrix0);
   return info;
 }
@@ -770,7 +770,7 @@ static int NM_gemm_test_all(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
 
@@ -982,7 +982,7 @@ static int NM_gemm_test_all2(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
 
@@ -1127,11 +1127,11 @@ static int NM_row_prod_test(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     /*    if (NMM[i]->matrix0) */
     /*        free(NMM[i]->matrix0); */
     /*    if (NMM[i]->matrix1) */
-    /*        SBM_free(NMM[i]->matrix1); */
+    /*        SBM_clear(NMM[i]->matrix1); */
     free(NMM[i]);
   }
 
@@ -1266,7 +1266,7 @@ static int NM_row_prod_no_diag_test_all(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
 
@@ -1409,7 +1409,7 @@ static int NM_row_prod_no_diag_non_square_test(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
 
@@ -1551,7 +1551,7 @@ static int test_NM_row_prod_non_square_test(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
   free(NMM);
@@ -1616,15 +1616,15 @@ static int test_NM_iterated_power_method(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
   free(NMM);
-  NM_free(Id);
-  NM_free(Atrans);
-  NM_free(Btrans);
-  NM_free(AAT);
-  NM_free(BBT);
+  NM_clear(Id);
+  NM_clear(Atrans);
+  NM_clear(Btrans);
+  NM_clear(AAT);
+  NM_clear(BBT);
 
 
 
@@ -1685,12 +1685,12 @@ static int test_NM_scal(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
   free(NMM);
-  NM_free(Id);
-  NM_free(B);
+  NM_clear(Id);
+  NM_clear(B);
 
 
   printf("========= End Numerics tests for NumericsMatrix NM_scal========= \n");
@@ -1746,24 +1746,24 @@ static int test_NM_inv(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
   free(NMM);
-  NM_free(Id);
-  NM_free(Iinv);
-  NM_free(IIinv);
+  NM_clear(Id);
+  NM_clear(Iinv);
+  NM_clear(IIinv);
 
-  NM_free(AAinv);
-  NM_free(Ainv);
-  NM_free(IA);
-  NM_free(BBinv);
-  NM_free(Binv);
-  NM_free(IB);
-  NM_free(CCinv);
-  NM_free(Cinv);
-  NM_free(IC);
-  NM_free(C);
+  NM_clear(AAinv);
+  NM_clear(Ainv);
+  NM_clear(IA);
+  NM_clear(BBinv);
+  NM_clear(Binv);
+  NM_clear(IB);
+  NM_clear(CCinv);
+  NM_clear(Cinv);
+  NM_clear(IC);
+  NM_clear(C);
 
   printf("========= End Numerics tests for NumericsMatrix NM_inv ========= \n");
   return info;
@@ -1848,7 +1848,7 @@ static int test_NM_gesv_expert(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
   free(NMM);
@@ -1969,7 +1969,7 @@ static int test_NM_posv_expert(void)
   }
   info = test_NM_posv_expert_unit(Id, b);
   if (info != 0) return info;
-  NM_free(Id);
+  NM_clear(Id);
   free(Id);
 
   NumericsMatrix * Z = NM_create(NM_SPARSE,2,2);
@@ -1981,7 +1981,7 @@ static int test_NM_posv_expert(void)
   NM_zentry(Z,1,0,1.0);
   info = test_NM_posv_expert_unit(Z, b);
   if (info != 0) return info;
-  NM_free(Z);
+  NM_clear(Z);
   free(Z);
 
   M1 = NMM[0];
@@ -1994,8 +1994,8 @@ static int test_NM_posv_expert(void)
     b[j] =1.0;
   info = test_NM_posv_expert_unit(C, b);
   if (info != 0) return info;
-  NM_free(M1T);
-  NM_free(C);
+  NM_clear(M1T);
+  NM_clear(C);
 
   /* M1=NMM[1]; */
   /* M1T = NM_transpose(M1); */
@@ -2031,7 +2031,7 @@ static int test_NM_posv_expert(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
   free(NMM);

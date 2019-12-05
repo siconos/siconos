@@ -276,8 +276,8 @@ int gfc3d_LmgcDriver(double *reaction,
   }
 
 
-  NM_free(M);
-  NM_free(H);
+  NM_clear(M);
+  NM_clear(H);
   free(M);
   free(H);
   free(problem);
@@ -454,8 +454,8 @@ int gfc3d_LmgcDriver(double *reaction,
 /*   } */
 
 
-/*   NM_free(&M); */
-/*   NM_free(&H); */
+/*   NM_clear(&M); */
+/*   NM_clear(&H); */
 
 /*   free(_colM); */
 /*   free(_colH); */

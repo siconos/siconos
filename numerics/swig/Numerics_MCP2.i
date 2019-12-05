@@ -73,7 +73,7 @@
        target_mem_mgmtX_instr(method_compute_F);
        target_mem_mgmtX_instr(method_compute_nabla_F);
        SWIG_Error(SWIG_TypeError, "argument 2 must be have a method compute_F and a method compute_nabla_F");
-       NM_free(MCP->nabla_Fmcp);
+       NM_clear(MCP->nabla_Fmcp);
        free(MCP->nabla_Fmcp);
        free(MCP);
        return NULL;

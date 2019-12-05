@@ -495,9 +495,9 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B )
     }
 
   }
-void NM_free(NumericsMatrix* m)
+void NM_clear(NumericsMatrix* m)
 {
-  assert(m && "NM_free, m == NULL");
+  assert(m && "NM_clear, m == NULL");
 
   NM_clearDense(m);
   NM_clearSparseBlock(m);
@@ -1064,7 +1064,7 @@ void NM_read_in_file(NumericsMatrix* const m, FILE *file)
   {
     NumericsMatrix * tmp = NM_new_from_file(file);
     NM_copy(tmp,m);
-    NM_free(tmp);
+    NM_clear(tmp);
   }
   else
   {
@@ -1692,7 +1692,7 @@ void NM_clearSparseBlock(NumericsMatrix* A)
 {
   if (A->matrix1)
   {
-    SBM_free(A->matrix1);
+    SBM_clear(A->matrix1);
     free(A->matrix1);
     A->matrix1 = NULL;
   }
@@ -1702,7 +1702,7 @@ void NM_clearSparse(NumericsMatrix* A)
 {
   if (A->matrix2)
   {
-    NSM_free(A->matrix2);
+    NSM_clear(A->matrix2);
     free(A->matrix2);
     A->matrix2 = NULL;
   }
@@ -2367,7 +2367,7 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
       assert(result);
       int size0 = C->size0;
       int size1 = C->size1;
-      NM_free(C);
+      NM_clear(C);
       NM_null(C);
       NM_fill(C, NM_SPARSE, size0, size1, result);
       NM_MKL_to_sparse_matrix(C);
@@ -2472,7 +2472,7 @@ void NM_gemm(const double alpha, NumericsMatrix* A, NumericsMatrix* B,
       NumericsSparseMatrix* result = NM_MKL_spblas_add(0, alpha, tmp_matrix, C->matrix2);
       int size0 = C->size0;
       int size1 = C->size1;
-      NM_free(C);
+      NM_clear(C);
       NM_null(C);
       NM_fill(C, NM_SPARSE, size0, size1, result);
       NM_MKL_to_sparse_matrix(C);
@@ -2675,7 +2675,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
           assert(!NSM_linear_solver_data(p));
           assert(!p->solver_free_hook);
 
-          p->solver_free_hook = &NSM_free_p;
+          p->solver_free_hook = &NSM_clear_p;
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
           CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
@@ -3028,7 +3028,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
           assert(!NSM_linear_solver_data(p));
           assert(!p->solver_free_hook);
 
-          p->solver_free_hook = &NSM_free_p;
+          p->solver_free_hook = &NSM_clear_p;
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
 
@@ -3215,7 +3215,7 @@ NumericsMatrix* NM_inv(NumericsMatrix* A)
     assert (0 && "NM_inv :  unknown storageType");
   }
 
-  NM_free(Atmp);
+  NM_clear(Atmp);
   free(Atmp);
   free(b);
   DEBUG_END("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
@@ -3423,8 +3423,8 @@ int NM_is_symmetric(NumericsMatrix* A)
   NumericsMatrix * Atrans = NM_transpose(A);
   NumericsMatrix * AplusATrans = NM_add(1/2.0, A, -1/2.0, Atrans);
   double norm_inf = NM_norm_inf(AplusATrans);
-  NM_free(Atrans); free(Atrans);
-  NM_free(AplusATrans);  free(AplusATrans);
+  NM_clear(Atrans); free(Atrans);
+  NM_clear(AplusATrans);  free(AplusATrans);
 
   if (norm_inf <= DBL_EPSILON*10)
   {

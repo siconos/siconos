@@ -118,7 +118,7 @@ NumericsSparseMatrix* NSM_new(void)
   return p;
 }
 
-NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A)
+NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A)
 {
   if (A->linearSolverParams)
   {
@@ -237,7 +237,7 @@ NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* 
   return NULL;
 }
 
-void NSM_free_p(void *p)
+void NSM_clear_p(void *p)
 {
   assert(p);
   NSM_linear_solver_params* ptr = (NSM_linear_solver_params*) p;

@@ -170,8 +170,8 @@ int main(void)
 
 
   free(Wpinvtest);
-  NM_free(Wnum);
-  NM_free(WnumpInv);
+  NM_clear(Wnum);
+  NM_clear(WnumpInv);
   free(Wnum);
   free(WnumpInv);
 
