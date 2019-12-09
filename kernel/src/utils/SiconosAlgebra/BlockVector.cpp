@@ -143,7 +143,7 @@ void BlockVector::updateSizeV()
   VectorOfVectors::iterator it;
   for(it = _vect.begin(); it != _vect.end(); ++it)
   {
-    if (*it)
+    if(*it)
       _sizeV += (*it)->size();
   }
 }
@@ -155,7 +155,7 @@ void BlockVector::updateTabIndex()
   VectorOfVectors::iterator it;
   for(it = _vect.begin(); it != _vect.end(); ++it)
   {
-    if (*it)
+    if(*it)
     {
       cumulated_size += (*it)->size();
     }
@@ -192,7 +192,7 @@ void BlockVector::display() const
   for(it = _vect.begin(); it != _vect.end(); ++it)
   {
     DEBUG_EXPR(std::cout <<"(*it)" << (*it) << std::endl;);
-    if (*it)
+    if(*it)
       (*it)->display();
     else
       std::cout << "(*it)-> NULL" <<std::endl;
@@ -216,9 +216,11 @@ std::ostream& operator<<(std::ostream& os, const BlockVector& bv)
 {
   VectorOfVectors::const_iterator it;
   os << "[" << bv._vect.size() << "](";
-  for(it = bv._vect.begin(); it != bv._vect.end(); ++it) {
-    if (it != bv._vect.begin()) os << ",";
-    if (*it) os << **it; else os << "(nil)";
+  for(it = bv._vect.begin(); it != bv._vect.end(); ++it)
+  {
+    if(it != bv._vect.begin()) os << ",";
+    if(*it) os << **it;
+    else os << "(nil)";
   }
   os << ")";
   return os;

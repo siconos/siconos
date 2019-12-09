@@ -66,7 +66,7 @@
     index2_data[blockNumber] -> columnNumber.
 
 
-    Related functions: SBM_gemv(), SBM_row_prod(), SBM_free(),
+    Related functions: SBM_gemv(), SBM_row_prod(), SBM_clear(),
     SBM_print, SBM_diagonal_block_index()
  * If we consider the matrix M and the right-hand-side q defined as
  *
@@ -334,7 +334,7 @@ extern "C"
   /** Destructor for SparseBlockStructuredMatrix objects
       \param blmat SparseBlockStructuredMatrix the matrix to be destroyed.
    */
-  void SBM_free(SparseBlockStructuredMatrix * blmat);
+  void SBM_clear(SparseBlockStructuredMatrix * blmat);
 
   /** To free a SBM matrix (for example allocated by NM_new_from_file).
    * \param[in] A the SparseBlockStructuredMatrix that mus be de-allocated.
@@ -387,7 +387,7 @@ extern "C"
   /** Destructor for SparseBlockStructuredMatrixPred objects
    *   \param blmatpred SparseBlockStructuredMatrix, the matrix to be destroyed.
    */
-  void SBM_free_pred(SparseBlockStructuredMatrixPred *blmatpred);
+  void SBM_clear_pred(SparseBlockStructuredMatrixPred *blmatpred);
 
   /** Compute the indices of blocks of the diagonal block
       \param M the SparseBlockStructuredMatrix matrix

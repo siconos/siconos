@@ -222,9 +222,9 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
 
   SN_free_SN_GAMS_gdx(gdx_data);
   free(gdx_data);
-  NM_free(&Htmat);
-  NM_free(&Emat);
-  NM_free(&Akmat);
+  NM_clear(&Htmat);
+  NM_clear(&Emat);
+  NM_clear(&Akmat);
   optFree(&Optr);
   optFree(&solverOptPtr);
   return status;

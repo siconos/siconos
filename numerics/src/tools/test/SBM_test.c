@@ -80,8 +80,8 @@ static int SBM_add_test1(double tol, double alpha, double beta)
   free(M_dense);
   free(C_dense);
 
-  SBM_free(M);
-  SBM_free(C);
+  SBM_clear(M);
+  SBM_clear(C);
   return info;
 
 }
@@ -150,10 +150,10 @@ static int SBM_add_test2(double tol, double alpha, double beta)
   if (info == 1)
     return info;
   
-  NM_free(M2);
-  NM_free(M10);
-  SBM_free(C2);
-  SBM_free(C3);
+  NM_clear(M2);
+  NM_clear(M10);
+  SBM_clear(C2);
+  SBM_clear(C3);
   free(C2_dense);
   free(C3_dense);
   free(M2_dense);
@@ -242,7 +242,7 @@ int test_SBM_column_permutation_all(void)
     printf("========= Failed SBM tests 3 for SBM  ========= \n");
     return 1;
   }
-  SBM_free(M);
+  SBM_clear(M);
   file = fopen("data/SBM2.dat", "r");
   M = SBM_new_from_file(file);
   fclose(file);
@@ -252,7 +252,7 @@ int test_SBM_column_permutation_all(void)
     printf("========= Failed SBM tests 3 for SBM  ========= \n");
     return 1;
   }
-  SBM_free(M);
+  SBM_clear(M);
   printf("\n========= Succed SBM tests 3 for SBM  ========= \n");
   return 0;
 
@@ -311,7 +311,7 @@ int SBM_extract_component_3x3_all(void)
     return 1;
   }
 
-  SBM_free(M);
+  SBM_clear(M);
   
   return 0;
 
@@ -695,22 +695,22 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
 
 
 exit_9:
-  NM_free(C20);
+  NM_clear(C20);
 exit_8:
-  NM_free(M10);
-  NM_free(C8);
+  NM_clear(M10);
+  NM_clear(C8);
 exit_7:
-  NM_free(M9);
-  NM_free(C7);
+  NM_clear(M9);
+  NM_clear(C7);
 exit_4:
-  NM_free(&C4);
+  NM_clear(&C4);
 exit_3:
-  NM_free(&C3);
+  NM_clear(&C3);
 exit_2:
   free(C2.matrix0);
-  NM_free(C2ref);
+  NM_clear(C2ref);
 exit_1:
-  NM_free(Cref);
+  NM_clear(Cref);
   free(C.matrix0);
   return info;
 }
@@ -762,7 +762,7 @@ int SBM_gemm_without_allocation_all(void)
 
   for (i = 0 ; i < nmm; i++)
   {
-    NM_free(NMM[i]);
+    NM_clear(NMM[i]);
     free(NMM[i]);
   }
 
@@ -809,8 +809,8 @@ static int SBM_multiply_test1(double tol)
   free(M_dense);
   free(C_dense);
 
-  SBM_free(M);
-  SBM_free(C);
+  SBM_clear(M);
+  SBM_clear(C);
   return info;
 }
 
@@ -867,10 +867,10 @@ static int SBM_multiply_test2(double tol)
   if (info == 1)
     return info;
 
-  NM_free(M2);
-  NM_free(M10);
-  SBM_free(C2);
-  SBM_free(C3);
+  NM_clear(M2);
+  NM_clear(M10);
+  SBM_clear(C2);
+  SBM_clear(C3);
   free(C2_dense);
   free(C3_dense);
   free(M2_dense);
@@ -920,9 +920,9 @@ static int SBM_multiply_test3(double tol)
   info = SBM_dense_equal(C2, C2_dense, tol);
   
 
-  NM_free(M2);
-  NM_free(M4);
-  SBM_free(C2);
+  NM_clear(M2);
+  NM_clear(M4);
+  SBM_clear(C2);
   free(C2_dense);
   free(M2_dense);
   free(M4_dense);
@@ -979,7 +979,7 @@ int test_SBM_row_permutation_all(void)
     return 1;
   }
 
-  SBM_free(M);
+  SBM_clear(M);
 
   
   file = fopen("data/SBM2.dat", "r");
@@ -991,7 +991,7 @@ int test_SBM_row_permutation_all(void)
     printf("========= Failed SBM tests 2 for SBM  ========= \n");
     return 1;
   }
-  SBM_free(M2);
+  SBM_clear(M2);
   printf("\n========= Succed SBM tests 2 for SBM  ========= \n");
   return 0;
 
@@ -1017,7 +1017,7 @@ int test_SBM_row_to_dense_all(void)
     return 1;
   }
 
-  SBM_free(M);
+  SBM_clear(M);
 
 
 
@@ -1030,7 +1030,7 @@ int test_SBM_row_to_dense_all(void)
     printf("========= Failed SBM tests 1 for SBM  ========= \n");
     return 1;
   }
-  SBM_free(M2);
+  SBM_clear(M2);
   printf("\n========= Succeeded SBM tests 1 for SBM  ========= \n");
   return 0;
 
@@ -1085,7 +1085,7 @@ int SBM_to_dense_all(void)
   printf("\n (warning: column-major) \n");
 
   free(denseMat);
-  SBM_free(M);
+  SBM_clear(M);
   printf("\n========= Succed SBM tests 4 for SBM  ========= \n");
   return 0;
 
@@ -1140,7 +1140,7 @@ int SBM_to_sparse_all(void)
 
   free(denseMat);
   printf("NUMERICS_SBM_FREE_BLOCK value %d", NUMERICS_SBM_FREE_BLOCK);
-  SBM_free(M);
+  SBM_clear(M);
   printf("\n========= Succed SBM tests 4 for SBM  ========= \n");
   return 0;
 
@@ -1234,9 +1234,9 @@ static int SBM_zentry_test1(double tol)
   DEBUG_EXPR(NM_display(C));
   DEBUG_EXPR(NM_display(C2));
   info = NM_dense_equal(C2,C->matrix0,tol);
-  NM_free(M2);
-  NM_free(C2);
-  NM_free(C);
+  NM_clear(M2);
+  NM_clear(C2);
+  NM_clear(C);
   return info;
 }
 
@@ -1255,7 +1255,7 @@ static int SBM_zentry_test2(double tol)
   info = SBM_zentry(M2->matrix1,8,0,1.0);
   info = SBM_zentry(M2->matrix1,0,7,1.0);
 
-  NM_free(M2);
+  NM_clear(M2);
 
   return info;
 }

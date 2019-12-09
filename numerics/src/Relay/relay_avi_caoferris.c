@@ -100,7 +100,7 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   free(s_vec);
   free(A);
   free(d_vec);
-  NM_free(lcplike_pb.M);
+  NM_clear(lcplike_pb.M);
   free(lcplike_pb.q);
   free(b_bar);
 }

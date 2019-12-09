@@ -554,15 +554,15 @@ void convexQP_ADMM(ConvexQP* problem,
     convexQP_ADMM_free(problem,options);
   }
 
-  NM_free(W);
+  NM_clear(W);
   if (AisIdentity)
   {
-    NM_free(A);
+    NM_clear(A);
     free(b);
   }
   else
   {
-    NM_free(Atrans);
+    NM_clear(Atrans);
   }
 
 

@@ -115,7 +115,7 @@ void freeAVI(AffineVariationalInequalities* avi)
   assert(avi);
   if (avi->M)
   {
-    NM_free(avi->M);
+    NM_clear(avi->M);
     free(avi->M);
     avi->M = NULL;
   }

@@ -112,7 +112,7 @@ extern "C"
    * \param A a NumericsSparseMatrix
    * \return NULL on success
    */
-  NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A);
+  NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A);
 
 
 
@@ -120,7 +120,7 @@ extern "C"
    /** Free a workspace related to a LU factorization
    * \param p the structure to free
    */
-  void NSM_free_p(void *p);
+  void NSM_clear_p(void *p);
 
   /** Get the data part of sparse matrix
    * \param A the sparse matrix

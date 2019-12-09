@@ -71,7 +71,7 @@ SparseBlockStructuredMatrix* SBM_new(void)
   return sbm;
 }
 
-void SBM_free(SparseBlockStructuredMatrix *sbm)
+void SBM_clear(SparseBlockStructuredMatrix *sbm)
 {
   /* Free memory for SparseBlockStructuredMatrix */
   /* Warning: nothing is done to check if memory has really been
@@ -2032,7 +2032,7 @@ void SBM_read_in_filename(SparseBlockStructuredMatrix* const m, const char *file
 {
 
 }
-void SBM_free_pred(SparseBlockStructuredMatrixPred *blmatpred)
+void SBM_clear_pred(SparseBlockStructuredMatrixPred *blmatpred)
 {
 
   for (int i = 0 ; i < blmatpred->nbbldiag ; i++)

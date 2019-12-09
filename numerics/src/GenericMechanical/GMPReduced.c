@@ -738,7 +738,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double
     NM_fill(&M, NM_DENSE, Me_size, Me_size, reducedProb);
     *info = NM_gesv(&M, reaction, true);
     M.matrix0 = NULL;
-    NM_free(&M);
+    NM_clear(&M);
     goto END_GMP3;
   }
   /*it is a MLCP*/

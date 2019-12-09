@@ -81,7 +81,7 @@ void convexQP_free(ConvexQP* cqp)
 {
   if (cqp->M)
   {
-    NM_free(cqp->M);
+    NM_clear(cqp->M);
     free(cqp->M);
     cqp->M = NULL;
   }
@@ -92,7 +92,7 @@ void convexQP_free(ConvexQP* cqp)
   }
   if (cqp->A)
   {
-    NM_free(cqp->A);
+    NM_clear(cqp->A);
     free(cqp->A);
     cqp->A = NULL;
   }

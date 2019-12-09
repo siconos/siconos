@@ -128,7 +128,7 @@
   if (nummat$argnum)
   {
     if (!NM_clean(nummat$argnum, alloc_ctrl_$argnum)) { return SN_SWIG_ERROR_CODE; }
-    NM_free(nummat$argnum);
+    NM_clear(nummat$argnum);
     free(nummat$argnum);
   }
 

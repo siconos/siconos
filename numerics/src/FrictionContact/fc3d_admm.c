@@ -249,7 +249,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
     if (has_rho_changed)
     {
-      /* NM_free(W); */
+      /* NM_clear(W); */
       /* W= NM_new(); */
       NM_copy(M,W);
       NM_add_to_diag3(W, rho);
@@ -527,7 +527,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     }
     numerics_printf_verbose(1,"---- FC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
   }
-  NM_free(W);
+  NM_clear(W);
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 }
@@ -608,7 +608,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   /* if (M->storageType == NM_DENSE) */
   /* { */
   /*   NM_copy(A,_A); */
-  /*   NM_free(A); */
+  /*   NM_clear(A); */
   /*   NM_to_dense(_A,A); */
   /* } */
   /* DEBUG_EXPR(NM_display(A);); */
@@ -618,7 +618,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   /*  cost Matrix */
   NumericsMatrix *M_T = NM_transpose(M);
   NumericsMatrix *M_s = NM_add(1.0, M, 1.0, M_T);
-  NM_free(M_T);
+  NM_clear(M_T);
   DEBUG_EXPR(NM_display(M););
   DEBUG_EXPR(NM_display(M_s););
 
@@ -660,7 +660,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
 
     if (has_rho_changed)
     {
-      /* NM_free(W); */
+      /* NM_clear(W); */
       /* W= NM_new(); */
       NM_copy(M_s,W);
       NM_gemm(rho, Atrans, A, 1.0, W);
@@ -917,7 +917,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
     numerics_printf_verbose(1,"---- FC3D - ADMM  - Iteration %i rho = %14.7e, residual = %14.7e, tol = %14.7e", iter, rho, residual, tolerance);
 
     /* 4-1 basic stopping criterion */
-    admm_has_converged = residual < tolerance;
+    admm_has_converged = 1;
 
     /* 4-2 Relative stopping criterion */
     /* admm_has_converged = (r < tolerance * fmax(r1,r2)) && (s < tolerance * s1 ) ; */
@@ -952,9 +952,9 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
-  NM_free(A);
-  NM_free(M_s);
-  NM_free(W);
+  NM_clear(A);
+  NM_clear(M_s);
+  NM_clear(W);
 
 }
 

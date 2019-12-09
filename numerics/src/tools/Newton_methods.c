@@ -608,7 +608,7 @@ void newton_LSA_free_solverOptions(SolverOptions* options)
   {
     newton_LSA_data* sd = (newton_LSA_data*) options->solverData;
     assert(sd->H);
-    NM_free(sd->H);
+    NM_clear(sd->H);
     free(sd->H);
     free(sd);
     options->solverData = NULL;
