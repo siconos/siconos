@@ -3453,7 +3453,7 @@ int NM_is_symmetric(NumericsMatrix* A)
   double norm_inf = NM_norm_inf(AplusATrans);
   NM_free(Atrans); free(Atrans);
   NM_free(AplusATrans);  free(AplusATrans);
-  
+
   if (norm_inf <= DBL_EPSILON*10)
   {
     return 1;
@@ -3501,12 +3501,26 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
 
   double * q = (double *) malloc(n*sizeof(double));
   double * z = (double *) malloc(n*sizeof(double));
+
+  double * x1 = (double *) malloc(n*sizeof(double));
+  double * z2= (double *) malloc(n*sizeof(double));
+
+  double * q2 = (double *) malloc(n*sizeof(double));
+
+
+
   srand(time(NULL));
   for (int i = 0; i < n ; i++)
   {
     q[i] = (rand()/(double)RAND_MAX);
     DEBUG_PRINTF("q[%i] = %e \t",i, q[i]);
   }
+
+
+  cblas_dcopy(n , q  , 1 , q2, 1);
+
+
+
   double norm = cblas_dnrm2(n , q, 1);
   cblas_dscal(m, 1.0/norm, q, 1);
   DEBUG_PRINT("\n");
@@ -3525,10 +3539,27 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
     eig_old=eig;
     eig = cblas_ddot(n, q, 1, z, 1);
 
-    DEBUG_PRINTF("eig[%i] = %32.24e \t error = %e\n",k, eig, fabs(eig-eig_old)/eig_old );
+
+    cblas_dcopy(n , q  , 1 , x1, 1);
+    NM_tgemv(1.0, A, q2, 0.0, z2);
+    double norm2 = cblas_dnrm2(n , z2, 1);
+    cblas_dscal(m, 1.0/norm2, z2, 1);
+    cblas_dcopy(n , z2  , 1 , q2, 1);
+
+    double costheta =  fabs(cblas_ddot(n, q2, 1, x1, 1));
+    if (costheta <= 5e-02)
+    {
+      numerics_printf("NM_iterated_power_method. failed Multiple eigenvalue\n");
+      break;
+    }
+    printf("eig[%i] = %32.24e \t error = %e, costheta = %e \n",k, eig, fabs(eig-eig_old)/eig_old, costheta );
     k++;
   }
   free(q);
   free(z);
+  free(x1);
+  free(z2);
+  free(q2);
+
   return eig;
 }
