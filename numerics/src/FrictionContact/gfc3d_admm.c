@@ -134,6 +134,21 @@ static double gfc3d_admm_select_rho(NumericsMatrix* M, NumericsMatrix* H, int * 
     else
       rho = options->dparam[SICONOS_FRICTION_3D_ADMM_RHO];
   }
+  else  if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] ==
+            SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_EIGENVALUES)
+  {
+    double lambda_max =  NM_iterated_power_method(M, 1e-08, 100);
+    double lambda_min =  1.0/NM_iterated_power_method(NM_inv(M), 1e-08, 100);
+    
+    numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of M = %g ",lambda_max);
+    numerics_printf_verbose(1,"---- GFC3D - ADMM - smallest eigenvalue of M = %g ",lambda_min);
+
+    rho = sqrt(lambda_max*lambda_min);
+  }
+  else
+  {
+    numerics_error("gfc3d_admm_select_rho", "options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] unknow value");
+  }
 
   /* rho adaptive from initial rho */
   if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
@@ -345,15 +360,15 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(M), norm_q);
     numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(M));
     numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of M = %g ", NM_iterated_power_method(M, 1e-08, 100));
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - smallest eigenvalue of M = %g ", NM_iterated_power_method(NM_inv(M), 1e-08, 100));
+    numerics_printf_verbose(1,"---- GFC3D - ADMM - smallest eigenvalue of M = %g ", 1./NM_iterated_power_method(NM_inv(M), 1e-08, 100));
 
     numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of H = %g norm of b = %g ", NM_norm_1(H), norm_b);
     numerics_printf_verbose(1,"---- GFC3D - ADMM - inf-norm of H = %g ", NM_norm_inf(H));
-    W = NM_create(NM_SPARSE,n,n);
-    NM_triplet_alloc(W, n);
-    W->matrix2->origin = NSM_TRIPLET;
-    NM_gemm(1.0, H, Htrans, 0.0, W);
-    numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of HH^T = %g  ", NM_norm_1(W));
+    /* W = NM_create(NM_SPARSE,n,n); */
+    /* NM_triplet_alloc(W, n); */
+    /* W->matrix2->origin = NSM_TRIPLET; */
+    /* NM_gemm(1.0, H, Htrans, 0.0, W); */
+    /* numerics_printf_verbose(1,"---- GFC3D - ADMM - 1-norm of HH^T = %g  ", NM_norm_1(W)); */
     /* numerics_printf_verbose(1,"---- GFC3D - ADMM - largest eigenvalue of HH^T = %g ", NM_iterated_power_method(W, 1e-08, 100)); */
     /* numerics_printf_verbose(1,"---- GFC3D - ADMM - smallest eigenvalue of HH^T = %g ", NM_iterated_power_method(NM_inv(W), 1e-08, 100)); */
     if (NM_is_symmetric(M))
@@ -970,7 +985,7 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
     //SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] =
-    SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_NO;
+    SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_YES;
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H] =
     SICONOS_FRICTION_3D_ADMM_FULL_H_NO;
