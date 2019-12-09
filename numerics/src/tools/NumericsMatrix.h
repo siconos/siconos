@@ -245,7 +245,7 @@ extern "C"
       Note that this function does not free m.
       \param m the matrix to be deleted.
    */
-  void NM_free(NumericsMatrix* m);
+  void NM_clear(NumericsMatrix* m);
 
 
   /**************************************************/

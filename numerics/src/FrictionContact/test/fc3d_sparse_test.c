@@ -86,7 +86,7 @@ static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, do
 
     NumericsMatrix* W = NM_create(NM_SPARSE, n, n);
     NM_copy_to_sparse(problem->M, W);
-    NM_free(problem->M);
+    NM_clear(problem->M);
     free(problem->M);
     problem->M = W;
 
@@ -253,9 +253,9 @@ int main(void)
 
   }
 
-  NM_free(W);
+  NM_clear(W);
   tmpM->matrix0 = NULL;
-  NM_free(tmpM);
+  NM_clear(tmpM);
   free(W);
   free(tmpM);
 

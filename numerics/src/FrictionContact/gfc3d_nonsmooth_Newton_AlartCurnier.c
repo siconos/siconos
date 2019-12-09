@@ -831,7 +831,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   }
 #endif
 
-  NM_free(AA);
+  NM_clear(AA);
   free(AA);
 }
 

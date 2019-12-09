@@ -219,7 +219,7 @@ int nonSmoothNewton(
 
   /** Free memory*/
   free(phiVector);
-  NM_free(H);
+  NM_clear(H);
   free(gradient_psi);
   free(ipiv);
 

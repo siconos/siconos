@@ -331,7 +331,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
         resLocalSolver = NM_gesv(&M, sol, true);
 
         M.matrix0 = NULL;
-        NM_free(&M);
+        NM_clear(&M);
         break;
       }
       case SICONOS_NUMERICS_PROBLEM_LCP:

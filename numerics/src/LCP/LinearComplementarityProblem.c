@@ -100,7 +100,7 @@ void freeLinearComplementarityProblem(LinearComplementarityProblem* problem)
 {
   if (problem->M)
   {
-    NM_free(problem->M);
+    NM_clear(problem->M);
     free(problem->M);
     problem->M = NULL;
   }

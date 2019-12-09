@@ -108,7 +108,7 @@ void vi_box_AVI_free_solverData(SolverOptions* options)
   assert(options->solverData);
 
   vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)options->solverData;
-  NM_free(sData->mat);
+  NM_clear(sData->mat);
   free(sData->mat);
   sData->mat = NULL;
   sData->relay_pb->lb = NULL;

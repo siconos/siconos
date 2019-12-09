@@ -97,6 +97,7 @@ void gfc3d_ADMM_free(GlobalFrictionContactProblem* problem, SolverOptions* optio
     free(data->reaction_hat);
     free(data->u_hat);
     free(data->reaction_k);
+    free(data->u);
     free(data->u_k);
     free(data->b_full);
     if  (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H] ==
@@ -225,7 +226,8 @@ static inline void gfc3d_ADMM_compute_full_H(int nc, double * u,
 
   //DEBUG_EXPR(NM_display(H));
   NM_gemm(1.0, H, H_correction, 0.0, H_full);
-  NM_free(H_correction);
+  NM_clear(H_correction);
+  free(H_correction);
 
   DEBUG_EXPR(NM_display(H_full));
   DEBUG_END("gfc3d_ADMM_compute_H_correction(...)\n");
@@ -309,7 +311,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     H = rescaled_problem->H;
     q = rescaled_problem->q;
     b = rescaled_problem->b;
-    NM_free(Htrans);
+    NM_clear(Htrans);
+    free(Htrans);
     Htrans =  NM_transpose(H);
     DEBUG_EXPR
       (double norm_q = cblas_dnrm2(n , problem->q , 1);
@@ -317,7 +320,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
        norm_q = cblas_dnrm2(n , rescaled_problem->q , 1);
        printf("norm_q (rescaled) = %e\n", norm_q););
   }
-  NM_free(W);
+  NM_clear(W);
 
 
   /* Maximum number of iterations */
@@ -326,10 +329,13 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   double tolerance = dparam[0];
 
   /* Check for trivial case */
-  *info = gfc3d_checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
-
-  if (*info == 0)
+  if(!gfc3d_checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options))
+  {
+    NM_clear(Htrans);
+    free(Htrans);
+    free(W);
     return;
+  }
 
   double norm_q = cblas_dnrm2(n , q , 1);
 
@@ -361,8 +367,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     {
       numerics_printf_verbose(1,"---- GFC3D - ADMM -  M is not symmetric");
     }
-    
-    NM_free(W);
+
+    NM_clear(W);
   }
 
   int internal_allocation=0;
@@ -545,6 +551,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
         }
         else
         {
+          NM_clear(W);
           NM_copy(M, W);
           NM_gemm(rho, H, Htrans, 1.0, W);
         }
@@ -882,8 +889,13 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
   /***** Free memory *****/
-  NM_free(W);
-  NM_free(Htrans);
+  NM_clear(W);
+  NM_clear(Htrans);
+  NM_clear(H_full);
+  free(W);
+  free(Htrans);
+  free(H_full);
+
   if (internal_allocation)
   {
     gfc3d_ADMM_free(problem,options);

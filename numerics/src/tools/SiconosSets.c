@@ -96,7 +96,7 @@ void free_polyhedron(polyhedron* poly)
   assert(poly);
   if (poly->H)
   {
-    NM_free(poly->H);
+    NM_clear(poly->H);
     free(poly->H);
     poly->H = NULL;
   }
@@ -107,7 +107,7 @@ void free_polyhedron(polyhedron* poly)
   }
   if (poly->Heq)
   {
-    NM_free(poly->Heq);
+    NM_clear(poly->Heq);
     free(poly->Heq);
     poly->Heq = NULL;
   }
@@ -123,7 +123,7 @@ void free_polyhedron_unified(polyhedron_unified* poly)
   assert(poly);
   if (poly->A)
   {
-    NM_free(poly->A);
+    NM_clear(poly->A);
     free(poly->A);
     poly->A = NULL;
   }

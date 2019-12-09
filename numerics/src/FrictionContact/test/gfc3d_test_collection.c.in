@@ -315,6 +315,11 @@ static int gfc_test(char ** test)
 
     }
 
+    free(failed_tests);
+    free(succeeded_tests);
+    free(_data_collection);
+    free(_test_collection);
+
 #ifdef SICONOS_HAS_MPI
     MPI_Finalize();
 #endif
