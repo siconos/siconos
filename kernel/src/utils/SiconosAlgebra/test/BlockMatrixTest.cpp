@@ -19,6 +19,7 @@
 #include "SiconosConfig.h"
 
 #include "SiconosAlgebraTypeDef.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include "BlockMatrixTest.hpp"
 #include "SimpleMatrix.hpp"

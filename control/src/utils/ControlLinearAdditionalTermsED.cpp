@@ -19,8 +19,7 @@
 #include "SimulationGraphs.hpp"
 #include "ControlLinearAdditionalTermsED.hpp"
 #include "DynamicalSystem.hpp"
-#include "SimpleMatrixFriends.hpp"
-#include "SiconosVectorFriends.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "Topology.hpp"
 #include "MatrixIntegrator.hpp"
 

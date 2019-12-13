@@ -476,7 +476,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double *reaction,
   getGamsOpt(Optr, sysdir);
 
   optHandle_t Opts[] = {Optr, solverOptPtr};
-  SN_Gams_set_options((SN_GAMSparams*)options->solverParameters, Opts);
+  SN_Gams_set_default((SN_GAMSparams*)options->solverParameters, Opts);
 
   if (strcmp(solverName, "path"))
   {

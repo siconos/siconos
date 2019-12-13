@@ -40,31 +40,24 @@
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
-// Constructor from a set of data
-// Required input: simulation
-// Optional: newNumericsSolverName
+// Constructor from solver id - Uses delegated constructor
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolverId):
-  LinearOSNS(numericsSolverId), _contactProblemDim(dimPb)
+  GlobalFrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
+                                                 solver_options_delete))
+{}
+
+// Constructor based on a pre-defined solver options set.
+GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions options):
+  LinearOSNS(options), _contactProblemDim(dimPb), _gfc_driver(&gfc3d_driver)
 {
-  
-  // Connect to the right function according to dim. of the problem
-  if (_contactProblemDim == 2)
-  {
+  // Only fc3d for the moment.
+  if (_contactProblemDim != 3)
     RuntimeException::selfThrow("GlobalFrictionContact No solver for 2 dimensional problems");
-  }
-  else if(_contactProblemDim == 3)
-  {
-    _gfc_driver = &gfc3d_driver;
-  }
-  else
-  {
-     RuntimeException::selfThrow("GlobalFrictionContact size not supported");
-  }
-  //default storage
+
+  //Reset default storage type for numerics matrices.
   _numericsMatrixStorageType = NM_SPARSE;
-
-
 }
+
 
 void GlobalFrictionContact::initVectorsMemory()
 {

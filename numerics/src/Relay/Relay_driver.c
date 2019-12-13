@@ -117,12 +117,13 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
     relay_avi_caoferris_test(problem, z , w , &info , options);
     break;
   }
-  /*error */
-  default:
-  {
-    fprintf(stderr, "Relay_driver error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId));
-    exit(EXIT_FAILURE);
-  }
+  /* /\*error *\/ */
+  // what should we do for case like SICONOS_RELAY_LEMKE (id) when the real solver is SICONOS_LCP_LEMKE ? Add case above ? No error ?
+  /* default: */
+  /* { */
+  /*   fprintf(stderr, "Relay_driver error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId)); */
+  /*   exit(EXIT_FAILURE); */
+  /* } */
   }
   if (options[0].filterOn > 0)
     info = relay_compute_error(problem, z, w, options[0].dparam[SICONOS_DPARAM_TOL], &(options[0].dparam[SICONOS_DPARAM_RESIDU]));

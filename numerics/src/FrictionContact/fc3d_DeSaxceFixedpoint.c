@@ -123,7 +123,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
 }
 
 
-void fc3d_dsfp_set_options(SolverOptions* options)
+void fc3d_dsfp_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.0;
 }

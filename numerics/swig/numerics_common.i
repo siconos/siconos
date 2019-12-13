@@ -24,6 +24,7 @@
   
   SolverOptions()
   {
+    // Do we really need this empty constructor ?
     SolverOptions *SO;
     SO = (SolverOptions *) malloc(sizeof(SolverOptions));
     return SO;
@@ -31,7 +32,7 @@
 
   ~SolverOptions()
   {
-    solver_options_clear($self);
+    solver_options_delete($self);
   }
 
 };

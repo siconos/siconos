@@ -610,7 +610,7 @@ exit_lcp_pivot:
   free(candidate_indx);
 }
 
-void lcp_pivot_lumod_set_options(SolverOptions* options)
+void lcp_pivot_lumod_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE;
 }

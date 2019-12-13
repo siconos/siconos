@@ -207,7 +207,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printSolution("ENUM", n, m, NbLines, z, w);
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
   }
 
@@ -236,7 +236,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printSolution("PGS", n, m, NbLines, z, w);
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
   }
 
@@ -262,7 +262,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printSolution("PGS", n, m, NbLines, z, w);
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
   }
   /*SOLVER RPGS*/
@@ -288,7 +288,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printSolution("RPGS", n, m, NbLines, z, w);
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
   }
   /*SOLVER PSOR*/
@@ -322,7 +322,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
         printSolution("PSOR", n, m, NbLines, z, w);
       }
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
   }
   /*SOLVER RPSOR*/
@@ -347,7 +347,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       mlcp_compute_error(problem, z, w, tol1,  &error);
       printSolution("RPSOR", n, m, NbLines, z, w);
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
   }
   /*SOLVER PATH*/
@@ -378,7 +378,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       }
       printSolution("PATH", n, m, NbLines, z, w);
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
   }
   /*SOLVER SIMPLEX*/
@@ -416,7 +416,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       }
       printSolution("SIMPLEX", n, m, NbLines, z, w);
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
   }
   /*SOLVER DIRECT ENUM*/
@@ -454,7 +454,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       }
       printSolution("DIRECT_ENUM_ID", n, m, NbLines, z, w);
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
   }
   /*SOLVER FB*/
@@ -489,7 +489,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       summary[itest].cvState[FB_ID][sIdWithSol] = 1;
       printSolution("FB", n, m, NbLines, z, w);
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
   }
   /*SOLVER DIRECT_FB*/
@@ -526,7 +526,7 @@ void test_mlcp_series(MixedLinearComplementarityProblem* problem, double *z, dou
       summary[itest].cvState[DIRECT_FB_ID][sIdWithSol] = 1;
       printSolution("DIRECT_FB", n, m, NbLines, z, w);
     }
-    solver_options_clear(mlcpOptions);
+    solver_options_delete(mlcpOptions);
     mlcp_driver_reset(problem, &mlcpOptions);
 
   }

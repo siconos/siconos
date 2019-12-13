@@ -22,7 +22,7 @@
 #include <assert.h>            // for assert
 #include <stdio.h>             // for printf, NULL, fprintf, fscanf, FILE
 #include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
-#include "NumericsMatrix.h"    // for NM_display, NM_free, NM_new_from_file
+#include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
 #include "SiconosSets.h"       // for polyhedron_set, free_polyhedron, free_...
 #include "numerics_verbose.h"  // for CHECK_IO
 

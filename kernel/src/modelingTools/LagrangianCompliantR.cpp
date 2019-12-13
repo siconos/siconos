@@ -19,7 +19,7 @@
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
 #include "LagrangianCompliantR.hpp"
-#include "SimpleMatrixFriends.hpp"
+#include "SiconosAlgebraProd.hpp" // for matrix-vector prod
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
@@ -73,6 +73,7 @@ void LagrangianCompliantR::computeJachq(double time, SiconosVector& q0, SiconosV
     ((FPtr2)(_pluginJachq->fPtr))(q0.size(), &(q0)(0), lambda.size(), &(lambda)(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
   }
 }
+
 void LagrangianCompliantR::computeJachlambda(double time, SiconosVector& q0, SiconosVector& lambda, SiconosVector& z)
 {
 
@@ -85,20 +86,19 @@ void LagrangianCompliantR::computeJachlambda(double time, SiconosVector& q0, Sic
 void LagrangianCompliantR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector workZ = *DSlink[LagrangianR::z];
+  SiconosVector workZ, workQ;
+  workZ.initFromBlock(*DSlink[LagrangianR::z]);
+  workQ.initFromBlock(*DSlink[LagrangianR::q0]);
   if (derivativeNumber == 0)
   {
     SiconosVector& y = *inter.y(0);
     SiconosVector& lambda = *inter.lambda(0);
-    SiconosVector workQ = *DSlink[LagrangianR::q0];
-
     computeh(time, workQ, lambda, workZ, y);
   }
   else
   {
     SiconosVector& y = *inter.y(derivativeNumber);
     SiconosVector& lambda = *inter.lambda(derivativeNumber);
-    SiconosVector workQ = *DSlink[LagrangianR::q0];
     computeJachq(time, workQ, lambda, workZ);
     computeJachlambda(time, workQ, lambda, workZ);
     if (derivativeNumber == 1)
@@ -123,8 +123,9 @@ void LagrangianCompliantR::computeInput(double time, Interaction& inter , unsign
   SiconosVector& lambda = *inter.lambda(level);
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  SiconosVector workQ = *DSlink[LagrangianR::q0];
-  SiconosVector workZ = *DSlink[LagrangianR::z];
+  SiconosVector workZ, workQ;
+  workZ.initFromBlock(*DSlink[LagrangianR::z]);
+  workQ.initFromBlock(*DSlink[LagrangianR::q0]);
   computeJachq(time, workQ, lambda, workZ);
   // data[name] += trans(G) * lambda
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
@@ -134,8 +135,9 @@ void LagrangianCompliantR::computeInput(double time, Interaction& inter , unsign
 void LagrangianCompliantR::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q = *DSlink[LagrangianR::q0];
-  SiconosVector z = *DSlink[LagrangianR::z];
+  SiconosVector q,z;
+  q.initFromBlock(*DSlink[LagrangianR::q0]);
+  z.initFromBlock(*DSlink[LagrangianR::z]);
   SiconosVector& lambda = *inter.lambda(0);
   computeJachq(time, q, lambda, z);
   computeJachlambda(time, q, lambda, z);

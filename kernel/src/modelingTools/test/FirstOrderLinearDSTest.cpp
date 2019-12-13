@@ -17,7 +17,7 @@
  * limitations under the License.
 */
 #include "FirstOrderLinearDSTest.hpp"
-#include "SiconosVectorFriends.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "SimpleMatrixFriends.hpp"
 
 

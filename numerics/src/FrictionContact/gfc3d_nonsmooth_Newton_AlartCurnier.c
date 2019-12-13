@@ -829,7 +829,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
   free(AA);
 }
 
-void gfc3d_nsn_ac_set_options(SolverOptions* options)
+void gfc3d_nsn_ac_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
 

@@ -18,7 +18,7 @@
 #include <stdio.h>                  // for printf
 #include "NonSmoothDrivers.h"       // for variationalInequality_driver
 #include "NumericsFwd.h"            // for VariationalInequality, SolverOptions
-#include "SolverOptions.h"          // for solver_options_clear, solver_opti...
+#include "SolverOptions.h"          // for solver_options_delete, solver_opti...
 #include "VI_cst.h"                 // for SICONOS_VI_HP, SICONOS_VI_EG, SIC...
 #include "VariationalInequality.h"  // for VariationalInequality, variationa...
 
@@ -144,7 +144,7 @@ static int test_1(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_clear(options);
+  solver_options_delete(options);
 
   return info;
 }
@@ -212,7 +212,7 @@ static int test_2(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_clear(options);
+  solver_options_delete(options);
 
   return info;
 }
@@ -284,7 +284,7 @@ static int test_3(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_clear(options);
+  solver_options_delete(options);
 
   return info;
 }
@@ -355,7 +355,7 @@ static int test_4(void)
     printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,F[i]);
   }
 
-  solver_options_clear(options);
+  solver_options_delete(options);
   options = NULL;
 
   return info;

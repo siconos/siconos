@@ -186,7 +186,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   }
 
   optHandle_t Opts[] = {Optr, solverOptPtr};
-  SN_Gams_set_options((SN_GAMSparams*)options->solverParameters, Opts);
+  SN_Gams_set_default((SN_GAMSparams*)options->solverParameters, Opts);
 
   optWriteParameterFile(solverOptPtr, msg);
 

@@ -512,7 +512,7 @@ int gmp_driver(GenericMechanicalProblem* problem, double *reaction , double *vel
 
 }
 
-void gmp_set_options(SolverOptions* options)
+void gmp_set_default(SolverOptions* options)
 {
   /*with Line search 1 without 0.*/
   options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_LINESEARCH] = 0;

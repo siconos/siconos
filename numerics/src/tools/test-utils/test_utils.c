@@ -55,7 +55,7 @@ void free_test_collection(TestCase* collection, int nb_tests)
 {
   for(int i=0;i<nb_tests;++i)
     {
-      solver_options_clear(collection[i].options);
+      solver_options_delete(collection[i].options);
       collection[i].options = NULL;
     }
 

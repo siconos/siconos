@@ -72,9 +72,8 @@ protected:
   */
   ACCEPT_SERIALIZATION(RollingFrictionContact);
 
-
   /** Type (dimension) of the contact problem (2D or 3D) */
-  int _contactProblemDim;
+  int _contactProblemDim = 5;
 
   /** * friction coefficients */
   SP::MuStorage _mu;
@@ -89,11 +88,23 @@ protected:
 
 public:
 
-  /**
-     \param dimPb dimension (2D or 3D) of the RollingFrictionContact problem (default = 3D)
-     \param numericsSolverId Numerics solver to use (default = NSGS)
+  /** constructor (solver id and dimension)
+      \param dimPb dimension, default = 5
+      \param numericsSolverId id of the solver to be used, optional,
+      default : SICONOS_ROLLING_FRICTION_3D_NSGS
+      \rst
+      see :ref:`problems_and_solvers` for details.
+      \endrst
   */
-  RollingFrictionContact(int dimPb = 5, int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
+  RollingFrictionContact(int dimPb, int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
+  /**  constructor from a pre-defined solver options set.
+       \param dim, pb dimension, 5 only. 
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  RollingFrictionContact(int dimPb, SP::SolverOptions options);
 
   /** destructor
    */

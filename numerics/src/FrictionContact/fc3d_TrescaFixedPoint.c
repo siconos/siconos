@@ -143,7 +143,7 @@ void fc3d_TrescaFixedPoint(FrictionContactProblem* problem, double *reaction, do
 
 
 
-void fc3d_tfp_set_options(SolverOptions* options)
+void fc3d_tfp_set_default(SolverOptions* options)
 {
   
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] =  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;

@@ -22,7 +22,7 @@
 #include "MCP_cst.h"                      // for SICONOS_MCP_OLD_FB
 #include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem...
 #include "NumericsFwd.h"                  // for MixedComplementarityProblem...
-#include "SolverOptions.h"                // for solver_options_clear, Solv...
+#include "SolverOptions.h"                // for solver_options_delete, Solv...
 
 void testF(int size, double *z, double * F);
 void testF(int size, double *z, double * F)
@@ -69,7 +69,7 @@ int main(void)
   printf("End of MCP solvers test. \n");
   mcp_old_driver_reset(problem, options);
   mixedComplementarityProblem_old_free(problem);
-  solver_options_clear(options);
+  solver_options_delete(options);
   options = NULL;
 
 

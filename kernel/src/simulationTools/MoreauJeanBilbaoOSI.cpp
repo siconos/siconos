@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "CxxStd.hpp"
-
+#include "SiconosAlgebraProd.hpp"
 #include "SimpleMatrixFriends.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"

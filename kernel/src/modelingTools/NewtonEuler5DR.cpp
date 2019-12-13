@@ -18,6 +18,7 @@
 
 
 #include "NewtonEuler5DR.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
 #include "RotationQuaternion.hpp"

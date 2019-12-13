@@ -167,7 +167,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   (*freeSolver)();
 }
 
-void fc3d_nsgs_velocity_set_options(SolverOptions* options)
+void fc3d_nsgs_velocity_set_default(SolverOptions* options)
 {
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN);

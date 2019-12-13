@@ -18,8 +18,7 @@
 
 #include "SimulationGraphs.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
-#include "SimpleMatrixFriends.hpp"
-#include "SiconosVectorFriends.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "SiconosVector.hpp"
 #include "Topology.hpp"
 #include "MatrixIntegrator.hpp"

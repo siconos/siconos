@@ -16,8 +16,8 @@
  * limitations under the License.
 */
 #include "CxxStd.hpp"
-
-#include "SimpleMatrixFriends.hpp" // for prod, setBlock ...
+#include "SiconosMatrixSetBlock.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "NewtonEulerDS.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"

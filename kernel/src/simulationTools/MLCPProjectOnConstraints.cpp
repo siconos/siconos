@@ -18,7 +18,7 @@
 #include "MLCPProjectOnConstraints.hpp"
 #include "MixedLinearComplementarityProblem.h"
 #include "SiconosVectorFriends.hpp"
-#include "SimpleMatrixFriends.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "MixedComplementarityConditionNSL.hpp"
 #include "EqualityConditionNSL.hpp"
 #include "Simulation.hpp"

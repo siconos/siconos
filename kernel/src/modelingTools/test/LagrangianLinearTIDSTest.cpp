@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "LagrangianLinearTIDSTest.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "SimpleMatrixFriends.hpp"
 #include "BlockMatrix.hpp"
 

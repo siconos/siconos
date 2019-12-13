@@ -17,7 +17,7 @@
 */
 #include <stdio.h>          // for printf, NULL
 #include "NumericsFwd.h"    // for SolverOptions
-#include "SolverOptions.h"  // for solver_options_clear, solver_options_create
+#include "SolverOptions.h"  // for solver_options_delete, solver_options_create
 #include "lcp_cst.h"        // for SICONOS_LCP_NSGS_SBM, SICONOS_LCP_AVI_CAO...
 
 int main(void)
@@ -38,7 +38,7 @@ int main(void)
     {
       options = solver_options_create(solvers[s]);
       solver_options_print(options);
-      solver_options_clear(options);
+      solver_options_delete(options);
       options = NULL;
         
     }

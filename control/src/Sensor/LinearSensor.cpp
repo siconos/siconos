@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 #include "LinearSensor.hpp"
-
+#include "SiconosAlgebraProd.hpp"
 #include "SensorFactory.hpp"
 #include "SiconosVector.hpp"
 #include "DynamicalSystem.hpp"

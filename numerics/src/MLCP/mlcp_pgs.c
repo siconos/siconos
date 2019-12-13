@@ -249,7 +249,7 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
   return;
 }
 
-void mlcp_pgs_set_options(SolverOptions* options)
+void mlcp_pgs_set_default(SolverOptions* options)
 {
   options->filterOn = false;
   options->iparam[SICONOS_IPARAM_MLCP_PGS_EXPLICIT] = 0; //implicit

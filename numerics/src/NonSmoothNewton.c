@@ -18,7 +18,7 @@
 #include "NonSmoothNewton.h"
 #include <stdlib.h>            // for free, malloc, NULL, calloc
 #include "Newton_methods.h"    // for SICONOS_IPARAM_STOPPING_CRITERION, SIC...
-#include "NumericsMatrix.h"    // for NM_create, NM_free, NM_DENSE, Numerics...
+#include "NumericsMatrix.h"    // for NM_create, NM_clear, NM_DENSE, Numerics...
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
 #include "math.h"              // for fmax, pow
 #include "numerics_verbose.h"  // for numerics_printf, numerics_printf_verbose
@@ -341,7 +341,7 @@ int nonSmoothDirectNewton(
 }
 
 
-void nonSmoothNewton_set_options(SolverOptions* options)
+void nonSmoothNewton_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_RESIDU;
 }

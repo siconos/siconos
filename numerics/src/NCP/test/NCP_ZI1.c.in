@@ -241,7 +241,7 @@ almostgood:
     t = k*sim_data.h;
     options->dparam[SICONOS_DPARAM_TOL] = N*DBL_EPSILON;
   }
-  solver_options_clear(options);
+  solver_options_delete(options);
 
   free(problem->nabla_F);
   free(problem);

@@ -581,7 +581,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
 }
 
-void soclcp_nsgs_set_options(SolverOptions* options)
+void soclcp_nsgs_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_IPARAM_ERROR_EVALUATION] = SICONOS_ERROR_FULL_EVALUATION;
   options->iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] = 0;

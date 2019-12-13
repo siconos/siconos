@@ -21,7 +21,7 @@
 #include "MixedComplementarityProblem.h"
 #include <stdio.h>           // for NULL
 #include <stdlib.h>          // for free, malloc
-#include "NumericsMatrix.h"  // for NM_free
+#include "NumericsMatrix.h"  // for NM_clear
 
 void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem)
 {

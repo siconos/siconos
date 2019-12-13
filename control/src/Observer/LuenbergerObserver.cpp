@@ -17,6 +17,7 @@
 */
 
 #include "ModelingTools.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "SimulationTools.hpp"
 #include "LuenbergerObserver.hpp"
 #include "ControlSensor.hpp"

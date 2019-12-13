@@ -67,12 +67,12 @@ protected:
 
 
   /** n is the number of equality */
-  int _n;
+  int _n = 0;
 
   /** m is the size of the complementarity conditions */
-  int _m;
+  int _m = 0;
 
-  int _curBlock;
+  int _curBlock = 0;
 
   /** The MLCP instance */
   SP::MixedLinearComplementarityProblem _numerics_problem;
@@ -80,11 +80,19 @@ protected:
 public:
 
   /** constructor from data
-  *  \param numericsSolverId id of Numerics solver
-  *  (optional, SICONOS_MLCP_ENUM the enumerative solver)
+      \param numericsSolverId id of Numerics solver
+      (optional, default = SICONOS_MLCP_ENUM the enumerative solver)
   */
   MLCP(int numericsSolverId = SICONOS_MLCP_ENUM);
 
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  MLCP(SP::SolverOptions options);
+  
   /** destructor
   */
   virtual ~MLCP() {reset();};

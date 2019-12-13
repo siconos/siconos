@@ -44,7 +44,7 @@
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
-#include "NumericsVector.h"
+
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"
 #include "NM_MKL_spblas.h"
@@ -410,14 +410,14 @@ void NM_internalData_free(NumericsMatrix* m)
     {
       assert (m->internalData->iWorkSize > 0);
       free(m->internalData->iWork);
-      m->internalData->iWork = NULL;
     }
+    m->internalData->iWork = NULL;
     if (m->internalData->dWork)
     {
       assert (m->internalData->dWorkSize > 0);
       free(m->internalData->dWork);
-      m->internalData->dWork = NULL;
     }
+    m->internalData->dWork = NULL;
     free(m->internalData);
     m->internalData = NULL;
   }
@@ -1692,8 +1692,8 @@ void NM_clearDense(NumericsMatrix* A)
   if (A->matrix0)
   {
     free(A->matrix0);
-    A->matrix0 = NULL;
   }
+  A->matrix0 = NULL;
 }
 
 void NM_clearSparseBlock(NumericsMatrix* A)
@@ -1702,8 +1702,8 @@ void NM_clearSparseBlock(NumericsMatrix* A)
   {
     SBM_clear(A->matrix1);
     free(A->matrix1);
-    A->matrix1 = NULL;
   }
+  A->matrix1 = NULL;
 }
 
 void NM_clearSparse(NumericsMatrix* A)
@@ -1712,8 +1712,8 @@ void NM_clearSparse(NumericsMatrix* A)
   {
     NSM_clear(A->matrix2);
     free(A->matrix2);
-    A->matrix2 = NULL;
   }
+  A->matrix2 = NULL;
 }
 
 void NM_clearTriplet(NumericsMatrix* A)
@@ -1723,8 +1723,8 @@ void NM_clearTriplet(NumericsMatrix* A)
     if (A->matrix2->triplet)
     {
       cs_spfree(A->matrix2->triplet);
-      A->matrix2->triplet = NULL;
     }
+    A->matrix2->triplet = NULL;
   }
 }
 
@@ -1735,8 +1735,8 @@ void NM_clearCSC(NumericsMatrix* A)
     if (A->matrix2->csc)
     {
       cs_spfree(A->matrix2->csc);
-      A->matrix2->csc = NULL;
     }
+    A->matrix2->csc = NULL;
   }
 }
 
@@ -1747,8 +1747,8 @@ void NM_clearCSCTranspose(NumericsMatrix* A)
     if (A->matrix2->trans_csc)
     {
       cs_spfree(A->matrix2->trans_csc);
-      A->matrix2->trans_csc = NULL;
     }
+    A->matrix2->trans_csc = NULL;
   }
 }
 
@@ -1759,8 +1759,8 @@ void NM_clearCSR(NumericsMatrix* A)
     if (A->matrix2->csr)
     {
       cs_spfree(A->matrix2->csr);
-      A->matrix2->csr = NULL;
     }
+    A->matrix2->csr = NULL;
   }
 }
 
@@ -3433,8 +3433,7 @@ int NM_is_symmetric(NumericsMatrix* A)
   double norm_inf = NM_norm_inf(AplusATrans);
   NM_clear(Atrans); free(Atrans);
   NM_clear(AplusATrans);  free(AplusATrans);
-
-
+  
   if (norm_inf <= DBL_EPSILON*10)
   {
     return 1;

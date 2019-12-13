@@ -33,19 +33,21 @@ using namespace RELATION;
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
-// Constructor from a set of data
+// Constructor from a set of data, use delegated constructor
 MLCP::MLCP(int numericsSolverId):
-  LinearOSNS(numericsSolverId)
+  MLCP(SP::SolverOptions(solver_options_create(numericsSolverId),
+                         solver_options_delete)){}
+
+// Constructor from a set of data
+MLCP::MLCP(SP::SolverOptions options):
+  LinearOSNS(options)
 {
-  _n = 0;
-  _m = 0;
   _numerics_problem.reset(new MixedLinearComplementarityProblem);
 
   _numerics_problem->blocksRows = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
   _numerics_problem->blocksIsComp = (int*)malloc(MLCP_NB_BLOCKS * sizeof(int));
   _numerics_problem->blocksRows[0] = 0;
-  _curBlock = 0;
-
+  
   _numerics_problem->A = 0;
   _numerics_problem->B = 0;
   _numerics_problem->C = 0;

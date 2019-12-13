@@ -86,7 +86,7 @@ static int test_0(void)
     printf("x[%i]=%f\t",i,z[i]);    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
   }
 
-  solver_options_clear(options);
+  solver_options_delete(options);
   free(problem);
   free(z);
   free(w);
@@ -184,7 +184,7 @@ static int test_1(void)
   {
     printf("test unsuccessful, residual = %g\n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
-  solver_options_clear(options);
+  solver_options_delete(options);
   free(problem);
   free(z);
   free(w);
@@ -281,7 +281,7 @@ static int test_2(void)
   {
     printf("test unsuccessful, residual = %g\n", options->dparam[SICONOS_DPARAM_RESIDU]);
   }
-  solver_options_clear(options);
+  solver_options_delete(options);
   free(problem);
   free(z);
   free(w);
@@ -375,7 +375,7 @@ static int test_3(void)
   {
     printf("test unsuccessful, residual = %g\n", options->dparam[1]);
   }
-  solver_options_clear(options);
+  solver_options_delete(options);
   options = NULL;
   free(problem);
   free(z);

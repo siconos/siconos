@@ -590,7 +590,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
   if (scontacts) free(scontacts);
 }
 
-void rfc3d_nsgs_set_options(SolverOptions* options)
+void rfc3d_nsgs_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE;

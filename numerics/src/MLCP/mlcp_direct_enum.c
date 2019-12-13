@@ -91,7 +91,7 @@ void mlcp_direct_enum(MixedLinearComplementarityProblem* problem, double *z, dou
   }
 }
 
-void mlcp_direct_enum_set_options(SolverOptions* options)
+void mlcp_direct_enum_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS] = 0;
   options->dparam[SICONOS_DPARAM_MLCP_SIGN_TOL_POS] = 1e-12;

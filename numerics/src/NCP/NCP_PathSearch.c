@@ -31,7 +31,7 @@
 #include "Newton_methods.h"                   // for functions_LSA, init_lsa...
 #include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
 #include "NumericsFwd.h"                      // for SolverOptions, Nonlinea...
-#include "NumericsMatrix.h"                   // for NM_display, NM_free
+#include "NumericsMatrix.h"                   // for NM_display, NM_clear
 #include "PathSearch.h"                       // for pathsearch_data
 #include "SiconosBlas.h"                      // for cblas_daxpy, cblas_ddot
 #include "SiconosSets.h"                      // for set_set_id, SICONOS_SET...
@@ -421,7 +421,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
   if (!preAlloc)
   {
 
-    NM_free(problem->nabla_F);
+    NM_clear(problem->nabla_F);
     free(problem->nabla_F);
     problem->nabla_F = NULL;
 

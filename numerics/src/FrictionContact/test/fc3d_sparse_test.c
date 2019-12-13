@@ -107,7 +107,7 @@ static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, do
     printf("Solver %s (sparse) succeded with %d iterations on problem %s\n", solver_options_id_to_name(solver_id), GET_ITER(SO), problem);
   }
 
-  solver_options_clear(SO);
+  solver_options_delete(SO);
   return info;
 }
 
@@ -153,7 +153,7 @@ static int solve_dense(int solver_id, FrictionContactProblem* FC, double* r, dou
   {
     printf("Solver %s (dense) succeded with %d iterations on problem %s\n", solver_options_id_to_name(solver_id), GET_ITER(SO), problem);
   }
-  solver_options_clear(SO);
+  solver_options_delete(SO);
   return info;
 }
 

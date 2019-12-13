@@ -131,7 +131,7 @@ int fc3d_nonsmooth_Newton_NaturalMap_compute_error(
   }
 }
 
-void fc3d_nsn_nm_set_options(SolverOptions* options)
+void fc3d_nsn_nm_set_default(SolverOptions* options)
 {
   options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/

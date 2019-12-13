@@ -524,7 +524,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 
 }
 
-void fc2d_latin_set_options(SolverOptions *options)
+void fc2d_latin_set_default(SolverOptions *options)
 {
   options->dparam[SICONOS_FRICTION_2D_K_LATIN] = 0.3;
 }

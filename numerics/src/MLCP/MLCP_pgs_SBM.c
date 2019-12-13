@@ -233,7 +233,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
 
 
 
-void mlcp_pgs_sbm_set_options(SolverOptions* options)
+void mlcp_pgs_sbm_set_default(SolverOptions* options)
 {
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PGS);

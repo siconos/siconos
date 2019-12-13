@@ -384,7 +384,7 @@ void mlcp_direct(MixedLinearComplementarityProblem* problem, double *z, double *
   }
 }
 
-void mlcp_direct_set_options(SolverOptions* options)
+void mlcp_direct_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_DPARAM_MLCP_SIGN_TOL_POS] = 1e-12;
   options->dparam[SICONOS_DPARAM_MLCP_SIGN_TOL_NEG] = 1e-12;

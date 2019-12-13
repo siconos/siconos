@@ -32,15 +32,25 @@ using namespace RELATION;
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
+#include "GenericMechanical_cst.h"          // for SICONOS_GENERIC_MECHANICA...
 #include <debug.h>
 
 
 GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
-  LinearOSNS()
+  GenericMechanical(
+     SP::SolverOptions(solver_options_create(SICONOS_GENERIC_MECHANICAL_NSGS),
+                       solver_options_delete))
 {
+  solver_options_update_internal(_numerics_solver_options.get(), 1, FC3D_Solver_Id);
+}
+
+
+GenericMechanical::GenericMechanical(SP::SolverOptions options):
+  LinearOSNS(options)
+{
+  assert(options->solverId = SICONOS_GENERIC_MECHANICAL_NSGS);
   _numericsMatrixStorageType = NM_SPARSE_BLOCK;
   _pnumerics_GMP = genericMechanicalProblem_new();
-  solver_options_update_internal(&*_numerics_solver_options, 1, FC3D_Solver_Id);
 }
 
 

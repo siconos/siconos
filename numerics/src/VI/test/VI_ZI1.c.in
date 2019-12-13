@@ -24,7 +24,7 @@
 #include "NumericsFwd.h"            // for VariationalInequality, SolverOptions
 #include "NumericsMatrix.h"         // for NM_create_from_data, NM_DENSE
 #include "SiconosSets.h"            // for box_constraints, SICONOS_SET_BOX
-#include "SolverOptions.h"          // for SolverOptions, solver_options_clear
+#include "SolverOptions.h"          // for SolverOptions, solver_options_delete
 #include "VI_cst.h"                 // for SICONOS_VI_BOX_AVI_LSA
 #include "VariationalInequality.h"  // for VariationalInequality, VI_get_env
 
@@ -168,7 +168,7 @@ int main(void)
     xk[1] = F[1];
     t = k*sim_data.h;
   }
-  solver_options_clear(options);
+  solver_options_delete(options);
   options = NULL;
   free(problem->nabla_F);
   problem->nabla_F = NULL;

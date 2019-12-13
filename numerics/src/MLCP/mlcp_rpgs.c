@@ -204,7 +204,7 @@ void mlcp_rpgs(MixedLinearComplementarityProblem* problem, double *z, double *w,
   return;
 }
 
-void mlcp_rpgs_set_options(SolverOptions* options)
+void mlcp_rpgs_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_DPARAM_MLCP_RHO] = 0.5; /*rho*/
   options->filterOn = false;

@@ -24,6 +24,7 @@
 #include "SiconosSets.h" // from numerics, for polyhedron
 //#include <AVI_Solvers.h>
 #include <NonSmoothDrivers.h>
+#include "SolverOptions.h" // for solver_options_create ...
 
 #include <limits>
 #include <cstdlib>
@@ -83,11 +84,18 @@ struct AVI::_BoundsNSLEffect : public SiconosVisitor
  * END visitor for nslaw
 */
 
-AVI::AVI(int numericsSolverId): LinearOSNS(numericsSolverId)
+
+AVI::AVI(int numericsSolverId):
+  AVI(SP::SolverOptions(solver_options_create(numericsSolverId),
+                        solver_options_delete))
+{}
+
+AVI::AVI(SP::SolverOptions options):
+  LinearOSNS(options), _numerics_problem(new AffineVariationalInequalities)
 {
-  _numerics_problem.reset(new AffineVariationalInequalities);
   _numerics_problem->poly.split = new polyhedron;
 }
+
 
 void AVI::initialize(SP::Simulation sim)
 {

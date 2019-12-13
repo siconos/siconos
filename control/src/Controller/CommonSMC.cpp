@@ -17,10 +17,13 @@
 */
 
 #include "ModelingTools.hpp"
+#include "SiconosAlgebraProd.hpp"
+#include "SiconosAlgebraScal.hpp"
 #include "SimulationTools.hpp"
 #include "CommonSMC.hpp"
 #include "ControlSensor.hpp"
 #include "FirstOrderR_helpers.hpp"
+#include "InvertMatrix.hpp" // for invertMatrix ...
 #include "SolverOptions.h"
 #include <string>
 
@@ -198,7 +201,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
     SP::SimpleMatrix tmpM(new SimpleMatrix(_Csurface->size(0), _B->size(1)));
     _invCB.reset(new SimpleMatrix(*tmpM));
     prod(*_Csurface, *_B, *tmpM);
-    invertMatrix(*tmpM, *_invCB);
+    InvertMatrix(*tmpM->dense(), *_invCB->dense());
   }
   DEBUG_END("CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulation & s)\n");
 }

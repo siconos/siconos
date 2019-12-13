@@ -20,7 +20,6 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "OSNSMatrix.hpp"
-#include "Model.hpp"
 #include "TimeStepping.hpp"
 #include "OneStepNSProblem.hpp"
 

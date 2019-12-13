@@ -67,11 +67,19 @@ protected:
 
 public:
 
-  /** Constructor with Numerics solver id (default = Lemke)
-      \param numericsSolverId id of numerics solver
-  */
+  /** constructor from numerics solver id
+   *  \param numericsSolverId id of numerics solver, default =  SICONOS_LCP_LEMKE
+   */
   LCP(int numericsSolverId = SICONOS_LCP_LEMKE);
 
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  LCP(SP::SolverOptions options);
+  
   /** destructor */
   ~LCP(){};
 

@@ -23,6 +23,7 @@
 #include "SimpleMatrix.hpp"
 #include "BlockMatrixIterators.hpp"
 #include "BlockMatrix.hpp"
+#include "BlockVector.hpp"
 
 #include "SiconosAlgebra.hpp"
 
@@ -418,4 +419,58 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
   }
 }
 
+void subprod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, const Index& coord, bool init)
+{
+  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 
+  // Number of the subvector of x that handles element at position coord[4]
+  std::size_t firstBlockNum = x.getNumVectorAtPos(coord[4]);
+  // Number of the subvector of x that handles element at position coord[5]
+  unsigned int lastBlockNum = x.getNumVectorAtPos(coord[5]);
+  Index subCoord = coord;
+  SPC::SiconosVector  tmp = x[firstBlockNum];
+  std::size_t subSize =  tmp->size(); // Size of the sub-vector
+  const SP::Index xTab = x.tabIndex();
+  if(firstBlockNum != 0)
+  {
+    subCoord[4] -= (*xTab)[firstBlockNum - 1];
+    subCoord[5] =  std::min(coord[5] - (*xTab)[firstBlockNum - 1], subSize);
+  }
+  else
+    subCoord[5] =  std::min(coord[5], subSize);
+
+  if(firstBlockNum == lastBlockNum)
+  {
+    subprod(A, *tmp, y, subCoord, init);
+  }
+  else
+  {
+    unsigned int xPos = 0 ; // Position in x of the current sub-vector of x
+    bool firstLoop = true;
+    subCoord[3] = coord[2] + subCoord[5] - subCoord[4];
+    for(VectorOfVectors::const_iterator it = x.begin(); it != x.end(); ++it)
+    {
+      if((*it)->num() == 0)
+        SiconosMatrixException::selfThrow("subprod(A,x,y) error: not yet implemented for x block of blocks ...");
+      if(xPos >= firstBlockNum && xPos <= lastBlockNum)
+      {
+        tmp = x[xPos];
+        if(firstLoop)
+        {
+          subprod(A, *tmp, y, subCoord, init);
+          firstLoop = false;
+        }
+        else
+        {
+          subCoord[2] += subCoord[5] - subCoord[4]; // !! old values for 4 and 5
+          subSize = tmp->size();
+          subCoord[4] = 0;
+          subCoord[5] = std::min(coord[5] - (*xTab)[xPos - 1], subSize);
+          subCoord[3] = subCoord[2] + subCoord[5] - subCoord[4];
+          subprod(A, *tmp, y, subCoord, false);
+        }
+      }
+      xPos++;
+    }
+  }
+}

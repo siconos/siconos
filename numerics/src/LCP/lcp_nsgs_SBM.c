@@ -210,7 +210,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
 
 
-void lcp_nsgs_sbm_set_options(SolverOptions* options)
+void lcp_nsgs_sbm_set_default(SolverOptions* options)
 {
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PSOR);

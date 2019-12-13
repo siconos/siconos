@@ -110,11 +110,11 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned i
   BlockVector& x = *DSlink[FirstOrderR::x];
   BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
-  SP::SiconosVector x_vec(new SiconosVector(x));
-  SP::SiconosVector z_vec(new SiconosVector(z));
+  SiconosVector x_vec;
+  x_vec.initFromBlock(x);
   SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
-  computeh(time, *x_vec, lambda, y);
+  computeh(time, x_vec, lambda, y);
   DEBUG_EXPR(y.display());
   DEBUG_END("FirstOrderType2R::computeOutput \n");
 }
@@ -124,10 +124,11 @@ void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned in
   DEBUG_BEGIN("FirstOrderType2R::computeInput \n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   // copy into Siconos continuous memory vector
-  SP::SiconosVector r_vec(new SiconosVector(*DSlink[FirstOrderR::r]));
+  SiconosVector r_vec;
+  r_vec.initFromBlock(*DSlink[FirstOrderR::r]);
   SiconosVector& lambda = *inter.lambda(level);
-  computeg(time, lambda,  *r_vec);
-  *DSlink[FirstOrderR::r] = *r_vec;
+  computeg(time, lambda,  r_vec);
+  *DSlink[FirstOrderR::r] = r_vec;
   DEBUG_EXPR(DSlink[FirstOrderR::r]->display());
   DEBUG_END("FirstOrderType2R::computeInput \n");
 }

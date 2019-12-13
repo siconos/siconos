@@ -654,6 +654,13 @@ def generate_cmakelists(args):
     if args.include_directories:
         args.includes += args.include_directories
 
+    # == runtime dependencies ==
+    # boost timer is required in many examples.
+    result += 'if(@WITH_CXX@)\n'
+    result += 'set(Boost_NO_BOOST_CMAKE 1)\n'
+    result += 'find_package(Boost @boost_min_version@ COMPONENTS timer @boost_required_components@)\n'
+    result += 'endif()\n'
+    
     # Create executable target
     if not args.is_python and args.driver:
         # -- Main target --
@@ -684,16 +691,9 @@ def generate_cmakelists(args):
 
         # target setup (compile options, headers, links ...)
         result += prepare_target(args.exe_name, args)
-
-        # == Other runtime dependencies ==
-        # boost timer is required in many examples.
-        result += 'if(@WITH_CXX@)\n'
-        result += 'set(Boost_NO_BOOST_CMAKE 1)\n'
-        result += 'find_package(Boost @boost_min_version@ COMPONENTS timer @boost_required_components@)\n'
         result += 'if(Boost_TIMER_FOUND)\n'
         result += '\t target_link_libraries({}'.format(args.exe_name)
         result += ' PUBLIC Boost::timer)\n endif()\n'
-        result += 'endif()\n'
 
         # == install binary ==
         result += 'install(TARGETS {}'.format(args.exe_name)

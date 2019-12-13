@@ -95,7 +95,7 @@ extern "C"
   /** @addtogroup SetSolverOptions
       @{
   */
-  void nonSmoothNewton_set_options(SolverOptions* options); 
+  void nonSmoothNewton_set_default(SolverOptions* options); 
   /** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

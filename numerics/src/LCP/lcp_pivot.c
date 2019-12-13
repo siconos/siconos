@@ -561,7 +561,7 @@ _exit:
 }
 
 
-void lcp_pivot_set_options(SolverOptions* options)
+void lcp_pivot_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE; // default
   // the pivoting method should be overwritten for BARD or MURTY before calling solver.

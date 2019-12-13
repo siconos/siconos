@@ -38,7 +38,7 @@ int main(void)
     {
       options = solver_options_create(solvers[s]);
       solver_options_print(options);
-      solver_options_clear(options);
+      solver_options_delete(options);
       options = NULL;
     }
   printf("\n End of test on Default SolverOptions\n");

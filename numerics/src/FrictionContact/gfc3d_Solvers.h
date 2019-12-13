@@ -211,9 +211,9 @@ extern "C"
 
   /** \addtogroup SetSolverOptions @{
    */
-  void gfc3d_nsn_ac_set_options(SolverOptions* options);
-  void gfc3d_aclmfp_set_options(SolverOptions* options);
-  void gfc3d_admm_set_options(SolverOptions* options);
+  void gfc3d_nsn_ac_set_default(SolverOptions* options);
+  void gfc3d_aclmfp_set_default(SolverOptions* options);
+  void gfc3d_admm_set_default(SolverOptions* options);
 
   /** @} */
 

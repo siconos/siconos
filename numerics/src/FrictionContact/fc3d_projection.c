@@ -841,7 +841,7 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
 
 }
 
-void fc3d_poc_set_options(SolverOptions* options)
+void fc3d_poc_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = 0; // this will be set by external solver
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 0.; // Used only for ProjectionOnConeWithRegularization

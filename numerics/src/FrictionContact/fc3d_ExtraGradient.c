@@ -325,7 +325,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
 }
 
 
-void fc3d_eg_set_options(SolverOptions* options)
+void fc3d_eg_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = -1.0; // rho is variable by default
 }

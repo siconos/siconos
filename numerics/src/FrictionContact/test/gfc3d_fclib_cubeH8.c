@@ -36,7 +36,7 @@ int main(void)
 
   info = globalFrictionContact_test_function(&current);
   
-  solver_options_clear(current.options);
+  solver_options_delete(current.options);
   printf("\nEnd of test on %s\n",filename);
   return info;
 }

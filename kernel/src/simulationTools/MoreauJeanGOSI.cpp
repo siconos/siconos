@@ -16,8 +16,9 @@
  * limitations under the License.
  */
 #include "MoreauJeanGOSI.hpp"
-#include "SimpleMatrixFriends.hpp"
-#include "SiconosVectorFriends.hpp"
+#include "SiconosAlgebraProd.hpp"
+#include "SiconosAlgebraScal.hpp"
+//#include "SiconosVectorFriends.hpp"
 #include "Simulation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"

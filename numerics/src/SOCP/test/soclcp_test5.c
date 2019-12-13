@@ -36,7 +36,7 @@ int main(void)
   options->iparam[0] = 2000000;
   info = soclcp_test_function(finput, options);
 
-  solver_options_clear(options);
+  solver_options_delete(options);
   options = NULL;
 
   fclose(finput);

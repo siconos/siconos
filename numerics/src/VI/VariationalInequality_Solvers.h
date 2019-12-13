@@ -140,11 +140,11 @@ extern "C"
 
   /** \addtogroup SetSolverOptions @{
   */
-  void variationalInequality_ExtraGradient_set_options(SolverOptions* options);
-  void variationalInequality_HyperplaneProjection_set_options(SolverOptions* options);
-  void variationalInequality_FixedPointProjection_set_options(SolverOptions* options);
-  void variationalInequality_BOX_QI_set_options(SolverOptions* options);
-  void variationalInequality_BOX_AVI_set_options(SolverOptions* options);
+  void variationalInequality_ExtraGradient_set_default(SolverOptions* options);
+  void variationalInequality_HyperplaneProjection_set_default(SolverOptions* options);
+  void variationalInequality_FixedPointProjection_set_default(SolverOptions* options);
+  void variationalInequality_BOX_QI_set_default(SolverOptions* options);
+  void variationalInequality_BOX_AVI_set_default(SolverOptions* options);
   /** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

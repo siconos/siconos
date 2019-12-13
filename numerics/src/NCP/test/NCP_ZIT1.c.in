@@ -195,7 +195,7 @@ int main(void)
     xk[1] = F[2] - z[3];
     t = k*sim_data.h;
   }
-  solver_options_clear(options);
+  solver_options_delete(options);
   free(problem->nabla_F);
   free(problem);
   return info;

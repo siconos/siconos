@@ -33,10 +33,15 @@ using namespace RELATION;
 
 
 Relay::Relay(int numericsSolverId):
-  LinearOSNS(numericsSolverId)
-{
-  _numerics_problem.reset(new RelayProblem);
-}
+  Relay(SP::SolverOptions(solver_options_create(numericsSolverId),
+                          solver_options_delete))
+{}
+
+Relay::Relay(SP::SolverOptions options):
+  LinearOSNS(options), _numerics_problem(new RelayProblem)
+{}
+
+
 /* nslaw dispatch on bounds */
 
 struct Relay::_BoundsNSLEffect : public SiconosVisitor

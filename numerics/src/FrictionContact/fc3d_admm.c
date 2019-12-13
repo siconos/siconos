@@ -24,7 +24,7 @@
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
-#include "NumericsMatrix.h"          // for NM_gemv, NM_free, NM_copy, NM_new
+#include "NumericsMatrix.h"          // for NM_gemv, NM_clear, NM_copy, NM_new
 #include "NumericsSparseMatrix.h"    // for NSM_diag_indices
 #include "SolverOptions.h"           // for SolverOptions, SICONOS_DPARAM_TOL
 /* #define DEBUG_NOCOLOR */
@@ -1083,7 +1083,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
 
 
 
-void fc3d_admm_set_options(SolverOptions* options)
+void fc3d_admm_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] = SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;

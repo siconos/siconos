@@ -119,7 +119,7 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
 }
 
 
-void lcp_pathsearch_set_options(SolverOptions* options)
+void lcp_pathsearch_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE;
   options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 0;

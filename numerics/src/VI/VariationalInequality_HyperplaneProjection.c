@@ -209,7 +209,7 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
 }
 
 
-void variationalInequality_HyperplaneProjection_set_options(SolverOptions* options)
+void variationalInequality_HyperplaneProjection_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_VI_IPARAM_LS_MAX_ITER] = 100;
   options->dparam[SICONOS_VI_DPARAM_LS_TAU] = 1.0; /*tau */

@@ -184,7 +184,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   return;
 }
-void lcp_psor_set_options(SolverOptions* options)
+void lcp_psor_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_LCP_DPARAM_RHO] = 0.1;
 }

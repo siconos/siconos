@@ -24,31 +24,31 @@
 #include <stdlib.h>                         // for free, calloc, malloc
 #include <string.h>                         // for strcmp
 #include "AVI_cst.h"                        // for SICONOS_AVI_CAOFERRIS_STR
-#include "ConvexQP_Solvers.h"               // for convexQP_ADMM_set_options
+#include "ConvexQP_Solvers.h"               // for convexQP_ADMM_set_default
 #include "ConvexQP_cst.h"                   // for SICONOS_CONVEXQP_ADMM_STR
 #include "Friction_cst.h"                   // for SICONOS_FRICTION_2D_CPG_STR
-#include "GenericMechanical_Solvers.h"      // for gmp_set_options
+#include "GenericMechanical_Solvers.h"      // for gmp_set_default
 #include "GenericMechanical_cst.h"          // for SICONOS_GENERIC_MECHANICA...
-#include "LCP_Solvers.h"                    // for lcp_pivot_set_options
+#include "LCP_Solvers.h"                    // for lcp_pivot_set_default
 #include "MCP_cst.h"                        // for SICONOS_MCP_NEWTON_FB_FBL...
-#include "MLCP_Solvers.h"                   // for mlcp_direct_set_options
+#include "MLCP_Solvers.h"                   // for mlcp_direct_set_default
 #include "NCP_cst.h"                        // for SICONOS_NCP_NEWTON_FB_FBL...
-#include "Newton_methods.h"                 // for newton_lsa_set_options
-#include "NonSmoothNewton.h"                // for nonSmoothNewton_set_options
-#include "PathSearch.h"                     // for pathsearch_set_options
-#include "SOCLCP_Solvers.h"                 // for soclcp_nsgs_set_options
+#include "Newton_methods.h"                 // for newton_lsa_set_default
+#include "NonSmoothNewton.h"                // for nonSmoothNewton_set_default
+#include "PathSearch.h"                     // for pathsearch_set_default
+#include "SOCLCP_Solvers.h"                 // for soclcp_nsgs_set_default
 #include "SOCLCP_cst.h"                     // for SICONOS_SOCLCP_NSGS_STR
 #include "SiconosNumerics_Solvers.h"        // for SICONOS_REGISTER_SOLVERS
 #include "VI_cst.h"                         // for SICONOS_VI_BOX_AVI_LSA_STR
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
-#include "fc2d_Solvers.h"                   // for fc2d_latin_set_options
-#include "fc3d_Solvers.h"                   // for fc3d_nsgs_set_options
-#include "gfc3d_Solvers.h"                  // for gfc3d_aclmfp_set_options
+#include "fc2d_Solvers.h"                   // for fc2d_latin_set_default
+#include "fc3d_Solvers.h"                   // for fc3d_nsgs_set_default
+#include "gfc3d_Solvers.h"                  // for gfc3d_aclmfp_set_default
 #include "lcp_cst.h"                        // for SICONOS_LCP_AVI_CAOFERRIS...
 #include "mlcp_cst.h"                       // for SICONOS_MLCP_DIRECT_ENUM_STR
 #include "numerics_verbose.h"               // for numerics_printf, numerics...
 #include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERR...
-#include "rolling_fc3d_Solvers.h"           // for rfc3d_poc_set_options
+#include "rolling_fc3d_Solvers.h"           // for rfc3d_poc_set_default
 
 /** Create a struct SolverOptions and initialize its content.
     
@@ -186,7 +186,7 @@ void solver_options_print(SolverOptions* options)
 
 
 
-void solver_options_clear(SolverOptions* op)
+void solver_options_delete(SolverOptions* op)
 {
   if(op)
   {
@@ -212,7 +212,7 @@ void solver_options_clear(SolverOptions* op)
     if(op->internalSolvers)
       {
         for(size_t i = 0; i < op->numberOfInternalSolvers; i++)
-          solver_options_clear(op->internalSolvers[i]);
+          solver_options_delete(op->internalSolvers[i]);
         op->numberOfInternalSolvers = 0;
         free(op->internalSolvers);
       }
@@ -300,7 +300,7 @@ SolverOptions * solver_options_create(int solverId)
   // In each case :
   // - first call a default setup, common to all solvers, with tolerance and max iter value,
   //   to ensure that pointers are ready, and minimum default values set;
-  // - then call <formulation>_<solver_name>_set_options(options) to set value specific to
+  // - then call <formulation>_<solver_name>_set_default(options) to set value specific to
   //   each solver, if required (if not, the function does not exist).
   switch (solverId)
     {
@@ -313,7 +313,7 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_GLOBAL_FRICTION_3D_VI_EG:
       {
         options = solver_options_initialize(solverId, 20000, 1e-3, 0);
-        variationalInequality_ExtraGradient_set_options(options);
+        variationalInequality_ExtraGradient_set_default(options);
         break;
       }
     case SICONOS_VI_FPP:
@@ -324,26 +324,26 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_GLOBAL_FRICTION_3D_VI_FPP:
       {
         options = solver_options_initialize(solverId, 20000, 1e-3, 0);
-        variationalInequality_FixedPointProjection_set_options(options);
+        variationalInequality_FixedPointProjection_set_default(options);
         break;
       }
     case SICONOS_VI_HP:
       {
         options = solver_options_initialize(solverId, 20000, 1e-3, 0);
-        variationalInequality_HyperplaneProjection_set_options(options);
+        variationalInequality_HyperplaneProjection_set_default(options);
         break;
       }
     case SICONOS_VI_BOX_QI:
       {
         options = solver_options_initialize(solverId, 1000, 1e-10, 0);
-        variationalInequality_BOX_QI_set_options(options);
+        variationalInequality_BOX_QI_set_default(options);
         break;
       }
 
     case SICONOS_VI_BOX_AVI_LSA:
       {
         options = solver_options_initialize(solverId, 100, 1e-12, 1);
-        variationalInequality_BOX_AVI_set_options(options);
+        variationalInequality_BOX_AVI_set_default(options);
         break;
       }
 
@@ -360,14 +360,14 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER:
       {
         options = solver_options_initialize(solverId, 20000, 1e-6, 0);
-        convexQP_ProjectedGradient_set_options(options);
+        convexQP_ProjectedGradient_set_default(options);
         break;
       }    
 
     case SICONOS_CONVEXQP_ADMM:
       {
         options = solver_options_initialize(solverId, 20000, 1e-6, 0);
-        convexQP_ADMM_set_options(options);
+        convexQP_ADMM_set_default(options);
         break;
       }   
     // --- LCP and Relay Solvers ---
@@ -378,13 +378,13 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_FRICTION_2D_LEMKE:
       {
         options = solver_options_initialize(solverId, 10000, 1e-6, 0);
-        lcp_lexicolemke_set_options(options);
+        lcp_lexicolemke_set_default(options);
         break;
       }
     case SICONOS_LCP_NSGS_SBM:
       {
         options = solver_options_initialize(solverId, 1000, 1e-6, 1);
-        lcp_nsgs_sbm_set_options(options);
+        lcp_nsgs_sbm_set_default(options);
         break;
       }
     case SICONOS_LCP_PGS:
@@ -402,14 +402,14 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_LCP_LATIN:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 0);
-        lcp_latin_set_options(options);
+        lcp_latin_set_default(options);
         break;
       }
       
     case SICONOS_LCP_LATIN_W:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 0);
-        lcp_latin_w_set_options(options);
+        lcp_latin_w_set_default(options);
         break;
       }
 
@@ -430,21 +430,21 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_LCP_NEWTON_MIN_FBLSA:
       {
         options = solver_options_initialize(solverId, 1000, 1e-10, 0);
-        lcp_newton_FB_set_options(options);
+        lcp_newton_FB_set_default(options);
         break;
       }
       
     case SICONOS_LCP_PSOR:
       {
         options = solver_options_initialize(solverId, 1000, 1e-6, 0);
-        lcp_psor_set_options(options);
+        lcp_psor_set_default(options);
         break;
       }
       
     case SICONOS_LCP_RPGS:
       {
         options = solver_options_initialize(solverId, 10000, 1e-6, 0);
-        lcp_rpgs_set_options(options);
+        lcp_rpgs_set_default(options);
         break;
       }
       
@@ -461,28 +461,28 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_FRICTION_2D_ENUM:
       {
         options = solver_options_initialize(solverId, 0, 1e-6, 0);
-        lcp_enum_set_options(options);
+        lcp_enum_set_default(options);
         break;
       }
       
     case SICONOS_LCP_PIVOT:
       {
         options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0);
-        lcp_pivot_set_options(options);
+        lcp_pivot_set_default(options);
         break;
       }
       
     case SICONOS_LCP_BARD:
       {
         options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0);
-        lcp_pivot_set_options(options);
+        lcp_pivot_set_default(options);
         // iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_BARD; set in lcp_driver
         break;
       }
     case SICONOS_LCP_MURTY:
       {
         options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0);
-        lcp_pivot_set_options(options);
+        lcp_pivot_set_default(options);
         // iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEAST_INDEX set in lcp_driver
         break;
       }
@@ -490,14 +490,14 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_LCP_PATHSEARCH:
       {
         options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0);
-        lcp_pathsearch_set_options(options);
+        lcp_pathsearch_set_default(options);
         break;
       }
 
     case SICONOS_LCP_PIVOT_LUMOD:
       {
         options = solver_options_initialize(solverId, 10000, 100 * DBL_EPSILON, 0);
-        lcp_pivot_lumod_set_options(options); // same as lcp_pivot
+        lcp_pivot_lumod_set_default(options); // same as lcp_pivot
         break;
       }
     
@@ -525,7 +525,7 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_FRICTION_3D_SOCLCP:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-        soclcp_nsgs_set_options(options);
+        soclcp_nsgs_set_default(options);
         break;
       }
 
@@ -534,7 +534,7 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_SOCLCP_ProjectionOnConeWithRegularization:
       {
         options = solver_options_initialize(solverId, 1000, 1e-16, 0);
-        soclcp_projection_set_options(options);
+        soclcp_projection_set_default(options);
         break;
       }
 
@@ -543,43 +543,43 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_MLCP_PGS:
       {
         options = solver_options_initialize(solverId, 1000, 1e-6, 0);
-        mlcp_pgs_set_options(options);
+        mlcp_pgs_set_default(options);
         break;
       }
     case SICONOS_MLCP_PGS_SBM:
       {
         options = solver_options_initialize(solverId, 1000, 1e-6, 1);
-        mlcp_pgs_sbm_set_options(options);
+        mlcp_pgs_sbm_set_default(options);
         break;
       }
     case SICONOS_MLCP_RPGS:
       {
         options = solver_options_initialize(solverId, 1000, 1e-6, 0);
-        mlcp_rpgs_set_options(options);
+        mlcp_rpgs_set_default(options);
         break;
       }
     case SICONOS_MLCP_PSOR:
       {
         options = solver_options_initialize(solverId, 1000, 1e-6, 0);
-        mlcp_psor_set_options(options);
+        mlcp_psor_set_default(options);
         break;
       }
     case SICONOS_MLCP_RPSOR:
       {
         options = solver_options_initialize(solverId, 1000, 1e-6, 0);
-        mlcp_rpsor_set_options(options);
+        mlcp_rpsor_set_default(options);
         break;
       }
     case SICONOS_MLCP_ENUM:
       {
         options = solver_options_initialize(solverId, 10000, 1e-12, 0);
-        mlcp_enum_set_options(options);
+        mlcp_enum_set_default(options);
         break;
       }
     case SICONOS_MLCP_DIRECT_ENUM:
       {
         options = solver_options_initialize(solverId, 10000, 1e-12, 0);
-        mlcp_direct_enum_set_options(options);
+        mlcp_direct_enum_set_default(options);
         break;
       }
     case SICONOS_MLCP_SIMPLEX:
@@ -591,26 +591,26 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_MLCP_DIRECT_SIMPLEX:
       {
         options = solver_options_initialize(solverId, 10000, 1e-12, 0);
-        mlcp_direct_set_options(options);
+        mlcp_direct_set_default(options);
         break;
       }
     case SICONOS_MLCP_PATH_ENUM:
       {
         options = solver_options_initialize(solverId, 10000, 1e-12, 0);
-        mlcp_enum_set_options(options);
+        mlcp_enum_set_default(options);
         break;
       }
     case SICONOS_MLCP_DIRECT_PATH:
       {
         options = solver_options_initialize(solverId, 10000, 1e-12, 0);
-        mlcp_direct_set_options(options);
+        mlcp_direct_set_default(options);
         break;
       }
     case SICONOS_MLCP_DIRECT_PATH_ENUM:
       {
         options = solver_options_initialize(solverId, 10000, 1e-12, 0);
-        mlcp_enum_set_options(options);
-        mlcp_direct_set_options(options);
+        mlcp_enum_set_default(options);
+        mlcp_direct_set_default(options);
         break;
       }
     case SICONOS_MLCP_FB:
@@ -621,7 +621,7 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_MLCP_DIRECT_FB:
       {
         options = solver_options_initialize(solverId, 10000, 1e-12, 0);
-        mlcp_direct_set_options(options);
+        mlcp_direct_set_default(options);
         break;
       }
 
@@ -631,13 +631,13 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_NCP_NEWTON_MIN_FBLSA:
       {
         options = solver_options_initialize(solverId, 1000, 1e-12, 0);
-        newton_lsa_set_options(options);
+        newton_lsa_set_default(options);
         break;
       };
     case SICONOS_NCP_PATHSEARCH:
       {
         options = solver_options_initialize(solverId, 100, 1e-12, 1);
-        pathsearch_set_options(options);
+        pathsearch_set_default(options);
         break;
       }
     case SICONOS_NCP_PATH:
@@ -652,13 +652,13 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_MCP_NEWTON_MIN_FBLSA:
       {
         options = solver_options_initialize(solverId, 1000, 1e-10, 0);
-        newton_lsa_set_options(options);
+        newton_lsa_set_default(options);
         break;
       }
     case SICONOS_MCP_OLD_FB:
       {
         options = solver_options_initialize(solverId, 10, 1e-7, 0);
-        nonSmoothNewton_set_options(options);
+        nonSmoothNewton_set_default(options);
         break;
       }
 
@@ -668,7 +668,7 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_FRICTION_2D_NSGS:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 0);
-        fc2d_nsgs_set_options(options);
+        fc2d_nsgs_set_default(options);
         break;
       }
     case SICONOS_FRICTION_2D_CPG:
@@ -679,7 +679,7 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_FRICTION_2D_LATIN:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 0);
-        fc2d_latin_set_options(options);
+        fc2d_latin_set_default(options);
         break;
       }
       
@@ -688,14 +688,14 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-        fc3d_nsgs_set_options(options);
+        fc3d_nsgs_set_default(options);
         break;
       }
       
     case SICONOS_ROLLING_FRICTION_3D_NSGS:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-        fc3d_nsgs_set_options(options);
+        fc3d_nsgs_set_default(options);
         break;
       }
 
@@ -703,72 +703,72 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-        fc3d_nsgs_velocity_set_options(options);
+        fc3d_nsgs_velocity_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_PROX:
     case SICONOS_GLOBAL_FRICTION_3D_PROX_WR:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-        fc3d_proximal_set_options(options);
+        fc3d_proximal_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_TFP:
     case SICONOS_GLOBAL_FRICTION_3D_TFP_WR:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-        fc3d_tfp_set_options(options);
+        fc3d_tfp_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_NSN_AC:
     case SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR:
       {
         options = solver_options_initialize(solverId, 200, 1e-3, 0);
-        fc3d_nsn_ac_set_options(options);
+        fc3d_nsn_ac_set_default(options);
         break;
       }
     case SICONOS_GLOBAL_FRICTION_3D_NSN_AC:
       {
         options = solver_options_initialize(solverId, 200, 1e-10, 0);
-        gfc3d_nsn_ac_set_options(options);
+        gfc3d_nsn_ac_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_NSN_AC_TEST:
       {
         options = solver_options_initialize(solverId, 1000, 1e-10, 0);
-        newton_lsa_set_options(options);
+        newton_lsa_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_DSFP:
     case SICONOS_GLOBAL_FRICTION_3D_DSFP_WR:
       {
         options = solver_options_initialize(solverId, 20000, 1e-3, 0);
-        fc3d_dsfp_set_options(options);
+        fc3d_dsfp_set_default(options);
         break;
       }
 
     case SICONOS_FRICTION_3D_HP:
       {
         options = solver_options_initialize(solverId, 2000000, 1e-3, 0);
-        fc3d_hp_set_options(options);
+        fc3d_hp_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_FPP:
       {
         options = solver_options_initialize(solverId, 20000, 1e-3, 0);
-        fc3d_fpp_set_options(options);
+        fc3d_fpp_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_EG:
       {
         options = solver_options_initialize(solverId, 20000, 1e-3, 0);
-        fc3d_eg_set_options(options);
+        fc3d_eg_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_NSN_FB:
       {
         options = solver_options_initialize(solverId, 200, 1e-3, 0);
-        fc3d_nsn_fb_set_options(options);
+        fc3d_nsn_fb_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_GAMS_PATH:
@@ -785,52 +785,52 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_FRICTION_3D_ACLMFP:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-        fc3d_aclmfp_set_options(options);
+        fc3d_aclmfp_set_default(options);
         break;
       }
     case SICONOS_GLOBAL_FRICTION_3D_ACLMFP:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-        gfc3d_aclmfp_set_options(options);
+        gfc3d_aclmfp_set_default(options);
         break;
       }
 
     case SICONOS_FRICTION_3D_NSN_NM:
       {
         options = solver_options_initialize(solverId, 200, 1e-3, 0);
-        fc3d_nsn_nm_set_options(options);
+        fc3d_nsn_nm_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_PFP:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 2);
-        fc3d_pfp_set_options(options);
+        fc3d_pfp_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_ADMM:
     case SICONOS_GLOBAL_FRICTION_3D_ADMM_WR:
       {
         options = solver_options_initialize(solverId, 20000, 1e-6, 0);
-        fc3d_admm_set_options(options);
+        fc3d_admm_set_default(options);
         break;
       }
     case SICONOS_GLOBAL_FRICTION_3D_ADMM:
       {
         options = solver_options_initialize(solverId, 20000, 1e-6, 0);
-        gfc3d_admm_set_options(options);
+        gfc3d_admm_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_ONECONTACT_NSN:
       {
         options = solver_options_initialize(solverId, 10, 1e-14, 0);
-        fc3d_onecontact_nsn_set_options(options);
+        fc3d_onecontact_nsn_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP:
     case SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID:
       {
         options = solver_options_initialize(solverId, 10, 1e-14, 0);
-        fc3d_onecontact_nsn_gp_set_options(options);
+        fc3d_onecontact_nsn_gp_set_default(options);
         break;
       }
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone:
@@ -842,20 +842,20 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration:
       {
         options = solver_options_initialize(solverId, 1000, 1e-14, 0);
-        fc3d_poc_set_options(options);
+        fc3d_poc_set_default(options);
         break;
       }
     case SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone:
       {
         options = solver_options_initialize(solverId, 1000, 1e-12, 0);
-        rfc3d_poc_set_options(options);
+        rfc3d_poc_set_default(options);
         break;
       }
       
     case SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration:
       {
         options = solver_options_initialize(solverId, 1000, 1e-12, 0);
-        rfc3d_poc_withLocalIteration_set_options(options);
+        rfc3d_poc_withLocalIteration_set_default(options);
         break;
       }
 
@@ -878,7 +878,7 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_GENERIC_MECHANICAL_NSGS:
       {
         options = solver_options_initialize(solverId, 10000, 1e-4, 3);
-        gmp_set_options(options);
+        gmp_set_default(options);
         break;
       }
     default:
@@ -896,7 +896,7 @@ void solver_options_update_internal(SolverOptions* parent, size_t internal_solve
   assert(parent->numberOfInternalSolvers > internal_solver_number);
 
   // Destroy current internal solver and create a new one with the new id.
-  solver_options_clear(parent->internalSolvers[internal_solver_number]);
+  solver_options_delete(parent->internalSolvers[internal_solver_number]);
   parent->internalSolvers[internal_solver_number] = solver_options_create(solver_id);
 }
 

@@ -2,7 +2,7 @@
 #include <stdlib.h>          // for free, malloc
 #include <string.h>          // for memcpy
 #include "NumericsFwd.h"     // for NumericsMatrix
-#include "NumericsMatrix.h"  // for NumericsMatrix, NM_free, NM_new, NM_writ...
+#include "NumericsMatrix.h"  // for NumericsMatrix, NM_clear, NM_new, NM_writ...
 #include "pinv.h"            // for pinv
 int main(void)
 {

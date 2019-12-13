@@ -216,7 +216,7 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   return;
 }
-void lcp_rpgs_set_options(SolverOptions* options)
+void lcp_rpgs_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_LCP_DPARAM_RHO] = 1.0;
 }

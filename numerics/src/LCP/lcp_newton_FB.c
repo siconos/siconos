@@ -72,7 +72,7 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 }
 
 
-void lcp_newton_FB_set_options(SolverOptions* options)
+void lcp_newton_FB_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;

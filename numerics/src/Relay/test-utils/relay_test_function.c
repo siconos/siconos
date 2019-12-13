@@ -21,7 +21,7 @@
 #include "NonSmoothDrivers.h"  // for relay_driver
 #include "NumericsFwd.h"       // for RelayProblem, SolverOptions
 #include "RelayProblem.h"      // for RelayProblem, freeRelay_problem, relay...
-#include "SolverOptions.h"     // for solver_options_clear, SolverOptions
+#include "SolverOptions.h"     // for solver_options_delete, SolverOptions
 #include "relay_test_utils.h"  // for relay_test_function
 #include "test_utils.h"        // for TestCase
 

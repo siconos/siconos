@@ -24,7 +24,7 @@
 #include <stdlib.h>            // for free, calloc, malloc, getenv, atoi
 #include "ArmijoSearch.h"      // for linesearch_Armijo2, armijo_extra_params
 #include "GoldsteinSearch.h"   // for goldstein_extra_params, search_Goldste...
-#include "NumericsMatrix.h"    // for NM_gesv, NM_tgemv, NM_duplicate, NM_free
+#include "NumericsMatrix.h"    // for NM_gesv, NM_tgemv, NM_duplicate, NM_clear
 #include "SiconosBlas.h"       // for cblas_dcopy, cblas_dnrm2, cblas_dscal
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
 #include "debug.h"             // for DEBUG_PRINT
@@ -510,7 +510,7 @@ newton_LSA_free:
   newton_LSA_free_solverOptions(options);
 }
 
-void newton_lsa_set_options(SolverOptions* options)
+void newton_lsa_set_default(SolverOptions* options)
 {
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;

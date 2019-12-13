@@ -346,7 +346,7 @@ int soclcp_projectionOnCylinder_solve(SecondOrderConeLinearComplementarityProble
 
 }
 
-void soclcp_projection_set_options(SolverOptions* options)
+void soclcp_projection_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
 }

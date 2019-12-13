@@ -297,23 +297,23 @@ extern "C"
 
   /** \addtogroup SetSolverOptions @{
    */
-  void fc3d_nsgs_set_options(SolverOptions* options);
-  void fc3d_nsgs_velocity_set_options(SolverOptions* options);
-  void fc3d_proximal_set_options(SolverOptions* options);
-  void fc3d_tfp_set_options(SolverOptions* options);
-  void fc3d_nsn_ac_set_options(SolverOptions* options);
-  void fc3d_dsfp_set_options(SolverOptions* options);
-  void fc3d_hp_set_options(SolverOptions* options);
-  void fc3d_fpp_set_options(SolverOptions* options);
-  void fc3d_eg_set_options(SolverOptions* options);
-  void fc3d_nsn_fb_set_options(SolverOptions* options);
-  void fc3d_aclmfp_set_options(SolverOptions* options);
-  void fc3d_nsn_nm_set_options(SolverOptions* options);
-  void fc3d_pfp_set_options(SolverOptions* options);
-  void fc3d_admm_set_options(SolverOptions* options);
-  void fc3d_onecontact_nsn_set_options(SolverOptions* options);
-  void fc3d_onecontact_nsn_gp_set_options(SolverOptions* options);
-  void fc3d_poc_set_options(SolverOptions* options);
+  void fc3d_nsgs_set_default(SolverOptions* options);
+  void fc3d_nsgs_velocity_set_default(SolverOptions* options);
+  void fc3d_proximal_set_default(SolverOptions* options);
+  void fc3d_tfp_set_default(SolverOptions* options);
+  void fc3d_nsn_ac_set_default(SolverOptions* options);
+  void fc3d_dsfp_set_default(SolverOptions* options);
+  void fc3d_hp_set_default(SolverOptions* options);
+  void fc3d_fpp_set_default(SolverOptions* options);
+  void fc3d_eg_set_default(SolverOptions* options);
+  void fc3d_nsn_fb_set_default(SolverOptions* options);
+  void fc3d_aclmfp_set_default(SolverOptions* options);
+  void fc3d_nsn_nm_set_default(SolverOptions* options);
+  void fc3d_pfp_set_default(SolverOptions* options);
+  void fc3d_admm_set_default(SolverOptions* options);
+  void fc3d_onecontact_nsn_set_default(SolverOptions* options);
+  void fc3d_onecontact_nsn_gp_set_default(SolverOptions* options);
+  void fc3d_poc_set_default(SolverOptions* options);
 
 
 

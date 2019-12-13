@@ -251,14 +251,14 @@ extern "C"
   /** @addtogroup SetSolverOptions
       @{
   */
-  void mlcp_pgs_set_options(SolverOptions* options);
-  void mlcp_pgs_sbm_set_options(SolverOptions* options);
-  void mlcp_rpgs_set_options(SolverOptions* options);
-  void mlcp_psor_set_options(SolverOptions* options);
-  void mlcp_rpsor_set_options(SolverOptions* options);
-  void mlcp_direct_set_options(SolverOptions* options);
-  void mlcp_direct_enum_set_options(SolverOptions* options);
-  void mlcp_enum_set_options(SolverOptions* options);
+  void mlcp_pgs_set_default(SolverOptions* options);
+  void mlcp_pgs_sbm_set_default(SolverOptions* options);
+  void mlcp_rpgs_set_default(SolverOptions* options);
+  void mlcp_psor_set_default(SolverOptions* options);
+  void mlcp_rpsor_set_default(SolverOptions* options);
+  void mlcp_direct_set_default(SolverOptions* options);
+  void mlcp_direct_enum_set_default(SolverOptions* options);
+  void mlcp_enum_set_default(SolverOptions* options);
   /** @} */
 
   

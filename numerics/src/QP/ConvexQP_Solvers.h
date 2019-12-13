@@ -67,8 +67,8 @@ extern "C"
   /** @addtogroup SetSolverOptions
       @{
   */
-  void convexQP_ProjectedGradient_set_options(SolverOptions* options);
-  void convexQP_ADMM_set_options(SolverOptions* options);
+  void convexQP_ProjectedGradient_set_default(SolverOptions* options);
+  void convexQP_ADMM_set_default(SolverOptions* options);
   
   /** @} */
 

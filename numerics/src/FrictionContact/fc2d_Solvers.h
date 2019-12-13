@@ -127,8 +127,8 @@ extern "C"
       @{
   */
 
-  void fc2d_nsgs_set_options(SolverOptions* options);
-  void fc2d_latin_set_options(SolverOptions* options);
+  void fc2d_nsgs_set_default(SolverOptions* options);
+  void fc2d_latin_set_default(SolverOptions* options);
 
 
   /** @} */

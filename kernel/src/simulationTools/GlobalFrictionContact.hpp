@@ -77,19 +77,18 @@ class GlobalFrictionContact : public LinearOSNS
 {
 private:
   /** default constructor */
-  GlobalFrictionContact() {};
+  GlobalFrictionContact() = default;
   
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(GlobalFrictionContact);
 
-
   /** Type (dimension) of the contact problem (2D or 3D) */
-  int _contactProblemDim;
+  int _contactProblemDim = 3;
 
   /** size of the local problem to solve */
-  size_t _sizeGlobalOutput;
+  size_t _sizeGlobalOutput = 0;
 
   /** contains the vector globalVelocities of a GlobalFrictionContact system */
   SP::SiconosVector _globalVelocities;
@@ -109,11 +108,23 @@ protected:
   GlobalFrictionContactProblem _numerics_problem;
 public:
 
-  /** constructor from data
-   *  \param dimPb dimension (2D or 3D) of the friction-contact problem
-   *  \param numericsSolverId solver to be used (see the documentation of siconos/numerics)
-   */
+  /** constructor (solver id and dimension)
+      \param dimPb dimension (2D or 3D) of the friction-contact problem
+      \param numericsSolverId id of the solver to be used, optional,
+      default : SICONOS_GLOBAL_FRICTION_3D_NSGS
+      \rst
+      see :ref:`problems_and_solvers` for details.
+      \endrst
+  */
   GlobalFrictionContact(int dimPb, int numericsSolverId = SICONOS_GLOBAL_FRICTION_3D_NSGS);
+
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  GlobalFrictionContact(int dimPb, SP::SolverOptions options);
 
   /** destructor
    */

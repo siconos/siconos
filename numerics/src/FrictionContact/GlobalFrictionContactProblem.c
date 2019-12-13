@@ -21,7 +21,7 @@
 #include <sys/errno.h>         // for errno
 #include <string.h>            // for memcpy
 #include "SiconosBlas.h"         // for cblas_dscal, cblas_dcopy
-#include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_free
+#include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO
 #include "io_tools.h"
 #include "debug.h"
@@ -165,33 +165,33 @@ void globalFrictionContact_free(GlobalFrictionContactProblem* problem)
   {
     NM_clear(problem->M);
     free(problem->M);
-    problem->M = NULL;
   }
+  problem->M = NULL;
 
   if (problem->H)
   {
     NM_clear(problem->H);
     free(problem->H);
-    problem->H = NULL;
   }
+  problem->H = NULL;
 
   if (problem->mu)
   {
     free(problem->mu);
-    problem->mu = NULL;
   }
+  problem->mu = NULL;
 
   if (problem->q)
   {
     free(problem->q);
-    problem->q = NULL;
   }
+  problem->q = NULL;
 
   if (problem->b)
   {
     free(problem->b);
-    problem->b = NULL;
   }
+  problem->b = NULL;
 
   if (problem->env) assert(0 && "globalFrictionContact_free :: problem->env != NULL, don't know what to do");
 

@@ -50,7 +50,7 @@ extern "C"
 
   /** \addtogroup SetSolverOptions @{
    */
-  void gmp_set_options(SolverOptions* options);
+  void gmp_set_default(SolverOptions* options);
   /** @} */
 
 

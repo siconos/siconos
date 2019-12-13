@@ -18,7 +18,7 @@
 #include "ConvexQP.h"
 #include <assert.h>          // for assert
 #include <stdlib.h>          // for free, exit, malloc, EXIT_FAILURE
-#include "NumericsMatrix.h"  // for NM_display, NM_free
+#include "NumericsMatrix.h"  // for NM_display, NM_clear
 #include "NumericsVector.h"  // for NV_display
 
 void convexQP_display(ConvexQP* cqp)

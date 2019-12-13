@@ -523,7 +523,7 @@ int rolling_fc3d_projectionOnConeWithLocalIteration_solve(
 
 }
 
-void rfc3d_poc_withLocalIteration_set_options(SolverOptions* options)
+void rfc3d_poc_withLocalIteration_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = 0; // this will be set by external solver
   options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] =
@@ -531,7 +531,7 @@ void rfc3d_poc_withLocalIteration_set_options(SolverOptions* options)
 
 }
 
-void rfc3d_poc_set_options(SolverOptions* options)
+void rfc3d_poc_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = 0; // this will be set by external solver
   options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_IPARAM_USE_TRIVIAL_SOLUTION] =

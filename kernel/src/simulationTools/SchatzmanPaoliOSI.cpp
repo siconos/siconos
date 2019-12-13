@@ -17,8 +17,8 @@
  * limitations under the License.
 */
 #include "SchatzmanPaoliOSI.hpp"
-#include "SimpleMatrixFriends.hpp"
-#include "SiconosVectorFriends.hpp"
+#include "SiconosAlgebraProd.hpp"
+#include "SiconosAlgebraScal.hpp"
 #include "Simulation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonEulerDS.hpp"

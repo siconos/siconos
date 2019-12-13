@@ -378,9 +378,9 @@ extern "C"
       
       Each function is of the form : 
 
-      void  <formulation>_<solver_name>_set_options(SolverOptions*)
+      void  <formulation>_<solver_name>_set_default(SolverOptions*)
       
-      e.g. void lcp_lexicolemke_set_options(SolverOptions * options)
+      e.g. void lcp_lexicolemke_set_default(SolverOptions * options)
     
       No need to create a function if the solvers does not need specific parameters. Use 
       solver_options_initialize instead.
@@ -389,17 +389,17 @@ extern "C"
       
       @{
   */
-  void lcp_lexicolemke_set_options(SolverOptions* options);
-  void lcp_nsgs_sbm_set_options(SolverOptions* options);
-  void lcp_latin_set_options(SolverOptions* options);
-  void lcp_latin_w_set_options(SolverOptions* options);
-  void lcp_newton_FB_set_options(SolverOptions* options);
-  void lcp_psor_set_options(SolverOptions* options);
-  void lcp_rpgs_set_options(SolverOptions* options);
-  void lcp_enum_set_options(SolverOptions* options);
-  void lcp_pivot_set_options(SolverOptions* options);
-  void lcp_pathsearch_set_options(SolverOptions* options);
-  void lcp_pivot_lumod_set_options(SolverOptions* options);
+  void lcp_lexicolemke_set_default(SolverOptions* options);
+  void lcp_nsgs_sbm_set_default(SolverOptions* options);
+  void lcp_latin_set_default(SolverOptions* options);
+  void lcp_latin_w_set_default(SolverOptions* options);
+  void lcp_newton_FB_set_default(SolverOptions* options);
+  void lcp_psor_set_default(SolverOptions* options);
+  void lcp_rpgs_set_default(SolverOptions* options);
+  void lcp_enum_set_default(SolverOptions* options);
+  void lcp_pivot_set_default(SolverOptions* options);
+  void lcp_pathsearch_set_default(SolverOptions* options);
+  void lcp_pivot_lumod_set_default(SolverOptions* options);
   /** @} */
   
   

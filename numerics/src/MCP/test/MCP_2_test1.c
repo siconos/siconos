@@ -140,7 +140,7 @@ static int test_mcp_newton(int solverId)
     printf("w[%i]= %lf\t", i, w[i]);
   }
   printf("\n");
-  solver_options_clear(options);
+  solver_options_delete(options);
   options = NULL;
   free(z);
   free(w);

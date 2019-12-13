@@ -274,7 +274,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
 }
 
 
-void convexQP_ProjectedGradient_set_options(SolverOptions* options)
+void convexQP_ProjectedGradient_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAX_ITER] =20;
   options->dparam[SICONOS_CONVEXQP_PGOC_RHO] = -1.e-3; /* rho is variable by default */

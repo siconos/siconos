@@ -24,14 +24,14 @@ Adding a new solver in numerics
 
      void <formulation>_<solver_name>(<NonSmooth problem type>*problem, double * unknonw_1, ..., int * info, SolverOptions* options)
   
-* If the solver needs some specific values for iparam and dparam, write <formulation>_<solver_name>_set_options function in <formulation>_<solver_name>.c file
+* If the solver needs some specific values for iparam and dparam, write <formulation>_<solver_name>_set_default function in <formulation>_<solver_name>.c file
 
   This function must set all solver specific values of iparam and dparam.
   e.g. :
 
   .. code-block:: 
 
-     void lcp_lexicolemke_set_options(SolverOptions* options)
+     void lcp_lexicolemke_set_default(SolverOptions* options)
      {
      options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE;
      }
@@ -46,7 +46,7 @@ Adding a new solver in numerics
 
     solver_options_initialize(options, solverId, iter_max, tol)
 
-    and a line to call <formulation>_<solver_name>_set_options(options) if (and only if)
+    and a line to call <formulation>_<solver_name>_set_default(options) if (and only if)
     some specific values are required.
 
 
@@ -64,5 +64,5 @@ Adding a new solver in numerics
    lcp_enum(problem, z, w, info, options);
    // ...
    // clear memory
-   solver_options_clear(&options);
+   solver_options_delete(&options);
    

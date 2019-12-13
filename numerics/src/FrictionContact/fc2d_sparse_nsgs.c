@@ -381,5 +381,5 @@ void fc2d_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w,
   free(local_problem);
 }
 
-// options setup is done through fc2d_nsgs_set_options.
+// options setup is done through fc2d_nsgs_set_default.
 

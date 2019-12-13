@@ -209,7 +209,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
 }
 
 
-void fc3d_hp_set_options(SolverOptions* options)
+void fc3d_hp_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 50;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-3;

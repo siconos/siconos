@@ -318,7 +318,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
     numerics_printf("lcp_enum has not found a solution!\n");
 }
 
-void lcp_enum_set_options(SolverOptions* options)
+void lcp_enum_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS] = 0;
   options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED] = 0;

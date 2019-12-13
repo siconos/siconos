@@ -435,7 +435,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 }
-void lcp_latin_w_set_options(SolverOptions* options)
+void lcp_latin_w_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_LCP_DPARAM_LATIN_PARAMETER] = 0.3;
   options->dparam[SICONOS_LCP_DPARAM_RHO] = 1.0;

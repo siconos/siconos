@@ -166,7 +166,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
     fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
 
     fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info, options);
-    solver_options_clear(options_vi_eg);
+    solver_options_delete(options_vi_eg);
     options_vi_eg = NULL;
 
   }
@@ -180,7 +180,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier(
   }
 }
 
-void fc3d_nsn_ac_set_options(SolverOptions* options)
+void fc3d_nsn_ac_set_default(SolverOptions* options)
 {
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;

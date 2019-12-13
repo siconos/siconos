@@ -17,6 +17,7 @@
 */
 
 #include "D1MinusLinearOSI.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "Simulation.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"

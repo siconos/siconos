@@ -208,7 +208,7 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
 
 }
 
-void mlcp_rpsor_set_options(SolverOptions* options)
+void mlcp_rpsor_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_DPARAM_MLCP_RHO] = 0.5;
   options->dparam[SICONOS_DPARAM_MLCP_OMEGA] = 2.;

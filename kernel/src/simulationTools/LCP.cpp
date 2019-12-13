@@ -30,12 +30,15 @@
 #include "debug.h"
 
 
-
 LCP::LCP(int numericsSolverId):
-  LinearOSNS(numericsSolverId)
-{
-  _numerics_problem.reset(new LinearComplementarityProblem);
-}
+  LCP(SP::SolverOptions(solver_options_create(numericsSolverId),
+                        solver_options_delete))
+{}
+
+LCP::LCP(SP::SolverOptions options):
+  LinearOSNS(options), _numerics_problem(new LinearComplementarityProblem)
+{}
+
 
 int LCP::numericsCompute()
 {

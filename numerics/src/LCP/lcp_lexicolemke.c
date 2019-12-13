@@ -452,7 +452,7 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
 }
 
 
-void lcp_lexicolemke_set_options(SolverOptions* options)
+void lcp_lexicolemke_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = 0;
   options->dparam[2] = 0.0 ;

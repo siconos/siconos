@@ -18,7 +18,7 @@
 #include <stdio.h>                 // for printf, fclose, fopen, FILE
 #include "NumericsFwd.h"           // for SolverOptions
 #include "SOCLCP_cst.h"            // for SICONOS_SOCLCP_NSGS, SICONOS_SOCLC...
-#include "SolverOptions.h"         // for SolverOptions, solver_options_clear
+#include "SolverOptions.h"         // for SolverOptions, solver_options_delete
 #include "soclcp_test_function.h"  // for soclcp_test_function
 
 int main(void)
@@ -33,7 +33,7 @@ int main(void)
   printf(" atroizeoieo zi e %d %d", options->solverId, options->internalSolvers[0]->solverId);
   info = soclcp_test_function(finput, options);
 
-  solver_options_clear(options);
+  solver_options_delete(options);
   options = NULL;
 
   fclose(finput);

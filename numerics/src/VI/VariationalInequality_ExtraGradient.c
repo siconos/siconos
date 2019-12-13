@@ -477,7 +477,7 @@ void variationalInequality_ExtraGradient(VariationalInequality* problem, double 
 }
 
 
-void variationalInequality_ExtraGradient_set_options(SolverOptions* options)
+void variationalInequality_ExtraGradient_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = SICONOS_VI_LS_ARMIJO;
   /* options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_FULL; */

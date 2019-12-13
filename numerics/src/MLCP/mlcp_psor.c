@@ -214,7 +214,7 @@ void mlcp_psor(MixedLinearComplementarityProblem* problem, double *z, double *w,
 }
 
 /*\warning omega is not explicitely used. must be completed    */
-void mlcp_psor_set_options(SolverOptions* options)
+void mlcp_psor_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_DPARAM_MLCP_OMEGA] = 2.;
   options->filterOn = false;

@@ -128,7 +128,7 @@ Solve a problem
    lcp_lexicolemke(problem, z, w, info, options);
 
    // Clear memory
-   solver_options_clear(&options);
+   solver_options_delete(&options);
    
    
 .. code-block:: python

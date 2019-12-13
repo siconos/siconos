@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 #include "LagrangianLinearTIR.hpp"
-#include "SimpleMatrixFriends.hpp"
+#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
 #include "Interaction.hpp"
 //
 #include "LagrangianDS.hpp"

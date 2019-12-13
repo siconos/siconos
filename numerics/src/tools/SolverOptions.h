@@ -53,7 +53,7 @@ typedef struct
 
     :func:`solver_options_update_internal`
 
-    :func:`solver_options_clear`
+    :func:`solver_options_delete`
 
     Details: :ref:`solver_options`
     \endrst
@@ -127,7 +127,7 @@ extern "C"
       release memory
       \param options the structure to be cleared.
   */
-  void solver_options_clear(SolverOptions * options);
+  void solver_options_delete(SolverOptions * options);
 
   /** Create and initialize a SolverOptions struct:
       allocate internal memories, set default values 

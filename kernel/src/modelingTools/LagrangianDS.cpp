@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 #include "LagrangianDS.hpp"
-#include "SimpleMatrixFriends.hpp" // for prod
+#include "SiconosAlgebraProd.hpp" // for matrix-vector prod
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
 // #define DEBUG_NOCOLOR

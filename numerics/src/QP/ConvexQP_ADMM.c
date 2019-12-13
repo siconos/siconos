@@ -25,7 +25,7 @@
 #include "ConvexQP_computeError.h"  // for convexQP_compute_error
 #include "ConvexQP_cst.h"           // for SICONOS_CONVEXQP_ADMM_IPARAM_ACCE...
 #include "NumericsFwd.h"            // for SolverOptions, ConvexQP, Numerics...
-#include "NumericsMatrix.h"         // for NM_gemv, NM_free, NM_gesv_expert
+#include "NumericsMatrix.h"         // for NM_gemv, NM_clear, NM_gesv_expert
 #include "NumericsSparseMatrix.h"   // for NSM_TRIPLET, NumericsSparseMatrix
 #include "SolverOptions.h"          // for SolverOptions, solver_options_nul...
 /* #define DEBUG_NOCOLOR */
@@ -569,7 +569,7 @@ void convexQP_ADMM(ConvexQP* problem,
 }
 
 
-void convexQP_ADMM_set_options(SolverOptions* options)
+void convexQP_ADMM_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART; /* 0 Acceleration */
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_RHO_STRATEGY] =

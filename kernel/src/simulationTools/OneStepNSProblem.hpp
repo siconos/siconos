@@ -76,25 +76,22 @@ protected:
   /* serialization hooks */
   ACCEPT_SERIALIZATION(OneStepNSProblem);
 
-  /** Numerics solver id */
-  int _numerics_solver_id;
-
   /** Numerics solver properties */
   SP::SolverOptions _numerics_solver_options;
 
   /** size of the nonsmooth problem */
-  unsigned int _sizeOutput;
+  unsigned int _sizeOutput = 0;
 
   /** link to the simulation that owns the nonsmooth problem */
   SP::Simulation _simulation;
 
   /** level of index sets that is considered by this osnsp */
-  unsigned int _indexSetLevel;
+  unsigned int _indexSetLevel = 0;
 
   /** level of input and output variables of the nonsmooth problems.
    *  We consider that the osnsp computes y[_inputOutputLevel] and lambda[_inputOutputLevel]
    */
-  unsigned int _inputOutputLevel;
+  unsigned int _inputOutputLevel = 0;
 
   /** maximum value for sizeOutput. Set to the number of declared
       constraints by default (topology->getNumberOfConstraints());
@@ -102,33 +99,31 @@ protected:
       call. The best choice is to set maxSize to the estimated maximum
       dimension of the problem. It must not exceed ...
   */
-  unsigned int _maxSize;
+  unsigned int _maxSize = 0;
 
   /*During Newton it, this flag allows to update the numerics matrices only once if necessary.*/
-  bool _hasBeenUpdated;
+  bool _hasBeenUpdated = false;
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
-  /** default constructor
-   */
-  OneStepNSProblem();
+  /** default constructor */
+  OneStepNSProblem() = default;
 
 private:
 
-  /** copy constructor (private => no copy nor pass-by value)
-   */
-  OneStepNSProblem(const OneStepNSProblem&) {};
+  /** copy constructor, forbidden */
+  OneStepNSProblem(const OneStepNSProblem&) = delete;
 
-  /** assignment (private => forbidden) 
-   * \param osnsp
-   * \return OneStepNSProblem&  osnsp
-   */
-  OneStepNSProblem& operator=(const OneStepNSProblem& osnsp);
+  /** assignment, forbidden */
+  OneStepNSProblem& operator=(const OneStepNSProblem& osnsp) = delete;
 
 public:
-  /**  constructor with a solver from Numerics
-   *  \param numericsSolverId id of numerics solver, see Numerics for the meaning
-   */
-  OneStepNSProblem(int numericsSolverId);
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  OneStepNSProblem(SP::SolverOptions options): _numerics_solver_options(options){};
 
   /** destructor
    */

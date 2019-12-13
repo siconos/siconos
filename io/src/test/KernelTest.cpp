@@ -152,8 +152,8 @@ void KernelTest::t3()
 
   CPPUNIT_ASSERT((so->iSize == sor->iSize));
 
-  solver_options_clear(so.get());
-  solver_options_clear(sor.get());
+  solver_options_delete(so.get());
+  solver_options_delete(sor.get());
 
 }
 

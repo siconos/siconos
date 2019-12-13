@@ -466,7 +466,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     printf("mlcp_enum failed nbSol=%i!\n", nbSol);
 }
 
-void mlcp_enum_set_options(SolverOptions* options)
+void mlcp_enum_set_default(SolverOptions* options)
 {
   options->dparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS] = 0;
   options->filterOn = false;

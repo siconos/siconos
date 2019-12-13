@@ -372,7 +372,7 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
 
 }
-void fc2d_nsgs_set_options(SolverOptions *options)
+void fc2d_nsgs_set_default(SolverOptions *options)
 {
   options->iparam[SICONOS_IPARAM_NSGS_SHUFFLE] = 0;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;

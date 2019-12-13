@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 #include "FirstOrderLinearDS.hpp"
-#include "SimpleMatrixFriends.hpp" // for prod
+#include "SiconosAlgebraProd.hpp" // For prod matrix-vectors
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include "debug.h"

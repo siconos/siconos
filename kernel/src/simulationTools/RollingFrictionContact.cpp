@@ -28,17 +28,19 @@ using namespace RELATION;
 
 
 RollingFrictionContact::RollingFrictionContact(int dimPb, int numericsSolverId):
-  LinearOSNS(numericsSolverId), _contactProblemDim(dimPb)
+  RollingFrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
+                                           solver_options_delete))
+{}
+
+RollingFrictionContact::RollingFrictionContact(int dimPb, SP::SolverOptions options):
+  LinearOSNS(options), _rolling_frictionContact_driver(&rolling_fc3d_driver)
 {
-  if (dimPb == 5)
-  {
-    _rolling_frictionContact_driver = &rolling_fc3d_driver;
-  }
-  else
-    RuntimeException::selfThrow("Wrong dimension value (must be 3 or 5) for RollingFrictionContact constructor.");
+   if (dimPb != 5)
+    RuntimeException::selfThrow("Wrong dimension value (only 5 is allowed for RollingFrictionContact constructor.");
 
   _mu.reset(new MuStorage());
   _muR.reset(new MuStorage());
+ 
 }
 
 void RollingFrictionContact::initialize(SP::Simulation sim)

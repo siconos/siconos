@@ -18,7 +18,7 @@
 #include "VariationalInequality.h"
 #include <assert.h>          // for assert
 #include <stdlib.h>          // for free, malloc, exit, EXIT_FAILURE
-#include "NumericsMatrix.h"  // for NM_free
+#include "NumericsMatrix.h"  // for NM_clear
 
 
 void variationalInequality_display(VariationalInequality* vi)

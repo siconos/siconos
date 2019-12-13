@@ -16,7 +16,8 @@
  * limitations under the License.
 */
 #include "LagrangianLinearTIDS.hpp"
-#include "SimpleMatrixFriends.hpp" // for prod and other operators
+#include "SimpleMatrixFriends.hpp" // for a*mat
+#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
 #include "BlockMatrix.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

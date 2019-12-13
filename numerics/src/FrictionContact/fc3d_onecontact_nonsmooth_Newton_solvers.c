@@ -1029,7 +1029,7 @@ int fc3d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(FrictionContactProblem
 
 
 
-void fc3d_onecontact_nsn_set_options(SolverOptions* options)
+void fc3d_onecontact_nsn_set_default(SolverOptions* options)
 {
   /* Value of rho parameter */
   options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND;
@@ -1047,7 +1047,7 @@ void fc3d_onecontact_nsn_set_options(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_MAX_ITER] = 10;
 }
 
-void fc3d_onecontact_nsn_gp_set_options(SolverOptions* options)
+void fc3d_onecontact_nsn_gp_set_default(SolverOptions* options)
 {
   /* Value of rho parameter */
   options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM;

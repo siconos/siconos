@@ -45,7 +45,7 @@ extern "C"
    * algorithm is used
    * \param options the structure to be modified
    */
-  void pathsearch_set_options(SolverOptions* options);
+  void pathsearch_set_default(SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

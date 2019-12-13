@@ -68,7 +68,7 @@ void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, doub
 }
 
 
-void variationalInequality_BOX_QI_set_options(SolverOptions* options)
+void variationalInequality_BOX_QI_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;

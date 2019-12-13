@@ -21,8 +21,7 @@
 #include "SiconosVector.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "ControlSensor.hpp"
-#include "SiconosVectorFriends.hpp"
-#include "SimpleMatrixFriends.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "ExplicitLinearSMC.hpp"
 
 

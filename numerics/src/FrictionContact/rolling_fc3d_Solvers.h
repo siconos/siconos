@@ -126,9 +126,9 @@ extern "C"
 
   /** \addtogroup SetSolverOptions @{
    */
-  void rfc3d_nsgs_set_options(SolverOptions* options);
-  void rfc3d_poc_withLocalIteration_set_options(SolverOptions* options);
-  void rfc3d_poc_set_options(SolverOptions* options);
+  void rfc3d_nsgs_set_default(SolverOptions* options);
+  void rfc3d_poc_withLocalIteration_set_default(SolverOptions* options);
+  void rfc3d_poc_set_default(SolverOptions* options);
   
   /** @} */
 

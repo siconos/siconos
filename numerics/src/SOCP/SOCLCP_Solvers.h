@@ -169,8 +169,8 @@ void soclcp_VI_ExtraGradient(SecondOrderConeLinearComplementarityProblem* proble
   
   /** \addtogroup SetSolverOptions @{
    */
-  void soclcp_nsgs_set_options(SolverOptions* options);
-  void soclcp_projection_set_options(SolverOptions* options);
+  void soclcp_nsgs_set_default(SolverOptions* options);
+  void soclcp_projection_set_default(SolverOptions* options);
 
   
   /** @} */

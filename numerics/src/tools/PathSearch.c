@@ -22,7 +22,7 @@
 #include "line_search.h"    // for ARCSEARCH, LINESEARCH, NM_LS_MEAN
 #include "lcp_cst.h"
 
-void pathsearch_set_options(SolverOptions* options)
+void pathsearch_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = NM_LS_MEAN;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 10;

@@ -195,7 +195,7 @@ extern "C"
   /** @addtogroup SetSolverOptions
       @{
   */
-  void newton_lsa_set_options(SolverOptions* options);
+  void newton_lsa_set_default(SolverOptions* options);
   /** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

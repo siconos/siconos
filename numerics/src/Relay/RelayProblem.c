@@ -23,7 +23,7 @@
 #include <assert.h>            // for assert
 #include <stdio.h>             // for printf, fprintf, fscanf, FILE, stderr
 #include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
-#include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_free
+#include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO
 
 void Relay_display(RelayProblem* p)
