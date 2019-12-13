@@ -53,7 +53,13 @@ extern "C"
    */
   bool NV_equal(double * x, double * y, int nRow, double tol);
 
-  
+  /** Compute the max of a vector
+   * \param x the vector
+   * \return  the max value
+   */
+  double NV_max(double * x, int n);
+
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

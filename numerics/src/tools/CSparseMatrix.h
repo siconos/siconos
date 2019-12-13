@@ -248,6 +248,11 @@ extern "C"
    */
   int CSparseMatrix_scal(const double alpha, const CSparseMatrix *A);
 
+
+  int CSparseMatrix_max_by_columns(const CSparseMatrix *A, double * max);
+
+  int CSparseMatrix_max_abs_by_columns(const CSparseMatrix *A, double * max);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

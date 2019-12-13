@@ -5,6 +5,7 @@
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "CSparseMatrix.h"
+#include "NumericsVector.h"
 
 #include "CSparseMatrix.h"
 #ifdef SICONOS_HAS_MPI
@@ -826,6 +827,119 @@ static int inv_test(void)
   return  !NM_equal(AAinv, Id);
 }
 
+static int test_NM_max_by_columns_and_rows(void)
+{
+  int size0 =5;
+  int size1 =5;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for (int i =0; i < size0; i++)
+  {
+    for (int j =i; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+
+  NM_display(A);
+
+  double * max = (double *) malloc(size0*sizeof(double));
+
+  int info = NM_max_by_columns(A, max);
+  printf("Max by columns:\n");
+  NV_display(max,size0);
+  printf("Max by rows:\n");
+  info += NM_max_by_rows(A, max);
+  NV_display(max,size0);
+  
+  return  info;
+}
+static int test_NM_compute_balancing_matrices(void)
+{
+  int size0 =50;
+  int size1 =50;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for (int i =0; i < size0; i++)
+  {
+    for (int j =i; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+
+  NM_display(A);
+
+  BalancingMatrices * B =  NM_compute_balancing_matrices(A, 1e-03, 10);
+
+  printf("D1\n:");NM_display(B->D1);
+  printf("D2\n:");NM_display(B->D2);
+  printf("A\n:");NM_display(B->A);
+  int info=0;
+  return  info;
+}
+
+static int test_NM_compute_balancing_matrices_sym(void)
+{
+  int size0 =10;
+  int size1 =10;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for (int i =0; i < size0; i++)
+  {
+    NM_zentry(A, i, i, i+i+1);
+    for (int j =i; j < size1; j++)
+    {
+      if (i != j)
+      {
+        NM_zentry(A, i, j, i+j+1);
+        NM_zentry(A, j, i, i+j+1);
+      }
+    }
+  }
+
+  NM_display(A);
+
+  BalancingMatrices * B =  NM_compute_balancing_matrices(A, 1e-03, 10);
+
+  printf("D1\n:");NM_display(B->D1);
+  printf("D2\n:");NM_display(B->D2);
+  printf("A\n:");NM_display(B->A);
+  int info=0;
+  return  info;
+}
+
+static int test_NM_compute_balancing_matrices_rectangle(void)
+{
+  int size0 =3;
+  int size1 =1;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  
+  for (int i =0; i < size0; i++)
+  {
+    for (int j =0; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+  
+  NM_display(A);
+
+  BalancingMatrices * B =  NM_compute_balancing_matrices(A, 1e-09, 100);
+
+  printf("D1\n:");NM_display(B->D1);
+  printf("D2\n:");NM_display(B->D2);
+  printf("A\n:");NM_display(B->A);
+  int info=0;
+  return  info;
+}
+
+
 
 
 int main()
@@ -843,6 +957,12 @@ int main()
   
   info += inv_test();
 
+  info += test_NM_max_by_columns_and_rows();
+
+
+  info += test_NM_compute_balancing_matrices();
+  info += test_NM_compute_balancing_matrices_sym();
+  info += test_NM_compute_balancing_matrices_rectangle();
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif

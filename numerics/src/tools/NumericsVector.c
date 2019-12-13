@@ -76,3 +76,12 @@ bool NV_equal(double * x, double * y, int n, double tol)
   }
   return true;
 }
+double NV_max(double * x, int n)
+{
+  double max = x[0];
+  for (int i =1; i< n ; i++)
+  {
+    max  = fmax(max, x[i]);
+  }
+  return max;
+}

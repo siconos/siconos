@@ -42,7 +42,7 @@
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
-
+#include "NumericsVector.h"
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"
 #include "NM_MKL_spblas.h"
@@ -3525,9 +3525,10 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
       numerics_printf("NM_iterated_power_method. failed Multiple eigenvalue\n");
       break;
     }
-    printf("eig[%i] = %32.24e \t error = %e, costheta = %e \n",k, eig, fabs(eig-eig_old)/eig_old, costheta );
+    /*numerics_printf_verbose(1,"eig[%i] = %32.24e \t error = %e, costheta = %e \n",k, eig, fabs(eig-eig_old)/eig_old, costheta );*/
     k++;
   }
+
   free(q);
   free(z);
   free(x1);
@@ -3535,4 +3536,208 @@ double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax)
   free(q2);
 
   return eig;
+}
+
+int NM_max_by_columns(NumericsMatrix *A, double * max)
+{
+
+  assert(A);
+  assert(max);
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  case NM_SPARSE_BLOCK:
+  case NM_SPARSE:
+  {
+    return CSparseMatrix_max_by_columns(NM_csc(A), max);
+  }
+  default:
+    {
+      assert(0 && "NM_max_by_columns unknown storageType");
+    }
+  }
+  return 0;
+}
+int NM_max_by_rows(NumericsMatrix *A, double * max)
+{
+
+  assert(A);
+  assert(max);
+
+  CSparseMatrix* Acsct = cs_transpose(NM_csc(A), 1);
+  int info  = CSparseMatrix_max_by_columns(Acsct, max);
+  cs_spfree(Acsct);
+  return info;
+}
+int NM_max_abs_by_columns(NumericsMatrix *A, double * max)
+{
+
+  assert(A);
+  assert(max);
+
+  switch (A->storageType)
+  {
+  case NM_DENSE:
+  case NM_SPARSE_BLOCK:
+  case NM_SPARSE:
+  {
+    return CSparseMatrix_max_abs_by_columns(NM_csc(A), max);
+  }
+  default:
+    {
+      assert(0 && "NM_max_abs_by_columns unknown storageType");
+    }
+  }
+  return 0;
+}
+int NM_max_abs_by_rows(NumericsMatrix *A, double * max)
+{
+
+  assert(A);
+  assert(max);
+
+  CSparseMatrix* Acsct = cs_transpose(NM_csc(A), 1);
+  int info  = CSparseMatrix_max_abs_by_columns(Acsct, max);
+  cs_spfree(Acsct);
+  return info;
+}
+
+
+
+BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A)
+{
+  BalancingMatrices * B = (BalancingMatrices * )malloc(sizeof(BalancingMatrices));
+  B->size0 =  A->size0;
+  B->size1 =  A->size1;
+  B->D1 = NM_eye(B->size0);
+  B->D2 = NM_eye(B->size1);
+  B->A = NM_create(NM_SPARSE,A->size0,A->size1);
+  NM_copy(A, B->A);
+  return B;
+}
+
+
+BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax)
+{
+
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+
+
+  NumericsMatrix* D1_k = B->D1;
+  NumericsMatrix* D2_k = B->D2;
+
+  unsigned int size0 = B->size0;
+  unsigned int size1 = B->size1;
+
+  NumericsMatrix* D_R = NM_eye(size0);
+  NumericsMatrix* D_C = NM_eye(size1);
+
+  double * D_C_x= D_C->matrix2->triplet->x;
+  double * D_R_x= D_R->matrix2->triplet->x;
+
+  double * tmp = (double *) malloc( size0*size1 * sizeof(double));
+
+  NumericsMatrix* D1_tmp = NM_eye(size0);
+  NumericsMatrix* D2_tmp = NM_eye(size1);
+
+  NumericsMatrix* A_k = B->A;
+  NumericsMatrix* A_tmp = NM_create(NM_SPARSE, size0, size1);
+  NM_copy(A, A_tmp);
+
+  double error = tol + 1.0;
+  int k =0;
+  int info;
+
+  info = NM_max_abs_by_columns(A_k, D_C_x);
+  info = NM_max_abs_by_rows(A_k, D_R_x);
+
+  
+  while ((error > tol) && (k < itermax))
+  {
+    numerics_printf_verbose(2,"NM_compute_balancing_matrices iteration : %i ", k);
+
+    NM_clearCSC(D_C);
+    NM_clearCSC(D_R);
+
+    /* inverse balancing matrices */
+    for (unsigned int i=0 ; i < size0; i++)
+    {
+      D_R_x[i] =1.0/sqrt(D_R_x[i]);
+    }
+    for (unsigned int i=0 ; i < size1; i++)
+    {
+      D_C_x[i] =1.0/sqrt(D_C_x[i]);
+    }
+
+ 
+
+    /* Update balancing matrix */
+    NM_gemm(1.0, D1_k, D_R, 0.0, D1_tmp);
+    NM_copy(D1_tmp, D1_k);
+
+    NM_gemm(1.0, D2_k, D_C, 0.0, D2_tmp);
+    NM_copy(D2_tmp, D2_k);
+
+    /* NM_display(D1_k); */
+    /* DEBUG_PRINTF("D1_k ");NV_display(NM_triplet(D1_k)->x, size); */
+    /* DEBUG_PRINTF("D2_k ");NV_display(NM_triplet(D2_k)->x, size); */
+    /* printf("\n\n\n\n"); */
+    
+    /* Compute new balanced matrix */
+    NM_gemm(1.0, A_k, D_C, 0.0, A_tmp);
+    NM_gemm(1.0, D_R, A_tmp, 0.0, A_k);
+    /* printf("D1_k ");NV_display(NM_triplet(D1_k)->x, size0); */
+    /* printf("D2_k ");NV_display(NM_triplet(D2_k)->x, size1); */
+
+    /* DEBUG_PRINTF("inv D_R ");NV_display(D_R_x, size); */
+    /* DEBUG_PRINTF("inv D_C ");NV_display(D_C_x, size); */
+    /* Compute error */
+
+    info = NM_max_abs_by_rows(A_k, D_R_x);
+    info = NM_max_abs_by_columns(A_k, D_C_x);
+    /* printf("D_R ");NV_display(D_R_x, size0);  */
+    /* printf("D_C ");NV_display(D_C_x, size1); */
+
+    
+    for (unsigned int i=0 ; i < size0; i++)
+    {
+      tmp[i] =(1.0 - D_R_x[i]);
+    }
+    error = fabs( NV_max(tmp,size0));
+    
+    for (unsigned int i=0 ; i < size1; i++)
+    {
+      tmp[i] =(1.0 - D_C_x[i]);
+    }
+    error += fabs( NV_max(tmp,size1));
+    
+
+    //error = fabs(1.0-NV_max(D_C_x,size)) +
+    //  fabs(1.0-NV_max(D_R_x,size));
+
+
+
+
+    numerics_printf_verbose(2,"NM_compute_balancing_matrices error =%e", error); 
+    /* printf("D_R ");NV_display(D_R_x, size); */
+    /* printf("D_C ");NV_display(D_C_x, size); */
+    /* printf("\n\n\n\n"); */
+
+    k = k+1;
+  }
+  /* NM_clearCSC(D1_k); */
+  /* NM_clearCSC(D2_k); */
+  
+  numerics_printf_verbose(1,"NM_compute_balancing_matrices final error =%e\n", error); 
+  free(tmp);
+  NM_clear(D_R); free(D_R);
+  NM_clear(D_C); free(D_C);
+  NM_clear(D1_tmp); free(D1_tmp);
+  NM_clear(D2_tmp); free(D2_tmp);
+  NM_clear(A_tmp); free(A_tmp);
+
+  return B;
+
+
 }
