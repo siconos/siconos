@@ -56,7 +56,6 @@ extern "C"
    */
   bool NV_equal(double * x, double * y, int nRow, double tol);
 
-
   /** Insert the vector y into the vector x starting from position i
       \param x the vector
       \param size_x the size of the vector x

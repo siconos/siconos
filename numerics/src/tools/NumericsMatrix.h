@@ -70,6 +70,15 @@ struct NumericsMatrix
 
 };
 
+typedef struct
+{
+  int size0;
+  int size1;
+  NumericsMatrix* D1;
+  NumericsMatrix* D2;
+  NumericsMatrix* A;
+} BalancingMatrices;
+
 /*! RawNumericsMatrix is used without conversion in python */
 typedef NumericsMatrix RawNumericsMatrix;
 
@@ -757,7 +766,53 @@ extern "C"
   {
     return A;
   };
+  /** Compute the  maximum eigenvalue with the iterated power method
+   * \param A the matrix
+   * \return the maximum eigenvalue*/
   double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax);
+
+  /* Compute the maximum values by columns
+   *  \param A the matrix
+   *  \param max the vecor of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_by_columns(NumericsMatrix *A, double * max);
+
+  /* Compute the maximum values by rows
+   *  \param A the matrix
+   *  \param max the vecor of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_by_rows(NumericsMatrix *A, double * max);
+  
+  /* Compute the maximum absolute values by columns
+   *  \param A the matrix
+   *  \param max the vecor of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_abs_by_columns(NumericsMatrix *A, double * max);
+
+  /* Compute the maximum absolute values by rows
+   *  \param A the matrix
+   *  \param max the vecor of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_abs_by_rows(NumericsMatrix *A, double * max);
+
+  /* Compute the balancing matrices for a given matrix by iteration
+   *  \param A the matrix
+   *  \param tol tolerance on the balanced matrix
+   *  \param itermax max number of iterations
+   *  \return the balancing matrices and the balanced matrix
+   */
+  BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax);
+
+  /* Create a Balancing Matrices structure
+   *  \param A the matrix  to be balanced
+   */
+  BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A);
+
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

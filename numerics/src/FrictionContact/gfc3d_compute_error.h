@@ -48,7 +48,10 @@ extern "C"
                           double* globalVelocity, double tolerance,
                           SolverOptions * options,
                           double norm_q, double norm_b,  double * error);
-
+  int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
+                                 double* globalVelocity, double tolerance,  SolverOptions * options,
+                                 double norm_q, double norm_b,  double * error);
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

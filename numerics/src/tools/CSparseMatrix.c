@@ -643,3 +643,42 @@ void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B)
 
   memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
 }
+
+int CSparseMatrix_max_by_columns(const CSparseMatrix *A, double * max)
+{
+  CS_INT p, j, n, *Ap ;
+  CS_ENTRY *Ax ;
+  double s ;
+
+  if (!CS_CSC (A) || !A->x) return (-1) ;             /* check inputs */
+  n = A->n ; Ap = A->p ; Ax = A->x ;
+  /* loop over the column */
+  for (j = 0 ; j < n ; j++)
+  {
+    /* loop over the element of the row */
+    p = Ap [j] ; s = Ax [p] ;
+    for (p = Ap [j] ; p < Ap [j+1] ; p++)
+      s = CS_MAX (Ax[p], s) ;
+    max[j] = s;
+  }
+  return 0 ;
+}
+int CSparseMatrix_max_abs_by_columns(const CSparseMatrix *A, double * max)
+{
+  CS_INT p, j, n, *Ap ;
+  CS_ENTRY *Ax ;
+  double s ;
+
+  if (!CS_CSC (A) || !A->x) return (-1) ;             /* check inputs */
+  n = A->n ; Ap = A->p ; Ax = A->x ;
+  /* loop over the column */
+  for (j = 0 ; j < n ; j++)
+  {
+    /* loop over the element of the row */
+    p = Ap [j] ; s = fabs(Ax [p]) ;
+    for (p = Ap [j] ; p < Ap [j+1] ; p++)
+      s = CS_MAX (fabs(Ax[p]), s) ;
+    max[j] = s;
+  }
+  return 0 ;
+}
