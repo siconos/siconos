@@ -96,7 +96,8 @@ public:
       see :ref:`problems_and_solvers` for details.
       \endrst
   */
-  RollingFrictionContact(int dimPb, int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
+  RollingFrictionContact(int dimPb=5, int numericsSolverId = SICONOS_ROLLING_FRICTION_3D_NSGS);
+  
   /**  constructor from a pre-defined solver options set.
        \param dim, pb dimension, 5 only. 
        \param options, the options set, 

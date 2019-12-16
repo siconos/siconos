@@ -28,7 +28,7 @@
 #include "CSparseMatrix.h"               // for CSparseMatrix_spfree_on_stack
 #include "NumericsFwd.h"                 // for NumericsMatrix, SparseBlockS...
 #include "NumericsMatrix.h"              // for NumericsMatrix, NM_clear, NM_...
-#include "SparseBlockMatrix.h"           // for SBM_free, SBM_new_from_file
+#include "SparseBlockMatrix.h"           // for SBM_clear, SBM_new_from_file
 #include "debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
 #include "numericsMatrixTestFunction.h"  // for SBM_dense_equal, test_matrix_2
 #include "numerics_verbose.h"            // for CHECK_RETURN
@@ -67,8 +67,8 @@ static int SBM_add_test1(double tol, double alpha, double beta)
   free(M_dense);
   free(C_dense);
 
-  SBM_free(M);
-  SBM_free(C);
+  SBM_clear(M);
+  SBM_clear(C);
   return info;
 
 }
@@ -139,8 +139,8 @@ static int SBM_add_test2(double tol, double alpha, double beta)
   
   NM_clear(M2);
   NM_clear(M10);
-  SBM_free(C2);
-  SBM_free(C3);
+  SBM_clear(C2);
+  SBM_clear(C3);
   free(C2_dense);
   free(C3_dense);
   free(M2_dense);
@@ -229,7 +229,7 @@ int test_SBM_column_permutation_all(void)
     printf("========= Failed SBM tests 3 for SBM  ========= \n");
     return 1;
   }
-  SBM_free(M);
+  SBM_clear(M);
   file = fopen("data/SBM2.dat", "r");
   M = SBM_new_from_file(file);
   fclose(file);
@@ -239,7 +239,7 @@ int test_SBM_column_permutation_all(void)
     printf("========= Failed SBM tests 3 for SBM  ========= \n");
     return 1;
   }
-  SBM_free(M);
+  SBM_clear(M);
   printf("\n========= Succed SBM tests 3 for SBM  ========= \n");
   return 0;
 
@@ -298,7 +298,7 @@ int SBM_extract_component_3x3_all(void)
     return 1;
   }
 
-  SBM_free(M);
+  SBM_clear(M);
   
   return 0;
 
@@ -792,8 +792,8 @@ static int SBM_multiply_test1(double tol)
   free(M_dense);
   free(C_dense);
 
-  SBM_free(M);
-  SBM_free(C);
+  SBM_clear(M);
+  SBM_clear(C);
   return info;
 }
 
@@ -852,8 +852,8 @@ static int SBM_multiply_test2(double tol)
 
   NM_clear(M2);
   NM_clear(M10);
-  SBM_free(C2);
-  SBM_free(C3);
+  SBM_clear(C2);
+  SBM_clear(C3);
   free(C2_dense);
   free(C3_dense);
   free(M2_dense);
@@ -905,7 +905,7 @@ static int SBM_multiply_test3(double tol)
 
   NM_clear(M2);
   NM_clear(M4);
-  SBM_free(C2);
+  SBM_clear(C2);
   free(C2_dense);
   free(M2_dense);
   free(M4_dense);
@@ -962,7 +962,7 @@ int test_SBM_row_permutation_all(void)
     return 1;
   }
 
-  SBM_free(M);
+  SBM_clear(M);
 
   
   file = fopen("data/SBM2.dat", "r");
@@ -974,7 +974,7 @@ int test_SBM_row_permutation_all(void)
     printf("========= Failed SBM tests 2 for SBM  ========= \n");
     return 1;
   }
-  SBM_free(M2);
+  SBM_clear(M2);
   printf("\n========= Succed SBM tests 2 for SBM  ========= \n");
   return 0;
 
@@ -1000,7 +1000,7 @@ int test_SBM_row_to_dense_all(void)
     return 1;
   }
 
-  SBM_free(M);
+  SBM_clear(M);
 
 
 
@@ -1013,7 +1013,7 @@ int test_SBM_row_to_dense_all(void)
     printf("========= Failed SBM tests 1 for SBM  ========= \n");
     return 1;
   }
-  SBM_free(M2);
+  SBM_clear(M2);
   printf("\n========= Succeeded SBM tests 1 for SBM  ========= \n");
   return 0;
 
@@ -1068,7 +1068,7 @@ int SBM_to_dense_all(void)
   printf("\n (warning: column-major) \n");
 
   free(denseMat);
-  SBM_free(M);
+  SBM_clear(M);
   printf("\n========= Succed SBM tests 4 for SBM  ========= \n");
   return 0;
 
@@ -1123,7 +1123,7 @@ int SBM_to_sparse_all(void)
 
   free(denseMat);
   printf("NUMERICS_SBM_FREE_BLOCK value %d", NUMERICS_SBM_FREE_BLOCK);
-  SBM_free(M);
+  SBM_clear(M);
   printf("\n========= Succed SBM tests 4 for SBM  ========= \n");
   return 0;
 

@@ -17,7 +17,6 @@
 */
 
 #include <stdio.h>             // for fprintf, NULL, printf, stderr
-#include <stdlib.h>            // for exit, EXIT_FAILURE
 #include "NumericsFwd.h"       // for SolverOptions, RelayProblem, NumericsM...
 #include "NumericsMatrix.h"    // for NumericsMatrix
 #include "RelayProblem.h"      // for RelayProblem

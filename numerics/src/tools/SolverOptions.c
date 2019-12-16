@@ -695,7 +695,7 @@ SolverOptions * solver_options_create(int solverId)
     case SICONOS_ROLLING_FRICTION_3D_NSGS:
       {
         options = solver_options_initialize(solverId, 1000, 1e-4, 1);
-        fc3d_nsgs_set_default(options);
+        rfc3d_nsgs_set_default(options);
         break;
       }
 

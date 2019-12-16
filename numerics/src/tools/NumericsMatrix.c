@@ -485,7 +485,7 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B )
           if( A->internalData->dWorkSize != B->internalData->dWorkSize)
           {
             B->internalData->dWorkSize = A->internalData->dWorkSize;
-            B->internalData->dWork =  (double*)realloc(B->internalData->dWork,A->internalData->dWorkSize*sizeof(double));
+            B->internalData->dWork = realloc(B->internalData->dWork,A->internalData->dWorkSize*sizeof(double));
           }
         }
 

@@ -108,7 +108,6 @@ void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned i
   DEBUG_BEGIN("FirstOrderType2R::computeOutput \n");
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   BlockVector& x = *DSlink[FirstOrderR::x];
-  BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
   SiconosVector x_vec;
   x_vec.initFromBlock(x);

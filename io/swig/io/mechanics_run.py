@@ -97,10 +97,10 @@ def setup_default_classes():
             msg += 'can not be imported. Check your installation.'
             print(msg)
 
-        def m(options):
-            if options is None:
-                options = SiconosBulletOptions()
-            return SiconosBulletCollisionManager(options)
+        def m(bullet_options):
+            if bullet_options is None:
+                bullet_options = SiconosBulletOptions()
+            return SiconosBulletCollisionManager(bullet_options)
         default_manager_class = m
         use_bullet = have_bullet
     elif backend == 'occ':
@@ -1998,7 +1998,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             with_timer=False,
             time_stepping=None,
             interaction_manager=None,
-            options=None,
+            bullet_options=None,
             body_class=None,
             shape_class=None,
             face_class=None,
@@ -2050,7 +2050,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             (depends on the backend, e.g. Bullet or OCC).
             Warning: overwrite the value
             provided during MechanicsHdf5Runner init.
-        options: ?, optional
+        bullet_options: ?, optional
             set of options for the interaction manager
             (e.g. SiconosBulletOptions), default = None
         body_class: siconos.mechanics.RigidBodyDS and heirs, optional
@@ -2230,20 +2230,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # Respect run() parameter for multipoints_iterations for
         # backwards compatibility, but this is overridden by
         # SiconosBulletOptions if one is provided.
-        if multipoints_iterations is not None and options is None:
-            print("CASE 1 ")
-            options = SiconosBulletOptions()
-            options.perturbationIterations = 3 * multipoints_iterations
-            options.minimumPointsPerturbationThreshold = 3 * multipoints_iterations
+        if multipoints_iterations and bullet_options is None:
+            bullet_options = SiconosBulletOptions()
+            bullet_options.perturbationIterations = 3 * multipoints_iterations
+            bullet_options.minimumPointsPerturbationThreshold = \
+                3 * multipoints_iterations
 
         if (self._dimension == 2):
-            print("CASE 2 ")
-            if options is None:
-                options = SiconosBulletOptions()
-            options.dimension = SICONOS_BULLET_2D
+            if bullet_options is None:
+                bullet_options = SiconosBulletOptions()
+            bullet_options.dimension = SICONOS_BULLET_2D
 
-        print("opt ", options.dimension, options.perturbationIterations)
-        self._interman = interaction_manager(options)
+        self._interman = interaction_manager(bullet_options)
 
         joints = list(self.joints())
         if hasattr(self._interman, 'useEqualityConstraints') \

@@ -84,6 +84,8 @@ void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *veloci
 
 
   /*        printf("\n"); */
+  // back to fc2d for the solver name
+  options->solverId = SICONOS_FRICTION_2D_ENUM;
 
   if (options->dparam[SICONOS_DPARAM_RESIDU] > options->iparam[SICONOS_DPARAM_TOL])
   {
