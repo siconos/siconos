@@ -1026,7 +1026,7 @@ int gfc3d_ADMM_setDefaultSolverOptions(SolverOptions* options)
     SICONOS_FRICTION_3D_ADMM_FULL_H_NO;
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]=
-    SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO;
+    SICONOS_FRICTION_3D_ADMM_UPDATE_S_YES;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 0.1;
