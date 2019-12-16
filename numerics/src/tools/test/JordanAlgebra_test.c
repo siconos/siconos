@@ -354,7 +354,8 @@ static int JA_quad_repr_test()
     if (test_failed > 0)
         info += 1;
 
-    NM_free(Qx);
+    NM_clear(Qx);
+    free(Qx);
 
     printf("== End of test JA_quad_repr_test(result = %d)\n", info);
     return info;

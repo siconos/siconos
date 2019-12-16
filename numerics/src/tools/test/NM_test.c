@@ -817,9 +817,12 @@ static int NM_insert_dense_test()
     if (!NM_equal(A_dense, AB_dense))
         info = 1;
 
-    NM_free(A_dense);
-    NM_free(B_dense);
-    NM_free(AB_dense);
+    NM_clear(A_dense);
+    NM_clear(B_dense);
+    NM_clear(AB_dense);
+    free(A_dense);
+    free(B_dense);
+    free(AB_dense);
     printf("== End of test NM_insert_dense_test(result = %d)\n", info);
     return info;
 }
@@ -864,9 +867,12 @@ static int NM_insert_sparse_test()
     if (!NM_equal(A_sparse, AB_sparse))
         info = 1;
 
-    NM_free(A_sparse);
-    NM_free(B_sparse);
-    NM_free(AB_sparse);
+    NM_clear(A_sparse);
+    NM_clear(B_sparse);
+    NM_clear(AB_sparse);
+    free(A_sparse);
+    free(B_sparse);
+    free(AB_sparse);
 
     printf("== End of test NM_insert_sparse_test(result = %d)\n", info);
     return info;

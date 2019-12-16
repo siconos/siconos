@@ -104,8 +104,10 @@ RawNumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize
     NM_insert(out, quad_tmp, i, i);
   }
 
-  NM_free(R);
-  NM_free(quad_tmp);
+  NM_clear(R);
+  NM_clear(quad_tmp);
+  free(R);
+  free(quad_tmp);
   free(dets);
 
   return out;

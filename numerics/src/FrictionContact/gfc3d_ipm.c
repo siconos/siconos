@@ -284,8 +284,8 @@ static void dualResidualVector(NumericsMatrix * M, const double * globalVelocity
   NV_sub(Mv_minus_f, HTr, m, out);
 
   // free allocated memory
-  NM_free(HT);
-
+  NM_clear(HT);
+  free(HT);
   free(Mv);
   free(HTr);
   free(Mv_minus_f);
@@ -489,10 +489,12 @@ void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* option
 
     free(data->starting_point);
 
-    NM_free(data->P_mu->mat);
+    NM_clear(data->P_mu->mat);
+    free(data->P_mu->mat);
     data->P_mu->mat = NULL;
 
-    NM_free(data->P_mu->inv_mat);
+    NM_clear(data->P_mu->inv_mat);
+    free(data->P_mu->inv_mat);
     data->P_mu->inv_mat = NULL;
 
     free(data->P_mu);
@@ -867,7 +869,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     /* Newton system solving */
     NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
 
-    NM_free(J);
+    NM_clear(J);
+    free(J);
 
     d_globalVelocity = rhs;
     d_velocity = rhs + m;
@@ -905,8 +908,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   /* check the full criterion */
   double norm_q = cblas_dnrm2(n, problem->q, 1);
+  double norm_b = cblas_dnrm2(m, problem->b, 1);
   double err;
-  gfc3d_compute_error(problem,  reaction, velocity, globalVelocity,  tol, options, norm_q, &err);
+  gfc3d_compute_error(problem,  reaction, velocity, globalVelocity,  tol, options, norm_q, norm_b, &err);
   numerics_printf_verbose(-1,"---- GFC3D - IPM  - Iteration %i, full error = %14.7e", iteration, err);
 
 
@@ -918,9 +922,12 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     gfc3d_IPM_free(problem,options);
   }
 
-  NM_free(H_tilde);
-  NM_free(minus_H);
-  NM_free(H);
+  NM_clear(H_tilde);
+  free(H_tilde);
+  NM_clear(minus_H);
+  free(minus_H);
+  NM_clear(H);
+  free(H);
 
   *info = hasNotConverged;
 }
