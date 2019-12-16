@@ -31,7 +31,7 @@
 #include "NumericsMatrix.h"
 #include "NumericsVector.h"
 
-/* #define DEBUG_NOCOLOR */
+//#define DEBUG_NOCOLOR
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"

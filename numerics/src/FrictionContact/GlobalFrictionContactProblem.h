@@ -24,6 +24,7 @@
 
 #include "NumericsFwd.h"
 #include "SiconosConfig.h"
+#include "NumericsMatrix.h"
 #include <stdio.h>
 
 /** \struct GlobalFrictionContactProblem GlobalFrictionContactProblem.h
@@ -35,10 +36,10 @@
  * \f$\mathrm{PFC}(M,H,q,b,\mu)\f$  such that
  *
  * \rststar
- * 
+ *
  *  ..math::
  *    :nowrap:
- *    
+ *
  *     \begin{cases}
  *      M v =  q +  H r \\
  *      u = H^\top v + b \\
@@ -51,7 +52,7 @@
  *      \right]^T \\ \\
  *       C^\star_{\mu} \ni {\hat u} \perp r \in C_{\mu}
  *      \end{cases}
- * 
+ *
  * \endrststar
  *
  * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
@@ -77,14 +78,14 @@ struct GlobalFrictionContactProblem
       (\f$ n_c =\f$ numberOfContacts) */
   double* mu;
   /** opaque environment, solver specific */
-  void* env; 
+  void* env;
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
-  
+
   /** display a GlobalFrictionContactProblem
    * \param problem the problem to display
    */
@@ -96,7 +97,7 @@ extern "C"
    * \return 0 if successfull
    */
   int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file);
-  
+
   /** print a GlobalFrictionContactProblem in a file (numerics .dat format) from its filename
    * \param problem the problem to print out
    * \param filename the dest file
@@ -128,9 +129,12 @@ extern "C"
   void globalFrictionContact_free(GlobalFrictionContactProblem* problem);
 
   GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactProblem* problem);
-  
-  void globalFrictionContact_rescaling(GlobalFrictionContactProblem* problem, double alpha,  double beta, double gamma);
 
+  void globalFrictionContact_rescaling(GlobalFrictionContactProblem* problem, double alpha,  double beta, double gamma);
+  void globalFrictionContact_balancing(
+    GlobalFrictionContactProblem* problem,
+    BalancingMatrices * B_for_M,
+    BalancingMatrices * B_for_H);
   /** Compute the global velocity given the reaction
    * \param[in] problem to be considered
    * \param[in] reaction the reaction, if there is no contacts reaction can be NULL
@@ -140,9 +144,9 @@ extern "C"
     GlobalFrictionContactProblem* problem,
     double * reaction,
     double * globalVelocity);
-  
 
-  
+
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

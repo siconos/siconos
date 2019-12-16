@@ -253,6 +253,112 @@ void globalFrictionContact_rescaling(
   cblas_dscal(m,beta,problem->b,1);
 
 }
+static void globalFrictionContact_balancing_full (
+  GlobalFrictionContactProblem* problem,
+  BalancingMatrices * B_for_M,
+  BalancingMatrices * B_for_H)
+{
+
+
+  assert(B_for_M);
+  assert(B_for_H);
+  
+  int nc = problem->numberOfContacts;
+  int n = problem->M->size0;
+  int m = 3 * nc;
+  /* scaling of M */
+  /* NM_scal(alpha*gamma*gamma, problem->M); */
+  NumericsMatrix* M_tmp = NM_create(NM_SPARSE, n, n);
+  NM_triplet_alloc(M_tmp, n);
+  NM_gemm(1.0,problem->M,B_for_M->D2,0.0, M_tmp);
+  NM_gemm(1.0,B_for_M->D2,M_tmp, 0.0, problem->M);
+  NM_gemm(1.0,B_for_M->D1,problem->M, 0.0, M_tmp);
+  NM_copy(M_tmp, problem->M);
+  
+  /* scaling of H */
+  /* NM_scal(beta*gamma, problem->H);*/
+
+
+  /* Warning the matrix H must be scaled such
+   * that the cone constraint is respected */
+  NumericsMatrix* H_tmp = NM_create(NM_SPARSE, n, m);
+  NM_triplet_alloc(H_tmp, n);
+  NM_gemm(1.0, B_for_M->D2, problem->H, 0.0, H_tmp);
+  NM_gemm(1.0, B_for_H->D1, H_tmp, 0.0, problem->H); 
+  
+  /* scaling of q */
+  /* cblas_dscal(n,alpha*gamma,problem->q,1); */
+  double * q_tmp = (double *) malloc(n*sizeof(double));
+  NM_gemv(1.0, B_for_M->D2, problem->q, 0.0, q_tmp );
+  NM_gemv(1.0, B_for_M->D1, q_tmp, 0.0, problem->q);
+  
+  /* scaling of b */
+  /* cblas_dscal(m,beta,problem->b,1); */
+  double * b_tmp = (double *) malloc(m*sizeof(double));
+  NM_gemv(1.0, B_for_H->D1, problem->b, 0.0, b_tmp);
+  cblas_dcopy(m, b_tmp, 1, problem->b, 1);
+
+
+  NM_clear(M_tmp);
+  free(M_tmp);
+  NM_clear(H_tmp);
+  free(H_tmp);
+  
+  free(q_tmp);
+  free(b_tmp);
+}
+
+
+void globalFrictionContact_balancing(
+  GlobalFrictionContactProblem* problem,
+  BalancingMatrices * B_for_M,
+  BalancingMatrices * B_for_H)
+{
+
+
+  assert(B_for_M);
+  assert(B_for_H);
+  
+  int nc = problem->numberOfContacts;
+  int n = problem->M->size0;
+  int m = 3 * nc;
+  /* scaling of M */
+  /* NM_scal(alpha*gamma*gamma, problem->M); */
+  NumericsMatrix* M_tmp = NM_create(NM_SPARSE, n, n);
+  NM_triplet_alloc(M_tmp, n);
+  NM_gemm(1.0,problem->M,B_for_M->D2,0.0, M_tmp);
+  NM_gemm(1.0,B_for_M->D1,M_tmp, 0.0, problem->M);
+
+  /* scaling of H */
+  /* NM_scal(beta*gamma, problem->H);*/
+  /* Warning the matrix H must be scaled such
+   * that the cone constraint is respected */
+  NumericsMatrix* H_tmp = NM_create(NM_SPARSE, n, m);
+  NM_triplet_alloc(H_tmp, n);
+  NM_gemm(1.0, B_for_M->D2, problem->H, 0.0, H_tmp);
+  NM_copy(H_tmp, problem->H);
+  
+  /* scaling of q */
+  /* cblas_dscal(n,alpha*gamma,problem->q,1); */
+  double * q_tmp = (double *) malloc(n*sizeof(double));
+  NM_gemv(1.0, B_for_M->D2, problem->q, 0.0, q_tmp );
+  cblas_dcopy(n, q_tmp, 1, problem->q, 1);
+  
+  /* scaling of b */
+  /* cblas_dscal(m,beta,problem->b,1); */
+  /* double * b_tmp = (double *) malloc(m*sizeof(double)); */
+  /* NM_gemv(1.0, B_for_H->D1, problem->b, 0.0, b_tmp); */
+  /* cblas_dcopy(m, b_tmp, 1, problem->b, 1); */
+
+
+  NM_clear(M_tmp);
+  free(M_tmp);
+  NM_clear(H_tmp);
+  free(H_tmp);
+  
+  free(q_tmp);
+  //free(b_tmp);
+}
 
 
 
