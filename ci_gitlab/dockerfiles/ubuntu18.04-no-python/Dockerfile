@@ -4,6 +4,7 @@ RUN apt update  && apt install -y -qq \
         git-core \
         make \
         libboost-dev \
+        libboost-timer-dev \
         libgmp-dev \
         gcc \
         gfortran \
@@ -13,6 +14,7 @@ RUN apt update  && apt install -y -qq \
         lp-solve \
         liblpsolve55-dev \
         python3 \
+        python3-packaging \
         libpython3-dev \
         libcppunit-dev \
         libbullet-dev \

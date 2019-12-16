@@ -26,7 +26,7 @@
 
 #include "SiconosConfig.h"
 #include "NumericsFwd.h"
-#include "CSparseMatrix.h" // for freeNSLSP
+//#include "CSparseMatrix.h" // for freeNSLSP
 #include "NM_MPI.h"
 
 /**\struct linalg_data_t NumericsSparseMatrix.h
@@ -48,7 +48,7 @@ extern "C"
 
   /** \enum NSM_linear_solver NumericsSparseMatrix.h
    * id for linear algebra solvers */
-  typedef enum { NSM_CS_LUSOL, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT } NSM_linear_solver;
+  typedef enum { NSM_CS_LUSOL, NSM_MUMPS, NSM_UMFPACK, NSM_MKL_PARDISO, NSM_SUPERLU, NSM_SUPERLU_MT, NSM_CS_CHOLSOL } NSM_linear_solver;
 
   typedef void (*freeNSLSP)(void* p);
 
@@ -112,7 +112,7 @@ extern "C"
    * \param A a NumericsSparseMatrix
    * \return NULL on success
    */
-  NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A);
+  NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A);
 
 
 
@@ -120,7 +120,7 @@ extern "C"
    /** Free a workspace related to a LU factorization
    * \param p the structure to free
    */
-  void NSM_free_p(void *p);
+  void NSM_clear_p(void *p);
 
   /** Get the data part of sparse matrix
    * \param A the sparse matrix

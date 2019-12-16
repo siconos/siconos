@@ -9,6 +9,9 @@ set(cmake_macros
   SiconosTools.cmake
   FindPythonModule.cmake
   valgrind.supp
+  FindBLASDEV.cmake
+  FindLAPACKDEV.cmake
+  BlasLapackUtils.cmake
   )
 
 foreach(file IN LISTS cmake_macros)

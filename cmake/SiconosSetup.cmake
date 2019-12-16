@@ -11,50 +11,11 @@ include(WindowsSiconosSetup)
 # Siconos current version
 include(SiconosVersion)
 
-# File used to print tests setup messages.
-set(TESTS_LOGFILE ${CMAKE_BINARY_DIR}/tests.log)
-
-# get system architecture 
-# https://raw.github.com/petroules/solar-cmake/master/TargetArch.cmake
-include(TargetArch)
-target_architecture(SYSTEM_ARCHITECTURE) # This variable seems to be required
-# to set CMAKE_SWIG_FLAGS in wrap/CMakeLists.txt.
-
-if(WITH_SYSTEM_INFO) # User defined option, default = off
-  include(CMakePrintSystemInformation)
-  message(STATUS "SYSTEM ARCHITECTURE: ${SYSTEM_ARCHITECTURE}")
-endif()
-
 # -- Set include directories that are required by ALL components
 # and only those!
 # Other includes must be specified to individual targets only.
 # Current binary dir, for generated headers. Only at build time!
 include_directories($<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
-
-# extensions of headers files that must be taken into account
-set(HDR_EXTS h hpp)
-
-# To include or not unstable source files
-set(WITH_UNSTABLE FALSE)
-
-# dirs of 'local' headers. Must be filled by each component.
-set(${PROJECT_NAME}_LOCAL_INCLUDE_DIRECTORIES
-  CACHE INTERNAL "Local include directories.")
-
-set(SICONOS_INCLUDE_DIRECTORIES
-  CACHE INTERNAL "Include directories for external dependencies.")
-
-set(SICONOS_LINK_LIBRARIES
-  CACHE INTERNAL "List of external libraries.")
-
-set(${PROJECT_NAME}_LOCAL_LIBRARIES
-  CACHE INTERNAL "List of siconos components libraries.")
-
-set(tests_timeout 120 CACHE INTERNAL "Limit time for tests (in seconds)")
-
-# extensions of source files that must be taken into account
-get_standard_ext()
-set(SRC_EXTS ${ALL_EXTS})
 
 if(WITH_GIT) # User defined option, default = off
   # Check if git is available
@@ -95,13 +56,13 @@ if(WITH_PYTHON_WRAPPER)
 else()
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
 endif()
-
 # For backward compat ...
 set(PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+include(FindPythonModule)
+find_python_module(packaging REQUIRED) # for siconos runtime
 
 get_filename_component(PYTHON_EXE_NAME ${PYTHON_EXECUTABLE} NAME)
 if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
-  include(FindPythonModule)
   # --- xml schema. Used in tests. ---
   if(WITH_XML)
     set(SICONOS_XML_SCHEMA "${CMAKE_SOURCE_DIR}/kernel/swig/SiconosModelSchema-V3.7.xsd")
@@ -112,25 +73,6 @@ if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
 endif()
 
 # --- End of python conf ---
-
-# Choice of CSparse/CXSparse integer size
-# Note FP :  this should be in externals isn't it?
-IF(NOT DEFINED SICONOS_INT64)
-  IF(NOT SIZE_OF_CSI)
-    INCLUDE(CheckTypeSize)
-    CHECK_TYPE_SIZE("size_t" SIZE_OF_CSI)
-    IF(NOT SIZE_OF_CSI)
-      message(FATAL_ERROR
-        "Could not get size of size_t, please specify SICONOS_INT64.")
-    ENDIF(NOT SIZE_OF_CSI)
-  ENDIF(NOT SIZE_OF_CSI)
-
-  IF ("${SIZE_OF_CSI}" EQUAL 8)
-    SET(SICONOS_INT64 TRUE)
-  ELSE ("${SIZE_OF_CSI}" EQUAL 8)
-    SET(SICONOS_INT64 FALSE)
-  ENDIF ("${SIZE_OF_CSI}" EQUAL 8)
-ENDIF()
 
 # =========== install setup ===========
 
@@ -183,19 +125,66 @@ if(WITH_DOCUMENTATION OR WITH_DOXY2SWIG OR WITH_DOXYGEN_WARNINGS OR WITH_GENERAT
   set(USE_DOXYGEN TRUE)
 endif()
 
+# ----- Required dependencies (whatever Siconos components are) -----
+
+# =========== Blas/Lapack ===========
+# Find package stuff provided by cmake deals
+# only with blas/lapack libraries.
+# Since headers are also required for Siconos
+# we use our own cmake "find package" stuff.
+find_package(LAPACKDEV REQUIRED)
+
+# =========== Boost ===========
+# check https://cmake.org/cmake/help/latest/module/FindBoost.html?highlight=boost
+if(WITH_CXX)
+
+  # From boost 1.71, something is wrong in cmake and boost support for multithread 
+  # https://github.com/boostorg/boost_install/issues/13
+  # https://gitlab.kitware.com/cmake/cmake/issues/19714
+  # set(Boost_USE_MULTITHREADED ON)
+  set(Boost_NO_BOOST_CMAKE 1)
+  set(boost_min_version 1.61)
+  # Set the list of required boost components
+  if(WITH_SERIALIZATION)
+    list(APPEND boost_required_components serialization filesystem)
+  endif()
+  if(HAVE_SICONOS_CONTROL)
+    # Should we always look for timer ? This a requirement for many examples
+    # but not for siconos components, except control.
+    list(APPEND boost_required_components timer)
+  endif()
+  if(boost_required_components)
+    set(boost_opts COMPONENTS ${boost_required_components})
+  endif()
+
+  # Search boost ...
+  find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED)
+
+  if(WITH_SERIALIZATION)
+    set(WITH_SYSTEM_BOOST_SERIALIZATION ON CACHE INTERNAL "Siconos uses boost serialization lib.")
+  endif()
+endif()
+
+# -- Open Cascade Community Edition --
+if(WITH_OCE)
+  include(oce_setup)
+endif()
+
+# -- Python bindings --
+if(WITH_PYTHON_WRAPPER)
+  find_package(SWIG 3.0 REQUIRED)
+  include(${SWIG_USE_FILE})
+endif()
+
+# ---- Extra 'developers only' options ----
+# -- The options below should be used with caution
+# and preferably by developers or advanced users --
+
 # =========== OpenMP ==========
-OPTION (WITH_OPENMP "Use OpenMP" OFF)
-IF(WITH_OPENMP)
-  FIND_PACKAGE(OpenMP)
-  IF(OPENMP_FOUND)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    # Only applies to numerics code, which is in C (for now)
-    #SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  ENDIF()
-ENDIF()
+option(WITH_OPENMP "Use OpenMP" OFF)
 
 # =========== use ccache if available ===========
-OPTION (WITH_CCACHE "Use ccache" OFF)
+option(WITH_CCACHE "Use ccache" OFF)
 if(WITH_CCACHE)
   find_program(CCACHE_FOUND ccache)
   if(CCACHE_FOUND)
@@ -218,11 +207,50 @@ if(WITH_MPI)
   # endif()
 endif()
 
-# ----- Required dependencies (whatever Siconos components are) -----
+# =========== Tests env ==========
+if(WITH_TESTING)
+  # File used to print tests setup messages.
+  set(TESTS_LOGFILE ${CMAKE_BINARY_DIR}/tests.log)
 
-# =========== Blas/Lapack ===========
-# Find package stuff provided by cmake deals
-# only with blas/lapack libraries.
-# Since headers are also required for Siconos
-# we use our own cmake "find package" stuff.
-find_package(LAPACKDEV REQUIRED)
+  set(tests_timeout 120 CACHE INTERNAL "Limit time for tests (in seconds)")
+  if(HAVE_SICONOS_KERNEL)
+    find_package(CPPUNIT REQUIRED)
+    # File used as main driver for cppunit tests
+    set(SIMPLE_TEST_MAIN ${CMAKE_SOURCE_DIR}/kernel/tests-common/TestMain.cpp CACHE INTERNAL "")
+  endif()
+  if(WITH_PYTHON_WRAPPER)
+    find_python_module(pytest REQUIRED)
+    if(WITH_AGGRESSIVE_PYTHON_TESTS)
+      set(pytest_opt "-s -v -pep8" CACHE INTERNAL "extra options for py.test")
+    else()
+      set(pytest_opt "-v" CACHE INTERNAL "extra options for py.test")
+    endif()
+  endif()
+endif()
+
+
+# ==== Python symlinks ===
+# Useful during io installation, to use links for python scripts rather
+# that copying files.
+# FP : in which case do we need this ? If anyone knows, please document it ...
+option(INSTALL_PYTHON_SYMLINKS "Install Python .py files as symlinks" OFF)
+
+# For SiconosConfig.h
+option(SICONOS_USE_MAP_FOR_HASH "Prefer std::map to std::unordered_map even if C++xy is enabled" ON)
+
+# Check Siconos compilation with include-what-you-use
+# See https://github.com/include-what-you-use/include-what-you-use
+# Set WITH_IWYU=path/to/iwyu binary file
+if(WITH_IWYU)
+  # Clang is required for iwyu. This is a devel option, so we assume that
+  # you know what you are doing and that you use the same version of clang
+  # for both iwyu and Siconos.
+  if(NOT CMAKE_CXX_COMPILER_ID STREQUAL Clang AND NOT CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
+    message(FATAL_ERROR "You must compile Siconos with clang to use include-what-you-use.")
+  endif()
+  if(NOT CMAKE_C_COMPILER_ID STREQUAL Clang AND NOT CMAKE_C_COMPILER_ID STREQUAL AppleClang)
+    message(FATAL_ERROR "You must compile Siconos with clang to use include-what-you-use.")
+  endif()
+  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "${WITH_IWYU};-Xiwyu;any;-Xiwyu;iwyu;-Xiwyu;args" CACHE INTERNAL "iwyu setup")
+  set(CMAKE_C_INCLUDE_WHAT_YOU_USE "${WITH_IWYU};-Xiwyu;any;-Xiwyu;iwyu;-Xiwyu;args" CACHE INTERNAL "iwyu setup")
+endif()

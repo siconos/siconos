@@ -38,6 +38,7 @@ union MATRIX_UBLAS_TYPE
   BandedMat *Banded;  // num = 5
   ZeroMat *Zero;      // num = 6
   IdentityMat *Identity; // num = 7
+  SparseCoordinateMat *SparseCoordinate; // num = 8
 };
 /** A STL vector of int */
 typedef std::vector<int> VInt;
@@ -195,6 +196,13 @@ public:
    */
   virtual const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0) const = 0;
 
+  /** get SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return a SparseCoordinateMat
+   */
+  virtual const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0, unsigned int col = 0) const = 0;
+
   /** get ZeroMat matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
@@ -243,6 +251,13 @@ public:
    *  \return a SparseMat*
    */
   virtual SparseMat* sparse(unsigned int row = 0, unsigned int col = 0) const = 0;
+  
+  /** get a pointer on SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return a SparseCoordinateMat*
+   */
+  virtual SparseCoordinateMat* sparseCoordinate(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get a pointer on ZeroMat matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
@@ -300,6 +315,10 @@ public:
   /** display data on standard output
    */
   virtual void display() const = 0;
+  
+  /** display data on standard output
+   */
+  virtual void displayExpert(bool brief = true ) const = 0;
 
   /** put data of the matrix into a std::string
    * \return std::string

@@ -244,8 +244,9 @@ static int test_2(void)
   verbose=1;
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
   options->dparam[0]=1e-13;
-  options->dparam[3]=0.8;
+  options->dparam[3]=500;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION;
+  options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_CONVEXQP_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
   FILE * finput  =  fopen(filename, "r");
@@ -347,7 +348,7 @@ static int test_3(void)
   verbose=1;
   int info = convexQP_ADMM_setDefaultSolverOptions(options);
   options->dparam[0]=1e-13;
-  options->dparam[3]=0.8;
+  options->dparam[3]=1.0;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART;
 
   char filename[50] = "./data/FC3D_Example1_SBM.dat";
@@ -419,7 +420,7 @@ int main(int argc, char *argv[])
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
-
+  verbose=2;
   int i=0;
   printf("start test #%i ConvexQP_PG_FC3D \n",i);
   int info = test_0();

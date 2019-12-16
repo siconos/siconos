@@ -139,7 +139,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
                                 double norm_q)
 {
 
-   /* verbose=2;  */
+  /* verbose=2;  */
   /* frictionContact_display(problem); */
   /* int and double parameters */
   int* iparam = options->iparam;
@@ -152,7 +152,6 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
   /* if SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE,
      we force the copy into a NM_SPARSE storageType */
-
   if(iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] == SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE
      && problem->M->storageType == NM_SPARSE_BLOCK)
   {
@@ -165,16 +164,25 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
   {
     M = problem->M;
   }
-
-  /* if (M->storageType == NM_SPARSE_BLOCK) */
-  /* { */
-  /*   CSparseMatrix* dummy; */
-  /*   dummy = NM_csc(M); */
-  /*   M->storageType = NM_SPARSE; */
-  /* } */
-
   double* q = problem->q;
   double* mu = problem->mu;
+  double alpha_r=0.0;
+  FrictionContactProblem *  rescaled_problem =  problem;
+  if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_YES)
+  {
+    alpha_r = NM_norm_inf(M);
+    //alpha_r=1./10.0;
+
+    rescaled_problem =  frictionContact_copy(problem);
+    frictionContact_rescaling(rescaled_problem, 1./alpha_r, 1.0);
+
+    M = rescaled_problem->M;
+    q = rescaled_problem->q;
+    norm_q = cblas_dnrm2(m , problem->q , 1);
+    printf("norm_q = %e\n", norm_q);
+    norm_q = cblas_dnrm2(m , rescaled_problem->q , 1);
+    printf("norm_q (rescaled) = %e\n", norm_q);
+  }
 
   /* Compute M + rho I (storage in W)*/
   NumericsMatrix *W = NM_new();
@@ -225,7 +233,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
   double rho_k=0.0, rho_ratio=0.0;
   double e_k = INFINITY, e,  alpha, r, s, residual, r_scaled, s_scaled;
-  double norm_r=0.0, norm_z=0.0, norm_xi=0.0;
+  double norm_r=0.0, norm_z=0.0;
   double tau , tau_k = 1.0;
   int pos;
   double normUT;
@@ -241,7 +249,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
     if (has_rho_changed)
     {
-      /* NM_free(W); */
+      /* NM_clear(W); */
       /* W= NM_new(); */
       NM_copy(M,W);
       NM_add_to_diag3(W, rho);
@@ -319,12 +327,9 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     cblas_daxpy(m, -1.0, z, 1, xi , 1);
     r = cblas_dnrm2(m , xi , 1);
 
-    if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-        SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
-    {
-      norm_r = cblas_dnrm2(m , reaction , 1);
-      norm_z = cblas_dnrm2(m , z , 1);
-    }
+    norm_r = cblas_dnrm2(m , reaction , 1);
+    norm_z = cblas_dnrm2(m , z , 1);
+
 
     cblas_daxpy(m, 1.0, xi_hat, 1, xi , 1);
     DEBUG_PRINT("xi : ")
@@ -340,11 +345,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     cblas_daxpy(m, -1, z, 1, tmp , 1);
 
     s = rho*cblas_dnrm2(m , tmp , 1);
-    if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-        SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
-    {
-      norm_xi = cblas_dnrm2(m , xi , 1);
-    }
+    double norm_rhoxi = rho*cblas_dnrm2(m , xi , 1);
 
     e =r*r+s*s;
 
@@ -416,8 +417,8 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
         SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
     {
       r_scaled = r / (fmax(norm_z,norm_r));
-      s_scaled = s / (rho*norm_xi);
-      numerics_printf_verbose(2, "fc3d_admm. scaling : norm_r  = %e, \t norm_z  = %e, \t norm_xi = %e, \t", norm_r,  norm_z, norm_xi);
+      s_scaled = s / (norm_rhoxi);
+      numerics_printf_verbose(2, "fc3d_admm. scaling : norm_r  = %e, \t norm_z  = %e, \t norm_rhoxi = %e, \t", norm_r,  norm_z, norm_rhoxi);
       numerics_printf_verbose(2, "fc3d_admm. residuals : r  = %e, \t  s = %e", r, s);
       numerics_printf_verbose(2, "fc3d_admm. scaled residuals : r_scaled  = %e, \t  s_scaled = %e", r_scaled, s_scaled);
     }
@@ -465,28 +466,37 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     /*********************************/
     /*  4 - Stopping criterium       */
     /*********************************/
-
+    int stopping_criterion =0;
     residual = sqrt(e);
-    if(fabs(norm_q) > DBL_EPSILON)
-      residual /= norm_q;
+    /* if (fabs(norm_q) > DBL_EPSILON) */
+    /*   residual /= norm_q; */
+    /* if (residual < tolerance) */
+    /*   stopping_criterion =1; */
+    double scaling_error_primal  = fmax(norm_z,norm_r) +  sqrt(m);
+    double epsilon_primal = tolerance *  scaling_error_primal ;
+    double scaling_error_dual = norm_rhoxi + sqrt(m);
+    double epsilon_dual =  tolerance * scaling_error_dual;
+    if (r < epsilon_primal && s < epsilon_dual)
+        stopping_criterion =1;
+
 
     numerics_printf_verbose(1,"---- FC3D - ADMM  - Iteration %i rho = %14.7e, residual = %14.7e, tol = %14.7e", iter, rho, residual, tolerance);
+    numerics_printf_verbose(1,"---- FC3D - ADMM  -                            primal residual = %14.7e, epsilon_primal = %14.7e", r,  epsilon_primal);
+    numerics_printf_verbose(1,"---- FC3D - ADMM  -                            dual residual = %14.7e, epsilon_dual = %14.7e", s,  epsilon_dual);
 
-    /* 4-1 basic stopping criterion */
-    admm_has_converged = residual < tolerance;
-
-    /* 4-2 Relative stopping criterion */
-    /* admm_has_converged = (r < tolerance * fmax(r1,r2)) && (s < tolerance * s1 ) ; */
-    /* numerics_printf_verbose(2,"---- FC3D - ADMM  - r1 = %14.7e, r2 = %14.7e, s1 = %14.7e , tolerance = %14.7e", r1, r2, s1, tolerance); */
-    /* numerics_printf_verbose(2,"---- FC3D - ADMM  - r = %14.7e, tolerance * fmax(r1,r2) = %14.7e, s = %14.7e,  tolerance * s1  = %14.7e ", r, tolerance * fmax(r1,r2), s,  tolerance * s1); */
     if (verbose >1)
       frictionContactProblem_compute_statistics(problem,
                                                 reaction,
                                                 velocity,
                                                 tolerance,
                                                 0) ;
-    if(admm_has_converged)
+    if(stopping_criterion)
     {
+      /* check the full criterion */
+      if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_YES)
+      {
+        norm_q = cblas_dnrm2(m , problem->q , 1);
+      }
       fc3d_compute_error(problem,  reaction, velocity, tolerance, options, norm_q, &error);
       DEBUG_EXPR(NV_display(velocity,m));
       if(error < dparam[SICONOS_DPARAM_TOL])
@@ -497,19 +507,27 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
       else
       {
         numerics_printf_verbose(1,"---- FC3D - ADMM  - The tolerance on the  residual is not sufficient to reach accuracy (error =  %14.7e)", error);
-        tolerance = tolerance * residual/error;
+        tolerance = tolerance * fmax(epsilon_dual/scaling_error_dual ,epsilon_primal/scaling_error_primal )/error;
         numerics_printf_verbose(1,"---- FC3D - ADMM  - We reduce the tolerance on the residual to %14.7e", tolerance);
+        if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_YES)
+        {
+          norm_q = cblas_dnrm2(m , rescaled_problem->q , 1);
+        }
       }
     }
     *info = hasNotConverged;
   }
-
   if(iter==itermax)
   {
+    norm_q = cblas_dnrm2(m , problem->q , 1);
     fc3d_compute_error(problem,  reaction, velocity, tolerance, options, norm_q, &error);
+    if (error < dparam[SICONOS_DPARAM_TOL])
+    {
+      *info = 0;
+    }
     numerics_printf_verbose(1,"---- FC3D - ADMM  - Iteration %i rho = %14.7e \t full error = %14.7e", iter, rho, error);
   }
-  NM_free(W);
+  NM_clear(W);
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 }
@@ -590,7 +608,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   /* if (M->storageType == NM_DENSE) */
   /* { */
   /*   NM_copy(A,_A); */
-  /*   NM_free(A); */
+  /*   NM_clear(A); */
   /*   NM_to_dense(_A,A); */
   /* } */
   /* DEBUG_EXPR(NM_display(A);); */
@@ -600,7 +618,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   /*  cost Matrix */
   NumericsMatrix *M_T = NM_transpose(M);
   NumericsMatrix *M_s = NM_add(1.0, M, 1.0, M_T);
-  NM_free(M_T);
+  NM_clear(M_T);
   DEBUG_EXPR(NM_display(M););
   DEBUG_EXPR(NM_display(M_s););
 
@@ -628,7 +646,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   double normUT;
   int admm_has_converged=0;
 
-  /* double r1=0.0,r2=0.0, s1=0.0; */
+
 
   rho_k=rho;
   int has_rho_changed = 1;
@@ -642,7 +660,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
 
     if (has_rho_changed)
     {
-      /* NM_free(W); */
+      /* NM_clear(W); */
       /* W= NM_new(); */
       NM_copy(M_s,W);
       NM_gemm(rho, Atrans, A, 1.0, W);
@@ -899,7 +917,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
     numerics_printf_verbose(1,"---- FC3D - ADMM  - Iteration %i rho = %14.7e, residual = %14.7e, tol = %14.7e", iter, rho, residual, tolerance);
 
     /* 4-1 basic stopping criterion */
-    admm_has_converged = residual < tolerance;
+    admm_has_converged = 1;
 
     /* 4-2 Relative stopping criterion */
     /* admm_has_converged = (r < tolerance * fmax(r1,r2)) && (s < tolerance * s1 ) ; */
@@ -934,22 +952,22 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
-  NM_free(A);
-  NM_free(M_s);
-  NM_free(W);
+  NM_clear(A);
+  NM_clear(M_s);
+  NM_clear(W);
 
 }
 
 static double fc3d_admm_select_rho(NumericsMatrix* M, int * is_rho_variable, SolverOptions* restrict options)
 {
   double rho=0.0;
-  if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-     SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT)
+  if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] ==
+     SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN)
   {
     rho = options->dparam[SICONOS_FRICTION_3D_ADMM_RHO];
   }
-  else if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
-           SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF)
+  else if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] ==
+           SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_NORM_INF)
   {
     double norm_1_M =   NM_norm_1(M);
     double norm_1_H =   1.0;
@@ -958,22 +976,17 @@ static double fc3d_admm_select_rho(NumericsMatrix* M, int * is_rho_variable, Sol
     else
       rho =  options->dparam[SICONOS_FRICTION_3D_ADMM_RHO];
   }
-  else if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
+
+
+  if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
           SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING ||
           options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] ==
           SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING)
   {
-    /* double norm_1_M =   NM_norm_1(M); */
-    /* double norm_1_H =   1.0; */
-    /* if ((fabs(norm_1_H) > DBL_EPSILON) &&  (fabs(norm_1_M) > DBL_EPSILON)) */
-    /*   rho = norm_1_M/norm_1_H; */
-    /* else */
-    /*   rho =  options->dparam[SICONOS_FRICTION_3D_ADMM_RHO]; */
-
-    rho = options->dparam[SICONOS_FRICTION_3D_ADMM_RHO];
-
     *is_rho_variable = 1 ;
   }
+  else
+    *is_rho_variable = 0 ;
   return rho;
 }
 
@@ -982,7 +995,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
                int* restrict info, SolverOptions* restrict options)
 {
 
-  /* verbose=3; */
+  verbose=1;
   /* frictionContact_display(problem); */
 
   /* Number of contacts */
@@ -1008,7 +1021,8 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     numerics_printf_verbose(1,"---- FC3D - ADMM - Problem information");
     numerics_printf_verbose(1,"---- FC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
     numerics_printf_verbose(1,"---- FC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
-}
+    /* getchar(); */
+  }
   int internal_allocation=0;
   if(!(Fc3d_ADMM_data *)options->solverData)
   {
@@ -1058,9 +1072,9 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     numerics_error("fc3d_admm", "iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = %i is not implemented", options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY]);
 
   numerics_printf_verbose(1,"---- FC3D - ADMM - Solution information");
-  numerics_printf_verbose(1,"---- FC3D - ADMM - norm of velocity = %g, norm of q = %g ",
+  numerics_printf_verbose(1,"---- FC3D - ADMM - norm of velocity = %e, norm of q = %e ",
                           cblas_dnrm2(m , velocity , 1) , norm_q);
-  numerics_printf_verbose(1,"---- FC3D - ADMM - norm of reaction = %g",
+  numerics_printf_verbose(1,"---- FC3D - ADMM - norm of reaction = %e",
                           cblas_dnrm2(m , reaction , 1) , norm_q);
 
   /***** Free memory *****/
@@ -1096,14 +1110,24 @@ int fc3d_admm_setDefaultSolverOptions(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] = SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] =  SICONOS_FRICTION_3D_ADMM_KEEP_STORAGE;
+
+  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_INITIAL_RHO] =
+    SICONOS_FRICTION_3D_ADMM_INITIAL_RHO_GIVEN;
+
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] =
-    SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_NORM_INF;
-  
+    SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_CONSTANT;
+
+  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] =
+    SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_NO;
+
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA] = 0.999;
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
-  options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=10.0;
+  options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=2.0;
+
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]=SICONOS_FRICTION_3D_RESCALING_NO;
+
 
   options->internalSolvers = NULL;
   options->solverData = NULL;

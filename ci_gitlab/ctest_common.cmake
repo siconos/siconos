@@ -27,6 +27,7 @@ if(NOT CTEST_CMAKE_GENERATOR)
 endif()
 
 # -- Query host system information --
+# --> to set ctest site for cdash.
 #include(cmake_host_system_information)
 cmake_host_system_information(RESULT hostname QUERY HOSTNAME)
 cmake_host_system_information(RESULT fqdn QUERY FQDN)
@@ -68,7 +69,7 @@ ctest_start(${model})
 
 # Set CTEST_CONFIGURE_COMMAND to cmake followed by siconos options 
 set(CTEST_CONFIGURE_COMMAND ${CMAKE_COMMAND})
-foreach(option ${SICONOS_CMAKE_OPTIONS})
+foreach(option IN LISTS SICONOS_CMAKE_OPTIONS)
   set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${option}")
 endforeach()
 set(CTEST_CONFIGURE_COMMAND "${CTEST_CONFIGURE_COMMAND} ${CTEST_SOURCE_DIRECTORY}")
@@ -81,18 +82,11 @@ else()
   message("- Results won't be submitted to a cdash server.\n")
 endif()
 
-if(${CMAKE_VERSION} VERSION_GREATER "3.6.3") 
-  ctest_configure(
-    RETURN_VALUE CONFIGURE_RESULT
-    CAPTURE_CMAKE_ERROR CONFIGURE_STATUS
-    QUIET
-    )
-else()
-  ctest_configure(
-    RETURN_VALUE CONFIGURE_RESULT
-    QUIET)
-  set(CONFIGURE_STATUS ${CONFIGURE_RESULT})
-endif()
+ctest_configure(
+  RETURN_VALUE CONFIGURE_RESULT
+  CAPTURE_CMAKE_ERROR CONFIGURE_STATUS
+  QUIET
+  )
 
 message("=============== End of ctest_configure =============== ")
 message("------> Configure status/result : ${CONFIGURE_STATUS}/${CONFIGURE_RESULT}")
@@ -106,26 +100,17 @@ endif()
 # --- Build ---
 
 if(NOT CTEST_BUILD_CONFIGURATION)
-  set(CTEST_BUILD_CONFIGURATION "Profiling")
+  set(CTEST_BUILD_CONFIGURATION "Release")
 endif()
 
 message("\n\n=============== Start ctest_build =============== ")
 
-if(${CMAKE_VERSION} VERSION_GREATER "3.6.3") 
-  ctest_build(
-      PROJECT_NAME ${current_project}
-      CAPTURE_CMAKE_ERROR BUILD_STATUS
-      RETURN_VALUE BUILD_RESULT
-      QUIET
-      )
-else()
-  ctest_build(
-      PROJECT_NAME ${current_project}
-      RETURN_VALUE BUILD_RESULT
-      QUIET
-      )
-    set(BUILD_STATUS ${BUILD_RESULT})
-  endif()
+ctest_build(
+  PROJECT_NAME ${current_project}
+  CAPTURE_CMAKE_ERROR BUILD_STATUS
+  RETURN_VALUE BUILD_RESULT
+  #QUIET if quiet, travis failed because of missing outputs during a long time ...
+  )
 message("=============== End of ctest_build =============== ")
 message("------> Build status/result : ${BUILD_STATUS}/${BUILD_RESULT}")
 if(NOT BUILD_STATUS EQUAL 0 OR NOT BUILD_RESULT EQUAL 0)
@@ -138,25 +123,23 @@ endif()
 
 # -- Tests --
 message("\n\n=============== Start ctest_test (nbprocs = ${NP}) =============== ")
-if(${CMAKE_VERSION} VERSION_GREATER "3.6.3") 
-  ctest_test(
-    PARALLEL_LEVEL NP
-    CAPTURE_CMAKE_ERROR TEST_STATUS
-    SCHEDULE_RANDOM ON
-    RETURN_VALUE TEST_RESULT
-    QUIET
-    )
-else()
-  ctest_test(
-    PARALLEL_LEVEL NP
-    RETURN_VALUE TEST_STATUS
-    SCHEDULE_RANDOM ON
-    QUIET
-    )
-  set(TEST_STATUS ${TEST_RESULT})
-endif()
+ctest_test(
+  PARALLEL_LEVEL NP
+  CAPTURE_CMAKE_ERROR TEST_STATUS
+  SCHEDULE_RANDOM ON
+  RETURN_VALUE TEST_RESULT
+  QUIET
+  )
 message("=============== End of ctest_test =============== ")
 message("------> Test status/result : ${TEST_STATUS}/${TEST_RESULT}")
+
+if(WITH_MEMCHECK AND CTEST_COVERAGE_COMMAND)
+  ctest_coverage()
+endif()
+if(WITH_MEMCHECK AND CTEST_MEMORYCHECK_COMMAND)
+  ctest_memcheck()
+endif()
+
 # error status check later, we try to submit even if tests failed.
 
 # -- memory check -- Skip this to 'enlight' submit process, since cdash inria is overbooked ...
@@ -172,20 +155,20 @@ endif()
 
 # -- Submission to cdash --
 message("\n\n=============== Start ctest_submit =============== ")
+# file(GLOB SUBMIT_FILES ${CMAKE_BINARY_DIR}/Testing/*/*)
+# message(STATUS "submit files : ${SUBMIT_FILES}")
 ctest_submit(
-  PARTS Configure
-  CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS)
-
-ctest_submit(
-  PARTS Build
-  CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS)
-
-
-ctest_submit(
-  PARTS Test
+#  FILES ${SUBMIT_FILES}
+#   PARTS Configure
+#   CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS)
+# ctest_submit(
+#   PARTS Build
+#   CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS)
+# ctest_submit(
+#   PARTS Test
   CAPTURE_CMAKE_ERROR  SUBMISSION_STATUS
-#RETRY_COUNT 4 # Retry 4 times, if submission failed ...)
-#  RETRY_DELAY 1 # seconds
+  #RETRY_COUNT 4 # Retry 4 times, if submission failed ...)
+  #  RETRY_DELAY 1 # seconds
   )
 message("=============== End of ctest_test =============== ")
 

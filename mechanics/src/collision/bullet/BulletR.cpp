@@ -105,15 +105,18 @@ void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& m
 
   ::boost::math::quaternion<double> rq1, rq2, posa;
   ::boost::math::quaternion<double> pq1, pq2, posb;
+
   copyQuatPos(*ds1->q(), pq1);
-  copyQuatPos(point.getPositionWorldOnA() / scaling, posa);
   copyQuatRot(*ds1->q(), rq1);
+
   if (ds2)
   {
     copyQuatPos(*ds2->q(), pq2);
-    copyQuatPos(point.getPositionWorldOnB() / scaling, posb);
     copyQuatRot(*ds2->q(), rq2);
   }
+
+  copyQuatPos(point.getPositionWorldOnA() / scaling, posa);
+  copyQuatPos(point.getPositionWorldOnB() / scaling, posb);
 
   if (flip)
   {
@@ -124,9 +127,9 @@ void BulletR::updateContactPointsFromManifoldPoint(const btPersistentManifold& m
 
   SiconosVector va(3), vb(3), vn(3);
   if (flip) {
-    copyQuatPos((1.0/rq1) * (posb - pq1) * rq1, va);
+    copyQuatPos((1.0/rq1) * (posa - pq1) * rq1, va);
     if (ds2)
-      copyQuatPos((1.0/rq2) * (posa - pq2) * rq2, vb);
+      copyQuatPos((1.0/rq2) * (posb - pq2) * rq2, vb);
     else {
       // If no body2, position is relative to 0,0,0
       copyBtVector3(point.getPositionWorldOnA() / scaling, vb);

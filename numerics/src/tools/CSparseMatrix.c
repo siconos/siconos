@@ -80,6 +80,28 @@ int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A,
   return 1;
 
 }
+/* A <-- alpha*A */
+int CSparseMatrix_scal(const double alpha, const CSparseMatrix *A)
+{
+
+  CS_INT n, *Ap;
+  double *Ax ;
+  if(!CS_CSC(A)) return (0);	     /* check inputs */
+  {
+    n = A->n;
+    Ap = A->p;
+    Ax = A->x;
+    for(int j=0 ; j<n ; j++)
+    {
+      for(CS_INT p = Ap [j] ; p < Ap [j+1] ; p++)
+      {
+        Ax [p] = alpha * Ax [p];
+      }
+    }
+
+  }
+  return 1;
+}
 
 int CSparseMatrix_check_triplet(CSparseMatrix *T)
 {
@@ -187,7 +209,7 @@ CSparseMatrix* CSparseMatrix_spfree_on_stack(CSparseMatrix* A)
   return NULL;
 }
 
-int CSparsematrix_lu_factorization(CS_INT order, const cs *A, double tol, CSparseMatrix_lu_factors * cs_lu_A )
+int CSparsematrix_lu_factorization(CS_INT order, const cs *A, double tol, CSparseMatrix_factors * cs_lu_A )
 {
   assert(A);
   cs_lu_A->n = A->n;
@@ -197,8 +219,18 @@ int CSparsematrix_lu_factorization(CS_INT order, const cs *A, double tol, CSpars
 
   return (S && cs_lu_A->N);
 }
+int CSparsematrix_chol_factorization(CS_INT order, const cs *A,  CSparseMatrix_factors * cs_chol_A )
+{
+  assert(A);
+  cs_chol_A->n = A->n;
+  css* S = cs_schol (order, A);
+  cs_chol_A->S = S;
+  cs_chol_A->N = cs_chol(A, S);
 
-void CSparseMatrix_free_lu_factors(CSparseMatrix_lu_factors* cs_lu_A)
+  return (S && cs_chol_A->N);
+}
+
+void CSparseMatrix_free_lu_factors(CSparseMatrix_factors* cs_lu_A)
 {
   assert(cs_lu_A);
   if (cs_lu_A)
@@ -217,7 +249,7 @@ void CSparseMatrix_free_lu_factors(CSparseMatrix_lu_factors* cs_lu_A)
 
 /* Solve Ax = b with the factorization of A stored in the cs_lu_A
  * This is extracted from cs_lusol, you need to synchronize any changes! */
-CS_INT CSparseMatrix_solve(CSparseMatrix_lu_factors* cs_lu_A, double* x, double *b)
+CS_INT CSparseMatrix_solve(CSparseMatrix_factors* cs_lu_A, double* x, double *b)
 {
   assert(cs_lu_A);
 
@@ -232,6 +264,25 @@ CS_INT CSparseMatrix_solve(CSparseMatrix_lu_factors* cs_lu_A, double* x, double 
     cs_lsolve (N->L, x) ;               /* x = L\x */
     cs_usolve (N->U, x) ;               /* x = U\x */
     cs_ipvec (S->q, x, b, n) ;          /* b(q) = x */
+  }
+  return (ok);
+}
+
+CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b)
+{
+  assert(cs_chol_A);
+
+  CS_INT ok;
+  CS_INT n = cs_chol_A->n;
+  css* S = cs_chol_A->S;
+  csn* N = cs_chol_A->N;
+  ok = (S && N && x) ;
+  if (ok)
+  {
+    cs_ipvec (S->pinv, b, x, n) ;   /* x = P*b */
+    cs_lsolve (N->L, x) ;           /* x = L\x */
+    cs_ltsolve (N->L, x) ;          /* x = L'\x */
+    cs_pvec (S->pinv, x, b, n) ;    /* b = P'*x */
   }
   return (ok);
 }
@@ -483,7 +534,7 @@ CS_INT CSparseMatrix_to_dense(const CSparseMatrix* const A, double * B)
   CS_INT p, j, m, n, nz, *Ap, *Ai ;
   CS_ENTRY *Ax ;
 
-  if (!A) { printf ("CSparseMatrix_to_dense :: A = null\n") ; return (0) ; }
+  if (!A) { printf ("CSparseMatrix_to_dense :: A = null\n") ; return (1) ; }
 
   m = A->m ; n = A->n ;
   nz = A->nz ;
@@ -513,7 +564,7 @@ CS_INT CSparseMatrix_to_dense(const CSparseMatrix* const A, double * B)
       }
     }
   }
-  return (1) ;
+  return (0) ;
 }
 
 CSparseMatrix* CSparseMatrix_alloc_for_copy(const CSparseMatrix* const m)

@@ -2,3 +2,4 @@ numpy
 scipy
 pytest
 h5py
+packaging

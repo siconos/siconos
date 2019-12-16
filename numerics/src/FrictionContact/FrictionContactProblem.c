@@ -23,6 +23,8 @@
 #include "numerics_verbose.h"
 #include "SparseBlockMatrix.h"
 #include <math.h>
+#include <string.h>
+#include "SiconosLapack.h"
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"
@@ -159,7 +161,7 @@ void frictionContactProblem_free(FrictionContactProblem* problem)
   assert(problem);
   if (problem->M)
   {
-    NM_free(problem->M);
+    NM_clear(problem->M);
     free(problem->M);
     problem->M = NULL;
   }
@@ -356,5 +358,34 @@ void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
   }
 
   numerics_printf_verbose(do_print, "---- FC3D - STAT  - Number of contact = %i\t,  take off = %i\t, closed = %i\t, sliding = %i\t,sticking = %i\t, ambiguous take off = %i\t, ambiguous closed = %i",nc ,take_off_count,closed_count,sliding_count,sticking_count, ambiguous_take_off_count,ambiguous_closed_count);
+
+}
+FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem)
+{
+  assert(problem);
+
+  int nc = problem->numberOfContacts;
+  int n = problem->M->size0;
+  FrictionContactProblem* new = (FrictionContactProblem*) malloc(sizeof(FrictionContactProblem));
+  new->dimension = problem->dimension;
+  new->numberOfContacts = problem->numberOfContacts;
+  new->M = NM_new();
+  NM_copy(problem->M, new->M);
+  new->q = (double*)malloc(n*sizeof(double));
+  memcpy(new->q, problem->q, n*sizeof(double));
+  new->mu = (double*)malloc(nc*sizeof(double));
+  memcpy(new->mu, problem->mu, nc*sizeof(double));
+  return new;
+}
+void frictionContact_rescaling(
+  FrictionContactProblem* problem,
+  double alpha,
+  double gamma)
+{
+  int n = problem->M->size0;
+  /* scaling of M */
+  NM_scal(alpha*gamma*gamma, problem->M);
+  /* scaling of q */
+  cblas_dscal(n,alpha*gamma,problem->q,1);
 
 }

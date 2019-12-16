@@ -92,7 +92,7 @@ find_package(BLASDEV ${_LAPACK_SEARCH_OPTS})
 
 if(BLAS_ROOT OR LAPACK_ROOT)
   set(_SEARCH_OPTS
-    HINTS ${BLAS_ROOT} ${LAPACK_ROOT} NO_DEFAULT_PATH)
+    "HINTS ${BLAS_ROOT} ${LAPACK_ROOT} NO_DEFAULT_PATH")
   set(CMAKE_FIND_ROOT_PATH ${BLAS_ROOT})
   list(APPEND CMAKE_FIND_ROOT_PATH ${LAPACK_ROOT})
 endif()
@@ -122,6 +122,8 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
   # SiconosConfig.h setup
   if(BLAS_NAME STREQUAL "mkl")
     set(HAS_MKL_LAPACKE 1 CACHE BOOL "Blas comes from Intel MKL.")
+  elseif(BLAS_NAME STREQUAL "OpenBlas")
+    set(HAS_OpenBLAS 1 CACHE BOOL "Blas comes from OpenBLAS.")   
   elseif(BLAS_NAME STREQUAL "Accelerate")
     set(HAS_ACCELERATE 1 CACHE BOOL "Blas/Lapack come from Accelerate framework ")
   elseif(BLAS_NAME STREQUAL "Matlab")
@@ -147,6 +149,7 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
     dgesv
     dgetrs
     dpotrf
+    dpotrs
     )
 
   # Functions that are optional
@@ -171,6 +174,7 @@ endif()
 # -- Library setup --
 find_package_handle_standard_args(LAPACKDEV
   REQUIRED_VARS LAPACK_LIBRARIES LAPACK_INCLUDE_DIR)
+
 
 if(NOT TARGET LAPACK::LAPACK)
   add_library(LAPACK::LAPACK IMPORTED INTERFACE)

@@ -50,13 +50,18 @@ def get_classes_conditional(doxy_xml_files, cond):
 def classes_from_build_path(build_path):
     """Get classes and members from all Doxygen XML files found on the
        provided build path."""
-    doxy_xml_path = os.path.join(build_path,'Docs/build/html/doxygen/xml')
+    doxy_xml_path = os.path.join(build_path,'docs/build/doxygen/xml4rst')
     if not os.path.exists(doxy_xml_path):
         print('%s: Error, path "%s" does not exist.'%(sys.argv[0], doxy_xml_path))
         sys.exit(1)
-    doxy_xml_files = (
-        glob(os.path.join(doxy_xml_path, 'class*.xml'))
-        + glob(os.path.join(doxy_xml_path, 'struct*.xml')))
+
+    components = ["kernel"] # FP : review this. Which components are to be included
+    # in serialization/generation process ?
+    doxy_xml_files = []
+    for component in components:
+        doxypath = os.path.join(doxy_xml_path, component)
+        doxy_xml_files += glob(os.path.join(doxypath, 'class*.xml'))
+        doxy_xml_files += glob(os.path.join(doxypath, 'struct*.xml'))
 
     # We want only classes that contain calls to the
     # ACCEPT_SERIALIZATION macro.

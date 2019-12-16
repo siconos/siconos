@@ -245,7 +245,7 @@ extern "C"
       Note that this function does not free m.
       \param m the matrix to be deleted.
    */
-  void NM_free(NumericsMatrix* m);
+  void NM_clear(NumericsMatrix* m);
 
 
   /**************************************************/
@@ -312,7 +312,7 @@ extern "C"
    */
 
   void NM_extract_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
-  
+
   /** get a 5x5 diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
    * \param[in] block_row_nb the number of the block row
@@ -320,7 +320,7 @@ extern "C"
    *   In case of SBM case **Bout contains the resulting block (from the SBM).
    */
   void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double **Block);
-  
+
   /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
    * \param[in] M a NumericsMatrix
    * \param[in] block_row_nb the number of the block row
@@ -389,10 +389,10 @@ extern "C"
       \param[in] init if True y = Ax, else y += Ax
   */
   void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
-  
 
 
-  
+
+
   void NM_row_prod_no_diag1x1(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
 
   /** Matrix vector multiplication : y = alpha A x + beta y
@@ -447,10 +447,11 @@ extern "C"
 
   void NM_dense_to_sparse(const NumericsMatrix* const A, NumericsMatrix* B);
 
+  /** Copy a NumericsMatrix into another with dense storage.
+      \param A source matrix (any kind of storage)
+      \param B targeted matrix, must be dense with the same dimension as A
+  */
   int NM_to_dense(const NumericsMatrix* const A, NumericsMatrix* B);
-
-
-
 
   /** Screen display of the matrix content stored as a double * array in Fortran style
       \param m the matrix to be displayed
@@ -604,14 +605,15 @@ extern "C"
    * used
    */
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
+  int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 
   /**  Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    * \param[in,out] A a NumericsMatrix.
-   * \param[out] Ainv the matrix inverse.
+   * \return the matrix inverse.
    */
-  int NM_inv(NumericsMatrix* A, NumericsMatrix* Ainv);
+  NumericsMatrix* NM_inv(NumericsMatrix* A);
 
   int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A);
 
@@ -695,11 +697,17 @@ extern "C"
    */
   RawNumericsMatrix *  NM_add(double alpha, NumericsMatrix* A, double beta, NumericsMatrix* B);
 
+  /** Multiply a matrix with a double alpha*A --> A
+   * \param alpha the  coefficient
+   * \param A the   matrix
+   */
+  void  NM_scal(double alpha, NumericsMatrix* A);
+
   /** assert that a NumericsMatrix has the right structure given its type
    * \param type expected type
    * \param M the matrix to check
    */
-  static inline void NM_assert(const int type, NumericsMatrix* M)
+    static inline void NM_assert(const int type, NumericsMatrix* M)
   {
 #ifndef NDEBUG
     assert(M && "NM_assert :: the matrix is NULL");
@@ -749,7 +757,7 @@ extern "C"
   {
     return A;
   };
-
+  double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

@@ -179,12 +179,12 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     {
       inter_work[EulerMoreauOSI::VEC_Z].reset(new SiconosVector(sizeZ));
       inter_work[EulerMoreauOSI::VEC_X].reset(new SiconosVector(sizeOfDS));
-
+       inter_work[EulerMoreauOSI::VEC_RESIDU_Y].reset(new SiconosVector(sizeY));
+        inter_work[EulerMoreauOSI::H_ALPHA].reset(new SiconosVector(sizeY));
+ 
       if (relationSubType == NonLinearR || relationSubType == Type2R )
       {
-        inter_work[EulerMoreauOSI::H_ALPHA].reset(new SiconosVector(sizeY));
-        inter_work[EulerMoreauOSI::VEC_RESIDU_Y].reset(new SiconosVector(sizeY));
-        inter_work[EulerMoreauOSI::G_ALPHA].reset(new SiconosVector(sizeOfDS));
+         inter_work[EulerMoreauOSI::G_ALPHA].reset(new SiconosVector(sizeOfDS));
         inter_work[EulerMoreauOSI::VEC_RESIDU_R].reset(new SiconosVector(sizeOfDS));
         inter_work_mat[EulerMoreauOSI::MAT_KHAT].reset(new SimpleMatrix(sizeOfDS, sizeY));
         inter_work_mat[EulerMoreauOSI::MAT_KTILDE].reset(new SimpleMatrix(sizeOfDS, sizeY));

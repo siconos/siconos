@@ -257,13 +257,9 @@ void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B)
 #ifdef WITH_MUMPS
   if (A->matrix2 && A->matrix2->linearSolverParams && A->matrix2->linearSolverParams->solver==NSM_MUMPS && A->matrix2->linearSolverParams->linear_solver_data)
   {
-    DMUMPS_STRUC_C* new_id = (DMUMPS_STRUC_C*) calloc(1, sizeof(DMUMPS_STRUC_C));
-    memcpy(new_id, A->matrix2->linearSolverParams->linear_solver_data, sizeof(DMUMPS_STRUC_C));
-    if (B->matrix2 && B->matrix2->linearSolverParams)
-    {
-      NSM_linearSolverParams_free(B->matrix2->linearSolverParams);
-    }
-    NM_MUMPS_set_id(B, new_id);
+    /* copy id of A into B */
+    DMUMPS_STRUC_C* B_id = NM_MUMPS_id(B);
+    memcpy(B_id, A->matrix2->linearSolverParams->linear_solver_data, sizeof(DMUMPS_STRUC_C));
   }
 #endif
 }

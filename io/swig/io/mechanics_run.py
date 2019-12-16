@@ -1,4 +1,5 @@
- 
+
+
 # Mechanics IO
 
 """Run a pre-configured Siconos "mechanics" HDF5 file."""
@@ -28,7 +29,8 @@ import siconos.numerics as Numerics
 from siconos.kernel import \
     EqualityConditionNSL, \
     Interaction, DynamicalSystem, TimeStepping,\
-    SICONOS_OSNSP_TS_VELOCITY
+    SICONOS_OSNSP_TS_VELOCITY,\
+    cast_FrictionContact
 import siconos.kernel as Kernel
 
 # Siconos Mechanics imports
@@ -86,6 +88,8 @@ def setup_default_classes():
     default_simulation_class = TimeStepping
     default_body_class = RigidBodyDS
     if backend == 'bullet':
+        if not have_bullet:
+            print('[mechanics_run] WARNING : The backend for collision is bullet but it seems that bullet is not linked with siconos')
         def m(options):
             if options is None:
                 options = SiconosBulletOptions()
@@ -1715,22 +1719,50 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             time = self.current_time()
             contact_points = self._io.contactPoints(self._nsds,
                                                     self._contact_index_set)
-            
+
             if contact_points is not None:
                 current_line = self._cf_data.shape[0]
+                # Increase the number of lines in cf_data
+                # (h5 dataset with chunks)
                 self._cf_data.resize(current_line + contact_points.shape[0], 0)
                 times = np.empty((contact_points.shape[0], 1))
                 times.fill(time)
 
-
-                
-                if self._dimension == 3 :
+                if self._dimension == 3:
+                    new_contact_points = np.zeros((contact_points.shape[0],25))
+                     
+                    new_contact_points[:, 0] = contact_points[:,0] # mu
+                    new_contact_points[:, 1] = contact_points[:,1] # posa
+                    new_contact_points[:, 2] = contact_points[:,2]
+                    #new_contact_points[:,3]
+                    new_contact_points[:,4] = contact_points[:,3] # posb
+                    new_contact_points[:,5] = contact_points[:,4]
+                    #new_contact_points[:,6]
+                    new_contact_points[:,7] = contact_points[:,5] # nc
+                    new_contact_points[:,8] = contact_points[:,6]
+                    #new_contact_points[:,9]
+                    new_contact_points[:,10] = contact_points[:,7] # cf 
+                    new_contact_points[:,11] = contact_points[:,8]
+                    #new_contact_points[:,12]
+                    new_contact_points[:,13] = contact_points[:,9] # gap
+                    new_contact_points[:,14] = contact_points[:,10]
+                    #new_contact_points[:,15]
+                    new_contact_points[:,16] = contact_points[:,11] # relative velocity
+                    new_contact_points[:,17] = contact_points[:,12]
+                    #new_contact_points[:,18]
+                    new_contact_points[:,19] = contact_points[:,13] # reaction impulse
+                    new_contact_points[:,20] = contact_points[:,14]
+                    #new_contact_points[:,21]
+                    new_contact_points[:,22] = contact_points[:,15] # inter id
+                    new_contact_points[:,23] = contact_points[:,16] # ds 1
+                    new_contact_points[:,24] = contact_points[:,17] # ds 2
+        
                     self._cf_data[current_line:, :] = \
                         np.concatenate((times,
                                         contact_points),
                                        axis=1)
-  
-                elif self._dimension == 2 :
+
+                elif self._dimension == 2:
                     
                     # VA. change the contact info such that is corresponds to a 3D object
                      new_contact_points=np.zeros((contact_points.shape[0],25))
@@ -1908,6 +1940,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         newtonNbIterations =0
         isNewtonConverge =False
+        explode_computeOneStep = False
+
         self.log(s.initializeNewtonLoop, with_timer)()
         while (not isNewtonConverge) and (newtonNbIterations <newtonMaxIteration):
             #self.print_verbose('newtonNbIterations',newtonNbIterations)
@@ -1916,7 +1950,18 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.log(s.prepareNewtonIteration, with_timer)()
             self.log(s.computeFreeState, with_timer)()
             if s.numberOfOSNSProblems() >0:
-                info = self.log(s.computeOneStepNSProblem, with_timer)(SICONOS_OSNSP_TS_VELOCITY)
+                if explode_computeOneStep:
+                    # experimental
+                    osnsp=s.oneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY)
+                    #info = self.log(osnsp.compute, with_timer)(s.nextTime())
+                    fc = cast_FrictionContact(osnsp)
+                    #self.log(fc.updateInteractionBlocks, with_timer)()
+                    self.log(fc.preCompute, with_timer)(s.nextTime())
+                    self.log(fc.updateMu, with_timer)()
+                    info = self.log(fc.solve, with_timer)()
+                    self.log(fc.postCompute, with_timer)()
+                else:
+                    info = self.log(s.computeOneStepNSProblem, with_timer)(SICONOS_OSNSP_TS_VELOCITY)
             self.log(s.DefaultCheckSolverOutput, with_timer)(info);
             self.log(s.updateInput, with_timer)();
             self.log(s.updateState, with_timer)();
@@ -2067,7 +2112,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # get dimension
         self._dimension=self._out.attrs.get('dimension', 3)
-        print("###################  self._dimension",  self._dimension)
+
         # Respect run() parameter for multipoints_iterations for
         # backwards compatibility, but this is overridden by
         # SiconosBulletOptions if one is provided.
@@ -2077,6 +2122,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             options.minimumPointsPerturbationThreshold = 3*multipoints_iterations
 
         if (self._dimension ==2) :
+            if  options is None:
+                options = SiconosBulletOptions()
             options.dimension = SICONOS_BULLET_2D
             
         self._interman = interaction_manager(options)
@@ -2208,9 +2255,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         #solverOptions.iparam[1]=Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE
         #solverOptions.iparam[8]=1
         # -- light error evaluation with full final
-        if self._dimension ==3: # ugly
-            solverOptions.iparam[1] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
-            solverOptions.iparam[14] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
+        if self._dimension ==3 and solver == Numerics.SICONOS_FRICTION_3D_NSGS: # ugly
+            solverOptions.iparam[Numerics.SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = Numerics.SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT
+            solverOptions.iparam[Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] = Numerics.SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
 
         
         osnspb.setNumericsVerboseMode(numerics_verbose)
@@ -2244,7 +2291,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         simulation.setNewtonOptions(Newton_options)
         simulation.setNewtonMaxIteration(Newton_max_iter)
         simulation.setNewtonTolerance(1e-10)
-        simulation.setDisplayNewtonConvergence(True)
+        if verbose:
+            simulation.setDisplayNewtonConvergence(True)
 
 
         self._simulation = simulation
@@ -2344,12 +2392,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 number_of_contacts = (
                     self._interman.statistics().new_interactions_created
                     + self._interman.statistics().existing_interactions_processed)
+                if verbose and number_of_contacts > 0 :
+                    self.print_verbose('number of contacts', number_of_contacts, '(detected)', osnspb.getSizeOutput()//3, '(active at velocity level. approx)')
+                    self.print_solver_infos()
+
             else:
                 number_of_contacts = osnspb.getSizeOutput()//3
+                if verbose and number_of_contacts > 0 :
+                    self.print_verbose('number of active contacts  at the velocity level (approx)', number_of_contacts)
+                    self.print_solver_infos()
             
-            if verbose and number_of_contacts > 0 :
-                self.print_verbose('number of contacts', number_of_contacts)
-                self.print_solver_infos()
 
             if violation_verbose and number_of_contacts > 0 :
                 if len(simulation.y(0,0)) >0 :

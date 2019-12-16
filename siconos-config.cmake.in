@@ -9,24 +9,12 @@
 # Usage :
 # 
 # find_package(siconos)
-# include_directories(${siconos_INCLUDE_DIRECTORIES})
-# # ... define some target ...
+#  ... define some target ...
 # target_link_libraries(my_target ${siconos_LIBRARIES})
 #
-# A call to find_package(siconos) 
-# will set the following variables :
-#
-# siconos_INCLUDE_DIR = where to find siconos headers
-# siconos_INCLUDE_DIRS : The final set of include directories listed in one variable for use by client code. It includes both path to siconos headers and path to external libraries headers
-# siconos_LIBRARIES : the libraries to link against to use siconos
-# siconos_EXTERNAL_LIBRARIES : the libraries on which siconos libs depend.
-# siconos_ROOT_DIR : where to find the base directory of siconos
-# siconos_FOUND : true if the find process went fine
+# A call to find_package(siconos) will define targets
+# Siconos::<component> with component = externals, numerics, kernel ...
 # 
-# 
-# Note : var names chosen as recommended here :
-# https://cmake.org/cmake/help/latest/manual/cmake-developer.7.html#manual:cmake-developer(7)
-#
 
 @PACKAGE_INIT@
 
@@ -36,7 +24,7 @@ include(CMakeFindDependencyMacro)
 set(PACKAGE_NAME siconos)
 
 # set path to siconos installation
-set_and_check(siconos_ROOT_DIR "@CMAKE_INSTALL_PREFIX@")
+set_and_check(siconos_ROOT "@CMAKE_INSTALL_PREFIX@")
 
 # set list of targets build by siconos project
 set(installed_targets "@installed_targets@")
@@ -44,15 +32,17 @@ set(installed_targets "@installed_targets@")
 # Path (relative to siconos install) to cmake extra tools
 set(ConfigPackageLocation @ConfigPackageLocation@)
 
-# set list of external libraries
-set(${PACKAGE_NAME}_EXTERNAL_LIBRARIES "@SICONOS_LINK_LIBRARIES@")
-
 # include siconos project targets
 include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")
 
+set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
+
 # --- Siconos extra components or options ---
 set(HAS_PYTHON_WRAPPER @WITH_PYTHON_WRAPPER@)
-set(SICONOS_PYTHON_EXECUTABLE @Python3_EXECUTABLE@)
+if(HAS_PYTHON_WRAPPER)
+  set(PYTHON_EXECUTABLE  @PYTHON_EXECUTABLE@)
+  set(Python3_EXECUTABLE @Python3_EXECUTABLE@)
+endif()
 
 # --- Numerics component extras ---
 set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
@@ -60,23 +50,13 @@ set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
 # --- Mechanics component extras ---
 # mechanics component with bullet?
 set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
+
 # mechanics (and/or mechanisms) component with oce?
 set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
 
-# set list of include dirs for external libraries
-set(${PACKAGE_NAME}_INCLUDE_DIRECTORIES @SICONOS_INCLUDE_DIRECTORIES@)
-list(APPEND ${PACKAGE_NAME}_INCLUDE_DIRECTORIES @CMAKE_INSTALL_PREFIX@/include/siconos)
-set(CMAKE_CXX_STANDARD @CMAKE_CXX_STANDARD@)
-
-
-#find_dependency(LAPACKDEV)
-
-#if(@WITH_SYSTEM_SUITESPARSE@)
-#  find_dependency(SuiteSparse)
-#endif()
-
 if(@WITH_FCLIB@)
-  set_and_check(FCLIB_ROOT @FCLIB_ROOT@)
+  # Look for fclib in default path, FCLIB_DIR (cmake <3.12)
+  # and/or FCLIB_ROOT (cmake >= 3.12).
   find_dependency(FCLIB 3.0.0 CONFIG REQUIRED)
 endif()
 

@@ -13,11 +13,11 @@ if(WITH_${COMPONENT}_TESTING)
 
   begin_tests(src/tools/test)
 
-  new_test(SOURCES test_op3x3.c DEPS "externals;LAPACK::LAPACK")
+  new_test(SOURCES test_op3x3.c)
 
   new_test(SOURCES test_timers_interf.c)
 
-  new_test(SOURCES test_blas_lapack.c DEPS "externals;LAPACK::LAPACK")
+  new_test(SOURCES test_blas_lapack.c)
 
   if(HAS_LAPACK_dgesvd) # Some lapack versions (e.g. Atlas) miss dgesvd
     new_test(SOURCES test_pinv.c)# DEPS "externals")
@@ -28,7 +28,7 @@ if(WITH_${COMPONENT}_TESTING)
   new_test(SOURCES NumericsArrays.c)
 
   #  tests for NumericsMatrix
-  new_test(SOURCES NM_test.c DEPS "externals;BLAS::BLAS;${suitesparse}")
+  new_test(SOURCES NM_test.c DEPS "${suitesparse}")
 
   #  tests for JordanAlgebra
   NEW_TEST(NAME tools_test_JordanAlgebra SOURCES JordanAlgebra_test.c)
@@ -39,11 +39,11 @@ if(WITH_${COMPONENT}_TESTING)
   endif()
   
   # Specfic tests for SBM matrices 
-  new_test(SOURCES SBM_test.c DEPS "externals;BLAS::BLAS;${suitesparse}")
+  new_test(SOURCES SBM_test.c DEPS "${suitesparse}")
   new_test(SOURCES SBCM_to_SBM.c)
 
   # Specfic tests for sparse matrices 
-  new_test(SOURCES SparseMatrix_test.c DEPS "externals;${suitesparse}")
+  new_test(SOURCES SparseMatrix_test.c DEPS "${suitesparse}")
 
   if(HAS_ONE_LP_SOLVER)
     new_test(SOURCES vertex_problem.c)
@@ -98,7 +98,7 @@ if(WITH_${COMPONENT}_TESTING)
   if(HAVE_SYSTIMES_H AND WITH_CXX)
     new_test(NAME MLCPtest SOURCES main_mlcp.cpp)
   endif()
-  new_test(SOURCES MixedLinearComplementarity_ReadWrite_test.c DEPS "externals")
+  new_test(SOURCES MixedLinearComplementarity_ReadWrite_test.c)
 
   # ----------- MCP solvers tests -----------
   begin_tests(src/MCP/test)
@@ -222,7 +222,7 @@ if(WITH_${COMPONENT}_TESTING)
   # ---------------------------------------------------
 
   new_tests_collection(
-    DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_NSGS_COLLECTION_1
+    DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_first_order_gfc3d_1.c)
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_1
@@ -252,7 +252,7 @@ if(WITH_${COMPONENT}_TESTING)
     #target_compile_definitions(fc3d_TEST_NSGS_COLLECTION_6 PUBLIC TEST_HDF5)
 
     new_tests_collection(
-      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_3
+      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_6
       EXTRA_SOURCES data_collection_6.c test_admm_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
@@ -272,8 +272,14 @@ if(WITH_${COMPONENT}_TESTING)
     #    #   IPARAM SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE  SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE)
 
     new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_NSGS_COLLECTION_2
+      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_2
       EXTRA_SOURCES data_collection_gfc3d_2.c test_first_order_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
+    
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_3
+      EXTRA_SOURCES data_collection_gfc3d_3.c test_admm_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
     new_tests_collection(
@@ -321,7 +327,7 @@ if(WITH_${COMPONENT}_TESTING)
   begin_tests(src/VI/test)
 
   new_test(SOURCES VI_test_collection_1.c)
-  new_test(SOURCES VI_fc3d_test_collection_1.c DEPS "externals;BLAS::BLAS")
+  new_test(SOURCES VI_fc3d_test_collection_1.c)
 
   set(SICONOS_VI_SOLVERS
     SICONOS_VI_BOX_QI
@@ -342,7 +348,7 @@ if(WITH_${COMPONENT}_TESTING)
   begin_tests(src/QP/test)
 
   new_test(NAME ConvexQP_test_collection SOURCES ConvexQP_test.c)
-  new_test(NAME ConvexQP_FC3D_test_collection SOURCES  ConvexQP_FC3D_test.c DEPS "externals;BLAS::BLAS")
+  new_test(NAME ConvexQP_FC3D_test_collection SOURCES  ConvexQP_FC3D_test.c)
   
   # ----------- AVI solvers tests -----------
   begin_tests(src/AVI/test)
@@ -361,7 +367,7 @@ if(WITH_${COMPONENT}_TESTING)
   # Feel free to remove this once it is fixed --xhub
   #new_test(SOURCES soclcp_test4.c)
   #new_test(SOURCES soclcp_test5.c)
-  new_test(SOURCES fc3d_to_soclcp.c DEPS LAPACK::LAPACK)
+  new_test(SOURCES fc3d_to_soclcp.c)
 
   # ---- Extra conf for ${COMPONENT}-test library ---
   if(TARGET numerics-test)
@@ -372,9 +378,9 @@ if(WITH_${COMPONENT}_TESTING)
     endif()
   endif()
 
-  # For SiconosLapack.h 
-  target_link_libraries(numerics-test PRIVATE externals)
-  target_link_libraries(numerics-test PUBLIC BLAS::BLAS)
-  target_include_directories(numerics-test PUBLIC ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
+  # For SuiteSparse and SiconosLapack.h 
+  target_link_libraries(numerics-test PUBLIC externals)
+  target_link_libraries(numerics-test PUBLIC LAPACK::LAPACK)
+  #target_include_directories(numerics-test PUBLIC ${CMAKE_SOURCE_DIR}/externals/blas_lapack)
 
 endif()

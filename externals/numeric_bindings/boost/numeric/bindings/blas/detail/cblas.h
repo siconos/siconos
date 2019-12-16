@@ -17,6 +17,8 @@
 
 
 #ifdef HAS_OpenBLAS
+// OpenBlas use a different signature for some functions.
+// See for example https://bitbucket.org/blaze-lib/blaze/issues/50/cannot-convert-const-std-complex-to-const.
 #define OPENBLAS_CONST_FLOAT_CAST(x) reinterpret_cast<const float*>(x)
 #define OPENBLAS_CONST_DOUBLE_CAST(x) reinterpret_cast<const double*>(x)
 #define OPENBLAS_FLOAT_CAST(x) reinterpret_cast<float*>(x)

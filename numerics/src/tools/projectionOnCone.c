@@ -71,6 +71,8 @@ unsigned projectionOnDualCone(double* u, double  mu)
   
     return PROJCONE_BOUNDARY;
   }
+  /* return projectionOnCone(u, 1.0/mu); */
+
 }
 
 

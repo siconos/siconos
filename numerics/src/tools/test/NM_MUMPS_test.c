@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
   if(rank > 0)
   {
     MPI_Finalize();
-    NM_free(M);
+    NM_clear(M);
     exit(0);
   }
 #endif
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
-  NM_free(M);
+  NM_clear(M);
 
   if (fabs(b[0] - 2./3.) > 1e-7) return(1);
   if (fabs(b[1] - 1./3.) > 1e-7) return(1);

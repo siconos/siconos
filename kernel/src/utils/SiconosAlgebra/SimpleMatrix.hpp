@@ -31,7 +31,10 @@ const std::string transpose = "transpose";
  *
  * SimpleMatrix is used in the platform to store matrices (mathematical object) of double.
  *
- * Possible types: Siconos::DENSE (default), TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, Siconos::IDENTITY.
+ * Possible types: Siconos::DENSE (default), 
+ *                          TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO,
+ *                          Siconos::IDENTITY, 
+ *                          Siconos::SPARSE_COORDINATE.
  *
  * \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
 
@@ -220,7 +223,12 @@ public:
    *  \param m a SparseMat
    */
   SimpleMatrix(const SparseMat& m);
-
+  
+  /** constructor with a SparseCoordinateMat matrix (see SiconosMatrix.h for details)
+   *  \param m a SparseMat
+   */
+  SimpleMatrix(const SparseCoordinateMat& m);
+  
   /** constructor with a ZeroMat matrix (see SiconosMatrix.h for details)
    *  \param m a ZeroMat
    */
@@ -308,6 +316,13 @@ public:
    *  \return a SparseMat
    */
   const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0) const;
+  
+  /** get SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
+   *  \return a SparseCoordinateMat
+   */
+  const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get ZeroMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
@@ -357,6 +372,13 @@ public:
    *  \return a SparseMat*
    */
   SparseMat* sparse(unsigned int row = 0, unsigned int col = 0) const;
+  
+  /** get a pointer on SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block - Useless for SimpleMatrix
+   *  \return a SparseCoordinateMat*
+   */
+  SparseCoordinateMat* sparseCoordinate(unsigned int row = 0, unsigned int col = 0) const;
 
   /** get a pointer on ZeroMat matrix
    *  \param row an unsigned int, position of the block - Useless for SimpleMatrix
@@ -402,6 +424,9 @@ public:
    */
   unsigned copyData(double* data) const;
 
+  void assign(const SimpleMatrix &smat);
+
+  
   /** get the number of rows or columns of the matrix
    *  \param index 0 for rows, 1 for columns
    *  \return the size
@@ -435,7 +460,8 @@ public:
   /** display data on standard output
    */
   void display() const;
-
+  
+  void displayExpert(bool  brief = true) const;
   /** put data of the matrix into a std::string
    * \return std::string
    */

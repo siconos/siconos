@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef GLOBALFRICTIONCONTACTPROBLEM_H
 #define GLOBALFRICTIONCONTACTPROBLEM_H
 
@@ -56,7 +56,7 @@
  *
  * and the set \f$C^{\alpha,\star}_{\mu^\alpha}\f$ is its dual.
  *
-*/
+ */
 struct GlobalFrictionContactProblem
 {
   /** dimension \f$d=2\f$ or \f$d=3\f$ of the contact space (3D or 2D ) */
@@ -67,7 +67,7 @@ struct GlobalFrictionContactProblem
       a matrix with \f$ n\f$ stored in NumericsMatrix structure */
   NumericsMatrix* M;
   /**  \f${H} \in {{\mathrm{I\!R}}}^{n \times m} \f$,
-      a matrix with \f$ m = d  n_c\f$ stored in NumericsMatrix structure */
+       a matrix with \f$ m = d  n_c\f$ stored in NumericsMatrix structure */
   NumericsMatrix* H;
   /** \f${q} \in {{\mathrm{I\!R}}}^{n} \f$ */
   double* q;
@@ -84,16 +84,33 @@ struct GlobalFrictionContactProblem
 extern "C"
 {
 #endif
-
+  
+  /** display a GlobalFrictionContactProblem
+   * \param problem the problem to display
+   */
   void globalFrictionContact_display(GlobalFrictionContactProblem*  problem);
 
-
+  /** print a GlobalFrictionContactProblem in a file (numerics .dat format)
+   * \param problem the problem to print out
+   * \param file the dest file
+   * \return 0 if successfull
+   */
   int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file);
-
+  
+  /** print a GlobalFrictionContactProblem in a file (numerics .dat format) from its filename
+   * \param problem the problem to print out
+   * \param filename the dest file
+   * \return 0 if successfull
+   */
   int globalFrictionContact_printInFileName(GlobalFrictionContactProblem*  problem,
                                             char * filename);
 
-  int globalFrictionContact_newFromFile(GlobalFrictionContactProblem*  problem, FILE* file);
+  /** read and create a GlobalFrictionContactProblem in a file (numerics .dat format)
+   * \param problem the problem to read
+   * \param file the target file
+   * \return NULL if not successfull
+   */
+  GlobalFrictionContactProblem * globalFrictionContact_newFromFile(FILE* file);
 
   static inline void globalFrictionContact_null(GlobalFrictionContactProblem*  problem)
   {
@@ -108,11 +125,24 @@ extern "C"
 
   }
 
- void freeGlobalFrictionContactProblem(GlobalFrictionContactProblem* problem);
+  void globalFrictionContact_free(GlobalFrictionContactProblem* problem);
 
+  GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactProblem* problem);
+  
+  void globalFrictionContact_rescaling(GlobalFrictionContactProblem* problem, double alpha,  double beta, double gamma);
 
+  /** Compute the global velocity given the reaction
+   * \param[in] problem to be considered
+   * \param[in] reaction the reaction, if there is no contacts reaction can be NULL
+   * \param[out] globalVelocity the global velocity computed by inverting the system.
+   */
+  int globalFrictionContact_computeGlobalVelocity(
+    GlobalFrictionContactProblem* problem,
+    double * reaction,
+    double * globalVelocity);
   
 
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

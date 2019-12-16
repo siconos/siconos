@@ -118,7 +118,7 @@ int fc3d_driver(FrictionContactProblem* problem,
   /* ADMM*/
   case SICONOS_FRICTION_3D_ADMM:
   {
-    numerics_printf(" ========================== Call NSGS solver for Friction-Contact 3D problem ==========================\n");
+    numerics_printf(" ========================== Call ADMM solver for Friction-Contact 3D problem ==========================\n");
     fc3d_admm(problem, reaction , velocity , &info , options);
     break;
   }

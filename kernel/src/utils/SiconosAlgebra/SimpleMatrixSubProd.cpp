@@ -45,41 +45,41 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
   unsigned int colA = coord[3] - coord[2];
   unsigned int dimX = coord[5] - coord[4];
   unsigned int dimY = coord[7] - coord[6];
-  if (colA != dimX)
+  if(colA != dimX)
     SiconosMatrixException::selfThrow("subprod(A,x,y) error: inconsistent sizes between A and x.");
 
-  if (rowA != dimY)
+  if(rowA != dimY)
     SiconosMatrixException::selfThrow("subprod(A,x,y) error: inconsistent sizes between A and y.");
 
-  if (dimX > x.size() || dimY > y.size() || rowA > A.size(0) || colA > A.size(1))
+  if(dimX > x.size() || dimY > y.size() || rowA > A.size(0) || colA > A.size(1))
     SiconosMatrixException::selfThrow("subprod(A,x,y) error: input index too large.");
 
   unsigned int numA = A.num();
   unsigned int numX = x.num();
   unsigned int numY = y.num();
 
-  if (numA == 0)  // If A,x or y is Block
+  if(numA == 0)   // If A,x or y is Block
     SiconosMatrixException::selfThrow("subprod(A,x,y) error: not yet implemented for A block matrices.");
 
-  if (numA == 6) // A = 0
+  if(numA == 6)  // A = 0
   {
-    if (init)
+    if(init)
     {
-      if (numY == 1)
+      if(numY == 1)
         ublas::subrange(*y.dense(), coord[6], coord[7]) *= 0.0;
       else //if(numY==4)
         ublas::subrange(*y.sparse(), coord[6], coord[7]) *= 0.0;
     }
     //else nothing
   }
-  else if (numA == 7) // A = identity
+  else if(numA == 7)  // A = identity
   {
-    if (!init)
+    if(!init)
       ublas::subrange(*y.dense(), coord[6], coord[7]) += ublas::subrange(*x.dense(), coord[4], coord[5]);
     else
     {
       // if x and y do not share memory (ie are different objects)
-      if (&x != &y)
+      if(&x != &y)
         noalias(ublas::subrange(*y.dense(), coord[6], coord[7])) = ublas::subrange(*x.dense(), coord[4], coord[5]);
 
       // else nothing
@@ -89,34 +89,34 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
   else // A is not 0 or identity
   {
     {
-      if (init)
+      if(init)
       {
-        if (&x != &y) // if no common memory between x and y.
+        if(&x != &y)  // if no common memory between x and y.
         {
-          if (numX == 1)
+          if(numX == 1)
           {
             ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[4], coord[5]));
 
-            if (numY != 1)
+            if(numY != 1)
               SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
             ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
 
-            if (numA == 1)
+            if(numA == 1)
             {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == 2)
+            else if(numA == 2)
             {
               ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == 3)
+            else if(numA == 3)
             {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == 4)
+            else if(numA == 4)
             {
 #ifdef BOOST_LIMITATION
               SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
@@ -134,35 +134,35 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
           else //if(numX == 4)
           {
             ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[4], coord[5]));
-            if (numY != 1 && numA != 4)
+            if(numY != 1 && numA != 4)
               SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
-            if (numA == 1)
+            if(numA == 1)
             {
               ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == 2)
+            else if(numA == 2)
             {
               ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == 3)
+            else if(numA == 3)
             {
               ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) = ublas::prod(subA, subX);
             }
-            else if (numA == 4)
+            else if(numA == 4)
             {
 #ifdef BOOST_LIMITATION
               SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
 
-              if (numY == 1)
+              if(numY == 1)
               {
                 ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
                 noalias(subY) = ublas::prod(subA, subX);
@@ -184,25 +184,25 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
         }
         else // if x and y are the same object => alias
         {
-          if (numX == 1)
+          if(numX == 1)
           {
             ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[4], coord[5]));
-            if (numA == 1)
+            if(numA == 1)
             {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == 2)
+            else if(numA == 2)
             {
               ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == 3)
+            else if(numA == 3)
             {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == 4)
+            else if(numA == 4)
             {
 #ifdef BOOST_LIMITATION
               SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> and vector_range<SparseVect> does not exist for your boost distribution and your architecture.");
@@ -220,22 +220,22 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
           else //if(numX == 4)
           {
             ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[4], coord[5]));
-            if (numA == 1)
+            if(numA == 1)
             {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == 2)
+            else if(numA == 2)
             {
               ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == 3)
+            else if(numA == 3)
             {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY = ublas::prod(subA, subY);
             }
-            else if (numA == 4)
+            else if(numA == 4)
             {
 #ifdef BOOST_LIMITATION
               SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
@@ -254,32 +254,32 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
       }
       else // += case
       {
-        if (&x != &y) // if no common memory between x and y.
+        if(&x != &y)  // if no common memory between x and y.
         {
-          if (numX == 1)
+          if(numX == 1)
           {
             ublas::vector_range<DenseVect> subX(*x.dense(), ublas::range(coord[4], coord[5]));
 
-            if (numY != 1)
+            if(numY != 1)
               SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
             ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
 
-            if (numA == 1)
+            if(numA == 1)
             {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == 2)
+            else if(numA == 2)
             {
               ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == 3)
+            else if(numA == 3)
             {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == 4)
+            else if(numA == 4)
             {
 #ifdef BOOST_LIMITATION
               SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
@@ -297,34 +297,34 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
           else //if(numX == 4)
           {
             ublas::vector_range<SparseVect> subX(*x.sparse(), ublas::range(coord[4], coord[5]));
-            if (numY != 1 && numA != 4)
+            if(numY != 1 && numA != 4)
               SiconosMatrixException::selfThrow("prod(A,x,y) error: y (output) must be a dense vector.");
 
-            if (numA == 1)
+            if(numA == 1)
             {
               ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == 2)
+            else if(numA == 2)
             {
               ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == 3)
+            else if(numA == 3)
             {
               ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               noalias(subY) += ublas::prod(subA, subX);
             }
-            else if (numA == 4)
+            else if(numA == 4)
             {
 #ifdef BOOST_LIMITATION
               SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
 #else
               ublas::matrix_range<SparseMat> subA(*A.sparse(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
-              if (numY == 1)
+              if(numY == 1)
               {
                 ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[6], coord[7]));
                 noalias(subY) += ublas::prod(subA, subX);
@@ -346,25 +346,25 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
         }
         else // if x and y are the same object => alias
         {
-          if (numX == 1)
+          if(numX == 1)
           {
             ublas::vector_range<DenseVect> subY(*y.dense(), ublas::range(coord[4], coord[5]));
-            if (numA == 1)
+            if(numA == 1)
             {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == 2)
+            else if(numA == 2)
             {
               ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == 3)
+            else if(numA == 3)
             {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == 4)
+            else if(numA == 4)
             {
 #ifdef BOOST_LIMITATION
               SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");
@@ -382,22 +382,22 @@ void subprod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, c
           else //if(numX == 4)
           {
             ublas::vector_range<SparseVect> subY(*y.sparse(), ublas::range(coord[4], coord[5]));
-            if (numA == 1)
+            if(numA == 1)
             {
               ublas::matrix_range<DenseMat> subA(*A.dense(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == 2)
+            else if(numA == 2)
             {
               ublas::matrix_range<TriangMat> subA(*A.triang(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == 3)
+            else if(numA == 3)
             {
               ublas::matrix_range<SymMat> subA(*A.sym(), ublas::range(coord[0], coord[1]), ublas::range(coord[2], coord[3]));
               subY += ublas::prod(subA, subY);
             }
-            else if (numA == 4)
+            else if(numA == 4)
             {
 #ifdef BOOST_LIMITATION
               SiconosMatrixException("SimpleMatrix::subprod warning - ublas::matrix_range<SparseMat> does not exist for your boost distribution and your architecture.");

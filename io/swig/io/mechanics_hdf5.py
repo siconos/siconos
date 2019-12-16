@@ -961,7 +961,7 @@ class MechanicsHdf5(object):
 
         if (self._dimension ==3):
             if orientation is None  : orientation= [1,0,0,0]
-            if velocity is None  : velocity= [0,0,0]
+            if velocity is None  : velocity= [0,0,0,0,0,0]
             ori = quaternion_get(orientation)
             assert (len(translation)==3)
             assert (len(ori)==4)
@@ -1027,8 +1027,8 @@ class MechanicsHdf5(object):
                 obj.attrs['type']='dynamic'
                 if np.isscalar(mass) and mass <= 0. :
 
-                    print_verbose("The use of a mass equal to zero to define a static object is deprecated.")
-                    print_verbose("Do not give the mass or set mass=None to define a static object")
+                    self.print_verbose("The use of a mass equal to zero to define a static object is deprecated.")
+                    self.print_verbose("Do not give the mass or set mass=None to define a static object")
             else:
                 obj.attrs['type']='static'
             obj.attrs['translation']=translation

@@ -29,9 +29,9 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
 {
   // To compute C = A + B in an "optimized" way (in comparison with operator +)
 
-  if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
+  if((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
     SiconosMatrixException::selfThrow("Matrix addition: inconsistent sizes");
-  if ((A.size(0) != C.size(0)) || (A.size(1) != C.size(1)))
+  if((A.size(0) != C.size(0)) || (A.size(1) != C.size(1)))
     SiconosMatrixException::selfThrow("Matrix addition: inconsistent sizes");
 
   unsigned int numA = A.num();
@@ -39,29 +39,29 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
   unsigned int numC = C.num();
 
   // === if C is zero or identity => read-only ===
-  if (numC == 6 || numC == 7)
+  if(numC == 6 || numC == 7)
     SiconosMatrixException::selfThrow("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
   // === common memory between A, B, C ===
-  if (&A == &C) // A and C have common memory
+  if(&A == &C)  // A and C have common memory
   {
     C += B;
   }
-  else if (&B == &C)  // B and C have common memory
+  else if(&B == &C)   // B and C have common memory
   {
     C += A;
   }
   else // No common memory between C and A or B.
   {
-    if (numA == 6) // A = 0
+    if(numA == 6)  // A = 0
       C = B ;
-    else if (numB == 6) // B = 0
+    else if(numB == 6)  // B = 0
       C = A;
     else // A and B different from 0
     {
-      if (numC == 0) // if C is Block
+      if(numC == 0)  // if C is Block
       {
-        if (numA != 0) // A simple, whatever is B
+        if(numA != 0)  // A simple, whatever is B
         {
           C = A;
           C += B;
@@ -74,48 +74,48 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
       }
       else // if C is a SimpleMatrix
       {
-        if (numA == numB && numA != 0) // A and B are of the same type and NOT block
+        if(numA == numB && numA != 0)  // A and B are of the same type and NOT block
         {
-          if (numC == numA)
+          if(numC == numA)
           {
-            if (numA == 1)
+            if(numA == 1)
               noalias(*C.dense()) = *A.dense() + *B.dense();
-            else if (numA == 2)
+            else if(numA == 2)
               noalias(*C.triang()) = *A.triang() + *B.triang();
-            else if (numA == 3)
+            else if(numA == 3)
               noalias(*C.sym()) = *A.sym() + *B.sym();
-            else if (numA == 4)
+            else if(numA == 4)
               noalias(*C.sparse()) = *A.sparse() + *B.sparse();
             else //if(numA==5)
               noalias(*C.banded()) = *A.banded() + *B.banded();
           }
           else // C and A of different types.
           {
-            if (numC != 1)
+            if(numC != 1)
               SiconosMatrixException::selfThrow("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C.");
             // Only dense matrices are allowed for output.
 
-            if (numA == 1)
+            if(numA == 1)
               noalias(*C.dense()) = *A.dense() + *B.dense();
-            else if (numA == 2)
+            else if(numA == 2)
               noalias(*C.dense()) = *A.triang() + *B.triang();
-            else if (numA == 3)
+            else if(numA == 3)
               noalias(*C.dense()) = *A.sym() + *B.sym();
-            else if (numA == 4)
+            else if(numA == 4)
               noalias(*C.dense()) = *A.sparse() + *B.sparse();
             else //if(numA==5)
               noalias(*C.dense()) = *A.banded() + *B.banded();
           }
           C.resetLU();
         }
-        else if (numA != 0 && numB != 0 && numA != numB) // A and B of different types and none is block
+        else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
         {
-          if (numC != 1)
+          if(numC != 1)
             SiconosMatrixException::selfThrow("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C.");
           // Only dense matrices are allowed for output.
 
-          if (numA == 1)
-            switch (numB)
+          if(numA == 1)
+            switch(numB)
             {
             case 2:
               noalias(*C.dense()) = *A.dense() + *B.triang();
@@ -135,8 +135,8 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 2)
-            switch (numB)
+          else if(numA == 2)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.triang() + *B.dense();
@@ -156,8 +156,8 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 3)
-            switch (numB)
+          else if(numA == 3)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.sym() + *B.dense();
@@ -177,8 +177,8 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 4)
-            switch (numB)
+          else if(numA == 4)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.sparse() + *B.dense();
@@ -198,8 +198,8 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 5)
-            switch (numB)
+          else if(numA == 5)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.banded() + *B.dense();
@@ -219,8 +219,8 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 7)
-            switch (numB)
+          else if(numA == 7)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.identity() + *B.dense();
@@ -246,7 +246,7 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
         }
         else // A and/or B is Block
         {
-          if (numA != 0) // A Simple, whatever is B
+          if(numA != 0)  // A Simple, whatever is B
           {
             C = A;
             C += B;
@@ -267,9 +267,9 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
 {
   // To compute C = A - B in an "optimized" way (in comparison with operator +)
 
-  if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
+  if((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
     SiconosMatrixException::selfThrow("Matrix addition: inconsistent sizes");
-  if ((A.size(0) != C.size(0)) || (A.size(1) != C.size(1)))
+  if((A.size(0) != C.size(0)) || (A.size(1) != C.size(1)))
     SiconosMatrixException::selfThrow("Matrix addition: inconsistent sizes");
 
   unsigned int numA = A.num();
@@ -277,60 +277,60 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
   unsigned int numC = C.num();
 
   // === if C is zero or identity => read-only ===
-  if (numC == 6 || numC == 7)
+  if(numC == 6 || numC == 7)
     SiconosMatrixException::selfThrow("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
   // === common memory between A, B, C ===
-  if (&A == &C) // A and C have common memory
+  if(&A == &C)  // A and C have common memory
   {
     C -= B;
   }
-  else if (&B == &C)  // B and C have common memory
+  else if(&B == &C)   // B and C have common memory
   {
-    if (numB == 0 || numA == 0) // if A or B(C) is Block
+    if(numB == 0 || numA == 0)  // if A or B(C) is Block
     {
       C *= -1.0;
       C += A;
     }
     else
     {
-      if (numC == 0) // if C is Block
+      if(numC == 0)  // if C is Block
       {
         C = A;
         C -= B;
       }
       else // if C is a SimpleMatrix
       {
-        if (numA == numB && numA != 0) // A and B are of the same type and NOT block
+        if(numA == numB && numA != 0)  // A and B are of the same type and NOT block
         {
-          if (numA == 1)
+          if(numA == 1)
             *C.dense() = *A.dense() - *B.dense();
-          else if (numA == 2)
+          else if(numA == 2)
             *C.triang() = *A.triang() - *B.triang();
-          else if (numA == 3)
+          else if(numA == 3)
             *C.sym() = *A.sym() - *B.sym();
-          else if (numA == 4)
+          else if(numA == 4)
             *C.sparse() = *A.sparse() - *B.sparse();
           else //if(numA==5)
             *C.banded() = *A.banded() - *B.banded();
         }
-        else if (numA != 0 && numB != 0 && numA != numB) // A and B of different types and none is block
+        else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
         {
-          if (numC != 1)  // => numB == 1
+          if(numC != 1)   // => numB == 1
             SiconosMatrixException::selfThrow("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C.");
           // Only dense matrices are allowed for output.
 
-          if (numA == 1)
+          if(numA == 1)
             *C.dense() = *A.dense() - *B.dense();
-          else if (numA == 2)
+          else if(numA == 2)
             *C.dense() = *A.triang() - *B.dense();
-          else if (numA == 3)
+          else if(numA == 3)
             *C.dense() = *A.sym() - *B.dense();
-          else if (numA == 4)
+          else if(numA == 4)
             *C.dense() = *A.sparse() - *B.dense();
-          else if (numA == 5)
+          else if(numA == 5)
             *C.dense() = *A.banded() - *B.dense();
-          else if (numA == 6)
+          else if(numA == 6)
             *C.dense() = *A.zero_mat() - *B.dense();
           else //if(numA==7)
             *C.dense() = *A.identity() - *B.dense();
@@ -346,59 +346,59 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
   }
   else // No common memory between C and A or B.
   {
-    if (numB == 6) // B = 0
+    if(numB == 6)  // B = 0
       C = A;
     else // B different from 0
     {
-      if (numC == 0) // if C is Block
+      if(numC == 0)  // if C is Block
       {
         C = A;
         C -= B;
       }
       else // if C is a SimpleMatrix
       {
-        if (numA == numB && numA != 0) // A and B are of the same type and NOT block
+        if(numA == numB && numA != 0)  // A and B are of the same type and NOT block
         {
-          if (numC == numA)
+          if(numC == numA)
           {
-            if (numA == 1)
+            if(numA == 1)
               noalias(*C.dense()) = *A.dense() - *B.dense();
-            else if (numA == 2)
+            else if(numA == 2)
               noalias(*C.triang()) = *A.triang() - *B.triang();
-            else if (numA == 3)
+            else if(numA == 3)
               noalias(*C.sym()) = *A.sym() - *B.sym();
-            else if (numA == 4)
+            else if(numA == 4)
               noalias(*C.sparse()) = *A.sparse() - *B.sparse();
             else //if(numA==5)
               noalias(*C.banded()) = *A.banded() - *B.banded();
           }
           else // C and A of different types.
           {
-            if (numC != 1)
+            if(numC != 1)
               SiconosMatrixException::selfThrow("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C.");
             // Only dense matrices are allowed for output.
 
-            if (numA == 1)
+            if(numA == 1)
               noalias(*C.dense()) = *A.dense() - *B.dense();
-            else if (numA == 2)
+            else if(numA == 2)
               noalias(*C.dense()) = *A.triang() - *B.triang();
-            else if (numA == 3)
+            else if(numA == 3)
               noalias(*C.dense()) = *A.sym() - *B.sym();
-            else if (numA == 4)
+            else if(numA == 4)
               noalias(*C.dense()) = *A.sparse() - *B.sparse();
             else //if(numA==5)
               noalias(*C.dense()) = *A.banded() - *B.banded();
           }
           C.resetLU();
         }
-        else if (numA != 0 && numB != 0 && numA != numB) // A and B of different types and none is block
+        else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
         {
-          if (numC != 1)
+          if(numC != 1)
             SiconosMatrixException::selfThrow("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C.");
           // Only dense matrices are allowed for output.
 
-          if (numA == 1)
-            switch (numB)
+          if(numA == 1)
+            switch(numB)
             {
             case 2:
               noalias(*C.dense()) = *A.dense() - *B.triang();
@@ -418,8 +418,8 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 2)
-            switch (numB)
+          else if(numA == 2)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.triang() - *B.dense();
@@ -439,8 +439,8 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 3)
-            switch (numB)
+          else if(numA == 3)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.sym() - *B.dense();
@@ -460,8 +460,8 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 4)
-            switch (numB)
+          else if(numA == 4)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.sparse() - *B.dense();
@@ -481,8 +481,8 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 5)
-            switch (numB)
+          else if(numA == 5)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.banded() - *B.dense();
@@ -502,8 +502,8 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 6)
-            switch (numB)
+          else if(numA == 6)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.zero_mat() - *B.dense();
@@ -523,8 +523,8 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
             default:
               SiconosMatrixException::selfThrow("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if (numA == 7)
-            switch (numB)
+          else if(numA == 7)
+            switch(numB)
             {
             case 1:
               noalias(*C.dense()) = *A.identity() - *B.dense();

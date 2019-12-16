@@ -12,11 +12,14 @@ RUN pacman -Sy && pacman --noconfirm -S \
         openblas \
         lapacke \
         cblas \
+        suitesparse \
         python3 \
         python-pytest \
         python-scipy \
         python-h5py \
         python-pip \
+        python-lxml \
+        python-packaging \
         cppunit \
         bullet \
         freetype2 \

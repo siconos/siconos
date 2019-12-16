@@ -132,7 +132,7 @@ void freeRelay_problem(RelayProblem* problem)
   assert(problem);
   if (problem->M)
   {
-    NM_free(problem->M);
+    NM_clear(problem->M);
     free(problem->M);
   }
   if (problem->q)  { free(problem->q); }

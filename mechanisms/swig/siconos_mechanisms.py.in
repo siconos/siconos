@@ -1,5 +1,4 @@
 #!/usr/bin/env @PYTHON_EXECUTABLE@
-from __future__ import print_function
 import os
 import sys
 import atexit
@@ -405,7 +404,7 @@ if with_io:
 
             io.add_object('artefact-{0}'.format(shape_name),
                          [Contactor(shape_name,collision_group=-1)],
-                         mass=0,
+                         mass=None,
                          translation=[0, 0, 0])
 
         io.output_static_objects()

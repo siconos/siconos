@@ -27,15 +27,15 @@
 
 /** the NonSmoothDynamicalSystem consists in Dynamical Systems and Interactions
     structured into a graph defined in a Topology.
-    In the DynamicalSystem graph, DynamicalSystem objects are nodes and Interaction objects 
+    In the DynamicalSystem graph, DynamicalSystem objects are nodes and Interaction objects
     are edges.
 
     To add a DynamicalSystem, use insertDynamicalSystem method.
     To add a new Interaction, use link method.
-    
+
     A dual graph is also contructed, where Interactions are vertices and DynamicalSystems
     are edges.
-    
+
 */
 class NonSmoothDynamicalSystem
 {
@@ -330,6 +330,10 @@ public:
   inline SP::DynamicalSystem dynamicalSystem(int nb) const
   {
     return _topology->getDynamicalSystem(nb);
+  }
+  inline void displayDynamicalSystems() const
+  {
+    _topology->displayDynamicalSystems();
   }
 
   /** remove a dynamical system

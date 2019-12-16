@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "CSparseMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "SiconosLapack.h"
 #include <math.h>
@@ -33,7 +32,6 @@
 /* #define DEBUG_MESSAGES 1 */
 
 #include "debug.h"
-#include "CSparseMatrix.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsMatrix.h"
@@ -73,7 +71,7 @@ SparseBlockStructuredMatrix* SBM_new(void)
   return sbm;
 }
 
-void SBM_free(SparseBlockStructuredMatrix *sbm)
+void SBM_clear(SparseBlockStructuredMatrix *sbm)
 {
   /* Free memory for SparseBlockStructuredMatrix */
   /* Warning: nothing is done to check if memory has really been
@@ -738,6 +736,36 @@ void SBM_add_without_allocation(SparseBlockStructuredMatrix * A, SparseBlockStru
 
   }
   DEBUG_END("SBM_add_without_allocation(...)\n");
+
+}
+void SBM_scal(double alpha, SparseBlockStructuredMatrix * A)
+{
+  DEBUG_BEGIN("SBM_scal(...)\n");
+  unsigned int currentRowNumber ;
+  size_t colNumber;
+  unsigned int nbRows, nbColumns;
+  
+  for (currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
+  {
+    for (size_t blockNum = A->index1_data[currentRowNumber];
+         blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < A->filled2);
+      colNumber = A->index2_data[blockNum];
+      /* Get dim. of the current block */
+      nbRows = A->blocksize0[currentRowNumber];
+      if (currentRowNumber != 0)
+        nbRows -= A->blocksize0[currentRowNumber - 1];
+      nbColumns = A->blocksize1[colNumber];
+
+      if (colNumber != 0)
+        nbColumns -= A->blocksize1[colNumber - 1];
+
+      cblas_dscal(nbRows * nbColumns, alpha, A->block[blockNum], 1);
+    }
+  }
+
+  DEBUG_END("SBM_scal(...)\n");
 
 }
 
@@ -2004,7 +2032,7 @@ void SBM_read_in_filename(SparseBlockStructuredMatrix* const m, const char *file
 {
 
 }
-void SBM_free_pred(SparseBlockStructuredMatrixPred *blmatpred)
+void SBM_clear_pred(SparseBlockStructuredMatrixPred *blmatpred)
 {
 
   for (int i = 0 ; i < blmatpred->nbbldiag ; i++)

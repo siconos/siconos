@@ -51,6 +51,16 @@ include(swig_python_tools)
 
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
+target_link_libraries(_numerics $<BUILD_INTERFACE:externals>)
+
+# If WITH_SYSTEM_SUITESPARSE, suite sparse is an imported target
+# that must be taken into account by swig process.
+if(WITH_SYSTEM_SUITESPARSE)
+  target_link_libraries(_numerics $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
+endif()
+
+
+
 # -- mpi4py -- 
 if(WITH_MPI)
   target_include_directories(_numerics PRIVATE ${MPI_C_INCLUDE_DIRS})
@@ -69,9 +79,16 @@ if(WITH_${COMPONENT}_TESTING)
   else()
     list(APPEND python_excluded_tests tests/test_NM_MUMPS.py)
   endif()
-
+  
   include(tools4tests)
+  if(WITH_SYSTEM_SUITESPARSE)
+    set(suitesparse SuiteSparse::CXSparse)
+  else()
+    set(suitesparse)
+  endif()
+
   build_python_tests(
-    DEPS ${COMPONENT} # some plugins in tests need to be linked with numerics
-    EXCLUDE ${python_excluded_tests})
+    DEPS "${COMPONENT};${suitesparse}" # some plugins in tests need to be linked with numerics
+    EXCLUDE ${python_excluded_tests}
+    DEPS externals)
 endif()

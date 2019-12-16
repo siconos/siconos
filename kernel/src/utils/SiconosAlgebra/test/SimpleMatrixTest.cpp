@@ -57,6 +57,7 @@ void SimpleMatrixTest::setUp()
   for (unsigned i = 0; i < D->size1(); ++ i)
     for (unsigned j = 0; j < D->size2(); ++ j)
       (*D)(i, j) = 3 * i + j;
+
   // Triang
   T.reset(new TriangMat(3, 3));
   for (unsigned i = 0; i < T->size1(); ++ i)
@@ -66,6 +67,7 @@ void SimpleMatrixTest::setUp()
   for (unsigned i = 0; i < T2->size1(); ++ i)
     for (unsigned j = i; j < T2->size2(); ++ j)
       (*T2)(i, j) = 3 * i + j;
+
   // Sym
   S.reset(new SymMat(3, 3));
   for (unsigned i = 0; i < S->size1(); ++ i)
@@ -75,11 +77,24 @@ void SimpleMatrixTest::setUp()
   for (unsigned i = 0; i < S2->size1(); ++ i)
     for (unsigned j = i; j < S2->size2(); ++ j)
       (*S2)(i, j) = 3 * i + j;
+  
   // Sparse
   SP.reset(new SparseMat(4, 4));
   for (unsigned i = 0; i < SP->size1(); ++ i)
     for (unsigned j = 0; j < SP->size2(); ++ j)
       (*SP)(i, j) = 3 * i + j;
+  
+  SP2.reset(new SparseMat(4, 4));
+  for (unsigned i = 0; i < SP2->size1(); ++ i)
+    for (unsigned j = 0; j < SP->size2()-1; ++ j)
+      if (i != j)
+        (*SP2)(i, j) = 3 * i + j;
+
+  // Sparse Coordinate
+  SP_coor.reset(new SparseCoordinateMat(4, 4));
+  for (unsigned i = 0; i < SP->size1(); ++ i)
+    for (unsigned j = 0; j < SP->size2(); ++ j)
+      (*SP_coor)(i, j) = 3 * i + j;
 
   // Banded
   Band.reset(new BandedMat(4, 4, 1, 1));
@@ -165,13 +180,6 @@ void SimpleMatrixTest::testConstructor3() // Copy constructor, from a BlockMatri
   std::cout << "--> Constructor 3 (copy) test ended with success." <<std::endl;
 }
 
-// void SimpleMatrixTest::testConstructor3()
-// {
-//   std::cout << "--> Test: constructor 3." <<std::endl;
-//   SP::SimpleMatrix test(new SimpleMatrix(Siconos::SPARSE);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ",test->num() == 4, true);
-//   std::cout << "--> Constructor 3 test ended with success." <<std::endl;
-// }
 
 void SimpleMatrixTest::testConstructor4()
 {
@@ -259,6 +267,22 @@ void SimpleMatrixTest::testConstructor12()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->num() == 7, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->normInf() == 1, true);
 }
+
+void SimpleMatrixTest::testConstructor13()
+{
+  std::cout << "--> Test: constructor 13." <<std::endl;
+  SP::SimpleMatrix test(new SimpleMatrix(4,4,Siconos::SPARSE));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ",test->num() == 4, true);
+  std::cout << "--> Constructor 13 test ended with success." <<std::endl;
+}
+void SimpleMatrixTest::testConstructor14()
+{
+  std::cout << "--> Test: constructor 14." <<std::endl;
+  SP::SimpleMatrix test(new SimpleMatrix(4,4,Siconos::SPARSE_COORDINATE));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor14 : ",test->num() == Siconos::SPARSE_COORDINATE, true);
+  std::cout << "--> Constructor 14 test ended with success." <<std::endl;
+}
+// Add tests with getDense ...
 
 // Add tests with getDense ...
 
@@ -579,7 +603,8 @@ void SimpleMatrixTest::testAssignment0()
   ref.reset(new SimpleMatrix(*I));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
-  // Sparse = Sparse or Zero
+  
+  // Sparse => Sparse or Zero
   ref.reset(new SimpleMatrix(*SP));
   tRef.reset(new SimpleMatrix(*SP));
   tRef->zero();
@@ -588,7 +613,19 @@ void SimpleMatrixTest::testAssignment0()
 
   ref.reset(new SimpleMatrix(*Z2));
   *tRef = *ref;
+  
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
+
+  // // Sparse coordinate => Sparse
+  ref.reset(new SimpleMatrix(*SP_coor));
+  ref->display();
+  tRef.reset(new SimpleMatrix(*SP));
+  tRef->zero();
+  *tRef = *ref;
+  tRef->displayExpert();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
+
+  
   // Banded = Banded, Id or Zero
   ref.reset(new SimpleMatrix(*Band));
   tRef.reset(new SimpleMatrix(*Band));
@@ -601,6 +638,8 @@ void SimpleMatrixTest::testAssignment0()
   ref.reset(new SimpleMatrix(*I2));
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref) , true);
+
+
 
   std::cout << "-->  test assignment0 ended with success." <<std::endl;
 }
@@ -928,7 +967,112 @@ void SimpleMatrixTest::testOperators4()
 
   std::cout << "-->  test operators4 ended with success." <<std::endl;
 }
+void SimpleMatrixTest::testOperators4bis()
+{
+  std::cout << "--> Test: operators4bis." <<std::endl;
+  // +=, -=, *=, /= sparse
+  SP::SiconosMatrix tmp(new SimpleMatrix(*SP_coor));
+  SP::SiconosMatrix tmp2(new SimpleMatrix(*SP_coor));
+  SP::SiconosMatrix tmp3(new SimpleMatrix(*T2));
 
+  SP::SiconosMatrix tmp4(new SimpleMatrix(*Band));
+  SP::SiconosMatrix tmp5(new SimpleMatrix(*S2));
+  
+  SP::SiconosMatrix tmp6(new SimpleMatrix(*SP));
+  
+
+  *tmp += *tmp2;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+    for (unsigned int j = 0 ; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * (*SP_coor)(i, j)) < tol , true);
+
+  int mult = 2;
+  double mult0 = 2.2;
+  *tmp *= mult0;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+    for (unsigned int j = 0 ; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult0 * (*SP_coor)(i, j)) < tol , true);
+
+  *tmp *= mult;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+    for (unsigned int j = 0 ; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult * mult0 * (*SP_coor)(i, j)) < tol , true);
+
+  *tmp /= mult;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+    for (unsigned int j = 0 ; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult0 * (*SP_coor)(i, j)) < tol , true);
+
+  *tmp /= mult0;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+    for (unsigned int j = 0 ; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2 * (*SP_coor)(i, j)) < tol , true);
+
+  *tmp -= *tmp2;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getSparseCoordinate() - *SP_coor) == 0 , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->num() == SPARSE_COORDINATE , true);
+
+  // += -= a triangular
+  *tmp += *tmp3;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+  {
+    for (unsigned int j = 0; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP_coor)(i, j)) < tol , true);
+    for (unsigned int j = i ; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP_coor)(i, j) - (*tmp3)(i, j)) < tol , true);
+  }
+
+  *tmp -= *tmp3;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+    for (unsigned int j = 0; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP_coor)(i, j)) < tol , true);
+
+  // += -= a banded
+  *tmp -= *tmp;
+  *tmp += *tmp4;
+  for (signed i = 0; i < signed(Band->size1()); ++ i)
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band->size2())); ++ j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*Band)(i, j)) < tol , true);
+
+  *tmp -= *tmp4;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+    for (unsigned int j = 0; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) < tol , true);
+
+  // += -= a sym
+
+  *tmp += *tmp5;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+  {
+    for (unsigned int j = 0; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP_coor)(i, j) - (*tmp5)(j, i)) < tol , true);
+    for (unsigned int j = i ; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP_coor)(i, j) - (*tmp5)(i, j)) < tol , true);
+  }
+
+  *tmp -= *tmp5;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+    for (unsigned int j = 0; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP_coor)(i, j)) < tol , true);
+
+  // += -= a sparse
+
+  *tmp += *tmp6;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+  {
+    for (unsigned int j = 0; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP_coor)(i, j) - (*tmp6)(j, i)) < tol , true);
+    for (unsigned int j = i ; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP_coor)(i, j) - (*tmp6)(i, j)) < tol , true);
+  }
+
+  *tmp -= *tmp6;
+  for (unsigned int i = 0; i < tmp->size(0); ++i)
+    for (unsigned int j = 0; j < tmp->size(1); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - (*SP_coor)(i, j)) < tol , true);
+
+  std::cout << "-->  test operators4bis ended with success." <<std::endl;
+}
 void SimpleMatrixTest::testOperators5()
 {
   std::cout << "--> Test: operators5." <<std::endl;
@@ -1300,6 +1444,27 @@ void SimpleMatrixTest::testOperators6Ter()
 
   *res = prod(*tmp , *tmp2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(*res->sparse() - prod(*SP, *SP)) < tol, true);
+
+  *res = *tmp - *tmp2;
+  tmp->zero();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == *tmp , true);
+
+  // SparseCoordinate +,-,* SparseCoordinate
+  
+  tmp.reset(new SimpleMatrix(*SP_coor));
+  tmp2.reset(new SimpleMatrix(*SP_coor));
+  res.reset(new SimpleMatrix(4, 4, Siconos::SPARSE_COORDINATE));
+  *res = *tmp + *tmp2;
+
+  res->displayExpert();
+  tmp->displayExpert();
+  tmp2->displayExpert();
+
+  
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == (2.0 * (*tmp)), true);
+
+  *res = prod(*tmp , *tmp2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", norm_inf(*res->sparseCoordinate() - prod(*SP_coor, *SP_coor)) < tol, true);
 
   *res = *tmp - *tmp2;
   tmp->zero();

@@ -22,6 +22,9 @@
 set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
 
 option(WITH_PYTHON_WRAPPER "Build and install python bindings using swig. Default = ON" ON)
+
+# -- Serialization --
+# Warning : this is highly unstable. Developers only !
 option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF" OFF)
 option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 
@@ -32,8 +35,6 @@ option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
 option(WITH_FORTRAN "Enable Fortran compiler. Default = ON" ON)
 option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)
 option(NO_RUNTIME_BUILD_DEP "Do not check for runtime dependencies. Useful only for packaging. Default = OFF" OFF)
-option(WITH_DOCKER "Build inside a docker container. Default = OFF" OFF)
-option(WITH_UNSTABLE "Enable this to include all 'unstable' sources. Default=OFF" OFF)
 option(WITH_UNSTABLE_TEST "Enable this to include all 'unstable' test. Default=OFF" OFF)
 option(BUILD_SHARED_LIBS "Building of shared libraries. Default = ON" ON)
 option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = OFF." OFF)

@@ -14,7 +14,7 @@
 #include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
 
 #define DEBUG_MESSAGES 1
-#include "../SiconosFull.hpp"
+#include "SiconosFull.hpp"
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -355,11 +355,6 @@ void KernelTest::t6()
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 1;
-    boost::progress_display show_progress(N);
-
-    boost::timer time;
-    time.restart();
-
     while (s->hasNextEvent())
     {
       s->computeOneStep();
@@ -375,7 +370,6 @@ void KernelTest::t6()
       k++;
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
-    cout << "Computation Time " << time.elapsed()  << endl;
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;

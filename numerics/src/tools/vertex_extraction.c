@@ -36,7 +36,7 @@
 //#define DEBUG_MESSAGES
 #include "debug.h"
 
-#ifdef WITH_LPSOLVE
+#ifdef HAS_ONE_LP_SOLVER
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 #include "lp_lib.h"
