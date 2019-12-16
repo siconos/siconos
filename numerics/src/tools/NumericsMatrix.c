@@ -40,10 +40,7 @@
 #include "debug.h"                    // for DEBUG_EXPR, DEBUG_BEGIN, DEBUG_...
 #include "numerics_verbose.h"         // for numerics_error, numerics_printf...
 #include "sanitizer.h"                // for cblas_dcopy_msan
-
-#ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
-#endif
 
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"

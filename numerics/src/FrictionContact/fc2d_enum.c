@@ -29,6 +29,7 @@
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
 #include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
 #include "numerics_verbose.h"              // for verbose
+#include "Friction_cst.h"                  // for SICONOS_FRICTION_2D_ENUM
 
 void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {
