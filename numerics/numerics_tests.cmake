@@ -230,6 +230,9 @@ if(WITH_${COMPONENT}_TESTING)
   new_tests_collection(
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_nsn_gfc3d_1.c)
+  new_tests_collection(
+    DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_1
+    EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c)
 
   #  IF (WITH_UNSTABLE_TEST)
   #    NEW_GFC_3D_TEST(GFC3D_TwoRods1.dat SICONOS_GLOBAL_FRICTION_3D_NSN_AC 0 0
@@ -291,6 +294,11 @@ if(WITH_${COMPONENT}_TESTING)
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_2
       EXTRA_SOURCES data_collection_gfc3d_2.c test_nsn_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_2
+      EXTRA_SOURCES data_collection_gfc3d_2.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
 

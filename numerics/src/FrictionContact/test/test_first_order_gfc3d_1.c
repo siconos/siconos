@@ -109,19 +109,6 @@ char *** test_collection(int n_data_1, char ** data_collection_1)
     test[n][e++] = data_collection_1[d];
     test[n][e++] = "0";
     test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_IPM);
-    test[n][e++] = "1e-5";
-    test[n][e++] = "10000";
-    test[n][e++] = "---";
-    n++;
-  }
-
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
     sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_ADMM);
     test[n][e++] = "1e-12";
     test[n][e++] = "100000";
