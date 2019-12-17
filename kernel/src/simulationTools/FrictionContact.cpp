@@ -29,19 +29,25 @@ using namespace RELATION;
 
 
 FrictionContact::FrictionContact(int dimPb, int numericsSolverId):
-  LinearOSNS(numericsSolverId), _contactProblemDim(dimPb)
+  FrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
+                                            solver_options_delete))
+{}
+
+FrictionContact::FrictionContact(int dimPb, SP::SolverOptions options):
+  LinearOSNS(options), _contactProblemDim(dimPb)
 {
-  if (dimPb == 2 && numericsSolverId == SICONOS_FRICTION_3D_NSGS)
-    _numerics_solver_id = SICONOS_FRICTION_2D_NSGS;
+  if (dimPb == 2 && options->solverId == SICONOS_FRICTION_3D_NSGS)
+    {
+     _numerics_solver_options.reset(solver_options_create(SICONOS_FRICTION_2D_NSGS),
+                                    solver_options_delete);
+    }
 
   if (dimPb == 2)
   {
-    fc2d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
     _frictionContact_driver = &fc2d_driver;
   }
   else if (dimPb == 3)
   {
-    fc3d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
     _frictionContact_driver = &fc3d_driver;
   }
   else
@@ -179,7 +185,3 @@ void FrictionContact::display() const
   LinearOSNS::display();
 }
 
-FrictionContact::~FrictionContact()
-{
-  solver_options_delete(&*_numerics_solver_options);
-}

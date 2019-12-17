@@ -15,30 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "fc3d_projection.h"
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
-#include "projectionOnCone.h"
-
-#include "SiconosLapack.h"
-
-#include <stdio.h>
-#include <assert.h>
-#include <math.h>
-#include <float.h>
-
-#include "sanitizer.h"
-
-
-#include "numerics_verbose.h"
-#include "NumericsVector.h"
-#include "NumericsSparseMatrix.h"
-
-
+#include <assert.h>                  // for assert
+#include <float.h>                   // for DBL_EPSILON
+#include <math.h>                    // for sqrt, fabs, fmax, INFINITY
+#include <stdio.h>                   // for NULL, printf
+#include <stdlib.h>                  // for calloc, free, malloc
+#include "CSparseMatrix.h"           // for CSparseMatrix_zentry, CSparseMatrix
+#include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NM_gemv, NM_clear, NM_copy, NM_new
+#include "NumericsSparseMatrix.h"    // for NSM_diag_indices
+#include "SolverOptions.h"           // for SolverOptions, SICONOS_DPARAM_TOL
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                   // for DEBUG_EXPR, DEBUG_PRINTF, DEBUG_...
+#include "fc3d_Solvers.h"            // for fc3d_checkTrivialCase, fc3d_admm
+#include "fc3d_compute_error.h"      // for fc3d_compute_error
+#include "numerics_verbose.h"        // for numerics_printf_verbose, numeric...
+#include "projectionOnCone.h"        // for projectionOnCone, projectionOnDu...
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_daxpy, cblas_...
+
 const char* const   SICONOS_FRICTION_3D_ADMM_STR = "FC3D ADMM";
 
 typedef struct
@@ -60,12 +58,12 @@ Fc3d_ADMM_data;
 
 void fc3d_admm_init(FrictionContactProblem* problem, SolverOptions* options)
 {
-  int nc = problem->numberOfContacts;
+  size_t nc = problem->numberOfContacts;
   /* int n = problem->M->size0; */
-  int m = 3 * nc;
+  size_t m = 3 * nc;
 
 
-  int nb_constraints =m;
+  size_t nb_constraints =m;
   options->solverData=(Fc3d_ADMM_data *)malloc(sizeof(Fc3d_ADMM_data));
   Fc3d_ADMM_data * data = (Fc3d_ADMM_data *)options->solverData;
   if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] == SICONOS_FRICTION_3D_ADMM_FORCED_ASYMMETRY||
@@ -127,6 +125,8 @@ void fc3d_admm_free(FrictionContactProblem* problem, SolverOptions* options)
     free(data->b);
     free(data);
   }
+  options->solverData = NULL;
+  
 
 }
 
@@ -152,6 +152,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
 
   /* if SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE,
      we force the copy into a NM_SPARSE storageType */
+
   if(iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE] == SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE
      && problem->M->storageType == NM_SPARSE_BLOCK)
   {
@@ -196,7 +197,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
@@ -237,8 +238,6 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
   double tau , tau_k = 1.0;
   int pos;
   double normUT;
-  int admm_has_converged=0;
-
   rho_k=rho;
   int has_rho_changed = 1;
 
@@ -517,6 +516,7 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     }
     *info = hasNotConverged;
   }
+
   if(iter==itermax)
   {
     norm_q = cblas_dnrm2(m , problem->q , 1);
@@ -561,7 +561,7 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   double eta = dparam[SICONOS_FRICTION_3D_ADMM_RESTART_ETA];
   double br_tau = dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_TAU];
@@ -645,8 +645,6 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
   int pos;
   double normUT;
   int admm_has_converged=0;
-
-
 
   rho_k=rho;
   int has_rho_changed = 1;
@@ -1021,8 +1019,7 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
     numerics_printf_verbose(1,"---- FC3D - ADMM - Problem information");
     numerics_printf_verbose(1,"---- FC3D - ADMM - 1-norm of M = %g norm of q = %g ", NM_norm_1(problem->M), norm_q);
     numerics_printf_verbose(1,"---- FC3D - ADMM - inf-norm of M = %g ", NM_norm_inf(problem->M));
-    /* getchar(); */
-  }
+}
   int internal_allocation=0;
   if(!(Fc3d_ADMM_data *)options->solverData)
   {
@@ -1086,26 +1083,8 @@ void fc3d_admm(FrictionContactProblem* restrict problem, double* restrict reacti
 
 
 
-int fc3d_admm_setDefaultSolverOptions(SolverOptions* options)
+void fc3d_admm_set_default(SolverOptions* options)
 {
-  if(verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ADMM Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_ADMM;
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_ACCELERATION] = SICONOS_FRICTION_3D_ADMM_ACCELERATION_AND_RESTART;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY;
@@ -1127,10 +1106,4 @@ int fc3d_admm_setDefaultSolverOptions(SolverOptions* options)
   options->dparam[SICONOS_FRICTION_3D_ADMM_BALANCING_RESIDUAL_PHI]=2.0;
 
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]=SICONOS_FRICTION_3D_RESCALING_NO;
-
-
-  options->internalSolvers = NULL;
-  options->solverData = NULL;
-
-  return 0;
 }

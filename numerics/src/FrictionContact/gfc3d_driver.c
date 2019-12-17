@@ -15,24 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include <assert.h>
-#include "SiconosConfig.h"
-#include "gfc3d_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
-
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
-
+#include <assert.h>                        // for assert
+#include <stdio.h>                         // for NULL, fprintf, stderr
+#include <stdlib.h>                        // for exit, EXIT_FAILURE
+#include "Friction_cst.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "NonSmoothDrivers.h"              // for gfc3d_driver
+#include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "debug.h"                         // for DEBUG_EXPR
+#include "gfc3d_Solvers.h"                 // for gfc3d_ACLMFixedPoint, gfc3...
+#include "numerics_verbose.h"              // for numerics_printf_verbose
+#include "NumericsMatrix.h" 
 #ifdef  DEBUG_MESSAGES
 #include "NumericsVector.h"
 #include "NumericsMatrix.h"

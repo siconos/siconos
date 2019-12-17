@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 
 #include "NumericsArrays.h"
+#include <stdio.h>   // for size_t, printf
+#include <stdlib.h>  // for rand
 
 void NA_diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
 {

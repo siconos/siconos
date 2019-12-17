@@ -18,6 +18,7 @@
 
 #include "FirstOrderLinearTIDS.hpp"
 #include "EventDriven.hpp"
+#include "SiconosAlgebraProd.hpp"
 
 #include "LinearSMCOT2.hpp"
 

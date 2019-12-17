@@ -14,30 +14,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
-
-#include "ConvexQP_Solvers.h"
-#include "ConvexQP_computeError.h"
-#include "NumericsMatrix.h"
-#include "SparseBlockMatrix.h"
-#include "NumericsMatrix.h"
-#include "NumericsVector.h"
-#include "NumericsSparseMatrix.h"
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include <float.h>
-#include "ConvexQP_cst.h"
-#include "numerics_verbose.h"
-
+#include <float.h>                  // for DBL_EPSILON
+#include <math.h>                   // for sqrt, fabs, INFINITY
+#include <stdio.h>                  // for NULL, printf
+#include <stdlib.h>                 // for calloc, free, malloc
+#include "ConvexQP.h"               // for ConvexQP
+#include "ConvexQP_Solvers.h"       // for convexQP_ADMM, convexQP_ADMM_free
+#include "ConvexQP_computeError.h"  // for convexQP_compute_error
+#include "ConvexQP_cst.h"           // for SICONOS_CONVEXQP_ADMM_IPARAM_ACCE...
+#include "NumericsFwd.h"            // for SolverOptions, ConvexQP, Numerics...
+#include "NumericsMatrix.h"         // for NM_gemv, NM_clear, NM_gesv_expert
+#include "NumericsSparseMatrix.h"   // for NSM_TRIPLET, NumericsSparseMatrix
+#include "SolverOptions.h"          // for SolverOptions, solver_options_nul...
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "debug.h"
+#include "debug.h"                  // for DEBUG_EXPR, DEBUG_PRINT, DEBUG_PR...
+#include "numerics_verbose.h"       // for numerics_printf_verbose, numerics...
+#include "SiconosBlas.h"                  // for cblas_daxpy, cblas_dcopy, cblas_d...
 
 const char* const   SICONOS_CONVEXQP_ADMM_STR = "CONVEXQP ADMM";
 typedef struct {
@@ -50,8 +46,8 @@ typedef struct {
 
 void convexQP_ADMM_init(ConvexQP* problem, SolverOptions* options)
 {
-  int n = problem->size;
-  int m = problem->m;
+  size_t n = problem->size;
+  size_t m = problem->m;
   if (!options->dWork || options->dWorkSize != 2*m+n)
   {
     options->dWork = (double*)calloc(2*m+n,sizeof(double));
@@ -74,9 +70,10 @@ void convexQP_ADMM_free(ConvexQP* problem, SolverOptions* options)
   if (options->dWork)
   {
     free(options->dWork);
-    options->dWork=NULL;
     options->dWorkSize = 0;
   }
+  options->dWork=NULL;
+
   if (options->solverData)
   {
     ConvexQP_ADDM_data * data = (ConvexQP_ADDM_data *)options->solverData;
@@ -86,6 +83,7 @@ void convexQP_ADMM_free(ConvexQP* problem, SolverOptions* options)
     free(data->u_k);
     free(data);
   }
+  options->solverData = NULL;
 
 }
 static double convexQP_ADMM_select_rho(NumericsMatrix* M, NumericsMatrix* A, int * is_rho_variable, SolverOptions* restrict options)
@@ -139,7 +137,7 @@ void convexQP_ADMM(ConvexQP* problem,
   double * b = problem->b;
 
   /* Dimension of the problem */
-  int n =  problem->size;
+  size_t n =  problem->size;
   int AisIdentity = 0;
   if (!problem->istheNormConvexQPset)
   {
@@ -158,7 +156,7 @@ void convexQP_ADMM(ConvexQP* problem,
     NM_triplet_alloc(problem->A,0);
     problem->A->matrix2->origin= NSM_TRIPLET;
 
-    for (int k =0; k< n; k++)
+    for (size_t k =0; k< n; k++)
     {
       NM_zentry(problem->A, k, k, 1);
     }
@@ -172,7 +170,7 @@ void convexQP_ADMM(ConvexQP* problem,
     b = problem->b;
     AisIdentity = 1;
   }
-  int m =  problem->m;
+  size_t m =  problem->m;
   double norm_b = cblas_dnrm2(m , b , 1);
 
 
@@ -571,40 +569,15 @@ void convexQP_ADMM(ConvexQP* problem,
 }
 
 
-int convexQP_ADMM_setDefaultSolverOptions(SolverOptions* options)
+void convexQP_ADMM_set_default(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ADMM Solver\n");
-  }
-
-  options->solverId = SICONOS_CONVEXQP_ADMM;
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_ACCELERATION] = SICONOS_CONVEXQP_ADMM_ACCELERATION_AND_RESTART; /* 0 Acceleration */
   options->iparam[SICONOS_CONVEXQP_ADMM_IPARAM_RHO_STRATEGY] =
     SICONOS_CONVEXQP_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
 
   options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-
   options->dparam[SICONOS_CONVEXQP_ADMM_RHO] = 1.0;
   options->dparam[SICONOS_CONVEXQP_ADMM_RESTART_ETA] = 0.999;
   options->dparam[SICONOS_CONVEXQP_ADMM_BALANCING_RESIDUAL_TAU]=2.0;
   options->dparam[SICONOS_CONVEXQP_ADMM_BALANCING_RESIDUAL_PHI]=10.0;
-
-  options->internalSolvers = NULL;
-
-
-  return 0;
 }

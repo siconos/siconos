@@ -18,7 +18,8 @@
 
 #ifndef gfc3d_compute_error_H
 #define gfc3d_compute_error_H
-#include "GlobalFrictionContactProblem.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for GlobalFrictionContactProblem, SolverOptions
 
 /*!\file gfc3d_compute_error.h
   \brief functions related to error computation for friction-contact problems

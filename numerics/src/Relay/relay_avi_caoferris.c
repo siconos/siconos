@@ -21,16 +21,15 @@
 Ferris solves the subsequent AVI.
 */
 
-#include "AVI_Solvers.h"
-#include "Relay_Solvers.h"
-#include "avi_caoferris.h"
-#include "relay_cst.h"
-#include "LinearComplementarityProblem.h"
-#include "NumericsMatrix.h"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
-
+#include <assert.h>                        // for assert
+#include <stdlib.h>                        // for free, malloc, calloc
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NumericsMatrix, NM_fill
+#include "RelayProblem.h"                  // for RelayProblem
+#include "Relay_Solvers.h"                 // for relay_avi_caoferris
+#include "avi_caoferris.h"                 // for avi_caoferris_stage3
+#include "debug.h"                         // for DEBUG_PRINT_VEC_INT
 
 void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -103,11 +102,5 @@ void relay_avi_caoferris(RelayProblem* problem, double *z, double *w, int *info,
   NM_clear(lcplike_pb.M);
   free(lcplike_pb.q);
   free(b_bar);
-}
-
-int relay_avi_caoferris_setDefaultSolverOptions(SolverOptions* options)
-{
-  solver_options_set(options, SICONOS_RELAY_AVI_CAOFERRIS);
-  return 0;
 }
 

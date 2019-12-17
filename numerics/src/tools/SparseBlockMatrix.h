@@ -19,11 +19,11 @@
 #ifndef SparseBlockMatrix_H
 #define SparseBlockMatrix_H
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-#include <stdio.h>
+#include <stdio.h>          // for size_t, FILE
+#include "CSparseMatrix.h"  // for CSparseMatrix
+#include "NumericsFwd.h"    // for SparseBlockStructuredMatrix, SparseBlockC...
 
-#include "CSparseMatrix.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /*!\file SparseBlockMatrix.h
   \brief Structure definition and functions related to

@@ -15,19 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
 #include "FrictionContactProblem.h"
-#include "NumericsMatrix.h"
-#include <stdio.h>
-#include "numerics_verbose.h"
-#include "SparseBlockMatrix.h"
-#include <math.h>
-#include <string.h>
-#include "SiconosLapack.h"
+#include <assert.h>             // for assert
+#include <math.h>               // for fabs
+#include <stdio.h>              // for printf, fprintf, fscanf, NULL, fclose
+#include <stdlib.h>             // for malloc, free, exit, EXIT_FAILURE
+#include <sys/errno.h>          // for errno
+#include <string.h>             // for memcpy
+#include "SiconosBlas.h"        // for cblas_dscal
+#include "NumericsMatrix.h"     // for NumericsMatrix, NM_create, RawNumeric...
+#include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "debug.h"              // for DEBUG_PRINT, DEBUG_PRINTF
+#include "numerics_verbose.h"   // for CHECK_IO, numerics_error, numerics_pr...
+#include "io_tools.h"
+#if defined(WITH_FCLIB)
+#include "fclib_interface.h"
+#endif
 
 void frictionContact_display(FrictionContactProblem* problem)
 {
@@ -111,8 +116,10 @@ int frictionContact_printInFilename(FrictionContactProblem* problem, char* filen
   return info;
 }
 
-int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
+FrictionContactProblem *  frictionContact_newFromFile(FILE* file)
 {
+
+  FrictionContactProblem* problem = frictionContactProblem_new();
   assert(file);
   DEBUG_PRINT("Start -- int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
   int nc = 0, d = 0;
@@ -137,23 +144,36 @@ int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
   }
   DEBUG_PRINT("End --  int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
 
-  return 0;
+  return problem;
 }
 
-int frictionContact_newFromFilename(FrictionContactProblem* problem, char* filename)
+FrictionContactProblem * frictionContact_new_from_filename(const char* filename)
 {
-  int info = 0;
-  FILE * file = fopen(filename, "r");
 
-  if (!file)
-  {
-    return errno;
-  }
+  FrictionContactProblem* problem = NULL;
+  int is_hdf5 = check_hdf5_file(filename);
+  // if the input file is an hdf5 file, we try to read it with fclib interface function.
+  if(is_hdf5)
+    {
+#if defined(WITH_FCLIB)
+      problem = frictionContact_fclib_read(filename);
+#else
+      numerics_error("FrictionContactProblem",
+                     "Try to read an hdf5 file, while fclib interface is not active. Recompile Siconos with fclib.",
+                     filename);
+#endif
+    }
+  else
+    {
+      FILE * file = fopen(filename, "r");
+      if (!file)
+        numerics_error("FrictionContactProblem", "Can not open file ", filename);
+      
+      problem = frictionContact_newFromFile(file);
+      fclose(file);
+    }
+  return problem;
 
-  info = frictionContact_newFromFile(problem, file);
-
-  fclose(file);
-  return info;
 }
 
 void frictionContactProblem_free(FrictionContactProblem* problem)
@@ -360,6 +380,7 @@ void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
   numerics_printf_verbose(do_print, "---- FC3D - STAT  - Number of contact = %i\t,  take off = %i\t, closed = %i\t, sliding = %i\t,sticking = %i\t, ambiguous take off = %i\t, ambiguous closed = %i",nc ,take_off_count,closed_count,sliding_count,sticking_count, ambiguous_take_off_count,ambiguous_closed_count);
 
 }
+
 FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem)
 {
   assert(problem);
@@ -377,6 +398,7 @@ FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem)
   memcpy(new->mu, problem->mu, nc*sizeof(double));
   return new;
 }
+
 void frictionContact_rescaling(
   FrictionContactProblem* problem,
   double alpha,

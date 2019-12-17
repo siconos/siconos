@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "LagrangianDSTest.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include "BlockMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \

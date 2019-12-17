@@ -16,12 +16,13 @@
  * limitations under the License.
 */
 
+#include "SiconosConfig.h"  // IWYU pragma: keep
+#ifdef WITH_SUPERLU_MT
+
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 #include "debug.h"
 #include "numerics_verbose.h"
-
-#ifdef WITH_SUPERLU_MT
 
 #include <slu_mt_ddefs.h>
 

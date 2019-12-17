@@ -15,18 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include "SiconosConfig.h"
 
-#include "LinearComplementarityProblem.h"
-#include "SolverOptions.h"
-#include "LCP_Solvers.h"
+#include "LCP_Solvers.h"  // for lcp_path
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
+
+#include "SiconosConfig.h" // for HAVE_PATHFERRIS // IWYU pragma: keep
 
 #ifdef HAVE_PATHFERRIS
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
+#include "LinearComplementarityProblem.h"
+#include "SolverOptions.h"
 #include "SimpleLCP.h"
 #include "numerics_verbose.h"
 #include "NumericsMatrix.h"

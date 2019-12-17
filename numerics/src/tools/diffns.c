@@ -15,12 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-#include "NSSTools.h"
+#include "NSSTools.h"  // for diffns
 
 void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
 {

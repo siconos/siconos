@@ -15,16 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
+
+#include "SimpleLCP.h"  // for ABCDtoM, FortranToPathSparse, MCP_Termination
+#include "SiconosConfig.h" // for HAVE_PATHFERRIS // IWYU pragma: keep
+
+#ifdef HAVE_PATHFERRIS
 #include <limits.h>
 #include <stdio.h>
 
-#include "SiconosConfig.h"
-
 #define PATHFERRIS_LOG_IN_FILE
 
-#include "SimpleLCP.h"
-
-#ifdef HAVE_PATHFERRIS
 
 #if defined(__cplusplus)
 extern "C"

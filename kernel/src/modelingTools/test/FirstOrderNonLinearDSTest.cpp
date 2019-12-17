@@ -16,6 +16,8 @@
  * limitations under the License.
 */
 #include "FirstOrderNonLinearDSTest.hpp"
+#include "SiconosAlgebraProd.hpp"
+#include "SimpleMatrixFriends.hpp"
 
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \

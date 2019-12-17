@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "SiconosBlas.h"
 #include "SiconosLapack.h"
 #include <assert.h>
 

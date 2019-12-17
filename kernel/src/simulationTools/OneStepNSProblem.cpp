@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "OneStepNSProblem.hpp"
+#include "SolverOptions.h"
 #include "NonSmoothDynamicalSystem.hpp"
 //#include "Interaction.hpp"
 #include "Interaction.hpp"
@@ -37,28 +38,8 @@
 #include "debug.h"
 #include "numerics_verbose.h" // numerics to set verbose mode ...
 
-
-OneStepNSProblem::OneStepNSProblem():
-  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _hasBeenUpdated(false)
-{
-  _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
-  _numerics_solver_options->dWork = NULL;
-}
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
-
-// Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
-OneStepNSProblem::OneStepNSProblem(int numericsSolverId):
-  _numerics_solver_id(numericsSolverId), _sizeOutput(0),
-  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _hasBeenUpdated(false)
-{
-
-  _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
-  _numerics_solver_options->dWork = NULL;
-  _numerics_solver_options->solverId = numericsSolverId;
-}
 
 bool OneStepNSProblem::hasInteractions() const
 {
@@ -489,7 +470,9 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
 
 void OneStepNSProblem::setSolverId(int solverId)
 {
-  RuntimeException::selfThrow("OneStepNSProblem::setSolverId - this virtual method should be implemented in all derived classes!");
+  // And create a new one, with default parameters values.
+  _numerics_solver_options.reset(solver_options_create(solverId),
+                                 solver_options_delete);
 }
 
 void OneStepNSProblem::setNumericsVerboseMode(bool vMode)

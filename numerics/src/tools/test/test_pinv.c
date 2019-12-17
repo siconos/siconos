@@ -1,9 +1,9 @@
-#include "pinv.h"
-#include "cond.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include "NumericsMatrix.h"
-#include <string.h>
+#include <stdio.h>           // for printf, NULL, fclose, fopen, FILE
+#include <stdlib.h>          // for free, malloc
+#include <string.h>          // for memcpy
+#include "NumericsFwd.h"     // for NumericsMatrix
+#include "NumericsMatrix.h"  // for NumericsMatrix, NM_clear, NM_new, NM_writ...
+#include "pinv.h"            // for pinv
 int main(void)
 {
   int n = 4;

@@ -1,5 +1,6 @@
 #include "SiconosConfig.h"
 #include "MechanicsIO.hpp"
+#include "SiconosAlgebraProd.hpp"
 
 #define DUMMY(X, Y) class X : public Y {}
 

@@ -18,14 +18,13 @@
 #ifndef AVI_PROBLEM_C
 #define AVI_PROBLEM_C
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <assert.h>
-#include "NumericsMatrix.h"
-#include "SiconosSets.h"
 #include "AffineVariationalInequalities.h"
-#include "numerics_verbose.h"
+#include <assert.h>            // for assert
+#include <stdio.h>             // for printf, NULL, fprintf, fscanf, FILE
+#include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
+#include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
+#include "SiconosSets.h"       // for polyhedron_set, free_polyhedron, free_...
+#include "numerics_verbose.h"  // for CHECK_IO
 
 
 void AVI_display(AffineVariationalInequalities* avi)
@@ -34,7 +33,7 @@ void AVI_display(AffineVariationalInequalities* avi)
   assert(avi);
   int i, n = avi->size;
   printf("AffineVariationalInequalities Display :\n-------------\n");
-  printf("size :%d \n", avi->size);
+  printf("size :%zu \n", avi->size);
   if (avi->M)
   {
     printf("M matrix:\n");

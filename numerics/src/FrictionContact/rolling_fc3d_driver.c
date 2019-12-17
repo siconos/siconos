@@ -15,16 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include <assert.h>
-
-#include "rolling_fc3d_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
+#include <assert.h>                         // for assert
+#include <float.h>                          // for DBL_EPSILON
+#include <stdio.h>                          // for fprintf, NULL, stderr
+#include <stdlib.h>                         // for exit, EXIT_FAILURE
+#include "Friction_cst.h"                   // for SICONOS_ROLLING_FRICTION_...
+#include "NonSmoothDrivers.h"               // for rolling_fc3d_driver
+#include "NumericsFwd.h"                    // for SolverOptions, RollingFri...
+#include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
+#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
+#include "numerics_verbose.h"               // for numerics_error, numerics_...
+#include "rolling_fc3d_Solvers.h"           // for rolling_fc3d_nsgs, rollin...
 
 const char* const   SICONOS_ROLLING_FRICTION_3D_NSGS_STR = "RFC3D_NSGS";
 

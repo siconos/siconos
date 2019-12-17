@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "OSNSMultipleImpact.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "LagrangianDS.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "Simulation.hpp"
@@ -24,45 +25,11 @@
 #include "OSNSMatrix.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 
-//Default constructor
-OSNSMultipleImpact::OSNSMultipleImpact(): LinearOSNS(), _typeCompLaw("BiStiffness")
+OSNSMultipleImpact::OSNSMultipleImpact(std::string newTypeLaw, double newDelP): LinearOSNS(), _typeCompLaw(newTypeLaw),  _deltaP(newDelP)                                                                               
 {
-  _nStepSave = 100;
-  _tolImpact = DEFAULT__tolImpact;
-  _Tol_Vel = DEFAULT_TOL_VEL;
-  _Tol_Ener = DEFAULT_TOL_ENER;
-  _ZeroVel_EndIm = DEFAULT_TOL_VEL;
-  _ZeroEner_EndIm = DEFAULT_TOL_ENER;
-  _saveData = false;
-  _sizeDataSave = 1000;
-  _nStepMax = 100000;
-  _stepMinSave = 1;
-  _stepMaxSave = _nStepMax;
-  _namefile = "DataMultipleImpact.dat";
-}
-//------------------------------ -------------------------------------------------------------
-OSNSMultipleImpact::OSNSMultipleImpact(std::string newTypeLaw, double newDelP = 1.0e-5): LinearOSNS()
-{
-  _typeCompLaw = newTypeLaw;
-  _deltaP = newDelP;
-  _nStepSave = 100;
-  _tolImpact = DEFAULT__tolImpact;
-  _Tol_Vel = DEFAULT_TOL_VEL;
-  _Tol_Ener = DEFAULT_TOL_ENER;
-  _ZeroVel_EndIm = DEFAULT_TOL_VEL;
-  _ZeroEner_EndIm = DEFAULT_TOL_ENER;
-  _saveData = false;
-  _namefile = "DataMultipleImpact.dat";
-  _sizeDataSave = 1000;
-  _nStepMax = 100000;
-  _stepMinSave = 1;
-  _stepMaxSave = _nStepMax;
   if ((_typeCompLaw != "MonoStiffness") && (_typeCompLaw != "BiStiffness"))
     RuntimeException::selfThrow("OSNSMultipleImpact::_typeCompLaw type of the compliance model must be either MonoStiffness or BiStiffness!");
 }
-//-------------------------------------------------------------------------------------------------
-OSNSMultipleImpact::~OSNSMultipleImpact() {}
-//------------------------------------------------------------------------------------------------
 
 void OSNSMultipleImpact::setTolImpact(double newTolZero)
 {

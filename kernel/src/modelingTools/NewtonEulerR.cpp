@@ -21,6 +21,8 @@
 #include <cstdio>
 
 #include "NewtonEulerR.hpp"
+#include "SiconosMatrixSetBlock.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"
 
@@ -333,7 +335,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
 
   DEBUG_EXPR(_dotjachq->display(););
 
-  prod(1.0,*_dotjachq, workQdot, *_secondOrderTimeDerivativeTerms, true);
+  prod(*_dotjachq, workQdot, *_secondOrderTimeDerivativeTerms, true);
 
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
 
@@ -384,9 +386,10 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   }
 
   // compute the product of jachqTdot and v
-  SiconosVector workVelocity = *DSlink[NewtonEulerR::velocity];
+  SiconosVector workVelocity;
+  workVelocity.initFromBlock(*DSlink[NewtonEulerR::velocity]);
   DEBUG_EXPR(workVelocity.display(););
-  prod(1.0, *jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
+  prod(*jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
   DEBUG_PRINT("NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
 

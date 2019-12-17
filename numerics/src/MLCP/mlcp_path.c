@@ -15,8 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "SiconosConfig.h"
-#include "MLCP_Solvers.h"
+#include "MLCP_Solvers.h"  // for mixedLinearComplementarity_path_setDefault...
+#include "NumericsFwd.h"   // for MixedLinearComplementarityProblem, SolverO...
+#include "SiconosConfig.h" // for HAVE_PATHFERRIS // IWYU pragma: keep
+
+#ifdef HAVE_PATHFERRIS
+#include "tools/InterfaceToPathFerris/SimpleLCP.h"
 #include "SiconosCompat.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,21 +28,7 @@
 #include <math.h>
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
-#ifdef HAVE_PATHFERRIS
-#include "tools/InterfaceToPathFerris/SimpleLCP.h"
 #endif
-/*
-Warning: this function requires MLCP with M and q, not (A,B,C,D).
-The input structure MixedLinearComplementarityProblem is supposed to fit with this form.
-*/
-int mixedLinearComplementarity_path_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-#ifdef HAVE_PATHFERRIS
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-#endif
-  return 0;
-}
-
 
 void mlcp_path(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -46,7 +36,7 @@ void mlcp_path(MixedLinearComplementarityProblem* problem, double *z, double *w,
 #ifdef HAVE_PATHFERRIS
   *info = 0;
   MCP_Termination termination;
-  double tol = options->dparam[0];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
 
   double * M = problem->M->matrix0;
   double * q = problem->q;

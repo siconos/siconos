@@ -17,10 +17,6 @@
  * Contact: Vincent ACARY, siconos-team@lists.gforge.inria.fr
 */
 
-
-#include <stdlib.h>
-#include <math.h>
-
 #ifdef _MSC_VER
 
 // before MSVC 2013

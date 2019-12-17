@@ -18,13 +18,12 @@
 #ifndef LCP_PROBLEM_C
 #define LCP_PROBLEM_C
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <assert.h>
-#include "NumericsMatrix.h"
 #include "LinearComplementarityProblem.h"
-#include "numerics_verbose.h"
+#include <assert.h>            // for assert
+#include <stdio.h>             // for printf, fprintf, fscanf, NULL, FILE
+#include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
+#include "NumericsMatrix.h"    // for NM_display, NM_clear, NM_new_from_file
+#include "numerics_verbose.h"  // for CHECK_IO
 
 void linearComplementarity_display(LinearComplementarityProblem* problem)
 {
@@ -85,10 +84,15 @@ int linearComplementarity_newFromFile(LinearComplementarityProblem* problem, FIL
   }
   return 1;
 }
-int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, char* filename)
+int linearComplementarity_newFromFilename(LinearComplementarityProblem* problem, const char* filename)
 {
   int info = 0;
   FILE * file = fopen(filename, "r");
+  if (file == NULL)
+  {
+    printf("Error! Could not open filename %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
 
   info = linearComplementarity_newFromFile(problem, file);
 

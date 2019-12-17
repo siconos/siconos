@@ -16,19 +16,18 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
+#include <assert.h>                        // for assert
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_new...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SiconosBlas.h"                   // for cblas_daxpy, cblas_dcopy
+#include "SiconosLapack.h"                 // for lapack_int, DGESV
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "numerics_verbose.h"              // for verbose
 
-#include "SiconosLapack.h"
-#include <assert.h>
-#include "numerics_verbose.h"
 void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
@@ -226,35 +225,4 @@ void lcp_newton_min(LinearComplementarityProblem* problem, double *z, double *w,
   free(ipiv);
   free(rho);
 
-}
-int linearComplementarity_newton_min_setDefaultSolverOptions(SolverOptions* options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NewtonMin Solver\n");
-  }
-
-
-
-  options->solverId = SICONOS_LCP_NEWTONMIN;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-
-
-  return 0;
 }

@@ -19,19 +19,20 @@
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
-#include "numerics_verbose.h"
-#include <float.h>
-#include <math.h>
-#include <assert.h>
-
-#include "SiconosBlas.h"
 #include "GoldsteinSearch.h"
-#include "SiconosSets.h"
+#include <assert.h>            // for assert
+#include <math.h>              // for NAN
+#include <stdio.h>             // for printf, size_t
+#include "SiconosSets.h"       // for project_on_set
+#include "debug.h"             // for DEBUG_EXPR_WE, DEBUG_PRINT, DEBUG_PRINTF
+#include "numerics_verbose.h"  // for verbose
+#include "SiconosBlas.h"       // for cblas_daxpy, cblas_dcopy, cblas_ddot
 
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
+#else
+#include <stdbool.h>           // for bool
 #endif
 
 double search_Goldstein_standalone(int n, double* theta, double preRHS, search_data* ls_data)

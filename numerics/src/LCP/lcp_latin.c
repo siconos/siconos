@@ -15,19 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "SiconosLapack.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
 
-#include "numerics_verbose.h"
+
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs, isnan
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_compute_error_only
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_LATIN_P...
+#include "numerics_verbose.h"              // for verbose
+
+#include "SiconosBlas.h"   // for cblas_dcopy, cblas_dgemv
+#include "SiconosLapack.h" // for LA_UP, LA_NONUNIT, LA_NOTRANS, DTRTRS, DPOTRF, lapack_int
 
 void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
@@ -45,7 +48,7 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
   int incx, incy;
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tol = options->dparam[SICONOS_DPARAM_TOL];
-  double k_latin = options->dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER];
+  double k_latin = options->dparam[SICONOS_LCP_DPARAM_LATIN_PARAMETER];
   double alpha, beta;
   double err1;
   double res, errmax;
@@ -401,34 +404,7 @@ void lcp_latin(LinearComplementarityProblem* problem, double *z, double *w, int 
 
 }
 
-int linearComplementarity_latin_setDefaultSolverOptions(SolverOptions* options)
+void lcp_latin_set_default(SolverOptions* options)
 {
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the Latin Solver\n");
-  }
-
-
-  options->solverId = SICONOS_LCP_LATIN;
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  options->dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER] = 0.3;
-
-  return 0;
+  options->dparam[SICONOS_LCP_DPARAM_LATIN_PARAMETER] = 0.3;
 }

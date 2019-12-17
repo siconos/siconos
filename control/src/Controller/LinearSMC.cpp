@@ -17,6 +17,7 @@
 */
 
 #include "FirstOrderLinearTIDS.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "TimeStepping.hpp"
 #include "Relay.hpp"
 #include "EventsManager.hpp"

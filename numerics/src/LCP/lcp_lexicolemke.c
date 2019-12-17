@@ -16,28 +16,23 @@
  * limitations under the License.
  */
 
-#include <math.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <float.h>
-#include "pivot-utils.h"
-#include "numerics_verbose.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "numerics_verbose.h"
+#include <assert.h>                        // for assert
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for free, malloc, calloc
+#include "LCP_Solvers.h"                   // for lcp_lexicolemke, linearCom...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-
 //#define MAX_PIVOT
 //#define INV_PIVOT
-
-#include "debug.h"
+#include "debug.h"                         // for DEBUG_EXPR_WE, DEBUG_PRINT
+#include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_PIVOTIN...
+#include "numerics_verbose.h"              // for verbose
 
 void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , double *wlem , int *info , SolverOptions* options)
 {
@@ -457,24 +452,9 @@ void lcp_lexicolemke(LinearComplementarityProblem* problem, double *zlem , doubl
 }
 
 
-int linearComplementarity_lexicolemke_setDefaultSolverOptions(SolverOptions* options)
+void lcp_lexicolemke_set_default(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the Lemke Solver\n");
-  }
-
-  options->solverId = SICONOS_LCP_LEMKE;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-  return 0;
+  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = 0;
+  options->dparam[2] = 0.0 ;
+  options->dparam[3] = 0.0 ;
 }

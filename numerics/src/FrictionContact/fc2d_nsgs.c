@@ -16,23 +16,24 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "SiconosBlas.h"
-#include "fc2d_Solvers.h"
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
-
+#include <float.h>                   // for DBL_EPSILON
+#include <math.h>                    // for fabs, sqrt, INFINITY
+#include <stdio.h>                   // for printf
+#include <stdlib.h>                  // for free, calloc, malloc, exit, rand
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_2D_NSGS
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                   // for DEBUG_PRINTF
+#include "fc2d_Solvers.h"            // for fc2d_nsgs, fc2d_nsgs_setDefaultS...
+#include "numerics_verbose.h"        // for verbose
+#include "SiconosBlas.h"                   // for cblas_ddot, cblas_daxpy, cblas_d...
 
-void shuffle(int size, int * randnum);
-void shuffle(int size, int * randnum) //size is the given range
+static void shuffle(int size, int * randnum) //size is the given range
 {
   int i;
   int swap, randindex;
@@ -77,10 +78,10 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
   double factor1;
   int * randomContactList;
 
-  int maxit = options->iparam[0];
-  double errmax = options->dparam[0];
-  options->iparam[1]  = 0;
-  options->dparam[1]  = 0.0;
+  int maxit = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double errmax = options->dparam[SICONOS_DPARAM_TOL];
+  options->iparam[SICONOS_IPARAM_ITER_DONE]  = 0;
+  options->dparam[SICONOS_DPARAM_RESIDU]  = 0.0;
 
   iter         = 0;
 
@@ -107,7 +108,7 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
   {
     iter = iter + 1 ;
 
-    if (options->iparam[2] > 0)
+    if (options->iparam[SICONOS_IPARAM_NSGS_SHUFFLE] > 0)
     {
       shuffle(nc, randomContactList);
     }
@@ -371,26 +372,9 @@ void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velo
 
 
 }
-int fc2d_nsgs_setDefaultSolverOptions(SolverOptions *options)
+void fc2d_nsgs_set_default(SolverOptions *options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the 2D NSGS Solver\n");
-  }
-
-  /*  strcpy(options->solverName,"NLGS");*/
-  options->solverId = SICONOS_FRICTION_2D_NSGS;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-4;
-  options ->internalSolvers = NULL;
-  return 0;
+  options->iparam[SICONOS_IPARAM_NSGS_SHUFFLE] = 0;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+  //  useful only for the sparse nsgs case.
 }

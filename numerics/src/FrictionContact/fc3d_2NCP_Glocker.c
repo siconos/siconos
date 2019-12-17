@@ -25,13 +25,16 @@
 */
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
-
-#include "fc3d_Solvers.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
+#include <math.h>                      // for sqrt, cos, sin
+#include <stdio.h>                     // for printf, NULL
+#include "FrictionContactProblem.h"    // for FrictionContactProblem
+#include "NumericsFwd.h"               // for FrictionContactProblem, Numeri...
+#include "NumericsMatrix.h"            // for NumericsMatrix, RawNumericsMatrix
+#include "SparseBlockMatrix.h"         // for SBM_diagonal_block_index, Spar...
+#include "fc3d_2NCP_Glocker.h"         // for Compute_NCP_error1, Compute_NC...
+#include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
+#include "numerics_verbose.h"          // for numerics_error
+#include "SiconosBlas.h"                     // for cblas_dcopy, cblas_dgemv, Cbla...
 
 /*Static variables */
 

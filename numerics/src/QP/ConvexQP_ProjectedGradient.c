@@ -16,23 +16,18 @@
  * limitations under the License.
 */
 
-
-#include "ConvexQP_Solvers.h"
-#include "ConvexQP_computeError.h"
-#include "NumericsMatrix.h"
-#include "SiconosCompat.h"
-
-
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include "ConvexQP_cst.h"
-#include "numerics_verbose.h"
-
-#include "debug.h"
+#include <stdio.h>                  // for printf, NULL
+#include <stdlib.h>                 // for free, malloc, calloc
+#include "ConvexQP.h"               // for ConvexQP
+#include "ConvexQP_Solvers.h"       // for convexQP_ProjectedGradient, conve...
+#include "ConvexQP_computeError.h"  // for convexQP_compute_error_reduced
+#include "ConvexQP_cst.h"           // for SICONOS_CONVEXQP_PGOC_RHO, SICONO...
+#include "NumericsFwd.h"            // for SolverOptions, ConvexQP, Numerics...
+#include "NumericsMatrix.h"         // for NM_gemv
+#include "SolverOptions.h"          // for SolverOptions, solver_options_nul...
+#include "debug.h"                  // for DEBUG_PRINTF
+#include "numerics_verbose.h"       // for numerics_error, verbose, numerics...
+#include "SiconosBlas.h"                  // for cblas_dcopy, cblas_daxpy, cblas_ddot
 
 //#define VERBOSE_DEBUG
 const char* const   SICONOS_CONVEXQP_PG_STR = "CONVEXQP PG";
@@ -132,6 +127,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
       problem->ProjectionOnC(problem,z_tmp,z);
 
       /* **** Criterium convergence **** */
+      // Warning : options->dWork required in the function below !
       convexQP_compute_error_reduced(problem, z , w, tolerance, options, norm_q, &error);
 
       if (verbose > 0)
@@ -153,7 +149,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
     if ((mu <= 0.0 ) || ( mu >= 1.0))
       numerics_error("fc3d_ProjectedGradientOnCylinder", "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] must in (0,1)");
 
-    int ls_iter_max = iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAXITER];
+    int ls_iter_max = iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAX_ITER];
 
     double theta = 0.0;
     double theta_k = 0.0;
@@ -266,7 +262,9 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
-  free(z_tmp);
+  if(z_tmp)
+    free(z_tmp);
+  z_tmp = NULL;
   if (isVariable)
   {
     free(z_k);
@@ -276,38 +274,11 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
 }
 
 
-int convexQP_ProjectedGradient_setDefaultSolverOptions(SolverOptions* options)
+void convexQP_ProjectedGradient_set_default(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the PGoC Solver\n");
-  }
-
-  options->solverId = SICONOS_CONVEXQP_PG;
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 20000;
-
-  options->iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAXITER] =20;
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+  options->iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAX_ITER] =20;
   options->dparam[SICONOS_CONVEXQP_PGOC_RHO] = -1.e-3; /* rho is variable by default */
   options->dparam[SICONOS_CONVEXQP_PGOC_RHOMIN] = 1e-9;
   options->dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] =0.9;
   options->dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU]  = 2.0/3.0;
-
-  options->internalSolvers = NULL;
-
-
-  return 0;
 }

@@ -16,15 +16,16 @@
  * limitations under the License.
 */
 
-#include <assert.h>
 #include "line_search.h"
-#include <math.h>
-#include "SiconosCompat.h"
+#include <assert.h>  // for assert
+#include <math.h>    // for isfinite
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for free, calloc, exit, NULL, EXIT_FAILURE
 
 #ifdef __cplusplus
 #undef restrict
+#include <sys/cdefs.h>  // for __restrict
 #define restrict __restrict
-using namespace std;
 #endif
 
 double line_search_generic(int n, double theta, double preRHS, search_data* ls_data, unsigned searchtype, sn_ls_fn ls_fn)

@@ -15,14 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-
-#include "SiconosBlas.h"
 #include "FischerBurmeister.h"
-#include "assert.h"
+#include <float.h>           // for DBL_EPSILON
+#include <math.h>            // for sqrt, fabs
+#include <stdio.h>           // for NULL
+#include "NumericsMatrix.h"  // for NM_assert, NM_DENSE, NumericsMatrix
+#include "assert.h"          // for assert
+#include "SiconosBlas.h"     // for cblas_dcopy, cblas_dscal, cblas_dgemv
 
 /* Computation of  Fischer-Burmeister function, phi(z,F(z)) = sqrt(z*z + F(z)*F(z)) - z - F(z) */
 void phi_FB(int size, double* restrict z, double* restrict F, double* restrict phiVector)

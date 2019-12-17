@@ -16,19 +16,18 @@
  * limitations under the License.
 */
 
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include "SecondOrderConeLinearComplementarityProblem_as_VI.h"
-#include "VariationalInequality_Solvers.h"
-#include "SOCLCP_Solvers.h"
-#include "soclcp_compute_error.h"
-
-#include "SolverOptions.h"
-#include "numerics_verbose.h"
+#include <stdio.h>                                              // for printf
+#include <stdlib.h>                                             // for free
+#include "NumericsFwd.h"                                        // for Varia...
+#include "SOCLCP_Solvers.h"                                     // for soclc...
+#include "SecondOrderConeLinearComplementarityProblem.h"        // for Secon...
+#include "SecondOrderConeLinearComplementarityProblem_as_VI.h"  // for Secon...
+#include "SiconosBlas.h"                                        // for cblas...
+#include "SolverOptions.h"                                      // for Solve...
+#include "VariationalInequality.h"                              // for Varia...
+#include "VariationalInequality_Solvers.h"                      // for varia...
+#include "numerics_verbose.h"                                   // for verbose
+#include "soclcp_compute_error.h"                               // for soclc...
 
 void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -41,7 +40,6 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem*
   vi->F = &Function_VI_SOCLCP;
   vi->ProjectionOnX = &Projection_VI_SOCLCP;
 
-  int iter=0;
   double error=1e24;
 
   SecondOrderConeLinearComplementarityProblem_as_VI *soclcp_as_vi= (SecondOrderConeLinearComplementarityProblem_as_VI*)malloc(sizeof(SecondOrderConeLinearComplementarityProblem_as_VI));
@@ -56,39 +54,7 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem*
   soclcp_as_vi->soclcp = problem;
   /* frictionContact_display(fc3d_as_vi->fc3d); */
 
-  SolverOptions * visolver_options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  variationalInequality_setDefaultSolverOptions(visolver_options,
-                                                SICONOS_VI_FPP);
-
-  int isize = options->iSize;
-  int dsize = options->dSize;
-  int vi_isize = visolver_options->iSize;
-  int vi_dsize = visolver_options->dSize;
-  if (isize != vi_isize )
-  {
-    printf("size problem in soclcp_VI_FixedPointProjection\n");
-  }
-  if (dsize != vi_dsize )
-  {
-    printf("size problem in soclcp_VI_FixedPointProjection\n");
-  }
-  int i;
-
-  for (i = 0; i < min(isize,vi_isize); i++)
-  {
-    if (options->iparam[i] != 0 )
-      visolver_options->iparam[i] = options->iparam[i] ;
-  }
-  for (i = 0; i < min(dsize,vi_dsize); i++)
-  {
-    if (fabs(options->dparam[i]) >= 1e-24 )
-      visolver_options->dparam[i] = options->dparam[i] ;
-  }
-
-  
-  variationalInequality_FixedPointProjection(vi, reaction, velocity , info , visolver_options);
-
-
+  variationalInequality_FixedPointProjection(vi, reaction, velocity , info , options);
 
   /* **** Criterium convergence **** */
   soclcp_compute_error(problem, reaction , velocity, options->dparam[0], options, &error);
@@ -98,37 +64,12 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem*
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  error = visolver_options->dparam[SICONOS_DPARAM_RESIDU];
-  iter = visolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
-
-  options->dparam[SICONOS_DPARAM_RESIDU] = error;
-  options->dparam[SICONOS_VI_EG_DPARAM_RHO] = visolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-
-
   if (verbose > 0)
   {
-    printf("---------------SOCLCP - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+    printf("---------------SOCLCP - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n",
+           options->iparam[SICONOS_IPARAM_MAX_ITER], options->dparam[SICONOS_DPARAM_RESIDU]);
+
   }
   free(vi);
-
-  solver_options_delete(visolver_options);
-  free(visolver_options);
   free(soclcp_as_vi);
-
-
-
-}
-
-
-int soclcp_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the FixedPointProjection Solver\n");
-  }
-  variationalInequality_FixedPointProjection_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_SOCLCP_VI_FPP;
-  options->iparam[SICONOS_IPARAM_MAX_ITER] =2000;
-  return 0;
 }

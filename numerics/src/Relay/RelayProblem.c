@@ -19,13 +19,12 @@
 #define RELAY_PROBLEM_C
 
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-
 #include "RelayProblem.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
+#include <assert.h>            // for assert
+#include <stdio.h>             // for printf, fprintf, fscanf, FILE, stderr
+#include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
+#include "NumericsMatrix.h"    // for NumericsMatrix, NM_display, NM_clear
+#include "numerics_verbose.h"  // for CHECK_IO
 
 void Relay_display(RelayProblem* p)
 {
@@ -98,8 +97,23 @@ int relay_printInFile(RelayProblem*  problem, FILE* file)
   return 1;
 }
 
-int relay_newFromFile(RelayProblem* problem, FILE* file)
+RelayProblem* relayProblem_new(void)
 {
+  RelayProblem* rp = (RelayProblem*) malloc(sizeof(RelayProblem));
+  rp->size = 0;
+  rp->M = NULL;
+  rp->q = NULL;
+  rp->lb = NULL;
+  rp->ub = NULL;
+
+  return rp;
+}
+
+
+RelayProblem* relay_newFromFile(FILE* file)
+{
+  RelayProblem* problem = relayProblem_new();
+  
   int n = 0;
   int i;
 
@@ -124,8 +138,23 @@ int relay_newFromFile(RelayProblem* problem, FILE* file)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->ub[i])));
   }
-  return 1;
+  return problem;
 }
+
+RelayProblem * relay_new_from_filename(const char* filename)
+{
+  RelayProblem* problem = NULL;
+  
+  FILE * file = fopen(filename, "r");
+  if (file == NULL)
+    numerics_error("RelayProblem", "Can not open file ", filename);
+
+  problem = relay_newFromFile(file);
+
+  fclose(file);
+  return problem;
+}
+
 
 void freeRelay_problem(RelayProblem* problem)
 {
@@ -140,6 +169,7 @@ void freeRelay_problem(RelayProblem* problem)
   if (problem->ub) { free(problem->ub); }
   free(problem);
 }
+
 
 
 

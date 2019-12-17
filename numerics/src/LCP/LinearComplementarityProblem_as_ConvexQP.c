@@ -16,23 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
 #include "LinearComplementarityProblem_as_ConvexQP.h"
-#include "LinearComplementarityProblem.h"
-#include "ConvexQP.h"
-
-
-#include "numerics_verbose.h"
-
-#include "SiconosBlas.h"
-#include "NumericsMatrix.h"
-#include "SolverOptions.h"
+#include <math.h>                          // for fmax
+#include "ConvexQP.h"                      // for ConvexQP
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
-
+#include "debug.h"                         // for DEBUG_PRINT
 
 void Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX)
 {

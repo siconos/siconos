@@ -30,8 +30,8 @@ set_and_check(siconos_ROOT "@CMAKE_INSTALL_PREFIX@")
 set(installed_targets "@installed_targets@")
 
 # Path (relative to siconos install) to cmake extra tools
-set(ConfigPackageLocation @ConfigPackageLocation@)
-
+set(SICONOS_CMAKE_MODULE_PATH @CMAKE_INSTALL_PREFIX@/@ConfigPackageLocation@)
+list(APPEND CMAKE_MODULE_PATH ${SICONOS_CMAKE_MODULE_PATH})
 # include siconos project targets
 include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")
 
@@ -55,6 +55,12 @@ set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
 set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
 
 if(@WITH_FCLIB@)
+  if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
+    set(FCLIB_ROOT @FCLIB_ROOT@)
+  else()
+    set(FCLIB_DIR @FCLIB_DIR@)
+  endif()
+  
   # Look for fclib in default path, FCLIB_DIR (cmake <3.12)
   # and/or FCLIB_ROOT (cmake >= 3.12).
   find_dependency(FCLIB 3.0.0 CONFIG REQUIRED)

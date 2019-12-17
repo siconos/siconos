@@ -22,9 +22,8 @@
 
 #ifndef MCP_NEWTON_FB
 #define MCP_NEWTON_FB
-
-#include "SiconosConfig.h"
-#include "NumericsMatrix.h"
+#include "NumericsFwd.h"  // for NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

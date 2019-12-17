@@ -15,19 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "NonSmoothNewton.h"
 #include "NonSmoothNewtonNeighbour.h"
-//#include "MixedLinearComplementarityProblem.h"
-#include <string.h>
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "SiconosLapack.h"
-#include "mlcp_enum_tool.h"
-#include "numerics_verbose.h"
-
-
-
+#include <stdio.h>             // for FILE
+#include <stdlib.h>            // for free, malloc
+#include <string.h>            // for NULL, memcpy, strcpy
+#include "NonSmoothNewton.h"   // for NewtonFunctionPtr
+#include "math.h"              // for fabs, pow
+#include "numerics_verbose.h"  // for verbose
+#include "stdio.h"             // for printf, fprintf, fclose, fopen, stderr
+#include "stdlib.h"            // for exit, rand, EXIT_FAILURE
+#include "SiconosBlas.h"       // for cblas_dnrm2, cblas_dcopy, cblas_daxpy
+#include "SiconosLapack.h"     // for DGESV, lapack_int
+#include "SolverOptions.h"
 static  int sN ;
 static  int sN2 ;
 
@@ -44,8 +43,6 @@ static  double *szzaux ;
 static  double *sz2 ;
 static  lapack_int* sipiv ;
 static  int* sW2V;
-
-static int scmp = 0;
 
 static int sPlotMerit = 1;
 static char fileName[64];
@@ -416,20 +413,20 @@ double * nonSmoothNewtonNeighInitMemory(int n, double * dWork, int * iWork)
   }
   sN = n;
   sN2 = n * n;
-  sphi_z = dWork;//(double*)malloc(n*sizeof(*phi_z));
-  sdir_descent = sphi_z + sN;//(double*)malloc(n*sizeof(double));
-  sphi_zaux = sdir_descent + sN ; //(double*)malloc(n*sizeof(double));
-  sjacobianPhi_z = sphi_zaux + sN; //(double*)malloc(n2*sizeof(*jacobianPhi_z));
-  sjacobianPhi_zaux = sjacobianPhi_z + sN2;//(double*)malloc(n2*sizeof(double));
-  sgrad_psi_z = sjacobianPhi_zaux + sN2;//(double*)malloc(n*sizeof(*jacobian_psi_z));
-  sgrad_psi_zaux = sgrad_psi_z + sN;//(double*)malloc(n*sizeof(double));
-  sPrevDirDescent = sgrad_psi_zaux + sN;//(double*)malloc((n)*sizeof(double));
-  szaux = sPrevDirDescent + sN;//(double*)malloc(n*sizeof(double));
-  szzaux = szaux + sN; //(double*)malloc(n*sizeof(double));
-  sz2 = szzaux + sN;// size n
+  sphi_z = dWork;
+  sdir_descent = sphi_z + sN;
+  sphi_zaux = sdir_descent + sN ;
+  sjacobianPhi_z = sphi_zaux + sN;
+  sjacobianPhi_zaux = sjacobianPhi_z + sN2;
+  sgrad_psi_z = sjacobianPhi_zaux + sN2;
+  sgrad_psi_zaux = sgrad_psi_z + sN;
+  sPrevDirDescent = sgrad_psi_zaux + sN;
+  szaux = sPrevDirDescent + sN;
+  szzaux = szaux + sN;
+  sz2 = szzaux + sN;
 
 
-  sipiv = iWork;//(int *)malloc(n*sizeof(*ipiv));
+  sipiv = iWork;
   sW2V = sipiv + sN;
 
   return sz2 + sN;
@@ -441,10 +438,10 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 {
 
 
-  int itermax = iparam[0]; // maximum number of iterations allowed
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER]; // maximum number of iterations allowed
   int iterMaxWithSameZ = itermax / 4;
   int niter = 0; // current iteration number
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
   /*   double coef; */
   sFphi = phi;
   sFjacobianPhi = jacobianPhi;
@@ -488,7 +485,6 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
   /** Iterations ... */
   while ((niter < itermax) && (terminationCriterion > tolerance))
   {
-    scmp++;
     ++niter;
     /** Computes phi and its jacobian */
     if (sZsol)
@@ -698,11 +694,6 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
     /* Criterion to be satisfied: error < -rho*norm(dk)^p */
     criterion = -rho * pow(criterion, p);
-    /*      printf("ddddddd %d\n",scmp);
-    if (scmp>100){
-    NM_dense_display(sjacobianPhi_z,n,n,n);
-    exit(1);
-    }*/
 
 //    if ((infoDGESV != 0 || descentCondition > criterion) && 0)
 //    {
@@ -764,25 +755,25 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
   }
 
   /* Total number of iterations */
-  iparam[1] = niter;
+  iparam[SICONOS_IPARAM_ITER_DONE] = niter;
   /* Final error */
-  dparam[1] = terminationCriterion;
+  dparam[SICONOS_DPARAM_RESIDU] = terminationCriterion;
 
   /** Free memory*/
 
   if (verbose > 0)
   {
-    if (dparam[1] > tolerance)
+    if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
       printf("Non Smooth Newton warning: no convergence after %i iterations\n" , niter);
 
     else
       printf("Non Smooth Newton: convergence after %i iterations\n" , niter);
-    printf(" The residue is : %e \n", dparam[1]);
+    printf(" The residue is : %e \n", dparam[SICONOS_DPARAM_RESIDU]);
   }
 
   /*  free(oldz);*/
 
-  if (dparam[1] > tolerance)
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
     return 1;
   else return 0;
 }

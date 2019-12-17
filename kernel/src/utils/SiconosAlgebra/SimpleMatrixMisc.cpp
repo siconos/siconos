@@ -193,9 +193,6 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
     default:
       SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed.");
     }
-    // unsigned int tmp = _dimRow;
-    // _dimRow = _dimCol;
-    // _dimCol = tmp;
     resetLU();
   }
 }
@@ -205,80 +202,6 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
 
 
 
-
-const SimpleMatrix matrix_pow(const SimpleMatrix& m, unsigned int power)
-{
-  if(m.isBlock())
-    SiconosMatrixException::selfThrow("Matrix, pow function: not yet implemented for BlockMatrix.");
-  if(m.size(0) != m.size(1))
-    SiconosMatrixException::selfThrow("matrix_pow(SimpleMatrix), matrix is not square.");
-
-  if(power > 0)
-  {
-    unsigned int num = m.num();
-    if(num == DENSE)
-    {
-      DenseMat p = *m.dense();
-      for(unsigned int i = 1; i < power; i++)
-        p = prod(p, *m.dense());
-      return p;
-    }
-    else if(num == TRIANGULAR)
-    {
-      TriangMat t = *m.triang();
-      for(unsigned int i = 1; i < power; i++)
-        t = prod(t, *m.triang());
-      return t;
-    }
-    else if(num == SYMMETRIC)
-    {
-      SymMat s = *m.sym();
-      for(unsigned int i = 1; i < power; i++)
-        s = prod(s, *m.sym());
-      return s;
-    }
-    else if(num == SPARSE)
-    {
-      SparseMat sp = *m.sparse();
-      for(unsigned int i = 1; i < power; i++)
-        sp = prod(sp, *m.sparse());
-      return sp;
-    }
-    else if(num == SPARSE_COORDINATE)
-    {
-      SparseCoordinateMat sp = *m.sparseCoordinate();
-      for(unsigned int i = 1; i < power; i++)
-        sp = prod(sp, *m.sparseCoordinate());
-      return sp;
-    }
-    else if(num == BANDED)
-    {
-      DenseMat b = *m.banded();
-      for(unsigned int i = 1; i < power; i++)
-        b = prod(b, *m.banded());
-      return b;
-    }
-    else if(num == ZERO)
-    {
-      ZeroMat z(m.size(0), m.size(1));
-      return z;
-    }
-    else if(num == IDENTITY)
-    {
-      IdentityMat I(m.size(0), m.size(1));;
-      return I;
-    }
-    else
-      SiconosMatrixException::selfThrow("matrix_pow(SimpleMatrix). Matrix Type not supported.");
-  }
-  else// if(power == 0)
-  {
-    IdentityMat I = ublas::identity_matrix<double>(m.size(0), m.size(1));
-    return I;
-  }
-  SiconosMatrixException::selfThrow("matrix_pow(SimpleMatrix). Matrix Type not supported.");
-  return NULL;
-}
 
 
 
@@ -333,22 +256,5 @@ bool InvertMatrix(const ublas::matrix<T, U, V>& input, ublas::matrix<T, U, V>& i
 void invertMatrix(const SimpleMatrix& input, SimpleMatrix& output)
 {
   InvertMatrix(*input.dense(), *output.dense());
-}
-
-
-/* XXX Find out if we can use an elementwise ublas operation */
-SP::SiconosVector compareMatrices(const SimpleMatrix& data, const SimpleMatrix& ref)
-{
-  SimpleMatrix diff(data.size(0), data.size(1));
-  SP::SiconosVector res(new SiconosVector(data.size(1)));
-  diff = data - ref;
-  for(unsigned int i = 0; i < data.size(0); ++i)
-  {
-    for(unsigned int j = 0; j < data.size(1); ++j)
-      diff(i, j) /= 1 + fabs(ref(i, j));
-  }
-  diff.normInfByColumn(res);
-  return res;
-
 }
 

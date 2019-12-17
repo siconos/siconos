@@ -16,21 +16,18 @@
  * limitations under the License.
 */
 
-
-#include "VariationalInequality.h"
-#include "SolverOptions.h"
 #include "VariationalInequality_computeError.h"
-#include "SiconosLapack.h"
-#include "SiconosSets.h"
-
-#include <math.h>
-#include <assert.h>
-#include <float.h>
-
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include "numerics_verbose.h"
+#include <assert.h>                 // for assert
+#include <float.h>                  // for DBL_EPSILON
+#include <math.h>                   // for fabs, sqrt
+#include <stdio.h>                  // for printf
+#include <stdlib.h>                 // for calloc
+#include "SiconosBlas.h"                  // for cblas_daxpy, cblas_dnrm2, cblas_d...
+#include "SiconosSets.h"            // for box_constraints
+#include "SolverOptions.h"          // for SolverOptions
+#include "VariationalInequality.h"  // for VariationalInequality
+#include "debug.h"                  // for DEBUG_PRINTF
+#include "numerics_verbose.h"       // for verbose
 
 int variationalInequality_computeError(
   VariationalInequality* problem,

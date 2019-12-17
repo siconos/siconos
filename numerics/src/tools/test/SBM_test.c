@@ -22,32 +22,19 @@
 
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "NumericsMatrix.h"
-#include <math.h>
-#include "numericsMatrixTestFunction.h"
-#include "SparseBlockMatrix.h"
-#include "SiconosLapack.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "sanitizer.h"
-
-#include "NumericsSparseMatrix.h"
-
-#include "CSparseMatrix.h"
-#include "CSparseMatrix.h"
-#include "numerics_verbose.h"
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-#include "debug.h"
-
-
 #include "SBM_test.h"
+#include <stdio.h>                       // for printf, fclose, fopen, FILE
+#include <stdlib.h>                      // for free, malloc, calloc
+#include "CSparseMatrix.h"               // for CSparseMatrix_spfree_on_stack
+#include "NumericsFwd.h"                 // for NumericsMatrix, SparseBlockS...
+#include "NumericsMatrix.h"              // for NumericsMatrix, NM_clear, NM_...
+#include "SparseBlockMatrix.h"           // for SBM_clear, SBM_new_from_file
+#include "debug.h"                       // for DEBUG_EXPR, DEBUG_PRINTF
+#include "numericsMatrixTestFunction.h"  // for SBM_dense_equal, test_matrix_2
+#include "numerics_verbose.h"            // for CHECK_RETURN
+#include "sanitizer.h"                   // for MSAN_INIT_VAR
+#include "SiconosBlas.h"                 // for cblas_daxpy, cblas_dgemm
+
 
 
 static int SBM_add_test1(double tol, double alpha, double beta)
@@ -479,7 +466,8 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   else
   {
     printf("Step 0 ( C = alpha*A*B + beta*C, double* storage, square matrix) failed ...\n");
-    goto exit_1;
+    NM_clear(Cref);
+    free(C.matrix0);
   }
 
 
@@ -515,7 +503,8 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   else
   {
     printf("Step 1 ( C = alpha*A*B + beta*C, double* storage, non square) failed ...\n");
-    goto exit_2;
+    free(C2.matrix0);
+    NM_clear(C2ref);
   }
   
   /***********************************************************/
@@ -555,7 +544,7 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   else
   {
     printf("Step 2 ( C = alpha*A*B + beta*C, SBM storage) failed ...\n");
-    goto exit_3;
+    NM_clear(&C3);
   }
   
   /***********************************************************/
@@ -592,7 +581,7 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   else
   {
     printf("Step 3 ( C = alpha*A*B + beta*C, SBM storage, non square) failed ...\n");
-    goto exit_4;
+    NM_clear(&C4);
   }
 
   /***********************************************************/
@@ -627,7 +616,8 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   else
   {
     printf("Step 6 ( C = alpha*A*B + beta*C, double* storage, square matrix, empty column of blocks) failed ...\n");
-    goto exit_7;
+    NM_clear(M9);
+    NM_clear(C7);
   }
 
 
@@ -662,7 +652,8 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   else
   {
     printf("Step 7 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks) failed ...\n");
-    goto exit_8;
+    NM_clear(M10);
+    NM_clear(C8);
   }
 
 
@@ -690,26 +681,18 @@ static int SBM_gemm_without_allocation_test(NumericsMatrix** MM, double alpha, d
   else
   {
     printf("Step 8 ( C = alpha*A*B + beta*C, NM_SPARSE_BLOCK storage,  empty column of blocks, extra blocks) failed ...\n");
-    goto exit_9;
+    NM_clear(C20);
   }
 
-
-exit_9:
   NM_clear(C20);
-exit_8:
   NM_clear(M10);
   NM_clear(C8);
-exit_7:
   NM_clear(M9);
   NM_clear(C7);
-exit_4:
   NM_clear(&C4);
-exit_3:
   NM_clear(&C3);
-exit_2:
   free(C2.matrix0);
   NM_clear(C2ref);
-exit_1:
   NM_clear(Cref);
   free(C.matrix0);
   return info;

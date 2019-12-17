@@ -15,19 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "SiconosBlas.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "numerics_verbose.h"
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_cpg
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "numerics_verbose.h"              // for verbose
 
 void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
@@ -273,34 +271,4 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   free(pp);
   free(zz);
 
-}
-int linearComplementarity_cpg_setDefaultSolverOptions(SolverOptions* options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the CPG Solver\n");
-  }
-  options->solverId = SICONOS_LCP_CPG;
-
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-
-
-  return 0;
 }

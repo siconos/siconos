@@ -38,7 +38,6 @@ void siconos_io(Archive& ar, SolverOptions&v, unsigned int version)
 
   if (Archive::is_loading::value)
   {
-    solver_options_nullify(&v);
     v.iparam = (int *) malloc(v.iSize * sizeof(int));
     v.dparam = (double *) malloc(v.dSize * sizeof(double));
     v.internalSolvers = (SolverOptions *) malloc(v.numberOfInternalSolvers * sizeof(SolverOptions));

@@ -15,18 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "projectionOnCone.h"
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "SiconosBlas.h"
+#include <math.h>                    // for sqrt, pow
+#include <stdio.h>                   // for printf, NULL
+#include <stdlib.h>                  // for calloc, free, malloc
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_FPP
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NM_gemv
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include "numerics_verbose.h"
+#include "debug.h"                   // for DEBUG_EXPR_WE, DEBUG_PRINTF
+#include "fc3d_Solvers.h"            // for fc3d_fixedPointProjection, fc3d_...
+#include "fc3d_compute_error.h"      // for fc3d_compute_error
+#include "numerics_verbose.h"        // for verbose
+#include "projectionOnCone.h"        // for projectionOnCone
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2, cblas_...
 
 void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -41,9 +46,9 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
   /* Dimension of the problem */
   int n = 3 * nc;
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
 
   /*****  Fixed point iterations *****/
@@ -52,7 +57,6 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
   int hasNotConverged = 1;
   int contact; /* Number of the current row of blocks in M */
   int nLocal = 3;
-  dparam[0] = dparam[2]; // set the tolerance for the local solver
   double * velocitytmp = (double *)malloc(n * sizeof(double));
 
 
@@ -60,13 +64,13 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
   int isVariable = 0;
   double rhomax = 0.0;
 
-  if (dparam[3] < 0.0)
+  if (dparam[SICONOS_FRICTION_3D_NSN_RHO] < 0.0)
   {
-    rho = -dparam[3];
+    rho = -dparam[SICONOS_FRICTION_3D_NSN_RHO];
   }
   /* Variable step in fixed*/
   isVariable = 1;
-  rhomax = dparam[3];
+  rhomax = dparam[SICONOS_FRICTION_3D_NSN_RHO];
   rho = rhomax;
   if (verbose > 0)
   {
@@ -233,9 +237,8 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
 
   if (verbose > 0)
     printf("--------------- FC3D - Fixed Point Projection (FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
-  iparam[7] = iter;
-  dparam[0] = tolerance;
-  dparam[1] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
   free(velocitytmp);
   free(reaction_k);
   free(velocity_k);
@@ -244,29 +247,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
 }
 
 
-int fc3d_fixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
+void fc3d_fpp_set_default(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the FPP Solver\n");
-  }
-
-  /*strcpy(options->solverName,"DSFP");*/
-  options->solverId = SICONOS_FRICTION_3D_FPP;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 20000;
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1.0; /* Default value for rho (line search activated)*/
-
-  options->internalSolvers = NULL;
-
-  return 0;
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.0;
 }

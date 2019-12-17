@@ -13,24 +13,34 @@
 
 /* GAMS stuff */
 
-#include "NumericsMatrix.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "SolverOptions.h"
+#include "LCP_Solvers.h"  // for lcp_gams
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
+#include "numerics_verbose.h" // for numerics_error
 
 #ifdef HAVE_GAMS_C_API
 
 #include "GAMSlink.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <stdlib.h>
+
+#include "NumericsMatrix.h"
+#include "LinearComplementarityProblem.h"
+#include "SolverOptions.h"
+#endif
 
 
 void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 
+#ifndef HAVE_GAMS_C_API
+  numerics_error("lcp_gams", "GAMS API is not enabled. Try to re-compile Siconos with GAMS.");
+#else
+  
+  if(!options->solverParameters)
+    options->solverParameters = createGAMSparams(GAMS_MODELS_SHARE_DIR, GAMS_DIR);
+
+  
   assert(problem);
   assert(problem->size > 0);
   assert(problem->M);
@@ -144,13 +154,10 @@ TERMINATE:
   gamsxFree(&Gptr);
 
   *info = status;
+
+#endif // HAVE_GAMS_C_API
+
 }
 
-#else
 
-void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
-  printf("lcp_gams :: gams was not enabled at compile time!\n");
-  exit(EXIT_FAILURE);
-}
-#endif
+

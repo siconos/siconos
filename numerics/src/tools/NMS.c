@@ -15,23 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-
 #include "NMS.h"
-
-#include <float.h>
-#include <assert.h>
-
-#include "SiconosBlas.h"
-#include "Newton_methods.h"
-#include "SiconosSets.h"
-
+#include <assert.h>          // for assert
+#include <stdio.h>           // for printf
+#include <stdlib.h>          // for free, malloc, exit, EXIT_FAILURE, NULL
+#include "ArmijoSearch.h"    // for search_Armijo_standalone
+#include "Newton_methods.h"  // for functions_LSA, SICONOS_IPARAM_LSA_NONMON...
+#include "NumericsMatrix.h"  // for NM_create, NM_clear, NumericsMatrix
+#include "SiconosSets.h"     // for free_siconos_set, project_on_set
+#include "SiconosBlas.h"    // for cblas_dcopy, cblas_daxpy, cblas_ddot
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "debug.h" // for DEBUG_PRINTF, DEBUG_PRINT, DEBUG_EXPR_WE
 
 #ifdef __cplusplus
 #undef restrict
+#include <sys/cdefs.h>       // for __restrict
 #define restrict __restrict
 #endif
 

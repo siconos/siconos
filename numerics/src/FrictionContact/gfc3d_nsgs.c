@@ -15,23 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "fc3d_projection.h"
-//#include "gfc3d_projection.h"
-#include "gfc3d_Solvers.h"
-#include "gfc3d_compute_error.h"
-#include "projectionOnCone.h"
-#include "SiconosLapack.h"
-#include "SparseBlockMatrix.h"
-#include <stdio.h>
-#include <assert.h>
-#include <math.h>
-#include "sanitizer.h"
-#include "numerics_verbose.h"
-
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include <assert.h>                        // for assert
+#include <math.h>                          // for sqrt
+#include <stdio.h>                         // for fprintf, NULL, stderr
+#include <stdlib.h>                        // for exit, EXIT_FAILURE
+#include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_IPARAM...
+#include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dnrm2
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "NumericsFwd.h"                   // for GlobalFrictionContactProblem
+#include "NumericsMatrix.h"                // for NumericsMatrix, NM_gemv
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "debug.h"                         // for DEBUG_EXPR, DEBUG_PRINTF
+#include "gfc3d_Solvers.h"                 // for ComputeErrorGlobalPtr, gfc...
+#include "gfc3d_compute_error.h"           // for gfc3d_compute_error
+#include "numerics_verbose.h"              // for numerics_printf_verbose
+#include "projectionOnCone.h"              // for projectionOnCone
+#include "sanitizer.h"                     // for cblas_dcopy_msan
 
 static void gfc3d_nsgs_local_solver_projection_free(GlobalFrictionContactProblem* problem)
 {
@@ -84,7 +83,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   /* Check for trivial case */
   *info = gfc3d_checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);

@@ -16,14 +16,11 @@
  * limitations under the License.
 */
 
-#include "SiconosBlas.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-#include "assert.h"
-
 #include "min_merit.h"
+#include "SiconosBlas.h"     // for cblas_dcopy
+#include <stdio.h>           // for NULL
+#include "NumericsMatrix.h"  // for NumericsMatrix
+#include "assert.h"          // for assert
 
 void F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict Fmin)
 {

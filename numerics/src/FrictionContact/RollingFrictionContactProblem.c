@@ -15,17 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
 #include "RollingFrictionContactProblem.h"
-#include "NumericsMatrix.h"
-#include <stdio.h>
-#include "numerics_verbose.h"
-#include "SparseBlockMatrix.h"
-#include <math.h>
+#include <assert.h>            // for assert
+#include <math.h>              // for fabs
+#include <stdio.h>             // for printf, fprintf, fscanf, NULL, fclose
+#include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
+#include <sys/errno.h>         // for errno
+#include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
+#include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "debug.h"             // for DEBUG_PRINT, DEBUG_PRINTF
 
 void rollingFrictionContact_display(RollingFrictionContactProblem* problem)
 {
@@ -122,8 +122,9 @@ int rollingFrictionContact_printInFilename(RollingFrictionContactProblem* proble
   return info;
 }
 
-int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, FILE* file)
+RollingFrictionContactProblem* rollingFrictionContact_newFromFile(FILE* file)
 {
+  RollingFrictionContactProblem* problem = rollingFrictionContactProblem_new();
   assert(file);
   DEBUG_PRINT("Start -- int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, FILE* file)\n");
   int nc = 0, d = 0;
@@ -153,23 +154,19 @@ int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, F
   }
   DEBUG_PRINT("End --  int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, FILE* file)\n");
 
-  return 0;
+  return problem;
 }
 
-int rollingFrictionContact_newFromFilename(RollingFrictionContactProblem* problem, char* filename)
+RollingFrictionContactProblem* rollingFrictionContact_new_from_filename(const char* filename)
 {
-  int info = 0;
+  RollingFrictionContactProblem* problem = NULL;
   FILE * file = fopen(filename, "r");
-
   if (!file)
-  {
-    return errno;
-  }
-
-  info = rollingFrictionContact_newFromFile(problem, file);
-
+    numerics_error("RollingFrictionContactProblem", "Can not open file ", filename);
+  
+  problem = rollingFrictionContact_newFromFile(file);
   fclose(file);
-  return info;
+  return problem;
 }
 
 void rollingFrictionContactProblem_free(RollingFrictionContactProblem* problem)

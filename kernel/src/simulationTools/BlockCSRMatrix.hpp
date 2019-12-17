@@ -22,18 +22,18 @@ Definition of a compressed row sparse block matrix of SiconosMatrix*
 #ifndef BLOCKCSRMATRIX_H
 #define BLOCKCSRMATRIX_H
 
-#include "SiconosNumerics.h"
+#include "NumericsFwd.h"  // Numerics forward declarations
 #include "SimulationTypeDef.hpp"
+#include "SiconosSerialization.hpp" // for ACCEPT_SERIALIZATION
+#include <boost/numeric/ublas/fwd.hpp> // Boost forward declarations 
 
 /* with signed int typedef  boost::numeric::ublas::compressed_matrix<double*> CompressedRowMat; */
 /* cf http://boost.2283326.n4.nabble.com/LU-decomposition-of-compressed-matrix-td3417929.html */
-typedef ublas::compressed_matrix <
-double*, ublas::basic_row_major<unsigned int>, 0, ublas::unbounded_array<std::size_t>
->  CompressedRowMat;
-
-
+typedef boost::numeric::ublas::compressed_matrix <
+double*, boost::numeric::ublas::basic_row_major<unsigned int>, 0, boost::numeric::ublas::unbounded_array<std::size_t> >  CompressedRowMat;
 TYPEDEF_SPTR(CompressedRowMat)
 TYPEDEF_SPTR(SparseBlockStructuredMatrix)
+
 
 /** Definition of a compressed sparse row matrix of SiconosMatrix,
  * used in OneStepNSProblem to store the M matrix.

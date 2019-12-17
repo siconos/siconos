@@ -16,6 +16,8 @@
  * limitations under the License.
 */
 #include "NewtonEulerDSTest.hpp"
+#include "SiconosMatrixSetBlock.hpp"
+#include "SiconosAlgebraProd.hpp"
 
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \

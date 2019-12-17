@@ -218,15 +218,7 @@ public:
    * \param num the number of indexSet
    * \return a SP::InteractionsGraph
    */
-  inline SP::InteractionsGraph indexSet(unsigned int num) const
-  {
-    if (num >= _IG.size())
-    {
-      RuntimeException::selfThrow("Topology::indexSet: indexSet does not exist");
-    }
-    assert(num < _IG.size()) ;
-    return _IG[num];
-  };
+  SP::InteractionsGraph indexSet(unsigned int num) const;
 
   /** get a pointer to the graph at level num of Interactions
    *  \return a SP::InteractionsGraph

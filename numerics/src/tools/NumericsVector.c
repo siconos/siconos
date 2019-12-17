@@ -15,22 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <float.h>
-#include <math.h>
-#include <stdint.h>
-#include <string.h>
-
-#include "sanitizer.h"
+#include "NumericsVector.h"
+#include <math.h>    // for fabs
+#include <stdio.h>   // for fprintf, printf, FILE, stderr
+#include <stdlib.h>  // for exit, EXIT_FAILURE
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"   // for DEBUG_PRINTF
+#include "SiconosBlas.h"
+#include "NumericsMatrix.h"
+#include "float.h"
 
-#include "NumericsVector.h"
-#include "math.h"
 void NV_display(const double * const m, int nRow)
 {
   int lin;

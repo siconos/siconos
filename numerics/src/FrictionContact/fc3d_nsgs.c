@@ -15,27 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
-#include "fc3d_Path.h"
-#include "fc3d_NCPGlockerFixedPoint.h"
-#include "fc3d_projection.h"
-#include "fc3d_unitary_enumerative.h"
-#include "fc3d_compute_error.h"
-#include "fc3d_local_problem_tools.h"
-#include "NCP_Solvers.h"
-#include "SiconosBlas.h"
-#include "NumericsArrays.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-#include <time.h>
-#include <float.h>
-#include <string.h>
+#include <assert.h>                                    // for assert
+#include <float.h>                                     // for DBL_EPSILON
+#include <math.h>                                      // for fabs, sqrt
+#include <stdio.h>                                     // for fclose, fopen
+#include <stdlib.h>                                    // for calloc, malloc
+#include <string.h>                                    // for NULL, memcpy
+#include "FrictionContactProblem.h"                    // for FrictionContac...
+#include "Friction_cst.h"                              // for SICONOS_FRICTI...
+#include "NumericsArrays.h"                            // for uint_shuffle
+#include "NumericsFwd.h"                               // for SolverOptions
+#include "SolverOptions.h"                             // for SolverOptions
+#include "fc3d_2NCP_Glocker.h"                         // for NCPGlocker_update
+#include "fc3d_NCPGlockerFixedPoint.h"                 // for fc3d_FixedP_in...
+#include "fc3d_Path.h"                                 // for fc3d_Path_init...
+#include "fc3d_Solvers.h"                              // for ComputeErrorPtr
+#include "fc3d_compute_error.h"                        // for fc3d_compute_e...
+#include "fc3d_local_problem_tools.h"                  // for fc3d_local_pro...
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for fc3d_onecontac...
+#include "fc3d_projection.h"                           // for fc3d_projectio...
+#include "fc3d_unitary_enumerative.h"                  // for fc3d_unitary_e...
+#include "numerics_verbose.h"                          // for numerics_printf
+#include "SiconosBlas.h"                                     // for cblas_dnrm2
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include "numerics_verbose.h"
+#include "debug.h"                                     // for DEBUG_EXPR
 
 
 //#define FCLIB_OUTPUT
@@ -49,18 +53,19 @@ static int fccounter = -1;
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, SolverOptions  *options,  double* error)
-{
-  int n = 3 * problem->numberOfContacts;
-  *error = 0.;
-  int i, m;
-  m = 5 * n / 3;
-  double err = INFINITY;
-  for (i = 0 ; i < m ; ++i)
-  {
-    *error += Compute_NCP_error1(i, err);
-  }
-}
+/* static void fake_compute_error_nsgs(FrictionContactProblem* problem, double *reaction, double *velocity, double tolerance, SolverOptions  *options,  double* error) */
+/* { */
+/*   int n = 3 * problem->numberOfContacts; */
+/*   *error = 0.; */
+/*   int i, m; */
+/*   m = 5 * n / 3; */
+/*   double err = INFINITY; */
+/*   for (i = 0 ; i < m ; ++i) */
+/*   { */
+/*     *error += Compute_NCP_error1(i, err); */
+/*   } */
+/* } */
+
 void fc3d_nsgs_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
 {
   /* Build a local problem for a specific contact
@@ -80,8 +85,6 @@ void fc3d_nsgs_update(int contact, FrictionContactProblem* problem, FrictionCont
 
   /* Friction coefficient for current block*/
   localproblem->mu[0] = problem->mu[contact];
-
-
 }
 
 void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
@@ -91,7 +94,7 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
                                        FrictionContactProblem* localproblem,
                                        SolverOptions * options)
 {
-  SolverOptions * localsolver_options = options->internalSolvers;
+  SolverOptions * localsolver_options = options->internalSolvers[0];
   /** Connect to local solver */
   switch (localsolver_options->solverId)
   {
@@ -157,25 +160,7 @@ void fc3d_nsgs_initialize_local_solver(SolverPtr* solve, UpdatePtr* update,
     *update = &fc3d_onecontact_nonsmooth_Newton_AC_update;
     *freeSolver = (FreeSolverNSGSPtr)&fc3d_onecontact_nonsmooth_Newton_solvers_free;
     *computeError = (ComputeErrorPtr)&fc3d_compute_error;
-    /* if (options->numberOfInternalSolvers ==1 ) */
-    /* { */
-    /*   /\* we increase the number of local solver options *\/ */
-    /*   options->numberOfInternalSolvers = 2; */
-    /*   SolverOptions * new_local_options =  (SolverOptions *)malloc(options->numberOfInternalSolvers* sizeof(SolverOptions)); */
-    /*   new_local_options[0].iparam=NULL; */
-    /*   new_local_options[1].iparam=NULL; */
-    /*   new_local_options[0].dparam=NULL; */
-    /*   new_local_options[1].dparam=NULL; */
-    /*   solver_options_nullify(&new_local_options[0]); */
-    /*   solver_options_nullify(&new_local_options[1]);       */
-    /*   solver_options_copy(localsolver_options, &new_local_options[0]); */
-    /*   fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(&new_local_options[1]); */
-    /*   free(localsolver_options); */
-    /*   options->internalSolvers = new_local_options; */
-    /*   localsolver_options = options->internalSolvers; */
-    /* } */
-    fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, &localsolver_options[0]);
-    /* fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem, &localsolver_options[1]); */
+    fc3d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem, localsolver_options);
     break;
   }  /* Newton solver (Glocker-Fischer-Burmeister)*/
   case SICONOS_FRICTION_3D_NCPGlockerFBNewton:
@@ -291,7 +276,7 @@ int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
   (*update_localproblem)(contact, problem, localproblem,
                          reaction, localsolver_options);
 
-  localsolver_options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER] = contact;
+  localsolver_options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = contact;
 
   localreaction[0] = reaction[contact*3 + 0];
   localreaction[1] = reaction[contact*3 + 1];
@@ -567,7 +552,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
   double omega = dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE];
 
-  SolverOptions * localsolver_options = options->internalSolvers;
+  if (options->numberOfInternalSolvers < 1)
+  {
+    numerics_error("fc3d_nsgs",
+                   "The NSGS method needs options for the internal solvers, "
+                   "options[0].numberOfInternalSolvers should be >= 1");
+  }
+  SolverOptions * localsolver_options = options->internalSolvers[0];
   SolverPtr local_solver = NULL;
   UpdatePtr update_localproblem = NULL;
   FreeSolverNSGSPtr freeSolver = NULL;
@@ -586,21 +577,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   if (*info == 0)
     return;
 
-  if (options->numberOfInternalSolvers < 1)
-  {
-    numerics_error("fc3d_nsgs",
-                   "The NSGS method needs options for the internal solvers, "
-                   "options[0].numberOfInternalSolvers should be >= 1");
-  }
-  assert(options->internalSolvers);
-
   /*****  Initialize various solver options *****/
   localproblem = fc3d_local_problem_allocate(problem);
 
   fc3d_nsgs_initialize_local_solver(&local_solver, &update_localproblem,
                                     (FreeSolverNSGSPtr *)&freeSolver, &computeError,
                                     problem, localproblem, options);
-
+  
   scontacts = allocShuffledContacts(problem, options);
 
   /*****  Check solver options *****/
@@ -635,7 +618,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   /* A special case for the most common options (should correspond
    * with mechanics_run.py **/
   if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE
-      && iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE
+      && iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] == SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE
       && iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] == SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_TRUE
       && iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
   {
@@ -644,7 +627,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
       ++iter;
       double light_error_sum = 0.0;
 
-      fc3d_set_internalsolver_tolerance(problem, options, &localsolver_options[0], error);
+      fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       for (unsigned int i = 0 ; i < nc ; ++i)
       {
@@ -680,7 +663,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
     {
       ++iter;
       double light_error_sum = 0.0;
-      fc3d_set_internalsolver_tolerance(problem, options, &localsolver_options[0], error);
+      fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       for (unsigned int i = 0 ; i < nc ; ++i)
       {
@@ -775,34 +758,20 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   if (scontacts) free(scontacts);
 }
 
-int fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
+void fc3d_nsgs_set_default(SolverOptions* options)
 {
-  numerics_printf_verbose(1,"fc3d_nsgs_setDefaultSolverOptions");
-
-  /*  strcpy(options->solverName,"NSGS");*/
-  options->solverId = SICONOS_FRICTION_3D_NSGS;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE;
   /* options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE; */
   /* options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT; */
-
+  options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] =  SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE;
+  options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED] = 0;
+  options->iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] = SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE;
+  options->iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] = SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
-
-
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_onecontact_nonsmooth_Newton_gp_setDefaultSolverOptions(options->internalSolvers);
-
-  return 0;
+  // Internal solver
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
 }

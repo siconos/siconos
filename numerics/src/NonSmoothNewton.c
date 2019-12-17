@@ -15,17 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "numerics_verbose.h"
 #include "NonSmoothNewton.h"
-#include "SolverOptions.h"
-#include "SiconosLapack.h"
-#include "NumericsMatrix.h"
-
-
-#include "Newton_methods.h"
-#include "math.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdlib.h>            // for free, malloc, NULL, calloc
+#include "Newton_methods.h"    // for SICONOS_IPARAM_STOPPING_CRITERION, SIC...
+#include "NumericsMatrix.h"    // for NM_create, NM_clear, NM_DENSE, Numerics...
+#include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
+#include "math.h"              // for fmax, pow
+#include "numerics_verbose.h"  // for numerics_printf, numerics_printf_verbose
+#include "stdio.h"             // for fprintf, stderr
+#include "stdlib.h"            // for exit, EXIT_FAILURE
+#include "SiconosBlas.h"             // for cblas_dnrm2, cblas_daxpy, cblas_dscal
+#include "SiconosLapack.h"     // for lapack_int, DGESV
 
 /* #define DEBUG_MESSAGES */
 #include "debug.h"
@@ -281,12 +281,6 @@ int nonSmoothDirectNewton(
 
   double norm_gradient_psi;
   double terminationCriterion = 1;
-  if (gradient_psi == NULL)
-  {
-    fprintf(stderr, "NonSmoothNewton, memory allocation failed for gradient_psi.\n");
-    exit(EXIT_FAILURE);
-  }
-
   /** Iterations ... */
   while ((niter < itermax) && (terminationCriterion > tolerance))
   {
@@ -347,25 +341,7 @@ int nonSmoothDirectNewton(
 }
 
 
-void nonSmoothNewton_setDefaultSolverOptions(SolverOptions* options)
+void nonSmoothNewton_set_default(SolverOptions* options)
 {
-
-  numerics_printf_verbose(1,"nonSmoothNewton_setDefaultSolverOptions");
-
-  options->solverId = SICONOS_NONSMOOTH_NEWTON_LSA;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
-
   options->dparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_RESIDU;
-  
 }

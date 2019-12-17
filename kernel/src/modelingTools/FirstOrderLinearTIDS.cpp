@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "FirstOrderLinearTIDS.hpp"
+#include "SiconosAlgebraProd.hpp" // for matrix-vector prod
 
 #include <iostream>
 

@@ -15,14 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "SiconosBlas.h"
-#include "MixedComplementarityProblem.h"
-#include "MCP_Solvers.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
-#include <math.h>
-#include <assert.h>
-#include <float.h>
+#include <math.h>                         // for fmax, pow, sqrt
+#include <stddef.h>                       // for NULL
+#include "SiconosBlas.h"                        // for cblas_dnrm2
+#include "MCP_Solvers.h"                  // for mcp_compute_error, mcp_old_...
+#include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem
+#include "NumericsFwd.h"                  // for MixedComplementarityProblem
+#include "numerics_verbose.h"             // for numerics_error
 
 int mcp_compute_error(MixedComplementarityProblem* problem, double *z , double *w,  double * error)
 {

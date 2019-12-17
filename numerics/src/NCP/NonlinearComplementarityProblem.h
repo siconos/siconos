@@ -18,8 +18,8 @@
 #ifndef NCP_PROBLEM_H
 #define NCP_PROBLEM_H
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
+#include "NumericsFwd.h"  // for NonlinearComplementarityProblem, NumericsMa...
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 
 /*!\file NonlinearComplementarityProblem.h

@@ -16,18 +16,20 @@
  * limitations under the License.
 */
 
-#include "fc3d_projection.h"
-#include "fc3d_Solvers.h"
-#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
-#include "fc3d_compute_error.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include "pinv.h"
-#include "Friction_cst.h"
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
+#include <assert.h>                  // for assert
+#include <stdio.h>                   // for printf, fprintf, NULL, stderr
+#include <stdlib.h>                  // for exit, EXIT_FAILURE
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_ONECONTACT_NSN
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NumericsMatrix
+#include "SiconosBlas.h"             // for cblas_dnrm2
+#include "SolverOptions.h"           // for SolverOptions, SICONOS_DPARAM_TOL
+#include "fc3d_Solvers.h"            // for ComputeErrorPtr, FreeSolverPtr
+#include "fc3d_compute_error.h"      // for fc3d_compute_error_velocity
+#include "fc3d_projection.h"         // for fc3d_projection_initialize, fc3d...
+#include "numerics_verbose.h"        // for numerics_error, verbose
+#include "pinv.h"                    // for pinv
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -65,9 +67,9 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   /* Dimension of the problem */
   int n = 3 * nc;
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
   /* Check for trivial case */
   /*   *info = fc3d_checkTrivialCase(n, q,velocity, reaction, options); */
@@ -112,7 +114,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   }
 
 
-  SolverOptions * localsolver_options = options->internalSolvers;
+  SolverOptions * localsolver_options = options->internalSolvers[0];
 
   /* Connect local solver */
 
@@ -128,7 +130,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
 
 
 
-  dparam[0] = dparam[2]; // set the tolerance for the local solver
+  dparam[SICONOS_DPARAM_TOL] = dparam[2]; // set the tolerance for the local solver
   while ((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
@@ -157,35 +159,16 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
     *info = hasNotConverged;
   }
   printf("--------------- FC3D - NSGS_VELOCITY - # Iteration %i Final Residual = %14.7e\n", iter, error);
-  dparam[0] = tolerance;
-  dparam[1] = error;
+  dparam[SICONOS_DPARAM_TOL] = tolerance;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[7] = iter;
 
   /***** Free memory *****/
   (*freeSolver)();
 }
-int fc3d_nsgs_velocity_setDefaultSolverOptions(SolverOptions* options)
+
+void fc3d_nsgs_velocity_set_default(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NSGSV Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_NSGSV;
-
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-4;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_onecontact_nonsmooth_Newton_setDefaultSolverOptions(options->internalSolvers);
-
-  return 0;
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN);
 }

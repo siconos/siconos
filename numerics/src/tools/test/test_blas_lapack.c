@@ -1,13 +1,10 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include "math.h"
-#include<SiconosBlas.h>
-
-#include "SiconosLapack.h"
-#include "test_utils.h"
-
-
-#include <assert.h>
+#include <stdio.h>          // for printf
+#include <stdlib.h>         // for exit
+#include "SiconosConfig.h"  // for HAS_LAPACK_dgels, HAS_LAPACK_dgesvd
+#include "SiconosBlas.h"    // for cblas_dgemm, CblasNoTrans, cblas_dcopy
+#include "SiconosLapack.h"  // for DGELS, DGESV, DGESVD, DGETRF, DGETRI, DPOTRF
+#include "math.h"           // for fabs
+#include "test_utils.h"     // for print_matrix, print_int_vector, print_vec...
 
 /* Parameters */
 #define M 2

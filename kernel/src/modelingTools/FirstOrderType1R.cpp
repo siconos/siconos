@@ -95,12 +95,13 @@ void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned i
   BlockVector& x = *DSlink[FirstOrderR::x];
   BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
-  SP::SiconosVector x_vec(new SiconosVector(x));
-  SP::SiconosVector z_vec(new SiconosVector(z));
+  SiconosVector x_vec, z_vec;
+  x_vec.initFromBlock(x); // copy !
+  z_vec.initFromBlock(z); // copy !
   
-  computeh(time, *x_vec, *z_vec, y);
+  computeh(time, x_vec, z_vec, y);
 
-  *DSlink[FirstOrderR::z] = *z_vec;
+  *DSlink[FirstOrderR::z] = z_vec;
 }
 
 void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned int level)
@@ -114,13 +115,14 @@ void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned in
   BlockVector& r = *DSlink[FirstOrderR::r];
   BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
-  SP::SiconosVector r_vec(new SiconosVector(r));
-  SP::SiconosVector z_vec(new SiconosVector(z));
+  SiconosVector r_vec, z_vec;
+  r_vec.initFromBlock(r);
+  z_vec.initFromBlock(z);
 
-  computeg(time, lambda, *z_vec, *r_vec);
+  computeg(time, lambda, z_vec, r_vec);
 
-  *DSlink[FirstOrderR::r] = *r_vec;
-  *DSlink[FirstOrderR::z] = *z_vec;
+  *DSlink[FirstOrderR::r] = r_vec;
+  *DSlink[FirstOrderR::z] = z_vec;
 }
 
 void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& C)

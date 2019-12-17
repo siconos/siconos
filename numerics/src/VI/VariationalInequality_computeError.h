@@ -24,6 +24,9 @@
 
 */
 
+#include "NumericsFwd.h"  // for VariationalInequality, SolverOptions
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict

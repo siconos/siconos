@@ -12,6 +12,7 @@
  *
  */
 
+#include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, SolverOp...
 void mlcp_direct_FB_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 void mlcp_direct_FB_reset(void);
 

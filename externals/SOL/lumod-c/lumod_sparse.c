@@ -1,11 +1,8 @@
-
-#include <stdlib.h>
-#include <stdio.h>
-//#include <memory.h>
-#include <string.h>
-#include <math.h>
 #include "lumod_sparse.h"
-#include "sparselib.h"
+#include <string.h> // for memset used through macros. // IWYU pragma: keep
+#include <math.h>       // for fabs
+#include <stdlib.h>     // for abs
+#include "sparselib.h"  // for sparseMatrix, sparseVector, putItem, getDiagonal
 
 /*
                         LUMOD 2.0  (29 Jun 1999)

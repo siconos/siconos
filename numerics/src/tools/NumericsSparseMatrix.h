@@ -24,10 +24,10 @@
  *
  */
 
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
-//#include "CSparseMatrix.h" // for freeNSLSP
-#include "NM_MPI.h"
+#include <stdio.h>          // for size_t, FILE
+#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT
+#include "NumericsFwd.h"    // for NumericsSparseMatrix, NSM_linear_solver_p...
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**\struct linalg_data_t NumericsSparseMatrix.h
  * generic data struct for linear algebra operations

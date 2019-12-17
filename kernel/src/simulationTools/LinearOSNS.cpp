@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 #include "LinearOSNS.hpp"
+#include "NumericsMatrix.h"
+#include "SiconosAlgebraProd.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "MoreauJeanOSI.hpp"
@@ -48,15 +50,6 @@ using namespace RELATION;
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
-
-LinearOSNS::LinearOSNS(): OneStepNSProblem(), _numericsMatrixStorageType(NM_DENSE), _keepLambdaAndYState(true)
-{
-}
-
-// Constructor from a set of data
-LinearOSNS::LinearOSNS(const int numericsSolverId):
-  OneStepNSProblem(numericsSolverId), _numericsMatrixStorageType(0), _keepLambdaAndYState(true)
-{}
 
 void LinearOSNS::initVectorsMemory()
 {

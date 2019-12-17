@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 #include "NewMarkAlphaOSI.hpp"
+#include "SiconosAlgebraProd.hpp"
+#include "SiconosAlgebraScal.hpp"
 #include "Simulation.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianScleronomousR.hpp"

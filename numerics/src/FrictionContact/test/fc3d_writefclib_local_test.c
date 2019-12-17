@@ -15,11 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "NonSmoothDrivers.h"
-#include "fclib_interface.h"
+
+#include <stdio.h>                   // for printf, fopen, fclose, FILE, size_t
+#include <stdlib.h>                  // for malloc, free, abs
+#include <string.h>                  // for strlen, strncpy, strcmp, strncat
+#include "FrictionContactProblem.h"  // for frictionContactProblem_free, Fri...
+#include "NumericsFwd.h"             // for FrictionContactProblem
+#include "fclib_interface.h"         // for frictionContact_fclib_read, fric...
 
 static int write_test_fclib(char * filename)
 {
@@ -51,13 +53,7 @@ static int write_test_fclib(char * filename)
   fclose(foutput);
 
 
-  FILE * f  =  fopen(filename, "r");
-
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-
-  info = frictionContact_newFromFile(problem, f);
-  fclose(f);
-
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
   int n = 100;
   char * title = (char *)malloc(n * sizeof(char *));
   strncpy(title, "Confeti-ex03-Fc3D-SBM", n);

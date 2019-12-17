@@ -182,7 +182,7 @@ SiconosVector::SiconosVector(const SiconosVector &svect) : std11::enable_shared_
 }
 
 // Copy from BlockVector
-SiconosVector::SiconosVector(const BlockVector & vIn) : std11::enable_shared_from_this<SiconosVector>()
+void SiconosVector::initFromBlock(const BlockVector & vIn)
 {
   if(ask<IsDense>(**(vIn.begin())))  // dense
   {

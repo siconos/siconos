@@ -1,6 +1,7 @@
 #ifndef MLCP_ENUM_H
 #define MLCP_ENUM_H
 
+#include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, SolverOp...
 int mlcp_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 /*Alloc memory iff options->iWork options->dWork and are  null.

@@ -16,21 +16,21 @@
  * limitations under the License.
 */
 
-
-#include "SecondOrderConeLinearComplementarityProblem.h"
-#include "SolverOptions.h"
 #include "soclcp_compute_error.h"
-#include "soclcp_projection.h"
-#include "projectionOnCone.h"
-#include "projectionOnCylinder.h"
-#include "SiconosLapack.h"
-#include "numerics_verbose.h"
-#include <math.h>
-#include <assert.h>
-
+#include <assert.h>                                       // for assert
+#include <math.h>                                         // for sqrt
+#include <stdio.h>                                        // for printf
+#include <stdlib.h>                                       // for free, NULL
+#include "NumericsMatrix.h"                               // for NM_gemv
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                                        // for DEBUG_PRINTF
+#include "numerics_verbose.h"                             // for numerics_error
+#include "projectionOnCone.h"                             // for projectionO...
+#include "NSSTools.h"  // for max
+#include "SiconosBlas.h"                                  // for cblas_dcopy
+
 void soclcp_unitary_compute_and_add_error(double *z , double *w, unsigned int dim, double mu, double * error,
                                           double * worktmp)
 {

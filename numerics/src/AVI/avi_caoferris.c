@@ -16,25 +16,25 @@
  * limitations under the License.
 */
 
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
 #include "avi_caoferris.h"
-
-#include "AVI_Solvers.h"
-#include "AVI_cst.h"
-#include "pivot-utils.h"
-#include "LinearComplementarityProblem.h"
-#include "vertex_extraction.h"
-#include "numerics_verbose.h"
-
-#include "SiconosLapack.h"
-
-#include "sanitizer.h"
-
+#include <assert.h>                         // for assert
+#include <stdlib.h>                         // for free, malloc, calloc, abs
+#include <string.h>                         // for memset
+#include "AVI_Solvers.h"                    // for avi_caoferris
+#include "AffineVariationalInequalities.h"  // for AffineVariationalInequali...
+#include "LinearComplementarityProblem.h"   // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                 // for NumericsMatrix, NM_fill
+#include "SiconosBlas.h"                    // for cblas_dcopy, cblas_dgemv
+#include "SiconosLapack.h"                  // for DGETRS, lapack_int, DGETRF, LA_NOTRANS, LA_TRANS
+#include "SiconosSets.h"                    // for polyhedron_set, polyhedron
+#include "SolverOptions.h"                  // for SolverOptions
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "debug.h"                          // for DEBUG_PRINT, DEBUG_EXPR_WE
+#include "numerics_verbose.h"               // for numerics_error_nonfatal
+#include "pivot-utils.h"                    // for pivot_init_lemke, pivot_s...
+#include "sanitizer.h"                      // for cblas_dcopy_msan
+#include "vertex_extraction.h"              // for siconos_find_vertex
 
 
 int avi_caoferris(AffineVariationalInequalities* problem, double *z, double *w, SolverOptions* options)
@@ -265,7 +265,7 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
   unsigned int has_sol = 0;
   unsigned int nb_iter = 0;
   unsigned int leaving;
-  unsigned int itermax = options->iparam[0];
+  unsigned int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   unsigned aux_indx = 0;
 
   double pivot, pivot_inv;
@@ -277,7 +277,7 @@ int avi_caoferris_stage3(LinearComplementarityProblem* problem, double* restrict
 
   /*output*/
 
-  options->iparam[1] = 0;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
 
   /* Allocation */
   basis = (unsigned int *)malloc(dim * sizeof(unsigned int));
@@ -507,7 +507,7 @@ exit_caoferris:
   DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i)
       { DEBUG_PRINTF("%e %e\n", u[i], s[i]) });
 
-  options->iparam[1] = nb_iter;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = nb_iter;
 
   if (has_sol) info = 0;
   else info = 1;

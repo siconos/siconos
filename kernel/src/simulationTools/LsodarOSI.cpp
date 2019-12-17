@@ -18,6 +18,7 @@
  */
 
 #include "LsodarOSI.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "EventDriven.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "BlockVector.hpp"
@@ -731,8 +732,9 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
 	    }
       else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
 	    {
-	      SiconosVector q = *DSlink[LagrangianR::q0];
-	      SiconosVector z = *DSlink[LagrangianR::z];
+              SiconosVector q,z;
+              q.initFromBlock(*DSlink[LagrangianR::q0]);
+	      z.initFromBlock(*DSlink[LagrangianR::z]);
 
 	      std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
 	      *DSlink[LagrangianR::z] = z;

@@ -15,16 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include <assert.h>
-
-#include "fc3d_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
+#include <assert.h>                                    // for assert
+#include <float.h>                                     // for DBL_EPSILON
+#include <stdio.h>                                     // for NULL
+#include "FrictionContactProblem.h"                    // for FrictionContac...
+#include "Friction_cst.h"                              // for SICONOS_FRICTI...
+#include "NonSmoothDrivers.h"                          // for fc3d_driver
+#include "NumericsFwd.h"                               // for SolverOptions
+#include "SolverOptions.h"                             // for SolverOptions
+#include "fc3d_Solvers.h"                              // for fc3d_ACLMFixed...
+#include "fc3d_nonsmooth_Newton_AlartCurnier.h"        // for fc3d_nonsmooth...
+#include "fc3d_nonsmooth_Newton_FischerBurmeister.h"   // for fc3d_nonsmooth...
+#include "fc3d_nonsmooth_Newton_natural_map.h"         // for fc3d_nonsmooth...
+#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for fc3d_onecontac...
+#include "fc3d_projection.h"                           // for fc3d_projectio...
+#include "fc3d_unitary_enumerative.h"                  // for fc3d_unitary_e...
+#include "numerics_verbose.h"                          // for numerics_printf
 
 const char* const   SICONOS_FRICTION_3D_NSGS_STR = "FC3D_NSGS";
 const char* const   SICONOS_FRICTION_3D_NSGSV_STR = "FC3D_NSGSV";
@@ -48,11 +54,10 @@ const char* const  SICONOS_FRICTION_3D_NCPGlockerFBPATH_STR = "FC3D_NCPGlockerFB
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder_STR = "FC3D_projectionOnCylinder";
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration_STR =  "FC3D_projectionOnCylinderWithLocalIteration";
 const char* const  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR = "FC3D_ProjectionOnCone_velocity";
-const char* const  SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder_STR = "FC3D ConvexQP PG solver";
+const char* const  SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER_STR = "FC3D ConvexQP PG solver";
 const char* const  SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR = "FC3D_VI_FPP_Cylinder";
 
 
-const char* const  SICONOS_FRICTION_3D_DeSaxceFixedPoint_STR = "FC3D_DeSaxceFixedPoint";
 const char* const  SICONOS_FRICTION_3D_EG_STR = "FC3D_ExtraGradient";
 const char* const  SICONOS_FRICTION_3D_FPP_STR = "FC3D_FixedPointProjection";
 const char* const  SICONOS_FRICTION_3D_VI_EG_STR = "FC3D_VI_ExtraGradient";

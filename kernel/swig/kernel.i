@@ -46,6 +46,8 @@
 #include <boost/mpl/eval_if.hpp>
 #include <boost/typeof/typeof.hpp>
 #include <RotationQuaternion.hpp>
+#include <SiconosVectorIterator.hpp>
+#include <vector>
 %}
 
 // ignores

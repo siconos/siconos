@@ -17,6 +17,7 @@
 */
 
 #include "SimulationGraphs.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "ControlLinearAdditionalTermsTS.hpp"
 
 #include "Topology.hpp"

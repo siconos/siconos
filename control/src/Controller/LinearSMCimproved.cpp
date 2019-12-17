@@ -19,6 +19,7 @@
 
 #include "FirstOrderLinearDS.hpp"
 #include "TimeStepping.hpp"
+#include "SiconosAlgebraProd.hpp"
 
 #include "LinearSMCimproved.hpp"
 #include "SiconosVector.hpp"

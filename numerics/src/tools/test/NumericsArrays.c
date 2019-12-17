@@ -21,12 +21,8 @@
 
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "NumericsArrays.h"
-#include <math.h>
-
+#include <stdio.h>           // for printf, size_t
+#include "NumericsArrays.h"  // for NA_display, NA_merge_and_sort_sorted_arrays
 
 static int NumericsArrays_merge_test0()
 {

@@ -21,6 +21,7 @@
 #include "SimpleMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
+#include "SiconosAlgebraProd.hpp" // for matrix-vector prod
 
 #include <iostream>
 
@@ -251,13 +252,14 @@ void FirstOrderLinearR::computeOutput(double time, Interaction& inter, unsigned 
   BlockVector& z = *DSlink[FirstOrderR::z];
   BlockVector& x = *DSlink[FirstOrderR::x];
 
-  SP::SiconosVector z_vec(new SiconosVector(z));
+  SiconosVector z_vec;
+  z_vec.initFromBlock(z); // copy !
   SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
 
-  computeh(time, x, lambda, *z_vec, y);
+  computeh(time, x, lambda, z_vec, y);
 
-  *DSlink[FirstOrderR::z] = *z_vec;
+  *DSlink[FirstOrderR::z] = z_vec;
 
   DEBUG_END("FirstOrderLinearR::computeOutput \n");
 }
@@ -283,9 +285,10 @@ void FirstOrderLinearR::computeInput(double time, Interaction& inter, unsigned i
   SiconosVector& lambda = *inter.lambda(level);
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   BlockVector& z = *DSlink[FirstOrderR::z];
-  SP::SiconosVector z_vec(new SiconosVector(z));
-  computeg(time, lambda, *z_vec, *DSlink[FirstOrderR::r]);
-  *DSlink[FirstOrderR::z] = *z_vec;
+  SiconosVector z_vec;
+  z_vec.initFromBlock(z);
+  computeg(time, lambda, z_vec, *DSlink[FirstOrderR::r]);
+  *DSlink[FirstOrderR::z] = z_vec;
 }
 
 

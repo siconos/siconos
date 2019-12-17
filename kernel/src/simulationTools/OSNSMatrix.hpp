@@ -23,6 +23,7 @@
 #define OSNSM_H
 
 #include "SiconosFwd.hpp"
+#include "SiconosSerialization.hpp" // for ACCEPT_SERIALIZATION
 #include "SimulationTypeDef.hpp"
 
 /** Interface to some specific storage types for matrices used in

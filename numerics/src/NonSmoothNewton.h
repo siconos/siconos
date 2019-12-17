@@ -28,11 +28,12 @@
 
  */
 
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for SolverOptions
+
+
 /* Pointer to function that corresponds to the function \f$ \phi \f$ */
 typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
-
-#include "SiconosConfig.h"
-#include "SolverOptions.h"
 
 enum NONSMOOTH_NEWTON_SOLVER
 {
@@ -91,8 +92,11 @@ extern "C"
   int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
                             NewtonFunctionPtr* jacobianPhi,
                             SolverOptions * options);
-  
-  void nonSmoothNewton_setDefaultSolverOptions(SolverOptions* options);
+  /** @addtogroup SetSolverOptions
+      @{
+  */
+  void nonSmoothNewton_set_default(SolverOptions* options); 
+  /** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

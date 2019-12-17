@@ -15,11 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "NSSTools.h"
+
+#include "NSSTools.h"  // for abs_part
 
 void abs_part(double x[], double sol[], int n)
 

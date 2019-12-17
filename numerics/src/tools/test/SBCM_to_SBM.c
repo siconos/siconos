@@ -21,14 +21,8 @@
 
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "NumericsMatrix.h"
-#include <math.h>
-#include "numericsMatrixTestFunction.h"
-#include "CSparseMatrix.h"
-#include "SparseBlockMatrix.h"
+#include "NumericsFwd.h"        // for SparseBlockCoordinateMatrix, SparseBl...
+#include "SparseBlockMatrix.h"  // for SparseBlockCoordinateMatrix, SBM_get_...
 
 #define nnz 10
 

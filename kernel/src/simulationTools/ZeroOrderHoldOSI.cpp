@@ -17,6 +17,7 @@
 */
 
 #include "ZeroOrderHoldOSI.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "EventDriven.hpp"
 #include "EventsManager.hpp"
 #include "NonSmoothDynamicalSystem.hpp"

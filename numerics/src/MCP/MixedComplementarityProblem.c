@@ -18,13 +18,10 @@
 
 #ifndef MCP_PROBLEM_C
 #define MCP_PROBLEM_C
-
-
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
 #include "MixedComplementarityProblem.h"
-#include "NumericsMatrix.h"
+#include <stdio.h>           // for NULL
+#include <stdlib.h>          // for free, malloc
+#include "NumericsMatrix.h"  // for NM_clear
 
 void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem)
 {

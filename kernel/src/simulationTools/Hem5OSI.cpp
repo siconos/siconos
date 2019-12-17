@@ -18,6 +18,7 @@
 
 #include "Hem5OSI.hpp"
 #include <hairer.h>
+#include "SiconosAlgebraProd.hpp" // for prod and subprod
 #include "EventDriven.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "BlockVector.hpp"
@@ -1058,8 +1059,9 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
 	    }
       else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
 	    {
-	      SiconosVector q = *DSlink[LagrangianR::q0];
-	      SiconosVector z = *DSlink[LagrangianR::z];
+              SiconosVector q,z;
+              q.initFromBlock(*DSlink[LagrangianR::q0]);
+	      z.initFromBlock(*DSlink[LagrangianR::z]);
 	      std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
 	      *DSlink[LagrangianR::z] = z;
 	      subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot

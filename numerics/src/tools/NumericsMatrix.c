@@ -15,37 +15,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <float.h>
-#include <math.h>
-#include <stdint.h>
-#include <string.h>
-
-#include "CSparseMatrix.h"
-#include "NumericsMatrix_internal.h"
-#include "NumericsSparseMatrix.h"
-#include "SiconosCompat.h"
-#include "SparseBlockMatrix.h"
-#include "NM_MUMPS.h"
-#include "NM_MPI.h"
-#include "NM_conversions.h"
-#include "SiconosLapack.h"
-#include "numerics_verbose.h"
-#include "sanitizer.h"
+#include <assert.h>                   // for assert
+#include <float.h>                    // for DBL_EPSILON
+#include <math.h>                     // for fabs, fmax, NAN
+#include <stdint.h>                   // for SIZE_MAX
+#include <stdio.h>                    // for printf, fprintf, size_t, fscanf
+#include <stdlib.h>                   // for exit, malloc, free, EXIT_FAILURE
+#include <string.h>                   // for memcpy, memset
+#include "CSparseMatrix.h"            // for CSparseMatrix, CS_INT, cs_dl_sp...
+#include "NM_MPI.h"                   // for NM_MPI_copy
+#include "NM_MUMPS.h"                 // for NM_MUMPS_copy
+#include "NM_conversions.h"           // for NM_csc_to_csr, NM_csc_to_triplet
+#include "NumericsFwd.h"              // for NumericsMatrix, NumericsSparseM...
+#include "NumericsMatrix.h"           // for NumericsMatrix, NumericsMatrixI...
+#include "NumericsMatrix_internal.h"  // for NM_internalData_free
+#include "NumericsSparseMatrix.h"     // for NumericsSparseMatrix, NSM_new
+#include "SiconosCompat.h"            // for SN_SIZE_T_F
+#include "SiconosBlas.h"              // for cblas_ddot, cblas_dgemv, CblasN...
+#include "SiconosLapack.h"            // for lapack_int, DGESV, DGETRF, DGETRS, LA_NOTRANS
+#include "SparseBlockMatrix.h"        // for SparseBlockStructuredMatrix
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                    // for DEBUG_EXPR, DEBUG_BEGIN, DEBUG_...
+#include "numerics_verbose.h"         // for numerics_error, numerics_printf...
+#include "sanitizer.h"                // for cblas_dcopy_msan
+#include "NumericsVector.h"
 
-#ifdef DEBUG_MESSAGES
-#include "NumericsVector.h"
-#endif
-#include "NumericsVector.h"
 #ifdef WITH_MKL_SPBLAS
 #include "MKL_common.h"
 #include "NM_MKL_spblas.h"
+#endif
+
+#ifdef __cplusplus
+#undef restrict
+#include <sys/cdefs.h>                // for __restrict
+#define restrict __restrict
 #endif
 
 
@@ -402,14 +407,14 @@ void NM_internalData_free(NumericsMatrix* m)
     {
       assert (m->internalData->iWorkSize > 0);
       free(m->internalData->iWork);
-      m->internalData->iWork = NULL;
     }
+    m->internalData->iWork = NULL;
     if (m->internalData->dWork)
     {
       assert (m->internalData->dWorkSize > 0);
       free(m->internalData->dWork);
-      m->internalData->dWork = NULL;
     }
+    m->internalData->dWork = NULL;
     free(m->internalData);
     m->internalData = NULL;
   }
@@ -469,7 +474,7 @@ void NM_internalData_copy(const NumericsMatrix* const A, NumericsMatrix* B )
       {
         if (! B->internalData->dWork)
         {
-          B->internalData->dWork = malloc(A->internalData->dWorkSize*sizeof(double));
+          B->internalData->dWork = (double*)malloc(A->internalData->dWorkSize*sizeof(double));
           B->internalData->dWorkSize = A->internalData->dWorkSize;
         }
         else
@@ -1187,7 +1192,7 @@ NumericsMatrix* NM_new_from_file(FILE *file)
   return m;
 }
 
-NumericsMatrix* NM_new_from_filename(char * filename)
+NumericsMatrix* NM_new_from_filename(const char * filename)
 {
   FILE* finput = fopen(filename, "r");
   if (finput == NULL)
@@ -1209,7 +1214,7 @@ NumericsMatrix* NM_create_from_file(FILE *file)
   return NM_new_from_file(file);
 }
 
-NumericsMatrix* NM_create_from_filename(char * filename)
+NumericsMatrix* NM_create_from_filename(const char * filename)
 {
   FILE* finput = fopen(filename, "r");
   if (finput == NULL)
@@ -1757,8 +1762,8 @@ void NM_clearDense(NumericsMatrix* A)
   if (A->matrix0)
   {
     free(A->matrix0);
-    A->matrix0 = NULL;
   }
+  A->matrix0 = NULL;
 }
 
 void NM_clearSparseBlock(NumericsMatrix* A)
@@ -1767,8 +1772,8 @@ void NM_clearSparseBlock(NumericsMatrix* A)
   {
     SBM_clear(A->matrix1);
     free(A->matrix1);
-    A->matrix1 = NULL;
   }
+  A->matrix1 = NULL;
 }
 
 void NM_clearSparse(NumericsMatrix* A)
@@ -1777,8 +1782,8 @@ void NM_clearSparse(NumericsMatrix* A)
   {
     NSM_clear(A->matrix2);
     free(A->matrix2);
-    A->matrix2 = NULL;
   }
+  A->matrix2 = NULL;
 }
 
 void NM_clearTriplet(NumericsMatrix* A)
@@ -1788,8 +1793,8 @@ void NM_clearTriplet(NumericsMatrix* A)
     if (A->matrix2->triplet)
     {
       cs_spfree(A->matrix2->triplet);
-      A->matrix2->triplet = NULL;
     }
+    A->matrix2->triplet = NULL;
   }
 }
 
@@ -1800,8 +1805,8 @@ void NM_clearCSC(NumericsMatrix* A)
     if (A->matrix2->csc)
     {
       cs_spfree(A->matrix2->csc);
-      A->matrix2->csc = NULL;
     }
+    A->matrix2->csc = NULL;
   }
 }
 
@@ -1812,8 +1817,8 @@ void NM_clearCSCTranspose(NumericsMatrix* A)
     if (A->matrix2->trans_csc)
     {
       cs_spfree(A->matrix2->trans_csc);
-      A->matrix2->trans_csc = NULL;
     }
+    A->matrix2->trans_csc = NULL;
   }
 }
 
@@ -1824,8 +1829,8 @@ void NM_clearCSR(NumericsMatrix* A)
     if (A->matrix2->csr)
     {
       cs_spfree(A->matrix2->csr);
-      A->matrix2->csr = NULL;
     }
+    A->matrix2->csr = NULL;
   }
 }
 
@@ -2316,7 +2321,7 @@ void NM_gemv(const double alpha, NumericsMatrix* A, const double *x,
   assert(A);
   assert(x);
   assert(y);
-
+  
   switch (A->storageType)
   {
   case NM_DENSE:
@@ -3632,8 +3637,7 @@ int NM_is_symmetric(NumericsMatrix* A)
   double norm_inf = NM_norm_inf(AplusATrans);
   NM_clear(Atrans); free(Atrans);
   NM_clear(AplusATrans);  free(AplusATrans);
-
-
+  
   if (norm_inf <= DBL_EPSILON*10)
   {
     return 1;

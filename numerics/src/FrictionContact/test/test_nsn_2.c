@@ -16,146 +16,65 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, Solve...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=200;
-  int n_entry = 50;
-  char *** test_nsn = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_nsn[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+  *number_of_tests = 9; //n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  int n =0;
-  int d= 7;
+  int solvers[] = {SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_AC_TEST,
+                   SICONOS_FRICTION_3D_NSN_FB, SICONOS_FRICTION_3D_NSN_NM};
+  int current = 0;
 
-  int e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "5e-2";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
+  int d;
 
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC_TEST);
-  test_nsn[n][e++] = "5e-2";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
+  // ===== RockPile_tob1.dat =====
+  d= 7;
+  for(int s=0;s<4;++s)
+    {
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(solvers[s]);    
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 5e-2;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+      current++;
+    }
 
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_FB);
-  test_nsn[n][e++] = "5e-2";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_NM);
-  test_nsn[n][e++] = "5e-2";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  d=8;
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "1e-5";
-  test_nsn[n][e++] = "100";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "iparam";
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e++] = "1";
+  // AC_TEST expected to fail
+  collection[1].will_fail= 1;
   
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC_TEST);
-  test_nsn[n][e++] = "1e-5";
-  test_nsn[n][e++] = "100";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "iparam";
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e++] = "---";
-  n++;
 
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "5e-2";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
+  // ===== KaplasTower-i1061-4.hdf5.dat =====
+  d = 8; 
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_TEST);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+  //#ifdef WITH_UMFPACK
+  // expected to fail
+  collection[current].will_fail = 1;
+  //#endif
+  current++;
 
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC_TEST);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "10";
-  test_nsn[n][e++] = "---";
-  n++;
-
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_FB);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_NM);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-
-#ifdef WITH_UMFPACK
-  test_nsn[5][1] = "1";
-  test_nsn[8][1] = "1";
-#endif
-
-
-
-  
-  test_nsn[n][0] ="---";
-  return test_nsn;
+  for(int s=0;s<4;++s)
+    {
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(solvers[s]);    
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+      current++;
+    }
+  //#ifdef WITH_UMFPACK
+  // AC_TEST for KaplasTower expected to fail
+  collection[6].will_fail = 1;
+  //#endif  
+  *number_of_tests = current;
+  return collection;
 
 }

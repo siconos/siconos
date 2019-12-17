@@ -128,7 +128,7 @@ class FrictionContactTrace(FrictionContact):
                     
                 problem = self.frictionContactProblemPtr()
                 #print(problem, type(problem))
-                solver_maxiter=SO.iparam[0]
+                solver_maxiter=SO.iparam[N.SICONOS_IPARAM_MAX_ITER]
                 n_format_string=len(str(solver_maxiter))
                 format_string = "{0}-i{1:0"+str(n_format_string)+"d}-{2}-{3}.hdf5"
                 filename = format_string.format(self._params._fileName,

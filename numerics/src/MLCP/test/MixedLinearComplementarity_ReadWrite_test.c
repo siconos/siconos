@@ -15,13 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include "MixedLinearComplementarityProblem.h"
-#include "SiconosCompat.h"
-
+#include <assert.h>                             // for assert
+#include <stdio.h>                              // for printf, fclose, fopen
+#include <stdlib.h>                             // for malloc, atof, free
+#include <string.h>                             // for strncpy, strcmp, strcpy
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NumericsFwd.h"                        // for MixedLinearComplement...
+#include "SiconosCompat.h"                      // for SN_SIZE_T_F
 int write_newformat(char *filename);
 int write_newformat(char *filename)
 {

@@ -15,38 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <math.h>
-#include "relay_test_utils.h"
-#include "NonSmoothDrivers.h"
-#include "RelayProblem.h"
-#include "SolverOptions.h"
-#include "Relay_Solvers.h"
-#include "SiconosCompat.h"
+#include <math.h>              // for isfinite
+#include <stdio.h>             // for printf, fclose, fopen, FILE
+#include <stdlib.h>            // for calloc, free, malloc
+#include "NonSmoothDrivers.h"  // for relay_driver
+#include "NumericsFwd.h"       // for RelayProblem, SolverOptions
+#include "RelayProblem.h"      // for RelayProblem, freeRelay_problem, relay...
+#include "SolverOptions.h"     // for solver_options_delete, SolverOptions
+#include "relay_test_utils.h"  // for relay_test_function
+#include "test_utils.h"        // for TestCase
 
-int relay_test_function(FILE * f, int  solverId)
+int relay_test_function(TestCase * current)
 {
-
   int i, info = 0 ;
-  RelayProblem* problem = (RelayProblem *)malloc(sizeof(RelayProblem));
-
-  info = relay_newFromFile(problem, f);
+  RelayProblem* problem = relay_new_from_filename(current->filename);
 
   FILE * foutput  =  fopen("./relay.verif", "w");
   info = relay_printInFile(problem, foutput);
-  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
-
-  relay_setDefaultSolverOptions(problem, options, solverId);
+  fclose(foutput);
 
   int maxIter = 50000;
   double tolerance = 1e-8;
-  options->iparam[0] = maxIter;
-  options->dparam[0] = tolerance;
+  current->options->iparam[SICONOS_IPARAM_MAX_ITER] = maxIter;
+  current->options->dparam[SICONOS_DPARAM_TOL] = tolerance;
 
 
   double * z = (double *)calloc(problem->size, sizeof(double));
   double * w = (double *)calloc(problem->size, sizeof(double));
 
-  info = relay_driver(problem, z , w, options);
+  info = relay_driver(problem, z , w, current->options);
 
   for (i = 0 ; i < problem->size ; i++)
   {
@@ -64,17 +61,8 @@ int relay_test_function(FILE * f, int  solverId)
   }
   free(z);
   free(w);
-
-  solver_options_delete(options);
-
-  free(options);
-
   freeRelay_problem(problem);
 
-  fclose(foutput);
-
   return info;
-
-
 }
 

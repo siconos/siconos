@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "Topology.hpp"
+#include "RuntimeException.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Interaction.hpp"
@@ -295,6 +296,16 @@ void Topology::setControlProperty(SP::Interaction inter,
   }
   _IG[0]->properties(ivd).forControl = isControlInteraction;
 }
+
+SP::InteractionsGraph Topology::indexSet(unsigned int num) const
+{
+  if (num >= _IG.size())
+    {
+      RuntimeException::selfThrow("Topology::indexSet: indexSet does not exist");
+    }
+  assert(num < _IG.size()) ;
+  return _IG[num];
+};
 
 void Topology::removeInteraction(SP::Interaction inter)
 {

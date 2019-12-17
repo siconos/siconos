@@ -15,12 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include <iostream>
 #include "SimpleMatrix.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
-#include <iostream>
+#include "SiconosAlgebraProd.hpp" // for matrix-vector prod
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

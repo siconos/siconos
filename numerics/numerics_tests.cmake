@@ -67,30 +67,27 @@ if(WITH_${COMPONENT}_TESTING)
 
   new_tests_collection(
     DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION TEST_LCP_COLLECTION_1
-    EXTRA_SOURCES data_collection_1.c test_solvers_collection_1.c)
+    EXTRA_SOURCES data_collection_1.c)
   new_tests_collection(
     DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION TEST_LCP_COLLECTION_2
-    EXTRA_SOURCES data_collection_2.c test_solvers_collection_1.c)
+    EXTRA_SOURCES data_collection_2.c)
   new_tests_collection(
     DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION TEST_LCP_COLLECTION_3
-    EXTRA_SOURCES data_collection_3.c test_solvers_collection_2.c)
+    EXTRA_SOURCES data_collection_3.c)
   new_tests_collection(
     DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION TEST_LCP_COLLECTION_4
-    EXTRA_SOURCES data_collection_4.c test_solvers_collection_3.c)
+    EXTRA_SOURCES data_collection_4.c)
+  new_tests_collection(
+    DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION TEST_LCP_COLLECTION_5
+    EXTRA_SOURCES data_collection_5.c)
 
   # ----------- Relay solvers tests -----------
   # Start tests for Relay dir.
   begin_tests(src/Relay/test)
 
-  new_test(SOURCES relay_test20.c)
-  new_test(SOURCES step_test1.c)
-  new_test(SOURCES step_test2.c)
-  new_test(SOURCES step_test3.c)
-  new_test(SOURCES step_test4.c)
-
   new_tests_collection(
     DRIVER relay_test_collection.c.in FORMULATION relay COLLECTION TEST_RELAY_COLLECTION_1
-    EXTRA_SOURCES data_collection_1.c test_solvers_collection_1.c)
+    EXTRA_SOURCES data_collection_1.c)
 
   # ----------- MLCP solvers tests -----------
   begin_tests(src/MLCP/test)
@@ -143,13 +140,13 @@ if(WITH_${COMPONENT}_TESTING)
     EXTRA_SOURCES data_collection_1.c test_nsgs_1.c)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_2
-    EXTRA_SOURCES data_collection_2.c test_nsgs_2.c)
+    EXTRA_SOURCES data_collection_2.c test_nsgs_1.c)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_3
     EXTRA_SOURCES data_collection_3.c test_nsgs_3.c)
   new_tests_collection(
-    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_4
-    EXTRA_SOURCES data_collection_4.c test_nsgs_4.c)
+    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_QUARTIC
+    EXTRA_SOURCES rover_collection.c test_nsgs_quartic.c)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_5
     EXTRA_SOURCES data_collection_3.c test_nsgs_5.c)
@@ -169,14 +166,12 @@ if(WITH_${COMPONENT}_TESTING)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSN_COLLECTION_3
     EXTRA_SOURCES data_collection_3.c test_nsn_3.c)
-
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_VI_BASED_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_vi_based_1.c)
-
   new_tests_collection(
-    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_FP_COLLECTION_0
-    EXTRA_SOURCES data_collection_3.c test_fp_0.c)
+    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_DSFP_COLLECTION
+    EXTRA_SOURCES data_collection_3.c test_dsfp.c)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_FP_COLLECTION_1
     EXTRA_SOURCES data_collection_3.c test_fp_1.c)
@@ -191,20 +186,7 @@ if(WITH_${COMPONENT}_TESTING)
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_QUARTIC_COLLECTION_1
     EXTRA_SOURCES data_collection_5.c test_quartic_1.c)
-  
-  #  IF (WITH_UNSTABLE_TEST)
-  #    NEW_FC_3D_TEST(BoxesStack1-i100000-32.hdf5.dat SICONOS_FRICTION_3D_NSN_AC 1e-5 5000
-  #      0 0 0
-  #      IPARAM 1 1)
-  #    NEW_FC_3D_TEST(BoxesStack1-i100000-32.hdf5.dat SICONOS_FRICTION_3D_NSN_AC_TEST 1e-5 500
-  #      0 0 0
-  #      IPARAM 1 1
-  #      DPARAM SICONOS_DPARAM_LSA_ALPHA_MIN 0.0) # alpha_min needs to be equal to zero for convergence
-  #    NEW_FC_3D_TEST(BoxesStack1-i100000-32.hdf5.dat SICONOS_FRICTION_3D_NSN_AC_TEST 1e-3 1000
-  #      0 0 0
-  #      DPARAM SICONOS_DPARAM_LSA_ALPHA_MIN 0.0) # alpha_min needs to be equal to zero for convergence
-  #  ENDIF()
-  
+    
   # --- LMGC driver ---
   new_test(SOURCES fc3d_newFromFortranData.c)
   new_test(SOURCES fc3d_LmgcDriver_test1.c)
@@ -212,10 +194,6 @@ if(WITH_${COMPONENT}_TESTING)
   new_test(SOURCES fc3d_LmgcDriver_test3.c)
   new_test(SOURCES fc3d_LmgcDriver_test4.c)
   new_test(SOURCES fc3d_LmgcDriver_test5.c)
-
-  # # --- Quartic ---
-  # # NEW_FC_3D_TEST(FrictionContact3D_1c.dat SICONOS_FRICTION_3D_ONECONTACT_QUARTIC)
-  # # NEW_FC_3D_TEST(FrictionContact3D_RR_1c.dat SICONOS_FRICTION_3D_ONECONTACT_QUARTIC)
 
   # ---------------------------------------------------
   # --- Global friction contact problem formulation ---
@@ -234,12 +212,6 @@ if(WITH_${COMPONENT}_TESTING)
     DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_1
     EXTRA_SOURCES data_collection_gfc3d_1.c test_ipm_gfc3d_1.c)
 
-  #  IF (WITH_UNSTABLE_TEST)
-  #    NEW_GFC_3D_TEST(GFC3D_TwoRods1.dat SICONOS_GLOBAL_FRICTION_3D_NSN_AC 0 0
-  #      0 0 0
-  #      WILL_FAIL) # pass with mumps only
-  #  ENDIF()
-
   # Alart Curnier functions
   new_test(NAME AlartCurnierFunctions_test SOURCES fc3d_AlartCurnierFunctions_test.c)
   
@@ -248,57 +220,42 @@ if(WITH_${COMPONENT}_TESTING)
     new_test(NAME FCLIB_test1 SOURCES fc3d_writefclib_local_test.c DEPS FCLIB::fclib)
 
     new_tests_collection(
-      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_6
-      EXTRA_SOURCES data_collection_6.c test_nsgs_1.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
-    #target_compile_definitions(fc3d_TEST_NSGS_COLLECTION_6 PUBLIC TEST_HDF5)
-
-    new_tests_collection(
-      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_6
-      EXTRA_SOURCES data_collection_6.c test_admm_1.c DEPS FCLIB::fclib
+      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_NSGS_COLLECTION_FCLIB
+      EXTRA_SOURCES data_collection_fclib.c test_nsgs_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
 
-    #    # NEW_FC_3D_TEST_HDF5(Capsules-i125-1213.hdf5 SICONOS_FRICTION_3D_NSGS)
-    #    # NEW_FC_3D_TEST_HDF5(Capsules-i125-1213.hdf5 SICONOS_FRICTION_3D_ADMM 1e-10 0
-    #    #   0 0 0
-    #    #   IPARAM SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY  SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING)
-    
-    #    # NEW_FC_3D_TEST_HDF5(LMGC_100_PR_PerioBox-i00361-60-03000.hdf5 SICONOS_FRICTION_3D_ADMM 1e-08 100000
-    #    #   0 0 0
-    #    #   IPARAM SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY  SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING)
-
-    #    # NEW_FC_3D_TEST_HDF5(LMGC_100_PR_PerioBox-i00361-60-03000.hdf5 SICONOS_FRICTION_3D_ADMM 1e-08 100000
-    #    #   0 0 0
-    #    #   IPARAM SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY  SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING
-    #    #   IPARAM SICONOS_FRICTION_3D_ADMM_IPARAM_SPARSE_STORAGE  SICONOS_FRICTION_3D_ADMM_FORCED_SPARSE_STORAGE)
+    new_tests_collection(
+      DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB
+      EXTRA_SOURCES data_collection_fclib.c test_admm_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
 
     new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_2
-      EXTRA_SOURCES data_collection_gfc3d_2.c test_first_order_gfc3d_1.c DEPS FCLIB::fclib
+      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_FCLIB
+      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_first_order_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
     
     new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_3
+      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_3.c test_admm_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
     new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_2
-      EXTRA_SOURCES data_collection_gfc3d_2.c test_solvers_wr_gfc3d_1.c DEPS FCLIB::fclib
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_FCLIB
+      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_solvers_wr_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
     
     new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_2
-      EXTRA_SOURCES data_collection_gfc3d_2.c test_nsn_gfc3d_1.c DEPS FCLIB::fclib
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSN_COLLECTION_FCLIB
+      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_nsn_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
     new_tests_collection(
-      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_2
-      EXTRA_SOURCES data_collection_gfc3d_2.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
+      DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_COLLECTION_FCLIB
+      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_ipm_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
 
@@ -307,18 +264,22 @@ if(WITH_${COMPONENT}_TESTING)
     # ---------------------------------------------------
     
     new_tests_collection(
-      DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_NSGS_COLLECTION_1
-      EXTRA_SOURCES data_collection_rfc3d_1.c test_first_order_rfc3d_1.c DEPS FCLIB::fclib)
+      DRIVER rfc3d_test_collection.c.in  FORMULATION rolling_fc3d COLLECTION TEST_NSGS_COLLECTION_FCLIB
+      EXTRA_SOURCES data_collection_rfc3d_fclib.c test_first_order_rfc3d_1.c DEPS FCLIB::fclib)
     
   endif()
 
   #===========================================
   # 2D Friction Contact tests
   #===========================================
-  # test 2D dense on two differents files
+  # test 2D dense, all solvers but enum
   new_tests_collection(
     DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_1
     EXTRA_SOURCES data_collection_fc2d_1.c test_fc2d_1.c)
+  # test fc2d dense, for enum solvers. Files from data_collection_fc2d_1.c lead to timeout.
+  new_tests_collection(
+    DRIVER fc_test_collection.c.in FORMULATION fc2d COLLECTION TEST_FC2D_COLLECTION_ENUM
+    EXTRA_SOURCES data_collection_fc2d_enum.c test_fc2d_enum.c)
 
   #===========================================
   # Generic mechanical tests
@@ -328,8 +289,6 @@ if(WITH_${COMPONENT}_TESTING)
   new_tests_collection(
     DRIVER gmp_test_collection.c.in FORMULATION gmp COLLECTION TEST_NSGS_COLLECTION_1
     EXTRA_SOURCES data_collection_1.c test_solvers_1.c)
-
-  # new_test(NAME GMP_FAILED SOURCES GenericMechanical_test1.c)
 
   # ----------- Variationnal inequalities solvers tests -----------
   begin_tests(src/VI/test)

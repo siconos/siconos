@@ -15,19 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "NumericsMatrix.h"
-#include "SparseBlockMatrix.h"
-#include "fc2d_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
-
+#include <assert.h>                  // for assert
+#include <stdio.h>                   // for printf, NULL, fprintf, stderr
+#include <stdlib.h>                  // for exit, malloc, EXIT_FAILURE
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_2D_NSGS, SICONO...
+#include "NonSmoothDrivers.h"        // for fc2d_driver
+#include "NumericsFwd.h"             // for FrictionContactProblem, SolverOp...
+#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
+#include "SolverOptions.h"           // for SolverOptions, solver_options_id...
+#include "SparseBlockMatrix.h"       // for SparseBlockStructuredMatrix, SBM...
+#include "fc2d_Solvers.h"            // for fc2d_cpg, fc2d_enum, fc2d_latin
+#include "numerics_verbose.h"        // for numerics_error, verbose, numeric...
 
 const char* const   SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
-const char* const   SICONOS_FRICTION_2D_PGS_STR  = "F2D_PGS";
 const char* const   SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
 const char* const   SICONOS_FRICTION_2D_LATIN_STR  = "F2D_LATIN";
 const char* const   SICONOS_FRICTION_2D_LEMKE_STR  = "F2D_LEMKE";
@@ -118,7 +119,6 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction , double *velo
     switch (options->solverId)
     {
       /****** NLGS algorithm ******/
-    case SICONOS_FRICTION_2D_PGS:
     case SICONOS_FRICTION_2D_NSGS:
     {
       if (verbose)

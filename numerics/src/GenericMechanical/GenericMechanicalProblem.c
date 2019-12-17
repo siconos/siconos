@@ -16,23 +16,16 @@
  * limitations under the License.
 */
 
-
-
 #include "GenericMechanicalProblem.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
-#include "FrictionContactProblem.h"
-#include "LinearComplementarityProblem.h"
-#include "RelayProblem.h"
-#include "GenericMechanical_Solvers.h"
-#include "NumericsMatrix.h"
-#include "SparseBlockMatrix.h"
-//#define GMP_DEBUG
-
-/* void * solverFC3D; */
-/* void * solverEquality; */
-/* void * solverLCP; */
-/* void * solverMLCP; */
+#include <assert.h>                        // for assert
+#include <stdlib.h>                        // for malloc, free, exit, EXIT_F...
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "GenericMechanical_Solvers.h"     // for NUMERICS_GMP_FREE_GMP, NUM...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NumericsMatrix, NM_new
+#include "RelayProblem.h"                  // for RelayProblem
+#include "SparseBlockMatrix.h"             // for SBMfree, SparseBlockStruct...
+#include "numerics_verbose.h"              // for CHECK_IO
 
 GenericMechanicalProblem * genericMechanicalProblem_new()
 {
@@ -94,9 +87,9 @@ void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int
     free(pGMP->q);
     free(pGMP->M);
   }
+
   if (level & NUMERICS_GMP_FREE_GMP)
     free(pGMP);
-
 }
 void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size)
 {
@@ -224,22 +217,19 @@ void genericMechanicalProblem_printInFile(GenericMechanicalProblem*  pGMP, FILE*
 
 GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
 {
+  GenericMechanicalProblem* problem = genericMechanicalProblem_new();
   size_t nsubProb = 0;
   int prbType = 0;
   int i, posInX, localSize;
   void * prb;
 
-  GenericMechanicalProblem*  pGMP = genericMechanicalProblem_new();
+  problem->M = NM_new_from_file(file);
+  SparseBlockStructuredMatrix* m = problem->M->matrix1;
 
-  //fscanf(file,"%d\n",&nsubProb);
-
-  pGMP->M = NM_new_from_file(file);
-  SparseBlockStructuredMatrix* m = pGMP->M->matrix1;
-
-  pGMP->q = (double *) malloc(pGMP->M->size1 * sizeof(double));
-  for (i = 0; i < pGMP->M->size1; i++)
+  problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
+  for (i = 0; i < problem->M->size1; i++)
   {
-    CHECK_IO(fscanf(file, "%lf ", pGMP->q + i));
+    CHECK_IO(fscanf(file, "%lf ", problem->q + i));
   }
   nsubProb = m->filled1 - 1;
   posInX = 0;
@@ -249,7 +239,7 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
       posInX = m->blocksize0[ii - 1];
     localSize = m->blocksize0[ii] - posInX;
     CHECK_IO(fscanf(file, "%d\n", &prbType));
-    prb = gmp_add(pGMP, prbType, localSize);
+    prb = gmp_add(problem, prbType, localSize);
     if (prbType == SICONOS_NUMERICS_PROBLEM_FC3D)
     {
       CHECK_IO(fscanf(file, "%lf ", ((FrictionContactProblem*)prb)->mu));
@@ -261,6 +251,73 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
 #ifdef GMP_DEBUG
   genericMechanicalProblem_display(pGMP);
 #endif
-
-  return pGMP;
+  return problem;
 }
+
+GenericMechanicalProblem * genericMechanical_new_from_filename(const char* filename)
+{
+  GenericMechanicalProblem * problem = NULL;
+  FILE * file = fopen(filename, "r");
+  if (file == NULL)
+  {
+    printf("Error! Could not open filename %s\n", filename);
+    exit(EXIT_FAILURE);
+  }
+
+  problem = genericMechanical_newFromFile(file);
+  fclose(file);
+  return problem;
+}
+
+/** return nonsmooth problem formulation name, from its id number. */
+const char * ns_problem_id_to_name(enum SICONOS_NUMERICS_PROBLEM_TYPE id)
+{
+  switch (id)
+  {
+  case (SICONOS_NUMERICS_PROBLEM_LCP):
+  {
+    return "LCP";
+  }
+  case (SICONOS_NUMERICS_PROBLEM_MLCP):
+  {
+    return "MLCP";
+  }
+  case (SICONOS_NUMERICS_PROBLEM_NCP):
+  {
+    return "NCP";
+  }
+  case (SICONOS_NUMERICS_PROBLEM_MCP):
+  {
+    return "MCP";
+  }
+  case (SICONOS_NUMERICS_PROBLEM_EQUALITY):
+  {
+    return "EQUALITY";
+  }
+  case (SICONOS_NUMERICS_PROBLEM_FC2D):
+  {
+    return "FC2D";
+  }
+  case (SICONOS_NUMERICS_PROBLEM_FC3D):
+  {
+    return "FC3D";
+  }
+  case (SICONOS_NUMERICS_PROBLEM_VI):
+  {
+    return "VI";
+  }
+  case (SICONOS_NUMERICS_PROBLEM_AVI):
+  {
+    return "AVI";
+  }
+  case (SICONOS_NUMERICS_PROBLEM_RELAY):
+  {
+    return "RELAY";
+  }
+  default:
+    printf("Numerics:ns_problem_id_to_name, id unknown : %d \n", id);
+    return NULL;
+  }
+}
+
+

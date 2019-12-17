@@ -17,29 +17,19 @@
 */
 
 
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "SiconosLapack.h"
-#include "Newton_methods.h"
-#include "FischerBurmeister.h"
-
 #include "lcp_newton_FB.h"
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-#include "debug.h"
+#include <assert.h>                        // for assert
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dgemv
+#include "FischerBurmeister.h"             // for Jac_F_FB, phi_FB
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_new...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "Newton_methods.h"                // for functions_LSA, init_lsa_fu...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h" 
 
 void FB_compute_F_lcp(void* data_opaque, double* z, double* w)
 {
-  // Computation of the new value w = F(z) = Mz + q
+  // Computation of the new val w = F(z) = Mz + q
   // q --> w
   LinearComplementarityProblem* data = (LinearComplementarityProblem *)data_opaque;
   assert(data->M);
@@ -79,4 +69,13 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
   set_lsa_params_data(options, problem->M);
   newton_LSA(problem->size, z, w, info, (void *)problem, options, &functions_FBLSA_lcp);
   
+}
+
+
+void lcp_newton_FB_set_default(SolverOptions* options)
+{
+  options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
+  options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
+  options->dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
+  options->iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
 }

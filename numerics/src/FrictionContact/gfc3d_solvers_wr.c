@@ -15,37 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include <assert.h>
-
-#include "SiconosLapack.h"
-#include "gfc3d_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "fc3d_Solvers.h"
-#include "cond.h"
-#include "pinv.h"
-#include <string.h>
+#include <assert.h>                              // for assert
+#include <stdio.h>                               // for printf, fclose, fopen
+#include <stdlib.h>                              // for malloc, free, exit
+#include "FrictionContactProblem.h"              // for FrictionContactProblem
+#include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
+#include "NumericsFwd.h"                         // for NumericsMatrix, Fric...
+#include "NumericsMatrix.h"                      // for NumericsMatrix, NM_gemv
+#include "NumericsSparseMatrix.h"                // for NumericsSparseMatrix
+#include "NumericsVector.h"                      // for NV_write_in_file_python
+#include "SiconosBlas.h"                         // for cblas_dcopy, cblas_d...
+#include "SparseBlockMatrix.h"                   // for SBM_gemv, SBM_free
+#include "fc3d_Solvers.h"                        // for fc3d_DeSaxceFixedPoint
+#include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for fc3d_nonsmooth_Newto...
+#include "gfc3d_Solvers.h"                       // for gfc3d_DeSaxceFixedPo...
+#include "numerics_verbose.h"                    // for verbose, numerics_pr...
+#include "sanitizer.h"                           // for cblas_dcopy_msan
 #include "gfc3d_compute_error.h"
+#include "SolverOptions.h"                       // for SICONOS_DPARAM_TOL
 
-#include "NumericsSparseMatrix.h"
-#include "NumericsVector.h"
-
-#include "sanitizer.h"
-#include "numerics_verbose.h"
-//#define TEST_COND
 #define OUTPUT_DEBUG */
+#include "debug.h"                                // for DEBUG_EXPR, DEBUG_P...
 
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
-
-//#define USE_LAPACK_DGETRS
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -384,6 +375,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
   }
   return info;
 }
+
 int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reaction, double * globalVelocity)
 {
   int info = -1;
@@ -517,10 +509,9 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , do
     {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_nsgs(localproblem, reaction , velocity , info , options->internalSolvers);
+    // call nsgs solver for the local problem
+    fc3d_nsgs(localproblem, reaction , velocity , info , options);
 
-    options->iparam[1] =  options->internalSolvers->iparam[1];
-    options->dparam[1] =  options->internalSolvers->dparam[1];
     computeGlobalVelocity(problem, reaction, globalVelocity);
     /* Number of contacts */
     int nc = problem->numberOfContacts;
@@ -542,19 +533,7 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction , do
   }
   DEBUG_END("gfc3d_nsgs_wr\n");
 }
-int gfc3d_nsgs_wr_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NSGS_WR Solver\n");
-  }
-  fc3d_nsgs_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSGS_WR;
-  options->numberOfInternalSolvers = 1;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_nsgs_setDefaultSolverOptions(options->internalSolvers);
-  return 0;
-}
+
 
 void  gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
@@ -576,10 +555,7 @@ void  gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , do
     {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_admm(localproblem, reaction , velocity , info , options->internalSolvers);
-
-    options->iparam[1] =  options->internalSolvers->iparam[1];
-    options->dparam[1] =  options->internalSolvers->dparam[1];
+    fc3d_admm(localproblem, reaction , velocity , info , options);
     computeGlobalVelocity(problem, reaction, globalVelocity);
 
     freeLocalProblem(localproblem);
@@ -591,20 +567,6 @@ void  gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , do
   }
   DEBUG_END("gfc3d_admm_wr\n");
 }
-int gfc3d_admm_wr_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ADMM_WR Solver\n");
-  }
-  fc3d_admm_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_ADMM_WR;
-  options->numberOfInternalSolvers = 1;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_admm_setDefaultSolverOptions(options->internalSolvers);
-  return 0;
-}
-
 
 void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
@@ -624,10 +586,8 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
     DEBUG_EXPR(frictionContact_display(localproblem););
     numerics_printf("gfc3d_nonsmooth_Newton_AlartCurnier_wr - Call to the fc3d solver ...\n");
 
-    fc3d_nonsmooth_Newton_AlartCurnier(localproblem, reaction , velocity , info , options->internalSolvers);
+    fc3d_nonsmooth_Newton_AlartCurnier(localproblem, reaction , velocity , info , options);
 
-    options->iparam[1] =  options->internalSolvers->iparam[1];
-    options->dparam[1] =  options->internalSolvers->dparam[1];
     computeGlobalVelocity(problem, reaction, globalVelocity);
 
     freeLocalProblem(localproblem);
@@ -641,19 +601,6 @@ void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* probl
   DEBUG_END("gfc3d_nonsmooth_Newton_AlartCurnier_wr(...)\n")
 
 
-}
-int gfc3d_nonsmooth_Newton_AlartCurnier_wr_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NSN_AC_WR Solver\n");
-  }
-  gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR;
-  options->numberOfInternalSolvers = 1;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(options->internalSolvers);
-  return 0;
 }
 
 void  gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
@@ -675,10 +622,8 @@ void  gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reac
     {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_nsgs_velocity(localproblem, reaction , velocity , info , options->internalSolvers);
+    fc3d_nsgs_velocity(localproblem, reaction , velocity , info , options);
 
-    options->iparam[1] =  options->internalSolvers->iparam[1];
-    options->dparam[1] =  options->internalSolvers->dparam[1];
     computeGlobalVelocity(problem, reaction, globalVelocity);
 
     freeLocalProblem(localproblem);
@@ -688,20 +633,6 @@ void  gfc3d_nsgs_velocity_wr(GlobalFrictionContactProblem* problem, double *reac
     computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0 ;
   }
-}
-int gfc3d_nsgs_velocity_wr_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NSGSV_WR Solver\n");
-  }
-  fc3d_nsgs_velocity_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR;
-  options->numberOfInternalSolvers = 1;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_nsgs_velocity_setDefaultSolverOptions(options->internalSolvers);
-  return 0;
-
 }
 
 void  gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
@@ -723,10 +654,8 @@ void  gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double *reaction 
     {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_proximal(localproblem, reaction , velocity , info , options->internalSolvers);
+    fc3d_proximal(localproblem, reaction , velocity , info , options);
 
-    options->iparam[1] =  options->internalSolvers->iparam[1];
-    options->dparam[1] =  options->internalSolvers->dparam[1];
     computeGlobalVelocity(problem, reaction, globalVelocity);
 
     freeLocalProblem(localproblem);
@@ -737,19 +666,7 @@ void  gfc3d_proximal_wr(GlobalFrictionContactProblem* problem, double *reaction 
     *info = 0 ;
   }
 }
-int gfc3d_proximal_wr_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the PROX_WR Solver\n");
-  }
-  fc3d_proximal_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_PROX_WR;
-  options->numberOfInternalSolvers = 1;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_proximal_setDefaultSolverOptions(options->internalSolvers);
-  return 0;
-}
+
 void  gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
   NumericsMatrix *H = problem->H;
@@ -769,9 +686,7 @@ void  gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double *
     {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_DeSaxceFixedPoint(localproblem, reaction , velocity , info , options->internalSolvers);
-    options->iparam[1] =  options->internalSolvers->iparam[1];
-    options->dparam[1] =  options->internalSolvers->dparam[1];
+    fc3d_DeSaxceFixedPoint(localproblem, reaction , velocity , info , options);
     computeGlobalVelocity(problem, reaction, globalVelocity);
 
     freeLocalProblem(localproblem);
@@ -781,21 +696,6 @@ void  gfc3d_DeSaxceFixedPoint_wr(GlobalFrictionContactProblem* problem, double *
     computeGlobalVelocity(problem, reaction, globalVelocity);
     *info = 0 ;
   }
-}
-int gfc3d_DeSaxceFixedPoint_setDefaultSolverOptions(SolverOptions* options)
-{
-
-
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
-  }
-  fc3d_DeSaxceFixedPoint_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_DSFP_WR;
-  options->numberOfInternalSolvers = 1;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_DeSaxceFixedPoint_setDefaultSolverOptions(options->internalSolvers);
-  return 0;
 }
 
 void  gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options)
@@ -817,9 +717,7 @@ void  gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double *r
     {
       printf("Call to the fc3d solver ...\n");
     }
-    fc3d_TrescaFixedPoint(localproblem, reaction , velocity , info , options->internalSolvers);
-    options->iparam[1] =  options->internalSolvers->iparam[1];
-    options->dparam[1] =  options->internalSolvers->dparam[1];
+    fc3d_TrescaFixedPoint(localproblem, reaction , velocity , info , options);
     computeGlobalVelocity(problem, reaction, globalVelocity);
 
     freeLocalProblem(localproblem);
@@ -830,21 +728,4 @@ void  gfc3d_TrescaFixedPoint_wr(GlobalFrictionContactProblem* problem, double *r
     *info = 0 ;
   }
 
-
-
-}
-int gfc3d_TrescaFixedPoint_setDefaultSolverOptions(SolverOptions* options)
-{
-
-
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the DSFP_WR Solver\n");
-  }
-  fc3d_TrescaFixedPoint_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_TFP_WR;
-  options->numberOfInternalSolvers = 1;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  fc3d_TrescaFixedPoint_setDefaultSolverOptions(options->internalSolvers);
-  return 0;
 }

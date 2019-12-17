@@ -16,22 +16,24 @@
  * limitations under the License.
  */
 
-#include "relay_test_utils.h"
+#include <stdlib.h>      // for malloc
+#include "test_utils.h"  // for data_collection
 
-char ** data_collection()
+const char ** data_collection()
 {
 
   int n_data_1=150;
 
-  char ** data_collection_1 = (char **)malloc(n_data_1*sizeof(char *));
+  const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
-  data_collection_1[n_data++] = "./data/relay1.dat";
   data_collection_1[n_data++] = "./data/relay_2x2.dat";
   data_collection_1[n_data++] = "./data/relay_4x4.dat";
   data_collection_1[n_data++] = "./data/relay_simple2.dat";
   data_collection_1[n_data++] = "./data/step_1x1.dat";
   data_collection_1[n_data++] = "./data/step_2x2.dat";
   data_collection_1[n_data++] = "./data/step_4x4.dat";
+  data_collection_1[n_data++] = "./data/relay_simple2.dat";
+  data_collection_1[n_data++] = "./data/relay1.dat";
   
   data_collection_1[n_data++] = "---";
 

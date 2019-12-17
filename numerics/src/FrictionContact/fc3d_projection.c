@@ -16,26 +16,29 @@
  * limitations under the License.
 */
 
-
+#include <assert.h>                    // for assert
+#include <float.h>                     // for DBL_EPSILON
+#include <math.h>                      // for sqrt
+#include <stdio.h>                     // for fprintf, printf, NULL, stderr
+#include <stdlib.h>                    // for calloc, free, exit, EXIT_FAILURE
+#include "FrictionContactProblem.h"    // for FrictionContactProblem
+#include "Friction_cst.h"              // for SICONOS_FRICTION_3D_NSGS_LOCAL...
+#include "NumericsFwd.h"               // for SolverOptions, FrictionContact...
+#include "NumericsMatrix.h"            // for NumericsMatrix, RawNumericsMatrix
+#include "SolverOptions.h"             // for SolverOptions, solver_options_...
+#include "SparseBlockMatrix.h"         // for SBM_row_prod
+#include "fc3d_compute_error.h"        // for fc3d_Tresca_unitary_compute_an...
+#include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
+#include "fc3d_projection.h"           // for fc3d_projectionOnConeWithDiago...
+#include "numerics_verbose.h"          // for numerics_printf, numerics_prin...
+#include "projectionOnCone.h"          // for projectionOnCone
+#include "projectionOnCylinder.h"      // for projectionOnCylinder
+#include "SiconosBlas.h"                     // for cblas_ddot
 #include "fc3d_Solvers.h"
-#include "projectionOnCone.h"
-#include "projectionOnCylinder.h"
-#include "fc3d_compute_error.h"
-
-#include "SiconosBlas.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-
-#include "sanitizer.h"
-#include "numerics_verbose.h"
-
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "debug.h"
-
+#include "debug.h"                     // for DEBUG_PRINTF, DEBUG_EXPR, DEBU...
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
@@ -183,7 +186,7 @@ void fc3d_projection_update_with_regularization(int contact, FrictionContactProb
      excluding the block corresponding to the current contact. ****/
   fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
 
-  double rho = options->dparam[3];
+  double rho = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
   for (int i = 0 ; i < 3 ; i++) localproblem->M->matrix0[i + 3 * i] += rho ;
 
   double *qLocal = localproblem->q;
@@ -253,7 +256,7 @@ int fc3d_projectionWithDiagonalization_solve(FrictionContactProblem* localproble
 
 void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options )
 {
-  int nc = problem->numberOfContacts;
+  size_t nc = problem->numberOfContacts;
   /* printf("fc3d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
   if (!localsolver_options->dWork
       || localsolver_options->dWorkSize < nc)
@@ -262,7 +265,7 @@ void fc3d_projectionOnConeWithLocalIteration_initialize(FrictionContactProblem *
                                                    nc * sizeof(double));
     localsolver_options->dWorkSize = nc ;
   }
-  for (int i = 0; i < nc; i++)
+  for (size_t i = 0; i < nc; i++)
   {
     localsolver_options->dWork[i]=1.0;
   }
@@ -305,8 +308,8 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
   /* double as = 1.0 / (MLocal[8] + mu_i); */
   /* at = an; */
   /* as = an; */
-  double rho=   options->dWork[options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER]] , rho_k;
-  DEBUG_PRINTF (" Contact options->iparam[4] = %i\n",options->iparam[4] );
+  double rho=   options->dWork[options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]] , rho_k;
+  DEBUG_PRINTF (" Contact options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = %i\n",options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] );
   DEBUG_PRINTF("saved rho = %14.7e\n",rho );
   assert(rho >0);
 
@@ -321,8 +324,7 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
   int localiter = 0;
-  double localtolerance = dparam[0];
-
+  double localtolerance = dparam[SICONOS_DPARAM_TOL];
 
   /* Variable for Line_search */
   double a1,a2;
@@ -330,17 +332,17 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
   double localerror_k;
   int ls_iter = 0;
   int ls_itermax = 10;
-  /* double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7]; */
+
   double tau=2.0/3.0, tauinv = 3.0/2.0,  L= 0.9, Lmin =0.3;
 
-  numerics_printf_verbose(2,"--  fc3d_projectionOnConeWithLocalIteration_solve contact = %i", options->iparam[4] );
+  numerics_printf_verbose(2,"--  fc3d_projectionOnConeWithLocalIteration_solve contact = %i", options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] );
   numerics_printf_verbose(2,"--  fc3d_projectionOnConeWithLocalIteration_solve | localiter \t| rho \t\t\t| error\t\t\t|");
   numerics_printf_verbose(2,"--                                                | %i \t\t| %.10e\t| %.10e\t|", localiter, rho, localerror);
 
 
 
   /*     printf ("localtolerance = %14.7e\n",localtolerance ); */
-  while ((localerror > localtolerance) && (localiter < iparam[0]))
+  while ((localerror > localtolerance) && (localiter < iparam[SICONOS_IPARAM_MAX_ITER]))
   {
     DEBUG_PRINT("\n Local iteration starts \n");
     localiter ++;
@@ -441,8 +443,8 @@ int fc3d_projectionOnConeWithLocalIteration_solve(FrictionContactProblem* localp
     numerics_printf_verbose(2,"--                                                | %i \t\t| %.10e\t| %.10e\t|", localiter, rho, localerror);
 
   }
-  options->dWork[options->iparam[4]] =rho;
-  options->dparam[1] = localerror ;
+  options->dWork[options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]] =rho;
+  options->dparam[SICONOS_DPARAM_RESIDU] = localerror ;
   DEBUG_PRINTF("final rho  =%e\n", rho);
   
   DEBUG_END("fc3d_projectionOnConeWithLocalIteration_solve(...)\n");
@@ -616,7 +618,7 @@ int fc3d_projectionOnCylinder_solve(FrictionContactProblem *localproblem , doubl
   /* int incx = 1, incy = 1; */
   double worktmp[3];
 
-  double R  = localproblem->mu[options->iparam[4]];
+  double R  = localproblem->mu[options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]];
   //printf("R=%e\n", R);
   /* cblas_dcopy(nLocal , qLocal, incx , worktmp , incy); */
   /* cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, worktmp, incy); */
@@ -697,9 +699,9 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
   /* double as = 1.0 / (MLocal[8] + mu_i); */
   /* at = an; */
   /* as = an; */
-  double rho=   options->dWork[options->iparam[4]] , rho_k;
+  double rho=   options->dWork[options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]] , rho_k;
   /* printf ("saved rho = %14.7e\n",rho );  */
-  /* printf ("options->iparam[4] = %i\n",options->iparam[4] );  */
+  /* printf ("options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = %i\n",options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] );  */
 
 
 
@@ -710,8 +712,7 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
   double localerror = 1.0;
   //printf ("localerror = %14.7e\n",localerror );
   int localiter = 0;
-  double localtolerance = dparam[0];
-
+  double localtolerance = dparam[SICONOS_DPARAM_TOL];
 
   /* Variable for Line_search */
   double a1,a2;
@@ -719,13 +720,12 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
   double localerror_k;
   int ls_iter = 0;
   int ls_itermax = 10;
-  /* double tau=dparam[4], tauinv=dparam[5], L= dparam[6], Lmin = dparam[7]; would be better */
   double tau=2.0/3.0, tauinv = 3.0/2.0,  L= 0.9, Lmin =0.3;
 
-  double R  = localproblem->mu[options->iparam[4]];
+  double R  = localproblem->mu[options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]];
 
   /* printf ("R = %14.7e\n",R ); */
-  while ((localerror > localtolerance) && (localiter < iparam[0]))
+  while ((localerror > localtolerance) && (localiter < iparam[SICONOS_IPARAM_MAX_ITER]))
   {
     localiter ++;
 
@@ -826,7 +826,7 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
     }
 
   }
-  options->dWork[options->iparam[4]] =rho;
+  options->dWork[options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER]] =rho;
 
  
  if (verbose > 1)
@@ -840,144 +840,9 @@ int fc3d_projectionOnCylinderWithLocalIteration_solve(FrictionContactProblem* lo
   return 0;
 
 }
-int fc3d_projectionOnConeWithDiagonalization_setDefaultSolverOptions(SolverOptions* options)
+
+void fc3d_poc_set_default(SolverOptions* options)
 {
-
-  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnConeWithDiagonalization  Solver\n");
-  
-
-  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 0;
-  options->dSize = 0;
-  options->iSize = 10;
-  options->dSize = 10;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  solver_options_nullify(options);
-
-
-  return 0;
-}
-int fc3d_projectionOnConeWithRegularization_setDefaultSolverOptions(SolverOptions* options)
-{
-
-  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnConeWithRegularization Solver\n");
-  
-
-  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 0;
-  options->dSize = 0;
-  options->iSize = 10;
-  options->dSize = 10;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  solver_options_nullify(options);
-
-
-  return 0;
-}
-
-int fc3d_projectionOnCone_setDefaultSolverOptions(SolverOptions* options)
-{
-
-  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnCone  Solver\n");
-  
-
-  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 10;
-  options->dSize = 10;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  solver_options_nullify(options);
-
-  return 0;
-}
-int fc3d_projectionOnCone_velocity_setDefaultSolverOptions(SolverOptions* options)
-{
-
-  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnCone_velocity  Solver\n");
-  
-
-  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 10;
-  options->dSize = 10;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  solver_options_nullify(options);
-
-
-  return 0;
-}
-int fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(SolverOptions* options)
-{
-
-  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnConeWithLocalIteration  Solver\n");
-  
-
-  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  solver_options_nullify(options);
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
-
-  return 0;
-}
-int fc3d_projectionOnCylinder_setDefaultSolverOptions(SolverOptions* options)
-{
-
-  numerics_printf("Set the Default SolverOptions for the ONECONTACT_projectionOnCylinder  Solver\n");
-  
-
-  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 10;
-  options->dSize = 10;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  solver_options_nullify(options);
-
-
-  return 0;
-}
-int fc3d_projectionOnCylinderWithLocalIteration_setDefaultSolverOptions(SolverOptions* options)
-{
-
-  numerics_printf("Set the Default SolverOptions for the ONECONTACT_ProjectionOnCylinderWithLocalIteration  Solver\n");
-  
-
-  options->solverId = SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  solver_options_nullify(options);
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
-
-  return 0;
+  options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = 0; // this will be set by external solver
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 0.; // Used only for ProjectionOnConeWithRegularization
 }

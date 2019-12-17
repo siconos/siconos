@@ -1,13 +1,9 @@
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <assert.h>
-
-#include "commonlib.h"
 #include "sparselib.h"
-
+#include <math.h>       // for fabs
+#include <stdio.h>      // for printf, NULL
+#include <assert.h> // for assert, used through macros // IWYU pragma: keep
+#include <string.h> // for memcpy, memmove used through macros. // IWYU pragma: keep
+#include "commonlib.h"  // for REAL, findIndex, mod, MEMFREE, BLAS_BASE, TRUE
 
 sparseMatrix *createMatrix(int dimLimit, int lenLimit, int initVectors)
 {

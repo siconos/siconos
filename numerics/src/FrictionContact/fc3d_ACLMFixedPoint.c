@@ -16,25 +16,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
-#include "SOCLCP_Solvers.h"
-#include "VI_cst.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-//#define VERBOSE_DEBUG
-#include "Friction_cst.h"
-#include "sanitizer.h"
-
+#include <assert.h>                                       // for assert
+#include <math.h>                                         // for sqrt
+#include <stdio.h>                                        // for printf, fpr...
+#include <stdlib.h>                                       // for free, malloc
+#include "FrictionContactProblem.h"                       // for FrictionCon...
+#include "Friction_cst.h"                                 // for SICONOS_FRI...
+#include "NumericsFwd.h"                                  // for SolverOptions
+#include "SOCLCP_Solvers.h"                               // for soclcp_VI_E...
+#include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "SiconosBlas.h"                                  // for cblas_dnrm2
+#include "SolverOptions.h"                                // for SolverOptions
+#include "VI_cst.h"                                       // for SICONOS_VI_...
 #define DEBUG_MESSAGES
 #define DEBUG_STDOUT
-#include "debug.h"
-#include "numerics_verbose.h"
-
+#include "debug.h"  // lines 32-32
+#include "fc3d_Solvers.h"                                 // for fc3d_set_in...
+#include "fc3d_compute_error.h"                           // for fc3d_comput...
+#include "numerics_verbose.h"                             // for verbose
 
 
 /** pointer to function used to call internal solver for proximal point solver */
@@ -60,10 +60,10 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
 
   if (options->numberOfInternalSolvers < 1)
   {
-    numerics_error("fc3d_ACLMFixedpoint", "The ACLM Fixed Point method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
+    numerics_error("fc3d_ACLMFixedpoint", "The ACLM Fixed Point method needs options for the internal solvers, please check your options.");
   }
 
-  SolverOptions * internalsolver_options = options->internalSolvers;
+  SolverOptions * internalsolver_options = options->internalSolvers[0];
 
   if (verbose > 0)
   {
@@ -136,7 +136,7 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
 
 
     (*internalsolver)(soclcp, reaction , velocity , info , internalsolver_options);
-    cumul_iter +=  internalsolver_options->iparam[7];
+    cumul_iter +=  internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
     /* **** Criterium convergence **** */
 
     fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
@@ -162,10 +162,7 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
   free(soclcp->coneIndex);
   free(soclcp);
 
-
-  if (internalsolver_options->internalSolvers != NULL)
-    internalsolver_options->internalSolvers->dWork = NULL;
-  dparam[SICONOS_VI_EG_DPARAM_RHO] = internalsolver_options->dparam[SICONOS_VI_EG_DPARAM_RHO];
+  dparam[SICONOS_VI_DPARAM_RHO] = internalsolver_options->dparam[SICONOS_VI_DPARAM_RHO];
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
@@ -173,31 +170,12 @@ void fc3d_ACLMFixedPoint(FrictionContactProblem* problem, double *reaction, doub
 
 
 
-int fc3d_ACLMFixedPoint_setDefaultSolverOptions(SolverOptions* options)
+void fc3d_aclmfp_set_default(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ACLMFP Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_ACLMFP;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  solver_options_nullify(options);
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] =  SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] =10.0;
-
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-
-  soclcp_nsgs_setDefaultSolverOptions(options->internalSolvers);
-  options->internalSolvers->iparam[SICONOS_IPARAM_MAX_ITER] =10000;
-  return 0;
+  
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_SOCLCP_NSGS);
+  options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] =10000;
 }

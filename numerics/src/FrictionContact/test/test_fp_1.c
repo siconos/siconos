@@ -16,95 +16,82 @@
  * limitations under the License.
  */
 
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ACLMFP
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SOCLCP_cst.h"                  // for SICONOS_SOCLCP_VI_EG, SICONO...
+#include "SolverOptions.h"               // for solver_options_create, Solve...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-#include "frictionContact_test_utils.h"
-#include "SOCLCP_cst.h"
-
-char *** test_collection(int n_data_1, char ** data_collection)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_fp = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_fp[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
-
-  int n =0;
-  int e=0;
+  *number_of_tests = 5; //n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
-  int d=6;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ACLMFP);
-  test_fp[n][e++] = "1e-06";
-  test_fp[n][e++] = "200";
-  test_fp[n][e++] = "---";
-  n++;
+  int current = 0;
 
-  d=5;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ACLMFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "200";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "iparam";
-  test_fp[n][e++] = "1";
-  test_fp[n][e++] = "1";
-  test_fp[n][e++] = "---";
-  n++;
+  int d;
+  // ===== FC3D_Example1_SBM.dat =====
+  d = 0; 
+  // ACLM fixed point + VI EG as internal solver.
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ACLMFP);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   
-  d=2;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ACLMFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "200";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_SOCLCP_VI_FPP);
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "---";
-  n++;
+  solver_options_update_internal(collection[current].options, 0, SICONOS_SOCLCP_VI_EG);
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
 
-  d=0;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ACLMFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "200";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_SOCLCP_VI_EG);
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "---";
-  n++;
-
-
-  d=5;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_SOCLCP);
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "---";
-  n++;
+  // ===== Confeti-ex13-4contact-Fc3D-SBM.dat =====
+  d = 2; 
+  // ACLM fixed point + VI FPP as internal solver.
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ACLMFP);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   
-  test_fp[n][0] ="---";
-  return test_fp;
+  solver_options_update_internal(collection[current].options, 0, SICONOS_SOCLCP_VI_FPP);
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  // ===== Confeti-ex03-Fc3D-SBM.dat =====
+  d = 5;
+  // ACLM fixed point 
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ACLMFP);    
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+  collection[current].options->iparam[1] = 1;
+  
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  // SOCLCP, default for all values.
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_SOCLCP);    
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  // ===== BoxesStack1-i100000-32.hdf5.dat =====
+  d = 6;
+  // ACLM fixed point 
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_ACLMFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+  
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
+
+  *number_of_tests = current;
+  return collection;
 
 }

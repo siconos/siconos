@@ -16,15 +16,16 @@
  * limitations under the License.
 */
 
-#include "SolverOptions.h"
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-
-#include "NonSmoothDrivers.h"
-#include "NCP_Solvers.h"
-#include "NCP_cst.h"
-#include "sn_error_handling.h"
+#include <assert.h>                           // for assert
+#include <stdio.h>                            // for fprintf, stderr
+#include <stdlib.h>                           // for exit, EXIT_FAILURE
+#include "NCP_Solvers.h"                      // for ncp_compute_error, ncp_...
+#include "NCP_cst.h"                          // for SICONOS_NCP_NEWTON_FB_F...
+#include "NonSmoothDrivers.h"                 // for ncp_driver
+#include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
+#include "NumericsFwd.h"                      // for SolverOptions, Nonlinea...
+#include "SolverOptions.h"                    // for SolverOptions
+#include "sn_error_handling.h"                // for sn_fatal_error_msg, SN_...
 
 const char* const  SICONOS_NCP_NEWTON_FB_FBLSA_STR = "NCP Newton FBLSA";
 const char* const  SICONOS_NCP_NEWTON_MIN_FBLSA_STR = "NCP Newton minFBLSA";

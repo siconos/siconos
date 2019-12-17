@@ -15,13 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <float.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include "SiconosLapack.h"
 #include "pinv.h"
+#include <stdlib.h>         // for free, malloc
+#include "NSSTools.h"  // for min
+#include "SiconosBlas.h"    // for cblas_dgemm, CblasColMajor, CblasNoTrans
+#include "SiconosLapack.h"  // for DGESVD, lapack_int
+
 /**
  * n : row number
  * m : col number

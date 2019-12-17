@@ -16,6 +16,8 @@
  * limitations under the License.
 */
 #include "LagrangianLinearTIDSTest.hpp"
+#include "SiconosAlgebraProd.hpp"
+#include "SimpleMatrixFriends.hpp"
 #include "BlockMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \

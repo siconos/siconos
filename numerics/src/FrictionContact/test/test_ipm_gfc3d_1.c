@@ -16,34 +16,30 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_ADMM
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, Solve...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
-
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test[n][e++] = data_collection_1[d];
-    test[n][e++] = "0";
-    test[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_IPM);
-    test[n][e++] = "1e-5";
-    test[n][e++] = "10000";
-    test[n][e++] = "---";
-    n++;
-  }
+  int n_solvers = 1;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
   
-  test[n][0] ="---";
-  return test;
+  int current = 0;
+  for(int d =0; d <n_data; d++)
+    {
+      // GFC3D,IPM
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_IPM);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+      current++;
+    }
 
+    return collection; 
 }

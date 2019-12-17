@@ -17,26 +17,25 @@
 */
 
 
-#include "FrictionContactProblem.h"
-#include "SolverOptions.h"
 #include "fc3d_compute_error.h"
-#include "fc3d_projection.h"
-#include "projectionOnCone.h"
-#include "projectionOnCylinder.h"
-#include "SiconosLapack.h"
-#include "numerics_verbose.h"
-
-#include <math.h>
-#include <assert.h>
-#include <float.h>
-
+#include <assert.h>                  // for assert
+#include <float.h>                   // for DBL_EPSILON
+#include <math.h>                    // for sqrt, fabs
+#include <stddef.h>                  // for NULL
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "NumericsMatrix.h"          // for NM_prod_mv_3x3, NM_gemv
+#include "SolverOptions.h"           // for SolverOptions
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                   // for DEBUG_PRINTF, DEBUG_EXPR, DEBUG_...
+#include "numerics_verbose.h"        // for numerics_error
+#include "projectionOnCone.h"        // for projectionOnCone
+#include "projectionOnCylinder.h"    // for projectionOnCylinder
 #ifdef DEBUG_MESSAGES
 #include "NumericsVector.h"
 #endif
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
 
 
 void fc3d_unitary_compute_and_add_error(double* restrict r , double* restrict u, double mu, double* restrict error, double * worktmp)
@@ -77,10 +76,8 @@ int fc3d_compute_error(
   cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
   NM_prod_mv_3x3(n, n, problem->M, z, w); // w = Mz +q
 
-  double norm_r= cblas_dnrm2(n, z, 1);
-  double norm_w= cblas_dnrm2(n, w, 1);
-  DEBUG_PRINTF("norm of the reaction %e\n", norm_r);
-  DEBUG_PRINTF("norm of the velocity %e\n", norm_w);
+  DEBUG_PRINTF("norm of the reaction %e\n", cblas_dnrm2(n, z, 1));
+  DEBUG_PRINTF("norm of the velocity %e\n", cblas_dnrm2(n, w, 1));
   DEBUG_PRINTF("norm of q = %12.8e\n", norm);
   /* DEBUG_EXPR(NV_display(problem->q,n);); */
   /* DEBUG_EXPR(NV_display(w,n);); */

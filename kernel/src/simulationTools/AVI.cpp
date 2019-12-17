@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "AVI.hpp"
+#include "NumericsMatrix.h"
 #include <assert.h>
 #include "Simulation.hpp"
 #include "NormalConeNSL.hpp"
@@ -23,6 +24,7 @@
 #include "SiconosSets.h" // from numerics, for polyhedron
 //#include <AVI_Solvers.h>
 #include <NonSmoothDrivers.h>
+#include "SolverOptions.h" // for solver_options_create ...
 
 #include <limits>
 #include <cstdlib>
@@ -82,12 +84,18 @@ struct AVI::_BoundsNSLEffect : public SiconosVisitor
  * END visitor for nslaw
 */
 
-AVI::AVI(int numericsSolverId): LinearOSNS(numericsSolverId)
+
+AVI::AVI(int numericsSolverId):
+  AVI(SP::SolverOptions(solver_options_create(numericsSolverId),
+                        solver_options_delete))
+{}
+
+AVI::AVI(SP::SolverOptions options):
+  LinearOSNS(options), _numerics_problem(new AffineVariationalInequalities)
 {
-  _numerics_problem.reset(new AffineVariationalInequalities);
   _numerics_problem->poly.split = new polyhedron;
-  solver_options_set(_numerics_solver_options.get(), numericsSolverId);
 }
+
 
 void AVI::initialize(SP::Simulation sim)
 {
@@ -171,17 +179,8 @@ void AVI::display() const
   LinearOSNS::display();
 }
 
-void AVI::setSolverId(int solverId)
-{
-  // clear previous Solveroptions
-  solver_options_delete(_numerics_solver_options.get());
-  solver_options_set(_numerics_solver_options.get(), solverId);
-}
-
-
 AVI::~AVI()
 {
-  solver_options_delete(&*_numerics_solver_options);
   delete _numerics_problem->poly.split;
 }
 

@@ -16,6 +16,9 @@
  * limitations under the License.
 */
 #include "MLCPProjectOnConstraints.hpp"
+#include "MixedLinearComplementarityProblem.h"
+#include "SiconosVectorFriends.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "MixedComplementarityConditionNSL.hpp"
 #include "EqualityConditionNSL.hpp"
 #include "Simulation.hpp"
@@ -1266,12 +1269,12 @@ void MLCPProjectOnConstraints::computeOptions(SP::Interaction inter1, SP::Intera
 
     if (equalitySize1 > 0)
     {
-      _numerics_problem.blocksRows[_curBlock + 1] = _numerics_problem.blocksRows[_curBlock] + equalitySize1;
-      _numerics_problem.blocksIsComp[_curBlock] = 0;
+      _numerics_problem->blocksRows[_curBlock + 1] = _numerics_problem->blocksRows[_curBlock] + equalitySize1;
+      _numerics_problem->blocksIsComp[_curBlock] = 0;
       // #ifdef MLCPPROJ_DEBUG
       //        std::cout << "_curBlock : " << _curBlock <<std::endl;
-      //        std::cout << "_numerics_problem.blocksRows["<<_curBlock+1 <<" ] : " << _numerics_problem.blocksRows[_curBlock+1] <<std::endl;
-      //        std::cout << "_numerics_problem.blocksIsComp["<<_curBlock <<" ] : " << _numerics_problem.blocksIsComp[_curBlock] <<std::endl;
+      //        std::cout << "_numerics_problem->blocksRows["<<_curBlock+1 <<" ] : " << _numerics_problem->blocksRows[_curBlock+1] <<std::endl;
+      //        std::cout << "_numerics_problem->blocksIsComp["<<_curBlock <<" ] : " << _numerics_problem->blocksIsComp[_curBlock] <<std::endl;
       // #endif
 
       _curBlock++;
@@ -1279,12 +1282,12 @@ void MLCPProjectOnConstraints::computeOptions(SP::Interaction inter1, SP::Intera
     /*add a complementarity block.*/
     if (inequalitySize1 > 0)
     {
-      _numerics_problem.blocksRows[_curBlock + 1] = _numerics_problem.blocksRows[_curBlock] + inequalitySize1;
-      _numerics_problem.blocksIsComp[_curBlock] = 1;
+      _numerics_problem->blocksRows[_curBlock + 1] = _numerics_problem->blocksRows[_curBlock] + inequalitySize1;
+      _numerics_problem->blocksIsComp[_curBlock] = 1;
       // #ifdef MLCPPROJ_DEBUG
       //        std::cout << "_curBlock : " << _curBlock <<std::endl;
-      //        std::cout << "_numerics_problem.blocksRows["<<_curBlock+1<< "] : " << _numerics_problem.blocksRows[_curBlock+1] <<std::endl;
-      //        std::cout << "_numerics_problem.blocksIsComp["<<_curBlock<< "] : " << _numerics_problem.blocksIsComp[_curBlock] <<std::endl;
+      //        std::cout << "_numerics_problem->blocksRows["<<_curBlock+1<< "] : " << _numerics_problem->blocksRows[_curBlock+1] <<std::endl;
+      //        std::cout << "_numerics_problem->blocksIsComp["<<_curBlock<< "] : " << _numerics_problem->blocksIsComp[_curBlock] <<std::endl;
       // #endif
 
       _curBlock++;

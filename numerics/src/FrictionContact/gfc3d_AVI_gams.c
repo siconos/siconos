@@ -14,18 +14,19 @@
 /* GAMS stuff */
 
 #define _XOPEN_SOURCE 700
+#include <stdio.h>          // for printf
+#include <stdlib.h>         // for exit, EXIT_FAILURE
+#include "NumericsFwd.h"    // for GlobalFrictionContactProblem, SolverOptions
+#include "gfc3d_Solvers.h"  // for gfc3d_AVI_gams_path, gfc3d_AVI_gams_pathvi
+#include "SiconosConfig.h"  // for HAVE_GAMS_C_API // IWYU pragma: keep
+
+#ifdef HAVE_GAMS_C_API
 
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "GlobalFrictionContactProblem.h"
-#include "gfc3d_Solvers.h"
-
-#ifdef HAVE_GAMS_C_API
-
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <stdlib.h>
 #include <math.h>
 
 #include "GAMSlink.h"
@@ -82,6 +83,10 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   assert(problem->numberOfContacts > 0);
   assert(problem->M);
   assert(problem->q);
+  if (!options->solverParameters)
+    {
+      options->solverParameters = createGAMSparams(GAMS_MODELS_SHARE_DIR, GAMS_DIR);
+    }
 
   /* Handles to the Option objects */
   optHandle_t Optr = NULL;
@@ -158,7 +163,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   }
 
   getGamsSolverOpt(solverOptPtr, sysdir, solverName);
-  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
+  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[SICONOS_DPARAM_TOL]);
 //  strncpy(msg, "./", sizeof(deffile));
   strncpy(msg, solverName, sizeof(msg));
   strncat(msg, ".opt", sizeof(msg) - strlen(msg) - 1);
@@ -181,7 +186,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   }
 
   optHandle_t Opts[] = {Optr, solverOptPtr};
-  SN_Gams_set_options((SN_GAMSparams*)options->solverParameters, Opts);
+  SN_Gams_set_default((SN_GAMSparams*)options->solverParameters, Opts);
 
   optWriteParameterFile(solverOptPtr, msg);
 
@@ -227,6 +232,8 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   NM_clear(&Akmat);
   optFree(&Optr);
   optFree(&solverOptPtr);
+  deleteGAMSparams((SN_GAMSparams *)options->solverParameters);
+
   return status;
 }
 

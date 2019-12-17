@@ -16,12 +16,11 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <math.h>
 
-#include "CSparseMatrix.h"
 #include "hdf5_logger.h"
-#include "NumericsSparseMatrix.h"
+#include <stdio.h>  // for fprintf, stderr
+#include "SiconosConfig.h" // for WITH_HDF5  // IWYU pragma: keep
+
 
 #ifdef WITH_HDF5
 

@@ -93,11 +93,11 @@ The following functions are (and must) be present in any class derived from Dyna
 
 * :func:`DynamicalSystem::initRhs()`
 
-* :func:`DynamicalSystem::icomputeRhs(time)`
+* :func:`DynamicalSystem::icomputeRhs()`
 
-* :func:`DynamicalSystem::computeJacobianRhsx(time)`
+* :func:`DynamicalSystem::computeJacobianRhsx()`
   
-* :func:`DynamicalSystem::initializeNonSmoothInput(level)`
+* :func:`DynamicalSystem::initializeNonSmoothInput()`
 
 * :func:`DynamicalSystem::swapInMemory()`
 
@@ -105,7 +105,7 @@ The following functions are (and must) be present in any class derived from Dyna
 
 * :func:`DynamicalSystem::resetAllNonSmoothParts()`
 
-* :func:`DynamicalSystem::resetNonSmoothPart(level)`
+* :func:`DynamicalSystem::resetNonSmoothPart()`
   
 
 

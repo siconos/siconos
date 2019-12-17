@@ -17,29 +17,32 @@
 */
 
 /* Factorisation with Newton_methods.c is needed */
-
 #include "fc3d_nonsmooth_Newton_solvers.h"
-
-#include "NumericsMatrix_internal.h"
-
+#include <assert.h>                                   // for assert
+#include <math.h>                                     // for isnan, isinf, pow
+#ifndef __cplusplus
+#include <stdbool.h>                                  // for true
+#endif
+#include <stdio.h>                                    // for printf, NULL
+#include <stdlib.h>                                   // for free, calloc, exit
+#include "CSparseMatrix.h"                            // for CSparseMatrix_z...
+#include "FrictionContactProblem.h"                   // for FrictionContact...
+#include "Friction_cst.h"                             // for SICONOS_FRICTIO...
+#include "NumericsMatrix.h"                           // for NumericsMatrix
+#include "NumericsSparseMatrix.h"                     // for NSM_linearSolve...
+#include "SolverOptions.h"                            // for SolverOptions
+#include "SparseBlockMatrix.h"                        // for SparseBlockStru...
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
-#include "debug.h"
-#include "op3x3.h"
-#include "SparseBlockMatrix.h"
-#include "fc3d_Solvers.h"
-#include "FrictionContactProblem.h"
-#include "fc3d_compute_error.h"
-#include "AlartCurnierGenerated.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include "Friction_cst.h"
-#include "SiconosLapack.h"
-#include "NumericsSparseMatrix.h"
-#include "sanitizer.h"
-#include "numerics_verbose.h"
+#include "debug.h"                                    // for DEBUG_EXPR_WE
+#include "fc3d_AlartCurnier_functions.h"              // for compute_rho_spe...
+#include "fc3d_compute_error.h"                       // for fc3d_compute_error
+#include "fc3d_local_problem_tools.h"                 // for fc3d_local_prob...
+#include "fc3d_nonsmooth_Newton_FischerBurmeister.h"  // for fc3d_FischerBur...
+#include "numerics_verbose.h"                         // for verbose, numeri...
+#include "op3x3.h"                                    // for extract3x3, add3x3
+#include "sanitizer.h"                                // for cblas_dcopy_msan
+#include "SiconosBlas.h"                                    // for cblas_dcopy
 
 static void NM_dense_to_sparse_diag_t(double* A, NumericsMatrix* B, size_t block_row_size, size_t block_col_size)
 {
@@ -564,12 +567,12 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
   unsigned int iter = 0;
   unsigned int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
-  unsigned int erritermax = options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION];
+  unsigned int erritermax = options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY];
 
   assert(itermax > 0);
 
 
-  double tolerance = options->dparam[0];
+  double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   assert(tolerance > 0);
 
   if (verbose > 0)
@@ -617,14 +620,14 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
   if (problem->M->storageType != NM_DENSE)
   {
-    switch(options->iparam[13])
-    {
-      case 0:
+    switch(options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER])
+      {
+      case SICONOS_FRICTION_3D_NSN_USE_CSLUSOL:
         {
           NSM_linearSolverParams(AWpB)->solver = NSM_CS_LUSOL;
           break;
         }
-      case 1:
+      case SICONOS_FRICTION_3D_NSN_USE_MUMPS:
         {
           NSM_linearSolverParams(AWpB)->solver = NSM_MUMPS;
           break;
@@ -759,14 +762,14 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
     cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
     NM_gemv(1., problem->M, reaction, 1., velocity);
 
-    options->dparam[1] = INFINITY;
+    options->dparam[SICONOS_DPARAM_RESIDU] = INFINITY;
 
     if (!(iter % erritermax))
     {
 
       fc3d_compute_error(problem, reaction, velocity,
 //      fc3d_FischerBurmeister_compute_error(problem, reaction, velocity,
-                         tolerance, options, norm_q, &(options->dparam[1]));
+                         tolerance, options, norm_q, &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
       DEBUG_EXPR_WE(equation->function(equation->data, problemSize,
                                        reaction, velocity, equation->problem->mu, rho,
@@ -775,7 +778,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
       DEBUG_EXPR_WE(assert((cblas_dnrm2(problemSize, F, 1)
                             / (1 + cblas_dnrm2(problemSize, problem->q, 1)))
-                           <= (10 * options->dparam[1] + 1e-15)));
+                           <= (10 * options->dparam[SICONOS_DPARAM_RESIDU] + 1e-15)));
 
     }
 
@@ -785,16 +788,16 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
                          reaction, velocity, equation->problem->mu, rho,
                          F, NULL, NULL);
 
-      printf("   ---- fc3d_nonsmooth_Newton_solvers_solve: iteration %d : , linear solver residual =%g, residual=%g, ||F||=%g\n", iter, linear_solver_residual, options->dparam[1],cblas_dnrm2(problemSize, F, 1));
+      printf("   ---- fc3d_nonsmooth_Newton_solvers_solve: iteration %d : , linear solver residual =%g, residual=%g, ||F||=%g\n", iter, linear_solver_residual, options->dparam[SICONOS_DPARAM_RESIDU],cblas_dnrm2(problemSize, F, 1));
     }
 
     if (options->callback)
     {
       options->callback->collectStatsIteration(options->callback->env, problemSize, reaction, velocity,
-                                      options->dparam[1], NULL);
+                                      options->dparam[SICONOS_DPARAM_RESIDU], NULL);
     }
 
-    if (isnan(options->dparam[1]))
+    if (isnan(options->dparam[SICONOS_DPARAM_RESIDU]))
     {
        if (verbose > 0)
        {
@@ -804,7 +807,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
        break;
     }
 
-    if (options->dparam[1] < tolerance)
+    if (options->dparam[SICONOS_DPARAM_RESIDU] < tolerance)
     {
       info[0] = 0;
       break;
@@ -815,10 +818,10 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
   if (verbose > 0)
   {
     if (!info[0])
-      printf("---- FC3D - NSN - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[1],tolerance);
+      printf("---- FC3D - NSN - convergence after %d iterations, residual : %g < %g \n",  iter, options->dparam[SICONOS_DPARAM_RESIDU],tolerance);
     else
     {
-      printf("---- FC3D - NSN - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[1], tolerance);
+      printf("---- FC3D - NSN - no convergence after %d iterations, residual : %g  < %g \n",  iter, options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
     }
   }
 

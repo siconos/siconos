@@ -16,30 +16,24 @@
  * limitations under the License.
 */
 
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
-
-#include "GlobalFrictionContactProblem_as_VI.h"
-#include "GlobalFrictionContactProblem.h"
-#include "VariationalInequality_Solvers.h"
-#include "gfc3d_Solvers.h"
-#include "gfc3d_compute_error.h"
-#include "NumericsMatrix.h"
-
-#include "SolverOptions.h"
-#include "numerics_verbose.h"
-
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
+#include <stdio.h>                               // for printf
+#include <stdlib.h>                              // for free, malloc, calloc
+#include <string.h>                              // for memcpy
+#include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
+#include "GlobalFrictionContactProblem_as_VI.h"  // for GlobalFrictionContac...
+#include "NumericsFwd.h"                         // for VariationalInequality
+#include "NumericsMatrix.h"                      // for NumericsMatrix
+#include "SiconosBlas.h"                         // for cblas_dnrm2
+#include "SolverOptions.h"                       // for SolverOptions, SICON...
+#include "VariationalInequality.h"               // for VariationalInequality
+#include "VariationalInequality_Solvers.h"       // for variationalInequalit...
+#include "debug.h"                               // for DEBUG_EXPR, DEBUG_BEGIN
+#include "gfc3d_Solvers.h"                       // for gfc3d_VI_FixedPointP...
+#include "gfc3d_compute_error.h"                 // for gfc3d_compute_error
+#include "numerics_verbose.h"                    // for verbose
 
 #ifdef  DEBUG_MESSAGES
 #include "NumericsVector.h"
-#include "NumericsMatrix.h"
 #endif
 
 void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
@@ -64,7 +58,6 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   vi->F = &Function_VI_GFC3D;
   vi->ProjectionOnX = &Projection_VI_GFC3D;
 
-  int iter=0;
   double error=1e24;
 
   GlobalFrictionContactProblem_as_VI *gfc3d_as_vi= (GlobalFrictionContactProblem_as_VI*)malloc(sizeof(GlobalFrictionContactProblem_as_VI));
@@ -80,35 +73,9 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   gfc3d_as_vi->gfc3d = problem;
   /* frictionContact_display(fc3d_as_vi->fc3d); */
 
-  SolverOptions * visolver_options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  variationalInequality_setDefaultSolverOptions(visolver_options,
-                                                SICONOS_VI_EG);
   DEBUG_EXPR(NV_display(reaction,m););
   DEBUG_EXPR(NV_display(globalVelocity,n););
-  int isize = options->iSize;
-  int dsize = options->dSize;
-  int vi_isize = visolver_options->iSize;
-  int vi_dsize = visolver_options->dSize;
-
-  if (isize != vi_isize )
-  {
-    printf("size prolem in gfc3d_VI_FixedPointProjection\n");
-  }
-  if (dsize != vi_dsize )
-  {
-    printf("size prolem in gfc3d_VI_FixedPointProjection\n");
-  }
-  int i;
-  for (i = 0; i < isize; i++)
-  {
-    visolver_options->iparam[i] = options->iparam[i] ;
-  }
-  for (i = 0; i < dsize; i++)
-  {
-    visolver_options->dparam[i] = options->dparam[i] ;
-  }
-
-
+  
   double * z = (double*)malloc((n+m)*sizeof(double));
   double * Fz = (double*)calloc((n+m),sizeof(double));
 
@@ -116,7 +83,8 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   memcpy(&z[n], reaction, m * sizeof(double));
   DEBUG_EXPR(NV_display(z,m+n););
   DEBUG_EXPR(NV_display(Fz,m+n););
-  variationalInequality_FixedPointProjection(vi, z, Fz , info , visolver_options);
+  // Warning : tolerance might be updated by VI determine_convergence function !
+  variationalInequality_FixedPointProjection(vi, z, Fz , info , options);
 
   memcpy(globalVelocity, z,  n * sizeof(double)  );
   memcpy(reaction, &z[n], m * sizeof(double)  );
@@ -142,7 +110,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   double norm_q = cblas_dnrm2(n , problem->q , 1);
   double norm_b = cblas_dnrm2(m , problem->b , 1);
 
-  gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[0],
+  gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[SICONOS_DPARAM_TOL],
                       options, norm_q, norm_b, &error);
 
   DEBUG_EXPR(NM_vector_display(reaction,m));
@@ -154,37 +122,15 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  error = visolver_options->dparam[SICONOS_DPARAM_RESIDU];
-  iter = visolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
-
-  options->dparam[SICONOS_DPARAM_RESIDU] = error;
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-
-
   if (verbose > 0)
   {
-    printf("--------------- GFC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], error);
+    printf("--------------- GFC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n",
+           options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   free(vi);
-
-  solver_options_delete(visolver_options);
-  free(visolver_options);
-  visolver_options=NULL;
   free(gfc3d_as_vi);
 
   DEBUG_END("gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, ... \n")
 
-}
 
-
-int gfc3d_VI_FixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the FixedPointProjection Solver\n");
-  }
-
-  variationalInequality_FixedPointProjection_setDefaultSolverOptions(options);
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_VI_FPP;
-  return 0;
 }

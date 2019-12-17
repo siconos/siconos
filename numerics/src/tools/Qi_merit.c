@@ -17,9 +17,10 @@
 */
 
 #include "Qi_merit.h"
-#include <math.h>
-#include <assert.h>
-#include <float.h>
+#include <assert.h>          // for assert
+#include <float.h>           // for DBL_EPSILON
+#include <math.h>            // for sqrt, fabs
+#include "NumericsMatrix.h"  // for NM_assert, NM_DENSE, NumericsMatrix
 
 void phi_Qi(int n, double* restrict x, double* restrict F, double* restrict Fbox, double* restrict lb, double* restrict ub)
 {

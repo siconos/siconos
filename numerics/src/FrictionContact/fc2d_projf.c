@@ -17,12 +17,7 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-#include "fc2d_Solvers.h"
+#include "fc2d_Solvers.h"  // for fc2d_projf
 
 void fc2d_projf(int etat[], int *nn, double y[], double fric[], double projf1[])
 {

@@ -15,19 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "projectionOnCone.h"
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
-#include "SiconosBlas.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "numerics_verbose.h"
-
+#include <math.h>                    // for sqrt, pow
+#include <stdio.h>                   // for printf, NULL
+#include <stdlib.h>                  // for calloc, free
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_EG
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NM_gemv
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                   // for DEBUG_PRINTF, DEBUG_EXPR_WE
+#include "fc3d_Solvers.h"            // for fc3d_ExtraGradient, fc3d_ExtraGr...
+#include "fc3d_compute_error.h"      // for fc3d_compute_error
+#include "numerics_verbose.h"        // for verbose
+#include "projectionOnCone.h"        // for projectionOnCone
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2, cblas_...
 
 void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -42,9 +45,9 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
   /* Dimension of the problem */
   int n = 3 * nc;
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
   double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
 
 
@@ -56,8 +59,6 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
   int hasNotConverged = 1;
   int contact; /* Number of the current row of blocks in M */
   int nLocal = 3;
-  dparam[0] = dparam[2]; // set the tolerance for the local solver
-
 
   double * velocitytmp = (double *)calloc(n,sizeof(double));
   double * reactiontmp = (double *)calloc(n,sizeof(double));
@@ -65,9 +66,9 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
   double rho = 0.0, rho_k =0.0;
   int isVariable = 0;
 
-  if (dparam[3] > 0.0)
+  if (dparam[SICONOS_FRICTION_3D_NSN_RHO] > 0.0)
   {
-    rho = dparam[3];
+    rho = dparam[SICONOS_FRICTION_3D_NSN_RHO];
     if (verbose > 0)
     {
       printf("--------------- FC3D - Extra Gradient (EG) - Fixed stepsize with  rho = %14.7e \n", rho);
@@ -77,7 +78,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
   {
     /* Variable step in iterations*/
     isVariable = 1;
-    rho = -dparam[3];
+    rho = -dparam[SICONOS_FRICTION_3D_NSN_RHO];
     if (verbose > 0)
     {
       printf("--------------- FC3D - Extra Gradient (EG) - Variable stepsize with starting rho = %14.7e \n", rho);
@@ -312,9 +313,8 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
   {
     printf("--------------- FC3D -  Extra Gradient (EG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }
-  dparam[0] = tolerance;
-  dparam[1] = error;
-  iparam[7] = iter;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   free(velocitytmp);
   free(reactiontmp);
   if (isVariable)
@@ -325,30 +325,7 @@ void fc3d_ExtraGradient(FrictionContactProblem* problem, double *reaction, doubl
 }
 
 
-int fc3d_ExtraGradient_setDefaultSolverOptions(SolverOptions* options)
+void fc3d_eg_set_default(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ExtraGradient Solver\n");
-  }
-
-  /*strcpy(options->solverName,"DSFP");*/
-  options->solverId = SICONOS_FRICTION_3D_EG;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 20000;
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1e-3;
-  options->dparam[3] = -1.0; // rho is variable by default
-
-  options->internalSolvers = NULL;
-
-  return 0;
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = -1.0; // rho is variable by default
 }

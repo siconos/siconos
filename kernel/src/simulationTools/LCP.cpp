@@ -17,6 +17,7 @@
  */
 #include "LCP.hpp"
 #include "OSNSMatrix.hpp"
+#include "SolverOptions.h"
 
 // --- numerics headers ---
 #include "NonSmoothDrivers.h"
@@ -29,13 +30,15 @@
 #include "debug.h"
 
 
-
 LCP::LCP(int numericsSolverId):
-  LinearOSNS(numericsSolverId)
-{
-  _numerics_problem.reset(new LinearComplementarityProblem);
-  linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
-}
+  LCP(SP::SolverOptions(solver_options_create(numericsSolverId),
+                        solver_options_delete))
+{}
+
+LCP::LCP(SP::SolverOptions options):
+  LinearOSNS(options), _numerics_problem(new LinearComplementarityProblem)
+{}
+
 
 int LCP::numericsCompute()
 {
@@ -101,9 +104,4 @@ int LCP::compute(double time)
   }
   DEBUG_END("LCP::compute(double time)\n");
   return info;
-}
-
-LCP::~LCP()
-{
-  solver_options_delete(&*_numerics_solver_options);
 }

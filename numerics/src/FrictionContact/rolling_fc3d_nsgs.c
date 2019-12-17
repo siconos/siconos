@@ -15,24 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "rolling_fc3d_projection.h"
-#include "rolling_fc3d_local_problem_tools.h"
-#include "rolling_fc3d_compute_error.h"
-#include "SiconosBlas.h"
-#include "NumericsArrays.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-#include <time.h>
-#include <float.h>
-#include <string.h>
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include "numerics_verbose.h"
-
+#include <assert.h>                            // for assert
+#include <float.h>                             // for DBL_EPSILON
+#include <math.h>                              // for pow, fabs, sqrt, isinf
+#include <stdlib.h>                            // for calloc, malloc, srand
+#include <string.h>                            // for NULL, memcpy
+#include "SiconosBlas.h"                             // for cblas_dnrm2
+#include "Friction_cst.h"                      // for SICONOS_FRICTION_3D_IP...
+#include "NumericsArrays.h"                    // for uint_shuffle
+#include "NumericsFwd.h"                       // for SolverOptions, Rolling...
+#include "RollingFrictionContactProblem.h"     // for RollingFrictionContact...
+#include "SolverOptions.h"                     // for SolverOptions, SICONOS...
+#include "debug.h"                             // for DEBUG_PRINTF, DEBUG_BEGIN
+#include "numerics_verbose.h"                  // for numerics_printf, numer...
+#include "rolling_fc3d_Solvers.h"              // for RollingComputeErrorPtr
+#include "rolling_fc3d_compute_error.h"        // for rolling_fc3d_compute_e...
+#include "rolling_fc3d_local_problem_tools.h"  // for rolling_fc3d_local_pro...
+#include "rolling_fc3d_projection.h"           // for rolling_fc3d_projectio...
 
 //#define FCLIB_OUTPUT
 
@@ -45,30 +44,30 @@ static int fccounter = -1;
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-void rolling_fc3d_nsgs_update(int contact, RollingFrictionContactProblem* problem, RollingFrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
-{
-  /* Build a local problem for a specific contact
-     reaction corresponds to the global vector (size n) of the global problem.
-  */
-  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  /* Build a local problem for a specific contact
-     reaction corresponds to the global vector (size n) of the global problem.
-  */
+/* static void rolling_fc3d_nsgs_update(int contact, RollingFrictionContactProblem* problem, RollingFrictionContactProblem* localproblem, double * reaction, SolverOptions* options) */
+/* { */
+/*   /\* Build a local problem for a specific contact */
+/*      reaction corresponds to the global vector (size n) of the global problem. */
+/*   *\/ */
+/*   /\* Call the update function which depends on the storage for MGlobal/MBGlobal *\/ */
+/*   /\* Build a local problem for a specific contact */
+/*      reaction corresponds to the global vector (size n) of the global problem. */
+/*   *\/ */
 
-  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  rolling_fc3d_local_problem_fill_M(problem, localproblem, contact);
+/*   /\* The part of MGlobal which corresponds to the current block is copied into MLocal *\/ */
+/*   rolling_fc3d_local_problem_fill_M(problem, localproblem, contact); */
 
-  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock,
-         excluding the block corresponding to the current contact. ****/
-  rolling_fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
+/*   /\****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products MLocal.reactionBlock, */
+/*          excluding the block corresponding to the current contact. ****\/ */
+/*   rolling_fc3d_local_problem_compute_q(problem, localproblem, reaction, contact); */
 
-  /* Friction coefficient for current block*/
-  localproblem->mu[0] = problem->mu[contact];
-  /* Rolling Friction coefficient for current block*/
-  localproblem->mu_r[0] = problem->mu_r[contact];
+/*   /\* Friction coefficient for current block*\/ */
+/*   localproblem->mu[0] = problem->mu[contact]; */
+/*   /\* Rolling Friction coefficient for current block*\/ */
+/*   localproblem->mu_r[0] = problem->mu_r[contact]; */
 
 
-}
+/* } */
 
 void rolling_fc3d_nsgs_initialize_local_solver(RollingSolverPtr* solve, RollingUpdatePtr* update,
                                                RollingFreeSolverNSGSPtr* freeSolver,
@@ -77,7 +76,7 @@ void rolling_fc3d_nsgs_initialize_local_solver(RollingSolverPtr* solve, RollingU
                                                RollingFrictionContactProblem* localproblem,
                                                SolverOptions * options)
 {
-  SolverOptions * localsolver_options = options->internalSolvers;
+  SolverOptions * localsolver_options = options->internalSolvers[0];
   /** Connect to local solver */
   switch (localsolver_options->solverId)
   {
@@ -141,7 +140,7 @@ int solveLocalReaction(RollingUpdatePtr update_localproblem, RollingSolverPtr lo
   (*update_localproblem)(contact, problem, localproblem,
                          reaction, localsolver_options);
 
-  localsolver_options->iparam[SICONOS_FRICTION_3D_NSGS_LOCALSOLVER_CONTACTNUMBER] = contact;
+  localsolver_options->iparam[SICONOS_FRICTION_3D_CURRENT_CONTACT_NUMBER] = contact;
 
   localreaction[0] = reaction[contact*5 + 0];
   localreaction[1] = reaction[contact*5 + 1];
@@ -384,7 +383,6 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
   double norm_q = cblas_dnrm2(nc*5 , problem->q , 1);
   double omega = dparam[SICONOS_FRICTION_3D_NSGS_RELAXATION_VALUE];
 
-  SolverOptions * localsolver_options = options->internalSolvers;
   RollingSolverPtr local_solver = NULL;
   RollingUpdatePtr update_localproblem = NULL;
   RollingFreeSolverNSGSPtr freeSolver = NULL;
@@ -409,7 +407,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
                    "The NSGS method needs options for the internal solvers, "
                    "options[0].numberOfInternalSolvers should be >= 1");
   }
-  assert(options->internalSolvers);
+  SolverOptions * localsolver_options = options->internalSolvers[0];
 
   /*****  Initialize various solver options *****/
   localproblem = rolling_fc3d_local_problem_allocate(problem);
@@ -462,7 +460,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
       ++iter;
       double light_error_sum = 0.0;
 
-      rolling_fc3d_set_internalsolver_tolerance(problem, options, &localsolver_options[0], error);
+      rolling_fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       for (unsigned int i = 0 ; i < nc ; ++i)
       {
@@ -497,7 +495,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
     {
       ++iter;
       double light_error_sum = 0.0;
-      rolling_fc3d_set_internalsolver_tolerance(problem, options, &localsolver_options[0], error);
+      rolling_fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       for (unsigned int i = 0 ; i < nc ; ++i)
       {
@@ -592,35 +590,20 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
   if (scontacts) free(scontacts);
 }
 
-int rolling_fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options)
+void rfc3d_nsgs_set_default(SolverOptions* options)
 {
-  numerics_printf_verbose(1,"rolling_fc3d_nsgs_setDefaultSolverOptions");
-
-  /*  strcpy(options->solverName,"NSGS");*/
-  options->solverId = SICONOS_ROLLING_FRICTION_3D_NSGS;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE;
   /* options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE; */
   /* options->iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] = SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT; */
-
+  options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] =  SICONOS_FRICTION_3D_NSGS_SHUFFLE_FALSE;
+  options->iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE_SEED] = 0;
+  options->iparam[SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION] = SICONOS_FRICTION_3D_NSGS_FILTER_LOCAL_SOLUTION_FALSE;
+  options->iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] = SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE;
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
-
-
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-
-  rolling_fc3d_projectionOnConeWithLocalIteration_setDefaultSolverOptions(options->internalSolvers);
-
-  return 0;
+  
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
 }

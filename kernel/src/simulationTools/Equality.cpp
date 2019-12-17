@@ -18,9 +18,19 @@
 #include "Equality.hpp"
 #include "Simulation.hpp"
 #include "OSNSMatrix.hpp"
+#include "SolverOptions.h"
 #include <NumericsMatrix.h>
 
 using namespace RELATION;
+
+Equality::Equality(int numericsSolverId):
+  Equality(SP::SolverOptions(solver_options_create(numericsSolverId),
+                             solver_options_delete))
+{}
+
+Equality::Equality(SP::SolverOptions options):
+  LinearOSNS(options)
+{}
 
 int Equality::compute(double time)
 {

@@ -16,21 +16,18 @@
  * limitations under the License.
 */
 
-#include "numerics_verbose.h"
-#include "op3x3.h"
-#include "SparseBlockMatrix.h"
-#include "fc3d_Solvers.h"
-#include "FrictionContactProblem.h"
-#include "fc3d_compute_error.h"
-#include "FischerBurmeisterGenerated.h"
-#include "fc3d_nonsmooth_Newton_solvers.h"
 #include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include "Friction_cst.h"
-#include "SiconosLapack.h"
+#include <assert.h>                         // for assert
+#include <math.h>                           // for sqrt
+#include <stdio.h>                          // for printf, NULL
+#include <stdlib.h>                         // for calloc, free, malloc
+#include "FischerBurmeisterGenerated.h"     // for fc3d_FischerBurmeisterFun...
+#include "FrictionContactProblem.h"         // for FrictionContactProblem
+#include "Friction_cst.h"                   // for SICONOS_FRICTION_3D_NSN_FB
+#include "SolverOptions.h"                  // for SolverOptions, solver_opt...
+#include "fc3d_nonsmooth_Newton_solvers.h"  // for fc3d_nonsmooth_Newton_sol...
+#include "numerics_verbose.h"               // for verbose
+#include "fc3d_Solvers.h"
 
 void fc3d_FischerBurmeisterFunction(
   unsigned int problemSize,
@@ -92,9 +89,9 @@ int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(
 
   FischerBurmeisterFun3x3Ptr computeACFun3x3;
 
-  switch (options->iparam[10])
+  switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
-  case 0:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
 
     computeACFun3x3 = &fc3d_FischerBurmeisterFunctionGenerated;
@@ -134,46 +131,26 @@ int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(
   }
 }
 
-int fc3d_nonsmooth_Newton_FischerBurmeister_setDefaultSolverOptions(
-  SolverOptions* options)
+void fc3d_nsn_fb_set_default(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the default solver options for the NSN_FB Solver\n");
-  }
-
-  options->solverId = SICONOS_FRICTION_3D_NSN_FB;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 14;
-  options->dSize = 14;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 200;
   options->iparam[1] = 1;
   options->iparam[3] = 100000; /* nzmax*/
   options->iparam[5] = 1;
-  options->iparam[7] = 1;      /* erritermax */
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1;      /* default rho */
+  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 1;
 
-  options->iparam[8] = -1;     /* mpi com fortran */
-  options->iparam[10] = 0;
-  options->iparam[11] = 0;     /* 0 GoldsteinPrice line search, 1 FBLSA */
-  options->iparam[12] = 100;   /* max iter line search */
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1;      /* default rho */
+
+  options->iparam[SICONOS_FRICTION_3D_NSN_MPI_COM] = -1;     /* mpi com fortran */
+  options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE;
+  
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER] = 100;   /* max iter line search */
 
 #ifdef WITH_MUMPS
-  options->iparam[13] = 1;
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER] = SICONOS_FRICTION_3D_NSN_USE_MUMPS;
 #else
-  options->iparam[13] = 0;     /* Linear solver used at each Newton iteration. 0: cs_lusol, 1 mumps */
+  options->iparam[SICONOS_FRICTION_3D_NSN_LINEAR_SOLVER] = SICONOS_FRICTION_3D_NSN_USE_CSLUSOL;
 #endif
-
-  options->internalSolvers = NULL;
-
-  return 0;
 }
 
 
@@ -243,9 +220,9 @@ void fc3d_nonsmooth_Newton_FischerBurmeister(
 
   FischerBurmeisterParams acparams;
 
-  switch (options->iparam[10])
+  switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
-  case 0:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
     acparams.computeACFun3x3 = &fc3d_FischerBurmeisterFunctionGenerated;
     break;

@@ -16,22 +16,22 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-#include <float.h>
-#include <stdbool.h>
-#include "CSparseMatrix.h"
-#include "SiconosCompat.h"
 #include "NumericsSparseMatrix.h"
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
-#include "string.h" // memcpy
+#include <assert.h>            // for assert
+#ifndef __cplusplus
+#include <stdbool.h>           // for bool, false, true
+#endif
+#include <stdio.h>             // for NULL, size_t, printf, fprintf, fscanf
+#include <stdlib.h>            // for free, exit, malloc, realloc, EXIT_FAILURE
+#include "CSparseMatrix.h"     // for CSparseMatrix, CS_INT, cs_dl_spfree
+#include "NumericsMatrix.h"    // for NumericsMatrix, NM_csc, numericsSparse...
+#include "SiconosConfig.h"     // for HAVE_SORT
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"             // for DEBUG_BEGIN, DEBUG_END, DEBUG_EXPR
+#include "numerics_verbose.h"  // for numerics_error_nonfatal, CHECK_IO
+#include "string.h"            // for memcpy, memset
 
 #if defined(__clang__)
 #pragma clang diagnostic push
@@ -51,7 +51,7 @@ typedef struct
 #define SORT_NAME sorter
 #define SORT_TYPE sort_indices_struct
 #define SORT_CMP(x, y) ((x).i - (y).i)
-#include "sort.h"
+#include "sort.h" // for sorter_tim_sort
 #else
 #include "stdlib.h" // qsort
 static int sort_indices_struct_cmp(const void *a, const void *b)

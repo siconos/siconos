@@ -16,16 +16,14 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "fc2d_Solvers.h"
-#include "LCP_Solvers.h"
-#include <assert.h>
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
+#include <stdio.h>                         // for NULL
+#include <stdlib.h>                        // for malloc
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NumericsMatrix, RawNumeric...
+#include "fc2d_Solvers.h"                  // for fc2d_tolcp
+#include "numerics_verbose.h"              // for numerics_error
 
 int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * lcp_problem)
 {

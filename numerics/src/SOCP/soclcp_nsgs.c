@@ -15,28 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "soclcp_projection.h"
-/* #include "soclcp_Newton.h" */
-/* #include "soclcp_Path.h" */
-/* #include "soclcp_NCPGlockerFixedPoint.h" */
-/* #include "soclcp_unitary_enumerative.h" */
-#include "soclcp_compute_error.h"
-#include "NCP_Solvers.h"
-#include "SiconosBlas.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <assert.h>
-#include <time.h>
-#include <string.h>
-
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-
-#include "debug.h"
-#include "numerics_verbose.h"
-
+#include <assert.h>                                       // for assert
+#include <math.h>                                         // for pow, sqrt
+#ifndef __cplusplus
+#include <stdbool.h>                                      // for false
+#endif
+#include <stdio.h>                                        // for printf, NULL
+#include <stdlib.h>                                       // for malloc, free
+#include <string.h>                                       // for memcpy
+#include "NumericsFwd.h"                                  // for SecondOrder...
+#include "NumericsMatrix.h"                               // for NumericsMatrix
+#include "SOCLCP_Solvers.h"                               // for FreeSolverN...
+#include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "SolverOptions.h"                                // for SolverOptions
+#include "numerics_verbose.h"                             // for verbose
+#include "soclcp_compute_error.h"                         // for soclcp_comp...
+#include "soclcp_projection.h"                            // for soclcp_proj...
+#include "NSSTools.h" // for max
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 void soclcp_nsgs_update(int cone, SecondOrderConeLinearComplementarityProblem* problem, SecondOrderConeLinearComplementarityProblem* localproblem, double * r, SolverOptions* options)
@@ -94,7 +90,7 @@ void soclcp_initializeLocalSolver_nsgs(Solver_soclcp_Ptr* solve, Update_soclcp_P
     soclcp_projectionOnConeWithLocalIteration_initialize(problem, localproblem,localsolver_options );
     break;
   }
-  case SICONOS_SOCLCP_projectionOnConeWithRegularization:
+  case SICONOS_SOCLCP_ProjectionOnConeWithRegularization:
   {
     *solve = &soclcp_projectionOnCone_solve;
     *update = &soclcp_projection_update_with_regularization;
@@ -237,9 +233,9 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   /* Number of cones */
   unsigned int nc = problem->nc;
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   if(*info == 0)
     return;
@@ -250,7 +246,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   }
   assert(&options[1]);
 
-  SolverOptions * localsolver_options = options->internalSolvers;
+  SolverOptions * localsolver_options = options->internalSolvers[0];
 
 
   Solver_soclcp_Ptr local_solver = NULL;
@@ -312,7 +308,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
   unsigned int *scones = NULL;
 
-  if(iparam[9])  /* shuffle */
+  if(iparam[SICONOS_IPARAM_NSGS_SHUFFLE])  /* shuffle */
   {
     scones = (unsigned int *) malloc(nc * sizeof(unsigned int));
     for(unsigned int i = 0; i<nc ; ++i)
@@ -323,9 +319,8 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   }
 
 
-  /*  dparam[0]= dparam[2]; // set the tolerance for the local solver */
-  
-  if(iparam[1] == 1 || iparam[1] == 2)
+  if(iparam[SICONOS_IPARAM_ERROR_EVALUATION] == SICONOS_ERROR_LIGHT_EVALUATION ||
+     iparam[SICONOS_IPARAM_ERROR_EVALUATION] == SICONOS_ERROR_LIGHT_EVALUATION_NO_UPDATE)
   {
     int n =problem->n;
     double * rold = (double*)malloc(n*sizeof(double)); // save memory if isConeDimensionsEqual
@@ -338,7 +333,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
       memcpy(rold, r, n * sizeof(double));
       for(unsigned int i= 0 ; i < nc ; ++i)
       {
-        if(iparam[9])
+        if(iparam[SICONOS_IPARAM_NSGS_SHUFFLE])
         {
           cone = scones[i];
         }
@@ -350,7 +345,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
         if(verbose > 1) printf("--------------- Cone Number %i\n", cone);
         (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
         
-        localsolver_options->iparam[4] = cone;
+        localsolver_options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] = cone;
 
         (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]) , localsolver_options);
       }
@@ -362,12 +357,12 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
       /* **** Criterium convergence **** */
       error = sqrt(error);
       if(verbose > 0)
-        printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+        printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[SICONOS_DPARAM_TOL]);
      if(error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
 
-    if(iparam[1] == 1)  /* Full criterium */
+    if(iparam[SICONOS_IPARAM_ERROR_EVALUATION] == SICONOS_ERROR_LIGHT_EVALUATION)  /* Full criterium */
     {
       double absolute_error;
       (*computeError)(problem, r , v, tolerance, options, &absolute_error);
@@ -384,14 +379,14 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
   else
   {
 
-    if(iparam[9])
+    if(iparam[SICONOS_IPARAM_NSGS_SHUFFLE])
     {
-      int withRelaxation=iparam[8];
+      int withRelaxation=iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION];
       if(withRelaxation)
       {
         int n = problem->n;
         double * rold = (double*)malloc(n*sizeof(double)); // save memory if isConeDimensionsEqual
-        double omega = dparam[8];
+        double omega = dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION];
         unsigned int dim;
         while((iter < itermax) && (hasNotConverged > 0))
         {
@@ -405,7 +400,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
             if(verbose > 1) printf("--------------- Cone Number %i\n", cone);
             (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
-            localsolver_options->iparam[4] = cone;
+            localsolver_options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] = cone;
             (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
 
             dim = problem->coneIndex[cone+1]-problem->coneIndex[cone];
@@ -420,7 +415,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[SICONOS_DPARAM_TOL]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -449,7 +444,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
             if(verbose > 1) printf("--------------- Cone Number %i\n", cone);
             (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
-            localsolver_options->iparam[4] = cone;
+            localsolver_options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] = cone;
             (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
 
           }
@@ -458,7 +453,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[SICONOS_DPARAM_TOL]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -477,13 +472,13 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
     }
     else
     {
-      int withRelaxation=iparam[8];
+      int withRelaxation=iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION];
       if(withRelaxation)
       {
         int n = problem->n;
         unsigned int dim;
         double * rold = (double*)malloc(n*sizeof(double)); // save memory if isConeDimensionsEqual
-        double omega = dparam[8];
+        double omega = dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION];
         while((iter < itermax) && (hasNotConverged > 0))
         {
           ++iter;
@@ -496,7 +491,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
             if(verbose > 1) printf("--------------- Cone Number %i\n", cone);
             (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
-            localsolver_options->iparam[4] = cone;
+            localsolver_options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] = cone;
             (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
 
             dim = problem->coneIndex[cone+1]-problem->coneIndex[cone];
@@ -511,7 +506,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[SICONOS_DPARAM_TOL]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -538,7 +533,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
             if(verbose > 1) printf("--------------- Cone Number %i\n", cone);
             (*update_localproblem)(cone, problem, localproblem, r, localsolver_options);
-            localsolver_options->iparam[4] = cone;
+            localsolver_options->iparam[SICONOS_IPARAM_SOCLCP_PROJECTION_CONE_INDEX] = cone;
             (*local_solver)(localproblem, &(r[problem->coneIndex[cone]]), localsolver_options);
 
           }
@@ -547,7 +542,7 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
           (*computeError)(problem, r , v, tolerance, options, &error);
 
           if(verbose > 0)
-            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[0]);
+            printf("--------------- SOCLP - NSGS - Iteration %i Residual = %14.7e >= %7.4e\n", iter, error, options->dparam[SICONOS_DPARAM_TOL]);
 
           if(error < tolerance) hasNotConverged = 0;
           *info = hasNotConverged;
@@ -568,9 +563,9 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
 
   }
-  dparam[0] = tolerance;
-  dparam[1] = error;
-  iparam[7] = iter;
+  dparam[SICONOS_DPARAM_TOL] = tolerance;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
   /***** Free memory *****/
   (*freeSolver)(problem,localproblem,localsolver_options);
@@ -586,33 +581,13 @@ void soclcp_nsgs(SecondOrderConeLinearComplementarityProblem* problem, double *r
 
 }
 
-int soclcp_nsgs_setDefaultSolverOptions(SolverOptions* options)
+void soclcp_nsgs_set_default(SolverOptions* options)
 {
-  int i;
-  if(verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NSGS Solver\n");
-  }
-
-  /*  strcpy(options->solverName,"NSGS");*/
-  solver_options_nullify(options);
-  options->solverId = SICONOS_SOCLCP_NSGS;
-  options->numberOfInternalSolvers = 1;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 10;
-  options->dSize = 10;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  for(i = 0; i < 10; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[0] = 1000;
-  options->dparam[0] = 1e-4;
-  options->internalSolvers = (SolverOptions *)malloc(sizeof(SolverOptions));
-  soclcp_projection_setDefaultSolverOptions(options->internalSolvers);
-
-  return 0;
+  options->iparam[SICONOS_IPARAM_ERROR_EVALUATION] = SICONOS_ERROR_FULL_EVALUATION;
+  options->iparam[SICONOS_IPARAM_SOCLCP_NSGS_WITH_RELAXATION] = 0;
+  options->iparam[SICONOS_IPARAM_NSGS_SHUFFLE] = 0;
+  options->dparam[SICONOS_DPARAM_SOCLCP_NSGS_RELAXATION] = 1.;
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration);
+  options->internalSolvers[0]->dparam[SICONOS_DPARAM_SOCLCP_PROJECTION_RHO] = 0.;
 }

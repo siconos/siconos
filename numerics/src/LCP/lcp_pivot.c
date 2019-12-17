@@ -16,28 +16,24 @@
  * limitations under the License.
 */
 
-#include <math.h>
-#include <float.h>
-#include <string.h>
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "pivot-utils.h"
-#include "numerics_verbose.h"
-#include "SiconosLapack.h"
-
+#include "lcp_pivot.h"
+#include <assert.h>                        // for assert
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for malloc, free
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_pivot
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 //#define DEBUG_NO_MATRIX
-#include "debug.h"
-
-#include "lcp_pivot.h"
+#include "debug.h"                         // for DEBUG_PRINTF, DEBUG_EXPR_WE
+#include "lcp_cst.h"                       // for SICONOS_LCP_PIVOT_PATHSEARCH
+#include "numerics_verbose.h"              // for verbose
+#include "pivot-utils.h"                   // for do_pivot_driftless, do_pivot
 
 void lcp_pivot(LinearComplementarityProblem* problem, double* u , double* s, int *info , SolverOptions* options)
 {
@@ -71,7 +67,7 @@ void lcp_pivot_covering_vector(LinearComplementarityProblem* problem, double* re
   unsigned leaving = 0;
   unsigned itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   unsigned preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
-  unsigned pivot_selection_rule = options->iparam[SICONOS_IPARAM_PIVOT_RULE];
+  unsigned pivot_selection_rule = options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE];
 
   double pivot;
   double tmp;
@@ -562,4 +558,13 @@ _exit:
     free(basis);
     free(mat);
   }
+}
+
+
+void lcp_pivot_set_default(SolverOptions* options)
+{
+  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE; // default
+  // the pivoting method should be overwritten for BARD or MURTY before calling solver.
+  
+  options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 0;
 }

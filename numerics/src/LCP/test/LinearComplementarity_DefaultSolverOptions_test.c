@@ -15,96 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "SolverOptions.h"
-#include "NumericsFwd.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "LinearComplementarityProblem.h"
-#include "assert.h"
+#include <stdio.h>          // for printf, NULL
+#include "NumericsFwd.h"    // for SolverOptions
+#include "SolverOptions.h"  // for solver_options_delete, solver_options_create
+#include "lcp_cst.h"        // for SICONOS_LCP_NSGS_SBM, SICONOS_LCP_AVI_CAO...
 
 int main(void)
 {
   printf("\n Start of test on Default SolverOptions\n");
   int info = 0 ;
-  SolverOptions * options = (SolverOptions *)malloc(sizeof(SolverOptions));
 
-  FILE * finput  =  fopen("./data/lcp_mmc.dat", "r");
-  LinearComplementarityProblem* problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
-
-  info = linearComplementarity_newFromFile(problem, finput);
-
-  fclose(finput);
-
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSGS_SBM);
-  assert(options->internalSolvers);
-  solver_options_set(options->internalSolvers, SICONOS_LCP_LEMKE);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_PGS);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_RPGS);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_QP);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NSQP);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_CPG);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_PSOR);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_LATIN);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_LATIN_W);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_LEMKE);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_PATH);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_ENUM);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_NEWTONMIN);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_AVI_CAOFERRIS);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-  info = linearComplementarity_setDefaultSolverOptions(problem, options, SICONOS_LCP_PIVOT);
-  solver_options_print(options);
-  solver_options_delete(options);
-
-
-  freeLinearComplementarityProblem(problem);
-  free(options);
-
+  int solvers[] = {SICONOS_LCP_NSGS_SBM, SICONOS_LCP_LEMKE, SICONOS_LCP_NSGS_SBM, 
+                   SICONOS_LCP_PGS, SICONOS_LCP_CPG, SICONOS_LCP_LATIN, SICONOS_LCP_LATIN_W,
+                   SICONOS_LCP_QP, SICONOS_LCP_NSQP, SICONOS_LCP_NEWTONMIN, SICONOS_LCP_NEWTON_FB_FBLSA,
+                   SICONOS_LCP_PSOR, SICONOS_LCP_RPGS, SICONOS_LCP_PATH, SICONOS_LCP_ENUM,
+                   SICONOS_LCP_AVI_CAOFERRIS, SICONOS_LCP_PIVOT, SICONOS_LCP_BARD, SICONOS_LCP_MURTY,
+                   SICONOS_LCP_NEWTON_MIN_FBLSA, SICONOS_LCP_PATHSEARCH, SICONOS_LCP_PIVOT_LUMOD, SICONOS_LCP_GAMS,
+                   SICONOS_LCP_CONVEXQP_PG};
+  int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
+  SolverOptions * options = NULL;
+  for(int s=0; s<n_solvers; ++s)
+    {
+      options = solver_options_create(solvers[s]);
+      solver_options_print(options);
+      solver_options_delete(options);
+      options = NULL;
+        
+    }
 
   printf("\n End of test on Default SolverOptions\n");
   return info;

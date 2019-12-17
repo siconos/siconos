@@ -16,20 +16,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
 #include "GlobalFrictionContactProblem_as_VI.h"
-#include "GlobalFrictionContactProblem.h"
-#include "VariationalInequality.h"
-#include "projectionOnCone.h"
-#include "numerics_verbose.h"
-#include "SiconosBlas.h"
-#include "NumericsMatrix.h"
-
+#include <math.h>                          // for sqrt
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "NumericsMatrix.h"                // for NM_gemv, NM_tgemv, Numeric...
+#include "VariationalInequality.h"         // for VariationalInequality
+#include "projectionOnCone.h"              // for projectionOnCone
+#include "SiconosBlas.h"                         // for cblas_dcopy
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                         // for DEBUG_EXPR, DEBUG_BEGIN
 
 void Function_VI_GFC3D(void * self, int n_notused, double *x, double *F)
 {

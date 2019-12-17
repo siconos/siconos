@@ -16,9 +16,12 @@
  * limitations under the License.
 */
 
-
-#include <stdlib.h>
 #include "sn_error_handling.h"
+#ifndef __cplusplus
+#include <stdbool.h>  // for false, bool, true
+#endif
+#include <stdlib.h>   // for NULL, abort, size_t
+#include "tlsdef.h"   // for tlsvar
 
 tlsvar jmp_buf internal_jmp_buf;
 tlsvar jmp_buf external_jmp_buf;

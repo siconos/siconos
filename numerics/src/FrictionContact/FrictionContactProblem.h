@@ -21,10 +21,10 @@
 /*!\file FrictionContactProblem.h
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
-
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-#include "NumericsMatrix.h"
+#include <stdio.h>           // for FILE
+#include "NumericsFwd.h"     // for FrictionContactProblem, NumericsMatrix
+#include "NumericsMatrix.h"  // for RawNumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct FrictionContactProblem FrictionContactProblem.h
  *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem.
@@ -105,22 +105,17 @@ extern "C"
    */
   int frictionContact_printInFilename(FrictionContactProblem*  problem, char * filename);
 
-  /** read a FrictionContactProblem in a file (numerics .dat format)
-   * \param problem the problem to read
-   * \param file the target file
-   * \return 0 if successfull
+  /** read a FrictionContactProblem from a file descriptor
+   * \param file descriptor
+   * \return problem the problem to read
    */
-  int frictionContact_newFromFile(FrictionContactProblem*  problem, FILE* file);
+  FrictionContactProblem*  frictionContact_newFromFile(FILE* file);
 
-  /** read a FrictionContactProblem in a file (numerics .dat format) from its filename
-   * \param problem the problem to read
-   * \param filename the name of the target file
-   * \return 0 if successfull
+  /** read a FrictionContactProblem from a file (.dat or hdf5 if fclib is on) from its filename
+   * \param filename the name of the input file
+   * \return problem the problem to read
    */
-  int frictionContact_newFromFilename(FrictionContactProblem*  problem, char * filename);
-
-
-
+  FrictionContactProblem* frictionContact_new_from_filename(const char * filename);
 
 
 
@@ -132,9 +127,24 @@ extern "C"
                                                  double tol,
                                                  int do_print)  ;
 
-
+  
+  /** Creates a new FrictionContact problem and initialize its content by copying
+      an existing problem.
+      \param problem the source problem to be copied
+      \return a pointer to a new FrictionContactProblem
+  */
   FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem);
 
+  /** Rescales M matrix and q vector of a given FrictionContactProblem.
+
+      \rst
+      :math:`M = \alpha\gamma^2 M, q=\alpha\gamma q`
+      \endrst
+
+      \param problem to be rescaled
+      \param alpha rescaling factor
+      \param gamma rescaling factor
+  */
   void frictionContact_rescaling(FrictionContactProblem* problem,  double alpha,  double gamma);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

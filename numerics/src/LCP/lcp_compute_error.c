@@ -15,14 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "SiconosBlas.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
-#include <math.h>
-#include <assert.h>
-#include <float.h>
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs, fmax, pow, sqrt
+#include <stddef.h>                        // for NULL
+
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_com...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NM_gemv
+#include "numerics_verbose.h"              // for numerics_error, numerics_p...
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
+
 /* void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double* restrict error) */
 /* { */
 /*   /\* Checks complementarity *\/ */

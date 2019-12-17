@@ -23,6 +23,9 @@
   Header to collect basic tools for integer arrays
 */
 
+#include <stddef.h>  // for size_t
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict

@@ -16,26 +16,23 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
+#include <assert.h>                        // for assert
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs
+#ifndef __cplusplus
+#include <stdbool.h>                       // for false
+#endif
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_pgs
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NM_get_value, NM_row_prod_...
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "debug.h"                         // for DEBUG_PRINTF
+#include "numerics_verbose.h"              // for verbose
 
-#include <assert.h>
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
-
-
-
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
 void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
@@ -152,32 +149,5 @@ void lcp_pgs(LinearComplementarityProblem* problem, double *z, double *w, int *i
   }
 
   free(diag);
-}
-int linearComplementarity_pgs_setDefaultSolverOptions(SolverOptions* options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the PGS Solver\n");
-  }
-
-
-  /*  strcpy(options->solverName,"PGS");*/
-  options->solverId = SICONOS_LCP_PGS;
-  options->numberOfInternalSolvers = 0;
-  options->internalSolvers = NULL;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-  options->dparam[SICONOS_DPARAM_RESIDU] = 1.0;
-
-
-  return 0;
 }
 

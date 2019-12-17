@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "SiconosPointers.hpp"
+#include "NumericsMatrix.h"
 #include "GlobalFrictionContact.hpp"
 #include "Simulation.hpp"
 //#include "Interaction.hpp"
@@ -39,35 +40,24 @@
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
-// Constructor from a set of data
-// Required input: simulation
-// Optional: newNumericsSolverName
+// Constructor from solver id - Uses delegated constructor
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolverId):
-  LinearOSNS(numericsSolverId), _contactProblemDim(dimPb)
+  GlobalFrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
+                                                 solver_options_delete))
+{}
+
+// Constructor based on a pre-defined solver options set.
+GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions options):
+  LinearOSNS(options), _contactProblemDim(dimPb), _gfc_driver(&gfc3d_driver)
 {
-  // Connect to the right function according to dim. of the problem
-  if (_contactProblemDim == 2)
-  {
+  // Only fc3d for the moment.
+  if (_contactProblemDim != 3)
     RuntimeException::selfThrow("GlobalFrictionContact No solver for 2 dimensional problems");
-  }
-  else if(_contactProblemDim == 3)
-  {
-    gfc3d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
-    _gfc_driver = &gfc3d_driver;
-  }
-  else
-  {
-     RuntimeException::selfThrow("GlobalFrictionContact size not supported");
-  }
-  //default storage
+
+  //Reset default storage type for numerics matrices.
   _numericsMatrixStorageType = NM_SPARSE;
-
-
 }
-GlobalFrictionContact::~GlobalFrictionContact()
-{
-  solver_options_delete(&*_numerics_solver_options);
-}
+
 
 void GlobalFrictionContact::initVectorsMemory()
 {
@@ -186,8 +176,7 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
 
 SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactProblem()
 {
-  SP::GlobalFrictionContactProblem numerics_problem(new GlobalFrictionContactProblem());
-  globalFrictionContact_null(numerics_problem.get());
+  SP::GlobalFrictionContactProblem numerics_problem(globalFrictionContactProblem_new());
   numerics_problem->M = &*_M->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
@@ -201,7 +190,6 @@ SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactPro
 GlobalFrictionContactProblem *GlobalFrictionContact::globalFrictionContactProblemPtr()
 {
   GlobalFrictionContactProblem *numerics_problem = &_numerics_problem;
-  globalFrictionContact_null(numerics_problem);
   numerics_problem->M = &*_M->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();

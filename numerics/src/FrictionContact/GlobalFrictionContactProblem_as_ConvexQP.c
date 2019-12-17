@@ -16,20 +16,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-#include "GlobalFrictionContactProblem_as_ConvexQP.h"
-#include "GlobalFrictionContactProblem.h"
-#include "ConvexQP.h"
-#include "projectionOnCone.h"
-#include "projectionOnCylinder.h"
-#include "projectionOnDisk.h"
-#include "numerics_verbose.h"
-#include "SiconosBlas.h"
-#include "NumericsMatrix.h"
-#include "SolverOptions.h"
 
+#include "GlobalFrictionContactProblem_as_ConvexQP.h"
+#include "ConvexQP.h"                      // for ConvexQP
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "projectionOnCone.h"              // for projectionOnCone
+#include "SiconosBlas.h"                         // for cblas_dcopy
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 #include "debug.h"

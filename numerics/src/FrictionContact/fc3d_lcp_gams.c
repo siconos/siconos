@@ -14,11 +14,16 @@
 /* GAMS stuff */
 
 #define _XOPEN_SOURCE 700
+#include <stdio.h>         // for printf
+#include <stdlib.h>        // for exit, EXIT_FAILURE
+#include "NumericsFwd.h"   // for FrictionContactProblem, SolverOptions
+#include "fc3d_Solvers.h"  // for fc3d_lcp_gams_path, fc3d_lcp_gams_pathvi
 
-#include <stdio.h>
+#if 0
+//#ifdef HAVE_GAMS_C_API
+
 #include <string.h>
 #include <assert.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <float.h>
 
@@ -28,9 +33,6 @@
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
 #include "projectionOnCone.h"
-
-#if 0
-//#ifdef HAVE_GAMS_C_API
 
 #include "GAMSlink.h"
 
@@ -700,6 +702,12 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
   assert(problem->M);
   assert(problem->q);
 
+  if (!options->solverParameters)
+    {
+      options->solverParameters = createGAMSparams(GAMS_MODELS_SHARE_DIR, GAMS_DIR);
+    }
+
+  
   /* Handles to the GAMSX, GDX, and Option objects */
   gamsxHandle_t Gptr = NULL;
   idxHandle_t Xptr = NULL;
@@ -765,7 +773,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
   }
   else // only for path
   {
-//    optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
+//    optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[SICONOS_DPARAM_TOL]);
 //    optSetIntStr(solverOptPtr, "output_linear_model", 1);
     optSetDblStr(solverOptPtr, "proximal_perturbation", 0.);
     optSetStrStr(solverOptPtr, "crash_method", "none");
@@ -777,7 +785,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
   optSetIntStr(solverOptPtr, "minor_iteration_limit", 100000);
   optSetDblStr(solverOptPtr, "expand_delta", 1e-10);
 //  optSetDblStr(solverOptPtr, "convergence_tolerance", 1e-12);
-  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
+  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[SICONOS_DPARAM_TOL]);
   optWriteParameterFile(solverOptPtr, msg);
 
   optSetIntStr(Optr, "Keep", 0);
@@ -984,7 +992,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
       default:
         {
           printf("Unknown Solve Stat return by the solver! Exiting ...\n");
-          options->dparam[1] = 1e20;
+          options->dparam[SICONOS_DPARAM_RESIDU] = 1e20;
           goto TERMINATE;
         }
     }
@@ -1262,7 +1270,7 @@ bad_angle:
 //    optSetDblStr(solverOptPtr, "convergence_tolerance", 1e-12);
     printf("FrictionContact3D_LCP_gams :: residual = %g\n", total_residual);
     DEBUG_PRINTF("FrictionContact3D_LCP_gams :: residual = %g\n", total_residual);
-//    done = (total_residual < options->dparam[0]);
+//    done = (total_residual < options->dparam[SICONOS_DPARAM_TOL]);
     done = (total_residual < 1e-8);
     if (total_residual > 10*old_residual)
     {
@@ -1331,7 +1339,7 @@ TERMINATE:
   free(slack_r);
   free(slack_y);
   free(predicted_angles);
-  free(delta_angles); //status = FrictionContact3D_compute_error(problem, reaction, velocity, options->dparam[0], options, &(options->dparam[1]));
+  free(delta_angles); //status = FrictionContact3D_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options, &(options->dparam[SICONOS_DPARAM_RESIDU]));
   free(real_angles);
   free(residual_contact);
   free(type_contact);
@@ -1340,13 +1348,16 @@ TERMINATE:
   if (done)
   {
     status = 0;
-    options->dparam[1] = total_residual;
+    options->dparam[SICONOS_DPARAM_RESIDU] = total_residual;
   }
   else
   {
     status = 1;
-    options->dparam[1] = old_residual;
+    options->dparam[SICONOS_DPARAM_RESIDU] = old_residual;
   }
+
+  deleteGAMSparams((SN_GAMSparams *)options->solverParameters);
+
   return status;
 }
 

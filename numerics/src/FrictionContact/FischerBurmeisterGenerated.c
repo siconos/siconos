@@ -1,15 +1,12 @@
-#include <math.h>
-#include <assert.h>
-#include <op3x3.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include "SiconosCompat.h"
-
+#include "FischerBurmeisterGenerated.h"
+#include <assert.h>  // for assert
 //#define DEBUG_MESSAGES 1
 //#define DEBUG_WHERE_MESSAGES 1
-//#include <stdio.h>
-#include <debug.h>
-#include "FischerBurmeisterGenerated.h"
+#include <debug.h>   // for DEBUG_PRINT
+#include <float.h>   // for DBL_EPSILON
+#include <math.h>    // for sqrt, pow, fabs
+#include <op3x3.h>   // for cpy3x3, cpy3, SET3
+#include <stdlib.h>  // for RAND_MAX
 
 #define Sign(x) ((x>0) - (x<0))
 #define Max fmax

@@ -16,19 +16,19 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs, fmax
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_psor
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_RHO
+#include "numerics_verbose.h"              // for verbose
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_ddot
 
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
 
 /*\warning omega is not explicitely used. must be completed    */
 void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
@@ -48,7 +48,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
   double *ww, *diag;
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tol = options->dparam[SICONOS_DPARAM_TOL];
-  double omega = options->dparam[SICONOS_LCP_IPARAM_RHO]; // Not yet used
+  double omega = options->dparam[SICONOS_LCP_DPARAM_RHO]; // Not yet used
   printf("Warning : omega %f is not used !!!!!\n", omega);
 
   incxn = n;
@@ -184,35 +184,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   return;
 }
-int linearComplementarity_psor_setDefaultSolverOptions(SolverOptions* options)
+void lcp_psor_set_default(SolverOptions* options)
 {
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the PSOR Solver\n");
-  }
-
-
-  /*  strcpy(options->solverName,"PSOR");*/
-  options->solverId = SICONOS_LCP_PSOR;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-  options->dparam[SICONOS_LCP_IPARAM_RHO] = 0.1;
-
-
-  return 0;
+  options->dparam[SICONOS_LCP_DPARAM_RHO] = 0.1;
 }

@@ -21,12 +21,9 @@
  */
 
 #include "vertex_extraction.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
-
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for exit, EXIT_FAILURE
+#include "SiconosConfig.h" // for HAS_ONE_LP_SOLVER // IWYU pragma: keep
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
@@ -34,7 +31,7 @@
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+//#include "debug.h"
 
 #ifdef HAS_ONE_LP_SOLVER
 #pragma GCC diagnostic push
@@ -112,6 +109,8 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis)
   free(rowno);
 }
 
+#pragma  GCC diagnostic pop
+
 #else
 
 void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
@@ -119,6 +118,5 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
   printf("You need to compile the lp_solve support");
   exit(EXIT_FAILURE);
 }
-#pragma  GCC diagnostic pop
 
 #endif

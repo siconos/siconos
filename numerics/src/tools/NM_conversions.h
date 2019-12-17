@@ -22,6 +22,8 @@
 /*!\file NM_conversions.h
   \brief Conversion related functions for the various matrix storages in Numerics
 */
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "CSparseMatrix.h"  // for CSparseMatrix
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

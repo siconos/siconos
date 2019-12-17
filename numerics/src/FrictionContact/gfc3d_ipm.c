@@ -952,25 +952,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   *info = hasNotConverged;
 }
 
-int gfc3d_IPM_setDefaultSolverOptions(SolverOptions* options)
-{
-  if(verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the IPM Solver\n");
-  }
-
-  solver_options_nullify(options);
-
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_IPM;
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+void gfc3d_ipm_set_default(SolverOptions* options){
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
@@ -989,5 +971,4 @@ int gfc3d_IPM_setDefaultSolverOptions(SolverOptions* options)
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.8;
   options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;
 
-  return 0;
 }

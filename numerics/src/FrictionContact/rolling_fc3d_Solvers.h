@@ -56,14 +56,6 @@ extern "C"
 {
 #endif
 
-  /** set the default solver parameters and perform memory allocation for fc3d
-      \param options the pointer to the options to set
-      \param solverId the identifier of the solver
-  */
-  int rolling_fc3d_setDefaultSolverOptions(SolverOptions* options, int solverId);
-
-
-
 
   /** Non-Smooth Gauss Seidel solver for friction-contact 3D problem
       \param problem the friction-contact 3D problem to solve
@@ -116,12 +108,6 @@ extern "C"
                                                   RollingFrictionContactProblem* localproblem,
                                                   SolverOptions * options);
 
-
-  /** set the default solver parameters and perform memory allocation for NSGS
-      \param options the pointer to the array of options to set
-  */
-  int  rolling_fc3d_nsgs_setDefaultSolverOptions(SolverOptions* options);
-
   /** Check for trivial solution in the friction-contact 3D problem
       \param problem FrictionContactProblem*  the problem
       \param velocity global vector (n), in-out parameter
@@ -136,6 +122,17 @@ extern "C"
                                                  SolverOptions* options,
                                                  SolverOptions* internalsolver_options,
                                                  double error);
+
+
+  /** \addtogroup SetSolverOptions @{
+   */
+  void rfc3d_nsgs_set_default(SolverOptions* options);
+  void rfc3d_poc_withLocalIteration_set_default(SolverOptions* options);
+  void rfc3d_poc_set_default(SolverOptions* options);
+  
+  /** @} */
+
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

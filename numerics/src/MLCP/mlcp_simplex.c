@@ -25,29 +25,23 @@ dim(u)=mm
 dim(v)=nn
 
 **************************************************************************/
+#include "MLCP_Solvers.h"  // for mixedLinearComplementarity_simplex_setDefa...
+#include "NumericsFwd.h"   // for MixedLinearComplementarityProblem, SolverO...
+#include "mlcp_simplex.h"  // for mlcp_simplex_init, mlcp_simplex_reset
+#include "SiconosConfig.h" // for HAVE_MLCPSIMPLEX  // IWYU pragma: keep
+
+#ifdef HAVE_MLCPSIMPLEX
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "SiconosConfig.h"
-#include "MLCP_Solvers.h"
 #include "SiconosCompat.h"
 #include <math.h>
-
-#ifdef HAVE_MLCPSIMPLEX
 /*import external implementation*/
 #include "external_mlcp_simplex.h"
 
 static int sIsInitialize = 0;
 #endif
-
-int mixedLinearComplementarity_simplex_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-#ifdef HAVE_MLCPSIMPLEX
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-#endif
-  return 0;
-}
 
 void mlcp_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
@@ -65,13 +59,7 @@ void mlcp_simplex_reset()
   sIsInitialize = 0;
 #endif
 }
-/*  tolVar =options->dparam[0];    tolerance to consider that a var is null
- *  tolComp = options->dparam[1];    tolerance to consider that complementarity holds
- *  tolNegVar = options->dparam[2];     tolerance to consider a value is negative
- *  nIterMax = options->iparam[0];   max number of nodes to consider in tree search
- *  options->iparam[1];   verbose if not 0
- *  info : output. info == 0 if success.
-*/
+
 void mlcp_simplex(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 #ifdef HAVE_MLCPSIMPLEX

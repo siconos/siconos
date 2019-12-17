@@ -141,6 +141,9 @@
 %inline
 %{
 #include "TYPE.hpp"
+#include "SiconosFwd.hpp"
+  
+#include <vector>
 %}
 %rename  (__getitem__) TYPE ## ::operator[];
 %rename  (__add__) TYPE ## ::operator+;

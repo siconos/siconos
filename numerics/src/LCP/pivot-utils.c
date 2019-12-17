@@ -16,27 +16,22 @@
  * limitations under the License.
 */
 
-#include <math.h>
-#include <assert.h>
-#include <stddef.h>
-#include <string.h>
-#include <float.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "pivot-utils.h"
-#include "lcp_pivot.h"
-
-#include "lumod_wrapper.h"
-#include "SiconosCompat.h"
-#include "SiconosBlas.h"
-#include "SiconosLapack.h"
-
-#include "sanitizer.h"
-
+#include <assert.h>              // for assert
+#include <float.h>               // for DBL_EPSILON
+#include <math.h>                // for fabs, INFINITY
+#include <stdio.h>               // for printf
+#include <stdlib.h>              // for exit, free, malloc, EXIT_FAILURE
+#include <string.h>              // for memset, NULL
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
-#include "pivot-utils.h"
+#include "debug.h"               // for DEBUG_PRINTF, DEBUG_EXPR_WE, DEBUG_G...
+#include "lcp_pivot.h"           // for LCP_PATHSEARCH_NON_ENTERING_T, LCP_P...
+#include "lumod_wrapper.h"       // for SN_lumod_dense_data, SN_lumod_find_a...
+#include "sanitizer.h"           // for cblas_dcopy_msan
+#include "SiconosBlas.h"         // for cblas_daxpy, cblas_dscal
+#include "SiconosLapack.h"       // for DGETRS, lapack_int, DGETRF, LA_NOTRANS
+
 #define TOL_LEXICO DBL_EPSILON*10000
 #define MIN_INCREASE 10
 #define SMALL_PIVOT 1e-10
@@ -45,7 +40,7 @@
 
 #define BASIS_OFFSET 1
 
-char* basis_to_name(unsigned nb, unsigned n)
+const char* basis_to_name(unsigned nb, unsigned n)
 {
   if (nb < n + BASIS_OFFSET) return "w";
   else if (nb > n + BASIS_OFFSET) return "z"; 

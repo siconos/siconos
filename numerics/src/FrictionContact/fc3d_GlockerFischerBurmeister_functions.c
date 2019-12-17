@@ -16,11 +16,11 @@
  * limitations under the License.
 */
 
-
 #include "fc3d_GlockerFischerBurmeister_functions.h"
-#include "NonSmoothNewton.h"
-#include "fc3d_Solvers.h"
-#include "FischerBurmeister.h"
+#include <stddef.h>             // for NULL
+#include "FischerBurmeister.h"  // for jacobianPhi_FB, phi_FB
+#include "fc3d_2NCP_Glocker.h"  // for computeFGlocker, computeJacobianFGlocker
+
 /* size of a block */
 /* static int Fsize; */
 

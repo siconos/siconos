@@ -18,26 +18,22 @@
 
 
 #include "lumod_wrapper.h"
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <assert.h>
-
-#include "SiconosBlas.h"
-#include "SiconosLapack.h"
-#include "lumod_dense.h"
-
-
+#include <assert.h>              // for assert
+#include <fenv.h>                // for feclearexcept, fetestexcept, FE_ALL_...
+#include <stdio.h>               // for printf
+#include <stdlib.h>              // for free, malloc, NULL, calloc
+#include <string.h>              // for memset
+#include "NumericsMatrix.h"      // for NumericsMatrix
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
-
+#include "debug.h"               // for DEBUG_PRINT_MAT_STR, DEBUG_PRINT_VEC...
+#include "lumod_dense.h"         // for LUmod_dense, Lprod_dense, Usolve_dense
+#include "SiconosBlas.h"         // for cblas_dcopy, cblas_dgemv, CblasColMajor
+#include "SiconosLapack.h"       // for lapack_int, DGETRF, DGETRS
 
 #define TOL_BLU 1e-30
 #define BASIS_OFFSET 1
 #define DEEP_DEBUG_Ck
-#include <fenv.h>
-#include "pivot-utils.h"
 
 /* TODO :
  *  - Yk should be row-major (be careful with gemv and lda)

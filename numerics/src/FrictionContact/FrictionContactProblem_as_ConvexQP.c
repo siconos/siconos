@@ -16,22 +16,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
+
 #include "FrictionContactProblem_as_ConvexQP.h"
-#include "FrictionContactProblem.h"
-#include "ConvexQP.h"
-#include "projectionOnCone.h"
-#include "projectionOnCylinder.h"
-#include "projectionOnDisk.h"
-#include "numerics_verbose.h"
-#include "SiconosBlas.h"
-#include "NumericsMatrix.h"
-#include "SolverOptions.h"
+#include "ConvexQP.h"                // for ConvexQP
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "SolverOptions.h"           // for SolverOptions
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                   // for DEBUG_PRINT
+#include "projectionOnCylinder.h"    // for projectionOnCylinder
+#include "projectionOnDisk.h"        // for projectionOnDisk
+#include "SiconosBlas.h"                   // for cblas_dcopy
 
 
 void Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX)

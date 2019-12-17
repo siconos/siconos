@@ -15,21 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "LCP_Solvers.h"
-#include "NumericsMatrix.h"
-#include "LinearComplementarityProblem.h"
+#include <assert.h>                        // for assert
+#include <stdio.h>                         // for printf, fprintf, stderr
+#include <stdlib.h>                        // for exit, EXIT_FAILURE
+#include "LCP_Solvers.h"                   // for lcp_pivot, lcp_compute_error
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NonSmoothDrivers.h"              // for linearComplementarity_driver
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                         // for DEBUG_END, DEBUG_BEGIN
+#include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_PIVOTIN...
+#include "numerics_verbose.h"              // for numerics_error, verbose
 
 const char* const   SICONOS_LCP_LEMKE_STR = "Lemke";
 const char* const   SICONOS_LCP_NSGS_SBM_STR = "NSGS_SBM";

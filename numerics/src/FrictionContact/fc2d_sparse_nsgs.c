@@ -15,27 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
-#include <float.h>
-#include <assert.h>
+#include <assert.h>                        // for assert
+#include <float.h>                         // for DBL_EPSILON
+#include <math.h>                          // for fabs, sqrt, INFINITY
+#include <stdio.h>                         // for NULL, fprintf, printf, stderr
+#include <stdlib.h>                        // for free, malloc, calloc
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_IPARAM...
+#include "LCP_Solvers.h"                   // for lcp_nsgs_SBM_buildLocalPro...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix, RawNumeric...
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "SparseBlockMatrix.h"             // for SparseBlockStructuredMatrix
+#include "fc2d_Solvers.h"                  // for fc2d_sparse_nsgs, fc2d_spa...
+#include "fc2d_compute_error.h"            // for fc2d_compute_error
+#include "numerics_verbose.h"              // for numerics_printf, verbose
+#include "SiconosBlas.h"                         // for cblas_dnrm2
 
-#ifndef MEXFLAG
-#include "NonSmoothDrivers.h"
-#endif
-
-#include "SolverOptions.h"
-#include "LinearComplementarityProblem.h"
-#include "fc2d_compute_error.h"
-#include "numerics_verbose.h"
-#include "fc2d_Solvers.h"
-#include "LCP_Solvers.h"
-#include "SparseBlockMatrix.h"
-#include "NumericsMatrix.h"
-#include "SiconosBlas.h"
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 
@@ -316,7 +313,7 @@ void fc2d_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w,
         free(local_problem->M);
         free(local_problem);
         /* Number of GS iterations */
-        options[0].iparam[1] = iter;
+        options[0].iparam[SICONOS_IPARAM_ITER_DONE] = iter;
         fprintf(stderr, "fc2d_nsgs error: local LCP solver failed at global iteration %d.\n for block-row number %d. Output info equal to %d.\n", iter, rowNumber, infoLocal);
 
         *info = infoLocal;
@@ -384,30 +381,5 @@ void fc2d_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w,
   free(local_problem);
 }
 
+// options setup is done through fc2d_nsgs_set_default.
 
-int fc2d_sparse_nsgs_setDefaultSolverOptions(SolverOptions *options)
-{
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the NSGS Solver\n");
-  }
-
-  /*strcpy(options->solverName,"NSGS");*/
-  options->solverId = SICONOS_FRICTION_2D_NSGS;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-
-  options ->internalSolvers = NULL;
-  return 0;
-}

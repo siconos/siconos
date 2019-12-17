@@ -16,22 +16,25 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
 #include "SparseBlockMatrix.h"
-#include "SiconosLapack.h"
-#include <math.h>
-#include <string.h>
-#include "numerics_verbose.h"
-#include "op3x3.h"
-#include "SiconosCompat.h"
-#include "NumericsArrays.h"
+#include <assert.h>            // for assert
+#include <math.h>              // for fabs, NAN
+#include <stdio.h>             // for size_t, fprintf, printf, fscanf, NULL
+#include <stdlib.h>            // for malloc, free, exit, realloc, calloc
+#include <string.h>            // for memcpy
+#include "NumericsArrays.h"    // for NA_merge_and_sort_sorted_arrays
+#include "SiconosBlas.h"       // for cblas_dscal, cblas_dgemv, CblasNoTrans, max
+#include "SiconosCompat.h"     // for SN_SIZE_T_Fn
+#include "SiconosLapack.h"     // for lapack_int, DGETRF, DGETRI
 /* #define DEBUG_NOCOLOR 1 */
 /* #define DEBUG_STDOUT 1 */
 /* #define DEBUG_MESSAGES 1 */
+#include "debug.h"             // for DEBUG_PRINTF, DEBUG_END, DEBUG_BEGIN
+#include "numerics_verbose.h"  // for CHECK_IO, numerics_error, numerics_war...
+#include "op3x3.h"             // for mvp3x3, mvp_alpha3x3
+#include "NSSTools.h"     // for min, max
 
-#include "debug.h"
+
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsMatrix.h"

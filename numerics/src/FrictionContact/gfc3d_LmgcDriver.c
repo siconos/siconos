@@ -1,32 +1,41 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2018 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+#include <math.h>                          // for fabs
+#include <stdio.h>                         // for printf, fclose, fopen, snp...
+#include <stdlib.h>                        // for malloc, free, abs
+#include <string.h>                        // for strncpy, NULL, memcpy
+#include "CSparseMatrix.h"                 // for CSparseMatrix, CS_INT
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "NonSmoothDrivers.h"              // for gfc3d_driver, gfc3d_LmgcDr...
+#include "NumericsFwd.h"                   // for NumericsMatrix, GlobalFric...
+#include "NumericsMatrix.h"                // for NumericsMatrix, NM_clear
+#include "NumericsSparseMatrix.h"          // for NSM_new, NumericsSparseMatrix
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
+#include "debug.h"                         // for DEBUG_PRINTF
+#include "numerics_verbose.h"              // for verbose
 
-#include "CSparseMatrix.h"
-
-// avoid a conflict with old csparse.h
-#define _CS_H
-
-#include "fc3d_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "fclib_interface.h"
-#include "GlobalFrictionContactProblem.h"
-#include "gfc3d_Solvers.h"
-#include "NumericsSparseMatrix.h"
-#include "numerics_verbose.h"
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
+#include "SiconosConfig.h" // for WITH_FCLIB  // IWYU pragma: keep
 
 #ifdef WITH_FCLIB
+// avoid a conflict with old csparse.h
+#define _CS_H
+#include <sys/stat.h>                      // for stat, mkdir
 static int gfccounter =-1;
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 #endif
 
@@ -193,21 +202,17 @@ int gfc3d_LmgcDriver(double *reaction,
   problem->b = b;
   problem->mu = mu;
 
-  SolverOptions numerics_solver_options;
-  
-  int infi = 0;
-  infi = gfc3d_setDefaultSolverOptions(&numerics_solver_options, solver_id);
-  assert(!infi);
-  int iSize_min = isize < numerics_solver_options.iSize ? isize : numerics_solver_options.iSize;
+  SolverOptions * numerics_solver_options = solver_options_create(solver_id);
+  int iSize_min = isize < numerics_solver_options->iSize ? isize : numerics_solver_options->iSize;
   DEBUG_PRINTF("iSize_min = %i", iSize_min);
   for (int i = 0; i < iSize_min; ++i)
     if (abs(iparam[i])>0)
-      numerics_solver_options.iparam[i] = iparam[i];
+      numerics_solver_options->iparam[i] = iparam[i];
 
-  int dSize_min = dsize <  numerics_solver_options.dSize ? dsize : numerics_solver_options.dSize;
+  int dSize_min = dsize <  numerics_solver_options->dSize ? dsize : numerics_solver_options->dSize;
   for (int i=0; i < dSize_min; ++i)
     if (fabs(dparam[i]) > 0)
-    numerics_solver_options.dparam[i] = dparam[i];
+    numerics_solver_options->dparam[i] = dparam[i];
 
   /* solver_options_print(&numerics_solver_options); */
   /* FILE * file  =  fopen("toto.dat", "w"); */
@@ -217,11 +222,11 @@ int gfc3d_LmgcDriver(double *reaction,
 			    reaction,
 			    velocity,
 			    globalVelocity,
-			    &numerics_solver_options);
+			    numerics_solver_options);
 
 
-  iparam[SICONOS_IPARAM_ITER_DONE] = numerics_solver_options.iparam[SICONOS_IPARAM_ITER_DONE];
-  dparam[SICONOS_DPARAM_TOL] = numerics_solver_options.dparam[SICONOS_DPARAM_TOL];
+  iparam[SICONOS_IPARAM_ITER_DONE] = numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE];
+  dparam[SICONOS_DPARAM_TOL] = numerics_solver_options->dparam[SICONOS_DPARAM_TOL];
 
   /* FILE * file1  =  fopen("tutu.dat", "w"); */
   /* globalFrictionContact_printInFile(problem, file1); */
@@ -246,8 +251,8 @@ int gfc3d_LmgcDriver(double *reaction,
     if (gfccounter % freq_output == 0)
     {
       char fname[256];
-      snprintf(fname, sizeof(fname), "./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options.iparam[SICONOS_IPARAM_ITER_DONE], nc, gfccounter);
-      printf("Dump ./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options.iparam[SICONOS_IPARAM_ITER_DONE], nc, gfccounter);
+      snprintf(fname, sizeof(fname), "./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, gfccounter);
+      printf("Dump ./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5.\n", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, gfccounter);
       /* printf("ndof = %i.\n", ndof); */
 
       FILE * foutput  =  fopen(fname, "w");
@@ -275,7 +280,8 @@ int gfc3d_LmgcDriver(double *reaction,
 
   }
 
-
+  solver_options_delete(numerics_solver_options);
+  numerics_solver_options = NULL;
   NM_clear(M);
   NM_clear(H);
   free(M);
@@ -397,14 +403,14 @@ int gfc3d_LmgcDriver(double *reaction,
 
 /*   gfc3d_setDefaultSolverOptions(&numerics_solver_options, solver_id); */
 
-/*   assert(isize <= numerics_solver_options.iSize); */
-/*   assert(dsize <= numerics_solver_options.dSize); */
+/*   assert(isize <= numerics_solver_options->iSize); */
+/*   assert(dsize <= numerics_solver_options->dSize); */
 
 /*   for (int i=0; i<isize; ++i) */
-/*     numerics_solver_options.iparam[i] = iparam[i]; */
+/*     numerics_solver_options->iparam[i] = iparam[i]; */
 
 /*   for (int i=0; i<dsize; ++i) */
-/*     numerics_solver_options.dparam[i] = dparam[i]; */
+/*     numerics_solver_options->dparam[i] = dparam[i]; */
 
 /*   int rinfo = gfc3d_driver(&problem, */
 /*                                              reaction, */

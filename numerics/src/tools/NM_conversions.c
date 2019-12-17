@@ -17,12 +17,12 @@
 */
 
 
-#include <assert.h>
-#include <stdio.h>
-
-#include "SiconosConfig.h"
-#include "CSparseMatrix.h"
 #include "NM_conversions.h"
+#include <assert.h>         // for assert
+#include <stdio.h>          // for fprintf, stderr
+#include <stdlib.h>         // for exit, EXIT_FAILURE
+#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT, CSparseMatrix_zentry
+#include "SiconosConfig.h"  // for WITH_MKL_SPBLAS  // IWYU pragma: keep
 
 #ifdef WITH_MKL_SPBLAS
 #include "tlsdef.h"

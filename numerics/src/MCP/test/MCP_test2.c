@@ -16,15 +16,15 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "MCP_cst.h"
-#include "MixedComplementarityProblem.h"
-#include "SolverOptions.h"
-#include "MCP_Solvers.h"
-#include "NumericsVerbose.h"
-#include "NumericsMatrix.h"
+#include <stdio.h>                        // for printf, NULL
+#include <stdlib.h>                       // for free, malloc, calloc
+#include "MCP_Solvers.h"                  // for mcp_old_driver_init, mcp_ol...
+#include "MCP_cst.h"                      // for SICONOS_MCP_OLD_FB
+#include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem...
+#include "NonSmoothDrivers.h"             // for mcp_old_driver
+#include "NumericsFwd.h"                  // for MixedComplementarityProblem...
+#include "NumericsVerbose.h"              // for numerics_set_verbose
+#include "SolverOptions.h"                // for SolverOptions, solver_optio...
 static double * M;
 static double * q;
 
@@ -77,10 +77,8 @@ int main(void)
   int n=10;
 
   /* Set solver options */
-  SolverOptions options;
-
+  SolverOptions * options = solver_options_create(SICONOS_MCP_OLD_FB);
   /* FB solver */
-  options.solverId = SICONOS_MCP_OLD_FB;
   /* Create a MixedComplementarityProblem */
   MixedComplementarityProblem_old* problem = (MixedComplementarityProblem_old *)malloc(sizeof(MixedComplementarityProblem_old));
 
@@ -107,8 +105,6 @@ int main(void)
 
   numerics_set_verbose(1);
 
-  mcp_old_setDefaultSolverOptions(problem, &options);
-
   int size = problem->sizeEqualities + problem->sizeInequalities ;
   double * z = (double *)malloc(size * sizeof(double));
   double * w = (double *)malloc(size * sizeof(double));
@@ -119,14 +115,12 @@ int main(void)
     w[i] = 0.0;
   }
 
-  options.dparam[0] = 1e-10;
-  options.iparam[0] = 1000;
 
 
   /* Initialize the solver */
-  mcp_old_driver_init(problem, &options) ;
-  info = mcp_old_driver(problem, z , w,  &options);
-  mcp_old_driver_reset(problem, &options) ;
+  mcp_old_driver_init(problem, options) ;
+  info = mcp_old_driver(problem, z , w,  options);
+  mcp_old_driver_reset(problem, options) ;
   /// TODO : write a real test ... ////
 
 
@@ -140,7 +134,9 @@ int main(void)
     printf("w[%i]= %lf\t", i, w[i]);
   }
   printf("\n");
-  solver_options_delete(&options);
+  solver_options_delete(options);
+  options = NULL;
+
   free(z);
   free(w);
   free(problem);

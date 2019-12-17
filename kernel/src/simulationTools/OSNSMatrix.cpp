@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include <assert.h>
+#include "NumericsMatrix.h"
 #include "OSNSMatrix.hpp"
 #include "NonSmoothLaw.hpp"
 #include "Tools.hpp"

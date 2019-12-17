@@ -18,6 +18,7 @@
 */
 
 #include "LagrangianRheonomousR.hpp"
+#include "SiconosAlgebraProd.hpp"  // for matrix-vector prod
 #include "Interaction.hpp"
 #include "LagrangianDS.hpp"
 
@@ -101,8 +102,9 @@ void LagrangianRheonomousR::computeJachq(double time,  SiconosVector& q, Siconos
 void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q = *DSlink[LagrangianR::q0];
-  SiconosVector z = *DSlink[LagrangianR::z];
+  SiconosVector q,z;
+  q.initFromBlock(*DSlink[LagrangianR::q0]);
+  z.initFromBlock(*DSlink[LagrangianR::z]);
   SiconosVector& y = *inter.y(derivativeNumber);
   if (derivativeNumber == 0)
     computeh(time, q, z, y);
@@ -142,8 +144,9 @@ void LagrangianRheonomousR::computeOutput(double time, Interaction& inter, unsig
 void LagrangianRheonomousR::computeInput(double time, Interaction& inter,  unsigned int level)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q = *DSlink[LagrangianR::q0];
-  SiconosVector z = *DSlink[LagrangianR::z];
+  SiconosVector q,z;
+  q.initFromBlock(*DSlink[LagrangianR::q0]);
+  z.initFromBlock(*DSlink[LagrangianR::z]);
   computeJachq(time, q, z);
   // get lambda of the concerned interaction
   SiconosVector& lambda = *inter.lambda(level);
@@ -155,8 +158,9 @@ void LagrangianRheonomousR::computeInput(double time, Interaction& inter,  unsig
 void LagrangianRheonomousR::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q = *DSlink[LagrangianR::q0];
-  SiconosVector z = *DSlink[LagrangianR::z];
+  SiconosVector q,z;
+  q.initFromBlock(*DSlink[LagrangianR::q0]);
+  z.initFromBlock(*DSlink[LagrangianR::z]);
   computeJachq(time, q, z);
   // computeJachqDot(time, inter);
   //    computeDotJachq(time, q, z);

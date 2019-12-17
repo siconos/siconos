@@ -15,14 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
 #include "fc2d_compute_error.h"
-#include "NumericsMatrix.h"
-#include "FrictionContactProblem.h"
-#include "SiconosBlas.h"
-#include <math.h>
-#include <float.h>
-#include "numerics_verbose.h"
+#include <float.h>                   // for DBL_EPSILON
+#include <math.h>                    // for fabs, sqrt
+#include <stdio.h>                   // for printf
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "NumericsMatrix.h"          // for NM_gemv
+#include "numerics_verbose.h"        // for numerics_error, verbose
+#include "SiconosBlas.h"                   // for cblas_dcopy
 
 #define SGN(x) ((x) < 0 ? -1 : (x) > 0 ? 1 : 0)
 

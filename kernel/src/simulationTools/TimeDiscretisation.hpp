@@ -25,6 +25,7 @@
 #include <vector>
 #include <gmp.h>
 #include "SiconosFwd.hpp"
+#include "SiconosSerialization.hpp" // for ACCEPT_SERIALIZATION
 
 typedef std::vector<double> TkVector;
 

@@ -33,14 +33,15 @@ using namespace RELATION;
 
 
 Relay::Relay(int numericsSolverId):
-  LinearOSNS(numericsSolverId)
-{
-  _numerics_problem.reset(new RelayProblem);
+  Relay(SP::SolverOptions(solver_options_create(numericsSolverId),
+                          solver_options_delete))
+{}
 
-  relay_setDefaultSolverOptions(NULL, &*_numerics_solver_options, numericsSolverId);
+Relay::Relay(SP::SolverOptions options):
+  LinearOSNS(options), _numerics_problem(new RelayProblem)
+{}
 
 
-}
 /* nslaw dispatch on bounds */
 
 struct Relay::_BoundsNSLEffect : public SiconosVisitor
@@ -175,13 +176,6 @@ int Relay::compute(double time)
   return info;
 }
 
-void Relay::setSolverId(int solverId)
-{
-  // clear previous Solveroptions
-  solver_options_delete(_numerics_solver_options.get());
-  relay_setDefaultSolverOptions(NULL, _numerics_solver_options.get(), solverId);
-}
-
 void Relay::display() const
 {
   std::cout << "======= Relay of size " << _sizeOutput << " with: " <<std::endl;
@@ -191,10 +185,5 @@ void Relay::display() const
   std::cout<< "upper bound : (_ub)"<<std::endl;
   _ub->display();
   
-}
-
-Relay::~Relay()
-{
-  solver_options_delete(&*_numerics_solver_options);
 }
 

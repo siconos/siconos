@@ -15,13 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
 #include "ConvexQP.h"
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
-#include "NumericsVector.h"
-
+#include <assert.h>          // for assert
+#include <stdlib.h>          // for free, exit, malloc, EXIT_FAILURE
+#include "NumericsMatrix.h"  // for NM_display, NM_clear
+#include "NumericsVector.h"  // for NV_display
 
 void convexQP_display(ConvexQP* cqp)
 {

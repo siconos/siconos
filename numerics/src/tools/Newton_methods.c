@@ -16,38 +16,24 @@
  * limitations under the License.
 */
 
-#include "SiconosConfig.h"
-#include "SiconosCompat.h"
-
 #include "Newton_methods.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "numerics_verbose.h"
-#include "SiconosLapack.h"
-#include "ArmijoSearch.h"
-#include "GoldsteinSearch.h"
-#include "SolverOptions.h"
-#include "lcp_cst.h"
-#include "NCP_cst.h"
-#include "MCP_cst.h"
-#include "VI_cst.h"
-#include "Friction_cst.h"
-#include "hdf5_logger.h"
-
-/* #define DEBUG_STDOUT */
-/* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include <assert.h>            // for assert
+#include <float.h>             // for DBL_MAX
+#include <math.h>              // for fmax, pow, INFINITY, isfinite
+#include <stdio.h>             // for fprintf, stderr
+#include <stdlib.h>            // for free, calloc, malloc, getenv, atoi
+#include "ArmijoSearch.h"      // for linesearch_Armijo2, armijo_extra_params
+#include "GoldsteinSearch.h"   // for goldstein_extra_params, search_Goldste...
+#include "NumericsMatrix.h"    // for NM_gesv, NM_tgemv, NM_duplicate, NM_clear
+#include "SiconosBlas.h"       // for cblas_dcopy, cblas_dnrm2, cblas_dscal
+#include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
+#include "debug.h"             // for DEBUG_PRINT
+#include "hdf5_logger.h"       // for SN_logh5_scalar_double, SN_logh5_vec_d...
+#include "line_search.h"       // for search_data, fill_nm_data, free_ls_data
+#include "numerics_verbose.h"  // for numerics_printf_verbose, numerics_printf
+#include "sn_logger.h"         // for SN_LOG_SCALAR, SN_LOG_VEC, SN_LOG_MAT
 
 typedef double (*linesearch_fptr)(int n, double theta, double preRHS, search_data*);
-
-#ifdef __cplusplus
-using namespace std;
-#endif
-
 
 const char* const SICONOS_NEWTON_LSA_STR  = "Newton method LSA";
 
@@ -82,8 +68,8 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
 
   double *workV1, *workV2;
   double *JacThetaF_merit, *F_merit;
-  unsigned int itermax = options->iparam[0];
-  double tol = options->dparam[0];
+  unsigned int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
 
   incx = 1;
   incy = 1;
@@ -520,23 +506,12 @@ newton_LSA_free:
     if (logger_s->group) SN_logh5_end_iter(logger_s);
     SN_logh5_end(logger_s);
   }
+
+  newton_LSA_free_solverOptions(options);
 }
 
-void newton_lsa_setDefaultSolverOptions(SolverOptions* options)
+void newton_lsa_set_default(SolverOptions* options)
 {
-
-  numerics_printf_verbose(1,"newton_lsa_setDefaultSolverOptions");
-
-  options->solverId = SICONOS_NEWTON_LSA;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
@@ -574,25 +549,6 @@ void set_lsa_params_data(SolverOptions* options, NumericsMatrix* mat)
     options->solverData = malloc(sizeof(newton_LSA_data));
     newton_LSA_data* sd = (newton_LSA_data*) options->solverData;
     sd->H = NM_duplicate(mat);
-  }
-}
-
-bool newton_LSA_check_solverId(int solverId)
-{
-  switch (solverId)
-  {
-    case SICONOS_NCP_NEWTON_FB_FBLSA:
-    case SICONOS_NCP_NEWTON_MIN_FBLSA:
-    case SICONOS_MCP_NEWTON_FB_FBLSA:
-    case SICONOS_MCP_NEWTON_MIN_FBLSA:
-    case SICONOS_LCP_NEWTON_FB_FBLSA:
-    case SICONOS_LCP_NEWTON_MIN_FBLSA:
-    case SICONOS_VI_BOX_QI:
-    case SICONOS_VI_BOX_AVI_LSA:
-    case SICONOS_FRICTION_3D_NSN_AC_TEST:
-      return true;
-    default:
-      return false;
   }
 }
 

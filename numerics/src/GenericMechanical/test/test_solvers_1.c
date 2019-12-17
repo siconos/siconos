@@ -16,228 +16,198 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>
-#include "genericMechanical_test_utils.h"
-#include "GenericMechanical_cst.h"
-#include "Friction_cst.h"
+#include <stdlib.h>                        // for malloc
+#include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_ONECON...
+#include "GenericMechanical_cst.h"         // for SICONOS_GENERIC_MECHANICAL...
+#include "NumericsFwd.h"                   // for SolverOptions
+#include "SiconosConfig.h"                 // for HAS_LAPACK_dgesvd
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "genericMechanical_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                    // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
-
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
-
-  int n =0;
-  
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GENERIC_MECHANICAL_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-
-
 #ifdef HAS_LAPACK_dgesvd
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GENERIC_MECHANICAL_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "1";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-
-#endif
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GENERIC_MECHANICAL_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "2";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1-3; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GENERIC_MECHANICAL_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "3";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GENERIC_MECHANICAL_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GENERIC_MECHANICAL_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "2";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GENERIC_MECHANICAL_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GENERIC_MECHANICAL_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "2";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GENERIC_MECHANICAL_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GENERIC_MECHANICAL_NSGS);
-    test_nsgs[n][e++] = "1e-5";
-    test_nsgs[n][e++] = "10000";
-    test_nsgs[n][e++] = "2";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-#ifdef HAS_LAPACK_dgesvd
-  test_nsgs[5][1] = "1";
-  test_nsgs[6][1] = "1";
-  test_nsgs[19][1] = "1";
-  test_nsgs[31][1] = "1";
-
-  test_nsgs[45][1] = "1";
-  test_nsgs[58][1] = "1";
-  test_nsgs[59][1] = "1";
-  test_nsgs[65][1] = "1";
+  int n_solvers = 10;
 #else
-  test_nsgs[5][1] = "1";
-  test_nsgs[6][1] = "1";
-  test_nsgs[12][1] = "1";
-  test_nsgs[24][1] = "1";
-  test_nsgs[38][1] = "1";
-  test_nsgs[51][1] = "1";
-  test_nsgs[52][1] = "1";
-  test_nsgs[58][1] = "1";
+  int n_solvers = 9;
+#endif
+  *number_of_tests = n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+
+
+  int topsolver = SICONOS_GENERIC_MECHANICAL_NSGS;
+  int current = 0;
+
+  for(int d =0; d <n_data; d++)
+    {
+      // internal = fc3d quartic. 
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS;  
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+      
+      current++;
+      // expected to fail
+      collection[5].will_fail = 1;  // GMP5.dat
+      collection[6].will_fail = 1;  // GMP6.dat
+    }
+
+#ifdef HAS_LAPACK_dgesvd
+  for(int d =0; d <n_data; d++)
+    {
+      // internal = fc3d quartic.
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_SUBS_EQUALITIES;  
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+      current++;
+    }
+#endif
+
+  for(int d =0; d <n_data; d++)
+    {
+      // internal = fc3d quartic.
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+      current++;
+    }
+
+  for(int d =0; d <n_data-3; d++) // warning : ignore GMP 4 to 6 .dat
+    {
+      // internal = fc3d quartic.
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_MLCP_LIKE;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+      current++;
+    }
+
+  for(int d =0; d <n_data; d++)
+    {
+      // internal = fc3d nsn gp
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS;
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+      collection[current].options->internalSolvers[1]->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND;
+      current++;
+    }
+
+  for(int d =0; d <n_data; d++)
+    {
+      // internal = fc3d nsn gp
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES;
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+      collection[current].options->internalSolvers[1]->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] = SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND;
+      current++;
+    }
+
+  
+  for(int d =0; d <n_data; d++)
+    {
+      // internal = fc3d nsn
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_NSN);
+      current++;
+    }
+
+  for(int d =0; d <n_data; d++)
+    {
+      // internal = fc3d nsn
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_NSN);
+      current++;
+    }
+
+  for(int d =0; d <n_data; d++)
+    {
+      // internal = fc3d projection on cone with local iterations
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+      collection[current].options->internalSolvers[1]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+      collection[current].options->internalSolvers[1]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+        
+      current++;
+    }
+
+  for(int d =0; d <n_data; d++)
+    {
+      // internal = fc3d projection on cone with local iterations
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(topsolver);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+      collection[current].options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] = SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES;
+      
+      solver_options_update_internal(collection[current].options, 1, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+      collection[current].options->internalSolvers[1]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+      collection[current].options->internalSolvers[1]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+      current++;
+    }
+
+  *number_of_tests = current;
+
+
+  // tests expected to fail
+  
+#ifdef HAS_LAPACK_dgesvd
+  collection[5].will_fail = 1; // GMP5.dat
+  collection[6].will_fail = 1; // GMP6.dat
+  collection[19].will_fail = 1; 
+  collection[31].will_fail = 1;
+
+  collection[45].will_fail = 1;
+  collection[58].will_fail = 1;
+  collection[59].will_fail = 1;
+  collection[65].will_fail = 1;
+#else
+  collection[5].will_fail = 1;
+  collection[6].will_fail = 1;
+  collection[12].will_fail = 1;
+  collection[24].will_fail = 1;
+  collection[38].will_fail = 1;
+  collection[51].will_fail = 1;
+  collection[52].will_fail = 1;
+  collection[58].will_fail = 1;
   
 #endif
 
-
-
-
-
-  
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+  return collection;
 
 }

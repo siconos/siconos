@@ -76,6 +76,8 @@ inline double fmin(double x, double y)
     else return x;
   }
 }
+
+
 #define INFINITY (DBL_MAX+DBL_MAX)
 #define NAN (INFINITY-INFINITY)
 #define copysign _copysign
