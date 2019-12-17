@@ -47,10 +47,10 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
 #ifdef FC3D_UE_DEBUG
   double Psav[5];
   printf("compute_racines: polynome(x)=%e.x4+%e.x3+%e.x2+%e.x+%e\n", Poly[0], Poly[1], Poly[2], Poly[3], Poly[4]);
-  for (int k = 0; k < 5; k++)
+  for(int k = 0; k < 5; k++)
     Psav[k] = Poly[k];
 #endif
-  if (fabs(Poly[1] / Poly[0]) > 1e7)
+  if(fabs(Poly[1] / Poly[0]) > 1e7)
   {
     Poly[0] = 0.0;
 #ifdef FC3D_UE_DEBUG
@@ -58,19 +58,19 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
 #endif
   }
   int degp1 = 5;
-  if (Poly[0] != 0.0)
+  if(Poly[0] != 0.0)
     BIQUADROOTS(Poly, r);
-  else if (Poly[1] != 0.0)
+  else if(Poly[1] != 0.0)
   {
     CUBICROOTS(Poly + 1, r);
     degp1 = 4;
   }
-  else if (Poly[2] != 0.0)
+  else if(Poly[2] != 0.0)
   {
     QUADROOTS(Poly + 2, r);
     degp1 = 3;
   }
-  else if (Poly[3] != 0.0)
+  else if(Poly[3] != 0.0)
   {
     r[1][1] = -Poly[0] / Poly[3];
     r[2][1] = 0;
@@ -78,20 +78,20 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
   }
   else
   {
-    if (verbose) printf("FC3D_unitary_enumerative: degre of polynom is 0.");
+    if(verbose) printf("FC3D_unitary_enumerative: degre of polynom is 0.");
     degp1 = 1;
   }
   (*nbRealRacines) = 0;
-  for (int k = 1; k < degp1; k++)
+  for(int k = 1; k < degp1; k++)
   {
-    if (fabs(r[2][k]) < 1e-10)
+    if(fabs(r[2][k]) < 1e-10)
     {
       Racines[*nbRealRacines] = r[1][k];
       (*nbRealRacines)++;
     }
   }
 #ifdef FC3D_UE_DEBUG
-  for (int k = 0; k < *nbRealRacines; k++)
+  for(int k = 0; k < *nbRealRacines; k++)
   {
     printf("compute_racines debug : Psav(Racines[%d]=%e)=%e\n", k, Racines[k],
            Psav[0]*Racines[k]*Racines[k]*Racines[k]*Racines[k] +
@@ -121,7 +121,7 @@ void FC3D_unitary_enum_factorize2x2(double *a, double *b, double *c, double *l1,
 #ifdef FC3D_UE_DEBUG
   printf("FC3D_unitary_enum_factorize2x2 matrix:\n %e %e \n %e %e \n", *a, *c, *c, *b);
 #endif
-  if (FC3D_UE_TEST_NULL(*c))
+  if(FC3D_UE_TEST_NULL(*c))
   {
     V[0] = 1;
     V[1] = 0;
@@ -151,8 +151,8 @@ void FC3D_unitary_enum_factorize2x2(double *a, double *b, double *c, double *l1,
   M[1] = *c;
   M[2] = *c;
   M[3] = *b;
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j < 2; j++)
+  for(int i = 0; i < 2; i++)
+    for(int j = 0; j < 2; j++)
     {
       VM[i + 2 * j] = V[i] * M[2 * j] + V[i + 2] * M[2 * j + 1];
     }
@@ -162,8 +162,8 @@ void FC3D_unitary_enum_factorize2x2(double *a, double *b, double *c, double *l1,
   Vt[3] = V[3];
   Vt[2] = V[1];
   double VM_Vt[4];
-  for (int i = 0; i < 2; i++)
-    for (int j = 0; j < 2; j++)
+  for(int i = 0; i < 2; i++)
+    for(int j = 0; j < 2; j++)
     {
       VM_Vt[i + 2 * j] = VM[i] * Vt[2 * j] + VM[i + 2] * Vt[2 * j + 1];
     }
@@ -177,7 +177,7 @@ void fc3d_unitary_enumerative_free(FrictionContactProblem* localproblem)
 }
 void fc3d_unitary_enumerative_initialize(FrictionContactProblem* localproblem)
 {
-  if (!localproblem->M->matrix0)
+  if(!localproblem->M->matrix0)
     localproblem->M->matrix0 = (double*)malloc(9 * sizeof(double));
 
 }
@@ -204,7 +204,7 @@ int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem, d
   //print3(Q);Q=Q0;
 
   /*take off? R=0 ?*/
-  if (*Q0 + tol > 0)
+  if(*Q0 + tol > 0)
   {
     *reaction0 = 0.;
     *reaction1 = 0.;
@@ -218,10 +218,10 @@ int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem, d
     return 0;
   }
 
-  if (*mu == 0.)
+  if(*mu == 0.)
   {
     *reaction0 = -(*Q0) / (*M00);
-    if (*reaction0 < 0)
+    if(*reaction0 < 0)
     {
       *reaction0 = 0;
       *reaction1 = 0;
@@ -251,10 +251,10 @@ int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem, d
   M = M00;
   reaction = reaction0;
   Q = Q0;
-  if (!isnan(*reaction0))
+  if(!isnan(*reaction0))
   {
-    if (- *reaction0 + tol > 0.0)
-      if ((*reaction0 * *mu) * (*reaction0 * *mu) + tol * tol > *reaction1 * *reaction1 + *reaction2 * *reaction2)
+    if(- *reaction0 + tol > 0.0)
+      if((*reaction0 * *mu) * (*reaction0 * *mu) + tol * tol > *reaction1 * *reaction1 + *reaction2 * *reaction2)
       {
         *reaction0 = - *reaction0;
         *reaction1 = - *reaction1;
@@ -282,12 +282,12 @@ int fc3d_unitary_enumerative_solve(FrictionContactProblem* problem, double * rea
 int fc3d_unitary_enumerative(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options)
 {
   *info = fc3d_unitary_enumerative_test_non_sliding(problem, reaction, velocity, options);
-  if (!(*info))
+  if(!(*info))
     return *info ;
 #ifdef FC3D_UE_DEBUG
   printf("FC3D: Not a trivial case, sliding?\n");
 #endif
-  if (options->solverId == SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU)
+  if(options->solverId == SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU)
   {
     *info = fc3d_unitary_enumerative_solve_poly_nu_sliding(problem, reaction, options);
   }
@@ -295,7 +295,7 @@ int fc3d_unitary_enumerative(FrictionContactProblem* problem, double * reaction,
   {
     *info = fc3d_unitary_enumerative_solve_sliding(problem, reaction, options);
   }
-  if (!(*info))
+  if(!(*info))
   {
     double * M = problem->M->matrix0;
     double * Q = problem->q;
@@ -313,7 +313,7 @@ int fc3d_unitary_enumerative(FrictionContactProblem* problem, double * reaction,
     *velocity2 += *Q2;
   }
 #ifdef FC3D_UE_DEBUG
-  if (*info)
+  if(*info)
     printf("fc3d_unitary_enumerative FAILED\n");
 
   double err = 0.0;
@@ -357,7 +357,7 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
 
   /*Sliding? */
 #ifdef FC3D_UE_DEBUG
-  if (*mu < 10e-20)
+  if(*mu < 10e-20)
   {
     printf("FC3D_UE_DEBUG : wrong value of mu\n");
     return -1;
@@ -386,14 +386,14 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
   double D_Dir[2];
 #endif
 
-  if (!FC3D_UE_TEST_NULL(e))
+  if(!FC3D_UE_TEST_NULL(e))
   {
     d = fabs(*Q0) / NormD;
     p = e * d;
     OD[0] = -((*M01) * (*Q)) / NormD2;
 
 
-    if (!FC3D_UE_TEST_NULL(*M02))
+    if(!FC3D_UE_TEST_NULL(*M02))
     {
       OD[1] = -(((-*M01) * (*M01) * (*Q0)) / NormD2 + *Q0) / (*M02);
 
@@ -407,7 +407,7 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
       OD[1] = 0;
 #ifdef FC3D_UE_DEBUG
       D_Dir[0] = 0;
-      if (*M01 > 0)
+      if(*M01 > 0)
         D_Dir[1] = 1;
       else
         D_Dir[1] = -1;
@@ -415,9 +415,9 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
     }
     OD2[0] = (*V00) * OD[0] + (*V01) * OD[1];
     OD2[1] = (*V10) * OD[0] + (*V11) * OD[1];
-    if (!FC3D_UE_TEST_NULL(OD2[0]))
+    if(!FC3D_UE_TEST_NULL(OD2[0]))
     {
-      if (FC3D_UE_TEST_NULL(OD2[1]))
+      if(FC3D_UE_TEST_NULL(OD2[1]))
       {
         phi = 0;
       }
@@ -429,10 +429,10 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
     else
     {
       phi = M_PI / 2.0;
-      if (OD2[1] < 0)
+      if(OD2[1] < 0)
         phi = -M_PI / 2.0;
     }
-    if (OD2[0] < 0)
+    if(OD2[0] < 0)
       phi += M_PI;
     cosphi = cos(phi);
     sinphi = sin(phi);
@@ -441,7 +441,7 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
   {
     d = 0;
     p = (-(*Q0) * (*mu)) / (*M00);
-    if (p < 0)
+    if(p < 0)
     {
       projectionOnCone(reaction, *mu);
       return -1;
@@ -474,17 +474,17 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
   double PossiblesTheta[8];
 
   compute_racines(Poly4, &nbRealRacines, Racines);
-  for (int numR = 0; numR < nbRealRacines; numR++)
+  for(int numR = 0; numR < nbRealRacines; numR++)
     PossiblesTheta[numR] = 2 * atan(Racines[numR]);
   /*Case RTb[x]==0*/
   PossiblesTheta[nbRealRacines] = -M_PI / 2;
   PossiblesTheta[nbRealRacines + 1] = M_PI / 2;
   PossiblesTheta[nbRealRacines + 2] = M_PI;
   PossiblesTheta[nbRealRacines + 3] = 0;
-  for (int numR = 0; numR < nbRealRacines + 4; numR++)
+  for(int numR = 0; numR < nbRealRacines + 4; numR++)
   {
 #ifdef FC3D_UE_DEBUG
-    if (numR >= nbRealRacines)
+    if(numR >= nbRealRacines)
       printf("FC3D_UE_DEBUG: The last attempt is R_T1 or R_T2 equal to 0?\n");
 #endif
     //    double R=Racines[numR];
@@ -500,19 +500,19 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
     *reaction0 = sqrt((*reaction1) * (*reaction1) + (*reaction2) * (*reaction2)) / (*mu);
 
     //In particular case RTb[x]==0, then check :
-    if (numR >= nbRealRacines)
+    if(numR >= nbRealRacines)
     {
       //RTb[0]==0
-      if (numR < nbRealRacines + 2)
+      if(numR < nbRealRacines + 2)
       {
         alpha = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
-        if (fabs(Q2b[0] - a1 * fabsradius) > tol)
+        if(fabs(Q2b[0] - a1 * fabsradius) > tol)
           continue;
       }
       else  //RTb[1]==0
       {
         alpha = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
-        if (fabs(Q2b[1] - a2 * fabsradius) > tol)
+        if(fabs(Q2b[1] - a2 * fabsradius) > tol)
           continue;
       }
     }
@@ -521,28 +521,28 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
       alpha = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
     }
 
-    if (alpha <= 0)
+    if(alpha <= 0)
       continue;
 #ifdef FC3D_UE_DEBUG
     double alpha1 = 0.0;
     double alpha2 = 0.0;
-    if (numR >= nbRealRacines)
+    if(numR >= nbRealRacines)
     {
       //RTb[0]==0
-      if (numR < nbRealRacines + 2)
+      if(numR < nbRealRacines + 2)
         alpha1 = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
       else
         alpha2 = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
     }
     else
     {
-      if (RTb[1] != 0.0)
+      if(RTb[1] != 0.0)
         alpha1 = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
-      if (RTb[0] != 0.0)
+      if(RTb[0] != 0.0)
         alpha2 = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
     }
     printf("FC3D_UE_DEBUG :: alpha1 = %e = %e =alpha2.(must be equal except if RTb[x]==0)\n", alpha1, alpha2);
-    if (!FC3D_UE_TEST_NULL(e))
+    if(!FC3D_UE_TEST_NULL(e))
     {
       double zero1 = (D1 - D2) * radius * costheta * sintheta + Q2b[0] * sintheta - Q2b[1] * costheta - fabsradius * (a1 * sintheta - a2 * costheta);
       double zero2 = (D1 - D2) * RTb[0] * RTb[1] + Q2b[0] * RTb[1] - Q2b[1] * RTb[0] - (a1 * RTb[1] - a2 * RTb[0]) * sqrt(RTb[0] * RTb[0] + RTb[1] * RTb[1]);
@@ -564,7 +564,7 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
 #ifdef FC3D_UE_DEBUG
     printf("FC3D_UE_DEBUG: fabs(s1)=fabs(s2)=%e=%e\n", fabs(s1), fabs(s2));
 #endif
-    if ((s1 >= 0. && s2 >= 0.) || (s1 <= 0. && s2 <= 0.) || FC3D_UE_TEST_NULL(e))
+    if((s1 >= 0. && s2 >= 0.) || (s1 <= 0. && s2 <= 0.) || FC3D_UE_TEST_NULL(e))
     {
 #ifdef FC3D_UE_DEBUG
       printf("R:\n");
@@ -608,7 +608,7 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
 void solve2x2(double *a, double *b, double *c, double *a1, double *b1, double *c1, double *x, double *y)
 {
   double delta = *a * *b1 - *a1 * *b;
-  if (delta == 0)
+  if(delta == 0)
   {
     *x = NAN;
     *y = NAN;
@@ -669,14 +669,14 @@ int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* probl
 
   compute_racines(cg, &nbRealRacines, Racines);
   double nu = -1;
-  for (int i = 0; i < nbRealRacines; i++)
+  for(int i = 0; i < nbRealRacines; i++)
   {
-    if (nu < 0 && Racines[i] > 0)
+    if(nu < 0 && Racines[i] > 0)
       nu = Racines[i];
-    else if (Racines[i] > 0 && Racines[i] < nu)
+    else if(Racines[i] > 0 && Racines[i] < nu)
       nu = Racines[i];
   }
-  if (nu > 0)
+  if(nu > 0)
   {
 #ifdef FC3D_UE_DEBUG
     printf("nb racines :%d\n", nbRealRacines);
@@ -727,11 +727,11 @@ int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* probl
 #ifdef FC3D_UE_DEBUG
 
 #endif
-  if (verbose) printf("fc3d_unitary_enumerative_poly_nu (FAILED) M:\n");
-  if (verbose) print3x3(M);
+  if(verbose) printf("fc3d_unitary_enumerative_poly_nu (FAILED) M:\n");
+  if(verbose) print3x3(M);
   M = M00;
-  if (verbose) printf("fc3d_unitary_enumerative_poly_nu (FAILED) Q:\n");
-  if (verbose) print3(Q);
+  if(verbose) printf("fc3d_unitary_enumerative_poly_nu (FAILED) Q:\n");
+  if(verbose) print3(Q);
   Q = Q0;
   return -1;
 }

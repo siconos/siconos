@@ -28,14 +28,14 @@ void NV_display(double * m, int nRow)
 {
   int lin;
   printf("vector of size\t%d\t =\n[", nRow);
-  if (nRow == 0)
+  if(nRow == 0)
   {
     printf("]\n");
   }
-  for (lin = 0; lin < nRow; lin++)
+  for(lin = 0; lin < nRow; lin++)
   {
     printf(" %.15e", m[lin]);
-    if (lin != nRow - 1)
+    if(lin != nRow - 1)
       printf(", ");
     else
       printf("]\n");
@@ -44,14 +44,14 @@ void NV_display(double * m, int nRow)
 }
 void NV_write_in_file_python(double * m,  int nRow, FILE* file)
 {
-  if (! m)
+  if(! m)
   {
     fprintf(stderr, "Numerics, NV_write_in_file_python  failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   fprintf(file, "size = %d; \n", nRow);
   fprintf(file, "data= [");
-  for (int i = 0; i < nRow; i++)
+  for(int i = 0; i < nRow; i++)
   {
     fprintf(file, "%32.24e,\t ", m[i]);
   }
@@ -60,20 +60,20 @@ void NV_write_in_file_python(double * m,  int nRow, FILE* file)
 
 bool NV_equal(double * x, double * y, int n, double tol)
 {
-  for (int i =0; i< n ; i++)
+  for(int i =0; i< n ; i++)
   {
-    if (fabs(x[i] - y[i]) >= tol)
+    if(fabs(x[i] - y[i]) >= tol)
     {
       DEBUG_PRINTF("error %i = %e\n",i, fabs(x[i]) - y[i]);
       return false;
-    } 
+    }
   }
   return true;
 }
 double NV_max(double * x, int n)
 {
   double max = x[0];
-  for (int i =1; i< n ; i++)
+  for(int i =1; i< n ; i++)
   {
     max  = fmax(max, x[i]);
   }

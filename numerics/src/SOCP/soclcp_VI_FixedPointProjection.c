@@ -47,24 +47,24 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem*
   vi->size =  n;
 
   /*set the norm of the VI to the norm of problem->q  */
-  vi->normVI= cblas_dnrm2(n , problem->q , 1);
+  vi->normVI= cblas_dnrm2(n, problem->q, 1);
   vi->istheNormVIset=1;
 
   soclcp_as_vi->vi = vi;
   soclcp_as_vi->soclcp = problem;
   /* frictionContact_display(fc3d_as_vi->fc3d); */
 
-  variationalInequality_FixedPointProjection(vi, reaction, velocity , info , options);
+  variationalInequality_FixedPointProjection(vi, reaction, velocity, info, options);
 
   /* **** Criterium convergence **** */
-  soclcp_compute_error(problem, reaction , velocity, options->dparam[0], options, &error);
+  soclcp_compute_error(problem, reaction, velocity, options->dparam[0], options, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
     printf("---------------SOCLCP - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n",
            options->iparam[SICONOS_IPARAM_MAX_ITER], options->dparam[SICONOS_DPARAM_RESIDU]);

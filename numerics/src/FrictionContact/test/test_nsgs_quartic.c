@@ -36,18 +36,18 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   int current = 0;
   for(int d =0; d <n_data; d++)
-    {
-      // Quartic solver, set tol and max iter.
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(topsolver);
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+  {
+    // Quartic solver, set tol and max iter.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-      solver_options_update_internal(collection[current].options, 0,SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
-      collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
-      collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-      current++;
-    }
+    solver_options_update_internal(collection[current].options, 0,SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+    current++;
+  }
 
   return collection;
 

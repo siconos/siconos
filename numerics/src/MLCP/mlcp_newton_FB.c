@@ -39,7 +39,7 @@ static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w)
   unsigned int n = problem->n;
   unsigned int m = problem->m;
   /* Problem in the form (M,q) */
-  if (problem->isStorageType1)
+  if(problem->isStorageType1)
   {
     cblas_dcopy(n, problem->q, 1, w, 1);
     // Mz+q --> w
@@ -56,7 +56,7 @@ static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w)
     double *D = problem->D;
 
     /* Compute "equalities" part, we = Au + Cv + a - Must be equal to 0 */
-    cblas_dcopy(n, a , 1 , w , 1); //  we = w[0..n-1] <-- a
+    cblas_dcopy(n, a, 1, w, 1);    //  we = w[0..n-1] <-- a
     cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, A, n, z, 1, 1.0, w, 1); // we <-- A*u + we
     cblas_dgemv(CblasColMajor, CblasNoTrans, n, m, 1.0, C, m, &z[n], 1, 1.0, w, 1); // we <-- C*v + we
 
@@ -66,7 +66,7 @@ static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w)
     cblas_dgemv(CblasColMajor, CblasNoTrans, m, n, 1.0, D, n, z, 1, 1.0, w_c, 1); // we <-- D*u + we
     cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, 1.0, B, m, &z[n], 1, 1.0, w_c, 1); // we <-- B*v + we
   }
- }
+}
 
 static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, NumericsMatrix* H)
 {
@@ -83,13 +83,13 @@ static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* w
   // workV1 = "z" in Facchibei--Pang p. 808
   // "z_i" = 1 if z_i = w_i = 0.0
   // M^T.workV1 --> workV2
-  cblas_dgemv(CblasColMajor, CblasTrans, n, n, 1.0, M, n , workV1, 1, 0.0, workV2, 1);
-  for (unsigned int i = 0; i < n; ++i)
+  cblas_dgemv(CblasColMajor, CblasTrans, n, n, 1.0, M, n, workV1, 1, 0.0, workV2, 1);
+  for(unsigned int i = 0; i < n; ++i)
   {
-    if (workV1[i] != 0.0) // i in beta
+    if(workV1[i] != 0.0)  // i in beta
     {
       normi = sqrt(workV1[i] * workV1[i] + workV2[i] * workV2[i]);
-      for (unsigned int j = 0; j < n; j++)
+      for(unsigned int j = 0; j < n; j++)
       {
         H[j * n + i] = (workV2[i] / normi - 1.0) * M[j * n + i];
       }
@@ -99,7 +99,7 @@ static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* w
     else // i not in beta
     {
       normi = sqrt(z[i] * z[i] + w[i] * w[i]);
-      for (unsigned int j = 0; j < n; j++)
+      for(unsigned int j = 0; j < n; j++)
       {
         H[j * n + i] = (w[i] / normi - 1.0) * M[j * n + i];
       }
@@ -120,7 +120,7 @@ void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double* nabl
   mlcp_compute_error((MixedLinearComplementarityProblem *)data_opaque, z, w, tol, err);
 }
 
-void mlcp_newton_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void mlcp_newton_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   functions_LSA functions_FBLSA_mlcp;
   init_lsa_functions(&functions_FBLSA_mlcp, &FB_compute_F_mlcp, (compute_F_merit_ptr)&mlcp_FB);

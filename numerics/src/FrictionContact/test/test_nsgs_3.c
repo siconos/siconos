@@ -35,7 +35,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   int topsolver = SICONOS_FRICTION_3D_NSGS;
   int current = 0;
 
-  
+
   {
     // Projection on cone, default values.
     int d = 0; // FC3D_Example1_SBM.dat
@@ -62,7 +62,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
     current++;
   }
-  
+
   {
     int d = 0; // FC3D_Example1_SBM.dat
     // Projection on cone with local iteration, set tol and max iter.
@@ -104,7 +104,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
     solver_options_update_internal(collection[current].options, 0,
                                    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-    
+
     collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 20;
     collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
     collection[current].options->internalSolvers[0]->dparam[9] = 1.; // ???
@@ -113,7 +113,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].will_fail = 1;
     current++;
   }
-  
+
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // Projection on cone set d[9], i[8]
@@ -124,7 +124,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
     solver_options_update_internal(collection[current].options, 0,
                                    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-    
+
     collection[current].options->internalSolvers[0]->dparam[9] = 1.; // ???
     collection[current].options->internalSolvers[0]->iparam[8] = 1;  // ???
     // Expected to fail ...
@@ -142,14 +142,14 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
     solver_options_update_internal(collection[current].options, 0,
                                    SICONOS_FRICTION_3D_ONECONTACT_NSN);
-    
+
     collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
     collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-18;
     collection[current].options->internalSolvers[0]->iparam[1] = 1;  // ???
-    current++;  
+    current++;
   }
 
-  
+
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // Projection on cone with local iteration, set tol and maxiter
@@ -160,13 +160,13 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
     solver_options_update_internal(collection[current].options, 0,
                                    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-    
+
     collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 100;
     collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
-    current++;  
+    current++;
   }
 
-  
+
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // Projection on cone with regularization, default values.
@@ -177,10 +177,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
     solver_options_update_internal(collection[current].options, 0,
                                    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
-    
-    current++;  
+
+    current++;
   }
-  
+
   {
     int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
     // Projection on cone, default values.
@@ -191,8 +191,8 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
     solver_options_update_internal(collection[current].options, 0,
                                    SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-    
-    current++;  
+
+    current++;
   }
 
   {
@@ -224,7 +224,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
     current++;
 
-    
+
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(topsolver);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
@@ -251,11 +251,11 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-18;
     current++;
   }
-  
+
 
   {
     int d  = 4; // FC3D_Example1.dat
-    
+
     // nonsmooth newton. Set tol and max iter. Default for other parameters
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(topsolver);
@@ -315,7 +315,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
     current++;
   }
- 
+
 
   {
     int d = 5;
@@ -335,7 +335,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   }
 
 
-  
+
   {
     int d = 7;
     // nonsmooth newton 'damped'. Set tol and max iter. Default for other parameters

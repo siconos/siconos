@@ -190,7 +190,9 @@ void ContactPointVisitor::operator()(const NewtonEuler3DR& rel)
   const SiconosVector& posa = *rel.pc1();
   const SiconosVector& posb = *rel.pc2();
   const SiconosVector& nc = *rel.nc();
-  DEBUG_PRINTF("posa(0)=%g\n", posa(0));  DEBUG_PRINTF("posa(1)=%g\n", posa(1));  DEBUG_PRINTF("posa(2)=%g\n", posa(2));
+  DEBUG_PRINTF("posa(0)=%g\n", posa(0));
+  DEBUG_PRINTF("posa(1)=%g\n", posa(1));
+  DEBUG_PRINTF("posa(2)=%g\n", posa(2));
 
   double id = inter->number();
   double mu = ask<ForMu>(*inter->nonSmoothLaw());
@@ -230,7 +232,9 @@ void ContactPointVisitor::operator()(const NewtonEuler5DR& rel)
   const SiconosVector& posa = *rel.pc1();
   const SiconosVector& posb = *rel.pc2();
   const SiconosVector& nc = *rel.nc();
-  DEBUG_PRINTF("posa(0)=%g\n", posa(0));  DEBUG_PRINTF("posa(1)=%g\n", posa(1));  DEBUG_PRINTF("posa(2)=%g\n", posa(2));
+  DEBUG_PRINTF("posa(0)=%g\n", posa(0));
+  DEBUG_PRINTF("posa(1)=%g\n", posa(1));
+  DEBUG_PRINTF("posa(2)=%g\n", posa(2));
 
   double id = inter->number();
   double mu = ask<ForMu>(*inter->nonSmoothLaw());
@@ -269,7 +273,8 @@ void ContactPointVisitor::operator()(const Lagrangian2d2DR& rel)
   const SiconosVector& posa = *rel.pc1();
   const SiconosVector& posb = *rel.pc2();
   const SiconosVector& nc = *rel.nc();
-  DEBUG_PRINTF("posa(0)=%g\n", posa(0));  DEBUG_PRINTF("posa(1)=%g\n", posa(1));
+  DEBUG_PRINTF("posa(0)=%g\n", posa(0));
+  DEBUG_PRINTF("posa(1)=%g\n", posa(1));
 
   double id = inter->number();
   double mu = ask<ForMu>(*inter->nonSmoothLaw());
@@ -371,30 +376,30 @@ SP::SimpleMatrix MechanicsIO::positions(const NonSmoothDynamicalSystem& nsds) co
 {
 
   typedef
-    Visitor < Classes < LagrangianDS, NewtonEulerDS >,
-              GetPosition >::Make Getter;
+  Visitor < Classes < LagrangianDS, NewtonEulerDS >,
+          GetPosition >::Make Getter;
 
   return visitAllVerticesForVector<Getter>
-    (*(nsds.topology()->dSG(0)));
+         (*(nsds.topology()->dSG(0)));
 };
 
 
 SP::SimpleMatrix MechanicsIO::velocities(const NonSmoothDynamicalSystem& nsds) const
 {
   typedef
-    Visitor < Classes < LagrangianDS, NewtonEulerDS >,
-              GetVelocity>::Make Getter;
+  Visitor < Classes < LagrangianDS, NewtonEulerDS >,
+          GetVelocity>::Make Getter;
 
   return visitAllVerticesForVector<Getter>
-    (*nsds.topology()->dSG(0));
+         (*nsds.topology()->dSG(0));
 }
 
 SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds,
-                                            unsigned int index_set) const
+    unsigned int index_set) const
 {
   SP::SimpleMatrix result(new SimpleMatrix());
   InteractionsGraph::VIterator vi, viend;
-  if (nsds.topology()->numberOfIndexSet() > 0)
+  if(nsds.topology()->numberOfIndexSet() > 0)
   {
     InteractionsGraph& graph =
       *nsds.topology()->indexSet(index_set);
@@ -409,11 +414,11 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
 
       /* create a visitor for specified classes */
       typedef Visitor < Classes <
-                          NewtonEuler1DR,
-                          NewtonEuler3DR,
-                          NewtonEuler5DR,
-                          Lagrangian2d2DR>,
-                        ContactPointVisitor>::Make ContactPointInspector;
+      NewtonEuler1DR,
+      NewtonEuler3DR,
+      NewtonEuler5DR,
+      Lagrangian2d2DR>,
+      ContactPointVisitor>::Make ContactPointInspector;
       ContactPointInspector inspector;
       inspector.inter = graph.bundle(*vi);
       graph.bundle(*vi)->relation()->accept(inspector);
@@ -427,7 +432,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       data.setValue(data_size, ds1.number());
       data.setValue(data_size+1, ds2.number());
 
-      if (result->size(1) != data.size())
+      if(result->size(1) != data.size())
       {
         result->resize(graph.vertices_number(), data.size());
       }
@@ -445,7 +450,7 @@ SP::SimpleMatrix MechanicsIO::domains(const NonSmoothDynamicalSystem& nsds) cons
 {
   SP::SimpleMatrix result(new SimpleMatrix());
   InteractionsGraph::VIterator vi, viend;
-  if (nsds.topology()->numberOfIndexSet() > 0)
+  if(nsds.topology()->numberOfIndexSet() > 0)
   {
     InteractionsGraph& graph =
       *nsds.topology()->indexSet(1);
@@ -457,17 +462,17 @@ SP::SimpleMatrix MechanicsIO::domains(const NonSmoothDynamicalSystem& nsds) cons
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
       typedef Visitor < Classes <
-                          NewtonEuler1DR,
-                          NewtonEuler3DR,
-                          PrismaticJointR,
-                          KneeJointR,
-                          PivotJointR>,
-                        ContactPointDomainVisitor>::Make DomainInspector;
+      NewtonEuler1DR,
+      NewtonEuler3DR,
+      PrismaticJointR,
+      KneeJointR,
+      PivotJointR>,
+      ContactPointDomainVisitor>::Make DomainInspector;
       DomainInspector inspector;
       inspector.inter = graph.bundle(*vi);
       graph.bundle(*vi)->relation()->accept(inspector);
       const SiconosVector& data = inspector.answer;
-      if (data.size() == 2) result->setRow(current_row, data);
+      if(data.size() == 2) result->setRow(current_row, data);
     }
   }
   return result;

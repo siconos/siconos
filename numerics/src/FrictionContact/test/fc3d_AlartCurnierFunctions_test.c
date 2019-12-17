@@ -38,32 +38,32 @@ int main()
 
   r = fscanf(file, "%d\n", &dim);
   assert(r > 0);
-  if (r <= 0) return(r);
+  if(r <= 0) return(r);
 
   reactions = (double *) malloc(3 * dim * sizeof(double));
   velocities = (double *) malloc(3 * dim * sizeof(double));
   mus = (double *) malloc(dim * sizeof(double));
   rhos = (double *) malloc(3 * dim * sizeof(double));
 
-  for (unsigned int i = 0; i < dim * 3 ; ++i)
+  for(unsigned int i = 0; i < dim * 3 ; ++i)
   {
     r = fscanf(file, "%lf\n", &reactions[i]);
     assert(r > 0);
   };
 
-  for (unsigned int i = 0; i < dim * 3 ; ++i)
+  for(unsigned int i = 0; i < dim * 3 ; ++i)
   {
     r = fscanf(file, "%lf\n", &velocities[i]);
     assert(r > 0);
   };
 
-  for (unsigned int k = 0; k < dim ; ++k)
+  for(unsigned int k = 0; k < dim ; ++k)
   {
     r = fscanf(file, "%lf\n", &mus[k]);
     assert(r > 0);
   };
 
-  for (unsigned int i = 0; i < dim * 3 ; ++i)
+  for(unsigned int i = 0; i < dim * 3 ; ++i)
   {
     r = fscanf(file, "%lf\n", &rhos[i]);
     assert(r > 0);
@@ -71,7 +71,7 @@ int main()
 
   double F1[3], A1[9], B1[9],
          F2[3], A2[9], B2[9];
-  for (unsigned int k = 0; k < dim; ++k)
+  for(unsigned int k = 0; k < dim; ++k)
   {
 
     double* p;

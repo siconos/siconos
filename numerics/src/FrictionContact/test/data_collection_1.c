@@ -56,7 +56,7 @@ const char ** data_collection()
   data_collection_1[n_data++] = "./data/NESpheres_30_1.dat";
 
   data_collection_1[n_data++] = "./data/Confeti-ex13-Fc3D-SBM.dat";
-  
+
   data_collection_1[n_data++] = "---";
 
 

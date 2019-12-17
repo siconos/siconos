@@ -37,9 +37,9 @@ void TimeDiscretisationEventNoSaveInMemory::process(Simulation& simulation)
 void TimeDiscretisationEventNoSaveInMemory::update(unsigned int k)
 {
   assert(k > _k && "TimeDiscretisationEvent::update - next step has to be greater than the current one");
-  if (_td) // if no TimeDiscretisation, then do nothing
+  if(_td)  // if no TimeDiscretisation, then do nothing
   {
-    if (_td->hGmp())
+    if(_td->hGmp())
       incrementTime(k-_k);
     else
       setTime(_td->getTk(k));

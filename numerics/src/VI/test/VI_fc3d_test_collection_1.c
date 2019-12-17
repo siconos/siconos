@@ -30,7 +30,8 @@
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-typedef struct {
+typedef struct
+{
   VariationalInequality * vi;
   FrictionContactProblem * fc3d;
 } Problems;
@@ -39,23 +40,23 @@ typedef struct {
 static void Ftest_0(void * self, int n_unused, double *x, double *F)
 {
   VariationalInequality * vi = (VariationalInequality *) self;
-  Problems* pb = (Problems *)vi->env;             
+  Problems* pb = (Problems *)vi->env;
   FrictionContactProblem * fc3d = pb->fc3d;
   //frictionContact_display(fc3d);
- 
+
   int nc = fc3d->numberOfContacts;
   int nLocal =  fc3d->dimension;
-  int n = nc * nLocal; 
+  int n = nc * nLocal;
 
-  cblas_dcopy(n , fc3d->q , 1 , F, 1);
+  cblas_dcopy(n, fc3d->q, 1, F, 1);
   NM_gemv(1.0, fc3d->M, x, 1.0, F);
   int contact =0;
- 
-  for (contact = 0 ; contact < nc ; ++contact)
+
+  for(contact = 0 ; contact < nc ; ++contact)
   {
     int pos = contact * nLocal;
     double  normUT = sqrt(F[pos + 1] * F[pos + 1] + F[pos + 2] * F[pos + 2]);
-    F[pos] +=  (fc3d->mu[contact] * normUT);
+    F[pos] += (fc3d->mu[contact] * normUT);
   }
 }
 
@@ -63,18 +64,18 @@ static void Ftest_0(void * self, int n_unused, double *x, double *F)
 static void PXtest_0(void *viIn, double *x, double *PX)
 {
   VariationalInequality * vi = (VariationalInequality *) viIn;
-  Problems* pb = (Problems *)vi->env;             
+  Problems* pb = (Problems *)vi->env;
   FrictionContactProblem * fc3d = pb->fc3d;
   //frictionContact_display(fc3d);
-  
-  int contact =0; 
+
+  int contact =0;
   int nc = fc3d->numberOfContacts;
   int nLocal =  fc3d->dimension;
-  int n = nc * nLocal; 
+  int n = nc * nLocal;
 
-  cblas_dcopy(n , x , 1 , PX, 1);
-  
-  for (contact = 0 ; contact < nc ; ++contact)
+  cblas_dcopy(n, x, 1, PX, 1);
+
+  for(contact = 0 ; contact < nc ; ++contact)
   {
     int pos = contact * nLocal;
     projectionOnCone(&PX[pos], fc3d->mu[contact]);
@@ -115,14 +116,15 @@ static int test_0(void)
 
   PXtest_0(&vi, x,w);
 
-  
+
   int info = variationalInequality_driver(&vi, x, w, options);
   int i =0;
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
+    printf("x[%i]=%f\t",i,x[i]);
+    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
   }
- 
+
   solver_options_delete(options);
   free(problem);
   free(x);
@@ -135,23 +137,23 @@ static int test_0(void)
 static void Ftest_1(void * self, int n_unused, double *x, double *F)
 {
   VariationalInequality * vi = (VariationalInequality *) self;
-  Problems* pb = (Problems *)vi->env;             
+  Problems* pb = (Problems *)vi->env;
   FrictionContactProblem * fc3d = pb->fc3d;
   //frictionContact_display(fc3d);
- 
+
   int nc = fc3d->numberOfContacts;
   int nLocal =  fc3d->dimension;
-  int n = nc * nLocal; 
+  int n = nc * nLocal;
 
-  cblas_dcopy(n , fc3d->q , 1 , F, 1);
+  cblas_dcopy(n, fc3d->q, 1, F, 1);
   NM_gemv(1.0, fc3d->M, x, 1.0, F);
   int contact =0;
- 
-  for (contact = 0 ; contact < nc ; ++contact)
+
+  for(contact = 0 ; contact < nc ; ++contact)
   {
     int pos = contact * nLocal;
     double  normUT = sqrt(F[pos + 1] * F[pos + 1] + F[pos + 2] * F[pos + 2]);
-    F[pos] +=  (fc3d->mu[contact] * normUT);
+    F[pos] += (fc3d->mu[contact] * normUT);
   }
 }
 
@@ -159,18 +161,18 @@ static void Ftest_1(void * self, int n_unused, double *x, double *F)
 static void PXtest_1(void *viIn, double *x, double *PX)
 {
   VariationalInequality * vi = (VariationalInequality *) viIn;
-  Problems* pb = (Problems *)vi->env;             
+  Problems* pb = (Problems *)vi->env;
   FrictionContactProblem * fc3d = pb->fc3d;
   //frictionContact_display(fc3d);
-  
-  int contact =0; 
+
+  int contact =0;
   int nc = fc3d->numberOfContacts;
   int nLocal =  fc3d->dimension;
-  int n = nc * nLocal; 
+  int n = nc * nLocal;
 
-  cblas_dcopy(n , x , 1 , PX, 1);
-  
-  for (contact = 0 ; contact < nc ; ++contact)
+  cblas_dcopy(n, x, 1, PX, 1);
+
+  for(contact = 0 ; contact < nc ; ++contact)
   {
     int pos = contact * nLocal;
     projectionOnCone(&PX[pos], fc3d->mu[contact]);
@@ -212,14 +214,15 @@ static int test_1(void)
 
   PXtest_1(&vi, x,w);
 
- 
+
   int info = variationalInequality_driver(&vi, x, w, options);
   int i =0;
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
+    printf("x[%i]=%f\t",i,x[i]);
+    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
   }
- 
+
   solver_options_delete(options);
   free(problem);
   free(x);
@@ -232,23 +235,23 @@ static int test_1(void)
 static void Ftest_2(void * self, int n_unused, double *x, double *F)
 {
   VariationalInequality * vi = (VariationalInequality *) self;
-  Problems* pb = (Problems *)vi->env;             
+  Problems* pb = (Problems *)vi->env;
   FrictionContactProblem * fc3d = pb->fc3d;
   //frictionContact_display(fc3d);
- 
+
   int nc = fc3d->numberOfContacts;
   int nLocal =  fc3d->dimension;
-  int n = nc * nLocal; 
+  int n = nc * nLocal;
 
-  cblas_dcopy(n , fc3d->q , 1 , F, 1);
+  cblas_dcopy(n, fc3d->q, 1, F, 1);
   NM_gemv(1.0, fc3d->M, x, 1.0, F);
   int contact =0;
- 
-  for (contact = 0 ; contact < nc ; ++contact)
+
+  for(contact = 0 ; contact < nc ; ++contact)
   {
     int pos = contact * nLocal;
     double  normUT = sqrt(F[pos + 1] * F[pos + 1] + F[pos + 2] * F[pos + 2]);
-    F[pos] +=  (fc3d->mu[contact] * normUT);
+    F[pos] += (fc3d->mu[contact] * normUT);
   }
 }
 
@@ -256,18 +259,18 @@ static void Ftest_2(void * self, int n_unused, double *x, double *F)
 static void PXtest_2(void *viIn, double *x, double *PX)
 {
   VariationalInequality * vi = (VariationalInequality *) viIn;
-  Problems* pb = (Problems *)vi->env;             
+  Problems* pb = (Problems *)vi->env;
   FrictionContactProblem * fc3d = pb->fc3d;
   //frictionContact_display(fc3d);
-  
-  int contact =0; 
+
+  int contact =0;
   int nc = fc3d->numberOfContacts;
   int nLocal =  fc3d->dimension;
-  int n = nc * nLocal; 
+  int n = nc * nLocal;
 
-  cblas_dcopy(n , x , 1 , PX, 1);
-  
-  for (contact = 0 ; contact < nc ; ++contact)
+  cblas_dcopy(n, x, 1, PX, 1);
+
+  for(contact = 0 ; contact < nc ; ++contact)
   {
     int pos = contact * nLocal;
     projectionOnCone(&PX[pos], fc3d->mu[contact]);
@@ -308,14 +311,15 @@ static int test_2(void)
 
   PXtest_2(&vi, x,w);
 
- 
+
   int info = variationalInequality_driver(&vi, x, w, options);
   int i =0;
-  for (i =0; i< n ; i++)
+  for(i =0; i< n ; i++)
   {
-    printf("x[%i]=%f\t",i,x[i]);    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
+    printf("x[%i]=%f\t",i,x[i]);
+    printf("w[%i]=F[%i]=%f\n",i,i,w[i]);
   }
- 
+
   solver_options_delete(options);
   options = NULL;
   free(problem);
@@ -333,7 +337,7 @@ int main(void)
   int i=0;
   printf("start test #%i\n",i);
   int info = test_0();
-  if (!info)
+  if(!info)
   {
     printf("end test #%i successful\n",i);
   }
@@ -341,11 +345,11 @@ int main(void)
   {
     printf("end test #%i  not  successful\n",i);
   }
-    
+
   i++;
   printf("start test #%i\n",i);
   info += test_1();
-  if (!info)
+  if(!info)
   {
     printf("end test #%i successful\n",i);
   }
@@ -353,12 +357,12 @@ int main(void)
   {
     printf("end test #%i  not  successful\n",i);
   }
-  
+
   i++;
   printf("start test #%i\n",i);
   int info_fail = test_2();
-  
-  if (!info_fail)
+
+  if(!info_fail)
   {
     printf("end test #%i successful\n",i);
   }

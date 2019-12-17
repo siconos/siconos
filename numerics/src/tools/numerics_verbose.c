@@ -38,25 +38,25 @@ tlsvar enum numerics_loggers numerics_logger_type = NUMERICS_LOG_TO_SCREEN;
 
 static void numerics_printf_internal(int level, const char* fmt, const char* extra_qual, va_list argp)
 {
-  switch (numerics_logger_type)
+  switch(numerics_logger_type)
   {
   case NUMERICS_EXTERNAL_LOGGER:
   {
 //    if (!numerics_logger)
 //    {
-      numerics_error("numerics_printf_internal", "unsupported custom logger");
+    numerics_error("numerics_printf_internal", "unsupported custom logger");
 //    }
     break;
   }
   case NUMERICS_LOG_TO_FILE:
   {
-    if (!logger_f)
+    if(!logger_f)
     {
       numerics_error("numerics_printf_internal", "no logger file opened!");
     }
     fputs("[Numerics]", logger_f);
 //    fprintf(logger_f, "[%d]", level);
-    if (extra_qual) fputs(extra_qual, logger_f);
+    if(extra_qual) fputs(extra_qual, logger_f);
     fputs(" ", logger_f);
     vfprintf(logger_f, fmt, argp);
     fputs("\n", logger_f);
@@ -67,7 +67,7 @@ static void numerics_printf_internal(int level, const char* fmt, const char* ext
   {
     printf("[Numerics]");
 //    printf("[%d]", level);
-    if (extra_qual) printf("%s",extra_qual);
+    if(extra_qual) printf("%s",extra_qual);
     printf(" ");
     vprintf(fmt, argp);
     printf("\n");
@@ -137,7 +137,7 @@ void numerics_warning(const char * fn_name, const char* msg, ...)
 
 void numerics_printf(const char * fmt, ...)
 {
-  if (verbose)
+  if(verbose)
   {
     va_list args;
     va_start(args,fmt);
@@ -148,7 +148,7 @@ void numerics_printf(const char * fmt, ...)
 
 void numerics_printf_verbose(int verbose_level, const char * fmt, ...)
 {
-  if (verbose >= verbose_level)
+  if(verbose >= verbose_level)
   {
     va_list args;
     va_start(args,fmt);

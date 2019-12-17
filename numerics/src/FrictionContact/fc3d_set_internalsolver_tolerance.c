@@ -25,25 +25,25 @@
 #include "numerics_verbose.h"        // for numerics_printf_verbose, numeric...
 
 void fc3d_set_internalsolver_tolerance(FrictionContactProblem* problem,
-                                                  SolverOptions* options,
-                                                  SolverOptions* internalsolver_options,
-                                                  double error)
+                                       SolverOptions* options,
+                                       SolverOptions* internalsolver_options,
+                                       double error)
 {
   int* iparam = options->iparam;
-  if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE )
+  if(iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE)
   {
     internalsolver_options->dparam[SICONOS_DPARAM_TOL] = fmax(error/options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO], options->dparam[SICONOS_DPARAM_TOL]/problem->numberOfContacts);
-    numerics_printf_verbose(2,"fc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e\n", internalsolver_options->dparam[SICONOS_DPARAM_TOL] );
+    numerics_printf_verbose(2,"fc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e\n", internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   }
-  else if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT )
+  else if(iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT)
   {
     internalsolver_options->dparam[SICONOS_DPARAM_TOL] = error/(options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO]*problem->numberOfContacts);
-    numerics_printf_verbose(2,"fc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e", internalsolver_options->dparam[SICONOS_DPARAM_TOL] );
+    numerics_printf_verbose(2,"fc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e", internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   }
-  else if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE)
+  else if(iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE)
   {
     // We use the user value for the error of the local solver
-    numerics_printf_verbose(2,"fc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e", internalsolver_options->dparam[SICONOS_DPARAM_TOL] );
+    numerics_printf_verbose(2,"fc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e", internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   }
   else
   {

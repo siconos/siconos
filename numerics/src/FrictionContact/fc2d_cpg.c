@@ -27,7 +27,7 @@
 #include "fc2d_Solvers.h"            // for fc2d_projf, fc2d_projc, fc2d_cpg
 #include "numerics_verbose.h"        // for verbose
 
-void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
+void fc2d_cpg(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
   assert(nc>0);
@@ -71,7 +71,7 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
 
 
-  for (i = 0; i < n ; i++)
+  for(i = 0; i < n ; i++)
   {
     reaction[i]     = 0.0;
     xi[i]    = 0.0;
@@ -83,7 +83,7 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
     z[i]     = 0.0;
     fric1[i] = 1.0;
 
-    if (i < nc)
+    if(i < nc)
     {
       fric[i]  = mu[i] * fric1[i];
       stat[i]    = 0;
@@ -109,20 +109,20 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
   /*             Check for initial status             */
 
 
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     mu[i] = fric[i];
-    if (reaction[2 * i] <= eps)
+    if(reaction[2 * i] <= eps)
     {
       /*       No contact            */
       stat[i] = 0;
     }
-    else if (reaction[2 * i + 1] <=  -mu[i]*reaction[2 * i])
+    else if(reaction[2 * i + 1] <=  -mu[i]*reaction[2 * i])
     {
       /*     Slide backward         */
       stat[i] = 1;
     }
-    else if (reaction[2 * i + 1] >=  mu[i]*reaction[2 * i])
+    else if(reaction[2 * i + 1] >=  mu[i]*reaction[2 * i])
     {
       /*   Slide forward          */
       stat[i] = 3;
@@ -140,18 +140,18 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
 
 
-  while ((iter < maxit) && (normr > tol))
+  while((iter < maxit) && (normr > tol))
   {
 
 
 
-    for (i = 0 ; i < nc ; i++)
+    for(i = 0 ; i < nc ; i++)
       statusi[i] = stat[i];
 
 
     cblas_dcopy(n, r, incx, v, incy);
 
-    if (iter == 0)
+    if(iter == 0)
     {
       cblas_dcopy(n, r, incx, w, incy);
 
@@ -173,9 +173,9 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
     pAp    = ddot_( (integer *)&n, p, &incx, Ap, &incy );*/
 
-    if (pAp == 0)
+    if(pAp == 0)
     {
-      if (verbose > 0)
+      if(verbose > 0)
         printf("\n Operation non conform alpha at the iteration %d \n", iter);
 
       free(r);
@@ -264,10 +264,10 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
 
 
-  if (normr < tol)
+  if(normr < tol)
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("convergence after %d iterations with a residual %g\n", iter - 1, normr);
 
     *info = 0;
@@ -276,7 +276,7 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("no convergence after %d iterations with a residual %g\n", iter - 1, normr);
 
     *info = 1;
@@ -284,7 +284,7 @@ void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *veloc
 
 
   alpha = -1.;
-  cblas_dscal(n , alpha , r , incx);
+  cblas_dscal(n, alpha, r, incx);
 
   cblas_dcopy(n, r, incx, velocity, incy);
 

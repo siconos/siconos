@@ -28,7 +28,7 @@ void convexQP_display(ConvexQP* cqp)
   printf("size :%d \n", cqp->size);
   printf("m:%d \n", cqp->m);
   printf("M matrix:\n");
-  if (cqp->M)
+  if(cqp->M)
   {
 
     NM_display(cqp->M);
@@ -38,7 +38,7 @@ void convexQP_display(ConvexQP* cqp)
     printf("cqp->M is NULL\n");
   }
   printf("q vector:\n");
-  if (cqp->q)
+  if(cqp->q)
   {
     NV_display(cqp->q, cqp->size);
   }
@@ -47,12 +47,12 @@ void convexQP_display(ConvexQP* cqp)
     printf("cqp->q is NULL\n");
   }
   printf("A matrix:\n");
-  if (cqp->A)
+  if(cqp->A)
     NM_display(cqp->A);
   else
     printf("cqp->A is NULL\n");
   printf("b vector:\n");
-  if (cqp->b)
+  if(cqp->b)
     NV_display(cqp->b, cqp->m);
   else
     printf("cqp->b is NULL\n");
@@ -61,7 +61,7 @@ void convexQP_display(ConvexQP* cqp)
 
 int convexQP_printInFile(ConvexQP*  cqp, FILE* file)
 {
-  if (! cqp)
+  if(! cqp)
   {
     fprintf(stderr, "Numerics, ConvexQP printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -77,24 +77,24 @@ int convexQP_newFromFile(ConvexQP* cqp, FILE* file)
 
 void convexQP_free(ConvexQP* cqp)
 {
-  if (cqp->M)
+  if(cqp->M)
   {
     NM_clear(cqp->M);
     free(cqp->M);
     cqp->M = NULL;
   }
-  if (cqp->q)
+  if(cqp->q)
   {
     free(cqp->q);
     cqp->q = NULL;
   }
-  if (cqp->A)
+  if(cqp->A)
   {
     NM_clear(cqp->A);
     free(cqp->A);
     cqp->A = NULL;
   }
-  if (cqp->b)
+  if(cqp->b)
   {
     free(cqp->b);
     cqp->b = NULL;
@@ -119,7 +119,7 @@ void convexQP_clear(ConvexQP* cqp)
 
 ConvexQP* convexQP_new(int size)
 {
-  ConvexQP* fcqp = (ConvexQP*) malloc(sizeof(ConvexQP)); 
+  ConvexQP* fcqp = (ConvexQP*) malloc(sizeof(ConvexQP));
   convexQP_clear(fcqp);
   fcqp->size = size;
   return fcqp;

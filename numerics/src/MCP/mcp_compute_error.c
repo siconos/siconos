@@ -23,10 +23,10 @@
 #include "NumericsFwd.h"                  // for MixedComplementarityProblem
 #include "numerics_verbose.h"             // for numerics_error
 
-int mcp_compute_error(MixedComplementarityProblem* problem, double *z , double *w,  double * error)
+int mcp_compute_error(MixedComplementarityProblem* problem, double *z, double *w,  double * error)
 {
   /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
+  if(problem == NULL || z == NULL || w == NULL)
     numerics_error("mcp_compute_error", "null input for problem and/or z and/or w");
 
   int size =  problem->n1 + problem->n2;
@@ -35,13 +35,13 @@ int mcp_compute_error(MixedComplementarityProblem* problem, double *z , double *
 
   * error =0.0;
   /* compute the error of the inequality constraints */
-  for ( int i = problem->n1; i < size ; i++)
+  for(int i = problem->n1; i < size ; i++)
   {
     *error += pow(z[i] - fmax(0,(z[i] - w[i])),2);
   }
   *error =sqrt(*error);
   /* add the error of the equality constraints */
-  * error += cblas_dnrm2(problem->n1 , w , 1);
+  * error += cblas_dnrm2(problem->n1, w, 1);
 
   /* int incx = 1, incy = 1; */
   /* unsigned int n = problem->size; */
@@ -52,15 +52,15 @@ int mcp_compute_error(MixedComplementarityProblem* problem, double *z , double *
   /* if (fabs(norm_q) > DBL_EPSILON) */
   /*   *error /= norm_q; */
 
-  
 
-    return 0;
+
+  return 0;
 
 }
-int mcp_old_compute_error(MixedComplementarityProblem_old* problem, double *z , double *w,  double * error)
+int mcp_old_compute_error(MixedComplementarityProblem_old* problem, double *z, double *w,  double * error)
 {
   /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
+  if(problem == NULL || z == NULL || w == NULL)
     numerics_error("mcp_old_compute_error", "null input for problem and/or z and/or w");
 
   int size =  problem->sizeEqualities + problem->sizeInequalities;
@@ -69,13 +69,13 @@ int mcp_old_compute_error(MixedComplementarityProblem_old* problem, double *z , 
 
   * error =0.0;
   /* compute the error of the inequality constraints */
-  for ( int i = problem->sizeInequalities; i < size ; i++)
+  for(int i = problem->sizeInequalities; i < size ; i++)
   {
     *error += pow(z[i] - fmax(0,(z[i] - w[i])),2);
   }
   *error =sqrt(*error);
   /* add the error of the equality constraints */
-  * error += cblas_dnrm2(problem->sizeEqualities , w , 1);
+  * error += cblas_dnrm2(problem->sizeEqualities, w, 1);
 
   /* int incx = 1, incy = 1; */
   /* unsigned int n = problem->size; */
@@ -86,8 +86,8 @@ int mcp_old_compute_error(MixedComplementarityProblem_old* problem, double *z , 
   /* if (fabs(norm_q) > DBL_EPSILON) */
   /*   *error /= norm_q; */
 
-  
 
-    return 0;
+
+  return 0;
 
 }

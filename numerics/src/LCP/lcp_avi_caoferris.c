@@ -34,11 +34,11 @@ void lcp_avi_caoferris(LinearComplementarityProblem* problem, double *z, double 
   assert(n > 0);
 
   double* d_vec = (double *)malloc(n*sizeof(double));
-  for (unsigned i = 0; i < n; ++i) d_vec[i] = -1.0;
+  for(unsigned i = 0; i < n; ++i) d_vec[i] = -1.0;
 
   /* Set of active constraint is trivial */
   unsigned* A = (unsigned*)malloc(n*sizeof(unsigned));
-  for (unsigned i = 0; i < n; ++i) A[i] = i + 1;
+  for(unsigned i = 0; i < n; ++i) A[i] = i + 1;
 
   /* Call directly the 3rd stage */
   *info = avi_caoferris_stage3(problem, w, z, d_vec, n, A, options);

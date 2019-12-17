@@ -61,7 +61,7 @@ void variationalInequality_box_newton_QiLSA(VariationalInequality* problem, doub
   functions_QiLSA.compute_H = &VI_compute_H_box_Qi;
   functions_QiLSA.compute_error = &VI_compute_error_box;
   functions_QiLSA.get_set_from_problem_data = &vi_get_set;
-  
+
 
   set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->size, x, F, info, (void *)problem, options, &functions_QiLSA);

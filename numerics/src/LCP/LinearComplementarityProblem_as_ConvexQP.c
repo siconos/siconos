@@ -33,7 +33,7 @@ void Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX)
   LinearComplementarityProblem * lcp = pb->lcp;
 
   int n = lcp->size;
-  for (int i = 0 ; i <n ; ++i)
+  for(int i = 0 ; i <n ; ++i)
   {
     PX[i] = fmax(0, x[i]);
   }

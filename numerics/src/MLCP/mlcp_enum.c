@@ -133,7 +133,7 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
   sMref = problem->M->matrix0;
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
   //  verbose=1;
-  if (verbose)
+  if(verbose)
     printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
 
   sM = workingFloat;
@@ -146,33 +146,33 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
 
   sDgelsWork = sQref + sMl;
 
-  for (lin = 0; lin < sMl; lin++)
+  for(lin = 0; lin < sMl; lin++)
     sQref[lin] =  - problem->q[lin];
-  for (lin = 0; lin < sMl; lin++)
+  for(lin = 0; lin < sMl; lin++)
     sColNul[lin] = 0;
 
   /*  printf("sColNul\n");
       NM_dense_display(sColNul,npm,1);*/
-  if (verbose)
+  if(verbose)
     printRefSystem();
   sW2V = workingInt;
   ipiv = sW2V + sMm;
   indexInBlock = ipiv + sMm + sNn;
-  if (sMm == 0)
+  if(sMm == 0)
     indexInBlock = 0;
   *info = 0;
   mlcp_buildIndexInBlock(problem, indexInBlock);
   initEnum(problem->m);
-  while (nextEnum(sW2V) && itermax-- > 0)
+  while(nextEnum(sW2V) && itermax-- > 0)
   {
     mlcp_buildM_Block(sW2V, sM, sMref, sNn, sMm, sMl, indexInBlock);
     buildQ();
-    if (verbose)
+    if(verbose)
       printCurrentSystem();
-    if (useDGELS)
+    if(useDGELS)
     {
       DGELS(LA_NOTRANS,sMl, npm, NRHS, sM, sMl, sQ, sMl,&LAinfo);
-      if (verbose)
+      if(verbose)
       {
         printf("Solution of dgels\n");
         NM_dense_display(sQ, sMl, 1, 0);
@@ -181,62 +181,62 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
     else
     {
       DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
-      if (verbose)
+      if(verbose)
       {
         printf("Solution of dgesv\n");
         NM_dense_display(sQ, sMl, 1, 0);
       }
     }
-    if (!LAinfo)
+    if(!LAinfo)
     {
-      if (useDGELS)
+      if(useDGELS)
       {
         int cc = 0;
         int ii;
         double rest = 0;
-        for (ii = 0; ii < npm; ii++)
+        for(ii = 0; ii < npm; ii++)
         {
-          if (isnan(sQ[ii]) || isinf(sQ[ii]))
+          if(isnan(sQ[ii]) || isinf(sQ[ii]))
           {
             printf("DGELS FAILED\n");
             cc = 1;
             break;
           }
         }
-        if (cc)
+        if(cc)
           continue;
 
-        if (sMl > npm)
+        if(sMl > npm)
         {
           rest = cblas_dnrm2(sMl - npm, sQ + npm, 1);
 
-          if (rest > tol || isnan(rest) || isinf(rest))
+          if(rest > tol || isnan(rest) || isinf(rest))
           {
-            if (verbose)
+            if(verbose)
               printf("DGELS, optimal point doesn't satisfy AX=b, rest = %e\n", rest);
             continue;
           }
-          if (verbose)
+          if(verbose)
             printf("DGELS, optimal point rest = %e\n", rest);
         }
       }
 
-      if (verbose)
+      if(verbose)
       {
         printf("Solving linear system success, solution in cone?\n");
         NM_dense_display(sQ, sMl, 1, 0);
       }
 
       check = 1;
-      for (lin = 0 ; lin < sMm; lin++)
+      for(lin = 0 ; lin < sMm; lin++)
       {
-        if (sQ[indexInBlock[lin]] < - tol)
+        if(sQ[indexInBlock[lin]] < - tol)
         {
           check = 0;
           break;/*out of the cone!*/
         }
       }
-      if (!check)
+      if(!check)
         continue;
       else
       {
@@ -244,13 +244,13 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
         mlcp_fillSolution_Block(sU, sW1, sNn, sMm, sMl, sW2V, sQ, indexInBlock);
         mlcp_compute_error(problem, z, w, tol, &err);
         /*because it happens the LU leads to an wrong solution witout raise any error.*/
-        if (err > 10 * tol)
+        if(err > 10 * tol)
         {
-          if (verbose)
+          if(verbose)
             printf("LU no-error, but mlcp_compute_error out of tol: %e!\n", err);
           continue;
         }
-        if (verbose)
+        if(verbose)
         {
           printf("mlcp_enum find a solution err = %e!\n", err);
           mlcp_DisplaySolution_Block(sU, sW1, sNn, sMm, sMl, indexInBlock);
@@ -261,14 +261,14 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
     }
     else
     {
-      if (verbose)
+      if(verbose)
       {
         printf("LU factorization failed:\n");
       }
     }
   }
   *info = 1;
-  if (verbose)
+  if(verbose)
     printf("mlcp_enum failed!\n");
 }
 
@@ -277,18 +277,18 @@ static void mlcp_enum_Block(MixedLinearComplementarityProblem* problem, double *
 
 int mlcp_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  if (!problem)
+  if(!problem)
     return 0;
   return 2 * (problem->n + problem->m) + problem->m;
 }
 
 int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
-  if (!problem)
+  if(!problem)
     return 0;
   assert(problem->M);
   LWORK = 0;
-  if (options->iparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS])
+  if(options->iparam[SICONOS_IPARAM_MLCP_ENUM_USE_DGELS])
   {
     LWORK = -1;
     //int info = 0;
@@ -296,13 +296,13 @@ int mlcp_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptio
     //DGELS(problem->M->size0, problem->n + problem->m, 1, 0, problem->M->size0, 0, problem->M->size0, &dgelsSize, LWORK, &info);
     LWORK = (int) dgelsSize;
   }
-  return LWORK + 3 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0); 
+  return LWORK + 3 * (problem->M->size0) + (problem->n + problem->m) * (problem->M->size0);
 }
 
 void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   int nbSol = 0;
-  if (problem->blocksRows)
+  if(problem->blocksRows)
   {
     mlcp_enum_Block(problem, z, w, info, options);
     return;
@@ -332,7 +332,7 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
   sMref = problem->M->matrix0;
   /*  LWORK = 2*npm; LWORK >= max( 1, MN + max( MN, NRHS ) ) where MN = min(M,N)*/
   //  verbose=1;
-  if (verbose)
+  if(verbose)
     printf("mlcp_enum begin, n %d m %d tol %lf\n", sNn, sMm, tol);
 
   sM = workingFloat;
@@ -345,28 +345,28 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
 
   sDgelsWork = sQref + sMl;
 
-  for (lin = 0; lin < sMl; lin++)
+  for(lin = 0; lin < sMl; lin++)
     sQref[lin] =  - problem->q[lin];
-  for (lin = 0; lin < sMl; lin++)
+  for(lin = 0; lin < sMl; lin++)
     sColNul[lin] = 0;
   /*  printf("sColNul\n");
       NM_dense_display(sColNul,npm,1);*/
-  if (verbose)
+  if(verbose)
     printRefSystem();
   sW2V = workingInt;
   ipiv = sW2V + sMm;
 
   initEnum(problem->m);
-  while (nextEnum(sW2V) && itermax-- > 0)
+  while(nextEnum(sW2V) && itermax-- > 0)
   {
     mlcp_buildM(sW2V, sM, sMref, sNn, sMm, sMl);
     buildQ();
-    if (verbose)
+    if(verbose)
       printCurrentSystem();
-    if (useDGELS)
+    if(useDGELS)
     {
       DGELS(LA_NOTRANS,sMl, npm, NRHS, sM, sMl, sQ, sMl, &LAinfo);
-      if (verbose)
+      if(verbose)
       {
         printf("Solution of dgels\n");
         NM_dense_display(sQ, sMl, 1, 0);
@@ -375,62 +375,62 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     else
     {
       DGESV(npm, NRHS, sM, npm, ipiv, sQ, npm, &LAinfo);
-      if (verbose)
+      if(verbose)
       {
         printf("Solution of dgesv\n");
         NM_dense_display(sQ, sMl, 1, 0);
       }
     }
-    if (!LAinfo)
+    if(!LAinfo)
     {
-      if (useDGELS)
+      if(useDGELS)
       {
         int cc = 0;
         int ii;
         double rest = 0;
-        for (ii = 0; ii < npm; ii++)
+        for(ii = 0; ii < npm; ii++)
         {
-          if (isnan(sQ[ii]) || isinf(sQ[ii]))
+          if(isnan(sQ[ii]) || isinf(sQ[ii]))
           {
             printf("DGELS FAILED\n");
             cc = 1;
             break;
           }
         }
-        if (cc)
+        if(cc)
           continue;
 
-        if (sMl > npm)
+        if(sMl > npm)
         {
           rest = cblas_dnrm2(sMl - npm, sQ + npm, 1);
 
-          if (rest > tol || isnan(rest) || isinf(rest))
+          if(rest > tol || isnan(rest) || isinf(rest))
           {
-            if (verbose)
+            if(verbose)
               printf("DGELS, optimal point doesn't satisfy AX=b, rest = %e\n", rest);
             continue;
           }
-          if (verbose)
+          if(verbose)
             printf("DGELS, optimal point rest = %e\n", rest);
         }
       }
 
-      if (verbose)
+      if(verbose)
       {
         printf("Solving linear system success, solution in cone?\n");
         NM_dense_display(sQ, sMl, 1, 0);
       }
 
       check = 1;
-      for (lin = 0 ; lin < sMm; lin++)
+      for(lin = 0 ; lin < sMm; lin++)
       {
-        if (sQ[sNn + lin] < - tol)
+        if(sQ[sNn + lin] < - tol)
         {
           check = 0;
           break;/*out of the cone!*/
         }
       }
-      if (!check)
+      if(!check)
         continue;
       else
       {
@@ -438,14 +438,14 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
         mlcp_fillSolution(sU, sV, sW1, sW2, sNn, sMm, sMl, sW2V, sQ);
         mlcp_compute_error(problem, z, w, tol, &err);
         /*because it happens the LU leads to an wrong solution witout raise any error.*/
-        if (err > 10 * tol)
+        if(err > 10 * tol)
         {
-          if (verbose)
+          if(verbose)
             printf("LU no-error, but mlcp_compute_error out of tol: %e!\n", err);
           continue;
         }
         nbSol++;
-        if (verbose)
+        if(verbose)
         {
           printf("mlcp_enum find a solution, err=%e !\n", err);
           mlcp_DisplaySolution(sU, sV, sW1, sW2, sNn, sMm, sMl);
@@ -455,14 +455,14 @@ void mlcp_enum(MixedLinearComplementarityProblem* problem, double *z, double *w,
     }
     else
     {
-      if (verbose)
+      if(verbose)
       {
         printf("LU factorization failed:\n");
       }
     }
   }
   *info = 1;
-  if (verbose)
+  if(verbose)
     printf("mlcp_enum failed nbSol=%i!\n", nbSol);
 }
 

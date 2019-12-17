@@ -52,7 +52,7 @@ void LagrangianLinearTIDS::initRhs(double time)
   LagrangianDS::initRhs(time);
 
   // jacobianRhsx
-  if (_K)
+  if(_K)
   {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
     if(!_rhsMatrices[jacobianXBloc10])
@@ -62,7 +62,7 @@ void LagrangianLinearTIDS::initRhs(double time)
   else
     _rhsMatrices[jacobianXBloc10] = _rhsMatrices[zeroMatrix] ;
 
-  if (_C)
+  if(_C)
   {
     //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
     if(!_rhsMatrices[jacobianXBloc11])
@@ -80,10 +80,10 @@ void LagrangianLinearTIDS::initRhs(double time)
 
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
 {
-  if (newValue.size(0) != _ndof || newValue.size(1) != _ndof)
+  if(newValue.size(0) != _ndof || newValue.size(1) != _ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setK: inconsistent input matrix size ");
 
-  if (!_K)
+  if(!_K)
     _K.reset(new SimpleMatrix(newValue));
   else
     *_K = newValue;
@@ -91,17 +91,17 @@ void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
 
 void LagrangianLinearTIDS::setKPtr(SP::SiconosMatrix newPtr)
 {
-  if (newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
+  if(newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
   _K = newPtr;
 }
 
 void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
 {
-  if (newValue.size(0) != _ndof || newValue.size(1) != _ndof)
+  if(newValue.size(0) != _ndof || newValue.size(1) != _ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
 
-  if (!_C)
+  if(!_C)
     _C.reset(new SimpleMatrix(newValue));
   else
     *_C = newValue;
@@ -109,7 +109,7 @@ void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
 
 void LagrangianLinearTIDS::setCPtr(SP::SiconosMatrix newPtr)
 {
-  if (newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
+  if(newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");
 
   _C = newPtr;
@@ -120,13 +120,13 @@ void LagrangianLinearTIDS::display(bool brief) const
   LagrangianDS::display();
   std::cout << "===== Lagrangian Linear Time Invariant System display ===== " <<std::endl;
   std::cout << "- Mass Matrix M : " <<std::endl;
-  if (_mass) _mass->display();
+  if(_mass) _mass->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- Stiffness Matrix K : " <<std::endl;
-  if (_K) _K->display();
+  if(_K) _K->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- Viscosity Matrix C : " <<std::endl;
-  if (_C) _C->display();
+  if(_C) _C->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "=========================================================== " <<std::endl;
 }
@@ -135,21 +135,21 @@ void LagrangianLinearTIDS::computeForces(double time, SP::SiconosVector q2, SP::
 {
   DEBUG_PRINT("LagrangianLinearTIDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2) \n");
 
-  if (!_forces)
+  if(!_forces)
   {
     _forces.reset(new SiconosVector(_ndof));
   }
   else
     _forces->zero();
 
-  if (_fExt)
+  if(_fExt)
   {
     computeFExt(time);
     *_forces += *_fExt;
   }
-  if (_K)
+  if(_K)
     *_forces -= prod(*_K, *q2);
-  if (_C)
+  if(_C)
     *_forces -= prod(*_C, *v2);
 }
 

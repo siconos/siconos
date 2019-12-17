@@ -66,17 +66,17 @@ extern int ungetc();
 t_getc(Void)
 {
   int ch;
-  if (f__curunit->uend) return(EOF);
-  if ((ch = getc(f__cf)) != EOF) return(ch);
-  if (feof(f__cf))
+  if(f__curunit->uend) return(EOF);
+  if((ch = getc(f__cf)) != EOF) return(ch);
+  if(feof(f__cf))
     f__curunit->uend = l_eof = 1;
   return(EOF);
 }
 integer e_rsle(Void)
 {
   int ch;
-  if (f__curunit->uend) return(0);
-  while ((ch = t_getc()) != '\n' && ch != EOF);
+  if(f__curunit->uend) return(0);
+  while((ch = t_getc()) != '\n' && ch != EOF);
   return(0);
 }
 
@@ -100,9 +100,9 @@ l_R(int poststar)
   long e, exp;
   int havenum, havestar, se;
 
-  if (!poststar)
+  if(!poststar)
   {
-    if (f__lcount > 0)
+    if(f__lcount > 0)
       return(0);
     f__lcount = 1;
   }
@@ -114,7 +114,7 @@ retry:
   spe = sp + FMAX;
   havenum = 0;
 
-  switch (GETC(ch))
+  switch(GETC(ch))
   {
   case '-':
     *sp++ = ch;
@@ -123,20 +123,20 @@ retry:
   case '+':
     GETC(ch);
   }
-  while (ch == '0')
+  while(ch == '0')
   {
     ++havenum;
     GETC(ch);
   }
-  while (isdigit(ch))
+  while(isdigit(ch))
   {
-    if (sp < spe) *sp++ = ch;
+    if(sp < spe) *sp++ = ch;
     else ++exp;
     GETC(ch);
   }
-  if (ch == '*' && !poststar)
+  if(ch == '*' && !poststar)
   {
-    if (sp == sp1 || exp || *s == '-')
+    if(sp == sp1 || exp || *s == '-')
     {
       errfl(f__elist->cierr, 112, "bad repetition count");
     }
@@ -145,19 +145,19 @@ retry:
     f__lcount = atoi(s);
     goto retry;
   }
-  if (ch == '.')
+  if(ch == '.')
   {
     GETC(ch);
-    if (sp == sp1)
-      while (ch == '0')
+    if(sp == sp1)
+      while(ch == '0')
       {
         ++havenum;
         --exp;
         GETC(ch);
       }
-    while (isdigit(ch))
+    while(isdigit(ch))
     {
-      if (sp < spe)
+      if(sp < spe)
       {
         *sp++ = ch;
         --exp;
@@ -166,42 +166,42 @@ retry:
     }
   }
   se = 0;
-  if (issign(ch))
+  if(issign(ch))
     goto signonly;
-  if (isexp(ch))
+  if(isexp(ch))
   {
     GETC(ch);
-    if (issign(ch))
+    if(issign(ch))
     {
 signonly:
-      if (ch == '-') se = 1;
+      if(ch == '-') se = 1;
       GETC(ch);
     }
-    if (!isdigit(ch))
+    if(!isdigit(ch))
     {
 bad:
       errfl(f__elist->cierr, 112, "exponent field");
     }
 
     e = ch - '0';
-    while (isdigit(GETC(ch)))
+    while(isdigit(GETC(ch)))
     {
       e = 10 * e + ch - '0';
-      if (e > EXPMAX)
+      if(e > EXPMAX)
         goto bad;
     }
-    if (se)
+    if(se)
       exp -= e;
     else
       exp += e;
   }
   (void) Ungetc(ch, f__cf);
-  if (sp > sp1)
+  if(sp > sp1)
   {
     ++havenum;
-    while (*--sp == '0')
+    while(*--sp == '0')
       ++exp;
-    if (exp)
+    if(exp)
       sprintf(sp + 1, "e%ld", exp);
     else
       sp[1] = 0;
@@ -209,20 +209,20 @@ bad:
   }
   else
     f__lx = 0.;
-  if (havenum)
+  if(havenum)
     f__ltype = TYLONG;
   else
-    switch (ch)
+    switch(ch)
     {
     case ',':
     case '/':
       break;
     default:
-      if (havestar && (ch == ' '
-                       || ch == '\t'
-                       || ch == '\n'))
+      if(havestar && (ch == ' '
+                      || ch == '\t'
+                      || ch == '\n'))
         break;
-      if (nml_read > 1)
+      if(nml_read > 1)
       {
         f__lquit = 2;
         return 0;
@@ -239,10 +239,10 @@ rd_count(ch) register int ch;
 rd_count(register int ch)
 #endif
 {
-  if (ch < '0' || ch > '9')
+  if(ch < '0' || ch > '9')
     return 1;
   f__lcount = ch - '0';
-  while (GETC(ch) >= '0' && ch <= '9')
+  while(GETC(ch) >= '0' && ch <= '9')
     f__lcount = 10 * f__lcount + ch - '0';
   Ungetc(ch, f__cf);
   return f__lcount <= 0;
@@ -252,30 +252,30 @@ l_C(Void)
 {
   int ch, nml_save;
   double lz;
-  if (f__lcount > 0) return(0);
+  if(f__lcount > 0) return(0);
   f__ltype = 0;
   GETC(ch);
-  if (ch != '(')
+  if(ch != '(')
   {
-    if (nml_read > 1 && (ch < '0' || ch > '9'))
+    if(nml_read > 1 && (ch < '0' || ch > '9'))
     {
       Ungetc(ch, f__cf);
       f__lquit = 2;
       return 0;
     }
-    if (rd_count(ch))
-      if (!f__cf || !feof(f__cf))
+    if(rd_count(ch))
+      if(!f__cf || !feof(f__cf))
         errfl(f__elist->cierr, 112, "complex format");
       else
         err(f__elist->cierr, (EOF), "lread");
-    if (GETC(ch) != '*')
+    if(GETC(ch) != '*')
     {
-      if (!f__cf || !feof(f__cf))
+      if(!f__cf || !feof(f__cf))
         errfl(f__elist->cierr, 112, "no star");
       else
         err(f__elist->cierr, (EOF), "lread");
     }
-    if (GETC(ch) != '(')
+    if(GETC(ch) != '(')
     {
       Ungetc(ch, f__cf);
       return(0);
@@ -283,29 +283,29 @@ l_C(Void)
   }
   else
     f__lcount = 1;
-  while (iswhit(GETC(ch)));
+  while(iswhit(GETC(ch)));
   Ungetc(ch, f__cf);
   nml_save = nml_read;
   nml_read = 0;
-  if (ch = l_R(1))
+  if(ch = l_R(1))
     return ch;
-  if (!f__ltype)
+  if(!f__ltype)
     errfl(f__elist->cierr, 112, "no real part");
   lz = f__lx;
-  while (iswhit(GETC(ch)));
-  if (ch != ',')
+  while(iswhit(GETC(ch)));
+  if(ch != ',')
   {
     (void) Ungetc(ch, f__cf);
     errfl(f__elist->cierr, 112, "no comma");
   }
-  while (iswhit(GETC(ch)));
+  while(iswhit(GETC(ch)));
   (void) Ungetc(ch, f__cf);
-  if (ch = l_R(1))
+  if(ch = l_R(1))
     return ch;
-  if (!f__ltype)
+  if(!f__ltype)
     errfl(f__elist->cierr, 112, "no imaginary part");
-  while (iswhit(GETC(ch)));
-  if (ch != ')') errfl(f__elist->cierr, 112, "no )");
+  while(iswhit(GETC(ch)));
+  if(ch != ')') errfl(f__elist->cierr, 112, "no )");
   f__ly = f__lx;
   f__lx = lz;
   nml_read = nml_save;
@@ -314,21 +314,21 @@ l_C(Void)
 l_L(Void)
 {
   int ch;
-  if (f__lcount > 0) return(0);
+  if(f__lcount > 0) return(0);
   f__ltype = 0;
   GETC(ch);
-  if (isdigit(ch))
+  if(isdigit(ch))
   {
     rd_count(ch);
-    if (GETC(ch) != '*')
-      if (!f__cf || !feof(f__cf))
+    if(GETC(ch) != '*')
+      if(!f__cf || !feof(f__cf))
         errfl(f__elist->cierr, 112, "no star");
       else
         err(f__elist->cierr, (EOF), "lread");
     GETC(ch);
   }
-  if (ch == '.') GETC(ch);
-  switch (ch)
+  if(ch == '.') GETC(ch);
+  switch(ch)
   {
   case 't':
   case 'T':
@@ -339,7 +339,7 @@ l_L(Void)
     f__lx = 0;
     break;
   default:
-    if (isblnk(ch) || issep(ch) || ch == EOF)
+    if(isblnk(ch) || issep(ch) || ch == EOF)
     {
       (void) Ungetc(ch, f__cf);
       return(0);
@@ -348,7 +348,7 @@ l_L(Void)
   }
   f__ltype = TYLONG;
   f__lcount = 1;
-  while (!issep(GETC(ch)) && ch != EOF);
+  while(!issep(GETC(ch)) && ch != EOF);
   (void) Ungetc(ch, f__cf);
   return(0);
 }
@@ -357,27 +357,27 @@ l_CHAR(Void)
 {
   int ch, size, i;
   char quote, *p;
-  if (f__lcount > 0) return(0);
+  if(f__lcount > 0) return(0);
   f__ltype = 0;
-  if (f__lchar != NULL) free(f__lchar);
+  if(f__lchar != NULL) free(f__lchar);
   size = BUFSIZE;
   p = f__lchar = (char *)malloc((unsigned int)size);
-  if (f__lchar == NULL)
+  if(f__lchar == NULL)
     errfl(f__elist->cierr, 113, "no space");
 
   GETC(ch);
-  if (isdigit(ch))
+  if(isdigit(ch))
   {
     /* allow Fortran 8x-style unquoted string...  */
     /* either find a repetition count or the string */
     f__lcount = ch - '0';
     *p++ = ch;
-    for (i = 1;;)
+    for(i = 1;;)
     {
-      switch (GETC(ch))
+      switch(GETC(ch))
       {
       case '*':
-        if (f__lcount == 0)
+        if(f__lcount == 0)
         {
           f__lcount = 1;
           goto noquote;
@@ -390,20 +390,20 @@ l_CHAR(Void)
       case '\n':
       case '/':
         Ungetc(ch, f__cf);
-        /* no break */
+      /* no break */
       case EOF:
         f__lcount = 1;
         f__ltype = TYCHAR;
         return *p = 0;
       }
-      if (!isdigit(ch))
+      if(!isdigit(ch))
       {
         f__lcount = 1;
         goto noquote;
       }
       *p++ = ch;
       f__lcount = 10 * f__lcount + ch - '0';
-      if (++i == size)
+      if(++i == size)
       {
         f__lchar = (char *)realloc(f__lchar,
                                    (unsigned int)(size += BUFSIZE));
@@ -411,10 +411,10 @@ l_CHAR(Void)
       }
     }
   }
-  else (void) Ungetc(ch, f__cf);
+  else(void) Ungetc(ch, f__cf);
 have_lcount:
-  if (GETC(ch) == '\'' || ch == '"') quote = ch;
-  else if (isblnk(ch) || (issep(ch) && ch != '\n') || ch == EOF)
+  if(GETC(ch) == '\'' || ch == '"') quote = ch;
+  else if(isblnk(ch) || (issep(ch) && ch != '\n') || ch == EOF)
   {
     (void) Ungetc(ch, f__cf);
     return(0);
@@ -423,9 +423,9 @@ have_lcount:
   {
     /* Fortran 8x-style unquoted string */
     *p++ = ch;
-    for (i = 1;;)
+    for(i = 1;;)
     {
-      switch (GETC(ch))
+      switch(GETC(ch))
       {
       case ',':
       case ' ':
@@ -433,14 +433,14 @@ have_lcount:
       case '\n':
       case '/':
         Ungetc(ch, f__cf);
-        /* no break */
+      /* no break */
       case EOF:
         f__ltype = TYCHAR;
         return *p = 0;
       }
 noquote:
       *p++ = ch;
-      if (++i == size)
+      if(++i == size)
       {
         f__lchar = (char *)realloc(f__lchar,
                                    (unsigned int)(size += BUFSIZE));
@@ -449,11 +449,11 @@ noquote:
     }
   }
   f__ltype = TYCHAR;
-  for (i = 0;;)
+  for(i = 0;;)
   {
-    while (GETC(ch) != quote && ch != '\n'
-           && ch != EOF && ++i < size) *p++ = ch;
-    if (i == size)
+    while(GETC(ch) != quote && ch != '\n'
+          && ch != EOF && ++i < size) *p++ = ch;
+    if(i == size)
     {
 newone:
       f__lchar = (char *)realloc(f__lchar,
@@ -461,18 +461,18 @@ newone:
       p = f__lchar + i - 1;
       *p++ = ch;
     }
-    else if (ch == EOF) return(EOF);
-    else if (ch == '\n')
+    else if(ch == EOF) return(EOF);
+    else if(ch == '\n')
     {
-      if (*(p - 1) != '\\') continue;
+      if(*(p - 1) != '\\') continue;
       i--;
       p--;
-      if (++i < size) *p++ = ch;
+      if(++i < size) *p++ = ch;
       else goto newone;
     }
-    else if (GETC(ch) == quote)
+    else if(GETC(ch) == quote)
     {
-      if (++i < size) *p++ = ch;
+      if(++i < size) *p++ = ch;
       else goto newone;
     }
     else
@@ -490,15 +490,15 @@ c_le(cilist *a)
 #endif
 {
   f__fmtbuf = "list io";
-  if (a->ciunit >= MXUNIT || a->ciunit < 0)
+  if(a->ciunit >= MXUNIT || a->ciunit < 0)
     err(a->cierr, 101, "stler");
   f__scale = f__recpos = 0;
   f__elist = a;
   f__curunit = &f__units[a->ciunit];
-  if (f__curunit->ufd == NULL && fk_open(SEQ, FMT, a->ciunit))
+  if(f__curunit->ufd == NULL && fk_open(SEQ, FMT, a->ciunit))
     err(a->cierr, 102, "lio");
   f__cf = f__curunit->ufd;
-  if (!f__curunit->ufmt) err(a->cierr, 103, "lio")
+  if(!f__curunit->ufmt) err(a->cierr, 103, "lio")
     return(0);
 }
 #ifdef KR_headers
@@ -513,18 +513,18 @@ l_read(ftnint *number, char *ptr, ftnlen len, ftnint type)
   int i, n, ch;
   doublereal *yy;
   real *xx;
-  for (i = 0; i < *number; i++)
+  for(i = 0; i < *number; i++)
   {
-    if (f__lquit) return(0);
-    if (l_eof)
+    if(f__lquit) return(0);
+    if(l_eof)
       err(f__elist->ciend, EOF, "list in")
-      if (f__lcount == 0)
+      if(f__lcount == 0)
       {
         f__ltype = 0;
-        for (;;)
+        for(;;)
         {
           GETC(ch);
-          switch (ch)
+          switch(ch)
           {
           case EOF:
             goto loopend;
@@ -545,7 +545,7 @@ l_read(ftnint *number, char *ptr, ftnlen len, ftnint type)
         }
       }
 rddata:
-    switch ((int)type)
+    switch((int)type)
     {
     case TYINT1:
     case TYSHORT:
@@ -570,23 +570,23 @@ rddata:
       ERR(l_CHAR());
       break;
     }
-    while (GETC(ch) == ' ' || ch == '\t');
-    if (ch != ',' || f__lcount > 1)
+    while(GETC(ch) == ' ' || ch == '\t');
+    if(ch != ',' || f__lcount > 1)
       Ungetc(ch, f__cf);
 loopend:
-    if (f__lquit) return(0);
-    if (f__cf)
+    if(f__lquit) return(0);
+    if(f__cf)
     {
-      if (feof(f__cf))
+      if(feof(f__cf))
         err(f__elist->ciend, (EOF), "list in")
-        else if (ferror(f__cf))
+        else if(ferror(f__cf))
         {
           clearerr(f__cf);
           errfl(f__elist->cierr, errno, "list in");
         }
     }
-    if (f__ltype == 0) goto bump;
-    switch ((int)type)
+    if(f__ltype == 0) goto bump;
+    switch((int)type)
     {
     case TYINT1:
     case TYLOGICAL1:
@@ -626,9 +626,9 @@ loopend:
       break;
     }
 bump:
-    if (f__lcount > 0) f__lcount--;
+    if(f__lcount > 0) f__lcount--;
     ptr += len;
-    if (nml_read)
+    if(nml_read)
       nml_read++;
   }
   return(0);
@@ -642,8 +642,8 @@ integer s_rsle(cilist *a)
 {
   int n;
 
-  if (!f__init) f_init();
-  if (n = c_le(a)) return(n);
+  if(!f__init) f_init();
+  if(n = c_le(a)) return(n);
   f__reading = 1;
   f__external = 1;
   f__formatted = 1;
@@ -651,7 +651,7 @@ integer s_rsle(cilist *a)
   f__lquit = 0;
   f__lcount = 0;
   l_eof = 0;
-  if (f__curunit->uwrt && f__nowreading(f__curunit))
+  if(f__curunit->uwrt && f__nowreading(f__curunit))
     err(a->cierr, errno, "read start");
   l_getc = t_getc;
   l_ungetc = un_getc;

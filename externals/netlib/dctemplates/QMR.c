@@ -215,19 +215,19 @@ int (*matvec)(), (*matvectrans)(), (*psolveq)(), (*psolvetransq)();
 
   /*     Test the input parameters. */
 
-  if (*n < 0)
+  if(*n < 0)
   {
     *info = -1;
   }
-  else if (*ldw < max(1, *n))
+  else if(*ldw < max(1, *n))
   {
     *info = -2;
   }
-  else if (*iter <= 0)
+  else if(*iter <= 0)
   {
     *info = -3;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     return 0;
   }
@@ -264,17 +264,17 @@ int (*matvec)(), (*matvectrans)(), (*psolveq)(), (*psolvetransq)();
   /*     Set initial residual. */
 
   dcopy_(n, &b[1], &c__1, &work[r * work_dim1 + 1], &c__1);
-  if (dnrm2_(n, &x[1], &c__1) != 0.)
+  if(dnrm2_(n, &x[1], &c__1) != 0.)
   {
     (*matvec)(&c_b5, &x[1], &c_b44, &work[r * work_dim1 + 1]);
-    if (dnrm2_(n, &work[r * work_dim1 + 1], &c__1) < tol)
+    if(dnrm2_(n, &work[r * work_dim1 + 1], &c__1) < tol)
     {
       goto L30;
     }
   }
 
   bnrm2 = dnrm2_(n, &b[1], &c__1);
-  if (bnrm2 == 0.)
+  if(bnrm2 == 0.)
   {
     bnrm2 = 1.;
   }
@@ -303,7 +303,7 @@ L10:
 
   ++(*iter);
 
-  if (abs(rho) < rhotol || abs(xi) < xitol)
+  if(abs(rho) < rhotol || abs(xi) < xitol)
   {
     goto L25;
   }
@@ -324,7 +324,7 @@ L10:
 
   delta = ddot_(n, &work[z * work_dim1 + 1], &c__1, &work[y * work_dim1 + 1]
                 , &c__1);
-  if (abs(delta) < deltatol)
+  if(abs(delta) < deltatol)
   {
     goto L25;
   }
@@ -334,7 +334,7 @@ L10:
   (*psolvetransq)(&work[ztld * work_dim1 + 1], &work[z * work_dim1 + 1],
                   "LEFT", 4L);
 
-  if (*iter > 1)
+  if(*iter > 1)
   {
     c1 = -(xi * delta / eps);
     daxpy_(n, &c1, &work[p * work_dim1 + 1], &c__1, &work[ytld *
@@ -360,13 +360,13 @@ L10:
 
   eps = ddot_(n, &work[q * work_dim1 + 1], &c__1, &work[ptld * work_dim1 +
               1], &c__1);
-  if (abs(eps) < epstol)
+  if(abs(eps) < epstol)
   {
     goto L25;
   }
 
   beta = eps / delta;
-  if (abs(beta) < betatol)
+  if(abs(beta) < betatol)
   {
     goto L25;
   }
@@ -399,7 +399,7 @@ L10:
   /* Computing 2nd power */
   d__1 = theta;
   gamma = 1. / sqrt(d__1 * d__1 + 1.);
-  if (abs(gamma) < gammatol)
+  if(abs(gamma) < gammatol)
   {
     goto L25;
   }
@@ -410,7 +410,7 @@ L10:
   d__2 = gamma1;
   eta = -eta * rho1 * (d__1 * d__1) / (beta * (d__2 * d__2));
 
-  if (*iter > 1)
+  if(*iter > 1)
   {
     /* Computing 2nd power */
     d__2 = theta1 * gamma;
@@ -445,11 +445,11 @@ L10:
   daxpy_(n, &c_b5, &work[s * work_dim1 + 1], &c__1, &work[r * work_dim1 + 1]
          , &c__1);
   *resid = dnrm2_(n, &work[r * work_dim1 + 1], &c__1) / bnrm2;
-  if (*resid <= tol)
+  if(*resid <= tol)
   {
     goto L30;
   }
-  if (*iter == maxit)
+  if(*iter == maxit)
   {
     goto L20;
   }
@@ -467,27 +467,27 @@ L25:
 
   /*     Method breakdown. */
 
-  if (abs(rho) < rhotol)
+  if(abs(rho) < rhotol)
   {
     *info = -10;
   }
-  else if (abs(beta) < betatol)
+  else if(abs(beta) < betatol)
   {
     *info = -11;
   }
-  else if (abs(gamma) < gammatol)
+  else if(abs(gamma) < gammatol)
   {
     *info = -12;
   }
-  else if (abs(delta) < deltatol)
+  else if(abs(delta) < deltatol)
   {
     *info = -13;
   }
-  else if (abs(eps) < epstol)
+  else if(abs(eps) < epstol)
   {
     *info = -14;
   }
-  else if (abs(xi) < xitol)
+  else if(abs(xi) < xitol)
   {
     *info = -15;
   }

@@ -37,15 +37,15 @@
 
 
 /** pointer to function used to call internal solver for proximal point solver */
-typedef void (*internalSolverPtr)(ConvexQP* ,
+typedef void (*internalSolverPtr)(ConvexQP*,
                                   double *, double *, double *, double *,
-                                  int* , SolverOptions* );
+                                  int*, SolverOptions*);
 void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double* restrict reaction, double* restrict velocity,
                           double* restrict globalVelocity, int* restrict info, SolverOptions* restrict options)
 {
 
   /* verbose=1; */
-  
+
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -59,19 +59,19 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(n , problem->q , 1);
-  double norm_b = cblas_dnrm2(m , problem->b , 1);
+  double norm_q = cblas_dnrm2(n, problem->q, 1);
+  double norm_b = cblas_dnrm2(m, problem->b, 1);
 
 
 
-  if (options->numberOfInternalSolvers < 1)
+  if(options->numberOfInternalSolvers < 1)
   {
     numerics_error("gfc3d_ACLMFixedpoint", "The ACLM Fixed Point method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
 
   SolverOptions * internalsolver_options = options->internalSolvers[0];
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
     solver_options_print(options);
   }
@@ -108,7 +108,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
   gfc3d_as_cqp->cqp = cqp;
   gfc3d_as_cqp->gfc3d = problem;
   gfc3d_as_cqp->options = options;
-  if (internalsolver_options->solverId == SICONOS_CONVEXQP_ADMM  )
+  if(internalsolver_options->solverId == SICONOS_CONVEXQP_ADMM)
   {
     numerics_printf_verbose(1," ========================== set ADMM solver internal ConveQP problem ==========================\n");
     internalsolver = &convexQP_ADMM;
@@ -122,14 +122,14 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
 
   double normUT;
   int cumul_iter =0;
-  while ((iter < itermax) && (hasNotConverged > 0))
+  while((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
     // internal solver for the regularized problem
 
     /* Compute the value of the initial value of b */
     cblas_dcopy(m,problem->b,1,cqp->b,1);
-    for (int ic = 0 ; ic < nc ; ic++)
+    for(int ic = 0 ; ic < nc ; ic++)
     {
       normUT = sqrt(velocity[ic*3+1] * velocity[ic*3+1] + velocity[ic*3+2] * velocity[ic*3+2]);
       cqp->b[3*ic] += problem->mu[ic]*normUT;
@@ -137,17 +137,17 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
 
     gfc3d_set_internalsolver_tolerance(problem,options,internalsolver_options, error);
 
-    (*internalsolver)(cqp, globalVelocity, w,  reaction , velocity , info , internalsolver_options);
+    (*internalsolver)(cqp, globalVelocity, w,  reaction, velocity, info, internalsolver_options);
 
     cumul_iter +=  internalsolver_options->iparam[SICONOS_IPARAM_ITER_DONE];
     /* **** Criterium convergence **** */
 
-    gfc3d_compute_error(problem, reaction , velocity, globalVelocity, tolerance, options,
+    gfc3d_compute_error(problem, reaction, velocity, globalVelocity, tolerance, options,
                         norm_q, norm_b, &error);
 
     numerics_printf_verbose(1,"---- GFC3D - ACLMFP - Iteration %i Residual = %14.7e", iter, error);
 
-    if (error < tolerance) hasNotConverged = 0;
+    if(error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
 
@@ -161,7 +161,7 @@ void gfc3d_ACLMFixedPoint(GlobalFrictionContactProblem* restrict problem, double
   free(cqp);
 
 
- if (internalsolver_options->solverId == SICONOS_CONVEXQP_ADMM  )
+  if(internalsolver_options->solverId == SICONOS_CONVEXQP_ADMM)
   {
     convexQP_ADMM_free(cqp, options->internalSolvers[0]);
   }

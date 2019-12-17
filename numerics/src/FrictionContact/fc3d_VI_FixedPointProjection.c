@@ -51,24 +51,24 @@ void fc3d_VI_FixedPointProjection(FrictionContactProblem* problem, double *react
   vi->size =  n;
 
   /*set the norm of the VI to the norm of problem->q  */
-  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3, problem->q, 1);
   vi->normVI= norm_q;
   vi->istheNormVIset=1;
 
   fc3d_as_vi->vi = vi;
   fc3d_as_vi->fc3d = problem;
   /* frictionContact_display(fc3d_as_vi->fc3d); */
-  variationalInequality_FixedPointProjection(vi, reaction, velocity , info , options);
+  variationalInequality_FixedPointProjection(vi, reaction, velocity, info, options);
 
   /* **** Criterium convergence **** */
-  fc3d_compute_error(problem, reaction , velocity, options->dparam[SICONOS_DPARAM_TOL], options, norm_q, &error);
+  fc3d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options, norm_q, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
     printf("--------------- FC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n",
            options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
@@ -101,7 +101,7 @@ void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, doub
   vi->size = n;
 
   /*set the norm of the VI to the norm of problem->q  */
-  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3, problem->q, 1);
   vi->normVI= norm_q;
   vi->istheNormVIset=1;
 
@@ -110,18 +110,18 @@ void fc3d_VI_FixedPointProjection_Cylinder(FrictionContactProblem* problem, doub
   fc3d_as_vi->options = options;
   /* frictionContact_display(fc3d_as_vi->fc3d); */
   options->solverId = SICONOS_VI_FPP;
-  variationalInequality_FixedPointProjection(vi, reaction, velocity , info , options);
+  variationalInequality_FixedPointProjection(vi, reaction, velocity, info, options);
 
   /* **** Criterium convergence **** */
 
-  fc3d_Tresca_compute_error(problem, reaction , velocity, options->dparam[SICONOS_DPARAM_RESIDU], options, norm_q, &error);
+  fc3d_Tresca_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_RESIDU], options, norm_q, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
     printf("--------------- FC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n",
            options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);

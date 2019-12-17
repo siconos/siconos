@@ -34,7 +34,7 @@
 #include "NumericsMatrix.h"
 #endif /*HAVE_PATHFERRIS*/
 
-void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   *info = 1;
 #ifdef HAVE_PATHFERRIS
@@ -60,7 +60,7 @@ void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *
 
 
   FortranToPathSparse(n, M, 1.0e-18, m_i, m_j, m_ij);
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
     lb[i] = 0.;
     ub[i] = 1.e20;
@@ -68,18 +68,18 @@ void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *
   SimpleLCP(n, nnz, m_i, m_j, m_ij, q, lb, ub,
             &termination, z);
 
-  if (termination == MCP_Error)
+  if(termination == MCP_Error)
   {
     *info = 1;
-    if (verbose > 0)
+    if(verbose > 0)
       printf("PATH : Error in the solution.\n");
   }
-  else if (termination == MCP_Solved)
+  else if(termination == MCP_Solved)
   {
-    for (i = 0; i < n; i++)
+    for(i = 0; i < n; i++)
     {
       val = q[i];
-      for (j = 0; j < n; j++)
+      for(j = 0; j < n; j++)
       {
         val += M[i + j * n] * z[j];
       }
@@ -89,12 +89,12 @@ void lcp_path(LinearComplementarityProblem* problem, double *z, double *w, int *
     /* **** Criterium convergence **** */
     lcp_compute_error(problem, z, w, tol, &err);
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("PATH : LCP Solved, error %10.7f.\n", err);
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("PATH : Other error: %d\n", termination);
   }
   free(m_i);

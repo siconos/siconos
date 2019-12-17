@@ -41,7 +41,7 @@ static void min_compute_H_mcp(void* data_opaque, double* z, double* F, double* w
   Jac_F_min(data->n1, data->n2, z, F, data->nabla_Fmcp, H);
 }
 
-void mcp_newton_min_FBLSA(MixedComplementarityProblem* problem, double *z, double* Fmcp, int *info , SolverOptions* options)
+void mcp_newton_min_FBLSA(MixedComplementarityProblem* problem, double *z, double* Fmcp, int *info, SolverOptions* options)
 {
   numerics_printf("mcp_newton_min_FBLSA. starts");
   functions_LSA functions_minFBLSA_mcp;
@@ -50,7 +50,7 @@ void mcp_newton_min_FBLSA(MixedComplementarityProblem* problem, double *z, doubl
   functions_minFBLSA_mcp.compute_error = &FB_compute_error_mcp;
   functions_minFBLSA_mcp.compute_RHS_desc = &mcp_min;
   functions_minFBLSA_mcp.compute_H_desc = &min_compute_H_mcp;
-  
+
   set_lsa_params_data(options, problem->nabla_Fmcp);
   newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem,
              options,
@@ -58,9 +58,9 @@ void mcp_newton_min_FBLSA(MixedComplementarityProblem* problem, double *z, doubl
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   double  error =0.0;
 
-  mcp_compute_error(problem, z , Fmcp, &error);
+  mcp_compute_error(problem, z, Fmcp, &error);
 
-  if (error > tolerance)
+  if(error > tolerance)
   {
     numerics_printf("mcp_newton_min_FBLSA : error = %e > tolerance = %e.", error, tolerance);
     *info = 1;
@@ -70,8 +70,8 @@ void mcp_newton_min_FBLSA(MixedComplementarityProblem* problem, double *z, doubl
     numerics_printf("mcp_newton_min_FBLSA : error = %e < tolerance = %e.", error, tolerance);
     *info = 0;
   }
- 
- 
+
+
   options->dparam[SICONOS_DPARAM_RESIDU] = error;
 
   numerics_printf("mcp_newton_min_FBLSA. ends");

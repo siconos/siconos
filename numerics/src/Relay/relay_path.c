@@ -30,12 +30,12 @@
 #include "tools/InterfaceToPathFerris/SimpleLCP.h"
 #endif /*HAVE_PATHFERRIS*/
 
-void relay_path(RelayProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void relay_path(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   *info = 1;
 #ifdef HAVE_PATHFERRIS
   /* matrix M/vector q of the relay */
-  if (!problem->M->matrix0)
+  if(!problem->M->matrix0)
   {
     printf("relay_path only implemented for dense storage\n");
     //      return info;
@@ -66,7 +66,7 @@ void relay_path(RelayProblem* problem, double *z, double *w, int *info , SolverO
 
 
   FortranToPathSparse(n, M, 1.0e-18, m_i, m_j, m_ij);
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
     lb[i] = problem->lb[i];
     ub[i] = problem->ub[i];
@@ -79,18 +79,18 @@ void relay_path(RelayProblem* problem, double *z, double *w, int *info , SolverO
             &termination, z);
   /*   printLCP(n, nnz, m_i, m_j, m_ij, q, lb, ub); */
 
-  if (termination == MCP_Error)
+  if(termination == MCP_Error)
   {
     *info = 1;
-    if (verbose > 0)
+    if(verbose > 0)
       printf("PATH : Error in the solution.\n");
   }
-  else if (termination == MCP_Solved)
+  else if(termination == MCP_Solved)
   {
-    for (i = 0; i < n; i++)
+    for(i = 0; i < n; i++)
     {
       val = q[i];
-      for (j = 0; j < n; j++)
+      for(j = 0; j < n; j++)
       {
         val += M[i + j * n] * z[j];
       }
@@ -100,12 +100,12 @@ void relay_path(RelayProblem* problem, double *z, double *w, int *info , SolverO
     /* **** Criterium convergence **** */
     //relay_compute_error(problem,z,w,tol,&err);
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("PATH : RELAY Solved, error %10.7f.\n", err);
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("PATH : Other error: %d\n", termination);
   }
   free(m_i);

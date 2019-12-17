@@ -34,43 +34,43 @@ static
 int determine_convergence(double error, double *tolerance, int iter,
                           SolverOptions *options,
                           VariationalInequality* problem,
-                          double *z , double *w, double rho)
+                          double *z, double *w, double rho)
 
 {
   int hasNotConverged = 1;
-  if (error < *tolerance)
+  if(error < *tolerance)
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- VI - Fixed Point Projection (FPP) - Iteration %i "
              "Residual = %14.7e < %7.3e\n", iter, error, *tolerance);
     double absolute_error =0.0;
-    variationalInequality_computeError(problem, z , w, *tolerance, options, &absolute_error);
-    if (verbose > 0)
+    variationalInequality_computeError(problem, z, w, *tolerance, options, &absolute_error);
+    if(verbose > 0)
       printf("--------------  VI - Fixed Point Projection (FPP)- Full error criterion =  %e\n", absolute_error);
 
 
     hasNotConverged = 0;
 
 
-    if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+    if(options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
     {
-      if (absolute_error > options->dparam[SICONOS_DPARAM_TOL])
+      if(absolute_error > options->dparam[SICONOS_DPARAM_TOL])
       {
         *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
-        if (verbose > 0)
+        if(verbose > 0)
           printf("--------------  VI - Fixed Point Projection (FPP)- We modify the required incremental precision to reach accuracy to %e\n", *tolerance);
         hasNotConverged = 1;
       }
       else
       {
-        if (verbose > 0)
+        if(verbose > 0)
           printf("-------------- VI - Fixed Point Projection (FPP) - The incremental precision is sufficient to reach accuracy to %e\n", *tolerance);
       }
     }
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- VI - Fixed Point Projection (FPP) - Iteration %i rho = %14.7e error = %14.7e > %10.5e \n", iter, rho, error, *tolerance);
   }
   return hasNotConverged;
@@ -78,23 +78,23 @@ int determine_convergence(double error, double *tolerance, int iter,
 
 static
 double compute_error(VariationalInequality* problem,
-                     double *z , double *w, double norm_z_z_k,
+                     double *z, double *w, double norm_z_z_k,
                      double tolerance,
                      SolverOptions * options)
 {
 
   double error;
-  if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_FULL)
-    variationalInequality_computeError(problem, z , w, tolerance, options, &error);
-  else if (options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT ||
-           options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
+  if(options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_FULL)
+    variationalInequality_computeError(problem, z, w, tolerance, options, &error);
+  else if(options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT ||
+          options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]==SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
   {
     /* cblas_dcopy(n , x , 1 , xtmp, 1); */
     /* cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ; */
     /* error = cblas_dnorm2(n,xtmp,1); */
-    double norm_z = cblas_dnrm2(problem->size , z , 1);
+    double norm_z = cblas_dnrm2(problem->size, z, 1);
     error = norm_z_z_k;
-    if (fabs(norm_z) > DBL_EPSILON)
+    if(fabs(norm_z) > DBL_EPSILON)
       error /= norm_z;
   }
   else
@@ -127,16 +127,16 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  double * xtmp = (double *)calloc(n , sizeof(double));
-  double * wtmp = (double *)calloc(n , sizeof(double));
+  double * xtmp = (double *)calloc(n, sizeof(double));
+  double * wtmp = (double *)calloc(n, sizeof(double));
 
   double rho = 0.0, rho_k =0.0;
   int isVariable = 0;
 
-  if (dparam[SICONOS_VI_DPARAM_RHO] > 0.0)
+  if(dparam[SICONOS_VI_DPARAM_RHO] > 0.0)
   {
     rho = dparam[SICONOS_VI_DPARAM_RHO];
-    if (verbose > 0)
+    if(verbose > 0)
     {
       printf("--------------- VI - Fixed Point Projection (FPP) - Fixed stepsize with  rho = %14.7e \n", rho);
     }
@@ -146,7 +146,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
     /* Variable step in iterations*/
     isVariable = 1;
     rho = -dparam[SICONOS_VI_DPARAM_RHO];
-    if (verbose > 0)
+    if(verbose > 0)
     {
       printf("--------------- VI - Fixed Point Projection (FPP) - Variable stepsize with starting rho = %14.7e \n", rho);
     }
@@ -159,66 +159,66 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   int ls_iter = 0;
   int ls_itermax = 10;
   double tau=dparam[SICONOS_VI_DPARAM_LS_TAU],
-    tauinv=dparam[SICONOS_VI_DPARAM_LS_TAUINV],
-    L= dparam[SICONOS_VI_DPARAM_LS_L], Lmin = dparam[SICONOS_VI_DPARAM_LS_LMIN];
+         tauinv=dparam[SICONOS_VI_DPARAM_LS_TAUINV],
+         L= dparam[SICONOS_VI_DPARAM_LS_L], Lmin = dparam[SICONOS_VI_DPARAM_LS_LMIN];
 
   DEBUG_PRINTF("tau=%g, tauinv=%g, L= %g, Lmin = %g",dparam[SICONOS_VI_DPARAM_LS_TAU],
                dparam[SICONOS_VI_DPARAM_LS_TAUINV],
                dparam[SICONOS_VI_DPARAM_LS_L],
-               dparam[SICONOS_VI_DPARAM_LS_LMIN] ) ;
-  
+               dparam[SICONOS_VI_DPARAM_LS_LMIN]) ;
+
   double a1=0.0, a2=0.0;
   double * x_k = NULL;
   double * w_k = NULL;
 
-  if (isVariable)
+  if(isVariable)
   {
     x_k = (double *)malloc(n * sizeof(double));
     w_k = (double *)malloc(n * sizeof(double));
   }
 
   //isVariable=0;
-  if (!isVariable)
+  if(!isVariable)
   {
     /*   double minusrho  = -1.0*rho; */
-    while ((iter < itermax) && (hasNotConverged > 0))
+    while((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
 
       problem->F(problem,n,x,w);
-      cblas_daxpy(n, -1.0, w , 1, x , 1) ;
-      cblas_dcopy(n , x , 1 , xtmp, 1);
+      cblas_daxpy(n, -1.0, w, 1, x, 1) ;
+      cblas_dcopy(n, x, 1, xtmp, 1);
       problem->ProjectionOnX(problem,xtmp,x);
 
       /* **** Criterium convergence **** */
 
-      variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+      variationalInequality_computeError(problem, x, w, tolerance, options, &error);
 
       hasNotConverged = determine_convergence(error, &tolerance, iter, options,
                                               problem, x, w, rho);
 
-      if (options->callback)
+      if(options->callback)
       {
         options->callback->collectStatsIteration(options->callback->env, n,
-                                        x, w,
-                                        error, NULL);
+            x, w,
+            error, NULL);
       }
 
     }
   }
-  else if (isVariable)
+  else if(isVariable)
   {
-    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] == SICONOS_VI_LS_ARMIJO) /* Armijo rule with Khotbotov ratio (default)   */
+    if(iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] == SICONOS_VI_LS_ARMIJO)  /* Armijo rule with Khotbotov ratio (default)   */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Khotbotov ratio (default) \n");
-      while ((iter < itermax) && (hasNotConverged > 0))
+      while((iter < itermax) && (hasNotConverged > 0))
       {
         ++iter;
         /* Store the error */
         error_k = error;
 
         /* x_k <-- x store the x at the beginning of the iteration */
-        cblas_dcopy(n , x , 1 , x_k, 1);
+        cblas_dcopy(n, x, 1, x_k, 1);
         /* compute w_k =F(x_k) */
         problem->F(problem,n,x,w_k);
 
@@ -226,28 +226,31 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         success =0;
         rho_k=rho / tau;
 
-        while (!success && (ls_iter < ls_itermax))
+        while(!success && (ls_iter < ls_itermax))
         {
           /* if (iparam[SICONOS_VI_IPARAM_DECREASE_RHO] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2/(rho_k*a1)); */
           /* else */ rho_k = rho_k * tau ;
 
           /* x <- x_k  for the std approach*/
-          if (iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
+          if(iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0) cblas_dcopy(n, x_k, 1, x, 1) ;
 
           /* x <- x - rho_k*  w_k */
-          cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
+          cblas_daxpy(n, -rho_k, w_k, 1, x, 1) ;
 
           /* xtmp <-  ProjectionOnX(x) */
           problem->ProjectionOnX(problem,x,xtmp);
           problem->F(problem,n,xtmp,w);
 
-          DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
-              printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
+          DEBUG_EXPR_WE(for(int i =0; i< 5 ; i++)
+        {
+          printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
+            printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+          });
           /* velocitytmp <- velocity */
           /* cblas_dcopy(n, w, 1, wtmp , 1) ; */
 
           /* velocity <- velocity - velocity_k   */
-          cblas_daxpy(n, -1.0, w_k , 1, w , 1) ;
+          cblas_daxpy(n, -1.0, w_k, 1, w, 1) ;
 
 
           /* a1 =  ||w - w_k|| */
@@ -255,16 +258,16 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           DEBUG_PRINTF("a1 = %12.8e\n", a1);
 
           /* xtmp <- x */
-          cblas_dcopy(n, xtmp, 1,x , 1) ;
+          cblas_dcopy(n, xtmp, 1,x, 1) ;
 
           /* xtmp <- x - x_k   */
-          cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
+          cblas_daxpy(n, -1.0, x_k, 1, xtmp, 1) ;
 
           /* a2 =  || x - x_k || */
           a2 = cblas_dnrm2(n, xtmp, 1) ;
           DEBUG_PRINTF("a2 = %12.8e\n", a2);
 
-          DEBUG_PRINTF("test rho_k*a1 < L * a2 = %e < %e\n", rho_k*a1 , L * a2 ) ;
+          DEBUG_PRINTF("test rho_k*a1 < L * a2 = %e < %e\n", rho_k*a1, L * a2) ;
           success = (rho_k*a1 < L * a2)?1:0;
 
           /* printf("rho_k = %12.8e\t", rho_k); */
@@ -277,27 +280,30 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         }
 
         /* problem->F(problem,x,w); */
-        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);
-            printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
+        DEBUG_EXPR_WE(for(int i =0; i< 5 ; i++)
+      {
+        printf("x[%i]=%12.8e\t",i,x[i]);
+          printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+        });
 
         /* **** Criterium convergence **** */
         /* variationalInequality_computeError(problem, x , w, tolerance, options, &error); */
 
-        error = compute_error(problem, x , w, a2,  tolerance, options);
+        error = compute_error(problem, x, w, a2,  tolerance, options);
 
         hasNotConverged = determine_convergence(error, &tolerance, iter, options,
                                                 problem, x, w, rho);
 
         DEBUG_EXPR_WE(
-          if ((error < error_k))
-          {
-            printf("(error < error_k) is satisfied\n");
-          };
-          );
+          if((error < error_k))
+      {
+        printf("(error < error_k) is satisfied\n");
+        };
+        );
 
 
         /*Update rho*/
-        if ((rho_k*a1 < Lmin * a2))
+        if((rho_k*a1 < Lmin * a2))
         {
           rho =rho_k*tauinv;
           DEBUG_PRINTF("We compute a new rho_k = %e\n", rho_k);
@@ -311,10 +317,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       }
     }
 
-    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] == SICONOS_VI_LS_SOLODOV) /* Armijo rule with Solodov.Tseng ratio */
+    if(iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] == SICONOS_VI_LS_SOLODOV)  /* Armijo rule with Solodov.Tseng ratio */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Solodov.Tseng ratio \n");
-      while ((iter < itermax) && (hasNotConverged > 0))
+      while((iter < itermax) && (hasNotConverged > 0))
       {
         ++iter;
 
@@ -323,40 +329,43 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         error_k = error;
 
         /* x_k <-- x store the x at the beginning of the iteration */
-        cblas_dcopy(n , x , 1 , x_k, 1);
+        cblas_dcopy(n, x, 1, x_k, 1);
         /* compute w_k =F(x_k) */
         problem->F(problem,n,x_k,w_k);
 
         ls_iter = 0 ;
         success =0;
         rho_k=rho/tau;
-        while (!success && (ls_iter < ls_itermax))
+        while(!success && (ls_iter < ls_itermax))
         {
 
           /* if (iparam[SICONOS_VI_IPARAM_DECREASE_RHO] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a2*a2/(rho_k*a1)); */
           /* else */ rho_k = rho_k * tau ;
 
-           /* x <- x_k  for the std approach*/
-          if (iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0) cblas_dcopy(n, x_k, 1, x , 1) ;
+          /* x <- x_k  for the std approach*/
+          if(iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0) cblas_dcopy(n, x_k, 1, x, 1) ;
 
           /* x <- x - rho_k*  w_k */
-          cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
+          cblas_daxpy(n, -rho_k, w_k, 1, x, 1) ;
 
           /* xtmp <-  ProjectionOnX(x) */
           problem->ProjectionOnX(problem,x,xtmp);
           problem->F(problem,n,xtmp,w);
 
-          DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
-              printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
+          DEBUG_EXPR_WE(for(int i =0; i< 5 ; i++)
+        {
+          printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
+            printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+          });
           /* wtmp <- w */
           /* cblas_dcopy(n, w, 1, wtmp , 1) ; */
 
           /* w <- w - w_k   */
-          cblas_daxpy(n, -1.0, w_k , 1, w , 1) ;
+          cblas_daxpy(n, -1.0, w_k, 1, w, 1) ;
 
           /* xtmp <- x - x_k   */
-          cblas_dcopy(n, xtmp, 1,x , 1) ;
-          cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
+          cblas_dcopy(n, xtmp, 1,x, 1) ;
+          cblas_daxpy(n, -1.0, x_k, 1, xtmp, 1) ;
 
           /* a1 =  (w - w_k)^T(x - x_k) */
           a1 = cblas_ddot(n, xtmp, 1, w, 1);
@@ -366,7 +375,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           a2 = cblas_dnrm2(n, xtmp, 1) ;
           DEBUG_PRINTF("a2 = %12.8e\n", a2);
 
-          DEBUG_PRINTF("test rho_k*a1 < L * a2 * a2 = %e < %e\n", rho_k*a1 , L * a2 * a2 ) ;
+          DEBUG_PRINTF("test rho_k*a1 < L * a2 * a2 = %e < %e\n", rho_k*a1, L * a2 * a2) ;
           success = (rho_k*a1 < L * a2 * a2)?1:0;
 
           /* printf("rho_k = %12.8e\t", rho_k); */
@@ -379,25 +388,28 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         }
 
         /* problem->F(problem,x,w); */
-        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);
-            printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
+        DEBUG_EXPR_WE(for(int i =0; i< 5 ; i++)
+      {
+        printf("x[%i]=%12.8e\t",i,x[i]);
+          printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+        });
 
         /* **** Criterium convergence **** */
 
-        error = compute_error(problem, x , w, a2,  tolerance, options);
+        error = compute_error(problem, x, w, a2,  tolerance, options);
 
         hasNotConverged = determine_convergence(error, &tolerance, iter, options,
                                                 problem, x, w, rho);
         DEBUG_EXPR_WE(
-          if ((error < error_k))
-          {
-            printf("(error < error_k) is satisfied\n");
-          };
-          );
+          if((error < error_k))
+      {
+        printf("(error < error_k) is satisfied\n");
+        };
+        );
 
 
         /*Update rho*/
-        if ((rho_k*a1 < Lmin * a2*a2))
+        if((rho_k*a1 < Lmin * a2*a2))
         {
           rho =rho_k*tauinv;
           DEBUG_PRINTF("We compute a new rho_k = %e \n", rho_k);
@@ -411,10 +423,10 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
       }
     }
 
-    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] == SICONOS_VI_LS_HANSUN) /* Armijo rule with Han.Sun ratio */
+    if(iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] == SICONOS_VI_LS_HANSUN)  /* Armijo rule with Han.Sun ratio */
     {
       DEBUG_PRINT("Variable step size method with Armijo rule with Han.Sun ratio \n");
-      while ((iter < itermax) && (hasNotConverged > 0))
+      while((iter < itermax) && (hasNotConverged > 0))
       {
         ++iter;
 
@@ -423,41 +435,44 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         error_k = error;
 
         /* x_k <-- x store the x at the beginning of the iteration */
-        cblas_dcopy(n , x , 1 , x_k, 1);
+        cblas_dcopy(n, x, 1, x_k, 1);
         /* compute w_k =F(x_k) */
         problem->F(problem,n,x_k,w_k);
 
         ls_iter = 0 ;
         success =0;
         rho_k=rho/tau;
-        while (!success && (ls_iter < ls_itermax))
+        while(!success && (ls_iter < ls_itermax))
         {
           /* if (iparam[SICONOS_VI_IPARAM_DECREASE_RHO] && ls_iter !=0) rho_k = rho_k * tau * min(1.0,a1/(rho_k*a2*a2)); */
           /* else */ rho_k = rho_k * tau ;
 
           /* x <- x_k  for the std approach*/
-          if (iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0)  cblas_dcopy(n, x_k, 1, x , 1) ;
+          if(iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE]==0)  cblas_dcopy(n, x_k, 1, x, 1) ;
 
           /* x <- x - rho_k*  w_k */
-          cblas_daxpy(n, -rho_k, w_k , 1, x , 1) ;
+          cblas_daxpy(n, -rho_k, w_k, 1, x, 1) ;
 
           /* xtmp <-  ProjectionOnX(x) */
           problem->ProjectionOnX(problem,x,xtmp);
           problem->F(problem,n,xtmp,w);
 
-          DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
-              printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
+          DEBUG_EXPR_WE(for(int i =0; i< 5 ; i++)
+        {
+          printf("xtmp[%i]=%12.8e\t",i,xtmp[i]);
+            printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+          });
           /* wtmp <- w */
           /* cblas_dcopy(n, w, 1, wtmp , 1) ; */
 
           /* w <- w - w_k   */
-          cblas_daxpy(n, -1.0, w_k , 1, w , 1) ;
+          cblas_daxpy(n, -1.0, w_k, 1, w, 1) ;
 
           /* xtmp <- x */
-          cblas_dcopy(n, xtmp, 1,x , 1) ;
+          cblas_dcopy(n, xtmp, 1,x, 1) ;
 
           /* xtmp <- x - x_k   */
-          cblas_daxpy(n, -1.0, x_k , 1, xtmp , 1) ;
+          cblas_daxpy(n, -1.0, x_k, 1, xtmp, 1) ;
 
           a1 = cblas_ddot(n, xtmp, 1, w, 1);
           DEBUG_PRINTF("a1 = %12.8e\n", a1);
@@ -465,7 +480,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
           a2 = cblas_dnrm2(n, w, 1) ;
           DEBUG_PRINTF("a2 = %12.8e\n", a2);
 
-          DEBUG_PRINTF("test rho_k*a2*a2 < L * a1 = %e < %e\n", rho_k*a2*a2 , L * a1 ) ;
+          DEBUG_PRINTF("test rho_k*a2*a2 < L * a1 = %e < %e\n", rho_k*a2*a2, L * a1) ;
           success = (rho_k*a2*a2 < L * a1)?1:0;
 
           /* printf("rho_k = %12.8e\t", rho_k); */
@@ -478,25 +493,28 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
         }
 
         /* problem->F(problem,x,w); */
-        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++) { printf("x[%i]=%12.8e\t",i,x[i]);
-            printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);});
+        DEBUG_EXPR_WE(for(int i =0; i< 5 ; i++)
+      {
+        printf("x[%i]=%12.8e\t",i,x[i]);
+          printf("w[%i]=F[%i]=%12.8e\n",i,i,w[i]);
+        });
 
         /* **** Criterium convergence **** */
 
-        error = compute_error(problem, x , w, a1,  tolerance, options);
+        error = compute_error(problem, x, w, a1,  tolerance, options);
         hasNotConverged = determine_convergence(error, &tolerance, iter, options,
                                                 problem, x, w, rho);
 
         DEBUG_EXPR_WE(
-          if ((error < error_k))
-          {
-            printf("(error < error_k) is satisfied\n");
-          };
-          );
+          if((error < error_k))
+      {
+        printf("(error < error_k) is satisfied\n");
+        };
+        );
 
 
         /*Update rho*/
-        if ((rho_k*a2*a2 < Lmin * a1) && (error < error_k))
+        if((rho_k*a2*a2 < Lmin * a1) && (error < error_k))
         {
           rho =rho_k*tauinv;
           DEBUG_PRINTF("We compute a new rho_k = %e \n", rho_k);
@@ -509,7 +527,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
       }
     }
-    if (iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2)
+    if(iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2)
     {
       fprintf(stderr, "Numerics, VariationalInequality_FixedPointProjection failed. iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] > 2 .\n");
       exit(EXIT_FAILURE);
@@ -519,7 +537,7 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
   }// end isvariable=1
 
   *info = hasNotConverged;
-  if (isVariable)
+  if(isVariable)
   {
     free(x_k);
     free(w_k);
@@ -535,7 +553,8 @@ void variationalInequality_FixedPointProjection(VariationalInequality* problem, 
 
 
 void variationalInequality_FixedPointProjection_set_default(SolverOptions* options)
-{ options->iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = SICONOS_VI_LS_ARMIJO;
+{
+  options->iparam[SICONOS_VI_IPARAM_LINESEARCH_METHOD] = SICONOS_VI_LS_ARMIJO;
   /* options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_FULL; */
   options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION]=SICONOS_VI_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   options->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION_FREQUENCY]=0;

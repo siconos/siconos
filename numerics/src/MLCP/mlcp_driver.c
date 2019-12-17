@@ -71,7 +71,7 @@ static void mlcp_driver_allocate_work_arrays(MixedLinearComplementarityProblem* 
 {
   size_t iwsize, dwsize;
   // compute internal work arrays size, depending on the chosen solver.
-  switch (options->solverId)
+  switch(options->solverId)
   {
   case SICONOS_MLCP_DIRECT_ENUM:
     iwsize = mlcp_direct_getNbIWork(problem, options) + mlcp_enum_getNbIWork(problem, options);
@@ -113,9 +113,9 @@ static void mlcp_driver_allocate_work_arrays(MixedLinearComplementarityProblem* 
   // allocate solver options working arrays.
   options->iWorkSize = iwsize;
   options->dWorkSize = dwsize;
-  if (options->iWorkSize)
+  if(options->iWorkSize)
     options->iWork = (int*)calloc(options->iWorkSize, sizeof(int));
-  if (options->dWorkSize)
+  if(options->dWorkSize)
     options->dWork = (double*)calloc(options->dWorkSize, sizeof(double));
 }
 
@@ -124,7 +124,7 @@ void mlcp_driver_init(MixedLinearComplementarityProblem* problem, SolverOptions*
   // iWork, dWork arrays memory allocation
   mlcp_driver_allocate_work_arrays(problem, options);
 
-  switch (options->solverId)
+  switch(options->solverId)
   {
   case SICONOS_MLCP_DIRECT_ENUM :
     mlcp_direct_enum_init(problem, options);
@@ -159,7 +159,7 @@ void mlcp_driver_reset(MixedLinearComplementarityProblem* problem, SolverOptions
 {
 
 
-  switch (options->solverId)
+  switch(options->solverId)
   {
   case SICONOS_MLCP_DIRECT_ENUM :
     mlcp_direct_enum_reset();
@@ -196,22 +196,22 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
 {
 
 
-  if (options == NULL)
+  if(options == NULL)
     numerics_error("mlcp_driver ", "null input for solver options.\n");
 
   /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
+  if(problem == NULL || z == NULL || w == NULL)
     numerics_error("mlcp_driver", "null input for MixedLinearComplementarityProblem and/or unknowns (z,w)");
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
-  if (verbose)
+  if(verbose)
     mixedLinearComplementarity_display(problem);
   /* Switch to DenseMatrix or SparseBlockMatrix solver according to the type of storage for M */
   /* Storage type for the matrix M of the LCP */
   int storageType = problem->M->storageType;
 
   /* Sparse Block Storage */
-  if (storageType == 1)
+  if(storageType == 1)
   {
     numerics_error("mlcp_driver", "not yet implemented for sparse storage.");
   }
@@ -232,79 +232,79 @@ int mlcp_driver(MixedLinearComplementarityProblem* problem, double *z, double *w
   // Note FP : shouldn't we call mlcp_driver_init here in order to avoid explicit call by user ?
   if(!options->dWork)
     mlcp_driver_allocate_work_arrays(problem, options);
-  
-  switch (options->solverId)
+
+  switch(options->solverId)
   {
   case  SICONOS_MLCP_PGS:/****** PGS algorithm ******/
-    mlcp_pgs(problem, z , w , &info , options);
+    mlcp_pgs(problem, z, w, &info, options);
     break;
   case  SICONOS_MLCP_PGS_SBM:/****** PGS algorithm ******/
-    mlcp_pgs_SBM(problem, z , w , &info , options);
+    mlcp_pgs_SBM(problem, z, w, &info, options);
     break;
   case SICONOS_MLCP_RPGS:
     /****** RPGS algorithm ******/
-    mlcp_rpgs(problem, z , w , &info , options);
+    mlcp_rpgs(problem, z, w, &info, options);
     break;
 
-    /****** PSOR algorithm ******/
+  /****** PSOR algorithm ******/
   case SICONOS_MLCP_PSOR:
-    mlcp_psor(problem, z , w , &info , options);
+    mlcp_psor(problem, z, w, &info, options);
     break;
 
-    /****** RPSOR algorithm ******/
+  /****** RPSOR algorithm ******/
   case SICONOS_MLCP_RPSOR:
-    mlcp_rpsor(problem, z , w , &info , options);
+    mlcp_rpsor(problem, z, w, &info, options);
     break;
 
-    /****** PATH algorithm ******/
+  /****** PATH algorithm ******/
   case SICONOS_MLCP_PATH:
-    mlcp_path(problem, z , w , &info , options);
+    mlcp_path(problem, z, w, &info, options);
     break;
 
-    /****** ENUM algorithm ******/
+  /****** ENUM algorithm ******/
   case  SICONOS_MLCP_ENUM:
-    mlcp_enum(problem, z , w , &info , options);
+    mlcp_enum(problem, z, w, &info, options);
     break;
 
-    /****** SIMPLEX algorithm ******/
+  /****** SIMPLEX algorithm ******/
   case SICONOS_MLCP_SIMPLEX:
-    mlcp_simplex(problem, z , w , &info , options);
+    mlcp_simplex(problem, z, w, &info, options);
     break;
 
-    /****** DIRECT ENUM algorithm ******/
+  /****** DIRECT ENUM algorithm ******/
   case SICONOS_MLCP_DIRECT_ENUM:
-    mlcp_direct_enum(problem, z , w , &info , options);
+    mlcp_direct_enum(problem, z, w, &info, options);
     break;
   case SICONOS_MLCP_PATH_ENUM:
-    mlcp_path_enum(problem, z , w , &info , options);
+    mlcp_path_enum(problem, z, w, &info, options);
     break;
 
-    /****** DIRECT SIMPLEX algorithm ******/
+  /****** DIRECT SIMPLEX algorithm ******/
   case SICONOS_MLCP_DIRECT_SIMPLEX:
-    mlcp_direct_simplex(problem, z , w , &info , options);
+    mlcp_direct_simplex(problem, z, w, &info, options);
     break;
 
-    /****** DIRECT PATH algorithm ******/
+  /****** DIRECT PATH algorithm ******/
   case SICONOS_MLCP_DIRECT_PATH:
-    mlcp_direct_path(problem, z , w , &info , options);
+    mlcp_direct_path(problem, z, w, &info, options);
     break;
   case SICONOS_MLCP_DIRECT_PATH_ENUM:
-    mlcp_direct_path_enum(problem, z , w , &info , options);
+    mlcp_direct_path_enum(problem, z, w, &info, options);
     break;
 
-    /****** FB algorithm ******/
+  /****** FB algorithm ******/
   case SICONOS_MLCP_FB :
-    mlcp_FB(problem, z , w , &info , options);
+    mlcp_FB(problem, z, w, &info, options);
     break;
-    /****** DIRECT FB algorithm ******/
+  /****** DIRECT FB algorithm ******/
   case  SICONOS_MLCP_DIRECT_FB :
-    mlcp_direct_FB(problem, z , w , &info , options);
+    mlcp_direct_FB(problem, z, w, &info, options);
     break;
-    // need a svn add mlcp_GaussSeidel_SBM ...
-    //  else if( strcmp( name , SICONOS_MLCP_MLCP_SBM ) == 0 )
-    //    mlcp_GaussSeidel_SBM( problem, z , w , &info , options,1);
+  // need a svn add mlcp_GaussSeidel_SBM ...
+  //  else if( strcmp( name , SICONOS_MLCP_MLCP_SBM ) == 0 )
+  //    mlcp_GaussSeidel_SBM( problem, z , w , &info , options,1);
 
-    /*error */
+  /*error */
   default:
   {
     fprintf(stderr, "mlcp_driver error: unknown solver id: %d\n", options->solverId);

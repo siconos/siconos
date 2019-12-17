@@ -45,7 +45,7 @@ static void mlcp_pgs_sbm_buildLocalProblem(int rowNumber, SparseBlockStructuredM
   local_problem->size = blmat->blocksize0[rowNumber];
   int pos = 0;
 
-  if (rowNumber != 0)
+  if(rowNumber != 0)
   {
     local_problem->size -= blmat->blocksize0[rowNumber - 1];
     pos =  blmat->blocksize0[rowNumber - 1];
@@ -75,7 +75,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
      - Input matrix M of the problem is supposed to be sparse-block
        with no null row (ie no rows with all blocks equal to null)
   */
-  if (problem->M->matrix1 == NULL)
+  if(problem->M->matrix1 == NULL)
   {
     fprintf(stderr, "mlcp_NSGS_SBM error: wrong storage type for input matrix M of the LCP.\n");
     exit(EXIT_FAILURE);
@@ -96,7 +96,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
 
   /* Number of non-null blocks in blmat */
   int nbOfNonNullBlocks = blmat->nbblocks;
-  if (nbOfNonNullBlocks < 1)
+  if(nbOfNonNullBlocks < 1)
   {
     fprintf(stderr, "Numerics::mlcp_NSGS_SBM error: empty M matrix (all blocks = NULL).\n");
     exit(EXIT_FAILURE);
@@ -116,10 +116,10 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
   /* Memory allocation for q. Size of q = blsizemax, size of the largest square-block in blmat */
   int blsizemax = blmat->blocksize0[0];
   int k;
-  for (unsigned int i = 1 ; i < blmat->blocknumber0 ; i++)
+  for(unsigned int i = 1 ; i < blmat->blocknumber0 ; i++)
   {
     k = blmat->blocksize0[i] - blmat->blocksize0[i - 1];
-    if (k > blsizemax) blsizemax = k;
+    if(k > blsizemax) blsizemax = k;
   }
   local_problem->q = (double*)malloc(blsizemax * sizeof(double));
 
@@ -135,7 +135,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
   options[0].iparam[SICONOS_IPARAM_MLCP_PGS_SUM_ITER] = 0;
   options[0].dparam[SICONOS_DPARAM_MLCP_PGS_SUM_ERRORS] = 0.0;
 
-  if (options->numberOfInternalSolvers < 1)
+  if(options->numberOfInternalSolvers < 1)
   {
     numerics_error("mlcp_nsgs_SBM", "The MLCP_PGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
@@ -149,29 +149,29 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
   /* Output from local solver */
   int infoLocal = -1;
 
-  while ((iter < itermax) && (hasNotConverged > 0))
+  while((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
     /* Loop over the rows of blocks in blmat */
     size_t solverid = 0;
     pos = 0;
     /*       cblas_dcopy(problem->size,w,1,wBackup,1); */
-    for (rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber)
+    for(rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber)
     {
       current_local_options = options[0].internalSolvers[solverid];
       /* Local problem formalization */
       mlcp_pgs_sbm_buildLocalProblem(rowNumber, blmat, local_problem, q, z);
       /* Solve local problem */
-      if (problem->blocksIsComp[rowNumber])
+      if(problem->blocksIsComp[rowNumber])
       {
-      infoLocal = lcp_driver_DenseMatrix(local_problem, &z[pos], &w[pos], current_local_options);
+        infoLocal = lcp_driver_DenseMatrix(local_problem, &z[pos], &w[pos], current_local_options);
       }
       else /* Solve a linear system*/
       {
-        if (local_problem->size ==1)
+        if(local_problem->size ==1)
         {
           double d =  local_problem->M->matrix0[0];
-          if (fabs(d) < DBL_EPSILON)
+          if(fabs(d) < DBL_EPSILON)
           {
             printf("Numerics::mlcp_pgs_sbm, error: vanishing diagonal term \n");
             printf(" The problem cannot be solved with this method \n");
@@ -192,7 +192,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
       /* sum of local errors (output from local_driver)*/
       options[0].dparam[SICONOS_DPARAM_MLCP_PGS_SUM_ERRORS] += current_local_options->dparam[SICONOS_DPARAM_RESIDU];
 
-      if (infoLocal > 0)
+      if(infoLocal > 0)
       {
         //free(local_problem->q);
         //free(local_problem->M);
@@ -206,7 +206,7 @@ void mlcp_pgs_SBM(MixedLinearComplementarityProblem* problem, double *z, double 
 
       }
 
-      while (solverid < options->numberOfInternalSolvers - 1)
+      while(solverid < options->numberOfInternalSolvers - 1)
         solverid++;
     }
 

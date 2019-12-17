@@ -47,15 +47,15 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
   // Call the lcp_solver
 
   options->solverId = SICONOS_LCP_LEMKE;
-  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options);
-  if (options->filterOn > 0)
+  *info = linearComplementarity_driver(lcp_problem, zlcp, wlcp, options);
+  if(options->filterOn > 0)
     lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
   /*       printf("\n"); */
   int nc = problem->numberOfContacts;
-  double norm_q = cblas_dnrm2(nc*2 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*2, problem->q, 1);
   // Conversion of result
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
 
     /* printf("Contact number = %i\n",i); */
@@ -82,23 +82,23 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
 
   /*        printf("\n"); */
   double error;
-  *info = fc2d_compute_error(problem, reaction , velocity, options->dparam[SICONOS_DPARAM_TOL], norm_q, &error);
+  *info = fc2d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], norm_q, &error);
 
   options->dparam[SICONOS_DPARAM_RESIDU] = error;
 
-  if (error > options->iparam[SICONOS_DPARAM_TOL])
+  if(error > options->iparam[SICONOS_DPARAM_TOL])
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- FC2D - LEMKE - No convergence after %i iterations"
              " residual = %14.7e < %7.3e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], error,
-             options->dparam[SICONOS_DPARAM_TOL] );
+             options->dparam[SICONOS_DPARAM_TOL]);
 
   }
   else
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- FC2D - LEMKE - Convergence after %i iterations"
              " residual = %14.7e < %7.3e\n", options->iparam[SICONOS_IPARAM_ITER_DONE],
              error, options->dparam[SICONOS_DPARAM_TOL]);

@@ -27,7 +27,7 @@ int check_hdf5_file(const char * filename)
   const char * ext = strrchr(filename, '.') + 1;
   // compare ext with standard ext for hdf5 files.
   int res = strcmp(ext, "hdf5");
-  if (res != 0)
+  if(res != 0)
     res = strcmp(ext+1, "h5");
 
   return !res;

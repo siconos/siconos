@@ -69,11 +69,11 @@ LagrangianDS::LagrangianDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::Sicon
 
 void LagrangianDS::allocateMass()
 {
-  if (!_mass)
+  if(!_mass)
   {
     _mass.reset(new SimpleMatrix(_ndof, _ndof));
   }
-  
+
 }
 
 
@@ -608,34 +608,34 @@ void LagrangianDS::display(bool brief) const
   if(_p[2]) _p[2]->display();
   else std::cout << "-> NULL" <<std::endl;
 
-  if (!brief)
+  if(!brief)
   {
     std::cout << "- Mass " <<std::endl;
-    if (_mass) _mass ->display();
-    else std::cout << "-> NULL" <<std::endl;
-    
-    std::cout << "- Forces " <<std::endl;
-    if (_forces) _forces ->display();
-    else std::cout << "-> NULL" <<std::endl;
-    std::cout << "- FInt " <<std::endl;
-    if (_fInt) _fInt ->display();
-    else std::cout << "-> NULL" <<std::endl;
-    
-    std::cout << "- jacobianqForces " <<std::endl;
-    if (_jacobianqForces) _jacobianqForces ->display();
-    else std::cout << "-> NULL" <<std::endl;
-    std::cout << "- jacobianFIntq " <<std::endl;
-    if (_jacobianFIntq) _jacobianFIntq ->display();
+    if(_mass) _mass ->display();
     else std::cout << "-> NULL" <<std::endl;
 
-    
+    std::cout << "- Forces " <<std::endl;
+    if(_forces) _forces ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    std::cout << "- FInt " <<std::endl;
+    if(_fInt) _fInt ->display();
+    else std::cout << "-> NULL" <<std::endl;
+
+    std::cout << "- jacobianqForces " <<std::endl;
+    if(_jacobianqForces) _jacobianqForces ->display();
+    else std::cout << "-> NULL" <<std::endl;
+    std::cout << "- jacobianFIntq " <<std::endl;
+    if(_jacobianFIntq) _jacobianFIntq ->display();
+    else std::cout << "-> NULL" <<std::endl;
+
+
     std::cout << "- jacobianqDotForces " <<std::endl;
-    if (_jacobianqDotForces) _jacobianqDotForces ->display();
+    if(_jacobianqDotForces) _jacobianqDotForces ->display();
     else std::cout << "-> NULL" <<std::endl;
 
   }
 
-  
+
   std::cout << "===================================== " <<std::endl;
 }
 
@@ -667,7 +667,7 @@ void LagrangianDS::swapInMemory()
 {
   _qMemory.swap(*_q[0]);
   _velocityMemory.swap(*_q[1]);
-  if (_forces)
+  if(_forces)
     _forcesMemory.swap(*_forces);
 
   // initialization of the reaction force due to the non smooth law

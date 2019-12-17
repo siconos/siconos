@@ -60,9 +60,9 @@ void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *
   DEBUG_PRINT_VEC(problem->ub, n);
 
   int starting_constraint = rand() % s;
-  for (unsigned i = 0, j = starting_constraint; i < s; ++i, j = (j+1) % s)
+  for(unsigned i = 0, j = starting_constraint; i < s; ++i, j = (j+1) % s)
   {
-    if (j >= n)
+    if(j >= n)
     {
       H[i + s*(j-n)] = 1.0;
       poly.K[i] = problem->lb[j-n];
@@ -74,18 +74,24 @@ void relay_avi_caoferris_test(RelayProblem* problem, double *z, double *w, int *
     }
   }
   DEBUG_PRINT("H matrix\n");
-  DEBUG_EXPR_WE(for (unsigned i = 0; i < s; ++i)
-      { for(unsigned j = 0 ; j < n; ++j)
-      { DEBUG_PRINTF("% 2.2e ", H[i + j*s]) }
-      DEBUG_PRINT("\n")});
+  DEBUG_EXPR_WE(for(unsigned i = 0; i < s; ++i)
+{
+  for(unsigned j = 0 ; j < n; ++j)
+    {
+      DEBUG_PRINTF("% 2.2e ", H[i + j*s])
+    }
+    DEBUG_PRINT("\n")
+  });
 
   DEBUG_PRINT("K vector\n");
-  DEBUG_EXPR_WE(for (unsigned i = 0; i < s; ++i)
-      { DEBUG_PRINTF("% 2.2e ", poly.K[i])
-      DEBUG_PRINT("\n")});
+  DEBUG_EXPR_WE(for(unsigned i = 0; i < s; ++i)
+{
+  DEBUG_PRINTF("% 2.2e ", poly.K[i])
+    DEBUG_PRINT("\n")
+  });
 
- /* Call directly the 3rd stage 
-   * Here w is used as u and z as s in the AVI */
+  /* Call directly the 3rd stage
+    * Here w is used as u and z as s in the AVI */
   *info = avi_caoferris(&avi_pb, z, w, options);
 
   free_polyhedron(&poly);

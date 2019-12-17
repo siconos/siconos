@@ -28,7 +28,7 @@ const char ** data_collection()
   int n_data=0;
   data_collection_1[n_data++] = "./data/lcp_tobenna.dat";
 
-  
+
   data_collection_1[n_data++] = "---";
 
 

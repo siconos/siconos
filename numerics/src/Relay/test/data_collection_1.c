@@ -34,7 +34,7 @@ const char ** data_collection()
   data_collection_1[n_data++] = "./data/step_4x4.dat";
   data_collection_1[n_data++] = "./data/relay_simple2.dat";
   data_collection_1[n_data++] = "./data/relay1.dat";
-  
+
   data_collection_1[n_data++] = "---";
 
 

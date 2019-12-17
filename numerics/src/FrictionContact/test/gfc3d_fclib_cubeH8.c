@@ -35,7 +35,7 @@ int main(void)
   current.options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
 
   info = globalFrictionContact_test_function(&current);
-  
+
   solver_options_delete(current.options);
   printf("\nEnd of test on %s\n",filename);
   return info;

@@ -9,17 +9,17 @@ double f__cabs(double real, double imag)
 {
   double temp;
 
-  if (real < 0)
+  if(real < 0)
     real = -real;
-  if (imag < 0)
+  if(imag < 0)
     imag = -imag;
-  if (imag > real)
+  if(imag > real)
   {
     temp = real;
     real = imag;
     imag = temp;
   }
-  if ((real + imag) == real)
+  if((real + imag) == real)
     return(real);
 
   temp = imag / real;

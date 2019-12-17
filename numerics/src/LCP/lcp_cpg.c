@@ -42,13 +42,13 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
 
 
-  double err, a1, b1 , qs;
+  double err, a1, b1, qs;
 
   double alpha, beta, rp, pMp;
   double tol = options->dparam[SICONOS_DPARAM_TOL];
 
   int *status;
-  double *zz , *pp , *rr, *ww, *Mp;
+  double *zz, *pp, *rr, *ww, *Mp;
 
   *info = 1;
   incx  = 1;
@@ -58,7 +58,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
-  qs = cblas_dnrm2(n , q , incx);
+  qs = cblas_dnrm2(n, q, incx);
 
   /*printf( " Norm: %g \n", qs );*/
 
@@ -75,7 +75,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
   incx = 1;
 
-  for (i = 0; i < n; ++i)
+  for(i = 0; i < n; ++i)
   {
 
     status[i] = 0;
@@ -110,7 +110,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
   iter = 0;
   err  = 1.0 ;
 
-  while ((iter < itermax) && (err > tol))
+  while((iter < itermax) && (err > tol))
   {
 
     ++iter;
@@ -129,10 +129,10 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     pMp = cblas_ddot(n, pp, incx, w, incy);
 
-    if (fabs(pMp) < DBL_EPSILON)
+    if(fabs(pMp) < DBL_EPSILON)
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" Operation not conform at the iteration %d \n", iter);
         printf(" Alpha can be obtained with pWp = %10.4g  \n", pMp);
@@ -166,9 +166,9 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     /* Iterate projection*/
 
-    for (i = 0; i < n; ++i)
+    for(i = 0; i < n; ++i)
     {
-      if (z[i] > 0.0)
+      if(z[i] > 0.0)
       {
         status[i] = 1;
       }
@@ -181,8 +181,8 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     /* rr = -Wz + q */
 
-    cblas_dcopy(n, rr, incx, w , incy);
-    cblas_dcopy(n, q , incx, rr, incy);
+    cblas_dcopy(n, rr, incx, w, incy);
+    cblas_dcopy(n, q, incx, rr, incy);
 
     a1 = -1.;
     b1 = -1.;
@@ -194,17 +194,17 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
      * pp --> zz
      */
 
-    for (i = 0; i < n; ++i)
+    for(i = 0; i < n; ++i)
     {
 
-      if (status[i])
+      if(status[i])
       {
         ww[i] = rr[i];
         zz[i] = pp[i];
       }
       else
       {
-        if (rr[i] < 0)
+        if(rr[i] < 0)
         {
           ww[i] = 0.0;
           zz[i] = 0.0;
@@ -212,7 +212,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
         else
         {
           ww[i] = rr[i];
-          if (pp[i] < 0) zz[i] = 0.0;
+          if(pp[i] < 0) zz[i] = 0.0;
           else zz[i] = pp[i];
         }
       }
@@ -220,7 +220,7 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
     /*  beta = -w.Mp / pMp  */
 
-    rp = cblas_ddot(n , ww, incx, w, incy);
+    rp = cblas_ddot(n, ww, incx, w, incy);
 
     beta = -rp / pMp;
 
@@ -247,21 +247,21 @@ void lcp_cpg(LinearComplementarityProblem* problem, double *z, double *w, int *i
 
 
   *info = 1;
-  if (verbose > 0)
+  if(verbose > 0)
   {
-    if (err > tol)
+    if(err > tol)
     {
-      printf(" No convergence of CPG after %d iterations\n" , iter);
+      printf(" No convergence of CPG after %d iterations\n", iter);
       printf(" The residue is : %g \n", err);
     }
     else
     {
-      printf(" Convergence of CPG after %d iterations\n" , iter);
+      printf(" Convergence of CPG after %d iterations\n", iter);
       printf(" The residue is : %g \n", err);
       *info = 0;
     }
   }
-  else if (err <= tol) *info = 0;
+  else if(err <= tol) *info = 0;
 
   free(Mp);
   free(status);

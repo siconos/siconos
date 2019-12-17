@@ -70,11 +70,11 @@ int fc3d_LmgcDriver(double *reaction,
 
   SolverOptions * numerics_solver_options = solver_options_create(solver_id);
 
-  if (solver_id == SICONOS_FRICTION_3D_NSGS)
+  if(solver_id == SICONOS_FRICTION_3D_NSGS)
   {
     numerics_solver_options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] = SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
   }
-  else if  (solver_id == SICONOS_FRICTION_3D_NSN_AC)
+  else if(solver_id == SICONOS_FRICTION_3D_NSN_AC)
   {
     numerics_solver_options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH] = SICONOS_FRICTION_3D_NSN_LINESEARCH_NO;
     numerics_solver_options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY]=SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN;
@@ -86,73 +86,73 @@ int fc3d_LmgcDriver(double *reaction,
 
   double * reaction_guess;
   double * velocity_guess;
-  if (outputFile == 3)
+  if(outputFile == 3)
   {
     // Save guesses.
 
     reaction_guess = (double *)malloc(nc*3*sizeof(double));
     velocity_guess = (double *)malloc(nc*3*sizeof(double));
-    for (unsigned int k =0; k < 3*nc; k++) reaction_guess[k]=reaction[k];
-    for (unsigned int k =0; k < 3*nc; k++) velocity_guess[k]=velocity[k];
+    for(unsigned int k =0; k < 3*nc; k++) reaction_guess[k]=reaction[k];
+    for(unsigned int k =0; k < 3*nc; k++) velocity_guess[k]=velocity[k];
 
   }
 
   DEBUG_EXPR(frictionContact_display(FC););
 
-  int info = fc3d_driver(FC, reaction , velocity, numerics_solver_options);
+  int info = fc3d_driver(FC, reaction, velocity, numerics_solver_options);
 
 
 //  uncomment to save FrictionContactProblem
 
-  if (outputFile == 1)
+  if(outputFile == 1)
   {
     FILE * file = fopen("tutu.c", "w");
 
     fprintf(file, "int nc = %i ;\n ", nc);
     fprintf(file, "int nb = %i ;\n ", nb);
     fprintf(file, "double mu[%i] ={\n", nc);
-    for (unsigned int i = 0; i < nc - 1 ; i++)
+    for(unsigned int i = 0; i < nc - 1 ; i++)
     {
       fprintf(file, "%32.24e, \t", mu[i]);
     }
     fprintf(file, "%32.24e };\n", mu[nc - 1]);
     fprintf(file, "int row[%i] ={\n", nb);
-    for (unsigned int i = 0; i < nb - 1 ; i++)
+    for(unsigned int i = 0; i < nb - 1 ; i++)
     {
       fprintf(file, "%i,\t", row[i]);
     }
 
     fprintf(file, " %i};\n", row[nb - 1]);
     fprintf(file, "int column[%i] ={\n", nb);
-    for (unsigned int i = 0; i < nb - 1 ; i++)
+    for(unsigned int i = 0; i < nb - 1 ; i++)
     {
       fprintf(file, "%i,\t", column[i]);
     }
     fprintf(file, " %i};\n", column[nb - 1]);
     fprintf(file, "double q[%i] ={\n", 3 * nc);
-    for (unsigned int i = 0; i < 3 * nc - 1 ; i++)
+    for(unsigned int i = 0; i < 3 * nc - 1 ; i++)
     {
       fprintf(file, "%32.24e,\t", q[i]);
     }
     fprintf(file, " %32.24e};\n", q[3 * nc - 1]);
 
     fprintf(file, "double W[%i] ={\n", 3 * 3 * nb);
-    for (unsigned int i = 0; i < nb - 1 ; i++)
+    for(unsigned int i = 0; i < nb - 1 ; i++)
     {
-      for (unsigned int j = 0; j < 3 * 3 ; j++)
+      for(unsigned int j = 0; j < 3 * 3 ; j++)
       {
         fprintf(file, "%32.24e, \t", W[i * 9 + j]);
       }
       fprintf(file, "\n");
     }
-    for (int j = 0; j < 3 * 3 - 1 ; j++)
+    for(int j = 0; j < 3 * 3 - 1 ; j++)
     {
       fprintf(file, "%32.24e, \t", W[(nb - 1) * 9 + j]);
     }
     fprintf(file, "%32.24e};\n", W[(nb - 1) * 9 + 8]);
     fclose(file);
   }
-  else if (outputFile == 2)
+  else if(outputFile == 2)
   {
     char fname[256];
     sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.dat", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
@@ -161,11 +161,11 @@ int fc3d_LmgcDriver(double *reaction,
     frictionContact_printInFile(FC, foutput);
     fclose(foutput);
   }
-  else if (outputFile == 3)
+  else if(outputFile == 3)
   {
 #ifdef WITH_FCLIB
     fccounter ++;
-    if (fccounter % freq_output == 0)
+    if(fccounter % freq_output == 0)
     {
       char fname[256];
       sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter);
@@ -217,7 +217,7 @@ int fc3d_LmgcDriver(double *reaction,
 
 
 
-   SBCM_free_3x3(MC);
+  SBCM_free_3x3(MC);
 
   free(M->index1_data);
   free(M->index2_data);

@@ -39,7 +39,7 @@ SP::Sensor Registry::instantiate(int type, SP::DynamicalSystem ds)
 {
   MapFactoryIt it = factory_map.find(type) ;
 
-  if (it == factory_map.end())
+  if(it == factory_map.end())
     RuntimeException::selfThrow("Registry::instantiate (SensorFactory) failed, no class named: " + type);
 
   return (it->second)(ds) ;  // run our factory

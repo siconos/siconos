@@ -41,7 +41,7 @@ void fc3d_nsgs_initialize_local_solver_velocity(SolverPtr* solve, FreeSolverPtr*
 
   /** Connect to local solver */
   /* Projection */
-  if (localsolver_options->solverId == SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity)
+  if(localsolver_options->solverId == SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity)
   {
     *solve = &fc3d_projectionOnCone_velocity_solve;
     *freeSolver = (FreeSolverPtr)&fc3d_projection_free;
@@ -70,11 +70,11 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3, problem->q, 1);
   /* Check for trivial case */
   /*   *info = fc3d_checkTrivialCase(n, q,velocity, reaction, options); */
 
-  if (*info == 0)
+  if(*info == 0)
     return;
 
   SolverPtr local_solver = NULL;
@@ -85,7 +85,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
 
 
 
-  if (M->storageType == 0)
+  if(M->storageType == 0)
   {
     /*  /\* Inversion of the matrix M *\/ */
     /*   int* ipiv = (int *)malloc(n*sizeof(*ipiv));  */
@@ -108,7 +108,7 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
     fprintf(stderr, "Numerics, fc3d_nsgs_velocity. Not yet implemented for storageType %i\n", M->storageType);
     exit(EXIT_FAILURE);
   }
-  if (options->numberOfInternalSolvers < 1)
+  if(options->numberOfInternalSolvers < 1)
   {
     numerics_error("fc3d_nsgs_velocity", "The NSGS method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
@@ -131,16 +131,16 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
 
 
   dparam[SICONOS_DPARAM_TOL] = dparam[2]; // set the tolerance for the local solver
-  while ((iter < itermax) && (hasNotConverged > 0))
+  while((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
     /* Loop through the contact points */
     //cblas_dcopy( n , q , incx , velocity , incy );
-    for (contact = 0 ; contact < nc ; ++contact)
+    for(contact = 0 ; contact < nc ; ++contact)
     {
 
       (*local_solver)(localproblem, velocity, localsolver_options);
-      for (int ncc = 0; ncc < 3; ncc ++)
+      for(int ncc = 0; ncc < 3; ncc ++)
       {
         printf("velocity[%i]=%14.7e\t", ncc, velocity[contact * 3 + ncc]);
       }
@@ -150,12 +150,12 @@ void fc3d_nsgs_velocity(FrictionContactProblem* problem, double *reaction, doubl
 
 
     /* **** Criterium convergence **** */
-    (*computeError)(problem, reaction , velocity, tolerance, options, norm_q,  &error);
+    (*computeError)(problem, reaction, velocity, tolerance, options, norm_q,  &error);
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- FC3D - NSGS_VELOCITY - Iteration %i Residual = %14.7e\n", iter, error);
 
-    if (error < tolerance) hasNotConverged = 0;
+    if(error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
   printf("--------------- FC3D - NSGS_VELOCITY - # Iteration %i Final Residual = %14.7e\n", iter, error);

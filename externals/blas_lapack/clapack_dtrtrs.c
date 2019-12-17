@@ -102,35 +102,35 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
   /* Function Body */
   info = 0;
   nounit = (Diag == CblasNonUnit);
-  if (!(Uplo == CblasUpper) && !(Uplo == CblasLower))
+  if(!(Uplo == CblasUpper) && !(Uplo == CblasLower))
   {
     info = -1;
   }
-  else if (!(Trans == CblasNoTrans) && !(Trans == CblasTrans) && !(Trans == CblasConjTrans))
+  else if(!(Trans == CblasNoTrans) && !(Trans == CblasTrans) && !(Trans == CblasConjTrans))
   {
     info = -2;
   }
-  else if (! nounit && !(Uplo == CblasUpper))
+  else if(! nounit && !(Uplo == CblasUpper))
   {
     info = -3;
   }
-  else if (n < 0)
+  else if(n < 0)
   {
     info = -4;
   }
-  else if (nrhs < 0)
+  else if(nrhs < 0)
   {
     info = -5;
   }
-  else if (lda < max(1, n))
+  else if(lda < max(1, n))
   {
     info = -7;
   }
-  else if (ldb < max(1, n))
+  else if(ldb < max(1, n))
   {
     info = -9;
   }
-  if (info != 0)
+  if(info != 0)
   {
     i__1 = -(info);
     return info;
@@ -138,19 +138,19 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 
   /*     Quick return if possible */
 
-  if (n == 0)
+  if(n == 0)
   {
     return 0;
   }
 
   /*     Check for singularity. */
 
-  if (nounit)
+  if(nounit)
   {
     i__1 = n;
-    for (info = 0; info < i__1; ++info)
+    for(info = 0; info < i__1; ++info)
     {
-      if (a[info + info * a_dim1] == 0.)
+      if(a[info + info * a_dim1] == 0.)
       {
         return ++info;
       }

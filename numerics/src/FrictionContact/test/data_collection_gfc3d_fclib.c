@@ -29,7 +29,7 @@ const char ** data_collection()
   data_collection_1[n_data++] = "./data/LMGC_GFC3D_CubeH8.hdf5";
   data_collection_1[n_data++] = "./data/LMGC_GFC3D-i00001-1-00000.hdf5";
   data_collection_1[n_data++] = "./data/LMGC_GFC3D-i00501-4-00000.hdf5";
-  
+
   data_collection_1[n_data++] = "---";
 
 

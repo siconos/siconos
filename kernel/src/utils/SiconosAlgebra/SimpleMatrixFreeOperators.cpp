@@ -221,7 +221,7 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
       tmp += *B.sparseCoordinate();
       return tmp;
     }
-     else if(numA == BANDED)
+    else if(numA == BANDED)
     {
       BandedMat tmp(*A.banded());
       tmp += *B.banded();

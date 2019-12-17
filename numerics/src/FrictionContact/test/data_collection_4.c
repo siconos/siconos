@@ -26,7 +26,7 @@ const char ** data_collection()
 
   const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
-  
+
   data_collection_1[n_data++] = "./data/Rover1039.dat";
   data_collection_1[n_data++] = "./data/Rover1040.dat";
   data_collection_1[n_data++] = "./data/Rover1041.dat";

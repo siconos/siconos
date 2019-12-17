@@ -49,7 +49,7 @@ void F_GlockerFixedP(int sizeF, double* reaction, double* FVector, int up2Date)
   */
 
   /* TMP COPY: review memory management for FGlocker ...*/
-  cblas_dcopy(sizeF , FGlocker , 1, FVector , 1);
+  cblas_dcopy(sizeF, FGlocker, 1, FVector, 1);
   FGlocker = NULL;
 }
 
@@ -65,7 +65,7 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem, FrictionContactProb
   */
 
   /* Glocker formulation */
-  if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint)
+  if(localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint)
   {
     Fsize = 5;
     NCPGlocker_initialize(problem, localproblem);
@@ -80,7 +80,7 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem, FrictionContactProb
   }
 }
 
-int fc3d_FixedP_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options)
+int fc3d_FixedP_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options)
 {
   int * iparam = options->iparam;
   double * dparam = options->dparam;
@@ -89,7 +89,7 @@ int fc3d_FixedP_solve(FrictionContactProblem * localproblem , double* reaction, 
 
   int info = Fixe(Fsize, reactionBlock, iparam, dparam);
 
-  if (info > 0)
+  if(info > 0)
   {
     fprintf(stderr, "Numerics, fc3d_FixedP failed, reached max. number of iterations without convergence. Residual = %f\n", dparam[SICONOS_DPARAM_RESIDU]);
     exit(EXIT_FAILURE);

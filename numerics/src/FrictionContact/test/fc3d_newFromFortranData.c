@@ -59,7 +59,7 @@ int main(void)
   free(M->index1_data);
   free(M->index2_data);
   free(M);
-   SBCM_free_3x3(MC);
+  SBCM_free_3x3(MC);
   free(MC);
   free(FC);
 

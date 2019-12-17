@@ -54,73 +54,79 @@ double search_Armijo_standalone(int n, double* theta, double preRHS, search_data
   preRHS *= aep->gamma;
 
   int success = 1;
-  while (alpha >= ls_data->alpha_min)
+  while(alpha >= ls_data->alpha_min)
   {
     DEBUG_PRINTF("search_Armijo :: alpha %g, ls_data->alpha_min %g \n", alpha, ls_data->alpha_min);
 
-     // desc_dir contains the direction d
-     cblas_dcopy(n, z, 1, zc, 1);
-     cblas_daxpy(n, alpha, desc_dir, 1, zc, 1);     //  z + alpha*d --> z
-     if (arcsearch)
-     {
-       project_on_set(n, zc, set);
-       /* we use F as a work vector here */
-       cblas_dcopy(n, z, 1, F, 1);
-       cblas_daxpy(n, -1.0, zc, 1, F, 1); /* F = z(0) - z(alpha) */
-       /* warning desc_dir = -JacMerit !*/
-       double dotprod = cblas_ddot(n, desc_dir, 1, F, 1);
-       if (dotprod > 0.0)
-         RHS = ls_data->sigma*dotprod;
-       else
-         RHS = -alpha*ls_data->sigma*theta_ref;
-     }
-     else
-     {
-       RHS = alpha*preRHS;
-     }
+    // desc_dir contains the direction d
+    cblas_dcopy(n, z, 1, zc, 1);
+    cblas_daxpy(n, alpha, desc_dir, 1, zc, 1);     //  z + alpha*d --> z
+    if(arcsearch)
+    {
+      project_on_set(n, zc, set);
+      /* we use F as a work vector here */
+      cblas_dcopy(n, z, 1, F, 1);
+      cblas_daxpy(n, -1.0, zc, 1, F, 1); /* F = z(0) - z(alpha) */
+      /* warning desc_dir = -JacMerit !*/
+      double dotprod = cblas_ddot(n, desc_dir, 1, F, 1);
+      if(dotprod > 0.0)
+        RHS = ls_data->sigma*dotprod;
+      else
+        RHS = -alpha*ls_data->sigma*theta_ref;
+    }
+    else
+    {
+      RHS = alpha*preRHS;
+    }
 
-     // compute new F_merit
-     ls_data->compute_F(data, zc, F);
-     ls_data->compute_F_merit(data, zc, F, F_merit);
+    // compute new F_merit
+    ls_data->compute_F(data, zc, F);
+    ls_data->compute_F_merit(data, zc, F, F_merit);
 
-     DEBUG_PRINT("z ");
-     DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-         { DEBUG_PRINTF("% 2.2e ", zc[i]) }
-         DEBUG_PRINT("\n"));
- 
-     DEBUG_PRINT("F ");
-     DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-         { DEBUG_PRINTF("% 2.2e ", F[i]) }
-         DEBUG_PRINT("\n"));
- 
-     DEBUG_PRINT("F_merit ");
-     DEBUG_EXPR_WE(for (unsigned int i = 0; i < n; ++i)
-         { DEBUG_PRINTF("% 2.2e ", F_merit[i]) }
-         DEBUG_PRINT("\n"));
- 
-     theta_iter = 0.5 * cblas_ddot(n, F_merit, 1, F_merit, 1);
- 
-     DEBUG_PRINTF("search_Armijo :: alpha %g\n", alpha);
-     DEBUG_PRINTF("search_Armijo :: theta_iter %.*e ; theta_ref %.*e  \n", DECIMAL_DIG, theta_iter, DECIMAL_DIG, theta_ref);
- 
-     // acceptance test
-     if (theta_iter <= theta_ref + RHS)
-     {
-       numerics_printf_verbose(2,"search_Armijo_standalone :: success alpha %g\n", alpha);
-       success = 0;
-       break;
-     }
-     else
-     {
-       // alpha too large, decrease it
-       alpha /= 2.0;
-     }
+    DEBUG_PRINT("z ");
+    DEBUG_EXPR_WE(for(unsigned int i = 0; i < n; ++i)
+  {
+    DEBUG_PRINTF("% 2.2e ", zc[i])
+    }
+    DEBUG_PRINT("\n"));
+
+    DEBUG_PRINT("F ");
+    DEBUG_EXPR_WE(for(unsigned int i = 0; i < n; ++i)
+  {
+    DEBUG_PRINTF("% 2.2e ", F[i])
+    }
+    DEBUG_PRINT("\n"));
+
+    DEBUG_PRINT("F_merit ");
+    DEBUG_EXPR_WE(for(unsigned int i = 0; i < n; ++i)
+  {
+    DEBUG_PRINTF("% 2.2e ", F_merit[i])
+    }
+    DEBUG_PRINT("\n"));
+
+    theta_iter = 0.5 * cblas_ddot(n, F_merit, 1, F_merit, 1);
+
+    DEBUG_PRINTF("search_Armijo :: alpha %g\n", alpha);
+    DEBUG_PRINTF("search_Armijo :: theta_iter %.*e ; theta_ref %.*e  \n", DECIMAL_DIG, theta_iter, DECIMAL_DIG, theta_ref);
+
+    // acceptance test
+    if(theta_iter <= theta_ref + RHS)
+    {
+      numerics_printf_verbose(2,"search_Armijo_standalone :: success alpha %g\n", alpha);
+      success = 0;
+      break;
+    }
+    else
+    {
+      // alpha too large, decrease it
+      alpha /= 2.0;
+    }
   }
-  if (success)
+  if(success)
     numerics_printf_verbose(2,"search_Armijo_standalone :: not successfull alpha %g\n", alpha);
-  
+
   *theta = theta_iter;
- 
+
   return alpha;
 }
 

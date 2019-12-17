@@ -45,7 +45,7 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3, problem->q, 1);
 
   /*****  Fixed point iterations *****/
   int iter = 0; /* Current iteration number */
@@ -57,10 +57,10 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
 
   double rho = 0.0;
 
-  if (dparam[SICONOS_FRICTION_3D_NSN_RHO] > 0.0)
+  if(dparam[SICONOS_FRICTION_3D_NSN_RHO] > 0.0)
   {
     rho = dparam[SICONOS_FRICTION_3D_NSN_RHO];
-    if (verbose > 0)
+    if(verbose > 0)
     {
       printf("--------------- FC3D - DeSaxce Fixed Point (DSFP) - Fixed stepsize with  rho = %14.7e \n", rho);
     }
@@ -74,47 +74,47 @@ void fc3d_DeSaxceFixedPoint(FrictionContactProblem* problem, double *reaction, d
   double alpha = 1.0;
   double beta = 1.0;
 
-    while ((iter < itermax) && (hasNotConverged > 0))
+  while((iter < itermax) && (hasNotConverged > 0))
+  {
+    ++iter;
+    /* velocitytmp <- q  */
+    cblas_dcopy(n, q, 1, velocitytmp, 1);
+
+    /* velocitytmp <- q + M * reaction  */
+    beta = 1.0;
+    NM_gemv(alpha, M, reaction, beta, velocitytmp);
+
+    /* projection for each contact */
+    for(contact = 0 ; contact < nc ; ++contact)
     {
-      ++iter;
-      /* velocitytmp <- q  */
-      cblas_dcopy(n , q , 1 , velocitytmp, 1);
-
-      /* velocitytmp <- q + M * reaction  */
-      beta = 1.0;
-      NM_gemv(alpha, M, reaction, beta, velocitytmp);
-
-      /* projection for each contact */
-      for (contact = 0 ; contact < nc ; ++contact)
-      {
-        int pos = contact * nLocal;
-        double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 2]);
-        reaction[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
-        reaction[pos + 1] -= rho * velocitytmp[pos + 1];
-        reaction[pos + 2] -= rho * velocitytmp[pos + 2];
-        projectionOnCone(&reaction[pos], mu[contact]);
-      }
-
-      /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
-
-      if (options->callback)
-      {
-        options->callback->collectStatsIteration(options->callback->env,
-                                        nc * 3, reaction, velocity,
-                                        error, NULL);
+      int pos = contact * nLocal;
+      double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 2]);
+      reaction[pos] -= rho * (velocitytmp[pos] + mu[contact] * normUT);
+      reaction[pos + 1] -= rho * velocitytmp[pos + 1];
+      reaction[pos + 2] -= rho * velocitytmp[pos + 2];
+      projectionOnCone(&reaction[pos], mu[contact]);
     }
 
-      if (verbose > 0)
-        printf("--------------- FC3D - DeSaxce Fixed Point (DSFP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+    /* **** Criterium convergence **** */
+    fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
 
-      if (error < tolerance) hasNotConverged = 0;
-      *info = hasNotConverged;
+    if(options->callback)
+    {
+      options->callback->collectStatsIteration(options->callback->env,
+          nc * 3, reaction, velocity,
+          error, NULL);
     }
 
+    if(verbose > 0)
+      printf("--------------- FC3D - DeSaxce Fixed Point (DSFP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+
+    if(error < tolerance) hasNotConverged = 0;
+    *info = hasNotConverged;
+  }
 
 
-  if (verbose > 0)
+
+  if(verbose > 0)
     printf("--------------- FC3D - DeSaxce Fixed point (DSFP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   dparam[SICONOS_DPARAM_RESIDU] = error;

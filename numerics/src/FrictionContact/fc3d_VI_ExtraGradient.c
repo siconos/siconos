@@ -51,7 +51,7 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, do
 
 
   /*Set the norm of the VI to the norm of problem->q  */
-  vi->normVI= cblas_dnrm2(n , problem->q , 1);
+  vi->normVI= cblas_dnrm2(n, problem->q, 1);
   vi->istheNormVIset=1;
 
   fc3d_as_vi->vi = vi;
@@ -61,10 +61,10 @@ void fc3d_VI_ExtraGradient(FrictionContactProblem* problem, double *reaction, do
 
 
   /* **** Criterium convergence **** */
-  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
-  fc3d_compute_error(problem, reaction , velocity, options->dparam[SICONOS_DPARAM_TOL], options, norm_q, &error);
+  double norm_q = cblas_dnrm2(nc*3, problem->q, 1);
+  fc3d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options, norm_q, &error);
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
     printf("--------------- FC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n",
            options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);

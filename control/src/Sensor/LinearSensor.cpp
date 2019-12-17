@@ -40,7 +40,7 @@ void LinearSensor::initialize(const NonSmoothDynamicalSystem& nsds)
   ControlSensor::initialize(nsds);
 
   // consistency checks
-  if (!_matC)
+  if(!_matC)
   {
     RuntimeException::selfThrow("LinearSensor::initialize - no C matrix was given");
   }
@@ -50,14 +50,14 @@ void LinearSensor::initialize(const NonSmoothDynamicalSystem& nsds)
   // What happen here if we have more than one DS ?
   // This may be unlikely to happen.
   //  _DS = _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0);
-  if (colC != _DS->n())
+  if(colC != _DS->n())
   {
     RuntimeException::selfThrow(" LinearSensor::initialize - The number of column of the C matrix must be equal to the length of x");
   }
-  if (_matD)
+  if(_matD)
   {
     unsigned int rowD = _matD->size(0);
-    if (rowC != rowD)
+    if(rowC != rowD)
     {
       RuntimeException::selfThrow("C and D must have the same number of rows");
     }
@@ -76,12 +76,12 @@ void LinearSensor::capture()
 {
   *_storedY = prod(*_matC, *_DSx);
   // untested
-  if (_matD)
+  if(_matD)
 //    *_storedY += prod(*_matD, *_DS->z());
-  //  _dataPlot->setSubRow(_k, 1, _storedY);
-  _k++;
+    //  _dataPlot->setSubRow(_k, 1, _storedY);
+    _k++;
 
-  if (_delay > 0)
+  if(_delay > 0)
   {
     _bufferY.push_back(_storedY);
   }

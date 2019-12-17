@@ -33,10 +33,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   int current = 0;
   int d;
   // ========== FC3D_Example1_SBM.dat ========
-  d = 0; 
+  d = 0;
   // rho = -1
   collection[current].filename = data_collection[d];
-  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);    
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = -1.;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
@@ -44,17 +44,17 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   // rho = 1
   collection[current].filename = data_collection[d];
-  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);    
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = 1.;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
   current++;
 
   // ========== Confeti-ex13-4contact-Fc3D-SBM.dat ========
-  d = 2; 
+  d = 2;
   // EG, rho = -3e-3
   collection[current].filename = data_collection[d];
-  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);    
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = -3.e-3;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
@@ -64,7 +64,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   // EG, rho = -1
   collection[current].filename = data_collection[d];
-  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);    
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_EG);
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   collection[current].options->dparam[SICONOS_VI_DPARAM_RHO] = -1;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
@@ -73,17 +73,17 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   // HP
   collection[current].filename = data_collection[d];
-  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_HP);    
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_HP);
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   // expected to fail
   collection[current].will_fail = 1;
   current++;
-  
+
   // ========== Capsules-i101-404.dat ========
-  d = 6; 
+  d = 6;
   collection[current].filename = data_collection[d];
-  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_VI_FPP);    
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_VI_FPP);
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000000;
   collection[current].options->iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 1;
@@ -92,7 +92,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   current++;
 
   collection[current].filename = data_collection[d];
-  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_FPP);    
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_FPP);
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
   // expected to fail
@@ -101,7 +101,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
 
   collection[current].filename = data_collection[d];
-  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_VI_EG);    
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_VI_EG);
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
   collection[current].options->iparam[SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 1;

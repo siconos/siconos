@@ -63,17 +63,17 @@ void LagrangianCompliantLinearTIR::checkSize(Interaction& inter)
   unsigned int sizeY = inter.dimension();
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  if (!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
+  if(!(_jachq) || _jachq->size(1) !=  inter.getSizeOfDS() ||  _jachq->size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianCompliantLinearTIR::checkSize inconsistent sizes between H matrix and the interaction.");
 
-  if ((_jachlambda) && (_jachlambda->size(0) != sizeY || _jachlambda->size(1) != sizeY))
+  if((_jachlambda) && (_jachlambda->size(0) != sizeY || _jachlambda->size(1) != sizeY))
     RuntimeException::selfThrow("LagrangianCompliantLinearTIR::checkSize inconsistent sizes between D matrix and the interaction.");
 
-  if ((_e) && _e->size() != sizeY)
+  if((_e) && _e->size() != sizeY)
     RuntimeException::selfThrow("LagrangianCompliantLinearTIR::checkSize inconsistent sizes between e vector and the dimension of the interaction.");
 
   unsigned int sizeZ = DSlink[LagrangianR::z]->size();
-  if ((_F) && (
+  if((_F) && (
         _F->size(0) != sizeZ || _F->size(1) != sizeZ))
     RuntimeException::selfThrow("LagrangianCompliantLinearTIR::checkSize inconsistent sizes between F matrix and the interaction.");
 
@@ -98,11 +98,11 @@ void LagrangianCompliantLinearTIR::computeOutput(double time, Interaction& inter
   prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
   prod(*_jachlambda, lambda, y, false);
 
-  if (derivativeNumber == 0)
+  if(derivativeNumber == 0)
   {
-    if (_e)
+    if(_e)
       y += *_e;
-    if (_F)
+    if(_F)
       prod(*_F, *DSlink[LagrangianR::z], y, false);
   }
 
@@ -113,22 +113,22 @@ void LagrangianCompliantLinearTIR::display() const
   LagrangianR::display();
   std::cout << "===== Lagrangian Linear Relation display ===== " <<std::endl;
   std::cout << " C: " <<std::endl;
-  if (_jachq)
+  if(_jachq)
     _jachq->display();
   else
     std::cout << " -> NULL " <<std::endl;
   std::cout << " e: " <<std::endl;
-  if (_e)
+  if(_e)
     _e->display();
   else
     std::cout << " -> NULL " <<std::endl;
   std::cout << " D: " <<std::endl;
-  if (_jachlambda)
+  if(_jachlambda)
     _jachlambda->display();
   else
     std::cout << " -> NULL " <<std::endl;
   std::cout << " F: " <<std::endl;
-  if (_F)
+  if(_F)
     _F->display();
   else
     std::cout << " -> NULL " <<std::endl;

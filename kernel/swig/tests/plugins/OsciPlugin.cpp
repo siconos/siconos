@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifdef _WIN32 
-#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
-#else 
-#define SICONOS_EXPORT extern "C" 
-#endif  
+#ifdef _WIN32
+#define SICONOS_EXPORT extern "C" __declspec(dllexport)
+#else
+#define SICONOS_EXPORT extern "C"
+#endif
 #include <math.h>
 const double omega = 1.4;
 const double g = 10;

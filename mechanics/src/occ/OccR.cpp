@@ -21,7 +21,7 @@ OccR::OccR(const ContactPoint& contact1,
   _offset1(0.),
   _offset2(0.)
 {
-  switch (Type::value(distance_calculator))
+  switch(Type::value(distance_calculator))
   {
   case Type::OccDistanceType:
     this->_geometer = ask<WhichGeometer<OccDistanceType> >(contact1.contactShape());

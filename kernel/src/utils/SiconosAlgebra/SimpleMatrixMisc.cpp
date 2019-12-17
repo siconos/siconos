@@ -52,7 +52,7 @@ double SimpleMatrix::normInf() const
     return 0;
   else if(_num == IDENTITY)
     return 1;
-  
+
   RuntimeException::selfThrow("SimpleMatrix::normInf: Matrix type not supported");
   return std::numeric_limits<double>::infinity();
 }

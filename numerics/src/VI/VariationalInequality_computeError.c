@@ -31,7 +31,7 @@
 
 int variationalInequality_computeError(
   VariationalInequality* problem,
-  double *z , double *w, double tolerance,
+  double *z, double *w, double tolerance,
   SolverOptions * options, double * error)
 {
 
@@ -39,27 +39,27 @@ int variationalInequality_computeError(
   assert(z);
   assert(w);
   assert(error);
-  
+
   int incx = 1;
   int n = problem->size;
 
   *error = 0.;
-  if (!options->dWork)
+  if(!options->dWork)
   {
     options->dWork = (double*)calloc(2*n,sizeof(double));
   }
   double *ztmp =  options->dWork;
   double *wtmp =  &(options->dWork[n]);
 
-  
-  if (!problem->istheNormVIset)
+
+  if(!problem->istheNormVIset)
   {
-    for (int i=0;i<n;i++)
+    for(int i=0; i<n; i++)
     {
       ztmp[i]=0.0 ;
     }
     problem->F(problem,n,ztmp,w);
-    problem->normVI= cblas_dnrm2(n , w , 1);
+    problem->normVI= cblas_dnrm2(n, w, 1);
     DEBUG_PRINTF("problem->normVI = %12.8e\n", problem->normVI);
     problem->istheNormVIset=1;
   }
@@ -68,23 +68,23 @@ int variationalInequality_computeError(
   DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
 
   problem->F(problem,n,z,w);
-  
-  cblas_dcopy(n , z , 1 , ztmp, 1);
-  cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
+
+  cblas_dcopy(n, z, 1, ztmp, 1);
+  cblas_daxpy(n, -1.0, w, 1, ztmp, 1) ;
 
   problem->ProjectionOnX(problem,ztmp,wtmp);
 
-  cblas_daxpy(n, -1.0, z , 1, wtmp , 1) ;
-  *error = cblas_dnrm2(n , wtmp , incx);
+  cblas_daxpy(n, -1.0, z, 1, wtmp, 1) ;
+  *error = cblas_dnrm2(n, wtmp, incx);
 
   /* Computes error */
-  if (fabs(norm_q) > DBL_EPSILON)
+  if(fabs(norm_q) > DBL_EPSILON)
     *error /= norm_q;
 
   DEBUG_PRINTF("error = %e\n",*error);
-  if (*error > tolerance)
+  if(*error > tolerance)
   {
-    if (verbose > 1)
+    if(verbose > 1)
       printf(" Numerics - variationalInequality_compute_error: error = %g > tolerance = %g.\n",
              *error, tolerance);
     return 1;
@@ -109,14 +109,14 @@ int variationalInequality_compute_error_box(
   double err = 0;
 
   // compute componentwise \Pi_box(x-F(x)) - x
-  for (int i = 0; i < problem->size; ++i)
+  for(int i = 0; i < problem->size; ++i)
   {
     diff = x[i] - F[i];
-    if (diff < lb[i])
+    if(diff < lb[i])
     {
       diff = lb[i] - x[i];
     }
-    else if (diff > ub[i])
+    else if(diff > ub[i])
     {
       diff = ub[i] - x[i];
     }
@@ -128,9 +128,9 @@ int variationalInequality_compute_error_box(
   }
   error[0] = sqrt(err);
 
-  if (error[0] > tolerance)
+  if(error[0] > tolerance)
   {
-    if (verbose > 1)
+    if(verbose > 1)
       printf(" Numerics - variationalInequality_compute_error: error = %g > tolerance = %g.\n", *error, tolerance);
     return 1;
   }
@@ -149,7 +149,7 @@ int variationalInequality_computeError_wait(
   assert(z);
   assert(w);
   assert(error);
-  
+
   int incx = 1;
 
   int n = problem->size;
@@ -160,23 +160,23 @@ int variationalInequality_computeError_wait(
 
   problem->F(problem,ztmp,w);
   double norm_q = cblas_dnrm2(n , w , incx);
-  
-  
+
+
   cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
-  
+
   problem->ProjectionOnX(problem,ztmp,w);
-  
+
   cblas_dcopy(n , z , 1 , ztmp, 1);
 
   cblas_daxpy(n, -1.0, w , 1, ztmp , 1) ;
 
   *error = cblas_dnrm2(n , ztmp , incx);
   free(ztmp);
-  
+
   problem->F(problem,z,w);
 
 
-  
+
   // Computes error
   *error = *error / (norm_q + 1.0);
   if (*error > tolerance)

@@ -39,13 +39,13 @@ LinearSMCOT2::~LinearSMCOT2()
 
 void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation & s)
 {
-  if (!_Csurface)
+  if(!_Csurface)
   {
     RuntimeException::selfThrow("CommonSMC::initialize - you have to set either _Csurface or h(.) before initializing the Actuator");
   }
   else
   {
-    if (_Csurface && !_u)
+    if(_Csurface && !_u)
       _u.reset(new SiconosVector(_Csurface->size(0), 0));
   }
 
@@ -56,7 +56,7 @@ void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simula
   SP::DynamicalSystem DS = _sensor->getDS();
   Type::Siconos dsType;
   dsType = Type::value(*DS);
-  if (dsType == Type::FirstOrderLinearDS)
+  if(dsType == Type::FirstOrderLinearDS)
   {
     FirstOrderLinearDS& fods = static_cast<FirstOrderLinearDS&>(*DS);
     SP::SiconosVector x0(new SiconosVector(*fods.x0()));
@@ -75,7 +75,7 @@ void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simula
       _DSPred->setb(*fods.b());
     }
   }
-  else if (dsType == Type::FirstOrderLinearTIDS)
+  else if(dsType == Type::FirstOrderLinearTIDS)
   {
     _DSPhi.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
     _DSPred.reset(new FirstOrderLinearTIDS(*(std11::static_pointer_cast<FirstOrderLinearTIDS>(DS))));
@@ -140,7 +140,7 @@ void LinearSMCOT2::actuate()
 
   // We change the values of the state each time, so we need to change istate to 1
   // See LsodarOSI.cpp for the meaning of istate
-  if (_indx > 0)
+  if(_indx > 0)
   {
     _simulPhi->setIstate(1);
     _simulPred->setIstate(1);
@@ -168,7 +168,7 @@ void LinearSMCOT2::actuate()
 }
 
 void LinearSMCOT2::setTimeDiscretisation(const TimeDiscretisation& td)
-{ 
+{
   _tdPhi.reset(new TimeDiscretisation(td));
   _tdPred.reset(new TimeDiscretisation(td));
 }

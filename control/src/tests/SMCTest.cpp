@@ -79,7 +79,7 @@ void SMCTest::initTwisting()
   _DS.reset(new FirstOrderLinearTIDS(_x0, _A));
   _sensor.reset(new LinearSensor(_DS, _C));
   _itw.reset(new Twisting(_sensor, 300., _beta, _h));
-  SP::SimpleMatrix eye(new SimpleMatrix(2 , 2));
+  SP::SimpleMatrix eye(new SimpleMatrix(2, 2));
   eye->eye();
   _itw->setCsurface(eye);
 }
@@ -105,7 +105,7 @@ void SMCTest::test_iSMC_ZOH()
   bool test = !((error=ioMatrix::compareRefFile(data, "iSMC.ref", _tol)) >= 0.0
                 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
 void SMCTest::test_iSMC_Lsodar()
@@ -124,7 +124,7 @@ void SMCTest::test_iSMC_Lsodar()
   bool test = !((error=ioMatrix::compareRefFile(data, "iSMC.ref", _tol)) >= 0.0
                 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
 void SMCTest::test_eSMC_ZOH()
@@ -143,7 +143,7 @@ void SMCTest::test_eSMC_ZOH()
   bool test = !((error=ioMatrix::compareRefFile(data, "eSMC.ref", _tol)) >= 0.0
                 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
 void SMCTest::test_eSMC_Lsodar()
@@ -162,7 +162,7 @@ void SMCTest::test_eSMC_Lsodar()
   bool test = !((error=ioMatrix::compareRefFile(data, "eSMC.ref", _tol)) >= 0.0
                 && error > _tol);
   std::cout << "------- Integration done -------" << test <<std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
 #ifdef HAS_EXTREME_POINT_ALGO

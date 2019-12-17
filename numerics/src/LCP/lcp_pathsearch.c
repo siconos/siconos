@@ -34,7 +34,7 @@
 #include "SiconosBlas.h"              // for cblas_dcopy, cblas_daxpy
 
 /* This function is here to test the pivotal code of the path search */
-void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 
   assert(problem);
@@ -82,28 +82,30 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
   options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_PATHSEARCH;
 
   DEBUG_PRINT("x_plus r q\n");
-  DEBUG_EXPR_WE(for (unsigned i = 0; i < n; ++i)
-      { DEBUG_PRINTF("%e %e %e\n", x_plus[i], r[i], problem->q[i]) });
+  DEBUG_EXPR_WE(for(unsigned i = 0; i < n; ++i)
+{
+  DEBUG_PRINTF("%e %e %e\n", x_plus[i], r[i], problem->q[i])
+  });
 
   lcp_pivot_covering_vector(problem, x_plus, w, info, options, r);
 
-  switch (*info)
+  switch(*info)
   {
-    case LCP_PIVOT_SUCCESS:
-      DEBUG_PRINT("lcp_pathsearch :: path search procedure was successful!\n");
-      break;
-    case LCP_PIVOT_RAY_TERMINATION:
-      DEBUG_PRINT("lcp_pathsearch :: ray termination, let's fastened your seat belt!\n");
-      break;
-    case LCP_PATHSEARCH_NON_ENTERING_T:
-      DEBUG_PRINT("lcp_pathsearch :: the variable t could not enter !\n");
-      break;
-    case LCP_PIVOT_NUL:
-    case LCP_PATHSEARCH_LEAVING_T:
-      printf("lcp_pathsearch :: kaboom, kaboom still more work needs to be done\n");
-      break;
-    default:
-      printf("lcp_pathsearch :: unknown code returned by the path search\n");
+  case LCP_PIVOT_SUCCESS:
+    DEBUG_PRINT("lcp_pathsearch :: path search procedure was successful!\n");
+    break;
+  case LCP_PIVOT_RAY_TERMINATION:
+    DEBUG_PRINT("lcp_pathsearch :: ray termination, let's fastened your seat belt!\n");
+    break;
+  case LCP_PATHSEARCH_NON_ENTERING_T:
+    DEBUG_PRINT("lcp_pathsearch :: the variable t could not enter !\n");
+    break;
+  case LCP_PIVOT_NUL:
+  case LCP_PATHSEARCH_LEAVING_T:
+    printf("lcp_pathsearch :: kaboom, kaboom still more work needs to be done\n");
+    break;
+  default:
+    printf("lcp_pathsearch :: unknown code returned by the path search\n");
   }
 
   /* recover solution */

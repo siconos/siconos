@@ -56,7 +56,7 @@ static inline double solve_lu(NumericsMatrix* M, unsigned i, rhs)
 }
 
 GE_API int GE_CALLCONV
-gefunc (int *icntr, double *x, double *func, double *d, msgcb_t msgcb)
+gefunc(int *icntr, double *x, double *func, double *d, msgcb_t msgcb)
 {
 
   assert(GFCP && "No GlobalFrictionContactProblem has been set!");
@@ -69,30 +69,34 @@ gefunc (int *icntr, double *x, double *func, double *d, msgcb_t msgcb)
   double t2, dt2dh;
   double h, cv, dfdh, dfdcv, f;
 
-  if (icntr[I_Mode] == DOINIT) {
+  if(icntr[I_Mode] == DOINIT)
+  {
     /*
      * Initialization Mode:
      * Write a "finger print" to the status file so errors in the DLL
      * can be detected more easily. This should be done before anything
      * can go wrong. Also write a line to the log just to show it.
      */
-    MSGCB (LOGFILE | STAFILE,"");
-    MSGCB (LOGFILE | STAFILE,"--- GEFUNC in ex4xc_cb.c is being initialized.");
+    MSGCB(LOGFILE | STAFILE,"");
+    MSGCB(LOGFILE | STAFILE,"--- GEFUNC in ex4xc_cb.c is being initialized.");
 
     /*  Test the equation count and return 2 if bogus */
-    if (icntr[I_Neq] != 1) {
-      MSGCB (LOGFILE | STAFILE,
-             "--- Model has the wrong number of external equations.");
+    if(icntr[I_Neq] != 1)
+    {
+      MSGCB(LOGFILE | STAFILE,
+            "--- Model has the wrong number of external equations.");
       return BOGUS_EXTEQ;
     }
-    if (2 != icntr[I_Nz]) {
-      MSGCB (LOGFILE | STAFILE,
-             "--- The external equation should be fully dense.");
+    if(2 != icntr[I_Nz])
+    {
+      MSGCB(LOGFILE | STAFILE,
+            "--- The external equation should be fully dense.");
       return BOGUS_EXTEQ;
     }
-    if (2 != icntr[I_Nvar]) {
-      MSGCB (LOGFILE | STAFILE,
-             "--- The external equation should have 2 variables.");
+    if(2 != icntr[I_Nvar])
+    {
+      MSGCB(LOGFILE | STAFILE,
+            "--- The external equation should have 2 variables.");
       return BOGUS_EXTEQ;
     }
     /* Define number of constant derivatives    */
@@ -102,21 +106,25 @@ gefunc (int *icntr, double *x, double *func, double *d, msgcb_t msgcb)
     NM_setup(GFCP->H);
     return 0;
   } /* initialization mode */
-  else if ( icntr[I_Mode] == DOCONSTDERIV ) {
+  else if(icntr[I_Mode] == DOCONSTDERIV)
+  {
     assert(0 && "Why are we here? icntr[I_Mode] == DOCONSTDERIV ");
   }
-  else if ( icntr[I_Mode] == DOTERM ) {
+  else if(icntr[I_Mode] == DOTERM)
+  {
     /* Termination mode: free allocated storage */
 
     return 0;
   } /* termination mode */
-  else if ( icntr[I_Mode] == DOEVAL ) {
+  else if(icntr[I_Mode] == DOEVAL)
+  {
     /*
      * Function index: there is only one equation here,
      * but we check the equation number just to show the principle.
      */
-    if (icntr[I_Eqno] != 1) {
-      MSGCB (STAFILE | LOGFILE," ** Eqno has unexpected value.");
+    if(icntr[I_Eqno] != 1)
+    {
+      MSGCB(STAFILE | LOGFILE," ** Eqno has unexpected value.");
       return BOGUS_EXTEQ;
     }
 
@@ -124,7 +132,7 @@ gefunc (int *icntr, double *x, double *func, double *d, msgcb_t msgcb)
     double* rhs = ((GFC3D_Gams*) GFCP->env)->rhs;
     /* set rhs = Hr + f */
     cblas_dcopy(n, func, 1, rhs, 1);
-    
+
 
 
     /* solve Mv = Hr + f = rhs */
@@ -134,22 +142,25 @@ gefunc (int *icntr, double *x, double *func, double *d, msgcb_t msgcb)
     cv = x[1];
 
 #if defined(SOME_DEBUG_STUFF)
-    sprintf (msgBuf, "              dh = %g, dcv = %g, f = %f",
-             dfdh, dfdcv, f);
-    MSGCB (STAFILE | LOGFILE, msgBuf);
+    sprintf(msgBuf, "              dh = %g, dcv = %g, f = %f",
+            dfdh, dfdcv, f);
+    MSGCB(STAFILE | LOGFILE, msgBuf);
 #endif
 
-    if (icntr[I_Dofunc]) {
+    if(icntr[I_Dofunc])
+    {
       *func = f;
     }
 
-    if (icntr[I_Dodrv]) {
+    if(icntr[I_Dodrv])
+    {
       assert(0 && "Computing derivative is not implemented yet ...!");
     }
     return 0;
   } /* Function and Derivative Evaluation Mode */
-  else {
-    MSGCB (STAFILE | LOGFILE, " ** Mode not defined.");
+  else
+  {
+    MSGCB(STAFILE | LOGFILE, " ** Mode not defined.");
     return 2;
   }
 } /* gefunc */

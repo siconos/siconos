@@ -36,18 +36,18 @@ const char* const   SICONOS_RELAY_LEMKE_STR = "RELAY_LEMKE";
 const char* const   SICONOS_RELAY_AVI_CAOFERRIS_STR = "RELAY_AVI_CAOFERRIS";
 const char* const   SICONOS_RELAY_AVI_CAOFERRIS_TEST_STR = "test version of the solver by Cao & Ferris; DO NOT USE!";
 
-int relay_driver(RelayProblem* problem, double *z , double *w,
+int relay_driver(RelayProblem* problem, double *z, double *w,
                  SolverOptions* options)
 {
 
 
   //Relay_display(problem);
 
-  if (options == NULL)
+  if(options == NULL)
     numerics_error("Relay_driver", "null input for solver and/or global options");
 
   /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
+  if(problem == NULL || z == NULL || w == NULL)
     numerics_error("Relay_driver", "null input for RelayProblem and/or unknowns (z,w)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
@@ -58,7 +58,7 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   int storageType = problem->M->storageType;
 
   /* Sparse Block Storage */
-  if (storageType == 1)
+  if(storageType == 1)
   {
     numerics_error("Relay_driver", "not yet implemented for sparse storage.");
   }
@@ -67,23 +67,23 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
   /*************************************************
    *  2 - Call specific solver (if no trivial sol.)
    *************************************************/
-  if (verbose > 0)
+  if(verbose > 0)
     solver_options_print(options);
 
   /* Solver name */
   //const char* const  name = options->solverName;
 
-  if (verbose == 1)
+  if(verbose == 1)
     printf(" ========================== Call %s solver for Relayproblem ==========================\n", solver_options_id_to_name(options->solverId));
 
-  switch (options->solverId)
+  switch(options->solverId)
   {
   case SICONOS_RELAY_PGS:
   {
-    relay_pgs(problem, z , w , &info , options);
+    relay_pgs(problem, z, w, &info, options);
     break;
   }
- case SICONOS_RELAY_LEMKE:
+  case SICONOS_RELAY_LEMKE:
   {
 
 #ifdef DEBUG_RELAY
@@ -93,38 +93,38 @@ int relay_driver(RelayProblem* problem, double *z , double *w,
     relay_printInFile(problem, FP);
     fclose(FP);
 #endif
-    relay_lexicolemke(problem, z , w , &info , options);
+    relay_lexicolemke(problem, z, w, &info, options);
     break;
   }
   case SICONOS_RELAY_ENUM:
   {
-    relay_enum(problem, z , w , &info , options);
+    relay_enum(problem, z, w, &info, options);
     break;
   }
   case SICONOS_RELAY_PATH:
   {
-    relay_path(problem, z , w , &info , options);
+    relay_path(problem, z, w, &info, options);
     break;
   }
   case SICONOS_RELAY_AVI_CAOFERRIS:
   {
-    relay_avi_caoferris(problem, z , w , &info , options);
+    relay_avi_caoferris(problem, z, w, &info, options);
     break;
   }
   case SICONOS_RELAY_AVI_CAOFERRIS_TEST:
   {
-    relay_avi_caoferris_test(problem, z , w , &info , options);
+    relay_avi_caoferris_test(problem, z, w, &info, options);
     break;
   }
-  /* /\*error *\/ */
-  // what should we do for case like SICONOS_RELAY_LEMKE (id) when the real solver is SICONOS_LCP_LEMKE ? Add case above ? No error ?
-  /* default: */
-  /* { */
-  /*   fprintf(stderr, "Relay_driver error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId)); */
-  /*   exit(EXIT_FAILURE); */
-  /* } */
+    /* /\*error *\/ */
+    // what should we do for case like SICONOS_RELAY_LEMKE (id) when the real solver is SICONOS_LCP_LEMKE ? Add case above ? No error ?
+    /* default: */
+    /* { */
+    /*   fprintf(stderr, "Relay_driver error: unknown solver name: %s\n", solver_options_id_to_name(options->solverId)); */
+    /*   exit(EXIT_FAILURE); */
+    /* } */
   }
-  if (options[0].filterOn > 0)
+  if(options[0].filterOn > 0)
     info = relay_compute_error(problem, z, w, options[0].dparam[SICONOS_DPARAM_TOL], &(options[0].dparam[SICONOS_DPARAM_RESIDU]));
 
   return info;

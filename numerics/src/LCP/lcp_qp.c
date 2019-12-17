@@ -25,7 +25,7 @@
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "sanitizer.h"                     // for MSAN_INIT_VAR
 
-void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* size of the LCP */
   int n = problem->size;
@@ -59,7 +59,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   /*/mnn :      must be equal to m + n + n. */
   mnn = m + n + n;
 
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
     z[i] = 0.0;
     w[i] = 0.0;
@@ -70,13 +70,13 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   // Q= M;*/
   double * vec = problem->M->matrix0;
   Q = (double *)malloc(nmax * nmax * sizeof(double));
-  for (j = 0; j < n; j++)
+  for(j = 0; j < n; j++)
   {
-    for (i = 0; i < n; i++) Q[j * nmax + i] = vec[j * n + i];
+    for(i = 0; i < n; i++) Q[j * nmax + i] = vec[j * n + i];
   }
 
   p = (double *)malloc(nmax * sizeof(double));
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
     p[i] = problem->q[i] ;
 
   /* / Creation of the data matrix of the linear constraints, A and  the constant data of the linear constraints b*/
@@ -86,7 +86,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
 
   /* Creation of the the lower and upper bounds for the variables.*/
   xu = (double *)malloc(n * sizeof(double));
-  for (i = 0; i < n; i++) xu[i] = 1e32 ;
+  for(i = 0; i < n; i++) xu[i] = 1e32 ;
   xl = (double *)calloc(n, sizeof(double));
 
   /*  on return, lambda contains the lagrange multipliers.*/
@@ -121,7 +121,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   //for (i=0;i<mnn;i++) printf("lambda[%i] = %g\n",i,lambda[i]);
 
   // getting the multiplier due to the lower bounds*/
-  for (i = 0; i < n; i++) w[i] = lambda[m + i] ;
+  for(i = 0; i < n; i++) w[i] = lambda[m + i] ;
 
   /*/ memory freeing*/
   free(A);

@@ -57,13 +57,13 @@ void FirstOrderType1R::initialize(Interaction& inter)
   unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
 
   VectorOfSMatrices& relationMat = inter.relationMatrices();
-  if (!_C)
+  if(!_C)
     relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeDS));
-  if (!_D)
+  if(!_D)
     relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
-  if (!_F)
+  if(!_F)
     relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
-  if (!_B)
+  if(!_B)
     relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeDS, sizeY));
 }
 
@@ -75,7 +75,7 @@ void FirstOrderType1R::checkSize(Interaction& inter)
 void FirstOrderType1R::computeh(double time, SiconosVector& x, SiconosVector& z, SiconosVector& y)
 {
   assert(_pluginh && "FirstOrderType1R::computeOutput() is not linked to a plugin function");
-  
+
   ((Type1Ptr)(_pluginh->fPtr))(x.size(), &(x)(0), y.size(), &(y)(0), z.size(), &(z)(0));
 
 }
@@ -98,7 +98,7 @@ void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned i
   SiconosVector x_vec, z_vec;
   x_vec.initFromBlock(x); // copy !
   z_vec.initFromBlock(z); // copy !
-  
+
   computeh(time, x_vec, z_vec, y);
 
   *DSlink[FirstOrderR::z] = z_vec;
@@ -136,7 +136,7 @@ void FirstOrderType1R::computeJachx(double time, SiconosVector& x, SiconosVector
 
 void FirstOrderType1R::computeJachz(double time, SiconosVector& x, SiconosVector& z, SimpleMatrix& F)
 {
-  if (_F && _pluginJachz && _pluginJachz->fPtr)
+  if(_F && _pluginJachz && _pluginJachz->fPtr)
     ((Type1Ptr)(_pluginJachz->fPtr))(x.size(), &(x)(0), F.size(0), F.getArray(), z.size(), &(z)(0));
 
 }
@@ -155,11 +155,11 @@ void FirstOrderType1R::computeJach(double time, Interaction& inter)
 
   *_vec_x = *DSlink[FirstOrderR::x];
   *_vec_z = *DSlink[FirstOrderR::z];
-  if (!_C)
+  if(!_C)
   {
     computeJachx(time, *_vec_x, *_vec_z, *relationMat[FirstOrderR::mat_C]);
   }
-  if (!_F)
+  if(!_F)
   {
     computeJachz(time, *_vec_x, *_vec_z, *relationMat[FirstOrderR::mat_F]);
   }
@@ -172,7 +172,7 @@ void FirstOrderType1R::computeJacg(double time, Interaction& inter)
   VectorOfSMatrices& relationMat = inter.relationMatrices();
 
   *_vec_z = *DSlink[FirstOrderR::z];
-  if (!_B)
+  if(!_B)
   {
     computeJacglambda(time, *inter.lambda(0), *_vec_z, *relationMat[FirstOrderR::mat_B]);
   }

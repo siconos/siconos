@@ -32,7 +32,7 @@
 #include "SiconosLapack.h"           // for DTRTRS, DPOTRF, lapack_int, LA_UP, LA_NONUNIT, LA_NOTRANS
 
 
-void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options)
+void fc2d_latin(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
 {
   int nc = problem->numberOfContacts;
   assert(nc>0);
@@ -126,11 +126,11 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 
 
 
-  for (i = 0; i < n * n; i++)
+  for(i = 0; i < n * n; i++)
   {
-    if (i < nc * nc)
+    if(i < nc * nc)
     {
-      if (i < n)
+      if(i < n)
       {
         reaction[i]     = 0.;
         velocity[i]     = 0.;
@@ -139,13 +139,13 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
   }
 
 
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
 
-    if (fabs(vec[i * n + i]) < DBL_EPSILON)
+    if(fabs(vec[i * n + i]) < DBL_EPSILON)
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
         printf("\n Warning nul diagonal term in M matrix \n");
 
       free(k);
@@ -190,16 +190,16 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
   }
 
 
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     ddln[i] = vectnt[2 * i];
-    if (i != 0) ddlt[i] = vectnt[2 * i - 1];
+    if(i != 0) ddlt[i] = vectnt[2 * i - 1];
     else ddlt[i] = 0;
 
   }
 
 
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     kn[i + nc * i] = k[ddln[i] + n * ddln[i]];
     kt[i + nc * i] = k[ddlt[i] + n * ddlt[i]];
@@ -214,41 +214,41 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
   idim = 1 +  taillen / taillet;
 
   taille = 0;
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
     taille = sizeof(qq[i]) + taille;
 
   taille = taille / sizeof(qq[0]);
   nbno = taille / idim;
 
 
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     kf[ddln[i] + n * ddln[i]] = kn[i + nc * i];
     kf[ddlt[i] + n * ddlt[i]] = kt[i + nc * i];
   }
 
 
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
     kfinv[i + n * i] = 1. / kf[i + n * i];
 
-    if (i < nc)
+    if(i < nc)
       kninv[i + nc * i] = 1. / kt[i + nc * i];
 
   }
 
 
-  for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
+  for(i = 0; i < n; i++)
+    for(j = 0; j < n; j++)
       DPO[i + n * j] = vec[j * n + i] + kfinv[i + n * j];
 
 
 
-  DPOTRF(LA_UP, n, DPO , n, &info2);
+  DPOTRF(LA_UP, n, DPO, n, &info2);
 
-  if (info2 != 0)
+  if(info2 != 0)
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("\n Matter with Cholesky factorization \n");
 
     free(k);
@@ -286,7 +286,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
   iter1 = 0;
   err1  = 1.;
 
-  while ((iter1 < itt) && (err1 > errmax))
+  while((iter1 < itt) && (err1 > errmax))
   {
 
     /*               Linear stage (zc,wc) -> (z,w)         */
@@ -298,7 +298,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
     cblas_dcopy(n, qq, incx, znum1, incy);
 
     alpha = -1.;
-    cblas_dscal(n , alpha , znum1 , incx);
+    cblas_dscal(n, alpha, znum1, incx);
 
     alpha = 1.;
     cblas_daxpy(n, alpha, wc, incx, znum1, incy);
@@ -321,7 +321,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
     /*               Local stage (z,w)->(zc,wc)          */
 
 
-    for (i = 0; i < n; i++)
+    for(i = 0; i < n; i++)
     {
       zc[i] = 0.;
       wc[i] = 0.0;
@@ -332,10 +332,10 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 
 
 
-    for (i = 0; i < nc; i++)
+    for(i = 0; i < nc; i++)
     {
       knz0 = 0.;
-      for (kk = 0; kk < nc; kk++)
+      for(kk = 0; kk < nc; kk++)
       {
         knz[i] = kt[i + nc * kk] * velocity[ddlt[kk]] + knz0;
         knz0 = knz[i];
@@ -343,7 +343,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 
       zt[i] = reaction[ddlt[i]] - knz[i];
 
-      if (zt[i] > 0.0)
+      if(zt[i] > 0.0)
       {
         zc[ddlt[i]] = zt[i];
         maxzt[i] = 0.0;
@@ -355,11 +355,11 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
       }
     }
 
-    for (i = 0; i < nc; i++)
+    for(i = 0; i < nc; i++)
     {
       zc0 = 0.;
       ktz0 = 0.;
-      for (j = 0; j < nc; j++)
+      for(j = 0; j < nc; j++)
       {
         wc[ddlt[i]] = kninv[i + nc * j] * maxzt[j] + zc0;
         zc0 = wc[ddlt[i]];
@@ -373,7 +373,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
     /*             Loop other nodes              */
 
 
-    for (ino = 0; ino < nbno; ino++)
+    for(ino = 0; ino < nbno; ino++)
     {
       ddl  = ddln[ino];
       nt   = fabs(wf[ino]);
@@ -383,7 +383,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 
 
 
-      if (nt < 1.e-8) tc = 0.;
+      if(nt < 1.e-8) tc = 0.;
       else tc = wf[ino] / nt;
 
 
@@ -395,7 +395,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 
       aa = nt - mu[ino] * wn;
 
-      if (aa > 0.0)
+      if(aa > 0.0)
       {
         maxa = aa;
       }
@@ -408,7 +408,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
 
       aa = -nt + mu[ino] * wn;
 
-      if (aa > 0.0)
+      if(aa > 0.0)
       {
         maxa = aa;
       }
@@ -444,7 +444,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
     cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, kfinv, n, znum1, incx, beta, wnum1, incy);
 
     num11 = cblas_ddot(n, wnum1, incx, znum1, incy);
-    
+
     cblas_dcopy(n, reaction, incx, znum1, incy);
 
     alpha  = 1.;
@@ -478,10 +478,10 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter1;
   options->dparam[SICONOS_DPARAM_RESIDU] = err1;
 
-  if (err1 > errmax)
+  if(err1 > errmax)
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("No convergence after %d iterations, the residue is %g\n", iter1, err1);
 
     *info = 1;
@@ -489,7 +489,7 @@ void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *vel
   else
   {
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("Convergence after %d iterations, the residue is %g \n", iter1, err1);
 
     *info = 0;

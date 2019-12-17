@@ -35,13 +35,13 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
 
   printf(p->isStorageType1 ? "using (M)\n" : "not using (M)\n");
   printf(p->isStorageType2 ? "using (ABCD)\n" : "not using (ABCD)\n");
-  if (p->blocksRows)
+  if(p->blocksRows)
   {
     printf("blocks are:\n");
     int NumBlock = 0;
-    while (p->blocksRows[NumBlock] < n + m)
+    while(p->blocksRows[NumBlock] < n + m)
     {
-      if (p->blocksIsComp[NumBlock])
+      if(p->blocksIsComp[NumBlock])
       {
         printf("->block of complementarity condition (type %d), from line %d, to line %d.\n", p->blocksIsComp[NumBlock], p->blocksRows[NumBlock], p->blocksRows[NumBlock + 1] - 1);
       }
@@ -53,7 +53,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
     }
   }
 
-  if (p->M)
+  if(p->M)
   {
     printf("M matrix:\n");
     NM_display(p->M);
@@ -61,7 +61,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
   else
     printf("No M matrix:\n");
 
-  if (p->q)
+  if(p->q)
   {
     printf("q matrix:\n");
     NM_dense_display(p->q, n + m, 1, 0);
@@ -69,7 +69,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
   else
     printf("No q matrix:\n");
 
-  if (p->A)
+  if(p->A)
   {
     printf("A matrix:\n");
     NM_dense_display(p->A, n, n, 0);
@@ -77,13 +77,13 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
   else
   {
     printf("No A matrix:\n");
-    if (p->M && !p->M->storageType)
+    if(p->M && !p->M->storageType)
     {
       printf("A matrix from M:\n");
       NM_dense_display(p->M->matrix0, n, n, n + m);
     }
   }
-  if (p->B)
+  if(p->B)
   {
     printf("B matrix:\n");
     NM_dense_display(p->B, m, m, 0);
@@ -91,14 +91,14 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
   else
   {
     printf("No B matrix:\n");
-    if (p->M && !p->M->storageType)
+    if(p->M && !p->M->storageType)
     {
       printf("B matrix from M:\n");
       NM_dense_display(p->M->matrix0 + n * (n + m) + n, m, m, n + m);
     }
   }
 
-  if (p->C)
+  if(p->C)
   {
     printf("C matrix:\n");
     NM_dense_display(p->C, n, m, 0);
@@ -106,14 +106,14 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
   else
   {
     printf("No C matrix:\n");
-    if (p->M && !p->M->storageType)
+    if(p->M && !p->M->storageType)
     {
       printf("C matrix from M:\n");
       NM_dense_display(p->M->matrix0 + n * (n + m), n, m, n + m);
     }
   }
 
-  if (p->D)
+  if(p->D)
   {
     printf("D matrix:\n");
     NM_dense_display(p->D, m, n, 0);
@@ -121,20 +121,20 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
   else
   {
     printf("No D matrix:\n");
-    if (p->M && !p->M->storageType)
+    if(p->M && !p->M->storageType)
     {
       printf("D matrix from M:\n");
       NM_dense_display(p->M->matrix0 + n, m, n, n + m);
     }
   }
-  if (p->a)
+  if(p->a)
   {
     printf("a matrix:\n");
     NM_dense_display(p->a, n, 1, 0);
   }
   else
     printf("No a matrix:\n");
-  if (p->b)
+  if(p->b)
   {
     printf("b matrix:\n");
     NM_dense_display(p->b, m, 1, 0);
@@ -146,7 +146,7 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem* p)
 int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* problem, FILE* file)
 {
   int info = 0;
-  if (! problem)
+  if(! problem)
   {
     fprintf(stderr, "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -159,24 +159,24 @@ int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* pr
   int m = problem->m;
   fprintf(file, "%d\n", m);
 
-  if (problem->isStorageType1)
+  if(problem->isStorageType1)
   {
     int nbBlocks = 0;
     fprintf(file, "%d ", problem->blocksRows[nbBlocks]);
-    while (problem->blocksRows[nbBlocks] < (n + m))
+    while(problem->blocksRows[nbBlocks] < (n + m))
     {
       nbBlocks++;
       fprintf(file, "%d ", problem->blocksRows[nbBlocks]);
     }
     fprintf(file, "\n");
-    for (i = 0; i < nbBlocks; i++)
+    for(i = 0; i < nbBlocks; i++)
     {
       fprintf(file, "%d ", problem->blocksIsComp[i]);
     }
     fprintf(file, "\n");
     NM_write_in_file(problem->M, file);
 
-    for (i = 0; i < problem->M->size1; i++)
+    for(i = 0; i < problem->M->size1; i++)
     {
       fprintf(file, "%32.24e ", problem->q[i]);
     }
@@ -187,49 +187,49 @@ int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem* pr
     /*   printf("Numerics, MixedLinearComplementarityProblem printInFile only Storage1 has been printed.\n"); */
     /* } */
   }
-  if (problem->isStorageType2)
+  if(problem->isStorageType2)
   {
 
-    for (i = 0; i < problem->n; i++)
+    for(i = 0; i < problem->n; i++)
     {
-      for (j = 0; j < problem->n; j++)
+      for(j = 0; j < problem->n; j++)
       {
         fprintf(file, "%32.24e ", problem->A[i + j * n]);
       }
       fprintf(file, "\n");
     }
 
-    for (i = 0; i < problem->m; i++)
+    for(i = 0; i < problem->m; i++)
     {
-      for (j = 0; j < problem->m; j++)
+      for(j = 0; j < problem->m; j++)
       {
         fprintf(file, "%32.24e ", problem->B[i + j * m]);
       }
       fprintf(file, "\n");
     }
-    for (i = 0; i < problem->n; i++)
+    for(i = 0; i < problem->n; i++)
     {
-      for (j = 0; j < problem->m; j++)
+      for(j = 0; j < problem->m; j++)
       {
         fprintf(file, "%32.24e ", problem->C[i + j * n]);
       }
       fprintf(file, "\n");
     }
-    for (i = 0; i < problem->m; i++)
+    for(i = 0; i < problem->m; i++)
     {
-      for (j = 0; j < problem->n; j++)
+      for(j = 0; j < problem->n; j++)
       {
         fprintf(file, "%32.24e ", problem->D[i + j * m]);
       }
       fprintf(file, "\n");
     }
 
-    for (i = 0; i < problem->n; i++)
+    for(i = 0; i < problem->n; i++)
     {
       fprintf(file, "%32.24e ", problem->a[i]);
     }
     fprintf(file, "\n");
-    for (i = 0; i < problem->m; i++)
+    for(i = 0; i < problem->m; i++)
     {
       fprintf(file, "%32.24e ", problem->b[i]);
     }
@@ -243,7 +243,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
 {
   int info = 0;
   assert(file);
-  if (! problem)
+  if(! problem)
   {
     fprintf(stderr, "Numerics, MixedLinearComplementarityProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -264,19 +264,19 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
 
 
 
-  if (problem->isStorageType1)
+  if(problem->isStorageType1)
   {
     int * blocksRows = (int *)malloc((n + m + 1) * sizeof(int));
     int nbBlocks = 0;
     CHECK_IO(fscanf(file, "%d ", &(blocksRows[nbBlocks])));
-    while (blocksRows[nbBlocks] < (n + m))
+    while(blocksRows[nbBlocks] < (n + m))
     {
       nbBlocks++;
       CHECK_IO(fscanf(file, "%d ", &(blocksRows[nbBlocks])));
     }
     problem->blocksRows = (int *)malloc((nbBlocks + 1) * sizeof(int));
     //CHECK_IO(fscanf(file,"\n"));
-    for (i = 0; i <= nbBlocks; i++)
+    for(i = 0; i <= nbBlocks; i++)
     {
       problem->blocksRows[i] = blocksRows[i];
     }
@@ -284,7 +284,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
     problem->blocksIsComp = (int *)malloc((nbBlocks) * sizeof(int));
 
     //fprintf(file,"\n");
-    for (i = 0; i < nbBlocks; i++)
+    for(i = 0; i < nbBlocks; i++)
     {
       CHECK_IO(fscanf(file, "%d ", &(problem->blocksIsComp[i])));
     }
@@ -293,7 +293,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
     problem->M = NM_new_from_file(file);
     problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
 
-    for (i = 0; i < problem->M->size1; i++)
+    for(i = 0; i < problem->M->size1; i++)
     {
       CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
     }
@@ -304,7 +304,7 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
     /*   printf("Numerics, MixedLinearComplementarityProblem printInFile only Storage1 has been printed.\n"); */
     /* } */
   }
-  if (problem->isStorageType2)
+  if(problem->isStorageType2)
   {
 
     problem->A = (double*)malloc(n * n * sizeof(double));
@@ -314,46 +314,46 @@ int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem* pr
     problem->a = (double*)malloc(n * sizeof(double));
     problem->b = (double*)malloc(m * sizeof(double));
 
-    for (i = 0; i < problem->n; i++)
+    for(i = 0; i < problem->n; i++)
     {
-      for (j = 0; j < problem->n; j++)
+      for(j = 0; j < problem->n; j++)
       {
         CHECK_IO(fscanf(file, "%lf ", &(problem->A[i + j * n])));
       }
       /* CHECK_IO(fscanf(file,"\n")); */
     }
 
-    for (i = 0; i < problem->m; i++)
+    for(i = 0; i < problem->m; i++)
     {
-      for (j = 0; j < problem->m; j++)
+      for(j = 0; j < problem->m; j++)
       {
         CHECK_IO(fscanf(file, "%lf ", &(problem->B[i + j * m])));
       }
       /* fprintf(file,"\n"); */
     }
-    for (i = 0; i < problem->n; i++)
+    for(i = 0; i < problem->n; i++)
     {
-      for (j = 0; j < problem->m; j++)
+      for(j = 0; j < problem->m; j++)
       {
         CHECK_IO(fscanf(file, "%lf ", &(problem->C[i + j * n])));
       }
       /* fprintf(file,"\n"); */
     }
-    for (i = 0; i < problem->m; i++)
+    for(i = 0; i < problem->m; i++)
     {
-      for (j = 0; j < problem->n; j++)
+      for(j = 0; j < problem->n; j++)
       {
         CHECK_IO(fscanf(file, "%lf ", &(problem->D[i + j * m])));
       }
       /* fprintf(file,"\n"); */
     }
 
-    for (i = 0; i < problem->n; i++)
+    for(i = 0; i < problem->n; i++)
     {
       CHECK_IO(fscanf(file, "%lf ", &(problem->a[i])));
     }
     /* fprintf(file,"\n"); */
-    for (i = 0; i < problem->m; i++)
+    for(i = 0; i < problem->m; i++)
     {
       CHECK_IO(fscanf(file, "%lf ", &(problem->b[i])));
     }
@@ -372,9 +372,9 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
   double *vecA, *vecB, *vecC, *vecD, *vecM, *vecQ;
   double *a, *b;
-  CHECK_IO(fscanf(file , "%d" , &n));
-  CHECK_IO(fscanf(file , "%d" , &m));
-  CHECK_IO(fscanf(file , "%d" , &NbLines));
+  CHECK_IO(fscanf(file, "%d", &n));
+  CHECK_IO(fscanf(file, "%d", &m));
+  CHECK_IO(fscanf(file, "%d", &NbLines));
 
   m2 = m * m;
 
@@ -419,18 +419,18 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
 
 
-  for (i = 0 ; i < NbLines - m ; ++i)
+  for(i = 0 ; i < NbLines - m ; ++i)
   {
-    for (j = 0 ; j < n ; ++j)
+    for(j = 0 ; j < n ; ++j)
     {
       CHECK_IO(fscanf(file, "%s", val));
       vecA[(NbLines - m)*j + i ] = atof(val);
       vecM[(NbLines)*j + i ] = atof(val);
     }
   }
-  for (i = 0 ; i < m ; ++i)
+  for(i = 0 ; i < m ; ++i)
   {
-    for (j = 0 ; j < m ; ++j)
+    for(j = 0 ; j < m ; ++j)
     {
       CHECK_IO(fscanf(file, "%s", val));
       vecB[ m * j + i ] = atof(val);
@@ -439,18 +439,18 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
 
     }
   }
-  for (i = 0 ; i < NbLines - m ; ++i)
+  for(i = 0 ; i < NbLines - m ; ++i)
   {
-    for (j = 0 ; j < m ; ++j)
+    for(j = 0 ; j < m ; ++j)
     {
       CHECK_IO(fscanf(file, "%s", val));
       vecC[(NbLines - m)*j + i ] = atof(val);
       vecM[(NbLines) * (n + j) + i ] = atof(val);
     }
   }
-  for (i = 0 ; i < m ; ++i)
+  for(i = 0 ; i < m ; ++i)
   {
-    for (j = 0 ; j < n ; ++j)
+    for(j = 0 ; j < n ; ++j)
     {
       CHECK_IO(fscanf(file, "%s", val));
       vecD[ m * j + i ] = atof(val);
@@ -458,15 +458,15 @@ int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem*
     }
   }
 
-  for (i = 0 ; i < NbLines - m ; ++i)
+  for(i = 0 ; i < NbLines - m ; ++i)
   {
-    CHECK_IO(fscanf(file , "%s" , val));
+    CHECK_IO(fscanf(file, "%s", val));
     a[i] = atof(val);
     vecQ[i] = atof(val);
   }
-  for (i = 0 ; i < m ; ++i)
+  for(i = 0 ; i < m ; ++i)
   {
-    CHECK_IO(fscanf(file , "%s" , val));
+    CHECK_IO(fscanf(file, "%s", val));
     b[i] = atof(val);
     vecQ[i + NbLines - m] = atof(val);
   }
@@ -490,7 +490,7 @@ int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem
 
 void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* problem)
 {
-  if (problem->isStorageType1)
+  if(problem->isStorageType1)
   {
     NM_clear(problem->M);
     free(problem->M);
@@ -498,7 +498,7 @@ void freeMixedLinearComplementarityProblem(MixedLinearComplementarityProblem* pr
     free(problem->blocksRows);
     free(problem->blocksIsComp);
   }
-  if (problem->isStorageType2)
+  if(problem->isStorageType2)
   {
     free(problem->A);
     free(problem->B);

@@ -39,7 +39,7 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Maximum number of iterations in Line--search */
-  int lsitermax = iparam[SICONOS_VI_IPARAM_LS_MAX_ITER]; 
+  int lsitermax = iparam[SICONOS_VI_IPARAM_LS_MAX_ITER];
   assert(lsitermax >0);
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
@@ -50,17 +50,17 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
-  double * xtmp = (double *)calloc(n , sizeof(double));
-  double * wtmp = (double *)calloc(n , sizeof(double));
-  double * xtmp2 = (double *)calloc(n , sizeof(double));
-  double * xtmp3 = (double *)calloc(n , sizeof(double));
+  double * xtmp = (double *)calloc(n, sizeof(double));
+  double * wtmp = (double *)calloc(n, sizeof(double));
+  double * xtmp2 = (double *)calloc(n, sizeof(double));
+  double * xtmp3 = (double *)calloc(n, sizeof(double));
 
   int isVariable = 0;
 
   double tau = 1.0;
   double sigma = 0.99;
 
-  if (dparam[SICONOS_VI_DPARAM_LS_TAU] > 0.0)
+  if(dparam[SICONOS_VI_DPARAM_LS_TAU] > 0.0)
   {
     tau = dparam[SICONOS_VI_DPARAM_LS_TAU];
   }
@@ -70,7 +70,7 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
     printf("Hyperplane Projection method. tau is set to 1.0\n");
   }
 
-  if (dparam[SICONOS_VI_DPARAM_SIGMA] > 0.0 && dparam[SICONOS_VI_DPARAM_SIGMA] < 1.0)
+  if(dparam[SICONOS_VI_DPARAM_SIGMA] > 0.0 && dparam[SICONOS_VI_DPARAM_SIGMA] < 1.0)
   {
     sigma = dparam[SICONOS_VI_DPARAM_SIGMA];
   }
@@ -84,19 +84,19 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
   isVariable=0;
 
 
-  if (!isVariable)
+  if(!isVariable)
   {
     /*   double minusrho  = -1.0*rho; */
-    while ((iter < itermax) && (hasNotConverged > 0))
+    while((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
       /** xtmp <-- x (x_k) */
-      cblas_dcopy(n , x , 1 , xtmp, 1);
+      cblas_dcopy(n, x, 1, xtmp, 1);
 
       /* xtmp (y_k)= P_X(x_k-tau F(x_k)) */
       problem->F(problem, n, xtmp, wtmp);
-      cblas_daxpy(n, -tau, wtmp , 1, xtmp , 1) ;
-      cblas_dcopy(n , xtmp, 1 , xtmp2, 1);
+      cblas_daxpy(n, -tau, wtmp, 1, xtmp, 1) ;
+      cblas_dcopy(n, xtmp, 1, xtmp2, 1);
       problem->ProjectionOnX(problem, xtmp2,xtmp);
 
       // Armijo line search
@@ -107,24 +107,25 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
       double lhs = NAN;
       double rhs;
       // xtmp3 = z_k-y_k
-      cblas_dcopy(n , x , 1 , xtmp3, 1);
+      cblas_dcopy(n, x, 1, xtmp3, 1);
       cblas_daxpy(n, -1.0, xtmp, 1, xtmp3, 1);
       rhs = cblas_dnrm2(n,xtmp3, 1);
       rhs = sigma / tau * rhs * rhs;
       DEBUG_EXPR_WE(
-        for (int i =0; i< n ; i++)
-        {
-          printf("(y_k) xtmp[%i]=%6.4e\t",i,xtmp[i]);    printf("(x_k-y_k) xtmp3[%i]=%6.4e\n",i,xtmp3[i]);
-        }
-        );
-      while (stopingcriteria && (ls_iter < lsitermax))
+        for(int i =0; i< n ; i++)
+    {
+      printf("(y_k) xtmp[%i]=%6.4e\t",i,xtmp[i]);
+        printf("(x_k-y_k) xtmp3[%i]=%6.4e\n",i,xtmp3[i]);
+      }
+      );
+      while(stopingcriteria && (ls_iter < lsitermax))
       {
         ls_iter++ ;
         /* xtmp2 = alpha * y_k + (1-alpha) x_k */
         alpha = 1.0 / (pow(2.0, ls_iter));
         DEBUG_PRINTF("alpha = %6.4e\n", alpha);
-        cblas_dcopy(n ,xtmp , 1 , xtmp2, 1);
-        cblas_dscal(n , alpha, xtmp2, 1);
+        cblas_dcopy(n,xtmp, 1, xtmp2, 1);
+        cblas_dscal(n, alpha, xtmp2, 1);
         cblas_daxpy(n, 1.0-alpha, x, 1, xtmp2, 1);
 
 
@@ -133,14 +134,15 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
 
         problem->F(problem, n, xtmp2,wtmp);
         DEBUG_EXPR_WE(
-          for (int i =0; i< n ; i++)
-          {
-            printf("(z_k) xtmp2[%i]=%6.4e\n",i,xtmp2[i]);    printf("F(z_k) wtmp[%i]=%6.4e\n",i,wtmp[i]);
-          }
-          );
+          for(int i =0; i< n ; i++)
+      {
+        printf("(z_k) xtmp2[%i]=%6.4e\n",i,xtmp2[i]);
+          printf("F(z_k) wtmp[%i]=%6.4e\n",i,wtmp[i]);
+        }
+        );
         lhs = cblas_ddot(n, wtmp, 1, xtmp3, 1);
 
-        if (lhs >= rhs)  stopingcriteria = 0;
+        if(lhs >= rhs)  stopingcriteria = 0;
 
         DEBUG_PRINTF("ls_iter= %i, lsitermax =%i, stopingcriteria  %i\n",ls_iter,lsitermax,stopingcriteria);
         DEBUG_PRINTF("Number of iteration in Armijo line search = %i\t, lhs = %6.4e\t, rhs = %6.4e\t, alpha = %6.4e\t, sigma = %6.4e\t, tau = %6.4e\n", ls_iter, lhs, rhs, alpha, sigma, tau);
@@ -149,9 +151,9 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
 
 
 
-      cblas_dcopy(n , x , 1 , xtmp3, 1);
+      cblas_dcopy(n, x, 1, xtmp3, 1);
       cblas_daxpy(n, -1.0, xtmp2, 1, xtmp3, 1);
-      DEBUG_PRINTF("norm(x-x_k) = %6.4e\n",cblas_dnrm2(n, xtmp3, 1) );
+      DEBUG_PRINTF("norm(x-x_k) = %6.4e\n",cblas_dnrm2(n, xtmp3, 1));
       lhs=cblas_ddot(n, wtmp, 1, xtmp3, 1);
 
       double nonorm = cblas_dnrm2(n, wtmp, 1);
@@ -162,40 +164,41 @@ void variationalInequality_HyperplaneProjection(VariationalInequality* problem, 
       DEBUG_PRINTF("lhs = %6.4e\n", lhs);
       DEBUG_PRINTF("rho equiv = %6.4e\n", rhoequiv);
 
-      cblas_daxpy(n, -rhoequiv, wtmp, 1, x  , 1);
+      cblas_daxpy(n, -rhoequiv, wtmp, 1, x, 1);
 
-      cblas_dcopy(n , x, 1 , xtmp, 1);
+      cblas_dcopy(n, x, 1, xtmp, 1);
       problem->ProjectionOnX(problem, xtmp,x);
 
 
 
       /* **** Criterium convergence **** */
-      variationalInequality_computeError(problem, x , w, tolerance, options, &error);
+      variationalInequality_computeError(problem, x, w, tolerance, options, &error);
       DEBUG_EXPR_WE(
-         for (int i =0; i< n ; i++)
-         {
-           printf("x[%i]=%6.4e\t",i,x[i]);    printf("w[%i]=F[%i]=%6.4e\n",i,i,w[i]);
-         }
-        );
-      if (options->callback)
+        for(int i =0; i< n ; i++)
+    {
+      printf("x[%i]=%6.4e\t",i,x[i]);
+        printf("w[%i]=F[%i]=%6.4e\n",i,i,w[i]);
+      }
+      );
+      if(options->callback)
       {
         options->callback->collectStatsIteration(options->callback->env, n,
-                                        x, w,
-                                        error, NULL);
+            x, w,
+            error, NULL);
       }
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf("--------------- VI - Hyperplane Projection (HP) - Iteration %i tau = %14.7e \t rhoequiv = %14.7e \tError = %14.7e\n", iter, tau, rhoequiv, error);
       }
-      if (error < tolerance) hasNotConverged = 0;
+      if(error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
   }
 
 
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
     printf("--------------- VI - Hyperplane Projection (HP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   }

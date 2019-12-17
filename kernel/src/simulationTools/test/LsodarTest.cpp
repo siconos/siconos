@@ -47,7 +47,8 @@ void LsodarTest::setUp()
 
 void LsodarTest::init(bool initDS)
 {
-  if (initDS) {
+  if(initDS)
+  {
     _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
   }
 
@@ -77,7 +78,8 @@ void LsodarTest::testCstGradTIDS()
 
   init(false);
 
-  while (_sim->hasNextEvent()) {
+  while(_sim->hasNextEvent())
+  {
     _sim->advanceToEvent();
     _sim->processEvents();
   }
@@ -101,7 +103,8 @@ void LsodarTest::testCstGradDS()
 
   init(false);
 
-  while (_sim->hasNextEvent()) {
+  while(_sim->hasNextEvent())
+  {
     _sim->advanceToEvent();
     _sim->processEvents();
   }
@@ -129,7 +132,8 @@ void LsodarTest::testCstGradNLDS()
 
   init(false);
 
-  while (_sim->hasNextEvent()) {
+  while(_sim->hasNextEvent())
+  {
     _sim->advanceToEvent();
     _sim->processEvents();
   }

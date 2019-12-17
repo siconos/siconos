@@ -51,7 +51,7 @@ void pathsearch_set_default(SolverOptions* options)
   /* set the right stacksize */
   lcp_options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE];
 
-  
+
 }
 
 

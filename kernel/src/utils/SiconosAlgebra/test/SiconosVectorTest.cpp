@@ -37,10 +37,10 @@ void SiconosVectorTest::setUp()
   // size = size1 + size2;
 
   ref.reset(new SiconosVector(size));
-  for (unsigned int i = 0; i < size; ++i)
+  for(unsigned int i = 0; i < size; ++i)
     (*ref)(i) = i;
   vq.resize(size, 1);
-  for (unsigned int i = 0; i < size; i++)
+  for(unsigned int i = 0; i < size; i++)
     vq[i] = i + 1;
 
   dv.reset(new DenseVect(3));
@@ -57,9 +57,9 @@ void SiconosVectorTest::setUp()
   y.reset(new SiconosVector(vq));
   tmp1.reset(new SiconosVector(size1));
   tmp2.reset(new SiconosVector(size2));
-  for (unsigned int i = 0; i < size1; ++i)
+  for(unsigned int i = 0; i < size1; ++i)
     (*tmp1)(i) = i;
-  for (unsigned int i = 0; i < size2; ++i)
+  for(unsigned int i = 0; i < size2; ++i)
     (*tmp2)(i) = 100 * i;
 
   xB.reset(new BlockVector(tmp1, tmp2));
@@ -88,7 +88,7 @@ void SiconosVectorTest::testConstructor0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->num() == 1, true);
-  for (unsigned int i = 0; i < v->size(); i++)
+  for(unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", (*v)(i) == 0, true);
   v.reset(new SiconosVector(3, Siconos::SPARSE));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", v->isBlock(), false);
@@ -104,14 +104,14 @@ void SiconosVectorTest::testConstructor1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->num() == 1, true);
-  for (unsigned int i = 0; i < v->size(); i++)
+  for(unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*v)(i) == 2.4, true);
   v.reset(new SiconosVector(3, 2.4, Siconos::SPARSE));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->num() == 4, true);
 
-  for (unsigned int i = 0; i < v->size(); i++)
+  for(unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*v)(i) == 2.4, true);
   std::cout << "--> Constructor 1 test ended with success." <<std::endl;
 }
@@ -124,7 +124,7 @@ void SiconosVectorTest::testConstructor2()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", v->size() == vq.size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
+  for(unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", (*v)(i) == vq[i], true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->num() == 1, true);
   std::cout << "--> Constructor 2 test ended with success." <<std::endl;
@@ -221,7 +221,7 @@ void SiconosVectorTest::testConstructor7()
   SP::SiconosVector v(new SiconosVector("vect.dat", 1));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", v->size() == 4, true);
-  for (unsigned int i = 0; i < v->size(); i++)
+  for(unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", (*v)(i) == i, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", v->num() == 1, true);
   std::cout << "--> Constructor 7 test ended with success." <<std::endl;
@@ -233,7 +233,7 @@ void SiconosVectorTest::testZero()
   std::cout << "--> Test: zero." <<std::endl;
   SP::SiconosVector v(new SiconosVector(vq));
   v->zero();
-  for (unsigned int i = 0; i < v->size(); i++)
+  for(unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testZero : ", (*v)(i) == 0, true);
   std::cout << "--> zero test ended with success." <<std::endl;
 }
@@ -253,7 +253,7 @@ void SiconosVectorTest::testFill()
   std::cout << "--> Test: fill." <<std::endl;
   double val = 4.5;
   SP::SiconosVector v(new SiconosVector(5, val));
-  for (unsigned int i = 0; i < v->size(); i++)
+  for(unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", (*v)(i) == val, true);
   std::cout << "--> fill test ended with success." <<std::endl;
 }
@@ -266,9 +266,9 @@ void SiconosVectorTest::testResize()
   v->resize(6);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", v->size() == 6, true);
-  for (unsigned int i = 0; i < vq.size(); i++)
+  for(unsigned int i = 0; i < vq.size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", (*v)(i) == vq[i], true);
-  for (unsigned int i = vq.size(); i < v->size(); i++)
+  for(unsigned int i = vq.size(); i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", (*v)(i) == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", v->num() == 1, true);
   std::cout << "-->  resize test ended with success." <<std::endl;
@@ -285,7 +285,7 @@ void SiconosVectorTest::testSetBlock()
   unsigned int posOut = 3;
   setBlock(*ref, subBlock, sizeB, posIn, posOut);
 
-  for (unsigned int i = posOut; i < sizeB; ++i)
+  for(unsigned int i = posOut; i < sizeB; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*subBlock)(i) == (*ref)(i + posIn), true);
   std::cout << "--> setBlock test ended with success." <<std::endl;
 }
@@ -322,10 +322,10 @@ void SiconosVectorTest::testSetBlock3()
 
   // Block copy from a Simple into a Block.
   SP::SiconosVector ref2(new SiconosVector(3));
-  for (unsigned int i = 0; i < 3; ++i)
+  for(unsigned int i = 0; i < 3; ++i)
     (*ref2)(i) = i;
   SP::SiconosVector ref3(new SiconosVector(6));
-  for (unsigned int i = 0; i < 6; ++i)
+  for(unsigned int i = 0; i < 6; ++i)
     (*ref3)(i) = i;
   SP::BlockVector BSV(new BlockVector());
   BSV->insertPtr(ref3);
@@ -338,7 +338,7 @@ void SiconosVectorTest::testSetBlock3()
   unsigned int posOut = 2;
 
   BSV->setBlock(*vIn, sizeB, posIn, posOut);
-  for (unsigned int i = 0; i < sizeB; ++i)
+  for(unsigned int i = 0; i < sizeB; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*BSV)(i + posOut) == (*vIn)(i + posIn), true);
 
   std::cout << "--> setBlock3 test ended with success." <<std::endl;
@@ -354,15 +354,15 @@ void SiconosVectorTest::testSetBlock4()
   unsigned int pos = 1;
   subBlock->setBlock(pos, *ref);
 
-  for (unsigned int i = pos; i < pos + 5; ++i)
+  for(unsigned int i = pos; i < pos + 5; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", fabs((*subBlock)(i) - (*ref)(i - pos)) < tol, true);
 
   // copy from a Block into a simple
   SP::SiconosVector ref2(new SiconosVector(2));
-  for (unsigned int i = 0; i < 2; ++i)
+  for(unsigned int i = 0; i < 2; ++i)
     (*ref2)(i) = i;
   SP::SiconosVector ref3(new SiconosVector(4));
-  for (unsigned int i = 0; i < 2; ++i)
+  for(unsigned int i = 0; i < 2; ++i)
     (*ref3)(i) = i;
   SP::BlockVector BSV(new BlockVector());
   BSV->insertPtr(ref3);
@@ -389,18 +389,18 @@ void SiconosVectorTest::testAssignment()
   // Simple = Simple
   SP::SiconosVector w(new SiconosVector(vq));
   *v = *w;
-  for (unsigned int i = 0; i < vq.size(); i++)
+  for(unsigned int i = 0; i < vq.size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment : ", (*v)(i) == (*w)(i), true);
 
   // Simple = Siconos (Simple)
   SP::SiconosVector w2(new SiconosVector(vq));
   *v = *w2;
-  for (unsigned int i = 0; i < vq.size(); i++)
+  for(unsigned int i = 0; i < vq.size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment : ", (*v)(i) == (*w2)(i), true);
 
   // Simple = Siconos (Block)
   *v = *xB;
-  for (unsigned int i = 0; i < vq.size(); i++)
+  for(unsigned int i = 0; i < vq.size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment : ", (*v)(i) == (*xB)(i), true);
   std::cout << "--> operators1 test ended with success." <<std::endl;
 }
@@ -421,26 +421,26 @@ void SiconosVectorTest::testOperators2()
   // dense +=, -=, ... dense
   *z += *x;
   *z += *x;
-  for (unsigned int i = 0; i < size; i++)
+  for(unsigned int i = 0; i < size; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", fabs((*z)(i) - 2 * (*x)(i)) < tol, true);
 
   double a = 2.2;
   int a1 = 2;
 
   *z *= a;
-  for (unsigned int i = 0; i < size; i++)
+  for(unsigned int i = 0; i < size; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", fabs((*z)(i) - 2 * a * (*x)(i)) < tol, true);
   *z *= a1;
-  for (unsigned int i = 0; i < size; i++)
+  for(unsigned int i = 0; i < size; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", fabs((*z)(i) - 2 * a1 * a * (*x)(i)) < tol, true);
   *z /= a1;
-  for (unsigned int i = 0; i < size; i++)
+  for(unsigned int i = 0; i < size; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", fabs((*z)(i) - 2 * a * (*x)(i)) < tol, true);
   *z /= a;
-  for (unsigned int i = 0; i < size; i++)
+  for(unsigned int i = 0; i < size; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", fabs((*z)(i) - 2 * (*x)(i)) < tol, true);
   *z -= *x;
-  for (unsigned int i = 0; i < size; i++)
+  for(unsigned int i = 0; i < size; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", fabs((*z)(i) - (*x)(i)) < tol, true);
 
   // Simple +=, -= Block
@@ -461,10 +461,10 @@ void SiconosVectorTest::testOperators2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->dense() - *w->sparse()) < tol, true);
   *z *= 3;
   *z -= *w;
-  for (unsigned int i = 0; i < size; i++)
+  for(unsigned int i = 0; i < size; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->dense() - 2 * *w->sparse()) < tol, true);
   *z /= 2.0;
-  for (unsigned int i = 0; i < size; i++)
+  for(unsigned int i = 0; i < size; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(*z->dense() - *w->sparse()) < tol, true);
 
   // sparse += -= sparse
@@ -766,8 +766,8 @@ void SiconosVectorTest::testOperators5()
 
   // Simple = Simple + Simple, all dense
   *z = *x + *y ;
-  for (unsigned int i = 0; i < size; ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators5 : ", fabs((*z)(i) - (*x)(i) - (*y)(i)) < tol , true);
+  for(unsigned int i = 0; i < size; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators5 : ", fabs((*z)(i) - (*x)(i) - (*y)(i)) < tol, true);
   z->zero();
   // Simple = Simple + Block, all dense
   //  *z = *x + *yB ;
@@ -819,8 +819,8 @@ void SiconosVectorTest::testOperators5Bis()
 
   // Simple = Simple + Simple, all dense
   add(*x, *y, *z);
-  for (unsigned int i = 0; i < size; ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators5Bis : ", fabs((*z)(i) - (*x)(i) - (*y)(i)) < tol , true);
+  for(unsigned int i = 0; i < size; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators5Bis : ", fabs((*z)(i) - (*x)(i) - (*y)(i)) < tol, true);
   z->zero();
   // Simple = Simple + Block, all dense
   //  add(*x,*yB,*z);
@@ -873,8 +873,8 @@ void SiconosVectorTest::testOperators6()
 
   // Simple = Simple - Simple, all dense
   *z = *x - *y ;
-  for (unsigned int i = 0; i < size; ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6 : ", fabs((*z)(i) - (*x)(i) + (*y)(i)) < tol , true);
+  for(unsigned int i = 0; i < size; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6 : ", fabs((*z)(i) - (*x)(i) + (*y)(i)) < tol, true);
   z->zero();
   // Simple = Simple - Block, all dense
   //  *z = *x - *yB ;
@@ -897,8 +897,8 @@ void SiconosVectorTest::testOperators6()
 
   // Block = Simple - Simple, all dense
   *zB = *x - *y ;
-  for (unsigned int i = 0; i < size; ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6 : ", fabs((*zB)(i) - (*x)(i) + (*y)(i)) < tol , true);
+  for(unsigned int i = 0; i < size; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6 : ", fabs((*zB)(i) - (*x)(i) + (*y)(i)) < tol, true);
   zB->zero();
   // Block = Simple - Block, all dense
   //  *zB = *x - *yB ;
@@ -926,8 +926,8 @@ void SiconosVectorTest::testOperators6Bis()
 
   // Simple = Simple - Simple, all dense
   sub(*x, *y, *z);
-  for (unsigned int i = 0; i < size; ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Bis : ", fabs((*z)(i) - (*x)(i) + (*y)(i)) < tol , true);
+  for(unsigned int i = 0; i < size; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Bis : ", fabs((*z)(i) - (*x)(i) + (*y)(i)) < tol, true);
   z->zero();
   // Simple = Simple - Block, all dense
   //  sub(*x,*yB,*z);
@@ -983,8 +983,8 @@ void SiconosVectorTest::testOperators7()
   SP::SiconosVector tmp(new SiconosVector(*z)); // copy of z for comparison.
   axpy(a, *x, *z);
 
-  for (unsigned int i = 0; i < size; ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators7 : ", fabs((*z)(i) - a * (*x)(i) - (*tmp)(i)) < tol , true);
+  for(unsigned int i = 0; i < size; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators7 : ", fabs((*z)(i) - a * (*x)(i) - (*tmp)(i)) < tol, true);
   z->zero();
   //  z Simple ,  x Block
   //  axpy(a, *xB,*z);
@@ -1019,30 +1019,30 @@ void SiconosVectorTest::testOperators8()
   SP::SiconosMatrix res(new SimpleMatrix(size1, size));
   *res = outer_prod(*tmp1, *x); // dense*dense
 
-  for (unsigned int i = 0 ; i < size1; ++i)
-    for (unsigned int j = 0; j < size; ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res)(i, j) - (*tmp1)(i) * (*x)(j)) < tol , true);
+  for(unsigned int i = 0 ; i < size1; ++i)
+    for(unsigned int j = 0; j < size; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res)(i, j) - (*tmp1)(i) * (*x)(j)) < tol, true);
 
   res->zero();
   SP::SiconosVector w(new SiconosVector(*sv));
   *res = outer_prod(*tmp1, *w); // dense*sparse
-  for (unsigned int i = 0 ; i < size1; ++i)
-    for (unsigned int j = 0; j < size; ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res)(i, j) - (*tmp1)(i) * (w->getSparse())(j)) < tol , true);
+  for(unsigned int i = 0 ; i < size1; ++i)
+    for(unsigned int j = 0; j < size; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res)(i, j) - (*tmp1)(i) * (w->getSparse())(j)) < tol, true);
 
   res->zero();
   SP::SiconosVector v(new SiconosVector(*sv));
   SP::SiconosMatrix res2(new SimpleMatrix(size, size));
   *res2 = outer_prod(*v, *w); // sparse*sparse
-  for (unsigned int i = 0 ; i < size1; ++i)
-    for (unsigned int j = 0; j < size; ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res2)(i, j) - (v->getSparse())(i) * (w->getSparse())(j)) < tol , true);
+  for(unsigned int i = 0 ; i < size1; ++i)
+    for(unsigned int j = 0; j < size; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res2)(i, j) - (v->getSparse())(i) * (w->getSparse())(j)) < tol, true);
   res->zero();
 
   *res2 = outer_prod(*v, *x); // sparse*dense
-  for (unsigned int i = 0 ; i < size1; ++i)
-    for (unsigned int j = 0; j < size; ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res2)(i, j) - (v->getSparse())(i) * (*x)(j)) < tol , true);
+  for(unsigned int i = 0 ; i < size1; ++i)
+    for(unsigned int j = 0; j < size; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8 : ", ((*res2)(i, j) - (v->getSparse())(i) * (*x)(j)) < tol, true);
 
   std::cout << "--> operators8 test ended with success." <<std::endl;
 }
@@ -1075,9 +1075,9 @@ void SiconosVectorTest::testSubscal()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(4) - a * (*xx)(1)) < tol, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(5) - a * (*xx)(2)) < tol, true);
-  for (unsigned int i = 0; i < size; ++i)
+  for(unsigned int i = 0; i < size; ++i)
   {
-    if (i != 4 && i != 5)
+    if(i != 4 && i != 5)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(i) - (*yref)(i)) < tol, true);
   }
 
@@ -1110,9 +1110,9 @@ void SiconosVectorTest::testSubscal()
   subscal(a, *xx, *ys, coord, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(4) - a * (*xx)(1)) < tol, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(5) - a * (*xx)(2)) < tol, true);
-  for (unsigned int i = 0; i < size; ++i)
+  for(unsigned int i = 0; i < size; ++i)
   {
-    if (i != 4 && i != 5)
+    if(i != 4 && i != 5)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(i) - (*yref)(i)) < tol, true);
   }
 
@@ -1122,9 +1122,9 @@ void SiconosVectorTest::testSubscal()
   subscal(a, *xx, *ys, coord, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(4) - a * (*xx)(1)) < tol, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys)(5) - a * (*xx)(2)) < tol, true);
-  for (unsigned int i = 0; i < size; ++i)
+  for(unsigned int i = 0; i < size; ++i)
   {
-    if (i != 4 && i != 5)
+    if(i != 4 && i != 5)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testSubscal : ", fabs((*ys->sparse())(i) - (*yref->dense())(i)) < tol, true);
   }
   std::cout << "-->  subscal test ended with success." <<std::endl;
@@ -1148,11 +1148,11 @@ void SiconosVectorTest::testStdVectorCast()
 void SiconosVectorTest::testIterators()
 {
   SP::SiconosVector y(new SiconosVector(3, 1.0));
-  for (SiconosVector::iterator it=y->begin(); it!=y->end(); it++)
+  for(SiconosVector::iterator it=y->begin(); it!=y->end(); it++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testIterators : ", *it == 1.0, true);
 
   SPC::SiconosVector z(new SiconosVector(3, 1.0));
-  for (SiconosVector::const_iterator it=z->begin(); it!=z->end(); it++)
+  for(SiconosVector::const_iterator it=z->begin(); it!=z->end(); it++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testIterators : ", *it == 1.0, true);
 }
 

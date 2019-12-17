@@ -43,54 +43,55 @@ void frictionContact_test_gams_opts(SolverOptions * options)
 {
   int solverId = options->solverId;
   if(solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
-     solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
-     solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH||
-     solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
-     solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
-     solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
-     solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
-     solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI
-     )
+      solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
+      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH||
+      solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
+      solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
+      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
+      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH ||
+      solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI
+    )
+  {
+    assert(options->solverParameters);
+    SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
+    GP->model_dir = strdup(GAMS_MODELS_SOURCE_DIR);
+    GP->filename = current->filename;
+
+    if(solverId == SICONOS_FRICTION_3D_GAMS_PATHVI ||
+        solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI ||
+        solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI)
     {
-      assert(options->solverParameters);
-      SN_GAMSparams* GP = (SN_GAMSparams*)options->solverParameters;
-      GP->model_dir = strdup(GAMS_MODELS_SOURCE_DIR);
-      GP->filename = current->filename;
-      
-      if (solverId == SICONOS_FRICTION_3D_GAMS_PATHVI ||
-          solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATHVI ||
-          solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI)
-        {
-          add_GAMS_opt_str(GP, "avi_start", "ray_first", GAMS_OPT_SOLVER);
-          add_GAMS_opt_str(GP, "ratio_tester", "expand", GAMS_OPT_SOLVER);
-          add_GAMS_opt_double(GP, "expand_eps", 0., GAMS_OPT_SOLVER);
-          add_GAMS_opt_bool(GP, "ratio_tester_tfirst", false, GAMS_OPT_SOLVER);
-          //    add_GAMS_opt_int(GP, "scheduler_decompose", 1, GAMS_OPT_SOLVER);
-          //    add_GAMS_opt_str(GP, "lemke_factorization_method", "minos_blu", GAMS_OPT_SOLVER);
-        }
-      else if (solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
-               solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
-               solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH
-               )
-        {
-          add_GAMS_opt_int(GP, "linear_model_perturb", 0, GAMS_OPT_SOLVER);
-          add_GAMS_opt_double(GP, "proximal_perturbation", 0., GAMS_OPT_SOLVER);
-          add_GAMS_opt_double(GP, "proximal_initial_maximum", 0., GAMS_OPT_SOLVER);
-          add_GAMS_opt_str(GP, "crash_method", "none", GAMS_OPT_SOLVER);
-          add_GAMS_opt_int(GP, "crash_perturb", 0, GAMS_OPT_SOLVER);
-          add_GAMS_opt_int(GP, "restart_limit", 0, GAMS_OPT_SOLVER);
-          //    add_GAMS_opt_str(GP, "lemke_start", "first", GAMS_OPT_SOLVER);
-          //    add_GAMS_opt_int(GP, "output_linear_model", 1, GAMS_OPT_SOLVER);
-          //    add_GAMS_opt_int(GP, "output_minor_iterations_frequency", 1, GAMS_OPT_SOLVER);
-          //    add_GAMS_opt_int(GP, "output_linear_model", 1, GAMS_OPT_SOLVER);
-        }
-      add_GAMS_opt_int(GP, "minor_iteration_limit", 100000, GAMS_OPT_SOLVER);
-      add_GAMS_opt_int(GP, "major_iteration_limit", 20, GAMS_OPT_SOLVER);
-      add_GAMS_opt_double(GP, "expand_delta", 1e-10, GAMS_OPT_SOLVER);
+      add_GAMS_opt_str(GP, "avi_start", "ray_first", GAMS_OPT_SOLVER);
+      add_GAMS_opt_str(GP, "ratio_tester", "expand", GAMS_OPT_SOLVER);
+      add_GAMS_opt_double(GP, "expand_eps", 0., GAMS_OPT_SOLVER);
+      add_GAMS_opt_bool(GP, "ratio_tester_tfirst", false, GAMS_OPT_SOLVER);
+      //    add_GAMS_opt_int(GP, "scheduler_decompose", 1, GAMS_OPT_SOLVER);
+      //    add_GAMS_opt_str(GP, "lemke_factorization_method", "minos_blu", GAMS_OPT_SOLVER);
     }
+    else if(solverId == SICONOS_FRICTION_3D_GAMS_PATH ||
+            solverId == SICONOS_FRICTION_3D_GAMS_LCP_PATH ||
+            solverId == SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH
+           )
+    {
+      add_GAMS_opt_int(GP, "linear_model_perturb", 0, GAMS_OPT_SOLVER);
+      add_GAMS_opt_double(GP, "proximal_perturbation", 0., GAMS_OPT_SOLVER);
+      add_GAMS_opt_double(GP, "proximal_initial_maximum", 0., GAMS_OPT_SOLVER);
+      add_GAMS_opt_str(GP, "crash_method", "none", GAMS_OPT_SOLVER);
+      add_GAMS_opt_int(GP, "crash_perturb", 0, GAMS_OPT_SOLVER);
+      add_GAMS_opt_int(GP, "restart_limit", 0, GAMS_OPT_SOLVER);
+      //    add_GAMS_opt_str(GP, "lemke_start", "first", GAMS_OPT_SOLVER);
+      //    add_GAMS_opt_int(GP, "output_linear_model", 1, GAMS_OPT_SOLVER);
+      //    add_GAMS_opt_int(GP, "output_minor_iterations_frequency", 1, GAMS_OPT_SOLVER);
+      //    add_GAMS_opt_int(GP, "output_linear_model", 1, GAMS_OPT_SOLVER);
+    }
+    add_GAMS_opt_int(GP, "minor_iteration_limit", 100000, GAMS_OPT_SOLVER);
+    add_GAMS_opt_int(GP, "major_iteration_limit", 20, GAMS_OPT_SOLVER);
+    add_GAMS_opt_double(GP, "expand_delta", 1e-10, GAMS_OPT_SOLVER);
+  }
   else
-    {// nothing, just pass
-    }
+  {
+    // nothing, just pass
+  }
 }
 #endif
 
@@ -104,31 +105,31 @@ int frictionContact_test_function(TestCase* current)
 
 #ifdef WITH_FCLIB
   int global_hdf5_output =0;
-  
+
   if(global_hdf5_output)
-    {
-      /* get the current calendar time */
-      int stime;
-      long ltime;
-      ltime = time(NULL);
-      stime = (unsigned) ltime/2;
-      srand(stime);
-      char filename[100];
-      sprintf(filename,"gfc3d_%d.hdf5",rand());
-      
-      GlobalFrictionContactProblem * gfc3d = fc3d_reformulation_global_problem(problem);
-      
-      char * title = "--";
-      char * description = "--";
-      char * mathInfo = "--";
-      
-      globalFrictionContact_fclib_write(gfc3d,
-                                        title,
-                                        description,
-                                        mathInfo,
-                                        filename);
-      
-    }
+  {
+    /* get the current calendar time */
+    int stime;
+    long ltime;
+    ltime = time(NULL);
+    stime = (unsigned) ltime/2;
+    srand(stime);
+    char filename[100];
+    sprintf(filename,"gfc3d_%d.hdf5",rand());
+
+    GlobalFrictionContactProblem * gfc3d = fc3d_reformulation_global_problem(problem);
+
+    char * title = "--";
+    char * description = "--";
+    char * mathInfo = "--";
+
+    globalFrictionContact_fclib_write(gfc3d,
+                                      title,
+                                      description,
+                                      mathInfo,
+                                      filename);
+
+  }
 #endif
 
   int NC = problem->numberOfContacts;
@@ -144,28 +145,28 @@ int frictionContact_test_function(TestCase* current)
 #ifdef HAVE_GAMS_C_API
   frictionContact_test_gams_opts(current->options);
 #endif
-  
-  if (dim == 2)
-    {
-      info = fc2d_driver(problem,
-                         reaction , velocity,
-                         current->options);
-    }
-  else if (dim == 3)
-    {
-      info = fc3d_driver(problem,
-                         reaction , velocity,
-                         current->options);
-    }
+
+  if(dim == 2)
+  {
+    info = fc2d_driver(problem,
+                       reaction, velocity,
+                       current->options);
+  }
+  else if(dim == 3)
+  {
+    info = fc3d_driver(problem,
+                       reaction, velocity,
+                       current->options);
+  }
   else
     info = 1;
 
-  for (int k = 0; k < dim * NC; ++k)
+  for(int k = 0; k < dim * NC; ++k)
   {
     info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
   }
-  
-  if (!info)
+
+  if(!info)
     printf("test successful, residual = %g\t, number of iterations = %i \n", current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   else
     printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", current->options->dparam[SICONOS_DPARAM_RESIDU], info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);

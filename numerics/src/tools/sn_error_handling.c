@@ -59,18 +59,18 @@ void sn_release_internal_jmp_buf(void)
 
 void sn_fatal_error(SN_ERROR_T code, const char* msg)
 {
-  if (external_fault_handler)
+  if(external_fault_handler)
   {
     (*external_fault_handler)(code, msg);
   }
 
-  if (internal_jmp_buf_used)
+  if(internal_jmp_buf_used)
   {
     internal_jmp_buf_used = false;
     internal_jmp_buf_err = msg;
     longjmp(internal_jmp_buf, code);
   }
-  else if (external_jmp_buf_used)
+  else if(external_jmp_buf_used)
   {
     external_jmp_buf_used = false;
     external_jmp_buf_err = msg;
@@ -85,12 +85,12 @@ void sn_fatal_error(SN_ERROR_T code, const char* msg)
 const char* sn_fatal_error_msg(void)
 {
   const char * err_msg = NULL;
-  if (internal_jmp_buf_err)
+  if(internal_jmp_buf_err)
   {
     err_msg = internal_jmp_buf_err;
     internal_jmp_buf_err = NULL;
   }
-  else if (external_jmp_buf_err)
+  else if(external_jmp_buf_err)
   {
     err_msg = external_jmp_buf_err;
     external_jmp_buf_err = NULL;

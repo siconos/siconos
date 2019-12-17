@@ -32,7 +32,7 @@ const char* const  SICONOS_NCP_NEWTON_MIN_FBLSA_STR = "NCP Newton minFBLSA";
 const char* const  SICONOS_NCP_PATHSEARCH_STR = "NCP Path search";
 const char* const  SICONOS_NCP_PATH_STR = "NCP PATH";
 
-int ncp_driver(NonlinearComplementarityProblem* problem, double *z , double *F, SolverOptions* options)
+int ncp_driver(NonlinearComplementarityProblem* problem, double *z, double *F, SolverOptions* options)
 {
   assert(options && "ncp_driver null input for solver options.\n");
 
@@ -43,9 +43,9 @@ int ncp_driver(NonlinearComplementarityProblem* problem, double *z , double *F, 
   int info = -1;
 
   int info_jmp = SN_SETJMP_INTERNAL_START;
-  if (info_jmp == SN_NO_ERROR)
+  if(info_jmp == SN_NO_ERROR)
   {
-    switch (options->solverId)
+    switch(options->solverId)
     {
     case SICONOS_NCP_NEWTON_FB_FBLSA: // Fischer-Burmeister + Newton w/ LS
       ncp_newton_FBLSA(problem, z, F, &info, options);
@@ -65,10 +65,10 @@ int ncp_driver(NonlinearComplementarityProblem* problem, double *z , double *F, 
     }
 
     /* check the conditions 0 <= z _|_ F(z) >= 0 */
-    if (options->filterOn > 0)
+    if(options->filterOn > 0)
     {
       int info_ = ncp_compute_error(problem->n, z, F, options->dparam[0], &(options->dparam[1]));
-      if (info <= 0) /* info was not set or the solver was happy */
+      if(info <= 0)  /* info was not set or the solver was happy */
         info = info_;
     }
     SN_SETJMP_INTERNAL_STOP

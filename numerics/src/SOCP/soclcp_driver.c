@@ -87,7 +87,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   case SICONOS_SOCLCP_NSGS:
   {
     numerics_printf(" ========================== Call NSGS solver for Second Order Cone LCP problem ==========================\n");
-    soclcp_nsgs(problem, r , v , &info , options);
+    soclcp_nsgs(problem, r, v, &info, options);
     break;
   }
   /* case SICONOS_SOCLCP_NSGSV: */
@@ -113,14 +113,14 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   case SICONOS_SOCLCP_VI_FPP:
   {
     numerics_printf(" ========================== Call VI_FixedPointProjection (VI_FPP) solver for Second Order Cone LCP problem ==========================\n");
-    soclcp_VI_FixedPointProjection(problem, r , v , &info , options);
+    soclcp_VI_FixedPointProjection(problem, r, v, &info, options);
     break;
   }
   /* VI Extra Gradient algorithm */
   case SICONOS_SOCLCP_VI_EG:
   {
     numerics_printf(" ========================== Call VI_ExtraGradient (VI_EG) solver for Second Order Cone LCP problem ==========================\n");
-    soclcp_VI_ExtraGradient(problem, r , v , &info , options);
+    soclcp_VI_ExtraGradient(problem, r, v, &info, options);
     break;
   }
   /* /\* Hyperplane Projection algorithm *\/ */

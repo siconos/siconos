@@ -37,35 +37,35 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   // ===== BoxesStack1-i100000-32.hdf5.dat =====
   d = 6;
-  for(int s=0;s<3;++s)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(solvers[s]);    
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
-      current++;
-    }
+  for(int s=0; s<3; ++s)
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(solvers[s]);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
+    current++;
+  }
   // NSN_FB expected to fail
   collection[1].will_fail = 1;
 
-  
+
   // ===== Rover4396.dat =====
   d = 10;
-  
+
   collection[current].filename = data_collection[d];
-  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);    
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
   current++;
 
-  for(int s=0;s<3;++s)
-    {
+  for(int s=0; s<3; ++s)
+  {
     collection[current].filename = data_collection[d];
-    collection[current].options = solver_options_create(solvers[s]);    
+    collection[current].options = solver_options_create(solvers[s]);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
     current++;
-    }
+  }
   *number_of_tests = current;
   return collection;
 

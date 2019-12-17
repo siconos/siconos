@@ -27,30 +27,30 @@
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
   int solvers[] = {SICONOS_GLOBAL_FRICTION_3D_NSN_AC, SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR};
-  
+
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
   *number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
-  
+
   int current = 0;
 
-  for(int s=0;s<n_solvers;++s)
+  for(int s=0; s<n_solvers; ++s)
+  {
+    for(int d =0; d <n_data; d++)
     {
-      for(int d =0; d <n_data; d++)
-        {
-          // default values for all parameters.
-          collection[current].filename = data_collection[d];
-          collection[current].options = solver_options_create(solvers[s]);    
-          current++;
-        }
+      // default values for all parameters.
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(solvers[s]);
+      current++;
     }
+  }
 
   // expected to fail
   collection[3].will_fail = 1; // NSN_AC on data/GFC3D_OneContact.dat
-# ifndef WITH_MUMPS 
+# ifndef WITH_MUMPS
   collection[4].will_fail = 1; // NSN_AC on data/GFC3D_TwoRods1.dat, mumps only
-#endif 
-  
+#endif
+
   return collection;
 }

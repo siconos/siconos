@@ -32,7 +32,8 @@
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
 #include "sanitizer.h"                      // for cblas_dcopy_msan
 
-typedef struct {
+typedef struct
+{
   NumericsMatrix* mat;
   RelayProblem* relay_pb;
 } vi_box_AVI_LSA_data;
@@ -75,20 +76,20 @@ void * vi_get_set(void* problem)
     This concerns only options parameters which management is
     specific to this solver. All others (iparam ...) are handled
     in solver_options_delete generic function.
- */ 
+ */
 static void vi_box_AVI_free(SolverOptions* options)
 {
   if(options->solverData)
-    {
-      vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)options->solverData;
-      NM_clear(sData->mat);
-      free(sData->mat);
-      sData->mat = NULL;
-      sData->relay_pb->lb = NULL;
-      sData->relay_pb->ub = NULL;
-      freeRelay_problem(sData->relay_pb);
-      free(sData);
-    }
+  {
+    vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)options->solverData;
+    NM_clear(sData->mat);
+    free(sData->mat);
+    sData->mat = NULL;
+    sData->relay_pb->lb = NULL;
+    sData->relay_pb->ub = NULL;
+    freeRelay_problem(sData->relay_pb);
+    free(sData);
+  }
   options->solverData = NULL;
 }
 
@@ -97,7 +98,7 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
 
   int n = problem->size;
 
-  if (!options->solverData)
+  if(!options->solverData)
   {
     RelayProblem* relay_pb = (RelayProblem*)malloc(sizeof(RelayProblem));
     relay_pb->size = n;
@@ -118,7 +119,7 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   functions_AVI_LSA.compute_H = &VI_compute_H_box_Qi;
   functions_AVI_LSA.compute_error = &VI_compute_error_box;
   functions_AVI_LSA.compute_descent_direction = &vi_compute_decent_dir_by_avi;
-  functions_AVI_LSA.get_set_from_problem_data = &vi_get_set;  
+  functions_AVI_LSA.get_set_from_problem_data = &vi_get_set;
   set_lsa_params_data(options, problem->nabla_F);
   newton_LSA(problem->size, z, F, info, (void *)problem, options, &functions_AVI_LSA);
 

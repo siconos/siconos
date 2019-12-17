@@ -43,8 +43,10 @@ using namespace RELATION;
 /// functions that take SP::SiconosVector without copy -- warning
 /// const abuse!)
 static void null_deleter(const SiconosVector *) {}
-template <typename T> static std11::shared_ptr<T> ptr(const T& a) {
-  return std11::shared_ptr<SiconosVector>(&*(T*)&a, null_deleter); }
+template <typename T> static std11::shared_ptr<T> ptr(const T& a)
+{
+  return std11::shared_ptr<SiconosVector>(&*(T*)&a, null_deleter);
+}
 
 double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 {
@@ -513,7 +515,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         }
         else
           RuntimeException::selfThrow
-            ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+          ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
         if(d->inverseMass())
         {

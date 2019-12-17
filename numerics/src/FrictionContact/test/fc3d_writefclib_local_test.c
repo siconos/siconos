@@ -34,7 +34,7 @@ static int write_test_fclib(char * filename)
   strncpy(extension, &filename[sizeoffilename - sizeof(extension) + 1], sizeof(extension));
   char * basename;
 
-  if (strcmp(extension, ".dat") == 0)
+  if(strcmp(extension, ".dat") == 0)
   {
     basename = (char *)malloc((sizeoffilename + 2) * sizeof(char *));
     strcpy(basename, filename);
@@ -121,17 +121,17 @@ int main(int argc, char *argv[])
 {
   int info=-1;
   printf("argc %i\n", argc);
-  if (argc == 1)
+  if(argc == 1)
   {
     info = write_test_fclib("./data/Confeti-ex03-Fc3D-SBM.dat");
   }
-  else if (argc == 2)
+  else if(argc == 2)
   {
     // We assume argv[1] is a filename to open
     FILE *file = fopen(argv[1], "r");
 
     /* fopen returns 0, the NULL pointer, on failure */
-    if (file == 0)
+    if(file == 0)
     {
       printf("Could not open file\n");
     }

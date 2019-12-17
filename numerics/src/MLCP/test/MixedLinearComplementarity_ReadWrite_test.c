@@ -35,7 +35,7 @@ int write_newformat(char *filename)
   printf("extension %s\n",  extension);
   char * basename;
 
-  if (strcmp(extension, "dat") == 0)
+  if(strcmp(extension, "dat") == 0)
   {
     basename = (char *)malloc((sizeoffilename + 5) * sizeof(char));
     basename[sizeoffilename + 4] = 0;
@@ -62,7 +62,7 @@ int write_newformat(char *filename)
   char  val[128];
   int t = 0;
   t++;
-  t = fscanf(f , "%s" , val);
+  t = fscanf(f, "%s", val);
   int withSol = 0;
   int n = problem->n;
   int m = problem ->m;
@@ -71,22 +71,22 @@ int write_newformat(char *filename)
   int i;
   double *sol  = (double*)malloc((n + m + m) * sizeof(double));
 
-  if (!feof(f))
+  if(!feof(f))
   {
     withSol = 1;
 
 
     sol[0] = atof(val);
 
-    for (i = 1 ; i < n + m + m ; ++i)
+    for(i = 1 ; i < n + m + m ; ++i)
     {
-      t = fscanf(f , "%s" , val);
+      t = fscanf(f, "%s", val);
       sol[i] = atof(val);
     }
   }
   else
   {
-    for (i = 0 ; i < (n + m + m) ; ++i) sol[i] = 0.0;
+    for(i = 0 ; i < (n + m + m) ; ++i) sol[i] = 0.0;
   }
 
 
@@ -97,11 +97,11 @@ int write_newformat(char *filename)
 
   info = mixedLinearComplementarity_printInFile(problem, foutput);
 
-  if (withSol)
+  if(withSol)
   {
-    for (i = 1 ; i < n + m + m ; ++i)
+    for(i = 1 ; i < n + m + m ; ++i)
     {
-      fprintf(foutput , "%lf " , sol[i]);
+      fprintf(foutput, "%lf ", sol[i]);
     }
   }
 
@@ -122,18 +122,18 @@ int main(int argc, char *argv[])
 {
   int info = 0;
   printf("argc %i\n", argc);
-  if (argc == 1)
+  if(argc == 1)
   {
     char filename[50] = "./data/RLCD_mlcp.dat";
     info = write_newformat(filename);
   }
-  else if (argc == 2)
+  else if(argc == 2)
   {
     // We assume argv[1] is a filename to open
     FILE *file = fopen(argv[1], "r");
 
     /* fopen returns 0, the NULL pointer, on failure */
-    if (file == 0)
+    if(file == 0)
     {
       printf("Could not open file\n");
       fclose(file);

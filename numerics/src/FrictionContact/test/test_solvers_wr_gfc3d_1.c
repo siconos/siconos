@@ -27,27 +27,28 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 {
   int solvers[] = {SICONOS_GLOBAL_FRICTION_3D_NSGS_WR, SICONOS_GLOBAL_FRICTION_3D_PROX_WR,
                    SICONOS_GLOBAL_FRICTION_3D_DSFP_WR, SICONOS_GLOBAL_FRICTION_3D_TFP_WR,
-                   SICONOS_GLOBAL_FRICTION_3D_ADMM_WR};
+                   SICONOS_GLOBAL_FRICTION_3D_ADMM_WR
+                  };
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
   *number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
-  
-  int current = 0;
-  for(int s=0;s<n_solvers;++s)
-    {
-      for(int d =0; d <n_data; d++)
-        {
-          collection[current].filename = data_collection[d];
-          collection[current].options = solver_options_create(solvers[s]);
-          collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
-          collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-          current++;
-        }
 
+  int current = 0;
+  for(int s=0; s<n_solvers; ++s)
+  {
+    for(int d =0; d <n_data; d++)
+    {
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(solvers[s]);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+      current++;
     }
 
-  collection[7].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_Example1.dat 
+  }
+
+  collection[7].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_Example1.dat
   collection[9].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
 
   return collection;

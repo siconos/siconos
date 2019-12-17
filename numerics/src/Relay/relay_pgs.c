@@ -55,11 +55,11 @@ void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOpt
   double * diag = (double*)malloc(n * sizeof(double));
 
 
-  for (i = 0 ; i < n ; ++i)
+  for(i = 0 ; i < n ; ++i)
   {
-    if (fabs(M[i * n + i]) < DBL_EPSILON)
+    if(fabs(M[i * n + i]) < DBL_EPSILON)
     {
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
         printf(" The problem cannot be solved with this method \n");
@@ -77,30 +77,30 @@ void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOpt
   double err  = 1.;
   *info = 1;
 
-  while ((iter < itermax) && (err > tol))
+  while((iter < itermax) && (err > tol))
   {
 
     ++iter;
 
     /* Initialization of w with q */
-    cblas_dcopy(n , q , 1 , w , 1);
+    cblas_dcopy(n, q, 1, w, 1);
 
-    for (i = 0 ; i < n ; ++i)
+    for(i = 0 ; i < n ; ++i)
     {
       z[i] = 0.0;
-      zi = -(q[i] + cblas_ddot(n , &M[i] , n , z , 1)) * diag[i];
+      zi = -(q[i] + cblas_ddot(n, &M[i], n, z, 1)) * diag[i];
       z[i] = zi;
-      if (zi < a[i]) z[i] = a[i];
-      else if (zi > b[i]) z[i] = b[i];
+      if(zi < a[i]) z[i] = a[i];
+      else if(zi > b[i]) z[i] = b[i];
     }
     /* **** Criterium convergence **** */
     *info = relay_compute_error(problem, z, w, tol, &err);
 
-    if (verbose == 2)
+    if(verbose == 2)
     {
       printf(" # i%d -- %g : ", iter, err);
-      for (i = 0 ; i < n ; ++i) printf(" %g", z[i]);
-      for (i = 0 ; i < n ; ++i) printf(" %g", w[i]);
+      for(i = 0 ; i < n ; ++i) printf(" %g", z[i]);
+      for(i = 0 ; i < n ; ++i) printf(" %g", w[i]);
       printf("\n");
     }
   }
@@ -109,17 +109,17 @@ void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOpt
   options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
 
-  if (err > tol)
+  if(err > tol)
   {
-    printf("Siconos/Numerics: relay_pgs: No convergence of PGS after %d iterations\n" , iter);
+    printf("Siconos/Numerics: relay_pgs: No convergence of PGS after %d iterations\n", iter);
     printf("The residue is : %g \n", err);
     *info = 1;
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
     {
-      printf("Siconos/Numerics: relay_pgs: Convergence of PGS after %d iterations\n" , iter);
+      printf("Siconos/Numerics: relay_pgs: Convergence of PGS after %d iterations\n", iter);
       printf("The residue is : %g \n", err);
     }
     *info = 0;

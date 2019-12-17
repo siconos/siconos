@@ -50,11 +50,11 @@ struct AVI::_BoundsNSLEffect : public SiconosVisitor
 
   void visit(const NormalConeNSL& nslaw)
   {
-    if (_pos > 0)
+    if(_pos > 0)
     {
       S
     }
-    // take the 
+    // take the
     SiconosVector& K = nslaw.K();
     SimpleMatrix& H = nslaw.H();
     _numerics_problem->size = nslaw.size();
@@ -107,11 +107,11 @@ void AVI::initialize(SP::Simulation sim)
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
   unsigned nbInter = 0;
-  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     NormalConeNSL& nc = static_cast<NormalConeNSL&>(*indexSet.bundle(*ui)->nonSmoothLaw());
     assert(Type::value(nc) == Type::NormalConeNSL &&
-        "AVI::initialize :: found a NonSmoothLaw that is not of the NormalConeNSL type! This is currently not supported");
+           "AVI::initialize :: found a NonSmoothLaw that is not of the NormalConeNSL type! This is currently not supported");
     SiconosVector& K = nc.K();
     SimpleMatrix& H = nc.H();
     _numerics_problem->size = nc.size();
@@ -125,7 +125,7 @@ void AVI::initialize(SP::Simulation sim)
     _numerics_problem->poly.split->Keq= NULL;
 
     // we do not support more than one interaction
-    if (!(nbInter++ == 0))
+    if(!(nbInter++ == 0))
       RuntimeException::selfThrow("AVI::initialize :: more than one Interactions for this OneStepNSProblem is not support ATM!");
   }
 
@@ -137,10 +137,10 @@ int AVI::compute(double time)
   int info = 0;
   // --- Prepare data for AVI computing ---
   bool cont = preCompute(time);
-  if (!cont)
+  if(!cont)
     return info;
 
-  if (_numerics_problem->size != _sizeOutput)
+  if(_numerics_problem->size != _sizeOutput)
   {
     RuntimeException::selfThrow("AVI::compute - size mismatch between AVI size and and the current size");
   }
@@ -152,16 +152,16 @@ int AVI::compute(double time)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
 
-  if (_sizeOutput != 0)
+  if(_sizeOutput != 0)
   {
     // The AVI in Numerics format
     _numerics_problem->M = _M->numericsMatrix().get();
     _numerics_problem->q = _q->getArray();
 
-    info = avi_driver(_numerics_problem.get(), _z->getArray() , _w->getArray() ,
+    info = avi_driver(_numerics_problem.get(), _z->getArray(), _w->getArray(),
                       _numerics_solver_options.get());
 
-    if (info != 0)
+    if(info != 0)
     {
       std::cout << "Warning : Problem in AVI resolution" <<std::endl;
     }

@@ -28,47 +28,47 @@ rd_Z(Uint *n, int w, ftnlen len)
   static int one = 1;
   int bad = 0;
 
-  if (!hex['0'])
+  if(!hex['0'])
   {
     s = "0123456789";
-    while (ch = *s++)
+    while(ch = *s++)
       hex[ch] = ch - '0' + 1;
     s = "ABCDEF";
-    while (ch = *s++)
+    while(ch = *s++)
       hex[ch] = hex[ch + 'a' - 'A'] = ch - 'A' + 11;
   }
   s = s0 = (char *)x;
   s1 = (char *)&x[4];
   se = (char *)&x[8];
-  if (len > 4 * sizeof(long))
+  if(len > 4 * sizeof(long))
     return errno = 117;
-  while (w)
+  while(w)
   {
     GET(ch);
-    if (ch == ',' || ch == '\n')
+    if(ch == ',' || ch == '\n')
       break;
     w--;
-    if (ch > ' ')
+    if(ch > ' ')
     {
-      if (!hex[ch & 0xff])
+      if(!hex[ch & 0xff])
         bad++;
       *s++ = ch;
-      if (s == se)
+      if(s == se)
       {
         /* discard excess characters */
-        for (t = s0, s = s1; t < s1;)
+        for(t = s0, s = s1; t < s1;)
           *t++ = *s++;
         s = s1;
       }
     }
   }
-  if (bad)
+  if(bad)
     return errno = 115;
   w = (int)len;
   w1 = s - s0;
   w2 = w1 + 1 >> 1;
   t = (char *)n;
-  if (*(char *)&one)
+  if(*(char *)&one)
   {
     /* little endian */
     t += w - 1;
@@ -76,16 +76,16 @@ rd_Z(Uint *n, int w, ftnlen len)
   }
   else
     i = 1;
-  for (; w > w2; t += i, --w)
+  for(; w > w2; t += i, --w)
     * t = 0;
-  if (!w)
+  if(!w)
     return 0;
-  if (w < w2)
+  if(w < w2)
     s0 = s - (w << 1);
-  else if (w1 & 1)
+  else if(w1 & 1)
   {
     *t = hex[*s0++ & 0xff] - 1;
-    if (!--w)
+    if(!--w)
       return 0;
     t += i;
   }
@@ -95,7 +95,7 @@ rd_Z(Uint *n, int w, ftnlen len)
     t += i;
     s0 += 2;
   }
-  while (--w);
+  while(--w);
   return 0;
 }
 
@@ -114,18 +114,18 @@ rd_I(Uint *n, int w, ftnlen len, register int base)
   char s[84], *ps;
   ps = s;
   x = 0;
-  while (w)
+  while(w)
   {
     GET(ch);
-    if (ch == ',' || ch == '\n') break;
+    if(ch == ',' || ch == '\n') break;
     *ps = ch;
     ps++;
     w--;
   }
   *ps = '\0';
   ps = s;
-  while (*ps == ' ') ps++;
-  if (*ps == '-')
+  while(*ps == ' ') ps++;
+  if(*ps == '-')
   {
     sign = 1;
     ps++;
@@ -133,28 +133,28 @@ rd_I(Uint *n, int w, ftnlen len, register int base)
   else
   {
     sign = 0;
-    if (*ps == '+') ps++;
+    if(*ps == '+') ps++;
   }
 loop:
-  while (*ps >= '0' && *ps <= '9')
+  while(*ps >= '0' && *ps <= '9')
   {
     x = x * base + (*ps - '0');
     ps++;
   }
-  if (*ps == ' ')
+  if(*ps == ' ')
   {
-    if (f__cblank) x *= base;
+    if(f__cblank) x *= base;
     ps++;
     goto loop;
   }
-  if (sign) x = -x;
-  if (len == sizeof(integer)) n->il = x;
-  else if (len == sizeof(char)) n->ic = (char)x;
+  if(sign) x = -x;
+  if(len == sizeof(integer)) n->il = x;
+  else if(len == sizeof(char)) n->ic = (char)x;
 #ifdef Allow_TYQUAD
-  else if (len == sizeof(longint)) n->ili = x;
+  else if(len == sizeof(longint)) n->ili = x;
 #endif
   else n->is = (short)x;
-  if (*ps) return(errno = 115);
+  if(*ps) return(errno = 115);
   else return(0);
 }
 static int
@@ -168,24 +168,24 @@ rd_L(ftnint *n, int w, ftnlen len)
   int ch, lv;
   char s[84], *ps;
   ps = s;
-  while (w)
+  while(w)
   {
     GET(ch);
-    if (ch == ',' || ch == '\n') break;
+    if(ch == ',' || ch == '\n') break;
     *ps = ch;
     ps++;
     w--;
   }
   *ps = '\0';
   ps = s;
-  while (*ps == ' ') ps++;
-  if (*ps == '.') ps++;
-  if (*ps == 't' || *ps == 'T')
+  while(*ps == ' ') ps++;
+  if(*ps == '.') ps++;
+  if(*ps == 't' || *ps == 'T')
     lv = 1;
-  else if (*ps == 'f' || *ps == 'F')
+  else if(*ps == 'f' || *ps == 'F')
     lv = 0;
   else return(errno = 116);
-  switch (len)
+  switch(len)
   {
   case sizeof(char):
     *(char *)n = (char)lv;
@@ -226,86 +226,86 @@ rd_F(ufloat *p, int w, int d, ftnlen len)
     GET(ch);
     w--;
   }
-  while (ch == ' ' && w);
-  switch (ch)
+  while(ch == ' ' && w);
+  switch(ch)
   {
   case '-':
     *sp++ = ch;
     sp1++;
     spe++;
   case '+':
-    if (!w) goto zero;
+    if(!w) goto zero;
     --w;
     GET(ch);
   }
-  while (ch == ' ')
+  while(ch == ' ')
   {
 blankdrop:
-    if (!w--) goto zero;
+    if(!w--) goto zero;
     GET(ch);
   }
-  while (ch == '0')
+  while(ch == '0')
   {
-    if (!w--) goto zero;
+    if(!w--) goto zero;
     GET(ch);
   }
-  if (ch == ' ' && f__cblank)
+  if(ch == ' ' && f__cblank)
     goto blankdrop;
   scale1 = f__scale;
-  while (isdigit(ch))
+  while(isdigit(ch))
   {
 digloop1:
-    if (sp < spe) *sp++ = ch;
+    if(sp < spe) *sp++ = ch;
     else ++exp;
 digloop1e:
-    if (!w--) goto done;
+    if(!w--) goto done;
     GET(ch);
   }
-  if (ch == ' ')
+  if(ch == ' ')
   {
-    if (f__cblank)
+    if(f__cblank)
     {
       ch = '0';
       goto digloop1;
     }
     goto digloop1e;
   }
-  if (ch == '.')
+  if(ch == '.')
   {
     exp += d;
-    if (!w--) goto done;
+    if(!w--) goto done;
     GET(ch);
-    if (sp == sp1)   /* no digits yet */
+    if(sp == sp1)    /* no digits yet */
     {
-      while (ch == '0')
+      while(ch == '0')
       {
 skip01:
         --exp;
 skip0:
-        if (!w--) goto done;
+        if(!w--) goto done;
         GET(ch);
       }
-      if (ch == ' ')
+      if(ch == ' ')
       {
-        if (f__cblank) goto skip01;
+        if(f__cblank) goto skip01;
         goto skip0;
       }
     }
-    while (isdigit(ch))
+    while(isdigit(ch))
     {
 digloop2:
-      if (sp < spe)
+      if(sp < spe)
       {
         *sp++ = ch;
         --exp;
       }
 digloop2e:
-      if (!w--) goto done;
+      if(!w--) goto done;
       GET(ch);
     }
-    if (ch == ' ')
+    if(ch == ' ')
     {
-      if (f__cblank)
+      if(f__cblank)
       {
         ch = '0';
         goto digloop2;
@@ -313,7 +313,7 @@ digloop2e:
       goto digloop2e;
     }
   }
-  switch (ch)
+  switch(ch)
   {
   default:
     break;
@@ -327,49 +327,49 @@ digloop2e:
   case 'E':
   case 'd':
   case 'D':
-    if (!w--)
+    if(!w--)
       goto bad;
     GET(ch);
-    while (ch == ' ')
+    while(ch == ' ')
     {
-      if (!w--)
+      if(!w--)
         goto bad;
       GET(ch);
     }
     se = 0;
-    switch (ch)
+    switch(ch)
     {
     case '-':
       se = 1;
     case '+':
 signonly:
-      if (!w--)
+      if(!w--)
         goto bad;
       GET(ch);
     }
-    while (ch == ' ')
+    while(ch == ' ')
     {
-      if (!w--)
+      if(!w--)
         goto bad;
       GET(ch);
     }
-    if (!isdigit(ch))
+    if(!isdigit(ch))
       goto bad;
 
     e = ch - '0';
-    for (;;)
+    for(;;)
     {
-      if (!w--)
+      if(!w--)
       {
         ch = '\n';
         break;
       }
       GET(ch);
-      if (!isdigit(ch))
+      if(!isdigit(ch))
       {
-        if (ch == ' ')
+        if(ch == ' ')
         {
-          if (f__cblank)
+          if(f__cblank)
             ch = '0';
           else continue;
         }
@@ -377,16 +377,16 @@ signonly:
           break;
       }
       e = 10 * e + ch - '0';
-      if (e > EXPMAX && sp > sp1)
+      if(e > EXPMAX && sp > sp1)
         goto bad;
     }
-    if (se)
+    if(se)
       exp -= e;
     else
       exp += e;
     scale1 = 0;
   }
-  switch (ch)
+  switch(ch)
   {
   case '\n':
   case ',':
@@ -396,18 +396,18 @@ bad:
     return (errno = 115);
   }
 done:
-  if (sp > sp1)
+  if(sp > sp1)
   {
-    while (*--sp == '0')
+    while(*--sp == '0')
       ++exp;
-    if (exp -= scale1)
+    if(exp -= scale1)
       sprintf(sp + 1, "e%ld", exp);
     else
       sp[1] = 0;
     x = atof(s);
   }
 zero:
-  if (len == sizeof(real))
+  if(len == sizeof(real))
     p->pf = x;
   else
     p->pd = x;
@@ -424,7 +424,7 @@ rd_A(char *p, ftnlen len)
 #endif
 {
   int i, ch;
-  for (i = 0; i < len; i++)
+  for(i = 0; i < len; i++)
   {
     GET(ch);
     *p++ = VAL(ch);
@@ -440,23 +440,23 @@ rd_AW(char *p, int w, ftnlen len)
 #endif
 {
   int i, ch;
-  if (w >= len)
+  if(w >= len)
   {
-    for (i = 0; i < w - len; i++)
+    for(i = 0; i < w - len; i++)
       GET(ch);
-    for (i = 0; i < len; i++)
+    for(i = 0; i < len; i++)
     {
       GET(ch);
       *p++ = VAL(ch);
     }
     return(0);
   }
-  for (i = 0; i < w; i++)
+  for(i = 0; i < w; i++)
   {
     GET(ch);
     *p++ = VAL(ch);
   }
-  for (i = 0; i < len - w; i++) *p++ = ' ';
+  for(i = 0; i < len - w; i++) *p++ = ' ';
   return(0);
 }
 static int
@@ -467,8 +467,8 @@ rd_H(int n, char *s)
 #endif
 {
   int i, ch;
-  for (i = 0; i < n; i++)
-    if ((ch = (*f__getn)()) < 0) return(ch);
+  for(i = 0; i < n; i++)
+    if((ch = (*f__getn)()) < 0) return(ch);
     else *s++ = ch == '\n' ? ' ' : ch;
   return(1);
 }
@@ -482,9 +482,9 @@ rd_POS(char *s)
   char quote;
   int ch;
   quote = *s++;
-  for (; *s; s++)
-    if (*s == quote && *(s + 1) != quote) break;
-    else if ((ch = (*f__getn)()) < 0) return(ch);
+  for(; *s; s++)
+    if(*s == quote && *(s + 1) != quote) break;
+    else if((ch = (*f__getn)()) < 0) return(ch);
     else *s = ch == '\n' ? ' ' : ch;
   return(1);
 }
@@ -497,24 +497,24 @@ rd_ed(struct f__syl *p, char *ptr, ftnlen len)
 #endif
 {
   int ch;
-  for (; f__cursor > 0; f__cursor--) if ((ch = (*f__getn)()) < 0) return(ch);
-  if (f__cursor < 0)
+  for(; f__cursor > 0; f__cursor--) if((ch = (*f__getn)()) < 0) return(ch);
+  if(f__cursor < 0)
   {
-    if (f__recpos + f__cursor < 0) /*err(elist->cierr,110,"fmt")*/
+    if(f__recpos + f__cursor < 0)  /*err(elist->cierr,110,"fmt")*/
       f__cursor = -f__recpos; /* is this in the standard? */
-    if (f__external == 0)
+    if(f__external == 0)
     {
       extern char *f__icptr;
       f__icptr += f__cursor;
     }
-    else if (f__curunit && f__curunit->useek)
+    else if(f__curunit && f__curunit->useek)
       (void) fseek(f__cf, (long) f__cursor, SEEK_CUR);
     else
       err(f__elist->cierr, 106, "fmt");
     f__recpos += f__cursor;
     f__cursor = 0;
   }
-  switch (p->op)
+  switch(p->op)
   {
   default:
     fprintf(stderr, "rd_ed, unexpected code: %d\n", p->op);
@@ -524,9 +524,9 @@ rd_ed(struct f__syl *p, char *ptr, ftnlen len)
     ch = rd_I((Uint *)ptr, p->p1, len, 10);
     break;
 
-    /* O and OM don't work right for character, double, complex, */
-    /* or doublecomplex, and they differ from Fortran 90 in */
-    /* showing a minus sign for negative values. */
+  /* O and OM don't work right for character, double, complex, */
+  /* or doublecomplex, and they differ from Fortran 90 in */
+  /* showing a minus sign for negative values. */
 
   case OM:
   case O:
@@ -550,16 +550,16 @@ rd_ed(struct f__syl *p, char *ptr, ftnlen len)
     ch = rd_F((ufloat *)ptr, p->p1, p->p2, len);
     break;
 
-    /* Z and ZM assume 8-bit bytes. */
+  /* Z and ZM assume 8-bit bytes. */
 
   case ZM:
   case Z:
     ch = rd_Z((Uint *)ptr, p->p1, len);
     break;
   }
-  if (ch == 0) return(ch);
-  else if (ch == EOF) return(EOF);
-  if (f__cf)
+  if(ch == 0) return(ch);
+  else if(ch == EOF) return(EOF);
+  if(f__cf)
     clearerr(f__cf);
   return(errno);
 }
@@ -569,7 +569,7 @@ rd_ned(p) struct f__syl *p;
 rd_ned(struct f__syl *p)
 #endif
 {
-  switch (p->op)
+  switch(p->op)
   {
   default:
     fprintf(stderr, "rd_ned, unexpected code: %d\n", p->op);
@@ -589,7 +589,7 @@ rd_ned(struct f__syl *p)
     return(1);
   case TL:
     f__cursor -= p->p1;
-    if (f__cursor < -f__recpos) /* TL1000, 1X */
+    if(f__cursor < -f__recpos)  /* TL1000, 1X */
       f__cursor = -f__recpos;
     return(1);
   }

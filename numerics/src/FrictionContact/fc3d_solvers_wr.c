@@ -65,5 +65,5 @@ GlobalFrictionContactProblem*  fc3d_reformulation_global_problem(FrictionContact
 
 
 
-   return globalproblem;
+  return globalproblem;
 }

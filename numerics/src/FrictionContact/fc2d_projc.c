@@ -32,12 +32,12 @@ void fc2d_projc(double xi[], int *nn, int statusi[], double pi[], double fric[],
 
 
 
-  for (i = 0 ; i < nc ; i++)
+  for(i = 0 ; i < nc ; i++)
   {
     mu1  = fric[i];
     stat = statusi[i];
 
-    if (xi[2 * i] <= 0.0)                       /* No contact status  */
+    if(xi[2 * i] <= 0.0)                        /* No contact status  */
     {
 
       projc1[2 * i]   = 0.0;
@@ -49,28 +49,28 @@ void fc2d_projc(double xi[], int *nn, int statusi[], double pi[], double fric[],
     {
       projc1[2 * i] = xi[2 * i];
 
-      if (xi[2 * i + 1] <= -mu1 * xi[2 * i])   /*  Slide backward     */
+      if(xi[2 * i + 1] <= -mu1 * xi[2 * i])    /*  Slide backward     */
       {
 
         projc1[2 * i + 1] = -mu1 * xi[2 * i] ;
         projc2[i]     = 1;
 
       }
-      else if (xi[2 * i + 1] >= mu1 * xi[2 * i]) /*  Slide forward      */
+      else if(xi[2 * i + 1] >= mu1 * xi[2 * i])  /*  Slide forward      */
       {
         projc1[2 * i + 1] = mu1 * xi[2 * i];
         projc2[i]     = 3;
       }
       else
       {
-        if (pi[2 * i + 1] == 0.0)
+        if(pi[2 * i + 1] == 0.0)
         {
-          if (stat == 1)                     /*  Slide backward     */
+          if(stat == 1)                      /*  Slide backward     */
           {
             projc1[2 * i + 1] = -mu1 * xi[2 * i];
             projc2[i]     = 1;
           }
-          else if (stat == 3)                  /*  Slide forward        */
+          else if(stat == 3)                   /*  Slide forward        */
           {
             projc1[2 * i + 1] = mu1 * xi[2 * i];
             projc2[i]     = 3;

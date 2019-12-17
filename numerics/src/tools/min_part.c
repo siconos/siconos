@@ -28,10 +28,10 @@ void min_part(double* x, double* sol, int n)
 
   minx = x[0];
 
-  for (i = 1 ; i < n ; i++)
+  for(i = 1 ; i < n ; i++)
   {
 
-    if (minx > x[i]) minx = x[i] ;
+    if(minx > x[i]) minx = x[i] ;
 
   }
 

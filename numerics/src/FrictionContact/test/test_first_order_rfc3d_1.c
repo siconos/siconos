@@ -27,29 +27,29 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   int n_solvers = 2;
   *number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
-  
+
   int current = 0;
   for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);    
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
-      solver_options_update_internal(collection[current].options, 0,
-                                     SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-      collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
-      collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
-      current++;
-    }
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+    current++;
+  }
 
   for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);    
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
-      solver_options_update_internal(collection[current].options, 0,
-                                     SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);   
-      current++;
-    }
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+    current++;
+  }
 
   *number_of_tests = current;
   return collection;

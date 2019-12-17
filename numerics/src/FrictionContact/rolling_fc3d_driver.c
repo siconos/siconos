@@ -44,22 +44,22 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
 
 
 
-  if (options == NULL)
+  if(options == NULL)
     numerics_error("rolling_fc3d_driver", "null input for solver options");
 
   assert(options->isSet); /* true(1) if the SolverOptions structure has been filled in else false(0) */
 
-  if (verbose > 1)
+  if(verbose > 1)
     solver_options_print(options);
 
   int info = -1 ;
 
-  if (problem->dimension != 5)
+  if(problem->dimension != 5)
     numerics_error("rolling_fc3d_driver", "Dimension of the problem : problem-> dimension is not compatible or is not set");
 
   /* Check for trivial case */
   info = rolling_fc3d_checkTrivialCase(problem, velocity, reaction, options);
-  if (info == 0)
+  if(info == 0)
   {
     /* If a trivial solution is found, we set the number of iterations to 0
        and the reached acuracy to 0.0 .
@@ -70,13 +70,13 @@ int rolling_fc3d_driver(RollingFrictionContactProblem* problem,
   }
 
 
-  switch (options->solverId)
+  switch(options->solverId)
   {
-    /* Non Smooth Gauss Seidel (NSGS) */
+  /* Non Smooth Gauss Seidel (NSGS) */
   case SICONOS_ROLLING_FRICTION_3D_NSGS:
   {
     numerics_printf(" ========================== Call NSGS solver for Rolling Friction-Contact 3D problem ==========================\n");
-    rolling_fc3d_nsgs(problem, reaction , velocity , &info , options);
+    rolling_fc3d_nsgs(problem, reaction, velocity, &info, options);
     break;
   }
   default:
@@ -104,12 +104,12 @@ int rolling_fc3d_checkTrivialCase(RollingFrictionContactProblem* problem, double
   int n = 5 * nc;
   int i = 0;
   /*take off? R=0 ?*/
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
-    if (q[5 * i] < -DBL_EPSILON)
+    if(q[5 * i] < -DBL_EPSILON)
       return -1;
   }
-  for (i = 0 ; i < n ; ++i)
+  for(i = 0 ; i < n ; ++i)
   {
     velocity[i] = q[i];
     reaction[i] = 0.;

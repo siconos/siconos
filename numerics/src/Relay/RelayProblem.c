@@ -33,7 +33,7 @@ void Relay_display(RelayProblem* p)
   int i, n = p->size;
   printf("RelayProblem Display :\n-------------\n");
   printf("size :%d \n", p->size);
-  if (p->M)
+  if(p->M)
   {
     printf("M matrix:\n");
     NM_display(p->M);
@@ -41,26 +41,26 @@ void Relay_display(RelayProblem* p)
   else
     printf("No M matrix:\n");
 
-  if (p->q)
+  if(p->q)
   {
     printf("q vector:\n");
-    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, p->q[i]);
+    for(i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, p->q[i]);
   }
   else
     printf("No q vector:\n");
 
-  if (p->lb)
+  if(p->lb)
   {
     printf("lb vector:\n");
-    for (i = 0; i < n; i++) printf("lb[ %i ] = %12.8e\n", i, p->lb[i]);
+    for(i = 0; i < n; i++) printf("lb[ %i ] = %12.8e\n", i, p->lb[i]);
   }
   else
     printf("No lb vector:\n");
 
-  if (p->ub)
+  if(p->ub)
   {
     printf("ub vector:\n");
-    for (i = 0; i < n; i++) printf("ub[ %i ] = %12.8e\n", i, p->ub[i]);
+    for(i = 0; i < n; i++) printf("ub[ %i ] = %12.8e\n", i, p->ub[i]);
   }
   else
     printf("No ub vector:\n");
@@ -71,7 +71,7 @@ void Relay_display(RelayProblem* p)
 
 int relay_printInFile(RelayProblem*  problem, FILE* file)
 {
-  if (! problem)
+  if(! problem)
   {
     fprintf(stderr, "Numerics, RelayProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -80,17 +80,17 @@ int relay_printInFile(RelayProblem*  problem, FILE* file)
   int n = problem->size;
   fprintf(file, "%d\n", n);
   NM_write_in_file(problem->M, file);
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
   fprintf(file, "\n");
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->lb[i]);
   }
   fprintf(file, "\n");
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->ub[i]);
   }
@@ -113,7 +113,7 @@ RelayProblem* relayProblem_new(void)
 RelayProblem* relay_newFromFile(FILE* file)
 {
   RelayProblem* problem = relayProblem_new();
-  
+
   int n = 0;
   int i;
 
@@ -122,19 +122,19 @@ RelayProblem* relay_newFromFile(FILE* file)
   problem->M =  NM_new_from_file(file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
 
   problem->lb = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->lb[i])));
   }
 
   problem->ub = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->ub[i])));
   }
@@ -144,9 +144,9 @@ RelayProblem* relay_newFromFile(FILE* file)
 RelayProblem * relay_new_from_filename(const char* filename)
 {
   RelayProblem* problem = NULL;
-  
+
   FILE * file = fopen(filename, "r");
-  if (file == NULL)
+  if(file == NULL)
     numerics_error("RelayProblem", "Can not open file ", filename);
 
   problem = relay_newFromFile(file);
@@ -159,14 +159,23 @@ RelayProblem * relay_new_from_filename(const char* filename)
 void freeRelay_problem(RelayProblem* problem)
 {
   assert(problem);
-  if (problem->M)
+  if(problem->M)
   {
     NM_clear(problem->M);
     free(problem->M);
   }
-  if (problem->q)  { free(problem->q); }
-  if (problem->lb) { free(problem->lb); }
-  if (problem->ub) { free(problem->ub); }
+  if(problem->q)
+  {
+    free(problem->q);
+  }
+  if(problem->lb)
+  {
+    free(problem->lb);
+  }
+  if(problem->ub)
+  {
+    free(problem->ub);
+  }
   free(problem);
 }
 

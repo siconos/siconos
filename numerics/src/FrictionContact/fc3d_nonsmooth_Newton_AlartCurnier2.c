@@ -39,7 +39,8 @@
 #include "line_search.h"                         // for SICONOS_LSA_GOLDSTEIN
 #include "numerics_verbose.h"                    // for numerics_error
 
-typedef struct {
+typedef struct
+{
   FrictionContactProblem* problem;
   fc3d_nonsmooth_Newton_solvers* equation;
   double* rho;
@@ -116,7 +117,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
 
   AlartCurnierParams acparams;
 
-  switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
+  switch(options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
   case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
@@ -155,7 +156,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
   opaque_data.problem = problem;
   opaque_data.equation = &equation;
   opaque_data.rho = (double*)calloc(problemSize, sizeof(double));
-  for (size_t i = 0; i < problemSize; ++i) opaque_data.rho[i] = 1.;
+  for(size_t i = 0; i < problemSize; ++i) opaque_data.rho[i] = 1.;
   opaque_data.Ax = (double*)calloc(_3problemSize, sizeof(double));
   opaque_data.Bx = (double*)calloc(_3problemSize, sizeof(double));
   opaque_data.normq = cblas_dnrm2(problemSize, problem->q, 1);
@@ -183,13 +184,13 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
     options_vi_eg->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
     options_vi_eg->dparam[SICONOS_DPARAM_TOL] = sqrt(options->dparam[SICONOS_DPARAM_TOL]);
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
-    fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
+    fc3d_VI_ExtraGradient(problem, reaction, velocity, info, options_vi_eg);
     solver_options_delete(options_vi_eg);
     options_vi_eg = NULL;
 
     newton_LSA(problemSize, reaction, velocity, info, (void *)&opaque_data, options, &functions_AC);
   }
-  else if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO)
+  else if(options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO)
   {
     newton_LSA(problemSize, reaction, velocity, info, (void *)&opaque_data, options, &functions_AC);
   }

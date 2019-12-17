@@ -32,7 +32,7 @@ void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* probl
 
 void mixedComplementarityProblem_free(MixedComplementarityProblem* mcp)
 {
-  if (mcp->nabla_Fmcp)
+  if(mcp->nabla_Fmcp)
   {
     NM_clear(mcp->nabla_Fmcp);
     free(mcp->nabla_Fmcp);

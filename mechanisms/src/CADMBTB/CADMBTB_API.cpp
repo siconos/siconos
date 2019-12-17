@@ -227,11 +227,11 @@ void CADMBTB_moveObjectFromQ(unsigned int id,double& x,double& y, double& z, dou
   ::boost::math::quaternion<double> quatBuff(0,0,0,0);
   quatBuff=quattrf*quatZ/quattrf;
   //    std::cout<<"Z axis"<<quatBuff<<"\n";
-  gp_Dir axeZ(quatBuff.R_component_2() ,quatBuff.R_component_3() ,quatBuff.R_component_4());
+  gp_Dir axeZ(quatBuff.R_component_2(),quatBuff.R_component_3(),quatBuff.R_component_4());
 
   quatBuff=quattrf*quatX/quattrf;
   //    std::cout<<"X axis"<<quatBuff<<"\n";
-  gp_Dir axeX(quatBuff.R_component_2() ,quatBuff.R_component_3() ,quatBuff.R_component_4());
+  gp_Dir axeX(quatBuff.R_component_2(),quatBuff.R_component_3(),quatBuff.R_component_4());
   gp_Ax3 aDestAx3(gp_Pnt(x,y,z),axeZ,axeX);
   // Set transformation
   sTrsfTopoDS[id].SetDisplacement(sStartTopoDS[id], aDestAx3);
@@ -410,20 +410,20 @@ void CADMBTB_getMinDistance
   if(sTopoDSType[id2] == CADMBTB_TYPE_EDGE || sTopoDSType[id1] == CADMBTB_TYPE_EDGE)
   {
     _CADMBTB_getMinDistanceFaceEdge_using_n2qn1(idContact,id1,id2,
-                                                X1,Y1,Z1,
-                                                X2,Y2,Z2,
-                                                nX,nY,nZ,
-                                                normalFromFace1,
-                                                MinDist);
+        X1,Y1,Z1,
+        X2,Y2,Z2,
+        nX,nY,nZ,
+        normalFromFace1,
+        MinDist);
   }
   else
   {
     _CADMBTB_getMinDistanceFaceFace_using_n2qn1(idContact,id1,id2,
-                                                X1,Y1,Z1,
-                                                X2,Y2,Z2,
-                                                nX,nY,nZ,
-                                                normalFromFace1,
-                                                MinDist);
+        X1,Y1,Z1,
+        X2,Y2,Z2,
+        nX,nY,nZ,
+        normalFromFace1,
+        MinDist);
   }
 
 #ifdef CADMBTB_PRINT_DIST
@@ -515,7 +515,7 @@ void CADMBTB_buildLineArtefactLine(unsigned int id,  double* X1, double* Y1, dou
   /** Color are listed in Quantity_NameOfColor.hxx header file */
   Quantity_NameOfColor         col =  Quantity_NOC_HOTPINK;
   if(MakeEdge.IsDone() && P1.Distance(P2) > sMinLineLength)
-  {   
+  {
     TopoDS_Compound compound;
     BRep_Builder B;
     B.MakeCompound(compound);
@@ -645,30 +645,30 @@ void CADMBTB_buildOrientedLineArtefactLine(unsigned int id,  double* X1, double*
     //printf("CADMBTB_buildArtefactLine P1 = %e, %e, %e, P2=%e,%e,%e\n",X1,Y1,Z1,X2,Y2,Z2);
 
 
-    
-    // /** V.A. Attempt yo draw arrow with OpenCascade. It Remains to do : 
+
+    // /** V.A. Attempt yo draw arrow with OpenCascade. It Remains to do :
     //  *  + Fix the solid display of the arrow and the length
     //  *  + Manage a list a Presentation  objects, the display and the delete at each time--step.
     //  */
     //  Handle(Prs3d_Presentation) aPresentation = new Prs3d_Presentation (pAIS_InteractiveContext->CurrentViewer()->Viewer());
-    
+
     // // // void Prs3d_Arrow::Draw	(	const Handle(Prs3d_Presentation)& 	aPresentation,
     // // //                           const gp_Pnt & 	aLocation,
     // // //                           const gp_Dir & 	aDirection,
     // // //                           const Quantity_PlaneAngle 	anAngle,
-    // // //                           const Quantity_Length 	aLength	 
-    // // //   )	
-    
+    // // //                           const Quantity_Length 	aLength
+    // // //   )
+
     // gp_Vec aVec(P1,P2);
     // gp_Dir aDirection(aVec);
     // Quantity_PlaneAngle 	anAngle = 0.2;
-    // Quantity_Length 	aLength	= aVec.Magnitude() ; 
+    // Quantity_Length 	aLength	= aVec.Magnitude() ;
     // Prs3d_Arrow::Draw	(aPresentation,
     //                    P1,
     //                    aDirection,
     //                    anAngle,
     //                    aLength ) ;
-    
+
     // aPresentation->Display();
 
   }
@@ -680,7 +680,7 @@ void CADMBTB_buildOrientedLineArtefactLine(unsigned int id,  double* X1, double*
 
 
 
-    
+
   pAIS_InteractiveContext->Display(sAISArtefacts[id],true);
 }
 
