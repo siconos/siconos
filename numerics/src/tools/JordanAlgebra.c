@@ -230,6 +230,8 @@ void JA_sqrt(const double * const vec, const unsigned int vecSize, const size_t 
 
   for(size_t i = 0; i < 2 * varsCount; i += 2)
   {
+    assert(eigenvals[i] >=0);
+    assert(eigenvals[i+1] >=0);
     sqrt_eigenval1 = sqrt(eigenvals[i]);
     sqrt_eigenval2 = sqrt(eigenvals[i + 1]);
     pos = (i / 2) * dimension;
@@ -265,6 +267,8 @@ void JA_sqrt_inv(const double * const vec, const unsigned int vecSize, const siz
 
   for(size_t i = 0; i < 2 * varsCount; i += 2)
   {
+    assert(eigenvals[i]>0 );
+    assert(eigenvals[i+1]>0 );
     sqrt_eigenval1 = 1. / sqrt(eigenvals[i]);
     sqrt_eigenval2 = 1. / sqrt(eigenvals[i + 1]);
     pos = (i / 2) * dimension;
