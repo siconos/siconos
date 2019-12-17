@@ -11,7 +11,10 @@ include: ci_gitlab/gitlab-ci-siconos-templates.yml
 docker-build:ubuntu18.04:
   variables:
     IMAGE_NAME: ubuntu18.04
+  stage: docker-build-layer2
   extends: .docker-build
+  dependencies:
+    - docker-build:ubuntu18.04-no-python
 
 
 # This job create a docker image with all required dependencies
@@ -21,7 +24,7 @@ docker-build:ubuntu18.04-oce:
   variables:
     IMAGE_NAME: ubuntu18.04-oce
   extends: .docker-build
-  stage: docker-build-layer2
+  stage: docker-build-layer3
   dependencies:
     - docker-build:ubuntu18.04
 
@@ -49,7 +52,7 @@ docker-build:ubuntu18.04-mumps-par:
   variables:
     IMAGE_NAME: ubuntu18.04-mumps-par
   extends: .docker-build
-  stage: docker-build-layer2 # layer 2 since it's based on docker-build:ubuntu18.04
+  stage: docker-build-layer3 # layer 3 since it's based on docker-build:ubuntu18.04
   dependencies:
     - docker-build:ubuntu18.04
 
@@ -69,7 +72,7 @@ docker-build:ubuntu18.04-doc:
   variables:
     IMAGE_NAME: ubuntu18.04-doc
   extends: .docker-build
-  stage: docker-build-layer3
+  stage: docker-build-layer-doc
   dependencies:
     - docker-build:ubuntu18.04-oce
 
@@ -82,7 +85,7 @@ docker-build:ubuntu18.04-fclib:
   variables:
     IMAGE_NAME: ubuntu18.04-fclib
   extends: .docker-build
-  stage: docker-build-layer2
+  stage: docker-build-layer3
   dependencies:
     - docker-build:ubuntu18.04
 

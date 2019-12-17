@@ -7,5 +7,5 @@ RUN apt update  && apt install -y -qq \
         python3-pytest \
 	valgrind \
         python3-lxml \
-        python3-h5py \
+        python3-h5py
 RUN apt clean && apt autoremove
