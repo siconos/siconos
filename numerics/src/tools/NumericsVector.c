@@ -178,17 +178,24 @@ void NV_sub(const double * const vec1, const double * const vec2, const unsigned
 
 double NV_norm_inf(const double * const vec, const unsigned int vecSize)
 {
-    double * abs_vec = NV_abs(vec, vecSize);
-    return NV_max(abs_vec, vecSize);
+    /* double * abs_vec = NV_abs(vec, vecSize); */
+    /* return NV_max(abs_vec, vecSize); */
+  double norm = DBL_MIN;
+  for (unsigned int i = 0; i < vecSize; ++i)
+  {
+    norm = fmax(norm, fabs(vec[i]));
+  }
+  return norm;
 }
 
 double NV_norm_2(const double * const vec, const unsigned int vecSize)
 {
-    double * vec2 = (double*)calloc(vecSize, sizeof(double));
-    NV_power2(vec, vecSize, vec2);
-    double sum = NV_reduce(vec2, vecSize);
-    free(vec2);
-    return sqrt(sum);
+  /* double * vec2 = (double*)calloc(vecSize, sizeof(double)); */
+  /* NV_power2(vec, vecSize, vec2); */
+  /* double sum = NV_reduce(vec2, vecSize); */
+  /* free(vec2); */
+  /* return sqrt(sum); */
+  return cblas_dnrm2(vecSize, vec, 1);
 }
 
 void NV_sqrt(const double * const vec, const unsigned int vecSize, double * out)
