@@ -270,7 +270,9 @@ static void dualResidualVector(NumericsMatrix * M, const double * globalVelocity
 
   // Mv = M @ globalVelocity
   NM_gemv(1.0, M, globalVelocity, 0.0, Mv);
-
+  //printf("Mv norm = %e\n", cblas_dnrm2(m, Mv, 1));
+  
+  
   // Mv_minus_f = M @ globalVelocity - f
   NV_sub(Mv, f, m, Mv_minus_f);
 
@@ -279,6 +281,7 @@ static void dualResidualVector(NumericsMatrix * M, const double * globalVelocity
 
   // HTr = H^T @ reaction
   NM_gemv(1.0, HT, reaction, 0.0, HTr);
+  //printf("HTr norm = %e\n", cblas_dnrm2(m, HTr, 1));
 
   // Mv_plus_f_minus_HTr = M @ globalVelocity - f - H^T @ reaction
   NV_sub(Mv_minus_f, HTr, m, out);
@@ -312,7 +315,7 @@ static double dualResidualNorm(NumericsMatrix * M, const double * globalVelocity
 {
   double * resid = (double*)calloc(H->size1, sizeof(double));
   dualResidualVector(M, globalVelocity, H, reaction, f, resid);
-
+  //printf("resid\n"); NV_display(resid, M->size0);
   double norm_inf = NV_norm_inf(resid, H->size1);
   free(resid);
 
@@ -525,42 +528,6 @@ void gfc3d_IPM_free(GlobalFrictionContactProblem* problem, SolverOptions* option
 
 }
 
-int gfc3d_IPM_setDefaultSolverOptions(SolverOptions* options)
-{
-  if(verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the IPM Solver\n");
-  }
-
-  solver_options_nullify(options);
-
-  options->solverId = SICONOS_GLOBAL_FRICTION_3D_IPM;
-
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 20;
-  options->dSize = 20;
-
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
-    SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
-
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
-
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
-  options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-5;
-  options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
-  options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
-  options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.9;
-  options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;
-
-  return 0;
-}
-
 void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict reaction,
                double* restrict velocity, double* restrict globalVelocity,
                int* restrict info, SolverOptions* restrict options)
@@ -715,7 +682,22 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double * velocity_t_inv = data->tmp_vault_nd[14];
   double * Qp_velocity_t_inv = data->tmp_vault_nd[15];
   double * tmp1 = data->tmp_vault_nd[16];
+  
+  ComputeErrorGlobalPtr computeError = NULL;
 
+  if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]==
+      SICONOS_FRICTION_3D_ADMM_UPDATE_S_YES)
+  {
+    computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error;
+  }
+  else
+  {
+    computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error_convex;
+  }
+  /* check the full criterion */
+  double norm_q = cblas_dnrm2(m, problem->q, 1);
+  double norm_b = cblas_dnrm2(nd, problem->b, 1);
+  
 
   while(iteration < max_iter)
   {
@@ -784,13 +766,17 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     /** Correction of w to take into account the dependence
         on the tangential velocity */
-    for(unsigned int i = 0; i < nd; ++ i)
+    if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]==
+        SICONOS_FRICTION_3D_ADMM_UPDATE_S_YES)
     {
-      if(i % d == 0)
-        w[i] = w_tilde[i]/(problem->mu[(int)(i/d)])
-               + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
+      for(unsigned int i = 0; i < nd; ++ i)
+      {
+        if(i % d == 0)
+          w[i] = w_tilde[i]/(problem->mu[(int)(i/d)])
+            + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
+      }
     }
-
+    
     primalResidualVector(velocity, H, globalVelocity, w, primalConstraint);
     dualResidualVector(M, globalVelocity, H, reaction, f, dualConstraint);
 
@@ -821,6 +807,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     alpha_primal = getNewtonStepLength(velocity, d_velocity, nd, n, 1.);
     alpha_dual = getNewtonStepLength(reaction, d_reaction, nd, n, 1.);
     gmm = gmmp1 + gmmp2 * fmin(alpha_primal, alpha_dual);
+    //gmm = gmmp1 + 0.08 * fmin(alpha_primal, alpha_dual);
 
     /* ----- Corrector step of Mehrotra ----- */
     cblas_dscal(nd, alpha_primal, data->tmp_point->t_velocity, 1);
@@ -833,7 +820,9 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * fmin(alpha_primal, alpha_dual)) : sgmp3;
     sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
-
+    
+    /* sigma = pow(barr_param_a / barr_param, 3); */
+    /* sigma=0.90;  */
     if(!options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])
     {
       iden = JA_iden(nd, n);
@@ -895,7 +884,37 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     barr_param = cblas_ddot(nd, reaction, 1, velocity, 1) / nd;
 
+    /* printf("reaction:");NV_display(reaction,nd); */
+    /* printf("velocity:");NV_display(velocity,nd); */
+
+    /* for (int kk =0 ; kk < nd ; kk++) */
+    /* { */
+    /*   printf("r[kk]*v[kk]  = %42.32e\n", reaction[kk]*velocity[kk] ); */
+    /* } */
+
+    
+    /* printf("barr_param  = %42.32e\n", barr_param); */
+    /* printf("barr_param  = %42.32e\n", cblas_ddot(nd, reaction, 1, velocity, 1) ); */
     iteration++;
+    /* ----- return to original variables ------ */
+    NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->tmp_point->t_velocity);
+    /* cblas_dcopy(nd, data->tmp_point->t_velocity, 1, velocity, 1); */
+
+    NM_gemv(1.0, P_mu, reaction, 0.0, data->tmp_point->t_reaction);
+    /* cblas_dcopy(nd, data->tmp_point->t_reaction, 1, reaction, 1); */
+
+
+
+    double err;
+    (*computeError)(problem,
+                    data->tmp_point->t_reaction, data->tmp_point->t_velocity, globalVelocity,
+                    tol, options,
+                    norm_q, norm_b,  &err);
+    numerics_printf_verbose(-1,"---- GFC3D - IPM  - Iteration %i, full error = %14.7e", iteration, err);
+
+
+
+    
   }
 
   /* ----- return to original variables ------ */
@@ -906,11 +925,12 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cblas_dcopy(nd, data->tmp_point->t_reaction, 1, reaction, 1);
 
 
-  /* check the full criterion */
-  double norm_q = cblas_dnrm2(n, problem->q, 1);
-  double norm_b = cblas_dnrm2(m, problem->b, 1);
+
   double err;
-  gfc3d_compute_error(problem,  reaction, velocity, globalVelocity,  tol, options, norm_q, norm_b, &err);
+  (*computeError)(problem,
+                  reaction, velocity, globalVelocity,
+                  tol, options,
+                  norm_q, norm_b,  &err);
   numerics_printf_verbose(-1,"---- GFC3D - IPM  - Iteration %i, full error = %14.7e", iteration, err);
 
 
@@ -930,4 +950,44 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   free(H);
 
   *info = hasNotConverged;
+}
+
+int gfc3d_IPM_setDefaultSolverOptions(SolverOptions* options)
+{
+  if(verbose > 0)
+  {
+    printf("Set the Default SolverOptions for the IPM Solver\n");
+  }
+
+  solver_options_nullify(options);
+
+  options->solverId = SICONOS_GLOBAL_FRICTION_3D_IPM;
+
+  options->numberOfInternalSolvers = 0;
+  options->isSet = 1;
+  options->filterOn = 1;
+  options->iSize = 20;
+  options->dSize = 20;
+
+  options->iparam = (int *)calloc(options->iSize, sizeof(int));
+  options->dparam = (double *)calloc(options->dSize, sizeof(double));
+
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
+    SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
+
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING] = 1;
+
+  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]=
+    SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO;
+
+  
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-05;
+  options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
+  options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
+  options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1] = 0.8;
+  options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2] = 0.09;
+
+  return 0;
 }
