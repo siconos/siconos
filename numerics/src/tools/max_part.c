@@ -24,10 +24,10 @@ void max_part(double* x, double *sol, int n)
   double  max;
   max = x[0];
 
-  for (i = 1 ; i < n ; i++)
+  for(i = 1 ; i < n ; i++)
   {
 
-    if (max < x[i]) max = x[i] ;
+    if(max < x[i]) max = x[i] ;
 
   }
 

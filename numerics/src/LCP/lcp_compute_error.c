@@ -46,34 +46,34 @@
 /*   } */
 /* } */
 
-void lcp_compute_error_only(unsigned int n, double* restrict z , double* restrict w, double* restrict error)
+void lcp_compute_error_only(unsigned int n, double* restrict z, double* restrict w, double* restrict error)
 {
   *error = 0.;
-  for (unsigned int i = 0 ; i < n ; i++)
+  for(unsigned int i = 0 ; i < n ; i++)
   {
     *error += pow(z[i] - fmax(0,(z[i] - w[i])),2);
   }
   *error =sqrt(*error);
 }
 
-int lcp_compute_error(LinearComplementarityProblem* problem, double *z , double *w, double tolerance, double * error)
+int lcp_compute_error(LinearComplementarityProblem* problem, double *z, double *w, double tolerance, double * error)
 {
   /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
+  if(problem == NULL || z == NULL || w == NULL)
     numerics_error("lcp_compute_error", "null input for problem and/or z and/or w");
 
   /* Computes w = Mz + q */
   int incx = 1, incy = 1;
   unsigned int n = problem->size;
-  cblas_dcopy(n , problem->q , incx , w , incy);  // w <-q
+  cblas_dcopy(n, problem->q, incx, w, incy);      // w <-q
   NM_gemv(1.0, problem->M, z, 1.0, w);
-  double norm_q = cblas_dnrm2(n , problem->q , incx);
+  double norm_q = cblas_dnrm2(n, problem->q, incx);
   lcp_compute_error_only(n, z, w, error);
 
-  if (fabs(norm_q) > DBL_EPSILON)
+  if(fabs(norm_q) > DBL_EPSILON)
     *error /= norm_q;
 
-  if (*error > tolerance)
+  if(*error > tolerance)
   {
     numerics_printf("lcp_compute_error : error = %g > tolerance = %g.\n", *error, tolerance);
     return 1;

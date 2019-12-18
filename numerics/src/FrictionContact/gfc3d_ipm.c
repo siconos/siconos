@@ -271,8 +271,8 @@ static void dualResidualVector(NumericsMatrix * M, const double * globalVelocity
   // Mv = M @ globalVelocity
   NM_gemv(1.0, M, globalVelocity, 0.0, Mv);
   //printf("Mv norm = %e\n", cblas_dnrm2(m, Mv, 1));
-  
-  
+
+
   // Mv_minus_f = M @ globalVelocity - f
   NV_sub(Mv, f, m, Mv_minus_f);
 
@@ -389,7 +389,7 @@ void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* option
   unsigned int nd = problem->H->size1;
   unsigned int d = problem->dimension;
 
-  if(!options->dWork || options->dWorkSize != (int)(m + nd + nd))
+  if(!options->dWork || options->dWorkSize != (size_t)(m + nd + nd))
   {
     options->dWork = (double*)calloc(m + nd + nd, sizeof(double));
     options->dWorkSize = m + nd + nd;
@@ -570,7 +570,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
   // initialize solver if it is not set
   int internal_allocation=0;
-  if(!options->dWork || (options->dWorkSize != (int)(m + nd + nd)))
+  if(!options->dWork || (options->dWorkSize != (size_t)(m + nd + nd)))
   {
     gfc3d_IPM_init(problem, options);
     internal_allocation = 1;
@@ -682,10 +682,10 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double * velocity_t_inv = data->tmp_vault_nd[14];
   double * Qp_velocity_t_inv = data->tmp_vault_nd[15];
   double * tmp1 = data->tmp_vault_nd[16];
-  
+
   ComputeErrorGlobalPtr computeError = NULL;
 
-  if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]==
+  if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]==
       SICONOS_FRICTION_3D_ADMM_UPDATE_S_YES)
   {
     computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error;
@@ -697,7 +697,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   /* check the full criterion */
   double norm_q = cblas_dnrm2(m, problem->q, 1);
   double norm_b = cblas_dnrm2(nd, problem->b, 1);
-  
+
 
   while(iteration < max_iter)
   {
@@ -766,17 +766,17 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     /** Correction of w to take into account the dependence
         on the tangential velocity */
-    if (options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]==
+    if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]==
         SICONOS_FRICTION_3D_ADMM_UPDATE_S_YES)
     {
       for(unsigned int i = 0; i < nd; ++ i)
       {
         if(i % d == 0)
           w[i] = w_tilde[i]/(problem->mu[(int)(i/d)])
-            + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
+                 + sqrt(velocity[i+1]*velocity[i+1]+velocity[i+2]*velocity[i+2]);
       }
     }
-    
+
     primalResidualVector(velocity, H, globalVelocity, w, primalConstraint);
     dualResidualVector(M, globalVelocity, H, reaction, f, dualConstraint);
 
@@ -820,7 +820,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
     e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * fmin(alpha_primal, alpha_dual)) : sgmp3;
     sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
-    
+
     /* sigma = pow(barr_param_a / barr_param, 3); */
     /* sigma=0.90;  */
     if(!options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING])
@@ -892,7 +892,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     /*   printf("r[kk]*v[kk]  = %42.32e\n", reaction[kk]*velocity[kk] ); */
     /* } */
 
-    
+
     /* printf("barr_param  = %42.32e\n", barr_param); */
     /* printf("barr_param  = %42.32e\n", cblas_ddot(nd, reaction, 1, velocity, 1) ); */
     iteration++;
@@ -914,7 +914,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
 
 
-    
+
   }
 
   /* ----- return to original variables ------ */
@@ -952,7 +952,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   *info = hasNotConverged;
 }
 
-void gfc3d_ipm_set_default(SolverOptions* options){
+void gfc3d_ipm_set_default(SolverOptions* options)
+{
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
@@ -963,7 +964,7 @@ void gfc3d_ipm_set_default(SolverOptions* options){
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]=
     SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO;
 
-  
+
   options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-05;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;

@@ -38,7 +38,7 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
   double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
   double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
 
-  for (i = 0; i < lcp_problem->size; i++)
+  for(i = 0; i < lcp_problem->size; i++)
   {
     zlcp[i] = 0.0;
     wlcp[i] = 0.0;
@@ -48,14 +48,14 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
   /*  FILE * fcheck = fopen("lcp_relay.dat","w"); */
   /*  info = linearComplementarity_printInFile(lcp_problem,fcheck); */
 
-  // Call the lcp_solver 
+  // Call the lcp_solver
   options->solverId = SICONOS_LCP_LEMKE;
-  *info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options);
-  if (options->filterOn > 0)
+  *info = linearComplementarity_driver(lcp_problem, zlcp, wlcp, options);
+  if(options->filterOn > 0)
     lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
   // Conversion of result
-  for (i = 0; i < problem->size; i++)
+  for(i = 0; i < problem->size; i++)
   {
     /* z[i] = 1.0/2.0*(zlcp[i]-wlcp[i+problem->size]); works only for ub=1 and lb=-1 */
     z[i] = zlcp[i] +  problem->lb[i];

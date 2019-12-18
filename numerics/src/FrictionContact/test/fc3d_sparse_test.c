@@ -34,11 +34,11 @@
 
 static double set_tol(int solver_id, char* problem)
 {
-  if (solver_id == SICONOS_FRICTION_3D_NSN_FB)
+  if(solver_id == SICONOS_FRICTION_3D_NSN_FB)
   {
     return 1e-12;
   }
-  if ((solver_id == SICONOS_FRICTION_3D_SOCLCP) && !strcmp(problem, "data/NESpheres_30_1.dat"))
+  if((solver_id == SICONOS_FRICTION_3D_SOCLCP) && !strcmp(problem, "data/NESpheres_30_1.dat"))
   {
     return 1e-10;
   }
@@ -47,9 +47,9 @@ static double set_tol(int solver_id, char* problem)
 
 static bool skip(int solver_id, char* problem)
 {
-  if (problem)
+  if(problem)
   {
-    if ((solver_id == SICONOS_FRICTION_3D_NSGS) && !strcmp(problem, "data/Rover4396.dat"))
+    if((solver_id == SICONOS_FRICTION_3D_NSGS) && !strcmp(problem, "data/Rover4396.dat"))
     {
       return true;
     }
@@ -59,16 +59,16 @@ static bool skip(int solver_id, char* problem)
 
 static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, double* u, char* problem)
 {
-  if (skip(solver_id, problem)) return 0;
+  if(skip(solver_id, problem)) return 0;
   SolverOptions * SO = solver_options_create(solver_id);
   SO->dparam[SICONOS_DPARAM_TOL] = set_tol(solver_id, problem);
   int info;
-  if (FC)
+  if(FC)
     info = fc3d_driver(FC, r, u, &SO);
   else
   {
     FILE *finput = fopen(problem, "r");
-    if (!finput)
+    if(!finput)
     {
       int _errno = errno;
       fprintf(stderr, "%s :: unable to open file %s\n", __func__, problem);
@@ -98,7 +98,7 @@ static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, do
 
   }
 
-  if (info)
+  if(info)
   {
     fprintf(stderr, "Solver %s (sparse) FAILED with error %d on problem %s. Residual is %e\n", solver_options_id_to_name(solver_id), info, problem, SO->dparam[SICONOS_DPARAM_RESIDU]);
   }
@@ -113,16 +113,16 @@ static int solve_sparse(int solver_id, FrictionContactProblem* FC, double* r, do
 
 static int solve_dense(int solver_id, FrictionContactProblem* FC, double* r, double* u, char* problem)
 {
-  if (skip(solver_id, problem)) return 0;
+  if(skip(solver_id, problem)) return 0;
   SolverOptions * SO = solver_options_create(solver_id);
   SO->dparam[SICONOS_DPARAM_TOL] = set_tol(solver_id, problem);
   int info;
-  if (FC)
+  if(FC)
     info = fc3d_driver(FC, r, u, &SO);
   else
   {
     FILE *finput = fopen(problem, "r");
-    if (!finput)
+    if(!finput)
     {
       int _errno = errno;
       fprintf(stderr, "%s :: unable to open file %s\n", __func__, problem);
@@ -145,7 +145,7 @@ static int solve_dense(int solver_id, FrictionContactProblem* FC, double* r, dou
     frictionContactProblem_free(problem);
   }
 
-  if (info)
+  if(info)
   {
     fprintf(stderr, "Solver %s (dense) FAILED with error %d on problem %s. Residual is %e\n", solver_options_id_to_name(solver_id), info, problem, SO->dparam[SICONOS_DPARAM_RESIDU]);
   }
@@ -184,7 +184,8 @@ int main(void)
                            SICONOS_FRICTION_3D_FPP,
                            SICONOS_FRICTION_3D_EG,
                            SICONOS_FRICTION_3D_VI_FPP,
-                           SICONOS_FRICTION_3D_VI_EG};
+                           SICONOS_FRICTION_3D_VI_EG
+                          };
 
   char* filetests[] = {"data/Rover1039.dat",
                        "data/Rover1040.dat",
@@ -202,9 +203,10 @@ int main(void)
                        "data/Rover9770.dat",
                        "data/NESpheres_10_1.dat",
                        "data/GFC3D_OneContact.dat",
-                       "data/NESpheres_30_1.dat"};
+                       "data/NESpheres_30_1.dat"
+                      };
 
-  for (size_t s = 0; s < sizeof(solvers_to_test)/sizeof(int); ++s)
+  for(size_t s = 0; s < sizeof(solvers_to_test)/sizeof(int); ++s)
   {
     int solver_id = solvers_to_test[s];
 
@@ -219,9 +221,9 @@ int main(void)
     FC->mu = NULL;
     frictionContactProblem_free(FC);
 
-    if (solver_id != SICONOS_FRICTION_3D_HP)
+    if(solver_id != SICONOS_FRICTION_3D_HP)
     {
-      for (size_t i = 0; i < sizeof(filetests)/sizeof(char*); ++i)
+      for(size_t i = 0; i < sizeof(filetests)/sizeof(char*); ++i)
       {
         int infos2 = solve_sparse(solver_id, NULL, NULL, NULL, filetests[i]);
         total_info = total_info ? total_info : infos2;
@@ -240,9 +242,9 @@ int main(void)
     FCdense->mu = NULL;
     frictionContactProblem_free(FCdense);
 
-    if (solver_id != SICONOS_FRICTION_3D_HP)
+    if(solver_id != SICONOS_FRICTION_3D_HP)
     {
-      for (size_t i = 0; i < sizeof(filetests)/sizeof(char*); ++i)
+      for(size_t i = 0; i < sizeof(filetests)/sizeof(char*); ++i)
       {
         int infod2 = solve_dense(solver_id, NULL, NULL, NULL, filetests[i]);
         total_info = total_info ? total_info : infod2;

@@ -22,15 +22,17 @@
 int intpow(int base, int exponent)
 {
   int result = 1;
-  while(exponent > 0) {
+  while(exponent > 0)
+  {
     result *= base;
     exponent--;
   }
-  while(exponent < 0) {
+  while(exponent < 0)
+  {
     result /= base;
     exponent++;
   }
-  return( result );
+  return(result);
 }
 int mod(int n, int d)
 {
@@ -41,23 +43,27 @@ int mod(int n, int d)
 void strtoup(char *s)
 {
   if(s != NULL)
-  while (*s) {
-    *s = (char)toupper(*s);
-    s++;
-  }
+    while(*s)
+    {
+      *s = (char)toupper(*s);
+      s++;
+    }
 }
 void strtolo(char *s)
 {
   if(s != NULL)
-  while (*s) {
-    *s = (char)tolower(*s);
-    s++;
-  }
+    while(*s)
+    {
+      *s = (char)tolower(*s);
+      s++;
+    }
 }
 void strcpyup(char *t, char *s)
 {
-  if((s != NULL) && (t != NULL)) {
-    while (*s) {
+  if((s != NULL) && (t != NULL))
+  {
+    while(*s)
+    {
       *t = (char)toupper(*s);
       t++;
       s++;
@@ -67,8 +73,10 @@ void strcpyup(char *t, char *s)
 }
 void strcpylo(char *t, char *s)
 {
-  if((s != NULL) && (t != NULL)) {
-    while (*s) {
+  if((s != NULL) && (t != NULL))
+  {
+    while(*s)
+    {
       *t = (char)tolower(*s);
       t++;
       s++;
@@ -83,23 +91,23 @@ MYBOOL so_stdname(char *stdname, char *descname, int buflen)
   char *ptr;
 
   if((descname == NULL) || (stdname == NULL) || (((int) strlen(descname)) >= buflen - 6))
-    return( FALSE );
+    return(FALSE);
 
   strcpy(stdname, descname);
   if((ptr = strrchr(descname, '/')) == NULL)
     ptr = descname;
   else
     ptr++;
-  stdname[(int) (ptr - descname)] = 0;
+  stdname[(int)(ptr - descname)] = 0;
   if(strncmp(ptr, "lib", 3))
     strcat(stdname, "lib");
   strcat(stdname, ptr);
   if(strcmp(stdname + strlen(stdname) - 3, ".so"))
     strcat(stdname, ".so");
-  return( TRUE );
+  return(TRUE);
 }
 
-/* Return the greatest common divisor of a and b, or -1 if it is 
+/* Return the greatest common divisor of a and b, or -1 if it is
    not defined. Return through the pointer arguments the integers
    such that gcd(a,b) = c*a + b*d. */
 int gcd(LLONG a, LLONG b, int *c, int *d)
@@ -107,8 +115,8 @@ int gcd(LLONG a, LLONG b, int *c, int *d)
   LLONG q,r,t;
   int   cret,dret,C,D,rval, sgn_a = 1,sgn_b = 1, swap = 0;
 
-  if((a == 0) || (b == 0)) 
-    return( -1 );
+  if((a == 0) || (b == 0))
+    return(-1);
 
   /* Use local multiplier instances, if necessary */
   if(c == NULL)
@@ -117,15 +125,18 @@ int gcd(LLONG a, LLONG b, int *c, int *d)
     d = &dret;
 
   /* Normalize so that 0 < a <= b */
-  if(a < 0){
+  if(a < 0)
+  {
     a = -a;
     sgn_a = -1;
   }
-  if(b < 0){
+  if(b < 0)
+  {
     b = -b;
     sgn_b = -1;
   }
-  if(b < a){
+  if(b < a)
+  {
     t = b;
     b = a;
     a = t;
@@ -135,32 +146,37 @@ int gcd(LLONG a, LLONG b, int *c, int *d)
   /* Now a <= b and both >= 1. */
   q = b/a;
   r = b - a*q;
-  if(r == 0) {
-    if(swap){
+  if(r == 0)
+  {
+    if(swap)
+    {
       *d = 1;
       *c = 0;
     }
-    else {
+    else
+    {
       *c = 1;
       *d = 0;
     }
     *c = sgn_a*(*c);
     *d = sgn_b*(*d);
-    return( (int) a );
+    return((int) a);
   }
 
   rval = gcd(a,r,&C,&D);
-  if(swap){
-    *d = (int) (C-D*q);
+  if(swap)
+  {
+    *d = (int)(C-D*q);
     *c = D;
   }
-  else {
+  else
+  {
     *d = D;
-    *c = (int) (C-D*q);
+    *c = (int)(C-D*q);
   }
   *c = sgn_a*(*c);
   *d = sgn_b*(*d);
-  return( rval );
+  return(rval);
 }
 
 /* Array search functions */
@@ -169,53 +185,61 @@ int findIndex(int target, int *attributes, int count, int offset)
   int focusPos, beginPos, endPos;
   int focusAttrib, beginAttrib, endAttrib;
 
- /* Set starting and ending index offsets */
+  /* Set starting and ending index offsets */
   beginPos = offset;
   endPos = beginPos + count - 1;
   if(endPos < beginPos)
     return(-1);
 
- /* Do binary search logic based on a sorted (decending) attribute vector */
+  /* Do binary search logic based on a sorted (decending) attribute vector */
   focusPos = (beginPos + endPos) / 2;
   beginAttrib = attributes[beginPos];
   focusAttrib = attributes[focusPos];
   endAttrib   = attributes[endPos];
 
-  while(endPos - beginPos > LINEARSEARCH) {
-    if(beginAttrib == target) {
+  while(endPos - beginPos > LINEARSEARCH)
+  {
+    if(beginAttrib == target)
+    {
       focusAttrib = beginAttrib;
       endPos = beginPos;
     }
-    else if(endAttrib == target) {
+    else if(endAttrib == target)
+    {
       focusAttrib = endAttrib;
       beginPos = endPos;
     }
-    else if(focusAttrib < target) {
+    else if(focusAttrib < target)
+    {
       beginPos = focusPos + 1;
       beginAttrib = attributes[beginPos];
       focusPos = (beginPos + endPos) / 2;
       focusAttrib = attributes[focusPos];
     }
-    else if(focusAttrib > target) {
+    else if(focusAttrib > target)
+    {
       endPos = focusPos - 1;
       endAttrib = attributes[endPos];
       focusPos = (beginPos + endPos) / 2;
       focusAttrib = attributes[focusPos];
     }
-    else {
+    else
+    {
       beginPos = focusPos;
       endPos = focusPos;
     }
   }
 
- /* Do linear (unsorted) search logic */
-  if(endPos - beginPos <= LINEARSEARCH) {
+  /* Do linear (unsorted) search logic */
+  if(endPos - beginPos <= LINEARSEARCH)
+  {
 
     /* CPU intensive loop; provide alternative evaluation models */
 #if defined DOFASTMATH
     /* Do fast pointer arithmetic */
     int *attptr = attributes + beginPos;
-    while((beginPos < endPos) && ((*attptr) < target)) {
+    while((beginPos < endPos) && ((*attptr) < target))
+    {
       beginPos++;
       attptr++;
     }
@@ -223,14 +247,15 @@ int findIndex(int target, int *attributes, int count, int offset)
 #else
     /* Do traditional indexed access */
     focusAttrib = attributes[beginPos];
-    while((beginPos < endPos) && (focusAttrib < target)) {
+    while((beginPos < endPos) && (focusAttrib < target))
+    {
       beginPos++;
       focusAttrib = attributes[beginPos];
     }
 #endif
   }
 
- /* Return the index if a match was found, or signal failure with a -1        */
+  /* Return the index if a match was found, or signal failure with a -1        */
   if(focusAttrib == target)             /* Found; return retrieval index      */
     return(beginPos);
   else if(focusAttrib > target)         /* Not found; last item               */
@@ -246,66 +271,75 @@ int findIndexEx(void *target, void *attributes, int count, int offset, int recsi
   int  focusPos, beginPos, endPos, compare, order;
   void *focusAttrib, *beginAttrib, *endAttrib;
 
- /* Set starting and ending index offsets */
+  /* Set starting and ending index offsets */
   beginPos = offset;
   endPos = beginPos + count - 1;
   if(endPos < beginPos)
     return(-1);
   order = (ascending ? -1 : 1);
 
- /* Do binary search logic based on a sorted attribute vector */
+  /* Do binary search logic based on a sorted attribute vector */
   focusPos = (beginPos + endPos) / 2;
   beginAttrib = CMP_ATTRIBUTES(beginPos);
   focusAttrib = CMP_ATTRIBUTES(focusPos);
   endAttrib   = CMP_ATTRIBUTES(endPos);
 
   compare = 0;
-  while(endPos - beginPos > LINEARSEARCH) {
-    if(findCompare(target, beginAttrib) == 0) {
+  while(endPos - beginPos > LINEARSEARCH)
+  {
+    if(findCompare(target, beginAttrib) == 0)
+    {
       focusAttrib = beginAttrib;
       endPos = beginPos;
     }
-    else if(findCompare(target, endAttrib) == 0) {
+    else if(findCompare(target, endAttrib) == 0)
+    {
       focusAttrib = endAttrib;
       beginPos = endPos;
     }
-    else {
+    else
+    {
       compare = findCompare(target, focusAttrib)*order;
-      if(compare < 0) {
+      if(compare < 0)
+      {
         beginPos = focusPos + 1;
         beginAttrib = CMP_ATTRIBUTES(beginPos);
         focusPos = (beginPos + endPos) / 2;
         focusAttrib = CMP_ATTRIBUTES(focusPos);
       }
-      else if(compare > 0) {
+      else if(compare > 0)
+      {
         endPos = focusPos - 1;
         endAttrib = CMP_ATTRIBUTES(endPos);
         focusPos = (beginPos + endPos) / 2;
         focusAttrib = CMP_ATTRIBUTES(focusPos);
       }
-      else {
+      else
+      {
         beginPos = focusPos;
         endPos = focusPos;
       }
     }
   }
 
- /* Do linear (unsorted) search logic */
-  if(endPos - beginPos <= LINEARSEARCH) {
+  /* Do linear (unsorted) search logic */
+  if(endPos - beginPos <= LINEARSEARCH)
+  {
 
     /* Do traditional indexed access */
     focusAttrib = CMP_ATTRIBUTES(beginPos);
     if(beginPos == endPos)
       compare = findCompare(target, focusAttrib)*order;
     else
-    while((beginPos < endPos) &&
-          ((compare = findCompare(target, focusAttrib)*order) < 0)) {
-      beginPos++;
-      focusAttrib = CMP_ATTRIBUTES(beginPos);
-    }
+      while((beginPos < endPos) &&
+            ((compare = findCompare(target, focusAttrib)*order) < 0))
+      {
+        beginPos++;
+        focusAttrib = CMP_ATTRIBUTES(beginPos);
+      }
   }
 
- /* Return the index if a match was found, or signal failure with a -1        */
+  /* Return the index if a match was found, or signal failure with a -1        */
   if(compare == 0)                      /* Found; return retrieval index      */
     return(beginPos);
   else if(compare > 0)                  /* Not found; last item               */
@@ -320,19 +354,19 @@ int findIndexEx(void *target, void *attributes, int count, int offset, int recsi
 /* Simple sorting and searching comparison "operators" */
 int CMP_CALLMODEL compareCHAR(const void *current, const void *candidate)
 {
-  return( CMP_COMPARE( *(char *) current, *(char *) candidate ) );
+  return(CMP_COMPARE(*(char *) current, *(char *) candidate));
 }
 int CMP_CALLMODEL compareINT(const void *current, const void *candidate)
 {
-  return( CMP_COMPARE( *(int *) current, *(int *) candidate ) );
+  return(CMP_COMPARE(*(int *) current, *(int *) candidate));
 }
 int CMP_CALLMODEL compareREAL(const void *current, const void *candidate)
 {
-  return( CMP_COMPARE( *(REAL *) current, *(REAL *) candidate ) );
+  return(CMP_COMPARE(*(REAL *) current, *(REAL *) candidate));
 }
 
-/* Heap sort function (procedurally based on the Numerical Recipes version, 
-   but expanded and generalized to hande any object with the use of 
+/* Heap sort function (procedurally based on the Numerical Recipes version,
+   but expanded and generalized to hande any object with the use of
    qsort-style comparison operator).  An expanded version is also implemented,
    where interchanges are reflected in a caller-initialized integer "tags" list. */
 void hpsort(void *attributes, int count, int offset, int recsize, MYBOOL descending, findCompare_func findCompare)
@@ -351,19 +385,23 @@ void hpsort(void *attributes, int count, int offset, int recsize, MYBOOL descend
     order = -1;
   else
     order = 1;
-  
+
   k = (count >> 1) + 1;
   ir = count;
 
-  for(;;) {
-    if(k > 1) {
+  for(;;)
+  {
+    if(k > 1)
+    {
       MEMCOPY(save, CMP_ATTRIBUTES(--k), recsize);
     }
-    else {
+    else
+    {
       hold = CMP_ATTRIBUTES(ir);
       MEMCOPY(save, hold, recsize);
       MEMCOPY(hold, base, recsize);
-      if(--ir == 1) {
+      if(--ir == 1)
+      {
         MEMCOPY(base, save, recsize);
         break;
       }
@@ -371,39 +409,44 @@ void hpsort(void *attributes, int count, int offset, int recsize, MYBOOL descend
 
     i = k;
     j = k << 1;
-    while(j <= ir) {
+    while(j <= ir)
+    {
       hold = CMP_ATTRIBUTES(j);
-      if( (j < ir) && (findCompare(hold, CMP_ATTRIBUTES(j+1))*order < 0) ) {
+      if((j < ir) && (findCompare(hold, CMP_ATTRIBUTES(j+1))*order < 0))
+      {
         hold += recsize;
         j++;
       }
-      if(findCompare(save, hold)*order < 0) {
+      if(findCompare(save, hold)*order < 0)
+      {
         MEMCOPY(CMP_ATTRIBUTES(i), hold, recsize);
         i = j;
         j <<= 1;
-	    }
+      }
       else
         break;
     }
     MEMCOPY(CMP_ATTRIBUTES(i), save, recsize);
   }
-  
+
   MEMFREE(save);
 }
 void hpsortex(void *attributes, int count, int offset, int recsize, MYBOOL descending, findCompare_func findCompare, int *tags)
 {
   if(count < 2)
     return;
-  if(tags == NULL) {
+  if(tags == NULL)
+  {
     hpsort(attributes, count, offset, recsize, descending, findCompare);
     return;
   }
-  else {
+  else
+  {
     register int  i, j, k, ir, order;
     register char *hold, *base;
     char          *save;
     int           savetag;
-  
+
     offset -= 1;
     attributes = CMP_ATTRIBUTES(offset);
     tags += offset;
@@ -413,22 +456,26 @@ void hpsortex(void *attributes, int count, int offset, int recsize, MYBOOL desce
       order = -1;
     else
       order = 1;
-  
+
     k = (count >> 1) + 1;
     ir = count;
 
-    for(;;) {
-      if(k > 1) {
+    for(;;)
+    {
+      if(k > 1)
+      {
         MEMCOPY(save, CMP_ATTRIBUTES(--k), recsize);
         savetag = tags[k];
       }
-      else {
+      else
+      {
         hold = CMP_ATTRIBUTES(ir);
         MEMCOPY(save, hold, recsize);
         MEMCOPY(hold, base, recsize);
         savetag = tags[ir];
         tags[ir] = tags[1];
-        if(--ir == 1) {
+        if(--ir == 1)
+        {
           MEMCOPY(base, save, recsize);
           tags[1] = savetag;
           break;
@@ -437,35 +484,38 @@ void hpsortex(void *attributes, int count, int offset, int recsize, MYBOOL desce
 
       i = k;
       j = k << 1;
-      while(j <= ir) {
+      while(j <= ir)
+      {
         hold = CMP_ATTRIBUTES(j);
-        if( (j < ir) && (findCompare(hold, CMP_ATTRIBUTES(j+1))*order < 0) ) {
+        if((j < ir) && (findCompare(hold, CMP_ATTRIBUTES(j+1))*order < 0))
+        {
           hold += recsize;
           j++;
         }
-        if(findCompare(save, hold)*order < 0) {
+        if(findCompare(save, hold)*order < 0)
+        {
           MEMCOPY(CMP_ATTRIBUTES(i), hold, recsize);
           tags[i] = tags[j];
           i = j;
           j <<= 1;
-  	    }
+        }
         else
           break;
       }
       MEMCOPY(CMP_ATTRIBUTES(i), save, recsize);
       tags[i] = savetag;
     }
-  
+
     MEMFREE(save);
   }
 }
 
 
-/* This is a "specialized generic" version of C.A.R Hoare's Quick Sort algorithm. 
-   It will handle arrays that are already sorted, and arrays with duplicate keys. 
+/* This is a "specialized generic" version of C.A.R Hoare's Quick Sort algorithm.
+   It will handle arrays that are already sorted, and arrays with duplicate keys.
    The implementation here requires the user to pass a comparison operator and
    assumes that the array passed has the QSORTrec format, which i.a. includes
-   the ability for to do linked list sorting. If the passed comparison operator 
+   the ability for to do linked list sorting. If the passed comparison operator
    is NULL, the comparison is assumed to be for integers. */
 #define QS_IS_switch 4    /* Threshold for switching to insertion sort */
 
@@ -478,7 +528,7 @@ void QS_swap(UNIONTYPE QSORTrec a[], int i, int j)
 int QS_addfirst(UNIONTYPE QSORTrec a[], void *mydata)
 {
   a[0].pvoid2.ptr = mydata;
-  return( 0 );
+  return(0);
 }
 int QS_append(UNIONTYPE QSORTrec a[], int ipos, void *mydata)
 {
@@ -486,7 +536,7 @@ int QS_append(UNIONTYPE QSORTrec a[], int ipos, void *mydata)
     ipos = QS_addfirst(a, mydata);
   else
     a[ipos].pvoid2.ptr = mydata;
-  return( ipos );
+  return(ipos);
 }
 void QS_replace(UNIONTYPE QSORTrec a[], int ipos, void *mydata)
 {
@@ -510,32 +560,45 @@ int QS_sort(UNIONTYPE QSORTrec a[], int l, int r, findCompare_func findCompare)
   UNIONTYPE QSORTrec v;
 
   /* Perform the a fast QuickSort */
-  if((r-l) > QS_IS_switch) {
+  if((r-l) > QS_IS_switch)
+  {
     i = (r+l)/2;
 
     /* Tri-Median Method */
     if(findCompare((char *) &a[l], (char *) &a[i]) > 0)
-      { nmove++; QS_swap(a,l,i); } 
-    if(findCompare((char *) &a[l], (char *) &a[r]) > 0) 
-      { nmove++; QS_swap(a,l,r); }
-    if(findCompare((char *) &a[i], (char *) &a[r]) > 0) 
-      { nmove++; QS_swap(a,i,r); }
+    {
+      nmove++;
+      QS_swap(a,l,i);
+    }
+    if(findCompare((char *) &a[l], (char *) &a[r]) > 0)
+    {
+      nmove++;
+      QS_swap(a,l,r);
+    }
+    if(findCompare((char *) &a[i], (char *) &a[r]) > 0)
+    {
+      nmove++;
+      QS_swap(a,i,r);
+    }
 
     j = r-1;
     QS_swap(a,i,j);
     i = l;
     v = a[j];
-    for(;;) {
+    for(;;)
+    {
       while(findCompare((char *) &a[++i], (char *) &v) < 0);
       while(findCompare((char *) &a[--j], (char *) &v) > 0);
       if(j < i) break;
-      nmove++; QS_swap (a,i,j);
+      nmove++;
+      QS_swap(a,i,j);
     }
-    nmove++; QS_swap(a,i,r-1);
+    nmove++;
+    QS_swap(a,i,r-1);
     nmove += QS_sort(a,l,j,findCompare);
     nmove += QS_sort(a,i+1,r,findCompare);
   }
-  return( nmove );
+  return(nmove);
 }
 int QS_finish(UNIONTYPE QSORTrec a[], int lo0, int hi0, findCompare_func findCompare);
 int QS_finish(UNIONTYPE QSORTrec a[], int lo0, int hi0, findCompare_func findCompare)
@@ -544,14 +607,16 @@ int QS_finish(UNIONTYPE QSORTrec a[], int lo0, int hi0, findCompare_func findCom
   UNIONTYPE QSORTrec v;
 
   /* This is actually InsertionSort, which is faster for local sorts */
-  for(i = lo0+1; i <= hi0; i++) {
+  for(i = lo0+1; i <= hi0; i++)
+  {
 
     /* Save bottom-most item */
     v = a[i];
 
     /* Shift down! */
     j = i;
-    while ((j > lo0) && (findCompare((char *) &a[j-1], (char *) &v) > 0)) {
+    while((j > lo0) && (findCompare((char *) &a[j-1], (char *) &v) > 0))
+    {
       a[j] = a[j-1];
       j--;
       nmove++;
@@ -560,7 +625,7 @@ int QS_finish(UNIONTYPE QSORTrec a[], int lo0, int hi0, findCompare_func findCom
     /* Store bottom-most item at the top */
     a[j] = v;
   }
-  return( nmove );
+  return(nmove);
 }
 MYBOOL QS_execute(UNIONTYPE QSORTrec a[], int count, findCompare_func findCompare, int *nswaps)
 {
@@ -580,10 +645,10 @@ MYBOOL QS_execute(UNIONTYPE QSORTrec a[], int count, findCompare_func findCompar
 Finish:
   if(nswaps != NULL)
     *nswaps = iswaps;
-  return( TRUE );
+  return(TRUE);
 }
 
- 
+
 
 /* Simple specialized bubble/insertion sort functions */
 int sortByREAL(int *item, REAL *weight, int size, int offset, MYBOOL unique)
@@ -591,14 +656,18 @@ int sortByREAL(int *item, REAL *weight, int size, int offset, MYBOOL unique)
   int i, ii, saveI;
   REAL saveW;
 
-  for(i = 1; i < size; i++) {
+  for(i = 1; i < size; i++)
+  {
     ii = i+offset-1;
-    while ((ii >= offset) && (weight[ii] >= weight[ii+1])) {
-      if(weight[ii] == weight[ii+1]) {
+    while((ii >= offset) && (weight[ii] >= weight[ii+1]))
+    {
+      if(weight[ii] == weight[ii+1])
+      {
         if(unique)
           return(item[ii]);
       }
-      else {
+      else
+      {
         saveI = item[ii];
         saveW = weight[ii];
         item[ii] = item[ii+1];
@@ -616,14 +685,18 @@ int sortByINT(int *item, int *weight, int size, int offset, MYBOOL unique)
   int i, ii, saveI;
   int saveW;
 
-  for(i = 1; i < size; i++) {
+  for(i = 1; i < size; i++)
+  {
     ii = i+offset-1;
-    while ((ii >= offset) && (weight[ii] >= weight[ii+1])) {
-      if(weight[ii] == weight[ii+1]) {
+    while((ii >= offset) && (weight[ii] >= weight[ii+1]))
+    {
+      if(weight[ii] == weight[ii+1])
+      {
         if(unique)
           return(item[ii]);
       }
-      else {
+      else
+      {
         saveI = item[ii];
         saveW = weight[ii];
         item[ii] = item[ii+1];
@@ -641,14 +714,18 @@ REAL sortREALByINT(REAL *item, int *weight, int size, int offset, MYBOOL unique)
   int  i, ii, saveW;
   REAL saveI;
 
-  for(i = 1; i < size; i++) {
+  for(i = 1; i < size; i++)
+  {
     ii = i+offset-1;
-    while ((ii >= offset) && (weight[ii] >= weight[ii+1])) {
-      if(weight[ii] == weight[ii+1]) {
+    while((ii >= offset) && (weight[ii] >= weight[ii+1]))
+    {
+      if(weight[ii] == weight[ii+1])
+      {
         if(unique)
           return(item[ii]);
       }
-      else {
+      else
+      {
         saveI = item[ii];
         saveW = weight[ii];
         item[ii] = item[ii+1];
@@ -688,10 +765,12 @@ void blockWriteINT(FILE *output, char *label, int *myvector, int first, int last
 
   fprintf(output, "%s", label);
   fprintf(output, "\n");
-  for(i = first; i <= last; i++) {
+  for(i = first; i <= last; i++)
+  {
     fprintf(output, " %5d", myvector[i]);
     k++;
-    if(k % 12 == 0) {
+    if(k % 12 == 0)
+    {
       fprintf(output, "\n");
       k = 0;
     }
@@ -707,13 +786,15 @@ void blockWriteBOOL(FILE *output, char *label, MYBOOL *myvector, int first, int 
 
   fprintf(output, "%s", label);
   fprintf(output, "\n");
-  for(i = first; i <= last; i++) {
+  for(i = first; i <= last; i++)
+  {
     if(asRaw)
       fprintf(output, " %1d", myvector[i]);
     else
       fprintf(output, " %5s", my_boolstr(myvector[i]));
     k++;
-    if(k % 36 == 0) {
+    if(k % 36 == 0)
+    {
       fprintf(output, "\n");
       k = 0;
     }
@@ -729,10 +810,12 @@ void blockWriteREAL(FILE *output, char *label, REAL *myvector, int first, int la
 
   fprintf(output, "%s", label);
   fprintf(output, "\n");
-  for(i = first; i <= last; i++) {
+  for(i = first; i <= last; i++)
+  {
     fprintf(output, " %18g", myvector[i]);
     k++;
-    if(k % 4 == 0) {
+    if(k % 4 == 0)
+    {
       fprintf(output, "\n");
       k = 0;
     }
@@ -743,12 +826,13 @@ void blockWriteREAL(FILE *output, char *label, REAL *myvector, int first, int la
 
 
 /* CONSOLE vector and matrix printing routines */
-void printvec( int n, REAL *x, int modulo )
+void printvec(int n, REAL *x, int modulo)
 {
   int i;
 
-  if (modulo <= 0) modulo = 5;
-  for (i = 1; i<=n; i++) {
+  if(modulo <= 0) modulo = 5;
+  for(i = 1; i<=n; i++)
+  {
     if(mod(i, modulo) == 1)
       printf("\n%2d:%12g", i, x[i]);
     else
@@ -758,25 +842,27 @@ void printvec( int n, REAL *x, int modulo )
 }
 
 
-void printmatUT( int size, int n, REAL *U, int modulo)
+void printmatUT(int size, int n, REAL *U, int modulo)
 {
-   int i, ll;
-   ll = 0;
-   for(i = 1; i<=n; i++) {
-     printvec(n-i+1, &U[ll], modulo);
-     ll += size-i+1;
-   }
+  int i, ll;
+  ll = 0;
+  for(i = 1; i<=n; i++)
+  {
+    printvec(n-i+1, &U[ll], modulo);
+    ll += size-i+1;
+  }
 }
 
 
-void printmatSQ( int size, int n, REAL *X, int modulo)
+void printmatSQ(int size, int n, REAL *X, int modulo)
 {
-   int i, ll;
-   ll = 0;
-   for(i = 1; i<=n; i++) {
-     printvec(n, &X[ll], modulo);
-     ll += size;
-   }
+  int i, ll;
+  ll = 0;
+  for(i = 1; i<=n; i++)
+  {
+    printvec(n, &X[ll], modulo);
+    ll += size;
+  }
 }
 
 #ifdef STRANGE_FUNCTIONS
@@ -787,35 +873,37 @@ void printmatSQ( int size, int n, REAL *X, int modulo)
 # define intptr_t long
 #endif
 
-int fileCount( char *filemask )
+int fileCount(char *filemask)
 {
   struct   _finddata_t c_file;
   intptr_t hFile;
   int      count = 0;
 
   /* Find first .c file in current directory */
-  if( (hFile = _findfirst( filemask, &c_file )) == -1L )
+  if((hFile = _findfirst(filemask, &c_file)) == -1L)
     ;
   /* Iterate over all matching names */
-  else {
-     while( _findnext( hFile, &c_file ) == 0 )
-       count++;
-    _findclose( hFile );
+  else
+  {
+    while(_findnext(hFile, &c_file) == 0)
+      count++;
+    _findclose(hFile);
   }
-  return( count );
+  return(count);
 }
-MYBOOL fileSearchPath( char *envvar, char *searchfile, char *foundpath )
+MYBOOL fileSearchPath(char *envvar, char *searchfile, char *foundpath)
 {
-   char pathbuffer[_MAX_PATH];
+  char pathbuffer[_MAX_PATH];
 
-   _searchenv( searchfile, envvar, pathbuffer );
-   if(pathbuffer[0] == '\0')
-     return( FALSE );
-   else {
-     if(foundpath != NULL)
-       strcpy(foundpath, pathbuffer);
-     return( TRUE );
-   }
+  _searchenv(searchfile, envvar, pathbuffer);
+  if(pathbuffer[0] == '\0')
+    return(FALSE);
+  else
+  {
+    if(foundpath != NULL)
+      strcpy(foundpath, pathbuffer);
+    return(TRUE);
+  }
 }
 #endif
 #endif

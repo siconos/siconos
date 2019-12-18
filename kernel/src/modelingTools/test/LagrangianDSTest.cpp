@@ -89,7 +89,7 @@ void LagrangianDSTest::testBuildLagrangianDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->jacobianqForces() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->jacobianvForces() == NULL, true);
 
-  
+
 
   ds->initRhs(time);
   SiconosVector x0(*q0, *velocity0);
@@ -98,12 +98,12 @@ void LagrangianDSTest::testBuildLagrangianDS1()
   i0(0,0) = i0(1,1) = i0(2,2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->x0()) == x0, true);
-   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->rhs()) == rhs0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->rhs()) == rhs0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->jacobianRhsx()->block(0,0)) == *m0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->jacobianRhsx()->block(0,1)) == i0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->jacobianRhsx()->block(1,0)) == *m0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->jacobianRhsx()->block(1,1)) == *m0, true);
-  
+
   std::cout << "--> Constructor 1 test ended with success." <<std::endl;
 }
 
@@ -150,7 +150,7 @@ void LagrangianDSTest::testBuildLagrangianDS4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", *(ds->jacobianRhsx()->block(0,1)) == i0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", *(ds->jacobianRhsx()->block(1,0)) == *m0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", *(ds->jacobianRhsx()->block(1,1)) == *m0, true);
-  
+
   std::cout << "--> Constructor 4 test ended with success." <<std::endl;
 }
 
@@ -172,7 +172,7 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   ds->computeMass();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", *(ds->mass()) == *(mass), true);
 
-  
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", *(ds->p(1)) == zero, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->p(0) == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->p(2) == NULL, true);

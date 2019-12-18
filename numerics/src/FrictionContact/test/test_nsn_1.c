@@ -31,67 +31,67 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   int current = 0;
   for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);    
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-      current++;
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    current++;
 
-    }
+  }
 
   for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_TEST);    
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
-      current++;
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_TEST);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    current++;
 #ifndef WITH_MUMPS
-      if(d>=4 && d<9) // Capsules tests work only with mumps
-        collection[current - 1].will_fail = 1;
+    if(d>=4 && d<9) // Capsules tests work only with mumps
+      collection[current - 1].will_fail = 1;
 #endif
-    }
+  }
 
   for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);    
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-      current++;
-    }
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
+  }
 
   for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_TEST);    
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-      current++;
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_TEST);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
 #ifndef WITH_MUMPS
-      if(d>=4 && d<9) // Capsules tests work only with mumps
-        collection[current - 1].will_fail = 1;
+    if(d>=4 && d<9) // Capsules tests work only with mumps
+      collection[current - 1].will_fail = 1;
 #endif
-    }
+  }
 
   for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_FB);    
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-      current++;
-    }
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_FB);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
+  }
 
   for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_NM);    
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-      current++;
-    }
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_NM);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
+  }
 
 
   *number_of_tests = current;

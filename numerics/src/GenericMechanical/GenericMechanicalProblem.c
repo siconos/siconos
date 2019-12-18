@@ -39,13 +39,13 @@ GenericMechanicalProblem * genericMechanicalProblem_new()
 
 void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int level)
 {
-  if (!pGMP)
+  if(!pGMP)
     return;
-  while (pGMP->lastListElem)
+  while(pGMP->lastListElem)
   {
     listNumericsProblem * pElem = pGMP->lastListElem;
     free(pElem->q);
-    switch (pElem->type)
+    switch(pElem->type)
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     {
@@ -76,11 +76,11 @@ void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int
     pGMP->lastListElem = pElem->prevProblem;
     free(pElem);
   }
-  if (level & NUMERICS_GMP_FREE_MATRIX)
+  if(level & NUMERICS_GMP_FREE_MATRIX)
   {
     assert(pGMP->M);
     int storageType = pGMP->M->storageType;
-    if (storageType == 0)
+    if(storageType == 0)
       free(pGMP->M->matrix0);
     else
       SBMfree(pGMP->M->matrix1, NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM);
@@ -88,7 +88,7 @@ void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int
     free(pGMP->M);
   }
 
-  if (level & NUMERICS_GMP_FREE_GMP)
+  if(level & NUMERICS_GMP_FREE_GMP)
     free(pGMP);
 }
 void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size)
@@ -99,9 +99,9 @@ void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size)
   newProblem->size = size;
   newProblem->error = 0;
   pGMP->size += size;
-  if (size > pGMP->maxLocalSize)
+  if(size > pGMP->maxLocalSize)
     pGMP->maxLocalSize = size;
-  if (!pGMP->lastListElem)
+  if(!pGMP->lastListElem)
   {
     pGMP->firstListElem = newProblem;
     pGMP->lastListElem = newProblem;
@@ -113,9 +113,9 @@ void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size)
     newProblem->prevProblem =  pGMP->lastListElem;
     pGMP->lastListElem = newProblem;
   }
-  switch (problemType)
+  switch(problemType)
   {
-  case (SICONOS_NUMERICS_PROBLEM_LCP):
+  case(SICONOS_NUMERICS_PROBLEM_LCP):
   {
     newProblem->problem = (void *) malloc(sizeof(LinearComplementarityProblem));
     LinearComplementarityProblem * pLCP = (LinearComplementarityProblem*)newProblem->problem;
@@ -129,7 +129,7 @@ void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size)
 
     break;
   }
-  case (SICONOS_NUMERICS_PROBLEM_RELAY):
+  case(SICONOS_NUMERICS_PROBLEM_RELAY):
   {
     newProblem->problem = (void *) malloc(sizeof(RelayProblem));
     RelayProblem * pRelay = (RelayProblem*)newProblem->problem;
@@ -145,13 +145,13 @@ void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size)
 
     break;
   }
-  case (SICONOS_NUMERICS_PROBLEM_EQUALITY):
+  case(SICONOS_NUMERICS_PROBLEM_EQUALITY):
   {
     newProblem->problem = NULL;
     newProblem->q = (double*) malloc(size * sizeof(double));;
     break;
   }
-  case (SICONOS_NUMERICS_PROBLEM_FC3D):
+  case(SICONOS_NUMERICS_PROBLEM_FC3D):
   {
     newProblem->problem = (void *) malloc(sizeof(FrictionContactProblem));
     FrictionContactProblem* pFC3D = (FrictionContactProblem*) newProblem->problem;
@@ -180,7 +180,7 @@ void genericMechanicalProblem_display(GenericMechanicalProblem * pGMP)
   int ii;
   printf("\nBEGIN Display a GenericMechanicalProblem(Numerics):\n");
 
-  while (pElem)
+  while(pElem)
   {
     printf("-->An sub-problem %s.\n", ns_problem_id_to_name(pElem->type));
     pElem = pElem->nextProblem;
@@ -188,7 +188,7 @@ void genericMechanicalProblem_display(GenericMechanicalProblem * pGMP)
   printf("The sparce block matrice is :\n");
   NM_display(pGMP->M);
   printf("The q vector is :\n");
-  for (ii = 0; ii < pGMP->size; ii++)
+  for(ii = 0; ii < pGMP->size; ii++)
     printf("%e ", pGMP->q[ii]);
 
   //SBM_print(pGMP->M->matrix1);
@@ -202,14 +202,14 @@ void genericMechanicalProblem_printInFile(GenericMechanicalProblem*  pGMP, FILE*
   NM_write_in_file(pGMP->M, file);
   fprintf(file, "\n");
   /*Print Q*/
-  for (int ii = 0; ii < pGMP->size; ii++)
+  for(int ii = 0; ii < pGMP->size; ii++)
     fprintf(file, "%e\n", pGMP->q[ii]);
   fprintf(file, "\n");
   /*Print lthe type and options (mu)*/
-  while (curProblem)
+  while(curProblem)
   {
     fprintf(file, "%d\n", curProblem->type);
-    if (curProblem->type == SICONOS_NUMERICS_PROBLEM_FC3D)
+    if(curProblem->type == SICONOS_NUMERICS_PROBLEM_FC3D)
       fprintf(file, "%e\n", ((FrictionContactProblem*)curProblem->problem)->mu[0]);
     curProblem = curProblem->nextProblem;
   }
@@ -227,20 +227,20 @@ GenericMechanicalProblem * genericMechanical_newFromFile(FILE* file)
   SparseBlockStructuredMatrix* m = problem->M->matrix1;
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", problem->q + i));
   }
   nsubProb = m->filled1 - 1;
   posInX = 0;
-  for (size_t ii = 0; ii < nsubProb; ii++)
+  for(size_t ii = 0; ii < nsubProb; ii++)
   {
-    if (ii)
+    if(ii)
       posInX = m->blocksize0[ii - 1];
     localSize = m->blocksize0[ii] - posInX;
     CHECK_IO(fscanf(file, "%d\n", &prbType));
     prb = gmp_add(problem, prbType, localSize);
-    if (prbType == SICONOS_NUMERICS_PROBLEM_FC3D)
+    if(prbType == SICONOS_NUMERICS_PROBLEM_FC3D)
     {
       CHECK_IO(fscanf(file, "%lf ", ((FrictionContactProblem*)prb)->mu));
     }
@@ -258,7 +258,7 @@ GenericMechanicalProblem * genericMechanical_new_from_filename(const char* filen
 {
   GenericMechanicalProblem * problem = NULL;
   FILE * file = fopen(filename, "r");
-  if (file == NULL)
+  if(file == NULL)
   {
     printf("Error! Could not open filename %s\n", filename);
     exit(EXIT_FAILURE);
@@ -272,45 +272,45 @@ GenericMechanicalProblem * genericMechanical_new_from_filename(const char* filen
 /** return nonsmooth problem formulation name, from its id number. */
 const char * ns_problem_id_to_name(enum SICONOS_NUMERICS_PROBLEM_TYPE id)
 {
-  switch (id)
+  switch(id)
   {
-  case (SICONOS_NUMERICS_PROBLEM_LCP):
+  case(SICONOS_NUMERICS_PROBLEM_LCP):
   {
     return "LCP";
   }
-  case (SICONOS_NUMERICS_PROBLEM_MLCP):
+  case(SICONOS_NUMERICS_PROBLEM_MLCP):
   {
     return "MLCP";
   }
-  case (SICONOS_NUMERICS_PROBLEM_NCP):
+  case(SICONOS_NUMERICS_PROBLEM_NCP):
   {
     return "NCP";
   }
-  case (SICONOS_NUMERICS_PROBLEM_MCP):
+  case(SICONOS_NUMERICS_PROBLEM_MCP):
   {
     return "MCP";
   }
-  case (SICONOS_NUMERICS_PROBLEM_EQUALITY):
+  case(SICONOS_NUMERICS_PROBLEM_EQUALITY):
   {
     return "EQUALITY";
   }
-  case (SICONOS_NUMERICS_PROBLEM_FC2D):
+  case(SICONOS_NUMERICS_PROBLEM_FC2D):
   {
     return "FC2D";
   }
-  case (SICONOS_NUMERICS_PROBLEM_FC3D):
+  case(SICONOS_NUMERICS_PROBLEM_FC3D):
   {
     return "FC3D";
   }
-  case (SICONOS_NUMERICS_PROBLEM_VI):
+  case(SICONOS_NUMERICS_PROBLEM_VI):
   {
     return "VI";
   }
-  case (SICONOS_NUMERICS_PROBLEM_AVI):
+  case(SICONOS_NUMERICS_PROBLEM_AVI):
   {
     return "AVI";
   }
-  case (SICONOS_NUMERICS_PROBLEM_RELAY):
+  case(SICONOS_NUMERICS_PROBLEM_RELAY):
   {
     return "RELAY";
   }

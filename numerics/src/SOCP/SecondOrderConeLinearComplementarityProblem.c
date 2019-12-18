@@ -177,23 +177,23 @@ int secondOrderConeLinearComplementarityProblem_newFromFilename(SecondOrderConeL
 void freeSecondOrderConeLinearComplementarityProblem(SecondOrderConeLinearComplementarityProblem* problem)
 {
 
-  if (problem->M)
+  if(problem->M)
   {
     NM_clear(problem->M);
     free(problem->M);
     problem->M = NULL;
   }
-  if (problem->tau)
+  if(problem->tau)
   {
     free(problem->tau);
     problem->tau = NULL;
   }
-  if (problem->q)
+  if(problem->q)
   {
     free(problem->q);
     problem->q = NULL;
   }
-  if (problem->coneIndex)
+  if(problem->coneIndex)
   {
     free(problem->coneIndex);
     problem->coneIndex = NULL;

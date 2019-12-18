@@ -35,7 +35,7 @@ void Function_VI_CQP(void * self, int n_notused, double *x, double *F)
 
   int n = cqp->size;
 
-  cblas_dcopy(n , cqp->q , 1 , F, 1);
+  cblas_dcopy(n, cqp->q, 1, F, 1);
   NM_gemv(1.0, cqp->M, x, 1.0, F);
 }
 

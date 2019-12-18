@@ -29,7 +29,7 @@ const char* const SICONOS_MCP_OLD_FB_STR = "NewtonFB";
 const char* const SICONOS_MCP_NEWTON_FB_FBLSA_STR = "MCP Newton FBLSA";
 const char* const SICONOS_MCP_NEWTON_MIN_FBLSA_STR = "MCP Newton minFBLSA";
 
-int mcp_driver(MixedComplementarityProblem* problem, double *z , double *Fmcp, SolverOptions* options)
+int mcp_driver(MixedComplementarityProblem* problem, double *z, double *Fmcp, SolverOptions* options)
 {
   assert(options != NULL);
   /* Checks inputs */
@@ -39,7 +39,7 @@ int mcp_driver(MixedComplementarityProblem* problem, double *z , double *Fmcp, S
   /* Output info. : 0: ok -  >0: error (which depends on the chosen solver) */
   int info = -1;
 
-  switch (options->solverId)
+  switch(options->solverId)
   {
   case SICONOS_MCP_NEWTON_FB_FBLSA: // Fischer-Burmeister/Newton -- new version
     mcp_newton_FB_FBLSA(problem, z, Fmcp, &info, options);
@@ -57,18 +57,18 @@ int mcp_driver(MixedComplementarityProblem* problem, double *z , double *Fmcp, S
   return info;
 }
 
-int mcp_old_driver(MixedComplementarityProblem_old* problem, double *z , double *w, SolverOptions* options)
+int mcp_old_driver(MixedComplementarityProblem_old* problem, double *z, double *w, SolverOptions* options)
 {
-  if (options == NULL)
+  if(options == NULL)
     numerics_error("mcp_old_driver ", "null input for solver options.\n");
 
   /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
+  if(problem == NULL || z == NULL || w == NULL)
     numerics_error("mcp_old_driver", "null input for MixedComplementarityProblem_old and/or unknowns (z,w)");
   /* Output info. : 0: ok -  >0: error (which depends on the chosen solver) */
   int info = -1;
 
-  switch (options->solverId)
+  switch(options->solverId)
   {
   case SICONOS_MCP_OLD_FB: // Fischer-Burmeister/Newton
     mcp_old_FischerBurmeister(problem, z, w, &info, options);
@@ -85,7 +85,7 @@ int mcp_old_driver(MixedComplementarityProblem_old* problem, double *z , double 
 
 void mcp_old_driver_init(MixedComplementarityProblem_old* problem, SolverOptions* options)
 {
-  switch (options->solverId)
+  switch(options->solverId)
   {
   case SICONOS_MCP_OLD_FB :
     mcp_old_FischerBurmeister_init(problem, options) ;
@@ -99,7 +99,7 @@ void mcp_old_driver_init(MixedComplementarityProblem_old* problem, SolverOptions
 
 void mcp_old_driver_reset(MixedComplementarityProblem_old* problem, SolverOptions* options)
 {
-  switch (options->solverId)
+  switch(options->solverId)
   {
   case SICONOS_MCP_OLD_FB :
     mcp_old_FischerBurmeister_reset(problem, options) ;

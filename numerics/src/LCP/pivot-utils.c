@@ -42,15 +42,15 @@
 
 const char* basis_to_name(unsigned nb, unsigned n)
 {
-  if (nb < n + BASIS_OFFSET) return "w";
-  else if (nb > n + BASIS_OFFSET) return "z"; 
+  if(nb < n + BASIS_OFFSET) return "w";
+  else if(nb > n + BASIS_OFFSET) return "z";
   else return "e";
 }
 
 unsigned basis_to_number(unsigned nb, unsigned n)
 {
-  if (nb < n + BASIS_OFFSET) return nb + 1 - BASIS_OFFSET;
-  else if (nb > n + BASIS_OFFSET) return nb - n - BASIS_OFFSET;
+  if(nb < n + BASIS_OFFSET) return nb + 1 - BASIS_OFFSET;
+  else if(nb > n + BASIS_OFFSET) return nb - n - BASIS_OFFSET;
   else return 0;
 }
 
@@ -72,23 +72,25 @@ int lexicosort_lumod(unsigned* vars, unsigned n, unsigned nb_candidates, SN_lumo
    *   we have to invert -e_i to get vector. Let's have fun
    */
   DEBUG_PRINTF("lexicosort_lumod :: starting lexicosort with %d candidates\n", nb_candidates);
-  DEBUG_EXPR_WE( DEBUG_PRINT("lexicosort_lumod :: candidates: ");
-      for (unsigned i = 0; i < nb_candidates; ++i)
-      { DEBUG_PRINTF("%s%d ", basis_to_name(basis[vars[i]], n), basis_to_number(basis[vars[i]], n)); }
-          DEBUG_PRINT("\n") );
+  DEBUG_EXPR_WE(DEBUG_PRINT("lexicosort_lumod :: candidates: ");
+                for(unsigned i = 0; i < nb_candidates; ++i)
+{
+  DEBUG_PRINTF("%s%d ", basis_to_name(basis[vars[i]], n), basis_to_number(basis[vars[i]], n));
+  }
+  DEBUG_PRINT("\n"));
   assert(nb_candidates > 1);
   unsigned nb_remaining_vars = nb_candidates;
-  for (unsigned i = 0; i < n; ++i)
+  for(unsigned i = 0; i < n; ++i)
   {
     unsigned staying_var_indx = 0;
     unsigned var_indx = 0;
-    if (basis[i] == i + BASIS_OFFSET) continue;
+    if(basis[i] == i + BASIS_OFFSET) continue;
     else
     {
-      while ((vars[var_indx] < i) && var_indx < nb_remaining_vars) ++var_indx;
+      while((vars[var_indx] < i) && var_indx < nb_remaining_vars) ++var_indx;
       /* We are lucky the lexicomin search was trivial -> the last variable is
        * the arg lexicomin -> return it as the blocking variable*/
-      if (var_indx > nb_remaining_vars-1)
+      if(var_indx > nb_remaining_vars-1)
       {
         return vars[nb_remaining_vars-1];
       }
@@ -103,17 +105,17 @@ int lexicosort_lumod(unsigned* vars, unsigned n, unsigned nb_candidates, SN_lumo
       double current_lexico_col_element = lexico_col[vars[var_indx]];
       unsigned zero_current_lexico_col_element = current_lexico_col_element == 0. ? 1 : 0;
       ++var_indx;
-      for (unsigned next_var = vars[var_indx]; var_indx < nb_remaining_vars; next_var = vars[++var_indx])
+      for(unsigned next_var = vars[var_indx]; var_indx < nb_remaining_vars; next_var = vars[++var_indx])
       {
         double next_lexico_col_element = lexico_col[next_var];
-        if (zero_current_lexico_col_element)
+        if(zero_current_lexico_col_element)
         {
-          if (next_lexico_col_element == 0.) /* equality  */
+          if(next_lexico_col_element == 0.)  /* equality  */
           {
             vars[++staying_var_indx] = next_var;
             DEBUG_PRINTF("lexicosort_lumod :: adding var %s%d because of equality (both row elements are 0)\n", basis_to_name(basis[next_var], n), basis_to_number(basis[next_var], n));
           }
-          else if (next_lexico_col_element < -lexico_tol) /* delta_lexico > 0 (since pivot are always >0., => new lexicomin  */
+          else if(next_lexico_col_element < -lexico_tol)  /* delta_lexico > 0 (since pivot are always >0., => new lexicomin  */
           {
             zero_current_lexico_col_element = 0;
             goto update_current_blocking_variable;
@@ -121,7 +123,7 @@ int lexicosort_lumod(unsigned* vars, unsigned n, unsigned nb_candidates, SN_lumo
           /* Implicit else -> delta_lexico < 0, next_var gets discarded  */
         }
         /* delta_lexico > 0 (since pivot are always >0., => new lexicomin  */
-        else if ((next_lexico_col_element == 0.) && (current_lexico_col_element > lexico_tol))
+        else if((next_lexico_col_element == 0.) && (current_lexico_col_element > lexico_tol))
         {
           zero_current_lexico_col_element = 1;
           goto update_current_blocking_variable;
@@ -130,25 +132,25 @@ int lexicosort_lumod(unsigned* vars, unsigned n, unsigned nb_candidates, SN_lumo
         {
           double candidate_pivot = driving_col[next_var];
           double delta_lexico  = current_lexico_col_element * candidate_pivot - next_lexico_col_element * current_pivot;
-          if (delta_lexico > lexico_tol) /* Difference is significant */
+          if(delta_lexico > lexico_tol)  /* Difference is significant */
           {
             DEBUG_PRINTF("lexicosort_lumod :: lexicomin change var block changes to %s%d from %s%d, delta_lexico = %2.2e, new pivot = %e\n",
-                basis_to_name(basis[next_var], n), basis_to_number(basis[next_var], n), basis_to_name(basis[vars[staying_var_indx]], n),
-                basis_to_number(basis[vars[staying_var_indx]], n), delta_lexico, candidate_pivot);
+                         basis_to_name(basis[next_var], n), basis_to_number(basis[next_var], n), basis_to_name(basis[vars[staying_var_indx]], n),
+                         basis_to_number(basis[vars[staying_var_indx]], n), delta_lexico, candidate_pivot);
             zero_current_lexico_col_element = 0;
             goto update_current_blocking_variable;
           }
-          else if (delta_lexico < - lexico_tol)
+          else if(delta_lexico < - lexico_tol)
           {
             continue; /* Delete variable  */
           }
-          else if (delta_lexico != 0.) /* XXX This is a hack */
+          else if(delta_lexico != 0.)  /* XXX This is a hack */
           {
-            if ((current_pivot < SMALL_PIVOT) && (candidate_pivot > MIN_INCREASE*current_pivot))
+            if((current_pivot < SMALL_PIVOT) && (candidate_pivot > MIN_INCREASE*current_pivot))
             {
               DEBUG_PRINTF("lexicosort_lumod :: lexicomin small difference %2.2e, taking largest pivot %e > %e (var %s%d vs %s%d)\n",
-                  delta_lexico, candidate_pivot, current_pivot, basis_to_name(basis[next_var], n), basis_to_number(basis[next_var], n),
-                  basis_to_name(basis[vars[staying_var_indx]], n), basis_to_number(basis[vars[staying_var_indx]], n));
+                           delta_lexico, candidate_pivot, current_pivot, basis_to_name(basis[next_var], n), basis_to_number(basis[next_var], n),
+                           basis_to_name(basis[vars[staying_var_indx]], n), basis_to_number(basis[vars[staying_var_indx]], n));
               DEBUG_EXPR_WE(max_pivot_helped = 1;);
               zero_current_lexico_col_element = 0;
               goto update_current_blocking_variable;
@@ -163,14 +165,14 @@ int lexicosort_lumod(unsigned* vars, unsigned n, unsigned nb_candidates, SN_lumo
         continue;
 update_current_blocking_variable:
         DEBUG_PRINTF("lexicosort_lumod :: lexicomin blocking variable changes to %s%d from %s%d\n", basis_to_name(basis[next_var], n), basis_to_number(basis[next_var], n),
-            basis_to_name(basis[vars[0]], n), basis_to_number(basis[vars[0]], n));
+                     basis_to_name(basis[vars[0]], n), basis_to_number(basis[vars[0]], n));
         vars[0] = next_var;
         staying_var_indx = 0;
         current_pivot = driving_col[next_var];
         current_lexico_col_element = next_lexico_col_element;
       }
     }
-    if (staying_var_indx == 0)
+    if(staying_var_indx == 0)
     {
 //      assert(0 && "Do I stop here ?");
       return vars[0];
@@ -191,41 +193,49 @@ update_current_blocking_variable:
 static inline int lexicosort_rowmajor(unsigned var, int block, unsigned n, double* lexico_mat, double candidate_pivot, double current_pivot, double lexico_tol)
 {
   assert(lexico_tol >= 0.);
-  DEBUG_EXPR_WE(if (!basis_global) {DEBUG_PRINT("basis_global not initialized!");});
+  DEBUG_EXPR_WE(if(!basis_global)
+{
+  DEBUG_PRINT("basis_global not initialized!");
+  });
   double* lexico_row_block = &lexico_mat[block*n];
   double* lexico_row_var = &lexico_mat[var*n];
-  for (unsigned j = 0; j < n; ++j)
+  for(unsigned j = 0; j < n; ++j)
   {
     assert(block >= 0 && "pivot_selection_lemke2: block < 0");
     double dblock = lexico_row_block[j] * candidate_pivot - lexico_row_var[j] * current_pivot;
-    DEBUG_EXPR_WE(if ((dblock != 0.) && (fabs(dblock) < LEXICO_TOL_DISPLAY)) { printf("lexicosort_rowmajor :: very small difference in lexicomin search: %2.2e\n", dblock);
-        unsigned block_number = basis_to_number(basis_global[block], n); unsigned var_number =  basis_to_number(basis_global[var], n);
-        char* block_name = basis_to_name(basis_global[block], n); char* var_name = basis_to_name(basis_global[var], n);
-        printf("lexicomin: A[%s%d][j] / A[%s%d][drive] = %e / %e vs A[%s%d][j] / A[%s%d][drive] = %e / %e\n",
-            block_name, block_number, block_name, block_number, lexico_row_block[j], current_pivot, var_name,
-            var_number, var_name, var_number, lexico_row_var[j], candidate_pivot);});
-    if (dblock < -lexico_tol) return block; /* Unchanged blocking variable */
-    else if (dblock > lexico_tol) /* Difference is significant */
+    DEBUG_EXPR_WE(if((dblock != 0.) && (fabs(dblock) < LEXICO_TOL_DISPLAY))
+  {
+    printf("lexicosort_rowmajor :: very small difference in lexicomin search: %2.2e\n", dblock);
+      unsigned block_number = basis_to_number(basis_global[block], n);
+      unsigned var_number =  basis_to_number(basis_global[var], n);
+      char* block_name = basis_to_name(basis_global[block], n);
+      char* var_name = basis_to_name(basis_global[var], n);
+      printf("lexicomin: A[%s%d][j] / A[%s%d][drive] = %e / %e vs A[%s%d][j] / A[%s%d][drive] = %e / %e\n",
+             block_name, block_number, block_name, block_number, lexico_row_block[j], current_pivot, var_name,
+             var_number, var_name, var_number, lexico_row_var[j], candidate_pivot);
+    });
+    if(dblock < -lexico_tol) return block;  /* Unchanged blocking variable */
+    else if(dblock > lexico_tol)  /* Difference is significant */
     {
       DEBUG_PRINTF("pivot_selection_lemke :: lexicomin change var block changes to %s%d from %s%d, dblock = %2.2e, new pivot = %e\n",
-          basis_to_name(basis_global[var], n), basis_to_number(basis_global[var], n), basis_to_name(basis_global[block], n),
-          basis_to_number(basis_global[block], n), dblock, candidate_pivot);
+                   basis_to_name(basis_global[var], n), basis_to_number(basis_global[var], n), basis_to_name(basis_global[block], n),
+                   basis_to_number(basis_global[block], n), dblock, candidate_pivot);
       return var;
     }
-    else if (dblock != 0.)
+    else if(dblock != 0.)
     {
-      if ((current_pivot < SMALL_PIVOT) && (candidate_pivot > MIN_INCREASE*current_pivot))
+      if((current_pivot < SMALL_PIVOT) && (candidate_pivot > MIN_INCREASE*current_pivot))
       {
         DEBUG_PRINTF("pivot_selection_lemke :: lexicomin small difference %2.2e, taking largest pivot %e > %e (var %s%d vs %s%d)\n",
-            dblock, candidate_pivot, current_pivot, basis_to_name(basis_global[var], n), basis_to_number(basis_global[var], n),
-            basis_to_name(basis_global[block], n), basis_to_number(basis_global[block], n));
+                     dblock, candidate_pivot, current_pivot, basis_to_name(basis_global[var], n), basis_to_number(basis_global[var], n),
+                     basis_to_name(basis_global[block], n), basis_to_number(basis_global[block], n));
         DEBUG_EXPR_WE(max_pivot_helped = 1;);
         return var;
       }
     }
   }
   DEBUG_PRINTF("lexicosort_rowmajor :: reaching end of function, which means that the lexicomin failed!, block = %d, var = %d\n",
-      block, var);
+               block, var);
   return block; /* This should almost never happen  */
 }
 
@@ -235,21 +245,21 @@ int pivot_init_lemke(double* mat, unsigned int dim)
   double zb, dblock;
   double z0 = mat[0];
 
-  for (unsigned int i = 1 ; i < dim ; ++i)
+  for(unsigned int i = 1 ; i < dim ; ++i)
   {
     zb = mat[i];
-    if (zb < z0)
+    if(zb < z0)
     {
       z0 = zb;
       block = i;
     }
-    else if (zb == z0)
+    else if(zb == z0)
     {
-      for (unsigned int j = 1; j <= dim; ++j)
+      for(unsigned int j = 1; j <= dim; ++j)
       {
         dblock = mat[block + j*dim] - mat[i + j*dim];
-        if (dblock < 0.) break;
-        else if (dblock > 0.)
+        if(dblock < 0.) break;
+        else if(dblock > 0.)
         {
           block = i;
           break;
@@ -266,25 +276,25 @@ int pivot_init_pathsearch(unsigned dim, double* mat, unsigned* t_indx)
   int block = -LCP_PATHSEARCH_NON_ENTERING_T;
   double* minus_r = &mat[dim*(dim+1)];
   double t_min =  INFINITY;
-  for (unsigned i = 0; i < dim; ++i)
+  for(unsigned i = 0; i < dim; ++i)
   {
     /* -r = mat[dim(dim+1) + ...] */
-    if (fabs(minus_r[i]) > DBL_EPSILON) /* XXX tolerance */
+    if(fabs(minus_r[i]) > DBL_EPSILON)  /* XXX tolerance */
     {
       double tt = mat[i]/minus_r[i];
-      if (tt >= 0.0)
+      if(tt >= 0.0)
       {
-        if (tt < t_min)
-      {
-        t_min = tt;
-        block = i;
-      }
+        if(tt < t_min)
+        {
+          t_min = tt;
+          block = i;
+        }
       }
       else /* ratio neg, t could be increased at will */
       {
-        if (block < 0) /* accept only if no variable has been detected as blocking */
+        if(block < 0)  /* accept only if no variable has been detected as blocking */
         {
-      DEBUG_PRINTF("pivot_init_pathsearch :: non-blocking variable %d\n", i);
+          DEBUG_PRINTF("pivot_init_pathsearch :: non-blocking variable %d\n", i);
           t_min = 1.0;
           block = i;
         }
@@ -294,10 +304,10 @@ int pivot_init_pathsearch(unsigned dim, double* mat, unsigned* t_indx)
 
   *t_indx = block;
 
-  if (block >= 0)
+  if(block >= 0)
   {
 //    if (t_min >= 1.0 - DBL_EPSILON*fabs(minus_r[block])) /* XXX need a tol here ?*/
-    if (t_min >= 1.0)
+    if(t_min >= 1.0)
     {
       DEBUG_PRINTF("pivot_init_pathsearch :: search successful, t = %.*e\n", DECIMAL_DIG, t_min);
       block = PIVOT_PATHSEARCH_SUCCESS;
@@ -317,21 +327,21 @@ int pivot_selection_lemke(double* mat, unsigned dim, unsigned drive, unsigned au
   int block = -1;
   double candidate_pivot, candidate_ratio, dblock;
   double ratio = INFINITY;
-  for (unsigned i = 0 ; i < dim ; ++i)
+  for(unsigned i = 0 ; i < dim ; ++i)
   {
     candidate_pivot = mat[i + drive*dim];
-    if (candidate_pivot > 0.)
+    if(candidate_pivot > 0.)
     {
       candidate_ratio = mat[i] / candidate_pivot;
-      if (candidate_ratio > ratio) continue;
-      else if (candidate_ratio < ratio)
+      if(candidate_ratio > ratio) continue;
+      else if(candidate_ratio < ratio)
       {
         ratio = candidate_ratio;
         block = i;
       }
       else
       {
-        if (block == (int)aux_indx || i == aux_indx)
+        if(block == (int)aux_indx || i == aux_indx)
         {
           /* We want the auxilliary variable to exit before any othe.
            * see CPS p. 279 and example 4.4.16 */
@@ -340,13 +350,13 @@ int pivot_selection_lemke(double* mat, unsigned dim, unsigned drive, unsigned au
         else
         {
           double current_pivot = mat[block + drive*dim];
-          for (unsigned j = 1; j <= dim; ++j)
+          for(unsigned j = 1; j <= dim; ++j)
           {
             assert(block >= 0 && "ratio_selection_lemke: block < 0");
             dblock = mat[block + j*dim] * candidate_pivot - mat[i + j*dim] * current_pivot;
-            DEBUG_EXPR_WE(if (fabs(dblock) < TOL_LEXICO) printf("pivot_selection_lemke :: very small difference in lexicomin: %2.2e\n", dblock););
-            if (dblock < 0.) break;
-            else if (dblock > 0.)
+            DEBUG_EXPR_WE(if(fabs(dblock) < TOL_LEXICO) printf("pivot_selection_lemke :: very small difference in lexicomin: %2.2e\n", dblock););
+            if(dblock < 0.) break;
+            else if(dblock > 0.)
             {
               block = i;
               break;
@@ -368,14 +378,14 @@ int pivot_selection_lemke2(unsigned n, double* restrict col_drive, double* restr
   double candidate_pivot, current_pivot =0.0, candidate_ratio;
   double ratio = INFINITY;
   DEBUG_EXPR_WE(max_pivot_helped = 0;);
-  for (unsigned i = 0 ; i < n ; ++i)
+  for(unsigned i = 0 ; i < n ; ++i)
   {
     candidate_pivot = col_drive[i];
-    if (candidate_pivot > 0.)
+    if(candidate_pivot > 0.)
     {
       candidate_ratio = q_tilde[i] / candidate_pivot;
-      if (candidate_ratio > ratio) continue;
-      else if (candidate_ratio < ratio)
+      if(candidate_ratio > ratio) continue;
+      else if(candidate_ratio < ratio)
       {
         ratio = candidate_ratio;
         block = i;
@@ -385,7 +395,7 @@ int pivot_selection_lemke2(unsigned n, double* restrict col_drive, double* restr
       }
       else
       {
-        if (block == (int)aux_indx || i == aux_indx)
+        if(block == (int)aux_indx || i == aux_indx)
         {
           /* We want the auxilliary variable to exit before any other.
            * see CPS p. 279 and example 4.4.16 */
@@ -395,17 +405,17 @@ int pivot_selection_lemke2(unsigned n, double* restrict col_drive, double* restr
         }
         else
         {
-          if (nb_candidate < SIZE_CANDIDATE_PIVOT-1) candidate_indx[nb_candidate++] = i;
+          if(nb_candidate < SIZE_CANDIDATE_PIVOT-1) candidate_indx[nb_candidate++] = i;
           else
           {
             candidate_indx[nb_candidate] = i;
             DEBUG_PRINTF("pivot_selection_lemke :: lexicomin 5 candidates, ratio = %e\n", ratio);
-            for (unsigned k = 0; k < 5; ++k)
+            for(unsigned k = 0; k < 5; ++k)
             {
               unsigned var = candidate_indx[k];
               double test_pivot = col_drive[var];
               block = lexicosort_rowmajor(var, block, n, lexico_mat, test_pivot, current_pivot, lexico_tol);
-              if (block == (int)var)
+              if(block == (int)var)
               {
                 current_pivot = test_pivot;
               }
@@ -416,21 +426,24 @@ int pivot_selection_lemke2(unsigned n, double* restrict col_drive, double* restr
       }
     }
   }
-  if (nb_candidate > 0)
+  if(nb_candidate > 0)
   {
     DEBUG_PRINTF("pivot_selection_lemke2 :: lexicomin %d candidate, ratio = %e\n", nb_candidate, ratio);
-    for (unsigned k = 0; k < nb_candidate; ++k)
+    for(unsigned k = 0; k < nb_candidate; ++k)
     {
       unsigned var = candidate_indx[k];
       double test_pivot = col_drive[var];
       block = lexicosort_rowmajor(var, block, n, lexico_mat, test_pivot, current_pivot, lexico_tol);
-      if (block == (int)var)
+      if(block == (int)var)
       {
         current_pivot = test_pivot;
       }
     }
   }
-  DEBUG_EXPR_WE(if (max_pivot_helped) {DEBUG_PRINT("pivot_selection_lemke2 :: lexicomin MAX PIVOT HELPED!\n");});
+  DEBUG_EXPR_WE(if(max_pivot_helped)
+{
+  DEBUG_PRINT("pivot_selection_lemke2 :: lexicomin MAX PIVOT HELPED!\n");
+  });
   return block;
 }
 
@@ -438,17 +451,17 @@ int pivot_selection_lemke3(unsigned n, double* restrict col_drive, double* restr
 {
   int block = -1;
   unsigned nb_candidates = 0;
-  double candidate_pivot , candidate_ratio;
+  double candidate_pivot, candidate_ratio;
   /* double current_pivot; */
   double ratio = INFINITY;
-  for (unsigned i = 0 ; i < n ; ++i)
+  for(unsigned i = 0 ; i < n ; ++i)
   {
     candidate_pivot = col_drive[i];
-    if (candidate_pivot > 0.)
+    if(candidate_pivot > 0.)
     {
       candidate_ratio = q_tilde[i] / candidate_pivot;
-      if (candidate_ratio > ratio) continue;
-      else if (candidate_ratio < ratio)
+      if(candidate_ratio > ratio) continue;
+      else if(candidate_ratio < ratio)
       {
         ratio = candidate_ratio;
         block = i;
@@ -458,7 +471,7 @@ int pivot_selection_lemke3(unsigned n, double* restrict col_drive, double* restr
       }
       else
       {
-        if (block == (int)aux_indx || i == aux_indx)
+        if(block == (int)aux_indx || i == aux_indx)
         {
           /* We want the auxilliary variable to exit before any other.
            * see CPS p. 279 and example 4.4.16 */
@@ -473,11 +486,14 @@ int pivot_selection_lemke3(unsigned n, double* restrict col_drive, double* restr
       }
     }
   }
-  if (nb_candidates > 1)
+  if(nb_candidates > 1)
   {
     DEBUG_PRINTF("pivot_selection_lemke3 :: lexicomin %d candidates, ratio = %e\n", nb_candidates, ratio);
     return lexicosort_lumod(candidate_indx, n, nb_candidates, lumod_data, basis, lexico_col, col_drive, lexico_tol);
-    DEBUG_EXPR_WE(if (max_pivot_helped) {DEBUG_PRINT("pivot_selection_lemke3 :: lexicomin MAX PIVOT HELPED!\n");});
+    DEBUG_EXPR_WE(if(max_pivot_helped)
+  {
+    DEBUG_PRINT("pivot_selection_lemke3 :: lexicomin MAX PIVOT HELPED!\n");
+    });
   }
   else
   {
@@ -489,14 +505,14 @@ int pivot_selection_pathsearch(double* mat, unsigned dim, unsigned drive, unsign
 {
   int block = pivot_selection_lemke(mat, dim, drive, t_indx);
   double pivot_t = mat[t_indx + drive*dim];
-  if (pivot_t <= -DBL_EPSILON)
+  if(pivot_t <= -DBL_EPSILON)
   {
     /* try to set t to 1 */
     double ratio_t = (mat[t_indx] - 1.0)/pivot_t;
-    if (block >= 0)
+    if(block >= 0)
     {
       double ratio_lemke = mat[block]/mat[block + drive*dim];
-      if (ratio_t <= ratio_lemke)
+      if(ratio_t <= ratio_lemke)
       {
         block = PIVOT_PATHSEARCH_SUCCESS;
       }
@@ -515,26 +531,26 @@ int pivot_selection_bard(double* mat, unsigned int dim)
   int block = -1;
   double zb, z0, dblock;
 
-  for (unsigned int i = 0; i < dim; ++i)
+  for(unsigned int i = 0; i < dim; ++i)
   {
     zb = mat[i];
-    if (zb < 0.0)
+    if(zb < 0.0)
     {
-      if (block == -1)
+      if(block == -1)
       {
         z0    = zb;
         block = i;
       }
       else
       {
-        for (unsigned int j = dim; j <= dim*dim; j += dim)
+        for(unsigned int j = dim; j <= dim*dim; j += dim)
         {
           dblock = mat[i + j]/zb - mat[block + j]/z0;
-          if (dblock < 0.0)
+          if(dblock < 0.0)
           {
             break;
           }
-          else if (dblock > 0.0)
+          else if(dblock > 0.0)
           {
             block = i;
             break;
@@ -550,9 +566,9 @@ int pivot_selection_least_index(double* mat, unsigned int dim)
 {
   int block = -1;
 
-  for (unsigned int i = 0; i < dim; ++i)
+  for(unsigned int i = 0; i < dim; ++i)
   {
-    if (mat[i] < 0.0)
+    if(mat[i] < 0.0)
     {
       block = i;
       break;
@@ -572,23 +588,23 @@ void init_M_lemke(double* restrict mat, double* restrict M, unsigned int dim, un
   memset(&mat[dim], 0, sizeof(double) * dim * dim);
 
   /*  Copy M but mat[dim+2:, :] = -M */
-  for (unsigned int i = 0 ; i < dim; ++i)
-    for (unsigned int j = 0 ; j < dim; ++j)
+  for(unsigned int i = 0 ; i < dim; ++i)
+    for(unsigned int j = 0 ; j < dim; ++j)
       mat[i + dim*(j + dim + 2)] = -M[dim*j + i]; // Siconos is in column major
 
 
-  for (unsigned int i = 0 ; i < dim; ++i)
+  for(unsigned int i = 0 ; i < dim; ++i)
   {
     mat[i] = q[i];
     mat[i + dim*(i + 1)] =  1.0;
   }
 
   /** Add covering vector */
-  if (d != NULL)
-    for (unsigned int i = 0; i < size_x  ; ++i) mat[i + dim*(dim + 1)] = d[i];
+  if(d != NULL)
+    for(unsigned int i = 0; i < size_x  ; ++i) mat[i + dim*(dim + 1)] = d[i];
   else
-    for (unsigned int i = 0; i < size_x  ; ++i) mat[i + dim*(dim + 1)] = -1.0;
-  for (unsigned int i = size_x; i < dim; ++i) mat[i + dim*(dim + 1)] = 0.0;
+    for(unsigned int i = 0; i < size_x  ; ++i) mat[i + dim*(dim + 1)] = -1.0;
+  for(unsigned int i = size_x; i < dim; ++i) mat[i + dim*(dim + 1)] = 0.0;
 }
 
 void init_M_bard(double* restrict mat, double* restrict M, unsigned int dim, double* restrict q)
@@ -598,9 +614,9 @@ void init_M_bard(double* restrict mat, double* restrict M, unsigned int dim, dou
    */
 
   /*  Copy M but mat[dim+1:, :] = -M */
-  for (unsigned int i = 0; i < dim; ++i)
+  for(unsigned int i = 0; i < dim; ++i)
   {
-    for (unsigned int j = 0; j < dim*dim; j += dim)
+    for(unsigned int j = 0; j < dim*dim; j += dim)
     {
       mat[i + j + dim*(1 + dim)] = -M[j + i]; /* Siconos is in column major */
     }
@@ -608,7 +624,7 @@ void init_M_bard(double* restrict mat, double* restrict M, unsigned int dim, dou
 
   memset(&mat[dim], 0, sizeof(double) * dim * dim);
 
-  for (unsigned int i = 0, j = dim; i < dim; ++i, j+= dim)
+  for(unsigned int i = 0, j = dim; i < dim; ++i, j+= dim)
   {
     mat[i] = q[i];
     mat[i + j] =  1.0;
@@ -622,10 +638,10 @@ void init_M_least_index(double* restrict mat, double* restrict M, unsigned int d
    */
 
   /* We need to init only the part corresponding to Id */
-  for (unsigned int i = 0 ; i < dim; ++i)
+  for(unsigned int i = 0 ; i < dim; ++i)
   {
     mat[i] = q[i];
-    for (unsigned int j = 0 ; j < dim*dim; j += dim)
+    for(unsigned int j = 0 ; j < dim*dim; j += dim)
       mat[i + j + dim] = M[j + i];
   }
 }
@@ -645,15 +661,15 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
 
   /* covering vector for the auxiliary variable */
   double* d = &mat[(n+1)*n];
-  if (cov_vec) cblas_dcopy_msan(n, cov_vec, 1, d, 1);
-  else for (int i = 0; i < n; ++i) d[i] = 1.0;
+  if(cov_vec) cblas_dcopy_msan(n, cov_vec, 1, d, 1);
+  else for(int i = 0; i < n; ++i) d[i] = 1.0;
 
   /* take care of M */
   double* mat_basic = &mat[n];
   double* mat_nonbasic = &mat[(n+2)*n];
-  for (int i = 0; i < n; ++i)
+  for(int i = 0; i < n; ++i)
   {
-    if (u[i] > DBL_EPSILON) // M_bas[:, i] = M[:, i]
+    if(u[i] > DBL_EPSILON)  // M_bas[:, i] = M[:, i]
     {
       basis[i] = i + 2 + n;
       cblas_dcopy_msan(n, &M[i*n], 1, &mat_basic[i*n], 1);
@@ -679,7 +695,7 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
   DGETRF(n, n, mat_basic, n, ipiv, &info);
 
   assert(info <= 0 && "crash_pivot_basis :: info from DGETRF > 0, this should not append !\n");
-  if (info < 0)
+  if(info < 0)
   {
     printf("crash_pivot_basis :: the crash basis is singular, cannot inverse the matrix.\n\
             The (first) diagonal element of U to be 0.0 is %d\n\
@@ -700,7 +716,7 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
 
   /* set the identity part in the matrix (for the lexicographic ordering) */
   memset(mat_basic, 0, sizeof(double) * n * n);
-  for (int i = 0; i < n; ++i) mat[i + n*(i + 1)] =  1.0;
+  for(int i = 0; i < n; ++i) mat[i + n*(i + 1)] =  1.0;
 
   free(ipiv);
   return info;
@@ -709,7 +725,7 @@ int init_M_lemke_warm_start(int n, double* restrict u, double* restrict mat, dou
 
 void do_pivot_driftless(double* mat, unsigned int dim, unsigned int dim2, unsigned int block, unsigned int drive)
 {
-  if (fabs(mat[block + drive*dim]) < DBL_EPSILON)
+  if(fabs(mat[block + drive*dim]) < DBL_EPSILON)
   {
     printf("do_pivot_driftless :: pivot value too small %e; q[block] = %e; theta = %e\n", mat[block + drive*dim], mat[block], mat[block]/mat[block + drive*dim]);
   }
@@ -723,21 +739,21 @@ void do_pivot_driftless(double* mat, unsigned int dim, unsigned int dim2, unsign
   /* Update column mat[block, :] */
   mat[block + drive*dim] = 1.; /* nm_rs = 1 */
   /* nm_rj = m_rj/m_rs */
-  for (unsigned int i = 0        ; i < drive; ++i) mat[block + i*dim] *= pivot_inv;
-  for (unsigned int i = drive + 1; i < dim2 ; ++i) mat[block + i*dim] *= pivot_inv;
+  for(unsigned int i = 0        ; i < drive; ++i) mat[block + i*dim] *= pivot_inv;
+  for(unsigned int i = drive + 1; i < dim2 ; ++i) mat[block + i*dim] *= pivot_inv;
 
   /* Update other columns*/
-  for (unsigned int i = 0; i < block; ++i)
+  for(unsigned int i = 0; i < block; ++i)
   {
     double tmp = mat[i + drive*dim];
     /* nm_ij = m_ij + (m_ir/m_rs)m_rj = m_ij - m_is*nm_rj */
-    for (unsigned int j = 0; j < ncols; j+=dim) mat[i + j] -= tmp*mat[block + j];
+    for(unsigned int j = 0; j < ncols; j+=dim) mat[i + j] -= tmp*mat[block + j];
   }
-  for (unsigned int i = block + 1; i < dim; ++i)
+  for(unsigned int i = block + 1; i < dim; ++i)
   {
     double tmp = mat[i + drive*dim];
     /* nm_ij = m_ij + (m_ir/m_rs)m_rj = m_ij - m_is*nm_rj */
-    for (unsigned int j = 0; j < ncols; j+=dim) mat[i + j] -= tmp*mat[block + j];
+    for(unsigned int j = 0; j < ncols; j+=dim) mat[i + j] -= tmp*mat[block + j];
   }
   DEBUG_PRINT_MAT_SMALL_STR("lexico_mat", (&mat[dim]), dim, dim, driving_col);
 #ifdef DEBUG_MESSAGES
@@ -753,22 +769,22 @@ void do_pivot_driftless2(double* mat, unsigned int dim, unsigned int dim2, unsig
   /* Update column mat[block, :] */
   mat[block + drive*dim] = pivot_inv; /* nm_rs = 1 */
   /*  nm_rj = m_rj/m_rs */
-  for (unsigned int i = 0        ; i < drive; ++i) mat[block + i*dim] *= pivot_inv;
-  for (unsigned int i = drive + 1; i < dim2 ; ++i) mat[block + i*dim] *= pivot_inv;
+  for(unsigned int i = 0        ; i < drive; ++i) mat[block + i*dim] *= pivot_inv;
+  for(unsigned int i = drive + 1; i < dim2 ; ++i) mat[block + i*dim] *= pivot_inv;
 
   /* Update other columns*/
-  for (unsigned int i = 0; i < block; ++i)
+  for(unsigned int i = 0; i < block; ++i)
   {
     tmp = mat[i + drive*dim];
     /* nm_ij = m_ij + (m_ir/m_rs)m_rj = m_ij - m_is*nm_rj */
-    for (unsigned int j = 0        ; j < drive; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
-    for (unsigned int j = drive + 1; j < dim2 ; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
+    for(unsigned int j = 0        ; j < drive; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
+    for(unsigned int j = drive + 1; j < dim2 ; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
   }
-  for (unsigned int i = block + 1; i < dim; ++i)
+  for(unsigned int i = block + 1; i < dim; ++i)
   {
     tmp = mat[i + drive*dim];
-    for (unsigned int j = 0        ; j < drive; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
-    for (unsigned int j = drive + 1; j < dim2 ; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
+    for(unsigned int j = 0        ; j < drive; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
+    for(unsigned int j = drive + 1; j < dim2 ; ++j) mat[i + j*dim] -= tmp*mat[block + j*dim];
   }
 }
 
@@ -782,23 +798,23 @@ void do_pivot(double* mat, unsigned int dim, unsigned int dim2, unsigned int blo
   /* Update column mat[block, :] */
   mat[block + drive*dim] = pivot_inv;   /* nm_rs = 1/m_rs  */
   /* nm_rj = -m_rj/m_rs */
-  for (unsigned int i = 0        ; i < drive; ++i) mat[block + i*dim] *= mpivot_inv;
-  for (unsigned int i = drive + 1; i < dim2 ; ++i) mat[block + i*dim] *= mpivot_inv;
+  for(unsigned int i = 0        ; i < drive; ++i) mat[block + i*dim] *= mpivot_inv;
+  for(unsigned int i = drive + 1; i < dim2 ; ++i) mat[block + i*dim] *= mpivot_inv;
 
   /* Update other lines*/
-  for (unsigned int i = 0; i < block; ++i)
+  for(unsigned int i = 0; i < block; ++i)
   {
     tmp = mat[i + drive*dim];
     /* nm_ij = m_ij - (m_is/m_rs)m_rj = m_ij + m_is*nm_rj */
-    for (unsigned int j = 0        ; j < drive; ++j) mat[i + j*dim] += tmp*mat[block + j*dim];
-    for (unsigned int j = drive + 1; j < dim2 ; ++j) mat[i + j*dim] += tmp*mat[block + j*dim];
+    for(unsigned int j = 0        ; j < drive; ++j) mat[i + j*dim] += tmp*mat[block + j*dim];
+    for(unsigned int j = drive + 1; j < dim2 ; ++j) mat[i + j*dim] += tmp*mat[block + j*dim];
     mat[i + drive*dim] *= pivot_inv; /* nm_is = m_is/m_rs */
   }
-  for (unsigned int i = block + 1; i < dim; ++i)
+  for(unsigned int i = block + 1; i < dim; ++i)
   {
     tmp = mat[i + drive*dim];
-    for (unsigned int j = 0        ; j < drive; ++j) mat[i + j*dim] += tmp*mat[block + j*dim];
-    for (unsigned int j = drive + 1; j < dim2 ; ++j) mat[i + j*dim] += tmp*mat[block + j*dim];
+    for(unsigned int j = 0        ; j < drive; ++j) mat[i + j*dim] += tmp*mat[block + j*dim];
+    for(unsigned int j = drive + 1; j < dim2 ; ++j) mat[i + j*dim] += tmp*mat[block + j*dim];
     mat[i + drive*dim] *= pivot_inv;
   }
 }
@@ -816,82 +832,82 @@ void do_pivot_lumod(SN_lumod_dense_data* restrict lumod_data, NumericsMatrix* re
   unsigned leaving_type = pos_leaving_var_in_factorized_basis > 0 ? 1 : 0;
   unsigned entering_type = lumod_data->factorized_basis[entering_var_indx] > 0 ? 2 : 0;
 
-  switch (leaving_type + entering_type)
+  switch(leaving_type + entering_type)
   {
-    case 0:
-      /* Both variables are not in the factorized basis
-       * -> change the column corresponding to the leaving variable */
-      assert(lumod_data->row_col_indx[leaving_var_indx] <= 0);
-      assert(lumod_data->row_col_indx[entering_var_indx] == 0);
-      SN_lumod_replace_col(lumod_data, -lumod_data->row_col_indx[leaving_var_indx], col_tilde);
-      lumod_data->row_col_indx[entering_var_indx] = lumod_data->row_col_indx[leaving_var_indx];
-      lumod_data->row_col_indx[leaving_var_indx] = 0;
-      break;
-    case 1:
-      /* Leaving variable is in the factorized basis, entering not
-       * -> add one row and col */
-      /* Save the index of the column associated with the entering variable that
-       * was not in the basis */
-        lumod_data->row_col_indx[entering_var_indx] = -lumod_data->k; /* col index is negative */
-        lumod_data->row_col_indx[leaving_var_indx] = lumod_data->k;
-        SN_lumod_add_row_col(lumod_data, pos_leaving_var_in_factorized_basis - BASIS_OFFSET, col_tilde);
-      break;
-    case 2:
-      {
-      /*  Leaving variable is not in the factorized basis, entering is.
-       *  -> remove one row and one col */
-        DEBUG_PRINT_VEC_INT_STR("old index", lumod_data->row_col_indx, 2*n+1);
-      int index_row = lumod_data->row_col_indx[entering_var_indx];
-      int index_col = lumod_data->row_col_indx[leaving_var_indx];
-      assert(index_row >= 0);
-      assert(index_col <= 0);
-      SN_lumod_delete_row_col(lumod_data, index_row, -index_col);
-      /*  update the index, since a row and col were deleted */
-      if (index_row < (int)lumod_data->k)
-      {
-        unsigned changed_row = SN_lumod_find_arg_var(lumod_data->row_col_indx, lumod_data->k, n);
-        DEBUG_PRINTF("Changing row for variable %d to %d\n", changed_row, index_row);
-        lumod_data->row_col_indx[changed_row] = index_row;
-      }
-      if (-index_col < (int)lumod_data->k)
-      {
-        unsigned changed_col = SN_lumod_find_arg_var(lumod_data->row_col_indx, -lumod_data->k, n);
-        DEBUG_PRINTF("Changing col for variable %d to %d\n", changed_col, index_col);
-        lumod_data->row_col_indx[changed_col] = index_col;
-      }
-      lumod_data->row_col_indx[entering_var_indx] = 0;
-      lumod_data->row_col_indx[leaving_var_indx] = 0;
-      DEBUG_PRINT_VEC_INT_STR("new index", lumod_data->row_col_indx, 2*n+1);
-/*       if ((index_row <= lumod_data->k) || (index_col >= -lumod_data->k))
-      {
-        for (unsigned i = 0; i < 2*n + 1; ++i)
-        {
-          if (lumod_data->row_col_indx[i] > index_row)
+  case 0:
+    /* Both variables are not in the factorized basis
+     * -> change the column corresponding to the leaving variable */
+    assert(lumod_data->row_col_indx[leaving_var_indx] <= 0);
+    assert(lumod_data->row_col_indx[entering_var_indx] == 0);
+    SN_lumod_replace_col(lumod_data, -lumod_data->row_col_indx[leaving_var_indx], col_tilde);
+    lumod_data->row_col_indx[entering_var_indx] = lumod_data->row_col_indx[leaving_var_indx];
+    lumod_data->row_col_indx[leaving_var_indx] = 0;
+    break;
+  case 1:
+    /* Leaving variable is in the factorized basis, entering not
+     * -> add one row and col */
+    /* Save the index of the column associated with the entering variable that
+     * was not in the basis */
+    lumod_data->row_col_indx[entering_var_indx] = -lumod_data->k; /* col index is negative */
+    lumod_data->row_col_indx[leaving_var_indx] = lumod_data->k;
+    SN_lumod_add_row_col(lumod_data, pos_leaving_var_in_factorized_basis - BASIS_OFFSET, col_tilde);
+    break;
+  case 2:
+  {
+    /*  Leaving variable is not in the factorized basis, entering is.
+     *  -> remove one row and one col */
+    DEBUG_PRINT_VEC_INT_STR("old index", lumod_data->row_col_indx, 2*n+1);
+    int index_row = lumod_data->row_col_indx[entering_var_indx];
+    int index_col = lumod_data->row_col_indx[leaving_var_indx];
+    assert(index_row >= 0);
+    assert(index_col <= 0);
+    SN_lumod_delete_row_col(lumod_data, index_row, -index_col);
+    /*  update the index, since a row and col were deleted */
+    if(index_row < (int)lumod_data->k)
+    {
+      unsigned changed_row = SN_lumod_find_arg_var(lumod_data->row_col_indx, lumod_data->k, n);
+      DEBUG_PRINTF("Changing row for variable %d to %d\n", changed_row, index_row);
+      lumod_data->row_col_indx[changed_row] = index_row;
+    }
+    if(-index_col < (int)lumod_data->k)
+    {
+      unsigned changed_col = SN_lumod_find_arg_var(lumod_data->row_col_indx, -lumod_data->k, n);
+      DEBUG_PRINTF("Changing col for variable %d to %d\n", changed_col, index_col);
+      lumod_data->row_col_indx[changed_col] = index_col;
+    }
+    lumod_data->row_col_indx[entering_var_indx] = 0;
+    lumod_data->row_col_indx[leaving_var_indx] = 0;
+    DEBUG_PRINT_VEC_INT_STR("new index", lumod_data->row_col_indx, 2*n+1);
+    /*       if ((index_row <= lumod_data->k) || (index_col >= -lumod_data->k))
           {
-            --(lumod_data->row_col_indx[i]);
-          }
-          else if(lumod_data->row_col_indx[i] < index_col)
-          {
-            ++(lumod_data->row_col_indx[i]);
-          }
-        }
-      }*/
-        DEBUG_PRINT_VEC_INT(lumod_data->row_col_indx, 2*n+1);
-      }
-      break;
-    case 3:
-      /* Both variables are in the factorized basis 
-       * -> replace the row corresponding to the entering variable by the
-       *  leaving one*/
-      assert(lumod_data->row_col_indx[entering_var_indx]>=0);
-      assert(lumod_data->row_col_indx[leaving_var_indx] == 0);
-      SN_lumod_replace_row(lumod_data, lumod_data->row_col_indx[entering_var_indx], pos_leaving_var_in_factorized_basis-BASIS_OFFSET);
-      lumod_data->row_col_indx[leaving_var_indx] = lumod_data->row_col_indx[entering_var_indx];
-      lumod_data->row_col_indx[entering_var_indx] = 0;
-      break;
-    default:
-      printf("do_pivot_lumod :: unknown update type occuring\n");
-      exit(EXIT_FAILURE);
+            for (unsigned i = 0; i < 2*n + 1; ++i)
+            {
+              if (lumod_data->row_col_indx[i] > index_row)
+              {
+                --(lumod_data->row_col_indx[i]);
+              }
+              else if(lumod_data->row_col_indx[i] < index_col)
+              {
+                ++(lumod_data->row_col_indx[i]);
+              }
+            }
+          }*/
+    DEBUG_PRINT_VEC_INT(lumod_data->row_col_indx, 2*n+1);
+  }
+  break;
+  case 3:
+    /* Both variables are in the factorized basis
+     * -> replace the row corresponding to the entering variable by the
+     *  leaving one*/
+    assert(lumod_data->row_col_indx[entering_var_indx]>=0);
+    assert(lumod_data->row_col_indx[leaving_var_indx] == 0);
+    SN_lumod_replace_row(lumod_data, lumod_data->row_col_indx[entering_var_indx], pos_leaving_var_in_factorized_basis-BASIS_OFFSET);
+    lumod_data->row_col_indx[leaving_var_indx] = lumod_data->row_col_indx[entering_var_indx];
+    lumod_data->row_col_indx[entering_var_indx] = 0;
+    break;
+  default:
+    printf("do_pivot_lumod :: unknown update type occuring\n");
+    exit(EXIT_FAILURE);
   }
 
   /* Update q_tilde */
@@ -906,9 +922,9 @@ void do_pivot_lumod(SN_lumod_dense_data* restrict lumod_data, NumericsMatrix* re
   double pivot = col_drive[block];
   unsigned block_row_indx = block*n;
 
-  for (unsigned i = 0, j = 0; i < n; ++i, j += n)
+  for(unsigned i = 0, j = 0; i < n; ++i, j += n)
   {
-    if (j == block_row_indx) continue;
+    if(j == block_row_indx) continue;
     cblas_daxpy(n, -col_drive[i]/pivot, &lexico_mat[block_row_indx], 1, &lexico_mat[j], 1);
   }
   cblas_dscal(n, 1./pivot, &lexico_mat[block_row_indx], 1);
@@ -917,24 +933,24 @@ void do_pivot_lumod(SN_lumod_dense_data* restrict lumod_data, NumericsMatrix* re
 
 void lcp_pivot_diagnose_info(int info)
 {
-  switch (info)
+  switch(info)
   {
-    case 0:
-      printf("lcp_pivot :: a solution to the problem has been found\n");
-      break;
-    case 1:
-      printf("lcp_pivot :: no solution have been found\n");
-      break;
-    case LCP_PIVOT_NUL:
-      printf("lcp_pivot :: the pivot is nul\n");
-      break;
-    case LCP_PATHSEARCH_LEAVING_T:
-      printf("lcp_pivot :: the pathsearch was not successful since the t variable was leaving\n");
-      break;
-    case LCP_PATHSEARCH_NON_ENTERING_T:
-      printf("lcp_pivot :: t could not become basic");
-      break;
-    default:
-      printf("lcp_pivot :: the info code %d is not documented\n", info);
+  case 0:
+    printf("lcp_pivot :: a solution to the problem has been found\n");
+    break;
+  case 1:
+    printf("lcp_pivot :: no solution have been found\n");
+    break;
+  case LCP_PIVOT_NUL:
+    printf("lcp_pivot :: the pivot is nul\n");
+    break;
+  case LCP_PATHSEARCH_LEAVING_T:
+    printf("lcp_pivot :: the pathsearch was not successful since the t variable was leaving\n");
+    break;
+  case LCP_PATHSEARCH_NON_ENTERING_T:
+    printf("lcp_pivot :: t could not become basic");
+    break;
+  default:
+    printf("lcp_pivot :: the info code %d is not documented\n", info);
   }
 }

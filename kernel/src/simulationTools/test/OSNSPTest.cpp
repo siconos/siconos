@@ -33,7 +33,7 @@ void OSNSPTest::testOSNSBuild_default()
 {
   // Build from solver id
   SP::FrictionContact problem = std::make_shared<FrictionContact>();
-  
+
   auto options = problem->numericsSolverOptions();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test solver options : ",  options->solverId == SICONOS_FRICTION_3D_NSGS, true);
 }
@@ -43,7 +43,7 @@ void OSNSPTest::testOSNSBuild_solverid()
 {
   // Build from solver id
   SP::FrictionContact problem = std::make_shared<FrictionContact>(3, SICONOS_FRICTION_3D_ADMM);
-  
+
   auto options = problem->numericsSolverOptions();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test solver options : ",  options->solverId == SICONOS_FRICTION_3D_ADMM, true);
 }
@@ -54,7 +54,7 @@ void OSNSPTest::testOSNSBuild_options()
   SP::SolverOptions options(solver_options_create(SICONOS_FRICTION_3D_ADMM),
                             solver_options_delete);
   SP::FrictionContact problem = std::make_shared<FrictionContact>(3, options);
-  
+
   auto options_link = problem->numericsSolverOptions();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test solver options : ",  options_link->solverId == SICONOS_FRICTION_3D_ADMM, true);
 }

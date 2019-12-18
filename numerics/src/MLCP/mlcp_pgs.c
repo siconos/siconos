@@ -39,7 +39,7 @@
 void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 
-  if (!problem->isStorageType2)
+  if(!problem->isStorageType2)
   {
     printf("Siconos/Numerics: mlcp_pgs: Wrong Storage (!isStorageType2) for PGS solver\n");
     exit(EXIT_FAILURE);
@@ -93,12 +93,12 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
 
   /* Preparation of the diagonal of the inverse matrix */
 
-  for (i = 0 ; i < n ; ++i)
+  for(i = 0 ; i < n ; ++i)
   {
-    if ((fabs(A[i * n + i]) < DBL_EPSILON))
+    if((fabs(A[i * n + i]) < DBL_EPSILON))
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" Vanishing diagonal term \n");
         printf(" The local problem cannot be solved \n");
@@ -116,12 +116,12 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
 
     }
   }
-  for (i = 0 ; i < m ; ++i)
+  for(i = 0 ; i < m ; ++i)
   {
-    if ((fabs(B[i * m + i]) < DBL_EPSILON))
+    if((fabs(B[i * m + i]) < DBL_EPSILON))
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" Vanishing diagonal term \n");
         printf(" The local problem cannot be solved \n");
@@ -154,7 +154,7 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
 
   mlcp_compute_error(problem, z, w, tol, &err);
 
-  while ((iter < itermax) && (err > tol))
+  while((iter < itermax) && (err > tol))
   {
 
     ++iter;
@@ -162,48 +162,48 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
     incx = 1;
     incy = 1;
 
-    if (pgsExplicit)
+    if(pgsExplicit)
     {
       /*Use w like a buffer*/
-      cblas_dcopy(n , w , incx , u , incy);  //w <- q
+      cblas_dcopy(n, w, incx, u, incy);      //w <- q
       Buf = w;
 
-      for (i = 0 ; i < n ; ++i)
+      for(i = 0 ; i < n ; ++i)
       {
         prev = Buf[i];
         Buf[i] = 0;
         //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-        u[i] =  - (a[i] + cblas_ddot(n , &A[i] , incAx , Buf , incAy)   + cblas_ddot(m , &C[i] , incAx , v , incBy)) * diagA[i];
+        u[i] =  - (a[i] + cblas_ddot(n, &A[i], incAx, Buf, incAy)   + cblas_ddot(m, &C[i], incAx, v, incBy)) * diagA[i];
         Buf[i] = prev;
       }
-      for (i = 0 ; i < m ; ++i)
+      for(i = 0 ; i < m ; ++i)
       {
         v[i] = 0.0;
         //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-        vi = -(b[i] + cblas_ddot(n , &D[i] , incBx , u , incAy)   + cblas_ddot(m , &B[i] , incBx , v , incBy)) * diagB[i];
+        vi = -(b[i] + cblas_ddot(n, &D[i], incBx, u, incAy)   + cblas_ddot(m, &B[i], incBx, v, incBy)) * diagB[i];
 
-        if (vi < 0) v[i] = 0.0;
+        if(vi < 0) v[i] = 0.0;
         else v[i] = vi;
       }
     }
     else
     {
 
-      for (i = 0 ; i < n ; ++i)
+      for(i = 0 ; i < n ; ++i)
       {
         u[i] = 0.0;
 
         //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-        u[i] =  - (a[i] + cblas_ddot(n , &A[i] , incAx , u , incAy)   + cblas_ddot(m , &C[i] , incAx , v , incBy)) * diagA[i];
+        u[i] =  - (a[i] + cblas_ddot(n, &A[i], incAx, u, incAy)   + cblas_ddot(m, &C[i], incAx, v, incBy)) * diagA[i];
       }
 
-      for (i = 0 ; i < m ; ++i)
+      for(i = 0 ; i < m ; ++i)
       {
         v[i] = 0.0;
         //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-        vi = -(b[i] + cblas_ddot(n , &D[i] , incBx , u , incAy)   + cblas_ddot(m , &B[i] , incBx , v , incBy)) * diagB[i];
+        vi = -(b[i] + cblas_ddot(n, &D[i], incBx, u, incAy)   + cblas_ddot(m, &B[i], incBx, v, incBy)) * diagB[i];
 
-        if (vi < 0) v[i] = 0.0;
+        if(vi < 0) v[i] = 0.0;
         else v[i] = vi;
       }
     }
@@ -212,12 +212,12 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
 
     mlcp_compute_error(problem, z, w, tol, &err);
 
-    if (verbose == 2)
+    if(verbose == 2)
     {
       printf(" # i%d -- %g : ", iter, err);
-      for (i = 0 ; i < n ; ++i) printf(" %g", u[i]);
-      for (i = 0 ; i < m ; ++i) printf(" %g", v[i]);
-      for (i = 0 ; i < m ; ++i) printf(" %g", w[i]);
+      for(i = 0 ; i < n ; ++i) printf(" %g", u[i]);
+      for(i = 0 ; i < m ; ++i) printf(" %g", v[i]);
+      for(i = 0 ; i < m ; ++i) printf(" %g", w[i]);
       printf("\n");
     }
 
@@ -228,17 +228,17 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem, double *z, double *w, 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
-  if (err > tol)
+  if(err > tol)
   {
-    printf("Siconos/Numerics: mlcp_pgs: No convergence of PGS after %d iterations\n" , iter);
+    printf("Siconos/Numerics: mlcp_pgs: No convergence of PGS after %d iterations\n", iter);
     printf("Siconos/Numerics: mlcp_pgs: The residue is : %g \n", err);
     *info = 1;
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
     {
-      printf("Siconos/Numerics: mlcp_pgs: Convergence of PGS after %d iterations\n" , iter);
+      printf("Siconos/Numerics: mlcp_pgs: Convergence of PGS after %d iterations\n", iter);
       printf("Siconos/Numerics: mlcp_pgs: The residue is : %g \n", err);
     }
     *info = 0;

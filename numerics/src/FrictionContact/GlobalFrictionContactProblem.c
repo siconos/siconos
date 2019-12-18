@@ -45,7 +45,7 @@ GlobalFrictionContactProblem* globalFrictionContactProblem_new(void)
 
 int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FILE* file)
 {
-  if (! problem)
+  if(! problem)
   {
     fprintf(stderr, "Numerics, GlobalFrictionContactProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -58,17 +58,17 @@ int globalFrictionContact_printInFile(GlobalFrictionContactProblem*  problem, FI
   fprintf(file, "%d\n", nc);
   NM_write_in_file(problem->M, file);
   NM_write_in_file(problem->H, file);
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
   fprintf(file, "\n");
-  for (i = 0; i < problem->H->size1; i++)
+  for(i = 0; i < problem->H->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->b[i]);
   }
   fprintf(file, "\n");
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     fprintf(file, "%32.24e ", problem->mu[i]);
   }
@@ -85,28 +85,28 @@ GlobalFrictionContactProblem* globalFrictionContact_newFromFile(FILE* file)
   problem->dimension = d;
   CHECK_IO(fscanf(file, "%d\n", &nc), &info);
   problem->numberOfContacts = nc;
-  problem->M = NM_new_from_file( file);
+  problem->M = NM_new_from_file(file);
 
   problem->H =  NM_new_from_file(file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (int i = 0; i < problem->M->size1; ++i)
+  for(int i = 0; i < problem->M->size1; ++i)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])), &info);
   }
   problem->b = (double *) malloc(problem->H->size1 * sizeof(double));
-  for (int i = 0; i < problem->H->size1; ++i)
+  for(int i = 0; i < problem->H->size1; ++i)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->b[i])), &info);
   }
 
   problem->mu = (double *) malloc(nc * sizeof(double));
-  for (int i = 0; i < nc; ++i)
+  for(int i = 0; i < nc; ++i)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])), &info);
   }
-  
-  if (info)
+
+  if(info)
   {
     problem = NULL;
   }
@@ -120,26 +120,26 @@ GlobalFrictionContactProblem* globalFrictionContact_new_from_filename(const char
   GlobalFrictionContactProblem* problem = NULL;
   int is_hdf5 = check_hdf5_file(filename);
   if(is_hdf5)
-    {
+  {
 #if defined(WITH_FCLIB)
-      problem = globalFrictionContact_fclib_read(filename);
+    problem = globalFrictionContact_fclib_read(filename);
 #else
-      numerics_error("GlobalFrictionContactProblem",
-                     "Try to read an hdf5 file, while fclib interface is not active. Recompile Siconos with fclib.",
-                     filename);
+    numerics_error("GlobalFrictionContactProblem",
+                   "Try to read an hdf5 file, while fclib interface is not active. Recompile Siconos with fclib.",
+                   filename);
 #endif
-    }
+  }
   else
-    {
-      FILE * file = fopen(filename, "r");
-      if (!file)
-        numerics_error("GlobalFrictionContactProblem", "Can not open file ", filename);
-      
-      problem = globalFrictionContact_newFromFile(file); 
-      fclose(file);
-    }
+  {
+    FILE * file = fopen(filename, "r");
+    if(!file)
+      numerics_error("GlobalFrictionContactProblem", "Can not open file ", filename);
+
+    problem = globalFrictionContact_newFromFile(file);
+    fclose(file);
+  }
   return problem;
-    
+
 }
 
 int globalFrictionContact_printInFileName(GlobalFrictionContactProblem* problem, const char* filename)
@@ -147,7 +147,7 @@ int globalFrictionContact_printInFileName(GlobalFrictionContactProblem* problem,
   int info = 0;
   FILE * file = fopen(filename, "w");
 
-  if (!file)
+  if(!file)
   {
     return errno;
   }
@@ -161,39 +161,39 @@ int globalFrictionContact_printInFileName(GlobalFrictionContactProblem* problem,
 void globalFrictionContact_free(GlobalFrictionContactProblem* problem)
 {
 
-  if (problem->M)
+  if(problem->M)
   {
     NM_clear(problem->M);
     free(problem->M);
   }
   problem->M = NULL;
 
-  if (problem->H)
+  if(problem->H)
   {
     NM_clear(problem->H);
     free(problem->H);
   }
   problem->H = NULL;
 
-  if (problem->mu)
+  if(problem->mu)
   {
     free(problem->mu);
   }
   problem->mu = NULL;
 
-  if (problem->q)
+  if(problem->q)
   {
     free(problem->q);
   }
   problem->q = NULL;
 
-  if (problem->b)
+  if(problem->b)
   {
     free(problem->b);
   }
   problem->b = NULL;
 
-  if (problem->env) assert(0 && "globalFrictionContact_free :: problem->env != NULL, don't know what to do");
+  if(problem->env) assert(0 && "globalFrictionContact_free :: problem->env != NULL, don't know what to do");
 
   free(problem);
 }
@@ -207,14 +207,14 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem)
   printf("dimension :%d \n", problem->dimension);
   printf("numberOfContacts:%d \n", problem->numberOfContacts);
   int m = problem->M->size0;
-  if (problem->M)
+  if(problem->M)
   {
     printf("M matrix:\n");
     NM_display(problem->M);
   }
   else
     printf("No M matrix:\n");
-  if (problem->H)
+  if(problem->H)
   {
     printf("H matrix:\n");
     NM_display(problem->H);
@@ -222,26 +222,26 @@ void globalFrictionContact_display(GlobalFrictionContactProblem* problem)
   else
     printf("No H matrix:\n");
 
-  if (problem->q)
+  if(problem->q)
   {
     printf("q vector:\n");
-    for (i = 0; i < m; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
+    for(i = 0; i < m; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
   }
   else
     printf("No q vector:\n");
 
-  if (problem->b)
+  if(problem->b)
   {
     printf("b vector:\n");
-    for (i = 0; i < n; i++) printf("b[ %i ] = %12.8e\n", i, problem->b[i]);
+    for(i = 0; i < n; i++) printf("b[ %i ] = %12.8e\n", i, problem->b[i]);
   }
   else
     printf("No q vector:\n");
 
-  if (problem->mu)
+  if(problem->mu)
   {
     printf("mu vector:\n");
-    for (i = 0; i < problem->numberOfContacts; i++) printf("mu[ %i ] = %12.8e\n", i, problem->mu[i]);
+    for(i = 0; i < problem->numberOfContacts; i++) printf("mu[ %i ] = %12.8e\n", i, problem->mu[i]);
   }
   else
     printf("No mu vector:\n");
@@ -305,10 +305,10 @@ int globalFrictionContact_computeGlobalVelocity(
   int m = problem->H->size1;
 
   /* globalVelocity <- problem->q */
-  cblas_dcopy(n,  problem->q , 1, globalVelocity, 1);
+  cblas_dcopy(n,  problem->q, 1, globalVelocity, 1);
 
   // We compute only if the problem has contacts
-  if (m>0)
+  if(m>0)
   {
     /* globalVelocity <-  H*reaction + globalVelocity*/
     NM_gemv(1.0, problem->H, reaction, 1.0, globalVelocity);

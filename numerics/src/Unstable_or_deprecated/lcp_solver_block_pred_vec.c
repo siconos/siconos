@@ -43,8 +43,8 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
                               SparseBlockStructuredMatrixPred *blmatpred,
                               int nbmethod,
                               int maxiterglob, double tolglob,
-                              double *q, method_lcp **ptvec ,
-                              double *z , double *w , int *it_end , int *itt_end , double *res)
+                              double *q, method_lcp **ptvec,
+                              double *z, double *w, int *it_end, int *itt_end, double *res)
 {
 
   static int firsttime = 1;
@@ -90,7 +90,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
   totaliter = 0;
 
   nbbl = blmat->nbblocks;
-  if (nbbl < 1)
+  if(nbbl < 1)
   {
     printf(" Problem : Null LCP block matrix !!! \n");
     return 1;
@@ -99,28 +99,28 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
   nbblrow = blmat->size;
   n = 0;
   blsizemax = 0;
-  for (i = 0 ; i < nbblrow ; i++)
+  for(i = 0 ; i < nbblrow ; i++)
   {
     k = blmat->blocksize[i];
     n += k;
-    if (k > blsizemax) blsizemax = k;
+    if(k > blsizemax) blsizemax = k;
   }
 
   sizelcp = n;
 
   i = 0;
-  while ((i < (n - 1)) && (q[i] >= 0.)) i++;
-  if ((i == (n - 1)) && (q[n - 1] >= 0.))
+  while((i < (n - 1)) && (q[i] >= 0.)) i++;
+  if((i == (n - 1)) && (q[n - 1] >= 0.))
   {
     /* TRIVIAL CASE : q >= 0
      * z = 0 and w = q is solution of LCP(q,M)
      */
-    for (j = 0 ; j < n; j++)
+    for(j = 0 ; j < n; j++)
     {
       z[j] = 0.0;
       w[j] = q[j];
     }
-    if (pt->lcp.chat > 0) printf("Trivial case of block LCP : positive vector q \n");
+    if(pt->lcp.chat > 0) printf("Trivial case of block LCP : positive vector q \n");
     return 0;
   }
 
@@ -128,7 +128,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
   rhs  = (double*)malloc(blsizemax * sizeof(double));
 
   incx = 1;
-  qs = cblas_dnrm2(n , q , incx);
+  qs = cblas_dnrm2(n, q, incx);
   den = 1.0 / qs;
 
   /* Initialization of z and w */
@@ -142,10 +142,10 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
 
   /*   test on matrix structure : is there null blocks rows ? */
   rowprecbl = -1;
-  for (i = 0 ; i < nbbl ; i++)
+  for(i = 0 ; i < nbbl ; i++)
   {
     rowcurbl = blmat->RowIndex[i];
-    if (rowcurbl > rowprecbl + 1)
+    if(rowcurbl > rowprecbl + 1)
     {
       printf(" Null blocks row in LCP matrix !!!\n");
       free(rhs);
@@ -153,7 +153,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
     }
     rowprecbl = rowcurbl;
   }
-  if (rowcurbl != nbblrow - 1)
+  if(rowcurbl != nbblrow - 1)
   {
     printf(" Null blocks row in LCP matrix !!!\n");
     free(rhs);
@@ -164,7 +164,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
   err  = 1.;
   iterrow0 = 0;
 
-  while ((iter < maxiterglob) && (info))
+  while((iter < maxiterglob) && (info))
   {
 
     iter++;
@@ -179,16 +179,16 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
     numsolver = 0;
     pt = ptvec[numsolver];
 
-    for (i = 0 ; i < nbbl ; i++)
+    for(i = 0 ; i < nbbl ; i++)
     {
 
       rowcurbl = blmat->RowIndex[i];
       colcurbl = blmat->ColumnIndex[i];
-      if (rowcurbl != rowprecbl)   /*  new row  */
+      if(rowcurbl != rowprecbl)    /*  new row  */
       {
-        if (rowprecbl != -1)
+        if(rowprecbl != -1)
         {
-          if (adrbldiag != NULL)
+          if(adrbldiag != NULL)
           {
             /* Local LCP resolution  */
             pt->lcp.iter = 0;
@@ -205,16 +205,16 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
             newz            = blmatpred->newz[rowprecbl];
             workspace       = blmatpred->workspace[rowprecbl];
 
-            info1 = lcp_solver_pred(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow] ,
-                                    firsttime, soltype , indic , indicop , submatlcp , submatlcpop , ipiv , sizesublcp , sizesublcpop ,
-                                    subq , bufz , newz , workspace);
+            info1 = lcp_solver_pred(adrbldiag, rhs, &rowsize, pt, &z[indicrow], &w[indicrow],
+                                    firsttime, soltype, indic, indicop, submatlcp, submatlcpop, ipiv, sizesublcp, sizesublcpop,
+                                    subq, bufz, newz, workspace);
 
             totaliter += pt->lcp.iter;
-            if (rowprecbl == 0) iterrow0 += pt->lcp.iter;
+            if(rowprecbl == 0) iterrow0 += pt->lcp.iter;
 
-            if (info1 > 0)
+            if(info1 > 0)
             {
-              if (pt->lcp.chat > 0)
+              if(pt->lcp.chat > 0)
               {
                 printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block", iter);
                 printf(" for block(%d,%d)\n", rowprecbl, rowprecbl);
@@ -223,7 +223,7 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
               return 1;
             }
 
-            if (numsolver + 1 < nbmethod)
+            if(numsolver + 1 < nbmethod)
             {
               numsolver++;
               pt = ptvec[numsolver];
@@ -240,23 +240,23 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
         adrbldiag = NULL;
 
         indiccol = 0;
-        for (j = 0 ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
+        for(j = 0 ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
         colprecbl = colcurbl;
 
         indicrow += rowsize;
-        for (j = rowprecbl + 1 ; j < rowcurbl ; j++) indicrow += blmat->blocksize[j];
+        for(j = rowprecbl + 1 ; j < rowcurbl ; j++) indicrow += blmat->blocksize[j];
 
         rowprecbl = rowcurbl;
         rowsize = blmat->blocksize[rowcurbl];
-        for (j = 0 ; j < rowsize ; j++) rhs[j] = q[indicrow + j];
+        for(j = 0 ; j < rowsize ; j++) rhs[j] = q[indicrow + j];
       }
-      if (rowcurbl == colcurbl)   /* diagonal block  */
+      if(rowcurbl == colcurbl)    /* diagonal block  */
       {
         adrbldiag = blmat->block[i];
       }
       else                      /* extra diagonal block  */
       {
-        for (j = colprecbl ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
+        for(j = colprecbl ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
         colprecbl = colcurbl;
 
         rowsize = blmat->blocksize[rowcurbl];
@@ -267,11 +267,11 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
         b1 = 1.;
         incx = 1;
         incy = 1;
-        cblas_dgemv(CblasColMajor,CblasNoTrans, rowsize , colsize , a1 , adrcurbl , rowsize , &z[indiccol] , incx , b1 , rhs , incy);
+        cblas_dgemv(CblasColMajor,CblasNoTrans, rowsize, colsize, a1, adrcurbl, rowsize, &z[indiccol], incx, b1, rhs, incy);
       }
     }
 
-    if (adrbldiag != NULL)
+    if(adrbldiag != NULL)
     {
 
       /*        strcpy(pt->lcp.name,"PGS"); */
@@ -295,14 +295,14 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
       newz            = blmatpred->newz[rowprecbl];
       workspace       = blmatpred->workspace[rowprecbl];
 
-      info1 = lcp_solver_pred(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow] ,
-                              firsttime, soltype , indic , indicop , submatlcp , submatlcpop , ipiv , sizesublcp , sizesublcpop ,
-                              subq , bufz , newz , workspace);
+      info1 = lcp_solver_pred(adrbldiag, rhs, &rowsize, pt, &z[indicrow], &w[indicrow],
+                              firsttime, soltype, indic, indicop, submatlcp, submatlcpop, ipiv, sizesublcp, sizesublcpop,
+                              subq, bufz, newz, workspace);
 
       totaliter += pt->lcp.iter;
-      if (info1 > 0)
+      if(info1 > 0)
       {
-        if (pt->lcp.chat > 0)
+        if(pt->lcp.chat > 0)
         {
           printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block", iter);
           printf(" for block(%d,%d)\n", rowprecbl, rowprecbl);
@@ -342,15 +342,15 @@ int lcp_solver_block_pred_vec(SparseBlockStructuredMatrix *blmat,
   /*  free(ww);*/
   free(rhs);
 
-  if (pt->lcp.chat > 0)
+  if(pt->lcp.chat > 0)
   {
-    if (info)
+    if(info)
     {
-      printf(" No convergence of lcp_solver_block after %d iterations\n" , iter);
+      printf(" No convergence of lcp_solver_block after %d iterations\n", iter);
     }
     else
     {
-      printf(" Convergence of lcp_solver_block after %d iterations\n" , iter);
+      printf(" Convergence of lcp_solver_block after %d iterations\n", iter);
       /*      printf( " The residue is : %g \n", err );*/
     }
   }

@@ -32,26 +32,26 @@
 const char* const SICONOS_AVI_CAOFERRIS_STR = "AVI from Cao & Ferris";
 const char* const SICONOS_AVI_PATHAVI_STR = "PATHVI";
 
-int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, SolverOptions* options)
+int avi_driver(AffineVariationalInequalities* problem, double *z, double *w, SolverOptions* options)
 {
 
   assert(options && "avi_driver : null input for solver options");
   /* Checks inputs */
   assert(problem && z && w &&
-      "avi_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");
+         "avi_driver : input for LinearComplementarityProblem and/or unknowns (z,w)");
 
   assert(problem->M->storageType == NM_DENSE &&
-      "avi_driver_DenseMatrix : forbidden type of storage for the matrix M of the AVI");
+         "avi_driver_DenseMatrix : forbidden type of storage for the matrix M of the AVI");
 
   assert(options->isSet);
 
-  if (!problem || !problem->M || !problem->q || !options)
+  if(!problem || !problem->M || !problem->q || !options)
   {
     numerics_error_nonfatal("avi_driver", "Problem data is incomplete: you need to set at least M, q and poly");
     return -1;
   }
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
     solver_options_print(options);
   }
@@ -59,11 +59,11 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
   int info = -1;
 
-  if (verbose == 1)
+  if(verbose == 1)
     printf(" ========================== Call %s solver for AVI ==========================\n", solver_options_id_to_name(options->solverId));
 
   int id = options->solverId;
-  switch (id)
+  switch(id)
   {
   case SICONOS_AVI_CAOFERRIS:
   {
@@ -85,7 +85,7 @@ int avi_driver(AffineVariationalInequalities* problem, double *z , double *w, So
   /*************************************************
    *  3 - Computes w = Mz + q and checks validity
    *************************************************/
-  if ((options->filterOn > 0) && (info <= 0))
+  if((options->filterOn > 0) && (info <= 0))
   {
     /* info was not set or the solver was happy */
     /* TODO implement avi_compute_error, for instance evaluate the normal map*/

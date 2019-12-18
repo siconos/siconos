@@ -29,7 +29,7 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 {
   NSM_linear_solver_params* params = NSM_linearSolverParams(A);
 
-  if (params->linear_solver_data)
+  if(params->linear_solver_data)
   {
     return (NM_UMFPACK_WS*) params->linear_solver_data;
   }
@@ -37,38 +37,38 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
   params->linear_solver_data = calloc(1, sizeof(NM_UMFPACK_WS));
   NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->linear_solver_data;
 
-  UMFPACK_FN(defaults) (umfpack_ws->control);
+  UMFPACK_FN(defaults)(umfpack_ws->control);
 
   umfpack_ws->control[UMFPACK_PRL] = verbose;
-/* TODO UMFPACK_PIVOT_TOLERANCE, UMFPACK_ORDERING, UMFPACK_SCALE
- * UMFPACK_DROPTOL, UMFPACK_STRATEGY, UMFPACK_IRSTEP*/
+  /* TODO UMFPACK_PIVOT_TOLERANCE, UMFPACK_ORDERING, UMFPACK_SCALE
+   * UMFPACK_DROPTOL, UMFPACK_STRATEGY, UMFPACK_IRSTEP*/
 
   CSparseMatrix* C = NM_csc(A);
 
   CS_INT status;
 
-  status = UMFPACK_FN(symbolic) (C->m, C->n, C->p, C->i, C->x, &(umfpack_ws->symbolic), umfpack_ws->control, umfpack_ws->info);
+  status = UMFPACK_FN(symbolic)(C->m, C->n, C->p, C->i, C->x, &(umfpack_ws->symbolic), umfpack_ws->control, umfpack_ws->info);
 
-  if (status)
+  if(status)
   {
     umfpack_ws->control[UMFPACK_PRL] = 1;
-    UMFPACK_FN(report_status) (umfpack_ws->control, status);
+    UMFPACK_FN(report_status)(umfpack_ws->control, status);
     return NULL;
   }
 
-  status = UMFPACK_FN(numeric) (C->p, C->i, C->x, umfpack_ws->symbolic, &(umfpack_ws->numeric), umfpack_ws->control, umfpack_ws->info);
+  status = UMFPACK_FN(numeric)(C->p, C->i, C->x, umfpack_ws->symbolic, &(umfpack_ws->numeric), umfpack_ws->control, umfpack_ws->info);
 
-  if (status)
+  if(status)
   {
     umfpack_ws->control[UMFPACK_PRL] = 1;
-    UMFPACK_FN(report_status) (umfpack_ws->control, status);
+    UMFPACK_FN(report_status)(umfpack_ws->control, status);
     return NULL;
   }
 
   umfpack_ws->wi = (CS_INT*)malloc(C->n * sizeof(CS_INT));
 
   CS_INT size_wd;
-  if (umfpack_ws->control[UMFPACK_IRSTEP] > 0)
+  if(umfpack_ws->control[UMFPACK_IRSTEP] > 0)
   {
     size_wd = 5 * C->n;
   }
@@ -93,22 +93,22 @@ void NM_UMFPACK_free(void* p)
   NM_UMFPACK_WS* umfpack_ws = (NM_UMFPACK_WS*) params->linear_solver_data;
   assert(umfpack_ws);
 
-  UMFPACK_FN(free_symbolic) (&(umfpack_ws->symbolic));
-  UMFPACK_FN(free_numeric) (&(umfpack_ws->numeric));
+  UMFPACK_FN(free_symbolic)(&(umfpack_ws->symbolic));
+  UMFPACK_FN(free_numeric)(&(umfpack_ws->numeric));
 
-  if (umfpack_ws->wi)
+  if(umfpack_ws->wi)
   {
     free(umfpack_ws->wi);
     umfpack_ws->wi = NULL;
   }
 
-  if (umfpack_ws->wd)
+  if(umfpack_ws->wd)
   {
     free(umfpack_ws->wd);
     umfpack_ws->wd = NULL;
   }
 
-  if (umfpack_ws->x)
+  if(umfpack_ws->x)
   {
     free(umfpack_ws->x);
     umfpack_ws->x = NULL;
@@ -122,18 +122,18 @@ void NM_UMFPACK_free(void* p)
 
 void NM_UMFPACK_extra_display(NM_UMFPACK_WS* umfpack_ws)
 {
-  if (verbose > 2)
+  if(verbose > 2)
   {
-    UMFPACK_FN(report_info) (umfpack_ws->control, umfpack_ws->info);
+    UMFPACK_FN(report_info)(umfpack_ws->control, umfpack_ws->info);
 
-    if (verbose > 3)
+    if(verbose > 3)
     {
-      UMFPACK_FN(report_control) (umfpack_ws->control);
+      UMFPACK_FN(report_control)(umfpack_ws->control);
     }
   }
-  else if (verbose > 1)
+  else if(verbose > 1)
   {
-    if (umfpack_ws->control[UMFPACK_IRSTEP] > 0)
+    if(umfpack_ws->control[UMFPACK_IRSTEP] > 0)
     {
       printf("UMFPACK : backward error estimate omega1 %g\n", umfpack_ws->info[UMFPACK_OMEGA1]);
       printf("UMFPACK : backward error estimate omega2 %g\n", umfpack_ws->info[UMFPACK_OMEGA2]);

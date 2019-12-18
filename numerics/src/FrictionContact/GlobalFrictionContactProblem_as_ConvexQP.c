@@ -36,13 +36,13 @@ void Projection_ConvexQP_GFC3D_DualCone(void *cqpIn, double *x, double *PX)
   GlobalFrictionContactProblem * gfc3d = pb->gfc3d;
 
   //globalFrictionContact_display(gfc3d);
-  
+
   int contact =0;
   int nLocal =  gfc3d->dimension;
   int n = gfc3d->numberOfContacts* nLocal;
-  
-  cblas_dcopy(n , x , 1 , PX, 1);
-  for (contact = 0 ; contact < gfc3d->numberOfContacts  ; ++contact)
+
+  cblas_dcopy(n, x, 1, PX, 1);
+  for(contact = 0 ; contact < gfc3d->numberOfContacts  ; ++contact)
   {
     projectionOnCone(&PX[ contact * nLocal ], 1.0/gfc3d->mu[contact]);
   }

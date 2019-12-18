@@ -37,10 +37,10 @@ void testF(int size, double *z, double * F)
   /*   printf("z[%i]= %lf\t",i,z[i]); */
   /* } */
   /* printf("\n"); */
-  for (int i = 0 ; i < size; i++)
+  for(int i = 0 ; i < size; i++)
   {
     F[i] = q[i];
-    for (int j = 0 ; j < size ;  j++)
+    for(int j = 0 ; j < size ;  j++)
     {
       F[i] += M[i + j * size] * z[j] ;
     }
@@ -58,9 +58,9 @@ void testNablaF(int size, double *z, double *nablaF)
 {
   /* printf("call to MCP function nablaF(z) ...\n"); */
 
-  for (int i = 0 ; i < size; i++)
+  for(int i = 0 ; i < size; i++)
   {
-    for (int j = 0 ; j < size ;  j++)
+    for(int j = 0 ; j < size ;  j++)
     {
       nablaF[i + j * size] = M[i + j * size];
     }
@@ -92,13 +92,13 @@ int main(void)
   M = (double *) calloc(n*n,sizeof(double));
   q = (double *) calloc(n,sizeof(double));
 
-  for (int i =0; i< n; i++)
+  for(int i =0; i< n; i++)
   {
     q[i] = - i + 7.;
     M[i+i*n] = 2.0 ;
-    if (i < n-1)
+    if(i < n-1)
       M[i+(i+1)*n] =1.0;
-    if (i >0)
+    if(i >0)
       M[i+(i-1)*n] =1.0;
   }
   //NM_dense_display(M,n,n,n);
@@ -109,7 +109,7 @@ int main(void)
   double * z = (double *)malloc(size * sizeof(double));
   double * w = (double *)malloc(size * sizeof(double));
 
-  for (int i = 0 ; i < size; i++)
+  for(int i = 0 ; i < size; i++)
   {
     z[i] = 0.0;
     w[i] = 0.0;
@@ -119,17 +119,17 @@ int main(void)
 
   /* Initialize the solver */
   mcp_old_driver_init(problem, options) ;
-  info = mcp_old_driver(problem, z , w,  options);
+  info = mcp_old_driver(problem, z, w,  options);
   mcp_old_driver_reset(problem, options) ;
   /// TODO : write a real test ... ////
 
 
-  for (int i = 0 ; i < size; i++)
+  for(int i = 0 ; i < size; i++)
   {
     printf("z[%i]= %lf\t", i, z[i]);
   }
   printf("\n");
-  for (int i = 0 ; i < size; i++)
+  for(int i = 0 ; i < size; i++)
   {
     printf("w[%i]= %lf\t", i, w[i]);
   }

@@ -14,16 +14,16 @@ int main(void)
   double * Wpinv = (double*)malloc(n * m * sizeof(double));
   double * Wpinvtest = (double*)malloc(m * n * sizeof(double));
 
-  for (int i = 0; i < n; i++)
+  for(int i = 0; i < n; i++)
   {
-    for (int j = 0; j < m; j++)
+    for(int j = 0; j < m; j++)
     {
       W[i + j * n] = 0.0;
     }
   }
-  for (int i = 0; i < m; i++)
+  for(int i = 0; i < m; i++)
   {
-    for (int j = 0; j < n; j++)
+    for(int j = 0; j < n; j++)
     {
       Wpinv[i + j * m] = 0.0;
       Wpinvtest[i + j * m] = 0.0;
@@ -35,9 +35,9 @@ int main(void)
   W[3 + 1 * n] = 4.0;
 
   printf("Original Matrix W\n");
-  for (int i = 0; i < n; i++)
+  for(int i = 0; i < n; i++)
   {
-    for (int j = 0; j < m; j++)
+    for(int j = 0; j < m; j++)
     {
       printf("%8.6e\t", W[i + j * n]) ;
     }
@@ -70,9 +70,9 @@ int main(void)
   memcpy(Wpinv, W, n * m * sizeof(double));
   pinv(Wpinv, n, m, tol);
   printf("Winvtest\n");
-  for (int i = 0; i < m; i++)
+  for(int i = 0; i < m; i++)
   {
-    for (int j = 0; j < n; j++)
+    for(int j = 0; j < n; j++)
     {
       printf("%8.6e\t", Wpinvtest[i + j * m]) ;
     }
@@ -85,9 +85,9 @@ int main(void)
   Wpinvtest[1 + 3 * m] = 1.0 / 4.0;
 
   printf("Winvtest\n");
-  for (int i = 0; i < m; i++)
+  for(int i = 0; i < m; i++)
   {
-    for (int j = 0; j < n; j++)
+    for(int j = 0; j < n; j++)
     {
       printf("%8.6e\t", Wpinvtest[i + j * m]) ;
     }
@@ -95,9 +95,9 @@ int main(void)
   }
   printf("Pseudo inverseWinv\n");
   double err = 0.0;
-  for (int i = 0; i < m; i++)
+  for(int i = 0; i < m; i++)
   {
-    for (int j = 0; j < n; j++)
+    for(int j = 0; j < n; j++)
     {
       printf("%8.6e\t", Wpinv[i + j * m]) ;
       err += (Wpinv[i + j * m] - Wpinvtest[i + j * m]) * (Wpinv[i + j * m] - Wpinvtest[i + j * m]);
@@ -105,24 +105,24 @@ int main(void)
     printf("\n");
   }
 
-  if (err < 1e-16) info = 0 ;
+  if(err < 1e-16) info = 0 ;
 
 
   printf("--------------------------\n");
   printf("test with transpose matrix\n");
   printf("--------------------------\n");
 
-  for (int i = 0; i < m; i++)
+  for(int i = 0; i < m; i++)
   {
-    for (int j = 0; j < n; j++)
+    for(int j = 0; j < n; j++)
     {
       W[i + j * m] = W[j + i * n];
     }
   }
   W[4 + 0 * m] = 2.0;
-  for (int i = 0; i < n; i++)
+  for(int i = 0; i < n; i++)
   {
-    for (int j = 0; j < m; j++)
+    for(int j = 0; j < m; j++)
     {
       Wpinv[i + j * n] = 0.0;
       Wpinvtest[i + j * n] = 0.0;
@@ -138,9 +138,9 @@ int main(void)
   pinv(Wpinv, m, n, tol);
   printf("Winvtest\n");
 
-  for (int i = 0; i < n; i++)
+  for(int i = 0; i < n; i++)
   {
-    for (int j = 0; j < m; j++)
+    for(int j = 0; j < m; j++)
     {
       printf("%8.6e\t", Wpinvtest[i + j * n]) ;
     }
@@ -148,9 +148,9 @@ int main(void)
   }
   printf("Pseudo inverseWinv\n");
   err = 0.0;
-  for (int i = 0; i < n; i++)
+  for(int i = 0; i < n; i++)
   {
-    for (int j = 0; j < m; j++)
+    for(int j = 0; j < m; j++)
     {
       printf("%8.6e\t", Wpinv[i + j * n]) ;
       err += (Wpinv[i + j * n] - Wpinvtest[i + j * n]) * (Wpinv[i + j * n] - Wpinvtest[i + j * n]);
@@ -158,7 +158,7 @@ int main(void)
     printf("\n");
   }
 
-  if (err < 1e-16) info = 0 ;
+  if(err < 1e-16) info = 0 ;
 
 
   FILE * file2 = fopen("dataWPseudoInverse.dat", "w");
@@ -182,9 +182,9 @@ int main(void)
   m = 4;
   W = (double*)malloc(n * m * sizeof(double));
   Wpinv = (double*)malloc(n * m * sizeof(double));
-  for (int i = 0; i < n; i++)
+  for(int i = 0; i < n; i++)
   {
-    for (int j = 0; j < m; j++)
+    for(int j = 0; j < m; j++)
     {
       W[i + j * n] = 0.0;
     }

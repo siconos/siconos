@@ -25,97 +25,105 @@ namespace ublas = boost::numeric::ublas;
 namespace lapack = boost::numeric::bindings::lapack;
 namespace bindings = boost::numeric::bindings;
 
-struct apply_real {
+struct apply_real
+{
   template< typename VectorD, typename VectorE, typename MatrixB >
-  static inline std::ptrdiff_t pttrs( const char uplo, const VectorD& d,
-        const VectorE& e, MatrixB& b ) {
-    return lapack::pttrs( d, e, b );
+  static inline std::ptrdiff_t pttrs(const char uplo, const VectorD& d,
+                                     const VectorE& e, MatrixB& b)
+  {
+    return lapack::pttrs(d, e, b);
   }
 };
 
-struct apply_complex {
+struct apply_complex
+{
   template< typename VectorD, typename VectorE, typename MatrixB >
-  static inline std::ptrdiff_t pttrs( const char uplo, const VectorD& d,
-        const VectorE& e, MatrixB& b ) {
-    return lapack::pttrs( uplo, d, e, b );
+  static inline std::ptrdiff_t pttrs(const char uplo, const VectorD& d,
+                                     const VectorE& e, MatrixB& b)
+  {
+    return lapack::pttrs(uplo, d, e, b);
   }
 };
 
 template <typename B, typename X>
-bool check_residual( B const& b, X const& x ) {
+bool check_residual(B const& b, X const& x)
+{
   typedef typename B::value_type value_type ;
 
-  ublas::matrix<value_type, ublas::column_major> res( b ) ;
-  row(res,0).minus_assign( value_type(2.0) * row(x,0) - row(x,1) ) ;
-  for (int i=1; i<res.size1()-1; ++i) {
-    row(res,i).minus_assign( value_type(2.0) * row(x,i) - row(x,i+1) - row(x,i-1) ) ;
+  ublas::matrix<value_type, ublas::column_major> res(b) ;
+  row(res,0).minus_assign(value_type(2.0) * row(x,0) - row(x,1)) ;
+  for(int i=1; i<res.size1()-1; ++i)
+  {
+    row(res,i).minus_assign(value_type(2.0) * row(x,i) - row(x,i+1) - row(x,i-1)) ;
   }
-  row(res,res.size1()-1).minus_assign( value_type(2.0) * row(x,res.size1()-1) - row(x,res.size1()-2) ) ;
+  row(res,res.size1()-1).minus_assign(value_type(2.0) * row(x,res.size1()-1) - row(x,res.size1()-2)) ;
 
   return norm_frobenius(res)<norm_frobenius(b)*1.e-5 ;
 } // check_residual()
 
 template <typename T>
-int do_value_type() {
-   typedef typename boost::mpl::if_<boost::is_complex<T>, apply_complex, apply_real>::type apply_t;
-   const int n = 8 ;
-   typedef typename bindings::remove_imaginary<T>::type real_type ;
+int do_value_type()
+{
+  typedef typename boost::mpl::if_<boost::is_complex<T>, apply_complex, apply_real>::type apply_t;
+  const int n = 8 ;
+  typedef typename bindings::remove_imaginary<T>::type real_type ;
 
-   typedef ublas::matrix<T, ublas::column_major>     matrix_type ;
+  typedef ublas::matrix<T, ublas::column_major>     matrix_type ;
 
-   // Set matrix
-   int const nrhs = 1 ;
-   matrix_type b( n, nrhs );
-   ublas::vector< real_type > d( n );
-   ublas::vector<T>           e( n-1 );
+  // Set matrix
+  int const nrhs = 1 ;
+  matrix_type b(n, nrhs);
+  ublas::vector< real_type > d(n);
+  ublas::vector<T>           e(n-1);
 
-   std::fill( d.begin(), d.end(), 2.0 ) ;
-   std::fill( e.begin(), e.end(), -1.0 ) ;
+  std::fill(d.begin(), d.end(), 2.0) ;
+  std::fill(e.begin(), e.end(), -1.0) ;
 
-   for (int i=0; i<b.size1(); ++i) b(i,0) = random_value<T>() ;
+  for(int i=0; i<b.size1(); ++i) b(i,0) = random_value<T>() ;
 
-   // Factorize and solve
-   matrix_type x( b );
-   if( lapack::ptsv( d, e, x ) ) return -1 ;
-   if (!check_residual(b,x)) return 1 ;
+  // Factorize and solve
+  matrix_type x(b);
+  if(lapack::ptsv(d, e, x)) return -1 ;
+  if(!check_residual(b,x)) return 1 ;
 
-   // Restart computations
-   std::fill( d.begin(), d.end(), 2.0 ) ;
-   std::fill( e.begin(), e.end(), -1.0 ) ;
+  // Restart computations
+  std::fill(d.begin(), d.end(), 2.0) ;
+  std::fill(e.begin(), e.end(), -1.0) ;
 
-   // Compute factorization.
-   if( lapack::pttrf( d, e ) ) return -1 ;
+  // Compute factorization.
+  if(lapack::pttrf(d, e)) return -1 ;
 
-   // Compute solve
-   x.assign( b ) ;
-   if( apply_t::pttrs( 'U', d, e, x ) ) return -2 ;
+  // Compute solve
+  x.assign(b) ;
+  if(apply_t::pttrs('U', d, e, x)) return -2 ;
 
-   if (!check_residual(b,x)) return 1 ;
+  if(!check_residual(b,x)) return 1 ;
 
-   x.assign( b ) ;
-   if( apply_t::pttrs( 'L', d, e, x ) ) return -3 ;
+  x.assign(b) ;
+  if(apply_t::pttrs('L', d, e, x)) return -3 ;
 
-   if (!check_residual(b,x)) return 2 ;
+  if(!check_residual(b,x)) return 2 ;
 
-   return 0 ;
+  return 0 ;
 } // do_value_type()
 
 
-int main() {
-   // Run tests for different value_types
-   std::cout << "double\n" ;
-   if (do_value_type< double >()) return 255;
+int main()
+{
+  // Run tests for different value_types
+  std::cout << "double\n" ;
+  if(do_value_type< double >()) return 255;
 
-   std::cout << "float\n" ;
-   if (do_value_type< float >()) return 255;
+  std::cout << "float\n" ;
+  if(do_value_type< float >()) return 255;
 
-   std::cout << "complex<double>\n" ;
-   if (do_value_type< std::complex<double> >()) return 255;
+  std::cout << "complex<double>\n" ;
+  if(do_value_type< std::complex<double> >()) return 255;
 
-   std::cout << "complex<float>\n" ;
-   if (do_value_type< std::complex<float> >()) return 255;
+  std::cout << "complex<float>\n" ;
+  if(do_value_type< std::complex<float> >()) return 255;
 
-   std::cout << "Regression test succeeded\n" ;
-   return 0;
+  std::cout << "Regression test succeeded\n" ;
+  return 0;
 }
 

@@ -32,7 +32,7 @@ const char ** data_collection()
   data_collection_1[n_data++] = "./data/lcp_ortiz.dat";
   data_collection_1[n_data++] = "./data/lcp_exp_murty.dat";
   data_collection_1[n_data++] = "./data/lcp_exp_murty2.dat";
-  
+
   data_collection_1[n_data++] = "---";
 
 

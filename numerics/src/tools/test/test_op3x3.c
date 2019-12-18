@@ -66,7 +66,7 @@ int main()
   assert(equal3x3(ia, a));
 
   START_TIMER(t1);
-  for (i = 0; i < 1000000; ++i)
+  for(i = 0; i < 1000000; ++i)
     cblas_daxpy(9, 1., a, 1, b, 1);
 //    DAXPY(9, 1., a, 1, b, 1);
   STOP_TIMER(t1);
@@ -77,7 +77,7 @@ int main()
   cpy3x3(ia, a);
   cpy3x3(ib, b);
   START_TIMER(t2);
-  for (i = 0; i < 1000000; ++i)
+  for(i = 0; i < 1000000; ++i)
     add3x3(a, b);
   STOP_TIMER(t2);
   PRINT_ELAPSED(t2);
@@ -95,11 +95,11 @@ int main()
   cpy3x3(ib, b);
   cpy3x3(ib, c);
   START_TIMER(t3);
-  for (i = 0; i < 1000000; ++i)
+  for(i = 0; i < 1000000; ++i)
   {
     //DGEMM(CblasNoTrans, CblasNoTrans, 3, 3, 3, 1, a, 3, b, 3, 1, c, 3);
-    cblas_dgemm (CblasColMajor, CblasNoTrans, CblasNoTrans, 3, 3, 3, 1.0, a, 3, b, 3, 1.0, c, 3);
-     
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, 3, 3, 3, 1.0, a, 3, b, 3, 1.0, c, 3);
+
   }
   STOP_TIMER(t3);
   PRINT_ELAPSED(t3);
@@ -112,7 +112,7 @@ int main()
   cpy3x3(ib, b);
   cpy3x3(ib, c);
   START_TIMER(t4);
-  for (i = 0; i < 1000000; ++i)
+  for(i = 0; i < 1000000; ++i)
   {
     mmp3x3(a, b, c);
   }
@@ -136,7 +136,7 @@ int main()
   cpy3x3(ib, c);
 
   START_TIMER(t5);
-  for (i = 0; i < 1000000; ++i)
+  for(i = 0; i < 1000000; ++i)
   {
     r = det3x3(a);
   }
@@ -172,7 +172,7 @@ int main()
   int info = 0;
 
   START_TIMER(t6);
-  for (i = 0; i < 1; ++i)
+  for(i = 0; i < 1; ++i)
   {
     cpy3(v, x);
     DGESV(3, 1, a, 3, ipiv, x, 3, &info);
@@ -191,7 +191,7 @@ int main()
   cpy3x3(ia, a);
   cpy3(iv, v);
   START_TIMER(t7);
-  for (i = 0; i < 1; ++i)
+  for(i = 0; i < 1; ++i)
   {
     cpy3(v, x);
     info = solv3x3(a, x, v);
@@ -231,9 +231,9 @@ int main()
   srandom(1);
   double A[9000];
   double* pA = A;
-  for (i = 0; i < 1000; ++i)
+  for(i = 0; i < 1000; ++i)
   {
-    for (k = 0; k < 9; k++)
+    for(k = 0; k < 9; k++)
     {
       *pA++ = (double) random() / RAND_MAX;
     }
@@ -241,9 +241,9 @@ int main()
 
   double B[3000];
   double* pB = B;
-  for (i = 0; i < 1000; ++i)
+  for(i = 0; i < 1000; ++i)
   {
-    for (k = 0; k < 3; k++)
+    for(k = 0; k < 3; k++)
     {
       *pB++ = (double) random() / RAND_MAX;
     }
@@ -252,7 +252,7 @@ int main()
   START_TIMER(t8);
   k = 0;
 
-  for (i = 0; i < 1000; ++i)
+  for(i = 0; i < 1000; ++i)
   {
 
     /*
@@ -267,10 +267,10 @@ int main()
     cpy3(B + 3 * i, x);
 
     cpy3x3(A + 9 * i, a);
-    
+
     DGESV(3, 1, a, 3, ipiv, x, 3, &info);
 
-    if (! info)
+    if(! info)
     {
       k++;
 
@@ -303,7 +303,7 @@ int main()
 #endif
   k = 0;
   START_TIMER(t9);
-  for (i = 0; i < 1000; ++i)
+  for(i = 0; i < 1000; ++i)
   {
 
     /*

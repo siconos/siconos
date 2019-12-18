@@ -46,7 +46,7 @@ void MBTB_JointR::computeEquivalentForces()
   ML_G.setValue(2,Blambda->getValue(5));
   SP::SiconosVector spML_G_abs(new SiconosVector(3));
   *spML_G_abs = ML_G;
-  changeFrameBodyToAbs(_ds1->q(),spML_G_abs );
+  changeFrameBodyToAbs(_ds1->q(),spML_G_abs);
   ML_G_abs = * spML_G_abs;
 #ifdef MBTB_JOINTR_DEBUG
   printf("MBTB_JointR::computeEquivalentForces Blambda\n");

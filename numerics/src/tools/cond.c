@@ -26,7 +26,7 @@ double cond(double * A, int n, int m)
 {
 //#ifdef COMPLETE_LAPACK_LIBRARIES
   int dimS = m < n ? m : n;
-  double * S =  (double *)malloc(dimS * sizeof(double));
+  double * S = (double *)malloc(dimS * sizeof(double));
 
   char JOBU = 'N';
   int LDU = 1;
@@ -40,24 +40,24 @@ double cond(double * A, int n, int m)
 
   lapack_int InfoDGSVD = -1;
 
-  double * superb =  (double *)malloc((min(m, n) - 1)* sizeof(double));
+  double * superb = (double *)malloc((min(m, n) - 1)* sizeof(double));
   DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, &InfoDGSVD);
 
-/* #else */
-/*   int LWORK = -1; */
-/*   double * WORK; */
-/*   WORK = malloc(sizeof(*WORK)); */
-/*   assert(WORK); */
-/*   DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD); */
-/*   LWORK = (int)(WORK[0]); */
-/*   WORK = realloc(WORK, LWORK * sizeof * WORK); */
-/*   DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD); */
-/*   free(WORK); */
-/* #endif */
+  /* #else */
+  /*   int LWORK = -1; */
+  /*   double * WORK; */
+  /*   WORK = malloc(sizeof(*WORK)); */
+  /*   assert(WORK); */
+  /*   DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD); */
+  /*   LWORK = (int)(WORK[0]); */
+  /*   WORK = realloc(WORK, LWORK * sizeof * WORK); */
+  /*   DGESVD(&JOBU, &JOBVT, n, m, A, m, S, U, LDU, VT, LDVT, WORK, LWORK, InfoDGSVD); */
+  /*   free(WORK); */
+  /* #endif */
 
   printf("SVD of A :\n ");
   printf("[\t ");
-  for (int i = 0; i < dimS ; i++)
+  for(int i = 0; i < dimS ; i++)
   {
     printf("%14.7e\t", S[i]);
   }
@@ -71,9 +71,9 @@ double cond(double * A, int n, int m)
   free(S);
 
   return conditioning;
-/* #else */
-/*   fprintf(stderr, "Numerics. cond.c dgesvd not found\n"); */
-/*   return 0.0; */
-/* #endif */
+  /* #else */
+  /*   fprintf(stderr, "Numerics. cond.c dgesvd not found\n"); */
+  /*   return 0.0; */
+  /* #endif */
 
 }

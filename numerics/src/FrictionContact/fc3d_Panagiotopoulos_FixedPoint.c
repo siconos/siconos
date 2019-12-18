@@ -57,12 +57,12 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3, problem->q, 1);
 
 
   SolverOptions ** internalsolver_options = options->internalSolvers;
 
-  if (verbose) solver_options_print(options);
+  if(verbose) solver_options_print(options);
 
   /*****  Fixed Point Iterations *****/
   int iter = 0; /* Current iteration number */
@@ -80,7 +80,7 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
   double * r_n = (double *) malloc(nc * sizeof(double));
 
   double * r_t = (double *) malloc(2* nc * sizeof(double));
-  for (int contact = 0 ; contact < nc; contact ++)
+  for(int contact = 0 ; contact < nc; contact ++)
   {
     r_n[contact] = reaction[contact*3];
     r_t[2*contact] = reaction[contact*3+1];
@@ -94,13 +94,13 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
   LinearComplementarityProblem* normal_lcp_problem;
   ConvexQP * tangent_cqp;
 
-  if (options->numberOfInternalSolvers !=2)
+  if(options->numberOfInternalSolvers !=2)
     numerics_error("fc3d_Panagiotopoulos_FixedPoint", " the solver requires 2 internal solver");
 
-  if (internalsolver_options[0]->solverId == SICONOS_LCP_PGS||
+  if(internalsolver_options[0]->solverId == SICONOS_LCP_PGS||
       internalsolver_options[0]->solverId == SICONOS_LCP_CONVEXQP_PG)
   {
- 
+
     normal_lcp_problem = (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
     normal_lcp_problem->size = nc;
     normal_lcp_problem->M = splitted_problem->M_nn;
@@ -114,15 +114,15 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     /* splitted_problem->M_nn->storageType=NM_DENSE; */
 
     normal_lcp_problem->q = (double *)malloc(nc*sizeof(double));
-    
+
   }
   else
   {
     numerics_error("fc3d_Panagiotopoulos_FixedPoint", "Unknown internal solver for the normal part.");
   }
- if (internalsolver_options[1]->solverId == SICONOS_CONVEXQP_PG ||
-     internalsolver_options[1]->solverId == SICONOS_CONVEXQP_VI_FPP||
-     internalsolver_options[1]->solverId == SICONOS_CONVEXQP_VI_EG)
+  if(internalsolver_options[1]->solverId == SICONOS_CONVEXQP_PG ||
+      internalsolver_options[1]->solverId == SICONOS_CONVEXQP_VI_FPP||
+      internalsolver_options[1]->solverId == SICONOS_CONVEXQP_VI_EG)
   {
     tangent_cqp = (ConvexQP *)malloc(sizeof(ConvexQP));
     tangent_cqp->M = splitted_problem->M_tt;
@@ -135,7 +135,7 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     tangent_cqp->size = nc*2;
 
     /*set the norm of the VI to the norm of problem->q  */
-    double norm_q_t = cblas_dnrm2(nc*2 , splitted_problem->q_t , 1);
+    double norm_q_t = cblas_dnrm2(nc*2, splitted_problem->q_t, 1);
     tangent_cqp->normConvexQP= norm_q_t;
     tangent_cqp->istheNormConvexQPset=1;
 
@@ -148,42 +148,42 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     numerics_error("fc3d_Panagiotopoulos_FixedPoint", "Unknown internal solver for the tangent part.");
   }
 
- if (internalsolver_options[0]->solverId == SICONOS_LCP_PGS)
- {
-   if (verbose > 0)
-     printf(" ========================== Call LCP_PGS solver for Friction-Contact 3D problem ==========================\n");
-   internalsolver_normal = &lcp_pgs;
- }  
- else if (internalsolver_options[0]->solverId == SICONOS_LCP_CONVEXQP_PG)
- {
-   if (verbose > 0)
-     printf(" ========================== Call LCP_CONVEX_QP solver for Friction-Contact 3D problem ==========================\n");
-   internalsolver_normal = &lcp_ConvexQP_ProjectedGradient;
- }
- else
- {
-   numerics_error("fc3d_Panagiotopoulos_FixedPoint", "Unknown internal solver for the normal part.");
- }
-   
+  if(internalsolver_options[0]->solverId == SICONOS_LCP_PGS)
+  {
+    if(verbose > 0)
+      printf(" ========================== Call LCP_PGS solver for Friction-Contact 3D problem ==========================\n");
+    internalsolver_normal = &lcp_pgs;
+  }
+  else if(internalsolver_options[0]->solverId == SICONOS_LCP_CONVEXQP_PG)
+  {
+    if(verbose > 0)
+      printf(" ========================== Call LCP_CONVEX_QP solver for Friction-Contact 3D problem ==========================\n");
+    internalsolver_normal = &lcp_ConvexQP_ProjectedGradient;
+  }
+  else
+  {
+    numerics_error("fc3d_Panagiotopoulos_FixedPoint", "Unknown internal solver for the normal part.");
+  }
 
- 
- if (internalsolver_options[1]->solverId == SICONOS_CONVEXQP_PG)
- {
-   if (verbose > 0)
-     printf(" ========================== Call SICONOS_CONVEX_QP solver for Friction-Contact 3D problem ==========================\n");
-   internalsolver_tangent = &convexQP_ProjectedGradient;
- }
- else if  (internalsolver_options[1]->solverId == SICONOS_CONVEXQP_VI_FPP ||
-           internalsolver_options[1]->solverId == SICONOS_CONVEXQP_VI_EG )
- {
-   if (verbose > 0)
-     printf(" ========================== Call SICONOS_CONVEX_VI_FPP solver for Friction-Contact 3D problem ==========================\n");
-   internalsolver_tangent = &convexQP_VI_solver;
- }
+
+
+  if(internalsolver_options[1]->solverId == SICONOS_CONVEXQP_PG)
+  {
+    if(verbose > 0)
+      printf(" ========================== Call SICONOS_CONVEX_QP solver for Friction-Contact 3D problem ==========================\n");
+    internalsolver_tangent = &convexQP_ProjectedGradient;
+  }
+  else if(internalsolver_options[1]->solverId == SICONOS_CONVEXQP_VI_FPP ||
+          internalsolver_options[1]->solverId == SICONOS_CONVEXQP_VI_EG)
+  {
+    if(verbose > 0)
+      printf(" ========================== Call SICONOS_CONVEX_VI_FPP solver for Friction-Contact 3D problem ==========================\n");
+    internalsolver_tangent = &convexQP_VI_solver;
+  }
 
   int cumul_internal=0;
   //verbose=1;
-  while ((iter < itermax) && (hasNotConverged > 0))
+  while((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
 
@@ -195,20 +195,20 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
     /* ----------------- */
 
     /* compute the rhs of the normal problem */
-    cblas_dcopy(nc , splitted_problem->q_n , 1 , normal_lcp_problem->q, 1);
+    cblas_dcopy(nc, splitted_problem->q_n, 1, normal_lcp_problem->q, 1);
     NM_gemv(1.0, splitted_problem->M_nt, r_t, 1.0, normal_lcp_problem->q);
 
-    (*internalsolver_normal)(normal_lcp_problem, r_n , velocity , info , internalsolver_options[0]);
+    (*internalsolver_normal)(normal_lcp_problem, r_n, velocity, info, internalsolver_options[0]);
     cumul_internal += internalsolver_options[0]->iparam[SICONOS_IPARAM_ITER_DONE];
 
-    for (int contact = 0 ; contact < nc; contact ++)
+    for(int contact = 0 ; contact < nc; contact ++)
     {
       reaction[contact*3]= r_n[contact];
     }
 
-    fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q,  &error);
+    fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q,  &error);
 
-    if (error < tolerance)
+    if(error < tolerance)
     {
       hasNotConverged = 0;
     }
@@ -221,20 +221,20 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
 
       fc3d_set_internalsolver_tolerance(problem,options,internalsolver_options[1], error);
       /* compute the rhs of the tangent problem */
-      cblas_dcopy(2*nc , splitted_problem->q_t, 1 , tangent_cqp->q, 1);
+      cblas_dcopy(2*nc, splitted_problem->q_t, 1, tangent_cqp->q, 1);
       NM_gemv(1.0, splitted_problem->M_tn, r_n, 1.0, tangent_cqp->q);
 
       /* Compute the value of the initial value friction threshold*/
-      for (int ic = 0 ; ic < nc ; ic++) mu[ic] = fmax(0.0, problem->mu[ic] *  reaction [ic * 3]);
+      for(int ic = 0 ; ic < nc ; ic++) mu[ic] = fmax(0.0, problem->mu[ic] *  reaction [ic * 3]);
 
       /* if (verbose>0) */
       /*   printf("norm of mu = %10.5e \n", cblas_dnrm2(nc , mu , 1)); */
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q,  &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q,  &error);
 
-      (*internalsolver_tangent)(tangent_cqp, r_t , velocity , info , internalsolver_options[1]);
+      (*internalsolver_tangent)(tangent_cqp, r_t, velocity, info, internalsolver_options[1]);
       cumul_internal += internalsolver_options[1]->iparam[SICONOS_IPARAM_ITER_DONE];
 
-      for (int contact = 0 ; contact < nc; contact ++)
+      for(int contact = 0 ; contact < nc; contact ++)
       {
         reaction[contact*3+1]= r_t[2*contact];
         reaction[contact*3+2]= r_t[2*contact+1];
@@ -242,25 +242,25 @@ void fc3d_Panagiotopoulos_FixedPoint(FrictionContactProblem* problem, double *re
 
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q,  &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q,  &error);
 
 
-      if (options->callback)
+      if(options->callback)
       {
         options->callback->collectStatsIteration(options->callback->env, nc * 3,
-                                                 reaction, velocity, error, NULL);
+            reaction, velocity, error, NULL);
       }
 
-      if (error < tolerance) hasNotConverged = 0;
+      if(error < tolerance) hasNotConverged = 0;
     }
 
 
 
     *info = hasNotConverged;
 
-    if (verbose > 0)
+    if(verbose > 0)
     {
-      if (hasNotConverged)
+      if(hasNotConverged)
       {
         printf("--------------- FC3D - PFP - Iteration %i error = %14.7e > %10.5e\n", iter, error, tolerance);
       }

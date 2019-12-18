@@ -95,7 +95,7 @@ void SiconosVisitorTest::t2()
     delete(ds);
   }
 
-  catch (...)
+  catch(...)
   {
     CPPUNIT_ASSERT(false);
     delete(ds);
@@ -114,7 +114,8 @@ void SiconosVisitorTest::t3()
   delete ds;
 }
 
-struct Object {
+struct Object
+{
 
   VIRTUAL_ACCEPT_VISITORS();
 
@@ -174,7 +175,7 @@ void SiconosVisitorTest::t4()
 
 
   Visitor < Classes < ObjectA, ObjectB >,
-            GetId >::Make visitor;
+          GetId >::Make visitor;
 
   o = & ooa;
 

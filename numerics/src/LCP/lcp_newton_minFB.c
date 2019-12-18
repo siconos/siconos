@@ -38,7 +38,7 @@ static void min_compute_H_lcp(void* data_opaque, double* z, double* F, double* w
   Jac_F_min(0, n, z, F, data->M, H);
 }
 
-void lcp_newton_minFB(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_newton_minFB(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   functions_LSA functions_minFBLSA_lcp;
   init_lsa_functions(&functions_minFBLSA_lcp, &FB_compute_F_lcp, &lcp_FB);

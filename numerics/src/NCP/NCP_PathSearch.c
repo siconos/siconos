@@ -57,12 +57,12 @@ static void ncp_pathsearch_update_lcp_data(NonlinearComplementarityProblem* prob
 {
   /* compute M = nabla F(x_plus) */
   problem->compute_nabla_F(problem->env, n, x_plus, problem->nabla_F);
-  
+
   /* r = F_+(x) = F(x_+) + x - x_+ */
   /* the real q = q - r = x_+ - x - M x_plus */
   /* q = -M x_plus */
   NM_gemv(-1.0, problem->nabla_F, x_plus, 0.0, lcp_subproblem->q);
-  
+
   /* first compute r = x - x_+ */
   cblas_dcopy(n, x, 1, r, 1); /* r = x */
   cblas_daxpy(n, -1.0, x_plus, 1, r, 1); /* r -= x_plus */
@@ -71,7 +71,7 @@ static void ncp_pathsearch_update_lcp_data(NonlinearComplementarityProblem* prob
   /* Finish r */
   problem->compute_F(problem->env, n, x_plus, x); /* compute F(x_plus) */
   cblas_daxpy(n, 1.0, x, 1, r, 1); /* r += F(x_plus) */
-  
+
 }
 
 /** Release memory used by SolverOptions members solverData and dWork.
@@ -80,7 +80,7 @@ static void ncp_pathsearch_update_lcp_data(NonlinearComplementarityProblem* prob
     This concerns only options parameters which management is
     specific to this solver. All others (iparam ...) are handled
     in solver_options_delete generic function.
- */ 
+ */
 static void ncp_pathsearch_free(SolverOptions * opt)
 {
   if(opt->dWork)
@@ -88,22 +88,22 @@ static void ncp_pathsearch_free(SolverOptions * opt)
   opt->dWork = NULL;
 
   if(opt->solverData)
-    {
-      pathsearch_data* solverData_PathSearch = (pathsearch_data*) opt->solverData;
-      free_NMS_data(solverData_PathSearch->data_NMS);
-      free(solverData_PathSearch->lsa_functions);
-      free(opt->solverData);
-    }
+  {
+    pathsearch_data* solverData_PathSearch = (pathsearch_data*) opt->solverData;
+    free_NMS_data(solverData_PathSearch->data_NMS);
+    free(solverData_PathSearch->lsa_functions);
+    free(opt->solverData);
+  }
   opt->solverData = NULL;
 }
 
 
-void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double* F, int *info , SolverOptions* options)
+void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double* F, int *info, SolverOptions* options)
 {
-/* Main step of the algorithm:
- * - compute jacobians
- * - call modified lemke
-*/
+  /* Main step of the algorithm:
+   * - compute jacobians
+   * - call modified lemke
+  */
 
   unsigned int n = problem->n;
   unsigned int preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
@@ -129,7 +129,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
   lcp_subproblem.M = problem->nabla_F;
 
 
-  if (!preAlloc || (preAlloc && !options->dWork))
+  if(!preAlloc || (preAlloc && !options->dWork))
   {
     options->dWork = (double *) malloc(4*n*sizeof(double));
   }
@@ -141,7 +141,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
   NMS_data* data_NMS;
   functions_LSA* functions;
 
-  if (!preAlloc || (preAlloc && !options->solverData))
+  if(!preAlloc || (preAlloc && !options->solverData))
   {
     options->solverData = malloc(sizeof(pathsearch_data));
     pathsearch_data* solverData = (pathsearch_data*) options->solverData;
@@ -207,7 +207,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
 
   /* F is already computed here at z */
 
-  while ((err > nn_tol) && (nbiter < itermax) && !nms_failed)
+  while((err > nn_tol) && (nbiter < itermax) && !nms_failed)
   {
     int force_watchdog_step = 0;
     int force_d_step_merit_check = 0;
@@ -221,7 +221,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
 
     ncp_pathsearch_update_lcp_data(problem, &lcp_subproblem, n, x_plus, x, r);
 
-    if (check_lcp_solution)
+    if(check_lcp_solution)
     {
       lcp_subproblem_check.size = n;
       lcp_subproblem_check.M = problem->nabla_F;
@@ -231,7 +231,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
     }
 
     double norm_r2 = cblas_ddot(n, r, 1, r, 1);
-    if (norm_r2 < DBL_EPSILON*DBL_EPSILON) /* ||r|| < 1e-15 */
+    if(norm_r2 < DBL_EPSILON*DBL_EPSILON)  /* ||r|| < 1e-15 */
     {
       DEBUG_PRINTF("ncp_pathsearch :: ||r||  = %e < %e; path search procedure was successful!\n", norm_r2, DBL_EPSILON*DBL_EPSILON);
       (*info) = 0;
@@ -240,74 +240,42 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
     }
 
     /* end update M, q and r */
-    
+
     lcp_pivot_covering_vector(&lcp_subproblem, x_plus, x, info, options->internalSolvers[0], r);
 
-    switch (*info)
+    switch(*info)
     {
-      case LCP_PIVOT_SUCCESS:
-        DEBUG_PRINT("ncp_pathsearch :: path search procedure was successful!\n");
-        if (check_lcp_solution)
+    case LCP_PIVOT_SUCCESS:
+      DEBUG_PRINT("ncp_pathsearch :: path search procedure was successful!\n");
+      if(check_lcp_solution)
+      {
+        double err_lcp = 0.0;
+        cblas_daxpy(n, 1.0, r, 1, lcp_subproblem_check.q, 1);
+        lcp_compute_error(&lcp_subproblem_check, x_plus, x, 1e-14, &err_lcp);
+        double local_tol = fmax(1e-14, DBL_EPSILON*sqrt(norm_r2));
+        printf("ncp_pathsearch :: lcp solved with error = %e; local_tol = %e\n", err_lcp, local_tol);
+        //assert(err_lcp < local_tol && "ncp_pathsearch :: lcp solved with very bad precision");
+        if(err_lcp > local_tol)
         {
-          double err_lcp = 0.0;
-          cblas_daxpy(n, 1.0, r, 1, lcp_subproblem_check.q, 1);
+          printf("ncp_pathsearch :: lcp solved with very bad precision\n");
+          NM_display(lcp_subproblem.M);
+          printf("z r q x_plus\n");
+          for(unsigned i = 0; i < n; ++i) printf("%e %e %e %e\n", z[i], r[i], lcp_subproblem.q[i], x_plus[i]);
+          options->internalSolvers[0]->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = 0; //
+          // Note FP : no 0 in allowed values of the enum for PIVOTING METHOD
+          lcp_pivot(&lcp_subproblem, x_plus, x, info, options->internalSolvers[0]);
+          options->internalSolvers[0]->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_PATHSEARCH;
           lcp_compute_error(&lcp_subproblem_check, x_plus, x, 1e-14, &err_lcp);
-          double local_tol = fmax(1e-14, DBL_EPSILON*sqrt(norm_r2));
-          printf("ncp_pathsearch :: lcp solved with error = %e; local_tol = %e\n", err_lcp, local_tol);
-          //assert(err_lcp < local_tol && "ncp_pathsearch :: lcp solved with very bad precision");
-          if (err_lcp > local_tol)
-          {
-            printf("ncp_pathsearch :: lcp solved with very bad precision\n");
-            NM_display(lcp_subproblem.M);
-            printf("z r q x_plus\n");
-            for (unsigned i = 0; i < n; ++i) printf("%e %e %e %e\n", z[i], r[i], lcp_subproblem.q[i], x_plus[i]);
-            options->internalSolvers[0]->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = 0; //
-            // Note FP : no 0 in allowed values of the enum for PIVOTING METHOD
-            lcp_pivot(&lcp_subproblem, x_plus, x, info, options->internalSolvers[0]);
-            options->internalSolvers[0]->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_PATHSEARCH;
-            lcp_compute_error(&lcp_subproblem_check, x_plus, x, 1e-14, &err_lcp);
-            printf("ncp_pathsearch :: lcp resolved with error = %e; local_tol = %e\n", err_lcp, local_tol);
-          }
-
-
-          /* XXX missing recompute x ?*/
-          /* recompute the normal norm */
-          problem->compute_F(problem->env, n, x_plus, r);
-          cblas_daxpy(n, -1.0, x, 1, r, 1);
-          normal_norm2_newton_point = cblas_ddot(n, r, 1, r, 1);
-          if (normal_norm2_newton_point > norm_r2)
-          {
-            printf("ncp_pathsearch :: lcp successfully solved, but the norm of the normal map increased! %e > %e\n", normal_norm2_newton_point, norm_r2);
-            //assert(normal_norm2_newton_point <= norm_r2);
-          }
-          else
-          {
-            printf("ncp_pathsearch :: lcp successfully solved, norm of the normal map decreased! %e < %e\n", normal_norm2_newton_point, norm_r2);
-            //check_ratio = norm_r2/normal_norm2_newton_point;
-          }
-          if (50*normal_norm2_newton_point < norm_r2)
-          {
-            force_d_step_merit_check = 1;
-          }
-          else if (10*normal_norm2_newton_point < norm_r2)
-          {
-//            check_ratio = sqrt(norm_r2/normal_norm2_newton_point);
-          }
+          printf("ncp_pathsearch :: lcp resolved with error = %e; local_tol = %e\n", err_lcp, local_tol);
         }
-        break;
-      case LCP_PIVOT_RAY_TERMINATION:
-        DEBUG_PRINT("ncp_pathsearch :: ray termination, let's fastened your seat belt!\n");
-        break;
-      case LCP_PATHSEARCH_LEAVING_T:
-        DEBUG_PRINT("ncp_pathsearch :: leaving t, fastened your seat belt!\n");
-        DEBUG_PRINTF("ncp_pathsearch :: max t value = %e\n", options->internalSolvers[0]->dparam[2]); /* XXX fix 2 */
-        /* try to retry solving the problem */
-        /* XXX keep or not ? */
+
+
+        /* XXX missing recompute x ?*/
         /* recompute the normal norm */
         problem->compute_F(problem->env, n, x_plus, r);
         cblas_daxpy(n, -1.0, x, 1, r, 1);
         normal_norm2_newton_point = cblas_ddot(n, r, 1, r, 1);
-        if (normal_norm2_newton_point > norm_r2)
+        if(normal_norm2_newton_point > norm_r2)
         {
           printf("ncp_pathsearch :: lcp successfully solved, but the norm of the normal map increased! %e > %e\n", normal_norm2_newton_point, norm_r2);
           //assert(normal_norm2_newton_point <= norm_r2);
@@ -315,76 +283,108 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
         else
         {
           printf("ncp_pathsearch :: lcp successfully solved, norm of the normal map decreased! %e < %e\n", normal_norm2_newton_point, norm_r2);
-          check_ratio = 5.0*norm_r2/normal_norm2_newton_point;
+          //check_ratio = norm_r2/normal_norm2_newton_point;
         }
-        if (options->internalSolvers[0]->dparam[2] > 1e-5) break;
-        memset(x_plus, 0, sizeof(double) * n);
-        problem->compute_F(problem->env, n, x_plus, r);
-        ncp_pathsearch_compute_x_from_z(n, x_plus, r, x);
-        ncp_pathsearch_update_lcp_data(problem, &lcp_subproblem, n, x_plus, x, r);
-        lcp_pivot_covering_vector(&lcp_subproblem, x_plus, x, info, options->internalSolvers[0], r);
-        if (*info == LCP_PIVOT_SUCCESS)
+        if(50*normal_norm2_newton_point < norm_r2)
         {
-           DEBUG_PRINT("ncp_pathsearch :: Lemke start worked !\n");
-           double err_lcp = 0.0;
-           cblas_daxpy(n, 1.0, r, 1, lcp_subproblem_check.q, 1);
-           lcp_compute_error(&lcp_subproblem_check, x_plus, x, 1e-14, &err_lcp);
-           double local_tol = fmax(1e-14, DBL_EPSILON*sqrt(norm_r2));
-           printf("ncp_pathsearch :: lcp solved with error = %e; local_tol = %e\n", err_lcp, local_tol);
-           assert(err_lcp < local_tol);
+          force_d_step_merit_check = 1;
+        }
+        else if(10*normal_norm2_newton_point < norm_r2)
+        {
+//            check_ratio = sqrt(norm_r2/normal_norm2_newton_point);
+        }
+      }
+      break;
+    case LCP_PIVOT_RAY_TERMINATION:
+      DEBUG_PRINT("ncp_pathsearch :: ray termination, let's fastened your seat belt!\n");
+      break;
+    case LCP_PATHSEARCH_LEAVING_T:
+      DEBUG_PRINT("ncp_pathsearch :: leaving t, fastened your seat belt!\n");
+      DEBUG_PRINTF("ncp_pathsearch :: max t value = %e\n", options->internalSolvers[0]->dparam[2]); /* XXX fix 2 */
+      /* try to retry solving the problem */
+      /* XXX keep or not ? */
+      /* recompute the normal norm */
+      problem->compute_F(problem->env, n, x_plus, r);
+      cblas_daxpy(n, -1.0, x, 1, r, 1);
+      normal_norm2_newton_point = cblas_ddot(n, r, 1, r, 1);
+      if(normal_norm2_newton_point > norm_r2)
+      {
+        printf("ncp_pathsearch :: lcp successfully solved, but the norm of the normal map increased! %e > %e\n", normal_norm2_newton_point, norm_r2);
+        //assert(normal_norm2_newton_point <= norm_r2);
+      }
+      else
+      {
+        printf("ncp_pathsearch :: lcp successfully solved, norm of the normal map decreased! %e < %e\n", normal_norm2_newton_point, norm_r2);
+        check_ratio = 5.0*norm_r2/normal_norm2_newton_point;
+      }
+      if(options->internalSolvers[0]->dparam[2] > 1e-5) break;
+      memset(x_plus, 0, sizeof(double) * n);
+      problem->compute_F(problem->env, n, x_plus, r);
+      ncp_pathsearch_compute_x_from_z(n, x_plus, r, x);
+      ncp_pathsearch_update_lcp_data(problem, &lcp_subproblem, n, x_plus, x, r);
+      lcp_pivot_covering_vector(&lcp_subproblem, x_plus, x, info, options->internalSolvers[0], r);
+      if(*info == LCP_PIVOT_SUCCESS)
+      {
+        DEBUG_PRINT("ncp_pathsearch :: Lemke start worked !\n");
+        double err_lcp = 0.0;
+        cblas_daxpy(n, 1.0, r, 1, lcp_subproblem_check.q, 1);
+        lcp_compute_error(&lcp_subproblem_check, x_plus, x, 1e-14, &err_lcp);
+        double local_tol = fmax(1e-14, DBL_EPSILON*sqrt(norm_r2));
+        printf("ncp_pathsearch :: lcp solved with error = %e; local_tol = %e\n", err_lcp, local_tol);
+        assert(err_lcp < local_tol);
+      }
+      else
+      {
+        NM_display(lcp_subproblem.M);
+        printf("z r q x_plus\n");
+        for(unsigned i = 0; i < n; ++i) printf("%e %e %e %e\n", z[i], r[i], lcp_subproblem.q[i], x_plus[i]);
+        DEBUG_PRINT("ncp_pathsearch :: Lemke start did not succeeded !\n");
+        lcp_pivot_diagnose_info(*info);
+        if(*info == LCP_PATHSEARCH_LEAVING_T)
+        {
+          DEBUG_PRINTF("ncp_pathsearch :: max t value after Lemke start = %e\n", options->internalSolvers[0]->dparam[2]);
+        }
+        options->internalSolvers[0]->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = 0;
+        lcp_pivot(&lcp_subproblem, x_plus, x, info, options->internalSolvers[0]);
+        options->internalSolvers[0]->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_PATHSEARCH;
+        double err_lcp = 0.0;
+        lcp_compute_error(&lcp_subproblem, x_plus, x, 1e-14, &err_lcp);
+        printf("ncp_pathsearch :: lemke start resolved with info = %d; error = %e\n", *info, err_lcp);
+        printf("x_plus x_minus\n");
+        for(unsigned i = 0; i < n; ++i) printf("%e %e\n", x_plus[i], x[i]);
+        /* recompute the normal norm */
+        problem->compute_F(problem->env, n, x_plus, r);
+        cblas_daxpy(n, -1.0, x, 1, r, 1);
+        double normal_norm2_newton_point = cblas_ddot(n, r, 1, r, 1);
+        if(normal_norm2_newton_point > norm_r2)
+        {
+          printf("ncp_pathsearch :: lcp successfully solved, but the norm of the normal map increased! %e > %e\n", normal_norm2_newton_point, norm_r2);
+          //assert(normal_norm2_newton_point <= norm_r2);
         }
         else
         {
-          NM_display(lcp_subproblem.M);
-          printf("z r q x_plus\n");
-          for (unsigned i = 0; i < n; ++i) printf("%e %e %e %e\n", z[i], r[i], lcp_subproblem.q[i], x_plus[i]);
-          DEBUG_PRINT("ncp_pathsearch :: Lemke start did not succeeded !\n");
-          lcp_pivot_diagnose_info(*info);
-          if (*info == LCP_PATHSEARCH_LEAVING_T)
-          {
-            DEBUG_PRINTF("ncp_pathsearch :: max t value after Lemke start = %e\n", options->internalSolvers[0]->dparam[2]);
-          }
-          options->internalSolvers[0]->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = 0;
-          lcp_pivot(&lcp_subproblem, x_plus, x, info, options->internalSolvers[0]);
-          options->internalSolvers[0]->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_PATHSEARCH;
-          double err_lcp = 0.0;
-          lcp_compute_error(&lcp_subproblem, x_plus, x, 1e-14, &err_lcp);
-          printf("ncp_pathsearch :: lemke start resolved with info = %d; error = %e\n", *info, err_lcp);
-          printf("x_plus x_minus\n");
-          for (unsigned i = 0; i < n; ++i) printf("%e %e\n", x_plus[i], x[i]);
-          /* recompute the normal norm */
-          problem->compute_F(problem->env, n, x_plus, r);
-          cblas_daxpy(n, -1.0, x, 1, r, 1);
-          double normal_norm2_newton_point = cblas_ddot(n, r, 1, r, 1);
-          if (normal_norm2_newton_point > norm_r2)
-          {
-            printf("ncp_pathsearch :: lcp successfully solved, but the norm of the normal map increased! %e > %e\n", normal_norm2_newton_point, norm_r2);
-            //assert(normal_norm2_newton_point <= norm_r2);
-          }
-          else
-          {
-             printf("ncp_pathsearch :: lcp successfully solved, norm of the normal map decreased! %.*e < %.*e\n", DECIMAL_DIG, normal_norm2_newton_point, DECIMAL_DIG, norm_r2);
-          }
-          if (100*normal_norm2_newton_point < norm_r2)
-          {
-            force_d_step_merit_check = 1;
-          }
+          printf("ncp_pathsearch :: lcp successfully solved, norm of the normal map decreased! %.*e < %.*e\n", DECIMAL_DIG, normal_norm2_newton_point, DECIMAL_DIG, norm_r2);
         }
-        break;
-      case LCP_PIVOT_NUL:
-        printf("ncp_pathsearch :: kaboom, kaboom still more work needs to be done\n");
-        lcp_pivot_diagnose_info(*info);
+        if(100*normal_norm2_newton_point < norm_r2)
+        {
+          force_d_step_merit_check = 1;
+        }
+      }
+      break;
+    case LCP_PIVOT_NUL:
+      printf("ncp_pathsearch :: kaboom, kaboom still more work needs to be done\n");
+      lcp_pivot_diagnose_info(*info);
 //        exit(EXIT_FAILURE);
-        force_watchdog_step = 1;
-        break;
-      case LCP_PATHSEARCH_NON_ENTERING_T:
-        DEBUG_PRINT("ncp_pathsearch :: non entering t, something is wrong here. Fix the f****** code!\n");
-        assert(0 && "ncp_pathsearch :: non entering t, something is wrong here\n"); 
-        force_watchdog_step = 1;
-        break;
-      default:
-        printf("ncp_pathsearch :: unknown code returned by the path search\n");
-        exit(EXIT_FAILURE);
+      force_watchdog_step = 1;
+      break;
+    case LCP_PATHSEARCH_NON_ENTERING_T:
+      DEBUG_PRINT("ncp_pathsearch :: non entering t, something is wrong here. Fix the f****** code!\n");
+      assert(0 && "ncp_pathsearch :: non entering t, something is wrong here\n");
+      force_watchdog_step = 1;
+      break;
+    default:
+      printf("ncp_pathsearch :: unknown code returned by the path search\n");
+      exit(EXIT_FAILURE);
     }
 
     nms_failed = NMS(data_NMS, problem, functions, z, x_plus, force_watchdog_step, force_d_step_merit_check, check_ratio);
@@ -403,11 +403,11 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = nbiter;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;
-  if (nbiter == itermax)
+  if(nbiter == itermax)
   {
     *info = 1;
   }
-  else if (nms_failed)
+  else if(nms_failed)
   {
     *info = 2;
   }
@@ -418,7 +418,7 @@ void ncp_pathsearch(NonlinearComplementarityProblem* problem, double* z, double*
 
   DEBUG_PRINTF("ncp_pathsearch procedure finished :: info = %d; iter = %d; ncp_error = %e; merit_norm^2 = %e\n", *info, nbiter, err, merit_norm);
 
-  if (!preAlloc)
+  if(!preAlloc)
   {
 
     NM_clear(problem->nabla_F);

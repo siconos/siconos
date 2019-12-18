@@ -49,7 +49,7 @@ void fc3d_NaturalMapFunction(
   assert(problemSize % 3 == 0);
 
   unsigned int i;
-  for (i = 0; i < problemSize; i += 3)
+  for(i = 0; i < problemSize; i += 3)
   {
 
     computeACFun3x3(reaction, velocity, *mu, rho, result, A, B);
@@ -59,13 +59,13 @@ void fc3d_NaturalMapFunction(
     mu++;
     rho += 3;
 
-    if (result)
+    if(result)
       result += 3;
 
-    if (A)
+    if(A)
       A += 9;
 
-    if (B)
+    if(B)
       B += 9;
 
   }
@@ -74,9 +74,9 @@ void fc3d_NaturalMapFunction(
 
 
 int fc3d_nonsmooth_Newton_NaturalMap_compute_error(
-    FrictionContactProblem* problem,
-    double *z , double *w, double tolerance,
-    SolverOptions * options, double * error)
+  FrictionContactProblem* problem,
+  double *z, double *w, double tolerance,
+  SolverOptions * options, double * error)
 {
 
   double *A = NULL;
@@ -89,7 +89,7 @@ int fc3d_nonsmooth_Newton_NaturalMap_compute_error(
 
   NaturalMapFun3x3Ptr computeACFun3x3;
 
-  switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
+  switch(options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
   case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
@@ -118,9 +118,9 @@ int fc3d_nonsmooth_Newton_NaturalMap_compute_error(
   free(F);
   free(rho);
 
-  if (*error > tolerance)
+  if(*error > tolerance)
   {
-    if (verbose > 1)
+    if(verbose > 1)
       printf(" Numerics - fc3d_compute_error: error = %g > tolerance = %g.\n",
              *error, tolerance);
     return 1;
@@ -160,35 +160,35 @@ typedef struct
 } NaturalMapParams;
 
 void nonsmoothEqnNaturalMapFun(void* arg,
-                                      unsigned int problemSize,
-                                      double* reaction,
-                                      double* velocity,
-                                      double* mu,
-                                      double* rho,
-                                      double* result,
-                                      double* A,
-                                      double* B);
+                               unsigned int problemSize,
+                               double* reaction,
+                               double* velocity,
+                               double* mu,
+                               double* rho,
+                               double* result,
+                               double* A,
+                               double* B);
 void nonsmoothEqnNaturalMapFun(void* arg,
-                                      unsigned int problemSize,
-                                      double* reaction,
-                                      double* velocity,
-                                      double* mu,
-                                      double* rho,
-                                      double* result,
-                                      double* A,
-                                      double* B)
+                               unsigned int problemSize,
+                               double* reaction,
+                               double* velocity,
+                               double* mu,
+                               double* rho,
+                               double* result,
+                               double* A,
+                               double* B)
 {
   NaturalMapParams* acparams_p = (NaturalMapParams *) arg;
 
   fc3d_NaturalMapFunction(problemSize,
-                                         acparams_p->computeACFun3x3,
-                                         reaction,
-                                         velocity,
-                                         mu,
-                                         rho,
-                                         result,
-                                         A,
-                                         B);
+                          acparams_p->computeACFun3x3,
+                          reaction,
+                          velocity,
+                          mu,
+                          rho,
+                          result,
+                          A,
+                          B);
 }
 
 
@@ -220,7 +220,7 @@ void fc3d_nonsmooth_Newton_NaturalMap(
 
   NaturalMapParams acparams;
 
-  switch (options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
+  switch(options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
   case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
@@ -236,6 +236,6 @@ void fc3d_nonsmooth_Newton_NaturalMap(
   equation.function = &nonsmoothEqnNaturalMapFun;
 
   fc3d_nonsmooth_Newton_solvers_solve(&equation, reaction, velocity, info,
-                                   options);
+                                      options);
 
 }

@@ -25,16 +25,16 @@ MBTB_Contact::MBTB_Contact(unsigned int id,const std::string& ContactName, unsig
   else
     _Relation.reset(new MBTB_ContactRelation(this));
 }
- void MBTB_Contact::setInteraction(SP::Interaction newInteraction)
-  {
+void MBTB_Contact::setInteraction(SP::Interaction newInteraction)
+{
 
-    std::cout << "MBTB_Contact::setInteraction(SP::Interaction newInteraction)"<< std::endl;
-    std::cout << "_interaction before"<< _interaction << std::endl;
-    std::cout << "newinteraction "<< newInteraction << std::endl;
-    newInteraction->display();
-    
-    _interaction = newInteraction ;
-    std::cout << "_interaction after"<< _interaction << std::endl;
-    _interaction->display();
+  std::cout << "MBTB_Contact::setInteraction(SP::Interaction newInteraction)"<< std::endl;
+  std::cout << "_interaction before"<< _interaction << std::endl;
+  std::cout << "newinteraction "<< newInteraction << std::endl;
+  newInteraction->display();
 
-  }
+  _interaction = newInteraction ;
+  std::cout << "_interaction after"<< _interaction << std::endl;
+  _interaction->display();
+
+}

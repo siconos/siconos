@@ -25,7 +25,7 @@
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "Newton_methods.h"                // for functions_LSA, init_lsa_fu...
 #include "NumericsMatrix.h"                // for NumericsMatrix
-#include "SolverOptions.h" 
+#include "SolverOptions.h"
 
 void FB_compute_F_lcp(void* data_opaque, double* z, double* w)
 {
@@ -35,7 +35,7 @@ void FB_compute_F_lcp(void* data_opaque, double* z, double* w)
   assert(data->M);
   assert(data->M->matrix0);
   unsigned int n = data->size;
-  cblas_dcopy(n , data->q, 1, w, 1);
+  cblas_dcopy(n, data->q, 1, w, 1);
   // Mz+q --> w
   cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, data->M->matrix0, n, z, 1, 1.0, w, 1);
 }
@@ -59,7 +59,7 @@ void lcp_FB(void* data_opaque, double* z, double* F, double* F_FB)
   phi_FB(((LinearComplementarityProblem *)data_opaque)->size, z, F, F_FB);
 }
 
-void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   functions_LSA functions_FBLSA_lcp;
   init_lsa_functions(&functions_FBLSA_lcp, &FB_compute_F_lcp, &lcp_FB);
@@ -68,7 +68,7 @@ void lcp_newton_FB(LinearComplementarityProblem* problem, double *z, double *w, 
 
   set_lsa_params_data(options, problem->M);
   newton_LSA(problem->size, z, w, info, (void *)problem, options, &functions_FBLSA_lcp);
-  
+
 }
 
 

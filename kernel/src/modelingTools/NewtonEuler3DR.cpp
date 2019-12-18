@@ -75,7 +75,7 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
 
   // 1 - Construction of the local contact frame from the normal vector
 
-  if (orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
+  if(orthoBaseFromVector(&Nx, &Ny, &Nz, pt, pt + 1, pt + 2, pt + 3, pt + 4, pt + 5))
     RuntimeException::selfThrow("NewtonEuler3DR::FC3DcomputeJachqTFromContacts. Problem in calling orthoBaseFromVector");
 
 
@@ -92,7 +92,7 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   _rotationAbsoluteToContactFrame->setValue(2, 2, *(pt + 5));
   DEBUG_PRINT("_rotationAbsoluteToContactFrame:\n");
   DEBUG_EXPR(_rotationAbsoluteToContactFrame->display(););
-  
+
   // 3 - Construction of the lever arm matrix in  the absolute frame
 
   _NPG1->zero();
@@ -121,7 +121,7 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   DEBUG_EXPR(_rotationBodyToAbsoluteFrame->display(););
 
 
-  // 5 - compose the body lever arm matrix with the rotation matrix 
+  // 5 - compose the body lever arm matrix with the rotation matrix
   prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
   DEBUG_EXPR(_rotationBodyToAbsoluteFrame->display(););
   DEBUG_EXPR(_AUX1->display(););
@@ -131,14 +131,14 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1)
   DEBUG_EXPR(_rotationAbsoluteToContactFrame->display(););
   DEBUG_EXPR(_AUX2->display(););
 
-  // 7 - fill the Jacobian 
+  // 7 - fill the Jacobian
 
-  for (unsigned int ii = 0; ii < 3; ii++)
-    for (unsigned int jj = 0; jj < 3; jj++)
+  for(unsigned int ii = 0; ii < 3; ii++)
+    for(unsigned int jj = 0; jj < 3; jj++)
       _jachqT->setValue(ii, jj, _rotationAbsoluteToContactFrame->getValue(ii, jj));
 
-  for (unsigned int ii = 0; ii < 3; ii++)
-    for (unsigned int jj = 3; jj < 6; jj++)
+  for(unsigned int ii = 0; ii < 3; ii++)
+    for(unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
   DEBUG_EXPR(_jachqT->display(););
@@ -238,12 +238,12 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Sic
   prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
 
-  for (unsigned int ii = 0; ii < 3; ii++)
-    for (unsigned int jj = 0; jj < 3; jj++)
+  for(unsigned int ii = 0; ii < 3; ii++)
+    for(unsigned int jj = 0; jj < 3; jj++)
       _jachqT->setValue(ii, jj, _rotationAbsoluteToContactFrame->getValue(ii, jj));
 
-  for (unsigned int ii = 0; ii < 3; ii++)
-    for (unsigned int jj = 3; jj < 6; jj++)
+  for(unsigned int ii = 0; ii < 3; ii++)
+    for(unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
 
@@ -251,12 +251,12 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Sic
   prod(*_NPG2, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
   prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
-  for (unsigned int ii = 0; ii < 3; ii++)
-    for (unsigned int jj = 0; jj < 3; jj++)
+  for(unsigned int ii = 0; ii < 3; ii++)
+    for(unsigned int jj = 0; jj < 3; jj++)
       _jachqT->setValue(ii, jj + 6, -_rotationAbsoluteToContactFrame->getValue(ii, jj));
 
-  for (unsigned int ii = 0; ii < 3; ii++)
-    for (unsigned int jj = 3; jj < 6; jj++)
+  for(unsigned int ii = 0; ii < 3; ii++)
+    for(unsigned int jj = 3; jj < 6; jj++)
       _jachqT->setValue(ii, jj + 6, -_AUX2->getValue(ii, jj - 3));
 
 }
@@ -264,7 +264,7 @@ void NewtonEuler3DR::FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Sic
 void NewtonEuler3DR::computeJachqT(Interaction& inter, SP::BlockVector q0)
 {
   DEBUG_BEGIN("NewtonEuler3DR::computeJachqT(Interaction& inter,  SP::BlockVector q0)\n");
-  if (q0->numberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     FC3DcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
   }

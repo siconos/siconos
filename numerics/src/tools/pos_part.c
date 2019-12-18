@@ -20,9 +20,9 @@
 void pos_part(unsigned n, double* restrict x, double* restrict x_plus)
 {
 
-  for (unsigned i = 0 ; i < n ; ++i)
+  for(unsigned i = 0 ; i < n ; ++i)
   {
-    if (x[i] > 0.0)
+    if(x[i] > 0.0)
     {
       x_plus[i] = x[i];
     }

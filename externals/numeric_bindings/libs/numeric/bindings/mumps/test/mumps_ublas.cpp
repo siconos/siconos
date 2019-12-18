@@ -9,7 +9,8 @@
 #include <complex>
 
 template <typename T>
-int test(double eps) {
+int test(double eps)
+{
   namespace ublas = ::boost::numeric::ublas ;
   namespace mumps = ::boost::numeric::bindings::mumps ;
 
@@ -18,9 +19,9 @@ int test(double eps) {
 
   typedef ublas::coordinate_matrix<T, ublas::column_major, 1, ublas::unbounded_array<int> > coo_type ;
 
-  coo_type coo( n, n, n + 6 ) ;
+  coo_type coo(n, n, n + 6) ;
 
-  for (int i=0; i<n; ++i) coo(i,i) = i+1.0 ;
+  for(int i=0; i<n; ++i) coo(i,i) = i+1.0 ;
   coo(2,3) = T(1.0) ;
   coo(2,4) = T(1.0) ;
   coo(5,6) = T(-1.0) ;
@@ -31,16 +32,18 @@ int test(double eps) {
   coo.sort() ;
   std::cout << "matrix " << coo << std::endl ;
 
-  ublas::vector<T> v( 10 ) ;
-  ublas::vector<T> w( 10 ) ;
+  ublas::vector<T> v(10) ;
+  ublas::vector<T> w(10) ;
 
-  std::fill( w.begin(), w.end(), 1.0 ) ;
+  std::fill(w.begin(), w.end(), 1.0) ;
 
-  for (int i=1; i<n; ++i) {
+  for(int i=1; i<n; ++i)
+  {
     w(i) += w(i-1) ;
   }
 
-  for (int i=0; i<n; ++i) {
+  for(int i=0; i<n; ++i)
+  {
     v[i] = T(coo(i,i)) * w[i] ;
   }
   v[2] += T(coo(2,3)) * w[3] ;
@@ -57,31 +60,32 @@ int test(double eps) {
 
   // Analysis
   mumps_coo.job = 1 ;
-  matrix_integer_data( mumps_coo, coo ) ;
-  driver( mumps_coo ) ;
+  matrix_integer_data(mumps_coo, coo) ;
+  driver(mumps_coo) ;
 
   // Factorization
   mumps_coo.job = 2 ;
-  matrix_value_data( mumps_coo, coo ) ;
-  driver( mumps_coo ) ;
+  matrix_value_data(mumps_coo, coo) ;
+  driver(mumps_coo) ;
 
   // Solve
   mumps_coo.job = 3 ;
-  rhs_sol_value_data( mumps_coo, v ) ;
-  driver( mumps_coo ) ;
+  rhs_sol_value_data(mumps_coo, v) ;
+  driver(mumps_coo) ;
 
   std::cout << "w : " << w << std::endl ;
   std::cout << "v : " << v << std::endl ;
 
-  if ( norm_2( v - w ) > eps * norm_2( v ) ) return 1 ;
+  if(norm_2(v - w) > eps * norm_2(v)) return 1 ;
 
   return 0 ;
 }
 
-int main() {
-  if ( test<float>(1e-5) ) return 1 ;
-  if ( test<double>(1e-10) ) return 2 ;
-  if ( test< std::complex<float> >(1e-5) ) return 3 ;
-  if ( test< std::complex<double> >(1e-10) ) return 4 ;
+int main()
+{
+  if(test<float>(1e-5)) return 1 ;
+  if(test<double>(1e-10)) return 2 ;
+  if(test< std::complex<float> >(1e-5)) return 3 ;
+  if(test< std::complex<double> >(1e-10)) return 4 ;
   return 0 ;
 }

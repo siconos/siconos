@@ -31,7 +31,7 @@
 
 
 /*\warning omega is not explicitely used. must be completed    */
-void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -65,16 +65,16 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   /* Check for non trivial case */
 
-  qs = cblas_dnrm2(n , q , incx);
+  qs = cblas_dnrm2(n, q, incx);
 
-  if (verbose > 0) printf("\n ||q||= %g \n", qs);
+  if(verbose > 0) printf("\n ||q||= %g \n", qs);
 
   // Note FP : den never used ...
   //if (qs > DBL_EPSILON) den = 1.0 / qs;
   //else
-  if (qs <= DBL_EPSILON)
+  if(qs <= DBL_EPSILON)
   {
-    for (i = 0 ; i < n ; ++i)
+    for(i = 0 ; i < n ; ++i)
     {
       w[i] = 0.;
       z[i] = 0.;
@@ -87,12 +87,12 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
     return;
   }
 
-  for (i = 0 ; i < n ; ++i)
+  for(i = 0 ; i < n ; ++i)
   {
     ww[i] = 0.;
   }
 
-  cblas_dcopy(n , q , incx , w , incy);
+  cblas_dcopy(n, q, incx, w, incy);
   /* Intialization of w and z */
   /*if(initmethod == 0) {*/
   /* dcopy_( (integer *)&n , q , (integer *)&incx , w , (integer *)&incy );*/
@@ -102,12 +102,12 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   /* Preparation of the diagonal of the inverse matrix */
 
-  for (i = 0 ; i < n ; ++i)
+  for(i = 0 ; i < n ; ++i)
   {
-    if (fabs(M[i * n + i]) < DBL_EPSILON)
+    if(fabs(M[i * n + i]) < DBL_EPSILON)
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" Warning negative diagonal term \n");
         printf(" The local problem cannot be solved \n");
@@ -129,17 +129,17 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   qs   = -1.0;
 
-  cblas_dcopy(n , q , incx , w , incy);
+  cblas_dcopy(n, q, incx, w, incy);
 
-  while ((iter < itermax) && (err > tol))
+  while((iter < itermax) && (err > tol))
   {
 
     ++iter;
 
-    cblas_dcopy(n , w , incx , ww , incy);   /* w --> ww */
-    cblas_dcopy(n , q , incx , w , incy);    /* q --> w */
+    cblas_dcopy(n, w, incx, ww, incy);       /* w --> ww */
+    cblas_dcopy(n, q, incx, w, incy);        /* q --> w */
 
-    for (i = 0 ; i < n ; ++i)
+    for(i = 0 ; i < n ; ++i)
     {
 
       z[i] = 0.0;
@@ -149,7 +149,7 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
       /*       if( zi < 0 ) z[i] = 0.0;  */
       /*       else z[i] = zi; */
 
-      z[i] = fmax(0.0, -(q[i] + cblas_ddot(n , &M[i] , incxn , z , incy)) * diag[i]);
+      z[i] = fmax(0.0, -(q[i] + cblas_ddot(n, &M[i], incxn, z, incy)) * diag[i]);
 
     }
 
@@ -162,17 +162,17 @@ void lcp_psor(LinearComplementarityProblem* problem, double *z, double *w, int *
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
-  if (err > tol)
+  if(err > tol)
   {
-    printf("Siconos/Numerics: lcp_psor: No convergence of PSOR after %d iterations\n" , iter);
+    printf("Siconos/Numerics: lcp_psor: No convergence of PSOR after %d iterations\n", iter);
     printf("Siconos/Numerics: lcp_psor: The residue is : %g \n", err);
     *info = 1;
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
     {
-      printf("Siconos/Numerics: lcp_psor: Convergence of PSOR after %d iterations\n" , iter);
+      printf("Siconos/Numerics: lcp_psor: Convergence of PSOR after %d iterations\n", iter);
       printf("Siconos/Numerics: lcp_psor: The residue is : %g \n", err);
     }
     *info = 0;

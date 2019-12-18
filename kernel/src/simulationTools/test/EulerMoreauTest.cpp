@@ -47,7 +47,8 @@ void EulerMoreauTest::setUp()
 
 void EulerMoreauTest::init(bool initDS)
 {
-  if (initDS) {
+  if(initDS)
+  {
     _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
   }
 
@@ -77,7 +78,8 @@ void EulerMoreauTest::testCstGradTIDS()
 
   init(false);
 
-  while (_sim->hasNextEvent()) {
+  while(_sim->hasNextEvent())
+  {
     _sim->computeOneStep();
     _sim->nextStep();
   }
@@ -101,7 +103,8 @@ void EulerMoreauTest::testCstGradDS()
 
   init(false);
 
-  while (_sim->hasNextEvent()) {
+  while(_sim->hasNextEvent())
+  {
     _sim->computeOneStep();
     _sim->nextStep();
   }
@@ -129,7 +132,8 @@ void EulerMoreauTest::testCstGradNLDS()
 
   init(false);
 
-  while (_sim->hasNextEvent()) {
+  while(_sim->hasNextEvent())
+  {
     _sim->computeOneStep();
     _sim->nextStep();
   }

@@ -38,15 +38,15 @@ const char* const   SICONOS_VI_BOX_QI_STR = "Box VI solver based on Qi C-functio
 const char* const   SICONOS_VI_BOX_AVI_LSA_STR = "Box VI solver based on the Newton-Josephy method";
 const char* const   SICONOS_VI_BOX_PATH_STR = "Box VI solver based on PATH solver";
 
-int variationalInequality_driver(VariationalInequality* problem, 
-                                 double *x, double *w, 
+int variationalInequality_driver(VariationalInequality* problem,
+                                 double *x, double *w,
                                  SolverOptions* options)
 {
-  if (options == NULL)
+  if(options == NULL)
     numerics_error("variationalInequality_driver", "null input for solver and/or global options");
 
   assert(options->isSet);
-  if (verbose > 0)
+  if(verbose > 0)
     solver_options_print(options);
 
   /* Solver name */
@@ -56,36 +56,37 @@ int variationalInequality_driver(VariationalInequality* problem,
 
   /* Check for trivial case */
   info = checkTrivialCase_vi(problem, x, w, options);
-  if (info == 0){
+  if(info == 0)
+  {
     double error;
-    variationalInequality_computeError(problem, x , w, options->dparam[SICONOS_DPARAM_TOL], options, &error);
+    variationalInequality_computeError(problem, x, w, options->dparam[SICONOS_DPARAM_TOL], options, &error);
     printf("variationalInequality_driver. error = %8.4e\n", error);
     return info;
   }
 
-  switch (options->solverId)
+  switch(options->solverId)
   {
-    /* Non Smooth Gauss Seidel (NSGS) */
+  /* Non Smooth Gauss Seidel (NSGS) */
   /* Extra Gradient algorithm */
   case SICONOS_VI_EG:
   {
     numerics_printf_verbose(1,
-             " ========================== Call ExtraGradient (EG) solver for VI problem ==========================\n");
-    variationalInequality_ExtraGradient(problem, x , w , &info , options);
+                            " ========================== Call ExtraGradient (EG) solver for VI problem ==========================\n");
+    variationalInequality_ExtraGradient(problem, x, w, &info, options);
     break;
   }
   case SICONOS_VI_FPP:
   {
     numerics_printf_verbose(1,
-             " ========================== Call Fixed Point Projection (FPP) solver for VI problem ==========================\n");
-    variationalInequality_FixedPointProjection(problem, x , w , &info , options);
+                            " ========================== Call Fixed Point Projection (FPP) solver for VI problem ==========================\n");
+    variationalInequality_FixedPointProjection(problem, x, w, &info, options);
     break;
   }
   case SICONOS_VI_HP:
   {
     numerics_printf_verbose(1,
-             " ========================== Call Hyperplane Projection (HP) solver for VI problem ==========================\n");
-    variationalInequality_HyperplaneProjection(problem, x , w , &info , options);
+                            " ========================== Call Hyperplane Projection (HP) solver for VI problem ==========================\n");
+    variationalInequality_HyperplaneProjection(problem, x, w, &info, options);
     break;
   }
   case SICONOS_VI_BOX_QI:
@@ -115,11 +116,11 @@ int variationalInequality_driver(VariationalInequality* problem,
 
 }
 
-int checkTrivialCase_vi(VariationalInequality* problem, double* x, 
+int checkTrivialCase_vi(VariationalInequality* problem, double* x,
                         double* w, SolverOptions* options)
 {
   int n = problem->size;
-  if (problem->ProjectionOnX)
+  if(problem->ProjectionOnX)
   {
     problem->ProjectionOnX(problem,x,w);
   }
@@ -128,21 +129,21 @@ int checkTrivialCase_vi(VariationalInequality* problem, double* x,
     cblas_dcopy(problem->size, x, 1, w, 1);
     project_on_set(problem->size, w, problem->set);
   }
-  cblas_daxpy(n, -1.0,x, 1, w , 1);
+  cblas_daxpy(n, -1.0,x, 1, w, 1);
   double nnorm = cblas_dnrm2(n,w,1);
   DEBUG_PRINTF("checkTrivialCase_vi, nnorm = %6.4e\n",nnorm);
-  
-  if (nnorm > fmin(options->dparam[SICONOS_DPARAM_TOL], 1e-12))
+
+  if(nnorm > fmin(options->dparam[SICONOS_DPARAM_TOL], 1e-12))
     return 1;
 
   problem->F(problem,n,x,w);
   nnorm = cblas_dnrm2(n,w,1);
   DEBUG_PRINTF("checkTrivialCase_vi, nnorm = %6.4e\n",nnorm);
 
-  if (nnorm > fmin(options->dparam[SICONOS_DPARAM_TOL], 1e-12))
+  if(nnorm > fmin(options->dparam[SICONOS_DPARAM_TOL], 1e-12))
     return 1;
 
-  if (verbose == 1)
+  if(verbose == 1)
     printf("variationalInequality driver, trivial solution F(x) = 0, x in X.\n");
   return 0;
 }

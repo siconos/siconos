@@ -35,7 +35,7 @@ void Lagrangian2d1DR::initialize(Interaction& inter)
   LagrangianR::initialize(inter);
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
 
-  if ((inter.getSizeOfDS() !=3) and (inter.getSizeOfDS() !=6 ))
+  if((inter.getSizeOfDS() !=3) and (inter.getSizeOfDS() !=6))
   {
     RuntimeException::selfThrow("Lagrangian2d1DR::initialize(Interaction& inter). The size of ds must of size 3");
   }
@@ -59,7 +59,7 @@ void Lagrangian2d1DR::computeJachq(SiconosVector& q, SiconosVector& z)
   _jachq->setValue(0,2,(G1y-Py)*Nx - (G1x-Px)*Ny);
 
 
-  if (q.size() ==6)
+  if(q.size() ==6)
   {
     DEBUG_PRINT("take into account second ds\n");
     double G2x = q.getValue(3);
@@ -95,7 +95,7 @@ void Lagrangian2d1DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector
   double angle= q(2);
   (*_Pc1)(0) = q(0) + cos(angle) * (*_relPc1)(0)+ sin(angle) * (*_relPc1)(1);
   (*_Pc1)(1) = q(1) + sin(angle) * (*_relPc1)(0)- cos(angle) * (*_relPc1)(1);
-  if (q.size() == 6)
+  if(q.size() == 6)
   {
     // To be checked
     DEBUG_PRINT("take into account second ds\n");

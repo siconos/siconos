@@ -36,72 +36,72 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   // The differences between tests are only for internal solvers and input data.
   int topsolver = SICONOS_FRICTION_3D_NSGS;
   int current = 0;
-  
+
   // nsgs + default values for internal solver.
   for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(topsolver);
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
-      current++;
-    }
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    current++;
+  }
 
   // nonsmooth newton 'damped', Moreau-Jean formulation. Default for other parameters
   for(int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(topsolver);
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
-      
-      solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-      collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
 
-      current++;
-    }
-  
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
+
+    current++;
+  }
+
   // Projection on cone with local iteration, set tol and max iter.
-  for ( int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(topsolver);
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+  for(int d =0; d <n_data; d++)
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-      solver_options_update_internal(collection[current].options, 0,
-                                     SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-      collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
-      collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
-      current++;
-    }
-  
-  // nonsmooth Newton 'damped', set hybrid strategy
-  for ( int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(topsolver);
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
-
-      solver_options_update_internal(collection[current].options, 0,
-                                     SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-      collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP;
-      current++;
-      // notice that this strategy is the default one.
-    }
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    current++;
+  }
 
   // nonsmooth Newton 'damped', set hybrid strategy
-  for ( int d =0; d <n_data; d++)
-    {
-      collection[current].filename = data_collection[d];
-      collection[current].options = solver_options_create(topsolver);
-      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;  
-      collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;  
+  for(int d =0; d <n_data; d++)
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-      solver_options_update_internal(collection[current].options, 0,
-                                     SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-      collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
-      current++;
-    }
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NSN_AND_PLI_NSN_LOOP;
+    current++;
+    // notice that this strategy is the default one.
+  }
+
+  // nonsmooth Newton 'damped', set hybrid strategy
+  for(int d =0; d <n_data; d++)
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
+    current++;
+  }
 
   return collection;
 

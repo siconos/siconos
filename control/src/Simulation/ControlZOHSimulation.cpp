@@ -41,7 +41,7 @@ ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
 {
   _processIntegrator.reset(new ZeroOrderHoldOSI());
   std11::static_pointer_cast<ZeroOrderHoldOSI>(_processIntegrator)->setExtraAdditionalTerms(
-      std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
+    std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
   _processSimulation.reset(new TimeStepping(_nsds,_processTD, 0));
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
@@ -62,17 +62,17 @@ void ControlZOHSimulation::run()
 
   TimeStepping& sim = static_cast<TimeStepping&>(*_processSimulation);
 
-  while (sim.hasNextEvent())
+  while(sim.hasNextEvent())
   {
     Event& nextEvent = *eventsManager.nextEvent();
-    if (nextEvent.getType() == TD_EVENT)
+    if(nextEvent.getType() == TD_EVENT)
     {
       sim.computeOneStep();
     }
 
     sim.nextStep();
 
-    if (sim.hasNextEvent() && eventsManager.nextEvent()->getType() == TD_EVENT)  // We store only on TD_EVENT
+    if(sim.hasNextEvent() && eventsManager.nextEvent()->getType() == TD_EVENT)   // We store only on TD_EVENT
     {
       (*_dataM)(k, 0) = sim.startingTime();
       storeData(k);

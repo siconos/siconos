@@ -37,7 +37,7 @@ DiskMovingPlanR::DiskMovingPlanR(FTime FA, FTime FB, FTime FC,
 
 void DiskMovingPlanR::init(double time)
 {
-  if (time != _time)
+  if(time != _time)
   {
     _time = time;
     computeA(time);

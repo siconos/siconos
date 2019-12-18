@@ -14,8 +14,8 @@ RUN apt update  && apt install -y -qq \
         gfortran \
         libgfortran3 \
         g++ \
-        liblapack-dev \
-        libatlas-base-dev \
+        libopenblas-dev \
+        liblapacke-dev \
         lp-solve \
         libsuitesparse-dev \
         liblpsolve55-dev \

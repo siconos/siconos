@@ -35,7 +35,7 @@ int main(void)
 
   double *reaction = (double*)malloc(3 * nc * sizeof(double));
   double *velocity = (double*)malloc(3 * nc * sizeof(double));
-  for (int i = 0; i < 3 * nc; i++)
+  for(int i = 0; i < 3 * nc; i++)
   {
     reaction[i] = 0.0;
     velocity[i] = 0.0;
@@ -46,18 +46,18 @@ int main(void)
   int itermax = 100;
 
   info = fc3d_LmgcDriver(reaction,
-                                      velocity,
-                                      q,
-                                      mu,
-                                      W,
-                                      row,
-                                      column,
-                                      nc,
-                                      nb,
-                                      solver_id,
-                                      tolerance,
-                                      itermax,
-                                      0, 0, 0, 0);
+                         velocity,
+                         q,
+                         mu,
+                         W,
+                         row,
+                         column,
+                         nc,
+                         nb,
+                         solver_id,
+                         tolerance,
+                         itermax,
+                         0, 0, 0, 0);
 
   free(reaction);
   free(velocity);

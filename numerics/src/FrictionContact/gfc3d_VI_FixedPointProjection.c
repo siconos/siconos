@@ -37,8 +37,8 @@
 #endif
 
 void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
-                            double *reaction, double *velocity,
-                            double *globalVelocity,  int* info, SolverOptions* options)
+                                   double *reaction, double *velocity,
+                                   double *globalVelocity,  int* info, SolverOptions* options)
 {
   DEBUG_BEGIN("gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, ... \n");
   DEBUG_EXPR(verbose=1;);
@@ -66,7 +66,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
 
 
   /*Set the norm of the VI to the norm of problem->q  */
-  vi->normVI= cblas_dnrm2(n , problem->q , 1);
+  vi->normVI= cblas_dnrm2(n, problem->q, 1);
   vi->istheNormVIset=1;
 
   gfc3d_as_vi->vi = vi;
@@ -75,7 +75,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
 
   DEBUG_EXPR(NV_display(reaction,m););
   DEBUG_EXPR(NV_display(globalVelocity,n););
-  
+
   double * z = (double*)malloc((n+m)*sizeof(double));
   double * Fz = (double*)calloc((n+m),sizeof(double));
 
@@ -84,12 +84,12 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   DEBUG_EXPR(NV_display(z,m+n););
   DEBUG_EXPR(NV_display(Fz,m+n););
   // Warning : tolerance might be updated by VI determine_convergence function !
-  variationalInequality_FixedPointProjection(vi, z, Fz , info , options);
+  variationalInequality_FixedPointProjection(vi, z, Fz, info, options);
 
-  memcpy(globalVelocity, z,  n * sizeof(double)  );
-  memcpy(reaction, &z[n], m * sizeof(double)  );
-  memcpy(velocity, &Fz[m],  m * sizeof(double)  )  ;
-  
+  memcpy(globalVelocity, z,  n * sizeof(double));
+  memcpy(reaction, &z[n], m * sizeof(double));
+  memcpy(velocity, &Fz[m],  m * sizeof(double))  ;
+
   /* for (int k =0 ;  k< n; k++) */
   /* { */
   /*   globalVelocity[k] = z[k]; */
@@ -107,10 +107,10 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   free(Fz);
 
   /* **** Criterium convergence **** */
-  double norm_q = cblas_dnrm2(n , problem->q , 1);
-  double norm_b = cblas_dnrm2(m , problem->b , 1);
+  double norm_q = cblas_dnrm2(n, problem->q, 1);
+  double norm_b = cblas_dnrm2(m, problem->b, 1);
 
-  gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[SICONOS_DPARAM_TOL],
+  gfc3d_compute_error(problem, reaction, velocity, globalVelocity, options->dparam[SICONOS_DPARAM_TOL],
                       options, norm_q, norm_b, &error);
 
   DEBUG_EXPR(NM_vector_display(reaction,m));
@@ -122,7 +122,7 @@ void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem,
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
     printf("--------------- GFC3D - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n",
            options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);

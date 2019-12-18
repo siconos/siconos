@@ -48,7 +48,7 @@ extern "C"
 }
 #endif
 
-  typedef struct
+typedef struct
 {
   int variables;
 
@@ -87,7 +87,7 @@ static CB_FUNC(void) bounds(void *v, int n, double *z, double *lb, double *ub)
 {
   int i;
 
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
     z[i] = problem.z[i];
     lb[i] = problem.lb[i];
@@ -101,21 +101,21 @@ static CB_FUNC(int) function_evaluation(void *v, int n, double *z, double *f)
   int col, colStart, colEnd, row;
   double value;
 
-  for (col = 0; col < n; col++)
+  for(col = 0; col < n; col++)
   {
     f[col] = problem.q[col];
   }
 
-  for (col = 0; col < n; col++)
+  for(col = 0; col < n; col++)
   {
     value = z[col];
 
-    if (value != 0)
+    if(value != 0)
     {
       colStart = problem.m_start[col] - 1;
       colEnd = colStart + problem.m_len[col];
 
-      while (colStart < colEnd)
+      while(colStart < colEnd)
       {
         row = problem.m_row[colStart] - 1;
         f[row] += problem.m_data[colStart] * value;
@@ -134,20 +134,20 @@ static CB_FUNC(int) jacobian_evaluation(void *v, int n, double *z, int wantf,
 {
   int element;
 
-  if (wantf)
+  if(wantf)
   {
     function_evaluation(v, n, z, f);
   }
 
-  if (!filled)
+  if(!filled)
   {
-    for (element = 0; element < problem.n; element++)
+    for(element = 0; element < problem.n; element++)
     {
       col_start[element] = problem.m_start[element];
       col_len[element] = problem.m_len[element];
     }
 
-    for (element = 0; element < problem.nnz; element++)
+    for(element = 0; element < problem.nnz; element++)
     {
       row[element] = problem.m_row[element];
       data[element] = problem.m_data[element];
@@ -164,7 +164,7 @@ static CB_FUNC(void) mcp_typ(void *d, int nnz, int *typ)
 {
   int i;
 
-  for (i = 0; i < nnz; i++)
+  for(i = 0; i < nnz; i++)
   {
     typ[i] = PRESOLVE_LINEAR;
   }
@@ -212,19 +212,19 @@ static void sort(int rows, int cols, int elements,
   m_row = (int *)Memory_Allocate(sizeof(int) * (elements + 1));
   m_data = (double *)Memory_Allocate(sizeof(double) * (elements + 1));
 
-  for (i = 0; i < cols; i++)
+  for(i = 0; i < cols; i++)
   {
     m_len[i] = 0;
   }
 
-  for (i = 0; i < elements; i++)
+  for(i = 0; i < elements; i++)
   {
-    if ((col[i] < 1) || (col[i] > cols))
+    if((col[i] < 1) || (col[i] > cols))
     {
       Error("column incorrect.\n");
     }
 
-    if ((row[i] < 1) || (row[i] > rows))
+    if((row[i] < 1) || (row[i] > rows))
     {
       Error("column incorrect.\n");
     }
@@ -233,14 +233,14 @@ static void sort(int rows, int cols, int elements,
   }
 
   m_start[0] = 0;
-  for (i = 1; i < cols; i++)
+  for(i = 1; i < cols; i++)
   {
     m_start[i] = m_start[i - 1] + m_len[i - 1];
     m_len[i - 1] = 0;
   }
   m_len[i - 1] = 0;
 
-  for (i = 0; i < elements; i++)
+  for(i = 0; i < elements; i++)
   {
     cs = col[i] - 1;
     ce = m_start[cs] + m_len[cs];
@@ -250,12 +250,12 @@ static void sort(int rows, int cols, int elements,
   }
 
   elements = 0;
-  for (i = 0; i < cols; i++)
+  for(i = 0; i < cols; i++)
   {
     cs = m_start[i];
     ce = cs + m_len[i];
 
-    while (cs < ce)
+    while(cs < ce)
     {
       row[elements] = m_row[cs];
       col[elements] = i + 1;
@@ -296,7 +296,7 @@ static void create(int variables,
 
   sort(variables, variables, m_nnz, m_i, m_j, m_ij);
 
-  for (i = 0; i < variables; i++)
+  for(i = 0; i < variables; i++)
   {
     problem.z[i] = z[i];
 
@@ -307,14 +307,14 @@ static void create(int variables,
 
   m_index = 0;
   m_count = 0;
-  for (i = 0; i < variables; i++)
+  for(i = 0; i < variables; i++)
   {
     problem.m_start[i] = m_count + 1;
     problem.m_len[i] = 0;
 
-    while ((m_index < m_nnz) && (m_j[m_index] <= i + 1))
+    while((m_index < m_nnz) && (m_j[m_index] <= i + 1))
     {
-      if (m_ij[m_index] != 0)
+      if(m_ij[m_index] != 0)
       {
         problem.m_len[i]++;
         problem.m_row[m_count] = m_i[m_index];
@@ -348,12 +348,12 @@ void printLCP(int variables,
   printf("********PRINT PATH INPUT***************\n");
   printf("***************************************\n");
   printf("dim: %d val non nul: %d\n", variables, m_nnz);
-  for (i = 0; i < m_nnz; i++)
+  for(i = 0; i < m_nnz; i++)
   {
     printf("%d %d %10.7f\n", m_i[i], m_j[i], m_ij[i]);
   }
   printf("bounds:\n");
-  for (i = 0; i < variables; i++)
+  for(i = 0; i < variables; i++)
   {
     printf("%d | %10.7f | %10.7f\n", i, lb[i], ub[i]);
   }
@@ -364,10 +364,10 @@ int nbNonNulElems(int n, double *M, double tol)
 {
   int i, j;
   int cmp = 0;
-  for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
+  for(i = 0; i < n; i++)
+    for(j = 0; j < n; j++)
     {
-      if (fabs(M[i + j * n]) > tol)
+      if(fabs(M[i + j * n]) > tol)
       {
         cmp++;
       }
@@ -378,10 +378,10 @@ void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, doubl
 {
   int i, j;
   int cmp = 0;
-  for (j = 0; j < n; j++)
-    for (i = 0; i < n; i++)
+  for(j = 0; j < n; j++)
+    for(i = 0; i < n; i++)
     {
-      if (fabs(M[i + j * n]) > tol)
+      if(fabs(M[i + j * n]) > tol)
       {
         m_i[cmp] = i + 1;
         m_j[cmp] = j + 1;
@@ -390,31 +390,31 @@ void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, doubl
       }
     }
 }
-void ABCDtoM(int n , int m, double *A , double *B , double *C , double *D , double *a, double *b, double *M, double *q)
+void ABCDtoM(int n, int m, double *A, double *B, double *C, double *D, double *a, double *b, double *M, double *q)
 {
   int i = 0, j = 0 ;
   int NM = n + m;
   /*A in M*/
-  for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
+  for(i = 0; i < n; i++)
+    for(j = 0; j < n; j++)
       M[i + j * NM] = A[i + j * n];
   /*C in M*/
-  for (i = 0; i < n; i++)
-    for (j = 0; j < m; j++)
+  for(i = 0; i < n; i++)
+    for(j = 0; j < m; j++)
       M[i + (j + n)*NM] = C[i + j * n];
   /*D in M*/
-  for (i = 0; i < m; i++)
-    for (j = 0; j < n; j++)
+  for(i = 0; i < m; i++)
+    for(j = 0; j < n; j++)
       M[i + n + (j)*NM] = D[i + j * m];
   /*B in M*/
-  for (i = 0; i < m; i++)
-    for (j = 0; j < m; j++)
+  for(i = 0; i < m; i++)
+    for(j = 0; j < m; j++)
       M[i + n + (j + n)*NM] = B[i + j * m];
   /*a in q*/
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
     q[i] = a[i];
   /*b in q*/
-  for (i = 0; i < m; i++)
+  for(i = 0; i < m; i++)
     q[n + i] = b[i];
 }
 
@@ -444,7 +444,7 @@ void SimpleLCP(int variables,
 
   create(variables, m_nnz, m_i, m_j, m_ij, q, z, lb, ub);
 
-  if (problem.n == 0)
+  if(problem.n == 0)
   {
     Output_Printf(Output_Log | Output_Status,
                   "\n ** EXIT - solution found (degenerate model).\n");
@@ -454,7 +454,7 @@ void SimpleLCP(int variables,
   }
 
   dnnz = MIN(1.0 * problem.nnz, 1.0 * problem.n * problem.n);
-  if (dnnz > INT_MAX)
+  if(dnnz > INT_MAX)
   {
     Output_Printf(Output_Log | Output_Status,
                   "\n ** EXIT - model too large.\n");
@@ -486,7 +486,7 @@ void SimpleLCP(int variables,
 
   x = MCP_GetX(m);
 
-  for (i = 0; i < problem.n; i++)
+  for(i = 0; i < problem.n; i++)
   {
     z[i] = x[i];
   }
@@ -524,7 +524,7 @@ void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, doubl
 {
   ;
 }
-void ABCDtoM(int n , int m, double *A , double *B , double *C , double *D , double *a, double *b, double *M, double *q)
+void ABCDtoM(int n, int m, double *A, double *B, double *C, double *D, double *a, double *b, double *M, double *q)
 {
   ;
 }

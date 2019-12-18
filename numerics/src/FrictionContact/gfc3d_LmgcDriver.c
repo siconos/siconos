@@ -44,14 +44,14 @@ static int gfccounter =-1;
 
 static double * alloc_memory_double(unsigned int size, double *p)
 {
-  double * r = (double *) malloc (size * sizeof(double));
+  double * r = (double *) malloc(size * sizeof(double));
   memcpy(r, p, size * sizeof(double));
   return r;
 }
 
 static CS_INT * alloc_memory_csi(unsigned int size, unsigned int *p)
 {
-  CS_INT * r = (CS_INT *) malloc (size * sizeof(CS_INT));
+  CS_INT * r = (CS_INT *) malloc(size * sizeof(CS_INT));
   for(unsigned int i=0; i<size; ++i)
   {
     r[i] = (CS_INT) p[i];
@@ -94,7 +94,7 @@ int gfc3d_LmgcDriver(double *reaction,
 
 
   verbose = verbose_in;
-  
+
   /* NumericsMatrix M, H; */
   NumericsMatrix * M =NM_new();
   M->storageType = 2; /* sparse */
@@ -109,7 +109,7 @@ int gfc3d_LmgcDriver(double *reaction,
 
   NumericsSparseMatrix * SM =NSM_new();
   M->matrix2 = SM;
-  SM->triplet =   (CSparseMatrix * )malloc(sizeof(CSparseMatrix));
+  SM->triplet = (CSparseMatrix *)malloc(sizeof(CSparseMatrix));
   CSparseMatrix * _M = SM->triplet;
   SM->origin = NSM_TRIPLET;
 
@@ -130,7 +130,7 @@ int gfc3d_LmgcDriver(double *reaction,
 
   NumericsSparseMatrix * SH =NSM_new();
   H->matrix2 = SH;
-  SH->triplet =   (CSparseMatrix * )malloc(sizeof(CSparseMatrix));
+  SH->triplet = (CSparseMatrix *)malloc(sizeof(CSparseMatrix));
   CSparseMatrix * _H = SH->triplet;
   SH->origin = NSM_TRIPLET;
 
@@ -147,7 +147,7 @@ int gfc3d_LmgcDriver(double *reaction,
   double * _Hdata = alloc_memory_double(nzH, Hdata);
   _H->x = _Hdata;
 
-  for (int i=0; i< _M->nz; ++i)
+  for(int i=0; i< _M->nz; ++i)
   {
     _M->p[i] --;
     _M->i[i] --;
@@ -155,7 +155,7 @@ int gfc3d_LmgcDriver(double *reaction,
 
   }
 
-  for (int i=0; i< _H->nz; ++i)
+  for(int i=0; i< _H->nz; ++i)
   {
     _H->p[i] --;
     _H->i[i] --;
@@ -170,7 +170,7 @@ int gfc3d_LmgcDriver(double *reaction,
 
   NumericsMatrix *MMtmp = NM_new();
   NumericsMatrix *HHtmp = NM_new();
-  
+
   NM_copy(M,MMtmp);
   NM_copy(H,HHtmp);
 
@@ -179,7 +179,7 @@ int gfc3d_LmgcDriver(double *reaction,
 
   M = NM_create(NM_DENSE, H->size0, H->size0);
   H = NM_create(NM_DENSE, H->size0, H->size1);
- 
+
   NM_to_dense(MMtmp,M);
   NM_to_dense(HHtmp,H);
 
@@ -189,7 +189,7 @@ int gfc3d_LmgcDriver(double *reaction,
 #endif
 
 
-  
+
   GlobalFrictionContactProblem * problem =(GlobalFrictionContactProblem*)malloc(sizeof(GlobalFrictionContactProblem));
 
   problem->dimension = 3;
@@ -205,24 +205,24 @@ int gfc3d_LmgcDriver(double *reaction,
   SolverOptions * numerics_solver_options = solver_options_create(solver_id);
   int iSize_min = isize < numerics_solver_options->iSize ? isize : numerics_solver_options->iSize;
   DEBUG_PRINTF("iSize_min = %i", iSize_min);
-  for (int i = 0; i < iSize_min; ++i)
-    if (abs(iparam[i])>0)
+  for(int i = 0; i < iSize_min; ++i)
+    if(abs(iparam[i])>0)
       numerics_solver_options->iparam[i] = iparam[i];
 
   int dSize_min = dsize <  numerics_solver_options->dSize ? dsize : numerics_solver_options->dSize;
-  for (int i=0; i < dSize_min; ++i)
-    if (fabs(dparam[i]) > 0)
-    numerics_solver_options->dparam[i] = dparam[i];
+  for(int i=0; i < dSize_min; ++i)
+    if(fabs(dparam[i]) > 0)
+      numerics_solver_options->dparam[i] = dparam[i];
 
   /* solver_options_print(&numerics_solver_options); */
   /* FILE * file  =  fopen("toto.dat", "w"); */
   /* globalFrictionContact_printInFile(problem, file); */
   /* fclose(file); */
   int rinfo =  gfc3d_driver(problem,
-			    reaction,
-			    velocity,
-			    globalVelocity,
-			    numerics_solver_options);
+                            reaction,
+                            velocity,
+                            globalVelocity,
+                            numerics_solver_options);
 
 
   iparam[SICONOS_IPARAM_ITER_DONE] = numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE];
@@ -235,20 +235,21 @@ int gfc3d_LmgcDriver(double *reaction,
   {
     /* dump in C format */
   }
-  else if (outputFile == 2)
+  else if(outputFile == 2)
   {
     /* dump in Numerics .dat format */
   }
-  else if (outputFile == 3)
+  else if(outputFile == 3)
   {
 #ifdef WITH_FCLIB
     gfccounter++;
     struct stat st = {};
-    if (stat("./fclib-hdf5/", &st) == -1) {
+    if(stat("./fclib-hdf5/", &st) == -1)
+    {
       mkdir("./fclib-hdf5/", 0700);
     }
     printf("################################## gfcccounter = %i\n", gfccounter);
-    if (gfccounter % freq_output == 0)
+    if(gfccounter % freq_output == 0)
     {
       char fname[256];
       snprintf(fname, sizeof(fname), "./fclib-hdf5/LMGC_GFC3D-i%.5d-%i-%.5d.hdf5", numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, gfccounter);

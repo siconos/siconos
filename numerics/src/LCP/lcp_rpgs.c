@@ -29,7 +29,7 @@
 #include "SiconosBlas.h"                         // for cblas_ddot, cblas_dnrm2
 
 #define EPSDIAG DBL_EPSILON
-void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -72,8 +72,8 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
 
   /*  qs = 0.;*/
   incx = 1;
-  qs = cblas_dnrm2(n , q , incx);
-  if (verbose > 0) printf("\n ||q||= %g \n", qs);
+  qs = cblas_dnrm2(n, q, incx);
+  if(verbose > 0) printf("\n ||q||= %g \n", qs);
   // den = 1.0 / qs; // Note FP, den is never used.
 
   /* Initialization of z & w */
@@ -93,13 +93,13 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
     if (maxdiag > EPSDIAG) rho = maxdiag;
     invrho = 1.0/rho;*/
 
-  for (i = 0 ; i < n ; ++i)
+  for(i = 0 ; i < n ; ++i)
   {
     Mii = M[i * (n + 1)];
     /* if(abs(Mii+rho)<EPSDIAG){   */ /* Version of Pascal */
-    if (Mii < -EPSDIAG)
+    if(Mii < -EPSDIAG)
     {
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" RPGS : Warning negative diagonal term \n");
         printf(" The local problem cannot be solved \n");
@@ -135,21 +135,21 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
   iter = 0;
   err  = 1.;
 
-  while ((iter < itermax) && (err > tol))
+  while((iter < itermax) && (err > tol))
   {
 
     ++iter;
 
     incx = n;
     incy = 1;
-    for (i = 0 ; i < n ; ++i)
+    for(i = 0 ; i < n ; ++i)
     {
       ziprev = z[i];
       z[i] = 0.0;
 
-      zi = -(q[i] - (rho * ziprev) + cblas_ddot(n , &M[i] , incx , z , incy)) * diag[i];
+      zi = -(q[i] - (rho * ziprev) + cblas_ddot(n, &M[i], incx, z, incy)) * diag[i];
 
-      if (zi > 0) z[i] = zi;
+      if(zi > 0) z[i] = zi;
 
     }
     /* **** Criterium convergence **** */
@@ -157,11 +157,11 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
 
     /*    buffer_errors[iter-1] = err;*/
 
-    if (verbose == 2)
+    if(verbose == 2)
     {
       printf(" # i%d -- %g : ", iter, err);
-      for (i = 0 ; i < n ; ++i) printf(" %g", z[i]);
-      for (i = 0 ; i < n ; ++i) printf(" %g", w[i]);
+      for(i = 0 ; i < n ; ++i) printf(" %g", z[i]);
+      for(i = 0 ; i < n ; ++i) printf(" %g", w[i]);
       printf("\n");
     }
 
@@ -172,24 +172,24 @@ void lcp_rpgs(LinearComplementarityProblem* problem, double *z, double *w, int *
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
-    if (err > tol)
+    if(err > tol)
     {
-      printf(" No convergence of RPGS after %d iterations\n" , iter);
+      printf(" No convergence of RPGS after %d iterations\n", iter);
       printf(" The residue is : %g \n", err);
       *info = 1;
     }
     else
     {
-      printf(" Convergence of RPGS after %d iterations\n" , iter);
+      printf(" Convergence of RPGS after %d iterations\n", iter);
       printf(" The residue is : %g \n", err);
       *info = 0;
     }
   }
   else
   {
-    if (err > tol) *info = 1;
+    if(err > tol) *info = 1;
     else *info = 0;
   }
 

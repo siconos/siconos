@@ -30,23 +30,23 @@ using namespace RELATION;
 
 FrictionContact::FrictionContact(int dimPb, int numericsSolverId):
   FrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
-                                            solver_options_delete))
+                  solver_options_delete))
 {}
 
 FrictionContact::FrictionContact(int dimPb, SP::SolverOptions options):
   LinearOSNS(options), _contactProblemDim(dimPb)
 {
-  if (dimPb == 2 && options->solverId == SICONOS_FRICTION_3D_NSGS)
-    {
-     _numerics_solver_options.reset(solver_options_create(SICONOS_FRICTION_2D_NSGS),
-                                    solver_options_delete);
-    }
+  if(dimPb == 2 && options->solverId == SICONOS_FRICTION_3D_NSGS)
+  {
+    _numerics_solver_options.reset(solver_options_create(SICONOS_FRICTION_2D_NSGS),
+                                   solver_options_delete);
+  }
 
-  if (dimPb == 2)
+  if(dimPb == 2)
   {
     _frictionContact_driver = &fc2d_driver;
   }
-  else if (dimPb == 3)
+  else if(dimPb == 3)
   {
     _frictionContact_driver = &fc3d_driver;
   }
@@ -83,13 +83,13 @@ void FrictionContact::initialize(SP::Simulation sim)
   // If the topology is TimeInvariant ie if M structure does not
   // change during simulation:
 
-  if (topology->indexSet0()->size()>0)
+  if(topology->indexSet0()->size()>0)
   {
     // Get index set from Simulation
     SP::InteractionsGraph indexSet =
       simulation()->indexSet(indexSetLevel());
     InteractionsGraph::VIterator ui, uiend;
-    for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
                      (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
@@ -102,7 +102,7 @@ void FrictionContact::updateMu()
   _mu->clear();
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
                    (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
@@ -133,7 +133,7 @@ FrictionContactProblem *FrictionContact::frictionContactProblemPtr()
 
 int FrictionContact::solve(SP::FrictionContactProblem problem)
 {
-  if (!problem)
+  if(!problem)
   {
     problem = frictionContactProblem();
   }
@@ -150,12 +150,12 @@ int FrictionContact::compute(double time)
   int info = 0;
   // --- Prepare data for FrictionContact computing ---
   bool cont = preCompute(time);
-  if (!cont)
+  if(!cont)
   {
     return info;
   }
   // nothing to do
-  if (indexSetLevel() == LEVELMAX)
+  if(indexSetLevel() == LEVELMAX)
   {
     return info;
   }
@@ -168,7 +168,7 @@ int FrictionContact::compute(double time)
   // - the unknowns (z,w)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
-  if (_sizeOutput != 0)
+  if(_sizeOutput != 0)
   {
     // Call Numerics Driver for FrictionContact
     info = solve();

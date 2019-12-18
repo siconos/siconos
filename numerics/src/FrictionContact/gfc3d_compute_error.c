@@ -31,7 +31,7 @@
 #include "projectionOnCone.h"
 
 int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
-                        double*  reaction , double*  velocity,
+                        double*  reaction, double*  velocity,
                         double*  globalVelocity,
                         double tolerance,
                         SolverOptions * options,
@@ -41,7 +41,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
 {
   DEBUG_BEGIN("gfc3d_compute_error(...)\n");
   /* Checks inputs */
-  if (problem == NULL || globalVelocity == NULL)
+  if(problem == NULL || globalVelocity == NULL)
     numerics_error("gfc3d_compute_error", "null input");
 
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
@@ -64,7 +64,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   NumericsMatrix *H = problem->H;
   NumericsMatrix *M = problem->M;
 
-  if (!options->dWork || options->dWorkSize < 2*n)
+  if(!options->dWork || options->dWorkSize < 2*n)
   {
     options->dWork = (double *)calloc(2*n,sizeof(double));
     options->dWorkSize = 2*n;
@@ -72,26 +72,28 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   double* tmp = options->dWork;
   double* tmp_1 = &options->dWork[n];
 
-  cblas_dcopy_msan(n, q, 1, tmp_1 , 1);
-  if (nc >0)
+  cblas_dcopy_msan(n, q, 1, tmp_1, 1);
+  if(nc >0)
   {
     NM_gemv(1.0, H, reaction, 0.0, tmp);
   }
   double norm_Hr = cblas_dnrm2(n,tmp,1);
   DEBUG_PRINTF("norm of H r %e\n", norm_Hr);
 
-  cblas_daxpy(n, 1.0, tmp, 1, tmp_1 , 1);
+
+  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
+
 
   NM_gemv(-1.0, M, globalVelocity, 0.0, tmp);
   double norm_Mv = cblas_dnrm2(n,tmp,1);
-  DEBUG_PRINTF("norm of M v %e\n", norm_Mv );
+  DEBUG_PRINTF("norm of M v %e\n", norm_Mv);
 
-  cblas_daxpy(n, 1.0, tmp, 1, tmp_1 , 1);
+  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
 
   double relative_scaling = fmax(norm_q, fmax(norm_Mv,norm_Hr));
   *error = cblas_dnrm2(n,tmp_1,1);
   DEBUG_PRINTF("absolute error  of -M v + H R + q = %e\n", *error);
-  if (fabs(relative_scaling) > DBL_EPSILON)
+  if(fabs(relative_scaling) > DBL_EPSILON)
     *error = *error/relative_scaling;
 
   DEBUG_PRINTF("relative error  of -M v + H R + q = %e\n", *error);
@@ -101,7 +103,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   double error_complementarity =0.0;
 
   /* Checks inputs */
-  if (reaction == NULL || velocity == NULL)
+  if(reaction == NULL || velocity == NULL)
     numerics_error("gfc3d_compute_error", "null input");
 
 
@@ -114,7 +116,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   DEBUG_PRINTF("norm of velocity %e\n", norm_u);
 
   double worktmp[3];
-  for (int ic = 0 ; ic < nc ; ic++)
+  for(int ic = 0 ; ic < nc ; ic++)
   {
     fc3d_unitary_compute_and_add_error(&reaction[ic * 3], &velocity[ic * 3], mu[ic],
                                        &error_complementarity,  worktmp);
@@ -125,14 +127,14 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   DEBUG_PRINTF("absolute error in complementarity= %e\n", error_complementarity);
 
   relative_scaling = fmax(norm_u, norm_r);
-  if (fabs(relative_scaling) > DBL_EPSILON)
+  if(fabs(relative_scaling) > DBL_EPSILON)
     error_complementarity = error_complementarity/relative_scaling;
   DEBUG_PRINTF("relative error in complementarity= %e\n", error_complementarity);
 
 
   *error += error_complementarity;
   DEBUG_PRINTF("relative error = %e\n", *error);
-  if (*error > tolerance)
+  if(*error > tolerance)
   {
     DEBUG_END("gfc3d_compute_error(...)\n");
     return 1;
@@ -144,7 +146,7 @@ int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
   }
 
 }
-static inline  void fc3d_unitary_compute_and_add_error_convex(double* restrict r , double* restrict u, double mu, double* restrict error, double * worktmp)
+static inline  void fc3d_unitary_compute_and_add_error_convex(double* restrict r, double* restrict u, double mu, double* restrict error, double * worktmp)
 {
 
   //double normUT;
@@ -162,17 +164,17 @@ static inline  void fc3d_unitary_compute_and_add_error_convex(double* restrict r
 
 }
 int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
-                        double*  reaction , double*  velocity,
-                        double*  globalVelocity,
-                        double tolerance,
-                        SolverOptions * options,
-                        double norm_q, double norm_b,
-                        double* restrict error)
+                               double*  reaction, double*  velocity,
+                               double*  globalVelocity,
+                               double tolerance,
+                               SolverOptions * options,
+                               double norm_q, double norm_b,
+                               double* restrict error)
 
 {
   DEBUG_BEGIN("gfc3d_compute_error_convex(...)\n");
   /* Checks inputs */
-  if (problem == NULL || globalVelocity == NULL)
+  if(problem == NULL || globalVelocity == NULL)
     numerics_error("gfc3d_compute_error", "null input");
 
   /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
@@ -195,7 +197,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   NumericsMatrix *H = problem->H;
   NumericsMatrix *M = problem->M;
 
-  if (!options->dWork || options->dWorkSize < 2*n)
+  if(!options->dWork || options->dWorkSize < 2*n)
   {
     options->dWork = (double *)calloc(2*n,sizeof(double));
     options->dWorkSize = 2*n;
@@ -203,26 +205,27 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   double* tmp = options->dWork;
   double* tmp_1 = &options->dWork[n];
 
-  cblas_dcopy_msan(n, q, 1, tmp_1 , 1);
-  if (nc >0)
+  cblas_dcopy_msan(n, q, 1, tmp_1, 1);
+  if(nc >0)
   {
     NM_gemv(1.0, H, reaction, 0.0, tmp);
   }
   double norm_Hr = cblas_dnrm2(n,tmp,1);
   DEBUG_PRINTF("norm of H r %e\n", norm_Hr);
 
-  cblas_daxpy(n, 1.0, tmp, 1, tmp_1 , 1);
+  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
 
   NM_gemv(-1.0, M, globalVelocity, 0.0, tmp);
   double norm_Mv = cblas_dnrm2(n,tmp,1);
-  DEBUG_PRINTF("norm of M v %e\n", norm_Mv );
+  DEBUG_PRINTF("norm of M v %e\n", norm_Mv);
 
-  cblas_daxpy(n, 1.0, tmp, 1, tmp_1 , 1);
+  cblas_daxpy(n, 1.0, tmp, 1, tmp_1, 1);
+
 
   double relative_scaling = fmax(norm_q, fmax(norm_Mv,norm_Hr));
   *error = cblas_dnrm2(n,tmp_1,1);
   DEBUG_PRINTF("absolute error  of -M v + H R + q = %e\n", *error);
-  if (fabs(relative_scaling) > DBL_EPSILON)
+  if(fabs(relative_scaling) > DBL_EPSILON)
     *error = *error/relative_scaling;
 
   DEBUG_PRINTF("relative error  of -M v + H R + q = %e\n", *error);
@@ -232,7 +235,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   double error_complementarity =0.0;
 
   /* Checks inputs */
-  if (reaction == NULL || velocity == NULL)
+  if(reaction == NULL || velocity == NULL)
     numerics_error("gfc3d_compute_error", "null input");
 
 
@@ -245,10 +248,10 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   DEBUG_PRINTF("norm of velocity %e\n", norm_u);
 
   double worktmp[3];
-  for (int ic = 0 ; ic < nc ; ic++)
+  for(int ic = 0 ; ic < nc ; ic++)
   {
     fc3d_unitary_compute_and_add_error_convex(&reaction[ic * 3], &velocity[ic * 3], mu[ic],
-                                              &error_complementarity,  worktmp);
+        &error_complementarity,  worktmp);
   }
 
   error_complementarity = sqrt(error_complementarity);
@@ -256,7 +259,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   DEBUG_PRINTF("absolute error in complementarity= %e\n", error_complementarity);
 
   relative_scaling = fmax(norm_u, norm_r);
-  if (fabs(relative_scaling) > DBL_EPSILON)
+  if(fabs(relative_scaling) > DBL_EPSILON)
     error_complementarity = error_complementarity/relative_scaling;
   DEBUG_PRINTF("relative error in complementarity= %e\n", error_complementarity);
 
@@ -264,7 +267,7 @@ int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem,
   *error += error_complementarity;
   DEBUG_PRINTF("relative error = %e\n", *error);
   numerics_printf_verbose(1,"---- GFC3D - Compute Error Convex case");
-  if (*error > tolerance)
+  if(*error > tolerance)
   {
     DEBUG_END("gfc3d_compute_error_convex(...)\n");
     return 1;

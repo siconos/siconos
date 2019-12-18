@@ -23,11 +23,11 @@
 
 #ifdef __cplusplus
 
-#ifdef _WIN32 
-#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
-#else 
-#define SICONOS_EXPORT extern "C" 
-#endif  
+#ifdef _WIN32
+#define SICONOS_EXPORT extern "C" __declspec(dllexport)
+#else
+#define SICONOS_EXPORT extern "C"
+#endif
 #define restrict __restrict
 
 #else

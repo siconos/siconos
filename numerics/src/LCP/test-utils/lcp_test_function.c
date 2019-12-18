@@ -51,9 +51,9 @@ int lcp_test_function(TestCase * current)
   int i, info = 0 ;
   LinearComplementarityProblem* problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
   info = linearComplementarity_newFromFilename(problem, current->filename);
-  
+
 #ifdef HAVE_GAMS_C_API
-  if (current->options->solverId == SICONOS_LCP_GAMS)
+  if(current->options->solverId == SICONOS_LCP_GAMS)
   {
     SN_GAMSparams* GP = (SN_GAMSparams*)current->options->solverParameters;
     assert(GP);
@@ -66,15 +66,15 @@ int lcp_test_function(TestCase * current)
   double * z = (double *)calloc(problem->size, sizeof(double));
   double * w = (double *)calloc(problem->size, sizeof(double));
 
-  info = linearComplementarity_driver(problem, z , w, current->options);
+  info = linearComplementarity_driver(problem, z, w, current->options);
 
-  for (i = 0 ; i < problem->size ; i++)
+  for(i = 0 ; i < problem->size ; i++)
   {
     printf("z[%i] = %12.8e\t,w[%i] = %12.8e\n", i, z[i], i, w[i]);
     info = info == 0 ? !(isfinite(z[i]) && isfinite(w[i])): info;
   }
 
-  if (!info)
+  if(!info)
     printf("test succeeded err = %e \n", current->options->dparam[SICONOS_DPARAM_RESIDU]);
   else
     printf("test unsuccessful err =%e  \n", current->options->dparam[SICONOS_DPARAM_RESIDU]);
@@ -86,4 +86,4 @@ int lcp_test_function(TestCase * current)
 }
 
 
-  
+

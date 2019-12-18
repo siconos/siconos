@@ -56,67 +56,69 @@ static inline char* strdup(const char* src)
 
 static int cp(const char *to, const char *from)
 {
-    int fd_to, fd_from;
-    char buf[4096];
-    ssize_t nread;
-    int saved_errno;
+  int fd_to, fd_from;
+  char buf[4096];
+  ssize_t nread;
+  int saved_errno;
 
-    fd_from = open(from, O_RDONLY);
-    if (fd_from < 0)
-        return -1;
-
-    fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0666);
-    if (fd_to < 0)
-        goto out_error;
-
-    while (nread = read(fd_from, buf, sizeof buf), nread > 0)
-    {
-        char *out_ptr = buf;
-        ssize_t nwritten;
-
-        do {
-            nwritten = write(fd_to, out_ptr, nread);
-
-            if (nwritten >= 0)
-            {
-                nread -= nwritten;
-                out_ptr += nwritten;
-            }
-            else if (errno != EINTR)
-            {
-                goto out_error;
-            }
-        } while (nread > 0);
-    }
-
-    if (nread == 0)
-    {
-        if (close(fd_to) < 0)
-        {
-            fd_to = -1;
-            goto out_error;
-        }
-        close(fd_from);
-
-        /* Success! */
-        return 0;
-    }
-
-  out_error:
-    saved_errno = errno;
-
-    close(fd_from);
-    if (fd_to >= 0)
-        close(fd_to);
-
-    errno = saved_errno;
+  fd_from = open(from, O_RDONLY);
+  if(fd_from < 0)
     return -1;
+
+  fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0666);
+  if(fd_to < 0)
+    goto out_error;
+
+  while(nread = read(fd_from, buf, sizeof buf), nread > 0)
+  {
+    char *out_ptr = buf;
+    ssize_t nwritten;
+
+    do
+    {
+      nwritten = write(fd_to, out_ptr, nread);
+
+      if(nwritten >= 0)
+      {
+        nread -= nwritten;
+        out_ptr += nwritten;
+      }
+      else if(errno != EINTR)
+      {
+        goto out_error;
+      }
+    }
+    while(nread > 0);
+  }
+
+  if(nread == 0)
+  {
+    if(close(fd_to) < 0)
+    {
+      fd_to = -1;
+      goto out_error;
+    }
+    close(fd_from);
+
+    /* Success! */
+    return 0;
+  }
+
+out_error:
+  saved_errno = errno;
+
+  close(fd_from);
+  if(fd_to >= 0)
+    close(fd_to);
+
+  errno = saved_errno;
+  return -1;
 }
 
 static void setDashedOptions(const char* optName, const char* optValue, const char* paramFileName)
 {
   FILE* f = fopen(paramFileName, "a");
-  if (f)
+  if(f)
   {
     fprintf(f, "%s %s\n", optName, paramFileName);
     fclose(f);
@@ -131,7 +133,7 @@ void filename_datafiles(const int iter, const int solverId, const char* base_nam
 {
   char iterStr[40];
   snprintf(iterStr, sizeof(iterStr), "-i%d-%s", iter, solver_options_id_to_name(solverId));
-  if (base_name)
+  if(base_name)
   {
     strncpy(template_name, base_name, len);
     strncpy(log_filename, base_name, len);
@@ -156,10 +158,10 @@ int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMat
   int dims[2];
   dims[0] = M->size0;
   dims[1] = M->size1;
-  if (idxDataWriteStart(Xptr, name, descr, 2, dims, msg, GMS_SSSIZE) == 0)
+  if(idxDataWriteStart(Xptr, name, descr, 2, dims, msg, GMS_SSSIZE) == 0)
     idxerrorR(idxGetLastError(Xptr), "idxDataWriteStart");
 
-  switch (M->storageType)
+  switch(M->storageType)
   {
   case NM_DENSE:
   {
@@ -178,12 +180,12 @@ int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMat
     int* i_int = (int*)malloc(cs->nzmax * sizeof(int));
     assert(cs->n == M->size1);
     assert(cs->m == M->size0);
-    for (unsigned i = 0; i < cs->n+1; ++i)
+    for(unsigned i = 0; i < cs->n+1; ++i)
     {
       p_int[i] = (int) cs->p[i];
     }
 
-    for (unsigned i = 0; i < cs->nzmax; ++i)
+    for(unsigned i = 0; i < cs->nzmax; ++i)
     {
       i_int[i] = (int) cs->i[i];
     }
@@ -202,11 +204,12 @@ int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMat
   }
 
 
-  if (0==idxDataWriteDone(Xptr))
+  if(0==idxDataWriteDone(Xptr))
     idxerrorR(idxGetLastError(Xptr), "idxDataWriteDone");
 
   return 0;
-}int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data)
+}
+int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data)
 {
   assert(gdx_data);
   SN_GAMS_NM_gdx* mat_for_gdx = gdx_data->mat_for_gdx;
@@ -222,19 +225,22 @@ int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMat
   /* Create objects */
 
   DEBUG_PRINT("FC3D_AVI_GAMS :: creating gamsx object\n");
-  if (! gamsxCreateD (&Gptr, sysdir, msg, sizeof(msg))) {
+  if(! gamsxCreateD(&Gptr, sysdir, msg, sizeof(msg)))
+  {
     fprintf(stderr, "Could not create gamsx object: %s\n", msg);
     return 1;
   }
 
   DEBUG_PRINT("FC3D_AVI_GAMS :: creating gdx object\n");
-  if (! idxCreateD (&Xptr, sysdir, msg, sizeof(msg))) {
+  if(! idxCreateD(&Xptr, sysdir, msg, sizeof(msg)))
+  {
     fprintf(stderr, "Could not create gdx object: %s\n", msg);
     return 1;
   }
 
   DEBUG_PRINT("FC3D_AVI_GAMS :: creating gmo object\n");
-  if (! gmoCreateD (&gmoPtr, sysdir, msg, sizeof(msg))) {
+  if(! gmoCreateD(&gmoPtr, sysdir, msg, sizeof(msg)))
+  {
     fprintf(stderr, "Could not create gmo object: %s\n", msg);
     return 1;
   }
@@ -255,55 +261,58 @@ int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMat
   /* XXX ParmFile is not a string option */
 //  optSetStrStr(Optr, "ParmFile", paramFileName);
 //  setDashedOptions("filename", gdxFileName, paramFileName);
-   optSetStrStr(Optr, "User1", gdxFileName);
-   optSetStrStr(Optr, "User2", solFileName);
+  optSetStrStr(Optr, "User1", gdxFileName);
+  optSetStrStr(Optr, "User2", solFileName);
 
-   idxOpenWrite(Xptr, gdxFileName, "Siconos/Numerics NM_to_GDX", &status);
-   if (status)
-     idxerrorR(status, "idxOpenWrite");
-   DEBUG_PRINT("FC3D_AVI_GAMS :: fc3d_avi-condensed.gdx opened\n");
+  idxOpenWrite(Xptr, gdxFileName, "Siconos/Numerics NM_to_GDX", &status);
+  if(status)
+    idxerrorR(status, "idxOpenWrite");
+  DEBUG_PRINT("FC3D_AVI_GAMS :: fc3d_avi-condensed.gdx opened\n");
 
-   while (mat_for_gdx)
-   {
-     char mat_descr[30];
-     assert(mat_for_gdx->name);
-     assert(mat_for_gdx->mat);
-     snprintf(mat_descr, sizeof(mat_descr), "%s matrix", mat_for_gdx->name);
-     if ((status=NM_to_GDX(Xptr, mat_for_gdx->name, mat_descr, mat_for_gdx->mat))) {
-       fprintf(stderr, "Model data for matrix %s not written\n", mat_for_gdx->name);
-       infos[1] = (double)-ETERMINATE;
-       goto fail;
-     }
-     DEBUG_PRINTF("GAMSlink :: %s matrix written\n", mat_for_gdx->name);
-     mat_for_gdx = mat_for_gdx->next;
-   }
+  while(mat_for_gdx)
+  {
+    char mat_descr[30];
+    assert(mat_for_gdx->name);
+    assert(mat_for_gdx->mat);
+    snprintf(mat_descr, sizeof(mat_descr), "%s matrix", mat_for_gdx->name);
+    if((status=NM_to_GDX(Xptr, mat_for_gdx->name, mat_descr, mat_for_gdx->mat)))
+    {
+      fprintf(stderr, "Model data for matrix %s not written\n", mat_for_gdx->name);
+      infos[1] = (double)-ETERMINATE;
+      goto fail;
+    }
+    DEBUG_PRINTF("GAMSlink :: %s matrix written\n", mat_for_gdx->name);
+    mat_for_gdx = mat_for_gdx->next;
+  }
 
-   while (vec_for_gdx)
-   {
-     char vec_descr[30];
-     assert(vec_for_gdx->name);
-     assert(vec_for_gdx->vec);
-     assert(vec_for_gdx->size > 0);
-     snprintf(vec_descr, sizeof(vec_descr), "%s vector", vec_for_gdx->name);
+  while(vec_for_gdx)
+  {
+    char vec_descr[30];
+    assert(vec_for_gdx->name);
+    assert(vec_for_gdx->vec);
+    assert(vec_for_gdx->size > 0);
+    snprintf(vec_descr, sizeof(vec_descr), "%s vector", vec_for_gdx->name);
 
-     if ((status=NV_to_GDX(Xptr, vec_for_gdx->name, vec_descr, vec_for_gdx->vec, vec_for_gdx->size))) {
-       fprintf(stderr, "Model data for vector %s not written\n", vec_for_gdx->name);
-       infos[1] = (double)-ETERMINATE;
-       goto fail;
-     }
-     DEBUG_PRINTF("FC3D_AVI_GAMS :: %s vector written\n", vec_for_gdx->name);
-     vec_for_gdx = vec_for_gdx->next;
+    if((status=NV_to_GDX(Xptr, vec_for_gdx->name, vec_descr, vec_for_gdx->vec, vec_for_gdx->size)))
+    {
+      fprintf(stderr, "Model data for vector %s not written\n", vec_for_gdx->name);
+      infos[1] = (double)-ETERMINATE;
+      goto fail;
+    }
+    DEBUG_PRINTF("FC3D_AVI_GAMS :: %s vector written\n", vec_for_gdx->name);
+    vec_for_gdx = vec_for_gdx->next;
 
-   }
+  }
 
-  if (idxClose(Xptr))
+  if(idxClose(Xptr))
     idxerrorR(idxGetLastError(Xptr), "idxClose");
 
 
 //   cp(gdxFileName, "fc3d_avi-condensed.gdx");
 
 
-  if ((status=CallGams(Gptr, Optr, sysdir, model))) {
+  if((status=CallGams(Gptr, Optr, sysdir, model)))
+  {
     fprintf(stderr, "Call to GAMS failed\n");
     infos[1] = (double)-ETERMINATE;
     goto fail;
@@ -314,10 +323,10 @@ int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMat
    * Read back solution
    ************************************************/
   idxOpenRead(Xptr, solFileName, &status);
-  if (status)
+  if(status)
     idxerrorR(status, "idxOpenRead");
 
-  while (vec_from_gdx)
+  while(vec_from_gdx)
   {
     assert(vec_from_gdx->name);
     assert(vec_from_gdx->vec);
@@ -326,7 +335,8 @@ int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMat
     unsigned size = vec_from_gdx->size;
     /* GAMS does not set a value to 0 ... --xhub */
     memset(data, 0, size*sizeof(double));
-    if ((status=GDX_to_NV(Xptr, vec_from_gdx->name, data, size))) {
+    if((status=GDX_to_NV(Xptr, vec_from_gdx->name, data, size)))
+    {
       fprintf(stderr, "Model data %s could not be read\n", vec_from_gdx->name);
       infos[1] = (double)-ETERMINATE;
       goto fail;
@@ -334,13 +344,14 @@ int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMat
     vec_from_gdx = vec_from_gdx->next;
   }
 
-  if ((status=GDX_to_NV(Xptr, "infos", infos, sizeof(infos)/sizeof(double)))) {
+  if((status=GDX_to_NV(Xptr, "infos", infos, sizeof(infos)/sizeof(double))))
+  {
     fprintf(stderr, "infos could not be read\n");
     infos[1] = (double)-ETERMINATE;
     goto fail;
   }
 
-  if (idxClose(Xptr))
+  if(idxClose(Xptr))
     idxerrorR(idxGetLastError(Xptr), "idxClose");
 
   options->iparam[TOTAL_ITER] += (int)infos[2];
@@ -433,22 +444,22 @@ SN_GAMSparams* createGAMSparams(char* model_dir, char* gams_dir)
 
 void deleteGAMSparams(SN_GAMSparams* GP)
 {
-  if (GP->model_dir)
+  if(GP->model_dir)
   {
     free(GP->model_dir);
     GP->model_dir = NULL;
   }
 
-  if (GP->gams_dir)
+  if(GP->gams_dir)
   {
     free(GP->gams_dir);
     GP->gams_dir = NULL;
   }
 
-  if (GP->opt_str_list)
+  if(GP->opt_str_list)
   {
     GAMS_opt_str* next_opt = GP->opt_str_list;
-    do 
+    do
     {
       GAMS_opt_str* str_opt = next_opt;
       next_opt = str_opt->next_opt;
@@ -461,13 +472,13 @@ void deleteGAMSparams(SN_GAMSparams* GP)
       str_opt->next_opt = NULL;
       free(str_opt);
     }
-    while (next_opt);
+    while(next_opt);
     GP->opt_str_list = NULL;
   }
-  if (GP->opt_bool_list)
+  if(GP->opt_bool_list)
   {
     GAMS_opt_bool* next_opt = GP->opt_bool_list;
-    do 
+    do
     {
       GAMS_opt_bool* bool_opt = next_opt;
       next_opt = bool_opt->next_opt;
@@ -476,13 +487,13 @@ void deleteGAMSparams(SN_GAMSparams* GP)
       bool_opt->next_opt = NULL;
       free(bool_opt);
     }
-    while (next_opt);
+    while(next_opt);
     GP->opt_bool_list = NULL;
   }
-  if (GP->opt_int_list)
+  if(GP->opt_int_list)
   {
     GAMS_opt_int* next_opt = GP->opt_int_list;
-    do 
+    do
     {
       GAMS_opt_int* int_opt = next_opt;
       next_opt = int_opt->next_opt;
@@ -491,13 +502,13 @@ void deleteGAMSparams(SN_GAMSparams* GP)
       int_opt->next_opt = NULL;
       free(int_opt);
     }
-    while (next_opt);
+    while(next_opt);
     GP->opt_int_list = NULL;
   }
-  if (GP->opt_double_list)
+  if(GP->opt_double_list)
   {
     GAMS_opt_double* next_opt = GP->opt_double_list;
-    do 
+    do
     {
       GAMS_opt_double* double_opt = next_opt;
       next_opt = double_opt->next_opt;
@@ -506,7 +517,7 @@ void deleteGAMSparams(SN_GAMSparams* GP)
       double_opt->next_opt = NULL;
       free(double_opt);
     }
-    while (next_opt);
+    while(next_opt);
     GP->opt_double_list = NULL;
   }
   free(GP);

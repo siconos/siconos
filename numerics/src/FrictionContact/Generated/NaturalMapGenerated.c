@@ -25,7 +25,7 @@ void fc3d_NaturalMapFunctionGenerated(
   SET3(rho);
 
 
-  if (f && A && B)
+  if(f && A && B)
   {
 
     fc3d_NaturalMapFABGenerated(
@@ -41,7 +41,7 @@ void fc3d_NaturalMapFunctionGenerated(
 
   else
   {
-    if (f)
+    if(f)
     {
       fc3d_NaturalMapFGenerated(
         *reaction0, *reaction1, *reaction2,
@@ -52,7 +52,7 @@ void fc3d_NaturalMapFunctionGenerated(
       cpy3(result, f);
     }
 
-    if (A && B)
+    if(A && B)
     {
       fc3d_NaturalMapABGenerated(
         *reaction0, *reaction1, *reaction2,

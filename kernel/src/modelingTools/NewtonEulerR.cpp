@@ -54,11 +54,11 @@ void NewtonEulerR::initialize(Interaction& inter)
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
 
-  if (!_jachq)
+  if(!_jachq)
     _jachq.reset(new SimpleMatrix(ySize, qSize));
   else
   {
-    if (_jachq->size(0) == 0)
+    if(_jachq->size(0) == 0)
     {
       // if the matrix dim are null
       _jachq->resize(ySize, qSize);
@@ -73,10 +73,10 @@ void NewtonEulerR::initialize(Interaction& inter)
 
   DEBUG_EXPR(_jachq->display());
 
-  if (! _jachqT)
+  if(! _jachqT)
     _jachqT.reset(new SimpleMatrix(ySize, xSize));
 
-  if (! _T)
+  if(! _T)
   {
     _T.reset(new SimpleMatrix(7, 6));
     _T->zero();
@@ -86,7 +86,7 @@ void NewtonEulerR::initialize(Interaction& inter)
   }
   DEBUG_EXPR(_jachqT->display());
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  if (!_contactForce)
+  if(!_contactForce)
   {
     _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
     _contactForce->zero();
@@ -119,7 +119,7 @@ void NewtonEulerR::setJachqPtr(SP::SimpleMatrix newPtr)
 void NewtonEulerR::computeh(double time, BlockVector& q0, SiconosVector& y)
 {
   prod(*_jachq, q0, y, true);
-  if (_e)
+  if(_e)
     y += *_e;
 }
 
@@ -136,7 +136,7 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, unsigned int d
   BlockVector& q = *DSlink[NewtonEulerR::q0];
 
 
-  if (derivativeNumber == 0)
+  if(derivativeNumber == 0)
   {
     computeh(time, q, y);
   }
@@ -148,17 +148,18 @@ void NewtonEulerR::computeOutput(double time, Interaction& inter, unsigned int d
     // computeJachq(time, inter, DSlink[NewtonEulerR::q0]);
     // computeJachqT(inter, DSlink[NewtonEulerR::q0]);
 
-    if (derivativeNumber == 1)
+    if(derivativeNumber == 1)
     {
       assert(_jachqT);
       assert(DSlink[NewtonEulerR::velocity]);
-      DEBUG_EXPR(_jachqT->display();); DEBUG_EXPR((*DSlink[NewtonEulerR::velocity]).display(););
+      DEBUG_EXPR(_jachqT->display(););
+      DEBUG_EXPR((*DSlink[NewtonEulerR::velocity]).display(););
 
       prod(*_jachqT, *DSlink[NewtonEulerR::velocity], y);
 
       DEBUG_EXPR(y.display(););
     }
-    else if (derivativeNumber == 2)
+    else if(derivativeNumber == 2)
     {
       RuntimeException::selfThrow("Warning: we attempt to call NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) for derivativeNumber=2");
     }
@@ -190,7 +191,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int le
   DEBUG_EXPR(lambda.display(););
   DEBUG_EXPR(DSlink[NewtonEulerR::p0 + level]->display(););
 
-  if (level == 1) /* \warning : we assume that ContactForce is given by lambda[level] */
+  if(level == 1)  /* \warning : we assume that ContactForce is given by lambda[level] */
   {
 
     prod(lambda, *_jachqT, *_contactForce, true);
@@ -211,7 +212,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int le
 
   }
 
-  else if (level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
+  else if(level == 2)  /* \warning : we assume that ContactForce is given by lambda[level] */
   {
 
     prod(lambda, *_jachqT, *_contactForce, true);
@@ -229,7 +230,7 @@ void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int le
                std::cout << "added part to p   " << buffer <<  std::endl;
                buffer->display(););
   }
-  else if (level == 0)
+  else if(level == 0)
   {
     prod(lambda, *_jachq, *DSlink[NewtonEulerR::p0 + level], false);
   }
@@ -252,7 +253,7 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
   Index dimIndex(2);
   Index startIndex(4);
 
-  for (unsigned int i =0 ; i < q0->numberOfBlocks()  ; i++)
+  for(unsigned int i =0 ; i < q0->numberOfBlocks()  ; i++)
   {
     SP::SiconosVector q = (q0->getAllVect())[i];
     startIndex[0] = 0;
@@ -304,10 +305,10 @@ void NewtonEulerR::computeJach(double time, Interaction& inter)
 
 void NewtonEulerR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
-  if (_dotjachq && _plugindotjacqh->fPtr)
-    {
-      ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_dotjachq)(0, 0), workZ.size(), &(workZ)(0));
-    }
+  if(_dotjachq && _plugindotjacqh->fPtr)
+  {
+    ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), &(workQ)(0), workQdot.size(), &(workQdot)(0), &(*_dotjachq)(0, 0), workZ.size(), &(workZ)(0));
+  }
 }
 
 void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, VectorOfBlockVectors& DSlink, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
@@ -315,7 +316,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
   DEBUG_PRINT("NewtonEulerR::computeSecondOrderTimeDerivativeTerms starts\n");
 
   // Compute the time derivative of the Jacobian
-    if (!_dotjachq) // lazy initialization
+  if(!_dotjachq)  // lazy initialization
   {
     unsigned int sizeY = inter.dimension();
     unsigned int xSize = inter.getSizeOfDS();
@@ -351,7 +352,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
 
   SP::SimpleMatrix jachqTdot(new SimpleMatrix(ySize, xSize));
   bool endl = false;
-  for (SP::DynamicalSystem ds = ds1; !endl; ds = ds2)
+  for(SP::DynamicalSystem ds = ds1; !endl; ds = ds2)
   {
     endl = (ds == ds2);
 

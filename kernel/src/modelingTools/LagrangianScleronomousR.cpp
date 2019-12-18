@@ -44,7 +44,7 @@ LagrangianScleronomousR::LagrangianScleronomousR(const std::string& pluginh, con
 
   _pluginJachq->setComputeFunction(pluginJacobianhq);
 
- // Warning: we cannot allocate memory for Jach[0] matrix since no interaction
+// Warning: we cannot allocate memory for Jach[0] matrix since no interaction
   // is connected to the relation. This will be done during initialize.
   // We only set the name of the plugin-function and connect it to the user-defined function.
 }
@@ -71,7 +71,7 @@ void LagrangianScleronomousR::_zeroPlugin()
 
 void LagrangianScleronomousR::initialize(Interaction& inter)
 {
-  if (!_jachq)
+  if(!_jachq)
   {
     unsigned int sizeY = inter.dimension();
     unsigned int sizeDS = inter.getSizeOfDS();
@@ -89,9 +89,9 @@ void LagrangianScleronomousR::computeh(SiconosVector& q, SiconosVector& z, Sicon
 {
   DEBUG_PRINT(" LagrangianScleronomousR::computeh(Interaction& inter, SP::BlockVector q, SP::BlockVector z)\n");
 
-  if (_pluginh && _pluginh->fPtr)
+  if(_pluginh && _pluginh->fPtr)
   {
-    ((FPtr3)(_pluginh->fPtr))(q.size(), &(q(0)) , y.size(), &(y(0)), z.size(), &(z(0)));
+    ((FPtr3)(_pluginh->fPtr))(q.size(), &(q(0)), y.size(), &(y(0)), z.size(), &(z(0)));
 
     DEBUG_EXPR(q.display());
     DEBUG_EXPR(z.display());
@@ -102,19 +102,19 @@ void LagrangianScleronomousR::computeh(SiconosVector& q, SiconosVector& z, Sicon
 }
 void LagrangianScleronomousR::computeJachq(SiconosVector& q, SiconosVector& z)
 {
-  if (_jachq && _pluginJachq->fPtr)
-    {
-      // get vector lambda of the current interaction
-      ((FPtr3)(_pluginJachq->fPtr))(q.size(), &(q)(0), _jachq->size(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
-    }
+  if(_jachq && _pluginJachq->fPtr)
+  {
+    // get vector lambda of the current interaction
+    ((FPtr3)(_pluginJachq->fPtr))(q.size(), &(q)(0), _jachq->size(0), &(*_jachq)(0, 0), z.size(), &(z)(0));
+  }
 }
 
 void LagrangianScleronomousR::computeDotJachq(SiconosVector& q, SiconosVector& z, SiconosVector& qDot)
 {
-  if (_dotjachq && _plugindotjacqh->fPtr)
-    {
-      ((FPtr2)(_plugindotjacqh->fPtr))(q.size(), &(q)(0), qDot.size(), &(qDot)(0), &(*_dotjachq)(0, 0), z.size(), &(z)(0));
-    }
+  if(_dotjachq && _plugindotjacqh->fPtr)
+  {
+    ((FPtr2)(_plugindotjacqh->fPtr))(q.size(), &(q)(0), qDot.size(), &(qDot)(0), &(*_dotjachq)(0, 0), z.size(), &(z)(0));
+  }
 }
 
 void  LagrangianScleronomousR::computedotjacqhXqdot(double time, Interaction& inter, VectorOfBlockVectors& DSlink)
@@ -143,24 +143,24 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  un
   SiconosVector q, z;
   q.initFromBlock(*DSlink[LagrangianR::q0]);
   z.initFromBlock(*DSlink[LagrangianR::z]);
-  if (derivativeNumber == 0)
+  if(derivativeNumber == 0)
   {
     computeh(q, z, y);
   }
   else
   {
-   computeJachq(q, z);
+    computeJachq(q, z);
 
-    if (derivativeNumber == 1)
+    if(derivativeNumber == 1)
     {
       assert(_jachq);
       prod(*_jachq, *DSlink[LagrangianR::q1], y);
     }
-    else if (derivativeNumber == 2)
+    else if(derivativeNumber == 2)
     {
-      if (!_dotjachq)
+      if(!_dotjachq)
       {
-        if (_plugindotjacqh && _plugindotjacqh->fPtr)
+        if(_plugindotjacqh && _plugindotjacqh->fPtr)
         {
           unsigned int sizeY = inter.dimension();
           unsigned int sizeDS = inter.getSizeOfDS();

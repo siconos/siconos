@@ -48,7 +48,7 @@ void mlcp_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions
 #ifdef HAVE_MLCPSIMPLEX
   int nn = problem->n;
   int mm = problem->m;
-  extern_mlcp_simplex_init_with_M(&nn , &mm, problem->M->matrix0);
+  extern_mlcp_simplex_init_with_M(&nn, &mm, problem->M->matrix0);
   sIsInitialize = 1;
 #endif
 }
@@ -77,12 +77,12 @@ void mlcp_simplex(MixedLinearComplementarityProblem* problem, double *z, double 
   int nn = problem->n;
   int mm = problem->m;
 
-  if (!sIsInitialize)
-    extern_mlcp_simplex_init_with_M(&nn , &mm, problem->M->matrix0);
+  if(!sIsInitialize)
+    extern_mlcp_simplex_init_with_M(&nn, &mm, problem->M->matrix0);
 
-  extern_mlcp_simplex(problem->q, problem->q + nn, z, z + nn, w , info ,  options->iparam , options->dparam);
+  extern_mlcp_simplex(problem->q, problem->q + nn, z, z + nn, w, info,  options->iparam, options->dparam);
 
-  if (!sIsInitialize)
+  if(!sIsInitialize)
     extern_mlcp_simplex_stop();
 #endif
 }

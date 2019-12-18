@@ -32,7 +32,7 @@ ExplicitTwisting::ExplicitTwisting(SP::ControlSensor sensor, double gain, double
   CommonSMC(EXPLICIT_TWISTING, sensor)
 {
   _u.reset(new SiconosVector(2));
-  if (beta <= 0.0 || beta >= 1.0)
+  if(beta <= 0.0 || beta >= 1.0)
   {
     std::cout << "ExplicitTwisting constructor: beta is not in (0, 1)" << std::endl;
   }

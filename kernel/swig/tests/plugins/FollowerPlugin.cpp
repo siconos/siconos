@@ -15,11 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifdef _WIN32 
-#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
-#else 
-#define SICONOS_EXPORT extern "C" 
-#endif  
+#ifdef _WIN32
+#define SICONOS_EXPORT extern "C" __declspec(dllexport)
+#else
+#define SICONOS_EXPORT extern "C"
+#endif
 #include <stdio.h>
 #include <math.h>
 #include "CamState.h"
@@ -31,7 +31,7 @@ SICONOS_EXPORT void FollowerMass(unsigned int sizeOfq, const double *q, double* 
 {
   double m = 1.221;
   // initialisation of the Mass matrix
-  for (unsigned int i = 0; i < sizeOfq * sizeOfq; i++)
+  for(unsigned int i = 0; i < sizeOfq * sizeOfq; i++)
     mass[i] = 0.0;
 
   mass[0] = m;
@@ -41,13 +41,13 @@ SICONOS_EXPORT void FollowerQNLInertia(unsigned int sizeOfq, const double *q, co
 {
   unsigned int i;
 
-  for (i = 0; i < sizeOfq; i++)
+  for(i = 0; i < sizeOfq; i++)
     Q[i] = 0.0;
 }
 
 SICONOS_EXPORT void FollowerFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *fInt, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfq; i++)
+  for(unsigned int i = 0; i < sizeOfq; i++)
     fInt[i] = 0.0;
 }
 
@@ -97,26 +97,26 @@ extern "C" double FextFunction(double time, double* z)
   //hp=w*cos(beta);
   //hpp=-w*w*sin(beta);
 
-  if (beta > PI)
+  if(beta > PI)
   {
     beta = 2 * PI - beta;
     w = -w;
   }
   dBetadt = w;
-  if (beta <= (PI / 2 - beta1))
+  if(beta <= (PI / 2 - beta1))
   {
     hc = Rb;
     hcp = 0;
     hcpp = 0;
   }
-  else if (beta <= (PI / 2 + beta2))
+  else if(beta <= (PI / 2 + beta2))
   {
     hc = -k1 * sin(beta) + rho1 * sqrt(1 - pow((cos(beta)) * (k1 / rho1), 2)) ;
     hcp = (-k1 * cos(beta) + (pow(k1, 2) * sin(beta) * cos(beta)) / (rho1 * sqrt(1 - pow((cos(beta)) * (k1 / rho1), 2)))) * dBetadt;
     tmp1 = pow(cos(beta - beta1), 2) - pow(sin(beta - beta1), 2) - (pow(k1 * sin(beta - beta1) * cos(beta - beta1), 2)) / (pow(rho1, 2) * (1 - pow((cos(beta - beta1)) * (k1 / rho1), 2)));
     hcpp = (k1 * sin(beta - beta1) + (pow(k1, 2) / (rho1 * sqrt(1 - pow((cos(beta - beta1)) * (k1 / rho1), 2)))) * tmp1) * (pow(dBetadt, 2));
   }
-  else if (beta <= (PI / 2 + beta3))
+  else if(beta <= (PI / 2 + beta3))
   {
     hc = -k2 * cos(beta + PI / 9) + rho3 * sqrt(1 - pow((sin(beta + PI / 9)) * (k2 / rho3), 2)) ;
     hcp = (k2 * sin(beta + PI / 9) - (pow(k2, 2) * sin(beta + PI / 9) * cos(beta + PI / 9)) / (rho3 * sqrt(1 - pow((sin(beta + PI / 9)) * (k2 / rho3), 2)))) * dBetadt;
@@ -141,7 +141,7 @@ SICONOS_EXPORT void FollowerFExtR(double time, unsigned int sizeOfq, double *fEx
 {
   //double rpm = z[0];
 
-  for (unsigned int i = 0; i < sizeOfq; i++)
+  for(unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
 
   fExt[0] = -m * g;
@@ -151,7 +151,7 @@ SICONOS_EXPORT void FollowerFExt(double time, unsigned int sizeOfq, double *fExt
   double rpm = z[0];
   //  double rpm = 358;
 
-  for (unsigned int i = 0; i < sizeOfq; i++)
+  for(unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
 
   fExt[0] = -m * g + FextFunction(time, &rpm);
@@ -159,25 +159,25 @@ SICONOS_EXPORT void FollowerFExt(double time, unsigned int sizeOfq, double *fExt
 
 SICONOS_EXPORT void groundFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfq; i++)
+  for(unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
 }
 
 SICONOS_EXPORT void ballJacobianFIntq(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfq * sizeOfq; i++)
+  for(unsigned int i = 0; i < sizeOfq * sizeOfq; i++)
     jacob[i] = 0.0;
 }
 
 SICONOS_EXPORT void ballJacobianVelocityFInt(double time, unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfq * sizeOfq; i++)
+  for(unsigned int i = 0; i < sizeOfq * sizeOfq; i++)
     jacob[i] = 0.0;
 }
 
 SICONOS_EXPORT void ballJacobianQQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i <  sizeOfq * sizeOfq; i++)
+  for(unsigned int i = 0; i <  sizeOfq * sizeOfq; i++)
   {
     jacob[i] = 0.0;
   }
@@ -186,7 +186,7 @@ SICONOS_EXPORT void ballJacobianQQNLInertia(unsigned int sizeOfq, const double *
 SICONOS_EXPORT void ballJacobianVelocityQNLInertia(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, unsigned int sizeZ, double* z)
 {
   printf("Call of the function 'ballJacobianVelocityQ' of the basic plugin.\nYou have to implement this function.\n");
-  for (unsigned int i = 0; i <  sizeOfq * sizeOfq; i++)
+  for(unsigned int i = 0; i <  sizeOfq * sizeOfq; i++)
   {
     jacob[i] = 0.0;
   }

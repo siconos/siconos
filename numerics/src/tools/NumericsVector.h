@@ -170,7 +170,10 @@ extern "C"
    * \param out is the resut matrix of rank 1.
    */
   void NV_dott(const double * const vec1, const double * const vec2, const unsigned int vecSize, NumericsMatrix* out);
-
+  
+  int NV_isnan(const double * const vec,  const unsigned int vecSize );
+  
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

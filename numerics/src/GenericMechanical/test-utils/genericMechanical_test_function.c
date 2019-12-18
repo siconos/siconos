@@ -37,22 +37,22 @@ int gmp_test_function(TestCase* current)
   /* printf(" dparam: \n"); */
   /* for(size_t i=0;i<20;++i) */
   /*   printf(" %g \t ", current->options->internalSolvers[1]->dparam[i]); */
-  
-  info = gmp_driver(problem, reaction , velocity, current->options);
-  
+
+  info = gmp_driver(problem, reaction, velocity, current->options);
+
   double err = 0;
-  gmp_compute_error(problem, reaction , velocity, current->options->dparam[SICONOS_DPARAM_TOL], current->options, &err);
+  gmp_compute_error(problem, reaction, velocity, current->options->dparam[SICONOS_DPARAM_TOL], current->options, &err);
   printf("\n");
-  for (k = 0 ; k < problem->size; k++)
+  for(k = 0 ; k < problem->size; k++)
   {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
   }
   printf("\n");
 
-  
-  if (!info)
+
+  if(!info)
   {
-    if (err > current->options->dparam[SICONOS_DPARAM_TOL])
+    if(err > current->options->dparam[SICONOS_DPARAM_TOL])
     {
       printf("test unsuccessful, residual = %g, info = %d, nb iter = %d\n", err, info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
       info = 1;

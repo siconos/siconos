@@ -61,7 +61,7 @@ static void lcp_buildQ();
 void affectWZ()
 {
   unsigned long  int aux = sCurrentEnum;
-  for (int i = 0; i < sSize; i++)
+  for(int i = 0; i < sSize; i++)
   {
     sWZ[i] = aux & 1;
     aux = aux >> 1;
@@ -74,9 +74,9 @@ void lcp_buildM(int * zw, double * M, double * Mref, int size)
   double * AuxRef;
   Aux = M;
   AuxRef = Mref;
-  for (col = 0; col < size; col++)
+  for(col = 0; col < size; col++)
   {
-    if (zw[col] == 0)
+    if(zw[col] == 0)
     {
       memcpy(Aux, AuxRef, size * sizeof(double));
     }
@@ -95,9 +95,9 @@ void   lcp_fillSolution(double*  z, double * w, int size, int* zw, double * Q)
 {
   int lin;
 
-  for (lin = 0; lin < size; lin++)
+  for(lin = 0; lin < size; lin++)
   {
-    if (zw[lin] == 0)
+    if(zw[lin] == 0)
     {
       w[lin] = 0;
       z[lin] = Q[lin];
@@ -114,24 +114,24 @@ void lcp_initEnum()
   int cmp;
   sCmpEnum = 0;
   sNbCase = 1;
-  for (cmp = 0; cmp < sSize; cmp++)
+  for(cmp = 0; cmp < sSize; cmp++)
     sNbCase = sNbCase << 1;
   sProgress = 0;
 }
 int lcp_nextEnum()
 {
-  if (sCmpEnum == sNbCase)
+  if(sCmpEnum == sNbCase)
     return 0;
-  if (sCurrentEnum >= sNbCase)
+  if(sCurrentEnum >= sNbCase)
   {
     sCurrentEnum = 0;
   }
-  if (verbose)
+  if(verbose)
     numerics_printf("try enum :%d\n", (int)sCurrentEnum);
   affectWZ();
   sCurrentEnum++;
   sCmpEnum++;
-  if (verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
+  if(verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
   {
     sProgress += 0.001;
     numerics_printf("lcp_enum progress %f %d", sProgress, (int) sCurrentEnum);
@@ -151,7 +151,7 @@ int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* op
 int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options)
 {
   int aux = 3 * (problem->size) + (problem->size) * (problem->size);
-  if (options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS])
+  if(options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS])
   {
     LWORK = -1;
     //int info = 0;
@@ -164,15 +164,15 @@ int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* op
 }
 void lcp_enum_init(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc)
 {
-  if (withMemAlloc)
-    {
-      options->dWork = (double *) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
-      options->iWork = (int *) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
-    }
+  if(withMemAlloc)
+  {
+    options->dWork = (double *) malloc(lcp_enum_getNbDWork(problem, options) * sizeof(double));
+    options->iWork = (int *) malloc(lcp_enum_getNbIWork(problem, options) * sizeof(int));
+  }
 }
 void lcp_enum_reset(LinearComplementarityProblem* problem, SolverOptions* options, int withMemAlloc)
 {
-  if (withMemAlloc)
+  if(withMemAlloc)
   {
     if(options->dWork)
       free(options->dWork);
@@ -184,11 +184,11 @@ void lcp_enum_reset(LinearComplementarityProblem* problem, SolverOptions* option
 }
 
 
-void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   *info = 1;
   double tol ;
-  if (options->dWork == NULL)
+  if(options->dWork == NULL)
   {
     lcp_enum_init(problem, options, 1);
   }
@@ -201,7 +201,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   int check;
   lapack_int LAinfo = 0;
   int useDGELS = options->iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS];
-  
+
   /*OUTPUT param*/
   sCurrentEnum = options->iparam[SICONOS_LCP_IPARAM_ENUM_SEED];
   tol = options->dparam[SICONOS_DPARAM_TOL];
@@ -212,20 +212,20 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
 
 
   sMref = problem->M->matrix0;
-  if (!sMref)
+  if(!sMref)
   {
     numerics_printf("lcp_enum failed, problem->M->matrix0 is null");
 
   }
 
-  if (verbose)
+  if(verbose)
     numerics_printf("lcp_enum begin, size %d tol %e", sSize, tol);
 
   sM = workingFloat;
   sQ = sM + sSize * sSize;
   sColNul = sQ + sSize;
   sQref = sColNul + sSize;
-  for (lin = 0; lin < sSize; lin++)
+  for(lin = 0; lin < sSize; lin++)
   {
     sQref[lin] =  - problem->q[lin];
     sColNul[lin] = 0;
@@ -234,13 +234,13 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
   ipiv = sWZ + sSize;
   *info = 0;
   lcp_initEnum();
-  while (lcp_nextEnum())
+  while(lcp_nextEnum())
   {
     lcp_buildM(sWZ, sM, sMref, sSize);
     lcp_buildQ();
     /*     if (verbose) */
     /*       printCurrentSystem(); */
-    if (useDGELS)
+    if(useDGELS)
     {
       /* if (verbose) */
       /*   { */
@@ -252,7 +252,7 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
       /*   } */
 
       DGELS(LA_NOTRANS,sSize, sSize, NRHS, sM, sSize, sQ, sSize,&LAinfo);
-      if (verbose)
+      if(verbose)
       {
         numerics_printf("Solution of dgels (info=%i)", LAinfo);
         NM_dense_display(sQ, sSize, 1, 0);
@@ -262,46 +262,46 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
     {
       DGESV(sSize, NRHS, sM, sSize, ipiv, sQ, sSize, &LAinfo);
     }
-    if (!LAinfo)
+    if(!LAinfo)
     {
-      if (useDGELS)
+      if(useDGELS)
       {
         int cc = 0;
         int ii;
         numerics_printf("DGELS LAInfo=%i", LAinfo);
-        for (ii = 0; ii < sSize; ii++)
+        for(ii = 0; ii < sSize; ii++)
         {
-          if (isnan(sQ[ii]) || isinf(sQ[ii]))
+          if(isnan(sQ[ii]) || isinf(sQ[ii]))
           {
             numerics_printf("DGELS FAILED");
             cc = 1;
             break;
           }
         }
-        if (cc)
+        if(cc)
           continue;
       }
 
-      if (verbose)
+      if(verbose)
       {
         numerics_printf("lcp_enum LU factorization succeeded:");
       }
 
       check = 1;
-      for (lin = 0 ; lin < sSize; lin++)
+      for(lin = 0 ; lin < sSize; lin++)
       {
-        if (sQ[lin] < - tol)
+        if(sQ[lin] < - tol)
         {
           check = 0;
           break;/*out of the cone!*/
         }
       }
-      if (!check)
+      if(!check)
         continue;
       else
       {
         numberofSolutions++;
-        if (verbose || multipleSolutions)
+        if(verbose || multipleSolutions)
         {
           numerics_printf("lcp_enum find %i solution with sCurrentEnum = %ld!", numberofSolutions, sCurrentEnum - 1);
         }
@@ -309,12 +309,12 @@ void lcp_enum(LinearComplementarityProblem* problem, double *z, double *w, int *
         lcp_fillSolution(z, w, sSize, sWZ, sQ);
         options->iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM ] = (int) sCurrentEnum - 1;
         options->iparam[SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS] = numberofSolutions;
-        if (!multipleSolutions)  return;
+        if(!multipleSolutions)  return;
       }
     }
   }
   *info = 1;
-  if (verbose)
+  if(verbose)
     numerics_printf("lcp_enum has not found a solution!\n");
 }
 
@@ -325,5 +325,5 @@ void lcp_enum_set_default(SolverOptions* options)
   options->iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS] = 0;
   // SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM (out)
   // SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS (out)
- 
+
 }

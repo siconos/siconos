@@ -42,7 +42,7 @@ void lcp_nsgs_SBM_buildLocalProblem(int rowNumber, SparseBlockStructuredMatrix* 
   local_problem->M->matrix0 = blmat->block[diagPos];
   local_problem->size = blmat->blocksize0[rowNumber];
   int pos = 0;
-  if (rowNumber != 0)
+  if(rowNumber != 0)
   {
     local_problem->size -= blmat->blocksize0[rowNumber - 1];
     pos =  blmat->blocksize0[rowNumber - 1];
@@ -73,7 +73,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
      - Input matrix M of the problem is supposed to be sparse-block
        with no null row (ie no rows with all blocks equal to null)
   */
-  if (problem->M->matrix1 == NULL)
+  if(problem->M->matrix1 == NULL)
   {
     fprintf(stderr, "lcp_NSGS_SBM error: wrong storage type for input matrix M of the LCP.\n");
     exit(EXIT_FAILURE);
@@ -94,7 +94,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
   /* Number of non-null blocks in blmat */
   int nbOfNonNullBlocks = blmat->nbblocks;
-  if (nbOfNonNullBlocks < 1)
+  if(nbOfNonNullBlocks < 1)
   {
     fprintf(stderr, "Numerics::lcp_NSGS_SBM error: empty M matrix (all blocks = NULL).\n");
     exit(EXIT_FAILURE);
@@ -113,10 +113,10 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
   /* Memory allocation for q. Size of q = blsizemax, size of the largest square-block in blmat */
   int blsizemax = blmat->blocksize0[0];
   int k;
-  for (unsigned int i = 1 ; i < blmat->blocknumber0 ; i++)
+  for(unsigned int i = 1 ; i < blmat->blocknumber0 ; i++)
   {
     k = blmat->blocksize0[i] - blmat->blocksize0[i - 1];
-    if (k > blsizemax) blsizemax = k;
+    if(k > blsizemax) blsizemax = k;
   }
   local_problem->q = (double*)malloc(blsizemax * sizeof(double));
 
@@ -132,7 +132,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
   options[0].iparam[SICONOS_LCP_IPARAM_NSGS_ITERATIONS_SUM] = 0;
   options[0].dparam[SICONOS_LCP_DPARAM_NSGS_LOCAL_ERROR_SUM] = 0.0;
 
-  if (options->numberOfInternalSolvers < 1)
+  if(options->numberOfInternalSolvers < 1)
   {
     numerics_error("lcp_nsgs_SBM", "The NSGS_SBM method needs options for the internal solvers, options[0].numberOfInternalSolvers should be >1");
   }
@@ -145,17 +145,17 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
   /* Output from local solver */
   int infoLocal = -1;
   SolverOptions * current_local_options = NULL;
-  
-  while ((iter < itermax) && (hasNotConverged > 0))
+
+  while((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
     // current internal solver number
     size_t solverid = 0;
-    
+
     /* Loop over the rows of blocks in blmat */
     pos = 0;
     /*       cblas_dcopy(problem->size,w,1,wBackup,1); */
-    for (rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber)
+    for(rowNumber = 0; rowNumber < blmat->blocknumber0; ++rowNumber)
     {
       current_local_options = options[0].internalSolvers[solverid];
       /* Local problem formalization */
@@ -168,7 +168,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
       /* sum of local errors (output from local_driver)*/
       options[0].dparam[SICONOS_LCP_DPARAM_NSGS_LOCAL_ERROR_SUM] += current_local_options->iparam[SICONOS_DPARAM_RESIDU];
 
-      if (infoLocal > 0)
+      if(infoLocal > 0)
       {
         //free(local_problem->q);
         //free(local_problem->M);
@@ -182,7 +182,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
       }
 
-      while (solverid < options->numberOfInternalSolvers - 1)
+      while(solverid < options->numberOfInternalSolvers - 1)
         solverid++;
     }
 

@@ -29,7 +29,7 @@
 #include "SiconosBlas.h"  // for cblas_dcopy, cblas_daxpy
 #include "SiconosLapack.h"                 // for DTRTRS, DPOTRF, lapack_int, LA_UP, LA_NONUNIT, LA_NOTRANS
 
-void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -107,11 +107,11 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
   /* Initialization */
 
-  for (i = 0; i < n2; i++)
+  for(i = 0; i < n2; i++)
   {
 
 
-    if (i < n)
+    if(i < n)
     {
 
       wc[i]       = 0.0;
@@ -143,15 +143,15 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 
-  for (i = 0 ; i < n ; i++)
+  for(i = 0 ; i < n ; i++)
   {
 
     k[i * n + i] =  k_latin * M[i * n + i];
 
-    if (fabs(k[i * n + i]) < 1e-12)
+    if(fabs(k[i * n + i]) < 1e-12)
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" Warning nul diagonal term in k matrix \n");
       }
@@ -194,8 +194,8 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 
-  for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
+  for(i = 0; i < n; i++)
+    for(j = 0; j < n; j++)
       DPO[i + n * j] = M[j * n + i] + k[i + n * j];
 
 
@@ -207,9 +207,9 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
   /*            Cholesky              */
 
 
-  DPOTRF(LA_UP, n, DPO , n, &info2);
+  DPOTRF(LA_UP, n, DPO, n, &info2);
 
-  if (info2 != 0)
+  if(info2 != 0)
   {
     printf(" Matter with Cholesky Factorization \n ");
 
@@ -252,7 +252,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
   err1 = 1.;
 
 
-  while ((iter1 < itt) && (err1 > errmax))
+  while((iter1 < itt) && (err1 > errmax))
   {
 
     /*       Linear stage (zc,wc) -> (z,w)*/
@@ -266,7 +266,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
     alpha = -1.;
-    cblas_dscal(n , alpha , znum1 , incx);
+    cblas_dscal(n, alpha, znum1, incx);
 
     alpha = 1.;
     cblas_daxpy(n, alpha, wc, incx, znum1, incy);
@@ -283,14 +283,14 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
     cblas_dcopy(n, wc, incx, w, incy);
 
     alpha = omega;
-    cblas_dscal(n , alpha , z , incx);
+    cblas_dscal(n, alpha, z, incx);
 
     alpha = 1.0 - omega;
     cblas_daxpy(n, alpha, zn, incx, z, incy);
 
 
     alpha = omega;
-    cblas_dscal(n, alpha, w , incx);
+    cblas_dscal(n, alpha, w, incx);
 
     alpha = 1.0 - omega;
     cblas_daxpy(n, alpha, wn, incx, w, incy);
@@ -311,9 +311,9 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 
-    for (i = 0; i < n; i++)
+    for(i = 0; i < n; i++)
     {
-      if (wt[i] > 0.0)
+      if(wt[i] > 0.0)
       {
         wc[i] = wt[i];
         zc[i] = 0.0;
@@ -391,14 +391,14 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 
-  if (err1 > errmax)
+  if(err1 > errmax)
   {
-    if (verbose > 0) printf("No convergence of LATIN_W after %d iterations, the residue is %g\n", iter1, err1);
+    if(verbose > 0) printf("No convergence of LATIN_W after %d iterations, the residue is %g\n", iter1, err1);
     *info = 1;
   }
   else
   {
-    if (verbose > 0) printf("Convergence of LATIN_W after %d iterations, the residue is %g \n", iter1, err1);
+    if(verbose > 0) printf("Convergence of LATIN_W after %d iterations, the residue is %g \n", iter1, err1);
     *info = 0;
   }
 

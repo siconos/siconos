@@ -43,15 +43,15 @@ int relay_test_function(TestCase * current)
   double * z = (double *)calloc(problem->size, sizeof(double));
   double * w = (double *)calloc(problem->size, sizeof(double));
 
-  info = relay_driver(problem, z , w, current->options);
+  info = relay_driver(problem, z, w, current->options);
 
-  for (i = 0 ; i < problem->size ; i++)
+  for(i = 0 ; i < problem->size ; i++)
   {
     printf("z[%i] = %12.8e\t,w[%i] = %12.8e\n", i, z[i], i, w[i]);
     info = info == 0 ? !(isfinite(z[i]) && isfinite(w[i])): info;
   }
 
-  if (!info)
+  if(!info)
   {
     printf("test succeeded\n");
   }

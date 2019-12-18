@@ -46,20 +46,20 @@ void lcp_ConvexQP_ProjectedGradient(LinearComplementarityProblem* problem, doubl
   cqp->size = n;
 
   /*set the norm of the ConvexQP to the norm of problem->q  */
-  double norm_q = cblas_dnrm2(n , problem->q , 1);
+  double norm_q = cblas_dnrm2(n, problem->q, 1);
   cqp->normConvexQP= norm_q;
   cqp->istheNormConvexQPset=1;
 
   lcp_as_cqp->cqp = cqp;
   lcp_as_cqp->lcp = problem;
   lcp_as_cqp->options = options;
-  convexQP_ProjectedGradient(cqp, z, w , info , options);
+  convexQP_ProjectedGradient(cqp, z, w, info, options);
 
   /* **** Criterium convergence **** */
 
   double error;
-  lcp_compute_error(problem, z , w, options->dparam[SICONOS_DPARAM_TOL], &error);
-  if (verbose > 0)
+  lcp_compute_error(problem, z, w, options->dparam[SICONOS_DPARAM_TOL], &error);
+  if(verbose > 0)
   {
     printf("--------------- LCP - ConvexQP PG  - #Iteration %i Final Residual = %14.7e\n",
            options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);

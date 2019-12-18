@@ -30,7 +30,7 @@ const char ** data_collection()
   data_collection_1[n_data++] = "./data/lcp_Pang_isolated_sol_perturbed.dat";
   data_collection_1[n_data++] = "./data/lcp_inf_sol_perturbed.dat";
 
-  
+
   data_collection_1[n_data++] = "---";
 
 

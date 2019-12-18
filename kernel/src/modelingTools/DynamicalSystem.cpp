@@ -35,7 +35,7 @@ void DynamicalSystem::_init()
   // Everything should be done in derived class init for required operators
   // and variables and in 'set'-like methods for optional
   // components.
-  
+
   _stepsInMemory = 1;
   _x.resize(2);
   _z.reset(new SiconosVector(1));
@@ -68,10 +68,10 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
     _r.reset(new SiconosVector(*(ds.r())));
   _x.resize(2);
   if(ds.x())
-     _x[0].reset(new SiconosVector(*(ds.x())));
+    _x[0].reset(new SiconosVector(*(ds.x())));
   if(ds.rhs())
     _x[1].reset(new SiconosVector(*(ds.rhs())));
-  if (ds.jacobianRhsx())
+  if(ds.jacobianRhsx())
     _jacxRhs.reset(new SimpleMatrix(*(ds.jacobianRhsx())));
 
   _z.reset(new SiconosVector(*(ds.z())));
@@ -83,9 +83,9 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem & ds):
 void DynamicalSystem::resetToInitialState()
 {
   if(_x0)
-    {
-      *(_x[0]) = *_x0;
-    }
+  {
+    *(_x[0]) = *_x0;
+  }
   else
     RuntimeException::selfThrow("DynamicalSystem::resetToInitialState() - initial state _x0 is null");
 }
@@ -96,9 +96,9 @@ void DynamicalSystem::resetToInitialState()
 void DynamicalSystem::setX0(const SiconosVector& newValue)
 {
   // check dimensions ...
-  if (newValue.size() != _n)
+  if(newValue.size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setX0 - inconsistent sizes between x0 input and system dimension.");
-  if (_x0)
+  if(_x0)
     *_x0 = newValue;
 
   else
@@ -110,7 +110,7 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
 void DynamicalSystem::setX0Ptr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
-  if (newPtr->size() != _n)
+  if(newPtr->size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and system dimension.");
   _x0 = newPtr;
 }
@@ -121,10 +121,10 @@ void DynamicalSystem::setX(const SiconosVector& newValue)
   // We suppose that both x and (*x)[0] are properly allocated.
 
   // check dimensions ...
-  if (newValue.size() != _n)
+  if(newValue.size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setX - inconsistent sizes between x input and system dimension.");
 
-  if (! _x[0])
+  if(! _x[0])
     _x[0].reset(new SiconosVector(newValue));
   else
     *(_x[0]) = newValue;
@@ -135,7 +135,7 @@ void DynamicalSystem::setXPtr(SP::SiconosVector newPtr)
   // Warning: this only sets the pointer x[0]
 
   // check dimensions ...
-  if (newPtr->size() != _n)
+  if(newPtr->size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setXPtr - inconsistent sizes between x input and system dimension.");
 
   _x[0] = newPtr;
@@ -146,10 +146,10 @@ void DynamicalSystem::setRhs(const SiconosVector& newValue)
   // Warning: this only sets the value of x[1]
 
   // check dimensions ...
-  if (newValue.size() != _n)
+  if(newValue.size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setRhs - inconsistent sizes between rhs input and system dimension.");
 
-  if (! _x[1])
+  if(! _x[1])
     _x[1].reset(new SiconosVector(newValue));
   else
     *(_x[1]) = newValue;
@@ -160,7 +160,7 @@ void DynamicalSystem::setRhsPtr(SP::SiconosVector newPtr)
   // Warning: this only sets the pointer (*x)[1]
 
   // check dimensions ...
-  if (newPtr->size() != _n)
+  if(newPtr->size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setRhsPtr - inconsistent sizes between rhs input and system dimension.");
 
   _x[1] = newPtr;
@@ -168,10 +168,10 @@ void DynamicalSystem::setRhsPtr(SP::SiconosVector newPtr)
 void DynamicalSystem::setR(const SiconosVector& newValue)
 {
   // check dimensions ...
-  if (newValue.size() != _n)
+  if(newValue.size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setR - inconsistent sizes between input and system dimension.");
 
-  if (_r)
+  if(_r)
     *_r = newValue;
 
   else
@@ -181,7 +181,7 @@ void DynamicalSystem::setR(const SiconosVector& newValue)
 void DynamicalSystem::setRPtr(SP::SiconosVector newPtr)
 {
   // check dimensions ...
-  if (newPtr->size() != _n)
+  if(newPtr->size() != _n)
     RuntimeException::selfThrow("DynamicalSystem::setRPtr - inconsistent sizes between input and system dimension.");
 
   _r = newPtr;
@@ -191,10 +191,10 @@ void DynamicalSystem::setRPtr(SP::SiconosVector newPtr)
 void DynamicalSystem::setJacobianRhsx(const SiconosMatrix& newValue)
 {
   // check dimensions ...
-  if (newValue.size(0) != _n || newValue.size(1) != _n)
+  if(newValue.size(0) != _n || newValue.size(1) != _n)
     RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsx - inconsistent sizes between and system dimension.");
 
-  if (_jacxRhs)
+  if(_jacxRhs)
     *_jacxRhs = newValue;
 
   else
@@ -204,7 +204,7 @@ void DynamicalSystem::setJacobianRhsx(const SiconosMatrix& newValue)
 void DynamicalSystem::setJacobianRhsxPtr(SP::SiconosMatrix newPtr)
 {
   // check dimensions ...
-  if (newPtr->size(0) != _n || newPtr->size(1) != _n)
+  if(newPtr->size(0) != _n || newPtr->size(1) != _n)
     RuntimeException::selfThrow("DynamicalSystem::setJacobianRhsxPtr - inconsistent sizes between and system dimension.");
 
   _jacxRhs = newPtr;
@@ -212,9 +212,9 @@ void DynamicalSystem::setJacobianRhsxPtr(SP::SiconosMatrix newPtr)
 
 void DynamicalSystem::setz(const SiconosVector& newValue)
 {
-  if (_z)
+  if(_z)
   {
-    if (newValue.size() != _z->size())
+    if(newValue.size() != _z->size())
       RuntimeException::selfThrow("DynamicalSystem::setz - inconsistent sizes between input and existing z - To change z size use setzPtr.");
     *_z = newValue;
   }
@@ -240,9 +240,9 @@ void DynamicalSystem::update(double time)
 void DynamicalSystem::initMemory(unsigned int steps)
 {
   DEBUG_BEGIN("void DynamicalSystem::initMemory(unsigned int steps)\n");
-  if (steps > _xMemory.size())
+  if(steps > _xMemory.size())
   {
-    if (steps == 0)
+    if(steps == 0)
       std::cout << "Warning : initMemory with size equal to zero" << std::endl;
     else
     {
@@ -251,7 +251,7 @@ void DynamicalSystem::initMemory(unsigned int steps)
     }
   }
   DEBUG_EXPR(_xMemory.display(););
-  
+
   DEBUG_END("void DynamicalSystem::initMemory(unsigned int steps)\n");
 }
 

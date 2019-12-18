@@ -278,7 +278,7 @@ void SiconosMatrix::private_prod(unsigned int startRow, const SiconosVector& x, 
 
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
 
-  if (init) // y = subA * x , else y += subA * x
+  if(init)  // y = subA * x , else y += subA * x
     y.zero();
   private_addprod(startRow, 0, x, y);
 }
@@ -302,25 +302,25 @@ void SiconosMatrix::private_addprod(unsigned startRow, unsigned int startCol, co
 
   assert(numX == numY && "private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
 
-  if (numY == Siconos::DENSE && numX == Siconos::DENSE)
+  if(numY == Siconos::DENSE && numX == Siconos::DENSE)
   {
 
     assert(y.dense() != x.dense());
 
-    if (numA == Siconos::DENSE)
+    if(numA == Siconos::DENSE)
       noalias(*y.dense()) += prod(ublas::subrange(*dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
-    else if (numA == Siconos::TRIANGULAR)
+    else if(numA == Siconos::TRIANGULAR)
       noalias(*y.dense()) += prod(ublas::subrange(*triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
-    else if (numA == Siconos::SYMMETRIC)
+    else if(numA == Siconos::SYMMETRIC)
       noalias(*y.dense()) += prod(ublas::subrange(*sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
-    else if (numA == Siconos::SPARSE)
+    else if(numA == Siconos::SPARSE)
       noalias(*y.dense()) += prod(ublas::subrange(*sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
     else //if(numA==Siconos::BANDED)
       noalias(*y.dense()) += prod(ublas::subrange(*banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
   }
   else // x and y sparse
   {
-    if (numA == Siconos::SPARSE)
+    if(numA == Siconos::SPARSE)
       *y.sparse() += prod(ublas::subrange(*sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.sparse());
     else
       SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x, y  sparse and A not sparse.");

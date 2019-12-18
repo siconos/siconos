@@ -28,20 +28,20 @@ void gfc3d_set_internalsolver_tolerance(GlobalFrictionContactProblem* problem,
                                         double error)
 {
   int* iparam = options->iparam;
-  if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE )
+  if(iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE)
   {
     internalsolver_options->dparam[SICONOS_DPARAM_TOL] = (error/options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO]);
-    numerics_printf_verbose(1,"---- GFC3D - gfc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e", internalsolver_options->dparam[SICONOS_DPARAM_TOL] );
+    numerics_printf_verbose(1,"---- GFC3D - gfc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e", internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   }
-  else if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT )
+  else if(iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT)
   {
     internalsolver_options->dparam[SICONOS_DPARAM_TOL] = error/(options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO]*problem->numberOfContacts);
-    numerics_printf_verbose(1,"---- GFC3D - gfc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e", internalsolver_options->dparam[SICONOS_DPARAM_TOL] );
+    numerics_printf_verbose(1,"---- GFC3D - gfc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e", internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   }
-  else if (iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE)
+  else if(iparam[SICONOS_FRICTION_3D_IPARAM_INTERNAL_ERROR_STRATEGY] == SICONOS_FRICTION_3D_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE)
   {
     // We use the user value for the error of the local solver
-    numerics_printf_verbose(1,"---- GFC3D - gfc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e", internalsolver_options->dparam[SICONOS_DPARAM_TOL] );
+    numerics_printf_verbose(1,"---- GFC3D - gfc3d_FixedPoint_set_internalsolver_tolerance - Internal solver tolerance is set to %e", internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   }
   else
   {

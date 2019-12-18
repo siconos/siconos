@@ -28,7 +28,7 @@ const char ** data_collection()
   int n_data=0;
   data_collection_1[n_data++] = "./data/FrictionContactProblem00374.dat";
   data_collection_1[n_data++] = "./data/FrictionContactProblem00394.dat";
-  
+
   /* ## test 2D sparse on 4 differents files */
   data_collection_1[n_data++] = "./data/FrictionContactProblem00727.dat";
   data_collection_1[n_data++] = "./data/FrictionContactProblem00031.dat";

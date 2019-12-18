@@ -29,18 +29,18 @@ using namespace RELATION;
 
 RollingFrictionContact::RollingFrictionContact(int dimPb, int numericsSolverId):
   RollingFrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
-                                           solver_options_delete))
+                         solver_options_delete))
 {}
 
 RollingFrictionContact::RollingFrictionContact(int dimPb, SP::SolverOptions options):
   LinearOSNS(options), _rolling_frictionContact_driver(&rolling_fc3d_driver)
 {
-   if (dimPb != 5)
+  if(dimPb != 5)
     RuntimeException::selfThrow("Wrong dimension value (only 5 is allowed for RollingFrictionContact constructor.");
 
   _mu.reset(new MuStorage());
   _muR.reset(new MuStorage());
- 
+
 }
 
 void RollingFrictionContact::initialize(SP::Simulation sim)
@@ -67,23 +67,23 @@ void RollingFrictionContact::initialize(SP::Simulation sim)
                ->topology()->indexSet(0)->size();
   _mu->reserve(sizeMu);
   _muR->reserve(sizeMu);
-  
+
   // If the topology is TimeInvariant ie if M structure does not
   // change during simulation:
 
-  if (topology->indexSet0()->size()>0)
+  if(topology->indexSet0()->size()>0)
   {
     // Get index set from Simulation
     SP::InteractionsGraph indexSet =
       simulation()->indexSet(indexSetLevel());
     InteractionsGraph::VIterator ui, uiend;
-    for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       _mu->push_back(std11::static_pointer_cast<NewtonImpactRollingFrictionNSL>
                      (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
       _muR->push_back(std11::static_pointer_cast<NewtonImpactRollingFrictionNSL>
-                     (indexSet->bundle(*ui)->nonSmoothLaw())->muR());
-   }
+                      (indexSet->bundle(*ui)->nonSmoothLaw())->muR());
+    }
   }
 }
 
@@ -93,12 +93,12 @@ void RollingFrictionContact::updateMu()
   _muR->clear();
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     _mu->push_back(std11::static_pointer_cast<NewtonImpactRollingFrictionNSL>
                    (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
     _muR->push_back(std11::static_pointer_cast<NewtonImpactRollingFrictionNSL>
-                   (indexSet->bundle(*ui)->nonSmoothLaw())->muR());
+                    (indexSet->bundle(*ui)->nonSmoothLaw())->muR());
   }
 }
 
@@ -128,15 +128,15 @@ RollingFrictionContactProblem *RollingFrictionContact::frictionContactProblemPtr
 
 int RollingFrictionContact::solve(SP::RollingFrictionContactProblem problem)
 {
-  if (!problem)
+  if(!problem)
   {
     problem = frictionContactProblem();
   }
 
   return (*_rolling_frictionContact_driver)(&*problem,
-                                            &*_z->getArray(),
-                                            &*_w->getArray(),
-                                            &*_numerics_solver_options);
+         &*_z->getArray(),
+         &*_w->getArray(),
+         &*_numerics_solver_options);
 }
 
 
@@ -145,12 +145,12 @@ int RollingFrictionContact::compute(double time)
   int info = 0;
   // --- Prepare data for RollingFrictionContact computing ---
   bool cont = preCompute(time);
-  if (!cont)
+  if(!cont)
   {
     return info;
   }
   // nothing to do
-  if (indexSetLevel() == LEVELMAX)
+  if(indexSetLevel() == LEVELMAX)
   {
     return info;
   }
@@ -163,7 +163,7 @@ int RollingFrictionContact::compute(double time)
   // - the unknowns (z,w)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
-  if (_sizeOutput != 0)
+  if(_sizeOutput != 0)
   {
     // Call Numerics Driver for RollingFrictionContact
     info = solve();

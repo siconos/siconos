@@ -32,7 +32,7 @@ int soclcp_test_function(FILE * f, SolverOptions * options)
 
   assert(f);
   assert(problem);
-  
+
   info = secondOrderConeLinearComplementarityProblem_newFromFile(problem, f);
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
@@ -45,12 +45,12 @@ int soclcp_test_function(FILE * f, SolverOptions * options)
   double *r = (double*)calloc(n, sizeof(double));
   double *v = (double*)calloc(n, sizeof(double));
 
-  info = soclcp_driver(problem, r , v, options);
+  info = soclcp_driver(problem, r, v, options);
 
   printf("\n");
   for(k = 0 ; k < n; k++)
   {
-    printf("v[%i] = %12.8e \t \t r[%i] = %12.8e\n", k, v[k], k , r[k]);
+    printf("v[%i] = %12.8e \t \t r[%i] = %12.8e\n", k, v[k], k, r[k]);
     info = info == 0 ? !(isfinite(v[k]) && isfinite(r[k])) : info;
   }
   printf("\n");

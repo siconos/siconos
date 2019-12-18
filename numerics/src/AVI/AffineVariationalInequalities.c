@@ -34,7 +34,7 @@ void AVI_display(AffineVariationalInequalities* avi)
   int i, n = avi->size;
   printf("AffineVariationalInequalities Display :\n-------------\n");
   printf("size :%zu \n", avi->size);
-  if (avi->M)
+  if(avi->M)
   {
     printf("M matrix:\n");
     NM_display(avi->M);
@@ -42,18 +42,18 @@ void AVI_display(AffineVariationalInequalities* avi)
   else
     printf("No M matrix.\n");
 
-  if (avi->q)
+  if(avi->q)
   {
     printf("q vector:\n");
-    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, avi->q[i]);
+    for(i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, avi->q[i]);
   }
   else
     printf("No q vector.\n");
 
-  if (avi->d)
+  if(avi->d)
   {
     printf("d vector:\n");
-    for (i = 0; i < n; i++) printf("d[ %i ] = %12.8e\n", i, avi->d[i]);
+    for(i = 0; i < n; i++) printf("d[ %i ] = %12.8e\n", i, avi->d[i]);
   }
   else
     printf("No d vector.\n");
@@ -66,7 +66,7 @@ void AVI_display(AffineVariationalInequalities* avi)
 
 int AVI_printInFile(AffineVariationalInequalities*  avi, FILE* file)
 {
-  if (! avi)
+  if(! avi)
   {
     fprintf(stderr, "Numerics, AffineVariationalInequalities printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -75,7 +75,7 @@ int AVI_printInFile(AffineVariationalInequalities*  avi, FILE* file)
   int n = avi->size;
   fprintf(file, "%d\n", n);
   NM_write_in_file(avi->M, file);
-  for (i = 0; i < avi->M->size1; i++)
+  for(i = 0; i < avi->M->size1; i++)
   {
     fprintf(file, "%32.24e ", avi->q[i]);
   }
@@ -92,7 +92,7 @@ int AVI_newFromFile(AffineVariationalInequalities* avi, FILE* file)
   avi->M = NM_new_from_file(file);
 
   avi->q = (double *) malloc(avi->M->size1 * sizeof(double));
-  for (i = 0; i < avi->M->size1; i++)
+  for(i = 0; i < avi->M->size1; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(avi->q[i])));
   }
@@ -112,28 +112,44 @@ int AVI_newFromFilename(AffineVariationalInequalities* avi, char* filename)
 void freeAVI(AffineVariationalInequalities* avi)
 {
   assert(avi);
-  if (avi->M)
+  if(avi->M)
   {
     NM_clear(avi->M);
     free(avi->M);
     avi->M = NULL;
   }
 
-  if (avi->poly.set->id == SICONOS_SET_POLYHEDRON)
+  if(avi->poly.set->id == SICONOS_SET_POLYHEDRON)
   {
     free_polyhedron(avi->poly.split);
     avi->poly.split = NULL;
   }
-  else if (avi->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED)
+  else if(avi->poly.set->id == SICONOS_SET_POLYHEDRON_UNIFIED)
   {
     free_polyhedron_unified(avi->poly.unif);
     avi->poly.unif = NULL;
   }
 
-  if (avi->q) { free(avi->q); avi->q = NULL; }
-  if (avi->d) { free(avi->d); avi->d = NULL; }
-  if (avi->lb) { free(avi->lb); avi->lb = NULL; }
-  if (avi->ub) { free(avi->ub); avi->ub = NULL; }
+  if(avi->q)
+  {
+    free(avi->q);
+    avi->q = NULL;
+  }
+  if(avi->d)
+  {
+    free(avi->d);
+    avi->d = NULL;
+  }
+  if(avi->lb)
+  {
+    free(avi->lb);
+    avi->lb = NULL;
+  }
+  if(avi->ub)
+  {
+    free(avi->ub);
+    avi->ub = NULL;
+  }
 
   free(avi);
 }

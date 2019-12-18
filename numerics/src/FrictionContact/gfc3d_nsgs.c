@@ -41,7 +41,7 @@ static void gfc3d_nsgs_initialize_local_solver(int n, SolverGlobalPtr* solve, Fr
 {
   /** Connect to local solver */
   /* Projection */
-  if (iparam[4] == 0)
+  if(iparam[4] == 0)
   {
     /*       *solve = &fc3d_projectionOnCone_solve; */
     *freeSolver = &gfc3d_nsgs_local_solver_projection_free;
@@ -88,7 +88,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
   /* Check for trivial case */
   *info = gfc3d_checkTrivialCaseGlobal(n, q, velocity, reaction, globalVelocity, options);
 
-  if (*info == 0)
+  if(*info == 0)
     return;
 
   SolverGlobalPtr local_solver = NULL;
@@ -105,17 +105,17 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
 
   int contact; /* Number of the current row of blocks in M */
 
-  if (H->storageType != M->storageType)
+  if(H->storageType != M->storageType)
   {
     //     if(verbose==1)
     fprintf(stderr, "Numerics, gfc3d_nsgs. H->storageType != M->storageType :This case is not taken into account.\n");
     exit(EXIT_FAILURE);
   }
 
-  double norm_q = cblas_dnrm2(n , problem->q , 1);
-  double norm_b = cblas_dnrm2(m , problem->b , 1);
+  double norm_q = cblas_dnrm2(n, problem->q, 1);
+  double norm_b = cblas_dnrm2(m, problem->b, 1);
   /* verbose=1; */
-  while ((iter < itermax) && (hasNotConverged > 0))
+  while((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
     /* Solve the first part with the current reaction */
@@ -123,14 +123,14 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
     /* globalVelocity <--q */
     cblas_dcopy_msan(n, q, 1, globalVelocity, 1);
     /* globalVelocity = H reaction + globalVelocity */
-    if (nc > 0) NM_gemv(1., H, reaction, 1., globalVelocity);
+    if(nc > 0) NM_gemv(1., H, reaction, 1., globalVelocity);
 
     CHECK_RETURN(!NM_gesv_expert(problem->M, globalVelocity, NM_KEEP_FACTORS));
 
     DEBUG_EXPR(NM_vector_display(reaction,m));
     DEBUG_EXPR(NM_vector_display(globalVelocity,n));
 
-    if (nc > 0)
+    if(nc > 0)
     {
       /* Compute current local velocity */
       /*      velocity <--b */
@@ -141,7 +141,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
       DEBUG_EXPR(NM_vector_display(velocity,m););
 
       /* Loop through the contact points */
-      for (contact = 0 ; contact < nc ; ++contact)
+      for(contact = 0 ; contact < nc ; ++contact)
       {
         /*    (*local_solver)(contact,n,reaction,iparam,dparam); */
         int pos = contact * 3;
@@ -154,33 +154,33 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
         projectionOnCone(&reaction[pos], mu[contact]);
       }
       DEBUG_EXPR(NM_vector_display(reaction,m););
-  }
+    }
 
 
     /* **** Criterium convergence **** */
     /* this is very expensive to check, you better do it only once in a while  */
-    if (options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY]>0)
+    if(options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY]>0)
     {
-      if (!(iter % options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY]))
+      if(!(iter % options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY]))
       {
         /* computeGlobalVelocity(problem, reaction, globalVelocity); */
-        (computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, norm_b, &error);
+        (computeError)(problem, reaction, velocity, globalVelocity, tolerance, options, norm_q, norm_b, &error);
       }
     }
     else
     {
-      (computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, norm_b, &error);
-   
+      (computeError)(problem, reaction, velocity, globalVelocity, tolerance, options, norm_q, norm_b, &error);
+
       numerics_printf_verbose(1,"----- GFC3D - NSGS - Iteration %i Residual = %14.7e; Tol = %g", iter, error, tolerance);
     }
-    if (error < tolerance) hasNotConverged = 0;
+    if(error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
 
   /*  One last error computation in case where are at the very end */
-  if (iter == itermax)
+  if(iter == itermax)
   {
-    (*computeError)(problem, reaction , velocity, globalVelocity, tolerance, options, norm_q, norm_b, &error);
+    (*computeError)(problem, reaction, velocity, globalVelocity, tolerance, options, norm_q, norm_b, &error);
   }
 
   dparam[SICONOS_DPARAM_TOL] = tolerance;

@@ -34,7 +34,7 @@ const char ** data_collection()
   data_collection_1[n_data++] = "./data/GFC3D_TwoRods1-condensed.dat";
   data_collection_1[n_data++] = "./data/FC3D_Example1.dat";
   data_collection_1[n_data++] = "./data/Confeti-ex03-Fc3D-SBM.dat";         /*5*/
-  data_collection_1[n_data++] = "./data/BoxesStack1-i100000-32.hdf5.dat";   
+  data_collection_1[n_data++] = "./data/BoxesStack1-i100000-32.hdf5.dat";
   data_collection_1[n_data++] = "./data/RockPile_tob1.dat";
   data_collection_1[n_data++] = "./data/KaplasTower-i1061-4.hdf5.dat";
   data_collection_1[n_data++] = "./data/OneObject-i100000-499.hdf5.dat";

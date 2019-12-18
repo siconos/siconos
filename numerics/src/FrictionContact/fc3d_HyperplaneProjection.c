@@ -49,8 +49,8 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
   int lsitermax = iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER];
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
- 
+  double norm_q = cblas_dnrm2(nc*3, problem->q, 1);
+
 
 
 
@@ -79,7 +79,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
   /*   printf("Hyperplane Projection method. rho is set to 1.0\n"); */
 
   /* } */
-  if (dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA] > 0.0 && dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA] < 1.0)
+  if(dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA] > 0.0 && dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA] < 1.0)
   {
     sigma = dparam[SICONOS_FRICTION_3D_PROXIMAL_DPARAM_SIGMA];
   }
@@ -88,14 +88,14 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
     printf("Hyperplane Projection method. 0<sigma <1  is not well defined\n");
     printf("Hyperplane Projection method. sigma is set to 0.99\n");
   }
- 
+
   /*   double minusrho  = -1.0*rho; */
-  while ((iter < itermax) && (hasNotConverged > 0))
+  while((iter < itermax) && (hasNotConverged > 0))
   {
     ++iter;
 
-    cblas_dcopy(n , q , 1 , velocitytmp, 1);
-    cblas_dcopy(n , reaction , 1 , reactiontmp, 1);
+    cblas_dcopy(n, q, 1, velocitytmp, 1);
+    cblas_dcopy(n, reaction, 1, reactiontmp, 1);
 
     NM_gemv(1.0, M, reactiontmp, 1.0, velocitytmp);
 
@@ -104,7 +104,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
 
     double rho = 1;
 
-    for (contact = 0 ; contact < nc ; ++contact)
+    for(contact = 0 ; contact < nc ; ++contact)
     {
       int pos = contact * nLocal;
       double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1] + velocitytmp[pos + 2] * velocitytmp[pos + 2]);
@@ -122,24 +122,24 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
     double lhs = NAN;
     double rhs;
     // z_k-y_k
-    cblas_dcopy(n , reaction , 1 , reactiontmp3, 1);
+    cblas_dcopy(n, reaction, 1, reactiontmp3, 1);
     cblas_daxpy(n, -1.0, reactiontmp, 1, reactiontmp3, 1);
 
 
-    while (stopingcriteria && (i < lsitermax))
+    while(stopingcriteria && (i < lsitermax))
     {
       i++ ;
-      cblas_dcopy(n , reactiontmp , 1 , reactiontmp2, 1);
+      cblas_dcopy(n, reactiontmp, 1, reactiontmp2, 1);
       alpha = 1.0 / (pow(2.0, i));
 #ifdef VERBOSE_DEBUG
       printf("alpha = %f\n", alpha);
 #endif
-      cblas_dscal(n , alpha, reactiontmp2, 1);
+      cblas_dscal(n, alpha, reactiontmp2, 1);
       alpha  = 1.0 - alpha;
 
       cblas_daxpy(n, alpha, reaction, 1, reactiontmp2, 1);
 
-      cblas_dcopy(n , q , 1 , velocitytmp, 1);
+      cblas_dcopy(n, q, 1, velocitytmp, 1);
 
       NM_gemv(1.0, M, reactiontmp2, 1.0, velocitytmp);
 
@@ -155,7 +155,7 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
       lhs = cblas_ddot(n, velocitytmp, 1, reactiontmp3, 1);
       rhs = cblas_dnrm2(n, reactiontmp3, 1);
       rhs = sigma / rho * rhs * rhs;
-      if (lhs >= rhs)  stopingcriteria = 0;
+      if(lhs >= rhs)  stopingcriteria = 0;
 #ifdef VERBOSE_DEBUG
       printf("Number of iteration in Armijo line search = %i\n", i);
       printf("lhs = %f\n", lhs);
@@ -171,33 +171,33 @@ void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double *reaction
 #ifdef VERBOSE_DEBUG
     printf("rho equiv = %f\n", rhoequiv);
 #endif
-    cblas_daxpy(n, -rhoequiv, velocitytmp, 1, reaction  , 1);
+    cblas_daxpy(n, -rhoequiv, velocitytmp, 1, reaction, 1);
 
 
     // projection for each contact
-    for (contact = 0 ; contact < nc ; ++contact)
+    for(contact = 0 ; contact < nc ; ++contact)
     {
       int pos = contact * nLocal;
       projectionOnCone(&reaction[pos], mu[contact]);
     }
 
     /* **** Criterium convergence **** */
-    fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
+    fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
 
-    if (options->callback)
+    if(options->callback)
     {
-      options->callback->collectStatsIteration(options->callback->env, nc * 3, 
-                                      reaction, velocity, 
-                                      error, NULL);
+      options->callback->collectStatsIteration(options->callback->env, nc * 3,
+          reaction, velocity,
+          error, NULL);
     }
 
-    if (verbose > 0)
+    if(verbose > 0)
       printf("--------------- FC3D - Hyperplane Projection (HP) - Iteration %i rho = %14.7e \t rhoequiv = %14.7e \tError = %14.7e\n", iter, rho, rhoequiv, error);
 
-    if (error < tolerance) hasNotConverged = 0;
+    if(error < tolerance) hasNotConverged = 0;
     *info = hasNotConverged;
   }
-  if (verbose > 0)
+  if(verbose > 0)
     printf("--------------- FC3D - Hyperplane Projection (HP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;

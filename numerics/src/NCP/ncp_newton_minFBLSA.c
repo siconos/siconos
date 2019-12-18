@@ -39,7 +39,7 @@ static void min_compute_H_ncp(void* data_opaque, double* z, double* F, double* w
   Jac_F_min(0, data->n, z, F, data->nabla_F, H);
 }
 
-void ncp_newton_minFBLSA(NonlinearComplementarityProblem* problem, double *z, double* F, int *info , SolverOptions* options)
+void ncp_newton_minFBLSA(NonlinearComplementarityProblem* problem, double *z, double* F, int *info, SolverOptions* options)
 {
   functions_LSA functions_minFBLSA_ncp;
   init_lsa_functions(&functions_minFBLSA_ncp, &FB_compute_F_ncp, &ncp_FB);

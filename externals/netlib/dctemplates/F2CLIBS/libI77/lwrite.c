@@ -24,12 +24,12 @@ lwrt_I(long n)
   char buf[LINTW], *p;
 #ifdef USE_STRLEN
   (void) sprintf(buf, " %ld", n);
-  if (f__recpos + strlen(buf) >= L_len)
+  if(f__recpos + strlen(buf) >= L_len)
 #else
-  if (f__recpos + sprintf(buf, " %ld", n) >= L_len)
+  if(f__recpos + sprintf(buf, " %ld", n) >= L_len)
 #endif
     (*f__donewrec)();
-  for (p = buf; *p; PUT(*p++));
+  for(p = buf; *p; PUT(*p++));
 }
 static VOID
 #ifdef KR_headers
@@ -39,7 +39,7 @@ ftnlen len;
 lwrt_L(ftnint n, ftnlen len)
 #endif
 {
-  if (f__recpos + LLOGW >= L_len)
+  if(f__recpos + LLOGW >= L_len)
     (*f__donewrec)();
   wrt_L((Uint *)&n, LLOGW, len);
 }
@@ -52,14 +52,14 @@ lwrt_A(char *p, ftnlen len)
 #endif
 {
   int i;
-  if (f__recpos + len >= L_len)
+  if(f__recpos + len >= L_len)
     (*f__donewrec)();
-  if (!f__recpos)
+  if(!f__recpos)
   {
     PUT(' ');
     ++f__recpos;
   }
-  for (i = 0; i < len; i++) PUT(*p++);
+  for(i = 0; i < len; i++) PUT(*p++);
 }
 
 static int
@@ -75,7 +75,7 @@ l_g(char *buf, double n)
   char *fmt;
 
   absn = n;
-  if (absn < 0)
+  if(absn < 0)
     absn = -absn;
   fmt = LLOW <= absn && absn < LHIGH ? LFFMT : LEFMT;
 #ifdef USE_STRLEN
@@ -90,14 +90,14 @@ l_g(char *buf, double n)
 
   b = buf;
   *b++ = ' ';
-  if (n < 0)
+  if(n < 0)
   {
     *b++ = '-';
     n = -n;
   }
   else
     *b++ = ' ';
-  if (n == 0)
+  if(n == 0)
   {
     *b++ = '0';
     *b++ = '.';
@@ -105,25 +105,25 @@ l_g(char *buf, double n)
     goto f__ret;
   }
   sprintf(b, LGFMT, n);
-  if (*b == '0')
+  if(*b == '0')
   {
-    while (b[0] = b[1])
+    while(b[0] = b[1])
       b++;
   }
   /* Fortran 77 insists on having a decimal point... */
-  else for (;; b++)
-      switch (*b)
+  else for(;; b++)
+      switch(*b)
       {
       case 0:
         *b++ = '.';
         *b = 0;
         goto f__ret;
       case '.':
-        while (*++b);
+        while(*++b);
         goto f__ret;
       case 'E':
-        for (c1 = '.', c = 'E';  *b = c1;
-             c1 = c, c = *++b);
+        for(c1 = '.', c = 'E';  *b = c1;
+            c1 = c, c = *++b);
         goto f__ret;
       }
 f__ret:
@@ -143,7 +143,7 @@ l_put(register char *s)
 #else
   register int c, (*pn)(int) = f__putn;
 #endif
-  while (c = *s++)
+  while(c = *s++)
     (*pn)(c);
 }
 
@@ -156,7 +156,7 @@ lwrt_F(double n)
 {
   char buf[LEFBL];
 
-  if (f__recpos + l_g(buf, n) >= L_len)
+  if(f__recpos + l_g(buf, n) >= L_len)
     (*f__donewrec)();
   l_put(buf);
 }
@@ -171,18 +171,18 @@ lwrt_C(double a, double b)
   int al, bl;
 
   al = l_g(bufa, a);
-  for (ba = bufa; *ba == ' '; ba++)
+  for(ba = bufa; *ba == ' '; ba++)
     --al;
   bl = l_g(bufb, b) + 1;  /* intentionally high by 1 */
-  for (bb = bufb; *bb == ' '; bb++)
+  for(bb = bufb; *bb == ' '; bb++)
     --bl;
-  if (f__recpos + al + bl + 3 >= L_len && f__recpos)
+  if(f__recpos + al + bl + 3 >= L_len && f__recpos)
     (*f__donewrec)();
   PUT(' ');
   PUT('(');
   l_put(ba);
   PUT(',');
-  if (f__recpos + bl >= L_len)
+  if(f__recpos + bl >= L_len)
   {
     (*f__donewrec)();
     PUT(' ');
@@ -204,9 +204,9 @@ l_write(ftnint *number, char *ptr, ftnlen len, ftnint type)
   double y, z;
   real *xx;
   doublereal *yy;
-  for (i = 0; i < *number; i++)
+  for(i = 0; i < *number; i++)
   {
-    switch ((int)type)
+    switch((int)type)
     {
     default:
       f__fatal(204, "unknown type in lio");

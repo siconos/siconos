@@ -47,13 +47,13 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
 #ifdef GMP_DEBUG_REDUCED
 static void printDenseMatrice(char* name, FILE * file, double * m, int N, int M)
 {
-  if (file)
+  if(file)
   {
     fprintf(file, "%s=[ \n", name);
-    for (int i = 0; i < N; i++)
+    for(int i = 0; i < N; i++)
     {
       fprintf(file, "[");
-      for (int j = 0; j < M; j++)
+      for(int j = 0; j < M; j++)
       {
         fprintf(file, "%e\t  ", m[i + j * N]);
       }
@@ -64,10 +64,10 @@ static void printDenseMatrice(char* name, FILE * file, double * m, int N, int M)
   else
   {
     printf("%s=[ \n", name);
-    for (int i = 0; i < N; i++)
+    for(int i = 0; i < N; i++)
     {
       printf("[");
-      for (int j = 0; j < M; j++)
+      for(int j = 0; j < M; j++)
       {
         printf("%e\t  ", m[i + j * N]);
       }
@@ -79,22 +79,22 @@ static void printDenseMatrice(char* name, FILE * file, double * m, int N, int M)
 #endif
 
 void gmp_reduced_convert_solution(GenericMechanicalProblem* pInProblem, double * reaction, double * velocity,
-                        double * Re, double * Rreduced, double * Vreduced)
+                                  double * Re, double * Rreduced, double * Vreduced)
 {
   listNumericsProblem * curProblem = 0;
   //int curRowE=0;
   //int curRowI=0;
   curProblem =  pInProblem->firstListElem;
   int curSize = 0;
-  while (curProblem)
+  while(curProblem)
   {
     curSize = curProblem->size;
-    switch (curProblem->type)
+    switch(curProblem->type)
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     {
       memcpy(reaction, Re, curSize * sizeof(double));
-      for (int i = 0; i < curSize; i++)
+      for(int i = 0; i < curSize; i++)
         velocity[i] = 0.0;
       Re += curSize;
       break;
@@ -123,9 +123,9 @@ void _GMPReducedGetSizes(GenericMechanicalProblem* pInProblem, int * Me_size, in
   (* Me_size) = 0;
   (* Mi_size) = 0;
   curProblem =  pInProblem->firstListElem;
-  while (curProblem)
+  while(curProblem)
   {
-    if (curProblem->type == SICONOS_NUMERICS_PROBLEM_EQUALITY)
+    if(curProblem->type == SICONOS_NUMERICS_PROBLEM_EQUALITY)
     {
       (*Me_size) += curProblem->size;;
     }
@@ -164,14 +164,14 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   int nbBlockRowI = 0;
   int numBlockRow = 0;
   curProblem =  pInProblem->firstListElem;
-  while (curProblem)
+  while(curProblem)
   {
-    if (numBlockRow)
+    if(numBlockRow)
       curSize = m->blocksize0[numBlockRow] - m->blocksize0[numBlockRow - 1];
     else
       curSize = m->blocksize0[numBlockRow];
 
-    if (curProblem->type == SICONOS_NUMERICS_PROBLEM_EQUALITY)
+    if(curProblem->type == SICONOS_NUMERICS_PROBLEM_EQUALITY)
     {
       nbBlockRowE++;
       MeRow += curSize;
@@ -189,9 +189,9 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   int numRowI = 0;
   int numRow = 0;
   curProblem =  pInProblem->firstListElem;
-  while (curProblem)
+  while(curProblem)
   {
-    if (curProblem->type == SICONOS_NUMERICS_PROBLEM_EQUALITY)
+    if(curProblem->type == SICONOS_NUMERICS_PROBLEM_EQUALITY)
     {
       newIndexOfCol[numRow] = numRowE;
       numRowE++;
@@ -207,7 +207,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
 #ifdef GMP_DEBUG_REDUCED
   printf("buildReducedGMP nb of block of eq=%i. nb of iq=%i\n", numRowE, numRowI);
 #endif
-  
+
   /*building of the permutation matrices*/
   SparseBlockStructuredMatrix * Maux = SBM_new();
   SBM_column_permutation(newIndexOfCol, m, Maux);
@@ -233,17 +233,17 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   Qi=(double *) malloc(MiRow*sizeof(double));*/
   /** copi in Me*/
   int curPos = 0;
-  for (int numBlockRow = 0; numBlockRow < nbBlockRowE; numBlockRow++)
+  for(int numBlockRow = 0; numBlockRow < nbBlockRowE; numBlockRow++)
   {
     SBM_row_to_dense(Morder, numBlockRow, Me, curPos, MeRow);
     curPos = Morder->blocksize1[numBlockRow];
   }
   curPos = 0;
   int firtMiLine = 0;
-  if (nbBlockRowI > 0)
+  if(nbBlockRowI > 0)
     firtMiLine = Morder->blocksize1[nbBlockRowE];
 
-  for (int numBlockRow = nbBlockRowE; numBlockRow < nbBlockRowE + nbBlockRowI; numBlockRow++)
+  for(int numBlockRow = nbBlockRowE; numBlockRow < nbBlockRowE + nbBlockRowI; numBlockRow++)
   {
     curPos = Morder->blocksize1[numBlockRow] - firtMiLine;
     SBM_row_to_dense(Morder, numBlockRow, Mi, curPos, MiRow);
@@ -258,9 +258,9 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   double *curQe = Qe;
   double *curQi = Qi;
   curBlock = 0;
-  while (curProblem)
+  while(curProblem)
   {
-    if (curBlock)
+    if(curBlock)
     {
       curSize = m->blocksize0[curBlock] - m->blocksize0[curBlock - 1];
     }
@@ -269,7 +269,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
       curSize = m->blocksize0[curBlock];
     }
 
-    switch (curProblem->type)
+    switch(curProblem->type)
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     {
@@ -298,10 +298,10 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   int nbCol = MeRow + MiRow;
   printf("\\The Me matrix is:\n");
   printf("Me=[ \n");
-  for (int i = 0; i < MeRow; i++)
+  for(int i = 0; i < MeRow; i++)
   {
     printf("[");
-    for (int j = 0; j < nbCol; j++)
+    for(int j = 0; j < nbCol; j++)
     {
       printf("%e\t  ", Me[i + j * MeRow]);
     }
@@ -309,15 +309,15 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   }
   printf("];\n");
   printf("Qe= [ \n");
-  for (int i = 0; i < MeRow; i++)
+  for(int i = 0; i < MeRow; i++)
     printf("%e\t  ", Qe[i]);
   printf("];\n");
   printf("\\The Mi matrix is:\n");
   printf("Mi=[ \n");
-  for (int i = 0; i < MiRow; i++)
+  for(int i = 0; i < MiRow; i++)
   {
     printf("[");
-    for (int j = 0; j < nbCol; j++)
+    for(int j = 0; j < nbCol; j++)
     {
       printf("%e\t  ", Mi[i + j * MiRow]);
     }
@@ -325,7 +325,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
   }
   printf("];\n");
   printf("Qi= [ \n");
-  for (int i = 0; i < MiRow; i++)
+  for(int i = 0; i < MiRow; i++)
     printf("%e\t  ", Qi[i]);
   printf("];\n");
 #endif
@@ -340,7 +340,7 @@ void buildReducedGMP(GenericMechanicalProblem* pInProblem, double * Me, double *
  *
  *and GS.
  */
-void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int * info, SolverOptions* options)
+void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *reaction, double *velocity, int * info, SolverOptions* options)
 {
 
   SparseBlockStructuredMatrix* m = pInProblem->M->matrix1;
@@ -356,7 +356,7 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *re
 
   _GMPReducedEquality(pInProblem, reducedProb, Qreduced, &Me_size, &Mi_size);
 
-  if (Me_size == 0)
+  if(Me_size == 0)
   {
     gmp_gauss_seidel(pInProblem, reaction, velocity, info, options);
     free(reducedProb);
@@ -368,15 +368,15 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *re
   listNumericsProblem * curProblem = 0;
   GenericMechanicalProblem * _pnumerics_GMP = genericMechanicalProblem_new();
   curProblem =  pInProblem->firstListElem;
-  if (Me_size)
+  if(Me_size)
     gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, Me_size);
   unsigned int curPos = 0;
   unsigned int curPosEq = 0;
   unsigned int curPosInq = Me_size;
-  while (curProblem)
+  while(curProblem)
   {
     unsigned int curSize = curProblem->size;
-    switch (curProblem->type)
+    switch(curProblem->type)
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     {
@@ -425,7 +425,7 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *re
   _pnumerics_GMP->q = Qreduced;
   gmp_gauss_seidel(_pnumerics_GMP, Rreduced, Vreduced, info, options);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
-  if (*info)
+  if(*info)
   {
     printf("\nGMPREduced2 failed!\n");
   }
@@ -436,16 +436,16 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *re
     //    printDenseMatrice("V",file,Vreduced,nbRow,1);
   }
 #endif
-  if (!*info)
+  if(!*info)
   {
     gmp_reduced_convert_solution(pInProblem, reaction, velocity, Rreduced, Rreduced + Me_size, Vreduced + Me_size);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
-  //    printDenseMatrice("R2",file,reaction,nbRow,1);
-  //    printDenseMatrice("V2",file,velocity,nbRow,1);
+    //    printDenseMatrice("R2",file,reaction,nbRow,1);
+    //    printDenseMatrice("V2",file,velocity,nbRow,1);
 #endif
     double err;
     int tolViolate = gmp_compute_error(pInProblem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options, &err);
-    if (tolViolate)
+    if(tolViolate)
     {
       printf("GMPReduced2, warnning, reduced problem solved, but error of initial probleme violated tol = %e, err= %e\n", options->dparam[SICONOS_DPARAM_TOL], err);
     }
@@ -473,7 +473,7 @@ void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *re
  *Vi=(Mi_2-Mi_1 Me_1^{-1} Me_2)Ri+Qi-Mi1 Me_1^{-1} Qe
  *
  */
-void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int * info, SolverOptions* options)
+void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction, double *velocity, int * info, SolverOptions* options)
 {
 
   SparseBlockStructuredMatrix* m = pInProblem->M->matrix1;
@@ -487,7 +487,7 @@ void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction , 
   int Mi_size;
   buildReducedGMP(pInProblem, Me, Mi, Qe, Qi, &Me_size, &Mi_size);
 
-  if ((Me_size == 0 || Mi_size == 0))
+  if((Me_size == 0 || Mi_size == 0))
   {
     gmp_gauss_seidel(pInProblem, reaction, velocity, info, options);
     free(Me);
@@ -540,9 +540,9 @@ void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction , 
   listNumericsProblem * curProblem = 0;
   GenericMechanicalProblem * _pnumerics_GMP = genericMechanicalProblem_new();
   curProblem =  pInProblem->firstListElem;
-  while (curProblem)
+  while(curProblem)
   {
-    switch (curProblem->type)
+    switch(curProblem->type)
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     {
@@ -576,7 +576,7 @@ void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction , 
   double *Vreduced = (double *) malloc(Mi_size * sizeof(double));
   gmp_gauss_seidel(_pnumerics_GMP, Rreduced, Vreduced, info, options);
 #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
-  if (*info)
+  if(*info)
   {
     printf("\nGMPREduced failed!\n");
   }
@@ -587,7 +587,7 @@ void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction , 
     printDenseMatrice("Vi", file, Vreduced, Mi_size, 1);
   }
 #endif
-  if (!*info)
+  if(!*info)
   {
     /*Re computation*/
     double * Re = (double*)malloc(Me_size * sizeof(double));
@@ -595,14 +595,14 @@ void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction , 
     memcpy(Rbuf, Qe, Me_size * sizeof(double));
     cblas_dgemv(CblasColMajor,CblasNoTrans, Me_size, Mi_size, 1.0, Me2, Me_size, Rreduced, 1, 1.0, Rbuf, 1);
     cblas_dgemv(CblasColMajor,CblasNoTrans, Me_size, Me_size, -1.0, pseduInvMe1, Me_size, Rbuf, 1, 0.0, Re, 1);
-  #ifdef GMP_DEBUG_GMPREDUCED_SOLVE
+#ifdef GMP_DEBUG_GMPREDUCED_SOLVE
     fprintf(file, "_Re=-Me1inv*(Me2*Ri+Qe);\n");
     printDenseMatrice("Re", file, Re, Me_size, 1);
-  #endif
+#endif
     gmp_reduced_convert_solution(pInProblem, reaction, velocity, Re, Rreduced, Vreduced);
     double err;
     int tolViolate = gmp_compute_error(pInProblem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options, &err);
-    if (tolViolate)
+    if(tolViolate)
     {
       printf("GMPReduced, warnning, reduced problem solved, but error of initial probleme violated tol = %e, err= %e\n", options->dparam[SICONOS_DPARAM_TOL], err);
     }
@@ -636,7 +636,7 @@ void _GMPReducedEquality(GenericMechanicalProblem* pInProblem, double * reducedP
   int nbCol = m->blocksize1[m->blocknumber1 - 1];
 
   _GMPReducedGetSizes(pInProblem, Me_size, Mi_size);
-  if (*Me_size == 0)
+  if(*Me_size == 0)
   {
     memcpy(Qreduced, pInProblem->q, (*Mi_size)*sizeof(double));
     SBM_to_dense(m, reducedProb);
@@ -663,29 +663,29 @@ void _GMPReducedEquality(GenericMechanicalProblem* pInProblem, double * reducedP
   printDenseMatrice("Qi", file, Qi, *Mi_size, 1);
   fclose(file);
 #endif
-  for (int numCol = 0; numCol < nbCol; numCol++)
+  for(int numCol = 0; numCol < nbCol; numCol++)
   {
-    if (*Me_size)
+    if(*Me_size)
       memcpy(reducedProb + numCol * nbRow, Me + numCol * (*Me_size), (*Me_size)*sizeof(double));
-    if (*Mi_size)
+    if(*Mi_size)
       memcpy(reducedProb + numCol * nbRow + (*Me_size), Mi + numCol * (*Mi_size), (*Mi_size)*sizeof(double));
   }
-  if (*Mi_size)
+  if(*Mi_size)
     memcpy(Qreduced + (*Me_size), Qi, (*Mi_size)*sizeof(double));
   free(Me);
   free(Mi);
   free(Qi);
 }
 
-void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int* info, SolverOptions* options)
+void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
 
   /*First, we don't manage FC3D.*/
   listNumericsProblem * curProblem = 0;
   curProblem =  pInProblem->firstListElem;
-  while (curProblem)
+  while(curProblem)
   {
-    switch (curProblem->type)
+    switch(curProblem->type)
     {
     case SICONOS_NUMERICS_PROBLEM_EQUALITY:
     case SICONOS_NUMERICS_PROBLEM_LCP:
@@ -712,7 +712,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double
   double * Qreduced = (double *)malloc(nbRow * sizeof(double));
   _GMPReducedEquality(pInProblem, reducedProb, Qreduced, &Me_size, &Mi_size);
 
-  if (!Me_size)
+  if(!Me_size)
   {
     /*it is a lcp.*/
     LinearComplementarityProblem aLCP;
@@ -734,11 +734,11 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double
 
     goto END_GMP3;
   }
-  if (!Mi_size)
+  if(!Mi_size)
   {
     /*it is a linear system.*/
     assert(Me_size >= 0);
-    for (size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
+    for(size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
     NumericsMatrix M;
     NM_fill(&M, NM_DENSE, Me_size, Me_size, reducedProb);
     *info = NM_gesv(&M, reaction, true);

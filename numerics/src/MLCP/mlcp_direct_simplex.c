@@ -50,11 +50,11 @@ void mlcp_direct_simplex(MixedLinearComplementarityProblem* problem, double *z, 
 {
   /*First, try direct solver*/
   mlcp_direct(problem, z, w, info, options);
-  if (*info)
+  if(*info)
   {
     /*solver direct failed, so run the simplex solver.*/
     mlcp_simplex(problem, z, w, info, options);
-    if (!(*info))
+    if(!(*info))
     {
       /*       for (i=0;i<problem->n+problem->m;i++){ */
       /*  printf("w[%d]=%f z[%d]=%f\t",i,w[i],i,z[i]);  */

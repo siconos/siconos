@@ -48,10 +48,10 @@ void NM_MUMPS_set_irn_jcn(NumericsMatrix* A)
    * just do triplet->p[k]++*/
   MUMPS_INT* iWork = (MUMPS_INT*)NM_iWork(A, (size_t)(2*nz) + 1, sizeof(MUMPS_INT));
 
-  for (size_t k=0 ; k < (size_t)nz; ++k)
+  for(size_t k=0 ; k < (size_t)nz; ++k)
   {
-    iWork [k + nz] = (MUMPS_INT) (triplet->p [k]) + 1;
-    iWork [k]      = (MUMPS_INT) (triplet->i [k]) + 1;
+    iWork [k + nz] = (MUMPS_INT)(triplet->p [k]) + 1;
+    iWork [k]      = (MUMPS_INT)(triplet->i [k]) + 1;
   }
 
   iWork [2*nz] = (MUMPS_INT) nz;
@@ -67,7 +67,7 @@ DMUMPS_STRUC_C* NM_MUMPS_id(NumericsMatrix* A)
   NSM_linear_solver_params* params = NSM_linearSolverParams(A);
   DMUMPS_STRUC_C* mumps_id;
 
-  if (!params->linear_solver_data)
+  if(!params->linear_solver_data)
   {
     /* valgrind reports some conditional move on initialized data in MUMPS
      * --xhub */
@@ -87,13 +87,13 @@ void NM_MUMPS_set_id(NumericsMatrix* A, DMUMPS_STRUC_C* id)
 void NM_MUMPS(NumericsMatrix* A, int job)
 {
 #ifdef SICONOS_HAS_MPI
-  if (NM_MPI_rank(A)==0)
+  if(NM_MPI_rank(A)==0)
   {
     NM_MUMPS_id(A)->job = job;
     /* we send the job number for listening processes */
     DEBUG_PRINTF("NM_MUMPS: %d sending job %d\n", NM_MPI_rank(A),job);
     CHECK_MPI(NM_MPI_comm(A), MPI_Bcast(&job, 1, MPI_INT, 0, NM_MPI_comm(A)));
-    if (job)
+    if(job)
     {
       dmumps_c(NM_MUMPS_id(A));
     }
@@ -112,7 +112,7 @@ void NM_MUMPS(NumericsMatrix* A, int job)
       DEBUG_PRINTF("NM_MUMPS: %d waiting for job specification from process 0\n", NM_MPI_rank(A));
       CHECK_MPI(NM_MPI_comm(A), MPI_Bcast(&ijob, 1, MPI_INT, 0, NM_MPI_comm(A)));
       DEBUG_PRINTF("NM_MUMPS: %d receiving job %d\n", NM_MPI_rank(A),ijob);
-      if (ijob)
+      if(ijob)
       {
         NM_MUMPS_id(A)->job = ijob;
         dmumps_c(NM_MUMPS_id(A));
@@ -156,7 +156,7 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A)
   mumps_id->sym = 0; /* unsymmetric */
 
 #ifdef SICONOS_HAS_MPI
-  if (NM_MPI_comm(A) == MPI_COMM_WORLD)
+  if(NM_MPI_comm(A) == MPI_COMM_WORLD)
   {
     mumps_id->comm_fortran = (MUMPS_INT) USE_COMM_WORLD;
   }
@@ -170,19 +170,19 @@ void NM_MUMPS_set_control_params(NumericsMatrix* A)
 void NM_MUMPS_set_verbosity(NumericsMatrix* A, unsigned int verbosity)
 {
   DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
-  if (verbosity == 0)
+  if(verbosity == 0)
   {
     mumps_id->ICNTL(1) = -1; // Error messages, standard output stream.
     mumps_id->ICNTL(2) = -1; // Diagnostics,    standard output stream.
     mumps_id->ICNTL(3) = -1; // Global infos,   standard output stream.
   }
-  else if (verbosity == 1)
+  else if(verbosity == 1)
   {
     mumps_id->ICNTL(1) = 6; // Error messages, standard output stream.
     mumps_id->ICNTL(2) = 6; // Diagnostics,    standard output stream.
     mumps_id->ICNTL(3) = 6; // Global infos,   standard output stream.
 //      mumps_id->ICNTL(4) = 4; // Errors, warnings and information on
-                              // input, output parameters printed.
+    // input, output parameters printed.
 
   }
 }
@@ -194,11 +194,11 @@ void NM_MUMPS_set_default_params(NumericsMatrix* A)
 
   mumps_id->ICNTL(24) = 1; // Null pivot row detection see also CNTL(3) & CNTL(5)
 //      mumps_id->ICNTL(10) = -2; // One step of iterative refinment
-    // ok for a cube on a plane & four contact points
-    // computeAlartCurnierSTD != generated in this case...
+  // ok for a cube on a plane & four contact points
+  // computeAlartCurnierSTD != generated in this case...
 
-    //mumps_id->CNTL(3) = ...;
-    //mumps_id->CNTL(5) = ...;
+  //mumps_id->CNTL(3) = ...;
+  //mumps_id->CNTL(5) = ...;
 
   mumps_id->ICNTL(7) = 3; // scotch
 }
@@ -206,7 +206,7 @@ void NM_MUMPS_set_default_params(NumericsMatrix* A)
 void NM_MUMPS_set_problem(NumericsMatrix* A, double *b)
 {
   /* numerics matrices are not distributed */
-  if (NM_MPI_rank(A) == 0)
+  if(NM_MPI_rank(A) == 0)
   {
     DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
     mumps_id->n = (MUMPS_INT) NM_triplet(A)->n;
@@ -224,7 +224,7 @@ void NM_MUMPS_extra_display(NumericsMatrix* A)
 {
   DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
-  if (mumps_id->ICNTL(11) == 2 || mumps_id->ICNTL(11) == 1)
+  if(mumps_id->ICNTL(11) == 2 || mumps_id->ICNTL(11) == 1)
   {
     printf("MUMPS : inf norm of A is %g\n", mumps_id->RINFOG(4));
     printf("MUMPS : inf norm of x is %g\n", mumps_id->RINFOG(5));
@@ -234,7 +234,7 @@ void NM_MUMPS_extra_display(NumericsMatrix* A)
     printf("MUMPS : \n");
   }
 
-  if (mumps_id->ICNTL(11) == 1)
+  if(mumps_id->ICNTL(11) == 1)
   {
     printf("MUMPS : estimate for error in solution %g\n", mumps_id->RINFOG(10));
     printf("MUMPS : condition number 1 %g\n", mumps_id->RINFOG(10));
@@ -256,7 +256,7 @@ void NM_MUMPS_set_sym(NumericsMatrix* A, int sym)
 void NM_MUMPS_copy(const NumericsMatrix* A, NumericsMatrix* B)
 {
 #ifdef WITH_MUMPS
-  if (A->matrix2 && A->matrix2->linearSolverParams && A->matrix2->linearSolverParams->solver==NSM_MUMPS && A->matrix2->linearSolverParams->linear_solver_data)
+  if(A->matrix2 && A->matrix2->linearSolverParams && A->matrix2->linearSolverParams->solver==NSM_MUMPS && A->matrix2->linearSolverParams->linear_solver_data)
   {
     /* copy id of A into B */
     DMUMPS_STRUC_C* B_id = NM_MUMPS_id(B);

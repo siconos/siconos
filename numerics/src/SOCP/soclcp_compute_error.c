@@ -31,12 +31,12 @@
 #include "NSSTools.h"  // for max
 #include "SiconosBlas.h"                                  // for cblas_dcopy
 
-void soclcp_unitary_compute_and_add_error(double *z , double *w, unsigned int dim, double mu, double * error,
-                                          double * worktmp)
+void soclcp_unitary_compute_and_add_error(double *z, double *w, unsigned int dim, double mu, double * error,
+    double * worktmp)
 {
 
   double rho = 1.0;
-  for (unsigned int i =0; i < dim; ++i)
+  for(unsigned int i =0; i < dim; ++i)
   {
     worktmp[i] = z[i] - rho * w[i];
   }
@@ -52,7 +52,7 @@ void soclcp_unitary_compute_and_add_error(double *z , double *w, unsigned int di
   /*   printf("-- worktmp[%i]=%e\t\t\n",i,(worktmp)[i]); */
   /* } */
 
-  for (unsigned int i =0; i < dim; ++i)
+  for(unsigned int i =0; i < dim; ++i)
   {
     worktmp[i] = z[i] -  worktmp[i];
     *error +=  worktmp[i] * worktmp[i];
@@ -60,7 +60,7 @@ void soclcp_unitary_compute_and_add_error(double *z , double *w, unsigned int di
 }
 int soclcp_compute_error(
   SecondOrderConeLinearComplementarityProblem* problem,
-  double *z , double *w, double tolerance,
+  double *z, double *w, double tolerance,
   SolverOptions * options, double * error)
 {
   assert(problem);
@@ -73,8 +73,8 @@ int soclcp_compute_error(
   int nc = problem->nc;
   double *mu = problem->tau;
   int n = problem->n;
-  
-  cblas_dcopy(n , problem->q , incx , w , incy); // w <-q
+
+  cblas_dcopy(n, problem->q, incx, w, incy);     // w <-q
   // Compute the current velocity
   NM_gemv(1.0, problem->M, z, 1.0, w);
 
@@ -84,13 +84,13 @@ int soclcp_compute_error(
   /*   printf("z[%i]=%e\n",i,z[i]); */
   /* } */
   /* printf("\n"); */
-  
+
   *error = 0.;
 
   int ic;
   int dim;
   unsigned int dim_max=0;
-  for (int i =0; i <nc; i++)
+  for(int i =0; i <nc; i++)
   {
     dim_max=max(dim_max,problem->coneIndex[i+1]-problem->coneIndex[i]);
   }
@@ -101,7 +101,7 @@ int soclcp_compute_error(
     dim = problem->coneIndex[ic+1]- problem->coneIndex[ic];
     soclcp_unitary_compute_and_add_error(z + problem->coneIndex[ic],
                                          w + problem->coneIndex[ic],
-                                         dim , mu[ic], error, worktmp);
+                                         dim, mu[ic], error, worktmp);
     /* for (int i=0; i < dim; i++ ) */
     /* { */
     /*   printf("-- w[%i]=%e\t\t\t",i,(w + problem->coneIndex[ic])[i]); */
@@ -112,10 +112,10 @@ int soclcp_compute_error(
   *error = sqrt(*error);
 
   /* Computes error */
-  double norm_q = cblas_dnrm2(n , problem->q , incx);
+  double norm_q = cblas_dnrm2(n, problem->q, incx);
   DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
   *error = *error / (norm_q + 1.0);
-  
+
   if(*error > tolerance)
   {
     if(verbose > 1)
@@ -129,7 +129,7 @@ int soclcp_compute_error(
 
 
 
-int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem, double *z , double *w, double tolerance, SolverOptions *options, double * error)
+int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem, double *z, double *w, double tolerance, SolverOptions *options, double * error)
 {
   /* Checks inputs */
   if(problem == NULL || z == NULL || w == NULL)
@@ -142,7 +142,7 @@ int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem,
   double *mu = problem->tau;
 
   double invmu = 0.0;
-  cblas_dcopy(n , problem->q , incx , z , incy); // z <-q
+  cblas_dcopy(n, problem->q, incx, z, incy);     // z <-q
 
   // Compute the current reaction
   NM_gemv(1.0, problem->M, w, 1.0, z);
@@ -154,13 +154,13 @@ int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem,
     int dim = problem->coneIndex[ic+1]-problem->coneIndex[ic];
     double * worktmp = (double *)malloc(dim*sizeof(double)) ;
     int nic = problem->coneIndex[ic];
-    for (int i=0; i < dim; i++)
+    for(int i=0; i < dim; i++)
     {
       worktmp[i] = w[nic+i] - rho * z[nic+i];
     }
     invmu = 1.0 / mu[ic];
     projectionOnSecondOrderCone(worktmp, invmu, dim);
-    for (int i=0; i < dim; i++)
+    for(int i=0; i < dim; i++)
     {
       worktmp[i] = w[nic+i] - worktmp[i];
       *error +=  worktmp[i] * worktmp[i];
@@ -170,7 +170,7 @@ int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem,
   *error = sqrt(*error);
 
   /* Computes error */
-  double norm_q = cblas_dnrm2(n , problem->q , incx);
+  double norm_q = cblas_dnrm2(n, problem->q, incx);
   *error = *error / (norm_q + 1.0);
   if(*error > tolerance)
   {

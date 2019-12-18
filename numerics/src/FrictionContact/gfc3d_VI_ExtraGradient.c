@@ -65,7 +65,7 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
   vi->size = n+m;
 
   /*Set the norm of the VI to the norm of problem->q  */
-  vi->normVI= cblas_dnrm2(n , problem->q , 1);
+  vi->normVI= cblas_dnrm2(n, problem->q, 1);
   vi->istheNormVIset=1;
 
   gfc3d_as_vi->vi = vi;
@@ -82,30 +82,30 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem,
   DEBUG_EXPR(NV_display(z,m+n););
   DEBUG_EXPR(NV_display(Fz,m+n););
 
-  variationalInequality_ExtraGradient(vi, z, Fz , info , options);
+  variationalInequality_ExtraGradient(vi, z, Fz, info, options);
 
-  memcpy(globalVelocity, z,  n * sizeof(double)  );
-  memcpy(reaction, &z[n], m * sizeof(double)  );
-  memcpy(velocity, &Fz[m],  m * sizeof(double)  )  ;
-  
+  memcpy(globalVelocity, z,  n * sizeof(double));
+  memcpy(reaction, &z[n], m * sizeof(double));
+  memcpy(velocity, &Fz[m],  m * sizeof(double))  ;
+
   free(z);
   free(Fz);
 
 
 
-   double norm_q = cblas_dnrm2(n , problem->q , 1);
-   double norm_b = cblas_dnrm2(m , problem->b , 1);
+  double norm_q = cblas_dnrm2(n, problem->q, 1);
+  double norm_b = cblas_dnrm2(m, problem->b, 1);
 
   /* **** Criterium convergence **** */
-   gfc3d_compute_error(problem, reaction , velocity, globalVelocity, options->dparam[SICONOS_DPARAM_TOL],
-                       options,
-                       norm_q, norm_b, &error);
+  gfc3d_compute_error(problem, reaction, velocity, globalVelocity, options->dparam[SICONOS_DPARAM_TOL],
+                      options,
+                      norm_q, norm_b, &error);
 
   DEBUG_EXPR(NM_vector_display(reaction,m));
   DEBUG_EXPR(NM_vector_display(velocity,m));
   DEBUG_EXPR(NM_vector_display(globalVelocity,n));
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
     printf("--------------- GFC3D - VI Extra Gradient (VI_EG) - #Iteration %i Final Residual = %14.7e\n",
            options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);

@@ -32,7 +32,7 @@
  * \param varsCount the count of variables (subvectors) in vec.
  * \return a pointer to a NumericsMatrix
  */
-RawNumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount);
+NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount);
 
 /**
  * Returns reflection matrix.
@@ -45,7 +45,7 @@ RawNumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSiz
  * \param size is the size of rectangular metrix
  * \return reflection matrix.
  */
-RawNumericsMatrix* Reflect_mat(const unsigned int size, NM_types type);
+NumericsMatrix* Reflect_mat(const unsigned int size, NM_types type);
 
 /**
  * Returns quadratic representation of the vector x by formula 2*xx^T - det(x)R
@@ -54,7 +54,7 @@ RawNumericsMatrix* Reflect_mat(const unsigned int size, NM_types type);
  * \param varsCount the count of variables (subvectors) in vec.
  * \return a pointer to a NumericsMatrix
  */
-RawNumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount);
+NumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount);
 
 
 void NesterovToddVector(const double* const vec1, const double* const vec2,

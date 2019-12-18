@@ -57,58 +57,58 @@ int globalFrictionContact_test_function(TestCase* current)
   frictionContact_test_gams_opts(current->options);
 #endif
 
-  
-  if (dim == 2)
+
+  if(dim == 2)
   {
     info = 1;
   }
-  else if (dim == 3)
+  else if(dim == 3)
   {
     info = gfc3d_driver(problem,
-			reaction , velocity, globalvelocity,
-			current->options);
+                        reaction, velocity, globalvelocity,
+                        current->options);
   }
 
   int print_size = 10;
 
-  if  (dim * NC >= print_size)
+  if(dim * NC >= print_size)
   {
     printf("First values (%i)\n", print_size);
-    for (k = 0 ; k < print_size; k++)
+    for(k = 0 ; k < print_size; k++)
     {
-      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
     }
     printf(" ..... \n");
-    for (k = 0 ; k < print_size; k++)
-  {
-    printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
-  }
+    for(k = 0 ; k < print_size; k++)
+    {
+      printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
+    }
   }
   else
   {
-    for (k = 0 ; k < dim * NC; k++)
+    for(k = 0 ; k < dim * NC; k++)
     {
-      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
     }
     printf("\n");
-    for (k = 0 ; k < dim*NC; k++)
+    for(k = 0 ; k < dim*NC; k++)
     {
       printf("GlocalVelocity[%i] = %12.8e\n", k, globalvelocity[k]);
     }
   }
   printf("\n");
 
-  for (k = 0; k < dim * NC; ++k)
+  for(k = 0; k < dim * NC; ++k)
   {
     info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
   }
 
-  for (k = 0; k < n; ++k)
+  for(k = 0; k < n; ++k)
   {
     info = info == 0 ? !(isfinite(globalvelocity[k])) : info;
   }
 
-  if (!info)
+  if(!info)
     printf("test successful, residual = %e\t, number of iterations = %i \n", current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
   else
     printf("test unsuccessful, residual = %e, info = %d, nb iter = %d\n", current->options->dparam[SICONOS_DPARAM_RESIDU], info, current->options->iparam[SICONOS_IPARAM_ITER_DONE]);

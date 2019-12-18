@@ -152,19 +152,19 @@ ftnlen uplo_len;
   lower = lsame_(uplo, "L", 1L, 1L);
 
   *info = 0;
-  if (!(wantz || lsame_(jobz, "N", 1L, 1L)))
+  if(!(wantz || lsame_(jobz, "N", 1L, 1L)))
   {
     *info = -1;
   }
-  else if (!(lower || lsame_(uplo, "U", 1L, 1L)))
+  else if(!(lower || lsame_(uplo, "U", 1L, 1L)))
   {
     *info = -2;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     *info = -3;
   }
-  else if (*lda < max(1, *n))
+  else if(*lda < max(1, *n))
   {
     *info = -5;
   }
@@ -172,13 +172,13 @@ ftnlen uplo_len;
   {
     /* Computing MAX */
     i__1 = 1, i__2 = *n * 3 - 1;
-    if (*lwork < max(i__1, i__2))
+    if(*lwork < max(i__1, i__2))
     {
       *info = -8;
     }
   }
 
-  if (*info != 0)
+  if(*info != 0)
   {
     i__1 = -(*info);
     xerbla_("DSYEV ", &i__1, 6L);
@@ -187,17 +187,17 @@ ftnlen uplo_len;
 
   /*     Quick return if possible */
 
-  if (*n == 0)
+  if(*n == 0)
   {
     work[1] = 1.;
     return 0;
   }
 
-  if (*n == 1)
+  if(*n == 1)
   {
     w[1] = a[a_dim1 + 1];
     work[1] = 3.;
-    if (wantz)
+    if(wantz)
     {
       a[a_dim1 + 1] = 1.;
     }
@@ -217,22 +217,22 @@ ftnlen uplo_len;
 
   anrm = dlansy_("M", uplo, n, &a[a_offset], lda, &work[1], 1L, 1L);
   iscale = 0;
-  if (anrm > 0. && anrm < rmin)
+  if(anrm > 0. && anrm < rmin)
   {
     iscale = 1;
     sigma = rmin / anrm;
   }
-  else if (anrm > rmax)
+  else if(anrm > rmax)
   {
     iscale = 1;
     sigma = rmax / anrm;
   }
-  if (iscale == 1)
+  if(iscale == 1)
   {
-    if (lower)
+    if(lower)
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         i__2 = *n - j + 1;
         dscal_(&i__2, &sigma, &a[j + j * a_dim1], &c__1);
@@ -242,7 +242,7 @@ ftnlen uplo_len;
     else
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         dscal_(&j, &sigma, &a[j * a_dim1 + 1], &c__1);
         /* L20: */
@@ -263,7 +263,7 @@ ftnlen uplo_len;
   /*     For eigenvalues only, call DSTERF.  For eigenvectors, first call */
   /*     DORGTR to generate the orthogonal matrix, then call DSTEQR. */
 
-  if (! wantz)
+  if(! wantz)
   {
     dsterf_(n, &w[1], &work[inde], info);
   }
@@ -277,9 +277,9 @@ ftnlen uplo_len;
 
   /*     If matrix was scaled, then rescale eigenvalues appropriately. */
 
-  if (iscale == 1)
+  if(iscale == 1)
   {
-    if (*info == 0)
+    if(*info == 0)
     {
       imax = *n;
     }
@@ -446,15 +446,15 @@ ftnlen compz_len;
   /* Function Body */
   *info = 0;
 
-  if (lsame_(compz, "N", 1L, 1L))
+  if(lsame_(compz, "N", 1L, 1L))
   {
     icompz = 0;
   }
-  else if (lsame_(compz, "V", 1L, 1L))
+  else if(lsame_(compz, "V", 1L, 1L))
   {
     icompz = 1;
   }
-  else if (lsame_(compz, "I", 1L, 1L))
+  else if(lsame_(compz, "I", 1L, 1L))
   {
     icompz = 2;
   }
@@ -462,19 +462,19 @@ ftnlen compz_len;
   {
     icompz = -1;
   }
-  if (icompz < 0)
+  if(icompz < 0)
   {
     *info = -1;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     *info = -2;
   }
-  else if (*ldz < 1 || icompz > 0 && *ldz < max(1, *n))
+  else if(*ldz < 1 || icompz > 0 && *ldz < max(1, *n))
   {
     *info = -6;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     i__1 = -(*info);
     xerbla_("DSTEQR", &i__1, 6L);
@@ -483,14 +483,14 @@ ftnlen compz_len;
 
   /*     Quick return if possible */
 
-  if (*n == 0)
+  if(*n == 0)
   {
     return 0;
   }
 
-  if (*n == 1)
+  if(*n == 1)
   {
-    if (icompz > 0)
+    if(icompz > 0)
     {
       z[z_dim1 + 1] = 1.;
     }
@@ -504,7 +504,7 @@ ftnlen compz_len;
   /*     Compute the eigenvalues and eigenvectors of the tridiagonal */
   /*     matrix. */
 
-  if (icompz == 2)
+  if(icompz == 2)
   {
     dlazro_(n, n, &c_b21, &c_b22, &z[z_offset], ldz);
   }
@@ -520,22 +520,22 @@ ftnlen compz_len;
   nm1 = *n - 1;
 
 L10:
-  if (l1 > *n)
+  if(l1 > *n)
   {
     goto L160;
   }
-  if (l1 > 1)
+  if(l1 > 1)
   {
     e[l1 - 1] = 0.;
   }
-  if (l1 <= nm1)
+  if(l1 <= nm1)
   {
     i__1 = nm1;
-    for (m = l1; m <= i__1; ++m)
+    for(m = l1; m <= i__1; ++m)
     {
       tst = (d__1 = e[m], abs(d__1));
-      if (tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m + 1],
-                        abs(d__2))))
+      if(tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m + 1],
+                       abs(d__2))))
       {
         goto L30;
       }
@@ -547,14 +547,14 @@ L10:
 L30:
   l = l1;
   lend = m;
-  if ((d__1 = d[lend], abs(d__1)) < (d__2 = d[l], abs(d__2)))
+  if((d__1 = d[lend], abs(d__1)) < (d__2 = d[l], abs(d__2)))
   {
     l = lend;
     lend = l1;
   }
   l1 = m + 1;
 
-  if (lend >= l)
+  if(lend >= l)
   {
 
     /*        QL Iteration */
@@ -562,15 +562,15 @@ L30:
     /*        Look for small subdiagonal element. */
 
 L40:
-    if (l != lend)
+    if(l != lend)
     {
       lendm1 = lend - 1;
       i__1 = lendm1;
-      for (m = l; m <= i__1; ++m)
+      for(m = l; m <= i__1; ++m)
       {
         tst = (d__1 = e[m], abs(d__1));
-        if (tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m + 1],
-                          abs(d__2))))
+        if(tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m + 1],
+                         abs(d__2))))
         {
           goto L60;
         }
@@ -581,12 +581,12 @@ L40:
     m = lend;
 
 L60:
-    if (m < lend)
+    if(m < lend)
     {
       e[m] = 0.;
     }
     p = d[l];
-    if (m == l)
+    if(m == l)
     {
       goto L80;
     }
@@ -594,9 +594,9 @@ L60:
     /*        If remaining matrix is 2-by-2, use DLAE2 or DLAEV2 */
     /*        to compute its eigensystem. */
 
-    if (m == l + 1)
+    if(m == l + 1)
     {
-      if (icompz > 0)
+      if(icompz > 0)
       {
         dlaev2_(&d[l], &e[l], &d[l + 1], &rt1, &rt2, &c, &s);
         work[l] = c;
@@ -612,14 +612,14 @@ L60:
       d[l + 1] = rt2;
       e[l] = 0.;
       l += 2;
-      if (l <= lend)
+      if(l <= lend)
       {
         goto L40;
       }
       goto L10;
     }
 
-    if (jtot == nmaxit)
+    if(jtot == nmaxit)
     {
       goto L140;
     }
@@ -639,12 +639,12 @@ L60:
 
     mm1 = m - 1;
     i__1 = l;
-    for (i = mm1; i >= i__1; --i)
+    for(i = mm1; i >= i__1; --i)
     {
       f = s * e[i];
       b = c * e[i];
       dlartg_(&g, &f, &c, &s, &r);
-      if (i != m - 1)
+      if(i != m - 1)
       {
         e[i + 1] = r;
       }
@@ -656,7 +656,7 @@ L60:
 
       /*           If eigenvectors are desired, then save rotations. */
 
-      if (icompz > 0)
+      if(icompz > 0)
       {
         work[i] = c;
         work[*n - 1 + i] = -s;
@@ -667,7 +667,7 @@ L60:
 
     /*        If eigenvectors are desired, then apply saved rotations. */
 
-    if (icompz > 0)
+    if(icompz > 0)
     {
       mm = m - l + 1;
       dlasr_("R", "V", "B", n, &mm, &work[l], &work[*n - 1 + l], &z[l *
@@ -684,7 +684,7 @@ L80:
     d[l] = p;
 
     ++l;
-    if (l <= lend)
+    if(l <= lend)
     {
       goto L40;
     }
@@ -699,15 +699,15 @@ L80:
     /*        Look for small superdiagonal element. */
 
 L90:
-    if (l != lend)
+    if(l != lend)
     {
       lendp1 = lend + 1;
       i__1 = lendp1;
-      for (m = l; m >= i__1; --m)
+      for(m = l; m >= i__1; --m)
       {
         tst = (d__1 = e[m - 1], abs(d__1));
-        if (tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m - 1],
-                          abs(d__2))))
+        if(tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m - 1],
+                         abs(d__2))))
         {
           goto L110;
         }
@@ -718,12 +718,12 @@ L90:
     m = lend;
 
 L110:
-    if (m > lend)
+    if(m > lend)
     {
       e[m - 1] = 0.;
     }
     p = d[l];
-    if (m == l)
+    if(m == l)
     {
       goto L130;
     }
@@ -731,9 +731,9 @@ L110:
     /*        If remaining matrix is 2-by-2, use DLAE2 or DLAEV2 */
     /*        to compute its eigensystem. */
 
-    if (m == l - 1)
+    if(m == l - 1)
     {
-      if (icompz > 0)
+      if(icompz > 0)
       {
         dlaev2_(&d[l - 1], &e[l - 1], &d[l], &rt1, &rt2, &c, &s);
         work[m] = c;
@@ -749,14 +749,14 @@ L110:
       d[l] = rt2;
       e[l - 1] = 0.;
       l += -2;
-      if (l >= lend)
+      if(l >= lend)
       {
         goto L90;
       }
       goto L10;
     }
 
-    if (jtot == nmaxit)
+    if(jtot == nmaxit)
     {
       goto L140;
     }
@@ -776,12 +776,12 @@ L110:
 
     lm1 = l - 1;
     i__1 = lm1;
-    for (i = m; i <= i__1; ++i)
+    for(i = m; i <= i__1; ++i)
     {
       f = s * e[i];
       b = c * e[i];
       dlartg_(&g, &f, &c, &s, &r);
-      if (i != m)
+      if(i != m)
       {
         e[i - 1] = r;
       }
@@ -793,7 +793,7 @@ L110:
 
       /*           If eigenvectors are desired, then save rotations. */
 
-      if (icompz > 0)
+      if(icompz > 0)
       {
         work[i] = c;
         work[*n - 1 + i] = s;
@@ -804,7 +804,7 @@ L110:
 
     /*        If eigenvectors are desired, then apply saved rotations. */
 
-    if (icompz > 0)
+    if(icompz > 0)
     {
       mm = l - m + 1;
       dlasr_("R", "V", "F", n, &mm, &work[m], &work[*n - 1 + m], &z[m *
@@ -821,7 +821,7 @@ L130:
     d[l] = p;
 
     --l;
-    if (l >= lend)
+    if(l >= lend)
     {
       goto L90;
     }
@@ -834,9 +834,9 @@ L130:
 
 L140:
   i__1 = *n - 1;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
-    if (e[i] != 0.)
+    if(e[i] != 0.)
     {
       ++(*info);
     }
@@ -848,26 +848,26 @@ L140:
 
 L160:
   i__1 = *n;
-  for (ii = 2; ii <= i__1; ++ii)
+  for(ii = 2; ii <= i__1; ++ii)
   {
     i = ii - 1;
     k = i;
     p = d[i];
     i__2 = *n;
-    for (j = ii; j <= i__2; ++j)
+    for(j = ii; j <= i__2; ++j)
     {
-      if (d[j] < p)
+      if(d[j] < p)
       {
         k = j;
         p = d[j];
       }
       /* L170: */
     }
-    if (k != i)
+    if(k != i)
     {
       d[k] = d[i];
       d[i] = p;
-      if (icompz > 0)
+      if(icompz > 0)
       {
         dswap_(n, &z[i * z_dim1 + 1], &c__1, &z[k * z_dim1 + 1], &
                c__1);
@@ -945,13 +945,13 @@ doublereal *f, *g, *cs, *sn, *r;
   /*     .. */
   /*     .. Executable Statements .. */
 
-  if (*g == 0.)
+  if(*g == 0.)
   {
     *cs = 1.;
     *sn = 0.;
     *r = *f;
   }
-  else if (*f == 0.)
+  else if(*f == 0.)
   {
     *cs = 0.;
     *sn = 1.;
@@ -959,7 +959,7 @@ doublereal *f, *g, *cs, *sn, *r;
   }
   else
   {
-    if (abs(*f) > abs(*g))
+    if(abs(*f) > abs(*g))
     {
       t = *g / *f;
       tt = sqrt(t * t + 1.);
@@ -1131,32 +1131,32 @@ ftnlen direct_len;
 
   /* Function Body */
   info = 0;
-  if (!(lsame_(side, "L", 1L, 1L) || lsame_(side, "R", 1L, 1L)))
+  if(!(lsame_(side, "L", 1L, 1L) || lsame_(side, "R", 1L, 1L)))
   {
     info = 1;
   }
-  else if (!(lsame_(pivot, "V", 1L, 1L) || lsame_(pivot, "T", 1L, 1L) ||
-             lsame_(pivot, "B", 1L, 1L)))
+  else if(!(lsame_(pivot, "V", 1L, 1L) || lsame_(pivot, "T", 1L, 1L) ||
+            lsame_(pivot, "B", 1L, 1L)))
   {
     info = 2;
   }
-  else if (!(lsame_(direct, "F", 1L, 1L) || lsame_(direct, "B", 1L, 1L)))
+  else if(!(lsame_(direct, "F", 1L, 1L) || lsame_(direct, "B", 1L, 1L)))
   {
     info = 3;
   }
-  else if (*m < 0)
+  else if(*m < 0)
   {
     info = 4;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     info = 5;
   }
-  else if (*lda < max(1, *m))
+  else if(*lda < max(1, *m))
   {
     info = 9;
   }
-  if (info != 0)
+  if(info != 0)
   {
     xerbla_("DLASR ", &info, 6L);
     return 0;
@@ -1164,28 +1164,28 @@ ftnlen direct_len;
 
   /*     Quick return if possible */
 
-  if (*m == 0 || *n == 0)
+  if(*m == 0 || *n == 0)
   {
     return 0;
   }
-  if (lsame_(side, "L", 1L, 1L))
+  if(lsame_(side, "L", 1L, 1L))
   {
 
     /*        Form  P * A */
 
-    if (lsame_(pivot, "V", 1L, 1L))
+    if(lsame_(pivot, "V", 1L, 1L))
     {
-      if (lsame_(direct, "F", 1L, 1L))
+      if(lsame_(direct, "F", 1L, 1L))
       {
         i__1 = *m - 1;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           ctemp = c[j];
           stemp = s[j];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__2 = *n;
-            for (i = 1; i <= i__2; ++i)
+            for(i = 1; i <= i__2; ++i)
             {
               temp = a[j + 1 + i * a_dim1];
               a[j + 1 + i * a_dim1] = ctemp * temp - stemp * a[
@@ -1198,16 +1198,16 @@ ftnlen direct_len;
           /* L20: */
         }
       }
-      else if (lsame_(direct, "B", 1L, 1L))
+      else if(lsame_(direct, "B", 1L, 1L))
       {
-        for (j = *m - 1; j >= 1; --j)
+        for(j = *m - 1; j >= 1; --j)
         {
           ctemp = c[j];
           stemp = s[j];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__1 = *n;
-            for (i = 1; i <= i__1; ++i)
+            for(i = 1; i <= i__1; ++i)
             {
               temp = a[j + 1 + i * a_dim1];
               a[j + 1 + i * a_dim1] = ctemp * temp - stemp * a[
@@ -1221,19 +1221,19 @@ ftnlen direct_len;
         }
       }
     }
-    else if (lsame_(pivot, "T", 1L, 1L))
+    else if(lsame_(pivot, "T", 1L, 1L))
     {
-      if (lsame_(direct, "F", 1L, 1L))
+      if(lsame_(direct, "F", 1L, 1L))
       {
         i__1 = *m;
-        for (j = 2; j <= i__1; ++j)
+        for(j = 2; j <= i__1; ++j)
         {
           ctemp = c[j - 1];
           stemp = s[j - 1];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__2 = *n;
-            for (i = 1; i <= i__2; ++i)
+            for(i = 1; i <= i__2; ++i)
             {
               temp = a[j + i * a_dim1];
               a[j + i * a_dim1] = ctemp * temp - stemp * a[i *
@@ -1246,16 +1246,16 @@ ftnlen direct_len;
           /* L60: */
         }
       }
-      else if (lsame_(direct, "B", 1L, 1L))
+      else if(lsame_(direct, "B", 1L, 1L))
       {
-        for (j = *m; j >= 2; --j)
+        for(j = *m; j >= 2; --j)
         {
           ctemp = c[j - 1];
           stemp = s[j - 1];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__1 = *n;
-            for (i = 1; i <= i__1; ++i)
+            for(i = 1; i <= i__1; ++i)
             {
               temp = a[j + i * a_dim1];
               a[j + i * a_dim1] = ctemp * temp - stemp * a[i *
@@ -1269,19 +1269,19 @@ ftnlen direct_len;
         }
       }
     }
-    else if (lsame_(pivot, "B", 1L, 1L))
+    else if(lsame_(pivot, "B", 1L, 1L))
     {
-      if (lsame_(direct, "F", 1L, 1L))
+      if(lsame_(direct, "F", 1L, 1L))
       {
         i__1 = *m - 1;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           ctemp = c[j];
           stemp = s[j];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__2 = *n;
-            for (i = 1; i <= i__2; ++i)
+            for(i = 1; i <= i__2; ++i)
             {
               temp = a[j + i * a_dim1];
               a[j + i * a_dim1] = stemp * a[*m + i * a_dim1] +
@@ -1294,16 +1294,16 @@ ftnlen direct_len;
           /* L100: */
         }
       }
-      else if (lsame_(direct, "B", 1L, 1L))
+      else if(lsame_(direct, "B", 1L, 1L))
       {
-        for (j = *m - 1; j >= 1; --j)
+        for(j = *m - 1; j >= 1; --j)
         {
           ctemp = c[j];
           stemp = s[j];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__1 = *n;
-            for (i = 1; i <= i__1; ++i)
+            for(i = 1; i <= i__1; ++i)
             {
               temp = a[j + i * a_dim1];
               a[j + i * a_dim1] = stemp * a[*m + i * a_dim1] +
@@ -1318,24 +1318,24 @@ ftnlen direct_len;
       }
     }
   }
-  else if (lsame_(side, "R", 1L, 1L))
+  else if(lsame_(side, "R", 1L, 1L))
   {
 
     /*        Form A * P' */
 
-    if (lsame_(pivot, "V", 1L, 1L))
+    if(lsame_(pivot, "V", 1L, 1L))
     {
-      if (lsame_(direct, "F", 1L, 1L))
+      if(lsame_(direct, "F", 1L, 1L))
       {
         i__1 = *n - 1;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           ctemp = c[j];
           stemp = s[j];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__2 = *m;
-            for (i = 1; i <= i__2; ++i)
+            for(i = 1; i <= i__2; ++i)
             {
               temp = a[i + (j + 1) * a_dim1];
               a[i + (j + 1) * a_dim1] = ctemp * temp - stemp *
@@ -1348,16 +1348,16 @@ ftnlen direct_len;
           /* L140: */
         }
       }
-      else if (lsame_(direct, "B", 1L, 1L))
+      else if(lsame_(direct, "B", 1L, 1L))
       {
-        for (j = *n - 1; j >= 1; --j)
+        for(j = *n - 1; j >= 1; --j)
         {
           ctemp = c[j];
           stemp = s[j];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__1 = *m;
-            for (i = 1; i <= i__1; ++i)
+            for(i = 1; i <= i__1; ++i)
             {
               temp = a[i + (j + 1) * a_dim1];
               a[i + (j + 1) * a_dim1] = ctemp * temp - stemp *
@@ -1371,19 +1371,19 @@ ftnlen direct_len;
         }
       }
     }
-    else if (lsame_(pivot, "T", 1L, 1L))
+    else if(lsame_(pivot, "T", 1L, 1L))
     {
-      if (lsame_(direct, "F", 1L, 1L))
+      if(lsame_(direct, "F", 1L, 1L))
       {
         i__1 = *n;
-        for (j = 2; j <= i__1; ++j)
+        for(j = 2; j <= i__1; ++j)
         {
           ctemp = c[j - 1];
           stemp = s[j - 1];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__2 = *m;
-            for (i = 1; i <= i__2; ++i)
+            for(i = 1; i <= i__2; ++i)
             {
               temp = a[i + j * a_dim1];
               a[i + j * a_dim1] = ctemp * temp - stemp * a[i +
@@ -1396,16 +1396,16 @@ ftnlen direct_len;
           /* L180: */
         }
       }
-      else if (lsame_(direct, "B", 1L, 1L))
+      else if(lsame_(direct, "B", 1L, 1L))
       {
-        for (j = *n; j >= 2; --j)
+        for(j = *n; j >= 2; --j)
         {
           ctemp = c[j - 1];
           stemp = s[j - 1];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__1 = *m;
-            for (i = 1; i <= i__1; ++i)
+            for(i = 1; i <= i__1; ++i)
             {
               temp = a[i + j * a_dim1];
               a[i + j * a_dim1] = ctemp * temp - stemp * a[i +
@@ -1419,19 +1419,19 @@ ftnlen direct_len;
         }
       }
     }
-    else if (lsame_(pivot, "B", 1L, 1L))
+    else if(lsame_(pivot, "B", 1L, 1L))
     {
-      if (lsame_(direct, "F", 1L, 1L))
+      if(lsame_(direct, "F", 1L, 1L))
       {
         i__1 = *n - 1;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           ctemp = c[j];
           stemp = s[j];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__2 = *m;
-            for (i = 1; i <= i__2; ++i)
+            for(i = 1; i <= i__2; ++i)
             {
               temp = a[i + j * a_dim1];
               a[i + j * a_dim1] = stemp * a[i + *n * a_dim1] +
@@ -1444,16 +1444,16 @@ ftnlen direct_len;
           /* L220: */
         }
       }
-      else if (lsame_(direct, "B", 1L, 1L))
+      else if(lsame_(direct, "B", 1L, 1L))
       {
-        for (j = *n - 1; j >= 1; --j)
+        for(j = *n - 1; j >= 1; --j)
         {
           ctemp = c[j];
           stemp = s[j];
-          if (ctemp != 1. || stemp != 0.)
+          if(ctemp != 1. || stemp != 0.)
           {
             i__1 = *m;
-            for (i = 1; i <= i__1; ++i)
+            for(i = 1; i <= i__1; ++i)
             {
               temp = a[i + j * a_dim1];
               a[i + j * a_dim1] = stemp * a[i + *n * a_dim1] +
@@ -1570,7 +1570,7 @@ doublereal *a, *b, *c, *rt1, *rt2, *cs1, *sn1;
   adf = abs(df);
   tb = *b + *b;
   ab = abs(tb);
-  if (abs(*a) > abs(*c))
+  if(abs(*a) > abs(*c))
   {
     acmx = *a;
     acmn = *c;
@@ -1580,13 +1580,13 @@ doublereal *a, *b, *c, *rt1, *rt2, *cs1, *sn1;
     acmx = *c;
     acmn = *a;
   }
-  if (adf > ab)
+  if(adf > ab)
   {
     /* Computing 2nd power */
     d__1 = ab / adf;
     rt = adf * sqrt(d__1 * d__1 + 1.);
   }
-  else if (adf < ab)
+  else if(adf < ab)
   {
     /* Computing 2nd power */
     d__1 = adf / ab;
@@ -1599,7 +1599,7 @@ doublereal *a, *b, *c, *rt1, *rt2, *cs1, *sn1;
 
     rt = ab * sqrt(2.);
   }
-  if (sm < 0.)
+  if(sm < 0.)
   {
     *rt1 = (sm - rt) * .5;
     sgn1 = -1;
@@ -1610,7 +1610,7 @@ doublereal *a, *b, *c, *rt1, *rt2, *cs1, *sn1;
 
     *rt2 = acmx / *rt1 * acmn - *b / *rt1 * *b;
   }
-  else if (sm > 0.)
+  else if(sm > 0.)
   {
     *rt1 = (sm + rt) * .5;
     sgn1 = 1;
@@ -1633,7 +1633,7 @@ doublereal *a, *b, *c, *rt1, *rt2, *cs1, *sn1;
 
   /*     Compute the eigenvector */
 
-  if (df >= 0.)
+  if(df >= 0.)
   {
     cs = df + rt;
     sgn2 = 1;
@@ -1644,7 +1644,7 @@ doublereal *a, *b, *c, *rt1, *rt2, *cs1, *sn1;
     sgn2 = -1;
   }
   acs = abs(cs);
-  if (acs > ab)
+  if(acs > ab)
   {
     ct = -tb / cs;
     *sn1 = 1. / sqrt(ct * ct + 1.);
@@ -1652,7 +1652,7 @@ doublereal *a, *b, *c, *rt1, *rt2, *cs1, *sn1;
   }
   else
   {
-    if (ab == 0.)
+    if(ab == 0.)
     {
       *cs1 = 1.;
       *sn1 = 0.;
@@ -1664,7 +1664,7 @@ doublereal *a, *b, *c, *rt1, *rt2, *cs1, *sn1;
       *sn1 = tn * *cs1;
     }
   }
-  if (sgn1 == sgn2)
+  if(sgn1 == sgn2)
   {
     tn = *cs1;
     *cs1 = -(*sn1);
@@ -1744,10 +1744,10 @@ integer *lda;
 
   /* Function Body */
   i__1 = *n;
-  for (j = 1; j <= i__1; ++j)
+  for(j = 1; j <= i__1; ++j)
   {
     i__2 = *m;
-    for (i = 1; i <= i__2; ++i)
+    for(i = 1; i <= i__2; ++i)
     {
       a[i + j * a_dim1] = *alpha;
       /* L10: */
@@ -1756,7 +1756,7 @@ integer *lda;
   }
 
   i__1 = min(*m, *n);
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     a[i + i * a_dim1] = *beta;
     /* L30: */
@@ -1874,15 +1874,15 @@ ftnlen uplo_len;
   /* Function Body */
   *info = 0;
   upper = lsame_(uplo, "U", 1L, 1L);
-  if (! upper && ! lsame_(uplo, "L", 1L, 1L))
+  if(! upper && ! lsame_(uplo, "L", 1L, 1L))
   {
     *info = -1;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     *info = -2;
   }
-  else if (*lda < max(1, *n))
+  else if(*lda < max(1, *n))
   {
     *info = -4;
   }
@@ -1890,12 +1890,12 @@ ftnlen uplo_len;
   {
     /* Computing MAX */
     i__1 = 1, i__2 = *n - 1;
-    if (*lwork < max(i__1, i__2))
+    if(*lwork < max(i__1, i__2))
     {
       *info = -7;
     }
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     i__1 = -(*info);
     xerbla_("DORGTR", &i__1, 6L);
@@ -1904,13 +1904,13 @@ ftnlen uplo_len;
 
   /*     Quick return if possible */
 
-  if (*n == 0)
+  if(*n == 0)
   {
     work[1] = 1.;
     return 0;
   }
 
-  if (upper)
+  if(upper)
   {
 
     /*        Q was determined by a call to DSYTRD with UPLO = 'U' */
@@ -1922,10 +1922,10 @@ ftnlen uplo_len;
     /*        those of the unit matrix */
 
     i__1 = *n - 1;
-    for (j = 1; j <= i__1; ++j)
+    for(j = 1; j <= i__1; ++j)
     {
       i__2 = j - 1;
-      for (i = 1; i <= i__2; ++i)
+      for(i = 1; i <= i__2; ++i)
       {
         a[i + j * a_dim1] = a[i + (j + 1) * a_dim1];
         /* L10: */
@@ -1934,7 +1934,7 @@ ftnlen uplo_len;
       /* L20: */
     }
     i__1 = *n - 1;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       a[i + *n * a_dim1] = 0.;
       /* L30: */
@@ -1961,11 +1961,11 @@ ftnlen uplo_len;
     o */
     /*        those of the unit matrix */
 
-    for (j = *n; j >= 2; --j)
+    for(j = *n; j >= 2; --j)
     {
       a[j * a_dim1 + 1] = 0.;
       i__1 = *n;
-      for (i = j + 1; i <= i__1; ++i)
+      for(i = j + 1; i <= i__1; ++i)
       {
         a[i + j * a_dim1] = a[i + (j - 1) * a_dim1];
         /* L40: */
@@ -1974,12 +1974,12 @@ ftnlen uplo_len;
     }
     a[a_dim1 + 1] = 1.;
     i__1 = *n;
-    for (i = 2; i <= i__1; ++i)
+    for(i = 2; i <= i__1; ++i)
     {
       a[i + a_dim1] = 0.;
       /* L60: */
     }
-    if (*n > 1)
+    if(*n > 1)
     {
 
       /*           Generate Q(2:n,2:n) */
@@ -2107,27 +2107,27 @@ integer *lwork, *info;
 
   /* Function Body */
   *info = 0;
-  if (*m < 0)
+  if(*m < 0)
   {
     *info = -1;
   }
-  else if (*n < 0 || *n > *m)
+  else if(*n < 0 || *n > *m)
   {
     *info = -2;
   }
-  else if (*k < 0 || *k > *n)
+  else if(*k < 0 || *k > *n)
   {
     *info = -3;
   }
-  else if (*lda < max(1, *m))
+  else if(*lda < max(1, *m))
   {
     *info = -5;
   }
-  else if (*lwork < max(1, *n))
+  else if(*lwork < max(1, *n))
   {
     *info = -8;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     i__1 = -(*info);
     xerbla_("DORGQR", &i__1, 6L);
@@ -2136,7 +2136,7 @@ integer *lwork, *info;
 
   /*     Quick return if possible */
 
-  if (*n <= 0)
+  if(*n <= 0)
   {
     work[1] = 1.;
     return 0;
@@ -2148,7 +2148,7 @@ integer *lwork, *info;
   nbmin = 2;
   nx = 0;
   iws = *n;
-  if (nb > 1 && nb < *k)
+  if(nb > 1 && nb < *k)
   {
 
     /*        Determine when to cross over from blocked to unblocked code.
@@ -2158,7 +2158,7 @@ integer *lwork, *info;
     i__1 = 0, i__2 = ilaenv_(&c__3, "DORGQR", " ", m, n, k, &c_n1, 6L, 1L)
                      ;
     nx = max(i__1, i__2);
-    if (nx < *k)
+    if(nx < *k)
     {
 
       /*           Determine if workspace is large enough for blocked co
@@ -2166,7 +2166,7 @@ integer *lwork, *info;
 
       ldwork = *n;
       iws = ldwork * nb;
-      if (*lwork < iws)
+      if(*lwork < iws)
       {
 
         /*              Not enough workspace to use optimal NB:  reduc
@@ -2182,7 +2182,7 @@ integer *lwork, *info;
     }
   }
 
-  if (nb >= nbmin && nb < *k && nx < *k)
+  if(nb >= nbmin && nb < *k && nx < *k)
   {
 
     /*        Use blocked code after the last block. */
@@ -2196,10 +2196,10 @@ integer *lwork, *info;
     /*        Set A(1:kk,kk+1:n) to zero. */
 
     i__1 = *n;
-    for (j = kk + 1; j <= i__1; ++j)
+    for(j = kk + 1; j <= i__1; ++j)
     {
       i__2 = kk;
-      for (i = 1; i <= i__2; ++i)
+      for(i = 1; i <= i__2; ++i)
       {
         a[i + j * a_dim1] = 0.;
         /* L10: */
@@ -2214,7 +2214,7 @@ integer *lwork, *info;
 
   /*     Use unblocked code for the last or only block. */
 
-  if (kk < *n)
+  if(kk < *n)
   {
     i__1 = *m - kk;
     i__2 = *n - kk;
@@ -2223,18 +2223,18 @@ integer *lwork, *info;
             tau[kk + 1], &work[1], &iinfo);
   }
 
-  if (kk > 0)
+  if(kk > 0)
   {
 
     /*        Use blocked code */
 
     i__1 = -nb;
-    for (i = ki + 1; i__1 < 0 ? i >= 1 : i <= 1; i += i__1)
+    for(i = ki + 1; i__1 < 0 ? i >= 1 : i <= 1; i += i__1)
     {
       /* Computing MIN */
       i__2 = nb, i__3 = *k - i + 1;
       ib = min(i__2, i__3);
-      if (i + ib <= *n)
+      if(i + ib <= *n)
       {
 
         /*              Form the triangular factor of the block reflec
@@ -2264,10 +2264,10 @@ integer *lwork, *info;
       /*           Set rows 1:i-1 of current block to zero */
 
       i__2 = i + ib - 1;
-      for (j = i; j <= i__2; ++j)
+      for(j = i; j <= i__2; ++j)
       {
         i__3 = i - 1;
-        for (l = 1; l <= i__3; ++l)
+        for(l = 1; l <= i__3; ++l)
         {
           a[l + j * a_dim1] = 0.;
           /* L30: */
@@ -2382,23 +2382,23 @@ integer *info;
 
   /* Function Body */
   *info = 0;
-  if (*m < 0)
+  if(*m < 0)
   {
     *info = -1;
   }
-  else if (*n < 0 || *n > *m)
+  else if(*n < 0 || *n > *m)
   {
     *info = -2;
   }
-  else if (*k < 0 || *k > *n)
+  else if(*k < 0 || *k > *n)
   {
     *info = -3;
   }
-  else if (*lda < max(1, *m))
+  else if(*lda < max(1, *m))
   {
     *info = -5;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     i__1 = -(*info);
     xerbla_("DORG2R", &i__1, 6L);
@@ -2407,7 +2407,7 @@ integer *info;
 
   /*     Quick return if possible */
 
-  if (*n <= 0)
+  if(*n <= 0)
   {
     return 0;
   }
@@ -2415,10 +2415,10 @@ integer *info;
   /*     Initialise columns k+1:n to columns of the unit matrix */
 
   i__1 = *n;
-  for (j = *k + 1; j <= i__1; ++j)
+  for(j = *k + 1; j <= i__1; ++j)
   {
     i__2 = *m;
-    for (l = 1; l <= i__2; ++l)
+    for(l = 1; l <= i__2; ++l)
     {
       a[l + j * a_dim1] = 0.;
       /* L10: */
@@ -2427,12 +2427,12 @@ integer *info;
     /* L20: */
   }
 
-  for (i = *k; i >= 1; --i)
+  for(i = *k; i >= 1; --i)
   {
 
     /*        Apply H(i) to A(i:m,i:n) from the left */
 
-    if (i < *n)
+    if(i < *n)
     {
       a[i + i * a_dim1] = 1.;
       i__1 = *m - i + 1;
@@ -2440,7 +2440,7 @@ integer *info;
       dlarf_("Left", &i__1, &i__2, &a[i + i * a_dim1], &c__1, &tau[i], &
              a[i + (i + 1) * a_dim1], lda, &work[1], 4L);
     }
-    if (i < *m)
+    if(i < *m)
     {
       i__1 = *m - i;
       d__1 = -tau[i];
@@ -2451,7 +2451,7 @@ integer *info;
     /*        Set A(1:i-1,i) to zero */
 
     i__1 = i - 1;
-    for (l = 1; l <= i__1; ++l)
+    for(l = 1; l <= i__1; ++l)
     {
       a[l + i * a_dim1] = 0.;
       /* L30: */
@@ -2574,27 +2574,27 @@ integer *lwork, *info;
 
   /* Function Body */
   *info = 0;
-  if (*m < 0)
+  if(*m < 0)
   {
     *info = -1;
   }
-  else if (*n < 0 || *n > *m)
+  else if(*n < 0 || *n > *m)
   {
     *info = -2;
   }
-  else if (*k < 0 || *k > *n)
+  else if(*k < 0 || *k > *n)
   {
     *info = -3;
   }
-  else if (*lda < max(1, *m))
+  else if(*lda < max(1, *m))
   {
     *info = -5;
   }
-  else if (*lwork < max(1, *n))
+  else if(*lwork < max(1, *n))
   {
     *info = -8;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     i__1 = -(*info);
     xerbla_("DORGQL", &i__1, 6L);
@@ -2603,7 +2603,7 @@ integer *lwork, *info;
 
   /*     Quick return if possible */
 
-  if (*n <= 0)
+  if(*n <= 0)
   {
     work[1] = 1.;
     return 0;
@@ -2615,7 +2615,7 @@ integer *lwork, *info;
   nbmin = 2;
   nx = 0;
   iws = *n;
-  if (nb > 1 && nb < *k)
+  if(nb > 1 && nb < *k)
   {
 
     /*        Determine when to cross over from blocked to unblocked code.
@@ -2625,7 +2625,7 @@ integer *lwork, *info;
     i__1 = 0, i__2 = ilaenv_(&c__3, "DORGQL", " ", m, n, k, &c_n1, 6L, 1L)
                      ;
     nx = max(i__1, i__2);
-    if (nx < *k)
+    if(nx < *k)
     {
 
       /*           Determine if workspace is large enough for blocked co
@@ -2633,7 +2633,7 @@ integer *lwork, *info;
 
       ldwork = *n;
       iws = ldwork * nb;
-      if (*lwork < iws)
+      if(*lwork < iws)
       {
 
         /*              Not enough workspace to use optimal NB:  reduc
@@ -2649,7 +2649,7 @@ integer *lwork, *info;
     }
   }
 
-  if (nb >= nbmin && nb < *k && nx < *k)
+  if(nb >= nbmin && nb < *k && nx < *k)
   {
 
     /*        Use blocked code after the first block. */
@@ -2662,10 +2662,10 @@ integer *lwork, *info;
     /*        Set A(m-kk+1:m,1:n-kk) to zero. */
 
     i__1 = *n - kk;
-    for (j = 1; j <= i__1; ++j)
+    for(j = 1; j <= i__1; ++j)
     {
       i__2 = *m;
-      for (i = *m - kk + 1; i <= i__2; ++i)
+      for(i = *m - kk + 1; i <= i__2; ++i)
       {
         a[i + j * a_dim1] = 0.;
         /* L10: */
@@ -2686,19 +2686,19 @@ integer *lwork, *info;
   dorg2l_(&i__1, &i__2, &i__3, &a[a_offset], lda, &tau[1], &work[1], &iinfo)
   ;
 
-  if (kk > 0)
+  if(kk > 0)
   {
 
     /*        Use blocked code */
 
     i__1 = *k;
     i__2 = nb;
-    for (i = *k - kk + 1; i__2 < 0 ? i >= i__1 : i <= i__1; i += i__2)
+    for(i = *k - kk + 1; i__2 < 0 ? i >= i__1 : i <= i__1; i += i__2)
     {
       /* Computing MIN */
       i__3 = nb, i__4 = *k - i + 1;
       ib = min(i__3, i__4);
-      if (*n - *k + i > 1)
+      if(*n - *k + i > 1)
       {
 
         /*              Form the triangular factor of the block reflec
@@ -2730,10 +2730,10 @@ integer *lwork, *info;
       /*           Set rows m-k+i+ib:m of current block to zero */
 
       i__3 = *n - *k + i + ib - 1;
-      for (j = *n - *k + i; j <= i__3; ++j)
+      for(j = *n - *k + i; j <= i__3; ++j)
       {
         i__4 = *m;
-        for (l = *m - *k + i + ib; l <= i__4; ++l)
+        for(l = *m - *k + i + ib; l <= i__4; ++l)
         {
           a[l + j * a_dim1] = 0.;
           /* L30: */
@@ -2895,12 +2895,12 @@ ftnlen storev_len;
   v -= v_offset;
 
   /* Function Body */
-  if (*m <= 0 || *n <= 0)
+  if(*m <= 0 || *n <= 0)
   {
     return 0;
   }
 
-  if (lsame_(trans, "N", 1L, 1L))
+  if(lsame_(trans, "N", 1L, 1L))
   {
     *transt = 'T';
   }
@@ -2909,17 +2909,17 @@ ftnlen storev_len;
     *transt = 'N';
   }
 
-  if (lsame_(storev, "C", 1L, 1L))
+  if(lsame_(storev, "C", 1L, 1L))
   {
 
-    if (lsame_(direct, "F", 1L, 1L))
+    if(lsame_(direct, "F", 1L, 1L))
     {
 
       /*           Let  V =  ( V1 )    (first K rows) */
       /*                     ( V2 ) */
       /*           where  V1  is unit lower triangular. */
 
-      if (lsame_(side, "L", 1L, 1L))
+      if(lsame_(side, "L", 1L, 1L))
       {
 
         /*              Form  H * C  or  H' * C  where  C = ( C1 ) */
@@ -2931,7 +2931,7 @@ ftnlen storev_len;
         /*              W := C1' */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           dcopy_(n, &c[j + c_dim1], ldc, &work[j * work_dim1 + 1], &
                  c__1);
@@ -2943,7 +2943,7 @@ ftnlen storev_len;
         dtrmm_("Right", "Lower", "No transpose", "Unit", n, k, &c_b22,
                &v[v_offset], ldv, &work[work_offset], ldwork, 5L,
                5L, 12L, 4L);
-        if (*m > *k)
+        if(*m > *k)
         {
 
           /*                 W := W + C2'*V2 */
@@ -2962,7 +2962,7 @@ ftnlen storev_len;
 
         /*              C := C - V * W' */
 
-        if (*m > *k)
+        if(*m > *k)
         {
 
           /*                 C2 := C2 - V2 * W' */
@@ -2983,10 +2983,10 @@ ftnlen storev_len;
         /*              C1 := C1 - W' */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *n;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[j + i * c_dim1] -= work[i + j * work_dim1];
             /* L20: */
@@ -2995,7 +2995,7 @@ ftnlen storev_len;
         }
 
       }
-      else if (lsame_(side, "R", 1L, 1L))
+      else if(lsame_(side, "R", 1L, 1L))
       {
 
         /*              Form  C * H  or  C * H'  where  C = ( C1  C2 )
@@ -3007,7 +3007,7 @@ ftnlen storev_len;
         /*              W := C1 */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           dcopy_(m, &c[j * c_dim1 + 1], &c__1, &work[j * work_dim1
                  + 1], &c__1);
@@ -3019,7 +3019,7 @@ ftnlen storev_len;
         dtrmm_("Right", "Lower", "No transpose", "Unit", m, k, &c_b22,
                &v[v_offset], ldv, &work[work_offset], ldwork, 5L,
                5L, 12L, 4L);
-        if (*n > *k)
+        if(*n > *k)
         {
 
           /*                 W := W + C2 * V2 */
@@ -3039,7 +3039,7 @@ ftnlen storev_len;
 
         /*              C := C - W * V' */
 
-        if (*n > *k)
+        if(*n > *k)
         {
 
           /*                 C2 := C2 - W * V2' */
@@ -3060,10 +3060,10 @@ ftnlen storev_len;
         /*              C1 := C1 - W */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + j * c_dim1] -= work[i + j * work_dim1];
             /* L50: */
@@ -3080,7 +3080,7 @@ ftnlen storev_len;
       /*                     ( V2 )    (last K rows) */
       /*           where  V2  is unit upper triangular. */
 
-      if (lsame_(side, "L", 1L, 1L))
+      if(lsame_(side, "L", 1L, 1L))
       {
 
         /*              Form  H * C  or  H' * C  where  C = ( C1 ) */
@@ -3092,7 +3092,7 @@ ftnlen storev_len;
         /*              W := C2' */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           dcopy_(n, &c[*m - *k + j + c_dim1], ldc, &work[j *
                  work_dim1 + 1], &c__1);
@@ -3104,7 +3104,7 @@ ftnlen storev_len;
         dtrmm_("Right", "Upper", "No transpose", "Unit", n, k, &c_b22,
                &v[*m - *k + 1 + v_dim1], ldv, &work[work_offset],
                ldwork, 5L, 5L, 12L, 4L);
-        if (*m > *k)
+        if(*m > *k)
         {
 
           /*                 W := W + C1'*V1 */
@@ -3123,7 +3123,7 @@ ftnlen storev_len;
 
         /*              C := C - V * W' */
 
-        if (*m > *k)
+        if(*m > *k)
         {
 
           /*                 C1 := C1 - V1 * W' */
@@ -3143,10 +3143,10 @@ ftnlen storev_len;
         /*              C2 := C2 - W' */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *n;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[*m - *k + j + i * c_dim1] -= work[i + j * work_dim1]
                                            ;
@@ -3156,7 +3156,7 @@ ftnlen storev_len;
         }
 
       }
-      else if (lsame_(side, "R", 1L, 1L))
+      else if(lsame_(side, "R", 1L, 1L))
       {
 
         /*              Form  C * H  or  C * H'  where  C = ( C1  C2 )
@@ -3168,7 +3168,7 @@ ftnlen storev_len;
         /*              W := C2 */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           dcopy_(m, &c[(*n - *k + j) * c_dim1 + 1], &c__1, &work[j *
                  work_dim1 + 1], &c__1);
@@ -3180,7 +3180,7 @@ ftnlen storev_len;
         dtrmm_("Right", "Upper", "No transpose", "Unit", m, k, &c_b22,
                &v[*n - *k + 1 + v_dim1], ldv, &work[work_offset],
                ldwork, 5L, 5L, 12L, 4L);
-        if (*n > *k)
+        if(*n > *k)
         {
 
           /*                 W := W + C1 * V1 */
@@ -3199,7 +3199,7 @@ ftnlen storev_len;
 
         /*              C := C - W * V' */
 
-        if (*n > *k)
+        if(*n > *k)
         {
 
           /*                 C1 := C1 - W * V1' */
@@ -3219,10 +3219,10 @@ ftnlen storev_len;
         /*              C2 := C2 - W */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + (*n - *k + j) * c_dim1] -= work[i + j *
                                                   work_dim1];
@@ -3234,16 +3234,16 @@ ftnlen storev_len;
     }
 
   }
-  else if (lsame_(storev, "R", 1L, 1L))
+  else if(lsame_(storev, "R", 1L, 1L))
   {
 
-    if (lsame_(direct, "F", 1L, 1L))
+    if(lsame_(direct, "F", 1L, 1L))
     {
 
       /*           Let  V =  ( V1  V2 )    (V1: first K columns) */
       /*           where  V1  is unit upper triangular. */
 
-      if (lsame_(side, "L", 1L, 1L))
+      if(lsame_(side, "L", 1L, 1L))
       {
 
         /*              Form  H * C  or  H' * C  where  C = ( C1 ) */
@@ -3255,7 +3255,7 @@ ftnlen storev_len;
         /*              W := C1' */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           dcopy_(n, &c[j + c_dim1], ldc, &work[j * work_dim1 + 1], &
                  c__1);
@@ -3267,7 +3267,7 @@ ftnlen storev_len;
         dtrmm_("Right", "Upper", "Transpose", "Unit", n, k, &c_b22, &
                v[v_offset], ldv, &work[work_offset], ldwork, 5L, 5L,
                9L, 4L);
-        if (*m > *k)
+        if(*m > *k)
         {
 
           /*                 W := W + C2'*V2' */
@@ -3286,7 +3286,7 @@ ftnlen storev_len;
 
         /*              C := C - V' * W' */
 
-        if (*m > *k)
+        if(*m > *k)
         {
 
           /*                 C2 := C2 - V2' * W' */
@@ -3306,10 +3306,10 @@ ftnlen storev_len;
         /*              C1 := C1 - W' */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *n;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[j + i * c_dim1] -= work[i + j * work_dim1];
             /* L140: */
@@ -3318,7 +3318,7 @@ ftnlen storev_len;
         }
 
       }
-      else if (lsame_(side, "R", 1L, 1L))
+      else if(lsame_(side, "R", 1L, 1L))
       {
 
         /*              Form  C * H  or  C * H'  where  C = ( C1  C2 )
@@ -3330,7 +3330,7 @@ ftnlen storev_len;
         /*              W := C1 */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           dcopy_(m, &c[j * c_dim1 + 1], &c__1, &work[j * work_dim1
                  + 1], &c__1);
@@ -3342,7 +3342,7 @@ ftnlen storev_len;
         dtrmm_("Right", "Upper", "Transpose", "Unit", m, k, &c_b22, &
                v[v_offset], ldv, &work[work_offset], ldwork, 5L, 5L,
                9L, 4L);
-        if (*n > *k)
+        if(*n > *k)
         {
 
           /*                 W := W + C2 * V2' */
@@ -3362,7 +3362,7 @@ ftnlen storev_len;
 
         /*              C := C - W * V */
 
-        if (*n > *k)
+        if(*n > *k)
         {
 
           /*                 C2 := C2 - W * V2 */
@@ -3371,7 +3371,7 @@ ftnlen storev_len;
           dgemm_("No transpose", "No transpose", m, &i__1, k, &
                  c_b211, &work[work_offset], ldwork, &v[(*k + 1) *
                      v_dim1 + 1], ldv, &c_b22, &c[(*k + 1) * c_dim1 +
-                                                  1], ldc, 12L, 12L);
+                                                           1], ldc, 12L, 12L);
         }
 
         /*              W := W * V1 */
@@ -3383,10 +3383,10 @@ ftnlen storev_len;
         /*              C1 := C1 - W */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + j * c_dim1] -= work[i + j * work_dim1];
             /* L170: */
@@ -3403,7 +3403,7 @@ ftnlen storev_len;
       /*           Let  V =  ( V1  V2 )    (V2: last K columns) */
       /*           where  V2  is unit lower triangular. */
 
-      if (lsame_(side, "L", 1L, 1L))
+      if(lsame_(side, "L", 1L, 1L))
       {
 
         /*              Form  H * C  or  H' * C  where  C = ( C1 ) */
@@ -3415,7 +3415,7 @@ ftnlen storev_len;
         /*              W := C2' */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           dcopy_(n, &c[*m - *k + j + c_dim1], ldc, &work[j *
                  work_dim1 + 1], &c__1);
@@ -3427,7 +3427,7 @@ ftnlen storev_len;
         dtrmm_("Right", "Lower", "Transpose", "Unit", n, k, &c_b22, &
                v[(*m - *k + 1) * v_dim1 + 1], ldv, &work[work_offset]
                , ldwork, 5L, 5L, 9L, 4L);
-        if (*m > *k)
+        if(*m > *k)
         {
 
           /*                 W := W + C1'*V1' */
@@ -3446,7 +3446,7 @@ ftnlen storev_len;
 
         /*              C := C - V' * W' */
 
-        if (*m > *k)
+        if(*m > *k)
         {
 
           /*                 C1 := C1 - V1' * W' */
@@ -3466,10 +3466,10 @@ ftnlen storev_len;
         /*              C2 := C2 - W' */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *n;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[*m - *k + j + i * c_dim1] -= work[i + j * work_dim1]
                                            ;
@@ -3479,7 +3479,7 @@ ftnlen storev_len;
         }
 
       }
-      else if (lsame_(side, "R", 1L, 1L))
+      else if(lsame_(side, "R", 1L, 1L))
       {
 
         /*              Form  C * H  or  C * H'  where  C = ( C1  C2 )
@@ -3491,7 +3491,7 @@ ftnlen storev_len;
         /*              W := C2 */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           dcopy_(m, &c[(*n - *k + j) * c_dim1 + 1], &c__1, &work[j *
                  work_dim1 + 1], &c__1);
@@ -3503,7 +3503,7 @@ ftnlen storev_len;
         dtrmm_("Right", "Lower", "Transpose", "Unit", m, k, &c_b22, &
                v[(*n - *k + 1) * v_dim1 + 1], ldv, &work[work_offset]
                , ldwork, 5L, 5L, 9L, 4L);
-        if (*n > *k)
+        if(*n > *k)
         {
 
           /*                 W := W + C1 * V1' */
@@ -3522,7 +3522,7 @@ ftnlen storev_len;
 
         /*              C := C - W * V */
 
-        if (*n > *k)
+        if(*n > *k)
         {
 
           /*                 C1 := C1 - W * V1 */
@@ -3542,10 +3542,10 @@ ftnlen storev_len;
         /*              C1 := C1 - W */
 
         i__1 = *k;
-        for (j = 1; j <= i__1; ++j)
+        for(j = 1; j <= i__1; ++j)
         {
           i__2 = *m;
-          for (i = 1; i <= i__2; ++i)
+          for(i = 1; i <= i__2; ++i)
           {
             c[i + (*n - *k + j) * c_dim1] -= work[i + j *
                                                   work_dim1];
@@ -3725,23 +3725,23 @@ ftnlen storev_len;
   v -= v_offset;
 
   /* Function Body */
-  if (*n == 0)
+  if(*n == 0)
   {
     return 0;
   }
 
-  if (lsame_(direct, "F", 1L, 1L))
+  if(lsame_(direct, "F", 1L, 1L))
   {
     i__1 = *k;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
-      if (tau[i] == 0.)
+      if(tau[i] == 0.)
       {
 
         /*              H(i)  =  I */
 
         i__2 = i;
-        for (j = 1; j <= i__2; ++j)
+        for(j = 1; j <= i__2; ++j)
         {
           t[j + i * t_dim1] = 0.;
           /* L10: */
@@ -3754,7 +3754,7 @@ ftnlen storev_len;
 
         vii = v[i + i * v_dim1];
         v[i + i * v_dim1] = 1.;
-        if (lsame_(storev, "C", 1L, 1L))
+        if(lsame_(storev, "C", 1L, 1L))
         {
 
           /*                 T(1:i-1,i) := - tau(i) * V(i:n,1:i-1)'
@@ -3795,15 +3795,15 @@ ftnlen storev_len;
   }
   else
   {
-    for (i = *k; i >= 1; --i)
+    for(i = *k; i >= 1; --i)
     {
-      if (tau[i] == 0.)
+      if(tau[i] == 0.)
       {
 
         /*              H(i)  =  I */
 
         i__1 = *k;
-        for (j = i; j <= i__1; ++j)
+        for(j = i; j <= i__1; ++j)
         {
           t[j + i * t_dim1] = 0.;
           /* L30: */
@@ -3814,9 +3814,9 @@ ftnlen storev_len;
 
         /*              general case */
 
-        if (i < *k)
+        if(i < *k)
         {
-          if (lsame_(storev, "C", 1L, 1L))
+          if(lsame_(storev, "C", 1L, 1L))
           {
             vii = v[*n - *k + i + i * v_dim1];
             v[*n - *k + i + i * v_dim1] = 1.;
@@ -3969,23 +3969,23 @@ integer *info;
 
   /* Function Body */
   *info = 0;
-  if (*m < 0)
+  if(*m < 0)
   {
     *info = -1;
   }
-  else if (*n < 0 || *n > *m)
+  else if(*n < 0 || *n > *m)
   {
     *info = -2;
   }
-  else if (*k < 0 || *k > *n)
+  else if(*k < 0 || *k > *n)
   {
     *info = -3;
   }
-  else if (*lda < max(1, *m))
+  else if(*lda < max(1, *m))
   {
     *info = -5;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     i__1 = -(*info);
     xerbla_("DORG2L", &i__1, 6L);
@@ -3994,7 +3994,7 @@ integer *info;
 
   /*     Quick return if possible */
 
-  if (*n <= 0)
+  if(*n <= 0)
   {
     return 0;
   }
@@ -4002,10 +4002,10 @@ integer *info;
   /*     Initialise columns 1:n-k to columns of the unit matrix */
 
   i__1 = *n - *k;
-  for (j = 1; j <= i__1; ++j)
+  for(j = 1; j <= i__1; ++j)
   {
     i__2 = *m;
-    for (l = 1; l <= i__2; ++l)
+    for(l = 1; l <= i__2; ++l)
     {
       a[l + j * a_dim1] = 0.;
       /* L10: */
@@ -4015,7 +4015,7 @@ integer *info;
   }
 
   i__1 = *k;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     ii = *n - *k + i;
 
@@ -4034,7 +4034,7 @@ integer *info;
     /*        Set A(m-k+i+1:m,n-k+i) to zero */
 
     i__2 = *m;
-    for (l = *m - *n + ii + 1; l <= i__2; ++l)
+    for(l = *m - *n + ii + 1; l <= i__2; ++l)
     {
       a[l + ii * a_dim1] = 0.;
       /* L30: */
@@ -4146,12 +4146,12 @@ ftnlen side_len;
   --v;
 
   /* Function Body */
-  if (lsame_(side, "L", 1L, 1L))
+  if(lsame_(side, "L", 1L, 1L))
   {
 
     /*        Form  H * C */
 
-    if (*tau != 0.)
+    if(*tau != 0.)
     {
 
       /*           w := C' * v */
@@ -4171,7 +4171,7 @@ ftnlen side_len;
 
     /*        Form  C * H */
 
-    if (*tau != 0.)
+    if(*tau != 0.)
     {
 
       /*           w := C * v */
@@ -4288,14 +4288,14 @@ integer *info;
 
   /*     Quick return if possible */
 
-  if (*n < 0)
+  if(*n < 0)
   {
     *info = -1;
     i__1 = -(*info);
     xerbla_("DSTERF", &i__1, 6L);
     return 0;
   }
-  if (*n <= 1)
+  if(*n <= 1)
   {
     return 0;
   }
@@ -4307,7 +4307,7 @@ integer *info;
   /*     Compute the eigenvalues of the tridiagonal matrix. */
 
   i__1 = *n - 1;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     /* Computing 2nd power */
     d__1 = e[i];
@@ -4327,22 +4327,22 @@ integer *info;
   nm1 = *n - 1;
 
 L20:
-  if (l1 > *n)
+  if(l1 > *n)
   {
     goto L170;
   }
-  if (l1 > 1)
+  if(l1 > 1)
   {
     e[l1 - 1] = 0.;
   }
-  if (l1 <= nm1)
+  if(l1 <= nm1)
   {
     i__1 = nm1;
-    for (m = l1; m <= i__1; ++m)
+    for(m = l1; m <= i__1; ++m)
     {
       tst = sqrt((d__1 = e[m], abs(d__1)));
-      if (tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m + 1],
-                        abs(d__2))))
+      if(tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m + 1],
+                       abs(d__2))))
       {
         goto L40;
       }
@@ -4354,14 +4354,14 @@ L20:
 L40:
   l = l1;
   lend = m;
-  if ((d__1 = d[lend], abs(d__1)) < (d__2 = d[l], abs(d__2)))
+  if((d__1 = d[lend], abs(d__1)) < (d__2 = d[l], abs(d__2)))
   {
     l = lend;
     lend = l1;
   }
   l1 = m + 1;
 
-  if (lend >= l)
+  if(lend >= l)
   {
 
     /*        QL Iteration */
@@ -4369,15 +4369,15 @@ L40:
     /*        Look for small subdiagonal element. */
 
 L50:
-    if (l != lend)
+    if(l != lend)
     {
       lendm1 = lend - 1;
       i__1 = lendm1;
-      for (m = l; m <= i__1; ++m)
+      for(m = l; m <= i__1; ++m)
       {
         tst = sqrt((d__1 = e[m], abs(d__1)));
-        if (tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m + 1],
-                          abs(d__2))))
+        if(tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m + 1],
+                         abs(d__2))))
         {
           goto L70;
         }
@@ -4388,12 +4388,12 @@ L50:
     m = lend;
 
 L70:
-    if (m < lend)
+    if(m < lend)
     {
       e[m] = 0.;
     }
     p = d[l];
-    if (m == l)
+    if(m == l)
     {
       goto L90;
     }
@@ -4401,7 +4401,7 @@ L70:
     /*        If remaining matrix is 2 by 2, use DLAE2 to compute its */
     /*        eigenvalues. */
 
-    if (m == l + 1)
+    if(m == l + 1)
     {
       rte = sqrt(e[l]);
       dlae2_(&d[l], &rte, &d[l + 1], &rt1, &rt2);
@@ -4409,14 +4409,14 @@ L70:
       d[l + 1] = rt2;
       e[l] = 0.;
       l += 2;
-      if (l <= lend)
+      if(l <= lend)
       {
         goto L50;
       }
       goto L20;
     }
 
-    if (jtot == nmaxit)
+    if(jtot == nmaxit)
     {
       goto L150;
     }
@@ -4438,11 +4438,11 @@ L70:
 
     mm1 = m - 1;
     i__1 = l;
-    for (i = mm1; i >= i__1; --i)
+    for(i = mm1; i >= i__1; --i)
     {
       bb = e[i];
       r = p + bb;
-      if (i != m - 1)
+      if(i != m - 1)
       {
         e[i + 1] = s * r;
       }
@@ -4453,7 +4453,7 @@ L70:
       alpha = d[i];
       gamma = c * (alpha - sigma) - s * oldgam;
       d[i + 1] = oldgam + (alpha - gamma);
-      if (c != 0.)
+      if(c != 0.)
       {
         p = gamma * gamma / c;
       }
@@ -4474,7 +4474,7 @@ L90:
     d[l] = p;
 
     ++l;
-    if (l <= lend)
+    if(l <= lend)
     {
       goto L50;
     }
@@ -4489,15 +4489,15 @@ L90:
     /*        Look for small superdiagonal element. */
 
 L100:
-    if (l != lend)
+    if(l != lend)
     {
       lendp1 = lend + 1;
       i__1 = lendp1;
-      for (m = l; m >= i__1; --m)
+      for(m = l; m >= i__1; --m)
       {
         tst = sqrt((d__1 = e[m - 1], abs(d__1)));
-        if (tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m - 1],
-                          abs(d__2))))
+        if(tst <= eps * ((d__1 = d[m], abs(d__1)) + (d__2 = d[m - 1],
+                         abs(d__2))))
         {
           goto L120;
         }
@@ -4508,12 +4508,12 @@ L100:
     m = lend;
 
 L120:
-    if (m > lend)
+    if(m > lend)
     {
       e[m - 1] = 0.;
     }
     p = d[l];
-    if (m == l)
+    if(m == l)
     {
       goto L140;
     }
@@ -4521,7 +4521,7 @@ L120:
     /*        If remaining matrix is 2 by 2, use DLAE2 to compute its */
     /*        eigenvalues. */
 
-    if (m == l - 1)
+    if(m == l - 1)
     {
       rte = sqrt(e[l - 1]);
       dlae2_(&d[l], &rte, &d[l - 1], &rt1, &rt2);
@@ -4529,14 +4529,14 @@ L120:
       d[l - 1] = rt2;
       e[l - 1] = 0.;
       l += -2;
-      if (l >= lend)
+      if(l >= lend)
       {
         goto L100;
       }
       goto L20;
     }
 
-    if (jtot == nmaxit)
+    if(jtot == nmaxit)
     {
       goto L150;
     }
@@ -4558,11 +4558,11 @@ L120:
 
     lm1 = l - 1;
     i__1 = lm1;
-    for (i = m; i <= i__1; ++i)
+    for(i = m; i <= i__1; ++i)
     {
       bb = e[i];
       r = p + bb;
-      if (i != m)
+      if(i != m)
       {
         e[i - 1] = s * r;
       }
@@ -4573,7 +4573,7 @@ L120:
       alpha = d[i + 1];
       gamma = c * (alpha - sigma) - s * oldgam;
       d[i] = oldgam + (alpha - gamma);
-      if (c != 0.)
+      if(c != 0.)
       {
         p = gamma * gamma / c;
       }
@@ -4594,7 +4594,7 @@ L140:
     d[l] = p;
 
     --l;
-    if (l >= lend)
+    if(l >= lend)
     {
       goto L100;
     }
@@ -4607,9 +4607,9 @@ L140:
 
 L150:
   i__1 = *n - 1;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
-    if (e[i] != 0.)
+    if(e[i] != 0.)
     {
       ++(*info);
     }
@@ -4621,22 +4621,22 @@ L150:
 
 L170:
   i__1 = *n;
-  for (ii = 2; ii <= i__1; ++ii)
+  for(ii = 2; ii <= i__1; ++ii)
   {
     i = ii - 1;
     k = i;
     p = d[i];
     i__2 = *n;
-    for (j = ii; j <= i__2; ++j)
+    for(j = ii; j <= i__2; ++j)
     {
-      if (d[j] < p)
+      if(d[j] < p)
       {
         k = j;
         p = d[j];
       }
       /* L180: */
     }
-    if (k != i)
+    if(k != i)
     {
       d[k] = d[i];
       d[i] = p;
@@ -4731,7 +4731,7 @@ doublereal *a, *b, *c, *rt1, *rt2;
   adf = abs(df);
   tb = *b + *b;
   ab = abs(tb);
-  if (abs(*a) > abs(*c))
+  if(abs(*a) > abs(*c))
   {
     acmx = *a;
     acmn = *c;
@@ -4741,13 +4741,13 @@ doublereal *a, *b, *c, *rt1, *rt2;
     acmx = *c;
     acmn = *a;
   }
-  if (adf > ab)
+  if(adf > ab)
   {
     /* Computing 2nd power */
     d__1 = ab / adf;
     rt = adf * sqrt(d__1 * d__1 + 1.);
   }
-  else if (adf < ab)
+  else if(adf < ab)
   {
     /* Computing 2nd power */
     d__1 = adf / ab;
@@ -4760,7 +4760,7 @@ doublereal *a, *b, *c, *rt1, *rt2;
 
     rt = ab * sqrt(2.);
   }
-  if (sm < 0.)
+  if(sm < 0.)
   {
     *rt1 = (sm - rt) * .5;
 
@@ -4770,7 +4770,7 @@ doublereal *a, *b, *c, *rt1, *rt2;
 
     *rt2 = acmx / *rt1 * acmn - *b / *rt1 * *b;
   }
-  else if (sm > 0.)
+  else if(sm > 0.)
   {
     *rt1 = (sm + rt) * .5;
 
@@ -4975,23 +4975,23 @@ ftnlen uplo_len;
   /* Function Body */
   *info = 0;
   upper = lsame_(uplo, "U", 1L, 1L);
-  if (! upper && ! lsame_(uplo, "L", 1L, 1L))
+  if(! upper && ! lsame_(uplo, "L", 1L, 1L))
   {
     *info = -1;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     *info = -2;
   }
-  else if (*lda < max(1, *n))
+  else if(*lda < max(1, *n))
   {
     *info = -4;
   }
-  else if (*lwork < 1)
+  else if(*lwork < 1)
   {
     *info = -9;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     i__1 = -(*info);
     xerbla_("DSYTRD", &i__1, 6L);
@@ -5000,7 +5000,7 @@ ftnlen uplo_len;
 
   /*     Quick return if possible */
 
-  if (*n == 0)
+  if(*n == 0)
   {
     work[1] = 1.;
     return 0;
@@ -5011,7 +5011,7 @@ ftnlen uplo_len;
   nb = ilaenv_(&c__1, "DSYTRD", uplo, n, &c_n1, &c_n1, &c_n1, 6L, 1L);
   nx = *n;
   iws = 1;
-  if (nb > 1 && nb < *n)
+  if(nb > 1 && nb < *n)
   {
 
     /*        Determine when to cross over from blocked to unblocked code
@@ -5022,7 +5022,7 @@ ftnlen uplo_len;
     i__1 = nb, i__2 = ilaenv_(&c__3, "DSYTRD", uplo, n, &c_n1, &c_n1, &
                               c_n1, 6L, 1L);
     nx = max(i__1, i__2);
-    if (nx < *n)
+    if(nx < *n)
     {
 
       /*           Determine if workspace is large enough for blocked co
@@ -5030,7 +5030,7 @@ ftnlen uplo_len;
 
       ldwork = *n;
       iws = ldwork * nb;
-      if (*lwork < iws)
+      if(*lwork < iws)
       {
 
         /*              Not enough workspace to use optimal NB:  deter
@@ -5042,7 +5042,7 @@ ftnlen uplo_len;
         nb = *lwork / ldwork;
         nbmin = ilaenv_(&c__2, "DSYTRD", uplo, n, &c_n1, &c_n1, &c_n1,
                         6L, 1L);
-        if (nb < nbmin)
+        if(nb < nbmin)
         {
           nx = *n;
         }
@@ -5058,7 +5058,7 @@ ftnlen uplo_len;
     nb = 1;
   }
 
-  if (upper)
+  if(upper)
   {
 
     /*        Reduce the upper triangle of A. */
@@ -5067,7 +5067,7 @@ ftnlen uplo_len;
     kk = *n - (*n - nx + nb - 1) / nb * nb;
     i__1 = kk + 1;
     i__2 = -nb;
-    for (i = *n - nb + 1; i__2 < 0 ? i >= i__1 : i <= i__1; i += i__2)
+    for(i = *n - nb + 1; i__2 < 0 ? i >= i__1 : i <= i__1; i += i__2)
     {
 
       /*           Reduce columns i:i+nb-1 to tridiagonal form and form
@@ -5094,7 +5094,7 @@ ftnlen uplo_len;
       /*           elements into D */
 
       i__3 = i + nb - 1;
-      for (j = i; j <= i__3; ++j)
+      for(j = i; j <= i__3; ++j)
       {
         a[j - 1 + j * a_dim1] = e[j - 1];
         d[j] = a[j + j * a_dim1];
@@ -5115,7 +5115,7 @@ ftnlen uplo_len;
 
     i__2 = *n - nx;
     i__1 = nb;
-    for (i = 1; i__1 < 0 ? i >= i__2 : i <= i__2; i += i__1)
+    for(i = 1; i__1 < 0 ? i >= i__2 : i <= i__2; i += i__1)
     {
 
       /*           Reduce columns i:i+nb-1 to tridiagonal form and form
@@ -5142,7 +5142,7 @@ ftnlen uplo_len;
       /*           elements into D */
 
       i__3 = i + nb - 1;
-      for (j = i; j <= i__3; ++j)
+      for(j = i; j <= i__3; ++j)
       {
         a[j + 1 + j * a_dim1] = e[j];
         d[j] = a[j + j * a_dim1];
@@ -5337,19 +5337,19 @@ ftnlen uplo_len;
   /* Function Body */
   *info = 0;
   upper = lsame_(uplo, "U", 1L, 1L);
-  if (! upper && ! lsame_(uplo, "L", 1L, 1L))
+  if(! upper && ! lsame_(uplo, "L", 1L, 1L))
   {
     *info = -1;
   }
-  else if (*n < 0)
+  else if(*n < 0)
   {
     *info = -2;
   }
-  else if (*lda < max(1, *n))
+  else if(*lda < max(1, *n))
   {
     *info = -4;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     i__1 = -(*info);
     xerbla_("DSYTD2", &i__1, 6L);
@@ -5358,17 +5358,17 @@ ftnlen uplo_len;
 
   /*     Quick return if possible */
 
-  if (*n <= 0)
+  if(*n <= 0)
   {
     return 0;
   }
 
-  if (upper)
+  if(upper)
   {
 
     /*        Reduce the upper triangle of A */
 
-    for (i = *n - 1; i >= 1; --i)
+    for(i = *n - 1; i >= 1; --i)
     {
 
       /*           Generate elementary reflector H(i) = I - tau * v * v'
@@ -5379,7 +5379,7 @@ ftnlen uplo_len;
               c__1, &taui);
       e[i] = a[i + (i + 1) * a_dim1];
 
-      if (taui != 0.)
+      if(taui != 0.)
       {
 
         /*              Apply H(i) from both sides to A(1:i,1:i) */
@@ -5420,7 +5420,7 @@ ftnlen uplo_len;
     /*        Reduce the lower triangle of A */
 
     i__1 = *n - 1;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
 
       /*           Generate elementary reflector H(i) = I - tau * v * v'
@@ -5434,7 +5434,7 @@ ftnlen uplo_len;
               a_dim1], &c__1, &taui);
       e[i] = a[i + 1 + i * a_dim1];
 
-      if (taui != 0.)
+      if(taui != 0.)
       {
 
         /*              Apply H(i) from both sides to A(i+1:n,i+1:n)
@@ -5737,21 +5737,21 @@ ftnlen uplo_len;
   a -= a_offset;
 
   /* Function Body */
-  if (*n <= 0)
+  if(*n <= 0)
   {
     return 0;
   }
 
-  if (lsame_(uplo, "U", 1L, 1L))
+  if(lsame_(uplo, "U", 1L, 1L))
   {
 
     /*        Reduce last NB columns of upper triangle */
 
     i__1 = *n - *nb + 1;
-    for (i = *n; i >= i__1; --i)
+    for(i = *n; i >= i__1; --i)
     {
       iw = i - *n + *nb;
-      if (i < *n)
+      if(i < *n)
       {
 
         /*              Update A(1:i,i) */
@@ -5765,7 +5765,7 @@ ftnlen uplo_len;
                w_dim1 + 1], ldw, &a[i + (i + 1) * a_dim1], lda, &
                c_b22, &a[i * a_dim1 + 1], &c__1, 12L);
       }
-      if (i > 1)
+      if(i > 1)
       {
 
         /*              Generate elementary reflector H(i) to annihila
@@ -5784,7 +5784,7 @@ ftnlen uplo_len;
         dsymv_("Upper", &i__2, &c_b22, &a[a_offset], lda, &a[i *
                a_dim1 + 1], &c__1, &c_b21, &w[iw * w_dim1 + 1], &
                c__1, 5L);
-        if (i < *n)
+        if(i < *n)
         {
           i__2 = i - 1;
           i__3 = *n - i;
@@ -5826,7 +5826,7 @@ ftnlen uplo_len;
     /*        Reduce first NB columns of lower triangle */
 
     i__1 = *nb;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
 
       /*           Update A(i:n,i) */
@@ -5841,7 +5841,7 @@ ftnlen uplo_len;
       dgemv_("No transpose", &i__2, &i__3, &c_b211, &w[i + w_dim1], ldw,
              &a[i + a_dim1], lda, &c_b22, &a[i + i * a_dim1], &c__1,
              12L);
-      if (i < *n)
+      if(i < *n)
       {
 
         /*              Generate elementary reflector H(i) to annihila
@@ -6000,7 +6000,7 @@ doublereal *tau;
   --x;
 
   /* Function Body */
-  if (*n <= 1)
+  if(*n <= 1)
   {
     *tau = 0.;
     return 0;
@@ -6009,7 +6009,7 @@ doublereal *tau;
   i__1 = *n - 1;
   xnorm = dnrm2_(&i__1, &x[1], incx);
 
-  if (xnorm == 0.)
+  if(xnorm == 0.)
   {
 
     /*        H  =  I */
@@ -6024,7 +6024,7 @@ doublereal *tau;
     d__1 = dlapy2_(alpha, &xnorm);
     beta = -d_sign(&d__1, alpha);
     safmin = dlamch_("S", 1L);
-    if (abs(beta) < safmin)
+    if(abs(beta) < safmin)
     {
 
       /*           XNORM, BETA may be inaccurate; scale X and recompute
@@ -6038,7 +6038,7 @@ L10:
       dscal_(&i__1, &rsafmn, &x[1], incx);
       beta *= rsafmn;
       *alpha *= rsafmn;
-      if (abs(beta) < safmin)
+      if(abs(beta) < safmin)
       {
         goto L10;
       }
@@ -6059,7 +6059,7 @@ L10:
 
       *alpha = beta;
       i__1 = knt;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         *alpha *= safmin;
         /* L20: */
@@ -6169,13 +6169,13 @@ ftnlen cmach_len;
   /*     .. */
   /*     .. Executable Statements .. */
 
-  if (first)
+  if(first)
   {
     first = FALSE_;
     dlamc2_(&beta, &it, &lrnd, &eps, &imin, &rmin, &imax, &rmax);
     base = (doublereal) beta;
     t = (doublereal) it;
-    if (lrnd)
+    if(lrnd)
     {
       rnd = 1.;
       i__1 = 1 - it;
@@ -6192,7 +6192,7 @@ ftnlen cmach_len;
     emax = (doublereal) imax;
     sfmin = rmin;
     small = 1. / rmax;
-    if (small >= sfmin)
+    if(small >= sfmin)
     {
 
       /*           Use SMALL plus a bit, to avoid the possibility of rou
@@ -6203,43 +6203,43 @@ ftnlen cmach_len;
     }
   }
 
-  if (lsame_(cmach, "E", 1L, 1L))
+  if(lsame_(cmach, "E", 1L, 1L))
   {
     rmach = eps;
   }
-  else if (lsame_(cmach, "S", 1L, 1L))
+  else if(lsame_(cmach, "S", 1L, 1L))
   {
     rmach = sfmin;
   }
-  else if (lsame_(cmach, "B", 1L, 1L))
+  else if(lsame_(cmach, "B", 1L, 1L))
   {
     rmach = base;
   }
-  else if (lsame_(cmach, "P", 1L, 1L))
+  else if(lsame_(cmach, "P", 1L, 1L))
   {
     rmach = prec;
   }
-  else if (lsame_(cmach, "N", 1L, 1L))
+  else if(lsame_(cmach, "N", 1L, 1L))
   {
     rmach = t;
   }
-  else if (lsame_(cmach, "R", 1L, 1L))
+  else if(lsame_(cmach, "R", 1L, 1L))
   {
     rmach = rnd;
   }
-  else if (lsame_(cmach, "M", 1L, 1L))
+  else if(lsame_(cmach, "M", 1L, 1L))
   {
     rmach = emin;
   }
-  else if (lsame_(cmach, "U", 1L, 1L))
+  else if(lsame_(cmach, "U", 1L, 1L))
   {
     rmach = rmin;
   }
-  else if (lsame_(cmach, "L", 1L, 1L))
+  else if(lsame_(cmach, "L", 1L, 1L))
   {
     rmach = emax;
   }
-  else if (lsame_(cmach, "O", 1L, 1L))
+  else if(lsame_(cmach, "O", 1L, 1L))
   {
     rmach = rmax;
   }
@@ -6338,7 +6338,7 @@ logical *rnd, *ieee1;
   /*     .. */
   /*     .. Executable Statements .. */
 
-  if (first)
+  if(first)
   {
     first = FALSE_;
     one = 1.;
@@ -6364,7 +6364,7 @@ logical *rnd, *ieee1;
 
     /* +       WHILE( C.EQ.ONE )LOOP */
 L10:
-    if (c == one)
+    if(c == one)
     {
       a *= 2;
       c = dlamc3_(&a, &one);
@@ -6385,7 +6385,7 @@ L10:
 
     /* +       WHILE( C.EQ.A )LOOP */
 L20:
-    if (c == a)
+    if(c == a)
     {
       b *= 2;
       c = dlamc3_(&a, &b);
@@ -6417,7 +6417,7 @@ L20:
     d__2 = -b / 100;
     f = dlamc3_(&d__1, &d__2);
     c = dlamc3_(&f, &a);
-    if (c == a)
+    if(c == a)
     {
       lrnd = TRUE_;
     }
@@ -6429,7 +6429,7 @@ L20:
     d__2 = b / 100;
     f = dlamc3_(&d__1, &d__2);
     c = dlamc3_(&f, &a);
-    if (lrnd && c == a)
+    if(lrnd && c == a)
     {
       lrnd = FALSE_;
     }
@@ -6466,7 +6466,7 @@ L20:
 
     /* +       WHILE( C.EQ.ONE )LOOP */
 L30:
-    if (c == one)
+    if(c == one)
     {
       ++lt;
       a *= lbeta;
@@ -6623,7 +6623,7 @@ explicitly.\002,/)";
   /*     .. */
   /*     .. Executable Statements .. */
 
-  if (first)
+  if(first)
   {
     first = FALSE_;
     zero = 0.;
@@ -6664,7 +6664,7 @@ explicitly.\002,/)";
     b = dlamc3_(&third, &d__1);
     b = dlamc3_(&b, &sixth);
     b = abs(b);
-    if (b < leps)
+    if(b < leps)
     {
       b = leps;
     }
@@ -6673,7 +6673,7 @@ explicitly.\002,/)";
 
     /* +       WHILE( ( LEPS.GT.B ).AND.( B.GT.ZERO ) )LOOP */
 L10:
-    if (leps > b && b > zero)
+    if(leps > b && b > zero)
     {
       leps = b;
       d__1 = half * leps;
@@ -6693,7 +6693,7 @@ L10:
     }
     /* +       END WHILE */
 
-    if (a < leps)
+    if(a < leps)
     {
       leps = a;
     }
@@ -6708,7 +6708,7 @@ L10:
 
     rbase = one / lbeta;
     small = one;
-    for (i = 1; i <= 3; ++i)
+    for(i = 1; i <= 3; ++i)
     {
       d__1 = small * rbase;
       small = dlamc3_(&d__1, &zero);
@@ -6723,16 +6723,16 @@ L10:
     dlamc4_(&gnmin, &d__1, &lbeta);
     ieee = FALSE_;
 
-    if (ngpmin == ngnmin && gpmin == gnmin)
+    if(ngpmin == ngnmin && gpmin == gnmin)
     {
-      if (ngpmin == gpmin)
+      if(ngpmin == gpmin)
       {
         lemin = ngpmin;
         /*            ( Non twos-complement machines, no gradual under
         flow; */
         /*              e.g.,  VAX ) */
       }
-      else if (gpmin - ngpmin == 3)
+      else if(gpmin - ngpmin == 3)
       {
         lemin = ngpmin - 1 + lt;
         ieee = TRUE_;
@@ -6748,9 +6748,9 @@ L10:
       }
 
     }
-    else if (ngpmin == gpmin && ngnmin == gnmin)
+    else if(ngpmin == gpmin && ngnmin == gnmin)
     {
-      if ((i__1 = ngpmin - ngnmin, abs(i__1)) == 1)
+      if((i__1 = ngpmin - ngnmin, abs(i__1)) == 1)
       {
         lemin = max(ngpmin, ngnmin);
         /*            ( Twos-complement machines, no gradual underflow
@@ -6765,9 +6765,9 @@ L10:
       }
 
     }
-    else if ((i__1 = ngpmin - ngnmin, abs(i__1)) == 1 && gpmin == gnmin)
+    else if((i__1 = ngpmin - ngnmin, abs(i__1)) == 1 && gpmin == gnmin)
     {
-      if (gpmin - min(ngpmin, ngnmin) == 3)
+      if(gpmin - min(ngpmin, ngnmin) == 3)
       {
         lemin = max(ngpmin, ngnmin) - 1 + lt;
         /*            ( Twos-complement machines with gradual underflo
@@ -6792,7 +6792,7 @@ L10:
     }
     /* ** */
     /* Comment out this if block if EMIN is ok */
-    if (iwarn)
+    if(iwarn)
     {
       first = TRUE_;
       s_wsfe(&io___231);
@@ -6819,7 +6819,7 @@ L10:
 
     lrmin = 1.;
     i__1 = 1 - lemin;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       d__1 = lrmin * rbase;
       lrmin = dlamc3_(&d__1, &zero);
@@ -6964,7 +6964,7 @@ integer *base;
   /* +    WHILE( ( C1.EQ.A ).AND.( C2.EQ.A ).AND. */
   /*    $       ( D1.EQ.A ).AND.( D2.EQ.A )      )LOOP */
 L10:
-  if (c1 == a && c2 == a && d1 == a && d2 == a)
+  if(c1 == a && c2 == a && d1 == a && d2 == a)
   {
     --(*emin);
     a = b1;
@@ -6974,7 +6974,7 @@ L10:
     c1 = dlamc3_(&d__1, &zero);
     d1 = zero;
     i__1 = *base;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       d1 += b1;
       /* L20: */
@@ -6985,7 +6985,7 @@ L10:
     c2 = dlamc3_(&d__1, &zero);
     d2 = zero;
     i__1 = *base;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       d2 += b2;
       /* L30: */
@@ -7088,13 +7088,13 @@ doublereal *rmax;
   exbits = 1;
 L10:
   try_ = lexp << 1;
-  if (try_ <= -(*emin))
+  if(try_ <= -(*emin))
   {
     lexp = try_;
     ++exbits;
     goto L10;
   }
-  if (lexp == -(*emin))
+  if(lexp == -(*emin))
   {
     uexp = lexp;
   }
@@ -7108,7 +7108,7 @@ L10:
   /*     than or equal to EMIN. EXBITS is the number of bits needed to */
   /*     store the exponent. */
 
-  if (uexp + *emin > -lexp - *emin)
+  if(uexp + *emin > -lexp - *emin)
   {
     expsum = lexp << 1;
   }
@@ -7126,7 +7126,7 @@ L10:
   /*     NBITS is the total number of bits needed to store a */
   /*     floating-point number. */
 
-  if (nbits % 2 == 1 && *beta == 2)
+  if(nbits % 2 == 1 && *beta == 2)
   {
 
     /*        Either there are an odd number of bits used to store a */
@@ -7149,7 +7149,7 @@ L10:
     --(*emax);
   }
 
-  if (*ieee)
+  if(*ieee)
   {
 
     /*        Assume we are on an IEEE machine which reserves one exponent
@@ -7169,17 +7169,17 @@ L10:
   z = *beta - 1.;
   y = 0.;
   i__1 = *p;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     z *= recbas;
-    if (y < 1.)
+    if(y < 1.)
     {
       oldy = y;
     }
     y = dlamc3_(&y, &z);
     /* L20: */
   }
-  if (y >= 1.)
+  if(y >= 1.)
   {
     y = oldy;
   }
@@ -7187,7 +7187,7 @@ L10:
   /*     Now multiply by BETA**EMAX to get RMAX. */
 
   i__1 = *emax;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     d__1 = y * *beta;
     y = dlamc3_(&d__1, &c_b21);
@@ -7251,7 +7251,7 @@ doublereal *x, *y;
   yabs = abs(*y);
   w = max(xabs, yabs);
   z = min(xabs, yabs);
-  if (z == 0.)
+  if(z == 0.)
   {
     ret_val = w;
   }
@@ -7406,7 +7406,7 @@ ftnlen opts_len;
   /*     .. */
   /*     .. Executable Statements .. */
 
-  switch ((int)*ispec)
+  switch((int)*ispec)
   {
   case 1:
     goto L100;
@@ -7439,18 +7439,18 @@ L100:
   s_copy(subnam, name, 6L, name_len);
   ic = *subnam;
   iz = 'Z';
-  if (iz == 90 || iz == 122)
+  if(iz == 90 || iz == 122)
   {
 
     /*        ASCII character set */
 
-    if (ic >= 97 && ic <= 122)
+    if(ic >= 97 && ic <= 122)
     {
       *subnam = (char)(ic - 32);
-      for (i = 2; i <= 6; ++i)
+      for(i = 2; i <= 6; ++i)
       {
         ic = (integer) subnam[i - 1];
-        if (ic >= 97 && ic <= 122)
+        if(ic >= 97 && ic <= 122)
         {
           subnam[i - 1] = (char)(ic - 32);
         }
@@ -7459,19 +7459,19 @@ L100:
     }
 
   }
-  else if (iz == 233 || iz == 169)
+  else if(iz == 233 || iz == 169)
   {
 
     /*        EBCDIC character set */
 
-    if (ic >= 129 && ic <= 137 || ic >= 145 && ic <= 153 || ic >= 162 &&
+    if(ic >= 129 && ic <= 137 || ic >= 145 && ic <= 153 || ic >= 162 &&
         ic <= 169)
     {
       *subnam = (char)(ic + 64);
-      for (i = 2; i <= 6; ++i)
+      for(i = 2; i <= 6; ++i)
       {
         ic = (integer) subnam[i - 1];
-        if (ic >= 129 && ic <= 137 || ic >= 145 && ic <= 153 || ic >=
+        if(ic >= 129 && ic <= 137 || ic >= 145 && ic <= 153 || ic >=
             162 && ic <= 169)
         {
           subnam[i - 1] = (char)(ic + 64);
@@ -7481,18 +7481,18 @@ L100:
     }
 
   }
-  else if (iz == 218 || iz == 250)
+  else if(iz == 218 || iz == 250)
   {
 
     /*        Prime machines:  ASCII+128 */
 
-    if (ic >= 225 && ic <= 250)
+    if(ic >= 225 && ic <= 250)
     {
       *subnam = (char)(ic - 32);
-      for (i = 2; i <= 6; ++i)
+      for(i = 2; i <= 6; ++i)
       {
         ic = (integer) subnam[i - 1];
-        if (ic >= 225 && ic <= 250)
+        if(ic >= 225 && ic <= 250)
         {
           subnam[i - 1] = (char)(ic - 32);
         }
@@ -7504,7 +7504,7 @@ L100:
   *c1 = *subnam;
   sname = *c1 == 'S' || *c1 == 'D';
   cname = *c1 == 'C' || *c1 == 'Z';
-  if (!(cname || sname))
+  if(!(cname || sname))
   {
     return ret_val;
   }
@@ -7512,7 +7512,7 @@ L100:
   s_copy(c3, subnam + 3, 3L, 3L);
   s_copy(c4, c3 + 1, 2L, 2L);
 
-  switch ((int)*ispec)
+  switch((int)*ispec)
   {
   case 1:
     goto L110;
@@ -7532,11 +7532,11 @@ L110:
 
   nb = 1;
 
-  if (s_cmp(c2, "GE", 2L, 2L) == 0)
+  if(s_cmp(c2, "GE", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "TRF", 3L, 3L) == 0)
+    if(s_cmp(c3, "TRF", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nb = 64;
       }
@@ -7545,11 +7545,11 @@ L110:
         nb = 64;
       }
     }
-    else if (s_cmp(c3, "QRF", 3L, 3L) == 0 || s_cmp(c3, "RQF", 3L, 3L)
-             == 0 || s_cmp(c3, "LQF", 3L, 3L) == 0 || s_cmp(c3, "QLF", 3L,
-                 3L) == 0)
+    else if(s_cmp(c3, "QRF", 3L, 3L) == 0 || s_cmp(c3, "RQF", 3L, 3L)
+            == 0 || s_cmp(c3, "LQF", 3L, 3L) == 0 || s_cmp(c3, "QLF", 3L,
+                3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nb = 32;
       }
@@ -7558,9 +7558,9 @@ L110:
         nb = 32;
       }
     }
-    else if (s_cmp(c3, "HRD", 3L, 3L) == 0)
+    else if(s_cmp(c3, "HRD", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nb = 32;
       }
@@ -7569,9 +7569,9 @@ L110:
         nb = 32;
       }
     }
-    else if (s_cmp(c3, "BRD", 3L, 3L) == 0)
+    else if(s_cmp(c3, "BRD", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nb = 32;
       }
@@ -7580,9 +7580,9 @@ L110:
         nb = 32;
       }
     }
-    else if (s_cmp(c3, "TRI", 3L, 3L) == 0)
+    else if(s_cmp(c3, "TRI", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nb = 64;
       }
@@ -7592,11 +7592,11 @@ L110:
       }
     }
   }
-  else if (s_cmp(c2, "PO", 2L, 2L) == 0)
+  else if(s_cmp(c2, "PO", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "TRF", 3L, 3L) == 0)
+    if(s_cmp(c3, "TRF", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nb = 64;
       }
@@ -7606,11 +7606,11 @@ L110:
       }
     }
   }
-  else if (s_cmp(c2, "SY", 2L, 2L) == 0)
+  else if(s_cmp(c2, "SY", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "TRF", 3L, 3L) == 0)
+    if(s_cmp(c3, "TRF", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nb = 64;
       }
@@ -7619,35 +7619,35 @@ L110:
         nb = 64;
       }
     }
-    else if (sname && s_cmp(c3, "TRD", 3L, 3L) == 0)
+    else if(sname && s_cmp(c3, "TRD", 3L, 3L) == 0)
     {
       nb = 1;
     }
-    else if (sname && s_cmp(c3, "GST", 3L, 3L) == 0)
+    else if(sname && s_cmp(c3, "GST", 3L, 3L) == 0)
     {
       nb = 64;
     }
   }
-  else if (cname && s_cmp(c2, "HE", 2L, 2L) == 0)
+  else if(cname && s_cmp(c2, "HE", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "TRF", 3L, 3L) == 0)
+    if(s_cmp(c3, "TRF", 3L, 3L) == 0)
     {
       nb = 64;
     }
-    else if (s_cmp(c3, "TRD", 3L, 3L) == 0)
+    else if(s_cmp(c3, "TRD", 3L, 3L) == 0)
     {
       nb = 1;
     }
-    else if (s_cmp(c3, "GST", 3L, 3L) == 0)
+    else if(s_cmp(c3, "GST", 3L, 3L) == 0)
     {
       nb = 64;
     }
   }
-  else if (sname && s_cmp(c2, "OR", 2L, 2L) == 0)
+  else if(sname && s_cmp(c2, "OR", 2L, 2L) == 0)
   {
-    if (*c3 == 'G')
+    if(*c3 == 'G')
     {
-      if (s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
+      if(s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
           || s_cmp(c4, "LQ", 2L, 2L) == 0 || s_cmp(c4, "QL", 2L, 2L)
           == 0 || s_cmp(c4, "HR", 2L, 2L) == 0 || s_cmp(c4, "TR",
               2L, 2L) == 0 || s_cmp(c4, "BR", 2L, 2L) == 0)
@@ -7655,9 +7655,9 @@ L110:
         nb = 32;
       }
     }
-    else if (*c3 == 'M')
+    else if(*c3 == 'M')
     {
-      if (s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
+      if(s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
           || s_cmp(c4, "LQ", 2L, 2L) == 0 || s_cmp(c4, "QL", 2L, 2L)
           == 0 || s_cmp(c4, "HR", 2L, 2L) == 0 || s_cmp(c4, "TR",
               2L, 2L) == 0 || s_cmp(c4, "BR", 2L, 2L) == 0)
@@ -7666,11 +7666,11 @@ L110:
       }
     }
   }
-  else if (cname && s_cmp(c2, "UN", 2L, 2L) == 0)
+  else if(cname && s_cmp(c2, "UN", 2L, 2L) == 0)
   {
-    if (*c3 == 'G')
+    if(*c3 == 'G')
     {
-      if (s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
+      if(s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
           || s_cmp(c4, "LQ", 2L, 2L) == 0 || s_cmp(c4, "QL", 2L, 2L)
           == 0 || s_cmp(c4, "HR", 2L, 2L) == 0 || s_cmp(c4, "TR",
               2L, 2L) == 0 || s_cmp(c4, "BR", 2L, 2L) == 0)
@@ -7678,9 +7678,9 @@ L110:
         nb = 32;
       }
     }
-    else if (*c3 == 'M')
+    else if(*c3 == 'M')
     {
-      if (s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
+      if(s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
           || s_cmp(c4, "LQ", 2L, 2L) == 0 || s_cmp(c4, "QL", 2L, 2L)
           == 0 || s_cmp(c4, "HR", 2L, 2L) == 0 || s_cmp(c4, "TR",
               2L, 2L) == 0 || s_cmp(c4, "BR", 2L, 2L) == 0)
@@ -7689,13 +7689,13 @@ L110:
       }
     }
   }
-  else if (s_cmp(c2, "GB", 2L, 2L) == 0)
+  else if(s_cmp(c2, "GB", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "TRF", 3L, 3L) == 0)
+    if(s_cmp(c3, "TRF", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
-        if (*n4 <= 64)
+        if(*n4 <= 64)
         {
           nb = 1;
         }
@@ -7706,7 +7706,7 @@ L110:
       }
       else
       {
-        if (*n4 <= 64)
+        if(*n4 <= 64)
         {
           nb = 1;
         }
@@ -7717,13 +7717,13 @@ L110:
       }
     }
   }
-  else if (s_cmp(c2, "PB", 2L, 2L) == 0)
+  else if(s_cmp(c2, "PB", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "TRF", 3L, 3L) == 0)
+    if(s_cmp(c3, "TRF", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
-        if (*n2 <= 64)
+        if(*n2 <= 64)
         {
           nb = 1;
         }
@@ -7734,7 +7734,7 @@ L110:
       }
       else
       {
-        if (*n2 <= 64)
+        if(*n2 <= 64)
         {
           nb = 1;
         }
@@ -7745,11 +7745,11 @@ L110:
       }
     }
   }
-  else if (s_cmp(c2, "TR", 2L, 2L) == 0)
+  else if(s_cmp(c2, "TR", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "TRI", 3L, 3L) == 0)
+    if(s_cmp(c3, "TRI", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nb = 64;
       }
@@ -7759,11 +7759,11 @@ L110:
       }
     }
   }
-  else if (s_cmp(c2, "LA", 2L, 2L) == 0)
+  else if(s_cmp(c2, "LA", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "UUM", 3L, 3L) == 0)
+    if(s_cmp(c3, "UUM", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nb = 64;
       }
@@ -7773,9 +7773,9 @@ L110:
       }
     }
   }
-  else if (sname && s_cmp(c2, "ST", 2L, 2L) == 0)
+  else if(sname && s_cmp(c2, "ST", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "EBZ", 3L, 3L) == 0)
+    if(s_cmp(c3, "EBZ", 3L, 3L) == 0)
     {
       nb = 1;
     }
@@ -7788,13 +7788,13 @@ L200:
   /*     ISPEC = 2:  minimum block size */
 
   nbmin = 2;
-  if (s_cmp(c2, "GE", 2L, 2L) == 0)
+  if(s_cmp(c2, "GE", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "QRF", 3L, 3L) == 0 || s_cmp(c3, "RQF", 3L, 3L) == 0 ||
+    if(s_cmp(c3, "QRF", 3L, 3L) == 0 || s_cmp(c3, "RQF", 3L, 3L) == 0 ||
         s_cmp(c3, "LQF", 3L, 3L) == 0 || s_cmp(c3, "QLF", 3L, 3L) ==
         0)
     {
-      if (sname)
+      if(sname)
       {
         nbmin = 2;
       }
@@ -7803,9 +7803,9 @@ L200:
         nbmin = 2;
       }
     }
-    else if (s_cmp(c3, "HRD", 3L, 3L) == 0)
+    else if(s_cmp(c3, "HRD", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nbmin = 2;
       }
@@ -7814,9 +7814,9 @@ L200:
         nbmin = 2;
       }
     }
-    else if (s_cmp(c3, "BRD", 3L, 3L) == 0)
+    else if(s_cmp(c3, "BRD", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nbmin = 2;
       }
@@ -7825,9 +7825,9 @@ L200:
         nbmin = 2;
       }
     }
-    else if (s_cmp(c3, "TRI", 3L, 3L) == 0)
+    else if(s_cmp(c3, "TRI", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nbmin = 2;
       }
@@ -7837,11 +7837,11 @@ L200:
       }
     }
   }
-  else if (s_cmp(c2, "SY", 2L, 2L) == 0)
+  else if(s_cmp(c2, "SY", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "TRF", 3L, 3L) == 0)
+    if(s_cmp(c3, "TRF", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nbmin = 2;
       }
@@ -7850,23 +7850,23 @@ L200:
         nbmin = 2;
       }
     }
-    else if (sname && s_cmp(c3, "TRD", 3L, 3L) == 0)
+    else if(sname && s_cmp(c3, "TRD", 3L, 3L) == 0)
     {
       nbmin = 2;
     }
   }
-  else if (cname && s_cmp(c2, "HE", 2L, 2L) == 0)
+  else if(cname && s_cmp(c2, "HE", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "TRD", 3L, 3L) == 0)
+    if(s_cmp(c3, "TRD", 3L, 3L) == 0)
     {
       nbmin = 2;
     }
   }
-  else if (sname && s_cmp(c2, "OR", 2L, 2L) == 0)
+  else if(sname && s_cmp(c2, "OR", 2L, 2L) == 0)
   {
-    if (*c3 == 'G')
+    if(*c3 == 'G')
     {
-      if (s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
+      if(s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
           || s_cmp(c4, "LQ", 2L, 2L) == 0 || s_cmp(c4, "QL", 2L, 2L)
           == 0 || s_cmp(c4, "HR", 2L, 2L) == 0 || s_cmp(c4, "TR",
               2L, 2L) == 0 || s_cmp(c4, "BR", 2L, 2L) == 0)
@@ -7874,9 +7874,9 @@ L200:
         nbmin = 2;
       }
     }
-    else if (*c3 == 'M')
+    else if(*c3 == 'M')
     {
-      if (s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
+      if(s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
           || s_cmp(c4, "LQ", 2L, 2L) == 0 || s_cmp(c4, "QL", 2L, 2L)
           == 0 || s_cmp(c4, "HR", 2L, 2L) == 0 || s_cmp(c4, "TR",
               2L, 2L) == 0 || s_cmp(c4, "BR", 2L, 2L) == 0)
@@ -7885,11 +7885,11 @@ L200:
       }
     }
   }
-  else if (cname && s_cmp(c2, "UN", 2L, 2L) == 0)
+  else if(cname && s_cmp(c2, "UN", 2L, 2L) == 0)
   {
-    if (*c3 == 'G')
+    if(*c3 == 'G')
     {
-      if (s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
+      if(s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
           || s_cmp(c4, "LQ", 2L, 2L) == 0 || s_cmp(c4, "QL", 2L, 2L)
           == 0 || s_cmp(c4, "HR", 2L, 2L) == 0 || s_cmp(c4, "TR",
               2L, 2L) == 0 || s_cmp(c4, "BR", 2L, 2L) == 0)
@@ -7897,9 +7897,9 @@ L200:
         nbmin = 2;
       }
     }
-    else if (*c3 == 'M')
+    else if(*c3 == 'M')
     {
-      if (s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
+      if(s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
           || s_cmp(c4, "LQ", 2L, 2L) == 0 || s_cmp(c4, "QL", 2L, 2L)
           == 0 || s_cmp(c4, "HR", 2L, 2L) == 0 || s_cmp(c4, "TR",
               2L, 2L) == 0 || s_cmp(c4, "BR", 2L, 2L) == 0)
@@ -7916,13 +7916,13 @@ L300:
   /*     ISPEC = 3:  crossover point */
 
   nx = 0;
-  if (s_cmp(c2, "GE", 2L, 2L) == 0)
+  if(s_cmp(c2, "GE", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "QRF", 3L, 3L) == 0 || s_cmp(c3, "RQF", 3L, 3L) == 0 ||
+    if(s_cmp(c3, "QRF", 3L, 3L) == 0 || s_cmp(c3, "RQF", 3L, 3L) == 0 ||
         s_cmp(c3, "LQF", 3L, 3L) == 0 || s_cmp(c3, "QLF", 3L, 3L) ==
         0)
     {
-      if (sname)
+      if(sname)
       {
         nx = 128;
       }
@@ -7931,9 +7931,9 @@ L300:
         nx = 128;
       }
     }
-    else if (s_cmp(c3, "HRD", 3L, 3L) == 0)
+    else if(s_cmp(c3, "HRD", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nx = 128;
       }
@@ -7942,9 +7942,9 @@ L300:
         nx = 128;
       }
     }
-    else if (s_cmp(c3, "BRD", 3L, 3L) == 0)
+    else if(s_cmp(c3, "BRD", 3L, 3L) == 0)
     {
-      if (sname)
+      if(sname)
       {
         nx = 128;
       }
@@ -7954,25 +7954,25 @@ L300:
       }
     }
   }
-  else if (s_cmp(c2, "SY", 2L, 2L) == 0)
+  else if(s_cmp(c2, "SY", 2L, 2L) == 0)
   {
-    if (sname && s_cmp(c3, "TRD", 3L, 3L) == 0)
+    if(sname && s_cmp(c3, "TRD", 3L, 3L) == 0)
     {
       nx = 1;
     }
   }
-  else if (cname && s_cmp(c2, "HE", 2L, 2L) == 0)
+  else if(cname && s_cmp(c2, "HE", 2L, 2L) == 0)
   {
-    if (s_cmp(c3, "TRD", 3L, 3L) == 0)
+    if(s_cmp(c3, "TRD", 3L, 3L) == 0)
     {
       nx = 1;
     }
   }
-  else if (sname && s_cmp(c2, "OR", 2L, 2L) == 0)
+  else if(sname && s_cmp(c2, "OR", 2L, 2L) == 0)
   {
-    if (*c3 == 'G')
+    if(*c3 == 'G')
     {
-      if (s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
+      if(s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
           || s_cmp(c4, "LQ", 2L, 2L) == 0 || s_cmp(c4, "QL", 2L, 2L)
           == 0 || s_cmp(c4, "HR", 2L, 2L) == 0 || s_cmp(c4, "TR",
               2L, 2L) == 0 || s_cmp(c4, "BR", 2L, 2L) == 0)
@@ -7981,11 +7981,11 @@ L300:
       }
     }
   }
-  else if (cname && s_cmp(c2, "UN", 2L, 2L) == 0)
+  else if(cname && s_cmp(c2, "UN", 2L, 2L) == 0)
   {
-    if (*c3 == 'G')
+    if(*c3 == 'G')
     {
-      if (s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
+      if(s_cmp(c4, "QR", 2L, 2L) == 0 || s_cmp(c4, "RQ", 2L, 2L) == 0
           || s_cmp(c4, "LQ", 2L, 2L) == 0 || s_cmp(c4, "QL", 2L, 2L)
           == 0 || s_cmp(c4, "HR", 2L, 2L) == 0 || s_cmp(c4, "TR",
               2L, 2L) == 0 || s_cmp(c4, "BR", 2L, 2L) == 0)
@@ -8160,23 +8160,23 @@ ftnlen uplo_len;
   a -= a_offset;
 
   /* Function Body */
-  if (*n == 0)
+  if(*n == 0)
   {
     value = 0.;
   }
-  else if (lsame_(norm, "M", 1L, 1L))
+  else if(lsame_(norm, "M", 1L, 1L))
   {
 
     /*        Find max(abs(A(i,j))). */
 
     value = 0.;
-    if (lsame_(uplo, "U", 1L, 1L))
+    if(lsame_(uplo, "U", 1L, 1L))
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         i__2 = j;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           /* Computing MAX */
           d__2 = value, d__3 = (d__1 = a[i + j * a_dim1], abs(d__1))
@@ -8190,10 +8190,10 @@ ftnlen uplo_len;
     else
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         i__2 = *n;
-        for (i = j; i <= i__2; ++i)
+        for(i = j; i <= i__2; ++i)
         {
           /* Computing MAX */
           d__2 = value, d__3 = (d__1 = a[i + j * a_dim1], abs(d__1))
@@ -8205,21 +8205,21 @@ ftnlen uplo_len;
       }
     }
   }
-  else if (lsame_(norm, "I", 1L, 1L) || lsame_(norm, "O", 1L, 1L) || *
-           norm == '1')
+  else if(lsame_(norm, "I", 1L, 1L) || lsame_(norm, "O", 1L, 1L) || *
+          norm == '1')
   {
 
     /*        Find normI(A) ( = norm1(A), since A is symmetric). */
 
     value = 0.;
-    if (lsame_(uplo, "U", 1L, 1L))
+    if(lsame_(uplo, "U", 1L, 1L))
     {
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         sum = 0.;
         i__2 = j - 1;
-        for (i = 1; i <= i__2; ++i)
+        for(i = 1; i <= i__2; ++i)
         {
           absa = (d__1 = a[i + j * a_dim1], abs(d__1));
           sum += absa;
@@ -8230,7 +8230,7 @@ ftnlen uplo_len;
         /* L60: */
       }
       i__1 = *n;
-      for (i = 1; i <= i__1; ++i)
+      for(i = 1; i <= i__1; ++i)
       {
         /* Computing MAX */
         d__1 = value, d__2 = work[i];
@@ -8241,17 +8241,17 @@ ftnlen uplo_len;
     else
     {
       i__1 = *n;
-      for (i = 1; i <= i__1; ++i)
+      for(i = 1; i <= i__1; ++i)
       {
         work[i] = 0.;
         /* L80: */
       }
       i__1 = *n;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         sum = work[j] + (d__1 = a[j + j * a_dim1], abs(d__1));
         i__2 = *n;
-        for (i = j + 1; i <= i__2; ++i)
+        for(i = j + 1; i <= i__2; ++i)
         {
           absa = (d__1 = a[i + j * a_dim1], abs(d__1));
           sum += absa;
@@ -8263,17 +8263,17 @@ ftnlen uplo_len;
       }
     }
   }
-  else if (lsame_(norm, "F", 1L, 1L) || lsame_(norm, "E", 1L, 1L))
+  else if(lsame_(norm, "F", 1L, 1L) || lsame_(norm, "E", 1L, 1L))
   {
 
     /*        Find normF(A). */
 
     scale = 0.;
     sum = 1.;
-    if (lsame_(uplo, "U", 1L, 1L))
+    if(lsame_(uplo, "U", 1L, 1L))
     {
       i__1 = *n;
-      for (j = 2; j <= i__1; ++j)
+      for(j = 2; j <= i__1; ++j)
       {
         i__2 = j - 1;
         dlassq_(&i__2, &a[j * a_dim1 + 1], &c__1, &scale, &sum);
@@ -8283,7 +8283,7 @@ ftnlen uplo_len;
     else
     {
       i__1 = *n - 1;
-      for (j = 1; j <= i__1; ++j)
+      for(j = 1; j <= i__1; ++j)
       {
         i__2 = *n - j;
         dlassq_(&i__2, &a[j + 1 + j * a_dim1], &c__1, &scale, &sum);
@@ -8386,16 +8386,16 @@ doublereal *scale, *sumsq;
   --x;
 
   /* Function Body */
-  if (*n > 0)
+  if(*n > 0)
   {
     i__1 = (*n - 1) * *incx + 1;
     i__2 = *incx;
-    for (ix = 1; i__2 < 0 ? ix >= i__1 : ix <= i__1; ix += i__2)
+    for(ix = 1; i__2 < 0 ? ix >= i__1 : ix <= i__1; ix += i__2)
     {
-      if (x[ix] != 0.)
+      if(x[ix] != 0.)
       {
         absxi = (d__1 = x[ix], abs(d__1));
-        if (*scale < absxi)
+        if(*scale < absxi)
         {
           /* Computing 2nd power */
           d__1 = *scale / absxi;
@@ -8557,7 +8557,7 @@ ftnlen cb_len;
   /*     Test if the characters are equal */
 
   ret_val = *ca == *cb;
-  if (ret_val)
+  if(ret_val)
   {
     return ret_val;
   }
@@ -8574,54 +8574,54 @@ ftnlen cb_len;
   inta = *ca;
   intb = *cb;
 
-  if (zcode == 90 || zcode == 122)
+  if(zcode == 90 || zcode == 122)
   {
 
     /*        ASCII is assumed - ZCODE is the ASCII code of either lower o
     r */
     /*        upper case 'Z'. */
 
-    if (inta >= 97 && inta <= 122)
+    if(inta >= 97 && inta <= 122)
     {
       inta += -32;
     }
-    if (intb >= 97 && intb <= 122)
+    if(intb >= 97 && intb <= 122)
     {
       intb += -32;
     }
 
   }
-  else if (zcode == 233 || zcode == 169)
+  else if(zcode == 233 || zcode == 169)
   {
 
     /*        EBCDIC is assumed - ZCODE is the EBCDIC code of either lower
      or */
     /*        upper case 'Z'. */
 
-    if (inta >= 129 && inta <= 137 || inta >= 145 && inta <= 153 || inta
+    if(inta >= 129 && inta <= 137 || inta >= 145 && inta <= 153 || inta
         >= 162 && inta <= 169)
     {
       inta += 64;
     }
-    if (intb >= 129 && intb <= 137 || intb >= 145 && intb <= 153 || intb
+    if(intb >= 129 && intb <= 137 || intb >= 145 && intb <= 153 || intb
         >= 162 && intb <= 169)
     {
       intb += 64;
     }
 
   }
-  else if (zcode == 218 || zcode == 250)
+  else if(zcode == 218 || zcode == 250)
   {
 
     /*        ASCII is assumed, on Prime machines - ZCODE is the ASCII cod
     e */
     /*        plus 128 of either lower or upper case 'Z'. */
 
-    if (inta >= 225 && inta <= 250)
+    if(inta >= 225 && inta <= 250)
     {
       inta += -32;
     }
-    if (intb >= 225 && intb <= 250)
+    if(intb >= 225 && intb <= 250)
     {
       intb += -32;
     }
@@ -8692,7 +8692,7 @@ ftnlen cb_len;
   /*     .. Executable Statements .. */
 
   ret_val = FALSE_;
-  if (i_len(ca, ca_len) < *n || i_len(cb, cb_len) < *n)
+  if(i_len(ca, ca_len) < *n || i_len(cb, cb_len) < *n)
   {
     goto L20;
   }
@@ -8700,12 +8700,12 @@ ftnlen cb_len;
   /*     Do for each character in the two strings. */
 
   i__1 = *n;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
 
     /*        Test if the characters are equal using LSAME. */
 
-    if (! lsame_(ca + (i - 1), cb + (i - 1), 1L, 1L))
+    if(! lsame_(ca + (i - 1), cb + (i - 1), 1L, 1L))
     {
       goto L20;
     }

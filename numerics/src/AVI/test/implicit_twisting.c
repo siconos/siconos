@@ -89,14 +89,14 @@ int main(void)
     sigma[1] = 0.0;
 
     info = avi_caoferris(&avi, lambda, sigma, options);
-    if (info) fprintf(stderr, "SOLVER FAILED!\tinfo=%d\n", info);
+    if(info) fprintf(stderr, "SOLVER FAILED!\tinfo=%d\n", info);
 
-/* /    printf("x_k: %2.6e %2.6e\n", x[0], x[1]);
-    printf("lambda: %2.6e %2.6e\n", lambda[0], lambda[1]);
-    printf("u = %2.6e\n", lambda[0] + beta*lambda[1]);*/
+    /* /    printf("x_k: %2.6e %2.6e\n", x[0], x[1]);
+        printf("lambda: %2.6e %2.6e\n", lambda[0], lambda[1]);
+        printf("u = %2.6e\n", lambda[0] + beta*lambda[1]);*/
     sigma[0] = x[0] + TS*x[1] + M[0]*lambda[0] + M[2]*lambda[1];
     sigma[1] = x[1] + M[1]*lambda[0] + M[3]*lambda[1];
-/*    printf("x_{k+1}: %2.6e %2.6e\n", sigma[0], sigma[1]);*/
+    /*    printf("x_{k+1}: %2.6e %2.6e\n", sigma[0], sigma[1]);*/
 
     /* let's check is it is correct */
     c1 = (sigma[0]*(v1[0] + lambda[0]) + sigma[1]*(v1[1] + lambda[1])) <= TOL_NC;
@@ -104,27 +104,27 @@ int main(void)
     c3 = (sigma[0]*(v3[0] + lambda[0]) + sigma[1]*(v3[1] + lambda[1])) <= TOL_NC;
     c4 = (sigma[0]*(v4[0] + lambda[0]) + sigma[1]*(v4[1] + lambda[1])) <= TOL_NC;
 
-    if (!c1)
+    if(!c1)
     {
       fprintf(stderr, "ERROR in implicit_twisting.c, bad value of lambda. test c1 failed\n");
       fprintf(stderr, "<v1-lambda, sigma> = %2.10e\n", (sigma[0]*(v1[0] + lambda[0]) + sigma[1]*(v1[1] + lambda[1])));
       goto expose_failure;
     }
-    if (!c2)
+    if(!c2)
     {
       fprintf(stderr, "ERROR in implicit_twisting.c, bad value of lambda. test c2 failed\n");
       fprintf(stderr, "<v2-lambda, sigma> = %2.10e\n", (sigma[0]*(v2[0] + lambda[0]) + sigma[1]*(v2[1] + lambda[1])));
       goto expose_failure;
     }
 
-    if (!c3)
+    if(!c3)
     {
       fprintf(stderr, "ERROR in implicit_twisting.c, bad value of lambda. test c3 failed\n");
       fprintf(stderr, "<v3-lambda, sigma> = %2.10e\n", (sigma[0]*(v3[0] + lambda[0]) + sigma[1]*(v3[1] + lambda[1])));
       goto expose_failure;
     }
 
-    if (!c4)
+    if(!c4)
     {
       fprintf(stderr, "ERROR in implicit_twisting.c, bad value of lambda. test c4 failed\n");
       fprintf(stderr, "<v4-lambda, sigma> = %2.10e\n", (sigma[0]*(v4[0] + lambda[0]) + sigma[1]*(v4[1] + lambda[1])));
@@ -135,7 +135,7 @@ int main(void)
     q[0] = x[0] + TS*x[1];
     q[1] = x[1];
   }
-  while (!info && c1 && c2 && c3 && c4 && (N <= NB_ITER));
+  while(!info && c1 && c2 && c3 && c4 && (N <= NB_ITER));
 
   printf("final x: %2.6e %2.6e\n", sigma[0], sigma[1]);
 

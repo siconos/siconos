@@ -35,7 +35,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   int current = 0;
 
-  for(int s=0;s<n_solvers;++s)
+  for(int s=0; s<n_solvers; ++s)
   {
     for(int d =0; d <n_data; d++)
     {
@@ -48,6 +48,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   // expected to fail
   collection[3].will_fail = 1; // NSN_AC on data/GFC3D_OneContact.dat
+
 #ifndef WITH_MUMPS
   collection[4].will_fail = 1; // NSN_AC on data/GFC3D_TwoRods1.dat, mumps only
 #endif

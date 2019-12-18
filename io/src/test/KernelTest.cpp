@@ -324,13 +324,13 @@ void KernelTest::t6()
       bouncingBall->topology()->dSG(0);
 
     SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
-      (dsg->bundle(*(dsg->begin())));
+                            (dsg->bundle(*(dsg->begin())));
 
     SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(sim);
     SP::Interaction inter;
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = bouncingBall->topology()->indexSet(0);
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       inter = indexSet0->bundle(*ui);
 
 
@@ -355,7 +355,7 @@ void KernelTest::t6()
     cout << "====> Start computation ... " << endl << endl;
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 1;
-    while (s->hasNextEvent())
+    while(s->hasNextEvent())
     {
       s->computeOneStep();
 
@@ -380,25 +380,25 @@ void KernelTest::t6()
     dataPlotRef.zero();
     ioMatrix::read("result.ref", "ascii", dataPlotRef);
 
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12)
+    if((dataPlot - dataPlotRef).normInf() > 1e-12)
     {
       std::cout <<
-        "Warning. The results is rather different from the reference file :"
+                "Warning. The results is rather different from the reference file :"
                 <<
-        (dataPlot - dataPlotRef).normInf()
+                (dataPlot - dataPlotRef).normInf()
                 <<
-        std::endl;
+                std::endl;
       CPPUNIT_ASSERT(false);
     }
 
   }
 
-  catch (SiconosException e)
+  catch(SiconosException e)
   {
     cout << e.report() << endl;
     CPPUNIT_ASSERT(false);
   }
-  catch (...)
+  catch(...)
   {
     cout << "Exception caught in KernelTest.cpp" << endl;
     CPPUNIT_ASSERT(false);
@@ -518,12 +518,12 @@ void KernelTest::t9()
 
     CPPUNIT_ASSERT(nsds1->finalT() == nsds2->finalT());
   }
-  catch (SiconosException e)
+  catch(SiconosException e)
   {
     cout << e.report() << endl;
     CPPUNIT_ASSERT(false);
   }
-  catch (...)
+  catch(...)
   {
     cout << "Exception caught in KernelTest.cpp" << endl;
     CPPUNIT_ASSERT(false);

@@ -61,12 +61,12 @@ void mcp_FB(void* data_opaque, double* z, double* F, double* F_FB)
   phi_Mixed_FB(data->n1, data->n2, z, F, F_FB);
 }
 
-void mcp_newton_FB_FBLSA(MixedComplementarityProblem* problem, double *z, double* Fmcp, int *info , SolverOptions* options)
+void mcp_newton_FB_FBLSA(MixedComplementarityProblem* problem, double *z, double* Fmcp, int *info, SolverOptions* options)
 {
   numerics_printf("mcp_newton_FB_FBLSA. starts");
   functions_LSA functions_FBLSA_mcp;
 
-  /* This call will set 
+  /* This call will set
    * functions_FBLSA_mcp.compute_F to FB_compute_F_mcp
    * functions_FBLSA_mcp.compute_F_merit to mcp_FB
    */
@@ -78,16 +78,16 @@ void mcp_newton_FB_FBLSA(MixedComplementarityProblem* problem, double *z, double
   /* function to compute the error (in our case the norm of the gradient of the merit function) */
   functions_FBLSA_mcp.compute_error = &FB_compute_error_mcp;
 
-  
+
   set_lsa_params_data(options, problem->nabla_Fmcp);
   newton_LSA(problem->n1 + problem->n2, z, Fmcp, info, (void *)problem, options, &functions_FBLSA_mcp);
 
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   double  error =0.0;
 
-  mcp_compute_error(problem, z , Fmcp, &error);
+  mcp_compute_error(problem, z, Fmcp, &error);
 
-  if (error > tolerance)
+  if(error > tolerance)
   {
     numerics_printf("mcp_newton_FB_FBLSA : error = %e > tolerance = %e.", error, tolerance);
     *info = 1;

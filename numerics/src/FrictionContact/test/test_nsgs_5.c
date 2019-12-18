@@ -44,9 +44,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
     collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
     collection[current].will_fail=1;
-    current++;   
+    current++;
   }
-  
+
   {
     int d = 6; // BoxesStack1-i100000-32.hdf5.dat
     // nonsmooth newton 'damped', change hybrid strategy. Default for other parameters
@@ -58,11 +58,11 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
     collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
     collection[current].will_fail=1;
-    current++;   
+    current++;
   }
   {
     int d = 8; // KaplasTower-i1061-4.hdf5.dat";
-    
+
     // Nonsmooth Newton "damped", default values.
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(topsolver);
@@ -70,11 +70,11 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
 
     solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-    current++;   
+    current++;
   }
   {
     int d = 8; // KaplasTower-i1061-4.hdf5.dat";
-   
+
     // nonsmooth newton 'damped', Moreau-Jean formulation. Default for other parameters
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(topsolver);
@@ -83,10 +83,10 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
     solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
     collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
-    current++;   
+    current++;
 
   }
-  
+
   {
     int d = 8; // KaplasTower-i1061-4.hdf5.dat";
     // nonsmooth newton 'damped', change hybrid strategy. Default for other parameters
@@ -97,7 +97,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
     solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
     collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
-    current++;   
+    current++;
   }
 
 
@@ -112,7 +112,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
     // expected to fail
     collection[current].will_fail=1;
-    current++;   
+    current++;
   }
   {
     int d = 9; // OneObject-i100000-499.hdf5.dat
@@ -126,8 +126,8 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
     // expected to fail
     collection[current].will_fail=1;
-    current++;   
-  }  
+    current++;
+  }
 
   {
     int d = 9; // OneObject-i100000-499.hdf5.dat
@@ -141,7 +141,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
     // expected to fail
     collection[current].will_fail=1;
-    current++;   
+    current++;
   }
 
   {
@@ -157,9 +157,9 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
     // expected to fail
     collection[current].will_fail=1;
-    current++;   
+    current++;
   }
-  
+
   *number_of_tests = current;
   return collection;
 

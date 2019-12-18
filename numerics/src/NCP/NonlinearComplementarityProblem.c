@@ -23,7 +23,7 @@
 
 void freeNCP(NonlinearComplementarityProblem* ncp)
 {
-  if (ncp->nabla_F)
+  if(ncp->nabla_F)
   {
     NM_clear(ncp->nabla_F);
     free(ncp->nabla_F);

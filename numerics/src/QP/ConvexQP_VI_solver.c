@@ -41,7 +41,7 @@ void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, Solv
 void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, SolverOptions* options)
 {
   NumericsMatrix* A = problem->A;
-  if (A)
+  if(A)
   {
     numerics_error("ConvexQP_VI_Solver", "This solver does not support a specific matrix A different from the identity");
   }
@@ -61,45 +61,45 @@ void convexQP_VI_solver(ConvexQP* problem, double *z, double *w, int* info, Solv
   vi->size =  n;
 
   /*set the norm of the VI to the norm of problem->q  */
-  double norm_q = cblas_dnrm2(n, problem->q , 1);
+  double norm_q = cblas_dnrm2(n, problem->q, 1);
   vi->normVI= norm_q;
   vi->istheNormVIset=1;
 
   convexQP_as_vi->vi = vi;
   convexQP_as_vi->cqp = problem;
 
-  if (options->solverId==SICONOS_CONVEXQP_VI_FPP)
+  if(options->solverId==SICONOS_CONVEXQP_VI_FPP)
   {
-    variationalInequality_FixedPointProjection(vi, z, w , info , options);
+    variationalInequality_FixedPointProjection(vi, z, w, info, options);
   }
-  else if (options->solverId==SICONOS_CONVEXQP_VI_EG)
+  else if(options->solverId==SICONOS_CONVEXQP_VI_EG)
   {
-    variationalInequality_ExtraGradient(vi, z, w , info , options);
+    variationalInequality_ExtraGradient(vi, z, w, info, options);
   }
 
 
   /* **** Criterium convergence **** */
-  convexQP_compute_error_reduced(problem, z , w, options->dparam[SICONOS_DPARAM_TOL], options, norm_q, &error);
+  convexQP_compute_error_reduced(problem, z, w, options->dparam[SICONOS_DPARAM_TOL], options, norm_q, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */
   /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
 
-    if (options->solverId==SICONOS_CONVEXQP_VI_FPP)
+    if(options->solverId==SICONOS_CONVEXQP_VI_FPP)
     {
       printf("--------------- CONVEXQP - VI solver (VI_FPP) - #Iteration %i Final Residual = %14.7e\n",
              options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
     }
-    else if (options->solverId==SICONOS_CONVEXQP_VI_EG)
+    else if(options->solverId==SICONOS_CONVEXQP_VI_EG)
     {
       printf("--------------- CONVEXQP - VI solver (VI_EG) - #Iteration %i Final Residual = %14.7e\n",
-                          options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
+             options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
     }
-    
+
   }
   free(vi);
 

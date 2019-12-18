@@ -21,7 +21,8 @@ sparseMatrix *createMatrix(int dimLimit, int lenLimit, int initVectors)
   matrix->limit = dimLimit;
   matrix->limitVector = lenLimit;
   resizeMatrix(matrix, initsize);
-  while(initVectors > 0) {
+  while(initVectors > 0)
+  {
     initVectors--;
     appendMatrix(matrix, createVector(lenLimit, 2));
   }
@@ -37,15 +38,17 @@ void resizeMatrix(sparseMatrix *matrix, int newSize)
     oldSize = 0;
   else
     oldSize = matrix->size;
-  while(oldSize>newSize) {
-	  oldSize--;
-	  freeVector(matrix->list[oldSize]);
+  while(oldSize>newSize)
+  {
+    oldSize--;
+    freeVector(matrix->list[oldSize]);
     return;
   }
   REALLOC(matrix->list, newSize);
-  while(oldSize<newSize) {
-	  matrix->list[oldSize] = NULL;
-	  oldSize++;
+  while(oldSize<newSize)
+  {
+    matrix->list[oldSize] = NULL;
+    oldSize++;
   }
   if(newSize>0)
     matrix->size = newSize;
@@ -53,12 +56,12 @@ void resizeMatrix(sparseMatrix *matrix, int newSize)
 
 int appendMatrix(sparseMatrix *matrix, sparseVector *newVector)
 {
-   if(matrix->count == matrix->size)
-     resizeMatrix(matrix, matrix->size + 10);
-   matrix->list[matrix->count] = newVector;
-   matrix->count++;
-   putDiagonalIndex(newVector, matrix->count);
-   return(matrix->count);
+  if(matrix->count == matrix->size)
+    resizeMatrix(matrix, matrix->size + 10);
+  matrix->list[matrix->count] = newVector;
+  matrix->count++;
+  putDiagonalIndex(newVector, matrix->count);
+  return(matrix->count);
 }
 
 
@@ -70,7 +73,7 @@ int NZcountMatrix(sparseMatrix *matrix)
   for(i = 0; i < matrix->count; i++)
     nz += matrix->list[i]->count;
 
-  return( nz );
+  return(nz);
 }
 
 
@@ -83,12 +86,13 @@ void freeMatrix(sparseMatrix *matrix)
 
 void printMatrix(int n, sparseMatrix *matrix, int modulo, MYBOOL showEmpty)
 {
-   int i;
-   for(i = 1; i<=matrix->count; i++) 
-     if(matrix->list[i-1] != NULL) { 
-       if(showEmpty || matrix->list[i-1]->count>0)
-         printVector(n, matrix->list[i-1], modulo);
-   }
+  int i;
+  for(i = 1; i<=matrix->count; i++)
+    if(matrix->list[i-1] != NULL)
+    {
+      if(showEmpty || matrix->list[i-1]->count>0)
+        printVector(n, matrix->list[i-1], modulo);
+    }
 }
 
 
@@ -118,7 +122,8 @@ int redimensionVector(sparseVector *sparse, int newDim)
 
   olddim = sparse->limit;
   sparse->limit = newDim;
-  if(lastIndex(sparse)>newDim) {
+  if(lastIndex(sparse)>newDim)
+  {
     i = sparse->count;
     while(i>0 && sparse->index[i]>newDim) i--;
     sparse->count = i;
@@ -146,24 +151,26 @@ void moveVector(sparseVector *sparse, int destPos, int sourcePos, int itemCount)
     return;
 
 #if defined DOFASTMATH
-  if(TRUE) {
+  if(TRUE)
+  {
     MEMMOVE(&sparse->value[destPos], &sparse->value[sourcePos], itemCount);
     MEMMOVE(&sparse->index[destPos], &sparse->index[sourcePos], itemCount);
   }
   /* XXX WTF is this ?  */
-/*   else {
-    int    *idxPtr1, *idxPtr2;
-    double *valPtr1, *valPtr2;
+  /*   else {
+      int    *idxPtr1, *idxPtr2;
+      double *valPtr1, *valPtr2;
 
-    for(i = 1, idxPtr1 = sparse->index+destPos, idxPtr2 = sparse->index+sourcePos,
-               valPtr1 = sparse->value+destPos, valPtr2 = sparse->value+sourcePos; 
-        i<=itemCount; i++, idxPtr1++, idxPtr2++, valPtr1++, valPtr2++) {
-      *idxPtr1 = *idxPtr2;
-      *valPtr1 = *valPtr2;
-    }
-  } */
+      for(i = 1, idxPtr1 = sparse->index+destPos, idxPtr2 = sparse->index+sourcePos,
+                 valPtr1 = sparse->value+destPos, valPtr2 = sparse->value+sourcePos;
+          i<=itemCount; i++, idxPtr1++, idxPtr2++, valPtr1++, valPtr2++) {
+        *idxPtr1 = *idxPtr2;
+        *valPtr1 = *valPtr2;
+      }
+    } */
 #else
-  for(int i = 1; i<=itemCount; i++) {
+  for(int i = 1; i<=itemCount; i++)
+  {
     sparse->value[destPos] = sparse->value[sourcePos];
     sparse->index[destPos] = sparse->index[sourcePos];
     destPos++;
@@ -175,8 +182,8 @@ void moveVector(sparseVector *sparse, int destPos, int sourcePos, int itemCount)
 
 void rotateVector(sparseVector *sparse, int startPos, int chainSize, int stepDelta)
 {
-/*  int idxHold; */
-/*  double valHold; */
+  /*  int idxHold; */
+  /*  double valHold; */
 
 }
 
@@ -216,7 +223,8 @@ void swapVector(sparseVector *sparse1, sparseVector *sparse2)
 
 void freeVector(sparseVector *sparse)
 {
-	if(sparse != NULL) {
+  if(sparse != NULL)
+  {
     MEMFREE(sparse->value);
     MEMFREE(sparse->index);
     MEMFREE(sparse);
@@ -226,7 +234,7 @@ void freeVector(sparseVector *sparse)
 
 MYBOOL verifyVector(sparseVector *sparse)
 {
-  int i, n, k1, k2, kd; 
+  int i, n, k1, k2, kd;
   int  err = 0;
   double vd;
 
@@ -237,10 +245,11 @@ MYBOOL verifyVector(sparseVector *sparse)
     return(TRUE);
   k1 = 0;
   k2 = sparse->index[1];
-  if(k2 == kd && sparse->value[1] != vd) 
+  if(k2 == kd && sparse->value[1] != vd)
     err = 2;
 
-  for(i = 2; i <= n && err == 0; i++) {
+  for(i = 2; i <= n && err == 0; i++)
+  {
     k1 = k2;
     k2 = sparse->index[i];
     if(k1 >= k2) err = 1;
@@ -278,7 +287,8 @@ int putDiagonalIndex(sparseVector *sparse, int index)
 {
   int oldindex;
   oldindex = sparse->index[0];
-  if(index > 0) {
+  if(index > 0)
+  {
     sparse->index[0] = 0; /* Must temporarily set to zero to force vector search in getItem */
     sparse->value[0] = getItem(sparse, index);
   }
@@ -291,8 +301,9 @@ int putDiagonalIndex(sparseVector *sparse, int index)
 
 MYBOOL putDiagonal(sparseVector *sparse, REAL value)
 {
-  if(sparse->index[0]>0) {
-    putItem(sparse, sparse->index[0], value); 
+  if(sparse->index[0]>0)
+  {
+    putItem(sparse, sparse->index[0], value);
     return(TRUE);
   }
   else
@@ -302,13 +313,13 @@ MYBOOL putDiagonal(sparseVector *sparse, REAL value)
 
 REAL getDiagonal(sparseVector *sparse)
 {
-   return(sparse->value[0]);
+  return(sparse->value[0]);
 }
 
 
 REAL getItem(sparseVector *sparse, int targetIndex)
 {
-  /* First check if we want the diagonal element */ 
+  /* First check if we want the diagonal element */
   if(targetIndex == sparse->index[0])
     return(sparse->value[0]);
 
@@ -325,18 +336,20 @@ REAL addtoItem(sparseVector *sparse, int targetIndex, REAL value)
 {
   int idx;
 
-  if(targetIndex > 0) 
+  if(targetIndex > 0)
     idx = findIndex(targetIndex, sparse->index, sparse->count, BLAS_BASE);
-  else {
+  else
+  {
     idx = -targetIndex;
     if(idx > sparse->count)
       /* Index error; ignore item */
       return(0.0);
   }
 
-  if(idx <=0 )
+  if(idx <=0)
     value = putItem(sparse, targetIndex, value);
-  else {
+  else
+  {
     value += sparse->value[idx];
     putItem(sparse, -idx, value);
   }
@@ -349,7 +362,8 @@ REAL putItem(sparseVector *sparse, int targetIndex, REAL value)
   REAL last = 0.0;
   int  posIndex;
 
-  if(targetIndex < 0) {
+  if(targetIndex < 0)
+  {
     posIndex = -targetIndex;
     if(posIndex > sparse->count)
       return(last);
@@ -361,29 +375,34 @@ REAL putItem(sparseVector *sparse, int targetIndex, REAL value)
   if(fabs(value) < MACHINEPREC)
     value = 0;
 
-  if(targetIndex == sparse->index[0]) 
+  if(targetIndex == sparse->index[0])
     sparse->value[0] = value;
 
-  if(posIndex < 0) {
-    if(value != 0) {
+  if(posIndex < 0)
+  {
+    if(value != 0)
+    {
       if(sparse->count == sparse->size)
         resizeVector(sparse, sparse->size + RESIZEDELTA);
       posIndex = -posIndex;
       sparse->count++;
-      if(posIndex < sparse->count) 
+      if(posIndex < sparse->count)
         moveVector(sparse, posIndex+1, posIndex, sparse->count-posIndex);
       sparse->value[posIndex] = value;
       sparse->index[posIndex] = targetIndex;
     }
   }
-  else {
-    if(value == 0) {
+  else
+  {
+    if(value == 0)
+    {
       last = sparse->value[posIndex];
-      if(sparse->count > posIndex) 
+      if(sparse->count > posIndex)
         moveVector(sparse, posIndex, posIndex+1, sparse->count-posIndex);
       sparse->count--;
     }
-    else {
+    else
+    {
       sparse->value[posIndex] = value;
       sparse->index[posIndex] = targetIndex;
     }
@@ -404,22 +423,24 @@ void swapItems(sparseVector *sparse, int firstIndex, int secondIndex)
 
   if(firstIndex == secondIndex)
     return;
-  if(firstIndex > secondIndex) {
+  if(firstIndex > secondIndex)
+  {
     i = firstIndex;
     firstIndex = secondIndex;
     secondIndex = i;
   }
 
-/* XXX WTF
-  if(FALSE) {
-    i = 1;
-    ki = 0;
-    while(i <= sparse->count && (ki = sparse->index[i])<firstIndex) i++;
-    j = i;
-    kj = 0;
-    while(j <= sparse->count && (kj = sparse->index[j])<secondIndex) j++;
-  }
-  else*/ {
+  /* XXX WTF
+    if(FALSE) {
+      i = 1;
+      ki = 0;
+      while(i <= sparse->count && (ki = sparse->index[i])<firstIndex) i++;
+      j = i;
+      kj = 0;
+      while(j <= sparse->count && (kj = sparse->index[j])<secondIndex) j++;
+    }
+    else*/
+  {
     i = findIndex(firstIndex, sparse->index, sparse->count, BLAS_BASE);
     if(i < 0)
       i = -i;
@@ -437,7 +458,8 @@ void swapItems(sparseVector *sparse, int firstIndex, int secondIndex)
   else
     kj = sparse->index[j];
 
-  if(ki == firstIndex && kj == secondIndex) {   /* Found both -> swap in place */
+  if(ki == firstIndex && kj == secondIndex)     /* Found both -> swap in place */
+  {
     hold = sparse->value[i];
     sparse->value[i] = sparse->value[j];
     sparse->value[j] = hold;
@@ -447,9 +469,11 @@ void swapItems(sparseVector *sparse, int firstIndex, int secondIndex)
     else if(sparse->index[0] == secondIndex)
       sparse->value[0] = sparse->value[j];
   }
-  else if(ki == firstIndex) {                   /* Found first, but not the second -> shift left */
+  else if(ki == firstIndex)                     /* Found first, but not the second -> shift left */
+  {
     j--;
-    if(i < j) {
+    if(i < j)
+    {
       hold = sparse->value[i];
       moveVector(sparse, i, i+1, j-i);
       sparse->value[j] = hold;
@@ -462,8 +486,10 @@ void swapItems(sparseVector *sparse, int firstIndex, int secondIndex)
       sparse->value[0] = sparse->value[j];
 
   }
-  else if(kj == secondIndex) {                  /* Found second, but not the first -> shift right */
-    if(i < j) {
+  else if(kj == secondIndex)                    /* Found second, but not the first -> shift right */
+  {
+    if(i < j)
+    {
       hold = sparse->value[j];
       moveVector(sparse, i+1, i, j-i);
       sparse->value[i] = hold;
@@ -497,17 +523,20 @@ void clearVector(sparseVector *sparse, int indexStart, int indexEnd)
 
   if(indexStart>indexEnd) return;
 
-  if(sparse->index[0]>=indexStart && sparse->index[0]<=indexEnd) {
+  if(sparse->index[0]>=indexStart && sparse->index[0]<=indexEnd)
+  {
     sparse->value[0] = 0;
   }
-  if(indexStart<=sparse->index[1] && indexEnd>=sparse->index[i]) 
+  if(indexStart<=sparse->index[1] && indexEnd>=sparse->index[i])
     sparse->count = 0;
-  else {
+  else
+  {
     while(i>0 && sparse->index[i]>indexEnd) i--;
     indexEnd = i;
     while(i>0 && sparse->index[i]>=indexStart) i--;
     indexStart = i+1;
-    if(indexEnd>=indexStart) {
+    if(indexEnd>=indexStart)
+    {
       i = sparse->count-indexEnd;
       moveVector(sparse, indexStart, indexEnd+1, i);
       sparse->count -= indexEnd-indexStart+1;
@@ -528,8 +557,10 @@ int getVector(sparseVector *sparse, REAL *dense, int indexStart, int indexEnd, M
   i = 1;
   while(i<=sparse->count && sparse->index[i]<indexStart) i++;
 
-  while(i<=sparse->count && (k=sparse->index[i])<=indexEnd) {
-    while(indexStart<k) {
+  while(i<=sparse->count && (k=sparse->index[i])<=indexEnd)
+  {
+    while(indexStart<k)
+    {
       dense[indexStart] = 0;
       indexStart++;
     }
@@ -538,13 +569,15 @@ int getVector(sparseVector *sparse, REAL *dense, int indexStart, int indexEnd, M
     i++;
   }
 
-  while(indexStart<=indexEnd) {
+  while(indexStart<=indexEnd)
+  {
     dense[indexStart] = 0;
     indexStart++;
   }
 
   k = sparse->count;
-  if(doClear) {
+  if(doClear)
+  {
     sparse->count = 0;
     sparse->value[0] = 0;
   }
@@ -561,23 +594,27 @@ void putVector(sparseVector *sparse, REAL *dense, int indexStart, int indexEnd)
   if(indexEnd<=0)
     indexEnd=sparse->index[n];
 
-  if(n==0 || sparse->index[n]<indexStart) {
+  if(n==0 || sparse->index[n]<indexStart)
+  {
     i = sparse->index[0];
     if(i>=indexStart && i<=indexEnd)
       sparse->value[0] = 0;
-    for(i = indexStart; i<=indexEnd; i++) {
+    for(i = indexStart; i<=indexEnd; i++)
+    {
       if(dense[i] == 0) continue;
       if(sparse->size == sparse->count)
         resizeVector(sparse, sparse->size + RESIZEDELTA);
       sparse->count++;
       sparse->value[sparse->count] = dense[i];
       sparse->index[sparse->count] = i;
-      if(i == sparse->index[0]) 
+      if(i == sparse->index[0])
         sparse->value[0] = dense[i];
     }
   }
-  else {
-    while(indexStart <= indexEnd) {
+  else
+  {
+    while(indexStart <= indexEnd)
+    {
       putItem(sparse, indexStart, dense[indexStart]);
       indexStart++;
     }
@@ -594,7 +631,7 @@ void fillVector(sparseVector *sparse, int count, REAL value)
 {
   int i;
 
-  if(sparse->count > 0) 
+  if(sparse->count > 0)
     clearVector(sparse, 0, 0);
   for(i = 1; i<=count; i++)
     putItem(sparse, i, value);
@@ -605,21 +642,24 @@ REAL dotVector(sparseVector *sparse, REAL *dense, int indexStart, int indexEnd)
 {
   int  i, n;
   long REAL sum;
-  
+
   n = sparse->count;
   sum = 0;
 
-  if(n > 0) {
+  if(n > 0)
+  {
     if(indexStart<=0)
       indexStart=sparse->index[1];
     if(indexEnd<=0)
       indexEnd=sparse->index[n];
 
-    if(indexStart > 1) {
+    if(indexStart > 1)
+    {
       i = findIndex(indexStart, sparse->index, sparse->count, BLAS_BASE);
-      if(i < 0) {
+      if(i < 0)
+      {
         i = -i;
-        if(i > n) 
+        if(i > n)
           return (REAL)sum;
       }
     }
@@ -632,25 +672,26 @@ REAL dotVector(sparseVector *sparse, REAL *dense, int indexStart, int indexEnd)
       /* Do fast pointer arithmetic */
       int  *indexptr;
       REAL *valueptr;
-/*      for(i = 1, indexptr = sparse->index + 1;
-          i <= n && (*indexptr) < indexStart; i++, indexptr++); */
+      /*      for(i = 1, indexptr = sparse->index + 1;
+                i <= n && (*indexptr) < indexStart; i++, indexptr++); */
       indexptr = sparse->index + i;
       for(valueptr = sparse->value + i;
-          i <= n && (*indexptr) <= indexEnd;  i++, indexptr++, valueptr++) 
+          i <= n && (*indexptr) <= indexEnd;  i++, indexptr++, valueptr++)
         sum += (*valueptr) * dense[(*indexptr)];
     }
 #else
     {
       /* Do traditional indexed access */
       int k;
-/*      i = 1; */
-/*      while(i<=n && sparse->index[i]<indexStart) i++; */
-      while(i<=n && (k = sparse->index[i])<=indexEnd) {
+      /*      i = 1; */
+      /*      while(i<=n && sparse->index[i]<indexStart) i++; */
+      while(i<=n && (k = sparse->index[i])<=indexEnd)
+      {
         sum += sparse->value[i] * dense[k];
         i++;
       }
     }
-#endif    
+#endif
   }
 
   return (REAL)sum;
@@ -678,21 +719,22 @@ void daxpyVector1(sparseVector *sparse, REAL scalar, REAL *dense, int indexStart
     for(i = 1, indexptr = sparse->index + 1;
         i <= n && (*indexptr) < indexStart; i++, indexptr++);
     for(valueptr = sparse->value + i;
-        i <= n && (*indexptr) <= indexEnd;  i++, indexptr++, valueptr++) 
+        i <= n && (*indexptr) <= indexEnd;  i++, indexptr++, valueptr++)
       dense[(*indexptr)] += (*valueptr) * scalar;
   }
 #else
   {
     /* Do traditional indexed access */
     int k;
-    for(i = 1; i<= n; i++) {
+    for(i = 1; i<= n; i++)
+    {
       k = sparse->index[i];
       if(k<indexStart) continue;
       if(k>indexEnd) break;
       dense[k] += sparse->value[i] * scalar;
     }
   }
-#endif  
+#endif
 }
 void daxpyVector2(REAL *dense, REAL scalar, sparseVector *sparse, int indexStart, int indexEnd)
 {
@@ -711,7 +753,7 @@ void daxpyVector3(sparseVector *sparse1, REAL scalar, sparseVector *sparse2, int
 
   if(sparse1->count == 0) return;
 
- /* Spool to start positions */
+  /* Spool to start positions */
   i1 = 1;
   c1 = sparse1->count;
   while(i1 <= c1 && sparse1->index[i1] < indexStart) i1++;
@@ -728,24 +770,28 @@ void daxpyVector3(sparseVector *sparse1, REAL scalar, sparseVector *sparse2, int
   else
     p2 = indexEnd+1;
 
- /* Create a temporary vector */
+  /* Create a temporary vector */
   k = c1+c2;
-  if(k > 0) {
+  if(k > 0)
+  {
     hold = createVector(MAX(sparse1->limit, sparse2->limit), k);
     putDiagonalIndex(hold, getDiagonalIndex(sparse2));
   }
   else
     hold = sparse2;
 
- /* Loop over all items in both vectors */
-  while((i1 <= c1 && p1 <= indexEnd) || 
-        (i2 <= c2 && p2 <= indexEnd)) {
+  /* Loop over all items in both vectors */
+  while((i1 <= c1 && p1 <= indexEnd) ||
+        (i2 <= c2 && p2 <= indexEnd))
+  {
 
     k = 0;
 
-   /* Add/spool exclusive right-vector items */
-    while(i2 <= c2 && p2 < p1) {
-      if(hold != sparse2) {
+    /* Add/spool exclusive right-vector items */
+    while(i2 <= c2 && p2 < p1)
+    {
+      if(hold != sparse2)
+      {
         putItem(hold, p2, sparse2->value[i2]);
       }
       i2++;
@@ -755,12 +801,13 @@ void daxpyVector3(sparseVector *sparse1, REAL scalar, sparseVector *sparse2, int
         p2 = indexEnd+1;
       k++;
     }
-   /* Add equal-indexed items */
-    while(i1 <= c1 && i2 <= c2 && p1 == p2) {
-/*      if(hold != sparse2) */
-        putItem(hold, p1, scalar*sparse1->value[i1]+sparse2->value[i2]);
-/*      else
-          addtoItem(sparse2, -i2, scalar*sparse1->value[i1]); */
+    /* Add equal-indexed items */
+    while(i1 <= c1 && i2 <= c2 && p1 == p2)
+    {
+      /*      if(hold != sparse2) */
+      putItem(hold, p1, scalar*sparse1->value[i1]+sparse2->value[i2]);
+      /*      else
+                addtoItem(sparse2, -i2, scalar*sparse1->value[i1]); */
       i1++;
       if(i1 <= c1)
         p1 = sparse1->index[i1];
@@ -773,10 +820,11 @@ void daxpyVector3(sparseVector *sparse1, REAL scalar, sparseVector *sparse2, int
         p2 = indexEnd+1;
       k++;
     }
-   /* Add exclusive left-vector items */
-    while(i1 <= c1 && p1 < p2) {
+    /* Add exclusive left-vector items */
+    while(i1 <= c1 && p1 < p2)
+    {
       putItem(hold, p1, scalar*sparse1->value[i1]);
-/*      if(hold == sparse2) c2++; */
+      /*      if(hold == sparse2) c2++; */
       i1++;
       if(i1 <= c1)
         p1 = sparse1->index[i1];
@@ -788,7 +836,7 @@ void daxpyVector3(sparseVector *sparse1, REAL scalar, sparseVector *sparse2, int
     if(k == 0) break;
   }
 
-/*  if(hold != sparse2) */
+  /*  if(hold != sparse2) */
   {
     swapVector(hold, sparse2);
     freeVector(hold);
@@ -809,18 +857,20 @@ void dswapVector1(sparseVector *sparse, REAL *dense, int indexStart, int indexEn
   if(indexStart <= 0)
     indexStart = 1;
   n = lastIndex(sparse);
-  if(indexEnd <= 0) 
+  if(indexEnd <= 0)
     indexEnd = n;
   CALLOC(x, (MAX(indexEnd,n)+1));
 
   getVector(sparse, x, indexStart, n, FALSE);
   d = getDiagonalIndex(sparse);
   clearVector(sparse, indexStart, n);
-  for(i = indexStart; i<=indexEnd; i++) {
+  for(i = indexStart; i<=indexEnd; i++)
+  {
     if(dense[i] != 0)
       putItem(sparse, i, dense[i]);
   }
-  for(i = indexEnd+1; i<=n; i++) {
+  for(i = indexEnd+1; i<=n; i++)
+  {
     if(x[i] != 0)
       putItem(sparse, i, x[i]);
   }
@@ -829,7 +879,7 @@ void dswapVector1(sparseVector *sparse, REAL *dense, int indexStart, int indexEn
 #ifdef DEBUG_SPARSELIB
   verifyVector(sparse);
 #endif
-  
+
   MEMFREE(x);
 }
 void dswapVector2(REAL *dense, sparseVector *sparse, int indexStart, int indexEnd)
@@ -848,11 +898,13 @@ void dswapVector3(sparseVector *sparse1, sparseVector *sparse2, int indexStart, 
   if(indexEnd<=0)
     indexEnd = MAX(lastIndex(sparse1), lastIndex(sparse2));
 
-  if(indexStart <= firstIndex(sparse1) && indexStart <= firstIndex(sparse2) && 
-     indexEnd >= lastIndex(sparse1) && indexEnd >= lastIndex(sparse2)) {
+  if(indexStart <= firstIndex(sparse1) && indexStart <= firstIndex(sparse2) &&
+      indexEnd >= lastIndex(sparse1) && indexEnd >= lastIndex(sparse2))
+  {
     swapVector(sparse1, sparse2);
   }
-  else {
+  else
+  {
 
     CALLOC(dense1, (indexEnd+1));
     CALLOC(dense2, (indexEnd+1));
@@ -877,7 +929,8 @@ int idamaxVector(sparseVector *sparse, int is, REAL *maxValue)
   imax = 1;
   if(n == 0)
     xmax = 0;
-  else {
+  else
+  {
     xmax = fabs(sparse->value[imax]);
 
     /* CPU intensive loop; provide alternative evaluation models */
@@ -889,10 +942,12 @@ int idamaxVector(sparseVector *sparse, int is, REAL *maxValue)
       for(i = 1, indexptr = sparse->index + 1;
           i <= n && (*indexptr) <= is; i++, indexptr++);
       for(valueptr = sparse->value + i;
-          i <= n; i++, indexptr++, valueptr++) {
-	      if((*valueptr)>xmax) {
-		      xmax = (*valueptr);
-		      imax = (*indexptr);
+          i <= n; i++, indexptr++, valueptr++)
+      {
+        if((*valueptr)>xmax)
+        {
+          xmax = (*valueptr);
+          imax = (*indexptr);
         }
       }
     }
@@ -902,15 +957,17 @@ int idamaxVector(sparseVector *sparse, int is, REAL *maxValue)
       /* Do traditional indexed access */
       i = 1;
       while(i <= n && sparse->index[i] <= is) i++;
-      for(; i<=n; i++) {
+      for(; i<=n; i++)
+      {
         xtest = fabs(sparse->value[i]);
-	      if(xtest>xmax) {
-		      xmax = xtest;
-		      imax = sparse->index[i];
+        if(xtest>xmax)
+        {
+          xmax = xtest;
+          imax = sparse->index[i];
         }
       }
     }
-#endif    
+#endif
   }
   if(maxValue != NULL)
     (*maxValue) = xmax;
@@ -918,27 +975,30 @@ int idamaxVector(sparseVector *sparse, int is, REAL *maxValue)
 }
 
 
-void printVector(int n, sparseVector *sparse, int modulo )
+void printVector(int n, sparseVector *sparse, int modulo)
 {
   int i,j,k;
 
   if(sparse == NULL) return;
 
-  if (modulo <= 0) modulo = 5;
-  for (i = 1, j = 1; j<=n; i++, j++) {
+  if(modulo <= 0) modulo = 5;
+  for(i = 1, j = 1; j<=n; i++, j++)
+  {
     if(i<=sparse->count)
       k = sparse->index[i];
     else
       k = n+1;
-    while (j < k) {
-      if(mod(j, modulo) == 1) 
+    while(j < k)
+    {
+      if(mod(j, modulo) == 1)
         printf("\n%2d:%12g", j, 0.0);
       else
         printf(" %2d:%12g", j, 0.0);
       j++;
     }
-    if(k<=n) {
-      if(mod(j, modulo) == 1) 
+    if(k<=n)
+    {
+      if(mod(j, modulo) == 1)
         printf("\n%2d:%12g", k, sparse->value[i]);
       else
         printf(" %2d:%12g", k, sparse->value[i]);

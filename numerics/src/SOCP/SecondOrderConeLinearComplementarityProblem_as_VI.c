@@ -35,7 +35,7 @@ void Function_VI_SOCLCP(void * self, int n_notused, double *x, double *F)
 
   int n =   soclcp->n;
 
-  cblas_dcopy(n , soclcp->q , 1 , F, 1);
+  cblas_dcopy(n, soclcp->q, 1, F, 1);
   NM_gemv(1.0, soclcp->M, x, 1.0, F);
 }
 
@@ -51,9 +51,9 @@ void Projection_VI_SOCLCP(void *viIn, double *x, double *PX)
 
   int cone =0;
   int n = soclcp->n;
-  cblas_dcopy(n , x , 1 , PX, 1);
+  cblas_dcopy(n, x, 1, PX, 1);
   int dim;
-  for (cone = 0 ; cone < soclcp->nc  ; ++cone)
+  for(cone = 0 ; cone < soclcp->nc  ; ++cone)
   {
     dim=soclcp->coneIndex[cone+1]-soclcp->coneIndex[cone];
     projectionOnSecondOrderCone(&PX[soclcp->coneIndex[cone]], soclcp->tau[cone], dim);

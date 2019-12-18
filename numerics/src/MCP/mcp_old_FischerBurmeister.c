@@ -90,24 +90,24 @@ void mcp_old_FischerBurmeister(MixedComplementarityProblem_old* problem, double 
   // Set links to Fisher functions and its jacobian
   NewtonFunctionPtr phi = &FischerFunc_MCP ;
   NewtonFunctionPtr nablaPhi = &nablaFischerFunc_MCP ;
-  
+
   // Call semi-smooth Newton solver
   *info = nonSmoothNewton(fullSize, z, &phi, &nablaPhi, options);
 
-  // Compute w 
+  // Compute w
   problem->computeFmcp(fullSize, z, w);
   // todo : compute error function
 
   // Check output
-  if (*info > 0)
+  if(*info > 0)
     fprintf(stderr, "Numerics, mcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[SICONOS_DPARAM_RESIDU]);
-  
+
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   double  error =0.0;
-  
-  mcp_old_compute_error(problem, z , w, &error);
 
-  if (error > tolerance)
+  mcp_old_compute_error(problem, z, w, &error);
+
+  if(error > tolerance)
   {
     numerics_printf("mcp_old_FischerBurmeister : error = %e > tolerance = %e.", error, tolerance);
     *info = 1;
@@ -118,7 +118,7 @@ void mcp_old_FischerBurmeister(MixedComplementarityProblem_old* problem, double 
     *info = 0;
   }
   options->dparam[SICONOS_DPARAM_RESIDU] = error;
- 
+
   return;
 }
 

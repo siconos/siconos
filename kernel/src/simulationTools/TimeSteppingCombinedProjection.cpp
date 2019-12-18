@@ -57,7 +57,7 @@ TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(
   insertNonSmoothProblem(osnspb_pos, SICONOS_OSNSP_TS_POS);
 
   _indexSetLevelForProjection = level;
-  if (_indexSetLevelForProjection != 2)
+  if(_indexSetLevelForProjection != 2)
   {
     RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection level not equal to 2 is not yet implemented.  ");
 
@@ -128,7 +128,7 @@ void TimeSteppingCombinedProjection::initOSNS()
   // better with visitor but I am not able to fix it.
   //_SimulationEffectOnOSNSP simulationEffectOnOSNSP(this);
   //osnspb_pos->accept(simulationEffectOnOSNSP);
-  if (Type::value(*osnspb_pos) ==     Type::MLCPProjectOnConstraints)
+  if(Type::value(*osnspb_pos) ==     Type::MLCPProjectOnConstraints)
   {
     // std::cout << "Type::name(*osnspb_pos) "<< Type::name(*osnspb_pos) <<std::endl;
     MLCPProjectOnConstraints * toto = static_cast<MLCPProjectOnConstraints*>(osnspb_pos.get());
@@ -162,7 +162,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
   initialize();
 
-  
+
   _isIndexSetsStable = false;
   _maxViolationUnilateral = 0.0;
   _maxViolationEquality = 0.0;
@@ -171,7 +171,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   updateInteractions();
 
   SP::Topology topo = _nsds->topology();
-  if (topo->numberOfIndexSet() > _indexSetLevelForProjection)
+  if(topo->numberOfIndexSet() > _indexSetLevelForProjection)
   {
     SP::InteractionsGraph indexSet1 = topo->indexSet(1);
     SP::InteractionsGraph indexSet2 = topo->indexSet(2);
@@ -182,19 +182,19 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     // zeroing the lambda of indexSet1
     std11::tie(ui, uiend) = indexSet1->vertices();
-    for (vnext = ui; ui != uiend; ui = vnext)
+    for(vnext = ui; ui != uiend; ui = vnext)
     {
       ++vnext;
       SP::Interaction inter1 = indexSet1->bundle(*ui);
       inter1->lambda(1)->zero();
       indexSet1->eraseProperties(*ui);
       InteractionsGraph::OEIterator oei, oeiend;
-      for (std11::tie(oei, oeiend) = indexSet1->out_edges(*ui);
-           oei != oeiend; ++oei)
+      for(std11::tie(oei, oeiend) = indexSet1->out_edges(*ui);
+          oei != oeiend; ++oei)
       {
         InteractionsGraph::EDescriptor ed1, ed2;
         std11::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
-        if (ed2 != ed1)
+        if(ed2 != ed1)
         {
           indexSet1->eraseProperties(ed1);
           indexSet1->eraseProperties(ed2);
@@ -209,17 +209,17 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     indexSet1->clear();
 
     std11::tie(ui, uiend) = indexSet2->vertices();
-    for (vnext = ui; ui != uiend; ui = vnext)
+    for(vnext = ui; ui != uiend; ui = vnext)
     {
       ++vnext;
       indexSet2->eraseProperties(*ui);
       InteractionsGraph::OEIterator oei, oeiend;
-      for (std11::tie(oei, oeiend) = indexSet2->out_edges(*ui);
-           oei != oeiend; ++oei)
+      for(std11::tie(oei, oeiend) = indexSet2->out_edges(*ui);
+          oei != oeiend; ++oei)
       {
         InteractionsGraph::EDescriptor ed1, ed2;
         std11::tie(ed1, ed2) = indexSet2->edges(indexSet2->source(*oei), indexSet2->target(*oei));
-        if (ed2 != ed1)
+        if(ed2 != ed1)
         {
           indexSet2->eraseProperties(ed1);
           indexSet2->eraseProperties(ed2);
@@ -242,11 +242,11 @@ void TimeSteppingCombinedProjection::advanceToEvent()
   _cumulatedNewtonNbIterations = 0 ;
   _nbCumulatedProjectionIteration = 0;
 
-  while (!_isIndexSetsStable)
+  while(!_isIndexSetsStable)
   {
     _nbIndexSetsIteration++ ;
     InteractionsGraph::VIterator ui, uiend;
-    DEBUG_PRINTF( "====================== _nbIndexSetsIteration = %i \n ", _nbIndexSetsIteration );
+    DEBUG_PRINTF("====================== _nbIndexSetsIteration = %i \n ", _nbIndexSetsIteration);
 
 #ifdef TSPROJ_DEBUG_LEVEL1
     SP::InteractionsGraph indexSet0 = topo->indexSet(0);
@@ -257,7 +257,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 #ifdef TSPROJ_DEBUG_LEVEL2
 
-    if (topo->numberOfIndexSet() > _indexSetLevelForProjection)
+    if(topo->numberOfIndexSet() > _indexSetLevelForProjection)
     {
       SP::InteractionsGraph indexSet1 = topo->indexSet(1);
       SP::InteractionsGraph indexSet2 = topo->indexSet(2);
@@ -266,7 +266,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     }
 
 
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       inter = indexSet0->bundle(*ui);
 
@@ -303,7 +303,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
 
-    if (_nbIndexSetsIteration > _kIndexSetMax)
+    if(_nbIndexSetsIteration > _kIndexSetMax)
     {
       RuntimeException::selfThrow("TimeSteppingCombinedProjection::TimeSteppingCombinedProjection _nbIndexSetsIteration >  _kIndexSetMax ");
     }
@@ -315,32 +315,32 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 #ifdef TSPROJ_DEBUG_LEVEL1
 
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    inter = indexSet0->bundle(*ui);
-    std::cout << "inter->number()" << inter->number()   << std::endl;
+    for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    {
+      inter = indexSet0->bundle(*ui);
+      std::cout << "inter->number()" << inter->number()   << std::endl;
 
-    level = 0;
+      level = 0;
 
-    assert(inter->lowerLevelForOutput() <= level);
-    assert(inter->upperLevelForOutput() >= level);
+      assert(inter->lowerLevelForOutput() <= level);
+      assert(inter->upperLevelForOutput() >= level);
 
-    //   std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
-    std::cout << "inter->y(" << level << ")"   << std::endl;
-    inter->y(level)->display();
-    std::cout << "inter->y_k(" << level << ")"   << std::endl;
-    inter->y_k(level)->display();
+      //   std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      std::cout << "inter->y(" << level << ")"   << std::endl;
+      inter->y(level)->display();
+      std::cout << "inter->y_k(" << level << ")"   << std::endl;
+      inter->y_k(level)->display();
 
 
-    level = 1;
-    assert(inter->lowerLevelForOutput() <= level);
-    assert(inter->upperLevelForOutput() >= level);
-    //std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
-    std::cout << "inter->y(" << level << ")"   << std::endl;
-    inter->y(level)->display();
-    std::cout << "inter->y_k(" << level << ")"   << std::endl;
-    inter->y_k(level)->display();
-  }
+      level = 1;
+      assert(inter->lowerLevelForOutput() <= level);
+      assert(inter->upperLevelForOutput() >= level);
+      //std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      std::cout << "inter->y(" << level << ")"   << std::endl;
+      inter->y(level)->display();
+      std::cout << "inter->y_k(" << level << ")"   << std::endl;
+      inter->y_k(level)->display();
+    }
 #endif
 
     int info = 0;
@@ -348,7 +348,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     // Zeroing Lambda Muliplier of indexSet()
 
     SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
-    for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet->bundle(*ui);
       inter->lambda(0)->zero();
@@ -359,7 +359,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 #else
     /** Second step, Perform the projection on constraints.*/
-    DEBUG_PRINT( "TimeSteppingCombinedProjection::newtonSolve begin projection:\n");
+    DEBUG_PRINT("TimeSteppingCombinedProjection::newtonSolve begin projection:\n");
 
     SP::DynamicalSystemsGraph dsGraph = _nsds->dynamicalSystems();
 
@@ -367,7 +367,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     bool runningProjection = false;
     _nbProjectionIteration = 0;
 
-    if (_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+    if(_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     {
       updateIndexSet(2);
       computeCriteria(&runningProjection);
@@ -376,11 +376,11 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       SP::InteractionsGraph indexSet2 = topo->indexSet(2);
       SP::InteractionsGraph indexSet1 = topo->indexSet(1);
-      if (indexSet2->size() > 1)
+      if(indexSet2->size() > 1)
       {
         printf("indexSet2->size() = %i >1 \n", (int)indexSet2->size());
       }
-      if (indexSet1->size() > 0)
+      if(indexSet1->size() > 0)
       {
         printf("indexSet1->size() = %i >0 \n", (int)indexSet1->size());
       }
@@ -391,13 +391,13 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     }
 
 
-    if (!runningProjection)
+    if(!runningProjection)
     {
       // Zeroing Lambda Muliplier of indexSet()
 
       SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
       InteractionsGraph::VIterator ui, uiend;
-      for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet->bundle(*ui);
         inter->lambda(0)->zero();
@@ -407,18 +407,18 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     //Store the q vector of each DS.
 
-    for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+    for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
     {
       SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
       Type::Siconos dsType = Type::value(*ds);
       VectorOfVectors& workVectors = *dsGraph->properties(*aVi2).workVectors;
 
-      if (dsType == Type::NewtonEulerDS)
+      if(dsType == Type::NewtonEulerDS)
       {
         SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
         *workVectors[MoreauJeanOSI::QTMP] = *neds->q();
       }
-      else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+      else if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
         SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
         *workVectors[MoreauJeanOSI::QTMP] = * d->q();
@@ -431,7 +431,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
     _nbProjectionIteration = 0;
 
-    while ((runningProjection && _nbProjectionIteration < _projectionMaxIteration) && _doCombinedProj)
+    while((runningProjection && _nbProjectionIteration < _projectionMaxIteration) && _doCombinedProj)
     {
       _nbProjectionIteration++;
 
@@ -443,7 +443,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
       SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
       InteractionsGraph::VIterator ui, uiend;
-      for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+      for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet->bundle(*ui);
         inter->lambda(0)->zero();
@@ -459,7 +459,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
 
 
-      if (info)
+      if(info)
       {
         std::cout << " TimeSteppingCombinedProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
         return;
@@ -471,20 +471,20 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
 
-      for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+      for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
       {
         SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
         Type::Siconos dsType = Type::value(*ds);
         VectorOfVectors& workVectors = *dsGraph->properties(*aVi2).workVectors;
-           
-        if (dsType == Type::NewtonEulerDS)
+
+        if(dsType == Type::NewtonEulerDS)
         {
           SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
           SP::SiconosVector q = neds->q();
-          
-          
+
+
           SP::SiconosVector qtmp = workVectors[MoreauJeanOSI::QTMP];
-          if (neds->p(0))
+          if(neds->p(0))
           {
             //*q = * qtmp +  *neds->p(0);
             *q +=  *neds->p(0);
@@ -498,12 +498,12 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
 
         }
-        else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+        else if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
           SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
           SP::SiconosVector q = d->q();
           SP::SiconosVector qtmp = workVectors[MoreauJeanOSI::QTMP];
-          if (d->p(0))
+          if(d->p(0))
           {
             //*q = * qtmp +  *d->p(0);
             *q +=  *d->p(0);
@@ -542,7 +542,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       // }
       SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
       std ::cout << "lambda(0) in indexSet2" << std::endl;
-      for (std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+      for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
         SP::Interaction inter = indexSet2->bundle(*ui);
         inter->lambda(0)->display();
@@ -559,10 +559,10 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       //}
     } // end while ((runningProjection && _nbProjectionIteration < _projectionMaxIteration) && _doCombinedProj)
 
-    DEBUG_PRINTF( "TimeSteppingCombinedProjection::Projection end : Number of iterations= %i\n", _nbProjectionIteration);
+    DEBUG_PRINTF("TimeSteppingCombinedProjection::Projection end : Number of iterations= %i\n", _nbProjectionIteration);
 
     _nbCumulatedProjectionIteration += _nbProjectionIteration ;
-    if (_nbProjectionIteration == _projectionMaxIteration)
+    if(_nbProjectionIteration == _projectionMaxIteration)
     {
       std::cout << "TimeSteppingCombinedProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
       printf("              max criteria equality =  %e.\n", _maxViolationEquality);
@@ -572,34 +572,34 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 #endif // TSPROJ_WITHOUT_PROJECTION
 
 
-    DEBUG_PRINT( "TimeSteppingCombinedProjection::newtonSolve end projection:\n");
+    DEBUG_PRINT("TimeSteppingCombinedProjection::newtonSolve end projection:\n");
 
     // We update forces to start the Newton Loop the next tiem step with a correct value in swap
-    for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+    for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+    {
+      SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
+      Type::Siconos dsType = Type::value(*ds);
+      if(dsType == Type::NewtonEulerDS)
       {
-        SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
-        Type::Siconos dsType = Type::value(*ds);
-        if (dsType == Type::NewtonEulerDS)
-        {
-          SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
-          double time = nextTime();
-          neds->computeForces(time, neds->q(), neds->twist());
-        }
-        else if (dsType == Type::LagrangianDS)
-        {
-          SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-          double time = nextTime();
-          d->computeForces(time, d->q(),d->velocity());
-        }
-        else if (dsType == Type::LagrangianLinearTIDS)
-        {
-        }
-        else
-          RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+        SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+        double time = nextTime();
+        neds->computeForces(time, neds->q(), neds->twist());
       }
+      else if(dsType == Type::LagrangianDS)
+      {
+        SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+        double time = nextTime();
+        d->computeForces(time, d->q(),d->velocity());
+      }
+      else if(dsType == Type::LagrangianLinearTIDS)
+      {
+      }
+      else
+        RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+    }
 
 
-    if (_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+    if(_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     {
       updateIndexSet(1);
     }
@@ -609,7 +609,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     }
 #ifdef TSPROJ_DEBUG_LEVEL1
 
-    if (topo->numberOfIndexSet() > _indexSetLevelForProjection)
+    if(topo->numberOfIndexSet() > _indexSetLevelForProjection)
     {
       SP::InteractionsGraph indexSet1 = topo->indexSet(1);
       SP::InteractionsGraph indexSet2 = topo->indexSet(2);
@@ -618,7 +618,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
     }
 
     level = 0;
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       inter =indexSet0->bundle(*ui);
       assert(inter->lowerLevelForOutput() <= level);
@@ -633,7 +633,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
       inter->y_k(level)->display();
     }
     level = 1;
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       inter =indexSet0->bundle(*ui);
       assert(inter->lowerLevelForOutput() <= level);
@@ -649,7 +649,7 @@ void TimeSteppingCombinedProjection::advanceToEvent()
 
   }// end  while (!_isIndexSetsStable)
 
-  DEBUG_PRINTF( "TimeSteppingCombinedProjection::indexset stable end : Number of iterations= %i \n ",_nbIndexSetsIteration);
+  DEBUG_PRINTF("TimeSteppingCombinedProjection::indexset stable end : Number of iterations= %i \n ",_nbIndexSetsIteration);
 
 
   return;
@@ -668,15 +668,15 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 
   *runningProjection = false;
 
-  for (std11::tie(aVi, viend) = indexSet->vertices();
-       aVi != viend; ++aVi)
+  for(std11::tie(aVi, viend) = indexSet->vertices();
+      aVi != viend; ++aVi)
   {
     SP::Interaction interac = indexSet->bundle(*aVi);
 
     interac->computeOutput(getTkp1(),  0);
     interac->relation()->computeJach(getTkp1(), *interac);
 
-    if (Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
+    if(Type::value(*(interac->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(interac->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {
 
@@ -685,12 +685,12 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
 #ifdef TSPROJ_DEBUG_LEVEL1
       printf("  TimeSteppingCombinedProjection::computeCriteria  Unilateral interac->y(0)->getValue(0) %e.\n", interac->y(0)->getValue(0));
 #endif
-      if (!_doCombinedProjOnEquality)
+      if(!_doCombinedProjOnEquality)
       {
-        if (maxViolationUnilateral > _constraintTolUnilateral)
+        if(maxViolationUnilateral > _constraintTolUnilateral)
         {
           double criteria = std::max(0.0, - interac->y(0)->getValue(0));
-          if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
+          if(criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
 
           *runningProjection = true;
 #ifdef TSPROJ_DEBUG_LEVEL1
@@ -701,9 +701,9 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
       else
       {
         double criteria = interac->y(0)->getValue(0);
-        if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
+        if(criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
 
-        if (std::abs(criteria) >=  _constraintTolUnilateral)
+        if(std::abs(criteria) >=  _constraintTolUnilateral)
         {
           *runningProjection = true;
 #ifdef TSPROJ_DEBUG_LEVEL1
@@ -716,12 +716,12 @@ void TimeSteppingCombinedProjection::computeCriteria(bool * runningProjection)
     else
     {
       DEBUG_EXPR(interac->y(0)->display(););
-      if (interac->y(0)->normInf()  > maxViolationEquality)
+      if(interac->y(0)->normInf()  > maxViolationEquality)
       {
         DEBUG_EXPR(interac->y(0)->display(););
         maxViolationEquality = interac->y(0)->normInf() ;
       }
-      if (interac->y(0)->normInf() > _constraintTol)
+      if(interac->y(0)->normInf() > _constraintTol)
       {
         *runningProjection = true;
 #ifdef TSPROJ_DEBUG_LEVEL1
@@ -788,7 +788,7 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
 
   // Check indexSet1
 
-  if (i == 1)
+  if(i == 1)
   {
     InteractionsGraph::VIterator ui1, ui1end, v1next;
 
@@ -798,11 +798,11 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
     DEBUG_PRINTF("update IndexSets start : indexSet1 size : %i\n", (int)(indexSet1->size()));
     // indexSet1->display();
     //Remove interactions from the indexSet1
-    for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
+    for(v1next = ui1; ui1 != ui1end; ui1 = v1next)
     {
       ++v1next;
       SP::Interaction inter1 = indexSet1->bundle(*ui1);
-      if (indexSet0->is_vertex(inter1))
+      if(indexSet0->is_vertex(inter1))
       {
         InteractionsGraph::VDescriptor ur1_descr0 = indexSet0->descriptor(inter1);
         assert((indexSet0->color(ur1_descr0) == boost::white_color));
@@ -821,16 +821,16 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
     // indexSet0\indexSet1 scan
     InteractionsGraph::VIterator ui0, ui0end;
     //Add interaction in indexSet1
-    for (std11::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
+    for(std11::tie(ui0, ui0end) = indexSet0->vertices(); ui0 != ui0end; ++ui0)
     {
-      if (indexSet0->color(*ui0) == boost::black_color)
+      if(indexSet0->color(*ui0) == boost::black_color)
       {
         // reset
         indexSet0->color(*ui0) = boost::white_color ;
       }
       else
       {
-        if (indexSet0->color(*ui0) == boost::gray_color)
+        if(indexSet0->color(*ui0) == boost::gray_color)
         {
           // reset
           indexSet0->color(*ui0) = boost::white_color;
@@ -848,16 +848,16 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
           assert(!indexSet1->is_vertex(inter0));
 
           bool activate = true;
-          if (Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
+          if(Type::value(*(inter0->nonSmoothLaw())) != Type::EqualityConditionNSL)
           {
             //SP::OneStepIntegrator Osi = indexSet0->properties(*ui0).osi;
             // We assume that the integrator of the ds1 drive the update of the index set
             SP::DynamicalSystem ds1 = indexSet1->properties(*ui0).source;
             OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
-            
+
             activate = osi.addInteractionInIndexSet(inter0, i);
           }
-          if (activate)
+          if(activate)
           {
             assert(!indexSet1->is_vertex(inter0));
 
@@ -877,22 +877,22 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
     DEBUG_PRINTF("update IndexSets end : indexSet1 size : %i\n", (int)(indexSet1->size()));
   } // i==1
 
-  if (i == 2)
+  if(i == 2)
   {
     InteractionsGraph::VIterator ui1, ui1end, v1next;
     std11::tie(ui1, ui1end) = indexSet2->vertices();
 
-    for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
+    for(v1next = ui1; ui1 != ui1end; ui1 = v1next)
     {
       ++v1next;
       indexSet2->eraseProperties(*ui1);
       InteractionsGraph::OEIterator oei, oeiend;
-      for (std11::tie(oei, oeiend) = indexSet2->out_edges(*ui1);
-           oei != oeiend; ++oei)
+      for(std11::tie(oei, oeiend) = indexSet2->out_edges(*ui1);
+          oei != oeiend; ++oei)
       {
         InteractionsGraph::EDescriptor ed1, ed2;
         std11::tie(ed1, ed2) = indexSet2->edges(indexSet2->source(*oei), indexSet2->target(*oei));
-        if (ed2 != ed1)
+        if(ed2 != ed1)
         {
           indexSet2->eraseProperties(ed1);
           indexSet2->eraseProperties(ed2);
@@ -912,12 +912,12 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
 
     // Scan indexSet1
     std11::tie(ui1, ui1end) = indexSet1->vertices();
-    for (v1next = ui1; ui1 != ui1end; ui1 = v1next)
+    for(v1next = ui1; ui1 != ui1end; ui1 = v1next)
     {
       ++v1next;
       SP::Interaction inter1 = indexSet1->bundle(*ui1);
       bool activate = true;
-      if (Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
+      if(Type::value(*(inter1->nonSmoothLaw())) != Type::EqualityConditionNSL)
       {
         //SP::OneStepIntegrator Osi = indexSet1->properties(*ui1).osi;
         // We assume that the integrator of the ds1 drive the update of the index set
@@ -926,7 +926,7 @@ void TimeSteppingCombinedProjection::updateIndexSet(unsigned int i)
 
         activate = osi.addInteractionInIndexSet(inter1, i);
       }
-      if (activate)
+      if(activate)
       {
         assert(!indexSet2->is_vertex(inter1));
 

@@ -22,42 +22,47 @@
 #include <time.h>
 
 /* Auxiliary routine: printing a matrix */
-void print_matrix( const char* desc, int m, int n, double* a, int lda ) {
-        int i, j;
-        printf( "\n %s\n", desc );
-        for( i = 0; i < m; i++ ) {
-                for( j = 0; j < n; j++ ) printf( " %6.2f", a[i+j*lda] );
-                printf( "\n" );
-        }
+void print_matrix(const char* desc, int m, int n, double* a, int lda)
+{
+  int i, j;
+  printf("\n %s\n", desc);
+  for(i = 0; i < m; i++)
+  {
+    for(j = 0; j < n; j++) printf(" %6.2f", a[i+j*lda]);
+    printf("\n");
+  }
 }
 
 /* Auxiliary routine: printing a vector of integers */
-void print_int_vector( const char* desc, int n, int* a ) {
-        int j;
-        printf( "\n %s\n", desc );
-        for( j = 0; j < n; j++ ) printf( " %6i", a[j] );
-        printf( "\n" );
+void print_int_vector(const char* desc, int n, int* a)
+{
+  int j;
+  printf("\n %s\n", desc);
+  for(j = 0; j < n; j++) printf(" %6i", a[j]);
+  printf("\n");
 }
 
-void print_vector_norm( const char* desc, int m, int n, double* a, int lda ) {
-        int i, j;
-        double norm;
-        printf( "\n %s\n", desc );
-        for( j = 0; j < n; j++ ) {
-                norm = 0.0;
-                for( i = 0; i < m; i++ ) norm += a[i+j*lda] * a[i+j*lda];
-                printf( " %6.2f", norm );
-        }
-        printf( "\n" );
+void print_vector_norm(const char* desc, int m, int n, double* a, int lda)
+{
+  int i, j;
+  double norm;
+  printf("\n %s\n", desc);
+  for(j = 0; j < n; j++)
+  {
+    norm = 0.0;
+    for(i = 0; i < m; i++) norm += a[i+j*lda] * a[i+j*lda];
+    printf(" %6.2f", norm);
+  }
+  printf("\n");
 }
 
 void free_test_collection(TestCase* collection, int nb_tests)
 {
-  for(int i=0;i<nb_tests;++i)
-    {
-      solver_options_delete(collection[i].options);
-      collection[i].options = NULL;
-    }
+  for(int i=0; i<nb_tests; ++i)
+  {
+    solver_options_delete(collection[i].options);
+    collection[i].options = NULL;
+  }
 
   free(collection);
   collection = NULL;
@@ -78,26 +83,26 @@ void print_tests_collection_report(TestCase * collection, int n_failed, int * fa
                                    int n_succeeded, int * succeeded_tests)
 {
   printf("\n Failed tests ids: [ ");
-  for (int t =0; t < n_failed; t++)
+  for(int t =0; t < n_failed; t++)
     printf("%i, ", failed_tests[t]);
   printf("] :\n");
-  
-  for (int t =0; t < n_failed; t++)
+
+  for(int t =0; t < n_failed; t++)
   {
     // was it expected to fail?
-    if (collection[failed_tests[t]].will_fail == 1)
+    if(collection[failed_tests[t]].will_fail == 1)
       print_test_info(failed_tests[t], &collection[failed_tests[t]], " was expected to fail");
-    else if (collection[failed_tests[t]].will_fail == 0) // Or not ...
+    else if(collection[failed_tests[t]].will_fail == 0)  // Or not ...
       print_test_info(failed_tests[t], &collection[failed_tests[t]], " was expected to succeed");
-    else if (collection[failed_tests[t]].will_fail == 2) // Or is unstable.
+    else if(collection[failed_tests[t]].will_fail == 2)  // Or is unstable.
       print_test_info(failed_tests[t], &collection[failed_tests[t]], " is unstable and has failed");
   }
-  
-  for (int t =0; t < n_succeeded; t++)
-    {
-      if (collection[succeeded_tests[t]].will_fail == 1)
-        print_test_info(succeeded_tests[t], &collection[succeeded_tests[t]], " was expected to fail but has succeeded");
-    }
+
+  for(int t =0; t < n_succeeded; t++)
+  {
+    if(collection[succeeded_tests[t]].will_fail == 1)
+      print_test_info(succeeded_tests[t], &collection[succeeded_tests[t]], " was expected to fail but has succeeded");
+  }
 }
 
 TestCase * build_test_collection_generic(int n_data, const char ** data_collection, int n_solvers, int * solvers_ids)
@@ -106,17 +111,17 @@ TestCase * build_test_collection_generic(int n_data, const char ** data_collecti
   TestCase * collection = (TestCase*)malloc(number_of_tests * sizeof(TestCase));
 
   int current;
-  for(int s=0; s <n_solvers;++s)
+  for(int s=0; s <n_solvers; ++s)
+  {
+    current = s * n_data;
+    for(int d=0; d <n_data; ++d)
     {
-      current = s * n_data;
-      for(int d=0; d <n_data; ++d)
-        {
-          collection[current].filename = data_collection[d];
-          collection[current].will_fail = 0;
-          collection[current].options = solver_options_create(solvers_ids[s]);
-          current ++;
-        }
+      collection[current].filename = data_collection[d];
+      collection[current].will_fail = 0;
+      collection[current].options = solver_options_create(solvers_ids[s]);
+      current ++;
     }
+  }
   return collection;
 }
 
@@ -132,38 +137,38 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
   long clk_tck = CLOCKS_PER_SEC;
 
   // Loop through tests collection
-  for(int test_num=0;test_num<number_of_tests;++test_num)
+  for(int test_num=0; test_num<number_of_tests; ++test_num)
+  {
+    // print solver details
+    printf("\n################# start of test # %i #######################\n", test_num);
+    printf("Solver : %s (id: %d) \n", solver_options_id_to_name(collection[test_num].options->solverId),
+           collection[test_num].options->solverId);
+    for(size_t i=0; i<collection[test_num].options->numberOfInternalSolvers; ++i)
     {
-      // print solver details
-      printf("\n################# start of test # %i #######################\n", test_num);
-      printf("Solver : %s (id: %d) \n", solver_options_id_to_name(collection[test_num].options->solverId),
-             collection[test_num].options->solverId);
-      for(size_t i=0;i<collection[test_num].options->numberOfInternalSolvers;++i)
-        {
-          int sid = collection[test_num].options->internalSolvers[i]->solverId;
-          const char * internal_name = solver_options_id_to_name(sid);
-          printf("Internal solver : %s (id: %d) \n", internal_name, sid);        
-        }
-      printf("Data file : %s \n", collection[test_num].filename);
-      t1 = clock();
-      // Execute a single test
-      int info = test_function(&collection[test_num]);
-      t2 = clock();
-      (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
-
-      // Update failed/succeeded lists
-      if (info) // info != 0 --> test is unsuccesful
-        {
-          failed_tests[n_failed++]  = test_num;
-          // was it expected to succeed?
-          if (collection[test_num].will_fail == 0 )
-            out = 1;
-        }
-      else
-        succeeded_tests[n_succeeded++]  = test_num;
-      
-      printf("\n################# end of  test # %i #######################\n", test_num);
+      int sid = collection[test_num].options->internalSolvers[i]->solverId;
+      const char * internal_name = solver_options_id_to_name(sid);
+      printf("Internal solver : %s (id: %d) \n", internal_name, sid);
     }
+    printf("Data file : %s \n", collection[test_num].filename);
+    t1 = clock();
+    // Execute a single test
+    int info = test_function(&collection[test_num]);
+    t2 = clock();
+    (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
+
+    // Update failed/succeeded lists
+    if(info)  // info != 0 --> test is unsuccesful
+    {
+      failed_tests[n_failed++]  = test_num;
+      // was it expected to succeed?
+      if(collection[test_num].will_fail == 0)
+        out = 1;
+    }
+    else
+      succeeded_tests[n_succeeded++]  = test_num;
+
+    printf("\n################# end of  test # %i #######################\n", test_num);
+  }
 
   // report (on screen)
   print_tests_collection_report(collection, n_failed, failed_tests, n_succeeded, succeeded_tests);

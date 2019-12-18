@@ -75,7 +75,7 @@ void mlcp_path_enum_reset()
 
 void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
-  if (!siWorkEnum)
+  if(!siWorkEnum)
   {
     *info = 1;
     printf("MLCP_PATH_ENUM error, call a non initialised method!!!!!!!!!!!!!!!!!!!!!\n");
@@ -85,7 +85,7 @@ void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double *z, doubl
   //  options->dWork = sdWorkDirect;
   //  options->iWork = siWorkDirect;
   mlcp_path(problem, z, w, info, options);
-  if (*info)
+  if(*info)
   {
     printf("MLCP_PATH_ENUM: path failed, call enum\n");
     options->dWork = sdWorkEnum;

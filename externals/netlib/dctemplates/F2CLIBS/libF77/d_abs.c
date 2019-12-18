@@ -6,7 +6,7 @@ double d_abs(x) doublereal *x;
 double d_abs(doublereal *x)
 #endif
 {
-  if (*x >= 0)
+  if(*x >= 0)
     return(*x);
   return(- *x);
 }

@@ -46,7 +46,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
   /* Tolerance */
   double tolerance = dparam[SICONOS_DPARAM_TOL];
-  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
+  double norm_q = cblas_dnrm2(nc*3, problem->q, 1);
   /*****  Fixed Point Iterations *****/
   double error = 1.; /* Current error */
 
@@ -62,7 +62,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
 
   memcpy(soclcp->q, problem->q, (soclcp->n) * sizeof(double));
 
-  for (int i=0; i <= soclcp->nc; ++i)
+  for(int i=0; i <= soclcp->nc; ++i)
   {
     soclcp->coneIndex[i] = 3*i;
   }
@@ -71,7 +71,7 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
   // if (options->solverId == SICONOS_SOCLCP_NSGS)
   // This is the only allowed option, at the time
   {
-    if (verbose == 1)
+    if(verbose == 1)
       printf(" ========================== Call NSGS solver SOCLCP problem ==========================\n");
     internalsolver = &soclcp_nsgs;
     //internalsolver_options->internalSolvers->dWork = options->dWork;
@@ -81,24 +81,24 @@ void fc3d_SOCLCP(FrictionContactProblem* problem, double *reaction, double *velo
   /*   fprintf(stderr, "Numerics, fc3d_SOCLCP failed. Unknown internal solver.\n"); */
   /*   exit(EXIT_FAILURE); */
   /* } */
-  (*internalsolver)(soclcp, reaction , velocity , info , options);
+  (*internalsolver)(soclcp, reaction, velocity, info, options);
 
   error = options->dparam[SICONOS_DPARAM_RESIDU];
   double real_error=0.0;
 
-  fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &real_error);
+  fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &real_error);
 
-  if (options->callback)
+  if(options->callback)
   {
     options->callback->collectStatsIteration(options->callback->env, nc * 3,
-                                             reaction, velocity, error, NULL);
+        reaction, velocity, error, NULL);
   }
 
-  if (verbose > 0)
+  if(verbose > 0)
   {
     printf("--------------- FC3D - SOCLCP - # Iteration %i Final Residual = %14.7e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], error);
-    printf("--------------- FC3D - SOCLCP - #              error of the real problem = %14.7e\n", real_error );
-    printf("--------------- FC3D - SOCLCP - #              gap with the real problem = %14.7e\n", fabs(real_error-error) );
+    printf("--------------- FC3D - SOCLCP - #              error of the real problem = %14.7e\n", real_error);
+    printf("--------------- FC3D - SOCLCP - #              gap with the real problem = %14.7e\n", fabs(real_error-error));
   }
 
   free(soclcp->q);

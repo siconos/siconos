@@ -102,7 +102,7 @@ void AVITest::testAVI()
   dataPlot(0, 2) = (*_x0)(1);
   dataPlot(0, 3) = -1.0;
   dataPlot(0, 4) = -1.0;
-  while (_sim->hasNextEvent())
+  while(_sim->hasNextEvent())
   {
     _sim->computeOneStep();
     k++;
@@ -127,7 +127,7 @@ void AVITest::testAVI()
   double maxErr = err->getValue(0) > err->getValue(1) ? (err->getValue(0) > err->getValue(2) ? err->getValue(0) : err->getValue(2)) : (err->getValue(1) > err->getValue(2) ? err->getValue(1) : err->getValue(2));
 
   std::cout << "------- Integration Ok, error = " << maxErr << " -------" <<std::endl;
-  if (maxErr > _tol)
+  if(maxErr > _tol)
   {
     dataPlot.display();
     (dataPlot - dataPlotRef).display();

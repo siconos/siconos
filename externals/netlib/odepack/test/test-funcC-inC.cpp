@@ -53,9 +53,9 @@ int main(void)
   doublereal hu;
   integer nqu;
 
-  for (int meth = 1; meth <= 2; meth++)
+  for(int meth = 1; meth <= 2; meth++)
   {
-    for (int miter = 0; miter <= 3; miter++)
+    for(int miter = 0; miter <= 3; miter++)
     {
       mf = 10 * meth + miter;
       printf(" Solution with mf = %3d\n", (int)mf);
@@ -70,7 +70,7 @@ int main(void)
       istate = 1;
       tout = tout1;
 
-      for (int i = 1; i <= nout; i++)
+      for(int i = 1; i <= nout; i++)
       {
         CNAME(dlsode)(CNAME(f1), &neq, y, &t, &tout, &itol, &rtol, &atol, &itask, &istate, &iopt, rwork, &lrw, iwork, &liw, CNAME(jac1), &mf);
         hu = rwork[10];

@@ -32,8 +32,8 @@ int rollingFrictionContact_test_function(TestCase* current)
 
   int k;
   RollingFrictionContactProblem* problem = rollingFrictionContact_new_from_filename(current->filename);
- numerics_set_verbose(1);
- 
+  numerics_set_verbose(1);
+
   FILE * foutput  =  fopen("checkinput.dat", "w");
   rollingFrictionContact_printInFile(problem, foutput);
 
@@ -44,29 +44,29 @@ int rollingFrictionContact_test_function(TestCase* current)
   double *reaction = (double*)calloc(dim * NC, sizeof(double));
   double *velocity = (double*)calloc(dim * NC, sizeof(double));
 
-  if (dim == 2)
+  if(dim == 2)
   {
     info = 1;
   }
-  else if (dim == 5)
+  else if(dim == 5)
   {
     info = rolling_fc3d_driver(problem,
-                               reaction , velocity,
+                               reaction, velocity,
                                current->options);
   }
   printf("\n");
-  for (k = 0 ; k < dim * NC; k++)
+  for(k = 0 ; k < dim * NC; k++)
   {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
   }
   printf("\n");
 
-  for (k = 0; k < dim * NC; ++k)
+  for(k = 0; k < dim * NC; ++k)
   {
     info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
   }
 
-  if (!info)
+  if(!info)
   {
     printf("test succeeded\n");
   }

@@ -27,7 +27,7 @@ int ncp_compute_error(int n, double* z, double * F, double tol, double* err)
 
   DEBUG_PRINTF("ncp_compute_error err= %g, tol =%g \n", *err, tol);
 
-  if (*err >= tol)
+  if(*err >= tol)
   {
     DEBUG_END("ncp_compute_error(int n, double* z, double * F, double tol, double* err)\n");
     return 1;

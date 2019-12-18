@@ -69,7 +69,7 @@ void mlcp_direct_path_enum_reset()
 
 void mlcp_direct_path_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
-  if (!siWorkPathEnum)
+  if(!siWorkPathEnum)
   {
     *info = 1;
     printf("MLCP_DIRECT_PATH_ENUM error, call a non initialised method!!!!!!!!!!!!!!!!!!!!!\n");
@@ -79,13 +79,13 @@ void mlcp_direct_path_enum(MixedLinearComplementarityProblem* problem, double *z
   options->dWork = sdWorkDirect;
   options->iWork = siWorkDirect;
   mlcp_direct(problem, z, w, info, options);
-  if (*info)
+  if(*info)
   {
     options->dWork = sdWorkPathEnum;
     options->iWork = siWorkPathEnum;
     /*solver direct failed, so run the enum solver.*/
     mlcp_path_enum(problem, z, w, info, options);
-    if (!(*info))
+    if(!(*info))
     {
       mlcp_direct_addConfigFromWSolution(problem, w + sN);
     }

@@ -21,9 +21,11 @@
 #include "math.h"
 #include "NumericsVector.h"
 
+//#define DEBUG_MESSAGES
+#include "debug.h"
 
 
-RawNumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
+NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
 {
   /* validation */
   if(vecSize % varsCount != 0)
@@ -62,7 +64,7 @@ RawNumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSiz
 }
 
 
-RawNumericsMatrix* Reflect_mat(const unsigned int size, NM_types type)
+NumericsMatrix* Reflect_mat(const unsigned int size, NM_types type)
 {
   NumericsMatrix * Refl_mat = NM_create(type, size, size);
 
@@ -78,12 +80,13 @@ RawNumericsMatrix* Reflect_mat(const unsigned int size, NM_types type)
   return Refl_mat;
 }
 
-RawNumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
+NumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize, const size_t varsCount)
 {
   size_t dimension = (size_t)(vecSize / varsCount);
   NumericsMatrix* out = NM_create(NM_SPARSE, vecSize, vecSize);
   NM_triplet_alloc(out, dimension * dimension * varsCount);
-  NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
+  //NM_fill(out, NM_SPARSE, vecSize, vecSize, out->matrix2);
+  
   NumericsMatrix* quad_tmp = NM_create(NM_DENSE, dimension, dimension);
 
   NumericsMatrix* R = Reflect_mat(dimension, NM_DENSE);
@@ -117,11 +120,15 @@ RawNumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize
 void NesterovToddVector(const double* const vec1, const double* const vec2,
                         const unsigned int vecSize, const size_t varsCount, double * out)
 {
+  DEBUG_BEGIN("NesterovToddVector(...)\n");
   NumericsMatrix* quad_repr;
-  double * x05 = (double*)malloc(vecSize * sizeof(double));
-  double * Qx05y = (double*)malloc(vecSize * sizeof(double));
-  double * Qx05yi = (double*)malloc(vecSize * sizeof(double));
-  double * _p = (double*)malloc(vecSize * sizeof(double));
+  double * x05 = (double*)calloc(vecSize, sizeof(double));
+  double * Qx05y = (double*)calloc(vecSize, sizeof(double));
+  double * Qx05yi = (double*)calloc(vecSize, sizeof(double));
+  double * _p = (double*)calloc(vecSize, sizeof(double));
+
+  assert(!NV_isnan(vec1,vecSize));
+  assert(!NV_isnan(vec2,vecSize));
 
   JA_sqrt(vec1, vecSize, varsCount, x05);
   quad_repr = Quad_repr(x05, vecSize, varsCount);
@@ -129,11 +136,15 @@ void NesterovToddVector(const double* const vec1, const double* const vec2,
   JA_sqrt_inv(Qx05y, vecSize, varsCount, Qx05yi);
   NM_gemv(1.0, quad_repr, Qx05yi, 0.0, _p);
   JA_sqrt_inv(_p, vecSize, varsCount, out);
-
+  
+  assert(!NV_isnan(out,vecSize));
+  
+  
   free(_p);
   free(Qx05yi);
   free(Qx05y);
   free(x05);
+  DEBUG_END("NesterovToddVector(...)\n");
 }
 
 
@@ -173,11 +184,14 @@ void JA_prod(const double * const vec1, const double * const vec2, const unsigne
 /* Returns the eigenvalues of each element in the vector. */
 void JA_eigenvals(const double * const vec, const unsigned int vecSize, const size_t varsCount, double * out)
 {
+  DEBUG_BEGIN("JA_eigenvals(...)\n");
   unsigned int dimension = (int)(vecSize / varsCount);
   unsigned register int pos;
+
   for(size_t i = 0; i < 2*varsCount; i += 2)
   {
     pos = (i / 2.) * dimension;
+    assert(!isnan(vec[pos]));
     out[i] = vec[pos] + NV_norm_2(vec + pos + 1, dimension - 1);
   }
 
@@ -186,6 +200,9 @@ void JA_eigenvals(const double * const vec, const unsigned int vecSize, const si
     pos = ((i - 1) / 2.) * dimension;
     out[i] = vec[pos] - NV_norm_2(vec + pos + 1, dimension - 1);
   }
+  DEBUG_EXPR(NV_display(vec,vecSize););
+  DEBUG_EXPR(NV_display(out,2*varsCount););
+  DEBUG_END("JA_eigenvals(...)\n");
 }
 
 void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const size_t varsCount, double ** out)
@@ -267,8 +284,9 @@ void JA_sqrt_inv(const double * const vec, const unsigned int vecSize, const siz
 
   for(size_t i = 0; i < 2 * varsCount; i += 2)
   {
-    assert(eigenvals[i]>0 );
-    assert(eigenvals[i+1]>0 );
+    //printf("eigenvals[i] = %e \t, eigenvals[i+1] = %e\n ", eigenvals[i], eigenvals[i + 1]);
+    assert(eigenvals[i]>0);
+    assert(eigenvals[i+1]>0);
     sqrt_eigenval1 = 1. / sqrt(eigenvals[i]);
     sqrt_eigenval2 = 1. / sqrt(eigenvals[i + 1]);
     pos = (i / 2) * dimension;

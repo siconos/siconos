@@ -50,14 +50,14 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
   options->solverId = SICONOS_LCP_ENUM;
   lcp_enum_init(lcp_problem, options, 1);
 
-  * info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options);
-  if (options->filterOn > 0)
+  * info = linearComplementarity_driver(lcp_problem, zlcp, wlcp, options);
+  if(options->filterOn > 0)
     lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
   lcp_enum_reset(lcp_problem, options, 1);
 
   // Conversion of result
-  for (i = 0; i < problem->size; i++)
+  for(i = 0; i < problem->size; i++)
   {
     /* z[i] = 1.0/2.0*(zlcp[i]-wlcp[i+problem->size]); works only for ub=1 and lb=-1 */
     z[i] = zlcp[i] +  problem->lb[i];
