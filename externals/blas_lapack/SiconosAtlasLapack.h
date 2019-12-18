@@ -20,7 +20,9 @@
 #ifndef SiconosAtlasLAPACK_H
 #define SiconosAtlasLAPACK_H
 
-#include "SiconosBlas.h"
+// IWYU pragma: private, include "SiconosLapack.h"
+
+//#include "SiconosBlas.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>

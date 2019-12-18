@@ -22,8 +22,8 @@
   \brief Definition of a structure to handle with global friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
+#include "NumericsFwd.h"  // for GlobalFrictionContactProblem, VariationalIn...
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct GlobalFrictionContactProblem_as_VI GlobalFrictionContactProblem_as_VI.h
  *

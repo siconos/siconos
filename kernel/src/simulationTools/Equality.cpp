@@ -18,16 +18,26 @@
 #include "Equality.hpp"
 #include "Simulation.hpp"
 #include "OSNSMatrix.hpp"
+#include "SolverOptions.h"
 #include <NumericsMatrix.h>
 
 using namespace RELATION;
+
+Equality::Equality(int numericsSolverId):
+  Equality(SP::SolverOptions(solver_options_create(numericsSolverId),
+                             solver_options_delete))
+{}
+
+Equality::Equality(SP::SolverOptions options):
+  LinearOSNS(options)
+{}
 
 int Equality::compute(double time)
 {
   int info = 0;
   // --- Prepare data for EQUALITY computing ---
   bool cont = preCompute(time);
-  if (!cont)
+  if(!cont)
     return info;
 
 
@@ -38,11 +48,11 @@ int Equality::compute(double time)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
 
-  if (_sizeOutput != 0)
+  if(_sizeOutput != 0)
   {
     double* q_ = q()->getArray();
     double* z_ =  _z->getArray();
-    for (size_t i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
+    for(size_t i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
     info = NM_gesv(&*_M->numericsMatrix(), z_, true);
     // --- Recovering of the desired variables from EQUALITY output ---
     postCompute();
@@ -66,7 +76,7 @@ void Equality::updateM()
   // Get index set from Simulation
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
 
-  if (!_M)
+  if(!_M)
   {
     // Creates and fills M using Interactionof indexSet
     _M.reset(new OSNSMatrix(indexSet, _numericsMatrixStorageType));

@@ -24,10 +24,16 @@ OccContactShape::OccContactShape() : _shape(new TopoDS_Shape())
 
 OccContactShape::ContactTypeValue OccContactShape::contactType() const
 {
-  switch (this->_shape->ShapeType())
+  switch(this->_shape->ShapeType())
   {
-  case TopAbs_EDGE: { return OccContactShape::Edge; }
-  case TopAbs_FACE: { return OccContactShape::Face; }
+  case TopAbs_EDGE:
+  {
+    return OccContactShape::Edge;
+  }
+  case TopAbs_FACE:
+  {
+    return OccContactShape::Face;
+  }
   default:
     return OccContactShape::Unknown;
   };
@@ -39,7 +45,7 @@ void OccContactShape::computeUVBounds()
 {
   RuntimeException::selfThrow(
     "OccContactShape::computeUVBounds() : cannot compute UV bounds for this contact shape"
-    );
+  );
 }
 
 std::string OccContactShape::exportBRepToString() const
@@ -71,8 +77,8 @@ SPC::TopoDS_Face OccContactShape::face(unsigned int index) const
 
   TopExp_Explorer exp;
   exp.Init(this->data(), TopAbs_FACE);
-  for (unsigned int i=0; i<index; ++i, exp.Next());
-  if (exp.More())
+  for(unsigned int i=0; i<index; ++i, exp.Next());
+  if(exp.More())
   {
     // taking a ref fail!
     *return_value = TopoDS::Face(exp.Current());
@@ -91,8 +97,8 @@ SPC::TopoDS_Edge OccContactShape::edge(unsigned int index) const
 
   TopExp_Explorer exp;
   exp.Init(this->data(), TopAbs_EDGE);
-  for (unsigned int i=0; i<index; ++i, exp.Next());
-  if (exp.More())
+  for(unsigned int i=0; i<index; ++i, exp.Next());
+  if(exp.More())
   {
     // taking a ref fail!
     *return_value = TopoDS::Edge(exp.Current());

@@ -104,10 +104,10 @@ void display_quat(boost::math::quaternion<double>& quat)
 #endif
 
 void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
-                                                     const btManifoldPoint& point,
-                                                     bool flip, double scaling,
-                                                     SP::RigidBody2dDS ds1,
-                                                     SP::RigidBody2dDS ds2)
+    const btManifoldPoint& point,
+    bool flip, double scaling,
+    SP::RigidBody2dDS ds1,
+    SP::RigidBody2dDS ds2)
 {
   DEBUG_BEGIN("Bullet2dR::updateContactPointsFromManifoldPoint(...)\n");
   // Get new world positions of contact points and calculate relative
@@ -139,7 +139,7 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   DEBUG_EXPR(display_quat(rq1););
 
 
-  if (ds2)
+  if(ds2)
   {
     DEBUG_EXPR(ds2->q()->display(););
     copyQuatPos2d(*ds2->q(), pq2);
@@ -156,7 +156,7 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   copyQuatPos2d(point.getPositionWorldOnB() / scaling, posb);
 
 
-  if (flip)
+  if(flip)
   {
     ::boost::math::quaternion<double> tmp = posa;
     posa = posb;
@@ -172,12 +172,12 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
 
 
   SiconosVector va(2), vb(2);
-  if (flip)
+  if(flip)
   {
     /* Rotate the relatice position of the contact point */
     copyQuatPos2d((1.0/rq1) * (posa - pq1) * rq1, va);
 
-    if (ds2)
+    if(ds2)
       copyQuatPos2d((1.0/rq2) * (posb - pq2) * rq2, vb);
     else
     {
@@ -188,9 +188,10 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   else
   {
     copyQuatPos2d((1.0/rq1) * (posa - pq1) * rq1, va);
-    if (ds2)
+    if(ds2)
       copyQuatPos2d((1.0/rq2) * (posb - pq2) * rq2, vb);
-    else {
+    else
+    {
       // If no body2, position is relative to 0,0,0
       copyBtVector32d(point.getPositionWorldOnB() / scaling, vb);
     }
@@ -200,7 +201,7 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
 
   SiconosVector vn(3);
   // Get new normal
-  if (ds2)
+  if(ds2)
   {
     btQuaternion qn(point.m_normalWorldOnB.x(),
                     point.m_normalWorldOnB.y(),

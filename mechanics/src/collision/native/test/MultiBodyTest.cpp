@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "MultiBodyTest.hpp"
+#include "SolverOptions.h"
 
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 
@@ -90,7 +91,7 @@ using namespace std;
 /* do nothing if solver does not converge */
 void localCheckSolverOuput(int info, Simulation*)
 {
-  if (info) exit(1);
+  if(info) exit(1);
 }
 
 double A(double t)
@@ -152,11 +153,11 @@ void Disks::init(std::string disks_input)
     // ------------
     // --- Init ---
     // ------------
-    
+
     std::cout << "====> nsds loading ..." << std::endl << std::endl;
 
     _plans.reset(new SimpleMatrix("plans.dat", true));
-    if (_plans->size(0) == 0)
+    if(_plans->size(0) == 0)
     {
       /* default plans */
       double A1 = P1A;
@@ -196,7 +197,7 @@ void Disks::init(std::string disks_input)
     }
 
     /* set center positions */
-    for (unsigned int i = 0 ; i < _plans->size(0); ++i)
+    for(unsigned int i = 0 ; i < _plans->size(0); ++i)
     {
       SP::DiskPlanR tmpr;
       tmpr.reset(new DiskPlanR(1, (*_plans)(i, 0), (*_plans)(i, 1), (*_plans)(i, 2),
@@ -227,7 +228,7 @@ void Disks::init(std::string disks_input)
     SP::NonSmoothDynamicalSystem nsds;
     nsds.reset(new NonSmoothDynamicalSystem(t0, T));
 
-    for (unsigned int i = 0; i < Disks->size(0); i++)
+    for(unsigned int i = 0; i < Disks->size(0); i++)
     {
       R = Disks->getValue(i, 2);
       m = Disks->getValue(i, 3);
@@ -242,7 +243,7 @@ void Disks::init(std::string disks_input)
       (*qTmp)(1) = (*Disks)(i, 1);
 
       SP::LagrangianDS body;
-      if (R > 0)
+      if(R > 0)
         body.reset(new Disk(R, m, qTmp, vTmp));
       else
         body.reset(new Circle(-R, m, qTmp, vTmp));
@@ -272,11 +273,11 @@ void Disks::init(std::string disks_input)
     // -- OneStepNsProblem --
     osnspb_.reset(new FrictionContact(2));
 
-    osnspb_->numericsSolverOptions()->iparam[0] = 100; // Max number of
+    osnspb_->numericsSolverOptions()->iparam[SICONOS_IPARAM_MAX_ITER] = 100; // Max number of
     // iterations
-    osnspb_->numericsSolverOptions()->iparam[1] = 20; // compute error
+    //osnspb_->numericsSolverOptions()->iparam[SICONOS_IPARAM_ITER_DONE] = 20; // compute error
     // iterations
-    osnspb_->numericsSolverOptions()->dparam[0] = 1e-3; // Tolerance
+    osnspb_->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] = 1e-3; // Tolerance
 
 
     osnspb_->setMaxSize(6 * ((3 * Ll * Ll + 3 * Ll) / 2 - Ll));
@@ -309,12 +310,12 @@ void Disks::init(std::string disks_input)
 
   }
 
-  catch (SiconosException e)
+  catch(SiconosException e)
   {
     std::cout << e.report() << std::endl;
     exit(1);
   }
-  catch (...)
+  catch(...)
   {
     std::cout << "Exception caught in Disks::init()" << std::endl;
     exit(1);
@@ -346,7 +347,7 @@ void MultiBodyTest::t1()
   // just try to run a simulation
   // if something is broken with SpaceFilter
   // an exception may occurs
-  for (unsigned int i = 0; i < 20; ++i)
+  for(unsigned int i = 0; i < 20; ++i)
   {
     disks->compute();
   }
@@ -367,7 +368,7 @@ void MultiBodyTest::t2()
   // if something is broken with SpaceFilter
   // an exception may occurs
   // test fail with rev 3146
-  for (unsigned int i = 0; i < 20; ++i)
+  for(unsigned int i = 0; i < 20; ++i)
   {
     disks->compute();
   }

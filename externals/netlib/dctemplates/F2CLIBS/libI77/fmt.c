@@ -29,12 +29,12 @@ char *ap_end(char *s)
 {
   char quote;
   quote = *s++;
-  for (; *s; s++)
+  for(; *s; s++)
   {
-    if (*s != quote) continue;
-    if (*++s != quote) return(s);
+    if(*s != quote) continue;
+    if(*++s != quote) return(s);
   }
-  if (f__elist->cierr)
+  if(f__elist->cierr)
   {
     errno = 100;
     return(NULL);
@@ -50,7 +50,7 @@ op_gen(int a, int b, int c, int d)
 #endif
 {
   struct f__syl *p = &f__syl[f__pc];
-  if (f__pc >= SYLMX)
+  if(f__pc >= SYLMX)
   {
     fprintf(stderr, "format too complicated:\n");
     sig_die(f__fmtbuf, 1);
@@ -72,19 +72,19 @@ char *gt_num(char *s, int *n)
 {
   int m = 0, f__cnt = 0;
   char c;
-  for (c = *s;; c = *s)
+  for(c = *s;; c = *s)
   {
-    if (c == ' ')
+    if(c == ' ')
     {
       s++;
       continue;
     }
-    if (c > '9' || c < '0') break;
+    if(c > '9' || c < '0') break;
     m = 10 * m + c - '0';
     f__cnt++;
     s++;
   }
-  if (f__cnt == 0) *n = 1;
+  if(f__cnt == 0) *n = 1;
   else *n = m;
   return(s);
 }
@@ -95,12 +95,12 @@ char *f_s(char *s, int curloc)
 #endif
 {
   skip(s);
-  if (*s++ != '(')
+  if(*s++ != '(')
   {
     return(NULL);
   }
-  if (f__parenlvl++ == 1) f__revloc = curloc;
-  if (op_gen(RET1, curloc, 0, 0) < 0 ||
+  if(f__parenlvl++ == 1) f__revloc = curloc;
+  if(op_gen(RET1, curloc, 0, 0) < 0 ||
       (s = f_list(s)) == NULL)
   {
     return(NULL);
@@ -116,7 +116,7 @@ ne_d(char *s, char **p)
 {
   int n, x, sign = 0;
   struct f__syl *sp;
-  switch (*s)
+  switch(*s)
   {
   default:
     return(0);
@@ -128,17 +128,17 @@ ne_d(char *s, char **p)
     break;
   case 'B':
   case 'b':
-    if (*++s == 'z' || *s == 'Z')(void) op_gen(BZ, 0, 0, 0);
-    else (void) op_gen(BN, 0, 0, 0);
+    if(*++s == 'z' || *s == 'Z')(void) op_gen(BZ, 0, 0, 0);
+    else(void) op_gen(BN, 0, 0, 0);
     break;
   case 'S':
   case 's':
-    if (*(s + 1) == 's' || *(s + 1) == 'S')
+    if(*(s + 1) == 's' || *(s + 1) == 'S')
     {
       x = SS;
       s++;
     }
-    else if (*(s + 1) == 'p' || *(s + 1) == 'P')
+    else if(*(s + 1) == 'p' || *(s + 1) == 'P')
     {
       x = SP;
       s++;
@@ -164,13 +164,13 @@ ne_d(char *s, char **p)
   case '8':
   case '9':
     s = gt_num(s, &n);
-    switch (*s)
+    switch(*s)
     {
     default:
       return(0);
     case 'P':
     case 'p':
-      if (sign) n = -n;
+      if(sign) n = -n;
       (void) op_gen(P, n, 0, 0);
       break;
     case 'X':
@@ -190,17 +190,17 @@ ne_d(char *s, char **p)
   case '\'':
     sp = &f__syl[op_gen(APOS, 0, 0, 0)];
     *(char **)&sp->p2 = s;
-    if ((*p = ap_end(s)) == NULL)
+    if((*p = ap_end(s)) == NULL)
       return(0);
     return(1);
   case 'T':
   case 't':
-    if (*(s + 1) == 'l' || *(s + 1) == 'L')
+    if(*(s + 1) == 'l' || *(s + 1) == 'L')
     {
       x = TL;
       s++;
     }
-    else if (*(s + 1) == 'r' || *(s + 1) == 'R')
+    else if(*(s + 1) == 'r' || *(s + 1) == 'R')
     {
       x = TR;
       s++;
@@ -233,7 +233,7 @@ e_d(char *s, char **p)
   char *sv = s;
   s = gt_num(s, &n);
   (void) op_gen(STACK, n, 0, 0);
-  switch (*s++)
+  switch(*s++)
   {
   default:
     break;
@@ -244,14 +244,14 @@ e_d(char *s, char **p)
   case 'g':
     found = 1;
     s = gt_num(s, &w);
-    if (w == 0) break;
-    if (*s == '.')
+    if(w == 0) break;
+    if(*s == '.')
     {
       s++;
       s = gt_num(s, &d);
     }
     else d = 0;
-    if (*s != 'E' && *s != 'e')
+    if(*s != 'E' && *s != 'e')
       (void) op_gen(x == 1 ? E : G, w, d, 0); /* default is Ew.dE2 */
     else
     {
@@ -274,17 +274,17 @@ e_d(char *s, char **p)
   case 'l':
     found = 1;
     s = gt_num(s, &w);
-    if (w == 0) break;
+    if(w == 0) break;
     (void) op_gen(L, w, 0, 0);
     break;
   case 'A':
   case 'a':
     found = 1;
     skip(s);
-    if (*s >= '0' && *s <= '9')
+    if(*s >= '0' && *s <= '9')
     {
       s = gt_num(s, &w);
-      if (w == 0) break;
+      if(w == 0) break;
       (void) op_gen(AW, w, 0, 0);
       break;
     }
@@ -294,8 +294,8 @@ e_d(char *s, char **p)
   case 'f':
     found = 1;
     s = gt_num(s, &w);
-    if (w == 0) break;
-    if (*s == '.')
+    if(w == 0) break;
+    if(*s == '.')
     {
       s++;
       s = gt_num(s, &d);
@@ -307,8 +307,8 @@ e_d(char *s, char **p)
   case 'd':
     found = 1;
     s = gt_num(s, &w);
-    if (w == 0) break;
-    if (*s == '.')
+    if(w == 0) break;
+    if(*s == '.')
     {
       s++;
       s = gt_num(s, &d);
@@ -323,8 +323,8 @@ e_d(char *s, char **p)
 finish_I:
     found = 1;
     s = gt_num(s, &w);
-    if (w == 0) break;
-    if (*s != '.')
+    if(w == 0) break;
+    if(*s != '.')
     {
       (void) op_gen(i, w, 0, 0);
       break;
@@ -334,7 +334,7 @@ finish_I:
     (void) op_gen(im, w, d, 0);
     break;
   }
-  if (found == 0)
+  if(found == 0)
   {
     f__pc--; /*unSTACK*/
     *p = sv;
@@ -351,11 +351,11 @@ char *i_tem(char *s)
 {
   char *t;
   int n, curloc;
-  if (*s == ')') return(s);
-  if (ne_d(s, &t)) return(t);
-  if (e_d(s, &t)) return(t);
+  if(*s == ')') return(s);
+  if(ne_d(s, &t)) return(t);
+  if(e_d(s, &t)) return(t);
   s = gt_num(s, &n);
-  if ((curloc = op_gen(STACK, n, 0, 0)) < 0) return(NULL);
+  if((curloc = op_gen(STACK, n, 0, 0)) < 0) return(NULL);
   return(f_s(s, curloc));
 }
 #ifdef KR_headers
@@ -364,15 +364,15 @@ char *f_list(s) char *s;
 char *f_list(char *s)
 #endif
 {
-  for (; *s != 0;)
+  for(; *s != 0;)
   {
     skip(s);
-    if ((s = i_tem(s)) == NULL) return(NULL);
+    if((s = i_tem(s)) == NULL) return(NULL);
     skip(s);
-    if (*s == ',') s++;
-    else if (*s == ')')
+    if(*s == ',') s++;
+    else if(*s == ')')
     {
-      if (--f__parenlvl == 0)
+      if(--f__parenlvl == 0)
       {
         (void) op_gen(REVERT, f__revloc, 0, 0);
         return(++s);
@@ -391,7 +391,7 @@ pars_f(char *s)
 #endif
 {
   f__parenlvl = f__revloc = f__pc = 0;
-  if (f_s(s, 0) == NULL)
+  if(f_s(s, 0) == NULL)
   {
     return(-1);
   }
@@ -407,7 +407,7 @@ type_f(n)
 type_f(int n)
 #endif
 {
-  switch (n)
+  switch(n)
   {
   default:
     return(n);
@@ -455,17 +455,17 @@ integer do_fio(ftnint *number, char *ptr, ftnlen len)
 {
   struct f__syl *p;
   int n, i;
-  for (i = 0; i < *number; i++, ptr += len)
+  for(i = 0; i < *number; i++, ptr += len)
   {
 loop:
-    switch (type_f((p = &f__syl[f__pc])->op))
+    switch(type_f((p = &f__syl[f__pc])->op))
     {
     default:
       fprintf(stderr, "unknown code in do_fio: %d\n%s\n",
               p->op, f__fmtbuf);
       err(f__elist->cierr, 100, "do_fio");
     case NED:
-      if ((*f__doned)(p))
+      if((*f__doned)(p))
       {
         f__pc++;
         goto loop;
@@ -473,19 +473,19 @@ loop:
       f__pc++;
       continue;
     case ED:
-      if (f__cnt[f__cp] <= 0)
+      if(f__cnt[f__cp] <= 0)
       {
         f__cp--;
         f__pc++;
         goto loop;
       }
-      if (ptr == NULL)
+      if(ptr == NULL)
         return((*f__doend)());
       f__cnt[f__cp]--;
       f__workdone = 1;
-      if ((n = (*f__doed)(p, ptr, len)) > 0)
+      if((n = (*f__doed)(p, ptr, len)) > 0)
         errfl(f__elist->cierr, errno, "fmt");
-      if (n < 0)
+      if(n < 0)
         err(f__elist->ciend, (EOF), "fmt");
       continue;
     case STACK:
@@ -497,7 +497,7 @@ loop:
       f__pc++;
       goto loop;
     case GOTO:
-      if (--f__cnt[f__cp] <= 0)
+      if(--f__cnt[f__cp] <= 0)
       {
         f__cp--;
         f__rp--;
@@ -509,13 +509,13 @@ loop:
     case REVERT:
       f__rp = f__cp = 0;
       f__pc = p->p1;
-      if (ptr == NULL)
+      if(ptr == NULL)
         return((*f__doend)());
-      if (!f__workdone) return(0);
-      if ((n = (*f__dorevert)()) != 0) return(n);
+      if(!f__workdone) return(0);
+      if((n = (*f__dorevert)()) != 0) return(n);
       goto loop;
     case COLON:
-      if (ptr == NULL)
+      if(ptr == NULL)
         return((*f__doend)());
       f__pc++;
       goto loop;

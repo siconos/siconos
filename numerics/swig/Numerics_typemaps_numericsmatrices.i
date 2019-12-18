@@ -135,7 +135,10 @@
 }
 
 %typemap(out, fragment="NumericsMatrix") (NumericsMatrix*) {
-  if (strcmp("$symname", "new_NumericsMatrix"))
+  // use tmp int to avoid "error: code will never be executed"
+  // message in C++.
+  int res = strcmp("$symname", "new_NumericsMatrix"); 
+  if (res) // convert to python or matlab object.
   {
 #ifdef SWIGPYTHON
     $result = NM_to_python($1);
@@ -144,7 +147,7 @@
 #endif
     if (!$result) SWIG_fail;
   }
-  else
+  else // create a new matrix
   {
     $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), $descriptor(NumericsMatrix *), SWIG_POINTER_NEW |  0 );
   }

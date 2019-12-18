@@ -21,6 +21,10 @@
 #ifndef NUMERICSMATRIX_TEST_FUNCTION_H
 #define NUMERICSMATRIX_TEST_FUNCTION_H
 
+#include "NumericsFwd.h"    // for NumericsMatrix, SparseBlockStructuredMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

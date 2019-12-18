@@ -37,7 +37,7 @@ void initEnum(int M)
   sNbCase = 1;
   sMm = M;
 
-  for (cmp = 0; cmp < sMm; cmp++)
+  for(cmp = 0; cmp < sMm; cmp++)
     sNbCase = sNbCase << 1;
   sProgress = 0;
 }
@@ -45,14 +45,14 @@ void initEnum(int M)
 void affectW2V(int * W2V)
 {
   unsigned long  int aux = sCurrentEnum;
-  for (int i = 0; i < sMm; i++)
+  for(int i = 0; i < sMm; i++)
   {
     W2V[i] = aux & 1;
     aux = aux >> 1;
   }
-  if (verbose)
+  if(verbose)
   {
-    for (int i = 0; i < sMm; i++)
+    for(int i = 0; i < sMm; i++)
       printf("wv[%d]=%d \t", i, W2V[i]);
     printf("\n");
   }
@@ -61,18 +61,18 @@ void affectW2V(int * W2V)
 
 int nextEnum(int * W2V)
 {
-  if (sCmpEnum == sNbCase)
+  if(sCmpEnum == sNbCase)
     return 0;
-  if (sCurrentEnum >= sNbCase)
+  if(sCurrentEnum >= sNbCase)
   {
     sCurrentEnum = 0;
   }
-  if (verbose)
+  if(verbose)
     printf("try enum :%d\n", (int)sCurrentEnum);
   affectW2V(W2V);
   sCurrentEnum++;
   sCmpEnum++;
-  if (verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
+  if(verbose && sCmpEnum > (unsigned long int)sProgress * sNbCase)
   {
     sProgress += 0.001;
     printf(" progress %f %d \n", sProgress, (int) sCurrentEnum);

@@ -1,20 +1,12 @@
 #ifndef AlartCurnierGenerated_h
 #define AlartCurnierGenerated_h
 
-#include "SiconosConfig.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
-
-#include "fc3d_AlartCurnierABGenerated.h"
-#include "fc3d_AlartCurnierFABGenerated.h"
-#include "fc3d_AlartCurnierFGenerated.h"
-#include "fc3d_AlartCurnierJeanMoreauABGenerated.h"
-#include "fc3d_AlartCurnierJeanMoreauFABGenerated.h"
-#include "fc3d_AlartCurnierJeanMoreauFGenerated.h"
-
 
 void fc3d_AlartCurnierFunctionGenerated(
   double *reaction,

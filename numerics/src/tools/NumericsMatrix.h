@@ -22,15 +22,17 @@
 /*!\file NumericsMatrix.h
   \brief Structure definition and functions related to matrix storage in Numerics
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <stdbool.h>
-#include <stdio.h>
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-#include "CSparseMatrix.h" // for CS_INT
-#include "NM_MPI.h"
+#include <assert.h>         // for assert
+#include <stdio.h>          // for size_t, FILE, NULL
+#include <stdlib.h>         // for malloc
+#include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
+#include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
+#include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
+
+#ifndef __cplusplus
+#include <stdbool.h>        // for bool
+#endif
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
@@ -126,7 +128,7 @@ extern "C"
    * \return a pointer to a NumericsMatrix
    */
   RawNumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
-  RawNumericsMatrix* NM_create_from_filename(char *filename);
+  RawNumericsMatrix* NM_create_from_filename(const char *filename);
   RawNumericsMatrix* NM_create_from_file(FILE *file);
 
 
@@ -278,7 +280,7 @@ extern "C"
    * \param j column index
    * \return  the value to be inserted.
    */
-  double NM_get_value(NumericsMatrix* M, int i, int j);
+  double NM_get_value(const NumericsMatrix* const M, int i, int j);
 
   /** compare to NumericsMatrix up to machine accuracy (DBL_EPSILON)
    * \param A the NumericsMatrix
@@ -338,6 +340,17 @@ extern "C"
    *  A copy is always performed
    */
   void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
+
+
+  /** Set the submatrix B into the matrix A on the position defined in
+   *  (start_i, start_j) position.
+   * \param[in] A a pointer to NumerixMatrix
+   * \param[in] B a pointer toNumericsMatrix
+   * \param[in] start_i a start row index
+   * \param[in] start_j a start column index
+   */
+  void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
+                 const unsigned int start_i, const unsigned int start_j);
 
   /**************************************************/
   /** Matrix - vector product           *************/
@@ -434,7 +447,6 @@ extern "C"
                 const double beta,
                 double *y);
 
-
   /**************************************************/
   /** matrix conversion display *********************/
   /**************************************************/
@@ -480,6 +492,11 @@ extern "C"
    */
   void NM_display(const NumericsMatrix* const M);
 
+  /** Screen display of the matrix storage
+      \param M the matrix to be displayed
+   */
+  void NM_display_storageType(const NumericsMatrix* const M);
+
 
   /** Screen display raw by raw of the matrix content
       \param m the matrix to be displayed
@@ -520,7 +537,7 @@ extern "C"
      \return 0 if the matrix
   */
   RawNumericsMatrix*  NM_new_from_file(FILE *file);
-  RawNumericsMatrix*  NM_new_from_filename(char * filename);
+  RawNumericsMatrix*  NM_new_from_filename(const char * filename);
 
   /**  NM_write_in_file_scilab of the matrix content
    \param M the matrix to be printed

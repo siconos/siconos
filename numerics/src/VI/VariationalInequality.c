@@ -15,11 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
 #include "VariationalInequality.h"
-#include "numerics_verbose.h"
-#include "NumericsMatrix.h"
+#include <assert.h>          // for assert
+#include <stdlib.h>          // for free, malloc, exit, EXIT_FAILURE
+#include "NumericsMatrix.h"  // for NM_clear
 
 
 void variationalInequality_display(VariationalInequality* vi)
@@ -31,7 +30,7 @@ void variationalInequality_display(VariationalInequality* vi)
 
 int variationalInequality_printInFile(VariationalInequality*  vi, FILE* file)
 {
-  if (! vi)
+  if(! vi)
   {
     fprintf(stderr, "Numerics, VariationalInequality printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -47,7 +46,7 @@ int variationalInequality_newFromFile(VariationalInequality* vi, FILE* file)
 
 void freeVariationalInequalityProblem(VariationalInequality* vi)
 {
-  if (vi->nabla_F)
+  if(vi->nabla_F)
   {
     NM_clear(vi->nabla_F);
     free(vi->nabla_F);
@@ -71,7 +70,7 @@ void variationalInequality_clear(VariationalInequality* vi)
 
 VariationalInequality* variationalInequality_new(int size)
 {
-  VariationalInequality* fvi = (VariationalInequality*) malloc(sizeof(VariationalInequality)); 
+  VariationalInequality* fvi = (VariationalInequality*) malloc(sizeof(VariationalInequality));
   variationalInequality_clear(fvi);
   fvi->size = size;
 

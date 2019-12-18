@@ -61,6 +61,4 @@ TYPEDEF_STRUCT(AffineVariationalInequalities)
 TYPEDEF_STRUCT(ConvexQP)
 TYPEDEF_STRUCT(ConvexQP_as_VI)
 
-
-
 #endif

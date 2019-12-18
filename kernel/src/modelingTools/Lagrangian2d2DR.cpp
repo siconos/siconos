@@ -35,7 +35,7 @@ void Lagrangian2d2DR::initialize(Interaction& inter)
   LagrangianR::initialize(inter);
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
 
-  if ((inter.getSizeOfDS() !=3) and (inter.getSizeOfDS() !=6 ))
+  if((inter.getSizeOfDS() !=3) and (inter.getSizeOfDS() !=6))
   {
     RuntimeException::selfThrow("Lagrangian2d2DR::initialize(Interaction& inter). The size of ds must of size 3");
   }
@@ -63,7 +63,7 @@ void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
   double lever_arm_x = G1x-Px ;
   double lever_arm_y = G1y-Py ;
   DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
-  
+
   _jachq->setValue(0,0,Nx);
   _jachq->setValue(0,1,Ny);
   _jachq->setValue(0,2,lever_arm_y*Nx - lever_arm_x*Ny);
@@ -74,7 +74,7 @@ void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
 
 
 
-  if (q.size() ==6)
+  if(q.size() ==6)
   {
     DEBUG_PRINT("take into account second ds\n");
     double G2x = q.getValue(3);
@@ -88,7 +88,7 @@ void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
     _jachq->setValue(1,4,-Ty);
     _jachq->setValue(1,5,-(G1y-Py)*Tx + (G1x-Px)*Ty);
 
-    
+
   }
   DEBUG_EXPR(_jachq->display(););
   DEBUG_END("Lagrangian2d2DR::computeJachq(Interaction& inter, SP::BlockVector q0) \n");
@@ -120,7 +120,7 @@ void Lagrangian2d2DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector
   DEBUG_PRINTF("angle (ds1)= %e\n", angle);
   (*_Pc1)(0) = q(0) + cos(angle) * (*_relPc1)(0)- sin(angle) * (*_relPc1)(1);
   (*_Pc1)(1) = q(1) + sin(angle) * (*_relPc1)(0)+ cos(angle) * (*_relPc1)(1);
-  if (q.size() == 6)
+  if(q.size() == 6)
   {
     // To be checked
     DEBUG_PRINT("take into account second ds\n");

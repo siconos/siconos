@@ -18,8 +18,9 @@
 #ifndef SOCLCP_H
 #define SOCLCP_H
 
-#include "NumericsMatrix.h"
-#include "NumericsFwd.h"
+#include <stdio.h>          // for FILE
+#include "NumericsFwd.h"    // for SecondOrderConeLinearComplementarityProblem
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct  SecondOrderConeLinearComplementarityProblem
  *  The structure that defines a Second Order Cone Linear Complementarity Problem.

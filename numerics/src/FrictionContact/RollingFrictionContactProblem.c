@@ -15,17 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
 #include "RollingFrictionContactProblem.h"
-#include "NumericsMatrix.h"
-#include <stdio.h>
-#include "numerics_verbose.h"
-#include "SparseBlockMatrix.h"
-#include <math.h>
+#include <assert.h>            // for assert
+#include <math.h>              // for fabs
+#include <stdio.h>             // for printf, fprintf, fscanf, NULL, fclose
+#include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
+#include <sys/errno.h>         // for errno
+#include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
+#include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "debug.h"             // for DEBUG_PRINT, DEBUG_PRINTF
 
 void rollingFrictionContact_display(RollingFrictionContactProblem* problem)
 {
@@ -36,7 +36,7 @@ void rollingFrictionContact_display(RollingFrictionContactProblem* problem)
   printf("dimension :%d \n", problem->dimension);
   printf("numberOfContacts:%d \n", problem->numberOfContacts);
 
-  if (problem->M)
+  if(problem->M)
   {
     printf("M matrix:\n");
     NM_display(problem->M);
@@ -44,7 +44,7 @@ void rollingFrictionContact_display(RollingFrictionContactProblem* problem)
   else
     printf("No M matrix:\n");
 
-  if (problem->q)
+  if(problem->q)
   {
     printf("q vector:\n");
     NM_vector_display(problem->q,n);
@@ -52,15 +52,15 @@ void rollingFrictionContact_display(RollingFrictionContactProblem* problem)
   else
     printf("No q vector:\n");
 
-  if (problem->mu)
+  if(problem->mu)
   {
     printf("mu vector:\n");
     NM_vector_display(problem->mu,problem->numberOfContacts);
   }
   else
     printf("No mu vector:\n");
-  
-  if (problem->mu_r)
+
+  if(problem->mu_r)
   {
     printf("mu_R vector:\n");
     NM_vector_display(problem->mu_r,problem->numberOfContacts);
@@ -76,7 +76,7 @@ void rollingFrictionContact_display(RollingFrictionContactProblem* problem)
 
 int rollingFrictionContact_printInFile(RollingFrictionContactProblem*  problem, FILE* file)
 {
-  if (! problem)
+  if(! problem)
   {
     fprintf(stderr, "Numerics, RollingFrictionContactProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -88,17 +88,17 @@ int rollingFrictionContact_printInFile(RollingFrictionContactProblem*  problem, 
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
   NM_write_in_file(problem->M, file);
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
   fprintf(file, "\n");
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     fprintf(file, "%32.24e ", problem->mu[i]);
   }
   fprintf(file, "\n");
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     fprintf(file, "%32.24e ", problem->mu_r[i]);
   }
@@ -111,7 +111,7 @@ int rollingFrictionContact_printInFilename(RollingFrictionContactProblem* proble
   int info = 0;
   FILE * file = fopen(filename, "w");
 
-  if (!file)
+  if(!file)
   {
     return errno;
   }
@@ -122,78 +122,75 @@ int rollingFrictionContact_printInFilename(RollingFrictionContactProblem* proble
   return info;
 }
 
-int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, FILE* file)
+RollingFrictionContactProblem* rollingFrictionContact_newFromFile(FILE* file)
 {
+  RollingFrictionContactProblem* problem = rollingFrictionContactProblem_new();
   assert(file);
   DEBUG_PRINT("Start -- int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, FILE* file)\n");
   int nc = 0, d = 0;
   int i;
   CHECK_IO(fscanf(file, "%d\n", &d));
   problem->dimension = d;
-  DEBUG_PRINTF("problem->dimension = %i \n",problem->dimension );
+  DEBUG_PRINTF("problem->dimension = %i \n",problem->dimension);
   CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
   problem->M =  NM_new_from_file(file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
 
   problem->mu = (double *) malloc(nc * sizeof(double));
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
   }
   problem->mu_r = (double *) malloc(nc * sizeof(double));
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu_r[i])));
   }
   DEBUG_PRINT("End --  int rollingFrictionContact_newFromFile(RollingFrictionContactProblem* problem, FILE* file)\n");
 
-  return 0;
+  return problem;
 }
 
-int rollingFrictionContact_newFromFilename(RollingFrictionContactProblem* problem, char* filename)
+RollingFrictionContactProblem* rollingFrictionContact_new_from_filename(const char* filename)
 {
-  int info = 0;
+  RollingFrictionContactProblem* problem = NULL;
   FILE * file = fopen(filename, "r");
+  if(!file)
+    numerics_error("RollingFrictionContactProblem", "Can not open file ", filename);
 
-  if (!file)
-  {
-    return errno;
-  }
-
-  info = rollingFrictionContact_newFromFile(problem, file);
-
+  problem = rollingFrictionContact_newFromFile(file);
   fclose(file);
-  return info;
+  return problem;
 }
 
 void rollingFrictionContactProblem_free(RollingFrictionContactProblem* problem)
 {
   assert(problem);
-  if (problem->M)
+  if(problem->M)
   {
     NM_clear(problem->M);
     free(problem->M);
     problem->M = NULL;
   }
 
-  if (problem->mu)
+  if(problem->mu)
   {
-  free(problem->mu);
-  problem->mu = NULL;
+    free(problem->mu);
+    problem->mu = NULL;
   }
-  if (problem->mu_r)
+  if(problem->mu_r)
   {
-  free(problem->mu_r);
-  problem->mu_r = NULL;
+    free(problem->mu_r);
+    problem->mu_r = NULL;
   }
 
-  if (problem->q)
+  if(problem->q)
   {
     free(problem->q);
     problem->q = NULL;
@@ -233,11 +230,11 @@ RollingFrictionContactProblem* rollingFrictionContactProblem_new_with_data(int d
 //#define SN_SBM_TO_DENSE
 
 void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProblem* problem,
-                                               double * reaction,
-                                               double * velocity,
+    double * reaction,
+    double * velocity,
 
-                                               double tol,
-                                               int do_print)
+    double tol,
+    int do_print)
 {
   /* NumericsMatrix* M = problem->M; */
   /* double* q = problem->q; */
@@ -259,24 +256,24 @@ void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProb
   int ambiguous_take_off_count=0;
   int ambiguous_closed_count=0;
 
-  for (contact =0; contact < nc; contact ++)
+  for(contact =0; contact < nc; contact ++)
   {
     int pos=0;
     pos=contact*3;
-    if (velocity[pos] > tol)
+    if(velocity[pos] > tol)
     {
       take_off_count++;
-      if (fabs(reaction[pos]) > tol)
+      if(fabs(reaction[pos]) > tol)
         ambiguous_take_off_count++;
     }
-    else if (reaction[pos] > tol)
+    else if(reaction[pos] > tol)
     {
       closed_count++;
-      if (fabs(velocity[pos]) > tol)
+      if(fabs(velocity[pos]) > tol)
         ambiguous_closed_count++;
 
       double criteria = reaction[pos+1]*reaction[pos+1] + reaction[pos+2]*reaction[pos+2] - mu[contact]*mu[contact]*reaction[pos]*reaction[pos];
-      if (criteria < 0 )
+      if(criteria < 0)
       {
         sticking_count++;
       }
@@ -287,6 +284,6 @@ void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProb
     }
   }
 
-  numerics_printf_verbose(do_print, "---- FC3D - STAT  - Number of contact = %i\t,  take off = %i\t, closed = %i\t, sliding = %i\t,sticking = %i\t, ambiguous take off = %i\t, ambiguous closed = %i",nc ,take_off_count,closed_count,sliding_count,sticking_count, ambiguous_take_off_count,ambiguous_closed_count);
+  numerics_printf_verbose(do_print, "---- FC3D - STAT  - Number of contact = %i\t,  take off = %i\t, closed = %i\t, sliding = %i\t,sticking = %i\t, ambiguous take off = %i\t, ambiguous closed = %i",nc,take_off_count,closed_count,sliding_count,sticking_count, ambiguous_take_off_count,ambiguous_closed_count);
 
 }

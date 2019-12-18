@@ -1,19 +1,17 @@
 #undef NDEBUG
-#include <assert.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "SiconosConfig.h"
+#include "SiconosConfig.h" // for WITH_TIMERS // IWYU pragma: keep
 #ifdef WITH_TIMERS
 #define TIMER_FFTW_CYCLE
 #endif
-#include "timers_interf.h"
-#include "op3x3.h"
-#include "NonSmoothDrivers.h"
-#include "fc3d_AlartCurnier_functions.h"
-#include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-#include "AlartCurnierGenerated.h"
+#include <assert.h>                       // for assert
+#include <math.h>                         // for NAN, isnan
+#include <stdio.h>                        // for fscanf, fclose, fopen, FILE
+#include <stdlib.h>                       // for free, malloc
+#include "AlartCurnierGenerated.h"        // for fc3d_AlartCurnierFunctionGe...
+#include "fc3d_AlartCurnier_functions.h"  // for computeAlartCurnierSTD
+#include "op3x3.h"                        // for OP3X3, sub3x3, OP3, sub3
+#include "timers_interf.h"                // for DECL_TIMER, PRINT_ELAPSED
+
 
 void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9]);
 
@@ -40,32 +38,32 @@ int main()
 
   r = fscanf(file, "%d\n", &dim);
   assert(r > 0);
-  if (r <= 0) return(r);
+  if(r <= 0) return(r);
 
   reactions = (double *) malloc(3 * dim * sizeof(double));
   velocities = (double *) malloc(3 * dim * sizeof(double));
   mus = (double *) malloc(dim * sizeof(double));
   rhos = (double *) malloc(3 * dim * sizeof(double));
 
-  for (unsigned int i = 0; i < dim * 3 ; ++i)
+  for(unsigned int i = 0; i < dim * 3 ; ++i)
   {
     r = fscanf(file, "%lf\n", &reactions[i]);
     assert(r > 0);
   };
 
-  for (unsigned int i = 0; i < dim * 3 ; ++i)
+  for(unsigned int i = 0; i < dim * 3 ; ++i)
   {
     r = fscanf(file, "%lf\n", &velocities[i]);
     assert(r > 0);
   };
 
-  for (unsigned int k = 0; k < dim ; ++k)
+  for(unsigned int k = 0; k < dim ; ++k)
   {
     r = fscanf(file, "%lf\n", &mus[k]);
     assert(r > 0);
   };
 
-  for (unsigned int i = 0; i < dim * 3 ; ++i)
+  for(unsigned int i = 0; i < dim * 3 ; ++i)
   {
     r = fscanf(file, "%lf\n", &rhos[i]);
     assert(r > 0);
@@ -73,7 +71,7 @@ int main()
 
   double F1[3], A1[9], B1[9],
          F2[3], A2[9], B2[9];
-  for (unsigned int k = 0; k < dim; ++k)
+  for(unsigned int k = 0; k < dim; ++k)
   {
 
     double* p;

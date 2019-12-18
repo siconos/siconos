@@ -17,59 +17,22 @@
 */
 
 #define _XOPEN_SOURCE 700
-#include <string.h>
+#include <math.h>                           // for isfinite
+#include <stdio.h>                          // for printf, fclose, fopen, FILE
+#include <stdlib.h>                         // for calloc, free
+#include "NonSmoothDrivers.h"               // for rolling_fc3d_driver
+#include "NumericsFwd.h"                    // for RollingFrictionContactPro...
+#include "NumericsVerbose.h"                // for numerics_set_verbose
+#include "RollingFrictionContactProblem.h"  // for rollingFrictionContactPro...
+#include "frictionContact_test_utils.h"     // for rollingFrictionContact_te...
+#include "test_utils.h"                     // for TestCase
 
-#if (__linux ||  __APPLE__)
-#elif _MSC_VER
-#define strdup _strdup
-#else
-static inline char* strdup(char* src)
-{
-  size_t len = strlen(src) + 1;
-  char* dest = (char*)malloc(len * sizeof(char));
-  strcpy(dest, src, len);
-  return dest;
-}
-#endif
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include "CSparseMatrix.h"
-
-// avoid a conflict with old csparse.h in case fclib includes it
-#define _CS_H
-
-#include "NonSmoothDrivers.h"
-#include "rollingFrictionContact_test_function.h"
-#include "gfc3d_Solvers.h"
-#include "RollingFrictionContactProblem.h"
-#include "NumericsMatrix.h"
-#include "numerics_verbose.h"
-#include "NumericsVector.h"
-#include "SiconosCompat.h"
-
-#include <string.h>
-#if defined(WITH_FCLIB)
-#include <fclib.h>
-#include <fclib_interface.h>
-#endif
-
-#ifdef __cplusplus
-using namespace std;
-#endif
-
-int rollingFrictionContact_test_function(FILE * f, SolverOptions * options)
+int rollingFrictionContact_test_function(TestCase* current)
 {
 
   int k;
-  RollingFrictionContactProblem* problem = (RollingFrictionContactProblem *)malloc(sizeof(RollingFrictionContactProblem));
+  RollingFrictionContactProblem* problem = rollingFrictionContact_new_from_filename(current->filename);
   numerics_set_verbose(1);
-
-  rollingFrictionContact_newFromFile(problem, f);
-  /* rollingFrictionContact_display(problem); */
-
 
   FILE * foutput  =  fopen("checkinput.dat", "w");
   rollingFrictionContact_printInFile(problem, foutput);
@@ -78,36 +41,32 @@ int rollingFrictionContact_test_function(FILE * f, SolverOptions * options)
   int dim = problem->dimension;
 
   int info;
-  double *reaction = (double*)malloc(dim * NC * sizeof(double));
-  double *velocity = (double*)malloc(dim * NC * sizeof(double));
-  for (k = 0 ; k < dim * NC; k++)
-  {
-    velocity[k] = 0.0;
-    reaction[k] = 0.0;
-  }
-  if (dim == 2)
+  double *reaction = (double*)calloc(dim * NC, sizeof(double));
+  double *velocity = (double*)calloc(dim * NC, sizeof(double));
+
+  if(dim == 2)
   {
     info = 1;
   }
-  else if (dim == 5)
+  else if(dim == 5)
   {
     info = rolling_fc3d_driver(problem,
-                               reaction , velocity,
-                               options);
+                               reaction, velocity,
+                               current->options);
   }
   printf("\n");
-  for (k = 0 ; k < dim * NC; k++)
+  for(k = 0 ; k < dim * NC; k++)
   {
-    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k , reaction[k]);
+    printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
   }
   printf("\n");
 
-  for (k = 0; k < dim * NC; ++k)
+  for(k = 0; k < dim * NC; ++k)
   {
     info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
   }
 
-  if (!info)
+  if(!info)
   {
     printf("test succeeded\n");
   }
@@ -121,18 +80,7 @@ int rollingFrictionContact_test_function(FILE * f, SolverOptions * options)
 
   rollingFrictionContactProblem_free(problem);
 
-
   return info;
-
 }
 
-#if defined(WITH_FCLIB)
 
-int rfc3d_test_function_hdf5(const char* path, SolverOptions* options)
-{
-  int info =0;
-
-  return info;
-
-}
-#endif

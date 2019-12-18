@@ -212,7 +212,6 @@ pkgs:
       - python3-lxml
       - python3-scipy
       - python3-pytest
-      - python3-scipy
       - python3-matplotlib
       - python3-packaging
     opensuse:

@@ -1,15 +1,17 @@
-.. index:: single: Quadratic Programming problems (QP)
-.. _doxid-_q_p_solvers:
+.. index::
+   single: Quadratic Programming problems (QP)
+
+.. contents::
+
+.. _qp_problem:
 
 Quadratic Programming problems (QP)
-===================================
+***********************************
 
-.. _doxid-_q_p_solvers_1qpIntro:
-.. rubric:: The problem:
+Problem statement
+=================
 
 Minimize:
-
-
 
 .. math::
 
@@ -17,16 +19,19 @@ Minimize:
 
 subject to:
 
-
-
 .. math::
 
-    \begin{eqnarray*} A(j)*x + b(j) = 0 & , & j=1,...,me \\ A(j)*x + b(j) >= 0 & , & j=me+1,...,m \\ xl <= x <= xu \end{eqnarray*}
+    \begin{eqnarray*}
+    A(j)*x + b(j) = 0 & , & j=1,...,me \\
+    A(j)*x + b(j) >= 0 & , & j=me+1,...,m \\
+    xl <= x <= xu \end{eqnarray*}
 
-.. _doxid-_q_p_solvers_1qpSolversList:
-.. rubric:: Available solvers:
+Available solvers
+=================
 
-The qp pack is not yet implemented. The only available function is ql0001() (fortran subroutine)
+The qp pack is not yet implemented. The only available function is :func:`ql0001()` (fortran subroutine).
 
-(see the functions/solvers list in ``QP_Solvers.h`` )
 
+.. seealso::
+
+   :ref:`convexqp_problem`.

@@ -10,6 +10,7 @@
  *
  */
 
+#include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, SolverOp...
 
 void mlcp_direct_addConfig(MixedLinearComplementarityProblem* problem, int * zw);
 void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarityProblem* problem, double * wSol);

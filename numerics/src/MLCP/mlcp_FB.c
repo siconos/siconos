@@ -15,18 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "SiconosConfig.h"
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-#include "SiconosBlas.h"
-#include "NonSmoothNewtonNeighbour.h"
-#include "FischerBurmeister.h"
-#include "numerics_verbose.h"
+#include <stdio.h>                              // for printf, fprintf, stderr
+#include <stdlib.h>                             // for exit
+#include "FischerBurmeister.h"                  // for jacobianPhi_Mixed_FB
+#include "MLCP_Solvers.h"                       // for mixedLinearComplement...
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "NonSmoothNewton.h"                    // for NewtonFunctionPtr
+#include "NonSmoothNewtonNeighbour.h"           // for NSNN_reset, nonSmooth...
+#include "NumericsFwd.h"                        // for MixedLinearComplement...
+#include "NumericsMatrix.h"                     // for NM_gemv, NumericsMatrix
+#include "SolverOptions.h"                      // for SolverOptions
+#include "mlcp_FB.h"                            // for mlcp_FB_getNbDWork
+#include "numerics_verbose.h"                   // for verbose
+#include "SiconosBlas.h"                              // for cblas_dcopy
 
 static int sN = 0;
 static int sM = 0;
@@ -37,13 +38,6 @@ static double sMaxError = 0;
 static void computeFz(double* z);
 static void F_MCPFischerBurmeister(int size, double* z, double* FBz, int a);
 static void jacobianF_MCPFischerBurmeister(int size, double* z, double* jacobianFMatrix, int a);
-
-
-int mixedLinearComplementarity_fb_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-  return 0;
-}
 
 /*
 Warning: this function requires MLCP with M and q, not (A,B,C,D).
@@ -65,7 +59,7 @@ void computeFz(double* z)
   int incx = 1, incy = 1;
   int size = sN + sM;
   //F(z)=Mz+q
-  cblas_dcopy(size , sProblem->q , incx , sFz , incy);
+  cblas_dcopy(size, sProblem->q, incx, sFz, incy);
   NM_gemv(1.0, sProblem->M, z, 1.0, sFz);
 }
 
@@ -99,7 +93,7 @@ void mlcp_FB_init(MixedLinearComplementarityProblem* problem, SolverOptions* opt
   sFz = options->dWork;
   double * last = nonSmoothNewtonNeighInitMemory(sN + sM, options->dWork + sN + sM, options->iWork);
   double * tlast = options->dWork + mlcp_FB_getNbDWork(problem, options);
-  if (last > tlast)
+  if(last > tlast)
   {
     printf("internal error.");
     exit(1);
@@ -121,7 +115,7 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
   NewtonFunctionPtr F = &F_MCPFischerBurmeister;
   NewtonFunctionPtr jacobianF = &jacobianF_MCPFischerBurmeister;
   double err;
-  double tol = options->dparam[0];
+  double tol = options->dparam[SICONOS_DPARAM_TOL];
   int i;
   /*only for debug
   double * zz = (double *)malloc((sN+sM)*sizeof(double));
@@ -129,9 +123,9 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
 
 
   *info = nonSmoothNewtonNeigh(sN + sM, z, &F, &jacobianF, options->iparam, options->dparam);
-  if (*info > 0)
+  if(*info > 0)
   {
-    fprintf(stderr, "Numerics, mlcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[1]);
+    fprintf(stderr, "Numerics, mlcp_FB failed, reached max. number of iterations without convergence. Residual = %f\n", options->dparam[SICONOS_DPARAM_RESIDU]);
     /*ONLY FOR DEBUG
       mixedLinearComplementarity_display(problem);
     printf("with z init;\n");
@@ -141,15 +135,15 @@ void mlcp_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, i
   }
   /*  free(zz);*/
   mlcp_compute_error(problem, z, w, tol, &err);
-  for (i = 0; i < sM; i++)
+  for(i = 0; i < sM; i++)
   {
-    if (z[sN + i] > w[sN + i])
+    if(z[sN + i] > w[sN + i])
       w[sN + i] = 0;
   }
 
-  if (err > sMaxError)
+  if(err > sMaxError)
     sMaxError = err;
-  if (verbose || 1)
+  if(verbose)
     printf("FB : MLCP Solved, error %10.10f   and max error  %10.10f \n", err, sMaxError);
 
   return;

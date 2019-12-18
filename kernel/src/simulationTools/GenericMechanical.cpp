@@ -32,15 +32,25 @@ using namespace RELATION;
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
+#include "GenericMechanical_cst.h"          // for SICONOS_GENERIC_MECHANICA...
 #include <debug.h>
 
 
 GenericMechanical::GenericMechanical(int FC3D_Solver_Id):
-  LinearOSNS()
+  GenericMechanical(
+    SP::SolverOptions(solver_options_create(SICONOS_GENERIC_MECHANICAL_NSGS),
+                      solver_options_delete))
 {
+  solver_options_update_internal(_numerics_solver_options.get(), 1, FC3D_Solver_Id);
+}
+
+
+GenericMechanical::GenericMechanical(SP::SolverOptions options):
+  LinearOSNS(options)
+{
+  assert(options->solverId = SICONOS_GENERIC_MECHANICAL_NSGS);
   _numericsMatrixStorageType = NM_SPARSE_BLOCK;
   _pnumerics_GMP = genericMechanicalProblem_new();
-  gmp_setDefaultSolverOptions(&*_numerics_solver_options, FC3D_Solver_Id);
 }
 
 
@@ -68,37 +78,38 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
 
   DEBUG_PRINT("GenericMechanical::computeInteractionBlock: add problem of type ");
 
-  if (!_hasBeenUpdated)
+  if(!_hasBeenUpdated)
   {
     int size = inter->nonSmoothLaw()->size();
-    if (Type::value(*(inter->nonSmoothLaw()))
+    if(Type::value(*(inter->nonSmoothLaw()))
         == Type::EqualityConditionNSL)
     {
       gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_EQUALITY, size);
       DEBUG_PRINT("Type::EqualityConditionNSL\n");
       //pAux->size= inter->nonSmoothLaw()->size();
     }
-    else if (Type::value(*(inter->nonSmoothLaw()))
-             == Type::NewtonImpactNSL)
+    else if(Type::value(*(inter->nonSmoothLaw()))
+            == Type::NewtonImpactNSL)
     {
       gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_LCP, size);
       DEBUG_PRINT(" Type::NewtonImpactNSL\n");
     }
-    else if (Type::value(*(inter->nonSmoothLaw()))
-             == Type::RelayNSL)
+    else if(Type::value(*(inter->nonSmoothLaw()))
+            == Type::RelayNSL)
     {
       RelayProblem * pAux =
         (RelayProblem *)gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_RELAY, size);
       SP::RelayNSL nsLaw =
         std11::static_pointer_cast<RelayNSL> (inter->nonSmoothLaw());
-      for (int i=0; i<size; i++) {
+      for(int i=0; i<size; i++)
+      {
         pAux->lb[i] = nsLaw->lb();
         pAux->ub[i] = nsLaw->ub();
       }
       DEBUG_PRINT(" Type::RelayNSL\n");
     }
-    else if (Type::value(*(inter->nonSmoothLaw()))
-             == Type::NewtonImpactFrictionNSL)
+    else if(Type::value(*(inter->nonSmoothLaw()))
+            == Type::NewtonImpactFrictionNSL)
     {
       FrictionContactProblem * pAux =
         (FrictionContactProblem *)gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
@@ -107,7 +118,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
       pAux->dimension = 3;
       pAux->numberOfContacts = 1;
       *(pAux->mu) = nsLaw->mu();
-      
+
       DEBUG_PRINT(" Type::NewtonImpactFrictionNSL\n");
     }
     else
@@ -128,7 +139,7 @@ int GenericMechanical::compute(double time)
   int info = 0;
   // --- Prepare data for GenericMechanical computing ---
   bool cont = preCompute(time);
-  if (!cont)
+  if(!cont)
     return info;
   // MB: if _hasBeenUpdated is set true then :
   // LinearOSNS.cpp:602
@@ -155,7 +166,7 @@ int GenericMechanical::compute(double time)
   // - the unknowns (z,w)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
-  if (_sizeOutput != 0)
+  if(_sizeOutput != 0)
   {
     // The GenericMechanical Problem in Numerics format
 
@@ -165,9 +176,9 @@ int GenericMechanical::compute(double time)
     // Call Numerics Driver for GenericMechanical
     //    display();
     info = gmp_driver(_pnumerics_GMP,
-                                    &*_z->getArray() ,
-                                    &*_w->getArray() ,
-                                    &*_numerics_solver_options);
+                      &*_z->getArray(),
+                      &*_w->getArray(),
+                      &*_numerics_solver_options);
     //printf("GenericMechanical::compute : R:\n");
     //_z->display();
     postCompute();
@@ -192,7 +203,7 @@ void GenericMechanical::display() const
 
 void  GenericMechanical::updateInteractionBlocks()
 {
-  if (!_hasBeenUpdated)
+  if(!_hasBeenUpdated)
   {
     //    printf("GenericMechanical::updateInteractionBlocks : must be updated\n");
     genericMechanicalProblem_free(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
@@ -205,7 +216,6 @@ GenericMechanical::~GenericMechanical()
 {
   genericMechanicalProblem_free(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
   _pnumerics_GMP = 0;
-  solver_options_delete(&*_numerics_solver_options);
 }
 
 

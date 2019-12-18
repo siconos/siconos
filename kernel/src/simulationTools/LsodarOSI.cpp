@@ -18,6 +18,7 @@
  */
 
 #include "LsodarOSI.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "EventDriven.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "BlockVector.hpp"
@@ -86,7 +87,7 @@ LsodarOSI::LsodarOSI():
   _levelMaxForOutput=2;
   _levelMinForInput=1;
   _levelMaxForInput=2;
-  
+
   rtol.reset(new doublereal[_sizeTol]) ;  // rtol, relative tolerance
   atol.reset(new doublereal[_sizeTol]) ;  // atol, absolute tolerance
   // Set atol and rtol values ...
@@ -148,7 +149,7 @@ void LsodarOSI::updateData()
 {
   // Used to update some data (iwork ...) when _intData is modified.
   // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
-  
+
   iwork.reset(new integer[_intData[7]]);
   for(int i = 0; i < _intData[7]; i++) iwork[i] = 0;
 
@@ -246,7 +247,7 @@ void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, in
 }
 
 
-void LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
+void LsodarOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
@@ -255,12 +256,12 @@ void LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
   Type::Siconos dsType = Type::value(*ds);
 
   ds->initRhs(t); // This will create p[2] and other required vectors/buffers
-  
+
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
     // TODO FP: use buffer in graph for xWork?
-    if (!_xWork)
+    if(!_xWork)
       _xWork.reset(new BlockVector());
     _xWork->insertPtr(lds.q());
     _xWork->insertPtr(lds.velocity());
@@ -269,7 +270,7 @@ void LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
   }
   else
   {
-    if (!_xWork)
+    if(!_xWork)
       _xWork.reset(new BlockVector());
     _xWork->insertPtr(ds->x());
   }
@@ -295,8 +296,8 @@ void LsodarOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
 }
 
 void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
-                              InteractionProperties& interProp,
-                              DynamicalSystemsGraph & DSG)
+    InteractionProperties& interProp,
+    DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
@@ -305,13 +306,13 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
 
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  if (!interProp.workVectors)
+  if(!interProp.workVectors)
   {
     interProp.workVectors.reset(new VectorOfVectors);
     interProp.workVectors->resize(LsodarOSI::WORK_INTERACTION_LENGTH);
   }
 
-  if (!interProp.workBlockVectors)
+  if(!interProp.workBlockVectors)
   {
     interProp.workBlockVectors.reset(new VectorOfBlockVectors);
     interProp.workBlockVectors->resize(LsodarOSI::BLOCK_WORK_LENGTH);
@@ -329,14 +330,14 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   Type::Siconos nslType = Type::value(nslaw);
 
-  if (nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
+  if(nslType == Type::NewtonImpactNSL || nslType == Type::MultipleImpactNSL)
   {
     _levelMinForOutput = 0;
     _levelMaxForOutput = 2 ;
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
   }
-  else if (nslType ==  Type::NewtonImpactFrictionNSL)
+  else if(nslType ==  Type::NewtonImpactFrictionNSL)
   {
     _levelMinForOutput = 0;
     _levelMaxForOutput = 4;
@@ -354,7 +355,7 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   /* allocate and set work vectors for the osi */
 
-  if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
+  if(!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
     RuntimeException::selfThrow("LsodarOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
@@ -362,7 +363,7 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
 
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-  if (relationType == Lagrangian)
+  if(relationType == Lagrangian)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
     inter_work_block[LsodarOSI::xfree].reset(new BlockVector());
@@ -380,10 +381,10 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
 
 
-  if (ds1 != ds2)
+  if(ds1 != ds2)
   {
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-    if (relationType == Lagrangian)
+    if(relationType == Lagrangian)
     {
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
       inter_work_block[LsodarOSI::xfree]->insertPtr(workVds2[LsodarOSI::FREE]);
@@ -552,7 +553,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
     std::cout << " -7 means work space insufficient to finish (see messages)." <<std::endl;
     RuntimeException::selfThrow("LsodarOSI, integration failed");
   }
- 
+
   *_xWork = *_xtmp;
   istate = _intData[4];
   tout  = tinit_DR; // real ouput time
@@ -726,18 +727,19 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
     if(relationSubType == RheonomousR)
     {
       if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
-	    {
-	      RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
-	    }
+      {
+        RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for LCP at acceleration level with LagrangianRheonomousR");
+      }
       else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
-	    {
-	      SiconosVector q = *DSlink[LagrangianR::q0];
-	      SiconosVector z = *DSlink[LagrangianR::z];
+      {
+        SiconosVector q,z;
+        q.initFromBlock(*DSlink[LagrangianR::q0]);
+        z.initFromBlock(*DSlink[LagrangianR::z]);
 
-	      std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
-	      *DSlink[LagrangianR::z] = z;
-	      subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
-	    }
+        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
+        *DSlink[LagrangianR::z] = z;
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
+      }
       else
         RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
     }
@@ -745,10 +747,10 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
     if(relationSubType == ScleronomousR)
     {
       if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
-	    {
-	      std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
-	      subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), osnsp_rhs, xcoord, false); // y += NonLinearPart
-	    }
+      {
+        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
+        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), osnsp_rhs, xcoord, false); // y += NonLinearPart
+      }
     }
   }
   else

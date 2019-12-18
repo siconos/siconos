@@ -25,6 +25,7 @@
  */
 
 #include "Newton_methods.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct search_data line_search.h
  * Struct to hold together the data needed by the search

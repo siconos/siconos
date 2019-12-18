@@ -24,18 +24,11 @@
 #define SimulationTypedef_H
 
 #include <vector>
-#include <map>
 #include <set>
-#include "SiconosVector.hpp"
-#include "SiconosPointers.hpp"
-
-/** double precision machine */
-#define MACHINE_PREC std::numeric_limits<double>::epsilon()
+#include "SiconosPointers.hpp" // for TYPEDEF_SPTR
+#include "SiconosFwd.hpp" // for SP::OneStepIntegrator, ...
 
 // ================== Objects to handle DS ==================
-
-/** Map of SP::SimpleMatrix; used only in MoreauJeanGOSI. key = the number(id) of the related DS*/
-typedef std::map<unsigned int, SP::SimpleMatrix> MapOfDSMatrices;
 
 /** list of indices */
 typedef std::vector<unsigned int> IndexInt;

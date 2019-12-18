@@ -128,19 +128,19 @@ int (*matvec)();
 
   /*     Test the input parameters. */
 
-  if (*n < 0)
+  if(*n < 0)
   {
     *info = -1;
   }
-  else if (*ldw < max(1, *n))
+  else if(*ldw < max(1, *n))
   {
     *info = -2;
   }
-  else if (*iter <= 0)
+  else if(*iter <= 0)
   {
     *info = -3;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     return 0;
   }
@@ -176,7 +176,7 @@ L10:
   dcopy_(n, &b[1], &c__1, &work[temp * work_dim1 + 1], &c__1);
   (*matvec)(&c_b2, &x[1], &c_b2, &work[temp * work_dim1 + 1]);
   i__1 = *n;
-  for (i = 1; i <= i__1; ++i)
+  for(i = 1; i <= i__1; ++i)
   {
     x[i] = work[i + mm * work_dim1] * work[i + temp * work_dim1];
     /* L15: */
@@ -188,11 +188,11 @@ L10:
   *resid = dnrm2_(n, &work[x1 * work_dim1 + 1], &c__1) / dnrm2_(n, &x[1], &
            c__1);
 
-  if (*resid <= tol)
+  if(*resid <= tol)
   {
     goto L30;
   }
-  if (*iter == maxit)
+  if(*iter == maxit)
   {
     goto L20;
   }

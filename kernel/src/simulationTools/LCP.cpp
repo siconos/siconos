@@ -17,6 +17,7 @@
  */
 #include "LCP.hpp"
 #include "OSNSMatrix.hpp"
+#include "SolverOptions.h"
 
 // --- numerics headers ---
 #include "NonSmoothDrivers.h"
@@ -29,13 +30,15 @@
 #include "debug.h"
 
 
-
 LCP::LCP(int numericsSolverId):
-  LinearOSNS(numericsSolverId)
-{
-  _numerics_problem.reset(new LinearComplementarityProblem);
-  linearComplementarity_setDefaultSolverOptions(NULL, &*_numerics_solver_options, _numerics_solver_id);
-}
+  LCP(SP::SolverOptions(solver_options_create(numericsSolverId),
+                        solver_options_delete))
+{}
+
+LCP::LCP(SP::SolverOptions options):
+  LinearOSNS(options), _numerics_problem(new LinearComplementarityProblem)
+{}
+
 
 int LCP::numericsCompute()
 {
@@ -48,16 +51,16 @@ int LCP::numericsCompute()
   _numerics_problem->size = _sizeOutput;
   int info  = 0;
   //const char * name = &*_numerics_solver_options->solverName;
-  if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
+  if(_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
   {
     lcp_enum_init(&*_numerics_problem, &*_numerics_solver_options, 1);
 
 
   }
-  info = linearComplementarity_driver(&*_numerics_problem, _z->getArray() , _w->getArray() ,
+  info = linearComplementarity_driver(&*_numerics_problem, _z->getArray(), _w->getArray(),
                                       &*_numerics_solver_options);
 
-  if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
+  if(_numerics_solver_options->solverId == SICONOS_LCP_ENUM)
   {
     lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);
   }
@@ -73,7 +76,7 @@ int LCP::compute(double time)
   // --- Prepare data for LCP computing ---
   // And check if there is something to be done
   bool cont = preCompute(time);
-  if (!cont)
+  if(!cont)
   {
     DEBUG_PRINT("Nothing to compute\n");
     DEBUG_END("LCP::compute(double time)\n");
@@ -89,7 +92,7 @@ int LCP::compute(double time)
   DEBUG_PRINTF("_indexSetLevel = %i\n", _indexSetLevel);
   DEBUG_EXPR(display(););
 
-  if (_sizeOutput != 0)
+  if(_sizeOutput != 0)
   {
 
     info = numericsCompute();
@@ -101,9 +104,4 @@ int LCP::compute(double time)
   }
   DEBUG_END("LCP::compute(double time)\n");
   return info;
-}
-
-LCP::~LCP()
-{
-  solver_options_delete(&*_numerics_solver_options);
 }

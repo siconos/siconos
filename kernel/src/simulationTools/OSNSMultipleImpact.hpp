@@ -23,6 +23,7 @@
 #define _OSNSMULTIPLEIMPACT_
 
 #include "LinearOSNS.hpp"
+#include "SiconosConst.hpp" // for MACHINE_PREC
 #include <string>
 
 #define DEFAULT__tolImpact MACHINE_PREC
@@ -41,17 +42,17 @@ private:
   ACCEPT_SERIALIZATION(OSNSMultipleImpact);
 
   //! Time-like variable (Impulse)
-  double _impulseVariable;
+  double _impulseVariable = 0.;
   //! Time variable
-  double _timeVariable;
+  double _timeVariable = 0.;
   //! Number of contacts (only the active contacts)
-  unsigned int _nContact;
+  unsigned int _nContact = 0;
   //! Maximal number of steps for each computation
-  unsigned int _nStepMax;
+  unsigned int _nStepMax = 100000;
   //! Tolerance to define zero
-  double _tolImpact;
+  double _tolImpact = DEFAULT__tolImpact;
   //! Type of the compliance model
-  std::string _typeCompLaw;
+  std::string _typeCompLaw = "BiStiffness";
   //Velocity of bodies during impact
   //SP::SiconosVector VelAllBody;
   // Relative velocity at all Interactions (with or without contact)
@@ -85,63 +86,60 @@ private:
   SP::SiconosVector _impulseContactUpdate;
   //! Force at contacts
   SP::SiconosVector _forceContact;
-  /** Flag to select the primary contact based on the relative velocity or on the potential energy
-   at contacts
-   if _selectPrimaConInVel = true => select the primary contact according to the relative velocity
-   at contact
-   if _selectPrimaConInVel = false => select the primary contact according to the potential energy
-   at contact */
-  bool _selectPrimaConInVel;
   //! ID of the primary contact
-  unsigned int _primaryContactId;
+  unsigned int _primaryContactId = 0;
   /** Indicator about the selection of the primary contact
       true if primary contact is selected according to the potential energy
       false if primary contact is selected according to the relative velocity */
-  bool _isPrimaryContactEnergy;
+  bool _isPrimaryContactEnergy = false;
   //! Relative velocity at primary contact
-  double _relativeVelocityPrimaryContact;
+  double _relativeVelocityPrimaryContact = 0.;
   //! Potential energy at primary contact
-  double _energyPrimaryContact;
+  double _energyPrimaryContact = 0.;
   //! Step size for the iterative calculation
-  double _deltaP;
+  double _deltaP = 0.;
   //! Name of file into which the datat is writen
-  std::string  _namefile;
+  std::string  _namefile = "DataMultipleImpact.dat";
   /** YesWriteData = true ==>save the data during impact
       YesWriteData = false ==> not save the data during impact */
-  bool _saveData;
+  bool _saveData = false;
   /** bool variable to set the step size for multiple impact computation
       If IsNumberOfStepsEst = true ==> estimate the step size from the state of the dynamic system before impact and the number of step needed
       Number of steps after which the data is saved */
-  unsigned int _nStepSave; //! If IsNumberOfStepsEst = false ==> user choose the step size
+  unsigned int _nStepSave = 100; //! If IsNumberOfStepsEst = false ==> user choose the step size
   //! Matrix on which the data during impact is saved
   SP::SiconosMatrix _DataMatrix;
   //! Number of points to be save during impacts
-  unsigned int _sizeDataSave;
+  unsigned int _sizeDataSave = 1000;
   /** indicator on the termination of the multiple impact process
       _IsImpactEnd = true: impact is terminated
       _IsImpactEnd = false: otherwise */
-  bool _IsImpactEnd;
+  bool _IsImpactEnd = true;
   //! Tolerance to define a negligeble value for a velocity grandeur
-  double _Tol_Vel;
+  double _Tol_Vel = DEFAULT_TOL_VEL;
   //! Tolerance to define a negligeable value for a potential energy grandeur
-  double _Tol_Ener;
+  double _Tol_Ener = DEFAULT_TOL_ENER;
   //! Epsilon to define a zero value for relative velocity in termination condition
-  double _ZeroVel_EndIm;
+  double _ZeroVel_EndIm = DEFAULT_TOL_VEL;;
   //! Epsilon to define a zero value for potential energy in termination condition
-  double _ZeroEner_EndIm;
+  double _ZeroEner_EndIm = DEFAULT_TOL_ENER;;
   //! we start to save data from _stepMinSave to _stepMaxSave
-  unsigned int _stepMinSave, _stepMaxSave;
+  unsigned int _stepMinSave = 1, _stepMaxSave = _nStepMax;
 public:
-  //!Default constructor
-  OSNSMultipleImpact();
+
+  /** default constructor
+   */
+  OSNSMultipleImpact():LinearOSNS(){};
+
   /** Constructor from data (step size is required here)
    *  \param type  the type of the compliance law
    *  \param step step size estimated
    */
-  OSNSMultipleImpact(std::string type, double step);
+  OSNSMultipleImpact(std::string type, double step = 1.0e-5);
 
   //!Destructor
-  ~OSNSMultipleImpact();
+  ~OSNSMultipleImpact(){};
+  
   /* To get the type of the compliance law at contact
    * \return std::string
    */

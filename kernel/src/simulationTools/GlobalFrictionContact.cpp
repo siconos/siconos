@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "SiconosPointers.hpp"
+#include "NumericsMatrix.h"
 #include "GlobalFrictionContact.hpp"
 #include "Simulation.hpp"
 //#include "Interaction.hpp"
@@ -39,54 +40,43 @@
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
-// Constructor from a set of data
-// Required input: simulation
-// Optional: newNumericsSolverName
+// Constructor from solver id - Uses delegated constructor
 GlobalFrictionContact::GlobalFrictionContact(int dimPb, const int numericsSolverId):
-  LinearOSNS(numericsSolverId), _contactProblemDim(dimPb)
+  GlobalFrictionContact(dimPb, SP::SolverOptions(solver_options_create(numericsSolverId),
+                        solver_options_delete))
+{}
+
+// Constructor based on a pre-defined solver options set.
+GlobalFrictionContact::GlobalFrictionContact(int dimPb, SP::SolverOptions options):
+  LinearOSNS(options), _contactProblemDim(dimPb), _gfc_driver(&gfc3d_driver)
 {
-  // Connect to the right function according to dim. of the problem
-  if (_contactProblemDim == 2)
-  {
+  // Only fc3d for the moment.
+  if(_contactProblemDim != 3)
     RuntimeException::selfThrow("GlobalFrictionContact No solver for 2 dimensional problems");
-  }
-  else if(_contactProblemDim == 3)
-  {
-    gfc3d_setDefaultSolverOptions(&*_numerics_solver_options, _numerics_solver_id);
-    _gfc_driver = &gfc3d_driver;
-  }
-  else
-  {
-     RuntimeException::selfThrow("GlobalFrictionContact size not supported");
-  }
-  //default storage
+
+  //Reset default storage type for numerics matrices.
   _numericsMatrixStorageType = NM_SPARSE;
-
-
 }
-GlobalFrictionContact::~GlobalFrictionContact()
-{
-  solver_options_delete(&*_numerics_solver_options);
-}
+
 
 void GlobalFrictionContact::initVectorsMemory()
 {
   // Memory allocation for reaction, and velocity
   LinearOSNS::initVectorsMemory();
 
-  if (!_globalVelocities)
+  if(!_globalVelocities)
     _globalVelocities.reset(new SiconosVector(_maxSize));
   else
   {
-    if (_globalVelocities->size() != _maxSize)
+    if(_globalVelocities->size() != _maxSize)
       _globalVelocities->resize(_maxSize);
   }
 
-  if (!_b)
+  if(!_b)
     _b.reset(new SiconosVector(_maxSize));
   else
   {
-    if (_b->size() != _maxSize)
+    if(_b->size() != _maxSize)
       _b->resize(_maxSize);
   }
 }
@@ -95,14 +85,14 @@ void GlobalFrictionContact::initVectorsMemory()
 void GlobalFrictionContact::initOSNSMatrix()
 {
   // Default size for M = _maxSize
-  if (!_M)
+  if(!_M)
   {
     // if (_numericsMatrixStorageType == NM_DENSE)
     //   _M.reset(new OSNSMatrix(_maxSize, NM_DENSE));
     // else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest considered graph of ds
     //   _M.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), 1));
 
-    switch (_numericsMatrixStorageType)
+    switch(_numericsMatrixStorageType)
     {
     case NM_DENSE:
     {
@@ -120,17 +110,17 @@ void GlobalFrictionContact::initOSNSMatrix()
       break;
     }
     {
-    default:
-      RuntimeException::selfThrow("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
-    }
+      default:
+        RuntimeException::selfThrow("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
+      }
     }
   }
 
 
-  if (!_H)
+  if(!_H)
   {
 
-    switch (_numericsMatrixStorageType)
+    switch(_numericsMatrixStorageType)
     {
     case NM_DENSE:
     {
@@ -139,18 +129,18 @@ void GlobalFrictionContact::initOSNSMatrix()
     }
     case NM_SPARSE:
     {
-      _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size()   , NM_SPARSE));
+      _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE));
       break;
     }
     case NM_SPARSE_BLOCK:
     {
-      _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size()   , NM_SPARSE_BLOCK));
+      _H.reset(new OSNSMatrix(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(), simulation()->indexSet(_indexSetLevel)->size(), NM_SPARSE_BLOCK));
       break;
     }
     {
-    default:
-      RuntimeException::selfThrow("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
-    }
+      default:
+        RuntimeException::selfThrow("GlobalFrictionContact::initOSNSMatrix unknown _storageType");
+      }
     }
   }
 
@@ -186,8 +176,7 @@ void GlobalFrictionContact::initialize(SP::Simulation sim)
 
 SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactProblem()
 {
-  SP::GlobalFrictionContactProblem numerics_problem(new GlobalFrictionContactProblem());
-  globalFrictionContact_null(numerics_problem.get());
+  SP::GlobalFrictionContactProblem numerics_problem(globalFrictionContactProblem_new());
   numerics_problem->M = &*_M->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
@@ -201,14 +190,13 @@ SP::GlobalFrictionContactProblem GlobalFrictionContact::globalFrictionContactPro
 GlobalFrictionContactProblem *GlobalFrictionContact::globalFrictionContactProblemPtr()
 {
   GlobalFrictionContactProblem *numerics_problem = &_numerics_problem;
-  globalFrictionContact_null(numerics_problem);
   numerics_problem->M = &*_M->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
   numerics_problem->q = _q->getArray();
   numerics_problem->b = _b->getArray();
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
   numerics_problem->mu = _mu->data();
-  numerics_problem->dimension = 3; 
+  numerics_problem->dimension = 3;
   return numerics_problem;
 }
 
@@ -226,13 +214,13 @@ bool GlobalFrictionContact::preCompute(double time)
 
   // Get topology
   SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
-  DEBUG_PRINTF( "indexSetLevel = %i\n", indexSetLevel() );
-  if (indexSetLevel() == LEVELMAX)
+  DEBUG_PRINTF("indexSetLevel = %i\n", indexSetLevel());
+  if(indexSetLevel() == LEVELMAX)
   {
     DEBUG_END("GlobalFrictionContact::preCompute(double time)\n");
     return false;
   }
-  if (!_hasBeenUpdated)
+  if(!_hasBeenUpdated)
   {
     InteractionsGraph& indexSet = *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel);
     DynamicalSystemsGraph& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -272,7 +260,7 @@ bool GlobalFrictionContact::preCompute(double time)
 
 
     // fill _q
-    if (_q->size() != _sizeGlobalOutput)
+    if(_q->size() != _sizeGlobalOutput)
       _q->resize(_sizeGlobalOutput);
 
     size_t offset = 0;
@@ -286,16 +274,16 @@ bool GlobalFrictionContact::preCompute(double time)
 
       OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
       OSI::TYPES osiType = Osi.getType();
-      if (osiType == OSI::MOREAUJEANGOSI)
+      if(osiType == OSI::MOREAUJEANGOSI)
       {
         VectorOfVectors& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
 
-        if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+        if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
         {
           SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
           setBlock(vfree, _q, dss, 0, offset);
         }
-        else  if (dsType == Type::NewtonEulerDS)
+        else  if(dsType == Type::NewtonEulerDS)
         {
           SiconosVector& vfree = *ds_work_vectors[MoreauJeanGOSI::FREE];
           setBlock(vfree, _q, dss, 0, offset);
@@ -312,21 +300,21 @@ bool GlobalFrictionContact::preCompute(double time)
     /************************************/
 
 
-     // fill H
+    // fill H
     _H->fillH(DSG0, indexSet);
-    DEBUG_EXPR(NM_display(_H->numericsMatrix().get() ););
+    DEBUG_EXPR(NM_display(_H->numericsMatrix().get()););
 
     _sizeOutput =_H->sizeColumn();
-    DEBUG_PRINTF( "_sizeOutput = %i\n ", _sizeOutput );
+    DEBUG_PRINTF("_sizeOutput = %i\n ", _sizeOutput);
 
 
     //fill _b
-    if (_b->size() != _sizeOutput)
+    if(_b->size() != _sizeOutput)
       _b->resize(_sizeOutput);
 
     size_t pos = 0;
     InteractionsGraph::VIterator ui, uiend;
-    for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+    for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet.bundle(*ui);
 
@@ -340,7 +328,7 @@ bool GlobalFrictionContact::preCompute(double time)
 
       OSI::TYPES osi1Type = Osi1.getType();
       OSI::TYPES osi2Type = Osi2.getType();
-      if (osi1Type == OSI::MOREAUJEANGOSI  && osi2Type == OSI::MOREAUJEANGOSI)
+      if(osi1Type == OSI::MOREAUJEANGOSI  && osi2Type == OSI::MOREAUJEANGOSI)
       {
         static_cast<MoreauJeanGOSI&>(Osi1).NSLcontrib(inter, *this);
       }
@@ -354,19 +342,19 @@ bool GlobalFrictionContact::preCompute(double time)
     }
     DEBUG_EXPR(_b->display(););
     // Checks z and w sizes and reset if necessary
-    if (_z->size() != _sizeOutput)
+    if(_z->size() != _sizeOutput)
     {
       _z->resize(_sizeOutput, false);
       _z->zero();
     }
 
-    if (_w->size() != _sizeOutput)
+    if(_w->size() != _sizeOutput)
     {
       _w->resize(_sizeOutput);
       _w->zero();
     }
 
-    if (_globalVelocities->size() != _sizeGlobalOutput)
+    if(_globalVelocities->size() != _sizeGlobalOutput)
     {
       _globalVelocities->resize(_sizeGlobalOutput);
       _globalVelocities->zero();
@@ -382,7 +370,7 @@ int GlobalFrictionContact::compute(double time)
   int info = 0;
   // --- Prepare data for GlobalFrictionContact computing ---
   bool cont = preCompute(time);
-  if (!cont)
+  if(!cont)
     return info;
   updateMu();
   // --- Call Numerics solver ---
@@ -396,7 +384,7 @@ int GlobalFrictionContact::compute(double time)
 
 int GlobalFrictionContact::solve(SP::GlobalFrictionContactProblem problem)
 {
-  if (!problem)
+  if(!problem)
   {
     problem = globalFrictionContactProblem();
   }
@@ -426,7 +414,7 @@ void GlobalFrictionContact::postCompute()
   size_t pos = 0;
 
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui, pos += 3)
+  for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui, pos += 3)
   {
     Interaction& inter = *indexSet.bundle(*ui);
     // Get Y and Lambda for the current Interaction
@@ -452,26 +440,26 @@ void GlobalFrictionContact::postCompute()
 
     if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianLinearDiagonalDS)
     {
-      LagrangianDS& d = static_cast<LagrangianDS&> (ds);
+      LagrangianDS& d = static_cast<LagrangianDS&>(ds);
       sizeDS = d.dimension();
       SP::SiconosVector velocity = d.velocity();
       DEBUG_PRINTF("ds.number() : %i \n",ds.number());
       DEBUG_EXPR(velocity->display(););
       DEBUG_EXPR(_globalVelocities->display(););
       pos = DSG0.properties(*dsi).absolute_position;
-      setBlock(*_globalVelocities, velocity, sizeDS, pos, 0 );
+      setBlock(*_globalVelocities, velocity, sizeDS, pos, 0);
       DEBUG_EXPR(velocity->display(););
     }
     else if(dsType == Type::NewtonEulerDS)
     {
-      NewtonEulerDS& neds = static_cast<NewtonEulerDS&> (ds);;
+      NewtonEulerDS& neds = static_cast<NewtonEulerDS&>(ds);;
       sizeDS = neds.dimension();
       SP::SiconosVector twist = neds.twist();
       DEBUG_PRINTF("ds.number() : %i \n",ds.number());
       DEBUG_EXPR(twist->display(););
       DEBUG_EXPR(_globalVelocities->display(););
       pos = DSG0.properties(*dsi).absolute_position;
-      setBlock(*_globalVelocities, twist, sizeDS, pos, 0 );
+      setBlock(*_globalVelocities, twist, sizeDS, pos, 0);
       DEBUG_EXPR(twist->display(););
     }
     else RuntimeException::selfThrow("GlobalFrictionContact::postCompute() - not yet implemented for Dynamical system of type: " +  Type::name(ds));
@@ -493,7 +481,7 @@ void GlobalFrictionContact::display() const
   // if (_M) _M->display();
   // else std::cout << "-> NULL" <<std::endl;
   NumericsMatrix* M_NM = _M->numericsMatrix().get();
-  if (M_NM)
+  if(M_NM)
   {
     NM_display(M_NM);
   }
@@ -501,28 +489,28 @@ void GlobalFrictionContact::display() const
   // if (_H) _H->display();
   // else std::cout << "-> NULL" <<std::endl;
   NumericsMatrix* H_NM = _H->numericsMatrix().get();
-  if (H_NM)
+  if(H_NM)
   {
     NM_display(H_NM);
   }
 
   std::cout << " - Vector q : " <<std::endl;
-  if (_q) _q->display();
+  if(_q) _q->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << " - Vector b : " <<std::endl;
-  if (_b) _b->display();
+  if(_b) _b->display();
   else std::cout << "-> NULL" <<std::endl;
 
   std::cout << " - Vector z (reaction) : " <<std::endl;
-  if (_z) _z->display();
+  if(_z) _z->display();
   else std::cout << "-> NULL" <<std::endl;
 
   std::cout << " - Vector w (local velocities): " <<std::endl;
-  if (_w) _w->display();
+  if(_w) _w->display();
   else std::cout << "-> NULL" <<std::endl;
 
   std::cout << " - Vector globalVelocities : " <<std::endl;
-  if (_globalVelocities) _globalVelocities->display();
+  if(_globalVelocities) _globalVelocities->display();
   else std::cout << "-> NULL" <<std::endl;
 
   std::cout << "============================================================" <<std::endl;
@@ -533,7 +521,7 @@ void GlobalFrictionContact::updateMu()
   _mu->clear();
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
                    (indexSet->bundle(*ui)->nonSmoothLaw())->mu());

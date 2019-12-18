@@ -23,8 +23,9 @@
 #ifndef vertex_extraction_h
 #define vertex_extraction_h
 
-#include "SiconosSets.h"
-#include "SiconosLapack.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosLapack.h"  // for lapack_int
+#include "SiconosSets.h"    // for polyhedron
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

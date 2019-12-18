@@ -1,6 +1,8 @@
 #ifndef MLCP_FB_H
 #define MLCP_FB_H
 
+#include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, SolverOp...
+
 void mlcp_FB_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 void mlcp_FB_reset(void);
 

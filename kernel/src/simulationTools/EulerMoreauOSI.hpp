@@ -23,9 +23,6 @@
 
 #include "OneStepIntegrator.hpp"
 
-
-const unsigned int EULERMOREAUSTEPSINMEMORY = 1;
-
 /** One Step time Integrator for First Order Dynamical Systems.
  *
  * This integrator is the work horse of the event--capturing time stepping schemes

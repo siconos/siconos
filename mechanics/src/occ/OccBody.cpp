@@ -6,7 +6,7 @@
 
 OccBody::OccBody(SP::SiconosVector position,
                  SP::SiconosVector velocity,
-                 double mass ,
+                 double mass,
                  SP::SiconosMatrix inertia) :
   NewtonEulerDS(position, velocity, mass, inertia),
   _contactShapes(new ContactShapes()),
@@ -19,13 +19,15 @@ void OccBody::addContactShape(SP::OccContactShape shape,
                               SP::SiconosVector ori,
                               unsigned int group)
 {
-  OffSet offset = {0, 0, 0, 1, 0, 0 ,0};
-  if (pos) {
+  OffSet offset = {0, 0, 0, 1, 0, 0,0};
+  if(pos)
+  {
     offset[0] = (*pos)(0);
     offset[1] = (*pos)(1);
     offset[2] = (*pos)(2);
   }
-  if (ori) {
+  if(ori)
+  {
     offset[3] = (*ori)(0);
     offset[4] = (*ori)(1);
     offset[5] = (*ori)(2);
@@ -43,13 +45,15 @@ void OccBody::addShape(SP::TopoDS_Shape shape,
                        SP::SiconosVector pos,
                        SP::SiconosVector ori)
 {
-  OffSet offset = {0, 0, 0, 1, 0, 0 ,0};
-  if (pos) {
+  OffSet offset = {0, 0, 0, 1, 0, 0,0};
+  if(pos)
+  {
     offset[0] = (*pos)(0);
     offset[1] = (*pos)(1);
     offset[2] = (*pos)(2);
   }
-  if (ori) {
+  if(ori)
+  {
     offset[3] = (*ori)(0);
     offset[4] = (*ori)(1);
     offset[5] = (*ori)(2);
@@ -66,8 +70,8 @@ void OccBody::updateContactShapes()
 {
   boost::math::quaternion<double> q((*_q)(3), (*_q)(4), (*_q)(5), (*_q)(6));
 
-  for (ContactShapes::iterator csi = _contactShapes->begin();
-       csi != _contactShapes->end(); ++ csi)
+  for(ContactShapes::iterator csi = _contactShapes->begin();
+      csi != _contactShapes->end(); ++ csi)
   {
     OffSet offset = boost::get<1>(*csi);
 
@@ -93,10 +97,10 @@ void OccBody::updateContactShapes()
 void OccBody::updateShapes()
 {
 
-   boost::math::quaternion<double> q((*_q)(3), (*_q)(4), (*_q)(5), (*_q)(6));
+  boost::math::quaternion<double> q((*_q)(3), (*_q)(4), (*_q)(5), (*_q)(6));
 
-  for (TopoDS_Shapes::iterator csi = _shapes->begin();
-       csi != _shapes->end(); ++ csi)
+  for(TopoDS_Shapes::iterator csi = _shapes->begin();
+      csi != _shapes->end(); ++ csi)
   {
 
     OffSet offset = boost::get<1>(*csi);

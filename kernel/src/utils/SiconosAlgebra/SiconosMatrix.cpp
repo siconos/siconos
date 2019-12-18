@@ -16,13 +16,26 @@
  * limitations under the License.
 */
 
-#include "CSparseMatrix.h"
 #include "SiconosMatrix.hpp"
+#include <assert.h>                                   // for assert
+#include <math.h>                                     // for fabs
+#include <algorithm>                                  // for max, min, lower...
+#include <boost/numeric/ublas/detail/config.hpp>      // for noalias, noalia...
+#include <boost/numeric/ublas/detail/iterator.hpp>    // for bidirectional_i...
+#include <boost/numeric/ublas/matrix_expression.hpp>  // for matrix_vector_b...
+#include <boost/numeric/ublas/matrix_proxy.hpp>       // for matrix_range
+#include <boost/numeric/ublas/matrix_sparse.hpp>      // for compressed_matr...
+#include <boost/numeric/ublas/storage.hpp>            // for unbounded_array
+#include <boost/numeric/ublas/vector.hpp>             // for vector
+#include <memory>                                     // for __shared_ptr_ac...
+#include <utility>                                    // for swap
+#include <vector>                                     // for vector, operator==
 #include "SiconosAlgebra.hpp"
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include "BlockMatrix.hpp"
+#include "BlockMatrix.hpp"                            // for BlockMatrix
+#include "CSparseMatrix.h"                            // for CSparseMatrix
+#include "SiconosVector.hpp"                          // for SiconosVector
 
-using namespace Siconos;
+
 // Constructor with the type-number
 SiconosMatrix::SiconosMatrix(unsigned int type): _num(type)
 {}
@@ -77,19 +90,19 @@ SiconosMatrix& operator *=(SiconosMatrix& m, const double& s)
         (**it2) *= s;
     }
   }
-  else if(m._num == DENSE)
+  else if(m._num == Siconos::DENSE)
     *m.dense() *= s;
-  else if(m._num == TRIANGULAR)
+  else if(m._num == Siconos::TRIANGULAR)
     *m.triang() *= s;
-  else if(m._num == SYMMETRIC)
+  else if(m._num == Siconos::SYMMETRIC)
     *m.sym() *= s;
-  else if(m._num == SPARSE)
+  else if(m._num == Siconos::SPARSE)
     *m.sparse() *= s;
-  else if(m._num == SPARSE_COORDINATE)
+  else if(m._num == Siconos::SPARSE_COORDINATE)
     *m.sparseCoordinate() *= s;
-  else if(m._num == BANDED)
+  else if(m._num == Siconos::BANDED)
     *m.banded() *= s;
-  else if(m._num == ZERO) {}  // nothing!
+  else if(m._num == Siconos::ZERO) {}  // nothing!
   else //if(_num == 7)
     SiconosMatrixException::selfThrow(" SP::SiconosMatrix = (double) : invalid type of matrix");
 
@@ -109,19 +122,19 @@ SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
         (**it2) /= s;
     }
   }
-  else if(m._num == DENSE)
+  else if(m._num == Siconos::DENSE)
     *m.dense() /= s;
-  else if(m._num == TRIANGULAR)
+  else if(m._num == Siconos::TRIANGULAR)
     *m.triang() /= s;
-  else if(m._num == SYMMETRIC)
+  else if(m._num == Siconos::SYMMETRIC)
     *m.sym() /= s;
-  else if(m._num == SPARSE)
+  else if(m._num == Siconos::SPARSE)
     *m.sparse() /= s;
-  else if(m._num == SPARSE_COORDINATE)
+  else if(m._num == Siconos::SPARSE_COORDINATE)
     *m.sparseCoordinate() /= s;
-  else if(m._num == BANDED)
+  else if(m._num == Siconos::BANDED)
     *m.banded() /= s;
-  else if(m._num == ZERO) {}  // nothing!
+  else if(m._num == Siconos::ZERO) {}  // nothing!
   else //if(_num == 7)
     SiconosMatrixException::selfThrow(" SiconosMatrix *= (double) : invalid type of matrix");
 
@@ -131,7 +144,7 @@ SiconosMatrix& operator /=(SiconosMatrix& m, const double& s)
 size_t SiconosMatrix::nnz(double tol)
 {
   size_t nnz = 0;
-  if(_num == DENSE)  //dense
+  if(_num == Siconos::DENSE)  //dense
   {
     double* arr = getArray();
     for(size_t i = 0; i < size(0)*size(1); ++i)
@@ -142,7 +155,7 @@ size_t SiconosMatrix::nnz(double tol)
       }
     }
   }
-  else if(_num == SPARSE)
+  else if(_num == Siconos::SPARSE)
   {
     nnz = sparse()->nnz();
   }
@@ -170,7 +183,7 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
 
   CS_INT pval = Mp[col_off];
 
-  if(_num == DENSE)  //dense
+  if(_num == Siconos::DENSE)  //dense
   {
     double* arr = getArray();
     for(size_t j = 0, joff = col_off; j < ncol; ++j)
@@ -194,7 +207,7 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, 
 
     }
   }
-  else if(_num == SPARSE)
+  else if(_num == Siconos::SPARSE)
   {
     const Index& ptr = sparse()->index1_data();
     const Index& indx = sparse()->index2_data();
@@ -230,7 +243,7 @@ bool SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t row_off, size_t c
   size_t nrow = size(0);
   size_t ncol = size(1);
 
-  if(_num == DENSE)  //dense
+  if(_num == Siconos::DENSE)  //dense
   {
     double* arr = getArray();
     for(size_t j = 0; j < ncol; ++j)
@@ -257,3 +270,60 @@ std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm)
   os << sm.toString();
   return os;
 }
+
+
+void SiconosMatrix::private_prod(unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init) const
+{
+  assert(!(isPLUFactorized()) && "A is PLUFactorized in prod !!");
+
+  // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
+
+  if(init)  // y = subA * x , else y += subA * x
+    y.zero();
+  private_addprod(startRow, 0, x, y);
+}
+
+/** Computation of y = subA.x
+
+    where subA is a sub-matrix of A, subA[0,0] = A[startRow, startCol]
+ */
+void SiconosMatrix::private_addprod(unsigned startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& y) const
+{
+  assert(!(isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!isBlock() && "private_addprod(start,x,y) error: not yet implemented for block matrix.");
+
+  // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
+  // Then computation of y = subA*x + y.
+  unsigned int numA = num();
+  unsigned int numY = y.num();
+  unsigned int numX = x.num();
+  unsigned int sizeX = x.size();
+  unsigned int sizeY = y.size();
+
+  assert(numX == numY && "private_addprod(A,start,x,y) error: not yet implemented for x and y of different types.");
+
+  if(numY == Siconos::DENSE && numX == Siconos::DENSE)
+  {
+
+    assert(y.dense() != x.dense());
+
+    if(numA == Siconos::DENSE)
+      noalias(*y.dense()) += prod(ublas::subrange(*dense(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
+    else if(numA == Siconos::TRIANGULAR)
+      noalias(*y.dense()) += prod(ublas::subrange(*triang(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
+    else if(numA == Siconos::SYMMETRIC)
+      noalias(*y.dense()) += prod(ublas::subrange(*sym(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
+    else if(numA == Siconos::SPARSE)
+      noalias(*y.dense()) += prod(ublas::subrange(*sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
+    else //if(numA==Siconos::BANDED)
+      noalias(*y.dense()) += prod(ublas::subrange(*banded(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.dense());
+  }
+  else // x and y sparse
+  {
+    if(numA == Siconos::SPARSE)
+      *y.sparse() += prod(ublas::subrange(*sparse(), startRow, startRow + sizeY, startCol, startCol + sizeX), *x.sparse());
+    else
+      SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for x, y  sparse and A not sparse.");
+  }
+}
+

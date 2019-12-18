@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
   }
 #endif
 
-  assert (rank == 0);
+  assert(rank == 0);
   NM_MUMPS_set_verbosity(M, 1);
 
   /*
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
   NM_MUMPS(M, -2);
   NM_MUMPS(M, 0);
 
-  for (unsigned int i=0; i<SIZE; ++i)
+  for(unsigned int i=0; i<SIZE; ++i)
   {
     printf("solution b[%u] = %g\n", i, b[i]);
   }
@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
 #endif
   NM_clear(M);
 
-  if (fabs(b[0] - 2./3.) > 1e-7) return(1);
-  if (fabs(b[1] - 1./3.) > 1e-7) return(1);
+  if(fabs(b[0] - 2./3.) > 1e-7) return(1);
+  if(fabs(b[1] - 1./3.) > 1e-7) return(1);
 
   return(0);
 }

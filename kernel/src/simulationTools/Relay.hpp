@@ -75,14 +75,22 @@ protected:
 
 public:
 
-  /** constructor from data
-   *  \param numericsSolverId id of numerics solver
+  /** constructor from numerics solver id
+   *  \param numericsSolverId id of numerics solver, default =  SICONOS_RELAY_AVI_CAOFERRIS
    */
   Relay(int numericsSolverId = SICONOS_RELAY_AVI_CAOFERRIS);
 
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  Relay(SP::SolverOptions options);
+
   /** destructor
    */
-  ~Relay();
+  ~Relay(){};
 
   // --- lb ---
   /** get the value of lb, the   lower bounds of the Relay system
@@ -136,8 +144,6 @@ public:
   }
 
   void initialize(SP::Simulation sim);
-
-  virtual void setSolverId(int solverId);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param time current time

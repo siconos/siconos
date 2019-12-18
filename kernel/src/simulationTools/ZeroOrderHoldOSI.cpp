@@ -17,6 +17,7 @@
 */
 
 #include "ZeroOrderHoldOSI.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "EventDriven.hpp"
 #include "EventsManager.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -60,7 +61,7 @@ ZeroOrderHoldOSI::ZeroOrderHoldOSI():
   _levelMaxForInput =0;
 }
 
-void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)
+void ZeroOrderHoldOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 {
   DEBUG_BEGIN("void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem ds)\n");
   // Get work buffers from the graph
@@ -79,7 +80,7 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(ds);
   if(!DSG0.Ad.hasKey(dsgVD))
   {
-    DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds, *_simulation->nonSmoothDynamicalSystem(), _simulation->eventsManager()->timeDiscretisation() ));
+    DSG0.Ad[dsgVD].reset(new MatrixIntegrator(*ds, *_simulation->nonSmoothDynamicalSystem(), _simulation->eventsManager()->timeDiscretisation()));
     if(DSG0.Ad.at(dsgVD)->isConst())
       DSG0.Ad.at(dsgVD)->integrate();
   }
@@ -143,21 +144,21 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForDS( double t, SP::DynamicalSystem
 }
 
 void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
-				     InteractionProperties& interProp,
-				     DynamicalSystemsGraph & DSG)
+    InteractionProperties& interProp,
+    DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
   assert(ds1);
   assert(ds2);
 
-  if (!interProp.workVectors)
+  if(!interProp.workVectors)
   {
     interProp.workVectors.reset(new VectorOfVectors);
     interProp.workVectors->resize(ZeroOrderHoldOSI::WORK_INTERACTION_LENGTH);
   }
 
-  if (!interProp.workBlockVectors)
+  if(!interProp.workBlockVectors)
   {
     interProp.workBlockVectors.reset(new VectorOfBlockVectors);
     interProp.workBlockVectors->resize(ZeroOrderHoldOSI::BLOCK_WORK_LENGTH);
@@ -169,8 +170,8 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   Relation &relation =  *inter.relation();
   RELATION::TYPES relationType = relation.getType();
   RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
-  
-  if (!inter_work[ZeroOrderHoldOSI::OSNSP_RHS])
+
+  if(!inter_work[ZeroOrderHoldOSI::OSNSP_RHS])
     inter_work[ZeroOrderHoldOSI::OSNSP_RHS].reset(new SiconosVector(inter.dimension()));
 
   // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
@@ -179,7 +180,7 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   inter.initializeMemory(_steps);
 
   /* allocate and set work vectors for the osi */
-  if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
+  if(!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
     RuntimeException::selfThrow("ZeroOrderHoldOSI::initializeWorkVectorsForInteraction. The implementation is not correct for two different OSI for one interaction");
   }
@@ -187,28 +188,28 @@ void ZeroOrderHoldOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   unsigned int xfree = ZeroOrderHoldOSI::xfree;
 
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
-  if (relationType == FirstOrder)
+  if(relationType == FirstOrder)
+  {
+
+    if(relationSubType == NonLinearR || relationSubType == Type2R)
     {
-
-      if (relationSubType == NonLinearR || relationSubType == Type2R )
-      {
-        inter_work[ZeroOrderHoldOSI::H_ALPHA].reset(new SiconosVector(inter.dimension()));
-      }
-      inter_work_block[xfree].reset(new BlockVector());
-      inter_work_block[xfree]->insertPtr(workVds1[ZeroOrderHoldOSI::FREE]);
+      inter_work[ZeroOrderHoldOSI::H_ALPHA].reset(new SiconosVector(inter.dimension()));
     }
+    inter_work_block[xfree].reset(new BlockVector());
+    inter_work_block[xfree]->insertPtr(workVds1[ZeroOrderHoldOSI::FREE]);
+  }
 
 
-  if (ds1 != ds2)
+  if(ds1 != ds2)
+  {
+    VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
+    if(relationType == Lagrangian)
     {
-      VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      if (relationType == Lagrangian)
-      {
-        inter_work_block[ZeroOrderHoldOSI::xfree]->insertPtr(workVds2[ZeroOrderHoldOSI::FREE]);
-      }
+      inter_work_block[ZeroOrderHoldOSI::xfree]->insertPtr(workVds2[ZeroOrderHoldOSI::FREE]);
     }
+  }
 
-  if (!inter_work_block[ZeroOrderHoldOSI::DELTA_X])
+  if(!inter_work_block[ZeroOrderHoldOSI::DELTA_X])
   {
     inter_work_block[ZeroOrderHoldOSI::DELTA_X].reset(new BlockVector());
     inter_work_block[ZeroOrderHoldOSI::DELTA_X]->insertPtr(workVds1[ZeroOrderHoldOSI::DELTA_X_FOR_RELATION]);
@@ -257,7 +258,7 @@ double ZeroOrderHoldOSI::computeResidu()
       RuntimeException::selfThrow("ZeroOrderHoldOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
   }
   DEBUG_END("double ZeroOrderHoldOSI::computeResidu()\n");
-  return maxResidu; 
+  return maxResidu;
 }
 
 void ZeroOrderHoldOSI::computeFreeState()
@@ -296,7 +297,7 @@ void ZeroOrderHoldOSI::computeFreeState()
 
       SiconosVector& xfree = *ds_work_vectors[ZeroOrderHoldOSI::FREE];
       DEBUG_EXPR(xfree.display(););
-      
+
       prod(DSG0.Ad.at(dsgVD)->mat(), *d.x(), xfree); // xfree = Ad*xold
       DEBUG_EXPR(xfree.display(););
       if(d.b())
@@ -316,7 +317,7 @@ void ZeroOrderHoldOSI::computeFreeState()
     }
     else
       RuntimeException::selfThrow("ZeroOrderHoldOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
-    
+
   }
   DEBUG_END("void ZeroOrderHoldOSI::computeFreeState()\n");
 }

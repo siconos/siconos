@@ -73,7 +73,7 @@ private:
   CPPUNIT_TEST(testOperators6Bis);
   CPPUNIT_TEST(testOperators6Ter);
   CPPUNIT_TEST(testOperators7);
-  CPPUNIT_TEST(testOperators8);
+  //  CPPUNIT_TEST(testOperators8);
   CPPUNIT_TEST(testOperators8Bis);
   CPPUNIT_TEST(testOperators8Ter);
   CPPUNIT_TEST(testOperators8_4);
@@ -86,15 +86,15 @@ private:
   CPPUNIT_TEST(testOperators11);
   CPPUNIT_TEST(testOperators12);
   CPPUNIT_TEST(testOperators13);
-  CPPUNIT_TEST(testPow);
+  //CPPUNIT_TEST(testPow);
   CPPUNIT_TEST(testProd);
   CPPUNIT_TEST(testProdBis);
   CPPUNIT_TEST(testProdTer);
   CPPUNIT_TEST(testProd4);
   CPPUNIT_TEST(testProd5);
   CPPUNIT_TEST(testProd6);
-  CPPUNIT_TEST(testGemv);
-  CPPUNIT_TEST(testGemm);
+  // CPPUNIT_TEST(testGemv);
+  // CPPUNIT_TEST(testGemm);
   CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
@@ -134,7 +134,7 @@ private:
   void testOperators6Bis();
   void testOperators6Ter();
   void testOperators7();
-  void testOperators8();
+  // void testOperators8();
   void testOperators8Bis();
   void testOperators8Ter();
   void testOperators8_4();
@@ -147,15 +147,14 @@ private:
   void testOperators11();
   void testOperators12();
   void testOperators13();
-  void testPow();
   void testProd();
   void testProdBis();
   void testProdTer();
   void testProd4();
   void testProd5();
   void testProd6();
-  void testGemm();
-  void testGemv();
+  // void testGemm();
+  // void testGemv();
   void End();
 
   unsigned int size, size2;

@@ -167,13 +167,13 @@ int (*afun)(), (*bfun)(), (*cfun)(), (*dfun)(), (*efun)(
   node = 1;
 
   i__1 = *nz;
-  for (iz = 1; iz <= i__1; ++iz)
+  for(iz = 1; iz <= i__1; ++iz)
   {
     i__2 = *ny;
-    for (iy = 1; iy <= i__2; ++iy)
+    for(iy = 1; iy <= i__2; ++iy)
     {
       i__3 = *nx;
-      for (ix = 1; ix <= i__3; ++ix)
+      for(ix = 1; ix <= i__3; ++ix)
       {
         pointr[node] = iedge;
 
@@ -184,7 +184,7 @@ int (*afun)(), (*bfun)(), (*cfun)(), (*dfun)(), (*efun)(
 
         /*              West. */
 
-        if (ix > 1)
+        if(ix > 1)
         {
           indx[iedge] = node - kx;
           a[iedge] = stencil[1];
@@ -193,7 +193,7 @@ int (*afun)(), (*bfun)(), (*cfun)(), (*dfun)(), (*efun)(
 
         /*              South. */
 
-        if (iy > 1)
+        if(iy > 1)
         {
           indx[iedge] = node - ky;
           a[iedge] = stencil[3];
@@ -202,7 +202,7 @@ int (*afun)(), (*bfun)(), (*cfun)(), (*dfun)(), (*efun)(
 
         /*              Front Plane. */
 
-        if (iz > 1)
+        if(iz > 1)
         {
           indx[iedge] = node - kz;
           a[iedge] = stencil[5];
@@ -219,13 +219,13 @@ int (*afun)(), (*bfun)(), (*cfun)(), (*dfun)(), (*efun)(
 
         /*              East. */
 
-        if (ix < *nx)
+        if(ix < *nx)
         {
           indx[iedge] = node + kx;
           a[iedge] = stencil[2];
           ++iedge;
         }
-        if (iy < *ny)
+        if(iy < *ny)
         {
           indx[iedge] = node + ky;
           a[iedge] = stencil[4];
@@ -234,7 +234,7 @@ int (*afun)(), (*bfun)(), (*cfun)(), (*dfun)(), (*efun)(
 
         /*              Back plane. */
 
-        if (iz < *nz)
+        if(iz < *nz)
         {
           indx[iedge] = node + kz;
           a[iedge] = stencil[6];
@@ -313,7 +313,7 @@ doublereal(*afun)(), (*bfun)(), (*cfun)(), (*dfun)(), (*efun)(), (*ffun)
   --stencil;
 
   /* Function Body */
-  for (k = 1; k <= 7; ++k)
+  for(k = 1; k <= 7; ++k)
   {
     stencil[k] = 0.;
     /* L10: */
@@ -340,7 +340,7 @@ doublereal(*afun)(), (*bfun)(), (*cfun)(), (*dfun)(), (*efun)(), (*ffun)
   coeff = (*dfun)(&x, &y, &z) * hhalf;
   stencil[3] += coeff;
   stencil[2] -= coeff;
-  if (*ny <= 1)
+  if(*ny <= 1)
   {
     goto L99;
   }
@@ -360,7 +360,7 @@ doublereal(*afun)(), (*bfun)(), (*cfun)(), (*dfun)(), (*efun)(), (*ffun)
   coeff = (*efun)(&x, &y, &z) * hhalf;
   stencil[5] += coeff;
   stencil[4] -= coeff;
-  if (*nz <= 1)
+  if(*nz <= 1)
   {
     goto L99;
   }
@@ -676,29 +676,29 @@ ftnlen flag_len;
 
   /* Function Body */
   *info = 0;
-  if (*n <= 0)
+  if(*n <= 0)
   {
     *info = -1;
   }
-  else if (*n > *lda)
+  else if(*n > *lda)
   {
     *info = -2;
   }
-  else if (! lsamen_(&c__3, flag_, "ROW", 3L, 3L) || ! lsamen_(&c__3,
-           flag_, "ROW", 3L, 3L))
+  else if(! lsamen_(&c__3, flag_, "ROW", 3L, 3L) || ! lsamen_(&c__3,
+          flag_, "ROW", 3L, 3L))
   {
     *info = -3;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     return 0;
   }
 
   i__1 = *n;
-  for (j = 1; j <= i__1; ++j)
+  for(j = 1; j <= i__1; ++j)
   {
     i__2 = *n;
-    for (i = 1; i <= i__2; ++i)
+    for(i = 1; i <= i__2; ++i)
     {
       adense[i + j * adense_dim1] = 0.;
       /* L10: */
@@ -706,13 +706,13 @@ ftnlen flag_len;
     /* L20: */
   }
 
-  if (lsame_(flag_, "ROW", 3L, 3L))
+  if(lsame_(flag_, "ROW", 3L, 3L))
   {
     i__1 = *n;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       i__2 = pointr[i + 1] - 1;
-      for (j = pointr[i]; j <= i__2; ++j)
+      for(j = pointr[i]; j <= i__2; ++j)
       {
         adense[i + indx[j] * adense_dim1] = asparse[j];
         /* L30: */
@@ -720,13 +720,13 @@ ftnlen flag_len;
       /* L40: */
     }
   }
-  else if (lsame_(flag_, "COL", 3L, 3L))
+  else if(lsame_(flag_, "COL", 3L, 3L))
   {
     i__1 = *n;
-    for (j = 1; j <= i__1; ++j)
+    for(j = 1; j <= i__1; ++j)
     {
       i__2 = pointr[j + 1] - 1;
-      for (i = pointr[j]; i <= i__2; ++i)
+      for(i = pointr[j]; i <= i__2; ++i)
       {
         adense[indx[i] + j * adense_dim1] = asparse[i];
         /* L50: */
@@ -806,7 +806,7 @@ integer *ldw, *info;
   /* Function Body */
   *info = 0;
   *n = *nx * 3 * *ny + (*nx << 1) + (*ny << 1) + 1;
-  if (*n > *lda)
+  if(*n > *lda)
   {
     s_wsle(&io___20);
     do_lio(&c__9, &c__1, "NOT ENOUGH ROOM ALLOCATED FOR WATHEN MATRIX",
@@ -815,19 +815,19 @@ integer *ldw, *info;
     *info = -1;
     return 0;
   }
-  else if (*nx < 1)
+  else if(*nx < 1)
   {
     *info = -2;
   }
-  else if (*ny < 1)
+  else if(*ny < 1)
   {
     *info = -3;
   }
-  else if (max(*nx, *ny) > *ldw)
+  else if(max(*nx, *ny) > *ldw)
   {
     *info = -4;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     return 0;
   }
@@ -841,10 +841,10 @@ integer *ldw, *info;
   set_e__(&work[e * work_dim1 + 1], ldw);
 
   i__1 = *n;
-  for (j = 1; j <= i__1; ++j)
+  for(j = 1; j <= i__1; ++j)
   {
     i__2 = *n;
-    for (i = 1; i <= i__2; ++i)
+    for(i = 1; i <= i__2; ++i)
     {
       a[i + j * a_dim1] = 0.;
       /* L10: */
@@ -857,10 +857,10 @@ integer *ldw, *info;
   iseed[2] = 2042;
   iseed[3] = 77;
   i__1 = *ny;
-  for (j = 1; j <= i__1; ++j)
+  for(j = 1; j <= i__1; ++j)
   {
     i__2 = *nx;
-    for (i = 1; i <= i__2; ++i)
+    for(i = 1; i <= i__2; ++i)
     {
       work[i + (rho + j - 1) * work_dim1] = dlaran_(iseed) * 100;
       /* L30: */
@@ -869,10 +869,10 @@ integer *ldw, *info;
   }
 
   i__1 = *ny;
-  for (j = 1; j <= i__1; ++j)
+  for(j = 1; j <= i__1; ++j)
   {
     i__2 = *nx;
-    for (i = 1; i <= i__2; ++i)
+    for(i = 1; i <= i__2; ++i)
     {
 
       nn[0] = j * 3 * *nx + (i << 1) + (j << 1) + 1;
@@ -885,9 +885,9 @@ integer *ldw, *info;
       nn[7] = nn[3] + 1;
 
       rhoit = work[i + (rho + j - 1) * work_dim1];
-      for (krow = 1; krow <= 8; ++krow)
+      for(krow = 1; krow <= 8; ++krow)
       {
-        for (kcol = 1; kcol <= 8; ++kcol)
+        for(kcol = 1; kcol <= 8; ++kcol)
         {
           work[krow + (em + kcol - 1) * work_dim1] = rhoit * work[
                 krow + (e + kcol - 1) * work_dim1];
@@ -896,9 +896,9 @@ integer *ldw, *info;
         /* L60: */
       }
 
-      for (krow = 1; krow <= 8; ++krow)
+      for(krow = 1; krow <= 8; ++krow)
       {
-        for (kcol = 1; kcol <= 8; ++kcol)
+        for(kcol = 1; kcol <= 8; ++kcol)
         {
           a[nn[krow - 1] + nn[kcol - 1] * a_dim1] += work[krow + (
                 em + kcol - 1) * work_dim1];
@@ -912,13 +912,13 @@ integer *ldw, *info;
     /* L100: */
   }
 
-  if (*kk == 1)
+  if(*kk == 1)
   {
 
     /*        A = diag(diag(A)) \ A (the result being unit diagonal); */
 
     i__1 = j;
-    for (i = 1; i <= i__1; ++i)
+    for(i = 1; i <= i__1; ++i)
     {
       a[i + i * a_dim1] = 1.;
       /* L110: */
@@ -984,9 +984,9 @@ integer *lde;
   e[(e_dim1 << 3) + 3] = -8.;
   e[(e_dim1 << 3) + 4] = 16.;
 
-  for (j = 1; j <= 4; ++j)
+  for(j = 1; j <= 4; ++j)
   {
-    for (i = 5; i <= 8; ++i)
+    for(i = 5; i <= 8; ++i)
     {
       e[i + j * e_dim1] = e[j + i * e_dim1];
       /* L10: */
@@ -994,9 +994,9 @@ integer *lde;
     /* L20: */
   }
 
-  for (j = 5; j <= 8; ++j)
+  for(j = 5; j <= 8; ++j)
   {
-    for (i = 5; i <= 8; ++i)
+    for(i = 5; i <= 8; ++i)
     {
       e[i + j * e_dim1] = e[i - 4 + (j - 4) * e_dim1];
       /* L30: */
@@ -1005,7 +1005,7 @@ integer *lde;
   }
 
   scale = .022222222222222223;
-  for (i = 1; i <= 8; ++i)
+  for(i = 1; i <= 8; ++i)
   {
     dscal_(&c__8, &scale, &e[i * e_dim1 + 1], &c__1);
     /* L50: */

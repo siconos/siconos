@@ -15,12 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifdef _WIN32 
-#define SICONOS_EXPORT extern "C" __declspec(dllexport) 
-#else 
-#define SICONOS_EXPORT extern "C" 
-#endif  
-#include <stdio.h>
+#ifdef _WIN32
+#define SICONOS_EXPORT extern "C" __declspec(dllexport)
+#else
+#define SICONOS_EXPORT extern "C"
+#endif
 
 const double m = 1; // ball mass
 const double g = 9.8; // gravity
@@ -34,7 +33,7 @@ extern "C" double FextFunction(double time)
 
 SICONOS_EXPORT void ballFExt(double time, unsigned int sizeOfq, double *fExt, unsigned int sizeZ, double* z)
 {
-  for (unsigned int i = 0; i < sizeOfq; i++)
+  for(unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
   fExt[0] = -m * g + FextFunction(time);
 }

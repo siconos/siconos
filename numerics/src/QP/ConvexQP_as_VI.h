@@ -23,7 +23,7 @@
 */
 
 #include "NumericsFwd.h"
-#include "SiconosConfig.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct ConvexQP_as_VI ConvexQP_as_VI.h
  *

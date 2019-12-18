@@ -24,13 +24,13 @@
 #endif
 #include "relay_cst.h"
 
-int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options)
+int dr_driver(RelayProblem* problem, double *z, double *w, SolverOptions* options)
 {
-  if (options == NULL)
+  if(options == NULL)
     numerics_error("dr_driver", "null input for solver options");
 
   /* Checks inputs */
-  if (problem == NULL || z == NULL || w == NULL)
+  if(problem == NULL || z == NULL || w == NULL)
     numerics_error("dr_driver", "null input for LinearComplementarityProblem and/or unknowns (z,w)");
 
   /* Output info. : 0: ok -  >0: problem (depends on solver) */
@@ -41,7 +41,7 @@ int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* optio
   int storageType = problem->M->storageType;
 
   /* Sparse Block Storage */
-  if (storageType == 1)
+  if(storageType == 1)
   {
     numerics_error("dr_driver", "not yet implemented for sparse storage.");
   }
@@ -54,16 +54,16 @@ int dr_driver(RelayProblem* problem, double *z , double *w, SolverOptions* optio
   /* Solver name
   const char* const  name = options->solverName;*/
 
-  if (verbose == 1)
+  if(verbose == 1)
     printf(" ========================== Call %s solver for Relayproblem ==========================\n", solver_options_id_to_name(options->solverId));
 
   /****** NLGS algorithm ******/
-  if (options->solverId == SICONOS_RELAY_NLGS)
-    dr_nlgs(problem, z , w , &info , options);
+  if(options->solverId == SICONOS_RELAY_NLGS)
+    dr_nlgs(problem, z, w, &info, options);
 
   /****** Latin algorithm ******/
-  else if (options->solverId == SICONOS_RELAY_LATIN)
-    dr_latin(problem, z , w , &info , options);
+  else if(options->solverId == SICONOS_RELAY_LATIN)
+    dr_latin(problem, z, w, &info, options);
 
   /*error */
   else

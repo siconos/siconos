@@ -15,19 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
 #include "FrictionContactProblem.h"
-#include "NumericsMatrix.h"
-#include <stdio.h>
-#include "numerics_verbose.h"
-#include "SparseBlockMatrix.h"
-#include <math.h>
-#include <string.h>
-#include "SiconosLapack.h"
+#include <assert.h>             // for assert
+#include <math.h>               // for fabs
+#include <stdio.h>              // for printf, fprintf, fscanf, NULL, fclose
+#include <stdlib.h>             // for malloc, free, exit, EXIT_FAILURE
+#include <sys/errno.h>          // for errno
+#include <string.h>             // for memcpy
+#include "SiconosBlas.h"        // for cblas_dscal
+#include "NumericsMatrix.h"     // for NumericsMatrix, NM_create, RawNumeric...
+#include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
+#include "debug.h"              // for DEBUG_PRINT, DEBUG_PRINTF
+#include "numerics_verbose.h"   // for CHECK_IO, numerics_error, numerics_pr...
+#include "io_tools.h"
+#if defined(WITH_FCLIB)
+#include "fclib_interface.h"
+#endif
 
 void frictionContact_display(FrictionContactProblem* problem)
 {
@@ -38,7 +43,7 @@ void frictionContact_display(FrictionContactProblem* problem)
   printf("dimension :%d \n", problem->dimension);
   printf("numberOfContacts:%d \n", problem->numberOfContacts);
 
-  if (problem->M)
+  if(problem->M)
   {
     printf("M matrix:\n");
     NM_display(problem->M);
@@ -46,7 +51,7 @@ void frictionContact_display(FrictionContactProblem* problem)
   else
     printf("No M matrix:\n");
 
-  if (problem->q)
+  if(problem->q)
   {
     printf("q vector:\n");
     NM_vector_display(problem->q,n);
@@ -54,7 +59,7 @@ void frictionContact_display(FrictionContactProblem* problem)
   else
     printf("No q vector:\n");
 
-  if (problem->mu)
+  if(problem->mu)
   {
     printf("mu vector:\n");
     NM_vector_display(problem->mu,problem->numberOfContacts);
@@ -70,7 +75,7 @@ void frictionContact_display(FrictionContactProblem* problem)
 
 int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file)
 {
-  if (! problem)
+  if(! problem)
   {
     fprintf(stderr, "Numerics, FrictionContactProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
@@ -82,12 +87,12 @@ int frictionContact_printInFile(FrictionContactProblem*  problem, FILE* file)
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
   NM_write_in_file(problem->M, file);
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
   fprintf(file, "\n");
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     fprintf(file, "%32.24e ", problem->mu[i]);
   }
@@ -100,7 +105,7 @@ int frictionContact_printInFilename(FrictionContactProblem* problem, char* filen
   int info = 0;
   FILE * file = fopen(filename, "w");
 
-  if (!file)
+  if(!file)
   {
     return errno;
   }
@@ -111,68 +116,83 @@ int frictionContact_printInFilename(FrictionContactProblem* problem, char* filen
   return info;
 }
 
-int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)
+FrictionContactProblem *  frictionContact_newFromFile(FILE* file)
 {
+
+  FrictionContactProblem* problem = frictionContactProblem_new();
   assert(file);
   DEBUG_PRINT("Start -- int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
   int nc = 0, d = 0;
   int i;
   CHECK_IO(fscanf(file, "%d\n", &d));
   problem->dimension = d;
-  DEBUG_PRINTF("problem->dimension = %i \n",problem->dimension );
+  DEBUG_PRINTF("problem->dimension = %i \n",problem->dimension);
   CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
   problem->M =  NM_new_from_file(file);
 
   problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for (i = 0; i < problem->M->size1; i++)
+  for(i = 0; i < problem->M->size1; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
 
   problem->mu = (double *) malloc(nc * sizeof(double));
-  for (i = 0; i < nc; i++)
+  for(i = 0; i < nc; i++)
   {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
   }
   DEBUG_PRINT("End --  int frictionContact_newFromFile(FrictionContactProblem* problem, FILE* file)\n");
 
-  return 0;
+  return problem;
 }
 
-int frictionContact_newFromFilename(FrictionContactProblem* problem, char* filename)
+FrictionContactProblem * frictionContact_new_from_filename(const char* filename)
 {
-  int info = 0;
-  FILE * file = fopen(filename, "r");
 
-  if (!file)
+  FrictionContactProblem* problem = NULL;
+  int is_hdf5 = check_hdf5_file(filename);
+  // if the input file is an hdf5 file, we try to read it with fclib interface function.
+  if(is_hdf5)
   {
-    return errno;
+#if defined(WITH_FCLIB)
+    problem = frictionContact_fclib_read(filename);
+#else
+    numerics_error("FrictionContactProblem",
+                   "Try to read an hdf5 file, while fclib interface is not active. Recompile Siconos with fclib.",
+                   filename);
+#endif
   }
+  else
+  {
+    FILE * file = fopen(filename, "r");
+    if(!file)
+      numerics_error("FrictionContactProblem", "Can not open file ", filename);
 
-  info = frictionContact_newFromFile(problem, file);
+    problem = frictionContact_newFromFile(file);
+    fclose(file);
+  }
+  return problem;
 
-  fclose(file);
-  return info;
 }
 
 void frictionContactProblem_free(FrictionContactProblem* problem)
 {
   assert(problem);
-  if (problem->M)
+  if(problem->M)
   {
     NM_clear(problem->M);
     free(problem->M);
     problem->M = NULL;
   }
 
-  if (problem->mu)
+  if(problem->mu)
   {
-  free(problem->mu);
-  problem->mu = NULL;
+    free(problem->mu);
+    problem->mu = NULL;
   }
 
-  if (problem->q)
+  if(problem->q)
   {
     free(problem->q);
     problem->q = NULL;
@@ -222,7 +242,7 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  Spli
   splitted_problem->q_n = (double *) malloc(nc * sizeof(double));
   splitted_problem->q_t = (double *) malloc(2* nc * sizeof(double));
 
-  for (int contact = 0 ; contact < nc; contact ++)
+  for(int contact = 0 ; contact < nc; contact ++)
   {
     splitted_problem->q_n[contact] = problem->q[contact*3];
     splitted_problem->q_t[2*contact] = problem->q[contact*3+1];
@@ -244,7 +264,7 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  Spli
   NumericsMatrix * M_nt =  splitted_problem->M_nt;
   NumericsMatrix * M_tt =  splitted_problem->M_tt;
 
-  switch (storageType)
+  switch(storageType)
   {
   case NM_SPARSE_BLOCK:
   {
@@ -254,14 +274,14 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  Spli
     unsigned int col_components_nn[1] = {0};
     unsigned int col_components_size_nn =1;
     SBM_extract_component_3x3(M->matrix1, M_nn->matrix1,
-                              row_components_nn, row_components_size_nn, col_components_nn, col_components_size_nn   );
+                              row_components_nn, row_components_size_nn, col_components_nn, col_components_size_nn);
 
     unsigned int row_components_nt[1] = {0};
     unsigned int row_components_size_nt =1;
     unsigned int col_components_nt[2] = {1,2};
     unsigned int col_components_size_nt =2;
     SBM_extract_component_3x3(M->matrix1, M_nt->matrix1,
-                              row_components_nt, row_components_size_nt, col_components_nt, col_components_size_nt   );
+                              row_components_nt, row_components_size_nt, col_components_nt, col_components_size_nt);
 
 
     unsigned int row_components_tn[2] = {1,2};
@@ -269,7 +289,7 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  Spli
     unsigned int col_components_tn[1] = {0};
     unsigned int col_components_size_tn =1;
     SBM_extract_component_3x3(M->matrix1, M_tn->matrix1,
-                              row_components_tn, row_components_size_tn, col_components_tn, col_components_size_tn   );
+                              row_components_tn, row_components_size_tn, col_components_tn, col_components_size_tn);
 
 
     unsigned int row_components_tt[2] = {1,2};
@@ -277,7 +297,7 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  Spli
     unsigned int col_components_tt[2] = {1,2};
     unsigned int col_components_size_tt =2;
     SBM_extract_component_3x3(M->matrix1, M_tt->matrix1,
-                              row_components_tt, row_components_size_tt, col_components_tt, col_components_size_tt   );
+                              row_components_tt, row_components_size_tt, col_components_tt, col_components_size_tt);
 
 #ifdef SN_SBM_TO_DENSE
     M_nn->matrix0 =(double *)malloc(M_nn->size0*M_nn->size1*sizeof(double));
@@ -304,11 +324,11 @@ void createSplittedFrictionContactProblem(FrictionContactProblem* problem,  Spli
 
 }
 void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
-                                               double * reaction,
-                                               double * velocity,
+    double * reaction,
+    double * velocity,
 
-                                               double tol,
-                                               int do_print)
+    double tol,
+    int do_print)
 {
   /* NumericsMatrix* M = problem->M; */
   /* double* q = problem->q; */
@@ -330,23 +350,23 @@ void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
   int ambiguous_take_off_count=0;
   int ambiguous_closed_count=0;
 
-  for (contact =0; contact < nc; contact ++)
+  for(contact =0; contact < nc; contact ++)
   {
     pos=contact*3;
-    if (velocity[pos] > tol)
+    if(velocity[pos] > tol)
     {
       take_off_count++;
-      if (fabs(reaction[pos]) > tol)
+      if(fabs(reaction[pos]) > tol)
         ambiguous_take_off_count++;
     }
-    else if (reaction[pos] > tol)
+    else if(reaction[pos] > tol)
     {
       closed_count++;
-      if (fabs(velocity[pos]) > tol)
+      if(fabs(velocity[pos]) > tol)
         ambiguous_closed_count++;
 
       double criteria = reaction[pos+1]*reaction[pos+1] + reaction[pos+2]*reaction[pos+2] - mu[contact]*mu[contact]*reaction[pos]*reaction[pos];
-      if (criteria < 0 )
+      if(criteria < 0)
       {
         sticking_count++;
       }
@@ -357,9 +377,10 @@ void frictionContactProblem_compute_statistics(FrictionContactProblem* problem,
     }
   }
 
-  numerics_printf_verbose(do_print, "---- FC3D - STAT  - Number of contact = %i\t,  take off = %i\t, closed = %i\t, sliding = %i\t,sticking = %i\t, ambiguous take off = %i\t, ambiguous closed = %i",nc ,take_off_count,closed_count,sliding_count,sticking_count, ambiguous_take_off_count,ambiguous_closed_count);
+  numerics_printf_verbose(do_print, "---- FC3D - STAT  - Number of contact = %i\t,  take off = %i\t, closed = %i\t, sliding = %i\t,sticking = %i\t, ambiguous take off = %i\t, ambiguous closed = %i",nc,take_off_count,closed_count,sliding_count,sticking_count, ambiguous_take_off_count,ambiguous_closed_count);
 
 }
+
 FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem)
 {
   assert(problem);
@@ -377,6 +398,7 @@ FrictionContactProblem* frictionContact_copy(FrictionContactProblem* problem)
   memcpy(new->mu, problem->mu, nc*sizeof(double));
   return new;
 }
+
 void frictionContact_rescaling(
   FrictionContactProblem* problem,
   double alpha,

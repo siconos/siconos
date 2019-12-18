@@ -20,7 +20,7 @@ RigidBody2dDS::RigidBody2dDS(SP::SiconosVector position,
 RigidBody2dDS::RigidBody2dDS(SP::SiconosVector position,
                              SP::SiconosVector velocity,
                              double mass,
-			     double inertia)
+                             double inertia)
   : LagrangianDS(position, velocity)
   ,_scalarMass(mass)
   , _contactors(std11::make_shared<SiconosContactorSet>())

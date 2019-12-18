@@ -31,7 +31,7 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
   double *b = problem->lb;
   //\todo Rewrite completely the algorithm with a projection.
   int ib;
-  for (ib = 0; ib < n; ib++) b[ib] = -b[ib];
+  for(ib = 0; ib < n; ib++) b[ib] = -b[ib];
   int itt = options->iparam[0];
   double errmax = options->dparam[0];
 
@@ -44,7 +44,7 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
   wnum1    = (double*) malloc(n * sizeof(double));
   zt       = (double*) malloc(n * sizeof(double));
 
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
     w[i]     = 0.;
     z[i]     = 0.;
@@ -57,27 +57,27 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
   err1 = 1.;
 
 
-  while ((iter1 < itt) && (err1 > errmax))
+  while((iter1 < itt) && (err1 > errmax))
   {
 
     iter1 = iter1 + 1;
 
-    for (i = 0; i < n; i++)
+    for(i = 0; i < n; i++)
     {
       avn = 0.;
       apn = 0.;
 
-      for (j = 0; j <= i - 1; j++)
+      for(j = 0; j <= i - 1; j++)
         avn = avn + vec[j * n + i] * z[j];
 
-      for (k = i + 1; k < n; k++)
+      for(k = i + 1; k < n; k++)
         apn = apn + vec[k * n + i] * z[k];
 
       xn = -q[i] - avn - apn;
 
       zt[i] = -xn;
 
-      if (a[i] < zt[i])
+      if(a[i] < zt[i])
       {
         mina = a[i];
       }
@@ -86,7 +86,7 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
         mina = zt[i];
       }
 
-      if (-b[i] < mina)
+      if(-b[i] < mina)
       {
         w[i] = mina;
       }
@@ -95,7 +95,7 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
         w[i] = -b[i];
       }
 
-      if (fabs(vec[i * n + i]) < 1e-12)
+      if(fabs(vec[i * n + i]) < 1e-12)
       {
         printf("\n Warning nul diagonal term of M \n");
 
@@ -135,16 +135,16 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
   }
 
 
-  if (err1 > errmax)
+  if(err1 > errmax)
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("No convergence after %d iterations, the residue is %g\n", iter1, err1);
 
     *info = 1;
   }
   else
   {
-    if (verbose > 0)
+    if(verbose > 0)
       printf("Convergence after %d iterations, the residue is %g \n", iter1, err1);
 
     *info = 0;

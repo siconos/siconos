@@ -20,7 +20,9 @@
 #ifndef SiconosAppleLAPACK_H
 #define SiconosAppleLAPACK_H
 
-#include "SiconosBlas.h"
+// IWYU pragma: private, include "SiconosLapack.h"
+
+//#include "SiconosBlas.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
@@ -51,7 +53,7 @@
   __CLPK_doublereal* work = (__CLPK_doublereal*)malloc(sizeof(*work));  \
   F(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,work,&lwork,INFO);               \
   lwork = (__CLPK_integer)work[0];                                      \
-  work = realloc(work,lwork*sizeof(*work));                             \
+  work = (__CLPK_doublereal*)realloc(work,lwork*sizeof(*work));                    \
   F(A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,work,&lwork,INFO);               \
   free(work);                                                           \
 
@@ -77,7 +79,7 @@
   __CLPK_doublereal* work = (__CLPK_doublereal*)malloc(sizeof(*work));  \
   F(A1,A2,A3,A4,A5,A6,A7,A8,work,&lwork,INFO);                          \
   lwork = (__CLPK_integer)work[0];                                      \
-  work = realloc(work,lwork*sizeof(*work));                             \
+  work = (__CLPK_doublereal*)realloc(work,lwork*sizeof(*work));         \
   F(A1,A2,A3,A4,A5,A6,A7,A8,work,&lwork,INFO);                          \
   free(work);                                                           \
 

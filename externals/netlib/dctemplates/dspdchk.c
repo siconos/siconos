@@ -218,7 +218,7 @@ MED\002)";
 
   /*     Check for quick return. */
 
-  if (nsys < 0)
+  if(nsys < 0)
   {
     s_wsle(&io___4);
     do_lio(&c__9, &c__1, "ERROR IN NONSYMMETRIC TESTER: NUMBER OF SYSTEM\
@@ -228,15 +228,15 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
   }
 
   flag_ = FALSE_;
-  for (i = 1; i <= 9; ++i)
+  for(i = 1; i <= 9; ++i)
   {
-    if (ltest[i])
+    if(ltest[i])
     {
       flag_ = TRUE_;
     }
     /* L5: */
   }
-  if (! flag_)
+  if(! flag_)
   {
     return 0;
   }
@@ -254,7 +254,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
   /* L10: */
 
   i__1 = nsys;
-  for (matform = 1; matform <= i__1; ++matform)
+  for(matform = 1; matform <= i__1; ++matform)
   {
 
     s_rsle(&io___17);
@@ -279,7 +279,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
      */
     /*           delx ( d u ) + dely (e u) + delz( f u ) + g u */
 
-    if (lsamen_(&c__4, aform, "F2SH", 4L, 4L))
+    if(lsamen_(&c__4, aform, "F2SH", 4L, 4L))
     {
 
       /*           -u_xx - u_yy */
@@ -293,7 +293,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
                zerofun_, zerofun_);
       comp2dense_(&work[ival], &work[ipointr], &work[iindx], &
                   matdim_1.n, system_1.a, &matdim_1.lda, "ROW", info, 3L);
-      if (info[0] != 0)
+      if(info[0] != 0)
       {
         s_wsfe(&io___28);
         do_fio(&c__1, (char *)&matdim_1.n, (ftnlen)sizeof(integer));
@@ -307,7 +307,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
       }
 
     }
-    else if (lsamen_(&c__4, aform, "F3SH", 4L, 4L))
+    else if(lsamen_(&c__4, aform, "F3SH", 4L, 4L))
     {
 
       /*           -u_xx - u_yy - u_zz */
@@ -321,7 +321,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
                zerofun_, zerofun_);
       comp2dense_(&work[ival], &work[ipointr], &work[iindx], &
                   matdim_1.n, system_1.a, &matdim_1.lda, "ROW", info, 3L);
-      if (info[0] != 0)
+      if(info[0] != 0)
       {
         s_wsfe(&io___30);
         do_fio(&c__1, (char *)&matdim_1.n, (ftnlen)sizeof(integer));
@@ -334,7 +334,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
         goto L60;
       }
     }
-    else if (lsamen_(&c__4, aform, "WATHEN", 4L, 6L))
+    else if(lsamen_(&c__4, aform, "WATHEN", 4L, 6L))
     {
 
       /*           Form Wathen matrix. */
@@ -343,7 +343,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
       k = 0;
       wathen_(&nx, &ny, &k, &matdim_1.n, system_1.a, &matdim_1.lda, &
               work[1], ldw, info);
-      if (info[0] != 0)
+      if(info[0] != 0)
       {
         s_wsfe(&io___33);
         i__2 = nx * 3 * ny + (nx << 1) + (ny << 1) + 1;
@@ -377,7 +377,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
     vecgen_(initialguess, &matdim_1.n, system_1.a, &matdim_1.lda, &x0[1],
             &info[2], 4L);
 
-    if (info[1] != 0)
+    if(info[1] != 0)
     {
       s_wsfe(&io___38);
       do_fio(&c__1, rhs, 4L);
@@ -387,7 +387,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
       e_wsfe();
       goto L60;
     }
-    else if (info[2] != 0)
+    else if(info[2] != 0)
     {
       s_wsfe(&io___40);
       do_fio(&c__1, initialguess, 4L);
@@ -404,10 +404,10 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
     /*        preconditioning, then diagonal preconditioning. */
 
     i__2 = npforms;
-    for (i = 1; i <= i__2; ++i)
+    for(i = 1; i <= i__2; ++i)
     {
 
-      for (j = 1; j <= 9; ++j)
+      for(j = 1; j <= 9; ++j)
       {
         info[j - 1] = 0;
         iter[j - 1] = maxit;
@@ -418,7 +418,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
 
       precon_(&matdim_1.n, system_1.a, &matdim_1.lda, pform + i * 5,
               system_1.m, info, 5L);
-      if (info[0] != 0)
+      if(info[0] != 0)
       {
         s_wsfe(&io___45);
         do_fio(&c__1, pform + i * 5, 5L);
@@ -430,24 +430,24 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
       }
       s_copy(forms_1.curpform, pform + i * 5, 5L, 5L);
 
-      if (tstcg)
+      if(tstcg)
       {
         cg_(&matdim_1.n, &b[1], &x[x_dim1 + 1], &work[1], ldw, iter,
             resid, matvec, psolve, info);
       }
 
-      if (tstcheby)
+      if(tstcheby)
       {
         cheby_(&matdim_1.n, &b[1], &x[(x_dim1 << 1) + 1], &work[1],
                ldw, &iter[1], &resid[1], matvec, psolve, &info[1]);
       }
 
-      if (tstsor)
+      if(tstsor)
       {
 
         /*              Set OMEGA */
 
-        if (matform == 1)
+        if(matform == 1)
         {
 
           /*                 Guass-Seidel */
@@ -462,26 +462,26 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
              iter[2], &resid[2], matvec, backsolve, &info[2]);
       }
 
-      if (tstbicg)
+      if(tstbicg)
       {
         bicg_(&matdim_1.n, &b[1], &x[(x_dim1 << 2) + 1], &work[1],
               ldw, &iter[3], &resid[3], matvec, matvectrans, psolve,
               psolvetrans, &info[3]);
       }
 
-      if (tstcgs)
+      if(tstcgs)
       {
         cgs_(&matdim_1.n, &b[1], &x[x_dim1 * 5 + 1], &work[1], ldw, &
              iter[4], &resid[4], matvec, psolve, &info[4]);
       }
 
-      if (tstbicgs)
+      if(tstbicgs)
       {
         bicgstab_(&matdim_1.n, &b[1], &x[x_dim1 * 6 + 1], &work[1],
                   ldw, &iter[5], &resid[5], matvec, psolve, &info[5]);
       }
 
-      if (tstgmres)
+      if(tstgmres)
       {
 
         /*              For the symmetric case, restarts = N. */
@@ -489,7 +489,7 @@ S TO BE GENERATED IS LESS THAN 0", 78L);
         restrt = matdim_1.n;
         needws = matdim_1.n * (restrt + 4) + (restrt + 1) * (restrt +
                  2);
-        if (needws > *maxws)
+        if(needws > *maxws)
         {
           info[6] = 100;
           s_wsle(&io___49);
@@ -519,16 +519,16 @@ EST MATRIX", 44L);
         }
       }
 
-      if (tstqmr)
+      if(tstqmr)
       {
         qmr_(&matdim_1.n, &b[1], &x[(x_dim1 << 3) + 1], &work[1], ldw,
              &iter[7], &resid[7], matvec, matvectrans, psolveq,
              psolvetransq, &info[7]);
       }
 
-      if (tstjacobi)
+      if(tstjacobi)
       {
-        if (! lsamen_(&c__3, aform, "WATH", 4L, 4L) && i == 1)
+        if(! lsamen_(&c__3, aform, "WATH", 4L, 4L) && i == 1)
         {
 
           /*                 Since preconditioning does not apply to
@@ -539,7 +539,7 @@ EST MATRIX", 44L);
 
           jacobi_(&matdim_1.n, &b[1], &x[x_dim1 * 9 + 1], &work[1],
                   ldw, &iter[8], &resid[8], matvec, &info[8]);
-          if (info[8] != 0)
+          if(info[8] != 0)
           {
             ++(*numsusp);
           }
@@ -555,9 +555,9 @@ EST MATRIX", 44L);
 
       /*           Check for convergence. */
 
-      for (j = 1; j <= 8; ++j)
+      for(j = 1; j <= 8; ++j)
       {
-        if (info[j - 1] != 0)
+        if(info[j - 1] != 0)
         {
           ++(*numsusp);
         }

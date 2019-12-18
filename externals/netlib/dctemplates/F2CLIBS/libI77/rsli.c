@@ -12,14 +12,14 @@ extern int f__icnum, f__recpos;
 
 static int i_getc(Void)
 {
-  if (f__recpos >= f__svic->icirlen)
+  if(f__recpos >= f__svic->icirlen)
   {
-    if (f__recpos++ == f__svic->icirlen)
+    if(f__recpos++ == f__svic->icirlen)
       return '\n';
     z_rnew();
   }
   f__recpos++;
-  if (f__icptr >= f__icend) err(f__svic->iciend, (EOF), "internal read");
+  if(f__icptr >= f__icend) err(f__svic->iciend, (EOF), "internal read");
   return(*f__icptr++);
 }
 
@@ -31,9 +31,9 @@ FILE *f;
 int i_ungetc(int ch, FILE *f)
 #endif
 {
-  if (--f__recpos == f__svic->icirlen)
+  if(--f__recpos == f__svic->icirlen)
     return '\n';
-  if (f__recpos < -1)
+  if(f__recpos < -1)
     err(f__svic->icierr, 110, "recend");
   /* *--icptr == ch, and icptr may point to read-only memory */
   return *--f__icptr /* = ch */;

@@ -30,8 +30,8 @@ void OccContactFace::computeUVBounds()
 
   TopExp_Explorer exp;
   exp.Init(this->data(), TopAbs_FACE);
-  for (unsigned int i=0; i<_index; ++i, exp.Next());
-  if (exp.More())
+  for(unsigned int i=0; i<_index; ++i, exp.Next());
+  if(exp.More())
   {
     const TopoDS_Face& face = TopoDS::Face(exp.Current());
     BRepTools::UVBounds(face,

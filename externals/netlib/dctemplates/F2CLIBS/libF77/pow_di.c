@@ -14,18 +14,18 @@ double pow_di(doublereal *ap, integer *bp)
   x = *ap;
   n = *bp;
 
-  if (n != 0)
+  if(n != 0)
   {
-    if (n < 0)
+    if(n < 0)
     {
       n = -n;
       x = 1 / x;
     }
-    for (; ;)
+    for(; ;)
     {
-      if (n & 01)
+      if(n & 01)
         pow *= x;
-      if (n >>= 1)
+      if(n >>= 1)
         x *= x;
       else
         break;

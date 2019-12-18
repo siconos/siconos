@@ -21,7 +21,8 @@
 /*!\file 
 
  */
-#include "RollingFrictionContactProblem.h"
+#include "NumericsFwd.h"  // for RollingFrictionContactProblem
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

@@ -22,7 +22,6 @@
 
 #ifndef OSITYPES_HPP
 #define OSITYPES_HPP
-#include "SiconosFwd.hpp"
 
 /** Namespace for one-step integrators. */
 namespace OSI

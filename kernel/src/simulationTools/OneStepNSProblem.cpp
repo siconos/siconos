@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "OneStepNSProblem.hpp"
+#include "SolverOptions.h"
 #include "NonSmoothDynamicalSystem.hpp"
 //#include "Interaction.hpp"
 #include "Interaction.hpp"
@@ -37,28 +38,8 @@
 #include "debug.h"
 #include "numerics_verbose.h" // numerics to set verbose mode ...
 
-
-OneStepNSProblem::OneStepNSProblem():
-  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _hasBeenUpdated(false)
-{
-  _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
-  _numerics_solver_options->dWork = NULL;
-}
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
-
-// Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
-OneStepNSProblem::OneStepNSProblem(int numericsSolverId):
-  _numerics_solver_id(numericsSolverId), _sizeOutput(0),
-  _indexSetLevel(0), _inputOutputLevel(0), _maxSize(0), _hasBeenUpdated(false)
-{
-
-  _numerics_solver_options.reset(new SolverOptions);
-  _numerics_solver_options->iWork = NULL;   _numerics_solver_options->callback = NULL;
-  _numerics_solver_options->dWork = NULL;
-  _numerics_solver_options->solverId = numericsSolverId;
-}
 
 bool OneStepNSProblem::hasInteractions() const
 {
@@ -97,21 +78,21 @@ void OneStepNSProblem::updateInteractionBlocks()
   // we put diagonal information on vertices
   // self loops with bgl are a *nightmare* at the moment
   // (patch 65198 on standard boost install)
-  if (indexSet->properties().symmetric)
+  if(indexSet->properties().symmetric)
   {
     DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Symmetric case");
     InteractionsGraph::VIterator vi, viend;
-    for (std11::tie(vi, viend) = indexSet->vertices();
-         vi != viend; ++vi)
+    for(std11::tie(vi, viend) = indexSet->vertices();
+        vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet->bundle(*vi);
       unsigned int nslawSize = inter->nonSmoothLaw()->size();
-      if (! indexSet->properties(*vi).block)
+      if(! indexSet->properties(*vi).block)
       {
         indexSet->properties(*vi).block.reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
-      if (!isLinear || !_hasBeenUpdated)
+      if(!isLinear || !_hasBeenUpdated)
       {
         computeDiagonalInteractionBlock(*vi);
       }
@@ -123,8 +104,8 @@ void OneStepNSProblem::updateInteractionBlocks()
     std::fill(initialized.begin(), initialized.end(), false);
 
     InteractionsGraph::EIterator ei, eiend;
-    for (std11::tie(ei, eiend) = indexSet->edges();
-         ei != eiend; ++ei)
+    for(std11::tie(ei, eiend) = indexSet->edges();
+        ei != eiend; ++ei)
     {
       SP::Interaction inter1 = indexSet->bundle(indexSet->source(*ei));
       SP::Interaction inter2 = indexSet->bundle(indexSet->target(*ei));
@@ -146,33 +127,33 @@ void OneStepNSProblem::updateInteractionBlocks()
 
       SP::SiconosMatrix currentInteractionBlock;
 
-      if (itar > isrc) // upper block
+      if(itar > isrc)  // upper block
       {
-        if (! indexSet->properties(ed1).upper_block)
+        if(! indexSet->properties(ed1).upper_block)
         {
           indexSet->properties(ed1).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
-          if (ed2 != ed1)
+          if(ed2 != ed1)
             indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
         }
         currentInteractionBlock = indexSet->properties(ed1).upper_block;
       }
       else  // lower block
       {
-        if (! indexSet->properties(ed1).lower_block)
+        if(! indexSet->properties(ed1).lower_block)
         {
           indexSet->properties(ed1).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
-          if (ed2 != ed1)
+          if(ed2 != ed1)
             indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
         }
         currentInteractionBlock = indexSet->properties(ed1).lower_block;
       }
 
-      if (!initialized[indexSet->index(ed1)])
+      if(!initialized[indexSet->index(ed1)])
       {
         initialized[indexSet->index(ed1)] = true;
         currentInteractionBlock->zero();
       }
-      if (!isLinear || !_hasBeenUpdated)
+      if(!isLinear || !_hasBeenUpdated)
       {
         {
           computeInteractionBlock(*ei);
@@ -181,9 +162,9 @@ void OneStepNSProblem::updateInteractionBlocks()
         // allocation for transposed block
         // should be avoided
 
-        if (itar > isrc) // upper block has been computed
+        if(itar > isrc)  // upper block has been computed
         {
-          if (!indexSet->properties(ed1).lower_block)
+          if(!indexSet->properties(ed1).lower_block)
           {
             indexSet->properties(ed1).lower_block.
             reset(new SimpleMatrix(indexSet->properties(ed1).upper_block->size(1),
@@ -195,7 +176,7 @@ void OneStepNSProblem::updateInteractionBlocks()
         else
         {
           assert(itar < isrc);    // lower block has been computed
-          if (!indexSet->properties(ed1).upper_block)
+          if(!indexSet->properties(ed1).upper_block)
           {
             indexSet->properties(ed1).upper_block.
             reset(new SimpleMatrix(indexSet->properties(ed1).lower_block->size(1),
@@ -212,18 +193,18 @@ void OneStepNSProblem::updateInteractionBlocks()
     DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Non symmetric case\n");
 
     InteractionsGraph::VIterator vi, viend;
-    for (std11::tie(vi, viend) = indexSet->vertices();
-         vi != viend; ++vi)
+    for(std11::tie(vi, viend) = indexSet->vertices();
+        vi != viend; ++vi)
     {
       DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Computation of diaganal block\n");
       SP::Interaction inter = indexSet->bundle(*vi);
       unsigned int nslawSize = inter->nonSmoothLaw()->size();
-      if (! indexSet->properties(*vi).block)
+      if(! indexSet->properties(*vi).block)
       {
         indexSet->properties(*vi).block.reset(new SimpleMatrix(nslawSize, nslawSize));
       }
 
-      if (!isLinear || !_hasBeenUpdated)
+      if(!isLinear || !_hasBeenUpdated)
       {
         computeDiagonalInteractionBlock(*vi);
       }
@@ -232,13 +213,13 @@ void OneStepNSProblem::updateInteractionBlocks()
       InteractionsGraph::OEIterator oei, oeiend;
       /* interactionBlock must be zeroed at init */
       std::map<SP::SiconosMatrix, bool> initialized;
-      for (std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
-           oei != oeiend; ++oei)
+      for(std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
+          oei != oeiend; ++oei)
       {
         /* on adjoint graph there is at most 2 edges between source and target */
         InteractionsGraph::EDescriptor ed1, ed2;
         std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
-        if (indexSet->properties(ed1).upper_block)
+        if(indexSet->properties(ed1).upper_block)
         {
           initialized[indexSet->properties(ed1).upper_block] = false;
         }
@@ -247,7 +228,7 @@ void OneStepNSProblem::updateInteractionBlocks()
         //   initialized[indexSet->properties(ed2).upper_block] = false;
         // }
 
-        if (indexSet->properties(ed1).lower_block)
+        if(indexSet->properties(ed1).lower_block)
         {
           initialized[indexSet->properties(ed1).lower_block] = false;
         }
@@ -258,8 +239,8 @@ void OneStepNSProblem::updateInteractionBlocks()
 
       }
 
-      for (std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
-           oei != oeiend; ++oei)
+      for(std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
+          oei != oeiend; ++oei)
       {
         DEBUG_PRINT("OneStepNSProblem::updateInteractionBlocks(). Computation of extra-diaganal block\n");
 
@@ -283,13 +264,13 @@ void OneStepNSProblem::updateInteractionBlocks()
 
         SP::SiconosMatrix currentInteractionBlock;
 
-        if (itar > isrc) // upper block
+        if(itar > isrc)  // upper block
         {
-          if (! indexSet->properties(ed1).upper_block)
+          if(! indexSet->properties(ed1).upper_block)
           {
             indexSet->properties(ed1).upper_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
             initialized[indexSet->properties(ed1).upper_block] = false;
-            if (ed2 != ed1)
+            if(ed2 != ed1)
               indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
           }
           currentInteractionBlock = indexSet->properties(ed1).upper_block;
@@ -297,26 +278,26 @@ void OneStepNSProblem::updateInteractionBlocks()
         }
         else  // lower block
         {
-          if (! indexSet->properties(ed1).lower_block)
+          if(! indexSet->properties(ed1).lower_block)
           {
             indexSet->properties(ed1).lower_block.reset(new SimpleMatrix(nslawSize1, nslawSize2));
             initialized[indexSet->properties(ed1).lower_block] = false;
-            if (ed2 != ed1)
+            if(ed2 != ed1)
               indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
           }
           currentInteractionBlock = indexSet->properties(ed1).lower_block;
         }
 
 
-        if (!initialized[currentInteractionBlock])
+        if(!initialized[currentInteractionBlock])
         {
           initialized[currentInteractionBlock] = true;
           currentInteractionBlock->zero();
         }
 
-        if (!isLinear || !_hasBeenUpdated)
+        if(!isLinear || !_hasBeenUpdated)
         {
-          if (isrc != itar)
+          if(isrc != itar)
             computeInteractionBlock(*oei);
         }
 
@@ -337,35 +318,35 @@ void OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet)
 
   std::cout <<  "OneStepNSProblem::displayBlocks(SP::InteractionsGraph indexSet) " << std::endl;
   InteractionsGraph::VIterator vi, viend;
-  for (std11::tie(vi, viend) = indexSet->vertices();
-       vi != viend; ++vi)
+  for(std11::tie(vi, viend) = indexSet->vertices();
+      vi != viend; ++vi)
   {
     SP::Interaction inter = indexSet->bundle(*vi);
-    if (indexSet->properties(*vi).block)
+    if(indexSet->properties(*vi).block)
     {
       indexSet->properties(*vi).block->display();
     }
 
     InteractionsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
-         oei != oeiend; ++oei)
+    for(std11::tie(oei, oeiend) = indexSet->out_edges(*vi);
+        oei != oeiend; ++oei)
     {
       InteractionsGraph::EDescriptor ed1, ed2;
       std11::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
 
-      if (indexSet->properties(ed1).upper_block)
+      if(indexSet->properties(ed1).upper_block)
       {
         indexSet->properties(ed1).upper_block->display();
       }
-      if (indexSet->properties(ed1).lower_block)
+      if(indexSet->properties(ed1).lower_block)
       {
         indexSet->properties(ed1).lower_block->display();
       }
-      if (indexSet->properties(ed2).upper_block)
+      if(indexSet->properties(ed2).upper_block)
       {
         indexSet->properties(ed2).upper_block->display();
       }
-      if (indexSet->properties(ed2).lower_block)
+      if(indexSet->properties(ed2).lower_block)
       {
         indexSet->properties(ed2).lower_block->display();
       }
@@ -385,7 +366,7 @@ void OneStepNSProblem::initialize(SP::Simulation sim)
   // The maximum size of the problem (for example, the dim. of M in
   // LCP or Friction problems).  Set to the number of possible scalar
   // constraints declared in the topology.
-  if (_maxSize == 0) // if maxSize not set explicitely by user before
+  if(_maxSize == 0)  // if maxSize not set explicitely by user before
     _maxSize = simulation()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 }
 
@@ -401,41 +382,41 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
   osiType = Osi.getType();
   dsType = Type::value(*ds);
 
-  if (osiType == OSI::MOREAUJEANOSI
+  if(osiType == OSI::MOREAUJEANOSI
       || osiType == OSI::MOREAUDIRECTPROJECTIONOSI)
   {
-      block = (static_cast<MoreauJeanOSI&> (Osi)).W(ds); // get its W matrix ( pointer link!)
+    block = (static_cast<MoreauJeanOSI&>(Osi)).W(ds);  // get its W matrix ( pointer link!)
   }
-  else if (osiType == OSI::MOREAUJEANBILBAOOSI)
+  else if(osiType == OSI::MOREAUJEANBILBAOOSI)
   {
-    block = (static_cast<MoreauJeanBilbaoOSI&> (Osi)).iteration_matrix(ds); // get its W matrix ( pointer link!)
+    block = (static_cast<MoreauJeanBilbaoOSI&>(Osi)).iteration_matrix(ds);  // get its W matrix ( pointer link!)
   }
-  else if (osiType == OSI::SCHATZMANPAOLIOSI)
+  else if(osiType == OSI::SCHATZMANPAOLIOSI)
   {
-      block = (static_cast<SchatzmanPaoliOSI&> (Osi)).W(ds); // get its W matrix ( pointer link!)
+    block = (static_cast<SchatzmanPaoliOSI&>(Osi)).W(ds);  // get its W matrix ( pointer link!)
   }
-  else if (osiType == OSI::EULERMOREAUOSI)
+  else if(osiType == OSI::EULERMOREAUOSI)
   {
     block = (static_cast<EulerMoreauOSI&>(Osi)).W(ds); // get its W matrix ( pointer link!)
   }
-  else if (osiType == OSI::LSODAROSI) // Warning: LagrangianDS only at the time !!!
+  else if(osiType == OSI::LSODAROSI)  // Warning: LagrangianDS only at the time !!!
   {
-    if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
+    if(dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for LsodarOSI Integrator with dynamical system of type " + dsType);
 
     // get lu-factorized mass
     block = (std11::static_pointer_cast<LagrangianDS>(ds))->inverseMass();
   }
-  else if (osiType == OSI::NEWMARKALPHAOSI)
+  else if(osiType == OSI::NEWMARKALPHAOSI)
   {
-    if (dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
+    if(dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
     {
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + dsType);
     }
     //
     SP::OneStepNSProblems  allOSNS  = Osi.simulation()->oneStepNSProblems();
     // If LCP at acceleration level
-    if (((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this)
+    if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == this)
     {
       block = (std11::static_pointer_cast<LagrangianDS>(ds))->inverseMass();
     }
@@ -444,11 +425,11 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
       block = (static_cast<NewMarkAlphaOSI&>(Osi)).W(ds);
     }
   } // End Newmark OSI
-  else if (osiType == OSI::D1MINUSLINEAROSI)
+  else if(osiType == OSI::D1MINUSLINEAROSI)
   {
     DEBUG_PRINT("OneStepNSProblem::getOSIMatrix  for osiType   OSI::D1MINUSLINEAR\n");
     /** \warning V.A. 30/052013 for implicit D1Minus it will not be the mass matrix for all OSNSP*/
-    if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
       // SP::SimpleMatrix Mold;
       // Mold.reset(new SimpleMatrix(*(std11::static_pointer_cast<LagrangianDS>(ds))->mass()));
@@ -463,7 +444,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
       /*Copy of the current mass matrix. */
       block.reset(new SimpleMatrix(*Mass));
     }
-    else if (dsType == Type::NewtonEulerDS)
+    else if(dsType == Type::NewtonEulerDS)
     {
       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
       //   d->computeMass();
@@ -475,9 +456,9 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinearOSI integrator with dynamical system of type " + dsType);
   }
   // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
-  else if (osiType == OSI::ZOHOSI)
+  else if(osiType == OSI::ZOHOSI)
   {
-    if (!block)
+    if(!block)
       block.reset(new SimpleMatrix((static_cast<ZeroOrderHoldOSI&>(Osi)).Ad(ds)));
     else
       *block = (static_cast<ZeroOrderHoldOSI&>(Osi)).Ad(ds);
@@ -489,7 +470,9 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
 
 void OneStepNSProblem::setSolverId(int solverId)
 {
-  RuntimeException::selfThrow("OneStepNSProblem::setSolverId - this virtual method should be implemented in all derived classes!");
+  // And create a new one, with default parameters values.
+  _numerics_solver_options.reset(solver_options_create(solverId),
+                                 solver_options_delete);
 }
 
 void OneStepNSProblem::setNumericsVerboseMode(bool vMode)

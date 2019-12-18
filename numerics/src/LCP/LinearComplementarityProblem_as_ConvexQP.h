@@ -22,8 +22,8 @@
   \brief Definition of a structure to handle with LCP problems.
 */
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
+#include "NumericsFwd.h"  // for ConvexQP, LinearComplementarityProblem, Sol...
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct LinearComplementarityProblem_as_ConvexQP LinearComplementarityProblem_as_ConvexQP.h
  *

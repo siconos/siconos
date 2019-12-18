@@ -29,7 +29,6 @@
 // Problems
 %newobject variationalInequality_new;
 %newobject frictionContactProblem_new;
-%newobject genericMechanical_newFromFile;
 %newobject genericMechanicalProblem_new;
 
 // NumericsMatrix

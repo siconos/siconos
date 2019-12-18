@@ -74,7 +74,6 @@ function(create_siconos_component COMPONENT)
       CACHE INTERNAL "")
   endif()
   
-  configure_component_documentation(${COMPONENT})
   
 endfunction()
 
@@ -99,7 +98,10 @@ endfunction()
 #   excluding files from <component>_EXCLUDE_SRCS
 #
 function(configure_component_documentation COMPONENT)
-  
+
+  set(multiValueArgs HEADERS)
+  cmake_parse_arguments(component "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
   include(doc_tools)
   # --- doxygen warnings ---
   include(doxygen_warnings)
@@ -124,7 +126,7 @@ function(configure_component_documentation COMPONENT)
   # update the main doxy file, without building the doc
   if(WITH_${COMPONENT}_DOCUMENTATION  OR WITH_SERIALIZATION)
     # Prepare target to generate rst files from xml
-    doxy2rst_sphinx(${COMPONENT})
+    doxy2rst_sphinx(${COMPONENT} HEADERS ${component_HEADERS})
   endif()
 endfunction()
 
@@ -183,11 +185,15 @@ function(siconos_component_install_setup COMPONENT)
       FILES ${_all_headers}
       DESTINATION include/siconos/${COMPONENT}
       )
-
+    
     # Add include dirs in target interface 
     target_include_directories(${COMPONENT} INTERFACE
       $<INSTALL_INTERFACE:include/siconos/${COMPONENT}>)
+
   endif()
+
+  # prepare documentation
+  configure_component_documentation(${COMPONENT} HEADERS ${_all_headers})
 
   # Set installed_targets list (for siconos-config.cmake file)
   list(APPEND installed_targets ${COMPONENT})

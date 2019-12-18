@@ -40,20 +40,18 @@ extern "C"
    * \param[in,out]  velocity global vector (n)
    * \param[in,out] options structure used to define the solver(s) and their parameters
    *               option->iparam[0]:nb max of iterations
-   *   option->iparam[1]:0 without 'LS' 1 with.
-   *   option->iparam[2]:0 GS block after block, 1 eliminate the equalities, 2 only one equality block, 3 solve the GMP as a MLCP.
-   *   option->iparam[3]: output, number of GS it.
-   *   options->dparam[0]: tolerance
+   *   option->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_LINESEARCH]:0 without 'LS' 1 with.
+   *   option->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED]:0 GS block after block, 1 eliminate the equalities, 2 only one equality block, 3 solve the GMP as a MLCP.
+   *   option->iparam[SICONOS_IPARAM_ITER_DONE]: output, number of GS it.
+   *   options->dparam[SICONOS_DPARAM_TOL]: tolerance
    * \return result (0 if successful otherwise 1).
    */
   int gmp_driver(GenericMechanicalProblem* problem, double *reaction , double *velocity, SolverOptions* options);
 
-  /* Set the default solver options
-   * It assumes that options is not NULL.
-   * \param [in] id, not used in the current version
-   * \param [in,out] options, the filled options.(by default LEMKE and Quartic)
+  /** \addtogroup SetSolverOptions @{
    */
-  void gmp_setDefaultSolverOptions(SolverOptions* options, int id);
+  void gmp_set_default(SolverOptions* options);
+  /** @} */
 
 
   /* Alloc memory iff options->iWork and options->dWork  are  null.

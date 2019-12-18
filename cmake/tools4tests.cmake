@@ -92,7 +92,7 @@ macro(test_windows_setup test_name test_sources)
   # fortran -> gfortran; {c,cpp} -> link.exe
   if(BUILD_AS_CPP)
     set(EXE_FORTRAN FALSE) # Windows only
-    foreach(_file IN LISTS ${test_sources)
+    foreach(_file IN LISTS ${test_sources})
       if(${_file} MATCHES "[.]c$")
         set_source_files_properties(${_file} PROPERTIES LANGUAGE CXX)
       endif()
@@ -153,7 +153,7 @@ function(new_test)
   file(APPEND ${TESTS_LOGFILE} "Add test ${CURRENT_TEST_DIR}/${TEST_NAME} \n")
 
   # -- Check if data files are required --
-  # If so, copy the corresponding file into the working directory
+  # If so, copy the corresponding files into the working directory
   if(TEST_DATA)
     foreach(_datafile IN LISTS TEST_DATA)
       file(APPEND ${TESTS_LOGFILE} "Copy data file : ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${_datafile} \n")
@@ -191,7 +191,7 @@ function(new_test)
   
   # Set path where exe should be generated
   set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/)
-
+  
   test_windows_setup(${TEST_NAME} ${TEST_SOURCES})
 
   # -- link with current component and its dependencies --
@@ -285,13 +285,16 @@ endfunction()
 # - create the test named <NAME>_<COLLECTION><SUFFIX> from sources and data set.
 function(new_tests_collection)
   set(oneValueArgs DRIVER NAME COLLECTION SUFFIX FORMULATION HDF5)
-  set(multiValueArgs DATASET EXTRA_SOURCES)
+  set(multiValueArgs EXTRA_SOURCES)
   cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   # set(TEST_SOLVER SICONOS_${PROBLEM_NAME}_${PROBLEM_SOLVER}) # Required for configure below!
   # This value is replaced in solver call in .c file.
   # Generate source file
   set(generated_driver_name ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}.c)
+  if(BUILD_AS_CPP)
+    set(generated_driver_name ${generated_driver_name}xx)
+  endif()
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${PROBLEM_DRIVER}
     ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name})
@@ -301,7 +304,6 @@ function(new_tests_collection)
   new_test(
     SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name} ${PROBLEM_EXTRA_SOURCES}
     NAME ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}
-    DATA_SET "${PROBLEM_DATASET}"
     HDF5 ${PROBLEM_HDF5}
     )
  
@@ -311,7 +313,7 @@ endfunction()
 function(new_lcp_tests_collection)
   set(options)
   set(oneValueArgs COLLECTION SUFFIX)
-  set(multiValueArgs DATASET EXTRA_SOURCES)
+  set(multiValueArgs EXTRA_SOURCES)
   cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   new_tests_collection(

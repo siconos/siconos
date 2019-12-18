@@ -23,9 +23,7 @@
  * \brief function to project on cones
  */
 
-#include "SiconosConfig.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 enum {PROJRCONE_DUAL, PROJRCONE_INSIDE, PROJRCONE_BOUNDARY_FRICTION, PROJRCONE_BOUNDARY_ROLLING, PROJRCONE_BOUNDARY_FRICTION_ROLLING};
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
