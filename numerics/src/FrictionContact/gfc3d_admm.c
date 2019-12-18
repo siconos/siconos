@@ -251,7 +251,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
                 double* restrict velocity, double* restrict globalVelocity,
                 int* restrict info, SolverOptions* restrict options)
 {
-  verbose=1;
+  /* verbose=1; */
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -989,7 +989,7 @@ void gfc3d_admm_set_default(SolverOptions* options)
   //SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_GET_PROBLEM_INFO] =
-    SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_YES;
+    SICONOS_FRICTION_3D_ADMM_GET_PROBLEM_INFO_NO;
 
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_FULL_H] =
     SICONOS_FRICTION_3D_ADMM_FULL_H_NO;
