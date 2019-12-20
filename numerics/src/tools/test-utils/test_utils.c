@@ -20,7 +20,7 @@
 #include <stdlib.h>         // for free
 #include "SolverOptions.h"  // for solver_options_id_to_name, SolverOptions
 #include <time.h>
-
+#include "numerics_verbose.h"
 /* Auxiliary routine: printing a matrix */
 void print_matrix(const char* desc, int m, int n, double* a, int lda)
 {
@@ -82,6 +82,13 @@ void print_test_info(int test_id, TestCase* current, const char* msg)
 void print_tests_collection_report(TestCase * collection, int n_failed, int * failed_tests,
                                    int n_succeeded, int * succeeded_tests)
 {
+
+
+  printf("\n Succeeded tests ids: [ ");
+  for(int t =0; t < n_succeeded; t++)
+    printf("%i, ", succeeded_tests[t]);
+  printf("] :\n");
+
   printf("\n Failed tests ids: [ ");
   for(int t =0; t < n_failed; t++)
     printf("%i, ", failed_tests[t]);
@@ -143,6 +150,9 @@ int run_test_collection(TestCase * collection, int number_of_tests, int (*test_f
     printf("\n################# start of test # %i #######################\n", test_num);
     printf("Solver : %s (id: %d) \n", solver_options_id_to_name(collection[test_num].options->solverId),
            collection[test_num].options->solverId);
+    /* verbose=1; */
+    solver_options_print(collection[test_num].options);
+    /* verbose=0; */
     for(size_t i=0; i<collection[test_num].options->numberOfInternalSolvers; ++i)
     {
       int sid = collection[test_num].options->internalSolvers[i]->solverId;
