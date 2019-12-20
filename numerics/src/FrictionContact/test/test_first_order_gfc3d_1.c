@@ -24,7 +24,7 @@
 
 TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_solvers = 9;
+  int n_solvers = 10;
   *number_of_tests = n_data * n_solvers;
   TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
@@ -93,7 +93,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
     current++;
   }
@@ -103,7 +103,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S] = SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO;
     current++;
@@ -114,10 +114,22 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S] = SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO;
-    collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] =  SICONOS_FRICTION_3D_RESCALING_YES;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] =  SICONOS_FRICTION_3D_RESCALING_SCALAR;
+    current++;
+  }
+  for(int d =0; d <n_data; d++)
+  {
+    // GFC3D, ADMM
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S] = SICONOS_FRICTION_3D_ADMM_UPDATE_S_NO;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] =  SICONOS_FRICTION_3D_RESCALING_BALANCING_M;
     current++;
   }
 

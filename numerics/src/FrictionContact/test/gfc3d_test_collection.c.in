@@ -30,24 +30,29 @@ int main (int argc, char *argv[])
 {
   const char ** _data_collection = data_collection();
   int n_data = 0;
-  
+
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
-  
+
   while (strcmp(_data_collection[n_data], "---") !=0)
     {
       n_data++;
     }
   printf("number of data = %i\n", n_data);
-  
+
   int number_of_tests;
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
 
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
 
 #if defined(TEST_FIRST_ORDER_COLLECTION_1)
-    collection[18].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
+  collection[2].will_fail = 1; /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[8].will_fail = 1; /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat*/
+  collection[14].will_fail = 1;/*GFC3D_VI_EG, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[20].will_fail = 1;/*GFC3D_VI_FPP, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[22].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
+  collection[53].will_fail = 1;  /* GFC3D ADMM, on ./data/GFC3D_TwoRods1.dat with scalar rescaling*/
 #endif
 #if defined(TEST_FIRST_ORDER_COLLECTION_FCLIB)
     /* collection[1].will_fail = 1;  // GFC3D_NSGS	./data/LMGC_GFC3D-i00001-1-00000.hdf5  *\/ */
@@ -66,18 +71,15 @@ int main (int argc, char *argv[])
 #if defined(TEST_WR_COLLECTION_FCLIB)
     collection[4].will_fail = 1;
     collection[10].will_fail = 1;
-#endif    
-  
+#endif
+
   int out = run_test_collection(collection, number_of_tests, globalFrictionContact_test_function);
 
   free_test_collection(collection, number_of_tests);
-  
+
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif
-  
+
   return out;
 }
-  
-
-  

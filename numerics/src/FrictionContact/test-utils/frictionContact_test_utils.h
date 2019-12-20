@@ -32,7 +32,7 @@ extern "C"
    */
   void frictionContact_test_gams_opts(SolverOptions * options);
 #endif
-  
+
   /** Solves fc3d using parameters and reference from a pre-defined TestCase
       return 1 if the test has succeeded.
   */
@@ -49,9 +49,9 @@ extern "C"
   int rollingFrictionContact_test_function(TestCase*);
 
   /** Creates a test collection (a 'list' of tests, each test being a TestCase, i.e. options + input data).
-      
+
       this function must be implemented for each tests collection (see e.g. test_nsgs_1.c, test_fp_1.c and so on)
-      
+
       \param n_data number of ref files
       \param data_collection 'list' of ref files
       \param[out] number of tests
@@ -60,10 +60,8 @@ extern "C"
   TestCase * build_test_collection(int n_data, const char ** data_collection, int*);
 
 
-#if defined(__cplusplus) && !defined(BUILD_AS_CPP) 
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
 #endif
-
-

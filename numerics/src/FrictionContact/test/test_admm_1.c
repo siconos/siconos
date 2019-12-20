@@ -64,7 +64,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_RESIDUAL_BALANCING;
-    collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_YES;
+    collection[current].options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_SCALAR;
     current++;
   }
 

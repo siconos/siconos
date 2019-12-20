@@ -293,7 +293,7 @@ void globalFrictionContact_rescaling(
   cblas_dscal(m,beta,problem->b,1);
 
 }
-static void globalFrictionContact_balancing_full (
+void globalFrictionContact_balancing_M_H (
   GlobalFrictionContactProblem* problem,
   BalancingMatrices * B_for_M,
   BalancingMatrices * B_for_H)
@@ -349,15 +349,11 @@ static void globalFrictionContact_balancing_full (
 }
 
 
-void globalFrictionContact_balancing(
+void globalFrictionContact_balancing_M(
   GlobalFrictionContactProblem* problem,
-  BalancingMatrices * B_for_M,
-  BalancingMatrices * B_for_H)
+  BalancingMatrices * B_for_M)
 {
-
-
   assert(B_for_M);
-  assert(B_for_H);
   
   int nc = problem->numberOfContacts;
   int n = problem->M->size0;
@@ -386,10 +382,6 @@ void globalFrictionContact_balancing(
   
   /* scaling of b */
   /* cblas_dscal(m,beta,problem->b,1); */
-  /* double * b_tmp = (double *) malloc(m*sizeof(double)); */
-  /* NM_gemv(1.0, B_for_H->D1, problem->b, 0.0, b_tmp); */
-  /* cblas_dcopy(m, b_tmp, 1, problem->b, 1); */
-
 
   NM_clear(M_tmp);
   free(M_tmp);

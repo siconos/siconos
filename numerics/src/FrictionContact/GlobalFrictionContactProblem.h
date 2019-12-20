@@ -113,10 +113,15 @@ extern "C"
   GlobalFrictionContactProblem* globalFrictionContact_copy(GlobalFrictionContactProblem* problem);
 
   void globalFrictionContact_rescaling(GlobalFrictionContactProblem* problem, double alpha,  double beta, double gamma);
-  void globalFrictionContact_balancing(
+  void globalFrictionContact_balancing_M(
+    GlobalFrictionContactProblem* problem,
+    BalancingMatrices * B_for_M);
+  void globalFrictionContact_balancing_M_H(
     GlobalFrictionContactProblem* problem,
     BalancingMatrices * B_for_M,
     BalancingMatrices * B_for_H);
+
+  
   /** Compute the global velocity given the reaction
    * \param[in] problem to be considered
    * \param[in] reaction the reaction, if there is no contacts reaction can be NULL
