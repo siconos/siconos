@@ -334,7 +334,10 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   {
     numerics_printf_verbose(1,"---- GFC3D - ADMM - Rescaling of the problem by balancing M");
     rescaled_problem =  globalFrictionContact_copy(problem);
-    B_for_M =  NM_compute_balancing_matrices(problem->M, 1e-03, 100);
+    
+    
+    B_for_M = NM_BalancingMatrices_new(problem->M);
+
     /* B_for_H =  NM_compute_balancing_matrices(problem->H, 1e-03, 100); */
     globalFrictionContact_balancing_M(rescaled_problem, B_for_M);
     M = rescaled_problem->M;
@@ -352,6 +355,28 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
      norm_q = cblas_dnrm2(n, rescaled_problem->q, 1);
      printf("norm_q (rescaled) = %e\n", norm_q););
   }
+  /* else if (options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_BALANCING_M) */
+  /* { */
+  /*   numerics_printf_verbose(1,"---- GFC3D - ADMM - Rescaling of the problem by balancing M and H"); */
+  /*   rescaled_problem =  globalFrictionContact_copy(problem); */
+  /*   B_for_M =  NM_compute_balancing_matrices(problem->M, 1e-03, 100); */
+  /*   B_for_H =  NM_compute_balancing_matrices(problem->H, 1e-03, 100); *\/ */
+  /*   globalFrictionContact_balancing_M(rescaled_problem, B_for_M_H); */
+  /*   M = rescaled_problem->M; */
+  /*   H = rescaled_problem->H; */
+  /*   q = rescaled_problem->q; */
+  /*   b = rescaled_problem->b; */
+  /*   NM_clear(Htrans); */
+  /*   free(Htrans); */
+  /*   Htrans =  NM_transpose(H); */
+  /*   /\* globalFrictionContact_display(rescaled_problem); *\/ */
+  /*   /\* getchar(); *\/ */
+  /*   DEBUG_EXPR */
+  /*   (double norm_q = cblas_dnrm2(n, problem->q, 1); */
+  /*    printf("norm_q = %e\n", norm_q); */
+  /*    norm_q = cblas_dnrm2(n, rescaled_problem->q, 1); */
+  /*    printf("norm_q (rescaled) = %e\n", norm_q);); */
+  /* } */
   else
   {
     numerics_printf_verbose(1,"---- GFC3D - ADMM - No rescaling of the problem");

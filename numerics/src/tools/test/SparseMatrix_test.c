@@ -888,7 +888,8 @@ static int test_NM_compute_balancing_matrices(void)
 
   NM_display(A);
 
-  BalancingMatrices * B =  NM_compute_balancing_matrices(A, 1e-03, 10);
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 10, B);
 
   printf("D1\n:");
   NM_display(B->D1);
@@ -922,8 +923,9 @@ static int test_NM_compute_balancing_matrices_sym(void)
 
   NM_display(A);
 
-  BalancingMatrices * B =  NM_compute_balancing_matrices(A, 1e-03, 10);
 
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 10, B);
   printf("D1\n:");
   NM_display(B->D1);
   printf("D2\n:");
@@ -951,9 +953,8 @@ static int test_NM_compute_balancing_matrices_rectangle(void)
   }
 
   NM_display(A);
-
-  BalancingMatrices * B =  NM_compute_balancing_matrices(A, 1e-09, 100);
-
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 100, B);
   printf("D1\n:");
   NM_display(B->D1);
   printf("D2\n:");

@@ -3856,11 +3856,8 @@ BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A)
 }
 
 
-BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax)
+int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, BalancingMatrices * B )
 {
-
-  BalancingMatrices * B = NM_BalancingMatrices_new(A);
-
 
   NumericsMatrix* D1_k = B->D1;
   NumericsMatrix* D2_k = B->D2;
@@ -3908,8 +3905,6 @@ BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol,
       D_C_x[i] =1.0/sqrt(D_C_x[i]);
     }
 
-
-
     /* Update balancing matrix */
     NM_gemm(1.0, D1_k, D_R, 0.0, D1_tmp);
     NM_copy(D1_tmp, D1_k);
@@ -3954,9 +3949,6 @@ BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol,
     //error = fabs(1.0-NV_max(D_C_x,size)) +
     //  fabs(1.0-NV_max(D_R_x,size));
 
-
-
-
     numerics_printf_verbose(2,"NM_compute_balancing_matrices error =%e", error);
     /* printf("D_R ");NV_display(D_R_x, size); */
     /* printf("D_C ");NV_display(D_C_x, size); */
@@ -3980,7 +3972,10 @@ BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol,
   NM_clear(A_tmp);
   free(A_tmp);
 
-  return B;
-
-
+  if (error > tol)
+  {
+    return 0;
+  }
+  else
+    return 1;
 }

@@ -775,28 +775,28 @@ extern "C"
 
   /* Compute the maximum values by columns
    *  \param A the matrix
-   *  \param max the vecor of max that must be preallocated
+   *  \param max the vector of max that must be preallocated
    *  \return info
    */
   int NM_max_by_columns(NumericsMatrix *A, double * max);
 
   /* Compute the maximum values by rows
    *  \param A the matrix
-   *  \param max the vecor of max that must be preallocated
+   *  \param max the vector of max that must be preallocated
    *  \return info
    */
   int NM_max_by_rows(NumericsMatrix *A, double * max);
   
   /* Compute the maximum absolute values by columns
    *  \param A the matrix
-   *  \param max the vecor of max that must be preallocated
+   *  \param max the vector of max that must be preallocated
    *  \return info
    */
   int NM_max_abs_by_columns(NumericsMatrix *A, double * max);
 
   /* Compute the maximum absolute values by rows
    *  \param A the matrix
-   *  \param max the vecor of max that must be preallocated
+   *  \param max the vector of max that must be preallocated
    *  \return info
    */
   int NM_max_abs_by_rows(NumericsMatrix *A, double * max);
@@ -805,9 +805,10 @@ extern "C"
    *  \param A the matrix
    *  \param tol tolerance on the balanced matrix
    *  \param itermax max number of iterations
-   *  \return the balancing matrices and the balanced matrix
+   *  \param alloated structure for the balancing matrices and the balanced matrix
+   * \return 0 if succeed.
    */
-  BalancingMatrices * NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax);
+  int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, BalancingMatrices * B);
 
   /* Create a Balancing Matrices structure
    *  \param A the matrix  to be balanced
