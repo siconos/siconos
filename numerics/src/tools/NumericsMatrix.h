@@ -29,6 +29,7 @@
 #include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
 #include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
 #include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
+#include "NM_MPI.h"
 
 #ifndef __cplusplus
 #include <stdbool.h>        // for bool
