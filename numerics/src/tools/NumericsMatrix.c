@@ -2399,7 +2399,7 @@ CSparseMatrix* NM_half_triplet(NumericsMatrix* A)
       default:
       case NSM_UNKNOWN:
       {
-        NSM_UNKNOWN_ERR("NM_half_triplet", A->matrix2->origin);
+        NSM_UNKNOWN_ERR("NM_half_triplet", (int) A->matrix2->origin);
         exit(EXIT_FAILURE);
       }
       }
