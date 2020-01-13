@@ -139,9 +139,9 @@ void mlcp_direct_init(MixedLinearComplementarityProblem* problem, SolverOptions*
     printf("n= %d  m= %d /n sTolneg= %lf sTolpos= %lf \n", sN, sM, sTolneg, sTolpos);
 
   sNpM = sN + sM;
-  spCurCC = 0;
-  spFirstCC = 0;
-  sNumberOfCC = 0;
+  //spCurCC = 0;
+  //spFirstCC = 0;
+  //sNumberOfCC = 0;
   sQ = mydMalloc(sNpM);
   sVBuf = mydMalloc(sNpM);
   spIntBuf = myiMalloc(sNpM);
