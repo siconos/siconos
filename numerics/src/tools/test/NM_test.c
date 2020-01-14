@@ -1954,11 +1954,19 @@ static int test_NM_posv_expert_unit(NumericsMatrix * M, double * b)
   for(int j=0; j < n; j++)
     y[j] = b[j];
   NSM_linear_solver_params* p = NSM_linearSolverParams(M);
+#ifdef WITH_MUMPS
+  p->solver = NSM_MUMPS;
+  NM_MUMPS_set_verbosity(M, 1);
+#else
   p->solver = NSM_CS_CHOLSOL;
+#endif
+
+  double res;
+#ifndef WITH_MUMPS
   NM_posv_expert(M, b, NM_PRESERVE);
   NV_display(b,n);
   NM_gemv(-1.0, M, b, 1.0, y);
-  double res = cblas_dnrm2(n,y,1);
+  res = cblas_dnrm2(n,y,1);
 
   printf("residual = %e\n", res);
   if(fabs(res) >= sqrt(DBL_EPSILON))
@@ -1968,7 +1976,7 @@ static int test_NM_posv_expert_unit(NumericsMatrix * M, double * b)
   }
   else
     info=0;
-
+#endif
 
   printf("Cholesky solve keeping factors\n");
   for(int j=0; j < n; j++)
@@ -2122,8 +2130,13 @@ static int test_NM_posv_expert(void)
   return info;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
+
+#ifdef SICONOS_HAS_MPI
+  MPI_Init(&argc, &argv);
+#endif
+
   int info = NM_read_write_test();
 
   info += NM_add_to_diag3_test_all();
@@ -2158,6 +2171,10 @@ int main(void)
   info += test_NM_gesv_expert();
 
   info += test_NM_posv_expert();
+
+#ifdef SICONOS_HAS_MPI
+  MPI_Finalize();
+#endif
 
   return info;
 

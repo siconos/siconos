@@ -36,6 +36,12 @@ extern "C"
    */
   CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc);
 
+  /** Convert from csc to half triplet for symmetric matrices
+   * \param csc the matrix to convert
+   * \return the matrix in triplet format
+   */
+  CSparseMatrix* NM_csc_to_half_triplet(CSparseMatrix* csc);
+
   /** Convert from triplet (aka coo) to csr
    * \param triplet the matrix to convert
    * \return the matrix in csr format

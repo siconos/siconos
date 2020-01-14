@@ -72,6 +72,7 @@ void NSM_null(NumericsSparseMatrix* A)
 {
   A->linearSolverParams = NULL;
   A->triplet = NULL;
+  A->half_triplet = NULL;
   A->csc = NULL;
   A->trans_csc = NULL;
   A->csr = NULL;
@@ -99,6 +100,12 @@ double* NSM_data(NumericsSparseMatrix* A)
   {
     assert(A->triplet);
     return A->triplet->x;
+    break;
+  }
+  case NSM_HALF_TRIPLET:
+  {
+    assert(A->half_triplet);
+    return A->half_triplet->x;
     break;
   }
   default:
@@ -130,7 +137,12 @@ NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A)
     cs_spfree(A->triplet);
     A->triplet = NULL;
   }
-  if(A->csc)
+  if (A->half_triplet)
+  {
+    cs_spfree(A->half_triplet);
+    A->half_triplet = NULL;
+  }
+  if (A->csc)
   {
     cs_spfree(A->csc);
     A->csc = NULL;
@@ -367,6 +379,8 @@ CSparseMatrix* NSM_get_origin(const NumericsSparseMatrix* M)
     return M->csc;
   case NSM_TRIPLET:
     return M->triplet;
+  case NSM_HALF_TRIPLET:
+    return M->half_triplet;
   case NSM_CSR:
     return M->csr;
   default:

@@ -75,7 +75,7 @@ extern "C"
 
   /**\enum NumericsSparseOrigin NumericsSparseMatrix.h
    * matrix storage types */
-  typedef enum { NSM_UNKNOWN, NSM_TRIPLET, NSM_CSC, NSM_CSR } NumericsSparseOrigin;
+  typedef enum { NSM_UNKNOWN, NSM_TRIPLET, NSM_CSC, NSM_CSR, NSM_HALF_TRIPLET } NumericsSparseOrigin;
 
 
   /** \struct NumericsSparseMatrix NumericsSparseMatrix.h
@@ -84,6 +84,7 @@ extern "C"
   struct NumericsSparseMatrix
   {
     CSparseMatrix* triplet;    /**< triplet format, aka coordinate */
+    CSparseMatrix* half_triplet;    /**< halt triplet format for symmetric matrices */
     CSparseMatrix* csc;        /**< csc matrix */
     CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
     CSparseMatrix* csr;        /**< csr matrix, only supported with mkl */
