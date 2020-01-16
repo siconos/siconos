@@ -26,10 +26,10 @@
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
-//#define MAX_PIVOT
-//#define INV_PIVOT
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+/* #define MAX_PIVOT */
+/* #define INV_PIVOT */
 #include "debug.h"                         // for DEBUG_EXPR_WE, DEBUG_PRINT
 #include "lcp_cst.h"                       // for SICONOS_LCP_IPARAM_PIVOTIN...
 #include "numerics_verbose.h"              // for verbose
