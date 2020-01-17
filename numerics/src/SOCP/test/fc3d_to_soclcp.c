@@ -15,26 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "soclcp_test_function.h"
-#include "FrictionContactProblem.h"
-#include "SecondOrderConeLinearComplementarityProblem.h"
-
-#include "../FrictionContact/test-utils/frictionContact_test_utils.h"
-
-
+#include <stdio.h>                                        // for fopen, printf
+#include <stdlib.h>                                       // for malloc
+#include "FrictionContactProblem.h"                       // for FrictionCon...
+#include "NumericsFwd.h"                                  // for FrictionCon...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 
 int main(void)
 {
   int info = 0 ;
   printf("Test on ./data/FC3D_Example1_SBM.dat\n");
-  FILE * finput  =  fopen("../../FrictionContact/test/data/Capsules-i122-1617.dat", "r");
+  const char * filename = "../../FrictionContact/test/data/Capsules-i122-1617.dat";
 
-  FrictionContactProblem* problem = (FrictionContactProblem *)malloc(sizeof(FrictionContactProblem));
-
-  info = frictionContact_newFromFile(problem, finput);
+  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
 
   unsigned int * coneIndex = (unsigned int *) malloc((problem->numberOfContacts+1)*sizeof(unsigned int));
@@ -64,7 +57,6 @@ int main(void)
   frictionContactProblem_free(problem);
 
 
-  fclose(finput);
   printf("\nEnd of test on ./data/FC3D_Example1_SBM.dat\n");
   return info;
 }

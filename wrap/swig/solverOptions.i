@@ -26,10 +26,11 @@
 #else
 #define FE_SWIG_INTERNAL_MEMBER 
 #endif
-
 %{
 #include "Newton_methods.h"
 %}
+
+typedef size_t size_t;
 
 #ifdef SWIGPYTHON
 #define FPyArray_SimpleNewFromData(nd, dims, typenum, data)             \
@@ -151,7 +152,8 @@ static int convert_darray(PyObject *input, double *ptr) {
   }
 
   if ($1) { free($1); };
-
+  printf("TYPEMAP IN\n") ;
+  
   $1 = &temp[0];
 
   // arg1 is *SolverOptions. May be version dependent, how to get
@@ -171,79 +173,12 @@ static int convert_darray(PyObject *input, double *ptr) {
   if ($1) { free($1); };
 
   $1 = &temp[0];
-
+  printf("TYPEMAP OUT\n") ;
   // arg1 is *SolverOptions. May be version dependent, how to get
   // this?
   if (arg1) arg1->dSize = PyObject_Length($input);
 
  }
-
-%typemap(out) (SolverOptions* internalSolvers) {
-  int i = arg1->numberOfInternalSolvers;
-  $result = PyList_New(i);
-  for (--i; i >= 0; --i) {
-    PyObject *o = SWIG_NewPointerObj(SWIG_as_voidptr(& $1[i]),
-                                     $1_descriptor, 0);
-    PyList_SetItem($result,i,o);
-  }
-}
-
-%typemap(in) (SolverOptions* internalSolvers) {
-  if (arg1) {
-    // $self
-    // Typecheck whole sequence before touching the target data structure
-    if (!PySequence_Check($input) || PySequence_Length($input)<0)
-      %argument_fail(SWIG_ValueError, "sequence of $type", $symname, $argnum);
-    int i, len = PySequence_Length($input);
-    for (i=0; i < len; i++) {
-      $ltype so;
-      PyObject *o = PySequence_GetItem($input, i);
-      int res = SWIG_ConvertPtr(o, SWIG_as_voidptrptr(&so), $descriptor, 0);
-      Py_DECREF(o);
-      if (!SWIG_IsOK(res))
-        %argument_fail(SWIG_ValueError, "$type", $symname, $argnum);
-    }
-
-    // Free previous solver options memory
-    for (i=0; i < arg1->numberOfInternalSolvers; i++)
-      solver_options_delete(&arg1->internalSolvers[i]);
-    if (len <= 0 || $input==Py_None)
-    {
-      arg1->numberOfInternalSolvers = 0;
-      if (arg1->internalSolvers)
-        free(arg1->internalSolvers);
-      arg1->internalSolvers = 0;
-    }
-    else
-    {
-      // Zero old memory or allocate new memory
-      if (arg1->numberOfInternalSolvers == len)
-      {
-        $1 = arg1->internalSolvers;
-        memset($1, 0, sizeof(struct SolverOptions)*len);
-      }
-      else
-      {
-        if (arg1->internalSolvers)
-          free(arg1->internalSolvers);
-        arg1->numberOfInternalSolvers = len;
-        $1 = ($ltype)calloc(arg1->numberOfInternalSolvers,
-                            sizeof(struct SolverOptions));
-      }
-    }
-
-    // Perform the copy of each SolverOptions
-    for (i=0; i < len; i++) {
-      $ltype so;
-      PyObject *o = PySequence_GetItem($input, i);
-      SWIG_ConvertPtr(o, SWIG_as_voidptrptr(&so), $descriptor, 0);
-      Py_DECREF(o);
-      solver_options_copy(so, &$1[i]);
-    }
-  }
-  else
-    SWIG_fail;
-}
 #endif /* SWIGPYTHON */
 
 #ifdef SWIGMATLAB

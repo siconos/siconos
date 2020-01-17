@@ -1,10 +1,15 @@
-.. index:: single: Affine Variational Inequalities (AVI)
+.. index::
+   single: Affine Variational Inequalities (AVI)
+   
+.. contents::
+
 .. _avi_problem:
 
 Affine Variational Inequalities (AVI)
-=====================================
+*************************************
 
-.. rubric:: Problem:
+Problem statement
+=================
 
 The Affine Variational Inequality (AVI) is defined by
 
@@ -22,57 +27,46 @@ or equivalently,
 
 where :math:`\mathcal{N}_K` is the normal cone to :math:`K` at :math:`z` .
 
-The AVI is a special case of a Variational Inequality (VI), where the function :math:`F` is affine. For VI solvers, see :ref:`Variational Inequality (VI) <vi_problem>` .
+The AVI is a special case of a Variational Inequality (VI), where the function :math:`F` is affine. For VI solvers, see :ref:`vi_problem`.
 
-From more details on theory and analysis of AVI (and VI in general), we refer to
+From more details on theory and analysis of AVI (and VI in general), we refer to :cite:`Facchinei.2003`
 
-Facchinei, Francisco; Pang, Jong-Shi (2003), *Finite Dimensional Variational Inequalities and Complementarity Problems* , Vol. 1 & 2, Springer Series in Operations Research, Berlin-Heidelberg-New York: Springer-Verlag.
+Implementation in numerics
+==========================
 
-.. _avi_problem_1aviSolversList:
-.. rubric:: Available solvers:
+Structure to define the problem: :class:`AffineVariationalInequalities`.
 
-The solvers and their parameters are described in :ref:`Affine Variational Inequalities Solvers <avi_problem_solvers>` .
+The generic driver for all VI is :func:`avi_driver()`.
 
-Use the generic function AVI_driver() to call one the the specific solvers listed below:
+solvers list  :enum:`AVI_SOLVER`
 
-* :func:`avi_caoferris()` , direct solver for AVI based on pivoting method principle for degenerate problem.
-  
-  Choice of pivot variable is performed via lexicographic ordering
+.. _avi_solvers:
 
-(see also the functions/solvers list in ``AVI_Solvers.h`` and numbering in ``AVI_cst.h`` )
+AVI Available solvers
+=====================
 
+Cao Ferris (:enumerator:`SICONOS_AVI_CAOFERRIS`)
+------------------------------------------------
 
-.. index:: single: Affine Variational Inequalities Solvers
-.. _avi_problem_solvers:
+Direct solver for AVI based on pivoting method principle for degenerate problem. Choice of pivot variable is performed via lexicographic ordering
 
-.. rubric:: Affine Variational Inequalities Solvers:
-
-Overview of the available solvers for AVI and their required parameters.
-
-For each solver, the input argument are:
-
-* an :class:`AffineVariationalInequalities`
-
-* the unknown z
-
-* the value of the function F(z)
-
-* info, the termination value (0: convergence, >0 problem which depends on the solver)
-
-* a SolverOptions struct, which contains iparam and dparam
-
-.. _avi_problem_solvers_1aviCaoFerris:
-.. rubric:: The Cao-Ferris algorithm:
-
-Direct solver for AVI based on pivoting method principle for (degenerated) problem.
-
-function: :func:`avi_caoferris()`
+driver: :func:`avi_caoferris()`
 
 parameters:
 
-* iparam[0] (in): max. number of iterations
+* iparam[SICONOS_IPARAM_MAX_ITER] = 10000
+* dparam[SICONOS_DPARAM_TOL] = 1e-12
 
-* iparam[1] (in,out): boolean, 1 if memory has been allocated, 0 otherwise
+Pathvi (:enumerator:`SICONOS_AVI_PATHAVI`)
+------------------------------------------
 
-* iparam[1] (out): number of iterations processed
+Direct solver for VI based on pivoting method principle for degenerate problem.
 
+Ref: "A structure-preserving Pivotal Method for Affine Variational Inequalities" Y. Kim, O. Huber, M.C. Ferris, Math Prog B (2017).
+
+driver: :func:`avi_pathvi()`
+
+parameters:
+
+* iparam[SICONOS_IPARAM_MAX_ITER] = 10000
+* dparam[SICONOS_DPARAM_TOL] = 1e-12

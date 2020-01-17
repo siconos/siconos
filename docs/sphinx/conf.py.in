@@ -64,38 +64,31 @@ if with_python_wrapper:
         'sphinx.ext.autosummary',
         # numpydoc must be listed after autodoc!
         # but we don't need it anymore because of napoleon
-        #'numpydoc.numpydoc', 
+        #'numpydoc.numpydoc',
         # napoleon will preprocess docstrings to convert them to
         # rst in numpydoc style
-        'sphinx.ext.napoleon', 
-        ]
+        'sphinx.ext.napoleon', ]
     #numpydoc_class_members_toctree = True
 
     # ---- Autodoc config ----
-    
     # Use class docstring for documentation, not __init__ (which is the same
     # due to doxy2swig way of doing things).
     autoclass_content = 'class'
 
-    ## Deprecated in sphinx 1.8, see eg http://luc.lino-framework.org/blog/2018/0821.html
-    if LooseVersion(sphinx.__version__) < LooseVersion("1.8"):
-        autodoc_default_flags = ['members', 'show-inheritance',]
-    else:
-        autodoc_default_options={
-          'members': None,
-          'show-inheritance': None,
-        }
-    
-
+    autodoc_default_options = {
+        'members': None,
+        'show-inheritance': None, }
     autodoc_docstring_signature = True
 
     # ---- Napoleon config ----
-    
-    ### Customize napoleon/sphinx output.
-    ### Source : https://michaelgoerz.net/notes/extending-sphinx-napoleon-docstring-sections.html
+
+    # Customize napoleon/sphinx output.
+    # Source :
+    # https://michaelgoerz.net/notes/extending-sphinx-napoleon-docstring-sections.html
     from sphinx.ext.napoleon.docstring import GoogleDocstring
 
-    # first, we define new methods for any new sections and add them to the class
+    # first, we define new methods for any new sections and
+    # add them to the class
     def parse_keys_section(self, section):
         return self._format_fields('Keys', self._consume_fields())
     GoogleDocstring._parse_keys_section = parse_keys_section
@@ -116,14 +109,14 @@ if with_python_wrapper:
         self._unpatched_parse()
     GoogleDocstring._unpatched_parse = GoogleDocstring._parse
     GoogleDocstring._parse = patched_parse
-    
+
     napoleon_include_private_with_doc = False
     napoleon_include_init_with_doc = False
     napoleon_include_special_with_doc = False
     napoleon_use_ivar = True
     napoleon_use_param = True
-    napoleon_use_rtype = False#True
-    
+    napoleon_use_rtype = False  # True
+
 # ---- Start Breathe conf ---
 extensions += ['breathe']
 components = bt.parse_cmake_list("@COMPONENTS@")
@@ -132,7 +125,7 @@ breathe_projects = {}
 for comp in components:
     breathe_projects[comp] = "@DOXYGEN_4_RST@/" + comp
     # Path to doxygen outputs
-breathe_default_project = 'numerics' # "@PROJECT_NAME@"
+breathe_default_project = 'numerics'  # "@PROJECT_NAME@"
 breathe_default_members = ('members', 'public-members')
 
 # sphinx versioning option. Review this later (issue to be fixed :
@@ -158,9 +151,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Siconos'
-copyright = u@YEAR@ + u' - Siconos development team'
-author = u'Siconos development team'
+project = 'Siconos'
+copyright = @YEAR@ + ' - Siconos development team'
+author = 'Siconos development team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -225,10 +218,9 @@ html_theme_options = {
     # Note the "1" or "True" value above as the third argument to indicate
     # an arbitrary url.
     'navbar_links': [
-        ("Sources on github", "https://github.com/siconos/siconos",1),
+        ("Sources on github", "https://github.com/siconos/siconos", 1),
         #("Quickstart", "getting_started/index"),
-        ("Index", "genindex"),
-        ],
+        ("Index", "genindex"), ],
     # Render the next and previous page links in navbar. (Default: true)
     'navbar_sidebarrel': True,
 
@@ -253,7 +245,7 @@ html_theme_options = {
 
     # HTML navbar class (Default: "navbar") to attach to <div> element.
     # For black navbar, do "navbar navbar-inverse"
-    'navbar_class': "navbar", # navbar-inverse",
+    'navbar_class': "navbar",  # navbar-inverse",
 
     # Fix navigation bar to top of page?
     # Values: "true" (default) or "false"
@@ -286,10 +278,11 @@ html_theme_options = {
 }
 
 html_context = {
- "display_github": False, # Add 'Edit on Github' link instead of 'View page source'
-# "last_updated": True,
-# "commit": False,
-    }
+    "display_github": False,
+    # Add 'Edit on Github' link instead of 'View page source'
+    # "last_updated": True,
+    # "commit": False,
+}
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -321,8 +314,6 @@ html_static_path = ['_static']
 # typographically correct entities.
 #html_use_smartypants = True
 
-
-
 # -- Options for HTMLHelp output ------------------------------------------
 
 # If true, an OpenSearch description file will be output, and all pages will
@@ -353,26 +344,25 @@ htmlhelp_basename = '@PROJECT_NAME@doc'
 # -- Options for LaTeX output ---------------------------------------------
 
 latex_elements = {
-# The paper size ('letterpaper' or 'a4paper').
-#'papersize': 'letterpaper',
+    # The paper size ('letterpaper' or 'a4paper').
+    #'papersize': 'letterpaper',
+    # The font size ('10pt', '11pt' or '12pt').
+    #'pointsize': '10pt',
 
-# The font size ('10pt', '11pt' or '12pt').
-#'pointsize': '10pt',
+    # Additional stuff for the LaTeX preamble.
+    #'preamble': '',
+    'preamble': '\\usepackage{amsfonts}'
 
-# Additional stuff for the LaTeX preamble.
-#'preamble': '',
-    'preamble': '\usepackage{amsfonts}'
-
-# Latex figure (float) alignment
-#'figure_align': 'htbp',
+    # Latex figure (float) alignment
+    #'figure_align': 'htbp',
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-  (master_doc, '@PROJECT_NAME@.tex', u'@PROJECT_NAME@ Documentation',
-   u'Siconos development team', 'manual'),
+latex_documents = [(
+    master_doc, '@PROJECT_NAME@.tex', '@PROJECT_NAME@ Documentation',
+    'Siconos development team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -401,7 +391,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, '@PROJECT_NAME@', u'@PROJECT_NAME@ Documentation',
+    (master_doc, '@PROJECT_NAME@', '@PROJECT_NAME@ Documentation',
      [author], 1)
 ]
 
@@ -414,10 +404,10 @@ man_pages = [
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
-texinfo_documents = [
-  (master_doc, '@PROJECT_NAME@', u'@PROJECT_NAME@ Documentation',
-   author, '@PROJECT_NAME@', 'One line description of project.',
-   'Miscellaneous'),
+texinfo_documents = [(
+    master_doc, '@PROJECT_NAME@', '@PROJECT_NAME@ Documentation',
+    author, '@PROJECT_NAME@', 'One line description of project.',
+    'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.
@@ -435,11 +425,11 @@ texinfo_documents = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 #intersphinx_mapping = {'https://docs.python.org/': None}
-intersphinx_mapping = {'python': ('https://docs.python.org', None),
-                        'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-                        'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
-                        'matplotlib': ('https://matplotlib.org/', None)}
-
+intersphinx_mapping = {
+    'python': ('https://docs.python.org', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference/', None),
+    'matplotlib': ('https://matplotlib.org/', None)}
 
 path_to_numerics = os.path.join('@CMAKE_SOURCE_DIR@', 'numerics')
 
@@ -454,6 +444,7 @@ def starting_with(prefixes):
     except:
         return ''
 
+
 path_to_kernel = os.path.join('@CMAKE_SOURCE_DIR@', 'kernel')
 
 
@@ -463,7 +454,8 @@ def under_directory(dirs):
         return ','.join(
             [','.join([
                 cls for cls in dir(importlib.import_module('siconos.kernel'))
-                if os.path.exists(os.path.join(os.path.join(path_to_kernel, d), '{0}.hpp'.format(cls)))])
+                if os.path.exists(os.path.join(os.path.join(path_to_kernel, d),
+                                               '{0}.hpp'.format(cls)))])
              for d in dirs])
     except:
         return ''
@@ -479,5 +471,6 @@ def source_read(app, docname, source):
 def setup(app):
     app.connect('source-read', source_read)
     app.add_stylesheet("biblio.css")
+
 #if with_python_wrapper:
 #    autodoc_member_order = 'bysource'

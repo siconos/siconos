@@ -15,18 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "projectionOnCone.h"
-#include "fc3d_Solvers.h"
-#include "fc3d_compute_error.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "SiconosBlas.h"
+#include <math.h>                    // for sqrt, pow
+#include <stdio.h>                   // for printf, NULL
+#include <stdlib.h>                  // for calloc, free, malloc
+#include "FrictionContactProblem.h"  // for FrictionContactProblem
+#include "Friction_cst.h"            // for SICONOS_FRICTION_3D_FPP
+#include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
+#include "NumericsMatrix.h"          // for NM_gemv
+#include "SolverOptions.h"           // for SolverOptions, solver_options_nu...
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
-#include "numerics_verbose.h"
+#include "debug.h"                   // for DEBUG_EXPR_WE, DEBUG_PRINTF
+#include "fc3d_Solvers.h"            // for fc3d_fixedPointProjection, fc3d_...
+#include "fc3d_compute_error.h"      // for fc3d_compute_error
+#include "numerics_verbose.h"        // for verbose
+#include "projectionOnCone.h"        // for projectionOnCone
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dnrm2, cblas_...
 
 void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
 {
@@ -41,10 +46,10 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
   /* Dimension of the problem */
   int n = 3 * nc;
   /* Maximum number of iterations */
-  int itermax = iparam[0];
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
   /* Tolerance */
-  double tolerance = dparam[0];
-  double norm_q = cblas_dnrm2(nc*3 , problem->q , 1);
+  double tolerance = dparam[SICONOS_DPARAM_TOL];
+  double norm_q = cblas_dnrm2(nc*3, problem->q, 1);
 
   /*****  Fixed point iterations *****/
   int iter = 0; /* Current iteration number */
@@ -52,7 +57,6 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
   int hasNotConverged = 1;
   int contact; /* Number of the current row of blocks in M */
   int nLocal = 3;
-  dparam[0] = dparam[2]; // set the tolerance for the local solver
   double * velocitytmp = (double *)malloc(n * sizeof(double));
 
 
@@ -60,15 +64,15 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
   int isVariable = 0;
   double rhomax = 0.0;
 
-  if (dparam[3] < 0.0)
+  if(dparam[SICONOS_FRICTION_3D_NSN_RHO] < 0.0)
   {
-    rho = -dparam[3];
+    rho = -dparam[SICONOS_FRICTION_3D_NSN_RHO];
   }
   /* Variable step in fixed*/
   isVariable = 1;
-  rhomax = dparam[3];
+  rhomax = dparam[SICONOS_FRICTION_3D_NSN_RHO];
   rho = rhomax;
-  if (verbose > 0)
+  if(verbose > 0)
   {
     printf("--------------- FC3D -  Fixed Point Projection (FPP) - Variable stepsize with starting rho = %14.7e \n", rho);
   }
@@ -91,7 +95,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
   double * reaction_k = 0;
   double * velocity_k = 0;
   double * reactiontmp = 0;
-  if (isVariable)
+  if(isVariable)
   {
     reaction_k = (double *)calloc(n,sizeof(double));
     velocity_k = (double *)calloc(n,sizeof(double));
@@ -101,19 +105,19 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
 
 
   // Compute new rho if variable
-  if (isVariable)
+  if(isVariable)
   {
-    while ((iter < itermax) && (hasNotConverged > 0))
+    while((iter < itermax) && (hasNotConverged > 0))
     {
       ++iter;
 
       /* Store the error */
       error_k = error;
       /* store the reaction at the beginning of the iteration */
-      cblas_dcopy(n , reaction , 1 , reaction_k, 1);
+      cblas_dcopy(n, reaction, 1, reaction_k, 1);
 
       /* velocity_k <- q  */
-      cblas_dcopy(n , q , 1 , velocity_k, 1);
+      cblas_dcopy(n, q, 1, velocity_k, 1);
 
       /* velocity_k <- q + M * reaction_k  */
       beta = 1.0;
@@ -122,7 +126,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
       ls_iter = 0 ;
       success =0;
 
-      while (!success && (ls_iter < ls_itermax))
+      while(!success && (ls_iter < ls_itermax))
       {
 
         rho_k = rho * pow(tau,ls_iter);
@@ -130,7 +134,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
 
 
         /* projection for each contact */
-        for (contact = 0 ; contact < nc ; ++contact)
+        for(contact = 0 ; contact < nc ; ++contact)
         {
           int pos = contact * nLocal;
           double  normUT = sqrt(velocity_k[pos + 1] * velocity_k[pos + 1] + velocity_k[pos + 2] * velocity_k[pos + 2]);
@@ -147,21 +151,22 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
 
 
         /* velocity <- q + M * reaction  */
-        cblas_dcopy(n , q , 1 , velocity, 1);
+        cblas_dcopy(n, q, 1, velocity, 1);
         beta = 1.0;
         NM_gemv(alpha, M, reaction, beta, velocity);
 
-        DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
-                       {
-                         printf("reaction[%i]=%12.8e\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%12.8e\n",i,i,velocity[i]);
-                       }
-          );
+        DEBUG_EXPR_WE(for(int i =0; i< 5 ; i++)
+      {
+        printf("reaction[%i]=%12.8e\t",i,reaction[i]);
+          printf("velocity[%i]=F[%i]=%12.8e\n",i,i,velocity[i]);
+        }
+                     );
 
 
         /* velocitytmp <- velocity */
-        cblas_dcopy(n, velocity, 1, velocitytmp , 1) ;
+        cblas_dcopy(n, velocity, 1, velocitytmp, 1) ;
 
-        for (contact = 0 ; contact < nc ; ++contact)
+        for(contact = 0 ; contact < nc ; ++contact)
         {
           int pos = contact * nLocal;
           double  normUT = sqrt(velocitytmp[pos + 1] * velocitytmp[pos + 1]
@@ -171,16 +176,16 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
         }
 
         /* velocitytmp <- velocity - velocity_k   */
-        cblas_daxpy(n, -1.0, velocity_k , 1, velocitytmp , 1) ;
+        cblas_daxpy(n, -1.0, velocity_k, 1, velocitytmp, 1) ;
 
         a1 = cblas_dnrm2(n, velocitytmp, 1);
         DEBUG_PRINTF("a1 = %12.8e\n", a1);
 
         /* reactiontmp <- reaction */
-        cblas_dcopy(n, reaction, 1, reactiontmp , 1) ;
+        cblas_dcopy(n, reaction, 1, reactiontmp, 1) ;
 
         /* reactiontmp <- reaction - reaction_k   */
-        cblas_daxpy(n, -1.0, reaction_k , 1, reactiontmp , 1) ;
+        cblas_daxpy(n, -1.0, reaction_k, 1, reactiontmp, 1) ;
 
         a2 = cblas_dnrm2(n, reactiontmp, 1) ;
         DEBUG_PRINTF("a2 = %12.8e\n", a2);
@@ -195,23 +200,24 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
         ls_iter++;
       }
 
-      DEBUG_EXPR_WE( for (int i =0; i< 5 ; i++)
-                     {
-                       printf("reaction[%i]=%12.8e\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%12.8e\n",i,i,velocity[i]);
-                     };
-        );
+      DEBUG_EXPR_WE(for(int i =0; i< 5 ; i++)
+    {
+      printf("reaction[%i]=%12.8e\t",i,reaction[i]);
+        printf("velocity[%i]=F[%i]=%12.8e\n",i,i,velocity[i]);
+      };
+                   );
 
 
       /* **** Criterium convergence **** */
-      fc3d_compute_error(problem, reaction , velocity, tolerance, options, norm_q, &error);
+      fc3d_compute_error(problem, reaction, velocity, tolerance, options, norm_q, &error);
       DEBUG_EXPR_WE(
-        if ((error < error_k))
-        {
-          printf("(error < error_k) is satisfied\n");
-        }
-        );
+        if((error < error_k))
+    {
+      printf("(error < error_k) is satisfied\n");
+      }
+      );
       /*Update rho*/
-      if ((rho_k*a1 < Lmin * a2) && (error < error_k))
+      if((rho_k*a1 < Lmin * a2) && (error < error_k))
       {
         rho =rho_k/taumin;
         DEBUG_PRINTF("We compute a new rho_k = \n", rho_k);
@@ -220,22 +226,21 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
       else
         rho =rho_k;
 
-    if (verbose > 0)
-      printf("--------------- FC3D -  Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+      if(verbose > 0)
+        printf("--------------- FC3D -  Fixed Point Projection (FPP) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
 
-    if (error < tolerance) hasNotConverged = 0;
-    *info = hasNotConverged;
+      if(error < tolerance) hasNotConverged = 0;
+      *info = hasNotConverged;
+    }
+
   }
 
-  }
 
 
-
-  if (verbose > 0)
+  if(verbose > 0)
     printf("--------------- FC3D - Fixed Point Projection (FPP) - #Iteration %i Final Residual = %14.7e\n", iter, error);
-  iparam[7] = iter;
-  dparam[0] = tolerance;
-  dparam[1] = error;
+  iparam[SICONOS_IPARAM_ITER_DONE] = iter;
+  dparam[SICONOS_DPARAM_RESIDU] = error;
   free(velocitytmp);
   free(reaction_k);
   free(velocity_k);
@@ -244,29 +249,7 @@ void fc3d_fixedPointProjection(FrictionContactProblem* problem, double *reaction
 }
 
 
-int fc3d_fixedPointProjection_setDefaultSolverOptions(SolverOptions* options)
+void fc3d_fpp_set_default(SolverOptions* options)
 {
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the FPP Solver\n");
-  }
-
-  /*strcpy(options->solverName,"DSFP");*/
-  options->solverId = SICONOS_FRICTION_3D_FPP;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 8;
-  options->dSize = 8;
-  options->iparam = (int *)calloc(options->iSize, sizeof(int));
-  options->dparam = (double *)calloc(options->dSize, sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  options->iparam[0] = 20000;
-  options->dparam[0] = 1e-3;
-  options->dparam[3] = 1.0; /* Default value for rho (line search activated)*/
-
-  options->internalSolvers = NULL;
-
-  return 0;
+  options->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 1.0;
 }

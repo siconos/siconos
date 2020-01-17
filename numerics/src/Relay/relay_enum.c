@@ -16,18 +16,16 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <float.h>
-#include "NonSmoothDrivers.h"
-#include "Relay_Solvers.h"
-#include "LCP_Solvers.h"
-#include <assert.h>
-#include "relay_cst.h"
-#include "numerics_verbose.h"
-#include "lcp_cst.h"
+#include <stdlib.h>                        // for malloc, free
+#include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_enu...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NonSmoothDrivers.h"              // for linearComplementarity_driver
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "RelayProblem.h"                  // for RelayProblem
+#include "Relay_Solvers.h"                 // for relay_to_lcp, relay_enum
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
+#include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
+
 void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   int i;
@@ -52,15 +50,14 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
   options->solverId = SICONOS_LCP_ENUM;
   lcp_enum_init(lcp_problem, options, 1);
 
-  * info = linearComplementarity_driver(lcp_problem, zlcp , wlcp, options);
-  if (options->filterOn > 0)
-    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[0], &(options->dparam[1]));
+  * info = linearComplementarity_driver(lcp_problem, zlcp, wlcp, options);
+  if(options->filterOn > 0)
+    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
   lcp_enum_reset(lcp_problem, options, 1);
-  options->solverId = SICONOS_RELAY_ENUM;
 
   // Conversion of result
-  for (i = 0; i < problem->size; i++)
+  for(i = 0; i < problem->size; i++)
   {
     /* z[i] = 1.0/2.0*(zlcp[i]-wlcp[i+problem->size]); works only for ub=1 and lb=-1 */
     z[i] = zlcp[i] +  problem->lb[i];
@@ -84,37 +81,5 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);
 
-}
-
-int relay_enum_setDefaultSolverOptions(RelayProblem* problem, SolverOptions* options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the ENUM Solver\n");
-  }
-
-  /*  strcpy(options->solverName,"ENUM");*/
-  options->solverId = SICONOS_RELAY_ENUM;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL ;/* (double*) malloc((3*problem->size +problem->size*problem->size)*sizeof(double)); */
-  options->iWork = NULL ; /* (int*) malloc(2*problem->size*sizeof(int)); */
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->dparam[0] = 1e-12;
-
-
-
-
-  return 0;
 }
 

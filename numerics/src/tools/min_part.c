@@ -15,11 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "NSSTools.h"
+#include "NSSTools.h"  // for min_part
 
 void min_part(double* x, double* sol, int n)
 
@@ -32,10 +28,10 @@ void min_part(double* x, double* sol, int n)
 
   minx = x[0];
 
-  for (i = 1 ; i < n ; i++)
+  for(i = 1 ; i < n ; i++)
   {
 
-    if (minx > x[i]) minx = x[i] ;
+    if(minx > x[i]) minx = x[i] ;
 
   }
 

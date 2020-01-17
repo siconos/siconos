@@ -15,22 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <math.h>
 #include "projectionOnCone.h"
+#include <math.h>    // for sqrt
+#include <stdio.h>   // for fprintf, stderr
+#include <stdlib.h>  // for exit, EXIT_FAILURE
 
 unsigned projectionOnCone(double* r, double  mu)
 {
   double normT = sqrt(r[1] * r[1] + r[2] * r[2]);
   /* hypot of libm is sure but really slow */
   /* double normT = hypot(r[1], r[2]); */
-  if (mu * normT <= - r[0])
+  if(mu * normT <= - r[0])
   {
     r[0] = 0.0;
     r[1] = 0.0;
     r[2] = 0.0;
     return PROJCONE_DUAL;
   }
-  else if (normT <= mu * r[0])
+  else if(normT <= mu * r[0])
   {
     return PROJCONE_INSIDE;
   }
@@ -49,15 +51,15 @@ unsigned projectionOnDualCone(double* u, double  mu)
   double normT = sqrt(u[1] * u[1] + u[2] * u[2]);
   /* hypot of libm is sure but really slow */
   /* double normT = hypot(u[1], u[2]); */
-  
-  if (normT <= - mu * u[0])
+
+  if(normT <= - mu * u[0])
   {
     u[0] = 0.0;
     u[1] = 0.0;
     u[2] = 0.0;
     return PROJCONE_DUAL;
   }
-  else if (mu * normT <= u[0])
+  else if(mu * normT <= u[0])
   {
     return PROJCONE_INSIDE;
   }
@@ -68,7 +70,7 @@ unsigned projectionOnDualCone(double* u, double  mu)
     u[1] = u[0] * u[1] / normT;
     u[2] = u[0] * u[2] / normT;
     u[0] = mu * u[0];
-  
+
     return PROJCONE_BOUNDARY;
   }
   /* return projectionOnCone(u, 1.0/mu); */
@@ -78,7 +80,7 @@ unsigned projectionOnDualCone(double* u, double  mu)
 
 void projectionOnSecondOrderCone(double* r, double  mu, int size)
 {
-  if (size ==3)
+  if(size ==3)
   {
     projectionOnCone(r, mu);
   }

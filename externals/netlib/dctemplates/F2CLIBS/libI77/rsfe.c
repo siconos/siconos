@@ -6,27 +6,27 @@
 xrd_SL(Void)
 {
   int ch;
-  if (!f__curunit->uend)
-    while ((ch = getc(f__cf)) != '\n' && ch != EOF);
+  if(!f__curunit->uend)
+    while((ch = getc(f__cf)) != '\n' && ch != EOF);
   f__cursor = f__recpos = 0;
   return(1);
 }
 x_getc(Void)
 {
   int ch;
-  if (f__curunit->uend) return(EOF);
+  if(f__curunit->uend) return(EOF);
   ch = getc(f__cf);
-  if (ch != EOF && ch != '\n')
+  if(ch != EOF && ch != '\n')
   {
     f__recpos++;
     return(ch);
   }
-  if (ch == '\n')
+  if(ch == '\n')
   {
     (void) ungetc(ch, f__cf);
     return(ch);
   }
-  if (f__curunit->uend || feof(f__cf))
+  if(f__curunit->uend || feof(f__cf))
   {
     errno = 0;
     f__curunit->uend = 1;
@@ -51,8 +51,8 @@ integer s_rsfe(cilist *a) /* start */
 #endif
 {
   int n;
-  if (!f__init) f_init();
-  if (n = c_sfe(a)) return(n);
+  if(!f__init) f_init();
+  if(n = c_sfe(a)) return(n);
   f__reading = 1;
   f__sequential = 1;
   f__formatted = 1;
@@ -63,7 +63,7 @@ integer s_rsfe(cilist *a) /* start */
   f__fmtbuf = a->cifmt;
   f__curunit = &f__units[a->ciunit];
   f__cf = f__curunit->ufd;
-  if (pars_f(f__fmtbuf) < 0) err(a->cierr, 100, "startio");
+  if(pars_f(f__fmtbuf) < 0) err(a->cierr, 100, "startio");
   f__getn = x_getc;
   f__doed = rd_ed;
   f__doned = rd_ned;
@@ -73,7 +73,7 @@ integer s_rsfe(cilist *a) /* start */
   f__dorevert = x_rev;
   f__cblank = f__curunit->ublnk;
   f__cplus = 0;
-  if (f__curunit->uwrt && f__nowreading(f__curunit))
+  if(f__curunit->uwrt && f__nowreading(f__curunit))
     err(a->cierr, errno, "read start");
   return(0);
 }

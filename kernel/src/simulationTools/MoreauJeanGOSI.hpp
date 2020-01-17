@@ -118,7 +118,7 @@ protected:
   ACCEPT_SERIALIZATION(MoreauJeanGOSI);
 
   /** Stl map that associates the columns of  W MoreauJeanGOSI matrix to each DynamicalSystem of the OSI if it has some boundary conditions */
-  MapOfDSMatrices _WBoundaryConditionsMap;
+  std::map<unsigned int, SP::SimpleMatrix> _WBoundaryConditionsMap;
 
   /** Stl map that associates a theta parameter for the integration
   *  scheme to each DynamicalSystem of the OSI */

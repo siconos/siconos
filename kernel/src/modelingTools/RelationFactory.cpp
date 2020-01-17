@@ -37,7 +37,7 @@ SP::Relation Registry::instantiate(int name)
 {
   MapFactoryIt it = factory_map.find(name) ;
 
-  if (it == factory_map.end())
+  if(it == factory_map.end())
     RuntimeException::selfThrow("Registry::instantiate (RelationFactory) failed, no class named: " + name);
 
   return (it->second)(name) ;  // run our factory

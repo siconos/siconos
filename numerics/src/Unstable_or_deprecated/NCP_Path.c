@@ -47,7 +47,7 @@ int NCP_Path(int n, double* z, FuncEvalPtr F, JacEvalPtr jacobianF, int* iparam,
   /* Fill in the lower and upper bounds */
   /**************************************/
 
-  for (j = 0; j < n; j++)
+  for(j = 0; j < n; j++)
   {
     lb[j] = 0;
     ub[j] = 1e20;

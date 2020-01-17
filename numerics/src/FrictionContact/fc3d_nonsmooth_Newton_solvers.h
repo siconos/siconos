@@ -24,8 +24,7 @@
   [...]
  */
 
-#include "FrictionContactProblem.h"
-#include "SolverOptions.h"
+#include "NumericsFwd.h"  // for NumericsMatrix, FrictionContactProblem, Sol...
 
 /* Notes:
  - check Olivier Newton_method (only dense)

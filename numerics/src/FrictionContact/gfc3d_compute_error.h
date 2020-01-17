@@ -18,7 +18,8 @@
 
 #ifndef gfc3d_compute_error_H
 #define gfc3d_compute_error_H
-#include "GlobalFrictionContactProblem.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for GlobalFrictionContactProblem, SolverOptions
 
 /*!\file gfc3d_compute_error.h
   \brief functions related to error computation for friction-contact problems
@@ -43,10 +44,15 @@ extern "C"
    * \param[in,out] error value
    * \return 0 if successfull
    */
-  int gfc3d_compute_error(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
-                          double* globalVelocity, double tolerance,  SolverOptions * options,
+  int gfc3d_compute_error(GlobalFrictionContactProblem* problem,
+                          double *reaction , double *velocity,
+                          double* globalVelocity, double tolerance,
+                          SolverOptions * options,
                           double norm_q, double norm_b,  double * error);
-
+  int gfc3d_compute_error_convex(GlobalFrictionContactProblem* problem, double *reaction , double *velocity,
+                                 double* globalVelocity, double tolerance,  SolverOptions * options,
+                                 double norm_q, double norm_b,  double * error);
+  
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

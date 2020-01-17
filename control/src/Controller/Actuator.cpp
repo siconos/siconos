@@ -36,7 +36,8 @@ Actuator::Actuator(unsigned int type, SP::ControlSensor sensor): _type(type), _i
 
 Actuator::Actuator(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B): _type(type), _id("none"), _B(B), _sensor(sensor)
 {
-  if (B) {
+  if(B)
+  {
     _u = std11::make_shared<SiconosVector>(B->size(1), 0);
   }
 }
@@ -52,7 +53,7 @@ void Actuator::addSensorPtr(SP::ControlSensor newSensor)
 
 void Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)
 {
-  if (!_sensor)
+  if(!_sensor)
   {
     RuntimeException::selfThrow("Actuator::initialize - No Sensor given to the Actuator");
   }
@@ -60,18 +61,18 @@ void Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation
   // Init the control variable and add the necessary properties
   DynamicalSystemsGraph& DSG0 = *nsds.topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor dsgVD = DSG0.descriptor(_sensor->getDS());
-  if (_B)
+  if(_B)
   {
     DSG0.B[dsgVD] = _B;
   }
-  else if (!_plugingName.empty())
+  else if(!_plugingName.empty())
   {
     DSG0.pluginU[dsgVD].reset(new PluggedObject(_plugingName));
-    if (!_pluginJacgxName.empty())
+    if(!_pluginJacgxName.empty())
     {
       DSG0.pluginJacgx[dsgVD].reset(new PluggedObject(_plugingName));
     }
-    if (!_u)
+    if(!_u)
     {
       RuntimeException::selfThrow("Actuator::initialize - u should have already been initialized");
     }
@@ -86,7 +87,8 @@ void Actuator::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation
 
 void Actuator::setSizeu(unsigned size)
 {
-  if (_B && size != _B->size(1)) {
+  if(_B && size != _B->size(1))
+  {
 
   }
   _u.reset(new SiconosVector(size, 0));
@@ -101,7 +103,7 @@ void Actuator::display() const
 {
   std::cout << "=====> Actuator of type " << _type << ", named " << _id << std::endl;;
   std::cout << "The associated Sensor is: " << std::endl;
-  if (_sensor)
+  if(_sensor)
     _sensor->display();
   std::cout << "======" <<std::endl;
   std::cout << "The value of the control is: " << std::endl;

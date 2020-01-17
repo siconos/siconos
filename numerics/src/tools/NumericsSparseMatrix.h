@@ -24,10 +24,10 @@
  *
  */
 
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
-//#include "CSparseMatrix.h" // for freeNSLSP
-#include "NM_MPI.h"
+#include <stdio.h>          // for size_t, FILE
+#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT
+#include "NumericsFwd.h"    // for NumericsSparseMatrix, NSM_linear_solver_p...
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**\struct linalg_data_t NumericsSparseMatrix.h
  * generic data struct for linear algebra operations
@@ -75,7 +75,7 @@ extern "C"
 
   /**\enum NumericsSparseOrigin NumericsSparseMatrix.h
    * matrix storage types */
-  typedef enum { NSM_UNKNOWN, NSM_TRIPLET, NSM_CSC, NSM_CSR } NumericsSparseOrigin;
+  typedef enum { NSM_UNKNOWN, NSM_TRIPLET, NSM_CSC, NSM_CSR, NSM_HALF_TRIPLET } NumericsSparseOrigin;
 
 
   /** \struct NumericsSparseMatrix NumericsSparseMatrix.h
@@ -84,6 +84,7 @@ extern "C"
   struct NumericsSparseMatrix
   {
     CSparseMatrix* triplet;    /**< triplet format, aka coordinate */
+    CSparseMatrix* half_triplet;    /**< halt triplet format for symmetric matrices */
     CSparseMatrix* csc;        /**< csc matrix */
     CSparseMatrix* trans_csc;  /**< transpose of a csc matrix (used by CSparse) */
     CSparseMatrix* csr;        /**< csr matrix, only supported with mkl */
@@ -112,7 +113,7 @@ extern "C"
    * \param A a NumericsSparseMatrix
    * \return NULL on success
    */
-  NumericsSparseMatrix* NSM_free(NumericsSparseMatrix* A);
+  NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A);
 
 
 
@@ -120,7 +121,7 @@ extern "C"
    /** Free a workspace related to a LU factorization
    * \param p the structure to free
    */
-  void NSM_free_p(void *p);
+  void NSM_clear_p(void *p);
 
   /** Get the data part of sparse matrix
    * \param A the sparse matrix

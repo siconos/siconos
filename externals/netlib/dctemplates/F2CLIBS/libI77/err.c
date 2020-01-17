@@ -88,19 +88,19 @@ f__canseek(FILE *f) /*SYSDEP*/
 #else
   struct stat x;
 
-  if (fstat(fileno(f), &x) < 0)
+  if(fstat(fileno(f), &x) < 0)
     return(0);
 #ifdef S_IFMT
-  switch (x.st_mode & S_IFMT)
+  switch(x.st_mode & S_IFMT)
   {
   case S_IFDIR:
   case S_IFREG:
-    if (x.st_nlink > 0) /* !pipe */
+    if(x.st_nlink > 0)  /* !pipe */
       return(1);
     else
       return(0);
   case S_IFCHR:
-    if (isatty(fileno(f)))
+    if(isatty(fileno(f)))
       return(0);
     return(1);
 #ifdef S_IFBLK
@@ -111,20 +111,20 @@ f__canseek(FILE *f) /*SYSDEP*/
 #else
 #ifdef S_ISDIR
   /* POSIX version */
-  if (S_ISREG(x.st_mode) || S_ISDIR(x.st_mode))
+  if(S_ISREG(x.st_mode) || S_ISDIR(x.st_mode))
   {
-    if (x.st_nlink > 0) /* !pipe */
+    if(x.st_nlink > 0)  /* !pipe */
       return(1);
     else
       return(0);
   }
-  if (S_ISCHR(x.st_mode))
+  if(S_ISCHR(x.st_mode))
   {
-    if (isatty(fileno(f)))
+    if(isatty(fileno(f)))
       return(0);
     return(1);
   }
-  if (S_ISBLK(x.st_mode))
+  if(S_ISBLK(x.st_mode))
     return(1);
 #else
   Help! How does fstat work on this system ?
@@ -141,15 +141,15 @@ f__fatal(n, s) char *s;
 f__fatal(int n, char *s)
 #endif
 {
-  if (n < 100 && n >= 0) perror(s); /*SYSDEP*/
-  else if (n >= (int)MAXERR || n < -1)
+  if(n < 100 && n >= 0) perror(s);  /*SYSDEP*/
+  else if(n >= (int)MAXERR || n < -1)
   {
     fprintf(stderr, "%s: illegal error number %d\n", s, n);
   }
-  else if (n == -1) fprintf(stderr, "%s: end of file\n", s);
+  else if(n == -1) fprintf(stderr, "%s: end of file\n", s);
   else
     fprintf(stderr, "%s: %s\n", s, F_err[n - 100]);
-  if (f__curunit)
+  if(f__curunit)
   {
     fprintf(stderr, "apparent state: unit %d ", f__curunit - f__units);
     fprintf(stderr, f__curunit->ufnm ? "named %s\n" : "(unnamed)\n",
@@ -157,7 +157,7 @@ f__fatal(int n, char *s)
   }
   else
     fprintf(stderr, "apparent state: internal I/O\n");
-  if (f__fmtbuf)
+  if(f__fmtbuf)
     fprintf(stderr, "last format: %s\n", f__fmtbuf);
   fprintf(stderr, "lately %s %s %s %s", f__reading ? "reading" : "writing",
           f__sequential ? "sequential" : "direct", f__formatted ? "formatted" : "unformatted",
@@ -191,7 +191,7 @@ f_init(Void)
   p->useek = f__canseek(stdout);
   /* IOLBUF and setvbuf only in system 5+ */
 #ifdef COMMENTED_OUT
-  if (isatty(fileno(stdout)))
+  if(isatty(fileno(stdout)))
   {
     extern char _sobuf[];
     setbuf(stdout, _sobuf);
@@ -210,10 +210,10 @@ f__nowreading(unit *x)
 {
   long loc;
   extern char *f__r_mode[];
-  if (!x->ufnm)
+  if(!x->ufnm)
     goto cantread;
   loc = ftell(x->ufd);
-  if (freopen(x->ufnm, f__r_mode[x->ufmt], x->ufd) == NULL)
+  if(freopen(x->ufnm, f__r_mode[x->ufmt], x->ufd) == NULL)
   {
 cantread:
     errno = 126;
@@ -233,15 +233,15 @@ f__nowwriting(unit *x)
   int k;
   extern char *f__w_mode[];
 
-  if (!x->ufnm)
+  if(!x->ufnm)
     goto cantwrite;
-  if (x->uwrt == 3)   /* just did write, rewind */
+  if(x->uwrt == 3)    /* just did write, rewind */
   {
 #ifdef NON_UNIX_STDIO
-    if (!(f__cf = x->ufd =
-                    freopen(x->ufnm, f__w_mode[x->ufmt], x->ufd)))
+    if(!(f__cf = x->ufd =
+                   freopen(x->ufnm, f__w_mode[x->ufmt], x->ufd)))
 #else
-    if (close(creat(x->ufnm, 0666)))
+    if(close(creat(x->ufnm, 0666)))
 #endif
       goto cantwrite;
   }
@@ -249,10 +249,10 @@ f__nowwriting(unit *x)
   {
     loc = ftell(x->ufd);
 #ifdef NON_UNIX_STDIO
-    if (!(f__cf = x->ufd =
-                    freopen(x->ufnm, f__w_mode[x->ufmt + 2], x->ufd)))
+    if(!(f__cf = x->ufd =
+                   freopen(x->ufnm, f__w_mode[x->ufmt + 2], x->ufd)))
 #else
-    if (fclose(x->ufd) < 0
+    if(fclose(x->ufd) < 0
         || (k = x->uwrt == 2 ? creat(x->ufnm, 0666)
                 : open(x->ufnm, O_WRONLY)) < 0
         || (f__cf = x->ufd = fdopen(k, f__w_mode[x->ufmt])) == NULL)
@@ -277,9 +277,9 @@ char *s;
 err__fl(int f, int m, char *s)
 #endif
 {
-  if (!f)
+  if(!f)
     f__fatal(m, s);
-  if (f__doend)
+  if(f__doend)
     (*f__doend)();
   return errno = m;
 }

@@ -14,14 +14,14 @@
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
-  extern int getpid(void), isatty(int), pause(void);
+extern int getpid(void), isatty(int), pause(void);
 #endif
 
 extern VOID f_exit(Void);
 
 static VOID waitpause(Int n)
 {
-  return;
+return;
 }
 
 #ifdef KR_headers
@@ -34,15 +34,15 @@ int s_paus(char *s, ftnlen n)
   int i;
 
   fprintf(stderr, "PAUSE ");
-  if (n > 0)
-    for (i = 0; i < n ; ++i)
+  if(n > 0)
+    for(i = 0; i < n ; ++i)
       putc(*s++, stderr);
   fprintf(stderr, " statement executed\n");
-  if (isatty(fileno(stdin)))
+  if(isatty(fileno(stdin)))
   {
     fprintf(stderr, "To resume execution, type go.  Any other input will terminate job.\n");
     fflush(stderr);
-    if (getchar() != 'g' || getchar() != 'o' || getchar() != '\n')
+    if(getchar() != 'g' || getchar() != 'o' || getchar() != '\n')
     {
       fprintf(stderr, "STOP\n");
       f_exit();

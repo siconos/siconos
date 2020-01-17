@@ -13,23 +13,33 @@
 
 /* GAMS stuff */
 
-#include "NumericsMatrix.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "SolverOptions.h"
+#include "LCP_Solvers.h"  // for lcp_gams
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
+#include "numerics_verbose.h" // for numerics_error
 
 #ifdef HAVE_GAMS_C_API
 
 #include "GAMSlink.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <stdlib.h>
+
+#include "NumericsMatrix.h"
+#include "LinearComplementarityProblem.h"
+#include "SolverOptions.h"
+#endif
 
 
 void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
+
+#ifndef HAVE_GAMS_C_API
+  numerics_error("lcp_gams", "GAMS API is not enabled. Try to re-compile Siconos with GAMS.");
+#else
+
+  if(!options->solverParameters)
+    options->solverParameters = createGAMSparams(GAMS_MODELS_SHARE_DIR, GAMS_DIR);
+
 
   assert(problem);
   assert(problem->size > 0);
@@ -50,22 +60,26 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
   SN_Gams_set_dirs((SN_GAMSparams*)options->solverParameters, defModel, defGAMSdir, model, sysdir, "/lcp.gms");
 
   /* Create objects */
-  if (! gamsxCreateD (&Gptr, sysdir, msg, sizeof(msg))) {
+  if(! gamsxCreateD(&Gptr, sysdir, msg, sizeof(msg)))
+  {
     printf("Could not create gamsx object: %s\n", msg);
     return;
   }
 
-  if (! idxCreateD (&Xptr, sysdir, msg, sizeof(msg))) {
+  if(! idxCreateD(&Xptr, sysdir, msg, sizeof(msg)))
+  {
     printf("Could not create gdx object: %s\n", msg);
     return;
   }
 
-  if (! optCreateD (&solverOptPtr, sysdir, msg, sizeof(msg))) {
+  if(! optCreateD(&solverOptPtr, sysdir, msg, sizeof(msg)))
+  {
     printf("Could not create solver opt object: %s\n", msg);
     return;
   }
 
-  if (! optCreateD (&Optr, sysdir, msg, sizeof(msg))) {
+  if(! optCreateD(&Optr, sysdir, msg, sizeof(msg)))
+  {
     printf("Could not create opt object: %s\n", msg);
     return;
   }
@@ -73,7 +87,7 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
   char gdxFileName[GMS_SSSIZE];
   char solFileName[GMS_SSSIZE];
   const char* base_name = GAMSP_get_filename(options->solverParameters);
-  if (base_name)
+  if(base_name)
   {
     strncpy(gdxFileName, base_name, sizeof(gdxFileName));
   }
@@ -99,24 +113,27 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
 
 
   idxOpenWrite(Xptr, gdxFileName, "Siconos/Numerics NM_to_GDX", &status);
-  if (status)
+  if(status)
     idxerror(status, "idxOpenWrite");
 
-  if ((status=NM_to_GDX(Xptr, "M", "M matrix", problem->M))) {
+  if((status=NM_to_GDX(Xptr, "M", "M matrix", problem->M)))
+  {
     printf("Model data not written\n");
     goto TERMINATE;
   }
 
-  if ((status=NV_to_GDX(Xptr, "q", "q vector", problem->q, problem->size))) {
+  if((status=NV_to_GDX(Xptr, "q", "q vector", problem->q, problem->size)))
+  {
     printf("Model data not written\n");
     goto TERMINATE;
   }
 
-  if (idxClose(Xptr))
+  if(idxClose(Xptr))
     idxerror(idxGetLastError(Xptr), "idxClose");
 
 
-  if ((status=CallGams(Gptr, Optr, sysdir, model))) {
+  if((status=CallGams(Gptr, Optr, sysdir, model)))
+  {
     printf("Call to GAMS failed\n");
     goto TERMINATE;
   }
@@ -126,15 +143,16 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
    * Read back solution
    ************************************************/
   idxOpenRead(Xptr, solFileName, &status);
-  if (status)
+  if(status)
     idxerror(status, "idxOpenRead");
 
-  if ((status=GDX_to_NV(Xptr, "sol", z, problem->size))) {
+  if((status=GDX_to_NV(Xptr, "sol", z, problem->size)))
+  {
     printf("Model data not read\n");
     goto TERMINATE;
   }
 
-  if (idxClose(Xptr))
+  if(idxClose(Xptr))
     idxerror(idxGetLastError(Xptr), "idxClose");
 
 TERMINATE:
@@ -144,13 +162,10 @@ TERMINATE:
   gamsxFree(&Gptr);
 
   *info = status;
+
+#endif // HAVE_GAMS_C_API
+
 }
 
-#else
 
-void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
-  printf("lcp_gams :: gams was not enabled at compile time!\n");
-  exit(EXIT_FAILURE);
-}
-#endif
+

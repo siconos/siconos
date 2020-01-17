@@ -8,6 +8,7 @@ Developer guide
    :maxdepth: 3
 
    write_and_build_doc
+   numerics/solvers
    modal_moreau_jean
    about_ci
    how_to_add_new_task

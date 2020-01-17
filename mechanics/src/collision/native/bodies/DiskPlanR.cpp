@@ -26,18 +26,18 @@ void DiskPlanR::init(double r, double A, double B, double C,
 {
   sqrA2pB2 = hypot(A, B);
 
-  if (width == 0 || width == std::numeric_limits<double>::infinity())
+  if(width == 0 || width == std::numeric_limits<double>::infinity())
     finite = false;
   else
     finite = true;
-  if (fabs(A * xC + B * yC + C) > std::numeric_limits<double>::epsilon())
+  if(fabs(A * xC + B * yC + C) > std::numeric_limits<double>::epsilon())
   {
-    if (A == 0)
+    if(A == 0)
       // By+C=0
     {
       yCenter = -C / B;
     }
-    else if (B == 0)
+    else if(B == 0)
       // Ax+C=0
     {
       xCenter = -C / A;
@@ -45,7 +45,7 @@ void DiskPlanR::init(double r, double A, double B, double C,
     else
       // Ax+By+C=0
     {
-      if (xCenter != 0)
+      if(xCenter != 0)
         yCenter = - (A * xCenter + C) / B;
       else
         xCenter = - (B * yCenter + C) / A;
@@ -91,12 +91,12 @@ DiskPlanR::DiskPlanR(double r, double xa, double ya, double xb, double yb)
 
 double DiskPlanR::distance(double x, double y, double rad) const
 {
-  if (finite)
+  if(finite)
   {
     double x0 = - (AC - B2 * x + AB * y) / (A2 + B2);
     double y0 = - (BC - A2 * y + AB * x) / (A2 + B2);
 
-    if (hypot(xCenter - x0, yCenter - y0) >= halfWidth)
+    if(hypot(xCenter - x0, yCenter - y0) >= halfWidth)
     {
       // ... and no jach...
       double r = fmin(hypot(x - x1, y - y1), hypot(x - x2, y - y2));
@@ -210,7 +210,7 @@ bool DiskPlanR::equal(double pA, double pB, double pC, double pr) const
 bool DiskPlanR::equal(double pA, double pB, double pC, double pr,
                       double pXc, double pYc, double pw) const
 {
-  if (finite)
+  if(finite)
     return (A == pA && B == pB && C == pC && r == pr &&
             pXc == xCenter && pYc == yCenter && pw == width);
   else
@@ -219,7 +219,7 @@ bool DiskPlanR::equal(double pA, double pB, double pC, double pr,
 
 bool DiskPlanR::equal(const DiskPlanR& odpr) const
 {
-  if (finite)
+  if(finite)
     return (equal(odpr.getA(), odpr.getB(), odpr.getC(),
                   odpr.getRadius()));
   else

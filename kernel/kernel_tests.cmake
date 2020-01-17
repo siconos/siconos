@@ -45,7 +45,8 @@ if(WITH_${COMPONENT}_TESTING)
   
   # ---- Simulation tools ---
   begin_tests(src/simulationTools/test DEPS "numerics;CPPUNIT::CPPUNIT")
-  new_test(SOURCES OSNSPTest.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
+  new_test(SOURCES OSNSPTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES testAVI.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
   if(HAS_FORTRAN)
     new_test(SOURCES ZOHTest.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
   endif()

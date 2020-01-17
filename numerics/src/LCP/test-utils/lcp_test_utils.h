@@ -18,27 +18,21 @@
 #ifndef LCP_TEST_UTILS_H
 #define LCP_TEST_UTILS_H
 
+#include "SiconosConfig.h" // for BUILD_AS_CPP
 #include <stdio.h>
 #include <stdlib.h>
 #include "lcp_cst.h"
+#include "test_utils.h" // for TestCase
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
-  int lcp_test_function(FILE * f, int solverid, char* filename);
-  int lcp_test_function_SBM(FILE * f, int solverid);
+  /** Solve lcp using parameters and reference from a pre-defined TestCase
+      return 1 if the test has succeeded.
+   */
+  int lcp_test_function(TestCase *);
 
-  /** Defines the list of data files
-      returns an array of char
-  */
-  char ** data_collection(void);
-  
-  /** Defines the set of tests (including parameters)
-      returns an 'array' of tests, some kind of dict.
-  */
-  char *** test_collection(int, char **);
-   
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

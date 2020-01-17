@@ -1,6 +1,9 @@
 #include "NaturalMapGenerated.h"
-#include "assert.h"
-#include "op3x3.h"
+#include "assert.h"                       // for assert
+#include "fc3d_NaturalMapABGenerated.h"   // for fc3d_NaturalMapABGenerated
+#include "fc3d_NaturalMapFABGenerated.h"  // for fc3d_NaturalMapFABGenerated
+#include "fc3d_NaturalMapFGenerated.h"    // for fc3d_NaturalMapFGenerated
+#include "op3x3.h"                        // for cpy3x3, cpy3, SET3
 
 void fc3d_NaturalMapFunctionGenerated(
   double *reaction,
@@ -22,7 +25,7 @@ void fc3d_NaturalMapFunctionGenerated(
   SET3(rho);
 
 
-  if (f && A && B)
+  if(f && A && B)
   {
 
     fc3d_NaturalMapFABGenerated(
@@ -38,7 +41,7 @@ void fc3d_NaturalMapFunctionGenerated(
 
   else
   {
-    if (f)
+    if(f)
     {
       fc3d_NaturalMapFGenerated(
         *reaction0, *reaction1, *reaction2,
@@ -49,7 +52,7 @@ void fc3d_NaturalMapFunctionGenerated(
       cpy3(result, f);
     }
 
-    if (A && B)
+    if(A && B)
     {
       fc3d_NaturalMapABGenerated(
         *reaction0, *reaction1, *reaction2,

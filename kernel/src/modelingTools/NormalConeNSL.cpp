@@ -31,8 +31,8 @@ NormalConeNSL::NormalConeNSL(): NonSmoothLaw(), _H(std11::shared_ptr<SimpleMatri
 NormalConeNSL::NormalConeNSL(unsigned size, SP::SimpleMatrix H, SP::SiconosVector K):
   NonSmoothLaw(size), _H(H), _K(K)
 {
-assert(H->size(1) == size &&
-      "NormalConeNSL::NormalConeNSL - the number of columns in H and the declared size are not equal, check your code !");
+  assert(H->size(1) == size &&
+         "NormalConeNSL::NormalConeNSL - the number of columns in H and the declared size are not equal, check your code !");
 }
 
 NormalConeNSL::~NormalConeNSL()

@@ -39,7 +39,7 @@ Sensor::~Sensor()
 void Sensor::display() const
 {
   std::cout << "=====> Sensor of type " << _type << ", named " << _id ;
-  if (_DS)
+  if(_DS)
     std::cout << " and linked to the DynamicalSystem number " << _DS->number() << "." <<std::endl;
   else
     std::cout << " and not linked to a DynamicalSystem." <<std::endl;

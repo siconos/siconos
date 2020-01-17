@@ -15,175 +15,50 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdio.h>             // for printf
+#include <string.h>            // for strcmp
+#include "relay_cst.h"         // for SICONOS_RELAY_AVI_CAOFERRIS, SICONOS_R...
+#include "relay_test_utils.h"  // for relay_test_function
+#include "test_utils.h"        // for build_test_collection_generic, data_co...
+#include "SiconosConfig.h"     // for HAVE_PATHFERRIS // IWYU pragma: keep
 
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 
-/* #include "NonSmoothDrivers.h" */
-#include "relay_test_utils.h"
-/* #include "relay_cst.h" */
-
-#include "SolverOptions.h"
 #define @PROBLEM_COLLECTION@ 1
-
-static int relay_test_single(char ** test)
-{
-  int info = 0;
-
-  char * filename = test[0];
-  printf("\n Test on %s\t ",filename);
-  printf("Test on %s\n", filename);
-
-  FILE * finput  =  fopen(filename, "r");
-  if (finput == NULL)
-  {
-    printf("Error! Could not open filename %s\n", filename);
-    exit(EXIT_FAILURE);
-  }
-
-
-  int will_failed =0;
-
-  will_failed  = atoi(test[1]);
-
-  int  solver = atoi(test[2]);
-  printf("with solver %i (%s)\n ",solver, solver_options_id_to_name(solver) );
-
-  info = relay_test_function(finput, solver);
-
-  fclose(finput);
-  printf("\nEnd of test on %s\n", filename);
-  return info;
-}
-
-
-
 
 int main(void)
 {
-  int out =0;
-  int n_failed_test=0;
-  int n_succeeded_test=0;
-  char ** _data_collection = data_collection();
+  // Remind that data_collection depends on current PROBLEM_COLLECTION value.
+  const char ** _data_collection = data_collection();
   int n_data = 0;
   while (strcmp(_data_collection[n_data], "---") !=0)
-  {
     n_data++;
-  }
-  printf("number of data = %i\n", n_data);
 
-  char *** _test_collection = test_collection(n_data, _data_collection);
-  int n_test = 0;
-  char * foo =  _test_collection[n_test][0];
-  while (strcmp(foo , "---") != 0)
-  {
-    n_test++;
-    foo =  _test_collection[n_test][0];
-  }
-  printf("number of tests = %i\n", n_test);
-
-#ifdef TEST_LCP_COLLECTION_1
-  _test_collection[28][1] = "1";
+  // set the list of solvers to be tested on the current data collections.
+#ifdef TEST_RELAY_COLLECTION_1
+  int solvers[] = {
+                   SICONOS_RELAY_LEMKE, SICONOS_RELAY_PGS, SICONOS_RELAY_AVI_CAOFERRIS,
+#ifdef HAVE_PATHFERRIS
+                   SICONOS_RELAY_PATH,
+#endif
+                   SICONOS_RELAY_ENUM
+  };
 #endif
 
+  // Rq : solver options parameters (tol and maxiter + default) are set explicitely in relay_test_function.
+  // All the same for all test cases.
 
+  int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
+  TestCase * collection = build_test_collection_generic(n_data, _data_collection, n_solvers, solvers);
 
-  int * failed_tests = (int*)calloc(n_test, sizeof(int));
-  int * succeeded_tests = (int*)calloc(n_test, sizeof(int));
-  clock_t t1, t2;
-  long clk_tck = CLOCKS_PER_SEC;
-  for (int n_t =0; n_t < n_test ; n_t++)
-  {
-    printf("\n################# start of test # %i #######################\n", n_t);
-    printf("%s\t", solver_options_id_to_name(atoi(_test_collection[n_t][2])));
-    int e=0;
-    while(strcmp(_test_collection[n_t][e], "---") !=0)
-    {
-      printf("%s \t ",_test_collection[n_t][e]);
-      e++;
-    }
-    t1 = clock();
-    int info = relay_test_single(_test_collection[n_t]);
-    t2 = clock();
-    (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
+  printf("Test %i data files with %i solvers.\n", n_data, n_solvers);
+  int number_of_tests = n_data * n_solvers;
 
-    if (info)
-    {
+  number_of_tests -= 1;   // Remove the last test : no enum on data/relay1.dat, too long ...
+  int out = run_test_collection(collection, number_of_tests, relay_test_function);
 
-      failed_tests[n_failed_test]  = n_t;
-      n_failed_test++;
-      if (strcmp(_test_collection[n_t][1],"0") == 0 )
-        out = 1;
-    }
-    else
-    {
-      e=0;
-      succeeded_tests[n_failed_test]  = n_t;
-      n_succeeded_test++;
-      while(strcmp(_test_collection[n_t][e], "---") !=0)
-      {
-        printf("%s \t ",_test_collection[n_t][e]);
-        e++;
-      }
-    }
-    printf("\n################# end of  test # %i #######################\n", n_t);
-  }
-  printf("\n Failed tests : [ ");
-  for (int t =0; t < n_failed_test; t++)
-  {
-    printf("%i \t", failed_tests[t]);
-  }
-  printf("] :\n");
-  for (int t =0; t < n_failed_test; t++)
-  {
-    if (strcmp(_test_collection[failed_tests[t]][1],"1") ==0 )
-    {
-      printf("test %i \t should fail : \t %s\t",
-             failed_tests[t],
-             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
-    }
-    else if (strcmp(_test_collection[failed_tests[t]][1],"0") ==0)
-    {
-      printf("test %i \t should not fail : \t %s\t",
-             failed_tests[t],
-             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
-    }
-    else if (strcmp(_test_collection[failed_tests[t]][1],"2") ==0)
-    {
-      printf("test %i \t unstable : \t %s\t",
-             failed_tests[t],
-             solver_options_id_to_name(atoi(_test_collection[failed_tests[t]][2])));
-    }
-    int e=0;
-    while(strcmp(_test_collection[failed_tests[t]][e], "---") !=0)
-    {
-      printf("%s \t ",_test_collection[failed_tests[t] ] [e]);
-      e++;
-    }
-    printf("\n");
-  }
-  for (int t =0; t < n_succeeded_test; t++)
-  {
-    if (strcmp(_test_collection[succeeded_tests[t]][1],"1") ==0)
-    {
-      printf("test %i \t should fail but finally not : \t %s\t",
-             failed_tests[t],
-             solver_options_id_to_name(atoi(_test_collection[succeeded_tests[t]][2])));
-      int e=0;
-      while(strcmp(_test_collection[succeeded_tests[t]][e], "---") !=0)
-      {
-        printf("%s \t ",_test_collection[failed_tests[t] ] [e]);
-        e++;
-      }
-      printf("\n");
-    }
+  free_test_collection(collection, number_of_tests);
 
-  }
-
-
-
+  
   return out;
-
 }

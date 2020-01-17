@@ -94,7 +94,7 @@ REGISTER_BOOST_SERIALIZATION(std::basic_ofstream<char>);
 template <class Archive>
 void siconos_io(Archive& ar, FrictionContact &v, unsigned int version)
 {
-  SERIALIZE(v, (_contactProblemDim)(_mu)(_numerics_solver_options)(_numerics_solver_id), ar);
+  SERIALIZE(v, (_contactProblemDim)(_mu)(_numerics_solver_options), ar);
 
   if (Archive::is_loading::value)
   {
@@ -114,7 +114,7 @@ REGISTER_BOOST_SERIALIZATION(FrictionContact);
 template <class Archive>
 void siconos_io(Archive& ar, GlobalFrictionContact &v, unsigned int version)
 {
-  SERIALIZE(v, (_contactProblemDim)(_sizeGlobalOutput)(_globalVelocities)(_b)(_H)(_mu)(_numerics_solver_options)(_numerics_solver_id), ar);
+  SERIALIZE(v, (_contactProblemDim)(_sizeGlobalOutput)(_globalVelocities)(_b)(_H)(_mu)(_numerics_solver_options), ar);
 
   if (Archive::is_loading::value)
   {

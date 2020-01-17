@@ -1,12 +1,29 @@
-#include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
-#include "CSparseMatrix.h"
+#include <stdio.h>                 // for printf, fclose, fopen, FILE, NULL
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2019 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
 
-#include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
-#include "CSparseMatrix.h"
+#include <stdlib.h>                // for malloc
+#include "CSparseMatrix.h"         // for cs_dl_entry, CS_INT, cs_dl_print
+#include "NumericsFwd.h"           // for NumericsMatrix, NumericsSparseMatrix
+#include "NumericsMatrix.h"        // for NM_zentry, NM_display, NM_create
+#include "NumericsSparseMatrix.h"  // for NumericsSparseMatrix, NSM_TRIPLET
+#include "NumericsVector.h"        // for NV_display
 
-#include "CSparseMatrix.h"
 #ifdef SICONOS_HAS_MPI
 #include <mpi.h>
 #endif
@@ -81,7 +98,7 @@ int add_square_csc()
   NM_zentry(A, 0, 2, 3);
   NM_zentry(A, 1, 1, 2);
   NM_zentry(A, 1, 2, 3);
-   /* NM_display(A); */
+  /* NM_display(A); */
 
 
   NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
@@ -108,7 +125,7 @@ int add_square_csc()
   NM_zentry(Cref, 2, 2, 6);
   NM_display(Cref);
   printf("add_square_csc: NM_equal(C,Cref) =%i \n", NM_equal(C,Cref));
-  return  (int)!NM_equal(C,Cref);;
+  return (int)!NM_equal(C,Cref);;
 
 }
 
@@ -277,7 +294,7 @@ int gemm_square_csc()
   NM_zentry(A, 0, 2, 3);
   NM_zentry(A, 1, 1, 2);
   NM_zentry(A, 1, 2, 3);
-   /* NM_display(A); */
+  /* NM_display(A); */
 
 
   NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
@@ -323,7 +340,7 @@ int gemm_square_csc()
   /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
   /*   } */
   /* } */
-  return  (int)!NM_equal(C,Cref);;
+  return (int)!NM_equal(C,Cref);;
 
 }
 int gemm_square_triplet_into_csc()
@@ -386,7 +403,7 @@ int gemm_square_triplet_into_csc()
   /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
   /*   } */
   /* } */
-  return  (int)!NM_equal(C,Cref);;
+  return (int)!NM_equal(C,Cref);;
 }
 
 int gemm_rectangle_triplet()
@@ -568,7 +585,7 @@ int gemm_square_csc_1()
   NM_zentry(A, 0, 2, 3);
   NM_zentry(A, 1, 1, 2);
   NM_zentry(A, 1, 2, 3);
-   /* NM_display(A); */
+  /* NM_display(A); */
 
 
   NumericsMatrix * B  = NM_create(NM_SPARSE, size0, size1);
@@ -614,7 +631,7 @@ int gemm_square_csc_1()
   /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
   /*   } */
   /* } */
-  return  (int)!NM_equal(C,Cref);;
+  return (int)!NM_equal(C,Cref);;
 
 }
 int gemm_square_triplet_into_csc_1()
@@ -677,7 +694,7 @@ int gemm_square_triplet_into_csc_1()
   /*     printf("NM_get_value(Cref,%i,%i) =%e \n", i,j,NM_get_value(Cref,i,j) ); */
   /*   } */
   /* } */
-  return  (int)!NM_equal(C,Cref);;
+  return (int)!NM_equal(C,Cref);;
 }
 
 int gemm_rectangle_triplet_1()
@@ -797,9 +814,9 @@ static int inv_test(void)
   NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
   NM_triplet_alloc(A,0);
   A->matrix2->origin= NSM_TRIPLET;
-  for (int i =0; i < size0; i++)
+  for(int i =0; i < size0; i++)
   {
-    for (int j =i; j < size1; j++)
+    for(int j =i; j < size1; j++)
     {
       NM_zentry(A, i, j, i+j+1);
     }
@@ -811,7 +828,7 @@ static int inv_test(void)
   FILE * fileout = fopen("dataA.py", "w");
   NM_write_in_file_python(A, fileout);
   fclose(fileout);
- 
+
   NumericsMatrix * Ainv  = NM_inv(A);
 
 
@@ -822,9 +839,132 @@ static int inv_test(void)
 
   //NM_display(Id);
 
-  
+
   return  !NM_equal(AAinv, Id);
 }
+
+static int test_NM_max_by_columns_and_rows(void)
+{
+  int size0 =5;
+  int size1 =5;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for(int i =0; i < size0; i++)
+  {
+    for(int j =i; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+
+  NM_display(A);
+
+  double * max = (double *) malloc(size0*sizeof(double));
+
+  int info = NM_max_by_columns(A, max);
+  printf("Max by columns:\n");
+  NV_display(max,size0);
+  printf("Max by rows:\n");
+  info += NM_max_by_rows(A, max);
+  NV_display(max,size0);
+
+  return  info;
+}
+static int test_NM_compute_balancing_matrices(void)
+{
+  int size0 =50;
+  int size1 =50;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for(int i =0; i < size0; i++)
+  {
+    for(int j =i; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+
+  NM_display(A);
+
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 10, B);
+
+  printf("D1\n:");
+  NM_display(B->D1);
+  printf("D2\n:");
+  NM_display(B->D2);
+  printf("A\n:");
+  NM_display(B->A);
+  int info=0;
+  return  info;
+}
+
+static int test_NM_compute_balancing_matrices_sym(void)
+{
+  int size0 =10;
+  int size1 =10;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+  for(int i =0; i < size0; i++)
+  {
+    NM_zentry(A, i, i, i+i+1);
+    for(int j =i; j < size1; j++)
+    {
+      if(i != j)
+      {
+        NM_zentry(A, i, j, i+j+1);
+        NM_zentry(A, j, i, i+j+1);
+      }
+    }
+  }
+
+  NM_display(A);
+
+
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 10, B);
+  printf("D1\n:");
+  NM_display(B->D1);
+  printf("D2\n:");
+  NM_display(B->D2);
+  printf("A\n:");
+  NM_display(B->A);
+  int info=0;
+  return  info;
+}
+
+static int test_NM_compute_balancing_matrices_rectangle(void)
+{
+  int size0 =3;
+  int size1 =1;
+  NumericsMatrix * A  = NM_create(NM_SPARSE, size0, size1);
+  NM_triplet_alloc(A,0);
+  A->matrix2->origin= NSM_TRIPLET;
+
+  for(int i =0; i < size0; i++)
+  {
+    for(int j =0; j < size1; j++)
+    {
+      NM_zentry(A, i, j, i+j+1);
+    }
+  }
+
+  NM_display(A);
+  BalancingMatrices * B = NM_BalancingMatrices_new(A);
+  NM_compute_balancing_matrices(A, 1e-03, 100, B);
+  printf("D1\n:");
+  NM_display(B->D1);
+  printf("D2\n:");
+  NM_display(B->D2);
+  printf("A\n:");
+  NM_display(B->A);
+  int info=0;
+  return  info;
+}
+
 
 
 
@@ -840,9 +980,15 @@ int main()
   info += gemm_test2();
 
   info += alloc_test();
-  
+
   info += inv_test();
 
+  info += test_NM_max_by_columns_and_rows();
+
+
+  info += test_NM_compute_balancing_matrices();
+  info += test_NM_compute_balancing_matrices_sym();
+  info += test_NM_compute_balancing_matrices_rectangle();
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
 #endif

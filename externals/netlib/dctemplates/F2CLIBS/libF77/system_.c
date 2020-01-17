@@ -16,7 +16,7 @@ system_(register char *s, ftnlen n)
 
   blast = buff + (n < 1000 ? n : 1000);
 
-  for (bp = buff ; bp < blast && *s != '\0' ;)
+  for(bp = buff ; bp < blast && *s != '\0' ;)
     *bp++ = *s++;
   *bp = '\0';
   return system(buff);

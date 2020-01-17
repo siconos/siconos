@@ -17,14 +17,15 @@
 */
 
 #include "NonlinearComplementarityProblem.h"
-#include "NumericsMatrix.h"
+#include <stdlib.h>          // for free, NULL, malloc
+#include "NumericsMatrix.h"  // for NM_clear
 
 
 void freeNCP(NonlinearComplementarityProblem* ncp)
 {
-  if (ncp->nabla_F)
+  if(ncp->nabla_F)
   {
-    NM_free(ncp->nabla_F);
+    NM_clear(ncp->nabla_F);
     free(ncp->nabla_F);
     ncp->nabla_F = NULL;
   }

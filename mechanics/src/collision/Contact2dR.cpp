@@ -40,7 +40,7 @@ void Contact2dR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
 
   y.setValue(0, distance());
 
-  
+
   DEBUG_PRINTF("distance : %g \n", distance());
   DEBUG_PRINTF("position on A : %g,%g\n", (*pc1())(0), (*pc1())(1));
   DEBUG_PRINTF("position on B : %g,%g\n", (*pc2())(0), (*pc2())(1));

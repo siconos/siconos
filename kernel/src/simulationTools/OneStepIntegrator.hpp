@@ -23,7 +23,8 @@
 #ifndef ONESTEPINTEGRATOR_H
 #define ONESTEPINTEGRATOR_H
 
-#include "SiconosConst.hpp"
+#include "SiconosVisitor.hpp" // for VIRTUAL_ACCEPT_VISITORS
+#include "RuntimeException.hpp"
 #include "SimulationTypeDef.hpp"
 #include "OneStepIntegratorTypes.hpp"
 #include "SimulationGraphs.hpp"

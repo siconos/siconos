@@ -22,6 +22,8 @@
 /*!\file NM_conversions.h
   \brief Conversion related functions for the various matrix storages in Numerics
 */
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "CSparseMatrix.h"  // for CSparseMatrix
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -33,6 +35,12 @@ extern "C"
    * \return the matrix in triplet format
    */
   CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc);
+
+  /** Convert from csc to half triplet for symmetric matrices
+   * \param csc the matrix to convert
+   * \return the matrix in triplet format
+   */
+  CSparseMatrix* NM_csc_to_half_triplet(CSparseMatrix* csc);
 
   /** Convert from triplet (aka coo) to csr
    * \param triplet the matrix to convert

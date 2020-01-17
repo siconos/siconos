@@ -38,13 +38,13 @@ void LagrangianR::display() const
 {
   Relation::display();
   std::cout << " _jachq :" << std::endl;
-  if (_jachq)
+  if(_jachq)
     _jachq->display();
   std::cout << " _jachqDot :" << std::endl;
-  if (_jachqDot)
+  if(_jachqDot)
     _jachqDot->display();
   std::cout << " _jachlambda :" << std::endl;
-  if (_jachlambda)
+  if(_jachlambda)
     _jachlambda->display();
   else
     std::cout << " NULL :" << std::endl;

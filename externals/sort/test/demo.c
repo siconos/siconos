@@ -34,14 +34,18 @@
 #define RUNS 1
 
 /* helper functions */
-void verify(int64_t *dst, const int size) {
+void verify(int64_t *dst, const int size)
+{
   int i;
 
-  for (i = 1; i < size; i++) {
-    if (dst[i - 1] > dst[i]) {
+  for(i = 1; i < size; i++)
+  {
+    if(dst[i - 1] > dst[i])
+    {
       printf("Verify failed! at %d\n", i);
 
-      for (i = i - 2; i < SIZE; i++) {
+      for(i = i - 2; i < SIZE; i++)
+      {
         printf(" %lld", (long long int)dst[i]);
       }
 
@@ -51,29 +55,34 @@ void verify(int64_t *dst, const int size) {
   }
 }
 
-static __inline double utime() {
+static __inline double utime()
+{
   struct timeval t;
   gettimeofday(&t, NULL);
   return (1000000.0 * t.tv_sec + t.tv_usec);
 }
 
-static void fill(int64_t *arr, const int size) {
+static void fill(int64_t *arr, const int size)
+{
   int i;
 
-  for (i = 0; i < size; i++) {
+  for(i = 0; i < size; i++)
+  {
     arr[i] = lrand48();
   }
 }
 
 /* used for stdlib */
-static __inline int simple_cmp(const void *a, const void *b) {
+static __inline int simple_cmp(const void *a, const void *b)
+{
   const int64_t da = *((const int64_t *) a);
   const int64_t db = *((const int64_t *) b);
   return (da < db) ? -1 : (da == db) ? 0 : 1;
 }
 
 
-void run_tests(void) {
+void run_tests(void)
+{
   int i;
   int64_t arr[SIZE];
   int64_t dst[SIZE];
@@ -84,7 +93,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -99,7 +109,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -113,7 +124,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -128,7 +140,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -142,7 +155,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -155,8 +169,9 @@ void run_tests(void) {
   printf("selection sort time:             %10.2f us per iteration\n", total_time / RUNS);
   srand48(SEED);
   total_time = 0.0;
-  
-  for (i = 0; i < RUNS; i++) {
+
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -170,7 +185,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -184,7 +200,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -198,7 +215,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -212,7 +230,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -226,7 +245,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -240,7 +260,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -254,7 +275,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -268,7 +290,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -282,7 +305,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -296,7 +320,8 @@ void run_tests(void) {
   srand48(SEED);
   total_time = 0.0;
 
-  for (i = 0; i < RUNS; i++) {
+  for(i = 0; i < RUNS; i++)
+  {
     fill(arr, SIZE);
     memcpy(dst, arr, sizeof(int64_t) * SIZE);
     start_time = utime();
@@ -309,7 +334,8 @@ void run_tests(void) {
   printf("grail sort dyn buffer sort time: %10.2f us per iteration\n", total_time / RUNS);
 }
 
-int main(void) {
+int main(void)
+{
   run_tests();
   return 0;
 }

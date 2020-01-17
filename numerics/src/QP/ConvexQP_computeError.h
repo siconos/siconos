@@ -23,6 +23,9 @@
   \brief functions related to error computation for friction-contact 
 */
 
+#include "NumericsFwd.h"  // for ConvexQP, SolverOptions
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict

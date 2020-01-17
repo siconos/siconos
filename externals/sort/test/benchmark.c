@@ -20,32 +20,38 @@
 size_t sizes[SIZES] = {100000};
 
 /* used for stdlib */
-static __inline int simple_cmp(const void *a, const void *b) {
+static __inline int simple_cmp(const void *a, const void *b)
+{
   const int64_t da = *((const int64_t *) a);
   const int64_t db = *((const int64_t *) b);
   return (da < db) ? -1 : (da == db) ? 0 : 1;
 }
 
-static __inline double utime() {
+static __inline double utime()
+{
   struct timeval t;
   gettimeofday(&t, NULL);
   return (1000000.0 * t.tv_sec + t.tv_usec);
 }
 
-static void fill_random(int64_t *dst, const int size) {
+static void fill_random(int64_t *dst, const int size)
+{
   srand48(SEED);
   int i;
 
-  for (i = 0; i < size; i++) {
+  for(i = 0; i < size; i++)
+  {
     dst[i] = lrand48();
   }
 }
 
-void capitalize(const char *word, char *new_word) {
+void capitalize(const char *word, char *new_word)
+{
   int len;
   len = strlen(word);
 
-  if (len < 1) {
+  if(len < 1)
+  {
     return;
   }
 
@@ -53,10 +59,12 @@ void capitalize(const char *word, char *new_word) {
   new_word[0] = toupper(new_word[0]);
 }
 
-int platform_bits() {
+int platform_bits()
+{
 #if defined (__amd64__) || defined (__x86_64__)
 
-  if (1) { /* avoid two returns in a row */
+  if(1)    /* avoid two returns in a row */
+  {
     return 64;
   }
 
@@ -65,7 +73,8 @@ int platform_bits() {
   return sizeof(void *) * 8;
 }
 
-void platform_name(char *output) {
+void platform_name(char *output)
+{
   char *name;
 #if defined (__amd64__) || defined (__x86_64__)
   name = "x86";
@@ -124,7 +133,8 @@ void platform_name(char *output) {
 } while (0)
 
 
-int main(void) {
+int main(void)
+{
   int test, iter;
   double usec1, usec2, diff;
   char capital_word[128];

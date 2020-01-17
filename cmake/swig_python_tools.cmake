@@ -52,16 +52,16 @@ macro(add_siconos_swig_sub_module fullname)
   # extra per-module flags if any
   list(APPEND ${COMPONENT}_SWIG_DEFS_${_name} "${${COMPONENT}_SWIG_DEFS}")
 
-  IF(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
+  if(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
     set_source_files_properties(${swig_file}
       PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS_${_name}}" CPLUSPLUS ON)
-  ELSE(WITH_CXX AND (BUILD_AS_CPP OR NOT ${COMPONENT} MATCHES "numerics"))
+  else()
     # C compilation, pass SWIG_FLAGS.
-    IF(${COMPONENT} MATCHES "numerics")
+    if(${COMPONENT} MATCHES "numerics")
       set_source_files_properties(${swig_file}
         PROPERTIES SWIG_FLAGS "${${COMPONENT}_SWIG_DEFS_${_name}}")
-    ENDIF()
-  ENDIF()
+    endif()
+  endif()
 
 
   if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.13")

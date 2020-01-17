@@ -158,23 +158,23 @@ int (*matvec)(), (*psolve)();
 
   /*     Test the input parameters. */
 
-  if (*n < 0)
+  if(*n < 0)
   {
     *info = -1;
   }
-  else if (*ldw < max(1, *n))
+  else if(*ldw < max(1, *n))
   {
     *info = -2;
   }
-  else if (*iter <= 0)
+  else if(*iter <= 0)
   {
     *info = -3;
   }
-  else if (*ldh < *restrt + 1)
+  else if(*ldh < *restrt + 1)
   {
     *info = -4;
   }
-  if (*info != 0)
+  if(*info != 0)
   {
     return 0;
   }
@@ -199,7 +199,7 @@ int (*matvec)(), (*psolve)();
   /*     Set initial residual (AV is temporary workspace here). */
 
   dcopy_(n, &b[1], &c__1, &work[av * work_dim1 + 1], &c__1);
-  if (dnrm2_(n, &x[1], &c__1) != 0.)
+  if(dnrm2_(n, &x[1], &c__1) != 0.)
   {
 
     /*        AV is temporary workspace here. */
@@ -209,11 +209,11 @@ int (*matvec)(), (*psolve)();
   }
   (*psolve)(&work[r * work_dim1 + 1], &work[av * work_dim1 + 1]);
   bnrm2 = dnrm2_(n, &b[1], &c__1);
-  if (bnrm2 == 0.)
+  if(bnrm2 == 0.)
   {
     bnrm2 = 1.;
   }
-  if (dnrm2_(n, &work[r * work_dim1 + 1], &c__1) / bnrm2 < tol)
+  if(dnrm2_(n, &work[r * work_dim1 + 1], &c__1) / bnrm2 < tol)
   {
     goto L70;
   }
@@ -236,7 +236,7 @@ L10:
 
   work[s * work_dim1 + 1] = rnorm;
   i__1 = *n;
-  for (k = 2; k <= i__1; ++k)
+  for(k = 2; k <= i__1; ++k)
   {
     work[k + s * work_dim1] = 0.;
     /* L20: */
@@ -263,7 +263,7 @@ L30:
   /*           the RESTRT iterations. */
 
   i__1 = i - 1;
-  for (k = 1; k <= i__1; ++k)
+  for(k = 1; k <= i__1; ++k)
   {
     drot_(&c__1, &h[k + i * h_dim1], ldh, &h[k + 1 + i * h_dim1], ldh, &h[
             k + cs * h_dim1], &h[k + sn * h_dim1]);
@@ -287,17 +287,17 @@ L30:
   drot_(&c__1, &work[i + s * work_dim1], ldw, &work[i + 1 + s * work_dim1],
         ldw, &h[i + cs * h_dim1], &h[i + sn * h_dim1]);
   *resid = (d__1 = work[i + 1 + s * work_dim1], abs(d__1)) / bnrm2;
-  if (*resid <= tol)
+  if(*resid <= tol)
   {
     update_(&i, n, &x[1], &h[h_offset], ldh, &work[y * work_dim1 + 1], &
             work[s * work_dim1 + 1], &work[v * work_dim1 + 1], ldw);
     goto L70;
   }
-  if (*iter == maxit)
+  if(*iter == maxit)
   {
     goto L50;
   }
-  if (i < *restrt)
+  if(i < *restrt)
   {
     goto L30;
   }
@@ -318,11 +318,11 @@ L50:
   (*psolve)(&work[r * work_dim1 + 1], &work[av * work_dim1 + 1]);
   work[i + 1 + s * work_dim1] = dnrm2_(n, &work[r * work_dim1 + 1], &c__1);
   *resid = work[i + 1 + s * work_dim1] / bnrm2;
-  if (*resid <= tol)
+  if(*resid <= tol)
   {
     goto L70;
   }
-  if (*iter == maxit)
+  if(*iter == maxit)
   {
     goto L60;
   }
@@ -429,7 +429,7 @@ doublereal *w;
 
   /* Function Body */
   i__1 = *i;
-  for (k = 1; k <= i__1; ++k)
+  for(k = 1; k <= i__1; ++k)
   {
     h[k] = ddot_(n, &w[1], &c__1, &v[k * v_dim1 + 1], &c__1);
     d__1 = -h[k];

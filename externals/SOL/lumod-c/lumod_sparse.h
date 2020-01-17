@@ -1,5 +1,6 @@
+#include "commonlib.h"  // for REAL
+#include "sparselib.h"  // for sparseMatrix, sparseVector
 
-#include "sparselib.h"
 
 #ifdef __cplusplus
 extern "C" {

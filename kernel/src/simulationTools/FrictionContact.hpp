@@ -74,7 +74,7 @@ protected:
 
 
   /** Type (dimension) of the contact problem (2D or 3D) */
-  int _contactProblemDim;
+  int _contactProblemDim = 3;
 
   /** * friction coefficients */
   SP::MuStorage _mu;
@@ -86,15 +86,27 @@ protected:
 
 public:
 
-  /**
-     \param dimPb dimension (2D or 3D) of the FrictionContact problem (default = 3D)
-     \param numericsSolverId Numerics solver to use (default = NSGS)
+  /** constructor (solver id and dimension)
+      \param dimPb dimension (2D or 3D) of the friction-contact problem
+      \param numericsSolverId id of the solver to be used, optional,
+      default : SICONOS_FRICTION_3D_NSGS
+      \rst
+      see :ref:`problems_and_solvers` for details.
+      \endrst
   */
-  FrictionContact(int dimPb = 3, int numericsSolverId = SICONOS_FRICTION_3D_NSGS);
+  FrictionContact(int dimPb=3, int numericsSolverId = SICONOS_FRICTION_3D_NSGS);
+
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  FrictionContact(int dimPb, SP::SolverOptions options);
 
   /** destructor
    */
-  virtual ~FrictionContact();
+  virtual ~FrictionContact(){};
 
   // GETTERS/SETTERS
 

@@ -41,7 +41,7 @@ ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
   std11::static_pointer_cast<LsodarOSI>(_processIntegrator)->setExtraAdditionalTerms(
-      std11::shared_ptr<ControlLinearAdditionalTermsED>(new ControlLinearAdditionalTermsED()));
+    std11::shared_ptr<ControlLinearAdditionalTermsED>(new ControlLinearAdditionalTermsED()));
 
   _DSG0 = _nsds->topology()->dSG(0);
   _IG0 = _nsds->topology()->indexSet0();
@@ -57,20 +57,20 @@ void ControlLsodarSimulation::run()
   boost::timer::cpu_timer time;
   EventDriven& sim = static_cast<EventDriven&>(*_processSimulation);
 
-  while (sim.hasNextEvent())
+  while(sim.hasNextEvent())
   {
-    if (eventsManager.needsIntegration())
+    if(eventsManager.needsIntegration())
     {
       sim.advanceToEvent();
     }
     sim.processEvents();
     Event& currentEvent = *eventsManager.currentEvent();
-    if (currentEvent.getType() == ACTUATOR_EVENT)
+    if(currentEvent.getType() == ACTUATOR_EVENT)
     {
       // this is necessary since we changed the control input, hence the RHS
       sim.setIstate(1);
     }
-    if (sim.hasNextEvent() && eventsManager.nextEvent()->getType() == TD_EVENT) // We store only on TD_EVENT, this should be settable
+    if(sim.hasNextEvent() && eventsManager.nextEvent()->getType() == TD_EVENT)  // We store only on TD_EVENT, this should be settable
     {
       (*_dataM)(k, 0) = sim.startingTime();
       storeData(k);
@@ -87,6 +87,6 @@ void ControlLsodarSimulation::run()
   // result of elpased is in ns while it was in seconds
   // in the old interface.
   // elapsed is a tuple with wall, user and system times.
-  _elapsedTime = time.elapsed().user * 1e-9; 
+  _elapsedTime = time.elapsed().user * 1e-9;
   _dataM->resize(k, _nDim + 1);
 }

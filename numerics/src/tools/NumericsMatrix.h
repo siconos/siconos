@@ -22,15 +22,18 @@
 /*!\file NumericsMatrix.h
   \brief Structure definition and functions related to matrix storage in Numerics
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <stdbool.h>
-#include <stdio.h>
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-#include "CSparseMatrix.h" // for CS_INT
+#include <assert.h>         // for assert
+#include <stdio.h>          // for size_t, FILE, NULL
+#include <stdlib.h>         // for malloc
+#include "CSparseMatrix.h"  // for CS_INT, CSparseMatrix
+#include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
+#include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
 #include "NM_MPI.h"
+
+#ifndef __cplusplus
+#include <stdbool.h>        // for bool
+#endif
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
  * Structure for simple workspaces
@@ -69,6 +72,15 @@ struct NumericsMatrix
   NumericsMatrixInternalData* internalData; /**< internal storage, used for workspace among other things */
 
 };
+
+typedef struct
+{
+  int size0;
+  int size1;
+  NumericsMatrix* D1;
+  NumericsMatrix* D2;
+  NumericsMatrix* A;
+} BalancingMatrices;
 
 /*! RawNumericsMatrix is used without conversion in python */
 typedef NumericsMatrix RawNumericsMatrix;
@@ -117,7 +129,7 @@ extern "C"
    * \return a pointer to a NumericsMatrix
    */
   RawNumericsMatrix* NM_create_from_data(int storageType, int size0, int size1, void* data);
-  RawNumericsMatrix* NM_create_from_filename(char *filename);
+  RawNumericsMatrix* NM_create_from_filename(const char *filename);
   RawNumericsMatrix* NM_create_from_file(FILE *file);
 
 
@@ -155,6 +167,12 @@ extern "C"
    * \return the triplet sparse Matrix created in A.
    */
   CSparseMatrix* NM_triplet(NumericsMatrix* A);
+
+   /** Creation, if needed, of half triplet storage from sparse block storage.
+   * \param[in,out] A a NumericsMatrix initialized with sparsed block storage.
+   * \return the triplet sparse Matrix created in A.
+   */
+  CSparseMatrix* NM_half_triplet(NumericsMatrix* A);
 
   /** Creation, if needed, of compress column storage of a NumericsMatrix.
    * \param[in,out] A a NumericsMatrix with sparse block storage initialized
@@ -245,7 +263,7 @@ extern "C"
       Note that this function does not free m.
       \param m the matrix to be deleted.
    */
-  void NM_free(NumericsMatrix* m);
+  void NM_clear(NumericsMatrix* m);
 
 
   /**************************************************/
@@ -269,7 +287,7 @@ extern "C"
    * \param j column index
    * \return  the value to be inserted.
    */
-  double NM_get_value(NumericsMatrix* M, int i, int j);
+  double NM_get_value(const NumericsMatrix* const M, int i, int j);
 
   /** compare to NumericsMatrix up to machine accuracy (DBL_EPSILON)
    * \param A the NumericsMatrix
@@ -329,6 +347,17 @@ extern "C"
    *  A copy is always performed
    */
   void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double **Block);
+
+
+  /** Set the submatrix B into the matrix A on the position defined in
+   *  (start_i, start_j) position.
+   * \param[in] A a pointer to NumerixMatrix
+   * \param[in] B a pointer toNumericsMatrix
+   * \param[in] start_i a start row index
+   * \param[in] start_j a start column index
+   */
+  void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
+                 const unsigned int start_i, const unsigned int start_j);
 
   /**************************************************/
   /** Matrix - vector product           *************/
@@ -425,7 +454,6 @@ extern "C"
                 const double beta,
                 double *y);
 
-
   /**************************************************/
   /** matrix conversion display *********************/
   /**************************************************/
@@ -471,6 +499,11 @@ extern "C"
    */
   void NM_display(const NumericsMatrix* const M);
 
+  /** Screen display of the matrix storage
+      \param M the matrix to be displayed
+   */
+  void NM_display_storageType(const NumericsMatrix* const M);
+
 
   /** Screen display raw by raw of the matrix content
       \param m the matrix to be displayed
@@ -511,7 +544,7 @@ extern "C"
      \return 0 if the matrix
   */
   RawNumericsMatrix*  NM_new_from_file(FILE *file);
-  RawNumericsMatrix*  NM_new_from_filename(char * filename);
+  RawNumericsMatrix*  NM_new_from_filename(const char * filename);
 
   /**  NM_write_in_file_scilab of the matrix content
    \param M the matrix to be printed
@@ -551,6 +584,11 @@ extern "C"
    * \param[in,out] A a Numericsmatrix
    */
   void NM_clearTriplet(NumericsMatrix* A);
+
+  /** Clear half triplet storage, if it is existent.
+   * \param[in,out] A a Numericsmatrix
+   */
+  void NM_clearHalfTriplet(NumericsMatrix* A);
 
   /** Clear compressed column storage, if it is existent.
    * \param[in,out] A a Numericsmatrix
@@ -745,7 +783,54 @@ extern "C"
   {
     return A;
   };
+  /** Compute the  maximum eigenvalue with the iterated power method
+   * \param A the matrix
+   * \return the maximum eigenvalue*/
   double NM_iterated_power_method(NumericsMatrix* A, double tol, int itermax);
+
+  /* Compute the maximum values by columns
+   *  \param A the matrix
+   *  \param max the vector of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_by_columns(NumericsMatrix *A, double * max);
+
+  /* Compute the maximum values by rows
+   *  \param A the matrix
+   *  \param max the vector of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_by_rows(NumericsMatrix *A, double * max);
+  
+  /* Compute the maximum absolute values by columns
+   *  \param A the matrix
+   *  \param max the vector of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_abs_by_columns(NumericsMatrix *A, double * max);
+
+  /* Compute the maximum absolute values by rows
+   *  \param A the matrix
+   *  \param max the vector of max that must be preallocated
+   *  \return info
+   */
+  int NM_max_abs_by_rows(NumericsMatrix *A, double * max);
+
+  /* Compute the balancing matrices for a given matrix by iteration
+   *  \param A the matrix
+   *  \param tol tolerance on the balanced matrix
+   *  \param itermax max number of iterations
+   *  \param alloated structure for the balancing matrices and the balanced matrix
+   * \return 0 if succeed.
+   */
+  int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, BalancingMatrices * B);
+
+  /* Create a Balancing Matrices structure
+   *  \param A the matrix  to be balanced
+   */
+  BalancingMatrices * NM_BalancingMatrices_new(NumericsMatrix* A);
+
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

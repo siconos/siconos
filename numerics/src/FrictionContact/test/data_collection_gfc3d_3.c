@@ -16,19 +16,18 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include "frictionContact_test_utils.h"
+#include <stdlib.h>      // for malloc
+#include "test_utils.h"  // for data_collection
 
-char ** data_collection()
+const char ** data_collection()
 {
 
   int n_data_1=150;
 
-  char ** data_collection_1 = (char **)malloc(n_data_1*sizeof(char *));
+  const char ** data_collection_1 = malloc(n_data_1*sizeof(const char *));
   int n_data=0;
   data_collection_1[n_data++] = "./data/spheres-in-a-box-98-i10000-256-10.hdf5";
+  /* data_collection_1[n_data++] = "./data/Spheres1mm-ndof-12000-nc-4196-1378.hdf5"; */
   data_collection_1[n_data++] = "---";
 
 

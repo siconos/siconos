@@ -458,7 +458,6 @@ SICONOS_IO_REGISTER_WITH_BASES(OSNSMultipleImpact,(LinearOSNS),
   (_relativeVelocityPrimaryContact)
   (_restitutionContact)
   (_saveData)
-  (_selectPrimaConInVel)
   (_sizeDataSave)
   (_stateContact)
   (_stepMaxSave)

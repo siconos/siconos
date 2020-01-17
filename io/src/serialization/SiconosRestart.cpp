@@ -29,52 +29,52 @@
 namespace Siconos
 {
 
-  void save(SP::Simulation s, const std::string& filename)
+void save(SP::Simulation s, const std::string& filename)
+{
+  boost::filesystem::path tempf =
+    boost::filesystem::path(filename + ".tmp");
+
+  boost::filesystem::path destf =
+    boost::filesystem::path(filename);
+
+  std::ofstream ofs(tempf.c_str());
   {
-    boost::filesystem::path tempf =
-      boost::filesystem::path(filename + ".tmp");
-
-    boost::filesystem::path destf =
-      boost::filesystem::path(filename);
-
-    std::ofstream ofs(tempf.c_str());
+    if(destf.extension() == ".xml")
     {
-      if (destf.extension() == ".xml")
-      {
-        RegisterSimulationOxml(ofs, s);
-      }
-
-      else if (destf.extension() == ".bin")
-      {
-        RegisterSimulationObin(ofs, s);
-      }
+      RegisterSimulationOxml(ofs, s);
     }
 
-    // atomic
-    boost::filesystem::rename(tempf, destf);
+    else if(destf.extension() == ".bin")
+    {
+      RegisterSimulationObin(ofs, s);
+    }
   }
+
+  // atomic
+  boost::filesystem::rename(tempf, destf);
+}
 
 /** load Siconos model from file
  * \param filename
  */
-  SP::Simulation load(const std::string& filename)
-  {
-    //SP::Simulation s(new Simulation());
-    SP::Simulation s;
+SP::Simulation load(const std::string& filename)
+{
+  //SP::Simulation s(new Simulation());
+  SP::Simulation s;
 
-    std::ifstream ifs(filename.c_str());
+  std::ifstream ifs(filename.c_str());
+  {
+    if(boost::filesystem::path(filename).extension() == ".xml")
     {
-      if (boost::filesystem::path(filename).extension() == ".xml")
-      {
-        RegisterSimulationIxml(ifs, s);
-      }
-      else if (boost::filesystem::path(filename).extension() == ".bin")
-      {
-        RegisterSimulationIbin(ifs, s);
-      }
+      RegisterSimulationIxml(ifs, s);
     }
-    return s;
+    else if(boost::filesystem::path(filename).extension() == ".bin")
+    {
+      RegisterSimulationIbin(ifs, s);
+    }
   }
+  return s;
+}
 }
 #else
 #include "SiconosRestart.hpp"
@@ -82,16 +82,16 @@ namespace Siconos
 namespace Siconos
 {
 
-  void save(SP::Simulation s, const std::string& filename)
-  {
-    RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
-  }
+void save(SP::Simulation s, const std::string& filename)
+{
+  RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
+}
 
-  SP::Simulation load(const std::string& filename)
-  {
-    RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
-    /* Dummy return to make every compiler happy  */
-    return std11::shared_ptr<Simulation>();
-  }
+SP::Simulation load(const std::string& filename)
+{
+  RuntimeException::selfThrow("Siconos/IO must be compiled with serialization support for this service.");
+  /* Dummy return to make every compiler happy  */
+  return std11::shared_ptr<Simulation>();
+}
 }
 #endif

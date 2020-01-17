@@ -30,26 +30,26 @@ x_wsne(cilist *a)
 
   nl = (Namelist *)a->cifmt;
   PUT('&');
-  for (s = nl->name; *s; s++)
+  for(s = nl->name; *s; s++)
     PUT(*s);
   PUT(' ');
   vd = nl->vars;
   vde = vd + nl->nvars;
-  while (vd < vde)
+  while(vd < vde)
   {
     v = *vd++;
     s = v->name;
 #ifdef No_Extra_Namelist_Newlines
-    if (f__recpos + strlen(s) + 2 >= L_len)
+    if(f__recpos + strlen(s) + 2 >= L_len)
 #endif
       nl_donewrec();
-    while (*s)
+    while(*s)
       PUT(*s++);
     PUT(' ');
     PUT('=');
     number = (dims = v->dims) ? dims + 1 : &one;
     type = v->type;
-    if (type < 0)
+    if(type < 0)
     {
       size = -type;
       type = TYCHAR;
@@ -57,14 +57,14 @@ x_wsne(cilist *a)
     else
       size = f__typesize[type];
     l_write(number, v->addr, size, type);
-    if (vd < vde)
+    if(vd < vde)
     {
-      if (f__recpos + 2 >= L_len)
+      if(f__recpos + 2 >= L_len)
         nl_donewrec();
       PUT(',');
       PUT(' ');
     }
-    else if (f__recpos + 1 >= L_len)
+    else if(f__recpos + 1 >= L_len)
       nl_donewrec();
   }
   PUT('/');

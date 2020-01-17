@@ -298,8 +298,8 @@ double sin_x(double x)
 void quaternionFromRotationVector(SP::SiconosVector rotationVector, SP::SiconosVector q)
 {
   double angle = sqrt(rotationVector->getValue(0)*rotationVector->getValue(0)+
-               rotationVector->getValue(1)*rotationVector->getValue(1)+
-               rotationVector->getValue(2)*rotationVector->getValue(2));
+                      rotationVector->getValue(1)*rotationVector->getValue(1)+
+                      rotationVector->getValue(2)*rotationVector->getValue(2));
 
   double f = 0.5 * sin_x(angle *0.5);
 

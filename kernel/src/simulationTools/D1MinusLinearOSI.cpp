@@ -17,6 +17,7 @@
 */
 
 #include "D1MinusLinearOSI.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "Simulation.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
@@ -119,7 +120,7 @@ void D1MinusLinearOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem 
   // Check dynamical system type
   Type::Siconos dsType = Type::value(*ds);
   assert(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS || dsType == Type::NewtonEulerDS);
-  
+
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
     SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
@@ -149,7 +150,7 @@ void D1MinusLinearOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem 
   else
     RuntimeException::selfThrow("D1MinusLinearOSI::initialize - not implemented for Dynamical system type: " + dsType);
 
-  for (unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
+  for(unsigned int k = _levelMinForInput ; k < _levelMaxForInput + 1; k++)
   {
     ds->initializeNonSmoothInput(k);
   }
@@ -206,8 +207,8 @@ void D1MinusLinearOSI::initialize_nonsmooth_problems()
 }
 
 void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
-				     InteractionProperties& interProp,
-				     DynamicalSystemsGraph & DSG)
+    InteractionProperties& interProp,
+    DynamicalSystemsGraph & DSG)
 {
 
   DEBUG_BEGIN("D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter, InteractionProperties& interProp, DynamicalSystemsGraph & DSG)\n");
@@ -218,12 +219,12 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   DEBUG_PRINTF("interaction number %i\n", inter.number());
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  if (!interProp.workVectors)
+  if(!interProp.workVectors)
   {
     interProp.workVectors.reset(new VectorOfVectors);
     interProp.workVectors->resize(D1MinusLinearOSI::WORK_INTERACTION_LENGTH);
   }
-  if (!interProp.workBlockVectors)
+  if(!interProp.workBlockVectors)
   {
     interProp.workBlockVectors.reset(new VectorOfBlockVectors);
     interProp.workBlockVectors->resize(D1MinusLinearOSI::BLOCK_WORK_LENGTH);
@@ -242,7 +243,7 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   // Initialize/allocate memory buffers in interaction.
   inter.initializeMemory(_steps);
 
-  if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
+  if(!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2))))
   {
     std::cout << "checkOSI(DSG.descriptor(ds1)): "
               << std::boolalpha
@@ -261,15 +262,15 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
 
-  if (ds1 != ds2)
+  if(ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
-    if ((!inter_work_block[xfree]) || (inter_work_block[xfree]->numberOfBlocks() !=2 ))
+    if((!inter_work_block[xfree]) || (inter_work_block[xfree]->numberOfBlocks() !=2))
       inter_work_block[xfree].reset(new BlockVector(2));
   }
   else
   {
-    if ((!inter_work_block[xfree]) || (inter_work_block[xfree]->numberOfBlocks() !=1 ))
+    if((!inter_work_block[xfree]) || (inter_work_block[xfree]->numberOfBlocks() !=1))
       inter_work_block[xfree].reset(new BlockVector(1));
   }
 
@@ -280,7 +281,7 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
     inter_work_block[xfree]->setVectorPtr(0,workVds1[D1MinusLinearOSI::FREE]);
   }
-  if (ds1 != ds2)
+  if(ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
     if(checkOSI(DSG.descriptor(ds2)))
@@ -295,26 +296,26 @@ void D1MinusLinearOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   DEBUG_EXPR(inter_work_block[xfree]->display(););
 
 
-  
-  if (relationType == Lagrangian)
+
+  if(relationType == Lagrangian)
   {
     LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
     DSlink[LagrangianR::p2].reset(new BlockVector());
     DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
   }
-  else if (relationType == NewtonEuler)
+  else if(relationType == NewtonEuler)
   {
-    
+
   }
 
-  if (ds1 != ds2)
+  if(ds1 != ds2)
   {
-    if (relationType == Lagrangian)
+    if(relationType == Lagrangian)
     {
       LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
       DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
     }
-    else if (relationType == NewtonEuler)
+    else if(relationType == NewtonEuler)
     {
     }
   }
@@ -456,11 +457,11 @@ void D1MinusLinearOSI::updateState(const unsigned int)
         /* copy the value of the impulse */
         SP::SiconosVector dummy(new SiconosVector(*(d->p(1))));
         /* Compute the velocity jump due to the impulse */
-	if(d->inverseMass())
-	  {
-	    d->update_inverse_mass();
-	    d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
-	  }
+        if(d->inverseMass())
+        {
+          d->update_inverse_mass();
+          d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+        }
         /* Add the velocity jump to the free velocity */
         *v += *dummy;
       }
@@ -479,11 +480,11 @@ void D1MinusLinearOSI::updateState(const unsigned int)
 
         // Update the velocity
         SP::SiconosVector dummy(new SiconosVector(*(d->p(1)))); // value = nonsmooth impulse
-	if(d->inverseMass())
-	  {
-	    d->update_inverse_mass();
-	    d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
-	  }
+        if(d->inverseMass())
+        {
+          d->update_inverse_mass();
+          d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+        }
         *v += *dummy; // add free velocity
 
         // update \f$ \dot q \f$

@@ -41,7 +41,7 @@ void* open_library(const char* lib_name, const int flags)
   void* HandleRes;
 #ifdef _WIN32
   HandleRes = (void*) LoadLibrary(lib_name);
-  if (!HandleRes)
+  if(!HandleRes)
   {
     int err = (int)GetLastError();
     printf("LoadLibrary error number %d while trying to open %s\n", err, lib_name);
@@ -60,7 +60,7 @@ void* open_library(const char* lib_name, const int flags)
   HandleRes = dlopen(lib_name, RTLD_LAZY | RTLD_DEEPBIND | flags);
 #endif
 
-  if (!HandleRes)
+  if(!HandleRes)
   {
     printf("dlopen error ``%s'' while trying to open library ``%s''\n", dlerror(), lib_name);
   }
@@ -74,7 +74,7 @@ void* get_function_address(void* plugin, const char* func)
 #ifdef _WIN32
   HMODULE pluginW = (HMODULE) plugin;
   ptr = (void*) GetProcAddress(pluginW, func);
-  if (!ptr)
+  if(!ptr)
   {
     DWORD err = GetLastError();
     printf("Error %d while trying to find procedure %s\n", func);
@@ -82,7 +82,7 @@ void* get_function_address(void* plugin, const char* func)
   }
 #else
   ptr = dlsym(plugin, func);
-  if (!ptr)
+  if(!ptr)
   {
     printf("Error ``%s'' while trying to find procedure %s\n", dlerror(), func);
     exit(EXIT_FAILURE);
