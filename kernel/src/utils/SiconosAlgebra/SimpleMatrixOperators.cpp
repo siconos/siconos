@@ -200,6 +200,9 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
     case SPARSE:
       switch(numM)
       {
+      case DENSE:
+      noalias(*(mat.Sparse)) = *m.dense();
+      break;
       case TRIANGULAR:
         noalias(*(mat.Sparse)) = *m.triang();
         break;
@@ -223,6 +226,9 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
     case SPARSE_COORDINATE:
       switch(numM)
       {
+      case DENSE:
+        noalias(*(mat.SparseCoordinate)) = *m.dense();
+        break;
       case TRIANGULAR:
         noalias(*(mat.SparseCoordinate)) = *m.triang();
         break;
@@ -334,6 +340,9 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
   case SPARSE:
     switch(numM)
     {
+    case DENSE:
+      noalias(*(mat.Sparse)) = *m.dense();
+      break;
     case TRIANGULAR:
       noalias(*(mat.Sparse)) = *m.triang();
       break;
@@ -354,6 +363,9 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
   case SPARSE_COORDINATE:
     switch(numM)
     {
+    case DENSE:
+      noalias(*(mat.SparseCoordinate)) = *m.dense();
+      break;
     case TRIANGULAR:
       noalias(*(mat.SparseCoordinate)) = *m.triang();
       break;

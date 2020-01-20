@@ -3593,14 +3593,30 @@ void SimpleMatrixTest::testPLUSolve()
   b->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
 
-  // test sparse matrix 3x3 sparse RhS
+  // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
   Sparse.reset(new SimpleMatrix(*SP3));
   SP::SiconosMatrix Sparse_rhs (new SimpleMatrix(*SP3));
   Sparse->PLUSolve(*Sparse_rhs);
-  SP::SiconosMatrix Id (new SimpleMatrix());
+  Sparse_rhs->display();
+  std::cout << "A A^{-1}" << std::endl;
+  (prod(*Sparse,*Sparse_rhs)).display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*Sparse_rhs) - *Sparse ).normInf()  < tol, true);
+
+  // test sparse matrix 3x3 sparse RhS. inverse
+  Sparse.reset(new SimpleMatrix(*SP3));
+  Sparse_rhs.reset(new SimpleMatrix(3,3));
+  Sparse_rhs->eye();
+  Sparse->PLUSolve(*Sparse_rhs);
+  SP::SiconosMatrix Id (new SimpleMatrix(3,3));
   Id->eye();
-  
+
+  Sparse_rhs->display();
+  std::cout << "A A^{-1}" << std::endl;
+  (prod(*Sparse,*Sparse_rhs)).display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*Sparse_rhs) - *Id ).normInf()  < tol, true);
+
+
+  
 
   std::cout << "-->  test PLUSolve ended with success." <<std::endl;
 }
