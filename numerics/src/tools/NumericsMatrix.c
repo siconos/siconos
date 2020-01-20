@@ -2985,7 +2985,7 @@ double* NM_dWork(NumericsMatrix* A, int size)
 
 int NM_LU_factorize(NumericsMatrix* A, unsigned keep)
 {
-  verbose=2;
+  /* verbose=2; */
   lapack_int info = 1;
   switch (A->storageType)
   {
