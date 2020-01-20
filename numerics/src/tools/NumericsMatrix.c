@@ -3039,7 +3039,7 @@ int NM_LU_factorize(NumericsMatrix* A, unsigned keep)
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
           CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
-          numerics_printf_verbose(2,"NM_LU_factorize,, we compute factors and keep it" );
+          numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep it" );
           DEBUG_EXPR(cs_print(NM_csc(A),0));
           CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
           p->linear_solver_data = cs_lu_A;
@@ -3121,13 +3121,13 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs, unsigned keep)
     switch (p->solver)
     {
     case NSM_CS_LUSOL:
-      numerics_printf_verbose(2,"NM_gesv, using CSparse" );
+      numerics_printf_verbose(2,"NM_LU_solve, using CSparse" );
 
       if (keep == NM_KEEP_FACTORS)
       {
         NM_LU_factorize(A, keep);
 
-        numerics_printf_verbose(2,"NM_gesv, we solve with given factors" );
+        numerics_printf_verbose(2,"NM_LU_solve, we solve with given factors" );
         for(unsigned int j=0; j < nrhs ; j++ )
         {
           info = !CSparseMatrix_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
