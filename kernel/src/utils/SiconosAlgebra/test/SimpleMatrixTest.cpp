@@ -3527,7 +3527,7 @@ void SimpleMatrixTest::testPLUSolve()
 {
   std::cout << "\n\n--> Test: PLUSolve." <<std::endl;
 
-
+  // Test dense matrix 
   SP::SiconosMatrix Dense(new SimpleMatrix(*D));
   SP::SiconosVector b (new SiconosVector(Dense->size(0)));
   for( int i =0; i <Dense->size(0); i++)
@@ -3540,10 +3540,9 @@ void SimpleMatrixTest::testPLUSolve()
   Dense->PLUSolve(*b);
   Dense->display();
   b->display();
-  
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*D_backup,*b) - *backup).norm2()  < tol, true);
 
-  
+  // Test sparse matrix identity 
   SP::SiconosMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
   b.reset(new SiconosVector(Sparse->size(0)));
   for( int i =0; i <Sparse->size(0); i++)
@@ -3556,10 +3555,9 @@ void SimpleMatrixTest::testPLUSolve()
   Sparse->display();
   Sparse->PLUSolve(*b);
   b->display();
-  
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
 
-
+  // test sparse matrix 3x3
   Sparse.reset(new SimpleMatrix(*SP3));
   b.reset(new SiconosVector(Sparse->size(0)));
   for( int i =0; i <Sparse->size(0); i++)
@@ -3569,10 +3567,33 @@ void SimpleMatrixTest::testPLUSolve()
   backup.reset (new SiconosVector(*b));
   Sparse->PLUSolve(*b);
   b->display();
-  
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
 
+  // Solve again with another r.h.s.
+  b.reset(new SiconosVector(Sparse->size(0)));
+  for( int i =0; i <Sparse->size(0); i++)
+  {
+    (*b)(i)=2.0;
+  }
+  backup.reset (new SiconosVector(*b));
+  Sparse->PLUSolve(*b);
+  b->display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
   
+
+  // test sparse matrix 3x3 SP4
+  Sparse.reset(new SimpleMatrix(*SP4));
+  b.reset(new SiconosVector(Sparse->size(0)));
+  for( int i =0; i <Sparse->size(0); i++)
+  {
+    (*b)(i)=1.0;
+  }
+  backup.reset (new SiconosVector(*b));
+  Sparse->PLUSolve(*b);
+  b->display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*b) - *backup).norm2()  < tol, true);
+
+  // test sparse matrix 3x3 sparse RhS
   Sparse.reset(new SimpleMatrix(*SP3));
   SP::SiconosMatrix Sparse_rhs (new SimpleMatrix(*SP3));
   Sparse->PLUSolve(*Sparse_rhs);

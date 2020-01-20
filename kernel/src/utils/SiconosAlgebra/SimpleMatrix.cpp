@@ -907,7 +907,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init)
 // {
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 //   if(init)
 //     y.zero();
 //   unsigned int startRow = 0;
@@ -927,7 +927,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_addprod(const SiconosMatrix& A, unsigned int startRow, unsigned int startCol, const BlockVector& x, SiconosVector& y)
 // {
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 //   assert(!A.isBlock() && "private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
 //   VectorOfVectors::const_iterator it;
 //   unsigned int startColBis = startCol;
@@ -942,7 +942,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 // // x block, y siconos
 // void private_prod(const SiconosMatrix& A, unsigned int startRow, const BlockVector& x, SiconosVector& y, bool init)
 // {
-//   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 //   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY
 //   if(init)  // y = subA * x , else y += subA * x
 //     y.zero();
@@ -952,7 +952,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 // // x and y blocks
 // void private_prod(SPC::SiconosMatrix A, const unsigned int startRow, SPC::BlockVector x, SP::BlockVector y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   unsigned int row = startRow;
 //   VectorOfVectors::const_iterator it;
@@ -966,7 +966,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 // // x and y blocks
 // void private_prod(SPC::SiconosMatrix A, const unsigned int startRow, SPC::SiconosVector x, SP::BlockVector y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   unsigned int row = startRow;
 //   VectorOfVectors::const_iterator it;
@@ -979,7 +979,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_addprod(SPC::BlockVector x, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SP::SiconosVector y)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 //   VectorOfVectors::const_iterator it;
 //   unsigned int startColBis = startCol;
 //   for(it = x->begin(); it != x->end(); ++it)
@@ -992,7 +992,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_prod(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::BlockVector  y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   unsigned int col = startCol;
 //   VectorOfVectors::const_iterator it;
@@ -1005,7 +1005,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_prod(SPC::BlockVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::SiconosVector  y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of trans(A), between el. of A of index (col) startCol and startCol + sizeY
 //   if(init)  // y = subA * x , else y += subA * x
@@ -1016,7 +1016,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_prod(SPC::BlockVector x, SPC::SiconosMatrix A, unsigned int startCol, SP::BlockVector  y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   unsigned int col = startCol;
 //   VectorOfVectors::const_iterator it;
@@ -1029,7 +1029,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_addprod(double a, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SPC::SiconosVector x, SP::SiconosVector y)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 //   if(A->isBlock())
 //     SiconosMatrixException::selfThrow("private_addprod(A,start,x,y) error: not yet implemented for block matrix.");
@@ -1073,7 +1073,7 @@ void SimpleMatrix::assign(const SimpleMatrix &smat)
 
 // void private_prod(double a, SPC::SiconosMatrix A, unsigned int startRow, SPC::SiconosVector x, SP::SiconosVector  y, bool init)
 // {
-//   assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+//   assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 
 //   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of A, between el. of index (row) startRow and startRow + sizeY

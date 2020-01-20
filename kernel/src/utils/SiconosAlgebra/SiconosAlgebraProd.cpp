@@ -28,7 +28,7 @@
 
 void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool init)
 {
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   unsigned int startRow = 0;
   VectorOfVectors::const_iterator it;
@@ -45,7 +45,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool i
 void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init)
 {
 
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
 
   if(init)
@@ -67,7 +67,7 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
 {
   // To compute y = A * x in an "optimized" way (in comparison with y = prod(A,x) )
   // or y += A*x if init = false.
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if(A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
@@ -257,7 +257,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
 {
   // To compute y = trans(A) * x in an "optimized" way, if init = true
   // (or y = trans(A) * x + y if init = false
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if(A.size(0) != x.size())
     SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and x.");
@@ -445,7 +445,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
 
 void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool init)
 {
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if(A.size(0) != x.size())
     SiconosMatrixException::selfThrow("prod(x,A,y) error: inconsistent sizes between A and x.");
@@ -470,7 +470,7 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y, bool i
 SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
 {
   // To compute y = A * x
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if(A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(matrix,vector) error: inconsistent sizes.");
@@ -521,8 +521,8 @@ SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
 void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init)
 {
   // To compute C = A * B
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-  assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
+  assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorizedInPlace in prod !!");
   if(!C.isBlock())
     C.resetLU();
 
@@ -919,7 +919,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
 {
   // To compute y = a*A * x in an "optimized" way (in comparison with y = prod(A,x) )
   // or y += a*A*x if init = false.
-  assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
   if(A.size(1) != x.size())
     SiconosMatrixException::selfThrow("prod(A,x,y) error: inconsistent sizes between A and x.");
@@ -1103,7 +1103,7 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
 
 void taxpy(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startRow, unsigned int startCol, SP::SiconosVector y, bool init)
 {
-  assert(!(A->isPLUFactorized()) && "A is PLUFactorized in prod !!");
+  assert(!(A->isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of trans(A), between el. of A of index (col) startCol and startCol + sizeY
   if(init)  // y = subA * x , else y += subA * x
     y->zero();

@@ -49,7 +49,7 @@ namespace lapack = boost::numeric::bindings::lapack;
                           #include "NumericsSparseMatrix.h"
 #include "CSparseMatrix.h"
 
-#define DEBUG_MESSAGES
+//#define DEBUG_MESSAGES
 #include "debug.h"
 
 #ifdef DEBUG_MESSAGES
@@ -365,8 +365,6 @@ void SimpleMatrix::PLUFactorize()
     NumericsMatrix * NM = _numericsMatrix.get();
     _numericsMatrix->matrix2->origin = NSM_CSC;
     NM_csc_alloc(NM, nnz());
-
-    DEBUG_EXPR(NM_display(NM););
 
     fillCSC(numericsSparseMatrix(NM)->csc, std::numeric_limits<double>::epsilon());
 
