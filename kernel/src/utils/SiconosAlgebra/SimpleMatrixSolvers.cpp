@@ -453,7 +453,6 @@ void SimpleMatrix::PLUSolve(SiconosVector &B)
   if(B.isBlock())
     SiconosMatrixException::selfThrow("SimpleMatrix PLUSolve(V) failed. Not yet implemented for V being a BlockVector.");
 
-  int info;
   if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
   {
     PLUFactorize();
@@ -461,6 +460,7 @@ void SimpleMatrix::PLUSolve(SiconosVector &B)
 
 
   // and then solve
+  int info =1;
   if(B.num() == 0)
   {
     NumericsMatrix * NM = _numericsMatrix.get();

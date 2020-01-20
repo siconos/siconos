@@ -328,7 +328,7 @@ void NewtonEulerDS::initRhs(double time)
     computeJacobianqForces(time);
 
     _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianWrenchq));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc10]);
+    _inverseMass->PLUSolve(*_rhsMatrices[jacobianXBloc10]);
     flag1 = true;
   }
 
@@ -337,7 +337,7 @@ void NewtonEulerDS::initRhs(double time)
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianvForces(time);
     _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianWrenchTwist));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc11]);
+    _inverseMass->PLUSolve(*_rhsMatrices[jacobianXBloc11]);
     flag2 = true;
   }
 
@@ -851,7 +851,7 @@ void NewtonEulerDS::computeRhs(double time)
   DEBUG_EXPR(_wrench->display(););
 
   if(_inverseMass)
-    _inverseMass->PLUForwardBackwardInPlace(*_acceleration);
+    _inverseMass->PLUSolve(*_acceleration);
 
 
   // Compute _dotq
@@ -870,14 +870,14 @@ void NewtonEulerDS::computeJacobianRhsx(double time)
     SP::SiconosMatrix bloc10 = _jacxRhs->block(1, 0);
     computeJacobianqForces(time);
     *bloc10 = *_jacobianWrenchq;
-    _inverseMass->PLUForwardBackwardInPlace(*bloc10);
+    _inverseMass->PLUSolve(*bloc10);
   }
   if(_jacobianWrenchTwist)
   {
     SP::SiconosMatrix bloc11 = _jacxRhs->block(1, 1);
     computeJacobianvForces(time);
     *bloc11 = *_jacobianWrenchTwist;
-    _inverseMass->PLUForwardBackwardInPlace(*bloc11);
+    _inverseMass->PLUSolve(*bloc11);
   }
 
 }

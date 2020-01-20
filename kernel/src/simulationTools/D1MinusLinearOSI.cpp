@@ -384,7 +384,7 @@ void D1MinusLinearOSI::computeFreeState()
       DEBUG_EXPR(residuFree.display());
       // d->computeMass();
       // M->resetLU();
-      // M->PLUForwardBackwardInPlace(vfree);
+      // M->PLUSolve(vfree);
       // DEBUG_EXPR(M->display());
 
       vfree *= -1.;
@@ -460,7 +460,7 @@ void D1MinusLinearOSI::updateState(const unsigned int)
         if(d->inverseMass())
         {
           d->update_inverse_mass();
-          d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+          d->inverseMass()->PLUSolve(*dummy);
         }
         /* Add the velocity jump to the free velocity */
         *v += *dummy;
@@ -483,7 +483,7 @@ void D1MinusLinearOSI::updateState(const unsigned int)
         if(d->inverseMass())
         {
           d->update_inverse_mass();
-          d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+          d->inverseMass()->PLUSolve(*dummy);
         }
         *v += *dummy; // add free velocity
 

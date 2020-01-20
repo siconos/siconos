@@ -104,7 +104,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       if(d->inverseMass())
       {
         d->update_inverse_mass();
-        d->inverseMass()->PLUForwardBackwardInPlace(accFree);
+        d->inverseMass()->PLUSolve(accFree);
       }
 
       /* Store the value of accFree in workspace(::FREE_TDG) */
@@ -144,7 +144,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
       if(d->inverseMass())
       {
         d->update_inverse_mass();
-        d->inverseMass()->PLUForwardBackwardInPlace(accFree); // contains left (right limit) acceleration without contact force
+        d->inverseMass()->PLUSolve(accFree); // contains left (right limit) acceleration without contact force
       }
       *work_tdg = accFree; // store the value in WorkFreeFree
 
@@ -214,7 +214,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
           if(d->inverseMass())
           {
             d->update_inverse_mass();
-            d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+            d->inverseMass()->PLUSolve(*dummy);
           }
           accFree  += *(dummy);
 
@@ -230,7 +230,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
           if(d->inverseMass())
           {
             d->update_inverse_mass();
-            d->inverseMass()->PLUForwardBackwardInPlace(*dummy);
+            d->inverseMass()->PLUSolve(*dummy);
           }
           accFree  += *(dummy);
 
@@ -441,7 +441,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         if(d->inverseMass())
         {
           d->update_inverse_mass();
-          d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
+          d->inverseMass()->PLUSolve(*work_tdg);
         }
         residuFree -= 0.5 * h**work_tdg;
         DEBUG_EXPR(residuFree.display());
@@ -469,7 +469,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         if(d->inverseMass())
         {
           d->update_inverse_mass();
-          d->inverseMass()->PLUForwardBackwardInPlace(*work_tdg);
+          d->inverseMass()->PLUSolve(*work_tdg);
         }
         residuFree -= 0.5 * h * *work_tdg;
         DEBUG_EXPR(residuFree.display());
@@ -519,7 +519,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         if(d->inverseMass())
         {
           d->update_inverse_mass();
-          d->inverseMass()->PLUForwardBackwardInPlace(accFree);// contains right (left limit) acceleration without contact force
+          d->inverseMass()->PLUSolve(accFree);// contains right (left limit) acceleration without contact force
         }
         DEBUG_PRINT("accFree contains left limit acceleration at  t^-_{k+1} without contact force :\n");
         DEBUG_EXPR(accFree.display());
@@ -543,7 +543,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         if(d->inverseMass())
         {
           d->update_inverse_mass();
-          d->inverseMass()->PLUForwardBackwardInPlace(accFree);// contains right (left limit) acceleration without contact force
+          d->inverseMass()->PLUSolve(accFree);// contains right (left limit) acceleration without contact force
         }
 
         DEBUG_PRINT("accFree contains left limit acceleration at  t^-_{k+1} without contact force :\n");
@@ -609,7 +609,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
           if(d->inverseMass())
           {
             d->update_inverse_mass();
-            d->inverseMass()->PLUForwardBackwardInPlace(dummy);
+            d->inverseMass()->PLUSolve(dummy);
           }
 
           residuFree -= 0.5 * h*dummy;
@@ -635,7 +635,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
           if(d->inverseMass())
           {
             d->update_inverse_mass();
-            d->inverseMass()->PLUForwardBackwardInPlace(dummy);
+            d->inverseMass()->PLUSolve(dummy);
           }
           residuFree -= 0.5 * h*dummy;
 

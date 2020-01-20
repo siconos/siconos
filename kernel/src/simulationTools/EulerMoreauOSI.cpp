@@ -736,7 +736,7 @@ void EulerMoreauOSI::computeFreeState()
 
       // At this point xfree = (ResiduFree - h(1-gamma)*rold)
       // -> Solve WX = xfree and set xfree = X
-      W.PLUForwardBackwardInPlace(xfree);
+      W.PLUSolve(xfree);
 
       // at this point, xfree = W^{-1} (ResiduFree - h(1-gamma)*rold)
       // -> compute real xfree = x - W^{-1} (ResiduFree - h(1-gamma)*rold)
@@ -755,7 +755,7 @@ void EulerMoreauOSI::computeFreeState()
 
       // -> Solve WX = g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
       // and set xPartialNS = X
-      W.PLUForwardBackwardInPlace(xPartialNS);
+      W.PLUSolve(xPartialNS);
       scal(h, xPartialNS, xPartialNS);
 
       // compute real xPartialNS = xfree + ...
@@ -1140,7 +1140,7 @@ void EulerMoreauOSI::updateState(const unsigned int)
         scal(h, *d.r(), x); // x = h*r
       }
 
-      W.PLUForwardBackwardInPlace(x); // x = h* W^{-1} *r
+      W.PLUSolve(x); // x = h* W^{-1} *r
 
       x += *ds_work_vectors[EulerMoreauOSI::FREE]; // x+=xfree
 

@@ -239,7 +239,7 @@ void CommonSMC::computeUeq()
   // xTk = (e^{Ah}-(1-\theta)\Psi_k\Pi_B A)x_k
   prod(_thetaSMC-1, *tmpN, _sensor->y(), *xTk, false);
   // compute the solution x_{k+1} of the system W*x_{k+1} = x_k
-  tmpW->PLUForwardBackwardInPlace(*xTk);
+  tmpW->PLUSolve(*xTk);
   // add the contribution from the implicit part to ueq
   prod(-_thetaSMC, *quasiProjB_A, *xTk, *_ueq, false);
   DEBUG_END("void CommonSMC::computeUeq()\n");

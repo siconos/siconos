@@ -1067,7 +1067,7 @@ void MoreauJeanOSI::computeFreeState()
       // -- vfree =  v - W^{-1} ResiduFree --
       // At this point vfree = residuFree
       // -> Solve WX = vfree and set vfree = X
-      W.PLUForwardBackwardInPlace(vfree);
+      W.PLUSolve(vfree);
       // -> compute real vfree
       vfree *= -1.0;
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
@@ -1111,7 +1111,7 @@ void MoreauJeanOSI::computeFreeState()
 
     //   vfree = residuFree;
     //   DEBUG_EXPR(vfree.display());
-    //   W.PLUForwardBackwardInPlace(vfree);
+    //   W.PLUSolve(vfree);
     //   vfree *= -1.0;
     //   vfree += vold;
 
@@ -1187,7 +1187,7 @@ void MoreauJeanOSI::computeFreeState()
     //   //    vfree->display();
     //   DEBUG_EXPR(residuFree.display(););
 
-    //   W.PLUForwardBackwardInPlace(vfree);
+    //   W.PLUSolve(vfree);
     //   //    std::cout<<"MoreauJeanOSI::computeFreeState -WRfree"<<endl;
     //   //    vfree->display();
     //   //    scal(h,*vfree,*vfree);
@@ -1562,7 +1562,7 @@ void MoreauJeanOSI::integrate(double& tinit, double& tend, double& tout, int& no
         scal(coeff, *Fext, v, false); // v += h*theta * fext(ti+1)
       }
       // -> Solve WX = v and set v = X
-      W->PLUForwardBackwardInPlace(v);
+      W->PLUSolve(v);
       v += vold;
     }
     else RuntimeException::selfThrow("MoreauJeanOSI::integrate - not yet implemented for Dynamical system of type :" +  Type::name(*ds));
@@ -1697,7 +1697,7 @@ void MoreauJeanOSI::updateState(const unsigned int)
         }
         else
         {
-          W.PLUForwardBackwardInPlace(v);
+          W.PLUSolve(v);
           v +=  vfree;
         }
       }
@@ -1784,7 +1784,7 @@ void MoreauJeanOSI::updateState(const unsigned int)
               ++itindex)
             v.setValue(*itindex, 0.0);
 
-        _dynamicalSystemsGraph->properties(*dsi).W->PLUForwardBackwardInPlace(v);
+        _dynamicalSystemsGraph->properties(*dsi).W->PLUSolve(v);
 
         DEBUG_EXPR(d.p(_levelMaxForInput)->display());
         DEBUG_PRINT("MoreauJeanOSI::updatestate W CT lambda\n");

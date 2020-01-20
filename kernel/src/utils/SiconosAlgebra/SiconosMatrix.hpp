@@ -86,25 +86,25 @@ protected:
 
   /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
    *  If x is a block vector, it call the present function for all blocks.
-   * \param A a pointer to SiconosMatrix 
+   * \param A a pointer to SiconosMatrix
    * \param startRow an int, sub-block position
    * \param x a pointer to a SiconosVector
    * \param y a pointer to a SiconosVector
    * \param init a bool
    */
   void private_prod(unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init) const;
-  
-  
+
+
   /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
    * If x is a block vector, it call the present function for all blocks.
-   * \param A a pointer to SiconosMatrix 
+   * \param A a pointer to SiconosMatrix
    * \param startRow an int, sub-block position
    * \param startCol an int, sub-block position
    * \param x a pointer to a SiconosVector
    * \param res a DenseVect
    */
   void private_addprod(unsigned int startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& res) const;
-  
+
 public:
 
   /** Destructor. */
@@ -131,7 +131,7 @@ public:
    */
   virtual bool isSymmetric(double tol) const =0;
 
-  /** determines if the matrix has been PLU factorized 
+  /** determines if the matrix has been PLU factorized
    *  \return true if the matrix is factorized
    */
   inline virtual bool isPLUFactorized() const
@@ -284,7 +284,7 @@ public:
    *  \return a SparseMat*
    */
   virtual SparseMat* sparse(unsigned int row = 0, unsigned int col = 0) const = 0;
-  
+
   /** get a pointer on SparseCoordinateMat matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
@@ -306,7 +306,7 @@ public:
    */
   virtual IdentityMat* identity(unsigned int row = 0, unsigned int col = 0) const = 0;
 
-  /** return the address of the array of double values of the matrix 
+  /** return the address of the array of double values of the matrix
    *   ( for block(i,j) if this is a block matrix)
    *  \param row position for the required block
    *  \param col position for the required block
@@ -323,7 +323,7 @@ public:
   virtual void randomize() = 0;
 
   /** Initialize a symmetric matrix with random values
-   */ 
+   */
   virtual void randomize_sym()= 0;
 
   /** set an identity matrix
@@ -348,7 +348,7 @@ public:
   /** display data on standard output
    */
   virtual void display() const = 0;
-  
+
   /** display data on standard output
    */
   virtual void displayExpert(bool brief = true ) const = 0;
@@ -400,7 +400,7 @@ public:
     RuntimeException::selfThrow("SP::SiconosMatrix block(...) must be implemented");
     return SP::SiconosMatrix();
   };
-  
+
 
   /** get block at position row-col if BlockMatrix, else if SimpleMatrix return this
    *  \param row unsigned int row
@@ -470,29 +470,59 @@ public:
    */
   virtual SiconosMatrix& operator -=(const SiconosMatrix& m) = 0;
 
-  /** computes a LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
-   *  The result is returned in this (InPlace). Based on Blas dgetrf function.
+  /** computes a LU factorization of a general M-by-N matrix
+   * with partial pivoting and row interchanges.
+   * The result is returned in this (InPlace).
+   * Based on Blas dgetrf function for dense matrix and
+   * ublas cholesky decomposition for sparse matrix
+   * (work only for a symmetric matrix and very slow because it uses
+   * matric accessor)
+   * use preferably PLUFactorize()
    */
   virtual void PLUFactorizationInPlace() = 0;
+
+  /** computes a LU factorization of a general M-by-N matrix
+   * with partial pivoting and row interchanges.
+   * The implementation is based on an internal NumericsMatrix
+   */
   virtual void PLUFactorize() = 0;
 
-  /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
-   *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
+  /**  compute inverse of this thanks to LU factorization with partial pivoting.
+   * This method inverts U and then computes inv(A) by solving the system
+   * inv(A)*L = inv(U) for inv(A).
+   * The result is returned in this (InPlace).
+   * Based on Blas dgetri function for dense function
    */
   virtual void  PLUInverseInPlace() = 0;
 
-  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
-   *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
-   *  \param[in,out] B on input the RHS matrix b; on output the result x
+  /** solves a system of linear equations A * X = B  (A=this)
+   * for a general N-by-N matrix A using the LU factorization computed
+   * by PLUFactorizationInPlace.
+   * Based on Blas dgetrs function for dense matrix.
+   * \param[in,out] B on input the RHS matrix b; on output the result x
    */
   virtual void  PLUForwardBackwardInPlace(SiconosMatrix &B) = 0;
-  virtual void  PLUSolve(SiconosMatrix &B) = 0;
 
-  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
-   *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
+  /** solves a system of linear equations A * X = B  (A=this)
+   * for a general N-by-N matrix A using the LU factorization computed
+   * by PLUFactorize.
    *  \param[in,out] B on input the RHS matrix b; on output the result x
    */
+  virtual void  PLUSolve(SiconosMatrix &B) = 0;
+
+  /** solves a system of linear equations A * X = B  (A=this)
+   * for a general N-by-N matrix A using the LU factorization computed
+   * by PLUFactorizationInPlace.
+   * Based on Blas dgetrs function for dense matrix.
+   * \param[in,out] B on input the RHS matrix b; on output the result x
+   */
   virtual void   PLUForwardBackwardInPlace(SiconosVector &B) = 0;
+
+   /** solves a system of linear equations A * X = B  (A=this)
+   * for a general N-by-N matrix A using the LU factorization computed
+   * by PLUFactorize.
+   *  \param[in,out] B on input the RHS matrix b; on output the result x
+   */
   virtual void   PLUSolve(SiconosVector &B) = 0;
 
   /** set to false all LU indicators. Useful in case of
@@ -510,16 +540,21 @@ public:
    */
   virtual size_t nnz(double tol = 1e-14);
 
-  /** Fill sparse matrix
+  /** Fill CSparseMatrix compresses column sparse matrix
    *  \param csc the compressed column sparse matrix
    *  \param row_off
    *  \param col_off
-   *  \param tol the tolerance under which a number is considered as equal to zero 
+   *  \param tol the tolerance under which a number is considered as equal to zero
    *  \return true if function worked.
    *  \warning not clear that it works for an empty csr matrix with row_off =0  and col_off =0
    */
   bool fillCSC(CSparseMatrix* csc, size_t row_off, size_t col_off, double tol = 1e-14);
 
+  /** Fill CSparseMatrix compresses column sparse matrix
+   *  \param csc the compressed column sparse matrix
+   *  \param tol the tolerance under which a number is considered as equal to zero
+   *  \return true if function worked.
+   */
   bool fillCSC(CSparseMatrix* csc, double tol = 1e-14);
 
   /** return the number of non-zero in the matrix
@@ -534,11 +569,11 @@ public:
   /** Visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(SiconosMatrix);
-  
+
   /** \defgroup SiconosMatrixFriends
-      
+
       List of friend functions of the SimpleMatrix class
-      
+
       Declared in SimpleMatrixFriends.hpp.
       Implemented in SimpleMatrixFriends.cpp.
 

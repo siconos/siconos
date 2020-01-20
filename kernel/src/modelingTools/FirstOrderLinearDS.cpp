@@ -190,7 +190,7 @@ void FirstOrderLinearDS::computeRhs(double time)
     if(! _invM)
       _invM.reset(new SimpleMatrix(*_M));
 
-    _invM->PLUForwardBackwardInPlace(*_x[1]);
+    _invM->PLUSolve(*_x[1]);
   }
 }
 
@@ -208,7 +208,7 @@ void FirstOrderLinearDS::computeJacobianRhsx(double time)
       else if(_pluginM->fPtr) // if M is plugged, invM must be updated
         *_invM = *_M;
       // solve MjacobianRhsx = A
-      _invM->PLUForwardBackwardInPlace(*_jacxRhs);
+      _invM->PLUSolve(*_jacxRhs);
     }
   }
   // else 0

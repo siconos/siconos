@@ -284,7 +284,7 @@ bool SiconosMatrix::fillCSC(CSparseMatrix* csc, double tol)
     assert(ptr.size() == ncol + 1);
     assert(indx.size() >= nnz);
     assert(vals.size() >= nnz);
-    
+
     for(size_t i = 0; i < nnz; ++i)
     {
       Mx[pval] = vals[i];

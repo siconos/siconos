@@ -213,7 +213,7 @@ void LagrangianDS::initRhs(double time)
     computeJacobianqForces(time);
 
     _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(*_jacobianqForces));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc10]);
+    _inverseMass->PLUSolve(*_rhsMatrices[jacobianXBloc10]);
     flag1 = true;
   }
 
@@ -222,7 +222,7 @@ void LagrangianDS::initRhs(double time)
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianqDotForces(time);
     _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(*_jacobianqDotForces));
-    _inverseMass->PLUForwardBackwardInPlace(*_rhsMatrices[jacobianXBloc11]);
+    _inverseMass->PLUSolve(*_rhsMatrices[jacobianXBloc11]);
     flag2 = true;
   }
 
@@ -461,7 +461,7 @@ void LagrangianDS::computeRhs(double time)
 
   //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
   if(_inverseMass)
-    _inverseMass->PLUForwardBackwardInPlace(*_q[2]);
+    _inverseMass->PLUSolve(*_q[2]);
 
   _x[1]->setBlock(0, *_q[1]);
   _x[1]->setBlock(_ndof, *_q[2]);
@@ -489,7 +489,7 @@ void LagrangianDS::computeJacobianRhsx(double time)
     SP::SiconosMatrix bloc10 = _jacxRhs->block(1, 0);
     computeJacobianqForces(time);
     *bloc10 = *_jacobianqForces;
-    _inverseMass->PLUForwardBackwardInPlace(*bloc10);
+    _inverseMass->PLUSolve(*bloc10);
   }
 
   if(_jacobianqDotForces)
@@ -497,7 +497,7 @@ void LagrangianDS::computeJacobianRhsx(double time)
     SP::SiconosMatrix bloc11 = _jacxRhs->block(1, 1);
     computeJacobianqDotForces(time);
     *bloc11 = *_jacobianqDotForces;
-    _inverseMass->PLUForwardBackwardInPlace(*bloc11);
+    _inverseMass->PLUSolve(*bloc11);
   }
 }
 
@@ -702,7 +702,7 @@ void LagrangianDS::computePostImpactVelocity()
   DEBUG_BEGIN("LagrangianDS::computePostImpactV()\n");
   SiconosVector tmp(*_p[1]);
   if(_inverseMass)
-    _inverseMass->PLUForwardBackwardInPlace(tmp);
+    _inverseMass->PLUSolve(tmp);
   *_q[1] += tmp;  // v+ = v- + p
   DEBUG_BEGIN("LagrangianDS::computePostImpactV() END \n");
 }

@@ -666,7 +666,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       if(_useMassNormalization)
       {
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi1, ds);
-        centralInteractionBlock->PLUForwardBackwardInPlace(*work);
+        centralInteractionBlock->PLUSolve(*work);
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       }
@@ -701,7 +701,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       work->trans();
       std::cout << "LinearOSNS::computeInteractionBlock workT2" <<std::endl;
       workT2->display();
-      workT2->PLUForwardBackwardInPlace(*work);
+      workT2->PLUSolve(*work);
       prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
 #else
       if(0)  //(std11::static_pointer_cast<NewtonEulerR> inter->relation())->_isConstact){
@@ -724,7 +724,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 //        work->trans();
 //        //cout<<"LinearOSNS::computeInteractionBlock workT2"<<endl;
 //        //workT2->display();
-//        workT2->PLUForwardBackwardInPlace(*work);
+//        workT2->PLUSolve(*work);
 //        prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
       }
       else
@@ -900,7 +900,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       rightInteractionBlock.reset(new SimpleMatrix(sizeY2, sizeDS));
       inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock);
       rightInteractionBlock->trans();
-      workT2->PLUForwardBackwardInPlace(*rightInteractionBlock);
+      workT2->PLUSolve(*rightInteractionBlock);
       prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
 
 #else
@@ -965,7 +965,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
 
         if(_useMassNormalization)
         {
-          centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+          centralInteractionBlock->PLUSolve(*rightInteractionBlock);
           //*currentInteractionBlock +=  *leftInteractionBlock ** work;
           prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
         }

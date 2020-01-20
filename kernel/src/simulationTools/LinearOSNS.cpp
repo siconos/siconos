@@ -253,7 +253,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-        centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+        centralInteractionBlock->PLUSolve(*rightInteractionBlock);
         VectorOfSMatrices& workMInter = *indexSet->properties(vd).workMatrices;
         static_cast<EulerMoreauOSI&>(osi).computeKhat(*inter, *rightInteractionBlock,
             workMInter, h);
@@ -325,7 +325,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         work->trans();
         SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
         DEBUG_EXPR_WE(std::cout <<  std::boolalpha << " centralInteractionBlock->isPLUFactorized() = "<< centralInteractionBlock->isPLUFactorized() << std::endl;);
-        centralInteractionBlock->PLUForwardBackwardInPlace(*work);
+        centralInteractionBlock->PLUSolve(*work);
         //*currentInteractionBlock +=  *leftInteractionBlock ** work;
         DEBUG_EXPR(work->display(););
         prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
@@ -465,7 +465,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
     SP::SiconosMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-    centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+    centralInteractionBlock->PLUSolve(*rightInteractionBlock);
 
     //      integration of r with theta method removed
     //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock * (*rightInteractionBlock); //left = C, right = W.B
@@ -551,7 +551,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       // size checking inside the getBlock function, a
       // getRight call will fail.
       SP::SimpleMatrix centralInteractionBlock = getOSIMatrix(osi, ds);
-      centralInteractionBlock->PLUForwardBackwardInPlace(*rightInteractionBlock);
+      centralInteractionBlock->PLUSolve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
     }
