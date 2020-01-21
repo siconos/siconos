@@ -121,8 +121,10 @@ driver: :func:`lcp_enum()`
 parameters:
 
 * iparam[SICONOS_LCP_IPARAM_ENUM_USE_DGELS] = 0 (0 : use dgesv, 1: use dgels)
+* iparam[SICONOS_LCP_IPARAM_ENUM_CURRENT_ENUM] (out): key of the solution
 * iparam[SICONOS_LCP_IPARAM_ENUM_SEED] = 0, starting key values
-* iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS] = 0;
+* iparam[SICONOS_LCP_IPARAM_ENUM_MULTIPLE_SOLUTIONS] = 0,  search for multiple solutions if 1
+* iparam[SICONOS_LCP_IPARAM_ENUM_NUMBER_OF_SOLUTIONS] (out): number of solutions
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
 
 PATH (:enumerator:`SICONOS_LCP_PATH`)
@@ -143,7 +145,9 @@ Iterative solvers
 Conjugated Projected Gradient (:enumerator:`SICONOS_LCP_CPG`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Solver based on quadratic minimization.
+Conjugated Projected Gradient solver for LCP based on quadratic minimization.
+Reference: "Conjugate gradient type algorithms for frictional multi-contact problems: applications to granular materials",
+M. Renouf, P. Alart. doi:10.1016/j.cma.2004.07.009
 
 driver: :func:`lcp_cpg()`
 
@@ -178,7 +182,7 @@ parameters:
 PSOR (:enumerator:`SICONOS_LCP_PSOR`)
 """""""""""""""""""""""""""""""""""""
 
-Projected Succesive over relaxation solver for LCP. See :cite:`Cottle.1992`, Chap 5.
+Projected Successive over relaxation solver for LCP. See :cite:`Cottle.1992`, Chap 5.
 
 driver: :func:`lcp_psor()`
 
@@ -208,12 +212,18 @@ Sparse-block Gauss-Seidel (:enumerator:`SICONOS_LCP_NSGS`)
 
 Gauss-Seidel solver based on a Sparse-Block storage for the matrix M of the LCP.
 
+Matrix M of the LCP must be a SparseBlockStructuredMatrix.
+
+This solver first build a local problem for each row of blocks and then call any of the other solvers through lcp_driver().
+
 driver: :func:`lcp_nsgs_SBM()`
 
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000
+* iparam[SICONOS_LCP_IPARAM_NSGS_ITERATIONS_SUM] (out): sum of all local number of iterations (if it has sense for the local solver)
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
+* dparam[SICONOS_LCP_DPARAM_NSGS_LOCAL_ERROR_SUM] (in): sum of all local error values
 
 internal solver : :enumerator:`SICONOS_LCP_PSOR`
 
@@ -246,6 +256,7 @@ Nonsmooth Newton, Fisher-Burmeister (:enumerator:`SICONOS_LCP_NEWTON_FB_FBLSA`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Nonsmooth Newton method based on the Fischer-Bursmeister NCP function.
+It uses a variant of line search algorithm (VFBLSA in Facchinei-Pang 2003).
 
 .. math::
 
@@ -260,8 +271,8 @@ driver: :func:`lcp_newton_FB()`
 parameters:
 
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000
-* iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0;
-* iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0;
+* iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = 0 (in): if > 0. use a non-monotone linear search
+* iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 0 (in): if a non-monotone linear search is used, specify the number of merit values to remember
 * iparam[SICONOS_IPARAM_STOPPING_CRITERION] = SICONOS_STOPPING_CRITERION_USER_ROUTINE;
 * dparam[SICONOS_DPARAM_TOL] = 1e-10
 * dparam[SICONOS_DPARAM_LSA_ALPHA_MIN] = 1e-16;
@@ -269,7 +280,8 @@ parameters:
 Nonsmooth Newton, Fisher-Burmeister (:enumerator:`SICONOS_LCP_NEWTON_MIN_FBLSA`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Nonsmooth Newton method combining the min and FB functions.
+A nonsmooth Newton method based based on the minFBLSA algorithm : the descent direction is given
+by a min reformulation but the linesearch is done with Fischer-Burmeister (and if needed the gradient direction).
 
 driver: :func:`lcp_newton_minFB()`
 
@@ -292,8 +304,19 @@ parameters:
 QP-reformulation
 ----------------
 
-quadratic programm formulation (:enumerator:`SICONOS_LCP_QP`)
+quadratic program formulation (:enumerator:`SICONOS_LCP_QP`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+Quadratic program formulation for solving a LCP
+
+The QP we solve is
+
+Minimize: :math:`z^T (M z + q)` subject to :math:`Mz  + q  \geq  0`
+
+which is the classical reformulation that can be found
+in Cottle, Pang and Stone (2009).
+
+If the symmetry condition is not fulfilled, use the NSQP Solver.
 
 driver: :func:`lcp_qp()`
 
@@ -302,10 +325,10 @@ parameters:
 * iparam[SICONOS_IPARAM_MAX_ITER] = 0
 * dparam[SICONOS_DPARAM_TOL] = 1e-6
 
-quadratic programm formulation (:enumerator:`SICONOS_LCP_NSQP`)
+quadratic program formulation (:enumerator:`SICONOS_LCP_NSQP`)
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-Quadratic programm formulation to solve a non symmetric LCP.
+Non symmetric (and not nonsmooth as one could have thought in a plateform dedicated to nonsmooth problems) quadratic program formulation for solving an LCP with a non symmetric matrix.
 
 driver: :func:`lcp_nsqp()`
 
