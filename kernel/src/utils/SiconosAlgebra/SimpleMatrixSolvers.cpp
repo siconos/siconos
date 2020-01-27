@@ -336,7 +336,7 @@ void SimpleMatrix::PLUFactorize()
   }
   if(_num == DENSE)
   {
-    _numericsMatrix.reset(NM_new());
+    _numericsMatrix.reset(NM_new(),NM_clear);
     NumericsMatrix * NM = _numericsMatrix.get();
     double * data = (double*)(getArray());
     DEBUG_EXPR(NV_display(data,size(0)*size(1)););
@@ -361,7 +361,7 @@ void SimpleMatrix::PLUFactorize()
   else
   {
     // We build a sparse matrix and we call numerics for the LU factorization of a sparse matrix.
-    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)));
+    _numericsMatrix.reset(NM_create(NM_SPARSE, size(0), size(1)),NM_clear);
     NumericsMatrix * NM = _numericsMatrix.get();
     _numericsMatrix->matrix2->origin = NSM_CSC;
     NM_csc_alloc(NM, nnz());
