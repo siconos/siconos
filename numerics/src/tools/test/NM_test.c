@@ -40,6 +40,10 @@
 #include "sanitizer.h"                   // for MSAN_INIT_VAR
 
 
+#ifdef WITH_MUMPS
+#include "NM_MUMPS.h"
+#endif
+
 #ifndef SIZE_MAX
 # ifdef __SIZE_MAX__
 #  define SIZE_MAX __SIZE_MAX__

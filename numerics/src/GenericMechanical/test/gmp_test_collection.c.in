@@ -25,6 +25,9 @@
 
 #define @PROBLEM_COLLECTION@ 1
 
+#ifdef SICONOS_HAS_MPI
+#include "mpi.h"
+#endif
 
 int main (int argc, char *argv[])
 {
