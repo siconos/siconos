@@ -222,6 +222,12 @@ function(new_test)
   if(WITH_CXX)
     set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   endif()
+
+  if(WITH_MPI)
+    target_include_directories(${TEST_NAME} PUBLIC ${MPI_CXX_INCLUDE_DIRS})
+    target_link_libraries(${TEST_NAME} PUBLIC ${MPI_CXX_LIBRARIES})
+  endif()
+
   
   if (LDLIBPATH)
     set_target_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
