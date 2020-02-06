@@ -3019,6 +3019,7 @@ int NM_LU_factorize(NumericsMatrix* A, unsigned keep)
     }
     break;
   }
+  case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
   case NM_SPARSE:
   {
     NSM_linear_solver_params* p = NSM_linearSolverParams(A);
@@ -3050,9 +3051,73 @@ int NM_LU_factorize(NumericsMatrix* A, unsigned keep)
       /*   numerics_printf_verbose(2,"NM_LU_factorize: We always keep factors with sparse implementation\n"); */
       /* } */
       break;
+#ifdef WITH_MUMPS
+    case NSM_MUMPS:
+    {
+      if(verbose >= 2)
+      {
+        printf("NM_LU_factorize: using MUMPS\n");
+      }
+      if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+      {
+        /* the mumps instance is initialized (call with job=-1) */
+        NM_MUMPS_set_control_params(A);
+        NM_MUMPS(A, -1);
+        if ((NM_MUMPS_icntl(A, 1) == -1 ||
+             NM_MUMPS_icntl(A, 2) == -1 ||
+             NM_MUMPS_icntl(A, 3) == -1 ||
+             verbose) ||
+            (NM_MUMPS_icntl(A, 1) != -1 ||
+             NM_MUMPS_icntl(A, 2) != -1 ||
+             NM_MUMPS_icntl(A, 3) != -1 ||
+             !verbose))
+        {
+          NM_MUMPS_set_verbosity(A, verbose);
+        }
+        NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
+        NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
+      }
+
+      NM_MUMPS_set_problem(A, NULL);
+
+      DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+      if(mumps_id->job == -1)
+      {
+        NM_MUMPS(A, 4); /* analyzis,factorization */
+      }
+      /* if(keep != NM_KEEP_FACTORS|| mumps_id->job == -1) */
+      /* { */
+      /*   NM_MUMPS(A, 6); /\* analyzis,factorization,solve*\/ */
+      /* } */
+      /* else */
+      /* { */
+      /*   NM_MUMPS(A, 3); /\* solve *\/ */
+      /* } */
+
+      info = mumps_id->info[0];
+
+      /* MUMPS can return info codes with negative value */
+      if(info)
+      {
+        if(verbose > 0)
+        {
+          fprintf(stderr,"NM_LU_factorize: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+        }
+      }
+      /* if(keep != NM_KEEP_FACTORS) */
+      /* { */
+      /*   NM_MUMPS(A, -2); */
+      /* } */
+      if(!p->solver_free_hook)
+      {
+        p->solver_free_hook = &NM_MUMPS_free;
+      }
+      break;
+    }
+#endif /* WITH_MUMPS */
     default:
     {
-      
+      numerics_printf_verbose(0,"NM_LU_factorize, Unknown solver in NM_SPARSE case." );
     }
     }
     break;
@@ -3141,6 +3206,78 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs, unsigned keep)
         }
       }
       break;
+#ifdef WITH_MUMPS
+    case NSM_MUMPS:
+    {
+      if(verbose >= 2)
+      {
+        printf("NM_LU_solve: using MUMPS\n");
+      }
+
+      NM_LU_factorize(A, keep);
+
+      if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+      {
+        /* the mumps instance is initialized (call with job=-1) */
+        NM_MUMPS_set_control_params(A);
+        NM_MUMPS(A, -1);
+        if ((NM_MUMPS_icntl(A, 1) == -1 ||
+             NM_MUMPS_icntl(A, 2) == -1 ||
+             NM_MUMPS_icntl(A, 3) == -1 ||
+             verbose) ||
+            (NM_MUMPS_icntl(A, 1) != -1 ||
+             NM_MUMPS_icntl(A, 2) != -1 ||
+             NM_MUMPS_icntl(A, 3) != -1 ||
+             !verbose))
+        {
+          NM_MUMPS_set_verbosity(A, verbose);
+        }
+        NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
+        NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
+      }
+      DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+      for(unsigned int j=0; j < nrhs ; j++ )
+      {
+        NM_MUMPS_set_problem(A, &b[j*nrhs]);
+        NM_MUMPS(A, 3); /* solve */
+      }
+      /* NM_MUMPS_set_problem(A, NULL); */
+
+      /* DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A); */
+      /* if(mumps_id->job == -1)  */
+      /* { */
+      /*   NM_MUMPS(A, 4); /\* analyzis,factorization *\/ */
+      /* }     */
+      /* if(keep != NM_KEEP_FACTORS|| mumps_id->job == -1) */
+      /* { */
+      /*   NM_MUMPS(A, 6); /\* analyzis,factorization,solve*\/ */
+      /* } */
+      /* else */
+      /* { */
+      /*   NM_MUMPS(A, 3); /\* solve *\/ */
+      /* } */
+
+      info = mumps_id->info[0];
+
+      /* MUMPS can return info codes with negative value */
+      if(info)
+      {
+        if(verbose > 0)
+        {
+          fprintf(stderr,"NM_LU_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+        }
+      }
+      /* if(keep != NM_KEEP_FACTORS) */
+      /* { */
+      /*   NM_MUMPS(A, -2); */
+      /* } */
+      /* if(!p->solver_free_hook) */
+      /* { */
+      /*   p->solver_free_hook = &NM_MUMPS_free; */
+      /* } */
+      break;
+    }
+#endif /* WITH_MUMPS */
     default:
     {
       fprintf(stderr, "NM_LU_solve: unknown sparse linearsolver %d\n", p->solver);
@@ -4043,7 +4180,7 @@ int NM_is_symmetric(NumericsMatrix* A)
   NumericsMatrix * Atrans = NM_transpose(A);
   NumericsMatrix * AplusATrans = NM_add(1/2.0, A, -1/2.0, Atrans);
   double norm_inf = NM_norm_inf(AplusATrans);
-  
+
   NM_clear(Atrans);
   free(Atrans);
   NM_clear(AplusATrans);

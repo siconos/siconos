@@ -1926,8 +1926,6 @@ static int test_NM_gesv_expert(void)
 
   free(b);
 
-
-
   printf("End of NM_gesv...\n");
   if(info != 0) return info;
 
@@ -2133,6 +2131,89 @@ static int test_NM_posv_expert(void)
   printf("========= End Numerics tests for NumericsMatrix ========= \n");
   return info;
 }
+static int test_NM_LU_solve_unit(NumericsMatrix * M1, double * b)
+{
+  int n = M1->size0;
+  int info =-1;
+  double * y = (double*)malloc(n* sizeof(double));
+  for(int j=0; j < n; j++)
+    y[j] = b[j];
+  NM_LU_solve(M1, b, 1, NM_PRESERVE);
+  NV_display(b,n);
+  NM_gemv(-1.0, M1, b, 1.0, y);
+  double res = cblas_dnrm2(n,y,1);
+  free(y);
+  printf("residual = %e\n", res);
+  if(fabs(res) >= sqrt(DBL_EPSILON))
+    info = 1;
+  else
+    info=0;
+  return info;
+}
+
+static int test_NM_LU_solve(void)
+{
+
+  printf("========= Starts Numerics tests for NumericsMatrix (test_NM_LU_solve) ========= \n");
+  /* numerics_set_verbose(2); */
+  int i, nmm = 4 ;
+  NumericsMatrix ** NMM = (NumericsMatrix **)malloc(nmm * sizeof(NumericsMatrix *)) ;
+  int info = test_build_first_4_NM(NMM);
+
+  if(info != 0)
+  {
+    printf("Construction failed ...\n");
+    return info;
+  }
+  printf("Construction ok ...\n");
+
+
+  NumericsMatrix * M1 = NULL;
+  double * b = NULL;
+
+  int n =0;
+  
+  M1 = NMM[0];
+  n = M1->size0;
+  b = (double*)malloc(n* sizeof(double));
+  for(int j=0; j < n; j++)
+    b[j] =1.0;
+  info = test_NM_LU_solve_unit(M1, b);
+  if(info != 0) return info;
+
+  M1=NMM[1];
+  n = M1->size0;
+  b = (double*)malloc(n* sizeof(double));
+  for(int j=0; j < n; j++)
+    b[j] =1.0;
+  info = test_NM_LU_solve_unit(M1, b);
+  if(info != 0) return info;
+
+  M1 = test_matrix_5();
+  n = M1->size0;
+  b = (double*)malloc(n* sizeof(double));
+  for(int j=0; j < n; j++)
+    b[j] =1.0;
+  info = test_NM_LU_solve_unit(M1, b);
+  if(info != 0) return info;
+
+  free(b);
+
+  printf("End of NM_gesv...\n");
+  if(info != 0) return info;
+
+  /* free memory */
+
+  for(i = 0 ; i < nmm; i++)
+  {
+    NM_clear(NMM[i]);
+    free(NMM[i]);
+  }
+  free(NMM);
+  printf("========= End Numerics tests for NumericsMatrix  (test_NM_LU_solve) ========= \n");
+  return info;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -2175,6 +2256,8 @@ int main(int argc, char *argv[])
   info += test_NM_gesv_expert();
 
   info += test_NM_posv_expert();
+
+  info += test_NM_LU_solve();
 
 #ifdef SICONOS_HAS_MPI
   MPI_Finalize();
