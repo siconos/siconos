@@ -382,11 +382,12 @@ SimpleMatrix::~SimpleMatrix()
   if(_num == Siconos::DENSE)
   {
     delete(mat.Dense);
-    if (_numericsMatrix->matrix0)
+    if (_numericsMatrix)
     {
       // _numericsMatrix->matrix0 points to the array contained in the ublas matrix
       // To avoid double free on this pointer, we set it to NULL before deletion
-      _numericsMatrix->matrix0 =NULL;
+      if (_numericsMatrix->matrix0)
+        _numericsMatrix->matrix0 =NULL;
     }
   }
   else if(_num == Siconos::TRIANGULAR)
