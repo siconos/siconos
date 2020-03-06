@@ -297,7 +297,7 @@ namespace std11 = std;
 #include "fc2d_Solvers.h"
 #include "fc3d_Solvers.h"
 #include "gfc3d_Solvers.h"
-#include "rolling_fc3d_Solvers.h"
+#include "rolling_fc_Solvers.h"
 #include "MCP_Solvers.h"
 #include "NCP_Solvers.h"
 #include "MLCP_Solvers.h"

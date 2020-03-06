@@ -22,7 +22,7 @@
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "OSNSMatrix.hpp"
 #include "NonSmoothDrivers.h" // from numerics, for fcX_driver
-#include <rolling_fc3d_Solvers.h>
+#include <rolling_fc_Solvers.h>
 
 using namespace RELATION;
 
@@ -33,10 +33,26 @@ RollingFrictionContact::RollingFrictionContact(int dimPb, int numericsSolverId):
 {}
 
 RollingFrictionContact::RollingFrictionContact(int dimPb, SP::SolverOptions options):
-  LinearOSNS(options), _rolling_frictionContact_driver(&rolling_fc3d_driver)
+  LinearOSNS(options), _contactProblemDim(dimPb)
 {
-  if(dimPb != 5)
-    RuntimeException::selfThrow("Wrong dimension value (only 5 is allowed for RollingFrictionContact constructor.");
+
+
+  if(dimPb == 3 && options->solverId == SICONOS_ROLLING_FRICTION_3D_NSGS)
+  {
+    _numerics_solver_options.reset(solver_options_create(SICONOS_ROLLING_FRICTION_2D_NSGS),
+                                   solver_options_delete);
+  }
+
+  if(dimPb == 5)
+  {
+    _rolling_frictionContact_driver = &rolling_fc3d_driver;
+  }
+  else if(dimPb == 3)
+  {
+    _rolling_frictionContact_driver = &rolling_fc2d_driver;
+  }
+  else
+    RuntimeException::selfThrow("Wrong dimension value (only 5 (3D) or 3 (2D) are allowed for RollingFrictionContact constructor.");
 
   _mu.reset(new MuStorage());
   _muR.reset(new MuStorage());

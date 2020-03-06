@@ -48,7 +48,7 @@
 #include "mlcp_cst.h"                       // for SICONOS_MLCP_DIRECT_ENUM_STR
 #include "numerics_verbose.h"               // for numerics_printf, numerics...
 #include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERR...
-#include "rolling_fc3d_Solvers.h"           // for rfc3d_poc_set_default
+#include "rolling_fc_Solvers.h"           // for rfc3d_poc_set_default
 
 /** Create a struct SolverOptions and initialize its content.
 
@@ -698,6 +698,12 @@ SolverOptions * solver_options_create(int solverId)
     rfc3d_nsgs_set_default(options);
     break;
   }
+  case SICONOS_ROLLING_FRICTION_2D_NSGS:
+  {
+    options = solver_options_initialize(solverId, 1000, 1e-4, 1);
+    rfc2d_nsgs_set_default(options);
+    break;
+  }
 
   case SICONOS_FRICTION_3D_NSGSV:
   case SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR:
@@ -862,6 +868,19 @@ SolverOptions * solver_options_create(int solverId)
   {
     options = solver_options_initialize(solverId, 1000, 1e-12, 0);
     rfc3d_poc_withLocalIteration_set_default(options);
+    break;
+  }
+  case SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone:
+  {
+    options = solver_options_initialize(solverId, 1000, 1e-12, 0);
+    rfc2d_poc_set_default(options);
+    break;
+  }
+
+  case SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration:
+  {
+    options = solver_options_initialize(solverId, 1000, 1e-12, 0);
+    rfc2d_poc_withLocalIteration_set_default(options);
     break;
   }
 

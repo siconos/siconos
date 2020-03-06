@@ -82,6 +82,61 @@ unsigned int projectionOnRollingCone(double* r, double  mu, double mur)
       return 20;
   }
 }
+unsigned int projectionOn2DRollingCone(double* r, double  mu, double mur)
+{
+
+  double normT = sqrt(r[1] * r[1]);
+  double normMT = sqrt(r[2] * r[2]);
+  /* hypot of libm is sure but really slow */
+  /* double normT = hypot(r[1], r[2]); */
+  /* double normMT = hypot(r[3], r[4]); */
+
+  if(mu * normT  + mur * normMT <= - r[0])
+  {
+    r[0] = 0.0;
+    r[1] = 0.0;
+    r[2] = 0.0;
+    return PROJRCONE_DUAL;
+  }
+  else if((normT <= mu * r[0]) && (normMT <= mur * r[0]))
+  {
+    return PROJRCONE_INSIDE;
+  }
+  else
+  {
+    double mu2 = mu * mu;
+    double mur2 = mur*mur;
+
+
+    double trial_rn = (mu * normT + mur * normMT + r[0]) / (mur2+ mu2 + 1.0);
+    if((normT > mu * trial_rn) && (normMT > mur * trial_rn))
+    {
+      r[0] = trial_rn;
+      r[1] = mu * r[0] * r[1] / normT;
+      r[2] = mur * r[0] * r[2] / normMT;
+      return PROJRCONE_BOUNDARY_FRICTION_ROLLING;
+    }
+
+    trial_rn = (mu * normT + r[0]) / (mu2 + 1.0);
+    if((normT > mu * trial_rn) && (normMT <= mur * trial_rn))
+    {
+      r[0] = trial_rn;
+      r[1] = mu * r[0] * r[1] / normT;
+      //r[2] = r[2] ;
+      return PROJRCONE_BOUNDARY_FRICTION;
+    }
+    trial_rn = (mur * normMT + r[0]) / (mur2 + 1.0);
+    if((normT <= mu * trial_rn) && (normMT > mur * trial_rn))
+    {
+      r[0] = trial_rn;
+      //r[1] = r[1] ;
+      r[2] = mur * r[0] * r[2] / normMT;
+      return PROJRCONE_BOUNDARY_ROLLING;
+    }
+    else
+      return 20;
+  }
+}
 unsigned projectionOnDualRollingCone(double* u, double  mu, double mur)
 {
   return 0;

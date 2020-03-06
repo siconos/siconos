@@ -23,7 +23,7 @@
 #include "numerics_verbose.h"               // for numerics_printf_verbose
 #include "rolling_fc_Solvers.h"             // for rolling_fc3d_set_internal...
 
-void rolling_fc3d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
+void rolling_fc2d_set_internalsolver_tolerance(RollingFrictionContactProblem* problem,
     SolverOptions* options,
     SolverOptions* internalsolver_options,
     double error)

@@ -15,32 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "Lagrangian2d2DR.hpp"
+
+
+#include "Lagrangian2d3DR.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
-
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
 
-void Lagrangian2d2DR::initialize(Interaction& inter)
+
+
+void Lagrangian2d3DR::initialize(Interaction& inter)
 {
   LagrangianR::initialize(inter);
   //proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->size(0),_jachq->size(1)));
 
   if((inter.getSizeOfDS() !=3) and (inter.getSizeOfDS() !=6))
   {
-    RuntimeException::selfThrow("Lagrangian2d2DR::initialize(Interaction& inter). The size of ds must of size 3");
+    RuntimeException::selfThrow("Lagrangian2d3DR::initialize(Interaction& inter). The size of ds must of size 3");
   }
   unsigned int qSize = 3 * (inter.getSizeOfDS() / 3);
-  _jachq.reset(new SimpleMatrix(2, qSize));
+  _jachq.reset(new SimpleMatrix(3, qSize));
 }
 
-void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
+void Lagrangian2d3DR::computeJachq(SiconosVector& q, SiconosVector& z)
 {
-  DEBUG_BEGIN("Lagrangian2d2DR::computeJachq(Interaction& inter, SP::BlockVector q0 \n");
+  DEBUG_BEGIN("Lagrangian2d3DR::computeJachq(Interaction& inter, SP::BlockVector q0 \n");
 
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
@@ -67,6 +70,9 @@ void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
   _jachq->setValue(1,1,Ty);
   _jachq->setValue(1,2,lever_arm_y*Tx - lever_arm_x*Ty);
 
+  _jachq->setValue(2,0,0.0);
+  _jachq->setValue(2,1,0.0);
+  _jachq->setValue(2,2,1.0);
 
 
   if(q.size() ==6)
@@ -74,7 +80,6 @@ void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
     DEBUG_PRINT("take into account second ds\n");
     double G2x = q.getValue(3);
     double G2y = q.getValue(4);
-
 
     _jachq->setValue(0,3,-Nx);
     _jachq->setValue(0,4,-Ny);
@@ -84,28 +89,31 @@ void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
     _jachq->setValue(1,4,-Ty);
     _jachq->setValue(1,5,-((G2y-Py)*Tx - (G2x-Px)*Ty));
 
+    _jachq->setValue(2,3,0.0);
+    _jachq->setValue(2,4,0.0);
+    _jachq->setValue(2,5,-1.0);
 
   }
   DEBUG_EXPR(_jachq->display(););
-  DEBUG_END("Lagrangian2d2DR::computeJachq(Interaction& inter, SP::BlockVector q0) \n");
+  DEBUG_END("Lagrangian2d3DR::computeJachq(Interaction& inter, SP::BlockVector q0) \n");
 
 }
 
-double Lagrangian2d2DR::distance() const
+double Lagrangian2d3DR::distance() const
 {
-  DEBUG_BEGIN("Lagrangian2d2DR::distance(...)\n")
+  DEBUG_BEGIN("Lagrangian2d3DR::distance(...)\n")
   SiconosVector dpc(*_Pc2 - *_Pc1);
   DEBUG_EXPR(_Pc1->display(););
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(dpc.display(););
-  DEBUG_END("Lagrangian2d2DR::distance(...)\n")
+  DEBUG_END("Lagrangian2d3DR::distance(...)\n")
   return dpc.norm2() * (inner_prod(*_Nc, dpc) >= 0 ? -1 : 1);
 
 }
 
-void Lagrangian2d2DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
+void Lagrangian2d3DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector& y)
 {
-  DEBUG_BEGIN("Lagrangian2d2DR::computeh(...)\n");
+  DEBUG_BEGIN("Lagrangian2d3DR::computeh(...)\n");
   DEBUG_EXPR(q.display());
   // Contact points and normal are stored as relative to q1 and q2, if
   // no q2 then pc2 and normal are absolute.
@@ -135,14 +143,14 @@ void Lagrangian2d2DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector
   DEBUG_EXPR(_Pc1->display(););
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(_Nc->display(););
-  
+
   LagrangianScleronomousR::computeh(q, z, y);
   y.setValue(0, distance());
   DEBUG_EXPR(y.display(););
   DEBUG_EXPR(display(););
-  DEBUG_END("Lagrangian2d2DR::computeh(...)\n")
+  DEBUG_END("Lagrangian2d3DR::computeh(...)\n")
 }
-void Lagrangian2d2DR::display() const
+void Lagrangian2d3DR::display() const
 {
   LagrangianR::display();
 
