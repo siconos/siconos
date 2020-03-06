@@ -32,7 +32,7 @@
 #include "ioMatrix.hpp"                                         // for read
 #include "Tools.hpp"                                            // for toString
 #include "bindings_utils.hpp"                                   // for fill
-
+#include "NumericsMatrix.h"
 using namespace Siconos;
 namespace siconosBindings = boost::numeric::bindings::blas;
 using std::cout;
@@ -380,7 +380,15 @@ SimpleMatrix::SimpleMatrix(const std::string &file, bool ascii): SiconosMatrix(1
 SimpleMatrix::~SimpleMatrix()
 {
   if(_num == Siconos::DENSE)
+  {
     delete(mat.Dense);
+    if (_numericsMatrix->matrix0)
+    {
+      // _numericsMatrix->matrix0 points to the array contained in the ublas matrix
+      // To avoid double free on this pointer, we set it to NULL before deletion
+      _numericsMatrix->matrix0 =NULL;
+    }
+  }
   else if(_num == Siconos::TRIANGULAR)
     delete(mat.Triang);
   else if(_num == Siconos::SYMMETRIC)
