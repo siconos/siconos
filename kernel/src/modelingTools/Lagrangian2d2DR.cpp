@@ -15,8 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-
 #include "Lagrangian2d2DR.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
@@ -27,8 +25,6 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "debug.h"
-
-
 
 void Lagrangian2d2DR::initialize(Interaction& inter)
 {
@@ -80,13 +76,14 @@ void Lagrangian2d2DR::computeJachq(SiconosVector& q, SiconosVector& z)
     double G2x = q.getValue(3);
     double G2y = q.getValue(4);
 
+
     _jachq->setValue(0,3,-Nx);
     _jachq->setValue(0,4,-Ny);
     _jachq->setValue(0,5,- ((G2y-Py)*Nx - (G2x-Px)*Ny));
 
     _jachq->setValue(1,3,-Tx);
     _jachq->setValue(1,4,-Ty);
-    _jachq->setValue(1,5,-(G1y-Py)*Tx + (G1x-Px)*Ty);
+    _jachq->setValue(1,5,-((G2y-Py)*Tx - (G2x-Px)*Ty));
 
 
   }
@@ -139,42 +136,7 @@ void Lagrangian2d2DR::computeh(SiconosVector& q, SiconosVector& z, SiconosVector
   DEBUG_EXPR(_Pc1->display(););
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(_Nc->display(););
-  // SP::SiconosVector q1 = (q0.getAllVect())[0];
-  // ::boost::math::quaternion<double> qq1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6));
-  // ::boost::math::quaternion<double> qpc1(0,(*_relPc1)(0),(*_relPc1)(1),(*_relPc1)(2));
-
-  // // apply q1 rotation and add
-  // qpc1 = qq1 * qpc1 / qq1;
-  // (*_Pc1)(0) = qpc1.R_component_2() + (*q1)(0);
-  // (*_Pc1)(1) = qpc1.R_component_3() + (*q1)(1);
-  // (*_Pc1)(2) = qpc1.R_component_4() + (*q1)(2);
-
-  // if (q0.numberOfBlocks() > 1)
-  // {
-  //   // Update pc2 based on q0 and relPc2
-  //   SP::SiconosVector q2 = (q0.getAllVect())[1];
-  //   ::boost::math::quaternion<double> qq2((*q2)(3), (*q2)(4), (*q2)(5), (*q2)(6));
-  //   ::boost::math::quaternion<double> qpc2(0,(*_relPc2)(0),(*_relPc2)(1),(*_relPc2)(2));
-
-  //   // apply q2 rotation and add
-  //   qpc2 = qq2 * qpc2 / qq2;
-  //   (*_Pc2)(0) = qpc2.R_component_2() + (*q2)(0);
-  //   (*_Pc2)(1) = qpc2.R_component_3() + (*q2)(1);
-  //   (*_Pc2)(2) = qpc2.R_component_4() + (*q2)(2);
-
-  //   // same for normal
-  //   ::boost::math::quaternion<double> qnc(0, (*_relNc)(0), (*_relNc)(1), (*_relNc)(2));
-  //   qnc = qq2 * qnc / qq2;
-  //   (*_Nc)(0) = qnc.R_component_2();
-  //   (*_Nc)(1) = qnc.R_component_3();
-  //   (*_Nc)(2) = qnc.R_component_4();
-  // }
-  // else
-  // {
-  //   *_Pc2 = *_relPc2;
-  //   *_Nc = *_relNc;
-  // }
-
+  
   LagrangianScleronomousR::computeh(q, z, y);
   y.setValue(0, distance());
   DEBUG_EXPR(y.display(););
