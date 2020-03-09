@@ -1901,8 +1901,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         iterations = so.iparam[sn.SICONOS_IPARAM_ITER_DONE]
         precision = so.dparam[sn.SICONOS_DPARAM_RESIDU]
         msg = 'Numerics solver info at time : {0:10.6f}'.format(time)
-        msg += 'iterations = {0:8d}'.format(iterations)
-        msg += 'precision = {0:5.3e}'.format(precision)
+        msg += ' iterations = {0:8d}'.format(iterations)
+        msg += ' precision = {0:5.3e}'.format(precision)
         self.print_verbose(msg)
 
     def import_plugins(self):
