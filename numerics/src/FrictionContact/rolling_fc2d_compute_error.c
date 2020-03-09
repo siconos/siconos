@@ -44,15 +44,11 @@ void rolling_fc2d_unitary_compute_and_add_error(
   DEBUG_BEGIN("rolling_fc2d_unitary_compute_and_add_error(...)\n");
   DEBUG_EXPR(NV_display(r,3););
   DEBUG_EXPR(NV_display(u,3););
-  DEBUG_PRINTF(" tilde u[0] = %f\n", u[0] + mu *  hypot(u[1], u[2]) + mur * hypot(u[3], u[4]));
-  /* Compute the modified local velocity */
-  //normUT = hypot(u[1], u[2]); // i.e sqrt(u[ic3p1]*u[ic3p1]+u[ic3p2]*u[ic3p2]);
-  /* hypot of libm is sure but really slow */
-  /* worktmp[0] = r[0] -  u[0] - mu *  hypot(u[1], u[2]) - mur * hypot(u[3], u[4]); */
+  DEBUG_PRINTF(" tilde u[0] = %f\n", u[0] + mu *  fabs(u[1]) + mur * fabs(u[2]));
 
   worktmp[0] = r[0] -  u[0]
-               - mu  * sqrt(u[1] * u[1])
-               - mur * sqrt(u[2] * u[2]);
+               - mu  * fabs(u[1])
+               - mur * fabs(u[2]);
   worktmp[1] = r[1] -  u[1] ;
   worktmp[2] = r[2] -  u[2] ;
 

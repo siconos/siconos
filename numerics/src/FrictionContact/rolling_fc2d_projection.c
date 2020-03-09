@@ -112,8 +112,8 @@ int rolling_fc2d_projectionOnCone_solve(
         + MLocal[i + 2 * 3] * reaction[2];
   DEBUG_EXPR(NV_display(velocity,3););
 
-  normUT = sqrt(velocity[1] * velocity[1]);
-  normOmegaT = sqrt(velocity[2] * velocity[2]);
+  normUT = fabs(velocity[1]);
+  normOmegaT = fabs(velocity[2]);
 
   reaction[0] -= an * (velocity[0] + mu_i * normUT+ mu_r_i*normOmegaT);
   reaction[1] -= an * velocity[1];
@@ -260,8 +260,8 @@ static int  rolling_fc2d_check_trivial_solution(
   /* } */
 
   /* assert(cblas_dnrm2(5, tmp, 1) < 1e-10); */
-  double normT = sqrt(reaction[1] * reaction[1]);
-  double normMT = sqrt(reaction[2] * reaction[2]);
+  double normT = fabs(reaction[1]);
+  double normMT = fabs(reaction[2]);
 
   if((normT <= mu * -reaction [0]) && (normMT <= mur * -reaction[0]))
   {
@@ -388,8 +388,8 @@ int rolling_fc2d_projectionOnConeWithLocalIteration_solve(
 
     rho_k=rho / tau;
 
-    normUT = sqrt(velocity_k[1] * velocity_k[1]);
-    normOmegaT = sqrt(velocity_k[2] * velocity_k[2]);
+    normUT = fabs(velocity_k[1]);
+    normOmegaT = fabs(velocity_k[2]);
     /* hypot of libm is sure but really slow */
     /* normUT = hypot(velocity_k[1], velocity_k[2]); */
     /* normOmegaT = hypot(velocity_k[3], velocity_k[4]); */

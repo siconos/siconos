@@ -85,11 +85,8 @@ unsigned int projectionOnRollingCone(double* r, double  mu, double mur)
 unsigned int projectionOn2DRollingCone(double* r, double  mu, double mur)
 {
 
-  double normT = sqrt(r[1] * r[1]);
-  double normMT = sqrt(r[2] * r[2]);
-  /* hypot of libm is sure but really slow */
-  /* double normT = hypot(r[1], r[2]); */
-  /* double normMT = hypot(r[3], r[4]); */
+  double normT = fabs(r[1]);
+  double normMT = fabs(r[2]);
 
   if(mu * normT  + mur * normMT <= - r[0])
   {
