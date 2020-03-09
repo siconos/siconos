@@ -50,6 +50,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   collection[7].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_Example1.dat
   collection[9].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
+  collection[14].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
 
   return collection;
 

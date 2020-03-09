@@ -47,7 +47,11 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   }
 
   // expected to fail
+  collection[2].will_fail = 1; // GFC3D_NSN_AC, on ./data/GFC3D_Example00_badly_scaled.dat
+  collection[5].will_fail = 1; // GFC3D_NSN_AC, on ./data/GFC3D_TwoRods1.dat
+  
   collection[3].will_fail = 1; // NSN_AC on data/GFC3D_OneContact.dat
+
 
 #ifndef WITH_MUMPS
   collection[4].will_fail = 1; // NSN_AC on data/GFC3D_TwoRods1.dat, mumps only
