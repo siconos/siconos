@@ -865,10 +865,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     float(self._nslaws_data[name].attrs['mu']),
                     self._dimension)
             elif nslawClass == sk.NewtonImpactRollingFrictionNSL:
-                nslaw = nslawClass(
-                    float(self._nslaws_data[name].attrs['e']), 0.,
-                    float(self._nslaws_data[name].attrs['mu']),
-                    float(self._nslaws_data[name].attrs['mu_r']), 5)
+                if self._dimension == 3:
+                    nslaw = nslawClass(
+                        float(self._nslaws_data[name].attrs['e']), 0.,
+                        float(self._nslaws_data[name].attrs['mu']),
+                        float(self._nslaws_data[name].attrs['mu_r']), 5)
+                elif self._dimension == 2:
+                    nslaw = nslawClass(
+                        float(self._nslaws_data[name].attrs['e']), 0.,
+                        float(self._nslaws_data[name].attrs['mu']),
+                        float(self._nslaws_data[name].attrs['mu_r']), 3)
             elif nslawClass == sk.NewtonImpactNSL:
                 nslaw = nslawClass(float(self._nslaws_data[name].attrs['e']))
             elif nslawClass == sk.RelayNSL:
@@ -1704,9 +1710,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 # VA. change the position such that is corresponds to a 3D object
                 new_positions = np.zeros((positions.shape[0], 8))
 
-                new_positions[:, 0] = positions[:, 0]
-                new_positions[:, 1] = positions[:, 1]
-                new_positions[:, 2] = positions[:, 2]
+                new_positions[:, 0] = positions[:, 0] # ds number
+                new_positions[:, 1] = positions[:, 1] # x position
+                new_positions[:, 2] = positions[:, 2] # y position
 
                 new_positions[:, 4] = np.cos(positions[:, 3] / 2.0)
                 new_positions[:, 7] = np.sin(positions[:, 3] / 2.0)
@@ -1742,7 +1748,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 new_velocities[:, 2] = velocities[:, 2]
 
                 new_velocities[:, 6] = velocities[:, 3]
-                self._dynamic_data[current_line:, :] = np.concatenate(
+                self._velocities_data[current_line:, :] = np.concatenate(
                     (times, new_velocities), axis=1)
 
     def output_contact_forces(self):
@@ -2321,7 +2327,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
 
                     elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
-                        osnspb = sk.RollingFrictionContact(5, solver_options)
+                        if self._dimension ==3:
+                            osnspb = sk.RollingFrictionContact(5, solver_options)
+                        elif self._dimension ==2:
+                            osnspb = sk.RollingFrictionContact(3, solver_options)
+
                     else:
                         msg = "Unknown nslaw type"
                         msg += str(set(nslaw_type_list))

@@ -14,13 +14,15 @@
 #define BULLET_CLASSES() \
   REGISTER(BulletR)\
   REGISTER(Bullet5DR)\
-  REGISTER(Bullet2dR)
+  REGISTER(Bullet2dR)\
+  REGISTER(Bullet2d3DR)
 
 
 #ifdef SICONOS_HAS_BULLET
 #include <BulletR.hpp>
 #include <Bullet5DR.hpp>
 #include <Bullet2dR.hpp>
+#include <Bullet2d3DR.hpp>
 #else
 #include <NewtonEuler3DR.hpp>
 #include <NewtonEuler5DR.hpp>
@@ -28,7 +30,9 @@
 DUMMY(BulletR, NewtonEuler3DR);
 DUMMY(Bullet5DR, NewtonEuler5DR);
 #include <Lagrangian2d2DR.cpp>
+#include <Lagrangian2d3DR.cpp>
 DUMMY(Bullet2dR, Lagrangian2d2DR);
+DUMMY(Bullet2d3DR, Lagrangian2d3DR);
 #endif
 
 #define OCC_CLASSES() \
@@ -67,8 +71,9 @@ DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
   REGISTER(LagrangianR)                         \
   REGISTER(Disk)                                \
   REGISTER(Circle)                              \
-  REGISTER(Lagrangian2d2DR)			\
-  REGISTER(NewtonEulerR)			\
+  REGISTER(Lagrangian2d2DR)                     \
+  REGISTER(Lagrangian2d3DR)                     \
+  REGISTER(NewtonEulerR)                        \
   REGISTER(NewtonEuler1DR)                      \
   REGISTER(NewtonEuler3DR)                      \
   REGISTER(NewtonEuler5DR)                      \
@@ -76,7 +81,7 @@ DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
   REGISTER(KneeJointR)                          \
   REGISTER(PrismaticJointR)                     \
   REGISTER(RigidBodyDS)                         \
-  REGISTER(RigidBody2dDS)			\
+  REGISTER(RigidBody2dDS)                       \
   MECHANISMS_CLASSES()                          \
   OCC_CLASSES()                                 \
   BULLET_CLASSES()
@@ -310,6 +315,49 @@ void ContactPointVisitor::operator()(const Lagrangian2d2DR& rel)
   answer.setValue(15, id);
 };
 
+template<>
+void ContactPointVisitor::operator()(const Lagrangian2d3DR& rel)
+{
+  const SiconosVector& posa = *rel.pc1();
+  const SiconosVector& posb = *rel.pc2();
+  const SiconosVector& nc = *rel.nc();
+  DEBUG_PRINTF("posa(0)=%g\n", posa(0));
+  DEBUG_PRINTF("posa(1)=%g\n", posa(1));
+
+  double id = inter->number();
+  double mu = ask<ForMu>(*inter->nonSmoothLaw());
+  const SimpleMatrix& jachq = *rel.jachq();
+  SiconosVector cf(jachq.size(1));
+  prod(*inter->lambda(1), jachq, cf, true);
+
+
+  answer.resize(16);
+
+  answer.setValue(0, mu);
+  answer.setValue(1, posa(0));
+  answer.setValue(2, posa(1));
+
+  answer.setValue(3, posb(0));
+  answer.setValue(4, posb(1));
+
+  answer.setValue(5, nc(0));
+  answer.setValue(6, nc(1));
+
+  answer.setValue(7, cf(0));
+  answer.setValue(8, cf(1));
+
+  answer.setValue(9,inter->y(0)->getValue(0));
+  answer.setValue(10,inter->y(0)->getValue(1));
+
+  answer.setValue(11,inter->y(1)->getValue(0));
+  answer.setValue(12,inter->y(1)->getValue(1));
+
+  answer.setValue(13,inter->lambda(1)->getValue(0));
+  answer.setValue(14,inter->lambda(1)->getValue(1));
+
+  answer.setValue(15, id);
+};
+
 
 struct ContactPointDomainVisitor : public SiconosVisitor
 {
@@ -417,7 +465,8 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       NewtonEuler1DR,
       NewtonEuler3DR,
       NewtonEuler5DR,
-      Lagrangian2d2DR>,
+      Lagrangian2d2DR,
+      Lagrangian2d3DR>,
       ContactPointVisitor>::Make ContactPointInspector;
       ContactPointInspector inspector;
       inspector.inter = graph.bundle(*vi);
