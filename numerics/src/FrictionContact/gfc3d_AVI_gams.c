@@ -14,18 +14,19 @@
 /* GAMS stuff */
 
 #define _XOPEN_SOURCE 700
+#include <stdio.h>          // for printf
+#include <stdlib.h>         // for exit, EXIT_FAILURE
+#include "NumericsFwd.h"    // for GlobalFrictionContactProblem, SolverOptions
+#include "gfc3d_Solvers.h"  // for gfc3d_AVI_gams_path, gfc3d_AVI_gams_pathvi
+#include "SiconosConfig.h"  // for HAVE_GAMS_C_API // IWYU pragma: keep
+
+#ifdef HAVE_GAMS_C_API
 
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "GlobalFrictionContactProblem.h"
-#include "gfc3d_Solvers.h"
-
-#ifdef HAVE_GAMS_C_API
-
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <stdlib.h>
 #include <math.h>
 
 #include "GAMSlink.h"
@@ -40,7 +41,7 @@
 
 static ptrdiff_t SN_rm_normal_part_on_H(ptrdiff_t i, ptrdiff_t j, double val, void* env)
 {
-  if (j%3 == 0)
+  if(j%3 == 0)
   {
     return 0;
   }
@@ -62,10 +63,10 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
   double angle = 2*M_PI/(NB_APPROX + 1);
   DEBUG_PRINTF("angle: %g\n", angle);
 
-  for (unsigned j = 0; j < nb_contacts; ++j)
+  for(unsigned j = 0; j < nb_contacts; ++j)
   {
     double mu = mus[j];
-    for (unsigned i = 0; i < nb_approx; ++i)
+    for(unsigned i = 0; i < nb_approx; ++i)
     {
       cs_entry(triplet_mat, i + offset_row, 3*j, mu);
       cs_entry(triplet_mat, i + offset_row, 3*j + 1, cos(i*angle));
@@ -82,6 +83,10 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   assert(problem->numberOfContacts > 0);
   assert(problem->M);
   assert(problem->q);
+  if(!options->solverParameters)
+  {
+    options->solverParameters = createGAMSparams(GAMS_MODELS_SHARE_DIR, GAMS_DIR);
+  }
 
   /* Handles to the Option objects */
   optHandle_t Optr = NULL;
@@ -105,7 +110,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
 
   Emat.matrix2->triplet = cs_spalloc(size, size, problem->numberOfContacts, 1, 1);
 
-  for (unsigned i = 0; i < size; i += 3)
+  for(unsigned i = 0; i < size; i += 3)
   {
     cs_entry(Emat.matrix2->triplet, i, i, 1.);
   }
@@ -127,14 +132,14 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   const char* filename = GAMSP_get_filename(options->solverParameters);
 
   /* Logger starting  */
-  if (filename)
+  if(filename)
   {
     strncpy(hdf5_filename, filename, sizeof(hdf5_filename));
     strncpy(base_filename, filename, sizeof(base_filename));
 
     const char* suffix = GAMSP_get_filename_suffix(options->solverParameters);
 
-    if (suffix)
+    if(suffix)
     {
       strncat(hdf5_filename, "_", sizeof(hdf5_filename) - strlen(hdf5_filename) - 1);
       strncat(hdf5_filename, suffix, sizeof(hdf5_filename) - strlen(hdf5_filename) - 1);
@@ -147,24 +152,26 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
     strncpy(hdf5_filename, "logger", sizeof(hdf5_filename));
     strncpy(base_filename, "output", sizeof(base_filename));
   }
-  if (! optCreateD (&Optr, sysdir, msg, sizeof(msg))) {
+  if(! optCreateD(&Optr, sysdir, msg, sizeof(msg)))
+  {
     printf("Could not create opt object: %s\n", msg);
     return 1;
   }
 
-  if (! optCreateD (&solverOptPtr, sysdir, msg, sizeof(msg))) {
+  if(! optCreateD(&solverOptPtr, sysdir, msg, sizeof(msg)))
+  {
     printf("Could not create opt object: %s\n", msg);
     return 1;
   }
 
   getGamsSolverOpt(solverOptPtr, sysdir, solverName);
-  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[0]);
+  optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[SICONOS_DPARAM_TOL]);
 //  strncpy(msg, "./", sizeof(deffile));
   strncpy(msg, solverName, sizeof(msg));
   strncat(msg, ".opt", sizeof(msg) - strlen(msg) - 1);
 
   FILE* f = fopen("jams.opt", "w");
-  if (f)
+  if(f)
   {
     char contents[] = "subsolveropt 1";
     fprintf(f, "%s\n", contents);
@@ -175,13 +182,13 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
     printf("Failed to create jams.opt!\n");
   }
   getGamsOpt(Optr, sysdir);
-  if (strcmp(solverName, "path"))
+  if(strcmp(solverName, "path"))
   {
     optSetStrStr(Optr, "emp", solverName);
   }
 
   optHandle_t Opts[] = {Optr, solverOptPtr};
-  SN_Gams_set_options((SN_GAMSparams*)options->solverParameters, Opts);
+  SN_Gams_set_default((SN_GAMSparams*)options->solverParameters, Opts);
 
   optWriteParameterFile(solverOptPtr, msg);
 
@@ -191,7 +198,7 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   cs_fkeep(NM_csc(&Htmat), &SN_rm_normal_part_on_H, NULL);
 
   cblas_dcopy(size, problem->b, 1, reaction, 1);
-  for (unsigned i = 0; i < size; i += 3)
+  for(unsigned i = 0; i < size; i += 3)
   {
     reaction[i] = 0.;
   }
@@ -206,27 +213,29 @@ static int gfc3d_AVI_gams_base(GlobalFrictionContactProblem* problem, double *re
   SN_GAMS_add_NM_to_gdx(gdx_data, &Htmat, "Ht");
   SN_GAMS_add_NM_to_gdx(gdx_data, &Emat, "E");
   SN_GAMS_add_NM_to_gdx(gdx_data, &Akmat, "Ak");
-  
+
   SN_GAMS_add_NV_to_gdx(gdx_data, problem->q, "q", problem->M->size0);
   SN_GAMS_add_NV_to_gdx(gdx_data, problem->b, "b", size);
   SN_GAMS_add_NV_to_gdx(gdx_data, reaction, "bt", size);
 
-   SN_GAMS_add_NV_from_gdx(gdx_data, reaction, "reaction", size);
-   SN_GAMS_add_NV_from_gdx(gdx_data, velocity, "velocity", problem->M->size0);
+  SN_GAMS_add_NV_from_gdx(gdx_data, reaction, "reaction", size);
+  SN_GAMS_add_NV_from_gdx(gdx_data, velocity, "velocity", problem->M->size0);
 
-   unsigned iter = 1;
-   filename_datafiles(iter, options->solverId, base_filename, sizeof(template_filename), template_filename, log_filename);
-   optSetStrStr(Optr, "LogFile", log_filename);
-   status = SN_gams_solve(iter, Optr, sysdir, model, template_filename, options, gdx_data);
+  unsigned iter = 1;
+  filename_datafiles(iter, options->solverId, base_filename, sizeof(template_filename), template_filename, log_filename);
+  optSetStrStr(Optr, "LogFile", log_filename);
+  status = SN_gams_solve(iter, Optr, sysdir, model, template_filename, options, gdx_data);
 
 
   SN_free_SN_GAMS_gdx(gdx_data);
   free(gdx_data);
-  NM_free(&Htmat);
-  NM_free(&Emat);
-  NM_free(&Akmat);
+  NM_clear(&Htmat);
+  NM_clear(&Emat);
+  NM_clear(&Akmat);
   optFree(&Optr);
   optFree(&solverOptPtr);
+  deleteGAMSparams((SN_GAMSparams *)options->solverParameters);
+
   return status;
 }
 

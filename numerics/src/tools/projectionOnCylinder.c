@@ -23,9 +23,9 @@ void projectionOnCylinder(double* r, double  R)
 
   double normTsquare = r[1] * r[1] + r[2] * r[2];
 
-  if (r[0] >= 0)
+  if(r[0] >= 0)
   {
-    if (normTsquare <= R * R)
+    if(normTsquare <= R * R)
     {
       return ;
     }
@@ -40,7 +40,7 @@ void projectionOnCylinder(double* r, double  R)
   else
   {
     r[0] = 0.0;
-    if (0 < normTsquare)
+    if(0 < normTsquare)
     {
 
       normTsquare = sqrt(normTsquare);

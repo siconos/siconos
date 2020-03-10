@@ -103,7 +103,7 @@ parameters:
 * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 * iparam[SICONOS_DPARAM_TOL] (in): tolerance
 * iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
-* dparam[SICONOS_LCP_IPARAM_RHO] (in): rho
+* dparam[SICONOS_LCP_DPARAM_RHO] (in): rho
 
 PSOR Solver
 -----------
@@ -118,7 +118,7 @@ parameters:
 * iparam[SICONOS_IPARAM_ITER_DONE] (out): number of iterations processed
 * iparam[SICONOS_DPARAM_TOL] (in): tolerance
 * iparam[SICONOS_DPARAM_RESIDU] (out): resulting error
-* dparam[SICONOS_LCP_IPARAM_RHO] (in): relaxation parameter
+* dparam[SICONOS_LCP_DPARAM_RHO] (in): relaxation parameter
 
 NewtonMin Solver
 ----------------

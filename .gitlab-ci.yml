@@ -11,7 +11,10 @@ include: ci_gitlab/gitlab-ci-siconos-templates.yml
 docker-build:ubuntu18.04:
   variables:
     IMAGE_NAME: ubuntu18.04
+  stage: docker-build-layer2
   extends: .docker-build
+  dependencies:
+    - docker-build:ubuntu18.04-no-python
 
 
 # This job create a docker image with all required dependencies
@@ -21,7 +24,7 @@ docker-build:ubuntu18.04-oce:
   variables:
     IMAGE_NAME: ubuntu18.04-oce
   extends: .docker-build
-  stage: docker-build-layer2
+  stage: docker-build-layer3
   dependencies:
     - docker-build:ubuntu18.04
 
@@ -35,7 +38,7 @@ docker-build:debian-stretch:
 
 # This job create a docker image with all required dependencies
 # (including serialization, python wrapper, bullet but not OCE)
-# It's based on debian stretch
+# It's based on debian buster
 docker-build:debian-buster:
   variables:
     IMAGE_NAME: debian-buster
@@ -49,7 +52,7 @@ docker-build:ubuntu18.04-mumps-par:
   variables:
     IMAGE_NAME: ubuntu18.04-mumps-par
   extends: .docker-build
-  stage: docker-build-layer2 # layer 2 since it's based on docker-build:ubuntu18.04
+  stage: docker-build-layer3 # layer 3 since it's based on docker-build:ubuntu18.04
   dependencies:
     - docker-build:ubuntu18.04
 
@@ -69,7 +72,7 @@ docker-build:ubuntu18.04-doc:
   variables:
     IMAGE_NAME: ubuntu18.04-doc
   extends: .docker-build
-  stage: docker-build-layer3
+  stage: docker-build-layer-doc
   dependencies:
     - docker-build:ubuntu18.04-oce
 
@@ -82,7 +85,7 @@ docker-build:ubuntu18.04-fclib:
   variables:
     IMAGE_NAME: ubuntu18.04-fclib
   extends: .docker-build
-  stage: docker-build-layer2
+  stage: docker-build-layer3
   dependencies:
     - docker-build:ubuntu18.04
 
@@ -102,8 +105,13 @@ docker-build:archlinux-oce:
     IMAGE_NAME: archlinux-oce
   extends: .docker-build
 
+# Centos distrib
+docker-build:centos-7:
+  variables:
+    IMAGE_NAME: centos-7
+  extends: .docker-build
 
-    
+
 # ---- Siconos build jobs -----
 
 # Siconos build and install, default config
@@ -121,16 +129,16 @@ install_siconos:ubuntu18.04:
 
 # Siconos build and install, default config
 # (based on cmake/default_siconos.cmake)
-# on debian stretch
+# on debian buster
 install_siconos:debian-buster:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/debian-buster
     cdash_submit: 1
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends: .siconos-build
-  artifacts:
-    paths:
-      - build
+  # artifacts:
+  #   paths:
+  #     - build
 
       
 # Siconos build and install, default config
@@ -142,9 +150,9 @@ install_siconos:opensuse-leap-15.0:
     cdash_submit: 1
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_default.cmake
   extends: .siconos-build
-  artifacts:
-    paths:
-      - build
+  # artifacts:
+  #   paths:
+  #     - build
 
 
 # Siconos build and install, without python wrappers
@@ -192,13 +200,20 @@ install_siconos:ubuntu18.04-fclib:
 install_siconos:ubuntu18.04-serialization:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
-    cdash_submit: 1
+    cdash_submit: 0 # No submit to cdash : too unstable.
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
   extends: .siconos-build
   allow_failure: true
 
+# Siconos build and install, default setup
+# on centos 7
+install_siconos:centos-7:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/centos-7
+  extends: .siconos-build
+  script: 
+     - "sh ci_gitlab/install_siconos_centos.sh"
 
-  
 
 # --- Build doc/web site and publish it ---
 # Image : ubuntu 18.04

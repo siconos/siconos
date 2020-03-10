@@ -17,18 +17,18 @@ MBTB_MoreauJeanOSI::MBTB_MoreauJeanOSI(double theta, double gamma):
 #ifdef STANDARD_ACTIVATION
 bool MBTB_MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  
+
 
   assert(i==1);
   double h = _simulation->timeStep();
   double y = (inter->y(i-1))->getValxxue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity 
-  
+  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
+
   double gamma = 1.0/2.0;
-  if (_useGamma)
+  if(_useGamma)
   {
     gamma = _gamma;
-  } 
+  }
   DEBUG_PRINTF("MBTB_MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+gamma*h*yDot);
   y += gamma*h*yDot;
   assert(!isnan(y));
@@ -41,12 +41,12 @@ bool MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(SP::Interaction inter, un
   assert(i==1);
   double h = _simulation->timeStep();
   double y = (inter->y(i-1))->getValue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity 
+  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
   double gamma = 1.0/2.0;
-  if (_useGamma)
+  if(_useGamma)
   {
     gamma = _gamma;
-  } 
+  }
   DEBUG_PRINTF("MBTB_MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e .\n", y, yDot, y+gamma*h*yDot);
   y += gamma*h*yDot;
   assert(!isnan(y));
@@ -59,19 +59,19 @@ bool MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(SP::Interaction inter, un
 #ifdef FIRSTWAY_ACTIVATION
 bool MBTB_MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
-  
+
   assert(i==1);
   double y = (inter->y(i-1))->getValue(0); // for i=1 y(i-1) is the position
   //double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
- 
+
   DEBUG_PRINTF("MBTB_MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e.\n", y, yDot);
 
   DEBUG_PRINTF("MBTB_MoreauJeanOSI::addInteractionInIndexSet  _activateYPosThreshold =%e, _activateYVelThreshold=%e\n",
-               _activateYPosThreshold ,
-               _activateYVelThreshold );
-  
+               _activateYPosThreshold,
+               _activateYVelThreshold);
+
   assert(!isnan(y));
-  
+
   if(y<=_activateYPosThreshold)
     DEBUG_PRINT("MBTB_MoreauJeanOSI::addInteractionInIndexSet ACTIVATE.\n");
   return (y<=_activateYPosThreshold);
@@ -83,13 +83,13 @@ bool MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(SP::Interaction inter, un
   assert(i==1);
 //  double h = _simulation->timeStep();
   double y = (inter->y(i-1))->getValue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity 
+  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
 
   DEBUG_PRINTF("MBTB_MoreauJeanOSI::removeInteractionFromIndexSet yref=%e, yDot=%e .\n", y, yDot);
 
   DEBUG_PRINTF("MBTB_MoreauJeanOSI::removeInteractionFromIndexSet  _deactivateYPosThreshold =%e, _deactivateYVelThreshold=%e\n",
-               _deactivateYPosThreshold ,
-               _deactivateYVelThreshold );
+               _deactivateYPosThreshold,
+               _deactivateYVelThreshold);
 
   assert(!isnan(y));
   if(y>_deactivateYPosThreshold && yDot>=_deactivateYVelThreshold)

@@ -1,19 +1,13 @@
 include(tools4tests)
 
 if(WITH_${COMPONENT}_TESTING)
-  
-  find_package(CPPUNIT REQUIRED)
-
-  # Main test driver for cppunit tests
-  set(TEST_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/src/test/TestMain.cpp)
-  set(SIMPLE_TEST_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/SiconosMemory/test/TestMain.cpp)
 
   # ---- Siconos Algebra tests ----
   begin_tests(src/utils/SiconosAlgebra/test)
 
   new_test(
     NAME testSiconosAlgebra
-    SOURCES BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SiconosVectorTest.cpp EigenProblemsTest.cpp AlgebraToolsTest.cpp TestMain.cpp
+    SOURCES BlockMatrixTest.cpp  SimpleMatrixTest.cpp BlockVectorTest.cpp  SiconosVectorTest.cpp EigenProblemsTest.cpp AlgebraToolsTest.cpp ${SIMPLE_TEST_MAIN}
     DEPS "numerics;CPPUNIT::CPPUNIT;externals"
     )
 
@@ -22,7 +16,7 @@ if(WITH_${COMPONENT}_TESTING)
 
   new_test(
     NAME testSiconosMemory
-    SOURCES SiconosMemoryTest.cpp TestMain.cpp
+    SOURCES SiconosMemoryTest.cpp ${SIMPLE_TEST_MAIN}
     DEPS "numerics;CPPUNIT::CPPUNIT"
     )
 
@@ -51,7 +45,8 @@ if(WITH_${COMPONENT}_TESTING)
   
   # ---- Simulation tools ---
   begin_tests(src/simulationTools/test DEPS "numerics;CPPUNIT::CPPUNIT")
-  new_test(SOURCES OSNSPTest.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
+  new_test(SOURCES OSNSPTest.cpp ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES testAVI.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
   if(HAS_FORTRAN)
     new_test(SOURCES ZOHTest.cpp ${SIMPLE_TEST_MAIN} DEPS LAPACK::LAPACK)
   endif()

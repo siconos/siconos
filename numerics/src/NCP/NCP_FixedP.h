@@ -19,8 +19,7 @@
 #ifndef Fixe_H
 #define Fixe_H
 
-#include "SiconosConfig.h"
-#include "NonSmoothNewton.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /*!\file NCP_FixedP.h
 

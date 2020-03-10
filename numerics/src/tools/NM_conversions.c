@@ -17,18 +17,18 @@
 */
 
 
-#include <assert.h>
-#include <stdio.h>
-
-#include "SiconosConfig.h"
-#include "CSparseMatrix.h"
 #include "NM_conversions.h"
+#include <assert.h>         // for assert
+#include <stdio.h>          // for fprintf, stderr
+#include <stdlib.h>         // for exit, EXIT_FAILURE
+#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT, CSparseMatrix_zentry
+#include "SiconosConfig.h"  // for WITH_MKL_SPBLAS  // IWYU pragma: keep
 
 #ifdef WITH_MKL_SPBLAS
 #include "tlsdef.h"
 #include "MKL_common.h"
-typedef void (*mkl_dcsrcoo_t) (const __INT_T *job , const __INT_T *n , double *acsr , __INT_T *ja , __INT_T *ia , __INT_T *nnz , double *acoo , __INT_T *rowind , __INT_T *colind , __INT_T *info );
-typedef void (*mkl_dcsrcsc_t) (const __INT_T *job , const __INT_T *n , double *acsr , __INT_T *ja , __INT_T *ia , double *acsc , __INT_T *ja1 , __INT_T *ia1 , __INT_T *info );
+typedef void (*mkl_dcsrcoo_t)(const __INT_T *job, const __INT_T *n, double *acsr, __INT_T *ja, __INT_T *ia, __INT_T *nnz, double *acoo, __INT_T *rowind, __INT_T *colind, __INT_T *info);
+typedef void (*mkl_dcsrcsc_t)(const __INT_T *job, const __INT_T *n, double *acsr, __INT_T *ja, __INT_T *ia, double *acsc, __INT_T *ja1, __INT_T *ia1, __INT_T *info);
 
 tlsvar mkl_dcsrcoo_t mkl_dcsrcoo_p = NULL;
 tlsvar mkl_dcsrcsc_t mkl_dcsrcsc_p = NULL;
@@ -43,11 +43,29 @@ CSparseMatrix* NM_csc_to_triplet(CSparseMatrix* csc)
   CS_INT* Ap = csc->p;
   CS_INT* Ai = csc->i;
   double* val = csc->x;
+  for(CS_INT j = 0; j < csc->n; ++j)
+  {
+    for(CS_INT i = Ap[j]; i < Ap[j+1]; ++i)
+    {
+      CSparseMatrix_zentry(triplet, Ai[i], j, val[i]);
+    }
+  }
+  return triplet;
+}
+
+CSparseMatrix* NM_csc_to_half_triplet(CSparseMatrix* csc)
+{
+  assert(csc);
+  CSparseMatrix* triplet = cs_spalloc(csc->m, csc->n, csc->p[csc->n], 1, 1);
+  if (!triplet) return (cs_done (triplet, NULL, NULL, 0)) ;
+  CS_INT* Ap = csc->p;
+  CS_INT* Ai = csc->i;
+  double* val = csc->x;
   for (CS_INT j = 0; j < csc->n; ++j)
   {
     for (CS_INT i = Ap[j]; i < Ap[j+1]; ++i)
     {
-      CSparseMatrix_zentry(triplet, Ai[i], j, val[i]);
+      CSparseMatrix_symmetric_zentry(triplet, Ai[i], j, val[i]);
     }
   }
   return triplet;
@@ -58,7 +76,7 @@ CSparseMatrix* NM_triplet_to_csr(CSparseMatrix* triplet)
 #ifdef WITH_MKL_SPBLAS
   assert(triplet);
   CHECK_MKL(load_mkl_function("mkl_dcsrcoo", (void**)&mkl_dcsrcoo_p));
-  if (triplet->m != triplet->n)
+  if(triplet->m != triplet->n)
   {
     fprintf(stderr, "NM_triplet_to_csr :: the matrix has to be square\n");
     exit(EXIT_FAILURE);
@@ -85,7 +103,7 @@ CSparseMatrix* NM_csr_to_triplet(CSparseMatrix* csr)
 #ifdef WITH_MKL_SPBLAS
   assert(csr);
   CHECK_MKL(load_mkl_function("mkl_dcsrcoo", (void**)&mkl_dcsrcoo_p));
-  if (csr->m != csr->n)
+  if(csr->m != csr->n)
   {
     fprintf(stderr, "NM_csr_to_triplet :: the matrix has to be square\n");
     exit(EXIT_FAILURE);
@@ -113,7 +131,7 @@ CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc)
 #ifdef WITH_MKL_SPBLAS
   assert(csc);
   CHECK_MKL(load_mkl_function("mkl_dcsrcsc", (void**)&mkl_dcsrcsc_p));
-  if (csc->m != csc->n)
+  if(csc->m != csc->n)
   {
     fprintf(stderr, "NM_csc_to_csr :: the matrix has to be square\n");
     exit(EXIT_FAILURE);
@@ -141,7 +159,7 @@ CSparseMatrix* NM_csr_to_csc(CSparseMatrix* csr)
 #ifdef WITH_MKL_SPBLAS
   assert(csr);
   CHECK_MKL(load_mkl_function("mkl_dcsrcsc", (void**)&mkl_dcsrcsc_p));
-  if (csr->m != csr->n)
+  if(csr->m != csr->n)
   {
     fprintf(stderr, "NM_csr_to_csc :: the matrix has to be square\n");
     exit(EXIT_FAILURE);

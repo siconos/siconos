@@ -30,8 +30,8 @@
   \f}
 */
 
-#include "SiconosConfig.h"
-#include "NumericsMatrix.h"
+#include "NumericsFwd.h"  // for NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #ifdef __cplusplus
 #undef restrict

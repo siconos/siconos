@@ -20,13 +20,14 @@
 #include "SiconosConfig.h"
 #include "NumericsMatrix.h"
 
-#ifdef WITH_LPSOLVE
+#ifdef HAS_ONE_LP_SOLVER
 #include "vertex_extraction.h"
 
 int main(void)
 {
   double Hdat[] = {1,  0, -1, 0,
-                0,  1, 0, -1};
+                   0,  1, 0, -1
+                  };
 
   NumericsMatrix* H = NM_create_from_data(NM_DENSE, 4, 2, Hdat);
 

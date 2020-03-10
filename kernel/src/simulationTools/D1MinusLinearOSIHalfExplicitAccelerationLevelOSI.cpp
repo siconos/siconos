@@ -17,6 +17,7 @@
 */
 
 #include "D1MinusLinearOSI.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "Simulation.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
@@ -513,7 +514,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitAccelerationLevel()
         }
         else
           RuntimeException::selfThrow
-            ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+          ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
 
         if(d->inverseMass())
         {

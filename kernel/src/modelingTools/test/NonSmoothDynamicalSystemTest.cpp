@@ -43,13 +43,18 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
                                           std11::make_shared<SiconosVector>(3)));
   ds->setNumber(23);
 
-  try {
+  try
+  {
     SP::DynamicalSystem dsnull;
     nsds->insertDynamicalSystem(dsnull);
-  } catch (const RuntimeException& e) {
+  }
+  catch(const RuntimeException& e)
+  {
     /*  Pass */
     std::cout << "testinsertDynamicalSystemNull: success!" << std::endl;
-  } catch (const std::exception& e) {
+  }
+  catch(const std::exception& e)
+  {
     std::cout << "testinsertDynamicalSystemNull:" << e.what() << std::endl;
     CPPUNIT_FAIL("testinsertDynamicalSystemNull: unexpected exception ");
   }
@@ -64,7 +69,7 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
   // Try again : must be ignored
   nsds->insertDynamicalSystem(ds);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemE: ", nsds->getNumberOfDS() == 1, true);
-  
+
   std::cout << "------- test insertDynamicalSystem ok -------" <<std::endl;
 }
 
@@ -99,10 +104,10 @@ void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem()
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem());
 
   SP::DynamicalSystem ds1(new LagrangianDS(std11::make_shared<SiconosVector>(3),
-                                           std11::make_shared<SiconosVector>(3)));
+                          std11::make_shared<SiconosVector>(3)));
   ds1->setNumber(23);
   SP::DynamicalSystem ds2(new LagrangianDS(std11::make_shared<SiconosVector>(3),
-                                           std11::make_shared<SiconosVector>(3)));
+                          std11::make_shared<SiconosVector>(3)));
   ds2->setNumber(32);
 
   nsds->insertDynamicalSystem(ds1);

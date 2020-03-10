@@ -50,8 +50,8 @@
   Two different storages are available for M: dense and sparse block.
 
  */
-#include "FrictionContactProblem.h"
-#include "SparseBlockMatrix.h"
+#include "NumericsFwd.h"  // for FrictionContactProblem
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

@@ -17,6 +17,7 @@
 */
 
 #include "FirstOrderLinearTIDS.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "TimeStepping.hpp"
 #include "Relay.hpp"
 #include "EventsManager.hpp"
@@ -55,7 +56,7 @@ void LinearSMC::actuate()
 {
   DEBUG_BEGIN("void LinearSMC::actuate()\n")
 
-  if (!_noUeq)
+  if(!_noUeq)
   {
     computeUeq();
     FirstOrderLinearDS& LinearDS_SMC = *std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC);
@@ -70,7 +71,7 @@ void LinearSMC::actuate()
   _DS_SMC->xMemory().getSiconosVectorMutable(0) = _sensor->y();
 
   Type::Siconos dsType = Type::value(*_DS_SMC);
-  if (dsType == Type::FirstOrderNonLinearDS)
+  if(dsType == Type::FirstOrderNonLinearDS)
   {
     _DS_SMC->computef(_simulationSMC->startingTime(), _DS_SMC->x());
     _DS_SMC->swapInMemory();

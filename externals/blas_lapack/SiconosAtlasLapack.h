@@ -20,7 +20,9 @@
 #ifndef SiconosAtlasLAPACK_H
 #define SiconosAtlasLAPACK_H
 
-#include "SiconosBlas.h"
+// IWYU pragma: private, include "SiconosLapack.h"
+
+//#include "SiconosBlas.h"
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
@@ -41,18 +43,27 @@
 
 int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, const enum ATLAS_UPLO Uplo, const enum CBLAS_TRANSPOSE Trans, const enum CBLAS_DIAG Diag, int n, int nrhs, double *a, int lda, double *b, int ldb);
 
-// --- DGESVD --- 
+// --- DGESVD ---
 #define WRAP_DGESVD(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,INFO)      \
   fprintf(stderr, "Your lapack (atlas) version misses dgesvd function.\n");
 
 // --- DGETRS ---
 #define WRAP_DGETRS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)   \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8)
-    
+
+// --- DPOTRS ---
+#define WRAP_DPOTRS(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
+  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7)
+
+
 // --- DGESV ---
 #define WRAP_DGESV(F,A1,A2,A3,A4,A5,A6,A7,INFO)   \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7)
-  
+
+// --- DPOSV ---
+#define WRAP_DPOSV(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
+  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7)
+
 // --- DGELS ---
 #if defined(HAS_LAPACK_dgels)
 #define WRAP_DGELS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)    \
@@ -61,11 +72,11 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 #define WRAP_DGELS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)                      \
   fprintf(stderr, "Your lapack (atlas) version misses dgels function.\n");
 #endif
-  
+
 // --- DGETRI ---
 #define WRAP_DGETRI(F,A1,A2,A3,A4,INFO)         \
   INFO = F(CblasColMajor,A1,A2,A3,A4)
-  
+
 // --- DPOTRF ---
 #define WRAP_DPOTRF(F,A1,A2,A3,A4,INFO)  \
   INFO = F(CblasColMajor,A1,A2,A3,A4)
@@ -73,6 +84,7 @@ int clapack_dtrtrs(const enum ATLAS_ORDER Order, const enum CBLAS_SIDE Side, con
 // --- DGETRF ---
 #define WRAP_DGETRF(F,A1,A2,A3,A4,A5,INFO)  \
   INFO = F(CblasColMajor,A1,A2,A3,A4,A5)
+
 
 // --- DTRTRS ---
 #if defined(HAS_LAPACK_dtrtrs)

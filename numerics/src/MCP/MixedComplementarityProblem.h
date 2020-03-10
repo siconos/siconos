@@ -21,8 +21,8 @@
 /*!\file MixedComplementarityProblem.h
 */
 
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for MixedComplementarityProblem, NumericsMatrix
 
 /** type for user defined function used to compute Fmcp and its jacobian.
     TODO : set properly the list of arguments for this function, when

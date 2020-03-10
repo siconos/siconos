@@ -59,17 +59,24 @@ protected:
 
 public:
 
-  /** constructor from data
-   *  \param numericsSolverId id of numerics solver
+  /** constructor from numerics solver id
+   *  \param numericsSolverId id of numerics solver, default =  SICONOS_AVI_CAOFERRIS
    */
   AVI(int numericsSolverId = SICONOS_AVI_CAOFERRIS);
+
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  AVI(SP::SolverOptions options);
 
   /** destructor
    */
   virtual ~AVI();
 
   void initialize(SP::Simulation sim);
-  virtual void setSolverId(int solverId);
 
   /** Compute the unknown z and update the Interaction (y and lambda)
    *  \param time current time

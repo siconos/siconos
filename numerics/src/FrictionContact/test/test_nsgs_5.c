@@ -15,236 +15,152 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ONECONTA...
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for SolverOptions, solver_option...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-#include "frictionContact_test_utils.h"
-
-char *** test_collection(int n_data_1, char ** data_collection)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
+  *number_of_tests = 9;//n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  for (int n =0 ; n <n_test ; n++)
+
+  // "External" solver parameters
+  // -> same values for all tests.
+  // The differences between tests are only for internal solvers and input data.
+  int topsolver = SICONOS_FRICTION_3D_NSGS;
+  int current = 0;
   {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
+    int d = 6; // BoxesStack1-i100000-32.hdf5.dat
+    // nonsmooth newton 'damped', Moreau-Jean formulation. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
+
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
+    collection[current].will_fail=1;
+    current++;
   }
 
-  int n =0;
-  int e=0;
-  int d=8;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "2000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "---";
-  n++;
+  {
+    int d = 6; // BoxesStack1-i100000-32.hdf5.dat
+    // nonsmooth newton 'damped', change hybrid strategy. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "---";
-  n++;
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
+    collection[current].will_fail=1;
+    current++;
+  }
+  {
+    int d = 8; // KaplasTower-i1061-4.hdf5.dat";
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY);
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP );
-  test_nsgs[n][e++] = "---";
-  n++;
+    // Nonsmooth Newton "damped", default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
 
-  d=9;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "100000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "---";
-  n++;
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    current++;
+  }
+  {
+    int d = 8; // KaplasTower-i1061-4.hdf5.dat";
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "---";
-  n++;
+    // nonsmooth newton 'damped', Moreau-Jean formulation. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY);
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP );
-  test_nsgs[n][e++] = "---";
-  n++;  
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
+    current++;
+
+  }
+
+  {
+    int d = 8; // KaplasTower-i1061-4.hdf5.dat";
+    // nonsmooth newton 'damped', change hybrid strategy. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
+
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
+    current++;
+  }
 
 
-  d=6;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "1";
+  {
+    int d = 9; // OneObject-i100000-499.hdf5.dat
+    // Nonsmooth Newton "damped", default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
 
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1500";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY);
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP );
-  test_nsgs[n][e++] = "---";
-  n++;  
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    // expected to fail
+    collection[current].will_fail=1;
+    current++;
+  }
+  {
+    int d = 9; // OneObject-i100000-499.hdf5.dat
+    // nonsmooth newton 'damped', Moreau-Jean formulation. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
 
-  d=9;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  /* test_nsgs[n][e++] = "internal_iparam"; */
-  /* test_nsgs[n][e] = (char *)malloc(50*sizeof(char)); */
-  /* sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY); */
-  /* test_nsgs[n][e] = (char *)malloc(50*sizeof(char)); */
-  /* sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP ); */
-  test_nsgs[n][e++] = "---";
-  n++;
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION] = SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD;
+    // expected to fail
+    collection[current].will_fail=1;
+    current++;
+  }
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "---";
-  n++; 
+  {
+    int d = 9; // OneObject-i100000-499.hdf5.dat
+    // nonsmooth newton 'damped', change hybrid strategy. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-   e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-  test_nsgs[n][e++] = "1e-12";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "---";
-  n++;
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] = SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP;
+    // expected to fail
+    collection[current].will_fail=1;
+    current++;
+  }
 
+  {
+    int d = 9; // OneObject-i100000-499.hdf5.dat
+    // Projection on cone with local iteration, set tol and max iter.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-   e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY);
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_PLI_NSN_LOOP);
-  test_nsgs[n][e++] = "---";
-  n++; 
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    // expected to fail
+    collection[current].will_fail=1;
+    current++;
+  }
 
+  *number_of_tests = current;
+  return collection;
 
-  
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
-  
 }

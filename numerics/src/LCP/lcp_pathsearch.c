@@ -16,28 +16,25 @@
  * limitations under the License.
 */
 
-#include "LCP_Solvers.h"
-#include "lcp_pivot.h"
-
-#include <assert.h>
-
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "SiconosBlas.h"
-#include "NSSTools.h"
-
+#include <assert.h>                        // for assert
+#include <stdio.h>                         // for printf
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_pivot_covering_vector
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NCP_PathSearch.h"                // for ncp_pathsearch_compute_x_f...
+#include "NSSTools.h"                      // for pos_part
+#include "NumericsFwd.h"                   // for LinearComplementarityProblem
+#include "NumericsMatrix.h"                // for NM_gemv
+#include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "debug.h"
-
-#include "NCP_PathSearch.h"
+#include "debug.h"                         // for DEBUG_PRINT, DEBUG_EXPR_WE
+#include "lcp_cst.h"                       // for SICONOS_LCP_PIVOT_PATHSEARCH
+#include "lcp_pivot.h"                     // for LCP_PATHSEARCH_LEAVING_T
+#include "SiconosBlas.h"              // for cblas_dcopy, cblas_daxpy
 
 /* This function is here to test the pivotal code of the path search */
-void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
 
   assert(problem);
@@ -82,31 +79,33 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
   /* end update M, q and r */
 
   options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 1;
-  options->iparam[SICONOS_IPARAM_PIVOT_RULE] = SICONOS_LCP_PIVOT_PATHSEARCH;
+  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_PATHSEARCH;
 
   DEBUG_PRINT("x_plus r q\n");
-  DEBUG_EXPR_WE(for (unsigned i = 0; i < n; ++i)
-      { DEBUG_PRINTF("%e %e %e\n", x_plus[i], r[i], problem->q[i]) });
+  DEBUG_EXPR_WE(for(unsigned i = 0; i < n; ++i)
+{
+  DEBUG_PRINTF("%e %e %e\n", x_plus[i], r[i], problem->q[i])
+  });
 
   lcp_pivot_covering_vector(problem, x_plus, w, info, options, r);
 
-  switch (*info)
+  switch(*info)
   {
-    case LCP_PIVOT_SUCCESS:
-      DEBUG_PRINT("lcp_pathsearch :: path search procedure was successful!\n");
-      break;
-    case LCP_PIVOT_RAY_TERMINATION:
-      DEBUG_PRINT("lcp_pathsearch :: ray termination, let's fastened your seat belt!\n");
-      break;
-    case LCP_PATHSEARCH_NON_ENTERING_T:
-      DEBUG_PRINT("lcp_pathsearch :: the variable t could not enter !\n");
-      break;
-    case LCP_PIVOT_NUL:
-    case LCP_PATHSEARCH_LEAVING_T:
-      printf("lcp_pathsearch :: kaboom, kaboom still more work needs to be done\n");
-      break;
-    default:
-      printf("lcp_pathsearch :: unknown code returned by the path search\n");
+  case LCP_PIVOT_SUCCESS:
+    DEBUG_PRINT("lcp_pathsearch :: path search procedure was successful!\n");
+    break;
+  case LCP_PIVOT_RAY_TERMINATION:
+    DEBUG_PRINT("lcp_pathsearch :: ray termination, let's fastened your seat belt!\n");
+    break;
+  case LCP_PATHSEARCH_NON_ENTERING_T:
+    DEBUG_PRINT("lcp_pathsearch :: the variable t could not enter !\n");
+    break;
+  case LCP_PIVOT_NUL:
+  case LCP_PATHSEARCH_LEAVING_T:
+    printf("lcp_pathsearch :: kaboom, kaboom still more work needs to be done\n");
+    break;
+  default:
+    printf("lcp_pathsearch :: unknown code returned by the path search\n");
   }
 
   /* recover solution */
@@ -119,4 +118,11 @@ void lcp_pathsearch(LinearComplementarityProblem* problem, double *z, double *w,
   free(x);
   free(x_plus);
   free(r);
+}
+
+
+void lcp_pathsearch_set_default(SolverOptions* options)
+{
+  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE;
+  options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 0;
 }

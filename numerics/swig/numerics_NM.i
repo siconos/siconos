@@ -144,7 +144,7 @@
 
   ~NumericsMatrix()
   {
-    NM_free($self);
+    NM_clear($self);
     free($self);
   }
 
@@ -154,7 +154,7 @@
 {
  ~SparseBlockStructuredMatrix()
  {
-   SBM_free($self);
+   SBM_clear($self);
    free($self);
  }
 }

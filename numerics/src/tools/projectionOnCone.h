@@ -23,9 +23,7 @@
  * \brief function to project on cones
  */
 
-#include "SiconosConfig.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 enum {PROJCONE_DUAL, PROJCONE_INSIDE, PROJCONE_BOUNDARY};
 

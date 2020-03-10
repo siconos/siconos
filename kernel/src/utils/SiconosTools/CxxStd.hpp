@@ -25,8 +25,8 @@
 #define SICONOS_ISNAN
 #include "SiconosConfig.h"
 #include <cmath>
-//#ifndef SICONOS_STD_ISNAN_ALREADY_HERE_AND_I_DO_NOT_KNOW_WHY
+#ifndef SICONOS_STD_ISNAN_ALREADY_HERE_AND_I_DO_NOT_KNOW_WHY
 using std::isnan;
 using std::isinf;
-//#endif
+#endif
 #endif

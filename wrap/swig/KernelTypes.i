@@ -141,6 +141,9 @@
 %inline
 %{
 #include "TYPE.hpp"
+#include "SiconosFwd.hpp"
+  
+#include <vector>
 %}
 %rename  (__getitem__) TYPE ## ::operator[];
 %rename  (__add__) TYPE ## ::operator+;
@@ -542,7 +545,7 @@ struct IsDense : public Question<bool>
     }
   }
 
-  PyObject * SP_SiconosVector_out(SP::SiconosVector result, bool l_upcall, PyObject* obj0)
+  PyObject * SP_SiconosVector_out(SP::SiconosVector result, bool l_upcall)
   {
     // call from director?
     if (l_upcall)
@@ -918,7 +921,7 @@ struct IsDense : public Question<bool>
   // from the wrapper we always return a numpy vector
   bool l_upcall = false;
 
-  $result = SP_SiconosVector_out($1, l_upcall, obj0);
+  $result = SP_SiconosVector_out($1, l_upcall);
 }
 
 // director output : PyObject -> SP::SiconosVector
@@ -1182,7 +1185,8 @@ struct IsDense : public Question<bool>
   if (l_upcall)
   {
     // result from C++ method, return the pointer
-    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), SWIGTYPE_p_std11__shared_ptrT_std__vectorT_unsigned_int_std__allocatorT_unsigned_int_t_t_const_t,  0 );
+    //$result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), $descriptor(const std11::shared_ptr<std::vector<unsigned int> > *),  0 );
+    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&$1), $&1_descriptor,  0 );
   }
   // call from python : return numpy from SiconosVector
   else

@@ -22,8 +22,8 @@
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions, Vari...
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct FrictionContactProblem_as_VI FrictionContactProblem_as_VI.h
  *

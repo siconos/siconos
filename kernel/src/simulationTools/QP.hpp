@@ -48,10 +48,10 @@ private:
 public:
 
   /* default constructor */
-  QP() {};
+  QP() = default;
 
   /** Destructor */
-  ~QP();
+  ~QP(){};
 
   // --- GETTERS/SETTERS ---
 

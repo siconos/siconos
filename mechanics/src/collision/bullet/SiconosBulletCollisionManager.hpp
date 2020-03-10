@@ -109,6 +109,12 @@ protected:
                                       SP::RigidBody2dDS ds2, SP::SiconosShape shape2,
                                       const btManifoldPoint &);
 
+  /** Provided so that creation of collision points can be overridden.
+   * See modify_normals.py in examples/Mechanics/Hacks */
+  virtual SP::Bullet2d3DR makeBullet2d3DR(SP::RigidBody2dDS ds1, SP::SiconosShape shape1,
+                                          SP::RigidBody2dDS ds2, SP::SiconosShape shape2,
+                                          const btManifoldPoint &);
+
 public:
   StaticContactorSetID insertStaticContactorSet(
     SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector());
@@ -116,6 +122,7 @@ public:
   bool removeStaticContactorSet(StaticContactorSetID id);
 
   void removeBody(const SP::RigidBodyDS& body);
+  void removeBody(const SP::RigidBody2dDS& body);
 
   void updateInteractions(SP::Simulation simulation);
 

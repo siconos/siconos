@@ -37,7 +37,7 @@ void KneeJointR::initialize(Interaction& inter)
 {
   NewtonEulerR::initialize(inter);
 
-  if (!_dotjachq)
+  if(!_dotjachq)
   {
     unsigned int sizeY = inter.dimension();
     unsigned int xSize = inter.getSizeOfDS();
@@ -48,7 +48,7 @@ void KneeJointR::initialize(Interaction& inter)
 }
 
 
-void KneeJointR::checkInitPos( SP::SiconosVector x1 ,  SP::SiconosVector x2 )
+void KneeJointR::checkInitPos(SP::SiconosVector x1,  SP::SiconosVector x2)
 {
   double X1 = x1->getValue(0);
   double Y1 = x1->getValue(1);
@@ -98,7 +98,8 @@ KneeJointR::KneeJointR(SP::SiconosVector P, bool absoluteRef,
   _points.resize(1);
   setAbsolute(absoluteRef);
   setPoint(0, P);
-  if (d1) {
+  if(d1)
+  {
     setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
     checkInitPos(d1->q(), d2 ? d2->q() : SP::SiconosVector());
   }
@@ -106,7 +107,7 @@ KneeJointR::KneeJointR(SP::SiconosVector P, bool absoluteRef,
 
 static ::boost::math::quaternion<double> rotquat(const SP::SiconosVector& v)
 {
-  if (v)
+  if(v)
     return ::boost::math::quaternion<double>((*v)(3),(*v)(4),(*v)(5),(*v)(6));
   else
     return ::boost::math::quaternion<double>(1, 0, 0, 0);
@@ -134,7 +135,7 @@ void KneeJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
   /** Computation of _G1P0 and _G2P0 */
 
   /* Calculate G1P0 and P0_abs */
-  if (_absoluteRef)
+  if(_absoluteRef)
   {
     quatP0_abs = posquat(_P0);
 
@@ -155,7 +156,7 @@ void KneeJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
   }
 
   /* Calculate G2P0, or set it to P0_abs (i.e. G2=absolute frame) */
-  if (q2)
+  if(q2)
   {
     boost::math::quaternion<double> rot2(rotquat(q2));
 
@@ -380,11 +381,11 @@ void KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11, do
 void KneeJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q0)
 {
   DEBUG_BEGIN("KneeJointR::computeJachq(double time, Interaction& inter,  SP::BlockVector q0) \n");
-  
+
   _jachq->zero();
   SP::SiconosVector q1 = (q0->getAllVect())[0];
 
-  
+
   double X1 = q1->getValue(0);
   double Y1 = q1->getValue(1);
   double Z1 = q1->getValue(2);
@@ -525,7 +526,7 @@ void KneeJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1,
 void KneeJointR::computeDotJachq(double time, BlockVector& workQ, BlockVector& workZ, BlockVector& workQdot)
 {
   DEBUG_PRINT("KneeJointR::computeDotJachq(double time, Interaction& inter) starts \n");
-  if (workQdot.numberOfBlocks()>1)
+  if(workQdot.numberOfBlocks()>1)
   {
     computeDotJachq(time, (workQdot.getAllVect())[0], (workQdot.getAllVect())[1]);
   }
@@ -536,11 +537,11 @@ void KneeJointR::computeDotJachq(double time, BlockVector& workQ, BlockVector& w
   DEBUG_PRINT("KneeJointR::computeDotJachq(double time, Interaction& inter) ends \n");
 }
 
-void KneeJointR::computeDotJachq(double time, SP::SiconosVector qdot1, SP::SiconosVector qdot2 )
+void KneeJointR::computeDotJachq(double time, SP::SiconosVector qdot1, SP::SiconosVector qdot2)
 {
   DEBUG_BEGIN("KneeJointR::computeDotJachq(double time, SP::SiconosVector qdot1, SP::SiconosVector qdot2) \n");
   _dotjachq->zero();
-  
+
   double Xdot1 = qdot1->getValue(0);
   double Ydot1 = qdot1->getValue(1);
   double Zdot1 = qdot1->getValue(2);
@@ -697,5 +698,5 @@ void KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
   y.setValue(2, Hz(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
   DEBUG_EXPR(y.display());
   DEBUG_END("KneeJointR::computeh(double time, BlockVector& q0, SiconosVector& y)\n");
-    
+
 }

@@ -23,6 +23,9 @@
 #ifndef LCP_NEWTON_FB
 #define LCP_NEWTON_FB
 
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"  // for NumericsMatrix
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {

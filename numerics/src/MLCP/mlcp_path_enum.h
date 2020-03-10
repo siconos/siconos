@@ -11,8 +11,7 @@
  *
  *
  */
-
-
+#include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, SolverOp...
 int mlcp_path_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 int mlcp_path_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 

@@ -53,11 +53,13 @@
   REGISTER(Bullet5DR)                           \
   REGISTER(Bullet1DR)                           \
   REGISTER(Bullet2dR)                           \
+  REGISTER(Bullet2d3DR)                         \
   REGISTER(RigidBodyDS)                         \
   REGISTER(RigidBody2dDS)                       \
   REGISTER(ContactR)                            \
   REGISTER(Contact5DR)                          \
   REGISTER(Contact2dR)                          \
+  REGISTER(Contact2d3DR)                        \
   REGISTER(SiconosContactor)                    \
   REGISTER(SiconosContactorSet)                 \
   REGISTER(SiconosContactorBase)                \

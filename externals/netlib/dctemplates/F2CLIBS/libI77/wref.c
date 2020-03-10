@@ -28,20 +28,20 @@ wrt_E(ufloat *p, int w, int d, int e, ftnlen len)
   int e0 = e;
 #endif
 
-  if (e <= 0)
+  if(e <= 0)
     e = 2;
-  if (f__scale)
+  if(f__scale)
   {
-    if (f__scale >= d + 2 || f__scale <= -d)
+    if(f__scale >= d + 2 || f__scale <= -d)
       goto nogood;
   }
-  if (f__scale <= 0)
+  if(f__scale <= 0)
     --d;
-  if (len == sizeof(real))
+  if(len == sizeof(real))
     dd = p->pf;
   else
     dd = p->pd;
-  if (dd < 0.)
+  if(dd < 0.)
   {
     signspace = sign = 1;
     dd = -dd;
@@ -51,22 +51,22 @@ wrt_E(ufloat *p, int w, int d, int e, ftnlen len)
     sign = 0;
     signspace = (int)f__cplus;
 #ifndef VAX
-    if (!dd)
+    if(!dd)
       dd = 0.;  /* avoid -0 */
 #endif
   }
   delta = w - (2 /* for the . and the d adjustment above */
                + 2 /* for the E+ */ + signspace + d + e);
-  if (delta < 0)
+  if(delta < 0)
   {
 nogood:
-    while (--w >= 0)
+    while(--w >= 0)
       PUT('*');
     return(0);
   }
-  if (f__scale < 0)
+  if(f__scale < 0)
     d += f__scale;
-  if (d > FMAX)
+  if(d > FMAX)
   {
     d1 = d - FMAX;
     d = FMAX;
@@ -76,42 +76,42 @@ nogood:
   sprintf(buf, "%#.*E", d, dd);
 #ifndef VAX
   /* check for NaN, Infinity */
-  if (!isdigit(buf[0]))
+  if(!isdigit(buf[0]))
   {
-    switch (buf[0])
+    switch(buf[0])
     {
     case 'n':
     case 'N':
       signspace = 0;  /* no sign for NaNs */
     }
     delta = w - strlen(buf) - signspace;
-    if (delta < 0)
+    if(delta < 0)
       goto nogood;
-    while (--delta >= 0)
+    while(--delta >= 0)
       PUT(' ');
-    if (signspace)
+    if(signspace)
       PUT(sign ? '-' : '+');
-    for (s = buf; *s; s++)
+    for(s = buf; *s; s++)
       PUT(*s);
     return 0;
   }
 #endif
   se = buf + d + 3;
-  if (f__scale != 1 && dd)
+  if(f__scale != 1 && dd)
     sprintf(se, "%+.2d", atoi(se) + 1 - f__scale);
   s = ++se;
-  if (e < 2)
+  if(e < 2)
   {
-    if (*s != '0')
+    if(*s != '0')
       goto nogood;
   }
 #ifndef VAX
   /* accommodate 3 significant digits in exponent */
-  if (s[2])
+  if(s[2])
   {
 #ifdef Pedantic
-    if (!e0 && !s[3])
-      for (s -= 2, e1 = 2; s[0] = s[1]; s++);
+    if(!e0 && !s[3])
+      for(s -= 2, e1 = 2; s[0] = s[1]; s++);
 
     /* Pedantic gives the behavior that Fortran 77 specifies, */
     /* i.e., requires that E be specified for exponent fields */
@@ -119,18 +119,18 @@ nogood:
     /* the behavior that Cray displays -- you get a bigger    */
     /* exponent field if it fits. */
 #else
-    if (!e0)
+    if(!e0)
     {
-      for (s -= 2, e1 = 2; s[0] = s[1]; s++)
+      for(s -= 2, e1 = 2; s[0] = s[1]; s++)
 #ifdef CRAY
         delta--;
-      if ((delta += 4) < 0)
+      if((delta += 4) < 0)
         goto nogood
 #endif
         ;
     }
 #endif
-    else if (e0 >= 0)
+    else if(e0 >= 0)
       goto shift;
     else
       e1 = e;
@@ -138,48 +138,48 @@ nogood:
   else
 shift:
 #endif
-    for (s += 2, e1 = 2; *s; ++e1, ++s)
-      if (e1 >= e)
+    for(s += 2, e1 = 2; *s; ++e1, ++s)
+      if(e1 >= e)
         goto nogood;
-  while (--delta >= 0)
+  while(--delta >= 0)
     PUT(' ');
-  if (signspace)
+  if(signspace)
     PUT(sign ? '-' : '+');
   s = buf;
   i = f__scale;
-  if (f__scale <= 0)
+  if(f__scale <= 0)
   {
     PUT('.');
-    for (; i < 0; ++i)
+    for(; i < 0; ++i)
       PUT('0');
     PUT(*s);
     s += 2;
   }
-  else if (f__scale > 1)
+  else if(f__scale > 1)
   {
     PUT(*s);
     s += 2;
-    while (--i > 0)
+    while(--i > 0)
       PUT(*s++);
     PUT('.');
   }
-  if (d1)
+  if(d1)
   {
     se -= 2;
-    while (s < se) PUT(*s++);
+    while(s < se) PUT(*s++);
     se += 2;
     do PUT('0');
-    while (--d1 > 0);
+    while(--d1 > 0);
   }
-  while (s < se)
+  while(s < se)
     PUT(*s++);
-  if (e < 2)
+  if(e < 2)
     PUT(s[1]);
   else
   {
-    while (++e1 <= e)
+    while(++e1 <= e)
       PUT('0');
-    while (*s)
+    while(*s)
       PUT(*s++);
   }
   return 0;
@@ -197,14 +197,14 @@ wrt_F(ufloat *p, int w, int d, ftnlen len)
   char *b, buf[MAXINTDIGS + MAXFRACDIGS + 4], *s;
 
   x = (len == sizeof(real) ? p->pf : p->pd);
-  if (d < MAXFRACDIGS)
+  if(d < MAXFRACDIGS)
     d1 = 0;
   else
   {
     d1 = d - MAXFRACDIGS;
     d = MAXFRACDIGS;
   }
-  if (x < 0.)
+  if(x < 0.)
   {
     x = -x;
     sign = 1;
@@ -213,18 +213,18 @@ wrt_F(ufloat *p, int w, int d, ftnlen len)
   {
     sign = 0;
 #ifndef VAX
-    if (!x)
+    if(!x)
       x = 0.;
 #endif
   }
 
-  if (n = f__scale)
-    if (n > 0)
+  if(n = f__scale)
+    if(n > 0)
       do x *= 10.;
-      while (--n > 0);
+      while(--n > 0);
     else
       do x *= 0.1;
-      while (++n < 0);
+      while(++n < 0);
 
 #ifdef USE_STRLEN
   sprintf(b = buf, "%#.*f", d, x);
@@ -233,18 +233,18 @@ wrt_F(ufloat *p, int w, int d, ftnlen len)
   n = sprintf(b = buf, "%#.*f", d, x) + d1;
 #endif
 
-  if (buf[0] == '0' && d)
+  if(buf[0] == '0' && d)
   {
     ++b;
     --n;
   }
-  if (sign)
+  if(sign)
   {
     /* check for all zeros */
-    for (s = b;;)
+    for(s = b;;)
     {
-      while (*s == '0') s++;
-      switch (*s)
+      while(*s == '0') s++;
+      switch(*s)
       {
       case '.':
         s++;
@@ -255,23 +255,23 @@ wrt_F(ufloat *p, int w, int d, ftnlen len)
       break;
     }
   }
-  if (sign || f__cplus)
+  if(sign || f__cplus)
     ++n;
-  if (n > w)
+  if(n > w)
   {
-    while (--w >= 0)
+    while(--w >= 0)
       PUT('*');
     return 0;
   }
-  for (w -= n; --w >= 0;)
+  for(w -= n; --w >= 0;)
     PUT(' ');
-  if (sign)
+  if(sign)
     PUT('-');
-  else if (f__cplus)
+  else if(f__cplus)
     PUT('+');
-  while (n = *b++)
+  while(n = *b++)
     PUT(n);
-  while (--d1 >= 0)
+  while(--d1 >= 0)
     PUT('0');
   return 0;
 }

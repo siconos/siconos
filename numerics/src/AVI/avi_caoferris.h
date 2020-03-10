@@ -23,8 +23,8 @@
 #ifndef AVI_CAOFERRIS_H
 #define AVI_CAOFERRIS_H
 
-#include "AVI_Solvers.h"
-#include "LinearComplementarityProblem.h"
+#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #ifdef __cplusplus
 #undef restrict

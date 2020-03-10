@@ -1,25 +1,46 @@
-#include "fc3d_Solvers.h"
-#include "FrictionContactProblem.h"
-#include "fc3d_compute_error.h"
-#include "AlartCurnierGenerated.h"
-#include "fc3d_nonsmooth_Newton_solvers.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <assert.h>
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
-#include "Friction_cst.h"
-#include "VI_cst.h"
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2019 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+#include <assert.h>                              // for assert
+#include <math.h>                                // for sqrt
+#ifndef __cplusplus
+#include <stdbool.h>                             // for false, bool, true
+#endif
+#include <stdio.h>                               // for size_t, NULL
+#include <stdlib.h>                              // for free, calloc, malloc
+#include "SiconosBlas.h"                         // for cblas_dcopy, cblas_d...
+#include "AlartCurnierGenerated.h"               // for fc3d_AlartCurnierFun...
+#include "FrictionContactProblem.h"              // for FrictionContactProblem
+#include "Friction_cst.h"                        // for SICONOS_FRICTION_3D_...
+#include "Newton_methods.h"                      // for newton_LSA, function...
+#include "NumericsFwd.h"                         // for FrictionContactProblem
+#include "NumericsMatrix.h"                      // for NM_gemv, NumericsMatrix
+#include "SolverOptions.h"                       // for SolverOptions, solve...
+#include "VI_cst.h"                              // for SICONOS_VI_ERROR_EVA...
+#include "fc3d_AlartCurnier_functions.h"         // for computeAlartCurnierJ...
+#include "fc3d_Solvers.h"                        // for fc3d_VI_ExtraGradient
+#include "fc3d_compute_error.h"                  // for fc3d_compute_error
+#include "fc3d_nonsmooth_Newton_AlartCurnier.h"  // for AlartCurnierParams
+#include "fc3d_nonsmooth_Newton_solvers.h"       // for fc3d_nonsmooth_Newto...
+#include "line_search.h"                         // for SICONOS_LSA_GOLDSTEIN
+#include "numerics_verbose.h"                    // for numerics_error
 
-#include "Newton_methods.h"
-#include "line_search.h"
-
-#define DEBUG_MESSAGES
-#include "debug.h"
-
-
-typedef struct {
+typedef struct
+{
   FrictionContactProblem* problem;
   fc3d_nonsmooth_Newton_solvers* equation;
   double* rho;
@@ -96,24 +117,24 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
 
   AlartCurnierParams acparams;
 
-  switch (options->iparam[10])
+  switch(options->iparam[SICONOS_FRICTION_3D_NSN_FORMULATION])
   {
-  case 0:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_STD:
   {
     acparams.computeACFun3x3 = &computeAlartCurnierSTD;
     break;
   }
-  case 1:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_STD:
   {
     acparams.computeACFun3x3 = &computeAlartCurnierJeanMoreau;
     break;
   };
-  case 2:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_ALARTCURNIER_GENERATED:
   {
     acparams.computeACFun3x3 = &fc3d_AlartCurnierFunctionGenerated;
     break;
   }
-  case 3:
+  case SICONOS_FRICTION_3D_NSN_FORMULATION_JEANMOREAU_GENERATED:
   {
     acparams.computeACFun3x3 = &fc3d_AlartCurnierJeanMoreauFunctionGenerated;
     break;
@@ -135,7 +156,7 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
   opaque_data.problem = problem;
   opaque_data.equation = &equation;
   opaque_data.rho = (double*)calloc(problemSize, sizeof(double));
-  for (size_t i = 0; i < problemSize; ++i) opaque_data.rho[i] = 1.;
+  for(size_t i = 0; i < problemSize; ++i) opaque_data.rho[i] = 1.;
   opaque_data.Ax = (double*)calloc(_3problemSize, sizeof(double));
   opaque_data.Bx = (double*)calloc(_3problemSize, sizeof(double));
   opaque_data.normq = cblas_dnrm2(problemSize, problem->q, 1);
@@ -159,18 +180,17 @@ void fc3d_nonsmooth_Newton_AlartCurnier2(
 
   if(options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_VI_EG_NSN)
   {
-    SolverOptions * options_vi_eg =(SolverOptions *)malloc(sizeof(SolverOptions));
-    fc3d_VI_ExtraGradient_setDefaultSolverOptions(options_vi_eg);
-    options_vi_eg->iparam[0] = 50;
-    options_vi_eg->dparam[0] = sqrt(options->dparam[0]);
+    SolverOptions * options_vi_eg = solver_options_create(SICONOS_FRICTION_3D_VI_EG);
+    options_vi_eg->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
+    options_vi_eg->dparam[SICONOS_DPARAM_TOL] = sqrt(options->dparam[SICONOS_DPARAM_TOL]);
     options_vi_eg->iparam[SICONOS_VI_IPARAM_ERROR_EVALUATION] = SICONOS_VI_ERROR_EVALUATION_LIGHT;
-    fc3d_VI_ExtraGradient(problem, reaction , velocity , info , options_vi_eg);
+    fc3d_VI_ExtraGradient(problem, reaction, velocity, info, options_vi_eg);
     solver_options_delete(options_vi_eg);
-    free(options_vi_eg);
+    options_vi_eg = NULL;
 
     newton_LSA(problemSize, reaction, velocity, info, (void *)&opaque_data, options, &functions_AC);
   }
-  else if (options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO)
+  else if(options->iparam[SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY] ==  SICONOS_FRICTION_3D_NSN_HYBRID_STRATEGY_NO)
   {
     newton_LSA(problemSize, reaction, velocity, info, (void *)&opaque_data, options, &functions_AC);
   }

@@ -15,34 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-#include <assert.h>
-
-#include "gfc3d_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "fc3d_Solvers.h"
 #include "fc3d_solvers_wr.h"
-#include <string.h>
+#include <stdlib.h>                        // for malloc, calloc
+#include "CSparseMatrix.h"                 // for CSparseMatrix
+#include "FrictionContactProblem.h"        // for FrictionContactProblem
+#include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
+#include "NumericsMatrix.h"                // for NM_create, NM_display, NM_eye
+#include "NumericsSparseMatrix.h"          // for NumericsSparseMatrix, NSM_...
+#include "SiconosBlas.h"                         // for cblas_dcopy
 
-#include "NumericsSparseMatrix.h"
-#include "NumericsVector.h"
-
-#include "sanitizer.h"
-#include "numerics_verbose.h"
 //#define TEST_COND
-/* #define OUTPUT_DEBUG */
-
-
-/* #define DEBUG_NOCOLOR */
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
-#include "debug.h"
-
-//#define USE_LAPACK_DGETRS
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -57,9 +39,7 @@ GlobalFrictionContactProblem*  fc3d_reformulation_global_problem(FrictionContact
 
 
 
-  GlobalFrictionContactProblem*  globalproblem = (GlobalFrictionContactProblem*) malloc(sizeof(GlobalFrictionContactProblem));
-  globalFrictionContact_null(globalproblem);
-
+  GlobalFrictionContactProblem*  globalproblem = globalFrictionContactProblem_new();
 
   globalproblem->numberOfContacts = problem->numberOfContacts;
   globalproblem->dimension =  problem->dimension;
@@ -85,5 +65,5 @@ GlobalFrictionContactProblem*  fc3d_reformulation_global_problem(FrictionContact
 
 
 
-   return globalproblem;
+  return globalproblem;
 }

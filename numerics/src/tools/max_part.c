@@ -15,12 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "NSSTools.h"
 
+#include "NSSTools.h"  // for max_part
 void max_part(double* x, double *sol, int n)
 
 {
@@ -28,10 +24,10 @@ void max_part(double* x, double *sol, int n)
   double  max;
   max = x[0];
 
-  for (i = 1 ; i < n ; i++)
+  for(i = 1 ; i < n ; i++)
   {
 
-    if (max < x[i]) max = x[i] ;
+    if(max < x[i]) max = x[i] ;
 
   }
 

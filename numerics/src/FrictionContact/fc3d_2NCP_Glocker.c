@@ -25,13 +25,16 @@
 */
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
-
-#include "fc3d_Solvers.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include "SiconosBlas.h"
-#include "numerics_verbose.h"
+#include <math.h>                      // for sqrt, cos, sin
+#include <stdio.h>                     // for printf, NULL
+#include "FrictionContactProblem.h"    // for FrictionContactProblem
+#include "NumericsFwd.h"               // for FrictionContactProblem, Numeri...
+#include "NumericsMatrix.h"            // for NumericsMatrix, RawNumericsMatrix
+#include "SparseBlockMatrix.h"         // for SBM_diagonal_block_index, Spar...
+#include "fc3d_2NCP_Glocker.h"         // for Compute_NCP_error1, Compute_NC...
+#include "fc3d_local_problem_tools.h"  // for fc3d_local_problem_compute_q
+#include "numerics_verbose.h"          // for numerics_error
+#include "SiconosBlas.h"                     // for cblas_dcopy, cblas_dgemv, Cbla...
 
 /*Static variables */
 
@@ -126,7 +129,7 @@ void computeMGlocker()
   MGlocker[4 * Gsize + 3] = 0.0;
 
   /* row 4 */
-  for (i = 0; i < Gsize; ++i)
+  for(i = 0; i < Gsize; ++i)
     MGlocker[i * Gsize + 4] = 0.0;
 }
 
@@ -158,7 +161,7 @@ void NCPGlocker_fillMLocal(FrictionContactProblem * problem, FrictionContactProb
 
 
   int storageType = MGlobal->storageType;
-  if (storageType == 0)
+  if(storageType == 0)
   {
     int in = 3 * contact, it = in + 1, is = it + 1;
     int inc = n * in;
@@ -178,7 +181,7 @@ void NCPGlocker_fillMLocal(FrictionContactProblem * problem, FrictionContactProb
     MLocal[7] = MM[inc + it];
     MLocal[8] = MM[inc + is];
   }
-  else if (storageType == 1)
+  else if(storageType == 1)
   {
     int diagPos = SBM_diagonal_block_index(MGlobal->matrix1, contact);
     localproblem->M->matrix0 = MGlobal->matrix1->block[diagPos];
@@ -350,7 +353,7 @@ void computeFGlocker(double** FOut, int up2Date)
 void computeJacobianFGlocker(double** jacobianFOut, int up2Date)
 {
   /* Computation of M (if required) and of the jacobian of g */
-  if (up2Date == 0)
+  if(up2Date == 0)
   {
     computeMGlocker();
     /* MGlocker is saved in jacobianF */
@@ -372,11 +375,11 @@ double Compute_NCP_error1(int i, double error)
   printf(" F[%i] = %14.7e\n", i, FGlocker[i]);
 
   Fz = FGlocker[i] * reactionGlocker[i];
-  if (Fz > 0)
+  if(Fz > 0)
     error += Fz;
-  if (reactionGlocker[i] < 0)
+  if(reactionGlocker[i] < 0)
     error += reactionGlocker[i];
-  if (FGlocker[i] < 0)
+  if(FGlocker[i] < 0)
     error += FGlocker[i];
   return error;
 }
@@ -390,7 +393,7 @@ double Compute_NCP_error2(int i, double error)
   //      printf(" F[%i] = %14.7e\n", i, FGlocker[i]);
 
   Fz = FGlocker[i] * reactionGlocker[i];
-  if (Fz > 0)
+  if(Fz > 0)
     error += Fz * Fz;
   error += (sqrt(FGlocker[i] * FGlocker[i] + reactionGlocker[i] * reactionGlocker[i]) - FGlocker[i] - reactionGlocker[i]) * (sqrt(FGlocker[i] * FGlocker[i] + reactionGlocker[i] * reactionGlocker[i]) - FGlocker[i] - reactionGlocker[i]);
   error = sqrt(error);
@@ -401,7 +404,7 @@ void compute_Z_GlockerFixedP(int i, double *reactionstep)
 {
 
   double rho = 1.;
-  if (reactionGlocker[i] - rho * FGlocker[i] > 0.)
+  if(reactionGlocker[i] - rho * FGlocker[i] > 0.)
   {
     reactionstep[i] = rho * FGlocker[i] - reactionGlocker[i];
     reactionGlocker[i] = rho * FGlocker[i];

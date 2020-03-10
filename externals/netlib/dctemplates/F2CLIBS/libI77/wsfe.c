@@ -11,10 +11,10 @@ x_putc(int c)
 #endif
 {
   /* this uses \n as an indicator of record-end */
-  if (c == '\n' && f__recpos < f__hiwater)  /* fseek calls fflush, a loss */
+  if(c == '\n' && f__recpos < f__hiwater)   /* fseek calls fflush, a loss */
   {
 #ifndef NON_UNIX_STDIO
-    if (f__cf->_ptr + f__hiwater - f__recpos < buf_end(f__cf))
+    if(f__cf->_ptr + f__hiwater - f__recpos < buf_end(f__cf))
       f__cf->_ptr += f__hiwater - f__recpos;
     else
 #endif
@@ -33,14 +33,14 @@ x_wSL(Void)
 }
 xw_end(Void)
 {
-  if (f__nonl == 0)
+  if(f__nonl == 0)
     (*f__putn)('\n');
   f__hiwater = f__recpos = f__cursor = 0;
   return(0);
 }
 xw_rev(Void)
 {
-  if (f__workdone)(*f__putn)('\n');
+  if(f__workdone)(*f__putn)('\n');
   f__hiwater = f__recpos = f__cursor = 0;
   return(f__workdone = 0);
 }
@@ -52,8 +52,8 @@ integer s_wsfe(cilist *a) /*start*/
 #endif
 {
   int n;
-  if (!f__init) f_init();
-  if (n = c_sfe(a)) return(n);
+  if(!f__init) f_init();
+  if(n = c_sfe(a)) return(n);
   f__reading = 0;
   f__sequential = 1;
   f__formatted = 1;
@@ -65,7 +65,7 @@ integer s_wsfe(cilist *a) /*start*/
   f__fmtbuf = a->cifmt;
   f__curunit = &f__units[a->ciunit];
   f__cf = f__curunit->ufd;
-  if (pars_f(f__fmtbuf) < 0) err(a->cierr, 100, "startio");
+  if(pars_f(f__fmtbuf) < 0) err(a->cierr, 100, "startio");
   f__putn = x_putc;
   f__doed = w_ed;
   f__doned = w_ned;
@@ -75,7 +75,7 @@ integer s_wsfe(cilist *a) /*start*/
   fmt_bg();
   f__cplus = 0;
   f__cblank = f__curunit->ublnk;
-  if (f__curunit->uwrt != 1 && f__nowwriting(f__curunit))
+  if(f__curunit->uwrt != 1 && f__nowwriting(f__curunit))
     err(a->cierr, errno, "write start");
   return(0);
 }

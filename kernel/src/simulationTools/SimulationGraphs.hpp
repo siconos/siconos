@@ -26,6 +26,8 @@
 #include "SiconosGraph.hpp"
 #include "SiconosProperties.hpp"
 #include "SiconosPointers.hpp"
+#include "SiconosFwd.hpp" // for SP::DynamicalSystem, ...
+#include "SiconosAlgebraTypeDef.hpp" // for VectorOfVectors, ...
 #include "SimulationTypeDef.hpp"
 
 /** the graph structure :

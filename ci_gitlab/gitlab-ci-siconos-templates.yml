@@ -34,6 +34,7 @@ stages:
   - docker-build
   - docker-build-layer2
   - docker-build-layer3
+  - docker-build-layer-doc
   # --- Doc stages ---
   # Build documentation
   - doc-build
@@ -63,7 +64,7 @@ stages:
 .docker-build:
   image: docker:stable
   services:
-    - docker:dind
+    - docker:18-dind
   tags:
     - priv
   stage: docker-build

@@ -37,32 +37,18 @@ if(NOT CPPUNIT_ROOT)
     set(CPPUNIT_ROOT $ENV{CPPUNIT_ROOT})
 endif()
 
-if(CPPUNIT_ROOT)
-  set(_CPPUNIT_SEARCH_OPTS
-    HINTS ${CPPUNIT_ROOT}
-    NO_DEFAULT_PATH)
-else()
-  # Try pkgconfig
-  find_package(PkgConfig)
-  pkg_check_modules(PKGC_CPPUNIT cppunit QUIET)
-  if(PKGC_CPPUNIT_FOUND)
-    set(CPPUNIT_LIBRARIES "${PKGC_CPPUNIT_LINK_LIBRARIES}")
-  endif()
-  set(_CPPUNIT_SEARCH_OPTS
-    HINTS ${PKGC_CPPUNIT_INCLUDE_DIRS})
-  
-endif()
-
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME CPPUNIT MODULE cppunit)
 
 find_path(CPPUNIT_INCLUDE_DIR NAMES TestCase.h
   PATH_SUFFIXES include cppunit
-  ${_CPPUNIT_SEARCH_OPTS}
+  ${_CPPUNIT_INC_SEARCH_OPTS}
   )
 
 if(NOT CPPUNIT_LIBRARIES)
   if(WIN32)
     find_library(CPPUNIT_LIBRARIES NAMES cppunit_dll
-      ${_CPPUNIT_SEARCH_OPTS}
+      ${_CPPUNIT_SEARCH_OPTS} 
       PATH_SUFFIXES lib lib64)
   else()
     find_library(CPPUNIT_LIBRARIES NAMES cppunit
@@ -79,16 +65,11 @@ find_package_handle_standard_args(CPPUNIT
 if(CPPUNIT_FOUND)
   
   if(NOT TARGET CPPUNIT::CPPUNIT)
-    add_library(CPPUNIT::CPPUNIT UNKNOWN IMPORTED)
+    add_library(CPPUNIT::CPPUNIT IMPORTED INTERFACE)
     set_property(TARGET CPPUNIT::CPPUNIT PROPERTY INTERFACE_LINK_LIBRARIES ${CPPUNIT_LIBRARIES})
     if(CPPUNIT_INCLUDE_DIR)
       set_target_properties(CPPUNIT::CPPUNIT PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${CPPUNIT_INCLUDE_DIR}")
-    endif()
-    if(EXISTS "${CPPUNIT_LIBRARIES}")
-      set_target_properties(CPPUNIT::CPPUNIT PROPERTIES
-        IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
-        IMPORTED_LOCATION "${CPPUNIT_LIBRARIES}")
     endif()
   endif()
 endif()

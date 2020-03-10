@@ -22,7 +22,7 @@ void projectionOnDisk(double* r, double  R)
 {
 
   double normTsquare = r[0] * r[0] + r[1] * r[1];
-  if (normTsquare <= R * R)
+  if(normTsquare <= R * R)
   {
     return ;
   }

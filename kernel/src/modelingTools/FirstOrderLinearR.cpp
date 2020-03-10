@@ -21,6 +21,7 @@
 #include "SimpleMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
+#include "SiconosAlgebraProd.hpp" // for matrix-vector prod
 
 #include <iostream>
 
@@ -90,15 +91,15 @@ void FirstOrderLinearR::initialize(Interaction& inter)
   VectorOfSMatrices& relationMat = inter.relationMatrices();
   VectorOfVectors & relationVec= inter.relationVectors();
 
-  if (!_C && _pluginJachx->fPtr)
+  if(!_C && _pluginJachx->fPtr)
     relationMat[FirstOrderR::mat_C].reset(new SimpleMatrix(sizeY, sizeX));
-  if (!_D && _pluginJachlambda->fPtr)
+  if(!_D && _pluginJachlambda->fPtr)
     relationMat[FirstOrderR::mat_D].reset(new SimpleMatrix(sizeY, sizeY));
-  if (!_B && _pluginJacglambda->fPtr)
+  if(!_B && _pluginJacglambda->fPtr)
     relationMat[FirstOrderR::mat_B].reset(new SimpleMatrix(sizeX, sizeY));
-  if (!_F && _pluginf->fPtr)
+  if(!_F && _pluginf->fPtr)
     relationMat[FirstOrderR::mat_F].reset(new SimpleMatrix(sizeY, sizeZ));
-  if (!_e && _plugine->fPtr)
+  if(!_e && _plugine->fPtr)
     relationVec[FirstOrderR::e].reset(new SiconosVector(sizeY));
 
   checkSize(inter);
@@ -118,41 +119,41 @@ void FirstOrderLinearR::checkSize(Interaction& inter)
   // Check if various operators sizes are consistent.
   // Reference: interaction.
 
-  if (_C)
+  if(_C)
   {
-    if (_C->size(0) == 0)
+    if(_C->size(0) == 0)
       _C->resize(sizeX, sizeY);
     else
       assert((_C->size(0) == sizeY && _C->size(1) == sizeX) && "FirstOrderLinearR::initialize , inconsistent size between C and Interaction.");
   }
-  if (_B)
+  if(_B)
   {
-    if (_B->size(0) == 0)
-    _B->resize(sizeY, sizeX);
-  else
-    assert((_B->size(1) == sizeY && _B->size(0) == sizeX) && "FirstOrderLinearR::initialize , inconsistent size between B and interaction.");
+    if(_B->size(0) == 0)
+      _B->resize(sizeY, sizeX);
+    else
+      assert((_B->size(1) == sizeY && _B->size(0) == sizeX) && "FirstOrderLinearR::initialize , inconsistent size between B and interaction.");
   }
   // C and B are the minimum inputs. The others may remain null.
 
-  if (_D)
+  if(_D)
   {
-    if (_D->size(0) == 0)
+    if(_D->size(0) == 0)
       _D->resize(sizeY, sizeY);
     else
       assert((_D->size(0) == sizeY || _D->size(1) == sizeY) && "FirstOrderLinearR::initialize , inconsistent size between C and D.");
   }
 
-  if (_F)
+  if(_F)
   {
-    if (_F->size(0) == 0)
+    if(_F->size(0) == 0)
       _F->resize(sizeY, sizeZ);
     else
       assert(((_F->size(0) == sizeY) && (_F->size(1) == sizeZ)) && "FirstOrderLinearR::initialize , inconsistent size between C and F.");
   }
 
-  if (_e)
+  if(_e)
   {
-    if (_e->size() == 0)
+    if(_e->size() == 0)
       _e->resize(sizeY);
     else
       assert(_e->size() == sizeY && "FirstOrderLinearR::initialize , inconsistent size between C and e.");
@@ -160,7 +161,7 @@ void FirstOrderLinearR::checkSize(Interaction& inter)
 }
 void FirstOrderLinearR::computeC(double time, SiconosVector& z, SimpleMatrix& C)
 {
-  if (_pluginJachx->fPtr)
+  if(_pluginJachx->fPtr)
   {
     ((FOMatPtr1)(_pluginJachx->fPtr))(time, C.size(0), C.size(1), &(C)(0, 0), z.size(), &(z)(0));
   }
@@ -168,7 +169,7 @@ void FirstOrderLinearR::computeC(double time, SiconosVector& z, SimpleMatrix& C)
 
 void FirstOrderLinearR::computeD(double time, SiconosVector& z, SimpleMatrix& D)
 {
-  if (_pluginJachlambda->fPtr)
+  if(_pluginJachlambda->fPtr)
   {
     ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, D.size(0), D.size(1), &(D)(0, 0), z.size(), &(z)(0));
   }
@@ -176,7 +177,7 @@ void FirstOrderLinearR::computeD(double time, SiconosVector& z, SimpleMatrix& D)
 
 void FirstOrderLinearR::computeF(double time, SiconosVector& z, SimpleMatrix& F)
 {
-  if (_pluginf->fPtr)
+  if(_pluginf->fPtr)
   {
     ((FOMatPtr1)(_pluginf->fPtr))(time, F.size(0), F.size(1), &(F)(0, 0), z.size(), &(z)(0));
   }
@@ -185,7 +186,7 @@ void FirstOrderLinearR::computeF(double time, SiconosVector& z, SimpleMatrix& F)
 void FirstOrderLinearR::computee(double time, SiconosVector& z, SiconosVector& e)
 {
 
-  if (_plugine->fPtr)
+  if(_plugine->fPtr)
   {
     ((FOVecPtr) _plugine->fPtr)(time, e.size(), &(e)(0), z.size(), &(z)(0));
   }
@@ -193,7 +194,7 @@ void FirstOrderLinearR::computee(double time, SiconosVector& z, SiconosVector& e
 
 void FirstOrderLinearR::computeB(double time, SiconosVector& z, SimpleMatrix& B)
 {
-  if (_pluginJacglambda->fPtr)
+  if(_pluginJacglambda->fPtr)
   {
     ((FOMatPtr1) _pluginJacglambda->fPtr)(time, B.size(0), B.size(1), &(B)(0, 0), z.size(), &(z)(0));
   }
@@ -205,41 +206,41 @@ void FirstOrderLinearR::computeh(double time, BlockVector& x, SiconosVector& lam
 
   y.zero();
 
-  if (_pluginJachx->fPtr)
+  if(_pluginJachx->fPtr)
   {
-    if (!_C)
+    if(!_C)
       _C.reset(new SimpleMatrix(y.size(),x.size()));
     computeC(time, z, *_C);
   }
-  if (_pluginJachlambda->fPtr)
+  if(_pluginJachlambda->fPtr)
   {
-    if (!_D)
+    if(!_D)
       _D.reset(new SimpleMatrix(y.size(),lambda.size()));
     computeD(time, z, *_D);
   }
-  if (_pluginf->fPtr)
+  if(_pluginf->fPtr)
   {
-    if (!_F)
+    if(!_F)
       _F.reset(new SimpleMatrix(y.size(),z.size()));
     computeF(time, z, *_F);
   }
-  if (_plugine->fPtr)
+  if(_plugine->fPtr)
   {
-    if (!_e)
+    if(!_e)
       _e.reset(new SiconosVector(y.size()));
     computee(time, z, *_e);
   }
 
-  if (_C)
+  if(_C)
     prod(*_C, x, y, false);
 
-  if (_D)
+  if(_D)
     prod(*_D, lambda, y, false);
 
-  if (_e)
+  if(_e)
     y += *_e;
 
-  if (_F)
+  if(_F)
     prod(*_F, z, y, false);
 
 }
@@ -251,22 +252,23 @@ void FirstOrderLinearR::computeOutput(double time, Interaction& inter, unsigned 
   BlockVector& z = *DSlink[FirstOrderR::z];
   BlockVector& x = *DSlink[FirstOrderR::x];
 
-  SP::SiconosVector z_vec(new SiconosVector(z));
+  SiconosVector z_vec;
+  z_vec.initFromBlock(z); // copy !
   SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
 
-  computeh(time, x, lambda, *z_vec, y);
+  computeh(time, x, lambda, z_vec, y);
 
-  *DSlink[FirstOrderR::z] = *z_vec;
+  *DSlink[FirstOrderR::z] = z_vec;
 
   DEBUG_END("FirstOrderLinearR::computeOutput \n");
 }
 
 void FirstOrderLinearR::computeg(double time, SiconosVector& lambda, SiconosVector& z, BlockVector& r)
 {
-  if (_pluginJacglambda->fPtr)
+  if(_pluginJacglambda->fPtr)
   {
-    if (!_B)
+    if(!_B)
       _B.reset(new SimpleMatrix(r.size(),lambda.size()));
     computeB(time, z, *_B);
   }
@@ -279,13 +281,14 @@ void FirstOrderLinearR::computeg(double time, SiconosVector& lambda, SiconosVect
 void FirstOrderLinearR::computeInput(double time, Interaction& inter, unsigned int level)
 {
 
-  
+
   SiconosVector& lambda = *inter.lambda(level);
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   BlockVector& z = *DSlink[FirstOrderR::z];
-  SP::SiconosVector z_vec(new SiconosVector(z));
-  computeg(time, lambda, *z_vec, *DSlink[FirstOrderR::r]);
-  *DSlink[FirstOrderR::z] = *z_vec;
+  SiconosVector z_vec;
+  z_vec.initFromBlock(z);
+  computeg(time, lambda, z_vec, *DSlink[FirstOrderR::r]);
+  *DSlink[FirstOrderR::z] = z_vec;
 }
 
 
@@ -293,19 +296,19 @@ void FirstOrderLinearR::display() const
 {
   std::cout << " ===== Linear Time Invariant relation display ===== " <<std::endl;
   std::cout << "| C " <<std::endl;
-  if (_C) _C->display();
+  if(_C) _C->display();
   else std::cout << "->NULL" <<std::endl;
   std::cout << "| D " <<std::endl;
-  if (_D) _D->display();
+  if(_D) _D->display();
   else std::cout << "->NULL" <<std::endl;
   std::cout << "| F " <<std::endl;
-  if (_F) _F->display();
+  if(_F) _F->display();
   else std::cout << "->NULL" <<std::endl;
   std::cout << "| e " <<std::endl;
-  if (_e) _e->display();
+  if(_e) _e->display();
   else std::cout << "->NULL" <<std::endl;
   std::cout << "| B " <<std::endl;
-  if (_B) _B->display();
+  if(_B) _B->display();
   else std::cout << "->NULL" <<std::endl;
   std::cout << " ================================================== " <<std::endl;
 }

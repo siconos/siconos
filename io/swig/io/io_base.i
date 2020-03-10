@@ -7,8 +7,12 @@
 %include io-docstrings.i
 %{
 #include <SiconosKernel.hpp>
-#include <SiconosRestart.hpp>
 %}
+#ifdef WITH_SERIALIZATION
+%{
+ #include <SiconosRestart.hpp>
+%}
+#endif
 
 %include handleException.i
 
@@ -18,8 +22,9 @@
 
 %import kernel.i
 
+#ifdef WITH_SERIALIZATION
 %include "SiconosRestart.hpp"
-
+#endif
 #ifdef WITH_MECHANICS
 %include <MechanicsIO.hpp>
 %{

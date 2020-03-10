@@ -16,21 +16,20 @@
  * limitations under the License.
 */
 
-#include "SiconosLapack.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "numerics_verbose.h"
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
+#include <math.h>                          // for fabs
+#include <stdio.h>                         // for printf, NULL
+#include <stdlib.h>                        // for free, malloc
+#include "LCP_Solvers.h"                   // for lcp_compute_error_only
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "lcp_cst.h"                       // for SICONOS_LCP_DPARAM_LATIN_P...
+#include "numerics_verbose.h"              // for verbose
+#include "SiconosBlas.h"  // for cblas_dcopy, cblas_daxpy
+#include "SiconosLapack.h"                 // for DTRTRS, DPOTRF, lapack_int, LA_UP, LA_NONUNIT, LA_NOTRANS
 
-#include "numerics_verbose.h"
-
-void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* matrix M/vector q of the lcp */
   double * M = problem->M->matrix0;
@@ -43,8 +42,8 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tol = options->dparam[SICONOS_DPARAM_TOL];
-  double k_latin = options->dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER];
-  double omega = options->dparam[SICONOS_LCP_IPARAM_RHO];
+  double k_latin = options->dparam[SICONOS_LCP_DPARAM_LATIN_PARAMETER];
+  double omega = options->dparam[SICONOS_LCP_DPARAM_RHO];
 
   int i, j,  iter1, nrhs;
   lapack_int info2 = 0;
@@ -108,11 +107,11 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
   /* Initialization */
 
-  for (i = 0; i < n2; i++)
+  for(i = 0; i < n2; i++)
   {
 
 
-    if (i < n)
+    if(i < n)
     {
 
       wc[i]       = 0.0;
@@ -144,15 +143,15 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 
-  for (i = 0 ; i < n ; i++)
+  for(i = 0 ; i < n ; i++)
   {
 
     k[i * n + i] =  k_latin * M[i * n + i];
 
-    if (fabs(k[i * n + i]) < 1e-12)
+    if(fabs(k[i * n + i]) < 1e-12)
     {
 
-      if (verbose > 0)
+      if(verbose > 0)
       {
         printf(" Warning nul diagonal term in k matrix \n");
       }
@@ -195,8 +194,8 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 
-  for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
+  for(i = 0; i < n; i++)
+    for(j = 0; j < n; j++)
       DPO[i + n * j] = M[j * n + i] + k[i + n * j];
 
 
@@ -208,9 +207,9 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
   /*            Cholesky              */
 
 
-  DPOTRF(LA_UP, n, DPO , n, &info2);
+  DPOTRF(LA_UP, n, DPO, n, &info2);
 
-  if (info2 != 0)
+  if(info2 != 0)
   {
     printf(" Matter with Cholesky Factorization \n ");
 
@@ -253,7 +252,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
   err1 = 1.;
 
 
-  while ((iter1 < itt) && (err1 > errmax))
+  while((iter1 < itt) && (err1 > errmax))
   {
 
     /*       Linear stage (zc,wc) -> (z,w)*/
@@ -267,7 +266,7 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
     alpha = -1.;
-    cblas_dscal(n , alpha , znum1 , incx);
+    cblas_dscal(n, alpha, znum1, incx);
 
     alpha = 1.;
     cblas_daxpy(n, alpha, wc, incx, znum1, incy);
@@ -284,14 +283,14 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
     cblas_dcopy(n, wc, incx, w, incy);
 
     alpha = omega;
-    cblas_dscal(n , alpha , z , incx);
+    cblas_dscal(n, alpha, z, incx);
 
     alpha = 1.0 - omega;
     cblas_daxpy(n, alpha, zn, incx, z, incy);
 
 
     alpha = omega;
-    cblas_dscal(n, alpha, w , incx);
+    cblas_dscal(n, alpha, w, incx);
 
     alpha = 1.0 - omega;
     cblas_daxpy(n, alpha, wn, incx, w, incy);
@@ -312,9 +311,9 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 
-    for (i = 0; i < n; i++)
+    for(i = 0; i < n; i++)
     {
-      if (wt[i] > 0.0)
+      if(wt[i] > 0.0)
       {
         wc[i] = wt[i];
         zc[i] = 0.0;
@@ -392,14 +391,14 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 
-  if (err1 > errmax)
+  if(err1 > errmax)
   {
-    if (verbose > 0) printf("No convergence of LATIN_W after %d iterations, the residue is %g\n", iter1, err1);
+    if(verbose > 0) printf("No convergence of LATIN_W after %d iterations, the residue is %g\n", iter1, err1);
     *info = 1;
   }
   else
   {
-    if (verbose > 0) printf("Convergence of LATIN_W after %d iterations, the residue is %g \n", iter1, err1);
+    if(verbose > 0) printf("Convergence of LATIN_W after %d iterations, the residue is %g \n", iter1, err1);
     *info = 0;
   }
 
@@ -436,35 +435,8 @@ void lcp_latin_w(LinearComplementarityProblem* problem, double *z, double *w, in
 
 
 }
-int linearComplementarity_latin_w_setDefaultSolverOptions(SolverOptions* options)
+void lcp_latin_w_set_default(SolverOptions* options)
 {
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the Latin_w Solver\n");
-  }
-
-
-  options->solverId = SICONOS_LCP_LATIN_W;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 15;
-  options->dSize = 15;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 15; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
-  options->dparam[SICONOS_LCP_IPARAM_LATIN_PARAMETER] = 0.3;
-  options->dparam[SICONOS_LCP_IPARAM_RHO] = 1.0;
-
-
-  return 0;
+  options->dparam[SICONOS_LCP_DPARAM_LATIN_PARAMETER] = 0.3;
+  options->dparam[SICONOS_LCP_DPARAM_RHO] = 1.0;
 }

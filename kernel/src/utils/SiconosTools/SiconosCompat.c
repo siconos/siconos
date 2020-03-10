@@ -37,13 +37,17 @@ int snprintf(char* str, size_t size, const char* format, ...)
 double rint(double x)
 {
   //middle value point test
-  if (ceil(x+0.5) == floor(x+0.5))
+  if(ceil(x+0.5) == floor(x+0.5))
   {
     int a = (int)ceil(x);
-    if (a%2 == 0)
-    {return ceil(x);}
+    if(a%2 == 0)
+    {
+      return ceil(x);
+    }
     else
-    {return floor(x);}
+    {
+      return floor(x);
+    }
   }
 
   else return floor(x+0.5);

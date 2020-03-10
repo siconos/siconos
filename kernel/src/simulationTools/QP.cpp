@@ -18,11 +18,6 @@
 
 #include "QP.hpp"
 
-
-
-QP::~QP()
-{}
-
 int QP::compute(double)
 {
   RuntimeException::selfThrow("QP::compute not yet implemented");

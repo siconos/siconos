@@ -60,11 +60,20 @@ function(create_siconos_component COMPONENT)
     VERSION "${SICONOS_SOVERSION}"
     SOVERSION "${SICONOS_SOVERSION_MAJOR}")
 
-    # windows stuff : this should be reviewed.
-    include(WindowsLibrarySetup)
-    windows_library_extra_setup(siconos_${COMPONENT} ${COMPONENT})
+  # windows stuff : this should be reviewed.
+  include(WindowsLibrarySetup)
+  windows_library_extra_setup(siconos_${COMPONENT} ${COMPONENT})
   
-  configure_component_documentation(${COMPONENT})
+  if(WITH_GENERATION)
+    # includes to be sent to python script for serialization/generation ...
+    # Unstable and to be reviewed.
+    foreach(_dir IN LISTS ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES)
+      list(APPEND ${COMPONENT}_GENERATED_INCLUDES -I${CMAKE_CURRENT_SOURCE_DIR}/${_dir})
+    endforeach()
+    set(GENERATED_INCLUDES "${GENERATED_INCLUDES};${${COMPONENT}_GENERATED_INCLUDES}"
+      CACHE INTERNAL "")
+  endif()
+  
   
 endfunction()
 
@@ -89,7 +98,10 @@ endfunction()
 #   excluding files from <component>_EXCLUDE_SRCS
 #
 function(configure_component_documentation COMPONENT)
-  
+
+  set(multiValueArgs HEADERS)
+  cmake_parse_arguments(component "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
   include(doc_tools)
   # --- doxygen warnings ---
   include(doxygen_warnings)
@@ -112,9 +124,9 @@ function(configure_component_documentation COMPONENT)
   endif()
   
   # update the main doxy file, without building the doc
-  if(WITH_${COMPONENT}_DOCUMENTATION)
+  if(WITH_${COMPONENT}_DOCUMENTATION  OR WITH_SERIALIZATION)
     # Prepare target to generate rst files from xml
-    doxy2rst_sphinx(${COMPONENT})
+    doxy2rst_sphinx(${COMPONENT} HEADERS ${component_HEADERS})
   endif()
 endfunction()
 
@@ -139,15 +151,14 @@ function(siconos_component_install_setup COMPONENT)
     RUNTIME DESTINATION bin
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    INCLUDES DESTINATION include
+    INCLUDES DESTINATION include/siconos
     )
 
   # Required for SiconosConfig.h
   target_include_directories(${COMPONENT} INTERFACE
-    $<INSTALL_INTERFACE:include>)
+    $<INSTALL_INTERFACE:include/siconos>)
 
-  # Setup include dirs for install interface
-  # Must be relocatable, i.e. no abs path!
+  # Setup the list of all headers to be installed.
   foreach(dir IN LISTS ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES)
 
     if(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
@@ -159,33 +170,30 @@ function(siconos_component_install_setup COMPONENT)
     endif()
     list(APPEND _all_headers ${_headers})
     
-    # Append component source dirs to include directories
-    # for targets linked to current target from install path.
-    # target_include_directories(${COMPONENT} INTERFACE
-    #   $<INSTALL_INTERFACE:include/${COMPONENT}/${dir}>)
-    
     # And each include path in install interface must obviously be installed ...
     # Note FP :  maybe we should have an explicit list of headers to be installed,
     # for each component, instead of a list of dirs?
   endforeach()
-  
-  # # Do not install files listed in ${COMPONENT}_HDRS_EXCLUDE
-  # if(_all_headers)
-  #   foreach(_file IN LISTS ${COMPONENT}_HDRS_EXCLUDE)
-  #     list(REMOVE_ITEM  _all_headers "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
-  #   endforeach()
-  # endif()
+
   if(_all_headers)
+    # Do not install files listed in ${COMPONENT}_HDRS_EXCLUDE
+    foreach(_file IN LISTS ${COMPONENT}_HDRS_EXCLUDE)
+      list(REMOVE_ITEM _all_headers "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
+    endforeach()
     # install files collected in _all_headers
     install(
       FILES ${_all_headers}
-      DESTINATION include/${COMPONENT}
+      DESTINATION include/siconos/${COMPONENT}
       )
-
+    
     # Add include dirs in target interface 
     target_include_directories(${COMPONENT} INTERFACE
-      $<INSTALL_INTERFACE:include/${COMPONENT}>)
+      $<INSTALL_INTERFACE:include/siconos/${COMPONENT}>)
+
   endif()
+
+  # prepare documentation
+  configure_component_documentation(${COMPONENT} HEADERS ${_all_headers})
 
   # Set installed_targets list (for siconos-config.cmake file)
   list(APPEND installed_targets ${COMPONENT})

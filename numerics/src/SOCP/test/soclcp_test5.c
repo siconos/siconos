@@ -37,7 +37,8 @@ int main(void)
   info = soclcp_test_function(finput, options);
 
   solver_options_delete(options);
-  free(options);
+  options = NULL;
+
   fclose(finput);
   printf("\nEnd of test on ./data/Capsules-i122-1617.dat \n");
   return info;

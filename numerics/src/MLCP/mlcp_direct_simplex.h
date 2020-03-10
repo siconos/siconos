@@ -13,6 +13,7 @@
  */
 
 
+#include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, SolverOp...
 int mlcp_direct_simplex_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 int mlcp_direct_simplex_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 

@@ -1,15 +1,18 @@
-"""Python package dedicated to nonsmooth systems modelisation and simulation.
+"""
+@SICONOS_PYTHON_PACKAGE@, a Python package dedicated to
+ nonsmooth systems modelisation and simulation.
 
 """
 __version__=0
-import sys
 
 version = '@SICONOS_VERSION@'
 __all__ = [@SICONOS_PYTHON_MODULES@]
 
+
 def _translate_cmake_option(option):
     opt = option.upper()
     return opt == "ON" or opt == "1" or opt == "TRUE"
+
 
 WITH_MUMPS = _translate_cmake_option("@WITH_MUMPS@")
 WITH_UMFPACK = _translate_cmake_option("@WITH_UMFPACK@")

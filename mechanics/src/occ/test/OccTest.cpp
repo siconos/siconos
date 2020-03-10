@@ -115,7 +115,7 @@ void OccTest::move()
   body->addContactShape(createSPtrOccContactShape(sphere_contact));
 
   gp_XYZ translat = body->contactShape(0).data().Location().Transformation().
-    TranslationPart();
+                    TranslationPart();
 
   std::cout << translat.X() << "," << translat.Y() << "," << translat.Z()
             << std::endl;
@@ -125,7 +125,7 @@ void OccTest::move()
   CPPUNIT_ASSERT(translat.Z() == 3.);
 
   gp_Quaternion rotat = body->contactShape(0).data().Location().Transformation().
-    GetRotation();
+                        GetRotation();
 
   CPPUNIT_ASSERT(std::abs(rotat.X() - 0.44543540318737401) < 1e-9);
   CPPUNIT_ASSERT(std::abs(rotat.Y() - 0.53452248382484879) < 1e-9);
@@ -187,14 +187,14 @@ void OccTest::distance()
   std::cout << "vmax2:" << body2->contactShape(0).bsup1[1] << std::endl;
 
   gp_XYZ translat1 = body1->contactShape(0).data().Location().Transformation().
-    TranslationPart();
+                     TranslationPart();
 
   std::cout << translat1.X() << "," << translat1.Y() << "," << translat1.Z()
             << std::endl;
 
 
   gp_XYZ translat2 = body2->contactShape(0).data().Location().Transformation().
-    TranslationPart();
+                     TranslationPart();
 
   std::cout << translat2.X() << "," << translat2.Y() << "," << translat2.Z()
             << std::endl;

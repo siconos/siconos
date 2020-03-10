@@ -176,13 +176,6 @@ public:
    */
   std::string toString() const;
 
-  /** send data of the matrix to an ostream
-   * \param os An output stream
-   * \param bv a BlockVector
-   * \return The same output stream
-   */
-  friend std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
-
   /** return the element vector[i]
    *  \param i an unsigned int
    *  \return a double
@@ -355,6 +348,24 @@ public:
   BlockVector& operator += (const SiconosVector& vIn);
   BlockVector& operator -= (const SiconosVector& vIn);
 
+   /** \defgroup BlockVectorFriends
+      
+      List of friend functions of the BlockVector class
+      
+      @{
+  */
+  
+  /** offstream operator 
+   * \param os An output stream
+   * \param bv a BlockVector
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
+
+
+   /** End of Friend functions group @} */
+
+  
   ACCEPT_NONVIRTUAL_VISITORS();
 
 };

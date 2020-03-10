@@ -31,8 +31,8 @@ Main changes:
 	Remove examples from siconos repository : moved to a dedicated repo
 	(https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials)
 
-	*  [numerics, kernel] add rolling friction
-	
+	*  [numerics, kernel] add rolling friction in 2D and 3D
+
 --------------------------------------------------------------------------------
   v4.2.0 (in development branch siconos/master)
 --------------------------------------------------------------------------------

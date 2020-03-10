@@ -92,7 +92,7 @@ macro(test_windows_setup test_name test_sources)
   # fortran -> gfortran; {c,cpp} -> link.exe
   if(BUILD_AS_CPP)
     set(EXE_FORTRAN FALSE) # Windows only
-    foreach(_file IN LISTS ${test_sources)
+    foreach(_file IN LISTS ${test_sources})
       if(${_file} MATCHES "[.]c$")
         set_source_files_properties(${_file} PROPERTIES LANGUAGE CXX)
       endif()
@@ -153,7 +153,7 @@ function(new_test)
   file(APPEND ${TESTS_LOGFILE} "Add test ${CURRENT_TEST_DIR}/${TEST_NAME} \n")
 
   # -- Check if data files are required --
-  # If so, copy the corresponding file into the working directory
+  # If so, copy the corresponding files into the working directory
   if(TEST_DATA)
     foreach(_datafile IN LISTS TEST_DATA)
       file(APPEND ${TESTS_LOGFILE} "Copy data file : ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${_datafile} \n")
@@ -191,7 +191,7 @@ function(new_test)
   
   # Set path where exe should be generated
   set_target_properties(${TEST_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/)
-
+  
   test_windows_setup(${TEST_NAME} ${TEST_SOURCES})
 
   # -- link with current component and its dependencies --
@@ -222,6 +222,12 @@ function(new_test)
   if(WITH_CXX)
     set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   endif()
+
+  if(WITH_MPI)
+    target_include_directories(${TEST_NAME} PUBLIC ${MPI_CXX_INCLUDE_DIRS})
+    target_link_libraries(${TEST_NAME} PUBLIC ${MPI_CXX_LIBRARIES})
+  endif()
+
   
   if (LDLIBPATH)
     set_target_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "${LDLIBPATH}")
@@ -285,13 +291,16 @@ endfunction()
 # - create the test named <NAME>_<COLLECTION><SUFFIX> from sources and data set.
 function(new_tests_collection)
   set(oneValueArgs DRIVER NAME COLLECTION SUFFIX FORMULATION HDF5)
-  set(multiValueArgs DATASET EXTRA_SOURCES)
+  set(multiValueArgs EXTRA_SOURCES)
   cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   # set(TEST_SOLVER SICONOS_${PROBLEM_NAME}_${PROBLEM_SOLVER}) # Required for configure below!
   # This value is replaced in solver call in .c file.
   # Generate source file
   set(generated_driver_name ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}.c)
+  if(BUILD_AS_CPP)
+    set(generated_driver_name ${generated_driver_name}xx)
+  endif()
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/${CURRENT_TEST_DIR}/${PROBLEM_DRIVER}
     ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name})
@@ -301,7 +310,6 @@ function(new_tests_collection)
   new_test(
     SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${CURRENT_TEST_DIR}/${generated_driver_name} ${PROBLEM_EXTRA_SOURCES}
     NAME ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}
-    DATA_SET "${PROBLEM_DATASET}"
     HDF5 ${PROBLEM_HDF5}
     )
  
@@ -311,7 +319,7 @@ endfunction()
 function(new_lcp_tests_collection)
   set(options)
   set(oneValueArgs COLLECTION SUFFIX)
-  set(multiValueArgs DATASET EXTRA_SOURCES)
+  set(multiValueArgs EXTRA_SOURCES)
   cmake_parse_arguments(PROBLEM "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   new_tests_collection(
@@ -384,9 +392,23 @@ macro(set_ldlibpath)
   endif()
 endmacro()
 
-# Declaration of a siconos test based on python bindings
+# ----------------------------------------
+# Declaration of a siconos test run with python.
+#
+# Usage :
+#
+#  add_pythons_test(<name> <file>)
+#
+# Result :
+#
+#  Add a test :
+#  - named <name>
+#  - that will be run using python
+#  - with PYTHONPATH set to ${CMAKE_BINARY_DIR}/wrap
+# 
 function(add_python_test test_name test_file)
-  add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
+  # add_test(${test_name} ${PYTHON_EXECUTABLE} ${TESTS_RUNNER} "${pytest_opt}" ${DRIVE_LETTER}${test_file})
+  add_test(${test_name} ${PYTHON_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${test_file})
   set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_ROOT_DIR}/tests)
   set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
   set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=$ENV{PYTHONPATH}:${CMAKE_BINARY_DIR}/wrap")
@@ -424,7 +446,9 @@ endfunction()
 #  * DEPS : list of targets that must be linked with c/c++ plugins used by python tests
 #  * EXCLUDE : list of python files (path relative to current source dir) that
 #    must not be run as tests.
-# Both DEPS and EXCLUDE are optional.
+# 
+# both DEPS and EXCLUDE are optional.
+#
 function(build_python_tests)
   set(multiValueArgs DEPS EXCLUDE)
   cmake_parse_arguments(test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
@@ -457,6 +481,7 @@ function(build_python_tests)
 	${SICONOS_SWIG_ROOT_DIR}/tests/CAD/${datafile} COPYONLY)
     endforeach()
   endif()
+
   if(CROSSCOMPILING_LINUX_TO_WINDOWS)
     set(EMULATOR "wine")
     set(DRIVE_LETTER "Z:")
@@ -472,9 +497,7 @@ function(build_python_tests)
     foreach(file ${testfiles})
       get_filename_component(testname ${file} NAME_WE)
       get_filename_component(exename ${file} NAME)
-      # Each file is copy to siconos/tests.
-      # Maybe we can create a 'tests' dir for each subpackage?
-      # --> Easier to deal with plugins and data if only one package
+      # Each file is copied into siconos/tests.
       configure_file(${file} ${SICONOS_SWIG_ROOT_DIR}/tests COPYONLY)
       set(name "python_${testname}")
       set(exename ${SICONOS_SWIG_ROOT_DIR}/tests/${exename})

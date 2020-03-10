@@ -10,8 +10,8 @@ char *f__icvt(long value, int *ndigit, int *sign, int base)
 {
   static char buf[MAXINTLENGTH + 1];
   register int i;
-  if (value > 0) *sign = 0;
-  else if (value < 0)
+  if(value > 0) *sign = 0;
+  else if(value < 0)
   {
     value = -value;
     *sign = 1;
@@ -23,7 +23,7 @@ char *f__icvt(long value, int *ndigit, int *sign, int base)
     buf[MAXINTLENGTH] = '0';
     return(&buf[MAXINTLENGTH]);
   }
-  for (i = MAXINTLENGTH - 1; value > 0; i--)
+  for(i = MAXINTLENGTH - 1; value > 0; i--)
   {
     *(buf + i) = (int)(value % base) + '0';
     value /= base;

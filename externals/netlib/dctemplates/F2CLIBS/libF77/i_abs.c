@@ -6,7 +6,7 @@ integer i_abs(x) integer *x;
 integer i_abs(integer *x)
 #endif
 {
-  if (*x >= 0)
+  if(*x >= 0)
     return(*x);
   return(- *x);
 }

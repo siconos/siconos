@@ -13,25 +13,25 @@ int kill;
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
 #endif
-  extern void f_exit(void);
+extern void f_exit(void);
 
-  void sig_die(register char *s, int kill)
+void sig_die(register char *s, int kill)
 #endif
 {
-  /* print error message, then clear buffers */
-  fprintf(stderr, "%s\n", s);
-  fflush(stderr);
-  f_exit();
-  fflush(stderr);
+/* print error message, then clear buffers */
+fprintf(stderr, "%s\n", s);
+fflush(stderr);
+f_exit();
+fflush(stderr);
 
-  if (kill)
-  {
-    /* now get a core */
-    signal(SIGIOT, SIG_DFL);
-    abort();
-  }
-  else
-    exit(1);
+if(kill)
+{
+  /* now get a core */
+  signal(SIGIOT, SIG_DFL);
+  abort();
+}
+else
+  exit(1);
 }
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

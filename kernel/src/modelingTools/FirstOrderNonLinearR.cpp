@@ -62,7 +62,7 @@ void FirstOrderNonLinearR::checkSize(Interaction& inter)
 
 void FirstOrderNonLinearR::computeh(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& y)
 {
-  if (_pluginh)
+  if(_pluginh)
   {
     ((FONLR_h)_pluginh->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), y.getArray(), z.size(), z.getArray());
   }
@@ -74,7 +74,7 @@ void FirstOrderNonLinearR::computeh(double time, SiconosVector& x, SiconosVector
 
 void FirstOrderNonLinearR::computeg(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SiconosVector& r)
 {
-  if (_pluging)
+  if(_pluging)
   {
     ((FONLR_g)_pluging->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), r.getArray(), z.size(), z.getArray());
   }
@@ -86,7 +86,7 @@ void FirstOrderNonLinearR::computeg(double time, SiconosVector& x, SiconosVector
 
 void FirstOrderNonLinearR::computeJachx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& C)
 {
-  if (_pluginJachx)
+  if(_pluginJachx)
   {
     ((FONLR_C)_pluginJachx->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), C.getArray(), z.size(), z.getArray());
   }
@@ -96,7 +96,7 @@ void FirstOrderNonLinearR::computeJachx(double time, SiconosVector& x, SiconosVe
 
 void FirstOrderNonLinearR::computeJachlambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& D)
 {
-  if (_pluginJachlambda)
+  if(_pluginJachlambda)
   {
     ((FONLR_D)_pluginJachlambda->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), D.getArray(), z.size(), z.getArray());
   }
@@ -106,7 +106,7 @@ void FirstOrderNonLinearR::computeJachlambda(double time, SiconosVector& x, Sico
 
 void FirstOrderNonLinearR::computeJacglambda(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& B)
 {
-  if (_pluginJacglambda)
+  if(_pluginJacglambda)
   {
     ((FONLR_B)_pluginJacglambda->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), B.getArray(), z.size(), z.getArray());
   }
@@ -116,7 +116,7 @@ void FirstOrderNonLinearR::computeJacglambda(double time, SiconosVector& x, Sico
 
 void FirstOrderNonLinearR::computeJacgx(double time, SiconosVector& x, SiconosVector& lambda, SiconosVector& z, SimpleMatrix& K)
 {
-  if (_pluginJacgx)
+  if(_pluginJacgx)
   {
     ((FONLR_K)_pluginJacgx->fPtr)(time, x.size(), x.getArray(), lambda.size(), lambda.getArray(), K.getArray(), z.size(), z.getArray());
   }
@@ -164,12 +164,12 @@ void FirstOrderNonLinearR::computeJach(double time, Interaction& inter)
   *_vec_z = *DSlink[FirstOrderR::z];
   SiconosVector& lambda = *inter.lambda(0);
 
-  if (!_C)
+  if(!_C)
   {
     computeJachx(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_C]);
   }
 
-  if (!_D)
+  if(!_D)
   {
     computeJachlambda(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_D]);
   }
@@ -184,11 +184,11 @@ void FirstOrderNonLinearR::computeJacg(double time, Interaction& inter)
   *_vec_x = *DSlink[FirstOrderR::x];
   *_vec_z = *DSlink[FirstOrderR::z];
   SiconosVector& lambda = *inter.lambda(0);
-  if (!_B)
+  if(!_B)
   {
     computeJacglambda(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_B]);
   }
-  if (!_K)
+  if(!_K)
   {
     computeJacgx(time, *_vec_x, lambda, *_vec_z, *relationMat[FirstOrderR::mat_K]);
   }

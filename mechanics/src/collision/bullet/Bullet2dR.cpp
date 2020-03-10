@@ -18,7 +18,7 @@
 
 
 // #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES 
+// #define DEBUG_MESSAGES
 #include <debug.h>
 
 #include "Bullet2dR.hpp"
@@ -92,11 +92,22 @@ Bullet2dR::Bullet2dR()
 {
 }
 
+#ifdef DEBUG_MESSAGES
+static
+void display_quat(boost::math::quaternion<double>& quat)
+{
+  std::cout << "q_0: " << quat.R_component_1()
+            << " q_1: " << quat.R_component_2()
+            << " q_2: " << quat.R_component_3()
+            << " q_3: " << quat.R_component_4() << std::endl;
+}
+#endif
+
 void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold& manifold,
-                                                     const btManifoldPoint& point,
-                                                     bool flip, double scaling,
-                                                     SP::RigidBody2dDS ds1,
-                                                     SP::RigidBody2dDS ds2)
+    const btManifoldPoint& point,
+    bool flip, double scaling,
+    SP::RigidBody2dDS ds1,
+    SP::RigidBody2dDS ds2)
 {
   DEBUG_BEGIN("Bullet2dR::updateContactPointsFromManifoldPoint(...)\n");
   // Get new world positions of contact points and calculate relative
@@ -119,36 +130,55 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   ::boost::math::quaternion<double> pq1, pq2, posb;
 
 
-  /* we build a unit quaternion from the angle */
+  /* Compute quaternion representation of the position of ds1 and the rotation */
   DEBUG_EXPR(ds1->q()->display(););
   copyQuatPos2d(*ds1->q(), pq1);
 
-  copyQuatPos2d(point.getPositionWorldOnA() / scaling, posa);
-
   copyQuatRot2d(*ds1->q(), rq1);
+  DEBUG_EXPR(display_quat(pq1););
+  DEBUG_EXPR(display_quat(rq1););
 
 
-  if (ds2)
+  if(ds2)
   {
     DEBUG_EXPR(ds2->q()->display(););
     copyQuatPos2d(*ds2->q(), pq2);
-    copyQuatPos2d(point.getPositionWorldOnB() / scaling, posb);
     copyQuatRot2d(*ds2->q(), rq2);
   }
 
-  if (flip)
+
+  /* Compute a quaternion representation of the position of the contact points
+   * to prepare rotations
+   * posa : global position of the contact point A on ds1 if flip =0
+   * posb : global position of the contact point B on ds2 if flip =0
+   */
+  copyQuatPos2d(point.getPositionWorldOnA() / scaling, posa);
+  copyQuatPos2d(point.getPositionWorldOnB() / scaling, posb);
+
+
+  if(flip)
   {
     ::boost::math::quaternion<double> tmp = posa;
     posa = posb;
     posb = tmp;
   }
 
+  /* after flips :
+   * posa : global position of the contact point A on ds1
+   * posb : global position of the contact point B on ds2
+   */
+  DEBUG_EXPR(display_quat(posa););
+  DEBUG_EXPR(display_quat(posb););
+
+
   SiconosVector va(2), vb(2);
-  if (flip)
+  if(flip)
   {
-    copyQuatPos2d((1.0/rq1) * (posb - pq1) * rq1, va);
-    if (ds2)
-      copyQuatPos2d((1.0/rq2) * (posa - pq2) * rq2, vb);
+    /* Rotate the relatice position of the contact point */
+    copyQuatPos2d((1.0/rq1) * (posa - pq1) * rq1, va);
+
+    if(ds2)
+      copyQuatPos2d((1.0/rq2) * (posb - pq2) * rq2, vb);
     else
     {
       // If no body2, position is relative to 0,0,0
@@ -158,9 +188,10 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
   else
   {
     copyQuatPos2d((1.0/rq1) * (posa - pq1) * rq1, va);
-    if (ds2)
+    if(ds2)
       copyQuatPos2d((1.0/rq2) * (posb - pq2) * rq2, vb);
-    else {
+    else
+    {
       // If no body2, position is relative to 0,0,0
       copyBtVector32d(point.getPositionWorldOnB() / scaling, vb);
     }
@@ -170,7 +201,7 @@ void Bullet2dR::updateContactPointsFromManifoldPoint(const btPersistentManifold&
 
   SiconosVector vn(3);
   // Get new normal
-  if (ds2)
+  if(ds2)
   {
     btQuaternion qn(point.m_normalWorldOnB.x(),
                     point.m_normalWorldOnB.y(),

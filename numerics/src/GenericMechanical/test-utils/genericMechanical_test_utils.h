@@ -18,25 +18,30 @@
 #ifndef GENERICMECHANICAL_TEST_UTILS_H
 #define GENERICMECHANICAL_TEST_UTILS_H
 
+#include "SiconosConfig.h" // for BUILD_AS_CPP
 #include <stdio.h>
-#include "SolverOptions.h"
+#include "test_utils.h"
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
-  int genericMechanical_test_function(FILE * f, SolverOptions * options);
-
-  /** Defines the list of data files
-      returns an array of char
+  /** Creates a test collection (a 'list' of tests, each test being a TestCase, i.e. options + input data).
+      
+      this function must be implemented for each tests collection (see e.g. test_nsgs_1.c, test_fp_1.c and so on)
+      
+      \param n_data number of ref files
+      \param data_collection 'list' of ref files
+      \param[out] number of tests
+      \return an array of tests, to be executed with run_test_collection
   */
-  char ** data_collection(void);
+  TestCase * build_test_collection(int n_data, const char ** data_collection, int*);
   
-  /** Defines the set of tests (including parameters)
-      returns an 'array' of tests, some kind of dict.
+  /** Solves gmp using parameters and reference from a pre-defined TestCase
+      return 1 if the test has succeeded.
   */
-  char *** test_collection(int, char **);
+  int gmp_test_function(TestCase*);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

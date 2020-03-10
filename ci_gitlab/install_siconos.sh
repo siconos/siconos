@@ -22,9 +22,10 @@
 : ${cdash_submit:?"Please set environment variable cdash_submit to TRUE or FALSE. If true, ctests results will be submitted to cdash server."}
 
 # Create build dir
-mkdir $CI_PROJECT_DIR/build
+mkdir -p $CI_PROJECT_DIR/build
 cd $CI_PROJECT_DIR/build
-
+#tmp fix
+python3 -m pip  install packaging
 # --- Run ctest for Siconos ---
 # configure, build, test and submit to cdash.
 # 

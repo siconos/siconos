@@ -92,7 +92,7 @@ find_package(BLASDEV ${_LAPACK_SEARCH_OPTS})
 
 if(BLAS_ROOT OR LAPACK_ROOT)
   set(_SEARCH_OPTS
-    HINTS ${BLAS_ROOT} ${LAPACK_ROOT} NO_DEFAULT_PATH)
+    "HINTS ${BLAS_ROOT} ${LAPACK_ROOT} NO_DEFAULT_PATH")
   set(CMAKE_FIND_ROOT_PATH ${BLAS_ROOT})
   list(APPEND CMAKE_FIND_ROOT_PATH ${LAPACK_ROOT})
 endif()
@@ -149,6 +149,7 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
     dgesv
     dgetrs
     dpotrf
+    dpotrs
     )
 
   # Functions that are optional
@@ -173,6 +174,7 @@ endif()
 # -- Library setup --
 find_package_handle_standard_args(LAPACKDEV
   REQUIRED_VARS LAPACK_LIBRARIES LAPACK_INCLUDE_DIR)
+
 
 if(NOT TARGET LAPACK::LAPACK)
   add_library(LAPACK::LAPACK IMPORTED INTERFACE)

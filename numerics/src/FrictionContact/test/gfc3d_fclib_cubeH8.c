@@ -25,18 +25,18 @@
 int main(void)
 {
   int info = 0 ;
-  char filename[50] = "./data/LMGC_GFC3D_CubeH8.hdf5";
+  const char filename[50] = "./data/LMGC_GFC3D_CubeH8.hdf5";
   printf("Test on %s\n", filename);
 
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = gfc3d_setDefaultSolverOptions(options, SICONOS_GLOBAL_FRICTION_3D_NSGS);
-  options->dparam[0] = 1e-08;
-  options->iparam[0] = 100000;
+  TestCase current;
+  current.filename = filename;
+  current.options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS);
+  current.options->dparam[SICONOS_DPARAM_TOL] = 1e-08;
+  current.options->iparam[SICONOS_IPARAM_MAX_ITER] = 100000;
 
-  info = gfc3d_test_function_hdf5(filename, options);
+  info = globalFrictionContact_test_function(&current);
 
-  solver_options_delete(options);
-  free(options);
+  solver_options_delete(current.options);
   printf("\nEnd of test on %s\n",filename);
   return info;
 }

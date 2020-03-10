@@ -16,101 +16,57 @@
  * limitations under the License.
  */
 
-#include "frictionContact_test_utils.h"
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, Solve...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
+
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=200;
-  int n_entry = 50;
-  char *** test_nsn = (char ***)malloc(n_test*sizeof(char **));
+  *number_of_tests = 7; //n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  for (int n =0 ; n <n_test ; n++)
+  int solvers[] = {SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_FB, SICONOS_FRICTION_3D_NSN_NM};
+  int current = 0;
+
+  int d;
+
+
+  // ===== BoxesStack1-i100000-32.hdf5.dat =====
+  d = 6;
+  for(int s=0; s<3; ++s)
   {
-    test_nsn[n] = (char **)malloc(n_entry*sizeof(char *));
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(solvers[s]);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1500;
+    current++;
   }
-
-  int n =0;
-  int d= 6;
-
-  int e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1500";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_FB);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_NM);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
+  // NSN_FB expected to fail
+  collection[1].will_fail = 1;
 
 
-  d=10;
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "1e-5";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e++] = "iparam";
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e++] = "---";
-  n++;
+  // ===== Rover4396.dat =====
+  d = 10;
 
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "1";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  current++;
 
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_FB);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsn[n][e++] = data_collection_1[d];
-  test_nsn[n][e++] = "0";
-  test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_NM);
-  test_nsn[n][e++] = "1e-3";
-  test_nsn[n][e++] = "1000";
-  test_nsn[n][e++] = "---";
-  n++;
-
-  test_nsn[n][0] ="---";
-  return test_nsn;
+  for(int s=0; s<3; ++s)
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(solvers[s]);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
+  }
+  *number_of_tests = current;
+  return collection;
 
 }

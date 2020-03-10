@@ -1,18 +1,29 @@
-sudo: required
+# --- Travis config ---
 
-service: docker
+# - runner os. Default on Travis is ubuntu16.04 - 
+dist: bionic # 18.04
 
-# 
-# for CI driver
-#
+# - services to start on the runner -
+services:
+  - docker
+
+# - Default language -
 language: python
-python: 3.6
+python: 3.7
+sudo: required
 
 # TASK line is of the form <config>:<parameters>
 # where <config> is a known config in tasks.py
 #
-# Each parameter is of the form of <kwd>=<value> or <kwd>+=<values> or <kwd>-=<values>
-# where:
+# A job will be created by Travis for each task in the list below.
+# 
+# TASK line must be of the form <config>:<parameters>
+# where :
+# - <config> is a known config in tasks.py
+# - <parameters> is a list (comma separated) of parameters, each of them being of
+# the form <kwd>=<value> or <kwd>+=<values> or <kwd>-=<values>.
+# 
+# With:
 #   - <kwd> is a named keyword accepted by ci_task.copy function
 #   - <value> can be:
 #       - a string
@@ -32,8 +43,7 @@ python: 3.6
 env:
   - TASK=default:distrib=ubuntu,18.04
   - TASK=default:distrib=debian,latest
-  - TASK=default:distrib=debian,stretch
-  - TASK=default:distrib=fedora,latest
+  - TASK=default:distrib=fedora,30
   - TASK=default:pkgs+=lpsolve,
   - TASK=default:ci_config=with_mumps_par:pkgs+=mumps-par,
   - TASK=default:ci_config=with_umfpack:pkgs+=umfpack,
@@ -56,8 +66,8 @@ before_script:
 
 script:
   - if test "$TRAVIS" = true; then
-      ../CI/driver.py --run --root-dir=.. --task="$TASK";
+      ../ci_travis/driver.py --run --root-dir=.. --task="$TASK";
     else
-      ../CI/driver.py --run --root-dir=..;
+      ../ci_travis/driver.py --run --root-dir=..;
     fi
 

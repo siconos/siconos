@@ -87,6 +87,12 @@ foreach(component_name IN LISTS COMPONENTS)
   endif()
   set(HAVE_SICONOS_${upname} TRUE)
 endforeach()
+if(HAVE_SICONOS_KERNEL AND NOT WITH_CXX)
+  message(FATAL_ERROR "You can not build kernel component without C++. Please set WITH_CXX=ON.")
+endif()
+  
+
+
 # Get last component in the list;
 # It might be usefull to set some dependencies in targets.
 list(GET COMPONENTS -1 last_component)
@@ -119,9 +125,6 @@ endif()
 
 # Common setup
 include(SiconosSetup)
-
-# ========= Search for 'common' dependencies =========
-include(siconos_find_common_dep)
 
 # ========= Python bindings =========
 if(WITH_PYTHON_WRAPPER)
@@ -173,6 +176,13 @@ if(EXISTS ${CMAKE_SOURCE_DIR}/config.h.cmake)
   install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
 endif()
 
+
+# man pages
+if(IS_DIRECTORY ${CMAKE_SOURCE_DIR}/man)
+  configure_file(man/siconos.1.in man/siconos.1)
+  install(FILES ${CMAKE_BINARY_DIR}/man/siconos.1 DESTINATION share/man/man1)
+endif()
+
 # ============= Summary =============
 message(STATUS "\n============================================ Summary ============================================")
 message(STATUS "${PROJECT_NAME} version ${SICONOS_VERSION} is now ready for compilation and installation.")
@@ -203,8 +213,6 @@ message(STATUS "Python interpreter is ${Python3_EXECUTABLE}")
 if(WITH_PYTHON_WRAPPER)
   message(STATUS "Python libraries are ${Python3_LIBRARIES}")
 endif()
-message(STATUS "All linking libraries are : ${SICONOS_LINK_LIBRARIES}.")
-message(STATUS "All include directories are : ${SICONOS_INCLUDE_DIRECTORIES}.")
 message(STATUS "The project will be installed in ${CMAKE_INSTALL_PREFIX}")
 if(WITH_PYTHON_WRAPPER)
   message(STATUS "${SICONOS_PYTHON_PACKAGE} python package will be installed in ${SICONOS_PYTHON_INSTALL_DIR}")
@@ -215,4 +223,3 @@ message(STATUS "================================================================
 
 # Log build info into ${CMAKE_BINARY_DIR}/Testing/Notes/Build
 write_notes()
-

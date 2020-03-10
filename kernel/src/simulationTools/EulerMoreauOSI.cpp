@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 #include "EulerMoreauOSI.hpp"
+#include "SiconosAlgebraProd.hpp" // for prod and subprod
+#include "SiconosAlgebraScal.hpp" // for scal
+//#include "SiconosVectorFriends.hpp" // for scal
 #include "Simulation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "FirstOrderLinearTIDS.hpp"
@@ -101,9 +104,9 @@ void EulerMoreauOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds
 
   // Check dynamical system type
   SP::FirstOrderNonLinearDS fods = std11::static_pointer_cast<FirstOrderNonLinearDS> (ds);
-  assert (Type::value(*ds) == Type::FirstOrderNonLinearDS ||
-    Type::value(*ds) == Type::FirstOrderLinearDS ||
-    Type::value(*ds) == Type::FirstOrderLinearTIDS);
+  assert(Type::value(*ds) == Type::FirstOrderNonLinearDS ||
+         Type::value(*ds) == Type::FirstOrderLinearDS ||
+         Type::value(*ds) == Type::FirstOrderLinearTIDS);
   // Compute W (iteration matrix)
   initializeIterationMatrixW(t, ds);
 
@@ -123,8 +126,8 @@ void EulerMoreauOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds
 }
 
 void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
-                                 InteractionProperties& interProp,
-                                 DynamicalSystemsGraph & DSG)
+    InteractionProperties& interProp,
+    DynamicalSystemsGraph & DSG)
 {
   SP::DynamicalSystem ds1= interProp.source;
   SP::DynamicalSystem ds2= interProp.target;
@@ -133,17 +136,17 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
 
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  if (!interProp.workVectors)
+  if(!interProp.workVectors)
   {
     interProp.workVectors.reset(new VectorOfVectors);
     interProp.workVectors->resize(EulerMoreauOSI::WORK_INTERACTION_LENGTH);
   }
-  if (!interProp.workMatrices)
+  if(!interProp.workMatrices)
   {
     interProp.workMatrices.reset(new VectorOfSMatrices);
     interProp.workMatrices->resize(EulerMoreauOSI::MAT_WORK_LENGTH);
   }
-  if (!interProp.workBlockVectors)
+  if(!interProp.workBlockVectors)
   {
     interProp.workBlockVectors.reset(new VectorOfBlockVectors);
     interProp.workBlockVectors->resize(EulerMoreauOSI::BLOCK_WORK_LENGTH);
@@ -175,15 +178,15 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
 
 
-    if (relationType == FirstOrder)
+    if(relationType == FirstOrder)
     {
       inter_work[EulerMoreauOSI::VEC_Z].reset(new SiconosVector(sizeZ));
       inter_work[EulerMoreauOSI::VEC_X].reset(new SiconosVector(sizeOfDS));
+      inter_work[EulerMoreauOSI::VEC_RESIDU_Y].reset(new SiconosVector(sizeY));
+      inter_work[EulerMoreauOSI::H_ALPHA].reset(new SiconosVector(sizeY));
 
-      if (relationSubType == NonLinearR || relationSubType == Type2R )
+      if(relationSubType == NonLinearR || relationSubType == Type2R)
       {
-        inter_work[EulerMoreauOSI::H_ALPHA].reset(new SiconosVector(sizeY));
-        inter_work[EulerMoreauOSI::VEC_RESIDU_Y].reset(new SiconosVector(sizeY));
         inter_work[EulerMoreauOSI::G_ALPHA].reset(new SiconosVector(sizeOfDS));
         inter_work[EulerMoreauOSI::VEC_RESIDU_R].reset(new SiconosVector(sizeOfDS));
         inter_work_mat[EulerMoreauOSI::MAT_KHAT].reset(new SimpleMatrix(sizeOfDS, sizeY));
@@ -191,7 +194,7 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
       }
 
 
-      if (!inter_work_block[EulerMoreauOSI::XFREE])
+      if(!inter_work_block[EulerMoreauOSI::XFREE])
       {
         inter_work_block[EulerMoreauOSI::XFREE].reset(new BlockVector());
         inter_work_block[EulerMoreauOSI::XFREE]->insertPtr(workVds1[EulerMoreauOSI::FREE]);
@@ -199,14 +202,14 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
       else
         inter_work_block[EulerMoreauOSI::XFREE]->setVectorPtr(0,workVds1[EulerMoreauOSI::FREE]);
 
-      if (!inter_work_block[EulerMoreauOSI::X_PARTIAL_NS])
+      if(!inter_work_block[EulerMoreauOSI::X_PARTIAL_NS])
       {
         inter_work_block[EulerMoreauOSI::X_PARTIAL_NS].reset(new BlockVector());
         inter_work_block[EulerMoreauOSI::X_PARTIAL_NS]->insertPtr(workVds1[EulerMoreauOSI::X_PARTIAL_NS_FOR_RELATION]);
       }
       else
         inter_work_block[EulerMoreauOSI::X_PARTIAL_NS]->setVectorPtr(0,workVds1[EulerMoreauOSI::X_PARTIAL_NS_FOR_RELATION]);
-      if (!inter_work_block[EulerMoreauOSI::DELTA_X])
+      if(!inter_work_block[EulerMoreauOSI::DELTA_X])
       {
         inter_work_block[EulerMoreauOSI::DELTA_X].reset(new BlockVector());
         inter_work_block[EulerMoreauOSI::DELTA_X]->insertPtr(workVds1[EulerMoreauOSI::DELTA_X_FOR_RELATION]);
@@ -218,7 +221,7 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   DEBUG_PRINTF("ds1->number() %i\n",ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n",ds2->number());
 
-  if (ds1 != ds2)
+  if(ds1 != ds2)
   {
     DEBUG_PRINT("ds1 != ds2\n");
 
@@ -227,9 +230,9 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
       DEBUG_PRINTF("ds2->number() %i is taken in to account\n",ds2->number());
       assert(DSG.properties(DSG.descriptor(ds2)).workVectors);
       VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
-      if (relationType == FirstOrder)
+      if(relationType == FirstOrder)
       {
-        if (!inter_work_block[EulerMoreauOSI::XFREE])
+        if(!inter_work_block[EulerMoreauOSI::XFREE])
         {
           inter_work_block[EulerMoreauOSI::XFREE].reset(new BlockVector());
           //dummy insertion to reserve first vector for ds1
@@ -239,7 +242,7 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
         else
           inter_work_block[EulerMoreauOSI::XFREE]->insertPtr(workVds2[EulerMoreauOSI::FREE]);
 
-        if (!inter_work_block[EulerMoreauOSI::X_PARTIAL_NS])
+        if(!inter_work_block[EulerMoreauOSI::X_PARTIAL_NS])
         {
           inter_work_block[EulerMoreauOSI::X_PARTIAL_NS].reset(new BlockVector());
           //dummy insertion to reserve first vector for ds1
@@ -250,7 +253,7 @@ void EulerMoreauOSI::initializeWorkVectorsForInteraction(Interaction &inter,
           inter_work_block[EulerMoreauOSI::X_PARTIAL_NS]->insertPtr(workVds2[EulerMoreauOSI::X_PARTIAL_NS_FOR_RELATION]);
 
 
-        if (!inter_work_block[EulerMoreauOSI::DELTA_X])
+        if(!inter_work_block[EulerMoreauOSI::DELTA_X])
         {
           inter_work_block[EulerMoreauOSI::DELTA_X].reset(new BlockVector());
           //dummy insertion to reserve first vector for ds1
@@ -398,7 +401,7 @@ void EulerMoreauOSI::computeW(double time, DynamicalSystem& ds,
   else if(dsType == Type::FirstOrderLinearDS || dsType == Type::FirstOrderLinearTIDS)
   {
     FirstOrderLinearDS& fods = static_cast<FirstOrderLinearDS&>(ds);
-    if(dsType == Type::FirstOrderLinearDS )
+    if(dsType == Type::FirstOrderLinearDS)
     {
       fods.computeA(time);
       fods.computeM(time);
@@ -448,10 +451,10 @@ void EulerMoreauOSI::computeKhat(Interaction& inter, SiconosMatrix& m,
 {
   RELATION::TYPES relationType = inter.relation()->getType();
 
-  if ((relationType == FirstOrder) && (workM[EulerMoreauOSI::MAT_KHAT]))
+  if((relationType == FirstOrder) && (workM[EulerMoreauOSI::MAT_KHAT]))
   {
     SP::SiconosMatrix K = std11::static_pointer_cast<FirstOrderR>(inter.relation())->K();
-    if (!K) K = inter.relationMatrices()[FirstOrderR::mat_K];
+    if(!K) K = inter.relationMatrices()[FirstOrderR::mat_K];
     prod(*K, m, *workM[EulerMoreauOSI::MAT_KHAT], true);
     *workM[EulerMoreauOSI::MAT_KHAT] *= h;
   }
@@ -535,18 +538,18 @@ double EulerMoreauOSI::computeResidu()
       double coef = -h * (1 - _theta);
       if(dsType == Type::FirstOrderLinearDS)
       {
-         // computes f(t_k,x_k)
-         // No fold in FirstOrderLinearDS.
-         // residu is used as a tmp buffer to compute Ax + b
-         residu.zero();
-         if(folds.A())
-         {
-            folds.computeA(told);
-            prod(*folds.A(), xold, residu);
-         }
+        // computes f(t_k,x_k)
+        // No fold in FirstOrderLinearDS.
+        // residu is used as a tmp buffer to compute Ax + b
+        residu.zero();
+        if(folds.A())
+        {
+          folds.computeA(told);
+          prod(*folds.A(), xold, residu);
+        }
 
-         if(folds.b())
-         {
+        if(folds.b())
+        {
           folds.computeb(told);
           residu += *folds.b();
         }
@@ -599,7 +602,9 @@ double EulerMoreauOSI::computeResidu()
         DEBUG_EXPR(fonlds.r()->display(););
         DEBUG_EXPR(residu.display());
         scal(-h, *fonlds.r(), residu, false); // residu = residu - h*r
-      } else {
+      }
+      else
+      {
         scal(-h*_gamma, *fonlds.r(), residu, false);
         scal(-h*(1-_gamma), fonlds.rMemory().getSiconosVector(0), residu, false);
       }
@@ -623,7 +628,8 @@ double EulerMoreauOSI::computeResidu()
 
       // 2. residuFree += -h * A (\theta x_{k+1}^{\alpha} + (1-\theta) x_k)
       // residu is used as a temp buffer
-      if(foltids.A()) {
+      if(foltids.A())
+      {
         SP::SiconosMatrix A = foltids.A();
         prod(*A, foltids.xMemory().getSiconosVector(0), residu, true);
         double coef = -h * (1 - _theta);
@@ -637,9 +643,12 @@ double EulerMoreauOSI::computeResidu()
       // 3. residuFree += M(x_{k+1}^{\alpha} - x_k)
       residu = *(foltids.x()) - foltids.xMemory().getSiconosVector(0);
       SP::SiconosMatrix M = foltids.M();
-      if(M) {
-         prod(*M, residu, residuFree, false);
-      } else {
+      if(M)
+      {
+        prod(*M, residu, residuFree, false);
+      }
+      else
+      {
         residuFree += residu;
       }
     }
@@ -717,7 +726,7 @@ void EulerMoreauOSI::computeFreeState()
       DEBUG_PRINT("EulerMoreauOSI::computeFreeState xfree <- residuFree\n");
       DEBUG_EXPR(xfree.display());
 
-      if (_useGamma)
+      if(_useGamma)
       {
         const SiconosVector& rold = d.rMemory().getSiconosVector(0);
         double coeff = -h * (1 - _gamma);
@@ -811,7 +820,7 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
 
-    for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       Interaction & inter = *indexSet0->bundle(*ui);
       InteractionProperties& interProp = indexSet0->properties(*ui);
@@ -825,12 +834,12 @@ void EulerMoreauOSI::prepareNewtonIteration(double time)
       RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
       if(relationType == FirstOrder)
       {
-        FirstOrderR& relation = static_cast<FirstOrderR&> (*inter.relation());
+        FirstOrderR& relation = static_cast<FirstOrderR&>(*inter.relation());
         BlockVector& xPartialNS = *inter_work_block[EulerMoreauOSI::X_PARTIAL_NS];
 
-        if (relationSubType == NonLinearR || relationSubType == Type2R)
+        if(relationSubType == NonLinearR || relationSubType == Type2R)
         {
-          if (relation.B())
+          if(relation.B())
             prod(*relation.B(), *inter.lambda(0), *inter_work[EulerMoreauOSI::VEC_X], true);
           else
             prod(*relationMat[FirstOrderR::mat_B], *inter.lambda(0), *inter_work[EulerMoreauOSI::VEC_X], true);
@@ -1172,18 +1181,18 @@ void EulerMoreauOSI::display()
 void EulerMoreauOSI::updateOutput(double time)
 {
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  for (unsigned int level = _levelMinForOutput;
-       level < _levelMaxForOutput + 1;
-       level++)
+  for(unsigned int level = _levelMinForOutput;
+      level < _levelMaxForOutput + 1;
+      level++)
     updateOutput(time,level);
 }
 
 void EulerMoreauOSI::updateInput(double time)
 {
   /** VA. 16/02/2017 This should normally be done only for interaction managed by the osi */
-  for (unsigned int level = _levelMinForInput;
-       level < _levelMaxForInput + 1;
-       level++)
+  for(unsigned int level = _levelMinForInput;
+      level < _levelMaxForInput + 1;
+      level++)
     updateInput(time,level);
 }
 
@@ -1194,7 +1203,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
   //_simulation->nonSmoothDynamicalSystem()->updateOutput(time,level);
   InteractionsGraph::VIterator ui, uiend;
   SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *indexSet0->bundle(*ui);
     assert(inter.lowerLevelForOutput() <= level);
@@ -1208,10 +1217,10 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
     VectorOfVectors& inter_work = *interProp.workVectors;
     VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
     RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
-    if (relationSubType == Type2R)
+    if(relationSubType == Type2R)
     {
       FirstOrderType2R & r = static_cast<FirstOrderType2R&>(*inter.relation());
-            // compute the new y obtained by linearisation (see DevNotes)
+      // compute the new y obtained by linearisation (see DevNotes)
       // y_{alpha+1}_{k+1} = h(x_{k+1}^{alpha},lambda_{k+1}^{alpha},t_k+1)
       //                     + C_{k+1}^alpha ( x_{k+1}^{alpha+1}- x_{k+1}^{alpha} )
       //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha} )
@@ -1224,7 +1233,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
 
 
 
-      if (r.D())
+      if(r.D())
         prod(*r.D(), *(inter.lambdaOld(level)), y, true);
       else
         prod(*relationMat[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
@@ -1248,7 +1257,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       DEBUG_PRINT("EulerMoreauOSI::updateOutput : deltax \n");
       DEBUG_EXPR(deltax.display());
 
-      if (r.C())
+      if(r.C())
         prod(*r.C(), deltax, y, false);
       else
         prod(*relationMat[FirstOrderR::mat_C], deltax, y, false);
@@ -1256,7 +1265,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
 
       DEBUG_PRINT("EulerMoreauOSI::updateOutput : y before osnsM\n");
       DEBUG_EXPR(y.display());
-      if (interProp.block)
+      if(interProp.block)
       {
         SiconosMatrix& osnsM = *interProp.block;
         prod(osnsM, *inter.lambda(level), y, false);
@@ -1276,7 +1285,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       DEBUG_PRINT("EulerMoreauOSI::updateOutput : new Halpha \n");
       DEBUG_EXPR(hAlpha.display());
     }
-    else if (relationSubType == NonLinearR )
+    else if(relationSubType == NonLinearR)
     {
       FirstOrderNonLinearR & r = static_cast<FirstOrderNonLinearR&>(*inter.relation());
       // compute the new y  obtained by linearisation (see DevNotes)
@@ -1291,7 +1300,7 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       DEBUG_EXPR(y.display());
 
 
-      if (r.D())
+      if(r.D())
         prod(*r.D(), *(inter.lambdaOld(level)), y, true);
       else
         prod(*relationMat[FirstOrderR::mat_D], *(inter.lambdaOld(level)), y, true);
@@ -1316,12 +1325,12 @@ void EulerMoreauOSI::updateOutput(double time, unsigned int level)
       DEBUG_PRINT("EulerMoreauOSI::updateOutput : deltax \n");
       DEBUG_EXPR(deltax.display());
 
-      if (r.C())
+      if(r.C())
         prod(*r.C(), deltax, y, false);
       else
         prod(*relationMat[FirstOrderR::mat_C], deltax, y, false);
 
-      if (interProp.block)
+      if(interProp.block)
       {
         SiconosMatrix& osnsM = *interProp.block;
         // osnsM = h * C * W^-1 * B + D
@@ -1361,7 +1370,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
   InteractionsGraph::VIterator ui, uiend;
 
   SP::InteractionsGraph indexSet0 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
-  for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = * indexSet0->bundle(*ui);
     assert(inter.lowerLevelForInput() <= level);
@@ -1376,13 +1385,13 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
     VectorOfBlockVectors& inter_work_block = *interProp.workBlockVectors;
 
     RELATION::SUBTYPES relationSubType = inter.relation()->getSubType();
-    if (relationSubType == Type2R)
+    if(relationSubType == Type2R)
     {
       FirstOrderType2R & r = static_cast<FirstOrderType2R&>(*inter.relation());
       SiconosVector lambda = *inter.lambda(level);
       lambda -= *(inter.lambdaOld(level));
 
-      if (r.B())
+      if(r.B())
         prod(*r.B(), lambda, *inter_work[EulerMoreauOSI::G_ALPHA], false);
       else
         prod(*relationMat[FirstOrderR::mat_B], lambda, *inter_work[EulerMoreauOSI::G_ALPHA], false);
@@ -1394,7 +1403,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       r.computeg(time, *inter.lambda(level), *inter_work[EulerMoreauOSI::G_ALPHA]);
       DEBUG_EXPR(inter_work[EulerMoreauOSI::G_ALPHA]->display(););
     }
-    else if (relationSubType == NonLinearR )
+    else if(relationSubType == NonLinearR)
     {
       FirstOrderNonLinearR & r = static_cast<FirstOrderNonLinearR&>(*inter.relation());
       // compute the new r  obtained by linearisation
@@ -1407,7 +1416,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
 
       SiconosVector& g_alpha = *inter_work[EulerMoreauOSI::G_ALPHA];
 
-      if (r.B())
+      if(r.B())
         prod(*r.B(), lambda, g_alpha, false);
       else
         prod(*relationMat[FirstOrderR::mat_B], lambda, g_alpha, false);
@@ -1416,7 +1425,7 @@ void EulerMoreauOSI::updateInput(double time, unsigned int level)
       DEBUG_PRINT("FirstOrderNonLinearR::computeInput : deltax \n");
       DEBUG_EXPR(deltax.display());
 
-      if (r.K())
+      if(r.K())
         prod(*r.K(), deltax, g_alpha, false);
       else
         prod(*relationMat[FirstOrderR::mat_K], deltax, g_alpha, false);
@@ -1450,7 +1459,7 @@ double EulerMoreauOSI::computeResiduOutput(double time, SP::InteractionsGraph in
 
   double residu =0.0;
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     VectorOfVectors& inter_work = *indexSet->properties(*ui).workVectors;
     SiconosVector&  residuY = *inter_work[EulerMoreauOSI::VEC_RESIDU_Y];
@@ -1467,7 +1476,7 @@ double EulerMoreauOSI::computeResiduInput(double time, SP::InteractionsGraph ind
 {
   double residu =0.0;
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     InteractionProperties& interProp = indexSet->properties(*ui);
     VectorOfVectors& inter_work = *interProp.workVectors;

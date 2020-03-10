@@ -16,21 +16,22 @@
  * limitations under the License.
 */
 #include "FirstOrderLinearTIDS.hpp"
+#include "SiconosAlgebraProd.hpp" // for matrix-vector prod
 
 #include <iostream>
 
 void FirstOrderLinearTIDS::initRhs(double time)
 {
-  if (_M && !_invM)
+  if(_M && !_invM)
     _invM.reset(new SimpleMatrix(*_M));
 
   computeRhs(time);
 
-  if (! _jacxRhs)  // if not allocated with a set or anything else
+  if(! _jacxRhs)   // if not allocated with a set or anything else
   {
-    if (_A && ! _M)  // if M is not defined, then A = _jacxRhs, no memory allocation for that one.
+    if(_A && ! _M)   // if M is not defined, then A = _jacxRhs, no memory allocation for that one.
       _jacxRhs = _A;
-    else if (_A && _M)
+    else if(_A && _M)
     {
       _jacxRhs.reset(new SimpleMatrix(*_A)); // Copy A into _jacxRhs
       // Solve M_jacxRhs = A
@@ -45,20 +46,20 @@ void FirstOrderLinearTIDS::computeRhs(double time)
 
   *_x[1] = * _r; // Warning: r update is done in Interactions/Relations
 
-  if (_A)
+  if(_A)
     prod(*_A, *_x[0], *_x[1], false);
 
   // compute and add b if required
-  if (_b)
+  if(_b)
     *_x[1] += *_b;
 
-  if (_M)
-    {
-      // allocate invM at the first call of the present function
-      if (! _invM)
-	_invM.reset(new SimpleMatrix(*_M));
-      _invM->PLUForwardBackwardInPlace(*_x[1]);
-    }
+  if(_M)
+  {
+    // allocate invM at the first call of the present function
+    if(! _invM)
+      _invM.reset(new SimpleMatrix(*_M));
+    _invM->PLUForwardBackwardInPlace(*_x[1]);
+  }
 }
 
 void FirstOrderLinearTIDS::computeJacobianRhsx(double time)
@@ -70,14 +71,14 @@ void FirstOrderLinearTIDS::display(bool brief) const
 {
   std::cout << "===> Linear Time-invariant First Order System display, " << _number << ")." <<std::endl;
   std::cout << "- A " <<std::endl;
-  if (_A) _A->display();
+  if(_A) _A->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- b " <<std::endl;
-  if (_b) _b->display();
+  if(_b) _b->display();
   else std::cout << "-> NULL" <<std::endl;
 
   std::cout << "- M: " <<std::endl;
-  if (_M) _M->display();
+  if(_M) _M->display();
   else std::cout << "-> NULL" <<std::endl;
   std::cout << "- x " <<std::endl;
   if(_x[0]) _x[0]->display();
@@ -88,6 +89,6 @@ void FirstOrderLinearTIDS::display(bool brief) const
   if(_x[1]) _x[1]->display();
   else std::cout << "-> NULL" <<std::endl;
 
-  
+
   std::cout << "============================================" <<std::endl;
 }
