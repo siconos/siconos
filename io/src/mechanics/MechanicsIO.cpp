@@ -473,23 +473,34 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
       graph.bundle(*vi)->relation()->accept(inspector);
       SiconosVector& data = inspector.answer;
       data_size = data.size();
-      data.resize(data_size+2);
 
-      DynamicalSystem& ds1 = *graph.properties(*vi).source;
-      DynamicalSystem& ds2 = *graph.properties(*vi).target;
-
-      data.setValue(data_size, ds1.number());
-      data.setValue(data_size+1, ds2.number());
-
-      if(result->size(1) != data.size())
+      if (data_size ==0)
       {
-        result->resize(graph.vertices_number(), data.size());
+        // Nothing is done since the relation does not appear as a relation
+        // related to a contact points (perhaps a joint)
       }
-      result->setRow(current_row++, data);
-      data_size +=2;
+      else
+      {
+        // We add at the end the number of ds1 and ds2
+        data.resize(data_size+2);
+        DEBUG_EXPR(data.display(););
+        DynamicalSystem& ds1 = *graph.properties(*vi).source;
+        DynamicalSystem& ds2 = *graph.properties(*vi).target;
+
+        data.setValue(data_size, ds1.number());
+        data.setValue(data_size+1, ds2.number());
+        DEBUG_EXPR(data.display(););
+        if(result->size(1) != data.size())
+        {
+          result->resize(graph.vertices_number(), data.size());
+        }
+        result->setRow(current_row++, data);
+        data_size +=2;
+      }
 
     }
     result->resize(current_row, data_size);
+    DEBUG_EXPR(result->display(););
   }
 
   return result;
