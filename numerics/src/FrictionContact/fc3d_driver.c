@@ -18,6 +18,7 @@
 #include <assert.h>                                    // for assert
 #include <float.h>                                     // for DBL_EPSILON
 #include <stdio.h>                                     // for NULL
+#include <string.h>                                     // for NULL
 #include "FrictionContactProblem.h"                    // for FrictionContac...
 #include "Friction_cst.h"                              // for SICONOS_FRICTI...
 #include "NonSmoothDrivers.h"                          // for fc3d_driver
