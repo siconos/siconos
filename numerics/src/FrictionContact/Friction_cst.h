@@ -189,6 +189,10 @@ extern const char* const   SICONOS_ROLLING_FRICTION_3D_NSGS_STR ;
 extern const char* const   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone_STR;
 extern const char* const   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
 
+extern const char* const   SICONOS_ROLLING_FRICTION_2D_NSGS_STR ;
+extern const char* const   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone_STR;
+extern const char* const   SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration_STR;
+
 enum SICONOS_FRICTION_3D_IPARAM
 {
   /** index in iparam to store the error strategy for the internal solver */

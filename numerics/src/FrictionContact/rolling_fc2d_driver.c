@@ -18,7 +18,7 @@
 #include <assert.h>                         // for assert
 #include <float.h>                          // for DBL_EPSILON
 #include <stdio.h>                          // for fprintf, NULL, stderr
-#include <stdlib.h>                         // for exit, EXIT_FAILURE
+#include <string.h>                         // for strcat, strcpy
 #include "Friction_cst.h"                   // for SICONOS_ROLLING_FRICTION_...
 #include "NonSmoothDrivers.h"               // for rolling_fc2d_driver
 #include "NumericsFwd.h"                    // for SolverOptions, RollingFri...
@@ -83,9 +83,12 @@ int rolling_fc2d_driver(RollingFrictionContactProblem* problem,
   }
   default:
   {
-    fprintf(stderr, "Numerics, rolling_fc2d_driver failed. Unknown solver.\n");
-    exit(EXIT_FAILURE);
-
+    char  msg[200];
+    strcpy(msg, "Unknown solver : ");
+    strcat(msg, solver_options_id_to_name(options->solverId));
+    strcat(msg, "\n");
+    numerics_warning("rolling_fc2d_driver",  msg);
+    numerics_error("rolling_fc2d_driver",  msg);
   }
   }
 
