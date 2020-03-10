@@ -1697,7 +1697,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         time = self.current_time()
 
         positions = self._io.positions(self._nsds)
-
         if positions is not None:
             self._dynamic_data.resize(current_line + positions.shape[0], 0)
 
@@ -1761,7 +1760,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             time = self.current_time()
             contact_points = self._io.contactPoints(self._nsds,
                                                     self._contact_index_set)
-
             if contact_points is not None:
                 current_line = self._cf_data.shape[0]
                 # Increase the number of lines in cf_data
@@ -2316,9 +2314,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
                 osnspb.setMaxSize(osnspb_max_size)
             else:
-                if (nb_of_nslaw_type > 1):
-                    osnspb = sk.GenericMechanical(
-                        sn.SICONOS_FRICTION_3D_ONECONTACT_NSN)
+                if ('EqualityConditionNSL' in set(nslaw_type_list)):
+                    if (solver_options is None):
+                        osnspb = sk.GenericMechanical(
+                            sn.SICONOS_FRICTION_3D_ONECONTACT_NSN)
+                    else:
+                        osnspb = sk.GenericMechanical(solver_options)
                 else:
                     if 'NewtonImpactFrictionNSL' in set(nslaw_type_list):
                         osnspb = sk.FrictionContact(self._dimension,
