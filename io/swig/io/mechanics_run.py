@@ -2325,11 +2325,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     else:
                         osnspb = sk.GenericMechanical(solver_options)
                 else:
-                    if 'NewtonImpactFrictionNSL' in set(nslaw_type_list):
+                    if ('NewtonImpactFrictionNSL' in set(nslaw_type_list)) or \
+                       (len(set(nslaw_type_list)) == 0):
                         if (solver_options is None):
-                            osnspb = sk.FrictionContact(self._dimension,solver_options)
-                        else:
                             osnspb = sk.FrictionContact(self._dimension)
+                        else:
+                            osnspb = sk.FrictionContact(self._dimension,solver_options)
                         osnspb.setMaxSize(osnspb_max_size)
                         osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
 
@@ -2386,7 +2387,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             simulation = time_stepping(nsds, timedisc)
             simulation.insertIntegrator(self._osi)
             simulation.insertNonSmoothProblem(osnspb)
-            
+
         simulation.insertInteractionManager(self._interman)
 
         simulation.setNewtonOptions(Newton_options)
