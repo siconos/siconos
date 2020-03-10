@@ -2385,8 +2385,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         else:
             simulation = time_stepping(nsds, timedisc)
             simulation.insertIntegrator(self._osi)
-
-        simulation.insertNonSmoothProblem(osnspb)
+            simulation.insertNonSmoothProblem(osnspb)
+            
         simulation.insertInteractionManager(self._interman)
 
         simulation.setNewtonOptions(Newton_options)
