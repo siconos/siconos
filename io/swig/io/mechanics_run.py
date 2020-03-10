@@ -2109,8 +2109,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             Note FP : already set in __enter__. Overwrite?
 
         solver_options : numerics SolverOptions, optional
-            OneStepNsProblem solver options set. If None,
-            default set will be SICONOS_FRICTION_3D_NSGS
+            OneStepNsProblem solver options set.
+            if solver_option is None, we leave Siconos/kernel choosing the default option
             (see solvers documentation for details)
 
         osnspb_max_size : int, optional
@@ -2197,10 +2197,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if gravity_scale is not None:
             self._gravity_scale = gravity_scale
 
-        # Solver options - Default : friction NSGS
-        if solver_options is None:
-            solver_options = sk.solver_options_create(
-                sn.SICONOS_FRICTION_3D_NSGS)
+
 
         # cold restart
         times = set()
@@ -2302,43 +2299,59 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # Creates and initialises the one-step nonsmooth problem.
         # The OSI and/or the nonsmooth law drives the choice.
-        sid = solver_options.solverId
+
+        # rationale for choosing numerics solver options
+        # if solver_option is None --> we leave Siconos/kernel choosing the default option
+        # else we use the user solver_options
+        
         if friction_contact_trace_params is None:
             # Global friction contact.
             if (osi == sk.MoreauJeanGOSI):
-                osnspb = sk.GlobalFrictionContact(3, solver_options)
-                if sid == sn.SICONOS_GLOBAL_FRICTION_3D_ADMM:
-                    osnspb.setMStorageType(sn.NM_SPARSE)
-                    # which is the default for gfc in kernel, is it?
+                if (solver_options is None):
+                    osnspb = sk.GlobalFrictionContact(3)
                 else:
-                    osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
+                    osnspb = sk.GlobalFrictionContact(3, solver_options)
+                osnspb.setMStorageType(sn.NM_SPARSE)
+                # if sid == sn.SICONOS_GLOBAL_FRICTION_3D_ADMM:
+                #     osnspb.setMStorageType(sn.NM_SPARSE)
+                #     # which is the default for gfc in kernel, is it?
+                # else:
+                #     osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
                 osnspb.setMaxSize(osnspb_max_size)
             else:
                 if ('EqualityConditionNSL' in set(nslaw_type_list)):
                     if (solver_options is None):
-                        osnspb = sk.GenericMechanical(
-                            sn.SICONOS_FRICTION_3D_ONECONTACT_NSN)
+                        osnspb = sk.GenericMechanical()
                     else:
                         osnspb = sk.GenericMechanical(solver_options)
                 else:
                     if 'NewtonImpactFrictionNSL' in set(nslaw_type_list):
-                        osnspb = sk.FrictionContact(self._dimension,
-                                                    solver_options)
+                        if (solver_options is None):
+                            osnspb = sk.FrictionContact(self._dimension,solver_options)
+                        else:
+                            osnspb = sk.FrictionContact(self._dimension)
                         osnspb.setMaxSize(osnspb_max_size)
                         osnspb.setMStorageType(sn.NM_SPARSE_BLOCK)
 
                     elif 'NewtonImpactRollingFrictionNSL' in set(nslaw_type_list):
                         if self._dimension ==3:
-                            osnspb = sk.RollingFrictionContact(5, solver_options)
+                            dimension_contact=5
                         elif self._dimension ==2:
-                            osnspb = sk.RollingFrictionContact(3, solver_options)
-
+                            dimension_contact=3
+                        if (solver_options is None): 
+                            osnspb = sk.RollingFrictionContact(dimension_contact)
+                        else:
+                            osnspb = sk.RollingFrictionContact(dimension_contact, solver_options)
                     else:
                         msg = "Unknown nslaw type"
                         msg += str(set(nslaw_type_list))
                         raise RuntimeError(msg)
 
         else:  # With trace
+            if solver_options is None:
+                solver_options = sk.solver_options_create(
+                    sn.SICONOS_FRICTION_3D_NSGS)
+            sid = solver_options.solverId
             if(osi == sk.MoreauJeanGOSI):
                 osnspb = GFCTrace(3, sid, friction_contact_trace_params, nsds)
                 osnspb.setMStorageType(sn.NM_SPARSE)
@@ -2516,7 +2529,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_verbose('  velocity max :', np.max(v))
                     self.print_verbose('  velocity min :', np.min(v))
                 #     #print(simulation.output(1,0))
-
+            solver_options = osnspb.numericsSolverOptions()
             precision = solver_options.dparam[sn.SICONOS_DPARAM_RESIDU]
             if (exit_tolerance is not None):
                 if (precision > exit_tolerance):
