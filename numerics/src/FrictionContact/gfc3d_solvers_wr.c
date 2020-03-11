@@ -34,7 +34,8 @@
 #include "gfc3d_compute_error.h"
 #include "SolverOptions.h"                       // for SICONOS_DPARAM_TOL
 
-#define OUTPUT_DEBUG */
+/* #define OUTPUT_DEBUG *\/ */
+
 #include "debug.h"                                // for DEBUG_EXPR, DEBUG_P...
 
 
@@ -493,6 +494,8 @@ int freeLocalProblem(FrictionContactProblem* localproblem)
 
 void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
+
+  /* verbose=1; */
   DEBUG_BEGIN("gfc3d_nsgs_wr\n");
   NumericsMatrix *H = problem->H;
   // We compute only if the local problem has contacts
