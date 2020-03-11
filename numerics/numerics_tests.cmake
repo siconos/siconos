@@ -244,7 +244,7 @@ if(WITH_${COMPONENT}_TESTING)
       )
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_FCLIB
-      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_solvers_wr_gfc3d_1.c DEPS FCLIB::fclib
+      EXTRA_SOURCES data_collection_gfc3d_fclib.c test_solvers_wr_gfc3d_fclib.c DEPS FCLIB::fclib
       HDF5 ON
       )
     

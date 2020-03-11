@@ -58,22 +58,20 @@ int main (int argc, char *argv[])
   collection[53].will_fail = 1;  /* GFC3D ADMM, on ./data/GFC3D_TwoRods1.dat with scalar rescaling*/
 #endif
 #if defined(TEST_FIRST_ORDER_COLLECTION_FCLIB)
-    /* collection[1].will_fail = 1;  // GFC3D_NSGS	./data/LMGC_GFC3D-i00001-1-00000.hdf5  *\/ */
-    /* collection[4].will_fail = 1; */
-    collection[6].will_fail = 1;
-    collection[8].will_fail = 1;
-    // Expected to fail
-    /* collection[9].will_fail = 1; */
-    /* collection[11].will_fail = 1; */
+  collection[0].will_fail = 1; /* (GFC3D_NSGS, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+  collection[1].will_fail = 1; /* (GFC3D_NSGS, on ./data/Spheres-i099-356-679.hdf5) */
+  collection[2].will_fail = 1; /* (GFC3D_NSGS, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+  collection[3].will_fail = 1; /* (GFC3D_NSGS, on ./data/Spheres-i099-356-679.hdf5)  */
 #endif
+  
 #if defined(TEST_NSN_COLLECTION_FCLIB)
-    collection[0].will_fail = 1;
-    collection[2].will_fail = 1;
+  collection[0].will_fail = 1; /* (GFC3D_NSN_AC, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+
 #endif
 
 #if defined(TEST_WR_COLLECTION_FCLIB)
-    collection[4].will_fail = 1;
-    collection[10].will_fail = 1;
+  collection[0].will_fail = 1;
+//    collection[10].will_fail = 1;
 #endif
 
   int out = run_test_collection(collection, number_of_tests, globalFrictionContact_test_function);
