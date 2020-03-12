@@ -273,3 +273,52 @@ function(create_target)
     endif()
   endif()
 endfunction()
+
+
+# Apply sanitizer options onto a given target
+#
+# Depends on user-defined variable USE_SANITIZER.
+# 
+# Might be:
+# - asan : fast memory error detector
+# - leaks : detects memory leaks
+# - msan : detects uninitialized reads.
+# - threads : detects data race
+# - cfi : control flow integrity
+# - undefined : detects the use of various features of C/C++ that are explicitly listed as resulting in undefined behaviour.
+#
+# Warning : do not combine options and notice that some of them may fail
+# on MacOs ...
+# 
+# Ref :
+# - http://www.stablecoder.ca/2018/10/30/full-cmake-helper-suite.html
+# - https://clang.llvm.org/docs/AddressSanitizer.html
+function(apply_sanitizer CURRENT_TARGET)
+
+  unset(SANITIZER_OPTIONS)
+  if(USE_SANITIZER MATCHES "asan") # Address sanitizer
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=address")
+  elseif(USE_SANITIZER MATCHES "undefined") # Address sanitizer
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=undefined")
+  elseif(USE_SANITIZER MATCHES "msan") # Memory sanitizer
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=memory")
+    list(APPEND SANITIZER_OPTIONS "-fsanitize-memory-track-origins")
+  elseif (USE_SANITIZER STREQUAL "thread") # Thread sanitizer (detect data race ...)
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=thread")
+  elseif (USE_SANITIZER STREQUAL "Leak")
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=leak") # not implemented on macos (01/2020)
+  elseif(USE_SANITIZER MATCHES "cfi") # control flow integrity
+    list(APPEND SANITIZER_OPTIONS "-fsanitize=cfi")
+    list(APPEND SANITIZER_OPTIONS "-flto")
+    list(APPEND SANITIZER_OPTIONS "-B ${CLANG_LD_HACK}")
+  endif()
+  if(DEFINED SANITIZER_OPTIONS)
+    list(APPEND SANITIZER_OPTIONS "-fno-omit-frame-pointer")
+    message(STATUS "Activate sanitizer options (USE_SANITIZER=${USE_SANITIZER}) : ${SANITIZER_OPTIONS}")
+  endif()
+
+  
+  target_compile_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+  target_link_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+  
+endfunction()

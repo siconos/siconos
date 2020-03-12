@@ -91,14 +91,6 @@ endif()
 # add_cxx_options("-static -static-libgcc -static-libstdc++" "GNU;Clang")
 # way too verbose with MSVC
 
-if(USE_SANITIZER MATCHES "asan")
-  APPEND_CXX_FLAGS("-fsanitize=leak -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer")
-elseif(USE_SANITIZER MATCHES "msan")
-  APPEND_CXX_FLAGS("-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer")
-elseif(USE_SANITIZER MATCHES "cfi")
-  APPEND_CXX_FLAGS("-fsanitize=cfi -flto -fno-omit-frame-pointer -B ${CLANG_LD_HACK}")
-endif()
-
 IF(USE_LIBCXX)
   APPEND_CXX_FLAGS("-stdlib=libc++ -I${USE_LIBCXX}/include -I${USE_LIBCXX}/include/c++/v1")
   SET(_LIBCXX_FLAGS_TO_ADD "-L${USE_LIBCXX}/lib -lc++abi -Wl,-rpath,${USE_LIBCXX}/lib")

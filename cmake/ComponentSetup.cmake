@@ -37,6 +37,8 @@ function(create_siconos_component COMPONENT)
     set_property(TARGET ${COMPONENT} PROPERTY POSITION_INDEPENDENT_CODE ON)
   endif()
 
+  apply_sanitizer(${COMPONENT})
+  
   # Append component source dirs to include directories
   # (Private : only to build current component).
   foreach(dir IN LISTS ${COMPONENT}_DIRS)
