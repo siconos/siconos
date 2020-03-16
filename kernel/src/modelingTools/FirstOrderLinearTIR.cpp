@@ -74,18 +74,19 @@ void FirstOrderLinearTIR::checkSize(Interaction& inter)
   DEBUG_PRINTF("_C->size(0) = %i,\t inter.dimension() = %i\n ",_C->size(0),inter.dimension());
   DEBUG_PRINTF("_C->size(1) = %i,\t inter.getSizeOfDS() = %i\n ",_C->size(1),inter.getSizeOfDS());
 
-  assert((_C->size(0) == inter.dimension() && _C->size(1) == inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
+  assert((_C->size(0) == inter.dimension() && _C->size(1) == inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction sizes.");
 
-  assert((_B->size(1) == inter.dimension() && _B->size(0) ==  inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
+  assert((_B->size(1) == inter.dimension() && _B->size(0) ==  inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction sizes.");
 
   // C and B are the minimum inputs. The others may remain null.
 
   if(_D)
-    assert((_D->size(0) == inter.dimension() || _D->size(1) == inter.dimension()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
+    assert((_D->size(0) == inter.dimension() || _D->size(1) == inter.dimension()) && "FirstOrderLinearTIR::initialize , inconsistent size between D and interaction sizes");
 
+  DEBUG_EXPR(if(_F) _F->display(); (inter.linkToDSVariables())[FirstOrderR::z]->display(););
 
   if(_F)
-    assert(((_F->size(0) != inter.dimension()) && (_F->size(1) != (inter.linkToDSVariables())[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
+    assert(((_F->size(0) == inter.dimension()) && (_F->size(1) == (inter.linkToDSVariables())[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between F and z.");
   if(_e)
     assert(_e->size() == inter.dimension() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 
