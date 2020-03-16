@@ -102,9 +102,10 @@ extern "C"
 
   /** Set linear problem
    * \param A, the matrix holding the MUMPS config,
-   * \param b, a pointer on double values.
+   * \param nrhs, the number of right hand side.
+   * \param b, a pointer on double values of the right hand side.
    */
-  void NM_MUMPS_set_problem(NumericsMatrix* A, double *b);
+  void NM_MUMPS_set_problem(NumericsMatrix* A, unsigned int nrhs, double *b);
 
   /** Set MUMPS verbosity.
    * \param A, the matrix holding the MUMPS config,

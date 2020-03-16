@@ -3078,7 +3078,7 @@ int NM_LU_factorize(NumericsMatrix* A, unsigned keep)
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
 
-      NM_MUMPS_set_problem(A, NULL);
+      NM_MUMPS_set_problem(A, 0, NULL);
 
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
       if(mumps_id->job == -1)
@@ -3236,11 +3236,10 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs, unsigned keep)
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
-      for(unsigned int j=0; j < nrhs ; j++ )
-      {
-        NM_MUMPS_set_problem(A, &b[j*nrhs]);
-        NM_MUMPS(A, 3); /* solve */
-      }
+
+      NM_MUMPS_set_problem(A, nrhs, b);
+
+      NM_MUMPS(A, 3); /* solve */
       /* NM_MUMPS_set_problem(A, NULL); */
 
       /* DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A); */
@@ -3438,7 +3437,7 @@ int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep)
         NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
-      NM_MUMPS_set_problem(A, b);
+      NM_MUMPS_set_problem(A, 1, b);
 
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
@@ -3821,7 +3820,7 @@ int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep)
         NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
       }
 
-      NM_MUMPS_set_problem(A, b);
+      NM_MUMPS_set_problem(A, 1, b);
 
       DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 

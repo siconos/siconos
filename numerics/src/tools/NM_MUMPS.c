@@ -210,7 +210,7 @@ void NM_MUMPS_set_default_params(NumericsMatrix* A)
   mumps_id->ICNTL(7) = 3; // scotch
 }
 
-void NM_MUMPS_set_problem(NumericsMatrix* A, double *b)
+void NM_MUMPS_set_problem(NumericsMatrix* A, unsigned int nrhs, double *b)
 {
   /* numerics matrices are not distributed */
   if(NM_MPI_rank(A) == 0)
@@ -229,6 +229,10 @@ void NM_MUMPS_set_problem(NumericsMatrix* A, double *b)
 
     MUMPS_INT nz;
     nz = (MUMPS_INT) triplet->nz;
+
+    mumps_id->nrhs = nrhs;
+    mumps_id->lrhs = A->size0; /* note: maybe this can also become a
+                                * parameter */
     mumps_id->nz = nz;
     mumps_id->a = triplet->x;
     mumps_id->rhs = b;
