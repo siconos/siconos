@@ -418,7 +418,7 @@ void SimpleMatrix::PLUSolve(SiconosMatrix &B)
   {
     NumericsMatrix * NM = _numericsMatrix.get();
     double * b = B.getArray();
-    info = NM_LU_solve(NM, b, B.size(1), NM_KEEP_FACTORS);
+    info = NM_LU_solve(NM, b, B.size(1));
   }
   else if(B.num() == SPARSE)
   {

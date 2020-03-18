@@ -92,7 +92,6 @@ typedef enum NumericsMatrix_types {
   NM_SPARSE,          /**< compressed column format */
 } NM_types;
 
-/*! option for gesv factorization */
 typedef enum {
   NM_NONE,          /**< keep nothing */
   NM_KEEP_FACTORS,  /**< keep all the factorization data (useful to reuse the factorization) */

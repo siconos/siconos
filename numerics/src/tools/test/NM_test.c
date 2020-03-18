@@ -2138,11 +2138,16 @@ static int test_NM_LU_solve_unit(NumericsMatrix * M1, double * b)
   double * y = (double*)malloc(n* sizeof(double));
   for(int j=0; j < n; j++)
     y[j] = b[j];
-  NM_LU_solve(M1, b, 1, NM_PRESERVE);
+  NumericsMatrix M1backup;
+  NM_null(&M1backup);
+
+  NM_copy(M1, &M1backup);
+  NM_LU_solve(M1, b, 1);
   NV_display(b,n);
-  NM_gemv(-1.0, M1, b, 1.0, y);
+  NM_gemv(-1.0, &M1backup, b, 1.0, y);
   double res = cblas_dnrm2(n,y,1);
   free(y);
+  NM_clear(&M1backup);
   printf("residual = %e\n", res);
   if(fabs(res) >= sqrt(DBL_EPSILON))
     info = 1;
