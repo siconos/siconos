@@ -3004,53 +3004,56 @@ double* NM_dWork(NumericsMatrix* A, int size)
   return A->internalData->dWork;
 }
 
-int NM_LU_factorize(NumericsMatrix* A, unsigned keep)
+int NM_LU_factorize(NumericsMatrix* A)
 {
-  /* verbose=2; */
-  lapack_int info = 1;
-  switch (A->storageType)
+  lapack_int info = 0;
+  if (!NM_internalData(A)->isLUfactorized)
   {
-  case NM_DENSE:
-  {
-    assert(A->matrix0);
-
-    if (keep == NM_KEEP_FACTORS)
+    switch (A->storageType)
     {
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
+
       numerics_printf_verbose(2,"NM_LU_factorize, using LAPACK" );
 
       lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
       DEBUG_PRINTF("iwork are initialized with size %i and %i\n",A->size0*A->size1,A->size0 );
 
-      if (!NM_internalData(A)->isLUfactorized)
+      numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep it in place" );
+      DEBUG_PRINT("Start to call DGETRF for NM_DENSE storage\n");
+      //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
+      DGETRF(A->size0, A->size1, A->matrix0, A->size0, ipiv, &info);
+      DEBUG_PRINT("end of call DGETRF for NM_DENSE storage\n");
+      if (info > 0)
       {
-        numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep it in place" );
-        DEBUG_PRINT("Start to call DGETRF for NM_DENSE storage\n");
-        //cblas_dcopy_msan(A->size0*A->size1, A->matrix0, 1, wkspace, 1);
-        DGETRF(A->size0, A->size1, A->matrix0, A->size0, ipiv, &info);
-        DEBUG_PRINT("end of call DGETRF for NM_DENSE storage\n");
-        if (info > 0)
-          numerics_printf_verbose(2,"NM_LU_factorize: LU factorisation DGETRF failed. The %d-th diagonal element is 0\n", info);
-        else if (info < 0)
-        {
-          fprintf(stderr, "NM_LU_factorize: LU factorisation DGETRF failed. The %d-th argument has an illegal value, stopping\n", -info);
-        }
-        if (info) { NM_internalData_free(A); return info; }
+        numerics_printf_verbose(2,"NM_LU_factorize: LU factorisation DGETRF failed. The %d-th diagonal element is 0\n", info);
+      }
+      else if (info < 0)
+      {
+        fprintf(stderr, "NM_LU_factorize: LU factorisation DGETRF failed. The %d-th argument has an illegal value, stopping\n", -info);
+      }
+      if (info)
+      {
+        NM_internalData_free(A);
+        assert(!NM_internalData(A)->isLUfactorized);
+      }
+      else
+      {
         NM_internalData(A)->isLUfactorized = true;
       }
     }
     break;
-  }
-  case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
-  case NM_SPARSE:
-  {
-    NSM_linear_solver_params* p = NSM_linearSolverParams(A);
-    switch (p->solver)
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
     {
-    case NSM_CS_LUSOL:
-      numerics_printf_verbose(2,"NM_LU_factorize, using CSparse" );
-
-      /* if (keep == NM_KEEP_FACTORS) */
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      assert(!NM_internalData(A)->isLUfactorized);
+      switch (p->solver)
       {
+      case NSM_CS_LUSOL:
+        numerics_printf_verbose(2, "NM_LU_factorize, using CSparse");
+
         if (!(p->dWork && p->linear_solver_data))
         {
           assert(!NSM_workspace(p));
@@ -3060,93 +3063,80 @@ int NM_LU_factorize(NumericsMatrix* A, unsigned keep)
           p->solver_free_hook = &NSM_clear_p;
           p->dWork = (double*) malloc(A->size1 * sizeof(double));
           p->dWorkSize = A->size1;
-          CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
-          numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep it" );
-          DEBUG_EXPR(cs_print(NM_csc(A),0));
-          CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
-          p->linear_solver_data = cs_lu_A;
-        }
-      }
-      /* else */
-      /* { */
-      /*   numerics_printf_verbose(2,"NM_LU_factorize: We always keep factors with sparse implementation\n"); */
-      /* } */
-      break;
+        };
+
+        CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*) malloc(sizeof(CSparseMatrix_factors));
+        numerics_printf_verbose(2,"NM_LU_factorize, we compute factors and keep it" );
+        DEBUG_EXPR(cs_print(NM_csc(A),0));
+        CHECK_RETURN(CSparsematrix_lu_factorization(1, NM_csc(A), DBL_EPSILON, cs_lu_A));
+        p->linear_solver_data = cs_lu_A;
+        NM_internalData(A)->isLUfactorized = true;
+        assert(!info);
+        break;
 #ifdef WITH_MUMPS
-    case NSM_MUMPS:
-    {
-      if(verbose >= 2)
+      case NSM_MUMPS:
       {
-        printf("NM_LU_factorize: using MUMPS\n");
-      }
-      if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
-      {
-        /* the mumps instance is initialized (call with job=-1) */
-        NM_MUMPS_set_control_params(A);
-        NM_MUMPS(A, -1);
-        if ((NM_MUMPS_icntl(A, 1) == -1 ||
-             NM_MUMPS_icntl(A, 2) == -1 ||
-             NM_MUMPS_icntl(A, 3) == -1 ||
-             verbose) ||
-            (NM_MUMPS_icntl(A, 1) != -1 ||
-             NM_MUMPS_icntl(A, 2) != -1 ||
-             NM_MUMPS_icntl(A, 3) != -1 ||
-             !verbose))
+        if(verbose >= 2)
         {
-          NM_MUMPS_set_verbosity(A, verbose);
+          printf("NM_LU_factorize: using MUMPS\n");
         }
-        NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
-        NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
-      }
+        if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
+        {
+          /* the mumps instance is initialized (call with job=-1) */
+          NM_MUMPS_set_control_params(A);
+          NM_MUMPS(A, -1);
+          if ((NM_MUMPS_icntl(A, 1) == -1 ||
+               NM_MUMPS_icntl(A, 2) == -1 ||
+               NM_MUMPS_icntl(A, 3) == -1 ||
+               verbose) ||
+              (NM_MUMPS_icntl(A, 1) != -1 ||
+               NM_MUMPS_icntl(A, 2) != -1 ||
+               NM_MUMPS_icntl(A, 3) != -1 ||
+               !verbose))
+          {
+            NM_MUMPS_set_verbosity(A, verbose);
+          }
+          NM_MUMPS_set_icntl(A, 24, 1); // Null pivot row detection
+          NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value
+        }
 
-      NM_MUMPS_set_problem(A, 0, NULL);
+        NM_MUMPS_set_problem(A, 0, NULL);
 
-      DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
-      if(mumps_id->job == -1)
-      {
         NM_MUMPS(A, 4); /* analyzis,factorization */
-      }
-      /* if(keep != NM_KEEP_FACTORS|| mumps_id->job == -1) */
-      /* { */
-      /*   NM_MUMPS(A, 6); /\* analyzis,factorization,solve*\/ */
-      /* } */
-      /* else */
-      /* { */
-      /*   NM_MUMPS(A, 3); /\* solve *\/ */
-      /* } */
 
-      info = mumps_id->info[0];
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
 
-      /* MUMPS can return info codes with negative value */
-      if(info)
-      {
-        if(verbose > 0)
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
         {
-          fprintf(stderr,"NM_LU_factorize: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_LU_factorize: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
         }
+
+        /* we should not do that here */
+        if(!p->solver_free_hook)
+        {
+          p->solver_free_hook = &NM_MUMPS_free;
+        }
+        break;
       }
-      /* if(keep != NM_KEEP_FACTORS) */
-      /* { */
-      /*   NM_MUMPS(A, -2); */
-      /* } */
-      if(!p->solver_free_hook)
+#endif /* WITH_MUMPS */
+      default:
       {
-        p->solver_free_hook = &NM_MUMPS_free;
+        numerics_printf_verbose(0,"NM_LU_factorize, Unknown solver in NM_SPARSE case." );
+        info = 1;
+      }
       }
       break;
     }
-#endif /* WITH_MUMPS */
     default:
-    {
-      numerics_printf_verbose(0,"NM_LU_factorize, Unknown solver in NM_SPARSE case." );
+      assert (0 && "NM_LU_factors: unknown storageType");
     }
-    }
-    break;
   }
-  default:
-    assert (0 && "NM_LU_factors: unknown storageType");
-  }
-
   return info;
 }
 
@@ -3168,7 +3158,7 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs, unsigned keep)
     {
       numerics_printf_verbose(2,"NM_LU_solve, using LAPACK" );
 
-      NM_LU_factorize(A, keep);
+      NM_LU_factorize(A);
 
       DEBUG_PRINT("Start to call DGETRS for NM_DENSE storage\n");
 
@@ -3211,7 +3201,7 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs, unsigned keep)
 
       if (keep == NM_KEEP_FACTORS)
       {
-        NM_LU_factorize(A, keep);
+        NM_LU_factorize(A);
 
         numerics_printf_verbose(2,"NM_LU_solve, we solve with given factors" );
         for(unsigned int j=0; j < nrhs ; j++ )
@@ -3235,7 +3225,7 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs, unsigned keep)
         printf("NM_LU_solve: using MUMPS\n");
       }
 
-      NM_LU_factorize(A, keep);
+      NM_LU_factorize(A);
 
       if(!NM_MUMPS_id(A)->job || (NM_MUMPS_id(A)->job == -2))
       {

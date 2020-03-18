@@ -607,7 +607,7 @@ extern "C"
 
 
 
-  /** Direct computation of the solution of a real system of linear
+  /** XXXXXX: to be rewritten Direct computation of the solution of a real system of linear
    * equations: A x = b. The factorized matrix A is kept for future solve.
    * If A is already factorized, the solve the linear system from it
    * \warning this is not enable for all the solvers, your mileage may vary
@@ -621,9 +621,9 @@ extern "C"
    * \return 0 if successful, else the error is specific to the backend solver
    * used
    */
-  int NM_LU_factorize(NumericsMatrix* A, unsigned keep);
+  int NM_LU_factorize(NumericsMatrix* A);
   int NM_LU_solve(NumericsMatrix* A,  double *b, unsigned int nrhs, unsigned keep);
-  
+
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
   int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
 

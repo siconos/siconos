@@ -343,7 +343,7 @@ void SimpleMatrix::PLUFactorize()
     NM_fill(NM, NM_DENSE, size(0), size(1), data ); // Pointer link
     DEBUG_EXPR(NM_display(NM));
 
-    int info  = NM_LU_factorize(NM,NM_KEEP_FACTORS);
+    int info  = NM_LU_factorize(NM);
     DEBUG_EXPR(NM_display(NM));
 
     if(info != 0)
@@ -370,7 +370,7 @@ void SimpleMatrix::PLUFactorize()
 
     DEBUG_EXPR(cs_print(numericsSparseMatrix(NM)->csc, 0););
 
-    NM_LU_factorize(NM, NM_KEEP_FACTORS);
+    NM_LU_factorize(NM);
 
     NSM_linear_solver_params* p = NSM_linearSolverParams(NM);
     CSparseMatrix_factors* cs_lu_A =  (CSparseMatrix_factors*)p->linear_solver_data;
