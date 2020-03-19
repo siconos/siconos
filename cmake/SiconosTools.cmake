@@ -346,10 +346,10 @@ function(apply_compiler_options COMPONENT)
   # Warn about types with virtual methods where code quality would be improved if the type were declared with the C++11 final specifier, or, if possible, declared in an anonymous namespace.
   #list(APPEND COMP_OPTIONS "-Wsuggest-final-types"). GNU/CXX ONLY.
   list(APPEND COMP_OPTIONS
-    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Gnu>>:-Wsuggest-final-types>)
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wsuggest-final-types>)
   # Warn about virtual methods where code quality would be improved if the method were declared with the C++11 final specifier, or, if possible, its type were declared in an anonymous namespace or with the final specifier. GNU/CXX ONLY.
   list(APPEND COMP_OPTIONS
-    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Gnu>>:-Wsuggest-final-methods>)
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wsuggest-final-methods>)
   # Warn when a literal ‘0’ is used as null pointer constant.
   list(APPEND COMP_OPTIONS "-Wzero-as-null-pointer-constant")
   if(WITH_SERIALIZATION)
@@ -394,7 +394,7 @@ function(apply_compiler_options COMPONENT)
     # Warn about boolean expression compared with an integer value different from true/false
     # GNU ONLY, C/CXX
     list(APPEND COMP_OPTIONS
-      $<$<OR:$<C_COMPILER_ID:Gnu>,$<CXX_COMPILER_ID:Gnu>>:-Werror=bool-compare>)
+      $<$<OR:$<C_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:GNU>>:-Werror=bool-compare>)
     # This option is only active when -ftree-vrp is active (default for -O2 and above). It warns about subscripts to arrays that are always out of bounds.
     list(APPEND COMP_OPTIONS -Werror=array-bounds)
     # Warn if a comparison is always true or always false due to the limited range of the data type
@@ -413,7 +413,7 @@ function(apply_compiler_options COMPONENT)
     # Warn about trampolines generated for pointers to nested functions.
     # GNU ONLY, C/CXX
     list(APPEND COMP_OPTIONS
-      $<$<OR:$<C_COMPILER_ID:Gnu>,$<CXX_COMPILER_ID:Gnu>>:-Werror=trampolines>)
+      $<$<OR:$<C_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:GNU>>:-Werror=trampolines>)
     # warnings from casts to pointer type of an integer of a different size
     list(APPEND COMP_OPTIONS -Werror=int-to-pointer-cast)
     #  warnings from casts from a pointer to an integer type of a different size.

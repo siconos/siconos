@@ -38,13 +38,13 @@ function(create_siconos_component COMPONENT)
   endif()
 
   # Set compiler options
-  if(MODE_COMP)
+  # if(MODE_COMP)
     if(DEV_MODE)
       apply_compiler_options(${COMPONENT} DEV)
     else()
       apply_compiler_options(${COMPONENT})
     endif()
-  endif()
+  # endif()
 
   
   # Append component source dirs to include directories
