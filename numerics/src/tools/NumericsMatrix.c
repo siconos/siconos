@@ -1841,9 +1841,10 @@ NumericsMatrix* NM_preserve(NumericsMatrix* A)
     {
       numerics_warning("NM_preserve", "preservation is done on a factorized matrix!");
     }
-    A->destructible = NM_new();
-    NM_copy(A, A->destructible);
+    NumericsMatrix* B = NM_new();
+    NM_copy(A, B);
 
+    A->destructible = B;
     assert(A->destructible->destructible == A->destructible);
   };
   return A->destructible;
@@ -2249,6 +2250,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   else
   {
     /* A is preserved, so B must be preserved */
+    assert(B->destructible == B);
     NM_preserve(B);
   }
 }
