@@ -317,8 +317,8 @@ function(apply_sanitizer CURRENT_TARGET)
     message(STATUS "Activate sanitizer options (USE_SANITIZER=${USE_SANITIZER}) : ${SANITIZER_OPTIONS}")
   endif()
 
-  
-  target_compile_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
-  target_link_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
-  
+  if(SANITIZER_OPTIONS)
+    target_compile_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+    target_link_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+  endif()
 endfunction()
