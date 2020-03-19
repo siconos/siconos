@@ -1801,7 +1801,9 @@ static int test_NM_inv(void)
   printf("Construction ok ...\n");
 
   NumericsMatrix * Id = NM_eye(50);
+  NM_csc(Id);
   NumericsMatrix * Iinv = NM_inv(Id);
+  NM_csc(Iinv);
   NumericsMatrix* IIinv = NM_multiply(Id,Iinv);
   info = !NM_equal(IIinv, Id);
   printf("info : %i\n", info);

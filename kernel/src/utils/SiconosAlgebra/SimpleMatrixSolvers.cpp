@@ -429,7 +429,7 @@ void SimpleMatrix::PLUSolve(SiconosMatrix &B)
     * Bdense= B ;                                                // copy to dense
     double * b = &(*Bdense->getArray());
     NumericsMatrix * NM = _numericsMatrix.get();
-    info = NM_LU_solve(NM, b, B.size(1), NM_KEEP_FACTORS);       // we solve with dense R.H.S.
+    info = NM_LU_solve(NM, b, B.size(1));       // we solve with dense R.H.S.
     DEBUG_EXPR(NV_display(b,size(0)*size(1)););
     DEBUG_EXPR(Bdense->display(););
     B = *Bdense ;                                                // we copy back to sparse.
@@ -467,7 +467,7 @@ void SimpleMatrix::PLUSolve(SiconosVector &B)
     double * b = B.getArray();
     DEBUG_EXPR(NV_display(b, B.size()););
     DEBUG_EXPR(B.display(););
-    info = NM_LU_solve(NM, b, 1, NM_KEEP_FACTORS);
+    info = NM_LU_solve(NM, b, 1);
     DEBUG_EXPR(NV_display(b, B.size()););
     DEBUG_EXPR(B.display(););
   }
@@ -478,7 +478,7 @@ void SimpleMatrix::PLUSolve(SiconosVector &B)
     * Bdense= B ;
     double * b = &(*Bdense->getArray());
     NumericsMatrix * NM = _numericsMatrix.get();
-    info = NM_LU_solve(NM, b, 1, NM_KEEP_FACTORS);
+    info = NM_LU_solve(NM, b, 1);
     B = *Bdense ;
 
     // Second way use inplace_solve of ublas

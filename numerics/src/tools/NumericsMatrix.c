@@ -62,7 +62,9 @@ void NM_null(NumericsMatrix* A)
   A->matrix1 = NULL;
   A->matrix2 = NULL;
   A->internalData = NULL;
+  A->destructible = A; /* by default, the destructible matrix is itself */
 }
+
 void NM_internalData_new(NumericsMatrix* M)
 {
   M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
@@ -532,6 +534,13 @@ void NM_clear(NumericsMatrix* m)
   NM_clearSparse(m);
 
   NM_internalData_free(m);
+
+  /* restore the destructible pointer */
+  if (m->destructible != m)
+  {
+    NM_clear(m->destructible);
+    m->destructible = m;
+  }
 }
 
 void NM_dense_display_matlab(double * m, int nRow, int nCol, int lDim)
@@ -1824,6 +1833,21 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
   return Atrans;
 }
 
+NumericsMatrix* NM_preserve(NumericsMatrix* A)
+{
+  if (A->destructible == A)
+  {
+    if (NM_internalData(A)->isLUfactorized)
+    {
+      numerics_warning("NM_preserve", "preservation is done on a factorized matrix!");
+    }
+    A->destructible = NM_new();
+    NM_copy(A, A->destructible);
+
+    assert(A->destructible->destructible == A->destructible);
+  };
+  return A->destructible;
+}
 
 void NM_clearDense(NumericsMatrix* A)
 {
@@ -2216,6 +2240,17 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   NM_internalData_copy(A, B);
   NM_MPI_copy(A, B);
   NM_MUMPS_copy(A, B);
+
+  if (A->destructible == A)
+  {
+    /* A is destructible, so B must be destructible */
+    B->destructible = B;
+  }
+  else
+  {
+    /* A is preserved, so B must be preserved */
+    NM_preserve(B);
+  }
 }
 
 NumericsSparseMatrix* numericsSparseMatrix(NumericsMatrix* A)
@@ -2728,6 +2763,7 @@ NumericsMatrix * NM_multiply(NumericsMatrix* A, NumericsMatrix* B)
 
   /* should we copy the whole internal data ? */
   /*NM_internalData_copy(A, C);*/
+  NM_copy(A,C);
   NM_MPI_copy(A, C);
   NM_MUMPS_copy(A, C);
 
@@ -3004,11 +3040,15 @@ double* NM_dWork(NumericsMatrix* A, int size)
   return A->internalData->dWork;
 }
 
-int NM_LU_factorize(NumericsMatrix* A)
+int NM_LU_factorize(NumericsMatrix* Ao)
 {
   lapack_int info = 0;
-  if (!NM_internalData(A)->isLUfactorized)
+  if (!NM_internalData(Ao)->isLUfactorized)
   {
+    assert(Ao->destructible); /* by default Ao->destructible == Ao */
+
+    NumericsMatrix* A = Ao->destructible;
+
     switch (A->storageType)
     {
     case NM_DENSE:
@@ -3037,10 +3077,6 @@ int NM_LU_factorize(NumericsMatrix* A)
       {
         NM_internalData_free(A);
         assert(!NM_internalData(A)->isLUfactorized);
-      }
-      else
-      {
-        NM_internalData(A)->isLUfactorized = true;
       }
     }
     break;
@@ -3073,6 +3109,7 @@ int NM_LU_factorize(NumericsMatrix* A)
         {
           numerics_printf_verbose(2, "NM_LU_factorize: cparse factorization failed.");
         }
+        assert(!p->linear_solver_data);
         p->linear_solver_data = cs_lu_A;
         break;
 #ifdef WITH_MUMPS
@@ -3157,7 +3194,7 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)
   /* factorization is done only if !A->internalData->isLUfactorized */
   NM_LU_factorize(A);
 
-  DEBUG_BEGIN("NM_LU_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
+  DEBUG_BEGIN("NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
   assert(A->size0 == A->size1);
 
   lapack_int info = 1;
@@ -3168,10 +3205,9 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)
   {
     assert(A->matrix0);
 
-    numerics_printf_verbose(2,"NM_LU_solve, using LAPACK" );
+    numerics_printf_verbose(2, "NM_LU_solve, using LAPACK" );
 
-    numerics_printf_verbose(2,"NM_LU_solve, factorization in-place" );
-    mat = A->matrix0;
+    numerics_printf_verbose(2, "NM_LU_solve, factorization in-place" );
 
 
     /* dgetrf is called in NM_LU_factorize */
@@ -3197,6 +3233,7 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)
     switch (p->solver)
     {
     case NSM_CS_LUSOL:
+    {
       numerics_printf_verbose(2,"NM_LU_solve, using CSparse" );
 
       numerics_printf_verbose(2,"NM_LU_solve, we solve with given factors" );
@@ -3205,6 +3242,7 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)
         info = !CSparseMatrix_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
       }
       break;
+    }
 #ifdef WITH_MUMPS
     case NSM_MUMPS:
     {
@@ -3240,6 +3278,7 @@ int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)
       fprintf(stderr, "NM_LU_solve: unknown sparse linearsolver %d\n", p->solver);
       exit(EXIT_FAILURE);
     }
+    break;
     }
     break;
   }

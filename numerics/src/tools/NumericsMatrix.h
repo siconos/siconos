@@ -71,6 +71,9 @@ struct NumericsMatrix
 
   NumericsMatrixInternalData* internalData; /**< internal storage, used for workspace among other things */
 
+  NumericsMatrix* destructible; /**< pointer on the destructible
+                                 * matrix, by default points toward
+                                 * the matrix itself */
 };
 
 typedef struct
@@ -221,6 +224,12 @@ extern "C"
    * \param A a matrix
    */
   void NM_null(NumericsMatrix* A);
+
+  /** preserve a matrix before in-place transformations such as factorizations.
+   * \param[in] A the NumericsMatrix
+   * \return a pointer on the destructible Matrix;
+   */
+  RawNumericsMatrix* NM_preserve(NumericsMatrix* A);
 
   /** update the size of the matrix based on the matrix data
    * \param[in,out] A the matrix which size is updated*/
@@ -621,7 +630,7 @@ extern "C"
    * used
    */
   int NM_LU_factorize(NumericsMatrix* A);
-  int NM_LU_solve(NumericsMatrix* A,  double *b, unsigned int nrhs, unsigned keep);
+  int NM_LU_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
 
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);
   int NM_posv_expert(NumericsMatrix* A, double *b, unsigned keep);
