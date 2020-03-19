@@ -457,4 +457,8 @@ function(apply_compiler_options COMPONENT)
   target_compile_options(${COMPONENT}
     PRIVATE
     $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:C>>:${COMP_OPTIONS}>)  
+  
+  target_compile_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+  target_link_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+  
 endfunction()
