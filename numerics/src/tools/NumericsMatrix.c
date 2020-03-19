@@ -1837,7 +1837,7 @@ NumericsMatrix* NM_preserve(NumericsMatrix* A)
 {
   if (A->destructible == A)
   {
-    if (NM_internalData(A)->isLUfactorized)
+    if (NM_factorized(A))
     {
       numerics_warning("NM_preserve", "preservation is done on a factorized matrix!");
     }
@@ -1848,6 +1848,27 @@ NumericsMatrix* NM_preserve(NumericsMatrix* A)
     assert(A->destructible->destructible == A->destructible);
   };
   return A->destructible;
+}
+
+NumericsMatrix* NM_unpreserve(NumericsMatrix* A)
+{
+  if (A->destructible != A)
+  {
+    NM_clear(A->destructible);
+    free(A->destructible);
+    A->destructible = A;
+  }
+  return A;
+}
+
+bool NM_factorized(NumericsMatrix* A)
+{
+  return NM_internalData(A->destructible)->isLUfactorized;
+}
+
+void NM_set_factorized(NumericsMatrix* A)
+{
+  NM_internalData(A->destructible)->isLUfactorized = true;
 }
 
 void NM_clearDense(NumericsMatrix* A)
@@ -3045,7 +3066,8 @@ double* NM_dWork(NumericsMatrix* A, int size)
 int NM_LU_factorize(NumericsMatrix* Ao)
 {
   lapack_int info = 0;
-  if (!NM_internalData(Ao)->isLUfactorized)
+
+  if (!NM_factorized(Ao))
   {
     assert(Ao->destructible); /* by default Ao->destructible == Ao */
 

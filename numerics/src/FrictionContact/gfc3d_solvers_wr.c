@@ -108,7 +108,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     lapack_int infoDGETRS;
     DGETRF(n, n, M->matrix0, n, ipiv, &infoDGETRF);
     assert(!infoDGETRF);
-    NM_internalData(M)->isLUfactorized = true;
+    NM_set_factorized(M);
     DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, &infoDGETRS);
 #else
     NM_gesv_expert_multiple_rhs(M,Htmp,m,NM_KEEP_FACTORS);
@@ -401,7 +401,7 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
 
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
 
-    assert(NM_internalData(problem->M)->isLUfactorized);
+    assert(NM_factorized(problem->M));
 #ifdef USE_LAPACK_DGETRS
     lapack_int infoDGETRS = 0;
     lapack_int* ipiv = (lapack_int*)NM_iWork(problem->M, problem->M->size0, sizeof(lapack_int));

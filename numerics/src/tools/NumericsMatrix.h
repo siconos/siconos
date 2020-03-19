@@ -231,6 +231,23 @@ extern "C"
    */
   RawNumericsMatrix* NM_preserve(NumericsMatrix* A);
 
+  /** clear the preserved part of a matrix.
+   * \param[in] A the NumericsMatrix
+   * \return a pointer on the Matrix;
+   */
+  RawNumericsMatrix* NM_unpreserve(NumericsMatrix* A);
+
+  /** check for a previous factorization.
+   * \param[in] A the NumericsMatrix
+   * \return true if the matrix has been factorized.
+   */
+  bool NM_factorized(NumericsMatrix* A);
+
+  /** set the factorization flag.
+   * \param[in] A the NumericsMatrix
+   */
+  void NM_set_factorized(NumericsMatrix* A);
+
   /** update the size of the matrix based on the matrix data
    * \param[in,out] A the matrix which size is updated*/
   void NM_update_size(NumericsMatrix* A);
