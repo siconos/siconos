@@ -3190,11 +3190,15 @@ int NM_LU_factorize(NumericsMatrix* Ao)
   return info;
 }
 
-int NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)
+int NM_LU_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 {
 
-  /* factorization is done only if !A->internalData->isLUfactorized */
-  NM_LU_factorize(A);
+  /* factorization is done on destructible part only if
+   * !A->internalData->isLUfactorized */
+  NM_LU_factorize(Ao);
+
+  /* get the destructible part of the matrix */
+  NumericsMatrix *A = Ao->destructible;
 
   DEBUG_BEGIN("NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
   assert(A->size0 == A->size1);

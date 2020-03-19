@@ -2140,6 +2140,11 @@ static int test_NM_LU_solve_unit(NumericsMatrix * M1, double * b)
   double * y = (double*)malloc(n* sizeof(double));
   for(int j=0; j < n; j++)
     y[j] = b[j];
+  /* NM_LU_solve is called here directly on the destructible part of
+     the matrix this is ok, as the destructible part of the
+     destructible part is the destructible part!  We can also write:
+     NM_preserve(M1);
+     NM_LU_solve(M1, b, 1); */
   NM_LU_solve(NM_preserve(M1), b, 1);
   NV_display(b,n);
   NM_gemv(-1.0, M1, b, 1.0, y);
