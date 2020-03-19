@@ -340,10 +340,6 @@ function(apply_compiler_options COMPONENT)
     set(COMP_LANGUAGE CXX)
   endif()
   unset(COMP_OPTIONS)   # C and C++ options. Append options there by default.
-  unset(C_SPEC_OPTIONS) # C only. 
-  unset(COMP_OPTIONS)   # CXX only
-  # Notice that compiler id (clang, gnu ...) specific options will be set
-  # using generators, for each option.
   
   # -- Compiler options common to all setups --
   
