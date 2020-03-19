@@ -127,6 +127,18 @@ install_siconos:ubuntu18.04:
     paths:
       - build
 
+# Same as above but with many devel (warnings ...) options activated.
+install_siconos:ubuntu18.04-devmode:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_devmode.cmake
+  extends: .siconos-build
+  artifacts:
+    paths:
+      - build
+
+      
 # Siconos build and install, default config
 # (based on cmake/default_siconos.cmake)
 # on debian buster

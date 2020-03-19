@@ -13,13 +13,9 @@ include(CheckSymbolExists)
 # activate warnings
 # and turn some of them to errors
 if(DEV_MODE)
-  # --- Clang ----
-  #add_c_options("-Weverything" Clang) # like Wall and more
-  #add_c_options("-Werror=unreachable-code" "Clang")
-  add_c_options("-Wno-string-plus-int" "Clang")
-
   # --- All compilers but MSVC (Microsoft Visual C) ---
   if(NOT MSVC)
+    # Activate all warnings 
     add_c_options("-Wall")
   endif()
   add_c_options("-Wuninitialized")
@@ -37,13 +33,12 @@ if(DEV_MODE)
   endif()
   add_c_options("-Wno-sign-conversion")
   add_c_options("-Wno-error=sign-conversion")
-  # ADD_C_OPTIONS("-Wno-error=shorten-64-to-32") # for clang
   add_c_options("-Werror=switch-bool")
   add_c_options("-Werror=logical-not-parentheses")
   add_c_options("-Werror=sizeof-array-argument")
   add_c_options("-Werror=bool-compare")
   add_c_options("-Werror=array-bounds")
-  add_c_options("-Werror=format-invalid-specifier")
+  add_c_options("-Werror=format-invalid-specifier") # unknown
   add_c_options("-Werror=type-limits")
   add_c_options("-Werror=incompatible-pointer-types")
   add_c_options("-Werror=missing-prototypes")
@@ -62,15 +57,4 @@ if(DEV_MODE)
   add_c_options("-Wformat=2")
   add_c_options("-Werror=format-security")
 endif()
-
-# Compiler Specific
-add_c_options("-diag-disable 654" "Intel")
-if(NOT ICCOK)
-  add_c_options("-D__aligned__=ignored" "Intel")
-endif()
-
-if(LLVM_ANALYSE)
-  set(CMAKE_C_OUTPUT_EXTENSION ".bc")
-  set(CMAKE_C_FLAGS "-emit-llvm")
-endif()
-
+message(" CC Flags (cmake setup) : ${CMAKE_C_FLAGS}")

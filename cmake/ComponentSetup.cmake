@@ -37,7 +37,15 @@ function(create_siconos_component COMPONENT)
     set_property(TARGET ${COMPONENT} PROPERTY POSITION_INDEPENDENT_CODE ON)
   endif()
 
-  apply_sanitizer(${COMPONENT})
+  # Set compiler options
+  if(MODE_COMP)
+    if(DEV_MODE)
+      apply_compiler_options(${COMPONENT} DEV)
+    else()
+      apply_compiler_options(${COMPONENT})
+    endif()
+  endif()
+
   
   # Append component source dirs to include directories
   # (Private : only to build current component).

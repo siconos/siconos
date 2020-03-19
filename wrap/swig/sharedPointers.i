@@ -5,8 +5,8 @@
 %}
 
 #define STD11 std
-#undef __cplusplus
-#define __cplusplus SICONOS_CXXVERSION
+/* #undef __cplusplus */
+/* #define __cplusplus SICONOS_CXXVERSION */
 %include <std_shared_ptr.i>
 
 // from g++-v4/bits/shared_ptr.h

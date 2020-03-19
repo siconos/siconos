@@ -317,8 +317,144 @@ function(apply_sanitizer CURRENT_TARGET)
     message(STATUS "Activate sanitizer options (USE_SANITIZER=${USE_SANITIZER}) : ${SANITIZER_OPTIONS}")
   endif()
 
+  if(SANITIZER_OPTIONS)
+    target_compile_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+    target_link_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+  endif()
+endfunction()
+
+
+
+function(apply_compiler_options COMPONENT)
+  set(options DEV STRICT)
+  set(oneValueArgs LANGUAGE)
+  cmake_parse_arguments(COMP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
+  # COMP_STRICT => COMP_DEV
+  if(COMP_STRICT)
+    set(COMP_DEV ON)
+  endif()
+
+  # If not set, we use C++
+  if(NOT COMP_LANGUAGE)
+    set(COMP_LANGUAGE CXX)
+  endif()
+  unset(COMP_OPTIONS)   # C and C++ options. Append options there by default.
+  unset(C_SPEC_OPTIONS) # C only. 
+  unset(COMP_OPTIONS)   # CXX only
+  # Notice that compiler id (clang, gnu ...) specific options will be set
+  # using generators, for each option.
   
-  target_compile_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
-  target_link_options(${CURRENT_TARGET} PUBLIC ${SANITIZER_OPTIONS})
+  # -- Compiler options common to all setups --
   
+  # Warn about types with virtual methods where code quality would be improved if the type were declared with the C++11 final specifier, or, if possible, declared in an anonymous namespace.
+  #list(APPEND COMP_OPTIONS "-Wsuggest-final-types"). GNU/CXX ONLY.
+  list(APPEND COMP_OPTIONS
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Gnu>>:-Wsuggest-final-types>)
+  # Warn about virtual methods where code quality would be improved if the method were declared with the C++11 final specifier, or, if possible, its type were declared in an anonymous namespace or with the final specifier. GNU/CXX ONLY.
+  list(APPEND COMP_OPTIONS
+    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Gnu>>:-Wsuggest-final-methods>)
+  # Warn when a literal ‘0’ is used as null pointer constant.
+  list(APPEND COMP_OPTIONS "-Wzero-as-null-pointer-constant")
+  if(WITH_SERIALIZATION)
+    list(APPEND COMP_OPTIONS "-ftemplate-depth=1024")
+  endif(WITH_SERIALIZATION)
+  # Intel specific
+  list(APPEND COMP_OPTIONS $<$<CXX_COMPILER_ID:Intel>:"-diag-disable 654">)
+  list(APPEND COMP_OPTIONS $<$<CXX_COMPILER_ID:Intel>:"-D__aligned__=ignored">)
+  # LLVM Static analyser ? Where do we ask to set this LLVM_ANALYSE ? 
+  if(LLVM_ANALYSE)
+    target_compile_options(${COMPONENT} PRIVATE "-emit-llvm")
+  endif()
+  # Clang++ specific
+  list(APPEND COMP_OPTIONS
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-string-plus-int>)
+ 
+  # -- Dev mode options --
+  if(COMP_DEV)
+    # -- options working with both C and C++ --
+    # and for all compilers.
+    # ! tested only with clang and gnu
+    # - Activates  all the warnings about constructions
+    # details: https://gcc.gnu.org/onlinedocs/gcc/Warning-Options.html
+    list(APPEND COMP_OPTIONS -Wall)
+    # - enables some extra warning flags that are not enabled by -Wall
+    list(APPEND COMP_OPTIONS -Wextra)
+    ## TMP ?? deactivate warning for unused parameters in C/CXX
+    list(APPEND COMP_OPTIONS -Wno-unused-parameter)
+    # This option controls warnings when a function is used before being declared.
+    list(APPEND COMP_OPTIONS -Werror=implicit-function-declaration)
+    # - Warn when variables are not initialized.
+    # Warning: this may lead to many false warnings.
+    # See for instance https://gcc.gnu.org/wiki/Better_Uninitialized_Warnings
+    # --> activated by Wall
+    #  list(APPEND COMP_OPTIONS "-Wuninitialized")
+    # warn/error when a switch statement has an index of boolean type and the case values are outside the range of a boolean type
+    list(APPEND COMP_OPTIONS -Werror=switch-bool)
+    # Warn about logical not used on the left hand side operand of a comparison
+    list(APPEND COMP_OPTIONS -Werror=logical-not-parentheses)
+    # warn when the sizeof operator is applied to a parameter that is declared as an array in a function definition. This warning is enabled by default for C and C++ programs
+    list(APPEND COMP_OPTIONS -Werror=sizeof-array-argument)
+    # Warn about boolean expression compared with an integer value different from true/false
+    # GNU ONLY, C/CXX
+    list(APPEND COMP_OPTIONS
+      $<$<OR:$<C_COMPILER_ID:Gnu>,$<CXX_COMPILER_ID:Gnu>>:-Werror=bool-compare>)
+    # This option is only active when -ftree-vrp is active (default for -O2 and above). It warns about subscripts to arrays that are always out of bounds.
+    list(APPEND COMP_OPTIONS -Werror=array-bounds)
+    # Warn if a comparison is always true or always false due to the limited range of the data type
+    list(APPEND COMP_OPTIONS -Werror=type-limits)
+    # warn when there is a conversion between pointers that have incompatible types.
+    list(APPEND COMP_OPTIONS -Werror=incompatible-pointer-types)
+    # Warn if a global function is defined without a previous prototype declaration.
+    ### list(APPEND COMP_OPTIONS -Werror=missing-prototypes) ACTIVATE THIS LATTER
+    # Warn whenever a function is defined with a return type that defaults to int.
+    list(APPEND COMP_OPTIONS -Werror=return-type)
+    # warns about cases where the compiler optimizes based on the assumption that signed overflow does not occur.
+    # !! this warning depends on the optimization level. Check doc.
+    list(APPEND COMP_OPTIONS -Wstrict-overflow=4)
+    # warns about code that might break the strict aliasing rules that the compiler is using for optimization.
+    list(APPEND COMP_OPTIONS -Werror=strict-aliasing)
+    # Warn about trampolines generated for pointers to nested functions.
+    # GNU ONLY, C/CXX
+    list(APPEND COMP_OPTIONS
+      $<$<OR:$<C_COMPILER_ID:Gnu>,$<CXX_COMPILER_ID:Gnu>>:-Werror=trampolines>)
+    # warnings from casts to pointer type of an integer of a different size
+    list(APPEND COMP_OPTIONS -Werror=int-to-pointer-cast)
+    #  warnings from casts from a pointer to an integer type of a different size.
+    list(APPEND COMP_OPTIONS -Werror=pointer-to-int-cast)
+    # Warn if a global function is defined without a previous declaration.
+    ## list(APPEND COMP_OPTIONS -Werror=missing-declarations) TMP COMMENT
+    # Check calls to printf and scanf, etc., to make sure that the arguments supplied have types appropriate to the format string specified
+    list(APPEND COMP_OPTIONS -Wformat=2)
+    # warn about uses of format functions that represent possible security problems.
+    list(APPEND COMP_OPTIONS -Werror=format-security)
+    # Warn when a function declaration hides virtual functions from a base class
+    list(APPEND COMP_OPTIONS -Werror=overloaded-virtual)
+    # Warn when a class has virtual functions and an accessible non-virtual destructor itself
+    list(APPEND COMP_OPTIONS -Werror=non-virtual-dtor)
+    
+    # Clang specific, C/C++
+    # Error when option does not exist ...
+    list(APPEND COMP_OPTIONS
+      $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror=unknown-warning-option>)
+    list(APPEND COMP_OPTIONS
+      $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Werror=unreachable-code>)
+  endif()
+  
+  # -- Paranoid mode  options --
+  if(COMP_STRICT)
+    # Give an error whenever the base standard (see -Wpedantic) requires a diagnostic,
+    list(APPEND COMP_OPTIONS -pedantic-errors)
+    
+    # implicit conversions that may alter a value
+    list(APPEND COMP_OPTIONS -Werror=conversion)
+
+    # Warn if a function is declared or defined without specifying the argument types.
+    list(APPEND COMP_OPTIONS -Werror=strict-prototypes)
+  endif()
+  
+  # --- Apply options to the current target ---
+  target_compile_options(${COMPONENT}
+    PRIVATE
+    $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:C>>:${COMP_OPTIONS}>)  
 endfunction()
