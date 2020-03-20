@@ -13,6 +13,7 @@
 #include "MBTB_TimeSteppingProj.hpp"
 #include "MBTB_TimeSteppingCombinedProj.hpp"
 #include <BRepTools.hxx>
+#include "SolverOptions.h" // for SolverOptions struct
 
 //#define MBTB_MOREAU_YES
 // #define DEBUG_STDOUT
@@ -244,7 +245,7 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
   SP::SiconosVector q10(new SiconosVector(qDim));
   SP::SiconosVector v10(new SiconosVector(nDim));
   _MBTB_BodyBuildComputeInitPosition(numDS,mass,initPos,modelCenterMass,inertialMatrix,q10,v10);
-  MBTB_Body * p=0;
+  MBTB_Body * p=nullptr;
   p =new MBTB_Body(q10,v10,mass,inertialMatrix,modelCenterMass,
                    BodyName, BodyName);
 

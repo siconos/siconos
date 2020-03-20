@@ -599,7 +599,7 @@ void LsodarOSI::updateState(const unsigned int level)
       }
     }
   }
-  else RuntimeException::selfThrow("LsodarOSI::updateState(index), index is out of range. Index = " + level);
+  else RuntimeException::selfThrow("LsodarOSI::updateState(index), index is out of range. Index = " + std::to_string(level));
 }
 
 struct LsodarOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
@@ -754,7 +754,7 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
     }
   }
   else
-    RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for Relation of type " + relationType);
+    RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not yet implemented for Relation of type " + std::to_string(relationType));
   if(((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
     if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)

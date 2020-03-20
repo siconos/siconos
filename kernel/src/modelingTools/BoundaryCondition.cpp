@@ -21,7 +21,7 @@
 
 
 // BoundaryCondition::BoundaryCondition()
-// _velocityIndices(NULL)
+// _velocityIndices(nullptr)
 // {
 // }
 

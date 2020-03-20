@@ -34,7 +34,7 @@
 #include "BlockMatrix.hpp"                            // for BlockMatrix
 #include "CSparseMatrix.h"                            // for CSparseMatrix
 #include "SiconosVector.hpp"                          // for SiconosVector
-
+#include "SimpleMatrixFriends.hpp" // for isComparableTo
 
 // Constructor with the type-number
 SiconosMatrix::SiconosMatrix(unsigned int type): _num(type)

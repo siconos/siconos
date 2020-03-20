@@ -38,14 +38,9 @@ function(create_siconos_component COMPONENT)
   endif()
 
   # Set compiler options
-  # if(MODE_COMP)
-    if(DEV_MODE)
-      apply_compiler_options(${COMPONENT} DEV)
-    else()
-      apply_compiler_options(${COMPONENT})
-    endif()
-  # endif()
-
+  # reminder : WARNINGS_LEVEL=0 -> no warnings, =1, developers mininmal set of warnings,
+  # =2 : strict mode, warnings to errors.
+  apply_compiler_options(${COMPONENT} DIAGNOSTICS_LEVEL ${WARNINGS_LEVEL})
   
   # Append component source dirs to include directories
   # (Private : only to build current component).

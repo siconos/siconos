@@ -152,8 +152,12 @@ target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
 target_include_directories(externals PRIVATE blas_lapack)
 
 # We don't want warnings from externals libraries.
+get_target_property(externals_COMPILE_FLAGS externals COMPILE_OPTIONS)
+list(REMOVE_ITEM externals_COMPILE_FLAGS -Wall)
+set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_FLAGS}")
 target_compile_options(externals PRIVATE "-w")
 target_compile_options(externals PRIVATE "-Wno-unused-variable")
+target_compile_options(externals PRIVATE "-Wno-unused-parameter")
 
 # - Extras, optional -
 # --- SuiteSparse ---

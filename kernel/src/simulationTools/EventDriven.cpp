@@ -257,7 +257,7 @@ void EventDriven::initOSNS()
       if(_allNSProblems->size() != 3)
         RuntimeException::selfThrow
         (" EventDriven::initialize, \n an EventDriven simulation associated with NewMarkAlphaOSI must have three non smooth problems.\n Here, there are "
-         + _allNSProblems->size());
+         + std::to_string(_allNSProblems->size()));
       // Initialize OSNSP at position level
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->setInputOutputLevel(2);
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->setIndexSetLevel(2);

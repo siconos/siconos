@@ -92,7 +92,7 @@ protected:
 
   /** Plug-in to compute e*/
   SP::PluggedObject _plugine;
-  /** To initialize all the plugin functions with NULL.
+  /** To initialize all the plugin functions with nullptr.
    */
   virtual void _zeroPlugin();
 

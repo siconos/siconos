@@ -56,7 +56,7 @@ template<class Seq> void purge(Seq& c)
   for (i = c.begin(); i != c.end(); ++i)
   {
     delete *i;
-    *i = NULL;
+    *i = nullptr;
   }
 }
 
@@ -69,7 +69,7 @@ template<class InpIt> void purge(InpIt begin, InpIt end)
   while (begin != end)
   {
     delete *begin;
-    *begin = NULL;
+    *begin = nullptr;
     ++begin;
   }
 }
@@ -86,7 +86,7 @@ template<class Seq> void purge(Seq& c, const std::vector<bool>& isAllocatedIn)
   for (i = c.begin(); i != c.end(); ++i)
   {
     if (*it ++) delete *i;
-    *i = NULL;
+    *i = nullptr;
   }
 }
 
@@ -100,7 +100,7 @@ template<class InpIt> void purge(InpIt begin, InpIt end, const std::vector<bool>
   while (begin != end)
   {
     if (*it ++) delete *begin;
-    *begin = NULL;
+    *begin = nullptr;
     ++begin;
   }
 }

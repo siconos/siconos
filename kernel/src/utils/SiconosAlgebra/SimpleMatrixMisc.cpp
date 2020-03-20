@@ -253,8 +253,9 @@ bool InvertMatrix(const ublas::matrix<T, U, V>& input, ublas::matrix<T, U, V>& i
 
 #endif //INVERT_MATRIX_HPP
 
-void invertMatrix(const SimpleMatrix& input, SimpleMatrix& output)
-{
-  InvertMatrix(*input.dense(), *output.dense());
-}
+// Note FP: never used. Comment before removal ?
+// void invertMatrix(const SimpleMatrix& input, SimpleMatrix& output)
+// {
+//   InvertMatrix(*input.dense(), *output.dense());
+// }
 

@@ -326,14 +326,8 @@ endfunction()
 
 
 function(apply_compiler_options COMPONENT)
-  set(options DEV STRICT)
-  set(oneValueArgs LANGUAGE)
+  set(oneValueArgs LANGUAGE DIAGNOSTICS_LEVEL)
   cmake_parse_arguments(COMP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-
-  # COMP_STRICT => COMP_DEV
-  if(COMP_STRICT)
-    set(COMP_DEV ON)
-  endif()
 
   # If not set, we use C++
   if(NOT COMP_LANGUAGE)
@@ -351,9 +345,9 @@ function(apply_compiler_options COMPONENT)
   list(APPEND COMP_OPTIONS
     $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wsuggest-final-methods>)
   # Warn when a literal ‘0’ is used as null pointer constant.
-  list(APPEND COMP_OPTIONS "-Wzero-as-null-pointer-constant")
+  list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Wzero-as-null-pointer-constant>)
   if(WITH_SERIALIZATION)
-    list(APPEND COMP_OPTIONS "-ftemplate-depth=1024")
+    list(APPEND COMP_OPTIONS -ftemplate-depth=1024)
   endif(WITH_SERIALIZATION)
   # Intel specific
   list(APPEND COMP_OPTIONS $<$<CXX_COMPILER_ID:Intel>:"-diag-disable 654">)
@@ -367,7 +361,7 @@ function(apply_compiler_options COMPONENT)
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-string-plus-int>)
  
   # -- Dev mode options --
-  if(COMP_DEV)
+  if(COMP_DIAGNOSTICS_LEVEL GREATER 0)
     # -- options working with both C and C++ --
     # and for all compilers.
     # ! tested only with clang and gnu
@@ -438,7 +432,7 @@ function(apply_compiler_options COMPONENT)
   endif()
   
   # -- Paranoid mode  options --
-  if(COMP_STRICT)
+  if(COMP_DIAGNOSTICS_LEVEL GREATER 1)
     # Give an error whenever the base standard (see -Wpedantic) requires a diagnostic,
     list(APPEND COMP_OPTIONS -pedantic-errors)
     

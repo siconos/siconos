@@ -41,7 +41,7 @@ extern "C" {
 /*     if (mode & Output_Log) flush log file                                 */
 /*     if (mode & Output_Status) flush status file                           */
 /*     if (mode & Output_Listing) flush listing file                         */
-/*   NOTE: the flush callback can be initialized to the NULL pointer without */
+/*   NOTE: the flush callback can be initialized to the nullptr pointer without */
 /*   any negative effects.                                                   */
 /*                                                                           */
 /*****************************************************************************/
@@ -77,15 +77,15 @@ FUN_DECL(Void) Output_SetInterface(Output_Interface *i);
 /*****************************************************************************/
 /*                                                                           */
 /* Output_SetLog     - redirect the log to the indicated opened file.  If    */
-/*                     NULL is passed in as the argument nothing will be     */
+/*                     nullptr is passed in as the argument nothing will be     */
 /*                     written to the log.                                   */
 /*                                                                           */
 /* Output_SetStatus  - redirect the status to the indicated opened file.  If */
-/*                     NULL is passed in as the argument nothing will be     */
+/*                     nullptr is passed in as the argument nothing will be     */
 /*                     written to the status.                                */
 /*                                                                           */
 /* Output_SetListing - redirect the listing to the indicated opened file.    */
-/*                     If NULL is passed in as the argument nothing will be  */
+/*                     If nullptr is passed in as the argument nothing will be  */
 /*                     written to the listing.                               */
 /*                                                                           */
 /*****************************************************************************/

@@ -170,9 +170,9 @@ void siconos_io(Archive&ar, NumericsMatrix& v, unsigned int version)
     if (Archive::is_loading::value)
     {
       v.matrix0 = (double *) malloc(v.size0 * v.size1 * sizeof(double));
-      v.matrix1 = NULL;
-      v.matrix2 = NULL;
-      v.internalData = NULL;
+      v.matrix1 = nullptr;
+      v.matrix2 = nullptr;
+      v.internalData = nullptr;
     }
     SERIALIZE_C_ARRAY(v.size0 * v.size1, v, matrix0, ar);
   }
@@ -181,10 +181,10 @@ void siconos_io(Archive&ar, NumericsMatrix& v, unsigned int version)
     {
       if (Archive::is_loading::value)
       {
-        v.matrix0 = NULL;
+        v.matrix0 = nullptr;
         v.matrix1 = (SparseBlockStructuredMatrix*) malloc(sizeof(SparseBlockStructuredMatrix));
-        v.matrix2 = NULL;
-        v.internalData = NULL;
+        v.matrix2 = nullptr;
+        v.internalData = nullptr;
       }
       SERIALIZE(v, (matrix1), ar);
     }
@@ -195,11 +195,11 @@ REGISTER_BOOST_SERIALIZATION(NumericsMatrix);
 template <class Archive>
 void siconos_io_register_Numerics(Archive& ar)
 {
-  ar.register_type(static_cast<SolverOptions*>(NULL));
-  ar.register_type(static_cast<LinearComplementarityProblem*>(NULL));
-  ar.register_type(static_cast<NumericsMatrix*>(NULL));
-  ar.register_type(static_cast<SparseBlockStructuredMatrix*>(NULL));
-  ar.register_type(static_cast<FrictionContactProblem*>(NULL));
+  ar.register_type(static_cast<SolverOptions*>(nullptr));
+  ar.register_type(static_cast<LinearComplementarityProblem*>(nullptr));
+  ar.register_type(static_cast<NumericsMatrix*>(nullptr));
+  ar.register_type(static_cast<SparseBlockStructuredMatrix*>(nullptr));
+  ar.register_type(static_cast<FrictionContactProblem*>(nullptr));
 
 }
 #endif

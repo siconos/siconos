@@ -402,7 +402,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
   else if(osiType == OSI::LSODAROSI)  // Warning: LagrangianDS only at the time !!!
   {
     if(dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for LsodarOSI Integrator with dynamical system of type " + dsType);
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for LsodarOSI Integrator with dynamical system of type " + std::to_string(dsType));
 
     // get lu-factorized mass
     block = (std11::static_pointer_cast<LagrangianDS>(ds))->inverseMass();
@@ -411,7 +411,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
   {
     if(dsType != Type::LagrangianDS && dsType != Type::LagrangianLinearTIDS)
     {
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + dsType);
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for NewmarkAlphaOSI Integrator with dynamical system of type " + std::to_string(dsType));
     }
     //
     SP::OneStepNSProblems  allOSNS  = Osi.simulation()->oneStepNSProblems();
@@ -453,7 +453,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
       block.reset(new SimpleMatrix(*(d->mass())));
     }
     else
-      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinearOSI integrator with dynamical system of type " + dsType);
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for D1MinusLinearOSI integrator with dynamical system of type " + std::to_string(dsType));
   }
   // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
   else if(osiType == OSI::ZOHOSI)
@@ -464,7 +464,7 @@ SP::SimpleMatrix OneStepNSProblem::getOSIMatrix(OneStepIntegrator& Osi, SP::Dyna
       *block = (static_cast<ZeroOrderHoldOSI&>(Osi)).Ad(ds);
   }
   else
-    RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for Integrator of type " + osiType);
+    RuntimeException::selfThrow("OneStepNSProblem::getOSIMatrix not yet implemented for Integrator of type " + std::to_string(osiType));
   return block;
 }
 

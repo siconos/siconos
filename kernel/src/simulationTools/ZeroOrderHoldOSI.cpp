@@ -255,7 +255,7 @@ double ZeroOrderHoldOSI::computeResidu()
       // No residu with ZOH ...
     }
     else
-      RuntimeException::selfThrow("ZeroOrderHoldOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("ZeroOrderHoldOSI::computeResidu - not yet implemented for Dynamical system type: " + std::to_string(dsType));
   }
   DEBUG_END("double ZeroOrderHoldOSI::computeResidu()\n");
   return maxResidu;
@@ -316,7 +316,7 @@ void ZeroOrderHoldOSI::computeFreeState()
       DEBUG_EXPR(xfree.display(););
     }
     else
-      RuntimeException::selfThrow("ZeroOrderHoldOSI::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("ZeroOrderHoldOSI::computeFreeState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
 
   }
   DEBUG_END("void ZeroOrderHoldOSI::computeFreeState()\n");
@@ -584,7 +584,7 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
       DEBUG_EXPR(ds->display(););
     }
     else
-      RuntimeException::selfThrow("ZeroOrderHoldOSI::updateState - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("ZeroOrderHoldOSI::updateState - not yet implemented for Dynamical system type: " + std::to_string(dsType));
   }
   DEBUG_END("ZeroOrderHoldOSI::updateState(const unsigned int level)\n");
 }

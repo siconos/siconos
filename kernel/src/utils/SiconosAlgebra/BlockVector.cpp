@@ -66,7 +66,7 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2)
   // Insert the two vectors in the container
   // NO COPY !!
   if(! v1  && ! v2)
-    SiconosVectorException::selfThrow("BlockVector:constructor(SiconosVector*,SiconosVector*), both vectors are NULL.");
+    SiconosVectorException::selfThrow("BlockVector:constructor(SiconosVector*,SiconosVector*), both vectors are nullptr.");
 
   _tabIndex.reset(new Index());
 
@@ -81,7 +81,7 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2)
 
   }
   else
-    // If first parameter is a NULL pointer, then set this(1) to a SiconosVector of the same size as v2, and equal to 0.
+    // If first parameter is a nullptr pointer, then set this(1) to a SiconosVector of the same size as v2, and equal to 0.
   {
     // This case is usefull to set xDot in LagrangianDS.
     _sizeV = v2->size();
@@ -97,7 +97,7 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2)
     _tabIndex->push_back(_sizeV);
 
   }
-  else // If second parameter is a NULL pointer, then set this(2) to a SiconosVector of the same size as v1, and equal to 0.
+  else // If second parameter is a nullptr pointer, then set this(2) to a SiconosVector of the same size as v1, and equal to 0.
   {
     // This case is usefull to set xDot in LagrangianDS.
 
@@ -195,7 +195,7 @@ void BlockVector::display() const
     if(*it)
       (*it)->display();
     else
-      std::cout << "(*it)-> NULL" <<std::endl;
+      std::cout << "(*it)-> nullptr" <<std::endl;
   }
 }
 
@@ -298,7 +298,7 @@ void BlockVector::setVector(unsigned int pos, const SiconosVector& v)
 {
   assert(pos < _vect.size() && "insertion out of vector size");
   if(! _vect[pos])
-    SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] == NULL pointer.");
+    SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] == nullptr pointer.");
 
   // if(v.size() != (_vect[pos])->size())
   //   SiconosVectorException::selfThrow("BlockVector::setVector(pos,v), this[pos] and v have unconsistent sizes.");
@@ -488,7 +488,7 @@ void BlockVector::insert(const  SiconosVector& v)
 void BlockVector::insertPtr(SP::SiconosVector v)
 {
   if(!v)
-    SiconosVectorException::selfThrow("BlockVector:insertPtr(v), v is a NULL vector.");
+    SiconosVectorException::selfThrow("BlockVector:insertPtr(v), v is a nullptr vector.");
 
   _sizeV += v->size();
   _vect.push_back(v);

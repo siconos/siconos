@@ -29,7 +29,7 @@
  *
  * A block vector is a stl vector that handles pointers to SiconosVector.
  *
- * Insertion of NULL SP::SiconosVector is not allowed.
+ * Insertion of nullptr SP::SiconosVector is not allowed.
  *
  */
 class BlockVector
@@ -89,7 +89,7 @@ public:
    */
   BlockVector(unsigned int numberOfBlocks, unsigned int dim);
 
-  /** contructor with a BlockVector of n (numberOfBlocks) blocks that point on NULL
+  /** contructor with a BlockVector of n (numberOfBlocks) blocks that point on nullptr
    *  \param numberOfBlocks number of blocks
    */
   BlockVector(unsigned int numberOfBlocks);

@@ -38,7 +38,7 @@ SP::DynamicalSystem Registry::instantiate(int name, const SiconosVector& x0)
   MapFactoryIt it = factory_map.find(name) ;
 
   if(it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (DynamicalSystemFactory) failed, no class named: " + name);
+    RuntimeException::selfThrow("Registry::instantiate (DynamicalSystemFactory) failed, no class named: " + std::to_string(name));
 
   return (it->second)(name, x0) ; // run our factory
 }
