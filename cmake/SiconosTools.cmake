@@ -402,7 +402,7 @@ function(apply_compiler_options COMPONENT)
     # warn when there is a conversion between pointers that have incompatible types.
     list(APPEND COMP_OPTIONS -Werror=incompatible-pointer-types)
     # Warn if a global function is defined without a previous prototype declaration.
-    ### list(APPEND COMP_OPTIONS -Werror=missing-prototypes) ACTIVATE THIS LATTER
+    list(APPEND COMP_OPTIONS -Werror=missing-prototypes)
     # Warn whenever a function is defined with a return type that defaults to int.
     list(APPEND COMP_OPTIONS -Werror=return-type)
     # warns about cases where the compiler optimizes based on the assumption that signed overflow does not occur.
@@ -419,7 +419,7 @@ function(apply_compiler_options COMPONENT)
     #  warnings from casts from a pointer to an integer type of a different size.
     list(APPEND COMP_OPTIONS -Werror=pointer-to-int-cast)
     # Warn if a global function is defined without a previous declaration.
-    ## list(APPEND COMP_OPTIONS -Werror=missing-declarations) TMP COMMENT
+    list(APPEND COMP_OPTIONS -Werror=missing-declarations)
     # Check calls to printf and scanf, etc., to make sure that the arguments supplied have types appropriate to the format string specified
     list(APPEND COMP_OPTIONS -Wformat=2)
     # warn about uses of format functions that represent possible security problems.
