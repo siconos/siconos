@@ -44,7 +44,7 @@ option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" OFF)
 option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings. Default = OFF" OFF)
 option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." OFF)
 
-
+set(CMAKE_BUILD_TYPE Debug CACHE STRING "build type (compiler options)" FORCE)
 
 # --- List of external libraries/dependencies to be searched (or not) ---
 option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)

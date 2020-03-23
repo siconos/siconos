@@ -358,7 +358,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   // dynamical systems belonging to the osi
 
   // Check osi type: only lsodar is allowed.
-  assert((osi.getType() == OSI::LSODAROSI) && "EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + osi.getType());
+  assert((osi.getType() == OSI::LSODAROSI) && "EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + std::to_string(osi.getType()));
 
   LsodarOSI& lsodar = static_cast<LsodarOSI&>(osi);
   // fill in xWork vector (ie all the x of the ds of this osi) with x
@@ -428,7 +428,7 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
                                     doublereal *jacob)
 {
   assert((osi.getType() == OSI::LSODAROSI) &&
-         "EventDriven::computeJacobianfx(osi, ...), not yet implemented for a one step integrator of type " + osi.getType());
+         "EventDriven::computeJacobianfx(osi, ...), not yet implemented for a one step integrator of type " + std::to_string(osi.getType()));
 
   LsodarOSI& lsodar = static_cast<LsodarOSI&>(osi);
 
