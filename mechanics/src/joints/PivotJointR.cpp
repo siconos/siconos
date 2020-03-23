@@ -449,7 +449,7 @@ void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
   double rot2to1x, rot2to1y, rot2to1z;
   rot2to1(q10, q11, q12, q13, q20, q21, q22, q23,
-          NULL, &rot2to1x, &rot2to1y, &rot2to1z);
+          nullptr, &rot2to1x, &rot2to1y, &rot2to1z);
 
   y.setValue(3, AscalA1(rot2to1x, rot2to1y, rot2to1z) - _initial_AscalA1);
   y.setValue(4, AscalA2(rot2to1x, rot2to1y, rot2to1z) - _initial_AscalA2);

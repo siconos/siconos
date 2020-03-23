@@ -50,13 +50,6 @@ void KneeJointR::initialize(Interaction& inter)
 
 void KneeJointR::checkInitPos(SP::SiconosVector x1,  SP::SiconosVector x2)
 {
-  double X1 = x1->getValue(0);
-  double Y1 = x1->getValue(1);
-  double Z1 = x1->getValue(2);
-  double q10 = x1->getValue(3);
-  double q11 = x1->getValue(4);
-  double q12 = x1->getValue(5);
-  double q13 = x1->getValue(6);
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
@@ -74,6 +67,17 @@ void KneeJointR::checkInitPos(SP::SiconosVector x1,  SP::SiconosVector x2)
     q22 = x2->getValue(5);
     q23 = x2->getValue(6);
   }
+
+#if !defined(NDEBUG)
+  double X1 = x1->getValue(0);
+  double Y1 = x1->getValue(1);
+  double Z1 = x1->getValue(2);
+  double q10 = x1->getValue(3);
+  double q11 = x1->getValue(4);
+  double q12 = x1->getValue(5);
+  double q13 = x1->getValue(6);
+
+#endif
 
   assert(Hx(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23)
          < DBL_EPSILON);

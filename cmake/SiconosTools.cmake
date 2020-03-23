@@ -338,12 +338,12 @@ function(apply_compiler_options COMPONENT)
   # -- Compiler options common to all setups --
   
   # Warn about types with virtual methods where code quality would be improved if the type were declared with the C++11 final specifier, or, if possible, declared in an anonymous namespace.
-  #list(APPEND COMP_OPTIONS "-Wsuggest-final-types"). GNU/CXX ONLY.
-  list(APPEND COMP_OPTIONS
-    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wsuggest-final-types>)
-  # Warn about virtual methods where code quality would be improved if the method were declared with the C++11 final specifier, or, if possible, its type were declared in an anonymous namespace or with the final specifier. GNU/CXX ONLY.
-  list(APPEND COMP_OPTIONS
-    $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wsuggest-final-methods>)
+  #list(APPEND COMP_OPTIONS "-Wsuggest-final-types"). GNU/CXX ONLY. ## NOTE FP : too many warnings, activate this later
+  # list(APPEND COMP_OPTIONS
+  #   $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wsuggest-final-types>)
+  # Warn about virtual methods where code quality would be improved if the method were declared with the C++11 final specifier, or, if possible, its type were declared in an anonymous namespace or with the final specifier. GNU/CXX ONLY. ## NOTE FP : too many warnings, activate this later
+  # list(APPEND COMP_OPTIONS
+  #   $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wsuggest-final-methods>)
   # Warn when a literal ‘0’ is used as null pointer constant.
   list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Wzero-as-null-pointer-constant>)
   if(WITH_SERIALIZATION)
