@@ -60,7 +60,7 @@ void _MBTB_DRAW_STEP()
   {
     for(unsigned int nC=0; nC<3*sNbOfContacts; nC++)
     {
-      CADMBTB_buildLineArtefactLine(nC,nullptr,nullptr,nullptr,nullptr,nullptr);
+      CADMBTB_buildLineArtefactLine(nC,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr);
     }
 
   }

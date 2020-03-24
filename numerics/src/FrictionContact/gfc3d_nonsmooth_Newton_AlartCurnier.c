@@ -714,23 +714,24 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
     /* line search */
 
     double alpha = 1.0;
-    int info_ls = 0;
+    // int info_ls = 0; Never used.
 
     switch(options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH])
     {
     case SICONOS_FRICTION_3D_NSN_LINESEARCH_NO:
       /* without line search */
-      info_ls = 1;
+      // info_ls = 1;
       break;
 
     case SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE:
       /* Goldstein Price */
-      info_ls = _globalLineSearchSparseGP(problem,
-                                          computeACFun3x3,
-                                          solution,
-                                          rhs,
-                                          problem->mu, rho, F, psi, Jcsc,
-                                          tmp2, &alpha, options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER]);
+      //      info_ls =
+      _globalLineSearchSparseGP(problem,
+                                computeACFun3x3,
+                                solution,
+                                rhs,
+                                problem->mu, rho, F, psi, Jcsc,
+                                tmp2, &alpha, options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH_MAX_ITER]);
       break;
     /* case SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO: */
     /*   /\* FBLSA *\/ */

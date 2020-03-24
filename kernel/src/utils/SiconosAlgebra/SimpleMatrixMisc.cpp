@@ -190,6 +190,7 @@ void SimpleMatrix::trans(const SiconosMatrix &m)
       break;
     case IDENTITY:
       *this = m;
+      break;
     default:
       SiconosMatrixException::selfThrow("SimpleMatrix::trans(m) failed.");
     }
