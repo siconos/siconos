@@ -309,7 +309,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
   double alpha_r=0.0, beta_r=0.0;
   GlobalFrictionContactProblem *  rescaled_problem =  problem;
   BalancingMatrices * B_for_M = NULL;
-  BalancingMatrices * B_for_H = NULL;
+  /* BalancingMatrices * B_for_H = NULL; */
   if(options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]==SICONOS_FRICTION_3D_RESCALING_SCALAR)
   {
     alpha_r = NM_norm_inf(M);

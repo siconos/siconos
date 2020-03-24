@@ -220,10 +220,10 @@ void FirstOrderLinearDS::display(bool brief) const
   std::cout << "=== Linear system display, " << _number << std::endl;
   std::cout << "- x " <<std::endl;
   if(_x[0]) _x[0]->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- x0 " <<std::endl;
   if(_x0) _x0->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "M :" << std::endl;
   if(_M)
   {
@@ -235,17 +235,17 @@ void FirstOrderLinearDS::display(bool brief) const
   if(_A)
     _A->display();
   else
-    std::cout << "-> NULL" << std::endl;
+    std::cout << "-> nullptr" << std::endl;
   std::cout << "b :" << std::endl;
   if(_b)
     _b->display();
   else
-    std::cout << "-> NULL" << std::endl;
+    std::cout << "-> nullptr" << std::endl;
   std::cout << "r :" << std::endl;
   if(_r)
     _r->display();
   else
-    std::cout << "-> NULL" << std::endl;
+    std::cout << "-> nullptr" << std::endl;
   if(_hasConstantA)
   {
     std::cout << "A is a time invariant matrix" << std::endl;

@@ -68,15 +68,15 @@ EulerMoreauOSI::EulerMoreauOSI(double theta, double gamma):
 const SimpleMatrix EulerMoreauOSI::getW(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "EulerMoreauOSI::getW(ds): ds == NULL.");
+         "EulerMoreauOSI::getW(ds): ds == nullptr.");
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
-         "EulerMoreauOSI::getW(ds): W[ds] == NULL.");
+         "EulerMoreauOSI::getW(ds): W[ds] == nullptr.");
   return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W); // Copy !!
 }
 
 SP::SimpleMatrix EulerMoreauOSI::W(SP::DynamicalSystem ds)
 {
-  assert(ds && "EulerMoreauOSI::W(ds): ds == NULL.");
+  assert(ds && "EulerMoreauOSI::W(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
 
@@ -84,16 +84,16 @@ SP::SimpleMatrix EulerMoreauOSI::W(SP::DynamicalSystem ds)
 const SimpleMatrix EulerMoreauOSI::getWBoundaryConditions(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "EulerMoreauOSI::getWBoundaryConditions(ds): ds == NULL.");
+         "EulerMoreauOSI::getWBoundaryConditions(ds): ds == nullptr.");
   //    return *(WBoundaryConditionsMap[0]);
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions
-         && "EulerMoreauOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
+         && "EulerMoreauOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == nullptr.");
   return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions); // Copy !!
 }
 
 SP::SiconosMatrix EulerMoreauOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 {
-  assert(ds && "EulerMoreauOSI::WBoundaryConditions(ds): ds == NULL.");
+  assert(ds && "EulerMoreauOSI::WBoundaryConditions(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
@@ -274,7 +274,7 @@ void EulerMoreauOSI::initializeIterationMatrixW(double time, SP::DynamicalSystem
   // - update its content for the current (initial) state of the dynamical system, depending on its type.
 
   if(!ds)
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
@@ -329,7 +329,7 @@ void EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(SP::DynamicalS
   // - insert this matrix into WBoundaryConditionsMap with ds as a key
 
   if(!ds)
-    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
@@ -351,7 +351,7 @@ void EulerMoreauOSI::computeWBoundaryConditions(SP::DynamicalSystem ds)
   // done during initializeIterationMatrixWBoundaryConditions.
 
   assert(ds &&
-         "EulerMoreauOSI::computeWBoundaryConditions(t,ds) - ds == NULL");
+         "EulerMoreauOSI::computeWBoundaryConditions(t,ds) - ds == nullptr");
 
   Type::Siconos dsType = Type::value(*ds);
   //unsigned int dsN = ds->number();
@@ -1173,7 +1173,7 @@ void EulerMoreauOSI::display()
     std::cout << "--------------------------------" <<std::endl;
     std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
     if(_dynamicalSystemsGraph->properties(*dsi).W) _dynamicalSystemsGraph->properties(*dsi).W->display();
-    else std::cout << "-> NULL" <<std::endl;
+    else std::cout << "-> nullptr" <<std::endl;
     std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
   }
   std::cout << "================================" <<std::endl;

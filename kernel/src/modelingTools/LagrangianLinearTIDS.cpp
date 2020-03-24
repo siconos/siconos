@@ -121,13 +121,13 @@ void LagrangianLinearTIDS::display(bool brief) const
   std::cout << "===== Lagrangian Linear Time Invariant System display ===== " <<std::endl;
   std::cout << "- Mass Matrix M : " <<std::endl;
   if(_mass) _mass->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- Stiffness Matrix K : " <<std::endl;
   if(_K) _K->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- Viscosity Matrix C : " <<std::endl;
   if(_C) _C->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "=========================================================== " <<std::endl;
 }
 

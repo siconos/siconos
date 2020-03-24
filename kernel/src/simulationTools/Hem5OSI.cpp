@@ -817,13 +817,13 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
   // Management of vectors of Size 0
   doublereal * pointerToU;
   if(_intData[2] ==0)
-    pointerToU = NULL;
+    pointerToU = nullptr;
   else
     pointerToU = &(*_utmp)(0);
 
   doublereal * pointerToXL;
   if(_intData[3] ==0)
-    pointerToXL = NULL;
+    pointerToXL = nullptr;
   else
     pointerToXL = &(*_lambdatmp)(0);
 #ifdef HAS_FORTRAN

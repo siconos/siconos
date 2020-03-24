@@ -68,15 +68,15 @@ NewMarkAlphaOSI::NewMarkAlphaOSI(double _rho_infty, bool flag = false):
 
 const SimpleMatrix NewMarkAlphaOSI::getW(SP::DynamicalSystem ds)
 {
-  assert(ds && "NewMarkAlphaOSI::getW(ds): ds == NULL.");
-  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W && "NewMarkAlphaOSI::getW(ds): W[ds] == NULL.");
+  assert(ds && "NewMarkAlphaOSI::getW(ds): ds == nullptr.");
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W && "NewMarkAlphaOSI::getW(ds): W[ds] == nullptr.");
   return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W); // Copy !!
 }
 
 SP::SimpleMatrix NewMarkAlphaOSI::W(SP::DynamicalSystem ds)
 {
-  assert(ds && "NewMarkAlphaOSI::W(ds): ds == NULL.");
-  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W && "NewMarkAlphaOSI::W(ds): W[ds] == NULL.");
+  assert(ds && "NewMarkAlphaOSI::W(ds): ds == nullptr.");
+  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W && "NewMarkAlphaOSI::W(ds): W[ds] == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
 
@@ -84,7 +84,7 @@ void NewMarkAlphaOSI::initializeIterationMatrixW(SP::DynamicalSystem ds)
 {
 
   if(!ds)
-    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
@@ -424,7 +424,7 @@ void NewMarkAlphaOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem d
   // Compute W (iteration matrix)
   initializeIterationMatrixW(ds);
   // allocate memory for work space for Newton iteration procedure
-  assert(_dynamicalSystemsGraph->properties(dsv).W && "W is NULL");
+  assert(_dynamicalSystemsGraph->properties(dsv).W && "W is nullptr");
   //Allocate the memory to stock the acceleration-like variable
   if((dsType == Type::LagrangianDS) || (dsType == Type::LagrangianLinearTIDS))
   {

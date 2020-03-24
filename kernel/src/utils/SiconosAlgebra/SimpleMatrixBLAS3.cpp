@@ -397,7 +397,7 @@ void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, Si
   C.resetLU();
 
   // At the time, only dense output allowed
-  DenseMat * tmpC = NULL;
+  DenseMat * tmpC = nullptr;
   if(numA == 0 || numB == 0 || numC == 0)
     SiconosMatrixException::selfThrow("gemm(...) not yet implemented for block matrices.");
 

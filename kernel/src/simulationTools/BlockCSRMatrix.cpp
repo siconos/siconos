@@ -291,7 +291,7 @@ void BlockCSRMatrix::convert()
   if(_sparseBlockStructuredMatrix->diagonal_blocks)
   {
     free(_sparseBlockStructuredMatrix->diagonal_blocks);
-    _sparseBlockStructuredMatrix->diagonal_blocks = NULL;
+    _sparseBlockStructuredMatrix->diagonal_blocks = nullptr;
   }
   //   // Loop through the non-null blocks
   //   for (SpMatIt1 i1 = _blockCSR->begin1(); i1 != _blockCSR->end1(); ++i1)

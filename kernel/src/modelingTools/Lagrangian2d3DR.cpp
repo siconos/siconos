@@ -158,35 +158,35 @@ void Lagrangian2d3DR::display() const
   if(_Pc1)
     _Pc1->display();
   else
-    std::cout << " NULL :" << std::endl;
+    std::cout << " nullptr :" << std::endl;
 
   std::cout << " _Pc2 :" << std::endl;
   if(_Pc2)
     _Pc2->display();
   else
-    std::cout << " NULL :" << std::endl;
+    std::cout << " nullptr :" << std::endl;
 
   std::cout << " _relPc1 :" << std::endl;
   if(_relPc1)
     _relPc1->display();
   else
-    std::cout << " NULL :" << std::endl;
+    std::cout << " nullptr :" << std::endl;
 
   std::cout << " _relPc2 :" << std::endl;
   if(_relPc2)
     _relPc2->display();
   else
-    std::cout << " NULL :" << std::endl;
+    std::cout << " nullptr :" << std::endl;
 
   std::cout << " _Nc :" << std::endl;
   if(_Nc)
     _Nc->display();
   else
-    std::cout << " NULL :" << std::endl;
+    std::cout << " nullptr :" << std::endl;
   std::cout << " _relNc :" << std::endl;
   if(_relNc)
     _relNc->display();
   else
-    std::cout << " NULL :" << std::endl;
+    std::cout << " nullptr :" << std::endl;
 
 }

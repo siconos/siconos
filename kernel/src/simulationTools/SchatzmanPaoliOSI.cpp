@@ -69,15 +69,15 @@ SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta, double gamma):
 const SimpleMatrix SchatzmanPaoliOSI::getW(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "SchatzmanPaoliOSI::getW(ds): ds == NULL.");
+         "SchatzmanPaoliOSI::getW(ds): ds == nullptr.");
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
-         "SchatzmanPaoliOSI::getW(ds): W[ds] == NULL.");
+         "SchatzmanPaoliOSI::getW(ds): W[ds] == nullptr.");
   return *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W; // Copy !!
 }
 
 SP::SimpleMatrix SchatzmanPaoliOSI::W(SP::DynamicalSystem ds)
 {
-  assert(ds && "SchatzmanPaoliOSI::W(ds): ds == NULL.");
+  assert(ds && "SchatzmanPaoliOSI::W(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
   ;
 }
@@ -85,16 +85,16 @@ SP::SimpleMatrix SchatzmanPaoliOSI::W(SP::DynamicalSystem ds)
 const SimpleMatrix SchatzmanPaoliOSI::getWBoundaryConditions(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "SchatzmanPaoliOSI::getWBoundaryConditions(ds): ds == NULL.");
+         "SchatzmanPaoliOSI::getWBoundaryConditions(ds): ds == nullptr.");
   //    return *(WBoundaryConditionsMap[0]);
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions &&
-         "SchatzmanPaoliOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
+         "SchatzmanPaoliOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == nullptr.");
   return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions); // Copy !!
 }
 
 SP::SiconosMatrix SchatzmanPaoliOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 {
-  assert(ds && "SchatzmanPaoliOSI::WBoundaryConditions(ds): ds == NULL.");
+  assert(ds && "SchatzmanPaoliOSI::WBoundaryConditions(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions;
 }
 
@@ -233,7 +233,7 @@ void SchatzmanPaoliOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem
   // - update its content for the current (initial) state of the dynamical system, depending on its type.
 
   if(!ds)
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::initializeIterationMatrixW(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("SchatzmanPaoliOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
@@ -301,7 +301,7 @@ void SchatzmanPaoliOSI::initializeIterationMatrixWBoundaryConditions(SP::Dynamic
   // - insert this matrix into WBoundaryConditionsMap with ds as a key
 
   if(!ds)
-    RuntimeException::selfThrow("SchatzmanPaoliOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("SchatzmanPaoliOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("SchatzmanPaoliOSI::initializeIterationMatrixWBoundaryConditions(t,ds) - ds does not belong to the OSI.");
@@ -322,7 +322,7 @@ void SchatzmanPaoliOSI::computeWBoundaryConditions(SP::DynamicalSystem ds, Sicon
   // done during initializeIterationMatrixWBoundaryConditions.
 
   assert(ds &&
-         "SchatzmanPaoliOSI::computeWBoundaryConditions(t,ds) - ds == NULL");
+         "SchatzmanPaoliOSI::computeWBoundaryConditions(t,ds) - ds == nullptr");
 
   Type::Siconos dsType = Type::value(*ds);
 
@@ -335,7 +335,7 @@ void SchatzmanPaoliOSI::computeW(double t, SP::DynamicalSystem ds, SiconosMatrix
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
 
   assert(ds &&
-         "SchatzmanPaoliOSI::computeW(t,ds) - ds == NULL");
+         "SchatzmanPaoliOSI::computeW(t,ds) - ds == nullptr");
 
   //double h = _simulation->timeStep();
   Type::Siconos dsType = Type::value(*ds);
@@ -925,7 +925,7 @@ void SchatzmanPaoliOSI::display()
     std::cout << "--------------------------------" <<std::endl;
     std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
     if(_dynamicalSystemsGraph->properties(*dsi).W)  _dynamicalSystemsGraph->properties(*dsi).W->display();
-    else std::cout << "-> NULL" <<std::endl;
+    else std::cout << "-> nullptr" <<std::endl;
     std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
   }
   std::cout << "================================" <<std::endl;

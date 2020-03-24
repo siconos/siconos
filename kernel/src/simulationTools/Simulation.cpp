@@ -52,7 +52,7 @@ Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation
   _staticLevels(false),_isInitialized(false)
 {
   if(!td)
-    RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
+    RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == nullptr.");
   _useRelativeConvergenceCriterion = false;
   _relativeConvergenceCriterionHeld = false;
   _relativeConvergenceTol = 10e-3;
@@ -81,7 +81,7 @@ Simulation::Simulation(SP::TimeDiscretisation td):
 
 {
   if(!td)
-    RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
+    RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == nullptr.");
   _allOSI.reset(new OSISet());
   _allNSProblems.reset(new OneStepNSProblems());
   _eventsManager.reset(new EventsManager(td)); //
@@ -472,7 +472,7 @@ int Simulation::computeOneStepNSProblem(int Id)
   DEBUG_PRINTF("with Id = %i\n", Id);
 
   if(!(*_allNSProblems)[Id])
-    RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == NULL, Id: " + Id);
+    RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem == nullptr, Id: " + Id);
 
   // Before compute, inform all OSNSs if topology has changed
   if(_nsds->topology()->hasChanged())

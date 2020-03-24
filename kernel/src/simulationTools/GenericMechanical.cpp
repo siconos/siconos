@@ -225,5 +225,5 @@ void  GenericMechanical::updateInteractionBlocks()
 GenericMechanical::~GenericMechanical()
 {
   genericMechanicalProblem_free(_pnumerics_GMP, NUMERICS_GMP_FREE_GMP);
-  _pnumerics_GMP = 0;
+  _pnumerics_GMP = nullptr;
 }

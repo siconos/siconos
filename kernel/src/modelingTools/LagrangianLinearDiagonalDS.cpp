@@ -116,13 +116,13 @@ void LagrangianLinearDiagonalDS::display(bool brief) const
   std::cout << "===== Lagrangian Linear Diagonal System display ===== " <<std::endl;
   std::cout << "- Mass Matrix M : " <<std::endl;
   if(_mass) _mass->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- Stiffness Matrix K : " <<std::endl;
   if(_stiffness) _stiffness->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- Viscosity Matrix C : " <<std::endl;
   if(_damping) _damping->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "=========================================================== " <<std::endl;
 }
 

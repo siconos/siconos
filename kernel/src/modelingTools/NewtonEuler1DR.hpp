@@ -125,7 +125,7 @@ public:
     _relPc1(new SiconosVector(3)), _relPc2(new SiconosVector(3)),
     _Nc(new SiconosVector(3)), _relNc(new SiconosVector(3))
   {
-    /*_ds1=NULL;_ds2=NULL;*/
+    /*_ds1=nullptr;_ds2=nullptr;*/
   }
 
   /** destructor

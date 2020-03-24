@@ -311,8 +311,8 @@ void Interaction::__init()
   // occur in reset function, potentially called during
   // simulation phase (in OSI indeed).
 
-  assert(_relation && "Interaction::__init failed, relation() == NULL");
-  assert(_nslaw && "Interaction::__inits, non smooth law == NULL");
+  assert(_relation && "Interaction::__init failed, relation() == nullptr");
+  assert(_nslaw && "Interaction::__inits, non smooth law == nullptr");
 
   // -- Set upper/lower levels, according to the nslaw --
   std11::shared_ptr<_setLevels> setLevels;
@@ -814,7 +814,7 @@ void Interaction::display(bool brief) const
       if(_y[i]->size() >= 5) std::cout <<std::endl;
       _y[i]->display();
     }
-    else std::cout << "->NULL" <<std::endl;
+    else std::cout << "->nullptr" <<std::endl;
   }
   for(unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
   {
@@ -824,7 +824,7 @@ void Interaction::display(bool brief) const
       if(_yOld[i]->size() >= 5) std::cout <<std::endl;
       _yOld[i]->display();
     }
-    else std::cout << "->NULL" <<std::endl;
+    else std::cout << "->nullptr" <<std::endl;
   }
   for(unsigned int i = 0; i < _upperLevelForInput + 1; i++)
   {
@@ -834,7 +834,7 @@ void Interaction::display(bool brief) const
       if(_lambda[i]->size() >= 5) std::cout <<std::endl;
       _lambda[i]->display();
     }
-    else std::cout << "->NULL" <<std::endl;
+    else std::cout << "->nullptr" <<std::endl;
   }
   if(!brief)
   {
@@ -846,7 +846,7 @@ void Interaction::display(bool brief) const
         if(_y_k[i]->size() >= 5) std::cout <<std::endl;
         _y_k[i]->display();
       }
-      else std::cout << "->NULL" <<std::endl;
+      else std::cout << "->nullptr" <<std::endl;
     }
     std::cout << "| _yMemory size: " << _yMemory.size() <<std::endl;;
     for(unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
@@ -985,7 +985,7 @@ void Interaction::getRightInteractionBlockForDS(unsigned int pos, SP::SiconosMat
     RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS, not yet implemented for relations of type " + relationType);
 
   if(! originalMatrix)
-    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): the right interactionBlock is a NULL pointer (miss matrix B or H or gradients ...in relation ?)");
+    RuntimeException::selfThrow("Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, ...): the right interactionBlock is a nullptr pointer (miss matrix B or H or gradients ...in relation ?)");
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock

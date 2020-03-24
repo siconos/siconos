@@ -102,6 +102,9 @@ typedef enum {
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
+#define NULL_C  nullptr
+#else
+#define NULL_C  NULL
 #endif
   /**************************************************/
   /** Constructors and destructors   ****************/
@@ -223,10 +226,10 @@ extern "C"
    */
   static inline void NM_null(NumericsMatrix* A)
   {
-    A->matrix0 = NULL;
-    A->matrix1 = NULL;
-    A->matrix2 = NULL;
-    A->internalData = NULL;
+    A->matrix0 = NULL_C;
+    A->matrix1 = NULL_C;
+    A->matrix2 = NULL_C;
+    A->internalData = NULL_C;
   }
 
   /** update the size of the matrix based on the matrix data
@@ -674,9 +677,9 @@ extern "C"
   static inline void NM_internalData_new(NumericsMatrix* M)
   {
     M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWork = NULL;
+    M->internalData->iWork = NULL_C;
     M->internalData->iWorkSize = 0;
-    M->internalData->dWork = NULL;
+    M->internalData->dWork = NULL_C;
     M->internalData->dWorkSize = 0;
     M->internalData->isLUfactorized = 0;
 #ifdef SICONOS_HAS_MPI

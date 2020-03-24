@@ -479,7 +479,7 @@ void GlobalFrictionContact::display() const
   std::cout << "_numericsMatrixStorageType" << _numericsMatrixStorageType<< std::endl;
   std::cout << " - Matrix M  : " <<std::endl;
   // if (_M) _M->display();
-  // else std::cout << "-> NULL" <<std::endl;
+  // else std::cout << "-> nullptr" <<std::endl;
   NumericsMatrix* M_NM = _M->numericsMatrix().get();
   if(M_NM)
   {
@@ -487,7 +487,7 @@ void GlobalFrictionContact::display() const
   }
   std::cout << " - Matrix H : " <<std::endl;
   // if (_H) _H->display();
-  // else std::cout << "-> NULL" <<std::endl;
+  // else std::cout << "-> nullptr" <<std::endl;
   NumericsMatrix* H_NM = _H->numericsMatrix().get();
   if(H_NM)
   {
@@ -496,22 +496,22 @@ void GlobalFrictionContact::display() const
 
   std::cout << " - Vector q : " <<std::endl;
   if(_q) _q->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << " - Vector b : " <<std::endl;
   if(_b) _b->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
 
   std::cout << " - Vector z (reaction) : " <<std::endl;
   if(_z) _z->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
 
   std::cout << " - Vector w (local velocities): " <<std::endl;
   if(_w) _w->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
 
   std::cout << " - Vector globalVelocities : " <<std::endl;
   if(_globalVelocities) _globalVelocities->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
 
   std::cout << "============================================================" <<std::endl;
 }

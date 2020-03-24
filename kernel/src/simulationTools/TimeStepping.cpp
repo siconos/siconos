@@ -55,7 +55,7 @@ using namespace RELATION;
     Note FP: (temporary) bad method to set checkSolverOutput but it
     works ... It may be better to use plug-in?
 */
-static CheckSolverFPtr checkSolverOutput = NULL;
+static CheckSolverFPtr checkSolverOutput = nullptr;
 
 TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
                            SP::TimeDiscretisation td,
