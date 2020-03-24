@@ -22,7 +22,7 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 
 --------------------------------------------------------------------------------
-  Current (in development branch siconos/master)
+  Current (in development branch siconos/master) --> 4.3.0.rc
 --------------------------------------------------------------------------------
 
 Main changes:
@@ -31,12 +31,12 @@ Main changes:
 	Remove examples from siconos repository : moved to a dedicated repo
 	(https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos-tutorials)
 
-	*[kernel, mechanics] implement 2D rigid bodies with Bullet contact detection.
+	* [kernel, mechanics] implement 2D rigid bodies with Bullet contact detection.
 
 
-	*[numerics, kernel, mechanics] add rolling friction in 2D and 3D
+	* [numerics, kernel, mechanics] add rolling friction in 2D and 3D
 
-	*[numerics] add gfc3d_ipm
+	* [numerics] add gfc3d_ipm
 	First implementatin of Interior Point Method for GlobalFrictionalContact Problem
 
 	* [kernel] add SPARSE_COORDINATE type of matrices
@@ -50,10 +50,10 @@ Main changes:
 	LagrangianDS, NewtonEulerDS)
 
 	* [numerics] rework the test frameworl for the numerics solvers
-	
+
 
 --------------------------------------------------------------------------------
-  v4.2.0 (in development branch siconos/master)
+  v4.2.x
 --------------------------------------------------------------------------------
 Main changes:
 	[...]
