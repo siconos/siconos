@@ -138,6 +138,17 @@ install_siconos:ubuntu18.04-devmode:
     paths:
       - build
 
+install_siconos:ubuntu18.04-paranoidmode:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_paranoidmode.cmake
+  extends: .siconos-build
+  artifacts:
+    paths:
+      - build
+  allow_failure: true
+  when: manual
       
 # Siconos build and install, default config
 # (based on cmake/default_siconos.cmake)
