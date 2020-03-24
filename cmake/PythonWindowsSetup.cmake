@@ -10,7 +10,7 @@ endif()
 
 IF(MSVC)
   SET(VAR_SEPARATOR ";")
-  APPEND_CXX_FLAGS("/bigobj")
+  add_compile_options(/bigobj)
 ELSE()
   SET(VAR_SEPARATOR ":")
 ENDIF()

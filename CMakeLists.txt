@@ -106,19 +106,12 @@ list(GET COMPONENTS -1 last_component)
 if(WITH_CXX)
   project(${PROJECT_NAME} CXX C) # C or not C ?
   set(CMAKE_CXX_STANDARD 11)
-  # Set CXX compilation flags
-  # if(NOT MODE_COMP)
-  #   include(CXXCompilerSetup)
-  # endif()
 else()
   # we may need to compile only numerics and only in C.
   # Really???
   project(${PROJECT_NAME} C)
 endif()
-# Set C compilation flags. Include this only when cxx is off ? Check this.
-# if(NOT MODE_COMP)
-#   include(CCompilerSetup)
-# endif()
+
 if(LLVM_ANALYSE)
   set(CMAKE_C_OUTPUT_EXTENSION ".bc")
 endif()

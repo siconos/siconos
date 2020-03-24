@@ -2,37 +2,6 @@
 # Some convenience macros
 #
 
-# -- Basic list manipulation --
-# Get first element of list var
-MACRO(CAR var)
-  SET(${var} ${ARGV1})
-ENDMACRO(CAR)
-
-# get elements in list var minus the first one.
-MACRO(CDR var junk)
-  SET(${var} ${ARGN})
-ENDMACRO(CDR)
-
-# LIST(APPEND ...) is not correct on <COMPILER>_FLAGS 
-MACRO(APPEND_FLAGS)
-  CAR(_V ${ARGV})
-  CDR(_F ${ARGV})
-  SET(${_V} "${${_V}} ${_F}")
-ENDMACRO(APPEND_FLAGS)
-
-# The use of ADD_DEFINITION results in a warning with Fortran compiler
-MACRO(APPEND_C_FLAGS)
-  APPEND_FLAGS(CMAKE_C_FLAGS ${ARGV})
-ENDMACRO(APPEND_C_FLAGS)
-
-MACRO(APPEND_CXX_FLAGS)
-  APPEND_FLAGS(CMAKE_CXX_FLAGS ${ARGV})
-ENDMACRO(APPEND_CXX_FLAGS)
-
-MACRO(APPEND_Fortran_FLAGS)
-  APPEND_FLAGS(CMAKE_Fortran_FLAGS ${ARGV})
-ENDMACRO(APPEND_Fortran_FLAGS)
-
 # Collect source files.
 # 
 # Usage:
@@ -325,14 +294,24 @@ endfunction()
 
 
 
+# Apply compiler options onto a given target
+#
+# Depends on the diagnostics level required.
+# 
+# Usage :
+# 
+#     apply_compiler_options(numerics DIAGNOSTICS_LEVEL ${WARNINGS_LEVEL})
+#
+# * This function must be called inside create_siconos_component function.
+# * WARNINGS_LEVEL is 0 by default and set by user in siconos config file
+# (-DUSER_OPTIONS_FILE=configfile.cmake)
+# * to be more specific on a given target, use target_compile_... functions
+#   Check in externals/CMakeLists.txt for an example.
+# 
 function(apply_compiler_options COMPONENT)
-  set(oneValueArgs LANGUAGE DIAGNOSTICS_LEVEL)
+  set(oneValueArgs DIAGNOSTICS_LEVEL)
   cmake_parse_arguments(COMP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-  # If not set, we use C++
-  if(NOT COMP_LANGUAGE)
-    set(COMP_LANGUAGE CXX)
-  endif()
   unset(COMP_OPTIONS)   # C and C++ options. Append options there by default.
   
   # -- Compiler options common to all setups --
@@ -442,6 +421,16 @@ function(apply_compiler_options COMPONENT)
     # Warn if a function is declared or defined without specifying the argument types.
     list(APPEND COMP_OPTIONS -Werror=strict-prototypes)
   endif()
+
+  # Note FP: this part is untested and I don't know to what ends its written?
+  # msan? Keep for the record and remove it later?
+  if(USE_LIBCXX)
+     list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:"-stdlib=libc++ -I${USE_LIBCXX}/include -I${USE_LIBCXX}/include/c++/v1">)
+     set(_LIBCXX_FLAGS_TO_ADD "-L${USE_LIBCXX}/lib -lc++abi -Wl,-rpath,${USE_LIBCXX}/lib")
+     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
+     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
+     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
+   endif()
   
   # --- Apply options to the current target ---
   if(COMP_OPTIONS)
