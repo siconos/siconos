@@ -381,24 +381,6 @@ pkgs:
       - openblas-devel
       - lapacke-devel
         
-  atlas-lapack:
-    nix:
-      - blas
-      - atlas-with-lapack
-      
-    debian:
-      - liblapack-dev
-      - libatlas-base-dev
-      
-    ubuntu-18.04:
-      - liblapack-dev
-      - libatlas-base-dev
-
-    fedora:
-      - blas
-      - blas-devel
-      - atlas-devel
-
   oce:
     nix: opencascade-oce-0.17.2
     debian:

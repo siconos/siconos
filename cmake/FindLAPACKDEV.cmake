@@ -34,7 +34,6 @@ Input Variables
   possibilities.  List of vendors valid for Siconos:
 
   * OpenBLAS
-  * ATLAS
   * Matlab
   * Intel10_32 (intel mkl v10 32 bit)
   * Intel10_64lp (intel mkl v10+ 64 bit, threaded code, lp64 model)
@@ -129,7 +128,7 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
   elseif(BLAS_NAME STREQUAL "Matlab")
     set(HAS_MATLAB_LAPACK 1 CACHE BOOL "Blas/Lapack come from MATLAB ")
   elseif(BLAS_NAME STREQUAL "ATLAS")
-    set(HAS_ATLAS_LAPACK 1 CACHE BOOL "Blas  comes from Atlas framework ")
+    message(FATAL_ERROR "Found Atlas for blas implementation. Not compatible with Siconos.")
   endif()
 
   if(MSVC AND HAS_LAPACKE)

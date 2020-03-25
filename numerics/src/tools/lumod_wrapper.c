@@ -225,7 +225,6 @@ int SN_lumod_dense_solve(SN_lumod_dense_data* restrict lumod_data, double* restr
       return SN_LUMOD_NEED_REFACTORIZATION;
     }
     /* Step 3. Compute x3 = x1 - Yk x2 */
-    /* Row-major looks broken on ATLAS ... */
     cblas_dgemv(CblasColMajor, CblasNoTrans, n, k, -1., lumod_data->Yk, n, lumod_data->z, 1, 1., x, 1);
     DEBUG_PRINT_VEC_STR("x3 = x1 - Yk x2", x, n);
 

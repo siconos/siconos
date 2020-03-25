@@ -128,9 +128,6 @@ namespace boost
     }
     namespace bindings
     {
-      namespace atlas
-      {
-      }
     }
   }
 };
