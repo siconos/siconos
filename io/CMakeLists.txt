@@ -63,6 +63,9 @@ if(WITH_SERIALIZATION)
       list(APPEND GENERATED_DEPENDENCIES ${CMAKE_SOURCE_DIR}/control/src/SiconosControl.hpp)
     endif()
     list(APPEND GENERATED_INCLUDES -I${CMAKE_BINARY_DIR}) # For SiconosConfig.h
+    if(SuiteSparse_CXSparse_INCLUDE_DIR)
+      list(APPEND GENERATED_INCLUDES -I${SuiteSparse_CXSparse_INCLUDE_DIR})
+    endif()
     
     if(MPI_FOUND)
       foreach(_DIR IN LISTS MPI_CXX_INCLUDE_PATH)
