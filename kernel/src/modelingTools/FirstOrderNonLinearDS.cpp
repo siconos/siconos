@@ -299,13 +299,13 @@ void FirstOrderNonLinearDS::display(bool brief) const
   std::cout << "- n (size) : " << _n <<std::endl;
   std::cout << "- x " <<std::endl;
   if(_x[0]) _x[0]->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- x0 " <<std::endl;
   if(_x0) _x0->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << "- M: " <<std::endl;
   if(_M) _M->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << " ============================================" <<std::endl;
 }
 

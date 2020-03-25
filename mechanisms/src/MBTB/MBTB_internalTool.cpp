@@ -7,6 +7,8 @@
 #include "MBTB_TimeSteppingCombinedProj.hpp"
 #include "NewtonEulerJointR.hpp"
 #include "RotationQuaternion.hpp"
+#include "SolverOptions.h"   // for SolverOptions struct
+#include "SiconosAlgebraProd.hpp" // for prod
 void _MBTB_updateContactFromDS()
 {
   for(unsigned int numC=0; numC<sNbOfContacts; numC++)
@@ -58,7 +60,7 @@ void _MBTB_DRAW_STEP()
   {
     for(unsigned int nC=0; nC<3*sNbOfContacts; nC++)
     {
-      CADMBTB_buildLineArtefactLine(nC,0,0,0,0,0,0);
+      CADMBTB_buildLineArtefactLine(nC,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr);
     }
 
   }

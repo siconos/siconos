@@ -55,7 +55,7 @@ using namespace RELATION;
     Note FP: (temporary) bad method to set checkSolverOutput but it
     works ... It may be better to use plug-in?
 */
-static CheckSolverFPtr checkSolverOutput = NULL;
+static CheckSolverFPtr checkSolverOutput = nullptr;
 
 TimeStepping::TimeStepping(SP::NonSmoothDynamicalSystem nsds,
                            SP::TimeDiscretisation td,
@@ -649,7 +649,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
     displayNewtonConvergenceAtTheEnd(info, maxStep);
   }
   else
-    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + _newtonOptions);
+    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + std::to_string(_newtonOptions));
   DEBUG_END("TimeStepping::newtonSolve(double criterion, unsigned int maxStep)\n");
 }
 

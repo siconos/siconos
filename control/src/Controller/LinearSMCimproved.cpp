@@ -97,7 +97,7 @@ void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleM
         predictedPertC = 3*measuredPertC - 3*(*(*_measuredPert)[1]) + *(*_measuredPert)[2];
         break;
       default:
-        RuntimeException::selfThrow("LinearSMCimproved::predictionPerturbation: unknown order " + _measuredPert->size());
+        RuntimeException::selfThrow("LinearSMCimproved::predictionPerturbation: unknown order " + std::to_string(_measuredPert->size()));
       }
 
       // Compute the control to counteract the perturbation

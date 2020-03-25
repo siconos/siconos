@@ -74,7 +74,7 @@ protected:
 
 
   /** Type (dimension) of the contact problem (2D or 3D) */
-  int _contactProblemDim = 3;
+  int _contactProblemDim;
 
   /** * friction coefficients */
   SP::MuStorage _mu;

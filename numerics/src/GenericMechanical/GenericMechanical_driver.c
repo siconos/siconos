@@ -38,11 +38,16 @@
 #include "Relay_Solvers.h"                 // for relay_compute_error
 #include "SiconosBlas.h"                   // for cblas_dnrm2, cblas_dgemv
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "debug.h"                         // for DEBUG_PRINTF, DEBUG_EXPR
 #include "fc3d_compute_error.h"            // for fc3d_unitary_compute_and_a...
 #include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
 #include "numerics_verbose.h"              // for verbose
 #include "relay_cst.h"                     // for SICONOS_RELAY_LEMKE
+
+
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
+#include "debug.h"                         // for DEBUG_PRINTF, DEBUG_EXPR
+
 
 const char* const   SICONOS_GENERIC_MECHANICAL_NSGS_STR = "GMP_NSGS";
 
@@ -214,6 +219,9 @@ static int SScmpTotal = 0;
 void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double * velocity, int * info,
                       SolverOptions* options)
 {
+
+
+  DEBUG_BEGIN("gmp_gauss_seidel(...)\n");
 #ifdef GMP_WRITE_PRB
   FILE * toto1  = fopen("GMP_CURRENT.txt", "w");
   genericMechanicalProblem_printInFile(pGMP, toto1);
@@ -477,6 +485,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
   *info = tolViolate;
   if(storageType == 0)
     free(bufForLocalProblemDense);
+  DEBUG_END("gmp_gauss_seidel(...)\n");
 }
 
 /* See allowed values for iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED]
@@ -490,33 +499,52 @@ int gmp_driver(GenericMechanicalProblem* problem, double *reaction, double *velo
     NM_display(problem->M);
     genericMechanicalProblem_display(problem);
   );
-  if(options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS)
-  {
-    gmp_gauss_seidel(problem, reaction, velocity, &info, options);
-  }
-  else if(options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_SUBS_EQUALITIES)
-  {
-    gmp_reduced_solve(problem, reaction, velocity, &info, options);
-  }
-  else if(options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES)
-  {
-    gmp_reduced_equality_solve(problem, reaction, velocity, &info, options);
-  }
-  else if(options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_MLCP_LIKE)
-  {
-    gmp_as_mlcp(problem, reaction, velocity, &info, options);
-  }
-  else
-  {
-    printf("gmp_driver error, options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] wrong value.\n");
-  }
 
+  switch(options->solverId)
+  {
+  /* Non Smooth Gauss Seidel (NSGS) */
+  case SICONOS_GENERIC_MECHANICAL_NSGS:
+  {
+    if(options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_GS_ON_ALLBLOCKS)
+    {
+      gmp_gauss_seidel(problem, reaction, velocity, &info, options);
+    }
+    else if(options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_SUBS_EQUALITIES)
+    {
+      gmp_reduced_solve(problem, reaction, velocity, &info, options);
+    }
+    else if(options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_ASSEMBLE_EQUALITIES)
+    {
+      gmp_reduced_equality_solve(problem, reaction, velocity, &info, options);
+    }
+    else if(options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] == SICONOS_GENERIC_MECHANICAL_MLCP_LIKE)
+    {
+      gmp_as_mlcp(problem, reaction, velocity, &info, options);
+    }
+    else
+    {
+      printf("gmp_driver error, options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_ISREDUCED] wrong value.\n");
+    }
+    break;
+  }
+  default:
+  {
+    char  msg[200];
+    strcpy(msg, "Unknown solver : ");
+    strcat(msg, solver_options_id_to_name(options->solverId));
+    strcat(msg, "\n");
+    numerics_warning("gmp_driver",  msg);
+    numerics_error("gmp_driver",  msg);
+    info = 1;
+  }
+  }
   return info;
 
 }
 
 void gmp_set_default(SolverOptions* options)
 {
+  DEBUG_BEGIN("gmp_set_default(SolverOptions* options)\n");
   /*with Line search 1 without 0.*/
   options->iparam[SICONOS_GENERIC_MECHANICAL_IPARAM_WITH_LINESEARCH] = 0;
 
@@ -539,6 +567,7 @@ void gmp_set_default(SolverOptions* options)
   /*       break; */
   /*     } */
   /*   } */
+  DEBUG_END("gmp_set_default(SolverOptions* options)\n");
 }
 
 /*Alloc memory iff options->iWork options->dWork and are  null.

@@ -343,7 +343,7 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
         }
       }
     }
-    else RuntimeException::selfThrow("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + relationType);
+    else RuntimeException::selfThrow("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + std::to_string(relationType));
     // Set pos for next loop.
     pos = pos2;
   }
@@ -556,7 +556,7 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
     }
   }
-  else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + relationType1);
+  else RuntimeException::selfThrow("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
   DEBUG_END("LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& ed)\n");
 }
 
@@ -666,7 +666,7 @@ void LinearOSNS::computeqBlock(InteractionsGraph::VDescriptor& vertex_inter, uns
 
   }
   else
-    RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + osi1Type  + osi2Type);
+    RuntimeException::selfThrow("LinearOSNS::computeqBlock not yet implemented for OSI1 and OSI2 of type " + std::to_string(osi1Type)  + std::to_string(osi2Type));
   DEBUG_EXPR(_q->display());
   DEBUG_END("LinearOSNS::computeqBlock(SP::Interaction inter, unsigned int pos)\n");
 }
@@ -842,17 +842,17 @@ void LinearOSNS::display() const
   std::cout << "this : " << this <<std::endl;
   std::cout << "_M  ";
   if(_M) _M->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout <<std::endl << "q : " ;
   if(_q) _q->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << std::endl;
   std::cout << "w : ";
   if(_w) _w->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout <<std::endl << "z : " ;
   if(_z) _z->display();
-  else std::cout << "-> NULL" <<std::endl;
+  else std::cout << "-> nullptr" <<std::endl;
   std::cout << std::endl;
   std::cout << "The linearOSNSP works on the index set of level  " << _indexSetLevel<< std::endl;
   std::cout << "==========================" <<std::endl;

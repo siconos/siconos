@@ -27,6 +27,8 @@
 
 #include "SiconosAlgebra.hpp"
 
+#include "SiconosAlgebraProd.hpp" // for subprod
+
 using namespace Siconos;
 
 

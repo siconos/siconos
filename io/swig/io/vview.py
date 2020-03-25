@@ -2441,8 +2441,10 @@ class VView(object):
         times = self.io_reader._times[
                 self.opts.start_step:self.opts.end_step:self.opts.stride]
         ntime = len(times)
-
-
+        export_2d = False
+        if self.io.dimension() ==2 :
+            export_2d=True
+            print('We export raw data for 2D object')
         # export
         k = self.opts.start_step
         packet = int(ntime/100)+1
@@ -2482,7 +2484,12 @@ class VView(object):
                     position_output_body =  position_output[bdy_id]
                     position_output_body.append([])
                     position_output_body[-1].append(time)
-                    position_output_body[-1].extend(pos_data[i,2:nvalue])
+                    if export_2d:
+                        data_2d =  [pos_data[i,2],pos_data[i,3],numpy.acos(pos_data[i,5]/2.0)]
+                        position_output_body[-1].extend(data_2d)
+                        #position_output_body[-1].extend(pos_data[i,2:nvalue])
+                    else:
+                        position_output_body[-1].extend(pos_data[i,2:nvalue])
                     position_output_body[-1].append(bdy_id)
 
                 

@@ -57,23 +57,40 @@ int main (int argc, char *argv[])
   collection[22].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
   collection[53].will_fail = 1;  /* GFC3D ADMM, on ./data/GFC3D_TwoRods1.dat with scalar rescaling*/
 #endif
-#if defined(TEST_FIRST_ORDER_COLLECTION_FCLIB)
-    /* collection[1].will_fail = 1;  // GFC3D_NSGS	./data/LMGC_GFC3D-i00001-1-00000.hdf5  *\/ */
-    /* collection[4].will_fail = 1; */
-    collection[6].will_fail = 1;
-    collection[8].will_fail = 1;
-    // Expected to fail
-    /* collection[9].will_fail = 1; */
-    /* collection[11].will_fail = 1; */
+
+#ifdef TEST_WR_COLLECTION_1
+  collection[7].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_Example1.dat
+  collection[9].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
+  collection[14].will_fail = 1; // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
 #endif
+
+
+#ifdef TEST_NSN_COLLECTION_1
+  // expected to fail
+  collection[2].will_fail = 1; // GFC3D_NSN_AC, on ./data/GFC3D_Example00_badly_scaled.dat
+  collection[5].will_fail = 1; // GFC3D_NSN_AC, on ./data/GFC3D_TwoRods1.dat
+  collection[3].will_fail = 1; // NSN_AC on data/GFC3D_OneContact.dat
+
+#ifndef WITH_MUMPS
+  collection[4].will_fail = 1; // NSN_AC on data/GFC3D_TwoRods1.dat, mumps only
+#endif
+#endif
+
+#if defined(TEST_FIRST_ORDER_COLLECTION_FCLIB)
+  collection[0].will_fail = 1; /* (GFC3D_NSGS, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+  collection[1].will_fail = 1; /* (GFC3D_NSGS, on ./data/Spheres-i099-356-679.hdf5) */
+  collection[2].will_fail = 1; /* (GFC3D_NSGS, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+  collection[3].will_fail = 1; /* (GFC3D_NSGS, on ./data/Spheres-i099-356-679.hdf5)  */
+#endif
+
 #if defined(TEST_NSN_COLLECTION_FCLIB)
-    collection[0].will_fail = 1;
-    collection[2].will_fail = 1;
+  collection[0].will_fail = 1; /* (GFC3D_NSN_AC, on ./data/Box_Stacks-i0122-82-5.hdf5)  */
+
 #endif
 
 #if defined(TEST_WR_COLLECTION_FCLIB)
-    collection[4].will_fail = 1;
-    collection[10].will_fail = 1;
+  collection[0].will_fail = 1;
+//    collection[10].will_fail = 1;
 #endif
 
   int out = run_test_collection(collection, number_of_tests, globalFrictionContact_test_function);

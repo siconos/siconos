@@ -29,7 +29,7 @@
 #include "OneStepNSProblem.hpp"
 #include "MoreauJeanOSI.hpp"
 
-static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
+static CheckSolverFPtr checkSolverOutputProjectOnConstraints = nullptr;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -627,5 +627,5 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     //      std::cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbIterations<<"maxStep="<<maxStep<<endl;
   }
   else
-    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + _newtonOptions);
+    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + std::to_string(_newtonOptions));
 }

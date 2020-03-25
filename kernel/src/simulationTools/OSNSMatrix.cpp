@@ -88,7 +88,7 @@ OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, int stor):
   case NM_DENSE:
   {
     // A zero matrix M of size nXn is built.  interactionBlocksPositions
-    // remains empty (=NULL) since we have no information concerning
+    // remains empty (=nullptr) since we have no information concerning
     // the Interaction.
     _M1.reset(new SimpleMatrix(n, n));
     break;
@@ -295,7 +295,7 @@ void OSNSMatrix::convert()
   case NM_DENSE:
   {
     _numericsMatrix->matrix0 = _M1->getArray(); // Pointer link
-    // _numericsMatrix->matrix1 = NULL; matrix1 is not set to NULL: we
+    // _numericsMatrix->matrix1 = nullptr; matrix1 is not set to nullptr: we
     // keep previous allocation. May be usefull if we switch between
     // different storages during simu
     break;
@@ -455,14 +455,14 @@ void OSNSMatrix::display() const
   {
     std::cout << "----- OSNS Matrix using default storage type for Numerics structure (SiconosMatrix -> double*)" <<std::endl;
     if(! _M1)
-      std::cout << " matrix = NULL pointer" <<std::endl;
+      std::cout << " matrix = nullptr pointer" <<std::endl;
     else _M1->display();
   }
   else if(_storageType == NM_SPARSE_BLOCK)
   {
     std::cout << "----- OSNS Matrix using Sparse InteractionBlock storage type for Numerics (SparseBlockStructuredMatrix)" <<std::endl;
     if(! _M2)
-      std::cout << " matrix = NULL pointer" <<std::endl;
+      std::cout << " matrix = nullptr pointer" <<std::endl;
     else _M2->display();
   }
   else if(_storageType == NM_SPARSE)

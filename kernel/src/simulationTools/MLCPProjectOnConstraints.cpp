@@ -339,7 +339,7 @@ void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
         indexSet->upper_blockProj[ed1]->display();
       }
       else
-        std::cout << "NULL " << std::endl;
+        std::cout << "nullptr " << std::endl;
 
       std::cout << "                          (ed1)->lower_blockProj : ";
       if(indexSet->lower_blockProj[ed1])
@@ -348,7 +348,7 @@ void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
         indexSet->lower_blockProj[ed1]->display();
       }
       else
-        std::cout << "NULL " << std::endl;
+        std::cout << "nullptr " << std::endl;
 
       std::cout << "                          (ed2)->upper_blockProj : ";
       if(indexSet->upper_blockProj[ed2])
@@ -357,7 +357,7 @@ void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
         indexSet->upper_blockProj[ed2]->display();
       }
       else
-        std::cout << "NULL" << std::endl;
+        std::cout << "nullptr" << std::endl;
 
       std::cout << "                          (ed2)->lower_blockProj : ";
       if(indexSet->lower_blockProj[ed2])
@@ -366,7 +366,7 @@ void MLCPProjectOnConstraints::displayBlocks(SP::InteractionsGraph indexSet)
         indexSet->lower_blockProj[ed2]->display();
       }
       else
-        std::cout << "NULL" << std::endl;
+        std::cout << "nullptr" << std::endl;
     }
 
   }
@@ -980,7 +980,7 @@ void MLCPProjectOnConstraints::computeDiagonalInteractionBlock(const Interaction
       }
 
       else
-        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeInteractionBlock not yet implemented for relation of type " + relationType1);
+        RuntimeException::selfThrow("MLCPProjectOnConstraints::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
 
     }
 

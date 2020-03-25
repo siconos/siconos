@@ -166,7 +166,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
     }
     else
     {
-      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
     }
   }
 
@@ -345,7 +345,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
 
     }
     else
-      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+      RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
 
 
     /** At this step, we obtain
@@ -476,7 +476,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         DEBUG_EXPR(residuFree.display());
       }
       else
-        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
     }
   }
   else
@@ -515,7 +515,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         }
         else
           RuntimeException::selfThrow
-          ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+            ("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
 
         if(d->inverseMass())
         {
@@ -569,7 +569,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         DEBUG_EXPR(vFree.display());
       }
       else
-        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
 
     }
 
@@ -659,7 +659,7 @@ double D1MinusLinearOSI::computeResiduHalfExplicitVelocityLevel()
         DEBUG_EXPR(residuFree.display());
       }
       else
-        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " + dsType);
+        RuntimeException::selfThrow("D1MinusLinearOSI::computeResidu - not yet implemented for Dynamical system type: " +  std::to_string(dsType));
 
       /**
        * \f[
@@ -835,7 +835,7 @@ void D1MinusLinearOSI::computeFreeOutputHalfExplicitVelocityLevel(InteractionsGr
 
 
   else
-    RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - not implemented for Relation of type " + relationType);
+    RuntimeException::selfThrow("D1MinusLinearOSI::computeFreeOutput - not implemented for Relation of type " +  std::to_string(relationType));
 
   DEBUG_EXPR(osnsp_rhs.display(););
 

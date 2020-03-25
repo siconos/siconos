@@ -16,6 +16,12 @@ IF(MSVC AND "${CMAKE_Fortran_COMPILER}" MATCHES "gfortran")
   IF(NOT CMAKE_AR)
     SET(CMAKE_AR "${GFORTRAN_DIR}/ar")
   ENDIF(NOT CMAKE_AR)
-  APPEND_Fortran_FLAGS("-static -static-libgcc -static-libgfortran -fno-stack-check -fno-stack-protector -mno-stack-arg-probe") # XXX No test :( -- xhub
-ENDIF()
+  target_compile_options(externals PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:static>)
+  target_compile_options(externals PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-static-libgcc>)
+  target_compile_options(externals PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-static-libgfortran>)
+  target_compile_options(externals PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-fno-stack-check>)
+  target_compile_options(externals PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-fno-stack-protector>)
+  target_compile_options(externals PRIVATE $<$<COMPILE_LANGUAGE:Fortran>:-mno-stack-arg-probe>)
+   # XXX No test :( -- xhub
+endif()
 

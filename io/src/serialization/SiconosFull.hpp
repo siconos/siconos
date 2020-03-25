@@ -415,20 +415,20 @@ BOOST_SERIALIZATION_SPLIT_FREE(NonSmoothDynamicalSystem::ChangeLogIter)
 template <class Archive>
 void siconos_io_register_Kernel(Archive& ar)
 {
-  ar.register_type(static_cast<SimpleMatrix*>(NULL));
-  ar.register_type(static_cast<SiconosVector*>(NULL));
+  ar.register_type(static_cast<SimpleMatrix*>(nullptr));
+  ar.register_type(static_cast<SiconosVector*>(nullptr));
 
   siconos_io_register_generated_Kernel(ar);
 
-  ar.register_type(static_cast<_DynamicalSystemsGraph*>(NULL));
-  ar.register_type(static_cast<_InteractionsGraph*>(NULL));
-  ar.register_type(static_cast<std::basic_ofstream<char>*>(NULL));
+  ar.register_type(static_cast<_DynamicalSystemsGraph*>(nullptr));
+  ar.register_type(static_cast<_InteractionsGraph*>(nullptr));
+  ar.register_type(static_cast<std::basic_ofstream<char>*>(nullptr));
 
-  //  ar.register_type(static_cast<PluginHandle*>(NULL));
-  ar.register_type(static_cast<__mpz_struct*>(NULL));
-  ar.register_type(static_cast<FrictionContact*>(NULL));
-  ar.register_type(static_cast<GlobalFrictionContact*>(NULL));
-  ar.register_type(static_cast<LsodarOSI*>(NULL));
+  //  ar.register_type(static_cast<PluginHandle*>(nullptr));
+  ar.register_type(static_cast<__mpz_struct*>(nullptr));
+  ar.register_type(static_cast<FrictionContact*>(nullptr));
+  ar.register_type(static_cast<GlobalFrictionContact*>(nullptr));
+  ar.register_type(static_cast<LsodarOSI*>(nullptr));
 
 
 }

@@ -906,7 +906,7 @@ public:
    * \param force A force vector to be added.
    * \param forceAbsRef If true, force is in inertial frame, otherwise
    *                    it is in body frame.
-   * \param pos A position at which force should be applied.  If NULL,
+   * \param pos A position at which force should be applied.  If nullptr,
    *            the center of mass is assumed.
    * \param posAbsRef If true, pos is in inertial frame, otherwise it
    *                  is in body frame.

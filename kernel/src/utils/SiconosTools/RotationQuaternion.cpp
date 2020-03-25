@@ -19,6 +19,8 @@
 //#define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
+#include "RotationQuaternion.hpp"
+
 #include <debug.h>
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"

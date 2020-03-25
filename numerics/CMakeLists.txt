@@ -283,6 +283,7 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   #   src/tools/internal
   src/AVI
   src/LCP
+  src/MCP
   src/MLCP
   src/Relay
   src/FrictionContact

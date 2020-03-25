@@ -21,6 +21,7 @@
 
 #ifndef ROTATIONQUATERNION_H
 #define ROTATIONQUATERNION_H
+#include "SiconosVector.hpp" // 
 
 /* For a given quaternion q, compute the angle/axis representation
  */

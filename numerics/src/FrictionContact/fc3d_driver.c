@@ -18,6 +18,7 @@
 #include <assert.h>                                    // for assert
 #include <float.h>                                     // for DBL_EPSILON
 #include <stdio.h>                                     // for NULL
+#include <string.h>                                     // for NULL
 #include "FrictionContactProblem.h"                    // for FrictionContac...
 #include "Friction_cst.h"                              // for SICONOS_FRICTI...
 #include "NonSmoothDrivers.h"                          // for fc3d_driver
@@ -283,7 +284,12 @@ int fc3d_driver(FrictionContactProblem* problem,
   }
   default:
   {
-    numerics_error("fc3d_driver", "Unknown solver.");
+    char  msg[200];
+    strcpy(msg, "Unknown solver : ");
+    strcat(msg, solver_options_id_to_name(options->solverId));
+    strcat(msg, "\n");
+    numerics_warning("fc3d_driver",  msg);
+    numerics_error("fc3d_driver",  msg);
     info = 1;
   }
   }

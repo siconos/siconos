@@ -61,6 +61,8 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include "Bullet5DR.hpp"
 #include "Bullet1DR.hpp"
 #include "Bullet2dR.hpp"
+#include "Bullet2d3DR.hpp"
+
 
 #include <map>
 #include <limits>
@@ -181,7 +183,7 @@ class btSiconosMeshData : public btGImpactMeshShape
 {
 public:
   btSiconosMeshData(btStridingMeshInterface*i)
-    : btGImpactMeshShape(i), btScalarVertices(0) {}
+    : btGImpactMeshShape(i), btScalarVertices(nullptr) {}
   ~btSiconosMeshData()
   {
     if(btScalarVertices) delete[] btScalarVertices;
@@ -668,7 +670,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   std11::shared_ptr<BR> record(
     std11::make_shared<BR>(base, ds, shape, btshape, btobject, contactor));
 
-  bodyShapeMap[ds ? &*ds : 0].push_back(record);
+  bodyShapeMap[ds ? &*ds : nullptr].push_back(record);
 
   assert(record->btobject);
   assert(record->sshape);
@@ -780,15 +782,27 @@ void SiconosBulletCollisionManager_impl::updateContactorInertia(
   SP::NewtonEulerDS ds, SP::btCollisionShape btshape)
 {
   btVector3 localinertia;
+  double scale_factor;
+  scale_factor = 1./(_options.worldScale*_options.worldScale);
+  localinertia[0] = std::numeric_limits<double>::signaling_NaN();
+  localinertia[1] = std::numeric_limits<double>::signaling_NaN();
+  localinertia[2] = std::numeric_limits<double>::signaling_NaN();
   btshape->calculateLocalInertia(ds->scalarMass(), localinertia);
-  assert(!((localinertia.x() == 0.0
-            && localinertia.y() == 0.0
-            && localinertia.z() == 0.0)
-           || isinf(localinertia.x())
-           || isinf(localinertia.y())
-           || isinf(localinertia.z()))
-         && "calculateLocalInertia() returned garbage");
-  ds->setInertia(localinertia[0], localinertia[1], localinertia[2]);
+
+  localinertia[0]*=scale_factor;
+  localinertia[1]*=scale_factor;
+  localinertia[2]*=scale_factor;
+  assert( ! ((localinertia.x() == 0.0
+              && localinertia.y() == 0.0
+              && localinertia.z() == 0.0)
+             || isinf(localinertia.x())
+             || isinf(localinertia.y())
+             || isinf(localinertia.z()))
+          && "calculateLocalInertia() returned garbage" );
+  ds->setInertia(localinertia[0],
+                 localinertia[1],
+                 localinertia[2]);
+
 }
 
 void SiconosBulletCollisionManager_impl::update2DContactorInertia(
@@ -815,8 +829,10 @@ void SiconosBulletCollisionManager_impl::updateShape(BodySphereRecord &record)
     btsphere->setMargin(sphere->insideMargin() * _options.worldScale);
 #endif
     SP::RigidBodyDS rbds=std11::static_pointer_cast<RigidBodyDS>(record.ds);
-    if(record.ds && rbds->useContactorInertia())
+    if (record.ds && rbds->useContactorInertia())
+    {
       updateContactorInertia(rbds, btsphere);
+    }
 
     if(record.btobject->getBroadphaseHandle())
     {
@@ -1244,7 +1260,7 @@ make_bt_vertex_array(SP::SiconosMesh mesh,
       mesh->vertices()->getArray(),
       sizeof(btScalar)*3));
 
-  return std::make_pair(bttris, (btScalar*)NULL);
+  return std::make_pair(bttris, (btScalar*)nullptr);
 }
 
 // If type of SiconosMatrix is not the same as btScalar, we must copy
@@ -2006,7 +2022,21 @@ bool SiconosBulletCollisionManager::bulletContactClear(void* userPersistentData)
   SP::Interaction *p_inter = (SP::Interaction*)userPersistentData;
   assert(p_inter!=NULL && "Contact point's stored (SP::Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p\n", &**p_inter);
-  std11::static_pointer_cast<Bullet2dR>((*p_inter)->relation())->preDelete();
+
+  // SP::BulletR rel_bulletR(std11::dynamic_pointer_cast<BulletR>((*p_inter)->relation()));
+  // SP::Bullet5DR rel_bullet5DR(std11::dynamic_pointer_cast<Bullet5DR>((*p_inter)->relation()));
+  // SP::Bullet2dR rel_bullet2dR(std11::dynamic_pointer_cast<Bullet2dR>((*p_inter)->relation()));
+  // SP::Bullet2d3DR rel_bullet2d3DR(std11::dynamic_pointer_cast<Bullet2d3DR>((*p_inter)->relation()));
+  // if (rel_bulletR)
+  //   rel_bulletR->preDelete();
+  // else if (rel_bullet5DR)
+  //   rel_bullet5DR->preDelete();
+  // else if (rel_bullet2dR)
+  //   rel_bullet2dR->preDelete();
+  // else if (rel_bullet2d3DR)
+  //   rel_bullet2d3DR->preDelete();
+  // std11::static_pointer_cast<BulletR>((*p_inter)->relation())->preDelete();
+
   gSimulation->unlink(*p_inter);
   delete p_inter;
   return false;
@@ -2036,7 +2066,14 @@ SP::Bullet2dR SiconosBulletCollisionManager::makeBullet2dR(SP::RigidBody2dDS ds1
 {
   return std11::make_shared<Bullet2dR>();
 }
-
+SP::Bullet2d3DR SiconosBulletCollisionManager::makeBullet2d3DR(SP::RigidBody2dDS ds1,
+    SP::SiconosShape shape1,
+    SP::RigidBody2dDS ds2,
+    SP::SiconosShape shape2,
+    const btManifoldPoint &p)
+{
+  return std11::make_shared<Bullet2d3DR>();
+}
 class CollisionUpdateVisitor : public SiconosVisitor
 {
 public:
@@ -2197,6 +2234,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
       SP::BulletR rel_bulletR(std11::dynamic_pointer_cast<BulletR>((*p_inter)->relation()));
       SP::Bullet5DR rel_bullet5DR(std11::dynamic_pointer_cast<Bullet5DR>((*p_inter)->relation()));
       SP::Bullet2dR rel_bullet2dR(std11::dynamic_pointer_cast<Bullet2dR>((*p_inter)->relation()));
+      SP::Bullet2d3DR rel_bullet2d3DR(std11::dynamic_pointer_cast<Bullet2d3DR>((*p_inter)->relation()));
 
       if(rel_bulletR || rel_bullet5DR)
       {
@@ -2227,6 +2265,21 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
             rbdsB ? rbdsB
             : SP::RigidBody2dDS());
       }
+      else if(rel_bullet2d3DR)
+      {
+        DEBUG_PRINT("SiconosBulletCollisionManager :: Bullet2d3DR case");
+        // We need to check for other type of dynamical systems.
+        SP::RigidBody2dDS rbdsA =  std11::static_pointer_cast<RigidBody2dDS>(pairA->ds);
+        SP::RigidBody2dDS rbdsB =  std11::static_pointer_cast<RigidBody2dDS>(pairB->ds);
+
+        /* update the relation */
+        rel_bullet2d3DR->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
+                                                              flip, _options.worldScale,
+                                                              rbdsA,
+                                                              rbdsB ? rbdsB
+                                                              : SP::RigidBody2dDS());
+      }
+
       else
       {
         throw SiconosException("Unknown relation type");
@@ -2396,6 +2449,52 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
             _stats.interaction_warnings ++;
           }
 
+          inter = std11::make_shared<Interaction>(nslaw, rel);
+          _stats.new_interactions_created ++;
+        }
+        else if(nslaw && nslaw->size() == 3)
+        {
+          DEBUG_PRINT("Creation of a relation for 2D rolling frictional contact\n");
+          SP::RigidBody2dDS rbdsA =  std11::static_pointer_cast<RigidBody2dDS>(pairA->ds);
+          SP::RigidBody2dDS rbdsB =  std11::static_pointer_cast<RigidBody2dDS>(pairB->ds);
+
+          SP::Bullet2d3DR rel(makeBullet2d3DR(rbdsA, pairA->sshape,
+                                            rbdsB, pairB->sshape,
+                                            *it->point));
+
+          if(!rel) continue;
+
+          // Fill in extra contact information
+          rel->base[0] = pairA->base;
+          rel->base[1] = pairB->base;
+          rel->shape[0] = pairA->sshape;
+          rel->shape[1] = pairB->sshape;
+          rel->contactor[0] = pairA->contactor;
+          rel->contactor[1] = pairB->contactor;
+          rel->ds[0] = rbdsA;
+          rel->ds[1] = rbdsB;
+          rel->btObject[0] = pairA->btobject;
+          rel->btObject[1] = pairB->btobject;
+
+          // TODO cast down btshape from BodyShapeRecord-derived classes
+          // rel->btShape[0] = pairA->btshape;
+          // rel->btShape[1] = pairB->btshape;
+
+          rel->updateContactPointsFromManifoldPoint(*it->manifold, *it->point,
+              flip, _options.worldScale,
+              rbdsA ? rbdsA : SP::RigidBody2dDS(),
+              rbdsB ? rbdsB : SP::RigidBody2dDS());
+
+          // We wish to be sure that no Interactions are created without
+          // sufficient warning before contact.  TODO: Replace with exception or
+          // flag.
+          if(rel->distance() < 0.0)
+          {
+            DEBUG_PRINTF("SiconosBulletCollisionManager :: Interactions must be created with positive "
+                         "distance (%f).\n", rel->distance());
+            _stats.interaction_warnings ++;
+          }
+          DEBUG_PRINT("SiconosBulletCollisionManager :: create 2d interaction\n");
           inter = std11::make_shared<Interaction>(nslaw, rel);
           _stats.new_interactions_created ++;
         }

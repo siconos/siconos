@@ -33,9 +33,6 @@ if(NOT CTEST_BUILD_NAME)
     get_filename_component(_name ${USER_FILE} NAME)
     set(CTEST_BUILD_NAME "${CTEST_BUILD_NAME} - Option file : ${_name}")
   endif()    
-  if(EXTRA_NAME)
-    set(CTEST_BUILD_NAME "${CTEST_BUILD_NAME} - ${EXTRA_NAME}.")
-  endif()
 endif()
 
 

@@ -30,9 +30,9 @@
 #include "NumericsFwd.h"    // for NumericsMatrix, NumericsSparseMatrix, Spa...
 #include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MP // IWYU pragma: keep
 #include "NM_MPI.h"
-
 #ifndef __cplusplus
 #include <stdbool.h>        // for bool
+#define nullptr NULL
 #endif
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
@@ -223,10 +223,10 @@ extern "C"
    */
   static inline void NM_null(NumericsMatrix* A)
   {
-    A->matrix0 = NULL;
-    A->matrix1 = NULL;
-    A->matrix2 = NULL;
-    A->internalData = NULL;
+    A->matrix0 = nullptr;
+    A->matrix1 = nullptr;
+    A->matrix2 = nullptr;
+    A->internalData = nullptr;
   }
 
   /** update the size of the matrix based on the matrix data
@@ -677,9 +677,9 @@ extern "C"
   static inline void NM_internalData_new(NumericsMatrix* M)
   {
     M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWork = NULL;
+    M->internalData->iWork = nullptr;
     M->internalData->iWorkSize = 0;
-    M->internalData->dWork = NULL;
+    M->internalData->dWork = nullptr;
     M->internalData->dWorkSize = 0;
     M->internalData->isLUfactorized = 0;
 #ifdef SICONOS_HAS_MPI

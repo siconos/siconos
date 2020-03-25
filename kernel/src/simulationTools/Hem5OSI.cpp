@@ -817,13 +817,13 @@ void Hem5OSI::integrate(double& tinit, double& tend, double& tout, int& idid)
   // Management of vectors of Size 0
   doublereal * pointerToU;
   if(_intData[2] ==0)
-    pointerToU = NULL;
+    pointerToU = nullptr;
   else
     pointerToU = &(*_utmp)(0);
 
   doublereal * pointerToXL;
   if(_intData[3] ==0)
-    pointerToXL = NULL;
+    pointerToXL = nullptr;
   else
     pointerToXL = &(*_lambdatmp)(0);
 #ifdef HAS_FORTRAN
@@ -931,7 +931,7 @@ void Hem5OSI::updateState(const unsigned int level)
       }
     }
   }
-  else RuntimeException::selfThrow("Hem5OSI::updateState(index), index is out of range. Index = " + level);
+  else RuntimeException::selfThrow("Hem5OSI::updateState(index), index is out of range. Index = " + std::to_string(level));
 }
 
 struct Hem5OSI::_NSLEffectOnFreeOutput : public SiconosVisitor
@@ -1080,7 +1080,7 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
     }
   }
   else
-    RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not yet implemented for Relation of type " + relationType);
+    RuntimeException::selfThrow("Hem5OSI::computeFreeOutput not yet implemented for Relation of type " + std::to_string(relationType));
   if(((*allOSNS)[SICONOS_OSNSP_ED_IMPACT]).get() == osnsp)
   {
     if(inter->relation()->getType() == Lagrangian || inter->relation()->getType() == NewtonEuler)

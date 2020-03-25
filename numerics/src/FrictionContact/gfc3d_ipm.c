@@ -911,7 +911,12 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
                     tol, options,
                     norm_q, norm_b,  &err);
     numerics_printf_verbose(-1,"---- GFC3D - IPM  - Iteration %i, full error = %14.7e", iteration, err);
-
+    // check exit condition
+    if(err < tol)
+    {
+      hasNotConverged = 0;
+      break;
+    }
 
 
 

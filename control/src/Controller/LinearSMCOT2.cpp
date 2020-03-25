@@ -82,7 +82,7 @@ void LinearSMCOT2::initialize(const NonSmoothDynamicalSystem& nsds, const Simula
   }
   else
   {
-    RuntimeException::selfThrow("LinearSMCOT2 is not yet implemented for system of type" + dsType);
+    RuntimeException::selfThrow("LinearSMCOT2 is not yet implemented for system of type" + std::to_string(dsType));
   }
 
   // We have to reset _pluginb

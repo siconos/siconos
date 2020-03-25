@@ -117,21 +117,21 @@ void EventsManager::preUpdate(Simulation& sim)
 double EventsManager::startingTime() const
 {
   if(_events.size() == 0)
-    RuntimeException::selfThrow("EventsManager::startingTime current event is NULL");
+    RuntimeException::selfThrow("EventsManager::startingTime current event is nullptr");
   return _events[0]->getDoubleTimeOfEvent();
 }
 
 double EventsManager::nextTime() const
 {
   if(_events.size() <= 1)
-    RuntimeException::selfThrow("EventsManager nextTime, next event is NULL");
+    RuntimeException::selfThrow("EventsManager nextTime, next event is nullptr");
   return _events[1]->getDoubleTimeOfEvent();
 }
 
 bool EventsManager::needsIntegration() const
 {
   if(_events.size() <= 1)
-    RuntimeException::selfThrow("EventsManager nextTime, next event is NULL");
+    RuntimeException::selfThrow("EventsManager nextTime, next event is nullptr");
   return (mpz_cmp(*_events[0]->getTimeOfEvent(), *_events[1]->getTimeOfEvent()) < 0);
 }
 

@@ -52,7 +52,7 @@
  * in some boost headers, so we specify which one we want. It seems
  * that there is no difference anyway:
  * http://stackoverflow.com/questions/5813700/difference-between-size-t-and-stdsize-t */
-using std::size_t;
+//using std::size_t;
 
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/adjacency_list.hpp>
@@ -731,13 +731,13 @@ public:
 
             assert(!ag.is_edge(new_ve, ag.descriptor(bundle(*ied)),
                                bundle(vdx)));
-	    
-	    typename AdjointG::EDescriptor aed =
-	      ag.add_edge(new_ve, ag.descriptor(bundle(*ied)),
-                          bundle(vdx));
 
-	    assert(ag.bundle(aed) == bundle(vdx));
-	    //            assert(ag.bundle(ag.add_edge(new_ve, ag.descriptor(bundle(*ied)), bundle(vdx))) == bundle(vdx));
+	    // typename AdjointG::EDescriptor aed =
+	    //   ag.add_edge(new_ve, ag.descriptor(bundle(*ied)),
+      //                     bundle(vdx));
+
+	    //assert(ag.bundle(aed) == bundle(vdx));
+      assert(ag.bundle(ag.add_edge(new_ve, ag.descriptor(bundle(*ied)), bundle(vdx))) == bundle(vdx));
           }
         }
 

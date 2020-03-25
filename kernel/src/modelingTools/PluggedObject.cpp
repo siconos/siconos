@@ -22,19 +22,19 @@
 #include <assert.h>
 PluggedObject::PluggedObject(): _pluginName("unplugged")
 {
-  fPtr = NULL;
+  fPtr = nullptr;
 }
 
 PluggedObject::PluggedObject(const std::string& name): _pluginName(name)
 {
-  fPtr = NULL;
+  fPtr = nullptr;
   setComputeFunction();
 }
 
 PluggedObject::PluggedObject(const PluggedObject & PO):  _pluginName(PO.pluginName())
 {
   // we don't copy the fPtr since we need to increment the number of times we opened the plugin file in the openedPlugins multimap
-  fPtr = NULL;
+  fPtr = nullptr;
   if((_pluginName.compare("unplugged") != 0) && (_pluginName.compare("Unknown") != 0))
     setComputeFunction();
 }

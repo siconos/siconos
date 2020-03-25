@@ -64,7 +64,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   else if(dsType == Type::FirstOrderLinearDS)
   {
     _DS_SMC.reset(new FirstOrderLinearDS(*(std11::static_pointer_cast<FirstOrderLinearDS>(DS))));
-    std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setComputebFunction(NULL);
+    std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setComputebFunction(nullptr);
     // We have to reset the _pluginb
     SP::SiconosVector dummyb(new SiconosVector(_DS_SMC->n(), 0));
     std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
@@ -78,7 +78,7 @@ void CommonSMC::initialize(const NonSmoothDynamicalSystem & nsds, const Simulati
   }
   else
   {
-    RuntimeException::selfThrow("LinearSMC is not yet implemented for system of type" + dsType);
+    RuntimeException::selfThrow("LinearSMC is not yet implemented for system of type" + std::to_string(dsType));
   }
   _DS_SMC->setNumber(999999);
   _DS_SMC->initMemory(1);

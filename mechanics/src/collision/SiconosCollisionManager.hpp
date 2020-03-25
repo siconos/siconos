@@ -138,7 +138,7 @@ public:
   /** Insert a static contactor set */
   virtual StaticContactorSetID insertStaticContactorSet(
     SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector())
-    { return (StaticContactorSetID)0; }
+    { return (StaticContactorSetID)nullptr; }
 
   /** Remove a static contactor set.
    * \param id An identifier returned by insertStaticContactorSet. */

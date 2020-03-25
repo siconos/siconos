@@ -37,6 +37,7 @@ PY_FULL_REGISTER(SiconosContactor, Mechanics);
 PY_FULL_REGISTER(ContactR, Mechanics);
 PY_FULL_REGISTER(RigidBodyDS, Mechanics);
 PY_FULL_REGISTER(Contact2dR, Mechanics);
+PY_FULL_REGISTER(Contact2d3DR, Mechanics);
 PY_FULL_REGISTER(RigidBody2dDS, Mechanics);
 PY_FULL_REGISTER(SiconosCollisionQueryResult, Mechanics);
 PY_FULL_REGISTER(SiconosCollisionManager, Mechanics);

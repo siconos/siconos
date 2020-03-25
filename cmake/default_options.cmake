@@ -29,8 +29,7 @@ option(WITH_SERIALIZATION "Compilation of serialization functions. Default = OFF
 option(WITH_GENERATION "Generation of serialization functions with doxygen XML. Default = OFF" OFF)
 
 # --- Build/compiling options ---
-option(DEV_MODE "Compilation flags setup for developers. Default = OFF" OFF)
-option(DEV_MODE_STRICT "Compilation flags setup for developers (extra strict, conversion warnings). Default = OFF" OFF)
+set(WARNINGS_LEVEL 0 CACHE INTERNAL "Set compiler diagnostics level. 0: no warnings, 1: developer's minimal warnings, 2: strict level, warnings to errors and so on. Default =0")
 option(WITH_CXX "Enable CXX compiler for numerics. Default = ON" ON)
 option(WITH_FORTRAN "Enable Fortran compiler. Default = ON" ON)
 option(FORCE_SKIP_RPATH "Do not build shared libraries with rpath. Useful only for packaging. Default = OFF" OFF)

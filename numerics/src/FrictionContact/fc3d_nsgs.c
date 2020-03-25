@@ -490,7 +490,8 @@ int determine_convergence_with_full_final(FrictionContactProblem *problem, Solve
     if(absolute_error > options->dparam[SICONOS_DPARAM_TOL])
     {
       *tolerance = error/absolute_error*options->dparam[SICONOS_DPARAM_TOL];
-      assert(*tolerance > 0.0 && "tolerance has to be positive");
+      /* assert(*tolerance > 0.0 && "tolerance has to be positive"); */
+
       /* if (*tolerance < DBL_EPSILON) */
       /* { */
       /*   numerics_warning("determine_convergence_with_full_fina", "We try to set a very smal tolerance"); */
@@ -718,6 +719,13 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
                           reaction, velocity,
                           &tolerance, norm_q, error,
                           iter);
+
+        if (!(tolerance > 0.0))
+        {
+          numerics_warning("fc3d_nsgs", "tolerance has to be positive!!");
+          numerics_warning("fc3d_nsgs", "we stop the iterations");
+          break;
+        }
 
       }
       else if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_FULL)

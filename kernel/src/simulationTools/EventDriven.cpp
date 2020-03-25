@@ -257,7 +257,7 @@ void EventDriven::initOSNS()
       if(_allNSProblems->size() != 3)
         RuntimeException::selfThrow
         (" EventDriven::initialize, \n an EventDriven simulation associated with NewMarkAlphaOSI must have three non smooth problems.\n Here, there are "
-         + _allNSProblems->size());
+         + std::to_string(_allNSProblems->size()));
       // Initialize OSNSP at position level
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->setInputOutputLevel(2);
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->setIndexSetLevel(2);
@@ -358,7 +358,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   // dynamical systems belonging to the osi
 
   // Check osi type: only lsodar is allowed.
-  assert((osi.getType() == OSI::LSODAROSI) && "EventDriven::computef(osi, ...), not yet implemented for a one step integrator of type " + osi.getType());
+  assert(osi.getType() == OSI::LSODAROSI);
 
   LsodarOSI& lsodar = static_cast<LsodarOSI&>(osi);
   // fill in xWork vector (ie all the x of the ds of this osi) with x
@@ -427,8 +427,7 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
                                     doublereal *x,
                                     doublereal *jacob)
 {
-  assert((osi.getType() == OSI::LSODAROSI) &&
-         "EventDriven::computeJacobianfx(osi, ...), not yet implemented for a one step integrator of type " + osi.getType());
+  assert(osi.getType() == OSI::LSODAROSI);
 
   LsodarOSI& lsodar = static_cast<LsodarOSI&>(osi);
 

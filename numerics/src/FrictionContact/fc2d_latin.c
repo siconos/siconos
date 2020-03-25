@@ -208,8 +208,8 @@ void fc2d_latin(FrictionContactProblem* problem, double *reaction, double *veloc
 
 
 
-  taillen = sizeof(ddln) / sizeof(ddln[0]);
-  taillet = sizeof(ddlt) / sizeof(ddlt[0]);
+  taillen = nc; //sizeof(ddln) / sizeof(ddln[0]);
+  taillet = nc; //sizeof(ddlt) / sizeof(ddlt[0]);
 
   idim = 1 +  taillen / taillet;
 

@@ -88,15 +88,15 @@ MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
 const SimpleMatrix MoreauJeanOSI::getW(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "MoreauJeanOSI::getW(ds): ds == NULL.");
+         "MoreauJeanOSI::getW(ds): ds == nullptr.");
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
-         "MoreauJeanOSI::getW(ds): W[ds] == NULL.");
+         "MoreauJeanOSI::getW(ds): W[ds] == nullptr.");
   return *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W; // Copy !!
 }
 
 SP::SimpleMatrix MoreauJeanOSI::W(SP::DynamicalSystem ds)
 {
-  assert(ds && "MoreauJeanOSI::W(ds): ds == NULL.");
+  assert(ds && "MoreauJeanOSI::W(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
 
@@ -104,16 +104,16 @@ SP::SimpleMatrix MoreauJeanOSI::W(SP::DynamicalSystem ds)
 const SimpleMatrix MoreauJeanOSI::getWBoundaryConditions(SP::DynamicalSystem ds)
 {
   assert(ds &&
-         "MoreauJeanOSI::getWBoundaryConditions(ds): ds == NULL.");
+         "MoreauJeanOSI::getWBoundaryConditions(ds): ds == nullptr.");
   //    return *(WBoundaryConditionsMap[0]);
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions &&
-         "MoreauJeanOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == NULL.");
+         "MoreauJeanOSI::getWBoundaryConditions(ds): WBoundaryConditions[ds] == nullptr.");
   return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).WBoundaryConditions); // Copy !!
 }
 
 SP::SiconosMatrix MoreauJeanOSI::WBoundaryConditions(SP::DynamicalSystem ds)
 {
-  assert(ds && "MoreauJeanOSI::WBoundaryConditions(ds): ds == NULL.");
+  assert(ds && "MoreauJeanOSI::WBoundaryConditions(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W ;
 }
 
@@ -257,7 +257,7 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::SecondOrderDS ds
   // - allocate memory for the matrix W
   // - update its content for the current (initial) state of the dynamical system, depending on its type.
   if(!ds)
-    RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds == NULL");
+    RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds == nullptr");
 
   if(!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     RuntimeException::selfThrow("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
@@ -1682,7 +1682,7 @@ void MoreauJeanOSI::updateState(const unsigned int)
       {
 
         assert(((d.p(_levelMaxForInput)).get()) &&
-               " MoreauJeanOSI::updateState() *d.p(_levelMaxForInput) == NULL.");
+               " MoreauJeanOSI::updateState() *d.p(_levelMaxForInput) == nullptr.");
         v = *d.p(_levelMaxForInput); // v = p
         if(d.boundaryConditions())
           for(std::vector<unsigned int>::iterator
@@ -1767,7 +1767,7 @@ void MoreauJeanOSI::updateState(const unsigned int)
       // failure on bullet sims
       // d.p(_levelMaxForInput) is checked in next condition
       // assert(((d.p(_levelMaxForInput)).get()) &&
-      //       " MoreauJeanOSI::updateState() *d.p(_levelMaxForInput) == NULL.");
+      //       " MoreauJeanOSI::updateState() *d.p(_levelMaxForInput) == nullptr.");
 
       SiconosVector& vfree = *ds_work_vectors[MoreauJeanOSI::VFREE];
 
@@ -1881,7 +1881,7 @@ void MoreauJeanOSI::display()
       std::cout << "--------------------------------" <<std::endl;
       std::cout << "--> W of dynamical system number " << ds->number() << ": " <<std::endl;
       if(_dynamicalSystemsGraph->properties(*dsi).W) _dynamicalSystemsGraph->properties(*dsi).W->display();
-      else std::cout << "-> NULL" <<std::endl;
+      else std::cout << "-> nullptr" <<std::endl;
       std::cout << "--> and corresponding theta is: " << _theta <<std::endl;
     }
   }

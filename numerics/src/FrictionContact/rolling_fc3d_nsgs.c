@@ -28,7 +28,7 @@
 #include "SolverOptions.h"                     // for SolverOptions, SICONOS...
 #include "debug.h"                             // for DEBUG_PRINTF, DEBUG_BEGIN
 #include "numerics_verbose.h"                  // for numerics_printf, numer...
-#include "rolling_fc3d_Solvers.h"              // for RollingComputeErrorPtr
+#include "rolling_fc_Solvers.h"              // for RollingComputeErrorPtr
 #include "rolling_fc3d_compute_error.h"        // for rolling_fc3d_compute_e...
 #include "rolling_fc3d_local_problem_tools.h"  // for rolling_fc3d_local_pro...
 #include "rolling_fc3d_projection.h"           // for rolling_fc3d_projectio...
@@ -516,7 +516,7 @@ void rolling_fc3d_nsgs(RollingFrictionContactProblem* problem, double *reaction,
                            localreaction);
 
         if(iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] == SICONOS_FRICTION_3D_NSGS_RELAXATION_TRUE)
-          performRelaxation(localreaction, &reaction[contact*3], omega);
+          performRelaxation(localreaction, &reaction[contact*5], omega);
 
         accumulateLightErrorSum(&light_error_sum, localreaction, &reaction[contact*5]);
 

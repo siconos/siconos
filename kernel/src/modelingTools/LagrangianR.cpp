@@ -47,6 +47,6 @@ void LagrangianR::display() const
   if(_jachlambda)
     _jachlambda->display();
   else
-    std::cout << " NULL :" << std::endl;
+    std::cout << " nullptr :" << std::endl;
 
 }

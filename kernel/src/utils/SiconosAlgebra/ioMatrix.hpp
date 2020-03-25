@@ -73,7 +73,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
            otherwise -1.
  */
 double compareRefFile(const SimpleMatrix& data, std::string filename, double epsilon,
-                      Index index=Index(), SP::SimpleMatrix* ref=0,
+                      Index index=Index(), SP::SimpleMatrix* ref=nullptr,
                       std::string mode="ascii", bool verbose=true);
 }
 

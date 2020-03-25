@@ -1147,6 +1147,7 @@ SparseBlockStructuredMatrix*  SBM_multiply(const SparseBlockStructuredMatrix* co
   return C;
 }
 
+#ifndef NDEBUG
 static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A,
                                 const SparseBlockStructuredMatrix* const B,
                                 SparseBlockStructuredMatrix*  C,
@@ -1277,6 +1278,7 @@ static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A,
   DEBUG_END("SBM_check_C_for_gemm(...)\n");
   return 1;
 }
+#endif
 
 void SBM_gemm_without_allocation(double alpha, const SparseBlockStructuredMatrix* const A,
                                  const SparseBlockStructuredMatrix* const B,

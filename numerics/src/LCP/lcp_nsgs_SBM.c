@@ -86,7 +86,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
 
   /* Global Solver parameters*/
   int itermax = options[0].iparam[SICONOS_IPARAM_MAX_ITER];
-  double tolerance = options[0].iparam[SICONOS_DPARAM_TOL];
+  double tolerance = options[0].dparam[SICONOS_DPARAM_TOL];
 
   /* Matrix M/vector q of the LCP */
   SparseBlockStructuredMatrix* blmat = problem->M->matrix1;
@@ -181,7 +181,6 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
         break;
 
       }
-
       while(solverid < options->numberOfInternalSolvers - 1)
         solverid++;
     }
@@ -194,6 +193,7 @@ void lcp_nsgs_SBM(LinearComplementarityProblem* problem, double *z, double *w, i
     /* Criterium convergence */
     hasNotConverged = lcp_compute_error(problem, z, w, tolerance, &error);
     /*       if(error<tolerance) hasNotConverged = 0; */
+    numerics_printf_verbose(1,"---- LCP - NSGS SBM  - Iteration %i  full error = %14.7e", iter, error);
   }
   *info = hasNotConverged;
   /* Number of GS iterations */

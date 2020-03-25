@@ -44,14 +44,14 @@ void KernelTest::t0()
   std::ofstream ofs("Kernelt0.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<SiconosVector*>(NULL));
+    oa.register_type(static_cast<SiconosVector*>(nullptr));
     oa << NVP(q);
   }
 
   std::ifstream ifs("Kernelt0.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<SiconosVector*>(NULL));
+    ia.register_type(static_cast<SiconosVector*>(nullptr));
     ia >> NVP(q0);
   }
 
@@ -71,14 +71,14 @@ void KernelTest::t1()
   std::ofstream ofs("Kernelt1.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<SimpleMatrix*>(NULL));
+    oa.register_type(static_cast<SimpleMatrix*>(nullptr));
     oa << NVP(m1);
   }
 
   std::ifstream ifs("Kernelt1.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<SimpleMatrix*>(NULL));
+    ia.register_type(static_cast<SimpleMatrix*>(nullptr));
     ia >> NVP(m2);
   }
 
@@ -104,18 +104,18 @@ void KernelTest::t2()
   std::ofstream ofs("Kernelt2.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<SimpleMatrix*>(NULL));
-    oa.register_type(static_cast<SiconosVector*>(NULL));
-    oa.register_type(static_cast<LagrangianDS*>(NULL));
+    oa.register_type(static_cast<SimpleMatrix*>(nullptr));
+    oa.register_type(static_cast<SiconosVector*>(nullptr));
+    oa.register_type(static_cast<LagrangianDS*>(nullptr));
     oa << NVP(ds1);
   }
 
   std::ifstream ifs("Kernelt2.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<SimpleMatrix*>(NULL));
-    ia.register_type(static_cast<SiconosVector*>(NULL));
-    ia.register_type(static_cast<LagrangianDS*>(NULL));
+    ia.register_type(static_cast<SimpleMatrix*>(nullptr));
+    ia.register_type(static_cast<SiconosVector*>(nullptr));
+    ia.register_type(static_cast<LagrangianDS*>(nullptr));
     ia >> NVP(ds2);
   }
 
@@ -177,9 +177,9 @@ void KernelTest::t3()
 //   std::ofstream ofs("t4.xml");
 //   {
 //     boost::archive::xml_oarchive oa(ofs);
-//     oa.register_type(static_cast<SimpleMatrix*>(NULL));
-//     oa.register_type(static_cast<SiconosVector*>(NULL));
-//     oa.register_type(static_cast<LagrangianDS*>(NULL));
+//     oa.register_type(static_cast<SimpleMatrix*>(nullptr));
+//     oa.register_type(static_cast<SiconosVector*>(nullptr));
+//     oa.register_type(static_cast<LagrangianDS*>(nullptr));
 //     oa << NVP(dsset);
 //   }
 
@@ -188,9 +188,9 @@ void KernelTest::t3()
 //   std::ifstream ifs("t4.xml");
 //   {
 //     boost::archive::xml_iarchive ia(ifs);
-//     ia.register_type(static_cast<SimpleMatrix*>(NULL));
-//     ia.register_type(static_cast<SiconosVector*>(NULL));
-//     ia.register_type(static_cast<LagrangianDS*>(NULL));
+//     ia.register_type(static_cast<SimpleMatrix*>(nullptr));
+//     ia.register_type(static_cast<SiconosVector*>(nullptr));
+//     ia.register_type(static_cast<LagrangianDS*>(nullptr));
 //     ia >> NVP(dssetfromfile);
 //   }
 

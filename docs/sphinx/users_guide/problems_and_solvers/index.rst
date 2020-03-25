@@ -156,4 +156,4 @@ Solve a problem
    friction_contact
    global_friction_contact
    rolling_friction_contact
-   
+   generic_mechanical

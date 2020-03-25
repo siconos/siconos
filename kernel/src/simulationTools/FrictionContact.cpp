@@ -184,4 +184,3 @@ void FrictionContact::display() const
   std::cout << "of size " << _sizeOutput << "(ie " << _sizeOutput / _contactProblemDim << " contacts)." <<std::endl;
   LinearOSNS::display();
 }
-

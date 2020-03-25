@@ -2579,8 +2579,8 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
   assert(A->size0 >= B->size0);
   assert(A->size1 >= B->size1);
 
-  unsigned int end_i = start_i + B->size0;
-  unsigned int end_j = start_j + B->size1;
+  int end_i = start_i + B->size0;
+  int end_j = start_j + B->size1;
   assert(start_i <= end_i);
   assert(start_j <= end_j);
   assert(end_i <= A->size0);
@@ -4402,10 +4402,8 @@ int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, Ba
 
   double error = tol + 1.0;
   int k =0;
-  int info;
-
-  info = NM_max_abs_by_columns(A_k, D_C_x);
-  info = NM_max_abs_by_rows(A_k, D_R_x);
+  NM_max_abs_by_columns(A_k, D_C_x);
+  NM_max_abs_by_rows(A_k, D_R_x);
 
 
   while((error > tol) && (k < itermax))
@@ -4447,8 +4445,8 @@ int NM_compute_balancing_matrices(NumericsMatrix* A, double tol, int itermax, Ba
     /* DEBUG_PRINTF("inv D_C ");NV_display(D_C_x, size); */
     /* Compute error */
 
-    info = NM_max_abs_by_rows(A_k, D_R_x);
-    info = NM_max_abs_by_columns(A_k, D_C_x);
+    NM_max_abs_by_rows(A_k, D_R_x);
+    NM_max_abs_by_columns(A_k, D_C_x);
     /* printf("D_R ");NV_display(D_R_x, size0);  */
     /* printf("D_C ");NV_display(D_C_x, size1); */
 

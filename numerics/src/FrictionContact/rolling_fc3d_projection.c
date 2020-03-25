@@ -16,7 +16,7 @@
  * limitations under the License.
 */
 
-#include "rolling_fc3d_Solvers.h"
+#include "rolling_fc_Solvers.h"
 #include <assert.h>                            // for assert
 #include <math.h>                              // for sqrt
 #include <stdlib.h>                            // for calloc, realloc, free

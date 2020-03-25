@@ -297,18 +297,18 @@ void FirstOrderLinearR::display() const
   std::cout << " ===== Linear Time Invariant relation display ===== " <<std::endl;
   std::cout << "| C " <<std::endl;
   if(_C) _C->display();
-  else std::cout << "->NULL" <<std::endl;
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| D " <<std::endl;
   if(_D) _D->display();
-  else std::cout << "->NULL" <<std::endl;
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| F " <<std::endl;
   if(_F) _F->display();
-  else std::cout << "->NULL" <<std::endl;
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| e " <<std::endl;
   if(_e) _e->display();
-  else std::cout << "->NULL" <<std::endl;
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| B " <<std::endl;
   if(_B) _B->display();
-  else std::cout << "->NULL" <<std::endl;
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << " ================================================== " <<std::endl;
 }

@@ -49,7 +49,7 @@ public:
 
     array (size_type n) {
         stg = new (std::nothrow) T[n]; 
-        sz = (stg != 0) ? n : 0; 
+        sz = (stg != nullptr) ? n : 0; 
     }
 
     ~array() {

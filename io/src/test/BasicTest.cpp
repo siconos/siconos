@@ -181,7 +181,7 @@ void BasicTest::t3()
   CPPUNIT_ASSERT(ofs.good());
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<colored_point*>(NULL));
+    oa.register_type(static_cast<colored_point*>(nullptr));
     oa << BOOST_SERIALIZATION_NVP(p);
   }
 
@@ -189,7 +189,7 @@ void BasicTest::t3()
   CPPUNIT_ASSERT(ifs.good());
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<colored_point*>(NULL));
+    ia.register_type(static_cast<colored_point*>(nullptr));
     ia >> BOOST_SERIALIZATION_NVP(pn);
   }
 

@@ -20,18 +20,7 @@ endif()
 message("--- Start conf for siconos install.")
 # - Source dir and path to siconos install
 if(NOT CTEST_SOURCE_DIRECTORY)
-  set(CTEST_SOURCE_DIRECTORY ..)# $ENV{CI_PROJECT_DIR})
-endif()
-
-# Build name (for cdash)
-if(NOT CTEST_BUILD_NAME)
-  # Get hash for commit of current version of Siconos
-  # Saved by CI in CI_COMMIT_SHORT_SHA.
-  include(${CTEST_SOURCE_DIRECTORY}/cmake/SiconosVersion.cmake)
-  set(CTEST_BUILD_NAME "Siconos (${SICONOS_VERSION}-devel, branch/commit=$ENV{TRAVIS_BRANCH}/$ENV{TRAVIS_COMMIT})")
-  if(EXTRA_NAME)
-    set(CTEST_BUILD_NAME "${CTEST_BUILD_NAME} - ${EXTRA_NAME}.")
-  endif()
+  set(CTEST_SOURCE_DIRECTORY $ENV{TRAVIS_BUILD_DIR})
 endif()
 
 set(CMAKE_MODULE_PATH ${CTEST_SOURCE_DIRECTORY}/ci_travis/cmake;${CTEST_SOURCE_DIRECTORY}/ci_travis/config;${CTEST_SOURCE_DIRECTORY}/ci_travis)
