@@ -211,7 +211,8 @@ public:
 
 // Default Bullet options
 SiconosBulletOptions::SiconosBulletOptions()
-  : contactBreakingThreshold(0.02)
+  : dimension(SICONOS_BULLET_3D)
+  , contactBreakingThreshold(0.02)
   , contactProcessingThreshold(0.03)
   , worldScale(1.0)
   , useAxisSweep3(false)
