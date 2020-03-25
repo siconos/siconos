@@ -101,6 +101,8 @@
 %warnfilter(509) quaternionRotate;
 %warnfilter(509) changeFrameAbsToBody;
 %warnfilter(509) changeFrameBodyToAbs;
+%warnfilter(325) Change;
+%warnfilter(325) ChangeLogIter;
 
 
  // common declarations with upper modules : Mechanics, IO, ...
