@@ -35,7 +35,6 @@ Input Variables
   possibilities.  List of vendors valid for Siconos:
 
   * OpenBLAS
-  * ATLAS
   * Matlab
   * Intel10_32 (intel mkl v10 32 bit)
   * Intel10_64lp (intel mkl v10+ 64 bit, threaded code, lp64 model)
@@ -62,7 +61,7 @@ Usage :
   
 .. code-block:: cmake
 
-    set(BLA_VENDOR ATLAS
+    set(BLA_VENDOR OpenBLAS
     find_package(BLASDEV)
 
     target_link_libraries(numerics PRIVATE BLAS::BLAS)
@@ -79,7 +78,6 @@ It also defines :
 
   * mkl
   * Matlab
-  * atlas
   * openblas
   * Accelerate
   * Unknown

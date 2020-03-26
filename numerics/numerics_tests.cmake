@@ -19,9 +19,9 @@ if(WITH_${COMPONENT}_TESTING)
 
   new_test(SOURCES test_blas_lapack.c)
 
-  if(HAS_LAPACK_dgesvd) # Some lapack versions (e.g. Atlas) miss dgesvd
-    new_test(SOURCES test_pinv.c)# DEPS "externals")
-  endif()
+  #if(HAS_LAPACK_dgesvd) # Some lapack versions miss dgesvd
+  new_test(SOURCES test_pinv.c)# DEPS "externals")
+  #endif()
   
   new_test(NAME tools_projection SOURCES test_projection.c)
 

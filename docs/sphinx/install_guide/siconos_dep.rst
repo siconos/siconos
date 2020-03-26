@@ -35,7 +35,6 @@ About blas and Lapack
 The BLAS (Basic Linear Algebra Subprograms, http://www.netlib.org/blas/) are routines that provide standard building blocks for performing basic vector and matrix operations, while LAPACK (http://www.netlib.org/lapack/#_presentation) provides routines for solving systems of simultaneous linear equations, least-squares solutions of linear systems of equations, eigenvalue problems, and singular value problems.
 Different implementations are available, such as:
 
-* atlas (http://math-atlas.sourceforge.net),
 * openblas (http://www.openblas.net),
 * the one from MKL (https://software.intel.com/en-us/intel-mkl),
 * Accelerate framework on Macosx (https://developer.apple.com/library/prerelease/mac/documentation/Accelerate/Reference/BLAS_Ref/index.html) ...
@@ -43,8 +42,9 @@ Different implementations are available, such as:
 For siconos we recommand:
 
 * accelerate on Macosx
-* atlas on linux systems
-* openblas on Fedora, instead of atlas since it provides LAPACKE functions.
+* OpenBLAS + lapacke on linux systems
+
+Warning : we do not provide support for atlas.
 
 Anyway, power users can still choose their favorite BLAS and LAPACK(E) vendor.
 
@@ -52,14 +52,20 @@ Blas, lapack setup of your system will be checked during cmake call.
 
 If the process failed or if you need a specific implementation, the following variables may be provided to cmake to help the searching process (see :ref:`siconos_detailed_install`)
 
-* WITH_BLAS : Blas implementation type [mkl/openblas/atlas/accelerate/generic]
-* BLAS_DIR : Blas implementation location.
-* BLAS_LIBRARY_DIR : path to blas libraries
-* BLAS_INCLUDE_DIRS : blas headers location(s)
-* LAPACK_DIR : Lapack implementation location.
-* WITH_LAPACK : Lapack implementation type [mkl/openblas/atlas/accelerate/generic]
-* LAPACK_LIBRARY_DIR : path to blas libraries
-* LAPACK_INCLUDE_DIRS : blas headers location(s)
+* BLA_VENDOR : Blas implementation type (used also as hint for lapack).
+  One of :
+  * OpenBLAS
+  * Matlab
+  * Intel10_32 (intel mkl v10 32 bit)
+  * Intel10_64lp (intel mkl v10+ 64 bit, threaded code, lp64 model)
+  * Intel10_64lp_seq (intel mkl v10+ 64 bit, sequential code, lp64 model)
+  * Intel10_64ilp (intel mkl v10+ 64 bit, threaded code, ilp64 model)
+  * Intel10_64ilp_seq (intel mkl v10+ 64 bit, sequential code, ilp64 model)
+  * Apple
+  * Generic
+
+* BLAS_ROOT : Blas implementation location.
+* LAPACK_ROOT : Lapack implementation location.
 
 
 About Boost

@@ -53,7 +53,6 @@ Example : if cmake is executed with WITH_MPI=ON
 
 // Which Lapack? 
 #cmakedefine HAS_MKL_LAPACKE
-#cmakedefine HAS_ATLAS_LAPACK
 #cmakedefine HAS_MATLAB_LAPACK
 
 // Which functions are defined in lapack?

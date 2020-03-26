@@ -31,7 +31,7 @@ Create a task
      my_new_task = CiTask(
      ci_config='task_name',
      distrib='ubuntu:16.10',
-     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'atlas-lapack', 'python-minimal'],
+     pkgs=['build-base', 'gcc', 'gfortran', 'gnu-c++', 'python-minimal'],
      srcs=['.'],
      targets={'.': ['docker-build', 'docker-ctest']})
 

@@ -42,14 +42,13 @@ include(CheckSymbolExists)
 # The following variables will be set in parent scope:
 #
 # * BLAS_NAME: name of the found implementation
-#   (could be: mkl, Matlab, ATLAS, OpenBLAS, Accelerate, Unknown).
+#   (could be: mkl, Matlab, OpenBLAS, Accelerate, Unknown).
 # * BLAS_HEADER: name of the required blas header file
 # * LAPACK_HEADER: name of the required lapack header file
 # * BLAS_PATH_SUFFIXES: dir name(s) used as hints to search for lib or headers
 # * LAPACK_EXTRA_LIBS: list of libraries names that may contain the required functions
-#   (e.g. lapack_atlas)
 # * LAPACK_PREFIX, LAPACK_SUFFIX: prefix and suffix for lapack functions names
-#   (e.g. in atlas : prefix = clapack_)
+#   (e.g. in openblas+lapacke : prefix = LAPACKE_)
 function(guess_blas_name_and_headers)
 
   if(BLA_VENDOR MATCHES Intel OR BLAS_LIBRARIES MATCHES mkl)
@@ -68,14 +67,6 @@ function(guess_blas_name_and_headers)
     set(LAPACK_EXTRA_LIBS mwlapack)
     set(LAPACK_SUFFIX "_")
     set(LAPACK_PREFIX)
-  elseif(BLAS_LIBRARIES MATCHES atlas OR BLA_VENDOR MATCHES ATLAS)
-    set(BLAS_NAME "ATLAS")
-    set(BLAS_HEADER cblas.h)
-    set(LAPACK_HEADER clapack.h)
-    set(BLAS_INCLUDE_SUFFIXES atlas)
-    set(LAPACK_EXTRA_LIBS lapack_atlas)
-    set(LAPACK_SUFFIX)
-    set(LAPACK_PREFIX "clapack_")
   elseif(BLAS_LIBRARIES MATCHES openblas OR BLA_VENDOR MATCHES OpenBlas)
     set(BLAS_NAME "OpenBlas")
     set(BLAS_HEADER cblas.h)

@@ -183,7 +183,7 @@ class btSiconosMeshData : public btGImpactMeshShape
 {
 public:
   btSiconosMeshData(btStridingMeshInterface*i)
-    : btGImpactMeshShape(i), btScalarVertices(0) {}
+    : btGImpactMeshShape(i), btScalarVertices(nullptr) {}
   ~btSiconosMeshData()
   {
     if(btScalarVertices) delete[] btScalarVertices;
@@ -211,7 +211,8 @@ public:
 
 // Default Bullet options
 SiconosBulletOptions::SiconosBulletOptions()
-  : contactBreakingThreshold(0.02)
+  : dimension(SICONOS_BULLET_3D)
+  , contactBreakingThreshold(0.02)
   , contactProcessingThreshold(0.03)
   , worldScale(1.0)
   , useAxisSweep3(false)
@@ -670,7 +671,7 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
   std11::shared_ptr<BR> record(
     std11::make_shared<BR>(base, ds, shape, btshape, btobject, contactor));
 
-  bodyShapeMap[ds ? &*ds : 0].push_back(record);
+  bodyShapeMap[ds ? &*ds : nullptr].push_back(record);
 
   assert(record->btobject);
   assert(record->sshape);
@@ -1260,7 +1261,7 @@ make_bt_vertex_array(SP::SiconosMesh mesh,
       mesh->vertices()->getArray(),
       sizeof(btScalar)*3));
 
-  return std::make_pair(bttris, (btScalar*)NULL);
+  return std::make_pair(bttris, (btScalar*)nullptr);
 }
 
 // If type of SiconosMatrix is not the same as btScalar, we must copy
