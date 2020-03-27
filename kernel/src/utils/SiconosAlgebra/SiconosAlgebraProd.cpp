@@ -518,6 +518,12 @@ SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
   }
 }
 
+const SimpleMatrix  prod(const SiconosMatrix& A, const SiconosMatrix& B)
+{
+  SimpleMatrix  C(A.size(0),B.size(1));
+  prod(A, B, C);
+  return C;
+}
 void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init)
 {
   // To compute C = A * B

@@ -3500,7 +3500,7 @@ void SimpleMatrixTest::testPLUFactorize()
   //CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUFactorize: ",  < tol, true);
 
   
-  SP::SiconosMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
+  SP::SimpleMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
   Sparse->eye();
   Sparse->display();
   Sparse->PLUFactorize();
@@ -3543,7 +3543,7 @@ void SimpleMatrixTest::testPLUSolve()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*D_backup,*b) - *backup).norm2()  < tol, true);
 
   // Test sparse matrix identity 
-  SP::SiconosMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
+  SP::SimpleMatrix Sparse(new SimpleMatrix(4,4,SPARSE));
   b.reset(new SiconosVector(Sparse->size(0)));
   for( int i =0; i <Sparse->size(0); i++)
   {
@@ -3595,7 +3595,7 @@ void SimpleMatrixTest::testPLUSolve()
 
   // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
   Sparse.reset(new SimpleMatrix(*SP3));
-  SP::SiconosMatrix Sparse_rhs (new SimpleMatrix(*SP3));
+  SP::SimpleMatrix Sparse_rhs (new SimpleMatrix(*SP3));
   Sparse->PLUSolve(*Sparse_rhs);
   Sparse_rhs->display();
   std::cout << "A A^{-1}" << std::endl;
@@ -3612,6 +3612,7 @@ void SimpleMatrixTest::testPLUSolve()
 
   Sparse_rhs->display();
   std::cout << "A A^{-1}" << std::endl;
+
   (prod(*Sparse,*Sparse_rhs)).display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUSolve: ", (prod(*Sparse,*Sparse_rhs) - *Id ).normInf()  < tol, true);
 
