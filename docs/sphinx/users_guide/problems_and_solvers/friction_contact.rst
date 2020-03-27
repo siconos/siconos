@@ -127,18 +127,6 @@ Conjugated projected gradient (:enumerator:`SICONOS_FRICTION_2D_CPG`)
 * iparam[SICONOS_IPARAM_MAX_ITER] = 1000
 * dparam[SICONOS_DPARAM_TOL] = 1e-4
 
-Latin method (:enumerator:`SICONOS_FRICTION_2D_LATIN`)
-""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-**Driver:** :func:`fc2d_latin`
-
-**Parameters:**
-
-* iparam[SICONOS_IPARAM_MAX_ITER] = 1000
-* dparam[SICONOS_DPARAM_TOL] = 1e-4
-* dparam[SICONOS_FRICTION_2D_K_LATIN] = 0.3;
-
-
 Lemke solver (:enumerator:`SICONOS_FRICTION_2D_LEMKE`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""
 

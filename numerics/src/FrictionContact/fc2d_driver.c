@@ -25,12 +25,11 @@
 #include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
 #include "SolverOptions.h"           // for SolverOptions, solver_options_id...
 #include "SparseBlockMatrix.h"       // for SparseBlockStructuredMatrix, SBM...
-#include "fc2d_Solvers.h"            // for fc2d_cpg, fc2d_enum, fc2d_latin
+#include "fc2d_Solvers.h"            // for fc2d_cpg, fc2d_enum
 #include "numerics_verbose.h"        // for numerics_error, verbose, numeric...
 
 const char* const   SICONOS_FRICTION_2D_NSGS_STR  = "F2D_NSGS";
 const char* const   SICONOS_FRICTION_2D_CPG_STR  = "F2D_CPG";
-const char* const   SICONOS_FRICTION_2D_LATIN_STR  = "F2D_LATIN";
 const char* const   SICONOS_FRICTION_2D_LEMKE_STR  = "F2D_LEMKE";
 const char* const   SICONOS_FRICTION_2D_ENUM_STR  = "F2D_ENUM";
 //#define DUMP_PROBLEM
@@ -132,14 +131,6 @@ int fc2d_driver(FrictionContactProblem* problem, double *reaction, double *veloc
       if(verbose)
         printf(" ========================== Call CPG solver for Friction-Contact 2D problem ==========================\n");
       fc2d_cpg(problem, reaction, velocity, &info, options);
-      break;
-    }
-    /****** Latin algorithm ******/
-    case SICONOS_FRICTION_2D_LATIN:
-    {
-      if(verbose)
-        printf(" ========================== Call Latin solver for Friction-Contact 2D problem ==========================\n");
-      fc2d_latin(problem, reaction, velocity, &info, options);
       break;
     }
     /****** Lexicolemke algorithm ******/
