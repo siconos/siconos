@@ -86,7 +86,6 @@ siconos_profiling = siconos_ubuntu_18_04.copy()(
     build_configuration='Profiling',
     add_pkgs=['profiling'])
 
-# note fedora/atlas-lapack in siconos.yml -> cmake does not detect blas
 siconos_fedora_latest_with_umfpack = siconos_default.copy()(
     distrib='fedora:latest',
     ci_config=('with_umfpack',),

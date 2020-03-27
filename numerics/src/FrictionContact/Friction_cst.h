@@ -9,7 +9,6 @@ enum FRICTION_SOLVER
   /** 2D Frictional Contact solvers */
   SICONOS_FRICTION_2D_NSGS = 400,
   SICONOS_FRICTION_2D_CPG = 402,
-  SICONOS_FRICTION_2D_LATIN = 403,
   SICONOS_FRICTION_2D_LEMKE = 404,
   SICONOS_FRICTION_2D_ENUM = 405,
 
@@ -124,7 +123,6 @@ enum FRICTION_SOLVER
 
 extern const char* const   SICONOS_FRICTION_2D_NSGS_STR ;
 extern const char* const   SICONOS_FRICTION_2D_CPG_STR ;
-extern const char* const   SICONOS_FRICTION_2D_LATIN_STR ;
 extern const char* const   SICONOS_FRICTION_2D_LEMKE_STR ;
 extern const char* const   SICONOS_FRICTION_2D_ENUM_STR ;
 
@@ -339,12 +337,7 @@ enum SICONOS_FRICTION_3D_NSN_DPARAM
   SICONOS_FRICTION_3D_NSN_RHO = 3,
 };
 
-enum SICONOS_FRICTION_2D_LATIN_DPARAM
-{
- /** index in dparam to store the klatin coeff value. Same index as rho in fc3d !*/
- SICONOS_FRICTION_2D_K_LATIN = 3,
-};
-  
+
 enum SICONOS_FRICTION_3D_NSN_RHO_STRATEGY_ENUM
 {
   /** A constant value given in dparam[SICONOS_FRICTION_3D_NSN_RHO] is used */

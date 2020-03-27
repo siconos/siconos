@@ -50,15 +50,6 @@ extern "C"
   */
   void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
-  /**  latin solver for global contact problem with friction in the 2D case.
-       \param[in] problem the friction-contact problem
-       \param[out] reaction global vector
-       \param[out] velocity global vector
-       \param[in,out] info termination value
-       \param[in,out] options SolverOptions structure
-  */
-  void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
-
   /** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for global contact problem with friction.
    *
    *
@@ -128,8 +119,6 @@ extern "C"
   */
 
   void fc2d_nsgs_set_default(SolverOptions* options);
-  void fc2d_latin_set_default(SolverOptions* options);
-
 
   /** @} */
 

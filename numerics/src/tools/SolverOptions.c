@@ -41,7 +41,7 @@
 #include "SiconosNumerics_Solvers.h"        // for SICONOS_REGISTER_SOLVERS
 #include "VI_cst.h"                         // for SICONOS_VI_BOX_AVI_LSA_STR
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
-#include "fc2d_Solvers.h"                   // for fc2d_latin_set_default
+#include "fc2d_Solvers.h"                   // for fc2d_nsgs_set_default
 #include "fc3d_Solvers.h"                   // for fc3d_nsgs_set_default
 #include "gfc3d_Solvers.h"                  // for gfc3d_aclmfp_set_default
 #include "lcp_cst.h"                        // for SICONOS_LCP_AVI_CAOFERRIS...
@@ -676,13 +676,6 @@ SolverOptions * solver_options_create(int solverId)
     options = solver_options_initialize(solverId, 1000, 1e-4, 0);
     break;
   }
-  case SICONOS_FRICTION_2D_LATIN:
-  {
-    options = solver_options_initialize(solverId, 1000, 1e-4, 0);
-    fc2d_latin_set_default(options);
-    break;
-  }
-
   case SICONOS_FRICTION_3D_NSGS:
   case SICONOS_GLOBAL_FRICTION_3D_NSGS:
   case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR:

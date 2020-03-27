@@ -40,7 +40,7 @@ void siconos_io(Archive& ar, SolverOptions&v, unsigned int version)
   {
     v.iparam = (int *) malloc(v.iSize * sizeof(int));
     v.dparam = (double *) malloc(v.dSize * sizeof(double));
-    v.internalSolvers = (SolverOptions *) malloc(v.numberOfInternalSolvers * sizeof(SolverOptions));
+    v.internalSolvers = (SolverOptions**)calloc(v.numberOfInternalSolvers, sizeof(SolverOptions*));
     v.callback = (Callback *) malloc(sizeof(Callback));
   }
   SERIALIZE(v, (callback), ar);

@@ -112,31 +112,6 @@ static inline double elapsed_clock_gettime(struct timespec* t1, struct timespec*
 
 #endif
 
-#ifdef HAVE_ATLAS_AUX_H
-#include <atlas_aux.h>
-#define DECL_TIMER_ATL_WALLTIME(T)                  \
-  double __timer__##T##1,__timer__##T##2
-#define START_TIMER_ATL_WALLTIME(T)             \
-  __timer__##T##1 = ATL_walltime()
-#define STOP_TIMER_ATL_WALLTIME(T)              \
-  __timer__##T##2 = ATL_walltime()
-#define ELAPSED_ATL_WALLTIME(T)                 \
-  __timer__##T##2-__timer__##T##1
-#define TIMER_TICK_ATL_WALLTIME double
-
-
-#define DECL_TIMER_ATL_CPUTIME(T)                   \
-  double __timer__##T##1,__timer__##T##2
-#define START_TIMER_ATL_CPUTIME(T)              \
-  __timer__##T##1 = ATL_cputime()
-#define STOP_TIMER_ATL_CPUTIME(T)               \
-  __timer__##T##2 = ATL_cputime()
-#define ELAPSED_ATL_CPUTIME(T)                  \
-  __timer__##T##2-__timer__##T##1
-#define TIMER_TICK_ATL_CPUTIME double
-
-#endif
-
 #ifdef HAVE_TIME_H
 #define DECL_TIMER_CLOCK(T)                           \
   clock_t __timer__##T##1,__timer__##T##2

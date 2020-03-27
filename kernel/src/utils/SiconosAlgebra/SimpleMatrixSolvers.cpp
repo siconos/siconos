@@ -114,7 +114,7 @@ void SimpleMatrix::PLUInverseInPlace()
   if(_num != 1)
     SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
 
-#if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
+#if defined(HAS_LAPACK_dgetri)
   int info = lapack::getri(*mat.Dense, *_ipiv);   // solve from factorization
 
   if(info != 0)

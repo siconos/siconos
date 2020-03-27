@@ -48,7 +48,7 @@ stdenv.mkDerivation rec {
     if enable_python then [ cmake swig gfortran pythonenv]
     else [cmake gfortran];
 
- cmakeFlags = [ "-DWITH_BLAS=${blas_name}" ]
+ cmakeFlags = [ "-DBLA_VENDOR=${blas_name}" ]
     ++ optional (numerics_only == true) [ "-DCOMPONENTS=externals;numerics -DWITH_CXX=OFF" ]
     ++ optional (enable_python != true) [ "-DWITH_PYTHON_WRAPPER=OFF" ]
     ++ optional (enable_openmp == true) [ "-DWITH_OPENMP=ON" ]
