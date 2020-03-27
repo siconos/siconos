@@ -32,7 +32,7 @@
 #include "NM_MPI.h"
 #ifndef __cplusplus
 #include <stdbool.h>        // for bool
-#define nullptr NULL
+//#define nullptr NULL
 #endif
 
 /** \struct NumericsMatrixInternalData NumericsMatrix.h
@@ -221,13 +221,7 @@ extern "C"
  /** set NumericsMatrix fields to NULL
    * \param A a matrix
    */
-  static inline void NM_null(NumericsMatrix* A)
-  {
-    A->matrix0 = nullptr;
-    A->matrix1 = nullptr;
-    A->matrix2 = nullptr;
-    A->internalData = nullptr;
-  }
+  void NM_null(NumericsMatrix* A);
 
   /** update the size of the matrix based on the matrix data
    * \param[in,out] A the matrix which size is updated*/
@@ -674,18 +668,8 @@ extern "C"
   /** Allocate the internalData structure (but not its content!)
    * \param M the matrix to modify
    */
-  static inline void NM_internalData_new(NumericsMatrix* M)
-  {
-    M->internalData = (NumericsMatrixInternalData *)malloc(sizeof(NumericsMatrixInternalData));
-    M->internalData->iWork = nullptr;
-    M->internalData->iWorkSize = 0;
-    M->internalData->dWork = nullptr;
-    M->internalData->dWorkSize = 0;
-    M->internalData->isLUfactorized = 0;
-#ifdef SICONOS_HAS_MPI
-    M->internalData->mpi_comm = MPI_COMM_NULL;
-#endif
-  }
+  void NM_internalData_new(NumericsMatrix* M);
+  
   /** Copy the internalData structure
    * \param M the matrix to modify
    */

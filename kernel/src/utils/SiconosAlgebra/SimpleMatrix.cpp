@@ -387,7 +387,7 @@ SimpleMatrix::~SimpleMatrix()
       // _numericsMatrix->matrix0 points to the array contained in the ublas matrix
       // To avoid double free on this pointer, we set it to NULL before deletion
       if (_numericsMatrix->matrix0)
-        _numericsMatrix->matrix0 =NULL;
+        _numericsMatrix->matrix0 =nullptr;
     }
   }
   else if(_num == Siconos::TRIANGULAR)
