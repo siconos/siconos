@@ -391,7 +391,7 @@ SP::SimpleMatrix MechanicsIO::visitAllVerticesForVector(const G& graph) const
   SP::SimpleMatrix result(new SimpleMatrix());
   typename G::VIterator vi, viend;
   unsigned int current_row;
-  for(current_row=0,std11::tie(vi,viend)=graph.vertices();
+  for(current_row=0,std::tie(vi,viend)=graph.vertices();
       vi!=viend; ++vi, ++current_row)
   {
     T getter;
@@ -409,7 +409,7 @@ SP::SiconosVector MechanicsIO::visitAllVerticesForDouble(const G& graph) const
   SP::SiconosVector result(new SiconosVector(graph.vertices_number()));
   typename G::VIterator vi, viend;
   unsigned int current_row;
-  for(current_row=0,std11::tie(vi,viend)=graph.vertices();
+  for(current_row=0,std::tie(vi,viend)=graph.vertices();
       vi!=viend; ++vi, ++current_row)
   {
     T getter;
@@ -455,7 +455,7 @@ SP::SimpleMatrix MechanicsIO::contactPoints(const NonSmoothDynamicalSystem& nsds
     result->resize(graph.vertices_number(), 25);
 
     int data_size =0;
-    for(current_row=0, std11::tie(vi,viend) = graph.vertices();
+    for(current_row=0, std::tie(vi,viend) = graph.vertices();
         vi!=viend; ++vi)
     {
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
@@ -516,7 +516,7 @@ SP::SimpleMatrix MechanicsIO::domains(const NonSmoothDynamicalSystem& nsds) cons
       *nsds.topology()->indexSet(1);
     unsigned int current_row;
     result->resize(graph.vertices_number(), 2);
-    for(current_row=0, std11::tie(vi,viend) = graph.vertices();
+    for(current_row=0, std::tie(vi,viend) = graph.vertices();
         vi!=viend; ++vi, ++current_row)
     {
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));

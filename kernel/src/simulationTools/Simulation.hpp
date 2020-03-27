@@ -37,7 +37,7 @@
     The available simulations are TimeStepping, EventDriven and TimeSteppingD1Minus.  
 */
 
-class Simulation : public std11::enable_shared_from_this<Simulation>
+class Simulation : public std::enable_shared_from_this<Simulation>
 {
 protected:
   /** serialization hooks

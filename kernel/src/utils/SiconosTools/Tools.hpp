@@ -120,9 +120,9 @@ template <class T, class SPT, class U> void setObject(SPT& obj, const U& val)
 #include "SiconosPointers.hpp"
 /** Graph -> Set conversion */
 template <class S, class G>
-std11::shared_ptr<S> setOfGraph(std11::shared_ptr<G> g)
+std::shared_ptr<S> setOfGraph(std::shared_ptr<G> g)
 {
-  std11::shared_ptr<S> r;
+  std::shared_ptr<S> r;
   r.reset(new S());
   for (typename G::VIterator vi = g->begin(); vi != g->end(); ++vi)
   {

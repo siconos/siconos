@@ -142,15 +142,15 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 
 // declare C++ shared_ptrs to C structs
 // need to do this here for other modules to reference numerics structs by shared_ptr.
-// swig requires same namespace 'std11' is used.
+// swig requires same namespace 'std' is used.
 %{
 #ifdef __cplusplus
-namespace std11 = std;
+
 #include <memory>
 #endif
 %}
 #ifdef __cplusplus
-#define SWIG_SHARED_PTR_NAMESPACE std11
+#define SWIG_SHARED_PTR_NAMESPACE std
 %include boost_shared_ptr.i
 #endif
 

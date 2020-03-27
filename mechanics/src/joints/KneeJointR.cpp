@@ -89,7 +89,7 @@ void KneeJointR::checkInitPos(SP::SiconosVector x1,  SP::SiconosVector x2)
 
 KneeJointR::KneeJointR()
   : NewtonEulerJointR()
-  , _P0(std11::make_shared<SiconosVector>(3))
+  , _P0(std::make_shared<SiconosVector>(3))
 {
   _points.resize(1);
 }
@@ -97,7 +97,7 @@ KneeJointR::KneeJointR()
 KneeJointR::KneeJointR(SP::SiconosVector P, bool absoluteRef,
                        SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : NewtonEulerJointR()
-  , _P0(std11::make_shared<SiconosVector>(3))
+  , _P0(std::make_shared<SiconosVector>(3))
 {
   _points.resize(1);
   setAbsolute(absoluteRef);

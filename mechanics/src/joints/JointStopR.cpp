@@ -39,9 +39,9 @@ JointStopR::JointStopR(SP::NewtonEulerJointR joint, double pos, bool dir,
                        unsigned int axis)
   : NewtonEulerR()
   , _joint(joint)
-  , _axis(std11::make_shared< std::vector<unsigned int> >())
-  , _pos(std11::make_shared<SiconosVector>(1))
-  , _dir(std11::make_shared<SiconosVector>(1))
+  , _axis(std::make_shared< std::vector<unsigned int> >())
+  , _pos(std::make_shared<SiconosVector>(1))
+  , _dir(std::make_shared<SiconosVector>(1))
 {
   _axis->push_back(axis);
   _pos->setValue(0, pos);
@@ -78,9 +78,9 @@ JointStopR::JointStopR(SP::NewtonEulerJointR joint, double pos, double neg,
                        unsigned int axis)
   : NewtonEulerR()
   , _joint(joint)
-  , _axis(std11::make_shared< std::vector<unsigned int> >())
-  , _pos(std11::make_shared<SiconosVector>(2))
-  , _dir(std11::make_shared<SiconosVector>(2))
+  , _axis(std::make_shared< std::vector<unsigned int> >())
+  , _pos(std::make_shared<SiconosVector>(2))
+  , _dir(std::make_shared<SiconosVector>(2))
 {
   _axis->push_back(axis);
   _axis->push_back(axis);
@@ -128,7 +128,7 @@ void JointStopR::computeJachq(double time, Interaction& inter, SP::BlockVector q
   if(!_jachqTmp || !(_jachqTmp->size(1) == q0->size() &&
                      _jachqTmp->size(0) == n))
   {
-    _jachqTmp = std11::make_shared<SimpleMatrix>(n, q0->size());
+    _jachqTmp = std::make_shared<SimpleMatrix>(n, q0->size());
   }
 
   // Compute the jacobian for the required range of axes

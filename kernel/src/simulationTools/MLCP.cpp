@@ -80,7 +80,7 @@ void MLCP::computeOptions(SP::Interaction inter1, SP::Interaction inter2)
   //unsigned int equalitySize2 =  0;
   if(Type::value(*(inter1->nonSmoothLaw()))
       == Type::MixedComplementarityConditionNSL)
-    equalitySize1 = std11::static_pointer_cast<MixedComplementarityConditionNSL>(inter1->nonSmoothLaw())->equalitySize();
+    equalitySize1 = std::static_pointer_cast<MixedComplementarityConditionNSL>(inter1->nonSmoothLaw())->equalitySize();
   else if(Type::value(*(inter1->nonSmoothLaw()))
           == Type::EqualityConditionNSL)
     equalitySize1 = nslawSize1;

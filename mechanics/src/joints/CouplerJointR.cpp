@@ -221,13 +221,13 @@ void CouplerJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
 void CouplerJointR::computeJachq(double time, Interaction& inter, SP::BlockVector q0)
 {
-  SP::SimpleMatrix jachq1 = std11::make_shared<SimpleMatrix>(1, q0->size());
-  SP::SimpleMatrix jachq2 = std11::make_shared<SimpleMatrix>(1, q0->size());
+  SP::SimpleMatrix jachq1 = std::make_shared<SimpleMatrix>(1, q0->size());
+  SP::SimpleMatrix jachq2 = std::make_shared<SimpleMatrix>(1, q0->size());
 
   // Get jacobians for the implicated degrees of freedom
   // Compute the jacobian for the required range of axes
-  SP::BlockVector q01 = std11::make_shared<BlockVector>();
-  SP::BlockVector q02 = std11::make_shared<BlockVector>();
+  SP::BlockVector q01 = std::make_shared<BlockVector>();
+  SP::BlockVector q02 = std::make_shared<BlockVector>();
   makeBlockVectors(q0->vector(0),
                    q0->getAllVect().size()>1 ? q0->vector(1) : SP::SiconosVector(),
                    *q01, *q02);
@@ -282,13 +282,13 @@ void CouplerJointR::computeJachqDoF(double time, Interaction& inter,
   // don't store result in member object.)
   assert(axis==0);
 
-  SP::SimpleMatrix jachq1 = std11::make_shared<SimpleMatrix>(1, q0->size());
-  SP::SimpleMatrix jachq2 = std11::make_shared<SimpleMatrix>(1, q0->size());
+  SP::SimpleMatrix jachq1 = std::make_shared<SimpleMatrix>(1, q0->size());
+  SP::SimpleMatrix jachq2 = std::make_shared<SimpleMatrix>(1, q0->size());
 
   // Get jacobians for the implicated degrees of freedom
   // Compute the jacobian for the required range of axes
-  SP::BlockVector q01 = std11::make_shared<BlockVector>();
-  SP::BlockVector q02 = std11::make_shared<BlockVector>();
+  SP::BlockVector q01 = std::make_shared<BlockVector>();
+  SP::BlockVector q02 = std::make_shared<BlockVector>();
   makeBlockVectors(q0->vector(0),
                    q0->getAllVect().size()>1 ? q0->vector(1) : SP::SiconosVector(),
                    *q01, *q02);

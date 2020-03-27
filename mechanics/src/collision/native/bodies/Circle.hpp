@@ -28,7 +28,7 @@
 #include "MechanicsFwd.hpp"
 #include "CircularDS.hpp"
 
-class Circle : public CircularDS, public std11::enable_shared_from_this<Circle>
+class Circle : public CircularDS, public std::enable_shared_from_this<Circle>
 {
 private:
   /** serialization hooks

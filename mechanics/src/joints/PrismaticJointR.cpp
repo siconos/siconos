@@ -64,7 +64,7 @@
 
 PrismaticJointR::PrismaticJointR()
   : NewtonEulerJointR()
-  , _axis0(std11::make_shared<SiconosVector>(3))
+  , _axis0(std::make_shared<SiconosVector>(3))
 {
   _axes.resize(1);
 }
@@ -72,7 +72,7 @@ PrismaticJointR::PrismaticJointR()
 PrismaticJointR::PrismaticJointR(SP::SiconosVector axis, bool absoluteRef,
                                  SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : NewtonEulerJointR()
-  , _axis0(std11::make_shared<SiconosVector>(3))
+  , _axis0(std::make_shared<SiconosVector>(3))
 {
   _axes.resize(1);
   setAbsolute(absoluteRef);

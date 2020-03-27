@@ -91,8 +91,8 @@ static double piwrap(double x)
 
 CylindricalJointR::CylindricalJointR()
   : NewtonEulerJointR()
-  , _axis0(std11::make_shared<SiconosVector>(3))
-  , _G1P0(std11::make_shared<SiconosVector>(3))
+  , _axis0(std::make_shared<SiconosVector>(3))
+  , _G1P0(std::make_shared<SiconosVector>(3))
 {
   _points.resize(1);
   _axes.resize(1);
@@ -102,8 +102,8 @@ CylindricalJointR::CylindricalJointR(SP::SiconosVector P, SP::SiconosVector A,
                                      bool absoluteRef,
                                      SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : NewtonEulerJointR()
-  , _axis0(std11::make_shared<SiconosVector>(3))
-  , _G1P0(std11::make_shared<SiconosVector>(3))
+  , _axis0(std::make_shared<SiconosVector>(3))
+  , _G1P0(std::make_shared<SiconosVector>(3))
 {
   _points.resize(1);
   _axes.resize(1);
@@ -171,7 +171,7 @@ void CylindricalJointR::setBasePositions(SP::SiconosVector q1,
   quatPos quatG2P0_abs(G2P0_abs);
   tmp = 1.0/quat2 * quatG2P0_abs * quat2;
 
-  _G2P0 = std11::make_shared<SiconosVector>(3);
+  _G2P0 = std::make_shared<SiconosVector>(3);
   _G2P0->setValue(0, tmp.R_component_2());
   _G2P0->setValue(1, tmp.R_component_3());
   _G2P0->setValue(2, tmp.R_component_4());

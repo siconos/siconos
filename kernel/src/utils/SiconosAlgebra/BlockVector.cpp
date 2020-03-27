@@ -52,7 +52,7 @@ BlockVector::BlockVector(const BlockVector &v)
   VectorOfVectors::const_iterator it;
   for(it = v.begin(); it != v.end(); ++it)
   {
-    _vect.push_back(std11::shared_ptr<SiconosVector>(new SiconosVector(**it))) ;
+    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(**it))) ;
     _sizeV += (*it)->size();
     _tabIndex->push_back(_sizeV);
   }
@@ -86,7 +86,7 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2)
     // This case is usefull to set xDot in LagrangianDS.
     _sizeV = v2->size();
 
-    _vect.push_back(std11::shared_ptr<SiconosVector>(new SiconosVector(_sizeV)));
+    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(_sizeV)));
     _tabIndex->push_back(_sizeV);
 
   }
@@ -101,7 +101,7 @@ BlockVector::BlockVector(SP::SiconosVector v1, SP::SiconosVector v2)
   {
     // This case is usefull to set xDot in LagrangianDS.
 
-    _vect.push_back(std11::shared_ptr<SiconosVector>(new SiconosVector(v1->size())));
+    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(v1->size())));
     _sizeV += v1->size();
     _tabIndex->push_back(_sizeV);
   }
@@ -116,7 +116,7 @@ BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim)
   _vect.reserve(numberOfBlocks);
   for(unsigned int i = 0; i < numberOfBlocks; ++i)
   {
-    _vect.push_back(std11::shared_ptr<SiconosVector>(new SiconosVector(dim)));
+    _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(dim)));
     _tabIndex->push_back(dim * (i + 1));
   }
   _sizeV = dim * numberOfBlocks;
@@ -480,7 +480,7 @@ void BlockVector::insert(const  SiconosVector& v)
 {
   _sizeV += v.size();
 
-  _vect.push_back(std11::shared_ptr<SiconosVector>(new SiconosVector(v))); // Copy
+  _vect.push_back(std::shared_ptr<SiconosVector>(new SiconosVector(v))); // Copy
 
   _tabIndex->push_back(_sizeV);
 }

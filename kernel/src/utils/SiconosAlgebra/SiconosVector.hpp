@@ -48,7 +48,7 @@ union VECTOR_UBLAS_TYPE
  * You can find an overview on how to build and use vectors and matrices in siconos users' guide .
  *
  */
-class SiconosVector : public std11::enable_shared_from_this<SiconosVector>
+class SiconosVector : public std::enable_shared_from_this<SiconosVector>
 {
 protected:
   /** serialization hooks

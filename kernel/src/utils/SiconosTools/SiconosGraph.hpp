@@ -47,9 +47,6 @@
 #include <boost/graph/directed_graph.hpp>
 #include <boost/property_map/property_map.hpp>
 #include <boost/static_assert.hpp>
-
-namespace std11 = std;
-
 #include "SiconosSerialization.hpp"
 
 enum vertex_properties_t { vertex_properties };

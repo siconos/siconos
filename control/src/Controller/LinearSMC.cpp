@@ -59,7 +59,7 @@ void LinearSMC::actuate()
   if(!_noUeq)
   {
     computeUeq();
-    FirstOrderLinearDS& LinearDS_SMC = *std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC);
+    FirstOrderLinearDS& LinearDS_SMC = *std::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC);
     prod(*_B, *_ueq, *(LinearDS_SMC.b()));
   }
 

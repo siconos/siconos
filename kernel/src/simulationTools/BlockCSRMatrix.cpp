@@ -102,7 +102,7 @@ void BlockCSRMatrix::fill(InteractionsGraph& indexSet)
   int sizeV = 0;
 
   InteractionsGraph::VIterator vi, viend;
-  for(std11::tie(vi, viend) = indexSet.vertices();
+  for(std::tie(vi, viend) = indexSet.vertices();
       vi != viend; ++vi)
   {
     SP::Interaction inter = indexSet.bundle(*vi);
@@ -120,7 +120,7 @@ void BlockCSRMatrix::fill(InteractionsGraph& indexSet)
   }
 
   InteractionsGraph::EIterator ei, eiend;
-  for(std11::tie(ei, eiend) = indexSet.edges();
+  for(std::tie(ei, eiend) = indexSet.edges();
       ei != eiend; ++ei)
   {
     InteractionsGraph::VDescriptor vd1 = indexSet.source(*ei);
@@ -156,7 +156,7 @@ void BlockCSRMatrix::fillM(InteractionsGraph& indexSet)
   /* on adjoint graph a dynamical system may be on several edges */
   std::map<SP::DynamicalSystem, bool> involvedDS;
   InteractionsGraph::EIterator ei, eiend;
-  for(std11::tie(ei, eiend) = indexSet.edges();
+  for(std::tie(ei, eiend) = indexSet.edges();
       ei != eiend; ++ei)
   {
     if(Type::value(*indexSet.bundle(*ei)) != Type::NewtonEulerDS)
@@ -172,7 +172,7 @@ void BlockCSRMatrix::fillM(InteractionsGraph& indexSet)
       involvedDS[indexSet.bundle(*ei)] = true;
       _blockCSR->resize(_nr, _nr, false);
 
-      (*_blockCSR)(_nr-1, _nr-1) = std11::static_pointer_cast<NewtonEulerDS>
+      (*_blockCSR)(_nr-1, _nr-1) = std::static_pointer_cast<NewtonEulerDS>
                                    (indexSet.bundle(*ei))->mass()->getArray();
     }
   }
@@ -200,7 +200,7 @@ void BlockCSRMatrix::fillH(InteractionsGraph& indexSet)
   InteractionsGraph::EIterator ei, eiend;
   {
     unsigned int index;
-    for(std11::tie(ei, eiend) = indexSet.edges(), index=0;
+    for(std::tie(ei, eiend) = indexSet.edges(), index=0;
         ei != eiend; ++ei, ++index)
     {
       if(involvedDS.find(indexSet.bundle(*ei)) == involvedDS.end())
@@ -219,7 +219,7 @@ void BlockCSRMatrix::fillH(InteractionsGraph& indexSet)
   _blockCSR->resize(_nr, _nr, false);
 
   InteractionsGraph::VIterator vi, viend;
-  for(std11::tie(vi, viend) = indexSet.vertices();
+  for(std::tie(vi, viend) = indexSet.vertices();
       vi != viend; ++vi)
   {
 
@@ -227,7 +227,7 @@ void BlockCSRMatrix::fillH(InteractionsGraph& indexSet)
     unsigned int pos=0, col=0;
     InteractionsGraph::EDescriptor ed1, ed2;
     InteractionsGraph::OEIterator oei, oeiend;
-    for(std11::tie(oei, oeiend) = indexSet.out_edges(*vi);
+    for(std::tie(oei, oeiend) = indexSet.out_edges(*vi);
         oei != oeiend; ++oei)
     {
       if(!first)
@@ -246,10 +246,10 @@ void BlockCSRMatrix::fillH(InteractionsGraph& indexSet)
     }
 
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) =
-      std11::static_pointer_cast<NewtonEulerR>(indexSet.bundle(*vi)->relation())->jachqT()->getArray();
+      std::static_pointer_cast<NewtonEulerR>(indexSet.bundle(*vi)->relation())->jachqT()->getArray();
 
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
-      std11::static_pointer_cast<NewtonEulerR>(indexSet.bundle(*vi)->relation())->jachqT()->getArray();
+      std::static_pointer_cast<NewtonEulerR>(indexSet.bundle(*vi)->relation())->jachqT()->getArray();
 
   }
 

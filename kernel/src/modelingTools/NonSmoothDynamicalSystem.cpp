@@ -216,7 +216,7 @@ void NonSmoothDynamicalSystem::pushInteractionsInMemory()
 
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = _topology->indexSet0();
-    for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
     {
       indexSet0->bundle(*ui)->swapInOldVariables();
       indexSet0->bundle(*ui)->swapInMemory();
@@ -241,7 +241,7 @@ void NonSmoothDynamicalSystem::updateInput(double time, unsigned int level)
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
   SP::InteractionsGraph indexSet0 = _topology->indexSet0();
-  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForInput() <= level);
@@ -265,7 +265,7 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level)
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
   SP::InteractionsGraph indexSet0 = _topology->indexSet0();
-  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
@@ -286,7 +286,7 @@ void NonSmoothDynamicalSystem::updateOutput(double time, unsigned int level_min,
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
   SP::InteractionsGraph indexSet0 = _topology->indexSet0();
-  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level_max);
@@ -303,7 +303,7 @@ void NonSmoothDynamicalSystem::computeInteractionJacobians(double time)
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
   SP::InteractionsGraph indexSet0 = _topology->indexSet0();
-  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
     inter->relation()->computeJach(time, *inter);
@@ -317,7 +317,7 @@ void NonSmoothDynamicalSystem::computeInteractionJacobians(double time, Interact
   DEBUG_BEGIN("NonSmoothDynamicalSystem::computeInteractionJacobians(double time)\n");
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
-  for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     inter = indexSet.bundle(*ui);
     inter->relation()->computeJach(time, *inter);
@@ -330,7 +330,7 @@ void NonSmoothDynamicalSystem::visitDynamicalSystems(SP::SiconosVisitor visitor)
 {
   DynamicalSystemsGraph &dsg = *dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  std11::tie(dsi, dsiend) = dsg.vertices();
+  std::tie(dsi, dsiend) = dsg.vertices();
   for(; dsi != dsiend; ++dsi)
   {
     dsg.bundle(*dsi)->acceptSP(visitor);

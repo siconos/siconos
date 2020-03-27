@@ -106,7 +106,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
       RelayProblem * pAux =
         (RelayProblem *)gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_RELAY, size);
       SP::RelayNSL nsLaw =
-        std11::static_pointer_cast<RelayNSL> (inter->nonSmoothLaw());
+        std::static_pointer_cast<RelayNSL> (inter->nonSmoothLaw());
       for(int i=0; i<size; i++)
       {
         pAux->lb[i] = nsLaw->lb();
@@ -120,7 +120,7 @@ void GenericMechanical::computeDiagonalInteractionBlock(const InteractionsGraph:
       FrictionContactProblem * pAux =
         (FrictionContactProblem *)gmp_add(_pnumerics_GMP, SICONOS_NUMERICS_PROBLEM_FC3D, size);
       SP::NewtonImpactFrictionNSL nsLaw =
-        std11::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
+        std::static_pointer_cast<NewtonImpactFrictionNSL> (inter->nonSmoothLaw());
       pAux->dimension = 3;
       pAux->numberOfContacts = 1;
       *(pAux->mu) = nsLaw->mu();

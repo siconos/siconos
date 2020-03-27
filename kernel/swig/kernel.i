@@ -164,7 +164,7 @@ namespace std
 %include solverOptions.i
 
 // access NumericsMatrix cf Numerics.i
-%typemap(out) (std11::shared_ptr<NumericsMatrix>) {
+%typemap(out) (std::shared_ptr<NumericsMatrix>) {
   npy_intp dims[2];
 
   if (!$1)
@@ -246,26 +246,26 @@ typedef __mpz_struct mpz_t[1];
 
 //namespace std {
 
-  %template (dspv) std::vector<std::pair<std11::shared_ptr<DynamicalSystem>,
-                                         std11::shared_ptr<DynamicalSystem> > >;
+  %template (dspv) std::vector<std::pair<std::shared_ptr<DynamicalSystem>,
+                                         std::shared_ptr<DynamicalSystem> > >;
 
   %template (dsiv) std::vector<std::pair<unsigned int, unsigned int > >;
 
 
   %template (dsi) std::pair<unsigned int, unsigned int >;
 
-  %template (dsp) std::pair<std11::shared_ptr<DynamicalSystem>,
-                            std11::shared_ptr<DynamicalSystem> >;
+  %template (dsp) std::pair<std::shared_ptr<DynamicalSystem>,
+                            std::shared_ptr<DynamicalSystem> >;
 
 //BouncingBallNETS.py, attempt to reach DSlink as a vector...
 //swig failure.
 //%shared_ptr(VectorOfBlockVectors);
-//%template (vectorOfBlockVectors) std::vector<std11::shared_ptr<BlockVector> >;
+//%template (vectorOfBlockVectors) std::vector<std::shared_ptr<BlockVector> >;
 ///
 //}
 
 
-%template(unsignedintv) std11::shared_ptr<std::vector<unsigned int> >;
+%template(unsignedintv) std::shared_ptr<std::vector<unsigned int> >;
 
 // not sufficient
 %ignore Question<bool>;
@@ -319,37 +319,37 @@ KERNEL_REGISTRATION()
 
   SP::NewtonImpactFrictionNSL cast_NewtonImpactFrictionNSL(SP::NonSmoothLaw nslaw)
   {
-    return std11::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
+    return std::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
   }
 
   SP::RelayNSL cast_RelayNSL(SP::NonSmoothLaw nslaw)
   {
-    return std11::dynamic_pointer_cast<RelayNSL>(nslaw);
+    return std::dynamic_pointer_cast<RelayNSL>(nslaw);
   }
 
   SP::NewtonImpactNSL cast_NewtonImpactNSL(SP::NonSmoothLaw nslaw)
   {
-    return std11::dynamic_pointer_cast<NewtonImpactNSL>(nslaw);
+    return std::dynamic_pointer_cast<NewtonImpactNSL>(nslaw);
   }
 
   SP::NewtonEulerDS cast_NewtonEulerDS(SP::DynamicalSystem ds)
   {
-    return std11::dynamic_pointer_cast<NewtonEulerDS>(ds);
+    return std::dynamic_pointer_cast<NewtonEulerDS>(ds);
   }
 
   SP::LagrangianDS cast_LagrangianDS(SP::DynamicalSystem ds)
   {
-    return std11::dynamic_pointer_cast<LagrangianDS>(ds);
+    return std::dynamic_pointer_cast<LagrangianDS>(ds);
   }
 
   SP::NewtonEuler1DR cast_NewtonEuler1DR(SP::Relation r)
   {
-    return std11::dynamic_pointer_cast<NewtonEuler1DR>(r);
+    return std::dynamic_pointer_cast<NewtonEuler1DR>(r);
   }
 
   SP::FrictionContact cast_FrictionContact(SP::OneStepNSProblem osnpb)
   {
-    return std11::dynamic_pointer_cast<FrictionContact>(osnpb);
+    return std::dynamic_pointer_cast<FrictionContact>(osnpb);
   }
 
   // Required to get size of a graph of interactions in python interp

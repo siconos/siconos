@@ -119,12 +119,12 @@ void KernelTest::t2()
     ia >> NVP(ds2);
   }
 
-  CPPUNIT_ASSERT(*(std11::static_pointer_cast<LagrangianDS>(ds1)->mass())
-                 == *(std11::static_pointer_cast<LagrangianDS>(ds2)->mass()));
-  CPPUNIT_ASSERT(*(std11::static_pointer_cast<LagrangianDS>(ds1)->q())
-                 == *(std11::static_pointer_cast<LagrangianDS>(ds2)->q()));
-  CPPUNIT_ASSERT(*(std11::static_pointer_cast<LagrangianDS>(ds1)->velocity())
-                 == *(std11::static_pointer_cast<LagrangianDS>(ds2)->velocity()));
+  CPPUNIT_ASSERT(*(std::static_pointer_cast<LagrangianDS>(ds1)->mass())
+                 == *(std::static_pointer_cast<LagrangianDS>(ds2)->mass()));
+  CPPUNIT_ASSERT(*(std::static_pointer_cast<LagrangianDS>(ds1)->q())
+                 == *(std::static_pointer_cast<LagrangianDS>(ds2)->q()));
+  CPPUNIT_ASSERT(*(std::static_pointer_cast<LagrangianDS>(ds1)->velocity())
+                 == *(std::static_pointer_cast<LagrangianDS>(ds2)->velocity()));
 
 }
 
@@ -323,14 +323,14 @@ void KernelTest::t6()
     SP::DynamicalSystemsGraph dsg =
       bouncingBall->topology()->dSG(0);
 
-    SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
+    SP::LagrangianDS ball = std::static_pointer_cast<LagrangianDS>
                             (dsg->bundle(*(dsg->begin())));
 
-    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(sim);
+    SP::TimeStepping s = std::static_pointer_cast<TimeStepping>(sim);
     SP::Interaction inter;
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = bouncingBall->topology()->indexSet(0);
-    for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       inter = indexSet0->bundle(*ui);
 
 
@@ -438,8 +438,8 @@ void KernelTest::t7()
     ia >> NVP(ds2);
   }
 
-  CPPUNIT_ASSERT(std11::static_pointer_cast<Disk>(ds1)->getRadius() ==
-                 std11::static_pointer_cast<Disk>(ds2)->getRadius());
+  CPPUNIT_ASSERT(std::static_pointer_cast<Disk>(ds1)->getRadius() ==
+                 std::static_pointer_cast<Disk>(ds2)->getRadius());
 }
 
 void KernelTest::t8()

@@ -93,11 +93,11 @@ void RollingFrictionContact::initialize(SP::Simulation sim)
     SP::InteractionsGraph indexSet =
       simulation()->indexSet(indexSetLevel());
     InteractionsGraph::VIterator ui, uiend;
-    for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
-      _mu->push_back(std11::static_pointer_cast<NewtonImpactRollingFrictionNSL>
+      _mu->push_back(std::static_pointer_cast<NewtonImpactRollingFrictionNSL>
                      (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
-      _muR->push_back(std11::static_pointer_cast<NewtonImpactRollingFrictionNSL>
+      _muR->push_back(std::static_pointer_cast<NewtonImpactRollingFrictionNSL>
                       (indexSet->bundle(*ui)->nonSmoothLaw())->muR());
     }
   }
@@ -109,11 +109,11 @@ void RollingFrictionContact::updateMu()
   _muR->clear();
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    _mu->push_back(std11::static_pointer_cast<NewtonImpactRollingFrictionNSL>
+    _mu->push_back(std::static_pointer_cast<NewtonImpactRollingFrictionNSL>
                    (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
-    _muR->push_back(std11::static_pointer_cast<NewtonImpactRollingFrictionNSL>
+    _muR->push_back(std::static_pointer_cast<NewtonImpactRollingFrictionNSL>
                     (indexSet->bundle(*ui)->nonSmoothLaw())->muR());
   }
 }

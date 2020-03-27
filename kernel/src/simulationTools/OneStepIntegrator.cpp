@@ -34,8 +34,8 @@ OneStepIntegrator::_initializeDSWorkVectors(SP::DynamicalSystem ds)
     _dynamicalSystemsGraph->descriptor(ds);
 
   // Create new work buffers, store in the graph
-  SP::VectorOfVectors wv = std11::make_shared<VectorOfVectors>();
-  SP::VectorOfMatrices wm = std11::make_shared<VectorOfMatrices>();
+  SP::VectorOfVectors wv = std::make_shared<VectorOfVectors>();
+  SP::VectorOfMatrices wm = std::make_shared<VectorOfMatrices>();
   _dynamicalSystemsGraph->properties(dsv).workVectors = wv;
   _dynamicalSystemsGraph->properties(dsv).workMatrices = wm;
 
@@ -132,7 +132,7 @@ void OneStepIntegrator::_check_and_update_interaction_levels(Interaction& inter)
 void OneStepIntegrator::resetAllNonSmoothParts()
 {
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     _dynamicalSystemsGraph->bundle(*dsi)->resetAllNonSmoothParts();
@@ -142,7 +142,7 @@ void OneStepIntegrator::resetAllNonSmoothParts()
 void OneStepIntegrator::resetNonSmoothPart(unsigned int level)
 {
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     _dynamicalSystemsGraph->bundle(*dsi)->resetNonSmoothPart(level);

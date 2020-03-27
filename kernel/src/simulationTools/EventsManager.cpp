@@ -210,7 +210,7 @@ void EventsManager::update(Simulation& sim)
     // TODO: create a TD at T if T ∈ (t_k, t_{k+1}), so the simulation effectively
     // run until T
     double tkp2 = getTkp2();
-    std11::static_pointer_cast<TimeDiscretisationEvent>(_events[0])->update(_k+2);
+    std::static_pointer_cast<TimeDiscretisationEvent>(_events[0])->update(_k+2);
     if(!isnan(tkp2))
     {
       insertEv(_events[0]);

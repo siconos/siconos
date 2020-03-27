@@ -110,7 +110,7 @@ void SchatzmanPaoliOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem
   assert(dsType == Type::LagrangianLinearTIDS);
   if(dsType == Type::LagrangianLinearTIDS)
   {
-    SP::LagrangianLinearTIDS lltids = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
+    SP::LagrangianLinearTIDS lltids = std::static_pointer_cast<LagrangianLinearTIDS> (ds);
     // buffers allocation (inside the graph)
 
     ds_work_vectors.resize(SchatzmanPaoliOSI::WORK_LENGTH);
@@ -196,7 +196,7 @@ void SchatzmanPaoliOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if(relationType == Lagrangian)
   {
-    LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
+    LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds1);
     DSlink[LagrangianR::p0].reset(new BlockVector());
     DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
 
@@ -216,7 +216,7 @@ void SchatzmanPaoliOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     if(relationType == Lagrangian)
     {
       inter_work_block[SchatzmanPaoliOSI::xfree]->insertPtr(workVds2[SchatzmanPaoliOSI::FREE]);
-      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
+      LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds2);
       DSlink[LagrangianR::p0]->insertPtr(lds.p(0));
     }
     else if(relationType == NewtonEuler)
@@ -256,7 +256,7 @@ void SchatzmanPaoliOSI::initializeIterationMatrixW(double t, SP::DynamicalSystem
   // 4 - Lagrangian linear systems
   else if(dsType == Type::LagrangianLinearTIDS)
   {
-    SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
+    SP::LagrangianLinearTIDS d = std::static_pointer_cast<LagrangianLinearTIDS> (ds);
     if(d->mass())
     {
       _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(*d->mass())); //*W = *d->mass();
@@ -393,7 +393,7 @@ double SchatzmanPaoliOSI::computeResidu()
   double normResidu = maxResidu;
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -419,7 +419,7 @@ double SchatzmanPaoliOSI::computeResidu()
 
 
       // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      SP::LagrangianLinearTIDS d = std::static_pointer_cast<LagrangianLinearTIDS> (ds);
       DEBUG_EXPR(d->display());
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       const SiconosVector& q_k = d->qMemory().getSiconosVector(0); // q_k
@@ -516,7 +516,7 @@ void SchatzmanPaoliOSI::computeFreeState()
   Type::Siconos dsType ; // Type of the current DS.
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
 
@@ -545,7 +545,7 @@ void SchatzmanPaoliOSI::computeFreeState()
       // ResiduFree = (-h*C -h^2*theta*K)*vi - h*K*qi + h*theta * Fext_i+1 + h*(1-theta)*Fext_i
 
       // -- Convert the DS into a Lagrangian one.
-      SP::LagrangianLinearTIDS d = std11::static_pointer_cast<LagrangianLinearTIDS> (ds);
+      SP::LagrangianLinearTIDS d = std::static_pointer_cast<LagrangianLinearTIDS> (ds);
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       const SiconosVector& qold = d->qMemory().getSiconosVector(0); // q_k
@@ -580,7 +580,7 @@ void SchatzmanPaoliOSI::computeFreeState()
 void SchatzmanPaoliOSI::prepareNewtonIteration(double time)
 {
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -718,7 +718,7 @@ void SchatzmanPaoliOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex
       }
 
     }
-    SP::LagrangianLinearTIR ltir = std11::static_pointer_cast<LagrangianLinearTIR> (mainInteraction->relation());
+    SP::LagrangianLinearTIR ltir = std::static_pointer_cast<LagrangianLinearTIR> (mainInteraction->relation());
     e = ltir->e();
     if(e)
     {
@@ -758,7 +758,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int)
 
   SP::SiconosMatrix W;
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     DynamicalSystem& ds = *_dynamicalSystemsGraph->bundle(*dsi);
@@ -841,7 +841,7 @@ void SchatzmanPaoliOSI::updateState(const unsigned int)
     else if(dsType == Type::NewtonEulerDS)
     {
       //  // get dynamical system
-      //       SP::NewtonEulerDS d = std11::static_pointer_cast<NewtonEulerDS> (ds);
+      //       SP::NewtonEulerDS d = std::static_pointer_cast<NewtonEulerDS> (ds);
       //       SP::SiconosVector v = d->velocity();
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
       //       std::cout<<"SchatzmanPaoliOSI::updatestate prev v"<<endl;
@@ -918,7 +918,7 @@ void SchatzmanPaoliOSI::display()
   std::cout << "====== SchatzmanPaoliOSI OSI display ======" <<std::endl;
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);

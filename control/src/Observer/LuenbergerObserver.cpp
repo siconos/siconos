@@ -92,8 +92,8 @@ void LuenbergerObserver::initialize(const NonSmoothDynamicalSystem& nsds, const 
   _nsds.reset(new NonSmoothDynamicalSystem(t0, T));
   _integrator.reset(new ZeroOrderHoldOSI());
 
-  std11::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
-    std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
+  std::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
+    std::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
   _nsds->insertDynamicalSystem(_DS);
 
   // Add the necessary properties

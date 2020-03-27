@@ -37,7 +37,7 @@
 JointFrictionR::JointFrictionR(SP::NewtonEulerJointR joint, unsigned int axis)
   : NewtonEulerR()
   , _joint(joint)
-  , _axis(std11::make_shared< std::vector<unsigned int> >())
+  , _axis(std::make_shared< std::vector<unsigned int> >())
 {
   _axis->push_back(axis);
   _axisMin = axis;
@@ -65,7 +65,7 @@ JointFrictionR::JointFrictionR(SP::NewtonEulerJointR joint, SP::UnsignedIntVecto
   else
   {
     _axisMin = _axisMax = 0;
-    _axis = std11::make_shared< std::vector<unsigned int> >();
+    _axis = std::make_shared< std::vector<unsigned int> >();
     _axis->push_back(0);
   }
 
@@ -86,7 +86,7 @@ void JointFrictionR::computeJachq(double time, Interaction& inter, SP::BlockVect
   if(!_jachqTmp || !(_jachqTmp->size(1) == q0->size() &&
                      _jachqTmp->size(0) == n))
   {
-    _jachqTmp = std11::make_shared<SimpleMatrix>(n, q0->size());
+    _jachqTmp = std::make_shared<SimpleMatrix>(n, q0->size());
   }
 
   // Compute the jacobian for the required range of axes

@@ -39,8 +39,8 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
 {
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem());
 
-  SP::DynamicalSystem ds(new LagrangianDS(std11::make_shared<SiconosVector>(3),
-                                          std11::make_shared<SiconosVector>(3)));
+  SP::DynamicalSystem ds(new LagrangianDS(std::make_shared<SiconosVector>(3),
+                                          std::make_shared<SiconosVector>(3)));
   ds->setNumber(23);
 
   try
@@ -78,8 +78,8 @@ void NonSmoothDynamicalSystemTest::testinsertInteraction()
 {
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem());
 
-  SP::DynamicalSystem ds(new LagrangianDS(std11::make_shared<SiconosVector>(3),
-                                          std11::make_shared<SiconosVector>(3)));
+  SP::DynamicalSystem ds(new LagrangianDS(std::make_shared<SiconosVector>(3),
+                                          std::make_shared<SiconosVector>(3)));
   ds->setNumber(23);
 
   nsds->insertDynamicalSystem(ds);
@@ -88,7 +88,7 @@ void NonSmoothDynamicalSystemTest::testinsertInteraction()
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertInteractionB: ", nsds->getNumberOfInteractions() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertInteractionC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
-  SP::Relation r(new LagrangianLinearTIR(std11::make_shared<SimpleMatrix>(1,3)));
+  SP::Relation r(new LagrangianLinearTIR(std::make_shared<SimpleMatrix>(1,3)));
   SP::NonSmoothLaw nsl(new NewtonImpactNSL(0.0));
   SP::Interaction inter(new Interaction(nsl, r));
   nsds->link(inter, ds);
@@ -103,11 +103,11 @@ void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem()
 {
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem());
 
-  SP::DynamicalSystem ds1(new LagrangianDS(std11::make_shared<SiconosVector>(3),
-                          std11::make_shared<SiconosVector>(3)));
+  SP::DynamicalSystem ds1(new LagrangianDS(std::make_shared<SiconosVector>(3),
+                          std::make_shared<SiconosVector>(3)));
   ds1->setNumber(23);
-  SP::DynamicalSystem ds2(new LagrangianDS(std11::make_shared<SiconosVector>(3),
-                          std11::make_shared<SiconosVector>(3)));
+  SP::DynamicalSystem ds2(new LagrangianDS(std::make_shared<SiconosVector>(3),
+                          std::make_shared<SiconosVector>(3)));
   ds2->setNumber(32);
 
   nsds->insertDynamicalSystem(ds1);
@@ -116,8 +116,8 @@ void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem()
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemB: ", nsds->getNumberOfInteractions() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
-  SP::Relation r1(new LagrangianLinearTIR(std11::make_shared<SimpleMatrix>(1,3)));
-  SP::Relation r2(new LagrangianLinearTIR(std11::make_shared<SimpleMatrix>(1,6)));
+  SP::Relation r1(new LagrangianLinearTIR(std::make_shared<SimpleMatrix>(1,3)));
+  SP::Relation r2(new LagrangianLinearTIR(std::make_shared<SimpleMatrix>(1,6)));
   SP::NonSmoothLaw nsl(new NewtonImpactNSL(0.0));
   SP::Interaction inter1(new Interaction(nsl, r1));
   SP::Interaction inter2(new Interaction(nsl, r1));
@@ -157,8 +157,8 @@ void NonSmoothDynamicalSystemTest::testremoveInteraction()
 {
   SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem());
 
-  SP::DynamicalSystem ds(new LagrangianDS(std11::make_shared<SiconosVector>(3),
-                                          std11::make_shared<SiconosVector>(3)));
+  SP::DynamicalSystem ds(new LagrangianDS(std::make_shared<SiconosVector>(3),
+                                          std::make_shared<SiconosVector>(3)));
   ds->setNumber(23);
 
   nsds->insertDynamicalSystem(ds);
@@ -167,7 +167,7 @@ void NonSmoothDynamicalSystemTest::testremoveInteraction()
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveInteractionB: ", nsds->getNumberOfInteractions() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveInteractionC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
-  SP::Relation r(new LagrangianLinearTIR(std11::make_shared<SimpleMatrix>(1,3)));
+  SP::Relation r(new LagrangianLinearTIR(std::make_shared<SimpleMatrix>(1,3)));
   SP::NonSmoothLaw nsl(new NewtonImpactNSL(0.0));
   SP::Interaction inter(new Interaction(nsl, r));
   nsds->link(inter, ds);

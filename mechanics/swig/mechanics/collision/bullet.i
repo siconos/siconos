@@ -128,10 +128,10 @@ PY_REGISTER_BULLET_LINEAR_MATH(btTransform);
 %include "BulletCollision/CollisionDispatch/btCollisionWorld.h"
 
 
-%shared_ptr(std::vector< std11::shared_ptr<btCollisionObject> >);
-%template (collisionObjects) std::vector< std11::shared_ptr< btCollisionObject > >;
+%shared_ptr(std::vector< std::shared_ptr<btCollisionObject> >);
+%template (collisionObjects) std::vector< std::shared_ptr< btCollisionObject > >;
 
-//%shared_ptr(std::vector< std11::shared_ptr<btCollisionShape> >);
+//%shared_ptr(std::vector< std::shared_ptr<btCollisionShape> >);
 
 PY_REGISTER_BULLET_NARROW_PHASE_COLLISION_DETECTION(btManifoldPoint);
 PY_REGISTER_BULLET_NARROW_PHASE_COLLISION_DETECTION(btPersistentManifold);
@@ -207,7 +207,7 @@ PY_FULL_REGISTER(Bullet1DR, Mechanics);
 {
   SP::BulletR cast_BulletR(SP::Relation rel)
   {
-    return std11::dynamic_pointer_cast<BulletR>(rel);
+    return std::dynamic_pointer_cast<BulletR>(rel);
   };
 
   extern bool gContactCalcArea3Points;

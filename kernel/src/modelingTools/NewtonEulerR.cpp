@@ -364,7 +364,7 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
     dimIndex[1] = 7;
     setBlock(_jachq, auxBloc, dimIndex, startIndex);
 
-    NewtonEulerDS& d = *std11::static_pointer_cast<NewtonEulerDS> (ds);
+    NewtonEulerDS& d = *std::static_pointer_cast<NewtonEulerDS> (ds);
     d.computeTdot();
     SimpleMatrix& Tdot = *d.Tdot();
 

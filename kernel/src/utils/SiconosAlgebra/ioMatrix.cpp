@@ -187,7 +187,7 @@ double compareRefFile(const SimpleMatrix& data, std::string filename, double eps
 {
   SP::SimpleMatrix r;
   if(!ref) ref = &r;
-  *ref = std11::make_shared<SimpleMatrix>(data);
+  *ref = std::make_shared<SimpleMatrix>(data);
   (*ref)->zero();
   bool compare = false;
 

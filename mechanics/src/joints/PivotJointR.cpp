@@ -59,7 +59,7 @@ static double piwrap(double x)
 
 PivotJointR::PivotJointR()
   : KneeJointR()
-  , _A(std11::make_shared<SiconosVector>(3))
+  , _A(std::make_shared<SiconosVector>(3))
 {
   _axes.resize(1);
 }
@@ -67,7 +67,7 @@ PivotJointR::PivotJointR()
 PivotJointR::PivotJointR(SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef,
                          SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : KneeJointR(P, absoluteRef, d1, d2)
-  , _A(std11::make_shared<SiconosVector>(3))
+  , _A(std::make_shared<SiconosVector>(3))
 {
   _axes.resize(1);
 
