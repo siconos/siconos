@@ -81,7 +81,8 @@ TYPEDEF_SPTR(SparseBlockStructuredMatrix)
     0   & 0   & b33&0 \\
     b81 & 0   & 0 & b44
     \end{array}\right.
- 
+
+ \endrst
  *
  * with nc = 4, nbNonNullBlocks = 8, RowPos = [0 0 0 1 1 2 3 3],
  * RowCol = [0 1 3 0 1 2 0 3]\n and _diagsize0 = [3 6 9 12].
