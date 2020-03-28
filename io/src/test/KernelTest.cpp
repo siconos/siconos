@@ -131,12 +131,12 @@ void KernelTest::t2()
 
 void KernelTest::t3()
 {
-  SP::SolverOptions so(new SolverOptions);
+  SP::SolverOptions so(solver_options_create(SICONOS_FRICTION_3D_NSN_AC),
+                       solver_options_delete);
   SP::SolverOptions sor(new SolverOptions);
-  solver_options_initialize(so.get(), SICONOS_FRICTION_3D_NSN_AC, 0, 0.);
   so->numberOfInternalSolvers = 1;
-  so->internalSolvers = (SolverOptions *) malloc(sizeof(SolverOptions) * so->numberOfInternalSolvers);
-  solver_options_initialize(so->internalSolvers, SICONOS_FRICTION_3D_NSN_AC, 0, 0.);
+  so->internalSolvers = (SolverOptions**) calloc(1, sizeof(SolverOptions*));
+  so->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
 
   std::ofstream ofs("SolverOptions.xml");
   {
@@ -151,10 +151,6 @@ void KernelTest::t3()
   }
 
   CPPUNIT_ASSERT((so->iSize == sor->iSize));
-
-  solver_options_delete(so.get());
-  solver_options_delete(sor.get());
-
 }
 
 // void KernelTest::t4()
@@ -366,7 +362,6 @@ void KernelTest::t6()
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*lambda)(0);
       s->nextStep();
-      ++show_progress;
       k++;
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
