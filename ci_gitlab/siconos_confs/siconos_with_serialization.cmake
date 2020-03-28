@@ -40,9 +40,9 @@ option(WITH_GIT "Consider sources are under GIT" OFF)
 
 
 # --- Documentation setup ---
-option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" OFF)
+option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" ON)
 option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings. Default = OFF" OFF)
-option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." OFF)
+option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." ON)
 
 
 
