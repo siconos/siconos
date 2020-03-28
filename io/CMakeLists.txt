@@ -77,9 +77,11 @@ if(WITH_SERIALIZATION)
       ${GENERATED_TARGETS} ${GENERATED_INCLUDES} --output=${GENERATED_HEADER}
       --source="${CMAKE_CURRENT_SOURCE_DIR}/../" --build="${CMAKE_BINARY_DIR}")
 
+    set(io_targets_doxy2xml "${io_targets}")
+    list(TRANSFORM io_targets_doxy2xml APPEND "-doxy2xml")
     add_custom_command(
       OUTPUT ${GENERATED_HEADER}
-      DEPENDS kernel-doxy2xml ${GENERATED_DEPENDENCIES}
+      DEPENDS ${io_targets_doxy2xml} ${GENERATED_DEPENDENCIES}
       ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
       ${CMAKE_SOURCE_DIR}/io/tools/builder_common.py
       ${GENERATED_COMMAND})
@@ -172,6 +174,13 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     target_link_libraries(io PUBLIC Boost::boost Boost::serialization Boost::filesystem)
     # TEST_SERIALIZATION_VECTOR_BUG() : not needed anymore, since we required boost >= 1.61
     # These test macros have been moved to siconos-junk.
+
+    target_include_directories(io PRIVATE serialization)
+    if(NOT WITH_GENERATION)
+      target_include_directories(io PRIVATE generation)
+    else()
+      target_include_directories(io PRIVATE ${CMAKE_BINARY_DIR}/io)
+    endif()
   endif()
   
   if(WITH_VTK)

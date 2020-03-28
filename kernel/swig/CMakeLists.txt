@@ -41,6 +41,7 @@ target_link_libraries(_kernel numerics)
 ## FP : when serialization is ON, we need includes from io in kernel ...
 # This has to be reviewed.
 if(WITH_SERIALIZATION)
+  target_include_directories(_kernel PRIVATE ${CMAKE_SOURCE_DIR}/io/src/serialization)
   if(WITH_GENERATION)
     target_include_directories(_kernel PRIVATE ${CMAKE_BINARY_DIR}/io/)
   else()
