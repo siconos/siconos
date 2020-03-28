@@ -132,6 +132,26 @@ REGISTER_BOOST_SERIALIZATION(GlobalFrictionContact);
 
 
 template <class Archive>
+void siconos_io(Archive& ar, RollingFrictionContact &v, unsigned int version)
+{
+	SERIALIZE(v, (_contactProblemDim)(_mu)(_muR)(_numerics_solver_options), ar);
+
+  if (Archive::is_loading::value)
+  {
+    if (v._contactProblemDim == 2)
+      v._rolling_frictionContact_driver = &rolling_fc2d_driver;
+    else
+      v._rolling_frictionContact_driver = &rolling_fc3d_driver;
+  }
+
+  ar & boost::serialization::make_nvp("LinearOSNS",
+                                      boost::serialization::base_object<LinearOSNS>(v));
+
+}
+REGISTER_BOOST_SERIALIZATION(RollingFrictionContact);
+
+
+template <class Archive>
 void siconos_io(Archive& ar, __mpz_struct& v, unsigned int version)
 {
   SERIALIZE(v, (_mp_alloc)(_mp_size), ar);
