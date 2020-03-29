@@ -44,6 +44,12 @@ enum SiconosBulletDimension
 
 struct SiconosBulletOptions
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletOptions);
+
+public:
   SiconosBulletOptions();
 
   int dimension;
@@ -60,6 +66,12 @@ struct SiconosBulletOptions
 
 struct SiconosBulletStatistics
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletStatistics);
+
+public:
   SiconosBulletStatistics()
     : new_interactions_created(0)
     , existing_interactions_processed(0)
@@ -72,6 +84,11 @@ struct SiconosBulletStatistics
 
 class SiconosBulletCollisionManager : public SiconosCollisionManager
 {
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBulletCollisionManager);
+
 protected:
   SP::SiconosBulletCollisionManager_impl impl;
 
