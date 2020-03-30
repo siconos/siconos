@@ -4,15 +4,15 @@
 #include <SiconosFwd.hpp>
 %}
 
-#define STD11 std
-#undef __cplusplus
-#define __cplusplus SICONOS_CXXVERSION
+#define STD std
+/* #undef __cplusplus */
+/* #define __cplusplus SICONOS_CXXVERSION */
 %include <std_shared_ptr.i>
 
 // from g++-v4/bits/shared_ptr.h
 // not sure if this is needed, but we can't use '#include <memory>'
 // since it is in a compiler path
-namespace STD11 {
+namespace STD {
   template<typename _Tp>
     class enable_shared_from_this
   {
@@ -97,9 +97,9 @@ FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SPC,TYPE)
   struct SharedPointerKeeper
   {
     // to keep a pointer on shared_ptr{Siconos,Simple}{Vector,Matrix}
-    std11::shared_ptr<void> ref;
+    std::shared_ptr<void> ref;
 
-    SharedPointerKeeper(std11::shared_ptr<void> v) : ref(v) 
+    SharedPointerKeeper(std::shared_ptr<void> v) : ref(v) 
     {
       DEBUG_PRINTF("SharedPointerKeeper : get %p use_count %ld\n",v.get(),v.use_count());
     };
@@ -116,7 +116,7 @@ FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SPC,TYPE)
   /* the PyCObject deleter 
      example: 
      SharedPointerKeeper* savedSharePtr = 
-       new SharedPointerKeeper(std11::static_pointer_cast<void>(mysharedptr));
+       new SharedPointerKeeper(std::static_pointer_cast<void>(mysharedptr));
      PyCObject_FromVoidPtr((void*) savedSharedPtr, &sharedPointerKeeperDelete);
   */
 

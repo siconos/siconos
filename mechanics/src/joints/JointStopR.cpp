@@ -39,16 +39,16 @@ JointStopR::JointStopR(SP::NewtonEulerJointR joint, double pos, bool dir,
                        unsigned int axis)
   : NewtonEulerR()
   , _joint(joint)
-  , _axis(std11::make_shared< std::vector<unsigned int> >())
-  , _pos(std11::make_shared<SiconosVector>(1))
-  , _dir(std11::make_shared<SiconosVector>(1))
+  , _axis(std::make_shared< std::vector<unsigned int> >())
+  , _pos(std::make_shared<SiconosVector>(1))
+  , _dir(std::make_shared<SiconosVector>(1))
 {
   _axis->push_back(axis);
   _pos->setValue(0, pos);
   _dir->setValue(0, dir ? -1 : 1);
   _axisMin = axis;
   _axisMax = axis;
-  assert( (_axisMax - _axisMin + 1) <= _joint->numberOfDoF() );
+  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 
 /** Initialize a multidimensional joint stop, e.g. the cone stop on
@@ -63,12 +63,12 @@ JointStopR::JointStopR(SP::NewtonEulerJointR joint, SP::SiconosVector pos,
 {
   _axisMin = 100;
   _axisMax = 0;
-  for (unsigned int i=0; i < _axis->size(); i++)
+  for(unsigned int i=0; i < _axis->size(); i++)
   {
-    if ((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
-    if ((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
+    if((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
+    if((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
   }
-  assert( (_axisMax - _axisMin + 1) <= _joint->numberOfDoF() );
+  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 
 #if 0  // Disabled, see JointStopR.hpp.  Use multiple JointStopR instead.
@@ -78,9 +78,9 @@ JointStopR::JointStopR(SP::NewtonEulerJointR joint, double pos, double neg,
                        unsigned int axis)
   : NewtonEulerR()
   , _joint(joint)
-  , _axis(std11::make_shared< std::vector<unsigned int> >())
-  , _pos(std11::make_shared<SiconosVector>(2))
-  , _dir(std11::make_shared<SiconosVector>(2))
+  , _axis(std::make_shared< std::vector<unsigned int> >())
+  , _pos(std::make_shared<SiconosVector>(2))
+  , _dir(std::make_shared<SiconosVector>(2))
 {
   _axis->push_back(axis);
   _axis->push_back(axis);
@@ -90,7 +90,7 @@ JointStopR::JointStopR(SP::NewtonEulerJointR joint, double pos, double neg,
   _dir->setValue(1, -1);
   _axisMin = axis;
   _axisMax = axis;
-  assert( (_axisMax - _axisMin + 1) <= _joint->numberOfDoF() );
+  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 #endif
 
@@ -99,12 +99,12 @@ void JointStopR::computeh(double time, BlockVector& q0, SiconosVector& y)
   // Common cases optimisation
   bool case_onestop = y.size()==1;
   bool case_posneg = y.size()==2 && (*_axis)[0] == (*_axis)[1];
-  if (case_onestop || case_posneg)
+  if(case_onestop || case_posneg)
   {
     _joint->computehDoF(time, q0, y, (*_axis)[0]);
 
     y.setValue(0, (y.getValue(0) - _pos->getValue(0)) * _dir->getValue(0));
-    if (case_posneg)
+    if(case_posneg)
       y.setValue(1, (y.getValue(0) - _pos->getValue(1)) * _dir->getValue(1));
     return;
   }
@@ -114,7 +114,8 @@ void JointStopR::computeh(double time, BlockVector& q0, SiconosVector& y)
   _joint->computehDoF(time, q0, tmp_y, _axisMin);
 
   // Copy and scale each stop for its axis/position/direction
-  for (unsigned int i=0; i < y.size(); i++) {
+  for(unsigned int i=0; i < y.size(); i++)
+  {
     y.setValue(i, (tmp_y.getValue((*_axis)[i])
                    - _pos->getValue(i))*_dir->getValue(i));
   }
@@ -124,18 +125,18 @@ void JointStopR::computeJachq(double time, Interaction& inter, SP::BlockVector q
 {
   unsigned int n = _axisMax - _axisMin + 1;
 
-  if (!_jachqTmp || !(_jachqTmp->size(1) == q0->size() &&
-                      _jachqTmp->size(0) == n))
+  if(!_jachqTmp || !(_jachqTmp->size(1) == q0->size() &&
+                     _jachqTmp->size(0) == n))
   {
-    _jachqTmp = std11::make_shared<SimpleMatrix>(n, q0->size());
+    _jachqTmp = std::make_shared<SimpleMatrix>(n, q0->size());
   }
 
   // Compute the jacobian for the required range of axes
   _joint->computeJachqDoF(time, inter, q0, *_jachqTmp, _axisMin);
 
   // Copy indicated axes into the stop jacobian, possibly flipped for negative stops
-  for (unsigned int i=0; i<_jachq->size(0); i++)
-    for (unsigned int j=0; j<_jachq->size(1); j++)
+  for(unsigned int i=0; i<_jachq->size(0); i++)
+    for(unsigned int j=0; j<_jachq->size(1); j++)
       _jachq->setValue(i,j,
                        _jachqTmp->getValue((*_axis)[i]-_axisMin,j) * _dir->getValue(i));
 }

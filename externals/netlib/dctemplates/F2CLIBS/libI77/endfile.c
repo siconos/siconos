@@ -34,16 +34,16 @@ integer f_end(alist *a)
 #endif
 {
   unit *b;
-  if (a->aunit >= MXUNIT || a->aunit < 0) err(a->aerr, 101, "endfile");
+  if(a->aunit >= MXUNIT || a->aunit < 0) err(a->aerr, 101, "endfile");
   b = &f__units[a->aunit];
-  if (b->ufd == NULL)
+  if(b->ufd == NULL)
   {
     char nbuf[10];
     (void) sprintf(nbuf, "fort.%ld", a->aunit);
 #ifdef NON_UNIX_STDIO
     {
       FILE *tf;
-      if (tf = fopen(nbuf, f__w_mode[0]))
+      if(tf = fopen(nbuf, f__w_mode[0]))
         fclose(tf);
     }
 #else
@@ -67,11 +67,11 @@ copy(FILE *from, register long len, FILE *to)
   int k, len1;
   char buf[BUFSIZ];
 
-  while (fread(buf, len1 = len > BUFSIZ ? BUFSIZ : (int)len, 1, from))
+  while(fread(buf, len1 = len > BUFSIZ ? BUFSIZ : (int)len, 1, from))
   {
-    if (!fwrite(buf, len1, 1, to))
+    if(!fwrite(buf, len1, 1, to))
       return 1;
-    if ((len -= len1) <= 0)
+    if((len -= len1) <= 0)
       break;
   }
   return 0;
@@ -88,18 +88,18 @@ copy(char *from, register long len, char *to)
   int k, rc = 0, tmp;
   char buf[BUFSIZ];
 
-  if ((k = open(from, O_RDONLY)) < 0)
+  if((k = open(from, O_RDONLY)) < 0)
     return 1;
-  if ((tmp = creat(to, 0666)) < 0)
+  if((tmp = creat(to, 0666)) < 0)
     return 1;
-  while ((n = read(k, buf, len > BUFSIZ ? BUFSIZ : (int)len)) > 0)
+  while((n = read(k, buf, len > BUFSIZ ? BUFSIZ : (int)len)) > 0)
   {
-    if (write(tmp, buf, n) != n)
+    if(write(tmp, buf, n) != n)
     {
       rc = 1;
       break;
     }
-    if ((len -= n) <= 0)
+    if((len -= n) <= 0)
       break;
   }
   close(k);
@@ -130,27 +130,27 @@ t_runc(alist *a)
   int rc = 0;
 
   b = &f__units[a->aunit];
-  if (b->url)
+  if(b->url)
     return(0);  /*don't truncate direct files*/
   loc = ftell(bf = b->ufd);
   fseek(bf, 0L, SEEK_END);
   len = ftell(bf);
-  if (loc >= len || b->useek == 0 || b->ufnm == NULL)
+  if(loc >= len || b->useek == 0 || b->ufnm == NULL)
     return(0);
 #ifdef NON_UNIX_STDIO
   fclose(b->ufd);
 #else
   rewind(b->ufd); /* empty buffer */
 #endif
-  if (!loc)
+  if(!loc)
   {
 #ifdef NON_UNIX_STDIO
-    if (!(bf = fopen(b->ufnm, f__w_mode[b->ufmt])))
+    if(!(bf = fopen(b->ufnm, f__w_mode[b->ufmt])))
 #else
-    if (close(creat(b->ufnm, 0666)))
+    if(close(creat(b->ufnm, 0666)))
 #endif
       rc = 1;
-    if (b->uwrt)
+    if(b->uwrt)
       b->uwrt = 1;
     goto done;
   }
@@ -161,29 +161,29 @@ t_runc(alist *a)
   mktemp(nm);
 #endif
 #ifdef NON_UNIX_STDIO
-  if (!(bf = fopen(b->ufnm, f__r_mode[0])))
+  if(!(bf = fopen(b->ufnm, f__r_mode[0])))
   {
 bad:
     rc = 1;
     goto done;
   }
-  if (!(tf = fopen(nm, f__w_mode[0])))
+  if(!(tf = fopen(nm, f__w_mode[0])))
     goto bad;
-  if (copy(bf, loc, tf))
+  if(copy(bf, loc, tf))
   {
 bad1:
     rc = 1;
     goto done1;
   }
-  if (!(bf = freopen(b->ufnm, f__w_mode[0], bf)))
+  if(!(bf = freopen(b->ufnm, f__w_mode[0], bf)))
     goto bad1;
-  if (!(tf = freopen(nm, f__r_mode[0], tf)))
+  if(!(tf = freopen(nm, f__r_mode[0], tf)))
     goto bad1;
-  if (copy(tf, loc, bf))
+  if(copy(tf, loc, bf))
     goto bad1;
-  if (f__w_mode[0] != f__w_mode[b->ufmt])
+  if(f__w_mode[0] != f__w_mode[b->ufmt])
   {
-    if (!(bf = freopen(b->ufnm, f__w_mode[b->ufmt + 2], bf)))
+    if(!(bf = freopen(b->ufnm, f__w_mode[b->ufmt + 2], bf)))
       goto bad1;
     fseek(bf, loc, SEEK_SET);
   }
@@ -193,14 +193,14 @@ done1:
 done:
   f__cf = b->ufd = bf;
 #else
-  if (copy(b->ufnm, loc, nm)
+  if(copy(b->ufnm, loc, nm)
       || copy(nm, loc, b->ufnm))
     rc = 1;
   unlink(nm);
   fseek(b->ufd, loc, SEEK_SET);
 done:
 #endif
-  if (rc)
+  if(rc)
     err(a->aerr, 111, "endfile");
   return 0;
 }

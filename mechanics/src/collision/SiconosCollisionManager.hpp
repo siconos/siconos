@@ -50,6 +50,12 @@ public:
    *  otherwise contact will occur with a non-graph body which results
    *  in failure. */
   virtual void removeBody(const SP::RigidBodyDS& body) {}
+  
+  /** Remove a body from the collision detector. This must be done
+   *  after removing a body from the NonSmoothDynamicalSystem
+   *  otherwise contact will occur with a non-graph body which results
+   *  in failure. */
+  virtual void removeBody(const SP::RigidBody2dDS& body) {}
 
   /** Perform an intersection test on all shapes in the contactors and
    * return a vector of all results, ordered by distance from start.
@@ -132,7 +138,7 @@ public:
   /** Insert a static contactor set */
   virtual StaticContactorSetID insertStaticContactorSet(
     SP::SiconosContactorSet cs, SP::SiconosVector position = SP::SiconosVector())
-    { return (StaticContactorSetID)0; }
+    { return (StaticContactorSetID)nullptr; }
 
   /** Remove a static contactor set.
    * \param id An identifier returned by insertStaticContactorSet. */

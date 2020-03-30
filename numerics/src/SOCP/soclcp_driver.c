@@ -15,15 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <float.h>
-
-#include "SOCLCP_Solvers.h"
-#include "NonSmoothDrivers.h"
-#include "numerics_verbose.h"
+#include <assert.h>                                       // for assert
+#include <float.h>                                        // for DBL_EPSILON
+#include <stdio.h>                                        // for fprintf
+#include <stdlib.h>                                       // for exit, EXIT_...
+#include "NonSmoothDrivers.h"                             // for soclcp_driver
+#include "NumericsFwd.h"                                  // for SolverOptions
+#include "SOCLCP_Solvers.h"                               // for soclcp_VI_E...
+#include "SOCLCP_cst.h"                                   // for SICONOS_SOC...
+#include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
+#include "SolverOptions.h"                                // for SolverOptions
+#include "numerics_verbose.h"                             // for numerics_pr...
 
 const char* const   SICONOS_SOCLCP_NSGS_STR = "SOCLCP_NSGS";
 const char* const   SICONOS_SOCLCP_NSGSV_STR = "SOCLCP_NSGSV";
@@ -38,7 +40,7 @@ const char* const   SICONOS_SOCLCP_NCPGlockerFBNewton_STR = "SOCLCP_NCPGlockerFB
 const char* const  SICONOS_SOCLCP_ProjectionOnConeWithDiagonalization_STR = "SOCLCP_ProjectionOnConeWithDiagonalization";
 const char* const  SICONOS_SOCLCP_ProjectionOnCone_STR = "SOCLCP_ProjectionOnCone";
 const char* const  SICONOS_SOCLCP_ProjectionOnConeWithLocalIteration_STR = "SOCLCP_ProjectionOnConeWithLocalIteration";
-const char* const  SICONOS_SOCLCP_projectionOnConeWithRegularization_STR = "SOCLCP_projectionOnConeWithRegularization";
+const char* const  SICONOS_SOCLCP_ProjectionOnConeWithRegularization_STR = "SOCLCP_ProjectionOnConeWithRegularization";
 const char* const  SICONOS_SOCLCP_NCPGlockerFBPATH_STR = "SOCLCP_NCPGlockerFBPATH";
 const char* const  SICONOS_SOCLCP_projectionOnCylinder_STR = "SOCLCP_projectionOnCylinder";
 const char* const  SICONOS_SOCLCP_ProjectionOnCone_velocity_STR = "SOCLCP_ProjectionOnCone_velocity";
@@ -85,7 +87,7 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   case SICONOS_SOCLCP_NSGS:
   {
     numerics_printf(" ========================== Call NSGS solver for Second Order Cone LCP problem ==========================\n");
-    soclcp_nsgs(problem, r , v , &info , options);
+    soclcp_nsgs(problem, r, v, &info, options);
     break;
   }
   /* case SICONOS_SOCLCP_NSGSV: */
@@ -111,14 +113,14 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem* problem,
   case SICONOS_SOCLCP_VI_FPP:
   {
     numerics_printf(" ========================== Call VI_FixedPointProjection (VI_FPP) solver for Second Order Cone LCP problem ==========================\n");
-    soclcp_VI_FixedPointProjection(problem, r , v , &info , options);
+    soclcp_VI_FixedPointProjection(problem, r, v, &info, options);
     break;
   }
   /* VI Extra Gradient algorithm */
   case SICONOS_SOCLCP_VI_EG:
   {
     numerics_printf(" ========================== Call VI_ExtraGradient (VI_EG) solver for Second Order Cone LCP problem ==========================\n");
-    soclcp_VI_ExtraGradient(problem, r , v , &info , options);
+    soclcp_VI_ExtraGradient(problem, r, v, &info, options);
     break;
   }
   /* /\* Hyperplane Projection algorithm *\/ */
@@ -202,7 +204,7 @@ int soclcp_checkTrivialCase(SecondOrderConeLinearComplementarityProblem* problem
   }
   options->iparam[2] = 0;
   options->iparam[4] = 0;
-  options->dparam[1] = 0.0;
+  options->dparam[SICONOS_IPARAM_ITER_DONE] = 0.0;
   options->dparam[3] = 0.0;
   if(verbose == 1)
     printf("SecondOrderConeLinearComplementarity driver, trivial solution r = 0, v = q.\n");

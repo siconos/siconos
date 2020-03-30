@@ -24,8 +24,17 @@
 #ifndef __SiconosMatrix__
 #define __SiconosMatrix__
 
-#include "SiconosAlgebraTypeDef.hpp"
-#include "SiconosMatrixException.hpp"
+#include <stddef.h>                    // for size_t
+#include <iosfwd>                      // for ostream
+#include "CSparseMatrix.h"             // for CSparseMatrix
+#include "RuntimeException.hpp"        // for RuntimeException
+#include "SiconosAlgebraTypeDef.hpp"   // for DenseMat, BandedMat, IdentityMat
+#include "SiconosFwd.hpp"              // for SiconosMatrix
+#include "SiconosMatrixException.hpp"  // for SiconosMatrixException
+#include "SiconosSerialization.hpp"    // for ACCEPT_SERIALIZATION
+#include "SiconosVisitor.hpp"          // for VIRTUAL_ACCEPT_VISITORS
+class BlockVector;
+
 
 /** Union of DenseMat pointer, TriangMat pointer BandedMat, SparseMat, SymMat, Zero and Identity mat pointers.
  */
@@ -38,6 +47,7 @@ union MATRIX_UBLAS_TYPE
   BandedMat *Banded;  // num = 5
   ZeroMat *Zero;      // num = 6
   IdentityMat *Identity; // num = 7
+  SparseCoordinateMat *SparseCoordinate; // num = 8
 };
 /** A STL vector of int */
 typedef std::vector<int> VInt;
@@ -54,14 +64,12 @@ TYPEDEF_SPTR(VInt)
  * You can find an overview on how to build and use vectors and matrices in siconos users guide .
  *
  */
-class SiconosMatrix //: public std11::enable_shared_from_this<SiconosMatrix>
+class SiconosMatrix //: public std::enable_shared_from_this<SiconosMatrix>
 {
 protected:
   /** serialization hooks
   */
   ACCEPT_SERIALIZATION(SiconosMatrix);
-
-
 
   /** A number to specify the type of the matrix: (block or ublas-type)
    * 0-> BlockMatrix, 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat, 6->zeroMat, 7->IdentityMat
@@ -76,8 +84,27 @@ protected:
    */
   SiconosMatrix(unsigned int type);
 
-  //SiconosMatrix(unsigned int, unsigned int, unsigned int);
-
+  /**  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of A (all columns, and rows between start and start+sizeY).
+   *  If x is a block vector, it call the present function for all blocks.
+   * \param A a pointer to SiconosMatrix 
+   * \param startRow an int, sub-block position
+   * \param x a pointer to a SiconosVector
+   * \param y a pointer to a SiconosVector
+   * \param init a bool
+   */
+  void private_prod(unsigned int startRow, const SiconosVector& x, SiconosVector& y, bool init) const;
+  
+  
+  /**  computes res = subA*x +res, subA being a submatrix of A (rows from startRow to startRow+sizeY and columns between startCol and startCol+sizeX).
+   * If x is a block vector, it call the present function for all blocks.
+   * \param A a pointer to SiconosMatrix 
+   * \param startRow an int, sub-block position
+   * \param startCol an int, sub-block position
+   * \param x a pointer to a SiconosVector
+   * \param res a DenseVect
+   */
+  void private_addprod(unsigned int startRow, unsigned int startCol, const SiconosVector& x, SiconosVector& res) const;
+  
 public:
 
   /** Destructor. */
@@ -195,6 +222,13 @@ public:
    */
   virtual const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0) const = 0;
 
+  /** get SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return a SparseCoordinateMat
+   */
+  virtual const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0, unsigned int col = 0) const = 0;
+
   /** get ZeroMat matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
@@ -243,6 +277,13 @@ public:
    *  \return a SparseMat*
    */
   virtual SparseMat* sparse(unsigned int row = 0, unsigned int col = 0) const = 0;
+  
+  /** get a pointer on SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param col an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return a SparseCoordinateMat*
+   */
+  virtual SparseCoordinateMat* sparseCoordinate(unsigned int row = 0, unsigned int col = 0) const = 0;
 
   /** get a pointer on ZeroMat matrix
    *  \param row an unsigned int, position of the block (row) - Useless for SimpleMatrix
@@ -300,18 +341,15 @@ public:
   /** display data on standard output
    */
   virtual void display() const = 0;
+  
+  /** display data on standard output
+   */
+  virtual void displayExpert(bool brief = true ) const = 0;
 
   /** put data of the matrix into a std::string
    * \return std::string
    */
   virtual std::string toString() const = 0;
-
-  /** send data of the matrix to an ostream
-   * \param os An output stream
-   * \param sm a SiconosMatrix
-   * \return The same output stream
-   */
-  friend std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
 
   // Note: in the following functions, row and col are general;
   // that means that for a SimpleMatrix m, m(i,j) is index (i,j) element but
@@ -425,20 +463,6 @@ public:
    */
   virtual SiconosMatrix& operator -=(const SiconosMatrix& m) = 0;
 
-  /** multiply the current matrix with a scalar
-   *  \param m the matrix to operate on
-   *  \param s the scalar
-   * \return SiconosMatrix&
-   */
-  friend SiconosMatrix& operator *=(SiconosMatrix& m, const double& s);
-
-  /** divide the current matrix with a scalar
-   *  \param m the matrix to operate on
-   *  \param s the scalar
-   * \return SiconosMatrix&
-   */
-  friend SiconosMatrix& operator /=(SiconosMatrix& m, const double& s);
-
   /** computes a LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
    *  The result is returned in this (InPlace). Based on Blas dgetrf function.
    */
@@ -469,13 +493,6 @@ public:
     SiconosMatrixException::selfThrow(" SiconosMatrix::resetLU not yet implemented for BlockMatrix.");
   };
 
-  /** Compares two (block) matrices: true if they have the same number of blocks and if
-      blocks which are facing each other have the same size;
-      always true if one of the two is a SimpleMatrix.
-      \param m1 a SiconosMatrix
-      \param m2 a SiconosMatrix
-  */
-  friend bool isComparableTo(const SiconosMatrix& m1, const SiconosMatrix& m2);
 
   /** return the number of non-zero in the matrix
    * \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
@@ -504,6 +521,44 @@ public:
   /** Visitors hook
    */
   VIRTUAL_ACCEPT_VISITORS(SiconosMatrix);
+  
+  /** \defgroup SiconosMatrixFriends
+      
+      List of friend functions of the SimpleMatrix class
+      
+      Declared in SimpleMatrixFriends.hpp.
+      Implemented in SimpleMatrixFriends.cpp.
+
+      @{
+  */
+
+  // grant access to private_prod
+  friend void prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y, bool init);
+  // grant access to private_addprod
+  friend void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init);
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sm a SiconosMatrix
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
+
+  /** multiply the current matrix with a scalar
+   *  \param m the matrix to operate on
+   *  \param s the scalar
+   * \return SiconosMatrix&
+   */
+  friend SiconosMatrix& operator *=(SiconosMatrix& m, const double& s);
+
+  /** divide the current matrix with a scalar
+   *  \param m the matrix to operate on
+   *  \param s the scalar
+   * \return SiconosMatrix&
+   */
+  friend SiconosMatrix& operator /=(SiconosMatrix& m, const double& s);
+
+  /** End of Friend functions group @} */
 
 };
 

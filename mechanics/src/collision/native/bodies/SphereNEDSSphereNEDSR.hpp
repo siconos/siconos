@@ -26,7 +26,7 @@
 #include "MechanicsFwd.hpp"
 #include "NewtonEuler3DR.hpp"
 class SphereNEDSSphereNEDSR : public NewtonEuler3DR,
-  public std11::enable_shared_from_this<SphereNEDSSphereNEDSR>
+  public std::enable_shared_from_this<SphereNEDSSphereNEDSR>
 {
 private:
   /** serialization hooks

@@ -40,8 +40,8 @@ SP::Event Registry::instantiate(double time, int type)
 {
   MapFactoryIt it = factory_map.find(type) ;
 
-  if (it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (EventFactory) failed, no class with id: " + type);
+  if(it == factory_map.end())
+    RuntimeException::selfThrow("Registry::instantiate (EventFactory) failed, no class with id: " + std::to_string(type));
 
   return (it->second)(time, type) ; // run our factory
 }

@@ -9,6 +9,7 @@ RUN zypper install -n -y \
     libboost_headers1_66_0-devel \
     gmp-devel \
     libboost_serialization1_66_0-devel \
+    libboost_timer1_66_0-devel \
     openblas-devel \
     lapacke-devel \
     liblpsolve55-0 \
@@ -19,6 +20,7 @@ RUN zypper install -n -y \
     libbullet-devel \
     hdf5-devel \
     doxygen \
+    suitesparse-devel \
     valgrind
 RUN zypper clean --all
 WORKDIR /home

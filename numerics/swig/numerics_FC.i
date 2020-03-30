@@ -9,7 +9,6 @@
 #include "fclib_interface.h"
 #endif
 #include "fc2d_Solvers.h"
-#include "gfc3d_Solvers.h"
 #include "fc3d_AlartCurnier_functions.h"
 #include "AlartCurnierGenerated.h"
 #include "FischerBurmeisterGenerated.h"
@@ -142,34 +141,7 @@
   static FrictionContactProblem* frictionContactProblemFromFile
     (const char * filename)
   {
-    FILE * finput = fopen(filename, "r");
-    if (finput)
-    {
-      FrictionContactProblem* problem =
-        (FrictionContactProblem *) malloc(sizeof(FrictionContactProblem));
-      if (frictionContact_newFromFile(problem,finput))
-      {
-      char msg[1024];
-      snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot load %s\n",filename);
-      SWIG_Error(SWIG_RuntimeError, msg);
-      free(problem);
-      fclose(finput);
-      return NULL;
-      }
-      else
-      {
-        fclose(finput);
-        return problem;
-      }
-    }
-    else
-    {
-      char msg[1024];
-      snprintf(msg, sizeof(msg), "frictionContactProblemFromFile: cannot open %s\n",filename);
-      SWIG_Error(SWIG_RuntimeError, msg);
-      return NULL;
-    }
-
+    return frictionContact_new_from_filename(filename);
   }
 
 %}

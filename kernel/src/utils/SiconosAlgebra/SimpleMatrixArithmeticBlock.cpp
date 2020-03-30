@@ -29,31 +29,31 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
   // add m to current matrix elements, starting from row row_min and column col_min, to the values of the matrix m.
   // m may be a BlockMatrix.
 
-  if (_num == 6 || _num == 7)
+  if(_num == 6 || _num == 7)
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(pos,..., m) forbidden for zero or identity matrix.");
 
-  if (&m == this)
+  if(&m == this)
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(pos,..., m): m = this.");
 
-  if (row_min >= size(0))
+  if(row_min >= size(0))
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(row,col): row is out of range");
 
-  if (col_min >= size(1))
+  if(col_min >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::addBloc(row,col)k: col is out of range");
 
   unsigned int row_max, col_max;
   row_max = m.size(0) + row_min;
   col_max = m.size(1) + col_min;
 
-  if (row_max > size(0))
+  if(row_max > size(0))
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(row,col,m): m.row + row is out of range.");
 
-  if (col_max > size(1))
+  if(col_max > size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::addBlock(row,col,m): m.col + col is out of range.");
 
   unsigned int numM = m.num();
 
-  if (numM == 0) // if m is a block matrix ...
+  if(numM == 0)  // if m is a block matrix ...
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     BlocksMat::const_iterator1 it;
@@ -61,9 +61,9 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
     unsigned int posRow = row_min;
     unsigned int posCol = col_min;
 
-    for (it = mB._mat->begin1(); it != mB._mat->end1(); ++it)
+    for(it = mB._mat->begin1(); it != mB._mat->end1(); ++it)
     {
-      for (it2 = it.begin(); it2 != it.end(); ++it2)
+      for(it2 = it.begin(); it2 != it.end(); ++it2)
       {
         addBlock(posRow, posCol, **it2);
         posCol += (*it2)->size(1);
@@ -72,15 +72,15 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
       posCol = 0;
     }
   }
-  else if (numM == 6) // if m = 0
+  else if(numM == 6)  // if m = 0
   {
     // nothing to do !
   }
   else // if m is a SimpleMatrix
   {
-    if (_num == 1)
+    if(_num == 1)
     {
-      switch (numM)
+      switch(numM)
       {
       case 1:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.dense());
@@ -116,31 +116,31 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
   // sub m to current matrix elements, starting from row row_min and column col_min, to the values of the matrix m.
   // m may be a BlockMatrix.
 
-  if (_num == 6 || _num == 7)
+  if(_num == 6 || _num == 7)
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(pos,..., m) forbidden for zero or identity matrix.");
 
-  if (&m == this)
+  if(&m == this)
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(pos,..., m): m = this.");
 
-  if (row_min >= size(0))
+  if(row_min >= size(0))
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col): row is out of range");
 
-  if (col_min >= size(1))
+  if(col_min >= size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col): col is out of range");
 
   unsigned int row_max, col_max;
   row_max = m.size(0) + row_min;
   col_max = m.size(1) + col_min;
 
-  if (row_max > size(0))
+  if(row_max > size(0))
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col,m): m.row + row is out of range.");
 
-  if (col_max > size(1))
+  if(col_max > size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::subBlock(row,col,m): m.col + col is out of range.");
 
   unsigned int numM = m.num();
 
-  if (numM == 0) // if m is a block matrix ...
+  if(numM == 0)  // if m is a block matrix ...
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     BlocksMat::const_iterator1 it;
@@ -148,9 +148,9 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
     unsigned int posRow = row_min;
     unsigned int posCol = col_min;
 
-    for (it = mB._mat->begin1(); it != mB._mat->end1(); ++it)
+    for(it = mB._mat->begin1(); it != mB._mat->end1(); ++it)
     {
-      for (it2 = it.begin(); it2 != it.end(); ++it2)
+      for(it2 = it.begin(); it2 != it.end(); ++it2)
       {
         subBlock(posRow, posCol, **it2);
         posCol += (*it2)->size(1);
@@ -159,15 +159,15 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
       posCol = 0;
     }
   }
-  else if (numM == 6) // if m = 0
+  else if(numM == 6)  // if m = 0
   {
     // nothing to do !
   }
   else // if m is a SimpleMatrix
   {
-    if (_num == 1)
+    if(_num == 1)
     {
-      switch (numM)
+      switch(numM)
       {
       case 1:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.dense());

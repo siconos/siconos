@@ -23,10 +23,9 @@
  *
 */
 
-#include "NumericsFwd.h"
-#include <stdio.h>
-
-#include "SiconosSets.h"
+#include <stdio.h>        // for FILE
+#include "NumericsFwd.h"  // for AffineVariationalInequalities, NumericsMatrix
+#include "SiconosSets.h"  // for polyhedron_set
 
 /** Structure that contains and defines an AVI
 
@@ -38,14 +37,16 @@
 
      \langle x - z, q + Mz \rangle \geq 0 \ \text{for all }x\in K
 
- \endrst
 
- See \rst :ref:`avi_problem`_ \endrst
+See  :ref:`avi_problem`.
+ 
+\endrst
+
 
  */
 struct AffineVariationalInequalities
 {
-  unsigned int size;     /**< size of the problem */
+  size_t size;     /**< size of the problem */
   NumericsMatrix* M; /**< M matrix of the AVI (see the mathematical description)*/
   double* q;         /**< vector of the AVI (see the mathematical description)*/
   double* d;         /**< Covering vector (optional) */

@@ -29,7 +29,7 @@
 #include "OneStepNSProblem.hpp"
 #include "MoreauJeanOSI.hpp"
 
-static CheckSolverFPtr checkSolverOutputProjectOnConstraints = NULL;
+static CheckSolverFPtr checkSolverOutputProjectOnConstraints = nullptr;
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -48,7 +48,7 @@ TimeSteppingDirectProjection::TimeSteppingDirectProjection(
   //if (Type::value(osi) != Type::MoreauJeanDirectProjectionOSI)
   OSI::TYPES typeOSI;
   typeOSI = (osi)->getType();
-  if (typeOSI != OSI::MOREAUDIRECTPROJECTIONOSI)
+  if(typeOSI != OSI::MOREAUDIRECTPROJECTIONOSI)
     RuntimeException::selfThrow("TimeSteppingDirectProjection::TimeSteppingDirectProjection.  wrong type of OneStepIntegrator");
 
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
@@ -90,7 +90,7 @@ void TimeSteppingDirectProjection::nextStep()
 
   SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     inter->lambda(0)->zero();
@@ -102,23 +102,23 @@ void TimeSteppingDirectProjection::advanceToEvent()
 {
 
   initialize();
-  
+
   /** First step, Solve the standard velocity formulation.*/
 
   DEBUG_BEGIN("TimeStepping::newtonSolve\n");
 
-  if (!_doOnlyProj)
+  if(!_doOnlyProj)
     TimeStepping::newtonSolve(_newtonTolerance, _newtonMaxIteration);
   else
     updateInteractions();
 
   DEBUG_EXPR_WE(std::cout << "TimeStepping::newtonSolve end : Number of iterations=" << getNewtonNbIterations() << "\n";
-		std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
-		std::cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
-		std::cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
-		);
+                std::cout << "                              : newtonResiduDSMax=" << newtonResiduDSMax() << "\n";
+                std::cout << "                              : newtonResiduYMax=" << newtonResiduYMax() << "\n";
+                std::cout << "                              : newtonResiduRMax=" << newtonResiduRMax() << "\n";
+               );
 
-  if (!_doProj)
+  if(!_doProj)
     return;
   int info = 0;
 
@@ -130,13 +130,13 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
 
 #ifdef TSPROJ_CORRECTIONVELOCITIES
-  for (DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
+  for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
   {
     SP::DynamicalSystem ds = dsGraph->bundle(*vi);
     Type::Siconos dsType = Type::value(*ds);
-    if (dsType != Type::NewtonEulerDS)
+    if(dsType != Type::NewtonEulerDS)
       RuntimeException::selfThrow("TS:: - ds is not from NewtonEulerDS.");
-    SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+    SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
     *(neds->deltaq()) = *(neds->q());
   }
 #endif
@@ -147,7 +147,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //   double criteria = (*it)->relation()->y(0)->getValue(0);
   //   if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
   //  Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL){
-  //     SP::NewtonEuler1DR ri = std11::static_pointer_cast<NewtonEuler1DR> ((*it)->relation());
+  //     SP::NewtonEuler1DR ri = std::static_pointer_cast<NewtonEuler1DR> ((*it)->relation());
   //     if (criteria < -1e-7){
   //  ri->_isOnContact=true;
   //     }else{
@@ -157,13 +157,13 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //   if (criteria < -_constraintTol)
   //     runningNewton=true;
   // }
-  if (_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
+  if(_nsds->topology()->numberOfIndexSet() > _indexSetLevelForProjection)
     computeCriteria(&runningProjection);
   // Zeroing Lambda Muliplier of indexSet()
 
   SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend;
-  for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     inter->lambda(0)->zero();
@@ -172,19 +172,19 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
   //Store the q vector of each DS.
 
-  for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+  for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
   {
     SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
     Type::Siconos dsType = Type::value(*ds);
     VectorOfVectors& workVectors = *dsGraph->properties(*aVi2).workVectors;
-    if (dsType == Type::NewtonEulerDS)
+    if(dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+      SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
       *workVectors[MoreauJeanOSI::QTMP] = *neds->q();
     }
-    else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+    else if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
       *workVectors[MoreauJeanOSI::QTMP] = * d->q();
 
     }
@@ -192,14 +192,14 @@ void TimeSteppingDirectProjection::advanceToEvent()
       RuntimeException::selfThrow("TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not from NewtonEulerDS neither from LagrangianDS.");
   }
 
-  while (runningProjection && _nbProjectionIteration < _projectionMaxIteration)
+  while(runningProjection && _nbProjectionIteration < _projectionMaxIteration)
   {
     _nbProjectionIteration++;
     DEBUG_PRINTF("TimeSteppingDirectProjection projection step = %d\n", _nbProjectionIteration);
 
     SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
-    for (std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet->bundle(*ui);
       inter->lambda(0)->zero();
@@ -211,72 +211,72 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
     info = computeOneStepNSProblem(SICONOS_OSNSP_TS_POS);
 
-    DEBUG_PRINTF("IndexSet0->size() = %i\n", (int)_nsds->topology()->indexSet(0)->size() );
-    DEBUG_PRINTF("IndexSet1->size() = %i\n", (int)_nsds->topology()->indexSet(1)->size() );
+    DEBUG_PRINTF("IndexSet0->size() = %i\n", (int)_nsds->topology()->indexSet(0)->size());
+    DEBUG_PRINTF("IndexSet1->size() = %i\n", (int)_nsds->topology()->indexSet(1)->size());
     DEBUG_EXPR(oneStepNSProblem(SICONOS_OSNSP_TS_POS)->display());
 
 
-    if (info && _warnOnNonConvergence)
+    if(info && _warnOnNonConvergence)
     {
       std::cout << " TimeSteppingDirectProjection::advanceToEvent() project on constraints. solver failed." <<std::endl ;
     }
     _nsds->updateInput(nextTime(),0);
 
     DEBUG_EXPR_WE(std ::cout << "After update input" << std::endl;
-	       SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
-	       std ::cout << "lamda(1) in IndexSet1" << std::endl;
-	       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
-		 {
-		   SP::Interaction inter = indexSet1->bundle(*ui);
-		   inter->lambda(1)->display();
-		 }
-	       SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
-	       std ::cout << "lamda(0) in indexSet0" << std::endl;
-	       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-		 {
-		   SP::Interaction inter = indexSet0->bundle(*ui);
-		   inter->lambda(0)->display();
-		 }
-	       );
+                  SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
+                  std ::cout << "lamda(1) in IndexSet1" << std::endl;
+                  for(std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet1->bundle(*ui);
+      inter->lambda(1)->display();
+    }
+    SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
+                                      std ::cout << "lamda(0) in indexSet0" << std::endl;
+                                      for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet0->bundle(*ui);
+      inter->lambda(0)->display();
+    }
+                 );
 
     // This part should be in MoreauJeanOSIProjectOnConstraintsOS::updateState(level =0)
-    for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+    for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
     {
       SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
       VectorOfVectors& workVectors = *dsGraph->properties(*aVi2).workVectors;
 
       Type::Siconos dsType = Type::value(*ds);
-      if (dsType == Type::NewtonEulerDS)
+      if(dsType == Type::NewtonEulerDS)
       {
-        SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+        SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
         SP::SiconosVector q = neds->q();
         SP::SiconosVector qtmp =  workVectors[MoreauJeanOSI::QTMP];
 
-	DEBUG_EXPR_WE(std ::cout << "qtmp before  update " << std::endl;
-		       qtmp->display();
-		       std ::cout << "p(0) before  update " << std::endl;
-		       neds->p(0)->display();
-		       );
+        DEBUG_EXPR_WE(std ::cout << "qtmp before  update " << std::endl;
+                      qtmp->display();
+                      std ::cout << "p(0) before  update " << std::endl;
+                      neds->p(0)->display();
+                     );
 
-        if (neds->p(0))
+        if(neds->p(0))
         {
           //*q = * qtmp +  *neds->p(0);
           *q += *neds->p(0); // Why it works like that and not with the previous line ?
         }
 
         DEBUG_EXPR_WE(std ::cout << "q after  update " << std::endl;
-		      q->display(););
+                      q->display(););
 
         neds->normalizeq();
         neds->computeT();
       }
-      else if (dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+      else if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
-        SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+        SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
         SP::SiconosVector q = d->q();
         SP::SiconosVector qtmp =  workVectors[MoreauJeanOSI::QTMP];
 
-        if (d->p(0))
+        if(d->p(0))
         {
           //*q = * qtmp +  *d->p(0);
           *q += *d->p(0);
@@ -291,37 +291,37 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
     //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
     //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
-    //(std11::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
+    //(std::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
 
     DEBUG_EXPR_WE(std::cout << "TimeSteppingDirectProjection::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
-	       std ::cout << "After update state in position" << std::endl;
-	       std ::cout << "lamda(1) in IndexSet1" << std::endl;
-	       SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
-	       SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
+                  std ::cout << "After update state in position" << std::endl;
+                  std ::cout << "lamda(1) in IndexSet1" << std::endl;
+                  SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
+                  SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
 
-	       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
-		 {
-		   SP::Interaction inter = indexSet1->bundle(*ui);
-		   inter->lambda(1)->display();
-		 }
-	       std ::cout << "lamda(0) in indexSet0" << std::endl;
-	       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-		 {
-		   SP::Interaction inter = indexSet0->bundle(*ui);
-		   inter->lambda(0)->display();
-		 }
-	       std ::cout << "y(1) in IndexSet1" << std::endl;	       for (std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
-		 {
-		   SP::Interaction inter = indexSet1->bundle(*ui);
-		   inter->y(1)->display();
-		 }
-	       std ::cout << "y(0) in indexSet0" << std::endl;
-	       for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
-		 {
-		   SP::Interaction inter = indexSet0->bundle(*ui);
-		   inter->y(0)->display();
-		 }
-	       );
+                  for(std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet1->bundle(*ui);
+      inter->lambda(1)->display();
+    }
+    std ::cout << "lamda(0) in indexSet0" << std::endl;
+               for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet0->bundle(*ui);
+      inter->lambda(0)->display();
+    }
+    std ::cout << "y(1) in IndexSet1" << std::endl;	       for(std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet1->bundle(*ui);
+      inter->y(1)->display();
+    }
+    std ::cout << "y(0) in indexSet0" << std::endl;
+               for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  {
+    SP::Interaction inter = indexSet0->bundle(*ui);
+      inter->y(0)->display();
+    }
+                 );
 
 
     //cout<<"during projection before normalizing of q:\n";
@@ -331,29 +331,29 @@ void TimeSteppingDirectProjection::advanceToEvent()
     //}
   }// end while(runningProjection && _nbProjectionIteration < _projectionMaxIteration)
 
-    // We update forces to start the Newton Loop the next tiem step with a correct value in swap
-    for (DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
-      {
-        SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
-        Type::Siconos dsType = Type::value(*ds);
-        if (dsType == Type::NewtonEulerDS)
-        {
-          SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
-          double time = nextTime();
-          neds->computeForces(time, neds->q(), neds->twist());
-        }
-        else if (dsType == Type::LagrangianDS)
-        {
-          SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
-          double time = nextTime();
-          d->computeForces(time, d->q(), d->velocity());
-        }
-        else if (dsType == Type::LagrangianLinearTIDS)
-        {
-        }
-        else
-          RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
-      }
+  // We update forces to start the Newton Loop the next tiem step with a correct value in swap
+  for(DynamicalSystemsGraph::VIterator aVi2 = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2)
+  {
+    SP::DynamicalSystem ds = dsGraph->bundle(*aVi2);
+    Type::Siconos dsType = Type::value(*ds);
+    if(dsType == Type::NewtonEulerDS)
+    {
+      SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
+      double time = nextTime();
+      neds->computeForces(time, neds->q(), neds->twist());
+    }
+    else if(dsType == Type::LagrangianDS)
+    {
+      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
+      double time = nextTime();
+      d->computeForces(time, d->q(), d->velocity());
+    }
+    else if(dsType == Type::LagrangianLinearTIDS)
+    {
+    }
+    else
+      RuntimeException::selfThrow("TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS neither from LagrangianDS.");
+  }
 
 
 
@@ -361,7 +361,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
 
 
-  if (_nbProjectionIteration == _projectionMaxIteration && _warnOnNonConvergence)
+  if(_nbProjectionIteration == _projectionMaxIteration && _warnOnNonConvergence)
   {
     std::cout << "TimeSteppingDirectProjection::advanceToEvent() Max number of projection iterations reached (" << _nbProjectionIteration << ")"  <<std::endl ;
     printf("              max criteria equality =  %e.\n", _maxViolationEquality);
@@ -391,7 +391,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //     // dotq->setValue(6,(q->getValue(6)-qold->getValue(6))/h);
 
   //     /*compute the new velocity seeing the work of fext*/
-  //     SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+  //     SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
   //     *(neds->deltaq())-=*(neds->q());
   //     DEBUG_EXPR(printf("TSProj NewtonSolve :deltaq:");
   //     (neds->deltaq())->display(););
@@ -495,21 +495,21 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
 
   *runningProjection = false;
 
-  for (std11::tie(aVi, viend) = indexSet->vertices();
-       aVi != viend; ++aVi)
+  for(std::tie(aVi, viend) = indexSet->vertices();
+      aVi != viend; ++aVi)
   {
     SP::Interaction inter = indexSet->bundle(*aVi);
     inter->computeOutput(getTkp1(), 0);
     inter->relation()->computeJach(getTkp1(), *inter);
 
-    if (Type::value(*(inter->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
+    if(Type::value(*(inter->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
         Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactNSL)
     {
       double criteria = std::max(0.0, - inter->y(0)->getValue(0));
       DEBUG_PRINTF("Unilateral inter->y(0)->getValue(0) %e.\n", inter->y(0)->getValue(0));
-      if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
+      if(criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
       //if (criteria < minViolationUnilateral) minViolationUnilateral=criteria;
-      if (maxViolationUnilateral > _constraintTolUnilateral)
+      if(maxViolationUnilateral > _constraintTolUnilateral)
       {
         *runningProjection = true;
 
@@ -519,9 +519,9 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
     else
     {
       DEBUG_PRINTF("Equality inter->y(0)->normInf() %e.\n", inter->y(0)->normInf());
-      if (inter->y(0)->normInf()  > maxViolationEquality) maxViolationEquality = inter->y(0)->normInf() ;
-      if (inter->y(0)->normInf()  < minViolationEquality) minViolationEquality = inter->y(0)->normInf() ;
-      if (inter->y(0)->normInf() > _constraintTol)
+      if(inter->y(0)->normInf()  > maxViolationEquality) maxViolationEquality = inter->y(0)->normInf() ;
+      if(inter->y(0)->normInf()  < minViolationEquality) minViolationEquality = inter->y(0)->normInf() ;
+      if(inter->y(0)->normInf() > _constraintTol)
       {
         *runningProjection = true;
         DEBUG_PRINTF("TSProj  newton criteria equality true %e.\n", inter->y(0)->normInf());
@@ -552,7 +552,7 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
   SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
   initializeNewtonLoop();
 
-  if ((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
+  if((_newtonOptions == SICONOS_TS_LINEAR || _newtonOptions == SICONOS_TS_LINEAR_IMPLICIT)
       || isLinear)
   {
     _newtonNbIterations++;
@@ -560,10 +560,10 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     computeFreeState();
     // updateOutput(0);
     // updateIndexSets();
-    if (!_allNSProblems->empty() &&  indexSet->size()>0)
+    if(!_allNSProblems->empty() &&  indexSet->size()>0)
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
     // Check output from solver (convergence or not ...)
-    if (!checkSolverOutputProjectOnConstraints)
+    if(!checkSolverOutputProjectOnConstraints)
       DefaultCheckSolverOutput(info);
     else
       checkSolverOutputProjectOnConstraints(info, this);
@@ -571,13 +571,13 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     update();
 
     //isNewtonConverge = newtonCheckConvergence(criterion);
-    if (!_allNSProblems->empty() &&   indexSet->size()>0)
+    if(!_allNSProblems->empty() &&   indexSet->size()>0)
       saveYandLambdaInOldVariables();
   }
 
-  else if (_newtonOptions == SICONOS_TS_NONLINEAR)
+  else if(_newtonOptions == SICONOS_TS_NONLINEAR)
   {
-    while ((!isNewtonConverge) && (_newtonNbIterations < maxStep) && (!info))
+    while((!isNewtonConverge) && (_newtonNbIterations < maxStep) && (!info))
     {
       _newtonNbIterations++;
       prepareNewtonIteration();
@@ -592,12 +592,12 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
 
       // if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->simulation())
       // is also relevant here.
-      if (!_allNSProblems->empty() && indexSet->size()>0)
+      if(!_allNSProblems->empty() && indexSet->size()>0)
       {
         info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
       }
       // Check output from solver (convergence or not ...)
-      if (!checkSolverOutputProjectOnConstraints)
+      if(!checkSolverOutputProjectOnConstraints)
         DefaultCheckSolverOutput(info);
       else
         checkSolverOutputProjectOnConstraints(info, this);
@@ -605,20 +605,21 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
       updateInput();
       updateState();
       isNewtonConverge = newtonCheckConvergence(criterion);
-      if (!isNewtonConverge && !info)
+      if(!isNewtonConverge && !info)
       {
         updateOutput();
-        if (!_allNSProblems->empty() &&  indexSet->size()>0)
+        if(!_allNSProblems->empty() &&  indexSet->size()>0)
           saveYandLambdaInOldVariables();
       }
     }
-    if (!isNewtonConverge)
+    if(!isNewtonConverge)
     {
-      if (_warnOnNonConvergence) {
+      if(_warnOnNonConvergence)
+      {
         std::cout << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps (" << maxStep << ") reached." <<std::endl ;
       }
     }
-    else if (info && _warnOnNonConvergence)
+    else if(info && _warnOnNonConvergence)
     {
       std::cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed." <<std::endl ;
     }
@@ -626,5 +627,5 @@ void TimeSteppingDirectProjection::newtonSolve(double criterion, unsigned int ma
     //      std::cout << "TimeStepping::newtonSolve succed nbit="<<_newtonNbIterations<<"maxStep="<<maxStep<<endl;
   }
   else
-    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + _newtonOptions);
+    RuntimeException::selfThrow("TimeStepping::NewtonSolve failed. Unknown newtonOptions: " + std::to_string(_newtonOptions));
 }

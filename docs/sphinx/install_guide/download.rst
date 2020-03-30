@@ -8,6 +8,16 @@ Download Siconos
    :local:
 
 
+
+Packages
+--------
+
+Debian packages :
+
+* Siconos 4.2.0 https://packages.debian.org/sid/siconos  sid(unstable)
+
+
+
 Latest source release
 ---------------------
 
@@ -28,7 +38,7 @@ and the development source code can be freely downloaded. Try for example::
 As user, you will probably only need to clone the repository (as shown above) once and then just update your local copy to
 include the last revision::
 
-  cd path-to-siconos
+  cd /path/to/siconos
   git pull
 
 As developer, you will need to learn more about git. Check for example https://git-scm.com/book/en/v1/Getting-Started-About-Version-Control.
@@ -67,8 +77,3 @@ Below, you can find a short git refresher:
 
     git push
 
-
-Binaries
---------
-
-Old binaries generated for some old platforms may be download from here: https://gforge.inria.fr/frs/?group_id=9

@@ -39,7 +39,7 @@ class FMatrix  : public ublas::matrix < FTime, ublas::column_major,
   ACCEPT_SERIALIZATION(FMatrix);
 };
 
-class Hashed : public std11::enable_shared_from_this<Hashed>
+class Hashed : public std::enable_shared_from_this<Hashed>
 {
 protected:
   /** serialization hooks
@@ -72,7 +72,7 @@ class space_hash : public boost::unordered_multiset < SP::Hashed,
 /* relations pool */
 typedef std::pair<double, double> CircleCircleRDeclared;
 typedef std::pair<double, double> DiskDiskRDeclared;
-typedef std11::array<double, 6> DiskPlanRDeclared;
+typedef std::array<double, 6> DiskPlanRDeclared;
 
 
 class CircleCircleRDeclaredPool : public std::map<CircleCircleRDeclared, SP::CircularR>

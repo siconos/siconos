@@ -28,6 +28,7 @@
  *
  */
 
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 #include "line_search.h"
 
 /** \struct armijo_extra_params ArmijoSearch.h

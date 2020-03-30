@@ -11,11 +11,8 @@ set(${COMPONENT}_PYTHON_MODULES "io/io_base")
 set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES)
 
 set(${COMPONENT}_SWIG_DEFS "${SWIG_DEFS}")
-set(${COMPONENT}_SWIG_INCLUDE_DIRECTORIES
-  ${CMAKE_SOURCE_DIR}/kernel/swig)
 
-
-
+list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES ${CMAKE_SOURCE_DIR}/kernel/swig)
 if(HAVE_SICONOS_MECHANICS)
   list(APPEND ${COMPONENT}_SWIG_DEFS "-DWITH_MECHANICS")
 
@@ -34,7 +31,7 @@ if(HAVE_SICONOS_MECHANICS)
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_info' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/info.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_info'\")")
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_filter' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/filter.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_filter'\")")
     install(CODE "execute_process(COMMAND sh -c \"test -e '${CMAKE_INSTALL_PREFIX}/bin/siconos_run' || ln -vs '${CMAKE_CURRENT_SOURCE_DIR}/io/run.py' '${CMAKE_INSTALL_PREFIX}/bin/siconos_run'\")")
-   else()
+  else()
 
     configure_file(io/mechanics_hdf5.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_hdf5.py @ONLY)
     configure_file(io/mechanics_run.py ${SICONOS_SWIG_ROOT_DIR}/io/mechanics_run.py @ONLY)
@@ -56,6 +53,9 @@ if(HAVE_SICONOS_MECHANICS)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_run      DESTINATION bin)
     install(PROGRAMS ${SICONOS_SWIG_ROOT_DIR}/io/siconos_compare  DESTINATION bin)
     # automatic manpages using help2man
+
+    # See if help2man is available
+    find_program(HELP2MAN help2man)
     if (HELP2MAN)
       # all other components must be built first so that tools don't fail to run
       set(_OTHER_COMPONENTS ${COMPONENTS})
@@ -107,7 +107,9 @@ endif()
 
 if(HAVE_SICONOS_MECHANISMS)
   list(APPEND ${COMPONENT}_SWIG_DEFS "-DWITH_MECHANISMS")
-
+  if(${CMAKE_VERSION} VERSION_LESS "3.13")
+    list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/mechanisms/src/")
+  endif()
   if(INSTALL_PYTHON_SYMLINKS)
     message("Making symlinks for io Python modules")
     execute_process(COMMAND sh -c "mkdir -p '${SICONOS_SWIG_ROOT_DIR}/io'")
@@ -118,13 +120,26 @@ if(HAVE_SICONOS_MECHANISMS)
   endif()
 endif()
 
+# TMP fix 
+if(${CMAKE_VERSION} VERSION_LESS "3.13")
+  # Notice that with last cmake versions, it's possible to propagate includes to swig in a better way.
+  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/numerics/src/tools")
+  list(APPEND ${COMPONENT}_SWIG_INCLUDE_DIRECTORIES "${Boost_INCLUDE_DIR}")
+endif()
+
+
+
 
 include(swig_python_tools)
 swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 
 # right now the only tests we have require serialization
-IF(WITH_SERIALIZATION)
-  build_python_tests()
-ENDIF(WITH_SERIALIZATION)
+if(WITH_SERIALIZATION)
+  if(WITH_${COMPONENT}_TESTING)
+    build_python_tests(
+      # DEPS ${COMPONENT} # some plugins in tests need to be linked with kernel
+      )
+  endif()
+endif()
 
 

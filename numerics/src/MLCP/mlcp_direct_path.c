@@ -16,45 +16,14 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "MLCP_Solvers.h"
-#include "SiconosCompat.h"
-#include <math.h>
 #include "mlcp_direct_path.h"
-#include "mlcp_direct.h"
-#include "mlcp_tool.h"
+#include "MLCP_Solvers.h"                       // for mixedLinearComplement...
+#include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
+#include "mlcp_direct.h"                        // for mlcp_direct_addConfig...
 
 static int sN;
 static int sM;
 
-int mixedLinearComplementarity_directPath_setDefaultSolverOptions(MixedLinearComplementarityProblem* problem, SolverOptions* pSolver)
-{
-  mixedLinearComplementarity_default_setDefaultSolverOptions(problem, pSolver);
-  return 0;
-}
-
-
-int mlcp_direct_path_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
-{
-  return mlcp_direct_getNbIWork(problem, options); //+mlcp_path_getNbIWork(problem,options);
-}
-int mlcp_direct_path_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
-{
-  return mlcp_direct_getNbDWork(problem, options); //+mlcp_path_getNbDWork(problem,options);
-}
-
-
-
-/*
- *options->iparam[5] : n0 number of possible configuration.
- * dparam[5] : (in) a positive value, tolerane about the sign.
- *options->iWork : double work memory of  mlcp_direct_path_getNbIWork() integers
- *options->dWork : double work memory of mlcp_direct_path_getNbDWork() doubles
- *
- *
- */
 
 void mlcp_direct_path_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
 {
@@ -70,29 +39,15 @@ void mlcp_direct_path_reset()
   //mlcp_path_reset();
 }
 
-/*
- * The are no memory allocation in mlcp_direct, all necessary memory must be allocated by the user.
- *
- *options:
- * iparam[0] : (in) verbose.
- * dparam[0] : (in) a positive value, tolerane about the sign used by the path algo.
- * iparam[5] : (in)  n0 number of possible configuration.
- * dparam[5] : (in) a positive value, tolerane about the sign.
- * dWork : working float zone size : n + m + n0*(n+m)*(n+m)  . MUST BE ALLOCATED BY THE USER.
- * iWork : working int zone size : (n + m)*(n0+1) + nO*m. MUST BE ALLOCATED BY THE USER.
- * double *z : size n+m
- * double *w : size n+m
- * info : output. info == 0 if success
- */
 void mlcp_direct_path(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /*First, try direct solver*/
   mlcp_direct(problem, z, w, info, options);
-  if (*info)
+  if(*info)
   {
     /*solver direct failed, so run the path solver.*/
     mlcp_path(problem, z, w, info, options);
-    if (!(*info))
+    if(!(*info))
     {
       /*       for (i=0;i<problem->n+problem->m;i++){ */
       /*  printf("w[%d]=%f z[%d]=%f\t",i,w[i],i,z[i]);  */
@@ -101,3 +56,4 @@ void mlcp_direct_path(MixedLinearComplementarityProblem* problem, double *z, dou
     }
   }
 }
+

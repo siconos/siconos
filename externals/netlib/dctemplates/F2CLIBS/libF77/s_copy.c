@@ -13,16 +13,16 @@ void s_copy(register char *a, register char *b, ftnlen la, ftnlen lb)
 
   aend = a + la;
 
-  if (la <= lb)
-    while (a < aend)
+  if(la <= lb)
+    while(a < aend)
       *a++ = *b++;
 
   else
   {
     bend = b + lb;
-    while (b < bend)
+    while(b < bend)
       *a++ = *b++;
-    while (a < aend)
+    while(a < aend)
       *a++ = ' ';
   }
 }

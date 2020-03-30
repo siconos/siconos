@@ -17,6 +17,7 @@
 */
 
 #include "ModelingTools.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "SimulationTools.hpp"
 #include "SlidingReducedOrderObserver.hpp"
 #include "ControlSensor.hpp"
@@ -30,10 +31,10 @@
 #include "debug.h"
 
 void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsds,
-                                             const Simulation& s)
+    const Simulation& s)
 {
   DEBUG_BEGIN(" SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s)\n");
-  if (!_C)
+  if(!_C)
   {
     RuntimeException::selfThrow("SlidingReducedOrderObserver::initialize - you have to set C before initializing the Observer");
   }
@@ -44,7 +45,7 @@ void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsd
   bool isDSinDSG0 = true;
   DynamicalSystemsGraph& originalDSG0 = *nsds.topology()->dSG(0);
   DynamicalSystemsGraph::VDescriptor originaldsgVD;
-  if (!_DS) // No DynamicalSystem was given
+  if(!_DS)  // No DynamicalSystem was given
   {
     // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
     // We can use the Visitor mighty power to check if we have the right type
@@ -56,18 +57,18 @@ void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsd
     // when we want for instant to see how well the controller behaves
     // if the plant model is not exact, we can use the setSimulatedDS
     // method
-    if (dsType == Type::FirstOrderLinearDS)
+    if(dsType == Type::FirstOrderLinearDS)
     {
       DEBUG_PRINT("dsType == Type::FirstOrderLinearDS\n");
       _DS.reset(new FirstOrderLinearDS(static_cast<FirstOrderLinearDS&>(observedDS)));
     }
-    else if (dsType == Type::FirstOrderLinearTIDS)
+    else if(dsType == Type::FirstOrderLinearTIDS)
     {
       DEBUG_PRINT("dsType == Type::FirstOrderLinearTIDS\n");
       _DS.reset(new FirstOrderLinearTIDS(static_cast<FirstOrderLinearTIDS&>(observedDS)));
     }
     else
-      RuntimeException::selfThrow("SlidingReducedOrderObserver is not yet implemented for system of type" + dsType);
+      RuntimeException::selfThrow("SlidingReducedOrderObserver is not yet implemented for system of type" + std::to_string(dsType));
 
     // is it controlled ?
     originaldsgVD = originalDSG0.descriptor(_sensor->getDS());
@@ -75,7 +76,7 @@ void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsd
   else
   {
     // is it controlled ?
-    if (originalDSG0.is_vertex(_DS))
+    if(originalDSG0.is_vertex(_DS))
       originaldsgVD = originalDSG0.descriptor(_DS);
     else
       isDSinDSG0 = false;
@@ -92,8 +93,8 @@ void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsd
   double T = nsds.finalT() + h;
   _nsds.reset(new NonSmoothDynamicalSystem(t0, T));
   _integrator.reset(new ZeroOrderHoldOSI());
-  std11::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
-      std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
+  std::static_pointer_cast<ZeroOrderHoldOSI>(_integrator)->setExtraAdditionalTerms(
+    std::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
   _nsds->insertDynamicalSystem(_DS);
 
   // Add the necessary properties
@@ -104,7 +105,7 @@ void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsd
   DSG0.e[dsgVD] = _e;
 
   // Was the original DynamicalSystem controlled ?
-  if (isDSinDSG0 && originalDSG0.B.hasKey(originaldsgVD))
+  if(isDSinDSG0 && originalDSG0.B.hasKey(originaldsgVD))
   {
     DSG0.B[dsgVD] = originalDSG0.B[originaldsgVD];
     assert(originalDSG0.u[originaldsgVD] && "A DynamicalSystem is controlled but its control input has not been initialized yet");
@@ -124,7 +125,7 @@ void SlidingReducedOrderObserver::initialize(const NonSmoothDynamicalSystem& nsd
 void SlidingReducedOrderObserver::process()
 {
   DEBUG_BEGIN("void SlidingReducedOrderObserver::process()\n");
-  if (!_pass)
+  if(!_pass)
   {
     DEBUG_PRINT("First pass \n ");
     _pass = true;
@@ -136,7 +137,7 @@ void SlidingReducedOrderObserver::process()
 
     SiconosVector tmpV(_DS->n());
     SimpleMatrix tmpC(*_C);
-    for (unsigned int i = 0; i < _e->size(); ++i)
+    for(unsigned int i = 0; i < _e->size(); ++i)
       tmpV(i) = (*_e)(i);
 
     tmpC.SolveByLeastSquares(tmpV);

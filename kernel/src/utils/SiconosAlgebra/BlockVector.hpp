@@ -29,7 +29,7 @@
  *
  * A block vector is a stl vector that handles pointers to SiconosVector.
  *
- * Insertion of NULL SP::SiconosVector is not allowed.
+ * Insertion of nullptr SP::SiconosVector is not allowed.
  *
  */
 class BlockVector
@@ -89,7 +89,7 @@ public:
    */
   BlockVector(unsigned int numberOfBlocks, unsigned int dim);
 
-  /** contructor with a BlockVector of n (numberOfBlocks) blocks that point on NULL
+  /** contructor with a BlockVector of n (numberOfBlocks) blocks that point on nullptr
    *  \param numberOfBlocks number of blocks
    */
   BlockVector(unsigned int numberOfBlocks);
@@ -175,13 +175,6 @@ public:
    * \return std::string
    */
   std::string toString() const;
-
-  /** send data of the matrix to an ostream
-   * \param os An output stream
-   * \param bv a BlockVector
-   * \return The same output stream
-   */
-  friend std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
 
   /** return the element vector[i]
    *  \param i an unsigned int
@@ -355,6 +348,24 @@ public:
   BlockVector& operator += (const SiconosVector& vIn);
   BlockVector& operator -= (const SiconosVector& vIn);
 
+   /** \defgroup BlockVectorFriends
+      
+      List of friend functions of the BlockVector class
+      
+      @{
+  */
+  
+  /** offstream operator 
+   * \param os An output stream
+   * \param bv a BlockVector
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
+
+
+   /** End of Friend functions group @} */
+
+  
   ACCEPT_NONVIRTUAL_VISITORS();
 
 };

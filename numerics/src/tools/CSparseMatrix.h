@@ -41,6 +41,13 @@
 #endif
 #endif
 
+/* Siconos does not need "complex" part of CXSparse, so avoid
+ * compilation C++-related problems with this flag (complex_t vs
+ * std::complex). */
+#define NCOMPLEX
+
+#include "cs.h"
+
 #ifndef CS_INT
 
 /* From cs.h */
@@ -125,13 +132,13 @@ extern "C"
 {
 #endif
 
-  /** \struct CSparseMatrix_lu_factors
+  /** \struct CSparseMatrix_factors
    * Information used and produced by CSparse for an LU factorization*/
   typedef struct {
     CS_INT n;       /**< size of linear system */
     css* S;      /**< symbolic analysis */
     csn* N;      /**< numerics factorization */
-  } CSparseMatrix_lu_factors;
+  } CSparseMatrix_factors;
 
  /** compute a LU factorization of A and store it in a workspace
    * \param order control if ordering is used
@@ -140,19 +147,34 @@ extern "C"
    * \param cs_lu_A the parameter structure that eventually holds the factors
    * \return 1 if the factorization was successful, 1 otherwise
    */
-  int CSparsematrix_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, CSparseMatrix_lu_factors * cs_lu_A);
+  int CSparsematrix_lu_factorization(CS_INT order, const CSparseMatrix *A, double tol, CSparseMatrix_factors * cs_lu_A);
+
+ /** compute a Cholesky factorization of A and store it in a workspace
+   * \param order control if ordering is used
+   * \param A the sparse matrix
+   * \param cs_chol_A the parameter structure that eventually holds the factors
+   * \return 1 if the factorization was successful, 1 otherwise
+   */
+  int CSparsematrix_chol_factorization(CS_INT order, const CSparseMatrix *A,  CSparseMatrix_factors * cs_chol_A);
 
   /** reuse a LU factorization (stored in the cs_lu_A) to solve a linear system Ax = b
    * \param cs_lu_A contains the LU factors of A, permutation information
    * \param x workspace
    * \param[in,out] b on input RHS of the linear system; on output the solution
    * \return 0 if failed, 1 otherwise*/
-  CS_INT CSparseMatrix_solve(CSparseMatrix_lu_factors* cs_lu_A, double* x, double *b);
+  CS_INT CSparseMatrix_solve(CSparseMatrix_factors* cs_lu_A, double* x, double *b);
+
+  /** reuse a Cholesky factorization (stored in the cs_chols_A) to solve a linear system Ax = b
+   * \param cs_chol_A contains the Cholesky factors of A, permutation information
+   * \param x workspace
+   * \param[in,out] b on input RHS of the linear system; on output the solution
+   * \return 0 if failed, 1 otherwise*/
+  CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b);
 
   /** Free a workspace related to a LU factorization
    * \param cs_lu_A the structure to free
    */
-  void CSparseMatrix_free_lu_factors(CSparseMatrix_lu_factors* cs_lu_A);
+  void CSparseMatrix_free_lu_factors(CSparseMatrix_factors* cs_lu_A);
 
   /** Matrix vector multiplication : y = alpha*A*x+beta*y
    * \param[in] alpha matrix coefficient
@@ -192,6 +214,17 @@ extern "C"
    */
   CS_INT CSparseMatrix_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x);
 
+  /** Add an entry to a symmetric triplet matrix only if the absolute value is
+   * greater than DBL_EPSILON.
+   * \param T the sparse matrix
+   * \param i row index
+   * \param j column index
+   * \param x the value
+   * \return integer value : 1 if the absolute value is less than
+   * DBL_EPSILON, otherwise the return value of cs_entry.
+   */
+  CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, double x);
+
   /** Check if the given triplet matrix is properly constructed (col and row indices are correct)
    * \param T the sparse matrix to check
    * \return 0 if the matrix is fine, 1 otherwise
@@ -212,13 +245,24 @@ extern "C"
    * \return NULL on success
   */
   CSparseMatrix* CSparseMatrix_spfree_on_stack(CSparseMatrix* A);
-  
+
   /** Copy a CSparseMatrix inside another CSparseMatrix.
    *  Reallocations are performed if B cannot hold a copy of A
    * \param[in] A a CSparseMatrix
    * \param[in,out] B a CSparseMatrix
    */
   void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B);
+
+  /** Multiply a matrix with a double alpha*A --> A
+   * \param alpha the  coefficient
+   * \param A the  matrix
+   */
+  int CSparseMatrix_scal(const double alpha, const CSparseMatrix *A);
+
+
+  int CSparseMatrix_max_by_columns(const CSparseMatrix *A, double * max);
+
+  int CSparseMatrix_max_abs_by_columns(const CSparseMatrix *A, double * max);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

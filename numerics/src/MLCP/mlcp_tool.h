@@ -1,6 +1,5 @@
 #ifndef MLCP_TOOL
 #define MLCP_TOOL
-#include "MixedLinearComplementarityProblem.h"
 /*
   |Z1       |W1
 M*|   + Q = |
@@ -15,7 +14,7 @@ M*|   + Q = |
 
 */
 
-
+#include "NumericsFwd.h"  // for MixedLinearComplementarityProblem
 void mlcp_buildM(int * zw, double * M, double * Mref, int n, int m, int NbLines);
 void mlcp_buildM_Block(int * zw, double * M, double * Mref, int n, int m, int NbLines, int *indexInBlock);
 void mlcp_fillSolution(double * z1, double * z2, double * w1, double * w2, int n, int m, int NbLines, int* zw, double * Q);

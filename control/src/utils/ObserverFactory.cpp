@@ -37,8 +37,8 @@ SP::Observer Registry::instantiate(unsigned int type, SP::ControlSensor sensor, 
 {
   MapFactoryIt it = factory_map.find(type) ;
 
-  if (it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (ObserverFactory) failed, no class named: " + type);
+  if(it == factory_map.end())
+    RuntimeException::selfThrow("Registry::instantiate (ObserverFactory) failed, no class named: " + std::to_string(type));
 
   // cout << endl << "Factory instance for class" << name << endl ; // for test purposes only
   return (it->second)(sensor, xHat0) ;  // run our factory

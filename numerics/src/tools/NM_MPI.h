@@ -15,8 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "SiconosConfig.h"
-#include "NumericsFwd.h"
+
+#include "NumericsFwd.h"  // for NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP, SICONOS_HAS_MPI // IWYU pragma: keep
+
 #ifdef SICONOS_HAS_MPI
 #include <mpi.h>
 #endif

@@ -15,9 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "FrictionContactProblem.h"
 #include "fc3d_local_problem_tools.h"
-#include "NumericsMatrix.h"
+#ifndef __cplusplus
+#include <stdbool.h>                 // for false
+#endif
+#include <stdlib.h>                  // for malloc, NULL
+#include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
+#include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
 
 
 void fc3d_local_problem_compute_q(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double *reaction, int contact)
@@ -54,10 +58,10 @@ FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* prob
   localproblem->q = (double*)malloc(3 * sizeof(double));
   localproblem->mu = (double*)malloc(sizeof(double));
 
-  if (problem->M->storageType != NM_SPARSE_BLOCK)
+  if(problem->M->storageType != NM_SPARSE_BLOCK)
   {
     localproblem->M = NM_create_from_data(NM_DENSE, 3, 3,
-                                           malloc(9 * sizeof(double)));
+                                          malloc(9 * sizeof(double)));
   }
   else /* NM_SPARSE_BLOCK */
   {
@@ -67,9 +71,9 @@ FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* prob
 }
 
 void fc3d_local_problem_free(FrictionContactProblem* localproblem,
-                      FrictionContactProblem* problem)
+                             FrictionContactProblem* problem)
 {
-  if (problem->M->storageType == NM_SPARSE_BLOCK)
+  if(problem->M->storageType == NM_SPARSE_BLOCK)
   {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
     localproblem->M->matrix0 = NULL;

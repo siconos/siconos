@@ -16,17 +16,15 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char ** data_collection(void);
+#include <stdlib.h>      // for malloc
+#include "test_utils.h"  // for data_collection
 
-char ** data_collection()
+const char ** data_collection()
 {
 
   int n_data_1=150;
 
-  char ** data_collection_1 = (char **)malloc(n_data_1*sizeof(char *));
+  const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
 
   data_collection_1[n_data++] = "./data/Capsules-i100-1090.dat";
@@ -35,7 +33,7 @@ char ** data_collection()
   data_collection_1[n_data++] = "./data/Capsules-i103-990.dat";
   data_collection_1[n_data++] = "./data/Capsules-i122-1617.dat";
 
-  
+
   data_collection_1[n_data++] = "---";
 
 

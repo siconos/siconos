@@ -84,7 +84,7 @@ public:
 };
 
 class SiconosPlane : public SiconosShape,
-                     public std11::enable_shared_from_this<SiconosPlane>
+                     public std::enable_shared_from_this<SiconosPlane>
 {
 protected:
   /** serialization hooks
@@ -102,7 +102,7 @@ public:
 };
 
 class SiconosSphere : public SiconosShape,
-                      public std11::enable_shared_from_this<SiconosSphere>
+                      public std::enable_shared_from_this<SiconosSphere>
 {
 private:
   SiconosSphere() : SiconosShape() {};
@@ -128,7 +128,7 @@ public:
 };
 
 class SiconosBox : public SiconosShape,
-                   public std11::enable_shared_from_this<SiconosBox>
+                   public std::enable_shared_from_this<SiconosBox>
 {
 private:
   SiconosBox() : SiconosShape() {};
@@ -183,7 +183,7 @@ public:
 };
 
 class SiconosCylinder : public SiconosShape,
-                        public std11::enable_shared_from_this<SiconosCylinder>
+                        public std::enable_shared_from_this<SiconosCylinder>
 {
 private:
   SiconosCylinder() : SiconosShape() {};
@@ -225,7 +225,7 @@ public:
 };
 
 class SiconosCone : public SiconosShape,
-                        public std11::enable_shared_from_this<SiconosCone>
+                        public std::enable_shared_from_this<SiconosCone>
 {
 private:
   SiconosCone() : SiconosShape() {};
@@ -267,7 +267,7 @@ public:
 };
 
 class SiconosCapsule : public SiconosShape,
-                        public std11::enable_shared_from_this<SiconosCapsule>
+                        public std::enable_shared_from_this<SiconosCapsule>
 {
 private:
   SiconosCapsule() : SiconosShape() {};
@@ -311,7 +311,7 @@ public:
 
 
 class SiconosConvexHull : public SiconosShape,
-                          public std11::enable_shared_from_this<SiconosConvexHull>
+                          public std::enable_shared_from_this<SiconosConvexHull>
 {
 private:
   SiconosConvexHull() : SiconosShape() {};
@@ -349,7 +349,7 @@ typedef std::vector<unsigned int> VUInt;
 TYPEDEF_SPTR(VUInt)
 
 class SiconosMesh : public SiconosShape,
-                    public std11::enable_shared_from_this<SiconosMesh>
+                    public std::enable_shared_from_this<SiconosMesh>
 {
 private:
   SiconosMesh() : SiconosShape() {};
@@ -383,7 +383,7 @@ public:
 };
 
 class SiconosHeightMap : public SiconosShape,
-                         public std11::enable_shared_from_this<SiconosHeightMap>
+                         public std::enable_shared_from_this<SiconosHeightMap>
 {
 private:
   SiconosHeightMap() : SiconosShape() {};
@@ -414,5 +414,123 @@ public:
    */
   ACCEPT_VISITORS();
 };
+
+
+class SiconosDisk : public SiconosShape,
+                    public std::enable_shared_from_this<SiconosDisk>
+{
+private:
+  SiconosDisk() : SiconosShape() {};
+
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosDisk);
+  float _radius;
+
+public:
+  SiconosDisk(float radius)
+    : SiconosShape(), _radius(radius) {}
+
+  virtual ~SiconosDisk() {}
+
+  float radius() const { return _radius; }
+  void setRadius(float r) { _radius = r; _version ++; }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
+class SiconosBox2d : public SiconosShape,
+                   public std::enable_shared_from_this<SiconosBox2d>
+{
+private:
+  SiconosBox2d() : SiconosShape() {};
+
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosBox2d);
+  SP::SiconosVector _dimensions;
+
+public:
+  SiconosBox2d(double width, double height)
+    : SiconosShape(), _dimensions(new SiconosVector(2))
+  {
+    (*_dimensions)(0) = width;
+    (*_dimensions)(1) = height;
+  }
+
+  SiconosBox2d(SP::SiconosVector dimensions)
+    : SiconosShape(), _dimensions(dimensions) {}
+
+  virtual ~SiconosBox2d() {}
+
+  SP::SiconosVector dimensions() const { return _dimensions; }
+
+  void setDimensions(double width, double height)
+  {
+    (*_dimensions)(0) = width;
+    (*_dimensions)(1) = height;
+    _version ++;
+  }
+
+  void setDimensions(SP::SiconosVector dim)
+  {
+    _dimensions = dim;
+    _version ++;
+  }
+
+  void setDimensions(const SiconosVector& dim)
+  {
+    (*_dimensions)(0) = dim(0);
+    (*_dimensions)(1) = dim(1);
+    _version ++;
+  }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
+class SiconosConvexHull2d : public SiconosShape,
+                          public std::enable_shared_from_this<SiconosConvexHull2d>
+{
+private:
+  SiconosConvexHull2d() : SiconosShape() {};
+
+protected:
+  /** serialization hooks
+   */
+  ACCEPT_SERIALIZATION(SiconosConvexHull2d);
+  SP::SiconosMatrix _vertices;
+
+public:
+  SiconosConvexHull2d(SP::SiconosMatrix vertices)
+    : SiconosShape(), _vertices(vertices)
+  {
+    if (_vertices && _vertices->size(1) != 2)
+      throw SiconosException("Convex hull vertices matrix must have 2 columns in 2d.");
+  }
+
+  virtual ~SiconosConvexHull2d() {}
+
+  SP::SiconosMatrix vertices() const { return _vertices; }
+
+  void setVertices(SP::SiconosMatrix vertices)
+  {
+    _vertices = vertices;
+    _version ++;
+  }
+
+  /** visitors hook
+   */
+  ACCEPT_VISITORS();
+};
+
+
+
+
 
 #endif /* SiconosShape_h */

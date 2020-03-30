@@ -18,8 +18,8 @@
 #ifndef NONSMOOTHNEWTONNEIGH_H
 #define NONSMOOTHNEWTONNEIGH_H
 
-#include "SiconosConfig.h"
-#include "NonSmoothNewton.h"
+#include "NonSmoothNewton.h"  // for NewtonFunctionPtr
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /*!\file NonSmoothNewtonNeighbour.h
   Typedef and functions declarations related to non-smooth Newton solver

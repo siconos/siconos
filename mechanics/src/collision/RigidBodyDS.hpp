@@ -30,7 +30,7 @@
 #include <SiconosContactor.hpp>
 
 class RigidBodyDS : public NewtonEulerDS,
-               public std11::enable_shared_from_this<RigidBodyDS>
+               public std::enable_shared_from_this<RigidBodyDS>
 {
 protected:
   /** serialization hooks

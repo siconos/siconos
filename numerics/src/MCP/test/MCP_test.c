@@ -16,14 +16,13 @@
  * limitations under the License.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "MCP_cst.h"
-#include "MixedComplementarityProblem.h"
-#include "SolverOptions.h"
-#include "MCP_Solvers.h"
-
+#include <stdio.h>                        // for printf, NULL
+#include <stdlib.h>                       // for malloc
+#include "MCP_Solvers.h"                  // for mcp_old_driver_init, mcp_ol...
+#include "MCP_cst.h"                      // for SICONOS_MCP_OLD_FB
+#include "MixedComplementarityProblem.h"  // for MixedComplementarityProblem...
+#include "NumericsFwd.h"                  // for MixedComplementarityProblem...
+#include "SolverOptions.h"                // for solver_options_delete, Solv...
 
 void testF(int size, double *z, double * F);
 void testF(int size, double *z, double * F)
@@ -44,13 +43,9 @@ int main(void)
   int info = 0 ;
 
   /* Set solver options */
-  SolverOptions options;
-
-  /* FB solver */
-  options.solverId = SICONOS_MCP_FB;
-
+  SolverOptions * options = solver_options_create(SICONOS_MCP_OLD_FB);
   /* Create a MixedComplementarityProblem */
-  MixedComplementarityProblem* problem = (MixedComplementarityProblem *)malloc(sizeof(MixedComplementarityProblem));
+  MixedComplementarityProblem_old* problem = (MixedComplementarityProblem_old *)malloc(sizeof(MixedComplementarityProblem_old));
 
   problem->sizeEqualities = 2;
   problem->sizeInequalities = 3;
@@ -58,8 +53,6 @@ int main(void)
   problem->computeNablaFmcp = &testNablaF ;
   problem->Fmcp = NULL;
   problem->nablaFmcp = NULL;
-
-  mixedComplementarity_setDefaultSolverOptions(problem, &options);
 
   int size = 5;
   double z[4];
@@ -69,14 +62,16 @@ int main(void)
   problem->computeNablaFmcp(size, z, nablaF);
 
   /* Initialize the solver */
-  mcp_driver_init(problem, &options) ;
+  mcp_old_driver_init(problem, options) ;
 
   /// TODO : write a real test ... ////
 
   printf("End of MCP solvers test. \n");
-  mcp_driver_reset(problem, &options);
-  freeMixedComplementarityProblem(problem);
-  solver_options_delete(&options);
+  mcp_old_driver_reset(problem, options);
+  mixedComplementarityProblem_old_free(problem);
+  solver_options_delete(options);
+  options = NULL;
+
 
   return info;
 }

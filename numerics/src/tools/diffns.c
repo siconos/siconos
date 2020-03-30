@@ -15,12 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-#include "NSSTools.h"
+#include "NSSTools.h"  // for diffns
 
 void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
 {
@@ -32,10 +27,10 @@ void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
   ptb = 0;
   ptc = 0;
 
-  if (*nb == 0)
+  if(*nb == 0)
   {
 
-    for (i = 0 ; i < *na ; i++)
+    for(i = 0 ; i < *na ; i++)
       c[i] = a[i];
     *nc  = *na;
 
@@ -44,22 +39,22 @@ void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
   else
   {
 
-    for (i = 0 ; i < *na ; i++)
+    for(i = 0 ; i < *na ; i++)
       c[i] = -1;
 
-    while ((pta < *na) && (ptb < *nb))
+    while((pta < *na) && (ptb < *nb))
     {
 
       aa  = a[pta];
 
-      if (b[ptb] > aa)
+      if(b[ptb] > aa)
       {
 
         c[ptc] = aa ;
         ptc    = ptc + 1 ;
         pta = pta + 1;
       }
-      else if (b[ptb] == aa)
+      else if(b[ptb] == aa)
       {
 
         pta = pta + 1;
@@ -68,13 +63,13 @@ void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
       else
       {
 
-        while ((b[ptb] < aa) && (ptb < *nb))
+        while((b[ptb] < aa) && (ptb < *nb))
         {
 
 
           ptb = ptb + 1;
 
-          if (ptb >= *nb)
+          if(ptb >= *nb)
           {
 
             c[ptc] = aa;
@@ -93,7 +88,7 @@ void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
 
 
 
-    for (i = pta + 1; i < *na ; i++)
+    for(i = pta + 1; i < *na ; i++)
     {
 
 

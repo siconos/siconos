@@ -85,10 +85,10 @@ hash(hashtab *ht, register char *s)
   register hashentry *h;
   char *s0 = s;
 
-  for (x = 0; c = *s++; x = x & 0x4000 ? ((x << 1) & 0x7fff) + 1 : x << 1)
+  for(x = 0; c = *s++; x = x & 0x4000 ? ((x << 1) & 0x7fff) + 1 : x << 1)
     x += c;
-  for (h = *(zot = ht->tab + x % ht->htsize); h; h = h->next)
-    if (!strcmp(s0, h->name))
+  for(h = *(zot = ht->tab + x % ht->htsize); h; h = h->next)
+    if(!strcmp(s0, h->name))
       return h->vd;
   return 0;
 }
@@ -106,10 +106,10 @@ mk_hashtab(Namelist *nl)
   hashentry *he;
 
   hashtab **x, **x0, *y;
-  for (x = &nl_cache; y = *x; x0 = x, x = &y->next)
-    if (nl == y->nl)
+  for(x = &nl_cache; y = *x; x0 = x, x = &y->next)
+    if(nl == y->nl)
       return y;
-  if (n_nlcache >= MAX_NL_CACHE)
+  if(n_nlcache >= MAX_NL_CACHE)
   {
     /* discard least recently used namelist hash table */
     y = *x0;
@@ -119,16 +119,16 @@ mk_hashtab(Namelist *nl)
   else
     n_nlcache++;
   nv = nl->nvars;
-  if (nv >= 0x4000)
+  if(nv >= 0x4000)
     nht = 0x7fff;
   else
   {
-    for (nht = 1; nht < nv; nht <<= 1);
+    for(nht = 1; nht < nv; nht <<= 1);
     nht += nht - 1;
   }
   ht = (hashtab *)malloc(sizeof(hashtab) + (nht - 1) * sizeof(hashentry *)
                          + nv * sizeof(hashentry));
-  if (!ht)
+  if(!ht)
     return 0;
   he = (hashentry *)&ht->tab[nht];
   ht->nl = nl;
@@ -138,10 +138,10 @@ mk_hashtab(Namelist *nl)
   memset((char *)ht->tab, 0, nht * sizeof(hashentry *));
   vd = nl->vars;
   vde = vd + nv;
-  while (vd < vde)
+  while(vd < vde)
   {
     v = *vd++;
-    if (!hash(ht, v->name))
+    if(!hash(ht, v->name))
     {
       he->next = *zot;
       *zot = he;
@@ -161,15 +161,15 @@ nl_init(Void)
   register char *s;
   register int c;
 
-  if (!f__init)
+  if(!f__init)
     f_init();
-  for (s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; c = *s++;)
+  for(s = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; c = *s++;)
     Alpha[c]
       = Alphanum[c]
         = Alpha[c + 'a' - 'A']
           = Alphanum[c + 'a' - 'A']
             = c;
-  for (s = "0123456789_"; c = *s++;)
+  for(s = "0123456789_"; c = *s++;)
     Alphanum[c] = c;
 }
 
@@ -188,18 +188,18 @@ getname(register char *s, int slen)
   register int ch;
 
   GETC(ch);
-  if (!(*s++ = Alpha[ch & 0xff]))
+  if(!(*s++ = Alpha[ch & 0xff]))
   {
-    if (ch != EOF)
+    if(ch != EOF)
       ch = 115;
     errfl(f__elist->cierr, ch, "namelist read");
   }
-  while (*s = Alphanum[GETC(ch) & 0xff])
-    if (s < se)
+  while(*s = Alphanum[GETC(ch) & 0xff])
+    if(s < se)
       s++;
-  if (ch == EOF)
+  if(ch == EOF)
     err(f__elist->cierr, EOF, "namelist read");
-  if (ch > ' ')
+  if(ch > ' ')
     Ungetc(ch, f__cf);
   return *s = 0;
 }
@@ -215,8 +215,8 @@ getnum(int *chp, ftnlen *val)
   register int ch, sign;
   register ftnlen x;
 
-  while (GETC(ch) <= ' ' && ch >= 0);
-  if (ch == '-')
+  while(GETC(ch) <= ' ' && ch >= 0);
+  if(ch == '-')
   {
     sign = 1;
     GETC(ch);
@@ -224,17 +224,17 @@ getnum(int *chp, ftnlen *val)
   else
   {
     sign = 0;
-    if (ch == '+')
+    if(ch == '+')
       GETC(ch);
   }
   x = ch - '0';
-  if (x < 0 || x > 9)
+  if(x < 0 || x > 9)
     return 115;
-  while (GETC(ch) >= '0' && ch <= '9')
+  while(GETC(ch) >= '0' && ch <= '9')
     x = 10 * x + ch - '0';
-  while (ch <= ' ' && ch >= 0)
+  while(ch <= ' ' && ch >= 0)
     GETC(ch);
-  if (ch == EOF)
+  if(ch == EOF)
     return EOF;
   *val = sign ? -x : x;
   *chp = ch;
@@ -254,23 +254,23 @@ getdimen(int *chp, dimen *d, ftnlen delta, ftnlen extent, ftnlen *x1)
   register int k;
   ftnlen x2, x3;
 
-  if (k = getnum(chp, x1))
+  if(k = getnum(chp, x1))
     return k;
   x3 = 1;
-  if (*chp == ':')
+  if(*chp == ':')
   {
-    if (k = getnum(chp, &x2))
+    if(k = getnum(chp, &x2))
       return k;
     x2 -= *x1;
-    if (*chp == ':')
+    if(*chp == ':')
     {
-      if (k = getnum(chp, &x3))
+      if(k = getnum(chp, &x3))
         return k;
-      if (!x3)
+      if(!x3)
         return 123;
       x2 /= x3;
     }
-    if (x2 < 0 || x2 >= extent)
+    if(x2 < 0 || x2 >= extent)
       return 123;
     d->extent = x2 + 1;
   }
@@ -330,13 +330,13 @@ x_rsne(cilist *a)
   long iva, ivae;
   dimen dimens[MAXDIM], substr;
 
-  if (!Alpha['a'])
+  if(!Alpha['a'])
     nl_init();
   f__reading = 1;
   f__formatted = 1;
   got1 = 0;
 top:
-  for (;;) switch (GETC(ch))
+  for(;;) switch(GETC(ch))
     {
     case EOF:
       err(a->ciend, (EOF), where0);
@@ -349,15 +349,15 @@ top:
       continue;
 #endif
     default:
-      if (ch <= ' ' && ch >= 0)
+      if(ch <= ' ' && ch >= 0)
         continue;
       errfl(a->cierr, 115, where0);
     }
 have_amp:
-  if (ch = getname(buf, sizeof(buf)))
+  if(ch = getname(buf, sizeof(buf)))
     return ch;
   nl = (Namelist *)a->cifmt;
-  if (strcmp(buf, nl->name))
+  if(strcmp(buf, nl->name))
 #ifdef No_Bad_Namelist_Skip
     errfl(a->cierr, 118, where0);
 #else
@@ -366,14 +366,14 @@ have_amp:
             "Skipping namelist \"%s\": seeking namelist \"%s\".\n",
             buf, nl->name);
     fflush(stderr);
-    for (;;) switch (GETC(ch))
+    for(;;) switch(GETC(ch))
       {
       case EOF:
         err(a->ciend, EOF, where0);
       case '/':
       case '&':
       case '$':
-        if (f__external)
+        if(f__external)
           e_rsle();
         else
           z_rnew();
@@ -382,10 +382,10 @@ have_amp:
       case '\'':
         quote = ch;
 more_quoted:
-        while (GETC(ch) != quote)
-          if (ch == EOF)
+        while(GETC(ch) != quote)
+          if(ch == EOF)
             err(a->ciend, EOF, where0);
-        if (GETC(ch) == quote)
+        if(GETC(ch) == quote)
           goto more_quoted;
         Ungetc(ch, f__cf);
       default:
@@ -394,14 +394,14 @@ more_quoted:
   }
 #endif
   ht = mk_hashtab(nl);
-  if (!ht)
+  if(!ht)
     errfl(f__elist->cierr, 113, where0);
-  for (;;)
+  for(;;)
   {
-    for (;;) switch (GETC(ch))
+    for(;;) switch(GETC(ch))
       {
       case EOF:
-        if (got1)
+        if(got1)
           return 0;
         err(a->ciend, EOF, where0);
       case '/':
@@ -409,21 +409,21 @@ more_quoted:
       case '&':
         return 0;
       default:
-        if (ch <= ' ' && ch >= 0 || ch == ',')
+        if(ch <= ' ' && ch >= 0 || ch == ',')
           continue;
         Ungetc(ch, f__cf);
-        if (ch = getname(buf, sizeof(buf)))
+        if(ch = getname(buf, sizeof(buf)))
           return ch;
         goto havename;
       }
 havename:
     v = hash(ht, buf);
-    if (!v)
+    if(!v)
       errfl(a->cierr, 119, where);
-    while (GETC(ch) <= ' ' && ch >= 0);
+    while(GETC(ch) <= ' ' && ch >= 0);
     vaddr = v->addr;
     type = v->type;
-    if (type < 0)
+    if(type < 0)
     {
       size = -type;
       type = TYCHAR;
@@ -432,98 +432,98 @@ havename:
       size = f__typesize[type];
     ivae = size;
     iva = 0;
-    if (ch == '(' /*)*/)
+    if(ch == '(' /*)*/)
     {
       dn = dimens;
-      if (!(dims = v->dims))
+      if(!(dims = v->dims))
       {
-        if (type != TYCHAR)
+        if(type != TYCHAR)
           errfl(a->cierr, 122, where);
-        if (k = getdimen(&ch, dn, (ftnlen)size,
-                         (ftnlen)size, &b))
+        if(k = getdimen(&ch, dn, (ftnlen)size,
+                        (ftnlen)size, &b))
           errfl(a->cierr, k, where);
-        if (ch != ')')
+        if(ch != ')')
           errfl(a->cierr, 115, where);
         b1 = dn->extent;
-        if (--b < 0 || b + b1 > size)
+        if(--b < 0 || b + b1 > size)
           return 124;
         iva += b;
         size = b1;
-        while (GETC(ch) <= ' ' && ch >= 0);
+        while(GETC(ch) <= ' ' && ch >= 0);
         goto scalar;
       }
       nd = (int)dims[0];
       nomax = span = dims[1];
       ivae = iva + size * nomax;
-      if (k = getdimen(&ch, dn, size, nomax, &b))
+      if(k = getdimen(&ch, dn, size, nomax, &b))
         errfl(a->cierr, k, where);
       no = dn->extent;
       b0 = dims[2];
       dims1 = dims += 3;
       ex = 1;
-      for (n = 1; n++ < nd; dims++)
+      for(n = 1; n++ < nd; dims++)
       {
-        if (ch != ',')
+        if(ch != ',')
           errfl(a->cierr, 115, where);
         dn1 = dn + 1;
         span /= *dims;
-        if (k = getdimen(&ch, dn1, dn->delta**dims,
-                         span, &b1))
+        if(k = getdimen(&ch, dn1, dn->delta**dims,
+                        span, &b1))
           errfl(a->cierr, k, where);
         ex *= *dims;
         b += b1 * ex;
         no *= dn1->extent;
         dn = dn1;
       }
-      if (ch != ')')
+      if(ch != ')')
         errfl(a->cierr, 115, where);
       b -= b0;
-      if (b < 0 || b >= nomax)
+      if(b < 0 || b >= nomax)
         errfl(a->cierr, 125, where);
       iva += size * b;
       dims = dims1;
-      while (GETC(ch) <= ' ' && ch >= 0);
+      while(GETC(ch) <= ' ' && ch >= 0);
       no1 = 1;
       dn0 = dimens;
-      if (type == TYCHAR && ch == '(' /*)*/)
+      if(type == TYCHAR && ch == '(' /*)*/)
       {
-        if (k = getdimen(&ch, &substr, size, size, &b))
+        if(k = getdimen(&ch, &substr, size, size, &b))
           errfl(a->cierr, k, where);
-        if (ch != ')')
+        if(ch != ')')
           errfl(a->cierr, 115, where);
         b1 = substr.extent;
-        if (--b < 0 || b + b1 > size)
+        if(--b < 0 || b + b1 > size)
           return 124;
         iva += b;
         b0 = size;
         size = b1;
-        while (GETC(ch) <= ' ' && ch >= 0);
-        if (b1 < b0)
+        while(GETC(ch) <= ' ' && ch >= 0);
+        if(b1 < b0)
           goto delta_adj;
       }
-      for (; dn0 < dn; dn0++)
+      for(; dn0 < dn; dn0++)
       {
-        if (dn0->extent != *dims++ || dn0->stride != 1)
+        if(dn0->extent != *dims++ || dn0->stride != 1)
           break;
         no1 *= dn0->extent;
       }
-      if (dn0 == dimens && dimens[0].stride == 1)
+      if(dn0 == dimens && dimens[0].stride == 1)
       {
         no1 = dimens[0].extent;
         dn0++;
       }
 delta_adj:
       ex = 0;
-      for (dn1 = dn0; dn1 <= dn; dn1++)
+      for(dn1 = dn0; dn1 <= dn; dn1++)
         ex += (dn1->extent - 1)
               * (dn1->delta *= dn1->stride);
-      for (dn1 = dn; dn1 > dn0; dn1--)
+      for(dn1 = dn; dn1 > dn0; dn1--)
       {
         ex -= (dn1->extent - 1) * dn1->delta;
         dn1->delta -= ex;
       }
     }
-    else if (dims = v->dims)
+    else if(dims = v->dims)
     {
       no = no1 = dims[1];
       ivae = iva + no * size;
@@ -531,46 +531,46 @@ delta_adj:
     else
 scalar:
       no = no1 = 1;
-    if (ch != '=')
+    if(ch != '=')
       errfl(a->cierr, 115, where);
     got1 = nml_read = 1;
     f__lcount = 0;
 readloop:
-    for (;;)
+    for(;;)
     {
-      if (iva >= ivae || iva < 0)
+      if(iva >= ivae || iva < 0)
       {
         f__lquit = 1;
         goto mustend;
       }
-      else if (iva + no1 * size > ivae)
+      else if(iva + no1 * size > ivae)
         no1 = (ivae - iva) / size;
       f__lquit = 0;
-      if (k = l_read(&no1, vaddr + iva, size, type))
+      if(k = l_read(&no1, vaddr + iva, size, type))
         return k;
-      if (f__lquit == 1)
+      if(f__lquit == 1)
         return 0;
 mustend:
-      if (GETC(ch) == '/' || ch == '$' || ch == '&')
+      if(GETC(ch) == '/' || ch == '$' || ch == '&')
       {
         f__lquit = 1;
         return 0;
       }
-      else if (f__lquit)
+      else if(f__lquit)
       {
-        while (ch <= ' ' && ch >= 0)
+        while(ch <= ' ' && ch >= 0)
           GETC(ch);
         Ungetc(ch, f__cf);
-        if (!Alpha[ch & 0xff] && ch >= 0)
+        if(!Alpha[ch & 0xff] && ch >= 0)
           errfl(a->cierr, 125, where);
         break;
       }
       Ungetc(ch, f__cf);
-      if ((no -= no1) <= 0)
+      if((no -= no1) <= 0)
         break;
-      for (dn1 = dn0; dn1 <= dn; dn1++)
+      for(dn1 = dn0; dn1 <= dn; dn1++)
       {
-        if (++dn1->curval < dn1->extent)
+        if(++dn1->curval < dn1->extent)
         {
           iva += dn1->delta;
           goto readloop;
@@ -594,14 +594,14 @@ s_rsne(cilist *a)
 
   f__external = 1;
   l_eof = 0;
-  if (n = c_le(a))
+  if(n = c_le(a))
     return n;
-  if (f__curunit->uwrt && f__nowreading(f__curunit))
+  if(f__curunit->uwrt && f__nowreading(f__curunit))
     err(a->cierr, errno, where0);
   l_getc = t_getc;
   l_ungetc = un_getc;
   f__doend = xrd_SL;
-  if (n = x_rsne(a))
+  if(n = x_rsne(a))
     return n;
   return e_rsle();
 }

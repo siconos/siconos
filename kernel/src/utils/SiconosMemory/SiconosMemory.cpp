@@ -31,7 +31,7 @@ SiconosMemory::SiconosMemory(const unsigned int size, const unsigned int vectorS
     _nbVectorsInMemory(0),
     _indx(size-1)
 {
-  for (unsigned int i = 0; i < size; i++)
+  for(unsigned int i = 0; i < size; i++)
   {
     push_back(SiconosVector(vectorSize));
   }
@@ -43,7 +43,7 @@ SiconosMemory::SiconosMemory(const MemoryContainer& V)
     _nbVectorsInMemory(V.size()),
     _indx(V.size()-1)
 {
-  for (unsigned int i = 0; i < V.size(); i++)
+  for(unsigned int i = 0; i < V.size(); i++)
   {
     push_back(V[i]);
   }
@@ -56,17 +56,17 @@ SiconosMemory::SiconosMemory(const unsigned int newMemorySize,
     _nbVectorsInMemory(V.size()),
     _indx(newMemorySize-1)
 {
-  if (newMemorySize < V.size())
+  if(newMemorySize < V.size())
     SiconosMemoryException::selfThrow(
       "SiconosMemory(int _size, vector<SP::SiconosVector> V) : V.size > _size");
   else
   {
     unsigned int i;
-    for (i = 0; i < V.size(); i++)
+    for(i = 0; i < V.size(); i++)
     {
       push_back(V[i]);
     }
-    for (; i < newMemorySize; i++)
+    for(; i < newMemorySize; i++)
     {
       push_back(SiconosVector(V[0].size()));
     }
@@ -79,7 +79,7 @@ SiconosMemory::SiconosMemory(const SiconosMemory& Mem)
     _nbVectorsInMemory(Mem.nbVectorsInMemory()),
     _indx(Mem.getMemorySize()-1)
 {
-  for (unsigned int i = 0; i < Mem.getMemorySize(); i++)
+  for(unsigned int i = 0; i < Mem.getMemorySize(); i++)
   {
     push_back(Mem[i]);
   }
@@ -93,10 +93,12 @@ SiconosMemory::~SiconosMemory()
 // Assignment
 void SiconosMemory::operator=(const SiconosMemory& V)
 {
-  if (size() != V.size()) {
+  if(size() != V.size())
+  {
     this->resize(V.size());
   }
-  for (unsigned int i = 0; i < V.size(); i++) {
+  for(unsigned int i = 0; i < V.size(); i++)
+  {
     (*this)[i].resize(V[i].size(), true);
     (*this)[i] = V[i];
   }
@@ -108,10 +110,10 @@ void SiconosMemory::operator=(const SiconosMemory& V)
 void SiconosMemory::operator=(const MemoryContainer& V)
 {
   _nbVectorsInMemory = V.size();
-  if (V.size() > size())
+  if(V.size() > size())
     this->resize(V.size());
   _indx = size()-1;
-  for (unsigned int i = 0; i < V.size(); i++)
+  for(unsigned int i = 0; i < V.size(); i++)
   {
     (*this)[i].resize(V[i].size(), true);
     (*this)[i] = V[i];
@@ -123,10 +125,10 @@ void SiconosMemory::setVectorMemory(const MemoryContainer& V,
                                     MemoryContainer::size_type _size)
 {
   _nbVectorsInMemory = std::min(V.size(), _size);
-  if (_size > size())
+  if(_size > size())
     resize(_size);
   _indx = size()-1;
-  for (unsigned int i = 0; i < _nbVectorsInMemory; i++)
+  for(unsigned int i = 0; i < _nbVectorsInMemory; i++)
   {
     (*this)[i].resize(V[i].size(), true);
     (*this)[i] = V[i];
@@ -139,11 +141,11 @@ void SiconosMemory::setMemorySize(const unsigned int steps,
 {
   _nbVectorsInMemory = 0;
   _indx = steps-1;
-  for (unsigned int i = 0; i < size(); i++)
+  for(unsigned int i = 0; i < size(); i++)
   {
     this->at(i).resize(vectorSize, true);
   }
-  for (unsigned int i = size(); i < steps; i++)
+  for(unsigned int i = size(); i < steps; i++)
   {
     this->push_back(SiconosVector(vectorSize));
   }
@@ -154,25 +156,25 @@ void SiconosMemory::setMemorySize(const unsigned int steps,
 const SiconosVector& SiconosMemory::getSiconosVector(const unsigned int index) const
 {
   assert(index < _nbVectorsInMemory && "getSiconosVector(index) : inconsistent index value");
-  return this->at( (_indx + 1 + index) % this->size() );
+  return this->at((_indx + 1 + index) % this->size());
 }
 
 SiconosVector& SiconosMemory::getSiconosVectorMutable(const unsigned int index)
 {
   assert(index < _nbVectorsInMemory && "getSiconosVector(index) : inconsistent index value");
-  return *(SiconosVector*)(&this->at( (_indx + 1 + index) % this->size() ));
+  return *(SiconosVector*)(&this->at((_indx + 1 + index) % this->size()));
 }
 
 void SiconosMemory::swap(const SiconosVector& v)
 {
   // Be robust to empty memory
-  if (size()==0)
+  if(size()==0)
     return;
 
   // If _nbVectorsInMemory is this->size(), we remove the last element.
   (*this)[_indx] = v;
   _nbVectorsInMemory = std::min(_nbVectorsInMemory+1, this->size());
-  if (_indx > 0)
+  if(_indx > 0)
     _indx--;
   else
     _indx = this->size()-1;
@@ -182,13 +184,13 @@ void SiconosMemory::swap(SP::SiconosVector v)
 {
   // Be robust to empty memory
   // Be robust to null pointer
-  if (size()==0 || !v)
+  if(size()==0 || !v)
     return;
 
   // If _nbVectorsInMemory is this->size(), we remove the last element.
   (*this)[_indx] = *v;
   _nbVectorsInMemory = std::min(_nbVectorsInMemory+1, this->size());
-  if (_indx > 0)
+  if(_indx > 0)
     _indx--;
   else
     _indx = this->size()-1;
@@ -199,7 +201,7 @@ void SiconosMemory::display() const
   std::cout << " ====== Memory vector display ======= " <<std::endl;
   std::cout << "| size : " << this->size() <<std::endl;
   std::cout << "| _nbVectorsInMemory : " << _nbVectorsInMemory <<std::endl;
-  for (unsigned int i = 0; i < _nbVectorsInMemory; i++)
+  for(unsigned int i = 0; i < _nbVectorsInMemory; i++)
   {
     std::cout << "vector number " << i << ": address = "
               << &this->at(i) << " | " << std::endl;

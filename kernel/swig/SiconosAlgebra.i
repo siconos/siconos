@@ -52,7 +52,7 @@
       return PyFloat_FromDouble($self->getValue(i));
     else {
       PyErr_SetNone(PyExc_IndexError);
-      return NULL;
+      return nullptr;
     }
   }
   PyObject *__setitem__(size_t i, double value) {
@@ -61,7 +61,7 @@
       return Py_None;
     } else {
       PyErr_SetNone(PyExc_IndexError);
-      return NULL;
+      return nullptr;
     }
   }
   double __len__() { return $self->size(); }
@@ -88,7 +88,7 @@
     if (*$self != (*$self).v->end())
       return PyFloat_FromDouble(*(*$self)++);
     PyErr_SetNone(PyExc_StopIteration);
-    return NULL;
+    return nullptr;
   }
 %insert("python") %{
     __next__ = next

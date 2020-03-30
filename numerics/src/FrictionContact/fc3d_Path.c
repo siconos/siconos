@@ -16,18 +16,16 @@
  * limitations under the License.
 */
 
-#include "NonSmoothNewton.h"
-#include "fc3d_Solvers.h"
-#include "SiconosBlas.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include "Friction_cst.h"
-
-#include "PathAlgebra.h"
-#include "NonlinearComplementarityProblem.h"
-
-#include "NCP_Solvers.h"
+#include <stdio.h>                            // for NULL, fprintf, stderr
+#include <stdlib.h>                           // for exit, EXIT_FAILURE
+#include "Friction_cst.h"                     // for SICONOS_FRICTION_3D_NCP...
+#include "NCP_Solvers.h"                      // for ncp_path
+#include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
+#include "NumericsFwd.h"                      // for FrictionContactProblem
+#include "SolverOptions.h"                    // for SolverOptions
+#include "fc3d_2NCP_Glocker.h"                // for computeFGlocker, NCPGlo...
+#include "fc3d_NCPGlockerFixedPoint.h"        // for fc3d_Path_computeError
+#include "SiconosBlas.h"                            // for cblas_dcopy
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -50,7 +48,7 @@ void F_GlockerPath(void* env, int sizeF, double* reaction, double* FVector)
   */
 
   /* TMP COPY: review memory management for FGlocker ...*/
-  cblas_dcopy(sizeF , FGlocker , 1, FVector , 1);
+  cblas_dcopy(sizeF, FGlocker, 1, FVector, 1);
   FGlocker = NULL;
 }
 
@@ -80,7 +78,7 @@ void fc3d_Path_initialize(FrictionContactProblem* problem, FrictionContactProble
   */
 
   /* Glocker formulation */
-  if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBPATH)
+  if(localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBPATH)
   {
     NCPGlocker_initialize(problem, localproblem);
   }
@@ -91,10 +89,11 @@ void fc3d_Path_initialize(FrictionContactProblem* problem, FrictionContactProble
   }
 }
 
-int fc3d_Path_solve(FrictionContactProblem * localproblem , double* reaction, SolverOptions * options)
+int fc3d_Path_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options)
 {
 
-  NonlinearComplementarityProblem NCP_struct = {
+  NonlinearComplementarityProblem NCP_struct =
+  {
     5,
     &F_GlockerPath,
     &jacobianF_GlockerPath,
@@ -105,7 +104,7 @@ int fc3d_Path_solve(FrictionContactProblem * localproblem , double* reaction, So
   double Fvec[5];
   int info;
   ncp_path(&NCP_struct, reaction, Fvec, &info, options);
-  if (info > 0)
+  if(info > 0)
   {
     fprintf(stderr, "Numerics, fc3d_Path failed");
     exit(EXIT_FAILURE);

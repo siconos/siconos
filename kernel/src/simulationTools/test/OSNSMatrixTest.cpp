@@ -31,7 +31,7 @@ void OSNSMatrixTest::setUp()
   tol = 1e-12;
   // Download a Model from Template.xml file
   temp.reset(new Model("Template.xml"));
-  SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(temp->simulation());
+  SP::TimeStepping s = std::static_pointer_cast<TimeStepping>(temp->simulation());
   s->initialize();
   // Get a set of Interactions
   indexSet = s->indexSet(0);
@@ -67,7 +67,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->size(0) == n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->size(1) == n, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->normInf() < tol , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix1 : ", M->defaultMatrix()->normInf() < tol, true);
   std::cout << "------- Constructor(dim) ended with success -------" <<std::endl;
   std::cout <<std::endl <<std::endl;
 }
@@ -79,15 +79,15 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
   SP::OSNSMatrix  M(new OSNSMatrix(indexSet, blocks));
 
   unsigned int dim = 0;
-  for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
   SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
-  for (InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
+  for(InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
-    for (InteractionsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
+    for(InteractionsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
     {
-      if (blocks[*itRow].find(*itCol) == blocks[*itRow].end())
+      if(blocks[*itRow].find(*itCol) == blocks[*itRow].end())
       {}
       else
         MRef.setBlock(row, col, *(blocks[*itRow][*itCol]));
@@ -102,7 +102,7 @@ void OSNSMatrixTest::testBuildOSNSMatrix2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->defaultMatrix()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->defaultMatrix()->size(1) == dim, true);
   unsigned int i = 0, pos = 0;
-  for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getPositionOfBlock(*it) == pos, true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildOSNSMatrix2 : ", M->getPositionOfBlock(*it) == pos, true);
@@ -123,15 +123,15 @@ void OSNSMatrixTest::testFill()
   M->fill(indexSet, blocks);
 
   unsigned int dim = 0;
-  for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
   SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
-  for (InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
+  for(InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
-    for (InteractionsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
+    for(InteractionsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
     {
-      if (blocks[*itRow].find(*itCol) == blocks[*itRow].end())
+      if(blocks[*itRow].find(*itCol) == blocks[*itRow].end())
       {}
       else
         MRef.setBlock(row, col, *(blocks[*itRow][*itCol]));
@@ -146,7 +146,7 @@ void OSNSMatrixTest::testFill()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(1) == dim, true);
   unsigned int i = 0, pos = 0;
-  for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getPositionOfBlock(*it) == pos, true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getPositionOfBlock(*it) == pos, true);
@@ -164,7 +164,7 @@ void OSNSMatrixTest::testFill()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->defaultMatrix()->size(1) == dim, true);
   i = 0;
   pos = 0;
-  for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getPositionOfBlock(*it) == pos, true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill : ", M->getPositionOfBlock(*it) == pos, true);
@@ -186,15 +186,15 @@ void OSNSMatrixTest::testConvert()
   M->convert();
   SP::NumericsMatrix NumMat = M->numericsMatrix();
   unsigned int dim = 0;
-  for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
   SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
-  for (InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
+  for(InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
-    for (InteractionsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
+    for(InteractionsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
     {
-      if (blocks[*itRow].find(*itCol) == blocks[*itRow].end())
+      if(blocks[*itRow].find(*itCol) == blocks[*itRow].end())
       {}
       else
         MRef.setBlock(row, col, *(blocks[*itRow][*itCol]));
@@ -209,7 +209,7 @@ void OSNSMatrixTest::testConvert()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", !NumMat->matrix1, false);
   double * m1 = NumMat->matrix0;
   double *mRef = MRef.getArray();
-  for (unsigned int k = 0; k < dim * dim; k++)
+  for(unsigned int k = 0; k < dim * dim; k++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert : ", fabs(mRef[k] - m1[k]) < tol, true);
 
   std::cout << "------- convert function test ended with success -------" <<std::endl;
@@ -224,15 +224,15 @@ void OSNSMatrixTest::testFill2()
   M->fill(indexSet, blocks);
 
   unsigned int dim = 0;
-  for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
   SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
-  for (InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
+  for(InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
-    for (InteractionsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
+    for(InteractionsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
     {
-      if (blocks[*itRow].find(*itCol) == blocks[*itRow].end())
+      if(blocks[*itRow].find(*itCol) == blocks[*itRow].end())
       {}
       else
         MRef.setBlock(row, col, *(blocks[*itRow][*itCol]));
@@ -247,7 +247,7 @@ void OSNSMatrixTest::testFill2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(0) == dim, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(1) == dim, true);
   unsigned int i = 0, pos = 0;
-  for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getPositionOfBlock(*it) == pos, true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getPositionOfBlock(*it) == pos, true);
@@ -266,7 +266,7 @@ void OSNSMatrixTest::testFill2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->defaultMatrix()->size(1) == dim, true);
   i = 0;
   pos = 0;
-  for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
   {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getPositionOfBlock(*it) == pos, true);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testFill2 : ", M->getPositionOfBlock(*it) == pos, true);
@@ -289,15 +289,15 @@ void OSNSMatrixTest::testConvert2()
   M->convert();
   SP::NumericsMatrix NumMat = M->numericsMatrix();
   unsigned int dim = 0;
-  for (InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
+  for(InteractionsIterator it = indexSet->begin(); it != indexSet->end(); ++it)
     dim += (*it)->nonSmoothLaw()->size();
   SimpleMatrix MRef(dim, dim);
   int row = 0, col = 0;
-  for (InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
+  for(InteractionsIterator itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
-    for (InteractionsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
+    for(InteractionsIterator itCol = indexSet->begin(); itCol != indexSet->end(); ++itCol)
     {
-      if (blocks[*itRow].find(*itCol) == blocks[*itRow].end())
+      if(blocks[*itRow].find(*itCol) == blocks[*itRow].end())
       {}
       else
         MRef.setBlock(row, col, *(blocks[*itRow][*itCol]));
@@ -312,7 +312,7 @@ void OSNSMatrixTest::testConvert2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", !NumMat->matrix1, false);
   double * m1 = NumMat->matrix0;
   double *mRef = MRef.getArray();
-  for (unsigned int k = 0; k < dim * dim; k++)
+  for(unsigned int k = 0; k < dim * dim; k++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConvert2 : ", fabs(mRef[k] - m1[k]) < tol, true);
 
   std::cout << "------- convert2 function test ended with success -------" <<std::endl;

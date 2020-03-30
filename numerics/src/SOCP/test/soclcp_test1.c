@@ -15,14 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "soclcp_test_function.h"
-#include "SOCLCP_cst.h"
-#include "SolverOptions.h"
-#include "SOCLCP_Solvers.h"
-
+#include <stdio.h>                 // for printf, fclose, fopen, FILE
+#include "NumericsFwd.h"           // for SolverOptions
+#include "SOCLCP_cst.h"            // for SICONOS_SOCLCP_NSGS, SICONOS_SOCLC...
+#include "SolverOptions.h"         // for SolverOptions, solver_options_delete
+#include "soclcp_test_function.h"  // for soclcp_test_function
 
 int main(void)
 {
@@ -30,15 +27,15 @@ int main(void)
   printf("Test on ./data/Example1_SOCLCP_SBM.dat\n");
 
   FILE * finput  =  fopen("./data/Example1_SOCLCP_SBM.dat", "r");
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
-  info = soclcp_setDefaultSolverOptions(options, SICONOS_SOCLCP_NSGS);
-  options->dparam[0] = 1e-16;
-  options->internalSolvers->solverId = SICONOS_SOCLCP_ProjectionOnCone;
-
+  SolverOptions * options = solver_options_create(SICONOS_SOCLCP_NSGS);
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+  solver_options_update_internal(options, 0, SICONOS_SOCLCP_ProjectionOnCone);
+  printf(" atroizeoieo zi e %d %d", options->solverId, options->internalSolvers[0]->solverId);
   info = soclcp_test_function(finput, options);
 
   solver_options_delete(options);
-  free(options);
+  options = NULL;
+
   fclose(finput);
   printf("\nEnd of test on ./data/Example1_SOCLCP_SBM.dat\n");
   return info;

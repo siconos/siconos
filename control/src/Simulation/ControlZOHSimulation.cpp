@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 
+#include <boost/timer/timer.hpp>
 #include "TimeStepping.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 #include "EventsManager.hpp"
@@ -28,9 +29,6 @@
 #include "ControlZOHSimulation.hpp"
 #include "ControlSimulation_impl.hpp"
 
-#include <boost/progress.hpp>
-#include <boost/timer.hpp>
-
 //#define DEBUG_BEGIN_END_ONLY
 //#define DEBUG_NOCOLOR
 //#define DEBUG_STDOUT
@@ -42,8 +40,8 @@ ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h):
   ControlSimulation(t0, T, h)
 {
   _processIntegrator.reset(new ZeroOrderHoldOSI());
-  std11::static_pointer_cast<ZeroOrderHoldOSI>(_processIntegrator)->setExtraAdditionalTerms(
-      std11::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
+  std::static_pointer_cast<ZeroOrderHoldOSI>(_processIntegrator)->setExtraAdditionalTerms(
+    std::shared_ptr<ControlZOHAdditionalTerms>(new ControlZOHAdditionalTerms()));
   _processSimulation.reset(new TimeStepping(_nsds,_processTD, 0));
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
@@ -60,31 +58,25 @@ void ControlZOHSimulation::run()
   DEBUG_BEGIN("void ControlZOHSimulation::run()\n");
   EventsManager& eventsManager = *_processSimulation->eventsManager();
   unsigned k = 0;
-  boost::progress_display show_progress(_N);
-  boost::timer time;
-  time.restart();
+  boost::timer::cpu_timer time;
 
   TimeStepping& sim = static_cast<TimeStepping&>(*_processSimulation);
 
-  while (sim.hasNextEvent())
+  while(sim.hasNextEvent())
   {
     Event& nextEvent = *eventsManager.nextEvent();
-    if (nextEvent.getType() == TD_EVENT)
+    if(nextEvent.getType() == TD_EVENT)
     {
       sim.computeOneStep();
     }
 
     sim.nextStep();
 
-    if (sim.hasNextEvent() && eventsManager.nextEvent()->getType() == TD_EVENT)  // We store only on TD_EVENT
+    if(sim.hasNextEvent() && eventsManager.nextEvent()->getType() == TD_EVENT)   // We store only on TD_EVENT
     {
       (*_dataM)(k, 0) = sim.startingTime();
       storeData(k);
       ++k;
-      if (!_silent)
-      {
-        ++show_progress;
-      }
     }
   }
 
@@ -93,7 +85,11 @@ void ControlZOHSimulation::run()
   storeData(k);
   ++k;
 
-  _elapsedTime = time.elapsed();
+  // Warning FP : with the new interface boost::timer, the
+  // result of elpased is in ns while it was in seconds
+  // in the old interface.
+  // elapsed is a tuple with wall, user and system times.
+  _elapsedTime = time.elapsed().user * 1e-9;
   _dataM->resize(k, _nDim + 1);
   DEBUG_END("void ControlZOHSimulation::run()\n");
 }

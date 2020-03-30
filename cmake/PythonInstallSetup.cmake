@@ -1,6 +1,3 @@
-
-option(INSTALL_PYTHON_SYMLINKS "Install Python .py files as symlinks" OFF)
-
 # --- Function to compute the install path/options ---
 #
 # Usage :

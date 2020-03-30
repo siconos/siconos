@@ -48,7 +48,7 @@ union VECTOR_UBLAS_TYPE
  * You can find an overview on how to build and use vectors and matrices in siconos users' guide .
  *
  */
-class SiconosVector : public std11::enable_shared_from_this<SiconosVector>
+class SiconosVector : public std::enable_shared_from_this<SiconosVector>
 {
 protected:
   /** serialization hooks
@@ -94,7 +94,14 @@ public:
    */
   SiconosVector(const SiconosVector& v);
 
-  SiconosVector(const BlockVector & vIn);
+  /** Create a new SiconosVector from a Block.
+
+      This could be done with a constructor but
+      using such a function avoid implicit copy-construction
+      in operators call.
+   */
+  void initFromBlock(const BlockVector & vIn);
+  
   /** constructor with a DenseVect vector (see SiconosAlgebra.hpp for details)
    *  \param v a DenseVect
    */
@@ -249,13 +256,6 @@ public:
    */
   std::string toString() const;
 
-  /** send data of the matrix to an ostream
-   * \param os An output stream
-   * \param sv a SiconosVector
-   * \return The same output stream
-   */
-  friend std::ostream& operator<<(std::ostream& os, const SiconosVector& sv);
-
   /** for iterator interface */
   typedef SiconosVectorIterator iterator;
 
@@ -409,6 +409,21 @@ public:
   */
   void exp_in_place();
 
+  
+  /** \defgroup SiconosVectorFriends
+      
+      List of friend functions of the SiconosVector class
+      
+      @{
+  */
+
+  /** send data of the matrix to an ostream
+   * \param os An output stream
+   * \param sv a SiconosVector
+   * \return The same output stream
+   */
+  friend std::ostream& operator<<(std::ostream& os, const SiconosVector& sv);
+
   friend SiconosVector& operator *= (SiconosVector& v, const double& s);
 
   friend SiconosVector& operator /= (SiconosVector& v, const double& s);
@@ -459,19 +474,13 @@ public:
 
   friend void  getMin(const SiconosVector&, double &, unsigned int &);
 
-  /*
-  friend SiconosVector abs_wise(const SiconosVector&);
-
-  friend void getMax(const SiconosVector&, double &,unsigned int &);
-
-  friend void  getMin(const SiconosVector&, double &, unsigned int &);
-  */
-
   friend struct IsDense;
 
   friend struct IsSparse;
 
   friend struct IsBlock;
+  
+  /** End of Friend functions group @} */
 
   //  temporary workaround, the visitor has to be removed or rework -- xhub
   ACCEPT_NONVIRTUAL_VISITORS();

@@ -11,6 +11,11 @@ with pkgs;
 			 enable_python=true;
 			 blas_implem=pkgs.openblas.override { blas64 = false; };
 			 };
+   siconos-numerics-openmp = callPackage ./siconos.nix {
+                         numerics_only=true;
+			 enable_openmp=true;
+			 blas_implem=pkgs.openblas.override { blas64 = false; };
+			 };
    siconos-numerics-python2 = callPackage ./siconos.nix {
    			 numerics_only=true;
 			 enable_python=true;

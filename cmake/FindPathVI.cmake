@@ -1,59 +1,67 @@
-# -----------------------------------------
-# Search for pathvi library
-# --> libpathvi
+#  Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 #
-# User hint : PathVI_DIR --> try cmake -DPathVI_DIR=path-to-pathvi-install
+# Copyright 2019 INRIA.
 #
-# header is searched for in 'standard' path + optional suffix , PathVI_DIR/include
-# PathVI_DIR
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-# -----------------------------------------
-include(LibFindMacros)
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# --
+#[=======================================================================[.rst:
+FindPathVI
+-----------
 
-# ----------------------------------------
-# First, search in (optionnaly) user-defined PathVI_DIR
-# Try : 
-# PathVI_DIR/
-# PathVI_DIR/include
-# ----------------------------------------
-IF(NOT PathVI_VERSION)
-  SET(PathVI_VERSION "")
-ENDIF(NOT PathVI_VERSION)
+Find Path library
 
-IF(NOT PathVI_DIR AND GAMSCAPI_FOUND)
-  SET(PathVI_DIR ${GAMS_DIR})
-ENDIF(NOT PathVI_DIR AND GAMSCAPI_FOUND)
+Usage :
+ 
+find_package(PathVI REQUIRED)
+target_link_libraries(yourlib PRIVATE PathVI::PathVI)
 
-# ----------------------------------------
-# Library == libpath${PathVI_VERSION}
-# First, search in (optionnaly) user-defined PathVI_DIR
-# Try:
-# - PathVI_DIR
-# - PathVI_DIR/lib
-# - PathVI_DIR/lib/CMAKE_LIBRARY_ARCHITECTURE (for example on Debian like system : lib/x86_64-linux-gnu
-if(PathVI_DIR)
-find_library(PathVI_LIBRARY pathvi${PathVI_VERSION}
-  PATHS ${PathVI_DIR}
-  PATH_SUFFIXES lib lib/${CMAKE_LIBRARY_ARCHITECTURE} 
-  )
-else(PathVI_DIR)
-find_library(PathVI_LIBRARY pathvi${PathVI_VERSION}
-  )
-endif(PathVI_DIR)
-# If not found, try standard path.
+Set PathVI_ROOT=<where cppunit is installed>
+if it's not in a "classic" place or if you want a specific version
 
-# Set PathVI_LIBRARY_DIRS and PathVI_LIBRARIES for libfindprocess
-# see Using LibFindMacros : https://cmake.org/Wiki/CMake:How_To_Find_Libraries
-IF (PathVI_LIBRARY)
-  GET_FILENAME_COMPONENT(PathVI_LIBRARY_DIRS ${PathVI_LIBRARY} PATH)
-  GET_FILENAME_COMPONENT(PathVI_LIBRARIES ${PathVI_LIBRARY} REALPATH)
-  SET(HAVE_PATHVI TRUE)
+Header : vi_desc.h
+Lib : <prefix>pathvi<PathVI_VERSION>.<suffix>
+
+#]=======================================================================]
+
+include(FindPackageHandleStandardArgs)
+
+if(NOT PathVI_ROOT)
+    set(PathVI_ROOT $ENV{PathVI_ROOT})
 endif()
-IF (NOT PathVI_FIND_QUIETLY)
-  MESSAGE(STATUS "Found PathVI: ${PathVI_LIBRARY}")
-  MESSAGE(STATUS "PathVI_LIBRARIES: ${PathVI_LIBRARIES}")
-ENDIF (NOT PathVI_FIND_QUIETLY)
 
-# Final check :
-set(PathVI_PROCESS_LIBS PathVI_LIBRARIES)
-libfind_process(PathVI)
+# Try to help find_package process (pkg-config ...)
+set_find_package_hints(NAME PathVI MODULE pathvi)
+
+if(NOT PathVI_LIBRARIES)
+  find_library(PathVI_LIBRARIES NAMES pathvi${PathVI_VERSION}
+    ${_PathVI_SEARCH_OPTS}
+    PATH_SUFFIXES lib lib64)
+endif()
+
+# -- Library setup --
+find_package_handle_standard_args(PathVI
+  REQUIRED_VARS PathVI_LIBRARIES)
+
+if(PathVI_FOUND)
+  
+  if(NOT TARGET PathVI::PathVI)
+    add_library(PathVI::PathVI IMPORTED INTERFACE)
+    set_property(TARGET PathVI::PathVI PROPERTY INTERFACE_LINK_LIBRARIES ${PathVI_LIBRARIES})
+    if(PathVI_INCLUDE_DIR)  # FP: should we set this with externals/PATH_SDK ??
+      set_target_properties(PathVI::PathVI PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${PathVI_INCLUDE_DIR}")
+    endif()
+  endif()
+endif()
+

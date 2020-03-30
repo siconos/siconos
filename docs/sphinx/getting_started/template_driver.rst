@@ -9,14 +9,11 @@ C++ template for siconos driver
 .. code::
 
    // Header file
-   #include "SiconosKernel.h"
+   #include <SiconosKernel.h>
    using namespace std;
    // main program
    int main(int argc, char* argv[])
    {
-   // == Start timer ==
-   boost::timer time;
-   time.restart();
    // Exception handling
    try
    {

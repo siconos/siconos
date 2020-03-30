@@ -15,14 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <float.h>
-
-#include "SiconosBlas.h"
 #include "FischerBurmeister.h"
-#include "assert.h"
+#include <float.h>           // for DBL_EPSILON
+#include <math.h>            // for sqrt, fabs
+#include <stdio.h>           // for NULL
+#include "NumericsMatrix.h"  // for NM_assert, NM_DENSE, NumericsMatrix
+#include "assert.h"          // for assert
+#include "SiconosBlas.h"     // for cblas_dcopy, cblas_dscal, cblas_dgemv
 
 /* Computation of  Fischer-Burmeister function, phi(z,F(z)) = sqrt(z*z + F(z)*F(z)) - z - F(z) */
 void phi_FB(int size, double* restrict z, double* restrict F, double* restrict phiVector)
@@ -31,7 +30,7 @@ void phi_FB(int size, double* restrict z, double* restrict F, double* restrict p
   assert(F != NULL);
   assert(phiVector != NULL);
 
-  for (int i = 0 ; i < size ; ++i)
+  for(int i = 0 ; i < size ; ++i)
   {
     phiVector[i] = sqrt(z[i] * z[i] + F[i] * F[i]) - (z[i] + F[i]);
   }
@@ -50,10 +49,10 @@ void jacobianPhi_FB(int size, double* restrict z, double* restrict F, double* re
 
   double ri, ai, bi;
 
-  for (int i = 0; i < size; i++)
+  for(int i = 0; i < size; i++)
   {
     ri = sqrt(z[i] * z[i] +  F[i] * F[i]);
-    if (ri > 0.0)
+    if(ri > 0.0)
     {
       ai = z[i] / ri - 1.0;
       bi = F[i] / ri - 1.0;
@@ -80,11 +79,11 @@ void phi_Mixed_FB(int sizeEq, int sizeIneq, double* restrict z, double* restrict
 
   int totalSize = sizeEq + sizeIneq;
 
-  for (int i = 0 ; i < sizeEq ; ++i)
+  for(int i = 0 ; i < sizeEq ; ++i)
   {
     phiVector[i] = F[i];
   }
-  for (int i = sizeEq ; i < totalSize ; ++i)
+  for(int i = sizeEq ; i < totalSize ; ++i)
   {
     phiVector[i] =  sqrt(z[i] * z[i] + F[i] * F[i]) - (z[i] + F[i]);
   }
@@ -103,10 +102,10 @@ void jacobianPhi_Mixed_FB(int sizeEq, int sizeIneq, double* restrict z, double* 
 
   double ri, ai, bi;
 
-  for (int i = sizeEq; i < sizeEq + sizeIneq; i++)
+  for(int i = sizeEq; i < sizeEq + sizeIneq; i++)
   {
     ri = sqrt(z[i] * z[i] +  F[i] * F[i]);
-    if (ri > 0.0)
+    if(ri > 0.0)
     {
       ai = z[i] / ri - 1.0;
       bi = F[i] / ri - 1.0;
@@ -137,7 +136,7 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
   double normi;
   int n = n1 + n2;
 
-  if (n1 > 0)
+  if(n1 > 0)
   {
     //printf("Jac_F_FB: the mixed case needs review and testing -- xhub\n");
     /* H is initialized with nabla_F */
@@ -145,9 +144,9 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
   }
   // constructing the set beta
   // Introduce a tolerance ? -- xhub
-  for (int i = n1; i < n; ++i)
+  for(int i = n1; i < n; ++i)
   {
-    if ((fabs(z[i]) < DBL_EPSILON) && (fabs(F[i]) < DBL_EPSILON))
+    if((fabs(z[i]) < DBL_EPSILON) && (fabs(F[i]) < DBL_EPSILON))
     {
       workV1[i] = 1.0;
     }
@@ -159,13 +158,13 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
   // workV1 = "z" in Facchinei--Pang (2003) p. 808
   // "z_i" = 1 if z_i = w_i = 0.0
   // nabla_F^T.workV1 --> workV2
-  cblas_dgemv(CblasColMajor,CblasTrans, n2 , n2 , 1.0 , nabla_F_dense , n2 , &workV1[n1], 1, 0.0 , &workV2[n1], 1);
-  for (int i = n1; i < n; ++i)
+  cblas_dgemv(CblasColMajor,CblasTrans, n2, n2, 1.0, nabla_F_dense, n2, &workV1[n1], 1, 0.0, &workV2[n1], 1);
+  for(int i = n1; i < n; ++i)
   {
-    if (workV1[i] != 0.0) // i in beta
+    if(workV1[i] != 0.0)  // i in beta
     {
       normi = sqrt(workV1[i] * workV1[i] + workV2[i] * workV2[i]);
-      for (int j = 0; j < n; j++)
+      for(int j = 0; j < n; j++)
       {
         H_dense[j * n + i] = (workV2[i] / normi - 1.0) * nabla_F_dense[j * n + i];
       }
@@ -175,7 +174,7 @@ void Jac_F_FB(int n1, int n2, double* restrict z, double* restrict F, double* re
     else // i not in beta
     {
       normi = sqrt(z[i] * z[i] + F[i] * F[i]);
-      for (int j = 0; j < n; j++)
+      for(int j = 0; j < n; j++)
       {
         H_dense[j * n + i] = (F[i] / normi - 1.0) * nabla_F_dense[j * n + i];
       }

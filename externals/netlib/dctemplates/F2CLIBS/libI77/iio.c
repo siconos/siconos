@@ -8,9 +8,9 @@ int f__icnum;
 extern int f__hiwater;
 z_getc(Void)
 {
-  if (f__recpos++ < f__svic->icirlen)
+  if(f__recpos++ < f__svic->icirlen)
   {
-    if (f__icptr >= f__icend) err(f__svic->iciend, (EOF), "endfile");
+    if(f__icptr >= f__icend) err(f__svic->iciend, (EOF), "endfile");
     return(*f__icptr++);
   }
   err(f__svic->icierr, 110, "recend");
@@ -24,8 +24,8 @@ z_putc(c)
 z_putc(int c)
 #endif
 {
-  if (f__icptr >= f__icend) err(f__svic->icierr, 110, "inwrite");
-  if (f__recpos++ < f__svic->icirlen)
+  if(f__icptr >= f__icend) err(f__svic->icierr, 110, "inwrite");
+  if(f__recpos++ < f__svic->icirlen)
     *f__icptr++ = c;
   else  err(f__svic->icierr, 110, "recend");
   return 0;
@@ -54,7 +54,7 @@ c_si(icilist *a)
 {
   f__elist = (cilist *)a;
   f__fmtbuf = a->icifmt;
-  if (pars_f(f__fmtbuf) < 0)
+  if(pars_f(f__fmtbuf) < 0)
     err(a->icierr, 100, "startint");
   fmt_bg();
   f__sequential = f__formatted = 1;
@@ -84,7 +84,7 @@ integer s_rsfi(icilist *a)
 #endif
 {
   int n;
-  if (n = c_si(a)) return(n);
+  if(n = c_si(a)) return(n);
   f__reading = 1;
   f__doed = rd_ed;
   f__doned = rd_ned;
@@ -97,7 +97,7 @@ integer s_rsfi(icilist *a)
 
 z_wnew(Void)
 {
-  while (f__recpos++ < f__svic->icirlen)
+  while(f__recpos++ < f__svic->icirlen)
     *f__icptr++ = ' ';
   f__recpos = 0;
   f__cursor = 0;
@@ -112,7 +112,7 @@ integer s_wsfi(icilist *a)
 #endif
 {
   int n;
-  if (n = c_si(a)) return(n);
+  if(n = c_si(a)) return(n);
   f__reading = 0;
   f__doed = w_ed;
   f__doned = w_ned;
@@ -134,9 +134,9 @@ integer e_wsfi(Void)
   int n;
   n = en_fio();
   f__fmtbuf = NULL;
-  if (f__icnum >= f__svic->icirnum)
+  if(f__icnum >= f__svic->icirnum)
     return(n);
-  while (f__recpos++ < f__svic->icirlen)
+  while(f__recpos++ < f__svic->icirlen)
     *f__icptr++ = ' ';
   return(n);
 }

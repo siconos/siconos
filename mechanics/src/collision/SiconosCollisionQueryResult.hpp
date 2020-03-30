@@ -43,7 +43,7 @@ public:
 
   /** Body owning the contactor that was intersected, may be null for
    * static contactors. */
-  SP::RigidBodyDS body;
+  SP::SecondOrderDS body;
 
   /** The shape that was intersected. */
   SP::SiconosShape shape;

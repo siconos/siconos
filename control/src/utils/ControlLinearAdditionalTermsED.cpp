@@ -19,7 +19,7 @@
 #include "SimulationGraphs.hpp"
 #include "ControlLinearAdditionalTermsED.hpp"
 #include "DynamicalSystem.hpp"
-
+#include "SiconosAlgebraProd.hpp"
 #include "Topology.hpp"
 #include "MatrixIntegrator.hpp"
 
@@ -29,14 +29,14 @@ void ControlLinearAdditionalTermsED::init(DynamicalSystemsGraph& DSG0, const Non
 {
 
   DynamicalSystemsGraph::VIterator dsvi, dsvdend;
-  for (std11::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
+  for(std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
   {
     DynamicalSystem& ds = *DSG0.bundle(*dsvi);
-    if (DSG0.pluginU.hasKey(*dsvi))
+    if(DSG0.pluginU.hasKey(*dsvi))
     {
       DSG0.tmpXdot[*dsvi].reset(new SiconosVector(ds.getx().size()));
     }
-    if (DSG0.pluginJacgx.hasKey(*dsvi))
+    if(DSG0.pluginJacgx.hasKey(*dsvi))
     {
       DSG0.jacgx[*dsvi].reset(new SimpleMatrix(ds.getx().size(), ds.getx().size()));
     }
@@ -48,13 +48,13 @@ void ControlLinearAdditionalTermsED::init(DynamicalSystemsGraph& DSG0, const Non
 void ControlLinearAdditionalTermsED::addSmoothTerms(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double t, SiconosVector& xdot)
 {
   // check whether we have a system with a control input
-  if (DSG0.u.hasKey(dsgVD))
+  if(DSG0.u.hasKey(dsgVD))
   {
-    if (DSG0.B.hasKey(dsgVD))
+    if(DSG0.B.hasKey(dsgVD))
     {
       prod(DSG0.B.getRef(dsgVD), DSG0.u.getRef(dsgVD), xdot, false); // xdot += B*u
     }
-    else if (DSG0.pluginU.hasKey(dsgVD))
+    else if(DSG0.pluginU.hasKey(dsgVD))
     {
       DynamicalSystem& ds = *DSG0.bundle(dsgVD);
       SiconosVector& u = DSG0.u.getRef(dsgVD);
@@ -68,7 +68,7 @@ void ControlLinearAdditionalTermsED::addSmoothTerms(DynamicalSystemsGraph& DSG0,
     }
   }
   // check whether the DynamicalSystem is an Observer
-  if (DSG0.e.hasKey(dsgVD))
+  if(DSG0.e.hasKey(dsgVD))
   {
     assert(DSG0.L.hasKey(dsgVD));
     prod(*DSG0.L[dsgVD], *DSG0.e[dsgVD], xdot, false); // xdot += -L*e
@@ -78,7 +78,7 @@ void ControlLinearAdditionalTermsED::addSmoothTerms(DynamicalSystemsGraph& DSG0,
 void ControlLinearAdditionalTermsED::addJacobianRhsContribution(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double t, SiconosMatrix& jacRhs)
 {
   // check whether we have a system with a control input
-  if (DSG0.pluginJacgx.hasKey(dsgVD))
+  if(DSG0.pluginJacgx.hasKey(dsgVD))
   {
     DynamicalSystem& ds = *DSG0.bundle(dsgVD);
     SiconosVector& u = DSG0.u.getRef(dsgVD);

@@ -16,211 +16,133 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
+#include <stdlib.h>                      // for malloc
+#include "ConvexQP_cst.h"                // for SICONOS_CONVEXQP_PGOC_LINESE...
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_TFP, SIC...
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, Solve...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_fp = (char ***)malloc(n_test*sizeof(char **));
 
-  for (int n =0 ; n <n_test ; n++)
-  {
-    test_fp[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+  *number_of_tests = 12; //n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  int n =0;
-  int e=0;
-  
-  int d=0;/* "./data/FC3D_Example1_SBM.dat"; */
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_TFP);
-  test_fp[n][e++] = "1e-16";
-  test_fp[n][e++] = "100";
-  test_fp[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_PFP);
-  test_fp[n][e++] = "1e-16";
-  test_fp[n][e++] = "100";
-  test_fp[n][e++] = "---";
-  n++;
+  int current = 0;
+  int d;
 
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_TFP);
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder);
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "---";
-  n++;
+  // ========== FC3D_Example1_SBM.dat ========
+  d = 0;
+  // Tresca FP
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_TFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+  current++;
 
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_TFP);
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder);
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "internal_iparam";
-  test_fp[n][e++] = "2";
-  test_fp[n][e++] = "20";
-  test_fp[n][e++] = "internal_dparam";
-  test_fp[n][e++] = "3";
-  test_fp[n][e++] = "-1";
-  test_fp[n][e++] = "internal_dparam";
-  test_fp[n][e++] = "4";
-  test_fp[n][e++] = "-1.e-6";
-  test_fp[n][e++] = "---";
-  n++;
+  // Panagiotopoulos FP
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_PFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+  current++;
 
-  
-  
+  // Tresca FP, internal = ConvexQP, PG cylinder. Default values for params
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_TFP);
+  solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER);
+  current++;
 
+  // Tresca FP, internal = ConvexQP, PG cylinder.
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_TFP);
 
-  
-  d=2;/* "./data/Confeti-ex13-4contact-Fc3D-SBM.dat"; */
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_TFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "1000";
-  test_fp[n][e++] = "---";
-  n++;
+  solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER);
 
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_PFP);
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_TFP);
-  test_fp[n][e++] = "1e-4";
-  test_fp[n][e++] = "100";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_ConvexQP_PG_Cylinder);
-  test_fp[n][e++] = "1e-6";
-  test_fp[n][e++] = "200";
-  test_fp[n][e++] = "---";
-  n++;
+  collection[current].options->internalSolvers[0]->dparam[SICONOS_CONVEXQP_PGOC_RHO] = -1.;
+  collection[current].options->internalSolvers[0]->dparam[SICONOS_CONVEXQP_PGOC_RHOMIN] = -1.e-6;
+  collection[current].options->internalSolvers[0]->iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAX_ITER] = 20;
+  current++;
 
+  // ========== Confeti-ex13-4contact-Fc3D-SBM.dat ========
+  d = 2;
+  // Tresca FP
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_TFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+  collection[current].will_fail = 1;
+  current++;
 
+  // Panagiotopoulos FP. Default values for params
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_PFP);
+  current++;
 
+  // Tresca FP, internal = ConvexQP, PG cylinder.
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_TFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+  solver_options_update_internal(collection[current].options, 0,
+                                 SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER);
+  collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+  collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
+  current++;
 
+  // ========== Confeti-ex03-Fc3D-SBM.dat ========
+  d = 5;
 
-  d=5;/* "./data/Confeti-ex03-Fc3D-SBM.dat";  */
-  
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_TFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "2000";
-  test_fp[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_PFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "2000";
-  test_fp[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "0";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_TFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "2000";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "iparam";
-  test_fp[n][e++] = "1";
-  test_fp[n][e++] = "1";
-  test_fp[n][e++] = "---";
-  n++;
+  // Tresca FP
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_TFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
+  current++;
 
+  // Panagiotopoulos FP
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_PFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
+  current++;
 
+  // Tresca FP
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_TFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
+  collection[current].options->iparam[1] = 1; // ???
+  current++;
 
-  d=6;/* "./data/Confeti-ex03-Fc3D-SBM.dat";  */
-  
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_TFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "100";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "dparam";
-  test_fp[n][e++] = "3";
-  test_fp[n][e++] = "1e4";
-  test_fp[n][e++] = "---";
-  n++;
+  // ========== BoxesStack1-i100000-32.hdf5.dat ========
+  d = 6;
+  // Tresca FP, set dp[3]
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_TFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
+  collection[current].options->dparam[3] = 1e4; // ???
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
 
+  // ========== OneObject-i100000-499.hdf5.dat ========
+  d = 9;
+  // Tresca FP, set dp[3]
+  collection[current].filename = data_collection[d];
+  collection[current].options = solver_options_create(SICONOS_FRICTION_3D_TFP);
+  collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+  collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+  collection[current].options->dparam[3] = 1e4; // ???
+  collection[current].options->iparam[1] = 1; // ???
+  // expected to fail
+  collection[current].will_fail = 1;
+  current++;
 
-  
-  d=9;
-  e=0;
-  test_fp[n][e++] = data_collection[d];
-  test_fp[n][e++] = "1";
-  test_fp[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_fp[n][e++], "%d", SICONOS_FRICTION_3D_TFP);
-  test_fp[n][e++] = "1e-08";
-  test_fp[n][e++] = "10000";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "0";
-  test_fp[n][e++] = "dparam";
-  test_fp[n][e++] = "3";
-  test_fp[n][e++] = "1e4";
-  test_fp[n][e++] = "iparam";
-  test_fp[n][e++] = "1";
-  test_fp[n][e++] = "1";
-  test_fp[n][e++] = "---";
-  n++;
-
-  
-  test_fp[n][0] ="---";
-  return test_fp;
+  *number_of_tests = current;
+  return collection;
 
 }

@@ -49,19 +49,19 @@ using namespace Siconos;
 
 void SimpleMatrix::PLUFactorizationInPlace()
 {
-  if (_isPLUFactorized)
+  if(_isPLUFactorized)
   {
     std::cout << "SimpleMatrix::PLUFactorizationInPlace warning: this matrix is already PLUFactorized. " << std::endl;
     return;
   }
-  if (_num == 1)
+  if(_num == 1)
   {
-    if (!_ipiv)
+    if(!_ipiv)
       _ipiv.reset(new VInt(size(0)));
     else
       _ipiv->resize(size(0));
     int info = lapack::getrf(*mat.Dense, *_ipiv);
-    if (info != 0)
+    if(info != 0)
     {
       _isPLUFactorized = false;
       SiconosMatrixException::selfThrow("SimpleMatrix::PLUFactorizationInPlace failed: the matrix is singular.");
@@ -72,7 +72,7 @@ void SimpleMatrix::PLUFactorizationInPlace()
   {
     int info = cholesky_decompose(*sparse());
     // \warning: VA 24/11/2010: work only for symmetric matrices. Should be replaced by efficient implementatation (e.g. mumps )
-    if (info != 0)
+    if(info != 0)
     {
       display();
       _isPLUFactorized = false;
@@ -86,15 +86,15 @@ void SimpleMatrix::PLUFactorizationInPlace()
 
 void SimpleMatrix::PLUInverseInPlace()
 {
-  if (!_isPLUFactorized)
+  if(!_isPLUFactorized)
     PLUFactorizationInPlace();
-  if (_num != 1)
+  if(_num != 1)
     SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
 
-#if defined(HAVE_ATLAS) && defined(OUTSIDE_FRAMEWORK_BLAS)
+#if defined(HAS_LAPACK_dgetri)
   int info = lapack::getri(*mat.Dense, *_ipiv);   // solve from factorization
 
-  if (info != 0)
+  if(info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUInverseInPlace failed, the matrix is singular.");
 
   _isPLUInversed = true;
@@ -105,16 +105,16 @@ void SimpleMatrix::PLUInverseInPlace()
 
 void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 {
-  if (B.isBlock())
+  if(B.isBlock())
     SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
   int info = 0;
 
-  if (_num == 1)
+  if(_num == 1)
   {
-    if (!_isPLUFactorized) // call gesv => LU-factorize+solve
+    if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
     {
       // solve system:
-      if (!_ipiv)
+      if(!_ipiv)
         _ipiv.reset(new VInt(size(0)));
       else
         _ipiv->resize(size(0));
@@ -132,24 +132,24 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       // B now contains solution:
     }
     else // call getrs: only solve using previous lu-factorization
-      if (B.num() == 1)
+      if(B.num() == 1)
         info = lapack::getrs(*mat.Dense, *_ipiv, *(B.dense()));
       else
         SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices in RHS.");
   }
   else
   {
-    if (!_isPLUFactorized) // call first PLUFactorizationInPlace
+    if(!_isPLUFactorized)  // call first PLUFactorizationInPlace
     {
       PLUFactorizationInPlace();
     }
     // and then solve
-    if (B.num() == 1)
+    if(B.num() == 1)
     {
       inplace_solve(*sparse(), *(B.dense()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.dense()), ublas::upper_tag());
     }
-    else if (B.num() == 4)
+    else if(B.num() == 4)
     {
       inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
@@ -162,13 +162,13 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 
 
 
-  if (info != 0)
+  if(info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUForwardBackwardInPlace failed.");
 }
 
 void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 {
-  if (B.isBlock())
+  if(B.isBlock())
     SiconosMatrixException::selfThrow("SimpleMatrix PLUForwardBackwardInPlace(V) failed. Not yet implemented for V being a BlockVector.");
 
 
@@ -176,12 +176,12 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
   ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
   int info;
 
-  if (_num == 1)
+  if(_num == 1)
   {
-    if (!_isPLUFactorized) // call gesv => LU-factorize+solve
+    if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
     {
       // solve system:
-      if (!_ipiv)
+      if(!_ipiv)
         _ipiv.reset(new VInt(size(0)));
       else
         _ipiv->resize(size(0));
@@ -205,7 +205,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
   }
   else
   {
-    if (!_isPLUFactorized) // call first PLUFactorizationInPlace
+    if(!_isPLUFactorized)  // call first PLUFactorizationInPlace
     {
       PLUFactorizationInPlace();
     }
@@ -214,7 +214,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
     inplace_solve(ublas::trans(*sparse()), tmpB, ublas::upper_tag());
     info = 0;
   }
-  if (info != 0)
+  if(info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::PLUForwardBackwardInPlace failed.");
   else
   {
@@ -224,7 +224,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 
 void SimpleMatrix::resetLU()
 {
-  if (_ipiv) _ipiv->clear();
+  if(_ipiv) _ipiv->clear();
   _isPLUFactorized = false;
   _isPLUInversed = false;
 }
@@ -242,7 +242,7 @@ void SimpleMatrix::resetQR()
 
 void SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
 {
-  if (B.isBlock())
+  if(B.isBlock())
     SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares(Siconos Matrix &B) failed. Not yet implemented for M being a BlockMatrix.");
   int info = 0;
 #ifdef USE_OPTIMAL_WORKSPACE
@@ -251,7 +251,7 @@ void SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
 #ifdef USE_MINIMAL_WORKSPACE
   info += lapack::gels(*mat.Dense, *(B.dense()), lapack::minimal_workspace());
 #endif
-  if (info != 0)
+  if(info != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares failed.");
 }
 
@@ -260,7 +260,7 @@ void SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
 
 void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
 {
-  if (B.isBlock())
+  if(B.isBlock())
     SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares(SiconosVector &B) failed. Not yet implemented for V being a BlockVector.");
 
   DenseMat tmpB(B.size(), 1);
@@ -273,7 +273,7 @@ void SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
 #ifdef USE_MINIMAL_WORKSPACE
   info += lapack::gels(*mat.Dense, tmpB, lapack::minimal_workspace());
 #endif
-  if (info != 0)
+  if(info != 0)
   {
     std::cout << "info = " << info << std::endl;
     SiconosMatrixException::selfThrow("SimpleMatrix::SolveByLeastSquares failed.");

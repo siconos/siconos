@@ -49,6 +49,7 @@
 
 #ifdef __cplusplus
 #undef restrict
+#include <sys/cdefs.h>  // for __restrict
 #define restrict __restrict
 #endif
 
@@ -329,6 +330,54 @@ static inline void mvp3x3(const double* restrict a, const double* restrict v, do
   *pr++ += *a++ * *v;
   *pr++ += *a++ * *v;
   *pr++ += *a++ * *v++;
+}
+
+static inline void mvp5x5(const double* restrict a, const double* restrict v, double* restrict r)
+{
+
+  double* pr;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+  pr = r;
+
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v;
+  *pr++ += *a++ * *v++;
+
+
 }
 
 /** add a matrix vector multiplication scaled by alpha 
@@ -613,6 +662,21 @@ static inline void cross3(double* restrict a, double* restrict b, double* restri
   *c   = *a0 * *b1 - *a1 * *b0;
 }
 
+/** norm : || a ||
+ *  may underflow & overflow
+ * \param[in] a a[2]
+ * \return the norm
+ */
+static inline double hypot2(double* a)
+{
+  double r;
+
+  r = *a * *a;
+  a++;
+  r += *a * *a;
+  return sqrt(r);
+}
+
 
 /** norm : || a ||
  *  may underflow & overflow
@@ -630,7 +694,22 @@ static inline double hypot3(double* a)
   r += *a * *a;
   return sqrt(r);
 }
+static inline double hypot5(double* a)
+{
+  double r;
 
+  r = *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+  a++;
+  r += *a * *a;
+
+  return sqrt(r);
+}
 static inline double hypot9(double* a)
 {
   double r;
@@ -802,7 +881,7 @@ static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
 
 
 /** solve Ax = b by partial pivoting Gaussian elimination. This function is 10
- * to 20 times faster than calling LAPACK (tested with netlib and atlas).
+ * to 20 times faster than calling LAPACK (tested with netlib).
  *
  * \param a column-major matrix (not modified)
  * \param[in,out] b on input, the right-hand side; on output the solution x
@@ -929,6 +1008,55 @@ static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
   b[2] = sol2;
 
   return info;
+}
+
+
+#define mat_elem(a, y, x, n) (a + ((y) * (n) + (x)))
+
+static void swap_row(double *a, double *b, int r1, int r2, int n)
+{
+	double tmp, *p1, *p2;
+	int i;
+
+	if (r1 == r2) return;
+	for (i = 0; i < n; i++) {
+		p1 = mat_elem(a, r1, i, n);
+		p2 = mat_elem(a, r2, i, n);
+		tmp = *p1, *p1 = *p2, *p2 = tmp;
+	}
+	tmp = b[r1], b[r1] = b[r2], b[r2] = tmp;
+}
+
+static inline  void solve_nxn_gepp(int n, double *a, double *b, double *x)
+{
+#define A(y, x) (*mat_elem(a, y, x, n))
+	int  j, col, row, max_row,dia;
+	double max, tmp;
+
+	for (dia = 0; dia < n; dia++) {
+		max_row = dia, max = A(dia, dia);
+
+		for (row = dia + 1; row < n; row++)
+			if ((tmp = fabs(A(row, dia))) > max)
+				max_row = row, max = tmp;
+
+		swap_row(a, b, dia, max_row, n);
+
+		for (row = dia + 1; row < n; row++) {
+			tmp = A(row, dia) / A(dia, dia);
+			for (col = dia+1; col < n; col++)
+				A(row, col) -= tmp * A(dia, col);
+			A(row, dia) = 0;
+			b[row] -= tmp * b[dia];
+		}
+	}
+	for (row = n - 1; row >= 0; row--) {
+		tmp = b[row];
+		for (j = n - 1; j > row; j--)
+			tmp -= x[j] * A(row, j);
+		x[row] = tmp / A(row, row);
+	}
+#undef A
 }
 
 /** Computation of the eigenvalues of a symmetric 3x3 real matrix

@@ -23,9 +23,9 @@
 #ifndef PATHVI_HELPERS_H
 #define PATHVI_HELPERS_H
 
-#include "SiconosConfig.h"
+#include <stddef.h>  // for size_t
 
-#include <stddef.h>
+#include "SiconosConfig.h"  // for HAVE_PATHVI, BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct SN_generic_pathvi_env PATHVI_helpers.h
  * Generic structure for the PATHVI solver*/

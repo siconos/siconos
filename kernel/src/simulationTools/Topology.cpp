@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 #include "Topology.hpp"
+#include "RuntimeException.hpp"
 #include "NonSmoothLaw.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Interaction.hpp"
@@ -64,7 +65,7 @@ std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>
 Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
 {
   // !! Private function !!
-  // 
+  //
   // This function must
   // - insert interaction and ds into IG/DSG
   // - update graph properties related to modeling (DSlink ...)
@@ -89,21 +90,21 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
   dsgv1 = _DSG[0]->add_vertex(ds1);
 
   if(ds2)
-    {
-      dsgv2 = _DSG[0]->add_vertex(ds2);
-    }
+  {
+    dsgv2 = _DSG[0]->add_vertex(ds2);
+  }
   else
-    {
-      dsgv2 = dsgv1;
-      ds2_ = ds1;
-    }
+  {
+    dsgv2 = dsgv1;
+    ds2_ = ds1;
+  }
 
   // this may be a multi edges graph
   assert(!_DSG[0]->is_edge(dsgv1, dsgv2, inter));
   assert(!_IG[0]->is_vertex(inter));
   InteractionsGraph::VDescriptor ig_new_ve;
   DynamicalSystemsGraph::EDescriptor new_ed;
-  std11::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
+  std::tie(new_ed, ig_new_ve) = _DSG[0]->add_edge(dsgv1, dsgv2, inter, *_IG[0]);
 
   inter->initializeLinkToDsVariables(*ds1, *ds2_);
 
@@ -131,7 +132,7 @@ Topology::__addInteractionInIndexSet0(SP::Interaction inter, SP::DynamicalSystem
 
 
 
-  
+
   return std::pair<DynamicalSystemsGraph::EDescriptor, InteractionsGraph::VDescriptor>(new_ed, ig_new_ve);
 }
 
@@ -146,11 +147,11 @@ struct VertexIsRemoved
   bool operator()(DynamicalSystemsGraph::EDescriptor ed)
   {
 
-    if (__IG->is_vertex(__DSG->bundle(ed)))
+    if(__IG->is_vertex(__DSG->bundle(ed)))
     {
       InteractionsGraph::VDescriptor ivd = __IG->descriptor(__DSG->bundle(ed));
 
-      if (__IG->bundle(ivd) == _I)
+      if(__IG->bundle(ivd) == _I)
       {
         __IG->remove_vertex(__DSG->bundle(ed));
 
@@ -183,11 +184,11 @@ struct VertexIsRemovedDS
     _ds(ds), __DSG(sg), __IG(asg) {};
   bool operator()(DynamicalSystemsGraph::EDescriptor ed)
   {
-    if (__IG->is_vertex(__DSG->bundle(ed)))
+    if(__IG->is_vertex(__DSG->bundle(ed)))
     {
       InteractionsGraph::VDescriptor ivd = __IG->descriptor(__DSG->bundle(ed));
 
-      if (__IG->properties(ivd).source == _ds
+      if(__IG->properties(ivd).source == _ds
           || __IG->properties(ivd).target == _ds)
       {
         __IG->remove_vertex(__DSG->bundle(ed));
@@ -219,7 +220,7 @@ void Topology::__removeInteractionFromIndexSet(SP::Interaction inter)
   SP::DynamicalSystem ds1 = _IG[0]->properties(_IG[0]->descriptor(inter)).source;
   SP::DynamicalSystem ds2 = _IG[0]->properties(_IG[0]->descriptor(inter)).target;
   _DSG[0]->remove_out_edge_if(_DSG[0]->descriptor(ds1), VertexIsRemoved(inter, _DSG[0], _IG[0]));
-  if (ds1 != ds2)
+  if(ds1 != ds2)
     _DSG[0]->remove_out_edge_if(_DSG[0]->descriptor(ds2), VertexIsRemoved(inter, _DSG[0], _IG[0]));
 }
 
@@ -251,7 +252,7 @@ void Topology::setName(SP::DynamicalSystem ds, const std::string& name)
 std::string Topology::name(SP::DynamicalSystem ds)
 {
   DynamicalSystemsGraph::VDescriptor dsgv = _DSG[0]->descriptor(ds);
-  if (dsgv)
+  if(dsgv)
     return _DSG[0]->name.at(dsgv);
   else
     return "";
@@ -266,7 +267,7 @@ void Topology::setName(SP::Interaction inter, const std::string& name)
 std::string Topology::name(SP::Interaction inter)
 {
   InteractionsGraph::VDescriptor igv = _IG[0]->descriptor(inter);
-  if (igv)
+  if(igv)
     return _IG[0]->name.at(igv);
   else
     return "";
@@ -278,16 +279,16 @@ void Topology::setOSI(SP::DynamicalSystem ds, SP::OneStepIntegrator OSI)
 }
 
 void Topology::setControlProperty(SP::Interaction inter,
-  const bool isControlInteraction)
+                                  const bool isControlInteraction)
 {
   InteractionsGraph::VDescriptor ivd = _IG[0]->descriptor(inter);
   DynamicalSystemsGraph::VDescriptor dvd = _DSG[0]->descriptor(_IG[0]->properties(ivd).target);
   SP::Interaction interG;
   DynamicalSystemsGraph::OEIterator oei, oeiend;
-  for (std11::tie(oei, oeiend) = _DSG[0]->out_edges(dvd); oei != oeiend; ++oei)
+  for(std::tie(oei, oeiend) = _DSG[0]->out_edges(dvd); oei != oeiend; ++oei)
   {
     interG = _DSG[0]->bundle(*oei);
-    if (inter == interG)
+    if(inter == interG)
     {
       _DSG[0]->properties(*oei).forControl = isControlInteraction;
       break;
@@ -295,6 +296,16 @@ void Topology::setControlProperty(SP::Interaction inter,
   }
   _IG[0]->properties(ivd).forControl = isControlInteraction;
 }
+
+SP::InteractionsGraph Topology::indexSet(unsigned int num) const
+{
+  if(num >= _IG.size())
+  {
+    RuntimeException::selfThrow("Topology::indexSet: indexSet does not exist");
+  }
+  assert(num < _IG.size()) ;
+  return _IG[num];
+};
 
 void Topology::removeInteraction(SP::Interaction inter)
 {
@@ -324,7 +335,7 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
                &*ds2);
 
   // If the interaction is already in the graph remove it
-  if (indexSet0()->is_vertex(inter))
+  if(indexSet0()->is_vertex(inter))
   {
     __removeInteractionFromIndexSet(inter);
   }
@@ -332,7 +343,8 @@ Topology::link(SP::Interaction inter, SP::DynamicalSystem ds, SP::DynamicalSyste
   // Compute interaction dimension (sum of involved dynamical systems sizes)
   unsigned int sumOfDSSizes = 0;
   sumOfDSSizes += ds->dimension();
-  if(ds2){
+  if(ds2)
+  {
     sumOfDSSizes += ds2->dimension();
     inter->setHas2Bodies(true);
   }
@@ -356,7 +368,7 @@ void Topology::setProperties()
   _IG[0]->update_vertices_indices();
   _IG[0]->update_edges_indices();
 
-  for (unsigned int i = 1; i < _IG.size(); ++i)
+  for(unsigned int i = 1; i < _IG.size(); ++i)
   {
     // .. global properties may be defined here with
     // InteractionsSubGraphProperties(), see SiconosProperties.hpp
@@ -387,11 +399,11 @@ SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber) co
   DynamicalSystemsGraph::VIterator vi, vdend;
   SP::DynamicalSystem ds;
   unsigned int currentNumber;
-  for (std11::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi)
+  for(std::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi)
   {
     ds = _DSG[0]->bundle(*vi);
     currentNumber = ds->number();
-    if (currentNumber == requiredNumber)
+    if(currentNumber == requiredNumber)
       return ds;
   }
 
@@ -401,12 +413,26 @@ SP::DynamicalSystem Topology::getDynamicalSystem(unsigned int requiredNumber) co
 }
 
 
+void Topology::displayDynamicalSystems() const
+{
+  DynamicalSystemsGraph::VIterator vi, vdend;
+  SP::DynamicalSystem ds;
+  unsigned int currentNumber;
+  for(std::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi)
+  {
+    ds = _DSG[0]->bundle(*vi);
+    currentNumber = ds->number();
+    std::cout << "Dynamical system number : " << currentNumber << std::endl;
+    ds->display();
+  }
+}
+
 SP::DynamicalSystem Topology::getDynamicalSystem(std::string name) const
 {
   DynamicalSystemsGraph::VIterator vi, vdend;
-  for (std11::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi)
+  for(std::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi)
   {
-    if (name == _DSG[0]->name.at(*vi))
+    if(name == _DSG[0]->name.at(*vi))
       return _DSG[0]->bundle(*vi);
   }
 
@@ -418,7 +444,7 @@ SP::DynamicalSystem Topology::getDynamicalSystem(std::string name) const
 
 unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
 {
-  if (inumber >= _IG.size())
+  if(inumber >= _IG.size())
   {
     RuntimeException::selfThrow("Topology::numberOfInvolvedDS :: index number must be smaller than the number of indexSets");
   }
@@ -431,12 +457,12 @@ unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
   SP::InteractionsGraph indexSet = _IG[inumber];
 
   InteractionsGraph::VIterator vi, viend;
-  for(std11::tie(vi, viend) = indexSet->vertices();
+  for(std::tie(vi, viend) = indexSet->vertices();
       vi != viend; ++vi)
   {
     if(indexSet->properties(*vi).source)
     {
-      if (flag.find(indexSet->properties(*vi).source) == flag.end())
+      if(flag.find(indexSet->properties(*vi).source) == flag.end())
       {
         flag[indexSet->properties(*vi).source] = true;
         return_value++;
@@ -444,7 +470,7 @@ unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
     }
     if(indexSet->properties(*vi).target)
     {
-      if (flag.find(indexSet->properties(*vi).target) == flag.end())
+      if(flag.find(indexSet->properties(*vi).target) == flag.end())
       {
         flag[indexSet->properties(*vi).target] = true;
         return_value++;
@@ -454,10 +480,10 @@ unsigned int Topology::numberOfInvolvedDS(unsigned int inumber)
 
   InteractionsGraph::EIterator ei, eiend;
 
-  for(std11::tie(ei, eiend) = indexSet->edges();
+  for(std::tie(ei, eiend) = indexSet->edges();
       ei != eiend; ++ei)
   {
-    if (flag.find(indexSet->bundle(*ei)) == flag.end())
+    if(flag.find(indexSet->bundle(*ei)) == flag.end())
     {
       flag[indexSet->bundle(*ei)] = true;
       return_value++;
@@ -472,11 +498,11 @@ SP::Interaction Topology::getInteraction(unsigned int requiredNumber) const
   InteractionsGraph::VIterator vi, vdend;
   SP::Interaction inter;
   unsigned int currentNumber;
-  for (std11::tie(vi, vdend) = _IG[0]->vertices(); vi != vdend; ++vi)
+  for(std::tie(vi, vdend) = _IG[0]->vertices(); vi != vdend; ++vi)
   {
     inter = _IG[0]->bundle(*vi);
     currentNumber = inter->number();
-    if (currentNumber == requiredNumber)
+    if(currentNumber == requiredNumber)
       return inter;
   }
 
@@ -486,9 +512,9 @@ SP::Interaction Topology::getInteraction(unsigned int requiredNumber) const
 SP::Interaction Topology::getInteraction(std::string name) const
 {
   DynamicalSystemsGraph::VIterator vi, vdend;
-  for (std11::tie(vi, vdend) = _IG[0]->vertices(); vi != vdend; ++vi)
+  for(std::tie(vi, vdend) = _IG[0]->vertices(); vi != vdend; ++vi)
   {
-    if (name == _IG[0]->name.at(*vi))
+    if(name == _IG[0]->name.at(*vi))
       return _IG[0]->bundle(*vi);
   }
 
@@ -501,13 +527,13 @@ std::vector<SP::Interaction> Topology::interactionsForDS(
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
   std::vector<SP::Interaction> result;
-  if (!ds) return result;
-  for (std11::tie(ui, uiend) = _IG[0]->vertices(); ui != uiend; ++ui)
+  if(!ds) return result;
+  for(std::tie(ui, uiend) = _IG[0]->vertices(); ui != uiend; ++ui)
   {
     inter = _IG[0]->bundle(*ui);
     SP::DynamicalSystem ds1 = _IG[0]->properties(_IG[0]->descriptor(inter)).source;
     SP::DynamicalSystem ds2 = _IG[0]->properties(_IG[0]->descriptor(inter)).target;
-    if (ds == ds1 || ds == ds2)
+    if(ds == ds1 || ds == ds2)
       result.push_back(inter);
   }
   return result;
@@ -520,22 +546,22 @@ std::vector<SP::Interaction> Topology::interactionsForPairOfDS(
   InteractionsGraph::VIterator ui, uiend;
   SP::Interaction inter;
   std::vector<SP::Interaction> result;
-  if (!dsA && !dsB) return result;
-  for (std11::tie(ui, uiend) = _IG[0]->vertices(); ui != uiend; ++ui)
+  if(!dsA && !dsB) return result;
+  for(std::tie(ui, uiend) = _IG[0]->vertices(); ui != uiend; ++ui)
   {
     inter = _IG[0]->bundle(*ui);
     SP::DynamicalSystem ds1 = _IG[0]->properties(_IG[0]->descriptor(inter)).source;
     SP::DynamicalSystem ds2 = _IG[0]->properties(_IG[0]->descriptor(inter)).target;
     int found = 0;
-    if (dsA == ds1)
+    if(dsA == ds1)
       found = 1;
-    else if (dsA == ds2)
+    else if(dsA == ds2)
       found = 2;
-    if (found==2 && dsB != ds1)
+    if(found==2 && dsB != ds1)
       found = 0;
-    else if (found==1 && dsB == ds2)
+    else if(found==1 && dsB == ds2)
       found = 0;
-    if (found)
+    if(found)
       result.push_back(inter);
   }
   return result;
@@ -548,7 +574,7 @@ Topology::dynamicalSystemsForInteraction(
   SP::DynamicalSystem ds1 = _IG[0]->properties(_IG[0]->descriptor(inter)).source;
   SP::DynamicalSystem ds2 = _IG[0]->properties(_IG[0]->descriptor(inter)).target;
   std::vector<SP::DynamicalSystem> result;
-  if (ds1) result.push_back(ds1);
-  if (ds2 && ds1 != ds2) result.push_back(ds2);
+  if(ds1) result.push_back(ds1);
+  if(ds2 && ds1 != ds2) result.push_back(ds2);
   return result;
 }

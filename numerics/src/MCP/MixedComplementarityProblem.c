@@ -18,26 +18,23 @@
 
 #ifndef MCP_PROBLEM_C
 #define MCP_PROBLEM_C
-
-
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
 #include "MixedComplementarityProblem.h"
-#include "NumericsMatrix.h"
+#include <stdio.h>           // for NULL
+#include <stdlib.h>          // for free, malloc
+#include "NumericsMatrix.h"  // for NM_clear
 
-void freeMixedComplementarityProblem(MixedComplementarityProblem* problem)
+void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem)
 {
 //  if (problem->Fmcp) free(problem->Fmcp);
 //  if (problem->nablaFmcp) free(problem->nablaFmcp);
   free(problem);
 }
 
-void freeMCP(MixedComplementarityProblem2* mcp)
+void mixedComplementarityProblem_free(MixedComplementarityProblem* mcp)
 {
-  if (mcp->nabla_Fmcp)
+  if(mcp->nabla_Fmcp)
   {
-    NM_free(mcp->nabla_Fmcp);
+    NM_clear(mcp->nabla_Fmcp);
     free(mcp->nabla_Fmcp);
     mcp->nabla_Fmcp = NULL;
   }
@@ -45,9 +42,9 @@ void freeMCP(MixedComplementarityProblem2* mcp)
   free(mcp);
 }
 
-MixedComplementarityProblem2* newMCP(void)
+MixedComplementarityProblem* mixedComplementarityProblem_new(void)
 {
-  MixedComplementarityProblem2* mcp = (MixedComplementarityProblem2*) malloc(sizeof(MixedComplementarityProblem2));
+  MixedComplementarityProblem* mcp = (MixedComplementarityProblem*) malloc(sizeof(MixedComplementarityProblem));
 
   mcp->n1 = 0;
   mcp->n2 = 0;

@@ -26,7 +26,7 @@
 #include "MechanicsFwd.hpp"
 #include "CircularR.hpp"
 
-class SphereLDSPlanR : public LagrangianScleronomousR, public std11::enable_shared_from_this<SphereLDSPlanR>
+class SphereLDSPlanR : public LagrangianScleronomousR, public std::enable_shared_from_this<SphereLDSPlanR>
 {
 private:
   /** serialization hooks

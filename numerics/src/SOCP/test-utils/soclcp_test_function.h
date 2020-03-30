@@ -18,13 +18,16 @@
 #ifndef SOCLCP_TEST_FUNCTION_H
 #define SOCLCP_TEST_FUNCTION_H
 
+#include <stdio.h>          // for FILE
+#include "NumericsFwd.h"    // for SolverOptions
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 {
 #endif
 
 int soclcp_test_function(FILE * f, SolverOptions * options);
-
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -20,7 +20,7 @@
 %typecheck(SWIG_TYPECHECK_INTEGER) (const TopoDS_Shape& shape) ()
 %{
   int res;
-  res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_std11__shared_ptrT_TopoDS_Shape_t, 0);
+  res = SWIG_ConvertPtr($input, 0, SWIGTYPE_p_std__shared_ptrT_TopoDS_Shape_t, 0);
   _v = SWIG_CheckState(res);
   if(!_v)
   {
@@ -83,7 +83,7 @@ typedef Interaction Interaction;
 %{
   // director mess
   int res;
-  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std11__shared_ptrT_OccContactFace_t, 0);
+  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__shared_ptrT_OccContactFace_t, 0);
   _v = SWIG_CheckState(res);
   if(!_v)
   {
@@ -95,7 +95,7 @@ typedef Interaction Interaction;
 %{
   // director mess
   int res;
-  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std11__shared_ptrT_OccContactShape_t, 0);
+  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__shared_ptrT_OccContactShape_t, 0);
   _v = SWIG_CheckState(res);
   if(!_v)
   {
@@ -107,7 +107,7 @@ typedef Interaction Interaction;
 %{
   // director mess
   int res;
-  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std11__shared_ptrT_OccContactShape_const_t, 0);
+  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__shared_ptrT_OccContactShape_const_t, 0);
   _v = SWIG_CheckState(res);
   if(!_v)
   {
@@ -119,7 +119,7 @@ typedef Interaction Interaction;
 %{
   // director mess
   int res;
-  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std11__shared_ptrT_OccContactFace_const_t, 0);
+  res = SWIG_ConvertPtr(argv[1], 0, SWIGTYPE_p_std__shared_ptrT_OccContactFace_const_t, 0);
   _v = SWIG_CheckState(res);
   if(!_v)
   {
@@ -181,7 +181,7 @@ PY_FULL_REGISTER(OccSpaceFilter, Mechanics);
   /* fix: use generated dynamic casting instead! */
   SP::OccBody cast_OccBody(SP::DynamicalSystem ds)
   {
-    return std11::dynamic_pointer_cast<OccBody>(ds);
+    return std::dynamic_pointer_cast<OccBody>(ds);
   };
 
   SP::SiconosVector facePoint(const TopoDS_Face &face,

@@ -16,21 +16,13 @@
  * limitations under the License.
 */
 
-#include "PathSearch.h"
-
 #include <assert.h>
+#include "PathSearch.h"
+#include "SolverOptions.h"  // for SolverOptions
+#include "line_search.h"    // for ARCSEARCH, LINESEARCH, NM_LS_MEAN
+#include "lcp_cst.h"
 
-#include "SolverOptions.h"
-
-void free_solverData_PathSearch(void* solverData)
-{
-  assert(solverData);
-  pathsearch_data* solverData_PathSearch = (pathsearch_data*) solverData;
-  free_NMS_data(solverData_PathSearch->data_NMS);
-  free(solverData_PathSearch->lsa_functions);
-}
-
-void pathsearch_default_SolverOption(SolverOptions* options)
+void pathsearch_set_default(SolverOptions* options)
 {
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = NM_LS_MEAN;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 10;
@@ -45,6 +37,21 @@ void pathsearch_default_SolverOption(SolverOptions* options)
   options->dparam[SICONOS_DPARAM_NMS_ALPHA_MIN_WATCHDOG] = 1e-12;
   options->dparam[SICONOS_DPARAM_NMS_ALPHA_MIN_PGRAD] = 1e-12;
   options->dparam[SICONOS_DPARAM_NMS_MERIT_INCR] = 1.1; /* XXX 1.1 ?*/
+
+  assert(options->numberOfInternalSolvers == 1);
+  options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PIVOT);
+
+  SolverOptions * lcp_options = options->internalSolvers[0];
+
+  /* We always allocate once and for all since we are supposed to solve
+   * many LCPs */
+  lcp_options->iparam[SICONOS_IPARAM_PREALLOC] = 1;
+  /* set the right pivot rule */
+  lcp_options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_PATHSEARCH;
+  /* set the right stacksize */
+  lcp_options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE];
+
+
 }
 
 

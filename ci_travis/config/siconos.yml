@@ -1,0 +1,711 @@
+#
+# use mksenv --distrib=<distrib> --pkgs=pkg1,pkg2,pkg3,... \
+#     --split=[true,false] <thisfile.yml> [--docker,--script]
+#
+
+##############################################################################
+wildcard: any
+
+match:
+  ubuntu: debian
+  nixos/nix: nix
+  nvidia/opengl: debian
+  suse: opensuse
+  opensuse: fedora
+  opensuse/leap: opensuse
+
+##############################################################################
+# Set commands used to install and update packages
+
+# note as driver.py --print=script may be a replacement for rc.*
+# we must keep standard updater and installer availables
+
+installer:
+  any:
+    fedora: dnf --setopt=deltarpm=false install -y
+    debian: apt-get install -f -y
+    nixos/nix: nix-env -i
+    opensuse/leap: zypper install -y
+
+updater:
+  # specific installer for sicono package from launchpad
+  siconos-source:
+    fedora:  dnf --setopt=deltarpm=false install -y dnf-plugins-core && dnf -y copr enable xhub/siconos-git
+  llvm-toolchain:
+    debian-sid: printf "deb http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main\ndeb-src http://llvm.org/apt/unstable/ llvm-toolchain-3.8 main" >> /etc/apt/sources.list && apt-get update -y
+    debian-jessie: printf "deb http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main\ndeb-src http://llvm.org/apt/jessie/ llvm-toolchain-jessie-3.8 main" >> /etc/apt/sources.list && apt-get update -y
+
+  any:
+    debian: apt-get update -y
+    opensuse/leap: zypper --gpg-auto-import-keys refresh
+
+  # science repo for opensuse (needed for mumps installation)
+  mumps-seq:
+    opensuse/leap: zypper addrepo https://download.opensuse.org/repositories/science/openSUSE_Leap_42.3/science.repo && zypper --gpg-auto-import-keys refresh
+
+
+##############################################################################
+# set specific extra definitions for some packages/distrib
+# (read using get_entry function from mksenv.py)
+# example:
+# to add -DOPT=VALUE when using package clang-3.9 on ubuntu-17
+# use
+# env:
+#   clang-3.9:
+#      ubuntu-17:
+#         - OPT=VALUE
+env:
+  clang-3.9:
+    any:
+      - CC=/usr/bin/clang-3.9
+      - CXX=/usr/bin/clang++-3.9
+      - OMPI_CC=/usr/bin/clang-3.9
+      - OMPI_CXX=/usr/bin/clang++-3.9
+      - LLVM_SYMBOLIZER=/usr/lib/llvm-3.9/bin/llvm-symbolizer
+      - ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.9/bin/llvm-symbolizer
+      - MSAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.9/bin/llvm-symbolizer
+
+  clang-3.8:
+    any:
+      - CC=/usr/bin/clang-3.8
+      - CXX=/usr/bin/clang++-3.8
+      - OMPI_CC=/usr/bin/clang-3.8
+      - OMPI_CXX=/usr/bin/clang++-3.8
+      - LLVM_SYMBOLIZER=/usr/lib/llvm-3.8/bin/llvm-symbolizer
+      - ASAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.8/bin/llvm-symbolizer
+      - MSAN_SYMBOLIZER_PATH=/usr/lib/llvm-3.8/bin/llvm-symbolizer
+
+  clang:
+    any:
+      - CC=/usr/bin/clang
+      - CXX=/usr/bin/clang++
+      - OMPI_CC=/usr/bin/clang
+      - OMPI_CXX=/usr/bin/clang++
+
+  mumps-par:
+    any:
+      - CC=mpicc
+      - FC=mpif90
+      - CXX=mpicxx
+
+  frama-c:
+    any:
+      - CAML_LD_LIBRARY_PATH="/root/.opam/system/lib/stublibs:/usr/lib/ocaml/stublibs"
+      - MANPATH="/root/.opam/system/man:"
+      - PERL5LIB="/root/.opam/system/lib/perl5"
+      - OCAML_TOPLEVEL_PATH="/root/.opam/system/lib/toplevel"
+      - PATH="/root/.opam/system/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+  # see http://pages.cs.wisc.edu/~ferris/path/LICENSE
+  path:
+    any:
+      - PATH_LICENSE_STRING="3413119131&Courtesy&&&USR&54784&12_1_2016&1000&PATH&GEN&31_12_2017&0_0_0&5000&0_0"
+
+  any:
+    debian:
+      - DEBIAN_FRONTEND=noninteractive
+    fedora:
+      - MODULEPATH=/usr/share/Modules/modulefiles:/etc/modulefiles:/usr/share/modulefiles
+
+
+##############################################################################
+# set dependencies list for some packages/distrib
+# (read using pkg_entries function from mksenv.py)
+# example:
+# to set python-dev and scipy as dependencies of python-env on debian
+# use
+# pkgs:
+#   python-env:
+#      debian:
+#         - python-dev
+#         - python-scipy
+#
+#
+pkgs:
+
+  build-base:
+    any:
+      - git-core
+      - wget
+      - make
+      - cmake
+      - boost
+      - gmp-pkg
+      - swig
+      - cppunit
+      - start-command
+      - suitesparse-dev
+
+  start-command:
+    any:
+      run-command:
+        /bin/echo *************************************************************************
+
+  suitesparse-dev:
+    debian:
+      - libsuitesparse-dev
+
+    ubuntu:
+      - libsuitesparse-dev
+
+    fedora:
+      - suitesparse-devel
+
+    opensuse:
+      - suitesparse-devel
+      
+  python3-minimal:
+    nix:
+      - python-3.6
+
+  python-env:
+    nix:
+      - python-3.6
+      - python-modules
+
+    debian:
+      - python3
+      - python3-dev
+      - python3-lxml
+      - python3-pytest
+      - python3-scipy
+      - python3-matplotlib
+      - python3-packaging
+
+    fedora:
+      - python3
+      - python3-devel
+      - python3-lxml
+      - pytest
+      - scipy
+      - python3-matplotlib
+      - python3-packaging
+
+  pytest:
+    opensuse:
+      python3-pytest
+
+  scipy:
+    opensuse:
+      python3-numpy
+      python3-numpy-devel
+      python3-scipy
+
+  python-modules:
+    nix:
+      command: 'printf "with import <nixpkgs> {}\;" > /tmp/python-env.nix && echo "" >> /tmp/python-env.nix && printf "pkgs.python27.withPackages (ps: with ps\; [lxml pytest scipy matplotlib])" >> /tmp/python-env.nix && echo "" >> /tmp/python-env.nix >> /tmp/python-env.nix && cat /tmp/python-env.nix >&2 && nix-env -if /tmp/python-env.nix'
+
+  python3-env:
+    nix:
+    debian:
+      - python3
+      - python3-dev
+      - libpython3-dev
+      - python3-lxml
+      - python3-pytest
+      - python3-scipy
+      - python3-matplotlib
+      - python3-packaging
+    fedora:
+      - python3
+      - python3-devel
+      - python3-lxml
+      - python3-scipy
+      - python3-pytest
+      - python3-matplotlib
+      - python3-packaging
+    opensuse:
+      - python3-devel
+      - python3-pip
+      - python3-scipy
+      - python3-numpy
+      - python3-packaging
+      
+  # bullet & serialization for full doc
+  documentation:
+    nix:
+    debian:
+      - doxygen
+      - graphviz
+      - python3-sphinx
+      - python3-sphinx-bootstrap-theme
+      - python3-sphinx-rtd-theme
+      - sphinx-common
+      - sphinx-doc
+      - sphinx-rtd-theme-common
+      - pip-command
+      - siconos-doc-pip-pkgs
+      - bullet
+      - serialization
+      
+  pip-command:
+    nix:
+      - python2.7-pip-9.0.1
+    debian:
+      - python3-pip
+      - pip-upgrade
+
+  pip-upgrade:
+    any:
+      command:
+        python3 -m pip install --upgrade pip
+
+  siconos-doc-pip-pkgs:
+    any:
+      command:
+        pip install sphinxcontrib-bibtex &&
+        pip install numpydoc &&
+        pip install git+https://github.com/sphinx-contrib/youtube.git
+
+  profiling:
+    nix:
+      - valgrind
+    debian:
+      - valgrind
+      - python3-dbg
+    fedora:
+      - valgrind
+      - python-debuginfo
+
+  lpsolve:
+    nix:
+    debian:
+      - lp-solve
+      - liblpsolve55-dev
+    fedora:
+      - lpsolve-devel
+
+  git-core:
+    nix:
+      - git
+
+  wget:
+    nix:
+      - wget
+
+  make:
+    nix:
+      - gnumake
+
+  swig:
+    nix:
+      - swig
+
+  gfortran:
+    nix: gfortran-wrapper
+    fedora: gcc-gfortran
+    opensuse: gcc-fortran
+
+  gcc:
+    nix: gcc-wrapper
+
+  gnu-c++:
+    nix: gcc
+    debian: g++
+    fedora: gcc-c++
+    opensuse: gcc-c++
+    
+  boost:
+    nix: boost-1.63.0
+    debian:
+      - libboost-dev
+      - libboost-system-dev
+      - libboost-timer-dev
+      - libboost-chrono-dev
+    fedora: boost-devel
+    opensuse: libboost_headers1_66_0-devel
+
+  serialization:
+    nix:
+    debian:
+      libboost-filesystem-dev
+      libboost-serialization-dev
+    fedora:
+      boost-filesystem
+      boost-serialization
+    opensuse:
+      libboost_serialization1_66_0-devel
+
+  gmp-pkg:
+    nix: gmp-with-cxx
+    debian: libgmp-dev
+    opensuse:
+      - gmp-devel
+    fedora: gmp-devel
+
+    
+  cppunit:
+    nix:
+      - cppunit
+    debian:
+      - libcppunit-dev
+
+    fedora:
+      - cppunit
+      - cppunit-devel
+    opensuse:
+      - cppunit-devel
+
+  hdf5:
+    nix: hdf5
+    fedora: hdf5-devel
+    debian: libhdf5-dev
+
+  h5py:
+    nix: python2.7-h5py-2.6.0
+    fedora: h5py
+    debian: python3-h5py
+
+  h5py3:
+    nix: python3.5-h5py-2.6.0
+    any: python3-h5py
+
+  openblas-lapacke:
+    nix:
+      - openblas
+      - pfff_lapacke_is_missing
+      
+    debian:
+      - libopenblas-dev
+      - liblapacke-dev
+
+    ubuntu18.04:
+      - libopenblas-dev
+      - liblapacke-dev 
+      
+    fedora:
+      - openblas-devel
+      - lapack-devel
+      
+    opensuse:
+      - openblas-devel
+      - lapacke-devel
+        
+  oce:
+    nix: opencascade-oce-0.17.2
+    debian:
+      - liboce-foundation-dev
+      - liboce-modeling-dev
+      - liboce-ocaf-dev
+      - liboce-visualization-dev
+      - oce-draw
+
+    fedora:
+      - OCE-devel
+
+  mumps-seq:
+    opensuse:
+      - libgmp10-6.1.2-5.1.x86_64
+      - mumps
+      - mumps-devel
+      
+    debian:
+      - libmumps-seq
+      - libmumps-seq-dev
+      
+  mumps-par:
+    nix:
+      - pfff_mumps_is_missing
+    debian-7.8:
+      - libopenmpi-dev
+      - openssh-client
+      - libscalapack-mpi-dev
+      - libscotchmetis-dev
+      - libmumps-dev
+
+    debian:
+      - libopenmpi-dev
+      - openssh-client
+      - libscalapack-mpi-dev
+      - libmetis-dev
+      - libmumps-dev
+      - python3-mpi4py
+
+
+    fedora:
+      - ptscotch-openmpi
+      - ptscotch-openmpi-devel
+      - blacs-openmpi-devel
+      - openmpi-devel
+      - scalapack-openmpi
+      - MUMPS-openmpi-devel
+      - environment-modules
+
+  bullet:
+    nix:
+      - bullet-2.83.7
+    debian:
+      - libbullet-dev
+
+  umfpack:
+    nix: pfff_umfpack_is_missing
+    debian:
+      - libsuitesparse-dev
+    fedora:
+      - suitesparse-devel
+
+  asan:
+    nix: pfff_asan_is_missing
+    fedora:
+      - libasan
+      - libubsan
+
+  xz:
+    nix:
+      - xz-5.2.2
+    debian:
+      - xz-utils
+
+  fclib:
+    any:
+      command: git clone https://github.com/FrictionalContactLibrary/fclib.git
+               mkdir build-fclib &&
+               cd build-fclib
+               cmake ../fclib  -DFCLIB_HEADER_ONLY=OFF -DCMAKE_BUILD_TYPE=Release &&
+               make &&
+               make install
+
+  clang:
+    nix:
+      - clang-4.9.1
+    debian-jessie:
+      - clang-3.8
+
+  # this is for msan. It also contains the so files for cppunit compiled with msan
+  libcxx_msan:
+    nix:
+    any:
+      command: wget http://siconos.gforge.inria.fr/build-42/libcxx_msan-clang-3.6.tar.xz &&
+               tar xJf libcxx_msan-clang-3.6.tar.xz -C /
+
+  # dummy target
+  cfi:
+    nix:
+    any:
+      command: mkdir /tmp/clang && ln -s /usr/bin/ld.gold /tmp/clang/ld
+
+  path:
+    debian:
+      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib/x86_64-linux-gnu/libpath47.so &&
+               apt-get install -y patchelf &&
+               patchelf --replace-needed libgfortran.so.3 libm.so.6
+    fedora:
+      command: wget -O - https://github.com/ampl/pathlib/raw/master/lib/linux64/libpath47.so > /usr/lib64/libpath47.so &&
+               dnf --setopt=deltarpm=false install -y patchelf &&
+               patchelf --replace-needed libgfortran.so.3 libm.so.6
+
+  pythonocc:
+    any:
+      command: wget https://github.com/tpaviot/pythonocc-core/archive/0.16.3.tar.gz &&
+               tar xvfz 0.16.3.tar.gz &&
+               cd pythonocc-core-0.16.3 &&
+               mkdir build &&
+               cd build &&
+               cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release &&
+               make -j2 &&
+               make install
+
+  pythonocc-conda:
+    any:
+      command: wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh &&
+               bash ./Miniconda-latest-Linux-x86_64.sh -b -p /opt/conda &&
+               /opt/conda/bin/conda install numpy scipy h5py lxml pytest matplotlib vtk &&
+               /opt/conda/bin/conda install -c https://conda.anaconda.org/dlr-sc pythonocc-core &&
+               rm /opt/conda/lib/libgfortran.so* &&
+               rm /opt/conda/pkgs/*.tar.bz2 -f &&
+               find /opt/conda/lib/ -maxdepth 1 -name libvtk*.so | xargs -n 1 -I{} sh -c 'ln -s {} $(echo {} | sed s/-.*/.so/)'
+
+               # for i in $(ls /opt/conda/lib/libvtk*.so); do ii=$(echo $i | sed s/-.*/.so/); ln -s $i $ii ; done
+
+               # conda is borken as of 10/03/2017: we need to install vtk by hand and the lib provided by conda ahave their name sufficex by -MV.mv.
+               # So we have to create the right symlink :( --xhub
+
+               #echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh &&
+               #echo 'export PATH=/opt/conda/bin:$PATH' >> $HOME/.profile &&
+
+  pythonocc-conda-dep:
+    debian:
+      - libgl1-mesa-glx
+      - libglu1-mesa
+      - libsm6
+      - libice6
+      - libxt6
+
+
+  # deps required for oce/pythonocc install, when oce/occ sources = git repos, last version.
+  oce-pythonocc-deps:
+    debian:
+      - libgl1-mesa-glx
+      - libglu1-mesa
+      - libgl1-mesa-dev
+      - libglu1-mesa-dev
+      - libglapi-mesa
+      - libfreetype6-dev
+
+
+  oce-pythonocc:
+    any:
+      command: git clone https://github.com/tpaviot/oce.git &&
+               git clone https://github.com/tpaviot/pythonocc-core.git &&
+               mkdir build &&
+               cd build &&
+               mkdir oce-last pythonocc &&
+               cd oce-last &&
+               cmake ../../oce -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release &&
+               make -j 2 &&
+               make install &&
+               cd ../pythonocc &&
+               cmake ../../pythonocc-core -DCMAKE_BUILD_TYPE=Release &&
+               make install &&
+               cd &&
+               python -c 'import OCC'
+
+  # building gazebo siconos fork
+  gazebo:
+    nvidia/opengl:
+      # - python-dev
+      # - python-lxml
+      # - python-pytest
+      # - python-scipy
+      # - python-matplotlib
+      # - libboost-all-dev
+      - libboost-thread-dev
+      - libboost-signals-dev
+      - libboost-system-dev
+      - libboost-filesystem-dev
+      - libboost-program-options-dev
+      - libboost-regex-dev
+      - libboost-date-time-dev
+      - libboost-iostreams-dev
+      # - libgmp-dev
+      # - libcppunit-dev
+      - libglu1-mesa
+      - libgl1-mesa-dev
+      - libglu1-mesa-dev
+      - libfreetype6-dev
+      # - pkg-config
+      - libzmq3-dev
+      - uuid-dev
+      - libprotobuf-dev
+      - libprotoc-dev
+      - protobuf-compiler
+      - libgdal-dev
+      - libfreeimage-dev
+      - libcurl4-gnutls-dev
+      - libtar-dev
+      - libtbb-dev
+      - libogre-1.9-dev
+      - libqwt-qt5-dev
+      - libqt5opengl5-dev
+      - mercurial
+      - libtinyxml2-dev
+      - libtinyxml-dev
+      - ruby
+      # optional, for comparing physics engines
+      - libsimbody-dev
+      - libbullet-dev
+      # TODO: add DART from sources
+      - gazebo-dependencies
+      - gazebo-siconos-test
+
+  # Install and build all Gazebo dependencies.  If the Siconos-enabled
+  # Gazebo fork is updated, dependency branches may need to be
+  # changed.  Unfortunately there is currently no way to automatically
+  # know which branch of the dependencies is needed by which version
+  # of Gazebo.
+  gazebo-dependencies:
+    any:
+      command:
+        gem install protobuf &&
+        cd ~ &&
+        hg clone https://bitbucket.org/ignitionrobotics/ign-cmake &&
+        cd ~/ign-cmake &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. &&
+        make -j5 &&
+        make install &&
+        cd ~ &&
+        hg clone https://bitbucket.org/ignitionrobotics/ign-math &&
+        cd ~/ign-math &&
+        hg up ign-math3 &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. -DENABLE_TESTS_COMPILATION=NO -DCMAKE_BUILD_TYPE=Release &&
+        make -j5 &&
+        make install &&
+        cd ~ &&
+        hg clone https://bitbucket.org/ignitionrobotics/ign-tools &&
+        cd ~/ign-tools &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. -DENABLE_TESTS_COMPILATION=NO -DCMAKE_BUILD_TYPE=Release &&
+        make -j5 &&
+        make install &&
+        cd ~ &&
+        hg clone https://bitbucket.org/ignitionrobotics/ign-msgs &&
+        cd ~/ign-msgs &&
+        hg up ign-msgs0 &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. -DENABLE_TESTS_COMPILATION=NO -DCMAKE_BUILD_TYPE=Release &&
+        make -j5 &&
+        make install &&
+        cd ~ &&
+        hg clone https://bitbucket.org/ignitionrobotics/ign-transport &&
+        cd ~/ign-transport &&
+        hg up ign-transport3 &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. -DENABLE_TESTS_COMPILATION=NO -DCMAKE_BUILD_TYPE=Release &&
+        make -j5 &&
+        make install &&
+        cd ~ &&
+        hg clone https://bitbucket.org/osrf/sdformat &&
+        cd ~/sdformat &&
+        hg up sdf5 &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. &&
+        make -j5 &&
+        make install &&
+        ldconfig
+
+  # Compile and run the Siconos-enabled fork of Gazebo.
+  # Do it using run-command since it must be done after docker-make-install.
+  gazebo-siconos-test:
+    any:
+      run-command:
+        cd ~ &&
+        git clone http://github.com/siconos/gazebo-siconos gazebo &&
+        cd ~/gazebo &&
+        git checkout siconos_integration &&
+        mkdir bld &&
+        cd bld &&
+        cmake .. &&
+        make -j5 &&
+        make install && ldconfig &&
+        gzserver --verbose -e siconos --iters 2000 /usr/local/share/gazebo-9/worlds/simple_gripper.world
+
+  # ocaml package manager
+  frama-c:
+    any:
+      command:
+        opam init &&
+        eval `opam config env` &&
+        opam install -y frama-c &&
+        git clone https://github.com/sylvainnahas/framac-werror &&
+        cd framac-werror &&
+        touch Werror.mli &&
+        make &&
+        make install
+
+  # dummy package needed for the specific installer for siconos package
+  siconos-source:
+    any:
+      command:
+
+  siconos-nix-default:
+    nix:
+      run-command:
+        cd $SOURCE_DIR && nix-env -f . -iA  siconos-full

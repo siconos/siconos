@@ -75,7 +75,9 @@ namespace Siconos
     /** id for zero matrix */
     ZERO,
     /** id for identity matrix */
-    IDENTITY};
+    IDENTITY,
+    /** id for sparse matrix or vector */
+    SPARSE_COORDINATE};
 }
 // Notes:
 // Vector definition in boost: vector<T,A> see http://www.boost.org/libs/numeric/ublas/doc/vector.htm
@@ -145,10 +147,15 @@ TYPEDEF_SPTR(SymMat)
 typedef ublas::banded_matrix<double, ublas::column_major > BandedMat;
 TYPEDEF_SPTR(BandedMat)
 
-/** SparseMat is a typedef of boost::ublas::numeric::mapped_matrix<double>
+/** SparseMat is a typedef of boost::ublas::numeric::compressed_matrix<double>
  */
 typedef ublas::compressed_matrix<double, ublas::column_major, 0, Index > SparseMat;
 TYPEDEF_SPTR(SparseMat)
+
+/** SparseMat is a typedef of boost::ublas::numeric::mapped_matrix<double>
+ */
+typedef ublas::coordinate_matrix<double, ublas::column_major, 0, Index > SparseCoordinateMat;
+TYPEDEF_SPTR(SparseCoordinateMat)
 
 /** ZeroMat is a typedef of boost::ublas::numeric::zero_matrix, ie null matrix.
  */

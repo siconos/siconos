@@ -9,6 +9,9 @@ set(cmake_macros
   SiconosTools.cmake
   FindPythonModule.cmake
   valgrind.supp
+  FindBLASDEV.cmake
+  FindLAPACKDEV.cmake
+  BlasLapackUtils.cmake
   )
 
 foreach(file IN LISTS cmake_macros)
@@ -56,8 +59,6 @@ include(CMakePackageConfigHelpers)
 # Generate ${PROJECT_NAME}Config.cmake
 configure_package_config_file(siconos-config.cmake.in ${CMAKE_BINARY_DIR}/siconos-config.cmake
   INSTALL_DESTINATION ${ConfigPackageLocation})
-
-install(FILES ${CMAKE_BINARY_DIR}/SiconosConfig.h DESTINATION include/${PROJECT_NAME})
 
 # Generate siconos-config-version.cmake file.
 write_basic_package_version_file(

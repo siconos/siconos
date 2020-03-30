@@ -46,7 +46,7 @@ public:
 
   /** Default Constructor
    */
-  SubPluggedObject(): PluggedObject(), _parentfPtr(NULL), _indx(0), _p(0)  { };
+  SubPluggedObject(): PluggedObject(), _parentfPtr(nullptr), _indx(0), _p(0)  { };
 
   /** Constructor with the plugin name
    * \param PO a PluggedObject

@@ -146,6 +146,13 @@ public:
    */
   const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0)const;
 
+  /** get SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block (row)
+   *  \param col an unsigned int, position of the block (column)
+   *  \return a SparseCoordinateMat
+   */
+  const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0, unsigned int col = 0)const;
+
   /** get ZeroMat matrix
    *  \param row an unsigned int, position of the block (row)
    *  \param col an unsigned int, position of the block (column)
@@ -194,6 +201,13 @@ public:
    *  \return a SparseMat*
    */
   SparseMat* sparse(unsigned int row = 0, unsigned int col = 0)const;
+
+  /** get a pointer on SparseCoordinateMat matrix
+   *  \param row an unsigned int, position of the block (row)
+   *  \param col an unsigned int, position of the block (column)
+   *  \return a SparseCoordinateMat*
+   */
+  SparseCoordinateMat* sparseCoordinate(unsigned int row = 0, unsigned int col = 0)const;
 
   /** get a pointer on ZeroMat matrix
    *  \param row an unsigned int, position of the block (row)
@@ -256,6 +270,10 @@ public:
   /** display data on standard output
    */
   void display() const;
+  
+  /** display data on standard output
+   */
+  void displayExpert(bool brief = true) const;
 
   /** put data of the matrix into a std::string
    * \return std::string

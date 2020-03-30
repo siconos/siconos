@@ -28,8 +28,8 @@
   - free
 
 */
-#include "SparseBlockMatrix.h"
-#include "SolverOptions.h"
+#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
@@ -42,7 +42,6 @@ extern "C"
   int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
   int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem, double * reaction, double * velocity, SolverOptions* options);
   int fc3d_unitary_enumerative(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options);
-  int fc3d_unitary_enumerative_setDefaultSolverOptions(SolverOptions* options);
   int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

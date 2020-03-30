@@ -52,10 +52,18 @@ private:
 
 public:
 
-  /** constructor
-   *  \param numericsSolverId int id of numerics solver
+  /** constructor from data
+   *  \param numericsSolverId id of numerics solver, default = 0
    */
-  Equality(int numericsSolverId = 0): LinearOSNS(numericsSolverId) {};
+  Equality(int numericsSolverId = 0);
+
+  /**  constructor from a pre-defined solver options set.
+       \param options, the options set, 
+       \rst
+       see :ref:`problems_and_solvers` for details.
+       \endrst
+  */
+  Equality(SP::SolverOptions options);
   
   /** destructor
    */

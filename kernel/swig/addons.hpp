@@ -74,7 +74,7 @@ graphLayoutInt(SP::DynamicalSystemsGraph dsg)
 /* access to edges & vertices from python */
 struct graphAccess  
 {
-  std11::shared_ptr<_InteractionsGraph> graph;
+  std::shared_ptr<_InteractionsGraph> graph;
   std::vector<SP::Interaction> vertices;
   std::vector<SP::DynamicalSystem> edges;
   
@@ -97,7 +97,7 @@ struct graphAccess
     
   };
   
-  graphAccess(std11::shared_ptr<_InteractionsGraph> ig) : graph(ig)
+  graphAccess(std::shared_ptr<_InteractionsGraph> ig) : graph(ig)
   {
     update();
   };

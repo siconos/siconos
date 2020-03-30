@@ -15,23 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include <stdlib.h>                        // for free, malloc, calloc
+#include "LCP_Solvers.h"                   // for lcp_qp, linearComplementar...
+#include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
+#include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
+#include "NumericsMatrix.h"                // for NumericsMatrix
+#include "QP_Solvers.h"                    // for ql0001_
+#include "SiconosConfig.h"                 // for HAS_FORTRAN, HAVE_QL0001
+#include "SolverOptions.h"                 // for SolverOptions, solver_opti...
+#include "sanitizer.h"                     // for MSAN_INIT_VAR
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "LinearComplementarityProblem.h"
-#include "LCP_Solvers.h"
-#include "lcp_cst.h"
-#include "SolverOptions.h"
-#include "NumericsMatrix.h"
-
-#include "QP_Solvers.h"
-#include "SiconosFortran.h"
-#include "numerics_verbose.h"
-#include "sanitizer.h"
-
-void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info , SolverOptions* options)
+void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
 {
   /* size of the LCP */
   int n = problem->size;
@@ -51,7 +45,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   int *iwar;
   double *war;
 
-  double tol = options->dparam[0]/10.0;
+  double tol = options->dparam[SICONOS_DPARAM_TOL]/10.0;
 
   /*/ m :        total number of constraints.*/
   m = 0;
@@ -65,7 +59,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   /*/mnn :      must be equal to m + n + n. */
   mnn = m + n + n;
 
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
   {
     z[i] = 0.0;
     w[i] = 0.0;
@@ -76,13 +70,13 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   // Q= M;*/
   double * vec = problem->M->matrix0;
   Q = (double *)malloc(nmax * nmax * sizeof(double));
-  for (j = 0; j < n; j++)
+  for(j = 0; j < n; j++)
   {
-    for (i = 0; i < n; i++) Q[j * nmax + i] = vec[j * n + i];
+    for(i = 0; i < n; i++) Q[j * nmax + i] = vec[j * n + i];
   }
 
   p = (double *)malloc(nmax * sizeof(double));
-  for (i = 0; i < n; i++)
+  for(i = 0; i < n; i++)
     p[i] = problem->q[i] ;
 
   /* / Creation of the data matrix of the linear constraints, A and  the constant data of the linear constraints b*/
@@ -92,7 +86,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
 
   /* Creation of the the lower and upper bounds for the variables.*/
   xu = (double *)malloc(n * sizeof(double));
-  for (i = 0; i < n; i++) xu[i] = 1e32 ;
+  for(i = 0; i < n; i++) xu[i] = 1e32 ;
   xl = (double *)calloc(n, sizeof(double));
 
   /*  on return, lambda contains the lagrange multipliers.*/
@@ -127,7 +121,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   //for (i=0;i<mnn;i++) printf("lambda[%i] = %g\n",i,lambda[i]);
 
   // getting the multiplier due to the lower bounds*/
-  for (i = 0; i < n; i++) w[i] = lambda[m + i] ;
+  for(i = 0; i < n; i++) w[i] = lambda[m + i] ;
 
   /*/ memory freeing*/
   free(A);
@@ -140,34 +134,4 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   free(iwar);
   free(Q);
 
-}
-int linearComplementarity_qp_setDefaultSolverOptions(SolverOptions* options)
-{
-  int i;
-  if (verbose > 0)
-  {
-    printf("Set the Default SolverOptions for the QP Solver\n");
-  }
-
-
-  /*  strcpy(options->solverName,"QP");*/
-  options->solverId = SICONOS_LCP_QP;
-  options->numberOfInternalSolvers = 0;
-  options->isSet = 1;
-  options->filterOn = 1;
-  options->iSize = 5;
-  options->dSize = 5;
-  options->iparam = (int *)malloc(options->iSize * sizeof(int));
-  options->dparam = (double *)malloc(options->dSize * sizeof(double));
-  options->dWork = NULL;
-  solver_options_nullify(options);
-  for (i = 0; i < 5; i++)
-  {
-    options->iparam[i] = 0;
-    options->dparam[i] = 0.0;
-  }
-  options->dparam[0] = 1e-6;
-
-
-  return 0;
 }

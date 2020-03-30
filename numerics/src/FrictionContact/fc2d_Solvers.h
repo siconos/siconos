@@ -32,12 +32,6 @@ extern "C"
 {
 #endif
 
-  /** set the default solver parameters and perform memory allocation for fc3d
-      \param options   the pointer to the options to set
-      \param solverId  the identifier of the solver
-  */
-  int fc2d_setDefaultSolverOptions(SolverOptions* options, int solverId);
-
   /**  cpg (conjugated projected gradient) solver for global contact problems with friction (2D)
        \param[in]  problem the friction-contact problem
        \param[out] reaction vector
@@ -47,10 +41,6 @@ extern "C"
   */
   void fc2d_cpg(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
 
-  /** set the default solver parameters and perform memory allocation for CPG
-   \param  options SolverOptions * the pointer to the options to set
-   */
-  int fc2d_cpg_setDefaultSolverOptions(SolverOptions* options);
   /**  Non Linear Gauss Seidel solver for global contact problem with friction in 2D case.
        \param[in] problem the friction-contact problem
        \param[out] reaction vector
@@ -59,25 +49,6 @@ extern "C"
        \param[in,out] options structure
   */
   void fc2d_nsgs(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for LATIN
-  \param options  the pointer to the options to set
-  */
-  int fc2d_nsgs_setDefaultSolverOptions(SolverOptions* options);
-
-  /**  latin solver for global contact problem with friction in the 2D case.
-       \param[in] problem the friction-contact problem
-       \param[out] reaction global vector
-       \param[out] velocity global vector
-       \param[in,out] info termination value
-       \param[in,out] options SolverOptions structure
-  */
-  void fc2d_latin(FrictionContactProblem* problem , double *reaction , double *velocity , int *info, SolverOptions* options);
-
-  /** set the default solver parameters and perform memory allocation for LATIN
-  \param  options the pointer to the options to set
-  */
-  int fc2d_latin_setDefaultSolverOptions(SolverOptions* options);
 
   /** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for global contact problem with friction.
    *
@@ -109,12 +80,6 @@ extern "C"
   /** */
   void fc2d_sparse_nsgs(FrictionContactProblem* problem, double *z, double *w, int *info, SolverOptions* options) ;
 
-  /** set the default solver parameters and perform memory allocation for NSGS
-  \param options the pointer to the options to set
-  */
-  int fc2d_sparse_nsgs_setDefaultSolverOptions(SolverOptions* options);
-
-
 
   /** fc2d_lexicolemke is a Lemke solver for  frictionContact2D problems.
      * \param[in] problem structure that represents the fc2d (M, q...)
@@ -129,11 +94,6 @@ extern "C"
   void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options);
 
 
-  /** set the default solver parameters and perform memory allocation for Lemke
-      \param options the pointer to options to set
-  */
-  int fc2d_lexicolemke_setDefaultSolverOptions(SolverOptions* options);
-
 
   /** This function transform a FrictionContactProblem (2D) into a LinearComplementarityProblem
    * \param[in] problem A pointer to a FrictionContactProblem to transform
@@ -141,11 +101,6 @@ extern "C"
    */
 
   int fc2d_tolcp(FrictionContactProblem* problem, LinearComplementarityProblem * lcp_problem);
-
-  /** set the default solver parameters and perform memory allocation for enum solver
-      \param options the pointer to options to set
-  */
-  int fc2d_enum_setDefaultSolverOptions(SolverOptions* options);
 
   /** fc2d_enum solver for  frictionContact2D problems.
      * \param[in] problem structure that represents the fc2d (M, q...)
@@ -158,6 +113,14 @@ extern "C"
      2 = Null diagonal term
     */
   void fc2d_enum(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options);
+
+  /** @addtogroup SetSolverOptions
+      @{
+  */
+
+  void fc2d_nsgs_set_default(SolverOptions* options);
+
+  /** @} */
 
 
 

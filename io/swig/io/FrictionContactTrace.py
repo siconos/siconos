@@ -128,7 +128,7 @@ class FrictionContactTrace(FrictionContact):
                     
                 problem = self.frictionContactProblemPtr()
                 #print(problem, type(problem))
-                solver_maxiter=SO.iparam[0]
+                solver_maxiter=SO.iparam[N.SICONOS_IPARAM_MAX_ITER]
                 n_format_string=len(str(solver_maxiter))
                 format_string = "{0}-i{1:0"+str(n_format_string)+"d}-{2}-{3}.hdf5"
                 filename = format_string.format(self._params._fileName,
@@ -248,16 +248,16 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
                 # problem = self.getNumericsProblemPtr()
                 # print(problem, type(problem))
 
-                
 
                 solver_maxiter=SO.iparam[0]
                 n_format_string=len(str(solver_maxiter))
-                format_string = "{0}-i{1:0"+str(n_format_string)+"d}-{2}-{3}.hdf5"
+                format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
+                
                 filename = format_string.format(self._params._fileName,
-                                                SO.iparam[N.SICONOS_IPARAM_ITER_DONE],
+                                                problem.q.shape[0],
                                                 problem.numberOfContacts,
                                                 self._counter)
-
+                print(filename)
                 if os.path.exists(filename):
                     os.remove(filename)
                     print('WARNING: file '+filename+ ' was existing and has been replaced')

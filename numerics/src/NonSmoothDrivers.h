@@ -103,7 +103,7 @@ extern "C"
    */
   int fc3d_driver(FrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options);
 
-  /** General interface to solvers for friction-contact 3D problem
+  /** General interface to solvers for rolling friction-contact 3D problem
    *  \param[in] problem the structure which handles the Friction-Contact problem
    *  \param[in,out] reaction global vector (n)
    *  \param[in,out] velocity global vector (n)
@@ -111,6 +111,15 @@ extern "C"
    *  \return result (0 if successful otherwise 1).
    */
   int rolling_fc3d_driver(RollingFrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options);
+
+  /** General interface to solvers for rolling friction-contact 2D problem
+   *  \param[in] problem the structure which handles the Friction-Contact problem
+   *  \param[in,out] reaction global vector (n)
+   *  \param[in,out] velocity global vector (n)
+   *  \param[in,out] options structure used to define the solver(s) and their parameters
+   *  \return result (0 if successful otherwise 1).
+   */
+  int rolling_fc2d_driver(RollingFrictionContactProblem* problem, double *reaction , double *velocity, SolverOptions* options);
 
   /** General interface to solvers for global friction-contact 3D problem
     \param[in] problem the structure which handles the Friction-Contact problem
@@ -145,6 +154,15 @@ extern "C"
   int avi_driver(AffineVariationalInequalities* problem, double* z, double* w, SolverOptions* options);
 
   /** General interface to solver for MCP problems
+      \param[in] problem the MixedComplementarityProblem_old structure which handles the problem
+      \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
+      \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
+      \param[in,out] options structure used to define the solver(s) and its(their) parameters
+      \return info termination value  0 : successful, else error.
+  */
+  int mcp_old_driver(MixedComplementarityProblem_old* problem, double *z, double *w, SolverOptions* options);
+
+  /** General interface to solver for MCP problems -- new version
       \param[in] problem the MixedComplementarityProblem structure which handles the problem
       \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
       \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
@@ -152,15 +170,6 @@ extern "C"
       \return info termination value  0 : successful, else error.
   */
   int mcp_driver(MixedComplementarityProblem* problem, double *z, double *w, SolverOptions* options);
-
-  /** General interface to solver for MCP problems -- new version
-      \param[in] problem the MixedComplementarityProblem2 structure which handles the problem
-      \param[in,out] z a m+n-vector of doubles which contains the solution of the problem.
-      \param[in,out] w a m+n-vector of doubles which contains the solution of the problem.
-      \param[in,out] options structure used to define the solver(s) and its(their) parameters
-      \return info termination value  0 : successful, else error.
-  */
-  int mcp_driver2(MixedComplementarityProblem2* problem, double *z, double *w, SolverOptions* options);
 
   /** General interface to solver for NCP problems
       \param[in] problem the NonlinearComplementarityProblem structure which handles the problem
@@ -282,7 +291,7 @@ extern "C"
   int relay_driver(RelayProblem* problem, double *z , double *w, SolverOptions* options);
 
 
-  
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

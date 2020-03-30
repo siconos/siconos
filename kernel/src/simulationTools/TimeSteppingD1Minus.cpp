@@ -52,9 +52,9 @@ void TimeSteppingD1Minus::initOSNS()
   SP::Topology topo =  _nsds->topology();
 
   // there is at least one OSNP
-  if (!_allNSProblems->empty())
+  if(!_allNSProblems->empty())
   {
-    if (_allNSProblems->size() != 2)
+    if(_allNSProblems->size() != 2)
       RuntimeException::selfThrow("TimeSteppingD1Minus::initOSNS, TimeSteppingD1Minus simulation must have two OneStepNonsmoothProblems.");
 
     //update all index sets
@@ -106,7 +106,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
   DEBUG_PRINTF(" indexSet(%i) size : %ld\n", i, topo->indexSet(i)->size());
 
   InteractionsGraph::VIterator uipend, uip;
-  for (std11::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip)
+  for(std::tie(uip, uipend) = indexSet0->vertices(); uip != uipend; ++uip)
     /* loop over ALL vertices in indexSet0 */
   {
 
@@ -117,28 +117,28 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
     SP::DynamicalSystem ds1 = indexSetCurrent->properties(*uip).source;
     OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
     unsigned int levelMaxForInput = osi.levelMaxForInput();
-    if ((!indexSetCurrent->is_vertex(inter))
+    if((!indexSetCurrent->is_vertex(inter))
         and (osi.addInteractionInIndexSet(inter, i)))
     {
       indexSetCurrent->copy_vertex(inter, *indexSet0);
       topo->setHasChanged(true);
     }
-    else if ((indexSetCurrent->is_vertex(inter))
-             and !(osi.addInteractionInIndexSet(inter, i)))
+    else if((indexSetCurrent->is_vertex(inter))
+            and !(osi.addInteractionInIndexSet(inter, i)))
     {
       indexSetCurrent->remove_vertex(inter);
       topo->setHasChanged(true);
-      if (i <= levelMaxForInput)
+      if(i <= levelMaxForInput)
       {
         DEBUG_PRINTF("Reset to zero inter->lambda(%i)", i);
         inter->lambda(i)->zero();
       }
     }
 
-    if (!indexSetCurrent->is_vertex(inter))
+    if(!indexSetCurrent->is_vertex(inter))
     {
       DEBUG_PRINTF("The current interaction is not in the indexSet(%i)\n",(int)i);
-      if (i <= levelMaxForInput)
+      if(i <= levelMaxForInput)
       {
         DEBUG_EXPR(inter->lambda(i)->display());
         inter->lambda(i)->zero();
@@ -147,7 +147,7 @@ void TimeSteppingD1Minus::updateIndexSet(unsigned int i)
     else
     {
       DEBUG_PRINTF("The current interaction is in the indexSet(%i)\n",(int)i);
-      DEBUG_EXPR(if (i <= levelMaxForInput) inter->lambda(i)->display());
+      DEBUG_EXPR(if(i <= levelMaxForInput) inter->lambda(i)->display());
     }
 
 
@@ -163,7 +163,7 @@ void TimeSteppingD1Minus::run()
 {
   unsigned int count = 0;
   std::cout << " ==== Start of " << Type::name(*this) << " simulation - This may take a while ... ====" <<std::endl;
-  while (_eventsManager->hasNextEvent())
+  while(_eventsManager->hasNextEvent())
   {
     advanceToEvent();
 
@@ -178,7 +178,7 @@ void TimeSteppingD1Minus::advanceToEvent()
 
   initialize();
 
-  
+
   // Update interactions if a manager was provided
   updateInteractions();
 
@@ -196,8 +196,8 @@ void TimeSteppingD1Minus::advanceToEvent()
   SP::InteractionsGraph indexSet0 = _nsds->
                                     topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend, vnext;
-  std11::tie(ui, uiend) = indexSet0->vertices();
-  for (vnext = ui; ui != uiend; ui = vnext)
+  std::tie(ui, uiend) = indexSet0->vertices();
+  for(vnext = ui; ui != uiend; ui = vnext)
   {
     ++vnext;
     indexSet0->bundle(*ui)->resetAllLambda();
@@ -236,13 +236,13 @@ void TimeSteppingD1Minus::advanceToEvent()
   //  }
   //}
 
-  if (!_allNSProblems->empty())
+  if(!_allNSProblems->empty())
     computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
 
   DEBUG_EXPR(
-    if (_nsds->topology()->indexSet(1)->size() >0)
-      (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->display();
-    );
+    if(_nsds->topology()->indexSet(1)->size() >0)
+    (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->display();
+  );
 
   // update on impulse level
   // * calculate global impulse (p_{k+1}^+)
@@ -259,9 +259,9 @@ void TimeSteppingD1Minus::updateInput(unsigned int level)
   DEBUG_BEGIN("TimeSteppingD1Minus::updateInput(unsigned int level)\n");
   OSIIterator itOSI;
   // 1 - compute input (lambda -> r)
-  if (!_allNSProblems->empty())
+  if(!_allNSProblems->empty())
   {
-    for (itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
+    for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
       (*itOSI)->updateInput(nextTime(),level);
     //_nsds->updateInput(nextTime(),levelInput);
   }
@@ -290,7 +290,7 @@ void TimeSteppingD1Minus::updateInput(unsigned int level)
 //   //       RuntimeException::selfThrow("TimeSteppingD1Minus::updateInput - not implemented for Dynamical system type: " + dsType);
 //   //     else
 //   //     {
-//   //       SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (*itDS);
+//   //       SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (*itDS);
 //   //       if (d->p(level)) d->p(level)->zero();
 //   //     }
 //   //   }
@@ -311,11 +311,11 @@ void TimeSteppingD1Minus::updateInput(unsigned int level)
 
 void TimeSteppingD1Minus::computeResidu()
 {
-  for (OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
+  for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
     (*it)->computeResidu();
 }
 
 void TimeSteppingD1Minus::computeFreeState()
 {
-  std::for_each(_allOSI->begin(), _allOSI->end(), std11::bind(&OneStepIntegrator::computeFreeState, _1));
+  std::for_each(_allOSI->begin(), _allOSI->end(), std::bind(&OneStepIntegrator::computeFreeState, _1));
 }

@@ -30,7 +30,7 @@ struct UpdateShapes : public SiconosVisitor
   using SiconosVisitor::visit;
 
   template<typename T>
-  void operator() (const T& ds)
+  void operator()(const T& ds)
   {
     const_cast<T&>(ds).updateShapes();
     const_cast<T&>(ds).updateContactShapes();
@@ -42,11 +42,11 @@ void OccTimeStepping::updateWorldFromDS()
 {
   DynamicalSystemsGraph& dsg = *_nsds->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  std11::tie(dsi, dsiend) = dsg.vertices();
+  std::tie(dsi, dsiend) = dsg.vertices();
 
   Visitor< Classes < OccBody >, UpdateShapes >::Make up;
 
-  for (; dsi != dsiend; ++dsi)
+  for(; dsi != dsiend; ++dsi)
   {
     dsg.bundle(*dsi)->accept(up);
   }

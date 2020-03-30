@@ -5,5 +5,5 @@ RUN apt update  && apt install -y -qq \
     libptscotch-dev \
     openssh-client \
     libmumps-dev
-RUN python3 -m pip install mpi4py
+RUN python3 -m pip install mpi4py packaging
 RUN apt clean && apt autoremove

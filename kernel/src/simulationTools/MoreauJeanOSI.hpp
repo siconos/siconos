@@ -119,14 +119,20 @@ protected:
   /** theta-scheme parameter */
   double _theta;
 
-  /** A gamma parameter for the integration scheme to each DynamicalSystem of the OSI
-   * This parameter is used to apply a theta-method to the input $r$
+  /** A gamma parameter for the forecast of activation of constraints
+   * leap-frog estimation of the constraints
+   * $\tilde y_k =  y_k + \gamma * h * ydot $
    */
   double _gamma;
 
   /** a boolean to know if the gamma-parameter must be used or not
    */
   bool _useGamma;
+
+  /** Constraint activation threshold 
+   *
+   */
+  double _constraintActivationThreshold;
 
   /** a boolean to know if the parameter must be used or not
    */
@@ -163,7 +169,7 @@ public:
 
   /** get the value of W corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get W[0] in that case
+   * nullptr. get W[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
@@ -180,14 +186,14 @@ public:
 
   /** Get the value of WBoundaryConditions corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get WBoundaryConditions[0] in that case
+   * nullptr. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
   const SimpleMatrix getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
    * \param ds a pointer to DynamicalSystem, optional, default =
-   * NULL. get WBoundaryConditions[0] in that case
+   * nullptr. get WBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
   SP::SiconosMatrix WBoundaryConditions(SP::DynamicalSystem ds);
@@ -263,6 +269,17 @@ public:
     _useGammaForRelation = newUseGammaForRelation;
     if(_useGammaForRelation) _useGamma = false;
   };
+  /** set the constraint activation threshold */
+  inline void setConstraintActivationThreshold (double v)
+  {
+    _constraintActivationThreshold = v;
+  }
+  
+  /** get the constraint activation threshold */
+  inline double constraintActivationThreshold ()
+  {
+    return _constraintActivationThreshold ;
+  }
 
   /** get boolean _explicitNewtonEulerDSOperators for the relation
    *  \return a Boolean

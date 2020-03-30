@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2016 INRIA.
+ * Copyright 2019 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,51 +16,36 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_GLOBAL_FRICTION_3D_N...
+#include "SolverOptions.h"               // for solver_options_create
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+#include "SiconosConfig.h" // for WITH_MUMPS // IWYU pragma: keep
+
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
+  int solvers[] = {SICONOS_GLOBAL_FRICTION_3D_NSN_AC, SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR};
 
-  for (int n =0 ; n <n_test ; n++)
+  int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
+
+  *number_of_tests = n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+
+  int current = 0;
+
+  for(int s=0; s<n_solvers; ++s)
   {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
+    for(int d =0; d <n_data; d++)
+    {
+      // default values for all parameters.
+      collection[current].filename = data_collection[d];
+      collection[current].options = solver_options_create(solvers[s]);
+      collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+      current++;
+    }
   }
 
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSN_AC);
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR);
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---"; 
-    n++;
-  }
-
-
-  
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
-
+  return collection;
 }

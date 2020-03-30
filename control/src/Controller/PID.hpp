@@ -38,7 +38,7 @@ private:
   ACCEPT_SERIALIZATION(PID);
 
   /** error vector */
-  std11::shared_ptr<boost::circular_buffer<double> > _err;
+  std::shared_ptr<boost::circular_buffer<double> > _err;
 
   /** reference we are tracking */
   double _ref;
@@ -54,7 +54,7 @@ public:
    * \param sensor the ControlSensor feeding the Actuator
    * \param B the B matrix
    */
-  PID(SP::ControlSensor sensor, SP::SimpleMatrix B = std11::shared_ptr<SimpleMatrix>());
+  PID(SP::ControlSensor sensor, SP::SimpleMatrix B = std::shared_ptr<SimpleMatrix>());
 
   /** destructor
    */

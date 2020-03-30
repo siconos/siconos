@@ -22,9 +22,9 @@
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsFwd.h"
-#include "SiconosConfig.h"
-#include <stdio.h>
+#include <stdio.h>        // for FILE
+#include "NumericsFwd.h"  // for RollingFrictionContactProblem, NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct RollingFrictionContactProblem RollingFrictionContactProblem.h
  *  The structure that defines a (reduced or dual) Friction-Contact (3D or 2D) problem.
@@ -99,20 +99,17 @@ extern "C"
    */
   int rollingFrictionContact_printInFilename(RollingFrictionContactProblem*  problem, char * filename);
 
-  /** read a RollingFrictionContactProblem in a file (numerics .dat format)
-   * \param problem the problem to read
-   * \param file the target file
-   * \return 0 if successfull
+  /** read a RollingFrictionContactProblem from a file descriptor
+   * \param file descriptor
+   * \return problem the problem to read
    */
-  int rollingFrictionContact_newFromFile(RollingFrictionContactProblem*  problem, FILE* file);
+  RollingFrictionContactProblem*  rollingFrictionContact_newFromFile(FILE* file);
 
-  /** read a RollingFrictionContactProblem in a file (numerics .dat format) from its filename
-   * \param problem the problem to read
-   * \param filename the name of the target file
-   * \return 0 if successfull
+  /** read a RollingFrictionContactProblem from a file (.dat or hdf5 if fclib is on) from its filename
+   * \param filename the name of the input file
+   * \return problem the problem to read
    */
-  int rollingFrictionContact_newFromFilename(RollingFrictionContactProblem*  problem, char * filename);
-
+  RollingFrictionContactProblem* rollingFrictionContact_new_from_filename(const char * filename);
 
   void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProblem* problem,
                                                  double * reaction,

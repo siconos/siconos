@@ -29,7 +29,7 @@
 
 /* same things in BulletDS_impl.hpp */
 /* long unsigned int with bullet stuff ? */
-typedef std11::array<double, 7> OffSet;
+typedef std::array<double, 7> OffSet;
 
 struct ContactShapes : public std::vector<boost::tuple<SP::OccContactShape, OffSet, int > >
 {

@@ -15,18 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "NSSTools.h"
 
+#include "NSSTools.h"  // for pos_part
 void pos_part(unsigned n, double* restrict x, double* restrict x_plus)
 {
 
-  for (unsigned i = 0 ; i < n ; ++i)
+  for(unsigned i = 0 ; i < n ; ++i)
   {
-    if (x[i] > 0.0)
+    if(x[i] > 0.0)
     {
       x_plus[i] = x[i];
     }

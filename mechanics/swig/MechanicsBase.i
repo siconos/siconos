@@ -23,6 +23,8 @@
 %{
 #include <SiconosKernel.hpp>
 #include <boost/typeof/typeof.hpp>
+#include <vector>
+#include "SiconosFwd.hpp"
 %}
 
 %import kernel.i

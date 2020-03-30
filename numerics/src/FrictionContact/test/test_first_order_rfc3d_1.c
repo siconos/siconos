@@ -15,59 +15,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_ROLLING_FRICTION_3D_...
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for SolverOptions, solver_option...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
-
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
+  int n_solvers = 2;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  for (int n =0 ; n <n_test ; n++)
+  int current = 0;
+  for(int d =0; d <n_data; d++)
   {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 50;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+    current++;
   }
 
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
+  for(int d =0; d <n_data; d++)
   {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_ROLLING_FRICTION_3D_NSGS);
-    test_nsgs[n][e++] = "1.e-12";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-    test_nsgs[n][e++] = "1e-14";
-    test_nsgs[n][e++] = "50";
-    test_nsgs[n][e++] = "---";
-    n++;
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_ROLLING_FRICTION_3D_NSGS);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+    current++;
   }
 
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsgs[n][e++] = data_collection_1[d];
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_ROLLING_FRICTION_3D_NSGS);
-    test_nsgs[n][e++] = "1.e-10";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsgs[n][e++], "%d", SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-    test_nsgs[n][e++] = "0.0";
-    test_nsgs[n][e++] = "0";
-    test_nsgs[n][e++] = "---";
-    n++;
-  }
-
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+  *number_of_tests = current;
+  return collection;
 
 }

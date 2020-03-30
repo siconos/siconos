@@ -48,8 +48,8 @@ void Contact5DR::computeh(double time, BlockVector& q0, SiconosVector& y)
 }
 
 void Contact5DR::updateContactPoints(const SiconosVector& pos1,
-                                   const SiconosVector& pos2,
-                                   const SiconosVector& normal)
+                                     const SiconosVector& pos2,
+                                     const SiconosVector& normal)
 {
   // Copy relative positions
   *_relPc1 = pos1;

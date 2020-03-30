@@ -22,8 +22,7 @@
 
   \brief Typedef and functions declarations related GlockerFischerBurmeister
  */
-#include "FrictionContactProblem.h"
-#include "SparseBlockMatrix.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

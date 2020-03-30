@@ -27,14 +27,10 @@
  *
  */
 
-#include "SiconosConfig.h"
-
-#include <float.h>
-
-#include "ArmijoSearch.h"
-#include "NumericsMatrix.h"
-#include "SiconosSets.h"
-
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "Newton_methods.h"  // for functions_LSA
+#include "NumericsFwd.h"     // for NumericsMatrix
+#include "line_search.h"     // for search_data
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
 #include "debug.h"

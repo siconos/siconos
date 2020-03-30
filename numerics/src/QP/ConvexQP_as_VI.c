@@ -16,22 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdlib.h>
-#include <assert.h>
-#include <math.h>
 #include "ConvexQP_as_VI.h"
-#include "ConvexQP.h"
-#include "VariationalInequality.h"
-#include "projectionOnCone.h"
-#include "projectionOnCylinder.h"
-#include "projectionOnDisk.h"
-#include "numerics_verbose.h"
-#include "SiconosBlas.h"
-#include "NumericsMatrix.h"
-#include "SolverOptions.h"
+#include "ConvexQP.h"               // for ConvexQP
+#include "NumericsMatrix.h"         // for NM_gemv
+#include "VariationalInequality.h"  // for VariationalInequality
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
-#include "debug.h"
+#include "debug.h"                  // for DEBUG_PRINT
+#include "SiconosBlas.h"                  // for cblas_dcopy
 
 
 void Function_VI_CQP(void * self, int n_notused, double *x, double *F)
@@ -43,7 +35,7 @@ void Function_VI_CQP(void * self, int n_notused, double *x, double *F)
 
   int n = cqp->size;
 
-  cblas_dcopy(n , cqp->q , 1 , F, 1);
+  cblas_dcopy(n, cqp->q, 1, F, 1);
   NM_gemv(1.0, cqp->M, x, 1.0, F);
 }
 

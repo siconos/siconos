@@ -19,6 +19,7 @@
 
 #include "FirstOrderLinearDS.hpp"
 #include "TimeStepping.hpp"
+#include "SiconosAlgebraProd.hpp"
 
 #include "LinearSMCimproved.hpp"
 #include "SiconosVector.hpp"
@@ -53,14 +54,14 @@ void LinearSMCimproved::initialize(const NonSmoothDynamicalSystem& nsds, const S
 
 void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleMatrix& CBstar)
 {
-  if (_us->normInf() < _alpha)
+  if(_us->normInf() < _alpha)
   {
-    if (_inDisceteTimeSlidingPhase)
+    if(_inDisceteTimeSlidingPhase)
     {
       SiconosVector& up = *_up;
-      if (_measuredPert->full())
+      if(_measuredPert->full())
       {
-        if (_measuredPert->size() > 1)
+        if(_measuredPert->size() > 1)
         {
           _measuredPert->rotate(_measuredPert->end()-1);
           _predictedPert->rotate(_predictedPert->end()-1);
@@ -86,17 +87,17 @@ void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleM
       // compute prediction
       switch(_measuredPert->size()-1)
       {
-        case 0:
-          predictedPertC = measuredPertC;
-          break;
-        case 1:
-          predictedPertC = 2*measuredPertC - *(*_measuredPert)[1];
-          break;
-        case 2:
-          predictedPertC = 3*measuredPertC - 3*(*(*_measuredPert)[1]) + *(*_measuredPert)[2];
-          break;
-        default:
-          RuntimeException::selfThrow("LinearSMCimproved::predictionPerturbation: unknown order " + _measuredPert->size());
+      case 0:
+        predictedPertC = measuredPertC;
+        break;
+      case 1:
+        predictedPertC = 2*measuredPertC - *(*_measuredPert)[1];
+        break;
+      case 2:
+        predictedPertC = 3*measuredPertC - 3*(*(*_measuredPert)[1]) + *(*_measuredPert)[2];
+        break;
+      default:
+        RuntimeException::selfThrow("LinearSMCimproved::predictionPerturbation: unknown order " + std::to_string(_measuredPert->size()));
       }
 
       // Compute the control to counteract the perturbation
@@ -106,16 +107,16 @@ void LinearSMCimproved::predictionPerturbation(const SiconosVector& xTk, SimpleM
 
       // project onto feasible set
       double norm = up.norm2();
-      if (norm > _ubPerturbation)
+      if(norm > _ubPerturbation)
       {
         up *= _ubPerturbation/norm;
         predictedPertC *= _ubPerturbation/norm;
       }
-   }
+    }
     else
       _inDisceteTimeSlidingPhase = true;
   }
-  else if (_inDisceteTimeSlidingPhase)
+  else if(_inDisceteTimeSlidingPhase)
   {
     _inDisceteTimeSlidingPhase = false;
     _up->zero();
@@ -129,7 +130,7 @@ void LinearSMCimproved::actuate()
   SP::SimpleMatrix CBstar(new SimpleMatrix(sDim, sDim, 0));
   SP::SiconosVector xTk(new SiconosVector(_sensor->y()));
 
-  ZeroOrderHoldOSI& zoh = *std11::static_pointer_cast<ZeroOrderHoldOSI>(_integratorSMC);
+  ZeroOrderHoldOSI& zoh = *std::static_pointer_cast<ZeroOrderHoldOSI>(_integratorSMC);
 
   // equivalent part
   zoh.updateMatrices(_DS_SMC);
@@ -143,7 +144,7 @@ void LinearSMCimproved::actuate()
   CBstar->PLUForwardBackwardInPlace(*_ueq);
 
   *(_DS_SMC->x()) = *xTk;
-  prod(*_B, *_ueq, *(std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->b()));
+  prod(*_B, *_ueq, *(std::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->b()));
   _simulationSMC->computeOneStep();
   _simulationSMC->nextStep();
 
@@ -154,7 +155,7 @@ void LinearSMCimproved::actuate()
   *_u += *_ueq;
 
   // prediction of the perturbation
-  if (_predictionPerturbation)
+  if(_predictionPerturbation)
   {
     predictionPerturbation(*xTk, *CBstar);
     *_u += *_up;

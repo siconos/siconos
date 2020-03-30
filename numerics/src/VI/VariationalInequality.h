@@ -23,9 +23,9 @@
 #ifndef VARIATIONALINEQUALITY_H
 #define VARIATIONALINEQUALITY_H
 
-#include "NumericsFwd.h"
-#include <stdio.h>
-#include "SiconosConfig.h"
+#include <stdio.h>        // for FILE
+#include "NumericsFwd.h"  // for VariationalInequality, NumericsMatrix
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 typedef void * (FVIPtr)(void*, double *, double *);
 typedef void (*ptrFunctionVI)(void *self, int n, double* x, double* fx);

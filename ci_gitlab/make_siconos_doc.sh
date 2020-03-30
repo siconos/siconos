@@ -20,9 +20,7 @@
 # Check if CI_PROJECT_DIR is set AND not empty
 : ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with the path to 'siconos' repository (absolute) path."}
 
-DOC_CI_CONFIG_DIR=$CI_PROJECT_DIR/CI/docs
 mkdir $CI_PROJECT_DIR/build
 cd $CI_PROJECT_DIR/build
-#export LANG=C.UTF-8 # Required, else doxy2swig fails!
-cmake $CI_PROJECT_DIR -DUSER_OPTIONS_FILE=$CI_PROJECT_DIR/CI/siconos_docs.cmake
+cmake $CI_PROJECT_DIR -DUSER_OPTIONS_FILE=$user_file
 make doc -j 4

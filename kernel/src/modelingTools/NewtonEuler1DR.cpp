@@ -18,6 +18,7 @@
 
 
 #include "NewtonEuler1DR.hpp"
+#include "SiconosAlgebraProd.hpp"
 #include "RotationQuaternion.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
@@ -75,10 +76,10 @@ void NewtonEuler1DR::NIcomputeJachqTFromContacts(SP::SiconosVector q1)
   prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
 
-  for (unsigned int jj = 0; jj < 3; jj++)
+  for(unsigned int jj = 0; jj < 3; jj++)
     _jachqT->setValue(0, jj, _rotationAbsoluteToContactFrame->getValue(0, jj));
 
-  for (unsigned int jj = 3; jj < 6; jj++)
+  for(unsigned int jj = 3; jj < 6; jj++)
     _jachqT->setValue(0, jj, _AUX2->getValue(0, jj - 3));
 
 #ifdef NEFC3D_DEBUG
@@ -119,11 +120,11 @@ void NewtonEuler1DR::NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Sicon
   prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
   prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
-  for (unsigned int jj = 0; jj < 3; jj++)
+  for(unsigned int jj = 0; jj < 3; jj++)
     _jachqT->setValue(0, jj, _rotationAbsoluteToContactFrame->getValue(0, jj));
 
 
-  for (unsigned int jj = 3; jj < 6; jj++)
+  for(unsigned int jj = 3; jj < 6; jj++)
     _jachqT->setValue(0, jj, _AUX2->getValue(0, jj - 3));
 
   double G2x = q2->getValue(0);
@@ -148,10 +149,10 @@ void NewtonEuler1DR::NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::Sicon
 
   prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
-  for (unsigned int jj = 0; jj < 3; jj++)
+  for(unsigned int jj = 0; jj < 3; jj++)
     _jachqT->setValue(0, jj + 6, -_rotationAbsoluteToContactFrame->getValue(0, jj));
 
-  for (unsigned int jj = 3; jj < 6; jj++)
+  for(unsigned int jj = 3; jj < 6; jj++)
     _jachqT->setValue(0, jj + 6, -_AUX2->getValue(0, jj - 3));
 }
 
@@ -186,14 +187,14 @@ void NewtonEuler1DR::computeJachq(double time, Interaction& inter, SP::BlockVect
   _jachq->setValue(0, 0, _Nc->getValue(0));
   _jachq->setValue(0, 1, _Nc->getValue(1));
   _jachq->setValue(0, 2, _Nc->getValue(2));
-  if (inter.has2Bodies())
+  if(inter.has2Bodies())
   {
     _jachq->setValue(0, 7, -_Nc->getValue(0));
     _jachq->setValue(0, 8, -_Nc->getValue(1));
     _jachq->setValue(0, 9, -_Nc->getValue(2));
   }
 
-  for (unsigned int iDS =0 ; iDS < q0->numberOfBlocks()  ; iDS++)
+  for(unsigned int iDS =0 ; iDS < q0->numberOfBlocks()  ; iDS++)
   {
     SP::SiconosVector q = (q0->getAllVect())[iDS];
     double sign = 1.0;
@@ -201,10 +202,10 @@ void NewtonEuler1DR::computeJachq(double time, Interaction& inter, SP::BlockVect
     DEBUG_EXPR_WE(q->display(););
 
     ::boost::math::quaternion<double>    quatGP;
-    if (iDS == 0)
+    if(iDS == 0)
     {
       ::boost::math::quaternion<double>    quatAux(0, _Pc1->getValue(0) - q->getValue(0), _Pc1->getValue(1) - q->getValue(1),
-                                                   _Pc1->getValue(2) - q->getValue(2));
+          _Pc1->getValue(2) - q->getValue(2));
       quatGP = quatAux;
     }
     else
@@ -212,14 +213,13 @@ void NewtonEuler1DR::computeJachq(double time, Interaction& inter, SP::BlockVect
       sign = -1.0;
       //cout<<"NewtonEuler1DR::computeJachq sign is -1 \n";
       ::boost::math::quaternion<double>    quatAux(0, _Pc2->getValue(0) - q->getValue(0), _Pc2->getValue(1) - q->getValue(1),
-                                                   _Pc2->getValue(2) - q->getValue(2));
+          _Pc2->getValue(2) - q->getValue(2));
       quatGP = quatAux;
     }
     DEBUG_PRINTF("NewtonEuler1DR::computeJachq :GP :%lf, %lf, %lf\n", quatGP.R_component_2(), quatGP.R_component_3(), quatGP.R_component_4());
     DEBUG_PRINTF("NewtonEuler1DR::computeJachq :Q :%e,%e, %e, %e\n", q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
     ::boost::math::quaternion<double>    quatQ(q->getValue(3), q->getValue(4), q->getValue(5), q->getValue(6));
     ::boost::math::quaternion<double>    quatcQ(q->getValue(3), -q->getValue(4), -q->getValue(5), -q->getValue(6));
-    ::boost::math::quaternion<double>    quat0(1, 0, 0, 0);
     ::boost::math::quaternion<double>    quatBuff;
     ::boost::math::quaternion<double>    _2qiquatGP;
     _2qiquatGP = quatGP;
@@ -229,17 +229,17 @@ void NewtonEuler1DR::computeJachq(double time, Interaction& inter, SP::BlockVect
     DEBUG_PRINTF("NewtonEuler1DR::computeJachq :quattBuuf : %e,%e,%e \n", quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
 
     _jachq->setValue(0, 7 * iDS + 3, sign * (quatBuff.R_component_2()*_Nc->getValue(0) +
-                                             quatBuff.R_component_3()*_Nc->getValue(1) + quatBuff.R_component_4()*_Nc->getValue(2)));
+                     quatBuff.R_component_3()*_Nc->getValue(1) + quatBuff.R_component_4()*_Nc->getValue(2)));
     //cout<<"WARNING NewtonEuler1DR set jachq \n";
     //_jachq->setValue(0,7*iDS+3,0);
-    for (unsigned int i = 1; i < 4; i++)
+    for(unsigned int i = 1; i < 4; i++)
     {
       ::boost::math::quaternion<double>    quatei(0, (i == 1) ? 1 : 0, (i == 2) ? 1 : 0, (i == 3) ? 1 : 0);
       _2qiquatGP = quatGP;
       _2qiquatGP *= 2 * (q->getValue(3 + i));
       quatBuff = quatei * quatcQ * quatGP - quatGP * quatQ * quatei - _2qiquatGP;
       _jachq->setValue(0, 7 * iDS + 3 + i, sign * (quatBuff.R_component_2()*_Nc->getValue(0) +
-                                                   quatBuff.R_component_3()*_Nc->getValue(1) + quatBuff.R_component_4()*_Nc->getValue(2)));
+                       quatBuff.R_component_3()*_Nc->getValue(1) + quatBuff.R_component_4()*_Nc->getValue(2)));
     }
   }
 
@@ -248,11 +248,11 @@ void NewtonEuler1DR::computeJachq(double time, Interaction& inter, SP::BlockVect
 
 }
 
-void NewtonEuler1DR::computeJachqT(Interaction& inter, SP::BlockVector q0 )
+void NewtonEuler1DR::computeJachqT(Interaction& inter, SP::BlockVector q0)
 {
   DEBUG_BEGIN("NewtonEuler1DR::computeJachqT(Interaction& inter, SP::BlockVector q0 \n")
 
-  if (q0->numberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     NIcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
   }
@@ -272,7 +272,7 @@ double NewtonEuler1DR::distance() const
 }
 
 void NewtonEuler1DR::computeh(double time, BlockVector& q0,
-                                            SiconosVector &y)
+                              SiconosVector &y)
 {
   // Contact points and normal are stored as relative to q1 and q2, if
   // no q2 then pc2 and normal are absolute.
@@ -288,7 +288,7 @@ void NewtonEuler1DR::computeh(double time, BlockVector& q0,
   (*_Pc1)(1) = qpc1.R_component_3() + (*q1)(1);
   (*_Pc1)(2) = qpc1.R_component_4() + (*q1)(2);
 
-  if (q0.numberOfBlocks() > 1)
+  if(q0.numberOfBlocks() > 1)
   {
     // Update pc2 based on q0 and relPc2
     SP::SiconosVector q2 = (q0.getAllVect())[1];

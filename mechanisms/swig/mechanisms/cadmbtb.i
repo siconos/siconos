@@ -10,7 +10,8 @@
 
 // handle stl data types
 %include stl.i
-
+%include <typemaps.i>
+%apply AIS_InteractiveContext & INOUT {AIS_InteractiveContext & aisContext};
 %include "CADMBTB_PYTHON_API.hpp"
 
 %inline %{

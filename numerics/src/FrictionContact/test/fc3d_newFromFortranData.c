@@ -15,12 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include <stdio.h>
-#include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "frictionContact_test_function.h"
-#include "SparseBlockMatrix.h"
-#include "FrictionContactProblem.h"
+#include <assert.h>                  // for assert
+#include <stdio.h>                   // for NULL
+#include <stdlib.h>                  // for free
+#include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
+#include "NumericsFwd.h"             // for SparseBlockStructuredMatrix, Fri...
+#include "NumericsMatrix.h"          // for NM_new_SBM, NumericsMatrix, RawN...
+#include "SparseBlockMatrix.h"       // for SparseBlockStructuredMatrix, SBC...
+
 
 int main(void)
 {
@@ -57,7 +59,7 @@ int main(void)
   free(M->index1_data);
   free(M->index2_data);
   free(M);
-   SBCM_free_3x3(MC);
+  SBCM_free_3x3(MC);
   free(MC);
   free(FC);
 

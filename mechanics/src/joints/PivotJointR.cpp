@@ -59,7 +59,7 @@ static double piwrap(double x)
 
 PivotJointR::PivotJointR()
   : KneeJointR()
-  , _A(std11::make_shared<SiconosVector>(3))
+  , _A(std::make_shared<SiconosVector>(3))
 {
   _axes.resize(1);
 }
@@ -67,18 +67,18 @@ PivotJointR::PivotJointR()
 PivotJointR::PivotJointR(SP::SiconosVector P, SP::SiconosVector A, bool absoluteRef,
                          SP::NewtonEulerDS d1, SP::NewtonEulerDS d2)
   : KneeJointR(P, absoluteRef, d1, d2)
-  , _A(std11::make_shared<SiconosVector>(3))
+  , _A(std::make_shared<SiconosVector>(3))
 {
   _axes.resize(1);
 
   setAxis(0, A);
-  if (d1)
+  if(d1)
     setBasePositions(d1->q(), d2 ? d2->q() : SP::SiconosVector());
 }
 
 static ::boost::math::quaternion<double> rotquat(const SP::SiconosVector& v)
 {
-  if (v)
+  if(v)
     return ::boost::math::quaternion<double>((*v)(3),(*v)(4),(*v)(5),(*v)(6));
   else
     return ::boost::math::quaternion<double>(1, 0, 0, 0);
@@ -108,7 +108,7 @@ void PivotJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
   *_A = *_axes[0];
 
   // If provided in absolute coordinates, must be rotated to q1 frame.
-  if (_absoluteRef)
+  if(_absoluteRef)
   {
     boost::math::quaternion<double> rot1(rotquat(q1)), quatBuff;
 
@@ -132,7 +132,7 @@ void PivotJointR::setBasePositions(SP::SiconosVector q1, SP::SiconosVector q2)
 
   // Get initial offsets relative to plane constraints.
   double rot2to1w, rot2to1x, rot2to1y, rot2to1z;
-  if (q2)
+  if(q2)
     rot2to1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6),
             (*q2)(3), (*q2)(4), (*q2)(5), (*q2)(6),
             &rot2to1w, &rot2to1x, &rot2to1y, &rot2to1z);
@@ -159,9 +159,9 @@ void PivotJointR::buildA1A2()
   double Ax = (*_A)(0);
   double Ay = (*_A)(1);
   double Az = (*_A)(2);
-  if (orthoBaseFromVector(&Ax, &Ay, &Az,
-                          &_A1x, &_A1y, &_A1z,
-                          &_A2x, &_A2y, &_A2z))
+  if(orthoBaseFromVector(&Ax, &Ay, &Az,
+                         &_A1x, &_A1y, &_A1z,
+                         &_A2x, &_A2y, &_A2z))
     RuntimeException::selfThrow("PivotJointR::initializeWorkVectorsAndMatrices. Problem in calling orthoBaseFromVector");
 
   assert(fabs(_A1x * Ax + _A1y * Ay + _A1z * Az) < 1e-9 && "PivotJoint, _A1 wrong\n");
@@ -366,11 +366,11 @@ void PivotJointR::rot2to1(double q10, double q11, double q12, double q13,
    * rot2to1 = qmul(qinv(qmul(q2,cq2q10)),q1)
    */
 
-  if (rot2to1w)
-  *rot2to1w = (q10*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
-               - q11*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
-               - q12*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
-               - q13*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20));
+  if(rot2to1w)
+    *rot2to1w = (q10*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
+                 - q11*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
+                 - q12*(-_cq2q101*q22 - _cq2q102*q23 - _cq2q103*q20 + _cq2q104*q21)
+                 - q13*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20));
   *rot2to1x = (q10*(-_cq2q101*q21 - _cq2q102*q20 + _cq2q103*q23 - _cq2q104*q22)
                + q11*(_cq2q101*q20 - _cq2q102*q21 - _cq2q103*q22 - _cq2q104*q23)
                - q12*(-_cq2q101*q23 + _cq2q102*q22 - _cq2q103*q21 - _cq2q104*q20)
@@ -422,8 +422,8 @@ double PivotJointR::AscalA(double rot2to1x, double rot2to1y, double rot2to1z)
    */
 
   return _A->getValue(0)*rot2to1x
-    + _A->getValue(1)*rot2to1y
-    + _A->getValue(2)*rot2to1z;
+         + _A->getValue(1)*rot2to1y
+         + _A->getValue(2)*rot2to1z;
 }
 
 void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
@@ -449,7 +449,7 @@ void PivotJointR::computeh(double time, BlockVector& q0, SiconosVector& y)
 
   double rot2to1x, rot2to1y, rot2to1z;
   rot2to1(q10, q11, q12, q13, q20, q21, q22, q23,
-          NULL, &rot2to1x, &rot2to1y, &rot2to1z);
+          nullptr, &rot2to1x, &rot2to1y, &rot2to1z);
 
   y.setValue(3, AscalA1(rot2to1x, rot2to1y, rot2to1z) - _initial_AscalA1);
   y.setValue(4, AscalA2(rot2to1x, rot2to1y, rot2to1z) - _initial_AscalA2);
@@ -462,7 +462,7 @@ void PivotJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
   // Normally we fill y starting at axis up to the number of columns,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
-  if (axis != 0)
+  if(axis != 0)
     return;
 
   SP::SiconosVector q1 = (q0.getAllVect())[0];
@@ -476,7 +476,7 @@ void PivotJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.numberOfBlocks()>1)
+  if(q0.numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0.getAllVect())[1];
     q20 = q2->getValue(3);
@@ -497,9 +497,9 @@ void PivotJointR::computehDoF(double time, BlockVector& q0, SiconosVector& y,
 
   // Count the number of twists around the angle, and report the
   // unwrapped angle.  Needed to implement joint stops near pi.
-  if (wrappedAngle < -M_PI*3/4 && _previousAngle > M_PI*3/4)
+  if(wrappedAngle < -M_PI*3/4 && _previousAngle > M_PI*3/4)
     _twistCount ++;
-  else if (wrappedAngle > M_PI*3/4 && _previousAngle < -M_PI*3/4)
+  else if(wrappedAngle > M_PI*3/4 && _previousAngle < -M_PI*3/4)
     _twistCount --;
   _previousAngle = wrappedAngle;
   double unwrappedAngle = wrappedAngle + 2*M_PI*_twistCount;
@@ -515,7 +515,7 @@ void PivotJointR::computeJachqDoF(double time, Interaction& inter,
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
-  if (axis != 0)
+  if(axis != 0)
     return;
 
   SP::SiconosVector q1 = (q0->getAllVect())[0];
@@ -529,7 +529,7 @@ void PivotJointR::computeJachqDoF(double time, Interaction& inter,
   double q22 = 0;
   double q23 = 0;
 
-  if (q0->numberOfBlocks()>1)
+  if(q0->numberOfBlocks()>1)
   {
     SP::SiconosVector q2 = (q0->getAllVect())[1];
     q20 = q2->getValue(3);
@@ -624,7 +624,7 @@ void PivotJointR::computeJachqDoF(double time, Interaction& inter,
   jachq.setValue(0, 5, x22*(_A->getValue(0)*x26 + _A->getValue(1)*x18 + _A->getValue(2)*x4) + x23*x24);
   jachq.setValue(0, 6, x22*(_A->getValue(0)*x9 + _A->getValue(1)*x25 + _A->getValue(2)*x18) + x23*x26);
 
-  if (q0->numberOfBlocks()<2)
+  if(q0->numberOfBlocks()<2)
     return;
 
   jachq.setValue(0, 7, 0);
@@ -650,11 +650,11 @@ void PivotJointR::_normalDoF(SiconosVector& ans, const BlockVector& q0, int axis
                              bool absoluteRef)
 {
   assert(axis == 0);
-  if (axis != 0) return;
+  if(axis != 0) return;
 
   // We assume that A is normalized.
   ans = *_A;
 
-  if (absoluteRef)
+  if(absoluteRef)
     changeFrameBodyToAbs(*q0.getAllVect()[0], ans);
 }

@@ -54,29 +54,29 @@ std::size_t hash_value(SP::Hashed const& h)
 }
 
 SpaceFilter::SpaceFilter(unsigned int bboxfactor,
-              unsigned int cellsize,
-              SP::SiconosMatrix plans,
-              SP::FMatrix moving_plans) :
-    _bboxfactor(bboxfactor),
-    _cellsize(cellsize),
-    _plans(plans),
-    _moving_plans(moving_plans),
-    _hash_table(new space_hash()),
-    diskdisk_relations(new DiskDiskRDeclaredPool()),
-    diskplan_relations(new DiskPlanRDeclaredPool()),
+                         unsigned int cellsize,
+                         SP::SiconosMatrix plans,
+                         SP::FMatrix moving_plans) :
+  _bboxfactor(bboxfactor),
+  _cellsize(cellsize),
+  _plans(plans),
+  _moving_plans(moving_plans),
+  _hash_table(new space_hash()),
+  diskdisk_relations(new DiskDiskRDeclaredPool()),
+  diskplan_relations(new DiskPlanRDeclaredPool()),
   circlecircle_relations(new CircleCircleRDeclaredPool())
 {};
 
 SpaceFilter::SpaceFilter(unsigned int bboxfactor,
-              unsigned int cellsize,
-              SP::SiconosMatrix plans) :
-    _bboxfactor(bboxfactor),
-    _cellsize(cellsize),
-    _plans(plans),
-    _hash_table(new space_hash()),
-    diskdisk_relations(new DiskDiskRDeclaredPool()),
-    diskplan_relations(new DiskPlanRDeclaredPool()),
-    circlecircle_relations(new CircleCircleRDeclaredPool())
+                         unsigned int cellsize,
+                         SP::SiconosMatrix plans) :
+  _bboxfactor(bboxfactor),
+  _cellsize(cellsize),
+  _plans(plans),
+  _hash_table(new space_hash()),
+  diskdisk_relations(new DiskDiskRDeclaredPool()),
+  diskplan_relations(new DiskPlanRDeclaredPool()),
+  circlecircle_relations(new CircleCircleRDeclaredPool())
 {};
 
 SpaceFilter::SpaceFilter() :
@@ -109,9 +109,9 @@ public:
     jmin = (int) floor((pds->getQ(1) - _bboxfactor * pds->getRadius()) / _cellsize);
     jmax = (int) floor((pds->getQ(1) + _bboxfactor * pds->getRadius()) / _cellsize);
 
-    for (i = imin; i <= imax; ++i)
+    for(i = imin; i <= imax; ++i)
     {
-      for (j = jmin; j <= jmax; ++j)
+      for(j = jmin; j <= jmax; ++j)
       {
         parent.insert(pds, i, j, 0);
       }
@@ -131,9 +131,9 @@ public:
     jmin = (int) floor((pds->getQ(1) - _bboxfactor * pds->getRadius()) / _cellsize);
     jmax = (int) floor((pds->getQ(1) + _bboxfactor * pds->getRadius()) / _cellsize);
 
-    for (i = imin; i <= imax; ++i)
+    for(i = imin; i <= imax; ++i)
     {
-      for (j = jmin; j <= jmax; ++j)
+      for(j = jmin; j <= jmax; ++j)
       {
         parent.insert(pds, i, j, 0);
       }
@@ -156,11 +156,11 @@ public:
     kmin = (int) floor((pds->getQ(2) - _bboxfactor * pds->getRadius()) / _cellsize);
     kmax = (int) floor((pds->getQ(2) + _bboxfactor * pds->getRadius()) / _cellsize);
 
-    for (i = imin; i <= imax; ++i)
+    for(i = imin; i <= imax; ++i)
     {
-      for (j = jmin; j <= jmax; ++j)
+      for(j = jmin; j <= jmax; ++j)
       {
-        for (k = kmin; k <= kmax; ++k)
+        for(k = kmin; k <= kmax; ++k)
         {
           parent.insert(pds, i, j, k);
         }
@@ -185,11 +185,11 @@ public:
     kmin = (int) floor((pds->getQ(2) - _bboxfactor * pds->getRadius()) / _cellsize);
     kmax = (int) floor((pds->getQ(2) + _bboxfactor * pds->getRadius()) / _cellsize);
 
-    for (i = imin; i <= imax; ++i)
+    for(i = imin; i <= imax; ++i)
     {
-      for (j = jmin; j <= jmax; ++j)
+      for(j = jmin; j <= jmax; ++j)
       {
-        for (k = kmin; k <= kmax; ++k)
+        for(k = kmin; k <= kmax; ++k)
         {
           parent.insert(pds, i, j, k);
         }
@@ -245,14 +245,14 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
 
     double d = hypot(x1 - x2, y1 - y2);
 
-    if (d < rmax)
+    if(d < rmax)
     {
       // one inside the other : CircleCircle relation
-      if (rmax - (d + rmin) < tol)
+      if(rmax - (d + rmin) < tol)
       {
         CircleCircleRDeclaredPool::iterator rcandid =
           parent->circlecircle_relations->find(CircleCircleRDeclared(r1, r2));
-        if (rcandid == parent->circlecircle_relations->end())
+        if(rcandid == parent->circlecircle_relations->end())
         {
           // a new relation
           rel.reset(new CircleCircleR(r1, r2));
@@ -268,11 +268,11 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
     else
     {
       // a DiskDisk relation
-      if (d - (r1 + r2) < tol)
+      if(d - (r1 + r2) < tol)
       {
         DiskDiskRDeclaredPool::iterator rcandid =
           parent->diskdisk_relations->find(DiskDiskRDeclared(r1, r2));
-        if (rcandid == parent->diskdisk_relations->end())
+        if(rcandid == parent->diskdisk_relations->end())
         {
           // a new relation
           rel.reset(new DiskDiskR(r1, r2));
@@ -288,21 +288,21 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
       }
     }
 
-    if (rel)
+    if(rel)
     {
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
-           oei != oeiend; ++oei)
+      for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+          oei != oeiend; ++oei)
       {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2)
+        if(DSG0->bundle(DSG0->target(*oei)) == ds2)
         {
           found = true;
           break;
         }
       }
 
-      if (!found)
+      if(!found)
       {
         SP::NonSmoothLaw nslaw =
           parent->nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds1)],
@@ -318,17 +318,17 @@ struct SpaceFilter::_CircularFilter : public SiconosVisitor
       // is interaction in graph ?
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
-           oei != oeiend; ++oei)
+      for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+          oei != oeiend; ++oei)
       {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2)
+        if(DSG0->bundle(DSG0->target(*oei)) == ds2)
         {
           found = true;
           break;
         }
       }
 
-      if (found)
+      if(found)
       {
 
 
@@ -393,23 +393,23 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
 
     double d = sqrt(dx * dx + dy * dy + dz * dz);
 
-    if (d < 2 * tol)
+    if(d < 2 * tol)
     {
       rel.reset(new SphereLDSSphereLDSR(r1, r2));
 
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
-           oei != oeiend; ++oei)
+      for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+          oei != oeiend; ++oei)
       {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2)
+        if(DSG0->bundle(DSG0->target(*oei)) == ds2)
         {
           found = true;
           break;
         }
       }
 
-      if (!found)
+      if(!found)
       {
         SP::NonSmoothLaw nslaw =
           parent->nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds1)],
@@ -424,17 +424,17 @@ struct SpaceFilter::_SphereLDSFilter : public SiconosVisitor
       // is interaction in graph ?
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
-           oei != oeiend; ++oei)
+      for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+          oei != oeiend; ++oei)
       {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2)
+        if(DSG0->bundle(DSG0->target(*oei)) == ds2)
         {
           found = true;
           break;
         }
       }
 
-      if (found)
+      if(found)
       {
         sim->unlink(DSG0->bundle(*oei));
       }
@@ -481,23 +481,23 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
 
     double d = sqrt(dx * dx + dy * dy + dz * dz);
 
-    if (d < 2 * tol)
+    if(d < 2 * tol)
     {
       rel.reset(new SphereNEDSSphereNEDSR(r1, r2));
 
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
-           oei != oeiend; ++oei)
+      for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+          oei != oeiend; ++oei)
       {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2)
+        if(DSG0->bundle(DSG0->target(*oei)) == ds2)
         {
           found = true;
           break;
         }
       }
 
-      if (!found)
+      if(!found)
       {
         SP::NonSmoothLaw nslaw =
           parent->nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds1)],
@@ -513,17 +513,17 @@ struct SpaceFilter::_SphereNEDSFilter : public SiconosVisitor
       // is interaction in graph ?
       bool found = false;
       DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
-           oei != oeiend; ++oei)
+      for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1));
+          oei != oeiend; ++oei)
       {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2)
+        if(DSG0->bundle(DSG0->target(*oei)) == ds2)
         {
           found = true;
           break;
         }
       }
 
-      if (found)
+      if(found)
       {
         sim->unlink(DSG0->bundle(*oei));
       }
@@ -549,7 +549,7 @@ struct SpaceFilter::_IsSameDiskPlanR : public SiconosVisitor
                    double xCenter, double yCenter, double width) :
     sim(s), parent(p), A(A), B(B), C(C), r(r),
     xCenter(xCenter), yCenter(yCenter), width(width), flag(false)
-    {};
+  {};
 
   void visit(const DiskDiskR&)
   {
@@ -674,20 +674,20 @@ void SpaceFilter::_PlanCircularFilter(SP::Simulation sim,
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
   SP::DiskPlanR relp(new DiskPlanR(r, A, B, C, xCenter, yCenter, width));
 
-  if (relp->distance(ds->getQ(0),
-                     ds->getQ(1),
-                     ds->getRadius()) < tol)
+  if(relp->distance(ds->getQ(0),
+                    ds->getQ(1),
+                    ds->getRadius()) < tol)
 
   {
     // is interaction in graph ?
     bool found = false;
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
-         oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+        oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
       ->relation()->accept(isSameDiskPlanR);
-      if (DSG0->bundle(DSG0->target(*oei)) == ds
+      if(DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR.flag)
       {
         found = true;
@@ -695,7 +695,7 @@ void SpaceFilter::_PlanCircularFilter(SP::Simulation sim,
       }
     }
 
-    if (!found)
+    if(!found)
       // no
     {
       SP::NonSmoothLaw nslaw = nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds)],
@@ -710,13 +710,13 @@ void SpaceFilter::_PlanCircularFilter(SP::Simulation sim,
   {
     // is interaction in graph ?
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
-         oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+        oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
       ->relation()->accept(isSameDiskPlanR);
 
-      if (DSG0->bundle(DSG0->target(*oei)) == ds
+      if(DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskPlanR.flag)
       {
 
@@ -733,7 +733,7 @@ void SpaceFilter::_PlanCircularFilter(SP::Simulation sim,
 
 /* proximity detection between circular object and plans */
 void SpaceFilter::_MovingPlanCircularFilter(SP::Simulation sim, unsigned int i,
-                                            SP::CircularDS ds, double time)
+    SP::CircularDS ds, double time)
 {
   double r = ds->getRadius();
 
@@ -756,27 +756,27 @@ void SpaceFilter::_MovingPlanCircularFilter(SP::Simulation sim, unsigned int i,
 
   relp->init(time);
 
-  if (relp->distance(ds->getQ(0),
-                     ds->getQ(1),
-                     ds->getRadius()) < tol)
+  if(relp->distance(ds->getQ(0),
+                    ds->getQ(1),
+                    ds->getRadius()) < tol)
 
   {
     // is interaction in graph ?
     bool found = false;
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
-         oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+        oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
       ->relation()->accept(isSameDiskMovingPlanR);
-      if (DSG0->bundle(DSG0->target(*oei)) == ds
+      if(DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskMovingPlanR.flag)
       {
         found = true;
         break;
       }
     }
-    if (!found)
+    if(!found)
       // no
     {
       SP::NonSmoothLaw nslaw = nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds)],
@@ -790,13 +790,13 @@ void SpaceFilter::_MovingPlanCircularFilter(SP::Simulation sim, unsigned int i,
   {
     // is interaction in graph ?
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
-         oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+        oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
       ->relation()->accept(isSameDiskMovingPlanR);
 
-      if (DSG0->bundle(DSG0->target(*oei)) == ds
+      if(DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameDiskMovingPlanR.flag)
       {
         sim->unlink(DSG0->bundle(*oei));
@@ -827,28 +827,28 @@ void SpaceFilter::_PlanSphereLDSFilter(SP::Simulation sim,
   // all DS must be in DS graph
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
   SP::SphereLDSPlanR relp(new SphereLDSPlanR(r, A, B, C, D));
-  if (relp->distance(ds->getQ(0),
-                     ds->getQ(1),
-                     ds->getQ(2),
-                     ds->getRadius()) < tol)
+  if(relp->distance(ds->getQ(0),
+                    ds->getQ(1),
+                    ds->getQ(2),
+                    ds->getRadius()) < tol)
 
   {
     // is interaction in graph ?
     bool found = false;
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
-         oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+        oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
       ->relation()->accept(IsSameSpherePlanR);
-      if (DSG0->bundle(DSG0->target(*oei)) == ds
+      if(DSG0->bundle(DSG0->target(*oei)) == ds
           && IsSameSpherePlanR.flag)
       {
         found = true;
         break;
       }
     }
-    if (!found)
+    if(!found)
       // no
     {
       SP::NonSmoothLaw nslaw = nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds)],
@@ -862,13 +862,13 @@ void SpaceFilter::_PlanSphereLDSFilter(SP::Simulation sim,
   {
     // is interaction in graph ?
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
-         oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+        oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
       ->relation()->accept(IsSameSpherePlanR);
 
-      if (DSG0->bundle(DSG0->target(*oei)) == ds
+      if(DSG0->bundle(DSG0->target(*oei)) == ds
           && IsSameSpherePlanR.flag)
       {
         sim->unlink(DSG0->bundle(*oei));
@@ -899,28 +899,28 @@ void SpaceFilter::_PlanSphereNEDSFilter(SP::Simulation sim,
   // all DS must be in DS graph
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
   SP::SphereNEDSPlanR relp(new SphereNEDSPlanR(r, A, B, C, D));
-  if (relp->distance(ds->getQ(0),
-                     ds->getQ(1),
-                     ds->getQ(2),
-                     ds->getRadius()) < tol)
+  if(relp->distance(ds->getQ(0),
+                    ds->getQ(1),
+                    ds->getQ(2),
+                    ds->getRadius()) < tol)
 
   {
     // is interaction in graph ?
     bool found = false;
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
-         oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+        oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
       ->relation()->accept(isSameSpherePlanR);
-      if (DSG0->bundle(DSG0->target(*oei)) == ds
+      if(DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSpherePlanR.flag)
       {
         found = true;
         break;
       }
     }
-    if (!found)
+    if(!found)
       // no
     {
       SP::NonSmoothLaw nslaw = nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds)],
@@ -934,13 +934,13 @@ void SpaceFilter::_PlanSphereNEDSFilter(SP::Simulation sim,
   {
     // is interaction in graph ?
     DynamicalSystemsGraph::OEIterator oei, oeiend;
-    for (std11::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
-         oei != oeiend; ++oei)
+    for(std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds));
+        oei != oeiend; ++oei)
     {
       DSG0->bundle(*oei)
       ->relation()->accept(isSameSpherePlanR);
 
-      if (DSG0->bundle(DSG0->target(*oei)) == ds
+      if(DSG0->bundle(DSG0->target(*oei)) == ds
           && isSameSpherePlanR.flag)
       {
         sim->unlink(DSG0->bundle(*oei));
@@ -955,14 +955,14 @@ void SpaceFilter::_PlanSphereNEDSFilter(SP::Simulation sim,
 void SpaceFilter::insert(SP::Disk ds, int i, int j, int k)
 {
 
-  SP::Hashed hashed(new Hashed(std11::static_pointer_cast<DynamicalSystem>(ds), i, j));
+  SP::Hashed hashed(new Hashed(std::static_pointer_cast<DynamicalSystem>(ds), i, j));
   _hash_table->insert(hashed);
 }
 
 void SpaceFilter::insert(SP::Circle ds, int i, int j, int k)
 {
 
-  SP::Hashed hashed(new Hashed(std11::static_pointer_cast<DynamicalSystem>(ds), i, j));
+  SP::Hashed hashed(new Hashed(std::static_pointer_cast<DynamicalSystem>(ds), i, j));
   _hash_table->insert(hashed);
 }
 
@@ -1036,9 +1036,9 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     // interactions with plans
 
-    if (parent->_plans)
+    if(parent->_plans)
     {
-      for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
+      for(unsigned int i = 0; i < parent->_plans->size(0); ++i)
       {
         parent->_PlanCircularFilter(sim,
                                     (*parent->_plans)(i, 0),
@@ -1051,9 +1051,9 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
       }
     }
 
-    if (parent->_moving_plans)
+    if(parent->_moving_plans)
     {
-      for (unsigned int i = 0; i < parent->_moving_plans->size1(); ++i)
+      for(unsigned int i = 0; i < parent->_moving_plans->size1(); ++i)
       {
         parent->_MovingPlanCircularFilter(sim, i, ds1, time);
       }
@@ -1063,8 +1063,8 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     double x1 = Q1->getValue(0);
     double y1 = Q1->getValue(1);
-    SP::Hashed hds1(new Hashed(std11::static_pointer_cast<DynamicalSystem>(ds1),
-                             (int) floor(x1 / parent->_cellsize),
+    SP::Hashed hds1(new Hashed(std::static_pointer_cast<DynamicalSystem>(ds1),
+                               (int) floor(x1 / parent->_cellsize),
                                (int) floor(y1 / parent->_cellsize)));
 
     // find all other systems that are in the same cells
@@ -1073,23 +1073,23 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
 
     unsigned int j;
     interPairs declaredInteractions;
-    std11::shared_ptr<_CircularFilter>
+    std::shared_ptr<_CircularFilter>
     circularFilter(new _CircularFilter(sim, parent, ds1));
 
-    for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
+    for(j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
       SP::DynamicalSystem ds2 = (*neighbours.first)->body;
       int ids1 = ds1->number();
       int ids2 = ds2->number();
       int imax = (std::max)(ids1, ids2);
       int imin = (std::min)(ids1, ids2);
-      if (ids1 != ids2)
+      if(ids1 != ids2)
       {
         // is interaction already treated ?
         interPair interpair;
         interpair = std::pair<int, int>(imin, imax);
 
-        if (declaredInteractions.find(interpair)
+        if(declaredInteractions.find(interpair)
             == declaredInteractions.end())
         {
           // no, check proximity
@@ -1115,7 +1115,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
   void visit(SP::SphereLDS ds1)
   {
     // interactions with plans
-    for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
+    for(unsigned int i = 0; i < parent->_plans->size(0); ++i)
     {
       parent->_PlanSphereLDSFilter(sim,
                                    (*parent->_plans)(i, 0),
@@ -1140,23 +1140,23 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     unsigned int j;
     interPairs declaredInteractions;
 
-    std11::shared_ptr<_SphereLDSFilter> sphereFilter(
+    std::shared_ptr<_SphereLDSFilter> sphereFilter(
       new _SphereLDSFilter(sim, parent, ds1));
 
-    for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
+    for(j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
       SP::DynamicalSystem ds2 = (*neighbours.first)->body;
       int ids1 = ds1->number();
       int ids2 = ds2->number();
       int imax = (std::max)(ids1, ids2);
       int imin = (std::min)(ids1, ids2);
-      if (ids1 != ids2)
+      if(ids1 != ids2)
       {
         // is interaction already treated ?
         interPair interpair;
         interpair = std::pair<int, int>(imin, imax);
 
-        if (declaredInteractions.find(interpair)
+        if(declaredInteractions.find(interpair)
             == declaredInteractions.end())
         {
           // no, check proximity
@@ -1172,7 +1172,7 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
   void visit(SP::SphereNEDS ds1)
   {
     // interactions with plans
-    for (unsigned int i = 0; i < parent->_plans->size(0); ++i)
+    for(unsigned int i = 0; i < parent->_plans->size(0); ++i)
     {
       parent->_PlanSphereNEDSFilter(sim,
                                     (*parent->_plans)(i, 0),
@@ -1197,23 +1197,23 @@ struct SpaceFilter::_FindInteractions : public SiconosVisitor
     unsigned int j;
     interPairs declaredInteractions;
 
-    std11::shared_ptr<_SphereNEDSFilter> sphereFilter(
+    std::shared_ptr<_SphereNEDSFilter> sphereFilter(
       new _SphereNEDSFilter(sim, parent, ds1));
 
-    for (j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
+    for(j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j)
     {
       SP::DynamicalSystem ds2 = (*neighbours.first)->body;
       int ids1 = ds1->number();
       int ids2 = ds2->number();
       int imax = (std::max)(ids1, ids2);
       int imin = (std::min)(ids1, ids2);
-      if (ids1 != ids2)
+      if(ids1 != ids2)
       {
         // is interaction already treated ?
         interPair interpair;
         interpair = std::pair<int, int>(imin, imax);
 
-        if (declaredInteractions.find(interpair)
+        if(declaredInteractions.find(interpair)
             == declaredInteractions.end())
         {
           // no, check proximity
@@ -1239,28 +1239,28 @@ void SpaceFilter::updateInteractions(SP::Simulation sim)
 {
   double time = sim->getTk();
   SP::DynamicalSystemsGraph
-    DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
+  DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
-  std11::shared_ptr<_BodyHash>
+  std::shared_ptr<_BodyHash>
   hasher(new _BodyHash(*sim, *this));
 
-  std11::shared_ptr<_FindInteractions>
+  std::shared_ptr<_FindInteractions>
   findInteractions(new _FindInteractions(sim, shared_from_this(), time));
 
   _hash_table->clear();
 
   // 1: rehash DS
   DynamicalSystemsGraph::VIterator vi, viend;
-  for (std11::tie(vi, viend) = DSG0->vertices();
-       vi != viend; ++vi)
+  for(std::tie(vi, viend) = DSG0->vertices();
+      vi != viend; ++vi)
   {
     // to avoid cast see dual dispatch, visitor pattern
     DSG0->bundle(*vi)->acceptSP(hasher);
   }
 
   // 2: prox detection
-  for (std11::tie(vi, viend) = DSG0->vertices();
-       vi != viend; ++vi)
+  for(std::tie(vi, viend) = DSG0->vertices();
+      vi != viend; ++vi)
   {
     DSG0->bundle(*vi)->acceptSP(findInteractions);
   }
@@ -1312,16 +1312,16 @@ double SpaceFilter::minDistance(SP::Hashed h)
   std::pair<space_hash::iterator, space_hash::iterator> neighbours
     = _hash_table->equal_range(h);
 
-  SP::SiconosVector q = std11::static_pointer_cast<LagrangianDS>(h->body)->q();
+  SP::SiconosVector q = std::static_pointer_cast<LagrangianDS>(h->body)->q();
 
   double dmin = INFINITY;
 
   {
-    SP::Disk disk = std11::static_pointer_cast<Disk>(h->body);
+    SP::Disk disk = std::static_pointer_cast<Disk>(h->body);
 
-    std11::shared_ptr<_DiskDistance> distance(new _DiskDistance((*q)(0), (*q)(1), disk->getRadius()));
+    std::shared_ptr<_DiskDistance> distance(new _DiskDistance((*q)(0), (*q)(1), disk->getRadius()));
 
-    for (; neighbours.first != neighbours.second; ++neighbours.first)
+    for(; neighbours.first != neighbours.second; ++neighbours.first)
     {
       (*neighbours.first)->body->acceptSP(distance);
 

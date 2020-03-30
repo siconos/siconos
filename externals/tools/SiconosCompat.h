@@ -23,6 +23,11 @@
     #define SN_SIZE_T_F    "%Iu"
     #define SN_SSIZE_T_F   "%Id"
     #define SN_PTRDIFF_T_F "%Id"
+
+// Note FP : I think that this is obsolete, isn't it ?
+// See https://docs.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions?view=vs-2019
+// Could we remove this and the define ?
+
 #else
     #define SN_SIZE_T_F    "%zu"
     #define SN_SSIZE_T_F   "%zd"
@@ -43,44 +48,6 @@
 #if defined(_MSC_VER)
 // for M_PI
 #define _USE_MATH_DEFINES
-
-#if _MSC_VER < 1800
-#include <float.h>
-#define isnan(x) _isnan(x)
-#define isinf(x) (!_finite(x) && !_isnan(x))
-
-/* This is really bad --xhub */
-#ifdef __cplusplus
-namespace std {
-  int isfinite(double x);
-}
-#endif
-
-inline double fmax(double x, double y)
-{
-  if (isnan(y)) return x;
-  else if (isnan(x)) return y;
-  else
-  {
-    if (x > y) return x;
-    else return y;
-  }
-}
-inline double fmin(double x, double y)
-{
-  if (isnan(y)) return x;
-  else if (isnan(x)) return y;
-  else
-  {
-    if (x > y) return y;
-    else return x;
-  }
-}
-#define INFINITY (DBL_MAX+DBL_MAX)
-#define NAN (INFINITY-INFINITY)
-#define copysign _copysign
-#define snprintf _snprintf
-#endif /* _MSC_VER < 1800 */
 
 #endif /* defined(_MSC_VER) */
 

@@ -64,7 +64,7 @@ unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGrap
   std::cout << "indexSet :" << indexSet << std::endl;
   indexSet.display();
 #endif
-  for (std11::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
+  for(std::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd)
   {
     assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
 
@@ -88,25 +88,25 @@ unsigned OSNSMatrixProjectOnConstraints::updateSizeAndPositions(InteractionsGrap
 void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool update)
 {
 
-  if (update)
+  if(update)
   {
     // Computes _dimRow and interactionBlocksPositions according to indexSet
     _dimColumn = updateSizeAndPositions(indexSet);
     _dimRow = _dimColumn;
   }
 
-  if (_storageType == 0)
+  if(_storageType == 0)
   {
 
     // === Memory allocation, if required ===
     // Mem. is allocate only if !M or if its size has changed.
-    if (update)
+    if(update)
     {
-      if (! _M1)
+      if(! _M1)
         _M1.reset(new SimpleMatrix(_dimRow, _dimColumn));
       else
       {
-        if (_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
+        if(_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
           _M1->resize(_dimRow, _dimColumn);
         _M1->zero();
       }
@@ -122,20 +122,20 @@ void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool upd
     // === Loop through "active" Interactions (ie present in
     // indexSets[level]) ===
     InteractionsGraph::VIterator vi, viend;
-    for (std11::tie(vi, viend) = indexSet.vertices();
-         vi != viend; ++vi)
+    for(std::tie(vi, viend) = indexSet.vertices();
+        vi != viend; ++vi)
     {
       SP::Interaction inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position_proj;
       assert(indexSet.blockProj[*vi]);
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(pos, pos, *(indexSet.blockProj[*vi]));
     }
 
 
     InteractionsGraph::EIterator ei, eiend;
-    for (std11::tie(ei, eiend) = indexSet.edges();
-         ei != eiend; ++ei)
+    for(std::tie(ei, eiend) = indexSet.edges();
+        ei != eiend; ++ei)
     {
       InteractionsGraph::VDescriptor vd1 = indexSet.source(*ei);
       InteractionsGraph::VDescriptor vd2 = indexSet.target(*ei);
@@ -157,11 +157,11 @@ void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool upd
       printf("OSNSMatrix lower: %i %i\n", (indexSet.lower_blockProj[*ei])->size(0), (indexSet.upper_blockProj[*ei])->size(1));
 #endif
 
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::min(pos, col), std::max(pos, col),
                  *(indexSet.upper_blockProj[*ei]));
 
-      std11::static_pointer_cast<SimpleMatrix>(_M1)
+      std::static_pointer_cast<SimpleMatrix>(_M1)
       ->setBlock(std::max(pos, col), std::min(pos, col),
                  *(indexSet.lower_blockProj[*ei]));
     }
@@ -169,12 +169,12 @@ void OSNSMatrixProjectOnConstraints::fillW(InteractionsGraph& indexSet, bool upd
   }
   else // if _storageType == 1
   {
-    if (! _M2)
+    if(! _M2)
       _M2.reset(new BlockCSRMatrix(indexSet));
     else
       _M2->fill(indexSet);
   }
-  if (update)
+  if(update)
     convert();
 }
 
@@ -194,12 +194,12 @@ unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Intera
 
   unsigned int size =  nslawSize;
 
-  if (Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
+  if(Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL ||
       Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactNSL)
   {
-    if (relationType == NewtonEuler)
+    if(relationType == NewtonEuler)
     {
-      // SP::NewtonEuler1DR ri = std11::static_pointer_cast<NewtonEuler1DR> (inter->relation());
+      // SP::NewtonEuler1DR ri = std::static_pointer_cast<NewtonEuler1DR> (inter->relation());
       // if(ri->_isOnContact)
       //   equalitySize = 1;
       size = 1;
@@ -207,7 +207,7 @@ unsigned int OSNSMatrixProjectOnConstraints::computeSizeForProjection(SP::Intera
       std::cout << "OSNSMatrixProjectOnConstraints::computeSizeForProjection : NewtonImpact * nslaw and  relationType NewtonEuler. size=1" << std::endl;
 #endif
     }
-    else if (relationType == Lagrangian)
+    else if(relationType == Lagrangian)
     {
       size = 1;
 #ifdef OSNSMPROJ_DEBUG

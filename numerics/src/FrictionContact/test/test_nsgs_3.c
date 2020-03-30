@@ -16,441 +16,378 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ONECONTA...
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for SolverOptions, solver_option...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=150;
-  int n_entry = 50;
-  char *** test_nsgs = (char ***)malloc(n_test*sizeof(char **));
+  *number_of_tests = 22;//n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  for (int n =0 ; n <n_test ; n++)
+
+  // "External" solver parameters
+  // -> same values for all tests.
+  // The differences between tests are only for internal solvers and input data.
+  int topsolver = SICONOS_FRICTION_3D_NSGS;
+  int current = 0;
+
+
   {
-    test_nsgs[n] = (char **)malloc(n_entry*sizeof(char *));
+    // Projection on cone, default values.
+    int d = 0; // FC3D_Example1_SBM.dat
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0, SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+
+    current++;
   }
 
-  int n =0;
-  int e=0;
-  int d=0;/* "./data/FC3D_Example1_SBM.dat"; */
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
+  {
+    int d = 0; // FC3D_Example1_SBM.dat
+    // Projection on cone with diagonalization, default value.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-  test_nsgs[n][e++] = "---";
-  n++;
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization);
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "---";
-  n++;
+    current++;
+  }
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-  test_nsgs[n][e++] = "1e-3";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "---";
-  n++;
+  {
+    int d = 0; // FC3D_Example1_SBM.dat
+    // Projection on cone with local iteration, set tol and max iter.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "3";
-  test_nsgs[n][e++] = "0.1";
-  test_nsgs[n][e++] = "---";
-  n++;
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    current++;
+  }
 
-  /* e=0; */
-  /* test_nsgs[n][e++] = data_collection[d]; */
-  /* test_nsgs[n][e++] = "1"; */
-  /* test_nsgs[n][e] = (char *)malloc(50*sizeof(char)); */
-  /* sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS); */
-  /* test_nsgs[n][e++] = "1e-16"; */
-  /* test_nsgs[n][e++] = "10000"; */
-  /* test_nsgs[n][e] = (char *)malloc(50*sizeof(char)); */
-  /* sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint); */
-  /* test_nsgs[n][e++] = "0.0"; */
-  /* test_nsgs[n][e++] = "10"; */
-  /* test_nsgs[n][e++] = "---";  */
-  /* n++; */
+  {
+    int d= 0; // FC3D_Example1_SBM.dat
+    // Projection on cone with regularization, set rho
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-  /* e=0; */
-  /* test_nsgs[n][e++] = data_collection[d]; */
-  /* test_nsgs[n][e++] = "1"; */
-  /* test_nsgs[n][e] = (char *)malloc(50*sizeof(char)); */
-  /* sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGSV); */
-  /* test_nsgs[n][e++] = "1e-05"; */
-  /* test_nsgs[n][e++] = "10000"; */
-  /* test_nsgs[n][e] = (char *)malloc(50*sizeof(char)); */
-  /* sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity); */
-  /* test_nsgs[n][e++] = "0.0"; */
-  /* test_nsgs[n][e++] = "0.0"; */
-  /* test_nsgs[n][e++] = "internal_iparam"; */
-  /* test_nsgs[n][e++] = "0"; */
-  /* test_nsgs[n][e++] = "0"; */
-  /* test_nsgs[n][e++] = "internal_dparam"; */
-  /* test_nsgs[n][e++] = "0"; */
-  /* test_nsgs[n][e++] = "0"; */
-  /* test_nsgs[n][e++] = "---"; */
-  /* n++; */
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_FRICTION_3D_NSN_RHO] = 0.1;
+    current++;
+  }
 
 
-  
-  d=1;/* "./data/Capsules-i122-1617.dat"; */
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "20";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "9";
-  test_nsgs[n][e++] = "1.0";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "8";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "---";
-  n++;
+  {
+    int d=1; // "./data/Capsules-i122-1617.dat"
 
-  d=2;/* "./data/Confeti-ex13-4contact-Fc3D-SBM.dat"; */
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "dparam";
-  test_nsgs[n][e++] = "9";
-  test_nsgs[n][e++] = "1.0";
-  test_nsgs[n][e++] = "iparam";
-  test_nsgs[n][e++] = "8";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "---";
-  n++;
+    // Projection on cone with local iteration, set tol, itermax, d[9], i[8]
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-12";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN);
-  test_nsgs[n][e++] = "1e-18";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "---";
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
 
-  n++;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-12";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-  test_nsgs[n][e++] = "1e-06";
-  test_nsgs[n][e++] = "100";
-  test_nsgs[n][e++] = "---";
-  n++;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 20;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    collection[current].options->internalSolvers[0]->dparam[9] = 1.; // ???
+    collection[current].options->internalSolvers[0]->iparam[8] = 1;  // ???
+    // Expected to fail ...
+    collection[current].will_fail = 1;
+    current++;
+  }
+
+  {
+    int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
+    // Projection on cone set d[9], i[8]
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+
+    collection[current].options->internalSolvers[0]->dparam[9] = 1.; // ???
+    collection[current].options->internalSolvers[0]->iparam[8] = 1;  // ???
+    // Expected to fail ...
+    collection[current].will_fail = 1;
+    current++;
+  }
+
+  {
+    int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
+    // nonsmooth newton. Set tol, max iter and i[1]. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-18;
+    collection[current].options->internalSolvers[0]->iparam[1] = 1;  // ???
+    current++;
+  }
 
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-12";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "---";
-  n++;
+  {
+    int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
+    // Projection on cone with local iteration, set tol and maxiter
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-02";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "---";
-  n++;
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
 
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "1000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-   e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-12";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-  test_nsgs[n][e++] = "1e-06";
-  test_nsgs[n][e++] = "100";
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-12";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "100";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-  
-  
-  
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 100;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+    current++;
+  }
 
 
+  {
+    int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
+    // Projection on cone with regularization, default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
+
+    current++;
+  }
+
+  {
+    int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
+    // Projection on cone, default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-2;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+
+    current++;
+  }
+
+  {
+    int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
+    // nonsmooth newton. Set tol and i[1]. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    current++;
+  }
+
+  {
+    int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
+    // Projection on cone with local iteration, set tol and maxiter
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 100;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+    current++;
+
+
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 100;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    current++;
+  }
+
+  {
+    int d = 3; // GFC3D_TwoRods1-condensed.dat
+    // nonsmooth newton. Set tol and i[1]. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-18;
+    current++;
+  }
+
+
+  {
+    int d  = 4; // FC3D_Example1.dat
+
+    // nonsmooth newton. Set tol and max iter. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-18;
+    current++;
+  }
+
+  {
+    int d = 5; // Confeti-ex03-Fc3D-SBM.dat
+    // Projection on cone, default values.
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+    // Expected to fail ...
+    collection[current].will_fail = 1;
+    current++;
+  }
+
+  {
+    int d = 5;
+    // nonsmooth newton. Set tol and max iter. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    // Expected to fail ...
+    collection[current].will_fail = 1;
+    current++;
+  }
+
+  {
+    int d = 5;
+    // Projection on cone with local iteration, set tol and maxiter
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-12;
+    current++;
+  }
+
+
+  {
+    int d = 5;
+    // Projection on cone with regularization, set tol and maxiter
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-8;
+    // Expected to fail ...
+    collection[current].will_fail = 1;
+    current++;
+  }
 
 
 
+  {
+    int d = 7;
+    // nonsmooth newton 'damped'. Set tol and max iter. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
 
-  
-  d=3 ; /* "./data/GFC3D_TwoRods1-condensed.dat"; */
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-12";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN);
-  test_nsgs[n][e++] = "1e-18";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "internal_iparam";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e++] = "---";
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    // Expected to fail ...
+    collection[current].will_fail = 1;
+    current++;
+  }
 
+  {
+    int d = 7;
+    // nonsmooth newton. Set tol and max iter. Default for other parameters
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
 
-  d=4 ; /* "./data/FC3D_Example1.dat"; */
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-12";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN);
-  test_nsgs[n][e++] = "1e-18";
-  test_nsgs[n][e++] = "10";
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+    // Expected to fail ...
+    collection[current].will_fail = 1;
+    current++;
+  }
 
+  {
+    int d = 7;
+    // Projection on cone with local iteration, set tol and maxiter
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(topsolver);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 2000;
 
+    solver_options_update_internal(collection[current].options, 0,
+                                   SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_IPARAM_MAX_ITER] = 100;
+    collection[current].options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-6;
+    // Expected to fail ...
+    collection[current].will_fail = 1;
+    current++;
+  }
 
-
-  d=5 ; /* "./data/Confeti-ex03-Fc3D-SBM.dat"; */
-
-
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
-  test_nsgs[n][e++] = "0.0";
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_NSN);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "0";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-  test_nsgs[n][e++] = "1e-12";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-05";
-  test_nsgs[n][e++] = "10000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
-  test_nsgs[n][e++] = "1e-08";
-  test_nsgs[n][e++] = "10";
-  test_nsgs[n][e++] = "---";
-  n++;
-
-
-  d=7;
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-03";
-  test_nsgs[n][e++] = "1000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d",  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "100";
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-03";
-  test_nsgs[n][e++] = "1000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d",  SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "1000";
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-03";
-  test_nsgs[n][e++] = "2000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d",  SICONOS_FRICTION_3D_ONECONTACT_NSN);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "100";
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-03";
-  test_nsgs[n][e++] = "2000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d",  SICONOS_FRICTION_3D_ONECONTACT_NSN);
-  test_nsgs[n][e++] = "1e-16";
-  test_nsgs[n][e++] = "1000";
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  e=0;
-  test_nsgs[n][e++] = data_collection[d];
-  test_nsgs[n][e++] = "1";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d", SICONOS_FRICTION_3D_NSGS);
-  test_nsgs[n][e++] = "1e-03";
-  test_nsgs[n][e++] = "2000";
-  test_nsgs[n][e] = (char *)malloc(50*sizeof(char));
-  sprintf(test_nsgs[n][e++], "%d",  SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
-  test_nsgs[n][e++] = "1e-06";
-  test_nsgs[n][e++] = "100";
-  test_nsgs[n][e++] = "---";
-  n++;
-  
-  test_nsgs[n][0] ="---";
-  return test_nsgs;
+  *number_of_tests = current;
+  return collection;
 
 }

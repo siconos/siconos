@@ -15,10 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "RollingFrictionContactProblem.h"
-#include "rolling_fc3d_local_problem_tools.h"
-#include "NumericsMatrix.h"
 
+#include "rolling_fc3d_local_problem_tools.h"
+#ifndef __cplusplus
+#include <stdbool.h>                        // for false
+#endif
+#include <stdlib.h>                         // for malloc, NULL
+#include "NumericsMatrix.h"                 // for NM_create_from_data, Nume...
+#include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 
 void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem * problem, RollingFrictionContactProblem * localproblem, double *reaction, int contact)
 {
@@ -28,6 +32,7 @@ void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem * proble
 
 
   int in = 5 * contact, it = in + 1, is = it + 1, iv = is + 1, iw = iv + 1;
+
 
   /* qLocal computation*/
   qLocal[0] = problem->q[in];
@@ -57,8 +62,8 @@ RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(RollingFricti
   localproblem->q = (double*)malloc(5 * sizeof(double));
   localproblem->mu = (double*)malloc(sizeof(double));
   localproblem->mu_r = (double*)malloc(sizeof(double));
-  
-  if (problem->M->storageType != NM_SPARSE_BLOCK)
+
+  if(problem->M->storageType != NM_SPARSE_BLOCK)
   {
     localproblem->M = NM_create_from_data(NM_DENSE, 5, 5,
                                           malloc(25 * sizeof(double)));
@@ -70,10 +75,11 @@ RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(RollingFricti
   return localproblem;
 }
 
+
 void rolling_fc3d_local_problem_free(RollingFrictionContactProblem* localproblem,
-                      RollingFrictionContactProblem* problem)
+                                     RollingFrictionContactProblem* problem)
 {
-  if (problem->M->storageType == NM_SPARSE_BLOCK)
+  if(problem->M->storageType == NM_SPARSE_BLOCK)
   {
     /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
     localproblem->M->matrix0 = NULL;

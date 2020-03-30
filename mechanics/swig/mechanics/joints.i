@@ -21,21 +21,21 @@ PY_FULL_REGISTER(JointFrictionR, Mechanics);
 %{
   // For converting interaction.relations() to known Relations
   SP::NewtonEulerJointR cast_NewtonEulerJointR(SP::Relation rel)
-    { return std11::dynamic_pointer_cast<NewtonEulerJointR>(rel); }
+    { return std::dynamic_pointer_cast<NewtonEulerJointR>(rel); }
   SP::KneeJointR cast_KneeJointR(SP::Relation rel)
-    { return std11::dynamic_pointer_cast<KneeJointR>(rel); }
+    { return std::dynamic_pointer_cast<KneeJointR>(rel); }
   SP::PivotJointR cast_PivotJointR(SP::Relation rel)
-    { return std11::dynamic_pointer_cast<PivotJointR>(rel); }
+    { return std::dynamic_pointer_cast<PivotJointR>(rel); }
   SP::PrismaticJointR cast_PrismaticJointR(SP::Relation rel)
-    { return std11::dynamic_pointer_cast<PrismaticJointR>(rel); }
+    { return std::dynamic_pointer_cast<PrismaticJointR>(rel); }
   SP::FixedJointR cast_FixedJointR(SP::Relation rel)
-    { return std11::dynamic_pointer_cast<FixedJointR>(rel); }
+    { return std::dynamic_pointer_cast<FixedJointR>(rel); }
   SP::CylindricalJointR cast_CylindricalJointR(SP::Relation rel)
-    { return std11::dynamic_pointer_cast<CylindricalJointR>(rel); }
+    { return std::dynamic_pointer_cast<CylindricalJointR>(rel); }
   SP::CouplerJointR cast_CouplerJointR(SP::Relation rel)
-    { return std11::dynamic_pointer_cast<CouplerJointR>(rel); }
+    { return std::dynamic_pointer_cast<CouplerJointR>(rel); }
   SP::JointStopR cast_JointStopR(SP::Relation rel)
-    { return std11::dynamic_pointer_cast<JointStopR>(rel); }
+    { return std::dynamic_pointer_cast<JointStopR>(rel); }
   SP::JointFrictionR cast_JointFrictionR(SP::Relation rel)
-    { return std11::dynamic_pointer_cast<JointFrictionR>(rel); }
+    { return std::dynamic_pointer_cast<JointFrictionR>(rel); }
 %}

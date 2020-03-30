@@ -22,14 +22,8 @@
   Subroutines for the resolution of contact problems with friction (3-dimensional case).
 
 */
-
-#include "GlobalFrictionContactProblem.h"
-#include "FrictionContactProblem.h"
-
-#include "SolverOptions.h"
-#include "Friction_cst.h"
-#include "gfc3d_nonsmooth_Newton_AlartCurnier.h"
-
+#include "NumericsFwd.h"  // for FrictionContactProblem, GlobalFrictionConta...
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"

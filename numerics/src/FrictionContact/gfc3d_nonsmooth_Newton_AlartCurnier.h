@@ -19,8 +19,7 @@
 #ifndef gfc3d_nonsmooth_Newton_AlartCurnier_h
 #define gfc3d_nonsmooth_Newton_AlartCurnier_h
 
-#include "SolverOptions.h"
-#include "GlobalFrictionContactProblem.h"
+#include "NumericsFwd.h"  // for SolverOptions
 
 int gfc3d_nonsmooth_Newton_AlartCurnier_setDefaultSolverOptions(
   SolverOptions* options);

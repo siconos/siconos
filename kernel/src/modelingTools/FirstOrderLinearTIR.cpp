@@ -15,12 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+#include <iostream>
 #include "SimpleMatrix.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "Interaction.hpp"
 #include "BlockVector.hpp"
 #include "SimulationGraphs.hpp"
-#include <iostream>
+#include "SiconosAlgebraProd.hpp" // for matrix-vector prod
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -59,9 +60,9 @@ void FirstOrderLinearTIR::initialize(Interaction& inter)
 
   FirstOrderR::initialize(inter); // ?
 
-  if (!_C)
+  if(!_C)
     RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() C is null and is a required input.");
-  if (!_B)
+  if(!_B)
     RuntimeException::selfThrow("FirstOrderLinearTIR::initialize() B is null and is a required input.");
 
   checkSize(inter);
@@ -70,22 +71,23 @@ void FirstOrderLinearTIR::initialize(Interaction& inter)
 void FirstOrderLinearTIR::checkSize(Interaction& inter)
 {
   DEBUG_PRINT("FirstOrderLinearTIR::checkSize(Interaction & inter)\n");
-  DEBUG_PRINTF("_C->size(0) = %i,\t inter.dimension() = %i\n ",_C->size(0),inter.dimension() );
-  DEBUG_PRINTF("_C->size(1) = %i,\t inter.getSizeOfDS() = %i\n ",_C->size(1),inter.getSizeOfDS() );
+  DEBUG_PRINTF("_C->size(0) = %i,\t inter.dimension() = %i\n ",_C->size(0),inter.dimension());
+  DEBUG_PRINTF("_C->size(1) = %i,\t inter.getSizeOfDS() = %i\n ",_C->size(1),inter.getSizeOfDS());
 
-  assert((_C->size(0) == inter.dimension() && _C->size(1) == inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction.");
+  assert((_C->size(0) == inter.dimension() && _C->size(1) == inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and Interaction sizes.");
 
-  assert((_B->size(1) == inter.dimension() && _B->size(0) ==  inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction.");
+  assert((_B->size(1) == inter.dimension() && _B->size(0) ==  inter.getSizeOfDS()) && "FirstOrderLinearTIR::initialize , inconsistent size between B and interaction sizes.");
 
   // C and B are the minimum inputs. The others may remain null.
 
-  if (_D)
-    assert((_D->size(0) == inter.dimension() || _D->size(1) == inter.dimension()) && "FirstOrderLinearTIR::initialize , inconsistent size between C and D.");
+  if(_D)
+    assert((_D->size(0) == inter.dimension() || _D->size(1) == inter.dimension()) && "FirstOrderLinearTIR::initialize , inconsistent size between D and interaction sizes");
 
+  DEBUG_EXPR(if(_F) _F->display(); (inter.linkToDSVariables())[FirstOrderR::z]->display(););
 
-  if (_F)
-    assert(((_F->size(0) != inter.dimension()) && (_F->size(1) != (inter.linkToDSVariables())[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between C and F.");
-  if (_e)
+  if(_F)
+    assert(((_F->size(0) == inter.dimension()) && (_F->size(1) == (inter.linkToDSVariables())[FirstOrderR::z]->size())) && "FirstOrderLinearTIR::initialize , inconsistent size between F and z.");
+  if(_e)
     assert(_e->size() == inter.dimension() && "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
 
 }
@@ -93,18 +95,18 @@ void FirstOrderLinearTIR::checkSize(Interaction& inter)
 void FirstOrderLinearTIR::computeh(BlockVector& x, SiconosVector& lambda, BlockVector& z, SiconosVector& y)
 {
 
-  if (_C)
+  if(_C)
     prod(*_C, x, y, true);
   else
     y.zero();
 
-  if (_D)
+  if(_D)
     prod(*_D, lambda, y, false);
 
-  if (_e)
+  if(_e)
     y += *_e;
 
-  if (_F)
+  if(_F)
     prod(*_F, z, y, false);
 
 }
@@ -138,19 +140,19 @@ void FirstOrderLinearTIR::display() const
 {
   std::cout << " ===== Linear Time Invariant relation display ===== " <<std::endl;
   std::cout << "| C " <<std::endl;
-  if (_C) _C->display();
-  else std::cout << "->NULL" <<std::endl;
+  if(_C) _C->display();
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| D " <<std::endl;
-  if (_D) _D->display();
-  else std::cout << "->NULL" <<std::endl;
+  if(_D) _D->display();
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| F " <<std::endl;
-  if (_F) _F->display();
-  else std::cout << "->NULL" <<std::endl;
+  if(_F) _F->display();
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| e " <<std::endl;
-  if (_e) _e->display();
-  else std::cout << "->NULL" <<std::endl;
+  if(_e) _e->display();
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << "| B " <<std::endl;
-  if (_B) _B->display();
-  else std::cout << "->NULL" <<std::endl;
+  if(_B) _B->display();
+  else std::cout << "->nullptr" <<std::endl;
   std::cout << " ================================================== " <<std::endl;
 }

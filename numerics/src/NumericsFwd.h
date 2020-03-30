@@ -42,8 +42,8 @@ TYPEDEF_STRUCT(SecondOrderConeLinearComplementarityProblem_as_VI)
 TYPEDEF_STRUCT(RelayProblem)
 TYPEDEF_STRUCT(NonlinearComplementarityProblem)
 TYPEDEF_STRUCT(MixedLinearComplementarityProblem)
+TYPEDEF_STRUCT(MixedComplementarityProblem_old)
 TYPEDEF_STRUCT(MixedComplementarityProblem)
-TYPEDEF_STRUCT(MixedComplementarityProblem2)
 TYPEDEF_STRUCT(LinearComplementarityProblem)
 TYPEDEF_STRUCT(LinearComplementarityProblem_as_ConvexQP)
 TYPEDEF_STRUCT(GlobalFrictionContactProblem)
@@ -60,7 +60,5 @@ TYPEDEF_STRUCT(VariationalInequality)
 TYPEDEF_STRUCT(AffineVariationalInequalities)
 TYPEDEF_STRUCT(ConvexQP)
 TYPEDEF_STRUCT(ConvexQP_as_VI)
-
-
 
 #endif

@@ -11,9 +11,9 @@ protected:
   /** coordinate of the center of mass in the just loaded model*/
   SP::SiconosVector _centerOfMass;
   //! The name of the body.
-  const std::string& _mBodyName;
+  const std::string _mBodyName;
   //! The cad file.
-  const std::string& _cadFileName;
+  const std::string _cadFileName;
   MBTB_Body();
 public:
   /** Basic constructor without plugin builder

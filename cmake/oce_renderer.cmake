@@ -2,10 +2,9 @@
 # This part is dedicated to the installation of oce renderer files (no build, only conf and installation).
 if(HAVE_SICONOS_MECHANICS AND WITH_RENDERER)
  
-  # This files is not installed as a program, even though it is one.
+  # This file is not installed as a program, even though it is one.
   # Remove the comment if you know how it should be installed --xhub
   #  configure_file(io/SimpleGui.py ${SICONOS_SWIG_ROOT_DIR}/io/SimpleGui.py @ONLY) 
-
 
   file(GLOB rendererFiles RELATIVE ${CMAKE_SOURCE_DIR}/externals/renderer  ${CMAKE_SOURCE_DIR}/externals/renderer/img/*.*)
   foreach(rendererFile IN LISTS rendererFiles)

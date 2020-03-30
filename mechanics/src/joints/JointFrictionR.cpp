@@ -37,12 +37,12 @@
 JointFrictionR::JointFrictionR(SP::NewtonEulerJointR joint, unsigned int axis)
   : NewtonEulerR()
   , _joint(joint)
-  , _axis(std11::make_shared< std::vector<unsigned int> >())
+  , _axis(std::make_shared< std::vector<unsigned int> >())
 {
   _axis->push_back(axis);
   _axisMin = axis;
   _axisMax = axis;
-  assert( (_axisMax - _axisMin + 1) <= _joint->numberOfDoF() );
+  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 
 /** Initialize a multidimensional joint friction, e.g. the cone friction on
@@ -52,24 +52,24 @@ JointFrictionR::JointFrictionR(SP::NewtonEulerJointR joint, SP::UnsignedIntVecto
   , _joint(joint)
   , _axis(axes)
 {
-  if (axes)
+  if(axes)
   {
     _axisMin = 100;
     _axisMax = 0;
-    for (unsigned int i=0; i < _axis->size(); i++)
+    for(unsigned int i=0; i < _axis->size(); i++)
     {
-      if ((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
-      if ((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
+      if((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
+      if((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
     }
   }
   else
   {
     _axisMin = _axisMax = 0;
-    _axis = std11::make_shared< std::vector<unsigned int> >();
+    _axis = std::make_shared< std::vector<unsigned int> >();
     _axis->push_back(0);
   }
 
-  assert( (_axisMax - _axisMin + 1) <= _joint->numberOfDoF() );
+  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 
 void JointFrictionR::computeh(double time, BlockVector& q0, SiconosVector& y)
@@ -83,10 +83,10 @@ void JointFrictionR::computeJachq(double time, Interaction& inter, SP::BlockVect
   unsigned int n = _axisMax - _axisMin + 1;
   assert(n==1); // For now, multi-axis support TODO
 
-  if (!_jachqTmp || !(_jachqTmp->size(1) == q0->size() &&
-                      _jachqTmp->size(0) == n))
+  if(!_jachqTmp || !(_jachqTmp->size(1) == q0->size() &&
+                     _jachqTmp->size(0) == n))
   {
-    _jachqTmp = std11::make_shared<SimpleMatrix>(n, q0->size());
+    _jachqTmp = std::make_shared<SimpleMatrix>(n, q0->size());
   }
 
   // Compute the jacobian for the required range of axes
@@ -95,8 +95,9 @@ void JointFrictionR::computeJachq(double time, Interaction& inter, SP::BlockVect
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation
   assert(_jachq->size(0)==1);
-  for (unsigned int i=0; i<1; i++)
-    for (unsigned int j=0; j<_jachq->size(1); j++) {
+  for(unsigned int i=0; i<1; i++)
+    for(unsigned int j=0; j<_jachq->size(1); j++)
+    {
       _jachq->setValue(i,j,_jachqTmp->getValue((*_axis)[i]-_axisMin,j) * (i==1?1:-1));
     }
 }

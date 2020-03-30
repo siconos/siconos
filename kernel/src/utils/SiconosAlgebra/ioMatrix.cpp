@@ -35,22 +35,22 @@ namespace ioMatrix
 bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m)
 {
   std::ifstream infile;
-  if (mode == "ascii")
+  if(mode == "ascii")
     infile.open(fileName.c_str(), std::ifstream::in);
-  else if (mode == "binary")
+  else if(mode == "binary")
     infile.open(fileName.c_str(), std::ifstream::binary);
   else
     SiconosMatrixException::selfThrow("ioMatrix::read Incorrect mode for reading");
 
-  if (!infile.good())
+  if(!infile.good())
     SiconosMatrixException::selfThrow("ioMatrix::read error : Fail to open \"" + fileName + "\"");
 
-  if (infile.peek() == std::ifstream::traits_type::eof())
+  if(infile.peek() == std::ifstream::traits_type::eof())
   {
     SiconosMatrixException::selfThrow("ioMatrix::read : the given file is empty!");
   }
 
-  if (m.isBlock())
+  if(m.isBlock())
     SiconosMatrixException::selfThrow("ioMatrix::read not yet implemented for block matrix.");
 
   infile.precision(15);
@@ -64,7 +64,7 @@ bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m
   infile >> s1;
   infile >> s2;
 
-  if (s1 != p.size1() || s2 != p.size2())
+  if(s1 != p.size1() || s2 != p.size2())
     p.resize(s1, s2);
 
   // Note: using istream stl iterator seems to be 2-times faster than << with a loop over matrix data.
@@ -76,9 +76,9 @@ bool read(const std::string& fileName, const std::string& mode, SiconosMatrix& m
   //    std::cout.precision(15);
   //    std::cout.setf(std::ios::scientific);
 
-  for (unsigned int i = 0; i < s1; i++)
+  for(unsigned int i = 0; i < s1; i++)
   {
-    for (unsigned int j = 0; j < s2; j++)
+    for(unsigned int j = 0; j < s2; j++)
     {
       infile >> p(i, j);
       /* fail on ubuntu 14.04 assert(infile.good());*/
@@ -97,38 +97,38 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
 {
   // Open file and various checks
   std::ofstream outfile;
-  if (mode == "ascii")
+  if(mode == "ascii")
     outfile.open(fileName.c_str(), std::ofstream::out);
-  else if (mode == "binary")
+  else if(mode == "binary")
     outfile.open(fileName.c_str(), std::ofstream::binary);
   else
     SiconosMatrixException::selfThrow("ioMatrix::write Incorrect mode for writing");
 
-  if (!outfile.good())
+  if(!outfile.good())
     SiconosMatrixException::selfThrow("ioMatrix:: write error : Fail to open \"" + fileName + "\"");
 
-  if (m.isBlock())
+  if(m.isBlock())
     SiconosMatrixException::selfThrow("ioMatrix:: write error : not yet implemented for BlockMatrix");
 
   outfile.precision(15);
   outfile.setf(std::ios::scientific);
   // Writing
 
-  if (outputType != "noDim")
+  if(outputType != "noDim")
     outfile << m.size(0) << " " << m.size(1) << std::endl;
 
-  if (m.num() == 1)
+  if(m.num() == 1)
   {
     // DenseMat * p = m.dense();
     DenseMat::iterator1 row;
     DenseMat::iterator2 col;
     double tmp;
-    for (unsigned int i = 0; i < m.size(0); i++)
+    for(unsigned int i = 0; i < m.size(0); i++)
     {
-      for (unsigned int j = 0; j < m.size(1); j++)
+      for(unsigned int j = 0; j < m.size(1); j++)
       {
         tmp = m(i, j);
-        if (fabs(tmp) < std::numeric_limits<double>::min()) tmp = 0.0;
+        if(fabs(tmp) < std::numeric_limits<double>::min()) tmp = 0.0;
         outfile << tmp << " " ;
         assert(outfile.good());
       }
@@ -136,31 +136,31 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
 
     }
   }
-  else if (m.num() == 2)
+  else if(m.num() == 2)
   {
     TriangMat * p = m.triang();
     TriangMat::iterator1 row;
-    for (row = p->begin1(); row != p->end1() ; ++row)
+    for(row = p->begin1(); row != p->end1() ; ++row)
     {
       std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
       outfile << std::endl;
     }
   }
-  else if (m.num() == 3)
+  else if(m.num() == 3)
   {
     SymMat * p = m.sym();
     SymMat::iterator1 row;
-    for (row = p->begin1(); row != p->end1() ; ++row)
+    for(row = p->begin1(); row != p->end1() ; ++row)
     {
       std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
       outfile << std::endl;
     }
   }
-  else if (m.num() == 4)
+  else if(m.num() == 4)
   {
     SparseMat * p = m.sparse();
     SparseMat::iterator1 row;
-    for (row = p->begin1(); row != p->end1() ; ++row)
+    for(row = p->begin1(); row != p->end1() ; ++row)
     {
       std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
       outfile << std::endl;
@@ -170,7 +170,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
   {
     BandedMat * p = m.banded();
     BandedMat::iterator1 row;
-    for (row = p->begin1(); row != p->end1() ; ++row)
+    for(row = p->begin1(); row != p->end1() ; ++row)
     {
       std::copy(row.begin(), row.end(), std::ostream_iterator<double>(outfile, " "));
       outfile << std::endl;
@@ -186,48 +186,50 @@ double compareRefFile(const SimpleMatrix& data, std::string filename, double eps
                       bool verbose)
 {
   SP::SimpleMatrix r;
-  if (!ref) ref = &r;
-  *ref = std11::make_shared<SimpleMatrix>(data);
+  if(!ref) ref = &r;
+  *ref = std::make_shared<SimpleMatrix>(data);
   (*ref)->zero();
   bool compare = false;
 
-  try {
+  try
+  {
     compare = ioMatrix::read(filename, mode, **ref);
   }
-  catch (SiconosMatrixException &e) {
-    if (verbose)
+  catch(SiconosMatrixException &e)
+  {
+    if(verbose)
       std::cout << "Warning: reference file " << filename
                 << " not found, no comparison performed." << std::endl;
   }
-  if (!compare)
+  if(!compare)
     return -1.0;
 
-  if (verbose)
+  if(verbose)
     std::cout << "Comparison with reference file " << filename << std::endl;
 
   SP::SiconosVector err(new SiconosVector(data.size(1)));
   (data - **ref).normInfByColumn(err);
 
-  if (verbose)
+  if(verbose)
     err->display();
 
-  if (index.size()==0)
-    for (unsigned int i = 0; i < err->size(); ++i)
+  if(index.size()==0)
+    for(unsigned int i = 0; i < err->size(); ++i)
       index.push_back(i);
 
   /* Scalar error = max of columns */
   double error = 0.0;
-  for (unsigned int i = 0; i < index.size(); ++i)
+  for(unsigned int i = 0; i < index.size(); ++i)
   {
-    if (error < (*err)(index[i]))
+    if(error < (*err)(index[i]))
       error = (*err)(index[i]);
   }
 
-  if (verbose)
+  if(verbose)
     std::cout << "Error = " << error << std::endl;
-  if (error > epsilon)
+  if(error > epsilon)
   {
-    if (verbose)
+    if(verbose)
     {
       std::cout << "Warning. The results are rather different from the reference file." << std::endl;
       std::cout << "Error = "<< error << std::endl;

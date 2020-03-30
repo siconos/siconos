@@ -16,125 +16,85 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-char *** test_collection(int, char **);
+#include <stdlib.h>                      // for malloc
+#include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC
+#include "NumericsFwd.h"                 // for SolverOptions
+#include "SolverOptions.h"               // for solver_options_create, Solve...
+#include "frictionContact_test_utils.h"  // for build_test_collection
+#include "test_utils.h"                  // for TestCase
 
-char *** test_collection(int n_data_1, char ** data_collection_1)
+TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
 {
-  int n_test=200;
-  int n_entry = 50;
-  char *** test_nsn = (char ***)malloc(n_test*sizeof(char **));
+  int n_solvers = 6;
+  *number_of_tests = n_data * n_solvers;
+  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
-  for (int n =0 ; n <n_test ; n++)
+  int current = 0;
+  for(int d =0; d <n_data; d++)
   {
-    test_nsn[n] = (char **)malloc(n_entry*sizeof(char *));
-  }
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    current++;
 
-  int n =0;
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-    test_nsn[n][e++] = "1e-5";
-    test_nsn[n][e++] = "10000";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "iparam";
-    test_nsn[n][e++] = "1";
-    test_nsn[n][e++] = "1";
-    test_nsn[n][e++] = "---";
-
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC_TEST);
-    test_nsn[n][e++] = "1e-5";
-    test_nsn[n][e++] = "10000";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e++] = "iparam";
-    test_nsn[n][e++] = "1";
-    test_nsn[n][e++] = "1";
-    test_nsn[n][e++] = "---";
-    n++;
-  }
-  for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC);
-    test_nsn[n][e++] = "1e-3";
-    test_nsn[n][e++] = "1000";
-    test_nsn[n][e++] = "---";
-    n++;
   }
 
-  for ( int d =0; d <n_data_1; d++)
+  for(int d =0; d <n_data; d++)
   {
-    int e=0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_AC_TEST);
-    test_nsn[n][e++] = "1e-3";
-    test_nsn[n][e++] = "1000";
-    test_nsn[n][e++] = "---";
-    n++;
-  }
-   for ( int d =0; d <n_data_1; d++)
-  {
-    int e =0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_FB);
-    test_nsn[n][e++] = "1e-3";
-    test_nsn[n][e++] = "1000";
-    test_nsn[n][e++] = "---";
-    n++;
-  }
-
-   for ( int d =0; d <n_data_1; d++)
-  {
-    int e=0;
-    test_nsn[n][e++] = data_collection_1[d];
-    test_nsn[n][e++] = "0";
-    test_nsn[n][e] = (char *)malloc(50*sizeof(char));
-    sprintf(test_nsn[n][e++], "%d", SICONOS_FRICTION_3D_NSN_NM);
-    test_nsn[n][e++] = "1e-3";
-    test_nsn[n][e++] = "1000";
-    test_nsn[n][e++] = "---";
-    n++;
-  }
-
-#ifndef WITH_MUMPS /* Works only with MUMPS */
-   test_nsn[29][1] ="1";
-   test_nsn[30][1] ="1";
-   test_nsn[31][1] ="1";
-   test_nsn[32][1] ="1";
-   test_nsn[33][1] ="1";
-   test_nsn[79][1] ="1";
-   test_nsn[80][1] ="1";
-   test_nsn[81][1] ="1";
-   test_nsn[82][1] ="1";
-   test_nsn[83][1] ="1";
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_TEST);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
+    current++;
+#ifndef WITH_MUMPS
+    if(d>=4 && d<9) // Capsules tests work only with mumps
+      collection[current - 1].will_fail = 1;
 #endif
+  }
 
-  test_nsn[n][0] ="---";
-  return test_nsn;
+  for(int d =0; d <n_data; d++)
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
+  }
+
+  for(int d =0; d <n_data; d++)
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_AC_TEST);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
+#ifndef WITH_MUMPS
+    if(d>=4 && d<9) // Capsules tests work only with mumps
+      collection[current - 1].will_fail = 1;
+#endif
+  }
+
+  for(int d =0; d <n_data; d++)
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_FB);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
+  }
+
+  for(int d =0; d <n_data; d++)
+  {
+    collection[current].filename = data_collection[d];
+    collection[current].options = solver_options_create(SICONOS_FRICTION_3D_NSN_NM);
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
+    current++;
+  }
+
+
+  *number_of_tests = current;
+  return collection;
 
 }

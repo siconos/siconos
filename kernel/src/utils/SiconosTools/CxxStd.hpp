@@ -21,12 +21,12 @@
 
 
 // Proper definition of isnan
-#ifndef SICONOS_ISNAN
-#define SICONOS_ISNAN
-#include "SiconosConfig.h"
-#include <cmath>
-//#ifndef SICONOS_STD_ISNAN_ALREADY_HERE_AND_I_DO_NOT_KNOW_WHY
-using std::isnan;
-using std::isinf;
-//#endif
-#endif
+// #ifndef SICONOS_ISNAN
+// #define SICONOS_ISNAN
+// #include "SiconosConfig.h"
+// #include <cmath>
+// #ifndef SICONOS_STD_ISNAN_ALREADY_HERE_AND_I_DO_NOT_KNOW_WHY
+// using std::isnan;
+// using std::isinf;
+// #endif
+// #endif

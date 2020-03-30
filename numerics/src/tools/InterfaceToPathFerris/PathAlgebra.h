@@ -5,7 +5,7 @@
   \brief functions and tools used to convert matrices between Numerics and Path format
 */
 
-#include "SiconosConfig.h"
+#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
