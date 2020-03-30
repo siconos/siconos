@@ -62,6 +62,31 @@ FIX_DIRECTOR_TYPEMAPS(TYPE)
 REF_PTR(TYPE)
 %enddef
 
+%define PY_REGISTER_WITHOUT_PICKLE(TYPE, COMPONENT)
+%inline
+%{
+#include <TYPE.hpp>
+%}
+%rename  (__getitem__) TYPE ## ::operator[];
+%rename  (__add__) TYPE ## ::operator+;
+%rename  (__mul__) TYPE ## ::operator*;
+%rename  (__div__) TYPE ## ::operator/;
+%rename  (__iadd__) TYPE ## ::operator+=;
+%rename  (__imul__) TYPE ## ::operator*=;
+%rename  (__idiv__) TYPE ## ::operator/=;
+%rename  (__eq__) TYPE ## ::operator==;
+%rename  (__ne__) TYPE ## ::operator!=;
+%rename  (__copy__) TYPE ## ::operator=;
+%feature("director") TYPE;
+%ignore std::enable_shared_from_this<TYPE>;
+%shared_ptr(std::enable_shared_from_this<TYPE>); // warning 520 suppression
+%template (shared ## TYPE) std::enable_shared_from_this<TYPE>;
+%shared_ptr(TYPE);
+FIX_DIRECTOR_TYPEMAPS(TYPE)
+%include TYPE.hpp
+REF_PTR(TYPE)
+%enddef
+
 %define PY_REGISTER_WITHOUT_DIRECTOR(TYPE, COMPONENT)
 %inline
 %{

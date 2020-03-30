@@ -197,11 +197,15 @@ PY_REGISTER_BULLET_COLLISION_DETECTION(btUniformScalingShape);
 typedef Interaction Interaction;
 
 %include "BulletSiconosFwd.hpp"
-PY_FULL_REGISTER(BulletR, Mechanics);
-PY_FULL_REGISTER(Bullet1DR, Mechanics);
 
-
-
+// Do not serialize (pickle) Bullet relations, because they can ony be
+// created by SiconosBulletCollisionManager when running Bullet
+// narrow-phase collision detection.
+PY_REGISTER_WITHOUT_PICKLE(BulletR, Mechanics);
+PY_REGISTER_WITHOUT_PICKLE(Bullet1DR, Mechanics);
+PY_REGISTER_WITHOUT_PICKLE(Bullet2dR, Mechanics);
+PY_REGISTER_WITHOUT_PICKLE(Bullet2d3DR, Mechanics);
+PY_REGISTER_WITHOUT_PICKLE(Bullet5DR, Mechanics);
 
 %inline
 {

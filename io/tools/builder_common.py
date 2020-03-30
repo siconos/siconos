@@ -28,8 +28,6 @@ input_headers = {
                   "SiconosJoints.hpp",
                   "SiconosCollision.hpp",
                   "SiconosBulletCollisionManager.hpp",
-                  "Bullet1DR.hpp",
-                  "BulletR.hpp",
     ],
 
     # fix missing forwards for Control
