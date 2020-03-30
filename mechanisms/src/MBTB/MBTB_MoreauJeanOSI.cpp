@@ -3,7 +3,6 @@
 //#define DEBUG_MESSAGES
 //#define DEBUG_WHERE_MESSAGES
 #include <debug.h>
-#include "CxxStd.hpp"
 
 //#define STANDARD_ACTIVATION
 #define FIRSTWAY_ACTIVATION

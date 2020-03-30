@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#include "CxxStd.hpp"
 #include "SiconosMatrixSetBlock.hpp"
 #include "SiconosAlgebraProd.hpp"
 #include "NewtonEulerDS.hpp"

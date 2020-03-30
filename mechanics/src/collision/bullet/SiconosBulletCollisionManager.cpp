@@ -67,7 +67,6 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include <map>
 #include <limits>
 #include <boost/format.hpp>
-#include <CxxStd.hpp>
 
 #include <Relation.hpp>
 #include <Simulation.hpp>

@@ -28,7 +28,6 @@
 #include "FirstOrderType2R.hpp"
 #include "FirstOrderType1R.hpp"
 #include "NonSmoothLaw.hpp"
-#include "CxxStd.hpp"
 #include "OneStepNSProblem.hpp"
 #include "BlockVector.hpp"
 // #define DEBUG_NOCOLOR
