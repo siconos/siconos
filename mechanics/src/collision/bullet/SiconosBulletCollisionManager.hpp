@@ -90,7 +90,7 @@ protected:
   ACCEPT_SERIALIZATION(SiconosBulletCollisionManager);
 
 protected:
-  SP::SiconosBulletCollisionManager_impl impl;
+  SP::SiconosBulletCollisionManager_impl _impl;
 
   void initialize_impl();
 
