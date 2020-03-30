@@ -28,7 +28,6 @@
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
-#include "CxxStd.hpp"
 #include "TypeName.hpp"
 
 #include "OneStepNSProblem.hpp"

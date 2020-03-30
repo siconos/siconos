@@ -22,7 +22,6 @@
 #include "Simulation.hpp"
 #include <cmath>
 #include <limits> // for ULONG_MAX
-#include "CxxStd.hpp"
 #include <gmp.h>
 #include <iostream>
 #include <set>

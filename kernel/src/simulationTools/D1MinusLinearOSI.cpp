@@ -26,7 +26,6 @@
 #include "NewtonEulerR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "BlockVector.hpp"
-#include "CxxStd.hpp"
 #include "Topology.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"

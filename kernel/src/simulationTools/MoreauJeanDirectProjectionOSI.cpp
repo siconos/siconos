@@ -24,9 +24,6 @@
 #include "LagrangianR.hpp"
 #include "BlockVector.hpp"
 
-#include "CxxStd.hpp"
-
-
 #include "TypeName.hpp"
 using namespace RELATION;
 //#define STANDARD_ACTIVATION
