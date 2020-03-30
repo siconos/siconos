@@ -1833,6 +1833,12 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
   return Atrans;
 }
 
+bool NM_destructible(NumericsMatrix* A)
+{
+  return A->destructible == A;
+}
+
+
 NumericsMatrix* NM_preserve(NumericsMatrix* A)
 {
   if (NM_destructible(A))

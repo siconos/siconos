@@ -228,10 +228,7 @@ extern "C"
   /** Check if a matrix is destructible.
    * \param[in] A the NumericsMatrix
    * \return true if the matrix is destructible */
-  bool NM_destructible(NumericsMatrix* A)
-  {
-    return A->destructible == A;
-  }
+  bool NM_destructible(NumericsMatrix* A);
 
   /** Preservation of a matrix before in-place transformations such as
    * factorizations.
