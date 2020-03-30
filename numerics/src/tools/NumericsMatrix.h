@@ -225,25 +225,34 @@ extern "C"
    */
   void NM_null(NumericsMatrix* A);
 
-  /** preserve a matrix before in-place transformations such as factorizations.
+  /** Check if a matrix is destructible.
    * \param[in] A the NumericsMatrix
-   * \return a pointer on the destructible Matrix;
+   * \return true if the matrix is destructible */
+  bool NM_destructible(NumericsMatrix* A)
+  {
+    return A->destructible == A;
+  }
+
+  /** Preservation of a matrix before in-place transformations such as
+   * factorizations.
+   * \param[in] A the NumericsMatrix
+   * \return a pointer on the preserved Matrix;
    */
   RawNumericsMatrix* NM_preserve(NumericsMatrix* A);
 
-  /** clear the preserved part of a matrix.
+  /** Set the matrix as destructible, clear the preserved data.
    * \param[in] A the NumericsMatrix
    * \return a pointer on the Matrix;
    */
   RawNumericsMatrix* NM_unpreserve(NumericsMatrix* A);
 
-  /** check for a previous factorization.
+  /** Check for a previous factorization.
    * \param[in] A the NumericsMatrix
    * \return true if the matrix has been factorized.
    */
   bool NM_factorized(NumericsMatrix* A);
 
-  /** set the factorization flag.
+  /** Set the factorization flag.
    * \param[in] A the NumericsMatrix
    */
   void NM_set_factorized(NumericsMatrix* A);

@@ -536,7 +536,7 @@ void NM_clear(NumericsMatrix* m)
   NM_internalData_free(m);
 
   /* restore the destructible pointer */
-  if (m->destructible != m)
+  if (!NM_destructible(m))
   {
     NM_clear(m->destructible);
     m->destructible = m;
@@ -1835,7 +1835,7 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
 
 NumericsMatrix* NM_preserve(NumericsMatrix* A)
 {
-  if (A->destructible == A)
+  if (NM_destructible(A))
   {
     if (NM_factorized(A))
     {
@@ -1847,7 +1847,7 @@ NumericsMatrix* NM_preserve(NumericsMatrix* A)
     A->destructible = B;
     assert(A->destructible->destructible == A->destructible);
   };
-  return A->destructible;
+  return A;
 }
 
 NumericsMatrix* NM_unpreserve(NumericsMatrix* A)
@@ -2263,7 +2263,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   NM_MPI_copy(A, B);
   NM_MUMPS_copy(A, B);
 
-  if (A->destructible == A)
+  if (NM_destructible(A))
   {
     /* A is destructible, so B must be destructible */
     B->destructible = B;
@@ -2271,7 +2271,7 @@ void NM_copy(const NumericsMatrix* const A, NumericsMatrix* B)
   else
   {
     /* A is preserved, so B must be preserved */
-    assert(B->destructible == B);
+    assert(!NM_destructible(B));
     NM_preserve(B);
   }
 }
