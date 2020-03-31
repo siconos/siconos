@@ -794,7 +794,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     cblas_dscal(m + nd + nd, -1.0, rhs, 1);
 
     /* Newton system solving */
-    NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
+    NM_LU_solve(J, rhs, 1);
 
     d_globalVelocity = rhs;
     d_velocity = rhs + m;
@@ -856,7 +856,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     cblas_dscal(m + nd + nd, -1.0, rhs, 1);
 
     /* Newton system solving */
-    NM_gesv_expert(J, rhs, NM_KEEP_FACTORS);
+    NM_LU_solve(J, rhs, 1);
 
     NM_clear(J);
     free(J);

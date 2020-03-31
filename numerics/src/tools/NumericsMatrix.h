@@ -250,9 +250,10 @@ extern "C"
   bool NM_factorized(NumericsMatrix* A);
 
   /** Set the factorization flag.
-   * \param[in] A the NumericsMatrix
+   * \param[in] A the NumericsMatrix,
+   * \param[in] flag a boolean.
    */
-  void NM_set_factorized(NumericsMatrix* A);
+  void NM_set_factorized(NumericsMatrix* A, bool flag);
 
   /** update the size of the matrix based on the matrix data
    * \param[in,out] A the matrix which size is updated*/

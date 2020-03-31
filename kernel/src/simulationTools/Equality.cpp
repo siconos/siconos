@@ -54,7 +54,7 @@ int Equality::compute(double time)
     double* q_ = q()->getArray();
     double* z_ =  _z->getArray();
     for(size_t i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
-    info = NM_gesv(&*_M->numericsMatrix(), z_, true);
+    info = NM_LU_solve(NM_preserve(&*_M->numericsMatrix()), z_, 1);
     // --- Recovering of the desired variables from EQUALITY output ---
     postCompute();
 

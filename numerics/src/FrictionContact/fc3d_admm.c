@@ -292,8 +292,8 @@ static void fc3d_admm_symmetric(FrictionContactProblem* restrict problem,
     DEBUG_PRINT("rhs:");
     DEBUG_EXPR(NV_display(reaction,m));
 
-    /* Linear system solver */
-    NM_gesv_expert(W,reaction, NM_KEEP_FACTORS);
+    /* Linear system solver, W destroyed */
+    NM_LU_solve(W, reaction, 1);
     DEBUG_PRINT("reaction:");
     DEBUG_EXPR(NV_display(reaction,m));
 
@@ -709,8 +709,8 @@ static void fc3d_admm_asymmetric(FrictionContactProblem* restrict problem,
     DEBUG_PRINT("rhs:");
     DEBUG_EXPR(NV_display(reaction,m));
 
-    /* Linear system solver */
-    NM_gesv_expert(W,reaction, NM_KEEP_FACTORS);
+    /* Linear system solver, W destroyed */
+    NM_LU_solve(W, reaction, 1);
     DEBUG_PRINT("reaction:");
     DEBUG_EXPR(NV_display(reaction,m));
 

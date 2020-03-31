@@ -741,7 +741,7 @@ void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction, double 
     for(size_t i = 0; i < (size_t)Me_size; ++i) reaction[i] = -Qreduced[i];
     NumericsMatrix M;
     NM_fill(&M, NM_DENSE, Me_size, Me_size, reducedProb);
-    *info = NM_gesv(&M, reaction, true);
+    *info = NM_LU_solve(&M, reaction, 1);
     M.matrix0 = NULL;
     NM_clear(&M);
     goto END_GMP3;

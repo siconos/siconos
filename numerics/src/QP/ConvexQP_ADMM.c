@@ -25,7 +25,7 @@
 #include "ConvexQP_computeError.h"  // for convexQP_compute_error
 #include "ConvexQP_cst.h"           // for SICONOS_CONVEXQP_ADMM_IPARAM_ACCE...
 #include "NumericsFwd.h"            // for SolverOptions, ConvexQP, Numerics...
-#include "NumericsMatrix.h"         // for NM_gemv, NM_clear, NM_gesv_expert
+#include "NumericsMatrix.h"         // for NM_gemv, NM_clear, ...
 #include "NumericsSparseMatrix.h"   // for NSM_TRIPLET, NumericsSparseMatrix
 #include "SolverOptions.h"          // for SolverOptions, solver_options_nul...
 /* #define DEBUG_NOCOLOR */
@@ -300,7 +300,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
     /* Linear system solver */
     /* cblas_dcopy(n , w_k , 1 , z, 1); */
-    NM_gesv_expert(W,z,NM_KEEP_FACTORS);
+    NM_LU_solve(W, z, 1);
     DEBUG_PRINT("z:");
     DEBUG_EXPR(NV_display(z,n));
 

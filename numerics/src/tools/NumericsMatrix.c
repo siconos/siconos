@@ -1872,9 +1872,9 @@ bool NM_factorized(NumericsMatrix* A)
   return NM_internalData(A->destructible)->isLUfactorized;
 }
 
-void NM_set_factorized(NumericsMatrix* A)
+void NM_set_factorized(NumericsMatrix* A, bool flag)
 {
-  NM_internalData(A->destructible)->isLUfactorized = true;
+  NM_internalData(A->destructible)->isLUfactorized = flag;
 }
 
 void NM_clearDense(NumericsMatrix* A)
