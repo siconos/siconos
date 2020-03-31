@@ -107,6 +107,7 @@ macro(add_siconos_swig_sub_module fullname)
 
   if(WITH_SERIALIZATION)
     target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/io/src/serialization")
+    target_link_libraries(${SWIG_MODULE_${_name}_REAL_NAME} Boost::serialization)
     if(NOT WITH_GENERATION)
       target_include_directories(${SWIG_MODULE_${_name}_REAL_NAME} PRIVATE "${CMAKE_SOURCE_DIR}/io/src/generation")
     else()
