@@ -27,7 +27,7 @@
 
 class ExternalBody :
   public LagrangianDS,
-  public std11::enable_shared_from_this<ExternalBody>
+  public std::enable_shared_from_this<ExternalBody>
 {
 public:
 

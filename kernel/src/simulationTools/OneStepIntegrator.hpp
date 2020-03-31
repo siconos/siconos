@@ -49,7 +49,7 @@
  * </ul>
  *
  */
-class OneStepIntegrator :public std11::enable_shared_from_this<OneStepIntegrator>
+class OneStepIntegrator :public std::enable_shared_from_this<OneStepIntegrator>
 {
 
 protected:

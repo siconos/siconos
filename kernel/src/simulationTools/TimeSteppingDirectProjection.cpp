@@ -90,7 +90,7 @@ void TimeSteppingDirectProjection::nextStep()
 
   SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     inter->lambda(0)->zero();
@@ -136,7 +136,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
     Type::Siconos dsType = Type::value(*ds);
     if(dsType != Type::NewtonEulerDS)
       RuntimeException::selfThrow("TS:: - ds is not from NewtonEulerDS.");
-    SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+    SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
     *(neds->deltaq()) = *(neds->q());
   }
 #endif
@@ -147,7 +147,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //   double criteria = (*it)->relation()->y(0)->getValue(0);
   //   if (Type::value(*((*it)->nonSmoothLaw())) ==  Type::NewtonImpactFrictionNSL ||
   //  Type::value(*((*it)->nonSmoothLaw())) == Type::NewtonImpactNSL){
-  //     SP::NewtonEuler1DR ri = std11::static_pointer_cast<NewtonEuler1DR> ((*it)->relation());
+  //     SP::NewtonEuler1DR ri = std::static_pointer_cast<NewtonEuler1DR> ((*it)->relation());
   //     if (criteria < -1e-7){
   //  ri->_isOnContact=true;
   //     }else{
@@ -163,7 +163,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
   SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet->bundle(*ui);
     inter->lambda(0)->zero();
@@ -179,12 +179,12 @@ void TimeSteppingDirectProjection::advanceToEvent()
     VectorOfVectors& workVectors = *dsGraph->properties(*aVi2).workVectors;
     if(dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+      SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
       *workVectors[MoreauJeanOSI::QTMP] = *neds->q();
     }
     else if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
       *workVectors[MoreauJeanOSI::QTMP] = * d->q();
 
     }
@@ -199,7 +199,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
     SP::InteractionsGraph indexSet = _nsds->topology()->indexSet(0);
     InteractionsGraph::VIterator ui, uiend;
-    for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet->bundle(*ui);
       inter->lambda(0)->zero();
@@ -225,14 +225,14 @@ void TimeSteppingDirectProjection::advanceToEvent()
     DEBUG_EXPR_WE(std ::cout << "After update input" << std::endl;
                   SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
                   std ::cout << "lamda(1) in IndexSet1" << std::endl;
-                  for(std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+                  for(std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet1->bundle(*ui);
       inter->lambda(1)->display();
     }
     SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
                                       std ::cout << "lamda(0) in indexSet0" << std::endl;
-                                      for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+                                      for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
       inter->lambda(0)->display();
@@ -248,7 +248,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       Type::Siconos dsType = Type::value(*ds);
       if(dsType == Type::NewtonEulerDS)
       {
-        SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+        SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
         SP::SiconosVector q = neds->q();
         SP::SiconosVector qtmp =  workVectors[MoreauJeanOSI::QTMP];
 
@@ -272,7 +272,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
       }
       else if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
       {
-        SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+        SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
         SP::SiconosVector q = d->q();
         SP::SiconosVector qtmp =  workVectors[MoreauJeanOSI::QTMP];
 
@@ -291,7 +291,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
 
     //cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
     //(*_allNSProblems)[SICONOS_OSNSP_TS_POS]->display();
-    //(std11::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
+    //(std::static_pointer_cast<LinearOSNS>((*_allNSProblems)[SICONOS_OSNSP_TS_POS]))->z()->display();
 
     DEBUG_EXPR_WE(std::cout << "TimeSteppingDirectProjection::Projection end : Number of iterations=" << _nbProjectionIteration << "\n";
                   std ::cout << "After update state in position" << std::endl;
@@ -299,24 +299,24 @@ void TimeSteppingDirectProjection::advanceToEvent()
                   SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
                   SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet(0);
 
-                  for(std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+                  for(std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet1->bundle(*ui);
       inter->lambda(1)->display();
     }
     std ::cout << "lamda(0) in indexSet0" << std::endl;
-               for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+               for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
       inter->lambda(0)->display();
     }
-    std ::cout << "y(1) in IndexSet1" << std::endl;	       for(std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+    std ::cout << "y(1) in IndexSet1" << std::endl;	       for(std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet1->bundle(*ui);
       inter->y(1)->display();
     }
     std ::cout << "y(0) in indexSet0" << std::endl;
-               for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+               for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = indexSet0->bundle(*ui);
       inter->y(0)->display();
@@ -338,13 +338,13 @@ void TimeSteppingDirectProjection::advanceToEvent()
     Type::Siconos dsType = Type::value(*ds);
     if(dsType == Type::NewtonEulerDS)
     {
-      SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+      SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
       double time = nextTime();
       neds->computeForces(time, neds->q(), neds->twist());
     }
     else if(dsType == Type::LagrangianDS)
     {
-      SP::LagrangianDS d = std11::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS d = std::static_pointer_cast<LagrangianDS> (ds);
       double time = nextTime();
       d->computeForces(time, d->q(), d->velocity());
     }
@@ -391,7 +391,7 @@ void TimeSteppingDirectProjection::advanceToEvent()
   //     // dotq->setValue(6,(q->getValue(6)-qold->getValue(6))/h);
 
   //     /*compute the new velocity seeing the work of fext*/
-  //     SP::NewtonEulerDS neds = std11::static_pointer_cast<NewtonEulerDS>(ds);
+  //     SP::NewtonEulerDS neds = std::static_pointer_cast<NewtonEulerDS>(ds);
   //     *(neds->deltaq())-=*(neds->q());
   //     DEBUG_EXPR(printf("TSProj NewtonSolve :deltaq:");
   //     (neds->deltaq())->display(););
@@ -495,7 +495,7 @@ void TimeSteppingDirectProjection::computeCriteria(bool * runningProjection)
 
   *runningProjection = false;
 
-  for(std11::tie(aVi, viend) = indexSet->vertices();
+  for(std::tie(aVi, viend) = indexSet->vertices();
       aVi != viend; ++aVi)
   {
     SP::Interaction inter = indexSet->bundle(*aVi);

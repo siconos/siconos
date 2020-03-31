@@ -62,7 +62,7 @@
  *   y (resp, lambda) is a container of SiconosVector.
  *
  */
-class Interaction : public std11::enable_shared_from_this<Interaction >
+class Interaction : public std::enable_shared_from_this<Interaction >
 {
 private:
   /* serialization hooks */

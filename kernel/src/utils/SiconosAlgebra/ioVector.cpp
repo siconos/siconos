@@ -34,7 +34,7 @@ bool read(const std::string& fileName,
           const std::ios::fmtflags& flags
          )
 {
-  // Note FP : .c_str() will be useless for std11
+  // Note FP : .c_str() will be useless for std
   std::ifstream infile(fileName.c_str(), mode);
   infile.flags(flags);
   if(!infile.good())

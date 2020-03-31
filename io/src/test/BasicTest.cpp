@@ -1,5 +1,5 @@
 #include "BasicTest.hpp"
-#include "../Register.hpp"
+#include "Register.hpp"
 
 #include <boost/static_assert.hpp>
 

@@ -40,8 +40,8 @@ ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T, double h):
   _processSimulation.reset(new EventDriven(_nsds, _processTD, 0));
   _processSimulation->setName("plant simulation");
   _processSimulation->insertIntegrator(_processIntegrator);
-  std11::static_pointer_cast<LsodarOSI>(_processIntegrator)->setExtraAdditionalTerms(
-    std11::shared_ptr<ControlLinearAdditionalTermsED>(new ControlLinearAdditionalTermsED()));
+  std::static_pointer_cast<LsodarOSI>(_processIntegrator)->setExtraAdditionalTerms(
+    std::shared_ptr<ControlLinearAdditionalTermsED>(new ControlLinearAdditionalTermsED()));
 
   _DSG0 = _nsds->topology()->dSG(0);
   _IG0 = _nsds->topology()->indexSet0();

@@ -234,11 +234,11 @@ void _MBTB_STEP()
   }
   else if(simuType == Type::TimeSteppingCombinedProjection)
   {
-    std::cout<< "     Number of projection iterations = " << (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->nbProjectionIteration() <<std::endl;
-    std::cout<< "     Number of cumulated Newton iterations = " << (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->cumulatedNewtonNbIterations() <<std::endl;
-    std::cout<< "     Number of set  iterations = " << (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->nbIndexSetsIteration() <<std::endl;
-    std::cout<< "     Max violation unilateral = " << (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->maxViolationUnilateral()  <<std::endl;
-    std::cout<< "     Max violation equality = " << (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->maxViolationEquality() <<std::endl;
+    std::cout<< "     Number of projection iterations = " << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->nbProjectionIteration() <<std::endl;
+    std::cout<< "     Number of cumulated Newton iterations = " << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->cumulatedNewtonNbIterations() <<std::endl;
+    std::cout<< "     Number of set  iterations = " << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->nbIndexSetsIteration() <<std::endl;
+    std::cout<< "     Max violation unilateral = " << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->maxViolationUnilateral()  <<std::endl;
+    std::cout<< "     Max violation equality = " << (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->maxViolationEquality() <<std::endl;
   }
 
   //sSimu->oneStepNSProblem(0)->display();

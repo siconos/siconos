@@ -28,7 +28,7 @@
 #include "MechanicsFwd.hpp"
 #include "LagrangianDS.hpp"
 
-class SphereLDS : public LagrangianDS, public std11::enable_shared_from_this<SphereLDS>
+class SphereLDS : public LagrangianDS, public std::enable_shared_from_this<SphereLDS>
 {
 protected:
   /** serialization hooks

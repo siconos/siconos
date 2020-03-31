@@ -42,7 +42,7 @@ void OccTimeStepping::updateWorldFromDS()
 {
   DynamicalSystemsGraph& dsg = *_nsds->dynamicalSystems();
   DynamicalSystemsGraph::VIterator dsi, dsiend;
-  std11::tie(dsi, dsiend) = dsg.vertices();
+  std::tie(dsi, dsiend) = dsg.vertices();
 
   Visitor< Classes < OccBody >, UpdateShapes >::Make up;
 

@@ -265,7 +265,7 @@ bool GlobalFrictionContact::preCompute(double time)
 
     size_t offset = 0;
     DynamicalSystemsGraph::VIterator dsi, dsend;
-    for(std11::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
+    for(std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
     {
       SP::DynamicalSystem ds = DSG0.bundle(*dsi);
       Type::Siconos dsType = Type::value(*ds);
@@ -314,12 +314,12 @@ bool GlobalFrictionContact::preCompute(double time)
 
     size_t pos = 0;
     InteractionsGraph::VIterator ui, uiend;
-    for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
     {
       SP::Interaction inter = indexSet.bundle(*ui);
 
       assert(Type::value(*(inter->nonSmoothLaw())) == Type::NewtonImpactFrictionNSL);
-      _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>(inter->nonSmoothLaw())->mu());
+      _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>(inter->nonSmoothLaw())->mu());
 
       SP::DynamicalSystem ds1 = indexSet.properties(*ui).source;
       SP::DynamicalSystem ds2 = indexSet.properties(*ui).target;
@@ -414,7 +414,7 @@ void GlobalFrictionContact::postCompute()
   size_t pos = 0;
 
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui, pos += 3)
+  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui, pos += 3)
   {
     Interaction& inter = *indexSet.bundle(*ui);
     // Get Y and Lambda for the current Interaction
@@ -433,7 +433,7 @@ void GlobalFrictionContact::postCompute()
   SP::OneStepIntegrator  Osi;
   DynamicalSystemsGraph::VIterator dsi, dsend;
   pos=0;
-  for(std11::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi)
   {
     DynamicalSystem& ds = *DSG0.bundle(*dsi);
     Type::Siconos dsType = Type::value(ds);
@@ -521,9 +521,9 @@ void GlobalFrictionContact::updateMu()
   _mu->clear();
   SP::InteractionsGraph indexSet = simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui)
   {
-    _mu->push_back(std11::static_pointer_cast<NewtonImpactFrictionNSL>
+    _mu->push_back(std::static_pointer_cast<NewtonImpactFrictionNSL>
                    (indexSet->bundle(*ui)->nonSmoothLaw())->mu());
   }
 }

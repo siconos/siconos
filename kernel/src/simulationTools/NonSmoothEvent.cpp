@@ -56,7 +56,7 @@ void NonSmoothEvent::process(Simulation& simulation)
     SP::InteractionsGraph indexSet2 = simulation.indexSet(2);
     bool found = true;
     InteractionsGraph::VIterator ui, uiend;
-    for(std11::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
     {
       found = indexSet2->is_vertex(indexSet1->bundle(*ui));
       if(!found) break;

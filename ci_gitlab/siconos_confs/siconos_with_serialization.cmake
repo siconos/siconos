@@ -40,14 +40,14 @@ option(WITH_GIT "Consider sources are under GIT" OFF)
 
 
 # --- Documentation setup ---
-option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" OFF)
+option(WITH_DOCUMENTATION "Build Documentation. Default = OFF" ON)
 option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings. Default = OFF" OFF)
-option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." OFF)
+option(WITH_DOXY2SWIG "Build swig docstrings from doxygen xml output. Default = OFF." ON)
 
 
 
 # --- List of external libraries/dependencies to be searched (or not) ---
-option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" OFF)
+option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" ON)
 option(WITH_OCE "compilation with OpenCascade Bindings. Default = OFF" OFF)
 option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)

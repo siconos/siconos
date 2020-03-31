@@ -45,8 +45,6 @@ This class is used to describe dynamical systems of the form :
    
 \f$ g(\dot x, x, t, z) = 0\f$
 
-\endverbatim
-
 where
     
 - \f$ x \in R^{n} \f$ is the state.

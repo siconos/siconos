@@ -159,7 +159,7 @@ SiconosVector::SiconosVector(const std::vector<double>& v, Siconos::UBLAS_TYPE t
 }
 
 // Copy
-SiconosVector::SiconosVector(const SiconosVector &svect) : std11::enable_shared_from_this<SiconosVector>()
+SiconosVector::SiconosVector(const SiconosVector &svect) : std::enable_shared_from_this<SiconosVector>()
 {
   if(ask<IsDense>(svect))  // dense
   {

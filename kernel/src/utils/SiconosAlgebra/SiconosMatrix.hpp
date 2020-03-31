@@ -64,7 +64,7 @@ TYPEDEF_SPTR(VInt)
  * You can find an overview on how to build and use vectors and matrices in siconos users guide .
  *
  */
-class SiconosMatrix //: public std11::enable_shared_from_this<SiconosMatrix>
+class SiconosMatrix //: public std::enable_shared_from_this<SiconosMatrix>
 {
 protected:
   /** serialization hooks

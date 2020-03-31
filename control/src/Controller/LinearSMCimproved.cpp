@@ -130,7 +130,7 @@ void LinearSMCimproved::actuate()
   SP::SimpleMatrix CBstar(new SimpleMatrix(sDim, sDim, 0));
   SP::SiconosVector xTk(new SiconosVector(_sensor->y()));
 
-  ZeroOrderHoldOSI& zoh = *std11::static_pointer_cast<ZeroOrderHoldOSI>(_integratorSMC);
+  ZeroOrderHoldOSI& zoh = *std::static_pointer_cast<ZeroOrderHoldOSI>(_integratorSMC);
 
   // equivalent part
   zoh.updateMatrices(_DS_SMC);
@@ -144,7 +144,7 @@ void LinearSMCimproved::actuate()
   CBstar->PLUSolve(*_ueq);
 
   *(_DS_SMC->x()) = *xTk;
-  prod(*_B, *_ueq, *(std11::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->b()));
+  prod(*_B, *_ueq, *(std::static_pointer_cast<FirstOrderLinearDS>(_DS_SMC)->b()));
   _simulationSMC->computeOneStep();
   _simulationSMC->nextStep();
 

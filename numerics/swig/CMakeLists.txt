@@ -54,7 +54,7 @@ swig_module_setup(${COMPONENT}_PYTHON_MODULES)
 target_link_libraries(_numerics $<BUILD_INTERFACE:externals>)
 
 if(WITH_SERIALIZATION)
-  include_directories(${CMAKE_SOURCE_DIR}/io/src/serialization)
+  target_include_directories(_numerics PRIVATE ${CMAKE_SOURCE_DIR}/io/src/serialization)
 endif()
 
 # If WITH_SYSTEM_SUITESPARSE, suite sparse is an imported target

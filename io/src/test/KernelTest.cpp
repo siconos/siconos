@@ -119,24 +119,24 @@ void KernelTest::t2()
     ia >> NVP(ds2);
   }
 
-  CPPUNIT_ASSERT(*(std11::static_pointer_cast<LagrangianDS>(ds1)->mass())
-                 == *(std11::static_pointer_cast<LagrangianDS>(ds2)->mass()));
-  CPPUNIT_ASSERT(*(std11::static_pointer_cast<LagrangianDS>(ds1)->q())
-                 == *(std11::static_pointer_cast<LagrangianDS>(ds2)->q()));
-  CPPUNIT_ASSERT(*(std11::static_pointer_cast<LagrangianDS>(ds1)->velocity())
-                 == *(std11::static_pointer_cast<LagrangianDS>(ds2)->velocity()));
+  CPPUNIT_ASSERT(*(std::static_pointer_cast<LagrangianDS>(ds1)->mass())
+                 == *(std::static_pointer_cast<LagrangianDS>(ds2)->mass()));
+  CPPUNIT_ASSERT(*(std::static_pointer_cast<LagrangianDS>(ds1)->q())
+                 == *(std::static_pointer_cast<LagrangianDS>(ds2)->q()));
+  CPPUNIT_ASSERT(*(std::static_pointer_cast<LagrangianDS>(ds1)->velocity())
+                 == *(std::static_pointer_cast<LagrangianDS>(ds2)->velocity()));
 
 }
 
 
 void KernelTest::t3()
 {
-  SP::SolverOptions so(new SolverOptions);
+  SP::SolverOptions so(solver_options_create(SICONOS_FRICTION_3D_NSN_AC),
+                       solver_options_delete);
   SP::SolverOptions sor(new SolverOptions);
-  solver_options_initialize(so.get(), SICONOS_FRICTION_3D_NSN_AC, 0, 0.);
   so->numberOfInternalSolvers = 1;
-  so->internalSolvers = (SolverOptions *) malloc(sizeof(SolverOptions) * so->numberOfInternalSolvers);
-  solver_options_initialize(so->internalSolvers, SICONOS_FRICTION_3D_NSN_AC, 0, 0.);
+  so->internalSolvers = (SolverOptions**) calloc(1, sizeof(SolverOptions*));
+  so->internalSolvers[0] = solver_options_create(SICONOS_FRICTION_3D_NSN_AC);
 
   std::ofstream ofs("SolverOptions.xml");
   {
@@ -151,10 +151,6 @@ void KernelTest::t3()
   }
 
   CPPUNIT_ASSERT((so->iSize == sor->iSize));
-
-  solver_options_delete(so.get());
-  solver_options_delete(sor.get());
-
 }
 
 // void KernelTest::t4()
@@ -323,14 +319,14 @@ void KernelTest::t6()
     SP::DynamicalSystemsGraph dsg =
       bouncingBall->topology()->dSG(0);
 
-    SP::LagrangianDS ball = std11::static_pointer_cast<LagrangianDS>
+    SP::LagrangianDS ball = std::static_pointer_cast<LagrangianDS>
                             (dsg->bundle(*(dsg->begin())));
 
-    SP::TimeStepping s = std11::static_pointer_cast<TimeStepping>(sim);
+    SP::TimeStepping s = std::static_pointer_cast<TimeStepping>(sim);
     SP::Interaction inter;
     InteractionsGraph::VIterator ui, uiend;
     SP::InteractionsGraph indexSet0 = bouncingBall->topology()->indexSet(0);
-    for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+    for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
       inter = indexSet0->bundle(*ui);
 
 
@@ -366,7 +362,6 @@ void KernelTest::t6()
       dataPlot(k, 3) = (*p)(0);
       dataPlot(k, 4) = (*lambda)(0);
       s->nextStep();
-      ++show_progress;
       k++;
     }
     cout << endl << "End of computation - Number of iterations done: " << k - 1 << endl;
@@ -438,8 +433,8 @@ void KernelTest::t7()
     ia >> NVP(ds2);
   }
 
-  CPPUNIT_ASSERT(std11::static_pointer_cast<Disk>(ds1)->getRadius() ==
-                 std11::static_pointer_cast<Disk>(ds2)->getRadius());
+  CPPUNIT_ASSERT(std::static_pointer_cast<Disk>(ds1)->getRadius() ==
+                 std::static_pointer_cast<Disk>(ds2)->getRadius());
 }
 
 void KernelTest::t8()

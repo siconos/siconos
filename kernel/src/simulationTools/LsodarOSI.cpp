@@ -183,7 +183,7 @@ void LsodarOSI::computeRhs(double t)
 {
   DEBUG_BEGIN("LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)\n")
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -196,7 +196,7 @@ void LsodarOSI::computeRhs(double t)
     Type::Siconos dsType = Type::value(*ds);
     if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
     {
-      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS> (ds);
+      SP::LagrangianDS lds = std::static_pointer_cast<LagrangianDS> (ds);
       SiconosVector &free=*workVectors[LsodarOSI::FREE];
       // we assume that inverseMass and forces are updated after call of ds->computeRhs(t);
       free = *lds->forces();
@@ -218,7 +218,7 @@ void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
 {
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
-  for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!checkOSI(dsi)) continue;
     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -233,17 +233,17 @@ void LsodarOSI::computeJacobianRhs(double t, DynamicalSystemsGraph& DSG0)
 
 void LsodarOSI::f(integer* sizeOfX, doublereal* time, doublereal* x, doublereal* xdot)
 {
-  std11::static_pointer_cast<EventDriven>(_simulation)->computef(*this, sizeOfX, time, x, xdot);
+  std::static_pointer_cast<EventDriven>(_simulation)->computef(*this, sizeOfX, time, x, xdot);
 }
 
 void LsodarOSI::g(integer* nEq, doublereal*  time, doublereal* x, integer* ng, doublereal* gOut)
 {
-  std11::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
+  std::static_pointer_cast<EventDriven>(_simulation)->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
 void LsodarOSI::jacobianfx(integer* sizeOfX, doublereal* time, doublereal* x, integer* ml, integer* mu,  doublereal* jacob, integer* nrowpd)
 {
-  std11::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(*this, sizeOfX, time, x, jacob);
+  std::static_pointer_cast<EventDriven>(_simulation)->computeJacobianfx(*this, sizeOfX, time, x, jacob);
 }
 
 
@@ -259,7 +259,7 @@ void LsodarOSI::initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds)
 
   if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
   {
-    LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS>(ds);
+    LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS>(ds);
     // TODO FP: use buffer in graph for xWork?
     if(!_xWork)
       _xWork.reset(new BlockVector());
@@ -365,7 +365,7 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
   VectorOfVectors &workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if(relationType == Lagrangian)
   {
-    LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds1);
+    LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds1);
     inter_work_block[LsodarOSI::xfree].reset(new BlockVector());
     inter_work_block[LsodarOSI::xfree]->insertPtr(workVds1[LsodarOSI::FREE]);
     DSlink[LagrangianR::p2].reset(new BlockVector());
@@ -386,7 +386,7 @@ void LsodarOSI::initializeWorkVectorsForInteraction(Interaction &inter,
     VectorOfVectors &workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if(relationType == Lagrangian)
     {
-      LagrangianDS& lds = *std11::static_pointer_cast<LagrangianDS> (ds2);
+      LagrangianDS& lds = *std::static_pointer_cast<LagrangianDS> (ds2);
       inter_work_block[LsodarOSI::xfree]->insertPtr(workVds2[LsodarOSI::FREE]);
       DSlink[LagrangianR::p2]->insertPtr(lds.p(2));
       DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
@@ -406,7 +406,7 @@ void LsodarOSI::initialize()
   // initialize xWork with x values of the dynamical systems present in the set.
 
   // DynamicalSystemsGraph::VIterator dsi, dsend;
-  // for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  // for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
   //   {
   //     if(!checkOSI(dsi)) continue;
   //     SP::DynamicalSystem ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -417,7 +417,7 @@ void LsodarOSI::initialize()
 
   // SP::InteractionsGraph indexSet0 = m.nonSmoothDynamicalSystem()->topology()->indexSet0();
   // InteractionsGraph::VIterator ui, uiend;
-  // for (std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  // for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   //   {
   //     Interaction& inter = *indexSet0->bundle(*ui);
   //     initializeWorkVectorsForInteraction(m.t0(), inter, indexSet0->properties(*ui), *_dynamicalSystemsGraph);
@@ -428,7 +428,7 @@ void LsodarOSI::initialize()
   //   The link with variable names in opkdmain.f is indicated in comments
 
   // 2 - Ng, number of constraints:
-  _intData[1] = std11::static_pointer_cast<EventDriven>(_simulation)->computeSizeOfg();
+  _intData[1] = std::static_pointer_cast<EventDriven>(_simulation)->computeSizeOfg();
   // 3 - Itol, itask, iopt
   _intData[2] = _itol; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
   _intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
@@ -489,7 +489,7 @@ void LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate
 
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
-  global_object = std11::static_pointer_cast<LsodarOSI>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
+  global_object = std::static_pointer_cast<LsodarOSI>(shared_from_this()); // Warning: global object must be initialized to current one before pointers to function initialisation.
 
 #ifdef HAS_FORTRAN
   // function to compute the righ-hand side of xdot = f(x,t) + Tu
@@ -580,17 +580,17 @@ void LsodarOSI::updateState(const unsigned int level)
   DynamicalSystemsGraph::VIterator dsi, dsend;
   if(level == 1)  // ie impact case: compute velocity
   {
-    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
       if(!checkOSI(dsi)) continue;
-      SP::LagrangianDS lds = std11::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
+      SP::LagrangianDS lds = std::static_pointer_cast<LagrangianDS>(_dynamicalSystemsGraph->bundle(*dsi));
       lds->computePostImpactVelocity();
     }
   }
   else if(level == 2)
   {
     double time = _simulation->nextTime();
-    for(std11::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+    for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
     {
       if(!checkOSI(dsi)) continue;
       {
@@ -736,9 +736,9 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
         q.initFromBlock(*DSlink[LagrangianR::q0]);
         z.initFromBlock(*DSlink[LagrangianR::z]);
 
-        std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
+        std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
         *DSlink[LagrangianR::z] = z;
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
+        subprod(*ID, *(std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot
       }
       else
         RuntimeException::selfThrow("LsodarOSI::computeFreeOutput not implemented for SICONOS_OSNSP ");
@@ -748,8 +748,8 @@ void LsodarOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, 
     {
       if(((*allOSNS)[SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp)
       {
-        std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
-        subprod(*ID, *(std11::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), osnsp_rhs, xcoord, false); // y += NonLinearPart
+        std::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->computedotjacqhXqdot(simulation()->getTkp1(), *inter, DSlink);
+        subprod(*ID, *(std::static_pointer_cast<LagrangianScleronomousR>(inter->relation())->dotjacqhXqdot()), osnsp_rhs, xcoord, false); // y += NonLinearPart
       }
     }
   }

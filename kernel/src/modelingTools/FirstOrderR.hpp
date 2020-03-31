@@ -31,11 +31,11 @@
  * This is an abstract class for all relation operating on first order systems.
  * It should not be used. Rather, the following classes should be used:
  *
- * - FirstOrderNonlinearR: for fully nonlinear relations: $\f y = h(t, X, \lambda, Z)\f$, $\f$ R = g(t, X, \lambda, Z)\f$.
- * - FirstOrderType2R: specialization with $\f y = h(t, X, \lambda, Z)\f$, $\f$ R = g(t, \lambda, Z)\f$.
- * - FirstOrderType1R: further specialization with $\f y = h(t, X, Z)\f$, $\f$ R = g(t, \lambda, Z)\f$.
- * - FirstOrderLinearR: linear case: $\f y = C(t)x + D(t)\lambda + F(t) z + e$, $\f$ R = B(t)\lambda\f$.
- * - FirstOrderLinearR: time-invariant linear case: $\f y = Cx + D\lambda + F z + e$, $\f$ R = B\lambda\f$.
+ * - FirstOrderNonlinearR: for fully nonlinear relations: \f$ y = h(t, X, \lambda, Z)\f$, \f$ R = g(t, X, \lambda, Z)\f$.
+ * - FirstOrderType2R: specialization with \f$ y = h(t, X, \lambda, Z)\f$, \f$ R = g(t, \lambda, Z)\f$.
+ * - FirstOrderType1R: further specialization with \f$ y = h(t, X, Z)\f$, \f$ R = g(t, \lambda, Z)\f$.
+ * - FirstOrderLinearR: linear case: \f$ y = C(t)x + D(t)\lambda + F(t) z + e\f$, \f$ R = B(t)\lambda\f$.
+ * - FirstOrderLinearR: time-invariant linear case: \f$ y = Cx + D\lambda + F z + e\f$, \f$ R = B\lambda\f$.
  *
  * If the relation involves only one DynamicalSystem, then \f$R = r\f$, \f$X = x\f$, and \f$Z = z\f$.
  * With two, then \f$R = [r_1, r_2] \f$, \f$X = [x_1 x_2] \f$, and \f$Z = [z_1 z_2]\f$.

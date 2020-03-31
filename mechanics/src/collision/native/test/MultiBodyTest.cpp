@@ -68,7 +68,7 @@
 #include "DiskPlanR.hpp"
 #include "SpaceFilter.hpp"
 
-class Disks : public SiconosBodies, public std11::enable_shared_from_this<Disks>
+class Disks : public SiconosBodies, public std::enable_shared_from_this<Disks>
 {
 public:
   void init()
@@ -289,12 +289,12 @@ void Disks::init(std::string disks_input)
     // -- Simulation --
     _sim.reset(new TimeStepping(nsds,timedisc_));
 
-    std11::static_pointer_cast<TimeStepping>(_sim)->setNewtonMaxIteration(3);
+    std::static_pointer_cast<TimeStepping>(_sim)->setNewtonMaxIteration(3);
 
     _sim->insertIntegrator(osi);
     _sim->insertNonSmoothProblem(osnspb_);
 
-    std11::static_pointer_cast<TimeStepping>(_sim)->setCheckSolverFunction(localCheckSolverOuput);
+    std::static_pointer_cast<TimeStepping>(_sim)->setCheckSolverFunction(localCheckSolverOuput);
 
     // --- Simulation initialization ---
 

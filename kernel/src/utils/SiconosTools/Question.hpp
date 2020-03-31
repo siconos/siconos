@@ -54,7 +54,7 @@ struct Question : public SiconosVisitor
   typedef AnswerType type;
   type answer;
 
-  Question() : answer(std11::array<typename std11::remove_reference<AnswerType>::type, 1>()[0])
+  Question() : answer(std::array<typename std::remove_reference<AnswerType>::type, 1>()[0])
   {};
   Question(AnswerType ref) : answer(ref) {};
 

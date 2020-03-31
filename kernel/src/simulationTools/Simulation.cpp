@@ -430,7 +430,7 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter)
     // \warning this looks like some debug code, but it gets executed even with NDEBUG.
     // may be compiler does something smarter, but still it should be rewritten. --xhub
     InteractionsGraph::OEIterator oei, oeiend;
-    for(std11::tie(oei, oeiend) = indexSet0->out_edges(ui);
+    for(std::tie(oei, oeiend) = indexSet0->out_edges(ui);
         oei != oeiend; ++oei)
     {
       // note : at most 4 edges
@@ -505,7 +505,7 @@ SP::SiconosVector Simulation::y(unsigned int level, unsigned int coor)
 
   SP::SiconosVector y(new SiconosVector(_nsds->topology()->indexSet0()->size()));
   int i=0;
-  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
@@ -531,7 +531,7 @@ SP::SiconosVector Simulation::lambda(unsigned int level, unsigned int coor)
 
   SP::SiconosVector lambda(new SiconosVector(_nsds->topology()->indexSet0()->size()));
   int i=0;
-  for(std11::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   {
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);

@@ -107,7 +107,7 @@ void AVI::initialize(SP::Simulation sim)
   InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
   InteractionsGraph::VIterator ui, uiend;
   unsigned nbInter = 0;
-  for(std11::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
   {
     NormalConeNSL& nc = static_cast<NormalConeNSL&>(*indexSet.bundle(*ui)->nonSmoothLaw());
     assert(Type::value(nc) == Type::NormalConeNSL &&

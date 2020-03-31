@@ -116,7 +116,7 @@ void EventDriven::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
 
   InteractionsGraph::VIterator uibegin, uipend, uip;
-  std11::tie(uibegin, uipend) = _indexSet0->vertices();
+  std::tie(uibegin, uipend) = _indexSet0->vertices();
   // loop over all vertices of the indexSet[i-1]
   for(uip = uibegin; uip != uipend; ++uip)
   {
@@ -207,7 +207,7 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
 
   InteractionsGraph::VIterator ui, uiend, vnext;
-  std11::tie(ui, uiend) = indexSet2->vertices();
+  std::tie(ui, uiend) = indexSet2->vertices();
 
   for(vnext = ui; ui != uiend; ui = vnext)
   {
@@ -321,7 +321,7 @@ void EventDriven::initOSIRhs()
     // perform the initialization
     DynamicalSystemsGraph::VIterator dsi, dsend;
     SP::DynamicalSystemsGraph osiDSGraph = (*itosi)->dynamicalSystemsGraph();
-    for(std11::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
+    for(std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
     {
       if(!(*itosi)->checkOSI(dsi)) continue;
 
@@ -367,7 +367,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   double t = *time;
   // Update Jacobian matrices at all interactions
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *_indexSet0->bundle(*ui);
     inter.relation()->computeJach(t, inter);
@@ -396,7 +396,7 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
 
   DynamicalSystemsGraph::VIterator dsi, dsend;
   SP::DynamicalSystemsGraph osiDSGraph = lsodar.dynamicalSystemsGraph();
-  for(std11::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!(lsodar.checkOSI(dsi))) continue;
 
@@ -452,7 +452,7 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
   unsigned pos = 0;
   DynamicalSystemsGraph::VIterator dsi, dsend;
   SP::DynamicalSystemsGraph osiDSGraph = lsodar.dynamicalSystemsGraph();
-  for(std11::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
+  for(std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
   {
     if(!(lsodar.checkOSI(dsi))) continue;
 
@@ -499,7 +499,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
   unsigned int nsLawSize, k = 0 ;
   SP::SiconosVector y, ydot, yddot, lambda;
-  SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(osi);
+  SP::LsodarOSI lsodar = std::static_pointer_cast<LsodarOSI>(osi);
   // Solve LCP at acceleration level to calculate the lambda[2] at Interaction of indexSet[2]
   lsodar->fillXWork(sizeOfX, x);
   //
@@ -521,7 +521,7 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
   _nsds->updateOutput(t,1);
   _nsds->updateOutput(t,2);
   //
-  for(std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = _indexSet0->bundle(*ui);
     nsLawSize = inter->nonSmoothLaw()->size();
@@ -639,7 +639,7 @@ void EventDriven::advanceToEvent()
 
   // Initialize lambdas of all interactions.
   InteractionsGraph::VIterator ui, uiend, vnext;
-  std11::tie(ui, uiend) = _indexSet0->vertices();
+  std::tie(ui, uiend) = _indexSet0->vertices();
   for(vnext = ui; ui != uiend; ui = vnext)
   {
     ++vnext;
@@ -731,7 +731,7 @@ void EventDriven::advanceToEvent()
       (*it)->integrate(_tinit, _tend, _tout, _istate); // integrate must
 
       //  cout << " End of LsodarOSI integration" << endl;
-      // SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(*it);
+      // SP::LsodarOSI lsodar = std::static_pointer_cast<LsodarOSI>(*it);
       // SA::integer iwork = lsodar->getIwork();
       // SA::doublereal rwork = lsodar->getRwork();
       //  cout << "Number of steps used: " << iwork[10] <<endl;
@@ -757,7 +757,7 @@ void EventDriven::advanceToEvent()
       }
       // if(_printStat)
       //   {
-      //     SP::LsodarOSI lsodar = std11::static_pointer_cast<LsodarOSI>(*it);
+      //     SP::LsodarOSI lsodar = std::static_pointer_cast<LsodarOSI>(*it);
       //     statOut << "Results at time " << _tout << ":" <<endl;
       //     SA::integer iwork = lsodar->getIwork();
       //     SA::doublereal Rwork = lsodar->getRwork();
@@ -812,9 +812,9 @@ double EventDriven::computeResiduConstraints()
   {
     if((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
     {
-      SP::NewMarkAlphaOSI osi_NewMark = std11::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+      SP::NewMarkAlphaOSI osi_NewMark = std::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
       bool _flag = osi_NewMark->getFlagVelocityLevel();
-      for(std11::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
+      for(std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
       {
         Interaction& inter = *indexSet2->bundle(*ui);
         if(!_flag)  // constraints at the position level
@@ -905,7 +905,7 @@ void EventDriven::predictionNewtonIteration()
   {
     if((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
     {
-      SP::NewMarkAlphaOSI osi_NewMark = std11::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+      SP::NewMarkAlphaOSI osi_NewMark = std::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
       osi_NewMark->prediction();
     }
     else
@@ -917,7 +917,7 @@ void EventDriven::predictionNewtonIteration()
   double t = nextTime(); // time at the end of the step
   // Loop over all interactions
   InteractionsGraph::VIterator ui, uiend;
-  for(std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
     Interaction& inter = *_indexSet0->bundle(*ui);
     inter.computeOutput(t, 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
@@ -935,7 +935,7 @@ void EventDriven::correctionNewtonIteration()
   {
     if((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
     {
-      SP::NewMarkAlphaOSI osi_NewMark = std11::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+      SP::NewMarkAlphaOSI osi_NewMark = std::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
       osi_NewMark->correction();
     }
     else
@@ -1005,7 +1005,7 @@ double EventDriven::detectEvents(bool updateIstate)
   SP::SiconosVector y, ydot, lambda;
   SP::Topology topo = _nsds->topology();
   SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-  for(std11::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
+  for(std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
   {
     SP::Interaction inter = _indexSet0->bundle(*ui);
     double nsLawSize = inter->nonSmoothLaw()->size();
@@ -1101,7 +1101,7 @@ void EventDriven::LocalizeFirstEvent()
   {
     if((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
     {
-      SP::NewMarkAlphaOSI osi_NewMark = std11::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+      SP::NewMarkAlphaOSI osi_NewMark = std::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
       osi_NewMark->prepareEventLocalization();
     }
     else
@@ -1126,7 +1126,7 @@ void EventDriven::LocalizeFirstEvent()
     {
       if((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
       {
-        SP::NewMarkAlphaOSI osi_NewMark = std11::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+        SP::NewMarkAlphaOSI osi_NewMark = std::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
         osi_NewMark->DenseOutputallDSs(t_i);
       }
     }

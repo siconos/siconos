@@ -27,7 +27,7 @@
 
 #include <boost/circular_buffer_fwd.hpp>
 
-typedef std11::shared_ptr<boost::circular_buffer<SP::SiconosVector> > BufferOfVectors;
+typedef std::shared_ptr<boost::circular_buffer<SP::SiconosVector> > BufferOfVectors;
 
 class LinearSMCimproved : public LinearSMC
 {
@@ -77,7 +77,7 @@ public:
    * \param B the B matrix in the FirstOrderLinearR
    * \param D the D matrix in the FirstOrderLinearR
    */
-  LinearSMCimproved(SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std11::shared_ptr<SimpleMatrix>());
+  LinearSMCimproved(SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std::shared_ptr<SimpleMatrix>());
 
   /** destructor
    */

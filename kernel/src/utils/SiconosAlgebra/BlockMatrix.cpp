@@ -65,9 +65,9 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
         i = it2.index1();
         j = it2.index2();
         if((*it2)->isBlock())   // if the current matrix is a blockMatrix
-          _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new BlockMatrix(**it2)));
+          _mat->insert_element(i, j, std::shared_ptr<SiconosMatrix>(new BlockMatrix(**it2)));
         else
-          _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new SimpleMatrix(**it2)));
+          _mat->insert_element(i, j, std::shared_ptr<SiconosMatrix>(new SimpleMatrix(**it2)));
         // _dimCol must be incremented only at first "column-loop"
         if(firstLoop)
         {
@@ -84,7 +84,7 @@ BlockMatrix::BlockMatrix(const SiconosMatrix &m): SiconosMatrix(0), _dimRow(0), 
     _tabCol->reserve(1);
     // _mat construction
     _mat.reset(new BlocksMat(1, 1, 1));
-    _mat->insert_element(0, 0, std11::shared_ptr<SiconosMatrix>(new SimpleMatrix(m)));
+    _mat->insert_element(0, 0, std::shared_ptr<SiconosMatrix>(new SimpleMatrix(m)));
 
     _dimRow = m.size(0);
     _dimCol = m.size(1);
@@ -120,9 +120,9 @@ BlockMatrix::BlockMatrix(const BlockMatrix &m): SiconosMatrix(0), _dimRow(0), _d
       i = it2.index1();
       j = it2.index2();
       if((*it2)->isBlock())   // if the current _matrix is a blockMatrix
-        _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new BlockMatrix(**it2)));
+        _mat->insert_element(i, j, std::shared_ptr<SiconosMatrix>(new BlockMatrix(**it2)));
       else
-        _mat->insert_element(i, j, std11::shared_ptr<SiconosMatrix>(new SimpleMatrix(**it2)));
+        _mat->insert_element(i, j, std::shared_ptr<SiconosMatrix>(new SimpleMatrix(**it2)));
 
       // _dimCol must be incremented only at first "column-loop"
       if(firstLoop)
@@ -804,7 +804,7 @@ void BlockMatrix::addSimple(unsigned int& indRow, unsigned int& indCol, const Si
     for(it2 = it1.begin(); it2 != it1.end(); ++it2)
     {
       if((*it2)->isBlock())   // if the sub-block is also a BlockMatrix ...
-        (std11::static_pointer_cast<BlockMatrix>(*it2))->addSimple(indRow, indCol, m);
+        (std::static_pointer_cast<BlockMatrix>(*it2))->addSimple(indRow, indCol, m);
 
       else
       {
@@ -857,7 +857,7 @@ void BlockMatrix::subSimple(unsigned int& indRow, unsigned int& indCol, const Si
     for(it2 = it1.begin(); it2 != it1.end(); ++it2)
     {
       if((*it2)->isBlock())   // if the sub-block is also a BlockMatrix ...
-        (std11::static_pointer_cast<BlockMatrix>(*it2))->subSimple(indRow, indCol, m);
+        (std::static_pointer_cast<BlockMatrix>(*it2))->subSimple(indRow, indCol, m);
 
       else
       {
@@ -1180,7 +1180,7 @@ SP::SiconosMatrix BlockMatrix::block(unsigned int row, unsigned int col)
 
 SPC::SiconosMatrix BlockMatrix::block(unsigned int row, unsigned int col) const
 {
-  return std11::shared_ptr<SiconosMatrix>((*_mat)(row, col));
+  return std::shared_ptr<SiconosMatrix>((*_mat)(row, col));
 }
 
 size_t BlockMatrix::nnz(double tol)

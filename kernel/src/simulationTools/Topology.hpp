@@ -51,7 +51,7 @@
  * the system.
  *
  */
-class Topology : public std11::enable_shared_from_this<Topology>
+class Topology : public std::enable_shared_from_this<Topology>
 {
 
 private:

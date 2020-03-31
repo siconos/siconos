@@ -47,7 +47,7 @@ typedef MapFactory::iterator MapFactoryIt;
  */
 template<class SubType> SP::Sensor factory(SP::DynamicalSystem ds)
 {
-  return std11::shared_ptr<SubType>(new SubType( ds));
+  return std::shared_ptr<SubType>(new SubType( ds));
 }
 
 /** Registry Class for sensors.

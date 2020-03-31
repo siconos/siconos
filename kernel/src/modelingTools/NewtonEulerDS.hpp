@@ -49,12 +49,14 @@ void computeExtForceAtPos(SP::SiconosVector q, bool isMextExpressedInInertialFra
   .. math::
      :nowrap:
 
+      \verbatim
       \left\{\begin{array}{rcl}
       M \\dot v +  F_{int}(q,v, \Omega, t)&=& F_{ext}(t), \             \
       I \dot \Omega + \Omega \wedge I\Omega  + M_{int}(q,v, \Omega, t) &=&  M_{ext}(t), \ \
       \dot q &=& T(q) [ v, \Omega] \                                    \
       \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
       \end{array}\right.
+      \endverbatim
  \endrst
 
  with

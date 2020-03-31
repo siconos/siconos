@@ -29,7 +29,7 @@
 /** \class DiskPlanR
  *  \brief disk - plan relation - Inherits from LagrangianScleronomousR
  */
-class DiskPlanR : public LagrangianScleronomousR, public std11::enable_shared_from_this<DiskPlanR>
+class DiskPlanR : public LagrangianScleronomousR, public std::enable_shared_from_this<DiskPlanR>
 {
 private:
   /** serialization hooks

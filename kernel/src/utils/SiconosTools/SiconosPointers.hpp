@@ -59,7 +59,6 @@ More documentation on smart pointers and reference counting:
 // only in HEM5 and LSodar
 #include <boost/shared_array.hpp>
 
-namespace std11 = std;
 namespace SP {}
 namespace SPC {}
 namespace SA {}

@@ -1,9 +1,6 @@
 
 #include "SiconosContactor.hpp"
 #include "SiconosShape.hpp"
-
-#include <boost/make_shared.hpp>
-
 SiconosContactor::SiconosContactor(SP::SiconosShape _shape,
                                    SP::SiconosVector _offset,
                                    int _collision_group)
@@ -11,7 +8,7 @@ SiconosContactor::SiconosContactor(SP::SiconosShape _shape,
 {
   if(!offset)
   {
-    offset = std11::make_shared<SiconosVector>(7);
+    offset = std::make_shared<SiconosVector>(7);
     offset->zero();
     (*offset)(3) = 1.0;
   }

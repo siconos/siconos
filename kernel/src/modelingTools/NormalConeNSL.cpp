@@ -25,7 +25,7 @@
 
 
 // Default (private)
-NormalConeNSL::NormalConeNSL(): NonSmoothLaw(), _H(std11::shared_ptr<SimpleMatrix>()), _K(std11::shared_ptr<SiconosVector>())
+NormalConeNSL::NormalConeNSL(): NonSmoothLaw(), _H(std::shared_ptr<SimpleMatrix>()), _K(std::shared_ptr<SiconosVector>())
 {}
 
 NormalConeNSL::NormalConeNSL(unsigned size, SP::SimpleMatrix H, SP::SiconosVector K):

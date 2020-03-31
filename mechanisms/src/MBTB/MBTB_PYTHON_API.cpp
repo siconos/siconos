@@ -605,21 +605,21 @@ void  MBTB_initSimu(double hTS, int withProj)
   if(withProj==0)
   {
     sSimu.reset(new MBTB_TimeStepping(myNsds,t,pOSI0,osnspb));
-    SP::MBTB_TimeStepping spSimu = (std11::static_pointer_cast<MBTB_TimeStepping>(sSimu));
+    SP::MBTB_TimeStepping spSimu = (std::static_pointer_cast<MBTB_TimeStepping>(sSimu));
   }
   else if(withProj==1)
   {
     sSimu.reset(new MBTB_TimeSteppingProj(myNsds,t,pOSI1,osnspb,osnspb_pos,sDParams[11]));
-    (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(sDParams[8]);
-    (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(sDParams[9]);
-    (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(sDParams[10]);
+    (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(sDParams[8]);
+    (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(sDParams[9]);
+    (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(sDParams[10]);
   }
   else if(withProj==2)
   {
     sSimu.reset(new MBTB_TimeSteppingCombinedProj(myNsds,t,pOSI2,osnspb,osnspb_pos,2));
-    (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setProjectionMaxIteration(sDParams[8]);
-    (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTol(sDParams[9]);
-    (std11::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTolUnilateral(sDParams[10]);
+    (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setProjectionMaxIteration(sDParams[8]);
+    (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTol(sDParams[9]);
+    (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTolUnilateral(sDParams[10]);
   }
 
   // --  OneStepIntegrators --
@@ -699,24 +699,24 @@ SP::Simulation MBTB_simulation()
 
 void MBTB_doProj(unsigned int v)
 {
-  (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setDoProj(v);
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setDoProj(v);
 }
 void MBTB_doOnlyProj(unsigned int v)
 {
-  (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setDoOnlyProj(v);
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setDoOnlyProj(v);
 }
 void MBTB_projectionMaxIteration(unsigned int v)
 {
-  (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(v);
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(v);
 }
 void MBTB_constraintTol(double v)
 {
-  (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(v);
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(v);
 }
 
 void MBTB_constraintTolUnilateral(double v)
 {
-  (std11::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(v);
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(v);
 }
 
 void MBTB_run(int NbSteps)

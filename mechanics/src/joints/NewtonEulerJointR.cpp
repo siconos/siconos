@@ -42,7 +42,7 @@ SP::SiconosVector NewtonEulerJointR::projectVectorDoF(const SiconosVector& v,
     int axis,
     bool absoluteRef)
 {
-  SP::SiconosVector ans(std11::make_shared<SiconosVector>(3));
+  SP::SiconosVector ans(std::make_shared<SiconosVector>(3));
   projectVectorDoF(v, q0, *ans, axis, absoluteRef);
   return ans;
 }
@@ -57,7 +57,7 @@ void NewtonEulerJointR::normalDoF(SiconosVector& ans,
 SP::SiconosVector NewtonEulerJointR::normalDoF(const BlockVector& q0, int axis,
     bool absoluteRef)
 {
-  SP::SiconosVector ans(std11::make_shared<SiconosVector>(3));
+  SP::SiconosVector ans(std::make_shared<SiconosVector>(3));
   _normalDoF(*ans, q0, axis, absoluteRef);
   return ans;
 }

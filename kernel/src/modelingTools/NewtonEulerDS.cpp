@@ -950,7 +950,7 @@ void NewtonEulerDS::computeForces(double time, SP::SiconosVector q, SP::SiconosV
       assert(!isnan(_mExt->vector_sum()));
       if(_isMextExpressedInInertialFrame)
       {
-        SP::SiconosVector mExt(std11::make_shared<SiconosVector>(*_mExt));
+        SP::SiconosVector mExt(std::make_shared<SiconosVector>(*_mExt));
         ::changeFrameAbsToBody(q,mExt);
         _wrench->setBlock(3, *mExt);
       }
@@ -1302,7 +1302,7 @@ SP::SiconosVector NewtonEulerDS::linearVelocity(bool absoluteRef) const
   if(absoluteRef)
     return _twist;
 
-  SP::SiconosVector v(std11::make_shared<SiconosVector>(3));
+  SP::SiconosVector v(std::make_shared<SiconosVector>(3));
   linearVelocity(absoluteRef, *v);
   return v;
 }
@@ -1320,7 +1320,7 @@ void NewtonEulerDS::linearVelocity(bool absoluteRef, SiconosVector &v) const
 
 SP::SiconosVector NewtonEulerDS::angularVelocity(bool absoluteRef) const
 {
-  SP::SiconosVector w(std11::make_shared<SiconosVector>(3));
+  SP::SiconosVector w(std::make_shared<SiconosVector>(3));
   angularVelocity(absoluteRef, *w);
   return w;
 }

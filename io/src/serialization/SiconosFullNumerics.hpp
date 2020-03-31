@@ -23,6 +23,7 @@
 #ifdef WITH_SERIALIZATION
 #include "Register.hpp"
 
+#include "SolverOptions.h"
 
 
 template <class Archive>

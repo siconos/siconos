@@ -785,7 +785,7 @@ double NM_get_value(const NumericsMatrix* const M, int i, int j)
 
 bool NM_equal(NumericsMatrix* A, NumericsMatrix* B)
 {
-  return NM_compare(A, B, DBL_EPSILON);
+  return NM_compare(A, B, DBL_EPSILON*2);
 };
 
 bool NM_compare(NumericsMatrix* A, NumericsMatrix* B, double tol)
