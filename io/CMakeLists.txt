@@ -77,8 +77,14 @@ if(WITH_SERIALIZATION)
       ${GENERATED_TARGETS} ${GENERATED_INCLUDES} --output=${GENERATED_HEADER}
       --source="${CMAKE_CURRENT_SOURCE_DIR}/../" --build="${CMAKE_BINARY_DIR}")
 
-    set(io_targets_doxy2xml "${io_targets}")
-    list(TRANSFORM io_targets_doxy2xml APPEND "-doxy2xml")
+		## CMake >= 3.12
+    # set(io_targets_doxy2xml "${io_targets}")
+    # list(TRANSFORM io_targets_doxy2xml APPEND "-doxy2xml")
+    set(io_targets_doxy2xml)
+		foreach(_T IN LISTS io_targets)
+			list(APPEND io_targets_doxy2xml "${_T}-doxy2xml")
+		endforeach()
+
     add_custom_command(
       OUTPUT ${GENERATED_HEADER}
       DEPENDS ${io_targets_doxy2xml} ${GENERATED_DEPENDENCIES}
