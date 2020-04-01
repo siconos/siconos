@@ -245,10 +245,19 @@ install_siconos:ubuntu18.04-fclib:
 install_siconos:ubuntu18.04-serialization:
   variables:
     IMAGE_NAME: $CI_REGISTRY_IMAGE/ubuntu18.04-doc
-    cdash_submit: 0 # No submit to cdash : too unstable.
+    cdash_submit: 1
     user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
   extends: .siconos-build
-  allow_failure: true
+
+# Siconos build and install, with serialization/generation ON
+# on debian unstable.
+install_siconos:debian-unstable-serialization:
+  variables:
+    IMAGE_NAME: $CI_REGISTRY_IMAGE/debian-unstable
+    cdash_submit: 1
+    user_file: $CI_PROJECT_DIR/$siconos_confs/siconos_with_serialization.cmake
+  extends: .siconos-build
+  allow_failure: false
 
 # Siconos build and install, default setup
 # on centos 7
