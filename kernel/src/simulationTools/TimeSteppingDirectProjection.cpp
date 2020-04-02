@@ -30,9 +30,9 @@
 #include "MoreauJeanOSI.hpp"
 
 static CheckSolverFPtr checkSolverOutputProjectOnConstraints = nullptr;
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
+#define DEBUG_NOCOLOR
+#define DEBUG_STDOUT
+#define DEBUG_MESSAGES
 #include "debug.h"
 //#define CORRECTIONSVELOCITIES
 TimeSteppingDirectProjection::TimeSteppingDirectProjection(
