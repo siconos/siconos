@@ -534,13 +534,13 @@ void SiconosBulletCollisionManager::initialize_impl()
 }
 
 SiconosBulletCollisionManager::SiconosBulletCollisionManager()
-  : SiconosCollisionManager()
+  : SiconosCollisionManager(),_with_equality_constraints(false)
 {
   initialize_impl();
 }
 
 SiconosBulletCollisionManager::SiconosBulletCollisionManager(const SiconosBulletOptions &options)
-  : _options(options)
+  : _with_equality_constraints(false),_options(options)
 {
   initialize_impl();
 }
