@@ -31,7 +31,7 @@
 
 #include "GAMSlink.h"
 #include "sanitizer.h"
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 
 #define DEBUG_STDOUT
 #define DEBUG_MESSAGES

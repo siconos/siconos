@@ -7,7 +7,7 @@
 #endif
 #endif
 
-%include "CSparseMatrix.h"
+%include "CSparseMatrix_internal.h"
 %include "SparseBlockMatrix.h"
 %include "NumericsMatrix.h"
 %include "NumericsSparseMatrix.h"
