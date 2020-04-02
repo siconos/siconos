@@ -11,6 +11,7 @@ set(cmake_macros
   valgrind.supp
   FindBLASDEV.cmake
   FindLAPACKDEV.cmake
+  FindSuiteSparse.cmake
   BlasLapackUtils.cmake
   )
 
