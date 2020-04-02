@@ -18,6 +18,10 @@ variables:
   cdash_submit: 0
   # Default path to siconos conf. files
   siconos_confs: ci_gitlab/siconos_confs
+  # By default we allow builds to run in parallel, but certain
+  # configurations may require non-parallel builds (cf. swig +
+  # serialization requires too much memory)
+  allow_parallel_build: 1
 
 
 stages:
