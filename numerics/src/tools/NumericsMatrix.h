@@ -228,7 +228,7 @@ extern "C"
   /** Check if a matrix is destructible.
    * \param[in] A the NumericsMatrix
    * \return true if the matrix is destructible */
-  bool NM_destructible(NumericsMatrix* A);
+  bool NM_destructible(const NumericsMatrix* A);
 
   /** Preservation of a matrix before in-place transformations such as
    * factorizations.
@@ -653,7 +653,34 @@ extern "C"
    * \return 0 if successful, else the error is specific to the backend solver
    * used
    */
+
+  /* LU factorization of the matrix. If the matrix has already been
+   * factorized (i.e if NM_factorized(A) return true), nothing is
+   * done. To force a new factorization one has to set factorization
+   * flag to false : NM_set_factorized(A, false) before the call to
+   * NM_LU_factorize.
+   * If the matrix is preserved, that means that a call to
+   * NM_preserve(A) has been done before the call to NM_LU_factorize,
+   * it is not destroyed, but the factorized part remains accessible for
+   * subsequent calls to NM_LU_solve.
+   * If the matrix is not preserved, then it is replaced by the
+   * factorized part.
+   * \param[in] A the NumericsMatrix
+   * \return an int, 0 means the matrix has been factorized. */
   int NM_LU_factorize(NumericsMatrix* A);
+
+  /* Solve linear system with multiple right hand size. A call to
+   * NM_LU_factorize is done at the beginning.
+
+   * \param[in] A the NumericsMatrix. A is not destroyed if it has
+   * been preserved by a call to NM_preserve(A).
+
+   * \param[in,out] b the right hand size which is a pointer on a
+   * matrix of double. It is replaced by the solutions
+
+   * \param[in] nrhs the number of right hand side.
+   * \return 0 if the solve succeeded.
+   */
   int NM_LU_solve(NumericsMatrix* A,  double *b, unsigned int nrhs);
 
   int NM_gesv_expert(NumericsMatrix* A, double *b, unsigned keep);

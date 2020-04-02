@@ -108,7 +108,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     lapack_int infoDGETRS;
     DGETRF(n, n, M->matrix0, n, ipiv, &infoDGETRF);
     assert(!infoDGETRF);
-    NM_set_factorized(M);
+    NM_set_factorized(M, true);
     DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, &infoDGETRS);
 #else
     NM_LU_solve(M, Htmp, m);

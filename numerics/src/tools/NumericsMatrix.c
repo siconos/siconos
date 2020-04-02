@@ -1833,13 +1833,12 @@ NumericsMatrix* NM_transpose(NumericsMatrix * A)
   return Atrans;
 }
 
-bool NM_destructible(NumericsMatrix* A)
+bool NM_destructible(const NumericsMatrix* A)
 {
   return A->destructible == A;
 }
 
-
-NumericsMatrix* NM_preserve(NumericsMatrix* A)
+RawNumericsMatrix* NM_preserve(NumericsMatrix* A)
 {
   if (NM_destructible(A))
   {
@@ -1856,7 +1855,7 @@ NumericsMatrix* NM_preserve(NumericsMatrix* A)
   return A;
 }
 
-NumericsMatrix* NM_unpreserve(NumericsMatrix* A)
+RawNumericsMatrix* NM_unpreserve(NumericsMatrix* A)
 {
   if (A->destructible != A)
   {
@@ -3221,115 +3220,118 @@ int NM_LU_factorize(NumericsMatrix* Ao)
 int NM_LU_solve(NumericsMatrix* Ao, double *b, unsigned int nrhs)
 {
 
+  lapack_int info = 1;
+
   /* factorization is done on destructible part only if
    * !A->internalData->isLUfactorized */
   NM_LU_factorize(Ao);
 
-  /* get the destructible part of the matrix */
-  NumericsMatrix *A = Ao->destructible;
+  if (NM_factorized(Ao))
 
-  DEBUG_BEGIN("NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
-  assert(A->size0 == A->size1);
-
-  lapack_int info = 1;
-
-  switch (A->storageType)
   {
-  case NM_DENSE:
-  {
-    assert(A->matrix0);
+    /* get the destructible part of the matrix */
+    NumericsMatrix *A = Ao->destructible;
 
-    numerics_printf_verbose(2, "NM_LU_solve, using LAPACK" );
+    DEBUG_BEGIN("NM_LU_solve(NumericsMatrix* A, double *b, unsigned int nrhs)\n");
+    assert(A->size0 == A->size1);
 
-    numerics_printf_verbose(2, "NM_LU_solve, factorization in-place" );
-
-
-    /* dgetrf is called in NM_LU_factorize */
-    DEBUG_PRINT("Start to call DGETRS for NM_DENSE storage\n");
-
-    numerics_printf_verbose(2,"NM_LU_solve, we solve with given factors" );
-    lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
-    DGETRS(LA_NOTRANS, A->size0, nrhs, A->matrix0, A->size0, ipiv, b, A->size0, &info);
-
-    DEBUG_PRINT("End of call DGETRS for NM_DENSE storage\n");
-
-    if (info < 0)
+    switch (A->storageType)
     {
-      numerics_printf_verbose(2,"NM_LU_solve: dense LU solve DGETRS failed. The %d-th argument has an illegal value\n", -info);
-    }
-    break;
-  }
+    case NM_DENSE:
+    {
+      assert(A->matrix0);
 
-  case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
-  case NM_SPARSE:
-  {
-    NSM_linear_solver_params* p = NSM_linearSolverParams(A);
-    switch (p->solver)
-    {
-    case NSM_CS_LUSOL:
-    {
-      numerics_printf_verbose(2,"NM_LU_solve, using CSparse" );
+      numerics_printf_verbose(2, "NM_LU_solve, using LAPACK" );
+
+      numerics_printf_verbose(2, "NM_LU_solve, factorization in-place" );
+
+      /* dgetrf is called in NM_LU_factorize */
+      DEBUG_PRINT("Start to call DGETRS for NM_DENSE storage\n");
 
       numerics_printf_verbose(2,"NM_LU_solve, we solve with given factors" );
-      for(unsigned int j=0; j < nrhs ; j++ )
+      lapack_int* ipiv = (lapack_int*)NM_iWork(A, A->size0, sizeof(lapack_int));
+      DGETRS(LA_NOTRANS, A->size0, nrhs, A->matrix0, A->size0, ipiv, b, A->size0, &info);
+
+      DEBUG_PRINT("End of call DGETRS for NM_DENSE storage\n");
+
+      if (info < 0)
       {
-        info = !CSparseMatrix_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
+        numerics_printf_verbose(2,"NM_LU_solve: dense LU solve DGETRS failed. The %d-th argument has an illegal value\n", -info);
       }
       break;
     }
-#ifdef WITH_MUMPS
-    case NSM_MUMPS:
+
+    case NM_SPARSE_BLOCK: /* sparse block -> triplet -> csc */
+    case NM_SPARSE:
     {
-      if(verbose >= 2)
+      NSM_linear_solver_params* p = NSM_linearSolverParams(A);
+      switch (p->solver)
       {
-        printf("NM_LU_solve: using MUMPS\n");
-      }
-
-      assert (NM_MUMPS_id(A)->job); /* this means that least a
-                                     * factorization has already been
-                                     * done */
-
-      DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
-
-      NM_MUMPS_set_problem(A, nrhs, b);
-
-      NM_MUMPS(A, 3); /* solve */
-      info = mumps_id->info[0];
-
-      /* MUMPS can return info codes with negative value */
-      if(info)
+      case NSM_CS_LUSOL:
       {
-        if(verbose > 0)
+        numerics_printf_verbose(2,"NM_LU_solve, using CSparse" );
+
+        numerics_printf_verbose(2,"NM_LU_solve, we solve with given factors" );
+        for(unsigned int j=0; j < nrhs ; j++ )
         {
-          fprintf(stderr,"NM_LU_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          info = !CSparseMatrix_solve((CSparseMatrix_factors *)NSM_linear_solver_data(p), NSM_workspace(p), &b[j*A->size1]);
         }
+        break;
+      }
+#ifdef WITH_MUMPS
+      case NSM_MUMPS:
+      {
+        if(verbose >= 2)
+        {
+          printf("NM_LU_solve: using MUMPS\n");
+        }
+
+        assert (NM_MUMPS_id(A)->job); /* this means that least a
+                                       * factorization has already been
+                                       * done */
+
+        DMUMPS_STRUC_C* mumps_id = NM_MUMPS_id(A);
+
+        NM_MUMPS_set_problem(A, nrhs, b);
+
+        NM_MUMPS(A, 3); /* solve */
+        info = mumps_id->info[0];
+
+        /* MUMPS can return info codes with negative value */
+        if(info)
+        {
+          if(verbose > 0)
+          {
+            fprintf(stderr,"NM_LU_solve: MUMPS fails : info(1)=%d, info(2)=%d\n", info, mumps_id->info[1]);
+          }
+        }
+        break;
+      }
+#endif /* WITH_MUMPS */
+      default:
+      {
+        fprintf(stderr, "NM_LU_solve: unknown sparse linearsolver %d\n", p->solver);
+        exit(EXIT_FAILURE);
+      }
+      break;
       }
       break;
     }
-#endif /* WITH_MUMPS */
     default:
-    {
-      fprintf(stderr, "NM_LU_solve: unknown sparse linearsolver %d\n", p->solver);
-      exit(EXIT_FAILURE);
+      assert (0 && "NM_LU_solve unknown storageType");
     }
-    break;
-    }
-    break;
-  }
-  default:
-    assert (0 && "NM_LU_solve unknown storageType");
-  }
 
 
-  /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
-     CHECK_RETURN is ok for cs, but not for MUMPS and others */
-
-  /* some time we cannot find a solution to a linear system, and its fine, for
-   * instance with the minFBLSA. Therefore, we should not check here for
-   * problems, but the calling function has to check the return code.*/
+    /* WARNING: cs returns 0 (false) for failed and 1 (true) for ok
+       CHECK_RETURN is ok for cs, but not for MUMPS and others */
+    /* some time we cannot find a solution to a linear system, and its fine, for
+     * instance with the minFBLSA. Therefore, we should not check here for
+     * problems, but the calling function has to check the return code.*/
 //  CHECK_RETURN(info);
-  DEBUG_END("NM_LU_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
-  return (int)info;
+    DEBUG_END("NM_LU_solve(NumericsMatrix* A, double *b, unsigned keep)\n");
+  }
+
+  return info;
 }
 
 

@@ -273,6 +273,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
       // Find direction by solving H * d = -F_desc
       cblas_dcopy(n, F_merit, incx, workV1, incy);
       cblas_dscal(n, -1.0, workV1, incx);
+      NM_set_factorized(H, false);
       info_dir_search = NM_LU_solve(params->keep_H ? NM_preserve(H) : H, workV1, 1);
     }
     /**************************************************************************
@@ -322,6 +323,7 @@ void newton_LSA(unsigned n, double *z, double *F, int *info, void* data, SolverO
         numerics_printf("functions->compute_RHS_desc : no  descent direction found! searching for merit descent direction");
         cblas_dcopy(n, F_merit, incx, workV1, incy);
         cblas_dscal(n, -1.0, workV1, incx);
+        NM_set_factorized(H, false);
         info_dir_search = NM_LU_solve(params->keep_H ? NM_preserve(H) : H, workV1, 1);
 
         if(log_hdf5)
