@@ -174,7 +174,7 @@ void EventsManager::scheduleNonSmoothEvent(Simulation& sim, double time, bool ye
     if(mpz_cmp_ui(delta_time, _GapLimit2Events) <= 0)  // the two are too close
     {
       // reschedule the TD event only if its time instant is less than T
-      if(!isnan(getTkp3()))
+      if(!std::isnan(getTkp3()))
       {
         _NSeventInsteadOfTD = true;
         static_cast<TimeDiscretisationEvent&>(ev).update(_k+3);
@@ -211,7 +211,7 @@ void EventsManager::update(Simulation& sim)
     // run until T
     double tkp2 = getTkp2();
     std::static_pointer_cast<TimeDiscretisationEvent>(_events[0])->update(_k+2);
-    if(!isnan(tkp2))
+    if(!std::isnan(tkp2))
     {
       insertEv(_events[0]);
     }

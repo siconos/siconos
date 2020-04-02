@@ -70,7 +70,7 @@ MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   _levelMaxForInput =1;
   _steps=1;
   _theta = theta;
-  if(!isnan(gamma))
+  if(!std::isnan(gamma))
   {
     _gamma = gamma;
     _useGamma = true;
@@ -1846,7 +1846,7 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   }
   DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n", i,  y, yDot, y + gamma * h * yDot, _constraintActivationThreshold);
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   DEBUG_EXPR(
     if(y <= 0)
     DEBUG_PRINT("MoreauJeanOSI::addInteractionInIndexSet ACTIVATE.\n");

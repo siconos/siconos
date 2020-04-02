@@ -63,7 +63,7 @@ MoreauJeanGOSI::MoreauJeanGOSI(double theta, double gamma):
   _levelMaxForInput =1;
   _steps=1;
   _theta = theta;
-  if(!isnan(gamma))
+  if(!std::isnan(gamma))
   {
     _gamma = gamma;
     _useGamma = true;
@@ -1065,7 +1065,7 @@ bool MoreauJeanGOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned in
   y += gamma * h * yDot;
 
   DEBUG_PRINTF("y = %e\n", y);
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   DEBUG_EXPR_WE(
     if(y <= 0)
 {
@@ -1093,7 +1093,7 @@ bool MoreauJeanGOSI::removeInteractionFromIndexSet(SP::Interaction inter, unsign
   }
   DEBUG_PRINTF("MoreauJeanGOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   DEBUG_EXPR(
     if(y > 0)
