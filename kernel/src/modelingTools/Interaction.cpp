@@ -805,6 +805,7 @@ void Interaction::display(bool brief) const
 
   cout << "| "  ;
   _relation->display();
+  _nslaw->display();
   for(unsigned int i = 0; i < _upperLevelForOutput + 1; i++)
   {
 
