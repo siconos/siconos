@@ -236,7 +236,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
                _activateYPosThreshold,
                _activateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #ifdef DEBUG_MESSAGES
   if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -263,7 +263,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(SP::Interactio
                _deactivateYPosThreshold,
                _deactivateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 #ifdef DEBUG_MESSAGES
   if(y > _deactivateYPosThreshold && yDot >= _deactivateYVelThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
@@ -291,7 +291,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
                _activateYPosThreshold,
                _activateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -312,7 +312,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(SP::Interactio
                _deactivateYPosThreshold,
                _deactivateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   if(y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
   return (y > _deactivateYPosThreshold && lambda <= _deactivateYVelThreshold);
@@ -335,7 +335,7 @@ bool MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(SP::Interaction int
                _activateYPosThreshold,
                _activateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   if(y <= _activateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -356,7 +356,7 @@ bool MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(SP::Interactio
                _deactivateYPosThreshold,
                _deactivateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   if(y > _deactivateYPosThreshold)
     DEBUG_PRINT("MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
   return (y > _deactivateYPosThreshold);

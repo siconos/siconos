@@ -31,7 +31,7 @@ bool MBTB_MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigne
   }
   DEBUG_PRINTF("MBTB_MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+gamma*h*yDot);
   y += gamma*h*yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   if(y<=0)
     DEBUG_PRINT("MBTB_MoreauJeanOSI::addInteractionInIndexSet ACTIVATE.\n");
   return (y<=0);
@@ -49,7 +49,7 @@ bool MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(SP::Interaction inter, un
   }
   DEBUG_PRINTF("MBTB_MoreauJeanOSI::addInteractionInIndexSet yref=%e, yDot=%e .\n", y, yDot, y+gamma*h*yDot);
   y += gamma*h*yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   if(y>0)
     DEBUG_PRINT("MBTB_MoreauJeanOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
   return (y>0);
@@ -70,7 +70,7 @@ bool MBTB_MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigne
                _activateYPosThreshold,
                _activateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   if(y<=_activateYPosThreshold)
     DEBUG_PRINT("MBTB_MoreauJeanOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -91,7 +91,7 @@ bool MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(SP::Interaction inter, un
                _deactivateYPosThreshold,
                _deactivateYVelThreshold);
 
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   if(y>_deactivateYPosThreshold && yDot>=_deactivateYVelThreshold)
     DEBUG_PRINT("MBTB_MoreauJeanOSI::removeInteractionFromIndexSet DEACTIVATE.\n");
   return (y>_deactivateYPosThreshold && yDot>=_deactivateYVelThreshold);
