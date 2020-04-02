@@ -35,8 +35,8 @@ private:
   CPPUNIT_TEST_SUITE(SiconosMemoryTest);
 
   CPPUNIT_TEST(testBuildMemory1);
-  CPPUNIT_TEST(testBuildMemory2);
-  CPPUNIT_TEST(testBuildMemory3);
+  // CPPUNIT_TEST(testBuildMemory2);
+  // CPPUNIT_TEST(testBuildMemory3);
   CPPUNIT_TEST(testSetVectorMemory);
   CPPUNIT_TEST(testGetSiconosVector);
   CPPUNIT_TEST(testSwap);
@@ -44,8 +44,8 @@ private:
   CPPUNIT_TEST_SUITE_END();
 
   void testBuildMemory1();
-  void testBuildMemory2();
-  void testBuildMemory3();
+  // void testBuildMemory2();
+  // void testBuildMemory3();
   void testSetVectorMemory();
   void testGetSiconosVector();
   void testSwap();

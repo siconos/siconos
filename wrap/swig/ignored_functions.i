@@ -25,8 +25,6 @@
 %ignore BlockVector::operator ()(unsigned int) const;
 %ignore BlockVector::vector(unsigned int) const;
 %ignore BlockVector::operator [](unsigned int) const;
-%ignore BlockVector::tabIndexBegin() const;
-%ignore BlockVector::tabIndexEnd() const;
 %ignore OneStepIntegrator::dynamicalSystemsBegin() const;
 %ignore OneStepIntegrator::dynamicalSystemsEnd() const;
 %ignore *::ACCEPT_NONVIRTUAL_VISITORS;

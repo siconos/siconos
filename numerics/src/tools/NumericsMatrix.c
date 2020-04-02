@@ -2577,12 +2577,12 @@ void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
   assert(A->size0 >= B->size0);
   assert(A->size1 >= B->size1);
 
-  int end_i = start_i + B->size0;
-  int end_j = start_j + B->size1;
+  unsigned int end_i = start_i + B->size0;
+  unsigned int end_j = start_j + B->size1;
   assert(start_i <= end_i);
   assert(start_j <= end_j);
-  assert(end_i <= A->size0);
-  assert(end_j <= A->size1);
+  assert((int)end_i <= A->size0);
+  assert((int)end_j <= A->size1);
 
   /* trivial case when size(A) == size(B) */
   if(A->size0 == B->size0 && A->size1 == B->size1)

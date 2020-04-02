@@ -53,6 +53,7 @@ private:
   CPPUNIT_TEST(testOperators2);
   CPPUNIT_TEST(testOperators3);
   CPPUNIT_TEST(testOperators4);
+  CPPUNIT_TEST(testSetBlock);
   CPPUNIT_TEST(testInsert);
   CPPUNIT_TEST(End);
 
@@ -73,6 +74,7 @@ private:
   void testOperators2();
   void testOperators3();
   void testOperators4();
+  void testSetBlock();
   void testInsert();
   void End();
   // Members

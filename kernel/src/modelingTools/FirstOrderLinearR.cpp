@@ -253,7 +253,7 @@ void FirstOrderLinearR::computeOutput(double time, Interaction& inter, unsigned 
   BlockVector& x = *DSlink[FirstOrderR::x];
 
   SiconosVector z_vec;
-  z_vec.initFromBlock(z); // copy !
+  z_vec.block2contiguous(z); // copy !
   SiconosVector& y = *inter.y(level);
   SiconosVector& lambda = *inter.lambda(level);
 
@@ -286,7 +286,7 @@ void FirstOrderLinearR::computeInput(double time, Interaction& inter, unsigned i
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   BlockVector& z = *DSlink[FirstOrderR::z];
   SiconosVector z_vec;
-  z_vec.initFromBlock(z);
+  z_vec.block2contiguous(z);
   computeg(time, lambda, z_vec, *DSlink[FirstOrderR::r]);
   *DSlink[FirstOrderR::z] = z_vec;
 }

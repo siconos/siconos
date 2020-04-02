@@ -73,7 +73,6 @@ void BlockVectorTest::testConstructor1()
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*tab)[0] == 3, true);
   //
   //  SP::SiconosVector  z = v->vector(0);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->isBlock(), false);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->size() == 3, true);
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", z->num() == 1, true);
   //  std::cout << "--> Constructor 1 test ended with success." <<std::endl;
@@ -105,11 +104,9 @@ void BlockVectorTest::testConstructor2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", (*tab)[0] == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", (*tab)[1] == 8, true);
   SP::SiconosVector  ww = v->vector(0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->num() == 1, true);
   ww = v->vector(1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->size() == 5, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww->num() == 1, true);
 
@@ -129,11 +126,9 @@ void BlockVectorTest::testConstructor2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", (*tab2)[0] == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", (*tab2)[1] == 8, true);
   SP::SiconosVector  ww2 = v2->vector(0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->size() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->num() == 1, true);
   ww2 = v2->vector(1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->size() == 5, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", ww2->num() == 1, true);
   std::cout << "--> Constructor 2 test ended with success." <<std::endl;
@@ -151,10 +146,10 @@ void BlockVectorTest::testConstructor3()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*v)(i) == 2, true);
   for(unsigned int i = w->size(); i < z->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*v)(i) == 3, true);
-  Index tab = v->getTabIndex();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab.size() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab[0] == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab[1] == 8, true);
+  SP::Index tab = v->tabIndex();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tab->size() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[0] == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", (*tab)[1] == 8, true);
   SP::SiconosVector ww = v->vector(0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", ww == w, true);
   ww = v->vector(1);
@@ -171,11 +166,11 @@ void BlockVectorTest::testConstructor4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->numberOfBlocks() == 3, true);
   for(unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", (*v)(i) == 0, true);
-  Index tab = v->getTabIndex();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", tab.size() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", tab[0] == 4, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", tab[1] == 8, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", tab[2] == 12, true);
+  SP::Index tab = v->tabIndex();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", tab->size() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", (*tab)[0] == 4, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", (*tab)[1] == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", (*tab)[2] == 12, true);
   std::cout << "--> Constructor 4 test ended with success." <<std::endl;
 }
 
@@ -215,25 +210,25 @@ void BlockVectorTest::testConstructor5()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 16, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->numberOfBlocks() == 5, true);
   v->display();
-  Index tab = v->getTabIndex();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab.size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[0] == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[1] == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[2] == 8, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[3] == 11, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[4] == 16, true);
+  SP::Index tab = v->tabIndex();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab->size() == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[0] == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[1] == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[2] == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[3] == 11, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[4] == 16, true);
 
   v->setVectorPtr(2,ww);
   v->display();
-  tab = v->getTabIndex();
+  tab = v->tabIndex();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 18, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->numberOfBlocks() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab.size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[0] == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[1] == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[2] == 10, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[3] == 13, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[4] == 18, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab->size() == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[0] == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[1] == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[2] == 10, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[3] == 13, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[4] == 18, true);
 
   std::cout << "--> Constructor 5 test ended with success." <<std::endl;
 }
@@ -290,6 +285,34 @@ void BlockVectorTest::testNorm()
   std::cout << "--> norm test ended with success." <<std::endl;
 }
 
+
+void BlockVectorTest::testSetBlock()
+{
+  std::cout << "--> Test: set block in BlockVector." <<std::endl;
+
+  // Block copy from a Simple into a Block.
+  SP::SiconosVector ref2(new SiconosVector(3));
+  for(unsigned int i = 0; i < 3; ++i)
+    (*ref2)(i) = i;
+  SP::SiconosVector ref3(new SiconosVector(6));
+  for(unsigned int i = 0; i < 6; ++i)
+    (*ref3)(i) = i;
+  SP::BlockVector BSV(new BlockVector());
+  BSV->insertPtr(ref3);
+  BSV->insertPtr(ref2);
+
+  SP::SiconosVector vIn(new SiconosVector(8));
+
+  unsigned int sizeB = 6;
+  unsigned int posIn = 1;
+  unsigned int posOut = 2;
+
+  BSV->setBlock(*vIn, sizeB, posIn, posOut);
+  for(unsigned int i = 0; i < sizeB; ++i)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*BSV)(i + posOut) == (*vIn)(i + posIn), true);
+
+  std::cout << "--> setBlock3 test ended with success." <<std::endl;
+}
 // OPERATORS
 
 // =
@@ -451,7 +474,7 @@ void BlockVectorTest::testInsert()
 
   SP::SiconosVector  y(new SiconosVector(7));
 
-  xB->insert(*y);
+  xB->insertPtr(y);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", xB->numberOfBlocks() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", xB->size() == (7 + size), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInsert : ", xB->vector(2) != y, true);

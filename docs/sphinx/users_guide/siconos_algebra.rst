@@ -4,7 +4,6 @@ Linear Algebra in Siconos
 =========================
 
 An overview of matrices and vectors in Siconos : storage, usage, operations ...
-Based on boost (https://www.boost.org/) ublas linear algebra library.
 
 Defined in :
 
@@ -15,14 +14,18 @@ Defined in :
    :local:
 
 
-     
+
+Siconos vectors and matrices in the kernel component are mostly an interface to boost ublas objects (https://www.boost.org/doc/libs/1_65_1/libs/numeric/ublas/doc/index.html)
+
+
+      
 Vectors
 -------
 
-Vectors in siconos are defined with SiconosVector object.
+Vectors in siconos are defined with `SiconosVector` object.
 
 * Contains real numbers (type : double precision)
-* Can be dense or sparse.
+* Can be dense (type: Siconos::DENSE) or sparse (type Siconos::SPARSE).
 
 
 Matrices
