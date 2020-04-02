@@ -47,8 +47,6 @@ if(NOT SuiteSparse_ROOT)
   set(SuiteSparse_ROOT $ENV{SuiteSparse_ROOT})
 endif()
 
-include(SiconosTools) # for set_find_package_hints
-
 # Try to help find_package process (pkg-config ...)
 set_find_package_hints(NAME SuiteSparse MODULE suitesparse)
 
