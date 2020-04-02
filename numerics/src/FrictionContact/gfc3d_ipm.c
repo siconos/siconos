@@ -29,7 +29,7 @@
 #include "NumericsVector.h"
 #include "float.h"
 #include "JordanAlgebra.h"
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
 
 

@@ -20,7 +20,7 @@
 
 %inline %{
 
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 
 static inline bool sane_pyseq_check(PyObject *o)
 {

@@ -25,7 +25,7 @@
 #include "SBM_test.h"
 #include <stdio.h>                       // for printf, fclose, fopen, FILE
 #include <stdlib.h>                      // for free, malloc, calloc
-#include "CSparseMatrix.h"               // for CSparseMatrix_spfree_on_stack
+#include "CSparseMatrix_internal.h"               // for CSparseMatrix_spfree_on_stack
 #include "NumericsFwd.h"                 // for NumericsMatrix, SparseBlockS...
 #include "NumericsMatrix.h"              // for NumericsMatrix, NM_clear, NM_...
 #include "SparseBlockMatrix.h"           // for SBM_clear, SBM_new_from_file

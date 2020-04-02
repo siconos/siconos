@@ -32,7 +32,7 @@
 #include <vector>                                     // for vector, operator==
 #include "SiconosAlgebra.hpp"
 #include "BlockMatrix.hpp"                            // for BlockMatrix
-#include "CSparseMatrix.h"                            // for CSparseMatrix
+#include "CSparseMatrix_internal.h"                   // for CSparseMatrix
 #include "SiconosVector.hpp"                          // for SiconosVector
 #include "SimpleMatrixFriends.hpp" // for isComparableTo
 

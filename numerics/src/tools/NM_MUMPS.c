@@ -19,7 +19,7 @@
 #include "NM_MUMPS.h"
 #ifdef WITH_MUMPS
 #include <string.h> // for memcpy
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"

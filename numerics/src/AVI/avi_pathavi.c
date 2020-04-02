@@ -26,7 +26,7 @@
 
 #include <string.h>
 
-#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"
 #include "AffineVariationalInequalities.h"
 #include "NumericsMatrix.h"
 #include "SiconosSets.h"

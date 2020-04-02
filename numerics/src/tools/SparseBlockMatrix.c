@@ -16,6 +16,7 @@
  * limitations under the License.
 */
 
+#include "CSparseMatrix_internal.h"
 #include "SparseBlockMatrix.h"
 #include <assert.h>            // for assert
 #include <math.h>              // for fabs, NAN
