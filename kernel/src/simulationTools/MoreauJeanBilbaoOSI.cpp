@@ -435,7 +435,7 @@ bool MoreauJeanBilbaoOSI::addInteractionInIndexSet(SP::Interaction inter, unsign
 
   double gamma = 1.0 / 2.0;
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
   DEBUG_EXPR(
     if(y <= 0)
     DEBUG_PRINT("MoreauJeanBilbaoOSI::addInteractionInIndexSet ACTIVATE.\n");
@@ -453,7 +453,7 @@ bool MoreauJeanBilbaoOSI::removeInteractionFromIndexSet(SP::Interaction inter, u
   double gamma = 1.0 / 2.0;
   DEBUG_PRINTF("MoreauJeanBilbaoOSI::addInteractionInIndexSet yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y + gamma * h * yDot);
   y += gamma * h * yDot;
-  assert(!isnan(y));
+  assert(!std::isnan(y));
 
   DEBUG_EXPR(
     if(y > 0)

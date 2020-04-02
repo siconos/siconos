@@ -118,7 +118,7 @@ void TimeStepping::insertIntegrator(SP::OneStepIntegrator osi)
 //   double yDot = inter->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
 //   DEBUG_PRINTF("TS::predictorDeactivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot);
 //   y += 0.5*h*yDot;
-//   assert(!isnan(y));
+//   assert(!std::isnan(y));
 //   if(y>0)
 //     DEBUG_PRINTF("TS::predictorDeactivate DEACTIVATE.\n");
 //   return (y>0);
@@ -131,7 +131,7 @@ void TimeStepping::insertIntegrator(SP::OneStepIntegrator osi)
 //   double yDot = inter->getYRef(i); // for i=1 it is the velocity -> historic notation yDot
 //   DEBUG_PRINTF("TS::predictorActivate yref=%e, yDot=%e, y_estimated=%e.\n", y, yDot, y+0.5*h*yDot);
 //   y += 0.5*h*yDot;
-//   assert(!isnan(y));
+//   assert(!std::isnan(y));
 //   if(y<=0)
 //     DEBUG_PRINTF("TS::predictorActivate ACTIVATE.\n");
 //   return (y<=0);
@@ -385,7 +385,7 @@ void TimeStepping::initializeNewtonLoop()
 {
   DEBUG_BEGIN("TimeStepping::initializeNewtonLoop()\n");
   double tkp1 = getTkp1();
-  assert(!isnan(tkp1));
+  assert(!std::isnan(tkp1));
 
   for(OSIIterator it = _allOSI->begin(); it != _allOSI->end() ; ++it)
   {
