@@ -113,8 +113,8 @@ protected:
   /** Arbitrary algebraic values vector, z, discrete state of the
       system. */
   SP::SiconosVector _z;
-  
-  /** the  previous state vectors stored in memory 
+
+  /** the  previous state vectors stored in memory
    */
   SiconosMemory _xMemory;
 

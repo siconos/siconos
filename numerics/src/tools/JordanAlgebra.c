@@ -186,7 +186,7 @@ void JA_eigenvals(const double * const vec, const unsigned int vecSize, const si
 {
   DEBUG_BEGIN("JA_eigenvals(...)\n");
   unsigned int dimension = (int)(vecSize / varsCount);
-  unsigned register int pos;
+  register unsigned int pos;
 
   for(size_t i = 0; i < 2*varsCount; i += 2)
   {
@@ -209,7 +209,7 @@ void JA_eigenvecs(const double * const vec, const unsigned int vecSize, const si
 {
   const double EPS = 1e-12;
   unsigned int dimension = (int)(vecSize / varsCount);
-  unsigned register int pos;
+  register unsigned int pos;
   double xi_bar_norm;
 
   for(size_t i = 0; i < 2*varsCount; i += 2)

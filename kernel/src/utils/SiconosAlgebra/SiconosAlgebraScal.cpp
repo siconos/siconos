@@ -26,6 +26,9 @@
 #include "SimpleMatrix.hpp"
 #include "BlockMatrix.hpp"
 #include "BlockMatrixIterators.hpp"
+#include "SiconosAlgebraTools.hpp" // for isComparableTo
+
+using Siconos::Algebra::isComparableTo;
 
 void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
 {

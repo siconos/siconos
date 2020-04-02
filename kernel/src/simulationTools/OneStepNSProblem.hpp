@@ -110,15 +110,15 @@ protected:
 
 private:
 
-  /** copy constructor, forbidden */
+  /* copy constructor, forbidden */
   OneStepNSProblem(const OneStepNSProblem&) = delete;
 
-  /** assignment, forbidden */
-  OneStepNSProblem& operator=(const OneStepNSProblem& osnsp) = delete;
+  /* assignment, forbidden */
+  OneStepNSProblem& operator=(const OneStepNSProblem&) = delete;
 
 public:
   /**  constructor from a pre-defined solver options set.
-       \param options, the options set, 
+       \param options, the options set,
        \rst
        see :ref:`problems_and_solvers` for details.
        \endrst

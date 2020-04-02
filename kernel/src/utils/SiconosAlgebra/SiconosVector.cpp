@@ -175,35 +175,11 @@ SiconosVector::SiconosVector(const SiconosVector &svect) : std::enable_shared_fr
     noalias(*vect.Sparse) = (*svect.sparse());
     //std::copy((vect.Sparse)->begin(), (vect.Sparse)->end(), (svect.sparse())->begin());
   }
-
-  // Note FP: using constructor + noalias = (or std::copy) is more
+  // Note FP: using constructor + noalias = (or std::copy) seems to be more
   // efficient than a call to ublas::vector copy constructor, this for
   // large or small vectors.
 }
 
-// Copy from BlockVector
-void SiconosVector::initFromBlock(const BlockVector & vIn)
-{
-  if(ask<IsDense>(**(vIn.begin())))  // dense
-  {
-    _dense = true;
-    vect.Dense = new DenseVect(vIn.size());
-  }
-  else
-  {
-    _dense = false;
-    vect.Sparse = new SparseVect(vIn.size());
-  }
-
-  VectorOfVectors::const_iterator it;
-  unsigned int pos = 0;
-  for(it = vIn.begin(); it != vIn.end(); ++it)
-  {
-    setBlock(pos, **it);
-    pos += (*it)->size();
-  }
-
-}
 
 SiconosVector::SiconosVector(const DenseVect& m)
 {
@@ -259,32 +235,46 @@ SiconosVector::~SiconosVector()
 {
   if(_dense)
     delete(vect.Dense);
-  else delete(vect.Sparse);
+  else
+    delete(vect.Sparse);
 }
 
+
+// Copy a block vector into a SiconosVector
+// in order to handle contiguous memory.
+void SiconosVector::block2contiguous(const BlockVector & vIn)
+{
+  if(_dense)
+    delete(vect.Dense);
+  else
+    delete(vect.Sparse);
+
+  if(ask<IsDense>(**(vIn.begin())))  // dense
+  {
+    _dense = true;
+    vect.Dense = new DenseVect(vIn.size());
+  }
+  else
+  {
+    _dense = false;
+    vect.Sparse = new SparseVect(vIn.size());
+  }
+
+  VectorOfVectors::const_iterator it;
+  unsigned int pos = 0;
+  for(it = vIn.begin(); it != vIn.end(); ++it)
+  {
+    setBlock(pos, **it);
+    pos += (*it)->size();
+  }
+
+}
 
 // =================================================
 //        get Ublas component (dense or sparse)
 // =================================================
 
-const DenseVect SiconosVector::getDense(unsigned int) const
-{
-  if(!_dense)
-    SiconosVectorException::selfThrow("SiconosVector::getDense(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
-
-  return *vect.Dense;
-}
-
-const SparseVect SiconosVector::getSparse(unsigned int)const
-{
-
-  if(_dense)
-    SiconosVectorException::selfThrow("SiconosVector::getSparse(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
-
-  return *vect.Sparse;
-}
-
-SparseVect* SiconosVector::sparse(unsigned int)const
+SparseVect* SiconosVector::sparse()const
 {
 
   if(_dense)
@@ -315,14 +305,6 @@ void SiconosVector::zero()
     *vect.Sparse *= 0.0;
   }
 
-}
-
-void SiconosVector::setVector(unsigned int, const SiconosVector& newV)
-{
-  if(newV.size() != size())
-    SiconosVectorException::selfThrow("SiconosVector::setVector(num,v), unconsistent sizes.");
-
-  *this = newV ;
 }
 
 void SiconosVector::fill(double value)
@@ -517,12 +499,9 @@ void SiconosVector::toBlock(SiconosVector& vOut, unsigned int sizeB, unsigned in
 void SiconosVector::addBlock(unsigned int index, const SiconosVector& vIn)
 {
   // Add vIn to the current vector, starting from position "index".
-  // vIn may be a BlockVector.
-
-  //if ( num != 1 ) SiconosVectorException::selfThrow("SiconosVector::addBlock : vector should be dense");
 
   if(&vIn == this)
-    SiconosVectorException::selfThrow("SiconosVector::this->addBlock(pos,vIn): vIn = this.");
+    SiconosVectorException::selfThrow("SiconosVector::this->addBlock(pos,vIn): try to add a vector to itself.");
 
   unsigned int end = vIn.size();
   if((index + end) > size()) SiconosVectorException::selfThrow("SiconosVector::addBlock : invalid ranges");
@@ -540,9 +519,6 @@ void SiconosVector::addBlock(unsigned int index, const SiconosVector& vIn)
 void SiconosVector::subBlock(unsigned int index, const SiconosVector& vIn)
 {
   // Add vIn from the current vector, starting from position "index".
-  // vIn may be a BlockVector.
-
-  //  if ( num != 1 ) SiconosVectorException::selfThrow("SiconosVector::subBlock : vector should be dense");
 
   unsigned int end = vIn.size();
   if((index + end) > size()) SiconosVectorException::selfThrow("SiconosVector::subBlock : invalid ranges");
@@ -1379,49 +1355,14 @@ void getMin(const SiconosVector& V, double& minvalue, unsigned int& idmin)
 }
 
 
-struct exp_op
-{
-  double operator()(double d) const
-  {
-    return std::exp(d);
-  }
-};
+// struct exp_op
+// {
+//   double operator()(double d) const
+//   {
+//     return std::exp(d);
+//   }
+// };
 
-void SiconosVector::exp_in_place()
-{
-  // struct exp_op { double operator() (double d) const { return std::exp(d); } };
-  // assert(num() == 1);
-  // std::transform(vect.Dense->begin(), vect.Dense->end(), vect.Dense->begin(), exp_op);
-}
-
-void SiconosVector::exp(SiconosVector& input)
-{
-  // assert(num() == 1 && input.num()==1);
-  // std::transform(input.dense()->begin(), input.dense()->end(), vect.Dense->begin(), exp_op);
-}
-
-
-//
-/*
-SiconosVector abs_wise(const SiconosVector& V){
-  SiconosVector Vabs(V.size());
-  for (int it = 0; it < V.size(); ++it){
-    Vabs.setValue(it,std::abs(V.getValue(it)));
-  };
-  return Vabs;
-}
-//
-void getMin(const SiconosVector& V, double& minvalue, unsigned int& idmin){
-  minvalue = V.getValue(0);
-  idmin = 0;
-  for (unsigned int it = 1; it < V.size(); ++it){
-    if (V.getValue(it) < minvalue){
-      minvalue = V.getValue(it);
-      idmin = it;
-    };
-  };
-}
-*/
 void setBlock(const SiconosVector& vIn, SP::SiconosVector vOut, unsigned int sizeB,
               unsigned int startIn, unsigned int startOut)
 {
@@ -1498,8 +1439,7 @@ SiconosVector::const_iterator SiconosVector::end() const
 
 SiconosVector::operator std::vector<double>()
 {
-  std::vector<double> v;
-  v.resize(size());
+  std::vector<double> v(size());
   std::copy(begin(), end(), v.begin());
   return v;
 }

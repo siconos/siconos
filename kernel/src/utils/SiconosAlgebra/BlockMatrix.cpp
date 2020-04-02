@@ -27,10 +27,12 @@
 #include "SiconosVector.hpp"
 #include "SiconosMatrixException.hpp"
 #include "SiconosMatrixSetBlock.hpp" // for setBlock
+#include "SiconosAlgebraTools.hpp" // for isComparableTo
 #include "Tools.hpp"
 
 using  std::cout;
 using std::endl;
+using Siconos::Algebra::isComparableTo;
 
 // =================================================
 //                CONSTRUCTORS

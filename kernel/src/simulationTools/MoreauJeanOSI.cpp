@@ -1426,9 +1426,9 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
       {
         if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
         {
-          SiconosVector q,z;
-          q.initFromBlock(*DSlink[LagrangianR::q0]);
-          z.initFromBlock(*DSlink[LagrangianR::z]);
+          SiconosVector q, z;
+          q.block2contiguous(*DSlink[LagrangianR::q0]);
+          z.block2contiguous(*DSlink[LagrangianR::z]);
 
           std::static_pointer_cast<LagrangianRheonomousR>(inter.relation())->computehDot(simulation()->getTkp1(), q, z);
           *DSlink[LagrangianR::z] = z;
@@ -1447,9 +1447,9 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
           osnsp_rhs *= h * _theta ;
 
           /* we have to check that the value are at the beginnning of the time step */
-          SiconosVector q,v;
-          q.initFromBlock(*DSlink[LagrangianR::q0]);
-          v.initFromBlock(*DSlink[LagrangianR::q1]);
+          SiconosVector q, v;
+          q.block2contiguous(*DSlink[LagrangianR::q0]);
+          v.block2contiguous(*DSlink[LagrangianR::q1]);
           // + C q_k
           subprod(C, q, osnsp_rhs, coord, false);
           // + h(1-_theta)v_k

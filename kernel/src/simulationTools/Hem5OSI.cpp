@@ -1059,9 +1059,9 @@ void Hem5OSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_inter, On
       }
       else if(((*allOSNS)[SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp)
       {
-        SiconosVector q,z;
-        q.initFromBlock(*DSlink[LagrangianR::q0]);
-        z.initFromBlock(*DSlink[LagrangianR::z]);
+        SiconosVector q, z;
+        q.block2contiguous(*DSlink[LagrangianR::q0]);
+        z.block2contiguous(*DSlink[LagrangianR::z]);
         std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(), q, z);
         *DSlink[LagrangianR::z] = z;
         subprod(*ID, *(std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->hDot()), osnsp_rhs, xcoord, false); // y += hDot

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2018 INRIA.
+ * Copyright 2020 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,37 +35,22 @@
 class BlockVector
 {
 private:
-  /** serialization hooks
-  */
+  /** serialization hooks */
   ACCEPT_SERIALIZATION(BlockVector);
 
-
   /** Size (ie total number of scalar elements, not number of blocks) */
-  unsigned int _sizeV;
+  unsigned int _sizeV = 0;
 
   /** A container of pointers on SiconosVector. */
   VectorOfVectors _vect;
 
-  /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
+  /** tabindex[i] = tabindex[i-1] + ni, ni being the size of block[i]. */
   SP::Index _tabIndex;
 
-  /* recompute the _sizeV */
-  void updateSizeV();
-
-  /* recompute the _tabIndex */
-  void updateTabIndex();
-
-
+  /* recompute the _sizeV and _tabIndex */
+  void _update();
 
 public:
-
-  /** Set a subblock of the current vector with the content (copy) of a SiconosVector
-      \param input the vector to be copied
-      \param size_block size of the block to be copied
-      \param start_in starting position in input vector of the block to be copied
-      \param start_out starting position in current vector of the block to be filled in.
-   */
-  void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in, unsigned int start_out);
 
   /** default contructor
    */
@@ -96,61 +81,54 @@ public:
 
   /** destructor
    */
-  ~BlockVector();
+  ~BlockVector(){};
 
-  /** get the vector size, ie the total number of (double) elements in
-     *  the vector
-   *  \return unsigned int
+  /** Set a subblock of the current vector with the content (copy) of a SiconosVector
+      \param input the vector to be copied
+      \param size_block size of the block to be copied
+      \param start_in starting position in input vector of the block to be copied
+      \param start_out starting position in current vector of the block to be filled in.
    */
+  void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in, unsigned int start_out);
+
+  /** \return the size of the vector (sum of the sizes of all its blocks) */
   unsigned int size() const
   {
     return _sizeV;
   };
 
 
-  /** iterator equal to _vect.begin
-      \return a VectorOfVectors::iterator
-  */
+  /** \return an iterator pointing to the first block in the container. */
   inline VectorOfVectors::iterator begin()
   {
     return _vect.begin();
   };
 
-  /** iterator equal to vect.end
-      \return a VectorOfVectors::iterator
-  */
+  /**  \return an iterator referring to the past-the-end element in the container. */
   inline VectorOfVectors::iterator end()
   {
     return _vect.end();
   };
 
-  /** const iterator equal to _vect.begin
-      \return a VectorOfVectors::iterator
-  */
+  /** \return an iterator pointing to the first block in the container. */
   inline VectorOfVectors::const_iterator begin() const
   {
     return _vect.begin();
   };
 
-  /** const iterator equal to _vect.end
-      \return a VectorOfVectors::iterator
-  */
+  /**  \return an iterator referring to the past-the-end element in the container. */
   inline VectorOfVectors::const_iterator end() const
   {
     return _vect.end();
   } ;
 
-  /** get _vect, ie all the vectors of the object
-   * \return a VectorOfVectors
-   */
+  /** \return the complete stl container */
   inline VectorOfVectors getAllVect() const
   {
     return _vect;
   }
 
-  /** get the number of Blocks
-   *  \return unsigned int
-   */
+  /** \return the number of SiconosVectors in the container */
   inline unsigned int numberOfBlocks() const
   {
     return _tabIndex->size();
@@ -158,8 +136,7 @@ public:
 
 
 
-  /** sets all the values of the vector to 0.0
-   */
+  /** sets all the values of the vector to 0.0 */
   void zero();
 
   /** set all values of the vector component to value.
@@ -167,8 +144,7 @@ public:
    */
   void fill(double a);
 
-  /** display data on standard output
-   */
+  /** display data on standard output */
   void display(void) const;
 
   /** put data of the vector into a std::string
@@ -176,123 +152,83 @@ public:
    */
   std::string toString() const;
 
-  /** return the element vector[i]
-   *  \param i an unsigned int
-   *  \return a double
+  /** Get a component of the vector
+   *  \param i index of the required component
+   *  \return the component value
    */
   double getValue(unsigned int i) const;
 
-  /** set the element vector[i]
-   *  \param i an unsigned int
-   *  \param value
+  /** set a component of the vector
+   *  \param i index of the required component
+   *  \param value of the component
    */
   void setValue(unsigned int i, double value);
 
-  /** get the element at position i (warning: absolute position.)
-   *  \param i an unsigned integer
-   *  \return a reference to a double
+  /** get a component of the vector
+   *  \param i index of the required component
+   *  \return value of the component
    */
   double& operator()(unsigned int i) ;
 
-  /** get the element at position i (warning: absolute position.)
-   *  \param  i an unsigned integer
-   *  \return a double
+  /** get a component of the vector
+   *  \param i index of the required component
+   *  \return value of the component
    */
   double operator()(unsigned int i) const;
 
-  /** return i-eme SiconosVector of _vect
-   * \param pos block number
-   * \return a pointer to a SiconosVector
+  /** get a block (SiconosVector) of the vector
+   * \param pos index of the required block
+   * \return the expected block
    */
   inline SP::SiconosVector vector(unsigned int pos)
   {
     return _vect[pos];
   };
 
-  /** return i-eme SiconosVector of _vect
-   * \param pos block number
-   * \return a pointer to a SiconosVector
+  /** gets a block (SiconosVector) of the vector
+   * \param pos index of the required block
+   * \return the expected block
    */
   inline SPC::SiconosVector vector(unsigned int pos) const
   {
     return _vect[pos];
   };
 
-  /** set i-eme SiconosVector of _vect (copy)
-   * \param pos block number
-   * \param v a SiconosVector
-   */
-  void setVector(unsigned int pos, const SiconosVector& v);
-
-  /** set i-eme SiconosVector of _vect (pointer link)
-   * \param pos block number
-   * \param v a SiconosVector
-   */
-  void setVectorPtr(unsigned int pos, SP::SiconosVector v);
-
-  /** set the vector array of _vect
-   * \param v a VectorOfVectors
-   */
-  void setAllVect(VectorOfVectors& v);
-
-  /** get the vector at position i(ie this for Simple and block i for BlockVector)
-   *  \param pos block number
-   *  \return a SP::SiconosVector
+  /** get a block (SiconosVector) of the vector
+   * \param pos index of the required block
+   * \return the expected block
    */
   SP::SiconosVector operator [](unsigned int pos) ;
 
-  /** get the vector at position i(ie this for Simple and block i for BlockVector)
-   *  \param pos block number
-   *  \return a SP::SiconosVector
+  /** get a block (SiconosVector) of the vector
+   * \param pos index of the required block
+   * \return the expected block
    */
   SPC::SiconosVector operator [](unsigned int pos) const;
 
-  /** get the index tab
-   * \return a standard vector of int
+  /** set a block with a given vector (copy!)
+   * \param pos index of the block to set
+   * \param v source vector to be copied at position i
    */
-  inline Index getTabIndex() const
-  {
-    return *_tabIndex;
-  }
+  void setVector(unsigned int pos, const SiconosVector& v);
 
-  /** get a pointer to the index tab
-   * \return SP::Index
+  /** set a block with a given vector (pointer link!)
+   * \param pos index of the block to set
+   * \param v source vector to be inserted at position i
+   */
+  void setVectorPtr(unsigned int pos, SP::SiconosVector v);
+
+  /** Fill the container with a list of SiconosVector.
+      Warning: pointer links, no copy
+      \param v the vectors to be inserted
+   */
+  void setAllVect(VectorOfVectors& v);
+
+  /** \return a pointer to the index tab
    */
   inline const SP::Index tabIndex() const
   {
     return _tabIndex;
-  }
-
-  /** get an iterator that points to the first element of tabIndex
-   * \return an Index::iterator
-   */
-  inline Index::iterator tabIndexBegin()
-  {
-    return _tabIndex->begin();
-  }
-
-  /** get an iterator that points to tabIndex.end()
-   * \return an Index::iterator
-   */
-  inline Index::iterator tabIndexEnd()
-  {
-    return _tabIndex->end();
-  }
-
-  /** get an iterator that points to the first element of tabIndex
-   * \return an Index::iterator
-   */
-  inline Index::const_iterator tabIndexBegin() const
-  {
-    return _tabIndex->begin();
-  }
-
-  /** get an iterator that points to tabIndex.end()
-   * \return an Index::iterator
-   */
-  inline Index::const_iterator tabIndexEnd() const
-  {
-    return _tabIndex->end();
   }
 
   /** get the number of the vector that handles element at position "pos"
@@ -301,71 +237,92 @@ public:
    */
   unsigned int getNumVectorAtPos(unsigned int pos) const;
 
-  /** operator =
-  *  \param vIn the vector to be copied
-  * \return  BlockVector&
+  /** Assignment operator
+      \param vIn the vector to be copied
+      \return  BlockVector&
   */
   BlockVector& operator =(const BlockVector& vIn);
 
-  /** Equality operator with raw double* data on the right-hand side
-   *  \param data data to put in the BlockVector
-   * \return  BlockVector&
-   */
+  /** Assignment operator
+      \param data data to put in the BlockVector
+      \return  BlockVector&
+  */
   BlockVector& operator = (const double* data);
 
-  BlockVector& operator -=(const BlockVector&);
-  BlockVector& operator +=(const BlockVector&);
-
-  /** operator =
+  /** Assignment operator
    *  \param vIn the vector to be copied
    * \return  BlockVector&
    */
   BlockVector& operator =(const SiconosVector& vIn);
 
+  /** Subtract in place operator
+      \param vIn rhs of the operator
+      \return BlockVector&
+  */
+  BlockVector& operator -=(const BlockVector& vIn);
+
+  /** Add in place operator
+      \param vIn rhs of the operator
+      \return BlockVector&
+  */
+  BlockVector& operator +=(const BlockVector&);
+
+  /** Add in place operator
+      \param vIn rhs of the operator
+      \return BlockVector&
+  */
+  BlockVector& operator += (const SiconosVector& vIn);
+
+  /** Subtract in place operator
+      \param vIn rhs of the operator
+      \return BlockVector&
+  */
+  BlockVector& operator -= (const SiconosVector& vIn);
+
+  /** multiply by a scalar, result in place
+      \param s the scalar factor
+      \return BlockVector&
+  */
   BlockVector& operator *= (double s);
 
+  /** divide by a scalar, result in place
+      \param s the scalar factor
+      \return BlockVector&
+  */
   BlockVector& operator /= (double s);
 
-  /** Insert a subvector in this vector: allocation and copy
-  *  \param v SiconosVector& v : the vector to be inserted
-  */
-  void insert(const SiconosVector& v) ;
+  // /** Insert a new block (allocation and copy)
+  // *  \param v the vector to be inserted
+  // */
+  // void insert(const SiconosVector& v) ;
 
-  /** Insert a pointer to a subvector in this vector: no reallocation nor copy.
-   *  \param v a SiconosVector
+  /** Insert a new block (no allocation and nor copy)
+   *  \param v the vector to be inserted
    */
   void insertPtr(SP::SiconosVector v);
 
-  bool isComparableTo(const BlockVector& v1, const BlockVector& v2);
-
+  /** \return the Euclidian norm of the vector */
   double norm2() const;
 
-  /** compute the infinite norm of the vector
-   *  \return a double
-   */
+  /** \return the infinite norm of the vector */
   double normInf() const;
 
-  BlockVector& operator += (const SiconosVector& vIn);
-  BlockVector& operator -= (const SiconosVector& vIn);
+  /** \defgroup BlockVectorFriends
 
-   /** \defgroup BlockVectorFriends
-      
       List of friend functions of the BlockVector class
-      
+
       @{
   */
-  
-  /** offstream operator 
+
+  /** offstream operator
    * \param os An output stream
    * \param bv a BlockVector
    * \return The same output stream
    */
   friend std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
 
-
    /** End of Friend functions group @} */
 
-  
   ACCEPT_NONVIRTUAL_VISITORS();
 
 };

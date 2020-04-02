@@ -49,7 +49,7 @@ public:
   {
   private:
     ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem::Change);
-    Change(){};
+    Change() = default;
   public:
     ChangeType typeOfChange;
     SP::DynamicalSystem ds;
@@ -79,25 +79,28 @@ private:
   */
   ACCEPT_SERIALIZATION(NonSmoothDynamicalSystem);
 
+  /** initial time of the simulation */
+  double _t0 = 0.;
+
   /** current time of the simulation
       Warning FP : it corresponds to the time
       at the end of the integration step.
       It means that _t corresponds to tkp1 of the
       simulation or nextTime().
    */
-  double _t;
-
-  /** initial time of the simulation */
-  double _t0;
+  double _t = _t0;
 
   /** final time of the simulation */
-  double _T;
+  double _T = 0.;
 
   /** information concerning the Model */
-  std::string _title, _author, _description, _date;
+  std::string _title = "none",
+    _author = "none",
+    _description = "none",
+    _date="unknown";
 
   /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
-  bool _BVP;
+  bool _BVP = false;
 
   /** log list of the modifications of the nsds */
   std::list<Change> _changeLog;
@@ -105,19 +108,21 @@ private:
   /** the topology of the system */
   SP::Topology _topology;
 
-  NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds);
-
   /** False is one of the interaction is non-linear.
    */
-  bool _mIsLinear;
+  bool _mIsLinear = true;
 
+  /* copy constructor, forbidden */
+  NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds) = delete;
+
+  /* assignment, forbidden */
+  OneStepNSProblem& operator=(const OneStepNSProblem& osnsp) = delete;
+
+  /* Forbid default constructor. No use to build a NSDS with t0=T.*/
+  NonSmoothDynamicalSystem() = delete;
 public:
 
-  /** default constructor
-   */
-  NonSmoothDynamicalSystem();
-
-  /** constructor with t0 and T
+  /** NSDS constructor.
    * \param t0 initial time
    * \param T final time
    */

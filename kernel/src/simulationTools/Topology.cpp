@@ -42,8 +42,7 @@
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // default
-Topology::Topology(): _hasChanged(true),
-  _numberOfConstraints(0), _symmetric(false)
+Topology::Topology()
 {
   _IG.resize(1);
   _DSG.resize(1);

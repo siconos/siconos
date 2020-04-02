@@ -121,10 +121,10 @@ void  LagrangianScleronomousR::computedotjacqhXqdot(double time, Interaction& in
 {
   DEBUG_PRINT("LagrangianScleronomousR::computeNonLinearH2dot starts");
   // Compute the H Jacobian dot
-  SiconosVector q,z,qDot;
-  q.initFromBlock(*DSlink[LagrangianR::q0]);
-  z.initFromBlock(*DSlink[LagrangianR::z]);
-  qDot.initFromBlock(*DSlink[LagrangianR::q1]);
+  SiconosVector q, z, qDot;
+  q.block2contiguous(*DSlink[LagrangianR::q0]);
+  z.block2contiguous(*DSlink[LagrangianR::z]);
+  qDot.block2contiguous(*DSlink[LagrangianR::q1]);
   LagrangianScleronomousR::computeDotJachq(q, z, qDot);
   _dotjacqhXqdot.reset(new SiconosVector(_dotjachq->size(0)));
   DEBUG_EXPR(qDot.display(););
@@ -141,8 +141,8 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  un
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector& y = *inter.y(derivativeNumber);
   SiconosVector q, z;
-  q.initFromBlock(*DSlink[LagrangianR::q0]);
-  z.initFromBlock(*DSlink[LagrangianR::z]);
+  q.block2contiguous(*DSlink[LagrangianR::q0]);
+  z.block2contiguous(*DSlink[LagrangianR::z]);
   if(derivativeNumber == 0)
   {
     computeh(q, z, y);
@@ -169,7 +169,7 @@ void LagrangianScleronomousR::computeOutput(double time, Interaction& inter,  un
       }
 
       SiconosVector qDot;
-      qDot.initFromBlock(*DSlink[LagrangianR::q1]);
+      qDot.block2contiguous(*DSlink[LagrangianR::q1]);
       computeDotJachq(q, z, qDot);
       assert(_jachq);
       prod(*_jachq, *DSlink[LagrangianR::q2], y);
@@ -189,9 +189,9 @@ void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsi
   DEBUG_PRINTF("level = %i\n", level);
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
-  SiconosVector q,z;
-  q.initFromBlock(*DSlink[LagrangianR::q0]);
-  z.initFromBlock(*DSlink[LagrangianR::z]);
+  SiconosVector q, z;
+  q.block2contiguous(*DSlink[LagrangianR::q0]);
+  z.block2contiguous(*DSlink[LagrangianR::z]);
 
   computeJachq(q, z);
   // get lambda of the concerned interaction
@@ -208,10 +208,10 @@ void LagrangianScleronomousR::computeInput(double time, Interaction& inter, unsi
 void LagrangianScleronomousR::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q,z, qDot;
-  q.initFromBlock(*DSlink[LagrangianR::q0]);
-  z.initFromBlock(*DSlink[LagrangianR::z]);
-  qDot.initFromBlock(*DSlink[LagrangianR::q1]);
+  SiconosVector q, z, qDot;
+  q.block2contiguous(*DSlink[LagrangianR::q0]);
+  z.block2contiguous(*DSlink[LagrangianR::z]);
+  qDot.block2contiguous(*DSlink[LagrangianR::q1]);
   computeJachq(q, z);
   // computeJachqDot(time, inter);
   computeDotJachq(q, z, qDot);

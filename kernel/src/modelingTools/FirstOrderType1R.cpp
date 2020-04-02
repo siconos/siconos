@@ -96,8 +96,8 @@ void FirstOrderType1R::computeOutput(double time, Interaction& inter, unsigned i
   BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
   SiconosVector x_vec, z_vec;
-  x_vec.initFromBlock(x); // copy !
-  z_vec.initFromBlock(z); // copy !
+  x_vec.block2contiguous(x); // copy !
+  z_vec.block2contiguous(z); // copy !
 
   computeh(time, x_vec, z_vec, y);
 
@@ -116,8 +116,8 @@ void FirstOrderType1R::computeInput(double time, Interaction& inter, unsigned in
   BlockVector& z = *DSlink[FirstOrderR::z];
   // copy into Siconos continuous memory vector
   SiconosVector r_vec, z_vec;
-  r_vec.initFromBlock(r);
-  z_vec.initFromBlock(z);
+  r_vec.block2contiguous(r);
+  z_vec.block2contiguous(z);
 
   computeg(time, lambda, z_vec, r_vec);
 

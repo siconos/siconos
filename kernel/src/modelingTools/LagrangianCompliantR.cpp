@@ -87,8 +87,8 @@ void LagrangianCompliantR::computeOutput(double time, Interaction& inter, unsign
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
   SiconosVector workZ, workQ;
-  workZ.initFromBlock(*DSlink[LagrangianR::z]);
-  workQ.initFromBlock(*DSlink[LagrangianR::q0]);
+  workZ.block2contiguous(*DSlink[LagrangianR::z]);
+  workQ.block2contiguous(*DSlink[LagrangianR::q0]);
   if(derivativeNumber == 0)
   {
     SiconosVector& y = *inter.y(0);
@@ -124,8 +124,8 @@ void LagrangianCompliantR::computeInput(double time, Interaction& inter, unsigne
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
 
   SiconosVector workZ, workQ;
-  workZ.initFromBlock(*DSlink[LagrangianR::z]);
-  workQ.initFromBlock(*DSlink[LagrangianR::q0]);
+  workZ.block2contiguous(*DSlink[LagrangianR::z]);
+  workQ.block2contiguous(*DSlink[LagrangianR::q0]);
   computeJachq(time, workQ, lambda, workZ);
   // data[name] += trans(G) * lambda
   prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
@@ -135,9 +135,9 @@ void LagrangianCompliantR::computeInput(double time, Interaction& inter, unsigne
 void LagrangianCompliantR::computeJach(double time, Interaction& inter)
 {
   VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector q,z;
-  q.initFromBlock(*DSlink[LagrangianR::q0]);
-  z.initFromBlock(*DSlink[LagrangianR::z]);
+  SiconosVector q, z;
+  q.block2contiguous(*DSlink[LagrangianR::q0]);
+  z.block2contiguous(*DSlink[LagrangianR::z]);
   SiconosVector& lambda = *inter.lambda(0);
   computeJachq(time, q, lambda, z);
   computeJachlambda(time, q, lambda, z);

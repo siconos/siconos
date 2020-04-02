@@ -33,29 +33,9 @@ using namespace std::placeholders;
 
 using namespace RELATION;
 
-// --- CONSTRUCTORS/DESTRUCTOR ---
-
-// Default constructor
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem():
-  _t(0.0), _t0(0.0), _T(0.0), _title("none"), _author("nobody"), _description("none"),
-  _date("none"), _BVP(false), _mIsLinear(true)
-{
-  // === Builds an empty topology ===
-  _topology.reset(new Topology());
-
-  // we push a first element in the list to avoid acces to null when
-  // we call --_changeLog.end();
-  _changeLog.push_back(Change(clearTopology));
-  DEBUG_EXPR((--_changeLog.end())->display(););
-
-  // see Simulation::initialize() for an explanation of why we
-  // implement this changelog
-};
 //  constructor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(double t0, double T):
-  _t(t0), _t0(t0), _T(T),
-  _title("none"), _author("nobody"), _description("none"),
-  _date("none"), _BVP(false), _mIsLinear(true)
+  _t0(t0), _T(T)
 {
   // === Builds an empty topology ===
   _topology.reset(new Topology());
