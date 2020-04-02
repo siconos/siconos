@@ -416,6 +416,7 @@ int globalFrictionContact_computeGlobalVelocity(
   }
 
   /* Compute globalVelocity <- M^(-1) globalVelocity*/
+  // info = NM_gesv_expert(problem->M, globalVelocity, NM_PRESERVE)
   info = NM_LU_solve(NM_preserve(problem->M), globalVelocity, 1);
   DEBUG_EXPR(NM_vector_display(globalVelocity, n));
 

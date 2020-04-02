@@ -681,6 +681,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(
 
     /* Solve: AWpB X = -F. We want to preserve NM_J, but as data has
        been updated we unset the previous backup before */
+    //int info_solver = NM_gesv(AA, rhs, true);
     int info_solver = NM_LU_solve(NM_preserve(NM_unpreserve(NM_J)), rhs, 1);
 
     DEBUG_PRINTF("norm of rhs (direction) = %e\n", cblas_dnrm2(problem_size,rhs,1));

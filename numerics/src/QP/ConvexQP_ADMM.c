@@ -300,6 +300,7 @@ void convexQP_ADMM(ConvexQP* problem,
 
     /* Linear system solver */
     /* cblas_dcopy(n , w_k , 1 , z, 1); */
+    // NM_gesv_expert(W,z,NM_KEEP_FACTORS);
     NM_LU_solve(W, z, 1);
     DEBUG_PRINT("z:");
     DEBUG_EXPR(NV_display(z,n));

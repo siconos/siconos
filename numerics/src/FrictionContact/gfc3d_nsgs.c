@@ -125,6 +125,7 @@ void gfc3d_nsgs(GlobalFrictionContactProblem* restrict problem, double* restrict
     /* globalVelocity = H reaction + globalVelocity */
     if(nc > 0) NM_gemv(1., H, reaction, 1., globalVelocity);
 
+    // CHECK_RETURN(!NM_gesv_expert(problem->M, globalVelocity, NM_KEEP_FACTORS));
     CHECK_RETURN(!NM_LU_solve(problem->M, globalVelocity, 1));
 
     DEBUG_EXPR(NM_vector_display(reaction,m));

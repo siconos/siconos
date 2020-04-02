@@ -111,6 +111,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
     NM_set_factorized(M, true);
     DGETRS(LA_NOTRANS, n, m,  M->matrix0, n, ipiv, Htmp, n, &infoDGETRS);
 #else
+    // NM_gesv_expert_multiple_rhs(M,Htmp,m,NM_KEEP_FACTORS);
     NM_LU_solve(M, Htmp, m);
 #endif
 
@@ -148,6 +149,7 @@ int gfc3d_reformulation_local_problem(GlobalFrictionContactProblem* problem, Fri
 #ifdef USE_LAPACK_DGETRS
     DGETRS(LA_NOTRANS, n, 1,  M->matrix0, n, ipiv, qtmp, n, &infoDGETRS);
 #else
+    // NM_gesv_expert(M,qtmp,NM_KEEP_FACTORS);
     NM_LU_solve(M, qtmp, 1);
 #endif
 
@@ -408,6 +410,7 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
     DGETRS(LA_NOTRANS, n, 1,   problem->M->matrix0, n, ipiv, globalVelocity, n, &infoDGETRS);
     assert(!infoDGETRS);
 #else
+    // NM_gesv_expert(problem->M,globalVelocity,NM_KEEP_FACTORS);
     NM_LU_solve(problem->M, globalVelocity, 1);
 #endif
 
@@ -455,6 +458,7 @@ int computeGlobalVelocity(GlobalFrictionContactProblem* problem, double * reacti
       DEBUG_EXPR(NM_vector_display(reaction, m));
     }
     /* Compute globalVelocity <- M^(-1) globalVelocity*/
+    // info = NM_gesv_expert(problem->M, globalVelocity, NM_PRESERVE);
     info = NM_LU_solve(NM_preserve(problem->M), globalVelocity, 1);
     DEBUG_EXPR(NM_vector_display(globalVelocity, n));
   }

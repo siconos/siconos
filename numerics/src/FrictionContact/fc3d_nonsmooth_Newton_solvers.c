@@ -698,8 +698,10 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
 
     /* Solve: AWpB X = -F */
 //    NM_copy(AWpB, AWpB_backup);
-    NM_set_factorized(AWpB, false);
+    // int lsi = NM_gesv(AWpB, tmp1, true);
+    NM_unpreserve(AWpB);
     NM_preserve(AWpB);
+    NM_set_factorized(AWpB, false);
     int lsi = NM_LU_solve(AWpB, tmp1, 1);
 
     /* NM_copy needed here */

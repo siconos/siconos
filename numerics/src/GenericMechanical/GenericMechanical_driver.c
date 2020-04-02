@@ -318,6 +318,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
         NM_row_prod_no_diag(pGMP->size, curSize, currentRowNumber, posInX, numMat, reaction, curProblem->q, NULL, 0);
         for(size_t i = 0; i < curSize; ++i) sol[i] = -curProblem->q[i];
 
+        // resLocalSolver = NM_gesv(&M, sol, true);
         resLocalSolver = NM_LU_solve(&M, sol, 1);
 
         M.matrix0 = NULL;

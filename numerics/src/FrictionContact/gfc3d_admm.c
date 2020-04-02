@@ -660,6 +660,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem, double* restrict
     if(with_full_Jacobian)
     {
       /* W destroyed */
+      // NM_gesv_expert(W,v,NM_KEEP_FACTORS);
       NM_LU_solve(W, v, 1);
     }
 
