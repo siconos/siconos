@@ -57,7 +57,7 @@ public:
 
   /** default constructor
    */
-  LinearComplementaritySystemsNSDS();
+  LinearComplementaritySystemsNSDS() = delete;
 
   /** constructor with t0 and T
    * \param t0 initial time

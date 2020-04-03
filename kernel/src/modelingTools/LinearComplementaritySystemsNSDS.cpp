@@ -32,11 +32,6 @@ using namespace RELATION;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
-// Default constructor
-LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(): NonSmoothDynamicalSystem()
-{
-
-};
 //  constructor
 LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(double t0, double T, SP::SiconosVector x0,
                                                                    SP::SimpleMatrix A,  SP::SimpleMatrix B,
